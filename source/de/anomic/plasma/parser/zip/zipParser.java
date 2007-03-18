@@ -110,7 +110,6 @@ public class zipParser extends AbstractParser implements Parser {
             }
             
             StringBuffer docKeywords = new StringBuffer();
-            StringBuffer docShortTitle = new StringBuffer();  
             StringBuffer docLongTitle = new StringBuffer();   
             LinkedList docSections = new LinkedList();
             StringBuffer docAbstrct = new StringBuffer();
@@ -163,15 +162,12 @@ public class zipParser extends AbstractParser implements Parser {
                 docKeywords.append(subDoc.getKeywords(','));
                 
                 if (docLongTitle.length() > 0) docLongTitle.append("\n");
-                docLongTitle.append(subDoc.getMainLongTitle());
-                
-                if (docShortTitle.length() > 0) docShortTitle.append("\n");
-                docShortTitle.append(subDoc.getMainShortTitle());                
+                docLongTitle.append(subDoc.getTitle());
                 
                 docSections.addAll(Arrays.asList(subDoc.getSectionTitles()));
                 
                 if (docAbstrct.length() > 0) docAbstrct.append("\n");
-                docAbstrct.append(subDoc.getAbstract());                   
+                docAbstrct.append(subDoc.getAbstract());
 
                 if (subDoc.getTextLength() > 0) {
                     if (docTextLength > 0) docText.write('\n');
@@ -195,7 +191,6 @@ public class zipParser extends AbstractParser implements Parser {
                     mimeType,
                     null,
                     docKeywords.toString().split(" |,"),
-                    docShortTitle.toString(), 
                     docLongTitle.toString(),
                     "", // TODO: AUTHOR
                     (String[])docSections.toArray(new String[docSections.size()]),
@@ -209,7 +204,6 @@ public class zipParser extends AbstractParser implements Parser {
                         mimeType,
                         null,
                         docKeywords.toString().split(" |,"),
-                        docShortTitle.toString(), 
                         docLongTitle.toString(),
                         "", // TODO: AUTHOR
                         (String[])docSections.toArray(new String[docSections.size()]),

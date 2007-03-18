@@ -205,7 +205,7 @@ public class indexURLEntryNew implements indexURLEntry {
         try {
             s.append("hash=").append(hash());
             s.append(",url=").append(crypt.simpleEncode(comp.url().toNormalform()));
-            s.append(",descr=").append(crypt.simpleEncode(comp.descr()));
+            s.append(",descr=").append(crypt.simpleEncode(comp.title()));
             s.append(",author=").append(crypt.simpleEncode(comp.author()));
             s.append(",tags=").append(crypt.simpleEncode(comp.tags()));
             s.append(",ETag=").append(crypt.simpleEncode(comp.ETag()));
@@ -373,7 +373,7 @@ public class indexURLEntryNew implements indexURLEntry {
                 null, 
                 comp().url(), 
                 referrerHash(), 
-                comp().descr(),
+                comp().title(),
                 loaddate(), 
                 null,
                 0, 

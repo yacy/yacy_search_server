@@ -759,7 +759,6 @@ public final class plasmaParser {
                     charSet,
                     scraper.getKeywords(),
                     scraper.getTitle(),
-                    scraper.getTitle(),
                     scraper.getAuthor(),
                     sections,
                     scraper.getDescription(),
@@ -960,7 +959,7 @@ public final class plasmaParser {
             // printing out all parsed sentences
             if (document != null) {
                 System.out.print("Document titel: ");
-                System.out.println(document.getMainLongTitle());
+                System.out.println(document.getTitle());
                 
                 // found text
                 final Iterator sentences = document.getSentences(false);

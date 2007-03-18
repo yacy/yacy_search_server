@@ -124,7 +124,7 @@ public class ViewFile {
                 return prop;
             }
             url = comp.url();
-            descr = comp.descr();
+            descr = comp.title();
             urlEntry.wordCount();
             size = urlEntry.size();
             pre = urlEntry.flags().get(plasmaCondenser.flag_cat_indexof);

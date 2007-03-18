@@ -113,7 +113,6 @@ public class pptParser extends AbstractParser implements Parser {
                     replaceAll("\n"," ").
                     replaceAll("\r"," ").
                     replaceAll("\t"," "),
-                    null,
                     "", // TODO: AUTHOR
                     null,
                     null,

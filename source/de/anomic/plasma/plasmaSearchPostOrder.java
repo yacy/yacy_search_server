@@ -111,9 +111,9 @@ public final class plasmaSearchPostOrder {
         
         // take out relevant information for reference computation
         indexURLEntry.Components comp = page.comp();
-        if ((comp.url() == null) || (comp.descr() == null)) return;
+        if ((comp.url() == null) || (comp.title() == null)) return;
         String[] urlcomps = htmlFilterContentScraper.urlComps(comp.url().toNormalform()); // word components of the url
-        String[] descrcomps = comp.descr().toLowerCase().split(htmlFilterContentScraper.splitrex); // words in the description
+        String[] descrcomps = comp.title().toLowerCase().split(htmlFilterContentScraper.splitrex); // words in the description
         
         // store everything
         results.add(new Object[] {page, urlcomps, descrcomps, preranking});

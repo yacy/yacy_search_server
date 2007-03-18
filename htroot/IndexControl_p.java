@@ -507,7 +507,7 @@ public class IndexControl_p {
         prop.put("genUrlProfile", 2);
         prop.put("genUrlProfile_urlNormalform", comp.url().toNormalform());
         prop.put("genUrlProfile_urlhash", urlhash);
-        prop.put("genUrlProfile_urlDescr", comp.descr());
+        prop.put("genUrlProfile_urlDescr", comp.title());
         prop.put("genUrlProfile_moddate", entry.moddate());
         prop.put("genUrlProfile_loaddate", entry.loaddate());
         prop.put("genUrlProfile_referrer", referrer);

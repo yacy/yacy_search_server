@@ -64,8 +64,7 @@ public class plasmaParserDocument {
     private String mimeType;    // mimeType as taken from http header
     private String charset;     // the charset of the document
     private String[] keywords;  // most resources provide a keyword field
-    private String shortTitle;  // a shortTitle mostly appears in the window header (border)
-    private String longTitle;   // the real title of the document, commonly h1-tags
+    private String title;       // a document title, taken from title or h1 tag; shall appear as headline of search result
     private String author;      // author or copyright
     private String[] sections;  // if present: more titles/headlines appearing in the document
     private String abstrct;     // an abstract, if present: short content description
@@ -81,15 +80,14 @@ public class plasmaParserDocument {
     private InputStream textStream; 
                     
     public plasmaParserDocument(URL location, String mimeType, String charset,
-                    String[] keywords, String shortTitle, String longTitle, String author,
+                    String[] keywords, String title, String author,
                     String[] sections, String abstrct,
                     byte[] text, Map anchors, TreeSet images) {
         this.location = location;
         this.mimeType = (mimeType==null)?"application/octet-stream":mimeType;
         this.charset = charset;
         this.keywords = (keywords==null) ? new String[0] : keywords;
-        this.shortTitle = (shortTitle==null)?"":shortTitle;
-        this.longTitle = (longTitle==null)?"":longTitle;
+        this.title = (title==null)?"":title;
         this.author = (author==null)?"":author;
         this.sections = (sections==null)?new String[0]:sections;
         this.abstrct = (abstrct==null)?"":abstrct;
@@ -105,15 +103,14 @@ public class plasmaParserDocument {
     }
     
     public plasmaParserDocument(URL location, String mimeType, String charset,
-            String[] keywords, String shortTitle, String longTitle, String author,
+            String[] keywords, String title, String author,
             String[] sections, String abstrct,
             File text, Map anchors, TreeSet images) {
         this.location = location;
         this.mimeType = (mimeType==null)?"application/octet-stream":mimeType;
         this.charset = charset;
         this.keywords = (keywords==null) ? new String[0] : keywords;
-        this.shortTitle = (shortTitle==null)?"":shortTitle;
-        this.longTitle = (longTitle==null)?"":longTitle;
+        this.title = (title==null)?"":title;
         this.author = (author==null)?"":author;
         this.sections = (sections==null)?new String[0]:sections;
         this.abstrct = (abstrct==null)?"":abstrct;
@@ -144,20 +141,16 @@ public class plasmaParserDocument {
         return this.charset;
     }
     
-    public String getMainShortTitle() {
-        if (shortTitle != null) return shortTitle; else return longTitle;
-    }
-    
-    public String getMainLongTitle() {
-        if (longTitle != null) return longTitle; else return shortTitle;
+    public String getTitle() {
+        return title;
     }
     
     public String[] getSectionTitles() {
-        if (sections != null) return sections; else return new String[]{getMainLongTitle()};
+        if (sections != null) return sections; else return new String[]{getTitle()};
     }
 
     public String getAbstract() {
-        if (abstrct != null) return abstrct; else return getMainLongTitle();
+        if (abstrct != null) return abstrct; else return getTitle();
     }
     
     public String getAuthor() {

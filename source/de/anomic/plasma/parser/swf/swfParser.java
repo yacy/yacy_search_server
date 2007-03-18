@@ -98,7 +98,6 @@ public class swfParser extends AbstractParser implements Parser {
             String url = null;
             String urlnr = null;
             String linebreak = System.getProperty("line.separator");
-            String longTitle = null;
             String[] sections =  null;
             String abstrct = null;
             //TreeSet images = null;
@@ -133,8 +132,7 @@ public class swfParser extends AbstractParser implements Parser {
                           replaceAll("\r\n"," ").
                           replaceAll("\n"," ").
                           replaceAll("\r"," ").
-                          replaceAll("\t"," "), //short title
-                    longTitle,    // a long document title
+                          replaceAll("\t"," "), // title
                     "", // TODO: AUTHOR
                     sections,     // an array of section headlines
                     abstrct,     // an abstract

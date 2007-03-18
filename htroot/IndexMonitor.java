@@ -181,7 +181,7 @@ public class IndexMonitor {
                     prop.put("table_indexed_" + cnt + "_showExec_executorSeed", (executorSeed == null) ? "unknown" : executorSeed.getName());
                     prop.put("table_indexed_" + cnt + "_moddate", daydate(urle.moddate()));
                     prop.put("table_indexed_" + cnt + "_wordcount", urle.wordCount());
-                    prop.put("table_indexed_" + cnt + "_urldescr", comp.descr());
+                    prop.put("table_indexed_" + cnt + "_urldescr", comp.title());
                     if (cachepath == null) {
                         prop.put("table_indexed_" + cnt + "_available", 0);
                     } else {

@@ -141,8 +141,8 @@ public final class plasmaCondenser {
         
             // the phrase counter:
             // phrase   0 are words taken from the URL
-            // phrase   1 is the MainLongTitle
-            // phrase   2 is the MainShortTitle
+            // phrase   1 is the MainTitle
+            // phrase   2 is <not used>
             // phrase   3 is the Document Abstract
             // phrase   4 is the Document Author
             // phrase   5 are the tags specified in document
@@ -151,8 +151,8 @@ public final class plasmaCondenser {
             // phrase  99 is taken from the media Link url and anchor description
             // phrase 100 and above are lines from the text
       
-            insertTextToWords(document.getMainLongTitle(),  1, indexRWIEntryNew.flag_app_descr, wflags);
-            insertTextToWords(document.getMainShortTitle(), 2, indexRWIEntryNew.flag_app_descr, wflags);
+            insertTextToWords(document.getTitle(),  1, indexRWIEntryNew.flag_app_descr, wflags);
+            //insertTextToWords(document.getTitle(), 2, indexRWIEntryNew.flag_app_descr, wflags);
             insertTextToWords(document.getAbstract(),       3, indexRWIEntryNew.flag_app_descr, wflags);
             insertTextToWords(document.getAuthor(),         4, indexRWIEntryNew.flag_app_descr, wflags);
             // missing: tags!

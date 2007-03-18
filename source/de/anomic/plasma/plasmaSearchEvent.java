@@ -411,7 +411,7 @@ public final class plasmaSearchEvent extends Thread implements Runnable {
                 if (page != null) {
                     if ((!(query.constraint.equals(plasmaSearchQuery.catchall_constraint))) &&
                         (query.constraint.get(plasmaCondenser.flag_cat_indexof)) &&
-                        (!(page.comp().descr().startsWith("Index of")))) {
+                        (!(page.comp().title().startsWith("Index of")))) {
                         log.logFine("filtered out " + page.comp().url().toString());
                         // filter out bad results
                         Iterator wi = query.queryHashes.iterator();

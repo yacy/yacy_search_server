@@ -66,28 +66,28 @@ public interface indexURLEntry {
 
     public class Components {
         private URL url;
-        private String descr, author, tags, ETag;
+        private String title, author, tags, ETag;
         
-        public Components(String url, String descr, String author, String tags, String ETag) {
+        public Components(String url, String title, String author, String tags, String ETag) {
             try {
                 this.url = new URL(url);
             } catch (MalformedURLException e) {
                 this.url = null;
             }
-            this.descr = descr;
+            this.title = title;
             this.author = author;
             this.tags = tags;
             this.ETag = ETag;
         }
         public Components(URL url, String descr, String author, String tags, String ETag) {
             this.url = url;
-            this.descr = descr;
+            this.title = descr;
             this.author = author;
             this.tags = tags;
             this.ETag = ETag;
         }
         public URL    url()    { return this.url; }
-        public String descr()  { return this.descr; }
+        public String title()  { return this.title; }
         public String author() { return this.author; }
         public String tags()   { return this.tags; }
         public String ETag()   { return this.ETag; }

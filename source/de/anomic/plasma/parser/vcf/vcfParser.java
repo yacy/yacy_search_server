@@ -245,7 +245,6 @@ public class vcfParser extends AbstractParser implements Parser {
                     mimeType,                   // the documents mime type
                     null,
                     null,                       // a list of extracted keywords
-                    null,                       // a short document title
                     parsedTitle.toString(),     // a long document title
                     "",                         // TODO: AUTHOR
                     sections,                   // an array of section headlines

@@ -341,7 +341,7 @@ public class indexURLEntryOld implements indexURLEntry {
                 null, 
                 comp().url(), 
                 referrerHash(), 
-                comp().descr(),
+                comp().title(),
                 loaddate(), 
                 null,
                 0, 

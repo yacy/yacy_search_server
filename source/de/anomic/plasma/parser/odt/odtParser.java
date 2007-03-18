@@ -101,9 +101,10 @@ public class odtParser extends AbstractParser implements Parser {
         File writerFile = null;
         try {          
             String docDescription = null;
-            String docKeywordStr    = null;
+            String docKeywordStr  = null;
             String docShortTitle  = null;
             String docLongTitle   = null;
+            String docAuthor      = null;
             
             // opening the file as zip file
             ZipFile zipFile= new ZipFile(dest);
@@ -145,9 +146,10 @@ public class odtParser extends AbstractParser implements Parser {
                     ODFMetaFileAnalyzer metaAnalyzer = new ODFMetaFileAnalyzer();
                     OpenDocumentMetadata metaData = metaAnalyzer.analyzeMetaData(zipFileEntryStream);
                     docDescription = metaData.getDescription();
-                    docKeywordStr    = metaData.getKeyword();
+                    docKeywordStr  = metaData.getKeyword();
                     docShortTitle  = metaData.getTitle();
                     docLongTitle   = metaData.getSubject();
+                    docAuthor      = metaData.getCreator();
                 }
             }
             
@@ -171,9 +173,8 @@ public class odtParser extends AbstractParser implements Parser {
                         mimeType,
                         "UTF-8",
                         docKeywords,
-                        docShortTitle, 
                         docLongTitle,
-                        "", // TODO: AUTHOR
+                        docAuthor,
                         null,
                         docDescription,
                         contentBytes,
@@ -185,9 +186,8 @@ public class odtParser extends AbstractParser implements Parser {
                         mimeType,
                         "UTF-8",
                         docKeywords,
-                        docShortTitle, 
                         docLongTitle,
-                        "", // TODO: AUTHOR
+                        docAuthor,
                         null,
                         docDescription,
                         writerFile,

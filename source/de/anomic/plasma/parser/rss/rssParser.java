@@ -188,7 +188,6 @@ public class rssParser extends AbstractParser implements Parser {
                     mimeType,
                     "UTF-8",
                     null,
-                    null,
                     feedTitle,
                     "", // TODO: AUTHOR
                     (String[]) feedSections.toArray(new String[feedSections.size()]),

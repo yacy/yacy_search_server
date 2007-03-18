@@ -1110,7 +1110,7 @@ public final class yacy {
                     indexURLEntry.Components comp = entry.comp();
                     if ((entry != null) && (comp.url() != null)) {
                         if (html) {
-                            bos.write(("<a href=\"" + comp.url().toNormalform() + "\">" + comp.descr() + "</a><br>").getBytes("UTF-8"));
+                            bos.write(("<a href=\"" + comp.url().toNormalform() + "\">" + comp.title() + "</a><br>").getBytes("UTF-8"));
                             bos.write(serverCore.crlf);
                         } else {
                             bos.write(comp.url().toNormalform().getBytes());
@@ -1189,7 +1189,7 @@ public final class yacy {
                 comp = oldentry.comp();
                 newentry = sb.wordIndex.loadedURL.newEntry(
                             comp.url(), 
-                            comp.descr(), 
+                            comp.title(), 
                             "", 
                             "", 
                             "", 

@@ -166,8 +166,8 @@ public class Bookmarks {
                             document = switchboard.snippetCache.retrieveDocument(comp.url(), true, 5000, true);
                             prop.put("mode_edit", 0); // create mode
                             prop.put("mode_url", comp.url().toNormalform());
-                            prop.put("mode_title", comp.descr());
-                            prop.put("mode_description", (document == null) ? comp.descr(): document.getMainLongTitle());
+                            prop.put("mode_title", comp.title());
+                            prop.put("mode_description", (document == null) ? comp.title(): document.getTitle());
                             prop.put("mode_author", comp.author());
                             prop.put("mode_tags", (document == null) ? comp.tags() : document.getKeywords(','));
                             prop.put("mode_public", 0);

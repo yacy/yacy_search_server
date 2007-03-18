@@ -309,7 +309,7 @@ public class plasmaSearchRankingProfile {
         // prefer hit with 'prefer' pattern
         indexURLEntry.Components comp = page.comp();
         if (comp.url().toNormalform().matches(query.prefer)) ranking += 256 << coeff_prefer;
-        if (comp.descr().matches(query.prefer)) ranking += 256 << coeff_prefer;
+        if (comp.title().matches(query.prefer)) ranking += 256 << coeff_prefer;
         
         // apply 'common-sense' heuristic using references
         for (int j = 0; j < urlcomps.length; j++) {

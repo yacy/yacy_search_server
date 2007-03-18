@@ -102,7 +102,7 @@ public class pdfParser extends AbstractParser implements Parser {
 //            Logger theLogger = Logger.getLogger("org.pdfbox");
 //            theLogger.setLevel(Level.INFO);            
             
-            String docTitle = null, docSubject = null, /*docAuthor = null,*/ docKeywordStr = null;
+            String docTitle = null, docSubject = null, docAuthor = null, docKeywordStr = null;
             
             // check for interruption
             checkInterruption();
@@ -127,7 +127,7 @@ public class pdfParser extends AbstractParser implements Parser {
             if (theDocInfo != null) {
                 docTitle = theDocInfo.getTitle();
                 docSubject = theDocInfo.getSubject();
-                //docAuthor = theDocInfo.getAuthor();
+                docAuthor = theDocInfo.getAuthor();
                 docKeywordStr = theDocInfo.getKeywords();
             }            
             
@@ -156,9 +156,8 @@ public class pdfParser extends AbstractParser implements Parser {
                         mimeType,
                         "UTF-8",
                         docKeywords,
-                        docSubject,
-                        docTitle,
-                        "", // TODO: AUTHOR
+                        (docTitle == null) ? docSubject : docTitle,
+                        docAuthor,
                         null,
                         null,
                         contentBytes,
@@ -170,9 +169,8 @@ public class pdfParser extends AbstractParser implements Parser {
                         mimeType,
                         "UTF-8",
                         docKeywords,
-                        docSubject,
-                        docTitle,
-                        "", // TODO: AUTHOR
+                        (docTitle == null) ? docSubject : docTitle,
+                        docAuthor,
                         null,
                         null,
                         writerFile,

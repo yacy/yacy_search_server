@@ -236,8 +236,8 @@ public class yacysearch {
                     // create a news message
                     HashMap map = new HashMap();
                     map.put("url", comp.url().toNormalform().replace(',', '|'));
-                    map.put("title", comp.descr().replace(',', ' '));
-                    map.put("description", ((document == null) ? comp.descr() : document.getMainLongTitle()).replace(',', ' '));
+                    map.put("title", comp.title().replace(',', ' '));
+                    map.put("description", ((document == null) ? comp.title() : document.getTitle()).replace(',', ' '));
                     map.put("author", ((document == null) ? "" : document.getAuthor()));
                     map.put("tags", ((document == null) ? "" : document.getKeywords(' ')));
                     yacyCore.newsPool.publishMyNews(new yacyNewsRecord("stippadd", map));
@@ -294,7 +294,7 @@ public class yacysearch {
                 prop.put("type_results_" + i + "_authorized_recommend_deletelink", "/yacysearch.html?search=" + results.getFormerSearch() + "&Enter=Search&count=" + results.getQuery().wantedResults + "&order=" + crypt.simpleEncode(results.getRanking().toExternalString()) + "&resource=local&time=3&deleteref=" + result.getUrlhash() + "&urlmaskfilter=.*");
                 prop.put("type_results_" + i + "_authorized_recommend_recommendlink", "/yacysearch.html?search=" + results.getFormerSearch() + "&Enter=Search&count=" + results.getQuery().wantedResults + "&order=" + crypt.simpleEncode(results.getRanking().toExternalString()) + "&resource=local&time=3&recommendref=" + result.getUrlhash() + "&urlmaskfilter=.*");
                 prop.put("type_results_" + i + "_authorized_urlhash", result.getUrlhash());
-                prop.put("type_results_" + i + "_description", result.getUrlentry().comp().descr());
+                prop.put("type_results_" + i + "_description", result.getUrlentry().comp().title());
                 prop.put("type_results_" + i + "_url", result.getUrl());
                 prop.put("type_results_" + i + "_urlhash", result.getUrlhash());
                 prop.put("type_results_" + i + "_urlhexhash", yacySeed.b64Hash2hexHash(result.getUrlhash()));

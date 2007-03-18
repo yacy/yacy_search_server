@@ -144,13 +144,13 @@ public class rpmParser extends AbstractParser implements Parser {
             // closing the rpm file
             rpmFile.close();
             rpmFile = null;
+            if (summary == null) summary = name;
             
             plasmaParserDocument theDoc = new plasmaParserDocument(
                     location,
                     mimeType,
                     "UTF-8",
                     null,
-                    name,
                     summary,
                     "", // TODO: AUTHOR
                     null,

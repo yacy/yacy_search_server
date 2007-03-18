@@ -141,7 +141,6 @@ public class xlsParser extends AbstractParser implements Parser, HSSFListener {
                     replaceAll("\n"," ").
                     replaceAll("\r"," ").
                     replaceAll("\t"," "),
-                    null,
                     "", // TODO: AUTHOR
                     null,
                     null,

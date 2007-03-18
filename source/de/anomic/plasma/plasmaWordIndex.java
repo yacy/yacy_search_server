@@ -296,7 +296,7 @@ public final class plasmaWordIndex implements indexRI {
             wprop = (plasmaCondenser.wordStatProp) wentry.getValue();
             assert (wprop.flags != null);
             ientry = new indexRWIEntryNew(urlHash,
-                        urlLength, urlComps, (document == null) ? urlLength : document.getMainLongTitle().length(),
+                        urlLength, urlComps, (document == null) ? urlLength : document.getTitle().length(),
                         wprop.count,
                         condenser.words().size(),
                         condenser.sentences().size(),
