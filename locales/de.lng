@@ -103,6 +103,7 @@ No changes have been submitted so far!==Es wurden noch keine &Auml;nderungen &uu
 Access denied==Zugriff verweigert
 To edit or create blog-entries you need to be logged in as Admin or User who has Blog rights.==Um Blogeintr&auml;ge zu ver&auml;ndern oder zu erstellen m&uuml;ssen Sie als Admin oder User mit Blog-Rechten eingeloggt sein.
 Are you sure==Sind Sie sicher
+# Matcht nicht, muss überarbeitet werden
 that you want to delete <strong>\#\[subject\]\#</strong> by \#\[author\]\#?==dass Sie <strong>#[subject]#</strong> von #[author]# l&ouml;schen wollen?
 Yes, delete it.==Ja, l&ouml;schen.
 No, leave it.==Nein, belassen.
@@ -127,7 +128,6 @@ here.==benutzen.
 "Submit"=="Absenden"
 "Preview"=="Vorschau"
 "Discard"=="Verwerfen"
->Preview==>Vorschau
 #-----------------------------
 
 #File: Bookmarks.html
@@ -201,8 +201,8 @@ Please set a password for your peer to protect your settings==Bitte setzen Sie e
 if this is successful you will be asked to log in with these values immediately==Falls dies erfolgreich ist werden Sie sofort gebeten sich mit diesen Angaben einzuloggen
 Password is set==Passwort wurde gesetzt
 Peer User:==Peer-Nutzer:
-Peer Password:==Peer-Passwort:
-repeat same password==selbes Passwort wiederholen
+New Peer Password:==Neues Peer-Passwort:
+Repeat Peer Password:==Peer-Passwort bestätigen:
 Your peer cannot be reached from outside==Ihr Peer kann nicht von au&szlig;en erreicht werden
 what is not fatal, but would be good for the YaCy network==was nicht schlimm ist, aber anders wäre für das YaCy-Netzwerk noch besser
 please open your firewall for this port and/or set a virtual server option in your router to allow connections on this port==Bitte &ouml;ffnen Sie Ihre Firewall auf diesem Port und/oder stellen Sie einen virtuellen Server in Ihrem Router ein um Verbindungen auf diesem Port zu erlauben
@@ -217,8 +217,7 @@ start an uncensored search==eine unzensierte Suche beginnen
 start your own crawl</a> and contribute to the global index, or create your own private web index==einen eigenen Crawl starten</a> und zum globalen Index beitragen, oder einen eigenen privaten Webindex aufbauen
 set a personal peer profile</a> \(optional settings\)==ein eigenes Peer-Profil angeben</a> (freiwillige Angabe)
 monitor at the network page</a> what the other peers are doing==auf der Netzwerkseite beobachten</a>, was andere Peers gerade machen
-Your Peer name is a default name; please set another peer name.==Ihr Peer-Name ist ein Standardname; bitte nutzen Sie einen anderen.
-If this does not work, the name is probably taken by someone else.==Falls das nicht funktioniert wird der Name wahrscheinlich bereits von jemand anderem verwendet.
+Your Peer name is a default name; please set an individual peer name.==Ihr Peer-Name ist ein Standardname; bitte stellen Sie einen individuellen Namen ein.
 Please try to choose another one.==Bitte versuchen Sie einen anderen.
 You did not set a user name and/or a password.==Sie haben keinen Nutzernamen und/oder kein Passwort gesetzt.
 Some pages are protected by passwords.==Einige Seiten sind passwortgesch&uuml;tzt.
@@ -249,7 +248,7 @@ Error saving the language file.==Es trat ein Fehler beim Speichern der Sprachdat
 #File: ConfigProfile_p.html
 #---------------------------
 Your Personal Profile==Ihr pers&ouml;nliches Profil
-You can create a personal profile here. Other YaCy users can view these information using a link on the network page.==Hier k&ouml;nnen Sie Ihr pers&ouml;nliches Profil verwalten. Andere YaCy-Benutzer k&ouml;nnen dieses Profil &uuml;ber einen Link auf ihrer Netzwerkseite ansehen.
+You can create a personal profile here, which can be seen by other YaCy-members.==Hier k&ouml;nnen Sie Ihr pers&ouml;nliches Profil verwalten, dass andere YaCy-Benutzer ansehen k&ouml;nnen.
 You do not need to provide any personal data here, but if you want to distribute your contact information, you can do that here.==Sie m&uuml;ssen hier keine pers&ouml;nlichen Daten eingeben, aber wenn Sie Kontaktinformationen bereitstellen m&ouml;chten, k&ouml;nnen Sie das hier machen.
 #Name==Name
 #Nick Name==Nick Name
@@ -264,6 +263,26 @@ Comment==Kommentar
 "Save"==Speichern
 You can use==Sie können
 here.==im Profil benutzen.
+#-----------------------------
+
+#File: ConfigRobotsTxt_p.html
+#---------------------------
+Exclude Web-Spiders==Web-Spider ausschlie&szlig;en
+Here you can set up a robots.txt for all webcrawlers that try to access the webinterface of your peer.==Hier können Sie eine robots.txt für alle Webcrawler die das Webinterface Ihres Peers indexieren wollen, erstellen.
+is a volunteer agreement most search-engines (including YaCy) follow.==ist ein freiwilliger Standard den die meisten Suchmaschinen (inkl. YaCy) befolgen.
+It disallows crawlers to access webpages or even entire domains.==Er kann Crawlern den Zugriff auf Webseiten oder sogar ganze Domains verbieten.
+Deny indexing of==Verbiete die Erfassung
+Entire Peer==des ganzen Peers
+Status page==der Statusseite
+Network pages==der Netzwerkseiten
+Surftips==der Surftipps
+News pages==der News-Seiten
+Blog==des Blogs
+Wiki=des Wikis
+Public bookmarks==der öffentlichen Bookmarks
+Home Page==der Home-Page
+File Share==des File-Shares
+Save restrictions==Beschränkungen speichern
 #-----------------------------
 
 #File: ConfigSkins_p.html
@@ -1861,7 +1880,7 @@ User created:==Benutzer erstellt:
 User changed:==Benutzer ge&auml;ndert:
 Generic error.==Genereller Fehler.
 Passwords do not match.==Passw&ouml;rter stimmen nicht &uuml;berein.
-Username too short. Username must be >= 4 Characters.==Benutzername zu kurz. Benutzername mus mehr als 4 Buchstaben enthalten.
+Username too short. Username must be \>\= 4 Characters.==Benutzername zu kurz. Benutzername muss länger als 3 Buchstaben sein.
 #-----------------------------
 
 #File: ViewFile.html
@@ -2188,6 +2207,7 @@ Basic Configuraton==Grundeinstellungen
 Peer Profile==Profil
 Interface Skins==Skin Auswahl
 >Advanced==>Erweitert
+Local robots.txt==Lokale robots.txt
 #-----------------------------
 
 #File: env/templates/submenuCookie.template
@@ -2264,7 +2284,8 @@ Admin and download accounts are necessary to grant their services to clients;==A
 no password is required for the download-account unless you set one.==f&uuml;r den download-Account ist kein Passwort notwendig, ausser Sie setzen eins. 
 Files uploaded and indexed here have a special index entry \'yacyshare\';==Dateien die hochgeladen und indexiert wurden, haben einen speziellen Indexeintrag "yacyshare";
 if you want to find files that are indexed in any share zone, add the word \'yacyshare\' to the search words.==wenn Sie Dateien finden wollen, die so indexiert wurden, geben Sie zus&auml;tzlich das Wort "yacyshare" zu Ihrem Suchwort ein.
-Uploaders are not granted to delete files or directories. If you want to do this, log-in as admin.==Uploaders d&uuml;rfen keine Dateien oder Verzeichnisse l&ouml;schen. Wenn Sie dies tun wollen, m&uuml;ssen Sie sich als Administrator einloggen.Download is granted even if no download account has been defined.==Herunterladen ist erlaubt, ausser ein extra Download Account wurde erstellt.
+Uploaders are not granted to delete files or directories. If you want to do this, log-in as admin.==Uploaders d&uuml;rfen keine Dateien oder Verzeichnisse l&ouml;schen. Wenn Sie dies tun wollen, m&uuml;ssen Sie sich als Administrator einloggen.
+Download is granted even if no download account has been defined.==Herunterladen ist erlaubt, ausser ein extra Download Account wurde erstellt.
 If you are an administrator and you wish to block non-authorized downloades, please log in as user 'admin' and set a download password.==Wenn Sie ein Administrator sind und nicht authorisiertes herunterladen blockieren wollen, loggen Sie sich bitte als Admin ein und setzen ein download Passwort. 						
 You must log-in to upload or download.==Sie m&uuml;ssen sich einloggen, um hoch- oder runterzuladen.
 Directory</i>==Verzeichnis</i>

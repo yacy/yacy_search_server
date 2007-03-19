@@ -1,7 +1,7 @@
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml">
   <head>
-    <title>YaCy '#[clientname]#': Your Personal Profile</title>
+    <title>YaCy '#[clientname]#': Local robots.txt</title>
     #%env/templates/metas.template%#
   </head>
   <body id="ConfigProfile">
@@ -9,7 +9,7 @@
     #%env/templates/submenuConfig.template%#
     <h2>Exclude Web-Spiders</h2>
     <p>
-      Here you can set robots.txt-settings for all webcrawlers that try to access your peer.
+      Here you can set up a robots.txt for all webcrawlers that try to access the webinterface of your peer.
       <span class="tt">robots.txt</span> is a volunteer agreement most search-engines (including YaCy) follow.
       It disallows crawlers to access webpages or even entire domains.
     </p>
@@ -17,7 +17,7 @@
     ::<p class="error">Unable to access the local file: <span class="error tt">#[msg]#</span></p>
     ::<p class="error">Deletion of <span class="error tt">htroot/robots.txt</span> failed</p>#(/error)#
     <form method="post" action="ConfigRobotsTxt_p.html" enctype="multipart/form-data" accept-charset="UTF-8">
-      <fieldset><legend>Restrict access for</legend>
+      <fieldset><legend>Deny access to</legend>
         <input type="hidden" name="directories" value="checked" />
         <input type="hidden" name="locked" value="checked" />
         <dl>
@@ -42,7 +42,7 @@
           <dt><label for="fileshare">File Share</label></dt>
           <dd><input type="checkbox" id="fileshare" name="fileshare"#(fileshare.checked)#:: checked="checked"#(/fileshare.checked)# /></dd>
           <dt>&nbsp;</dt>
-          <dd><input type="submit" name="save" value="Set restrictions" /></dd>
+          <dd><input type="submit" name="save" value="Save restrictions" /></dd>
         </dl>
       </fieldset>
     </form>
