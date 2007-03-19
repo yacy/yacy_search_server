@@ -81,8 +81,8 @@ public class Bookmarks {
     else if(isAdmin) username="admin";    
     
     //redirect to userpage
-    if(username!="" &&(post == null || !post.containsKey("user") && !post.containsKey("mode")))
-        prop.put("LOCATION", "/Bookmarks.html?user="+username);
+    /*if(username!="" &&(post == null || !post.containsKey("user") && !post.containsKey("mode")))
+        prop.put("LOCATION", "/Bookmarks.html?user="+username);*/
     prop.put("user",username);
     
     // set peer address
