@@ -754,7 +754,7 @@ public class kelondroRecords {
         assert start >= 0;
         assert end <= USAGE.allCount();
         byte[] bulk = new byte[(end - start) * recordsize];
-        long bulkstart = POS_NODES + ((long) recordsize * start);
+        long bulkstart = POS_NODES + ((long) recordsize * (long) start);
         entryFile.readFully(bulkstart, bulk, 0, bulk.length);
         return bulk;
     }
@@ -1041,7 +1041,7 @@ public class kelondroRecords {
                 // load all values from the database file
                 this.tailChunk = new byte[tailchunksize];
                 // read values
-                entryFile.readFully(seekpos(this.handle) + headchunksize, this.tailChunk, 0, this.tailChunk.length);
+                entryFile.readFully(seekpos(this.handle) + (long) headchunksize, this.tailChunk, 0, this.tailChunk.length);
             }
 
             // create return value
@@ -1236,7 +1236,7 @@ public class kelondroRecords {
 
     protected final long seekpos(Handle handle) {
         assert (handle.index >= 0): "handle index too low: " + handle.index;
-        return POS_NODES + ((long) recordsize * handle.index);
+        return POS_NODES + ((long) recordsize * (long) handle.index);
     }
     
     protected final long seekpos(int index) {
@@ -1454,11 +1454,15 @@ public class kelondroRecords {
             if (pos.index >= (bulkstart + bulksize)) {
                 bulkstart = pos.index;
                 int maxlength = Math.min(USAGE.allCount() - bulkstart, bulksize);
-                if ((POS_NODES + bulkstart * recordsize) < 0)
+                if ((((long) POS_NODES) + ((long) bulkstart) * ((long) recordsize)) < 0)
                     serverLog.logSevere("kelondroRecords", "DEBUG: negative offset. POS_NODES = " + POS_NODES + ", bulkstart = " + bulkstart + ", recordsize = " + recordsize);
-                entryFile.readFully(POS_NODES + bulkstart * recordsize, bulk, 0, maxlength * recordsize);
+                if ((maxlength * recordsize) < 0)
+                    serverLog.logSevere("kelondroRecords", "DEBUG: negative length. maxlength = " + maxlength + ", recordsize = " + recordsize);
+                entryFile.readFully(((long) POS_NODES) + ((long) bulkstart) * ((long) recordsize), bulk, 0, maxlength * recordsize);
             }
-                
+            /* POS_NODES = 302, bulkstart = 3277, recordsize = 655386
+               POS_NODES = 302, bulkstart = 820, recordsize = 2621466
+               POS_NODES = 302, bulkstart = 13106, recordsize = 163866 */                
             // read node from bulk
             Node n = new Node(new Handle(pos.index), bulk, (pos.index - bulkstart) * recordsize);
             pos.index++;
