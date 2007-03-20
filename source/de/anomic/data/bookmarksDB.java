@@ -389,7 +389,7 @@ public class bookmarksDB {
         }
         Bookmark b;
         try {
-            b = (Bookmark) bookmarksTable.get(urlHash);
+            b = getBookmark(urlHash);
             bookmarksTable.remove(urlHash);
         } catch (IOException e) {
             b = null;
