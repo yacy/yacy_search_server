@@ -2989,7 +2989,7 @@ public final class plasmaSwitchboard extends serverAbstractSwitch implements ser
         thread.setIdleSleep(1000);
         
         thread = getThread(INDEXER);
-        setConfig(INDEXER_BUSYSLEEP , thread.setBusySleep(newBusySleep / 4));
+        setConfig(INDEXER_BUSYSLEEP , thread.setBusySleep(newBusySleep / 2));
         thread.setIdleSleep(1000);
         
         thread = getThread(CRAWLSTACK);
