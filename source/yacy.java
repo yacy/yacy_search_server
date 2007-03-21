@@ -320,6 +320,7 @@ public final class yacy {
             // create some directories
             final File htRootPath = new File(homePath, sb.getConfig("htRootPath", "htroot"));
             final File htDocsPath = new File(homePath, sb.getConfig("htDocsPath", "DATA/HTDOCS"));
+            if (!(htDocsPath.exists())) htDocsPath.mkdir();
             //final File htTemplatePath = new File(homePath, sb.getConfig("htTemplatePath","htdocs"));
 
             // create default notifier picture
@@ -329,7 +330,6 @@ public final class yacy {
                                      new File(htDocsPath, "notifier.gif"));
             } catch (IOException e) {}
 
-            if (!(htDocsPath.exists())) htDocsPath.mkdir();
             final File htdocsDefaultReadme = new File(htDocsPath, "readme.txt");
             if (!(htdocsDefaultReadme.exists())) try {serverFileUtils.write((
                     "This is your root directory for individual Web Content\r\n" +
