@@ -57,6 +57,7 @@ import java.util.Properties;
 
 import de.anomic.data.wikiCode;
 import de.anomic.http.httpHeader;
+import de.anomic.kelondro.kelondroBase64Order;
 import de.anomic.plasma.plasmaSwitchboard;
 import de.anomic.server.serverObjects;
 import de.anomic.server.serverSwitch;
@@ -83,6 +84,7 @@ public class ViewProfile {
             prop.put("success","0");
             return prop;
         }
+        prop.put("hash",hash);
         
         // get the profile
         HashMap profile = null;
@@ -101,6 +103,7 @@ public class ViewProfile {
             prop.put("success", "3"); // everything ok
             prop.put("localremotepeer", 0);
             prop.put("success_peername", yacyCore.seedDB.mySeed.getName());
+            prop.put("success_peerhash", yacyCore.seedDB.mySeed.hash);
         } else {
             // read the profile from remote peer
             yacySeed seed = yacyCore.seedDB.getConnected(hash);
@@ -125,6 +128,7 @@ public class ViewProfile {
                     prop.put("success", "3"); // everything ok
                 }
                 prop.put("success_peername", seed.getName());
+                prop.put("success_peerhash", seed.hash);
             }
             prop.put("localremotepeer", 1);
         }
@@ -146,7 +150,7 @@ public class ViewProfile {
         knownKeys.add("yahoo");
         knownKeys.add("msn");
         knownKeys.add("skype");
-        knownKeys.add("comment");
+        knownKeys.add("comment");        
 
         //empty values
         Iterator it = knownKeys.iterator();
@@ -174,6 +178,7 @@ public class ViewProfile {
 							"success_" + key + "_value",
 							wikiTransformer.transform(((String) entry.getValue()).replaceAll("\r", "").replaceAll("\\\\n", "\n"))
 						);
+						prop.putASIS("success_" + key + "_b64value",kelondroBase64Order.standardCoder.encodeString((String) entry.getValue()));
 					}else{
 	            		prop.put("success_" + key + "_value", value); //put replaces HTML Chars by entities.
 					}
