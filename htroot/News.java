@@ -45,8 +45,11 @@
 
 import java.io.IOException;
 import java.util.Enumeration;
+import java.util.Iterator;
+import java.util.Map;
 
 import de.anomic.http.httpHeader;
+import de.anomic.http.httpc;
 import de.anomic.plasma.plasmaSwitchboard;
 import de.anomic.server.serverObjects;
 import de.anomic.server.serverSwitch;
@@ -134,17 +137,76 @@ public class News {
                     if (record == null) continue;
                     seed = yacyCore.seedDB.getConnected(record.originator());
                     if (seed == null) seed = yacyCore.seedDB.getDisconnected(record.originator());
+                    String category = record.category();
                     prop.put("table_list_" + i + "_id", record.id());
                     prop.put("table_list_" + i + "_ori", (seed == null) ? record.originator() : seed.getName());
                     prop.put("table_list_" + i + "_cre", yacyCore.universalDateShortString(record.created()));
-                    prop.put("table_list_" + i + "_cat", record.category());
+                    prop.put("table_list_" + i + "_crerfcdate", httpc.dateString(record.created()));
+                    prop.put("table_list_" + i + "_cat", category);
                     prop.put("table_list_" + i + "_rec", (record.received() == null) ? "-" : yacyCore.universalDateShortString(record.received()));
                     prop.put("table_list_" + i + "_dis", record.distributed());
-                    prop.put("table_list_" + i + "_att", record.attributes().toString() );
+                    
+                    Map attributeMap = record.attributes();
+                    prop.put("table_list_" + i + "_att", attributeMap.toString() );                    
+                    int j = 0;
+                    if (attributeMap.size() > 0) {
+	                    Iterator attributeKeys = attributeMap.keySet().iterator();
+	                    while (attributeKeys.hasNext()) {
+	                    	String key = (String) attributeKeys.next();
+	                    	String value = (String) attributeMap.get(key);
+	                    	prop.put("table_list_" + i + "_attributes_" + j + "_name",key);
+	                    	prop.put("table_list_" + i + "_attributes_" + j + "_value",value);
+	                    	j++;
+	                    }
+                    }
+                    prop.put("table_list_" + i + "_attributes",j);       
+                                        
+                    // generating link / title / description (taken over from Surftips.java)
+                    String link, title, description;
+                    if (category.equals(yacyNewsPool.CATEGORY_CRAWL_START)) {
+                    	link = record.attribute("startURL", "");
+                    	title = (record.attribute("intention", "").length() == 0) ? link : record.attribute("intention", "");
+                    	description = "Crawl Start Point";
+                    } else if (category.equals(yacyNewsPool.CATEGORY_PROFILE_UPDATE)) {
+                    	link = record.attribute("homepage", "");
+                    	title = "Home Page of " + record.attribute("nickname", "");
+                    	description = "Profile Update";
+                    } else if (category.equals(yacyNewsPool.CATEGORY_BOOKMARK_ADD)) {
+                    	link = record.attribute("url", "");
+                    	title = record.attribute("title", "");
+                    	description = "Bookmark: " + record.attribute("description", "");
+                    } else if (category.equals(yacyNewsPool.CATEGORY_SURFTIPP_ADD)) {
+                    	link = record.attribute("url", "");
+                    	title = record.attribute("title", "");
+                    	description = "Surf Tipp: " + record.attribute("description", "");
+                    } else if (category.equals(yacyNewsPool.CATEGORY_SURFTIPP_VOTE_ADD)) {
+                    	link = record.attribute("url", "");
+                    	title = record.attribute("title", "");
+                    	description = record.attribute("url", "");
+                    } else if (category.equals(yacyNewsPool.CATEGORY_WIKI_UPDATE)) {
+                    	link = "http://" + seed.getAddress() + "/Wiki.html?page=" + record.attribute("page", "");
+                    	title = record.attribute("author", "Anonymous") + ": " + record.attribute("page", "");
+                    	description = "Wiki Update: " + record.attribute("description", "");
+                    } else if (category.equals(yacyNewsPool.CATEGORY_BLOG_ADD)) {
+                    	link = "http://" + seed.getAddress() + "/Blog.html?page=" + record.attribute("page", "");
+                    	title = record.attribute("author", "Anonymous") + ": " + record.attribute("page", "");
+                    	description = "Blog Entry: " + record.attribute("subject", "");
+                    } else {
+                    	link = "";             
+                    	title = ""; 
+                    	description = "";
+                    }
+                    prop.put("table_list_" + i + "_link", link);
+                    prop.put("table_list_" + i + "_title", title);
+                    prop.put("table_list_" + i + "_description", description);
                 } catch (IOException e) {e.printStackTrace();}
                 prop.put("table_list", maxCount);
             }
         }
+        
+        // adding the peer address
+        prop.put("address",yacyCore.seedDB.mySeed.getAddress());
+        
         // return rewrite properties
         return prop;
     }

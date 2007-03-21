@@ -61,6 +61,7 @@ public class yacyNewsPool {
     /* ------------------------------------------------------------------------
      * PROFILE related CATEGORIES
      * ------------------------------------------------------------------------ */
+    public static final String CATEGORY_PROFILE = "prfl";
     /**
      * a profile entry was updated (implemented)
      */
@@ -69,6 +70,7 @@ public class yacyNewsPool {
     /* ------------------------------------------------------------------------
      * CRAWLING related CATEGORIES
      * ------------------------------------------------------------------------ */    
+    public static final String CATEGORY_CRAWL = "crwl";
     /**
      * a crawl with remote indexing was startet
      */
@@ -84,7 +86,8 @@ public class yacyNewsPool {
     
     /* ------------------------------------------------------------------------
      * BLACKLIST related CATEGORIES
-     * ------------------------------------------------------------------------ */    
+     * ------------------------------------------------------------------------ */  
+    public static final String CATEGORY_BLACKLIST = "blckl";
     /**
      * a public blacklist entry was added
      */
@@ -105,6 +108,7 @@ public class yacyNewsPool {
     /* ------------------------------------------------------------------------
      * FLIE-SHARE related CATEGORIES
      * ------------------------------------------------------------------------ */    
+    public static final String CATEGORY_FILESHARE = "flshr";
     /**
      * a file was added to the file share
      */
@@ -121,6 +125,7 @@ public class yacyNewsPool {
     /* ------------------------------------------------------------------------
      * BOOKMARK related CATEGORIES
      * ------------------------------------------------------------------------ */       
+    public static final String CATEGORY_BOOKMARK = "bkmrk";
     /**
      * a bookmark was added/created
      */
@@ -149,6 +154,7 @@ public class yacyNewsPool {
     /* ------------------------------------------------------------------------
      * SURFTIPP related CATEGORIES
      * ------------------------------------------------------------------------ */ 
+    public static final String CATEGORY_SURFTIPP = "stipp";
     /** 
      * a surf tipp was added
      */
@@ -161,6 +167,7 @@ public class yacyNewsPool {
     /* ------------------------------------------------------------------------
      * WIKI related CATEGORIES
      * ------------------------------------------------------------------------ */ 	
+	public static final String CATEGORY_WIKI = "wiki";
 	/**
 	 * a wiki page was updated
 	 */
@@ -173,6 +180,7 @@ public class yacyNewsPool {
     /* ------------------------------------------------------------------------
      * BLOG related CATEGORIES
      * ------------------------------------------------------------------------ */ 	
+	public static final String CATEGORY_BLOG = "blog";
 	/**
 	 * a blog entry was added
 	 */

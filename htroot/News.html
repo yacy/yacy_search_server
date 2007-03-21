@@ -2,6 +2,14 @@
 <html xmlns="http://www.w3.org/1999/xhtml">
   <head>
     <title>YaCy '#[clientname]#': News</title>
+    #(table)#
+    <link rel="alternate" type="application/rss+xml" title="Incoming News" href="News.rss?page=1" />
+    <link rel="alternate" type="application/rss+xml" title="Processed News" href="News.rss?page=2" />
+    <link rel="alternate" type="application/rss+xml" title="Outgoing News" href="News.rss?page=3" />
+    <link rel="alternate" type="application/rss+xml" title="Published News" href="News.rss?page=4" />
+    ::
+    <link rel="alternate" type="application/rss+xml" title="#(page)#News Overview::Incoming News::Processed News::Outgoing News::Published News#(/page)#" href="News.rss?page=#[page]#" />
+    #(/table)#
     #%env/templates/metas.template%#
   </head>
   <body id="News">
