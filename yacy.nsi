@@ -138,7 +138,7 @@ Section "Binaries (required)"
 SectionEnd
 
 Section "Addons"
-	SectionIn 1 2 3
+	SectionIn 2 3
 	SetOutPath $INSTDIR\addon
 	File /r "addon\*"
 
