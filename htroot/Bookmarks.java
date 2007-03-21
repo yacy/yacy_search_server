@@ -65,6 +65,7 @@ import de.anomic.plasma.plasmaSwitchboard;
 import de.anomic.server.serverObjects;
 import de.anomic.server.serverSwitch;
 import de.anomic.yacy.yacyCore;
+import de.anomic.yacy.yacyNewsPool;
 import de.anomic.yacy.yacyNewsRecord;
 
 public class Bookmarks {
@@ -304,7 +305,7 @@ public class Bookmarks {
         map.put("title", title.replace(',', ' '));
         map.put("description", description.replace(',', ' '));
         map.put("tags", tagsString.replace(',', ' '));
-        yacyCore.newsPool.publishMyNews(new yacyNewsRecord("bkmrkadd", map));
+        yacyCore.newsPool.publishMyNews(new yacyNewsRecord(yacyNewsPool.CATEGORY_BOOKMARK_ADD, map));
     }
 
 }

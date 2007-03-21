@@ -81,7 +81,7 @@ public class Surftips {
                 map.put("urlhash", hash);
                 map.put("vote", "negative");
                 map.put("refid", post.get("refid", ""));
-                yacyCore.newsPool.publishMyNews(new yacyNewsRecord("stippavt", map));
+                yacyCore.newsPool.publishMyNews(new yacyNewsRecord(yacyNewsPool.CATEGORY_SURFTIPP_VOTE_ADD, map));
             }
             if ((post != null) && ((hash = post.get("votePositive", null)) != null)) {
                 if (!sb.verifyAuthentication(header, false)) {
@@ -97,7 +97,7 @@ public class Surftips {
                 map.put("vote", "positive");
                 map.put("refid", post.get("refid", ""));
                 map.put("comment", post.get("comment", ""));
-                yacyCore.newsPool.publishMyNews(new yacyNewsRecord("stippavt", map));
+                yacyCore.newsPool.publishMyNews(new yacyNewsRecord(yacyNewsPool.CATEGORY_SURFTIPP_VOTE_ADD, map));
             }
         
             // create surftips
@@ -133,7 +133,7 @@ public class Surftips {
                 refid = row.getColString(3, null);
                 voted = false;
                 try {
-                    voted = (yacyCore.newsPool.getSpecific(yacyNewsPool.OUTGOING_DB, "stippavt", "refid", refid) != null) || (yacyCore.newsPool.getSpecific(yacyNewsPool.PUBLISHED_DB, "stippavt", "refid", refid) != null);
+                    voted = (yacyCore.newsPool.getSpecific(yacyNewsPool.OUTGOING_DB, yacyNewsPool.CATEGORY_SURFTIPP_VOTE_ADD, "refid", refid) != null) || (yacyCore.newsPool.getSpecific(yacyNewsPool.PUBLISHED_DB, "stippavt", "refid", refid) != null);
                 } catch (IOException e) {
                     e.printStackTrace();
                 }
@@ -179,7 +179,7 @@ public class Surftips {
             record = yacyCore.newsPool.get(dbtype, j);
             if (record == null) continue;
             
-            if (record.category().equals("stippavt")) {
+            if (record.category().equals(yacyNewsPool.CATEGORY_SURFTIPP_VOTE_ADD)) {
                 String urlhash = record.attribute("urlhash", "");
                 String vote    = record.attribute("vote", "");
                 int factor = ((dbtype == yacyNewsPool.OUTGOING_DB) || (dbtype == yacyNewsPool.PUBLISHED_DB)) ? 2 : 1;
@@ -211,7 +211,7 @@ public class Surftips {
             if (record == null) continue;
             
             entry = null;
-            if (record.category().equals("crwlstrt")) {
+            if (record.category().equals(yacyNewsPool.CATEGORY_CRAWL_START)) {
                 String intention = record.attribute("intention", "");
                 url = record.attribute("startURL", "");
                 entry = rowdef.newEntry(new byte[][]{
@@ -223,7 +223,7 @@ public class Surftips {
                 score = 2 + Math.min(10, intention.length() / 4) + timeFactor(record.created());
             }
             
-            if (record.category().equals("prfleupd")) {
+            if (record.category().equals(yacyNewsPool.CATEGORY_PROFILE_UPDATE)) {
                 url = record.attribute("homepage", "");
                 entry = rowdef.newEntry(new byte[][]{
                                 url.getBytes(),
@@ -234,7 +234,7 @@ public class Surftips {
                 score = 1 + timeFactor(record.created());
             }
             
-            if (record.category().equals("bkmrkadd")) {
+            if (record.category().equals(yacyNewsPool.CATEGORY_BOOKMARK_ADD)) {
                 url = record.attribute("url", "");
                 entry = rowdef.newEntry(new byte[][]{
                                 url.getBytes(),
@@ -245,7 +245,7 @@ public class Surftips {
                 score = 8 + timeFactor(record.created());
             }
             
-            if (record.category().equals("stippadd")) {
+            if (record.category().equals(yacyNewsPool.CATEGORY_SURFTIPP_ADD)) {
                 url = record.attribute("url", "");
                 entry = rowdef.newEntry(new byte[][]{
                                 url.getBytes(),
@@ -256,7 +256,7 @@ public class Surftips {
                 score = 5 + timeFactor(record.created());
             }
             
-            if (record.category().equals("stippavt")) {
+            if (record.category().equals(yacyNewsPool.CATEGORY_SURFTIPP_VOTE_ADD)) {
                 if (!(record.attribute("vote", "negative").equals("positive"))) continue;
                 url = record.attribute("url", "");
                 entry = rowdef.newEntry(new byte[][]{
@@ -268,7 +268,7 @@ public class Surftips {
                 score = 5 + timeFactor(record.created());
             }
             
-            if (record.category().equals("wiki_upd")) {
+            if (record.category().equals(yacyNewsPool.CATEGORY_WIKI_UPDATE)) {
                 yacySeed seed = yacyCore.seedDB.getConnected(record.originator());
                 if (seed == null) seed = yacyCore.seedDB.getDisconnected(record.originator());
                 if (seed != null) {
@@ -283,7 +283,7 @@ public class Surftips {
                 }
             }
             
-            if (record.category().equals("blog_add")) {
+            if (record.category().equals(yacyNewsPool.CATEGORY_BLOG_ADD)) {
                 yacySeed seed = yacyCore.seedDB.getConnected(record.originator());
                 if (seed == null) seed = yacyCore.seedDB.getDisconnected(record.originator());
                 if (seed != null) {

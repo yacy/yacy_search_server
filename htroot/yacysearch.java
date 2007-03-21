@@ -217,7 +217,7 @@ public class yacysearch {
             map.put("urlhash", delHash);
             map.put("vote", "negative");
             map.put("refid", "");
-            yacyCore.newsPool.publishMyNews(new yacyNewsRecord("stippavt", map));
+            yacyCore.newsPool.publishMyNews(new yacyNewsRecord(yacyNewsPool.CATEGORY_SURFTIPP_VOTE_ADD, map));
         }
 
         // if aplus-button was hit, create new voting message
@@ -240,7 +240,7 @@ public class yacysearch {
                     map.put("description", ((document == null) ? comp.title() : document.getTitle()).replace(',', ' '));
                     map.put("author", ((document == null) ? "" : document.getAuthor()));
                     map.put("tags", ((document == null) ? "" : document.getKeywords(' ')));
-                    yacyCore.newsPool.publishMyNews(new yacyNewsRecord("stippadd", map));
+                    yacyCore.newsPool.publishMyNews(new yacyNewsRecord(yacyNewsPool.CATEGORY_SURFTIPP_ADD, map));
                     document.close();
                 }
             }
@@ -287,7 +287,7 @@ public class yacysearch {
             for(int i=0;i<results.numResults();i++){
                 plasmaSearchResults.searchResult result=results.getResult(i);
                 try {
-                    prop.put("type_results_" + i + "_authorized_recommend", (yacyCore.newsPool.getSpecific(yacyNewsPool.OUTGOING_DB, "stippadd", "url", result.getUrl()) == null) ? 1 : 0);
+                    prop.put("type_results_" + i + "_authorized_recommend", (yacyCore.newsPool.getSpecific(yacyNewsPool.OUTGOING_DB, yacyNewsPool.CATEGORY_SURFTIPP_ADD, "url", result.getUrl()) == null) ? 1 : 0);
                 } catch (IOException e) {}
                 //prop.put("type_results_" + i + "_authorized_recommend_deletelink", "/yacysearch.html?search=" + results.getFormerSearch() + "&amp;Enter=Search&amp;count=" + results.getQuery().wantedResults + "&amp;order=" + crypt.simpleEncode(results.getRanking().toExternalString()) + "&amp;resource=local&amp;time=3&amp;deleteref=" + result.getUrlhash() + "&amp;urlmaskfilter=.*");
                 //prop.put("type_results_" + i + "_authorized_recommend_recommendlink", "/yacysearch.html?search=" + results.getFormerSearch() + "&amp;Enter=Search&amp;count=" + results.getQuery().wantedResults + "&amp;order=" + crypt.simpleEncode(results.getRanking().toExternalString()) + "&amp;resource=local&amp;time=3&amp;recommendref=" + result.getUrlhash() + "&amp;urlmaskfilter=.*");

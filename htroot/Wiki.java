@@ -60,6 +60,7 @@ import de.anomic.plasma.plasmaSwitchboard;
 import de.anomic.server.serverObjects;
 import de.anomic.server.serverSwitch;
 import de.anomic.yacy.yacyCore;
+import de.anomic.yacy.yacyNewsPool;
 import de.anomic.yacy.yacyNewsRecord;
 
 public class Wiki {
@@ -131,7 +132,7 @@ public class Wiki {
             map.put("page", pagename);
             map.put("author", author.replace(',', ' '));
             if (post.get("content", "").trim().length() > 0 && !page.page().equals(content))
-                yacyCore.newsPool.publishMyNews(new yacyNewsRecord("wiki_upd", map));
+                yacyCore.newsPool.publishMyNews(new yacyNewsRecord(yacyNewsPool.CATEGORY_WIKI_UPDATE, map));
             page = newEntry;
             prop.put("LOCATION", "/Wiki.html?page=" + pagename);
         }

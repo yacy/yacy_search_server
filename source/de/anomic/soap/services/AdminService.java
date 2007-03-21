@@ -70,6 +70,7 @@ import de.anomic.server.serverThread;
 import de.anomic.server.logging.GuiHandler;
 import de.anomic.soap.AbstractService;
 import de.anomic.yacy.yacyCore;
+import de.anomic.yacy.yacyNewsPool;
 import de.anomic.yacy.yacyNewsRecord;
 import de.anomic.yacy.yacySeed;
 
@@ -747,7 +748,7 @@ public class AdminService extends AbstractService {
             // generate a news message
             Properties news = profile;
             news.remove(PEERPROFILE_COMMENT);
-            yacyCore.newsPool.publishMyNews(new yacyNewsRecord("prfleupd", news));
+            yacyCore.newsPool.publishMyNews(new yacyNewsRecord(yacyNewsPool.CATEGORY_PROFILE_UPDATE, news));
         } catch(IOException e) {
         	throw new AxisFault("Unable to write profile data to file");
         } finally {

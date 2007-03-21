@@ -202,7 +202,7 @@ public class IndexCreate_p {
             for (int c = 0; c < availableNews; c++) {
                 record = yacyCore.newsPool.get(yacyNewsPool.INCOMING_DB, c);
                 if (record == null) continue;
-                if (record.category().equals("crwlstrt")) {
+                if (record.category().equals(yacyNewsPool.CATEGORY_CRAWL_START)) {
                     peer = yacyCore.seedDB.get(record.originator());
                     if (peer == null) peername = record.originator(); else peername = peer.getName();
                     prop.put("otherCrawlStartInProgress_" + showedCrawl + "_dark", ((dark) ? 1 : 0));
@@ -227,7 +227,7 @@ public class IndexCreate_p {
             for (int c = 0; c < availableNews; c++) {
                 record = yacyCore.newsPool.get(yacyNewsPool.PROCESSED_DB, c);
                 if (record == null) continue;
-                if (record.category().equals("crwlstrt")) {
+                if (record.category().equals(yacyNewsPool.CATEGORY_CRAWL_START)) {
                     peer = yacyCore.seedDB.get(record.originator());
                     if (peer == null) peername = record.originator(); else peername = peer.getName();
                     prop.put("otherCrawlStartFinished_" + showedCrawl + "_dark", ((dark) ? 1 : 0));

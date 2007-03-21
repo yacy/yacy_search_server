@@ -110,7 +110,7 @@ public class ViewProfile {
             } else {
                 // process news if existent
                 try {
-                    yacyNewsRecord record = yacyCore.newsPool.getByOriginator(yacyNewsPool.INCOMING_DB, "prfleupd", seed.hash);
+                    yacyNewsRecord record = yacyCore.newsPool.getByOriginator(yacyNewsPool.INCOMING_DB, yacyNewsPool.CATEGORY_PROFILE_UPDATE, seed.hash);
                     if (record != null) yacyCore.newsPool.moveOff(yacyNewsPool.INCOMING_DB, record.id());
                 } catch (IOException e) {}
                 

@@ -266,13 +266,13 @@ public class Network {
                             record = yacyCore.newsPool.get(yacyNewsPool.INCOMING_DB, c);
                             if (record == null) {
                                 break;
-                            } else if (record.category().equals("prfleupd")) {
+                            } else if (record.category().equals(yacyNewsPool.CATEGORY_PROFILE_UPDATE)) {
                                 updatedProfile.add(record.originator());
-                            } else if (record.category().equals("wiki_upd")) {
+                            } else if (record.category().equals(yacyNewsPool.CATEGORY_WIKI_UPDATE)) {
                                 updatedWiki.put(record.originator(), record.attributes());
-                            } else if (record.category().equals("blog_add")) {
+                            } else if (record.category().equals(yacyNewsPool.CATEGORY_BLOG_ADD)) {
                                 updatedBlog.put(record.originator(), record.attributes());
-                            } else if (record.category().equals("crwlstrt")) {
+                            } else if (record.category().equals(yacyNewsPool.CATEGORY_CRAWL_START)) {
                                 isCrawling.put(record.originator(), record.attributes().get("startURL"));
                             }
                         }

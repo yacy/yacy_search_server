@@ -58,6 +58,7 @@ import de.anomic.http.httpHeader;
 import de.anomic.server.serverObjects;
 import de.anomic.server.serverSwitch;
 import de.anomic.yacy.yacyCore;
+import de.anomic.yacy.yacyNewsPool;
 import de.anomic.yacy.yacyNewsRecord;
 
 public class ConfigProfile_p {
@@ -112,8 +113,8 @@ public class ConfigProfile_p {
                 // generate a news message
                 Properties news = profile;
                 news.remove("comment");
-                yacyCore.newsPool.publishMyNews(new yacyNewsRecord("prfleupd", news));
-                //yacyCore.newsPool.publishMyNews(new yacyNewsRecord("prfleupd", profile));
+                yacyCore.newsPool.publishMyNews(new yacyNewsRecord(yacyNewsPool.CATEGORY_PROFILE_UPDATE, news));
+                //yacyCore.newsPool.publishMyNews(new yacyNewsRecord(yacyNewsRecord.CATEGORY_PROFILE_UPDATE, profile));
             } catch(IOException e) {
             } finally {
                 if (fileOut != null) try { fileOut.close(); } catch (Exception e) {}

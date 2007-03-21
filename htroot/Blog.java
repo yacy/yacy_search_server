@@ -63,6 +63,7 @@ import de.anomic.server.serverObjects;
 import de.anomic.server.serverSwitch;
 import de.anomic.server.logging.serverLog;
 import de.anomic.yacy.yacyCore;
+import de.anomic.yacy.yacyNewsPool;
 import de.anomic.yacy.yacyNewsRecord;
 
 public class Blog {
@@ -183,7 +184,7 @@ public class Blog {
 			map.put("page", pagename);
 			map.put("subject", StrSubject.replace(',', ' '));
 			map.put("author", StrAuthor.replace(',', ' '));
-			yacyCore.newsPool.publishMyNews(new yacyNewsRecord("blog_add", map));
+			yacyCore.newsPool.publishMyNews(new yacyNewsRecord(yacyNewsPool.CATEGORY_BLOG_ADD, map));
 		}
 
 		page = switchboard.blogDB.read(pagename); //maybe "if(page == null)"

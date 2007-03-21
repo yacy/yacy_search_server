@@ -55,30 +55,175 @@ public class yacyNewsPool {
     public static final int OUTGOING_DB  = 2;
     public static final int PUBLISHED_DB = 3;
     
+    /* ========================================================================
+     * CATEGORIES for YACY NEWS
+     * ======================================================================== */
+    /* ------------------------------------------------------------------------
+     * PROFILE related CATEGORIES
+     * ------------------------------------------------------------------------ */
+    /**
+     * a profile entry was updated (implemented)
+     */
+    public static final String CATEGORY_PROFILE_UPDATE = "prfleupd";
+    
+    /* ------------------------------------------------------------------------
+     * CRAWLING related CATEGORIES
+     * ------------------------------------------------------------------------ */    
+    /**
+     * a crawl with remote indexing was startet
+     */
+    public static final String CATEGORY_CRAWL_START = "crwlstrt";
+    /**
+     * a crawl with remote indexing was stopped
+     */
+    public static final String CATEGORY_CRAWL_STOP = "crwlstop";
+    /**
+     * a comment on a crawl with remote indexing
+     */
+    public static final String CATEGORY_CRAWL_COMMENT = "crwlcomm";
+    
+    /* ------------------------------------------------------------------------
+     * BLACKLIST related CATEGORIES
+     * ------------------------------------------------------------------------ */    
+    /**
+     * a public blacklist entry was added
+     */
+    public static final String CATEGORY_BLACKLIST_ADD = "blckladd";
+    /**
+     * a vote and comment on a public blacklist add
+     */
+    public static final String CATEGORY_BLACKLIST_VOTE_ADD = "blcklavt";
+    /**
+     * a public blacklist entry was deleted
+     */
+    public static final String CATEGORY_BLACKLIST_DELETE = "blckldel";
+    /**
+     * a vote and comment on a public blacklist delete
+     */
+    public static final String CATEGORY_BLACKLIST_VOTE_DEL = "blckldvt";
+    
+    /* ------------------------------------------------------------------------
+     * FLIE-SHARE related CATEGORIES
+     * ------------------------------------------------------------------------ */    
+    /**
+     * a file was added to the file share
+     */
+    public static final String CATEGORY_FILESHARE_ADD = "flshradd";
+    /**
+     * a file was added to the file share
+     */
+    public static final String CATEGORY_FILESHARE_DEL = "flshrdel";
+    /**
+     * a comment to a file share entry
+     */
+    public static final String CATEGORY_FILESHARE_COMMENT = "flshrcom";
+    
+    /* ------------------------------------------------------------------------
+     * BOOKMARK related CATEGORIES
+     * ------------------------------------------------------------------------ */       
+    /**
+     * a bookmark was added/created
+     */
+    public static final String CATEGORY_BOOKMARK_ADD = "bkmrkadd";
+    /**
+     * a vote and comment on a bookmark add
+     */
+    public static final String CATEGORY_BOOKMARK_VOTE_ADD = "bkmrkavt";
+    /**
+     * a bookmark was moved
+     */
+    public static final String CATEGORY_BOOKMARK_MOVE = "bkmrkmov";
+    /**
+     * a vote and comment on a bookmark move
+     */
+    public static final String CATEGORY_BOOKMARK_VOTE_MOVE = "bkmrkmvt";
+    /**
+     * a bookmark was deleted
+     */
+    public static final String CATEGORY_BOOKMARK_DEL = "bkmrkdel";
+    /**
+     * a vote and comment on a bookmark delete
+     */
+    public static final String CATEGORY_BOOKMARK_VOTE_DEL = "bkmrkdvt";
+    
+    /* ------------------------------------------------------------------------
+     * SURFTIPP related CATEGORIES
+     * ------------------------------------------------------------------------ */ 
+    /** 
+     * a surf tipp was added
+     */
+	public static final String CATEGORY_SURFTIPP_ADD = "stippadd";	 
+	/**
+	 * a vote and comment on a surf tipp
+	 */
+	public static final String CATEGORY_SURFTIPP_VOTE_ADD = "stippavt";
+	
+    /* ------------------------------------------------------------------------
+     * WIKI related CATEGORIES
+     * ------------------------------------------------------------------------ */ 	
+	/**
+	 * a wiki page was updated
+	 */
+	public static final String CATEGORY_WIKI_UPDATE = "wiki_upd";
+	/** 
+	 * a wiki page das deleted
+	 */
+	public static final String CATEGORY_WIKI_DEL = "wiki_del";
+	
+    /* ------------------------------------------------------------------------
+     * BLOG related CATEGORIES
+     * ------------------------------------------------------------------------ */ 	
+	/**
+	 * a blog entry was added
+	 */
+	public static final String CATEGORY_BLOG_ADD = "blog_add";
+	/**
+	 * a blog page das deleted
+	 */
+	public static final String CATEGORY_BLOG_DEL = "blog_del";
+    
+    /* ========================================================================
+     * ARRAY of valid CATEGORIES
+     * ======================================================================== */	
     public static final String[] category = {
-        "prfleupd", // a profile entry was updated (implemented)
-        "crwlstrt", // a crawl with remote indexing was startet
-        "crwlstop", // a crawl with remote indexing was stopped
-        "crwlcomm", // a comment on a crawl with remote indexing
-        "blckladd", // a public blacklist entry was added
-        "blcklavt", // a vote and comment on a public blacklist add
-        "blckldel", // a public blacklist entry was deleted
-        "blckldvt", // a vote and comment on a public blacklist delete
-        "flshradd", // a file was added to the file share
-        "flshrdel", // a file was added to the file share
-        "flshrcom", // a comment to a file share entry
-        "bkmrkadd", // a bookmark was added/created
-        "bkmrkavt", // a vote and comment on a bookmark add
-        "bkmrkmov", // a bookmark was moved
-        "bkmrkmvt", // a vote and comment on a bookmark move
-        "bkmrkdel", // a bookmark was deleted
-        "bkmrkdvt", // a vote and comment on a bookmark delete
-        "stippadd", // a surf tipp was added
-        "stippavt", // a vote and comment on a surf tipp
-        "wiki_upd", // a wiki page was updated
-        "wiki_del", // a wiki page das deleted
-        "blog_add", // a blog entry was added
-        "blog_del"  // a blog page das deleted
+    	// PROFILE related CATEGORIES
+    	CATEGORY_PROFILE_UPDATE,
+    	
+    	// CRAWLING related CATEGORIES
+    	CATEGORY_CRAWL_START, 
+    	CATEGORY_CRAWL_STOP,
+    	CATEGORY_CRAWL_COMMENT,
+    	
+    	// BLACKLIST related CATEGORIES
+    	CATEGORY_BLACKLIST_ADD,  
+    	CATEGORY_BLACKLIST_VOTE_ADD,
+    	CATEGORY_BLACKLIST_DELETE,
+    	CATEGORY_BLACKLIST_VOTE_DEL,
+    	
+        // FILESHARE related CATEGORIES    	
+    	CATEGORY_FILESHARE_ADD,
+    	CATEGORY_FILESHARE_DEL,
+    	CATEGORY_FILESHARE_COMMENT,
+    	
+    	// BOOKMARK related CATEGORIES
+    	CATEGORY_BOOKMARK_ADD,
+    	CATEGORY_BOOKMARK_VOTE_ADD,
+    	CATEGORY_BOOKMARK_MOVE,
+    	CATEGORY_BOOKMARK_VOTE_MOVE,
+    	CATEGORY_BOOKMARK_DEL,
+    	CATEGORY_BOOKMARK_VOTE_DEL,
+        
+    	// SURFTIPP related CATEGORIES
+    	CATEGORY_SURFTIPP_ADD,
+    	CATEGORY_SURFTIPP_VOTE_ADD,
+    	
+    	// WIKI related CATEGORIE
+    	CATEGORY_WIKI_UPDATE,
+    	CATEGORY_WIKI_DEL,
+    	
+    	// BLOG related CATEGORIES
+    	CATEGORY_BLOG_ADD,
+    	CATEGORY_BLOG_DEL
     };
     public static HashSet categories;
     static {
@@ -188,19 +333,19 @@ public class yacyNewsPool {
             // remove everything after 1 week
             return true;
         }
-        if ((record.category().equals("wiki_upd")) &&
+        if ((record.category().equals(CATEGORY_WIKI_UPDATE)) &&
                 ((System.currentTimeMillis() - record.created().getTime()) > (3 * day))) {
                 return true;
             }
-        if ((record.category().equals("blog_add")) &&
+        if ((record.category().equals(CATEGORY_BLOG_ADD)) &&
                 ((System.currentTimeMillis() - record.created().getTime()) > (3 * day))) {
                 return true;
             }
-        if ((record.category().equals("prfleupd")) &&
+        if ((record.category().equals(CATEGORY_PROFILE_UPDATE)) &&
                 ((System.currentTimeMillis() - record.created().getTime()) > (7 * day))) {
                 return true;
             }
-        if ((record.category().equals("crwlstrt")) &&
+        if ((record.category().equals(CATEGORY_CRAWL_START)) &&
             ((System.currentTimeMillis() - record.created().getTime()) > (2 * day))) {
             yacySeed seed = yacyCore.seedDB.get(record.originator());
             if (seed == null) return false;
