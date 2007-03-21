@@ -108,6 +108,7 @@ public class rssParser extends AbstractParser implements Parser {
             HashMap anchors = new HashMap();
             TreeSet images  = new TreeSet();
             serverByteBuffer text = new serverByteBuffer();
+            serverCharBuffer authors = new serverCharBuffer();
             
             
 	        // creating a channel-builder
@@ -119,6 +120,10 @@ public class rssParser extends AbstractParser implements Parser {
             // getting the rss feed title and description
             String feedTitle = channel.getTitle();
 
+            // getting feed creator
+			String feedCreator = channel.getCreator();
+			if (feedCreator != null && feedCreator.length() > 0) authors.append(",").append(feedCreator);            
+            
             // getting the feed description
             String feedDescription = channel.getDescription();
             
@@ -144,6 +149,8 @@ public class rssParser extends AbstractParser implements Parser {
         			String itemTitle = item.getTitle();
         			URL    itemURL   = new URL(item.getLink().toExternalForm());
         			String itemDescr = item.getDescription();
+        			String itemCreator = item.getCreator();
+        			if (itemCreator != null && itemCreator.length() > 0) authors.append(",").append(itemCreator);
                     
                     feedSections.add(itemTitle);
                     anchors.put(itemURL.toString(),itemTitle);
@@ -189,7 +196,7 @@ public class rssParser extends AbstractParser implements Parser {
                     "UTF-8",
                     null,
                     feedTitle,
-                    "", // TODO: AUTHOR
+                    (authors.length() > 0)?authors.toString(1,authors.length()):"",
                     (String[]) feedSections.toArray(new String[feedSections.size()]),
                     feedDescription,
                     text.getBytes(),
