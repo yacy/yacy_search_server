@@ -109,7 +109,7 @@ public class rpmParser extends AbstractParser implements Parser {
     public plasmaParserDocument parse(URL location, String mimeType, String charset, File sourceFile) throws ParserException, InterruptedException {
         RPMFile rpmFile = null;        
         try {
-            String summary = null, description = null, name = sourceFile.getName();
+            String summary = null, description = null, packager = null, name = sourceFile.getName();
             HashMap anchors = new HashMap();
             StringBuffer content = new StringBuffer();            
             
@@ -134,11 +134,11 @@ public class rpmParser extends AbstractParser implements Parser {
                 .append(tag.toString())
                 .append("\n");
                 
-                if (headerNames[i].equals("N")) name = tag.toString();
-                else if (headerNames[i].equals("SUMMARY")) summary = tag.toString();
-                else if (headerNames[i].equals("DESCRIPTION")) description = tag.toString();
-                else if (headerNames[i].equals("URL")) anchors.put(tag.toString(), tag.toString());
-                
+                if (headerNames[i].equalsIgnoreCase("N")) name = tag.toString();
+                else if (headerNames[i].equalsIgnoreCase("SUMMARY")) summary = tag.toString();
+                else if (headerNames[i].equalsIgnoreCase("DESCRIPTION")) description = tag.toString();
+                else if (headerNames[i].equalsIgnoreCase("PACKAGER")) packager = tag.toString();
+                else if (headerNames[i].equalsIgnoreCase("URL")) anchors.put(tag.toString(), tag.toString());
             }
 
             // closing the rpm file
@@ -152,7 +152,7 @@ public class rpmParser extends AbstractParser implements Parser {
                     "UTF-8",
                     null,
                     summary,
-                    "", // TODO: AUTHOR
+                    packager,
                     null,
                     description,
                     content.toString().getBytes("UTF-8"),
