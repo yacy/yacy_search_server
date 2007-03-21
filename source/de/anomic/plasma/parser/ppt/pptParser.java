@@ -64,9 +64,9 @@ public class pptParser extends AbstractParser implements Parser {
      */
     public static final Hashtable SUPPORTED_MIME_TYPES = new Hashtable();    
     static { 
-        SUPPORTED_MIME_TYPES.put("application/mspowerpoint","ppt");
-        SUPPORTED_MIME_TYPES.put("application/powerpoint","ppt");
-        SUPPORTED_MIME_TYPES.put("application/vnd.ms-powerpoint","ppt");
+        SUPPORTED_MIME_TYPES.put("application/mspowerpoint","ppt,pps");
+        SUPPORTED_MIME_TYPES.put("application/powerpoint","ppt,pps");
+        SUPPORTED_MIME_TYPES.put("application/vnd.ms-powerpoint","ppt,pps");
     }     
 
     /**
