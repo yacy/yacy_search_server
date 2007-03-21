@@ -685,15 +685,16 @@ public class kelondroRecords {
     }
 
     private int cacheGrowStatus() {
-        return cacheGrowStatus(memStopGrow, memStartShrink);
+        long available = serverMemory.available();
+        if ((cacheHeaders != null) && (available < cacheHeaders.memoryNeededForGrow())) return 0;
+        return cacheGrowStatus(available, memStopGrow, memStartShrink);
     }
     
-    public static final int cacheGrowStatus(long stopGrow, long startShrink) {
+    public static final int cacheGrowStatus(long available, long stopGrow, long startShrink) {
         // returns either 0, 1 or 2:
         // 0: cache is not allowed to grow, but shall shrink
         // 1: cache is allowed to grow, but need not to shrink
         // 2: cache is allowed to grow and must not shrink
-        long available = serverMemory.available();
         if (available > stopGrow) return 2;
         if (available > startShrink) return 1;
         return 0;

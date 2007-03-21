@@ -169,6 +169,10 @@ public class kelondroRowCollection {
         newChunkcache = null;
     }
     
+    public final long memoryNeededForGrow() {
+        return (long) ((((long) (chunkcount + 1)) * ((long) rowdef.objectsize())) * growfactor);
+    }
+    
     public synchronized void trim(boolean plusGrowFactor) {
         if (chunkcache.length == 0)
             return;

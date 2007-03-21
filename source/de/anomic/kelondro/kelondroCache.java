@@ -36,6 +36,7 @@ import java.util.Map;
 import java.util.TreeMap;
 
 import de.anomic.kelondro.kelondroRow.Entry;
+import de.anomic.server.serverMemory;
 
 public class kelondroCache implements kelondroIndex {
 
@@ -157,7 +158,7 @@ public class kelondroCache implements kelondroIndex {
     }
     
     private int cacheGrowStatus() {
-        return kelondroRecords.cacheGrowStatus(memStopGrow, memStartShrink);
+        return kelondroRecords.cacheGrowStatus(serverMemory.available(), memStopGrow, memStartShrink);
     }
     
     private void flushUnique() throws IOException {
