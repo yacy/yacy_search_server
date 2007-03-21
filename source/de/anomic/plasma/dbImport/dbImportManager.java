@@ -58,9 +58,7 @@ public class dbImportManager {
         if (type.length() == 0) return null;
         
         dbImporter newImporter = null;
-        if (type.equalsIgnoreCase("ASSORTMENT")) {
-            newImporter = new AssortmentImporter(this.sb.wordIndex);
-        } else if (type.equalsIgnoreCase("NURL")) {
+        if (type.equalsIgnoreCase("NURL")) {
             newImporter = new plasmaCrawlNURLImporter(this.sb);
         }
         return newImporter;

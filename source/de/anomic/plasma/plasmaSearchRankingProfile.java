@@ -47,7 +47,6 @@ import java.util.Map;
 import java.util.Set;
 
 import de.anomic.index.indexRWIEntry;
-import de.anomic.index.indexRWIEntryNew;
 import de.anomic.plasma.plasmaURL;
 import de.anomic.index.indexURLEntry;
 import de.anomic.kelondro.kelondroBitfield;
@@ -268,12 +267,12 @@ public class plasmaSearchRankingProfile {
         ranking += (normalizedEntry.worddistance() == 0) ? 0 : (256 - normalizedEntry.worddistance()) << coeff_worddistance;
 
         kelondroBitfield flags = normalizedEntry.flags();
-        ranking += (flags.get(indexRWIEntryNew.flag_app_url)) ? 256 << coeff_appurl : 0;
-        ranking += (flags.get(indexRWIEntryNew.flag_app_descr)) ? 256 << coeff_appdescr : 0;
-        ranking += (flags.get(indexRWIEntryNew.flag_app_author)) ? 256 << coeff_appauthor : 0;
-        ranking += (flags.get(indexRWIEntryNew.flag_app_tags)) ? 256 << coeff_apptags : 0;
-        ranking += (flags.get(indexRWIEntryNew.flag_app_reference)) ? 256 << coeff_appref : 0;
-        ranking += (flags.get(indexRWIEntryNew.flag_app_emphasized)) ? 256 << coeff_appemph : 0;
+        ranking += (flags.get(indexRWIEntry.flag_app_url)) ? 256 << coeff_appurl : 0;
+        ranking += (flags.get(indexRWIEntry.flag_app_descr)) ? 256 << coeff_appdescr : 0;
+        ranking += (flags.get(indexRWIEntry.flag_app_author)) ? 256 << coeff_appauthor : 0;
+        ranking += (flags.get(indexRWIEntry.flag_app_tags)) ? 256 << coeff_apptags : 0;
+        ranking += (flags.get(indexRWIEntry.flag_app_reference)) ? 256 << coeff_appref : 0;
+        ranking += (flags.get(indexRWIEntry.flag_app_emphasized)) ? 256 << coeff_appemph : 0;
         ranking += (flags.get(plasmaCondenser.flag_cat_indexof)) ? 256 << coeff_catindexof : 0;
         ranking += (flags.get(plasmaCondenser.flag_cat_hasimage)) ? 256 << coeff_cathasimage : 0;
         ranking += (flags.get(plasmaCondenser.flag_cat_hasaudio)) ? 256 << coeff_cathasaudio : 0;

@@ -55,7 +55,6 @@ import java.util.TreeMap;
 import de.anomic.http.httpc;
 import de.anomic.index.indexContainer;
 import de.anomic.index.indexRWIEntry;
-import de.anomic.index.indexRWIEntryNew;
 import de.anomic.plasma.plasmaURL;
 import de.anomic.index.indexURLEntry;
 import de.anomic.kelondro.kelondroBase64Order;
@@ -535,7 +534,6 @@ public final class yacyClient {
                 }
                 // add the url entry to the word indexes
                 for (int m = 0; m < words; m++) {
-                    assert (entry instanceof indexRWIEntryNew);
                     container[m].add(entry, System.currentTimeMillis());
                 }
                 // store url hash for statistics

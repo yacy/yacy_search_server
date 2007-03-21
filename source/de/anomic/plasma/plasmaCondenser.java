@@ -66,7 +66,7 @@ import java.util.TreeSet;
 
 import de.anomic.htmlFilter.htmlFilterContentScraper;
 import de.anomic.htmlFilter.htmlFilterImageEntry;
-import de.anomic.index.indexRWIEntryNew;
+import de.anomic.index.indexRWIEntry;
 import de.anomic.kelondro.kelondroBase64Order;
 import de.anomic.kelondro.kelondroBitfield;
 import de.anomic.kelondro.kelondroMSetTools;
@@ -151,22 +151,22 @@ public final class plasmaCondenser {
             // phrase  99 is taken from the media Link url and anchor description
             // phrase 100 and above are lines from the text
       
-            insertTextToWords(document.getTitle(),  1, indexRWIEntryNew.flag_app_descr, wflags);
+            insertTextToWords(document.getTitle(),  1, indexRWIEntry.flag_app_descr, wflags);
             //insertTextToWords(document.getTitle(), 2, indexRWIEntryNew.flag_app_descr, wflags);
-            insertTextToWords(document.getAbstract(),       3, indexRWIEntryNew.flag_app_descr, wflags);
-            insertTextToWords(document.getAuthor(),         4, indexRWIEntryNew.flag_app_descr, wflags);
+            insertTextToWords(document.getAbstract(),       3, indexRWIEntry.flag_app_descr, wflags);
+            insertTextToWords(document.getAuthor(),         4, indexRWIEntry.flag_app_descr, wflags);
             // missing: tags!
             String[] titles = document.getSectionTitles();
             for (int i = 0; i < titles.length; i++) {
-                insertTextToWords(titles[i], i + 10, indexRWIEntryNew.flag_app_emphasized, wflags);
+                insertTextToWords(titles[i], i + 10, indexRWIEntry.flag_app_emphasized, wflags);
             }
         
             // anchors
             Iterator i = document.getAnchors().entrySet().iterator();
             while (i.hasNext()) {
                 entry = (Map.Entry) i.next();
-                insertTextToWords((String) entry.getKey(), 98, indexRWIEntryNew.flag_app_url, wflags);
-                insertTextToWords((String) entry.getValue(), 98, indexRWIEntryNew.flag_app_url, wflags);
+                insertTextToWords((String) entry.getKey(), 98, indexRWIEntry.flag_app_url, wflags);
+                insertTextToWords((String) entry.getValue(), 98, indexRWIEntry.flag_app_url, wflags);
             }
         } else {
             this.RESULT_NUMB_WORDS = 0;

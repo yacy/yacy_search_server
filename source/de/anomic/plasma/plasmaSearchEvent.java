@@ -50,7 +50,7 @@ import java.util.Set;
 import java.util.TreeMap;
 
 import de.anomic.index.indexContainer;
-import de.anomic.index.indexRWIEntryNew;
+import de.anomic.index.indexRWIEntry;
 import de.anomic.index.indexURLEntry;
 import de.anomic.kelondro.kelondroException;
 import de.anomic.kelondro.kelondroMSetTools;
@@ -393,7 +393,7 @@ public final class plasmaSearchEvent extends Thread implements Runnable {
         profileLocal.startTimer();
         plasmaSearchPostOrder acc = new plasmaSearchPostOrder(query, ranking);
         
-        indexRWIEntryNew entry;
+        indexRWIEntry entry;
         indexURLEntry page;
         Long preranking;
         Object[] preorderEntry;
@@ -402,7 +402,7 @@ public final class plasmaSearchEvent extends Thread implements Runnable {
             while (preorder.hasNext()) {
                 if ((System.currentTimeMillis() >= postorderLimitTime) && (acc.sizeFetched() >= minEntries)) break;
                 preorderEntry = preorder.next();
-                entry = (indexRWIEntryNew) preorderEntry[0];
+                entry = (indexRWIEntry) preorderEntry[0];
                 // load only urls if there was not yet a root url of that hash
                 preranking = (Long) preorderEntry[1];
                 // find the url entry
@@ -457,11 +457,11 @@ public final class plasmaSearchEvent extends Thread implements Runnable {
         if (preorder.filteredCount()> query.wantedResults) preorder.remove(true, true);
         
         // start url-fetch
-        indexRWIEntryNew entry;
+        indexRWIEntry entry;
         try {
             while (preorder.hasNext()) {
                 if (System.currentTimeMillis() >= timeout) break;
-                entry = (indexRWIEntryNew) (preorder.next()[0]);
+                entry = (indexRWIEntry) (preorder.next()[0]);
                 // find and fetch the url entry
                 urlStore.load(entry.urlHash(), entry);
             }

@@ -52,7 +52,6 @@ import java.util.Iterator;
 
 import de.anomic.index.indexContainer;
 import de.anomic.index.indexRWIEntry;
-import de.anomic.index.indexRWIEntryNew;
 import de.anomic.index.indexURLEntry;
 import de.anomic.kelondro.kelondroBase64Order;
 import de.anomic.kelondro.kelondroException;
@@ -213,7 +212,7 @@ public class plasmaDHTChunk {
             final Iterator indexContainerIterator = wordIndex.indexContainerSet(hash, ram, true, maxcount).iterator();
             indexContainer container;
             Iterator urlIter;
-            indexRWIEntryNew iEntry;
+            indexRWIEntry iEntry;
             indexURLEntry lurl;
             int refcount = 0;
             int wholesize;
@@ -243,7 +242,7 @@ public class plasmaDHTChunk {
                         // CPU & IO reduce
                         // try { Thread.sleep(50); } catch (InterruptedException e) { }
 
-                        iEntry = (indexRWIEntryNew) urlIter.next();
+                        iEntry = (indexRWIEntry) urlIter.next();
                         if ((iEntry == null) || (iEntry.urlHash() == null)) {
                             urlIter.remove();
                             continue;
@@ -263,7 +262,7 @@ public class plasmaDHTChunk {
 
                     // remove all remaining; we have enough
                     while (urlIter.hasNext()) {
-                        iEntry = (indexRWIEntryNew) urlIter.next();
+                        iEntry = (indexRWIEntry) urlIter.next();
                         urlIter.remove();
                     }
 

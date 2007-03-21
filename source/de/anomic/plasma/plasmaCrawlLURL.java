@@ -62,9 +62,8 @@ import java.util.LinkedList;
 
 import de.anomic.http.httpc;
 import de.anomic.http.httpc.response;
-import de.anomic.index.indexRWIEntryNew;
+import de.anomic.index.indexRWIEntry;
 import de.anomic.index.indexURLEntry;
-import de.anomic.index.indexURLEntryNew;
 import de.anomic.kelondro.kelondroBitfield;
 import de.anomic.kelondro.kelondroCache;
 import de.anomic.kelondro.kelondroCloneableIterator;
@@ -96,7 +95,7 @@ public final class plasmaCrawlLURL {
         super();
 
         try {
-            urlIndexFile = new kelondroFlexSplitTable(new File(indexPath, "PUBLIC/TEXT"), "urls", preloadTime, indexURLEntryNew.rowdef);
+            urlIndexFile = new kelondroFlexSplitTable(new File(indexPath, "PUBLIC/TEXT"), "urls", preloadTime, indexURLEntry.rowdef);
         } catch (IOException e) {
             e.printStackTrace();
             System.exit(-1);
@@ -164,7 +163,7 @@ public final class plasmaCrawlLURL {
         return 0;
     }
 
-    public synchronized indexURLEntry load(String urlHash, indexRWIEntryNew searchedWord) {
+    public synchronized indexURLEntry load(String urlHash, indexRWIEntry searchedWord) {
         // generates an plasmaLURLEntry using the url hash
         // to speed up the access, the url-hashes are buffered
         // in the hash cache.
@@ -175,7 +174,7 @@ public final class plasmaCrawlLURL {
         try {
             kelondroRow.Entry entry = urlIndexFile.get(urlHash.getBytes());
             if (entry == null) return null;
-            return new indexURLEntryNew(entry, searchedWord);
+            return new indexURLEntry(entry, searchedWord);
         } catch (IOException e) {
             return null;
         }
@@ -206,7 +205,7 @@ public final class plasmaCrawlLURL {
 
     public synchronized indexURLEntry newEntry(String propStr) {
         if (propStr != null && propStr.startsWith("{") && propStr.endsWith("}")) {
-            return new indexURLEntryNew(serverCodings.s2p(propStr.substring(1, propStr.length() - 1)));
+            return new indexURLEntry(serverCodings.s2p(propStr.substring(1, propStr.length() - 1)));
         } else {
             return null;
         }
@@ -234,7 +233,7 @@ public final class plasmaCrawlLURL {
             int limage,
             int lvideo,
             int lapp) {
-        return new indexURLEntryNew(url, descr, author, tags, ETag, mod, load, fresh, referrer, md5,
+        return new indexURLEntry(url, descr, author, tags, ETag, mod, load, fresh, referrer, md5,
                     size, wc, dt, flags, lang, llocal, lother, laudio, limage, lvideo, lapp);
     }
 
@@ -372,7 +371,7 @@ public final class plasmaCrawlLURL {
             if (this.iter == null) { return null; }
             if (this.iter.hasNext()) { e = (kelondroRow.Entry) this.iter.next(); }
             if (e == null) { return null; }
-            return new indexURLEntryNew(e, null);
+            return new indexURLEntry(e, null);
         }
 
         public final void remove() {

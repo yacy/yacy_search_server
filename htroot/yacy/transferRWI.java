@@ -52,7 +52,6 @@ import java.util.List;
 
 import de.anomic.http.httpHeader;
 import de.anomic.index.indexRWIEntry;
-import de.anomic.index.indexRWIEntryNew;
 import de.anomic.plasma.plasmaSwitchboard;
 import de.anomic.plasma.urlPattern.plasmaURLPattern;
 import de.anomic.server.serverCore;
@@ -163,7 +162,7 @@ public final class transferRWI {
                 }
                 wordHash = estring.substring(0, p);
                 wordhashes[received] = wordHash;
-                iEntry = new indexRWIEntryNew(estring.substring(p));
+                iEntry = new indexRWIEntry(estring.substring(p));
                 urlHash = iEntry.urlHash();
                 
                 // block blacklisted entries

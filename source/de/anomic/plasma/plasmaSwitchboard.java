@@ -135,7 +135,6 @@ import de.anomic.http.httpd;
 import de.anomic.http.httpdRobotsTxtConfig;
 import de.anomic.index.indexContainer;
 import de.anomic.index.indexRWIEntry;
-import de.anomic.index.indexRWIEntryNew;
 import de.anomic.plasma.plasmaURL;
 import de.anomic.index.indexURLEntry;
 import de.anomic.kelondro.kelondroBase64Order;
@@ -2330,7 +2329,7 @@ public final class plasmaSwitchboard extends serverAbstractSwitch implements ser
                                 String word = (String) wentry.getKey();
                                 wordStat = (plasmaCondenser.wordStatProp) wentry.getValue();
                                 String wordHash = plasmaCondenser.word2hash(word);
-                                indexRWIEntry wordIdxEntry = new indexRWIEntryNew(
+                                indexRWIEntry wordIdxEntry = new indexRWIEntry(
                                             urlHash,
                                             urlLength, urlComps,
                                             wordStat.count,

@@ -103,7 +103,7 @@ public class indexContainer extends kelondroRowSet {
         assert entry.toKelondroEntry().objectsize() == super.rowdef.objectsize();
         kelondroRow.Entry r = super.put(entry.toKelondroEntry());
         if (r == null) return null;
-        return new indexRWIEntryNew(r);
+        return new indexRWIEntry(r);
     }
     
     public boolean putRecent(indexRWIEntry entry) {
@@ -113,7 +113,7 @@ public class indexContainer extends kelondroRowSet {
         if (oldEntryRow == null) {
             return true;
         } else {
-            indexRWIEntry oldEntry = new indexRWIEntryNew(oldEntryRow);
+            indexRWIEntry oldEntry = new indexRWIEntry(oldEntryRow);
             if (entry.isOlder(oldEntry)) { // A more recent Entry is already in this container
                 this.put(oldEntry.toKelondroEntry()); // put it back
                 return false;
@@ -145,13 +145,13 @@ public class indexContainer extends kelondroRowSet {
     public indexRWIEntry get(String urlHash) {
         kelondroRow.Entry entry = this.get(urlHash.getBytes());
         if (entry == null) return null;
-        return new indexRWIEntryNew(entry);
+        return new indexRWIEntry(entry);
     }
 
     public indexRWIEntry remove(String urlHash) {
         kelondroRow.Entry entry = this.remove(urlHash.getBytes());
         if (entry == null) return null;
-        return new indexRWIEntryNew(entry);
+        return new indexRWIEntry(entry);
     }
 
     public boolean removeEntry(String wordHash, String urlHash) {
@@ -187,7 +187,7 @@ public class indexContainer extends kelondroRowSet {
         public Object next() {
             kelondroRow.Entry rentry = (kelondroRow.Entry) rowEntryIterator.next();
             if (rentry == null) return null;
-            return new indexRWIEntryNew(rentry);
+            return new indexRWIEntry(rentry);
         }
 
         public void remove() {

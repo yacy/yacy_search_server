@@ -212,7 +212,7 @@ public final class indexRAMRI implements indexRI {
                     if ((row == null) || (row.empty(0)) || (row.empty(3))) continue;
                     wordHash = row.getColString(0, "UTF-8");
                     //creationTime = kelondroRecords.bytes2long(row[2]);
-                    wordEntry = new indexRWIEntryNew(row.getColBytes(3));
+                    wordEntry = new indexRWIEntry(row.getColBytes(3));
                     // store to cache
                     addEntry(wordHash, wordEntry, startTime, false);
                     urlCount++;

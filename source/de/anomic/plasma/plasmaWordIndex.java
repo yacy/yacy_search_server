@@ -43,7 +43,6 @@ import de.anomic.index.indexContainerOrder;
 import de.anomic.index.indexRAMRI;
 import de.anomic.index.indexRI;
 import de.anomic.index.indexRWIEntry;
-import de.anomic.index.indexRWIEntryNew;
 import de.anomic.index.indexURLEntry;
 import de.anomic.kelondro.kelondroBase64Order;
 import de.anomic.kelondro.kelondroCloneableIterator;
@@ -74,13 +73,13 @@ public final class plasmaWordIndex implements indexRI {
     public plasmaWordIndex(File indexRoot, long preloadTime, serverLog log) {
         File textindexcache = new File(indexRoot, "PUBLIC/TEXT/RICACHE");
         if (!(textindexcache.exists())) textindexcache.mkdirs();
-        this.dhtOutCache = new indexRAMRI(textindexcache, indexRWIEntryNew.urlEntryRow, wCacheMaxChunk, wCacheMaxAge, "dump1.array", log);
-        this.dhtInCache  = new indexRAMRI(textindexcache, indexRWIEntryNew.urlEntryRow, wCacheMaxChunk, wCacheMaxAge, "dump2.array", log);
+        this.dhtOutCache = new indexRAMRI(textindexcache, indexRWIEntry.urlEntryRow, wCacheMaxChunk, wCacheMaxAge, "dump1.array", log);
+        this.dhtInCache  = new indexRAMRI(textindexcache, indexRWIEntry.urlEntryRow, wCacheMaxChunk, wCacheMaxAge, "dump2.array", log);
         
         // create collections storage path
         File textindexcollections = new File(indexRoot, "PUBLIC/TEXT/RICOLLECTION");
         if (!(textindexcollections.exists())) textindexcollections.mkdirs();
-        this.collections = new indexCollectionRI(textindexcollections, "collection", preloadTime, maxCollectionPartition, indexRWIEntryNew.urlEntryRow);
+        this.collections = new indexCollectionRI(textindexcollections, "collection", preloadTime, maxCollectionPartition, indexRWIEntry.urlEntryRow);
 
         // create LURL-db
         loadedURL = new plasmaCrawlLURL(indexRoot, preloadTime);
@@ -166,12 +165,10 @@ public final class plasmaWordIndex implements indexRI {
     }
     
     public indexContainer emptyContainer(String wordHash) {
-    	return new indexContainer(wordHash, indexRWIEntryNew.urlEntryRow);
+    	return new indexContainer(wordHash, indexRWIEntry.urlEntryRow);
     }
 
     public void addEntry(String wordHash, indexRWIEntry entry, long updateTime, boolean dhtInCase) {
-        assert (entry instanceof indexRWIEntryNew);
-
         // set dhtInCase depending on wordHash
         if ((!dhtInCase) && (yacyDHTAction.shallBeOwnWord(wordHash))) dhtInCase = true;
         
@@ -186,7 +183,7 @@ public final class plasmaWordIndex implements indexRI {
     }
     
     public void addEntries(indexContainer entries, long updateTime, boolean dhtInCase) {
-        assert (entries.row().objectsize() == indexRWIEntryNew.urlEntryRow.objectsize());
+        assert (entries.row().objectsize() == indexRWIEntry.urlEntryRow.objectsize());
         
         // set dhtInCase depending on wordHash
         if ((!dhtInCase) && (yacyDHTAction.shallBeOwnWord(entries.getWordHash()))) dhtInCase = true;
@@ -295,7 +292,7 @@ public final class plasmaWordIndex implements indexRI {
             word = (String) wentry.getKey();
             wprop = (plasmaCondenser.wordStatProp) wentry.getValue();
             assert (wprop.flags != null);
-            ientry = new indexRWIEntryNew(urlHash,
+            ientry = new indexRWIEntry(urlHash,
                         urlLength, urlComps, (document == null) ? urlLength : document.getTitle().length(),
                         wprop.count,
                         condenser.words().size(),
@@ -396,7 +393,7 @@ public final class plasmaWordIndex implements indexRI {
     }
 
     public indexContainer deleteContainer(String wordHash) {
-        indexContainer c = new indexContainer(wordHash, indexRWIEntryNew.urlEntryRow);
+        indexContainer c = new indexContainer(wordHash, indexRWIEntry.urlEntryRow);
         c.addAllUnique(dhtInCache.deleteContainer(wordHash));
         c.addAllUnique(dhtOutCache.deleteContainer(wordHash));
         c.addAllUnique(collections.deleteContainer(wordHash));
