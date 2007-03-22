@@ -45,6 +45,7 @@ package de.anomic.yacy;
 
 import java.util.ArrayList;
 import java.util.Enumeration;
+import java.util.Hashtable;
 
 import de.anomic.kelondro.kelondroBase64Order;
 import de.anomic.kelondro.kelondroException;
@@ -280,13 +281,15 @@ public class yacyDHTAction implements yacyPeerAction {
 
         double avdist;
         Enumeration e = this.getAcceptRemoteIndexSeeds(lastKey);
+        Hashtable peerFilter = new Hashtable(); 
         while ((e.hasMoreElements()) && (seeds.size() < (primaryPeerCount + reservePeerCount))) {
             seed = (yacySeed) e.nextElement();
             if (seeds != null) {
                 avdist = Math.max(yacyDHTAction.dhtDistance(seed.hash, firstKey), yacyDHTAction.dhtDistance(seed.hash, lastKey));
-                if (avdist < maxDistance) {
+                if (avdist < maxDistance && !peerFilter.containsKey(seed.hash)) {
                     if (log != null) log.logInfo("Selected " + ((seeds.size() < primaryPeerCount) ? "primary" : "reserve") + " DHT target peer " + seed.getName() + ":" + seed.hash + ", distance = " + avdist);
                     seeds.add(seed);
+                    peerFilter.put(seed.hash, seed);
                 }
             }
         }
