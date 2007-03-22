@@ -47,15 +47,22 @@ public class plasmaURL {
     // day formatter for entry export
     public static final SimpleDateFormat shortDayFormatter = new SimpleDateFormat("yyyyMMdd");
 
+    // TLD separation in political and cultural parts
+    // https://www.cia.gov/cia/publications/factbook/index.html
+    // http://en.wikipedia.org/wiki/List_of_countries_by_continent
+    
     private static final String[] TLD_NorthAmericaOceania={
         // primary english-speaking countries
         // english-speaking countries from central america are also included
         // includes also dutch and french colonies in the caribbean sea
+        // and US/English/Australian military bases in asia
          "EDU=US Educational",
          "GOV=US Government",
          "MIL=US Military",
          "NET=Network",
          "ORG=Non-Profit Organization",
+         "AN=Netherlands Antilles",
+         "AS=American Samoa",
          "AG=Antigua and Barbuda",
          "AI=Anguilla",
          "AU=Australia",
@@ -64,12 +71,41 @@ public class plasmaURL {
          "BM=Bermuda",
          "BS=Bahamas",
          "CA=Canada",
+         "CC=Cocos (Keeling) Islands",
+         "CK=Cook Islands",
+         "CX=Christmas Island", // located in the Indian Ocean, but belongs to Australia
          "DM=Dominica",
+         "FM=Micronesia",
+         "FJ=Fiji",
          "GD=Grenada",
          "GP=Guadeloupe",
+         "GS=South Georgia and the South Sandwich Islands", // south of south america, but administrated by british, has only a scientific base
+         "GU=Guam", // strategical US basis close to Japan
+         "HM=Heard and McDonald Islands", // uninhabited, sub-Antarctic island, owned by Australia
+         "HT=Haiti",
+         "IO=British Indian Ocean Territory", // UK-US naval support facility in the Indian Ocean
+         "KI=Kiribati", // 33 coral atolls in the pacific, formerly owned by UK
+         "KN=Saint Kitts and Nevis", // islands in the carribean see
          "KY=Cayman Islands",
+         "LC=Saint Lucia",
+         "MH=Marshall Islands", // formerly US atomic bomb test site, now a key installation in the US missile defense network
+         "MP=Northern Mariana Islands", // US strategic location in the western Pacific Ocean
+         "NC=New Caledonia",
+         "NF=Norfolk Island",
+         "NR=Nauru", // independent UN island
+         "NU=Niue", // one of world's largest coral islands
          "NZ=New Zealand (Aotearoa)",
-         "PM=St. Pierre and Miquelon",
+         "PG=Papua New Guinea",
+         "PN=Pitcairn", // overseas territory of the UK
+         "PR=Puerto Rico", // territory of the US with commonwealth status
+         "PW=Palau", // was once governed by Micronesia
+         "Sb=Solomon Islands",
+         "TC=Turks and Caicos Islands", // overseas territory of the UK
+         "TK=Tokelau", // group of three atolls in the South Pacific Ocean, british protectorat
+         "TO=Tonga",
+         "TT=Trinidad and Tobago",
+         "TV=Tuvalu", //  nine coral atolls in the South Pacific Ocean; in 2000, Tuvalu leased its TLD ".tv" for $50 million over a 12-year period
+         "UM=US Minor Outlying Islands", // nine insular United States possessions in the Pacific Ocean and the Caribbean Sea
          "US=United States",
          "VC=Saint Vincent and the Grenadines",
          "VG=Virgin Islands (British)",
@@ -90,8 +126,9 @@ public class plasmaURL {
          "CU=Cuba",
          "DO=Dominican Republic",
          "EC=Ecuador",
-         "GF=French Guiana",
          "FK=Falkland Islands (Malvinas)",
+         "GF=French Guiana",
+         "GT=Guatemala",
          "GY=Guyana",
          "HN=Honduras",
          "JM=Jamaica",
@@ -115,6 +152,8 @@ public class plasmaURL {
          "BA=Bosnia and Herzegovina",
          "BE=Belgium",
          "BG=Bulgaria",
+         "BV=Bouvet Island", // this island is uninhabited and covered by ice, south of africa but governed by Norway
+         "BY=Belarus",
          "CH=Switzerland",
          "CS=Czechoslovakia (former)",
          "CZ=Czech Republic",
@@ -124,6 +163,7 @@ public class plasmaURL {
          "ES=Spain",
          "EE=Estonia",
          "FI=Finland",
+         "FO=Faroe Islands", // Viking Settlers
          "FR=France",
          "FX=France, Metropolitan",
          "GB=Great Britain (UK)",
@@ -143,48 +183,83 @@ public class plasmaURL {
          "MC=Monaco",
          "MK=Macedonia",
          "MN=Mongolia",
+         "MS=Montserrat", // British island in the Caribbean Sea, almost not populated because of strong vulcanic activity
          "MT=Malta",
+         "MQ=Martinique", // island in the eastern Caribbean Sea, overseas department of France
          "NATO=Nato field",
          "NL=Netherlands",
          "NO=Norway",
+         "PF=French Polynesia", // French annexed Polynesian island in the South Pacific, French atomic bomb test site
          "PL=Poland",
+         "PM=St. Pierre and Miquelon", // french-administrated colony close to canada, belongs to France
          "PT=Portugal",
          "RO=Romania",
          "RU=Russia",
          "SE=Sweden",
          "SI=Slovenia",
+         "SJ=Svalbard and Jan Mayen Islands", // part of Norway
+         "SM=San Marino",
          "SK=Slovak Republic",
          "SU=USSR (former)",
+         "TF=French Southern Territories", // islands in the arctic see, no inhabitants
          "UK=United Kingdom",
+         "UA=Ukraine",
          "VA=Vatican City State (Holy See)",
          "YU=Yugoslavia"
      };
+     
      private static final String[] TLD_MiddleEastWestAsia = {
+         // states that are influenced by islamic culture and arabic language
+         // includes also eurasia states and those that had been part of the former USSR and close to southwest asia
          "AE=United Arab Emirates",
          "AF=Afghanistan",
+         "AM=Armenia",
          "AZ=Azerbaijan",
          "BH=Bahrain",
+         "GE=Georgia",
          "IL=Israel",
          "IQ=Iraq",
          "IR=Iran",
+         "JO=Jordan",
+         "KG=Kyrgyzstan",
+         "KZ=Kazakhstan",
+         "KW=Kuwait",
+         "LB=Lebanon",
+         "OM=Oman",
+         "QA=Qatar",
+         "SA=Saudi Arabia",
+         "SY=Syria",
+         "TJ=Tajikistan",
+         "TM=Turkmenistan",
          "PK=Pakistan",
          "TR=Turkey",
+         "UZ=Uzbekistan",
          "YE=Yemen"
      };
      private static final String[] TLD_SouthEastAsia = {
          "BD=Bangladesh",
+         "BN=Brunei Darussalam",
          "BT=Bhutan",
          "CN=China",
          "HK=Hong Kong",
          "ID=Indonesia",
          "IN=India",
+         "LA=Laos",
          "NP=Nepal",
          "JP=Japan",
          "KH=Cambodia",
          "KP=Korea (North)",
          "KR=Korea (South)",
          "LK=Sri Lanka",
+         "MY=Malaysia",
+         "MM=Myanmar", // formerly known as Burma
+         "MO=Macau", // Portuguese settlement, part of China, but has some autonomy
+         "MV=Maldives", // group of atolls in the Indian Ocean
+         "PH=Philippines",
          "SG=Singapore",
+         "TP=East Timor",
+         "TH=Thailand",
+         "TW=Taiwan",
          "VN=Viet Nam"
      };
      private static final String[] TLD_Africa = {
@@ -197,6 +272,8 @@ public class plasmaURL {
          "CG=Congo",
          "CI=Cote D'Ivoire (Ivory Coast)",
          "CM=Cameroon",
+         "CV=Cape Verde",
+         "DJ=Djibouti",
          "DZ=Algeria",
          "EG=Egypt",
          "EH=Western Sahara",
@@ -206,7 +283,10 @@ public class plasmaURL {
          "GH=Ghana",
          "GM=Gambia",
          "GN=Guinea",
+         "GQ=Equatorial Guinea",
+         "GW=Guinea-Bissau",
          "KE=Kenya",
+         "KM=Comoros",
          "LR=Liberia",
          "LS=Lesotho",
          "LY=Libya",
@@ -222,12 +302,15 @@ public class plasmaURL {
          "NG=Nigeria",
          "RE=Reunion",
          "RW=Rwanda",
+         "SC=Seychelles",
+         "SD=Sudan",
          "SH=St. Helena",
          "SL=Sierra Leone",
          "SN=Senegal",
          "SO=Somalia",
          "ST=Sao Tome and Principe",
          "SZ=Swaziland",
+         "TD=Chad",
          "TG=Togo",
          "TN=Tunisia",
          "TZ=Tanzania",
@@ -253,85 +336,6 @@ public class plasmaURL {
          "NT=Neutral Zone"
      };
 
-     /*
-         http://www.odci.gov/cia/publications/factbook/
-         http://en.wikipedia.org/wiki/List_of_countries_by_continent
-         "AM=Armenia",
-         "AN=Netherlands Antilles",
-         "AS=American Samoa",
-         "BN=Brunei Darussalam",
-         "BV=Bouvet Island",
-         "BY=Belarus",
-         "CC=Cocos (Keeling) Islands",
-         "CK=Cook Islands",
-         "CV=Cape Verde",
-         "CX=Christmas Island",
-         "DJ=Djibouti",
-         "FJ=Fiji",
-         "FM=Micronesia",
-         "FO=Faroe Islands",
-         "GE=Georgia",
-         "GQ=Equatorial Guinea",
-         "GS=S. Georgia and S. Sandwich Isls.",
-         "GT=Guatemala",
-         "GU=Guam",
-         "GW=Guinea-Bissau",
-         "HM=Heard and McDonald Islands",
-         "HT=Haiti",
-         "IO=British Indian Ocean Territory",
-         "JO=Jordan",
-         "KG=Kyrgyzstan",
-         "KI=Kiribati",
-         "KM=Comoros",
-         "KN=Saint Kitts and Nevis",
-         "KW=Kuwait",
-         "KZ=Kazakhstan",
-         "LA=Laos",
-         "LB=Lebanon",
-         "LC=Saint Lucia",
-         "MH=Marshall Islands",
-         "MM=Myanmar",
-         "MO=Macau",
-         "MP=Northern Mariana Islands",
-         "MQ=Martinique",
-         "MS=Montserrat",
-         "MV=Maldives",
-         "MY=Malaysia",
-         "NC=New Caledonia",
-         "NF=Norfolk Island",
-         "NR=Nauru",
-         "NU=Niue",
-         "OM=Oman",
-         "PF=French Polynesia",
-         "PG=Papua New Guinea",
-         "PH=Philippines",
-         "PN=Pitcairn",
-         "PR=Puerto Rico",
-         "PW=Palau",
-         "QA=Qatar",
-         "SA=Saudi Arabia",
-         "Sb=Solomon Islands",
-         "SC=Seychelles",
-         "SD=Sudan",
-         "SJ=Svalbard and Jan Mayen Islands",
-         "SM=San Marino",
-         "SY=Syria",
-         "TC=Turks and Caicos Islands",
-         "TD=Chad",
-         "TF=French Southern Territories",
-         "TH=Thailand",
-         "TJ=Tajikistan",
-         "TK=Tokelau",
-         "TM=Turkmenistan",
-         "TO=Tonga",
-         "TP=East Timor",
-         "TT=Trinidad and Tobago",
-         "TV=Tuvalu",
-         "TW=Taiwan",
-         "UA=Ukraine",
-         "UM=US Minor Outlying Islands",
-         "UZ=Uzbekistan",
-      */
 
     /*
      * TLDs: aero, biz, com, coop, edu, gov, info, int, mil, museum, name, net,
