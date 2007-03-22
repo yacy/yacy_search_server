@@ -42,7 +42,7 @@
       <li><a href="/share/" class="MenuItemLink">Your File Share</a></li>
       <li><a href="/Wiki.html" class="MenuItemLink">YaCy Wiki</a></li>
       <li><a href="/Blog.html" class="MenuItemLink">YaCy Blog</a></li>
-      <li><a href="/Messages_p.html" class="MenuItemLink lock">Messages <img src="notifier.gif" alt="New Messages" /></a></li>
+      <li><a href="/Messages_p.html" class="MenuItemLink lock">Messages <img src="/notifier.gif" alt="New Messages" /></a></li>
     </ul>
   </li>
   <li class="menugroup" id="menugroupPeerControl">
