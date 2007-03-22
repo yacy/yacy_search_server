@@ -139,7 +139,7 @@ public class MessageService extends AbstractService {
         serverObjects args = new serverObjects();
         args.put("action","list");
         
-        byte[] result = writeTemplate(TEMPLATE_MESSAGE_HEADER_LIST_XML, args);
+        byte[] result = this.serverContext.writeTemplate(TEMPLATE_MESSAGE_HEADER_LIST_XML, args, this.requestHeader);
         
         // sending back the result to the client
         return this.convertContentToXML(result);    		
@@ -173,7 +173,7 @@ public class MessageService extends AbstractService {
         args.put("action","view");
         args.put("object",messageID);
         
-        byte[] result = writeTemplate(TEMPLATE_MESSAGE_HEADER_LIST_XML, args);
+        byte[] result = this.serverContext.writeTemplate(TEMPLATE_MESSAGE_HEADER_LIST_XML, args, this.requestHeader);
         
         // sending back the result to the client
         return this.convertContentToXML(result);    		

@@ -113,7 +113,7 @@ public class BlacklistService extends AbstractService {
     		extractMessageContext(AUTHENTICATION_NEEDED);      
     		
     		// generating the template containing the network status information
-    		byte[] result = writeTemplate(TEMPLATE_BLACKLIST_XML,  new serverObjects());
+    		byte[] result = this.serverContext.writeTemplate(TEMPLATE_BLACKLIST_XML,  new serverObjects(), this.requestHeader);
     		
     		// sending back the result to the client
     		return this.convertContentToXML(result);

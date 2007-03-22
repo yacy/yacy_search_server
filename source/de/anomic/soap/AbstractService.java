@@ -46,12 +46,6 @@
 package de.anomic.soap;
 
 import java.io.ByteArrayInputStream;
-import java.io.ByteArrayOutputStream;
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.IOException;
-import java.lang.reflect.Method;
-import java.util.HashMap;
 
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
@@ -66,19 +60,14 @@ import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 
 import de.anomic.http.httpHeader;
-import de.anomic.http.httpTemplate;
 import de.anomic.http.httpd;
-import de.anomic.server.serverClassLoader;
-import de.anomic.server.serverObjects;
 import de.anomic.server.serverSwitch;
 
 public abstract class AbstractService {
-    protected String rootPath;
-    protected serverClassLoader provider;
-    protected HashMap templates;
     protected serverSwitch switchboard;
     protected httpHeader requestHeader;
     protected MessageContext messageContext;
+    protected ServerContext serverContext;
     
     protected static final boolean NO_AUTHENTICATION = false;
     protected static final boolean AUTHENTICATION_NEEDED = true;
@@ -92,11 +81,9 @@ public abstract class AbstractService {
     protected void extractMessageContext(boolean authenticate) throws AxisFault {        
         this.messageContext = MessageContext.getCurrentContext();
         
-        this.rootPath      = (String) this.messageContext.getProperty(httpdSoapHandler.MESSAGE_CONTEXT_HTTP_ROOT_PATH);       
-        this.provider      = (serverClassLoader) this.messageContext.getProperty(httpdSoapHandler.MESSAGE_CONTEXT_SERVER_CLASSLOADER);
-        this.templates     = (HashMap) this.messageContext.getProperty(httpdSoapHandler.MESSAGE_CONTEXT_TEMPLATES);
         this.switchboard   = (serverSwitch) this.messageContext.getProperty(httpdSoapHandler.MESSAGE_CONTEXT_SERVER_SWITCH);
         this.requestHeader = (httpHeader) this.messageContext.getProperty(httpdSoapHandler.MESSAGE_CONTEXT_HTTP_HEADER);
+        this.serverContext = (ServerContext) this.messageContext.getProperty(httpdSoapHandler.MESSAGE_CONTEXT_SERVER_CONTEXT);
         
         if (authenticate) {
             String authInfo = this.doAuthentication();
@@ -107,115 +94,7 @@ public abstract class AbstractService {
             this.requestHeader.put("CLIENTIP","localhost");
             
         }                        
-    }
-    
-
-    
-    /**
-     * This function is called by the service functions to
-     * invoke the desired server-internal method and to generate
-     * a output document using one of the available templates.
-     * 
-     * @param templateName
-     * @param args
-     * @return the output document
-     * @throws AxisFault
-     */
-    protected byte[] writeTemplate(String templateName, serverObjects args) throws AxisFault {
-        try {
-        	// invoke servlet
-        	serverObjects tp = invokeServlet(templateName,args);
-            
-        	// generate output
-        	byte[] result = buildServletOutput(templateName, tp);
-            return result; 
-        } catch (Exception e) {
-    		if (e instanceof AxisFault) throw (AxisFault) e;
-    		
-    		// create a new AxisFault Object
-    		throw new AxisFault(e.getMessage());
-        }
-    }        
-    
-    protected byte[] buildServletOutput(String templateName, serverObjects tp) throws AxisFault {
-            try {
-            	File templateFile = getTemplateFile(templateName);
-            	
-                // generating the output document
-                ByteArrayOutputStream o = new ByteArrayOutputStream();
-                FileInputStream fis = new FileInputStream(templateFile);
-                httpTemplate.writeTemplate(fis, o, tp, "-UNRESOLVED_PATTERN-".getBytes("UTF-8"));
-                o.close();
-                fis.close();
-                
-                // convert it into a byte array and send it back as result
-                byte[] result = o.toByteArray();            
-                return result; 
-            } catch (Exception e) {
-        		if (e instanceof AxisFault) throw (AxisFault) e;
-        		
-        		// create a new AxisFault Object
-        		throw new AxisFault(e.getMessage());
-            }    	
-    }
-    
-    protected serverObjects invokeServlet(String templateName, serverObjects args) throws AxisFault {
-    	try {
-    		// getting the template class file
-    		File rc = getServletClassFile(templateName);
-    		
-    		// invoke the desired method
-    		serverObjects tp = (serverObjects) rewriteMethod(rc).invoke(null, new Object[] {this.requestHeader, args, this.switchboard});
-    		
-    		// testing if a authentication was needed by the invoked method
-    		validateAuthentication(tp);
-    		
-    		// adding all available templates
-    		tp.putAll(this.templates);
-    		
-    		// return result
-    		return tp;
-    	} catch (Exception e) {
-    		if (e instanceof AxisFault) throw (AxisFault) e;
-    		
-    		e.printStackTrace();
-    		
-    		// create a new AxisFault Object
-    		throw new AxisFault(e.getMessage());
-    	}        
-    }
-    
-    protected File getTemplateFile(String templateName) {
-        // determining the proper class that should be invoked
-        File file = new File(this.rootPath, templateName);     
-        return file;
-    }
-    
-    protected File getServletClassFile(String templateName) {
-    	File templateFile = getTemplateFile(templateName);
-    	File templateClassFile = getServletClassFile(templateFile);
-    	return templateClassFile;
-    }
-    
-    protected File getServletClassFile(File templateFile) {    	 
-        File templateClassFile = rewriteClassFile(templateFile);    	
-        return templateClassFile;
-    }
-    
-    
-    /**
-     * This function is used to test if an invoked method requires authentication
-     * 
-     * @param tp the properties returned by a previous method invocation
-     * 
-     * @throws AxisFault if an authentication was required.
-     */
-    protected void validateAuthentication(serverObjects tp) throws AxisFault {
-        // check if the servlets requests authentification
-        if (tp.containsKey("AUTHENTICATE")) {
-            throw new AxisFault("log-in required");
-        }             
-    }    
+    }  
     
     /**
      * Doing the user authentication. To improve security, this client
@@ -246,55 +125,7 @@ public abstract class AbstractService {
         }
 		throw new AxisFault("log-in required");
     }
-    
-    /**
-     * This method was copied from the {@link httpdFileHandler httpdFileHandler-class}
-     * @param template
-     * @return the .class-{@link File} belonging to the given template or <code>null</code>
-     * if no fitting .class-{@link File} does exist
-     */
-    protected File rewriteClassFile(File template) {
-        try {
-            String f = template.getCanonicalPath();
-            int p = f.lastIndexOf(".");
-            if (p < 0) return null;
-            f = f.substring(0, p) + ".class";
-            //System.out.println("constructed class path " + f);
-            File cf = new File(f);
-            if (cf.exists()) return cf;
-            return null;
-        } catch (IOException e) {
-            return null;
-        }
-    }    
-    
-    /**
-     * This method was copied from the {@link httpdFileHandler httpdFileHandler-class}
-     * @param classFile
-     * @return the <code>resond({@link httpHeader}, {@link serverObjects}, {@link serverSwitch})</code>
-     * {@link Method} of the specified class file or <code>null</code> if this file doesn't contain
-     * such a method
-     */    
-    protected Method rewriteMethod(File classFile) {
-        Method m = null;
-        // now make a class out of the stream
-        try {
-            //System.out.println("**DEBUG** loading class file " + classFile);
-            Class c = this.provider.loadClass(classFile);
-            Class[] params = new Class[] {
-                    httpHeader.class,     // Class.forName("de.anomic.http.httpHeader"),
-                    serverObjects.class,  // Class.forName("de.anomic.server.serverObjects"),
-                    serverSwitch.class }; // Class.forName("de.anomic.server.serverSwitch")};
-            m = c.getMethod("respond", params);
-        } catch (ClassNotFoundException e) {
-            System.out.println("INTERNAL ERROR: class " + classFile + " is missing:" + e.getMessage()); 
-        } catch (NoSuchMethodException e) {
-            System.out.println("INTERNAL ERROR: method respond not found in class " + classFile + ": " + e.getMessage());
-        }
-        //System.out.println("found method: " + m.toString());
-        return m;
-    }        
-    
+        
     protected Document convertContentToXML(String contentString) throws Exception {
         return convertContentToXML(contentString.getBytes("UTF-8"));
     }    

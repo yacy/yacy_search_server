@@ -418,7 +418,7 @@ public class BookmarkService extends AbstractService {
         if (tag != null) args.put("tag",tag);
         if (date != null) args.put("date",date);
         
-        byte[] result = writeTemplate((date != null)?TEMPLATE_BOOKMARK_LIST_GET_XML:TEMPLATE_BOOKMARK_LIST_ALL_XML, args);
+        byte[] result = this.serverContext.writeTemplate((date != null)?TEMPLATE_BOOKMARK_LIST_GET_XML:TEMPLATE_BOOKMARK_LIST_ALL_XML, args, this.requestHeader);
         
         // sending back the result to the client
         return this.convertContentToXML(result);    		
@@ -446,7 +446,7 @@ public class BookmarkService extends AbstractService {
         extractMessageContext(AUTHENTICATION_NEEDED);          	
         
         // generate the xml document
-        byte[] result = writeTemplate(TEMPLATE_BOOKMARK_TAGS_XML, new serverObjects());
+        byte[] result = this.serverContext.writeTemplate(TEMPLATE_BOOKMARK_TAGS_XML, new serverObjects(), this.requestHeader);
         
         // sending back the result to the client
         return this.convertContentToXML(result);    

@@ -37,15 +37,22 @@
   	</path>	
 	
 	
-    <target name="compile">
-  	  <javac srcdir="${src}/de/anomic/soap/" 
-  	  		destdir="${build}" 
-  	  		source="${javacSource}" 
-  	  		target="${javacTarget}" 
-  	  		debug="true" 
-  	  		debuglevel="lines,vars,source"
-	  	    classpathref="soap.class.path">
-  	  </javac>    	
+    <target name="compile">      
+    	<!-- compile main sources -->
+		<javac srcdir="${src}/de/anomic/soap/" 
+			destdir="${build}" 
+			source="${javacSource}" 
+			target="${javacTarget}" 
+			debug="true" 
+			debuglevel="lines,vars,source"
+		    classpathref="soap.class.path">
+		</javac>    	
+	
+		<!-- compile htroot parts -->
+		<javac srcdir="${htroot}/soap/" 
+		     classpathref="soap.class.path"
+		     debug="true" debuglevel="lines,vars,source" 
+		     source="${javacSource}" target="${javacTarget}"/>
     </target>
 	
 
@@ -60,20 +67,30 @@
 			  	  	dirmode="755" mode="644"/>
   	  	<tarfileset dir="${build}/de/anomic/soap/" 
   	  				prefix="${releaseDir}/classes/de/anomic/soap/"
-			  	  	dirmode="755" mode="644"/>			  	  					  	  		
+			  	  	dirmode="755" mode="644"/>		
+  	  	<tarfileset dir="${htroot}/soap/" 
+  	  				prefix="${releaseDir}/htroot/soap/"
+			  	  	dirmode="755" mode="644"/>  	  	
   	  </tar>    	
     </target>	
 
     <target name="copy" depends="compile">
+    	<!-- copy libx -->
         <copy todir="${release}/libx/">
              <fileset dir="${libx}" includes="axis.jar,axis-ant.jar,commons-discovery.jar,commons-logging.jar,jaxrpc.jar,saaj.jar,wsdl4j.jar,gnumail.jar,activation.jar,inetlib.jar"/> 
         </copy>
+        <!-- copy source files -->
         <copy todir="${release}/source/de/anomic/soap/">
              <fileset dir="${src}/de/anomic/soap/" includes="**/*"/> 
         </copy>        
+        <!-- copy classes -->
         <copy todir="${release}/classes/de/anomic/soap/">
              <fileset dir="${build}/de/anomic/soap/" includes="**/*"/> 
         </copy>         
+    	<!-- copy htroot -->
+        <copy todir="${release}/htroot/soap/">
+             <fileset dir="${htroot}/soap/" includes="**/*"/> 
+        </copy>    	
     </target>  
  
     

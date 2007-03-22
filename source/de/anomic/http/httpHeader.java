@@ -160,6 +160,11 @@ public final class httpHeader extends TreeMap implements Map {
     public static final String TE = "TE";
     
     /* =============================================================
+     * Constants for content-encodings
+     * ============================================================= */
+    public static final String CONTENT_ENCODING_GZIP = "gzip";
+    
+    /* =============================================================
      * Constants defining http methods
      * ============================================================= */
     public static final String METHOD_GET = "GET";

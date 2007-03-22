@@ -274,7 +274,7 @@ public class ShareService extends AbstractService {
     private String yacyhURL(yacySeed seed, String filename, String md5) throws AxisFault {
     	try {
     		// getting the template class file
-    		Class c = this.provider.loadClass(getServletClassFile(TEMPLATE_SHARE_XML));
+    		Class c = this.serverContext.getProvider().loadClass(this.serverContext.getServletClassFile(TEMPLATE_SHARE_XML));
     		Method m = c.getMethod("yacyhURL", new Class[]{yacySeed.class,String.class,String.class});
     		
     		// invoke the desired method
@@ -287,7 +287,7 @@ public class ShareService extends AbstractService {
     private void indexPhrase(String urlstring, String phrase, String descr, byte[] md5) throws AxisFault {
     	try {
     		// getting the template class file
-    		Class c = this.provider.loadClass(getServletClassFile(TEMPLATE_SHARE_XML));
+    		Class c = this.serverContext.getProvider().loadClass(this.serverContext.getServletClassFile(TEMPLATE_SHARE_XML));
     		Method m = c.getMethod("indexPhrase", new Class[]{plasmaSwitchboard.class,String.class,String.class,String.class,byte[].class});
     		
     		// invoke the desired method
@@ -300,7 +300,7 @@ public class ShareService extends AbstractService {
     private void deletePhrase(String urlstring, String phrase, String descr) throws AxisFault {
     	try {
     		// getting the template class file
-    		Class c = this.provider.loadClass(getServletClassFile(TEMPLATE_SHARE_XML));
+    		Class c = this.serverContext.getProvider().loadClass(this.serverContext.getServletClassFile(TEMPLATE_SHARE_XML));
     		Method m = c.getMethod("deletePhrase", new Class[]{plasmaSwitchboard.class,String.class,String.class,String.class});
     		
     		// invoke the desired method
@@ -336,7 +336,7 @@ public class ShareService extends AbstractService {
 		this.requestHeader.put("PATH",workingDirPath);
     	
 		// generating the template containing the network status information
-		byte[] result = writeTemplate(TEMPLATE_SHARE_XML, new serverObjects());
+		byte[] result = this.serverContext.writeTemplate(TEMPLATE_SHARE_XML, new serverObjects(), this.requestHeader);
 		
 		// sending back the result to the client
 		return this.convertContentToXML(result);		

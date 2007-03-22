@@ -246,7 +246,7 @@ public class AdminService extends AbstractService {
         extractMessageContext(AUTHENTICATION_NEEDED);          	
         
         // generating the template containing the network status information
-        byte[] result = writeTemplate(TEMPLATE_CONFIG_XML, new serverObjects());
+        byte[] result = this.serverContext.writeTemplate(TEMPLATE_CONFIG_XML, new serverObjects(),this.requestHeader);
         
         // sending back the result to the client
         return this.convertContentToXML(result);        
@@ -271,7 +271,7 @@ public class AdminService extends AbstractService {
         extractMessageContext(AUTHENTICATION_NEEDED);          	
         
         // generating the template containing the network status information
-        byte[] result = writeTemplate(TEMPLATE_VERSION_XML, new serverObjects());
+        byte[] result = this.serverContext.writeTemplate(TEMPLATE_VERSION_XML, new serverObjects(), this.requestHeader);
         
         // sending back the result to the client
         return this.convertContentToXML(result);        
@@ -795,7 +795,7 @@ public class AdminService extends AbstractService {
         args.put(PEER_HASH,peerhash);
         
     	// invoke servlet
-    	serverObjects tp = invokeServlet(TEMPLATE_PROFILE_XML,args);
+    	serverObjects tp = this.serverContext.invokeServlet(TEMPLATE_PROFILE_XML,args, this.requestHeader);
         
     	// query status
     	if (tp.containsKey(PEER_PROFILE_FETCH_SUCCESS)) {
@@ -809,7 +809,7 @@ public class AdminService extends AbstractService {
     	
     	
     	// generate output
-    	byte[] result = buildServletOutput(TEMPLATE_PROFILE_XML, tp);        
+    	byte[] result = this.serverContext.buildServletOutput(TEMPLATE_PROFILE_XML, tp);        
         
         // sending back the result to the client
         return this.convertContentToXML(result);     

@@ -117,7 +117,7 @@ public class CrawlService extends AbstractService {
                 args.put("xsstopw",xsstopw.booleanValue()?"on":"off");               
             
             // triggering the crawling
-            byte[] result = writeTemplate(TEMPLATE_CRAWLING, args);
+            byte[] result = this.serverContext.writeTemplate(TEMPLATE_CRAWLING, args, this.requestHeader);
             
             // sending back the result to the client
             return this.convertContentToXML(result);

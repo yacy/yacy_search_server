@@ -74,7 +74,7 @@ public class StatusService extends AbstractService {
     	extractMessageContext(NO_AUTHENTICATION);  
     	
     	// generating the template containing the network status information
-    	byte[] result = writeTemplate(TEMPLATE_NETWORK_XML, new serverObjects());
+    	byte[] result = this.serverContext.writeTemplate(TEMPLATE_NETWORK_XML, new serverObjects(), this.requestHeader);
     	
     	// sending back the result to the client
     	return this.convertContentToXML(result);
@@ -135,7 +135,7 @@ public class StatusService extends AbstractService {
     	if (details) args.put("ip","1");
     	
     	// generating the template containing the network status information
-    	byte[] result = writeTemplate(TEMPLATE_NETWORK_XML, args);
+    	byte[] result = this.serverContext.writeTemplate(TEMPLATE_NETWORK_XML, args, this.requestHeader);
     	
     	// sending back the result to the client
     	return this.convertContentToXML(result);  	
@@ -180,7 +180,7 @@ public class StatusService extends AbstractService {
         
         
         // generating the template containing the network status information
-        byte[] result = writeTemplate(TEMPLATE_QUEUES_XML, input);
+        byte[] result = this.serverContext.writeTemplate(TEMPLATE_QUEUES_XML, input, this.requestHeader);
         
         // sending back the result to the client
         return this.convertContentToXML(result);        
@@ -196,7 +196,7 @@ public class StatusService extends AbstractService {
         extractMessageContext(AUTHENTICATION_NEEDED);          	
         
         // generating the template containing the network status information
-        byte[] result = writeTemplate(TEMPLATE_STATUS_XML, new serverObjects());
+        byte[] result = this.serverContext.writeTemplate(TEMPLATE_STATUS_XML, new serverObjects(), this.requestHeader);
         
         // sending back the result to the client
         return this.convertContentToXML(result);        

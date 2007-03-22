@@ -156,7 +156,7 @@ public class SearchService extends AbstractService
             args.put("Enter","Search");
             
             // invoke servlet
-            serverObjects searchResult = invokeServlet(TEMPLATE_SEARCH, args);
+            serverObjects searchResult = this.serverContext.invokeServlet(TEMPLATE_SEARCH, args, this.requestHeader);
             
             // Postprocess search ...
             int count = Integer.valueOf(searchResult.get("type_results","0")).intValue();
@@ -167,7 +167,7 @@ public class SearchService extends AbstractService
             }
             
             // format the result
-            byte[] result = buildServletOutput(TEMPLATE_SEARCH, searchResult);
+            byte[] result = this.serverContext.buildServletOutput(TEMPLATE_SEARCH, searchResult);
             
             // sending back the result to the client
             return this.convertContentToXML(result);
@@ -233,7 +233,7 @@ public class SearchService extends AbstractService
            args.put("viewMode",viewModeStr);
           
            // generating the template containing the url info
-           byte[] result = writeTemplate(TEMPLATE_URLINFO, args);
+           byte[] result = this.serverContext.writeTemplate(TEMPLATE_URLINFO, args, this.requestHeader);
           
            // sending back the result to the client
            return this.convertContentToXML(result);
@@ -256,7 +256,7 @@ public class SearchService extends AbstractService
            args.put("search",searchString);      
            
            // generating the template containing the url info
-           byte[] result = writeTemplate(TEMPLATE_SNIPPET, args);     
+           byte[] result = this.serverContext.writeTemplate(TEMPLATE_SNIPPET, args, this.requestHeader);     
            
            // sending back the result to the client
            return this.convertContentToXML(result);           
@@ -297,7 +297,7 @@ public class SearchService extends AbstractService
        extractMessageContext(false);          	
        
        // generating the template containing the network status information
-       byte[] result = writeTemplate(TEMPLATE_OPENSEARCH, new serverObjects());
+       byte[] result = this.serverContext.writeTemplate(TEMPLATE_OPENSEARCH, new serverObjects(), this.requestHeader);
        
        // sending back the result to the client
        return this.convertContentToXML(result);   	   

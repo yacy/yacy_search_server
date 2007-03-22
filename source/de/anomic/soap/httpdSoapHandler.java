@@ -86,6 +86,7 @@ import de.anomic.plasma.plasmaParser;
 import de.anomic.server.serverClassLoader;
 import de.anomic.server.serverCore;
 import de.anomic.server.serverFileUtils;
+import de.anomic.server.serverObjects;
 import de.anomic.server.serverSwitch;
 import de.anomic.server.logging.serverLog;
 
@@ -158,11 +159,7 @@ public final class httpdSoapHandler extends httpdAbstractHandler implements http
     
     /* ===============================================================
      * Constants needed to set the SOAP message context
-     * =============================================================== */
-    /**
-     * CONSTANT: the http root path 
-     */
-    public static final String MESSAGE_CONTEXT_HTTP_ROOT_PATH = "htRootPath";    
+     * =============================================================== */  
     /**
      * CONSTANT: tge server switchboard
      */
@@ -172,13 +169,10 @@ public final class httpdSoapHandler extends httpdAbstractHandler implements http
      */
     public static final String MESSAGE_CONTEXT_HTTP_HEADER = "httpHeader";
     /**
-     * CONSTANT: the server classloader
+     * CONSTANT: soap utility class
      */
-    public static final String MESSAGE_CONTEXT_SERVER_CLASSLOADER = "serverClassLoader";
-    /**
-     * CONSTANT: available templates
-     */
-    public static final String MESSAGE_CONTEXT_TEMPLATES = "templates";
+    public static final String MESSAGE_CONTEXT_SERVER_CONTEXT = "serverContext";    
+    
     
     /* ===============================================================
      * Other object fields
@@ -341,7 +335,7 @@ public final class httpdSoapHandler extends httpdAbstractHandler implements http
          * =========================================================================== */
         try {
             if (contentEncoding != null && !contentEncoding.equals("identity")) {
-                if (contentEncoding.equalsIgnoreCase("gzip")) {
+                if (contentEncoding.equalsIgnoreCase(httpHeader.CONTENT_ENCODING_GZIP)) {
                     input = new GZIPInputStream(input);
                 } else {
                     String errorMsg = "Unsupported content encoding: " + contentEncoding;
@@ -401,31 +395,42 @@ public final class httpdSoapHandler extends httpdAbstractHandler implements http
     public void doGet(Properties conProp, httpHeader requestHeader, OutputStream response) throws IOException {
     	MessageContext msgContext = null;
         String path = conProp.getProperty(httpHeader.CONNECTION_PROP_PATH);
+        
         try {
         	// generating message context
             msgContext = this.generateMessageContext(path, requestHeader, conProp);
-            
-            // generating wsdl file
-            Document doc = generateWSDL(msgContext);
-            
-            if (doc != null) {
-            	// TODO: what about doc.getInputEncoding()?
-            	// TODO: what about getXmlEncoding?           
-                // Converting the the wsdl document into a byte-array
-                String responseDoc = XMLUtils.DocumentToString(doc);
-                byte[] result = responseDoc.getBytes("UTF-8");
-                
-                // send back the result
-                sendMessage(conProp, requestHeader, response, 200, "OK", "text/xml; charset=utf-8", result);
-                
-                if (!(requestHeader.get(httpHeader.CONNECTION, "close").equals("keep-alive"))) {
-                    // wait a little time until everything closes so that clients can read from the streams/sockets
-                    try {Thread.currentThread().join(200);} catch (InterruptedException e) {/* ignore this */}
-                  }
-            } else {
-                // if we where unable to generate the wsdl file ....
-                String errorMsg = "Internal Server Error: Unable to generate the WSDL file.";
-                sendMessage(conProp, requestHeader, response, 500, "Internal Error", "text/plain",errorMsg.getBytes("UTF-8"));            
+
+            if (path.equals("/soap/")) {
+            	serverObjects args = new serverObjects();
+            	args.put("SOAP.engine",httpdSoapHandler.engine);
+            	ServerContext sContext = (ServerContext) msgContext.getProperty(MESSAGE_CONTEXT_SERVER_CONTEXT);
+                byte[] result = sContext.writeTemplate("soap/ServiceList.html", args, requestHeader);
+                sendMessage(conProp, requestHeader, response, 200, "OK", "text/html; charset=utf-8", result);
+            } else if (path.equals("/soap/favicon.ico")) {
+            	sendMessage(conProp, requestHeader, response, 404, "File not found", "text/plain",null); 
+            } else {            	
+            	// generating wsdl file
+            	Document doc = generateWSDL(msgContext);
+            	
+            	if (doc != null) {
+            		// TODO: what about doc.getInputEncoding()?
+            		// TODO: what about getXmlEncoding?           
+            		// Converting the the wsdl document into a byte-array
+            		String responseDoc = XMLUtils.DocumentToString(doc);
+            		byte[] result = responseDoc.getBytes("UTF-8");
+            		
+            		// send back the result
+            		sendMessage(conProp, requestHeader, response, 200, "OK", "text/xml; charset=utf-8", result);
+            		
+            		if (!(requestHeader.get(httpHeader.CONNECTION, "close").equals("keep-alive"))) {
+            			// wait a little time until everything closes so that clients can read from the streams/sockets
+            			try {Thread.currentThread().join(200);} catch (InterruptedException e) {/* ignore this */}
+            		}
+            	} else {
+            		// if we where unable to generate the wsdl file ....
+            		String errorMsg = "Internal Server Error: Unable to generate the WSDL file.";
+            		sendMessage(conProp, requestHeader, response, 500, "Internal Error", "text/plain",errorMsg.getBytes("UTF-8"));            
+            	}
             }
             
             return;
@@ -630,14 +635,16 @@ public final class httpdSoapHandler extends httpdAbstractHandler implements http
             // the used http verson
             String version = conProps.getProperty(httpHeader.CONNECTION_PROP_HTTP_VER);
             msgContext.setProperty(MessageContext.HTTP_TRANSPORT_VERSION,version);
-                        
-            // YaCy specific objects
-            msgContext.setProperty(MESSAGE_CONTEXT_HTTP_ROOT_PATH  ,this.htRootPath.toString());
-            msgContext.setProperty(MESSAGE_CONTEXT_SERVER_SWITCH,this.switchboard);
-            msgContext.setProperty(MESSAGE_CONTEXT_HTTP_HEADER ,requestHeader);        
-            msgContext.setProperty(MESSAGE_CONTEXT_SERVER_CLASSLOADER ,this.provider);
-            msgContext.setProperty(MESSAGE_CONTEXT_TEMPLATES ,this.templates);    
+
+            // generate the serverContext object
+            ServerContext serverContext = new ServerContext(this.htRootPath.toString(),this.provider,this.templates,this.switchboard);
+            msgContext.setProperty(MESSAGE_CONTEXT_SERVER_CONTEXT ,serverContext);            
             
+            // YaCy specific objects
+            msgContext.setProperty(MESSAGE_CONTEXT_SERVER_SWITCH,this.switchboard);
+            msgContext.setProperty(MESSAGE_CONTEXT_HTTP_HEADER ,requestHeader);           
+            
+            // setting the service to execute
             msgContext.setTargetService(serviceName);
             
             return msgContext;
@@ -727,7 +734,6 @@ public final class httpdSoapHandler extends httpdAbstractHandler implements http
         if (contentEncoding != null) bodyOut = gzipOut = new GZIPOutputStream(bodyOut);
         
         // sending the body     
-        soapMessage.writeTo(System.out);
         soapMessage.writeTo(bodyOut);            
         bodyOut.flush();
         
