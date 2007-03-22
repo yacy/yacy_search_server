@@ -1,7 +1,7 @@
 <?xml version="1.0"?>
 <rss version="2.0">
 	<channel>
-		<title>YaCy-Blog of Peer #[clientname]#</title>
+		<title><![CDATA[YaCy '#[clientname]#': Bookmarks]]></title>
 		<link>http://#[address]#/Bookmarks.html</link>
 		<description><![CDATA[#[user]#'s Bookmark-Feed]]></description>
 	</channel>

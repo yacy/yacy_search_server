@@ -1,7 +1,7 @@
 <?xml version="1.0"?>
 <rss version="2.0">
 <channel>
-	<title><![CDATA[YaCy '#[address]#': #(page)#News Overview::Incoming News::Processed News::Outgoing News::Published News#(/page)#]]></title>
+	<title><![CDATA[YaCy '#[clientname]#': #(page)#News Overview::Incoming News::Processed News::Outgoing News::Published News#(/page)#]]></title>
 	<link>http://#[address]#/News.html?page=#[page]#</link>
 	<image>
 		<url>http://#[address]#/env/grafics/yacy.png</url>
