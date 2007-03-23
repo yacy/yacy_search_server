@@ -1,7 +1,7 @@
 <?xml version="1.0"?>
 <rss version="2.0">
 <channel>
-	<title><![CDATA[YaCy '#[clientname]#': Public Files]]></title>
+	<title><![CDATA[YaCy '#[clientname]#': Public Files #[path]#]]></title>
 	<link>http://#[peeraddress]##[path]#</link>
 	<description><![CDATA[Directory Listing of #[path]#]]></description>
 	<image>
