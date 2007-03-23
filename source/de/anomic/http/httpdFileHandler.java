@@ -466,6 +466,7 @@ public final class httpdFileHandler extends httpdAbstractHandler implements http
                 //no defaultfile, send a dirlisting
                 if(targetFile == null || !targetFile.exists()){
                 	String dirlistFormat = (args==null)?"html":args.get("format","html");
+                	targetExt = dirlistFormat; // this is needed to set the mime type correctly
                     targetFile = getOverlayedFile("/htdocsdefault/dir." + dirlistFormat);
                     targetClass=getOverlayedClass("/htdocsdefault/dir." + dirlistFormat);
                     if(! (( targetFile != null && targetFile.exists()) && ( targetClass != null && targetClass.exists())) ){
