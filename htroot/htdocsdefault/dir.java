@@ -58,6 +58,7 @@ import java.util.Iterator;
 
 import de.anomic.data.userDB;
 import de.anomic.http.httpHeader;
+import de.anomic.http.httpc;
 import de.anomic.http.httpd;
 import de.anomic.plasma.plasmaURL;
 import de.anomic.index.indexURLEntry;
@@ -279,13 +280,15 @@ public class dir {
 
                     // last modification date if the entry
                     prop.put("dirlist_" + fileIdx + "_dir_date" , dateString(new Date(f.lastModified())));
+                    prop.put("dirlist_" + fileIdx + "_dir_rfc822date" , httpc.dateString(new Date(f.lastModified())));
                     prop.put("dirlist_" + fileIdx + "_dir_timestamp" , Long.toString(f.lastModified()));
                     // the entry name
-                    prop.putSafeXML("dirlist_" + fileIdx + "_dir_name" , fileName);                                                    
+                    prop.putSafeXML("dirlist_" + fileIdx + "_dir_name" , fileName);                     
 
                     if (f.isDirectory()) {
                         // the entry is a directory
                         prop.put("dirlist_" + fileIdx + "_dir" , 1);
+                        prop.putSafeXML("dirlist_" + fileIdx + "_dir_URL","http://" + yacyCore.seedDB.mySeed.getAddress() + path + fileName + "/");
                     } else {
                         // determine if we should display the description string or a preview image
                         boolean showImage = (description.length() == 0) && (fileName.endsWith(".jpg") || fileName.endsWith(".gif") || fileName.endsWith(".png"));
@@ -296,16 +299,17 @@ public class dir {
                         prop.put("dirlist_" + fileIdx + "_dir_size" , serverMemory.bytesToString(f.length()));
                         prop.put("dirlist_" + fileIdx + "_dir_sizeBytes" , Long.toString(f.length()));
                         // the unique url
-                        prop.putSafeXML("dirlist_" + fileIdx + "_dir_yacyhURL",yacyhURL(yacyCore.seedDB.mySeed, fileName, md5s));
+                        prop.putSafeXML("dirlist_" + fileIdx + "_dir_yacyhURL",yacyhURL(yacyCore.seedDB.mySeed, fileName, md5s));  
+                        prop.putSafeXML("dirlist_" + fileIdx + "_dir_URL","http://" + yacyCore.seedDB.mySeed.getAddress() + path + fileName);
                         // the md5 sum of the file
                         prop.put("dirlist_" + fileIdx + "_dir_md5s",md5s);
                         // description mode: 0...image preview, 1...description text 
                         prop.put("dirlist_" + fileIdx + "_dir_descriptionMode",showImage?0:1);
                         if (showImage) {
                             prop.put("dirlist_" + fileIdx + "_dir_descriptionMode_image",fileName);
-                        } else {
-                            prop.putSafeXML("dirlist_" + fileIdx + "_dir_descriptionMode_text",description);
-                        }                            
+                        }
+                        // always set the description tag (needed by rss and xml)
+                        prop.putSafeXML("dirlist_" + fileIdx + "_dir_descriptionMode_text",description);                                                   
                     }
 
                     prop.put("dirlist_" + fileIdx + "_adminAuthorization",adminAuthorization?1:0);
