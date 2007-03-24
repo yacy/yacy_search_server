@@ -304,10 +304,16 @@ public class Network {
                         seed = (yacySeed) e.nextElement();
                         if (seed != null) {
                             if(post.containsKey("search")) {
+                                boolean abort = true;
                                 Matcher m = peerSearchPattern.matcher (seed.getName());
-                                if (!m.find ()) {
-                                    continue;
+                                if (m.find ()) {
+                                    abort = false;
                                 }
+                                m = peerSearchPattern.matcher (seed.hash);
+                                if (m.find ()) {
+                                    abort = false;
+                                }
+                                if (abort) continue;
                             }
                             prop.put(STR_TABLE_LIST + conCount + "_updatedProfile", 0);
                             prop.put(STR_TABLE_LIST + conCount + "_updatedWikiPage", 0);
