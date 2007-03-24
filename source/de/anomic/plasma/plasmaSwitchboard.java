@@ -201,7 +201,7 @@ public final class plasmaSwitchboard extends serverAbstractSwitch implements ser
     // storage management
     public  File                        htCachePath;
     private File                        plasmaPath;
-    public  File                        indexPath;
+    public  File                        indexPrimaryPath, indexSecondaryPath;
     public  File                        listsPath;
     public  File                        htDocsPath;
     public  File                        rankingPath;
@@ -728,7 +728,8 @@ public final class plasmaSwitchboard extends serverAbstractSwitch implements ser
      * <p>Name of the setting specifying the folder beginning from the YaCy-installation's top-folder, where the
      * whole database of known RWIs and URLs as well as dumps of the DHT-In and DHT-Out caches are stored</p>
      */
-    public static final String INDEX_PATH               = "indexPath";
+    public static final String INDEX_PRIMARY_PATH       = "indexPrimaryPath"; // this is a relative path to the data root
+    public static final String INDEX_SECONDARY_PATH     = "indexSecondaryPath"; // this is a absolute path to any location
     public static final String INDEX_PATH_DEFAULT       = "DATA/INDEX";
     /**
      * <p><code>public static final String <strong>LISTS_PATH</strong> = "listsPath"</code></p>
@@ -868,8 +869,10 @@ public final class plasmaSwitchboard extends serverAbstractSwitch implements ser
         // load values from configs
         this.plasmaPath   = new File(rootPath, getConfig(DBPATH, DBPATH_DEFAULT));
         this.log.logConfig("Plasma DB Path: " + this.plasmaPath.toString());
-        this.indexPath = new File(rootPath, getConfig(INDEX_PATH, INDEX_PATH_DEFAULT));
-        this.log.logConfig("Index Path: " + this.indexPath.toString());
+        this.indexPrimaryPath = new File(rootPath, getConfig(INDEX_PRIMARY_PATH, INDEX_PATH_DEFAULT));
+        this.log.logConfig("Index Primary Path: " + this.indexPrimaryPath.toString());
+        this.indexSecondaryPath = (getConfig(INDEX_SECONDARY_PATH, "").length() == 0) ? indexPrimaryPath : new File(getConfig(INDEX_SECONDARY_PATH, ""));
+        this.log.logConfig("Index Secondary Path: " + this.indexSecondaryPath.toString());
         this.listsPath      = new File(rootPath, getConfig(LISTS_PATH, LISTS_PATH_DEFAULT));
         this.log.logConfig("Lists Path:     " + this.listsPath.toString());
         this.htDocsPath   = new File(rootPath, getConfig(HTDOCS_PATH, HTDOCS_PATH_DEFAULT));
@@ -1040,7 +1043,7 @@ public final class plasmaSwitchboard extends serverAbstractSwitch implements ser
         noticeURL = new plasmaCrawlNURL(plasmaPath);
         errorURL = new plasmaCrawlZURL(plasmaPath, "urlError.db");
         delegatedURL = new plasmaCrawlZURL(plasmaPath, "urlDelegated.db");
-        wordIndex = new plasmaWordIndex(indexPath, ramRWI_time, log);
+        wordIndex = new plasmaWordIndex(indexPrimaryPath, indexSecondaryPath, ramRWI_time, log);
         
         // set a high maximum cache size to current size; this is adopted later automatically
         int wordCacheMaxCount = Math.max((int) getConfigLong(WORDCACHE_INIT_COUNT, 30000),

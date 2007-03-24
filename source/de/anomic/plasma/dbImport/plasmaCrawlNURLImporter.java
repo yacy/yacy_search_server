@@ -31,7 +31,7 @@ public class plasmaCrawlNURLImporter extends AbstractImporter implements dbImpor
     }
 
     public String getJobName() {
-        return this.importPath.toString();
+        return this.importPrimaryPath.toString();
     }
 
     public int getProcessingStatusPercent() {
@@ -47,23 +47,23 @@ public class plasmaCrawlNURLImporter extends AbstractImporter implements dbImpor
         return theStatus.toString();
     }
 
-    public void init(File theImportPath, int theCacheSize, long preloadTime) {
-        super.init(theImportPath);
+    public void init(File plasmaPath, File indexPrimary, File indexSecondary, int theCacheSize, long preloadTime) {
+        super.init(indexPrimary, indexSecondary);
         this.cacheSize = theCacheSize;
         this.preloadTime = preloadTime;
         
-        File noticeUrlDbFile = new File(this.importPath,"urlNotice1.db");
-        File profileDbFile = new File(this.importPath, "crawlProfiles0.db");
+        File noticeUrlDbFile = new File(plasmaPath,"urlNotice1.db");
+        File profileDbFile = new File(plasmaPath, "crawlProfiles0.db");
         
         String errorMsg = null;
-        if (!this.importPath.exists()) 
-            errorMsg = "The import path '" + this.importPath + "' does not exist.";
-        else if (!this.importPath.isDirectory()) 
-            errorMsg = "The import path '" + this.importPath + "' is not a directory.";
-        else if (!this.importPath.canRead()) 
-            errorMsg = "The import path '" + this.importPath + "' is not readable.";
-        else if (!this.importPath.canWrite()) 
-            errorMsg = "The import path '" + this.importPath + "' is not writeable.";
+        if (!plasmaPath.exists()) 
+            errorMsg = "The import path '" + plasmaPath+ "' does not exist.";
+        else if (!plasmaPath.isDirectory()) 
+            errorMsg = "The import path '" + plasmaPath + "' is not a directory.";
+        else if (!plasmaPath.canRead()) 
+            errorMsg = "The import path '" + plasmaPath + "' is not readable.";
+        else if (!plasmaPath.canWrite()) 
+            errorMsg = "The import path '" + plasmaPath + "' is not writeable.";
         
         else if (!noticeUrlDbFile.exists()) 
             errorMsg = "The noticeUrlDB file '" + noticeUrlDbFile + "' does not exist.";
@@ -90,7 +90,7 @@ public class plasmaCrawlNURLImporter extends AbstractImporter implements dbImpor
         
         // init noticeUrlDB
         this.log.logInfo("Initializing the source noticeUrlDB");
-        this.importNurlDB = new plasmaCrawlNURL(this.importPath);
+        this.importNurlDB = new plasmaCrawlNURL(plasmaPath);
         this.importStartSize = this.importNurlDB.size();
         //int stackSize = this.importNurlDB.stackSize();
         

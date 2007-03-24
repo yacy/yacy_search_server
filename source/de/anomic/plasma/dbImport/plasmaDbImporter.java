@@ -31,7 +31,7 @@ public class plasmaDbImporter extends AbstractImporter implements dbImporter {
     }
     
     public String getJobName() {
-        return this.importPath.toString();
+        return this.importPrimaryPath.toString();
     }
 
     public String getStatus() {
@@ -46,25 +46,33 @@ public class plasmaDbImporter extends AbstractImporter implements dbImporter {
         return theStatus.toString();
     }
     
-    public void init(File theImportPath, int theCacheSize, long preloadTime) {
-        super.init(theImportPath);
+    public void init(File plasmaPath, File thePrimaryPath, File theSecondaryPath, int theCacheSize, long preloadTime) {
+        super.init(thePrimaryPath, theSecondaryPath);
 
         this.cacheSize = theCacheSize;
         if (this.cacheSize < 2*1024*1024) this.cacheSize = 8*1024*1024;
         
         // configure import DB
         String errorMsg = null;
-        if (!this.importPath.exists()) errorMsg = "Import directory does not exist.";
-        if (!this.importPath.canRead()) errorMsg = "Import directory is not readable.";
-        if (!this.importPath.canWrite()) errorMsg = "Import directory is not writeable";
-        if (!this.importPath.isDirectory()) errorMsg = "ImportDirectory is not a directory.";
+        if (!this.importPrimaryPath.exists()) errorMsg = "Primary Import directory does not exist.";
+        if (!this.importPrimaryPath.canRead()) errorMsg = "Primary Import directory is not readable.";
+        if (!this.importPrimaryPath.canWrite()) errorMsg = "Primary Import directory is not writeable";
+        if (!this.importPrimaryPath.isDirectory()) errorMsg = "Primary Import directory is not a directory.";
         if (errorMsg != null) {
-            this.log.logSevere(errorMsg + "\nName: " + this.importPath.getAbsolutePath());
+            this.log.logSevere(errorMsg + "\nName: " + this.importPrimaryPath.getAbsolutePath());
             throw new IllegalArgumentException(errorMsg);
-        }         
+        }
+        if (!this.importSecondaryPath.exists()) errorMsg = "Secondary Import directory does not exist.";
+        if (!this.importSecondaryPath.canRead()) errorMsg = "Secondary Import directory is not readable.";
+        if (!this.importSecondaryPath.canWrite()) errorMsg = "Secondary Import directory is not writeable";
+        if (!this.importSecondaryPath.isDirectory()) errorMsg = "Secondary Import directory is not a directory.";
+        if (errorMsg != null) {
+            this.log.logSevere(errorMsg + "\nName: " + this.importSecondaryPath.getAbsolutePath());
+            throw new IllegalArgumentException(errorMsg);
+        }
         
         this.log.logFine("Initializing source word index db.");
-        this.importWordIndex = new plasmaWordIndex(this.importPath, preloadTime / 2, this.log);
+        this.importWordIndex = new plasmaWordIndex(this.importPrimaryPath, importSecondaryPath, preloadTime / 2, this.log);
 
         this.importStartSize = this.importWordIndex.size();
     }
@@ -93,8 +101,8 @@ public class plasmaDbImporter extends AbstractImporter implements dbImporter {
     public void importWordsDB() {
         this.log.logInfo("STARTING DB-IMPORT");  
         
-        try {                                                
-            this.log.logInfo("Importing DB from '" + this.importPath.getAbsolutePath() + "'");
+        try {
+            this.log.logInfo("Importing DB from '" + this.importPrimaryPath.getAbsolutePath() + "'/'" + this.importSecondaryPath.getAbsolutePath() + "'");
             this.log.logInfo("Home word index contains " + wi.size() + " words and " + wi.loadedURL.size() + " URLs.");
             this.log.logInfo("Import word index contains " + this.importWordIndex.size() + " words and " + this.importWordIndex.loadedURL.size() + " URLs.");                        
             

@@ -20,10 +20,11 @@ public interface dbImporter {
     public int getJobID();
     public String getJobName();
     public String getJobType();
-    public File getImportPath();
+    public File getPrimaryImportPath();
+    public File getSecondaryImportPath();
     public String getError();
     public String getStatus();
     
-    public void init(File indexPath, int cacheSize, long preloadTime);
+    public void init(File plasmaPath, File indexPrimaryPath, File indexSecondaryPath, int cacheSize, long preloadTime);
     public void startIt();    
 }

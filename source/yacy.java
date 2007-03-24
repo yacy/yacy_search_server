@@ -616,14 +616,15 @@ public final class yacy {
     public static void minimizeUrlDB(String homePath) {
         // run with "java -classpath classes yacy -minimizeUrlDB"
         try {serverLog.configureLogging(new File(homePath, "DATA/LOG/yacy.logging"));} catch (Exception e) {}
-        File indexRoot = new File(new File(homePath), "DATA/INDEX");
+        File indexPrimaryRoot = new File(new File(homePath), "DATA/INDEX");
+        File indexSecondaryRoot = new File(new File(homePath), "DATA/INDEX");
         File indexRoot2 = new File(new File(homePath), "DATA/INDEX2");
         serverLog log = new serverLog("URL-CLEANUP");
         try {
             log.logInfo("STARTING URL CLEANUP");
             
             // db containing all currently loades urls
-            plasmaCrawlLURL currentUrlDB = new plasmaCrawlLURL(indexRoot, 10000);
+            plasmaCrawlLURL currentUrlDB = new plasmaCrawlLURL(indexSecondaryRoot, 10000);
             
             // db used to hold all neede urls
             plasmaCrawlLURL minimizedUrlDB = new plasmaCrawlLURL(indexRoot2, 10000);
@@ -632,7 +633,7 @@ public final class yacy {
             int cacheMem = (int)(serverMemory.max-rt.totalMemory());
             if (cacheMem < 2048000) throw new OutOfMemoryError("Not enough memory available to start clean up.");
                 
-            plasmaWordIndex wordIndex = new plasmaWordIndex(indexRoot, 10000, log);
+            plasmaWordIndex wordIndex = new plasmaWordIndex(indexPrimaryRoot, indexSecondaryRoot, 10000, log);
             Iterator indexContainerIterator = wordIndex.wordContainers("AAAAAAAAAAAA", false, false);
             
             long urlCounter = 0, wordCounter = 0;
@@ -1000,7 +1001,8 @@ public final class yacy {
     private static void RWIHashList(String homePath, String targetName, String resource, String format) {
         plasmaWordIndex WordIndex = null;
         serverLog log = new serverLog("HASHLIST");
-        File indexRoot = new File(new File(homePath), "DATA/INDEX");
+        File indexPrimaryRoot = new File(new File(homePath), "DATA/INDEX");
+        File indexSecondaryRoot = new File(new File(homePath), "DATA/INDEX");
         String wordChunkStartHash = "AAAAAAAAAAAA";
         try {serverLog.configureLogging(new File(homePath, "DATA/LOG/yacy.logging"));} catch (Exception e) {}
         log.logInfo("STARTING CREATION OF RWI-HASHLIST");
@@ -1008,7 +1010,7 @@ public final class yacy {
         try {
             Iterator indexContainerIterator = null;
             if (resource.equals("all")) {
-                WordIndex = new plasmaWordIndex(indexRoot, 3000, log);
+                WordIndex = new plasmaWordIndex(indexPrimaryRoot, indexSecondaryRoot, 3000, log);
                 indexContainerIterator = WordIndex.wordContainers(wordChunkStartHash, false, false);
             }
             int counter = 0;

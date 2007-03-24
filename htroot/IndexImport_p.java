@@ -73,7 +73,9 @@ public final class IndexImport_p {
             if (post.containsKey("startIndexDbImport")) {
                 try {
                     // getting the import path
-                    String importPath = (String) post.get("importPath");
+                    String importPlasmaPath = (String) post.get("importPlasmaPath");
+                    String importIndexPrimaryPath = (String) post.get("importIndexPrimaryPath");
+                    String importIndexSecondaryPath = (String) post.get("importIndexSecondaryPath");
                     String importType = (String) post.get("importType");
                     String cacheSizeStr = (String) post.get("cacheSize");
                     int cacheSize = 8*1024*1024;
@@ -98,7 +100,7 @@ public final class IndexImport_p {
                     if (startImport) {
                         dbImporter importerThread = switchboard.dbImportManager.getNewImporter(importType);
                         if (importerThread != null) {
-                            importerThread.init(new File(importPath), cacheSize, 100);
+                            importerThread.init(new File(importPlasmaPath), new File(importIndexPrimaryPath), new File(importIndexSecondaryPath), cacheSize, 100);
                             importerThread.startIt();                            
                         }
                         prop.put("LOCATION","");

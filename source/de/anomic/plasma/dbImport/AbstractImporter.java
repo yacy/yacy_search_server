@@ -13,7 +13,7 @@ public abstract class AbstractImporter extends Thread implements dbImporter{
     protected boolean stopped = false;
     protected boolean paused = false;
     
-    protected File importPath;
+    protected File importPrimaryPath, importSecondaryPath;
     protected int cacheSize;
     protected long preloadTime;
     
@@ -33,9 +33,11 @@ public abstract class AbstractImporter extends Thread implements dbImporter{
         return this.error;
     }    
     
-    public void init(File theImportPath) {
-        if (theImportPath == null) throw new NullPointerException("The Import path must not be null.");
-        this.importPath = theImportPath;
+    public void init(File thePrimaryPath, File theSecondaryPath) {
+        if (thePrimaryPath == null) throw new NullPointerException("The Primary Import path must not be null.");
+        if (theSecondaryPath == null) throw new NullPointerException("The Secondary Import path must not be null.");
+        this.importPrimaryPath = thePrimaryPath;
+        this.importSecondaryPath = theSecondaryPath;
         
         // getting a job id from the import manager
         //this.jobID = this.sb.dbImportManager.getJobID();
@@ -115,8 +117,11 @@ public abstract class AbstractImporter extends Thread implements dbImporter{
         return this.jobType;
     }
     
-    public File getImportPath() {
-        return this.importPath;
+    public File getPrimaryImportPath() {
+        return this.importPrimaryPath;
+    }
+    public File getSecondaryImportPath() {
+        return this.importSecondaryPath;
     }
     
     public abstract long getEstimatedTime();

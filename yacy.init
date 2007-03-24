@@ -198,7 +198,10 @@ promoteSearchPageGreeting =
 dbPath=DATA/PLASMADB
 
 # the path to the public reverse word index for text files (web pages)
-indexPath=DATA/INDEX
+# the primary path is relative to the data root, the secondary path is an absolute path
+# when the secondary path should be equal to the primary, it must be declared empty
+indexPrimaryPath=DATA/INDEX
+indexSecondaryPath=
 
 # the path to the LISTS files. Most lists are used to filter web content
 listsPath=DATA/LISTS
