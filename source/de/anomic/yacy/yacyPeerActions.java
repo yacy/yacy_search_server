@@ -111,7 +111,7 @@ public class yacyPeerActions {
 		long uptimediff = uptime - sb.lastseedcheckuptime;
 		long indexedcdiff = sb.indexedPages - sb.lastindexedPages;
         //double requestcdiff = sb.requestedQueries - sb.lastrequestedQueries;
-        if (uptimediff > 300 || sb.lastseedcheckuptime == -1 ) {
+        if (uptimediff > 300 || uptimediff <= 0 || sb.lastseedcheckuptime == -1 ) {
 			sb.lastseedcheckuptime = uptime;
 			sb.lastindexedPages = sb.indexedPages;
             sb.lastrequestedQueries = sb.requestedQueries;
