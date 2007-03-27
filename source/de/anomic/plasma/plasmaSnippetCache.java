@@ -853,6 +853,7 @@ public class plasmaSnippetCache {
     
     public String failConsequences(TextSnippet snippet, Set queryhashes) {
         // problems with snippet fetch
+        if (yacyCore.seedDB.mySeed.isVirgin()) return snippet.getError() + " (no consequences, no network connection)"; // no consequences if we do not have a network connection
         String urlHash = plasmaURL.urlHash(snippet.getUrl());
         String querystring = kelondroMSetTools.setToString(snippet.getRemainingHashes(), ' ');
         if ((snippet.getErrorCode() == ERROR_SOURCE_LOADING) ||
