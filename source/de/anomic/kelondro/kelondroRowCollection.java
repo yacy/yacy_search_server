@@ -113,13 +113,20 @@ public class kelondroRowCollection {
         this.chunkcache = exportedCollection.getColBytes(exp_collection);        
     }
     
+    private static final kelondroRow exportMeasureRow = exportRow(0 /* no relevance */);
+    
+    protected static final int sizeOfExportedCollectionRows(kelondroRow rowdef, byte[] exportedCollectionRowinstance) {
+        int chunkcount = (int) exportMeasureRow.getColLong(exportedCollectionRowinstance, exp_chunkcount);
+        return chunkcount;
+    }
+    
     private static final long day = 1000 * 60 * 60 * 24;
     
     public static int daysSince2000(long time) {
         return (int) (time / day) - 10957;
     }
     
-    private kelondroRow exportRow(int chunkcachelength) {
+    private static kelondroRow exportRow(int chunkcachelength) {
         // find out the size of this collection
         return new kelondroRow(
                 "int size-4 {b256}," +

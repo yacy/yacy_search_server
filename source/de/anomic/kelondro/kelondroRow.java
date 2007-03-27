@@ -138,6 +138,35 @@ public class kelondroRow {
         return new String(s);
     }
     
+    public long getColLong(byte[] rowinstance, int column) {
+        // uses the column definition to choose the right encoding
+        return getColLong(rowinstance, row[column].encoder(), colstart[column], row[column].cellwidth());
+    }
+    
+    protected static final long getColLong(byte[] rowinstance, int encoder, int offset, int length) {
+        // start - fix for badly stored parameters
+        if ((length >= 3) && (rowinstance[offset] == '[') && (rowinstance[offset + 1] == 'B') && (rowinstance[offset + 2] == '@')) return 0;
+        if ((length == 2) && (rowinstance[offset] == '[') && (rowinstance[offset + 1] == 'B')) return 0;
+        if ((length == 1) && (rowinstance[offset] == '[')) return 0;
+        // stop - fix for badly stored parameters
+        switch (encoder) {
+        case kelondroColumn.encoder_none:
+            throw new kelondroException("ROW", "getColLong has celltype none, no encoder given");
+        case kelondroColumn.encoder_b64e:
+            // start - fix for badly stored parameters
+            boolean maxvalue = true;
+            for (int i = 0; i < length; i++) if (rowinstance[offset + i] != '_') {maxvalue = false; break;}
+            if (maxvalue) return 0;
+            // stop - fix for badly stored parameters
+            return kelondroBase64Order.enhancedCoder.decodeLong(rowinstance, offset, length);
+        case kelondroColumn.encoder_b256:
+            return kelondroNaturalOrder.decodeLong(rowinstance, offset, length);
+        case kelondroColumn.encoder_bytes:
+            throw new kelondroException("ROW", "getColLong of celltype bytes not applicable");
+        }
+        throw new kelondroException("ROW", "getColLong did not find appropriate encoding");
+    }
+    
     public Entry newEntry() {
         return new Entry();
     }
@@ -405,36 +434,12 @@ public class kelondroRow {
             if (ref == null) return dflt;
             kelondroColumn col = (kelondroColumn) ref[0];
             int colstart = ((Integer) ref[1]).intValue();
-            return getColLong(col.encoder(), colstart, col.cellwidth());
+            return kelondroRow.getColLong(rowinstance, col.encoder(), colstart, col.cellwidth());
         }
         
         public long getColLong(int column) {
             // uses the column definition to choose the right encoding
-            return getColLong(row[column].encoder(), colstart[column], row[column].cellwidth());
-        }
-
-        private long getColLong(int encoder, int offset, int length) {
-            // start - fix for badly stored parameters
-            if ((length >= 3) && (rowinstance[offset] == '[') && (rowinstance[offset + 1] == 'B') && (rowinstance[offset + 2] == '@')) return 0;
-            if ((length == 2) && (rowinstance[offset] == '[') && (rowinstance[offset + 1] == 'B')) return 0;
-            if ((length == 1) && (rowinstance[offset] == '[')) return 0;
-            // stop - fix for badly stored parameters
-            switch (encoder) {
-            case kelondroColumn.encoder_none:
-                throw new kelondroException("ROW", "getColLong has celltype none, no encoder given");
-            case kelondroColumn.encoder_b64e:
-                // start - fix for badly stored parameters
-                boolean maxvalue = true;
-                for (int i = 0; i < length; i++) if (rowinstance[offset + i] != '_') {maxvalue = false; break;}
-                if (maxvalue) return 0;
-                // stop - fix for badly stored parameters
-                return kelondroBase64Order.enhancedCoder.decodeLong(rowinstance, offset, length);
-            case kelondroColumn.encoder_b256:
-                return kelondroNaturalOrder.decodeLong(rowinstance, offset, length);
-            case kelondroColumn.encoder_bytes:
-                throw new kelondroException("ROW", "getColLong of celltype bytes not applicable");
-            }
-            throw new kelondroException("ROW", "getColLong did not find appropriate encoding");
+            return kelondroRow.getColLong(rowinstance, row[column].encoder(), colstart[column], row[column].cellwidth());
         }
 
         public byte getColByte(String nickname, byte dflt) {

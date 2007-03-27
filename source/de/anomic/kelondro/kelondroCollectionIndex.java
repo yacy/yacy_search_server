@@ -174,11 +174,10 @@ public class kelondroCollectionIndex {
                     key = aentry.getColBytes(0);
                     assert (key != null);
                     if (key == null) continue; // skip deleted entries
-                    kelondroRowSet indexrows = new kelondroRowSet(this.payloadrow, aentry.getColBytes(1));
                     ientry = irow.newEntry();
                     ientry.setCol(idx_col_key,        key);
                     ientry.setCol(idx_col_chunksize,  chunksize);
-                    ientry.setCol(idx_col_chunkcount, indexrows.size());
+                    ientry.setCol(idx_col_chunkcount, kelondroRowCollection.sizeOfExportedCollectionRows(this.payloadrow, aentry.getColBytes(1)));
                     ientry.setCol(idx_col_clusteridx, (byte) partitionNumber);
                     ientry.setCol(idx_col_flags,      (byte) 0);
                     ientry.setCol(idx_col_indexpos,   aentry.index());
