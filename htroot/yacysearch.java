@@ -354,7 +354,7 @@ public class yacysearch {
                 final int totalcount = prop.getInt("num-results_totalcount", 0);
                 if (totalcount >= 10) {
                     final Object[] references = (Object[]) prop.get( "references", new String[0]);
-                    prop.put("num-results", 4);
+                    prop.put("num-results", 5);
                     int hintcount = references.length;
                     if (hintcount > 0) {
 
