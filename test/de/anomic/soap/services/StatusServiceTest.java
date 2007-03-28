@@ -20,8 +20,8 @@ public class StatusServiceTest extends AbstractServiceTest {
 		service = locator.getstatus();		
 	}	
 	
-	public void testNetwork() throws RemoteException {
-		Document xml = ((StatusService)service).network();
+	public void testNetworkOverview() throws RemoteException {
+		Document xml = ((StatusService)service).getNetworkOverview();
 		System.out.println(XMLUtils.DocumentToString(xml));	
 	}
 	

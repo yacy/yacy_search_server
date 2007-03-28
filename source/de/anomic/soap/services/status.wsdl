@@ -1,45 +1,67 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <wsdl:definitions targetNamespace="http://yacy:8080/soap/status" xmlns:apachesoap="http://xml.apache.org/xml-soap" xmlns:impl="http://yacy:8080/soap/status" xmlns:intf="http://yacy:8080/soap/status" xmlns:soapenc="http://schemas.xmlsoap.org/soap/encoding/" xmlns:wsdl="http://schemas.xmlsoap.org/wsdl/" xmlns:wsdlsoap="http://schemas.xmlsoap.org/wsdl/soap/" xmlns:xsd="http://www.w3.org/2001/XMLSchema"><!--WSDL created by Apache Axis version: 1.4
 Built on Apr 22, 2006 (06:55:48 PDT)-->
-  <wsdl:message name="peerListRequest">
-    <wsdl:part name="peerType" type="xsd:string"/>
-    <wsdl:part name="maxCount" type="xsd:int"/>
-    <wsdl:part name="details" type="xsd:boolean"/>
-  </wsdl:message>
   <wsdl:message name="getPeerHashRequest">
   </wsdl:message>
   <wsdl:message name="getQueueStatusResponse">
-
     <wsdl:part name="getQueueStatusReturn" type="apachesoap:Document"/>
   </wsdl:message>
   <wsdl:message name="createNewXMLDocumentResponse">
     <wsdl:part name="createNewXMLDocumentReturn" type="apachesoap:Document"/>
   </wsdl:message>
+
+  <wsdl:message name="getPotentialPeersRequest">
+  </wsdl:message>
   <wsdl:message name="createNewXMLDocumentRequest">
     <wsdl:part name="rootElementName" type="xsd:string"/>
   </wsdl:message>
   <wsdl:message name="getQueueStatusRequest">
-
     <wsdl:part name="localqueueCount" type="xsd:int"/>
     <wsdl:part name="loaderqueueCount" type="xsd:int"/>
     <wsdl:part name="localcrawlerqueueCount" type="xsd:int"/>
+
     <wsdl:part name="remotecrawlerqueueCount" type="xsd:int"/>
   </wsdl:message>
-  <wsdl:message name="peerListResponse">
-    <wsdl:part name="peerListReturn" type="apachesoap:Document"/>
-  </wsdl:message>
   <wsdl:message name="networkResponse">
-
     <wsdl:part name="networkReturn" type="apachesoap:Document"/>
   </wsdl:message>
   <wsdl:message name="getPeerHashResponse">
     <wsdl:part name="getPeerHashReturn" type="xsd:string"/>
   </wsdl:message>
+  <wsdl:message name="getStatusResponse">
+
+    <wsdl:part name="getStatusReturn" type="apachesoap:Document"/>
+  </wsdl:message>
+  <wsdl:message name="getNetworkOverviewRequest">
+  </wsdl:message>
+  <wsdl:message name="getPassivePeersResponse">
+    <wsdl:part name="getPassivePeersReturn" type="apachesoap:Document"/>
+  </wsdl:message>
+  <wsdl:message name="peerListRequest">
+    <wsdl:part name="peerType" type="xsd:string"/>
+
+    <wsdl:part name="maxCount" type="xsd:int"/>
+    <wsdl:part name="details" type="xsd:boolean"/>
+  </wsdl:message>
+  <wsdl:message name="getPotentialPeersResponse">
+    <wsdl:part name="getPotentialPeersReturn" type="apachesoap:Document"/>
+  </wsdl:message>
+  <wsdl:message name="getActivePeersResponse">
+    <wsdl:part name="getActivePeersReturn" type="apachesoap:Document"/>
+  </wsdl:message>
+
+  <wsdl:message name="peerListResponse">
+    <wsdl:part name="peerListReturn" type="apachesoap:Document"/>
+  </wsdl:message>
+  <wsdl:message name="getPassivePeersRequest">
+  </wsdl:message>
+  <wsdl:message name="getActivePeersRequest">
+  </wsdl:message>
   <wsdl:message name="networkRequest">
   </wsdl:message>
-  <wsdl:message name="getStatusResponse">
-    <wsdl:part name="getStatusReturn" type="apachesoap:Document"/>
 
+  <wsdl:message name="getNetworkOverviewResponse">
+    <wsdl:part name="getNetworkOverviewReturn" type="apachesoap:Document"/>
   </wsdl:message>
   <wsdl:message name="getStatusRequest">
   </wsdl:message>
@@ -47,11 +69,29 @@ Built on Apr 22, 2006 (06:55:48 PDT)-->
     <wsdl:operation name="getStatus">
       <wsdl:input message="impl:getStatusRequest" name="getStatusRequest"/>
       <wsdl:output message="impl:getStatusResponse" name="getStatusResponse"/>
+
     </wsdl:operation>
     <wsdl:operation name="network">
-
       <wsdl:input message="impl:networkRequest" name="networkRequest"/>
       <wsdl:output message="impl:networkResponse" name="networkResponse"/>
+    </wsdl:operation>
+    <wsdl:operation name="getNetworkOverview">
+      <wsdl:input message="impl:getNetworkOverviewRequest" name="getNetworkOverviewRequest"/>
+      <wsdl:output message="impl:getNetworkOverviewResponse" name="getNetworkOverviewResponse"/>
+    </wsdl:operation>
+
+    <wsdl:operation name="getActivePeers">
+      <wsdl:input message="impl:getActivePeersRequest" name="getActivePeersRequest"/>
+      <wsdl:output message="impl:getActivePeersResponse" name="getActivePeersResponse"/>
+    </wsdl:operation>
+    <wsdl:operation name="getPassivePeers">
+      <wsdl:input message="impl:getPassivePeersRequest" name="getPassivePeersRequest"/>
+      <wsdl:output message="impl:getPassivePeersResponse" name="getPassivePeersResponse"/>
+    </wsdl:operation>
+    <wsdl:operation name="getPotentialPeers">
+
+      <wsdl:input message="impl:getPotentialPeersRequest" name="getPotentialPeersRequest"/>
+      <wsdl:output message="impl:getPotentialPeersResponse" name="getPotentialPeersResponse"/>
     </wsdl:operation>
     <wsdl:operation name="peerList" parameterOrder="peerType maxCount details">
       <wsdl:input message="impl:peerListRequest" name="peerListRequest"/>
@@ -91,6 +131,46 @@ Built on Apr 22, 2006 (06:55:48 PDT)-->
       </wsdl:input>
 
       <wsdl:output name="networkResponse">
+        <wsdlsoap:body encodingStyle="http://schemas.xmlsoap.org/soap/encoding/" namespace="http://yacy:8080/soap/status" use="encoded"/>
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="getNetworkOverview">
+      <wsdlsoap:operation soapAction=""/>
+      <wsdl:input name="getNetworkOverviewRequest">
+        <wsdlsoap:body encodingStyle="http://schemas.xmlsoap.org/soap/encoding/" namespace="http://services.soap.anomic.de" use="encoded"/>
+      </wsdl:input>
+
+      <wsdl:output name="getNetworkOverviewResponse">
+        <wsdlsoap:body encodingStyle="http://schemas.xmlsoap.org/soap/encoding/" namespace="http://yacy:8080/soap/status" use="encoded"/>
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="getActivePeers">
+      <wsdlsoap:operation soapAction=""/>
+      <wsdl:input name="getActivePeersRequest">
+        <wsdlsoap:body encodingStyle="http://schemas.xmlsoap.org/soap/encoding/" namespace="http://services.soap.anomic.de" use="encoded"/>
+      </wsdl:input>
+
+      <wsdl:output name="getActivePeersResponse">
+        <wsdlsoap:body encodingStyle="http://schemas.xmlsoap.org/soap/encoding/" namespace="http://yacy:8080/soap/status" use="encoded"/>
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="getPassivePeers">
+      <wsdlsoap:operation soapAction=""/>
+      <wsdl:input name="getPassivePeersRequest">
+        <wsdlsoap:body encodingStyle="http://schemas.xmlsoap.org/soap/encoding/" namespace="http://services.soap.anomic.de" use="encoded"/>
+      </wsdl:input>
+
+      <wsdl:output name="getPassivePeersResponse">
+        <wsdlsoap:body encodingStyle="http://schemas.xmlsoap.org/soap/encoding/" namespace="http://yacy:8080/soap/status" use="encoded"/>
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="getPotentialPeers">
+      <wsdlsoap:operation soapAction=""/>
+      <wsdl:input name="getPotentialPeersRequest">
+        <wsdlsoap:body encodingStyle="http://schemas.xmlsoap.org/soap/encoding/" namespace="http://services.soap.anomic.de" use="encoded"/>
+      </wsdl:input>
+
+      <wsdl:output name="getPotentialPeersResponse">
         <wsdlsoap:body encodingStyle="http://schemas.xmlsoap.org/soap/encoding/" namespace="http://yacy:8080/soap/status" use="encoded"/>
       </wsdl:output>
     </wsdl:operation>

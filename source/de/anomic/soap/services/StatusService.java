@@ -64,21 +64,68 @@ public class StatusService extends AbstractService {
     private static final String TEMPLATE_QUEUES_XML = "xml/queues_p.xml";
     private static final String TEMPLATE_STATUS_XML = "xml/status_p.xml";
     
+	/* =====================================================================
+	 * Constants needed to query the network status
+	 * ===================================================================== */
+    private static final int NETWORK_OVERVIEW = 0;
+    private static final int NETWORK_ACTIVE_PEERS = 1;
+    private static final int NETWORK_PASSIVE_PEERS = 2;
+    private static final int NETWORK_POTENTIAL_PEERS = 3;
     
     /**
-     * Service used to query the network properties
-     * @throws Exception 
+     * @return
+     * @throws Exception
+     * @deprecated kept for backward compatibility 
      */
     public Document network() throws Exception {
+    	return this.getNetworkOverview();
+    }
+    
+    public Document getNetworkOverview() throws Exception {
     	// extracting the message context
     	extractMessageContext(NO_AUTHENTICATION);  
+
+    	// return DOM
+    	return getNetworkData(NETWORK_OVERVIEW);
+    }
+    
+    public Document getActivePeers() throws Exception {
+    	// extracting the message context
+    	extractMessageContext(NO_AUTHENTICATION);  
+
+    	// return DOM
+    	return getNetworkData(NETWORK_ACTIVE_PEERS);
+    }    
+    
+    public Document getPassivePeers() throws Exception {
+    	// extracting the message context
+    	extractMessageContext(NO_AUTHENTICATION);  
+
+    	// return DOM
+    	return getNetworkData(NETWORK_PASSIVE_PEERS);
+    }        
+    
+    public Document getPotentialPeers() throws Exception {
+    	// extracting the message context
+    	extractMessageContext(NO_AUTHENTICATION);  
+
+    	// return DOM
+    	return getNetworkData(NETWORK_POTENTIAL_PEERS);
+    }      
+    
+    private Document getNetworkData(int page) throws Exception {    
+    	if (page < 0 || page > 3) page = 0;
+    	
+    	serverObjects post = new serverObjects();
+    	post.put("page", Integer.toString(page));
     	
     	// generating the template containing the network status information
-    	byte[] result = this.serverContext.writeTemplate(TEMPLATE_NETWORK_XML, new serverObjects(), this.requestHeader);
+    	byte[] result = this.serverContext.writeTemplate(TEMPLATE_NETWORK_XML, post, this.requestHeader);
     	
     	// sending back the result to the client
-    	return this.convertContentToXML(result);
+    	return this.convertContentToXML(result);    	
     }
+    
     
     /**
      * Returns a list of peers this peer currently knows
