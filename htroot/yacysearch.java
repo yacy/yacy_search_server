@@ -52,6 +52,7 @@ import java.net.MalformedURLException;
 import java.net.URLEncoder;
 import java.util.HashMap;
 import java.util.Iterator;
+import java.util.regex.PatternSyntaxException;
 import java.util.TreeSet;
 
 import de.anomic.htmlFilter.htmlFilterImageEntry;
@@ -267,8 +268,16 @@ public class yacysearch {
         plasmaSearchRankingProfile ranking = (sb.getConfig("rankingProfile", "").length() == 0) ? new plasmaSearchRankingProfile(contentdomString) : new plasmaSearchRankingProfile("", crypt.simpleDecode(sb.getConfig("rankingProfile", ""), null));
         plasmaSearchTimingProfile localTiming = new plasmaSearchTimingProfile(4 * thisSearch.maximumTime / 10, thisSearch.wantedResults);
         plasmaSearchTimingProfile remoteTiming = new plasmaSearchTimingProfile(6 * thisSearch.maximumTime / 10, thisSearch.wantedResults);
-        
-        plasmaSearchResults results = sb.searchFromLocal(thisSearch, ranking, localTiming, remoteTiming, true, (String) header.get("CLIENTIP"));
+
+        plasmaSearchResults results = new plasmaSearchResults();
+        String wrongregex = null;
+        try{
+            results = sb.searchFromLocal(thisSearch, ranking, localTiming, remoteTiming, true, (String) header.get("CLIENTIP"));
+        }
+        catch(PatternSyntaxException e){
+            wrongregex = e.getPattern();
+        }
+
         //prop=sb.searchFromLocal(thisSearch, ranking, localTiming, remoteTiming, true, (String) header.get("CLIENTIP"));
         prop=new serverObjects();
         //prop.put("references", 0);
@@ -395,15 +404,23 @@ public class yacysearch {
                         }
                     }
                 } else {
-                    if (totalcount == 0) {
-                        prop.put("num-results", 3); // long
-                    } else {
+                    if (wrongregex != null) {
+                        prop.put("num-results_wrong_regex", wrongregex);
                         prop.put("num-results", 4);
+                    }
+                    else if (totalcount == 0) {
+                        prop.put("num-results", 3); // long
+                    }
+                    else {
+                        prop.put("num-results", 5);
                     }
                 }
             }
 
-            if (yacyonline) {
+            if (wrongregex != null) {
+                    prop.put("type_resultbottomline", 0);
+            }
+            else if (yacyonline) {
                 if (global) {
                     prop.put("type_resultbottomline", 1);
                     prop.put("type_resultbottomline_globalresults", prop.get("num-results_globalresults", "0"));
