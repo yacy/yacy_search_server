@@ -68,6 +68,7 @@ import org.apache.axis.EngineConfiguration;
 import org.apache.axis.Message;
 import org.apache.axis.MessageContext;
 import org.apache.axis.WSDDEngineConfiguration;
+import org.apache.axis.configuration.FileProvider;
 import org.apache.axis.deployment.wsdd.WSDDDeployment;
 import org.apache.axis.deployment.wsdd.WSDDDocument;
 import org.apache.axis.server.AxisServer;
@@ -234,7 +235,7 @@ public final class httpdSoapHandler extends httpdAbstractHandler implements http
     		
     		// create an Axis server
     		this.theLogger.logInfo("Init soap engine ...");
-    		engine = new AxisServer();
+    		engine = new AxisServer(new FileProvider("server-config.wsdd"));
     		
     		// setting some options ...
     		engine.setShouldSaveConfig(false);
