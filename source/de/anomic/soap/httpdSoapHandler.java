@@ -228,6 +228,10 @@ public final class httpdSoapHandler extends httpdAbstractHandler implements http
     
     private void deployDefaultServices() throws Exception {
     	try {
+    		// testing if a security manager is active.    		
+    		SecurityManager sm = System.getSecurityManager();
+    		this.theLogger.logInfo("Security Manager is: " + ((sm==null)?"not ":"") + "active");
+    		
     		// create an Axis server
     		this.theLogger.logInfo("Init soap engine ...");
     		engine = new AxisServer();
