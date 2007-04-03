@@ -285,6 +285,8 @@ public class kelondroFlexTable extends kelondroFlexWidthArray implements kelondr
     }
     
     public synchronized kelondroCloneableIterator rows(boolean up, byte[] firstKey) throws IOException {
+        if (ROindex == null) return new rowIterator(RWindex, up, firstKey);
+        if (RWindex == null) return new rowIterator(ROindex, up, firstKey);
         return new kelondroMergeIterator(
                 new rowIterator(ROindex, up, firstKey),
                 new rowIterator(RWindex, up, firstKey),
