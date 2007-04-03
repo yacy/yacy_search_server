@@ -1,13 +1,11 @@
 // ymageCapcha.java
 // -----------------------
 // part of YaCy
-// (C) by Michael Peter Christen; mc@anomic.de
-// first published on http://www.anomic.de
-// Frankfurt, Germany, 2004, 2005
+// (C) by Marc Nause
 //
-// $LastChangedDate: 2007-03-24 17:51:19 +0100 (Sa, 24 Mär 2007) $
-// $LastChangedRevision: 3520 $
-// $LastChangedBy: hydrox $
+// $LastChangedDate: 2007-04-03 22:56:00 +0100 (Di, 04 Apr 2007) $
+// $LastChangedRevision: 3542 $
+// $LastChangedBy: low012 $
 //
 // This program is free software; you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
