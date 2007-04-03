@@ -134,8 +134,9 @@ public class plasmaCrawlBalancer {
         if (urlFileIndex != null) {
             urlFileIndex.close();
             urlFileIndex = null;
-            File cacheFile = new File(cacheStacksPath, stackname + indexSuffix);
-            cacheFile.delete();
+            kelondroFlexTable.delete(cacheStacksPath, stackname + indexSuffix);
+            //File cacheFile = new File(cacheStacksPath, stackname + indexSuffix);
+             //cacheFile.delete();
         }
         openFileIndex();
     }
