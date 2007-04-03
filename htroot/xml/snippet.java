@@ -46,13 +46,13 @@ public class snippet {
         if ((querystring.length() > 2) && (querystring.charAt(0) == '"') && (querystring.charAt(querystring.length() - 1) == '"')) {
             querystring = querystring.substring(1, querystring.length() - 1).trim();
         }        
-        final TreeSet query = plasmaSearchQuery.cleanQuery(querystring);
-        Set queryHashes = plasmaCondenser.words2hashes(query);
+        final TreeSet[] query = plasmaSearchQuery.cleanQuery(querystring);
+        Set queryHashes = plasmaCondenser.words2hashes(query[0]);
         
         // filter out stopwords
-        final TreeSet filtered = kelondroMSetTools.joinConstructive(query, plasmaSwitchboard.stopwords);
+        final TreeSet filtered = kelondroMSetTools.joinConstructive(query[0], plasmaSwitchboard.stopwords);
         if (filtered.size() > 0) {
-            kelondroMSetTools.excludeDestructive(query, plasmaSwitchboard.stopwords);
+            kelondroMSetTools.excludeDestructive(query[0], plasmaSwitchboard.stopwords);
         }
         
         // find snippet

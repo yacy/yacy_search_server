@@ -205,11 +205,11 @@ public class DetailedSearch {
             wdist = 1;
         }
         if (sb.facilityDB != null) try { sb.facilityDB.update("zeitgeist", querystring, post); } catch (Exception e) {}
-        final TreeSet query = plasmaSearchQuery.cleanQuery(querystring);
+        final TreeSet[] query = plasmaSearchQuery.cleanQuery(querystring);
         // filter out stopwords
-        final TreeSet filtered = kelondroMSetTools.joinConstructive(query, plasmaSwitchboard.stopwords);
+        final TreeSet filtered = kelondroMSetTools.joinConstructive(query[0], plasmaSwitchboard.stopwords);
         if (filtered.size() > 0) {
-            kelondroMSetTools.excludeDestructive(query, plasmaSwitchboard.stopwords);
+            kelondroMSetTools.excludeDestructive(query[0], plasmaSwitchboard.stopwords);
         }
         
         boolean authenticated = sb.adminAuthenticated(header) >= 2;
@@ -221,7 +221,7 @@ public class DetailedSearch {
                 return prop;
             }
             final String delHash = post.get("deleteref", "");
-            sb.wordIndex.removeWordReferences(query, delHash);
+            sb.wordIndex.removeWordReferences(query[0], delHash);
         }
         
         // prepare search order
@@ -239,7 +239,7 @@ public class DetailedSearch {
         }
 
         // do the search
-        plasmaSearchQuery thisSearch = new plasmaSearchQuery(query, wdist, "", plasmaSearchQuery.CONTENTDOM_TEXT, count, searchtime, urlmask,
+        plasmaSearchQuery thisSearch = new plasmaSearchQuery(query[0], query[1], wdist, "", plasmaSearchQuery.CONTENTDOM_TEXT, count, searchtime, urlmask,
                                                              ((global) && (yacyonline) && (!(env.getConfig("last-search","").equals(querystring)))) ? plasmaSearchQuery.SEARCHDOM_GLOBALDHT : plasmaSearchQuery.SEARCHDOM_LOCAL,
                                                              "", 20, plasmaSearchQuery.catchall_constraint);
         plasmaSearchRankingProfile localRanking = new plasmaSearchRankingProfile("local", post.toString());

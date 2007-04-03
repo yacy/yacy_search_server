@@ -196,11 +196,11 @@ public class yacysearch {
         serverObjects prop = new serverObjects();
         if (post.get("cat", "href").equals("href")) {
 
-        final TreeSet query = plasmaSearchQuery.cleanQuery(querystring);
+        final TreeSet[] query = plasmaSearchQuery.cleanQuery(querystring);
         // filter out stopwords
-        final TreeSet filtered = kelondroMSetTools.joinConstructive(query, plasmaSwitchboard.stopwords);
+        final TreeSet filtered = kelondroMSetTools.joinConstructive(query[0], plasmaSwitchboard.stopwords);
         if (filtered.size() > 0) {
-            kelondroMSetTools.excludeDestructive(query, plasmaSwitchboard.stopwords);
+            kelondroMSetTools.excludeDestructive(query[0], plasmaSwitchboard.stopwords);
         }
 
         // if a minus-button was hit, remove a special reference first
@@ -212,7 +212,7 @@ public class yacysearch {
                 
             // delete the index entry locally
             final String delHash = post.get("deleteref", ""); // urlhash
-            sb.wordIndex.removeWordReferences(query, delHash);
+            sb.wordIndex.removeWordReferences(query[0], delHash);
 
             // make new news message with negative voting
             HashMap map = new HashMap();
@@ -255,7 +255,8 @@ public class yacysearch {
         
         // do the search
         plasmaSearchQuery thisSearch = new plasmaSearchQuery(
-                    query,
+                    query[0],
+                    query[1],
                     maxDistance,
                     prefermask,
                     contentdomCode,

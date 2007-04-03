@@ -127,20 +127,19 @@ public final class plasmaSearchPreOrder {
         indexRWIEntry iEntry;
         String hashpart;
         boolean isWordRootURL;
+        String querywords = query.words("");
         while (i.hasNext()) {
             if (pageAcc.size() <= query.wantedResults) break;
             entry = (Map.Entry) i.next();
             iEntry = (indexRWIEntry) entry.getValue();
             hashpart = iEntry.urlHash().substring(6);
-            isWordRootURL = plasmaURL.isWordRootURL(iEntry.urlHash(), query.words(""));
-            if ((!(isWordRootURL)) &&
-                (((rootDomExt) && (rootDoms.contains(hashpart))) ||
-                 ((doubleDom) && (doubleDoms.contains(hashpart))))) {
-                i.remove();
-                if (pageAcc.size() <= query.wantedResults) return;
+            isWordRootURL = plasmaURL.isWordRootURL(iEntry.urlHash(), querywords);
+            if (isWordRootURL) {
+                rootDoms.add(hashpart);
             } else {
-                if (isWordRootURL) {
-                    rootDoms.add(hashpart);
+            	if (((rootDomExt) && (rootDoms.contains(hashpart))) ||
+                    ((doubleDom) && (doubleDoms.contains(hashpart)))) {
+            		i.remove();
                 }
             }
             doubleDoms.add(hashpart);

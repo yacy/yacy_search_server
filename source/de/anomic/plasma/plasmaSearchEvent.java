@@ -397,9 +397,12 @@ public final class plasmaSearchEvent extends Thread implements Runnable {
         indexURLEntry page;
         Long preranking;
         Object[] preorderEntry;
+        indexURLEntry.Components comp;
+        String pagetitle, pageurl, pageauthor, exclw;
+        Iterator excli;
         int minEntries = profileLocal.getTargetCount(plasmaSearchTimingProfile.PROCESS_POSTSORT);
         try {
-            while (preorder.hasNext()) {
+            ordering: while (preorder.hasNext()) {
                 if ((System.currentTimeMillis() >= postorderLimitTime) && (acc.sizeFetched() >= minEntries)) break;
                 preorderEntry = preorder.next();
                 entry = (indexRWIEntry) preorderEntry[0];
@@ -407,12 +410,26 @@ public final class plasmaSearchEvent extends Thread implements Runnable {
                 preranking = (Long) preorderEntry[1];
                 // find the url entry
                 page = urlStore.load(entry.urlHash(), entry);
-                // add a result
                 if (page != null) {
-                    if ((!(query.constraint.equals(plasmaSearchQuery.catchall_constraint))) &&
+                	comp = page.comp();
+                	pagetitle = comp.title().toLowerCase();
+                	pageurl = comp.url().toString().toLowerCase();
+                	pageauthor = comp.author().toLowerCase();
+                	
+                	// check exclusion
+                	excli = query.excludeWords.iterator();
+                	while (excli.hasNext()) {
+                		exclw = (String) excli.next();
+                		if ((pagetitle.indexOf(exclw) >= 0) ||
+                			(pageurl.indexOf(exclw) >= 0) ||
+                			(pageauthor.indexOf(exclw) >= 0)) continue ordering;
+                	}
+                	
+                	// check constraints
+                	if ((!(query.constraint.equals(plasmaSearchQuery.catchall_constraint))) &&
                         (query.constraint.get(plasmaCondenser.flag_cat_indexof)) &&
-                        (!(page.comp().title().startsWith("Index of")))) {
-                        log.logFine("filtered out " + page.comp().url().toString());
+                        (!(comp.title().startsWith("Index of")))) {
+                        log.logFine("filtered out " + comp.url().toString());
                         // filter out bad results
                         Iterator wi = query.queryHashes.iterator();
                         while (wi.hasNext()) wordIndex.removeEntry((String) wi.next(), page.hash());
@@ -454,7 +471,7 @@ public final class plasmaSearchEvent extends Thread implements Runnable {
 
         if (rcLocal == null) return;
         plasmaSearchPreOrder preorder = new plasmaSearchPreOrder(query, ranking, rcLocal, timeout - System.currentTimeMillis());
-        if (preorder.filteredCount()> query.wantedResults) preorder.remove(true, true);
+        if (preorder.filteredCount() > query.wantedResults) preorder.remove(true, true);
         
         // start url-fetch
         indexRWIEntry entry;

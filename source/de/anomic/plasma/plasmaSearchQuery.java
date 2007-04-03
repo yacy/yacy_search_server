@@ -71,6 +71,7 @@ public final class plasmaSearchQuery {
     public static final kelondroBitfield catchall_constraint = new kelondroBitfield(4, "______");
     
     public Set queryWords, queryHashes;
+    public Set excludeWords;
     public int wantedResults;
     public String prefer;
     public int contentdom;
@@ -82,15 +83,16 @@ public final class plasmaSearchQuery {
     public int maxDistance;
     public kelondroBitfield constraint;
 
-    public plasmaSearchQuery(Set queryWords, int maxDistance, String prefer, int contentdom,
+    public plasmaSearchQuery(Set queryWords, Set excludeWords, int maxDistance, String prefer, int contentdom,
                              int wantedResults, long maximumTime, String urlMask,
                              int domType, String domGroupName, int domMaxTargets,
                              kelondroBitfield constraint) {
         this.queryWords = queryWords;
+        this.queryHashes = plasmaCondenser.words2hashes(queryWords);
+        this.excludeWords = excludeWords;
         this.maxDistance = maxDistance;
         this.prefer = prefer;
         this.contentdom = contentdom;
-        this.queryHashes = plasmaCondenser.words2hashes(queryWords);
         this.wantedResults = wantedResults;
         this.maximumTime = maximumTime;
         this.urlMask = urlMask;
@@ -104,6 +106,7 @@ public final class plasmaSearchQuery {
                              int wantedResults, long maximumTime, String urlMask,
                              kelondroBitfield constraint) {
         this.queryWords = null;
+        this.excludeWords = null;
         this.maxDistance = maxDistance;
         this.prefer = prefer;
         this.contentdom = contentdom;
@@ -142,24 +145,37 @@ public final class plasmaSearchQuery {
         return new String(sb);
     }
     
-    public static TreeSet cleanQuery(String words) {
+    public static TreeSet[] cleanQuery(String words) {
+    	// returns two sets: a query set and a exclude set
+    	if ((words == null) || (words.length() == 0)) return new TreeSet[]{new TreeSet(), new TreeSet()};
+        
         // convert Umlaute
         words = htmlFilterAbstractScraper.convertUmlaute(new serverCharBuffer(words.toCharArray())).toString();
         
         // remove funny symbols
-        final String seps = "' .,:/-&";
+        final String seps = "'.,:/&";
         words = words.toLowerCase().trim();
         int c;
         for (int i = 0; i < seps.length(); i++) {
-            if ((c = words.indexOf(seps.charAt(i))) >= 0) { words = words.substring(0, c) + (((c + 1) < words.length()) ? (" " + words.substring(c + 1)) : ""); }
+            while ((c = words.indexOf(seps.charAt(i))) >= 0) { words = words.substring(0, c) + (((c + 1) < words.length()) ? (" " + words.substring(c + 1)) : ""); }
         }
         
         // the string is clean now, but we must generate a set out of it
         final TreeSet query = new TreeSet(kelondroNaturalOrder.naturalOrder);
-        if (words.length() == 0) return query; // split returns always one element
+        final TreeSet exclude = new TreeSet(kelondroNaturalOrder.naturalOrder);
         final String[] a = words.split(" ");
-        for (int i = 0; i < a.length; i++) { query.add(a[i]); }
-        return query;
+        for (int i = 0; i < a.length; i++) {
+        	if (a[i].startsWith("-")) {
+        		exclude.add(a[i].substring(1));
+        	} else {
+        		while ((c = a[i].indexOf('-')) >= 0) {
+        			query.add(a[i].substring(0, c));
+        			a[i] = a[i].substring(c + 1);
+        		}
+        		if (a[i].length() > 0) query.add(a[i]);
+        	}
+        }
+        return new TreeSet[]{query, exclude};
     }
     
     public int size() {
