@@ -204,11 +204,11 @@ public final class indexRAMRI implements indexRI {
                 String wordHash;
                 //long creationTime;
                 indexRWIEntry wordEntry;
-                kelondroRow.Entry row;
+                kelondroRow.EntryIndex row;
                 //Runtime rt = Runtime.getRuntime();
                 while (i.hasNext()) {
                     // get out one entry
-                    row = (kelondroRow.Entry) i.next();
+                    row = (kelondroRow.EntryIndex) i.next();
                     if ((row == null) || (row.empty(0)) || (row.empty(3))) continue;
                     wordHash = row.getColString(0, "UTF-8");
                     //creationTime = kelondroRecords.bytes2long(row[2]);

@@ -177,7 +177,7 @@ public class kelondroCollectionIndex {
                     ientry = irow.newEntry();
                     ientry.setCol(idx_col_key,        key);
                     ientry.setCol(idx_col_chunksize,  chunksize);
-                    ientry.setCol(idx_col_chunkcount, kelondroRowCollection.sizeOfExportedCollectionRows(this.payloadrow, aentry.getColBytes(1)));
+                    ientry.setCol(idx_col_chunkcount, kelondroRowCollection.sizeOfExportedCollectionRows(aentry, 1));
                     ientry.setCol(idx_col_clusteridx, (byte) partitionNumber);
                     ientry.setCol(idx_col_flags,      (byte) 0);
                     ientry.setCol(idx_col_indexpos,   aentry.index());
@@ -207,7 +207,7 @@ public class kelondroCollectionIndex {
         if (propfile.exists()) {
             props = serverFileUtils.loadHashMap(propfile);
             String stored_rowdef = (String) props.get("rowdef");
-            if ((stored_rowdef == null) || (!(rowdef.subsumes(new kelondroRow(stored_rowdef, null, 0))))) {
+            if ((stored_rowdef == null) || (!(rowdef.subsumes(new kelondroRow(stored_rowdef, rowdef.objectOrder, 0))))) {
                 System.out.println("FATAL ERROR: stored rowdef '" + stored_rowdef + "' does not match with new rowdef '" + 
                         rowdef + "' for array cluster '" + path + "/" + filenameStub + "'");
                 System.exit(-1);
@@ -414,11 +414,12 @@ public class kelondroCollectionIndex {
         array.set(rowNumber, arrayEntry);
 
         // update the index entry
-        indexrow.setCol(idx_col_chunkcount, collection.size());
+        final int collectionsize = collection.size(); // extra variable for easier debugging
+        indexrow.setCol(idx_col_chunkcount, collectionsize);
         indexrow.setCol(idx_col_clusteridx, (byte) partitionNumber);
         indexrow.setCol(idx_col_lastwrote, kelondroRowCollection.daysSince2000(System.currentTimeMillis()));
         
-        // after calling this method there mus be a index.put(indexrow);
+        // after calling this method there must be a index.put(indexrow);
     }
     
     private ArrayList array_replace_multiple(TreeMap array_replace_map, int serialNumber, int chunkSize) throws IOException {
@@ -515,6 +516,10 @@ public class kelondroCollectionIndex {
                     newPartitionNumber, serialNumber, this.payloadrow.objectsize()); // modifies indexrow
         }
         arrayResolveRemoved(); // remove all to-be-removed marked entries
+        
+        if ((int) indexrow.getColLong(idx_col_chunkcount) != collection.size())
+        	serverLog.logSevere("kelondroCollectionIndex", "UPDATE (put) ERROR: array has different chunkcount than index after merge: index = " + (int) indexrow.getColLong(idx_col_chunkcount) + ", collection.size() = " + collection.size());
+        
         index.put(indexrow); // write modified indexrow
     }
     
@@ -567,6 +572,7 @@ public class kelondroCollectionIndex {
         ArrayList actionList;
         TreeMap actionMap;
         boolean madegc = false;
+        System.out.println("DEBUG existingContainer: " + existingContainer.toString());
         while (existingContainer.size() > 0) {
             oldPartitionNumber1 = ((Integer) existingContainer.lastKey()).intValue();
             containerMap = (TreeMap) existingContainer.remove(new Integer(oldPartitionNumber1));
@@ -586,8 +592,8 @@ public class kelondroCollectionIndex {
                 int oldchunkcount      = (int) indexrow.getColLong(idx_col_chunkcount); // the number if rows in the collection
                 int oldrownumber       = (int) indexrow.getColLong(idx_col_indexpos);   // index of the entry in array
                 int oldPartitionNumber = (int) indexrow.getColByte(idx_col_clusteridx); // points to array file
-                assert oldPartitionNumber1 == oldPartitionNumber;
-                assert oldrownumber1 == oldrownumber;
+                assert oldPartitionNumber1 == oldPartitionNumber : "oldPartitionNumber1 = " + oldPartitionNumber1 + ", oldPartitionNumber = " + oldPartitionNumber + ", containerMap = " + containerMap + ", existingContainer: " + existingContainer.toString();
+                assert oldrownumber1 == oldrownumber : "oldrownumber1 = " + oldrownumber1 + ", oldrownumber = " + oldrownumber + ", containerMap = " + containerMap + ", existingContainer: " + existingContainer.toString();
                 assert (oldPartitionNumber >= arrayIndex(oldchunkcount));
                 int oldSerialNumber = 0;
 
@@ -705,7 +711,7 @@ public class kelondroCollectionIndex {
             int oldchunkcount      = (int) indexrow.getColLong(idx_col_chunkcount); // the number if rows in the collection
             int oldrownumber       = (int) indexrow.getColLong(idx_col_indexpos);   // index of the entry in array
             int oldPartitionNumber = (int) indexrow.getColByte(idx_col_clusteridx); // points to array file
-            assert (oldPartitionNumber >= arrayIndex(oldchunkcount));
+            assert (oldPartitionNumber >= arrayIndex(oldchunkcount)) : "oldPartitionNumber = " + oldPartitionNumber + ", arrayIndex(oldchunkcount) = " + arrayIndex(oldchunkcount);
             int oldSerialNumber = 0;
 
             // load the old collection and join it
@@ -717,7 +723,7 @@ public class kelondroCollectionIndex {
             oldcollection.uniq(); // FIXME: not clear if it would be better to insert the collection with put to avoid double-entries
             oldcollection.trim(false);
             collection = oldcollection;
-
+            
             // check for size of collection:
             // if necessary shrink the collection and dump a part of that collection
             // to avoid that this grows too big
@@ -747,6 +753,12 @@ public class kelondroCollectionIndex {
                         newPartitionNumber, oldSerialNumber, this.payloadrow.objectsize()); // modifies indexrow
             }
             arrayResolveRemoved(); // remove all to-be-removed marked entries
+
+            final int collectionsize = collection.size(); // extra variable for easier debugging
+            final int indexrowcount = (int) indexrow.getColLong(idx_col_chunkcount);
+            if (indexrowcount != collectionsize)
+            	serverLog.logSevere("kelondroCollectionIndex", "UPDATE (merge) ERROR: array has different chunkcount than index after merge: index = " + indexrowcount + ", collection.size() = " + collectionsize);
+            
             index.put(indexrow); // write modified indexrow
         }
     }
@@ -911,13 +923,13 @@ public class kelondroCollectionIndex {
         int chunkcount      = (int) indexrow.getColLong(idx_col_chunkcount);
         int rownumber       = (int) indexrow.getColLong(idx_col_indexpos);
         int partitionnumber = (int) indexrow.getColByte(idx_col_clusteridx);
-        assert(partitionnumber >= arrayIndex(chunkcount));
+        assert(partitionnumber >= arrayIndex(chunkcount)) : "partitionnumber = " + partitionnumber + ", arrayIndex(chunkcount) = " + arrayIndex(chunkcount);
         int serialnumber = 0;
         
         return getwithparams(indexrow, chunksize, chunkcount, partitionnumber, rownumber, serialnumber, remove);
     }
 
-    private kelondroRowSet getwithparams(kelondroRow.Entry indexrow, int chunksize, int chunkcount, int clusteridx, int rownumber, int serialnumber, boolean remove) throws IOException {
+    private synchronized kelondroRowSet getwithparams(kelondroRow.Entry indexrow, int chunksize, int chunkcount, int clusteridx, int rownumber, int serialnumber, boolean remove) throws IOException {
         // open array entry
         kelondroFixedWidthArray array = getArray(clusteridx, serialnumber, chunksize);
         kelondroRow.Entry arrayrow = array.get(rownumber);
@@ -933,7 +945,7 @@ public class kelondroCollectionIndex {
             serverLog.logSevere("kelondroCollectionIndex." + array.filename, "lost a RowCollection because of a bad arraykey");
             return new kelondroRowSet(this.payloadrow, 0);
         }
-        kelondroRowSet collection = new kelondroRowSet(this.payloadrow, arrayrow.getColBytes(1)); // FIXME: this does not yet work with different rowdef in case of several rowdef.objectsize()
+        kelondroRowSet collection = new kelondroRowSet(this.payloadrow, arrayrow, 1); // FIXME: this does not yet work with different rowdef in case of several rowdef.objectsize()
         if ((!(index.row().objectOrder.wellformed(indexkey))) || (index.row().objectOrder.compare(arraykey, indexkey) != 0)) {
             // check if we got the right row; this row is wrong. Fix it:
             index.remove(indexkey); // the wrong row cannot be fixed
@@ -955,7 +967,7 @@ public class kelondroCollectionIndex {
             // fix the entry in index
             indexrow.setCol(idx_col_chunkcount, chunkcountInArray);
             index.put(indexrow);
-            array.logFailure("INCONSISTENCY in " + arrayFile(this.path, this.filenameStub, this.loadfactor, chunksize, clusteridx, serialnumber).toString() + ": array has different chunkcount than index: index = " + chunkcount + ", array = " + chunkcountInArray + "; the index has been auto-fixed");
+            array.logFailure("INCONSISTENCY (get) in " + arrayFile(this.path, this.filenameStub, this.loadfactor, chunksize, clusteridx, serialnumber).toString() + ": array has different chunkcount than index: index = " + chunkcount + ", array = " + chunkcountInArray + "; the index has been auto-fixed");
         }
         if (remove) array.remove(rownumber, false); // index is removed in calling method
         return collection;
@@ -1031,7 +1043,7 @@ public class kelondroCollectionIndex {
             collection.addUnique(rowdef.newEntry(new byte[][]{"abc".getBytes(), "efg".getBytes()}));
             collectionIndex.put("erstes".getBytes(), collection);
             
-            for (int i = 0; i <= 17; i++) {
+            for (int i = 0; i <= 170; i++) {
                 collection = new kelondroRowSet(rowdef, 0);
                 for (int j = 0; j < i; j++) {
                     collection.addUnique(rowdef.newEntry(new byte[][]{("abc" + j).getBytes(), "xxx".getBytes()}));
@@ -1041,7 +1053,7 @@ public class kelondroCollectionIndex {
             }
             
             // extend collections with more values
-            for (int i = 0; i <= 17; i++) {
+            for (int i = 0; i <= 170; i++) {
                 collection = new kelondroRowSet(rowdef, 0);
                 for (int j = 0; j < i; j++) {
                     collection.addUnique(rowdef.newEntry(new byte[][]{("def" + j).getBytes(), "xxx".getBytes()}));

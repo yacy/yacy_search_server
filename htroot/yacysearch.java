@@ -178,7 +178,8 @@ public class yacysearch {
         // SEARCH
         final boolean indexDistributeGranted = sb.getConfig("allowDistributeIndex", "true").equals("true");
         final boolean indexReceiveGranted = sb.getConfig("allowReceiveIndex", "true").equals("true");
-        if (!indexDistributeGranted || !indexReceiveGranted) { global = false; }
+        final boolean offline = yacyCore.seedDB.mySeed.isVirgin();
+        if (offline || !indexDistributeGranted || !indexReceiveGranted) { global = false; }
         
         // find search domain
         int contentdomCode = plasmaSearchQuery.CONTENTDOM_TEXT;

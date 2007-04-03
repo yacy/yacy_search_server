@@ -118,7 +118,9 @@ public final class serverInstantThread extends serverAbstractThread implements s
             this.terminate(false);
         } catch (InvocationTargetException e) {
             String targetException = e.getTargetException().getMessage();
-            if (targetException.indexOf("heap space") > 0) e.getTargetException().printStackTrace();
+            e.getTargetException().printStackTrace();
+            e.printStackTrace();
+            if ((targetException.indexOf("heap space") > 0) || (targetException.indexOf("NullPointerException") > 0)) e.getTargetException().printStackTrace();
             serverLog.logSevere("SERVER", "Runtime Error in serverInstantThread.job, thread '" + this.getName() + "': " + e.getMessage() + "; target exception: " + targetException, e.getTargetException());
             e.getTargetException().printStackTrace();
         } catch (OutOfMemoryError e) {

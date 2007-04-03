@@ -52,30 +52,26 @@ public final class kelondroRAIOChunks extends kelondroAbstractIOChunks implement
         this.ra = ra;
     }
 
-    public long length() throws IOException {
+    public synchronized long length() throws IOException {
         return ra.length();
     }
     
-    public int read(long pos, byte[] b, int off, int len) throws IOException {
+    public synchronized int read(long pos, byte[] b, int off, int len) throws IOException {
         if (len == 0) return 0;
-        synchronized (this.ra) {
-            this.ra.seek(pos);
-            long available = ra.available();
-            if (available >= len) {
-                return ra.read(b, off, len);
-            } else if (available == 0) {
-                return -1;
-            } else {
-                return ra.read(b, off, (int) available);
-            }
+        this.ra.seek(pos);
+        long available = ra.available();
+        if (available >= len) {
+            return ra.read(b, off, len);
+        } else if (available == 0) {
+            return -1;
+        } else {
+            return ra.read(b, off, (int) available);
         }
     }
 
-    public void write(long pos, byte[] b, int off, int len) throws IOException {
-        synchronized (this.ra) {
-            this.ra.seek(pos);
-            this.ra.write(b, off, len);
-        }
+    public synchronized void write(long pos, byte[] b, int off, int len) throws IOException {
+        this.ra.seek(pos);
+        this.ra.write(b, off, len);
     }
 
     public void commit() throws IOException {
@@ -83,7 +79,7 @@ public final class kelondroRAIOChunks extends kelondroAbstractIOChunks implement
         // this method is used to flush write-buffers
     }
     
-    public void close() throws IOException {
+    public synchronized void close() throws IOException {
         if (this.ra != null) this.ra.close();
         this.ra = null;
     }

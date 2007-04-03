@@ -228,7 +228,7 @@ public class kelondroFlexTable extends kelondroFlexWidthArray implements kelondr
     public synchronized kelondroRow.Entry put(kelondroRow.Entry row) throws IOException {
         assert (row != null);
         assert (!(serverLog.allZero(row.getColBytes(0))));
-        assert row.bytes().length <= this.rowdef.objectsize;
+        assert row.objectsize() <= this.rowdef.objectsize;
         byte[] key = row.getColBytes(0);
         int pos = RWindex.geti(key);
         if ((pos < 0) && (ROindex != null)) pos = ROindex.geti(key);
@@ -246,7 +246,7 @@ public class kelondroFlexTable extends kelondroFlexWidthArray implements kelondr
     }
     
     public synchronized void addUnique(kelondroRow.Entry row) throws IOException {
-        assert row.bytes().length == this.rowdef.objectsize;
+        assert row.objectsize() == this.rowdef.objectsize;
         RWindex.addi(row.getColBytes(0), super.add(row));
     }
     
@@ -390,8 +390,7 @@ public class kelondroFlexTable extends kelondroFlexWidthArray implements kelondr
             serverLog.logWarning("kelondroFlexTable", "close(): file '" + this.filename + "' was not tracked with record tracker.");
         }
         if (ROindex != null) {ROindex.close(); ROindex = null;}
-        RWindex.close();
-        RWindex = null;
+        if (RWindex != null) {RWindex.close(); RWindex = null;}
         super.close();
     }
     

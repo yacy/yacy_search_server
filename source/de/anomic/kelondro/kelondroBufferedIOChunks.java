@@ -74,7 +74,7 @@ public final class kelondroBufferedIOChunks extends kelondroAbstractIOChunks imp
         return ra.length();
     }
     
-    public int read(long pos, byte[] b, int off, int len) throws IOException {
+    public synchronized int read(long pos, byte[] b, int off, int len) throws IOException {
         assert (b.length >= off + len): "read pos=" + pos  + ", b.length=" + b.length + ", off=" + off + ", len=" + len;
         
         // check commit time
@@ -106,7 +106,7 @@ public final class kelondroBufferedIOChunks extends kelondroAbstractIOChunks imp
         }
     }
 
-    public void write(long pos, byte[] b, int off, int len) throws IOException {
+    public synchronized void write(long pos, byte[] b, int off, int len) throws IOException {
         assert (b.length >= off + len): "write pos=" + pos + ", b.length=" + b.length + ", b='" + new String(b) + "', off=" + off + ", len=" + len;
 
         //if (len > 10) System.out.println("WRITE(" + name + ", " + pos + ", " + b.length + ", "  + off + ", "  + len + ")");
@@ -127,7 +127,7 @@ public final class kelondroBufferedIOChunks extends kelondroAbstractIOChunks imp
         }
     }
 
-    public void commit() throws IOException {
+    public synchronized void commit() throws IOException {
         synchronized (buffer) {
             if (buffer.size() == 0) return;
             Iterator i = buffer.entrySet().iterator();
@@ -170,7 +170,7 @@ public final class kelondroBufferedIOChunks extends kelondroAbstractIOChunks imp
         }
     }
     
-    public void close() throws IOException {
+    public synchronized void close() throws IOException {
         if (this.ra != null) {
             commit();
             this.ra.close();

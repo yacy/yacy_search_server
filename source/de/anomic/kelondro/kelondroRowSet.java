@@ -51,8 +51,8 @@ public class kelondroRowSet extends kelondroRowCollection implements kelondroInd
         this.profile = new kelondroProfile();
     }
     
-    public kelondroRowSet(kelondroRow rowdef, byte[] exportedCollectionRowinstance) {
-        super(rowdef, exportedCollectionRowinstance);
+    public kelondroRowSet(kelondroRow rowdef, kelondroRow.Entry exportedCollectionRowEnvironment, int columnInEnvironment) {
+        super(rowdef, exportedCollectionRowEnvironment, columnInEnvironment);
         this.profile = new kelondroProfile();
     }
     
@@ -109,17 +109,6 @@ public class kelondroRowSet extends kelondroRowCollection implements kelondroInd
 
     public kelondroRow.Entry remove(byte[] a) {
         return remove(a, 0, a.length);
-    }
-    
-    public void removeMarkedAll(kelondroRowCollection c) {
-        long handle = profile.startDelete();
-        Iterator i = c.rows();
-        kelondroRow.Entry entry;
-        while (i.hasNext()) {
-            entry = (kelondroRow.Entry) i.next();
-            remove(entry.bytes(), 0, entry.bytes().length);
-        }
-        profile.stopDelete(handle);
     }
     
     public void setOrdering(kelondroOrder newOrder, int newColumn) {

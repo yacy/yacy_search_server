@@ -204,7 +204,8 @@ public class kelondroRecords {
             // needs to run up and own all the way between the beginning and the end of the
             // file for each record. We check consistency beteen file size and
             if (finalwrite) synchronized (entryFile) {
-                entryFile.writeInt(POS_USEDC, USEDC);
+            	assert this.USEDC >= 0 : "this.USEDC = " + this.USEDC;
+                entryFile.writeInt(POS_USEDC, this.USEDC);
                 entryFile.commit();
             }
         }
@@ -221,6 +222,7 @@ public class kelondroRecords {
         private synchronized void readused() throws IOException {
             synchronized (entryFile) {
                 this.USEDC = entryFile.readInt(POS_USEDC);
+                assert this.USEDC >= 0 : "this.USEDC = " + this.USEDC + ", filename = " + filename;
             }
         }
         
@@ -245,20 +247,22 @@ public class kelondroRecords {
             // delete element with handle h
             // this element is then connected to the deleted-chain and can be
             // re-used change counter
-            assert (h.index >= 0);
+        	assert (h.index >= 0);
             assert (h.index != NUL);
-            assert (h.index < USEDC + FREEC) : "USEDC = " + USEDC + ", FREEC = " + FREEC + ", h.index = " + h.index;
-            long sp = seekpos(h);
-            assert (sp <= entryFile.length() + ROW.objectsize) : h.index + "/" + sp + " exceeds file size " + entryFile.length();
             synchronized (USAGE) {
-                USEDC--;
-                FREEC++;
-                // change pointer
-                entryFile.writeInt(sp, FREEH.index); // extend free-list
-                // write new FREEH Handle link
-                FREEH = h;
-                writefree();
-                writeused(false);
+            	synchronized (entryFile) {
+            	    assert (h.index < USEDC + FREEC) : "USEDC = " + USEDC + ", FREEC = " + FREEC + ", h.index = " + h.index;
+                    long sp = seekpos(h);
+                    assert (sp <= entryFile.length() + ROW.objectsize) : h.index + "/" + sp + " exceeds file size " + entryFile.length();
+                    USEDC--;
+                    FREEC++;
+                    // change pointer
+                    entryFile.writeInt(sp, FREEH.index); // extend free-list
+                    // write new FREEH Handle link
+                    FREEH = h;
+                    writefree();
+                    writeused(false);
+            	}
             }
         }
         
@@ -271,46 +275,48 @@ public class kelondroRecords {
             }
             assert (chunk.length == ROW.objectsize()) : "chunk.length = " + chunk.length + ", ROW.objectsize() = " + ROW.objectsize();
             synchronized (USAGE) {
-                if (USAGE.FREEC == 0) {
-                    // generate new entry
-                    int index = USAGE.allCount();
-                    entryFile.write(seekpos(index) + overhead, chunk, 0, ROW.objectsize()); // occupy space, othervise the USAGE computaton does not work
-                    USAGE.USEDC++;
-                    writeused(false);
-                    return index;
-                } else {
-                    // re-use record from free-list
-                    USAGE.USEDC++;
-                    USAGE.FREEC--;
-                    // take link
-                    int index;
-                    if (USAGE.FREEH.index == NUL) {
-                        serverLog.logSevere("kelondroRecords/" + filename, "INTERNAL ERROR (DATA INCONSISTENCY): re-use of records failed, lost " + (USAGE.FREEC + 1) + " records.");
-                        // try to heal..
-                        USAGE.USEDC = USAGE.allCount() + 1;
-                        USAGE.FREEC = 0;
-                        index = USAGE.USEDC - 1;
-                    } else {
-                        index = USAGE.FREEH.index;
-                        //System.out.println("*DEBUG* ALLOCATED DELETED INDEX " + index);
-                        // check for valid seek position
-                        long seekp = seekpos(USAGE.FREEH);
-                        if (seekp > entryFile.length()) {
-                            // this is a severe inconsistency. try to heal..
-                            serverLog.logSevere("kelondroRecords/" + filename, "new Handle: lost " + USAGE.FREEC + " marked nodes; seek position " + seekp + "/" + USAGE.FREEH.index + " out of file size " + entryFile.length() + "/" + ((entryFile.length() - POS_NODES) / recordsize));
-                            index = USAGE.allCount(); // a place at the end of the file
-                            USAGE.USEDC += USAGE.FREEC; // to avoid that non-empty records at the end are overwritten
-                            USAGE.FREEC = 0; // discard all possible empty nodes
-                            USAGE.FREEH.index = NUL;
-                        } else {
-                            // read link to next element of FREEH chain
-                            USAGE.FREEH.index = entryFile.readInt(seekp);
-                        }
-                    }
-                    USAGE.writeused(false);
-                    USAGE.writefree();
-                    entryFile.write(seekpos(index) + overhead, chunk, 0, ROW.objectsize()); // overwrite space
-                    return index;
+            	synchronized (entryFile) {
+            		if (USAGE.FREEC == 0) {
+            			// generate new entry
+                		int index = USAGE.allCount();
+                		entryFile.write(seekpos(index) + overhead, chunk, 0, ROW.objectsize()); // occupy space, othervise the USAGE computaton does not work
+                		USAGE.USEDC++;
+                		writeused(false);
+                        return index;
+            		} else {
+            			// re-use record from free-list
+            			USAGE.USEDC++;
+            			USAGE.FREEC--;
+            			// take link
+            			int index;
+            			if (USAGE.FREEH.index == NUL) {
+            				serverLog.logSevere("kelondroRecords/" + filename, "INTERNAL ERROR (DATA INCONSISTENCY): re-use of records failed, lost " + (USAGE.FREEC + 1) + " records.");
+            				// try to heal..
+            				USAGE.USEDC = USAGE.allCount() + 1;
+            				USAGE.FREEC = 0;
+            				index = USAGE.USEDC - 1;
+            			} else {
+            				index = USAGE.FREEH.index;
+            				//System.out.println("*DEBUG* ALLOCATED DELETED INDEX " + index);
+            				// check for valid seek position
+            				long seekp = seekpos(USAGE.FREEH);
+            				if (seekp > entryFile.length()) {
+            					// this is a severe inconsistency. try to heal..
+            					serverLog.logSevere("kelondroRecords/" + filename, "new Handle: lost " + USAGE.FREEC + " marked nodes; seek position " + seekp + "/" + USAGE.FREEH.index + " out of file size " + entryFile.length() + "/" + ((entryFile.length() - POS_NODES) / recordsize));
+            					index = USAGE.allCount(); // a place at the end of the file
+            					USAGE.USEDC += USAGE.FREEC; // to avoid that non-empty records at the end are overwritten
+            					USAGE.FREEC = 0; // discard all possible empty nodes
+            					USAGE.FREEH.index = NUL;
+            				} else {
+            					// read link to next element of FREEH chain
+            					USAGE.FREEH.index = entryFile.readInt(seekp);
+            				}
+            			}
+            			USAGE.writeused(false);
+            			USAGE.writefree();
+            			entryFile.write(seekpos(index) + overhead, chunk, 0, ROW.objectsize()); // overwrite space
+            			return index;
+            		}
                 }
             }
         }
@@ -325,48 +331,49 @@ public class kelondroRecords {
             }
             //assert (chunk.length == ROW.objectsize()) : "chunk.length = " + chunk.length + ", ROW.objectsize() = " + ROW.objectsize();
             synchronized (USAGE) {
-                if (index < USAGE.allCount()) {
-                    // write within the file
-                    // this can be critical, if we simply overwrite fields that are marked
-                    // as deleted. This case should be avoided. There is no other way to check
-                    // that the field is not occupied than looking at the FREEC counter
-                    assert (USAGE.FREEC == 0) : "FREEC = " + USAGE.FREEC;
-                    // simply overwrite the cell
-                    entryFile.write(seekpos(index), bulkchunk, offset, recordsize);
-                    // no changes of counter necessary
-                } else {
-                    // write beyond the end of the file
-                    // records that are in between are marked as deleted
-                    Handle h;
-                    while (index > USAGE.allCount()) {
-                        h = new Handle(USAGE.allCount());
-                        USAGE.FREEC++;
-                        entryFile.write(seekpos(h), spaceChunk); // occupy space, othervise the USAGE computaton does not work
-                        entryFile.writeInt(seekpos(h), USAGE.FREEH.index);
-                        USAGE.FREEH = h;
-                        USAGE.writefree();
-                        entryFile.commit();
-                    }
-                    assert (index <= USAGE.allCount());
+            	synchronized (entryFile) {
+            		if (index < USAGE.allCount()) {
+            			// write within the file
+            			// this can be critical, if we simply overwrite fields that are marked
+            			// as deleted. This case should be avoided. There is no other way to check
+            			// that the field is not occupied than looking at the FREEC counter
+            			assert (USAGE.FREEC == 0) : "FREEC = " + USAGE.FREEC;
+            			// simply overwrite the cell
+            			entryFile.write(seekpos(index), bulkchunk, offset, recordsize);
+            			// no changes of counter necessary
+            		} else {
+            			// write beyond the end of the file
+            			// records that are in between are marked as deleted
+            			Handle h;
+            			while (index > USAGE.allCount()) {
+            				h = new Handle(USAGE.allCount());
+            				USAGE.FREEC++;
+            				entryFile.write(seekpos(h), spaceChunk); // occupy space, othervise the USAGE computaton does not work
+            				entryFile.writeInt(seekpos(h), USAGE.FREEH.index);
+            				USAGE.FREEH = h;
+            				USAGE.writefree();
+            				entryFile.commit();
+            			}
+            			assert (index <= USAGE.allCount());
                 
-                    // adopt USAGE.USEDC
-                    if (USAGE.allCount() == index) {
-                        entryFile.write(seekpos(index), bulkchunk, offset, recordsize); // write chunk and occupy space
-                        USAGE.USEDC++;
-                        USAGE.writeused(false);
-                        entryFile.commit();
+            			// adopt USAGE.USEDC
+            			if (USAGE.allCount() == index) {
+            				entryFile.write(seekpos(index), bulkchunk, offset, recordsize); // write chunk and occupy space
+            				USAGE.USEDC++;
+            				USAGE.writeused(false);
+            				entryFile.commit();
+            			}
                     }
                 }
             }
         }
-        
         
         private synchronized void checkConsistency() {
             if (debugmode) try { // in debug mode
                 long efl = entryFile.length();
                 assert ((efl - POS_NODES) % ((long) recordsize)) == 0 : "rest = " + ((entryFile.length()  - POS_NODES) % ((long) recordsize)) + ", USEDC = " + this.USEDC + ", FREEC = " + this.FREEC  + ", recordsize = " + recordsize + ", file = " + filename;
                 long calculated_used = (efl - POS_NODES) / ((long) recordsize);
-                assert calculated_used == this.USEDC + this.FREEC : "calculated_used = " + calculated_used + ", USEDC = " + this.USEDC + ", FREEC = " + this.FREEC  + ", recordsize = " + recordsize + ", file = " + filename;
+                if (calculated_used != this.USEDC + this.FREEC) logFailure("INCONSISTENCY in USED computation: calculated_used = " + calculated_used + ", USEDC = " + this.USEDC + ", FREEC = " + this.FREEC  + ", recordsize = " + recordsize + ", file = " + filename);
             } catch (IOException e) {
                 assert false;
             }
@@ -911,7 +918,7 @@ public class kelondroRecords {
             if (cacheHeaders == null) {
                 if (fillTail) {
                     // read complete record
-                    byte[] chunkbuffer = new byte[recordsize];
+                	byte[] chunkbuffer = new byte[recordsize];
                     entryFile.readFully(seekpos(this.handle), chunkbuffer, 0, recordsize);
                     this.headChunk = new byte[headchunksize];
                     this.tailChunk = new byte[tailchunksize];
@@ -1031,6 +1038,12 @@ public class kelondroRecords {
             return result; // return previous value
         }
 
+        public boolean valid() {
+            // returns true if the key starts with non-zero byte
+        	// this may help to detect deleted entries
+            return headChunk[overhead] != 0;
+        }
+
         public byte[] getKey() {
             // read key
             return trimCopy(headChunk, overhead, ROW.width(0));
@@ -1071,8 +1084,10 @@ public class kelondroRecords {
             boolean doCommit = this.headChanged || this.tailChanged;
             
             // save head
+            synchronized (entryFile) {
             if (this.headChanged) {
                 //System.out.println("WRITEH(" + filename + ", " + seekpos(this.handle) + ", " + this.headChunk.length + ")");
+            	assert (headChunk == null) || (headChunk.length == headchunksize);
                 entryFile.write(seekpos(this.handle), (this.headChunk == null) ? new byte[headchunksize] : this.headChunk);
                 updateNodeCache(cachePriority);
                 this.headChanged = false;
@@ -1081,11 +1096,13 @@ public class kelondroRecords {
             // save tail
             if ((this.tailChunk != null) && (this.tailChanged)) {
                 //System.out.println("WRITET(" + filename + ", " + (seekpos(this.handle) + headchunksize) + ", " + this.tailChunk.length + ")");
+            	assert (tailChunk == null) || (tailChunk.length == tailchunksize);
                 entryFile.write(seekpos(this.handle) + headchunksize, (this.tailChunk == null) ? new byte[tailchunksize] : this.tailChunk);
                 this.tailChanged = false;
             }
             
             if (doCommit) entryFile.commit();
+            }
         }
 
         public synchronized void collapse() {
@@ -1283,7 +1300,9 @@ public class kelondroRecords {
 
     // Returns the number of key-value mappings in this map.
     public int size() {
-        return USAGE.used();
+    	synchronized (entryFile) {
+    		return USAGE.used();
+    	}
     }
 
     protected final int free() {
@@ -1311,7 +1330,7 @@ public class kelondroRecords {
         public Object next() {
             try {
                 Node n = (Node) nodeIterator.next();
-                return row().newEntry(n.getValueRow(), n.handle.index);
+                return row().newEntryIndex(n.getValueRow(), n.handle.index);
             } catch (IOException e) {
                 throw new kelondroException(filename, e.getMessage());
             }

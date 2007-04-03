@@ -67,6 +67,7 @@ import de.anomic.index.indexURLEntry;
 import de.anomic.kelondro.kelondroBitfield;
 import de.anomic.kelondro.kelondroCache;
 import de.anomic.kelondro.kelondroCloneableIterator;
+import de.anomic.kelondro.kelondroException;
 import de.anomic.kelondro.kelondroFlexSplitTable;
 import de.anomic.kelondro.kelondroIndex;
 import de.anomic.kelondro.kelondroRow;
@@ -204,8 +205,11 @@ public final class plasmaCrawlLURL {
     }
 
     public synchronized indexURLEntry newEntry(String propStr) {
-        if (propStr != null && propStr.startsWith("{") && propStr.endsWith("}")) {
+        if (propStr != null && propStr.startsWith("{") && propStr.endsWith("}")) try {
             return new indexURLEntry(serverCodings.s2p(propStr.substring(1, propStr.length() - 1)));
+        } catch (kelondroException e) {
+        	// wrong format
+        	return null;
         } else {
             return null;
         }

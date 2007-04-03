@@ -124,9 +124,15 @@ public class kelondroFixedWidthArray extends kelondroRecords implements kelondro
             set(((Integer) entry.getKey()).intValue(), (kelondroRow.Entry) entry.getValue());
         }
     }
+   
+    public synchronized kelondroRow.Entry getIfValid(int index) throws IOException {
+    	byte[] b = getNode(new Handle(index), true).getValueRow();
+    	if (b[0] == 0) return null;
+    	return row().newEntry(b);
+    }
     
     public synchronized kelondroRow.Entry get(int index) throws IOException {
-        return row().newEntry(getNode(new Handle(index), true).getValueRow());
+    	return row().newEntry(getNode(new Handle(index), true).getValueRow());
     }
 
     protected synchronized int seti(int index, int value) throws IOException {

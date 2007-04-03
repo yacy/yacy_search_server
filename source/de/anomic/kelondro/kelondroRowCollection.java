@@ -80,10 +80,10 @@ public class kelondroRowCollection {
         this.lastTimeWrote = System.currentTimeMillis();
     }
     
-    public kelondroRowCollection(kelondroRow rowdef, byte[] exportedCollectionRowinstance) {
+    public kelondroRowCollection(kelondroRow rowdef, kelondroRow.Entry exportedCollectionRowEnvironment, int columnInEnvironment) {
         this.rowdef = rowdef;
-        int chunkcachelength = exportedCollectionRowinstance.length - exportOverheadSize;
-        kelondroRow.Entry exportedCollection = exportRow(chunkcachelength).newEntry(exportedCollectionRowinstance);
+        int chunkcachelength = exportedCollectionRowEnvironment.cellwidth(columnInEnvironment) - exportOverheadSize;
+        kelondroRow.Entry exportedCollection = exportRow(chunkcachelength).newEntry(exportedCollectionRowEnvironment, columnInEnvironment);
         this.chunkcount = (int) exportedCollection.getColLong(exp_chunkcount);
         //assert (this.chunkcount <= chunkcachelength / rowdef.objectsize) : "chunkcount = " + this.chunkcount + ", chunkcachelength = " + chunkcachelength + ", rowdef.objectsize = " + rowdef.objectsize;
         if ((this.chunkcount > chunkcachelength / rowdef.objectsize)) {
@@ -114,9 +114,10 @@ public class kelondroRowCollection {
     }
     
     private static final kelondroRow exportMeasureRow = exportRow(0 /* no relevance */);
-    
-    protected static final int sizeOfExportedCollectionRows(kelondroRow rowdef, byte[] exportedCollectionRowinstance) {
-        int chunkcount = (int) exportMeasureRow.getColLong(exportedCollectionRowinstance, exp_chunkcount);
+
+    protected static final int sizeOfExportedCollectionRows(kelondroRow.Entry exportedCollectionRowEnvironment, int columnInEnvironment) {
+    	kelondroRow.Entry exportedCollectionEntry = exportMeasureRow.newEntry(exportedCollectionRowEnvironment, columnInEnvironment);
+    	int chunkcount = (int) exportedCollectionEntry.getColLong(exp_chunkcount);
         return chunkcount;
     }
     
@@ -136,7 +137,7 @@ public class kelondroRowCollection {
                 "short ordercol-2 {b256}," +
                 "short orderbound-2 {b256}," +
                 "byte[] collection-" + chunkcachelength,
-                null, 0
+                kelondroNaturalOrder.naturalOrder, 0
                 );
     }
     
@@ -214,23 +215,16 @@ public class kelondroRowCollection {
         assert (index * rowdef.objectsize < chunkcache.length);
         if (index >= chunkcount) return null;
         if (index * rowdef.objectsize() >= chunkcache.length) return null;
-        byte[] a = new byte[rowdef.objectsize()];
-        System.arraycopy(chunkcache, index * rowdef.objectsize(), a, 0, rowdef.objectsize());
         this.lastTimeRead = System.currentTimeMillis();
-        return rowdef.newEntry(a);
+        return rowdef.newEntry(chunkcache, index * rowdef.objectsize());
     }
     
     public final void set(int index, kelondroRow.Entry a) {
-        set(index, a.bytes(), 0, a.bytes().length);
-    }
-    
-    public synchronized final void set(int index, byte[] a, int astart, int alength) {
         assert (index >= 0) : "get: access with index " + index + " is below zero";
         assert (index < chunkcount) : "get: access with index " + index + " is above chunkcount " + chunkcount;
-        assert (!(bugappearance(a, astart, alength))) : "a = " + serverLog.arrayList(a, astart, alength);
-        if (bugappearance(a, astart, alength)) return; // TODO: this is temporary; remote peers may still submit bad entries
-        int l = Math.min(rowdef.objectsize(), Math.min(alength, a.length - astart));
-        System.arraycopy(a, astart, chunkcache, index * rowdef.objectsize(), l);
+        //assert (!(bugappearance(a, astart, alength))) : "a = " + serverLog.arrayList(a, astart, alength);
+        //if (bugappearance(a, astart, alength)) return; // TODO: this is temporary; remote peers may still submit bad entries
+        a.writeToArray(chunkcache, index * rowdef.objectsize());
         this.lastTimeWrote = System.currentTimeMillis();
     }
     

@@ -199,8 +199,12 @@ public final class plasmaWordIndex implements indexRI {
     }
 
     public void flushCacheSome() {
-        flushCache(dhtOutCache, (dhtOutCache.size() > 3 * flushsize) ? flushsize : Math.min(flushsize, Math.max(1, dhtOutCache.size() / lowcachedivisor)));
-        flushCache(dhtInCache, (dhtInCache.size() > 3 * flushsize) ? flushsize : Math.min(flushsize, Math.max(1, dhtInCache.size() / lowcachedivisor)));
+    	synchronized (dhtOutCache) {
+    		flushCache(dhtOutCache, (dhtOutCache.size() > 3 * flushsize) ? flushsize : Math.min(flushsize, Math.max(1, dhtOutCache.size() / lowcachedivisor)));
+    	}
+    	synchronized (dhtInCache) {
+    		flushCache(dhtInCache, (dhtInCache.size() > 3 * flushsize) ? flushsize : Math.min(flushsize, Math.max(1, dhtInCache.size() / lowcachedivisor)));
+    	}
     }
     
     private void flushCache(indexRAMRI ram, int count) {
@@ -394,32 +398,48 @@ public final class plasmaWordIndex implements indexRI {
 
     public indexContainer deleteContainer(String wordHash) {
         indexContainer c = new indexContainer(wordHash, indexRWIEntry.urlEntryRow);
-        c.addAllUnique(dhtInCache.deleteContainer(wordHash));
-        c.addAllUnique(dhtOutCache.deleteContainer(wordHash));
+        synchronized (dhtInCache) {
+        	c.addAllUnique(dhtInCache.deleteContainer(wordHash));
+        }
+        synchronized (dhtOutCache) {
+        	c.addAllUnique(dhtOutCache.deleteContainer(wordHash));
+        }
         c.addAllUnique(collections.deleteContainer(wordHash));
         return c;
     }
     
     public boolean removeEntry(String wordHash, String urlHash) {
         boolean removed = false;
-        removed = removed | (dhtInCache.removeEntry(wordHash, urlHash));
-        removed = removed | (dhtOutCache.removeEntry(wordHash, urlHash));
+        synchronized (dhtInCache) {
+        	removed = removed | (dhtInCache.removeEntry(wordHash, urlHash));
+        }
+        synchronized (dhtOutCache) {
+        	removed = removed | (dhtOutCache.removeEntry(wordHash, urlHash));
+        }
         removed = removed | (collections.removeEntry(wordHash, urlHash));
         return removed;
     }
     
     public int removeEntries(String wordHash, Set urlHashes) {
         int removed = 0;
-        removed += dhtInCache.removeEntries(wordHash, urlHashes);
-        removed += dhtOutCache.removeEntries(wordHash, urlHashes);
+        synchronized (dhtInCache) {
+        	removed += dhtInCache.removeEntries(wordHash, urlHashes);
+        }
+        synchronized (dhtOutCache) {
+        	removed += dhtOutCache.removeEntries(wordHash, urlHashes);
+        }
         removed += collections.removeEntries(wordHash, urlHashes);
         return removed;
     }
     
     public String removeEntriesExpl(String wordHash, Set urlHashes) {
         String removed = "";
-        removed += dhtInCache.removeEntries(wordHash, urlHashes) + ", ";
-        removed += dhtOutCache.removeEntries(wordHash, urlHashes) + ", ";
+        synchronized (dhtOutCache) {
+        	removed += dhtInCache.removeEntries(wordHash, urlHashes) + ", ";
+        }
+        synchronized (dhtOutCache) {
+        	removed += dhtOutCache.removeEntries(wordHash, urlHashes) + ", ";
+        }
         removed += collections.removeEntries(wordHash, urlHashes);
         return removed;
     }
@@ -453,8 +473,13 @@ public final class plasmaWordIndex implements indexRI {
         // urlHash assigned. This can only work if the entry is really fresh
         // and can be found in the RAM cache
         // this returns the number of deletion that had been possible
-        int d = dhtInCache.tryRemoveURLs(urlHash);
-        if (d > 0) return d; else return dhtOutCache.tryRemoveURLs(urlHash);
+    	int d = 0;
+    	synchronized (dhtInCache) {
+    		d = dhtInCache.tryRemoveURLs(urlHash);
+    	}
+    	synchronized (dhtOutCache) {
+    		if (d > 0) return d; else return dhtOutCache.tryRemoveURLs(urlHash);
+    	}
     }
     
     public TreeSet indexContainerSet(String startHash, boolean ram, boolean rot, int count) {
