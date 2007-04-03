@@ -197,7 +197,7 @@ public class plasmaCrawlBalancer {
                 if (kelondroRecords.debugmode) {
                     serverLog.logWarning("PLASMA BALANCER", "size operation wrong in " + stackname + " - componentsize = " + componentsize + ", urlFileIndex.size() = " + urlFileIndex.size());
                 }
-                if (componentsize == 0) {
+                if ((componentsize == 0) && (urlFileIndex.size() > 0)) {
                     resetFileIndex();
                 }
             }
