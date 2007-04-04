@@ -1,4 +1,4 @@
-// ymageCapcha.java
+// ymageCaptcha.java
 // -----------------------
 // part of YaCy
 // (C) by Marc Nause
@@ -45,9 +45,9 @@ package de.anomic.ymage;
 import java.util.Random;
 import javax.imageio.ImageIO;
 
-public class ymageCapcha extends ymageMatrix {
+public class ymageCaptcha extends ymageMatrix {
 
-    public ymageCapcha(int width, int height, String code) {
+    public ymageCaptcha(int width, int height, String code) {
         super(width, height, SUBTRACTIVE_WHITE);
         this.create(code);
     }
@@ -100,7 +100,7 @@ public class ymageCapcha extends ymageMatrix {
         // go into headless awt mode
         System.setProperty("java.awt.headless", "true");
 
-        ymageCapcha m = new ymageCapcha(200, 70, args[1]);
+        ymageCaptcha m = new ymageCaptcha(200, 70, args[1]);
         try {
             ImageIO.write(m.getImage(), "png", new java.io.File(args[0]));
         } catch (java.io.IOException e) {
