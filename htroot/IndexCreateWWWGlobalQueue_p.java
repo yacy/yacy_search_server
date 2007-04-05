@@ -92,6 +92,11 @@ public class IndexCreateWWWGlobalQueue_p {
                 */
                 prop.put("info", 3);//crawling queue cleared
                 prop.put("info_numEntries", c);
+            } else if (post.containsKey("deleteEntry")) {
+                String urlHash = (String) post.get("deleteEntry");
+                switchboard.noticeURL.remove(urlHash);
+                prop.put("LOCATION","");
+                return prop;
             }
         }
 
@@ -101,7 +106,7 @@ public class IndexCreateWWWGlobalQueue_p {
         } else {
             prop.put("crawler-queue", 1);
             plasmaCrawlEntry[] crawlerList = switchboard.noticeURL.top(plasmaCrawlNURL.STACK_TYPE_LIMIT, showLimit);
-            prop.put("crawler-queue_num", stackSize);//num Entries
+            
             plasmaCrawlEntry urle;
             boolean dark = true;
             yacySeed initiator;
@@ -114,18 +119,22 @@ public class IndexCreateWWWGlobalQueue_p {
                     initiator = yacyCore.seedDB.getConnected(urle.initiator());
                     profileHandle = urle.profileHandle();
                     profileEntry = (profileHandle == null) ? null : switchboard.profiles.getEntry(profileHandle);
-                    prop.put("crawler-queue_list_"+i+"_dark", ((dark) ? 1 : 0) );
-                    prop.put("crawler-queue_list_"+i+"_initiator", ((initiator == null) ? "proxy" : wikiCode.replaceHTML(initiator.getName())) );
-                    prop.put("crawler-queue_list_"+i+"_profile", ((profileEntry == null) ? "unknown" : wikiCode.replaceHTML(profileEntry.name())));
-                    prop.put("crawler-queue_list_"+i+"_depth", urle.depth());
-                    prop.put("crawler-queue_list_"+i+"_modified", daydate(urle.loaddate()) );
-                    prop.put("crawler-queue_list_"+i+"_anchor", wikiCode.replaceHTML(urle.name()));
-                    prop.put("crawler-queue_list_"+i+"_url", wikiCode.replaceHTML(urle.url().toString()));
+                    prop.put("crawler-queue_list_"+showNum+"_dark", ((dark) ? 1 : 0) );
+                    prop.put("crawler-queue_list_"+showNum+"_initiator", ((initiator == null) ? "proxy" : wikiCode.replaceHTML(initiator.getName())) );
+                    prop.put("crawler-queue_list_"+showNum+"_profile", ((profileEntry == null) ? "unknown" : wikiCode.replaceHTML(profileEntry.name())));
+                    prop.put("crawler-queue_list_"+showNum+"_depth", urle.depth());
+                    prop.put("crawler-queue_list_"+showNum+"_modified", daydate(urle.loaddate()) );
+                    prop.put("crawler-queue_list_"+showNum+"_anchor", wikiCode.replaceHTML(urle.name()));
+                    prop.put("crawler-queue_list_"+showNum+"_url", wikiCode.replaceHTML(urle.url().toString()));
+                    prop.put("crawler-queue_list_"+showNum+"_hash", urle.urlhash());
                     dark = !dark;
                     showNum++;
+                } else {
+                    stackSize--;
                 }
             }
             prop.put("crawler-queue_show-num", showNum); //showin sjow-num most recent
+            prop.put("crawler-queue_num", stackSize);//num Entries
             prop.put("crawler-queue_list", showNum);
         }
 

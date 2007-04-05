@@ -29,6 +29,7 @@
         <col width="80" />
         <col width="180" />
         <col />
+        <col width="10" />
       </colgroup>
       <tr class="TableHeader">
         <th>Initiator</th>
@@ -37,6 +38,7 @@
         <th>Modified Date</th>
         <th>Anchor Name</th>
         <th>URL</th>
+        <th>Delete</th>
       </tr>
       #{list}#
       <tr class="TableCell#(dark)#Light::Dark#(/dark)#">
@@ -46,6 +48,7 @@
         <td>#[modified]#</td>
         <td>#[anchor]#</td>
         <td><a href="#[url]#">#[url]#</a></td>
+        <td><a href="IndexCreateWWWGlobalQueue_p.html?deleteEntry=#[hash]#">[Delete]</a></td>
       </tr>
       #{/list}#
     </table>
