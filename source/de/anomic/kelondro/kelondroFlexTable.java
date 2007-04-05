@@ -151,7 +151,9 @@ public class kelondroFlexTable extends kelondroFlexWidthArray implements kelondr
     }
     
     private kelondroIndex initializeRamIndex() {
-        kelondroRowSet ri = new kelondroRowSet(new kelondroRow(new kelondroColumn[]{super.row().column(0), new kelondroColumn("int c-4 {b256}")}, super.rowdef.objectOrder, super.rowdef.primaryKey), super.col[0].size() + 1);
+    	int space = super.col[0].size() + 1;
+    	if (space < 0) throw new kelondroException("wrong space: " + space);
+        kelondroRowSet ri = new kelondroRowSet(new kelondroRow(new kelondroColumn[]{super.row().column(0), new kelondroColumn("int c-4 {b256}")}, super.rowdef.objectOrder, super.rowdef.primaryKey), space);
         Iterator content = super.col[0].contentNodes(-1);
         kelondroRecords.Node node;
         kelondroRow.Entry indexentry;

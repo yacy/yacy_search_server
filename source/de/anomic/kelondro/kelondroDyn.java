@@ -109,30 +109,11 @@ public class kelondroDyn {
         buffer = new kelondroObjectBuffer(file.toString());
     }
     
-    public static final kelondroDyn open(File file, boolean useNodeCache, boolean useObjectCache, long preloadTime, int key, int nodesize, char fillChar, boolean usetree, boolean writebuffer, boolean resetOnFail) {
-        return open(file, useNodeCache, useObjectCache, preloadTime, key, nodesize, fillChar, new kelondroNaturalOrder(true), usetree, writebuffer, resetOnFail);
-    }
-    
-    public static final kelondroDyn open(File file, boolean useNodeCache, boolean useObjectCache, long preloadTime, int key,
-            int nodesize, char fillChar, kelondroOrder objectOrder, boolean usetree, boolean writebuffer, boolean resetOnFail) {
-        return new kelondroDyn(file, useNodeCache, useObjectCache, preloadTime, key, nodesize, fillChar, objectOrder, usetree, writebuffer, resetOnFail);
-    }
-    
     public void reset() throws IOException {
     	String name = this.index.filename();
     	this.index.reset();
     	this.buffer = new kelondroObjectBuffer(name);
     }
-    
-    /*
-    private void writeSegmentCount() {
-        try {
-            setText(0, kelondroBase64Order.enhancedCoder.encodeLong(segmentCount, 8).getBytes());
-        } catch (Exception e) {
-            
-        }
-    }
-    */
     
     public kelondroRow row() {
         return this.rowdef;

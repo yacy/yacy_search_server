@@ -139,7 +139,7 @@ public final class plasmaWordIndex implements indexRI {
 
     public void dhtOutFlushControl() {
         // check for forced flush
-        synchronized (this) {
+        synchronized (dhtOutCache) {
             if ((dhtOutCache.getMaxWordCount() > wCacheMaxChunk ) ||
                 (dhtOutCache.size() > dhtOutCache.getMaxWordCount()) ||
                 (serverMemory.available() < collections.minMem())) {
@@ -149,7 +149,7 @@ public final class plasmaWordIndex implements indexRI {
     }
     public void dhtInFlushControl() {
         // check for forced flush
-        synchronized (this) {
+        synchronized (dhtInCache) {
             if ((dhtInCache.getMaxWordCount() > wCacheMaxChunk ) ||
                 (dhtInCache.size() > dhtInCache.getMaxWordCount())||
                 (serverMemory.available() < collections.minMem())) {
@@ -173,10 +173,10 @@ public final class plasmaWordIndex implements indexRI {
         if ((!dhtInCase) && (yacyDHTAction.shallBeOwnWord(wordHash))) dhtInCase = true;
         
         // add the entry
-        if (dhtInCase) {
+        if (dhtInCase) synchronized (dhtInCache) {
             dhtInCache.addEntry(wordHash, entry, updateTime, true);
             dhtInFlushControl();
-        } else {
+        } else synchronized (dhtOutCache) {
             dhtOutCache.addEntry(wordHash, entry, updateTime, false);
             dhtOutFlushControl();
         }
@@ -189,10 +189,10 @@ public final class plasmaWordIndex implements indexRI {
         if ((!dhtInCase) && (yacyDHTAction.shallBeOwnWord(entries.getWordHash()))) dhtInCase = true;
         
         // add the entry
-        if (dhtInCase) {
+        if (dhtInCase) synchronized (dhtInCache) {
             dhtInCache.addEntries(entries, updateTime, true);
             dhtInFlushControl();
-        } else {
+        } else synchronized (dhtOutCache) {
             dhtOutCache.addEntries(entries, updateTime, false);
             dhtOutFlushControl();
         }
@@ -329,13 +329,18 @@ public final class plasmaWordIndex implements indexRI {
     public indexContainer getContainer(String wordHash, Set urlselection, long maxTime) {
 
         // get from cache
-        indexContainer container = dhtOutCache.getContainer(wordHash, urlselection, -1);
-        if (container == null) {
-            container = dhtInCache.getContainer(wordHash, urlselection, -1);
-        } else {
-            container.addAllUnique(dhtInCache.getContainer(wordHash, urlselection, -1));
+        indexContainer container;
+        synchronized (dhtOutCache) {
+        	container = dhtOutCache.getContainer(wordHash, urlselection, -1);
         }
-
+        synchronized (dhtInCache) {
+        	if (container == null) {
+        		container = dhtInCache.getContainer(wordHash, urlselection, -1);
+        	} else {
+        		container.addAllUnique(dhtInCache.getContainer(wordHash, urlselection, -1));
+        	}
+        }
+        
         // get from collection index
         if (container == null) {
             container = collections.getContainer(wordHash, urlselection, (maxTime < 0) ? -1 : maxTime);

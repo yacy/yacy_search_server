@@ -572,7 +572,7 @@ public class kelondroCollectionIndex {
         ArrayList actionList;
         TreeMap actionMap;
         boolean madegc = false;
-        System.out.println("DEBUG existingContainer: " + existingContainer.toString());
+        //System.out.println("DEBUG existingContainer: " + existingContainer.toString());
         while (existingContainer.size() > 0) {
             oldPartitionNumber1 = ((Integer) existingContainer.lastKey()).intValue();
             containerMap = (TreeMap) existingContainer.remove(new Integer(oldPartitionNumber1));

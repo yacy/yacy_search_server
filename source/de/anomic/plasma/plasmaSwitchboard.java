@@ -2801,13 +2801,8 @@ public final class plasmaSwitchboard extends serverAbstractSwitch implements ser
                             //snippet = null;
                             result.setSnippet(null);
                         }
-                        /*
-                        if ((snippet != null) && (snippet.getSource() == plasmaSnippetCache.ERROR_NO_MATCH)) {
-                            // suppress line: there is no match in that resource
-                        } else {*/
-                            i++;
-                            results.appendResult(result);
-                        //}
+                        i++;
+                        results.appendResult(result);
                     }
                 }
                 log.logFine("SEARCH TIME AFTER RESULT PREPARATION: " + ((System.currentTimeMillis() - timestamp) / 1000) + " seconds");
