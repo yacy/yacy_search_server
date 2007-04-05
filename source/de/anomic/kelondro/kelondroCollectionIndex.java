@@ -123,8 +123,8 @@ public class kelondroCollectionIndex {
         boolean ramIndexGeneration = false;
         boolean fileIndexGeneration = !(new File(path, filenameStub + ".index").exists());
         if (ramIndexGeneration) index = new kelondroRowSet(indexRow(keyLength, indexOrder), 0);
-        if (fileIndexGeneration) index = new kelondroFlexTable(path, filenameStub + ".index", preloadTime, indexRow(keyLength, indexOrder));
-                   
+        if (fileIndexGeneration) index = new kelondroFlexTable(path, filenameStub + ".index", preloadTime, indexRow(keyLength, indexOrder), true);
+        
         // open array files
         this.arrays = new HashMap(); // all entries will be dynamically created with getArray()
         if (((fileIndexGeneration) || (ramIndexGeneration))) {
@@ -199,7 +199,7 @@ public class kelondroCollectionIndex {
     private kelondroIndex openIndexFile(File path, String filenameStub, kelondroOrder indexOrder,
             long preloadTime, int loadfactor, kelondroRow rowdef) throws IOException {
         // open/create index table
-        kelondroIndex theindex = new kelondroCache(new kelondroFlexTable(path, filenameStub + ".index", preloadTime, indexRow(keylength, indexOrder)), true, false);
+        kelondroIndex theindex = new kelondroCache(new kelondroFlexTable(path, filenameStub + ".index", preloadTime, indexRow(keylength, indexOrder), true), true, false);
 
         // save/check property file for this array
         File propfile = propertyFile(path, filenameStub, loadfactor, rowdef.objectsize());
@@ -1063,7 +1063,7 @@ public class kelondroCollectionIndex {
             
             // printout of index
             collectionIndex.close();
-            kelondroFlexTable index = new kelondroFlexTable(path, filenameStub + ".index", preloadTime, kelondroCollectionIndex.indexRow(9, kelondroNaturalOrder.naturalOrder));
+            kelondroFlexTable index = new kelondroFlexTable(path, filenameStub + ".index", preloadTime, kelondroCollectionIndex.indexRow(9, kelondroNaturalOrder.naturalOrder), true);
             index.print();
             index.close();
         } catch (IOException e) {

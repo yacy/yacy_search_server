@@ -45,6 +45,7 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
 import java.util.Set;
+import java.util.TreeSet;
 
 import de.anomic.index.indexRWIEntry;
 import de.anomic.plasma.plasmaURL;
@@ -248,7 +249,7 @@ public class plasmaSearchRankingProfile {
         return new String(ext);
     }
     
-    public long preRanking(indexRWIEntry normalizedEntry, String searchedWord) {
+    public long preRanking(indexRWIEntry normalizedEntry, TreeSet searchedWords) {
         // the normalizedEntry must be a normalized indexEntry
         long ranking = 0;
         ranking += (256 - plasmaURL.domLengthNormalized(normalizedEntry.urlHash())) << coeff_domlength;
@@ -280,7 +281,7 @@ public class plasmaSearchRankingProfile {
         ranking += (flags.get(plasmaCondenser.flag_cat_hasapp)) ? 256 << coeff_cathasapp : 0;
         
         ranking += (plasmaURL.probablyRootURL(normalizedEntry.urlHash())) ? 16 << coeff_urllength : 0;
-        ranking += (plasmaURL.probablyWordURL(normalizedEntry.urlHash(), searchedWord) != null) ? 256 << coeff_appurl : 0;
+        ranking += (plasmaURL.probablyWordURL(normalizedEntry.urlHash(), searchedWords) != null) ? 256 << coeff_appurl : 0;
 
         /*
         if (indexURL.probablyWordURL(normalizedEntry.urlHash(), searchedWord))

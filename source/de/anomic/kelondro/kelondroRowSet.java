@@ -55,7 +55,12 @@ public class kelondroRowSet extends kelondroRowCollection implements kelondroInd
         super(rowdef, exportedCollectionRowEnvironment, columnInEnvironment);
         this.profile = new kelondroProfile();
     }
-    
+
+	public void reset() {
+		super.reset();
+		this.profile = new kelondroProfile();
+	}
+   
     public synchronized boolean has(byte[] key) throws IOException {
         return (get(key) != null);
     }
@@ -379,4 +384,5 @@ public class kelondroRowSet extends kelondroRowCollection implements kelondroInd
     public String filename() {
         return null;
     }
+
 }

@@ -125,7 +125,7 @@ public final class plasmaSearchEvent extends Thread implements Runnable {
         // generate statistics about search: query, time, etc
         HashMap r = new HashMap();
         r.put("queryhashes", query.queryHashes);
-        r.put("querywords", query.queryWords);
+        r.put("querystring", query.queryString);
         r.put("querycount", new Integer(query.wantedResults));
         r.put("querytime", new Long(query.maximumTime));
         r.put("resultcount", new Integer(this.searchcount));
@@ -398,8 +398,7 @@ public final class plasmaSearchEvent extends Thread implements Runnable {
         Long preranking;
         Object[] preorderEntry;
         indexURLEntry.Components comp;
-        String pagetitle, pageurl, pageauthor, exclw;
-        Iterator excli;
+        String pagetitle, pageurl, pageauthor;
         int minEntries = profileLocal.getTargetCount(plasmaSearchTimingProfile.PROCESS_POSTSORT);
         try {
             ordering: while (preorder.hasNext()) {
@@ -417,13 +416,9 @@ public final class plasmaSearchEvent extends Thread implements Runnable {
                 	pageauthor = comp.author().toLowerCase();
                 	
                 	// check exclusion
-                	excli = query.excludeWords.iterator();
-                	while (excli.hasNext()) {
-                		exclw = (String) excli.next();
-                		if ((pagetitle.indexOf(exclw) >= 0) ||
-                			(pageurl.indexOf(exclw) >= 0) ||
-                			(pageauthor.indexOf(exclw) >= 0)) continue ordering;
-                	}
+                	if (plasmaSearchQuery.matches(pagetitle, query.excludeHashes)) continue ordering;
+                	if (plasmaSearchQuery.matches(pageurl, query.excludeHashes)) continue ordering;
+                	if (plasmaSearchQuery.matches(pageauthor, query.excludeHashes)) continue ordering;
                 	
                 	// check constraints
                 	if ((!(query.constraint.equals(plasmaSearchQuery.catchall_constraint))) &&
@@ -494,7 +489,7 @@ public final class plasmaSearchEvent extends Thread implements Runnable {
         // this must be called after search results had been computed
         // it is wise to call this within a separate thread because
         // this method waits until all threads are finished
-        serverLog.logFine("PLASMA", "STARTED FLUSHING GLOBAL SEARCH RESULTS FOR SEARCH " + query.queryWords);
+        serverLog.logFine("PLASMA", "STARTED FLUSHING GLOBAL SEARCH RESULTS FOR SEARCH " + query.queryString);
         
         int remaining = 0;
         if (primarySearchThreads == null) return;
@@ -511,13 +506,13 @@ public final class plasmaSearchEvent extends Thread implements Runnable {
             if (System.currentTimeMillis() - starttime > 90000) {
                 yacySearch.interruptAlive(primarySearchThreads);
                 if (secondarySearchThreads != null) yacySearch.interruptAlive(secondarySearchThreads);
-                log.logFine("SEARCH FLUSH: " + remaining + " PEERS STILL BUSY; ABANDONED; SEARCH WAS " + query.queryWords);
+                log.logFine("SEARCH FLUSH: " + remaining + " PEERS STILL BUSY; ABANDONED; SEARCH WAS " + query.queryString);
                 break;
             }
             //log.logFine("FINISHED FLUSH RESULTS PROCESS for query " + query.hashes(","));
         }
         
-        serverLog.logFine("PLASMA", "FINISHED FLUSHING " + rcContainerFlushCount + " GLOBAL SEARCH RESULTS FOR SEARCH " + query.queryWords);
+        serverLog.logFine("PLASMA", "FINISHED FLUSHING " + rcContainerFlushCount + " GLOBAL SEARCH RESULTS FOR SEARCH " + query.queryString);
             
         // finally delete the temporary index
         rcContainers = null;

@@ -48,6 +48,9 @@ public interface kelondroIOChunks {
     // logging support
     public String name();
     
+    // reference handling
+    public kelondroRA getRA();
+    
     // pseudo-native methods:
     public long length() throws IOException;
     public int read(long pos, byte[] b, int off, int len) throws IOException;

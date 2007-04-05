@@ -70,7 +70,7 @@ public class kelondroRowCollection {
         this.lastTimeRead = System.currentTimeMillis();
         this.lastTimeWrote = System.currentTimeMillis();
     }
-    
+     
     public kelondroRowCollection(kelondroRow rowdef, int objectCount, byte[] cache, int sortBound) {
         this.rowdef = rowdef;
         this.chunkcache = cache;
@@ -112,7 +112,13 @@ public class kelondroRowCollection {
         }
         this.chunkcache = exportedCollection.getColBytes(exp_collection);        
     }
-    
+
+	public void reset() {
+		this.chunkcache = new byte[0];
+        this.chunkcount = 0;
+        this.sortBound = 0;
+	}
+   
     private static final kelondroRow exportMeasureRow = exportRow(0 /* no relevance */);
 
     protected static final int sizeOfExportedCollectionRows(kelondroRow.Entry exportedCollectionRowEnvironment, int columnInEnvironment) {

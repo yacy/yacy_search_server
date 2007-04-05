@@ -58,6 +58,7 @@ import java.util.Map;
 import de.anomic.http.httpHeader;
 import de.anomic.kelondro.kelondroMSetTools;
 import de.anomic.net.URL;
+import de.anomic.plasma.plasmaCondenser;
 import de.anomic.plasma.plasmaSearchPreOrder;
 import de.anomic.plasma.plasmaSearchQuery;
 import de.anomic.plasma.plasmaSearchRankingProfile;
@@ -239,7 +240,7 @@ public class DetailedSearch {
         }
 
         // do the search
-        plasmaSearchQuery thisSearch = new plasmaSearchQuery(query[0], query[1], wdist, "", plasmaSearchQuery.CONTENTDOM_TEXT, count, searchtime, urlmask,
+        plasmaSearchQuery thisSearch = new plasmaSearchQuery(querystring, plasmaCondenser.words2hashes(query[0]), plasmaCondenser.words2hashes(query[1]), wdist, "", plasmaSearchQuery.CONTENTDOM_TEXT, count, searchtime, urlmask,
                                                              ((global) && (yacyonline) && (!(env.getConfig("last-search","").equals(querystring)))) ? plasmaSearchQuery.SEARCHDOM_GLOBALDHT : plasmaSearchQuery.SEARCHDOM_LOCAL,
                                                              "", 20, plasmaSearchQuery.catchall_constraint);
         plasmaSearchRankingProfile localRanking = new plasmaSearchRankingProfile("local", post.toString());
@@ -278,12 +279,12 @@ public class DetailedSearch {
                 prop.put("type_results_" + i + "_ybr", plasmaSearchPreOrder.ybr(result.getUrlentry().hash()));
                 prop.put("type_results_" + i + "_size", Long.toString(result.getUrlentry().size()));
                 try {
-                    prop.put("type_results_" + i + "_words", URLEncoder.encode(results.getQuery().queryWords.toString(),"UTF-8"));
+                    prop.put("type_results_" + i + "_words", URLEncoder.encode(query[0].toString(),"UTF-8"));
                 } catch (UnsupportedEncodingException e) {}
                 prop.put("type_results_" + i + "_former", results.getFormerSearch());
                 prop.put("type_results_" + i + "_rankingprops", result.getUrlentry().word().toPropertyForm() + ", domLengthEstimated=" + plasmaURL.domLengthEstimation(result.getUrlhash()) +
                         ((plasmaURL.probablyRootURL(result.getUrlhash())) ? ", probablyRootURL" : "") + 
-                        (((wordURL = plasmaURL.probablyWordURL(result.getUrlhash(), results.getQuery().words(""))) != null) ? ", probablyWordURL=" + wordURL.toNormalform() : ""));
+                        (((wordURL = plasmaURL.probablyWordURL(result.getUrlhash(), query[0])) != null) ? ", probablyWordURL=" + wordURL.toNormalform() : ""));
                 // adding snippet if available
                 if (result.hasSnippet()) {
                     prop.put("type_results_" + i + "_snippet", 1);

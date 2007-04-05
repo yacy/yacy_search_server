@@ -62,10 +62,18 @@ public class kelondroCache implements kelondroIndex {
     private kelondroRow    keyrow;
     private int            readHit, readMiss, writeUnique, writeDouble, cacheDelete, cacheFlush;
     private int            hasnotHit, hasnotMiss, hasnotUnique, hasnotDouble, hasnotDelete, hasnotFlush;
+    private boolean 	   read, write;
     
-    public kelondroCache(kelondroIndex backupIndex, boolean read, boolean write) throws IOException {
+    public kelondroCache(kelondroIndex backupIndex, boolean read, boolean write) {
         assert write == false;
         this.index = backupIndex;
+        this.read = read;
+        this.write = write;
+        init();
+        objectTracker.put(backupIndex.filename(), this);
+    }
+    
+    private void init() {
         this.keyrow = new kelondroRow(new kelondroColumn[]{index.row().column(index.row().primaryKey)}, index.row().objectOrder, index.row().primaryKey);
         this.readHitCache = (read) ? new kelondroRowSet(index.row(), 0) : null;
         this.readMissCache = (read) ? new kelondroRowSet(this.keyrow, 0) : null;
@@ -83,15 +91,10 @@ public class kelondroCache implements kelondroIndex {
         this.hasnotDouble = 0;
         this.hasnotDelete = 0;
         this.hasnotFlush = 0;
-        objectTracker.put(backupIndex.filename(), this);
     }
     
     public final int cacheObjectChunkSize() {
-        try {
-            return index.row().objectsize();
-        } catch (IOException e) {
-            return 0;
-        }
+        return index.row().objectsize();
     }
     
     public int writeBufferSize() {
@@ -626,7 +629,7 @@ public class kelondroCache implements kelondroIndex {
         return entry;
     }
 
-    public synchronized kelondroRow row() throws IOException {
+    public synchronized kelondroRow row() {
         return index.row();
     }
 
@@ -642,5 +645,10 @@ public class kelondroCache implements kelondroIndex {
     public String filename() {
         return index.filename();
     }
+
+	public void reset() throws IOException {
+		this.index.reset();
+		init();
+	}
 
 }

@@ -52,6 +52,7 @@ import java.net.MalformedURLException;
 import java.net.URLEncoder;
 import java.util.HashMap;
 import java.util.Iterator;
+import java.util.Set;
 import java.util.regex.PatternSyntaxException;
 import java.util.TreeSet;
 
@@ -254,9 +255,11 @@ public class yacysearch {
         final boolean globalsearch = (global) && (yacyonline) && (!samesearch);
         
         // do the search
+        Set querywords = query[0];
         plasmaSearchQuery thisSearch = new plasmaSearchQuery(
-                    query[0],
-                    query[1],
+        			querystring,
+        			plasmaCondenser.words2hashes(query[0]),
+        			plasmaCondenser.words2hashes(query[1]),
                     maxDistance,
                     prefermask,
                     contentdomCode,
@@ -314,12 +317,12 @@ public class yacysearch {
                 prop.put("type_results_" + i + "_ybr", plasmaSearchPreOrder.ybr(result.getUrlentry().hash()));
                 prop.put("type_results_" + i + "_size", Long.toString(result.getUrlentry().size()));
                 try {
-                    prop.put("type_results_" + i + "_words", URLEncoder.encode(results.getQuery().queryWords.toString(),"UTF-8"));
+                    prop.put("type_results_" + i + "_words", URLEncoder.encode(querywords.toString(),"UTF-8"));
                 } catch (UnsupportedEncodingException e) {}
                 prop.put("type_results_" + i + "_former", results.getFormerSearch());
                 prop.put("type_results_" + i + "_rankingprops", result.getUrlentry().word().toPropertyForm() + ", domLengthEstimated=" + plasmaURL.domLengthEstimation(result.getUrlhash()) +
                         ((plasmaURL.probablyRootURL(result.getUrlhash())) ? ", probablyRootURL" : "") + 
-                        (((wordURL = plasmaURL.probablyWordURL(result.getUrlhash(), results.getQuery().words(""))) != null) ? ", probablyWordURL=" + wordURL.toNormalform() : ""));
+                        (((wordURL = plasmaURL.probablyWordURL(result.getUrlhash(), query[0])) != null) ? ", probablyWordURL=" + wordURL.toNormalform() : ""));
                 // adding snippet if available
                 if (result.hasSnippet()) {
                     prop.put("type_results_" + i + "_snippet", 1);

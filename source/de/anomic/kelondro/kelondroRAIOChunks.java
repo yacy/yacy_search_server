@@ -51,6 +51,10 @@ public final class kelondroRAIOChunks extends kelondroAbstractIOChunks implement
         this.name = name;
         this.ra = ra;
     }
+    
+    public kelondroRA getRA() {
+    	return this.ra;
+    }
 
     public synchronized long length() throws IOException {
         return ra.length();

@@ -46,10 +46,14 @@ public class kelondroFlexSplitTable implements kelondroIndex {
     private File path;
     private String tablename;
     
-    public kelondroFlexSplitTable(File path, String tablename, long preloadTime, kelondroRow rowdef) throws IOException {
+    public kelondroFlexSplitTable(File path, String tablename, long preloadTime, kelondroRow rowdef, boolean resetOnFail) throws IOException {
         this.path = path;
         this.tablename = tablename;
         this.rowdef = rowdef;
+        init(preloadTime, resetOnFail);
+    }
+    
+    public void init(long preloadTime, boolean resetOnFail) throws IOException {
         
         // initialized tables map
         this.tables = new HashMap();
@@ -96,9 +100,20 @@ public class kelondroFlexSplitTable implements kelondroIndex {
             // open next biggest table
             t.remove(maxf);
             date = maxf.substring(tablename.length() + 1);
-            table = new kelondroCache(new kelondroFlexTable(path, maxf, preloadTime, rowdef), true, false);
+            table = new kelondroCache(new kelondroFlexTable(path, maxf, preloadTime, rowdef, resetOnFail), true, false);
             tables.put(date, table);
         }
+    }
+    
+    public void reset() throws IOException {
+    	this.close();
+    	String[] l = path.list();
+    	for (int i = 0; i < l.length; i++) {
+    		if (l[i].startsWith(tablename)) {
+    			kelondroFlexTable.delete(path, l[i]);
+    		}
+    	}
+    	init(-1, true);
     }
     
     public String filename() {
@@ -160,7 +175,7 @@ public class kelondroFlexSplitTable implements kelondroIndex {
         }
     }
     
-    public kelondroRow row() throws IOException {
+    public kelondroRow row() {
         return this.rowdef;
     }
     
@@ -198,7 +213,7 @@ public class kelondroFlexSplitTable implements kelondroIndex {
         kelondroIndex table = (kelondroIndex) tables.get(suffix);
         if (table == null) {
             // make new table
-            table = new kelondroFlexTable(path, tablename + "." + suffix, -1, rowdef);
+            table = new kelondroFlexTable(path, tablename + "." + suffix, -1, rowdef, true);
             tables.put(suffix, table);
         }
         table.put(row);
@@ -229,7 +244,7 @@ public class kelondroFlexSplitTable implements kelondroIndex {
         kelondroIndex table = (kelondroIndex) tables.get(suffix);
         if (table == null) {
             // make new table
-            table = new kelondroFlexTable(path, tablename + "." + suffix, -1, rowdef);
+            table = new kelondroFlexTable(path, tablename + "." + suffix, -1, rowdef, true);
             tables.put(suffix, table);
         }
         table.addUnique(row, entryDate);

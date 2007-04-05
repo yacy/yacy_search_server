@@ -58,8 +58,6 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.util.Iterator;
 
-import de.anomic.server.logging.serverLog;
-
 public class kelondroDyn {
 
     private static final int counterlen = 8;
@@ -72,50 +70,58 @@ public class kelondroDyn {
     private kelondroObjectBuffer buffer;
     private kelondroRow rowdef;
     
-    public kelondroDyn(File file, boolean useNodeCache, boolean useObjectCache, long preloadTime, int key, int nodesize, char fillChar, boolean usetree, boolean writebuffer) throws IOException {
-        this(file, useNodeCache, useObjectCache, preloadTime, key, nodesize, fillChar, new kelondroNaturalOrder(true), usetree, writebuffer);
+    public kelondroDyn(File file, boolean useNodeCache, boolean useObjectCache, long preloadTime, int key, int nodesize, char fillChar, boolean usetree, boolean writebuffer, boolean resetOnFail) {
+        this(file, useNodeCache, useObjectCache, preloadTime, key, nodesize, fillChar, new kelondroNaturalOrder(true), usetree, writebuffer, resetOnFail);
     }
     
     public kelondroDyn(File file, boolean useNodeCache, boolean useObjectCache, long preloadTime, int key,
-            int nodesize, char fillChar, kelondroOrder objectOrder, boolean usetree, boolean writebuffer) throws IOException {
+            int nodesize, char fillChar, kelondroOrder objectOrder, boolean usetree, boolean writebuffer, boolean resetOnFail) {
         // creates or opens a dynamic tree
         rowdef = new kelondroRow("byte[] key-" + (key + counterlen) + ", byte[] node-" + nodesize, objectOrder, 0);
+        kelondroIndex fbi;
         if (usetree) {
-            kelondroTree tree = new kelondroTree(file, useNodeCache, preloadTime, rowdef, 1, 8);
-            this.index = (useObjectCache) ? (kelondroIndex) new kelondroCache(tree, true, writebuffer) : (kelondroIndex) tree;
+			try {
+				fbi = new kelondroTree(file, useNodeCache, preloadTime, rowdef, 1, 8);
+			} catch (IOException e) {
+				e.printStackTrace();
+				if (resetOnFail) {
+					file.delete();
+					try {
+						fbi = new kelondroTree(file, useNodeCache, -1, rowdef, 1, 8);
+					} catch (IOException e1) {
+						e1.printStackTrace();
+						throw new kelondroException(e.getMessage());
+					}
+				} else {
+					throw new kelondroException(e.getMessage());
+				}
+			}
+            
         } else {
-            kelondroFlexTable table = new kelondroFlexTable(file.getParentFile(), file.getName(), 10000, rowdef);
-            this.index = (useObjectCache) ? (kelondroIndex) new kelondroCache(table, true, writebuffer) : (kelondroIndex) table;
+            fbi = new kelondroFlexTable(file.getParentFile(), file.getName(), 10000, rowdef, resetOnFail);
         }
-        this.keylen = index.row().width(0) - counterlen;
-        this.reclen = index.row().width(1);
+        this.index = (useObjectCache) ? (kelondroIndex) new kelondroCache(fbi, true, writebuffer) : fbi;
+        this.keylen = key;
+        this.reclen = nodesize;
         this.fillChar = fillChar;
         //this.segmentCount = 0;
         //if (!(tree.fileExisted)) writeSegmentCount();
         buffer = new kelondroObjectBuffer(file.toString());
     }
     
-    public static final kelondroDyn open(File file, boolean useNodeCache, boolean useObjectCache, long preloadTime, int key, int nodesize, char fillChar, boolean usetree, boolean writebuffer) {
-        return open(file, useNodeCache, useObjectCache, preloadTime, key, nodesize, fillChar, new kelondroNaturalOrder(true), usetree, writebuffer);
+    public static final kelondroDyn open(File file, boolean useNodeCache, boolean useObjectCache, long preloadTime, int key, int nodesize, char fillChar, boolean usetree, boolean writebuffer, boolean resetOnFail) {
+        return open(file, useNodeCache, useObjectCache, preloadTime, key, nodesize, fillChar, new kelondroNaturalOrder(true), usetree, writebuffer, resetOnFail);
     }
     
     public static final kelondroDyn open(File file, boolean useNodeCache, boolean useObjectCache, long preloadTime, int key,
-            int nodesize, char fillChar, kelondroOrder objectOrder, boolean usetree, boolean writebuffer) {
-        // opens new or existing file; in case that any error occur the file is deleted again and it is tried to create the file again
-        // if that fails, the method returns null
-        try {
-            return new kelondroDyn(file, useNodeCache, useObjectCache, preloadTime, key, nodesize, fillChar, objectOrder, usetree, writebuffer);
-        } catch (IOException e) {
-            file.delete();
-            try {
-                return new kelondroDyn(file, useNodeCache, useObjectCache, preloadTime, key, nodesize, fillChar, objectOrder, usetree, writebuffer);
-            } catch (IOException ee) {
-                serverLog.logSevere("kelondroDyn", "cannot open or create file " + file.toString());
-                e.printStackTrace();
-                ee.printStackTrace();
-                return null;
-            }
-        }
+            int nodesize, char fillChar, kelondroOrder objectOrder, boolean usetree, boolean writebuffer, boolean resetOnFail) {
+        return new kelondroDyn(file, useNodeCache, useObjectCache, preloadTime, key, nodesize, fillChar, objectOrder, usetree, writebuffer, resetOnFail);
+    }
+    
+    public void reset() throws IOException {
+    	String name = this.index.filename();
+    	this.index.reset();
+    	this.buffer = new kelondroObjectBuffer(name);
     }
     
     /*
@@ -478,7 +484,7 @@ public class kelondroDyn {
         if (args.length == 1) {
             // open a db and list keys
             try {
-                kelondroDyn kd = new kelondroDyn(new File(args[0]), true, true, 0, 4 ,100, '_', false, false);
+                kelondroDyn kd = new kelondroDyn(new File(args[0]), true, true, 0, 4 ,100, '_', false, false, true);
                 System.out.println(kd.sizeDyn() + " elements in DB");
                 Iterator i = kd.dynKeys(true, false);
                 while (i.hasNext())
@@ -495,7 +501,7 @@ public class kelondroDyn {
             File f = new File(args[3]);
             kelondroDyn kd;
             try {
-                kd = new kelondroDyn(db, true, true, 0, 80, 200, '_', false, false);
+                kd = new kelondroDyn(db, true, true, 0, 80, 200, '_', false, false, true);
                 if (writeFile)
                     kd.readFile(key, f);
                 else

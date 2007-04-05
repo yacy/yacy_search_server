@@ -191,6 +191,10 @@ public class kelondroRecords {
                     if ((rest != 0) || (calculated_used != this.USEDC + this.FREEC)) {
                         theLogger.log(Level.WARNING, "USEDC inconsistency at startup: calculated_used = " + calculated_used + ", USEDC = " + this.USEDC + ", FREEC = " + this.FREEC  + ", recordsize = " + recordsize + ", file = " + filename);
                         this.USEDC = calculated_used - this.FREEC;
+                        if (this.USEDC < 0) {
+                        	theLogger.log(Level.WARNING, "USEDC inconsistency at startup: cannot recover " + filename);
+                        	throw new kelondroException("cannot recover inconsistency in " + filename);
+                        }
                         writeused(true);
                     }
                 } catch (IOException e) {
@@ -409,6 +413,11 @@ public class kelondroRecords {
         // txtProps: number of text properties
 
         this.fileExisted = file.exists(); // can be used by extending class to track if this class created the file
+        this.OHBYTEC   = ohbytec;
+        this.OHHANDLEC = ohhandlec;
+        this.ROW = rowdef; // create row
+        this.TXTPROPW  = txtPropWidth;
+
         if (file.exists()) {
             // opens an existing tree
             this.filename = file.getCanonicalPath();
@@ -422,7 +431,7 @@ public class kelondroRecords {
             kelondroRA raf = new kelondroFileRA(this.filename);
             // kelondroRA raf = new kelondroBufferedRA(new kelondroFileRA(this.filename), 1024, 100);
             // kelondroRA raf = new kelondroNIOFileRA(this.filename, false, 10000);
-            initNewFile(raf, ohbytec, ohhandlec, rowdef, FHandles, txtProps, txtPropWidth, useNodeCache);
+            initNewFile(raf, FHandles, txtProps);
         }
         assignRowdef(rowdef);
         if (fileExisted) {
@@ -446,8 +455,13 @@ public class kelondroRecords {
         // this always creates a new file
         this.fileExisted = false;
         this.filename = filename;
+        this.OHBYTEC   = ohbytec;
+        this.OHHANDLEC = ohhandlec;
+        this.ROW = rowdef; // create row
+        this.TXTPROPW  = txtPropWidth;
+        
         try {
-            initNewFile(ra, ohbytec, ohhandlec, rowdef, FHandles, txtProps, txtPropWidth, useCache);
+            initNewFile(ra, FHandles, txtProps);
         } catch (IOException e) {
             logFailure("cannot create / " + e.getMessage());
             if (exitOnFail) System.exit(-1);
@@ -458,8 +472,16 @@ public class kelondroRecords {
         if (useCache) recordTracker.put(this.filename, this);
     }
 
-    private void initNewFile(kelondroRA ra, short ohbytec, short ohhandlec,
-                      kelondroRow rowdef, int FHandles, int txtProps, int txtPropWidth, boolean useCache) throws IOException {
+    public void reset() throws IOException {
+    	kelondroRA ra = this.entryFile.getRA();
+    	File f = new File(ra.name());
+    	this.entryFile.close();
+    	f.delete();
+    	ra = new kelondroFileRA(f);
+    	initNewFile(ra, this.HANDLES.length, this.TXTPROPS.length);
+	}
+    
+    private void initNewFile(kelondroRA ra, int FHandles, int txtProps) throws IOException {
 
         // create new Chunked IO
         if (useWriteBuffer) {
@@ -468,11 +490,9 @@ public class kelondroRecords {
             this.entryFile = new kelondroRAIOChunks(ra, ra.name());
         }
         
-        // create row
-        ROW = rowdef;
         
         // store dynamic run-time data
-        this.overhead = ohbytec + 4 * ohhandlec;
+        this.overhead = this.OHBYTEC + 4 * this.OHHANDLEC;
         this.recordsize = this.overhead + ROW.objectsize();
         this.headchunksize = overhead + ROW.width(0);
         this.tailchunksize = this.recordsize - this.headchunksize;
@@ -481,18 +501,15 @@ public class kelondroRecords {
         // store dynamic run-time seek pointers
         POS_HANDLES = POS_COLWIDTHS + ROW.columns() * 4;
         POS_TXTPROPS = POS_HANDLES + FHandles * 4;
-        POS_NODES = POS_TXTPROPS + txtProps * txtPropWidth;
+        POS_NODES = POS_TXTPROPS + txtProps * this.TXTPROPW;
         //System.out.println("*** DEBUG: POS_NODES = " + POS_NODES + " for " + filename);
 
         // store dynamic back-up variables
         USAGE     = new usageControl(true);
-        OHBYTEC   = ohbytec;
-        OHHANDLEC = ohhandlec;
         HANDLES   = new Handle[FHandles];
         for (int i = 0; i < FHandles; i++) HANDLES[i] = new Handle(NUL);
         TXTPROPS  = new byte[txtProps][];
         for (int i = 0; i < txtProps; i++) TXTPROPS[i] = new byte[0];
-        TXTPROPW  = txtPropWidth;
 
         // write data to file
         entryFile.writeByte(POS_MAGIC, 4); // magic marker for this file type
@@ -510,7 +527,7 @@ public class kelondroRecords {
         entryFile.writeLong(POS_OFFSET, POS_NODES);
         entryFile.writeInt(POS_INTPROPC, FHandles);
         entryFile.writeInt(POS_TXTPROPC, txtProps);
-        entryFile.writeInt(POS_TXTPROPW, txtPropWidth);
+        entryFile.writeInt(POS_TXTPROPW, this.TXTPROPW);
 
         // write configuration arrays
         for (int i = 0; i < this.ROW.columns(); i++) {

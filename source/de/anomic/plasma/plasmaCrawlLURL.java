@@ -96,7 +96,7 @@ public final class plasmaCrawlLURL {
         super();
 
         try {
-            urlIndexFile = new kelondroFlexSplitTable(new File(indexPath, "PUBLIC/TEXT"), "urls", preloadTime, indexURLEntry.rowdef);
+            urlIndexFile = new kelondroFlexSplitTable(new File(indexPath, "PUBLIC/TEXT"), "urls", preloadTime, indexURLEntry.rowdef, false);
         } catch (IOException e) {
             e.printStackTrace();
             System.exit(-1);

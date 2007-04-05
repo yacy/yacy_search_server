@@ -68,7 +68,7 @@ public class kelondroDynTree {
     private Hashtable buffer, cache;
     private long cycleBuffer;
     
-    public kelondroDynTree(File file, long preloadTime, int keylength, int nodesize, kelondroRow rowdef, char fillChar) throws IOException {
+    public kelondroDynTree(File file, long preloadTime, int keylength, int nodesize, kelondroRow rowdef, char fillChar, boolean resetOnFail) throws IOException {
         // creates or opens a DynTree
         this.file = file;
         this.preloadTime = preloadTime;
@@ -77,7 +77,7 @@ public class kelondroDynTree {
         this.cache = new Hashtable();
         //this.cycleCache = Long.MIN_VALUE;
         this.cycleBuffer = Long.MIN_VALUE;
-        this.table = new kelondroDyn(file, true, true, preloadTime, keylength, nodesize, fillChar, true, false);
+        this.table = new kelondroDyn(file, true, true, preloadTime, keylength, nodesize, fillChar, true, false, resetOnFail);
         this.treeRAHandles = new Hashtable();
     }
     
@@ -296,10 +296,10 @@ public class kelondroDynTree {
             System.out.println("start");
             File file = new File("D:\\bin\\testDyn.db");
             if (file.exists()) {
-                kelondroDynTree dt = new kelondroDynTree(file, 0, 16, 512, new kelondroRow("byte[] a-10, byte[] b-20, byte[] c-30", kelondroNaturalOrder.naturalOrder, 0), '_');
+                kelondroDynTree dt = new kelondroDynTree(file, 0, 16, 512, new kelondroRow("byte[] a-10, byte[] b-20, byte[] c-30", kelondroNaturalOrder.naturalOrder, 0), '_', true);
                 System.out.println("opened: table keylength=" + dt.table.row().width(0) + ", sectorsize=" + dt.table.row().width(1) + ", " + dt.table.sizeDyn() + " entries.");
             } else {
-                kelondroDynTree dt = new kelondroDynTree(file, 0, 16, 512, new kelondroRow("byte[] a-10, byte[] b-20, byte[] c-30", kelondroNaturalOrder.naturalOrder, 0), '_');
+                kelondroDynTree dt = new kelondroDynTree(file, 0, 16, 512, new kelondroRow("byte[] a-10, byte[] b-20, byte[] c-30", kelondroNaturalOrder.naturalOrder, 0), '_', true);
                 String name;
                 kelondroTree t;
                 kelondroRow.Entry line;

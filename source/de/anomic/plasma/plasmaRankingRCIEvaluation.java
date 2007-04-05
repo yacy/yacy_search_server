@@ -55,6 +55,7 @@ import java.util.TreeSet;
 
 import de.anomic.plasma.plasmaURL;
 import de.anomic.kelondro.kelondroAttrSeq;
+import de.anomic.kelondro.kelondroBase64Order;
 import de.anomic.net.URL;
 import de.anomic.server.serverCodings;
 import de.anomic.server.serverFileUtils;
@@ -155,7 +156,7 @@ public class plasmaRankingRCIEvaluation {
     
     public static TreeSet[] genRankingTable(kelondroAttrSeq rci, int[] partition) {
         TreeSet[] ranked = new TreeSet[partition.length];
-        for (int i = 0; i < partition.length; i++) ranked[i] = new TreeSet();
+        for (int i = 0; i < partition.length; i++) ranked[i] = new TreeSet(kelondroBase64Order.enhancedCoder);
         Iterator i = rci.keys();
         String key;
         kelondroAttrSeq.Entry entry;

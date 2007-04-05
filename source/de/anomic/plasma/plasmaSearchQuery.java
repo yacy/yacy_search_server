@@ -42,13 +42,14 @@
 
 package de.anomic.plasma;
 
-import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Set;
 import java.util.TreeSet;
 
 import de.anomic.htmlFilter.htmlFilterAbstractScraper;
+import de.anomic.kelondro.kelondroBase64Order;
 import de.anomic.kelondro.kelondroBitfield;
+import de.anomic.kelondro.kelondroMSetTools;
 import de.anomic.kelondro.kelondroNaturalOrder;
 import de.anomic.server.serverCharBuffer;
 import de.anomic.yacy.yacySeedDB;
@@ -70,8 +71,8 @@ public final class plasmaSearchQuery {
     public static final kelondroBitfield empty_constraint    = new kelondroBitfield(4, "AAAAAA");
     public static final kelondroBitfield catchall_constraint = new kelondroBitfield(4, "______");
     
-    public Set queryWords, queryHashes;
-    public Set excludeWords;
+    public String queryString;
+    public TreeSet queryHashes, excludeHashes;
     public int wantedResults;
     public String prefer;
     public int contentdom;
@@ -83,13 +84,13 @@ public final class plasmaSearchQuery {
     public int maxDistance;
     public kelondroBitfield constraint;
 
-    public plasmaSearchQuery(Set queryWords, Set excludeWords, int maxDistance, String prefer, int contentdom,
+    public plasmaSearchQuery(String queryString, TreeSet queryHashes, TreeSet excludeHashes, int maxDistance, String prefer, int contentdom,
                              int wantedResults, long maximumTime, String urlMask,
                              int domType, String domGroupName, int domMaxTargets,
                              kelondroBitfield constraint) {
-        this.queryWords = queryWords;
-        this.queryHashes = plasmaCondenser.words2hashes(queryWords);
-        this.excludeWords = excludeWords;
+        this.queryString = queryString;
+        this.queryHashes = queryHashes;
+        this.excludeHashes = excludeHashes;
         this.maxDistance = maxDistance;
         this.prefer = prefer;
         this.contentdom = contentdom;
@@ -102,11 +103,11 @@ public final class plasmaSearchQuery {
         this.constraint = constraint;
     }
     
-    public plasmaSearchQuery(Set queryHashes, int maxDistance, String prefer, int contentdom,
+    public plasmaSearchQuery(TreeSet queryHashes, int maxDistance, String prefer, int contentdom,
                              int wantedResults, long maximumTime, String urlMask,
                              kelondroBitfield constraint) {
-        this.queryWords = null;
-        this.excludeWords = null;
+        this.queryString = null;
+        this.excludeHashes =  new TreeSet(kelondroBase64Order.enhancedCoder);;
         this.maxDistance = maxDistance;
         this.prefer = prefer;
         this.contentdom = contentdom;
@@ -129,9 +130,9 @@ public final class plasmaSearchQuery {
         return CONTENTDOM_TEXT;
     }
     
-    public static Set hashes2Set(String query) {
-        if (query == null) return new HashSet();
-        final HashSet keyhashes = new HashSet(query.length() / yacySeedDB.commonHashLength);
+    public static TreeSet hashes2Set(String query) {
+        if (query == null) return new TreeSet(kelondroBase64Order.enhancedCoder);
+        final TreeSet keyhashes = new TreeSet(kelondroBase64Order.enhancedCoder);
         for (int i = 0; i < (query.length() / yacySeedDB.commonHashLength); i++) {
             keyhashes.add(query.substring(i * yacySeedDB.commonHashLength, (i + 1) * yacySeedDB.commonHashLength));
         }
@@ -145,25 +146,32 @@ public final class plasmaSearchQuery {
         return new String(sb);
     }
     
-    public static TreeSet[] cleanQuery(String words) {
+    public static final boolean matches(String text, TreeSet keyhashes) {
+    	// returns true if any of the word hashes in keyhashes appear in the String text
+    	// to do this, all words in the string must be recognized and transcoded to word hashes
+    	TreeSet wordhashes = plasmaCondenser.words2hashes(plasmaCondenser.getWords(text).keySet());
+    	return kelondroMSetTools.anymatch(wordhashes, keyhashes);
+    }
+    
+    public static TreeSet[] cleanQuery(String querystring) {
     	// returns two sets: a query set and a exclude set
-    	if ((words == null) || (words.length() == 0)) return new TreeSet[]{new TreeSet(), new TreeSet()};
+    	if ((querystring == null) || (querystring.length() == 0)) return new TreeSet[]{new TreeSet(kelondroBase64Order.enhancedCoder), new TreeSet(kelondroBase64Order.enhancedCoder)};
         
         // convert Umlaute
-        words = htmlFilterAbstractScraper.convertUmlaute(new serverCharBuffer(words.toCharArray())).toString();
+        querystring = htmlFilterAbstractScraper.convertUmlaute(new serverCharBuffer(querystring.toCharArray())).toString();
         
         // remove funny symbols
         final String seps = "'.,:/&";
-        words = words.toLowerCase().trim();
+        querystring = querystring.toLowerCase().trim();
         int c;
         for (int i = 0; i < seps.length(); i++) {
-            while ((c = words.indexOf(seps.charAt(i))) >= 0) { words = words.substring(0, c) + (((c + 1) < words.length()) ? (" " + words.substring(c + 1)) : ""); }
+            while ((c = querystring.indexOf(seps.charAt(i))) >= 0) { querystring = querystring.substring(0, c) + (((c + 1) < querystring.length()) ? (" " + querystring.substring(c + 1)) : ""); }
         }
         
         // the string is clean now, but we must generate a set out of it
         final TreeSet query = new TreeSet(kelondroNaturalOrder.naturalOrder);
         final TreeSet exclude = new TreeSet(kelondroNaturalOrder.naturalOrder);
-        final String[] a = words.split(" ");
+        final String[] a = querystring.split(" ");
         for (int i = 0; i < a.length; i++) {
         	if (a[i].startsWith("-")) {
         		exclude.add(a[i].substring(1));
@@ -179,29 +187,18 @@ public final class plasmaSearchQuery {
     }
     
     public int size() {
-    		return queryHashes.size();
+    	return queryHashes.size();
     }
     
-    public String words(String separator) {
-        if (queryWords == null) return "";
-    		StringBuffer result = new StringBuffer(8 * queryWords.size());
-    		Iterator i = queryWords.iterator();
-    		if (i.hasNext()) result.append((String) i.next());
-    		while (i.hasNext()) {
-    			result.append(separator);
-    			result.append((String) i.next());
-    		}
-    		return result.toString();
+    public String queryString() {
+    	return this.queryString;
     }
     
     public void filterOut(Set blueList) {
         // filter out words that appear in this set
-        Iterator it = queryWords.iterator();
-        String word;
-        while (it.hasNext()) {
-            word = (String) it.next();
-            if (blueList.contains(word)) it.remove();
-        }
+    	// this is applied to the queryHashes
+    	TreeSet blues = plasmaCondenser.words2hashes(blueList);
+    	kelondroMSetTools.excludeDestructive(queryHashes, blues);
     }
 
     public static String anonymizedQueryHashes(Set hashes) {

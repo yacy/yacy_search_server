@@ -34,17 +34,52 @@ import java.util.Map;
 import java.util.TreeMap;
 
 import de.anomic.server.serverFileUtils;
+import de.anomic.server.logging.serverLog;
 
 public class kelondroFlexWidthArray implements kelondroArray {
 
     protected kelondroFixedWidthArray[] col;
     protected kelondroRow rowdef;
+    protected File path;
     protected String tablename;
     protected String filename;
     
-    public kelondroFlexWidthArray(File path, String tablename, kelondroRow rowdef) throws IOException {
-        this.rowdef = rowdef;
+    public kelondroFlexWidthArray(File path, String tablename, kelondroRow rowdef, boolean resetOnFail) {
+    	this.path = path;
+    	this.rowdef = rowdef;
         this.tablename = tablename;
+        try {
+			init();
+		} catch (IOException e) {
+			if (resetOnFail) {
+				serverLog.logSevere("kelondroFlexWidthArray", "IOException during initialization of " + new File(path, tablename).toString() + ": reset");
+				delete(path, tablename);
+				try {
+					init();
+				} catch (IOException e1) {
+					e1.printStackTrace();
+					throw new kelondroException("IOException during initialization of " + new File(path, tablename).toString() + ": cannot reset: " + e1.getMessage());
+				}
+			} else {
+				throw new kelondroException("IOException during initialization of " + new File(path, tablename).toString() + ": not allowed to reset: " + e.getMessage());
+			}
+		} catch (kelondroException e) {
+			if (resetOnFail) {
+				serverLog.logSevere("kelondroFlexWidthArray", "kelondroException during initialization of " + new File(path, tablename).toString() + ": reset");
+				delete(path, tablename);
+				try {
+					init();
+				} catch (IOException e1) {
+					e1.printStackTrace();
+					throw new kelondroException("kelondroException during initialization of " + new File(path, tablename).toString() + ": cannot reset: " + e1.getMessage());
+				}
+			} else {
+				throw new kelondroException("kelondroException during initialization of " + new File(path, tablename).toString() + ": not allowed to reset: " + e.getMessage());
+			}
+		}
+   }
+    
+    public void init() throws IOException {
         
         // initialize columns
         col = new kelondroFixedWidthArray[rowdef.columns()];
@@ -145,20 +180,10 @@ public class kelondroFlexWidthArray implements kelondroArray {
         tabledir.delete();
     }
     
-    public static kelondroFlexWidthArray open(File path, String tablename, kelondroRow rowdef) {
-        try {
-            return new kelondroFlexWidthArray(path, tablename, rowdef);
-        } catch (IOException e) {
-            kelondroFlexWidthArray.delete(path, tablename);
-            try {
-                return new kelondroFlexWidthArray(path, tablename, rowdef);
-            } catch (IOException ee) {
-                e.printStackTrace();
-                ee.printStackTrace();
-                System.exit(-1);
-                return null;
-            }
-        }
+    public void reset() throws IOException {
+    	this.close();
+    	delete(path, tablename);
+    	this.init();
     }
     
     public void close() {
@@ -352,7 +377,7 @@ public class kelondroFlexWidthArray implements kelondroArray {
         try {
             System.out.println("erster Test");
             kelondroFlexWidthArray.delete(f, testname);
-            kelondroFlexWidthArray k = kelondroFlexWidthArray.open(f, "flextest", rowdef);
+            kelondroFlexWidthArray k = new kelondroFlexWidthArray(f, "flextest", rowdef, true);
             k.add(k.row().newEntry(new byte[][]{"a".getBytes(), "xxxx".getBytes()}));
             k.add(k.row().newEntry(new byte[][]{"b".getBytes(), "xxxx".getBytes()}));
             k.remove(0, false);
@@ -375,19 +400,19 @@ public class kelondroFlexWidthArray implements kelondroArray {
             //k = kelondroFlexWidthArray.open(f, "flextest", rowdef);
             for (int i = 1; i <= 20; i = i * 2) {
                 System.out.println("LOOP: " + i);
-                k = kelondroFlexWidthArray.open(f, "flextest", rowdef);
+                k = new kelondroFlexWidthArray(f, "flextest", rowdef, true);
                 for (int j = 0; j < i*2; j++) {
                     k.add(k.row().newEntry(new byte[][]{(Integer.toString(i) + "-" + Integer.toString(j)).getBytes(), "xxxx".getBytes()}));
                 }
                 k.close();
-                k = kelondroFlexWidthArray.open(f, "flextest", rowdef);
+                k = new kelondroFlexWidthArray(f, "flextest", rowdef, true);
                 for (int j = 0; j < i; j++) {
                     k.remove(i*2 - j - 1, true);
                 }
                 k.close();
             }
             k.resolveMarkedRemoved();
-            k = kelondroFlexWidthArray.open(f, "flextest", rowdef);
+            k = new kelondroFlexWidthArray(f, "flextest", rowdef, true);
             k.print();
             k.col[0].print(true);
             k.close();

@@ -70,6 +70,10 @@ public final class kelondroBufferedIOChunks extends kelondroAbstractIOChunks imp
         this.lastCommit = System.currentTimeMillis();
     }
 
+    public kelondroRA getRA() {
+    	return this.ra;
+    }
+    
     public long length() throws IOException {
         return ra.length();
     }

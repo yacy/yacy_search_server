@@ -47,6 +47,12 @@ public class kelondroObjects {
         this.startup = System.currentTimeMillis();
         this.cachesize = cachesize;
     }
+    
+    public void reset() throws IOException {
+    	this.dyn.reset();
+        this.cache = new HashMap();
+        this.cacheScore = new kelondroMScoreCluster();
+    }
 
     public int keySize() {
         return dyn.row().width(0);

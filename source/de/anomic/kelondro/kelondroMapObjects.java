@@ -140,6 +140,30 @@ public class kelondroMapObjects extends kelondroObjects {
         if (longaccfields != null) for (int i = 0; i < longaccfields.length; i++) accMap.put(longaccfields[i], longaccumulator[i]);
         if (doubleaccfields != null) for (int i = 0; i < doubleaccfields.length; i++) accMap.put(doubleaccfields[i], doubleaccumulator[i]);
     }
+
+    public void reset() throws IOException {
+    	super.reset();
+        if (sortfields == null) sortClusterMap = null; else {
+            sortClusterMap = new HashMap();
+            for (int i = 0; i < sortfields.length; i++) {
+            	sortClusterMap.put(sortfields[i], new kelondroMScoreCluster());
+            }
+        }
+
+        if (longaccfields == null) accMap = null; else {
+            accMap = new HashMap();
+            for (int i = 0; i < longaccfields.length; i++) {
+        		accMap.put(longaccfields[i], new Long(0));
+        	}
+        }
+        
+        if (doubleaccfields == null) accMap = null; else {
+            accMap = new HashMap();
+            for (int i = 0; i < doubleaccfields.length; i++) {
+        		accMap.put(doubleaccfields[i], new Double(0));
+        	}
+        }
+    }
     
     public synchronized void set(String key, Map newMap) throws IOException {
         assert (key != null);

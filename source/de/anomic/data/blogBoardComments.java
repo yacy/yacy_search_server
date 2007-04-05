@@ -84,7 +84,7 @@ public class blogBoardComments {
     public blogBoardComments(File actpath, long preloadTime) {
     		new File(actpath.getParent()).mkdir();
         if (datbase == null) {
-            datbase = new kelondroMapObjects(kelondroDyn.open(actpath, true, true, preloadTime, keyLength, recordSize, '_', false, false), 500);
+            datbase = new kelondroMapObjects(new kelondroDyn(actpath, true, true, preloadTime, keyLength, recordSize, '_', false, false, false), 500);
         }
     }
     

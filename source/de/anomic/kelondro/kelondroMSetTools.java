@@ -245,7 +245,59 @@ public class kelondroMSetTools {
 	return result;
     }
     
-    
+    // now the same for set-set
+    public static boolean anymatch(TreeSet set1, TreeSet set2) {
+		// comparators must be equal
+		if ((set1 == null) || (set2 == null)) return false;
+		if (set1.comparator() != set2.comparator()) return false;
+		if ((set1.size() == 0) || (set2.size() == 0)) return false;
+
+		// decide which method to use
+		int high = ((set1.size() > set2.size()) ? set1.size() : set2.size());
+		int low = ((set1.size() > set2.size()) ? set2.size() : set1.size());
+		int stepsEnum = 10 * (high + low - 1);
+		int stepsTest = 12 * log2a(high) * low;
+
+		// start most efficient method
+		if (stepsEnum > stepsTest) {
+			if (set1.size() < set2.size()) return anymatchByTest(set1, set2);
+			return anymatchByTest(set2, set1);
+		}
+		return anymatchByEnumeration(set1, set2);
+	}
+
+	private static boolean anymatchByTest(TreeSet small, TreeSet large) {
+		Iterator mi = small.iterator();
+		Object o;
+		while (mi.hasNext()) {
+			o = mi.next();
+			if (large.contains(o)) return true;
+		}
+		return false;
+	}
+
+    private static boolean anymatchByEnumeration(TreeSet set1, TreeSet set2) {
+		// implement pairvise enumeration
+		Comparator comp = set1.comparator();
+		Iterator mi = set1.iterator();
+		Iterator si = set2.iterator();
+		int c;
+		if ((mi.hasNext()) && (si.hasNext())) {
+			Object mobj = mi.next();
+			Object sobj = si.next();
+			while (true) {
+				c = compare(mobj, sobj, comp);
+				if (c < 0) {
+					if (mi.hasNext()) mobj = mi.next(); else break;
+				} else if (c > 0) {
+					if (si.hasNext()) sobj = si.next(); else break;
+				} else {
+					return true;
+				}
+			}
+		}
+		return false;
+	}
     
     // ------------------------------------------------------------------------------------------------
     // exclude

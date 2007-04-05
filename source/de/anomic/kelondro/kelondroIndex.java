@@ -59,7 +59,7 @@ public interface kelondroIndex {
     public String filename(); // returns a unique identified for this index; can be a real or artificial file name
     public int size() throws IOException;
     public kelondroProfile profile();
-    public kelondroRow row() throws IOException;
+    public kelondroRow row();
     public boolean has(byte[] key) throws IOException; // use this only if there is no get in case that has returns true
     public kelondroRow.Entry get(byte[] key) throws IOException;
     public kelondroRow.Entry put(kelondroRow.Entry row) throws IOException;
@@ -72,4 +72,5 @@ public interface kelondroIndex {
     public kelondroRow.Entry removeOne() throws IOException;
     public kelondroCloneableIterator rows(boolean up, byte[] firstKey) throws IOException;
     public void close();
+    public void reset() throws IOException;
 }

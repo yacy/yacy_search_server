@@ -87,6 +87,12 @@ public class kelondroSplittedTree implements kelondroIndex {
         ff = forkfactor;
     }
     
+    public void reset() throws IOException {
+    	for (int i = 0; i < ktfs.length; i++) {
+            ktfs[i].reset();
+        }
+    }
+    
     public void close() {
         for (int i = 0; i < ktfs.length; i++) ktfs[i].close();
     }

@@ -58,12 +58,7 @@ public class plasmaCrawlZURL {
     
     public plasmaCrawlZURL(File cachePath, String tablename) {
         cachePath.mkdirs();
-        try {
-            urlIndexFile = new kelondroFlexTable(cachePath, tablename, -1, rowdef);
-        } catch (IOException e) {
-            e.printStackTrace();
-            System.exit(-1);
-        }
+        urlIndexFile = new kelondroFlexTable(cachePath, tablename, -1, rowdef, true);
     }
     
     public int size() {

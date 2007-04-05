@@ -50,10 +50,10 @@
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
-import java.util.Set;
 import java.util.TreeSet;
 
 import de.anomic.http.httpHeader;
+import de.anomic.kelondro.kelondroBase64Order;
 import de.anomic.kelondro.kelondroBitfield;
 import de.anomic.index.indexContainer;
 import de.anomic.net.natLib;
@@ -116,7 +116,7 @@ public final class search {
         // tell all threads to do nothing for a specific time
         sb.intermissionAllThreads(2 * duetime);
 
-        Set abstractSet = ((abstracts.length() == 0) || (abstracts.equals("auto"))) ? null : plasmaSearchQuery.hashes2Set(abstracts);
+        TreeSet abstractSet = ((abstracts.length() == 0) || (abstracts.equals("auto"))) ? null : plasmaSearchQuery.hashes2Set(abstracts);
         
         // store accessing peer
         if (yacyCore.seedDB == null) {
@@ -126,7 +126,7 @@ public final class search {
         }
 
         // prepare search
-        final Set keyhashes = plasmaSearchQuery.hashes2Set(query);
+        final TreeSet keyhashes = plasmaSearchQuery.hashes2Set(query);
         final long timestamp = System.currentTimeMillis();
         serverObjects prop = new serverObjects();
         
@@ -255,7 +255,7 @@ public final class search {
         searchProfile.put("time", trackerHandle);
         sb.remoteSearches.add(searchProfile);
         TreeSet handles = (TreeSet) sb.remoteSearchTracker.get(client);
-        if (handles == null) handles = new TreeSet();
+        if (handles == null) handles = new TreeSet(kelondroBase64Order.enhancedCoder);
         handles.add(trackerHandle);
         sb.remoteSearchTracker.put(client, handles);
         

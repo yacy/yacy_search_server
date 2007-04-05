@@ -34,6 +34,7 @@ import java.util.Map;
 import java.util.StringTokenizer;
 
 import de.anomic.server.serverByteBuffer;
+import de.anomic.server.logging.serverLog;
 
 public class kelondroRow {
    
@@ -148,7 +149,7 @@ public class kelondroRow {
     public Entry newEntry(byte[] rowinstance) {
         if (rowinstance == null) return null;
         //assert (rowinstance[0] != 0);
-        assert (this.objectOrder.wellformed(rowinstance, 0, row[0].cellwidth()));
+        assert (this.objectOrder.wellformed(rowinstance, 0, row[0].cellwidth())) : "rowinstance[0] = " + serverLog.arrayList(rowinstance, 0, row[0].cellwidth());
         if (!(this.objectOrder.wellformed(rowinstance, 0, row[0].cellwidth()))) return null;
         return new Entry(rowinstance);
     }

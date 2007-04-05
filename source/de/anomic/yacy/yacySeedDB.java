@@ -192,11 +192,11 @@ public final class yacySeedDB {
             initializeHandlerMethod = null;
         }
         try {
-            return new kelondroMapObjects(kelondroDyn.open(seedDBFile, true, true, preloadTime / 3, commonHashLength, 480, '#', false, false), 500, sortFields, longaccFields, doubleaccFields, initializeHandlerMethod, this);
+            return new kelondroMapObjects(kelondroDyn.open(seedDBFile, true, true, preloadTime / 3, commonHashLength, 480, '#', false, false, true), 500, sortFields, longaccFields, doubleaccFields, initializeHandlerMethod, this);
         } catch (Exception e) {
             seedDBFile.delete();
             // try again
-            return new kelondroMapObjects(kelondroDyn.open(seedDBFile, true, true, preloadTime / 3, commonHashLength, 480, '#', false, false), 500, sortFields, longaccFields, doubleaccFields, initializeHandlerMethod, this);
+            return new kelondroMapObjects(kelondroDyn.open(seedDBFile, true, true, preloadTime / 3, commonHashLength, 480, '#', false, false, true), 500, sortFields, longaccFields, doubleaccFields, initializeHandlerMethod, this);
         }
     }
     
@@ -888,10 +888,23 @@ public final class yacySeedDB {
         
         public Object nextElement() {
             yacySeed seed = nextSeed;
-            while (true) {
+            try {while (true) {
                 nextSeed = internalNext();
                 if (nextSeed == null) break;
                 if (nextSeed.getVersion() >= this.minVersion) break;
+            }} catch (kelondroException e) {
+            	e.printStackTrace();
+            	// eergency reset
+            	yacyCore.log.logSevere("seed-db emergency reset", e);
+            	try {
+					database.reset();
+					nextSeed = null;
+					return null;
+				} catch (IOException e1) {
+					// no recovery possible
+					e1.printStackTrace();
+					System.exit(-1);
+				}
             }
             return seed;
         }

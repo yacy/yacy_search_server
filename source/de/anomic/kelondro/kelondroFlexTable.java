@@ -47,17 +47,19 @@ public class kelondroFlexTable extends kelondroFlexWidthArray implements kelondr
     protected kelondroBytesIntMap ROindex, RWindex;
     private boolean RAMIndex;
     
-    public kelondroFlexTable(File path, String tablename, long preloadTime, kelondroRow rowdef) throws IOException {
+    public kelondroFlexTable(File path, String tablename, long preloadTime, kelondroRow rowdef, boolean resetOnFail) {
     	// the buffersize applies to a possible load of the ram-index
     	// if the ram is not sufficient, a tree file is generated
     	// if, and only if a tree file exists, the preload time is applied
-    	super(path, tablename, rowdef);
+    	super(path, tablename, rowdef, resetOnFail);
+    	try {
     	long neededRAM = (long) ((super.row().column(0).cellwidth() + 4) * super.size() * kelondroRowCollection.growfactor);
     	
     	File newpath = new File(path, tablename);
         File indexfile = new File(newpath, "col.000.index");
         kelondroIndex ki = null;
-        String description = new String(this.col[0].getDescription());
+        String description = "";
+        description = new String(this.col[0].getDescription());
         int p = description.indexOf(';', 4);
         long stt = (p > 0) ? Long.parseLong(description.substring(4, p)) : 0;
         System.out.println("*** Last Startup time: " + stt + " milliseconds");
@@ -107,6 +109,26 @@ public class kelondroFlexTable extends kelondroFlexWidthArray implements kelondr
         // assign index to wrapper
         description = "stt=" + Long.toString(System.currentTimeMillis() - start) + ";";
         super.col[0].setDescription(description.getBytes());
+    	} catch (IOException e) {
+    		if (resetOnFail) {
+    			RAMIndex = true;
+    	    	ROindex = null;
+    	        try {
+					RWindex = new kelondroBytesIntMap(new kelondroRowSet(new kelondroRow(new kelondroColumn[]{super.row().column(0), new kelondroColumn("int c-4 {b256}")}, super.rowdef.objectOrder, super.rowdef.primaryKey), 100));
+				} catch (IOException e1) {
+					throw new kelondroException(e1.getMessage());
+				}
+    		} else {
+    			throw new kelondroException(e.getMessage());
+    		}
+    	}
+    }
+    
+    public void reset() throws IOException {
+    	super.reset();
+    	RAMIndex = true;
+    	ROindex = null;
+        RWindex = new kelondroBytesIntMap(new kelondroRowSet(new kelondroRow(new kelondroColumn[]{super.row().column(0), new kelondroColumn("int c-4 {b256}")}, super.rowdef.objectOrder, super.rowdef.primaryKey), 100));
     }
     
     public static int staticSize(File path, String tablename) {
@@ -402,7 +424,7 @@ public class kelondroFlexTable extends kelondroFlexWidthArray implements kelondr
         String name = args[1];
         kelondroRow row = new kelondroRow("Cardinal key-4 {b256}, byte[] x-64", kelondroNaturalOrder.naturalOrder, 0);
         try {
-            kelondroFlexTable t = new kelondroFlexTable(f, name, 0, row);
+            kelondroFlexTable t = new kelondroFlexTable(f, name, 0, row, true);
             kelondroRow.Entry entry = row.newEntry();
             entry.setCol(0, System.currentTimeMillis());
             entry.setCol(1, "dummy".getBytes());

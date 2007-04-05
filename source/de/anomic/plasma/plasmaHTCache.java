@@ -197,12 +197,7 @@ public final class plasmaHTCache {
     private void openResponseHeaderDB(long preloadTime) {
         // open the response header database
         File dbfile = new File(this.cachePath, "responseHeader.db");
-        try {
-            this.responseHeaderDB = new kelondroMapObjects(new kelondroDyn(dbfile, true, true, preloadTime, yacySeedDB.commonHashLength, 150, '#', true, false), 500);
-        } catch (IOException e) {
-            this.log.logSevere("the request header database could not be opened: " + e.getMessage());
-            System.exit(0);
-        }
+        this.responseHeaderDB = new kelondroMapObjects(new kelondroDyn(dbfile, true, true, preloadTime, yacySeedDB.commonHashLength, 150, '#', true, false, true), 500);
     }
     
     private void deleteOldHTCache(File directory) {

@@ -156,6 +156,11 @@ public class kelondroTree extends kelondroRecords implements kelondroIndex {
         super.setLogger(log);
     }
 
+    public void reset() throws IOException {
+    	super.reset();
+        setHandle(root, null); 
+	}
+    
     private void commitNode(Node n) throws IOException {
         Handle left = n.getOHHandle(leftchild);
         Handle right = n.getOHHandle(rightchild);

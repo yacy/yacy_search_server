@@ -188,11 +188,11 @@ public class dbtest {
             }
             if (dbe.equals("kelondroFlexTable")) {
                 File tablepath = new File(tablename).getParentFile();
-                table = new kelondroFlexTable(tablepath, new File(tablename).getName(), preload, testRow);
+                table = new kelondroFlexTable(tablepath, new File(tablename).getName(), preload, testRow, true);
             }
             if (dbe.equals("kelondroFlexSplitTable")) {
                 File tablepath = new File(tablename).getParentFile();
-                table = new kelondroFlexSplitTable(tablepath, new File(tablename).getName(), preload, testRow);
+                table = new kelondroFlexSplitTable(tablepath, new File(tablename).getName(), preload, testRow, true);
             }
             if (dbe.equals("mysql")) {
                 table = new dbTable("mysql", testRow);
@@ -654,6 +654,11 @@ final class dbTable implements kelondroIndex {
     public final int[] cacheNodeStatus() {
         return new int[]{0,0,0,0,0,0,0,0,0,0};
     }
+
+	public void reset() {
+		// TODO Auto-generated method stub
+		
+	}
 }
 
 

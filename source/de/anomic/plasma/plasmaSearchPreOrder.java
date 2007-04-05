@@ -48,6 +48,7 @@ import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Map;
 import java.util.TreeMap;
+import java.util.TreeSet;
 
 import de.anomic.index.indexContainer;
 import de.anomic.index.indexRWIEntry;
@@ -98,6 +99,7 @@ public final class plasmaSearchPreOrder {
         // second pass: normalize entries and get ranking
         i = container.entries();
         this.pageAcc = new TreeMap();
+        TreeSet searchWords = plasmaSearchQuery.cleanQuery(query.queryString)[0];
         for (int j = 0; j < count; j++) {
             iEntry = (indexRWIEntry) i.next();
             if (iEntry.urlHash().length() != container.row().width(container.row().primaryKey())) continue;
@@ -108,7 +110,7 @@ public final class plasmaSearchPreOrder {
                 if ((query.contentdom == plasmaSearchQuery.CONTENTDOM_IMAGE) && (!(iEntry.flags().get(plasmaCondenser.flag_cat_hasimage)))) continue;
                 if ((query.contentdom == plasmaSearchQuery.CONTENTDOM_APP  ) && (!(iEntry.flags().get(plasmaCondenser.flag_cat_hasapp  )))) continue;
             }
-            pageAcc.put(serverCodings.encodeHex(Long.MAX_VALUE - this.ranking.preRanking(iEntry.generateNormalized(this.entryMin, this.entryMax), query.words("")), 16) + iEntry.urlHash(), iEntry);
+            pageAcc.put(serverCodings.encodeHex(Long.MAX_VALUE - this.ranking.preRanking(iEntry.generateNormalized(this.entryMin, this.entryMax), searchWords), 16) + iEntry.urlHash(), iEntry);
         }
         this.filteredCount = pageAcc.size();
     }
@@ -127,7 +129,7 @@ public final class plasmaSearchPreOrder {
         indexRWIEntry iEntry;
         String hashpart;
         boolean isWordRootURL;
-        String querywords = query.words("");
+        TreeSet querywords = plasmaSearchQuery.cleanQuery(query.queryString())[0];
         while (i.hasNext()) {
             if (pageAcc.size() <= query.wantedResults) break;
             entry = (Map.Entry) i.next();

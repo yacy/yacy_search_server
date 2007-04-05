@@ -60,7 +60,7 @@ public class plasmaWordConnotation {
     private kelondroDynTree refDB;
     
     public plasmaWordConnotation(File refDBfile, long preloadTime, char fillChar) throws IOException {
-        refDB = new kelondroDynTree(refDBfile, preloadTime, wordlength, nodesize, new kelondroRow("byte[] word-" + wordlength + ", Cardinal count-" + countlength, kelondroNaturalOrder.naturalOrder, 0), fillChar);
+        refDB = new kelondroDynTree(refDBfile, preloadTime, wordlength, nodesize, new kelondroRow("byte[] word-" + wordlength + ", Cardinal count-" + countlength, kelondroNaturalOrder.naturalOrder, 0), fillChar, true);
     }
 
     private void addSingleRef(String word, String reference) throws IOException {

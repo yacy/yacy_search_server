@@ -32,6 +32,7 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
 import java.util.TreeMap;
+import java.util.TreeSet;
 
 import de.anomic.index.indexContainer;
 import de.anomic.index.indexRWIEntry;
@@ -489,25 +490,31 @@ public class plasmaURL {
 
     private static String[] testTLDs = new String[] { "com", "net", "org", "uk", "fr", "de", "es", "it" };
 
-    public static final URL probablyWordURL(String urlHash, String word) {
-        if ((word == null) || (word.length() == 0))return null;
-        String pattern = urlHash.substring(6, 11);
-        for (int i = 0; i < testTLDs.length; i++) {
-            if (pattern.equals(protocolHostPort("http", "www." + word.toLowerCase() + "." + testTLDs[i], 80)))
-                try {
-                    return new URL("http://www." + word.toLowerCase() + "." + testTLDs[i]);
-                } catch (MalformedURLException e) {
-                    return null;
-                }
+    public static final URL probablyWordURL(String urlHash, TreeSet words) {
+    	Iterator wi = words.iterator();
+    	String word;
+        while (wi.hasNext()) {
+        	word = (String) wi.next();
+        	if ((word == null) || (word.length() == 0)) continue;
+        	String pattern = urlHash.substring(6, 11);
+        	for (int i = 0; i < testTLDs.length; i++) {
+        		if (pattern.equals(protocolHostPort("http", "www." + word.toLowerCase() + "." + testTLDs[i], 80)))
+        			try {
+        				return new URL("http://www." + word.toLowerCase() + "." + testTLDs[i]);
+        			} catch (MalformedURLException e) {
+        				return null;
+        			}
+        	}
         }
         return null;
     }
 
-    public static final boolean isWordRootURL(String givenURLHash, String word) {
+    public static final boolean isWordRootURL(String givenURLHash, TreeSet words) {
         if (!(probablyRootURL(givenURLHash))) return false;
-        URL wordURL = probablyWordURL(givenURLHash, word);
+        URL wordURL = probablyWordURL(givenURLHash, words);
         if (wordURL == null) return false;
-        return urlHash(wordURL).equals(givenURLHash);
+        if (urlHash(wordURL).equals(givenURLHash)) return true;
+        return false;
     }
 
     public static final int domLengthEstimation(String urlHash) {

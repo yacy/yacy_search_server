@@ -2709,7 +2709,7 @@ public final class plasmaSwitchboard extends serverAbstractSwitch implements ser
             results.setQuery(query);
             
             // log
-            log.logInfo("INIT WORD SEARCH: " + query.queryWords + ":" + query.queryHashes + " - " + query.wantedResults + " links, " + (query.maximumTime / 1000) + " seconds");
+            log.logInfo("INIT WORD SEARCH: " + query.queryString + ":" + query.queryHashes + " - " + query.wantedResults + " links, " + (query.maximumTime / 1000) + " seconds");
             long timestamp = System.currentTimeMillis();
             
             // start a presearch, which makes only sense if we idle afterwards.
@@ -2747,7 +2747,7 @@ public final class plasmaSwitchboard extends serverAbstractSwitch implements ser
                 String host, hash, address;
                 yacySeed seed;
                 boolean includeSnippets = false;
-                results.setFormerSearch(query.words(" "));
+                results.setFormerSearch(query.queryString());
                 long targetTime = timestamp + query.maximumTime;
                 if (targetTime < System.currentTimeMillis()) targetTime = System.currentTimeMillis() + 1000;
                 while ((acc.hasMoreElements()) && (i < query.wantedResults) && (System.currentTimeMillis() < targetTime)) {
@@ -2838,7 +2838,7 @@ public final class plasmaSwitchboard extends serverAbstractSwitch implements ser
             }
             
             // log
-            log.logInfo("EXIT WORD SEARCH: " + query.queryWords + " - " +
+            log.logInfo("EXIT WORD SEARCH: " + query.queryString + " - " +
                     results.getTotalcount() + " links found, " +
                     results.getFilteredcount() + " links filtered, " +
                     results.getOrderedcount() + " links ordered, " +
