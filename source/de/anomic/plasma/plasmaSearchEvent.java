@@ -420,6 +420,9 @@ public final class plasmaSearchEvent extends Thread implements Runnable {
                 	if (plasmaSearchQuery.matches(pageurl, query.excludeHashes)) continue ordering;
                 	if (plasmaSearchQuery.matches(pageauthor, query.excludeHashes)) continue ordering;
                 	
+                	// check url mask
+                	if (!(pageurl.matches(query.urlMask))) continue ordering;
+                	
                 	// check constraints
                 	if ((!(query.constraint.equals(plasmaSearchQuery.catchall_constraint))) &&
                         (query.constraint.get(plasmaCondenser.flag_cat_indexof)) &&

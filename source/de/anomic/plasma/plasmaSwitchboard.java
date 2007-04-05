@@ -2793,18 +2793,16 @@ public final class plasmaSwitchboard extends serverAbstractSwitch implements ser
                     result.setUrl(urlstring);
                     result.setUrlname(urlname);
                     result.setUrlentry(urlentry);
-                    if (urlstring.matches(results.getQuery().urlMask)) { //.* is default
-                        if (includeSnippets) {
-                            result.setSnippet(snippetCache.retrieveTextSnippet(comp.url(), results.getQuery().queryHashes, false, urlentry.flags().get(plasmaCondenser.flag_cat_indexof), 260, 1000));
-                            //snippet = snippetCache.retrieveTextSnippet(comp.url(), query.queryHashes, false, urlentry.flags().get(plasmaCondenser.flag_cat_indexof), 260, 1000);
-                        } else {
-                            //snippet = null;
-                            result.setSnippet(null);
-                        }
-                        i++;
-                        results.appendResult(result);
-                    }
-                }
+                    if (includeSnippets) {
+						result.setSnippet(snippetCache.retrieveTextSnippet(comp.url(), results.getQuery().queryHashes, false, urlentry.flags().get(plasmaCondenser.flag_cat_indexof), 260, 1000));
+						// snippet = snippetCache.retrieveTextSnippet(comp.url(), query.queryHashes, false, urlentry.flags().get(plasmaCondenser.flag_cat_indexof), 260, 1000);
+					} else {
+						// snippet = null;
+						result.setSnippet(null);
+					}
+					i++;
+					results.appendResult(result);
+				}
                 log.logFine("SEARCH TIME AFTER RESULT PREPARATION: " + ((System.currentTimeMillis() - timestamp) / 1000) + " seconds");
                 
                 // calc some more cross-reference
