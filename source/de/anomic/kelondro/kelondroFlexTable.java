@@ -52,7 +52,14 @@ public class kelondroFlexTable extends kelondroFlexWidthArray implements kelondr
     	// if the ram is not sufficient, a tree file is generated
     	// if, and only if a tree file exists, the preload time is applied
     	super(path, tablename, rowdef, resetOnFail);
-    	try {
+        if ((super.col[0].size() < 0) && (resetOnFail)) try {
+            super.reset();
+        } catch (IOException e2) {
+            e2.printStackTrace();
+            throw new kelondroException(e2.getMessage());
+        }
+        
+        try {
     	long neededRAM = (long) ((super.row().column(0).cellwidth() + 4) * super.size() * kelondroRowCollection.growfactor);
     	
     	File newpath = new File(path, tablename);
@@ -65,6 +72,7 @@ public class kelondroFlexTable extends kelondroFlexWidthArray implements kelondr
         System.out.println("*** Last Startup time: " + stt + " milliseconds");
         long start = System.currentTimeMillis();
 
+        
         if (serverMemory.available(neededRAM, true)) {
         	// we can use a RAM index
         	

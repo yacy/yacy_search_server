@@ -187,7 +187,7 @@ public class kelondroFlexWidthArray implements kelondroArray {
     }
     
     public void close() {
-        synchronized (col) {
+        if (col != null) synchronized (col) {
             for (int i = 0; i < col.length; i++) {
                 if (col[i] != null) {
                     // a column can be null, this is normal

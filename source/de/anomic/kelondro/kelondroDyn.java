@@ -109,6 +109,14 @@ public class kelondroDyn {
         buffer = new kelondroObjectBuffer(file.toString());
     }
     
+    public static final void delete(File file,  boolean usetree) {
+        if (usetree) {
+            file.delete();
+        } else {
+            kelondroFlexTable.delete(file.getParentFile(), file.getName());
+        }
+    }
+    
     public void reset() throws IOException {
     	String name = this.index.filename();
     	this.index.reset();
