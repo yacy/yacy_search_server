@@ -63,20 +63,22 @@ public class kelondroMapObjects extends kelondroObjects {
         }
 
         Long[] longaccumulator = null;
-        if (longaccfields == null) accMap = null; else {
-            accMap = new HashMap();
-            longaccumulator = new Long[longaccfields.length];
-            for (int i = 0; i < longaccfields.length; i++) {
-                longaccumulator[i] = new Long(0);   
-            }
-        }
-        
         Double[] doubleaccumulator = null;
-        if (doubleaccfields == null) accMap = null; else {
+        if ((longaccfields == null) && (doubleaccfields == null)) {
+        	accMap = null;
+        } else {
             accMap = new HashMap();
-            doubleaccumulator = new Double[doubleaccfields.length];
-            for (int i = 0; i < doubleaccfields.length; i++) {
-                doubleaccumulator[i] = new Double(0);   
+            if (longaccfields != null) {
+                longaccumulator = new Long[longaccfields.length];
+                for (int i = 0; i < longaccfields.length; i++) {
+                    longaccumulator[i] = new Long(0);   
+                }
+            }
+            if (doubleaccfields != null) {
+                doubleaccumulator = new Double[doubleaccfields.length];
+                for (int i = 0; i < doubleaccfields.length; i++) {
+                    doubleaccumulator[i] = new Double(0);   
+                }
             }
         }
 
@@ -149,19 +151,21 @@ public class kelondroMapObjects extends kelondroObjects {
             	sortClusterMap.put(sortfields[i], new kelondroMScoreCluster());
             }
         }
-
-        if (longaccfields == null) accMap = null; else {
-            accMap = new HashMap();
-            for (int i = 0; i < longaccfields.length; i++) {
-        		accMap.put(longaccfields[i], new Long(0));
-        	}
-        }
         
-        if (doubleaccfields == null) accMap = null; else {
-            accMap = new HashMap();
-            for (int i = 0; i < doubleaccfields.length; i++) {
-        		accMap.put(doubleaccfields[i], new Double(0));
-        	}
+        if ((longaccfields == null) && (doubleaccfields == null)) {
+        	accMap = null;
+        } else {
+        	accMap = new HashMap();
+        	if (longaccfields != null) {
+                for (int i = 0; i < longaccfields.length; i++) {
+            		accMap.put(longaccfields[i], new Long(0));
+            	}
+            }
+        	if (doubleaccfields != null) {
+                for (int i = 0; i < doubleaccfields.length; i++) {
+            		accMap.put(doubleaccfields[i], new Double(0));
+            	}
+            }
         }
     }
     
