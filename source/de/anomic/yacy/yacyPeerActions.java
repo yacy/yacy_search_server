@@ -119,15 +119,6 @@ public class yacyPeerActions {
         
         //the speed of indexing (pages/minute) of the peer
         sb.totalPPM = (int) (sb.indexedPages * 60 / Math.max(uptime, 1));
-        if (yacyCore.log.isFinest()) {
-        	yacyCore.log.logFinest("PPM-Calculation:\n"+
-        			"\tStartuptime: "+sb.startupTime+"\n"+
-        			"\tCurrenttime: "+System.currentTimeMillis()+"\n"+
-        			"\tUptime: "+uptime+"\n"+
-        			"\tLastcheck: "+sb.lastseedcheckuptime+"\n"+
-        			"\tUptimediff: "+uptimediff
-        	);
-        }
         seedDB.mySeed.put(yacySeed.ISPEED, Long.toString(Math.round(Math.max((float) indexedcdiff, 0f) * 60f / Math.max((float) uptimediff, 1f))));
         sb.totalQPM = sb.requestedQueries * 60d / Math.max((double) uptime, 1d);
         seedDB.mySeed.put(yacySeed.RSPEED, Double.toString(sb.totalQPM /*Math.max((float) requestcdiff, 0f) * 60f / Math.max((float) uptimediff, 1f)*/ ));
