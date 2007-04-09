@@ -49,6 +49,7 @@
 
 import java.io.File;
 import java.lang.reflect.Method;
+import java.lang.Integer;
 import java.util.regex.Pattern;
 
 import de.anomic.data.translator;
@@ -138,7 +139,10 @@ public class ConfigBasic {
         String peerName = (post == null) ? env.getConfig("peerName","") : (String) post.get("peername", "");
         
         // port settings
-        String port = (post == null) ? env.getConfig("port", "8080") : (String) post.get("port", "8080");
+        String port = env.getConfig("port", "8080"); //this allows a low port, but it will only get one, if the user edits the config himself.
+		if(post!=null && Integer.parseInt((String)post.get("port"))>1023){
+			port = (String)post.get("port", "8080");
+		}
         
         // admin password
         if ((user.length() > 0) && (pw1.length() > 3) && (pw1.equals(pw2))) {
