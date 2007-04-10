@@ -16,8 +16,12 @@
 	#%env/templates/simpleheader.template%#
 	::
 	#%env/templates/header.template%#
+	::
+	#%env/templates/embeddedheader.template%#
 #(/display)#
 
+#(input)#
+	::
     <form class="search small" action="yacysearch.html" method="get" accept-charset="UTF-8">
       <p class="yacylogo"><a href="http://yacy.net/yacy/" class="yacylogo"><img src="/env/grafics/yacy.png" alt="yacy" /></a></p>
       <h2>#[promoteSearchPageGreeting]#</h2>
@@ -53,7 +57,8 @@
       </fieldset>
       </div>
     </form>
-  
+#(/input)#
+
 <script type="text/javascript">
 document.getElementById("Enter").value = "search again - catch up more links";
 </script>
@@ -199,14 +204,17 @@ document.getElementById("Enter").value = "search again - catch up more links";
 	</table>
 #(/type)#
 
-<p class="info">
-YaCy is a GPL'ed project with the target of implementing a P2P-based global search engine.<br />
-Architecture (C) by Michael Peter Christen, <img src="/env/grafics/mcemailh.gif" alt="Mail-Adresse von Michael Peter Christen" />
-</p>
+
 #(display)#
+	<p class="info">
+	YaCy is a GPL'ed project with the target of implementing a P2P-based global search engine.<br />
+	Architecture (C) by Michael Peter Christen, <img src="/env/grafics/mcemailh.gif" alt="Mail-Adresse von Michael Peter Christen" />
+	</p>
 	#%env/templates/simplefooter.template%#
 	::
 	#%env/templates/footer.template%#
+	::
+	#%env/templates/embeddedfooter.template%#
 #(/display)#
 
 </body>

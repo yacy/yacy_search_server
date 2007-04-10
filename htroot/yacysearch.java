@@ -93,6 +93,7 @@ public class yacysearch {
 
         boolean authenticated = sb.adminAuthenticated(header) >= 2;
         int display = ((post == null) || (!authenticated)) ? 0 : post.getInt("display", 0);
+        int input = (post == null) ? 0 : post.getInt("input", 1);
         String promoteSearchPageGreeting = env.getConfig("promoteSearchPageGreeting", "");
         if (promoteSearchPageGreeting.length() == 0) promoteSearchPageGreeting = "P2P WEB SEARCH";
 
@@ -119,31 +120,31 @@ public class yacysearch {
 
             // we create empty entries for template strings
             final serverObjects prop = new serverObjects();
-            prop.putASIS("promoteSearchPageGreeting", promoteSearchPageGreeting);
-            prop.put("former", "");
-            prop.put("count", 10);
-            prop.put("order", plasmaSearchPreOrder.canUseYBR() ? "YBR-Date-Quality" : "Date-Quality-YBR");
-            prop.put("resource", "global");
-            prop.put("time", 6);
-            prop.put("urlmaskfilter", ".*");
-            prop.put("prefermaskfilter", "");
-            prop.put("indexof", "off");
-            prop.put("constraint", plasmaSearchQuery.catchall_constraint.exportB64());
-            prop.put("cat", "href");
-            prop.put("depth", "0");
-            prop.put("type", 0);
-            prop.put("type_excluded", 0);
-            prop.put("type_num-results", 0);
-            prop.put("type_combine", 0);
-            prop.put("type_resultbottomline", 0);
-            prop.put("type_results", "");
             prop.put("display", display);
-            prop.put("contentdom", "text");
-            prop.put("contentdomCheckText", 1);
-            prop.put("contentdomCheckAudio", 0);
-            prop.put("contentdomCheckVideo", 0);
-            prop.put("contentdomCheckImage", 0);
-            prop.put("contentdomCheckApp", 0);
+            prop.putASIS("input_promoteSearchPageGreeting", promoteSearchPageGreeting);
+            prop.put("input_former", "");
+            prop.put("input_count", 10);
+            prop.put("input_resource", "global");
+            prop.put("input_time", 6);
+            prop.put("input_urlmaskfilter", ".*");
+            prop.put("input_prefermaskfilter", "");
+            prop.put("input_indexof", "off");
+            prop.put("input_constraint", plasmaSearchQuery.catchall_constraint.exportB64());
+            prop.put("input_cat", "href");
+            prop.put("input_depth", "0");
+            prop.put("input_type", 0);
+            prop.put("input_type_excluded", 0);
+            prop.put("input_type_num-results", 0);
+            prop.put("input_type_combine", 0);
+            prop.put("input_type_resultbottomline", 0);
+            prop.put("input_type_results", "");
+            prop.put("input_contentdom", "text");
+            prop.put("input_contentdomCheckText", 1);
+            prop.put("input_contentdomCheckAudio", 0);
+            prop.put("input_contentdomCheckVideo", 0);
+            prop.put("input_contentdomCheckImage", 0);
+            prop.put("input_contentdomCheckApp", 0);
+            prop.put("input", 0);
             return prop;
         }
 
@@ -157,7 +158,6 @@ public class yacysearch {
         if (sb.facilityDB != null) try { sb.facilityDB.update("zeitgeist", querystring, post); } catch (Exception e) {}
 
         int count = Integer.parseInt(post.get("count", "10"));
-        final String order = post.get("order", plasmaSearchPreOrder.canUseYBR() ? "YBR-Date-Quality" : "Date-Quality-YBR");
         boolean global = (post == null) ? true : post.get("resource", "global").equals("global");
         final boolean indexof = post.get("indexof","").equals("on"); 
         final long searchtime = 1000 * Long.parseLong(post.get("time", "10"));
@@ -398,7 +398,6 @@ public class yacysearch {
                                 prop.put("type_combine_words_" + hintcount + "_word", word);
                                 prop.put("type_combine_words_" + hintcount + "_newsearch", post.get("search", "").replace(' ', '+') + "+" + word);
                                 prop.put("type_combine_words_" + hintcount + "_count", count);
-                                prop.put("type_combine_words_" + hintcount + "_order", order);
                                 prop.put("type_combine_words_" + hintcount + "_resource", ((global) ? "global" : "local"));
                                 prop.put("type_combine_words_" + hintcount + "_time", (searchtime / 1000));
                             }
@@ -489,24 +488,24 @@ public class yacysearch {
         for (int i=0; i<linkcount; i++)
             prop.put("type_results_" + i + "_authorized", (authenticated) ? 1 : 0);
 
-        prop.putASIS("promoteSearchPageGreeting", promoteSearchPageGreeting);
-        prop.put("former", post.get("search", ""));
-        prop.put("count", count);
-        prop.put("order", order);
-        prop.put("resource", (global) ? "global" : "local");
-        prop.put("time", searchtime / 1000);
-        prop.put("urlmaskfilter", urlmask);
-        prop.put("prefermaskfilter", prefermask);
         prop.put("display", display);
-        prop.put("indexof", (indexof) ? "on" : "off");
-        prop.put("constraint", constraint.exportB64());
-        prop.put("contentdom", contentdomString);
-        prop.put("contentdomCheckText", (contentdomCode == plasmaSearchQuery.CONTENTDOM_TEXT) ? 1 : 0);
-        prop.put("contentdomCheckAudio", (contentdomCode == plasmaSearchQuery.CONTENTDOM_AUDIO) ? 1 : 0);
-        prop.put("contentdomCheckVideo", (contentdomCode == plasmaSearchQuery.CONTENTDOM_VIDEO) ? 1 : 0);
-        prop.put("contentdomCheckImage", (contentdomCode == plasmaSearchQuery.CONTENTDOM_IMAGE) ? 1 : 0);
-        prop.put("contentdomCheckApp", (contentdomCode == plasmaSearchQuery.CONTENTDOM_APP) ? 1 : 0);
-
+        prop.putASIS("input_promoteSearchPageGreeting", promoteSearchPageGreeting);
+        prop.put("input_former", post.get("search", ""));
+        prop.put("input_count", count);
+        prop.put("input_resource", (global) ? "global" : "local");
+        prop.put("input_time", searchtime / 1000);
+        prop.put("input_urlmaskfilter", urlmask);
+        prop.put("input_prefermaskfilter", prefermask);
+        prop.put("input_indexof", (indexof) ? "on" : "off");
+        prop.put("input_constraint", constraint.exportB64());
+        prop.put("input_contentdom", contentdomString);
+        prop.put("input_contentdomCheckText", (contentdomCode == plasmaSearchQuery.CONTENTDOM_TEXT) ? 1 : 0);
+        prop.put("input_contentdomCheckAudio", (contentdomCode == plasmaSearchQuery.CONTENTDOM_AUDIO) ? 1 : 0);
+        prop.put("input_contentdomCheckVideo", (contentdomCode == plasmaSearchQuery.CONTENTDOM_VIDEO) ? 1 : 0);
+        prop.put("input_contentdomCheckImage", (contentdomCode == plasmaSearchQuery.CONTENTDOM_IMAGE) ? 1 : 0);
+        prop.put("input_contentdomCheckApp", (contentdomCode == plasmaSearchQuery.CONTENTDOM_APP) ? 1 : 0);
+        prop.put("input", input);
+        
         // return rewrite properties
         return prop;
     }
