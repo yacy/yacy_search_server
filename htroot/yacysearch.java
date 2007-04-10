@@ -429,13 +429,13 @@ public class yacysearch {
                     prop.put("type_resultbottomline", 1);
                     prop.put("type_resultbottomline_globalresults", prop.get("num-results_globalresults", "0"));
                 } else {
-                    prop.put("type_resultbottomline", 2);
+                    prop.put("type_resultbottomline", 0);
                 }
             } else {
                 if (global) {
                     prop.put("type_resultbottomline", 3);
                 } else {
-                    prop.put("type_resultbottomline", 4);
+                    prop.put("type_resultbottomline", 0);
                 }
             }
 
