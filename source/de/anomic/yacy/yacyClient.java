@@ -367,6 +367,7 @@ public final class yacyClient {
 
     public static String[] search(
             String wordhashes,
+            String excludehashes,
             String urlhashes,
             String prefer,
             String filter,
@@ -429,6 +430,7 @@ public final class yacyClient {
             obj.put("resource", ((global) ? "global" : "local"));
             obj.put("partitions", partitions);
             obj.put("query", wordhashes);
+            obj.put("exclude", excludehashes);
             obj.put("urls", urlhashes);
             obj.put("prefer", prefer);
             obj.put("filter", filter);

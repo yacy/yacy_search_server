@@ -96,7 +96,7 @@ public final class plasmaSearchEvent extends Thread implements Runnable {
         this.snippetCache = snippetCache;
         this.rcContainers = wordIndex.emptyContainer(null);
         this.rcContainerFlushCount = 0;
-        this.rcAbstracts = (query.size() > 1) ? new TreeMap() : null; // generate abstracts only for combined searches
+        this.rcAbstracts = (query.queryHashes.size() > 1) ? new TreeMap() : null; // generate abstracts only for combined searches
         this.profileLocal = localTiming;
         this.profileGlobal = remoteTiming;
         this.postsort = postsort;
@@ -151,12 +151,12 @@ public final class plasmaSearchEvent extends Thread implements Runnable {
                 log.logFine("STARTING " + fetchpeers + " THREADS TO CATCH EACH " + profileGlobal.getTargetCount(plasmaSearchTimingProfile.PROCESS_POSTSORT) + " URLs WITHIN " + (profileGlobal.duetime() / 1000) + " SECONDS");
                 long secondaryTimeout = System.currentTimeMillis() + profileGlobal.duetime() / 3 * 2;
                 long primaryTimeout = System.currentTimeMillis() + profileGlobal.duetime();
-                primarySearchThreads = yacySearch.primaryRemoteSearches(plasmaSearchQuery.hashSet2hashString(query.queryHashes), "",
+                primarySearchThreads = yacySearch.primaryRemoteSearches(plasmaSearchQuery.hashSet2hashString(query.queryHashes), plasmaSearchQuery.hashSet2hashString(query.excludeHashes), "",
                         query.prefer, query.urlMask, query.maxDistance, urlStore, wordIndex, rcContainers, rcAbstracts,
                         fetchpeers, plasmaSwitchboard.urlBlacklist, snippetCache, profileGlobal, ranking, query.constraint);
 
                 // meanwhile do a local search
-                Map searchContainerMap = localSearchContainers(null);
+                Map[] searchContainerMaps = localSearchContainers(null);
                 
                 // use the search containers to fill up rcAbstracts locally
                 /*
@@ -184,7 +184,7 @@ public final class plasmaSearchEvent extends Thread implements Runnable {
                 */
                 
                 // try to pre-fetch some LURLs if there is enough time
-                indexContainer rcLocal = localSearchJoin(searchContainerMap.values());
+                indexContainer rcLocal = localSearchJoinExclude(searchContainerMaps[0].values(), searchContainerMaps[1].values());
                 prefetchLocal(rcLocal, secondaryTimeout);
                 
                 // this is temporary debugging code to learn that the index abstracts are fetched correctly
@@ -217,8 +217,8 @@ public final class plasmaSearchEvent extends Thread implements Runnable {
                     this.start(); // start to flush results
                 }
             } else {
-                Map searchContainerMap = localSearchContainers(null);
-                indexContainer rcLocal = (searchContainerMap == null) ? wordIndex.emptyContainer(null) : localSearchJoin(searchContainerMap.values());
+                Map[] searchContainerMaps = localSearchContainers(null);
+                indexContainer rcLocal = (searchContainerMaps == null) ? wordIndex.emptyContainer(null) : localSearchJoinExclude(searchContainerMaps[0].values(), searchContainerMaps[1].values());
                 result = orderFinal(rcLocal);
                 result.globalContributions = 0;
             }
@@ -238,9 +238,9 @@ public final class plasmaSearchEvent extends Thread implements Runnable {
 
     private void prepareSecondarySearch() {
         // catch up index abstracts and join them; then call peers again to submit their urls
-        System.out.println("DEBUG-INDEXABSTRACT: " + rcAbstracts.size() + " word references catched, " + query.size() + " needed");
+        System.out.println("DEBUG-INDEXABSTRACT: " + rcAbstracts.size() + " word references catched, " + query.queryHashes.size() + " needed");
         
-        if (rcAbstracts.size() != query.size()) return; // secondary search not possible
+        if (rcAbstracts.size() != query.queryHashes.size()) return; // secondary search not possible
         
         Iterator i = rcAbstracts.entrySet().iterator();
         Map.Entry entry;
@@ -249,7 +249,7 @@ public final class plasmaSearchEvent extends Thread implements Runnable {
             System.out.println("DEBUG-INDEXABSTRACT: hash " + (String) entry.getKey() + ": " + ((query.queryHashes.contains((String) entry.getKey())) ? "NEEDED" : "NOT NEEDED") + "; " + ((TreeMap) entry.getValue()).size() + " entries");
         }
         
-        TreeMap abstractJoin = (rcAbstracts.size() == query.size()) ? kelondroMSetTools.joinConstructive(rcAbstracts.values(), true) : new TreeMap();
+        TreeMap abstractJoin = (rcAbstracts.size() == query.queryHashes.size()) ? kelondroMSetTools.joinConstructive(rcAbstracts.values(), true) : new TreeMap();
         if (abstractJoin.size() == 0) {
             System.out.println("DEBUG-INDEXABSTRACT: no success using index abstracts from remote peers");
         } else {
@@ -293,7 +293,7 @@ public final class plasmaSearchEvent extends Thread implements Runnable {
                 System.out.println("DEBUG-INDEXABSTRACT ***: peer " + peer + "   has urls: " + urls);
                 System.out.println("DEBUG-INDEXABSTRACT ***: peer " + peer + " from words: " + words);
                 secondarySearchThreads[c++] = yacySearch.secondaryRemoteSearch(
-                        words, urls, urlStore, wordIndex, rcContainers, peer, plasmaSwitchboard.urlBlacklist, snippetCache,
+                        words, "", urls, urlStore, wordIndex, rcContainers, peer, plasmaSwitchboard.urlBlacklist, snippetCache,
                         profileGlobal, ranking, query.constraint);
 
             }
@@ -328,35 +328,48 @@ public final class plasmaSearchEvent extends Thread implements Runnable {
         return wordlist;
     }
     
-    public Map localSearchContainers(Set urlselection) {
+    public Map[] localSearchContainers(Set urlselection) {
         // search for the set of hashes and return a map of of wordhash:indexContainer containing the seach result
 
         // retrieve entities that belong to the hashes
         profileLocal.startTimer();
-        Map containers = wordIndex.getContainers(
+        long start = System.currentTimeMillis();
+        Map inclusionContainers = wordIndex.getContainers(
                         query.queryHashes,
                         urlselection,
                         true,
                         true,
-                        profileLocal.getTargetTime(plasmaSearchTimingProfile.PROCESS_COLLECTION));
-        if ((containers.size() != 0) && (containers.size() < query.size())) containers = new HashMap(); // prevent that only a subset is returned
+                        profileLocal.getTargetTime(plasmaSearchTimingProfile.PROCESS_COLLECTION) * query.queryHashes.size() / (query.queryHashes.size() + query.excludeHashes.size()));
+        if ((inclusionContainers.size() != 0) && (inclusionContainers.size() < query.queryHashes.size())) inclusionContainers = new HashMap(); // prevent that only a subset is returned
+        long remaintime =  profileLocal.getTargetTime(plasmaSearchTimingProfile.PROCESS_COLLECTION) - System.currentTimeMillis() + start;
+        Map exclusionContainers = ((inclusionContainers == null) || (inclusionContainers.size() == 0) || (remaintime <= 0)) ? new HashMap() : wordIndex.getContainers(
+                query.excludeHashes,
+                urlselection,
+                true,
+                true,
+                remaintime);
         profileLocal.setYieldTime(plasmaSearchTimingProfile.PROCESS_COLLECTION);
-        profileLocal.setYieldCount(plasmaSearchTimingProfile.PROCESS_COLLECTION, containers.size());
+        profileLocal.setYieldCount(plasmaSearchTimingProfile.PROCESS_COLLECTION, inclusionContainers.size());
 
-        return containers;
+        return new Map[]{inclusionContainers, exclusionContainers};
     }
     
-    public indexContainer localSearchJoin(Collection containers) {
+    public indexContainer localSearchJoinExclude(Collection includeContainers, Collection excludeContainers) {
         // join a search result and return the joincount (number of pages after join)
 
         // since this is a conjunction we return an empty entity if any word is not known
-        if (containers == null) return wordIndex.emptyContainer(null);
+        if (includeContainers == null) return wordIndex.emptyContainer(null);
 
         // join the result
         profileLocal.startTimer();
-        indexContainer rcLocal = indexContainer.joinContainer(containers,
-                profileLocal.getTargetTime(plasmaSearchTimingProfile.PROCESS_JOIN),
+        long start = System.currentTimeMillis();
+        indexContainer rcLocal = indexContainer.joinContainers(includeContainers,
+                profileLocal.getTargetTime(plasmaSearchTimingProfile.PROCESS_JOIN) * query.queryHashes.size() / (query.queryHashes.size() + query.excludeHashes.size()),
                 query.maxDistance);
+        long remaining = profileLocal.getTargetTime(plasmaSearchTimingProfile.PROCESS_JOIN) - System.currentTimeMillis() + start;
+        if ((rcLocal != null) && (remaining > 0)) {
+        	indexContainer.excludeContainers(rcLocal, excludeContainers, remaining);
+        }
         if (rcLocal == null) rcLocal = wordIndex.emptyContainer(null);
         profileLocal.setYieldTime(plasmaSearchTimingProfile.PROCESS_JOIN);
         profileLocal.setYieldCount(plasmaSearchTimingProfile.PROCESS_JOIN, rcLocal.size());

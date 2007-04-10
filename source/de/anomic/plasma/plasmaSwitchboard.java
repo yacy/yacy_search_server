@@ -2769,9 +2769,9 @@ public final class plasmaSwitchboard extends serverAbstractSwitch implements ser
                             wordIndex.loadedURL.remove(urlentry.hash()); // clean up
                             continue; // next result
                         }
+                        urlstring = "http://" + address + "/" + host.substring(0, p) + filename;
                         urlname = "http://share." + seed.getName() + ".yacy" + filename;
                         if ((p = urlname.indexOf("?")) > 0) urlname = urlname.substring(0, p);
-                        urlstring = "http://" + address + "/" + host.substring(0, p) + filename;
                     } else {
                         urlstring = comp.url().toNormalform();
                         urlname = urlstring;

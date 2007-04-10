@@ -89,6 +89,7 @@ public final class search {
 //      final String  youare = post.get("youare", ""); // seed hash of the target peer, used for testing network stability
         final String  key    = post.get("key", "");    // transmission key for response
         final String  query  = post.get("query", "");  // a string of word hashes that shall be searched and combined
+        final String  exclude= post.get("exclude", "");// a string of word hashes that shall not be within the search result
         String  urls   = post.get("urls", "");         // a string of url hashes that are preselected for the search: no other may be returned
         String abstracts = post.get("abstracts", "");  // a string of word hashes for abstracts that shall be generated, or 'auto' (for maxcount-word), or '' (for none)
 //      final String  fwdep  = post.get("fwdep", "");  // forward depth. if "0" then peer may NOT ask another peer for more results
@@ -126,7 +127,8 @@ public final class search {
         }
 
         // prepare search
-        final TreeSet keyhashes = plasmaSearchQuery.hashes2Set(query);
+        final TreeSet queryhashes = plasmaSearchQuery.hashes2Set(query);
+        final TreeSet excludehashes = (exclude.length() == 0) ? new TreeSet(kelondroBase64Order.enhancedCoder) : plasmaSearchQuery.hashes2Set(exclude);
         final long timestamp = System.currentTimeMillis();
         serverObjects prop = new serverObjects();
         
@@ -138,7 +140,7 @@ public final class search {
         plasmaSearchEvent theSearch = null;
         if ((query.length() == 0) && (abstractSet != null)) {
             // this is _not_ a normal search, only a request for index abstracts
-            squery = new plasmaSearchQuery(abstractSet, maxdist, prefer, plasmaSearchQuery.contentdomParser(contentdom), count, duetime, filter, plasmaSearchQuery.catchall_constraint);
+            squery = new plasmaSearchQuery(abstractSet, new TreeSet(kelondroBase64Order.enhancedCoder), maxdist, prefer, plasmaSearchQuery.contentdomParser(contentdom), count, duetime, filter, plasmaSearchQuery.catchall_constraint);
             squery.domType = plasmaSearchQuery.SEARCHDOM_LOCAL;
             yacyCore.log.logInfo("INIT HASH SEARCH (abstracts only): " + plasmaSearchQuery.anonymizedQueryHashes(squery.queryHashes) + " - " + squery.wantedResults + " links");
 
@@ -148,9 +150,9 @@ public final class search {
             plasmaSearchTimingProfile remoteTiming = null;
 
             theSearch = new plasmaSearchEvent(squery, rankingProfile, localTiming, remoteTiming, true, yacyCore.log, sb.wordIndex, sb.wordIndex.loadedURL, sb.snippetCache);
-            Map containers = theSearch.localSearchContainers(plasmaSearchQuery.hashes2Set(urls));
+            Map[] containers = theSearch.localSearchContainers(plasmaSearchQuery.hashes2Set(urls));
             if (containers != null) {
-                Iterator ci = containers.entrySet().iterator();
+                Iterator ci = containers[0].entrySet().iterator();
                 Map.Entry entry;
                 String wordhash;
                 while (ci.hasNext()) {
@@ -165,7 +167,7 @@ public final class search {
             prop.put("joincount", 0);
         } else {
             // retrieve index containers from search request
-            squery = new plasmaSearchQuery(keyhashes, maxdist, prefer, plasmaSearchQuery.contentdomParser(contentdom), count, duetime, filter, constraint);
+            squery = new plasmaSearchQuery(queryhashes, excludehashes, maxdist, prefer, plasmaSearchQuery.contentdomParser(contentdom), count, duetime, filter, constraint);
             squery.domType = plasmaSearchQuery.SEARCHDOM_LOCAL;
             yacyCore.log.logInfo("INIT HASH SEARCH (query-" + abstracts + "): " + plasmaSearchQuery.anonymizedQueryHashes(squery.queryHashes) + " - " + squery.wantedResults + " links");
 
@@ -178,14 +180,14 @@ public final class search {
                     rankingProfile, localTiming, remoteTiming, true,
                     yacyCore.log, sb.wordIndex, sb.wordIndex.loadedURL,
                     sb.snippetCache);
-            Map containers = theSearch.localSearchContainers(plasmaSearchQuery.hashes2Set(urls));
+            Map[] containers = theSearch.localSearchContainers(plasmaSearchQuery.hashes2Set(urls));
 
             // set statistic details of search result and find best result index set
             if (containers == null) {
                 prop.putASIS("indexcount", "");
                 prop.putASIS("joincount", "0");
             } else {
-                Iterator ci = containers.entrySet().iterator();
+                Iterator ci = containers[0].entrySet().iterator();
                 StringBuffer indexcount = new StringBuffer();
                 Map.Entry entry;
                 int maxcount = -1;
@@ -213,7 +215,7 @@ public final class search {
                 prop.putASIS("indexcount", new String(indexcount));
 
                 // join and order the result
-                indexContainer localResults = theSearch.localSearchJoin(containers.values());
+                indexContainer localResults = theSearch.localSearchJoinExclude(containers[0].values(), containers[1].values());
                 if (localResults == null) {
                     joincount = 0;
                     prop.put("joincount", 0);
@@ -226,13 +228,13 @@ public final class search {
                 // generate compressed index for maxcounthash
                 // this is not needed if the search is restricted to specific
                 // urls, because it is a re-search
-                if ((maxcounthash == null) || (urls.length() != 0) || (keyhashes.size() == 1) || (abstracts.length() == 0)) {
+                if ((maxcounthash == null) || (urls.length() != 0) || (queryhashes.size() == 1) || (abstracts.length() == 0)) {
                     prop.putASIS("indexabstract", "");
                 } else if (abstracts.equals("auto")) {
-                    indexabstract.append("indexabstract." + maxcounthash + "=").append(plasmaURL.compressIndex(((indexContainer) containers.get(maxcounthash)),localResults, 1000).toString()).append(serverCore.crlfString);
+                    indexabstract.append("indexabstract." + maxcounthash + "=").append(plasmaURL.compressIndex(((indexContainer) containers[0].get(maxcounthash)),localResults, 1000).toString()).append(serverCore.crlfString);
                     if ((neardhthash != null)
                             && (!(neardhthash.equals(maxcounthash)))) {
-                        indexabstract.append("indexabstract." + neardhthash + "=").append(plasmaURL.compressIndex(((indexContainer) containers.get(neardhthash)), localResults, 1000).toString()).append(serverCore.crlfString);
+                        indexabstract.append("indexabstract." + neardhthash + "=").append(plasmaURL.compressIndex(((indexContainer) containers[0].get(neardhthash)), localResults, 1000).toString()).append(serverCore.crlfString);
                     }
                     //System.out.println("DEBUG-ABSTRACTGENERATION: maxcounthash = " + maxcounthash);
                     //System.out.println("DEBUG-ABSTRACTGENERATION: neardhthash  = "+ neardhthash);

@@ -103,11 +103,11 @@ public final class plasmaSearchQuery {
         this.constraint = constraint;
     }
     
-    public plasmaSearchQuery(TreeSet queryHashes, int maxDistance, String prefer, int contentdom,
+    public plasmaSearchQuery(TreeSet queryHashes, TreeSet excludeHashes, int maxDistance, String prefer, int contentdom,
                              int wantedResults, long maximumTime, String urlMask,
                              kelondroBitfield constraint) {
         this.queryString = null;
-        this.excludeHashes =  new TreeSet(kelondroBase64Order.enhancedCoder);;
+        this.excludeHashes =  excludeHashes;
         this.maxDistance = maxDistance;
         this.prefer = prefer;
         this.contentdom = contentdom;
@@ -184,10 +184,6 @@ public final class plasmaSearchQuery {
         	}
         }
         return new TreeSet[]{query, exclude};
-    }
-    
-    public int size() {
-    	return queryHashes.size();
     }
     
     public String queryString() {

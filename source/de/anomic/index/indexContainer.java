@@ -213,7 +213,7 @@ public class indexContainer extends kelondroRowSet {
         }
     }
 
-    public static indexContainer joinContainer(Collection containers, long time, int maxDistance) {
+    public static indexContainer joinContainers(Collection containers, long time, int maxDistance) {
         
         long stamp = System.currentTimeMillis();
         
@@ -256,6 +256,23 @@ public class indexContainer extends kelondroRowSet {
         // in 'searchResult' is now the combined search result
         if (searchResult.size() == 0) return null;
         return searchResult;
+    }
+    
+    public static indexContainer excludeContainers(indexContainer pivot, Collection containers, long time) {
+        
+        long stamp = System.currentTimeMillis();
+        
+        // check if there is any result
+        if ((containers == null) || (containers.size() == 0)) return pivot; // no result, nothing found
+        
+        Iterator i = containers.iterator();
+        while (i.hasNext()) {
+        	time -= (System.currentTimeMillis() - stamp); stamp = System.currentTimeMillis();
+        	pivot = excludeDestructive(pivot, (indexContainer) i.next(), time);
+        	if ((pivot == null) || (pivot.size() == 0)) return null;
+        }
+        
+        return pivot;
     }
     
     // join methods
@@ -346,6 +363,83 @@ public class indexContainer extends kelondroRowSet {
             }
         }
         return conj;
+    }
+    
+    public static indexContainer excludeDestructive(indexContainer pivot, indexContainer excl, long time) {
+        if (pivot == null) return null;
+        if (excl == null) return pivot;
+        if (pivot.size() == 0) return null;
+        if (excl.size() == 0) return pivot;
+        
+        // decide which method to use
+        int high = ((pivot.size() > excl.size()) ? pivot.size() : excl.size());
+        int low  = ((pivot.size() > excl.size()) ? excl.size() : pivot.size());
+        int stepsEnum = 10 * (high + low - 1);
+        int stepsTest = 12 * log2(high) * low;
+        
+        // start most efficient method
+        if (stepsEnum > stepsTest) {
+            return excludeDestructiveByTest(pivot, excl, time);
+        } else {
+            return excludeDestructiveByEnumeration(pivot, excl, time);
+        }
+    }
+    
+    private static indexContainer excludeDestructiveByTest(indexContainer pivot, indexContainer excl, long time) {
+        assert pivot.rowdef.equals(excl.rowdef) : "small = " + pivot.rowdef.toString() + "; large = " + excl.rowdef.toString();
+        int keylength = pivot.rowdef.width(0);
+        assert (keylength == excl.rowdef.width(0));
+        boolean iterate_pivot = pivot.size() < excl.size();
+        Iterator se = (iterate_pivot) ? pivot.entries() : excl.entries();
+        indexRWIEntry ie0, ie1;
+        long stamp = System.currentTimeMillis();
+            while ((se.hasNext()) && ((System.currentTimeMillis() - stamp) < time)) {
+                ie0 = (indexRWIEntry) se.next();
+                ie1 = excl.get(ie0.urlHash());
+                if ((ie0 != null) && (ie1 != null)) {
+                    assert (ie0.urlHash().length() == keylength) : "ie0.urlHash() = " + ie0.urlHash();
+                    assert (ie1.urlHash().length() == keylength) : "ie1.urlHash() = " + ie1.urlHash();
+                    if (iterate_pivot) se.remove(); pivot.remove(ie0.urlHash().getBytes());
+                }
+            }
+        return pivot;
+    }
+    
+    private static indexContainer excludeDestructiveByEnumeration(indexContainer pivot, indexContainer excl, long time) {
+        assert pivot.rowdef.equals(excl.rowdef) : "i1 = " + pivot.rowdef.toString() + "; i2 = " + excl.rowdef.toString();
+        int keylength = pivot.rowdef.width(0);
+        assert (keylength == excl.rowdef.width(0));
+        if (!((pivot.rowdef.getOrdering().signature().equals(excl.rowdef.getOrdering().signature())) &&
+              (pivot.rowdef.primaryKey() == excl.rowdef.primaryKey()))) return pivot; // ordering must be equal
+        Iterator e1 = pivot.entries();
+        Iterator e2 = excl.entries();
+        int c;
+        if ((e1.hasNext()) && (e2.hasNext())) {
+            indexRWIEntry ie1;
+            indexRWIEntry ie2;
+            ie1 = (indexRWIEntry) e1.next();
+            ie2 = (indexRWIEntry) e2.next();
+
+            long stamp = System.currentTimeMillis();
+            while ((System.currentTimeMillis() - stamp) < time) {
+                assert (ie1.urlHash().length() == keylength) : "ie1.urlHash() = " + ie1.urlHash();
+                assert (ie2.urlHash().length() == keylength) : "ie2.urlHash() = " + ie2.urlHash();
+                c = pivot.rowdef.getOrdering().compare(ie1.urlHash(), ie2.urlHash());
+                //System.out.println("** '" + ie1.getUrlHash() + "'.compareTo('" + ie2.getUrlHash() + "')="+c);
+                if (c < 0) {
+                    if (e1.hasNext()) ie1 = (indexRWIEntry) e1.next(); else break;
+                } else if (c > 0) {
+                    if (e2.hasNext()) ie2 = (indexRWIEntry) e2.next(); else break;
+                } else {
+                    // we have found the same urls in different searches!
+                    ie1.combineDistance(ie2);
+                    e1.remove();
+                    if (e1.hasNext()) ie1 = (indexRWIEntry) e1.next(); else break;
+                    if (e2.hasNext()) ie2 = (indexRWIEntry) e2.next(); else break;
+                }
+            }
+        }
+        return pivot;
     }
 
     public String toString() {

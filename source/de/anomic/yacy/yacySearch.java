@@ -64,7 +64,7 @@ import de.anomic.server.logging.serverLog;
 
 public class yacySearch extends Thread {
 
-    final private String wordhashes, urlhashes;
+    final private String wordhashes, excludehashes, urlhashes;
     final private boolean global;
     final private int partitions;
     final private plasmaCrawlLURL urlManager;
@@ -81,7 +81,7 @@ public class yacySearch extends Thread {
     final private String prefer, filter;
     final private kelondroBitfield constraint;
     
-    public yacySearch(String wordhashes, String urlhashes, String prefer, String filter, int maxDistance, 
+    public yacySearch(String wordhashes, String excludehashes, String urlhashes, String prefer, String filter, int maxDistance, 
                       boolean global, int partitions, yacySeed targetPeer, plasmaCrawlLURL urlManager, plasmaWordIndex wordIndex,
                       indexContainer containerCache, Map abstractCache,
                       plasmaURLPattern blacklist, plasmaSnippetCache snippetCache,
@@ -90,6 +90,7 @@ public class yacySearch extends Thread {
         super("yacySearch_" + targetPeer.getName());
         //System.out.println("DEBUG - yacySearch thread " + this.getName() + " initialized " + ((urlhashes.length() == 0) ? "(primary)" : "(secondary)"));
         this.wordhashes = wordhashes;
+        this.excludehashes = excludehashes;
         this.urlhashes = urlhashes;
         this.prefer = prefer;
         this.filter = filter;
@@ -111,7 +112,7 @@ public class yacySearch extends Thread {
 
     public void run() {
         this.urls = yacyClient.search(
-                    wordhashes, urlhashes, prefer, filter, maxDistance, global, partitions,
+                    wordhashes, excludehashes, urlhashes, prefer, filter, maxDistance, global, partitions,
                     targetPeer, urlManager, wordIndex, containerCache, abstractCache,
                     blacklist, snippetCache, timingProfile, rankingProfile, constraint);
         if (urls != null) {
@@ -206,7 +207,7 @@ public class yacySearch extends Thread {
         return result;
     }
 
-    public static yacySearch[] primaryRemoteSearches(String wordhashes, String urlhashes, String prefer, String filter, int maxDist,
+    public static yacySearch[] primaryRemoteSearches(String wordhashes, String excludehashes, String urlhashes, String prefer, String filter, int maxDist,
                            plasmaCrawlLURL urlManager, plasmaWordIndex wordIndex,
                            indexContainer containerCache, Map abstractCache,
                            int targets, plasmaURLPattern blacklist, plasmaSnippetCache snippetCache,
@@ -223,7 +224,7 @@ public class yacySearch extends Thread {
         if (targets == 0) return null;
         yacySearch[] searchThreads = new yacySearch[targets];
         for (int i = 0; i < targets; i++) {
-            searchThreads[i]= new yacySearch(wordhashes, urlhashes, prefer, filter, maxDist, true, targets, targetPeers[i],
+            searchThreads[i]= new yacySearch(wordhashes, excludehashes, urlhashes, prefer, filter, maxDist, true, targets, targetPeers[i],
                     urlManager, wordIndex, containerCache, abstractCache, blacklist, snippetCache, timingProfile, rankingProfile, constraint);
             searchThreads[i].start();
             //try {Thread.sleep(20);} catch (InterruptedException e) {}
@@ -231,7 +232,7 @@ public class yacySearch extends Thread {
         return searchThreads;
     }
     
-    public static yacySearch secondaryRemoteSearch(String wordhashes, String urlhashes,
+    public static yacySearch secondaryRemoteSearch(String wordhashes, String excludehashes, String urlhashes,
             plasmaCrawlLURL urlManager, plasmaWordIndex wordIndex,
             indexContainer containerCache,
             String targethash, plasmaURLPattern blacklist, plasmaSnippetCache snippetCache,
@@ -244,7 +245,7 @@ public class yacySearch extends Thread {
         //Set wordhashes = plasmaSearch.words2hashes(querywords);
         final yacySeed targetPeer = yacyCore.seedDB.getConnected(targethash);
         if (targetPeer == null) return null;
-        yacySearch searchThread = new yacySearch(wordhashes, urlhashes, "", "", 9999, true, 0, targetPeer,
+        yacySearch searchThread = new yacySearch(wordhashes, excludehashes, urlhashes, "", "", 9999, true, 0, targetPeer,
                                              urlManager, wordIndex, containerCache, new TreeMap(), blacklist, snippetCache, timingProfile, rankingProfile, constraint);
         searchThread.start();
         return searchThread;
