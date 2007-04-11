@@ -29,7 +29,7 @@
       <fieldset class="yacys">
               <input id="search" name="search" type="text" size="50" maxlength="80" value="#[former]#" onclick="document.getElementById('Enter').value = 'Search'" />
               <input id="Enter" type="submit" name="Enter" value="Search" /> &nbsp;
-              <a href="index.html?display=#[display]#&amp;searchoptions=1&amp;count=#[count]#&amp;order=#[order]#&amp;resource=#[resource]#&amp;time=#[time]#&amp;urlmaskfilter=#[urlmaskfilter]#&amp;prefermaskfilter=#[prefermaskfilter]#&amp;cat=#[cat]#&amp;type=#[type]#&amp;constraint=#[constraint]#&amp;contentdom=#[contentdom]#&amp;former=#[former]#">more options</a>
+              <a href="index.html?display=#[display]#&amp;input=#[input]#&amp;searchoptions=1&amp;count=#[count]#&amp;resource=#[resource]#&amp;time=#[time]#&amp;urlmaskfilter=#[urlmaskfilter]#&amp;prefermaskfilter=#[prefermaskfilter]#&amp;cat=#[cat]#&amp;type=#[type]#&amp;constraint=#[constraint]#&amp;contentdom=#[contentdom]#&amp;former=#[former]#">more options</a>
           <div class="yacysearch">
               <input type="radio" id="text" name="contentdom" value="text"#(contentdomCheckText)#:: checked="checked"#(/contentdomCheckText)# />
               <label for="text">Text</label>&nbsp;&nbsp;
@@ -44,7 +44,6 @@
            </div>
         <input type="hidden" name="former" value="#[former]#" />
         <input type="hidden" name="count" value="#[count]#" />
-        <input type="hidden" name="order" value="#[order]#" />
         <input type="hidden" name="resource" value="#[resource]#" />
         <input type="hidden" name="time" value="#[time]#" />
         <input type="hidden" name="urlmaskfilter" value="#[urlmaskfilter]#" />
@@ -106,7 +105,7 @@ document.getElementById("Enter").value = "search again - catch up more links";
 		<p><strong>Refine your search with these topwords</strong>:</p>
 		<p>
 		#{words}#
-		<a href="yacysearch.html?search=#[newsearch]#&amp;Enter=Search&amp;count=#[count]#&amp;order=#[order]#&amp;resource=#[resource]#&amp;time=#[time]#">#[word]#</a>
+		<a href="yacysearch.html?search=#[newsearch]#&amp;Enter=Search&amp;count=#[count]#&amp;resource=#[resource]#&amp;time=#[time]#">#[word]#</a>
 		#{/words}#
 		</p>
 	#(/combine)#

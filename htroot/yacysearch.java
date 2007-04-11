@@ -52,7 +52,6 @@ import java.net.MalformedURLException;
 import java.net.URLEncoder;
 import java.util.HashMap;
 import java.util.Iterator;
-import java.util.Set;
 import java.util.regex.PatternSyntaxException;
 import java.util.TreeSet;
 
@@ -92,7 +91,8 @@ public class yacysearch {
         final plasmaSwitchboard sb = (plasmaSwitchboard) env;
 
         boolean authenticated = sb.adminAuthenticated(header) >= 2;
-        int display = ((post == null) || (!authenticated)) ? 0 : post.getInt("display", 0);
+        int display = (post == null) ? 0 : post.getInt("display", 0);
+        if ((display == 1) && (!authenticated)) display = 0;
         int input = (post == null) ? 0 : post.getInt("input", 1);
         String promoteSearchPageGreeting = env.getConfig("promoteSearchPageGreeting", "");
         if (promoteSearchPageGreeting.length() == 0) promoteSearchPageGreeting = "P2P WEB SEARCH";
@@ -120,7 +120,10 @@ public class yacysearch {
 
             // we create empty entries for template strings
             final serverObjects prop = new serverObjects();
+            prop.put("input", input);
             prop.put("display", display);
+            prop.put("input_input", input);
+            prop.put("input_display", display);
             prop.putASIS("input_promoteSearchPageGreeting", promoteSearchPageGreeting);
             prop.put("input_former", "");
             prop.put("input_count", 10);
@@ -144,7 +147,6 @@ public class yacysearch {
             prop.put("input_contentdomCheckVideo", 0);
             prop.put("input_contentdomCheckImage", 0);
             prop.put("input_contentdomCheckApp", 0);
-            prop.put("input", 0);
             return prop;
         }
 
@@ -255,7 +257,6 @@ public class yacysearch {
         final boolean globalsearch = (global) && (yacyonline) && (!samesearch);
         
         // do the search
-        Set querywords = query[0];
         plasmaSearchQuery thisSearch = new plasmaSearchQuery(
         			querystring,
         			plasmaCondenser.words2hashes(query[0]),
@@ -317,7 +318,7 @@ public class yacysearch {
                 prop.put("type_results_" + i + "_ybr", plasmaSearchPreOrder.ybr(result.getUrlentry().hash()));
                 prop.put("type_results_" + i + "_size", Long.toString(result.getUrlentry().size()));
                 try {
-                    prop.put("type_results_" + i + "_words", URLEncoder.encode(querywords.toString(),"UTF-8"));
+                    prop.put("type_results_" + i + "_words", URLEncoder.encode(query[0].toString(),"UTF-8"));
                 } catch (UnsupportedEncodingException e) {}
                 prop.put("type_results_" + i + "_former", results.getFormerSearch());
                 prop.put("type_results_" + i + "_rankingprops", result.getUrlentry().word().toPropertyForm() + ", domLengthEstimated=" + plasmaURL.domLengthEstimation(result.getUrlhash()) +
@@ -439,10 +440,10 @@ public class yacysearch {
                 }
             }
 
-            prop.put("type", (thisSearch.contentdom == plasmaSearchQuery.CONTENTDOM_TEXT) ? 0 : ((thisSearch.contentdom == plasmaSearchQuery.CONTENTDOM_IMAGE) ? 2 : 1));
+            prop.put("input_type", (thisSearch.contentdom == plasmaSearchQuery.CONTENTDOM_TEXT) ? 0 : ((thisSearch.contentdom == plasmaSearchQuery.CONTENTDOM_IMAGE) ? 2 : 1));
             if (prop.getInt("type", 0) == 1) prop.put("type_mediatype", contentdomString);
-            prop.put("cat", "href");
-            prop.put("depth", "0");
+            prop.put("input_cat", "href");
+            prop.put("input_depth", "0");
 
             // adding some additional properties needed for the rss feed
             String hostName = (String) header.get("Host", "localhost");
@@ -478,9 +479,9 @@ public class yacysearch {
             }
             prop.put("type_results", line);
 
-            prop.put("type", 3); // set type of result: image list
-            prop.put("cat", "href");
-            prop.put("depth", depth);
+            prop.put("input_type", 3); // set type of result: image list
+            prop.put("input_cat", "href");
+            prop.put("input_depth", depth);
         }
 
         // if user is not authenticated, he may not vote for URLs
@@ -488,7 +489,10 @@ public class yacysearch {
         for (int i=0; i<linkcount; i++)
             prop.put("type_results_" + i + "_authorized", (authenticated) ? 1 : 0);
 
+        prop.put("input", input);
         prop.put("display", display);
+        prop.put("input_input", input);
+        prop.put("input_display", display);
         prop.putASIS("input_promoteSearchPageGreeting", promoteSearchPageGreeting);
         prop.put("input_former", post.get("search", ""));
         prop.put("input_count", count);
@@ -504,7 +508,7 @@ public class yacysearch {
         prop.put("input_contentdomCheckVideo", (contentdomCode == plasmaSearchQuery.CONTENTDOM_VIDEO) ? 1 : 0);
         prop.put("input_contentdomCheckImage", (contentdomCode == plasmaSearchQuery.CONTENTDOM_IMAGE) ? 1 : 0);
         prop.put("input_contentdomCheckApp", (contentdomCode == plasmaSearchQuery.CONTENTDOM_APP) ? 1 : 0);
-        prop.put("input", input);
+        
         
         // return rewrite properties
         return prop;
