@@ -217,7 +217,6 @@ public class yacySearch extends Thread {
         if (yacyCore.seedDB.mySeed == null || yacyCore.seedDB.mySeed.getAddress() == null) { return null; }
 
         // prepare seed targets and threads
-        //Set wordhashes = plasmaSearch.words2hashes(querywords);
         final yacySeed[] targetPeers = selectPeers(plasmaSearchQuery.hashes2Set(wordhashes), targets);
         if (targetPeers == null) return null;
         targets = targetPeers.length;
@@ -242,7 +241,6 @@ public class yacySearch extends Thread {
         if (yacyCore.seedDB.mySeed == null || yacyCore.seedDB.mySeed.getAddress() == null) { return null; }
 
         // prepare seed targets and threads
-        //Set wordhashes = plasmaSearch.words2hashes(querywords);
         final yacySeed targetPeer = yacyCore.seedDB.getConnected(targethash);
         if (targetPeer == null) return null;
         yacySearch searchThread = new yacySearch(wordhashes, excludehashes, urlhashes, "", "", 9999, true, 0, targetPeer,

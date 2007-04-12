@@ -58,17 +58,10 @@ public class SearchStatistics_p {
             ArrayList array = (page == 1) ? switchboard.localSearches : switchboard.remoteSearches;
             Long trackerHandle;
             HashMap searchProfile;
-            StringBuffer a = null;
             int m = Math.min(maxCount, array.size());
             for (int entCount = 0; entCount < m; entCount++) {
                 searchProfile = (HashMap) array.get(array.size() - entCount - 1);
                 trackerHandle = (Long) searchProfile.get("time");
-                
-                if (page == 1) {
-                    Iterator wi = ((Set) searchProfile.get("querywords")).iterator();
-                    a = new StringBuffer();
-                    while (wi.hasNext()) a.append((String) wi.next()).append(' ');
-                }
             
                 // put values in template
                 prop.put("page_list_" + entCount + "_dark", ((dark) ? 1 : 0) ); dark =! dark;
@@ -77,7 +70,7 @@ public class SearchStatistics_p {
                 if (page == 1) {
                     // local search
                     prop.put("page_list_" + entCount + "_offset", ((Integer) searchProfile.get("offset")).toString());
-                    prop.put("page_list_" + entCount + "_querywords", new String(a));
+                    prop.put("page_list_" + entCount + "_querystring", searchProfile.get("querystring"));
                 } else {
                     // remote search
                     prop.put("page_list_" + entCount + "_peername", (String) searchProfile.get("peername"));

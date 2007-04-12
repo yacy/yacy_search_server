@@ -241,7 +241,7 @@ public final class plasmaSwitchboard extends serverAbstractSwitch implements ser
     public  dbImportManager             dbImportManager;
     public  plasmaDHTFlush              transferIdxThread = null;
     private plasmaDHTChunk              dhtTransferChunk = null;
-    public  ArrayList                   localSearches, remoteSearches;
+    public  ArrayList                   localSearches, remoteSearches; // array of search result properties as HashMaps
     public  HashMap                     localSearchTracker, remoteSearchTracker;
     public  long                        startupTime = 0;
     public  long                        lastseedcheckuptime = -1;
@@ -2842,6 +2842,7 @@ public final class plasmaSwitchboard extends serverAbstractSwitch implements ser
             // prepare search statistics
             Long trackerHandle = new Long(System.currentTimeMillis());
             HashMap searchProfile = theSearch.resultProfile();
+            searchProfile.put("querystring", query.queryString);
             searchProfile.put("time", trackerHandle);
             searchProfile.put("host", client);
             searchProfile.put("offset", new Integer(0));
