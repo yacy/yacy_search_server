@@ -194,12 +194,25 @@ tt, *.tt {
 .diff .added { font-family: monospace; }
 .diff .deleted { font-family: monospace; text-decoration: line-through; }
 
-.imgtable {
-  margin: 1px;
-  padding: 1px;
+.thumbcontainer {
+  margin: 2px;
   width: 100px;
-  border: 0px solid #aaaaaa;
+  height: 160px; /* 96px thumbnail + some lines of text */
   float: left;
+}
+
+.thumblink {
+  display:block;
+  width: 96px;
+  height: 96px;
+  margin: 2px;
+  line-height: 96px;
+  text-align: center;
+  overflow: hidden;
+}
+
+.thumblink img {
+  vertical-align: bottom;
 }
 
 .hides .hoverShow {

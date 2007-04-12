@@ -1647,7 +1647,10 @@ public final class plasmaSwitchboard extends serverAbstractSwitch implements ser
                 return false;
             }
 
-            if ((sbQueue.size() == 0) && ((getThread(CRAWLJOB_LOCAL_CRAWL).getJobCount() == 0))) setPerformance((int) Math.max(120, 60000 / getConfigLong(INDEX_DIST_BUSYSLEEP, 6000))); // if there is no activity, set low performance
+            if ((sbQueue.size() == 0) && ((getThread(CRAWLJOB_LOCAL_CRAWL).getJobCount() == 0))) {
+            	long sleep = getConfigLong(INDEX_DIST_BUSYSLEEP, 6000);
+            	setPerformance((int) Math.max(120, 60000 / (sleep==0?1:sleep))); // if there is no activity, set low performance
+            }
             
             // flush some entries from the RAM cache
             if (sbQueue.size() == 0) wordIndex.flushCacheSome(); // permanent flushing only if we are not busy

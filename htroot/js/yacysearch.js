@@ -25,10 +25,10 @@ function AllMediaSnippets(mediatype) {
 function AllImageSnippets() {
     var query = document.getElementsByName("former")[0].value;
     
-	var span = document.getElementsByTagName("span");
-	for(var x=0;x<span.length;x++) {
-		if (span[x].className == 'snippetLoading') {
-				var url = document.getElementById("url" + span[x].id);
+	var div = document.getElementsByTagName("div");
+	for(var x=0;x<div.length;x++) {
+		if (div[x].className == 'snippetLoading') {
+				var url = document.getElementById("url" + div[x].id);
 				requestImageSnippet(url,query);
 		}
 	}
@@ -159,11 +159,11 @@ function handleImageState(req) {
 	var response = req.responseXML;
 	var urlHash = response.getElementsByTagName("urlHash")[0].firstChild.data;
 	var links = response.getElementsByTagName("links")[0].firstChild.data;
-	var span = document.getElementById(urlHash)
-	removeAllChildren(span);
+	var div = document.getElementById(urlHash)
+	removeAllChildren(div);
 	
 	if (links > 0) {
-		span.className = "snippetLoaded";
+		div.className = "snippetLoaded";
 		for (i = 0; i < links; i++) {
 			var type = response.getElementsByTagName("type")[i].firstChild.data;
 			var href = response.getElementsByTagName("href")[i].firstChild.data;
@@ -177,38 +177,28 @@ function handleImageState(req) {
 			
 			var imganchor = document.createElement("a");
 			imganchor.setAttribute("href", href);
+			imganchor.setAttribute("class", "thumblink")
 			imganchor.appendChild(img);
 			
 			var nameanchor = document.createElement("a");
 			nameanchor.setAttribute("href", href);
 			nameanchor.appendChild(document.createTextNode(name));
 			
-			var col1 = document.createElement("td");
-			col1.setAttribute("width", "100");
-			col1.appendChild(imganchor);
 			
-			var row1 = document.createElement("tr");
-			//row1.setAttribute("class", "TableCellLight");
-			row1.appendChild(col1);
+			var textcontainer = document.createElement("div");
+			textcontainer.setAttribute("class", "TableCellDark");
+			textcontainer.appendChild(nameanchor);
 			
-			var col2 = document.createElement("td");
-			col2.setAttribute("width", "100");
-			col2.appendChild(nameanchor);
-			
-			var row2 = document.createElement("tr");
-			row2.setAttribute("class", "TableCellDark");
-			row2.appendChild(col2);
-
-			var table = document.createElement("table");
-			table.setAttribute("class", "imgtable");
-			table.appendChild(row1);
-			table.appendChild(row2);
-			span.appendChild(table);
+			var thumbcontainer = document.createElement("div");
+			thumbcontainer.setAttribute("class", "thumbcontainer");
+			thumbcontainer.appendChild(imganchor);
+			thumbcontainer.appendChild(textcontainer);
+			div.appendChild(thumbcontainer);
 			//span.appendChild(imganchor);
 		}
 	} else {
-		span.className = "snippetError";
-		span.appendChild(document.createTextNode(""));
+		div.className = "snippetError";
+		div.appendChild(document.createTextNode(""));
 	}
 }
 

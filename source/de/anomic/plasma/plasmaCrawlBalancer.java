@@ -189,7 +189,7 @@ public class plasmaCrawlBalancer {
         int componentsize = urlFileStack.size() + urlRAMStack.size() + sizeDomainStacks();
         try {
             if (componentsize != urlFileIndex.size()) {
-                // hier ist urlIndexFile.size() immer grš§er. warum?
+                // here is urlIndexFile.size() always bigger. why?
                 if (kelondroRecords.debugmode) {
                     serverLog.logWarning("PLASMA BALANCER", "size operation wrong in " + stackname + " - componentsize = " + componentsize + ", urlFileIndex.size() = " + urlFileIndex.size());
                 }

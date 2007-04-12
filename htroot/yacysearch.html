@@ -195,11 +195,10 @@ document.getElementById("Enter").value = "search again - catch up more links";
 	
 	<!-- linklist end -->
 	::<!-- type 2: image search: presents image thumbnails -->
-	<table border="0"><tr><td><!-- table to prevent flow behind last snippet image -->
 	<!-- linklist begin -->
 	#{results}#
 	<!-- link begin -->
-	    <span class="snippetLoading" id="#[urlhash]#">loading snippet from <a href="#[url]#" id="url#[urlhash]#">#[urlname]#</a></span>
+	    <div class="snippetLoading" id="#[urlhash]#">loading snippet from <a href="#[url]#" id="url#[urlhash]#">#[urlname]#</a></div>
 	<!-- link end -->
 	#{/results}#
 	<script type="text/javascript">
@@ -207,7 +206,7 @@ document.getElementById("Enter").value = "search again - catch up more links";
 	addHover();
 	</script> 
 	<!-- linklist end -->
-	</td></tr></table>
+	<br style="clear:left;" />
 	::<!-- type 3: image thumbnail list for one single url -->
 	<table border="0" cellspacing="16" cellpadding="0">
 	#{results}#
