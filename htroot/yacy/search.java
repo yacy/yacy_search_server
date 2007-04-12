@@ -257,7 +257,7 @@ public final class search {
         searchProfile.put("time", trackerHandle);
         sb.remoteSearches.add(searchProfile);
         TreeSet handles = (TreeSet) sb.remoteSearchTracker.get(client);
-        if (handles == null) handles = new TreeSet(kelondroBase64Order.enhancedCoder);
+        if (handles == null) handles = new TreeSet();
         handles.add(trackerHandle);
         sb.remoteSearchTracker.put(client, handles);
         
