@@ -23,6 +23,28 @@
 #(input)#
 	::
     <form class="search small" action="yacysearch.html" method="get" accept-charset="UTF-8">
+      <div>
+      <fieldset class="yacys">
+        <input id="search" name="search" type="text" size="50" maxlength="80" value="#[former]#" onclick="document.getElementById('Enter').value = 'Search'" />
+        <input id="Enter" type="submit" name="Enter" value="Search" />
+        <input type="hidden" name="contentdom" value="#[contentdom]#" />
+        <input type="hidden" name="former" value="#[former]#" />
+        <input type="hidden" name="count" value="#[count]#" />
+        <input type="hidden" name="resource" value="#[resource]#" />
+        <input type="hidden" name="time" value="#[time]#" />
+        <input type="hidden" name="urlmaskfilter" value="#[urlmaskfilter]#" />
+        <input type="hidden" name="prefermaskfilter" value="#[prefermaskfilter]#" />
+        <input type="hidden" name="depth" value="#[depth]#" />
+        <input type="hidden" name="cat" value="#[cat]#" />
+        <input type="hidden" name="type" value="#[type]#" />
+        <input type="hidden" name="display" value="#[display]#" />
+        <input type="hidden" name="input" value="#[input]#" />
+        <input type="hidden" name="constraint" value="#[constraint]#" />
+      </fieldset>
+      </div>
+    </form>
+    ::
+    <form class="search small" action="yacysearch.html" method="get" accept-charset="UTF-8">
       <p class="yacylogo"><a href="http://yacy.net/yacy/" class="yacylogo"><img src="/env/grafics/yacy.png" alt="yacy" /></a></p>
       <h2>#[promoteSearchPageGreeting]#</h2>
       <div>
@@ -52,15 +74,19 @@
         <input type="hidden" name="cat" value="#[cat]#" />
         <input type="hidden" name="type" value="#[type]#" />
         <input type="hidden" name="display" value="#[display]#" />
+        <input type="hidden" name="input" value="#[input]#" />
         <input type="hidden" name="constraint" value="#[constraint]#" />
       </fieldset>
       </div>
     </form>
 #(/input)#
 
+#(searchagain)#
+::
 <script type="text/javascript">
 document.getElementById("Enter").value = "search again - catch up more links";
 </script>
+#(/searchagain)#
 
 <!-- show information about search key handling -->
 #(excluded)#

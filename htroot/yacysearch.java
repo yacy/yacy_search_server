@@ -93,7 +93,7 @@ public class yacysearch {
         boolean authenticated = sb.adminAuthenticated(header) >= 2;
         int display = (post == null) ? 0 : post.getInt("display", 0);
         if ((display == 1) && (!authenticated)) display = 0;
-        int input = (post == null) ? 0 : post.getInt("input", 1);
+        int input = (post == null) ? 2 : post.getInt("input", 2);
         String promoteSearchPageGreeting = env.getConfig("promoteSearchPageGreeting", "");
         if (promoteSearchPageGreeting.length() == 0) promoteSearchPageGreeting = "P2P WEB SEARCH";
 
@@ -120,6 +120,7 @@ public class yacysearch {
 
             // we create empty entries for template strings
             final serverObjects prop = new serverObjects();
+            prop.put("searchagain", 0);
             prop.put("input", input);
             prop.put("display", display);
             prop.put("input_input", input);
@@ -489,6 +490,7 @@ public class yacysearch {
         for (int i=0; i<linkcount; i++)
             prop.put("type_results_" + i + "_authorized", (authenticated) ? 1 : 0);
 
+        prop.put("searchagain", (global) ? 1 : 0);
         prop.put("input", input);
         prop.put("display", display);
         prop.put("input_input", input);
