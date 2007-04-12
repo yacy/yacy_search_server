@@ -1,7 +1,7 @@
 /* Skin */
 
 body {
-  background-color:#F8F8FF;
+  background-color:#FFFFFF;
   color:black;
 }
 
@@ -87,7 +87,7 @@ div.head h1 {
 
 .WikiTOCBox {
   border: 1px solid #aaa;
-  background-color: #F8F8FF;
+  background-color: #FFFFFF;
 }
 
 a.unknown {
@@ -212,7 +212,7 @@ div.ProgressBarFill {
   background-color:#D3D3D3;
 }
 
-.hides:hover .hoverShow { background-color: #F8F8FF; }
+.hides:hover .hoverShow { background-color: #FFFFFF; }
 
 /* Log */
 
