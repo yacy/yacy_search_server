@@ -136,18 +136,18 @@ public class yacysearch {
             prop.put("input_constraint", plasmaSearchQuery.catchall_constraint.exportB64());
             prop.put("input_cat", "href");
             prop.put("input_depth", "0");
-            prop.put("input_type", 0);
-            prop.put("input_type_excluded", 0);
-            prop.put("input_type_num-results", 0);
-            prop.put("input_type_combine", 0);
-            prop.put("input_type_resultbottomline", 0);
-            prop.put("input_type_results", "");
             prop.put("input_contentdom", "text");
             prop.put("input_contentdomCheckText", 1);
             prop.put("input_contentdomCheckAudio", 0);
             prop.put("input_contentdomCheckVideo", 0);
             prop.put("input_contentdomCheckImage", 0);
             prop.put("input_contentdomCheckApp", 0);
+            prop.put("type", 0);
+            prop.put("type_excluded", 0);
+            prop.put("type_num-results", 0);
+            prop.put("type_combine", 0);
+            prop.put("type_resultbottomline", 0);
+            prop.put("type_results", "");
             return prop;
         }
 
@@ -441,7 +441,7 @@ public class yacysearch {
                 }
             }
 
-            prop.put("input_type", (thisSearch.contentdom == plasmaSearchQuery.CONTENTDOM_TEXT) ? 0 : ((thisSearch.contentdom == plasmaSearchQuery.CONTENTDOM_IMAGE) ? 2 : 1));
+            prop.put("type", (thisSearch.contentdom == plasmaSearchQuery.CONTENTDOM_TEXT) ? 0 : ((thisSearch.contentdom == plasmaSearchQuery.CONTENTDOM_IMAGE) ? 2 : 1));
             if (prop.getInt("type", 0) == 1) prop.put("type_mediatype", contentdomString);
             prop.put("input_cat", "href");
             prop.put("input_depth", "0");
@@ -480,7 +480,7 @@ public class yacysearch {
             }
             prop.put("type_results", line);
 
-            prop.put("input_type", 3); // set type of result: image list
+            prop.put("type", 3); // set type of result: image list
             prop.put("input_cat", "href");
             prop.put("input_depth", depth);
         }
