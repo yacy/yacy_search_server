@@ -496,14 +496,18 @@ public final class plasmaWordIndex implements indexRI {
         Iterator i = wordContainers(startHash, ram, rot);
         if (ram) count = Math.min(dhtOutCache.size(), count);
         indexContainer container;
+        // this loop does not terminate using the i.hasNex() predicate when rot == true
+        // because then the underlying iterator is a rotating iterator without termination
+        // in this case a termination must be ensured with a counter
+        // It must also be ensured that the counter is in/decreased every loop
         while ((count > 0) && (i.hasNext())) {
             container = (indexContainer) i.next();
             if ((container != null) && (container.size() > 0)) {
                 containers.add(container);
-                count--;
             }
+            count--; // decrease counter even if the container was null or empty to ensure termination
         }
-        return containers;
+        return containers; // this may return less containers as demanded
     }
 
     public kelondroCloneableIterator wordContainers(String startHash, boolean ram, boolean rot) {

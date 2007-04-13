@@ -47,6 +47,9 @@ public class kelondroRotateIterator implements kelondroCloneableIterator {
     }
     
     public Object next() {
+    	// attention: this iterator has no termination - on purpose.
+    	// it must be taken care that a calling method has a termination predicate different
+    	// from the hasNext() method
         if (!(a.hasNext())) {
             a = (kelondroCloneableIterator) clone.clone(modifier);
         }
