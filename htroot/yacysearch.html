@@ -10,7 +10,7 @@
 	<script type="text/javascript" src="/js/yacysearch.js"></script>
    
 </head>
-<body id="yacysearch" onload="document.getElementById('search').focus()">
+<body id="yacysearch"#(input)#:: onload="document.getElementById('search').focus()":: onload="document.getElementById('search').focus()"#(/input)#>
 
 #(display)#
 	#%env/templates/simpleheader.template%#
@@ -23,7 +23,6 @@
 #(input)#
 	::
     <form class="search small" action="yacysearch.html" method="get" accept-charset="UTF-8">
-      <div>
       <fieldset class="yacys">
         <input id="search" name="search" type="text" size="50" maxlength="80" value="#[former]#" onclick="document.getElementById('Enter').value = 'Search'" />
         <input id="Enter" type="submit" name="Enter" value="Search" />
@@ -41,13 +40,11 @@
         <input type="hidden" name="input" value="#[input]#" />
         <input type="hidden" name="constraint" value="#[constraint]#" />
       </fieldset>
-      </div>
     </form>
     ::
     <form class="search small" action="yacysearch.html" method="get" accept-charset="UTF-8">
       <p class="yacylogo"><a href="http://yacy.net/yacy/" class="yacylogo"><img src="/env/grafics/yacy.png" alt="yacy" /></a></p>
       <h2>#[promoteSearchPageGreeting]#</h2>
-      <div class="noborder">
       <fieldset class="yacys">
               <input id="search" name="search" type="text" size="50" maxlength="80" value="#[former]#" onclick="document.getElementById('Enter').value = 'Search'" />
               <input id="Enter" type="submit" name="Enter" value="Search" /> &nbsp;
@@ -77,7 +74,6 @@
         <input type="hidden" name="input" value="#[input]#" />
         <input type="hidden" name="constraint" value="#[constraint]#" />
       </fieldset>
-      </div>
     </form>
 #(/input)#
 
@@ -161,7 +157,7 @@ document.getElementById("Enter").value = "search again - catch up more links";
 	#{/results}#
 	
 	<script type="text/javascript">
-	AllTextSnippets();
+	AllTextSnippets("#[former]#");
 	addHover();
 	</script> 
 	
@@ -189,7 +185,7 @@ document.getElementById("Enter").value = "search again - catch up more links";
 	<!-- link end -->
 	#{/results}#
 	<script type="text/javascript">
-	AllMediaSnippets("#[mediatype]#");
+	AllMediaSnippets("#[mediatype]#", "#[former]#");
 	addHover();
 	</script> 
 	
@@ -202,7 +198,7 @@ document.getElementById("Enter").value = "search again - catch up more links";
 	<!-- link end -->
 	#{/results}#
 	<script type="text/javascript">
-	AllImageSnippets();
+	AllImageSnippets("#[former]#");
 	addHover();
 	</script> 
 	<!-- linklist end -->

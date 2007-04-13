@@ -1,6 +1,4 @@
-function AllTextSnippets() {
-    var query = document.getElementsByName("former")[0].value;
-    
+function AllTextSnippets(query) {
 	var span = document.getElementsByTagName("span");
 	for(var x=0;x<span.length;x++) {
 		if (span[x].className == 'snippetLoading') {
@@ -10,9 +8,7 @@ function AllTextSnippets() {
 	}
 }
 
-function AllMediaSnippets(mediatype) {
-    var query = document.getElementsByName("former")[0].value;
-    
+function AllMediaSnippets(query, mediatype) {
 	var span = document.getElementsByTagName("span");
 	for(var x=0;x<span.length;x++) {
 		if (span[x].className == 'snippetLoading') {
@@ -22,9 +18,7 @@ function AllMediaSnippets(mediatype) {
 	}
 }
 
-function AllImageSnippets() {
-    var query = document.getElementsByName("former")[0].value;
-    
+function AllImageSnippets(query) {
 	var div = document.getElementsByTagName("div");
 	for(var x=0;x<div.length;x++) {
 		if (div[x].className == 'snippetLoading') {
