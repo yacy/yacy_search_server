@@ -201,20 +201,6 @@ tt, *.tt {
   float: left;
 }
 
-.thumblink {
-  display:block;
-  width: 96px;
-  height: 96px;
-  margin: 2px;
-  line-height: 96px;
-  text-align: center;
-  overflow: hidden;
-}
-
-.thumblink img {
-  vertical-align: bottom;
-}
-
 .hides .hoverShow {
   display: none;
 }
@@ -323,7 +309,7 @@ form.search.small p.yacylogo { /* The logo in yacysearch.html */
   display:block;
   float:left;
   padding:0;
-  margin:5px;
+  margin: 0 5px 5px;
   width:70px;
 }
 
@@ -445,6 +431,16 @@ ul.SubMenu a.MenuItemLink{
   margin-top:0;
 }
 
+a.thumblink {
+  display:block;
+  width: 96px;
+  height: 96px;
+  margin: 2px;
+  line-height: 96px;
+  text-align: center;
+  overflow: hidden;
+}
+
 /*----------
 <em>
 */
@@ -508,14 +504,14 @@ li.menugroup {
 
 dl.pairs dd {
   padding:0.2em 0.5em;
-  margin:2px 0 2px 18.3em;
+  margin:0 0 2px 18.3em;
 }
 
 form dt, dl.pairs dt {
   float:left;
   clear:left;
   width:17em;
-  margin:0 2px 0.5em 2px;
+  margin:0 0 2px;
   padding:0.2em 0.5em;
   text-align:right;
 }
@@ -561,6 +557,11 @@ fieldset.yacysearch {
 form.PeerControl fieldset { /* on Status.html */
 	text-align:right;
 }
+
+form.search.small fieldset {
+    clear:left;
+    margin-left:85px;
+}
 /*----------
 <img>
 */
@@ -568,6 +569,10 @@ form.PeerControl fieldset { /* on Status.html */
 img.bookmarkIcon, img.deleteIcon, img.recommendIcon {
   height: 11px;
   width: 11px;
+}
+
+.thumblink img {
+  vertical-align: bottom;
 }
 
 /* site specific ------------------------------------*/

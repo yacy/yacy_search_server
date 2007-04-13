@@ -131,7 +131,7 @@ function handleMediaState(req) {
 			col2.appendChild(linkanchor);
 			
 			var row = document.createElement("tr");
-			row.setAttribute("class", "TableCellDark");
+			row.className = "TableCellDark";
 			row.appendChild(col1);
 			row.appendChild(col2);
 
@@ -171,7 +171,7 @@ function handleImageState(req) {
 			
 			var imganchor = document.createElement("a");
 			imganchor.setAttribute("href", href);
-			imganchor.setAttribute("class", "thumblink")
+			imganchor.className = "thumblink";
 			imganchor.appendChild(img);
 			
 			var nameanchor = document.createElement("a");
@@ -180,11 +180,11 @@ function handleImageState(req) {
 			
 			
 			var textcontainer = document.createElement("div");
-			textcontainer.setAttribute("class", "TableCellDark");
+			textcontainer.className = "TableCellDark";
 			textcontainer.appendChild(nameanchor);
 			
 			var thumbcontainer = document.createElement("div");
-			thumbcontainer.setAttribute("class", "thumbcontainer");
+			thumbcontainer.className = "thumbcontainer";
 			thumbcontainer.appendChild(imganchor);
 			thumbcontainer.appendChild(textcontainer);
 			div.appendChild(thumbcontainer);
