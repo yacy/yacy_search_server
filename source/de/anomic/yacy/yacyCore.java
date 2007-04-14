@@ -6,7 +6,7 @@
 //
 // $LastChangedDate$
 // $LastChangedRevision$
-// $LastChangedBy: $
+// $LastChangedBy$
 //
 // This program is free software; you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -96,6 +96,7 @@ public class yacyCore {
     public static serverLog log;
     public static long lastOnlineTime = 0;
     public static double latestVersion = 0.1;
+    /** pseudo-random key derived from a time-interval while YaCy startup*/
     public static long speedKey = 0;
     public static File yacyDBPath;
     public static final Map amIAccessibleDB = Collections.synchronizedMap(new HashMap()); // Holds PeerHash / yacyAccessible Relations

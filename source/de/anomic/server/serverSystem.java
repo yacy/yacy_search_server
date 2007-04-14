@@ -239,6 +239,7 @@ public final class serverSystem {
 	return s;
     }
 
+    /** generates a 2-character string containing information about the OS-type*/
     public static String infoKey() {
 	String s = "";
 	if (systemOS == systemUnknown) s += "o";

@@ -120,37 +120,55 @@ public class yacySeed {
      */
     public static final String PEERTYPE = "PeerType";
 
+    /** static/dynamic (if the IP changes often for any reason) */
     public static final String IPTYPE    = "IPType";
     public static final String FLAGS     = "Flags";
     public static final String FLAGSZERO = "____";
+    /** the applications version */
     public static final String VERSION   = "Version";
 
     public static final String YOURTYPE  = "yourtype";
     public static final String LASTSEEN  = "LastSeen";
     public static final String USPEED    = "USpeed";
 
+    /** the name of the peer (user-set) */
     public static final String NAME      = "Name";
     public static final String HASH      = "Hash";
+    /** Birthday - first startup */
     public static final String BDATE     = "BDate";
+    /** UTC-Offset */
     public static final String UTC       = "UTC";
     public static final String PEERTAGS  = "Tags";
 
+    /** the speed of indexing (pages/minute) of the peer */
     public static final String ISPEED    = "ISpeed";
+    /** the speed of retrieval (queries/minute) of the peer */
     public static final String RSPEED    = "RSpeed";
+    /** the number of minutes that the peer is up in minutes/day (moving average MA30) */
     public static final String UPTIME    = "Uptime";
+    /** the number of links that the peer has stored (LURL's) */
     public static final String LCOUNT    = "LCount";
+    /** the number of links that the peer has noticed, but not loaded (NURL's) */
     public static final String NCOUNT    = "NCount";
+    /** the number of words the peer has indexed (as it says) */
     public static final String ICOUNT    = "ICount";
+    /** the number of seeds that the peer has stored */
     public static final String SCOUNT    = "SCount";
-    public static final String CCOUNT    = "CCount"; // Connection Count
-    public static final String CRWCNT    = "CRWCnt"; // Citation Rank (Own) - Count
-    public static final String CRTCNT    = "CRTCnt"; // Citation Rank (Other) - Count
+    /** the number of clients that the peer connects (connects/hour) */
+    public static final String CCOUNT    = "CCount";
+    /** Citation Rank (Own) - Count */
+    public static final String CRWCNT    = "CRWCnt";
+    /** Citation Rank (Other) - Count */
+    public static final String CRTCNT    = "CRTCnt";
     public static final String IP        = "IP";
     public static final String PORT      = "Port";
+    /** zero-value */
     public static final String ZERO      = "0";
     
     // class variables
+    /** the peer-hash */
     public String hash;
+    /** a set of identity founding values, eg. IP, name of the peer, YaCy-version, ...*/
     private final Map dna;
     public int available;
     public int selectscore = -1; // only for debugging
@@ -170,25 +188,25 @@ public class yacySeed {
         // settings that can only be computed by originating peer:
         // at first startup -
         this.hash = theHash; // the hash key of the peer - very important. should be static somehow, even after restart
-        this.dna.put(yacySeed.NAME, "&empty;");  // the name that the peer has given itself
-        this.dna.put(yacySeed.BDATE, "&empty;"); // birthdate - first startup
+        this.dna.put(yacySeed.NAME, "&empty;");
+        this.dna.put(yacySeed.BDATE, "&empty;");
         this.dna.put(yacySeed.UTC, "+0000");
         // later during operation -
-        this.dna.put(yacySeed.ISPEED, yacySeed.ZERO);  // the speed of indexing (pages/minute) of the peer
-        this.dna.put(yacySeed.RSPEED, yacySeed.ZERO);  // the speed of retrieval (queries/minute) of the peer
-        this.dna.put(yacySeed.UPTIME, yacySeed.ZERO);  // the number of minutes that the peer is up in minutes/day (moving average MA30)
-        this.dna.put(yacySeed.LCOUNT, yacySeed.ZERO);  // the number of links that the peer has stored (LURL's)
-        this.dna.put(yacySeed.NCOUNT, yacySeed.ZERO);  // the number of links that the peer has noticed, but not loaded (NURL's)
-        this.dna.put(yacySeed.ICOUNT, yacySeed.ZERO);  // the number of words that the peer has indexed (as it says)
-        this.dna.put(yacySeed.SCOUNT, yacySeed.ZERO);  // the number of seeds that the peer has stored
-        this.dna.put(yacySeed.CCOUNT, yacySeed.ZERO);  // the number of clients that the peer connects (as connects/hour)
-        this.dna.put(yacySeed.VERSION, yacySeed.ZERO); // the applications version
+        this.dna.put(yacySeed.ISPEED, yacySeed.ZERO);
+        this.dna.put(yacySeed.RSPEED, yacySeed.ZERO);
+        this.dna.put(yacySeed.UPTIME, yacySeed.ZERO);
+        this.dna.put(yacySeed.LCOUNT, yacySeed.ZERO);
+        this.dna.put(yacySeed.NCOUNT, yacySeed.ZERO);
+        this.dna.put(yacySeed.ICOUNT, yacySeed.ZERO);
+        this.dna.put(yacySeed.SCOUNT, yacySeed.ZERO);
+        this.dna.put(yacySeed.CCOUNT, yacySeed.ZERO);
+        this.dna.put(yacySeed.VERSION, yacySeed.ZERO);
 
         // settings that is created during the 'hello' phase - in first contact
         this.dna.put(yacySeed.IP, "");                 // 123.234.345.456
         this.dna.put(yacySeed.PORT, "&empty;");
         this.dna.put(yacySeed.PEERTYPE, yacySeed.PEERTYPE_VIRGIN); // virgin/junior/senior/principal
-        this.dna.put(yacySeed.IPTYPE, "&empty;");      // static/dynamic (if the ip changes often for any reason)
+        this.dna.put(yacySeed.IPTYPE, "&empty;");
 
         // settings that can only be computed by visiting peer
         this.dna.put(yacySeed.LASTSEEN, yacyCore.universalDateShortString(new Date())); // for last-seen date
@@ -214,8 +232,8 @@ public class yacySeed {
         this.available = 0;
     }
 
+    /** generate a default peer name */
     public static String makeDefaultPeerName() {
-        // generate a default peer name
         String name = serverCore.publicIP() + "-" + yacyCore.speedKey  + "dpn" + serverSystem.infoKey() + (System.currentTimeMillis() & 99);
         name = name.replace('.', '-');
         name = name.replace('_', '-');
@@ -257,6 +275,11 @@ public class yacySeed {
      */
     public final String orPrincipal() { return get(yacySeed.PEERTYPE, yacySeed.PEERTYPE_PRINCIPAL); }
 
+    /**
+     * Get a value from the peer's DNA (its set of peer defining values, e.g. IP, name, version, ...)
+     * @param key the key for the value to fetch
+     * @param dflt the default value
+     */
     public final String get(String key, String dflt) {
         final Object o = this.dna.get(key);
         if (o == null) { return dflt; }
@@ -277,6 +300,7 @@ public class yacySeed {
         }
     }
 
+    /** return the DNA-map of this peer */
     public final Map getMap() {
         return this.dna;
     }
@@ -370,11 +394,11 @@ public class yacySeed {
         return natLib.getInetAddress((String) this.dna.get(yacySeed.IP));
     }
     
+    /** Get the portnumber of this seed */
     public final int getPort() {
         final String port = (String) this.dna.get(yacySeed.PORT);
         if (port == null) return -1;
-        if (port.length() < 2) return -1;
-
+        /*if (port.length() < 2) return -1; It is possible to use port 0-9*/
         return Integer.parseInt(port);
     }
     
@@ -417,8 +441,8 @@ public class yacySeed {
         return get(yacySeed.LASTSEEN, "20040101000000");
     }
 
+    /** returns the age of the seed in number of days */
     public final int getAge() {
-        // returns the age as number of days
         try {
             final long t = yacyCore.parseUniversalDate(get(yacySeed.BDATE, "20040101000000")).getTime();
             return (int) ((System.currentTimeMillis() - (t - getUTCDiff() + serverDate.UTCDiff())) / 1000 / 60 / 60 / 24);
