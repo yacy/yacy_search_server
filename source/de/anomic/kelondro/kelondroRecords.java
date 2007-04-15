@@ -215,26 +215,26 @@ public class kelondroRecords {
         }
         
         private synchronized void writefree() throws IOException {
-            synchronized (entryFile) {
+            //synchronized (entryFile) {
                 entryFile.writeInt(POS_FREEC, FREEC);
                 entryFile.writeInt(POS_FREEH, FREEH.index);
                 entryFile.commit();
                 checkConsistency();
-            }
+            //}
         }
         
         private synchronized void readused() throws IOException {
-            synchronized (entryFile) {
+            //synchronized (entryFile) {
                 this.USEDC = entryFile.readInt(POS_USEDC);
                 assert this.USEDC >= 0 : "this.USEDC = " + this.USEDC + ", filename = " + filename;
-            }
+            //}
         }
         
         private synchronized void readfree() throws IOException {
-            synchronized (entryFile) {
+            //synchronized (entryFile) {
                 this.FREEC = entryFile.readInt(POS_FREEC);
                 this.FREEH = new Handle(entryFile.readInt(POS_FREEH));
-            }
+            //}
         }
         
         private synchronized int allCount() {
@@ -253,8 +253,8 @@ public class kelondroRecords {
             // re-used change counter
         	assert (h.index >= 0);
             assert (h.index != NUL);
-            synchronized (USAGE) {
-            	synchronized (entryFile) {
+            //synchronized (USAGE) {
+            	//synchronized (entryFile) {
             	    assert (h.index < USEDC + FREEC) : "USEDC = " + USEDC + ", FREEC = " + FREEC + ", h.index = " + h.index;
                     long sp = seekpos(h);
                     assert (sp <= entryFile.length() + ROW.objectsize) : h.index + "/" + sp + " exceeds file size " + entryFile.length();
@@ -266,8 +266,8 @@ public class kelondroRecords {
                     FREEH = h;
                     writefree();
                     writeused(false);
-            	}
-            }
+            	//}
+            //}
         }
         
         private synchronized int allocatePayload(byte[] chunk) throws IOException {
@@ -278,8 +278,8 @@ public class kelondroRecords {
                 chunk = spaceChunk;
             }
             assert (chunk.length == ROW.objectsize()) : "chunk.length = " + chunk.length + ", ROW.objectsize() = " + ROW.objectsize();
-            synchronized (USAGE) {
-            	synchronized (entryFile) {
+            //synchronized (USAGE) {
+            	//synchronized (entryFile) {
             		if (USAGE.FREEC == 0) {
             			// generate new entry
                 		int index = USAGE.allCount();
@@ -321,8 +321,8 @@ public class kelondroRecords {
             			entryFile.write(seekpos(index) + overhead, chunk, 0, ROW.objectsize()); // overwrite space
             			return index;
             		}
-                }
-            }
+                //}
+            //}
         }
         
         private synchronized void allocateRecord(int index, byte[] bulkchunk, int offset) throws IOException {
@@ -334,8 +334,8 @@ public class kelondroRecords {
                 offset = 0;
             }
             //assert (chunk.length == ROW.objectsize()) : "chunk.length = " + chunk.length + ", ROW.objectsize() = " + ROW.objectsize();
-            synchronized (USAGE) {
-            	synchronized (entryFile) {
+            //synchronized (USAGE) {
+            	//synchronized (entryFile) {
             		if (index < USAGE.allCount()) {
             			// write within the file
             			// this can be critical, if we simply overwrite fields that are marked
@@ -368,8 +368,8 @@ public class kelondroRecords {
             				entryFile.commit();
             			}
                     }
-                }
-            }
+                //}
+            //}
         }
         
         private synchronized void checkConsistency() {
