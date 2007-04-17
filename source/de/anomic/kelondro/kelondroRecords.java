@@ -177,7 +177,7 @@ public class kelondroRecords {
         private int    FREEC; // counter of free elements in list of free Nodes
         private Handle FREEH; // pointer to first element in list of free Nodes, empty = NUL
 
-        public usageControl(boolean init) throws IOException {
+        private usageControl(boolean init) throws IOException {
             if (init) {
                 this.USEDC = 0;
                 this.FREEC = 0;
@@ -254,7 +254,7 @@ public class kelondroRecords {
         	assert (h.index >= 0);
             assert (h.index != NUL);
             //synchronized (USAGE) {
-            	//synchronized (entryFile) {
+            	synchronized (entryFile) {
             	    assert (h.index < USEDC + FREEC) : "USEDC = " + USEDC + ", FREEC = " + FREEC + ", h.index = " + h.index;
                     long sp = seekpos(h);
                     assert (sp <= entryFile.length() + ROW.objectsize) : h.index + "/" + sp + " exceeds file size " + entryFile.length();
@@ -266,7 +266,7 @@ public class kelondroRecords {
                     FREEH = h;
                     writefree();
                     writeused(false);
-            	//}
+            	}
             //}
         }
         
@@ -279,7 +279,7 @@ public class kelondroRecords {
             }
             assert (chunk.length == ROW.objectsize()) : "chunk.length = " + chunk.length + ", ROW.objectsize() = " + ROW.objectsize();
             //synchronized (USAGE) {
-            	//synchronized (entryFile) {
+            	synchronized (entryFile) {
             		if (USAGE.FREEC == 0) {
             			// generate new entry
                 		int index = USAGE.allCount();
@@ -292,19 +292,18 @@ public class kelondroRecords {
             			USAGE.USEDC++;
             			USAGE.FREEC--;
             			// take link
-            			int index;
-            			if (USAGE.FREEH.index == NUL) {
+            			int index = USAGE.FREEH.index;
+            			if (index == NUL) {
             				serverLog.logSevere("kelondroRecords/" + filename, "INTERNAL ERROR (DATA INCONSISTENCY): re-use of records failed, lost " + (USAGE.FREEC + 1) + " records.");
             				// try to heal..
             				USAGE.USEDC = USAGE.allCount() + 1;
             				USAGE.FREEC = 0;
             				index = USAGE.USEDC - 1;
             			} else {
-            				index = USAGE.FREEH.index;
             				//System.out.println("*DEBUG* ALLOCATED DELETED INDEX " + index);
             				// check for valid seek position
             				long seekp = seekpos(USAGE.FREEH);
-            				if (seekp > entryFile.length()) {
+            				if (seekp >= entryFile.length()) {
             					// this is a severe inconsistency. try to heal..
             					serverLog.logSevere("kelondroRecords/" + filename, "new Handle: lost " + USAGE.FREEC + " marked nodes; seek position " + seekp + "/" + USAGE.FREEH.index + " out of file size " + entryFile.length() + "/" + ((entryFile.length() - POS_NODES) / recordsize));
             					index = USAGE.allCount(); // a place at the end of the file
@@ -314,6 +313,7 @@ public class kelondroRecords {
             				} else {
             					// read link to next element of FREEH chain
             					USAGE.FREEH.index = entryFile.readInt(seekp);
+            					assert ((USAGE.FREEH.index == NUL) && (USAGE.FREEC == 0)) || seekpos(USAGE.FREEH) < entryFile.length() : "allocatePayload: USAGE.FREEH.index = " + USAGE.FREEH.index + ", seekp = " + seekp;
             				}
             			}
             			USAGE.writeused(false);
@@ -321,7 +321,7 @@ public class kelondroRecords {
             			entryFile.write(seekpos(index) + overhead, chunk, 0, ROW.objectsize()); // overwrite space
             			return index;
             		}
-                //}
+                }
             //}
         }
         
@@ -335,7 +335,7 @@ public class kelondroRecords {
             }
             //assert (chunk.length == ROW.objectsize()) : "chunk.length = " + chunk.length + ", ROW.objectsize() = " + ROW.objectsize();
             //synchronized (USAGE) {
-            	//synchronized (entryFile) {
+            	synchronized (entryFile) {
             		if (index < USAGE.allCount()) {
             			// write within the file
             			// this can be critical, if we simply overwrite fields that are marked
@@ -355,6 +355,7 @@ public class kelondroRecords {
             				entryFile.write(seekpos(h), spaceChunk); // occupy space, othervise the USAGE computaton does not work
             				entryFile.writeInt(seekpos(h), USAGE.FREEH.index);
             				USAGE.FREEH = h;
+            				assert ((USAGE.FREEH.index == NUL) && (USAGE.FREEC == 0)) || seekpos(USAGE.FREEH) < entryFile.length() : "allocateRecord: USAGE.FREEH.index = " + USAGE.FREEH.index;
             				USAGE.writefree();
             				entryFile.commit();
             			}
@@ -368,7 +369,7 @@ public class kelondroRecords {
             				entryFile.commit();
             			}
                     }
-                //}
+                }
             //}
         }
         
@@ -770,7 +771,7 @@ public class kelondroRecords {
         return map;
     }
     
-    public final byte[] bulkRead(int start, int end) throws IOException {
+    public synchronized final byte[] bulkRead(int start, int end) throws IOException {
         // a bulk read simply reads a piece of memory from the record file
         // this makes only sense if there are no overhead bytes or pointer
         // the end value is OUTSIDE the record interval
@@ -803,14 +804,23 @@ public class kelondroRecords {
     }
     
     protected synchronized final void deleteNode(Handle handle) throws IOException {
-        if ((cacheHeaders == null) || (cacheHeaders.size() == 0)) {
-            USAGE.dispose(handle);
-        } else synchronized (cacheHeaders) {
-            cacheHeaders.removeb(handle.index);
-            cacheDelete++;
-            USAGE.dispose(handle);
+    	if (cacheHeaders == null) {
+    		USAGE.dispose(handle);
+    	} else synchronized (cacheHeaders) {
+    		if (cacheHeaders.size() == 0) {
+    			USAGE.dispose(handle);
+    		} else {
+    			cacheHeaders.removeb(handle.index);
+    			cacheDelete++;
+    			USAGE.dispose(handle);
+    		}
         }
     }
+    
+    public synchronized void commit(Node n, int cachePriority) throws IOException {
+    	n.commit(cachePriority);
+    }
+        
 
     public final class Node {
         // an Node holds all information of one row of data. This includes the key to the entry
@@ -839,13 +849,13 @@ public class kelondroRecords {
         //private byte[]    ohBytes  = null;  // the overhead bytes, OHBYTEC values
         //private Handle[]  ohHandle= null;  // the overhead handles, OHHANDLEC values
         //private byte[][]  values  = null;  // an array of byte[] nodes is the value vector
-        protected Handle handle = null; // index of the entry, by default NUL means undefined
-        protected byte[] headChunk = null; // contains ohBytes, ohHandles and the key value
-        protected byte[] tailChunk = null; // contains all values except the key value
-        protected boolean headChanged = false;
-        protected boolean tailChanged = false;
+    	private Handle handle = null; // index of the entry, by default NUL means undefined
+    	private byte[] headChunk = null; // contains ohBytes, ohHandles and the key value
+    	private byte[] tailChunk = null; // contains all values except the key value
+    	private boolean headChanged = false;
+    	private boolean tailChanged = false;
 
-        protected Node(byte[] rowinstance) throws IOException {
+        private Node(byte[] rowinstance) throws IOException {
             // this initializer is used to create nodes from bulk-read byte arrays
             assert ((rowinstance == null) || (rowinstance.length == ROW.objectsize)) : "bulkchunk.length = " + rowinstance.length + ", ROW.width(0) = " + ROW.width(0);
             this.handle = new Handle(USAGE.allocatePayload(rowinstance));
@@ -871,7 +881,7 @@ public class kelondroRecords {
             this.tailChanged = false; // we write the tail already during allocate
         }
         
-        protected Node(Handle handle, byte[] bulkchunk, int offset) throws IOException {
+        private Node(Handle handle, byte[] bulkchunk, int offset) throws IOException {
             // this initializer is used to create nodes from bulk-read byte arrays
             // if write is true, then the chunk in bulkchunk is written to the file
             // othervise it is considered equal to what is stored in the file
@@ -902,7 +912,7 @@ public class kelondroRecords {
             this.tailChanged = changed;
         }
         
-        protected Node(Handle handle, Node parentNode, int referenceInParent, boolean fillTail) throws IOException {
+        private Node(Handle handle, Node parentNode, int referenceInParent, boolean fillTail) throws IOException {
             // this creates an entry with an pre-reserved entry position.
             // values can be written using the setValues() method,
             // but we expect that values are already there in the file.
@@ -1040,7 +1050,7 @@ public class kelondroRecords {
             return (h == NUL) ? null : new Handle(h);
         }
 
-        public byte[] setValueRow(byte[] row) throws IOException {
+        public synchronized byte[] setValueRow(byte[] row) throws IOException {
             // if the index is defined, then write values directly to the file, else only to the object
             if ((row != null) && (row.length != ROW.objectsize())) throw new IOException("setValueRow with wrong (" + row.length + ") row length instead correct: " + ROW.objectsize());
             byte[] result = getValueRow(); // previous value (this loads the values if not already happened)
@@ -1055,18 +1065,18 @@ public class kelondroRecords {
             return result; // return previous value
         }
 
-        public boolean valid() {
+        public synchronized boolean valid() {
             // returns true if the key starts with non-zero byte
         	// this may help to detect deleted entries
-            return headChunk[overhead] != 0;
+            return (headChunk[overhead] != 0) && ((headChunk[overhead] != -128) || (headChunk[overhead + 1] != 0));
         }
 
-        public byte[] getKey() {
+        public synchronized byte[] getKey() {
             // read key
             return trimCopy(headChunk, overhead, ROW.width(0));
         }
 
-        public byte[] getValueRow() throws IOException {
+        public synchronized byte[] getValueRow() throws IOException {
             
             if (this.tailChunk == null) {
                 // load all values from the database file
@@ -1087,7 +1097,7 @@ public class kelondroRecords {
             return row;
         }
 
-        public synchronized void commit(int cachePriority) throws IOException {
+        private synchronized void commit(int cachePriority) throws IOException {
             // this must be called after all write operations to the node are
             // finished
 
@@ -1120,14 +1130,6 @@ public class kelondroRecords {
             
             if (doCommit) entryFile.commit();
             }
-        }
-
-        public synchronized void collapse() {
-            // this must be called after all write and read operations to the
-            // node are finished
-            this.headChunk = null;
-            this.tailChunk = null;
-            this.handle = null;
         }
 
         private byte[] trimCopy(byte[] a, int offset, int length) {
@@ -1168,7 +1170,7 @@ public class kelondroRecords {
             if (cacheGrowStatus() == 2) return true; // no need to flush cache space
             
             // just delete any of the entries
-            if (cacheGrowStatus() <= 1) {
+            if (cacheGrowStatus() <= 1) synchronized (cacheHeaders) {
                 cacheHeaders.removeoneb();
                 cacheFlush++;
             }
@@ -1316,13 +1318,11 @@ public class kelondroRecords {
     }
 
     // Returns the number of key-value mappings in this map.
-    public int size() {
-    	synchronized (entryFile) {
-    		return USAGE.used();
-    	}
+    public synchronized int size() {
+    	return USAGE.used();
     }
 
-    protected final int free() {
+    protected synchronized final int free() {
         return USAGE.FREEC;
     }
     
@@ -1379,13 +1379,12 @@ public class kelondroRecords {
             if (USAGE.FREEC != 0) {
                 Handle h = USAGE.FREEH;
                 long repair_position = POS_FREEH;
-                int iter = 0;
                 while (h.index != NUL) {
                     // check handle
                     seekp = seekpos(h);
                     if (seekp > entryFile.length()) {
                         // repair last hande store position
-                        this.theLogger.severe("KELONDRO WARNING " + this.filename + ": seek position " + seekp + "/" + h.index + " out of file size " + entryFile.length() + "/" + ((entryFile.length() - POS_NODES) / recordsize) + " after " + iter + " iterations; patched wrong node");
+                        this.theLogger.severe("KELONDRO WARNING " + this.filename + ": seek position " + seekp + "/" + h.index + " out of file size " + entryFile.length() + "/" + ((entryFile.length() - POS_NODES) / recordsize) + " after " + markedDeleted.size() + " iterations; patched wrong node");
                         entryFile.writeInt(repair_position, NUL);
                         return markedDeleted;
                     }
@@ -1407,10 +1406,9 @@ public class kelondroRecords {
                     }
                     
                     // this appears to be correct. go on.
-                    iter++;
                     if (System.currentTimeMillis() > timeLimit) throw new kelondroException(filename, "time limit of " + maxTime + " exceeded; > " + markedDeleted.size() + " deleted entries");
                 }
-                System.out.println("\nDEBUG: " + iter + " deleted entries in " + entryFile.name());
+                System.out.println("\nDEBUG: " + markedDeleted.size() + " deleted entries in " + entryFile.name());
             }
         }
         return markedDeleted;

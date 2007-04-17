@@ -9,6 +9,7 @@ import java.sql.DriverManager;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.Iterator;
 import java.util.List;
@@ -125,6 +126,23 @@ public class dbtest {
             final STEntry entry = new STEntry(this.getSource());
             try {
                 getTable().put(getTable().row().newEntry(new byte[][] { entry.getKey(), entry.getValue() , entry.getValue() }));
+            } catch (IOException e) {
+                System.err.println(e);
+                e.printStackTrace();
+                System.exit(0);
+            }
+        }
+    }
+
+    public static final class RemoveJob extends STJob {
+        public RemoveJob(final kelondroIndex aTable, final long aSource) {
+            super(aTable, aSource);
+        }
+
+        public void run() {
+            final STEntry entry = new STEntry(this.getSource());
+            try {
+                getTable().remove(entry.getKey());
             } catch (IOException e) {
                 System.err.println(e);
                 e.printStackTrace();
@@ -357,14 +375,26 @@ public class dbtest {
                 long readCount = Long.parseLong(args[4]);
                 long randomstart = Long.parseLong(args[5]);
                 final Random random = new Random(randomstart);
+                long r;
+                int p;
+                ArrayList ra = new ArrayList();
                 for (int i = 0; i < writeCount; i++) {
-                    serverInstantThread.oneTimeJob(new WriteJob(table, i), random.nextLong() % 1000, 50);
+                	r = random.nextLong() % 1000;
+                    serverInstantThread.oneTimeJob(new WriteJob(table, r), 0, 50);
+                    if (random.nextLong() % 5 == 0) ra.add(new Long(r));
                     for (int j = 0; j < readCount; j++) {
                         serverInstantThread.oneTimeJob(new ReadJob(table, random.nextLong() % writeCount), random.nextLong() % 1000, 20);
                     }
+                    if ((ra.size() > 0) && (random.nextLong() % 7 == 0)) {
+                    	p = Math.abs(random.nextInt()) % ra.size();
+                    	System.out.println("remove: " + ((Long) ra.get(p)).longValue());
+                    	serverInstantThread.oneTimeJob(new RemoveJob(table, ((Long) ra.remove(p)).longValue()), 0, 50);
+                    }
                 }
-                while (serverInstantThread.instantThreadCounter > 0)
-                    try {Thread.sleep(100);} catch (InterruptedException e) {} // wait for all tasks to finish
+                while (serverInstantThread.instantThreadCounter > 0) {
+                    try {Thread.sleep(1000);} catch (InterruptedException e) {} // wait for all tasks to finish
+                    System.out.println("count: "  + serverInstantThread.instantThreadCounter + ", jobs: " + serverInstantThread.jobs.toString());
+                }
                 try {Thread.sleep(6000);} catch (InterruptedException e) {}
             }
             

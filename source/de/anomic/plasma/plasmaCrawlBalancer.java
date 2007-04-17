@@ -146,37 +146,42 @@ public class plasmaCrawlBalancer {
         // this method is only here, because so many import/export methods need it
         // and it was implemented in the previous architecture
         // however, usage is not recommendet
+    	int s = urlFileIndex.size();
        kelondroRow.Entry entry = urlFileIndex.remove(urlhash.getBytes());
        if (entry == null) return null;
+       assert urlFileIndex.size() + 1 == s : "urlFileIndex.size() = " + urlFileIndex.size() + ", s = " + s;
        
        // now delete that thing also from the queues
-       
+
        // iterate through the RAM stack
        Iterator i = urlRAMStack.iterator();
        String h;
-       boolean removed = false;
        while (i.hasNext()) {
            h = (String) i.next();
            if (h.equals(urlhash)) {
                i.remove();
-               removed = true;
-               break;
+               return new plasmaCrawlEntry(entry);
            }
        }
-       if ((kelondroRecords.debugmode) && (!removed)) {
-           serverLog.logWarning("PLASMA BALANCER", "remove: not found urlhash " + urlhash + " in " + stackname);
+       
+       // iterate through the file stack
+       // in general this is a bad idea. But this can only be avoided by avoidance of this method
+       i = urlFileStack.iterator();
+       while (i.hasNext()) {
+           h = new String(((kelondroRecords.Node) i.next()).getKey());
+           if (h.equals(urlhash)) {
+               i.remove();
+               return new plasmaCrawlEntry(entry);
+           }
        }
        
-       // we cannot iterate through the file stack, because the stack iterator
-       // has not yet a delete method implemented. It would also be a bad idea
-       // to do that, it would make too much IO load
-       // instead, the top/pop methods that aquire elements from the stack, that
-       // cannot be found in the urlFileIndex must handle that case silently
-       
+       if (kelondroRecords.debugmode) {
+           serverLog.logWarning("PLASMA BALANCER", "remove: not found urlhash " + urlhash + " in " + stackname);
+       }
        return new plasmaCrawlEntry(entry);
     }
     
-    public boolean has(String urlhash) {
+    public synchronized boolean has(String urlhash) {
         try {
             return urlFileIndex.has(urlhash.getBytes());
         } catch (IOException e) {
@@ -189,7 +194,7 @@ public class plasmaCrawlBalancer {
         int componentsize = urlFileStack.size() + urlRAMStack.size() + sizeDomainStacks();
         try {
             if (componentsize != urlFileIndex.size()) {
-                // here is urlIndexFile.size() always bigger. why?
+                // here is urlIndexFile.size() always smaller. why?
                 if (kelondroRecords.debugmode) {
                     serverLog.logWarning("PLASMA BALANCER", "size operation wrong in " + stackname + " - componentsize = " + componentsize + ", urlFileIndex.size() = " + urlFileIndex.size());
                 }
@@ -285,7 +290,7 @@ public class plasmaCrawlBalancer {
         }
         
         // 2nd-a: check domainStacks for latest arrivals
-        if (result == null) {
+        if ((result == null) && (domainStacks.size() > 0)) {
             // we select specific domains that have not been used for a long time
             // i.e. 60 seconds. Latest arrivals that have not yet been crawled
             // fit also in that scheme
@@ -320,7 +325,7 @@ public class plasmaCrawlBalancer {
         }
         
         // 2nd-b: check domainStacks for best match between stack size and retrieval time
-        if (result == null) {
+        if ((result == null) && (domainStacks.size() > 0)) {
             // we order all domains by the number of entries per domain
             // then we iterate through these domains in descending entry order
             // and that that one, that has a delta > minimumDelta
@@ -407,8 +412,13 @@ public class plasmaCrawlBalancer {
         
         // update statistical data
         domainAccess.put(result.substring(6), new Long(System.currentTimeMillis()));
+        int s = urlFileIndex.size();
         kelondroRow.Entry entry = urlFileIndex.remove(result.getBytes());
-        if (entry == null) return null;
+        assert urlFileIndex.size() + 1 == s : "urlFileIndex.size() = " + urlFileIndex.size() + ", s = " + s + ", result = " + result;
+        if (entry == null) {
+        	serverLog.logSevere("PLASMA BALANCER", "get() found a valid urlhash, but failed to fetch the corresponding url entry - total size = " + size() + ", fileStack.size() = " + urlFileStack.size() + ", ramStack.size() = " + urlRAMStack.size() + ", domainStacks.size() = " + domainStacks.size());
+            return null;
+        }
         return new plasmaCrawlEntry(entry);
     }
     
@@ -444,13 +454,13 @@ public class plasmaCrawlBalancer {
         return new plasmaCrawlEntry(entry);
     }
 
-    public Iterator iterator() throws IOException {
+    public synchronized Iterator iterator() throws IOException {
         return new EntryIterator();
     }
     
-    public class EntryIterator implements Iterator {
+    private class EntryIterator implements Iterator {
 
-        Iterator rowIterator;
+        private Iterator rowIterator;
         
         public EntryIterator() throws IOException {
             rowIterator = urlFileIndex.rows(true, null);

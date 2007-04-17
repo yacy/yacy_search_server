@@ -225,7 +225,7 @@ public class kelondroRowCollection {
         return rowdef.newEntry(chunkcache, index * rowdef.objectsize());
     }
     
-    public final void set(int index, kelondroRow.Entry a) {
+    public synchronized final void set(int index, kelondroRow.Entry a) {
         assert (index >= 0) : "get: access with index " + index + " is below zero";
         assert (index < chunkcount) : "get: access with index " + index + " is above chunkcount " + chunkcount;
         //assert (!(bugappearance(a, astart, alength))) : "a = " + serverLog.arrayList(a, astart, alength);
@@ -234,11 +234,11 @@ public class kelondroRowCollection {
         this.lastTimeWrote = System.currentTimeMillis();
     }
     
-    public void addUnique(kelondroRow.Entry row) {
+    public synchronized void addUnique(kelondroRow.Entry row) {
         addUnique(row.bytes(), 0, row.bytes().length);
     }
     
-    public void addUnique(kelondroRow.Entry row, Date entryDate) {
+    public synchronized void addUnique(kelondroRow.Entry row, Date entryDate) {
         addUnique(row);
     }
 
@@ -247,11 +247,11 @@ public class kelondroRowCollection {
         while (i.hasNext()) addUnique((kelondroRow.Entry) i.next());
     }
     
-    public void add(byte[] a) {
+    public synchronized void add(byte[] a) {
         addUnique(a, 0, a.length);
     }
     
-    private synchronized final void addUnique(byte[] a, int astart, int alength) {
+    private final void addUnique(byte[] a, int astart, int alength) {
         assert (a != null);
         assert (astart >= 0) && (astart < a.length) : " astart = " + a;
         assert (!(serverLog.allZero(a, astart, alength))) : "a = " + serverLog.arrayList(a, astart, alength);
@@ -289,7 +289,7 @@ public class kelondroRowCollection {
         chunkcount += c.size();
     }
 
-    protected final void removeShift(int pos, int dist, int upBound) {
+    private final void removeShift(int pos, int dist, int upBound) {
         assert ((pos + dist) * rowdef.objectsize() >= 0) : "pos = " + pos + ", dist = " + dist + ", rowdef.objectsize() = " + rowdef.objectsize;
         assert (pos * rowdef.objectsize() >= 0) : "pos = " + pos + ", rowdef.objectsize() = " + rowdef.objectsize;
         assert ((pos + dist) * rowdef.objectsize() + (upBound - pos - dist) * rowdef.objectsize() <= chunkcache.length) : "pos = " + pos + ", dist = " + dist + ", rowdef.objectsize() = " + rowdef.objectsize + ", upBound = " + upBound + ", chunkcache.length = " + chunkcache.length;
@@ -299,7 +299,7 @@ public class kelondroRowCollection {
                          (upBound - pos - dist) * rowdef.objectsize());
     }
     
-    protected final void copytop(int i) {
+    private final void copytop(int i) {
         // copies the topmost row element to given position
         if (i == chunkcount - 1) return;
         System.arraycopy(chunkcache, this.rowdef.objectsize() * (chunkcount - 1), chunkcache, this.rowdef.objectsize() * i, this.rowdef.objectsize());
@@ -458,7 +458,7 @@ public class kelondroRowCollection {
                 swap(j, j - 1, 0);
     }
 
-    protected final int swap(int i, int j, int p) {
+    private final int swap(int i, int j, int p) {
         if (i == j) return p;
         if ((this.chunkcount + 1) * this.rowdef.objectsize() < this.chunkcache.length) {
             // there is space in the chunkcache that we can use as buffer
@@ -490,7 +490,7 @@ public class kelondroRowCollection {
         }
     }
     
-    public String toString() {
+    public synchronized String toString() {
         StringBuffer s = new StringBuffer();
         Iterator i = rows();
         if (i.hasNext()) s.append(((kelondroRow.Entry) i.next()).toString());
@@ -519,13 +519,13 @@ public class kelondroRowCollection {
         return c;
     }
 
-    protected int compare(byte[] a, int astart, int alength, int chunknumber) {
+    protected synchronized int compare(byte[] a, int astart, int alength, int chunknumber) {
         assert (chunknumber < chunkcount);
         int l = Math.min(this.rowdef.width(rowdef.primaryKey), Math.min(a.length - astart, alength));
         return rowdef.objectOrder.compare(a, astart, l, chunkcache, chunknumber * this.rowdef.objectsize() + this.rowdef.colstart[rowdef.primaryKey], this.rowdef.width(rowdef.primaryKey));
     }
     
-    protected boolean match(byte[] a, int astart, int alength, int chunknumber) {
+    protected synchronized boolean match(byte[] a, int astart, int alength, int chunknumber) {
         if (chunknumber >= chunkcount) return false;
         int i = 0;
         int p = chunknumber * this.rowdef.objectsize() + this.rowdef.colstart[rowdef.primaryKey];

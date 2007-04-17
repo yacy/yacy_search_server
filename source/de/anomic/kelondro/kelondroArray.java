@@ -38,9 +38,7 @@ public interface kelondroArray {
 
     public int add(kelondroRow.Entry rowinstance) throws IOException;
 
-    public void remove(int index, boolean marked) throws IOException;
-
-    public void resolveMarkedRemoved() throws IOException;
+    public void remove(int index) throws IOException;
     
     public void print() throws IOException;
 

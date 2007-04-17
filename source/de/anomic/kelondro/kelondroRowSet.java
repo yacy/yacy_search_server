@@ -109,6 +109,7 @@ public class kelondroRowSet extends kelondroRowCollection implements kelondroInd
         if (index < 0) return null;
         kelondroRow.Entry entry = super.get(index);
         super.removeRow(index);
+        assert find(a, start, length) < 0; // check if the remove worked
         return entry;
     }
 

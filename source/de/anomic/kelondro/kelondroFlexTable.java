@@ -218,7 +218,13 @@ public class kelondroFlexTable extends kelondroFlexWidthArray implements kelondr
     
     public synchronized kelondroRow.Entry get(byte[] key) throws IOException {
             int pos = RWindex.geti(key);
-            if ((pos < 0) && (ROindex != null)) pos = ROindex.geti(key);
+            if (ROindex != null) {
+            	if (pos < 0) {
+            		pos = ROindex.geti(key);
+            	} else {
+            		assert ROindex.geti(key) < 0;
+            	}
+            }
             if (pos < 0) return null;
             // i may be greater than this.size(), because this table may have deleted entries
             // the deleted entries are subtracted from the 'real' tablesize, so the size may be
@@ -298,11 +304,20 @@ public class kelondroFlexTable extends kelondroFlexWidthArray implements kelondr
     
     public synchronized kelondroRow.Entry remove(byte[] key) throws IOException {
         int i = RWindex.removei(key);
-        if ((i < 0) && (ROindex != null)) i = ROindex.removei(key); // yes, we are allowed to remove entries from RO partition of the index
+        if (ROindex != null) {
+        	if (i < 0) {
+            	i = ROindex.removei(key); // yes, we are allowed to remove entries from RO partition of the index
+            } else {
+            	assert ROindex.removei(key) < 0;
+            }
+        }
+        assert (RWindex.removei(key) < 0);
+        assert (ROindex == null) || (ROindex.removei(key) < 0);
         if (i < 0) return null;
-        kelondroRow.Entry r;
-        r = super.get(i);
-        super.remove(i, false);
+        kelondroRow.Entry r = super.get(i);
+        assert r != null; // error
+        super.remove(i);
+        assert super.get(i) == null : "i = " + i + ", get(i) = " + serverLog.arrayList(super.get(i).bytes(), 0, 12);
         return r;
     }
 
@@ -312,7 +327,7 @@ public class kelondroFlexTable extends kelondroFlexWidthArray implements kelondr
         if (i < 0) return null;
         kelondroRow.Entry r;
         r = super.get(i);
-        super.remove(i, false);
+        super.remove(i);
         return r;
     }
     

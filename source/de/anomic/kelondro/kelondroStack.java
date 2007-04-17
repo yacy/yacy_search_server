@@ -109,6 +109,7 @@ public final class kelondroStack extends kelondroRecords {
 
     public class Counter implements Iterator {
         Handle nextHandle = null;
+        Handle lastHandle = null;
 
         public Counter() {
             nextHandle = getHandle(root);
@@ -119,17 +120,21 @@ public final class kelondroStack extends kelondroRecords {
         }
 
         public Object next() {
-            Handle ret = nextHandle;
+        	lastHandle = nextHandle;
             try {
                 nextHandle = getNode(nextHandle, null, 0, false).getOHHandle(right);
-                return getNode(ret, null, 0, true);
+                return getNode(lastHandle, null, 0, true);
             } catch (IOException e) {
                 throw new kelondroException(filename, "IO error at Counter:next()");
             }
         }
 
         public void remove() {
-            throw new UnsupportedOperationException("no remove here..");
+        	try {
+				unlinkNode(getNode(lastHandle, false));
+			} catch (IOException e) {
+				e.printStackTrace();
+			}
         }
     }
 
@@ -145,7 +150,7 @@ public final class kelondroStack extends kelondroRecords {
             Node n = newNode(row.bytes());
             n.setOHHandle(left, null);
             n.setOHHandle(right, null);
-            n.commit(CP_NONE);
+            commit(n, CP_NONE);
             // assign handles
             setHandle(root, n.handle());
             setHandle(toor, n.handle());
@@ -157,8 +162,8 @@ public final class kelondroStack extends kelondroRecords {
             n.setOHHandle(right, null);
             Node n1 = getNode(getHandle(toor), null, 0, false);
             n1.setOHHandle(right, n.handle());
-            n.commit(CP_NONE);
-            n1.commit(CP_NONE);
+            commit(n, CP_NONE);
+            commit(n1, CP_NONE);
             // assign handles
             setHandle(toor, n.handle());
             // thats it
@@ -248,7 +253,7 @@ public final class kelondroStack extends kelondroRecords {
             Node k = getNode(l, null, 0, false);
             k.setOHHandle(left, k.getOHHandle(left));
             k.setOHHandle(right, r);
-            k.commit(CP_NONE);
+            commit(k, CP_NONE);
         }
         // look right
         if (r == null) {
@@ -259,7 +264,7 @@ public final class kelondroStack extends kelondroRecords {
             Node k = getNode(r, null, 0, false);
             k.setOHHandle(left, l);
             k.setOHHandle(right, k.getOHHandle(right));
-            k.commit(CP_NONE);
+            commit(k, CP_NONE);
         }
     }
     

@@ -42,6 +42,7 @@ package de.anomic.server;
 
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
+import java.util.TreeMap;
 
 import de.anomic.server.logging.serverLog;
 
@@ -49,8 +50,10 @@ public final class serverInstantThread extends serverAbstractThread implements s
     
     private Method jobExecMethod, jobCountMethod, freememExecMethod;
     private Object environment;
+    private Long   handle;
     
     public static int instantThreadCounter = 0;
+    public static TreeMap jobs = new TreeMap();
     
     public serverInstantThread(Object env, String jobExec, String jobCount, String freemem) {
         // jobExec is the name of a method of the object 'env' that executes the one-step-run
@@ -81,6 +84,7 @@ public final class serverInstantThread extends serverAbstractThread implements s
         }
         this.environment = env;
         this.setName(env.getClass().getName() + "." + jobExec);
+        this.handle = new Long(System.currentTimeMillis() + this.getName().hashCode());
     }
     
     public int getJobCount() {
@@ -103,6 +107,8 @@ public final class serverInstantThread extends serverAbstractThread implements s
         
     public boolean job() throws Exception {
         instantThreadCounter++;
+        //System.out.println("started job " + this.handle + ": " + this.getName());
+        synchronized(jobs) {jobs.put(this.handle, this.getName());}
         boolean jobHasDoneSomething = false;
         try {
             Object result = jobExecMethod.invoke(environment, new Object[0]);
@@ -129,6 +135,7 @@ public final class serverInstantThread extends serverAbstractThread implements s
             freemem();
         }
         instantThreadCounter--;
+        synchronized(jobs) {jobs.remove(this.handle);}
         return jobHasDoneSomething;
     }
     

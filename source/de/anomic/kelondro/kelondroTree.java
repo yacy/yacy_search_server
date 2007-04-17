@@ -164,10 +164,10 @@ public class kelondroTree extends kelondroRecords implements kelondroIndex {
     private void commitNode(Node n) throws IOException {
         Handle left = n.getOHHandle(leftchild);
         Handle right = n.getOHHandle(rightchild);
-        if ((left == null) && (right == null)) n.commit(CP_LOW);
-        else if (left == null) n.commit(CP_MEDIUM);
-        else if (right == null) n.commit(CP_MEDIUM);
-        else n.commit(CP_HIGH);
+        if ((left == null) && (right == null)) commit(n, CP_LOW);
+        else if (left == null) commit(n, CP_MEDIUM);
+        else if (right == null) commit(n, CP_MEDIUM);
+        else commit(n, CP_HIGH);
     }
 
     public boolean has(byte[] key) throws IOException {
@@ -269,7 +269,7 @@ public class kelondroTree extends kelondroRecords implements kelondroIndex {
                     thenode.setOHHandle(parent, null);
                     thenode.setOHHandle(leftchild, null);
                     thenode.setOHHandle(rightchild, null);
-                    thenode.commit(CP_NONE);
+                    commit(thenode, CP_NONE);
                     logWarning("kelondroTree.Search.process: database contains loops; the loop-nodes have been auto-fixed");
                     found = false;
                     return;
@@ -372,7 +372,7 @@ public class kelondroTree extends kelondroRecords implements kelondroIndex {
                 e.setOHHandle(leftchild, null);
                 e.setOHHandle(rightchild, null);
                 // do updates
-                e.commit(CP_LOW);
+                commit(e, CP_LOW);
                 setHandle(root, e.handle());
                 result = null;
             } else {
@@ -391,15 +391,15 @@ public class kelondroTree extends kelondroRecords implements kelondroIndex {
                 theNode.setOHHandle(parent, parentNode.handle());
                 theNode.setOHHandle(leftchild, null);
                 theNode.setOHHandle(rightchild, null);
-                theNode.commit(CP_LOW);
+                commit(theNode, CP_LOW);
                 
                 // check consistency and link new node to parent node
                 byte parentBalance;
                 if (writeSearchObj.isLeft()) {
-                    if (parentNode.getOHHandle(leftchild) != null) throw new kelondroException(filename, "tried to create leftchild node twice. parent=" + new String(parentNode.getKey()) + ", leftchild=" + new String(new Node(parentNode.getOHHandle(leftchild), (Node) null, 0, true).getKey()));
+                    if (parentNode.getOHHandle(leftchild) != null) throw new kelondroException(filename, "tried to create leftchild node twice. parent=" + new String(parentNode.getKey()) + ", leftchild=" + new String(getNode(parentNode.getOHHandle(leftchild), (Node) null, 0, true).getKey()));
                     parentNode.setOHHandle(leftchild, theNode.handle());
                 } else if (writeSearchObj.isRight()) {
-                    if (parentNode.getOHHandle(rightchild) != null) throw new kelondroException(filename, "tried to create rightchild node twice. parent=" + new String(parentNode.getKey()) + ", rightchild=" + new String(new Node(parentNode.getOHHandle(rightchild), (Node) null, 0, true).getKey()));
+                    if (parentNode.getOHHandle(rightchild) != null) throw new kelondroException(filename, "tried to create rightchild node twice. parent=" + new String(parentNode.getKey()) + ", rightchild=" + new String(getNode(parentNode.getOHHandle(rightchild), (Node) null, 0, true).getKey()));
                     parentNode.setOHHandle(rightchild, theNode.handle());
                 } else {
                     throw new kelondroException(filename, "neither left nor right child");
@@ -933,7 +933,7 @@ public class kelondroTree extends kelondroRecords implements kelondroIndex {
                         if (visitedNodeHandles.contains(childHandle)) {
                             // try to repair the nextNode
                             nextNode.setOHHandle(childtype, null);
-                            nextNode.commit(CP_NONE);
+                            commit(nextNode, CP_NONE);
                             logWarning("nodeIterator.next: internal loopback; fixed loop and try to go on");
                             break;
                         }
