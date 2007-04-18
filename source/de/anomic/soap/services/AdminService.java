@@ -98,8 +98,8 @@ public class AdminService extends AbstractService {
 	
 	// remote triggered crawl properties
 	private static final String CRAWL_RESPONSE = "crawlResponse";
-	private static final String _62_REMOTETRIGGEREDCRAWL_BUSYSLEEP = "62_remotetriggeredcrawl_busysleep";
-	private static final String _62_REMOTETRIGGEREDCRAWL = "62_remotetriggeredcrawl";
+	private static final String _62_REMOTETRIGGEREDCRAWL_BUSYSLEEP = plasmaSwitchboard.CRAWLJOB_REMOTE_TRIGGERED_CRAWL_BUSYSLEEP;
+	private static final String _62_REMOTETRIGGEREDCRAWL = plasmaSwitchboard.CRAWLJOB_REMOTE_TRIGGERED_CRAWL;
 	
 	// index transfer properties
 	private static final String INDEX_RECEIVE_BLOCK_BLACKLIST = "indexReceiveBlockBlacklist";

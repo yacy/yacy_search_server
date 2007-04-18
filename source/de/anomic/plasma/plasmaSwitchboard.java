@@ -2979,9 +2979,9 @@ public final class plasmaSwitchboard extends serverAbstractSwitch implements ser
         setConfig(CRAWLJOB_GLOBAL_CRAWL_TRIGGER_BUSYSLEEP , thread.setBusySleep(Math.max(1000, newBusySleep * 3)));
         thread.setIdleSleep(10000);
         
-        thread = getThread(CRAWLJOB_REMOTE_TRIGGERED_CRAWL);
-        setConfig(CRAWLJOB_REMOTE_TRIGGERED_CRAWL_BUSYSLEEP , thread.setBusySleep(newBusySleep * 10));
-        thread.setIdleSleep(10000);
+        //thread = getThread(CRAWLJOB_REMOTE_TRIGGERED_CRAWL);
+        //setConfig(CRAWLJOB_REMOTE_TRIGGERED_CRAWL_BUSYSLEEP , thread.setBusySleep(newBusySleep * 10));
+        //thread.setIdleSleep(10000);
         
         thread = getThread(PROXY_CACHE_ENQUEUE);
         setConfig(PROXY_CACHE_ENQUEUE_BUSYSLEEP , thread.setBusySleep(0));

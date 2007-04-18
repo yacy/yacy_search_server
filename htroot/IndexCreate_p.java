@@ -70,7 +70,7 @@ public class IndexCreate_p {
         
         if (post != null) {
             if (post.containsKey("distributedcrawling")) {
-                long newBusySleep = Integer.parseInt(env.getConfig("62_remotetriggeredcrawl_busysleep", "100"));
+                long newBusySleep = Integer.parseInt(env.getConfig(plasmaSwitchboard.CRAWLJOB_REMOTE_TRIGGERED_CRAWL_BUSYSLEEP, "100"));
                 if (post.get("dcr", "").equals("acceptCrawlMax")) {
                     env.setConfig("crawlResponse", "true");
                     newBusySleep = 100;
@@ -83,9 +83,9 @@ public class IndexCreate_p {
                 } else if (post.get("dcr", "").equals("acceptCrawlDenied")) {
                     env.setConfig("crawlResponse", "false");
                 }
-                serverThread rct = switchboard.getThread("62_remotetriggeredcrawl");
+                serverThread rct = switchboard.getThread(plasmaSwitchboard.CRAWLJOB_REMOTE_TRIGGERED_CRAWL);
                 rct.setBusySleep(newBusySleep);
-                env.setConfig("62_remotetriggeredcrawl_busysleep", Long.toString(newBusySleep));
+                env.setConfig(plasmaSwitchboard.CRAWLJOB_REMOTE_TRIGGERED_CRAWL_BUSYSLEEP, Long.toString(newBusySleep));
                 //boolean crawlResponse = ((String) post.get("acceptCrawlMax", "")).equals("on");
                 //env.setConfig("crawlResponse", (crawlResponse) ? "true" : "false");
             }
