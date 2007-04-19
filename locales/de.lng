@@ -1039,8 +1039,8 @@ Passive \(disconnected Senior and Principal\)==Passiv (nicht verbundene Senior u
 Potential \(Junior\)==Potenziell (Junior)
 Network Total==Netzwerk insgesamt
 #YaCy Cluster==YaCy Cluster
-Indexing Speed: \#\[gppm\]\# Pages Per Minute \(PPM\)==Indexier Geschwindikeit: #[gppm]# Seiten pro Minute (PPM)
-Query Frequency: \#\[gqph\]\# Queries Per Hour \(QPH\)==Suchfrequenz: #[gqph]# Suchanfragen pro Minute (QPH) 
+Indexing Speed: \#\[gppm\]\# Pages Per Minute \(PPM\)==Indexier Geschwindigkeit: #[gppm]# Seiten pro Minute (PPM)
+Query Frequency: \#\[gqph\]\# Queries Per Hour \(QPH\)==Suchfrequenz: #[gqph]# Suchanfragen pro Stunde (QPH) 
 Your Peer:==Ihr Peer:
 Version==Version
 Own/Other==Eigene/Andere

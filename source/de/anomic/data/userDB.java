@@ -5,7 +5,7 @@
 //(C) 2005, 2006 by Martin Thelian
 //                  Alexander Schier
 //
-//last change: $LastChangedDate$ by $LastChangedBy: $
+//last change: $LastChangedDate$ by $LastChangedBy$
 //Revision: $LastChangedRevision$
 //
 //This program is free software; you can redistribute it and/or modify
@@ -125,7 +125,7 @@ public final class userDB {
         }
     }    
 
-    /*
+    /**
 	 * use a ProxyAuth String to authenticate a user
 	 * @param auth a base64 Encoded String, which contains "username:pw".
 	 */
@@ -162,11 +162,9 @@ public final class userDB {
             entry=proxyAuth(auth);
         if(entry == null)
             entry=cookieAuth(cookies);
-        if(entry == null)
-            entry=cookieAuth(cookies);
         return entry;
     }
-    /*
+    /**
      * determinate, if a user has Adminrights from a authorisation http-headerfield
      * it tests both userDB and oldstyle adminpw.
      * @param auth the http-headerline for authorisation
@@ -175,13 +173,13 @@ public final class userDB {
         Entry entry=getUser(auth, ip, cookies);
         if(entry != null)
             return entry.hasAdminRight();
-        else if(cookieAdminAuth(cookies))
+        else if(entry != null && cookieAdminAuth(cookies))
             return entry.hasAdminRight();
         else
             return false;
     }
 
-	/*
+	/**
 	 * use a ProxyAuth String to authenticate a user and save the ip/username for ipAuth
 	 * @param auth a base64 Encoded String, which contains "username:pw".
 	 * @param ip an ip.
@@ -195,7 +193,7 @@ public final class userDB {
         this.ipUsers.put(ip, entry.getUserName());
         return entry;
 	}
-	/*
+	/**
 	 * authenticate a user by ip, if he had used proxyAuth in the last 10 Minutes
 	 * @param ip the IP of the User
 	 */

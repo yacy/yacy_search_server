@@ -7,7 +7,7 @@
 //
 // $LastChangedDate$
 // $LastChangedRevision$
-// $LastChangedBy: $
+// $LastChangedBy$
 //
 // This program is free software; you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -540,31 +540,23 @@ public final class plasmaHTCache {
     public static boolean noIndexingURL(String urlString) {
         if (urlString == null) return false;
         urlString = urlString.toLowerCase();
-//        return (
-//                (urlString.endsWith(".gz")) ||
-//                (urlString.endsWith(".msi")) ||
-//                (urlString.endsWith(".doc")) ||
-//                (urlString.endsWith(".zip")) ||
-//                (urlString.endsWith(".tgz")) ||
-//                (urlString.endsWith(".rar")) ||
-//                (urlString.endsWith(".pdf")) ||
-//                (urlString.endsWith(".ppt")) ||
-//                (urlString.endsWith(".xls")) ||
-//                (urlString.endsWith(".log")) ||
-//                (urlString.endsWith(".java")) ||
-//                (urlString.endsWith(".c")) ||
-//                (urlString.endsWith(".p"))
-//        );
+        
+        //http://www.yacy.net/getimage.php?image.png
+        
         int idx = urlString.indexOf("?");
         if (idx > 0) urlString = urlString.substring(0,idx);
 
+        //http://www.yacy.net/getimage.php
+        
         idx = urlString.lastIndexOf(".");
         if (idx > 0) urlString = urlString.substring(idx+1);
 
+        //php
+        
         return plasmaParser.mediaExtContains(urlString);
     }
 
-    /*
+    /**
      * This function moves an old cached object (if it exists) to the new position
      */
     private void moveCachedObject(File oldpath, File newpath) {

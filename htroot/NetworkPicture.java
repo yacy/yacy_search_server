@@ -50,8 +50,7 @@ import de.anomic.server.serverObjects;
 import de.anomic.server.serverSwitch;
 import de.anomic.ymage.ymageMatrix;
 
-// draw a picture of the yacy network
-
+/** draw a picture of the yacy network */
 public class NetworkPicture {
     
     public static ymageMatrix respond(httpHeader header, serverObjects post, serverSwitch env) {

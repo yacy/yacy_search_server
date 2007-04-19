@@ -6,7 +6,7 @@
 //
 // $LastChangedDate$
 // $LastChangedRevision$
-// $LastChangedBy: $
+// $LastChangedBy$
 //
 // This program is free software; you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -535,7 +535,7 @@ public final class yacySeedDB {
                     if (seed != null) {
                         addressStr = seed.getAddress();
                         if (addressStr == null) {
-                        	serverLog.logWarning("YACY","lookupByIP: address of seed " + seed.getName() + "is null.");
+                        	serverLog.logWarning("YACY","lookupByIP: address of seed " + seed.getName() + " is null.");
                         	continue; 
                         }
                         if ((pos = addressStr.indexOf(":"))!= -1) {
