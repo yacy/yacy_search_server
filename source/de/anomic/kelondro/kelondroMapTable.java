@@ -178,7 +178,7 @@ public class kelondroMapTable {
         if (table != null) return table.size();
         
         kelondroIndex Tree = (kelondroIndex) tTables.get(tablename);
-        if (Tree != null) try { return Tree.size(); } catch (IOException e) {return 0;}
+        if (Tree != null) return Tree.size();
         
         throw new RuntimeException("kelondroTables.accumulator: table '" + tablename + "' does not exist.");
     }

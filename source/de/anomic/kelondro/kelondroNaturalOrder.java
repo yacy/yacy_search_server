@@ -168,9 +168,10 @@ public class kelondroNaturalOrder extends kelondroAbstractOrder implements kelon
         int i = 0;
         final int al = Math.min(alength, a.length - aoffset);
         final int bl = Math.min(blength, b.length - boffset);
-        final int len = Math.min(al, bl);
+        if (al > bl) return 1;
+        if (al < bl) return -1;
         int aa, bb;
-        while (i < len) {
+        while (i < al) {
             aa = 0xff & (int) a[i + aoffset];
             bb = 0xff & (int) b[i + boffset];
             if (aa > bb) return 1;
@@ -178,13 +179,7 @@ public class kelondroNaturalOrder extends kelondroAbstractOrder implements kelon
             // else the bytes are equal and it may go on yet undecided
             i++;
         }
-        // check if we have a zero-terminated equality
-        if ((i == al) && (i < bl) && (b[i + boffset] == 0)) return 0;
-        if ((i == bl) && (i < al) && (a[i + aoffset] == 0)) return 0;
-        // no, decide by length
-        if (al > bl) return 1;
-        if (al < bl) return -1;
-        // no, they are equal
+        // they are equal
         return 0;
     }
 

@@ -30,6 +30,8 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Random;
 
+import de.anomic.server.logging.serverLog;
+
 public class kelondroRowSet extends kelondroRowCollection implements kelondroIndex {
 
     private static final int collectionReSortLimit = 90;
@@ -107,9 +109,12 @@ public class kelondroRowSet extends kelondroRowCollection implements kelondroInd
     private synchronized kelondroRow.Entry remove(byte[] a, int start, int length) {
         int index = find(a, start, length);
         if (index < 0) return null;
+        //System.out.println("remove: chunk found at index position (before remove) " + index + ", inset=" + serverLog.arrayList(super.chunkcache, super.rowdef.objectsize() * index, length + 10) + ", searchkey=" + serverLog.arrayList(a, start, length));
         kelondroRow.Entry entry = super.get(index);
         super.removeRow(index);
-        assert find(a, start, length) < 0; // check if the remove worked
+        //System.out.println("remove: chunk found at index position (after  remove) " + index + ", inset=" + serverLog.arrayList(super.chunkcache, super.rowdef.objectsize() * index, length) + ", searchkey=" + serverLog.arrayList(a, start, length));
+        int findagainindex = find(a, start, length);
+        assert findagainindex < 0 : "remove: chunk found again at index position (after  remove) " + findagainindex + ", inset=" + serverLog.arrayList(super.chunkcache, super.rowdef.objectsize() * findagainindex, length) + ", searchkey=" + serverLog.arrayList(a, start, length); // check if the remove worked
         return entry;
     }
 
@@ -132,7 +137,9 @@ public class kelondroRowSet extends kelondroRowCollection implements kelondroInd
         if (rowdef.objectOrder == null) return iterativeSearch(a, astart, alength, 0, this.chunkcount);
         
         // check if a re-sorting make sense
-        if ((this.chunkcount - this.sortBound) > collectionReSortLimit) sort();
+        if ((this.chunkcount - this.sortBound) > collectionReSortLimit) {
+        	sort();
+        }
         
         // first try to find in sorted area
         int p = binarySearch(a, astart, alength);

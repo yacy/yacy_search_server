@@ -112,11 +112,7 @@ public final class plasmaCrawlLURL {
     }
 
     public int size() {
-        try {
-            return urlIndexFile.size();
-        } catch (IOException e) {
-            return 0;
-        }
+        return urlIndexFile.size();
     }
 
     public void close() {

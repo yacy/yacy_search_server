@@ -24,9 +24,10 @@
 
 package de.anomic.kelondro;
 
+import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.Iterator;
-
-//import java.util.Random;
+import java.util.Random;
 
 public class kelondroIntBytesMap {
 
@@ -58,7 +59,6 @@ public class kelondroIntBytesMap {
         newentry.setCol(1, value);
         index.addUnique(newentry);
     }
-
     
     public byte[] putb(int ii, byte[] value) {
         kelondroRow.Entry newentry;
@@ -100,19 +100,40 @@ public class kelondroIntBytesMap {
     }
     
     public static void main(String[] args) {
-        long start = System.currentTimeMillis();
-        kelondroIntBytesMap c = new kelondroIntBytesMap(30, 0);
-        //Random random = new Random(0);
-        int x;
-        for (int i = 0; i < 100000; i++) {
-            //x = random.nextInt(100000);
-            x = i;
-            c.putb(x, new byte[30]);
-            //if (c.getb(x) == null) System.out.println("consistency error at " + i + " with key " + x);
-            if (i % 10000 == 0) System.out.println(i + " entries. ");
-        }
-        System.out.println("RESULT SIZE: " + c.size());
-        System.out.println("Time: " + ((System.currentTimeMillis() - start) / 1000) + " seconds");
-    }
+    	boolean assertEnabled = false;
+    	assert  assertEnabled = true;
+    	System.out.println((assertEnabled) ? "asserts are enabled" : "enable asserts with 'java -ea'; not enabled yet");
+		long start = System.currentTimeMillis();
+		long randomstart = 0;
+		Random random = new Random(randomstart);
+		long r;
+		Long R;
+		int p, rc = 0;
+		ArrayList ra = new ArrayList();
+		HashSet jcontrol = new HashSet();
+		kelondroIntBytesMap kcontrol = new kelondroIntBytesMap(1, 0);
+		for (int i = 0; i < 1000000; i++) {
+			r = Math.abs(random.nextLong() % 10000);
+			//System.out.println("add " + r);
+			jcontrol.add(new Long(r));
+			kcontrol.putb((int) r, "x".getBytes());
+			if (random.nextLong() % 5 == 0) ra.add(new Long(r));
+			if ((ra.size() > 0) && (random.nextLong() % 7 == 0)) {
+				rc++;
+				p = Math.abs(random.nextInt()) % ra.size();
+				R = (Long) ra.get(p);
+				//System.out.println("remove " + R.longValue());
+				jcontrol.remove(R);
+				kcontrol.removeb((int) R.longValue());
+				assert kcontrol.removeb((int) R.longValue()) == null;
+			}
+			assert jcontrol.size() == kcontrol.size();
+		}
+		System.out.println("removed: " + rc + ", size of jcontrol set: "
+				+ jcontrol.size() + ", size of kcontrol set: "
+				+ kcontrol.size());
+		System.out.println("Time: "
+				+ ((System.currentTimeMillis() - start) / 1000) + " seconds");
+	}
     
 }

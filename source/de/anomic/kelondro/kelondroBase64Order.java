@@ -299,8 +299,8 @@ public class kelondroBase64Order extends kelondroAbstractOrder implements kelond
     public final int compare0(byte[] a, int aoffset, int alength, byte[] b, int boffset, int blength) {
         if (zero == null) return compares(a, aoffset, alength, b, boffset, blength);
         // we have an artificial start point. check all combinations
-        int az = compares(a, aoffset, alength, zero, 0, zero.length); // -1 if a < z; 0 if a == z; 1 if a > z
-        int bz = compares(b, boffset, blength, zero, 0, zero.length); // -1 if b < z; 0 if b == z; 1 if b > z
+        int az = compares(a, aoffset, alength, zero, 0, Math.min(alength, zero.length)); // -1 if a < z; 0 if a == z; 1 if a > z
+        int bz = compares(b, boffset, blength, zero, 0, Math.min(blength, zero.length)); // -1 if b < z; 0 if b == z; 1 if b > z
         if ((az ==  0) && (bz ==  0)) return 0;
         if  (az ==  0) return -1;
         if  (bz ==  0) return  1;
@@ -315,32 +315,28 @@ public class kelondroBase64Order extends kelondroAbstractOrder implements kelond
         int i = 0;
         final int al = Math.min(alength, a.length - aoffset);
         final int bl = Math.min(blength, b.length - boffset);
-        final int len = (al > bl) ? bl : al;
+        if (al > bl) return 1;
+        if (al < bl) return -1;
         byte ac, bc;
         byte acc, bcc;
-        while (i < len) {
-            assert (i + aoffset < a.length) : "i = " + i + ", aoffset = " + aoffset + ", a.length = " + a.length + ", a = " + serverLog.arrayList(a, aoffset, len);
-            assert (i + boffset < b.length) : "i = " + i + ", boffset = " + boffset + ", b.length = " + b.length + ", b = " + serverLog.arrayList(b, boffset, len);
+        while (i < al) {
+            assert (i + aoffset < a.length) : "i = " + i + ", aoffset = " + aoffset + ", a.length = " + a.length + ", a = " + serverLog.arrayList(a, aoffset, al);
+            assert (i + boffset < b.length) : "i = " + i + ", boffset = " + boffset + ", b.length = " + b.length + ", b = " + serverLog.arrayList(b, boffset, al);
             ac = a[aoffset + i];
-            assert (ac >= 0) && (ac < 128) : "ac = " + ac + ", a = " + serverLog.arrayList(a, aoffset, len);
+            assert (ac >= 0) && (ac < 128) : "ac = " + ac + ", a = " + serverLog.arrayList(a, aoffset, al);
             bc = b[boffset + i];
-            assert (bc >= 0) && (bc < 128) : "bc = " + bc + ", b = " + serverLog.arrayList(b, boffset, len);
+            if ((ac == 0) && (bc == 0)) return 0; // zero-terminated length
+            assert (bc >= 0) && (bc < 128) : "bc = " + bc + ", b = " + serverLog.arrayList(b, boffset, al);
             acc = ahpla[ac];
-            assert (acc >= 0) : "acc = " + acc + ", a = " + serverLog.arrayList(a, aoffset, len) + "/" + new String(a, aoffset, len) + ", aoffset = 0x" + Integer.toHexString(aoffset) + ", i = " + i + "\n" + serverLog.table(a, 16, aoffset);
+            assert (acc >= 0) : "acc = " + acc + ", a = " + serverLog.arrayList(a, aoffset, al) + "/" + new String(a, aoffset, al) + ", aoffset = 0x" + Integer.toHexString(aoffset) + ", i = " + i + "\n" + serverLog.table(a, 16, aoffset);
             bcc = ahpla[bc];
-            assert (bcc >= 0) : "bcc = " + bcc + ", b = " + serverLog.arrayList(b, boffset, len) + "/" + new String(b, boffset, len) + ", boffset = 0x" + Integer.toHexString(boffset) + ", i = " + i + "\n" + serverLog.table(b, 16, boffset);
+            assert (bcc >= 0) : "bcc = " + bcc + ", b = " + serverLog.arrayList(b, boffset, al) + "/" + new String(b, boffset, al) + ", boffset = 0x" + Integer.toHexString(boffset) + ", i = " + i + "\n" + serverLog.table(b, 16, boffset);
             if (acc > bcc) return 1;
             if (acc < bcc) return -1;
             // else the bytes are equal and it may go on yet undecided
             i++;
         }
-        // check if we have a zero-terminated equality
-        if ((i == al) && (i < bl) && (b[i + boffset] == 0)) return 0;
-        if ((i == bl) && (i < al) && (a[i + aoffset] == 0)) return 0;
-        // no, decide by length
-        if (al > bl) return 1;
-        if (al < bl) return -1;
-        // no, they are equal
+        // they are equal
         return 0;
     }
 

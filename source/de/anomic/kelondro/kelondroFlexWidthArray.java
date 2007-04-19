@@ -231,7 +231,7 @@ public class kelondroFlexWidthArray implements kelondroArray {
                 rowentry = (kelondroRow.Entry) entry.getValue();
                 assert rowentry.objectsize() == this.rowdef.objectsize;
                         
-                e = col[c].row().newEntry(rowentry.bytes(), rowdef.colstart[c]);
+                e = col[c].row().newEntry(rowentry.bytes(), rowdef.colstart[c], false);
                 col[c].set(index, e);             
             }
             c = c + col[c].row().columns();   
@@ -244,7 +244,7 @@ public class kelondroFlexWidthArray implements kelondroArray {
         kelondroRow.Entry e;
 		byte[] reb = rowentry.bytes();
 		while (c < rowdef.columns()) {
-			e = col[c].row().newEntry(reb, rowdef.colstart[c]);
+			e = col[c].row().newEntry(reb, rowdef.colstart[c], false);
 			col[c].set(index, e);
 			c = c + col[c].row().columns();
 		}
@@ -252,16 +252,13 @@ public class kelondroFlexWidthArray implements kelondroArray {
     
     public synchronized int add(kelondroRow.Entry rowentry) throws IOException {
         assert rowentry.objectsize() == this.rowdef.objectsize;
-        kelondroRow.Entry e;
         int index = -1;
 		byte[] reb = rowentry.bytes();
-		e = col[0].row().newEntry(reb, 0);
-		index = col[0].add(e);
+		index = col[0].add(col[0].row().newEntry(reb, 0, false));
 		int c = col[0].row().columns();
 
 		while (c < rowdef.columns()) {
-			e = col[c].row().newEntry(reb, rowdef.colstart[c]);
-			col[c].set(index, e);
+			col[c].set(index, col[c].row().newEntry(reb, rowdef.colstart[c], false));
 			c = c + col[c].row().columns();
 		}
 		return index;
@@ -286,12 +283,12 @@ public class kelondroFlexWidthArray implements kelondroArray {
             kelondroRow.Entry e;
             int index = -1;
             byte[] reb = rowentry.bytes();
-			e = col[0].row().newEntry(reb, 0);
+			e = col[0].row().newEntry(reb, 0, false);
 			index = col[0].add(e);
 			int c = col[0].row().columns();
 
 			while (c < rowdef.columns()) {
-				e = col[c].row().newEntry(reb, rowdef.colstart[c]);
+				e = col[c].row().newEntry(reb, rowdef.colstart[c], false);
 				// remember write to column, but do not write directly
 				colm[c].put(new Integer(index), e); // col[c].set(index,e);
 				c = c + col[c].row().columns();

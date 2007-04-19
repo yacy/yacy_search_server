@@ -137,7 +137,7 @@ public class kelondroFlexSplitTable implements kelondroIndex {
         return new String(suffix);    
     }
     
-    public int size() throws IOException {
+    public int size() {
         Iterator i = tables.values().iterator();
         int s = 0;
         while (i.hasNext()) {

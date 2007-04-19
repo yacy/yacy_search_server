@@ -638,7 +638,7 @@ public class kelondroCache implements kelondroIndex {
         return index.rows(up, firstKey);
     }
 
-    public int size() throws IOException {
+    public int size() {
         return index.size() + ((writeBufferUnique == null) ? 0 : writeBufferUnique.size());
     }
 

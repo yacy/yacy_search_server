@@ -151,21 +151,24 @@ public class kelondroRow {
         //assert (rowinstance[0] != 0);
         assert (this.objectOrder.wellformed(rowinstance, 0, row[0].cellwidth())) : "rowinstance[0] = " + serverLog.arrayList(rowinstance, 0, row[0].cellwidth());
         if (!(this.objectOrder.wellformed(rowinstance, 0, row[0].cellwidth()))) return null;
-        return new Entry(rowinstance);
+        return new Entry(rowinstance, false);
     }
     
     public Entry newEntry(Entry oldrow, int fromColumn) {
         if (oldrow == null) return null;
         assert (oldrow.getColBytes(0)[0] != 0);
         assert (this.objectOrder.wellformed(oldrow.getColBytes(0), 0, row[0].cellwidth()));
-        return new Entry(oldrow, fromColumn);
+        return new Entry(oldrow, fromColumn, false);
     }
     
-    public Entry newEntry(byte[] rowinstance, int start) {
+    public Entry newEntry(byte[] rowinstance, int start, boolean clone) {
         if (rowinstance == null) return null;
         //assert (rowinstance[0] != 0);
         assert (this.objectOrder.wellformed(rowinstance, start, row[0].cellwidth()));
-        return new Entry(rowinstance, start);
+        // this method offers the option to clone the content
+        // this is necessary if it is known that the underlying byte array may change and therefore
+        // the reference to the byte array does not contain the original content
+        return new Entry(rowinstance, start, clone);
     }
     
     public Entry newEntry(byte[][] cells) {
@@ -198,22 +201,23 @@ public class kelondroRow {
             offset = 0;
         }
         
-        public Entry(byte[] newrow) {
-            this(newrow, 0);
+        public Entry(byte[] newrow, boolean forceclone) {
+            this(newrow, 0, forceclone);
         }
         
-        public Entry(Entry oldrow, int fromColumn) {
-            this(oldrow.rowinstance, oldrow.offset + oldrow.colstart(fromColumn));
+        public Entry(Entry oldrow, int fromColumn, boolean forceclone) {
+            this(oldrow.rowinstance, oldrow.offset + oldrow.colstart(fromColumn), forceclone);
         }
         
-        public Entry(byte[] newrow, int start) {
-        	if (newrow.length - start >= objectsize) {
+        public Entry(byte[] newrow, int start, boolean forceclone) {
+        	if ((!forceclone) && (newrow.length - start >= objectsize)) {
         		this.rowinstance = newrow;
+        		this.offset = start;
         	} else {
         		this.rowinstance = new byte[objectsize];
-        		System.arraycopy(newrow, start, this.rowinstance, 0, newrow.length - start);
+        		System.arraycopy(newrow, start, this.rowinstance, 0, objectsize);
+        		this.offset = 0;
         	}
-            this.offset = start;
             //for (int i = ll; i < objectsize; i++) this.rowinstance[i] = 0;
         }
         
@@ -500,6 +504,8 @@ public class kelondroRow {
         }
         
         public byte[] getColBytes(int column) {
+        	assert offset + colstart[column] + row[column].cellwidth() <= rowinstance.length :
+        		"column = " + column + ", offset = " + offset + ", colstart[column] = " + colstart[column] + ", row[column].cellwidth() = " + row[column].cellwidth() + ", rowinstance.length = " + rowinstance.length;
             byte[] c = new byte[row[column].cellwidth()];
             System.arraycopy(rowinstance, offset + colstart[column], c, 0, row[column].cellwidth());
             return c;
@@ -552,7 +558,7 @@ public class kelondroRow {
     public final class EntryIndex extends Entry {
         private int index;
         public EntryIndex(byte[] row, int i) {
-            super(row);
+            super(row, false);
             this.index = i;
         }
         public int index() {

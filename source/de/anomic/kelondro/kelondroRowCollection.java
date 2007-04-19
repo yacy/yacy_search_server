@@ -39,7 +39,7 @@ public class kelondroRowCollection {
 
     public static final double growfactor = 1.4;
     
-    private   byte[]        chunkcache;
+    protected byte[]        chunkcache;
     protected int           chunkcount;
     protected long          lastTimeRead, lastTimeWrote;    
     protected kelondroRow   rowdef;
@@ -222,7 +222,7 @@ public class kelondroRowCollection {
         if (index >= chunkcount) return null;
         if (index * rowdef.objectsize() >= chunkcache.length) return null;
         this.lastTimeRead = System.currentTimeMillis();
-        return rowdef.newEntry(chunkcache, index * rowdef.objectsize());
+        return rowdef.newEntry(chunkcache, index * rowdef.objectsize(), true);
     }
     
     public synchronized final void set(int index, kelondroRow.Entry a) {
@@ -235,7 +235,8 @@ public class kelondroRowCollection {
     }
     
     public synchronized void addUnique(kelondroRow.Entry row) {
-        addUnique(row.bytes(), 0, row.bytes().length);
+    	byte[] r = row.bytes();
+        addUnique(r, 0, r.length);
     }
     
     public synchronized void addUnique(kelondroRow.Entry row, Date entryDate) {
@@ -288,30 +289,27 @@ public class kelondroRowCollection {
         System.arraycopy(c.chunkcache, 0, chunkcache, rowdef.objectsize() * chunkcount, rowdef.objectsize() * c.size());
         chunkcount += c.size();
     }
-
-    private final void removeShift(int pos, int dist, int upBound) {
-        assert ((pos + dist) * rowdef.objectsize() >= 0) : "pos = " + pos + ", dist = " + dist + ", rowdef.objectsize() = " + rowdef.objectsize;
-        assert (pos * rowdef.objectsize() >= 0) : "pos = " + pos + ", rowdef.objectsize() = " + rowdef.objectsize;
-        assert ((pos + dist) * rowdef.objectsize() + (upBound - pos - dist) * rowdef.objectsize() <= chunkcache.length) : "pos = " + pos + ", dist = " + dist + ", rowdef.objectsize() = " + rowdef.objectsize + ", upBound = " + upBound + ", chunkcache.length = " + chunkcache.length;
-        assert (pos * rowdef.objectsize() + (upBound - pos - dist) * rowdef.objectsize() <= chunkcache.length) : "pos = " + pos + ", dist = " + dist + ", rowdef.objectsize() = " + rowdef.objectsize + ", upBound = " + upBound + ", chunkcache.length = " + chunkcache.length;
-        System.arraycopy(chunkcache, (pos + dist) * rowdef.objectsize(),
-                         chunkcache, pos * rowdef.objectsize(),
-                         (upBound - pos - dist) * rowdef.objectsize());
-    }
-    
-    private final void copytop(int i) {
-        // copies the topmost row element to given position
-        if (i == chunkcount - 1) return;
-        System.arraycopy(chunkcache, this.rowdef.objectsize() * (chunkcount - 1), chunkcache, this.rowdef.objectsize() * i, this.rowdef.objectsize());
-    }
     
     protected synchronized final void removeRow(int p) {
-        assert ((p >= 0) && (p < chunkcount) && (chunkcount > 0)) : "p = " + p + ", chunkcount = " + chunkcount;
+        assert p >= 0 : "p = " + p;
+        assert p < chunkcount : "p = " + p + ", chunkcount = " + chunkcount;
+        assert chunkcount > 0 : "chunkcount = " + chunkcount;
+        assert sortBound <= chunkcount : "sortBound = " + sortBound + ", chunkcount = " + chunkcount;
         if (p < sortBound) {
-            removeShift(p, 1, chunkcount);
+        	// remove by shift
+        	System.arraycopy(
+        			chunkcache, (p + 1) * this.rowdef.objectsize(),
+                    chunkcache, p * this.rowdef.objectsize(),
+                    (chunkcount - p - 1) * this.rowdef.objectsize());
             sortBound--;
         } else {
-            copytop(p);
+        	// remove by copying the top-element to the remove position
+        	if (p != chunkcount - 1) {
+        		System.arraycopy(
+        			chunkcache, (chunkcount - 1) * this.rowdef.objectsize(),
+        			chunkcache, p * this.rowdef.objectsize(),
+        			this.rowdef.objectsize());
+        	}
         }
         chunkcount--;
         this.lastTimeWrote = System.currentTimeMillis();
@@ -482,6 +480,8 @@ public class kelondroRowCollection {
         if (chunkcount <= 1) return;
         int i = 0;
         while (i < chunkcount - 1) {
+        	//System.out.println("ENTRY0: " + serverLog.arrayList(chunkcache, rowdef.objectsize*i, rowdef.objectsize));
+        	//System.out.println("ENTRY1: " + serverLog.arrayList(chunkcache, rowdef.objectsize*(i+1), rowdef.objectsize));
             if (compare(i, i + 1) == 0) {
                 removeRow(i);
             } else {

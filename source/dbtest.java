@@ -11,6 +11,7 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Date;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Random;
@@ -23,15 +24,18 @@ import de.anomic.kelondro.kelondroCloneableIterator;
 import de.anomic.kelondro.kelondroFlexSplitTable;
 import de.anomic.kelondro.kelondroFlexTable;
 import de.anomic.kelondro.kelondroIndex;
+import de.anomic.kelondro.kelondroIntBytesMap;
 import de.anomic.kelondro.kelondroNaturalOrder;
 import de.anomic.kelondro.kelondroOrder;
 import de.anomic.kelondro.kelondroProfile;
 import de.anomic.kelondro.kelondroRow;
+import de.anomic.kelondro.kelondroRowSet;
 import de.anomic.kelondro.kelondroSplittedTree;
 import de.anomic.kelondro.kelondroTree;
 import de.anomic.kelondro.kelondroRow.Entry;
 import de.anomic.server.serverInstantThread;
 import de.anomic.server.serverMemory;
+import de.anomic.server.logging.serverLog;
 import de.anomic.ymage.ymageChart;
 
 public class dbtest {
@@ -50,8 +54,9 @@ public class dbtest {
     public static byte[] randomHash(final long r0, final long r1) {
         // a long can have 64 bit, but a 12-byte hash can have 6 * 12 = 72 bits
         // so we construct a generic Hash using two long values
-        return (kelondroBase64Order.enhancedCoder.encodeLong(Math.abs(r0), 11).substring(5) +
-                kelondroBase64Order.enhancedCoder.encodeLong(Math.abs(r1), 11).substring(5)).getBytes();
+        String s = (kelondroBase64Order.enhancedCoder.encodeLong(Math.abs(r0), 6) +
+                    kelondroBase64Order.enhancedCoder.encodeLong(Math.abs(r1), 6));
+        return s.getBytes();
     }
     
     public static byte[] randomHash(Random r) {
@@ -124,6 +129,7 @@ public class dbtest {
 
         public void run() {
             final STEntry entry = new STEntry(this.getSource());
+            System.out.println("write:  " + serverLog.arrayList(entry.getKey(), 0, entry.getKey().length));
             try {
                 getTable().put(getTable().row().newEntry(new byte[][] { entry.getKey(), entry.getValue() , entry.getValue() }));
             } catch (IOException e) {
@@ -141,6 +147,7 @@ public class dbtest {
 
         public void run() {
             final STEntry entry = new STEntry(this.getSource());
+            System.out.println("remove: " + serverLog.arrayList(entry.getKey(), 0, entry.getKey().length));
             try {
                 getTable().remove(entry.getKey());
             } catch (IOException e) {
@@ -194,6 +201,9 @@ public class dbtest {
             
             // create the database access
             kelondroRow testRow = new kelondroRow("byte[] key-" + keylength + ", byte[] dummy-" + keylength + ", value-" + valuelength, kelondroBase64Order.enhancedCoder, 0);
+            if (dbe.equals("kelondroRowSet")) {
+                table = new kelondroRowSet(testRow, 0);
+            }
             if (dbe.equals("kelondroTree")) {
                 File tablefile = new File(tablename + ".kelondro.db");
                 table = new kelondroCache(new kelondroTree(tablefile, true, preload, testRow), true, false);
@@ -376,21 +386,31 @@ public class dbtest {
                 long randomstart = Long.parseLong(args[5]);
                 final Random random = new Random(randomstart);
                 long r;
-                int p;
+                Long R;
+                int p, rc=0;
                 ArrayList ra = new ArrayList();
+                HashSet jcontrol = new HashSet();
+                kelondroIntBytesMap kcontrol = new kelondroIntBytesMap(1, 0);
                 for (int i = 0; i < writeCount; i++) {
-                	r = random.nextLong() % 1000;
+                	r = Math.abs(random.nextLong() % 1000);
+                	jcontrol.add(new Long(r));
+                	kcontrol.putb((int) r, "x".getBytes());
                     serverInstantThread.oneTimeJob(new WriteJob(table, r), 0, 50);
                     if (random.nextLong() % 5 == 0) ra.add(new Long(r));
                     for (int j = 0; j < readCount; j++) {
                         serverInstantThread.oneTimeJob(new ReadJob(table, random.nextLong() % writeCount), random.nextLong() % 1000, 20);
                     }
                     if ((ra.size() > 0) && (random.nextLong() % 7 == 0)) {
+                    	rc++;
                     	p = Math.abs(random.nextInt()) % ra.size();
-                    	System.out.println("remove: " + ((Long) ra.get(p)).longValue());
+                    	R = (Long) ra.get(p);
+                    	jcontrol.remove(R);
+                    	kcontrol.removeb((int) R.longValue());
+                    	System.out.println("remove: " + R.longValue());
                     	serverInstantThread.oneTimeJob(new RemoveJob(table, ((Long) ra.remove(p)).longValue()), 0, 50);
                     }
                 }
+                System.out.println("removed: " + rc + ", size of jcontrol set: " + jcontrol.size() + ", size of kcontrol set: " + kcontrol.size());
                 while (serverInstantThread.instantThreadCounter > 0) {
                     try {Thread.sleep(1000);} catch (InterruptedException e) {} // wait for all tasks to finish
                     System.out.println("count: "  + serverInstantThread.instantThreadCounter + ", jobs: " + serverInstantThread.jobs.toString());
@@ -404,13 +424,34 @@ public class dbtest {
                 long writeCount = Long.parseLong(args[3]);
                 long readCount = Long.parseLong(args[4]);
                 long randomstart = Long.parseLong(args[5]);
-                final Random random = new Random(randomstart);
+                Random random = new Random(randomstart);
+                long r;
+                Long R;
+                int p, rc=0;
+                ArrayList ra = new ArrayList();
+                HashSet jcontrol = new HashSet();
+                kelondroIntBytesMap kcontrol = new kelondroIntBytesMap(1, 0);
                 for (int i = 0; i < writeCount; i++) {
-                    new WriteJob(table, i).run();
+                	//if (i == 30) random = new Random(randomstart);
+                	r = Math.abs(random.nextLong() % 1000);
+                	jcontrol.add(new Long(r));
+                	kcontrol.putb((int) r, "x".getBytes());
+                    new WriteJob(table, r).run();
+                    if (random.nextLong() % 5 == 0) ra.add(new Long(r));
                     for (int j = 0; j < readCount; j++) {
                         new ReadJob(table, random.nextLong() % writeCount).run();
                     }
+                    if ((ra.size() > 0) && (random.nextLong() % 7 == 0)) {
+                    	rc++;
+                    	p = Math.abs(random.nextInt()) % ra.size();
+                    	R = (Long) ra.get(p);
+                    	jcontrol.remove(R);
+                    	kcontrol.removeb((int) R.longValue());
+                    	new RemoveJob(table, ((Long) ra.remove(p)).longValue()).run();
+                    }
                 }
+                try {Thread.sleep(1000);} catch (InterruptedException e) {}
+                System.out.println("removed: " + rc + ", size of jcontrol set: " + jcontrol.size() + ", size of kcontrol set: " + kcontrol.size());
             }
             
             long aftercommand = System.currentTimeMillis();
@@ -418,10 +459,7 @@ public class dbtest {
             System.out.println("Database size = " + table.size() + " unique entries.");
             
             // finally close the database/table
-            if (table instanceof kelondroTree) ((kelondroTree) table).close();
-            if (table instanceof kelondroFlexTable) ((kelondroFlexTable) table).close();
-            if (table instanceof kelondroSplittedTree) ((kelondroSplittedTree) table).close();
-            if (table instanceof dbTable) ((dbTable)table).close();
+            table.close();
             
             long afterclose = System.currentTimeMillis();
             
@@ -501,7 +539,7 @@ final class dbTable implements kelondroIndex {
         this.theDBConnection = null;
     }
     
-    public int size() throws IOException {
+    public int size() {
         int size = -1;
         try {
             String sqlQuery = new String
@@ -521,7 +559,8 @@ final class dbTable implements kelondroIndex {
             
             return size;
         } catch (Exception e) {
-            throw new IOException(e.getMessage());
+        	e.printStackTrace();
+        	return -1;
         }
     }
     
