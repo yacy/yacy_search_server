@@ -5,7 +5,6 @@ http://home.arcor.de/hermens/yacy/seed.txt
 http://low.audioattack.de/yacy/seed.txt
 http://sam-daheim.de/seed.txt
 http://thq.homeip.net/share/seed.txt
-http://www.anomic.de/yacy/seed.txt
 http://www.dortmund.homelinux.org/~samba/yacy/seed.txt
 http://www.lulabad.de/seed.txt
 http://www.suma-lab.de/yacy/seed.txt

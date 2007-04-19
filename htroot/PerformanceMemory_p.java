@@ -116,20 +116,16 @@ public class PerformanceMemory_p {
         String filename;
         Map map;
         int p, c = 0;
-        long ROmem, RWmem, totalmem = 0;
+        long mem, totalmem = 0;
         while (i.hasNext()) {
             filename = (String) i.next();
             map = (Map) kelondroFlexTable.memoryStats(filename);
-            ROmem = Long.parseLong((String) map.get("tableROIndexMem"));
-            RWmem = Long.parseLong((String) map.get("tableRWIndexMem"));
-            totalmem += ROmem;
-            totalmem += RWmem;
+            mem = Long.parseLong((String) map.get("tableIndexMem"));
+            totalmem += mem;
             prop.put("TableList_" + c + "_tableIndexPath", ((p = filename.indexOf("DATA")) < 0) ? filename : filename.substring(p));
             prop.put("TableList_" + c + "_tableIndexChunkSize", map.get("tableIndexChunkSize"));
-            prop.put("TableList_" + c + "_tableROIndexCount", map.get("tableROIndexCount"));
-            prop.put("TableList_" + c + "_tableROIndexMem", ROmem / (1024 * 1024));
-            prop.put("TableList_" + c + "_tableRWIndexCount", map.get("tableRWIndexCount"));
-            prop.put("TableList_" + c + "_tableRWIndexMem", RWmem / (1024 * 1024));
+            prop.put("TableList_" + c + "_tableIndexCount", map.get("tableIndexCount"));
+            prop.put("TableList_" + c + "_tableIndexMem", map.get("tableIndexCount"));
             c++;
         }
         prop.put("TableList", c);
@@ -139,7 +135,6 @@ public class PerformanceMemory_p {
         i = kelondroRecords.filenames();
         c = 0;
         totalmem = 0;
-        long mem;
         while (i.hasNext()) {
             filename = (String) i.next();
             map = (Map) kelondroRecords.memoryStats(filename);

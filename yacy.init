@@ -83,6 +83,24 @@ pkcs12ImportPwd =
 superseedFile=superseed.txt
 superseedLocation=http://www.yacy.net/superseed.txt
 
+
+
+# network definition
+# we distiguish local and global networks. Each network type can have different user groups
+# groups can be uncontrolled, moderated or controlled
+# Each group has a group master, but in case the group is uncontrolled the only task of the
+# group master is to provide a bootstrap file which contains peer addresses of peers that
+# are member of the group. All attributes are given in a single network description string
+# of the form:
+# network = <group-name>:<network-name>:<network-domain>:{'uncontrolled'|'moderated'|'controlled'}:<bootstrap-uri>
+# in case that the network is the uncontrolled global dht-managed community for everybody,
+# the details defaults to:
+# network = all:world:global:uncontrolled:http://yacy.net/
+# the network-uri must have a sub-path yacy/seed.txt containing a list of urls pointing to the
+# peer-address of peers within the group of that network
+# several network definition strings can be listed in a single
+
+
 # bootstrapLoadTimeout
 # this is the time-out for loading of the seedlist files during bootstraping
 # the time should not be too long, since loading of the seedlist is not parallelized
