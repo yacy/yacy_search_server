@@ -185,7 +185,7 @@ public class kelondroFlexTable extends kelondroFlexWidthArray implements kelondr
         System.out.flush();
         ri.sort();
         int sbu = ri.size();
-        ri.uniq();        
+        ri.uniq(10000);        
         if (ri.size() != sbu) serverLog.logSevere("kelondroFlexTable.initializeRamIndex: " + tablename, "; size before uniq = " + sbu + ", after uniq = " + ri.size());
         return ri;
     }

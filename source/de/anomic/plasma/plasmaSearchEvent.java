@@ -391,7 +391,7 @@ public final class plasmaSearchEvent extends Thread implements Runnable {
         searchResult.addAllUnique(rcLocal);
         searchResult.addAllUnique(rcContainers);
         searchResult.sort();
-        searchResult.uniq();
+        searchResult.uniq(1000);
         preorderTime = preorderTime - (System.currentTimeMillis() - pst);
         if (preorderTime < 0) preorderTime = 200;
         plasmaSearchPreOrder preorder = new plasmaSearchPreOrder(query, ranking, searchResult, preorderTime);

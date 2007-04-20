@@ -183,7 +183,7 @@ public class kelondroCollectionIndex {
                     ientry.setCol(idx_col_indexpos,   aentry.index());
                     ientry.setCol(idx_col_lastread,   t);
                     ientry.setCol(idx_col_lastwrote,  t);
-                    index.addUnique(ientry);
+                    index.addUnique(ientry); // FIXME: this should avoid doubles
                     count++;
                     
                     // write a log
@@ -590,7 +590,7 @@ public class kelondroCollectionIndex {
                 // join with new collection
                 oldcollection.addAllUnique(collection);
                 oldcollection.sort();
-                oldcollection.uniq(); // FIXME: not clear if it would be better to insert the collection with put to avoid double-entries
+                oldcollection.uniq(-1); // FIXME: not clear if it would be better to insert the collection with put to avoid double-entries
                 oldcollection.trim(false);
                 
                 // check for size of collection:
@@ -704,7 +704,7 @@ public class kelondroCollectionIndex {
             // join with new collection
             oldcollection.addAllUnique(collection);
             oldcollection.sort();
-            oldcollection.uniq(); // FIXME: not clear if it would be better to insert the collection with put to avoid double-entries
+            oldcollection.uniq(-1); // FIXME: not clear if it would be better to insert the collection with put to avoid double-entries
             oldcollection.trim(false);
             collection = oldcollection;
             

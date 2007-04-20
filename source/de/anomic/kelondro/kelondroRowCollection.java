@@ -473,20 +473,26 @@ public class kelondroRowCollection {
         if (i == p) return j; else if (j == p) return i; else return p;
     }
 
-    public synchronized void uniq() {
+    public synchronized void uniq(long maxtime) {
         assert (this.rowdef.objectOrder != null);
         // removes double-occurrences of chunks
         // this works only if the collection was ordered with sort before
+        // if the collection is large and the number of deletions is also large,
+        // then this method may run a long time with 100% CPU load which is caused
+        // by the large number of memory movements. Therefore it is possible
+        // to assign a runtime limitation
+        long start = System.currentTimeMillis();
         if (chunkcount <= 1) return;
         int i = 0;
         while (i < chunkcount - 1) {
         	//System.out.println("ENTRY0: " + serverLog.arrayList(chunkcache, rowdef.objectsize*i, rowdef.objectsize));
         	//System.out.println("ENTRY1: " + serverLog.arrayList(chunkcache, rowdef.objectsize*(i+1), rowdef.objectsize));
             if (compare(i, i + 1) == 0) {
-                removeRow(i);
+                removeRow(i); // this decreases the chunkcount
             } else {
                 i++;
             }
+            if ((maxtime > 0) && (start + maxtime < System.currentTimeMillis())) break;
         }
     }
     

@@ -259,6 +259,23 @@ public class kelondroRowSet extends kelondroRowCollection implements kelondroInd
     }
     
     public static void main(String[] args) {
+    	// sort/uniq-test
+    	kelondroRow rowdef = new kelondroRow("Cardinal key-4 {b256}, byte[] payload-1", kelondroNaturalOrder.naturalOrder, 0);
+    	kelondroRowSet rs = new kelondroRowSet(rowdef, 0);
+        Random random = new Random(0);
+        kelondroRow.Entry entry;
+        for (int i = 0; i < 10000000; i++) {
+        	entry = rowdef.newEntry();
+        	entry.setCol(0, Math.abs(random.nextLong() % 1000000));
+        	entry.setCol(1, "a".getBytes());
+        	rs.addUnique(entry);
+        }
+        System.out.println("before sort, size = " + rs.size());
+        rs.sort();
+        System.out.println("after sort, before uniq, size = " + rs.size());
+        rs.uniq(10000);
+        System.out.println("after uniq, size = " + rs.size());
+        
         /*
         String[] test = { "eins", "zwei", "drei", "vier", "fuenf", "sechs", "sieben", "acht", "neun", "zehn" };
         kelondroRowSet c = new kelondroRowSet(new kelondroRow(new int[]{10, 3}));
@@ -351,7 +368,7 @@ public class kelondroRowSet extends kelondroRowCollection implements kelondroInd
         byte[] key;
         int testsize = 5000;
         byte[][] delkeys = new byte[testsize / 5][];
-        Random random = new Random(0);
+        random = new Random(0);
         for (int i = 0; i < testsize; i++) {
             key = randomHash(random);
             if (i % 5 != 0) continue;
