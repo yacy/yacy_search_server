@@ -425,6 +425,7 @@ public final class plasmaSearchEvent extends Thread implements Runnable {
                 if (page != null) {
                 	comp = page.comp();
                 	pagetitle = comp.title().toLowerCase();
+                    if (comp.url() == null) continue ordering; // rare case where the url is corrupted
                 	pageurl = comp.url().toString().toLowerCase();
                 	pageauthor = comp.author().toLowerCase();
                 	
