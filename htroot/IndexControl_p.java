@@ -70,7 +70,6 @@ import de.anomic.net.URL;
 import de.anomic.plasma.plasmaCondenser;
 import de.anomic.plasma.plasmaSwitchboard;
 import de.anomic.plasma.urlPattern.plasmaURLPattern;
-import de.anomic.server.serverCodings;
 import de.anomic.server.serverObjects;
 import de.anomic.server.serverSwitch;
 import de.anomic.yacy.yacyClient;
@@ -94,11 +93,6 @@ public class IndexControl_p {
             prop.put("wcount", Integer.toString(switchboard.wordIndex.size()));
             prop.put("ucount", Integer.toString(switchboard.wordIndex.loadedURL.size()));
             prop.put("otherHosts", "");
-            prop.put("indexDistributeChecked", (switchboard.getConfig("allowDistributeIndex", "true").equals("true")) ? 1 : 0);
-            prop.put("indexDistributeWhileCrawling", (switchboard.getConfig("allowDistributeIndexWhileCrawling", "true").equals("true")) ? 1 : 0);
-            prop.put("indexReceiveChecked", (switchboard.getConfig("allowReceiveIndex", "true").equals("true")) ? 1 : 0);
-            prop.put("indexReceiveBlockBlacklistChecked", (switchboard.getConfig("indexReceiveBlockBlacklist", "true").equals("true")) ? 1 : 0);
-            prop.put("peertags", serverCodings.set2string(yacyCore.seedDB.mySeed.getPeerTags(), ",", false));
             listHosts(prop, "");
             return prop; // be save
         }
@@ -122,40 +116,6 @@ public class IndexControl_p {
         String[] urlx = post.getAll("urlhx.*");
         boolean delurl    = post.containsKey("delurl");
         boolean delurlref = post.containsKey("delurlref");
-//      System.out.println("DEBUG CHECK: " + ((delurl) ? "delurl" : "") + " " + ((delurlref) ? "delurlref" : ""));
-
-        // DHT control
-        if (post.containsKey("setIndexTransmission")) {
-            if (post.get("indexDistribute", "").equals("on")) {
-                switchboard.setConfig("allowDistributeIndex", "true");
-            } else {
-                switchboard.setConfig("allowDistributeIndex", "false");
-            }
-
-            if (post.get("indexDistributeWhileCrawling","").equals("on")) {
-                switchboard.setConfig("allowDistributeIndexWhileCrawling", "true");
-            } else {
-                switchboard.setConfig("allowDistributeIndexWhileCrawling", "false");
-            }
-
-            if (post.get("indexReceive", "").equals("on")) {
-                switchboard.setConfig("allowReceiveIndex", "true");
-                yacyCore.seedDB.mySeed.setFlagAcceptRemoteIndex(true);
-            } else {
-                switchboard.setConfig("allowReceiveIndex", "false");
-                yacyCore.seedDB.mySeed.setFlagAcceptRemoteIndex(false);
-            }
-
-            if (post.get("indexReceiveBlockBlacklist", "").equals("on")) {
-                switchboard.setConfig("indexReceiveBlockBlacklist", "true");
-            } else {
-                switchboard.setConfig("indexReceiveBlockBlacklist", "false");
-            }
-            
-            if (post.containsKey("peertags")) {
-                yacyCore.seedDB.mySeed.setPeerTags(serverCodings.string2set((String) post.get("peertags"), ","));
-            }
-        }
 
         // delete word
         if (post.containsKey("keyhashdeleteall")) {
@@ -455,11 +415,6 @@ public class IndexControl_p {
         // insert constants
         prop.put("wcount", Integer.toString(switchboard.wordIndex.size()));
         prop.put("ucount", Integer.toString(switchboard.wordIndex.loadedURL.size()));
-        prop.put("indexDistributeChecked", (switchboard.getConfig("allowDistributeIndex", "true").equals("true")) ? 1 : 0);
-        prop.put("indexDistributeWhileCrawling", (switchboard.getConfig("allowDistributeIndexWhileCrawling", "true").equals("true")) ? 1 : 0);
-        prop.put("indexReceiveChecked", (switchboard.getConfig("allowReceiveIndex", "true").equals("true")) ? 1 : 0);
-        prop.put("indexReceiveBlockBlacklistChecked", (switchboard.getConfig("indexReceiveBlockBlacklist", "true").equals("true")) ? 1 : 0);
-        prop.put("peertags", serverCodings.set2string(yacyCore.seedDB.mySeed.getPeerTags(), ",", false));
         // return rewrite properties
         return prop;
     }

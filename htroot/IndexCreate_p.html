@@ -218,52 +218,6 @@
         </tr>
       </table>
     </form>
-      
-    <form action="IndexCreate_p.html" method="post" enctype="multipart/form-data">
-      <p id="distributedIndexing">
-        <strong>Distributed Indexing: </strong>
-        Crawling and indexing can be done by remote peers.
-        Your peer can search and index for other peers and they can search for you.
-      </p>
-    
-      <table border="0" cellpadding="5" cellspacing="1">
-        <colgroup>
-          <col width="10%" />
-          <col />
-        </colgroup>
-        <tr valign="top" class="TableCellDark">
-          <td>
-            <input type="radio" name="dcr" id="acceptCrawlMax" value="acceptCrawlMax" #(acceptCrawlMaxChecked)#::checked="checked"#(/acceptCrawlMaxChecked)# />
-          </td>
-          <td><label for="acceptCrawlMax">Accept remote crawling requests and perform crawl at maximum load</label></td>
-        </tr>
-        <tr valign="top" class="TableCelllight">
-          <td>
-            <input type="radio" name="dcr" id="acceptCrawlLimited" value="acceptCrawlLimited" #(acceptCrawlLimitedChecked)#::checked="checked"#(/acceptCrawlLimitedChecked)# />
-          </td>
-          <td>
-            <label for="acceptCrawlLimited">Accept remote crawling requests and perform crawl at maximum of</label>
-            <input name="acceptCrawlLimit" type="text" size="4" maxlength="4" value="#[PPM]#" /> Pages Per Minute (minimum is 1, low system load usually at PPM &ge; 30)
-          </td>
-        </tr>
-        <tr valign="top" class="TableCellDark">
-          <td>
-            <input type="radio" name="dcr" id="acceptCrawlDenied" value="acceptCrawlDenied" #(acceptCrawlDeniedChecked)#::checked="checked"#(/acceptCrawlDeniedChecked)# />
-          </td>
-          <td>
-            <label for="acceptCrawlDenied">Do not accept remote crawling requests (please set this only if
-            you cannot accept to crawl only one page per minute; see option above)</label>
-          </td>
-        </tr>
-        <tr valign="top" class="TableCellLight">
-          <td>
-            <input type="submit" name="distributedcrawling" value="set" />
-          </td>
-          <td>
-          </td>
-        </tr>
-      </table>
-    </form>
     
     <p>
       #(info)#

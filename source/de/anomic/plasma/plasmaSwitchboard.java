@@ -522,6 +522,7 @@ public final class plasmaSwitchboard extends serverAbstractSwitch implements ser
      * @see plasmaSwitchboard#INDEX_DIST_ALLOW_WHILE_CRAWLING
      */
     public static final String INDEX_DIST_ALLOW                 = "allowDistributeIndex";
+    public static final String INDEX_RECEIVE_ALLOW              = "allowReceiveIndex";
     /**
      * <p><code>public static final String <strong>INDEX_DIST_ALLOW_WHILE_CRAWLING</strong> = "allowDistributeIndexWhileCrawling"</code></p>
      * <p>Name of the setting whether Index Distribution shall be allowed while crawling is in progress, i.e.
@@ -1324,9 +1325,71 @@ public final class plasmaSwitchboard extends serverAbstractSwitch implements ser
     }
 
     public boolean isRobinsonMode() {
-        return (yacyCore.seedDB.sizeConnected() == 0) && (yacyCore.seedDB.mySeed.isVirgin());
+    	// we are in robinson mode, if we do not exchange index by dht distribution
+    	// we need to take care that search requests and remote indexing requests go only
+    	// to the peers in the same cluster, if we run a robinson cluster.
+    	return getConfigBool(plasmaSwitchboard.INDEX_DIST_ALLOW, false) && !getConfigBool(plasmaSwitchboard.INDEX_RECEIVE_ALLOW, false);
     }
 
+    public boolean isClosedRobinsonCluster() {
+    	// robinson peers may be member of robinson clusters, which can be public or private
+    	// this does not check the robinson attribute, only the specific subtype of the cluster
+    	String clustermode = getConfig("cluster.mode", "publicpeer");
+    	return (clustermode.equals("privatecluster")) || (clustermode.equals("privatepeer"));
+    }
+    
+    public boolean isInMyCluster(String peer) {
+    	// check if the given peer is in the own network, if this is a robinson cluster
+    	// depending on the robinson cluster type, the peer String may be a peerhash (b64-hash)
+    	// or a ip:port String or simply a ip String
+    	if (!isRobinsonMode()) return false;
+    	String clustermode = getConfig("cluster.mode", "publicpeer");
+    	if (clustermode.equals("privatecluster")) {
+    		// check if we got the request from a peer in the private cluster
+    		String network = getConfig("cluster.peers.ipport", "");
+            return network.indexOf(peer) >= 0;
+    	} else if (clustermode.equals("publiccluster")) {
+    		// check if we got the request from a peer in the public cluster
+    		String network = getConfig("cluster.peers.yacydomain", "");
+            // check for .yacyh hexhash-domain
+    		String hexhash = yacySeed.b64Hash2hexHash(peer);
+    		if (hexhash == null) return false;
+    		if (network.indexOf(hexhash + ".yacyh") >= 0) return true;
+    		// resolve seed
+    		yacySeed seed = yacyCore.seedDB.get(peer);
+    		if (seed == null) return false;
+    		// check for .yacy (name) - Domain
+    		if (network.indexOf(seed.getName() + ".yacy") >= 0) return true;
+    		return false;
+    	} else {
+    		return false;
+    	}
+    }
+    
+    public boolean isInMyCluster(yacySeed seed) {
+    	// check if the given peer is in the own network, if this is a robinson cluster
+    	if (seed == null) return false;
+		if (!isRobinsonMode()) return false;
+    	String clustermode = getConfig("cluster.mode", "publicpeer");
+    	if (clustermode.equals("privatecluster")) {
+    		// check if we got the request from a peer in the private cluster
+    		String network = getConfig("cluster.peers.ipport", "");
+            return network.indexOf(seed.getAddress()) >= 0;
+    	} else if (clustermode.equals("publiccluster")) {
+    		// check if we got the request from a peer in the public cluster
+    		String network = getConfig("cluster.peers.yacydomain", "");
+            // check for .yacyh hexhash-domain
+    		String hexhash = yacySeed.b64Hash2hexHash(seed.hash);
+    		if (hexhash == null) return false;
+    		if (network.indexOf(hexhash + ".yacyh") >= 0) return true;
+    		// check for .yacy (name) - Domain
+    		if (network.indexOf(seed.getName() + ".yacy") >= 0) return true;
+    		return false;
+    	} else {
+    		return false;
+    	}
+    }
+    
     public String urlExists(String hash) {
         // tests if hash occurrs in any database
         // if it exists, the name of the database is returned,

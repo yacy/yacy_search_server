@@ -62,7 +62,7 @@ public class index {
         final String cat = (post == null) ? "href" : post.get("cat", "href");
         final int type = (post == null) ? 0 : post.getInt("type", 0);
         
-        final boolean indexDistributeGranted = sb.getConfig("allowDistributeIndex", "true").equals("true");
+        final boolean indexDistributeGranted = sb.getConfig(plasmaSwitchboard.INDEX_DIST_ALLOW, "true").equals("true");
         final boolean indexReceiveGranted = sb.getConfig("allowReceiveIndex", "true").equals("true");
         if (!indexDistributeGranted || !indexReceiveGranted) { global = false; }
 

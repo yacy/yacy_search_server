@@ -180,7 +180,7 @@ public class yacysearch {
         }
         
         // SEARCH
-        final boolean indexDistributeGranted = sb.getConfig("allowDistributeIndex", "true").equals("true");
+        final boolean indexDistributeGranted = sb.getConfig(plasmaSwitchboard.INDEX_DIST_ALLOW, "true").equals("true");
         final boolean indexReceiveGranted = sb.getConfig("allowReceiveIndex", "true").equals("true");
         final boolean offline = yacyCore.seedDB.mySeed.isVirgin();
         if (offline || !indexDistributeGranted || !indexReceiveGranted) { global = false; }

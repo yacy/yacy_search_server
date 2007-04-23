@@ -195,7 +195,7 @@ public class DetailedSearch {
         
         boolean global = post.get("global", "").equals("on");
         boolean postsort = post.get("postsort", "").equals("on");
-        final boolean indexDistributeGranted = sb.getConfig("allowDistributeIndex", "true").equals("true");
+        final boolean indexDistributeGranted = sb.getConfig(plasmaSwitchboard.INDEX_DIST_ALLOW, "true").equals("true");
         final boolean indexReceiveGranted = sb.getConfig("allowReceiveIndex", "true").equals("true");
         if (!indexDistributeGranted || !indexReceiveGranted) { global = false; }
         

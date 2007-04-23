@@ -52,7 +52,6 @@ import de.anomic.plasma.plasmaURL;
 import de.anomic.plasma.plasmaSwitchboard;
 import de.anomic.server.serverObjects;
 import de.anomic.server.serverSwitch;
-import de.anomic.server.serverThread;
 import de.anomic.yacy.yacyCore;
 import de.anomic.yacy.yacyNewsPool;
 import de.anomic.yacy.yacyNewsRecord;
@@ -69,26 +68,6 @@ public class IndexCreate_p {
         prop.put("refreshbutton", 0);
         
         if (post != null) {
-            if (post.containsKey("distributedcrawling")) {
-                long newBusySleep = Integer.parseInt(env.getConfig(plasmaSwitchboard.CRAWLJOB_REMOTE_TRIGGERED_CRAWL_BUSYSLEEP, "100"));
-                if (post.get("dcr", "").equals("acceptCrawlMax")) {
-                    env.setConfig("crawlResponse", "true");
-                    newBusySleep = 100;
-                } else if (post.get("dcr", "").equals("acceptCrawlLimited")) {
-                    env.setConfig("crawlResponse", "true");
-                    int newppm = Integer.parseInt(post.get("acceptCrawlLimit", "1"));
-                    if (newppm < 1) newppm = 1;
-                    newBusySleep = 60000 / newppm;
-                    if (newBusySleep < 100) newBusySleep = 100;
-                } else if (post.get("dcr", "").equals("acceptCrawlDenied")) {
-                    env.setConfig("crawlResponse", "false");
-                }
-                serverThread rct = switchboard.getThread(plasmaSwitchboard.CRAWLJOB_REMOTE_TRIGGERED_CRAWL);
-                rct.setBusySleep(newBusySleep);
-                env.setConfig(plasmaSwitchboard.CRAWLJOB_REMOTE_TRIGGERED_CRAWL_BUSYSLEEP, Long.toString(newBusySleep));
-                //boolean crawlResponse = ((String) post.get("acceptCrawlMax", "")).equals("on");
-                //env.setConfig("crawlResponse", (crawlResponse) ? "true" : "false");
-            }
 
             if (post.containsKey("pausecrawlqueue")) {
                 switchboard.pauseCrawlJob(plasmaSwitchboard.CRAWLJOB_LOCAL_CRAWL);
@@ -151,30 +130,6 @@ public class IndexCreate_p {
         prop.put("crawlingSpeedCustChecked", ((LCppm > 10) && (LCppm < 1000)) ? 1 : 0);
         prop.put("crawlingSpeedMinChecked", (LCppm <= 10) ? 1 : 0);
         prop.put("customPPMdefault", ((LCppm > 10) && (LCppm < 1000)) ? Integer.toString(LCppm) : "");
-
-        long RTCbusySleep = Integer.parseInt(env.getConfig(plasmaSwitchboard.CRAWLJOB_REMOTE_TRIGGERED_CRAWL_BUSYSLEEP, "100"));
-        if (RTCbusySleep < 100) {
-            RTCbusySleep = 100;
-            env.setConfig(plasmaSwitchboard.CRAWLJOB_REMOTE_TRIGGERED_CRAWL_BUSYSLEEP, Long.toString(RTCbusySleep));
-        }
-        if (env.getConfig("crawlResponse", "").equals("true")) {
-            if (RTCbusySleep <= 100) {
-                prop.put("acceptCrawlMaxChecked", 1);
-                prop.put("acceptCrawlLimitedChecked", 0);
-                prop.put("acceptCrawlDeniedChecked", 0);
-            } else {
-                prop.put("acceptCrawlMaxChecked", 0);
-                prop.put("acceptCrawlLimitedChecked", 1);
-                prop.put("acceptCrawlDeniedChecked", 0);
-            }
-        } else {
-            prop.put("acceptCrawlMaxChecked", 0);
-            prop.put("acceptCrawlLimitedChecked", 0);
-            prop.put("acceptCrawlDeniedChecked", 1);
-        }
-        int RTCppm = (RTCbusySleep == 0) ? 60 : (int) (60000L / RTCbusySleep);
-        if (RTCppm > 60) RTCppm = 60;
-        prop.put("PPM", RTCppm);
         
         prop.put("xsstopwChecked", env.getConfig("xsstopw", "").equals("true") ? 1 : 0);
         prop.put("xdstopwChecked", env.getConfig("xdstopw", "").equals("true") ? 1 : 0);

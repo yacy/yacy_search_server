@@ -71,7 +71,7 @@ public class IndexShare_p {
         }
         
         if (post.containsKey("indexsharesetting")) {
-            switchboard.setConfig("allowDistributeIndex", (post.containsKey("distribute")) ? "true" : "false");
+            switchboard.setConfig(plasmaSwitchboard.INDEX_DIST_ALLOW, (post.containsKey("distribute")) ? "true" : "false");
             switchboard.setConfig("allowReceiveIndex", (post.containsKey("receive")) ? "true" : "false");
             switchboard.setConfig("defaultLinkReceiveFrequency", post.get("linkfreq", "30"));
             switchboard.setConfig("defaultWordReceiveFrequency", post.get("wordfreq", "10"));

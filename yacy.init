@@ -83,8 +83,6 @@ pkcs12ImportPwd =
 superseedFile=superseed.txt
 superseedLocation=http://www.yacy.net/superseed.txt
 
-
-
 # network definition
 # we distiguish local and global networks. Each network type can have different user groups
 # groups can be uncontrolled, moderated or controlled
@@ -98,8 +96,22 @@ superseedLocation=http://www.yacy.net/superseed.txt
 # network = all:world:global:uncontrolled:http://yacy.net/
 # the network-uri must have a sub-path yacy/seed.txt containing a list of urls pointing to the
 # peer-address of peers within the group of that network
-# several network definition strings can be listed in a single
+# several network definition strings can be listed
 
+# clusters within a network:
+# every network can have an unlimited number of clusters. Clusters may be also completely
+# sealed and have no connection to other peers. When a cluster does not use the
+# p2p protocol and the bootstraping mechanism to contact other peers, we call them
+# Robinson peers. They can appear in different 'visibilities':
+# - privatepeer: no connection and no data exchange to any other peer
+# - privatecluster: connections only to self-defined addresses (other peers in same mode)
+# - publiccluster: like privatecluster, but visible and searcheable by public p2p nodes
+# - publicpeer: a single peer without cluster connection, but visible for p2p nodes
+# all public robinson peers should use a peer tag string to be searcheable if in the
+# search request these tags appear
+cluster.mode=publicpeer
+cluster.peers.yacydomain=localpeer.yacy
+cluster.peers.ipport=localhost:8080
 
 # bootstrapLoadTimeout
 # this is the time-out for loading of the seedlist files during bootstraping
@@ -541,7 +553,7 @@ filterOutStopwordsFromTopwords=true
 
 # ram cache for database files
 
-# ram cache for assortment cache cluster (for all 64 files)
+# ram cache for collection index
 ramCacheRWI_time     =    30000
 
 # ram cache for responseHeader.db

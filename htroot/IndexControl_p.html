@@ -62,59 +62,6 @@
           </td>
         </tr>
       </table>
-      
-      
-      <p>
-        <strong>DHT Transmission control:</strong><br />
-        The transmission is necessary for the functionality of global search on other peers.
-        If you switch off distribution or receipt of RWIs you will be banned from global search.
-      </p>
-      <table border="0" cellpadding="5" cellspacing="0">
-        <colgroup>
-          <col width="100" />
-          <col span="2"/>
-        </colgroup>
-        <tr valign="top" class="TableCellDark">
-          <td>Index&nbsp;Distribution:</td>
-          <td><input type="checkbox" name="indexDistribute" #(indexDistributeChecked)#::checked="checked" #(/indexDistributeChecked)#/></td>
-          <td></td>
-          <td>This enables automated, DHT-ruled Index Transmission to other peers.
-          </td>
-        </tr>
-        <tr valign="top" class="TableCellDark">
-          <td></td>
-          <td>&nbsp;&nbsp;</td>
-          <td><input type="checkbox" name="indexDistributeWhileCrawling" #(indexDistributeWhileCrawling)#::checked="checked" #(/indexDistributeWhileCrawling)#/></td>
-          <td>If checked, DHT-Transmission is enabled even during crawling.</td>
-        </tr>
-        <tr valign="top" class="TableCellDark">
-          <td>Index Receive:</td>
-          <td><input type="checkbox" name="indexReceive" #(indexReceiveChecked)#::checked="checked" #(/indexReceiveChecked)#::/></td>
-          <td></td>
-          <td>Accept remote Index Transmissions. This works only if you are a senior peer.
-          The DHT-rules do not work without this function.</td>
-        </tr>
-        <tr valign="top" class="TableCellDark">
-          <td></td>
-          <td>&nbsp;&nbsp;</td>
-          <td><input type="checkbox" name="indexReceiveBlockBlacklist" #(indexReceiveBlockBlacklistChecked)#::checked="checked" #(/indexReceiveBlockBlacklistChecked)#/></td>
-          <td>If checked, your peer silently ignores transmitted URLs that match your blacklist</td>
-        </tr>
-        <tr valign="top" class="TableCellDark">
-          <td>Peer Tags:</td>
-          <td colspan="2"><input type="text" name="peertags" value="#[peertags]#" size="40" maxlength="80" /></td>
-          <td>If your peer runs in 'Robinson Mode' (Distribution and Receive off), you probably run YaCy as a search engine
-              for your own search portal. Please describe your search portal with some keywords (comma-separated).
-              This will help to use your peer as search target even if you do not distribute your web index by
-              DHT distribution.</td>
-        </tr>
-        <tr valign="top" class="TableCellLight">
-          <td></td>
-          <td><input type="submit" name="setIndexTransmission" value="set" /></td>
-          <td></td>
-          <td>Changes will take effect immediately</td>
-        </tr>
-      </table>
     </form>
     #(keyhashsimilar)#::Sequential List of Word-Hashes:<br />
     #{rows}# 
