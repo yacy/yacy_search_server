@@ -149,7 +149,7 @@ public class CacheAdmin_p {
                     prop.put("info_type_headlines", t.length);
                     for (i = 0; i < t.length; i++)
                     	prop.put("info_type_headlines_" + i + "_headline",
-                    			de.anomic.data.wikiCode.replaceXMLEntities(t[i].replaceAll("\n", "").trim()));
+                    			t[i].replaceAll("\n", "").trim());
                     
                     formatAnchor(prop, document.getHyperlinks(), "links");
                     formatImageAnchor(prop, document.getImages());
@@ -166,7 +166,7 @@ public class CacheAdmin_p {
                     if (sentences != null)
                     	while (sentences.hasNext()) {
                     		prop.put("info_type_lines_" + i + "_line",
-                    				de.anomic.data.wikiCode.replaceXMLEntities((new String((StringBuffer) sentences.next())).replaceAll("\n", "").trim()));
+                    				new String((StringBuffer) sentences.next()).replaceAll("\n", "").trim());
 	                        i++;
 	                    }
                     prop.put("info_type_lines", i);

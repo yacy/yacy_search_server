@@ -389,7 +389,7 @@ public class WatchCrawler_p {
 
     private static int recrawlIfOlderC(boolean recrawlIfOlderCheck, int recrawlIfOlderNumber, String crawlingIfOlderUnit) {
         if (!recrawlIfOlderCheck) return -1;
-        if (crawlingIfOlderUnit.equals("year")) return recrawlIfOlderNumber * 60 * 24 * 356;
+        if (crawlingIfOlderUnit.equals("year")) return recrawlIfOlderNumber * 60 * 24 * 365;
         if (crawlingIfOlderUnit.equals("month")) return recrawlIfOlderNumber * 60 * 24 * 30;
         if (crawlingIfOlderUnit.equals("day")) return recrawlIfOlderNumber * 60 * 24;
         if (crawlingIfOlderUnit.equals("hour")) return recrawlIfOlderNumber * 60;

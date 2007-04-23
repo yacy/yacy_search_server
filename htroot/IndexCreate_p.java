@@ -115,19 +115,19 @@ public class IndexCreate_p {
         prop.put("crawlingIfOlderUnitHourCheck", 0);
         prop.put("crawlingIfOlderUnitMinuteCheck", 0);
         if ((crawlingIfOlder == -1) || (crawlingIfOlder == Integer.MAX_VALUE)) {
-            prop.put("crawlingIfOlderNumber", 1);
+            prop.put("crawlingIfOlderNumber", -1);
             prop.put("crawlingIfOlderUnitYearCheck", 1);
         } else if (crawlingIfOlder >= 60*24*365) {
-            prop.put("crawlingIfOlderNumber", crawlingIfOlder / (60*24*365));
+            prop.put("crawlingIfOlderNumber", Math.round((float)crawlingIfOlder / (float)(60*24*365)));
             prop.put("crawlingIfOlderUnitYearCheck", 1);
         } else if (crawlingIfOlder >= 60*24*30) {
-            prop.put("crawlingIfOlderNumber", crawlingIfOlder / (60*24*30));
+            prop.put("crawlingIfOlderNumber", Math.round((float)crawlingIfOlder / (float)(60*24*30)));
             prop.put("crawlingIfOlderUnitMonthCheck", 1);
         } else if (crawlingIfOlder >= 60*24) {
-            prop.put("crawlingIfOlderNumber", crawlingIfOlder / (60*24));
+            prop.put("crawlingIfOlderNumber", Math.round((float)crawlingIfOlder / (float)(60*24)));
             prop.put("crawlingIfOlderUnitDayCheck", 1);
         } else if (crawlingIfOlder >= 60) {
-            prop.put("crawlingIfOlderNumber", crawlingIfOlder / 60);
+            prop.put("crawlingIfOlderNumber", Math.round((float)crawlingIfOlder / 60f));
             prop.put("crawlingIfOlderUnitHourCheck", 1);
         } else {
             prop.put("crawlingIfOlderNumber", crawlingIfOlder);
@@ -146,7 +146,7 @@ public class IndexCreate_p {
         prop.put("crawlOrderChecked", env.getConfig("crawlOrder", "").equals("true") ? 1 : 0);
         
         long LCbusySleep = Integer.parseInt(env.getConfig(plasmaSwitchboard.CRAWLJOB_LOCAL_CRAWL_BUSYSLEEP, "100"));
-        int LCppm = (int) (60000L / LCbusySleep);
+        int LCppm = (LCbusySleep == 0) ? 1000 : (int) (60000L / LCbusySleep);
         prop.put("crawlingSpeedMaxChecked", (LCppm >= 1000) ? 1 : 0);
         prop.put("crawlingSpeedCustChecked", ((LCppm > 10) && (LCppm < 1000)) ? 1 : 0);
         prop.put("crawlingSpeedMinChecked", (LCppm <= 10) ? 1 : 0);
@@ -172,7 +172,7 @@ public class IndexCreate_p {
             prop.put("acceptCrawlLimitedChecked", 0);
             prop.put("acceptCrawlDeniedChecked", 1);
         }
-        int RTCppm = (int) (60000L / RTCbusySleep);
+        int RTCppm = (RTCbusySleep == 0) ? 60 : (int) (60000L / RTCbusySleep);
         if (RTCppm > 60) RTCppm = 60;
         prop.put("PPM", RTCppm);
         

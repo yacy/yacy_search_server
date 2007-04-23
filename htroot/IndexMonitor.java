@@ -47,7 +47,6 @@ import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.Locale;
 
-import de.anomic.data.wikiCode;
 import de.anomic.http.httpHeader;
 import de.anomic.index.indexURLEntry;
 import de.anomic.net.URL;
@@ -187,8 +186,8 @@ public class IndexMonitor {
                     } else {
                         prop.put("table_indexed_" + cnt + "_available", 1);
                         prop.put("table_indexed_" + cnt + "_available_cachepath", cachepath);
-                        prop.put("table_indexed_" + cnt + "_available_urltitle", wikiCode.replaceXMLEntities(urlstr));
-                        prop.put("table_indexed_" + cnt + "_available_url", wikiCode.replaceXMLEntities(urltxt));
+                        prop.put("table_indexed_" + cnt + "_available_urltitle", urlstr);
+                        prop.put("table_indexed_" + cnt + "_available_url", urltxt);
                     }
                     dark = !dark;
                     cnt++;

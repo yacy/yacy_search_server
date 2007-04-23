@@ -28,16 +28,16 @@
           <td>
             <table cellpadding="0" cellspacing="0">
               <tr>
-                <td>From&nbsp;URL:</td>
-                <td><input type="radio" name="crawlingMode" value="url" checked="checked" /></td>
+                <td><label for="url"><nobr>From URL</nobr></label>:</td>
+                <td><input type="radio" name="crawlingMode" id="url" value="url" checked="checked" /></td>
                 <td>
                   <input name="crawlingURL" type="text" size="41" maxlength="256" value="http://" onkeypress="changed()" />
                   <span id="robotsOK"></span>
                 </td>
               </tr>
               <tr>
-                <td>From&nbsp;File:</td>
-                <td><input type="radio" name="crawlingMode" value="file" /></td>
+                <td><label for="file"><nobr>From File</nobr></label>:</td>
+                <td><input type="radio" name="crawlingMode" id="file" value="file" /></td>
                 <td><input type="file" name="crawlingFile" size="28" /></td>
               </tr>
               <tr>
@@ -52,8 +52,8 @@
           </td>
         </tr>
         <tr valign="top" class="TableCellLight">
-          <td>Crawling Depth:</td>
-          <td><input name="crawlingDepth" type="text" size="2" maxlength="2" value="#[crawlingDepth]#" /></td>
+          <td><label for="crawlingDepth">Crawling Depth</label>:</td>
+          <td><input name="crawlingDepth" id="crawlingDepth" type="text" size="2" maxlength="2" value="#[crawlingDepth]#" /></td>
           <td>
             This defines how often the Crawler will follow links embedded in websites.<br />
             A minimum of 0 is recommended and means that the page you enter under "Starting Point" will be added
@@ -63,8 +63,8 @@
           </td>
         </tr>
         <tr valign="top" class="TableCellDark">
-          <td>Crawling Filter:</td>
-          <td><input name="crawlingFilter" type="text" size="20" maxlength="100" value="#[crawlingFilter]#" /></td>
+          <td><label for="crawlingFilter">Crawling Filter</label>:</td>
+          <td><input name="crawlingFilter" id="crawlingFilter" type="text" size="20" maxlength="100" value="#[crawlingFilter]#" /></td>
           <td>
             This is an emacs-like regular expression that must match with the URLs which are used to be crawled.
             Use this i.e. to crawl a single domain. If you set this filter it makes sense to increase
@@ -74,16 +74,16 @@
         <tr valign="top" class="TableCellLight">
           <td>Re-Crawl Option:</td>
           <td>
-            Use:<input type="checkbox" name="crawlingIfOlderCheck" #(crawlingIfOlderCheck)#::checked="checked"#(/crawlingIfOlderCheck)# />&nbsp;&nbsp;
-            Interval:
-			
-			<input name="crawlingIfOlderNumber" type="text" size="7" maxlength="7" value="#[crawlingIfOlderNumber]#" />
-			<select>
-            <option name="crawlingIfOlderUnit" value="year"   #(crawlingIfOlderUnitYearCheck)#::selected="selected"#(/crawlingIfOlderUnitYearCheck)# />Year(s)&nbsp;&nbsp;
-            <option name="crawlingIfOlderUnit" value="month"  #(crawlingIfOlderUnitMonthCheck)#::selected="selected"#(/crawlingIfOlderUnitMonthCheck)# />Month(s)&nbsp;&nbsp;
-            <option name="crawlingIfOlderUnit" value="day"    #(crawlingIfOlderUnitDayCheck)#::selected="selected"#(/crawlingIfOlderUnitDayCheck)# />Day(s)&nbsp;&nbsp;
-            <option name="crawlingIfOlderUnit" value="hour"   #(crawlingIfOlderUnitHourCheck)#::selected="selected"#(/crawlingIfOlderUnitHourCheck)# />Hour(s)&nbsp;&nbsp;
-            <option name="crawlingIfOlderUnit" value="minute" #(crawlingIfOlderUnitMinuteCheck)#::selected="selected"#(/crawlingIfOlderUnitMinuteCheck)# />Minute(s)
+            <label for="crawlingIfOlderChecked">Use</label>:
+            <input type="checkbox" name="crawlingIfOlderCheck" id="crawlingIfOlderChecked" #(crawlingIfOlderCheck)#::checked="checked"#(/crawlingIfOlderCheck)# />&nbsp;&nbsp;
+            <label for="crawlingIfOlderNumber">Interval</label>:
+			<input name="crawlingIfOlderNumber" id="crawlingIfOlderNumber" type="text" size="7" maxlength="7" value="#[crawlingIfOlderNumber]#" />
+			<select name="crawlingIfOlderUnit">
+              <option value="year"   #(crawlingIfOlderUnitYearCheck)#::selected="selected"#(/crawlingIfOlderUnitYearCheck)#>Year(s)</option>
+              <option value="month"  #(crawlingIfOlderUnitMonthCheck)#::selected="selected"#(/crawlingIfOlderUnitMonthCheck)#>Month(s)</option>
+              <option value="day"    #(crawlingIfOlderUnitDayCheck)#::selected="selected"#(/crawlingIfOlderUnitDayCheck)#>Day(s)</option>
+              <option value="hour"   #(crawlingIfOlderUnitHourCheck)#::selected="selected"#(/crawlingIfOlderUnitHourCheck)#>Hour(s)</option>
+              <option value="minute" #(crawlingIfOlderUnitMinuteCheck)#::selected="selected"#(/crawlingIfOlderUnitMinuteCheck)#>Minute(s)</option>
 			</select>
           </td>
           <td>
@@ -95,8 +95,11 @@
         <tr valign="top" class="TableCellDark">
           <td>Auto-Dom-Filter:</td>
           <td>
-          Use:<input type="checkbox" name="crawlingDomFilterCheck" #(crawlingDomFilterCheck)#::checked="checked"#(/crawlingDomFilterCheck)# />&nbsp;&nbsp;
-          Depth:<input name="crawlingDomFilterDepth" type="text" size="2" maxlength="2" value="#[crawlingDomFilterDepth]#" /></td>
+            <label for="crawlingDomFilterCheck">Use</label>:
+            <input type="checkbox" name="crawlingDomFilterCheck" id="crawlingDomFilterCheck" #(crawlingDomFilterCheck)#::checked="checked"#(/crawlingDomFilterCheck)# />&nbsp;&nbsp;
+            <label for="crawlingDomFilterDepth">Depth</label>:
+            <input name="crawlingDomFilterDepth" id="crawlingDomFilterDepth" type="text" size="2" maxlength="2" value="#[crawlingDomFilterDepth]#" />
+          </td>
           <td>
             This option will automatically create a domain-filter which limits the crawl on domains the crawler
             will find on the given depth. You can use this option i.e. to crawl a page with bookmarks while
@@ -108,8 +111,11 @@
         <tr valign="top" class="TableCellLight">
           <td>Maximum Pages per Domain:</td>
           <td>
-          Use:<input type="checkbox" name="crawlingDomMaxCheck" #(crawlingDomMaxCheck)#::checked="checked"#(/crawlingDomMaxCheck)# />&nbsp;&nbsp;
-          Page-Count:<input name="crawlingDomMaxPages" type="text" size="6" maxlength="6" value="#[crawlingDomMaxPages]#" /></td>
+            <label for="crawlingDomMaxCheck">Use</label>:
+            <input type="checkbox" name="crawlingDomMaxCheck" id="crawlingDomMaxCheck" #(crawlingDomMaxCheck)#::checked="checked"#(/crawlingDomMaxCheck)# />&nbsp;&nbsp;
+            <label for="crawlingDomMaxPages">Page-Count</label>:
+            <input name="crawlingDomMaxPages" id="crawlingDomMaxPages" type="text" size="6" maxlength="6" value="#[crawlingDomMaxPages]#" />
+          </td>
           <td>
             You can limit the maxmimum number of pages that are fetched and indexed from a single domain with this option.
             You can combine this limitation with the 'Auto-Dom-Filter', so that the limit is applied to all the domains within
@@ -117,16 +123,16 @@
           </td>
         </tr>
         <tr valign="top" class="TableCellDark">
-          <td>Accept URLs with '?' / dynamic URLs:</td>
-          <td><input type="checkbox" name="crawlingQ" #(crawlingQChecked)#::checked="checked"#(/crawlingQChecked)# /></td>
+          <td><label for="crawlingQ">Accept URLs with '?' / dynamic URLs</label>:</td>
+          <td><input type="checkbox" name="crawlingQ" id="crawlingQ" #(crawlingQChecked)#::checked="checked"#(/crawlingQChecked)# /></td>
           <td>
             A questionmark is usually a hint for a dynamic page. URLs pointing to dynamic content should usually not be crawled. However, there are sometimes web pages with static content that
             is accessed with URLs containing question marks. If you are unsure, do not check this to avoid crawl loops.
           </td>
         </tr>
         <tr valign="top" class="TableCellLight">
-          <td>Store to Web Cache:</td>
-          <td><input type="checkbox" name="storeHTCache" #(storeHTCacheChecked)#::checked="checked"#(/storeHTCacheChecked)# /></td>
+          <td><label for="storeHTCache">Store to Web Cache</label>:</td>
+          <td><input type="checkbox" name="storeHTCache" id="storeHTCache" #(storeHTCacheChecked)#::checked="checked"#(/storeHTCacheChecked)# /></td>
           <td>
             This option is used by default for proxy prefetch, but is not needed for explicit crawling.
             We recommend to leave this switched off unless you want to control the crawl results with the
@@ -135,24 +141,28 @@
         </tr>
         <tr valign="top" class="TableCellDark">
           <td>Do Local Indexing:</td>
-          <td>index text:<input type="checkbox" name="indexText" #(indexingTextChecked)#::checked="checked"#(/indexingTextChecked)# />&nbsp;&nbsp;&nbsp;
-              index media:<input type="checkbox" name="indexMedia" #(indexingMediaChecked)#::checked="checked"#(/indexingMediaChecked)# /></td>
+          <td>
+            <label for="indexText">index text</label>:
+            <input type="checkbox" name="indexText" id="indexText" #(indexingTextChecked)#::checked="checked"#(/indexingTextChecked)# />&nbsp;&nbsp;&nbsp;
+            <label for="indexMedia">index media</label>:
+            <input type="checkbox" name="indexMedia" id="indexMedia" #(indexingMediaChecked)#::checked="checked"#(/indexingMediaChecked)# />
+          </td>
           <td>
             This enables indexing of the wepages the crawler will download. This should be switched on by default, unless you want to crawl only to fill the
             <a href="CacheAdmin_p.html">Proxy Cache</a> without indexing.
           </td>
         </tr>
         <tr valign="top" class="TableCellLight">
-          <td>Do Remote Indexing:</td>
+          <td><label for="crawlOrder">Do Remote Indexing</label>:</td>
           <td>
             <table border="0" cellpadding="2" cellspacing="0">
               <tr>
                 <td>
-                  <input type="checkbox" name="crawlOrder"  #(crawlOrderChecked)#::checked="checked"#(/crawlOrderChecked)# />
+                  <input type="checkbox" name="crawlOrder" id="crawlOrder" #(crawlOrderChecked)#::checked="checked"#(/crawlOrderChecked)# />
                 </td>
                 <td>
-                  Describe your intention to start this global crawl (optional):<br />
-                  <input name="intention" type="text" size="40" maxlength="100" value="" /><br />
+                  <label for="intention">Describe your intention to start this global crawl (optional)</label>:<br />
+                  <input name="intention" id="intention" type="text" size="40" maxlength="100" value="" /><br />
                   This message will appear in the 'Other Peer Crawl Start' table of other peers.
                 </td>
               </tr>
@@ -162,12 +172,13 @@
             If checked, the crawler will contact other peers and use them as remote indexers for your crawl.
             If you need your crawling results locally, you should switch this off.
             Only senior and principal peers can initiate or receive remote crawls.
-            <strong>A YaCyNews message will be created to inform all peers about a global crawl</strong>, so they can omit starting a crawl with the same start point.
+            <strong>A YaCyNews message will be created to inform all peers about a global crawl</strong>,
+            so they can omit starting a crawl with the same start point.
           </td>
         </tr>
         <tr valign="top" class="TableCellDark">
-          <td>Exclude <em>static</em> Stop-Words</td>
-          <td><input type="checkbox" name="xsstopw" #(xsstopwChecked)#::checked="checked"#(/xsstopwChecked)# /></td>
+          <td><label for="xsstopw">Exclude <em>static</em> Stop-Words</label>:</td>
+          <td><input type="checkbox" name="xsstopw" id="xsstopw" #(xsstopwChecked)#::checked="checked"#(/xsstopwChecked)# /></td>
           <td>
             This can be useful to circumvent that extremely common words are added to the database, i.e. "the", "he", "she", "it"... To exclude all words given in the file <tt>yacy.stopwords</tt> from indexing,
             check this box.
@@ -194,9 +205,9 @@
         <tr valign="top" class="TableCellLight">
           <td>Wanted Performance:</td>
           <td>
-            <input type="radio" name="crawlingPerformance" value="maximum" #(crawlingSpeedMaxChecked)#::checked="checked"#(/crawlingSpeedMaxChecked)# />maximum&nbsp;&nbsp;
-			<input type="radio" name="crawlingPerformance" value="custom" #(crawlingSpeedCustChecked)#::checked="checked"#(/crawlingSpeedCustChecked)# />custom: <input name="customPPM" type="text" size="4" maxlength="4" value="#[customPPMdefault]#" />PPM&nbsp;&nbsp;
-			<input type="radio" name="crawlingPerformance" value="minimum" #(crawlingSpeedMinChecked)#::checked="checked"#(/crawlingSpeedMinChecked)# />optimal as background process
+            <input type="radio" name="crawlingPerformance" id="maximum" value="maximum" #(crawlingSpeedMaxChecked)#::checked="checked"#(/crawlingSpeedMaxChecked)# /><label for="maximum">maximum</label><br />
+			<input type="radio" name="crawlingPerformance" id="custom" value="custom" #(crawlingSpeedCustChecked)#::checked="checked"#(/crawlingSpeedCustChecked)# /><label for="custom">custom</label>: <input name="customPPM" type="text" size="4" maxlength="4" value="#[customPPMdefault]#" />PPM<br />
+			<input type="radio" name="crawlingPerformance" id="minimum" value="minimum" #(crawlingSpeedMinChecked)#::checked="checked"#(/crawlingSpeedMinChecked)# /><label for="minimum"><nobr>optimal as background process</nobr></label>
           </td>
           <td colspan="3">
             Set wanted level of computing power, used for this and other running crawl tasks. (PPM = pages per minute)
@@ -222,27 +233,26 @@
         </colgroup>
         <tr valign="top" class="TableCellDark">
           <td>
-              <input type="radio" name="dcr" value="acceptCrawlMax" #(acceptCrawlMaxChecked)#::checked="checked"#(/acceptCrawlMaxChecked)# />
+            <input type="radio" name="dcr" id="acceptCrawlMax" value="acceptCrawlMax" #(acceptCrawlMaxChecked)#::checked="checked"#(/acceptCrawlMaxChecked)# />
           </td>
-          <td>
-              Accept remote crawling requests and perform crawl at maximum load
-          </td>
+          <td><label for="acceptCrawlMax">Accept remote crawling requests and perform crawl at maximum load</label></td>
         </tr>
         <tr valign="top" class="TableCelllight">
           <td>
-              <input type="radio" name="dcr" value="acceptCrawlLimited" #(acceptCrawlLimitedChecked)#::checked="checked"#(/acceptCrawlLimitedChecked)# />
+            <input type="radio" name="dcr" id="acceptCrawlLimited" value="acceptCrawlLimited" #(acceptCrawlLimitedChecked)#::checked="checked"#(/acceptCrawlLimitedChecked)# />
           </td>
           <td>
-              Accept remote crawling requests and perform crawl at maximum of
-              <input name="acceptCrawlLimit" type="text" size="4" maxlength="4" value="#[PPM]#" /> Pages Per Minute (minimum is 1, low system load usually at PPM &ge; 30)
+            <label for="acceptCrawlLimited">Accept remote crawling requests and perform crawl at maximum of</label>
+            <input name="acceptCrawlLimit" type="text" size="4" maxlength="4" value="#[PPM]#" /> Pages Per Minute (minimum is 1, low system load usually at PPM &ge; 30)
           </td>
         </tr>
         <tr valign="top" class="TableCellDark">
           <td>
-              <input type="radio" name="dcr" value="acceptCrawlDenied" #(acceptCrawlDeniedChecked)#::checked="checked"#(/acceptCrawlDeniedChecked)# />
+            <input type="radio" name="dcr" id="acceptCrawlDenied" value="acceptCrawlDenied" #(acceptCrawlDeniedChecked)#::checked="checked"#(/acceptCrawlDeniedChecked)# />
           </td>
           <td>
-              Do not accept remote crawling requests (please set this only if you cannot accept to crawl only one page per minute; see option above)
+            <label for="acceptCrawlDenied">Do not accept remote crawling requests (please set this only if
+            you cannot accept to crawl only one page per minute; see option above)</label>
           </td>
         </tr>
         <tr valign="top" class="TableCellLight">
