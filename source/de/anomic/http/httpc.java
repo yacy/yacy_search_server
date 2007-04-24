@@ -557,7 +557,7 @@ public final class httpc {
         int cutofftime = intTime(System.currentTimeMillis()) - maxNameCacheMissAge;
         int size;
         String k;
-        synchronized (nameCacheMissAges) {
+        synchronized (nameCacheMiss) {
             size = nameCacheMissAges.size();
             while ((size > 0) &&
                    (size > maxNameCacheMissSize) || (nameCacheMissAges.getMinScore() < cutofftime)) {
