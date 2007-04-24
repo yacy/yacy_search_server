@@ -124,6 +124,11 @@ public final class crawlReceipt {
             return prop;
         }
         
+        if ((switchboard.isRobinsonMode()) && (!switchboard.isInMyCluster(otherPeer))) {
+        	// we reject urls that are from outside our cluster
+        	prop.putASIS("delay", "9999");
+    	}
+        
         // generating a new loaded URL entry
         indexURLEntry entry = switchboard.wordIndex.loadedURL.newEntry(propStr);
         if (entry == null) {

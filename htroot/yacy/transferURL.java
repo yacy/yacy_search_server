@@ -89,7 +89,10 @@ public final class transferURL {
         final yacySeed otherPeer = yacyCore.seedDB.get(iam);
         final String otherPeerName = iam + ":" + ((otherPeer == null) ? "NULL" : (otherPeer.getName() + "/" + otherPeer.getVersion()));
 
-        if (granted) {
+        if ((!granted) || (sb.isRobinsonMode())) {
+        	sb.getLog().logInfo("Rejecting URLs from peer " + otherPeerName + ". Not granted.");
+            result = "error_not_granted";
+        } else {
             int received = 0;
             int blocked = 0;
             final int sizeBefore = sb.wordIndex.loadedURL.size();
@@ -154,9 +157,6 @@ public final class transferURL {
             sb.getLog().logInfo("Received " + received + " URLs from peer " + otherPeerName + " in " + (System.currentTimeMillis() - start) + " ms, Blocked " + blocked + " URLs");
             if ((received - more) > 0) sb.getLog().logSevere("Received " + doublevalues + " double URLs from peer " + otherPeerName);
             result = "ok";
-        } else {
-            sb.getLog().logInfo("Rejecting URLs from peer " + otherPeerName + ". Not granted.");
-            result = "error_not_granted";
         }
 
         prop.putASIS("double", doublevalues);

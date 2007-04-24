@@ -57,6 +57,7 @@ import de.anomic.data.listManager;
 import de.anomic.data.wikiCode;
 import de.anomic.http.httpHeader;
 import de.anomic.net.URL;
+import de.anomic.plasma.plasmaSwitchboard;
 import de.anomic.server.serverCore;
 import de.anomic.server.serverObjects;
 import de.anomic.server.serverSwitch;
@@ -69,6 +70,7 @@ public final class list {
     public static serverObjects respond(httpHeader header, serverObjects post, serverSwitch ss) {
         if (post == null || ss == null)
             throw new NullPointerException("post: " + post + ", sb: " + ss);
+        plasmaSwitchboard sb = (plasmaSwitchboard) ss;
         
         // return variable that accumulates replacements
         final serverObjects prop = new serverObjects();
@@ -82,6 +84,11 @@ public final class list {
             if (bla != null) otherPeerName = bla.getName();
         }
         if (otherPeerName == null) otherPeerName = (String)header.get(httpHeader.CONNECTION_PROP_CLIENTIP);
+        
+        if ((sb.isRobinsonMode()) && (!sb.isInMyCluster(otherPeerName))) {
+            // if we are a robinson cluster, answer only if this client is known by our network definition
+            return null;
+        }
         
         if (col.equals("black")) {
             final StringBuffer out = new StringBuffer();
@@ -109,16 +116,16 @@ public final class list {
                 final int count = Math.min(post.getInt("count", 50), CrawlURLFetchStack_p.maxURLsPerFetch);
                 
                 if (count > 0 && db.size() > 0) {
-                    final StringBuffer sb = new StringBuffer();
+                    final StringBuffer b = new StringBuffer();
                     
                     URL url;
                     int cnt = 0;
                     for (int i=0; i<count; i++) {
                         if ((url = db.pop()) == null) continue;
-                        sb.append(wikiCode.deReplaceHTMLEntities(url.toNormalform())).append("\n");
+                        b.append(wikiCode.deReplaceHTMLEntities(url.toNormalform())).append("\n");
                         cnt++;
                     }
-                    prop.put("list", sb);
+                    prop.put("list", b);
                     CrawlURLFetchStack_p.fetchMap.put(
                             otherPeerName,
                             new Integer(((CrawlURLFetchStack_p.fetchMap.get(otherPeerName) == null)

@@ -56,6 +56,7 @@ import java.util.Map;
 import java.util.Properties;
 
 import de.anomic.http.httpHeader;
+import de.anomic.plasma.plasmaSwitchboard;
 import de.anomic.server.serverObjects;
 import de.anomic.server.serverSwitch;
 
@@ -64,8 +65,17 @@ public final class profile {
     public static serverObjects respond(httpHeader header, serverObjects post, serverSwitch ss) {
         // return variable that accumulates replacements
         serverObjects prop = new serverObjects();
+        plasmaSwitchboard sb = (plasmaSwitchboard) ss;
         if (prop == null) { return null; }
 
+        if ((sb.isRobinsonMode()) &&
+           	 (!((sb.isOpenRobinsonCluster()) ||
+           	    (sb.isInMyCluster((String)header.get(httpHeader.CONNECTION_PROP_CLIENTIP)))))) {
+               // if we are a robinson cluster, answer only if this client is known by our network definition
+        	prop.put("list", 0);
+            return prop;
+        }
+        
         Properties profile = new Properties();
         int count=0;
         String key="";

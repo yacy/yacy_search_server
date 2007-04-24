@@ -64,6 +64,14 @@ public final class query {
         final serverObjects prop = new serverObjects();
         if (prop == null || sb == null) { return null; }
 
+        if ((sb.isRobinsonMode()) &&
+              	 (!((sb.isOpenRobinsonCluster()) ||
+              	    (sb.isInMyCluster((String)header.get(httpHeader.CONNECTION_PROP_CLIENTIP)))))) {
+                  // if we are a robinson cluster, answer only if this client is known by our network definition
+        	prop.putASIS("response", "-1"); // request rejected
+            return prop;
+        }
+        
 //      System.out.println("YACYQUERY: RECEIVED POST = " + ((post == null) ? "NULL" : post.toString()));
 
 //      final String iam    = post.get("iam", "");    // complete seed of the requesting peer

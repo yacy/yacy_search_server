@@ -114,6 +114,18 @@ public final class search {
         // http://localhost:8080/yacy/search.html?query=4galTpdpDM5Qgh8DKIhGKXws&abstracts=auto (search for linux and book, generate abstract automatically)
         // http://localhost:8080/yacy/search.html?query=&abstracts=4galTpdpDM5Q (only abstracts for linux)
         
+        serverObjects prop = new serverObjects();
+        
+        if ((sb.isRobinsonMode()) &&
+             	 (!((sb.isOpenRobinsonCluster()) ||
+             	    (sb.isInMyCluster((String)header.get(httpHeader.CONNECTION_PROP_CLIENTIP)))))) {
+                 // if we are a robinson cluster, answer only if this client is known by our network definition
+        	prop.putASIS("links", "");
+            prop.putASIS("linkcount", "0");
+            prop.putASIS("references", "");
+        	return prop;
+        }
+        
         // tell all threads to do nothing for a specific time
         sb.intermissionAllThreads(2 * duetime);
 
@@ -130,7 +142,6 @@ public final class search {
         final TreeSet queryhashes = plasmaSearchQuery.hashes2Set(query);
         final TreeSet excludehashes = (exclude.length() == 0) ? new TreeSet(kelondroBase64Order.enhancedCoder) : plasmaSearchQuery.hashes2Set(exclude);
         final long timestamp = System.currentTimeMillis();
-        serverObjects prop = new serverObjects();
         
         // prepare an abstract result
         StringBuffer indexabstract = new StringBuffer();

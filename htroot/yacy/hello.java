@@ -49,6 +49,7 @@
 import java.util.Date;
 
 import de.anomic.http.httpHeader;
+import de.anomic.plasma.plasmaSwitchboard;
 import de.anomic.server.serverCore;
 import de.anomic.server.serverObjects;
 import de.anomic.server.serverSwitch;
@@ -62,6 +63,7 @@ public final class hello {
     public static serverObjects respond(httpHeader header, serverObjects post, serverSwitch ss) throws InterruptedException {
         if (post == null || ss == null || yacyCore.seedDB == null || yacyCore.seedDB.mySeed == null) { return null; }
 
+        plasmaSwitchboard sb = (plasmaSwitchboard) ss;
         // return variable that accumulates replacements
         final serverObjects prop = new serverObjects();
         if (prop == null) { return null; }
@@ -80,6 +82,7 @@ public final class hello {
 
 //      System.out.println("YACYHELLO: REMOTESEED=" + ((remoteSeed == null) ? "NULL" : remoteSeed.toString()));
         if (remoteSeed == null) { return null; }
+        
 //      final String properTest = remoteSeed.isProper();
         // The remote peer might not know its IP yet, so don't abort if the IP check fails
 //      if ((properTest != null) && (! properTest.substring(0,1).equals("IP"))) { return null; }
@@ -91,6 +94,11 @@ public final class hello {
         final String reportedPeerType = remoteSeed.get(yacySeed.PEERTYPE, yacySeed.PEERTYPE_JUNIOR);
         final float clientversion = remoteSeed.getVersion();
 
+        if ((sb.isRobinsonMode()) && (!sb.isOpenRobinsonCluster())) {
+        	// if we are a robinson cluster, answer only if this client is known by our network definition
+        	return null;
+        }
+        
         int urls = -1;
         // if the remote client has reported its own IP address and the client supports
         // the port forwarding feature (if client version >= 0.383) then we try to 

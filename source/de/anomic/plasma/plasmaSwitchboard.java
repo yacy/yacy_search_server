@@ -1331,17 +1331,18 @@ public final class plasmaSwitchboard extends serverAbstractSwitch implements ser
     	return getConfigBool(plasmaSwitchboard.INDEX_DIST_ALLOW, false) && !getConfigBool(plasmaSwitchboard.INDEX_RECEIVE_ALLOW, false);
     }
 
-    public boolean isClosedRobinsonCluster() {
+    public boolean isOpenRobinsonCluster() {
     	// robinson peers may be member of robinson clusters, which can be public or private
     	// this does not check the robinson attribute, only the specific subtype of the cluster
     	String clustermode = getConfig("cluster.mode", "publicpeer");
-    	return (clustermode.equals("privatecluster")) || (clustermode.equals("privatepeer"));
+    	return (clustermode.equals("publiccluster")) || (clustermode.equals("publicepeer"));
     }
     
     public boolean isInMyCluster(String peer) {
     	// check if the given peer is in the own network, if this is a robinson cluster
     	// depending on the robinson cluster type, the peer String may be a peerhash (b64-hash)
     	// or a ip:port String or simply a ip String
+    	// if this robinson mode does not define a cluster membership, false is returned
     	if (!isRobinsonMode()) return false;
     	String clustermode = getConfig("cluster.mode", "publicpeer");
     	if (clustermode.equals("privatecluster")) {
@@ -1368,6 +1369,7 @@ public final class plasmaSwitchboard extends serverAbstractSwitch implements ser
     
     public boolean isInMyCluster(yacySeed seed) {
     	// check if the given peer is in the own network, if this is a robinson cluster
+    	// if this robinson mode does not define a cluster membership, false is returned
     	if (seed == null) return false;
 		if (!isRobinsonMode()) return false;
     	String clustermode = getConfig("cluster.mode", "publicpeer");

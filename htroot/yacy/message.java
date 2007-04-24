@@ -79,8 +79,6 @@ public final class message {
         serverObjects prop = new serverObjects();
         if (prop == null || sb == null) { return null; }
 
-//      System.out.println("yacy/message:post=" + post.toString());
-
         String process = post.get("process", "permission");
         String key =  post.get("key", "");
 
@@ -90,17 +88,22 @@ public final class message {
         prop.putASIS("messagesize", "0");
         prop.putASIS("attachmentsize", "0");
 
-//      System.out.println("DEBUG yacy/message: message post values = " + post.toString());
-
         String youare = post.get("youare", ""); // seed hash of the target peer, needed for network stability
         // check if we are the right target and requester has correct information about this peer
         if ((yacyCore.seedDB.mySeed == null) || (!(yacyCore.seedDB.mySeed.hash.equals(youare)))) {
             // this request has a wrong target
-//          System.out.println("DEBUG yacy/message: authenticate failed");
             prop.putASIS("response", "-1"); // request rejected
             return prop;
         }
 
+        if ((sb.isRobinsonMode()) &&
+        	 (!((sb.isOpenRobinsonCluster()) ||
+        	    (sb.isInMyCluster((String)header.get(httpHeader.CONNECTION_PROP_CLIENTIP)))))) {
+            // if we are a robinson cluster, answer only if this client is known by our network definition
+        	prop.putASIS("response", "-1"); // request rejected
+            return prop;
+        }
+        
         prop.putASIS("messagesize", Integer.toString(messagesize));
         prop.putASIS("attachmentsize", Integer.toString(attachmentsize));
 

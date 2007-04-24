@@ -105,7 +105,7 @@ public final class transferRWI {
         }
         */
         
-        if (!granted) {
+        if ((!granted) || (sb.isRobinsonMode())) {
             // we dont want to receive indexes
             sb.getLog().logInfo("Rejecting RWIs from peer " + otherPeerName + ". Not granted.");
             result = "not_granted";

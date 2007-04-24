@@ -99,7 +99,7 @@ public final class crawlOrder {
         String  reason      = "false-input";
         String  delay       = "5";
         String  lurl        = "";
-        boolean granted     = switchboard.getConfig("crawlResponse", "false").equals("true");
+        boolean granted     = switchboard.getConfigBool("crawlResponse", false);
         int     acceptDepth = Integer.parseInt(switchboard.getConfig("crawlResponseDepth", "0"));
         int     ppm         = yacyCore.seedDB.mySeed.getPPM();
         int     acceptDelay = (ppm == 0) ? 10 : (2 + 60 / yacyCore.seedDB.mySeed.getPPM());
@@ -108,11 +108,17 @@ public final class crawlOrder {
 
         // check if requester is authorized
         if ((yacyCore.seedDB.mySeed == null) || (!(yacyCore.seedDB.mySeed.hash.equals(youare)))) {
-        // this request has a wrong target
+            // this request has a wrong target
             response = "denied";
             reason = "authentify-problem";
             delay = "3600"; // may request one hour later again
-        } else if (orderDepth > 0) {
+        } else if ((switchboard.isRobinsonMode()) && (!switchboard.isInMyCluster(iam))) {
+        	// check network environment, if we are a robinson peer or in a robinson cluster
+            // then the request must come from a peer that is in the same cluster as we are
+          	reason = "not in my cluster";
+        	response = "denied";
+        	delay = "9999";
+    	} else if (orderDepth > 0) {
             response = "denied";
             reason = "order depth must be 0";
             delay = "3600"; // may request one hour later again
