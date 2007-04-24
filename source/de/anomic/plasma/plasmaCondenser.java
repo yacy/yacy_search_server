@@ -52,6 +52,7 @@ import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.io.RandomAccessFile;
 import java.io.Reader;
 import java.io.UnsupportedEncodingException;
 import java.util.Enumeration;
@@ -390,6 +391,21 @@ public final class plasmaCondenser {
             word = (new String((StringBuffer) wordenum.nextElement())).toLowerCase(); // TODO: does toLowerCase work for non ISO-8859-1 chars?
             //System.out.println("PARSED-WORD " + word);
             
+            //This is useful for testing what YaCy "sees" of a website.
+            if (false) { 	
+            	File f = new File("dump.txt");
+            	RandomAccessFile fa = null;
+            	try {
+					fa = new RandomAccessFile(f, "rw");
+					fa.seek(fa.length());
+					fa.writeBytes(word);
+					fa.write(160);
+					fa.close();
+				} catch (IOException e) {
+					e.printStackTrace();
+				}
+            }
+            
             // distinguish punctuation and words
             wordlen = word.length();
             if ((wordlen == 1) && (htmlFilterContentScraper.punctuation(word.charAt(0)))) {
@@ -450,7 +466,7 @@ public final class plasmaCondenser {
                 wordInSentenceCounter++;
             }
         }
-        // finnish last sentence
+        // finish last sentence
         if (sentence.length() > 0) {
             allsentencecounter++;
             sentence.insert(0, "."); // append at beginning

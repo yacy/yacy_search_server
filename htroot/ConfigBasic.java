@@ -103,7 +103,10 @@ public class ConfigBasic {
         
         // scan for Upnp routers
         long begin = System.currentTimeMillis();
-        boolean upnpRouterFound = config.findUPnPRouter(3000);
+        boolean upnpRouterFound = false;
+        if (yacyCore.seedDB.mySeed.isVirgin() || yacyCore.seedDB.mySeed.isJunior()) {
+        	upnpRouterFound = config.findUPnPRouter(3000);
+        }
         long end = System.currentTimeMillis();
         
         // if the upnp router scan has taken less than 3 sec, we need to wait

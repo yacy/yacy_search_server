@@ -639,6 +639,7 @@ public class ftpc {
   }
 
   public boolean JAR() {
+	  /*Sun proprietary API may be removed in a future Java release*/
     sun.tools.jar.Main.main(shift(cmd));
     return true;
   }

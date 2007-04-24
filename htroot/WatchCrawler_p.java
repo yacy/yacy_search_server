@@ -266,6 +266,7 @@ public class WatchCrawler_p {
                                 HashMap hyperlinks = (HashMap) scraper.getAnchors();
                                 
                                 // creating a crawler profile
+                                																			/* file.toURL() marked as deprecated per Sun JRE 6 */
                                 plasmaCrawlProfile.entry profile = switchboard.profiles.newEntry(fileName, file.toURL().toString(), newcrawlingfilter, newcrawlingfilter, newcrawlingdepth, newcrawlingdepth, crawlingIfOlder, crawlingDomFilterDepth, crawlingDomMaxPages, crawlingQ, indexText, indexMedia, storeHTCache, true, crawlOrder, xsstopw, xdstopw, xpstopw);
                                 
                                 // loop through the contained links
