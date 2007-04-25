@@ -86,23 +86,23 @@ public class ShareService extends AbstractService {
     private static final String TEMPLATE_SHARE_XML = "htdocsdefault/dir.xml";
     
     /**
-     * @return the yacy htroot directory
+     * @return the yacy HTDOCS directory, e.g. <code>DATA/HTDOCS</code>
      * @throws AxisFault if the directory does not exist
      */
-    private File getHtrootDir() throws AxisFault {
+    private File getHtDocsPath() throws AxisFault {
     	// get htroot path
-    	File htroot = new File(this.switchboard.getRootPath(), this.switchboard.getConfig("htDocsPath", "DATA/HTDOCS"));
-    	if (!htroot.exists()) throw new AxisFault("htroot directory does not exists.");
-    	return htroot;
+    	File htdocs = new File(this.switchboard.getRootPath(), this.switchboard.getConfig("htDocsPath", "DATA/HTDOCS"));
+    	if (!htdocs.exists()) throw new AxisFault("htDocsPath directory does not exists.");
+    	return htdocs;
     }
     
     /**
-     * @return the yacy fileshare directory
+     * @return the yacy fileshare directory, e.g. <code>DATA/HTDOCS/share/</code>
      * @throws AxisFault if the directory does not exist
      */
     private File getShareDir() throws AxisFault {
-    	File htroot = getHtrootDir();    	
-    	File share = new File(htroot,"share/");
+    	File htdocs = getHtDocsPath();    	
+    	File share = new File(htdocs,"share/");
     	if (!share.exists()) throw new AxisFault("Share directory does not exists.");
     	return share;
     }
@@ -114,6 +114,7 @@ public class ShareService extends AbstractService {
      * @return the absolut path
      * 
      * @throws AxisFault if the directory does not exist
+     * @throws AxisFault if the directory is not a directory
      * @throws AxisFault if the directory is not readable
      * @throws AxisFault if the directory path is too long
      * @throws AxisFault if the directory path is outside of the yacy share directory
@@ -122,6 +123,7 @@ public class ShareService extends AbstractService {
     private File getWorkingDir(String path) throws IOException {
     	File share = getShareDir();
     	
+    	// cut of a tailing slash
     	if (path != null && path.startsWith("/")) path = path.substring(1);
     	
     	// construct directory
@@ -130,8 +132,14 @@ public class ShareService extends AbstractService {
     	if (!workingDir.exists())
     		throw new AxisFault("Working directory does not exists");
     	
+    	if (!workingDir.isDirectory())
+    		throw new AxisFault("Working directory is not a directory");
+    	
     	if (!workingDir.canRead())
     		throw new AxisFault("Working directory is not readable.");
+    	
+    	if (!workingDir.canWrite())	   
+    		throw new AxisFault("Working directory is not writeable.");	    	
     	
     	if (workingDir.getAbsolutePath().length() > serverSystem.maxPathLength) 
     		throw new AxisFault("Path name is too long");
@@ -144,11 +152,12 @@ public class ShareService extends AbstractService {
     
     /**
      * Returns a file object representing a file in the yacy fileshare directory
-     * @param workingDir the current working directory
+     * @param workingDir the current working directory (must be a subdirectory of the share directory)
      * @param workingFileName the name of the file
      * @return a file object pointing to a file or directory in the yacy fileshare directory
      * 
      * @throws NullPointerException if the filename is null
+     * @throws AxisFault if the file name contains (back)slashes
      * @throws AxisFault if the file path is too long
      * @throws AxisFault if the file path is outside the yacy share directory
      * @throws AxisFault if the file path is pointing to share itself
@@ -163,7 +172,7 @@ public class ShareService extends AbstractService {
     	
     	// check filename for illegal characters
     	if (workingFileName != null) {
-    		if ((workingFileName.indexOf("/") != -1) || (workingFileName.indexOf("/") != -1))
+    		if ((workingFileName.indexOf("/") != -1) || (workingFileName.indexOf("\\") != -1))
     			throw new AxisFault("Filename contains illegal characters.");    			
     	}
     	
@@ -213,6 +222,13 @@ public class ShareService extends AbstractService {
     	return md5File;
     }
     
+    private void deleteFileMD5File(File theFile) throws IOException {    	
+        File md5File = getFileMD5File(theFile);
+        if (md5File.exists()) {
+        	md5File.delete();
+        }
+    }
+    
     /**
      * Generates a md5 sum of a file and store it together with an optional comment
      * in a special md5 file.
@@ -220,8 +236,8 @@ public class ShareService extends AbstractService {
      * @param comment description of the file
      * @return an Object array containing
      * <ul>
-     * 	<li>[0] the md5 sum of the file as byte array</li>
-     * 	<li>[1] the md5 sum of the file as string</li>
+     * 	<li>[{@link GENMD5_MD5_ARRAY}] the md5 sum of the file as byte array</li>
+     * 	<li>[{@link GENMD5_MD5_STRING}] the md5 sum of the file as string</li>
      * </ul>
      * @throws UnsupportedEncodingException should never occur
      * @throws IOException if the md5 file could not be written or the source file could not be read 
@@ -248,8 +264,8 @@ public class ShareService extends AbstractService {
      * @param theFile the regular file-share file
      * @return an array containing
      * <ul>
-     * 	<li>[0] the md5 sum of the file as string</li>
-     *  <li>[1] the comment</li>
+     * 	<li>[{@link FILEINFO_MD5_STRING}] the md5 sum of the file as string</li>
+     *  <li>[{@link FILEINFO_COMMENT}] the comment</li>
      * </ul>
      * @throws IOException if the md5 file could not be read
      */
@@ -269,6 +285,11 @@ public class ShareService extends AbstractService {
     		} catch (IOException e) {/* */} 
     	}
     	return new String[]{md5s,description};
+    }
+    
+    private String getFileComment(File theFile) throws IOException {
+    	String[] info = getFileInfo(theFile);
+    	return info[FILEINFO_COMMENT];
     }
     
     private String yacyhURL(yacySeed seed, String filename, String md5) throws AxisFault {
@@ -309,7 +330,60 @@ public class ShareService extends AbstractService {
     		throw new AxisFault("Unable to index the file");
     	}      	
     }
+    
+    private String getPhrase(String filename) {
+    	return filename.replace('.', ' ').replace('_', ' ').replace('-', ' ');
+    }
+        
+    private void indexFile(File newFile, String comment, byte[] md5b) throws IOException {
+    	if (comment == null) comment = "";
+    	
+    	// getting the file name
+    	String newFileName = newFile.getName();
+    	String phrase = this.getPhrase(newFileName);
+    	
+		// convert md5 sum to string
+		String md5s = convertMD5ArrayToString(md5b);
+        
+        // index file		
+		String urlstring = yacyhURL(yacyCore.seedDB.mySeed, newFileName, md5s);		
+		indexPhrase(urlstring, phrase, comment, md5b);        	
+    }
 
+    private void unIndexFile(File file) throws IOException {
+		String filename = file.getName();
+		String phrase = this.getPhrase(filename);
+		
+		// getting file info [0=md5s,1=comment]
+		String[] fileInfo = getFileInfo(file);
+		
+		// delete old indexed phrases
+        String urlstring = yacyhURL(yacyCore.seedDB.mySeed, filename, fileInfo[FILEINFO_MD5_STRING]);        
+        deletePhrase(urlstring, phrase, fileInfo[FILEINFO_COMMENT]);   
+    }
+    
+    
+    private void deleteRecursive(File file) throws IOException {
+    	if (file == null) throw new NullPointerException("File object is null");
+    	if (!file.exists()) return;
+    	if (!file.canWrite()) throw new IllegalArgumentException("File object can not be deleted. No write access.");
+    	
+    	if (file.isDirectory()) {    		
+    		// delete all subdirectories and files
+            File[] subFiles = file.listFiles();
+            for (int i = 0; i < subFiles.length; i++) deleteRecursive(subFiles[i]);
+    	} else {
+    		// unindex the file
+    		this.unIndexFile(file);
+    		
+            // delete md5 file
+    		this.deleteFileMD5File(file);
+    	}
+    	
+		// delete file / directory
+		file.delete();    		
+    }    
+    
     /**
      * Returns a directory listing in xml format
      * @param workingDirPath a relative path within the yacy file-share
@@ -321,15 +395,12 @@ public class ShareService extends AbstractService {
 		// extracting the message context
 		extractMessageContext(AUTHENTICATION_NEEDED);   
 				
-		// getting the relativ path
-		File htroot = getHtrootDir();
+		// getting the htDocs and sub-directory
+		File htdocs = getHtDocsPath();
 		File workingDir = getWorkingDir(workingDirPath);
-		if (!workingDir.exists())      throw new AxisFault("Working directory does not exist.");
-		if (!workingDir.canRead())     throw new AxisFault("Working directory is not readable.");
-		if (!workingDir.isDirectory()) throw new AxisFault("Working directory is not a directory.");
 		
 		// generate the proper path for the servlet
-		workingDirPath = workingDir.getCanonicalPath().substring(htroot.getCanonicalPath().length()+1);
+		workingDirPath = workingDir.getCanonicalPath().substring(htdocs.getCanonicalPath().length()+1);
 		if (!workingDirPath.endsWith("/")) workingDirPath = workingDirPath + "/";
 		
 		// construct arguments
@@ -358,10 +429,7 @@ public class ShareService extends AbstractService {
 		extractMessageContext(AUTHENTICATION_NEEDED);  
 		
 		// getting the full path
-		File workingDir = getWorkingDir(workingDirPath);
-		if (!workingDir.exists())      throw new AxisFault("Working directory does not exist.");		
-		if (!workingDir.canWrite())    throw new AxisFault("Working directory is not writeable.");
-		if (!workingDir.isDirectory()) throw new AxisFault("Working directory is not a directory.");
+		File workingDir = getWorkingDir(workingDirPath);	
 		
 		// get the current message context
         MessageContext msgContext = MessageContext.getCurrentContext();
@@ -391,22 +459,14 @@ public class ShareService extends AbstractService {
 		
 		// getting directory to create
 		File newFile = getWorkingFile(workingDir,newFileName);
-		if (newFile.exists())
-			throw new AxisFault("File '" + newFileName + "' already exists");		    	
+		if (newFile.exists()) throw new AxisFault("File '" + newFileName + "' already exists");		    	
     	
 		// copy datahandler content to file
 		serverFileUtils.copy(dh.getInputStream(),newFile);
 
-		// generate md5 sum and write it to file
-		if (comment == null) comment = "";
-		Object[] md5 = generateMD5File(newFile,comment);
-        
-        // index file
-        if (indexFile) {
-            String urlstring = yacyhURL(yacyCore.seedDB.mySeed, newFileName, (String)md5[GENMD5_MD5_STRING]);
-            String phrase = newFileName.replace('.', ' ').replace('_', ' ').replace('-', ' ');
-            indexPhrase(urlstring, phrase, comment, (byte[])md5[GENMD5_MD5_ARRAY]);        	
-        }
+		// generate md5 sum and index the file
+		Object[] info = generateMD5File(newFile,comment);
+		if (indexFile) indexFile(newFile,comment,(byte[]) info[GENMD5_MD5_ARRAY]);
     }
     
     /**
@@ -422,10 +482,7 @@ public class ShareService extends AbstractService {
 		extractMessageContext(AUTHENTICATION_NEEDED);  
 		
 		// getting the full path
-		File workingDir = getWorkingDir(workingDirPath);
-		if (!workingDir.exists()) 	   throw new AxisFault("Working directory does not exist.");		
-		if (!workingDir.canWrite())	   throw new AxisFault("Working directory is not writeable.");
-		if (!workingDir.isDirectory()) throw new AxisFault("Working directory is not a directory");		
+		File workingDir = getWorkingDir(workingDirPath);		
 		
 		// getting directory to create
 		File newDirFile = getWorkingFile(workingDir,newDirName);
@@ -452,9 +509,6 @@ public class ShareService extends AbstractService {
 		
 		// getting the full path
 		File workingDir = getWorkingDir(workingDirPath);
-		if (!workingDir.exists())      throw new AxisFault("Working directory does not exist.");		
-		if (!workingDir.canWrite())    throw new AxisFault("Working directory is not writeable.");
-		if (!workingDir.isDirectory()) throw new AxisFault("Working directory is not a directory");	
 		
 		// getting directory or file to delete
 		File fileToDelete = getWorkingFile(workingDir, nameToDelete);		
@@ -478,17 +532,16 @@ public class ShareService extends AbstractService {
 		// extracting the message context
 		extractMessageContext(AUTHENTICATION_NEEDED);  
 		
-		// getting the full path
+		// getting the working directory
 		File workingDir = getWorkingDir(workingDirPath);
-		if (!workingDir.exists())  	   throw new AxisFault("Working directory does not exist.");				
-		if (!workingDir.canRead()) 	   throw new AxisFault("Working directory is not readable.");
-		if (!workingDir.isDirectory()) throw new AxisFault("Working directory is not a directory");
 		
+		// getting the working file
 		File workingFile = getWorkingFile(workingDir,fileName);
 		if (!workingFile.exists()) throw new AxisFault("Requested file does not exist.");		
 		if (!workingFile.canRead())throw new AxisFault("Requested file can not be read.");
 		if (!workingFile.isFile()) throw new AxisFault("Requested file is not a file.");				
 		
+		// getting the md5 string and comment
 		String[] info = getFileInfo(workingFile);
 		
 		// get the current message context
@@ -512,6 +565,36 @@ public class ShareService extends AbstractService {
         return info[FILEINFO_MD5_STRING];
     }
     
+    public void renameFile(String workingDirPath, String oldFileName, String newFileName, boolean indexFile) throws IOException {
+		// extracting the message context
+		extractMessageContext(AUTHENTICATION_NEEDED);
+		
+		// getting the full path
+		File workingDir = getWorkingDir(workingDirPath);				
+		
+		// getting file
+		File sourceFile = getWorkingFile(workingDir,oldFileName);
+		if (!sourceFile.exists()) throw new AxisFault("Source file does not exist.");		
+		if (!sourceFile.isFile()) throw new AxisFault("Source file is not a file.");	
+		
+		File destFile = getWorkingFile(workingDir,newFileName);
+		if (destFile.exists()) throw new AxisFault("Destination file already exists.");				
+		
+		// get the old file comment
+		String comment = this.getFileComment(sourceFile);
+		
+		// unindex the old file and delete the old MD5 file
+		this.unIndexFile(sourceFile);
+		this.deleteFileMD5File(sourceFile);
+		
+        // rename file
+        sourceFile.renameTo(destFile);
+        
+        // generate MD5 file and index file
+		Object[] info = generateMD5File(destFile,comment);
+		if (indexFile) indexFile(destFile,comment,(byte[]) info[GENMD5_MD5_ARRAY]);        
+    }
+    
     /**
      * To change the comment of a file located in the yacy file-share
      * @param workingDirPatha relative path within the yacy file-share
@@ -526,10 +609,7 @@ public class ShareService extends AbstractService {
 		extractMessageContext(AUTHENTICATION_NEEDED);      	
     	
 		// getting the full path
-		File workingDir = getWorkingDir(workingDirPath);	
-		if (!workingDir.exists())  	   throw new AxisFault("Working directory does not exist.");				
-		if (!workingDir.canWrite())    throw new AxisFault("Working directory is not writeable.");
-		if (!workingDir.isDirectory()) throw new AxisFault("Working directory is not a directory");	
+		File workingDir = getWorkingDir(workingDirPath);				
 		
 		// getting wroking file
 		File workingFile = getWorkingFile(workingDir,fileName);
@@ -537,56 +617,43 @@ public class ShareService extends AbstractService {
 		if (!workingFile.canRead())throw new AxisFault("Requested file can not be read.");
 		if (!workingFile.isFile()) throw new AxisFault("Requested file is not a file.");	
 		
-		// getting filename and indexing phrase
-		String filename = workingFile.getName();
-		String phrase = filename.replace('.', ' ').replace('_', ' ').replace('-', ' ');
+		// unindex file and delete MD5 file
+		this.unIndexFile(workingFile);		
+		this.deleteFileMD5File(workingFile);
 		
-		// getting file info [0=md5s,1=comment]
-		String[] info = getFileInfo(workingFile);
-		
-		// delete old indexed phrases
-        String urlstring = yacyhURL(yacyCore.seedDB.mySeed, filename, info[FILEINFO_MD5_STRING]);        
-        deletePhrase(urlstring, phrase, info[FILEINFO_COMMENT]);    					
-		
-		// re-generate md5 file [0=byteArray, 1=String]
-		Object[] md5 = generateMD5File(workingFile,comment);
-
-        // index file
-        if (indexFile) {
-            urlstring = yacyhURL(yacyCore.seedDB.mySeed, filename, (String)md5[GENMD5_MD5_STRING]);
-            indexPhrase(urlstring, phrase, comment, (byte[])md5[GENMD5_MD5_ARRAY]);        	
-        }		
+		// generate new MD5 file and index file
+		Object[] info = generateMD5File(workingFile,comment);
+		if (indexFile) indexFile(workingFile,comment,(byte[]) info[GENMD5_MD5_ARRAY]);     			
     }
     
-    private void deleteRecursive(File file) throws IOException {
-    	if (file == null) throw new NullPointerException("File object is null");
-    	if (!file.exists()) return;
-    	if (!file.canWrite()) throw new IllegalArgumentException("File object can not be deleted. No write access.");
-    	
-    	if (file.isDirectory()) {    		
-    		// delete all subdirectories and files
-            File[] subFiles = file.listFiles();
-            for (int i = 0; i < subFiles.length; i++) deleteRecursive(subFiles[i]);
-    	} else {
-    		// getting the file short name
-    		String filename = file.getName();
-    		int pos = file.getName().lastIndexOf("/");
-    		if (pos != -1) filename = filename.substring(pos + 1);
-    		
-    		// getting file info [0=md5s,1=comment]
-    		String[] info = getFileInfo(file);
-    		
-    		// delete indexed phrases
-            String urlstring = yacyhURL(yacyCore.seedDB.mySeed, filename, info[FILEINFO_MD5_STRING]);
-            String phrase = filename.replace('.', ' ').replace('_', ' ').replace('-', ' ');
-            deletePhrase(urlstring, phrase, info[FILEINFO_MD5_STRING]);    		
-    		
-            // delete md5 file
-            File md5File = getFileMD5File(file);
-            if (md5File.exists()) md5File.delete();
-    	}
-    	
-		// delete file / directory
-		file.delete();    		
+    public void moveFile(String sourceDirName, String destDirName, String fileName, boolean indexFile) throws IOException {
+		// extracting the message context
+		extractMessageContext(AUTHENTICATION_NEEDED);
+		
+		// getting source and destination directory
+		File sourceDir = getWorkingDir(sourceDirName);						
+		File destDir = getWorkingDir(destDirName);					
+		
+		// getting source and destination file
+		File sourceFile = getWorkingFile(sourceDir,fileName);
+		if (!sourceFile.exists()) throw new AxisFault("Source file does not exist.");		
+		if (!sourceFile.isFile()) throw new AxisFault("Source file is not a file.");	
+
+		File destFile = getWorkingFile(destDir,fileName);
+		if (destFile.exists()) throw new AxisFault("Destination file already exists.");			
+		
+		// getting the old comment
+		String comment = this.getFileComment(sourceFile);
+		
+		// unindex old file and delete MD5 file
+		this.unIndexFile(sourceFile);
+		this.deleteFileMD5File(sourceFile);
+		
+        // rename file
+        sourceFile.renameTo(destFile);
+
+        // index file and generate MD5
+		Object[] info = generateMD5File(destFile,comment);
+		if (indexFile) indexFile(destFile,comment,(byte[]) info[GENMD5_MD5_ARRAY]);         
     }
 }
