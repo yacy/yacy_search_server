@@ -114,6 +114,7 @@ public class indexCollectionRI implements indexRI {
 
         public Object next() {
             Object[] oo = (Object[]) wci.next();
+            if (oo == null) return null;
             byte[] key = (byte[]) oo[0];
             kelondroRowSet collection = (kelondroRowSet) oo[1];
             if (collection == null) return null;
