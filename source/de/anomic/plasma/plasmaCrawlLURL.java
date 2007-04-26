@@ -362,7 +362,8 @@ public final class plasmaCrawlLURL {
         }
         
         public final boolean hasNext() {
-            if (this.error) { return false; }
+            if (this.error) return false;
+            if (this.iter == null) return false;
             return this.iter.hasNext();
         }
 

@@ -1355,17 +1355,7 @@ public final class plasmaSwitchboard extends serverAbstractSwitch implements ser
             return network.indexOf(peer) >= 0;
     	} else if (clustermode.equals("publiccluster")) {
     		// check if we got the request from a peer in the public cluster
-    		String network = getConfig("cluster.peers.yacydomain", "");
-            // check for .yacyh hexhash-domain
-    		String hexhash = yacySeed.b64Hash2hexHash(peer);
-    		if (hexhash == null) return false;
-    		if (network.indexOf(hexhash + ".yacyh") >= 0) return true;
-    		// resolve seed
-    		yacySeed seed = yacyCore.seedDB.get(peer);
-    		if (seed == null) return false;
-    		// check for .yacy (name) - Domain
-    		if (network.indexOf(seed.getName() + ".yacy") >= 0) return true;
-    		return false;
+            return this.clusterhashes.contains(peer);
     	} else {
     		return false;
     	}
@@ -1382,15 +1372,8 @@ public final class plasmaSwitchboard extends serverAbstractSwitch implements ser
     		String network = getConfig("cluster.peers.ipport", "");
             return network.indexOf(seed.getAddress()) >= 0;
     	} else if (clustermode.equals("publiccluster")) {
-    		// check if we got the request from a peer in the public cluster
-    		String network = getConfig("cluster.peers.yacydomain", "");
-            // check for .yacyh hexhash-domain
-    		String hexhash = yacySeed.b64Hash2hexHash(seed.hash);
-    		if (hexhash == null) return false;
-    		if (network.indexOf(hexhash + ".yacyh") >= 0) return true;
-    		// check for .yacy (name) - Domain
-    		if (network.indexOf(seed.getName() + ".yacy") >= 0) return true;
-    		return false;
+    	    // check if we got the request from a peer in the public cluster
+            return this.clusterhashes.contains(seed.hash);
     	} else {
     		return false;
     	}
@@ -3049,32 +3032,46 @@ public final class plasmaSwitchboard extends serverAbstractSwitch implements ser
         serverThread thread;
         
         thread = getThread(INDEX_DIST);
-        setConfig(INDEX_DIST_BUSYSLEEP , thread.setBusySleep(Math.max(2000, thread.setBusySleep(newBusySleep * 2))));
-        thread.setIdleSleep(30000);
+        if (thread != null) {
+            setConfig(INDEX_DIST_BUSYSLEEP , thread.setBusySleep(Math.max(2000, thread.setBusySleep(newBusySleep * 2))));
+            thread.setIdleSleep(30000);
+        }
         
         thread = getThread(CRAWLJOB_LOCAL_CRAWL);
-        setConfig(CRAWLJOB_LOCAL_CRAWL_BUSYSLEEP , thread.setBusySleep(newBusySleep));
-        thread.setIdleSleep(1000);
+        if (thread != null) {
+        	setConfig(CRAWLJOB_LOCAL_CRAWL_BUSYSLEEP , thread.setBusySleep(newBusySleep));
+        	thread.setIdleSleep(1000);
+        }
         
         thread = getThread(CRAWLJOB_GLOBAL_CRAWL_TRIGGER);
-        setConfig(CRAWLJOB_GLOBAL_CRAWL_TRIGGER_BUSYSLEEP , thread.setBusySleep(Math.max(1000, newBusySleep * 3)));
-        thread.setIdleSleep(10000);
-        
-        //thread = getThread(CRAWLJOB_REMOTE_TRIGGERED_CRAWL);
-        //setConfig(CRAWLJOB_REMOTE_TRIGGERED_CRAWL_BUSYSLEEP , thread.setBusySleep(newBusySleep * 10));
-        //thread.setIdleSleep(10000);
-        
+        if (thread != null) {
+            setConfig(CRAWLJOB_GLOBAL_CRAWL_TRIGGER_BUSYSLEEP , thread.setBusySleep(Math.max(1000, newBusySleep * 3)));
+            thread.setIdleSleep(10000);
+        }
+        /*
+        thread = getThread(CRAWLJOB_REMOTE_TRIGGERED_CRAWL);
+        if (thread != null) {
+            setConfig(CRAWLJOB_REMOTE_TRIGGERED_CRAWL_BUSYSLEEP , thread.setBusySleep(newBusySleep * 10));
+            thread.setIdleSleep(10000);
+        }
+        */
         thread = getThread(PROXY_CACHE_ENQUEUE);
-        setConfig(PROXY_CACHE_ENQUEUE_BUSYSLEEP , thread.setBusySleep(0));
-        thread.setIdleSleep(1000);
+        if (thread != null) {
+            setConfig(PROXY_CACHE_ENQUEUE_BUSYSLEEP , thread.setBusySleep(0));
+            thread.setIdleSleep(1000);
+        }
         
         thread = getThread(INDEXER);
-        setConfig(INDEXER_BUSYSLEEP , thread.setBusySleep(newBusySleep / 2));
-        thread.setIdleSleep(1000);
+        if (thread != null) {
+            setConfig(INDEXER_BUSYSLEEP , thread.setBusySleep(newBusySleep / 2));
+            thread.setIdleSleep(1000);
+        }
         
         thread = getThread(CRAWLSTACK);
-        setConfig(CRAWLSTACK_BUSYSLEEP , thread.setBusySleep(0));
-        thread.setIdleSleep(5000);
+        if (thread != null) {
+            setConfig(CRAWLSTACK_BUSYSLEEP , thread.setBusySleep(0));
+            thread.setIdleSleep(5000);
+        }
         
     }
     

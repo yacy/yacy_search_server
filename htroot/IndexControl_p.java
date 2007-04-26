@@ -333,6 +333,7 @@ public class IndexControl_p {
                 prop.put("urlhashsimilar", 1);
                 while (entryIt.hasNext() && i < 256) {
                     entry = (indexURLEntry) entryIt.next();
+                    if (entry == null) break;
                     prop.put("urlhashsimilar_rows_"+rows+"_cols_"+cols+"_urlHash", entry.hash());
                     cols++;
                     if (cols==8) {

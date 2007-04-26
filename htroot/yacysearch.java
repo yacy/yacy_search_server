@@ -127,6 +127,7 @@ public class yacysearch {
             prop.put("input_display", display);
             prop.putASIS("input_promoteSearchPageGreeting", promoteSearchPageGreeting);
             prop.put("input_former", "");
+            prop.put("former", "");
             prop.put("input_count", 10);
             prop.put("input_resource", "global");
             prop.put("input_time", 6);
@@ -502,6 +503,7 @@ public class yacysearch {
         prop.put("input_display", display);
         prop.putASIS("input_promoteSearchPageGreeting", promoteSearchPageGreeting);
         prop.put("input_former", post.get("search", ""));
+        prop.put("former", post.get("search", ""));
         prop.put("input_count", count);
         prop.put("input_resource", (global) ? "global" : "local");
         prop.put("input_time", searchtime / 1000);
