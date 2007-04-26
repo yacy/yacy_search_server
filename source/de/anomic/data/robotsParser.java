@@ -80,11 +80,16 @@ import de.anomic.server.logging.serverLog;
  *        See: http://www.kollar.com/robots.html
  */
 public final class robotsParser{
-    
+	public static final int DOWNLOAD_ACCESS_RESTRICTED = 0;
+	public static final int DOWNLOAD_ROBOTS_TXT = 1;
+	public static final int DOWNLOAD_ETAG = 2;
+	public static final int DOWNLOAD_MODDATE = 3;
+	
     public static final String ROBOTS_USER_AGENT = "User-agent:".toUpperCase();
     public static final String ROBOTS_DISALLOW = "Disallow:".toUpperCase();
     public static final String ROBOTS_ALLOW = "Allow:".toUpperCase();
     public static final String ROBOTS_COMMENT = "#";
+    public static final String ROBOTS_SITEMAP = "Sitemap:".toUpperCase();
     
     /*public robotsParser(URL robotsUrl){
      }*/
@@ -93,29 +98,29 @@ public final class robotsParser{
      * at the Moment it only creates a list of Deny Paths
      */
     
-    public static ArrayList parse(File robotsFile) throws IOException {
+    public static Object[] parse(File robotsFile) throws IOException {
         BufferedReader reader = null;
         try {
             reader = new BufferedReader(new FileReader(robotsFile));
             return parse(reader);
         } finally {
-            if (reader != null) try{reader.close();}catch(Exception e){}
+            if (reader != null) try{reader.close();}catch(Exception e){/* ignore this */}
         }
     }
     
-    public static ArrayList parse(byte[] robotsTxt) throws IOException {
-        if ((robotsTxt == null)||(robotsTxt.length == 0)) return new ArrayList(0);
+    public static Object[] parse(byte[] robotsTxt) throws IOException {
+        if ((robotsTxt == null)||(robotsTxt.length == 0)) return new Object[]{new ArrayList(0),null};
         ByteArrayInputStream bin = new ByteArrayInputStream(robotsTxt);
         BufferedReader reader = new BufferedReader(new InputStreamReader(bin));
         return parse(reader);
     }
     
-    public static ArrayList parse(BufferedReader reader) throws IOException{
+    public static Object[] parse(BufferedReader reader) throws IOException{
         ArrayList deny4AllAgents = new ArrayList();
         ArrayList deny4YaCyAgent = new ArrayList();
         
         int pos;
-        String line = null, lineUpper = null;
+        String line = null, lineUpper = null, sitemap = null;
         boolean isRuleBlock4AllAgents = false,
                 isRuleBlock4YaCyAgent = false,
                 rule4YaCyFound = false,
@@ -132,6 +137,11 @@ public final class robotsParser{
                 // NEW: just ignore it
             } else if (line.startsWith(ROBOTS_COMMENT)) {
                 // we can ignore this. Just a comment line
+            } else if (line.startsWith(ROBOTS_SITEMAP)) {
+                pos = line.indexOf(" ");
+                if (pos != -1) {
+                    sitemap = line.substring(pos).trim();
+                }
             } else if (lineUpper.startsWith(ROBOTS_USER_AGENT)) {
                 
                 if (inBlock) {
@@ -200,7 +210,8 @@ public final class robotsParser{
             }
         }
         
-        return (rule4YaCyFound)?deny4YaCyAgent:deny4AllAgents;
+        ArrayList denyList = (rule4YaCyFound)?deny4YaCyAgent:deny4AllAgents;
+        return new Object[]{denyList,sitemap};
     }        
     
     public static boolean isDisallowed(URL nexturl) {
@@ -250,10 +261,10 @@ public final class robotsParser{
                     result = downloadRobotsTxt(robotsURL,5,robotsTxt4Host);
                     
                     if (result != null) {
-                        accessCompletelyRestricted = ((Boolean)result[0]).booleanValue();
-                        robotsTxt = (byte[])result[1];
-                        eTag = (String) result[2];
-                        modDate = (Date) result[3];
+                        accessCompletelyRestricted = ((Boolean)result[DOWNLOAD_ACCESS_RESTRICTED]).booleanValue();
+                        robotsTxt = (byte[])result[DOWNLOAD_ROBOTS_TXT];
+                        eTag = (String) result[DOWNLOAD_ETAG];
+                        modDate = (Date) result[DOWNLOAD_MODDATE];
                     } else if (robotsTxt4Host != null) {
                         robotsTxt4Host.setLoadedDate(new Date());
                         plasmaSwitchboard.robots.addEntry(robotsTxt4Host);
@@ -264,20 +275,23 @@ public final class robotsParser{
                 
                 if ((robotsTxt4Host==null)||((robotsTxt4Host!=null)&&(result!=null))) {
                     ArrayList denyPath = null;
+                    String sitemap = null;
                     if (accessCompletelyRestricted) {
                         denyPath = new ArrayList();
                         denyPath.add("/");
                     } else {
                         // parsing the robots.txt Data and converting it into an arraylist
                         try {
-                            denyPath = robotsParser.parse(robotsTxt);
+                            Object[] parserResult = robotsParser.parse(robotsTxt);
+                            denyPath = (ArrayList) parserResult[0];
+                            sitemap = (String) parserResult[1];
                         } catch (IOException e) {
                             serverLog.logSevere("ROBOTS","Unable to parse the robots.txt file from URL '" + robotsURL + "'.");
                         }
                     } 
                     
                     // storing the data into the robots DB
-                    robotsTxt4Host = plasmaSwitchboard.robots.addEntry(urlHostPort,denyPath,new Date(),modDate,eTag);
+                    robotsTxt4Host = plasmaSwitchboard.robots.addEntry(urlHostPort,denyPath,new Date(),modDate,eTag,sitemap);
                 } 
             }
         }
@@ -288,7 +302,7 @@ public final class robotsParser{
         return false;
     }
     
-    private static Object[] downloadRobotsTxt(URL robotsURL, int redirectionCount, plasmaCrawlRobotsTxt.Entry entry) throws Exception {
+    static Object[] downloadRobotsTxt(URL robotsURL, int redirectionCount, plasmaCrawlRobotsTxt.Entry entry) throws Exception {
         
         if (redirectionCount < 0) return new Object[]{Boolean.FALSE,null,null};
         redirectionCount--;
@@ -395,28 +409,4 @@ public final class robotsParser{
         }            
         return new Object[]{new Boolean(accessCompletelyRestricted),robotsTxt,eTag,lastMod};
     }
-    
-    public static void main(String[] args) {
-        try {
-        //robotsParser parser = new robotsParser();
-        
-        URL robotsURL = new URL("http://www.bigfoot2002.de.vu/robots.txt");
-        Object[] result = downloadRobotsTxt(robotsURL,5,null);
-        
-        if (result != null) {
-            boolean accessCompletelyRestricted = ((Boolean)result[0]).booleanValue();
-            byte[] robotsTxt = (byte[])result[1];
-            //String eTag = (String) result[2];
-            //Date modDate = (Date) result[3];
-        
-            if (!accessCompletelyRestricted) {
-                /*ArrayList denyPath =*/ robotsParser.parse(robotsTxt);
-            }
-
-        }
-        }catch(Exception e) {
-            e.printStackTrace();
-        }
-    }
-
 }

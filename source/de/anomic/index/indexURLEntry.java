@@ -75,23 +75,44 @@ public class indexURLEntry {
         kelondroBase64Order.enhancedCoder,
         0);      
     
+    /* ===========================================================================
+     * Constants to access the various columns of an URL entry
+     * =========================================================================== */
+    /** the url's hash */
     private static final int col_hash     =  0;
+    /** components: the url, description, author and tags. As 5th element, an ETag is possible */
     private static final int col_comp     =  1;
+    /** components: the url, description, author and tags. As 5th element, an ETag is possible */
     private static final int col_mod      =  2;
+    /** time when the url was loaded */
     private static final int col_load     =  3;
+    /** time until this url is fresh */
     private static final int col_fresh    =  4;
+    /** time when the url was loaded */
     private static final int col_referrer =  5;
+    /** the md5 of the url content (to identify changes) */
     private static final int col_md5      =  6;
+    /** size of file in bytes */
     private static final int col_size     =  7;
+    /** size of file by number of words; for video and audio: seconds */
     private static final int col_wc       =  8;
+    /** doctype, taken from extension or any other heuristic */
     private static final int col_dt       =  9;
+    /** flags; any stuff (see Word-Entity definition) */
     private static final int col_flags    = 10;
+    /** language */
     private static final int col_lang     = 11;
+    /** of outlinks to same domain; for video and image: width */
     private static final int col_llocal   = 12;
+    /** of outlinks to outside domain; for video and image: height */
     private static final int col_lother   = 13;
+    /** of embedded image links */
     private static final int col_limage   = 14;
+    /** of embedded audio links; for audio: track number; for video: number of audio tracks */
     private static final int col_laudio   = 15;
+    /** of embedded video links */
     private static final int col_lvideo   = 16;
+    /** of embedded links to applications */
     private static final int col_lapp     = 17;
     
     private kelondroRow.Entry entry;
@@ -405,7 +426,7 @@ public class indexURLEntry {
     }
     
     /**
-     * Returns this object as String.<br> 
+     * @return the object as String.<br> 
      * This e.g. looks like this:
      * <pre>{hash=jmqfMk7Y3NKw,referrer=------------,mod=20050610,load=20051003,size=51666,wc=1392,cc=0,local=true,q=AEn,dt=h,lang=uk,url=b|aHR0cDovL3d3dy50cmFuc3BhcmVuY3kub3JnL3N1cnZleXMv,descr=b|S25vd2xlZGdlIENlbnRyZTogQ29ycnVwdGlvbiBTdXJ2ZXlzIGFuZCBJbmRpY2Vz}</pre>
      */

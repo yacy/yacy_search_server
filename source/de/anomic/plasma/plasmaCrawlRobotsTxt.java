@@ -111,8 +111,8 @@ public class plasmaCrawlRobotsTxt {
         }
     }    
     
-    public Entry addEntry(String hostName, ArrayList disallowPathList, Date loadedDate, Date modDate, String eTag) {
-        Entry entry = new Entry(hostName,disallowPathList,loadedDate,modDate,eTag);
+    public Entry addEntry(String hostName, ArrayList disallowPathList, Date loadedDate, Date modDate, String eTag, String sitemap) {
+        Entry entry = new Entry(hostName,disallowPathList,loadedDate,modDate,eTag,sitemap);
         addEntry(entry);
         return entry;
     }
@@ -132,6 +132,7 @@ public class plasmaCrawlRobotsTxt {
         public static final String LOADED_DATE = "date";
         public static final String MOD_DATE = "modDate";
         public static final String ETAG = "etag";
+        public static final String SITEMAP = "sitemap";
         
         // this is a simple record structure that hold all properties of a single crawl start
         private Map mem;
@@ -161,16 +162,18 @@ public class plasmaCrawlRobotsTxt {
                 ArrayList disallowPathList, 
                 Date loadedDate,
                 Date modDate,
-                String eTag) {
+                String eTag,
+                String sitemap) {
             if ((hostName == null) || (hostName.length() == 0)) throw new IllegalArgumentException();
             
             this.hostName = hostName.trim().toLowerCase();
             this.disallowPathList = new LinkedList();
             
-            this.mem = new HashMap();
+            this.mem = new HashMap(5);
             if (loadedDate != null) this.mem.put(LOADED_DATE,Long.toString(loadedDate.getTime()));
             if (modDate != null) this.mem.put(MOD_DATE,Long.toString(modDate.getTime()));
             if (eTag != null) this.mem.put(ETAG,eTag);
+            if (sitemap != null) this.mem.put(SITEMAP,sitemap);
             
             if ((disallowPathList != null)&&(disallowPathList.size()>0)) {
                 this.disallowPathList.addAll(disallowPathList);
@@ -195,6 +198,10 @@ public class plasmaCrawlRobotsTxt {
             
             return str.toString();
         }    
+        
+        public String getSitemap() {
+            return this.mem.containsKey(SITEMAP)? (String)this.mem.get(LOADED_DATE): null;
+        }
         
         public Date getLoadedDate() {
             if (this.mem.containsKey(LOADED_DATE)) {

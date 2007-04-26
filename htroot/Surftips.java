@@ -133,7 +133,8 @@ public class Surftips {
                 refid = row.getColString(3, null);
                 voted = false;
                 try {
-                    voted = (yacyCore.newsPool.getSpecific(yacyNewsPool.OUTGOING_DB, yacyNewsPool.CATEGORY_SURFTIPP_VOTE_ADD, "refid", refid) != null) || (yacyCore.newsPool.getSpecific(yacyNewsPool.PUBLISHED_DB, "stippavt", "refid", refid) != null);
+                    voted = (yacyCore.newsPool.getSpecific(yacyNewsPool.OUTGOING_DB, yacyNewsPool.CATEGORY_SURFTIPP_VOTE_ADD, "refid", refid) != null) || 
+                    		(yacyCore.newsPool.getSpecific(yacyNewsPool.PUBLISHED_DB, yacyNewsPool.CATEGORY_SURFTIPP_VOTE_ADD, "refid", refid) != null);
                 } catch (IOException e) {
                     e.printStackTrace();
                 }
