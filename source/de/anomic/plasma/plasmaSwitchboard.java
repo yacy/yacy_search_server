@@ -251,6 +251,7 @@ public final class plasmaSwitchboard extends serverAbstractSwitch implements ser
     public  double                      lastrequestedQueries = 0d;
     public  int                         totalPPM = 0;
     public  double                      totalQPM = 0d;
+    public  TreeSet                     clusterhashes;
     
     /*
      * Remote Proxy configuration
@@ -1272,6 +1273,9 @@ public final class plasmaSwitchboard extends serverAbstractSwitch implements ser
 
         this.dbImportManager = new dbImportManager(this);
         
+        // init robinson cluster
+        this.clusterhashes = yacyCore.seedDB.clusterHashes(getConfig("cluster.peers.yacydomain", ""));
+        
         sb=this;
         log.logConfig("Finished Switchboard Initialization");
     }
@@ -1881,6 +1885,9 @@ public final class plasmaSwitchboard extends serverAbstractSwitch implements ser
             kelondroRecords.setCacheGrowStati(memprereq + (memprereq / 8) + 2 * 1024 * 1024, memprereq);
             kelondroCache.setCacheGrowStati(memprereq + (memprereq / 8) + 2 * 1024 * 1024, memprereq);
             
+            // update the cluster set
+            this.clusterhashes = yacyCore.seedDB.clusterHashes(getConfig("cluster.peers.yacydomain", ""));
+            
             return hasDoneSomething;
         } catch (InterruptedException e) {
             this.log.logInfo("cleanupJob: Shutdown detected");
@@ -2007,6 +2014,13 @@ public final class plasmaSwitchboard extends serverAbstractSwitch implements ser
         if (noticeURL.stackSize(plasmaCrawlNURL.STACK_TYPE_LIMIT) == 0) {
             //log.logDebug("LimitCrawl: queue is empty");
             return false;
+        }
+        
+        if ((isRobinsonMode()) &&
+        	((getConfig("cluster.mode", "").equals("publicpeer")) ||
+        	 (getConfig("cluster.mode", "").equals("privatepeer")))){ 
+        	// not-clustered robinson peers do not do remote crawling
+        	return false;
         }
         
         if ((coreCrawlJobSize() <= 20) && (limitCrawlTriggerJobSize() > 100)) {
@@ -2672,7 +2686,9 @@ public final class plasmaSwitchboard extends serverAbstractSwitch implements ser
         }
         
         // check if peer for remote crawl is available
-        yacySeed remoteSeed = yacyCore.dhtAgent.getCrawlSeed(urlEntry.urlhash());
+        yacySeed remoteSeed = ((this.isOpenRobinsonCluster()) && (getConfig("cluster.mode", "").equals("publiccluster"))) ?
+        	yacyCore.dhtAgent.getPublicClusterCrawlSeed(urlEntry.urlhash(), this.clusterhashes) :	
+        	yacyCore.dhtAgent.getGlobalCrawlSeed(urlEntry.urlhash());
         if (remoteSeed == null) {
             log.logFine("plasmaSwitchboard.processRemoteCrawlTrigger: no remote crawl seed available");
             return false;
@@ -2788,7 +2804,7 @@ public final class plasmaSwitchboard extends serverAbstractSwitch implements ser
             //}
             
             // create a new search event
-            plasmaSearchEvent theSearch = new plasmaSearchEvent(query, ranking, localTiming, remoteTiming, postsort, log, wordIndex, wordIndex.loadedURL, snippetCache);
+            plasmaSearchEvent theSearch = new plasmaSearchEvent(query, ranking, localTiming, remoteTiming, postsort, log, wordIndex, wordIndex.loadedURL, snippetCache, (isRobinsonMode()) ? this.clusterhashes : null);
             plasmaSearchPostOrder acc = theSearch.search();
             
             // fetch snippets

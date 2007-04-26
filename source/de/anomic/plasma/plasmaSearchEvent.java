@@ -48,6 +48,7 @@ import java.util.Iterator;
 import java.util.Map;
 import java.util.Set;
 import java.util.TreeMap;
+import java.util.TreeSet;
 
 import de.anomic.index.indexContainer;
 import de.anomic.index.indexRWIEntry;
@@ -78,6 +79,7 @@ public final class plasmaSearchEvent extends Thread implements Runnable {
     private yacySearch[] primarySearchThreads, secondarySearchThreads;
     private long searchtime;
     private int searchcount;
+    private TreeSet preselectedPeerHashes;
     
     public plasmaSearchEvent(plasmaSearchQuery query,
                              plasmaSearchRankingProfile ranking,
@@ -87,7 +89,8 @@ public final class plasmaSearchEvent extends Thread implements Runnable {
                              serverLog log,
                              plasmaWordIndex wordIndex,
                              plasmaCrawlLURL urlStore,
-                             plasmaSnippetCache snippetCache) {
+                             plasmaSnippetCache snippetCache,
+                             TreeSet preselectedPeerHashes) {
         this.log = log;
         this.wordIndex = wordIndex;
         this.query = query;
@@ -104,6 +107,7 @@ public final class plasmaSearchEvent extends Thread implements Runnable {
         this.secondarySearchThreads = null;
         this.searchtime = -1;
         this.searchcount = -1;
+        this.preselectedPeerHashes = preselectedPeerHashes;
     }
     
     public plasmaSearchQuery getQuery() {
@@ -141,7 +145,8 @@ public final class plasmaSearchEvent extends Thread implements Runnable {
         synchronized (flushThreads) {
             long start = System.currentTimeMillis();
             plasmaSearchPostOrder result;
-            if (query.domType == plasmaSearchQuery.SEARCHDOM_GLOBALDHT) {
+            if ((query.domType == plasmaSearchQuery.SEARCHDOM_GLOBALDHT) ||
+                (query.domType == plasmaSearchQuery.SEARCHDOM_CLUSTERALL)) {
                 int fetchpeers = (int) (query.maximumTime / 500L); // number of target peers; means 10 peers in 10 seconds
                 if (fetchpeers > 50) fetchpeers = 50;
                 if (fetchpeers < 30) fetchpeers = 30;
@@ -153,7 +158,8 @@ public final class plasmaSearchEvent extends Thread implements Runnable {
                 long primaryTimeout = System.currentTimeMillis() + profileGlobal.duetime();
                 primarySearchThreads = yacySearch.primaryRemoteSearches(plasmaSearchQuery.hashSet2hashString(query.queryHashes), plasmaSearchQuery.hashSet2hashString(query.excludeHashes), "",
                         query.prefer, query.urlMask, query.maxDistance, urlStore, wordIndex, rcContainers, rcAbstracts,
-                        fetchpeers, plasmaSwitchboard.urlBlacklist, snippetCache, profileGlobal, ranking, query.constraint);
+                        fetchpeers, plasmaSwitchboard.urlBlacklist, snippetCache, profileGlobal, ranking, query.constraint,
+                        (query.domType == plasmaSearchQuery.SEARCHDOM_GLOBALDHT) ? null : preselectedPeerHashes);
 
                 // meanwhile do a local search
                 Map[] searchContainerMaps = localSearchContainers(null);

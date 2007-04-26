@@ -183,7 +183,11 @@ public class yacysearch {
         final boolean indexDistributeGranted = sb.getConfig(plasmaSwitchboard.INDEX_DIST_ALLOW, "true").equals("true");
         final boolean indexReceiveGranted = sb.getConfig("allowReceiveIndex", "true").equals("true");
         final boolean offline = yacyCore.seedDB.mySeed.isVirgin();
+        final boolean clustersearch = sb.isRobinsonMode() &&
+    									(sb.getConfig("clustermode", "").equals("privatecluster") ||
+    									 sb.getConfig("clustermode", "").equals("publiccluster"));
         if (offline || !indexDistributeGranted || !indexReceiveGranted) { global = false; }
+        if (clustersearch) global = true; // switches search on, but search target is limited to cluster nodes
         
         // find search domain
         int contentdomCode = plasmaSearchQuery.CONTENTDOM_TEXT;
@@ -268,7 +272,8 @@ public class yacysearch {
                     count,
                     searchtime,
                     urlmask,
-                    (globalsearch) ? plasmaSearchQuery.SEARCHDOM_GLOBALDHT : plasmaSearchQuery.SEARCHDOM_LOCAL,
+                    (clustersearch && globalsearch) ? plasmaSearchQuery.SEARCHDOM_CLUSTERALL :
+                    ((globalsearch) ? plasmaSearchQuery.SEARCHDOM_GLOBALDHT : plasmaSearchQuery.SEARCHDOM_LOCAL),
                     "",
                     20,
                     constraint);

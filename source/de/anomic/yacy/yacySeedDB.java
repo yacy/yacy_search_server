@@ -57,14 +57,19 @@ import java.util.Enumeration;
 import java.util.Hashtable;
 import java.util.Iterator;
 import java.util.Map;
+import java.util.TreeSet;
 
 import de.anomic.http.httpHeader;
 import de.anomic.http.httpc;
 import de.anomic.http.httpd;
+import de.anomic.kelondro.kelondroCloneableIterator;
+import de.anomic.kelondro.kelondroCloneableSetIterator;
 import de.anomic.kelondro.kelondroDyn;
 import de.anomic.kelondro.kelondroException;
 import de.anomic.kelondro.kelondroMScoreCluster;
 import de.anomic.kelondro.kelondroMapObjects;
+import de.anomic.kelondro.kelondroBase64Order;
+import de.anomic.kelondro.kelondroRotateIterator;
 import de.anomic.net.URL;
 import de.anomic.plasma.plasmaSwitchboard;
 import de.anomic.server.serverCore;
@@ -240,6 +245,53 @@ public final class yacySeedDB {
     public Enumeration seedsSortedPotential(boolean up, String field) {
         // enumerates seed-type objects: all seeds sequentially ordered by field
         return new seedEnum(up, field, seedPotentialDB);
+    }
+    
+    public TreeSet /* peer-b64-hashes */ clusterHashes(String clusterdefinition) {
+    	// collects seeds according to cluster definition string, which consists of
+    	// comma-separated .yacy or .yacyh-domains
+    	String[] cluster = clusterdefinition.split(",");
+    	TreeSet clusterset = new TreeSet(kelondroBase64Order.enhancedCoder);
+    	yacySeed seed;
+    	String hash;
+    	for (int i = 0; i < cluster.length; i++) {
+    		if (cluster[i].endsWith(".yacyh")) {
+    			// find a peer with its hexhash
+    			hash = yacySeed.hexHash2b64Hash(cluster[i].substring(0, cluster[i].length() - 6));
+    			seed = get(hash);
+    			if (seed == null) {
+    				yacyCore.log.logWarning("cluster peer '" + cluster[i] + "' was not found.");
+    			} else {
+    				clusterset.add(hash);
+    			}
+    		} else if (cluster[i].endsWith(".yacy")) {
+    			// find a peer with its name
+    			seed = lookupByName(cluster[i].substring(0, cluster[i].length() - 5));
+    			if (seed == null) {
+    				yacyCore.log.logWarning("cluster peer '" + cluster[i] + "' was not found.");
+    			} else {
+    				clusterset.add(seed.hash);
+    			}
+    		} else {
+    			yacyCore.log.logWarning("cluster peer '" + cluster[i] + "' has wrong syntax. the name must end with .yacy or .yacyh");
+    		}
+    	}
+    	return clusterset;
+    }
+    
+    public Iterator /*of yacySeed*/ seedsInCluster(String firstHash, TreeSet clusterhashes) {
+    	// returns an seed iterator for all peer hashes in the given set
+    	// the iterator starts at the firstHash
+        kelondroCloneableIterator i = new kelondroRotateIterator(new kelondroCloneableSetIterator(clusterhashes, firstHash), null);
+        ArrayList l = new ArrayList();
+        Object o;
+        while (i.hasNext()) {
+        	o = i.next();
+        	if (o instanceof String) l.add(get((String) o));
+        	if (o instanceof byte[]) l.add(get(new String((byte[]) o)));
+        	if (l.size() >= clusterhashes.size()) break;
+        }
+        return l.iterator();
     }
     
     public Enumeration seedsConnected(boolean up, boolean rot, String firstHash, float minVersion) {
@@ -474,7 +526,7 @@ public final class yacySeedDB {
     
     public yacySeed lookupByName(String peerName) {
         // reads a seed by searching by name
-        
+
         // local peer?
         if (peerName.equals("localpeer")) return mySeed;
         

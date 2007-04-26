@@ -120,6 +120,9 @@ public class ConfigNetwork_p {
             sb.setConfig("cluster.peers.ipport", checkIPPortList(post.get("cluster.peers.ipport", "")));
             sb.setConfig("cluster.peers.yacydomain", checkYaCyDomainList(post.get("cluster.peers.yacydomain", "")));
             
+            // update the cluster hash set
+            sb.clusterhashes = yacyCore.seedDB.clusterHashes(sb.getConfig("cluster.peers.yacydomain", ""));
+            
         }
         
         // write answer code
@@ -150,7 +153,7 @@ public class ConfigNetwork_p {
         prop.put("robinson.checked", (indexDistribute || indexReceive) ? 0 : 1);
         prop.put("cluster.peers.ipport", sb.getConfig("cluster.peers.ipport", ""));
         prop.put("cluster.peers.yacydomain", sb.getConfig("cluster.peers.yacydomain", ""));
-        
+        prop.put("cluster.peers.yacydomain.hashes", (sb.clusterhashes.size() == 0) ? "" : sb.clusterhashes.toString());
         // set p2p mode flags
         prop.put("privatepeerChecked", (sb.getConfig("cluster.mode", "").equals("privatepeer")) ? 1 : 0);
         prop.put("privateclusterChecked", (sb.getConfig("cluster.mode", "").equals("privatecluster")) ? 1 : 0);

@@ -46,10 +46,14 @@ package de.anomic.yacy;
 import java.util.ArrayList;
 import java.util.Enumeration;
 import java.util.Hashtable;
+import java.util.TreeSet;
 
 import de.anomic.kelondro.kelondroBase64Order;
+import de.anomic.kelondro.kelondroCloneableIterator;
+import de.anomic.kelondro.kelondroCloneableSetIterator;
 import de.anomic.kelondro.kelondroException;
 import de.anomic.kelondro.kelondroMScoreCluster;
+import de.anomic.kelondro.kelondroRotateIterator;
 import de.anomic.server.logging.serverLog;
 
 public class yacyDHTAction implements yacyPeerAction {
@@ -205,12 +209,20 @@ public class yacyDHTAction implements yacyPeerAction {
 
     }
     
-    public synchronized yacySeed getCrawlSeed(String urlHash) {
+    public synchronized yacySeed getGlobalCrawlSeed(String urlHash) {
         Enumeration e = getAcceptRemoteCrawlSeeds(urlHash, true);
         yacySeed seed;
         if (e.hasMoreElements()) seed = (yacySeed) e.nextElement(); else seed = null;
         e = null;
         return seed;
+    }
+    
+    public synchronized yacySeed getPublicClusterCrawlSeed(String urlHash, TreeSet clusterhashes) {
+        kelondroCloneableIterator i = new kelondroRotateIterator(new kelondroCloneableSetIterator(clusterhashes, urlHash), null);
+        if (i.hasNext()) {
+        	return seedDB.getConnected((String) i.next());
+        }
+        return null;
     }
         
     public void setCrawlTime(String seedHash, int newYacyTime) {

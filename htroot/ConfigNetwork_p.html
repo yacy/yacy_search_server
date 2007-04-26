@@ -71,14 +71,15 @@
 			List of ip:port - addresses of the cluster: (comma-separated)<br>
             <input type="text" name="cluster.peers.ipport" value="#[cluster.peers.ipport]#" size="80" maxlength="800" />
         </dd>
+        -->
         <dt>Public Cluster<input type="radio" value="publiccluster" name="cluster.mode" #(publicclusterChecked)#::checked="checked" #(/publicclusterChecked)#/></dt>
         <dd>Your peer is part of a public cluster within the YaCy network.<br>
             Index data is not distributed, but remote crawl requests are distributed and accepted<br>
             Search requests are spread over all peers of the cluster, and answered from all peers of the cluster.<br>
 			List of .yacy or .yacyh - domains of the cluster: (comma-separated)<br>
-            <input type="text" name="cluster.peers.yacydomain" value="#[cluster.peers.yacydomain]#" size="80" maxlength="800" />
+            <input type="text" name="cluster.peers.yacydomain" value="#[cluster.peers.yacydomain]#" size="80" maxlength="800" /><br>
+            #[cluster.peers.yacydomain.hashes]#
         </dd>
-        -->
         <dt>Public Peer<input type="radio" value="publicpeer" name="cluster.mode" #(publicpeerChecked)#::checked="checked" #(/publicpeerChecked)#/></dt>
         <dd>You are visible to other peers and contact them to distribute your presence.<br>
             Your peer does not accept any outside index data, but responds on all remote search requests.

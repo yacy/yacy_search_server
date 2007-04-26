@@ -67,12 +67,14 @@ import java.net.InetAddress;
 import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.Map;
 import java.util.Properties;
 import java.util.Set;
 
 import de.anomic.kelondro.kelondroBase64Order;
 import de.anomic.net.natLib;
+import de.anomic.plasma.plasmaCondenser;
 import de.anomic.plasma.plasmaSwitchboard;
 import de.anomic.server.serverCodings;
 import de.anomic.server.serverCore;
@@ -459,6 +461,15 @@ public class yacySeed {
 
     public Set getPeerTags() {
         return serverCodings.string2set(get(PEERTAGS, ""), "|");
+    }
+
+    public boolean matchPeerTags(Set searchHashes) {
+        Set tags = serverCodings.string2set(get(PEERTAGS, ""), "|");
+        Iterator i = tags.iterator();
+        while (i.hasNext()) {
+        	if (searchHashes.contains(plasmaCondenser.word2hash((String) i.next()))) return true;
+        }
+        return false;
     }
 
     public int getPPM() {

@@ -43,12 +43,14 @@
 
 package de.anomic.yacy;
 
+import java.util.ArrayList;
 import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
 import java.util.Set;
 import java.util.TreeMap;
+import java.util.TreeSet;
 
 import de.anomic.index.indexContainer;
 import de.anomic.kelondro.kelondroBitfield;
@@ -144,8 +146,19 @@ public class yacySearch extends Thread {
     public yacySeed target() {
         return targetPeer;
     }
+
+    private static yacySeed[] selectClusterPeers(TreeSet peerhashes) {
+    	Iterator i = peerhashes.iterator();
+    	ArrayList l = new ArrayList();
+    	yacySeed s;
+    	while (i.hasNext()) {
+    		s = yacyCore.seedDB.getConnected((String) i.next());
+    		if (s != null) l.add(s);
+    	}
+    	return (yacySeed[]) l.toArray();
+    }
     
-    private static yacySeed[] selectPeers(Set wordhashes, int seedcount) {
+    private static yacySeed[] selectDHTPeers(Set wordhashes, int seedcount) {
         // find out a specific number of seeds, that would be relevant for the given word hash(es)
         // the result is ordered by relevance: [0] is most relevant
         // the seedcount is the maximum number of wanted results
@@ -167,9 +180,10 @@ public class yacySearch extends Thread {
             c = seedcount;
             while (dhtEnum.hasMoreElements() && c > 0) {
                 seed = (yacySeed) dhtEnum.nextElement();
-                if (seed == null) { continue; }
+                if (seed == null) continue;
                 distance = yacyDHTAction.dhtDistance(seed.hash, wordhash);
-                if (distance > 0.9) { continue; } // catch bug in peer selection
+                if (distance > 0.9) continue; // catch bug in peer selection
+                if (!seed.getFlagAcceptRemoteIndex()) continue; // probably a robinson peer
                 serverLog.logFine("PLASMA", "selectPeers/DHTorder: " + seed.hash + ":" + seed.getName() + "/" + distance + " for wordhash " + wordhash + ", score " + c);
                 ranking.addScore(seed.hash, c--);
                 seeds.put(seed.hash, seed);
@@ -183,7 +197,8 @@ public class yacySearch extends Thread {
         if (c > yacyCore.seedDB.sizeConnected()) { c = yacyCore.seedDB.sizeConnected(); }
         while (dhtEnum.hasMoreElements() && c > 0) {
             seed = (yacySeed) dhtEnum.nextElement();
-            if (seed == null) { continue; }
+            if (seed == null) continue;
+            if (!seed.getFlagAcceptRemoteIndex()) continue; // probably a robinson peer
             score = (int) Math.round(Math.random() * ((c / 3) + 3));
             serverLog.logFine("PLASMA", "selectPeers/RWIcount: " + seed.hash + ":" + seed.getName() + ", RWIcount=" + seed.get(yacySeed.ICOUNT,"") + ", score " + score);
             ranking.addScore(seed.hash, score);
@@ -191,6 +206,17 @@ public class yacySearch extends Thread {
             c--;
         }
 
+        // put in seeds that are public robinson peers and where the peer tags match with query
+        dhtEnum = yacyCore.seedDB.seedsConnected(true, false, null, (float) 0.50);
+        while (dhtEnum.hasMoreElements()) {
+        	seed = (yacySeed) dhtEnum.nextElement();
+            if (seed == null) continue;
+            if (!seed.matchPeerTags(wordhashes)) continue;
+            serverLog.logInfo("PLASMA", "selectPeers/RWIcount: " + seed.hash + ":" + seed.getName() + ", is specialized peer for " + seed.getPeerTags().toString());
+            ranking.addScore(seed.hash, seedcount);
+            seeds.put(seed.hash, seed);
+        }
+        
         // evaluate the ranking score and select seeds
         if (ranking.size() < seedcount) { seedcount = ranking.size(); }
         yacySeed[] result = new yacySeed[seedcount];
@@ -212,12 +238,12 @@ public class yacySearch extends Thread {
                            indexContainer containerCache, Map abstractCache,
                            int targets, plasmaURLPattern blacklist, plasmaSnippetCache snippetCache,
                            plasmaSearchTimingProfile timingProfile, plasmaSearchRankingProfile rankingProfile,
-                           kelondroBitfield constraint) {
+                           kelondroBitfield constraint, TreeSet clusterselection) {
         // check own peer status
         if (yacyCore.seedDB.mySeed == null || yacyCore.seedDB.mySeed.getAddress() == null) { return null; }
 
         // prepare seed targets and threads
-        final yacySeed[] targetPeers = selectPeers(plasmaSearchQuery.hashes2Set(wordhashes), targets);
+        final yacySeed[] targetPeers = (clusterselection == null) ? selectDHTPeers(plasmaSearchQuery.hashes2Set(wordhashes), targets) : selectClusterPeers(clusterselection);
         if (targetPeers == null) return null;
         targets = targetPeers.length;
         if (targets == 0) return null;

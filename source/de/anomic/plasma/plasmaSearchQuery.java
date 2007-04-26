@@ -57,8 +57,8 @@ import de.anomic.yacy.yacySeedDB;
 public final class plasmaSearchQuery {
     
     public static final int SEARCHDOM_LOCAL = 0;
-    public static final int SEARCHDOM_GROUPDHT = 1;
-    public static final int SEARCHDOM_GROUPALL = 2;
+    public static final int SEARCHDOM_CLUSTERDHT = 1;
+    public static final int SEARCHDOM_CLUSTERALL = 2;
     public static final int SEARCHDOM_GLOBALDHT = 3;
     public static final int SEARCHDOM_GLOBALALL = 4;
     

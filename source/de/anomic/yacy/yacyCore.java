@@ -326,6 +326,14 @@ public class yacyCore {
 
     public void peerPing() {
         if (!online()) return;
+        if ((switchboard.isRobinsonMode()) && (switchboard.getConfig("cluster.mode", "").equals("privatepeer"))) {
+        	// in case this peer is a privat peer we omit the peer ping
+        	// all other robinson peer types do a peer ping:
+        	// the privatecluster does the ping to the other cluster members
+        	// the publiccluster does the ping to all peers, but prefers the own peer
+        	// the publicpeer does the ping to all peers
+        	return;
+        }
 
         // before publishing, update some seed data
         peerActions.updateMySeed();

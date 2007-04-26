@@ -240,6 +240,8 @@ public class kelondroRowSet extends kelondroRowCollection implements kelondroInd
         }
         
         public boolean hasNext() {
+        	if (p < 0) return false;
+        	if (p >= size()) return false;
             if (up) {
                 return p < bound;
             } else {

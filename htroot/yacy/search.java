@@ -160,7 +160,7 @@ public final class search {
             plasmaSearchTimingProfile localTiming  = new plasmaSearchTimingProfile(squery.maximumTime, squery.wantedResults);
             plasmaSearchTimingProfile remoteTiming = null;
 
-            theSearch = new plasmaSearchEvent(squery, rankingProfile, localTiming, remoteTiming, true, yacyCore.log, sb.wordIndex, sb.wordIndex.loadedURL, sb.snippetCache);
+            theSearch = new plasmaSearchEvent(squery, rankingProfile, localTiming, remoteTiming, true, yacyCore.log, sb.wordIndex, sb.wordIndex.loadedURL, sb.snippetCache, null);
             Map[] containers = theSearch.localSearchContainers(plasmaSearchQuery.hashes2Set(urls));
             if (containers != null) {
                 Iterator ci = containers[0].entrySet().iterator();
@@ -190,7 +190,7 @@ public final class search {
             theSearch = new plasmaSearchEvent(squery,
                     rankingProfile, localTiming, remoteTiming, true,
                     yacyCore.log, sb.wordIndex, sb.wordIndex.loadedURL,
-                    sb.snippetCache);
+                    sb.snippetCache, null);
             Map[] containers = theSearch.localSearchContainers(plasmaSearchQuery.hashes2Set(urls));
 
             // set statistic details of search result and find best result index set
