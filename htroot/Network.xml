@@ -75,6 +75,10 @@
         <seeds>#[my-seeds]#</seeds>
         <connects>#[my-connects]#</connects>
   </your>
+  <cluster>
+  	<ppm>#[gppm]#</ppm>
+	<qph>#[gqph]#</qph>
+  </cluster>
   <status>#[comment]#</status>
   <!--
   0 - nothing
