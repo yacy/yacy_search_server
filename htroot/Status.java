@@ -79,7 +79,31 @@ public class Status {
                 prop.put("LOCATION","");
             }
             return prop;
-        } 
+        } else if (post != null) {
+        	if (post.containsKey("pauseCrawlJob")) {
+        		String jobType = (String) post.get("jobType");
+        		if (jobType.equals("localCrawl")) 
+        			((plasmaSwitchboard)env).pauseCrawlJob(plasmaSwitchboard.CRAWLJOB_LOCAL_CRAWL);
+        		else if (jobType.equals("remoteTriggeredCrawl")) 
+        			((plasmaSwitchboard)env).pauseCrawlJob(plasmaSwitchboard.CRAWLJOB_REMOTE_TRIGGERED_CRAWL);
+        		else if (jobType.equals("globalCrawlTrigger")) 
+        			((plasmaSwitchboard)env).pauseCrawlJob(plasmaSwitchboard.CRAWLJOB_GLOBAL_CRAWL_TRIGGER);                    
+        	} else if (post.containsKey("continueCrawlJob")) {
+        		String jobType = (String) post.get("jobType");
+        		if (jobType.equals("localCrawl")) 
+        			((plasmaSwitchboard)env).continueCrawlJob(plasmaSwitchboard.CRAWLJOB_LOCAL_CRAWL);
+        		else if (jobType.equals("remoteTriggeredCrawl")) 
+        			((plasmaSwitchboard)env).continueCrawlJob(plasmaSwitchboard.CRAWLJOB_REMOTE_TRIGGERED_CRAWL);
+        		else if (jobType.equals("globalCrawlTrigger")) 
+        			((plasmaSwitchboard)env).continueCrawlJob(plasmaSwitchboard.CRAWLJOB_GLOBAL_CRAWL_TRIGGER);                      
+        	} else if (post.containsKey("ResetTraffic")) {
+        		httpdByteCountInputStream.resetCount();
+        		httpdByteCountOutputStream.resetCount();
+        		//enables or disables the browser popup on Yacy-start
+        	} 
+        	prop.put("LOCATION","");
+        	return prop;
+        }
         
         /*
           versionProbe=http://www.anomic.de/AnomicHTTPProxy/release.txt
