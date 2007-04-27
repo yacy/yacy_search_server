@@ -78,7 +78,7 @@ public class ShareService extends AbstractService {
 	private static final int FILEINFO_COMMENT = 1;
 	
 	private static final int GENMD5_MD5_ARRAY = 0;
-	//private static final int GENMD5_MD5_STRING = 1;
+	private static final int GENMD5_MD5_STRING = 1;
 	
 	/* =====================================================================
 	 * Used XML Templates
@@ -269,7 +269,7 @@ public class ShareService extends AbstractService {
      * </ul>
      * @throws IOException if the md5 file could not be read
      */
-    private String[] getFileInfo(File theFile) throws IOException {
+    private String[] readFileInfo(File theFile) throws IOException {
     	File md5File = getFileMD5File(theFile);
 
     	String md5s = "";
@@ -287,10 +287,15 @@ public class ShareService extends AbstractService {
     	return new String[]{md5s,description};
     }
     
-    private String getFileComment(File theFile) throws IOException {
-    	String[] info = getFileInfo(theFile);
+    private String readFileComment(File theFile) throws IOException {
+    	String[] info = readFileInfo(theFile);
     	return info[FILEINFO_COMMENT];
     }
+    
+    private String readFileMD5String(File theFile) throws IOException {
+    	String[] info = readFileInfo(theFile);
+    	return info[FILEINFO_MD5_STRING];
+    }    
     
     private String yacyhURL(yacySeed seed, String filename, String md5) throws AxisFault {
     	try {
@@ -355,7 +360,7 @@ public class ShareService extends AbstractService {
 		String phrase = this.getPhrase(filename);
 		
 		// getting file info [0=md5s,1=comment]
-		String[] fileInfo = getFileInfo(file);
+		String[] fileInfo = readFileInfo(file);
 		
 		// delete old indexed phrases
         String urlstring = yacyhURL(yacyCore.seedDB.mySeed, filename, fileInfo[FILEINFO_MD5_STRING]);        
@@ -517,6 +522,56 @@ public class ShareService extends AbstractService {
 		this.deleteRecursive(fileToDelete);
     }
     
+    
+    /**
+     * Reads the comment assigned to a file located in the yacy file-share
+     * @param workingDirPath a relative path within the yacy file-share
+     * @param fileName the name of the file
+     * @return the comment assigned to a file located in the yacy file-share or an emty string if no comment is available
+     * @throws AxisFault
+     * @throws IOException
+     */
+    public String getFileComment(String workingDirPath, String fileName) throws AxisFault, IOException {
+		// extracting the message context
+		extractMessageContext(AUTHENTICATION_NEEDED);  
+		
+		// getting the working directory
+		File workingDir = getWorkingDir(workingDirPath);
+		
+		// getting the working file
+		File workingFile = getWorkingFile(workingDir,fileName);
+		if (!workingFile.exists()) throw new AxisFault("Requested file does not exist.");		
+		if (!workingFile.canRead())throw new AxisFault("Requested file can not be read.");
+		if (!workingFile.isFile()) throw new AxisFault("Requested file is not a file.");	
+		
+		// get the old file comment
+		return this.readFileComment(workingFile);
+    }
+    
+    /**
+     * Reads the MD5 checksum of a file located in the yacy file-share
+     * @param workingDirPatha relative path within the yacy file-share
+     * @param fileName the name of the file
+     * @return the MD5 checksum of the file or an empty string if the checksum is not available
+     * @throws IOException
+     */
+    public String getFileMD5(String workingDirPath, String fileName) throws IOException {
+		// extracting the message context
+		extractMessageContext(AUTHENTICATION_NEEDED);  
+		
+		// getting the working directory
+		File workingDir = getWorkingDir(workingDirPath);
+		
+		// getting the working file
+		File workingFile = getWorkingFile(workingDir,fileName);
+		if (!workingFile.exists()) throw new AxisFault("Requested file does not exist.");		
+		if (!workingFile.canRead())throw new AxisFault("Requested file can not be read.");
+		if (!workingFile.isFile()) throw new AxisFault("Requested file is not a file.");	
+		
+		// get the old file comment
+		return this.readFileMD5String(workingFile); 	
+    }
+    
     /**
      * To download a file located in the yacy file-share.
      * This function returns the requested file as soap attachment to the caller of this function.
@@ -542,7 +597,7 @@ public class ShareService extends AbstractService {
 		if (!workingFile.isFile()) throw new AxisFault("Requested file is not a file.");				
 		
 		// getting the md5 string and comment
-		String[] info = getFileInfo(workingFile);
+		String[] info = readFileInfo(workingFile);
 		
 		// get the current message context
         MessageContext msgContext = MessageContext.getCurrentContext();
@@ -581,7 +636,7 @@ public class ShareService extends AbstractService {
 		if (destFile.exists()) throw new AxisFault("Destination file already exists.");				
 		
 		// get the old file comment
-		String comment = this.getFileComment(sourceFile);
+		String comment = this.readFileComment(sourceFile);
 		
 		// unindex the old file and delete the old MD5 file
 		this.unIndexFile(sourceFile);
@@ -643,7 +698,7 @@ public class ShareService extends AbstractService {
 		if (destFile.exists()) throw new AxisFault("Destination file already exists.");			
 		
 		// getting the old comment
-		String comment = this.getFileComment(sourceFile);
+		String comment = this.readFileComment(sourceFile);
 		
 		// unindex old file and delete MD5 file
 		this.unIndexFile(sourceFile);
