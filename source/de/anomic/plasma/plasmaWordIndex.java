@@ -173,10 +173,10 @@ public final class plasmaWordIndex implements indexRI {
         if ((!dhtInCase) && (yacyDHTAction.shallBeOwnWord(wordHash))) dhtInCase = true;
         
         // add the entry
-        if (dhtInCase) synchronized (dhtInCache) {
+        if (dhtInCase) {
             dhtInCache.addEntry(wordHash, entry, updateTime, true);
             dhtInFlushControl();
-        } else synchronized (dhtOutCache) {
+        } else {
             dhtOutCache.addEntry(wordHash, entry, updateTime, false);
             dhtOutFlushControl();
         }
@@ -189,10 +189,10 @@ public final class plasmaWordIndex implements indexRI {
         if ((!dhtInCase) && (yacyDHTAction.shallBeOwnWord(entries.getWordHash()))) dhtInCase = true;
         
         // add the entry
-        if (dhtInCase) synchronized (dhtInCache) {
+        if (dhtInCase) {
             dhtInCache.addEntries(entries, updateTime, true);
             dhtInFlushControl();
-        } else synchronized (dhtOutCache) {
+        } else {
             dhtOutCache.addEntries(entries, updateTime, false);
             dhtOutFlushControl();
         }
@@ -352,7 +352,7 @@ public final class plasmaWordIndex implements indexRI {
         return container;
     }
 
-    public synchronized Map getContainers(Set wordHashes, Set urlselection, boolean deleteIfEmpty, boolean interruptIfEmpty, long maxTime) {
+    public Map getContainers(Set wordHashes, Set urlselection, boolean deleteIfEmpty, boolean interruptIfEmpty, long maxTime) {
         // return map of wordhash:indexContainer
         
         // retrieve entities that belong to the hashes
