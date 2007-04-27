@@ -338,7 +338,7 @@ public class yacyPeerActions {
         }
 
         // update latest version number
-        if (seed.getVersion() > yacyCore.latestVersion) yacyCore.latestVersion = seed.getVersion();
+        if (seed.getVersion() > yacyVersion.latestRelease) yacyVersion.latestRelease = seed.getVersion();
 
         // prepare to update
         if (disconnectedSeed != null) {

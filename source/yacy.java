@@ -91,8 +91,8 @@ import de.anomic.server.serverSystem;
 import de.anomic.server.logging.serverLog;
 import de.anomic.tools.enumerateFiles;
 import de.anomic.yacy.yacyClient;
-import de.anomic.yacy.yacyCore;
 import de.anomic.yacy.yacySeedDB;
+import de.anomic.yacy.yacyVersion;
 
 /**
 * This is the main class of YaCy. Several threads are started from here:
@@ -300,7 +300,7 @@ public final class yacy {
             sb.setConfig("applicationRoot", homePath);
             sb.startupTime = startup;
             serverLog.logConfig("STARTUP", "YACY Version: " + version + ", Built " + vDATE);
-            yacyCore.latestVersion = version;
+            yacyVersion.latestRelease = version;
 
             // read environment
             int timeout       = Integer.parseInt(sb.getConfig("httpdTimeout", "60000"));

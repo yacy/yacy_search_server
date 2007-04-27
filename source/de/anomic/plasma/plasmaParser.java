@@ -680,7 +680,7 @@ public final class plasmaParser {
                 theParser.setContentLength(contentLength);
                 // parse the resource
                 doc = theParser.parse(location, mimeType,documentCharset,sourceStream);
-            } else if (realtimeParsableMimeTypesContains(mimeType)) {                      
+            } else if (realtimeParsableMimeTypesContains(mimeType)) {
                 doc = parseHtml(location, mimeType, documentCharset, sourceStream);
             } else {
                 String errorMsg = "No parser available to parse mimetype '" + mimeType + "'";
@@ -719,7 +719,7 @@ public final class plasmaParser {
     
     private plasmaParserDocument parseHtml(URL location, String mimeType, String documentCharset, InputStream sourceStream) throws IOException, ParserException {
         
-        // ...otherwise we make a scraper and transformer
+        // make a scraper and transformer
         htmlFilterInputStream htmlFilter = new htmlFilterInputStream(sourceStream,documentCharset,location,null,false);
         String charset = htmlFilter.detectCharset();
         if (charset == null) {
@@ -745,7 +745,7 @@ public final class plasmaParser {
             this.theLogger.logSevere("Unable to parse '" + location + "'. " + errorMsg);
             throw new ParserException(errorMsg,location);    
         }
-        return transformScraper(location, mimeType, documentCharset, scraper);        
+        return transformScraper(location, mimeType, documentCharset, scraper);
     }
     
     public plasmaParserDocument transformScraper(URL location, String mimeType, String charSet, htmlFilterContentScraper scraper) {

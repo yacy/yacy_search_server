@@ -61,6 +61,7 @@ import de.anomic.server.serverObjects;
 import de.anomic.server.serverSwitch;
 import de.anomic.yacy.yacyCore;
 import de.anomic.yacy.yacySeed;
+import de.anomic.yacy.yacyVersion;
 
 public class Status {
 
@@ -150,16 +151,20 @@ public class Status {
 
         // version information
         prop.put("versionpp", yacy.combined2prettyVersion(env.getConfig("version","0.1")));
+        
+        
         double thisVersion = Double.parseDouble(env.getConfig("version","0.1"));
         // cut off the SVN Rev in the Version
         try {thisVersion = Math.round(thisVersion*1000.0)/1000.0;} catch (NumberFormatException e) {}
-//      System.out.println("TEST: "+thisVersion);
-        if (yacyCore.latestVersion >= (thisVersion+0.01)) { // only new Versions(not new SVN)
+        if (yacyVersion.latestRelease >= (thisVersion+0.01)) { // only new Versions(not new SVN)
             prop.put("versioncomment", 1); // new version
         } else {
             prop.put("versioncomment", 0); // no comment
         }
-        prop.put("versioncomment_latestVersion", Double.toString(yacyCore.latestVersion));
+        yacyVersion.aquireLatestReleaseInfo();
+        prop.putASIS("versioncomment_versionResMain", (yacyVersion.latestMainRelease == null) ? "-" : yacyVersion.latestMainRelease.toAnchor());
+        prop.putASIS("versioncomment_versionResDev", (yacyVersion.latestDevRelease == null) ? "-" : yacyVersion.latestDevRelease.toAnchor());
+        prop.put("versioncomment_latestVersion", Double.toString(yacyVersion.latestRelease));
 
         // hostname and port
         String extendedPortString = env.getConfig("port", "8080");

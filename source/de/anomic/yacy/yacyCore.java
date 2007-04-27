@@ -95,7 +95,6 @@ public class yacyCore {
     public static yacyDHTAction dhtAgent = null;
     public static serverLog log;
     public static long lastOnlineTime = 0;
-    public static double latestVersion = 0.1;
     /** pseudo-random key derived from a time-interval while YaCy startup*/
     public static long speedKey = 0;
     public static File yacyDBPath;

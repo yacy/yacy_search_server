@@ -415,8 +415,19 @@ public class URL {
     
     public String getFile(boolean includeReference) {
         // this is the path plus quest plus ref
+        // if there is no quest and no ref the result is identical to getPath
+        // this is defined according to http://java.sun.com/j2se/1.4.2/docs/api/java/net/URL.html#getFile()
         if (quest != null) return ((includeReference) && (ref != null)) ? path + "?" + quest + "#" + ref : path + "?" + quest;
         return ((includeReference) && (ref != null)) ? path + "#" + ref : path;
+    }
+    
+    public String getFileName() {
+        // this is a method not defined in any sun api
+        // it returns the last portion of a path without any reference
+        int p = path.lastIndexOf('/');
+        if (p < 0) return path;
+        if (p == path.length() - 1) return ""; // no file name, this is a path to a directory
+        return path.substring(p + 1); // the 'real' file name
     }
 
     public String getPath() {

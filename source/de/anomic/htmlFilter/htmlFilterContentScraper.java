@@ -45,7 +45,10 @@
 
 package de.anomic.htmlFilter;
 
+import java.io.ByteArrayInputStream;
+import java.io.IOException;
 import java.io.UnsupportedEncodingException;
+import java.io.Writer;
 import java.net.MalformedURLException;
 import java.text.Collator;
 import java.util.ArrayList;
@@ -58,8 +61,11 @@ import java.util.TreeSet;
 
 import javax.swing.event.EventListenerList;
 
+import de.anomic.http.httpc;
 import de.anomic.net.URL;
+import de.anomic.plasma.plasmaSwitchboard;
 import de.anomic.server.serverCharBuffer;
+import de.anomic.server.serverFileUtils;
 
 public class htmlFilterContentScraper extends htmlFilterAbstractScraper implements htmlFilterScraper {
 
@@ -328,6 +334,7 @@ public class htmlFilterContentScraper extends htmlFilterAbstractScraper implemen
     }
 
     public Map getAnchors() {
+        // returns a url (String) / name (String) relation
         return anchors;
     }
 
@@ -449,5 +456,25 @@ public class htmlFilterContentScraper extends htmlFilterAbstractScraper implemen
                     ((htmlFilterEventListener)listeners[i+1]).scrapeTag1(tagname, tagopts, text);
             }
         }
-    }      
+    }
+    
+    public static htmlFilterContentScraper parseResource(URL location) throws IOException {
+        // load page
+        byte[] page = httpc.wget(
+                location,
+                location.getHost(),
+                10000, 
+                null, 
+                null, 
+                plasmaSwitchboard.getSwitchboard().remoteProxyConfig
+        );
+        if (page == null) throw new IOException("no response from url " + location.toString());
+        
+        // scrape content
+        htmlFilterContentScraper scraper = new htmlFilterContentScraper(location);
+        Writer writer = new htmlFilterWriter(null, null, scraper, null, false);
+        serverFileUtils.copy(new ByteArrayInputStream(page), writer, "UTF-8");
+        
+        return scraper;
+    }
 }
