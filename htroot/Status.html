@@ -29,7 +29,16 @@
       <tr class="TableHeader"><td colspan="2"><strong>Public System Properties</strong></td></tr>
       <tr class="TableCellLight"><td>System version</td><td>
       #[versionpp]#
-      #(versioncomment)#:: - the latest public version is #[latestVersion]#.
+      #(versioncomment)#
+      :: - the latest public version is #[latestVersion]#.
+      You can download a more recent version of YaCy. Click here to aquire a direct download location: 
+      <form action="Status.html" method="get" class="PeerControl">
+        <button type="submit" name="aquirerelease" value="aquire release information">
+          <img src="/env/grafics/lock.gif"/>
+          aquire download location
+        </button>
+      </form>
+      ::
       You can download the latest releases here:<br>
       #[versionResMain]#<br>
       #[versionResDev]#
@@ -74,6 +83,7 @@
       #(/peerStatus)#
       </td></tr>
       <tr class="TableCellDark"><td>Other peers</td><td>#(otherPeers)#not online::#[num]# other peers online.#(/otherPeers)#</td></tr>
+	  <!-- temporary disabled information, may be outdated. No decision made if this function should remain
       <tr class="TableCellLight"><td>Online-mode</td><td>
       #(omode)#
       You are in <em>Cache-browsing</em> mode.<br />
@@ -99,7 +109,7 @@
         <input type="submit" name="cmode" value="Go to Cache-Mode" /></div>
       </form>
       #(/omode)#
-      </td></tr>
+      </td></tr>-->
     </table>
     #(showPrivateTable)#
     Click here to <a href="Status.html?login=">log in</a> as administrator and see full status. 

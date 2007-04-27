@@ -72,56 +72,14 @@ public class Status {
         // return variable that accumulates replacements
         final serverObjects prop = new serverObjects();
 
-        if (post != null) {
-            if (post.containsKey("login")) {
-                if (((plasmaSwitchboard) env).adminAuthenticated(header) < 2) {
-                    prop.put("AUTHENTICATE","admin log-in");
-                } else {
-                    prop.put("LOCATION","");
-                }
+        if ((post != null) && (post.containsKey("login"))) {
+            if (((plasmaSwitchboard) env).adminAuthenticated(header) < 2) {
+                prop.put("AUTHENTICATE","admin log-in");
             } else {
-                if (post.containsKey("pauseCrawlJob")) {
-                    String jobType = (String) post.get("jobType");
-                    if (jobType.equals("localCrawl")) 
-                        ((plasmaSwitchboard)env).pauseCrawlJob(plasmaSwitchboard.CRAWLJOB_LOCAL_CRAWL);
-                    else if (jobType.equals("remoteTriggeredCrawl")) 
-                        ((plasmaSwitchboard)env).pauseCrawlJob(plasmaSwitchboard.CRAWLJOB_REMOTE_TRIGGERED_CRAWL);
-                    else if (jobType.equals("globalCrawlTrigger")) 
-                        ((plasmaSwitchboard)env).pauseCrawlJob(plasmaSwitchboard.CRAWLJOB_GLOBAL_CRAWL_TRIGGER);                    
-                } else if (post.containsKey("continueCrawlJob")) {
-                    String jobType = (String) post.get("jobType");
-                    if (jobType.equals("localCrawl")) 
-                        ((plasmaSwitchboard)env).continueCrawlJob(plasmaSwitchboard.CRAWLJOB_LOCAL_CRAWL);
-                    else if (jobType.equals("remoteTriggeredCrawl")) 
-                        ((plasmaSwitchboard)env).continueCrawlJob(plasmaSwitchboard.CRAWLJOB_REMOTE_TRIGGERED_CRAWL);
-                    else if (jobType.equals("globalCrawlTrigger")) 
-                        ((plasmaSwitchboard)env).continueCrawlJob(plasmaSwitchboard.CRAWLJOB_GLOBAL_CRAWL_TRIGGER);                      
-                } else if (post.containsKey("ResetTraffic")) {
-                    httpdByteCountInputStream.resetCount();
-                    httpdByteCountOutputStream.resetCount();
-                //enables or disables the browser popup on Yacy-start
-                } else if (post.containsKey("popup")) {
-                String trigger_enabled = (String) post.get("popup");
-                if (trigger_enabled.equals("false")) {
-                    env.setConfig("browserPopUpTrigger", "false");
-                } else if (trigger_enabled.equals("true")){
-                    env.setConfig("browserPopUpTrigger", "true");
-                }
-                }
-                
-                /*
-                } else if (post.containsKey("popup")) {
-                    env.setConfig("browserPopUpTrigger", "false");
-                    prop.put("info", 9); //popup disabled
-                } else if (post.containsKey("enpop")) { 
-                    env.setConfig("browserPopUpTrigger", "true");
-                    prop.put("info", 10); //popup enabled
-                } */
-                
                 prop.put("LOCATION","");
             }
             return prop;
-        }
+        } 
         
         /*
           versionProbe=http://www.anomic.de/AnomicHTTPProxy/release.txt
@@ -130,7 +88,8 @@ public class Status {
         // update seed info
         yacyCore.peerActions.updateMySeed();
 
-        if (((plasmaSwitchboard) env).adminAuthenticated(header) >= 2) {
+        boolean adminaccess = ((plasmaSwitchboard) env).adminAuthenticated(header) >= 2;
+        if (adminaccess) {
             prop.put("showPrivateTable",1);
             prop.put("privateStatusTable", "Status_p.inc");
         } else { 
@@ -156,12 +115,19 @@ public class Status {
         double thisVersion = Double.parseDouble(env.getConfig("version","0.1"));
         // cut off the SVN Rev in the Version
         try {thisVersion = Math.round(thisVersion*1000.0)/1000.0;} catch (NumberFormatException e) {}
-        if (yacyVersion.latestRelease >= (thisVersion+0.01)) { // only new Versions(not new SVN)
-            prop.put("versioncomment", 1); // new version
+        if ((adminaccess) && (yacyVersion.latestRelease >= (thisVersion+0.01))) { // only new Versions(not new SVN)
+            if ((yacyVersion.latestMainRelease != null) ||
+                (yacyVersion.latestDevRelease != null)) {
+                prop.put("versioncomment", 2);
+            } else if ((post != null) && (post.containsKey("aquirerelease"))) {
+                yacyVersion.aquireLatestReleaseInfo();
+                prop.put("versioncomment", 2);
+            } else {
+                prop.put("versioncomment", 1);
+            }
         } else {
             prop.put("versioncomment", 0); // no comment
         }
-        yacyVersion.aquireLatestReleaseInfo();
         prop.putASIS("versioncomment_versionResMain", (yacyVersion.latestMainRelease == null) ? "-" : yacyVersion.latestMainRelease.toAnchor());
         prop.putASIS("versioncomment_versionResDev", (yacyVersion.latestDevRelease == null) ? "-" : yacyVersion.latestDevRelease.toAnchor());
         prop.put("versioncomment_latestVersion", Double.toString(yacyVersion.latestRelease));
