@@ -1332,7 +1332,7 @@ public final class plasmaSwitchboard extends serverAbstractSwitch implements ser
     	// we are in robinson mode, if we do not exchange index by dht distribution
     	// we need to take care that search requests and remote indexing requests go only
     	// to the peers in the same cluster, if we run a robinson cluster.
-    	return getConfigBool(plasmaSwitchboard.INDEX_DIST_ALLOW, false) && !getConfigBool(plasmaSwitchboard.INDEX_RECEIVE_ALLOW, false);
+    	return !getConfigBool(plasmaSwitchboard.INDEX_DIST_ALLOW, false) && !getConfigBool(plasmaSwitchboard.INDEX_RECEIVE_ALLOW, false);
     }
 
     public boolean isOpenRobinsonCluster() {
