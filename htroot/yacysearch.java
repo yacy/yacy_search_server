@@ -185,8 +185,8 @@ public class yacysearch {
         final boolean indexReceiveGranted = sb.getConfig("allowReceiveIndex", "true").equals("true");
         final boolean offline = yacyCore.seedDB.mySeed.isVirgin();
         final boolean clustersearch = sb.isRobinsonMode() &&
-    									(sb.getConfig("clustermode", "").equals("privatecluster") ||
-    									 sb.getConfig("clustermode", "").equals("publiccluster"));
+    									(sb.getConfig("cluster.mode", "").equals("privatecluster") ||
+    									 sb.getConfig("cluster.mode", "").equals("publiccluster"));
         if (offline || !indexDistributeGranted || !indexReceiveGranted) { global = false; }
         if (clustersearch) global = true; // switches search on, but search target is limited to cluster nodes
         

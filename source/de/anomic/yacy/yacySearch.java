@@ -155,7 +155,12 @@ public class yacySearch extends Thread {
     		s = yacyCore.seedDB.getConnected((String) i.next());
     		if (s != null) l.add(s);
     	}
-    	return (yacySeed[]) l.toArray();
+    	yacySeed[] result = new yacySeed[l.size()];
+    	for (int j = 0; j < l.size(); j++) {
+    		result[j] = (yacySeed) l.get(j);
+    	}
+    	return result;
+    	//return (yacySeed[]) l.toArray();
     }
     
     private static yacySeed[] selectDHTPeers(Set wordhashes, int seedcount) {
