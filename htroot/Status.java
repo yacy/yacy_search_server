@@ -80,6 +80,7 @@ public class Status {
             }
             return prop;
         } else if (post != null) {
+        	boolean redirect = false;
         	if (post.containsKey("pauseCrawlJob")) {
         		String jobType = (String) post.get("jobType");
         		if (jobType.equals("localCrawl")) 
@@ -87,7 +88,8 @@ public class Status {
         		else if (jobType.equals("remoteTriggeredCrawl")) 
         			((plasmaSwitchboard)env).pauseCrawlJob(plasmaSwitchboard.CRAWLJOB_REMOTE_TRIGGERED_CRAWL);
         		else if (jobType.equals("globalCrawlTrigger")) 
-        			((plasmaSwitchboard)env).pauseCrawlJob(plasmaSwitchboard.CRAWLJOB_GLOBAL_CRAWL_TRIGGER);                    
+        			((plasmaSwitchboard)env).pauseCrawlJob(plasmaSwitchboard.CRAWLJOB_GLOBAL_CRAWL_TRIGGER);  
+        		redirect = true;
         	} else if (post.containsKey("continueCrawlJob")) {
         		String jobType = (String) post.get("jobType");
         		if (jobType.equals("localCrawl")) 
@@ -95,14 +97,18 @@ public class Status {
         		else if (jobType.equals("remoteTriggeredCrawl")) 
         			((plasmaSwitchboard)env).continueCrawlJob(plasmaSwitchboard.CRAWLJOB_REMOTE_TRIGGERED_CRAWL);
         		else if (jobType.equals("globalCrawlTrigger")) 
-        			((plasmaSwitchboard)env).continueCrawlJob(plasmaSwitchboard.CRAWLJOB_GLOBAL_CRAWL_TRIGGER);                      
+        			((plasmaSwitchboard)env).continueCrawlJob(plasmaSwitchboard.CRAWLJOB_GLOBAL_CRAWL_TRIGGER);    
+        		redirect = true;
         	} else if (post.containsKey("ResetTraffic")) {
         		httpdByteCountInputStream.resetCount();
         		httpdByteCountOutputStream.resetCount();
-        		//enables or disables the browser popup on Yacy-start
+        		redirect = true;
         	} 
-        	prop.put("LOCATION","");
-        	return prop;
+        	
+        	if (redirect) {
+        		prop.put("LOCATION","");
+        		return prop;
+        	}
         }
         
         /*
