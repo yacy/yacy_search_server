@@ -103,7 +103,15 @@ public class Status {
         		httpdByteCountInputStream.resetCount();
         		httpdByteCountOutputStream.resetCount();
         		redirect = true;
-        	} 
+        	} else if (post.containsKey("popup")) {
+                String trigger_enabled = (String) post.get("popup");
+                if (trigger_enabled.equals("false")) {
+                    env.setConfig("browserPopUpTrigger", "false");
+                } else if (trigger_enabled.equals("true")){
+                    env.setConfig("browserPopUpTrigger", "true");
+                }
+                redirect = true;
+        	}
         	
         	if (redirect) {
         		prop.put("LOCATION","");
