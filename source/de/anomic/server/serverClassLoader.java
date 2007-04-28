@@ -50,7 +50,8 @@ public final class serverClassLoader extends ClassLoader {
     private final HashMap classes;
 
     public serverClassLoader() {
-        super(ClassLoader.getSystemClassLoader());
+        //super(ClassLoader.getSystemClassLoader());
+    	super(Thread.currentThread().getContextClassLoader());
         this.classes = new HashMap();
     }
 
