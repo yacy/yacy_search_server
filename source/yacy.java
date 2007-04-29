@@ -139,6 +139,8 @@ public final class yacy {
     private static final String copyright = "[ YaCy v" + vString + ", build " + vDATE + " by Michael Christen / www.yacy.net ]";
     private static final String hline = "-------------------------------------------------------------------------------";
    
+    static plasmaSwitchboard sb = null; 
+    
     /**
     * Converts combined version-string to a pretty string, e.g. "0.435/01818" or "dev/01818" (development version) or "dev/00000" (in case of wrong input)
     *
@@ -253,7 +255,7 @@ public final class yacy {
                 }
             */                    
             
-            final plasmaSwitchboard sb = new plasmaSwitchboard(homePath, "yacy.init", "DATA/SETTINGS/httpProxy.conf");
+            sb = new plasmaSwitchboard(homePath, "yacy.init", "DATA/SETTINGS/httpProxy.conf");
             
             // save information about available memory at startup time
             sb.setConfig("memoryFreeAfterStartup", startupMemFree);
@@ -506,10 +508,15 @@ public final class yacy {
 
         return config;
     }
-
-    static void shutdown() {
-        String applicationRoot = System.getProperty("user.dir").replace('\\', '/');
-        shutdown(applicationRoot);
+    
+    public static void shutdown() {
+    	if (sb != null) {
+    		// YaCy is running in the same runtime. we can shutdown via interrupt
+    		sb.terminate();
+    	} else {    	
+    		String applicationRoot = System.getProperty("user.dir").replace('\\', '/');
+    		shutdown(applicationRoot);
+    	}
     }
     
     /**
