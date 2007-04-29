@@ -2001,8 +2001,8 @@ public final class plasmaSwitchboard extends serverAbstractSwitch implements ser
         }
         
         if ((isRobinsonMode()) &&
-        	((getConfig("cluster.mode", "").equals("publicpeer")) ||
-        	 (getConfig("cluster.mode", "").equals("privatepeer")))){ 
+        	(!getConfig("cluster.mode", "").equals("publicpeer")) &&
+        	(!getConfig("cluster.mode", "").equals("privatepeer"))) { 
         	// not-clustered robinson peers do not do remote crawling
         	return false;
         }
