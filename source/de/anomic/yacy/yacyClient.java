@@ -410,7 +410,7 @@ public final class yacyClient {
                                (yacyCore.seedDB.sb.remoteProxyConfig.useProxy4Yacy());
             
             // building url
-            final String url = "http://" + targetPeer.getAddress() + "/yacy/search.html";
+            final String url = "http://" + ((targetPeer.getIP().equals(yacyCore.seedDB.mySeed.getIP())) ? "localhost:" + targetPeer.getPort() : targetPeer.getAddress()) + "/yacy/search.html";
             
             // adding all needed parameters
             /*
@@ -421,7 +421,7 @@ public final class yacyClient {
                 "&count=" + count + "&resource=" + ((global) ? "global" : "local") +
                 "&query=" + wordhashes;
              */
-            final serverObjects obj = new serverObjects(9);
+            final serverObjects obj = new serverObjects(20);
             long duetime = timingProfile.duetime();
             obj.put("myseed", yacyCore.seedDB.mySeed.genSeedStr(key));
             obj.put("youare", targetPeer.hash);

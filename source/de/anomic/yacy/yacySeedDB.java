@@ -54,6 +54,7 @@ import java.net.InetAddress;
 import java.net.UnknownHostException;
 import java.util.ArrayList;
 import java.util.Enumeration;
+import java.util.HashMap;
 import java.util.Hashtable;
 import java.util.Iterator;
 import java.util.Map;
@@ -315,7 +316,9 @@ public final class yacySeedDB {
         return (yacySeed) e.nextElement();
     }
 
-    public yacySeed[] seedsByAge(boolean up, int count) {
+    public HashMap seedsByAge(boolean up, int count) {
+    	// returns a peerhash/yacySeed relation
+    	
         if (count > sizeConnected()) count = sizeConnected();
 
         // fill a score object
@@ -335,10 +338,14 @@ public final class yacySeedDB {
             }
             
             // result is now in the score object; create a result vector
-            yacySeed[] result = new yacySeed[count];
+            HashMap result = new HashMap();
             Iterator it = seedScore.scores(up);
             int c = 0;
-            while ((c < count) && (it.hasNext())) result[c++] = getConnected((String) it.next());
+            while ((c < count) && (it.hasNext())) {
+            	c++;
+            	ys = getConnected((String) it.next());
+            	result.put(ys.hash, ys);
+            }
             return result;
         } catch (kelondroException e) {
             seedActiveDB = resetSeedTable(seedActiveDB, seedActiveDBFile);
@@ -535,15 +542,17 @@ public final class yacySeedDB {
         if (seed != null) return seed;
 
         // enumerate the cache and simultanous insert values
-        Enumeration e = seedsConnected(true, false, null, (float) 0.0);
         String name;
-        while (e.hasMoreElements()) {
-            seed = (yacySeed) e.nextElement();
-        if (seed != null) {
-        name = seed.getName().toLowerCase();
-        if (seed.isProper() == null) nameLookupCache.put(name, seed);
-        if (name.equals(peerName)) return seed;
-        }
+    	for (int table = 0; table < 2; table++) {
+        	Enumeration e = (table == 0) ? seedsConnected(true, false, null, (float) 0.0) : seedsDisconnected(true, false, null, (float) 0.0);
+        	while (e.hasMoreElements()) {
+        		seed = (yacySeed) e.nextElement();
+        		if (seed != null) {
+        			name = seed.getName().toLowerCase();
+        			if (seed.isProper() == null) nameLookupCache.put(name, seed);
+        			if (name.equals(peerName)) return seed;
+        		}
+        	}
         }
         // check local seed
         name = mySeed.getName().toLowerCase();

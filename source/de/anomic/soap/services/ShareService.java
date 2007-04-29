@@ -78,7 +78,7 @@ public class ShareService extends AbstractService {
 	private static final int FILEINFO_COMMENT = 1;
 	
 	private static final int GENMD5_MD5_ARRAY = 0;
-	private static final int GENMD5_MD5_STRING = 1;
+	//private static final int GENMD5_MD5_STRING = 1;
 	
 	/* =====================================================================
 	 * Used XML Templates

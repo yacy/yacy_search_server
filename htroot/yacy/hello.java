@@ -47,6 +47,8 @@
 // if the shell's current path is HTROOT
 
 import java.util.Date;
+import java.util.Iterator;
+import java.util.Map;
 
 import de.anomic.http.httpHeader;
 import de.anomic.plasma.plasmaSwitchboard;
@@ -74,7 +76,6 @@ public final class hello {
         final String key      = post.get("key", "");      // transmission key for response
         final String seed     = post.get("seed", "");
         final String countStr = post.get("count", "0");
-        int  i;
         int  count = 0;
         try {count = (countStr == null) ? 0 : Integer.parseInt(countStr);} catch (NumberFormatException e) {count = 0;}
 //      final Date remoteTime = yacyCore.parseUniversalDate((String) post.get(MYTIME)); // read remote time
@@ -173,7 +174,7 @@ public final class hello {
             if (count > 100) { count = 100; }
             
             // latest seeds
-            final yacySeed[] ySeeds = yacyCore.seedDB.seedsByAge(true, count);          
+            final Map ySeeds = yacyCore.seedDB.seedsByAge(true, count); // peerhash/yacySeed relation
             
             // attach also my own seed
             seeds.append("seed0=").append(yacyCore.seedDB.mySeed.genSeedStr(key)).append(serverCore.crlfString);
@@ -181,10 +182,13 @@ public final class hello {
             
             // attach other seeds
             if (ySeeds != null) {
-                seeds.ensureCapacity((ySeeds.length + 1) * 768);
-                for (i = 0; i < ySeeds.length; i++) {
-                    if ((ySeeds[i] != null) && (ySeeds[i].isProper() == null)) {
-                        seeds.append("seed").append(count).append('=').append(ySeeds[i].genSeedStr(key)).append(serverCore.crlfString);
+                seeds.ensureCapacity((ySeeds.size() + 1) * 768);
+                Iterator si = ySeeds.values().iterator();
+                yacySeed s;
+                while (si.hasNext()) {
+                	s = (yacySeed) si.next();
+                    if ((s != null) && (s.isProper() == null)) {
+                        seeds.append("seed").append(count).append('=').append(s.genSeedStr(key)).append(serverCore.crlfString);
                         count++;
                     }
                 }

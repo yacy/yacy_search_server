@@ -152,7 +152,7 @@ public class yacySearch extends Thread {
     	ArrayList l = new ArrayList();
     	yacySeed s;
     	while (i.hasNext()) {
-    		s = yacyCore.seedDB.getConnected((String) i.next());
+    		s = yacyCore.seedDB.get((String) i.next()); // should be getConnected; get only during testing time
     		if (s != null) l.add(s);
     	}
     	yacySeed[] result = new yacySeed[l.size()];

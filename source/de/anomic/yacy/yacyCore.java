@@ -423,7 +423,7 @@ public class yacyCore {
             //    probed until we get a valid response.
 
             // init yacyHello-process
-            yacySeed[] seeds;
+            Map seeds; // hash/yacySeed relation
 
             int attempts = seedDB.sizeConnected();
 
@@ -431,6 +431,16 @@ public class yacyCore {
             if (seedDB.mySeed.get(yacySeed.PEERTYPE, yacySeed.PEERTYPE_VIRGIN).equals(yacySeed.PEERTYPE_VIRGIN)) {
                 if (attempts > peerPingInitial) { attempts = peerPingInitial; }
                 seeds = seedDB.seedsByAge(true, attempts + 10); // best for fast connection
+                // add also all peers from cluster if this is a public robinson cluster
+                if (plasmaSwitchboard.getSwitchboard().clusterhashes != null) {
+                	Iterator i = plasmaSwitchboard.getSwitchboard().clusterhashes.iterator();
+                	String hash;
+                	while (i.hasNext()) {
+                		hash = (String) i.next();
+                		if (seeds.containsKey(hash)) continue;
+                		seeds.put(hash, seedDB.get(hash));
+                	}
+                }
             } else {
                 int diff = peerPingMinDBSize - amIAccessibleDB.size();
                 if (diff > peerPingMinRunning) {
@@ -447,13 +457,15 @@ public class yacyCore {
             // This will try to get Peers that are not currently in amIAccessibleDB
             LinkedList seedList = new LinkedList();
             LinkedList tmpSeedList = new LinkedList();
-            for(int i = 0; i < seeds.length; i++) {
-                if (seeds[i] != null) {
-                if (amIAccessibleDB.containsKey(seeds[i].hash)) {
-                    tmpSeedList.add(seeds[i]);
+            Iterator si = seeds.values().iterator();
+            yacySeed seed;
+            while (si.hasNext()) {
+            	seed = (yacySeed) si.next();
+                if (seed == null) continue;
+                if (amIAccessibleDB.containsKey(seed.hash)) {
+                    tmpSeedList.add(seed);
                 } else {
-                    seedList.add(seeds[i]);
-                }
+                    seedList.add(seed);
                 }
             }
             while (!tmpSeedList.isEmpty()) { seedList.add(tmpSeedList.remove(0)); }
@@ -484,7 +496,7 @@ public class yacyCore {
 
             // going through the peer list and starting a new publisher thread for each peer
             for (int i = 0; i < attempts; i++) {
-                yacySeed seed = (yacySeed) seedList.remove(0);
+                seed = (yacySeed) seedList.remove(0);
                 if (seed == null) continue;
 
                 final String address = seed.getAddress();
@@ -528,7 +540,7 @@ public class yacyCore {
 
             // Nobody contacted yet, try again until peerPingInitial attempts are through
             while ((newSeeds < 0) && (contactedSeedCount < peerPingInitial) && (!seedList.isEmpty())) {
-                yacySeed seed = (yacySeed) seedList.remove(0);
+                seed = (yacySeed) seedList.remove(0);
                 if (seed != null) {
                     final String address = seed.getAddress();
                     log.logFine("HELLO x" + contactedSeedCount + " to peer '" + seed.get(yacySeed.NAME, "") + "' at " + address); // debug
