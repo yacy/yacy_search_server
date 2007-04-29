@@ -97,7 +97,7 @@ public final class hello {
 
         if ((sb.isRobinsonMode()) && (!sb.isOpenRobinsonCluster())) {
         	// if we are a robinson cluster, answer only if this client is known by our network definition
-        	return null;
+        	return prop;
         }
         
         int urls = -1;

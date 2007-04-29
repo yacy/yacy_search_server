@@ -102,7 +102,7 @@ public class IndexCreateWWWLocalQueue_p {
                         Iterator iter = switchboard.noticeURL.iterator(plasmaCrawlNURL.STACK_TYPE_CORE);
                         plasmaCrawlEntry entry;
                         while (iter.hasNext()) {
-                            entry = (plasmaCrawlEntry) iter.next();
+                            if ((entry = (plasmaCrawlEntry) iter.next()) == null) continue;
                             String value = null;
                             String nextHash = entry.urlhash();
                             if ((option.equals("URL")&&(entry.url() != null))) {

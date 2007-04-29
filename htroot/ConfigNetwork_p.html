@@ -25,73 +25,120 @@
       peers, which we call a 'Robinson' peer.
     </p>
     <form method="post" action="ConfigNetwork_p.html" enctype="multipart/form-data" accept-charset="UTF-8">
-    	<fieldset>
-    	<legend><input type="radio" name="network" id="p2p" value="p2p"#(p2p.checked)#:: checked="checked"#(/p2p.checked)# />Peer-to-Peer Mode</legend>
-		<dl>
-        <dt>Index Distribution <input type="checkbox" name="indexDistribute" #(indexDistributeChecked)#::checked="checked" #(/indexDistributeChecked)#/></dt>
+      <fieldset>
+      <legend>
+        <input type="radio" name="network" id="p2p" value="p2p"#(p2p.checked)#:: checked="checked"#(/p2p.checked)# />
+        <label for="p2p">Peer-to-Peer Mode</label>
+      </legend>
+	  <dl>
+        <dt>
+          <label for="indexDistribute">Index Distribution</label>
+          <input type="checkbox" id="indexDistribute" name="indexDistribute"
+                 #(indexDistributeChecked)#::checked="checked" #(/indexDistributeChecked)#/>
+        </dt>
         <dd>
-          This enables automated, DHT-ruled Index Transmission to other peers.<br>
-            <input type="radio" value="on" name="indexDistributeWhileCrawling" #(indexDistributeWhileCrawling.on)#::checked="checked" #(/indexDistributeWhileCrawling.on)#/> enabled
-			/
-			<input type="radio" value="off" name="indexDistributeWhileCrawling" #(indexDistributeWhileCrawling.off)#::checked="checked" #(/indexDistributeWhileCrawling.off)#/> disabled
-			during crawling.
+          This enables automated, DHT-ruled Index Transmission to other peers.<br />
+          <input type="radio" value="on" id="indexDistributeWhileCrawlingOn"
+                 name="indexDistributeWhileCrawling"
+                 #(indexDistributeWhileCrawling.on)#::checked="checked" #(/indexDistributeWhileCrawling.on)#/>
+          <label for="indexDistributeWhileCrawlingOn">enabled</label> /
+          <input type="radio" value="off" id="indexDistributeWhileCrawlingOff"
+                 name="indexDistributeWhileCrawling"
+                 #(indexDistributeWhileCrawling.off)#::checked="checked" #(/indexDistributeWhileCrawling.off)#/>
+          <label for="indexDistributeWhileCrawlingOff">disabled during crawling</label>.
 		</dd>
-		<dt>Index Receive <input type="checkbox" name="indexReceive" #(indexReceiveChecked)#::checked="checked" #(/indexReceiveChecked)#::/></dt>
+		<dt>
+		  <label for="indexReceive">Index Receive</label>
+		  <input type="checkbox" id="indexReceive" name="indexReceive" #(indexReceiveChecked)#::checked="checked" #(/indexReceiveChecked)#/>
+		</dt>
 		<dd>
-		  Accept remote Index Transmissions.<br>This works only if you have a senior peer. The DHT-rules do not work without this function.<br>
-		    <input type="radio" value="on" name="indexReceiveBlockBlacklist" #(indexReceiveBlockBlacklistChecked.on)#::checked="checked" #(/indexReceiveBlockBlacklistChecked.on)#/> reject
-			/
-			<input type="radio" value="off" name="indexReceiveBlockBlacklist" #(indexReceiveBlockBlacklistChecked.off)#::checked="checked" #(/indexReceiveBlockBlacklistChecked.off)#/> accept
-			transmitted URLs that match your blacklist
+		  Accept remote Index Transmissions.<br />
+		  This works only if you have a senior peer. The DHT-rules do not work without this function.<br />
+		  <input type="radio" value="on" id="indexReceiveBlockBlacklistOn"
+		         name="indexReceiveBlockBlacklist"
+		         #(indexReceiveBlockBlacklistChecked.on)#::checked="checked" #(/indexReceiveBlockBlacklistChecked.on)#/>
+		  <label for="indexReceiveBlockBlacklistOn">reject</label> /
+          <input type="radio" value="off" id="indexReceiveBlockBlacklistOff"
+                 name="indexReceiveBlockBlacklist"
+                 #(indexReceiveBlockBlacklistChecked.off)#::checked="checked" #(/indexReceiveBlockBlacklistChecked.off)#/>
+          <label for="indexReceiveBlockBlacklistOff">accept transmitted URLs that match your blacklist</label>.
         </dd>
-        <dt>Accept Remote Crawl Requests <input type="checkbox" name="crawlResponse" #(crawlResponse)#::checked="checked" #(/crawlResponse)#::/></dt>
+        <dt>
+          <label for="crawlResponse">Accept Remote Crawl Requests</label>
+          <input type="checkbox" id="crawlResponse" name="crawlResponse" #(crawlResponse)#::checked="checked" #(/crawlResponse)#/>
+        </dt>
 		<dd>
-		  Perform web indexing upon request of another peer.<br>This works only if you are a senior peer.<br>
-		  Load with a maximum of <input name="acceptCrawlLimit" type="text" size="3" maxlength="3" value="#[acceptCrawlLimit]#" /> pages per minute
+		  Perform web indexing upon request of another peer.<br />
+		  This works only if you are a senior peer.<br />
+		  <label for="acceptCrawlLimit">Load with a maximum of</label>
+		  <input id="acceptCrawlLimit" name="acceptCrawlLimit" type="text" size="3" maxlength="3" value="#[acceptCrawlLimit]#" /> pages per minute
         </dd>
-        </dl>
-        </fieldset>
+      </dl>
+    </fieldset>
         
-        <fieldset>
-    	<legend><input type="radio" name="network" id="robinson" value="robinson"#(robinson.checked)#:: checked="checked"#(/robinson.checked)# />Robinson Mode</legend>
-    	<p class="help">
-            If your peer runs in 'Robinson Mode' you run YaCy as a search engine for your own search portal without data exchange to other peers.
-            There is no index receive and no index distribution between your peer and any other peer.
-            In case of Robinson-clustering there can be acceptance of remote crawl requests from peers of that cluster.
-        </p>
-		<dl>
-        <dt>Private Peer<input type="radio" value="privatepeer" name="cluster.mode" #(privatepeerChecked)#::checked="checked" #(/privatepeerChecked)#/></dt>
+    <fieldset>
+      <legend>
+        <input type="radio" name="network" id="robinson" value="robinson"#(robinson.checked)#:: checked="checked"#(/robinson.checked)# />
+        <label for="robinson">Robinson Mode</label>
+      </legend>
+      <p class="help">
+        If your peer runs in 'Robinson Mode' you run YaCy as a search engine for your own search portal without data exchange to other peers.
+        There is no index receive and no index distribution between your peer and any other peer.
+        In case of Robinson-clustering there can be acceptance of remote crawl requests from peers of that cluster.
+      </p>
+      <dl>
+        <dt>
+          <label for="privatepeer">Private Peer</label>
+          <input type="radio" id="privatepeer" value="privatepeer" name="cluster.mode"
+                 #(privatepeerChecked)#::checked="checked" #(/privatepeerChecked)#/>
+        </dt>
         <dd>Your search engine will not contact any other peer, and will reject every request.
         </dd>
         <!-- not yet implemented
-        <dt>Private Cluster<input type="radio" value="privatecluster" name="cluster.mode" #(privateclusterChecked)#::checked="checked" #(/privateclusterChecked)#/></dt>
-        <dd>Your peer is part of a private cluster without public visibility.<br>
-            Index data is not distributed, but remote crawl requests are distributed and accepted from your cluster.<br>
-            Search requests are spread over all peers of the cluster, and answered from all peers of the cluster.<br>
-			List of ip:port - addresses of the cluster: (comma-separated)<br>
-            <input type="text" name="cluster.peers.ipport" value="#[cluster.peers.ipport]#" size="80" maxlength="800" />
+        <dt>
+          <label for="cluster.modePrivatecluster">Private Cluster</label>
+          <input type="radio" value="privatecluster" id="cluster.modePrivatecluster" name="cluster.mode"
+                 #(privateclusterChecked)#::checked="checked" #(/privateclusterChecked)#/>
+        </dt>
+        <dd>
+          Your peer is part of a private cluster without public visibility.<br />
+          Index data is not distributed, but remote crawl requests are distributed and accepted from your cluster.<br />
+          Search requests are spread over all peers of the cluster, and answered from all peers of the cluster.<br />
+          List of ip:port - addresses of the cluster: (comma-separated)<br />
+          <input type="text" name="cluster.peers.ipport" value="#[cluster.peers.ipport]#" size="80" maxlength="800" />
         </dd>
         -->
-        <dt>Public Cluster<input type="radio" value="publiccluster" name="cluster.mode" #(publicclusterChecked)#::checked="checked" #(/publicclusterChecked)#/></dt>
-        <dd>Your peer is part of a public cluster within the YaCy network.<br>
-            Index data is not distributed, but remote crawl requests are distributed and accepted<br>
-            Search requests are spread over all peers of the cluster, and answered from all peers of the cluster.<br>
-			List of .yacy or .yacyh - domains of the cluster: (comma-separated)<br>
-            <input type="text" name="cluster.peers.yacydomain" value="#[cluster.peers.yacydomain]#" size="80" maxlength="800" /><br>
-            #[cluster.peers.yacydomain.hashes]#
+        <dt>
+          <label for="cluster.modePubliccluster">Public Cluster</label>
+          <input type="radio" value="publiccluster" id="cluster.modePubliccluster" name="cluster.mode"
+                 #(publicclusterChecked)#::checked="checked" #(/publicclusterChecked)#/>
+        </dt>
+        <dd>
+          Your peer is part of a public cluster within the YaCy network.<br />
+          Index data is not distributed, but remote crawl requests are distributed and accepted<br />
+          Search requests are spread over all peers of the cluster, and answered from all peers of the cluster.<br />
+          List of .yacy or .yacyh - domains of the cluster: (comma-separated)<br />
+          <input type="text" name="cluster.peers.yacydomain" value="#[cluster.peers.yacydomain]#" size="80" maxlength="800" /><br />
+          #[cluster.peers.yacydomain.hashes]#
         </dd>
-        <dt>Public Peer<input type="radio" value="publicpeer" name="cluster.mode" #(publicpeerChecked)#::checked="checked" #(/publicpeerChecked)#/></dt>
-        <dd>You are visible to other peers and contact them to distribute your presence.<br>
-            Your peer does not accept any outside index data, but responds on all remote search requests.
+        <dt>
+          <label for="cluster.modePublicpeer">Public Peer</label>
+          <input type="radio" value="publicpeer" id="cluster.modePublicpeer" name="cluster.mode"
+                 #(publicpeerChecked)#::checked="checked" #(/publicpeerChecked)#/>
+        </dt>
+        <dd>
+          You are visible to other peers and contact them to distribute your presence.<br />
+          Your peer does not accept any outside index data, but responds on all remote search requests.
         </dd>
-        <dt>Peer Tags</dt>
-        <dd>When you allow access from the YaCy network, your data is recognized using keywords.<br>
-            Please describe your search portal with some keywords (comma-separated).<br>
-            <input type="text" name="peertags" value="#[peertags]#" size="40" maxlength="80" />
+        <dt><label for="peertags">Peer Tags</label></dt>
+        <dd>
+          When you allow access from the YaCy network, your data is recognized using keywords.<br />
+          Please describe your search portal with some keywords (comma-separated).<br />
+          <input type="text" id="peertags" name="peertags" value="#[peertags]#" size="40" maxlength="80" />
         </dd>
-        </dl>
-        </fieldset>
-        <input type="submit" name="save" value="Save" />
+      </dl>
+      <input type="submit" name="save" value="Save" />
+    </fieldset>
         
     </form>
     #%env/templates/footer.template%#

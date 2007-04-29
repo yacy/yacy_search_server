@@ -482,7 +482,8 @@ public class Network {
                                 prop.put("table_progressbar_timemessage", 2);
                             }else{
                                 prop.put("table_progressbar_timemessage", 1);
-                                prop.put("table_progressbar_timemessage_time", serverDate.intervalToString( (int)((float)indexdiff/(float)ppmdiff)*1000 ));
+                                // indexdiff / (ppmdiff * 60 * 1000) to get it in milli-seconds
+                                prop.put("table_progressbar_timemessage_time", serverDate.intervalToString( (int)((float)indexdiff/(float)ppmdiff)*60000 ));
                             }
                         else
                             prop.put("table_progressbar_timemessage", 0);
