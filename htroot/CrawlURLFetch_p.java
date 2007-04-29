@@ -161,7 +161,7 @@ public class CrawlURLFetch_p {
                             ys = yacyCore.seedDB.get(post.get("peerhash", null));
                             if (ys != null) {
                                 if ((url = URLFetcher.getListServletURL(
-                                        ys.getAddress(),
+                                        ys.getPublicAddress(),
                                         URLFetcher.MODE_LIST,
                                         count,
                                         yacyCore.seedDB.mySeed.hash)) == null) {
@@ -311,7 +311,7 @@ public class CrawlURLFetch_p {
     private static int getURLs2Fetch(yacySeed seed, httpRemoteProxyConfig theRemoteProxyConfig) {
         try {
             String answer = new String(httpc.wget(
-                    URLFetcher.getListServletURL(seed.getAddress(), URLFetcher.MODE_COUNT, 0, null),
+                    URLFetcher.getListServletURL(seed.getPublicAddress(), URLFetcher.MODE_COUNT, 0, null),
                     seed.getIP(),
                     5000,
                     null, null,
@@ -469,7 +469,7 @@ public class CrawlURLFetch_p {
             }
             if (ys == null) return null;
             
-            return getListServletURL(ys.getAddress(), MODE_LIST, this.count, yacyCore.seedDB.mySeed.hash);
+            return getListServletURL(ys.getPublicAddress(), MODE_LIST, this.count, yacyCore.seedDB.mySeed.hash);
         }
         
         private int stackURLs(String[] urls) throws InterruptedException {

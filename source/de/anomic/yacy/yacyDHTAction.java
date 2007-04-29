@@ -46,6 +46,7 @@ package de.anomic.yacy;
 import java.util.ArrayList;
 import java.util.Enumeration;
 import java.util.Hashtable;
+import java.util.TreeMap;
 import java.util.TreeSet;
 
 import de.anomic.kelondro.kelondroBase64Order;
@@ -217,10 +218,12 @@ public class yacyDHTAction implements yacyPeerAction {
         return seed;
     }
     
-    public synchronized yacySeed getPublicClusterCrawlSeed(String urlHash, TreeSet clusterhashes) {
-        kelondroCloneableIterator i = new kelondroRotateIterator(new kelondroCloneableSetIterator(clusterhashes, urlHash), null);
+    public synchronized yacySeed getPublicClusterCrawlSeed(String urlHash, TreeMap clusterhashes) {
+        kelondroCloneableIterator i = new kelondroRotateIterator(new kelondroCloneableSetIterator((TreeSet) clusterhashes.keySet(), urlHash), null);
         if (i.hasNext()) {
-        	return seedDB.getConnected((String) i.next());
+        	yacySeed seed = seedDB.getConnected((String) i.next());
+        	seed.setAlternativeAddress((String) clusterhashes.get(seed.hash));
+        	return seed;
         }
         return null;
     }

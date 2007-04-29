@@ -750,7 +750,7 @@ public class wikiCode {
                 // or an image DATA/HTDOCS/grafics/kaskelix.jpg with [[Image:grafics/kaskelix.jpg]]
                 // you are free to use other sub-paths of DATA/HTDOCS
                 if (kl.indexOf("://")<1) {
-                    kl = "http://" + yacyCore.seedDB.mySeed.getAddress().trim() + "/" + kl;
+                    kl = "http://" + yacyCore.seedDB.mySeed.getPublicAddress().trim() + "/" + kl;
                 }
 
                 result = result.substring(0, p0) + "<img src=\"" + kl + "\"" + align + alt + ">" + result.substring(p1 + 2);
@@ -791,7 +791,7 @@ public class wikiCode {
             // or a file DATA/HTDOCS/www/page.html with [www/page.html]
             // you are free to use other sub-paths of DATA/HTDOCS
             if (kl.indexOf("://")<1) {
-                kl = "http://" + yacyCore.seedDB.mySeed.getAddress().trim() + "/" + kl;
+                kl = "http://" + yacyCore.seedDB.mySeed.getPublicAddress().trim() + "/" + kl;
             }
         result = result.substring(0, p0) + "<a class=\"extern\" href=\"" + kl + "\">" + kv + "</a>" + result.substring(p1 + 1);
         }

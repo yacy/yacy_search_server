@@ -175,7 +175,7 @@ public final class plasmaRankingDistribution {
             target = yacyCore.seedDB.anySeedVersion(yacyVersion.YACY_ACCEPTS_RANKING_TRANSMISSION);
             
             if (target == null) continue;
-            String targetaddress = target.getAddress();
+            String targetaddress = target.getPublicAddress();
             if (transferRankingAddress(crfile, targetaddress)) return true;
         }
         return false;

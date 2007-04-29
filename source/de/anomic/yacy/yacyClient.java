@@ -255,7 +255,7 @@ public final class yacyClient {
             // sending request
             final HashMap result = nxTools.table(
                     httpc.wget(
-                            new URL("http://" + target.getAddress() +
+                            new URL("http://" + target.getClusterAddress() +
                                     "/yacy/query.html" +
                                     "?iam=" + yacyCore.seedDB.mySeed.hash +
                                     "&youare=" + target.hash + 
@@ -291,7 +291,7 @@ public final class yacyClient {
             // sending request
             final HashMap result = nxTools.table(
                     httpc.wget(
-                            new URL("http://" + target.getAddress() +
+                            new URL("http://" + target.getClusterAddress() +
                                     "/yacy/query.html" +
                                     "?iam=" + yacyCore.seedDB.mySeed.hash +
                                     "&youare=" + target.hash + 
@@ -327,7 +327,7 @@ public final class yacyClient {
         
         // building url
         final String querystr =
-            "http://" + target.getAddress() +
+            "http://" + target.getClusterAddress() +
             "/yacy/query.html" +
             "?iam=" + yacyCore.seedDB.mySeed.hash +
             "&youare=" + target.hash +
@@ -410,7 +410,7 @@ public final class yacyClient {
                                (yacyCore.seedDB.sb.remoteProxyConfig.useProxy4Yacy());
             
             // building url
-            final String url = "http://" + ((targetPeer.getIP().equals(yacyCore.seedDB.mySeed.getIP())) ? "localhost:" + targetPeer.getPort() : targetPeer.getAddress()) + "/yacy/search.html";
+            final String url = "http://" + targetPeer.getClusterAddress() + "/yacy/search.html";
             
             // adding all needed parameters
             /*
@@ -669,17 +669,16 @@ public final class yacyClient {
             return null;
         }
     }
-
     
     public static String targetAddress(String targetHash) {
         // find target address    
         String address;
         if (targetHash.equals(yacyCore.seedDB.mySeed.hash)) {
-            address = yacyCore.seedDB.mySeed.getAddress();
+            address = yacyCore.seedDB.mySeed.getClusterAddress();
         } else {
             final yacySeed targetSeed = yacyCore.seedDB.getConnected(targetHash);
             if (targetSeed == null) { return null; }
-            address = targetSeed.getAddress();
+            address = targetSeed.getClusterAddress();
         }
         if (address == null) address = "localhost:8080";
         return address;
@@ -827,7 +826,7 @@ public final class yacyClient {
         post.put("ttl", "0");
 
         // determining target address
-        final String address = targetSeed.getAddress();
+        final String address = targetSeed.getClusterAddress();
         if (address == null) { return null; }
         
         // sending request
@@ -892,7 +891,7 @@ public final class yacyClient {
         final String key = crypt.randomSalt();
 
         // determining target address
-        String address = targetSeed.getAddress();
+        String address = targetSeed.getClusterAddress();
         if (address == null) { return null; }
         
         // sending request
@@ -1015,7 +1014,7 @@ public final class yacyClient {
     }
 
     private static HashMap transferRWI(yacySeed targetSeed, indexContainer[] indexes, boolean gzipBody, int timeout) {
-        final String address = targetSeed.getAddress();
+        final String address = targetSeed.getPublicAddress();
         if (address == null) { return null; }
         
         // should we use the proxy?
@@ -1091,7 +1090,7 @@ public final class yacyClient {
 
     private static HashMap transferURL(yacySeed targetSeed, indexURLEntry[] urls, boolean gzipBody, int timeout) {
         // this post a message to the remote message board
-        final String address = targetSeed.getAddress();
+        final String address = targetSeed.getPublicAddress();
         if (address == null) { return null; }
         
         // should we use the proxy?
@@ -1163,7 +1162,7 @@ public final class yacyClient {
         final serverObjects post = new serverObjects(2);
         post.put("iam", yacyCore.seedDB.mySeed.hash);
         post.put("youare", targetSeed.hash);
-        String address = targetSeed.getAddress();
+        String address = targetSeed.getClusterAddress();
         if (address == null) { address = "localhost:8080"; }
         try {
             return nxTools.table(
@@ -1200,7 +1199,7 @@ public final class yacyClient {
             
             final HashMap result = nxTools.table(
                     httpc.wget(
-                            new URL("http://" + target.getAddress() + "/yacy/search.html" +
+                            new URL("http://" + target.getPublicAddress() + "/yacy/search.html" +
                                     "?myseed=" + yacyCore.seedDB.mySeed.genSeedStr(null) +
                                     "&youare=" + target.hash + "&key=" +
                                     "&myseed=" + yacyCore.seedDB.mySeed.genSeedStr(null) +

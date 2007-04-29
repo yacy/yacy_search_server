@@ -184,11 +184,11 @@ public class News {
                     	title = record.attribute("title", "");
                     	description = record.attribute("url", "");
                     } else if (category.equals(yacyNewsPool.CATEGORY_WIKI_UPDATE)) {
-                    	link = (seed==null)?"":"http://" + seed.getAddress() + "/Wiki.html?page=" + record.attribute("page", "");
+                    	link = (seed==null)?"":"http://" + seed.getPublicAddress() + "/Wiki.html?page=" + record.attribute("page", "");
                     	title = record.attribute("author", "Anonymous") + ": " + record.attribute("page", "");
                     	description = "Wiki Update: " + record.attribute("description", "");
                     } else if (category.equals(yacyNewsPool.CATEGORY_BLOG_ADD)) {
-                    	link = (seed==null)?"":"http://" + seed.getAddress() + "/Blog.html?page=" + record.attribute("page", "");
+                    	link = (seed==null)?"":"http://" + seed.getPublicAddress() + "/Blog.html?page=" + record.attribute("page", "");
                     	title = record.attribute("author", "Anonymous") + ": " + record.attribute("page", "");
                     	description = "Blog Entry: " + record.attribute("subject", "");
                     } else {
@@ -205,7 +205,7 @@ public class News {
         }
         
         // adding the peer address
-        prop.put("address",yacyCore.seedDB.mySeed.getAddress());
+        prop.put("address",yacyCore.seedDB.mySeed.getPublicAddress());
         
         // return rewrite properties
         return prop;

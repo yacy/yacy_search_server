@@ -76,7 +76,7 @@ public class Messages_p {
         serverObjects prop = new serverObjects();
         
         // set peer address / name
-        final String peerAddress = yacyCore.seedDB.mySeed.getAddress();
+        final String peerAddress = yacyCore.seedDB.mySeed.getPublicAddress();
         final String peerName = yacyCore.seedDB.mySeed.getName();
         prop.put("peerAddress", peerAddress);
         prop.put("peerName", peerName);

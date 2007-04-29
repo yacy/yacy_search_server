@@ -58,6 +58,7 @@ import java.util.HashMap;
 import java.util.Hashtable;
 import java.util.Iterator;
 import java.util.Map;
+import java.util.TreeMap;
 import java.util.TreeSet;
 
 import de.anomic.http.httpHeader;
@@ -248,36 +249,51 @@ public final class yacySeedDB {
         return new seedEnum(up, field, seedPotentialDB);
     }
     
-    public TreeSet /* peer-b64-hashes */ clusterHashes(String clusterdefinition) {
+    public TreeMap /* peer-b64-hashes/ipport */ clusterHashes(String clusterdefinition) {
     	// collects seeds according to cluster definition string, which consists of
     	// comma-separated .yacy or .yacyh-domains
-    	String[] cluster = clusterdefinition.split(",");
-    	TreeSet clusterset = new TreeSet(kelondroBase64Order.enhancedCoder);
+    	// the domain may be extended by an alternative address specification of the form
+    	// <ip> or <ip>:<port>. The port must be identical to the port specified in the peer seed,
+    	// therefore it is optional. The address specification is separated by a '='; the complete
+    	// address has therefore the form
+    	// address    ::= (<peername>'.yacy'|<peerhexhash>'.yacyh'){'='<ip>{':'<port}}
+    	// clusterdef ::= {address}{','address}*
+    	String[] addresses = clusterdefinition.split(",");
+    	TreeMap clustermap = new TreeMap(kelondroBase64Order.enhancedCoder);
     	yacySeed seed;
-    	String hash;
-    	for (int i = 0; i < cluster.length; i++) {
-    		if (cluster[i].endsWith(".yacyh")) {
+    	String hash, yacydom, ipport;
+    	int p;
+    	for (int i = 0; i < addresses.length; i++) {
+    		p = addresses[i].indexOf('=');
+    		if (p >= 0) {
+    			yacydom = addresses[i].substring(0, p);
+    			ipport  = addresses[i].substring(p + 1);
+    		} else {
+    			yacydom = addresses[i];
+    			ipport  = null;
+    		}
+    		if (yacydom.endsWith(".yacyh")) {
     			// find a peer with its hexhash
-    			hash = yacySeed.hexHash2b64Hash(cluster[i].substring(0, cluster[i].length() - 6));
+    			hash = yacySeed.hexHash2b64Hash(yacydom.substring(0, yacydom.length() - 6));
     			seed = get(hash);
     			if (seed == null) {
-    				yacyCore.log.logWarning("cluster peer '" + cluster[i] + "' was not found.");
+    				yacyCore.log.logWarning("cluster peer '" + yacydom + "' was not found.");
     			} else {
-    				clusterset.add(hash);
+    				clustermap.put(hash, ipport);
     			}
-    		} else if (cluster[i].endsWith(".yacy")) {
+    		} else if (yacydom.endsWith(".yacy")) {
     			// find a peer with its name
-    			seed = lookupByName(cluster[i].substring(0, cluster[i].length() - 5));
+    			seed = lookupByName(yacydom.substring(0, yacydom.length() - 5));
     			if (seed == null) {
-    				yacyCore.log.logWarning("cluster peer '" + cluster[i] + "' was not found.");
+    				yacyCore.log.logWarning("cluster peer '" + yacydom + "' was not found.");
     			} else {
-    				clusterset.add(seed.hash);
+    				clustermap.put(seed.hash, ipport);
     			}
     		} else {
-    			yacyCore.log.logWarning("cluster peer '" + cluster[i] + "' has wrong syntax. the name must end with .yacy or .yacyh");
+    			yacyCore.log.logWarning("cluster peer '" + addresses[i] + "' has wrong syntax. the name must end with .yacy or .yacyh");
     		}
     	}
-    	return clusterset;
+    	return clustermap;
     }
     
     public Iterator /*of yacySeed*/ seedsInCluster(String firstHash, TreeSet clusterhashes) {
@@ -594,7 +610,7 @@ public final class yacySeedDB {
                 try {
                     seed = (yacySeed) e.nextElement();
                     if (seed != null) {
-                        addressStr = seed.getAddress();
+                        addressStr = seed.getPublicAddress();
                         if (addressStr == null) {
                         	serverLog.logWarning("YACY","lookupByIP: address of seed " + seed.getName() + " is null.");
                         	continue; 
@@ -618,7 +634,7 @@ public final class yacySeedDB {
                 try {
                     seed = (yacySeed) e.nextElement();
                     if (seed != null) {
-                        addressStr = seed.getAddress();
+                        addressStr = seed.getPublicAddress();
                         if ((pos = addressStr.indexOf(":"))!= -1) {
                             addressStr = addressStr.substring(0,pos);
                         }
@@ -637,7 +653,7 @@ public final class yacySeedDB {
             while (e.hasMoreElements()) {
                 try {
                     seed = (yacySeed) e.nextElement();
-                    if ((seed != null) && ((addressStr = seed.getAddress()) != null)) {
+                    if ((seed != null) && ((addressStr = seed.getPublicAddress()) != null)) {
                         if ((pos = addressStr.indexOf(":"))!= -1) {
                             addressStr = addressStr.substring(0,pos);
                         }
@@ -651,7 +667,7 @@ public final class yacySeedDB {
         
         try {
             // check local seed
-            addressStr = mySeed.getAddress();
+            addressStr = mySeed.getPublicAddress();
             if ((pos = addressStr.indexOf(":"))!= -1) {
                 addressStr = addressStr.substring(0,pos);
             }
@@ -866,7 +882,7 @@ public final class yacySeedDB {
                     seed = mySeed;
                 else return null;
             }
-            return seed.getAddress() + ((subdom == null) ? "" : ("/" + subdom));
+            return seed.getPublicAddress() + ((subdom == null) ? "" : ("/" + subdom));
         } else if (host.endsWith(".yacy")) {
             // identify subdomain
             p = host.indexOf(".");
@@ -882,7 +898,7 @@ public final class yacySeedDB {
                 // take local ip instead of external
                 return serverCore.publicIP() + ":" + serverCore.getPortNr(sb.getConfig("port", "8080")) + ((subdom == null) ? "" : ("/" + subdom));
             }
-            return seed.getAddress() + ((subdom == null) ? "" : ("/" + subdom));
+            return seed.getPublicAddress() + ((subdom == null) ? "" : ("/" + subdom));
         } else {
             return null;
         }

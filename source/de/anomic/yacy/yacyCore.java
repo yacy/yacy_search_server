@@ -358,9 +358,9 @@ public class yacyCore {
             return true;
         }
         log.logInfo("re-connect own seed");
-        final String oldAddress = seedDB.mySeed.getAddress();
+        final String oldAddress = seedDB.mySeed.getPublicAddress();
         /*final int newSeeds =*/ publishMySeed(true);
-        return (oldAddress != null && oldAddress.equals(seedDB.mySeed.getAddress()));
+        return (oldAddress != null && oldAddress.equals(seedDB.mySeed.getPublicAddress()));
     }
 
     protected class publishThread extends Thread {
@@ -384,15 +384,15 @@ public class yacyCore {
 
         public void run() {
             try {
-                this.added = yacyClient.publishMySeed(seed.getAddress(), seed.hash);
+                this.added = yacyClient.publishMySeed(seed.getPublicAddress(), seed.hash);
                 if (this.added < 0) {
                     // no or wrong response, delete that address
-                    log.logInfo("publish: disconnected " + this.seed.get(yacySeed.PEERTYPE, yacySeed.PEERTYPE_SENIOR) + " peer '" + this.seed.getName() + "' from " + this.seed.getAddress());
+                    log.logInfo("publish: disconnected " + this.seed.get(yacySeed.PEERTYPE, yacySeed.PEERTYPE_SENIOR) + " peer '" + this.seed.getName() + "' from " + this.seed.getPublicAddress());
                     peerActions.peerDeparture(this.seed);
                 } else {
                     // success! we have published our peer to a senior peer
                     // update latest news from the other peer
-                    log.logInfo("publish: handshaked " + this.seed.get(yacySeed.PEERTYPE, yacySeed.PEERTYPE_SENIOR) + " peer '" + this.seed.getName() + "' at " + this.seed.getAddress());
+                    log.logInfo("publish: handshaked " + this.seed.get(yacySeed.PEERTYPE, yacySeed.PEERTYPE_SENIOR) + " peer '" + this.seed.getName() + "' at " + this.seed.getPublicAddress());
                 }
             } catch (Exception e) {
                 log.logSevere("publishThread: error with target seed " + seed.toString() + ": " + e.getMessage(), e);
@@ -433,12 +433,17 @@ public class yacyCore {
                 seeds = seedDB.seedsByAge(true, attempts + 10); // best for fast connection
                 // add also all peers from cluster if this is a public robinson cluster
                 if (plasmaSwitchboard.getSwitchboard().clusterhashes != null) {
-                	Iterator i = plasmaSwitchboard.getSwitchboard().clusterhashes.iterator();
+                	Iterator i = plasmaSwitchboard.getSwitchboard().clusterhashes.entrySet().iterator();
                 	String hash;
+                	Map.Entry entry;
+                	yacySeed seed;
                 	while (i.hasNext()) {
-                		hash = (String) i.next();
+                		entry = (Map.Entry) i.next();
+                		hash = (String) entry.getKey();
                 		if (seeds.containsKey(hash)) continue;
-                		seeds.put(hash, seedDB.get(hash));
+                		seed = seedDB.get(hash);
+                		seed.setAlternativeAddress((String) entry.getValue());
+                		seeds.put(hash, seed);
                 	}
                 }
             } else {
@@ -499,7 +504,7 @@ public class yacyCore {
                 seed = (yacySeed) seedList.remove(0);
                 if (seed == null) continue;
 
-                final String address = seed.getAddress();
+                final String address = seed.getPublicAddress();
                 log.logFine("HELLO #" + i + " to peer '" + seed.get(yacySeed.NAME, "") + "' at " + address); // debug
                 if ((address == null) || (seed.isProper() != null)) {
                     // we don't like that address, delete it
@@ -542,20 +547,21 @@ public class yacyCore {
             while ((newSeeds < 0) && (contactedSeedCount < peerPingInitial) && (!seedList.isEmpty())) {
                 seed = (yacySeed) seedList.remove(0);
                 if (seed != null) {
-                    final String address = seed.getAddress();
+                    String address = seed.getPublicAddress();
                     log.logFine("HELLO x" + contactedSeedCount + " to peer '" + seed.get(yacySeed.NAME, "") + "' at " + address); // debug
                     if ((address == null) || (seed.isProper() != null)) {
                         peerActions.peerDeparture(seed);
                     } else {
+                    	if (seed.alternativeIP != null) address = seed.alternativeIP + ":" + seed.getPort();
                         contactedSeedCount++;
                         //new publishThread(yacyCore.publishThreadGroup,seeds[i],sync,syncList)).start();
                         try {
-                            newSeeds = yacyClient.publishMySeed(seed.getAddress(), seed.hash);
+                            newSeeds = yacyClient.publishMySeed(address, seed.hash);
                             if (newSeeds < 0) {
-                                log.logInfo("publish: disconnected " + seed.get(yacySeed.PEERTYPE, yacySeed.PEERTYPE_SENIOR) + " peer '" + seed.getName() + "' from " + seed.getAddress());
+                                log.logInfo("publish: disconnected " + seed.get(yacySeed.PEERTYPE, yacySeed.PEERTYPE_SENIOR) + " peer '" + seed.getName() + "' from " + seed.getPublicAddress());
                                 peerActions.peerDeparture(seed);
                             } else {
-                                log.logInfo("publish: handshaked " + seed.get(yacySeed.PEERTYPE, yacySeed.PEERTYPE_SENIOR) + " peer '" + seed.getName() + "' at " + seed.getAddress());
+                                log.logInfo("publish: handshaked " + seed.get(yacySeed.PEERTYPE, yacySeed.PEERTYPE_SENIOR) + " peer '" + seed.getName() + "' at " + seed.getPublicAddress());
                             }
                         } catch (Exception e) {
                             log.logSevere("publishMySeed: error with target seed " + seed.toString() + ": " + e.getMessage(), e);
@@ -632,7 +638,7 @@ public class yacyCore {
             if (seedDB.mySeed.get(yacySeed.PEERTYPE, yacySeed.PEERTYPE_JUNIOR).equals(yacySeed.PEERTYPE_JUNIOR)) // ???????????????
                 seedDB.mySeed.put(yacySeed.PEERTYPE, yacySeed.PEERTYPE_SENIOR); // to start bootstraping, we need to be recognised as PEERTYPE_SENIOR peer
             log.logInfo("publish: no recipient found, our address is " +
-                    ((seedDB.mySeed.getAddress() == null) ? "unknown" : seedDB.mySeed.getAddress()));
+                    ((seedDB.mySeed.getPublicAddress() == null) ? "unknown" : seedDB.mySeed.getPublicAddress()));
             peerActions.saveMySeed();
             return 0;
         } catch (InterruptedException e) {
@@ -782,7 +788,7 @@ public class yacyCore {
             String logt;
 
             // be shure that we have something to say
-            if (seedDB.mySeed.getAddress() == null) {
+            if (seedDB.mySeed.getPublicAddress() == null) {
                 final String errorMsg = "We have no valid IP address until now";
                 log.logWarning("SaveSeedList: " + errorMsg);
                 return errorMsg;

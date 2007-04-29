@@ -105,7 +105,7 @@ public class dir {
         // general settings
         prop.put("peername", env.getConfig("peerName", "<nameless>"));
         prop.put("peerdomain", env.getConfig("peerName", "<nameless>").toLowerCase());
-        prop.put("peeraddress", yacyCore.seedDB.mySeed.getAddress());
+        prop.put("peeraddress", yacyCore.seedDB.mySeed.getPublicAddress());
         prop.put("hostname", serverCore.publicIP());
         try{
             prop.put("hostip", InetAddress.getByName(serverCore.publicIP()).getHostAddress());
@@ -288,7 +288,7 @@ public class dir {
                     if (f.isDirectory()) {
                         // the entry is a directory
                         prop.put("dirlist_" + fileIdx + "_dir" , 1);
-                        prop.putSafeXML("dirlist_" + fileIdx + "_dir_URL","http://" + yacyCore.seedDB.mySeed.getAddress() + path + fileName + "/");
+                        prop.putSafeXML("dirlist_" + fileIdx + "_dir_URL","http://" + yacyCore.seedDB.mySeed.getPublicAddress() + path + fileName + "/");
                     } else {
                         // determine if we should display the description string or a preview image
                         boolean showImage = /* (description.length() == 0) && */ (fileName.endsWith(".jpg") || fileName.endsWith(".gif") || fileName.endsWith(".png"));
@@ -300,7 +300,7 @@ public class dir {
                         prop.put("dirlist_" + fileIdx + "_dir_sizeBytes" , Long.toString(f.length()));
                         // the unique url
                         prop.putSafeXML("dirlist_" + fileIdx + "_dir_yacyhURL",yacyhURL(yacyCore.seedDB.mySeed, fileName, md5s));  
-                        prop.putSafeXML("dirlist_" + fileIdx + "_dir_URL","http://" + yacyCore.seedDB.mySeed.getAddress() + path + fileName);
+                        prop.putSafeXML("dirlist_" + fileIdx + "_dir_URL","http://" + yacyCore.seedDB.mySeed.getPublicAddress() + path + fileName);
                         // the md5 sum of the file
                         prop.put("dirlist_" + fileIdx + "_dir_md5s",md5s);
                         // description mode: 0...image preview, 1...description text 

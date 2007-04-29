@@ -91,7 +91,7 @@ public final class transfer {
             // reject unknown peers: this does not appear fair, but anonymous senders are dangerous
             // reject paths that contain '..' because they are dangerous
             if (otherseed == null) sb.getLog().logFine("RankingTransmission: rejected unknown peer '" + otherpeer + "', current IP " + header.get("CLIENTIP", "unknown"));
-            if (filename.indexOf("..") >= 0) sb.getLog().logFine("RankingTransmission: rejected wrong path '" + filename + "' from peer " + otherseed.getName() + "/" + otherseed.getAddress()+ ", current IP " + header.get("CLIENTIP", "unknown"));
+            if (filename.indexOf("..") >= 0) sb.getLog().logFine("RankingTransmission: rejected wrong path '" + filename + "' from peer " + otherseed.getName() + "/" + otherseed.getPublicAddress()+ ", current IP " + header.get("CLIENTIP", "unknown"));
             return prop;
         }
         
@@ -106,7 +106,7 @@ public final class transfer {
                 String access = kelondroBase64Order.enhancedCoder.encode(serverCodings.encodeMD5Raw(otherpeer + ":" + filename)) + ":" + kelondroBase64Order.enhancedCoder.encode(serverCodings.encodeMD5Raw("" + System.currentTimeMillis()));
                 prop.putASIS("response", "ok");
                 prop.putASIS("process_access", access);
-                prop.putASIS("process_address", yacyCore.seedDB.mySeed.getAddress());
+                prop.putASIS("process_address", yacyCore.seedDB.mySeed.getPublicAddress());
                 prop.putASIS("process_protocol", "http");
                 prop.putASIS("process_path", "");  // currently empty; the store process will find a path
                 prop.putASIS("process_maxsize", "-1"); // if response is too big we return the size of the file

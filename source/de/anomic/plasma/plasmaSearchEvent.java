@@ -48,7 +48,6 @@ import java.util.Iterator;
 import java.util.Map;
 import java.util.Set;
 import java.util.TreeMap;
-import java.util.TreeSet;
 
 import de.anomic.index.indexContainer;
 import de.anomic.index.indexRWIEntry;
@@ -79,7 +78,7 @@ public final class plasmaSearchEvent extends Thread implements Runnable {
     private yacySearch[] primarySearchThreads, secondarySearchThreads;
     private long searchtime;
     private int searchcount;
-    private TreeSet preselectedPeerHashes;
+    private TreeMap preselectedPeerHashes;
     
     public plasmaSearchEvent(plasmaSearchQuery query,
                              plasmaSearchRankingProfile ranking,
@@ -90,7 +89,7 @@ public final class plasmaSearchEvent extends Thread implements Runnable {
                              plasmaWordIndex wordIndex,
                              plasmaCrawlLURL urlStore,
                              plasmaSnippetCache snippetCache,
-                             TreeSet preselectedPeerHashes) {
+                             TreeMap preselectedPeerHashes) {
         this.log = log;
         this.wordIndex = wordIndex;
         this.query = query;

@@ -50,7 +50,6 @@ import java.util.Iterator;
 import java.util.Map;
 import java.util.Set;
 import java.util.TreeMap;
-import java.util.TreeSet;
 
 import de.anomic.index.indexContainer;
 import de.anomic.kelondro.kelondroBitfield;
@@ -147,13 +146,18 @@ public class yacySearch extends Thread {
         return targetPeer;
     }
 
-    private static yacySeed[] selectClusterPeers(TreeSet peerhashes) {
-    	Iterator i = peerhashes.iterator();
+    private static yacySeed[] selectClusterPeers(TreeMap peerhashes) {
+    	Iterator i = peerhashes.entrySet().iterator();
     	ArrayList l = new ArrayList();
+    	Map.Entry entry;
     	yacySeed s;
     	while (i.hasNext()) {
-    		s = yacyCore.seedDB.get((String) i.next()); // should be getConnected; get only during testing time
-    		if (s != null) l.add(s);
+    		entry = (Map.Entry) i.next();
+    		s = yacyCore.seedDB.get((String) entry.getKey()); // should be getConnected; get only during testing time
+    		if (s != null) {
+    			s.setAlternativeAddress((String) entry.getValue());
+    			l.add(s);
+    		}
     	}
     	yacySeed[] result = new yacySeed[l.size()];
     	for (int j = 0; j < l.size(); j++) {
@@ -243,9 +247,9 @@ public class yacySearch extends Thread {
                            indexContainer containerCache, Map abstractCache,
                            int targets, plasmaURLPattern blacklist, plasmaSnippetCache snippetCache,
                            plasmaSearchTimingProfile timingProfile, plasmaSearchRankingProfile rankingProfile,
-                           kelondroBitfield constraint, TreeSet clusterselection) {
+                           kelondroBitfield constraint, TreeMap clusterselection) {
         // check own peer status
-        if (yacyCore.seedDB.mySeed == null || yacyCore.seedDB.mySeed.getAddress() == null) { return null; }
+        if (yacyCore.seedDB.mySeed == null || yacyCore.seedDB.mySeed.getPublicAddress() == null) { return null; }
 
         // prepare seed targets and threads
         final yacySeed[] targetPeers = (clusterselection == null) ? selectDHTPeers(plasmaSearchQuery.hashes2Set(wordhashes), targets) : selectClusterPeers(clusterselection);
@@ -269,7 +273,7 @@ public class yacySearch extends Thread {
             plasmaSearchTimingProfile timingProfile, plasmaSearchRankingProfile rankingProfile,
             kelondroBitfield constraint) {
         // check own peer status
-        if (yacyCore.seedDB.mySeed == null || yacyCore.seedDB.mySeed.getAddress() == null) { return null; }
+        if (yacyCore.seedDB.mySeed == null || yacyCore.seedDB.mySeed.getPublicAddress() == null) { return null; }
 
         // prepare seed targets and threads
         final yacySeed targetPeer = yacyCore.seedDB.getConnected(targethash);

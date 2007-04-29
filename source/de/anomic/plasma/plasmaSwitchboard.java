@@ -118,6 +118,7 @@ import java.util.Hashtable;
 import java.util.Iterator;
 import java.util.Map;
 import java.util.Set;
+import java.util.TreeMap;
 import java.util.TreeSet;
 
 import de.anomic.data.blogBoard;
@@ -251,7 +252,7 @@ public final class plasmaSwitchboard extends serverAbstractSwitch implements ser
     public  double                      lastrequestedQueries = 0d;
     public  int                         totalPPM = 0;
     public  double                      totalQPM = 0d;
-    public  TreeSet                     clusterhashes;
+    public  TreeMap                     clusterhashes; // map of peerhash(String)/alternative-local-address as ip:port or only ip (String) or null if address in seed should be used
     
     /*
      * Remote Proxy configuration
@@ -864,6 +865,7 @@ public final class plasmaSwitchboard extends serverAbstractSwitch implements ser
 
     public plasmaSwitchboard(String rootPath, String initPath, String configPath) {
         super(rootPath, initPath, configPath);
+        sb=this;
         
         // set loglevel and log
         setLog(new serverLog("PLASMA"));
@@ -1276,7 +1278,6 @@ public final class plasmaSwitchboard extends serverAbstractSwitch implements ser
         // init robinson cluster
         this.clusterhashes = yacyCore.seedDB.clusterHashes(getConfig("cluster.peers.yacydomain", ""));
         
-        sb=this;
         log.logConfig("Finished Switchboard Initialization");
     }
 
@@ -1355,7 +1356,7 @@ public final class plasmaSwitchboard extends serverAbstractSwitch implements ser
             return network.indexOf(peer) >= 0;
     	} else if (clustermode.equals("publiccluster")) {
     		// check if we got the request from a peer in the public cluster
-            return this.clusterhashes.contains(peer);
+            return this.clusterhashes.containsKey(peer);
     	} else {
     		return false;
     	}
@@ -1370,10 +1371,10 @@ public final class plasmaSwitchboard extends serverAbstractSwitch implements ser
     	if (clustermode.equals("privatecluster")) {
     		// check if we got the request from a peer in the private cluster
     		String network = getConfig("cluster.peers.ipport", "");
-            return network.indexOf(seed.getAddress()) >= 0;
+            return network.indexOf(seed.getPublicAddress()) >= 0;
     	} else if (clustermode.equals("publiccluster")) {
     	    // check if we got the request from a peer in the public cluster
-            return this.clusterhashes.contains(seed.hash);
+            return this.clusterhashes.containsKey(seed.hash);
     	} else {
     		return false;
     	}
@@ -2830,7 +2831,7 @@ public final class plasmaSwitchboard extends serverAbstractSwitch implements ser
                         hash = yacySeed.hexHash2b64Hash(host.substring(p + 1, host.length() - 6));
                         seed = yacyCore.seedDB.getConnected(hash);
                         filename = comp.url().getFile();
-                        if ((seed == null) || ((address = seed.getAddress()) == null)) {
+                        if ((seed == null) || ((address = seed.getPublicAddress()) == null)) {
                             // seed is not known from here
                             wordIndex.removeWordReferences(plasmaCondenser.getWords(("yacyshare " + filename.replace('?', ' ') + " " + comp.title()).getBytes(), "UTF-8").keySet(), urlentry.hash());
                             wordIndex.loadedURL.remove(urlentry.hash()); // clean up

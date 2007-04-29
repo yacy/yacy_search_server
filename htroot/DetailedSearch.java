@@ -230,7 +230,7 @@ public class DetailedSearch {
         final long searchtime = 1000 * Long.parseLong(post.get("localTime", "10"));
         final boolean yacyonline = ((yacyCore.seedDB != null) &&
                                     (yacyCore.seedDB.mySeed != null) &&
-                                    (yacyCore.seedDB.mySeed.getAddress() != null));
+                                    (yacyCore.seedDB.mySeed.getPublicAddress() != null));
 
         String urlmask = "";
         if (post.containsKey("urlmask") && post.get("urlmask").equals("no")) {

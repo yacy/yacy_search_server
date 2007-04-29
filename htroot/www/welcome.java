@@ -68,7 +68,7 @@ public class welcome {
 
         prop.put("peername", env.getConfig("peerName", "<nameless>"));
         prop.put("peerdomain", env.getConfig("peerName", "<nameless>").toLowerCase());
-        prop.put("peeraddress", yacyCore.seedDB.mySeed.getAddress());
+        prop.put("peeraddress", yacyCore.seedDB.mySeed.getPublicAddress());
         prop.put("hostname", serverCore.publicIP());
         try{
             prop.put("hostip", InetAddress.getByName(serverCore.publicIP()).getHostAddress());

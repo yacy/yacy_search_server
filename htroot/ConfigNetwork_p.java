@@ -177,7 +177,8 @@ public class ConfigNetwork_p {
 		String[] s = input.split(",");
 		input = "";
 		for (int i = 0; i < s.length; i++) {
-			if ((s[i].endsWith(".yacyh")) || (s[i].endsWith(".yacy"))) input += "," + s[i];
+			if ((s[i].endsWith(".yacyh")) || (s[i].endsWith(".yacy")) ||
+			    (s[i].indexOf(".yacyh=") > 0) || (s[i].indexOf(".yacy=") > 0)) input += "," + s[i];
 		}
 		if (input.length() == 0) return input; else return input.substring(1);
 	}

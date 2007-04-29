@@ -273,7 +273,7 @@ public class Surftips {
                 yacySeed seed = yacyCore.seedDB.getConnected(record.originator());
                 if (seed == null) seed = yacyCore.seedDB.getDisconnected(record.originator());
                 if (seed != null) {
-                    url = "http://" + seed.getAddress() + "/Wiki.html?page=" + record.attribute("page", "");
+                    url = "http://" + seed.getPublicAddress() + "/Wiki.html?page=" + record.attribute("page", "");
                     entry = rowdef.newEntry(new byte[][]{
                                 url.getBytes(),
                                 (record.attribute("author", "Anonymous") + ": " + record.attribute("page", "")).getBytes("UTF-8"),
@@ -288,7 +288,7 @@ public class Surftips {
                 yacySeed seed = yacyCore.seedDB.getConnected(record.originator());
                 if (seed == null) seed = yacyCore.seedDB.getDisconnected(record.originator());
                 if (seed != null) {
-                    url = "http://" + seed.getAddress() + "/Blog.html?page=" + record.attribute("page", "");
+                    url = "http://" + seed.getPublicAddress() + "/Blog.html?page=" + record.attribute("page", "");
                     entry = rowdef.newEntry(new byte[][]{
                                 url.getBytes(),
                                 (record.attribute("author", "Anonymous") + ": " + record.attribute("page", "")).getBytes("UTF-8"),

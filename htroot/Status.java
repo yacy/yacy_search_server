@@ -224,13 +224,13 @@ public class Status {
             prop.put("peerStatistics_principalConnects", yacyCore.peerActions.principalConnects);
             prop.put("peerStatistics_disconnects", yacyCore.peerActions.disconnects);
             prop.put("peerStatistics_connects", yacyCore.seedDB.mySeed.get(yacySeed.CCOUNT, "0"));
-            if (yacyCore.seedDB.mySeed.getAddress() == null) {
+            if (yacyCore.seedDB.mySeed.getPublicAddress() == null) {
                 thisHash = yacyCore.seedDB.mySeed.hash;
                 prop.put("peerAddress", 1); // not assigned + instructions
             } else {
                 thisHash = yacyCore.seedDB.mySeed.hash;
                 prop.put("peerAddress", 2); // Address
-                prop.put("peerAddress_address", yacyCore.seedDB.mySeed.getAddress());
+                prop.put("peerAddress_address", yacyCore.seedDB.mySeed.getPublicAddress());
                 prop.put("peerAddress_peername", env.getConfig("peerName", "<nameless>").toLowerCase());
             }
         }

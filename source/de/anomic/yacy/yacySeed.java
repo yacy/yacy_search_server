@@ -174,6 +174,7 @@ public class yacySeed {
     private final Map dna;
     public int available;
     public int selectscore = -1; // only for debugging
+    public String alternativeIP = null;
 
     public yacySeed(String theHash, Map theDna) {
         // create a seed with a pre-defined hash map
@@ -244,6 +245,16 @@ public class yacySeed {
 
     public static boolean isDefaultPeerName(String name) {
         return name != null && name.length() > 10 && name.charAt(0) <= '9' && name.charAt(name.length() - 1) <= '9' && name.indexOf("dpn") > 0;
+    }
+    
+    /**
+     * used when doing routing within a cluster; this can assign a ip and a port
+     * that is used instead the address stored in the seed DNA
+     */
+    public void setAlternativeAddress(String ipport) {
+    	if (ipport == null) return;
+    	int p = ipport.indexOf(':');
+    	if (p < 0) this.alternativeIP = ipport; else this.alternativeIP = ipport.substring(0, p);
     }
 
     /**
@@ -376,7 +387,7 @@ public class yacySeed {
         }
     }
 
-    public final String getAddress() {
+    public final String getPublicAddress() {
         // returns an ip:port string
         String ip = (String) this.dna.get(yacySeed.IP);
         if (ip == null) { return null; }
@@ -389,6 +400,22 @@ public class yacySeed {
         if (port.length() < 2) { return null; }
 
         return ip + ":" + port;
+    }
+    
+    public final String getClusterAddress() {
+        // if this seed is part of a cluster, the peer has probably the
+    	// alternativeIP object set to a local ip
+    	// if this is present and the public ip of this peer is identical to the public ip of the own seed,
+    	// construct an address using this ip; othervise return the public address
+    	if ((this.alternativeIP == null) ||
+    	    (yacyCore.seedDB == null) ||
+    		(!(this.getIP().equals(yacyCore.seedDB.mySeed.getIP())))) return getPublicAddress();
+    			
+        final String port = (String) this.dna.get(yacySeed.PORT);
+        if (port == null) { return null; }
+        if (port.length() < 2) { return null; }
+
+        return this.alternativeIP + ":" + port;
     }
 
     public final InetAddress getInetAddress() {

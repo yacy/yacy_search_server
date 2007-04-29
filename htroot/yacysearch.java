@@ -258,7 +258,7 @@ public class yacysearch {
         }
 
         // prepare search properties
-        final boolean yacyonline = ((yacyCore.seedDB != null) && (yacyCore.seedDB.mySeed != null) && (yacyCore.seedDB.mySeed.getAddress() != null));
+        final boolean yacyonline = ((yacyCore.seedDB != null) && (yacyCore.seedDB.mySeed != null) && (yacyCore.seedDB.mySeed.getPublicAddress() != null));
         final boolean samesearch = env.getConfig("last-search", "").equals(querystring + contentdomString);
         final boolean globalsearch = (global) && (yacyonline) && (!samesearch);
         

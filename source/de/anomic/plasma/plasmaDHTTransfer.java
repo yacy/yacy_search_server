@@ -236,7 +236,7 @@ public class plasmaDHTTransfer extends Thread {
                         return;
 
                     // doing a peer ping to the remote seed
-                    int added = yacyClient.publishMySeed(this.seed.getAddress(), this.seed.hash);
+                    int added = yacyClient.publishMySeed(this.seed.getPublicAddress(), this.seed.hash);
                     if (added < 0) {
                         // inc. retry counter
                         retryCount++;

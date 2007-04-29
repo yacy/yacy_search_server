@@ -68,7 +68,7 @@ public class wikiParser {
         tokens = new Token[] {
                 new SimpleToken('=', '=', new String[][] { null, { "h2" }, { "h3" }, { "h4" } }, true),
                 new SimpleToken('\'', '\'', new String[][] { null, { "i" }, { "b" }, null, { "b", "i" } }, false),
-                new LinkToken(yacyCore.seedDB.mySeed.getAddress(), "Wiki.html?page=", sb),
+                new LinkToken(yacyCore.seedDB.mySeed.getPublicAddress(), "Wiki.html?page=", sb),
                 new ListToken('*', "ul"),
                 new ListToken('#', "ol"),
                 new ListToken(':', "blockquote", null),

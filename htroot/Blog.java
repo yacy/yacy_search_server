@@ -84,7 +84,7 @@ public class Blog {
 		
 		boolean hasRights = switchboard.verifyAuthentication(header, true);
         final boolean xml = ((String)header.get(httpHeader.CONNECTION_PROP_PATH)).endsWith(".xml");
-        final String address = yacyCore.seedDB.mySeed.getAddress();
+        final String address = yacyCore.seedDB.mySeed.getPublicAddress();
 
         if(hasRights) {
             prop.put("mode_admin",1);

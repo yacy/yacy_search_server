@@ -202,19 +202,19 @@ public class Network {
                 yacySeed peer = new yacySeed((String) post.get("peerHash"),map);
 
                 yacyCore.peerActions.updateMySeed();
-                final int added = yacyClient.publishMySeed(peer.getAddress(), peer.hash);
+                final int added = yacyClient.publishMySeed(peer.getPublicAddress(), peer.hash);
 
                 if (added <= 0) {
                     prop.put("table_comment",1);
-                    prop.put("table_comment_status","publish: disconnected peer '" + peer.getName() + "/" + post.get("peerHash") + "' from " + peer.getAddress());
+                    prop.put("table_comment_status","publish: disconnected peer '" + peer.getName() + "/" + post.get("peerHash") + "' from " + peer.getPublicAddress());
                 } else {
                     peer = yacyCore.seedDB.getConnected(peer.hash);
                     if (peer == null) {
                         prop.put("table_comment",1);
-                        prop.put("table_comment_status","publish: disconnected peer '" + peer.getName() + "/" + post.get("peerHash") + "' from " + peer.getAddress());                     
+                        prop.put("table_comment_status","publish: disconnected peer '" + peer.getName() + "/" + post.get("peerHash") + "' from " + peer.getPublicAddress());                     
                     } else {
                         prop.put("table_comment",2);
-                        prop.put("table_comment_status","publish: handshaked " + peer.get(yacySeed.PEERTYPE, yacySeed.PEERTYPE_SENIOR) + " peer '" + peer.getName() + "' at " + peer.getAddress());
+                        prop.put("table_comment_status","publish: handshaked " + peer.get(yacySeed.PEERTYPE, yacySeed.PEERTYPE_SENIOR) + " peer '" + peer.getName() + "' at " + peer.getPublicAddress());
                         prop.put("table_comment_details",peer.toString());
                     }
                 }
@@ -352,7 +352,7 @@ public class Network {
                             } else {
                                 prop.put(STR_TABLE_LIST + conCount + "_updatedWiki", 1);
                                 prop.put(STR_TABLE_LIST + conCount + "_updatedWiki_page", (String) wikiMap.get("page"));
-                                prop.put(STR_TABLE_LIST + conCount + "_updatedWiki_address", seed.getAddress());
+                                prop.put(STR_TABLE_LIST + conCount + "_updatedWiki_address", seed.getPublicAddress());
                             }
                             if ((blogMap = (Map) updatedBlog.get(seed.hash)) == null) {
                                 prop.put(STR_TABLE_LIST + conCount + "_updatedBlog", 0);
@@ -360,7 +360,7 @@ public class Network {
                                 prop.put(STR_TABLE_LIST + conCount + "_updatedBlog", 1);
                                 prop.put(STR_TABLE_LIST + conCount + "_updatedBlog_page", (String) blogMap.get("page"));
                                 prop.put(STR_TABLE_LIST + conCount + "_updatedBlog_subject", (String) blogMap.get("subject"));
-                                prop.put(STR_TABLE_LIST + conCount + "_updatedBlog_address", seed.getAddress());
+                                prop.put(STR_TABLE_LIST + conCount + "_updatedBlog_address", seed.getPublicAddress());
                             }
                             PPM = seed.getPPM();
                             QPM = seed.getQPM();
