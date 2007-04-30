@@ -74,7 +74,7 @@ public final class transferRWI {
 
         // request values
         final String iam      = post.get("iam", "");                      // seed hash of requester
-//      final String youare   = (String) post.get("youare", "");          // seed hash of the target peer, needed for network stability
+        final String youare   = (String) post.get("youare", "");          // seed hash of the target peer, needed for network stability
 //      final String key      = (String) post.get("key", "");             // transmission key
         final int wordc       = Integer.parseInt(post.get("wordc", ""));  // number of different words
         final int entryc      = Integer.parseInt(post.get("entryc", "")); // number of entries in indexes
@@ -89,23 +89,13 @@ public final class transferRWI {
         // response values
         String       result      = "ok";
         StringBuffer unknownURLs = new StringBuffer();
-        int          pause       = 0;
+        int          pause       = 10000;
         
-        /*
-        boolean shortCacheFlush = false;
-        if ((granted) && (sb.wordIndex.busyCacheFlush)) {
-            // wait a little bit, maybe we got into a short flush slot
-            for (int i = 0; i < 20; i++) {
-                if (!(sb.wordIndex.busyCacheFlush)) {
-                    shortCacheFlush = true;
-                    break;
-                }
-                try {Thread.sleep(100);} catch (InterruptedException e) {}
-            }
-        }
-        */
-        
-        if ((!granted) || (sb.isRobinsonMode())) {
+        if ((youare == null) || (!youare.equals(yacyCore.seedDB.mySeed.hash))) {
+        	sb.getLog().logInfo("Rejecting RWIs from peer " + otherPeerName + ". Wrong target. Wanted peer=" + youare + ", iam=" + yacyCore.seedDB.mySeed.hash);
+            result = "wrong_target";
+            pause = 0;
+        } else if ((!granted) || (sb.isRobinsonMode())) {
             // we dont want to receive indexes
             sb.getLog().logInfo("Rejecting RWIs from peer " + otherPeerName + ". Not granted.");
             result = "not_granted";

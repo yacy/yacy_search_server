@@ -76,7 +76,7 @@ public final class transferURL {
 
         // request values
         final String iam      = post.get("iam", "");      // seed hash of requester
-//      final String youare   = post.get("youare", "");   // seed hash of the target peer, needed for network stability
+        final String youare   = post.get("youare", "");   // seed hash of the target peer, needed for network stability
 //      final String key      = post.get("key", "");      // transmission key
         final int urlc        = post.getInt("urlc", 0);    // number of transported urls
         final boolean granted = sb.getConfig("allowReceiveIndex", "false").equals("true");
@@ -89,7 +89,10 @@ public final class transferURL {
         final yacySeed otherPeer = yacyCore.seedDB.get(iam);
         final String otherPeerName = iam + ":" + ((otherPeer == null) ? "NULL" : (otherPeer.getName() + "/" + otherPeer.getVersion()));
 
-        if ((!granted) || (sb.isRobinsonMode())) {
+        if ((youare == null) || (!youare.equals(yacyCore.seedDB.mySeed.hash))) {
+        	sb.getLog().logInfo("Rejecting URLs from peer " + otherPeerName + ". Wrong target. Wanted peer=" + youare + ", iam=" + yacyCore.seedDB.mySeed.hash);
+            result = "wrong_target";
+        } else if ((!granted) || (sb.isRobinsonMode())) {
         	sb.getLog().logInfo("Rejecting URLs from peer " + otherPeerName + ". Not granted.");
             result = "error_not_granted";
         } else {

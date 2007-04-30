@@ -65,13 +65,16 @@ public final class query {
         if (prop == null || sb == null) { return null; }
 
         if ((sb.isRobinsonMode()) &&
-              	 (!((sb.isPublicRobinson()) ||
-              	    (sb.isInMyCluster((String)header.get(httpHeader.CONNECTION_PROP_CLIENTIP)))))) {
-                  // if we are a robinson cluster, answer only if this client is known by our network definition
+            (!sb.isPublicRobinson()) &&
+            (!sb.isInMyCluster((String)header.get(httpHeader.CONNECTION_PROP_CLIENTIP)))) {
+        	// if we are a robinson cluster, answer only if we are public robinson peers,
+        	// or we are a private cluster and the requester is in our cluster.
+          	// if we don't answer, the remote peer will recognize us as junior peer,
+          	// what would mean that our peer ping does not work
         	prop.putASIS("response", "-1"); // request rejected
             return prop;
         }
-        
+                  
 //      System.out.println("YACYQUERY: RECEIVED POST = " + ((post == null) ? "NULL" : post.toString()));
 
 //      final String iam    = post.get("iam", "");    // complete seed of the requesting peer
