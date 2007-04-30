@@ -174,6 +174,8 @@ public class kelondroColumn {
             this.encoder = encoder_bytes;
         }
         
+        assert (this.celltype != celltype_cardinal) || (this.encoder == encoder_b64e) || (this.encoder == encoder_b256);
+        
         // parse/check description
         if ((celldef.length() > 0) && (celldef.charAt(0) == '"')) {
             p = celldef.indexOf('"', 1);

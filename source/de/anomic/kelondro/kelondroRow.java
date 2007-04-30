@@ -261,6 +261,7 @@ public class kelondroRow {
                             try {
                                 setCol(nick, Long.parseLong(elts[i].substring(p + 1).trim()));
                             } catch (NumberFormatException e) {
+                            	serverLog.logSevere("kelondroRow", "NumberFormatException for celltype_cardinal; row = " + i + ", celltype = " + row[i].celltype() + ", encoder = " + row[i].encoder() + ", value = '" + elts[i].substring(p + 1).trim() + "'");
                                 setCol(nick, 0);
                             }
                         } else if ((decimalCardinal) && (row[i].celltype() == kelondroColumn.celltype_binary)) {
@@ -268,6 +269,7 @@ public class kelondroRow {
                             try {
                                 setCol(nick, new byte[]{(byte) Integer.parseInt(elts[i].substring(p + 1).trim())});
                             } catch (NumberFormatException e) {
+                            	serverLog.logSevere("kelondroRow", "NumberFormatException for celltype_binary; row = " + i + ", celltype = " + row[i].celltype() + ", encoder = " + row[i].encoder() + ", value = '" + elts[i].substring(p + 1).trim() + "'");
                                 setCol(nick, new byte[]{0});
                             }
                         } else if ((decimalCardinal) && (row[i].celltype() == kelondroColumn.celltype_bitfield)) {
