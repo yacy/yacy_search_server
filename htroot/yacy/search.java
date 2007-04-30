@@ -117,7 +117,7 @@ public final class search {
         serverObjects prop = new serverObjects();
         
         if ((sb.isRobinsonMode()) &&
-             	 (!((sb.isOpenRobinsonCluster()) ||
+             	 (!((sb.isPublicRobinson()) ||
              	    (sb.isInMyCluster((String)header.get(httpHeader.CONNECTION_PROP_CLIENTIP)))))) {
                  // if we are a robinson cluster, answer only if this client is known by our network definition
         	prop.putASIS("links", "");

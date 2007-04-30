@@ -397,6 +397,7 @@ public class plasmaCrawlBalancer {
         
         // finally: check minimumDelta and if necessary force a sleep
         long delta = lastAccessDelta(result);
+        assert delta >= 0: "delta = " + delta;
         if (delta < minimumDelta) {
             // force a busy waiting here
             // in best case, this should never happen if the balancer works propertly

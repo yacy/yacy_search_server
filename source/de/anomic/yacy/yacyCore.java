@@ -349,10 +349,10 @@ public class yacyCore {
                                       seedDB.sizeConnected() + " different peers");
     }
 
-    private boolean canReachMyself() {
+    private boolean canReachMyself() { // TODO: check if this method is necessary - depending on the used router it will not work
         // returns true if we can reach ourself under our known peer address
         // if we cannot reach ourself, we call a forced publishMySeed and return false
-        final int urlc = yacyClient.queryUrlCount(seedDB.mySeed);
+    	final int urlc = yacyClient.queryUrlCount(seedDB.mySeed);
         if (urlc >= 0) {
             seedDB.mySeed.setLastSeenUTC();
             return true;

@@ -47,11 +47,10 @@ import java.util.ArrayList;
 import java.util.Enumeration;
 import java.util.Hashtable;
 import java.util.TreeMap;
-import java.util.TreeSet;
 
 import de.anomic.kelondro.kelondroBase64Order;
 import de.anomic.kelondro.kelondroCloneableIterator;
-import de.anomic.kelondro.kelondroCloneableSetIterator;
+import de.anomic.kelondro.kelondroCloneableMapIterator;
 import de.anomic.kelondro.kelondroException;
 import de.anomic.kelondro.kelondroMScoreCluster;
 import de.anomic.kelondro.kelondroRotateIterator;
@@ -219,9 +218,10 @@ public class yacyDHTAction implements yacyPeerAction {
     }
     
     public synchronized yacySeed getPublicClusterCrawlSeed(String urlHash, TreeMap clusterhashes) {
-        kelondroCloneableIterator i = new kelondroRotateIterator(new kelondroCloneableSetIterator((TreeSet) (clusterhashes.keySet()), urlHash), null);
-        if (i.hasNext()) {
+        kelondroCloneableIterator i = new kelondroRotateIterator(new kelondroCloneableMapIterator(clusterhashes, urlHash), null);
+        while (i.hasNext()) {
         	yacySeed seed = seedDB.getConnected((String) i.next());
+        	if (seed == null) continue;
         	seed.setAlternativeAddress((String) clusterhashes.get(seed.hash));
         	return seed;
         }

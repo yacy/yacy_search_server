@@ -1336,7 +1336,7 @@ public final class plasmaSwitchboard extends serverAbstractSwitch implements ser
     	return !getConfigBool(plasmaSwitchboard.INDEX_DIST_ALLOW, false) && !getConfigBool(plasmaSwitchboard.INDEX_RECEIVE_ALLOW, false);
     }
 
-    public boolean isOpenRobinsonCluster() {
+    public boolean isPublicRobinson() {
     	// robinson peers may be member of robinson clusters, which can be public or private
     	// this does not check the robinson attribute, only the specific subtype of the cluster
     	String clustermode = getConfig("cluster.mode", "publicpeer");
@@ -1999,24 +1999,20 @@ public final class plasmaSwitchboard extends serverAbstractSwitch implements ser
             //log.logDebug("LimitCrawl: queue is empty");
             return false;
         }
+        boolean robinsonPrivateCase = ((isRobinsonMode()) && 
+            	(!getConfig("cluster.mode", "").equals("publiccluster")) &&
+            	(!getConfig("cluster.mode", "").equals("privatecluster")));
         
-        if ((isRobinsonMode()) &&
-        	(!getConfig("cluster.mode", "").equals("publicpeer")) &&
-        	(!getConfig("cluster.mode", "").equals("privatepeer"))) { 
-        	// not-clustered robinson peers do not do remote crawling
-        	return false;
-        }
-        
-        if ((coreCrawlJobSize() <= 20) && (limitCrawlTriggerJobSize() > 100)) {
+        if ((robinsonPrivateCase) || ((coreCrawlJobSize() <= 20) && (limitCrawlTriggerJobSize() > 10))) {
             // it is not efficient if the core crawl job is empty and we have too much to do
             // move some tasks to the core crawl job
-            int toshift = limitCrawlTriggerJobSize() / 5;
-            if (toshift > 1000) toshift = 1000;
+            int toshift = 10; // this cannot be a big number because the balancer makes a forced waiting if it cannot balance
             if (toshift > limitCrawlTriggerJobSize()) toshift = limitCrawlTriggerJobSize();
             for (int i = 0; i < toshift; i++) {
                 noticeURL.shift(plasmaCrawlNURL.STACK_TYPE_LIMIT, plasmaCrawlNURL.STACK_TYPE_CORE);
             }
-            log.logInfo("shifted " + toshift + " jobs from global crawl to local crawl");
+            log.logInfo("shifted " + toshift + " jobs from global crawl to local crawl (coreCrawlJobSize()=" + coreCrawlJobSize() + ", limitCrawlTriggerJobSize()=" + limitCrawlTriggerJobSize() + ", cluster.mode=" + getConfig("cluster.mode", "") + ", robinsonMode=" + ((isRobinsonMode()) ? "on" : "off"));
+            if (robinsonPrivateCase) return false;
         }
         
         // if the server is busy, we do crawling more slowly
@@ -2484,6 +2480,7 @@ public final class plasmaSwitchboard extends serverAbstractSwitch implements ser
                         // if this was performed for a remote crawl request, notify requester
                         if ((processCase == PROCESSCASE_6_GLOBAL_CRAWLING) && (initiatorPeer != null)) {
                             log.logInfo("Sending crawl receipt for '" + entry.normalizedURLString() + "' to " + initiatorPeer.getName());
+                            initiatorPeer.setAlternativeAddress((String) clusterhashes.get(initiatorPeer.hash));
                             yacyClient.crawlReceipt(initiatorPeer, "crawl", "fill", "indexed", newEntry, "");
                         }
                     } else {
@@ -2498,6 +2495,7 @@ public final class plasmaSwitchboard extends serverAbstractSwitch implements ser
                     
                     log.logSevere("Could not index URL " + entry.url() + ": " + ee.getMessage(), ee);
                     if ((processCase == PROCESSCASE_6_GLOBAL_CRAWLING) && (initiatorPeer != null)) {
+                    	initiatorPeer.setAlternativeAddress((String) clusterhashes.get(initiatorPeer.hash));
                         yacyClient.crawlReceipt(initiatorPeer, "crawl", "exception", ee.getMessage(), null, "");
                     }
                     addURLtoErrorDB(entry.url(), referrerUrlHash, initiatorPeerHash, docDescription, plasmaCrawlEURL.DENIED_UNSPECIFIED_INDEXING_ERROR, new kelondroBitfield());
@@ -2510,6 +2508,7 @@ public final class plasmaSwitchboard extends serverAbstractSwitch implements ser
                 log.logInfo("Not indexed any word in URL " + entry.url() + "; cause: " + noIndexReason);
                 addURLtoErrorDB(entry.url(), referrerUrlHash, initiatorPeerHash, docDescription, noIndexReason, new kelondroBitfield());
                 if ((processCase == PROCESSCASE_6_GLOBAL_CRAWLING) && (initiatorPeer != null)) {
+                	initiatorPeer.setAlternativeAddress((String) clusterhashes.get(initiatorPeer.hash));
                     yacyClient.crawlReceipt(initiatorPeer, "crawl", "rejected", noIndexReason, null, "");
                 }
             }
@@ -2670,7 +2669,7 @@ public final class plasmaSwitchboard extends serverAbstractSwitch implements ser
         }
         
         // check if peer for remote crawl is available
-        yacySeed remoteSeed = ((this.isOpenRobinsonCluster()) && (getConfig("cluster.mode", "").equals("publiccluster"))) ?
+        yacySeed remoteSeed = ((this.isPublicRobinson()) && (getConfig("cluster.mode", "").equals("publiccluster"))) ?
         	yacyCore.dhtAgent.getPublicClusterCrawlSeed(urlEntry.urlhash(), this.clusterhashes) :	
         	yacyCore.dhtAgent.getGlobalCrawlSeed(urlEntry.urlhash());
         if (remoteSeed == null) {
@@ -2694,6 +2693,7 @@ public final class plasmaSwitchboard extends serverAbstractSwitch implements ser
             return false; // no response from peer, we will crawl this ourself
         }
         
+        String response = (String) page.get("response");
         log.logFine("plasmaSwitchboard.processRemoteCrawlTrigger: remoteSeed="
                 + remoteSeed.getName() + ", url=" + urlEntry.url().toString()
                 + ", response=" + page.toString()); // DEBUG
@@ -2701,7 +2701,6 @@ public final class plasmaSwitchboard extends serverAbstractSwitch implements ser
         // we received an answer and we are told to wait a specific time until we shall ask again for another crawl
         int newdelay = Integer.parseInt((String) page.get("delay"));
         yacyCore.dhtAgent.setCrawlDelay(remoteSeed.hash, newdelay);
-        String response = (String) page.get("response");
         if (response.equals("stacked")) {
             // success, the remote peer accepted the crawl
             log.logInfo(STR_REMOTECRAWLTRIGGER + remoteSeed.getName()

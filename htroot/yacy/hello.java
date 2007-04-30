@@ -95,12 +95,14 @@ public final class hello {
         final String reportedPeerType = remoteSeed.get(yacySeed.PEERTYPE, yacySeed.PEERTYPE_JUNIOR);
         final float clientversion = remoteSeed.getVersion();
 
-        if ((sb.isRobinsonMode()) && (!sb.isOpenRobinsonCluster())) {
+        if ((sb.isRobinsonMode()) && (!sb.isPublicRobinson())) {
         	// if we are a robinson cluster, answer only if this client is known by our network definition
         	return prop;
         }
         
         int urls = -1;
+        remoteSeed.setAlternativeAddress((String) sb.clusterhashes.get(remoteSeed.hash));
+        
         // if the remote client has reported its own IP address and the client supports
         // the port forwarding feature (if client version >= 0.383) then we try to 
         // connect to the reported IP address first

@@ -299,7 +299,7 @@ public final class plasmaSearchEvent extends Thread implements Runnable {
                 System.out.println("DEBUG-INDEXABSTRACT ***: peer " + peer + " from words: " + words);
                 secondarySearchThreads[c++] = yacySearch.secondaryRemoteSearch(
                         words, "", urls, urlStore, wordIndex, rcContainers, peer, plasmaSwitchboard.urlBlacklist, snippetCache,
-                        profileGlobal, ranking, query.constraint);
+                        profileGlobal, ranking, query.constraint, preselectedPeerHashes);
 
             }
         }

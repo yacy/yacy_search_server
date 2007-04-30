@@ -69,8 +69,8 @@ public final class profile {
         if (prop == null) { return null; }
 
         if ((sb.isRobinsonMode()) &&
-           	 (!((sb.isOpenRobinsonCluster()) ||
-           	    (sb.isInMyCluster((String)header.get(httpHeader.CONNECTION_PROP_CLIENTIP)))))) {
+           	(!sb.isPublicRobinson()) &&
+           	(!sb.isInMyCluster((String)header.get(httpHeader.CONNECTION_PROP_CLIENTIP)))) {
                // if we are a robinson cluster, answer only if this client is known by our network definition
         	prop.put("list", 0);
             return prop;

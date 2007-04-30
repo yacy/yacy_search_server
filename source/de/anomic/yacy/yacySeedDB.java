@@ -59,19 +59,15 @@ import java.util.Hashtable;
 import java.util.Iterator;
 import java.util.Map;
 import java.util.TreeMap;
-import java.util.TreeSet;
 
 import de.anomic.http.httpHeader;
 import de.anomic.http.httpc;
 import de.anomic.http.httpd;
-import de.anomic.kelondro.kelondroCloneableIterator;
-import de.anomic.kelondro.kelondroCloneableSetIterator;
 import de.anomic.kelondro.kelondroDyn;
 import de.anomic.kelondro.kelondroException;
 import de.anomic.kelondro.kelondroMScoreCluster;
 import de.anomic.kelondro.kelondroMapObjects;
 import de.anomic.kelondro.kelondroBase64Order;
-import de.anomic.kelondro.kelondroRotateIterator;
 import de.anomic.net.URL;
 import de.anomic.plasma.plasmaSwitchboard;
 import de.anomic.server.serverCore;
@@ -294,21 +290,6 @@ public final class yacySeedDB {
     		}
     	}
     	return clustermap;
-    }
-    
-    public Iterator /*of yacySeed*/ seedsInCluster(String firstHash, TreeSet clusterhashes) {
-    	// returns an seed iterator for all peer hashes in the given set
-    	// the iterator starts at the firstHash
-        kelondroCloneableIterator i = new kelondroRotateIterator(new kelondroCloneableSetIterator(clusterhashes, firstHash), null);
-        ArrayList l = new ArrayList();
-        Object o;
-        while (i.hasNext()) {
-        	o = i.next();
-        	if (o instanceof String) l.add(get((String) o));
-        	if (o instanceof byte[]) l.add(get(new String((byte[]) o)));
-        	if (l.size() >= clusterhashes.size()) break;
-        }
-        return l.iterator();
     }
     
     public Enumeration seedsConnected(boolean up, boolean rot, String firstHash, float minVersion) {

@@ -1,4 +1,4 @@
-// kelondroCloneableSetIterator.java
+// kelondroCloneableMapIterator.java
 // (C) 2007 by Michael Peter Christen; mc@yacy.net, Frankfurt a. M., Germany
 // first published 25.04.2007 on http://yacy.net
 //
@@ -28,33 +28,33 @@
 package de.anomic.kelondro;
 
 import java.util.Iterator;
-import java.util.TreeSet;
+import java.util.TreeMap;
 
-public class kelondroCloneableSetIterator implements kelondroCloneableIterator {
+public class kelondroCloneableMapIterator implements kelondroCloneableIterator {
 
-	TreeSet set;
+	TreeMap map;
 	Object next, last;
 	Object start;
 	Iterator iter;
 	
 
-	public kelondroCloneableSetIterator(TreeSet set, Object start) {
+	public kelondroCloneableMapIterator(TreeMap map, Object start) {
 		// set must contain byte[] elements or String elements.
 		// start must be either of type byte[] or String
-		this.set = set;
+		this.map = map;
 		this.start = start;
-		this.iter = set.iterator();
+		this.iter = map.keySet().iterator();
 		if (this.start == null) {
 			if (iter.hasNext()) this.next = iter.next(); else this.next = null;
 		} else while (iter.hasNext()) {
 			this.next = iter.next();
-			if (set.comparator().compare(next, start) > 1) break;
+			if (map.comparator().compare(next, start) > 1) break;
 		}
 		this.last = null;
 	}
 	
 	public Object clone(Object modifier) {
-		return new kelondroCloneableSetIterator(set, modifier);
+		return new kelondroCloneableMapIterator(map, modifier);
 	}
 
 	public boolean hasNext() {
@@ -62,6 +62,7 @@ public class kelondroCloneableSetIterator implements kelondroCloneableIterator {
 	}
 
 	public Object next() {
+		// returns key-elements, not entry-elements
 		this.last = this.next;
 		if (this.iter.hasNext()) {
 			this.next = this.iter.next();
@@ -72,7 +73,7 @@ public class kelondroCloneableSetIterator implements kelondroCloneableIterator {
 	}
 
 	public void remove() {
-		this.set.remove(this.last);
+		this.map.remove(this.last);
 	}
 
 }

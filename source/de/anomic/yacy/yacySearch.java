@@ -271,13 +271,14 @@ public class yacySearch extends Thread {
             indexContainer containerCache,
             String targethash, plasmaURLPattern blacklist, plasmaSnippetCache snippetCache,
             plasmaSearchTimingProfile timingProfile, plasmaSearchRankingProfile rankingProfile,
-            kelondroBitfield constraint) {
+            kelondroBitfield constraint, TreeMap clusterselection) {
         // check own peer status
         if (yacyCore.seedDB.mySeed == null || yacyCore.seedDB.mySeed.getPublicAddress() == null) { return null; }
 
         // prepare seed targets and threads
         final yacySeed targetPeer = yacyCore.seedDB.getConnected(targethash);
         if (targetPeer == null) return null;
+        targetPeer.setAlternativeAddress((String) clusterselection.get(targetPeer.hash));
         yacySearch searchThread = new yacySearch(wordhashes, excludehashes, urlhashes, "", "", 9999, true, 0, targetPeer,
                                              urlManager, wordIndex, containerCache, new TreeMap(), blacklist, snippetCache, timingProfile, rankingProfile, constraint);
         searchThread.start();
