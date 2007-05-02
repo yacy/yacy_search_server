@@ -278,7 +278,7 @@ public class yacySearch extends Thread {
         // prepare seed targets and threads
         final yacySeed targetPeer = yacyCore.seedDB.getConnected(targethash);
         if (targetPeer == null) return null;
-        targetPeer.setAlternativeAddress((String) clusterselection.get(targetPeer.hash));
+        if (clusterselection != null) targetPeer.setAlternativeAddress((String) clusterselection.get(targetPeer.hash));
         yacySearch searchThread = new yacySearch(wordhashes, excludehashes, urlhashes, "", "", 9999, true, 0, targetPeer,
                                              urlManager, wordIndex, containerCache, new TreeMap(), blacklist, snippetCache, timingProfile, rankingProfile, constraint);
         searchThread.start();

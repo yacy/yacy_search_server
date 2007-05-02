@@ -2480,7 +2480,7 @@ public final class plasmaSwitchboard extends serverAbstractSwitch implements ser
                         // if this was performed for a remote crawl request, notify requester
                         if ((processCase == PROCESSCASE_6_GLOBAL_CRAWLING) && (initiatorPeer != null)) {
                             log.logInfo("Sending crawl receipt for '" + entry.normalizedURLString() + "' to " + initiatorPeer.getName());
-                            initiatorPeer.setAlternativeAddress((String) clusterhashes.get(initiatorPeer.hash));
+                            if (clusterhashes != null) initiatorPeer.setAlternativeAddress((String) clusterhashes.get(initiatorPeer.hash));
                             yacyClient.crawlReceipt(initiatorPeer, "crawl", "fill", "indexed", newEntry, "");
                         }
                     } else {
@@ -2495,7 +2495,7 @@ public final class plasmaSwitchboard extends serverAbstractSwitch implements ser
                     
                     log.logSevere("Could not index URL " + entry.url() + ": " + ee.getMessage(), ee);
                     if ((processCase == PROCESSCASE_6_GLOBAL_CRAWLING) && (initiatorPeer != null)) {
-                    	initiatorPeer.setAlternativeAddress((String) clusterhashes.get(initiatorPeer.hash));
+                        if (clusterhashes != null) initiatorPeer.setAlternativeAddress((String) clusterhashes.get(initiatorPeer.hash));
                         yacyClient.crawlReceipt(initiatorPeer, "crawl", "exception", ee.getMessage(), null, "");
                     }
                     addURLtoErrorDB(entry.url(), referrerUrlHash, initiatorPeerHash, docDescription, plasmaCrawlEURL.DENIED_UNSPECIFIED_INDEXING_ERROR, new kelondroBitfield());
@@ -2508,7 +2508,7 @@ public final class plasmaSwitchboard extends serverAbstractSwitch implements ser
                 log.logInfo("Not indexed any word in URL " + entry.url() + "; cause: " + noIndexReason);
                 addURLtoErrorDB(entry.url(), referrerUrlHash, initiatorPeerHash, docDescription, noIndexReason, new kelondroBitfield());
                 if ((processCase == PROCESSCASE_6_GLOBAL_CRAWLING) && (initiatorPeer != null)) {
-                	initiatorPeer.setAlternativeAddress((String) clusterhashes.get(initiatorPeer.hash));
+                    if (clusterhashes != null) initiatorPeer.setAlternativeAddress((String) clusterhashes.get(initiatorPeer.hash));
                     yacyClient.crawlReceipt(initiatorPeer, "crawl", "rejected", noIndexReason, null, "");
                 }
             }

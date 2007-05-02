@@ -222,7 +222,7 @@ public class yacyDHTAction implements yacyPeerAction {
         while (i.hasNext()) {
         	yacySeed seed = seedDB.getConnected((String) i.next());
         	if (seed == null) continue;
-        	seed.setAlternativeAddress((String) clusterhashes.get(seed.hash));
+            if (clusterhashes != null) seed.setAlternativeAddress((String) clusterhashes.get(seed.hash));
         	return seed;
         }
         return null;

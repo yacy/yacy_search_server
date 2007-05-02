@@ -101,7 +101,7 @@ public final class hello {
         }
         
         int urls = -1;
-        remoteSeed.setAlternativeAddress((String) sb.clusterhashes.get(remoteSeed.hash));
+        if (sb.clusterhashes != null) remoteSeed.setAlternativeAddress((String) sb.clusterhashes.get(remoteSeed.hash));
         
         // if the remote client has reported its own IP address and the client supports
         // the port forwarding feature (if client version >= 0.383) then we try to 
