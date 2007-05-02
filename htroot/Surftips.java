@@ -226,6 +226,7 @@ public class Surftips {
             
             if (record.category().equals(yacyNewsPool.CATEGORY_PROFILE_UPDATE)) {
                 url = record.attribute("homepage", "");
+                if ((url == null) || (url.length() < 12)) continue;
                 entry = rowdef.newEntry(new byte[][]{
                                 url.getBytes(),
                                 ("Home Page of " + record.attribute("nickname", "")).getBytes("UTF-8"),

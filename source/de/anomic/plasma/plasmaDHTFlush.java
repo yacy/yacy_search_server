@@ -153,7 +153,7 @@ public class plasmaDHTFlush extends Thread {
         public void performTransferWholeIndex() {
             plasmaDHTChunk newDHTChunk = null, oldDHTChunk = null;
             try {
-                // initial startingpoint of intex transfer is "------------"                 
+                // initial startingpoint of intex transfer is "AAAAAAAAAAAA"                 
                 this.log.logFine("Selected hash " + this.startPointHash + " as start point for index distribution of whole index");        
                 
                 /* Loop until we have
@@ -178,7 +178,7 @@ public class plasmaDHTFlush extends Thread {
                     if (nothingSelected(newDHTChunk)) {
                         if (this.sb.wordIndex.size() > 0 && this.delete) {
                             // if there are still words in the index we try it again now
-                            this.startPointHash = "------------";
+                            this.startPointHash = "AAAAAAAAAAAA";
                         } else {                            
                             // otherwise we could end transfer now
                             this.log.logFine("No index available for index transfer, hash start-point " + this.startPointHash);

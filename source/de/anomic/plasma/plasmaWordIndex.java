@@ -199,12 +199,8 @@ public final class plasmaWordIndex implements indexRI {
     }
 
     public void flushCacheSome() {
-    	synchronized (dhtOutCache) {
-    		flushCache(dhtOutCache, (dhtOutCache.size() > 3 * flushsize) ? flushsize : Math.min(flushsize, Math.max(1, dhtOutCache.size() / lowcachedivisor)));
-    	}
-    	synchronized (dhtInCache) {
-    		flushCache(dhtInCache, (dhtInCache.size() > 3 * flushsize) ? flushsize : Math.min(flushsize, Math.max(1, dhtInCache.size() / lowcachedivisor)));
-    	}
+    	flushCache(dhtOutCache, (dhtOutCache.size() > 3 * flushsize) ? flushsize : Math.min(flushsize, Math.max(1, dhtOutCache.size() / lowcachedivisor)));
+    	flushCache(dhtInCache, (dhtInCache.size() > 3 * flushsize) ? flushsize : Math.min(flushsize, Math.max(1, dhtInCache.size() / lowcachedivisor)));
     }
     
     private void flushCache(indexRAMRI ram, int count) {
@@ -214,7 +210,7 @@ public final class plasmaWordIndex implements indexRI {
         busyCacheFlush = true;
         String wordHash;
         ArrayList containerList = new ArrayList();
-        synchronized (this) {
+        synchronized (ram) {
             boolean collectMax = true;
             indexContainer c;
             while (collectMax) {
