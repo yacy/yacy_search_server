@@ -203,17 +203,6 @@
         </tr>
         -->
         <tr valign="top" class="TableCellLight">
-          <td>Wanted Performance:</td>
-          <td>
-            <input type="radio" name="crawlingPerformance" id="maximum" value="maximum" #(crawlingSpeedMaxChecked)#::checked="checked"#(/crawlingSpeedMaxChecked)# /><label for="maximum">maximum</label><br />
-			<input type="radio" name="crawlingPerformance" id="custom" value="custom" #(crawlingSpeedCustChecked)#::checked="checked"#(/crawlingSpeedCustChecked)# /><label for="custom">custom</label>: <input name="customPPM" type="text" size="4" maxlength="4" value="#[customPPMdefault]#" />PPM<br />
-			<input type="radio" name="crawlingPerformance" id="minimum" value="minimum" #(crawlingSpeedMinChecked)#::checked="checked"#(/crawlingSpeedMinChecked)# /><label for="minimum"><nobr>optimal as background process</nobr></label>
-          </td>
-          <td colspan="3">
-            Set wanted level of computing power, used for this and other running crawl tasks. (PPM = pages per minute)
-          </td>
-        </tr>
-        <tr valign="top" class="TableCellDark">
           <td colspan="5"><input type="submit" name="crawlingstart" value="Start New Crawl" /></td>
         </tr>
       </table>

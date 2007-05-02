@@ -143,8 +143,6 @@ public class WatchCrawler_p {
                     boolean xpstopw = post.get("xpstopw", "off").equals("on");
                     env.setConfig("xpstopw", (xpstopw) ? "true" : "false");
                     
-                    setPerformance(switchboard, post);
-                    
                     String crawlingMode = post.get("crawlingMode","url");
                     if (crawlingMode.equals("url")) {
                         // getting the crawljob start url

@@ -1060,11 +1060,10 @@ public final class plasmaSwitchboard extends serverAbstractSwitch implements ser
         wordIndex.setWordFlushSize((int) getConfigLong("wordFlushSize", 1000));
         
         // set a minimum amount of memory for the indexer thread
-        long memprereq = Math.max(getConfigLong(INDEXER_MEMPREREQ, 0), wordIndex.minMem());
-        long memprereq1 = memprereq + (memprereq / 8) + 2 * 1024 * 1024;
-        setConfig(INDEXER_MEMPREREQ, memprereq);
-        kelondroRecords.setCacheGrowStati(memprereq1, memprereq);
-        kelondroCache.setCacheGrowStati(memprereq1, memprereq);
+        long memprereq = wordIndex.minMem();
+        //setConfig(INDEXER_MEMPREREQ, memprereq);
+        kelondroRecords.setCacheGrowStati(memprereq + 2 * 1024 * 1024, memprereq);
+        kelondroCache.setCacheGrowStati(memprereq + 2 * 1024 * 1024, memprereq);
         
         // make parser
         log.logConfig("Starting Parser");
@@ -1699,11 +1698,6 @@ public final class plasmaSwitchboard extends serverAbstractSwitch implements ser
                 log.logFine("deQueue: online caution, omitting resource stack processing");
                 return false;
             }
-
-            if ((sbQueue.size() == 0) && ((getThread(CRAWLJOB_LOCAL_CRAWL).getJobCount() == 0))) {
-            	long sleep = getConfigLong(INDEX_DIST_BUSYSLEEP, 6000);
-            	setPerformance((int) Math.max(120, 60000 / (sleep==0?1:sleep))); // if there is no activity, set low performance
-            }
             
             // flush some entries from the RAM cache
             if (sbQueue.size() == 0) wordIndex.flushCacheSome(); // permanent flushing only if we are not busy
@@ -1861,13 +1855,10 @@ public final class plasmaSwitchboard extends serverAbstractSwitch implements ser
 
             // set new memory limit for indexer thread
             long memprereq = Math.max(getConfigLong(INDEXER_MEMPREREQ, 0), wordIndex.minMem());
-            setConfig(INDEXER_MEMPREREQ, memprereq);
-            setThreadPerformance(INDEXER,
-                    getConfigLong(INDEXER_IDLESLEEP, 0),
-                    getConfigLong(INDEXER_BUSYSLEEP, 0),
-                    memprereq);
-            kelondroRecords.setCacheGrowStati(memprereq + (memprereq / 8) + 2 * 1024 * 1024, memprereq);
-            kelondroCache.setCacheGrowStati(memprereq + (memprereq / 8) + 2 * 1024 * 1024, memprereq);
+            //setConfig(INDEXER_MEMPREREQ, memprereq);
+            //setThreadPerformance(INDEXER, getConfigLong(INDEXER_IDLESLEEP, 0), getConfigLong(INDEXER_BUSYSLEEP, 0), memprereq);
+            kelondroRecords.setCacheGrowStati(memprereq + 2 * 1024 * 1024, memprereq);
+            kelondroCache.setCacheGrowStati(memprereq + 2 * 1024 * 1024, memprereq);
             
             // update the cluster set
             this.clusterhashes = yacyCore.seedDB.clusterHashes(getConfig("cluster.peers.yacydomain", ""));
