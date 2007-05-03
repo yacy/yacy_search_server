@@ -81,6 +81,10 @@ public class PerformanceMemory_p {
                 env.setConfig("javastart_Xms", "Xms" + xmx + "m");
                 prop.put("setStartupCommit", 1);
             }
+            if (post.containsKey("gc")) {
+                System.gc();
+                prop.put("gc", 1);
+            }
         }
         
         long memoryFreeNow = Runtime.getRuntime().freeMemory();
