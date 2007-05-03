@@ -294,17 +294,22 @@ public class yacyDHTAction implements yacyPeerAction {
         double ownDistance = Math.min(yacyDHTAction.dhtDistance(yacyCore.seedDB.mySeed.hash, firstKey), yacyDHTAction.dhtDistance(yacyCore.seedDB.mySeed.hash, lastKey));
         double maxDistance = Math.min(ownDistance, maxDist);
 
-        double avdist;
+        double avdist, firstdist, lastdist;
         Enumeration e = this.getAcceptRemoteIndexSeeds(lastKey);
         Hashtable peerFilter = new Hashtable(); 
+        if (log != null) log.logInfo("Collecting DHT target peers for first_hash = " + firstKey + ", last_hash = " + lastKey);
         while ((e.hasMoreElements()) && (seeds.size() < (primaryPeerCount + reservePeerCount))) {
             seed = (yacySeed) e.nextElement();
             if (seeds != null) {
-                avdist = Math.max(yacyDHTAction.dhtDistance(seed.hash, firstKey), yacyDHTAction.dhtDistance(seed.hash, lastKey));
+            	firstdist = yacyDHTAction.dhtDistance(seed.hash, firstKey);
+            	lastdist = yacyDHTAction.dhtDistance(seed.hash, lastKey);
+                avdist = Math.max(firstdist, lastdist);
                 if (avdist < maxDistance && !peerFilter.containsKey(seed.hash)) {
-                    if (log != null) log.logInfo("Selected " + ((seeds.size() < primaryPeerCount) ? "primary" : "reserve") + " DHT target peer " + seed.getName() + ":" + seed.hash + ", distance = " + avdist);
+                    if (log != null) log.logInfo("Selected  " + ((seeds.size() < primaryPeerCount) ? "primary" : "reserve") + "  DHT target peer " + seed.getName() + ":" + seed.hash + ", distance2first = " + firstdist + ", distance2last = " + lastdist);
                     seeds.add(seed);
                     peerFilter.put(seed.hash, seed);
+                } else {
+                	if (log != null) log.logInfo("Discarded improper DHT target peer " + seed.getName() + ":" + seed.hash + ", distance2first = " + firstdist + ", distance2last = " + lastdist);
                 }
             }
         }
