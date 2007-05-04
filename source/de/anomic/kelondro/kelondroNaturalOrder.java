@@ -96,7 +96,7 @@ public class kelondroNaturalOrder extends kelondroAbstractOrder implements kelon
         long zeroCardinal = cardinalI(this.zero);
         long keyCardinal = cardinalI(key);
         if (keyCardinal > zeroCardinal) return keyCardinal - zeroCardinal;
-        return Long.MAX_VALUE - keyCardinal + zeroCardinal + 1;
+        return Long.MAX_VALUE - keyCardinal + zeroCardinal;
     }
 
     public final static byte[] encodeLong(long c, int length) {
@@ -131,7 +131,10 @@ public class kelondroNaturalOrder extends kelondroAbstractOrder implements kelon
         while (offset < m) c = (c << 8) | ((long) s[offset++] & 0xFF);
         return c;
     }
-    
+
+    private static final int sig(int x) {
+        return (x > 0) ? 1 : (x < 0) ? -1 : 0;
+    }
     
     // Compares its two arguments for order.
     // Returns -1, 0, or 1 as the first argument
@@ -151,11 +154,8 @@ public class kelondroNaturalOrder extends kelondroAbstractOrder implements kelon
         // we have an artificial start point. check all combinations
         int az = compares(a, aoffset, alength, zero, 0, zero.length); // -1 if a < z; 0 if a == z; 1 if a > z
         int bz = compares(b, boffset, blength, zero, 0, zero.length); // -1 if b < z; 0 if b == z; 1 if b > z
-        if ((az ==  0) && (bz ==  0)) return 0;
-        if  (az ==  0) return -1;
-        if  (bz ==  0) return  1;
-        if  (az == bz) return compares(a, aoffset, alength, b, boffset, blength);
-        return bz;
+        if (az == bz) return compares(a, aoffset, alength, b, boffset, blength);
+        return sig(az - bz);
     }
 
     public static final boolean equal(byte[] a, byte[] b) {
@@ -168,10 +168,8 @@ public class kelondroNaturalOrder extends kelondroAbstractOrder implements kelon
         int i = 0;
         final int al = Math.min(alength, a.length - aoffset);
         final int bl = Math.min(blength, b.length - boffset);
-        if (al > bl) return 1;
-        if (al < bl) return -1;
         int aa, bb;
-        while (i < al) {
+        while ((i < al) && (i < bl)) {
             aa = 0xff & (int) a[i + aoffset];
             bb = 0xff & (int) b[i + boffset];
             if (aa > bb) return 1;
@@ -179,6 +177,9 @@ public class kelondroNaturalOrder extends kelondroAbstractOrder implements kelon
             // else the bytes are equal and it may go on yet undecided
             i++;
         }
+        // compare length
+        if (al > bl) return 1;
+        if (al < bl) return -1;
         // they are equal
         return 0;
     }

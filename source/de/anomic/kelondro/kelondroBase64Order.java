@@ -285,7 +285,11 @@ public class kelondroBase64Order extends kelondroAbstractOrder implements kelond
         long zeroCardinal = cardinalI(this.zero);
         long keyCardinal = cardinalI(key);
         if (keyCardinal > zeroCardinal) return keyCardinal - zeroCardinal;
-        return Long.MAX_VALUE - keyCardinal + zeroCardinal + 1;
+        return Long.MAX_VALUE - keyCardinal + zeroCardinal;
+    }
+    
+    private static final int sig(int x) {
+        return (x > 0) ? 1 : (x < 0) ? -1 : 0;
     }
     
     public final int compare(byte[] a, byte[] b) {
@@ -301,11 +305,8 @@ public class kelondroBase64Order extends kelondroAbstractOrder implements kelond
         // we have an artificial start point. check all combinations
         int az = compares(a, aoffset, alength, zero, 0, Math.min(alength, zero.length)); // -1 if a < z; 0 if a == z; 1 if a > z
         int bz = compares(b, boffset, blength, zero, 0, Math.min(blength, zero.length)); // -1 if b < z; 0 if b == z; 1 if b > z
-        if ((az ==  0) && (bz ==  0)) return 0;
-        if  (az ==  0) return -1;
-        if  (bz ==  0) return  1;
-        if  (az == bz) return compares(a, aoffset, alength, b, boffset, blength);
-        return bz;
+        if (az == bz) return compares(a, aoffset, alength, b, boffset, blength);
+        return sig(az - bz);
     }
     
     public final int compares(byte[] a, int aoffset, int alength, byte[] b, int boffset, int blength) {
@@ -315,11 +316,9 @@ public class kelondroBase64Order extends kelondroAbstractOrder implements kelond
         int i = 0;
         final int al = Math.min(alength, a.length - aoffset);
         final int bl = Math.min(blength, b.length - boffset);
-        if (al > bl) return 1;
-        if (al < bl) return -1;
         byte ac, bc;
         byte acc, bcc;
-        while (i < al) {
+        while ((i < al) && (i < bl)) {
             assert (i + aoffset < a.length) : "i = " + i + ", aoffset = " + aoffset + ", a.length = " + a.length + ", a = " + serverLog.arrayList(a, aoffset, al);
             assert (i + boffset < b.length) : "i = " + i + ", boffset = " + boffset + ", b.length = " + b.length + ", b = " + serverLog.arrayList(b, boffset, al);
             ac = a[aoffset + i];
@@ -336,6 +335,9 @@ public class kelondroBase64Order extends kelondroAbstractOrder implements kelond
             // else the bytes are equal and it may go on yet undecided
             i++;
         }
+        // compare length
+        if (al > bl) return 1;
+        if (al < bl) return -1;
         // they are equal
         return 0;
     }
