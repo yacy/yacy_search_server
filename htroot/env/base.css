@@ -336,6 +336,23 @@ h2.yacy { /* The heading in index.html */
   background:url(/env/grafics/kaskelix.png) top center no-repeat;
 }
 
+div.welcome { /* The heading in Status.html */
+  float:left;
+  margin:10px auto;
+  padding-top:130px;
+  text-align:left;
+  width:50%;
+  background:url(/env/grafics/kaskelix.png) top center no-repeat;
+}
+
+div.sidebar { /* sidebars on the right side */
+  float:left;
+  width:25%;
+  margin:10px auto;
+  padding-top:10px;
+  text-align:left;
+}
+
 form.search.small h2 {
   clear:none;
   margin-left:85px;

@@ -7,9 +7,14 @@
   </head>
   <body style="margin:0px;">
     #%env/templates/header.template%#
-    <h2>System-, Index- and Peer-Status</h2>
     
-    <p>Welcome to YaCy!</p>
+    
+    <div class="welcome"><center><h2>Welcome to YaCy!</h2></center>
+    
+    
+    </div>
+    
+    <div class="sidebar">
     
     <form action="Steering.html" method="get" class="PeerControl">
       <fieldset>
@@ -25,10 +30,11 @@
       </fieldset>
     </form>
     
-    <table class="StatusTable">
-      <tr class="TableHeader"><td colspan="2"><strong>Public System Properties</strong></td></tr>
-      <tr class="TableCellLight"><td>System version</td><td>
-      #[versionpp]#
+    <fieldset>
+    <legend>Public System Properties</legend>
+    <dl>
+    <dt>System Version</dt>
+    <dd>#[versionpp]#
       #(versioncomment)#
       :: - the latest public version is #[latestVersion]#.
       You can download a more recent version of YaCy. Click here to aquire a direct download location: 
@@ -42,10 +48,10 @@
       You can download the latest releases here:<br>
       #[versionResMain]#<br>
       #[versionResDev]#
-      #(/versioncomment)#
-      </td></tr>
-      <tr class="TableCellDark"><td>This&nbsp;peer's&nbsp;address</td><td>
-      #(peerAddress)#
+      #(/versioncomment)#</dd>
+    
+    <dt>This&nbsp;peer's&nbsp;address</dt>
+    <dd>#(peerAddress)#
       Not assigned
       ::
       Not assigned. The peer must go online to get an address.
@@ -55,11 +61,13 @@
       see the <a href="http://www.yacy.net/yacy/Installation.html#wininst">installation instructions</a>.
       ::
       #[address]# ; Your '.yacy' home at http://www.#[peername]#.yacy
-      #(/peerAddress)#
-      </td></tr>
-      <tr class="TableCellLight"><td>This peer's name</td><td>#[peerName]#/#[hash]#</td></tr>
-      <tr class="TableCellDark"><td>This peer's statistics</td><td>
-      #(peerStatistics)#
+      #(/peerAddress)#</dd>
+    
+    <dt>This peer's name</dt>
+    <dd>#[peerName]#/#[hash]#</dd>
+    
+    <dt>This peer's statistics</dt>
+    <dd>#(peerStatistics)#
       Unknown
       ::
       <div>Uptime: #[uptime]#</div>
@@ -68,10 +76,10 @@
       <div>Connects: 
         <span title="connected Juniors">#[juniorConnects]#</span> | <span title="connected Seniors">#[seniorConnects]#</span> | <span title="connected Principals">#[principalConnects]#</span> | <span title="disconnected peers">#[disconnects]#</span> (#[connects]# peers/hour)
       #(/peerStatistics)#
-      </div>
-      </td></tr>
-      <tr class="TableCellLight"><td>This peer's status</td><td>
-      #(peerStatus)#
+      </div></dd>
+    
+    <dt>This peer's status</dt>
+    <dd>#(peerStatus)#
       Virgin - You have not published your peer seed yet. This happens automatically, just wait. While you have this status you are not allowed to search other peers.
       ::
       Junior - You cannot be reached from outside. A possible reason is that you are behind a firewall, NAT or Router. But you can <a href="index.html">search the internet</a> using the other peers' global index on your own search page. We encourage you to open your firewall for the port you configured (usually: 8080), or to set up a 'virtual server' in your router settings (often called DMZ). Please be fair, contribute your own index to the global index.
@@ -80,43 +88,25 @@
       ::
       Principal - You are senior and you publish your seed-list to a public accessible server where it can be retrieved using the URL <a href="#[seedURL]#">#[seedURL]#</a>.<br />
       You can of course <a href="index.html">search the internet</a> using the other peers' global index on your own search page.
-      #(/peerStatus)#
-      </td></tr>
-      <tr class="TableCellDark"><td>Other peers</td><td>#(otherPeers)#not online::#[num]# other peers online.#(/otherPeers)#</td></tr>
-	  <!-- temporary disabled information, may be outdated. No decision made if this function should remain
-      <tr class="TableCellLight"><td>Online-mode</td><td>
-      #(omode)#
-      You are in <em>Cache-browsing</em> mode.<br />
-      Only websites from the proxy-cache are accessible.
-      To switch online-mode, press one of the following buttons:
-      <form action="SettingsAck_p.html" method="get">
-        <div><input type="submit" name="emode" value="event-based Mode" />
-        <input type="submit" name="pmode" value="Permanent Mode" /></div>
-      </form>
-      ::
-      You are in <em>event-based</em> online mode.<br />
-      The YaCy p2p network will boot when you start using YaCy as a web proxy or you switch to permanent mode.
-      To switch online-mode, press one of the following buttons:
-      <form action="SettingsAck_p.html" method="get">
-        <div><input type="submit" name="pmode" value="Go on-line" />
-        <input type="submit" name="cmode" value="Go to Cache-Mode" /></div>
-      </form>
-      ::
-      You are in <em>permanent</em> mode.
-      To switch online-mode, press one of the following buttons:
-      <form action="SettingsAck_p.html" method="get">
-        <div><input type="submit" name="emode" value="event-based Mode" />
-        <input type="submit" name="cmode" value="Go to Cache-Mode" /></div>
-      </form>
-      #(/omode)#
-      </td></tr>-->
-    </table>
+      #(/peerStatus)#</dd>
+    
+    <dt>Other peers</dt>
+    <dd>#(otherPeers)#not online::#[num]# other peers online.#(/otherPeers)#</dd>
+    
     #(showPrivateTable)#
-    Click here to <a href="Status.html?login=">log in</a> as administrator and see full status. 
+    <dt>Log-In</dt>
+    <dd>Click here to <a href="Status.html?login=">log in</a> as administrator and see full status.</dd>
     ::
     #(/showPrivateTable)#
+    
+    </dl>
+    </fieldset>
+    
+    </div>
+    
     #%[privateStatusTable]%#
-    <p><em>Last Refresh:</em> #[date]#</p>
+    
+    
     
     #%env/templates/footer.template%#
   </body>
