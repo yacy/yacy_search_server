@@ -1,8 +1,11 @@
 package de.anomic.server;
 
 public interface serverUpdaterCallback {
-	public boolean updateIsPossible();
-	public String getUpdateReleaseFileName();
-	public String getUpdateSource();	
-	public void grantUpdate();
+	public boolean updateYaCyIsPossible();
+	public void grantYaCyUpdate();
+	public String getYaCyUpdateReleaseVersion();
+	//public File getYaCyUpdateReleaseFile();
+	public String getYaCyUpdateSource();
+	public void signalYaCyShutdown();
+	public void signalYaCyRestart();
 }
