@@ -85,7 +85,7 @@ public class tarParser extends AbstractParser implements Parser {
      * @see Parser#getLibxDependences()
      */
     private static final String[] LIBX_DEPENDENCIES = new String[] {
-        "tar.jar"
+//        "tar.jar"
     };    
     
     public tarParser() {        

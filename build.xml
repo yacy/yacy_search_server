@@ -206,6 +206,7 @@
     <!-- libs needed for the yacy thread/object-pools -->
     <pathelement location="${lib}/commons-collections.jar" />
     <pathelement location="${lib}/commons-pool.jar" />    
+	<pathelement location="${lib}/tar.jar" />
   </path>
     
   <!-- compiling yacy.java -->   
@@ -250,7 +251,7 @@
 	    <!-- libs needed for the yacy thread/object-pools -->
 	    <pathelement location="${lib}/commons-collections.jar" />
 	    <pathelement location="${lib}/commons-pool.jar" />  
-	  	
+	  	<pathelement location="${lib}/tar.jar" />
 	  	<!-- userspecific libs -->
 		<pathelement location="${htdocsWWW}/lib/*.jar" />
 	  	<pathelement location="${htdocsWWW}/" />
@@ -643,6 +644,7 @@
       <pathelement location="${htroot}"/>
       <pathelement location="${lib}/commons-collections.jar" />
       <pathelement location="${lib}/commons-pool.jar" />        
+      <pathelement location="${lib}/tar.jar" />
       <pathelement location="${libx}" />                 
       <fileset dir="${libx}" includes="**/*.jar" />
     </classpath>
@@ -663,6 +665,7 @@
       <pathelement location="${htroot}"/>
       <pathelement location="${lib}/commons-collections.jar" />
       <pathelement location="${lib}/commons-pool.jar" />        
+      <pathelement location="${lib}/tar.jar" />
       <pathelement location="${libx}" />                 
       <fileset dir="${libx}" includes="**/*.jar" />
     </classpath>
@@ -678,6 +681,7 @@
       <pathelement location="${htroot}"/>
       <pathelement location="${lib}/commons-collections.jar" />
       <pathelement location="${lib}/commons-pool.jar" />        
+      <pathelement location="${lib}/tar.jar" />
       <pathelement location="${libx}" />                 
       <fileset dir="${libx}" includes="**/*.jar" />
     </classpath>
@@ -697,6 +701,7 @@
       <pathelement location="${htroot}"/>
       <pathelement location="${lib}/commons-collections.jar" />
       <pathelement location="${lib}/commons-pool.jar" />        
+      <pathelement location="${lib}/tar.jar" />
       <pathelement location="${libx}" />                 
       <fileset dir="${libx}" includes="**/*.jar" />
     </classpath>

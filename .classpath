@@ -8,6 +8,7 @@
 	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER"/>
 	<classpathentry kind="lib" path="lib/commons-collections.jar"/>
 	<classpathentry kind="lib" path="lib/commons-pool.jar"/>
+	<classpathentry kind="lib" path="lib/tar.jar"/>
 	<classpathentry kind="lib" path="libx/axis-ant.jar"/>
 	<classpathentry kind="lib" path="libx/axis.jar"/>
 	<classpathentry kind="lib" path="libx/bzip2.jar"/>
@@ -28,7 +29,6 @@
 	<classpathentry kind="lib" path="libx/PDFBox-0.7.2.jar"/>
 	<classpathentry kind="lib" path="libx/saaj.jar"/>
 	<classpathentry kind="lib" path="libx/sbbi-upnplib-1.0.3.jar"/>
-	<classpathentry kind="lib" path="libx/tar.jar"/>
 	<classpathentry kind="lib" path="libx/tm-extractors-0.4.jar"/>
 	<classpathentry kind="lib" path="libx/wsdl4j.jar"/>
 	<classpathentry kind="lib" path="libx/xerces.jar"/>
