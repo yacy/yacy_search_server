@@ -341,13 +341,13 @@ div.welcome { /* The heading in Status.html */
   margin:10px auto;
   padding-top:130px;
   text-align:left;
-  width:50%;
+  width:44%;
   background:url(/env/grafics/kaskelix.png) top center no-repeat;
 }
 
 div.sidebar { /* sidebars on the right side */
   float:left;
-  width:25%;
+  width:28%;
   margin:10px auto;
   padding-top:10px;
   text-align:left;

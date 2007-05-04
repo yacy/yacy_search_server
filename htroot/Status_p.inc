@@ -8,16 +8,18 @@
     
     <dt>Protection</dt>
     <dd>#(protection)#
-      <strong>Your settings are _not_ protected!</strong> Please go to the <a href="ConfigBasic.html">settings</a> page <strong>immediately</strong> and set an administration password.
+      <strong>Password is missing</strong>
       ::
-      Your settings are protected by a password.
+      password-protected
       #(/protection)#</dd>
     
     <dt>Peer Host</dt>
     <dd>#[host]#:#[port]# #(extPortFormat)#::| (Binding to interface: #[extPort]#)#(/extPortFormat)# #(sslSupport)#::| SSL: enabled#(/sslSupport)#</dd>
     
+    #(portForwarding)#::
     <dt>Port Forwarding Host</dt>
-    <dd>#(portForwarding)#not used::#[host]#:#[port]# (#(status)#broken::connected#(/status)#)#(/portForwarding)#</dd>
+    <dd>#[host]#:#[port]# (#(status)#broken::connected#(/status)#)</dd>
+    #(/portForwarding)#
     
     <dt>Remote Proxy</dt>
     <dd>#(remoteProxy)#not used::#[host]#:#[port]# | Used for YaCy -> YaCy communication: #(4Yacy)#Yes::No #(/4Yacy)# #(/remoteProxy)#</dd>
@@ -32,7 +34,10 @@
     </dd>
       
     <dt><a href="PerformanceMemory_p.html">Memory Usage</a></dt>
-    <dd>free: #[freeMemory]# | total: #[totalMemory]# | max: #[maxMemory]#</dd>
+    <dd>
+    free: #[freeMemory]#<br>
+    total: #[totalMemory]#<br>
+    max: #[maxMemory]#</dd>
     
     <dt>Traffic</dt>
     <dd>Proxy: #[trafficProxy]# | Crawler: #[trafficCrawler]# [<a href="Status.html?ResetTraffic=">Reset</a>]</dd>
@@ -42,14 +47,18 @@
     
     <dt><a href="IndexCreateIndexingQueue_p.html">Indexing Queue</a></dt>
     <dd><table>
-      <tr><td><div class="ProgressBarCaption">#[indexingQueueSize]#&nbsp;|&nbsp;#[indexingQueueMax]#</div></td></tr>
-      <tr><td><div class="ProgressBar"><div class="ProgressBarFill" style="width:#[indexingQueuePercent]#%;" /></div></div></td></tr>
+      <tr>
+      <td><div class="ProgressBar"><div class="ProgressBarFill" style="width:#[indexingQueuePercent]#%;" /></div></div</td>
+      <td><div class="ProgressBarCaption">#[indexingQueueSize]#&nbsp;|&nbsp;#[indexingQueueMax]#</div></td>
+      </tr>
     </table></dd>
     
     <dt><a href="IndexCreateLoaderQueue_p.html">Loader Queue</a></dt>
     <dd><table>
-      <tr><td><div class="ProgressBarCaption">#[loaderQueueSize]#&nbsp;|&nbsp;#[loaderQueueMax]#</div></td></tr>
-      <tr><td><div class="ProgressBar"><div class="ProgressBarFill" style="width:#[loaderQueuePercent]#%;" /></div></div></td></tr>
+      <tr>
+      <td><div class="ProgressBar"><div class="ProgressBarFill" style="width:#[loaderQueuePercent]#%;" /></div></div></td>
+      <td><div class="ProgressBarCaption">#[loaderQueueSize]#&nbsp;|&nbsp;#[loaderQueueMax]#</div></td>
+      </tr>
     </table></dd>
     
     <dt>Crawler Queues</dt>
@@ -89,13 +98,13 @@
     <dt>Seed server</dt>
     <dd>
     #(seedServer)#
-      Disabled. To enable this you need a FTP account where you can upload files to a web space. If you do that, you become a YaCy root server.
+      Disabled.
       <a href="Settings_p.html?page=seed">[Configure]</a>.
       ::
-      Enabled: Updating periodically to server #[seedServer]#.
+      Enabled: Updating to server #[seedServer]#.
       Last upload: #[lastUpload]# ago.
       ::
-      Enabled: Updating periodically to file #[seedFile]#.
+      Enabled: Updating to file #[seedFile]#.
       Last upload: #[lastUpload]# ago.
     #(/seedServer)#</td>
     </dd>

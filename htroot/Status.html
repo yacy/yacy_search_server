@@ -11,6 +11,85 @@
     
     <div class="welcome"><center><h2>Welcome to YaCy!</h2></center>
     
+    <dl>
+    
+    <!-- urgent -->
+
+    #(urgentSetPassword)#::
+    <dt><img src="env/grafics/start.gif"></dt>
+    <dd><strong>Your settings are _not_ protected!</strong>
+    Please open the <a href="ConfigBasic.html">settings</a> page <strong>immediately</strong>
+    and set an administration password.
+    </dd>
+    #(/urgentSetPassword)#
+
+
+    <!-- warnings -->
+    
+    #(warningGoOnline)#::
+    <dt><img src="env/grafics/start.gif"></dt>
+    <dd>The peer must go online to get a peer address.
+      If you don't know how to configure your system to use a proxy,
+      see the <a href="http://www.yacy.net/yacy/Installation.html#wininst">installation instructions</a>.
+    </dd>
+    #(/warningGoOnline)#
+    
+    <!-- hints -->
+    
+    #(hintVersionAvailable)#::
+    <dt><img src="env/grafics/start.gif"></dt>
+    <dd>latest public version is #[latestVersion]#.
+      You can download a more recent version of YaCy. Click here to aquire a direct download location: 
+      <form action="Status.html" method="get" class="PeerControl">
+        <button type="submit" name="aquirerelease" value="aquire release information">
+          <img src="/env/grafics/lock.gif"/>
+          aquire download location
+        </button>
+      </form>
+    </dd>
+    #(/hintVersionAvailable)#
+    
+    #(hintVersionDownload)#::
+    <dt><img src="env/grafics/start.gif"></dt>
+    <dd>You can download the latest releases here:
+      #[versionResMain]# or #[versionResDev]#
+    </dd>
+    #(/hintVersionDownload)#
+    
+    #(hintStatusVirgin)#::
+    <dt><img src="env/grafics/start.gif"></dt>
+    <dd>You have not published your peer seed yet. This happens automatically, just wait.
+    While you have this status you are not allowed to search other peers.
+    </dd>
+    #(/hintStatusVirgin)#
+    
+    #(hintStatusJunior)#::
+    <dt><img src="env/grafics/start.gif"></dt>
+    <dd>You cannot be reached from outside.
+    A possible reason is that you are behind a firewall, NAT or Router.
+    But you can <a href="index.html">search the internet</a> using the other peers'
+    global index on your own search page.
+    We encourage you to open your firewall for the port you configured (usually: 8080),
+    or to set up a 'virtual server' in your router settings (often called DMZ).
+    Please be fair, contribute your own index to the global index.
+    </dd>
+    #(/hintStatusJunior)#
+    
+    #(hintStatusSenior)#::
+    <dt><img src="env/grafics/start.gif"></dt>
+    <dd>You are running a server in senior mode and you support the global internet index,
+    which you can also <a href="index.html">search yourself</a>.
+    </dd>
+    #(/hintStatusSenior)#
+    
+    #(hintStatusPrincipal)#::
+    <dt><img src="env/grafics/start.gif"></dt>
+    <dd>You have a principal peer because you publish your seed-list to a public accessible server
+    where it can be retrieved using the URL <a href="#[seedURL]#">#[seedURL]#</a>.
+    </dd>
+    #(/hintStatusPrincipal)#
+      
+    </dl>
     
     </div>
     
@@ -34,33 +113,14 @@
     <legend>Public System Properties</legend>
     <dl>
     <dt>System Version</dt>
-    <dd>#[versionpp]#
-      #(versioncomment)#
-      :: - the latest public version is #[latestVersion]#.
-      You can download a more recent version of YaCy. Click here to aquire a direct download location: 
-      <form action="Status.html" method="get" class="PeerControl">
-        <button type="submit" name="aquirerelease" value="aquire release information">
-          <img src="/env/grafics/lock.gif"/>
-          aquire download location
-        </button>
-      </form>
-      ::
-      You can download the latest releases here:<br>
-      #[versionResMain]#<br>
-      #[versionResDev]#
-      #(/versioncomment)#</dd>
+    <dd>#[versionpp]#</dd>
     
     <dt>This&nbsp;peer's&nbsp;address</dt>
     <dd>#(peerAddress)#
       Not assigned
       ::
-      Not assigned. The peer must go online to get an address.
-      The peer does not go online until you use the proxy to surf the internet,
-      thus proving that you <em>want</em> to go online.
-      If you don't know how to configure your system to use a proxy,
-      see the <a href="http://www.yacy.net/yacy/Installation.html#wininst">installation instructions</a>.
-      ::
-      #[address]# ; Your '.yacy' home at http://www.#[peername]#.yacy
+      #[address]#<br>
+      http://www.#[peername]#.yacy
       #(/peerAddress)#</dd>
     
     <dt>This peer's name</dt>
@@ -80,14 +140,13 @@
     
     <dt>This peer's status</dt>
     <dd>#(peerStatus)#
-      Virgin - You have not published your peer seed yet. This happens automatically, just wait. While you have this status you are not allowed to search other peers.
+      Virgin
       ::
-      Junior - You cannot be reached from outside. A possible reason is that you are behind a firewall, NAT or Router. But you can <a href="index.html">search the internet</a> using the other peers' global index on your own search page. We encourage you to open your firewall for the port you configured (usually: 8080), or to set up a 'virtual server' in your router settings (often called DMZ). Please be fair, contribute your own index to the global index.
+      Junior
       ::
-      Senior - You are running a server and you support the global internet index, which you can also <a href="index.html">search yourself</a>. Thank you!
+      Senior
       ::
-      Principal - You are senior and you publish your seed-list to a public accessible server where it can be retrieved using the URL <a href="#[seedURL]#">#[seedURL]#</a>.<br />
-      You can of course <a href="index.html">search the internet</a> using the other peers' global index on your own search page.
+      Principal
       #(/peerStatus)#</dd>
     
     <dt>Other peers</dt>

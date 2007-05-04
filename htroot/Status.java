@@ -138,6 +138,7 @@ public class Status {
         // password protection
         if (env.getConfig(httpd.ADMIN_ACCOUNT_B64MD5, "").length() == 0) {
             prop.put("protection", 0); // not protected
+            prop.put("urgentSetPassword", 1);
         } else {
             prop.put("protection", 1); // protected
         }
@@ -156,19 +157,17 @@ public class Status {
         if ((adminaccess) && (yacyVersion.latestRelease >= (thisVersion+0.01))) { // only new Versions(not new SVN)
             if ((yacyVersion.latestMainRelease != null) ||
                 (yacyVersion.latestDevRelease != null)) {
-                prop.put("versioncomment", 2);
+                prop.put("hintVersionDownload", 1);
             } else if ((post != null) && (post.containsKey("aquirerelease"))) {
                 yacyVersion.aquireLatestReleaseInfo();
-                prop.put("versioncomment", 2);
+                prop.put("hintVersionDownload", 1);
             } else {
-                prop.put("versioncomment", 1);
+                prop.put("hintVersionAvailable", 1);
             }
-        } else {
-            prop.put("versioncomment", 0); // no comment
         }
-        prop.putASIS("versioncomment_versionResMain", (yacyVersion.latestMainRelease == null) ? "-" : yacyVersion.latestMainRelease.toAnchor());
-        prop.putASIS("versioncomment_versionResDev", (yacyVersion.latestDevRelease == null) ? "-" : yacyVersion.latestDevRelease.toAnchor());
-        prop.put("versioncomment_latestVersion", Double.toString(yacyVersion.latestRelease));
+        prop.putASIS("hintVersionDownload_versionResMain", (yacyVersion.latestMainRelease == null) ? "-" : yacyVersion.latestMainRelease.toAnchor());
+        prop.putASIS("hintVersionDownload_versionResDev", (yacyVersion.latestDevRelease == null) ? "-" : yacyVersion.latestDevRelease.toAnchor());
+        prop.put("hintVersionAvailable_latestVersion", Double.toString(yacyVersion.latestRelease));
 
         // hostname and port
         String extendedPortString = env.getConfig("port", "8080");
@@ -226,10 +225,11 @@ public class Status {
             prop.put("peerStatistics_connects", yacyCore.seedDB.mySeed.get(yacySeed.CCOUNT, "0"));
             if (yacyCore.seedDB.mySeed.getPublicAddress() == null) {
                 thisHash = yacyCore.seedDB.mySeed.hash;
-                prop.put("peerAddress", 1); // not assigned + instructions
+                prop.put("peerAddress", 0); // not assigned + instructions
+                prop.put("warningGoOnline", 1);
             } else {
                 thisHash = yacyCore.seedDB.mySeed.hash;
-                prop.put("peerAddress", 2); // Address
+                prop.put("peerAddress", 1); // Address
                 prop.put("peerAddress_address", yacyCore.seedDB.mySeed.getPublicAddress());
                 prop.put("peerAddress_peername", env.getConfig("peerName", "<nameless>").toLowerCase());
             }
@@ -237,13 +237,17 @@ public class Status {
         final String peerStatus = ((yacyCore.seedDB.mySeed == null) ? yacySeed.PEERTYPE_VIRGIN : yacyCore.seedDB.mySeed.get(yacySeed.PEERTYPE, yacySeed.PEERTYPE_VIRGIN));
         if (peerStatus.equals(yacySeed.PEERTYPE_VIRGIN)) {
             prop.put(PEERSTATUS, 0);
+            prop.put("hintStatusVirgin", 1);
         } else if (peerStatus.equals(yacySeed.PEERTYPE_JUNIOR)) {
             prop.put(PEERSTATUS, 1);
+            prop.put("hintStatusJunior", 1);
         } else if (peerStatus.equals(yacySeed.PEERTYPE_SENIOR)) {
             prop.put(PEERSTATUS, 2);
+            prop.put("hintStatusSenior", 1);
         } else if (peerStatus.equals(yacySeed.PEERTYPE_PRINCIPAL)) {
             prop.put(PEERSTATUS, 3);
-            prop.put("peerStatus_seedURL", yacyCore.seedDB.mySeed.get("seedURL", "?"));
+            prop.put("hintStatusPrincipal", 1);
+            prop.put("hintStatusPrincipal_seedURL", yacyCore.seedDB.mySeed.get("seedURL", "?"));
         }
         prop.put("peerName", thisName);
         prop.put("hash", thisHash);
