@@ -82,6 +82,17 @@ public class plasmaCrawlEntry {
         this(yacyCore.seedDB.mySeed.hash, url, null, null, new Date(), null, 0, 0, 0);
     }
     
+    /**
+     * @param initiator the hash of the initiator peer
+     * @param url the {@link URL} to crawl
+     * @param referrer the hash of the referrer URL
+     * @param name the name of the document to crawl
+     * @param appdate the time when the url was first time appeared
+     * @param profileHandle the name of the prefetch profile. This must not be null!
+     * @param depth the crawling depth of the entry 
+     * @param anchors number of anchors of the parent
+     * @param forkfactor sum of anchors of all ancestors
+     */
     public plasmaCrawlEntry(
                  String initiator, 
                  URL url, 

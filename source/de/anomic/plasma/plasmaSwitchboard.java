@@ -1668,6 +1668,8 @@ public final class plasmaSwitchboard extends serverAbstractSwitch implements ser
         errorURL.close();
         wordIndex.close();
         yc.close();
+        // signal shudown to the updater
+        if (updaterCallback != null) updaterCallback.signalYaCyShutdown();
         log.logConfig("SWITCHBOARD SHUTDOWN TERMINATED");
     }
     
