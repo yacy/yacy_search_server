@@ -87,7 +87,9 @@ import de.anomic.server.serverCore;
 import de.anomic.server.serverDate;
 import de.anomic.server.serverFileUtils;
 import de.anomic.server.serverMemory;
+import de.anomic.server.serverSemaphore;
 import de.anomic.server.serverSystem;
+import de.anomic.server.serverUpdaterCallback;
 import de.anomic.server.logging.serverLog;
 import de.anomic.tools.enumerateFiles;
 import de.anomic.yacy.yacyClient;
@@ -139,6 +141,7 @@ public final class yacy {
     private static final String copyright = "[ YaCy v" + vString + ", build " + vDATE + " by Michael Christen / www.yacy.net ]";
     private static final String hline = "-------------------------------------------------------------------------------";
    
+    static serverSemaphore sbSync = new serverSemaphore(0);
     static plasmaSwitchboard sb = null; 
     
     /**
@@ -256,6 +259,7 @@ public final class yacy {
             */                    
             
             sb = new plasmaSwitchboard(homePath, "yacy.init", "DATA/SETTINGS/httpProxy.conf");
+            sbSync.V(); // signal that the sb reference was set
             
             // save information about available memory at startup time
             sb.setConfig("memoryFreeAfterStartup", startupMemFree);
@@ -517,6 +521,17 @@ public final class yacy {
     		String applicationRoot = System.getProperty("user.dir").replace('\\', '/');
     		shutdown(applicationRoot);
     	}
+    }
+    
+    /**
+     * Function to set the updater callback class
+     * @param updaterCallback
+     * @throws InterruptedException 
+     */
+    public static void setUpdaterCallback(serverUpdaterCallback updaterCallback) throws InterruptedException {
+    	sbSync.P();    	
+    	sb.updaterCallback = updaterCallback;
+    	sbSync.V();
     }
     
     /**

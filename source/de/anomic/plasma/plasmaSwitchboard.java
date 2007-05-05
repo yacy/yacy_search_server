@@ -159,6 +159,7 @@ import de.anomic.server.serverObjects;
 import de.anomic.server.serverSemaphore;
 import de.anomic.server.serverSwitch;
 import de.anomic.server.serverThread;
+import de.anomic.server.serverUpdaterCallback;
 import de.anomic.server.logging.serverLog;
 import de.anomic.tools.crypt;
 import de.anomic.yacy.yacyClient;
@@ -275,6 +276,11 @@ public final class plasmaSwitchboard extends serverAbstractSwitch implements ser
     
     private serverSemaphore shutdownSync = new serverSemaphore(0);
     private boolean terminate = false;
+    
+    /**
+     * Reference to the Updater callback class
+     */
+    public serverUpdaterCallback updaterCallback = null;
     
     //private Object  crawlingPausedSync = new Object();
     //private boolean crawlingIsPaused = false;    
