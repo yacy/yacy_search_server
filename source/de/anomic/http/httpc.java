@@ -535,17 +535,11 @@ public final class httpc {
     */
     public static void flushHitNameCache() {
         int cutofftime = intTime(System.currentTimeMillis()) - maxNameCacheHitAge;
-        int size;
         String k;
-        synchronized (nameCacheHit) {
-            size = nameCacheHitAges.size();
-            while ((size > 0) &&
-                   (size > maxNameCacheHitSize) || (nameCacheHitAges.getMinScore() < cutofftime)) {
-                k = (String) nameCacheHitAges.getMinObject();
-                nameCacheHit.remove(k);
-                nameCacheHitAges.deleteScore(k);
-                size--; // size = nameCacheAges.size();
-            }
+        while ((nameCacheHitAges.size() > maxNameCacheHitSize) || (nameCacheHitAges.getMinScore() < cutofftime)) {
+            k = (String) nameCacheHitAges.getMinObject();
+            if (nameCacheHit.remove(k) == null) break; // ensure termination
+            nameCacheHitAges.deleteScore(k);
         }
         
     }
@@ -555,17 +549,11 @@ public final class httpc {
      */
      public static void flushMissNameCache() {
         int cutofftime = intTime(System.currentTimeMillis()) - maxNameCacheMissAge;
-        int size;
         String k;
-        synchronized (nameCacheMiss) {
-            size = nameCacheMissAges.size();
-            while ((size > 0) &&
-                   (size > maxNameCacheMissSize) || (nameCacheMissAges.getMinScore() < cutofftime)) {
-                k = (String) nameCacheMissAges.getMinObject();
-                nameCacheMiss.remove(k);
-                nameCacheMissAges.deleteScore(k);
-                size--; // size = nameCacheAges.size();
-            }
+        while ((nameCacheMissAges.size() > maxNameCacheMissSize) || (nameCacheMissAges.getMinScore() < cutofftime)) {
+            k = (String) nameCacheMissAges.getMinObject();
+            if (!nameCacheMiss.remove(k)) break; // ensure termination
+            nameCacheMissAges.deleteScore(k);
         }
         
     }

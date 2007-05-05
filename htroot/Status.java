@@ -179,7 +179,7 @@ public class Status {
         } else {
             prop.put("extPortFormat",0);
         }
-        prop.put("host", serverCore.publicLocalIP());
+        prop.put("host", serverCore.publicLocalIP().getHostAddress());
         
         // ssl support
         prop.put("sslSupport",env.getConfig("keyStore", "").length() == 0 ? 0:1);

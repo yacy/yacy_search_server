@@ -235,7 +235,7 @@ div.ProgressBarCaption {
 }
 div.ProgressBar {
 	float:left;
-	width:150px;
+	width:120px;
 	height:10px;
 }
 div.ProgressBarFill {
