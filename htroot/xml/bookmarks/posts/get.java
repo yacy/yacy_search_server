@@ -19,6 +19,7 @@
 
 package xml.bookmarks.posts;
 
+import java.text.ParseException;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.Iterator;
@@ -27,6 +28,7 @@ import de.anomic.data.bookmarksDB;
 import de.anomic.http.httpHeader;
 import de.anomic.plasma.plasmaSwitchboard;
 import de.anomic.server.serverCodings;
+import de.anomic.server.serverDate;
 import de.anomic.server.serverObjects;
 import de.anomic.server.serverSwitch;
 
@@ -46,15 +48,23 @@ public class get {
         if(post != null && post.containsKey("date")){
             date=(String)post.get("date");
         }else{
-            date=bookmarksDB.dateToiso8601(new Date(System.currentTimeMillis()));
+            date=serverDate.dateToiso8601(new Date(System.currentTimeMillis()));
         }
         int count=0;
-        ArrayList bookmark_hashes=switchboard.bookmarksDB.getDate(Long.toString(bookmarksDB.iso8601ToDate(date).getTime())).getBookmarkList();
+        
+        Date parsedDate = null; 
+        try {
+			parsedDate = serverDate.iso8601ToDate(date);
+		} catch (ParseException e) {
+			parsedDate = new Date();
+		}
+        
+        ArrayList bookmark_hashes=switchboard.bookmarksDB.getDate(Long.toString(parsedDate.getTime())).getBookmarkList();
         Iterator it=bookmark_hashes.iterator();
         bookmarksDB.Bookmark bookmark=null;
         while(it.hasNext()){
             bookmark=switchboard.bookmarksDB.getBookmark((String) it.next());
-            if(bookmarksDB.dateToiso8601(new Date(bookmark.getTimeStamp())) == date &&
+            if(serverDate.dateToiso8601(new Date(bookmark.getTimeStamp())) == date &&
                     tag==null || bookmark.getTags().contains(tag) &&
                     isAdmin || bookmark.getPublic()){
                 prop.putSafeXML("posts_"+count+"_url", bookmark.getUrl());

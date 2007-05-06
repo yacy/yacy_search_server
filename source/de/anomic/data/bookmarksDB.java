@@ -51,7 +51,6 @@ import java.io.Writer;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
-import java.util.Calendar;
 import java.util.Comparator;
 import java.util.Date;
 import java.util.HashMap;
@@ -81,6 +80,7 @@ import de.anomic.kelondro.kelondroMapObjects;
 import de.anomic.kelondro.kelondroObjects;
 import de.anomic.kelondro.kelondroObjectsMapEntry;
 import de.anomic.net.URL;
+import de.anomic.server.serverDate;
 import de.anomic.server.serverFileUtils;
 import de.anomic.server.logging.serverLog;
 
@@ -98,38 +98,6 @@ public class bookmarksDB {
     public static String tagHash(String tagName, String user){
         return plasmaCondenser.word2hash(user+":"+tagName.toLowerCase());
     }
-    public static String dateToiso8601(Date date){
-    	return new SimpleDateFormat("yyyy-MM-dd").format(date)+"T"+(new SimpleDateFormat("HH:mm:ss")).format(date)+"Z";
-    }
-    public static Date iso8601ToDate(String iso8601){
-    	String[] tmp=iso8601.split("T");
-        if(tmp.length!=2){
-            //Error parsing Date
-            return new Date();
-        }
-    	String day=tmp[0];
-    	String time=tmp[1];
-    	if(time.length()>8){
-    		time=time.substring(0,8);
-    	}
-    	try {
-			Calendar date=Calendar.getInstance();
-			Calendar date2=Calendar.getInstance();
-			date.setTime(new SimpleDateFormat("yyyy-MM-dd").parse(day));
-			date2.setTime(new SimpleDateFormat("HH:mm:ss").parse(time));
-			
-			date.set(Calendar.HOUR_OF_DAY, date2.get(Calendar.HOUR_OF_DAY));
-			date.set(Calendar.MINUTE, date2.get(Calendar.MINUTE));
-			date.set(Calendar.SECOND, date2.get(Calendar.SECOND));
-			
-			return date.getTime();
-		} catch (ParseException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
-    	return new Date();
-    }
-    
     public bookmarksDB(File bookmarksFile, File tagsFile, File datesFile, long preloadTime) {
         // bookmarks
         tagCache=new HashMap();
@@ -534,7 +502,14 @@ public class bookmarksDB {
             }
             bm.setTags(tags, true);
             if(time != null){
-                bm.setTimeStamp(iso8601ToDate(time).getTime());
+            	
+            	Date parsedDate = null;
+            	try {
+					parsedDate = serverDate.iso8601ToDate(time);
+				} catch (ParseException e) {
+					parsedDate = new Date();
+				}            	
+                bm.setTimeStamp(parsedDate.getTime());
             }
             if(description!=null){
                 bm.setProperty(Bookmark.BOOKMARK_DESCRIPTION, description);

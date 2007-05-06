@@ -43,6 +43,7 @@
 
 package de.anomic.server;
 
+import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.Date;
@@ -266,7 +267,35 @@ public final class serverDate {
         return new String(result);
     }
     
-    // the following is only here to compare the kelondroDate with java-Date:
+    public static Date iso8601ToDate(String iso8601) throws ParseException{
+		String[] tmp=iso8601.split("T");
+	    if(tmp.length!=2){
+	        //Error parsing Date
+	        return new Date();
+	    }
+		String day=tmp[0];
+		String time=tmp[1];
+		if(time.length()>8){
+			time=time.substring(0,8);
+		}
+		
+		Calendar date=Calendar.getInstance();
+		Calendar date2=Calendar.getInstance();
+		date.setTime(new SimpleDateFormat("yyyy-MM-dd").parse(day));
+		date2.setTime(new SimpleDateFormat("HH:mm:ss").parse(time));
+		
+		date.set(Calendar.HOUR_OF_DAY, date2.get(Calendar.HOUR_OF_DAY));
+		date.set(Calendar.MINUTE, date2.get(Calendar.MINUTE));
+		date.set(Calendar.SECOND, date2.get(Calendar.SECOND));
+		
+		return date.getTime();
+	}
+
+	public static String dateToiso8601(Date date){
+		return new SimpleDateFormat("yyyy-MM-dd").format(date)+"T"+(new SimpleDateFormat("HH:mm:ss")).format(date)+"Z";
+	}
+
+	// the following is only here to compare the kelondroDate with java-Date:
     private static TimeZone GMTTimeZone = TimeZone.getTimeZone("GMT");
     private static Calendar gregorian = new GregorianCalendar(GMTTimeZone);
     private static SimpleDateFormat testSFormatter = new SimpleDateFormat("yyyyMMddHHmmss");

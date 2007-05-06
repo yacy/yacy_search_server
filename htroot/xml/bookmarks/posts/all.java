@@ -52,6 +52,7 @@ import de.anomic.data.bookmarksDB;
 import de.anomic.http.httpHeader;
 import de.anomic.plasma.plasmaSwitchboard;
 import de.anomic.server.serverCodings;
+import de.anomic.server.serverDate;
 import de.anomic.server.serverObjects;
 import de.anomic.server.serverSwitch;
 
@@ -77,7 +78,7 @@ public class all {
             prop.putSafeXML("posts_"+count+"_description", bookmark.getDescription());
             prop.putSafeXML("posts_"+count+"_md5", serverCodings.encodeMD5Hex(bookmark.getUrl()));
             date=new Date(bookmark.getTimeStamp());
-            prop.putSafeXML("posts_"+count+"_time", bookmarksDB.dateToiso8601(date));
+            prop.putSafeXML("posts_"+count+"_time", serverDate.dateToiso8601(date));
             prop.putSafeXML("posts_"+count+"_tags", bookmark.getTagsString().replaceAll(","," "));
             count++;
         }

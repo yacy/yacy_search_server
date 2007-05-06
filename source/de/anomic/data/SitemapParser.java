@@ -46,6 +46,7 @@ package de.anomic.data;
 
 import java.io.InputStream;
 import java.net.MalformedURLException;
+import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.Locale;
@@ -66,6 +67,7 @@ import de.anomic.plasma.plasmaCrawlProfile;
 import de.anomic.plasma.plasmaCrawlZURL;
 import de.anomic.plasma.plasmaSwitchboard;
 import de.anomic.plasma.plasmaURL;
+import de.anomic.server.serverDate;
 import de.anomic.server.logging.serverLog;
 import de.anomic.yacy.yacyCore;
 
@@ -102,10 +104,6 @@ public class SitemapParser extends DefaultHandler {
 	public static final String SITEMAP_URL_CHANGEFREQ = "changefreq";
 	public static final String SITEMAP_URL_PRIORITY = "priority";
 	
-	// TODO: which local settings should we use here?
-	private final SimpleDateFormat dateFormater = new SimpleDateFormat("EEE, dd MMM yyyy HH:mm:ss zzz", Locale.US);
-	
-	
 	/**
 	 * The crawling profile used to parse the URLs contained in the sitemap file
 	 */
@@ -136,25 +134,45 @@ public class SitemapParser extends DefaultHandler {
 	 */
 	private int urlCounter = 0;
 	
+	/**
+	 * the logger
+	 */
 	private serverLog logger = new serverLog("SITEMAP");
 	
+	/**
+	 * The location of the sitemap file
+	 */
 	private URL siteMapURL = null;
+	
+	/**
+	 * The next URL to enqueue
+	 */
 	private String nextURL = null;
+	
+	/**
+	 * last modification date of the {@link #nextURL}
+	 */
 	private Date lastMod = null;
 	
 	
 	public SitemapParser(plasmaSwitchboard sb, URL sitemap, plasmaCrawlProfile.entry theCrawlingProfile) {
 		if (sb == null) throw new NullPointerException("The switchboard must not be null");
+		if (sitemap == null) throw new NullPointerException("The sitemap URL must not be null");
 		this.switchboard = sb;
 		this.siteMapURL = sitemap;		
 		
 		if (theCrawlingProfile == null) {
+			// create a new profile
 			this.crawlingProfile = createProfile(this.siteMapURL.getHost(),this.siteMapURL.toString());
 		} else {
+			// use an existing profile
 			this.crawlingProfile = theCrawlingProfile;
 		}
 	}
 	
+	/**
+	 * Function to download and parse the sitemap file
+	 */
 	public void parse() {
 		// download document
 		httpc remote = null;
@@ -168,7 +186,8 @@ public class SitemapParser extends DefaultHandler {
 			
 			httpc.response res = remote.GET(this.siteMapURL.getFile(), null);
 			if (res.statusCode != 200) {
-				throw new Exception("Unable to download the sitemap file. Server returned status: " + res.status);
+				this.logger.logWarning("Unable to download the sitemap file " + this.siteMapURL + "\nServer returned status: " + res.status);
+				return;
 			}
 			
 			// getting some metadata
@@ -180,36 +199,45 @@ public class SitemapParser extends DefaultHandler {
 				 contentMimeType.equals("application/x-gzip") ||
 				 contentMimeType.equals("application/gzip")			
 			)) {
+				this.logger.logFine("Sitemap file has mimetype " + contentMimeType);
 				contentStream =  new GZIPInputStream(contentStream);
 			}
 			
 			this.counterStream = new httpdByteCountInputStream(contentStream,null);
 			
 			// parse it
+			this.logger.logInfo("Start parsing sitemap file " + this.siteMapURL 
+					+ "\n\tMimeType: " + contentMimeType 
+					+ "\n\tLength:   " + this.contentLength);
 			SAXParser saxParser = SAXParserFactory.newInstance().newSAXParser();
 			saxParser.parse(this.counterStream, this);
 		} catch (Exception e) {
-			e.printStackTrace();
+			this.logger.logWarning("Unable to parse sitemap file " + this.siteMapURL,e);
 		} finally {
-			if (remote != null) try { httpc.returnInstance(remote); } catch (Exception e) {}
+			if (remote != null) try { httpc.returnInstance(remote); } catch (Exception e) {/* ignore this */}
 		}
 	}
 	
+	/**
+	 * @return the total length of the sitemap file in bytes or <code>-1</code> if the length is unknown
+	 */
 	public long getTotalLength() {
 		return this.contentLength;
 	}
 	
+	/**
+	 * @return the amount of bytes of the sitemap file that were downloaded so far 
+	 */
 	public long getProcessedLength() {
 		return (this.counterStream==null)?0:this.counterStream.getCount();
 	}
 	
+	/**
+	 * @return the amount of URLs that were successfully enqueued so far
+	 */
 	public long getUrlcount() {
 		return this.urlCounter;
-	}
-	
-	public void startDocument() throws SAXException {
-		// TODO: create a new crawling profile
-	}
+	}	
 	
 	/**
 	 * @param localName local name
@@ -236,11 +264,13 @@ public class SitemapParser extends DefaultHandler {
 	/**
 	 * @param localName local name
 	 * @param qName qualified name
+	 * @throws SAXException 
 	 * @see DefaultHandler#endElement(java.lang.String, java.lang.String, java.lang.String)
 	 */
-	public void endElement( String namespaceURI,
+	public void endElement( 
+			String namespaceURI,
 			String localName,
-			String qName ) {
+			String qName ) throws SAXException {
 		this.currentElement = "";
 		
 		if (qName.equalsIgnoreCase(SITEMAP_URL)) {
@@ -277,18 +307,22 @@ public class SitemapParser extends DefaultHandler {
 						this.crawlingProfile
 				);
 			} catch (InterruptedException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
+				throw new SAXException ("Parsing interrupted", e);
 			}
 			
 			if (error != null) {
 				try {
+					this.logger.logInfo("The URL '" + this.nextURL + "' can not be crawled. Reason: " + error);
+					
+					// insert URL into the error DB
 					plasmaCrawlZURL.Entry ee = this.switchboard.errorURL.newEntry(new URL(this.nextURL), error);
-				} catch (MalformedURLException e) {
-					// TODO Auto-generated catch block
-					e.printStackTrace();
-				}
+                    ee.store();
+                    this.switchboard.errorURL.stackPushEntry(ee);					
+				} catch (MalformedURLException e) {/* ignore this */ }
 			} else {
+				this.logger.logInfo("New URL '" + this.nextURL + "' added for crawling.");
+				
+				// count successfully added URLs
 				this.urlCounter++;
 			}
 		}		
@@ -298,18 +332,18 @@ public class SitemapParser extends DefaultHandler {
 		if (this.currentElement.equalsIgnoreCase(SITEMAP_URL_LOC)) {
 			// TODO: we need to decode the URL here
 			this.nextURL =(new String(buf,offset,len)).trim();
-			if (!this.nextURL.startsWith("http")) {
-				System.out.println(this.nextURL);
+			if (!this.nextURL.startsWith("http") && !this.nextURL.startsWith("https")) {
+				this.logger.logInfo("The url '" + this.nextURL + "' has a wrong format. Ignore it.");
+				this.nextURL = null;
 			}
-		} 
-//		else if (this.currentElement.equalsIgnoreCase(SITEMAP_URL_LASTMOD)) {
-//			try {
-//				this.lastMod = this.dateFormater.parse(new String(buf,offset,len));
-//			} catch (ParseException e) {
-//				// TODO Auto-generated catch block
-//				e.printStackTrace();
-//			}
-//		}
+		} else if (this.currentElement.equalsIgnoreCase(SITEMAP_URL_LASTMOD)) {
+			String dateStr = new String(buf,offset,len);
+			try {
+				this.lastMod = serverDate.iso8601ToDate(dateStr);
+			} catch (ParseException e) {
+				this.logger.logInfo("Unable to parse datestring '" + dateStr + "'");
+			}
+		}
 	}
 	
 	private plasmaCrawlProfile.entry createProfile(String domainName, String sitemapURL) {

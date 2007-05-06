@@ -62,6 +62,7 @@ import de.anomic.index.indexURLEntry;
 import de.anomic.net.URL;
 import de.anomic.plasma.plasmaParserDocument;
 import de.anomic.plasma.plasmaSwitchboard;
+import de.anomic.server.serverDate;
 import de.anomic.server.serverObjects;
 import de.anomic.server.serverSwitch;
 import de.anomic.yacy.yacyCore;
@@ -258,7 +259,7 @@ public class Bookmarks {
             prop.put("bookmarks_"+count+"_link", de.anomic.data.wikiCode.replaceXMLEntities(bookmark.getUrl()));
             prop.put("bookmarks_"+count+"_title", bookmark.getTitle());
             prop.put("bookmarks_"+count+"_description", bookmark.getDescription());
-            prop.put("bookmarks_"+count+"_date", bookmarksDB.dateToiso8601(new Date(bookmark.getTimeStamp())));
+            prop.put("bookmarks_"+count+"_date", serverDate.dateToiso8601(new Date(bookmark.getTimeStamp())));
             prop.put("bookmarks_"+count+"_rfc822date", httpc.dateString(new Date(bookmark.getTimeStamp())));
             prop.put("bookmarks_"+count+"_public", (bookmark.getPublic()? 1:0));
             
