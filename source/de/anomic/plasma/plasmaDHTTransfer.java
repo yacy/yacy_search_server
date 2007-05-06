@@ -260,8 +260,8 @@ public class plasmaDHTTransfer extends Thread {
         if (transferRWIResult != null && transferRWIResult.containsKey("pause")) {
             String pauseStr = (String) transferRWIResult.get("pause");
             try { pause = Integer.valueOf(pauseStr).intValue(); } catch (NumberFormatException numEx){}
-            if (pause < 0) pause = 60000;
-            else if (pause > 1800000) pause = 1800000;
+            if (pause < 0) pause = 5000;
+            else if (pause > 30000) pause = 30000;
         }        
         return pause;     
     }

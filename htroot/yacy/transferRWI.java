@@ -200,7 +200,7 @@ public final class transferRWI {
             result = "ok";
             
             if (checkLimit) {
-                pause = (sb.wordIndex.dhtInCacheSize() < 500) ? 0 : 60 * sb.wordIndex.dhtInCacheSize(); // estimation of necessary pause time
+                pause = (sb.wordIndex.dhtInCacheSize() < 500) ? 0 : sb.wordIndex.dhtInCacheSize(); // estimation of necessary pause time
             }
         }
 
