@@ -491,7 +491,7 @@ public final class yacy {
         } catch (Exception ee) {
             serverLog.logSevere("STARTUP", "FATAL ERROR: " + ee.getMessage(),ee);
         } finally {
-        	startupFinishedSync.notifyAll();
+        	startupFinishedSync.V();
         }
         serverLog.logConfig("SHUTDOWN", "goodbye. (this is the last line)");
         //try {
