@@ -154,6 +154,16 @@ public class Status {
         double thisVersion = Double.parseDouble(env.getConfig("version","0.1"));
         // cut off the SVN Rev in the Version
         try {thisVersion = Math.round(thisVersion*1000.0)/1000.0;} catch (NumberFormatException e) {}
+        
+        if ((adminaccess) && !(((plasmaSwitchboard) env).updaterCallback == null) && (((plasmaSwitchboard) env).updaterCallback.updateYaCyIsPossible() == true)){
+        	prop.put("hintVersionAvailable", 1);
+            prop.put("hintVersionAvailable_latestVersion", ((plasmaSwitchboard) env).updaterCallback.getYaCyUpdateReleaseVersion());
+            if ((post != null) && (post.containsKey("aquirerelease"))) {
+            	((plasmaSwitchboard) env).updaterCallback.grantYaCyUpdate();
+            }
+        }
+        
+        /*
         if ((adminaccess) && (yacyVersion.latestRelease >= (thisVersion+0.01))) { // only new Versions(not new SVN)
             if ((yacyVersion.latestMainRelease != null) ||
                 (yacyVersion.latestDevRelease != null)) {
@@ -168,7 +178,8 @@ public class Status {
         prop.putASIS("hintVersionDownload_versionResMain", (yacyVersion.latestMainRelease == null) ? "-" : yacyVersion.latestMainRelease.toAnchor());
         prop.putASIS("hintVersionDownload_versionResDev", (yacyVersion.latestDevRelease == null) ? "-" : yacyVersion.latestDevRelease.toAnchor());
         prop.put("hintVersionAvailable_latestVersion", Double.toString(yacyVersion.latestRelease));
-
+		*/
+        
         // hostname and port
         String extendedPortString = env.getConfig("port", "8080");
         int pos = extendedPortString.indexOf(":"); 
