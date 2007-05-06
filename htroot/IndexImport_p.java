@@ -51,6 +51,7 @@
 import java.io.File;
 import java.io.PrintStream;
 import java.util.Date;
+import java.util.HashMap;
 
 import de.anomic.http.httpHeader;
 import de.anomic.plasma.plasmaSwitchboard;
@@ -78,11 +79,12 @@ public final class IndexImport_p {
                     String importIndexSecondaryPath = (String) post.get("importIndexSecondaryPath");
                     String importType = (String) post.get("importType");
                     String cacheSizeStr = (String) post.get("cacheSize");
-                    int cacheSize = 8*1024*1024;
-                    try {
-                        cacheSize = Integer.valueOf(cacheSizeStr).intValue();
-                    } catch (NumberFormatException e) {}
                     boolean startImport = true;
+                    
+                    HashMap initParams = new HashMap();
+                    initParams.put("plasmaPath",importPlasmaPath);
+                    initParams.put("cacheSize",cacheSizeStr);
+                    initParams.put("preloadTime","100");
                     
 //                    // check if there is an already running thread with the same import path
 //                    Thread[] importThreads = new Thread[plasmaDbImporter.runningJobs.activeCount()*2];
@@ -100,7 +102,7 @@ public final class IndexImport_p {
                     if (startImport) {
                         dbImporter importerThread = switchboard.dbImportManager.getNewImporter(importType);
                         if (importerThread != null) {
-                            importerThread.init(new File(importPlasmaPath), new File(importIndexPrimaryPath), new File(importIndexSecondaryPath), cacheSize, 100);
+                            importerThread.init(initParams);
                             importerThread.startIt();                            
                         }
                         prop.put("LOCATION","");

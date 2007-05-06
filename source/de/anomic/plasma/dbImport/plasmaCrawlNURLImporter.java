@@ -2,6 +2,7 @@ package de.anomic.plasma.dbImport;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.TreeMap;
@@ -10,20 +11,22 @@ import de.anomic.plasma.plasmaCrawlEntry;
 import de.anomic.plasma.plasmaCrawlNURL;
 import de.anomic.plasma.plasmaCrawlProfile;
 import de.anomic.plasma.plasmaSwitchboard;
+import de.anomic.plasma.plasmaWordIndex;
 
 public class plasmaCrawlNURLImporter extends AbstractImporter implements dbImporter {
 
+	private File plasmaPath = null;
     private HashSet importProfileHandleCache = new HashSet();
     private plasmaCrawlProfile importProfileDB;
     private plasmaCrawlNURL importNurlDB;
+    private plasmaWordIndex wi;
     private int importStartSize;
     private int urlCount = 0;
     private int profileCount = 0;
-    private plasmaSwitchboard sb;
     
     public plasmaCrawlNURLImporter(plasmaSwitchboard theSb) {
-        super(theSb.wordIndex);
-        this.jobType="NURL";
+    	super("NURL",theSb);
+        this.wi = this.sb.wordIndex;
     }
 
     public long getEstimatedTime() {
@@ -31,7 +34,7 @@ public class plasmaCrawlNURLImporter extends AbstractImporter implements dbImpor
     }
 
     public String getJobName() {
-        return this.importPrimaryPath.toString();
+        return this.plasmaPath.toString();
     }
 
     public int getProcessingStatusPercent() {
@@ -47,10 +50,21 @@ public class plasmaCrawlNURLImporter extends AbstractImporter implements dbImpor
         return theStatus.toString();
     }
 
-    public void init(File plasmaPath, File indexPrimary, File indexSecondary, int theCacheSize, long preloadTime) {
-        super.init(indexPrimary, indexSecondary);
-        this.cacheSize = theCacheSize;
-        this.preloadTime = preloadTime;
+    public void init(HashMap initParams) throws ImporterException {
+        super.init(initParams);
+        
+        if (initParams == null || initParams.size() == 0) throw new IllegalArgumentException("Init parameters are missing");
+        if (!initParams.containsKey("plasmaPath")) throw new IllegalArgumentException("Init parameters 'plasmaPath' is missing");
+        if (!initParams.containsKey("cacheSize")) throw new IllegalArgumentException("Init parameters 'cacheSize' is missing");
+        if (!initParams.containsKey("preloadTime")) throw new IllegalArgumentException("Init parameters 'preloadTime' is missing");
+        
+        // TODO: we need more errorhandling here
+        this.plasmaPath = new File((String)initParams.get("plasmaPath"));      
+
+        this.cacheSize = Integer.valueOf((String)initParams.get("cacheSize")).intValue();
+        if (this.cacheSize < 2*1024*1024) this.cacheSize = 8*1024*1024;
+        
+        this.preloadTime = Long.valueOf((String)initParams.get("preloadTime")).longValue();        
         
         File noticeUrlDbFile = new File(plasmaPath,"urlNotice1.db");
         File profileDbFile = new File(plasmaPath, "crawlProfiles0.db");

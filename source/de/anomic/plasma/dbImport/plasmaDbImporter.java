@@ -1,6 +1,7 @@
 package de.anomic.plasma.dbImport;
 
 import java.io.File;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.TreeSet;
@@ -9,12 +10,23 @@ import de.anomic.index.indexContainer;
 import de.anomic.index.indexRWIEntry;
 import de.anomic.index.indexURLEntry;
 import de.anomic.kelondro.kelondroNaturalOrder;
+import de.anomic.plasma.plasmaSwitchboard;
 import de.anomic.plasma.plasmaWordIndex;
 import de.anomic.server.serverDate;
 
 public class plasmaDbImporter extends AbstractImporter implements dbImporter {
 
+	private File importPrimaryPath, importSecondaryPath;
+	
+	/**
+	 * the source word index (the DB to import)
+	 */
     private plasmaWordIndex importWordIndex;
+    
+    /**
+     * the destination word index (the home DB)
+     */
+    protected plasmaWordIndex homeWordIndex;
     private int importStartSize;   
 
     private String wordHash = "------------";
@@ -24,16 +36,22 @@ public class plasmaDbImporter extends AbstractImporter implements dbImporter {
     private long urlCounter = 0, wordCounter = 0, entryCounter = 0, notBoundEntryCounter = 0;
     
 
-    public plasmaDbImporter(plasmaWordIndex homeWI, plasmaWordIndex importWI) {
-        super(homeWI);
+    public plasmaDbImporter(plasmaSwitchboard sb, plasmaWordIndex homeWI, plasmaWordIndex importWI) {
+    	super("PLASMADB",sb);
+        this.homeWordIndex = homeWI;
         this.importWordIndex = importWI;
-        this.jobType = "PLASMADB";
     }
     
+    /**
+     * @see dbImporter#getJobName()
+     */
     public String getJobName() {
         return this.importPrimaryPath.toString();
     }
 
+    /**
+     * @see dbImporter#getStatus()
+     */
     public String getStatus() {
         StringBuffer theStatus = new StringBuffer();
         
@@ -46,11 +64,28 @@ public class plasmaDbImporter extends AbstractImporter implements dbImporter {
         return theStatus.toString();
     }
     
-    public void init(File plasmaPath, File thePrimaryPath, File theSecondaryPath, int theCacheSize, long preloadTime) {
-        super.init(thePrimaryPath, theSecondaryPath);
+    //public void init(File thePrimaryPath, File theSecondaryPath, int theCacheSize, long preloadTime) {
+    /**
+     * @throws ImporterException 
+     * @see dbImporter#init(HashMap)
+     */
+    public void init(HashMap initParams) throws ImporterException {
+        super.init(initParams);
+        
+        if (initParams == null || initParams.size() == 0) throw new IllegalArgumentException("Init parameters are missing");
+        if (!initParams.containsKey("primaryPath")) throw new IllegalArgumentException("Init parameters 'primaryPath' is missing");
+        if (!initParams.containsKey("secondaryPath")) throw new IllegalArgumentException("Init parameters 'secondaryPath' is missing");
+        if (!initParams.containsKey("cacheSize")) throw new IllegalArgumentException("Init parameters 'cacheSize' is missing");
+        if (!initParams.containsKey("preloadTime")) throw new IllegalArgumentException("Init parameters 'preloadTime' is missing");
+        
+        // TODO: we need more errorhandling here
+        this.importPrimaryPath = new File((String)initParams.get("primaryPath"));
+        this.importSecondaryPath = new File((String)initParams.get("secondaryPath"));        
 
-        this.cacheSize = theCacheSize;
+        this.cacheSize = Integer.valueOf((String)initParams.get("cacheSize")).intValue();
         if (this.cacheSize < 2*1024*1024) this.cacheSize = 8*1024*1024;
+        
+        this.preloadTime = Long.valueOf((String)initParams.get("preloadTime")).longValue();
         
         // configure import DB
         String errorMsg = null;
@@ -72,7 +107,7 @@ public class plasmaDbImporter extends AbstractImporter implements dbImporter {
         }
         
         this.log.logFine("Initializing source word index db.");
-        this.importWordIndex = new plasmaWordIndex(this.importPrimaryPath, importSecondaryPath, preloadTime / 2, this.log);
+        this.importWordIndex = new plasmaWordIndex(this.importPrimaryPath, this.importSecondaryPath, preloadTime / 2, this.log);
 
         this.importStartSize = this.importWordIndex.size();
     }
@@ -86,6 +121,9 @@ public class plasmaDbImporter extends AbstractImporter implements dbImporter {
         }
     }
 
+    /**
+     * @see dbImporter#getProcessingStatusPercent()
+     */
     public int getProcessingStatusPercent() {
         // thid seems to be better:
         // (this.importStartSize-this.importWordIndex.size())*100/((this.importStartSize==0)?1:this.importStartSize);
@@ -94,6 +132,9 @@ public class plasmaDbImporter extends AbstractImporter implements dbImporter {
         return (int)(this.wordCounter)/((this.importStartSize<100)?1:(this.importStartSize)/100);
     }
 
+    /**
+     * @see dbImporter#getElapsedTime()
+     */
     public long getEstimatedTime() {
         return (this.wordCounter==0)?0:((this.importStartSize*getElapsedTime())/this.wordCounter)-getElapsedTime();
     }
@@ -103,7 +144,7 @@ public class plasmaDbImporter extends AbstractImporter implements dbImporter {
         
         try {
             this.log.logInfo("Importing DB from '" + this.importPrimaryPath.getAbsolutePath() + "'/'" + this.importSecondaryPath.getAbsolutePath() + "'");
-            this.log.logInfo("Home word index contains " + wi.size() + " words and " + wi.loadedURL.size() + " URLs.");
+            this.log.logInfo("Home word index contains " + homeWordIndex.size() + " words and " + homeWordIndex.loadedURL.size() + " URLs.");
             this.log.logInfo("Import word index contains " + this.importWordIndex.size() + " words and " + this.importWordIndex.loadedURL.size() + " URLs.");                        
             
             HashSet unknownUrlBuffer = new HashSet();
@@ -156,7 +197,7 @@ public class plasmaDbImporter extends AbstractImporter implements dbImporter {
                             if (urlEntry != null) {
 
                                 /* write it into the home url db */
-                                wi.loadedURL.store(urlEntry);
+                                homeWordIndex.loadedURL.store(urlEntry);
                                 importedUrlBuffer.add(urlHash);
                                 this.urlCounter++;
 
@@ -178,7 +219,7 @@ public class plasmaDbImporter extends AbstractImporter implements dbImporter {
                     if (isAborted()) break;
                     
                     // importing entity container to home db
-                    if (newContainer.size() > 0) { wi.addEntries(newContainer, System.currentTimeMillis(), false); }
+                    if (newContainer.size() > 0) { homeWordIndex.addEntries(newContainer, System.currentTimeMillis(), false); }
                     
                     // delete complete index entity file
                     this.importWordIndex.deleteContainer(this.wordHash);                 
@@ -198,7 +239,7 @@ public class plasmaDbImporter extends AbstractImporter implements dbImporter {
                                 "Speed: "+ 500*1000/duration + " word entities/s" +
                                 " | Elapsed time: " + serverDate.intervalToString(getElapsedTime()) +
                                 " | Estimated time: " + serverDate.intervalToString(getEstimatedTime()) + "\n" + 
-                                "Home Words = " + wi.size() + 
+                                "Home Words = " + homeWordIndex.size() + 
                                 " | Import Words = " + this.importWordIndex.size());
                         this.wordChunkStart = this.wordChunkEnd;
                         this.wordChunkStartHash = this.wordChunkEndHash;
@@ -221,7 +262,7 @@ public class plasmaDbImporter extends AbstractImporter implements dbImporter {
                 }
             }
             
-            this.log.logInfo("Home word index contains " + wi.size() + " words and " + wi.loadedURL.size() + " URLs.");
+            this.log.logInfo("Home word index contains " + homeWordIndex.size() + " words and " + homeWordIndex.loadedURL.size() + " URLs.");
             this.log.logInfo("Import word index contains " + this.importWordIndex.size() + " words and " + this.importWordIndex.loadedURL.size() + " URLs.");
         } catch (Exception e) {
             this.log.logSevere("Database import failed.",e);

@@ -137,7 +137,7 @@ public final class robotsParser{
                 // NEW: just ignore it
             } else if (line.startsWith(ROBOTS_COMMENT)) {
                 // we can ignore this. Just a comment line
-            } else if (line.startsWith(ROBOTS_SITEMAP)) {
+            } else if (lineUpper.startsWith(ROBOTS_SITEMAP)) {
                 pos = line.indexOf(" ");
                 if (pos != -1) {
                     sitemap = line.substring(pos).trim();
@@ -214,22 +214,55 @@ public final class robotsParser{
         return new Object[]{denyList,sitemap};
     }        
     
-    public static boolean isDisallowed(URL nexturl) {
-        if (nexturl == null) throw new IllegalArgumentException();               
-        
-        // generating the hostname:poart string needed to do a DB lookup
-        String urlHostPort = null;
-        int port = nexturl.getPort();
+    private static final int getPort(URL theURL) {
+        int port = theURL.getPort();
         if (port == -1) {
-            if (nexturl.getProtocol().equalsIgnoreCase("http")) {
+            if (theURL.getProtocol().equalsIgnoreCase("http")) {
                 port = 80;
-            } else if (nexturl.getProtocol().equalsIgnoreCase("https")) {
+            } else if (theURL.getProtocol().equalsIgnoreCase("https")) {
                 port = 443;
             }
             
         }
-        urlHostPort = nexturl.getHost() + ":" + port;
-        urlHostPort = urlHostPort.toLowerCase().intern();
+        return port;
+    }
+    
+    private static final String getHostPort(URL theURL) {
+        String urlHostPort = null;
+        int port = getPort(theURL);
+        urlHostPort = theURL.getHost() + ":" + port;
+        urlHostPort = urlHostPort.toLowerCase().intern();    
+        
+        return urlHostPort;
+    }
+    
+    public static URL getSitemapURL(URL theURL) {
+    	if (theURL == null) throw new IllegalArgumentException(); 
+    	URL sitemapURL = null;
+    	
+        // generating the hostname:poart string needed to do a DB lookup
+        String urlHostPort = getHostPort(theURL);    	
+    	
+        plasmaCrawlRobotsTxt.Entry robotsTxt4Host = null;
+        synchronized(urlHostPort) {
+            // doing a DB lookup to determine if the robots data is already available
+            robotsTxt4Host = plasmaSwitchboard.robots.getEntry(urlHostPort);
+        }                
+        if (robotsTxt4Host == null) return null;
+                       
+        try {
+        	String sitemapUrlStr = robotsTxt4Host.getSitemap();
+        	if (sitemapUrlStr != null) sitemapURL = new URL(sitemapUrlStr);
+        } catch (MalformedURLException e) {/* ignore this */}
+        
+        return sitemapURL;
+    }
+    
+    public static boolean isDisallowed(URL nexturl) {
+        if (nexturl == null) throw new IllegalArgumentException();               
+        
+        // generating the hostname:poart string needed to do a DB lookup
+        String urlHostPort = getHostPort(nexturl);
         
         plasmaCrawlRobotsTxt.Entry robotsTxt4Host = null;
         synchronized(urlHostPort) {
@@ -245,7 +278,7 @@ public final class robotsParser{
                 URL robotsURL = null;
                 // generating the proper url to download the robots txt
                 try {                 
-                    robotsURL = new URL(nexturl.getProtocol(),nexturl.getHost(),port,"/robots.txt");
+                    robotsURL = new URL(nexturl.getProtocol(),nexturl.getHost(),getPort(nexturl),"/robots.txt");
                 } catch (MalformedURLException e) {
                     serverLog.logSevere("ROBOTS","Unable to generate robots.txt URL for URL '" + nexturl.toString() + "'.");
                     return false;

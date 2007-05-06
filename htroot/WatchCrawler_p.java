@@ -35,6 +35,7 @@ import java.util.Map;
 import java.util.regex.Pattern;
 import java.util.regex.PatternSyntaxException;
 
+import de.anomic.data.SitemapParser;
 import de.anomic.data.wikiCode;
 import de.anomic.htmlFilter.htmlFilterContentScraper;
 import de.anomic.htmlFilter.htmlFilterWriter;
@@ -44,6 +45,7 @@ import de.anomic.plasma.plasmaCrawlProfile;
 import de.anomic.plasma.plasmaCrawlZURL;
 import de.anomic.plasma.plasmaSwitchboard;
 import de.anomic.plasma.plasmaURL;
+import de.anomic.plasma.dbImport.dbImporter;
 import de.anomic.server.serverFileUtils;
 import de.anomic.server.serverObjects;
 import de.anomic.server.serverSwitch;
@@ -52,6 +54,10 @@ import de.anomic.yacy.yacyNewsPool;
 import de.anomic.yacy.yacyNewsRecord;
 
 public class WatchCrawler_p {
+	public static final String CRAWLING_MODE_URL = "url";
+	public static final String CRAWLING_MODE_FILE = "file";
+	public static final String CRAWLING_MODE_SITEMAP = "sitemap";
+	
 
     // this servlet does NOT create the WatchCrawler page content!
     // this servlet starts a web crawl. The interface for entering the web crawl parameters is in IndexCreate_p.html
@@ -144,7 +150,7 @@ public class WatchCrawler_p {
                     env.setConfig("xpstopw", (xpstopw) ? "true" : "false");
                     
                     String crawlingMode = post.get("crawlingMode","url");
-                    if (crawlingMode.equals("url")) {
+                    if (crawlingMode.equals(CRAWLING_MODE_URL)) {
                         // getting the crawljob start url
                         String crawlingStart = post.get("crawlingURL","");
                         crawlingStart = crawlingStart.trim();
@@ -236,7 +242,7 @@ public class WatchCrawler_p {
                             e.printStackTrace();
                         }                        
                         
-                    } else if (crawlingMode.equals("file")) {                        
+                    } else if (crawlingMode.equals(CRAWLING_MODE_FILE)) {                        
                         if (post.containsKey("crawlingFile")) {
                             // getting the name of the uploaded file
                             String fileName = (String) post.get("crawlingFile");  
@@ -316,6 +322,38 @@ public class WatchCrawler_p {
                                 e.printStackTrace();                                
                             }
                         }                        
+                    } else if (crawlingMode.equals(CRAWLING_MODE_SITEMAP)) { 
+                    	String sitemapURLStr = null;
+                    	try {
+                    		// getting the sitemap URL
+                    		sitemapURLStr = post.get("sitemapURL","");
+                    		
+                    		// create a new profile
+                    		plasmaCrawlProfile.entry pe = switchboard.profiles.newEntry(
+                    				sitemapURLStr, sitemapURLStr, newcrawlingfilter, newcrawlingfilter,
+                    				newcrawlingdepth, newcrawlingdepth,
+                    				crawlingIfOlder, crawlingDomFilterDepth, crawlingDomMaxPages,
+                    				crawlingQ,
+                    				indexText, indexMedia,
+                    				storeHTCache, true, crawlOrder, xsstopw, xdstopw, xpstopw);
+                    		
+                    		// create a new sitemap importer             
+                    		dbImporter importerThread = switchboard.dbImportManager.getNewImporter("sitemap");
+                    		if (importerThread != null) {
+                    			HashMap initParams = new HashMap();
+                    			initParams.put("sitemapURL",sitemapURLStr);
+                    			initParams.put("crawlingProfile",pe.handle());
+                    			
+                    			importerThread.init(initParams);
+                    			importerThread.startIt();                            
+                    		}              
+                    	} catch (Exception e) {
+                    		// mist
+                    		prop.put("info", 6);//Error with url
+                    		prop.put("info_crawlingStart", sitemapURLStr);
+                    		prop.put("info_error", e.getMessage());
+                    		e.printStackTrace();                    		
+                    	}
                     }
                 }
             }

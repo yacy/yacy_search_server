@@ -101,11 +101,18 @@ public class getpageinfo_p {
             }
             if(actions.indexOf("robots")>=0){
                 try {
-                    if(robotsParser.isDisallowed(new URL(url))){
+                	URL theURL = new URL(url);
+                	
+                	// determine if crawling of the current URL is allowed
+                    if(robotsParser.isDisallowed(theURL)){
                         prop.put("robots-allowed", 0);
                     }else{
                         prop.put("robots-allowed", 1);
                     }
+                    
+                    // get the sitemap URL of the domain
+                    URL sitemapURL = robotsParser.getSitemapURL(theURL);
+                    prop.put("sitemap", (sitemapURL==null)?"":sitemapURL.toString());
                 } catch (MalformedURLException e) {}
             }
             

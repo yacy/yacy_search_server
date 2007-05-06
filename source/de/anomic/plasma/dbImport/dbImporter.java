@@ -1,6 +1,7 @@
 package de.anomic.plasma.dbImport;
 
-import java.io.File;
+import java.util.HashMap;
+
 
 public interface dbImporter {
 
@@ -18,13 +19,12 @@ public interface dbImporter {
     public int getProcessingStatusPercent();
     
     public int getJobID();
+    public void setJobID(int id);
     public String getJobName();
     public String getJobType();
-    public File getPrimaryImportPath();
-    public File getSecondaryImportPath();
     public String getError();
-    public String getStatus();
-    
-    public void init(File plasmaPath, File indexPrimaryPath, File indexSecondaryPath, int cacheSize, long preloadTime);
+    public String getStatus();    
+    //public void init(File plasmaPath, File indexPrimaryPath, File indexSecondaryPath, int cacheSize, long preloadTime);
+    public void init(HashMap initParams) throws ImporterException;
     public void startIt();    
 }

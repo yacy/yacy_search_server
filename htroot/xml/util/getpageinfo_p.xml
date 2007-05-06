@@ -2,4 +2,5 @@
 <pageinfo>
   <title>#[title]#</title>
   <robots>#(robots-allowed)#0::1::#(/robots-allowed)#</robots>
+  <sitemap>#[sitemap]#</sitemap>
 </pageinfo>

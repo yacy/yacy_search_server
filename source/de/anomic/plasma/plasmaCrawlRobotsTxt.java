@@ -200,7 +200,7 @@ public class plasmaCrawlRobotsTxt {
         }    
         
         public String getSitemap() {
-            return this.mem.containsKey(SITEMAP)? (String)this.mem.get(LOADED_DATE): null;
+            return this.mem.containsKey(SITEMAP)? (String)this.mem.get(SITEMAP): null;
         }
         
         public Date getLoadedDate() {

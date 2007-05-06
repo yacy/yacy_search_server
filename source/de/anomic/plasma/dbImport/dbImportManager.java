@@ -16,18 +16,18 @@ public class dbImportManager {
         this.sb = theSb;
     }
     
-    public int getJobID() {
+    private int generateUniqueJobID() {
         int jobID;
-        synchronized(runningJobs) {
-            jobID = currMaxJobNr;
-            currMaxJobNr++;
+        synchronized(this.runningJobs) {
+            jobID = this.currMaxJobNr;
+            this.currMaxJobNr++;
         }
         return jobID;
     }
     
     public dbImporter[] getRunningImporter() {
-        Thread[] importThreads = new Thread[runningJobs.activeCount()*2];
-        int activeCount = runningJobs.enumerate(importThreads);
+        Thread[] importThreads = new Thread[this.runningJobs.activeCount()*2];
+        int activeCount = this.runningJobs.enumerate(importThreads);
         dbImporter[] importers = new dbImporter[activeCount];
         for (int i=0; i<activeCount; i++) {
             importers[i] = (dbImporter) importThreads[i];
@@ -36,7 +36,7 @@ public class dbImportManager {
     }
     
     public dbImporter[] getFinishedImporter() {
-        return (dbImporter[]) finishedJobs.toArray(new dbImporter[finishedJobs.size()]);
+        return (dbImporter[]) this.finishedJobs.toArray(new dbImporter[this.finishedJobs.size()]);
     }
     
     public dbImporter getImporterByID(int jobID) {
@@ -57,10 +57,18 @@ public class dbImportManager {
         if (type == null) return null;
         if (type.length() == 0) return null;
         
+        // create a new importer thread
         dbImporter newImporter = null;
         if (type.equalsIgnoreCase("NURL")) {
             newImporter = new plasmaCrawlNURLImporter(this.sb);
+        } else if (type.equalsIgnoreCase("sitemap")) {
+        	newImporter = new SitemapImporter(this.sb);
         }
+        
+        // assign a job ID to it
+        newImporter.setJobID(this.generateUniqueJobID());
+        
+        // return the newly created importer
         return newImporter;
     }
     
@@ -86,7 +94,7 @@ public class dbImportManager {
             for ( int currentThreadIdx = 0; currentThreadIdx < threadCount; currentThreadIdx++ )  {
                 Thread currentThread = threadList[currentThreadIdx];
                 if (currentThread.isAlive()) {
-                    ((plasmaDbImporter)currentThread).stopIt();
+                    ((dbImporter)currentThread).stopIt();
                 }
             }      
             

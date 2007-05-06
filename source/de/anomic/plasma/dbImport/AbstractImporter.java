@@ -1,19 +1,18 @@
 package de.anomic.plasma.dbImport;
 
-import java.io.File;
+import java.util.HashMap;
 
-import de.anomic.plasma.plasmaWordIndex;
+import de.anomic.plasma.plasmaSwitchboard;
 import de.anomic.server.logging.serverLog;
 
 public abstract class AbstractImporter extends Thread implements dbImporter{
 
-    protected int jobID;
+    protected int jobID = -1;
     protected String jobType;
     protected serverLog log;
     protected boolean stopped = false;
     protected boolean paused = false;
     
-    protected File importPrimaryPath, importSecondaryPath;
     protected int cacheSize;
     protected long preloadTime;
     
@@ -22,29 +21,26 @@ public abstract class AbstractImporter extends Thread implements dbImporter{
     protected long globalPauseLast;
     protected long globalPauseDuration;
     protected String error;
-    protected plasmaWordIndex wi;
     
-    public AbstractImporter(plasmaWordIndex wi) {
-        //super(theSb.dbImportManager.runningJobs,"");
-        this.wi = wi;
+    protected plasmaSwitchboard sb;
+
+    AbstractImporter(String theJobType, plasmaSwitchboard switchboard) {
+    	super(switchboard.dbImportManager.runningJobs,"");
+    	this.jobType = theJobType;
+    	this.sb = switchboard;
     }
     
     public String getError() {
         return this.error;
     }    
     
-    public void init(File thePrimaryPath, File theSecondaryPath) {
-        if (thePrimaryPath == null) throw new NullPointerException("The Primary Import path must not be null.");
-        if (theSecondaryPath == null) throw new NullPointerException("The Secondary Import path must not be null.");
-        this.importPrimaryPath = thePrimaryPath;
-        this.importSecondaryPath = theSecondaryPath;
-        
-        // getting a job id from the import manager
-        //this.jobID = this.sb.dbImportManager.getJobID();
-        
+    /**
+     * @see dbImporter#init(HashMap)
+     */
+    public void init(HashMap initparams) throws ImporterException {
         // initializing the logger and setting a more verbose thread name
         this.log = new serverLog("IMPORT_" + this.jobType + "_" + this.jobID);
-        this.setName("IMPORT_" + this.jobType /*+ "_" + this.sb.dbImportManager.getJobID()*/);
+        this.setName("IMPORT_" + this.jobType + "_" + this.jobID);
     }
     
     public void startIt() {
@@ -101,6 +97,11 @@ public abstract class AbstractImporter extends Thread implements dbImporter{
         return this.jobID;
     }
     
+    public void setJobID(int id) {
+    	if (this.jobID != -1) throw new IllegalStateException("job ID already assigned");
+    	this.jobID = id;
+    }
+    
     public long getTotalRuntime() {
         return (this.globalEnd == 0)?System.currentTimeMillis()-(this.globalStart+this.globalPauseDuration):this.globalEnd-(this.globalStart+this.globalPauseDuration);
     }    
@@ -115,13 +116,6 @@ public abstract class AbstractImporter extends Thread implements dbImporter{
 
     public String getJobType() {
         return this.jobType;
-    }
-    
-    public File getPrimaryImportPath() {
-        return this.importPrimaryPath;
-    }
-    public File getSecondaryImportPath() {
-        return this.importSecondaryPath;
     }
     
     public abstract long getEstimatedTime();
