@@ -129,7 +129,7 @@ public class PerformanceMemory_p {
             prop.put("TableList_" + c + "_tableIndexPath", ((p = filename.indexOf("DATA")) < 0) ? filename : filename.substring(p));
             prop.put("TableList_" + c + "_tableIndexChunkSize", map.get("tableIndexChunkSize"));
             prop.put("TableList_" + c + "_tableIndexCount", map.get("tableIndexCount"));
-            prop.put("TableList_" + c + "_tableIndexMem", map.get("tableIndexCount"));
+            prop.put("TableList_" + c + "_tableIndexMem", memstr(mem));
             c++;
         }
         prop.put("TableList", c);
@@ -147,7 +147,7 @@ public class PerformanceMemory_p {
             prop.put("NodeList_" + c + "_nodeCachePath", ((p = filename.indexOf("DATA")) < 0) ? filename : filename.substring(p));
             prop.put("NodeList_" + c + "_nodeChunkSize", map.get("nodeChunkSize"));
             prop.put("NodeList_" + c + "_nodeCacheCount", map.get("nodeCacheCount"));
-            prop.put("NodeList_" + c + "_nodeCacheMem", mem / (1024 * 1024));
+            prop.put("NodeList_" + c + "_nodeCacheMem", memstr(mem));
             prop.put("NodeList_" + c + "_nodeCacheReadHit", map.get("nodeCacheReadHit"));
             prop.put("NodeList_" + c + "_nodeCacheReadMiss", map.get("nodeCacheReadMiss"));
             prop.put("NodeList_" + c + "_nodeCacheWriteUnique", map.get("nodeCacheWriteUnique"));
@@ -175,7 +175,7 @@ public class PerformanceMemory_p {
             totalhitmem += hitmem;
             prop.put("ObjectList_" + c + "_objectHitChunkSize", map.get("objectHitChunkSize"));
             prop.put("ObjectList_" + c + "_objectHitCacheCount", map.get("objectHitCacheCount"));
-            prop.put("ObjectList_" + c + "_objectHitCacheMem", hitmem / (1024 * 1024));
+            prop.put("ObjectList_" + c + "_objectHitCacheMem", memstr(hitmem));
             prop.put("ObjectList_" + c + "_objectHitCacheReadHit", map.get("objectHitCacheReadHit"));
             prop.put("ObjectList_" + c + "_objectHitCacheReadMiss", map.get("objectHitCacheReadMiss"));
             prop.put("ObjectList_" + c + "_objectHitCacheWriteUnique", map.get("objectHitCacheWriteUnique"));
@@ -188,7 +188,7 @@ public class PerformanceMemory_p {
             totalmissmem += missmem;
             prop.put("ObjectList_" + c + "_objectMissChunkSize", map.get("objectMissChunkSize"));
             prop.put("ObjectList_" + c + "_objectMissCacheCount", map.get("objectMissCacheCount"));
-            prop.put("ObjectList_" + c + "_objectMissCacheMem", missmem / (1024 * 1024));
+            prop.put("ObjectList_" + c + "_objectMissCacheMem", memstr(missmem));
             prop.put("ObjectList_" + c + "_objectMissCacheReadHit", map.get("objectMissCacheReadHit"));
             prop.put("ObjectList_" + c + "_objectMissCacheReadMiss", map.get("objectMissCacheReadMiss"));
             prop.put("ObjectList_" + c + "_objectMissCacheWriteUnique", map.get("objectMissCacheWriteUnique"));
@@ -219,5 +219,9 @@ public class PerformanceMemory_p {
         prop.put("blacklistcache.size",Long.toString(amount));
         // return rewrite values for templates
         return prop;
+    }
+    
+    private static final String memstr(long mem) {
+    	return (mem == 0) ? "-" : ((mem < 1024*1024) ? ((mem / 1024) + " KB") : (mem / (1024 * 1024) + " MB"));
     }
 }
