@@ -141,8 +141,23 @@ public final class yacy {
     private static final String copyright = "[ YaCy v" + vString + ", build " + vDATE + " by Michael Christen / www.yacy.net ]";
     private static final String hline = "-------------------------------------------------------------------------------";
    
-    static serverSemaphore sbSync = new serverSemaphore(0);
-    static plasmaSwitchboard sb = null; 
+    /**
+     * a reference to the {@link plasmaSwitchboard} created by the
+     * {@link yacy#startup(String, long, long)} method.
+     */
+    private static plasmaSwitchboard sb = null;
+    
+    /**
+     * Semaphore needed by {@link yacy#setUpdaterCallback(serverUpdaterCallback)} to block 
+     * until the {@link plasmaSwitchboard }object was created.
+     */
+    private static serverSemaphore sbSync = new serverSemaphore(0);
+    
+    /**
+     * Semaphore needed by {@link yacy#waitForFinishedStartup()} to block 
+     * until startup has finished
+     */
+    private static serverSemaphore startupFinishedSync = new serverSemaphore(0);
     
     /**
     * Converts combined version-string to a pretty string, e.g. "0.435/01818" or "dev/01818" (development version) or "dev/00000" (in case of wrong input)
@@ -441,6 +456,9 @@ public final class yacy {
                         sb.setConfig("memoryTotalAfterInitAGC", Runtime.getRuntime().totalMemory());
                     //} catch (ConcurrentModificationException e) {}
                     
+                    // signal finished startup
+                    startupFinishedSync.V();
+                        
                     // wait for server shutdown
                     try {
                         sb.waitForShutdown();
@@ -472,6 +490,8 @@ public final class yacy {
             }
         } catch (Exception ee) {
             serverLog.logSevere("STARTUP", "FATAL ERROR: " + ee.getMessage(),ee);
+        } finally {
+        	startupFinishedSync.notifyAll();
         }
         serverLog.logConfig("SHUTDOWN", "goodbye. (this is the last line)");
         //try {
@@ -532,6 +552,15 @@ public final class yacy {
     	sbSync.P();    	
     	sb.updaterCallback = updaterCallback;
     	sbSync.V();
+    }
+    
+    /**
+     * Function allowing the updater to block until the startup has finished 
+     * @throws InterruptedException
+     */
+    public static void waitForFinishedStartup() throws InterruptedException {
+    	startupFinishedSync.P();
+    	startupFinishedSync.V();
     }
     
     /**
