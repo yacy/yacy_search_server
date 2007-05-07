@@ -61,7 +61,6 @@ import de.anomic.server.serverObjects;
 import de.anomic.server.serverSwitch;
 import de.anomic.yacy.yacyCore;
 import de.anomic.yacy.yacySeed;
-import de.anomic.yacy.yacyVersion;
 
 public class Status {
 
@@ -248,10 +247,10 @@ public class Status {
         final String peerStatus = ((yacyCore.seedDB.mySeed == null) ? yacySeed.PEERTYPE_VIRGIN : yacyCore.seedDB.mySeed.get(yacySeed.PEERTYPE, yacySeed.PEERTYPE_VIRGIN));
         if (peerStatus.equals(yacySeed.PEERTYPE_VIRGIN)) {
             prop.put(PEERSTATUS, 0);
-            prop.put("hintStatusVirgin", 1);
+            prop.put("urgentStatusVirgin", 1);
         } else if (peerStatus.equals(yacySeed.PEERTYPE_JUNIOR)) {
             prop.put(PEERSTATUS, 1);
-            prop.put("hintStatusJunior", 1);
+            prop.put("warningStatusJunior", 1);
         } else if (peerStatus.equals(yacySeed.PEERTYPE_SENIOR)) {
             prop.put(PEERSTATUS, 2);
             prop.put("hintStatusSenior", 1);
