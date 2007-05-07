@@ -24,14 +24,14 @@ function handleResponse(){
         if(robotsOK==1){
         	img=document.createElement("img");
         	img.setAttribute("src", "/env/grafics/ok.png");
-        	img.setAttribute("width", "24px");
-        	img.setAttribute("height", "24px");
+        	img.setAttribute("width", "32px");
+        	img.setAttribute("height", "32px");
         	robotsOKspan.appendChild(img);
         }else if(robotsOK==0){
 			img=document.createElement("img");
-        	img.setAttribute("src", "/env/grafics/failed.png");
-        	img.setAttribute("width", "24px");
-        	img.setAttribute("height", "24px");
+        	img.setAttribute("src", "/env/grafics/bad.png");
+        	img.setAttribute("width", "32px");
+        	img.setAttribute("height", "32px");
         	robotsOKspan.appendChild(img);
         	robotsOKspan.appendChild(img);
         }else{
