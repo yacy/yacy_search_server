@@ -1714,27 +1714,40 @@ Auto pop-up of status page on start-up:==Automatisches Pop-Up der Status-Seite b
 #---------------------------
 System-, Index- and Peer-Status==System-, Index- und Peer-Status
 Welcome to YaCy!==Willkommen bei YaCy!
+Your settings are _not_ protected!</strong>==Ihre Einstellungen sind _nicht_ mit einem Kennwort gesch&uuml;tzt!</strong>
+Please open the <a href="ConfigBasic.html">settings</a> page <strong>immediately</strong>==Bitte &ouml;ffnen Sie die <a href="ConfigBasic.html">Einstellungen-Seite</a> <strong>sofort</strong>
+and set an administration password.==und geben Sie ein Administrator Passwort ein.
+You have not published your peer seed yet. This happens automatically, just wait.==Ihr Peer ist dem Netzwerk noch nicht bekannt. Warten Sie noch ein wenig, dies geschieht automatisch.
+While you have this status you are not allowed to search other peers.==W&auml;hrend Sie diesen Status haben, ist es Ihnen nicht erlaubt andere Peers zu durchsuchen.
+The peer must go online to get a peer address.==Ihr Peer muss online gehen, um eine Adresse zu bekommen.
+If you don't know how to configure your system to use a proxy,==Wenn Sie nicht wissen, wie Sie Ihr System konfigurieren, sodass es einen Proxy benutzt,
+see the <a==lesen Sie die <a
+installation instructions</a>.==Installationsanleitung</a>.
+You cannot be reached from outside.==Ihr Peer kann nicht von au&szlig;en erreicht werden.
+A possible reason is that you are behind a firewall, NAT or Router.==Ein m&ouml;glicher Grund ist, dass Sie sich hinter einer Firewall, NAT oder einem Router befinden.
+But you can <a href="index.html">search the internet</a> using the other peers'==Trotzdem k&ouml;nnen Sie <a href="index.html">das Internet durchsuchen</a>, indem Sie den globalen Index
+global index on your own search page.==der anderen Peers von Ihrer Suchseite aus benutzen.
+We encourage you to open your firewall for the port you configured \(usually: 8080\),==Wir m&ouml;chten Sie ermutigen den Port, den Sie f&uuml;r YaCy eingestellt haben (Vorgabe: 8080) in Ihrer Firewall zu &ouml;ffnen,
+or to set up a 'virtual server' in your router settings \(often called DMZ\).==oder einen "virtuellen Server" in Ihrem Router aufzusetzten (oft auch DMZ genannt).
+Please be fair, contribute your own index to the global index.==Bitte seien Sie fair und tragen Sie Ihren Teil zum globalen Index bei!
+Latest public version is==Die neueste stabile Version ist
+You can download a more recent version of YaCy. Click here to install this update and restart YaCy:==Sie k&ouml;nnen eine aktuellere Version von YaCy herunterladen. Klicken Sie hier, um dieses Update zu installieren und YaCy neu zu starten: 
+#"Update YaCy"=="Update YaCy"
+Install YaCy==Installiere YaCy
+You are running a server in senior mode and you support the global internet index,==Sie lassen YaCy bei sich im Senior Modus laufen und unterst&uuml;tzen den globalen Index,
+which you can also <a href="index.html">search yourself</a>.==den Sie auch selbst <a href="index.html">durchsuchen</a> k&ouml;nnen.
+You have a principal peer because you publish your seed-list to a public accessible server==Sie haben einen Principal Peer, weil Sie Ihre Seed-Liste auf einen &ouml;ffentlich zug&auml;nglichen Server hoch laden,
+where it can be retrieved using the URL==von wo aus sie unter folgender Adresse erreichbar ist:
+Your Web Page Indexer is idle. You can start your own web crawl <a href="IndexCreate_p.html">here</a>==Ihr Webseiten Indexierer ist unt&auml;tig. Sie k&ouml;nnen <a href="IndexCreate_p.html">hier</a> einen Web Crawl starten 
+Your Web Page Indexer is busy. You can monitor your web crawl <a href="WatchCrawler_p.html">here</a>==Ihr Webseiten Indexierer ist besch&auml;ftigt. Sie k&ouml;nnen Ihren Web Crawl <a href="WatchCrawler_p.html">hier</a> kontrollieren
 Restart==Neustarten
 "Only the administrator may restart this peer"=="Nur der Administrator darf den Peer neustarten"
 Shutdown==Herunterfahren
 "Only the administrator may shutdown this peer"=="Nur der Administrator darf den Peer herunterfahren"
 Public System Properties==Allgemeine Systemangaben
 System version==Systemversion
-the latest public version is==Die neueste stabile Version ist
-Click here to==Klicken Sie
-download</a> it.==hier</a>, um sie herunterzuladen.
 This&nbsp;peer's&nbsp;address==Adresse dieses Peers
-#Not assigned==nicht zugewiesen
-Not assigned. The peer must go online to get an address.==Nicht zugewiesen. Ihr Peer muss online gehen, um eine Adresse zu bekommen.
-#---
-The peer does not go online until you use the proxy to surf the internet,==Ihr Peer geht nicht online, bis Sie den Proxy benutzen,
-thus proving that you <em>want</em> to go online.==wodurch Sie signalisieren, online gehen zu <em>wollen</em>.
-#---
-If you don't know how to configure your system to use a proxy,==Wenn Sie nicht wissen, wie Sie Ihr System konfigurieren, sodass es einen Proxy benutzt,
-see the <a==lesen Sie die <a
-installation instructions</a>.==Installationsanleitung</a>.
-#---
-Your '.yacy' home at==Ihre YaCy-Domain ist
+Not assigned==nicht zugewiesen
 This peer's name==Name dieses Peers
 This peer's statistics==Statistik dieses Peers
 Unknown==unbekannt
@@ -1746,28 +1759,16 @@ Connects:==Verbindungen:
 "disconnected peers"=="nichtverbundene Peers"
 peers/hour==Peers/Stunde
 This peer's status==Status dieses Peers
-Virgin - You have not published your peer seed yet. This happens automatically, just wait. While you have this status you are not allowed to search other peers.==Virgin - Ihr Peer ist dem Netzwerk noch nicht bekannt. Warten Sie noch ein wenig, dies geschieht automatisch. W&auml;hrend Sie diesen Status haben, ist es Ihnen nicht erlaubt andere Peers zu durchsuchen.
-Junior - You cannot be reached from outside. A possible reason is that you are behind a firewall, NAT or Router. But you can <a href="index.html">search the internet</a> using the other peers' global index on your own search page. We encourage you to open your firewall for the port you configured \(usually: 8080\), or to set up a 'virtual server' in your router settings \(often called DMZ\). Please be fair, contribute your own index to the global index.==Junior - Ihr Peer kann nicht von au&szlig;en erreicht werden. Ein m&ouml;glicher Grund ist, dass Sie sich hinter einer Firewall, NAT oder einem Router befinden. Trotzdem k&ouml;nnen Sie <a href="index.html">das Internet durchsuchen</a>, indem Sie den globalen Index der anderen Peers von Ihrer Suchseite aus benutzen. Wir m&ouml;chten Sie ermutigen den Port, den Sie f&uuml;r YaCy eingestellt haben (Vorgabe: 8080) in Ihrer Firewall zu &ouml;ffnen, oder einen "virtuellen Server" in Ihrem Router aufzusetzten (oft auch DMZ genannt). Bitte seien Sie fair und tragen Sie Ihren Teil zum globalen Index bei!
-Senior - You are running a server and you support the global internet index, which you can also <a href="index.html">search yourself</a>. Thank you!==Senior - Sie lassen YaCy bei sich laufen und unterst&uuml;tzen den globalen Index, den Sie auch selbst <a href="index.html">durchsuchen</a> k&ouml;nnen. Danke!
-Principal - You are senior and you publish your seed-list to a public accessible server where it can be retrieved using the URL==Principal - Sie haben den Senior-Status und laden zus&auml;tzlich Ihre Seed-Liste auf einen &ouml;ffentlich zug&auml;nglichen Server hoch, von wo aus sie unter folgender Adresse erreichbar ist:
-You can of course <a href="index.html">search the internet</a> using the other peers' global index on your own search page.==Nat&uuml;rlich k&ouml;nnen Sie auch mithilfe des globalen Indexes von Ihrer Suchseite aus <a href="index.html">das Internet durchsuchen</a>.
+#Virgin==Virgin
+#Junior==Junior
+#Senior==Senior
+#Principal==Principal
 Other peers==Andere Peers
-other peers online.==andere Peers online.
 not online==nicht online
-Online-mode==Onlinemodus
-You are in <em>Cache-browsing</em> mode.==Sie sind im <em>Cache</em> Modus.
-Only websites from the proxy-cache are accessible.==Nur Webseiten aus dem Proxycache sind abrufbar.
-To switch online-mode, press one of the following buttons:==Um den Online Modus zu wechseln, klicken Sie auf einen der folgenden Buttons:
-"event-based Mode"=="aktivit&auml;tsbasierten Modus"
-"Permanent Mode"=="Permanenter Modus"
-You are in <em>event-based</em> online mode.==Sie sind im <em>aktivit&auml;tsbasierten</em> Onlinemodus.
-The YaCy p2p network will boot when you start using YaCy as a web proxy or you switch to permanent mode.==Das YaCy-P2P-Netzwerk wird aktiviert, wenn Sie YaCy zum ersten Mal als Web Proxy benutzen oder Sie in den permanenten Modus wechseln.
-"Go on-line"=="Online gehen"
-"Go to Cache-Mode"=="In Cache-Modus gehen"
-You are in <em>permanent</em> mode.==Sie sind im <em>permanenten</em> Modus. 
-Last Refresh:==Letzte Aktualisierung:
-Click here to==Klicken Sie
-log in</a> as administrator and see full status.==hier</a>, um sich als Administrator einzuloggen und den vollst&auml;ndigen Status zu sehen.
+other peers online.==andere Peers online.
+Log-In==Einloggen
+Click here to <a href="Status.html?login=">log in</a> as administrator and see full status.==Klicken Sie <a href="Status.html?login=">hier</a>, um sich als Administrator einzuloggen und den vollst&auml;ndigen Status zu sehen.
+
 #-----------------------------
 
 #File: Status_p.inc
@@ -1776,11 +1777,10 @@ Private System Properties==Private Systemeigenschaften
 System Resources==Systemressourcen
 Processors:==Prozessoren:
 Protection==Sicherheit
-<strong>Your settings are _not_ protected!</strong> Please go to the==<strong>Ihre Einstellungen sind _nicht_ mit einem Kennwort gesch&uuml;tzt!</strong> Bitte geben Sie auf der
-settings</a> page <strong>immediately</strong> and set an administration password.==Einstellungen-Seite</a> <strong>sofort</strong> ein Kennwort an.
-Your settings are protected by a password.==Ihre Einstellungen sind mit einem Kennwort gesch&uuml;tzt.
-Peer host==Peer Host
-Port forwarding host==Port forwarding Host
+Password is missing==Kein Passwort
+password-protected==Passwort-gesch&uuml;tzt
+#Peer Host==Peer Host
+#Port Forwarding Host==Port Forwarding Host
 not used==nicht benutzt
 broken==unterbrochen
 connected==verbunden
@@ -1790,9 +1790,9 @@ Used for YaCy -> YaCy communication:==Benutzt zur YaCy -> YaCy Kommunikation:
 Yes==Ja
 No==Nein
 Auto-popup on start-up==Auto-Popup beim Starten
-Disabled</td>==Deaktiviert</td>
+Disabled==Deaktiviert
 Enable\]==Aktivieren]
-Enabled</td>==Aktiviert</td>
+Enabled <a==Aktiviert <a
 Disable\]==Deaktivieren]
 Memory Usage==Speicherverbrauch
 free:==Frei:
@@ -1800,7 +1800,7 @@ total:==Total:
 max:==Maximal:
 Configure==Einstellen
 Reset</a>==Zur&uuml;cksetzen</a>
-Connections Incoming==Eingehende Verbindungen
+Incoming Connections==Eingehende Verbindungen
 Active:==Aktiv:
 Idle:==Wartend:
 #Max:Max:
@@ -1812,12 +1812,11 @@ Local Crawl==Lokales Crawlen
 Remote triggered Crawl==eingehende Remote-Crawls
 Global Crawl Trigger==ausgehende Remote-Crawls
 Pre-Queueing==Vor-Pufferung
- local== lokal
-Disabled. To enable this you need a FTP account where you can upload files to a web space. If you do that, you become a YaCy root server.==Deaktiviert. Um dies zu aktivieren ben&ouml;tigen Sie FTP-Zugang zu einem Webspace, auf den Sie Dateien hochladen k&ouml;nnen. Wenn Sie das tun, werden Sie ein YaCy-Rootserver.
-Enabled: Updating periodically to server==Aktiv: Periodische Aktualisierung auf
-Enabled: Updating periodically to file==Aktiv: Periodische Aktualisierung in Datei
-Last upload:==Letztesmal hochgeladen:
-#-----------------------------
+Seed server==Seed Server
+Configure\]==Konfigurieren]
+Enabled: Updating to server==Aktiviert: Aktualisiere auf Server
+Last upload: #\[lastUpload\]# ago.==Letztesmal Hochladen #[lastUpload]# her
+Enabled: Updating to file==Aktiviert: Aktualisiere die Datei#-----------------------------
 
 #File: Steering.html
 #---------------------------
