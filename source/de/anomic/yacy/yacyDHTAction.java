@@ -218,11 +218,15 @@ public class yacyDHTAction implements yacyPeerAction {
     }
     
     public synchronized yacySeed getPublicClusterCrawlSeed(String urlHash, TreeMap clusterhashes) {
+        // clusterhashes is a String(hash)/String(IP) - mapping
         kelondroCloneableIterator i = new kelondroRotateIterator(new kelondroCloneableMapIterator(clusterhashes, urlHash), null);
-        while (i.hasNext()) {
-        	yacySeed seed = seedDB.getConnected((String) i.next());
+        String hash;
+        int count = clusterhashes.size(); // counter to ensure termination
+        while ((i.hasNext()) && (count-- > 0)) {
+            hash = (String) i.next();
+        	yacySeed seed = seedDB.getConnected(hash);
         	if (seed == null) continue;
-            if (clusterhashes != null) seed.setAlternativeAddress((String) clusterhashes.get(seed.hash));
+            seed.setAlternativeAddress((String) clusterhashes.get(hash));
         	return seed;
         }
         return null;

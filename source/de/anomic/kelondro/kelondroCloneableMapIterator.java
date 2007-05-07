@@ -39,8 +39,9 @@ public class kelondroCloneableMapIterator implements kelondroCloneableIterator {
 	
 
 	public kelondroCloneableMapIterator(TreeMap map, Object start) {
-		// set must contain byte[] elements or String elements.
+		// map must contain eiter a byte[]/Object or a String/Object mapping.
 		// start must be either of type byte[] or String
+        // this iterator iterates then only the key elements of the map
 		this.map = map;
 		this.start = start;
 		this.iter = map.keySet().iterator();
