@@ -458,7 +458,7 @@ public class yacyCore {
                 } else {
                     if (attempts > peerPingMinRunning) { attempts = peerPingMinRunning; }
                 }
-                seeds = seedDB.seedsByAge(false, attempts + 10); // best for seed list maintenance/cleaning
+                seeds = seedDB.seedsByAge(false, attempts); // best for seed list maintenance/cleaning
             }
 
             if (seeds == null) { return 0; }

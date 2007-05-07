@@ -212,7 +212,7 @@ public class yacySeed {
         this.dna.put(yacySeed.IPTYPE, "&empty;");
 
         // settings that can only be computed by visiting peer
-        this.dna.put(yacySeed.LASTSEEN, yacyCore.universalDateShortString(new Date())); // for last-seen date
+        this.dna.put(yacySeed.LASTSEEN, yacyCore.universalDateShortString(new Date(System.currentTimeMillis() - serverDate.UTCDiff()))); // for last-seen date
         this.dna.put(yacySeed.USPEED, yacySeed.ZERO);  // the computated uplink speed of the peer
 
         this.dna.put(yacySeed.CRWCNT, yacySeed.ZERO);
@@ -652,7 +652,7 @@ public class yacySeed {
         } else {
             newSeed.dna.put(yacySeed.PORT, Integer.toString(serverCore.getPortNr(sb.getConfig("port", "8080"))));
         }
-        newSeed.dna.put(yacySeed.BDATE, yacyCore.universalDateShortString(new Date()));
+        newSeed.dna.put(yacySeed.BDATE, yacyCore.universalDateShortString(new Date(System.currentTimeMillis() - serverDate.UTCDiff())) );
         newSeed.dna.put(yacySeed.LASTSEEN, newSeed.dna.get(yacySeed.BDATE)); // just as initial setting
         newSeed.dna.put(yacySeed.UTC, serverDate.UTCDiffString());
         newSeed.dna.put(yacySeed.PEERTYPE, yacySeed.PEERTYPE_VIRGIN);

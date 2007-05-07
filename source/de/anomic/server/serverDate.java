@@ -55,18 +55,18 @@ public final class serverDate {
     
     
     // statics
-    private final static long secondMillis = 1000;
-    private final static long minuteMillis = 60 * secondMillis;
-    private final static long hourMillis = 60 * minuteMillis;
-    private final static long dayMillis = 24 * hourMillis;
-    private final static long normalyearMillis = 365 * dayMillis;
-    private final static long leapyearMillis = 366 * dayMillis;
-    private final static int january = 31, normalfebruary = 28, leapfebruary = 29, march = 31,
+    public final static long secondMillis = 1000;
+    public final static long minuteMillis = 60 * secondMillis;
+    public final static long hourMillis = 60 * minuteMillis;
+    public final static long dayMillis = 24 * hourMillis;
+    public final static long normalyearMillis = 365 * dayMillis;
+    public final static long leapyearMillis = 366 * dayMillis;
+    public final static int january = 31, normalfebruary = 28, leapfebruary = 29, march = 31,
                              april = 30, may = 31, june = 30, july = 31, august = 31,
                              september = 30, october = 31, november = 30, december = 31;
-    private final static int[] dimnormal = {january, normalfebruary, march, april, may, june, july, august, september, october, november, december};
-    private final static int[] dimleap = {january, leapfebruary, march, april, may, june, july, august, september, october, november, december};
-    private final static String[] wkday = {"Mon","Tue","Wed","Thu","Fri","Sat","Sun"};
+    public final static int[] dimnormal = {january, normalfebruary, march, april, may, june, july, august, september, october, november, december};
+    public final static int[] dimleap = {january, leapfebruary, march, april, may, june, july, august, september, october, november, december};
+    public final static String[] wkday = {"Mon","Tue","Wed","Thu","Fri","Sat","Sun"};
     //private final static String[] month = {"Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"};
 
     // find out time zone and DST offset

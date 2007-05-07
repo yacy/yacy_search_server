@@ -71,6 +71,7 @@ import de.anomic.kelondro.kelondroBase64Order;
 import de.anomic.net.URL;
 import de.anomic.plasma.plasmaSwitchboard;
 import de.anomic.server.serverCore;
+import de.anomic.server.serverDate;
 import de.anomic.server.serverFileUtils;
 import de.anomic.server.serverSwitch;
 import de.anomic.server.logging.serverLog;
@@ -315,6 +316,7 @@ public final class yacySeedDB {
 
     public HashMap seedsByAge(boolean up, int count) {
     	// returns a peerhash/yacySeed relation
+        // to get most recent peers, set up = true; for oldest peers, set up = false
     	
         if (count > sizeConnected()) count = sizeConnected();
 
@@ -329,8 +331,8 @@ public final class yacySeedDB {
             while ((s.hasMoreElements()) && (searchcount-- > 0)) {
                 ys = (yacySeed) s.nextElement();
                 if ((ys != null) && (ys.get(yacySeed.LASTSEEN, "").length() > 10)) try {
-                    absage = Math.abs(System.currentTimeMillis() - ys.getLastSeenUTC());
-                    seedScore.addScore(ys.hash, (int) absage);
+                    absage = Math.abs(System.currentTimeMillis() + serverDate.dayMillis - ys.getLastSeenUTC());
+                    seedScore.addScore(ys.hash, (int) absage); // the higher absage, the older is the peer
                 } catch (Exception e) {}
             }
             
