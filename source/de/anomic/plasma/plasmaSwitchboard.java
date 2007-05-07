@@ -1227,6 +1227,9 @@ public final class plasmaSwitchboard extends serverAbstractSwitch implements ser
         this.dhtTransferChunk = null;
         this.dhtTransferIndexCount = (int) getConfigLong(INDEX_DIST_CHUNK_SIZE_START, 50);
         
+        // init robinson cluster
+        this.clusterhashes = yacyCore.seedDB.clusterHashes(getConfig("cluster.peers.yacydomain", ""));
+        
         // deploy threads
         log.logConfig("Starting Threads");
         // System.gc(); // help for profiler
@@ -1279,9 +1282,6 @@ public final class plasmaSwitchboard extends serverAbstractSwitch implements ser
         //plasmaSnippetCache.result scr = snippetCache.retrieve(new URL("http://www.heise.de/kiosk/archiv/ct/2003/4/20"), query, true, 260);
 
         this.dbImportManager = new dbImportManager(this);
-        
-        // init robinson cluster
-        this.clusterhashes = yacyCore.seedDB.clusterHashes(getConfig("cluster.peers.yacydomain", ""));
         
         log.logConfig("Finished Switchboard Initialization");
     }

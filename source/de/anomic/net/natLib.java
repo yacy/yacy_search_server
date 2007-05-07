@@ -131,6 +131,7 @@ public class natLib {
     public static boolean isProper(String ip) {
         plasmaSwitchboard sb=plasmaSwitchboard.getSwitchboard();
         if (sb != null) {
+        	if (sb.isRobinsonMode()) return true;
             String yacyDebugMode = sb.getConfig("yacyDebugMode", "false");
             if (yacyDebugMode.equals("true")) {
                 return true;

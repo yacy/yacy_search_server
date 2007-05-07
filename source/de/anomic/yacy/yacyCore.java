@@ -384,7 +384,7 @@ public class yacyCore {
 
         public void run() {
             try {
-                this.added = yacyClient.publishMySeed(seed.getPublicAddress(), seed.hash);
+                this.added = yacyClient.publishMySeed(seed.getClusterAddress(), seed.hash);
                 if (this.added < 0) {
                     // no or wrong response, delete that address
                     log.logInfo("publish: disconnected " + this.seed.get(yacySeed.PEERTYPE, yacySeed.PEERTYPE_SENIOR) + " peer '" + this.seed.getName() + "' from " + this.seed.getPublicAddress());
@@ -430,20 +430,24 @@ public class yacyCore {
             // getting a list of peers to contact
             if (seedDB.mySeed.get(yacySeed.PEERTYPE, yacySeed.PEERTYPE_VIRGIN).equals(yacySeed.PEERTYPE_VIRGIN)) {
                 if (attempts > peerPingInitial) { attempts = peerPingInitial; }
-                seeds = seedDB.seedsByAge(true, attempts + 10); // best for fast connection
+                Map ch = plasmaSwitchboard.getSwitchboard().clusterhashes;
+                seeds = seedDB.seedsByAge(true, attempts - ((ch == null) ? 0 : ch.size())); // best for fast connection
                 // add also all peers from cluster if this is a public robinson cluster
                 if (plasmaSwitchboard.getSwitchboard().clusterhashes != null) {
-                	Iterator i = plasmaSwitchboard.getSwitchboard().clusterhashes.entrySet().iterator();
+                	Iterator i = ch.entrySet().iterator();
                 	String hash;
                 	Map.Entry entry;
                 	yacySeed seed;
                 	while (i.hasNext()) {
                 		entry = (Map.Entry) i.next();
                 		hash = (String) entry.getKey();
-                		if (seeds.containsKey(hash)) continue;
-                		seed = seedDB.get(hash);
+                		seed = (yacySeed) seeds.get(hash);
+                		if (seed == null) {
+                			seed = seedDB.get(hash);
+                			if (seed == null) continue;
+                		}
                 		seed.setAlternativeAddress((String) entry.getValue());
-                		seeds.put(hash, seed);
+            			seeds.put(hash, seed);
                 	}
                 }
             } else {
@@ -504,7 +508,7 @@ public class yacyCore {
                 seed = (yacySeed) seedList.remove(0);
                 if (seed == null) continue;
 
-                final String address = seed.getPublicAddress();
+                final String address = seed.getClusterAddress();
                 log.logFine("HELLO #" + i + " to peer '" + seed.get(yacySeed.NAME, "") + "' at " + address); // debug
                 if ((address == null) || (seed.isProper() != null)) {
                     // we don't like that address, delete it

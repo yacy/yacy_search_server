@@ -396,8 +396,7 @@ public class yacySeed {
         // if (this.hash.equals("xxxxxxxxxxxx")) return "192.168.100.1:3300";
         
         final String port = (String) this.dna.get(yacySeed.PORT);
-        if (port == null) { return null; }
-        if (port.length() < 2) { return null; }
+        if ((port == null) || (port.length() < 2)) return null;
 
         return ip + ":" + port;
     }
@@ -407,13 +406,10 @@ public class yacySeed {
     	// alternativeIP object set to a local ip
     	// if this is present and the public ip of this peer is identical to the public ip of the own seed,
     	// construct an address using this ip; othervise return the public address
-    	if ((this.alternativeIP == null) ||
-    	    (yacyCore.seedDB == null) ||
-    		(!(this.getIP().equals(yacyCore.seedDB.mySeed.getIP())))) return getPublicAddress();
+    	if (this.alternativeIP == null) return getPublicAddress();
     			
         final String port = (String) this.dna.get(yacySeed.PORT);
-        if (port == null) { return null; }
-        if (port.length() < 2) { return null; }
+        if ((port == null) || (port.length() < 2)) return null;
 
         return this.alternativeIP + ":" + port;
     }

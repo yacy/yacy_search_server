@@ -211,7 +211,7 @@ public final class plasmaSearchEvent extends Thread implements Runnable {
                 int globalContributions = rcContainers.size();
                 
                 // finished searching
-                log.logFine("SEARCH TIME AFTER GLOBAL-TRIGGER TO " + fetchpeers + " PEERS: " + ((System.currentTimeMillis() - start) / 1000) + " seconds");
+                log.logFine("SEARCH TIME AFTER GLOBAL-TRIGGER TO " + primarySearchThreads.length + " PEERS: " + ((System.currentTimeMillis() - start) / 1000) + " seconds");
 
                 // combine the result and order
                 result = orderFinal(rcLocal);
