@@ -4,7 +4,7 @@
 	<title><![CDATA[YaCy '#[clientname]#': Messages]]></title>
 	<link>http://#[peerAddress]#/Messages_p.html</link>
 	<image>
-		<url>http://#[peerAddress]#/env/grafics/yacy.png</url>
+		<url>http://#[peerAddress]#/env/grafics/YaCyLogo_60ppi.png</url>
 		<title>YaCy</title>
 		<link>http://#[peerAddress]#/</link>
 	</image>

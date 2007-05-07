@@ -4,7 +4,7 @@
 	<title><![CDATA[YaCy '#[clientname]#': Blog]]></title>
 	<link>http://#[address]#/Blog.html</link>
     <image>
-      <url>http://#[address]#/env/grafics/yacy.png</url>
+      <url>http://#[address]#/env/grafics/YaCyLogo_60ppi.png</url>
       <title>YaCy</title>
       <link>http://#[address]#/</link>
     </image>	

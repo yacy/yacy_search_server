@@ -5,7 +5,7 @@
 	<link>http://#[peeraddress]##[path]#</link>
 	<description><![CDATA[Directory Listing of #[path]#]]></description>
 	<image>
-		<url>http://#[peeraddress]#/env/grafics/yacy.png</url>
+		<url>http://#[peeraddress]#/env/grafics/YaCyLogo_60ppi.png</url>
 		<title>YaCy</title>
 		<link>http://#[peeraddress]#/</link>
 	</image>

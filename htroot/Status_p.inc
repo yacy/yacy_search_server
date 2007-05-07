@@ -39,8 +39,8 @@
     total: #[totalMemory]#<br>
     max: #[maxMemory]#</dd>
     
-    <dt>Traffic</dt>
-    <dd>Proxy: #[trafficProxy]# | Crawler: #[trafficCrawler]# [<a href="Status.html?ResetTraffic=">Reset</a>]</dd>
+    <dt>Traffic [<a href="Status.html?ResetTraffic=">Reset</a>]</dt>
+    <dd>Proxy: #[trafficProxy]#<br>Crawler: #[trafficCrawler]#</dd>
     
     <dt><a href="Connections_p.html">Incoming Connections</a></dt>
     <dd>Active: #[connectionsActive]# | Idle: #[connectionsIdle]# | Max: #[connectionsMax]#</dd>
@@ -65,30 +65,26 @@
     <dd>
       <table>
         <tr>
-          <td>Local Crawl</td>
+          <td><a href="IndexCreateWWWLocalQueue_p.html">Local Crawl</a></td>
           <td>#[localCrawlQueueSize]#</td>
           <td><a href="Status.html?#(localCrawlPaused)#pauseCrawlJob::continueCrawlJob#(/localCrawlPaused)#=&amp;jobType=localCrawl" title="#(localCrawlPaused)#pause local crawl::continue local crawl#(/localCrawlPaused)#"><img src="env/grafics/#(localCrawlPaused)#stop.gif::start.gif#(/localCrawlPaused)#" alt="#(localCrawlPaused)#pause local crawl::continue local crawl#(/localCrawlPaused)#" style="width:12px;height:12px;" /></a></td>
           <td>#(localCrawlPaused)#&nbsp;::(paused)#(/localCrawlPaused)#</td>
-          <td>[<a href="IndexCreateWWWLocalQueue_p.html">Details</a>]</td>
         </tr>
         <tr>
           <td>Remote triggered Crawl</td>
           <td>#[remoteTriggeredCrawlQueueSize]#</td>
           <td><a href="Status.html?#(remoteTriggeredCrawlPaused)#pauseCrawlJob::continueCrawlJob#(/remoteTriggeredCrawlPaused)#=&amp;jobType=remoteTriggeredCrawl" title="#(remoteTriggeredCrawlPaused)#pause remote triggered crawl::continue remote triggered crawl#(/remoteTriggeredCrawlPaused)#"><img src="env/grafics/#(remoteTriggeredCrawlPaused)#stop.gif::start.gif#(/remoteTriggeredCrawlPaused)#" alt="#(remoteTriggeredCrawlPaused)#pause remote triggered crawl::continue remote triggered crawl#(/remoteTriggeredCrawlPaused)#" style="width:12px;height:12px;" /></a></td>
           <td>#(remoteTriggeredCrawlPaused)#&nbsp;::(paused)#(/remoteTriggeredCrawlPaused)#</td>
-          <td></td>
         </tr>
         <tr>
-          <td>Global Crawl Trigger</td>
+          <td><a href="IndexCreateWWWGlobalQueue_p.html">Global Crawl Trigger</a></td>
           <td>#[globalCrawlTriggerQueueSize]#</td>
           <td><a href="Status.html?#(globalCrawlTriggerPaused)#pauseCrawlJob::continueCrawlJob#(/globalCrawlTriggerPaused)#=&amp;jobType=globalCrawlTrigger" title="#(globalCrawlTriggerPaused)#pause global crawl trigger::continue global crawl trigger#(/globalCrawlTriggerPaused)#"><img src="env/grafics/#(globalCrawlTriggerPaused)#stop.gif::start.gif#(/globalCrawlTriggerPaused)#" alt="#(globalCrawlTriggerPaused)#pause global crawl trigger::continue global crawl trigger#(/globalCrawlTriggerPaused)#" style="width:12px;height:12px;" /></a></td>
           <td>#(globalCrawlTriggerPaused)#&nbsp;::(paused)#(/globalCrawlTriggerPaused)#</td>
-          <td>[<a href="IndexCreateWWWGlobalQueue_p.html">Details</a>]</td>
         </tr>    
         <tr>
           <td>Pre-Queueing</td>
           <td>#[stackCrawlQueueSize]#</td>
-          <td></td>
           <td></td>
           <td></td>
         </tr>  

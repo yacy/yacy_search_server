@@ -235,7 +235,7 @@ div.ProgressBarCaption {
 }
 div.ProgressBar {
 	float:left;
-	width:120px;
+	width:100px;
 	height:10px;
 }
 div.ProgressBarFill {
@@ -310,7 +310,7 @@ form.search.small p.yacylogo { /* The logo in yacysearch.html */
   float:left;
   padding:0;
   margin: 0 5px 5px;
-  width:70px;
+  width:90px;
 }
 
 /*----------
@@ -333,7 +333,7 @@ h2.yacy { /* The heading in index.html */
   padding-top:130px;
   width:256px;
   min-width:256px; /*min-width does not exist in IE 5.5, 6 and Safari */
-  background:url(/env/grafics/kaskelix.png) top center no-repeat;
+  background:url(/env/grafics/YaCyLogo_120ppi.png) top center no-repeat;
 }
 
 div.welcome { /* The heading in Status.html */
@@ -577,7 +577,7 @@ form.PeerControl fieldset { /* on Status.html */
 
 form.search.small fieldset {
     clear:left;
-    margin-left:85px;
+    margin-left:100px;
 }
 /*----------
 <img>
