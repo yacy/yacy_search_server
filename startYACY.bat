@@ -36,6 +36,8 @@ start "YaCy" %priority% /B /WAIT java %javacmd% -classpath %CLASSPATH% yacy
 if not exist DATA\yacy.restart GoTo :END
 :WAIT
 echo Please wait...
+REM 'sleep' five seconds
+ping localhost -n 5 >NUL
 if exist DATA\yacy.running GoTo :WAIT
 del DATA\yacy.restart
 
