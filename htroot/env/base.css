@@ -533,6 +533,14 @@ form dt, dl.pairs dt {
   text-align:right;
 }
 
+dt.hintIcon {
+	float:left;
+}
+
+dd.hint {
+	padding-bottom: 10px;
+}
+
 /*----------
 <form>
 */

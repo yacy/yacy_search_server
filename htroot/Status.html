@@ -16,16 +16,16 @@
     <!-- urgent -->
 
     #(urgentSetPassword)#::
-    <dt><img src="env/grafics/bad.png" width="32" height="32"></dt>
-    <dd><strong>Your settings are _not_ protected!</strong>
+    <dt class="hintIcon"><img src="env/grafics/bad.png" width="32" height="32"></dt>
+    <dd class="hint"><strong>Your settings are _not_ protected!</strong>
     Please open the <a href="ConfigBasic.html">settings</a> page <strong>immediately</strong>
     and set an administration password.
     </dd>
     #(/urgentSetPassword)#
 
 	#(urgentStatusVirgin)#::
-    <dt><img src="env/grafics/bad.png" width="32" height="32"></dt>
-    <dd>You have not published your peer seed yet. This happens automatically, just wait.
+    <dt class="hintIcon"><img src="env/grafics/bad.png" width="32" height="32"></dt>
+    <dd class="hint">You have not published your peer seed yet. This happens automatically, just wait.
     While you have this status you are not allowed to search other peers.
     </dd>
     #(/urgentStatusVirgin)#
@@ -33,16 +33,16 @@
     <!-- warnings -->
     
     #(warningGoOnline)#::
-    <dt><img src="env/grafics/bad.png" width="32" height="32"></dt>
-    <dd>The peer must go online to get a peer address.
+    <dt class="hintIcon"><img src="env/grafics/bad.png" width="32" height="32"></dt>
+    <dd class="hint">The peer must go online to get a peer address.
       If you don't know how to configure your system to use a proxy,
       see the <a href="http://www.yacy.net/yacy/Installation.html#wininst">installation instructions</a>.
     </dd>
     #(/warningGoOnline)#
     
     #(warningStatusJunior)#::
-    <dt><img src="env/grafics/bad.png" width="32" height="32"></dt>
-    <dd>You cannot be reached from outside.
+    <dt class="hintIcon"><img src="env/grafics/bad.png" width="32" height="32"></dt>
+    <dd class="hint">You cannot be reached from outside.
     A possible reason is that you are behind a firewall, NAT or Router.
     But you can <a href="index.html">search the internet</a> using the other peers'
     global index on your own search page.
@@ -55,8 +55,8 @@
      <!-- hints -->
     
     #(hintVersionAvailable)#::
-    <dt><img src="env/grafics/idea.png" width="32" height="32"></dt>
-    <dd>Latest public version is v#[latestVersion]#.
+    <dt class="hintIcon"><img src="env/grafics/idea.png" width="32" height="32"></dt>
+    <dd class="hint">Latest public version is v#[latestVersion]#.
       You can download a more recent version of YaCy. Click here to install this update and restart YaCy: 
       <form action="Status.html" method="get" class="PeerControl">
         <button type="submit" name="aquirerelease" value="Update YaCy">
@@ -68,59 +68,59 @@
     #(/hintVersionAvailable)#
     <!--
     #(hintVersionDownload)#::
-    <dt><img src="env/grafics/start.gif"></dt>
-    <dd>You can download the latest releases here:
+    <dt class="hintIcon"><img src="env/grafics/start.gif"></dt>
+    <dd class="hint">You can download the latest releases here:
       #[versionResMain]# or #[versionResDev]#
     </dd>
     #(/hintVersionDownload)#
     -->
     #(hintStatusSenior)#::
-    <dt><img src="env/grafics/good.png" width="32" height="32"></dt>
-    <dd>You are running a server in senior mode and you support the global internet index,
+    <dt class="hintIcon"><img src="env/grafics/good.png" width="32" height="32"></dt>
+    <dd class="hint">You are running a server in senior mode and you support the global internet index,
     which you can also <a href="index.html">search yourself</a>.
     </dd>
     #(/hintStatusSenior)#
     
     #(hintStatusPrincipal)#::
-    <dt><img src="env/grafics/good.png" width="32" height="32"></dt>
-    <dd>You have a principal peer because you publish your seed-list to a public accessible server
+    <dt class="hintIcon"><img src="env/grafics/good.png" width="32" height="32"></dt>
+    <dd class="hint">You have a principal peer because you publish your seed-list to a public accessible server
     where it can be retrieved using the URL <a href="#[seedURL]#">#[seedURL]#</a>.
     </dd>
     #(/hintStatusPrincipal)#
     
     #(hintCrawlStart)#::
-    <dt><img src="env/grafics/idea.png" width="32" height="32"></dt>
-    <dd>Your Web Page Indexer is idle. You can start your own web crawl <a href="IndexCreate_p.html">here</a>
+    <dt class="hintIcon"><img src="env/grafics/idea.png" width="32" height="32"></dt>
+    <dd class="hint">Your Web Page Indexer is idle. You can start your own web crawl <a href="IndexCreate_p.html">here</a>
     </dd>
     #(/hintCrawlStart)#
     
     #(hintCrawlMonitor)#::
-    <dt><img src="env/grafics/idea.png" width="32" height="32"></dt>
-    <dd>Your Web Page Indexer is busy. You can monitor your web crawl <a href="WatchCrawler_p.html">here</a>
+    <dt class="hintIcon"><img src="env/grafics/idea.png" width="32" height="32"></dt>
+    <dd class="hint">Your Web Page Indexer is busy. You can monitor your web crawl <a href="WatchCrawler_p.html">here</a>
     </dd>
     #(/hintCrawlMonitor)#
     <!-- templates
     #(hint)#::
-    <dt><img src="env/grafics/idea.png" width="32" height="32"></dt>
-    <dd>
+    <dt class="hintIcon"><img src="env/grafics/idea.png" width="32" height="32"></dt>
+    <dd class="hint">
     </dd>
     #(/hint)#
     
     #(hint)#::
-    <dt><img src="env/grafics/idea.png" width="32" height="32"></dt>
-    <dd>
+    <dt class="hintIcon"><img src="env/grafics/idea.png" width="32" height="32"></dt>
+    <dd class="hint">
     </dd>
     #(/hint)#
     
     #(hint)#::
-    <dt><img src="env/grafics/idea.png" width="32" height="32"></dt>
-    <dd>
+    <dt class="hintIcon"><img src="env/grafics/idea.png" width="32" height="32"></dt>
+    <dd class="hint">
     </dd>
     #(/hint)#
     
     #(hint)#::
-    <dt><img src="env/grafics/idea.png" width="32" height="32"></dt>
-    <dd>
+    <dt class="hintIcon"><img src="env/grafics/idea.png" width="32" height="32"></dt>
+    <dd class="hint">
     </dd>
     #(/hint)#
        -->
