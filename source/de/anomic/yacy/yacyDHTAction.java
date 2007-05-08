@@ -290,6 +290,11 @@ public class yacyDHTAction implements yacyPeerAction {
     
     public synchronized ArrayList /* of yacySeed */ getDHTTargets(serverLog log, int primaryPeerCount, int reservePeerCount, String firstKey, String lastKey, double maxDist) {
         // find a list of DHT-peers
+        assert firstKey != null;
+        assert lastKey != null;
+        assert yacyCore.seedDB != null;
+        assert yacyCore.seedDB.mySeed != null;
+        assert yacyCore.seedDB.mySeed.hash != null;
         assert
             !(kelondroBase64Order.enhancedCoder.cardinal(firstKey.getBytes()) < kelondroBase64Order.enhancedCoder.cardinal(yacyCore.seedDB.mySeed.hash.getBytes()) &&
               kelondroBase64Order.enhancedCoder.cardinal(lastKey.getBytes()) > kelondroBase64Order.enhancedCoder.cardinal(yacyCore.seedDB.mySeed.hash.getBytes()));

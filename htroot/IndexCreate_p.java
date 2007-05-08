@@ -201,7 +201,7 @@ public class IndexCreate_p {
 
         
         // remote crawl peers
-        if (yacyCore.seedDB != null) {
+        if ((yacyCore.seedDB == null) || (yacyCore.seedDB.mySeed.isVirgin()) || (yacyCore.seedDB.mySeed.isJunior())) {
             prop.put("remoteCrawlPeers", 0);
         } else {
             Enumeration crawlavail = yacyCore.dhtAgent.getAcceptRemoteCrawlSeeds(plasmaURL.dummyHash, true);
