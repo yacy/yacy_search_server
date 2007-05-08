@@ -245,6 +245,60 @@ Unable to get URL:==Nicht m&ouml;glich die angegebene Datei von folgender URL zu
 Error saving the language file.==Es trat ein Fehler beim Speichern der Sprachdatei auf.
 #-----------------------------
 
+#File: ConfigNetwork_p.html
+#---------------------------
+Network Configuration==Netzwerk Einstellungen
+Accepted Changes==&Auml;nderungen gespeichert
+Inapplicable Setting Combination==unpassende Einstellungskombination
+P2P operation can run without remote indexing, but runs better with remote indexing switched on. Please switch 'Accept Remote Crawl Requests' on==P2P-T&auml;tigkeit l&auml;uft ohne Remote-Indexierung, aber funktioniert besser wenn diese eingeschaltet ist. Bitte aktivieren Sie 'Remote Crawling akzeptieren'
+For P2P operation, at least DHT distribution or DHT receive \(or both\) must be set. You have thus defined a Robinson configuration==F&uuml;r P2P-T&auml;tigkeit muss mindestens DHT-Verteilung oder DHT-Empfang (oder beides) aktiviert sein. Ansonsten haben Sie einen Robinson-Peer definiert
+Global Search in P2P configuration is only allowed, if both, index receive and distribution is switched on. You have a P2P configuration, but are not allowed to search other peers==Die globale Suche im P2P-Modus ist nur erlaubt, wenn DHT-Empfang und -Versand aktiviert wurden. Sie sind im P2P-Modus, aber Sie d&uuml;rfen keine anderen Peers durchsuchen
+For Robinson Mode, index distribution and receive is switched off==Im Robinson-Modus werden Indexverteilung und -empfang deaktiviert
+This Robinson Mode switches remote indexing on, but limits targets to peers within the same cluster. Remote indexing requests from peers within the same cluster are accepted==Dieser Robinson-Modus aktiviert Remote-Indexierung, aber beschr&auml;nkt die Anfragen auf Peers des selben Clusters. Nur Remote-Indexierungsanfragen von Peers des selben Clusters werden akzeptiert
+This Robinson Mode does not allow any remote indexing \(neither requests remote indexing, nor accepts it\)==Dieser Robinson-Modus erlaubt keinerlei Remote-Indexierung (es wird weder Remote-Indexierung angefragt, noch akzeptiert)
+You can configure if you want to participate at the global YaCy network or if you want to have your==Sie k&ouml;nnen einstellen, ob Sie am globalen YaCy-Netzwerk teilnehmen wollen oder ob Sie einen eigenen
+own separate search cluster with or without connection to the global network. You may also define==separaten Such-Cluster, mit oder ohne Verbindung zum globalen Netz, haben m&ouml;chten. Sie k&ouml;nnen auch
+a completely independent search engine instance, without any data exchange between your peer and other==eine vollkommen unabh&auml;ngige Instanz einer Suchmaschine, ohne jeglichen Datenaustausch zwischen Ihrem und anderen Peers, definieren.
+peers, which we call a 'Robinson' peer.==Dies nennen wir einen 'Robinson'-Peer.
+Peer-to-Peer Mode==Peer-to-Peer Modus
+>Index Distribution==>Index-Verteilung
+This enables automated, DHT-ruled Index Transmission to other peers==Dies aktiviert den automatischen, DHT-basierten Versand an andere Peers
+>enabled==>aktiviert
+disabled during crawling==w&auml;hrend des Crawlings deaktiviert
+>Index Receive==>Index-Empfang
+Accept remote Index Transmissions==Remote Index-&Uuml;bertragungen akzeptieren
+This works only if you have a senior peer. The DHT-rules do not work without this function==Dies funktioniert nur, wenn Sie einen Senior-Peer haben. Die DHT-Regeln arbeiten nicht ohne diese Funktion
+>reject==>verwerfe
+accept transmitted URLs that match your blacklist==akzeptiere &uuml;bertragene URLs, die zu Ihrer Blacklist passen
+>Accept Remote Crawl Requests==>Remotecrawl-Anfragen akzeptieren
+Perform web indexing upon request of another peer==F&uuml;hre Indexierung bei Anfrage eines anderen Peers aus
+This works only if you are a senior peer==Dies funktioniert nur, wenn Sie ein Senior-Peer sind
+Load with a maximum of==Lade mit maximal
+pages per minute==Seiten pro Minute (PPM)
+>Robinson Mode==>Robinson Modus
+If your peer runs in 'Robinson Mode' you run YaCy as a search engine for your own search portal without data exchange to other peers==Falls Ihr Peer im 'Robinson Modus' l&auml;uft, so verwenden Sie YaCy als Suchmaschine f&uuml;r Ihr eigenes Suchportal, ohne Datenaustausch mit anderen Peers
+There is no index receive and no index distribution between your peer and any other peer==Es gibt keinen Index-Empfang von und keine Index-Verteilung zu anderen Peers
+In case of Robinson-clustering there can be acceptance of remote crawl requests from peers of that cluster==Im Fall eines Robinson-Clusters k&ouml;nnen Remotecrawl-Anfragen von Peers des selben Clusters akzeptiert werden
+>Private Peer==>Privater Peer
+Your search engine will not contact any other peer, and will reject every request==Ihre Suchmaschine wird keine fremden Peers kontaktieren und alle Anfragen anderer Peers ablehnen
+#>Private Cluster==>Privater Cluster
+#Your peer is part of a private cluster without public visibility
+#Index data is not distributed, but remote crawl requests are distributed and accepted from your cluster
+#Search requests are spread over all peers of the cluster, and answered from all peers of the cluster
+#List of ip:port - addresses of the cluster: \(comma-separated\)
+>Public Cluster==>&Ouml;ffentlicher Cluster
+Your peer is part of a public cluster within the YaCy network==Ihr Peer ist Teil eines &ouml;ffentlichen Clusters innerhalb des YaCy-Netzwerkes
+Index data is not distributed, but remote crawl requests are distributed and accepted==Indexdaten werden nicht verteilt, aber Remotecrawl-Anfragen werden verteilt und akzeptiert
+Search requests are spread over all peers of the cluster, and answered from all peers of the cluster==Suchanfragen werden &uuml;ber alle Peers des Clusters verteilt und von allen Peers des Clusters beantwortet
+List of .yacy or .yacyh - domains of the cluster: \(comma-separated\)==Liste von .yacy oder .yacyh Domains der Peers des Clusters: (kommagetrennt)
+>Public Peer==>&Ouml;ffentlicher Peer
+You are visible to other peers and contact them to distribute your presence==Sie sind f&uuml;r andere Peers sichtbar und kontaktieren sie um ihnen Ihre Anwesenheit mitzuteilen
+Your peer does not accept any outside index data, but responds on all remote search requests==Ihr Peer akzeptiert keinerlei Indexdaten von au&szlig;en, aber antwortet auf alle Remote-Suchanfragen
+#>Peer Tags==>Peer Tags
+When you allow access from the YaCy network, your data is recognized using keywords==Falls Sie Zugriff vom YaCy-Netzwerk aus erlauben, so werden Ihre Daten anhand von Schl&uuml;sselw&ouml;rtern erkannt
+Please describe your search portal with some keywords \(comma-separated\)==Bitte beschreiben Sie Ihr Suchportal mit einigen Schl&uuml;sselw&ouml;rtern (kommagetrennt)
+"Save"=="Speichern"
+
 #File: ConfigProfile_p.html
 #---------------------------
 Your Personal Profile==Ihr pers&ouml;nliches Profil
