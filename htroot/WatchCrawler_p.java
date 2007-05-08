@@ -36,7 +36,6 @@ import java.util.regex.Pattern;
 import java.util.regex.PatternSyntaxException;
 
 import de.anomic.data.SitemapParser;
-import de.anomic.data.wikiCode;
 import de.anomic.htmlFilter.htmlFilterContentScraper;
 import de.anomic.htmlFilter.htmlFilterWriter;
 import de.anomic.http.httpHeader;
@@ -223,7 +222,7 @@ public class WatchCrawler_p {
                                 
                             } else {
                                 prop.put("info", 5); //Crawling failed
-                                prop.put("info_crawlingURL", wikiCode.replaceHTML(((String) post.get("crawlingURL"))));
+                                prop.put("info_crawlingURL", ((String) post.get("crawlingURL")));
                                 prop.put("info_reasonString", reasonString);
                                 
                                 plasmaCrawlZURL.Entry ee = switchboard.errorURL.newEntry(crawlingStartURL, reasonString);

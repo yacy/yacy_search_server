@@ -46,7 +46,6 @@
 import java.io.IOException;
 import java.util.Enumeration;
 
-import de.anomic.data.wikiCode;
 import de.anomic.http.httpHeader;
 import de.anomic.plasma.plasmaURL;
 import de.anomic.plasma.plasmaSwitchboard;
@@ -162,9 +161,9 @@ public class IndexCreate_p {
                     if (peer == null) peername = record.originator(); else peername = peer.getName();
                     prop.put("otherCrawlStartInProgress_" + showedCrawl + "_dark", ((dark) ? 1 : 0));
                     prop.put("otherCrawlStartInProgress_" + showedCrawl + "_cre", record.created());
-                    prop.put("otherCrawlStartInProgress_" + showedCrawl + "_peername", wikiCode.replaceHTML(peername));
-                    prop.put("otherCrawlStartInProgress_" + showedCrawl + "_startURL", wikiCode.replaceHTML(record.attributes().get("startURL").toString()));
-                    prop.put("otherCrawlStartInProgress_" + showedCrawl + "_intention", wikiCode.replaceHTML(record.attributes().get("intention").toString()));
+                    prop.put("otherCrawlStartInProgress_" + showedCrawl + "_peername", peername);
+                    prop.put("otherCrawlStartInProgress_" + showedCrawl + "_startURL", record.attributes().get("startURL").toString());
+                    prop.put("otherCrawlStartInProgress_" + showedCrawl + "_intention", record.attributes().get("intention").toString());
                     prop.put("otherCrawlStartInProgress_" + showedCrawl + "_generalDepth", record.attributes().get("generalDepth"));
                     prop.put("otherCrawlStartInProgress_" + showedCrawl + "_crawlingQ", (record.attributes().get("crawlingQ").equals("true")) ? 1 : 0);
                     showedCrawl++;
@@ -187,9 +186,9 @@ public class IndexCreate_p {
                     if (peer == null) peername = record.originator(); else peername = peer.getName();
                     prop.put("otherCrawlStartFinished_" + showedCrawl + "_dark", ((dark) ? 1 : 0));
                     prop.put("otherCrawlStartFinished_" + showedCrawl + "_cre", record.created());
-                    prop.put("otherCrawlStartFinished_" + showedCrawl + "_peername", wikiCode.replaceHTML(peername));
-                    prop.put("otherCrawlStartFinished_" + showedCrawl + "_startURL", wikiCode.replaceHTML(record.attributes().get("startURL").toString()));
-                    prop.put("otherCrawlStartFinished_" + showedCrawl + "_intention", wikiCode.replaceHTML(record.attributes().get("intention").toString()));
+                    prop.put("otherCrawlStartFinished_" + showedCrawl + "_peername", peername);
+                    prop.put("otherCrawlStartFinished_" + showedCrawl + "_startURL", record.attributes().get("startURL").toString());
+                    prop.put("otherCrawlStartFinished_" + showedCrawl + "_intention", record.attributes().get("intention").toString());
                     prop.put("otherCrawlStartFinished_" + showedCrawl + "_generalDepth", record.attributes().get("generalDepth"));
                     prop.put("otherCrawlStartFinished_" + showedCrawl + "_crawlingQ", (record.attributes().get("crawlingQ").equals("true")) ? 1 : 0);
                     showedCrawl++;
