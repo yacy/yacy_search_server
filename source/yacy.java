@@ -324,8 +324,7 @@ public final class yacy {
             yacyVersion.latestRelease = version;
 
             // read environment
-            int timeout       = Integer.parseInt(sb.getConfig("httpdTimeout", "60000"));
-            if (timeout < 60000) timeout = 60000;
+            int timeout = Math.max(20000, Integer.parseInt(sb.getConfig("httpdTimeout", "20000")));
 
             // create some directories
             final File htRootPath = new File(homePath, sb.getConfig("htRootPath", "htroot"));

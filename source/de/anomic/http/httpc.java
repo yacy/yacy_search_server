@@ -111,6 +111,7 @@ public final class httpc {
     private static final String vDATE = "20040602";
     public static String userAgent;
     private static final int terminalMaxLength = 30000;
+    private static final long terminalMaxTime  = 60000;
     private static final TimeZone GMTTimeZone = TimeZone.getTimeZone("GMT");
     /**
     * This string is initialized on loading of this class and contains
@@ -1708,7 +1709,7 @@ do upload
             }
 
             // reads in the http header, right now, right here
-            byte[] b = serverCore.receive(httpc.this.clientInput, httpc.this.readLineBuffer, terminalMaxLength, false);
+            byte[] b = serverCore.receive(httpc.this.clientInput, httpc.this.readLineBuffer, terminalMaxLength, terminalMaxTime, false);
             if (b == null) {
                 // the server has meanwhile disconnected
                 this.statusCode = 503;
@@ -1727,7 +1728,7 @@ do upload
             
             if ((this.statusCode==500)&&(this.statusText.equals("status line parse error"))) {
                 // flush in anything that comes without parsing
-                while ((b != null) && (b.length != 0)) b = serverCore.receive(httpc.this.clientInput, httpc.this.readLineBuffer, terminalMaxLength, false);
+                while ((b != null) && (b.length != 0)) b = serverCore.receive(httpc.this.clientInput, httpc.this.readLineBuffer, terminalMaxLength, terminalMaxTime, false);
                 return; // in bad mood                
             }
                         
@@ -1735,13 +1736,13 @@ do upload
             if (this.statusCode == 400) {
                 // bad request
                 // flush in anything that comes without parsing
-                while ((b = serverCore.receive(httpc.this.clientInput, httpc.this.readLineBuffer, terminalMaxLength, false)).length != 0) {}
+                while ((b = serverCore.receive(httpc.this.clientInput, httpc.this.readLineBuffer, terminalMaxLength, terminalMaxTime, false)).length != 0) {}
                 return; // in bad mood
             }
 
             // at this point we should have a valid response. read in the header properties
             String key = "";
-            while ((b = serverCore.receive(httpc.this.clientInput, httpc.this.readLineBuffer, terminalMaxLength, false)) != null) {
+            while ((b = serverCore.receive(httpc.this.clientInput, httpc.this.readLineBuffer, terminalMaxLength, terminalMaxTime, false)) != null) {
                 if (b.length == 0) break;
                 buffer = new String(b);
                 buffer=buffer.trim();
