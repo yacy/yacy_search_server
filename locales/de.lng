@@ -1821,8 +1821,9 @@ Other peers==Andere Peers
 not online==nicht online
 other peers online.==andere Peers online.
 Log-In==Einloggen
-Click here to <a href="Status.html?login=">log in</a> as administrator and see full status.==Klicken Sie <a href="Status.html?login=">hier</a>, um sich als Administrator einzuloggen und den vollst&auml;ndigen Status zu sehen.
-
+Click here to <==Klicken Sie <
+log in<==hier,<
+as administrator and see full status.==um sich als Administrator einzuloggen und den vollst&auml;ndigen Status zu sehen.
 #-----------------------------
 
 #File: Status_p.inc
@@ -2093,10 +2094,9 @@ Changes will be published as announcement on YaCyNews==&Auml;nderungen werden &u
 #File: WikiHelp.html
 #-----------------------------
 Wiki Help==Wiki Hilfe
-Index Creation==Index erzeugen
+Wiki-Code==Wiki-Befehle
 This table contains a short description of the tags that can be used in the Wiki and several other servlets of YaCy. For a more detailed description visit the==Diese Tabelle ent&auml;lt eine kurze Beschreibung der Tags, die in diesem Wiki und an anderen Stellen in YaCy benutzen k&ouml;nnen. F&uuml;r eine detailliertere Beschreibung besuchen Sie bitte das 
 #YaCy Wiki==YaCy Wiki
-Code==Befehl
 Description==Beschreibung
 \=\=headline====&Uuml;berschrift
 This tags create headlines. If a page has three or more headlines, a directory will be created automaticly.==Diese Tags erzeugen &Uuml;berschriften. Wenn die Seite drei oder mehr &Uuml;berschriften enth&auml;lt, wird automatisch ein Inhaltsverzeichnis erstellt.
@@ -2163,17 +2163,9 @@ ordered links from==angeforderten Links aus
 filtered links of a total number of==gefilterten Links von insgesamt
 known.==bekannten Links.
 Refine your search with these topwords==Verfeinere die Suche mit diesen Topw&ouml;rtern
-You can enrich the search results by using the 'global' option==Sie k&ouml;nnen die Anzahl Ihrer Treffer erh&ouml;hen, wenn Sie die 'global' Option benutzen
-This will search also other YaCy peers==So werden auch andere YaCy Peers zum Suchen benutzt.
+You can enrich the search results by using the 'global' option; you must also switch to online mode==Sie k&ouml;nnen die Anzahl Ihrer Treffer erh&ouml;hen, wenn Sie die 'global' Option benutzen; Sie m&uuml;ssen aber erst in den Onlinemodus wechseln
+\(by using the proxy\) to contribute to the global index.==(indem Sie den Proxy benutzen), um etwas zum globalen Index beizutragen.
 You cannot get global search results because you are not connected to another YaCy peer.==Sie k&ouml;nnen keine globalen Treffer erhalten, da sie nicht mit einem anderen YaCy Peer verbunden sind.
-To connect you must first use the proxy.==Um sich zu verbinden, m&uuml;ssen Sie erst den Proxy benutzen.
-See here for an==Sehen Sie hier
-installation guide==f&uuml;r eine Installations-Anleitung
-Alternatively, you can run the proxy in permanent online mode, which also grants global search.==Alternativ k&ouml;nnen Sie auch den Proxy im permanent online Modus laufen lassen. Dies garantiert eine globale Suche.
-To do this, press this button:==Um dies zu tun, klicken Sie bitte auf folgenden Button:
-"go online"=="gehe online"
-you must also switch to online mode==Sie m&uuml;ssen aber erst in den online Modus wechseln
-\(by using the proxy\) to contribute to the global index.==(indem Sie den Proxy benutzen) um auch am globalen Index beizutragen.
 "bookmark"=="Lesezeichen"
 "recommend"=="empfehlen"
 "delete"=="l&ouml;schen"
@@ -2257,6 +2249,7 @@ Blacklist Cleaner==Blacklist aufr&auml;men
 Peer Configuration Menu==Peerkonfigurationsmen&uuml;
 Basic Configuraton==Grundeinstellungen
 >Language==>Sprache
+>Network==>Netzwerk
 Peer Profile==Profil
 Interface Skins==Skin Auswahl
 >Advanced==>Erweitert
@@ -2302,6 +2295,12 @@ Performance Menu==Performance Men&uuml;
 Queues Performance Settings==Puffer Performance Einstellungen
 Memory Settings for Database Caches==Speicher Einstellungen des Datenbank Caches
 Timing Settings for Search Sequence==Zeit Einstellungen f&uuml;r die Such Sequenz
+#-----------------------------
+
+#File: env/templates/submenuViewLog.template
+#---------------------------
+#Server Log==Server Log
+Log Statistics==Log Statistik
 #-----------------------------
 
 #File: htdocsdefault/dir.html
