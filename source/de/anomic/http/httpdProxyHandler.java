@@ -229,7 +229,7 @@ public final class httpdProxyHandler extends httpdAbstractHandler implements htt
             
             // load a transformer
             transformer = new htmlFilterContentTransformer();
-            transformer.init(new File(switchboard.getRootPath(), switchboard.getConfig("plasmaBlueList", "")).toString());
+            transformer.init(new File(switchboard.getRootPath(), switchboard.getConfig(plasmaSwitchboard.LIST_BLUE, "")).toString());
             
             String f;
             // load the yellow-list

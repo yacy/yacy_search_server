@@ -339,7 +339,7 @@ public final class plasmaSearchEvent extends Thread implements Runnable {
         // retrieve entities that belong to the hashes
         profileLocal.startTimer();
         long start = System.currentTimeMillis();
-        Map inclusionContainers = wordIndex.getContainers(
+        Map inclusionContainers = (query.queryHashes.size() == 0) ? new HashMap() : wordIndex.getContainers(
                         query.queryHashes,
                         urlselection,
                         true,
@@ -369,6 +369,7 @@ public final class plasmaSearchEvent extends Thread implements Runnable {
         profileLocal.startTimer();
         long start = System.currentTimeMillis();
         indexContainer rcLocal = indexContainer.joinContainers(includeContainers,
+        		(query.queryHashes.size() == 0) ? 0 :
                 profileLocal.getTargetTime(plasmaSearchTimingProfile.PROCESS_JOIN) * query.queryHashes.size() / (query.queryHashes.size() + query.excludeHashes.size()),
                 query.maxDistance);
         long remaining = profileLocal.getTargetTime(plasmaSearchTimingProfile.PROCESS_JOIN) - System.currentTimeMillis() + start;
