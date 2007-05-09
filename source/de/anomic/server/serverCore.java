@@ -1004,7 +1004,7 @@ public final class serverCore extends serverAbstractThread implements serverThre
     	}
     
     	public byte[] readLine() {
-    	    return receive(this.in, this.readLineBuffer, serverCore.this.commandMaxLength, serverCore.this.timeout, false);
+    	    return receive(this.in, this.readLineBuffer, serverCore.this.commandMaxLength, false);
     	}
     
         /**
@@ -1155,14 +1155,10 @@ public final class serverCore extends serverAbstractThread implements serverThre
                 String reqCmd;
                 String reqProtocol = "HTTP";
                 Object[] stringParameter = new String[1];
-                long starttime = System.currentTimeMillis();
-                while ((this.in != null) &&
-                       ((requestBytes = readLine()) != null) &&
-                       (System.currentTimeMillis() - starttime < serverCore.this.timeout)) {
+                while ((this.in != null) && ((requestBytes = readLine()) != null)) {
                     this.setName("Session_" + this.userAddress.getHostAddress() + 
                             ":" + this.controlSocket.getPort() + 
-                            "_#=" + this.commandCounter +
-                            "_T=" + (System.currentTimeMillis() - starttime));
+                            "#" + this.commandCounter);
                     
                     this.request = new String(requestBytes);
                     //log.logDebug("* session " + handle + " received command '" + request + "'. time = " + (System.currentTimeMillis() - handle));
@@ -1308,18 +1304,16 @@ public final class serverCore extends serverAbstractThread implements serverThre
         
     }
 
-    public static byte[] receive(PushbackInputStream pbis, serverByteBuffer readLineBuffer, int maxSize, long timeout, boolean logerr) {
+    public static byte[] receive(PushbackInputStream pbis, serverByteBuffer readLineBuffer, int maxSize, boolean logerr) {
 
         // reuse an existing linebuffer
         readLineBuffer.reset();
         
         int bufferSize = 0, b = 0;    	
     	try {
-            long start = System.currentTimeMillis();
     	    while ((b = pbis.read()) > 31) {
                 readLineBuffer.write(b);
                 if (bufferSize++ > maxSize) break;
-                if ((System.currentTimeMillis() - start > timeout)) break;
             }
             
     	    // we have catched a possible line end
