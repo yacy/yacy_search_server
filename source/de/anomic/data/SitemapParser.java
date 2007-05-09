@@ -47,9 +47,7 @@ package de.anomic.data;
 import java.io.InputStream;
 import java.net.MalformedURLException;
 import java.text.ParseException;
-import java.text.SimpleDateFormat;
 import java.util.Date;
-import java.util.Locale;
 import java.util.zip.GZIPInputStream;
 
 import javax.xml.parsers.SAXParser;

@@ -189,15 +189,15 @@ public final class plasmaHTCache {
 
     private void resetResponseHeaderDB() {
         if (this.responseHeaderDB != null) this.responseHeaderDB.close();
-        File dbfile = new File(this.cachePath, "responseHeader.db");
+        File dbfile = new File(this.cachePath, "responseHeader1.db");
         if (dbfile.exists()) dbfile.delete();
         openResponseHeaderDB(0);
     }
     
     private void openResponseHeaderDB(long preloadTime) {
         // open the response header database
-        File dbfile = new File(this.cachePath, "responseHeader.db");
-        this.responseHeaderDB = new kelondroMapObjects(new kelondroDyn(dbfile, true, true, preloadTime, yacySeedDB.commonHashLength, 150, '#', true, false, true), 500);
+        File dbfile = new File(this.cachePath, "responseHeader1.db");
+        this.responseHeaderDB = new kelondroMapObjects(new kelondroDyn(dbfile, true, true, preloadTime, yacySeedDB.commonHashLength, 150, '#', kelondroBase64Order.enhancedCoder, true, false, true), 500);
     }
     
     private void deleteOldHTCache(File directory) {

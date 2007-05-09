@@ -69,6 +69,7 @@ import org.xml.sax.SAXException;
 import de.anomic.kelondro.kelondroBase64Order;
 import de.anomic.kelondro.kelondroDyn;
 import de.anomic.kelondro.kelondroMapObjects;
+import de.anomic.kelondro.kelondroNaturalOrder;
 
 public class blogBoard {
     
@@ -84,7 +85,7 @@ public class blogBoard {
     public blogBoard(File actpath, long preloadTime) {
     		new File(actpath.getParent()).mkdir();
         if (datbase == null) {
-            datbase = new kelondroMapObjects(new kelondroDyn(actpath, true, true, preloadTime, keyLength, recordSize, '_', true, false, false), 500);
+            datbase = new kelondroMapObjects(new kelondroDyn(actpath, true, true, preloadTime, keyLength, recordSize, '_', kelondroNaturalOrder.naturalOrder, true, false, false), 500);
         }
     }
     

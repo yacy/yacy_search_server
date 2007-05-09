@@ -306,7 +306,7 @@ public class yacyDHTAction implements yacyPeerAction {
         double avdist, firstdist, lastdist;
         Enumeration e = this.getAcceptRemoteIndexSeeds(lastKey);
         Hashtable peerFilter = new Hashtable();
-        int maxloop = Math.min(30, yacyCore.seedDB.sizeConnected()); // to ensure termination
+        int maxloop = Math.min(100, yacyCore.seedDB.sizeConnected()); // to ensure termination
         if (log != null) log.logInfo("Collecting DHT target peers for first_hash = " + firstKey + ", last_hash = " + lastKey);
         while ((e.hasMoreElements()) && (seeds.size() < (primaryPeerCount + reservePeerCount)) && (maxloop-- > 0)) {
             seed = (yacySeed) e.nextElement();

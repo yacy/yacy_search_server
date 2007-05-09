@@ -62,19 +62,19 @@ public class kelondroMapTable {
     }
     
     public void declareMaps(
-            String tablename, int keysize, int nodesize, int cacheslots,
+            String tablename, int keysize, kelondroOrder objectOrder, int nodesize, int cacheslots,
             char fillChar, boolean resetOnFail) throws IOException {
-        declareMaps(tablename, keysize, nodesize, cacheslots, null, null, null, fillChar, resetOnFail);
+        declareMaps(tablename, keysize, objectOrder, nodesize, cacheslots, null, null, null, fillChar, resetOnFail);
     }
     
     public void declareMaps(
-            String tablename, int keysize, int nodesize, int cacheslots,
+            String tablename, int keysize, kelondroOrder objectOrder, int nodesize, int cacheslots,
             String[] sortfields, String[] longaccfields, String[] doubleaccfields, char fillChar, boolean resetOnFail) throws IOException {
-        declareMaps(tablename, keysize, nodesize, cacheslots, sortfields, longaccfields, doubleaccfields, fillChar, 0, resetOnFail);
+        declareMaps(tablename, keysize, objectOrder, nodesize, cacheslots, sortfields, longaccfields, doubleaccfields, fillChar, 0, resetOnFail);
     }
     
     public void declareMaps(
-            String tablename, int keysize, int nodesize, int cacheslots,
+            String tablename, int keysize, kelondroOrder objectOrder, int nodesize, int cacheslots,
             String[] sortfields, String[] longaccfields, String[] doubleaccfields, char fillChar,
             long preloadTime, boolean resetOnFail) throws IOException {
         if (mTables.containsKey(tablename)) throw new RuntimeException("kelondroTables.declareMap: table '" + tablename + "' declared twice.");
@@ -82,7 +82,7 @@ public class kelondroMapTable {
         File tablefile = new File(tablesPath, "table." + tablename + ".mdb");
         kelondroDyn dyn;
         if (!(tablefile.exists())) tablefile.getParentFile().mkdirs();
-        dyn = new kelondroDyn(tablefile, true, true, preloadTime, keysize, nodesize, fillChar, true, false, resetOnFail);
+        dyn = new kelondroDyn(tablefile, true, true, preloadTime, keysize, nodesize, fillChar, objectOrder, true, false, resetOnFail);
         kelondroMapObjects map = new kelondroMapObjects(dyn, cacheslots, sortfields, longaccfields, doubleaccfields, null, null);
         mTables.put(tablename, map);
     }

@@ -35,7 +35,6 @@ import java.util.Map;
 import java.util.regex.Pattern;
 import java.util.regex.PatternSyntaxException;
 
-import de.anomic.data.SitemapParser;
 import de.anomic.htmlFilter.htmlFilterContentScraper;
 import de.anomic.htmlFilter.htmlFilterWriter;
 import de.anomic.http.httpHeader;

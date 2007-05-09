@@ -70,10 +70,6 @@ public class kelondroDyn {
     private kelondroObjectBuffer buffer;
     private kelondroRow rowdef;
     
-    public kelondroDyn(File file, boolean useNodeCache, boolean useObjectCache, long preloadTime, int key, int nodesize, char fillChar, boolean usetree, boolean writebuffer, boolean resetOnFail) {
-        this(file, useNodeCache, useObjectCache, preloadTime, key, nodesize, fillChar, new kelondroNaturalOrder(true), usetree, writebuffer, resetOnFail);
-    }
-    
     public kelondroDyn(File file, boolean useNodeCache, boolean useObjectCache, long preloadTime, int key,
             int nodesize, char fillChar, kelondroOrder objectOrder, boolean usetree, boolean writebuffer, boolean resetOnFail) {
         // creates or opens a dynamic tree
@@ -473,7 +469,7 @@ public class kelondroDyn {
         if (args.length == 1) {
             // open a db and list keys
             try {
-                kelondroDyn kd = new kelondroDyn(new File(args[0]), true, true, 0, 4 ,100, '_', false, false, true);
+                kelondroDyn kd = new kelondroDyn(new File(args[0]), true, true, 0, 4 ,100, '_', kelondroNaturalOrder.naturalOrder, false, false, true);
                 System.out.println(kd.sizeDyn() + " elements in DB");
                 Iterator i = kd.dynKeys(true, false);
                 while (i.hasNext())
@@ -490,7 +486,7 @@ public class kelondroDyn {
             File f = new File(args[3]);
             kelondroDyn kd;
             try {
-                kd = new kelondroDyn(db, true, true, 0, 80, 200, '_', false, false, true);
+                kd = new kelondroDyn(db, true, true, 0, 80, 200, '_', kelondroNaturalOrder.naturalOrder, false, false, true);
                 if (writeFile)
                     kd.readFile(key, f);
                 else

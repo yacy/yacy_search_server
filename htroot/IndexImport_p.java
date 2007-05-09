@@ -48,7 +48,6 @@
 //javac -classpath .:../Classes IndexControl_p.java
 //if the shell's current path is HTROOT
 
-import java.io.File;
 import java.io.PrintStream;
 import java.util.Date;
 import java.util.HashMap;
@@ -75,8 +74,8 @@ public final class IndexImport_p {
                 try {
                     // getting the import path
                     String importPlasmaPath = (String) post.get("importPlasmaPath");
-                    String importIndexPrimaryPath = (String) post.get("importIndexPrimaryPath");
-                    String importIndexSecondaryPath = (String) post.get("importIndexSecondaryPath");
+                    //String importIndexPrimaryPath = (String) post.get("importIndexPrimaryPath");
+                    //String importIndexSecondaryPath = (String) post.get("importIndexSecondaryPath");
                     String importType = (String) post.get("importType");
                     String cacheSizeStr = (String) post.get("cacheSize");
                     boolean startImport = true;

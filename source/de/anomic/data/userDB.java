@@ -60,6 +60,7 @@ import de.anomic.kelondro.kelondroCloneableIterator;
 import de.anomic.kelondro.kelondroDyn;
 import de.anomic.kelondro.kelondroException;
 import de.anomic.kelondro.kelondroMapObjects;
+import de.anomic.kelondro.kelondroNaturalOrder;
 import de.anomic.server.serverCodings;
 
 public final class userDB {
@@ -77,7 +78,7 @@ public final class userDB {
         this.userTableFile = userTableFile;
         this.preloadTime = preloadTime;
         userTableFile.getParentFile().mkdirs();
-        this.userTable = new kelondroMapObjects(new kelondroDyn(userTableFile, true, true, preloadTime, 128, 256, '_', true, false, false), 10);
+        this.userTable = new kelondroMapObjects(new kelondroDyn(userTableFile, true, true, preloadTime, 128, 256, '_', kelondroNaturalOrder.naturalOrder, true, false, false), 10);
     }
     
     void resetDatabase() {
@@ -85,7 +86,7 @@ public final class userDB {
         if (userTable != null) userTable.close();
         if (!(userTableFile.delete())) throw new RuntimeException("cannot delete user database");
         userTableFile.getParentFile().mkdirs();
-        userTable = new kelondroMapObjects(new kelondroDyn(userTableFile, true, true, preloadTime, 256, 512, '_', true, false, false), 10);
+        userTable = new kelondroMapObjects(new kelondroDyn(userTableFile, true, true, preloadTime, 256, 512, '_', kelondroNaturalOrder.naturalOrder, true, false, false), 10);
     }
     
     public void close() {

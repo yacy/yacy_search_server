@@ -197,11 +197,11 @@ public final class yacySeedDB {
             initializeHandlerMethod = null;
         }
         try {
-            return new kelondroMapObjects(new kelondroDyn(seedDBFile, true, true, preloadTime / 3, commonHashLength, 480, '#', usetree, false, true), 500, sortFields, longaccFields, doubleaccFields, initializeHandlerMethod, this);
+            return new kelondroMapObjects(new kelondroDyn(seedDBFile, true, true, preloadTime / 3, commonHashLength, 480, '#', kelondroBase64Order.enhancedCoder, usetree, false, true), 500, sortFields, longaccFields, doubleaccFields, initializeHandlerMethod, this);
         } catch (Exception e) {
             // try again
             kelondroDyn.delete(seedDBFile, usetree);
-            return new kelondroMapObjects(new kelondroDyn(seedDBFile, true, true, preloadTime / 3, commonHashLength, 480, '#', usetree, false, true), 500, sortFields, longaccFields, doubleaccFields, initializeHandlerMethod, this);
+            return new kelondroMapObjects(new kelondroDyn(seedDBFile, true, true, preloadTime / 3, commonHashLength, 480, '#', kelondroBase64Order.enhancedCoder, usetree, false, true), 500, sortFields, longaccFields, doubleaccFields, initializeHandlerMethod, this);
         }
     }
     

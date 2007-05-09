@@ -1,7 +1,10 @@
 package de.anomic.plasma.dbImport;
 
 public class ImporterException extends Exception {
-	public ImporterException(String message) {
+
+    private static final long serialVersionUID = 6070972210596234670L;
+
+    public ImporterException(String message) {
 		super(message);
 	}
 	

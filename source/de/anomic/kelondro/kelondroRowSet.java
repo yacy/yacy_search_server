@@ -38,26 +38,39 @@ public class kelondroRowSet extends kelondroRowCollection implements kelondroInd
 
     private kelondroProfile profile;
 
-    public kelondroRowSet(kelondroRow rowdef, int objectCount, byte[] cache, int sortBound) {
-        super(rowdef, objectCount, cache, sortBound);
-        this.profile = new kelondroProfile();
-    }
-        
     public kelondroRowSet(kelondroRowSet rs) {
         super(rs);
         this.profile = rs.profile;
     }
 
+    public kelondroRowSet(kelondroRow rowdef, int objectCount, byte[] cache, int sortBound) {
+        super(rowdef, objectCount, cache, sortBound);
+        assert rowdef.objectOrder != null;
+        this.profile = new kelondroProfile();
+    }
+        
     public kelondroRowSet(kelondroRow rowdef, int objectCount) {
         super(rowdef, objectCount);
+        assert rowdef.objectOrder != null;
         this.profile = new kelondroProfile();
     }
     
     public kelondroRowSet(kelondroRow rowdef, kelondroRow.Entry exportedCollectionRowEnvironment, int columnInEnvironment) {
         super(rowdef, exportedCollectionRowEnvironment, columnInEnvironment);
+        assert rowdef.objectOrder != null;
         this.profile = new kelondroProfile();
     }
 
+    public void setOrdering(kelondroOrder newOrder, int newColumn) {
+        assert newOrder != null;
+        if ((rowdef.objectOrder == null) ||
+                (!(rowdef.objectOrder.signature().equals(newOrder.signature()))) ||
+                (newColumn != rowdef.primaryKey)) {
+            rowdef.setOrdering(newOrder, newColumn);
+            this.sortBound = 0;
+        }
+    }
+    
 	public void reset() {
 		super.reset();
 		this.profile = new kelondroProfile();
@@ -120,15 +133,6 @@ public class kelondroRowSet extends kelondroRowCollection implements kelondroInd
 
     public kelondroRow.Entry remove(byte[] a) {
         return remove(a, 0, a.length);
-    }
-    
-    public void setOrdering(kelondroOrder newOrder, int newColumn) {
-        if ((rowdef.objectOrder == null) ||
-                (!(rowdef.objectOrder.signature().equals(newOrder.signature()))) ||
-                (newColumn != rowdef.primaryKey)) {
-            rowdef.setOrdering(newOrder, newColumn);
-            this.sortBound = 0;
-        }
     }
 
     private int find(byte[] a, int astart, int alength) {
@@ -231,8 +235,8 @@ public class kelondroRowSet extends kelondroRowCollection implements kelondroInd
             if (first == null) {
                 p = 0;
             } else {
-                p = binaryPosition(first, 0, first.length);
-                //System.out.println("binaryposition for key " + new String(firstKey) + " is " + p);
+                p = binaryPosition(first, 0, first.length); // check this to find bug in DHT selection enumeration
+                System.out.println("binaryposition for key " + new String(firstKey) + " is " + p);
             }
         }
         

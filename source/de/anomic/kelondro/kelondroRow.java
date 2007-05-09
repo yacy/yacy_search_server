@@ -46,6 +46,7 @@ public class kelondroRow {
     protected Map              nickref = null; // a mapping from nicknames to Object[2]{kelondroColumn, Integer(colstart)}
     
     public kelondroRow(kelondroColumn[] row, kelondroOrder objectOrder, int primaryKey) {
+        assert objectOrder != null;
         this.row = row;
         assert (objectOrder != null);
         this.objectOrder = objectOrder;

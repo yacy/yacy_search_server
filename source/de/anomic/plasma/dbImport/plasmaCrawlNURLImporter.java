@@ -11,7 +11,6 @@ import de.anomic.plasma.plasmaCrawlEntry;
 import de.anomic.plasma.plasmaCrawlNURL;
 import de.anomic.plasma.plasmaCrawlProfile;
 import de.anomic.plasma.plasmaSwitchboard;
-import de.anomic.plasma.plasmaWordIndex;
 
 public class plasmaCrawlNURLImporter extends AbstractImporter implements dbImporter {
 
@@ -19,14 +18,12 @@ public class plasmaCrawlNURLImporter extends AbstractImporter implements dbImpor
     private HashSet importProfileHandleCache = new HashSet();
     private plasmaCrawlProfile importProfileDB;
     private plasmaCrawlNURL importNurlDB;
-    private plasmaWordIndex wi;
     private int importStartSize;
     private int urlCount = 0;
     private int profileCount = 0;
     
     public plasmaCrawlNURLImporter(plasmaSwitchboard theSb) {
     	super("NURL",theSb);
-        this.wi = this.sb.wordIndex;
     }
 
     public long getEstimatedTime() {
