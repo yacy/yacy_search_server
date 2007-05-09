@@ -27,20 +27,20 @@
     <dt>Auto-popup on start-up</dt>
     <dd>
     #(popup)#
-    Disabled <a href="Status.html?popup=true">[Enable]
+    Disabled <a href="Status.html?popup=true">[Enable]</a>
     ::
-    Enabled <a href="Status.html?popup=false">[Disable]
+    Enabled <a href="Status.html?popup=false">[Disable]</a>
     #(/popup)#
     </dd>
       
     <dt><a href="PerformanceMemory_p.html">Memory Usage</a></dt>
     <dd>
-    free: #[freeMemory]#<br>
-    total: #[totalMemory]#<br>
+    free: #[freeMemory]#<br/>
+    total: #[totalMemory]#<br/>
     max: #[maxMemory]#</dd>
     
     <dt>Traffic [<a href="Status.html?ResetTraffic=">Reset</a>]</dt>
-    <dd>Proxy: #[trafficProxy]#<br>Crawler: #[trafficCrawler]#</dd>
+    <dd>Proxy: #[trafficProxy]#<br/>Crawler: #[trafficCrawler]#</dd>
     
     <dt><a href="Connections_p.html">Incoming Connections</a></dt>
     <dd>Active: #[connectionsActive]# | Idle: #[connectionsIdle]# | Max: #[connectionsMax]#</dd>
@@ -48,7 +48,7 @@
     <dt><a href="IndexCreateIndexingQueue_p.html">Indexing Queue</a></dt>
     <dd><table>
       <tr>
-      <td><div class="ProgressBar"><div class="ProgressBarFill" style="width:#[indexingQueuePercent]#%;" /></div></div</td>
+      <td><div class="ProgressBar"><div class="ProgressBarFill" style="width:#[indexingQueuePercent]#%;" ></div></div></td>
       <td><div class="ProgressBarCaption">#[indexingQueueSize]#&nbsp;|&nbsp;#[indexingQueueMax]#</div></td>
       </tr>
     </table></dd>
@@ -56,7 +56,7 @@
     <dt><a href="IndexCreateLoaderQueue_p.html">Loader Queue</a></dt>
     <dd><table>
       <tr>
-      <td><div class="ProgressBar"><div class="ProgressBarFill" style="width:#[loaderQueuePercent]#%;" /></div></div></td>
+      <td><div class="ProgressBar"><div class="ProgressBarFill" style="width:#[loaderQueuePercent]#%;" ></div></div></td>
       <td><div class="ProgressBarCaption">#[loaderQueueSize]#&nbsp;|&nbsp;#[loaderQueueMax]#</div></td>
       </tr>
     </table></dd>
@@ -102,7 +102,7 @@
       ::
       Enabled: Updating to file #[seedFile]#.
       Last upload: #[lastUpload]# ago.
-    #(/seedServer)#</td>
+    #(/seedServer)#
     </dd>
     
   </dl>
