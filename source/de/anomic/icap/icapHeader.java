@@ -290,6 +290,7 @@ public class icapHeader extends TreeMap implements Map {
         icapHeader header = new icapHeader();
         int p;
         String line;
+        long start = System.currentTimeMillis();
         while ((line = theSession.readLineAsString()) != null) {
             if (line.length() == 0) break; // this seperates the header of the HTTP request from the body
             // parse the header line: a property seperated with the ':' sign
@@ -297,6 +298,7 @@ public class icapHeader extends TreeMap implements Map {
                 // store a property
                 header.add(line.substring(0, p).trim(), line.substring(p + 1).trim());
             }
+            if (System.currentTimeMillis() - start > theSession.socketTimeout) break;
         }
         
         return header;        

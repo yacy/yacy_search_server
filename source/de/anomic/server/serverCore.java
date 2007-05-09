@@ -900,7 +900,7 @@ public final class serverCore extends serverAbstractThread implements serverThre
         public  int userPort;              // the ip port used by the client 
     	public  PushbackInputStream in;    // on control input stream
     	public  OutputStream out;          // on control output stream, autoflush
-        private int socketTimeout;
+        public  int socketTimeout;
 
         private final serverByteBuffer readLineBuffer = new serverByteBuffer(256);
         
@@ -1155,10 +1155,14 @@ public final class serverCore extends serverAbstractThread implements serverThre
                 String reqCmd;
                 String reqProtocol = "HTTP";
                 Object[] stringParameter = new String[1];
-                while ((this.in != null) && ((requestBytes = readLine()) != null)) {                    
+                long starttime = System.currentTimeMillis();
+                while ((this.in != null) &&
+                       ((requestBytes = readLine()) != null) &&
+                       (System.currentTimeMillis() - starttime < serverCore.this.timeout)) {
                     this.setName("Session_" + this.userAddress.getHostAddress() + 
-                                 ":" + this.controlSocket.getPort() + 
-                                 "#" + this.commandCounter);
+                            ":" + this.controlSocket.getPort() + 
+                            "_#=" + this.commandCounter +
+                            "_T=" + (System.currentTimeMillis() - starttime));
                     
                     this.request = new String(requestBytes);
                     //log.logDebug("* session " + handle + " received command '" + request + "'. time = " + (System.currentTimeMillis() - handle));
