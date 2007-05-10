@@ -236,7 +236,7 @@ public class kelondroRowSet extends kelondroRowCollection implements kelondroInd
                 p = 0;
             } else {
                 p = binaryPosition(first, 0, first.length); // check this to find bug in DHT selection enumeration
-                System.out.println("binaryposition for key " + new String(firstKey) + " is " + p);
+                //System.out.println("binaryposition for key " + new String(firstKey) + " is " + p);
             }
         }
         
