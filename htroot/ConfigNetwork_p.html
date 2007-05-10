@@ -3,6 +3,29 @@
   <head>
     <title>YaCy '#[clientname]#': Network Configuration</title>
     #%env/templates/metas.template%#
+    <script type="text/javascript">
+    <!--
+      function CheckForRobinson() {
+         var dist = document.ConfigForm.indexDistribute.checked;
+         var recv = document.ConfigForm.indexReceive.checked;
+         if(!(dist || recv)) {
+            //robinson-mode
+            document.ConfigForm.network[1].checked = true;
+         }
+         else {
+            //p2p-mode
+            document.ConfigForm.network[0].checked = true;
+         }
+      }
+      
+      function EnableRobinson() {
+         if(document.ConfigForm.network[1].checked) {
+            document.ConfigForm.indexDistribute.checked = false;
+            document.ConfigForm.indexReceive.checked = false;
+         }
+      }
+    //-->
+    </script>
   </head>
   <body id="ConfigNetwork">
     #%env/templates/header.template%#
@@ -24,7 +47,7 @@
       a completely independent search engine instance, without any data exchange between your peer and other
       peers, which we call a 'Robinson' peer.
     </p>
-    <form method="post" action="ConfigNetwork_p.html" enctype="multipart/form-data" accept-charset="UTF-8">
+    <form name="ConfigForm" method="post" action="ConfigNetwork_p.html" enctype="multipart/form-data" accept-charset="UTF-8">
       <fieldset>
       <legend>
         <input type="radio" name="network" id="p2p" value="p2p"#(p2p.checked)#:: checked="checked"#(/p2p.checked)# />
@@ -33,8 +56,7 @@
 	  <dl>
         <dt>
           <label for="indexDistribute">Index Distribution</label>
-          <input type="checkbox" id="indexDistribute" name="indexDistribute"
-                 #(indexDistributeChecked)#::checked="checked" #(/indexDistributeChecked)#/>
+          <input type="checkbox" id="indexDistribute" name="indexDistribute" onclick="CheckForRobinson()" #(indexDistributeChecked)#::checked="checked" #(/indexDistributeChecked)#/>
         </dt>
         <dd>
           This enables automated, DHT-ruled Index Transmission to other peers.<br />
@@ -49,7 +71,7 @@
 		</dd>
 		<dt>
 		  <label for="indexReceive">Index Receive</label>
-		  <input type="checkbox" id="indexReceive" name="indexReceive" #(indexReceiveChecked)#::checked="checked" #(/indexReceiveChecked)#/>
+		  <input type="checkbox" id="indexReceive" name="indexReceive" onclick="CheckForRobinson()" #(indexReceiveChecked)#::checked="checked" #(/indexReceiveChecked)#/>
 		</dt>
 		<dd>
 		  Accept remote Index Transmissions.<br />
@@ -78,7 +100,7 @@
         
     <fieldset>
       <legend>
-        <input type="radio" name="network" id="robinson" value="robinson"#(robinson.checked)#:: checked="checked"#(/robinson.checked)# />
+        <input type="radio" name="network" id="robinson" onclick="EnableRobinson()" value="robinson"#(robinson.checked)#:: checked="checked"#(/robinson.checked)# />
         <label for="robinson">Robinson Mode</label>
       </legend>
       <p class="help">
