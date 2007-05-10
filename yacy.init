@@ -838,7 +838,7 @@ timeout_media = 15000
 rankingPath = DATA/RANKING
 
 # a list of domain name patterns that should not be cached by the httpc dns cache
-httpc.nameCacheNoCachingPatterns = .*.dyndns.org, .*.dynalias.org, .*.homeip.net
+httpc.nameCacheNoCachingPatterns = .*.ath.cx,.*.blogdns.*,.*.boldlygoingnowhere.org,.*.dnsalias.*,.*.dnsdojo.*,.*.dvrdns.org,.*.dyn-o-saur.com,.*.dynalias.*,.*.dyndns.*,.*.ftpaccess.cc,.*.game-host.org,.*.game-server.cc,.*.getmyip.com,.*.gotdns.*,.*.ham-radio-op.net,.*.hobby-site.com,.*.homedns.org,.*.homeftp.*,.*.homeip.net,.*.homelinux.*,.*.homeunix.*,.*.is-a-chef.*,.*.is-a-geek.*,.*.kicks-ass.*,.*.merseine.nu,.*.mine.nu,.*.myphotos.cc,.*.podzone.*,.*.scrapping.cc,.*.selfip.*,.*.servebbs.*,.*.serveftp.*,.*.servegame.org,.*.shacknet.nu
 
 #externalRedirectors
 #squid Redirector compatible
