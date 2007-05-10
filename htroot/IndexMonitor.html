@@ -84,16 +84,8 @@
     #(/size)#
     </em></p>
     <table cellpadding="2" cellspacing="1" >
-      <colgroup>
-        <col width="30" />
-        #(showInit)#::<col width="60" />#(/showInit)#
-        #(showExec)#::<col width="60" />#(/showExec)#
-        <col width="80" />
-        <col width="40" />
-        <col width="180" />
-        <col />
-      </colgroup>
       <tr class="TableHeader">
+        #(showControl)#::
         <td align="center">
           <form action="#[feedbackpage]#" method="post" enctype="multipart/form-data">
             <div>
@@ -102,15 +94,17 @@
             </div>
           </form>
         </td>
+        #(/showControl)#
         #(showInit)#::<td><strong>Initiator</strong></td>#(/showInit)#
         #(showExec)#::<td><strong>Executor</strong></td>#(/showExec)#
-        <td><strong>Modified Date</strong></td>
-        <td><strong>#Words</strong></td>
-        <td><strong>Title</strong></td>
-        <td><strong>URL</strong></td>
+        #(showDate)#::<td><strong>Modified</strong></td>#(/showDate)#
+        #(showWords)#::<td><strong>Words</strong></td>#(/showWords)#
+        #(showTitle)#::<td><strong>Title</strong></td>#(/showTitle)#
+        #(showURL)#::<td><strong>URL</strong></td>#(/showURL)#
       </tr>
       #{indexed}#
       <tr class="TableCell#(dark)#Light::Dark#(/dark)#">
+        #(showControl)#::
         <td align="center">
           <form action="#[feedbackpage]#" method="post" enctype="multipart/form-data">
             <div>
@@ -120,11 +114,26 @@
             </div>
           </form>
         </td>
+        #(/showControl)#
         #(showInit)#::<td>#[initiatorSeed]#</td>#(/showInit)#
         #(showExec)#::<td>#[executorSeed]#</td>#(/showExec)#
-        <td>#[moddate]#</td>
-        <td>#[wordcount]#</td>
-        <td>#[urldescr]#</td>
+
+        #(showDate)#::<td>#[modified]#</td>#(/showDate)#
+        #(showWords)#::<td>#[count]#</td>#(/showWords)#
+
+        #(showTitle)#
+        ::
+        <td>
+          #(available)#
+            <span class="tt">-not cached-</span>
+          ::          
+            <a href="CacheAdmin_p.html?action=info&amp;path=#[cachepath]#" class="small" title="#[urltitle]#">#(nodescr)#no title::#[urldescr]##(/nodescr)#</a>
+          #(/available)#
+        </td>
+        #(/showTitle)#
+
+        #(showURL)#
+        ::
         <td>
           #(available)#
             <span class="tt">-not cached-</span>
@@ -132,6 +141,8 @@
             <a href="CacheAdmin_p.html?action=info&amp;path=#[cachepath]#" class="small" title="#[urltitle]#">#[url]#</a>
           #(/available)#
         </td>
+        #(/showURL)#
+
       </tr>
       #{/indexed}#
     </table>

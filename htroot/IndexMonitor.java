@@ -61,22 +61,25 @@ import de.anomic.yacy.yacySeed;
 
 public class IndexMonitor {
 
-    
     public static serverObjects respond(httpHeader header, serverObjects post, serverSwitch env) {
-	// return variable that accumulates replacements
-        plasmaSwitchboard sb = (plasmaSwitchboard) env;
-	serverObjects prop = new serverObjects();
-        
-        int lines = 40;
-        boolean showInit = false;
-        boolean showExec = false;
-        
-        
+        // return variable that accumulates replacements
+        final plasmaSwitchboard sb = (plasmaSwitchboard) env;
+        final serverObjects prop = new serverObjects();
+
+        int lines = 500;
+        boolean showControl = env.getConfigBool("IndexMonitorControl", true);
+        boolean showInit = env.getConfigBool("IndexMonitorInit", false);
+        boolean showExec = env.getConfigBool("IndexMonitorExec", false);
+        boolean showDate = env.getConfigBool("IndexMonitorDate", true);
+        boolean showWords = env.getConfigBool("IndexMonitorWords", true);
+        boolean showTitle = env.getConfigBool("IndexMonitorTitle", true);
+        boolean showURL = env.getConfigBool("IndexMonitorURL", true);
+
         if (post == null) {
             post = new serverObjects();
             post.put("process", "0");
         }
-        
+
         // find process number
         int tabletype;
         try {
@@ -84,7 +87,7 @@ public class IndexMonitor {
         } catch (NumberFormatException e) {
             tabletype = 0;
         }
-        
+
         // check if authorization is needed and/or given
         if (((tabletype > 0) && (tabletype < 6)) ||
             (post.containsKey("clearlist")) ||
@@ -96,18 +99,18 @@ public class IndexMonitor {
                     prop.put("AUTHENTICATE", "admin log-in");
                     return prop;
                 }
-            }else{
+            } else {
                 // force log-in
                 prop.put("AUTHENTICATE", "admin log-in");
                 return prop;
             }
         }
-        
+
         // custom number of lines
         if (post.containsKey("count")) {
-            lines = Integer.parseInt(post.get("count", "40"));
+            lines = Integer.parseInt(post.get("count", "500"));
         }
-        
+
         // do the commands
         if (post.containsKey("clearlist")) sb.wordIndex.loadedURL.clearStack(tabletype);
         if (post.containsKey("deleteentry")) {
@@ -118,11 +121,23 @@ public class IndexMonitor {
                 }
             }
         if (post.containsKey("moreIndexed")) {
-            lines = Integer.parseInt(post.get("showIndexed", "40"));
+            lines = Integer.parseInt(post.get("showIndexed", "500"));
         }
-        if (post.get("si") != null) showInit = true;
-        if (post.get("se") != null) showExec = true;
-        
+        if (post.get("sc") != null)
+            if (post.get("sc").equals("0")) showControl = false; else showControl = true;
+        if (post.get("si") != null)
+            if (post.get("si").equals("0")) showInit = false; else showInit = true;
+        if (post.get("se") != null)
+            if (post.get("se").equals("0")) showExec = false; else showExec = true;
+        if (post.get("sd") != null)
+            if (post.get("sd").equals("0")) showDate = false; else showDate = true;
+        if (post.get("sw") != null)
+            if (post.get("sw").equals("0")) showWords = false; else showWords = true;
+        if (post.get("st") != null)
+            if (post.get("st").equals("0")) showTitle = false; else showTitle = true;
+        if (post.get("su") != null)
+            if (post.get("su").equals("0")) showURL = false; else showURL = true;
+
         // create table
         if (tabletype == 0) {
             prop.put("table", 2);
@@ -138,10 +153,19 @@ public class IndexMonitor {
                 prop.put("table_size_count", lines);
             }
             prop.put("table_size_all", sb.wordIndex.loadedURL.getStackSize(tabletype));
-            prop.put("table_feedbackpage", "IndexMonitor.html");
-            prop.put("table_tabletype", tabletype);
+            
+            if (showControl) {
+                prop.put("table_showControl", 1);
+                prop.put("table_showControl_feedbackpage", "IndexMonitor.html");
+                prop.put("table_showControl_tabletype", tabletype);
+            } else
+                prop.put("table_showControl", 0);
             prop.put("table_showInit", (showInit) ? 1 : 0);
             prop.put("table_showExec", (showExec) ? 1 : 0);
+            prop.put("table_showDate", (showDate) ? 1 : 0);
+            prop.put("table_showWords", (showWords) ? 1 : 0);
+            prop.put("table_showTitle", (showTitle) ? 1 : 0);
+            prop.put("table_showURL", (showURL) ? 1 : 0);
 
             boolean dark = true;
             String urlHash, initiatorHash, executorHash;
@@ -171,24 +195,71 @@ public class IndexMonitor {
                     cachepath = cacheManager.getCachePath(new URL(urlstr)).toString().replace('\\', '/').substring(cacheManager.cachePath.toString().length() + 1);
 
                     prop.put("table_indexed_" + cnt + "_dark", (dark) ? 1 : 0);
-                    prop.put("table_indexed_" + cnt + "_feedbackpage", "IndexMonitor.html");
-                    prop.put("table_indexed_" + cnt + "_tabletype", tabletype);
-                    prop.put("table_indexed_" + cnt + "_urlhash", urlHash);
-                    prop.put("table_indexed_" + cnt + "_showInit", (showInit) ? 1 : 0);
-                    prop.put("table_indexed_" + cnt + "_showInit_initiatorSeed", (initiatorSeed == null) ? "unknown" : initiatorSeed.getName());
-                    prop.put("table_indexed_" + cnt + "_showExec", (showExec) ? 1 : 0);
-                    prop.put("table_indexed_" + cnt + "_showExec_executorSeed", (executorSeed == null) ? "unknown" : executorSeed.getName());
-                    prop.put("table_indexed_" + cnt + "_moddate", daydate(urle.moddate()));
-                    prop.put("table_indexed_" + cnt + "_wordcount", urle.wordCount());
-                    prop.put("table_indexed_" + cnt + "_urldescr", comp.title());
-                    if (cachepath == null) {
-                        prop.put("table_indexed_" + cnt + "_available", 0);
-                    } else {
-                        prop.put("table_indexed_" + cnt + "_available", 1);
-                        prop.put("table_indexed_" + cnt + "_available_cachepath", cachepath);
-                        prop.put("table_indexed_" + cnt + "_available_urltitle", urlstr);
-                        prop.put("table_indexed_" + cnt + "_available_url", urltxt);
-                    }
+                    if (showControl) {
+                        prop.put("table_indexed_" + cnt + "_showControl", 1);
+                        prop.put("table_indexed_" + cnt + "_showControl_feedbackpage", "IndexMonitor.html");
+                        prop.put("table_indexed_" + cnt + "_showControl_tabletype", tabletype);
+                        prop.put("table_indexed_" + cnt + "_showControl_urlhash", urlHash);
+                    } else
+                        prop.put("table_indexed_" + cnt + "_showControl", 0);
+
+                    if (showInit) {
+                        prop.put("table_indexed_" + cnt + "_showInit", 1);
+                        prop.put("table_indexed_" + cnt + "_showInit_initiatorSeed", (initiatorSeed == null) ? "unknown" : initiatorSeed.getName());
+                    } else
+                        prop.put("table_indexed_" + cnt + "_showInit", 0);
+
+                    if (showExec) {
+                        prop.put("table_indexed_" + cnt + "_showExec", 1);
+                        prop.put("table_indexed_" + cnt + "_showExec_executorSeed", (executorSeed == null) ? "unknown" : executorSeed.getName());
+                    } else
+                        prop.put("table_indexed_" + cnt + "_showExec", 0);
+
+                    if (showDate) {
+                        prop.put("table_indexed_" + cnt + "_showDate", 1);
+                        prop.put("table_indexed_" + cnt + "_showDate_modified", daydate(urle.moddate()));
+                    } else
+                        prop.put("table_indexed_" + cnt + "_showDate", 0);
+
+                    if (showWords) {
+                        prop.put("table_indexed_" + cnt + "_showWords", 1);
+                        prop.put("table_indexed_" + cnt + "_showWords_count", urle.wordCount());
+                    } else
+                        prop.put("table_indexed_" + cnt + "_showWords", 0);
+
+                    if (showTitle) {
+                        prop.put("table_indexed_" + cnt + "_showTitle", (showTitle) ? 1 : 0);
+                        if (cachepath == null) {
+                            prop.put("table_indexed_" + cnt + "_showTitle_available", 0);
+                        } else {
+                            prop.put("table_indexed_" + cnt + "_showTitle_available", 1);
+
+                            if (comp.title() == null || comp.title().trim().length() == 0)
+                                prop.put("table_indexed_" + cnt + "_showTitle_available_nodescr", 0);
+                            else
+                                prop.put("table_indexed_" + cnt + "_showTitle_available_nodescr", 1);
+                            prop.put("table_indexed_" + cnt + "_showTitle_available_nodescr_urldescr", comp.title());
+
+                            prop.put("table_indexed_" + cnt + "_showTitle_available_cachepath", cachepath);
+                            prop.put("table_indexed_" + cnt + "_showTitle_available_urltitle", urlstr);
+                        }
+                    } else
+                        prop.put("table_indexed_" + cnt + "_showTitle", 0);
+
+                    if (showURL) {
+                        prop.put("table_indexed_" + cnt + "_showURL", 1);
+                        if (cachepath == null) {
+                            prop.put("table_indexed_" + cnt + "_showURL_available", 0);
+                        } else {
+                            prop.put("table_indexed_" + cnt + "_showURL_available", 1);
+
+                            prop.put("table_indexed_" + cnt + "_showURL_available_cachepath", cachepath);
+                            prop.put("table_indexed_" + cnt + "_showURL_available_urltitle", urlstr);
+                            prop.put("table_indexed_" + cnt + "_showURL_available_url", urltxt);
+                        }
+                    } else
+                        prop.put("table_indexed_" + cnt + "_showURL", 0);
+
                     dark = !dark;
                     cnt++;
                 } catch (Exception e) {
@@ -201,7 +272,7 @@ public class IndexMonitor {
         // return rewrite properties
         return prop;
     }
-    
+
     private static SimpleDateFormat dayFormatter = new SimpleDateFormat("yyyy/MM/dd", Locale.US);
     private static String daydate(Date date) {
         if (date == null) {
