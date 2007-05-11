@@ -1973,7 +1973,7 @@ public final class plasmaSwitchboard extends serverAbstractSwitch implements ser
                 }
                 plasmaCrawlProfile.entry profile = profiles.getEntry(profileHandle);
                 if (profile == null) {
-                    log.logSevere(stats + ": LOST PROFILE HANDLE '" + urlEntry.profileHandle() + "' for URL " + urlEntry.url());
+                    log.logWarning(stats + ": LOST PROFILE HANDLE '" + urlEntry.profileHandle() + "' for URL " + urlEntry.url());
                     return true;
                 }
                 log.logFine("LOCALCRAWL: URL=" + urlEntry.url() + ", initiator=" + urlEntry.initiator() + ", crawlOrder=" + ((profile.remoteIndexing()) ? "true" : "false") + ", depth=" + urlEntry.depth() + ", crawlDepth=" + profile.generalDepth() + ", filter=" + profile.generalFilter()
@@ -2038,7 +2038,7 @@ public final class plasmaSwitchboard extends serverAbstractSwitch implements ser
             // profileHandle = " + profileHandle + ", urlEntry.url = " + urlEntry.url());
             plasmaCrawlProfile.entry profile = profiles.getEntry(profileHandle);
             if (profile == null) {
-                log.logSevere(stats + ": LOST PROFILE HANDLE '" + urlEntry.profileHandle() + "' for URL " + urlEntry.url());
+                log.logWarning(stats + ": LOST PROFILE HANDLE '" + urlEntry.profileHandle() + "' for URL " + urlEntry.url());
                 return true;
             }
             log.logFine("plasmaSwitchboard.limitCrawlTriggerJob: url=" + urlEntry.url() + ", initiator=" + urlEntry.initiator() + ", crawlOrder=" + ((profile.remoteIndexing()) ? "true" : "false") + ", depth=" + urlEntry.depth() + ", crawlDepth=" + profile.generalDepth() + ", filter="
@@ -2127,7 +2127,7 @@ public final class plasmaSwitchboard extends serverAbstractSwitch implements ser
             plasmaCrawlProfile.entry profile = profiles.getEntry(profileHandle);
 
             if (profile == null) {
-                log.logSevere(stats + ": LOST PROFILE HANDLE '" + urlEntry.profileHandle() + "' for URL " + urlEntry.url());
+                log.logWarning(stats + ": LOST PROFILE HANDLE '" + urlEntry.profileHandle() + "' for URL " + urlEntry.url());
                 return false;
             }
             log.logFine("plasmaSwitchboard.remoteTriggeredCrawlJob: url=" + urlEntry.url() + ", initiator=" + urlEntry.initiator() + ", crawlOrder=" + ((profile.remoteIndexing()) ? "true" : "false") + ", depth=" + urlEntry.depth() + ", crawlDepth=" + profile.generalDepth() + ", filter="

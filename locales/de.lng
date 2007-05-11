@@ -545,7 +545,7 @@ show all==alle zeigen
 Prefer mask==Vorzugsmaske
 Constraints==Einschr&auml;nkungen
 only index pages==Nur Index Seiten
-This peer holds \#\[links\]\# URLs of \#\[total-links\]\# in the known network.==Dieser Peer speichert #[links]# von #[total-links]#, der dem Netzwerk bekannten URLs.
+This peer holds \#\[links\]\# URLs of \#\[total-links\]\# in the known network.==Dieser Peer speichert #[links]# von #[total-links]# der dem Netzwerk bekannten URLs.
 #-----------------------------
 
 #File: IndexCleaner_p.html
@@ -1396,18 +1396,18 @@ Unable to add URL to crawler queue:==Es ist nicht m&ouml;glich die URL zum Crawl
 
 #File: SearchStatistics_p.html
 #---------------------------
-Search Statistics Menu==Such Statistik Men&uuml;
+Search Statistics Menu==Suchstatistik Men&uuml;
 Local&nbsp;Search&nbsp;Log==Lokale Suche Log
 Local&nbsp;Search&nbsp;Host&nbsp;Tracker==Lokale Suche Host Tracker
 Remote&nbsp;Search&nbsp;Log==Remote Suche Log
 Remote&nbsp;Search&nbsp;Host&nbsp;Tracker==Remote Suche Host Tracker
-Search Statistics</h2>==Such Statistik</h2>
+Search Statistics</h2>==Suchstatistik</h2>
 You can monitor search attempts at your own peer.==Sie k&ouml;nnen hier die Suchanfragen an Ihren Peer einsehen.
 Local statistics apply for search attempts at your own search portal,==Die lokale Statistik zeigt Suchanfragen, die von Ihrem eigenen Such Portal gestartet wurden.
 and remote statistics show search requests form other peer. Not all remote peers ask your peer during a global search,==Die Remote Statistik zeigt Suchanfragen von anderen Peers an. Nicht alle Peers fragen w&auml;hrend einer Suche Ihren Peer an, 
 therefore your cannot have a global view over all search requests within the complete YaCy network.==deswegen k&ouml;nnen Sie keine Gesamt&uuml;bersicht f&uuml;r das komplette YaCy Netzwerk haben.
-Search Statistics: Local Searches==Such Statistik: Lokale Suche
-Search Statistics: Local Searche Tracker==Such Statistik: Lokale Suche Tracker
+Search Statistics: Local Searches==Suchstatistik: Lokale Suche
+Search Statistics: Local Searche Tracker==Suchstatistik: Lokale Suche Tracker
 This is a list of searches that had been requested from this\' peer search interface==Dies ist eine Liste aller Suchanfragen, die von diesem Peer ausgef&uuml;hrt wurden. 
 Showing \#\[num\]\# entries from a total of \#\[total\]\# Requests.==Es werden #[num]# Eintr&auml;ge von insgesamt #[total]# Anfragen angezeigt.
 Requesting Host==Anfragender Host
@@ -1420,8 +1420,8 @@ Used Time==Gebrauchte Zeit
 Search Words==Such Wort
 Count==Anzahl
 Access Dates==Zugriffsdaten
-Search Statistics: Remote Searches==Such Statistik: Remote Suche
-Search Statistics: Remote Searche Tracker==Such Statistik: Remote Suche Tracker
+Search Statistics: Remote Searches==Suchstatistik: Remote Suche
+Search Statistics: Remote Searche Tracker==Suchstatistik: Remote Suche Tracker
 This is a list of searches that had been requested from remote peer search interface==Dies ist eine Liste aller Suchanfragen, die von einem anderen Peer gestellt wurden. 
 
 #---------------------------
@@ -1871,7 +1871,8 @@ Seed server==Seed Server
 Configure\]==Konfigurieren]
 Enabled: Updating to server==Aktiviert: Aktualisiere auf Server
 Last upload: #\[lastUpload\]# ago.==Letztesmal Hochladen #[lastUpload]# her
-Enabled: Updating to file==Aktiviert: Aktualisiere die Datei#-----------------------------
+Enabled: Updating to file==Aktiviert: Aktualisiere die Datei
+#-----------------------------
 
 #File: Steering.html
 #---------------------------
@@ -1953,7 +1954,7 @@ Parsed Text==Geparsten Text
 Parsed Sentences==Geparste S&auml;tze
 Link List==Linkliste
 "Show"=="Anzeigen"
-No URL hash submitted.==Es wurde kein URL Hash &uuml;vertragen.
+No URL hash submitted.==Es wurde kein URL Hash &uuml;bertragen.
 Unable to find URL Entry in DB==Es war nicht m&ouml;glich den URL Eintrag in der DB zu finden.
 Invalid URL==Ung&uuml;ltige URL
 Unable to download resource content.==Es war nicht m&ouml;glich den Inhalt der Quelle runterzuladen.
@@ -1967,7 +1968,7 @@ Original Resource Content==Original Quellen Inhalt
 #File: ViewLog_p.html
 #---------------------------
 Lines==Zeilen
-reversed order==in umgekehrter Reihenfolge
+reversed order==umgekehrte Reihenfolge
 "refresh"=="Aktualisieren"
 #-----------------------------
 
@@ -1995,22 +1996,6 @@ Comment==Kommentar
 
 #File: WatchCrawler_p.html
 #---------------------------
-Next update in==Nächste Aktualisierung in
-seconds.==Sekunden.
-Queue</th>==Puffer</th>
-Size==Größe
-#Max==Max
-Indexing</td>==Indexieren</td>
-Loader==Lader
-Local Crawler==Lokaler Crawler
-unlimited==uneingeschr&auml;nkt
-#Remote Crawler==Remote Crawler
-Database==Datenbank
-Entries==Eintr&auml;ge
-Pages \(URLs\)==Seiten (URLs)
-RWIs \(Words\)==RWIs (W&ouml;rter)
-Indicator==Indikator
-Level==Stufe
 PPM \(Pages Per Minute\)==PPM (Seiten pro Minute)
 RWI RAM \(Word Cache\)==RWI RAM (W&ouml;rter Zwischenspeicher)
 Error with profile management. Please stop YaCy, delete the file DATA/PLASMADB/crawlProfiles0.db and restart.==Fehler im Profil Management. Bitte stoppen Sie YaCy, l&ouml;schen Sie die Datei DATA/PLASMADB/crawlProfiles0.db und starten Sie YaCy neu. 
@@ -2039,7 +2024,7 @@ Auto Filter Content</strong>==Auto Inhalts Filter</strong>
 Max Page Per Domain</strong>==Max. Seiten pro Domain</strong>
 Accept \'?\' URLs</strong>==URLs mit "?" akzeptieren</strong>
 Fill Proxy Cache==F&uuml;lle Proxy Cache
-Local Text Indexing==Lokal Test Indexieren
+Local Text Indexing==Lokal Text Indexieren
 Local Media Indexing==Lokal Media Indexieren
 Remote Indexing==Remote Indexieren
 \#no::yes\#==#nein::ja#
@@ -2048,10 +2033,26 @@ Queue==Puffer
 Profile</th>==Profil</th>
 Initiator==Auftraggeber
 Depth</th>==Tiefe</th>
-Modified Date==zuletzt bearbeitet-Datum
+#Modified Date==zuletzt bearbeitet-Datum
 Anchor Name==Linkbezeichnung
 #URL==URL
 Delete==Löschen
+seconds.==Sekunden.
+Next update in==Nächste Aktualisierung in
+Queue</th>==Puffer</th>
+Size==Größe
+#Max==Max
+Indexing</td>==Indexieren</td>
+Loader==Lader
+Local Crawler==Lokaler Crawler
+unlimited==uneingeschr&auml;nkt
+#Remote Crawler==Remote Crawler
+Database==Datenbank
+Entries==Eintr&auml;ge
+Pages \(URLs\)==Seiten (URLs)
+RWIs \(Words\)==RWIs (W&ouml;rter)
+Indicator==Indikator
+Level==Stufe
 #-----------------------------
 
 #File: Wiki.html
@@ -2126,8 +2127,7 @@ This tag displays an image, it can be aligned left, right or center.==Dieser Tag
 This tags create a table.==Diese Tags erstellen eine Tabelle.
 The escape tags will cause all tags in the text between the starting and the closing tag to not be treated as regular text.==Durch diesen Tag wird der Text, der zwischen den Klammern steht, nicht interpretiert und unformatiert als normaler Text ausgegeben. 
 A text between this tags will keep all the spaces and linebreaks in it. Great for ASCII-art and program code.==Ein Text zwischen diesen Tags wird alle Leerzeichen und Zeilenumbr&uuml;che beinhalten. Gut geeignet f&uuml;r ASCII-Kunst und Programm Code.  
-If a line starts with a space, it will be displayed in a non-proportional font.==Wenn eine Zeile mit einem Leerzeichen anf&auml;ngt, wird dieser als nicht-proportionale Schriftart dargestellt.
-
+If a line starts with a space, it will be displayed in a non-proportional font.==Wenn eine Zeile mit einem Leerzeichen anf&auml;ngt, wird diese als nicht-proportionale Schriftart dargestellt.
 #-----------------------------
 
 #File: yacysearch.html
@@ -2209,7 +2209,7 @@ Monitoring==Kontrolle
 YaCy Network==YaCy Netzwerk
 Crawler Monitor==Crawler Kontrolle
 Web Crawl Results==Crawl Ergebnisse
-Search Statistics==Such Statistik
+Search Statistics==Suchstatistik
 #Server Log==Server Log
 >Connections==>Verbindungen
 #Web Cache==Web Cache
