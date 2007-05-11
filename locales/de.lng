@@ -882,7 +882,7 @@ and automatically excluded from indexing.==und automatisch von der Indexierung a
 Set the proxy settings of your browser to the same port as given==Setzen Sie dazu die Proxy Einstellungen Ihres Browsers auf den selben Port, der
 on the 'Settings'-page in the 'Proxy and Administration Port' field.==auf der 'Einstellungen' Seite im 'Proxy und Administration Port' angegeben ist.
 \(5\) Index Monitor for Local Crawling.==(5) Index Monitor f&uuml;r das lokale Crawlen
-These web pages had been crawled by your own crawl task.==Diese Internetseiten wurden gecrawlt, da Sie einen lokalen Crawl auf der 'Index erzeugen' Seite gestartet haben.
+These web pages had been crawled by your own crawl task.==Diese Internetseiten wurden gecrawlt, da Sie einen Crawl auf der 'Index erzeugen' Seite gestartet haben.
 <em>Use Case:</em> start a crawl by setting a crawl start point on the 'Index Create' page.==<em>Anwendung:</em> Starten Sie einen Crawl, indem Sie auf der 'Index erzeugen' Seite einen Startpunkt eintragen.
 \(6\) Index Monitor for Global Crawling==(6) Index Monitor f&uuml;r das globale Crawlen
 These pages had been indexed by your peer, but the crawl was initiated by a remote peer.==Diese Seiten wurden von Ihrem Peer indexiert, der Crawl wurde aber von einem anderen Peer initiiert (remote-Crawl).
@@ -1908,12 +1908,12 @@ Hide surftips==Verberge Surftipps
 
 #File: User_p.html
 #---------------------------
-User Administration==Benutzer Verwaltung
+User Administration==Benutzerverwaltung
 Select user==Benutzer w&auml;hlen
-New user==neuer Benutzer
+New user==Neuer Benutzer
 Edit User==Benutzer bearbeiten
 Delete User==Benutzer l&ouml;schen
-Edit current user:==aktuellen Benutzer bearbeiten:
+Edit current user:==Aktuellen Benutzer bearbeiten:
 Username==Benutzername
 Password==Passwort
 Repeat password==Passwort wiederholen
@@ -1929,7 +1929,7 @@ Fileshare-Download==Dateifreigabe-Download
 #Wiki Admin==Wiki Admin
 Bookmarks==Lesezeichen
 Timelimit==Zeitlimit
-Time used==verbrauchte Zeit
+Time used==Verbrauchte Zeit
 Save User==Benutzer speichern
 User created:==Benutzer erstellt:
 User changed:==Benutzer ge&auml;ndert:
@@ -1950,7 +1950,7 @@ Size==Gr&ouml;sse
 View as==Zeige als
 #Original==Original
 Plain Text==Quelltext
-Parsed Text==Geparsten Text
+Parsed Text==Geparster Text
 Parsed Sentences==Geparste S&auml;tze
 Link List==Linkliste
 "Show"=="Anzeigen"
@@ -2011,7 +2011,7 @@ failed. Reason:==schlug fehl. Grund:
 Error with URL input==Fehler mit URL Eingabe
 Error with file input==Fehler mit Datei Eingabe
 started.==gestartet.
-Please wait some seconds, it may take some seconds until the first result appears there.==Bitte warten Sie ein wenig, es dauert einige Sekunden, bis die ersten Ergebnisse hier zu sehen sind. 
+Please wait some seconds, it may take some seconds until the first result appears there.==Bitte warten Sie einige Sekunden, bis hier die ersten Ergebnisse zu sehen sind. 
 If you crawl any un-wanted pages, you can delete them <a href="IndexCreateWWWLocalQueue_p.html">here</a>.==Wenn Ihr Crawl Seiten indexiert, die Sie nicht indexiert haben wollen, k&ouml;nnen Sie diese <a href="IndexCreateWWWLocalQueue_p.html">hier</a> l&ouml;schen.
 Crawl Profiles:==Crawl Profile:
 Crawl Thread==Crawl Art
@@ -2118,16 +2118,16 @@ This tag creates a horizontal line.==Dieser Tag erzeugt eine horizontale Linie.
 pagename==Seitenname
 description==Beschreibung
 This tag creates links to other pages of the wiki.==Dieser Tag erzeugt einen Link zu einer anderen Seite im Wiki.
-url==URL
-This tag creates links to external websites.==Dieser Tag erstellt einen Link zu einer externen Internetseite.
-Image==Bild
-alt==Beschreibung
-align==Ausrichtung
 This tag displays an image, it can be aligned left, right or center.==Dieser Tag f&uuml;gt ein Bild ein, es kann links (left), rechts (right) oder mittig (center) ausgerichtet werden.
 This tags create a table.==Diese Tags erstellen eine Tabelle.
 The escape tags will cause all tags in the text between the starting and the closing tag to not be treated as regular text.==Durch diesen Tag wird der Text, der zwischen den Klammern steht, nicht interpretiert und unformatiert als normaler Text ausgegeben. 
 A text between this tags will keep all the spaces and linebreaks in it. Great for ASCII-art and program code.==Ein Text zwischen diesen Tags wird alle Leerzeichen und Zeilenumbr&uuml;che beinhalten. Gut geeignet f&uuml;r ASCII-Kunst und Programm Code.  
 If a line starts with a space, it will be displayed in a non-proportional font.==Wenn eine Zeile mit einem Leerzeichen anf&auml;ngt, wird diese als nicht-proportionale Schriftart dargestellt.
+url==URL
+This tag creates links to external websites.==Dieser Tag erstellt einen Link zu einer externen Internetseite.
+Image==Bild
+alt==Beschreibung
+align==Ausrichtung
 #-----------------------------
 
 #File: yacysearch.html
@@ -2186,7 +2186,6 @@ Peer Owner Profile==Impressum dieses Peers
 Help / Wiki==Hilfe / Wiki
 Surftips</a>==Surftipps</a>
 Project Home==Projektseite
-
 #-----------------------------
 
 #File: env/templates/header.template
