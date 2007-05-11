@@ -1695,7 +1695,7 @@ public final class plasmaSwitchboard extends serverAbstractSwitch implements ser
         // flush some entries from the RAM cache
         wordIndex.flushCacheSome();
         // adopt maximum cache size to current size to prevent that further OutOfMemoryErrors occur
-        int newMaxCount = Math.max(2000, Math.min((int) getConfigLong(WORDCACHE_MAX_COUNT, 20000), wordIndex.dhtOutCacheSize()));
+        int newMaxCount = Math.max(1200, Math.min((int) getConfigLong(WORDCACHE_MAX_COUNT, 1200), wordIndex.dhtOutCacheSize()));
         setConfig(WORDCACHE_MAX_COUNT, Integer.toString(newMaxCount));
         wordIndex.setMaxWordCount(newMaxCount); 
     }

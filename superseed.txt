@@ -2,10 +2,6 @@ http://breyvogel.gmxhome.de/seed.txt
 http://de.geocities.com/d15511z/yacy/angel/seed.txt
 http://home.arcor.de/hermens/yacy/seed.txt
 http://low.audioattack.de/yacy/seed.txt
-http://sam-daheim.de/seed.txt
 http://thq.homeip.net/share/seed.txt
 http://www.lulabad.de/seed.txt
-http://www.nkcells.info/yacyseed/seed.txt
-http://www.suma-lab.de/yacy/seed.txt
-http://www.tc-world.de/seed.txt
 http://www.yacy.net/yacy/seed.txt
