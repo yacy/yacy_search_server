@@ -216,14 +216,21 @@ public class yacySearch extends Thread {
         }
 
         // put in seeds that are public robinson peers and where the peer tags match with query
+        // or seeds that are newbies to ensure that public demonstrations always work
         dhtEnum = yacyCore.seedDB.seedsConnected(true, false, null, (float) 0.50);
         while (dhtEnum.hasMoreElements()) {
         	seed = (yacySeed) dhtEnum.nextElement();
             if (seed == null) continue;
-            if (!seed.matchPeerTags(wordhashes)) continue;
-            serverLog.logInfo("PLASMA", "selectPeers/RWIcount: " + seed.hash + ":" + seed.getName() + ", is specialized peer for " + seed.getPeerTags().toString());
-            ranking.addScore(seed.hash, seedcount);
-            seeds.put(seed.hash, seed);
+            if (seed.matchPeerTags(wordhashes)) { // access robinson peers with matching tag
+            	serverLog.logInfo("PLASMA", "selectPeers/PeerTags: " + seed.hash + ":" + seed.getName() + ", is specialized peer for " + seed.getPeerTags().toString());
+            	ranking.addScore(seed.hash, seedcount);
+            	seeds.put(seed.hash, seed);
+            }
+            if (seed.getAge() < 1) { // the 'workshop feature'
+            	serverLog.logInfo("PLASMA", "selectPeers/Age: " + seed.hash + ":" + seed.getName() + ", is newbie, age = " + seed.getAge());
+            	ranking.addScore(seed.hash, seedcount);
+            	seeds.put(seed.hash, seed);
+            }
         }
         
         // evaluate the ranking score and select seeds
