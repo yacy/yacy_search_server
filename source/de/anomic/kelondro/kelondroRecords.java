@@ -127,8 +127,8 @@ public class kelondroRecords {
 
     // static supervision objects: recognize and coordinate all activites
     private static TreeMap recordTracker = new TreeMap(); // a String/filename - kelondroRecords mapping
-    private static long memStopGrow = 4000000; // a limit for the node cache to stop growing if less than this memory amount is available
-    private static long memStartShrink = 2000000; // a limit for the node cache to start with shrinking if less than this memory amount is available
+    private static long memStopGrow    = 10000000; // a limit for the node cache to stop growing if less than this memory amount is available
+    private static long memStartShrink =  6000000; // a limit for the node cache to start with shrinking if less than this memory amount is available
     
     // values that are only present at run-time
     protected String           filename;     // the database's file name

@@ -325,7 +325,7 @@ use_proxyAccounts=false
 # because the p2p-index-sharing function will use the http server for
 # data exchange.
 # example
-#serverAccount=dicke:berta
+#serverAccount=admin:mysecretpassword
 serverAccount=
 serverAccountBase64MD5=
 
@@ -334,7 +334,7 @@ serverAccountBase64MD5=
 # should be set to a secret. By default it is without a password
 # but you are encouraged to set it to another value on the page
 # http://localhost:8080/
-#adminAccount=admin:anomic
+#adminAccount=admin:mysecretpassword
 adminAccount=
 adminAccountBase64MD5=
 
@@ -395,7 +395,6 @@ peerCycle=2
 # - process any job only if we are online, which is technically only the case
 #   if the proxy is used -> mode 1
 # - process jobs periodically, with periodes according to peerCycle -> mode 2
-#onlineMode=1
 onlineMode=2
 
 # Debug mode for YACY network: this will trigger that also local ip's are
@@ -615,7 +614,7 @@ javastart_priority=0
 # flushed to disc; this may last some minutes.
 wordCacheMaxCount = 20000
 wordCacheInitCount = 30000
-wordFlushSize = 1000;
+wordFlushSize = 500;
 
 # Specifies if yacy can be used as transparent http proxy.
 # 
@@ -635,7 +634,7 @@ isTransparentProxy=false
 connectionKeepAliveSupport=true
 
 # Specifies the timeout the proxy sould use
-proxy.clientTimeout = 10000
+proxy.clientTimeout = 30000
 
 # Specifies if the proxy should send the via header according to RFC
 proxy.sendViaHeader=true
@@ -666,7 +665,7 @@ msgForwardingCmd=/usr/sbin/sendmail
 msgForwardingTo=root@localhost
 
 #onlineCautionDelay: delay time after proxy usage before crawling is resumed
-onlineCautionDelay=30000
+onlineCautionDelay=10000
 
 # Some configuration values for the crawler
 crawler.clientTimeout=9000

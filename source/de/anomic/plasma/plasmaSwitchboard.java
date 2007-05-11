@@ -1065,11 +1065,12 @@ public final class plasmaSwitchboard extends serverAbstractSwitch implements ser
         wordIndex.setInMaxWordCount(wordInCacheMaxCount);
         wordIndex.setWordFlushSize((int) getConfigLong("wordFlushSize", 1000));
         
-        // set a minimum amount of memory for the indexer thread
-        long memprereq = wordIndex.minMem();
-        //setConfig(INDEXER_MEMPREREQ, memprereq);
-        kelondroRecords.setCacheGrowStati(memprereq + 2 * 1024 * 1024, memprereq);
-        kelondroCache.setCacheGrowStati(memprereq + 2 * 1024 * 1024, memprereq);
+        // set a maximum amount of memory for the caches
+        long memprereq = Math.max(getConfigLong(INDEXER_MEMPREREQ, 0), wordIndex.minMem());
+        // setConfig(INDEXER_MEMPREREQ, memprereq);
+        //setThreadPerformance(INDEXER, getConfigLong(INDEXER_IDLESLEEP, 0), getConfigLong(INDEXER_BUSYSLEEP, 0), memprereq);
+        kelondroRecords.setCacheGrowStati(memprereq + 4 * 1024 * 1024, memprereq + 2 * 1024 * 1024);
+        kelondroCache.setCacheGrowStati(memprereq + 4 * 1024 * 1024, memprereq + 2 * 1024 * 1024);
         
         // make parser
         log.logConfig("Starting Parser");
@@ -1861,12 +1862,12 @@ public final class plasmaSwitchboard extends serverAbstractSwitch implements ser
                 if (yacyCore.newsPool.automaticProcess() > 0) hasDoneSomething = true;
             } catch (IOException e) {}
 
-            // set new memory limit for indexer thread
+            // set a maximum amount of memory for the caches
             long memprereq = Math.max(getConfigLong(INDEXER_MEMPREREQ, 0), wordIndex.minMem());
-            //setConfig(INDEXER_MEMPREREQ, memprereq);
+            // setConfig(INDEXER_MEMPREREQ, memprereq);
             //setThreadPerformance(INDEXER, getConfigLong(INDEXER_IDLESLEEP, 0), getConfigLong(INDEXER_BUSYSLEEP, 0), memprereq);
-            kelondroRecords.setCacheGrowStati(memprereq + 2 * 1024 * 1024, memprereq);
-            kelondroCache.setCacheGrowStati(memprereq + 2 * 1024 * 1024, memprereq);
+            kelondroRecords.setCacheGrowStati(memprereq + 4 * 1024 * 1024, memprereq + 2 * 1024 * 1024);
+            kelondroCache.setCacheGrowStati(memprereq + 4 * 1024 * 1024, memprereq + 2 * 1024 * 1024);
             
             // update the cluster set
             this.clusterhashes = yacyCore.seedDB.clusterHashes(getConfig("cluster.peers.yacydomain", ""));

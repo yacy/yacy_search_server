@@ -407,7 +407,7 @@ public final class plasmaSearchEvent extends Thread implements Runnable {
         
         // start url-fetch
         long postorderTime = profileLocal.getTargetTime(plasmaSearchTimingProfile.PROCESS_POSTSORT);
-        System.out.println("DEBUG: postorder-final (urlfetch) maxtime = " + postorderTime);
+        //System.out.println("DEBUG: postorder-final (urlfetch) maxtime = " + postorderTime);
         long postorderLimitTime = (postorderTime < 0) ? Long.MAX_VALUE : (System.currentTimeMillis() + postorderTime);
         profileLocal.startTimer();
         plasmaSearchPostOrder acc = new plasmaSearchPostOrder(query, ranking);

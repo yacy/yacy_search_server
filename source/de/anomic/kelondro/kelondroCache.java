@@ -50,8 +50,8 @@ public class kelondroCache implements kelondroIndex {
 
     // static object tracker; stores information about object cache usage
     private static final TreeMap objectTracker = new TreeMap();
-    private static long memStopGrow = 4000000; // a limit for the node cache to stop growing if less than this memory amount is available
-    private static long memStartShrink = 2000000; // a limit for the node cache to start with shrinking if less than this memory amount is available
+    private static long memStopGrow    = 10000000; // a limit for the node cache to stop growing if less than this memory amount is available
+    private static long memStartShrink =  6000000; // a limit for the node cache to start with shrinking if less than this memory amount is available
     
     // class objects
     private kelondroRowSet readHitCache;
