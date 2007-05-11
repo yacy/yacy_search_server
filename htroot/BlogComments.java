@@ -293,8 +293,6 @@ public class BlogComments {
                 }
 	        }
 		}
-        prop.put("blogSize", switchboard.blogDB.size());
-        prop.put("blogCommentsSize", switchboard.blogCommentDB.size());
 
 		// return rewrite properties
 		return prop;
