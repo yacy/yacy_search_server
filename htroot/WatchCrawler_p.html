@@ -9,7 +9,7 @@
 <script type="text/javascript" src="/js/WatchCrawler.js"></script></head>
 <body id="watchCrawler"> #%env/templates/header.template%# 
 <h2>Crawler Monitor</h2>
-<p> Next update in <span id="nextUpdate" onclick="changeInterval()"></span> seconds. <img src="/env/grafics/empty.gif" name="ajax" />
+<p> Next update in <span id="nextUpdate" onclick="changeInterval()"></span> seconds. <img src="/env/grafics/empty.gif" name="ajax" alt="empty"/>
 </p>
       <table border="0" cellpadding="2" cellspacing="1" class="watchCrawler">
         <tbody>
@@ -66,6 +66,7 @@
             <td align="left" #(crawlingSpeedMaxChecked)#::class="TableCellDark"#(/crawlingSpeedMaxChecked)#><input type="submit" name="crawlingPerformance" value="maximum" /></td>
           </tr>
         </tbody>
+        </form>
       </table>
 
       <table border="0" cellpadding="2" cellspacing="1" class="watchCrawler">
