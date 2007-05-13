@@ -13,6 +13,40 @@
     </image>
 
     <item>
+      <title>New Release V0.52 (20070512_3715)</title>
+      <link>http://www.yacy.net/yacy/News.html#3715</link>
+      <pubDate>Sat, 12 May 2007 00:12:29 GMT</pubDate>
+      <guid>3715</guid>
+     <description><![CDATA[
+		<ul>
+		<li>New Functions</li>
+		  <ul>
+		  <li>Added exclusion-search (a search with '-' to exclude specific words from the search results)</li>
+		  <li>Added extraction of sitemap-url from robots.txt, which can be used for crawl starts</li>
+		  <li>Added a network configuration menu for new cluster configuration functions: a set of peers may now operate as an isle within the YaCy network, without exchange of index data over the border of the isle. Peers within the cluster can trigger internal remote crawls and search only within the own cluster.</li>
+		  <li>Added a postscript parser</li>
+		  </ul>
+		<li>Interface Enhancements</li>
+		  <ul>
+		  <li>Redesigned the status page, shows now also hints and warnings</li>
+		  <li>Better layout for image search results</li>
+		  <li>The peer profile can now be displayed as vcard, e.g. http://localhost:8080/ViewProfile.vcf?hash=localhash</li>
+		  </ul>
+		<li>Performance Enhancements</li>
+		  <ul>
+		  <li>Added an option to configure a path to a secondary index location.
+		This shall be used to store a fragment of the index on another physical device,
+		to split IO load and enhance access speed. The index is splitted in such a way
+		that the LURLs are stored to the secondary location, and the RWIs to the primary
+		location.</li>
+		  <li>Optimized memory allocation when accessing the web-index (now half of memory throughput as before)</li>
+		  <li>Fixed bugs in database engine that corrupted the data when entries had been removed</li>
+		  </ul>
+		</ul>
+	 ]]></description>
+    </item>	 
+	
+    <item>
       <title>New Release V0.51 (20070321_3501)</title>
       <link>http://www.yacy.net/yacy/News.html#3501</link>
       <pubDate>Wed, 21 Mar 2007 15:00:00 GMT</pubDate>
