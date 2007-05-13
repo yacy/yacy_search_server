@@ -459,6 +459,7 @@ public final class plasmaCondenser {
                     // word does not yet exist, create new word entry
                     wordHandle = wordHandleCount++;
                     wsp = new wordStatProp(wordHandle, wordInSentenceCounter, sentences.size() + 100);
+                    wsp.flags = (kelondroBitfield) RESULT_FLAGS.clone();
                 }
                 words.put(word, wsp);
                 // we now have the unique handle of the word, put it into the sentence:
