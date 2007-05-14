@@ -125,10 +125,10 @@ public class ftpc {
   
   public ftpc(java.io.InputStream ins, java.io.PrintStream outs, java.io.PrintStream errs) {
       
-      try {
-	  System.setSecurityManager(new sm());
-      } catch (java.security.AccessControlException e) {
-      }
+      //try {
+	  //System.setSecurityManager(new sm());
+      //} catch (java.security.AccessControlException e) {
+      //}
       
       this.in = ins;
       this.out = outs;
