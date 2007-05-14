@@ -931,12 +931,8 @@ public class bookmarksDB {
         public int compare(Object obj1, Object obj2){
             Bookmark bm1=getBookmark((String)obj1);
             Bookmark bm2=getBookmark((String)obj2);
-            //XXX: what happens, if there is a big difference? (to much for int)
-            /*if(this.newestFirst){
-                return (new Long(bm2.getTimeStamp() - bm1.getTimeStamp())).intValue();
-            }else{
-                return (new Long(bm1.getTimeStamp() - bm2.getTimeStamp())).intValue();
-            }*/
+			if(bm1==null || bm2==null)
+				return 0; //XXX: i think this should not happen? maybe this needs further tracing of the bug
             if(this.newestFirst){
                 if(bm2.getTimeStamp() - bm1.getTimeStamp() >0)
                     return 1;
