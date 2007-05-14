@@ -54,6 +54,7 @@ import de.anomic.plasma.urlPattern.plasmaURLPattern;
 import de.anomic.server.logging.serverLog;
 import de.anomic.server.serverMemory;
 import de.anomic.yacy.yacyDHTAction;
+import de.anomic.yacy.yacySeedDB;
 
 public final class plasmaWordIndex implements indexRI {
 
@@ -323,7 +324,11 @@ public final class plasmaWordIndex implements indexRI {
     }
     
     public indexContainer getContainer(String wordHash, Set urlselection, long maxTime) {
-
+        if ((wordHash == null) || (wordHash.length() != yacySeedDB.commonHashLength)) {
+            // wrong input
+            return null;
+        }
+        
         // get from cache
         indexContainer container;
         synchronized (dhtOutCache) {
