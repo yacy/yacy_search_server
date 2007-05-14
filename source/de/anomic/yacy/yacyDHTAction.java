@@ -300,8 +300,8 @@ public class yacyDHTAction implements yacyPeerAction {
               kelondroBase64Order.enhancedCoder.cardinal(lastKey.getBytes()) > kelondroBase64Order.enhancedCoder.cardinal(yacyCore.seedDB.mySeed.hash.getBytes()));
         ArrayList seeds = new ArrayList();
         yacySeed seed;
-        double ownDistance = Math.min(yacyDHTAction.dhtDistance(yacyCore.seedDB.mySeed.hash, firstKey), yacyDHTAction.dhtDistance(yacyCore.seedDB.mySeed.hash, lastKey));
-        double maxDistance = Math.min(ownDistance, maxDist);
+        //double ownDistance = Math.min(yacyDHTAction.dhtDistance(yacyCore.seedDB.mySeed.hash, firstKey), yacyDHTAction.dhtDistance(yacyCore.seedDB.mySeed.hash, lastKey));
+        //double maxDistance = Math.min(ownDistance, maxDist);
 
         double firstdist, lastdist;
         Enumeration e = this.getAcceptRemoteIndexSeeds(lastKey);
@@ -313,7 +313,7 @@ public class yacyDHTAction implements yacyPeerAction {
             if (seeds != null) {
             	firstdist = yacyDHTAction.dhtDistance(seed.hash, firstKey);
             	lastdist = yacyDHTAction.dhtDistance(seed.hash, lastKey);
-                if ((lastdist < maxDistance) && (!(doublecheck.contains(seed.hash)))) {
+                if ((lastdist < maxDist) && (!(doublecheck.contains(seed.hash)))) {
                     if (log != null) log.logInfo("Selected  " + ((seeds.size() < primaryPeerCount) ? "primary" : "reserve") + "  DHT target peer " + seed.getName() + ":" + seed.hash + ", distance2first = " + firstdist + ", distance2last = " + lastdist);
                     seeds.add(seed);
                     doublecheck.add(seed.hash);
