@@ -11,5 +11,6 @@ X-ICQ: #(icq)#::#[value]# #(/icq)#
 X-JABBER: #(jabber)#::#[value]# #(/jabber)#
 X-YAHOO: #(yahoo)#::#[value]# #(/yahoo)#
 X-MSN: #(msn)#::#[value]# #(/msn)#
+X-SKYPE: #(skype)#::#[value]# #(/skype)#
 #{other}#X-#[key]#:#[value]##{/other}#
 END:vcard#(/success)#

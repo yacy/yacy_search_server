@@ -17,6 +17,7 @@
 	<jabber>#(jabber)#::<![CDATA[#[value]#]]>#(/jabber)#</jabber>
 	<yahoo>#(yahoo)#::<![CDATA[#[value]#]]>#(/yahoo)#</yahoo>
 	<msn>#(msn)#::<![CDATA[#[value]#]]>#(/msn)#</msn>
+	<skype>#(skype)#::<![CDATA[#[value]#]]>#(/skype)#</skype>
 	<comment>#(comment)#::<![CDATA[#[value]#]]>#(/comment)#</comment>
 	
 	<!-- optional profile fields -->
