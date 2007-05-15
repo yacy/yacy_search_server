@@ -31,10 +31,12 @@
     ::
     <p>Showing #[num]# entries from a total of #[total]# peers.</p>
     <form action="Network.html?page=#[page]#" method="get" enctype="multipart/form-data" accept-charset="UTF-8">
-    <fieldset>
-    Search for a peername (RegExp allowed):
-    <input type="text" name="match" value="#[searchpattern]#" /><input type="hidden" name="page" value="#[page]#" /><input type="submit" name="search" value="Search" />
-    </fieldset>
+      <fieldset>
+        <label for="match">Search for a peername (RegExp allowed)</label>:
+        <input type="text" id="match" name="match" value="#[searchpattern]#" />
+        <input type="hidden" name="page" value="#[page]#" />
+        <input type="submit" name="search" value="Search" />
+      </fieldset>
     </form>
     <table class="networkTable" border="0" cellpadding="2" cellspacing="1">
       <tr class="TableHeader" valign="bottom">

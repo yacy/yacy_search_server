@@ -72,6 +72,8 @@ import java.util.Map;
 import java.util.Properties;
 import java.util.Set;
 
+import com.sun.org.apache.bcel.internal.generic.LLOAD;
+
 import de.anomic.kelondro.kelondroBase64Order;
 import de.anomic.net.natLib;
 import de.anomic.plasma.plasmaCondenser;
@@ -235,16 +237,37 @@ public class yacySeed {
         this.available = 0;
     }
 
-    /** generate a default peer name */
+    /**
+     * Generate a default peer name assembled of the following fragments in order:
+     * <ul>
+     *   <li>the public IP (may be an IPv4- or IPv6-IP) obtained by {@link serverCore#publicIP()} followed by a minus sign (<code>-</code>)</li>
+     *   <li>a pseudo-random value, the {@link yacyCore#speedKey}</li>
+     *   <li>the string '<code>dpn</code>' which assumingly stands for Default Peer Name</li>
+     *   <li>shortened OS information, the {@link serverSystem#infoKey()}</li>
+     *   <li>another pseudo-random value derived from the {@link System#currentTimeMillis()}-method modulo 99</li>
+     * </ul> 
+     * @return a default peer name following the above pattern whereas dots, underscores and colons are replaced by minus signs
+     */
     public static String makeDefaultPeerName() {
         String name = serverCore.publicIP() + "-" + yacyCore.speedKey  + "dpn" + serverSystem.infoKey() + (System.currentTimeMillis() & 99);
         name = name.replace('.', '-');
         name = name.replace('_', '-');
+        name = name.replace(':', '-');
         return name;
     }
-
+    
+    /**
+     * Checks for the static fragments of a generated default peer name, such as the string 'dpn'
+     * @see #makeDefaultPeerName()
+     * @param name the peer name to check for default peer name compliance
+     * @return whether the given peer name may be a default generated peer name
+     */
     public static boolean isDefaultPeerName(String name) {
-        return name != null && name.length() > 10 && name.charAt(0) <= '9' && name.charAt(name.length() - 1) <= '9' && name.indexOf("dpn") > 0;
+        return (name != null &&
+                name.length() > 10 &&
+                name.charAt(0) <= '9' &&
+                name.charAt(name.length() - 1) <= '9' &&
+                name.indexOf("dpn") > 0);
     }
     
     /**
@@ -313,7 +336,7 @@ public class yacySeed {
         }
     }
 
-    /** return the DNA-map of this peer */
+    /** @return the DNA-map of this peer */
     public final Map getMap() {
         return this.dna;
     }
@@ -350,35 +373,62 @@ public class yacySeed {
         dna.put(yacySeed.URL_IN, Integer.toString(Integer.parseInt(v) + count));
     }
 
-    // 12 * 6 bit = 72 bit = 24 characters octal-hash
-    // octal hashes are used for cache-dumps that are DHT-ready
-    // cause: the natural order of octal hashes are the same as the b64-order of b64Hashes
-    // a hexhash cannot be used in such cases, and b64Hashes are not appropriate for file names
+    /**
+     * <code>12 * 6 bit = 72 bit = 24</code> characters octal-hash
+     * <p>Octal hashes are used for cache-dumps that are DHT-ready</p>
+     * <p>
+     *   Cause: the natural order of octal hashes are the same as the b64-order of b64Hashes.
+     *   a hexhash cannot be used in such cases, and b64Hashes are not appropriate for file names
+     * </p>
+     * @param b64Hash a base64 hash
+     * @return the octal representation of the given base64 hash
+     */
     public static String b64Hash2octalHash(String b64Hash) {
         return serverCodings.encodeOctal(kelondroBase64Order.enhancedCoder.decode(b64Hash));
     }
 
-    // 12 * 6 bit = 72 bit = 18 characters hex-hash
+    /**
+     * <code>12 * 6 bit = 72 bit = 18</code> characters hex-hash
+     * @param b64Hash a base64 hash
+     * @return the hexadecimal representation of the given base64 hash
+     */
     public static String b64Hash2hexHash(String b64Hash) {
         // the hash string represents 12 * 6 bit = 72 bits. This is too much for a long integer.
         return serverCodings.encodeHex(kelondroBase64Order.enhancedCoder.decode(b64Hash));
     }
-
+    
+    /**
+     * @param hexHash a hexadecimal hash
+     * @return the base64 representation of the given hex hash
+     */
     public static String hexHash2b64Hash(String hexHash) {
         return kelondroBase64Order.enhancedCoder.encode(serverCodings.decodeHex(hexHash));
     }
 
-    //  12 * 6 bit = 72 bit = 9 byte
+    /**
+     * <code>12 * 6 bit = 72 bit = 9 byte</code>
+     * @param b64Hash a base64 hash
+     * @return returns a base256 - a byte - representation of the given base64 hash
+     */
     public static byte[] b64Hash2b256Hash(String b64Hash) {
         assert b64Hash.length() == 12;
         return kelondroBase64Order.enhancedCoder.decode(b64Hash);
     }
-
+    
+    /**
+     * @param b256Hash a base256 hash - normal byte number system
+     * @return the base64 representation of the given base256 hash
+     */
     public static String b256Hash2b64Hash(byte[] b256Hash) {
         assert b256Hash.length == 9;
         return kelondroBase64Order.enhancedCoder.encode(b256Hash);
     }
-
+    
+    /**
+     * The returned version follows this pattern: <code>MAJORVERSION . MINORVERSION 0 SVN REVISION</code> 
+     * @return the YaCy version of this peer as a float or <code>0</code> if no valid value could be retrieved
+     * from this yacySeed object
+     */
     public final float getVersion() {
         try {
             return Float.parseFloat(get(yacySeed.VERSION, yacySeed.ZERO));
@@ -386,9 +436,12 @@ public class yacySeed {
             return 0;
         }
     }
-
+    
+    /**
+     * @return the public address of the peer as IP:port string or <code>null</code> if no valid values for
+     * either the IP or the port could be retrieved from this yacySeed object
+     */
     public final String getPublicAddress() {
-        // returns an ip:port string
         String ip = (String) this.dna.get(yacySeed.IP);
         if (ip == null) { return null; }
         if (ip.length() < 8) { return null; } // 10.0.0.0
@@ -401,11 +454,14 @@ public class yacySeed {
         return ip + ":" + port;
     }
     
+    /**
+     * If this seed is part of a cluster, the peer has probably the {@linkplain #alternativeIP} object set to
+     * a local IP. If this is present and the public IP of this peer is identical to the public IP of the own seed,
+     * construct an address using this IP; otherwise return the public address
+     * @see #getPublicAddress()
+     * @return the alternative IP:port if present, else the public address
+     */
     public final String getClusterAddress() {
-        // if this seed is part of a cluster, the peer has probably the
-    	// alternativeIP object set to a local ip
-    	// if this is present and the public ip of this peer is identical to the public ip of the own seed,
-    	// construct an address using this ip; othervise return the public address
     	if (this.alternativeIP == null) return getPublicAddress();
     			
         final String port = (String) this.dna.get(yacySeed.PORT);
@@ -413,13 +469,15 @@ public class yacySeed {
 
         return this.alternativeIP + ":" + port;
     }
-
+    
+    /**
+     * @return the IP address of the peer represented by this yacySeed object as {@link InetAddress}
+     */
     public final InetAddress getInetAddress() {
-        // returns the ip address
         return natLib.getInetAddress((String) this.dna.get(yacySeed.IP));
     }
     
-    /** Get the portnumber of this seed */
+    /** @return the portnumber of this seed or <code>-1</code> if not present */
     public final int getPort() {
         final String port = (String) this.dna.get(yacySeed.PORT);
         if (port == null) return -1;
@@ -427,24 +485,32 @@ public class yacySeed {
         return Integer.parseInt(port);
     }
     
+    /**
+     * To synchronize peer pings the local time differential must be included in calculations.
+     * @return the difference to UTC (universal time coordinated) in milliseconds of this yacySeed,
+     * the difference to <code>+0130</code> if not present or <code>0</code> if an error occured during conversion
+     */
     public final long getUTCDiff() {
         String utc = (String) this.dna.get(yacySeed.UTC);
         if (utc == null) { utc = "+0130"; }
         try {
             return serverDate.UTCDiff(utc);
-        } catch (RuntimeException e) {
+        } catch (IllegalArgumentException e) {
             return 0;
         }
     }
 
+    /** puts the current time into the lastseen field and cares about the time differential to UTC */
     public final void setLastSeenUTC() {
-        // we put the current time into the lastseen field
         // because java thinks it must apply the UTC offset to the current time,
         // to create a string that looks like our current time, it adds the local UTC offset to the
         // time. To create a corrected UTC Date string, we first subtract the local UTC offset.
         dna.put(yacySeed.LASTSEEN, yacyCore.universalDateShortString(new Date(System.currentTimeMillis() - serverDate.UTCDiff())) );
     }
     
+    /**
+     * @return the last seen time converted to UTC in milliseconds
+     */
     public final long getLastSeenUTC() {
         try {
             final long t = yacyCore.parseUniversalDate(get(yacySeed.LASTSEEN, "20040101000000")).getTime();
@@ -462,11 +528,16 @@ public class yacySeed {
         }
     }
     
+    /**
+     * @see #getLastSeenUTC()
+     * @return the last seen value as string representation in the following format: YearMonthDayHoursMinutesSeconds
+     * or <code>20040101000000</code> if not present
+     */
     public final String getLastSeenString() {
         return get(yacySeed.LASTSEEN, "20040101000000");
     }
 
-    /** returns the age of the seed in number of days */
+    /** @return the age of the seed in number of days */
     public final int getAge() {
         try {
             final long t = yacyCore.parseUniversalDate(get(yacySeed.BDATE, "20040101000000")).getTime();
