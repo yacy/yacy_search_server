@@ -152,7 +152,7 @@ public class CrawlProfileEditor_p {
             prop.put("edit_entries_" + count + "_readonly_label", ee.label);
             prop.put("edit_entries_" + count + "_readonly_type", ee.type);
             if (ee.type == eentry.BOOLEAN) {
-                prop.put("edit_entries_" + count + "_readonly_type_checked", Boolean.parseBoolean((String)val) ? 1 : 0);
+                prop.put("edit_entries_" + count + "_readonly_type_checked", Boolean.getBoolean((String)val) ? 1 : 0);
             } else {
                 prop.put("edit_entries_" + count + "_readonly_type_value", val);
             }
