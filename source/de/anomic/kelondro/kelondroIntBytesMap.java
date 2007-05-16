@@ -24,6 +24,7 @@
 
 package de.anomic.kelondro;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.Iterator;
@@ -38,82 +39,159 @@ public class kelondroIntBytesMap {
 	// to index0 with addb, and a runtime-phase where data can only be written
 	// to index1 with putb.
 	
-    private kelondroRowSet index0, index1; 
     private kelondroRow rowdef;
-    private boolean initPhase;
+    private kelondroRowSet index0, index1;
     
     public kelondroIntBytesMap(int payloadSize, int initSize) {
     	rowdef = new kelondroRow("Cardinal key-4 {b256}, byte[] payload-" + payloadSize, kelondroNaturalOrder.naturalOrder, 0);
         index0 = new kelondroRowSet(rowdef, initSize);
-        index1 = new kelondroRowSet(rowdef, 0);
-        initPhase = true;
-    }
-    
-    public int size() {
-        return index0.size() + index1.size();
+        index1 = null;
     }
     
     public long memoryNeededForGrow() {
-        return index1.memoryNeededForGrow();
+        if (index1 == null) 
+            return index0.memoryNeededForGrow();
+        else
+            return index1.memoryNeededForGrow();
+    }
+    
+    public kelondroRow row() throws IOException {
+        return index0.row();
     }
     
     public byte[] getb(int ii) {
+        assert ii >= 0 : "i = " + ii;
     	byte[] key = kelondroNaturalOrder.encodeLong((long) ii, 4);
-        kelondroRow.Entry indexentry = index0.get(key);
-        if (indexentry == null) indexentry = index1.get(key);
+        if (index0 != null) {
+            if (index1 == null) {
+                // finish initialization phase
+                index0.sort();
+                index0.uniq(10000);
+                index1 = new kelondroRowSet(rowdef, 0); 
+            }
+            kelondroRow.Entry indexentry = index0.get(key);
+            if (indexentry != null) return indexentry.getColBytes(1);
+        }
+        assert (index1 != null);
+        kelondroRow.Entry indexentry = index1.get(key);
         if (indexentry == null) return null;
         return indexentry.getColBytes(1);
     }
     
+    public byte[] putb(int ii, byte[] value) {
+        assert ii >= 0 : "i = " + ii;
+        assert value != null;
+        byte[] key = kelondroNaturalOrder.encodeLong((long) ii, 4);
+        if (index0 != null) {
+            if (index1 == null) {
+                // finish initialization phase
+                index0.sort();
+                index0.uniq(10000);
+                index1 = new kelondroRowSet(rowdef, 0); 
+            }
+            kelondroRow.Entry indexentry = index0.get(key);
+            if (indexentry != null) {
+                byte[] oldv = indexentry.getColBytes(1);
+                indexentry.setCol(0, key);
+                indexentry.setCol(1, value);
+                index0.put(indexentry);
+                return oldv;
+            }
+            // else place it in the index1
+        }
+        // at this point index1 cannot be null
+        assert (index1 != null);
+        
+        kelondroRow.Entry newentry = rowdef.newEntry();
+        newentry.setCol(0, (long) ii);
+        newentry.setCol(1, value);
+        kelondroRow.Entry oldentry = index1.put(newentry);
+        if (oldentry == null) return null;
+        return oldentry.getColBytes(1);
+    }
+
     public void addb(int ii, byte[] value) {
-    	assert initPhase;
+    	assert index1 == null; // valid only in init-phase
+        assert ii >= 0 : "i = " + ii;
+        assert value != null;
         kelondroRow.Entry newentry = index0.row().newEntry();
         newentry.setCol(0, (long) ii);
         newentry.setCol(1, value);
         index0.addUnique(newentry);
     }
     
-    public byte[] putb(int ii, byte[] value) {
-    	initPhase = false;
-    	kelondroRow.Entry newentry = rowdef.newEntry();
-        newentry.setCol(0, (long) ii);
-        newentry.setCol(1, value);
-        kelondroRow.Entry indexentry = index0.get(kelondroNaturalOrder.encodeLong((long) ii, 4));
-    	if (indexentry != null) {
-    		index0.put(newentry);
-    		return indexentry.getColBytes(1);
-    	}
-        kelondroRow.Entry oldentry = index1.put(newentry);
-        if (oldentry == null) return null;
-        return oldentry.getColBytes(1);
-    }
-
     public byte[] removeb(int ii) {
-        if ((index0.size() == 0) && (index1.size() == 0)) return null;
+        assert ii >= 0 : "i = " + ii;
+        
         byte[] key = kelondroNaturalOrder.encodeLong((long) ii, 4);
-        kelondroRow.Entry indexentry = index0.remove(key);
-        if (indexentry != null) {
-        	return indexentry.getColBytes(1);
+        if (index0 != null) {
+            if (index1 == null) {
+                // finish initialization phase
+                index0.sort();
+                index0.uniq(10000);
+                index1 = new kelondroRowSet(rowdef, 0); 
+            }
+            kelondroRow.Entry indexentry = index0.remove(key);
+            if (indexentry != null) {
+                return indexentry.getColBytes(1);
+            }
+            // else remove it from the index1
         }
-        indexentry = index1.remove(key);
+        // at this point index1 cannot be null
+        assert (index1 != null);
+        if (index1.size() == 0) return null;
+        kelondroRow.Entry indexentry = index1.remove(key);
         if (indexentry == null) return null;
         return indexentry.getColBytes(1);
     }
     
     public byte[] removeoneb() {
-    	if ((index0.size() == 0) && (index1.size() == 0)) return null;
-    	if (index1.size() == 0) {
-    		kelondroRow.Entry indexentry = index0.removeOne();
+        if ((index1 != null) && (index1.size() != 0)) {
+            kelondroRow.Entry indexentry = index1.removeOne();
+            assert (indexentry != null);
             if (indexentry == null) return null;
+            //assert consistencyAnalysis0() : "consistency problem: " + consistencyAnalysis();
             return indexentry.getColBytes(1);
-    	}
-        kelondroRow.Entry indexentry = index1.removeOne();
-        if (indexentry == null) return null;
-        return indexentry.getColBytes(1);
+        }
+        if ((index0 != null) && (index0.size() != 0)) {
+            kelondroRow.Entry indexentry = index0.removeOne();
+            assert (indexentry != null);
+            if (indexentry == null) return null;
+            //assert consistencyAnalysis0() : "consistency problem: " + consistencyAnalysis();
+            return indexentry.getColBytes(1);
+        }
+        return null;
+    }
+    
+    public int size() {
+        if ((index0 != null) && (index1 == null)) {
+            //assert consistencyAnalysis0() : "consistency problem: " + consistencyAnalysis();
+            return index0.size();
+        }
+        if ((index0 == null) && (index1 != null)) {
+            //assert consistencyAnalysis0() : "consistency problem: " + consistencyAnalysis();
+            return index1.size();
+        }
+        assert ((index0 != null) && (index1 != null));
+        //assert consistencyAnalysis0() : "consistency problem: " + consistencyAnalysis();
+        return index0.size() + index1.size();
     }
     
     public Iterator rows() {
-    	return new kelondroMergeIterator(
+        if (index0 != null) {
+            if (index1 == null) {
+                // finish initialization phase
+                index0.sort();
+                index0.uniq(10000);
+                index1 = new kelondroRowSet(rowdef, 0); 
+            }
+            return index0.rows(true, null);
+        }
+        assert (index1 != null);
+    	if (index0 == null) {
+            return index1.rows(true, null);
+        }
+        return new kelondroMergeIterator(
     				index0.rows(true, null),
     				index1.rows(true, null),
     				rowdef.objectOrder,
@@ -122,14 +200,20 @@ public class kelondroIntBytesMap {
     }
     
     public void flush() {
-        index0.sort();
-        index0.trim(true);
-        index1.sort();
-        index1.trim(true);
+        if (index0 != null) {
+            index0.sort();
+            index0.trim(true);
+        }
+        if (index1 != null) {
+            index1.sort();
+            index1.trim(true);
+        }
     }
     
     public kelondroProfile profile() {
-    	return kelondroProfile.consolidate(index0.profile(), index1.profile());
+        if (index0 == null) return index1.profile();
+        if (index1 == null) return index0.profile();
+        return kelondroProfile.consolidate(index0.profile(), index1.profile());
     }
     
     public static void main(String[] args) {

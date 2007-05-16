@@ -67,13 +67,11 @@ public class kelondroBytesIntMap {
             //assert consistencyAnalysis0() : "consistency problem: " + consistencyAnalysis();
             if (indexentry != null) return (int) indexentry.getColLong(1);
         }
-        if (index1 != null) {
-            kelondroRow.Entry indexentry = index1.get(key);
-            //assert consistencyAnalysis0() : "consistency problem: " + consistencyAnalysis();
-            if (indexentry != null) return (int) indexentry.getColLong(1);
-        }
+        assert (index1 != null);
+        kelondroRow.Entry indexentry = index1.get(key);
         //assert consistencyAnalysis0() : "consistency problem: " + consistencyAnalysis();
-        return -1;
+        if (indexentry == null) return -1;
+        return (int) indexentry.getColLong(1);
     }
     
     public synchronized int puti(byte[] key, int i) throws IOException {
@@ -213,19 +211,24 @@ public class kelondroBytesIntMap {
             //assert consistencyAnalysis0() : "consistency problem: " + consistencyAnalysis();
             return index0.rows(up, firstKey);
         }
-        if ((index0 == null) && (index1 != null)) {
+        assert (index1 != null);
+        if (index0 == null) {
             //assert consistencyAnalysis0() : "consistency problem: " + consistencyAnalysis();
             return index1.rows(up, firstKey);
         }
-        assert ((index0 != null) && (index1 != null));
         //assert consistencyAnalysis0() : "consistency problem: " + consistencyAnalysis();
-        return new kelondroMergeIterator(index0.rows(up, firstKey), index1.rows(up, firstKey), rowdef.objectOrder, kelondroMergeIterator.simpleMerge, true);
+        return new kelondroMergeIterator(
+                index0.rows(up, firstKey),
+                index1.rows(up, firstKey),
+                rowdef.objectOrder,
+                kelondroMergeIterator.simpleMerge,
+                true);
     }
     
     public kelondroProfile profile() {
-        if (index0 != null) return index0.profile();
-        if (index1 != null) return index1.profile();
-        return null;
+        if (index0 == null) return index1.profile();
+        if (index1 == null) return index0.profile();
+        return kelondroProfile.consolidate(index0.profile(), index1.profile());
     }
     
     public synchronized void close() {
