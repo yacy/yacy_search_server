@@ -242,26 +242,35 @@ public class kelondroCache implements kelondroIndex {
           ((writeBufferDoubles == null) ? 0 : writeBufferDoubles.size());
     }
     
-    private void checkMissSpace() {
-        if ((readMissCache != null) && (cacheGrowStatus() < 1)) {
-            readMissCache.clear();
+    private boolean checkMissSpace() {
+        // returns true if it is allowed to write into this cache
+        if (cacheGrowStatus() < 1) {
+            if (readMissCache != null) {
+                readMissCache.clear();
+            }
+            return false;
         }
+        return true;
     }
     
-    private void checkHitSpace() throws IOException {
-        int s = sumRecords();
-        if (cacheGrowStatus() < 2) {flushDoubles(s / 4); s = sumRecords();}
-        if (cacheGrowStatus() < 2) {flushUnique(s / 4); s = sumRecords();}
-        if ((cacheGrowStatus() < 2) && (readHitCache != null)) {
-            readHitCache.clear();
-        }
-        if (cacheGrowStatus() < 1) {
+    private boolean checkHitSpace() throws IOException {
+        // returns true if it is allowed to write into this cache
+        int status = cacheGrowStatus();
+        if (status < 1) {
             flushUnique();
             flushDoubles();
             if (readHitCache != null) {
                 readHitCache.clear();
             }
+            return false;
         }
+        if (status < 2) {
+            int s = sumRecords();
+            flushDoubles(s / 4);
+            flushUnique(s / 4);
+            if (readHitCache != null) readHitCache.clear();
+        }
+        return true;
     }
     
     public synchronized void close() {
@@ -327,15 +336,13 @@ public class kelondroCache implements kelondroIndex {
         entry = index.get(key);
         // learn from result
         if (entry == null) {
-            checkMissSpace();
-            if (readMissCache != null) {
+            if ((checkMissSpace()) && (readMissCache != null)) {
                 kelondroRow.Entry dummy = readMissCache.put(readMissCache.row().newEntry(key));
                 if (dummy == null) this.hasnotUnique++; else this.hasnotDouble++;
             }
             return null;
         } else {
-            checkHitSpace();
-            if (readHitCache != null) {
+            if ((checkHitSpace()) && (readHitCache != null)) {
                 kelondroRow.Entry dummy = readHitCache.put(entry);
                 if (dummy == null) this.writeUnique++; else this.writeDouble++;
             }
@@ -343,6 +350,11 @@ public class kelondroCache implements kelondroIndex {
         }
     }
 
+    public synchronized void putMultiple(List rows) throws IOException {
+        Iterator i = rows.iterator();
+        while (i.hasNext()) put ((Entry) i.next());
+    }
+    
     public synchronized void putMultiple(List rows, Date entryDate) throws IOException {
         Iterator i = rows.iterator();
         while (i.hasNext()) put ((Entry) i.next(), entryDate);
@@ -443,6 +455,8 @@ public class kelondroCache implements kelondroIndex {
         // a put with a date is bad for the cache: the date cannot be handled
         // The write buffer does not work here, because it does not store dates.
         
+        throw new UnsupportedOperationException("put with date is inefficient in kelondroCache");
+        /*
         if (entryDate == null) return put(row);
         
         assert (row != null);
@@ -467,6 +481,7 @@ public class kelondroCache implements kelondroIndex {
             if (dummy == null) this.writeUnique++; else this.writeDouble++;
         }
         return entry;
+        */
     }
 
     public synchronized void addUnique(Entry row) throws IOException {
@@ -543,9 +558,9 @@ public class kelondroCache implements kelondroIndex {
         }
     }
     
-    public synchronized void addUniqueMultiple(List rows, Date entryDate) throws IOException {
+    public synchronized void addUniqueMultiple(List rows) throws IOException {
         Iterator i = rows.iterator();
-        while (i.hasNext()) addUnique((Entry) i.next(), entryDate);
+        while (i.hasNext()) addUnique((Entry) i.next());
     }
 
     public synchronized Entry remove(byte[] key) throws IOException {

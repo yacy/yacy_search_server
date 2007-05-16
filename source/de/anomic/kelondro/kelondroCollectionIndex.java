@@ -30,7 +30,6 @@ import java.io.IOException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
-import java.util.Date;
 import java.util.GregorianCalendar;
 import java.util.HashMap;
 import java.util.Iterator;
@@ -200,6 +199,7 @@ public class kelondroCollectionIndex {
             long preloadTime, int loadfactor, kelondroRow rowdef) throws IOException {
         // open/create index table
         kelondroIndex theindex = new kelondroCache(new kelondroFlexTable(path, filenameStub + ".index", preloadTime, indexRow(keylength, indexOrder), true), true, false);
+        //kelondroIndex theindex = new kelondroFlexTable(path, filenameStub + ".index", preloadTime, indexRow(keylength, indexOrder), true);
 
         // save/check property file for this array
         File propfile = propertyFile(path, filenameStub, loadfactor, rowdef.objectsize());
@@ -672,8 +672,8 @@ public class kelondroCollectionIndex {
         }
         
         // write index entries
-        index.putMultiple(indexrows_existing, new Date()); // write modified indexrows in optimized manner
-        index.addUniqueMultiple(indexrows_new, new Date()); // write new indexrows in optimized manner
+        index.putMultiple(indexrows_existing); // write modified indexrows in optimized manner
+        index.addUniqueMultiple(indexrows_new); // write new indexrows in optimized manner
     }
     
     public synchronized void merge(indexContainer container) throws IOException, kelondroOutOfLimitsException {

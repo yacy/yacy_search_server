@@ -333,9 +333,9 @@ public class kelondroTree extends kelondroRecords implements kelondroIndex {
         return (lc.equals(childn.handle()));
     }
     
-    public synchronized void putMultiple(List rows, Date entryDate) throws IOException {
+    public synchronized void putMultiple(List rows) throws IOException {
         Iterator i = rows.iterator();
-        while (i.hasNext()) put ((Entry) i.next(), entryDate);
+        while (i.hasNext()) put ((Entry) i.next());
     }
     
     public kelondroRow.Entry put(kelondroRow.Entry row, Date entryDate) throws IOException {
@@ -491,9 +491,9 @@ public class kelondroTree extends kelondroRecords implements kelondroIndex {
         this.put(row, entryDate);
     }
     
-    public synchronized void addUniqueMultiple(List rows, Date entryDate) throws IOException {
+    public synchronized void addUniqueMultiple(List rows) throws IOException {
         Iterator i = rows.iterator();
-        while (i.hasNext()) addUnique((kelondroRow.Entry) i.next(), entryDate);
+        while (i.hasNext()) addUnique((kelondroRow.Entry) i.next());
     }
     
     private void assignChild(Node parentNode, Node childNode, int childType) throws IOException {

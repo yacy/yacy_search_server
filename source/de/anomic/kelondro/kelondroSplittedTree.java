@@ -118,7 +118,7 @@ public class kelondroSplittedTree implements kelondroIndex {
         return ktfs[partition(key)].get(key);
     }
 
-    public synchronized void putMultiple(List rows, Date entryDate) throws IOException {
+    public synchronized void putMultiple(List rows) throws IOException {
         Iterator i = rows.iterator();
         kelondroRow.Entry row;
         ArrayList[] parts = new ArrayList[ktfs.length];
@@ -127,7 +127,7 @@ public class kelondroSplittedTree implements kelondroIndex {
             row = (kelondroRow.Entry) i.next();
             parts[partition(row.getColBytes(0))].add(row);
         }
-        for (int j = 0; j < ktfs.length; j++) ktfs[j].putMultiple(parts[j], entryDate);
+        for (int j = 0; j < ktfs.length; j++) ktfs[j].putMultiple(parts[j]);
     }
     
     public kelondroRow.Entry put(kelondroRow.Entry row, Date entryDate) throws IOException {
@@ -142,7 +142,7 @@ public class kelondroSplittedTree implements kelondroIndex {
         throw new UnsupportedOperationException();
     }
     
-    public synchronized void addUniqueMultiple(List rows, Date entryDate) throws IOException {
+    public synchronized void addUniqueMultiple(List rows) throws IOException {
         throw new UnsupportedOperationException();
     }
     

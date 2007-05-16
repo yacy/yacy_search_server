@@ -26,7 +26,6 @@ package de.anomic.kelondro;
 
 import java.io.File;
 import java.io.IOException;
-import java.util.Date;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
@@ -182,7 +181,68 @@ public class kelondroRowCollection {
         chunkcache = newChunkcache;
         newChunkcache = null;
     }
+    /*
+    private static final Object[] arraydepot = new Object[]{new byte[0]};
     
+    private final void ensureSize(int elements) {
+        int needed = elements * rowdef.objectsize();
+        if (chunkcache.length >= needed) return;
+        long neededRAM = (long) (needed * growfactor);
+        long availableRAM = serverMemory.available();
+        //if ((safemode) && (neededRAM > availableRAM)) throw new kelondroMemoryProtectionException("rowCollection temporary chunkcache", neededRAM, availableRAM);
+
+        if (neededRAM > availableRAM) {
+                // go into safe mode: use the arraydepot
+                synchronized (arraydepot) {
+                        if (((byte[]) arraydepot[0]).length >= neededRAM) {
+                                System.out.println("ensureSize case 1");
+                                // use the depot to increase the chunkcache
+                                byte[] newChunkcache = (byte[]) arraydepot[0];
+                        System.arraycopy(chunkcache, 0, newChunkcache, 0, chunkcache.length);
+                        // safe the chunkcache for later use in arraydepot
+                        arraydepot[0] = chunkcache;
+                        chunkcache = newChunkcache;
+                        newChunkcache = null;
+                        } else {
+                                System.out.println("ensureSize case 2");
+                                // this is the critical part: we need more RAM.
+                                // do a buffering using the arraydepot
+                                byte[] buffer0 = (byte[]) arraydepot[0];
+                                byte[] buffer1 = new byte[chunkcache.length - buffer0.length];
+                        // first copy the previous chunkcache to the two buffers
+                                System.arraycopy(chunkcache, 0, buffer0, 0, buffer0.length);
+                                System.arraycopy(chunkcache, buffer0.length, buffer1, 0, buffer1.length);
+                                // then free the previous chunkcache and replace it with a new array at target size
+                                chunkcache = null; // hand this over to GC
+                                chunkcache = new byte[(int) neededRAM];
+                                System.arraycopy(buffer0, 0, chunkcache, 0, buffer0.length);
+                                System.arraycopy(buffer1, 0, chunkcache, buffer0.length, buffer1.length);
+                                // then move the bigger buffer into the arraydepot
+                                if (buffer0.length > buffer1.length) {
+                                        arraydepot[0] = buffer0;
+                                } else {
+                                        arraydepot[1] = buffer1;
+                                }
+                                buffer0 = null;
+                                buffer1 = null;
+                        }
+                }
+        } else {
+                // there is enough memory available
+                byte[] newChunkcache = new byte[(int) neededRAM]; // increase space
+                System.arraycopy(chunkcache, 0, newChunkcache, 0, chunkcache.length);
+                // safe the chunkcache for later use in arraydepot
+                synchronized (arraydepot) {
+                        if (((byte[]) arraydepot[0]).length < chunkcache.length) {
+                                System.out.println("ensureSize case 0");
+                                arraydepot[0] = chunkcache;
+                        }
+                }
+                chunkcache = newChunkcache;
+                newChunkcache = null;
+        }
+    }
+    */
     public final long memoryNeededForGrow() {
         return (long) ((((long) (chunkcount + 1)) * ((long) rowdef.objectsize())) * growfactor);
     }
@@ -235,15 +295,12 @@ public class kelondroRowCollection {
     }
     
     public synchronized void addUnique(kelondroRow.Entry row) {
-    	byte[] r = row.bytes();
+        byte[] r = row.bytes();
         addUnique(r, 0, r.length);
     }
-    
-    public synchronized void addUnique(kelondroRow.Entry row, Date entryDate) {
-        addUnique(row);
-    }
 
-    public synchronized void addUniqueMultiple(List rows, Date entryDate) throws IOException {
+    public synchronized void addUniqueMultiple(List rows) throws IOException {
+        assert this.sortBound == 0 : "sortBound = " + this.sortBound + ", chunkcount = " + this.chunkcount;
         Iterator i = rows.iterator();
         while (i.hasNext()) addUnique((kelondroRow.Entry) i.next());
     }
@@ -325,6 +382,7 @@ public class kelondroRowCollection {
     }
     
     public synchronized void clear() {
+        if (this.chunkcache.length == 0) return;
         this.chunkcache = new byte[0];
         this.chunkcount = 0;
         this.sortBound = 0;

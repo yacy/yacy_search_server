@@ -36,6 +36,10 @@ public class kelondroBytesIntMap {
         this.ki = ki;
     }
     
+    public kelondroBytesIntMap(int keylength, kelondroOrder objectOrder, int space) {
+        this.ki = new kelondroRowSet(new kelondroRow(new kelondroColumn[]{new kelondroColumn("key", kelondroColumn.celltype_binary, kelondroColumn.encoder_bytes, keylength, "key"), new kelondroColumn("int c-4 {b256}")}, objectOrder, 0), space);
+    }
+    
     public kelondroRow row() throws IOException {
         return ki.row();
     }
@@ -106,6 +110,14 @@ public class kelondroBytesIntMap {
     
     public synchronized void close() {
         ki.close();
+    }
+    
+    public synchronized void sort() {
+        if (ki instanceof kelondroRowSet) ((kelondroRowSet) ki).sort();
+    }
+    
+    public synchronized void uniq(long time) {
+        if (ki instanceof kelondroRowSet) ((kelondroRowSet) ki).uniq(time);
     }
     
 }

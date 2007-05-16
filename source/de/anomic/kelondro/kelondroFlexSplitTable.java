@@ -195,7 +195,7 @@ public class kelondroFlexSplitTable implements kelondroIndex {
         return (kelondroRow.Entry) keeper[1];
     }
     
-    public synchronized void putMultiple(List rows, Date entryDate) throws IOException {
+    public synchronized void putMultiple(List rows) throws IOException {
         throw new UnsupportedOperationException("not yet implemented");
     }
     
@@ -247,7 +247,12 @@ public class kelondroFlexSplitTable implements kelondroIndex {
             table = new kelondroFlexTable(path, tablename + "." + suffix, -1, rowdef, true);
             tables.put(suffix, table);
         }
-        table.addUnique(row, entryDate);
+        table.addUnique(row);
+    }
+    
+    public synchronized void addUniqueMultiple(List rows) throws IOException {
+        Iterator i = rows.iterator();
+        while (i.hasNext()) addUnique((kelondroRow.Entry) i.next());
     }
     
     public synchronized void addUniqueMultiple(List rows, Date entryDate) throws IOException {

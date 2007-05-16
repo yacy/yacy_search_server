@@ -92,9 +92,9 @@ public class kelondroRowSet extends kelondroRowCollection implements kelondroInd
         return entry;
     }
     
-    public synchronized void putMultiple(List rows, Date entryDate) throws IOException {
+    public synchronized void putMultiple(List rows) throws IOException {
         Iterator i = rows.iterator();
-        while (i.hasNext()) put((kelondroRow.Entry) i.next(), entryDate);
+        while (i.hasNext()) put((kelondroRow.Entry) i.next());
     }
     
     public kelondroRow.Entry put(kelondroRow.Entry row, Date entryDate) {
@@ -127,6 +127,7 @@ public class kelondroRowSet extends kelondroRowCollection implements kelondroInd
         super.removeRow(index);
         //System.out.println("remove: chunk found at index position (after  remove) " + index + ", inset=" + serverLog.arrayList(super.chunkcache, super.rowdef.objectsize() * index, length) + ", searchkey=" + serverLog.arrayList(a, start, length));
         int findagainindex = find(a, start, length);
+        //System.out.println("kelondroRowSet.remove");
         assert findagainindex < 0 : "remove: chunk found again at index position (after  remove) " + findagainindex + ", index(before) = " + index + ", inset=" + serverLog.arrayList(super.chunkcache, super.rowdef.objectsize() * findagainindex, length) + ", searchkey=" + serverLog.arrayList(a, start, length); // check if the remove worked
         return entry;
     }
@@ -212,6 +213,7 @@ public class kelondroRowSet extends kelondroRowCollection implements kelondroInd
     }
     
     public synchronized Iterator rows() {
+        // iterates kelondroRow.Entry - type entries
         sort();
         return super.rows();
     }
@@ -267,6 +269,7 @@ public class kelondroRowSet extends kelondroRowCollection implements kelondroInd
     
     public static void main(String[] args) {
     	// sort/uniq-test
+        /*
     	kelondroRow rowdef = new kelondroRow("Cardinal key-4 {b256}, byte[] payload-1", kelondroNaturalOrder.naturalOrder, 0);
     	kelondroRowSet rs = new kelondroRowSet(rowdef, 0);
         Random random = new Random(0);
@@ -282,32 +285,34 @@ public class kelondroRowSet extends kelondroRowCollection implements kelondroInd
         System.out.println("after sort, before uniq, size = " + rs.size());
         rs.uniq(10000);
         System.out.println("after uniq, size = " + rs.size());
+        */
         
-        /*
         String[] test = { "eins", "zwei", "drei", "vier", "fuenf", "sechs", "sieben", "acht", "neun", "zehn" };
-        kelondroRowSet c = new kelondroRowSet(new kelondroRow(new int[]{10, 3}));
-        c.setOrdering(kelondroNaturalOrder.naturalOrder, 0);
-        for (int i = 0; i < test.length; i++) c.add(test[i].getBytes());
-        for (int i = 0; i < test.length; i++) c.add(test[i].getBytes());
-        c.shape();
-        c.removeMarked("fuenf".getBytes(), 0, 5);
-        Iterator i = c.elements();
+        kelondroRowSet d = new kelondroRowSet(new kelondroRow("byte[] key-10, Cardinal x-4 {b256}", kelondroNaturalOrder.naturalOrder, 0), 0);
+        d.setOrdering(kelondroNaturalOrder.naturalOrder, 0);
+        for (int ii = 0; ii < test.length; ii++) d.add(test[ii].getBytes());
+        for (int ii = 0; ii < test.length; ii++) d.add(test[ii].getBytes());
+        d.sort();
+        d.remove("fuenf".getBytes(), 0, 5);
+        Iterator ii = d.rows();
         String s;
         System.out.print("INPUT-ITERATOR: ");
-        while (i.hasNext()) {
-            s = new String((byte[]) i.next()).trim();
+        kelondroRow.Entry entry;
+        while (ii.hasNext()) {
+            entry = (kelondroRow.Entry) ii.next();
+            s = new String((byte[]) entry.getColBytes(0)).trim();
             System.out.print(s + ", ");
-            if (s.equals("drei")) i.remove();
+            if (s.equals("drei")) ii.remove();
         }
         System.out.println("");
-        System.out.println("INPUT-TOSTRING: " + c.toString());
-        c.shape();
-        System.out.println("SORTED        : " + c.toString());
-        c.uniq();
-        System.out.println("UNIQ          : " + c.toString());
-        c.trim();
-        System.out.println("TRIM          : " + c.toString());
-        */
+        System.out.println("INPUT-TOSTRING: " + d.toString());
+        d.sort();
+        System.out.println("SORTED        : " + d.toString());
+        d.uniq(10000);
+        System.out.println("UNIQ          : " + d.toString());
+        d.trim(false);
+        System.out.println("TRIM          : " + d.toString());
+        
         
         /*
         // second test
@@ -375,7 +380,7 @@ public class kelondroRowSet extends kelondroRowCollection implements kelondroInd
         byte[] key;
         int testsize = 5000;
         byte[][] delkeys = new byte[testsize / 5][];
-        random = new Random(0);
+        Random random = new Random(0);
         for (int i = 0; i < testsize; i++) {
             key = randomHash(random);
             if (i % 5 != 0) continue;
