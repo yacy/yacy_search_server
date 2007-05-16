@@ -228,7 +228,27 @@ public class plasmaCrawlProfile {
     
     public class entry {
         // this is a simple record structure that hold all properties of a single crawl start
-
+        
+        public static final String HANDLE           = "handle";
+        public static final String NAME             = "name";
+        public static final String START_URL        = "startURL";
+        public static final String GENERAL_FILTER   = "generalFilter";
+        public static final String SPECIFIC_FILTER  = "specificFilter";
+        public static final String GENERAL_DEPTH    = "generalDepth";
+        public static final String SPECIFIC_DEPTH   = "specificDepth";
+        public static final String RECRAWL_IF_OLDER = "recrawlIfOlder";
+        public static final String DOM_FILTER_DEPTH = "domFilterDepth";
+        public static final String DOM_MAX_PAGES    = "domMaxPages";
+        public static final String CRAWLING_Q       = "crawlingQ";
+        public static final String INDEX_TEXT       = "indexText";
+        public static final String INDEX_MEDIA      = "indexMedia";
+        public static final String STORE_HTCACHE    = "storeHTCache";
+        public static final String STORE_TXCACHE    = "storeTXCache";
+        public static final String REMOTE_INDEXING  = "remoteIndexing";
+        public static final String XSSTOPW          = "xsstopw";
+        public static final String XDSTOPW          = "xdstopw";
+        public static final String XPSTOPW          = "xpstopw";
+        
         private Map mem;
         private Map doms;
         
@@ -243,25 +263,25 @@ public class plasmaCrawlProfile {
             if (name == null || name.length() == 0) throw new NullPointerException("name must not be null");
             String handle = kelondroBase64Order.enhancedCoder.encode(serverCodings.encodeMD5Raw(Long.toString(System.currentTimeMillis()))).substring(0, crawlProfileHandleLength);
             mem = new HashMap();
-            mem.put("handle",           handle);
-            mem.put("name",             name);
-            mem.put("startURL",         (startURL == null) ? "" : startURL);
-            mem.put("generalFilter",    (generalFilter == null) ? ".*" : generalFilter);
-            mem.put("specificFilter",   (specificFilter == null) ? ".*" : specificFilter);
-            mem.put("generalDepth",     Integer.toString(generalDepth));
-            mem.put("specificDepth",    Integer.toString(specificDepth));
-            mem.put("recrawlIfOlder",   Integer.toString(recrawlIfOlder));
-            mem.put("domFilterDepth",   Integer.toString(domFilterDepth));
-            mem.put("domMaxPages",      Integer.toString(domMaxPages));
-            mem.put("crawlingQ",        (crawlingQ) ? "true" : "false"); // crawling of urls with '?'
-            mem.put("indexText",        (indexText) ? "true" : "false");
-            mem.put("indexMedia",       (indexMedia) ? "true" : "false");
-            mem.put("storeHTCache",     (storeHTCache) ? "true" : "false");
-            mem.put("storeTXCache",     (storeTXCache) ? "true" : "false");
-            mem.put("remoteIndexing",   (remoteIndexing) ? "true" : "false");
-            mem.put("xsstopw",          (xsstopw) ? "true" : "false"); // exclude static stop-words
-            mem.put("xdstopw",          (xdstopw) ? "true" : "false"); // exclude dynamic stop-word
-            mem.put("xpstopw",          (xpstopw) ? "true" : "false"); // exclude parent stop-words
+            mem.put(HANDLE,           handle);
+            mem.put(NAME,             name);
+            mem.put(START_URL,        (startURL == null) ? "" : startURL);
+            mem.put(GENERAL_FILTER,   (generalFilter == null) ? ".*" : generalFilter);
+            mem.put(SPECIFIC_FILTER,  (specificFilter == null) ? ".*" : specificFilter);
+            mem.put(GENERAL_DEPTH,    Integer.toString(generalDepth));
+            mem.put(SPECIFIC_DEPTH,   Integer.toString(specificDepth));
+            mem.put(RECRAWL_IF_OLDER, Integer.toString(recrawlIfOlder));
+            mem.put(DOM_FILTER_DEPTH, Integer.toString(domFilterDepth));
+            mem.put(DOM_MAX_PAGES,    Integer.toString(domMaxPages));
+            mem.put(CRAWLING_Q,       Boolean.toString(crawlingQ)); // crawling of urls with '?'
+            mem.put(INDEX_TEXT,       Boolean.toString(indexText));
+            mem.put(INDEX_MEDIA,      Boolean.toString(indexMedia));
+            mem.put(STORE_HTCACHE,    Boolean.toString(storeHTCache));
+            mem.put(STORE_TXCACHE,    Boolean.toString(storeTXCache));
+            mem.put(REMOTE_INDEXING,  Boolean.toString(remoteIndexing));
+            mem.put(XSSTOPW,          Boolean.toString(xsstopw)); // exclude static stop-words
+            mem.put(XDSTOPW,          Boolean.toString(xdstopw)); // exclude dynamic stop-word
+            mem.put(XPSTOPW,          Boolean.toString(xpstopw)); // exclude parent stop-words
 
             doms = new HashMap();
         }
@@ -278,7 +298,7 @@ public class plasmaCrawlProfile {
         
         public entry(Map mem) {
             this.mem = mem;
-            this.doms = (HashMap) domsCache.get(this.mem.get("handle"));
+            this.doms = (HashMap) domsCache.get(this.mem.get(HANDLE));
             if (this.doms == null) this.doms = new HashMap();
         }
         
@@ -286,27 +306,27 @@ public class plasmaCrawlProfile {
             return mem;
         }
         public String handle() {
-            String r = (String) mem.get("handle");
+            String r = (String) mem.get(HANDLE);
             if (r == null) return null; else return r;
         }
         public String name() {
-            String r = (String) mem.get("name");
+            String r = (String) mem.get(NAME);
             if (r == null) return ""; else return r;
         }
         public String startURL() {
-            String r = (String) mem.get("startURL");
+            String r = (String) mem.get(START_URL);
             if (r == null) return null; else return r;
         }
         public String generalFilter() {
-            String r = (String) mem.get("generalFilter");
+            String r = (String) mem.get(GENERAL_FILTER);
             if (r == null) return ".*"; else return r;
         }
         public String specificFilter() {
-            String r = (String) mem.get("specificFilter");
+            String r = (String) mem.get(SPECIFIC_FILTER);
             if (r == null) return ".*"; else return r;
         }
         public int generalDepth() {
-            String r = (String) mem.get("generalDepth");
+            String r = (String) mem.get(GENERAL_DEPTH);
             if (r == null) return 0; else try {
                 return Integer.parseInt(r);
             } catch (NumberFormatException e) {
@@ -314,7 +334,7 @@ public class plasmaCrawlProfile {
             }
         }
         public int specificDepth() {
-            String r = (String) mem.get("specificDepth");
+            String r = (String) mem.get(SPECIFIC_DEPTH);
             if (r == null) return 0; else try {
                 return Integer.parseInt(r);
             } catch (NumberFormatException e) {
@@ -324,7 +344,7 @@ public class plasmaCrawlProfile {
         public long recrawlIfOlder() {
             // returns a long (millis) that is the minimum age that
             // an antry must have to be re-crawled
-            String r = (String) mem.get("recrawlIfOlder");
+            String r = (String) mem.get(RECRAWL_IF_OLDER);
             if (r == null) return Long.MAX_VALUE; else try {
                 long l = Long.parseLong(r) * ((long) 60000);
                 if (l < 0) return Long.MAX_VALUE; else return l;
@@ -336,7 +356,7 @@ public class plasmaCrawlProfile {
             // if the depth is equal or less to this depth,
             // then the current url feeds with its domain the crawl filter
             // if this is -1, all domains are feeded
-            String r = (String) mem.get("domFilterDepth");
+            String r = (String) mem.get(DOM_FILTER_DEPTH);
             if (r == null) return Integer.MAX_VALUE; else try {
                 int i = Integer.parseInt(r);
                 if (i < 0) return Integer.MAX_VALUE;
@@ -348,7 +368,7 @@ public class plasmaCrawlProfile {
         public int domMaxPages() {
             // this is the maximum number of pages that are crawled for a single domain
             // if -1, this means no limit
-            String r = (String) mem.get("domMaxPages");
+            String r = (String) mem.get(DOM_MAX_PAGES);
             if (r == null) return Integer.MAX_VALUE; else try {
                 int i = Integer.parseInt(r);
                 if (i < 0) return Integer.MAX_VALUE;
@@ -358,40 +378,40 @@ public class plasmaCrawlProfile {
             }
         }
         public boolean crawlingQ() {
-            String r = (String) mem.get("crawlingQ");
-            if (r == null) return false; else return (r.equals("true"));
+            String r = (String) mem.get(CRAWLING_Q);
+            if (r == null) return false; else return (r.equals(Boolean.TRUE.toString()));
         }
         public boolean indexText() {
-            String r = (String) mem.get("indexText");
-            if (r == null) return true; else return (r.equals("true"));
+            String r = (String) mem.get(INDEX_TEXT);
+            if (r == null) return true; else return (r.equals(Boolean.TRUE.toString()));
         }
         public boolean indexMedia() {
-            String r = (String) mem.get("indexMedia");
-            if (r == null) return true; else return (r.equals("true"));
+            String r = (String) mem.get(INDEX_MEDIA);
+            if (r == null) return true; else return (r.equals(Boolean.TRUE.toString()));
         }
         public boolean storeHTCache() {
-            String r = (String) mem.get("storeHTCache");
-            if (r == null) return false; else return (r.equals("true"));
+            String r = (String) mem.get(STORE_HTCACHE);
+            if (r == null) return false; else return (r.equals(Boolean.TRUE.toString()));
         }
         public boolean storeTXCache() {
-            String r = (String) mem.get("storeTXCache");
-            if (r == null) return false; else return (r.equals("true"));
+            String r = (String) mem.get(STORE_TXCACHE);
+            if (r == null) return false; else return (r.equals(Boolean.TRUE.toString()));
         }
         public boolean remoteIndexing() {
-            String r = (String) mem.get("remoteIndexing");
-            if (r == null) return false; else return (r.equals("true"));
+            String r = (String) mem.get(REMOTE_INDEXING);
+            if (r == null) return false; else return (r.equals(Boolean.TRUE.toString()));
         }
         public boolean excludeStaticStopwords() {
-            String r = (String) mem.get("xsstopw");
-            if (r == null) return false; else return (r.equals("true"));
+            String r = (String) mem.get(XSSTOPW);
+            if (r == null) return false; else return (r.equals(Boolean.TRUE.toString()));
         }
         public boolean excludeDynamicStopwords() {
-            String r = (String) mem.get("xdstopw");
-            if (r == null) return false; else return (r.equals("true"));
+            String r = (String) mem.get(XDSTOPW);
+            if (r == null) return false; else return (r.equals(Boolean.TRUE.toString()));
         }
         public boolean excludeParentStopwords() {
-            String r = (String) mem.get("xpstopw");
-            if (r == null) return false; else return (r.equals("true"));
+            String r = (String) mem.get(XPSTOPW);
+            if (r == null) return false; else return (r.equals(Boolean.TRUE.toString()));
         }
         public void changeEntry(String propName, String newValue) throws IOException {
             mem.put(propName,  newValue);
@@ -409,7 +429,7 @@ public class plasmaCrawlProfile {
                     doms.put(domain, dp);
                 }
             }
-            domsCache.put(this.mem.get("handle"), doms);
+            domsCache.put(this.mem.get(HANDLE), doms);
         }
         public boolean grantedDomAppearance(String domain) {
             int max = domFilterDepth();

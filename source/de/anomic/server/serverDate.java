@@ -134,11 +134,11 @@ public final class serverDate {
     }
     
     public static long UTCDiff(String diffString) {
-        if (diffString.length() != 5) throw new RuntimeException("UTC String malformed (wrong size):" + diffString);
+        if (diffString.length() != 5) throw new IllegalArgumentException("UTC String malformed (wrong size):" + diffString);
         boolean ahead = true;
         if (diffString.charAt(0) == '+') ahead = true;
         else if (diffString.charAt(0) == '-') ahead = false;
-        else throw new RuntimeException("UTC String malformed (wrong sign):" + diffString);
+        else throw new IllegalArgumentException("UTC String malformed (wrong sign):" + diffString);
         long oh = Long.parseLong(diffString.substring(1, 3));
         long om = Long.parseLong(diffString.substring(3));
         return ((ahead) ? (long) 1 : (long) -1) * (oh * hourMillis + om * minuteMillis);

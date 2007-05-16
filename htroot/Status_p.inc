@@ -71,7 +71,7 @@
           <td>#(localCrawlPaused)#&nbsp;::(paused)#(/localCrawlPaused)#</td>
         </tr>
         <tr>
-          <td>Remote triggered Crawl</td>
+          <td><a href="IndexCreateWWWRemoteQueue_p.html">Remote triggered Crawl</a></td>
           <td>#[remoteTriggeredCrawlQueueSize]#</td>
           <td><a href="Status.html?#(remoteTriggeredCrawlPaused)#pauseCrawlJob::continueCrawlJob#(/remoteTriggeredCrawlPaused)#=&amp;jobType=remoteTriggeredCrawl" title="#(remoteTriggeredCrawlPaused)#pause remote triggered crawl::continue remote triggered crawl#(/remoteTriggeredCrawlPaused)#"><img src="env/grafics/#(remoteTriggeredCrawlPaused)#stop.gif::start.gif#(/remoteTriggeredCrawlPaused)#" alt="#(remoteTriggeredCrawlPaused)#pause remote triggered crawl::continue remote triggered crawl#(/remoteTriggeredCrawlPaused)#" style="width:12px;height:12px;" /></a></td>
           <td>#(remoteTriggeredCrawlPaused)#&nbsp;::(paused)#(/remoteTriggeredCrawlPaused)#</td>

@@ -72,8 +72,6 @@ import java.util.Map;
 import java.util.Properties;
 import java.util.Set;
 
-import com.sun.org.apache.bcel.internal.generic.LLOAD;
-
 import de.anomic.kelondro.kelondroBase64Order;
 import de.anomic.net.natLib;
 import de.anomic.plasma.plasmaCondenser;

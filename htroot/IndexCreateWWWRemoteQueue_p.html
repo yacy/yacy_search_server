@@ -1,0 +1,65 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <title>YaCy '#[clientname]#': Index Creation / WWW Remote Crawl Queue</title>
+    #%env/templates/metas.template%#
+  </head>
+  <body id="IndexCreateWWWGlobalQueue">
+    #%env/templates/header.template%#
+    #%env/templates/submenuIndexCreate.template%#
+    <h2>Index Creation: WWW Remote Crawl Queue</h2>
+    <p>
+      This queue stores the urls that other peers sent to you in order to perform a remote crawl for them.
+    </p>
+    #(crawler-queue)#
+    <p>The remote crawler queue is empty</p>
+    ::
+    <form action="IndexCreateWWWRemoteQueue_p.html" method="post" enctype="multipart/form-data">
+      <fieldset>
+        <input type="submit" name="clearcrawlqueue" value="clear remote crawl queue" />
+      </fieldset>
+    </form>
+    <p>
+      There are <strong>#[num]#</strong> entries in the remote crawler queue.
+      Showing <strong>#[show-num]#</strong> most recent entries.
+    </p>
+    <p>
+      Show last <a href="IndexCreateWWWRemoteQueue_p.html?limit=50">50</a> |
+      <a href="IndexCreateWWWRemoteQueue_p.html?limit=100">100</a> |
+      <a href="IndexCreateWWWRemoteQueue_p.html?limit=250">250</a> |
+      <a href="IndexCreateWWWRemoteQueue_p.html?limit=500">500</a> entries.
+    </p>
+    <table border="0" cellpadding="2" cellspacing="1">
+      <colgroup>
+        <col width="60" span="2" />
+        <col width="10" />
+        <col width="80" />
+        <col width="180" />
+        <col />
+        <col width="10" />
+      </colgroup>
+      <tr class="TableHeader">
+        <th>Initiator</th>
+        <th>Profile</th>
+        <th>Depth</th>
+        <th>Modified Date</th>
+        <th>Anchor Name</th>
+        <th>URL</th>
+        <th>Delete</th>
+      </tr>
+      #{list}#
+      <tr class="TableCell#(dark)#Light::Dark#(/dark)#">
+        <td>#[initiator]#</td>
+        <td>#[profile]#</td>
+        <td>#[depth]#</td>
+        <td>#[modified]#</td>
+        <td>#[anchor]#</td>
+        <td><a href="#[url]#">#[url]#</a></td>
+        <td><a href="IndexCreateWWWRemoteQueue_p.html?deleteEntry=#[hash]#">[Delete]</a></td>
+      </tr>
+      #{/list}#
+    </table>
+    #(/crawler-queue)#
+    #%env/templates/footer.template%#
+  </body>
+</html>

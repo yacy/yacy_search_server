@@ -1,0 +1,49 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <title>YaCy '#[clientname]#': Crawl Profile Editor</title>
+    #%env/templates/metas.template%#
+  </head>
+  <body id="IndexCreateWWWGlobalQueue">
+    #%env/templates/header.template%#
+    #%env/templates/submenuIndexCreate.template%#
+    <h2>Crawl Profile Editor</h2>
+    <p>
+      Crawl profiles hold information about a specific URL which is internally used to perform the crawl it belongs to.
+      The profiles for remote crawls, <a href="/ProxyIndexingMonitor_p.html">indexing via proxy</a> and snippet fetches
+      cannot be altered here as they are hard-coded.
+    </p>
+    <form action="/CrawlProfileEditor_p.html" method="post" enctype="multipart/form-data">
+      <fieldset><legend>Select the profile to edit</legend>
+        <select name="handle">#{profiles}# 
+          <option value="#[handle]#"#(selected)#:: selected="selected"#(/selected)#>#[name]#</option>#{/profiles}# 
+        </select>
+        <input type="submit" name="edit" value="Edit profile" />
+      </fieldset>
+    </form>
+    
+    #(error)#::
+    <p class="error">An error occured during editing the crawl profile: #[message]#</p>
+    #(/error)#
+    
+    #(edit)#::
+    <form action="/CrawlProfileEditor_p.html" method="post" enctype="multipart/form-data">
+      <fieldset><legend>Edit Profile #[name]#</legend>
+        <input type="hidden" name="handle" value="#[handle]#" />
+        <dl>#{entries}# 
+          <dt>#(readonly)#<label for="#[name]#">#[label]#</label>::#[label]##(/readonly)#</dt>
+          <dd>#(readonly)# 
+            <input id="#[name]#" name="#[name]#"
+                   #(type)# type="checkbox"#(checked)#:: checked="checked"#(/checked)#::
+                    type="text" value="#[value]#"::
+                    type="text" value="#[value]#"#(/type)# />::
+            <strong>#(type)##(checked)#false::true#(/checked)#::#[value]#::#[value]##(/type)#</strong>#(/readonly)# 
+          </dd>#{/entries}# 
+        </dl>
+        <input type="submit" name="submit" value="Submit changes" />
+      </fieldset>
+    </form>
+    #(/edit)#
+    #%env/templates/footer.template%#
+  </body>
+</html>

@@ -1,9 +1,15 @@
 <div class="SubMenu">
   <h3>Index Creation Menu</h3>
   <div class="SubMenugroup">
-    <h3>Control Queues</h3>
+    <h3>Administration</h3>
     <ul class="SubMenu">
       <li><a href="/IndexCreate_p.html" class="MenuItemLink lock">Crawl Start</a></li>
+      <li><a href="/CrawlProfileEditor_p.html" class="MenuItemLink lock">Crawl Profile Editor</a></li>
+    </ul>
+  </div>
+  <div class="SubMenugroup">
+    <h3>Control Queues</h3>
+    <ul class="SubMenu">
       <li><a href="/IndexCreateIndexingQueue_p.html" class="MenuItemLink lock">Indexing</a></li>
       <li><a href="/IndexCreateLoaderQueue_p.html" class="MenuItemLink lock">Loader</a></li>
     </ul>
@@ -13,6 +19,7 @@
     <ul class="SubMenu">
       <li><a href="/IndexCreateWWWLocalQueue_p.html" class="MenuItemLink lock">Local</a></li>
       <li><a href="/IndexCreateWWWGlobalQueue_p.html" class="MenuItemLink lock">Global</a></li>
+      <li><a href="/IndexCreateWWWRemoteQueue_p.html" class="MenuItemLink lock">Remote</a></li>
       <li><!--<a href="/IndexCreateWWWOverhangQueue_p.html" class="MenuItemLink">--><em class="lock">Overhang</em><!--</a>--></li>
     </ul>
   </div>
