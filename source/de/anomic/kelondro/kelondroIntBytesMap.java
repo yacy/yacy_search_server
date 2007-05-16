@@ -75,7 +75,7 @@ public class kelondroIntBytesMap {
     
     public byte[] putb(int ii, byte[] value) {
     	initPhase = false;
-    	kelondroRow.Entry newentry = index1.row().newEntry();
+    	kelondroRow.Entry newentry = rowdef.newEntry();
         newentry.setCol(0, (long) ii);
         newentry.setCol(1, value);
         kelondroRow.Entry indexentry = index0.get(kelondroNaturalOrder.encodeLong((long) ii, 4));

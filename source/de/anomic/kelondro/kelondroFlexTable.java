@@ -174,10 +174,8 @@ public class kelondroFlexTable extends kelondroFlexWidthArray implements kelondr
         }
         System.out.print(" -ordering- ");
         System.out.flush();
-        ri.sort();
-        int sbu = ri.size();
-        ri.uniq(10000);        
-        if (ri.size() != sbu) serverLog.logSevere("kelondroFlexTable.initializeRamIndex: " + tablename, "; size before uniq = " + sbu + ", after uniq = " + ri.size());
+        //int sbu = ri.size();
+        //if (ri.size() != sbu) serverLog.logSevere("kelondroFlexTable.initializeRamIndex: " + tablename, "; size before uniq = " + sbu + ", after uniq = " + ri.size());
         return ri;
     }
     
@@ -212,7 +210,7 @@ public class kelondroFlexTable extends kelondroFlexWidthArray implements kelondr
     
     public synchronized kelondroRow.Entry get(byte[] key) throws IOException {
 		int pos = index.geti(key);
-		assert this.size() == index.size() : "content.size() = " + this.size() + ", index.size() = " + index.size();
+		assert this.size() == index.size() : "content.size() = " + this.size() + ", index.size() = " + index.size() + ", analysis: " + index.consistencyAnalysis();
 		if (pos < 0) return null;
 		// i may be greater than this.size(), because this table may have deleted entries
 		// the deleted entries are subtracted from the 'real' tablesize,
