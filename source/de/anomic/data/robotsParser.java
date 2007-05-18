@@ -110,7 +110,7 @@ public final class robotsParser{
     }
     
     public static Object[] parse(byte[] robotsTxt) throws IOException {
-        if ((robotsTxt == null)||(robotsTxt.length == 0)) return new Object[]{new ArrayList(0),null};
+        if ((robotsTxt == null)||(robotsTxt.length == 0)) return new Object[]{new ArrayList(0),null,null};
         ByteArrayInputStream bin = new ByteArrayInputStream(robotsTxt);
         BufferedReader reader = new BufferedReader(new InputStreamReader(bin));
         return parse(reader);
