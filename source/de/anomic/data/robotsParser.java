@@ -90,6 +90,7 @@ public final class robotsParser{
     public static final String ROBOTS_ALLOW = "Allow:".toUpperCase();
     public static final String ROBOTS_COMMENT = "#";
     public static final String ROBOTS_SITEMAP = "Sitemap:".toUpperCase();
+    public static final String ROBOTS_CRAWL_DELAY = "Crawl-Delay:".toUpperCase();
     
     /*public robotsParser(URL robotsUrl){
      }*/
@@ -121,6 +122,7 @@ public final class robotsParser{
         
         int pos;
         String line = null, lineUpper = null, sitemap = null;
+        Integer crawlDelay = null;
         boolean isRuleBlock4AllAgents = false,
                 isRuleBlock4YaCyAgent = false,
                 rule4YaCyFound = false,
@@ -149,6 +151,7 @@ public final class robotsParser{
                     inBlock = false;
                     isRuleBlock4AllAgents = false;
                     isRuleBlock4YaCyAgent = false;
+                    crawlDelay = null; // each block has a separate delay
                 }
                 
                 // cutting off comments at the line end
@@ -166,6 +169,15 @@ public final class robotsParser{
                     isRuleBlock4YaCyAgent |= userAgent.toLowerCase().indexOf("yacy") >=0;
                     if (isRuleBlock4YaCyAgent) rule4YaCyFound = true;
                 }
+            } else if (lineUpper.startsWith(ROBOTS_CRAWL_DELAY)) {
+                pos = line.indexOf(" ");
+                if (pos != -1) {
+                	try {
+                		crawlDelay = Integer.valueOf(line.substring(pos).trim());
+                	} catch (NumberFormatException e) {
+                		// invalid crawling delay
+                	}
+                } 
             } else if (lineUpper.startsWith(ROBOTS_DISALLOW) || 
                        lineUpper.startsWith(ROBOTS_ALLOW)) {
                 inBlock = true;
@@ -211,7 +223,7 @@ public final class robotsParser{
         }
         
         ArrayList denyList = (rule4YaCyFound)?deny4YaCyAgent:deny4AllAgents;
-        return new Object[]{denyList,sitemap};
+        return new Object[]{denyList,sitemap,crawlDelay};
     }        
     
     private static final int getPort(URL theURL) {
@@ -256,6 +268,27 @@ public final class robotsParser{
         } catch (MalformedURLException e) {/* ignore this */}
         
         return sitemapURL;
+    }
+    
+    public static Integer getCrawlDelay(URL theURL) {
+    	if (theURL == null) throw new IllegalArgumentException(); 
+    	Integer crawlDelay = null;
+    	
+        // generating the hostname:poart string needed to do a DB lookup
+        String urlHostPort = getHostPort(theURL);    	
+    	
+        plasmaCrawlRobotsTxt.Entry robotsTxt4Host = null;
+        synchronized(urlHostPort) {
+            // doing a DB lookup to determine if the robots data is already available
+            robotsTxt4Host = plasmaSwitchboard.robots.getEntry(urlHostPort);
+        }                
+        if (robotsTxt4Host == null) return null;
+                       
+        try {
+        	crawlDelay = robotsTxt4Host.getCrawlDelay();
+        } catch (NumberFormatException e) {/* ignore this */}
+        
+        return crawlDelay;    	
     }
     
     public static boolean isDisallowed(URL nexturl) {
@@ -309,6 +342,7 @@ public final class robotsParser{
                 if ((robotsTxt4Host==null)||((robotsTxt4Host!=null)&&(result!=null))) {
                     ArrayList denyPath = null;
                     String sitemap = null;
+                    Integer crawlDelay = null;
                     if (accessCompletelyRestricted) {
                         denyPath = new ArrayList();
                         denyPath.add("/");
@@ -318,13 +352,14 @@ public final class robotsParser{
                             Object[] parserResult = robotsParser.parse(robotsTxt);
                             denyPath = (ArrayList) parserResult[0];
                             sitemap = (String) parserResult[1];
+                            crawlDelay = (Integer) parserResult[2];
                         } catch (IOException e) {
                             serverLog.logSevere("ROBOTS","Unable to parse the robots.txt file from URL '" + robotsURL + "'.");
                         }
                     } 
                     
                     // storing the data into the robots DB
-                    robotsTxt4Host = plasmaSwitchboard.robots.addEntry(urlHostPort,denyPath,new Date(),modDate,eTag,sitemap);
+                    robotsTxt4Host = plasmaSwitchboard.robots.addEntry(urlHostPort,denyPath,new Date(),modDate,eTag,sitemap,crawlDelay);
                 } 
             }
         }

@@ -84,16 +84,16 @@ public class plasmaCrawlRobotsTxt {
     }
     
     public void close() {
-        robotsTable.close();
+        this.robotsTable.close();
     }
     
     public int size() {
-        return robotsTable.size();
+        return this.robotsTable.size();
     }    
     
     public void removeEntry(String hostName) {
         try {
-            robotsTable.remove(hostName.toLowerCase());
+            this.robotsTable.remove(hostName.toLowerCase());
         } catch (IOException e) {
         	
         } catch (kelondroException e) {
@@ -103,7 +103,7 @@ public class plasmaCrawlRobotsTxt {
     
     public Entry getEntry(String hostName) {
         try {
-            Map record = robotsTable.getMap(hostName);
+            Map record = this.robotsTable.getMap(hostName);
             if (record == null) return null;
             return new Entry(hostName, record);
         } catch (kelondroException e) {
@@ -112,8 +112,16 @@ public class plasmaCrawlRobotsTxt {
         }
     }    
     
-    public Entry addEntry(String hostName, ArrayList disallowPathList, Date loadedDate, Date modDate, String eTag, String sitemap) {
-        Entry entry = new Entry(hostName,disallowPathList,loadedDate,modDate,eTag,sitemap);
+    public Entry addEntry(
+    		String hostName, 
+    		ArrayList disallowPathList, 
+    		Date loadedDate, 
+    		Date modDate, 
+    		String eTag, 
+    		String sitemap,
+    		Integer crawlDelay
+    ) {
+        Entry entry = new Entry(hostName,disallowPathList,loadedDate,modDate,eTag,sitemap,crawlDelay);
         addEntry(entry);
         return entry;
     }
@@ -121,7 +129,7 @@ public class plasmaCrawlRobotsTxt {
     public String addEntry(Entry entry) {
         // writes a new page and returns key
         try {
-            robotsTable.set(entry.hostName,entry.mem);
+            this.robotsTable.set(entry.hostName,entry.mem);
             return entry.hostName;
         } catch (IOException e) {
             return null;
@@ -134,11 +142,12 @@ public class plasmaCrawlRobotsTxt {
         public static final String MOD_DATE = "modDate";
         public static final String ETAG = "etag";
         public static final String SITEMAP = "sitemap";
+        public static final String CRAWL_DELAY = "crawlDelay";
         
         // this is a simple record structure that hold all properties of a single crawl start
-        private Map mem;
+        Map mem;
         private LinkedList disallowPathList;
-        private String hostName;
+        String hostName;
         
         public Entry(String hostName, Map mem) {
             this.hostName = hostName.toLowerCase();
@@ -164,8 +173,10 @@ public class plasmaCrawlRobotsTxt {
                 Date loadedDate,
                 Date modDate,
                 String eTag,
-                String sitemap) {
-            if ((hostName == null) || (hostName.length() == 0)) throw new IllegalArgumentException();
+                String sitemap,
+                Integer crawlDelay
+        ) {
+            if ((hostName == null) || (hostName.length() == 0)) throw new IllegalArgumentException("The hostname is missing");
             
             this.hostName = hostName.trim().toLowerCase();
             this.disallowPathList = new LinkedList();
@@ -175,6 +186,7 @@ public class plasmaCrawlRobotsTxt {
             if (modDate != null) this.mem.put(MOD_DATE,Long.toString(modDate.getTime()));
             if (eTag != null) this.mem.put(ETAG,eTag);
             if (sitemap != null) this.mem.put(SITEMAP,sitemap);
+            if (crawlDelay != null) this.mem.put(CRAWL_DELAY,crawlDelay.toString());
             
             if ((disallowPathList != null)&&(disallowPathList.size()>0)) {
                 this.disallowPathList.addAll(disallowPathList);
@@ -230,6 +242,13 @@ public class plasmaCrawlRobotsTxt {
             }
             return null;
         }          
+        
+        public Integer getCrawlDelay() {
+            if (this.mem.containsKey(CRAWL_DELAY)) {
+                return Integer.valueOf((String)this.mem.get(CRAWL_DELAY));
+            }
+            return null;        	
+        }
         
         public boolean isDisallowed(String path) {
             if ((this.mem == null) || (this.disallowPathList.size() == 0)) return false;   
