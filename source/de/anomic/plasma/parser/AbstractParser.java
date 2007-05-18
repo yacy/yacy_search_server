@@ -53,6 +53,7 @@ import java.io.IOException;
 import java.io.InputStream;
 
 import de.anomic.net.URL;
+import de.anomic.plasma.plasmaParser;
 import de.anomic.plasma.plasmaParserDocument;
 import de.anomic.server.serverThread;
 import de.anomic.server.logging.serverLog;
@@ -136,6 +137,39 @@ public abstract class AbstractParser implements Parser{
         // creates the temp file
         File tempFile = File.createTempFile(parserClassName + "_" + ((idx>-1)?fileName.substring(0,idx):fileName), (fileExt.length()>0)?"."+fileExt:fileExt);
         return tempFile;
+    }
+    
+    public int parseDir(URL location, String prefix, File dir, plasmaParserDocument doc)
+            throws ParserException, InterruptedException, IOException {
+        if (!dir.isDirectory())
+            throw new ParserException("tried to parse ordinary file " + dir + " as directory", location);
+        
+        String[] files = dir.list();
+        int result = 0;
+        for (int i=0; i<files.length; i++) {
+            checkInterruption();
+            File file = new File(dir, files[i]);
+            this.theLogger.logFine("parsing file " + location + "#" + file + " in archive...");
+            if (file.isDirectory()) {
+                result += parseDir(location, prefix, file, doc);
+            } else try {
+                URL url = new URL(location, "/" + prefix + "/"
+                        // XXX: workaround for relative paths within document
+                        + file.getPath().substring(file.getPath().indexOf(File.separatorChar) + 1)
+                        + "/" + file.getName());
+                plasmaParserDocument subdoc = new plasmaParser().parseSource(
+                        url,
+                        plasmaParser.getMimeTypeByFileExt(files[i].substring(files[i].indexOf('.') + 1)),
+                        null, file);
+                // TODO: change anchors back to use '#' after archive name
+                doc.addSubDocument(subdoc);
+                subdoc.close();
+                result++;
+            } catch (ParserException e) {
+                this.theLogger.logInfo("unable to parse file " + file + " in " + location + ", skipping");
+            }
+        }
+        return result;
     }
     
 	/**

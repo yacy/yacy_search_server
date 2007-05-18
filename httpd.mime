@@ -3,6 +3,7 @@
 ###
 
 # Extension = MIME type
+7z      = application/x-7z-compressed
 ai      = application/postscript
 aiff    = audio/x-aiff
 au      = audio/basic

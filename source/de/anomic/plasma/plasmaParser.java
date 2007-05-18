@@ -941,7 +941,7 @@ public final class plasmaParser {
             plasmaParser theParser = new plasmaParser();
             
             // configuring the realtime parsable mimeTypes
-            plasmaParser.initRealtimeParsableMimeTypes("application/xhtml+xml,text/html,text/plain");
+            plasmaParser.initRealtimeParsableMimeTypes("application/xhtml+xml,text/html,text/plain,text/sgml");
             
             // configure all other supported mimeTypes
             plasmaParser.enableAllParsers(PARSER_MODE_PROXY);

@@ -1,0 +1,58 @@
+<?xml version="1.0"?>
+<project name="YACY - sevenzipParser" default="dist">
+    <description>
+            Some classes to parse 7zip files
+    </description>
+
+    <property name="parserShortName" value="sevenzip"/>
+	<property name="parserVersion" value="0.1"/>
+
+    <property name="parserLongName" value="yacyContentParser_${parserShortName}"/>    	
+   	<property name="parserArchive" location="${release}/${parserLongName}_${parserVersion}.tgz"/>	    	
+    	
+    <target name="compile">
+  	  <javac srcdir="${src}/de/anomic/plasma/parser/${parserShortName}"
+  	  	     destdir="${build}" source="${javacSource}" target="${javacTarget}"
+  	  	     debug="true" debuglevel="lines,vars,source">
+  	  	<classpath>
+  	  	  <pathelement location="${build}" />	
+  	  	
+  		  <pathelement location="${libx}/J7Zip-modified.jar" />        	  
+  	  	</classpath>
+  	  </javac>    	
+    </target>
+	
+
+    <target name="zip" depends="compile">
+  	  <tar destfile="${parserArchive}" compression="gzip">
+  	  	<tarfileset dir="${libx}" 
+  	  				includes="J7Zip-modified.jar" 
+  	  				prefix="${releaseFileParentDir}/libx/"
+			  	  	dirmode="755" mode="644"/>
+  	  	<tarfileset dir="${src}/de/anomic/plasma/parser/${parserShortName}" 
+  	  				prefix="${releaseFileParentDir}/source/de/anomic/plasma/parser/${parserShortName}"
+			  	  	dirmode="755" mode="644"/>
+  	  	<tarfileset dir="${build}/de/anomic/plasma/parser/${parserShortName}" 
+  	  				prefix="${releaseFileParentDir}/classes/de/anomic/plasma/parser/${parserShortName}"
+			  	  	dirmode="755" mode="644"/>	  	
+  	  </tar>    	
+    </target>	
+
+    <target name="copy" depends="compile">
+        <copy todir="${release}/libx/">
+             <fileset dir="${libx}" includes="J7Zip-modified.jar"/> 
+        </copy>
+        <copy todir="${release}/source/de/anomic/plasma/parser/${parserShortName}">
+             <fileset dir="${src}/de/anomic/plasma/parser/${parserShortName}" includes="**/*"/> 
+        </copy>        
+        <copy todir="${release}/classes/de/anomic/plasma/parser/${parserShortName}">
+             <fileset dir="${build}/de/anomic/plasma/parser/${parserShortName}" includes="**/*"/> 
+        </copy>         
+    </target>  
+    
+
+    <target name="dist" depends="compile,zip" description="Compile and zip the parser"/>        
+	
+	
+</project>
+

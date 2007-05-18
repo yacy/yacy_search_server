@@ -46,28 +46,35 @@ import java.io.BufferedInputStream;
 import java.io.ByteArrayInputStream;
 import java.io.File;
 import java.io.FileInputStream;
+import java.io.IOException;
 import java.io.InputStream;
 import java.net.MalformedURLException;
+
+import de.anomic.server.serverCachedFileOutputStream;
 import de.anomic.server.serverFileUtils;
 
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Iterator;
+import java.util.LinkedList;
+import java.util.List;
 import java.util.Map;
 import java.util.TreeSet;
 
 import de.anomic.htmlFilter.htmlFilterImageEntry;
 import de.anomic.net.URL;
+import de.anomic.plasma.parser.Parser;
 
 public class plasmaParserDocument {
     
     private URL location;       // the source url
     private String mimeType;    // mimeType as taken from http header
     private String charset;     // the charset of the document
-    private String[] keywords;  // most resources provide a keyword field
-    private String title;       // a document title, taken from title or h1 tag; shall appear as headline of search result
-    private String author;      // author or copyright
-    private String[] sections;  // if present: more titles/headlines appearing in the document
-    private String abstrct;     // an abstract, if present: short content description
+    private List keywords;  // most resources provide a keyword field
+    private StringBuffer title;       // a document title, taken from title or h1 tag; shall appear as headline of search result
+    private StringBuffer author;      // author or copyright
+    private List sections;  // if present: more titles/headlines appearing in the document
+    private StringBuffer abstrct;     // an abstract, if present: short content description
     private Object text;  // the clear text, all that is visible
     private Map anchors;        // all links embedded as clickeable entities (anchor tags)
     private TreeSet images;     // all visible pictures in document
@@ -77,54 +84,63 @@ public class plasmaParserDocument {
     private Map hyperlinks, audiolinks, videolinks, applinks;
     private Map emaillinks;
     private boolean resorted;
-    private InputStream textStream; 
-                    
-    public plasmaParserDocument(URL location, String mimeType, String charset,
+    private InputStream textStream;
+    
+    protected plasmaParserDocument(URL location, String mimeType, String charset,
                     String[] keywords, String title, String author,
                     String[] sections, String abstrct,
-                    byte[] text, Map anchors, TreeSet images) {
+                    Object text, Map anchors, TreeSet images) {
         this.location = location;
-        this.mimeType = (mimeType==null)?"application/octet-stream":mimeType;
+        this.mimeType = (mimeType == null) ? "application/octet-stream" : mimeType;
         this.charset = charset;
-        this.keywords = (keywords==null) ? new String[0] : keywords;
-        this.title = (title==null)?"":title;
-        this.author = (author==null)?"":author;
-        this.sections = (sections==null)?new String[0]:sections;
-        this.abstrct = (abstrct==null)?"":abstrct;
-        this.text = (text==null)?new byte[0]:text;
-        this.anchors = (anchors==null)?new HashMap(0):anchors;
-        this.images = (images==null)?new TreeSet():images;
+        this.keywords = (keywords == null) ? new LinkedList() : Arrays.asList(keywords);
+        this.title = (title == null) ? new StringBuffer() : new StringBuffer(title);
+        this.author = (author == null) ? new StringBuffer() : new StringBuffer(author);
+        this.sections = (sections == null) ? new LinkedList() : Arrays.asList(sections);
+        this.abstrct = (abstrct == null) ? new StringBuffer() : new StringBuffer(abstrct);
+        this.anchors = (anchors == null) ? new HashMap(0) : anchors;
+        this.images = (images == null) ? new TreeSet() : images;
         this.hyperlinks = null;
         this.audiolinks = null;
         this.videolinks = null;
         this.applinks = null;
         this.emaillinks = null;
         this.resorted = false;
+        
+        if (text == null) try {
+            this.text = new serverCachedFileOutputStream(Parser.MAX_KEEP_IN_MEMORY_SIZE);
+        } catch (IOException e) {
+            e.printStackTrace();
+            this.text = new StringBuffer();
+        } else {
+            this.text = text;
+        }
+    }
+    
+    public plasmaParserDocument(URL location, String mimeType, String charset) {
+        this(location, mimeType, charset, null, null, null, null, null, (Object)null, null, null);
+    }
+    
+    public plasmaParserDocument(URL location, String mimeType, String charset,
+                    String[] keywords, String title, String author,
+                    String[] sections, String abstrct,
+                    byte[] text, Map anchors, TreeSet images) {
+        this(location, mimeType, charset, keywords, title, author, sections, abstrct, (Object)text, anchors, images);
     }
     
     public plasmaParserDocument(URL location, String mimeType, String charset,
             String[] keywords, String title, String author,
             String[] sections, String abstrct,
             File text, Map anchors, TreeSet images) {
-        this.location = location;
-        this.mimeType = (mimeType==null)?"application/octet-stream":mimeType;
-        this.charset = charset;
-        this.keywords = (keywords==null) ? new String[0] : keywords;
-        this.title = (title==null)?"":title;
-        this.author = (author==null)?"":author;
-        this.sections = (sections==null)?new String[0]:sections;
-        this.abstrct = (abstrct==null)?"":abstrct;
-        this.text = text;
-        if (text != null) text.deleteOnExit();
-        this.anchors = (anchors==null)?new HashMap(0):anchors;
-        this.images = (images==null)?new TreeSet():images;
-        this.hyperlinks = null;
-        this.audiolinks = null;
-        this.videolinks = null;
-        this.applinks = null;
-        this.emaillinks = null;
-        this.resorted = false;
-    }    
+        this(location, mimeType, charset, keywords, title, author, sections, abstrct, (Object)text, anchors, images);
+    }
+    
+    public plasmaParserDocument(URL location, String mimeType, String charset,
+            String[] keywords, String title, String author,
+            String[] sections, String abstrct,
+            serverCachedFileOutputStream text, Map anchors, TreeSet images) {
+        this(location, mimeType, charset, keywords, title, author, sections, abstrct, (Object)text, anchors, images);
+    }
 
     public URL getLocation() {
         return this.location;
@@ -142,19 +158,23 @@ public class plasmaParserDocument {
     }
     
     public String getTitle() {
-        return title;
+        return title.toString();
     }
     
     public String[] getSectionTitles() {
-        if (sections != null) return sections; else return new String[]{getTitle()};
+        if (sections != null) {
+            return (String[])sections.toArray(new String[this.sections.size()]);
+        } else {
+            return new String[] { getTitle() };
+        }
     }
 
     public String getAbstract() {
-        if (abstrct != null) return abstrct; else return getTitle();
+        if (abstrct != null) return abstrct.toString(); else return getTitle();
     }
     
     public String getAuthor() {
-        if (author != null) return author; else return "";
+        if (author != null) return author.toString(); else return new String();
     }
     
     public InputStream getText() {
@@ -165,6 +185,8 @@ public class plasmaParserDocument {
                 this.textStream = new BufferedInputStream(new FileInputStream((File)this.text));
             } else if (this.text instanceof byte[]) {
                 this.textStream =  new ByteArrayInputStream((byte[])this.text);
+            } else if (this.text instanceof serverCachedFileOutputStream) {
+                return ((serverCachedFileOutputStream)this.text).getContent();
             }
             return this.textStream;
         } catch (Exception e) {
@@ -177,8 +199,18 @@ public class plasmaParserDocument {
         try {
             if (this.text == null) return new byte[0];
 
-            if (this.text instanceof File) return serverFileUtils.read((File)this.text);
-            else if (this.text instanceof byte[]) return (byte[])this.text;
+            if (this.text instanceof File) {
+                return serverFileUtils.read((File)this.text);
+            } else if (this.text instanceof byte[]) {
+                return (byte[])this.text;
+            } else if (this.text instanceof serverCachedFileOutputStream) {
+                serverCachedFileOutputStream ffbaos = (serverCachedFileOutputStream)this.text;
+                if (ffbaos.isFallback()) {
+                    return serverFileUtils.read(ffbaos.getContent());
+                } else {
+                    return ffbaos.getContentBAOS();
+                }
+            }
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -189,6 +221,9 @@ public class plasmaParserDocument {
         if (this.text == null) return 0;
         if (this.text instanceof File) return ((File)this.text).length();
         else if (this.text instanceof byte[]) return ((byte[])this.text).length;
+        else if (this.text instanceof serverCachedFileOutputStream) {
+            return ((serverCachedFileOutputStream)this.text).getLength();
+        }
         
         return -1; 
     }
@@ -204,17 +239,21 @@ public class plasmaParserDocument {
         // sort out doubles and empty words
         TreeSet hs = new TreeSet();
         String s;
-        for (int i = 0; i < this.keywords.length; i++) {
-            if (this.keywords[i] == null) continue;
-            s = this.keywords[i].trim();
+        for (int i = 0; i < this.keywords.size(); i++) {
+            if (this.keywords.get(i) == null) continue;
+            s = ((String)this.keywords.get(i)).trim();
             if (s.length() > 0) hs.add(s.toLowerCase());
         }
         if (hs.size() == 0) return "";
         // generate a new list
-        StringBuffer sb = new StringBuffer(this.keywords.length * 6);
+        StringBuffer sb = new StringBuffer(this.keywords.size() * 6);
         Iterator i = hs.iterator();
         while (i.hasNext()) sb.append((String) i.next()).append(separator);
         return sb.substring(0, sb.length() - 1);
+    }
+    
+    public List getKeywords() {
+        return this.keywords;
     }
     
     public Map getAnchors() {
@@ -333,6 +372,27 @@ public class plasmaParserDocument {
         
         // don't do this again
         this.resorted = true;
+    }
+    
+    public void addSubDocument(plasmaParserDocument doc) throws IOException {
+        this.sections.addAll(Arrays.asList(doc.getSectionTitles()));
+        
+        if (this.title.length() > 0) this.title.append('\n');
+        this.title.append(doc.getTitle());
+        
+        this.keywords.addAll(doc.getKeywords());
+        
+        if (this.abstrct.length() > 0) this.abstrct.append('\n');
+        this.abstrct.append(doc.getAbstract());
+        
+        if (!(this.text instanceof serverCachedFileOutputStream)) {
+            this.text = new serverCachedFileOutputStream(Parser.MAX_KEEP_IN_MEMORY_SIZE);
+            serverFileUtils.copy(getText(), (serverCachedFileOutputStream)this.text);
+        }
+        serverFileUtils.copy(doc.getText(), (serverCachedFileOutputStream)this.text);
+        
+        anchors.putAll(doc.getAnchors());
+        images.addAll(doc.getImages());
     }
     
     public void close() {

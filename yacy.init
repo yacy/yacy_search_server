@@ -204,7 +204,7 @@ proxyCacheMigration = true
 #
 # parseableRealtimeMimeTypes: specifies mime-types that can be indexed on the fly
 # parseableMime: specifies mime-types that can be indexed but not on the fly
-parseableRealtimeMimeTypes=application/xhtml+xml,text/html,text/plain
+parseableRealtimeMimeTypes=application/xhtml+xml,text/html,text/plain,text/sgml
 parseableMimeTypes=
 parseableMimeTypes.CRAWLER=
 parseableMimeTypes.PROXY=
