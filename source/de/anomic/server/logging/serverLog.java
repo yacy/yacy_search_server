@@ -45,6 +45,7 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
+import java.util.Properties;
 import java.util.logging.Level;
 import java.util.logging.LogManager;
 import java.util.logging.Logger;
@@ -186,7 +187,7 @@ public final class serverLog {
         Logger.getLogger(appName).isLoggable(Level.FINEST);
     } 
     
-    public static final void configureLogging(File loggingConfigFile) throws SecurityException, FileNotFoundException, IOException {
+    public static final void configureLogging(String homePath, File loggingConfigFile) throws SecurityException, FileNotFoundException, IOException {
         FileInputStream fileIn = null;
         try {
             System.out.println("STARTUP: Trying to load logging configuration from file " + loggingConfigFile.toString());
@@ -197,9 +198,11 @@ public final class serverLog {
             logManager.readConfiguration(fileIn);
 
             // creating the logging directory
-            File log = new File("./DATA/LOG/");
+            File log = new File(homePath,"./DATA/LOG/");
             if(!log.canRead()) log.mkdir();
 
+            // TODO: changing the pattern settings for the file handlers
+            
             // generating the root logger
             /*Logger logger =*/ Logger.getLogger("");
 

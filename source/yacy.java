@@ -244,7 +244,7 @@ public final class yacy {
                 System.out.println("could not copy yacy.logging");
             }
             try{
-                serverLog.configureLogging(new File(homePath, "DATA/LOG/yacy.logging"));
+                serverLog.configureLogging(homePath,new File(homePath, "DATA/LOG/yacy.logging"));
             } catch (IOException e) {
                 System.out.println("could not find logging properties in homePath=" + homePath);
                 e.printStackTrace();
@@ -666,7 +666,7 @@ public final class yacy {
      */
     public static void minimizeUrlDB(String homePath) {
         // run with "java -classpath classes yacy -minimizeUrlDB"
-        try {serverLog.configureLogging(new File(homePath, "DATA/LOG/yacy.logging"));} catch (Exception e) {}
+        try {serverLog.configureLogging(homePath,new File(homePath, "DATA/LOG/yacy.logging"));} catch (Exception e) {}
         File indexPrimaryRoot = new File(new File(homePath), "DATA/INDEX");
         File indexSecondaryRoot = new File(new File(homePath), "DATA/INDEX");
         File indexRoot2 = new File(new File(homePath), "DATA/INDEX2");
@@ -1043,7 +1043,7 @@ public final class yacy {
     private static void urldbcleanup(String homePath) {
         File root = new File(homePath);
         File indexroot = new File(root, "DATA/INDEX");
-        try {serverLog.configureLogging(new File(homePath, "DATA/LOG/yacy.logging"));} catch (Exception e) {}
+        try {serverLog.configureLogging(homePath,new File(homePath, "DATA/LOG/yacy.logging"));} catch (Exception e) {}
         plasmaCrawlLURL currentUrlDB = new plasmaCrawlLURL(indexroot, 10000);
         currentUrlDB.urldbcleanup();
         currentUrlDB.close();
@@ -1055,7 +1055,7 @@ public final class yacy {
         File indexPrimaryRoot = new File(new File(homePath), "DATA/INDEX");
         File indexSecondaryRoot = new File(new File(homePath), "DATA/INDEX");
         String wordChunkStartHash = "AAAAAAAAAAAA";
-        try {serverLog.configureLogging(new File(homePath, "DATA/LOG/yacy.logging"));} catch (Exception e) {}
+        try {serverLog.configureLogging(homePath,new File(homePath, "DATA/LOG/yacy.logging"));} catch (Exception e) {}
         log.logInfo("STARTING CREATION OF RWI-HASHLIST");
         File root = new File(homePath);
         try {
