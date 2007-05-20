@@ -969,7 +969,7 @@ public final class plasmaSwitchboard extends serverAbstractSwitch implements ser
             ppRamString(stopwordsFile.length()/1024));
         }
 
-        // load ranking tablesb
+        // load ranking tables
         File YBRPath = new File(rootPath, "ranking/YBR");
         if (YBRPath.exists()) {
             plasmaSearchPreOrder.loadYBR(YBRPath, 15);
