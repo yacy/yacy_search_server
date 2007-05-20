@@ -64,6 +64,7 @@ import java.util.Iterator;
 import java.util.Properties;
 import java.util.StringTokenizer;
 
+import de.anomic.data.htmlTools;
 import de.anomic.data.userDB;
 import de.anomic.data.wikiCode;
 import de.anomic.kelondro.kelondroBase64Order;
@@ -899,11 +900,11 @@ public final class httpd implements serverHandler {
     // 06.01.2007: decode HTML entities by [FB]
     public static String decodeHtmlEntities(String s) {
         // replace all entities defined in wikiCode.characters and htmlentities
-        for (int i=1; i<wikiCode.htmlentities.length; i+=2) {
-            s = s.replaceAll(wikiCode.htmlentities[i], wikiCode.htmlentities[i - 1]);
+        for (int i=1; i<htmlTools.htmlentities.length; i+=2) {
+            s = s.replaceAll(htmlTools.htmlentities[i], htmlTools.htmlentities[i - 1]);
         }
-        for (int i=1; i<wikiCode.xmlentities.length; i+=2) {
-            s = s.replaceAll(wikiCode.xmlentities[i], wikiCode.xmlentities[i - 1]);
+        for (int i=1; i<htmlTools.xmlentities.length; i+=2) {
+            s = s.replaceAll(htmlTools.xmlentities[i], htmlTools.xmlentities[i - 1]);
         }
         
         // replace all other 

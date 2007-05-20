@@ -47,15 +47,17 @@
 
 package de.anomic.data.wiki.tokens;
 
+import de.anomic.data.wiki.wikiParserException;
+
 public abstract class AbstractToken implements Token {
 	
 	protected String text = null;
 	protected String markup = null;
 	protected boolean parsed = false;
 	
-	protected abstract void parse();
+	protected abstract void parse() throws wikiParserException;
 	
-	public String getMarkup() {
+	public String getMarkup() throws wikiParserException {
 		if (this.text == null)
 			throw new IllegalArgumentException();
 		if (!this.parsed) parse();
@@ -64,5 +66,5 @@ public abstract class AbstractToken implements Token {
 	
 	public String getText() { return this.text; }
 	
-	public String toString() { return getMarkup(); }
+	public String toString() { try { return getMarkup(); } catch (wikiParserException e) { return null; } }
 }

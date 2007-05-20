@@ -256,7 +256,7 @@ public class Bookmarks {
     while(count<max_count && it.hasNext()){
         bookmark=switchboard.bookmarksDB.getBookmark((String)it.next());
         if(bookmark!=null){
-            prop.put("bookmarks_"+count+"_link", de.anomic.data.wikiCode.replaceXMLEntities(bookmark.getUrl()));
+            prop.put("bookmarks_"+count+"_link", de.anomic.data.htmlTools.replaceXMLEntities(bookmark.getUrl()));
             prop.put("bookmarks_"+count+"_title", bookmark.getTitle());
             prop.put("bookmarks_"+count+"_description", bookmark.getDescription());
             prop.put("bookmarks_"+count+"_date", serverDate.dateToiso8601(new Date(bookmark.getTimeStamp())));

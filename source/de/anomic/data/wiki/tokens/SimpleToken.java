@@ -51,7 +51,7 @@ import java.util.ArrayList;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import de.anomic.data.wiki.WikiParserException;
+import de.anomic.data.wiki.wikiParserException;
 
 public class SimpleToken extends AbstractToken {
 	
@@ -88,7 +88,7 @@ public class SimpleToken extends AbstractToken {
                 "([\\" + lastChar + "]{" + i + "," + definitionList.length + "})")};
 	}
 	
-	public String getMarkup() {
+	public String getMarkup() throws wikiParserException {
 		if (this.content == null) {
 			if (this.text == null) {
 				throw new IllegalArgumentException();
@@ -96,14 +96,14 @@ public class SimpleToken extends AbstractToken {
 				setText(this.text, 0);
 			}
 		}
-		if (!this.parsed) try { parse(); } catch (WikiParserException e) { return this.text; }
+		if (!this.parsed) parse();
 		return this.markup;
 	}
 	
-	protected void parse() {
+	protected void parse() throws wikiParserException {
 		String[] e;
 		if (this.grade >= this.definitionList.length || (e = this.definitionList[this.grade]) == null)
-		    throw new WikiParserException("Token not defined for grade: " + this.grade);
+		    throw new wikiParserException("Token not defined for grade: " + this.grade);
 		this.markup = getMarkup(e);
 		this.parsed = true;
 	}

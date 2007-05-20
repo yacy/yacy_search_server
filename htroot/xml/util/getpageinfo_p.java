@@ -50,8 +50,8 @@ import java.net.MalformedURLException;
 import java.util.ArrayList;
 import java.util.Iterator;
 
+import de.anomic.data.htmlTools;
 import de.anomic.data.robotsParser;
-import de.anomic.data.wikiCode;
 import de.anomic.http.httpHeader;
 import de.anomic.http.httpc;
 import de.anomic.net.URL;
@@ -92,7 +92,7 @@ public class getpageinfo_p {
                                     "<title>") + 7, line.toLowerCase().indexOf(
                                     "</title>"));
                             // de-replace html entities
-                            title = wikiCode.deReplaceHTML(title);
+                            title = htmlTools.deReplaceHTML(title);
                             prop.put("title", title);
                         } catch (IndexOutOfBoundsException e) {
                         }

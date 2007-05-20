@@ -53,8 +53,8 @@
 import java.io.File;
 
 import de.anomic.data.URLFetcherStack;
+import de.anomic.data.htmlTools;
 import de.anomic.data.listManager;
-import de.anomic.data.wikiCode;
 import de.anomic.http.httpHeader;
 import de.anomic.net.URL;
 import de.anomic.plasma.plasmaSwitchboard;
@@ -122,7 +122,7 @@ public final class list {
                     int cnt = 0;
                     for (int i=0; i<count; i++) {
                         if ((url = db.pop()) == null) continue;
-                        b.append(wikiCode.deReplaceHTMLEntities(url.toNormalform())).append("\n");
+                        b.append(htmlTools.deReplaceHTMLEntities(url.toNormalform())).append("\n");
                         cnt++;
                     }
                     prop.put("list", b);

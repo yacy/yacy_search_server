@@ -55,7 +55,7 @@ import java.util.regex.Pattern;
 import de.anomic.data.bookmarksDB;
 import de.anomic.data.bookmarksDB.Bookmark;
 import de.anomic.data.bookmarksDB.Tag;
-import de.anomic.data.wiki.WikiParserException;
+import de.anomic.data.wiki.wikiParserException;
 import de.anomic.plasma.plasmaSwitchboard;
 
 public class LinkToken extends AbstractToken {
@@ -106,13 +106,13 @@ public class LinkToken extends AbstractToken {
         this.sb = sb;
 	}
 	
-	protected void parse() {
+	protected void parse() throws wikiParserException {
 		StringBuffer sb = new StringBuffer();
         if (this.patternNr < 0 || this.patternNr >= patterns.length)
-            throw new WikiParserException("patternNr was not set correctly: " + this.patternNr);
+            throw new wikiParserException("patternNr was not set correctly: " + this.patternNr);
 		Matcher m = patterns[this.patternNr].matcher(this.text);
         if (!m.find())
-            throw new WikiParserException("Didn't find match for: (" + this.patternNr + ") " + this.text);
+            throw new wikiParserException("Didn't find match for: (" + this.patternNr + ") " + this.text);
         
         switch (this.patternNr) {
 			case IMG:

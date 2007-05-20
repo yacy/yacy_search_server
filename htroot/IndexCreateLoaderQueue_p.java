@@ -43,7 +43,7 @@
 // javac -classpath .:../classes IndexCreate_p.java
 // if the shell's current path is HTROOT
 
-import de.anomic.data.wikiCode;
+import de.anomic.data.htmlTools;
 import de.anomic.http.httpHeader;
 import de.anomic.plasma.plasmaCrawlLoaderMessage;
 import de.anomic.plasma.plasmaSwitchboard;
@@ -80,9 +80,9 @@ public class IndexCreateLoaderQueue_p {
                 
                 initiator = yacyCore.seedDB.getConnected(theMsg.initiator);
                 prop.put("loader-set_list_"+count+"_dark", ((dark) ? 1 : 0) );
-                prop.put("loader-set_list_"+count+"_initiator", ((initiator == null) ? "proxy" : wikiCode.replaceHTML(initiator.getName())) );
+                prop.put("loader-set_list_"+count+"_initiator", ((initiator == null) ? "proxy" : htmlTools.replaceHTML(initiator.getName())) );
                 prop.put("loader-set_list_"+count+"_depth", theMsg.depth );
-                prop.put("loader-set_list_"+count+"_url", wikiCode.replaceHTML(theMsg.url.toString())); // null pointer exception here !!! maybe url = null; check reason.
+                prop.put("loader-set_list_"+count+"_url", htmlTools.replaceHTML(theMsg.url.toString())); // null pointer exception here !!! maybe url = null; check reason.
                 dark = !dark;
                 count++;
             }

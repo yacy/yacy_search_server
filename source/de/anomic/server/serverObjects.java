@@ -61,11 +61,13 @@ import java.io.BufferedOutputStream;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.UnsupportedEncodingException;
 import java.util.ArrayList;
 import java.util.Enumeration;
 import java.util.Hashtable;
 import java.util.Map;
 
+import de.anomic.data.htmlTools;
 import de.anomic.data.wikiCode;
 import de.anomic.plasma.plasmaSwitchboard;
 
@@ -89,7 +91,7 @@ public class serverObjects extends Hashtable implements Cloneable {
      * like put, but it replaces any HTML special chars.
      */
     public Object putSafeXML(Object key, String value){
-        return put(key, wikiCode.replaceXMLEntities(value));
+        return put(key, htmlTools.replaceXMLEntities(value));
     }
 
     // new put takes also null values
@@ -126,8 +128,12 @@ public class serverObjects extends Hashtable implements Cloneable {
         //TODO: Cache the wikiCode Object?
         return this.putASIS(key, (new wikiCode(plasmaSwitchboard.getSwitchboard())).transform(wikiCode));
     }
-    public String putWiki(Object key, byte[] wikiCode){
-        return this.putASIS(key, (new wikiCode(plasmaSwitchboard.getSwitchboard())).transform(wikiCode));
+    public String putWiki(Object key, byte[] wikiCode) {
+        try {
+            return this.putASIS(key, (new wikiCode(plasmaSwitchboard.getSwitchboard())).transform(wikiCode));
+        } catch (UnsupportedEncodingException e) {
+            return "Internal error: no UTF-8 supported";
+        }
     }
 
     // long variant

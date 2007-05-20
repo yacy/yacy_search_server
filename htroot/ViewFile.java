@@ -53,7 +53,7 @@ import java.util.Iterator;
 import java.util.Map;
 import java.util.TreeSet;
 
-import de.anomic.data.wikiCode;
+import de.anomic.data.htmlTools;
 import de.anomic.htmlFilter.htmlFilterImageEntry;
 import de.anomic.http.httpHeader;
 import de.anomic.http.httpc;
@@ -385,7 +385,7 @@ public class ViewFile {
     }
     
     private static final String markup(String[] wordArray, String message) {
-        message = wikiCode.replaceXMLEntities(message);
+        message = htmlTools.replaceXMLEntities(message);
         if (wordArray != null)
             for (int j = 0; j < wordArray.length; j++) {
                 String currentWord = wordArray[j].trim();

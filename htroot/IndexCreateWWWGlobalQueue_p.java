@@ -47,7 +47,7 @@ import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.Locale;
 
-import de.anomic.data.wikiCode;
+import de.anomic.data.htmlTools;
 import de.anomic.http.httpHeader;
 import de.anomic.plasma.plasmaCrawlEntry;
 import de.anomic.plasma.plasmaCrawlNURL;
@@ -120,12 +120,12 @@ public class IndexCreateWWWGlobalQueue_p {
                     profileHandle = urle.profileHandle();
                     profileEntry = (profileHandle == null) ? null : switchboard.profiles.getEntry(profileHandle);
                     prop.put("crawler-queue_list_"+showNum+"_dark", ((dark) ? 1 : 0) );
-                    prop.put("crawler-queue_list_"+showNum+"_initiator", ((initiator == null) ? "proxy" : wikiCode.replaceHTML(initiator.getName())) );
-                    prop.put("crawler-queue_list_"+showNum+"_profile", ((profileEntry == null) ? "unknown" : wikiCode.replaceHTML(profileEntry.name())));
+                    prop.put("crawler-queue_list_"+showNum+"_initiator", ((initiator == null) ? "proxy" : htmlTools.replaceHTML(initiator.getName())) );
+                    prop.put("crawler-queue_list_"+showNum+"_profile", ((profileEntry == null) ? "unknown" : htmlTools.replaceHTML(profileEntry.name())));
                     prop.put("crawler-queue_list_"+showNum+"_depth", urle.depth());
                     prop.put("crawler-queue_list_"+showNum+"_modified", daydate(urle.loaddate()) );
-                    prop.put("crawler-queue_list_"+showNum+"_anchor", wikiCode.replaceHTML(urle.name()));
-                    prop.put("crawler-queue_list_"+showNum+"_url", wikiCode.replaceHTML(urle.url().toString()));
+                    prop.put("crawler-queue_list_"+showNum+"_anchor", htmlTools.replaceHTML(urle.name()));
+                    prop.put("crawler-queue_list_"+showNum+"_url", htmlTools.replaceHTML(urle.url().toString()));
                     prop.put("crawler-queue_list_"+showNum+"_hash", urle.urlhash());
                     dark = !dark;
                     showNum++;

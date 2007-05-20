@@ -51,7 +51,7 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.regex.PatternSyntaxException;
 
-import de.anomic.data.wikiCode;
+import de.anomic.data.htmlTools;
 import de.anomic.http.httpHeader;
 import de.anomic.plasma.plasmaCrawlEntry;
 import de.anomic.plasma.plasmaCrawlNURL;
@@ -124,7 +124,7 @@ public class IndexCreateWWWLocalQueue_p {
                             } else if ((option.equals("Depth"))) {
                                 value = Integer.toString(entry.depth());
                             } else if ((option.equals("Initiator"))) {
-                                value = (entry.initiator()==null)?"proxy":wikiCode.replaceHTML(entry.initiator());
+                                value = (entry.initiator()==null)?"proxy":htmlTools.replaceHTML(entry.initiator());
                             } else if ((option.equals("ModifiedDate"))) {
                                 value = daydate(entry.loaddate());
                             }
@@ -172,12 +172,12 @@ public class IndexCreateWWWLocalQueue_p {
                     profileHandle = urle.profileHandle();
                     profileEntry = (profileHandle == null) ? null : switchboard.profiles.getEntry(profileHandle);
                     prop.put("crawler-queue_list_"+showNum+"_dark", ((dark) ? 1 : 0) );
-                    prop.put("crawler-queue_list_"+showNum+"_initiator", ((initiator == null) ? "proxy" : wikiCode.replaceHTML(initiator.getName())) );
+                    prop.put("crawler-queue_list_"+showNum+"_initiator", ((initiator == null) ? "proxy" : htmlTools.replaceHTML(initiator.getName())) );
                     prop.put("crawler-queue_list_"+showNum+"_profile", ((profileEntry == null) ? "unknown" : profileEntry.name()));
                     prop.put("crawler-queue_list_"+showNum+"_depth", urle.depth());
                     prop.put("crawler-queue_list_"+showNum+"_modified", daydate(urle.loaddate()) );
-                    prop.put("crawler-queue_list_"+showNum+"_anchor", wikiCode.replaceHTML(urle.name()));
-                    prop.put("crawler-queue_list_"+showNum+"_url", wikiCode.replaceHTML(urle.url().toString()));
+                    prop.put("crawler-queue_list_"+showNum+"_anchor", htmlTools.replaceHTML(urle.name()));
+                    prop.put("crawler-queue_list_"+showNum+"_url", htmlTools.replaceHTML(urle.url().toString()));
                     prop.put("crawler-queue_list_"+showNum+"_hash", urle.urlhash());
                     dark = !dark;
                     showNum++;

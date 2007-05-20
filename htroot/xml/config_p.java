@@ -27,7 +27,7 @@ import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
 
-import de.anomic.data.wikiCode;
+import de.anomic.data.htmlTools;
 import de.anomic.http.httpHeader;
 import de.anomic.server.serverObjects;
 import de.anomic.server.serverSwitch;
@@ -62,8 +62,8 @@ public class config_p {
         int count=0;
         while(keys.hasNext()){
             key = (String) keys.next();
-            prop.put("options_"+count+"_key", wikiCode.replaceXMLEntities(key));
-            prop.put("options_"+count+"_value", wikiCode.replaceXMLEntities(env.getConfig(key, "ERROR")));
+            prop.put("options_"+count+"_key", htmlTools.replaceXMLEntities(key));
+            prop.put("options_"+count+"_value", htmlTools.replaceXMLEntities(env.getConfig(key, "ERROR")));
             count++;        
         }
         prop.put("options", count);

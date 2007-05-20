@@ -48,6 +48,7 @@ package de.anomic.soap.services;
 import org.apache.axis.AxisFault;
 import org.w3c.dom.Document;
 
+import de.anomic.data.htmlTools;
 import de.anomic.data.wikiCode;
 import de.anomic.plasma.plasmaURL;
 import de.anomic.net.URL;
@@ -161,9 +162,9 @@ public class SearchService extends AbstractService
             // Postprocess search ...
             int count = Integer.valueOf(searchResult.get("type_results","0")).intValue();
             for (int i=0; i < count; i++) {
-            	searchResult.put("type_results_" + i + "_url",wikiCode.replaceXMLEntities(searchResult.get("type_results_" + i + "_url","")));
-            	searchResult.put("type_results_" + i + "_description",wikiCode.replaceXMLEntities(searchResult.get("type_results_" + i + "_description","")));
-            	searchResult.put("type_results_" + i + "_urlname",wikiCode.replaceXMLEntities(searchResult.get("type_results_" + i + "_urlname","")));
+            	searchResult.put("type_results_" + i + "_url",htmlTools.replaceXMLEntities(searchResult.get("type_results_" + i + "_url","")));
+            	searchResult.put("type_results_" + i + "_description",htmlTools.replaceXMLEntities(searchResult.get("type_results_" + i + "_description","")));
+            	searchResult.put("type_results_" + i + "_urlname",htmlTools.replaceXMLEntities(searchResult.get("type_results_" + i + "_urlname","")));
             }
             
             // format the result

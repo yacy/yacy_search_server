@@ -52,7 +52,7 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.Locale;
 
-import de.anomic.data.wikiCode;
+import de.anomic.data.htmlTools;
 import de.anomic.http.httpHeader;
 import de.anomic.plasma.plasmaCrawlEntry;
 import de.anomic.plasma.plasmaCrawlLoaderMessage;
@@ -123,10 +123,10 @@ public class queues_p {
                         totalSize += entrySize;
                         initiator = yacyCore.seedDB.getConnected(pcentry.initiator());
                         prop.put("list-indexing_"+i+"_profile", (pcentry.profile() != null) ? pcentry.profile().name() : "deleted");
-                        prop.putSafeXML("list-indexing_"+i+"_initiator", ((initiator == null) ? "proxy" : wikiCode.replaceHTML(initiator.getName())));
+                        prop.putSafeXML("list-indexing_"+i+"_initiator", ((initiator == null) ? "proxy" : htmlTools.replaceHTML(initiator.getName())));
                         prop.put("list-indexing_"+i+"_depth", pcentry.depth());
                         prop.put("list-indexing_"+i+"_modified", pcentry.getModificationDate());
-                        prop.putSafeXML("list-indexing_"+i+"_anchor", (pcentry.anchorName()==null)?"":wikiCode.replaceHTML(pcentry.anchorName()));
+                        prop.putSafeXML("list-indexing_"+i+"_anchor", (pcentry.anchorName()==null)?"":htmlTools.replaceHTML(pcentry.anchorName()));
                         prop.putSafeXML("list-indexing_"+i+"_url", pcentry.normalizedURLString());
                         prop.put("list-indexing_"+i+"_size", entrySize);
                         prop.put("list-indexing_"+i+"_inProcess", (inProcess)?1:0);

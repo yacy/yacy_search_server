@@ -159,7 +159,7 @@ public class CacheAdmin_p {
                     formatAnchor(prop, document.getEmaillinks(), "email");
                     
                     prop.put("info_type_text",
-                    		de.anomic.data.wikiCode.replaceXMLEntities(new String(scraper.getText())));
+                    		de.anomic.data.htmlTools.replaceXMLEntities(new String(scraper.getText())));
                     
                     i = 0;
                     final Iterator sentences = document.getSentences(false);
@@ -266,9 +266,9 @@ public class CacheAdmin_p {
             descr = ((String) entry.getValue()).trim();
             if (descr.length() == 0) { descr = "-"; }
             prop.put("info_type_use." + extension + "_" + extension + "_" + i + "_name",
-            		de.anomic.data.wikiCode.replaceXMLEntities(descr.replaceAll("\n", "").trim()));
+            		de.anomic.data.htmlTools.replaceXMLEntities(descr.replaceAll("\n", "").trim()));
             prop.put("info_type_use." + extension + "_" + extension + "_" + i + "_link",
-            		de.anomic.data.wikiCode.replaceXMLEntities(entry.getKey().toString()));
+            		de.anomic.data.htmlTools.replaceXMLEntities(entry.getKey().toString()));
             i++;
         }
         prop.put("info_type_use." + extension, (i == 0) ? 0 : 1);
@@ -283,7 +283,7 @@ public class CacheAdmin_p {
             ie = (htmlFilterImageEntry) iter.next();
             prop.put("info_type_use.images_images_" + i + "_name", ie.alt().replaceAll("\n", "").trim());
             prop.put("info_type_use.images_images_" + i + "_link",
-            		de.anomic.data.wikiCode.replaceXMLEntities(ie.url().toNormalform()));
+            		de.anomic.data.htmlTools.replaceXMLEntities(ie.url().toNormalform()));
             i++;
         }
         prop.put("info_type_use.images", (i == 0) ? 0 : 1);

@@ -272,7 +272,7 @@ public class Diff {
                 case Diff.Part.ADDED: sb.append("added"); break;
                 case Diff.Part.DELETED: sb.append("deleted"); break;
                 }
-                sb.append("\">").append(wikiCode.replaceXMLEntities(ps[j].getString()).replaceAll("\n", "<br />"));
+                sb.append("\">").append(htmlTools.replaceXMLEntities(ps[j].getString()).replaceAll("\n", "<br />"));
                 sb.append("</span>");
             }
             sb.append("</p>");
