@@ -68,7 +68,6 @@ import java.util.Hashtable;
 import java.util.Map;
 
 import de.anomic.data.htmlTools;
-import de.anomic.data.wikiCode;
 import de.anomic.plasma.plasmaSwitchboard;
 
 public class serverObjects extends Hashtable implements Cloneable {
@@ -124,15 +123,13 @@ public class serverObjects extends Hashtable implements Cloneable {
         return (String) this.put(key, (Object) value);
     }
     public String putWiki(Object key, String wikiCode){
-        //XXX: This is ineffizient, if a lot of wikiCode is used on the same page.
-        //TODO: Cache the wikiCode Object?
-        return this.putASIS(key, (new wikiCode(plasmaSwitchboard.getSwitchboard())).transform(wikiCode));
+        return this.putASIS(key, plasmaSwitchboard.wikiParser.transform(wikiCode));
     }
     public String putWiki(Object key, byte[] wikiCode) {
         try {
-            return this.putASIS(key, (new wikiCode(plasmaSwitchboard.getSwitchboard())).transform(wikiCode));
+            return this.putASIS(key, plasmaSwitchboard.wikiParser.transform(wikiCode));
         } catch (UnsupportedEncodingException e) {
-            return "Internal error: no UTF-8 supported";
+            return this.putASIS(key, "Internal error pasting wiki-code: " + e.getMessage());
         }
     }
 

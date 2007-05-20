@@ -13,7 +13,7 @@
 # e.g. 8080
 #      #eth0:8080
 # 	   192.168.0.1:8080
-port = 8080
+port = 8085
 
 #sometimes you may want yacy to bind to another port, than the one reachable from outside.
 #then set bindPort to the port yacy should bind on, and port to the port, visible from outside
@@ -909,3 +909,6 @@ thumbnailProgram =
 # - surftips  : the surftips-page
 # - wiki      : the wiki-page
 httpd.robots.txt = locked,dirs
+
+# class to use for parsing wikicode
+wikiParser.class = de.anomic.data.wikiCode

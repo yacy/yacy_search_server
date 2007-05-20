@@ -384,6 +384,16 @@ public final class plasmaCondenser {
         int wordInSentenceCounter = 1;
         Iterator it, it1;
         boolean comb_indexof = false, last_last = false, last_index = false;
+        RandomAccessFile fa;
+        final boolean dumpWords = false;
+        
+        if (dumpWords) try {
+            fa = new RandomAccessFile(new File("dump.txt"), "rw");
+            fa.seek(fa.length());
+        } catch (IOException e) {
+            e.printStackTrace();
+            fa = null;
+        }
         
         // read source
         sievedWordsEnum wordenum = new sievedWordsEnum(is, charset, wordminsize);
@@ -392,19 +402,12 @@ public final class plasmaCondenser {
             //System.out.println("PARSED-WORD " + word);
             
             //This is useful for testing what YaCy "sees" of a website.
-            if (false) { 	
-            	File f = new File("dump.txt");
-            	RandomAccessFile fa = null;
-            	try {
-					fa = new RandomAccessFile(f, "rw");
-					fa.seek(fa.length());
-					fa.writeBytes(word);
-					fa.write(160);
-					fa.close();
-				} catch (IOException e) {
-					e.printStackTrace();
-				}
-            }
+            if (dumpWords && fa != null) try {
+				fa.writeBytes(word);
+				fa.write(160);
+			} catch (IOException e) {
+				e.printStackTrace();
+			}
             
             // distinguish punctuation and words
             wordlen = word.length();
@@ -478,6 +481,13 @@ public final class plasmaCondenser {
             } else {
                 sentences.put(sentence, new phraseStatProp(sentenceHandleCount++));
             }
+        }
+        
+        if (dumpWords && fa != null) try {
+            fa.write('\n');
+            fa.close();
+        } catch (IOException e) {
+            e.printStackTrace();
         }
 
         // -------------------

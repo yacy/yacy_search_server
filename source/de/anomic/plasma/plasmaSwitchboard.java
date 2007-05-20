@@ -128,6 +128,7 @@ import de.anomic.data.listManager;
 import de.anomic.data.messageBoard;
 import de.anomic.data.userDB;
 import de.anomic.data.wikiBoard;
+import de.anomic.data.wiki.wikiParser;
 import de.anomic.htmlFilter.htmlFilterContentScraper;
 import de.anomic.http.httpHeader;
 import de.anomic.http.httpRemoteProxyConfig;
@@ -199,6 +200,8 @@ public final class plasmaSwitchboard extends serverAbstractSwitch implements ser
     public static TreeSet blueList = null;
     public static TreeSet stopwords = null;    
     public static plasmaURLPattern urlBlacklist;
+    
+    public static wikiParser wikiParser = null;
     
     // storage management
     public  File                        htCachePath;
@@ -672,6 +675,9 @@ public final class plasmaSwitchboard extends serverAbstractSwitch implements ser
     public static final String ROBOTS_TXT                       = "httpd.robots.txt";
     public static final String ROBOTS_TXT_DEFAULT               = httpdRobotsTxtConfig.LOCKED + "," + httpdRobotsTxtConfig.DIRS;
     
+    public static final String WIKIPARSER_CLASS                 = "wikiParser.class";
+    public static final String WIKIPARSER_CLASS_DEFAULT         = "de.anomic.data.wikiCode";
+    
     //////////////////////////////////////////////////////////////////////////////////////////////
     // Lists
     //////////////////////////////////////////////////////////////////////////////////////////////
@@ -963,7 +969,7 @@ public final class plasmaSwitchboard extends serverAbstractSwitch implements ser
             ppRamString(stopwordsFile.length()/1024));
         }
 
-        // load ranking tables
+        // load ranking tablesb
         File YBRPath = new File(rootPath, "ranking/YBR");
         if (YBRPath.exists()) {
             plasmaSearchPreOrder.loadYBR(YBRPath, 15);
@@ -1218,6 +1224,16 @@ public final class plasmaSwitchboard extends serverAbstractSwitch implements ser
         //log.logSystem("Started YaCy Protocol Core");
         //      System.gc(); try{Thread.currentThread().sleep(5000);} catch (InterruptedException e) {} // for profiler
         serverInstantThread.oneTimeJob(yc, "loadSeeds", yacyCore.log, 3000);
+        
+        String wikiParserClassName = getConfig(WIKIPARSER_CLASS, WIKIPARSER_CLASS_DEFAULT);
+        this.log.logConfig("Loading wiki parser " + wikiParserClassName + " ...");
+        try {
+            Class wikiParserClass = Class.forName(wikiParserClassName);
+            Constructor wikiParserClassConstr = wikiParserClass.getConstructor(new Class[] { plasmaSwitchboard.class });
+            wikiParser = (wikiParser)wikiParserClassConstr.newInstance(new Object[] { this });
+        } catch (Exception e) {
+            this.log.logSevere("Unable to load wiki parser, the wiki won't work", e);
+        }
         
         // initializing the stackCrawlThread
         this.sbStackCrawlThread = new plasmaCrawlStacker(this, this.plasmaPath, ramPreNURL_time, (int) getConfigLong("tableTypeForPreNURL", 0));

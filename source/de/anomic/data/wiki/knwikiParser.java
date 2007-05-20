@@ -62,34 +62,12 @@ import de.anomic.yacy.yacyCore;
 
 public class knwikiParser implements wikiParser {
 	
-	public final Token[] tokens;
-	private final String[] BEs;
+	public Token[] tokens;
+	private String[] BEs;
+    private final plasmaSwitchboard sb;
     
     public knwikiParser(plasmaSwitchboard sb) {
-        tokens = new Token[] {
-                new SimpleToken('=', '=', new String[][] { null, { "h2" }, { "h3" }, { "h4" } }, true),
-                new SimpleToken('\'', '\'', new String[][] { null, { "i" }, { "b" }, null, { "b", "i" } }, false),
-                new LinkToken(yacyCore.seedDB.mySeed.getPublicAddress(), "Wiki.html?page=", sb),
-                new ListToken('*', "ul"),
-                new ListToken('#', "ol"),
-                new ListToken(':', "blockquote", null),
-                new ListToken(' ', null, "tt", false),
-                new DefinitionListToken(),
-                new TableToken()
-        };
-        ArrayList r = new ArrayList();
-        for (int i=0, k, j; i<tokens.length; i++)
-            if (tokens[i].getBlockElementNames() != null)
-                for (j=0; j<tokens[i].getBlockElementNames().length; j++) {
-                    if (tokens[i].getBlockElementNames()[j] == null) continue;
-                    if ((k = tokens[i].getBlockElementNames()[j].indexOf(' ')) > 1) {
-                        r.add(tokens[i].getBlockElementNames()[j].substring(0, k));
-                    } else {
-                        r.add(tokens[i].getBlockElementNames()[j]);
-                    }
-                }
-        r.add("hr");
-        BEs = (String[])r.toArray(new String[r.size()]);
+        this.sb = sb;
     }
 	
 	public static void main(String[] args) {
@@ -157,6 +135,31 @@ public class knwikiParser implements wikiParser {
     }
 	
 	public String parse(String text) {
+        tokens = new Token[] {
+                new SimpleToken('=', '=', new String[][] { null, { "h2" }, { "h3" }, { "h4" } }, true),
+                new SimpleToken('\'', '\'', new String[][] { null, { "i" }, { "b" }, null, { "b", "i" } }, false),
+                new LinkToken(yacyCore.seedDB.mySeed.getPublicAddress(), "Wiki.html?page=", sb),
+                new ListToken('*', "ul"),
+                new ListToken('#', "ol"),
+                new ListToken(':', "blockquote", null),
+                new ListToken(' ', null, "tt", false),
+                new DefinitionListToken(),
+                new TableToken()
+        };
+        ArrayList r = new ArrayList();
+        for (int i=0, k, j; i<tokens.length; i++)
+            if (tokens[i].getBlockElementNames() != null)
+                for (j=0; j<tokens[i].getBlockElementNames().length; j++) {
+                    if (tokens[i].getBlockElementNames()[j] == null) continue;
+                    if ((k = tokens[i].getBlockElementNames()[j].indexOf(' ')) > 1) {
+                        r.add(tokens[i].getBlockElementNames()[j].substring(0, k));
+                    } else {
+                        r.add(tokens[i].getBlockElementNames()[j]);
+                    }
+                }
+        r.add("hr");
+        BEs = (String[])r.toArray(new String[r.size()]);
+        
         Text[] tt = Text.split2Texts(text, "[=", "=]");
         for (int i=0; i<tt.length; i+=2)
         	tt[i].setText(parseUnescaped(tt[i].getText()));

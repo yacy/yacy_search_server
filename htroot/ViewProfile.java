@@ -55,7 +55,6 @@ import java.util.Iterator;
 import java.util.Map;
 import java.util.Properties;
 
-import de.anomic.data.wikiCode;
 import de.anomic.http.httpHeader;
 import de.anomic.kelondro.kelondroBase64Order;
 import de.anomic.plasma.plasmaSwitchboard;
@@ -73,7 +72,6 @@ public class ViewProfile {
 	    // listManager.switchboard = (plasmaSwitchboard) env;
         serverObjects prop = new serverObjects();
         plasmaSwitchboard switchboard = (plasmaSwitchboard) env;
-        wikiCode wikiTransformer = new wikiCode(switchboard);
         boolean authenticated = switchboard.adminAuthenticated(header) >= 2;
         int display = ((post == null) || (!authenticated)) ? 0 : post.getInt("display", 0);
         prop.put("display", display);
@@ -175,9 +173,9 @@ public class ViewProfile {
             		prop.put("success_" + key, 1);
 					// only comments get "wikified"
 					if(key.equals("comment")){
-						prop.putASIS(
+						prop.putWiki(
 							"success_" + key + "_value",
-							wikiTransformer.transform(((String) entry.getValue()).replaceAll("\r", "").replaceAll("\\\\n", "\n"))
+							((String) entry.getValue()).replaceAll("\r", "").replaceAll("\\\\n", "\n")
 						);
 						prop.putASIS("success_" + key + "_b64value",kelondroBase64Order.standardCoder.encodeString((String) entry.getValue()));
 					}else{
