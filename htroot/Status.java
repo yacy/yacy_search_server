@@ -181,7 +181,7 @@ public class Status {
 		*/
         
         // place some more hints
-        if ((adminaccess) && (sb.getThread(plasmaSwitchboard.CRAWLJOB_LOCAL_CRAWL).getJobCount() == 0)) {
+        if ((adminaccess) && (sb.getThread(plasmaSwitchboard.CRAWLJOB_LOCAL_CRAWL).getJobCount() == 0) && (sb.getThread(plasmaSwitchboard.INDEXER).getJobCount() == 0)) {
             prop.put("hintCrawlStart", 1);
         }
         
