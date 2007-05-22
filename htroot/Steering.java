@@ -46,8 +46,6 @@
 // javac -classpath .:../Classes SettingsAck_p.java
 // if the shell's current path is HTROOT
 
-import java.io.File;
-import java.io.IOException;
 
 import de.anomic.http.httpHeader;
 import de.anomic.plasma.plasmaSwitchboard;
@@ -72,12 +70,14 @@ public class Steering {
         }
 
         if (post.containsKey("shutdown")) {
+        	if (sb.updaterCallback != null) { sb.updaterCallback.signalYaCyShutdown(); }
             sb.terminate(3000);
             prop.put("info", 3);
             return prop;
         }
 
         if (post.containsKey("restart")) {
+        	/*
             // yacy.restart erstellen (wird im startscript ausgewertet)
             final File yacyRestart = new File(sb.getRootPath(), "DATA/yacy.restart");
             if (!yacyRestart.exists()) {
@@ -88,8 +88,16 @@ public class Steering {
                     e.printStackTrace();
                 }
             }
-            sb.terminate(5000);
+            */
+            if (sb.updaterCallback != null) { 
+            	sb.updaterCallback.signalYaCyRestart();
+            } else {
+            	serverLog.logWarning("SHUTDOWN", "ERROR: no wrapper/updater running! Performing a normal shutdown...");
+             }
+            
+        	sb.terminate(5000);
             prop.put("info", 4);
+
             return prop;
         }
 
