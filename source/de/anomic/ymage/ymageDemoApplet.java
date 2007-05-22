@@ -62,7 +62,7 @@ public class ymageDemoApplet extends Applet implements Runnable {
         ymageMatrix.demoPaint(m);
         int y = (int) (System.currentTimeMillis() / 10 % 300);
         m.setColor(ymageMatrix.SUBTRACTIVE_BLACK);
-        ymageToolPrint.print(m, 0, y, 0, "Hello World", true);
+        ymageToolPrint.print(m, 0, y, 0, "Hello World", -1);
     }
     
 }

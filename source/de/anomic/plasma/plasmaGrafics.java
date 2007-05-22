@@ -252,9 +252,9 @@ public class plasmaGrafics {
         // draw description
         networkPicture.setColor(COL_HEADLINE);
         networkPicture.setMode(ymageMatrix.MODE_SUB);
-        ymageToolPrint.print(networkPicture, 2, 8, 0, "THE YACY NETWORK", true);
-        ymageToolPrint.print(networkPicture, 2, 16, 0, "DRAWING OF " + totalCount + " SELECTED PEERS", true);
-        ymageToolPrint.print(networkPicture, width - 2, 8, 0, "SNAPSHOT FROM " + new Date().toString().toUpperCase(), false);
+        ymageToolPrint.print(networkPicture, 2, 8, 0, "THE YACY NETWORK", -1);
+        ymageToolPrint.print(networkPicture, 2, 16, 0, "DRAWING OF " + totalCount + " SELECTED PEERS", -1);
+        ymageToolPrint.print(networkPicture, width - 2, 8, 0, "SNAPSHOT FROM " + new Date().toString().toUpperCase(), 1);
 
         // set timestamp
         networkPictureDate = System.currentTimeMillis();

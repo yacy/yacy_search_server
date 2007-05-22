@@ -255,25 +255,25 @@ public class ymageMatrix /*implements Cloneable*/ {
     public static void demoPaint(ymageMatrix m) {
         m.setMode(MODE_SUB);
         m.setColor(SUBTRACTIVE_CYAN);
-        m.line(0,  10, 100,  10); ymageToolPrint.print(m, 0,   5, 0, "Cyan", true);
+        m.line(0,  10, 100,  10); ymageToolPrint.print(m, 0,   5, 0, "Cyan", -1);
         m.line(50, 0,   50, 300);
         m.setColor(SUBTRACTIVE_MAGENTA);
-        m.line(0,  30, 100,  30); ymageToolPrint.print(m, 0,  25, 0, "Magenta", true);
+        m.line(0,  30, 100,  30); ymageToolPrint.print(m, 0,  25, 0, "Magenta", -1);
         m.line(55, 0,   55, 300);
         m.setColor(SUBTRACTIVE_YELLOW);
-        m.line(0,  50, 100,  50); ymageToolPrint.print(m, 0,  45, 0, "Yellow", true);
+        m.line(0,  50, 100,  50); ymageToolPrint.print(m, 0,  45, 0, "Yellow", -1);
         m.line(60, 0,   60, 300);
         m.setColor(SUBTRACTIVE_BLACK);
-        m.line(0,  70, 100,  70); ymageToolPrint.print(m, 0,  65, 0, "Black", true);
+        m.line(0,  70, 100,  70); ymageToolPrint.print(m, 0,  65, 0, "Black", -1);
         m.line(65, 0,   65, 300);
         m.setColor(SUBTRACTIVE_RED);
-        m.line(0,  90, 100,  90); ymageToolPrint.print(m, 0,  85, 0, "Red", true);
+        m.line(0,  90, 100,  90); ymageToolPrint.print(m, 0,  85, 0, "Red", -1);
         m.line(70, 0,   70, 300);
         m.setColor(SUBTRACTIVE_GREEN);
-        m.line(0, 110, 100, 110); ymageToolPrint.print(m, 0, 105, 0, "Green", true);
+        m.line(0, 110, 100, 110); ymageToolPrint.print(m, 0, 105, 0, "Green", -1);
         m.line(75, 0,   75, 300);
         m.setColor(SUBTRACTIVE_BLUE);
-        m.line(0, 130, 100, 130); ymageToolPrint.print(m, 0, 125, 0, "Blue", true);
+        m.line(0, 130, 100, 130); ymageToolPrint.print(m, 0, 125, 0, "Blue", -1);
         m.line(80, 0,   80, 300);
     }
     

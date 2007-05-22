@@ -45,6 +45,7 @@ public class plasmaWebStructure {
 
     public static int maxCRLDump = 500000;
     public static int maxCRGDump = 200000;
+    public static int maxref = 10; // maximum number of references, to avoid overflow when a large link farm occurs (i.e. wikipedia)
 
     private StringBuffer crg;     // global citation references
     private serverLog    log;
@@ -147,7 +148,7 @@ public class plasmaWebStructure {
         }
     }
     
-    public static TreeMap refstr2map(String refs) {
+    private static TreeMap refstr2map(String refs) {
         if ((refs == null) || (refs.length() <= 8)) return new TreeMap();
         TreeMap map = new TreeMap();
         String c;
@@ -188,6 +189,7 @@ public class plasmaWebStructure {
     }
     
     public TreeMap references(String domhash) {
+        // returns a map with a domhash(String):refcount(Integer) relation
         assert domhash.length() == 6;
         SortedMap tailMap = structure.tailMap(domhash);
         if ((tailMap == null) || (tailMap.size() == 0)) return new TreeMap();
@@ -214,6 +216,8 @@ public class plasmaWebStructure {
     
     private void learn(URL url, StringBuffer reference /*string of b64(12digits)-hashes*/) {
         String domhash = plasmaURL.urlHash(url).substring(6);
+
+        // parse the new reference string and join it with the stored references
         TreeMap refs = references(domhash);
         assert reference.length() % 12 == 0;
         String dom;
@@ -226,8 +230,27 @@ public class plasmaWebStructure {
             }
             refs.put(dom, new Integer(++c));
         }
-        structure.put(domhash + "," + url.getHost(), map2refstr(refs));
         
+        // check if the maxref is exceeded
+        if (refs.size() > maxref) {
+            // shrink the references: the entry with the smallest number of references is removed
+            int minrefcount = Integer.MAX_VALUE;
+            String minrefkey = null;
+            Iterator i = refs.entrySet().iterator();
+            Map.Entry entry;
+            while (i.hasNext()) {
+                entry = (Map.Entry) i.next();
+                if (((Integer) entry.getValue()).intValue() < minrefcount) {
+                    minrefcount = ((Integer) entry.getValue()).intValue();
+                    minrefkey = (String) entry.getKey();
+                }
+            }
+            // remove the smallest
+            if (minrefkey != null) refs.remove(minrefkey);
+        }
+        
+        // store the map back to the structure
+        structure.put(domhash + "," + url.getHost(), map2refstr(refs));
     }
     
     public void saveWebStructure() {
@@ -236,6 +259,23 @@ public class plasmaWebStructure {
         } catch (IOException e) {
             e.printStackTrace();
         }
+    }
+    
+    public String hostWithMaxReferences() {
+        // find domain with most references
+        Iterator i = structure.entrySet().iterator();
+        int refsize, maxref = 0;
+        String maxhost = null;
+        Map.Entry entry;
+        while (i.hasNext()) {
+            entry = (Map.Entry) i.next();
+            refsize = ((String) entry.getValue()).length();
+            if (refsize > maxref) {
+                maxref = refsize;
+                maxhost = ((String) entry.getKey()).substring(7);
+            }
+        }
+        return maxhost;
     }
     
     public Iterator structureEntryIterator() {

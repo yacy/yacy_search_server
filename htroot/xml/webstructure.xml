@@ -1,6 +1,6 @@
 <?xml version="1.0"?>
 <webstructure>
-<domains reference="forward" count="#[domains]#">
+<domains reference="forward" count="#[domains]#" maxref="#[maxref]#">
 #{domains}#
 <domain host="#[domain]#" id="#[hash]#" date="#[date]#">
 #{citations}#

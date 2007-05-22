@@ -71,7 +71,7 @@ public class ymageCaptcha extends ymageMatrix {
         for(int i=0;i<chars;i++){
             y = random.nextInt((int)(height/2)) + (int)(height/4);
             setColor(((random.nextInt(128)+64)<<16) + ((random.nextInt(128)+64)<<8) + random.nextInt(128)+64);
-            ymageToolPrint.print(this, widthPerChar*i+random.nextInt((int)(widthPerChar/2)) , y , 0, code.substring(i,i+1), true);
+            ymageToolPrint.print(this, widthPerChar*i+random.nextInt((int)(widthPerChar/2)) , y , 0, code.substring(i,i+1), -1);
         }
 
         //adding some noise

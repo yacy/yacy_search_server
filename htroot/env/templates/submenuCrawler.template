@@ -1,0 +1,7 @@
+<div class="SubMenu">
+<h3>Crawler Monitor Menu</h3>
+<ul class="SubMenu">
+<li><a href="/WatchCrawler_p.html" class="MenuItemLink lock">Crawler Queues</a></li>
+<li><a href="/WatchWebStructure_p.html" class="MenuItemLink lock">Web Structure</a></li>
+</ul>
+</div>

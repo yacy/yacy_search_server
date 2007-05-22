@@ -67,7 +67,7 @@ public class ymageChart extends ymageMatrix {
         this.topborder = topborder;
         this.bottomborder = bottomborder;
         if (name != null) {
-            ymageToolPrint.print(this, width / 2 - name.length() * 3, 6, 0, name, true);
+            ymageToolPrint.print(this, width / 2 - name.length() * 3, 6, 0, name, -1);
         }
     }
     
@@ -111,12 +111,12 @@ public class ymageChart extends ymageMatrix {
             }
             setColor(colorNaming);
             line(x, y - 3, x, y + 3);
-            ymageToolPrint.print(this, x, (top) ? y - 3 : y + 9, 0, Integer.toString(s), true);
+            ymageToolPrint.print(this, x, (top) ? y - 3 : y + 9, 0, Integer.toString(s), -1);
             x += pixelperscale;
             s += scale;
         }
         setColor(colorNaming);
-        ymageToolPrint.print(this, width - rightborder, (top) ? y - 9 : y + 15, 0, name, false);
+        ymageToolPrint.print(this, width - rightborder, (top) ? y - 9 : y + 15, 0, name, 1);
         line(leftborder - 4, y, width - rightborder + 4, y);
     }
     
@@ -135,12 +135,12 @@ public class ymageChart extends ymageMatrix {
             line(x - 3, y, x + 3, y);
             s1 = Integer.toString(s);
             if (s1.length() > s1max) s1max = s1.length();
-            ymageToolPrint.print(this, (left) ? leftborder - 4 : width - rightborder + 4, y, 0, s1, (!left));
+            ymageToolPrint.print(this, (left) ? leftborder - 4 : width - rightborder + 4, y, 0, s1, (left) ? 1 : -1);
             y -= pixelperscale;
             s += scale;
         }
         setColor(colorNaming);
-        ymageToolPrint.print(this, (left) ? x - s1max * 6 - 6 : x + s1max * 6 + 9, topborder, 90, name, false);
+        ymageToolPrint.print(this, (left) ? x - s1max * 6 - 6 : x + s1max * 6 + 9, topborder, 90, name, 1);
         line(x, topborder - 4, x, height - bottomborder + 4);
     }
    

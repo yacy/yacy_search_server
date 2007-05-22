@@ -88,8 +88,8 @@ public class imagetest {
         
         img.setMode(ymageMatrix.MODE_SUB);
         img.setColor(ymageMatrix.SUBTRACTIVE_BLACK);
-        for (int y = 0; y < 600; y = y + 50) ymageToolPrint.print(img, 0, 6 + y, 0, "" + y, true);
-        for (int x = 0; x < 800; x = x + 50) ymageToolPrint.print(img, x, 6    , 0, "" + x, true);
+        for (int y = 0; y < 600; y = y + 50) ymageToolPrint.print(img, 0, 6 + y, 0, "" + y, -1);
+        for (int x = 0; x < 800; x = x + 50) ymageToolPrint.print(img, x, 6    , 0, "" + x, -1);
         img.setColor(ymageMatrix.SUBTRACTIVE_RED);
         img.dot(550, 110, 90, true);
         img.setColor(ymageMatrix.SUBTRACTIVE_GREEN);
@@ -102,9 +102,9 @@ public class imagetest {
         img.arc(220, 110, 50, 90, 30, 110);
         img.arc(210, 120, 50, 90, 30, 110);
         img.setColor(ymageMatrix.SUBTRACTIVE_BLACK);
-        ymageToolPrint.print(img, 50, 110, 0, "BROADCAST MESSAGE #772: NODE %882 BLACK abcefghijklmnopqrstuvwxyz", true);
+        ymageToolPrint.print(img, 50, 110, 0, "BROADCAST MESSAGE #772: NODE %882 BLACK abcefghijklmnopqrstuvwxyz", -1);
         img.setColor(ymageMatrix.SUBTRACTIVE_GREEN);
-        ymageToolPrint.print(img, 50, 120, 0, "BROADCAST MESSAGE #772: NODE %882 GREEN abcefghijklmnopqrstuvwxyz", true);
+        ymageToolPrint.print(img, 50, 120, 0, "BROADCAST MESSAGE #772: NODE %882 GREEN abcefghijklmnopqrstuvwxyz", -1);
         for (long i = 0; i < 256; i++) {
             img.setColor(i);
             img.dot(10 + 14 * (int) (i / 16), 200 + 14 * (int) (i % 16), 6, true);

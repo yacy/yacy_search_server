@@ -43,14 +43,17 @@ public class ymageToolPrint {
         }
     }
     
-    public static void print(ymageMatrix matrix, int x, int y, int angle, String message, boolean alignLeft) {
+    public static void print(ymageMatrix matrix, int x, int y, int angle, String message, int align) {
+        // align = -1 : left
+        // align =  1 : right
+        // align =  0 : center
         int xx = 0, yy = 0;
         if (angle == 0) {
-            xx = (alignLeft) ? x : x - 6 * message.length();
+            xx = (align == -1) ? x : (align == 1) ? x - 6 * message.length() : x - 3 * message.length();
             yy = y;
         } else if (angle == 90) {
             xx = x;
-            yy = (alignLeft) ? y : y + 6 * message.length();
+            yy = (align == -1) ? y : (align == 1) ? y + 6 * message.length() : y + 3 * message.length();
         }
         for (int i = 0; i < message.length(); i++) {
             print(matrix, xx, yy, angle, message.charAt(i));
@@ -72,7 +75,7 @@ public class ymageToolPrint {
         int xp = x - 3 * message.length();
         if ((angle > (90 + arcDist)) && (angle < (270 - arcDist))) xp = x - 6 * message.length();
         if ((angle < (90 - arcDist)) || (angle > (270 + arcDist))) xp = x;
-        print(matrix, xp, yp, 0, message, true);
+        print(matrix, xp, yp, 0, message, -1);
     }
     
     
