@@ -139,7 +139,6 @@ import de.anomic.index.indexContainer;
 import de.anomic.index.indexRWIEntry;
 import de.anomic.plasma.plasmaURL;
 import de.anomic.index.indexURLEntry;
-import de.anomic.kelondro.kelondroBase64Order;
 import de.anomic.kelondro.kelondroBitfield;
 import de.anomic.kelondro.kelondroCache;
 import de.anomic.kelondro.kelondroException;
@@ -153,7 +152,6 @@ import de.anomic.plasma.parser.ParserException;
 import de.anomic.plasma.urlPattern.defaultURLPattern;
 import de.anomic.plasma.urlPattern.plasmaURLPattern;
 import de.anomic.server.serverAbstractSwitch;
-import de.anomic.server.serverDate;
 import de.anomic.server.serverFileUtils;
 import de.anomic.server.serverInstantThread;
 import de.anomic.server.serverObjects;
@@ -174,9 +172,6 @@ public final class plasmaSwitchboard extends serverAbstractSwitch implements ser
     public static int crawlSlots            = 10;
     public static int indexingSlots         = 30;
     public static int stackCrawlSlots       = 1000000;
-    
-    public static int maxCRLDump            = 500000;
-    public static int maxCRGDump            = 200000;
     
     private int       dhtTransferIndexCount = 50;    
     
@@ -241,8 +236,7 @@ public final class plasmaSwitchboard extends serverAbstractSwitch implements ser
     public  HashMap                     indexingTasksInProcess;
     public  userDB                      userDB;
     public  bookmarksDB                 bookmarksDB;
-    //public  StringBuffer                crl; // local citation references
-    public  StringBuffer                crg; // global citation references
+    public  plasmaWebStructure          webStructure;
     public  dbImportManager             dbImportManager;
     public  plasmaDHTFlush              transferIdxThread = null;
     private plasmaDHTChunk              dhtTransferChunk = null;
@@ -910,8 +904,7 @@ public final class plasmaSwitchboard extends serverAbstractSwitch implements ser
         
         // setting timestamp of last proxy access
         this.proxyLastAccess = System.currentTimeMillis() - 60000;
-        crg = new StringBuffer(maxCRGDump);
-        //crl = new StringBuffer(maxCRLDump);
+        this.webStructure = new plasmaWebStructure(log, rankingPath, "LOCAL/010_cr/", getConfig("CRDist0Path", plasmaRankingDistribution.CR_OWN), new File(plasmaPath, "webStructure.map"));
         
         // configuring list path
         if (!(listsPath.exists())) listsPath.mkdirs();
@@ -1678,7 +1671,8 @@ public final class plasmaSwitchboard extends serverAbstractSwitch implements ser
         parser.close();
         cacheManager.close();
         sbQueue.close();
-        flushCitationReference(crg, "crg");
+        webStructure.flushCitationReference("crg");
+        webStructure.close();
         log.logConfig("SWITCHBOARD SHUTDOWN STEP 3: sending termination signal to database manager (stand by...)");
         noticeURL.close();
         delegatedURL.close();
@@ -2298,7 +2292,7 @@ public final class plasmaSwitchboard extends serverAbstractSwitch implements ser
                 plasmaCondenser condenser = new plasmaCondenser(document, entry.profile().indexText(), entry.profile().indexMedia());
                 
                 // generate citation reference
-                Integer[] ioLinks = generateCitationReference(entry.urlHash(), docDate, document, condenser); // [outlinksSame, outlinksOther]
+                Integer[] ioLinks = webStructure.generateCitationReference(entry.url(), entry.urlHash(), docDate, document, condenser); // [outlinksSame, outlinksOther]
                 
                 try {        
                     // check for interruption
@@ -2564,84 +2558,7 @@ public final class plasmaSwitchboard extends serverAbstractSwitch implements ser
             if (document != null) try { document.close(); } catch (Exception e) { /* ignore this */ }
         }
     }
-    
-    private Integer[] /*(outlinksSame, outlinksOther)*/ generateCitationReference(String baseurlhash, Date docDate, plasmaParserDocument document, plasmaCondenser condenser) {
-        // generate citation reference
-        Map hl = document.getHyperlinks();
-        Iterator it = hl.entrySet().iterator();
-        String nexturlhash;
-        StringBuffer cpg = new StringBuffer(12 * (hl.size() + 1) + 1);
-        StringBuffer cpl = new StringBuffer(12 * (hl.size() + 1) + 1);
-        String lhp = baseurlhash.substring(6); // local hash part
-        int GCount = 0;
-        int LCount = 0;
-        while (it.hasNext()) {
-            nexturlhash = plasmaURL.urlHash((String) ((Map.Entry) it.next()).getKey());
-            if (nexturlhash != null) {
-                if (nexturlhash.substring(6).equals(lhp)) {
-                    cpl.append(nexturlhash.substring(0, 6));
-                    LCount++;
-                } else {
-                    cpg.append(nexturlhash);
-                    GCount++;
-                }
-            }
-        }
-        
-        // append this reference to buffer
-        // generate header info
-        String head = baseurlhash + "=" +
-        plasmaWordIndex.microDateHoursStr(docDate.getTime()) +          // latest update timestamp of the URL
-        plasmaWordIndex.microDateHoursStr(System.currentTimeMillis()) + // last visit timestamp of the URL
-        kelondroBase64Order.enhancedCoder.encodeLongSmart(LCount, 2) +  // count of links to local resources
-        kelondroBase64Order.enhancedCoder.encodeLongSmart(GCount, 2) +  // count of links to global resources
-        kelondroBase64Order.enhancedCoder.encodeLongSmart(document.getImages().size(), 2) + // count of Images in document
-        kelondroBase64Order.enhancedCoder.encodeLongSmart(0, 2) +       // count of links to other documents
-        kelondroBase64Order.enhancedCoder.encodeLongSmart(document.getTextLength(), 3) +   // length of plain text in bytes
-        kelondroBase64Order.enhancedCoder.encodeLongSmart(condenser.RESULT_NUMB_WORDS, 3) + // count of all appearing words
-        kelondroBase64Order.enhancedCoder.encodeLongSmart(condenser.words().size(), 3) + // count of all unique words
-        kelondroBase64Order.enhancedCoder.encodeLongSmart(0, 1); // Flags (update, popularity, attention, vote)
-        
-        //crl.append(head); crl.append ('|'); crl.append(cpl); crl.append((char) 13); crl.append((char) 10);
-        crg.append(head); crg.append('|'); crg.append(cpg); crg.append((char) 13); crg.append((char) 10);
-        
-        // if buffer is full, flush it.
-        /*
-        if (crl.length() > maxCRLDump) {
-            flushCitationReference(crl, "crl");
-            crl = new StringBuffer(maxCRLDump);
-        }
-         **/
-        if (crg.length() > maxCRGDump) {
-            flushCitationReference(crg, "crg");
-            crg = new StringBuffer(maxCRGDump);
-        }
-        
-        return new Integer[] {new Integer(LCount), new Integer(GCount)};
-    }
-    
-    private void flushCitationReference(StringBuffer cr, String type) {
-        if (cr.length() < 12) return;
-        String filename = type.toUpperCase() + "-A-" + new serverDate().toShortString(true) + "." + cr.substring(0, 12) + ".cr.gz";
-        File path = new File(rankingPath, (type.equals("crl") ? "LOCAL/010_cr/" : getConfig("CRDist0Path", plasmaRankingDistribution.CR_OWN)));
-        path.mkdirs();
-        File file = new File(path, filename);
-        
-        // generate header
-        StringBuffer header = new StringBuffer(200);
-        header.append("# Name=YaCy " + ((type.equals("crl")) ? "Local" : "Global") + " Citation Reference Ticket"); header.append((char) 13); header.append((char) 10);
-        header.append("# Created=" + System.currentTimeMillis()); header.append((char) 13); header.append((char) 10);
-        header.append("# Structure=<Referee-12>,'=',<UDate-3>,<VDate-3>,<LCount-2>,<GCount-2>,<ICount-2>,<DCount-2>,<TLength-3>,<WACount-3>,<WUCount-3>,<Flags-1>,'|',*<Anchor-" + ((type.equals("crl")) ? "6" : "12") + ">"); header.append((char) 13); header.append((char) 10);
-        header.append("# ---"); header.append((char) 13); header.append((char) 10);
-        cr.insert(0, header.toString());
-        try {
-            serverFileUtils.writeAndGZip(cr.toString().getBytes(), file);
-            log.logFine("wrote citation reference dump " + file.toString());
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-    }
-    
+
     private void processLocalCrawling(plasmaCrawlEntry urlEntry, plasmaCrawlProfile.entry profile, String stats) {
         // work off one Crawl stack entry
         if ((urlEntry == null) || (urlEntry.url() == null)) {

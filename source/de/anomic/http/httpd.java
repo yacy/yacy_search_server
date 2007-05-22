@@ -66,7 +66,6 @@ import java.util.StringTokenizer;
 
 import de.anomic.data.htmlTools;
 import de.anomic.data.userDB;
-import de.anomic.data.wikiCode;
 import de.anomic.kelondro.kelondroBase64Order;
 import de.anomic.net.URL;
 import de.anomic.plasma.plasmaSwitchboard;

@@ -49,7 +49,6 @@ import org.apache.axis.AxisFault;
 import org.w3c.dom.Document;
 
 import de.anomic.data.htmlTools;
-import de.anomic.data.wikiCode;
 import de.anomic.plasma.plasmaURL;
 import de.anomic.net.URL;
 import de.anomic.plasma.plasmaSearchPreOrder;

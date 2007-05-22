@@ -552,18 +552,6 @@ public class plasmaURL {
         return domDomain(urlhash) != 7;
     }
 
-    public static final String oldurlHash(URL url) {
-        if (url == null) return null;
-        String hash = kelondroBase64Order.enhancedCoder.encode(serverCodings.encodeMD5Raw(url.toNormalform())).substring(0, yacySeedDB.commonHashLength);
-        return hash;
-    }
-
-    public static final String oldurlHash(String url) throws MalformedURLException {
-        if ((url == null) || (url.length() < 10)) return null;
-        String hash = kelondroBase64Order.enhancedCoder.encode(serverCodings.encodeMD5Raw(new URL(url).toNormalform())).substring(0, yacySeedDB.commonHashLength);
-        return hash;
-    }
-
     public static final serverByteBuffer compressIndex(indexContainer inputContainer, indexContainer excludeContainer, long maxtime) {
         // collect references according to domains
         long timeout = (maxtime < 0) ? Long.MAX_VALUE : System.currentTimeMillis() + maxtime;

@@ -1,0 +1,12 @@
+<?xml version="1.0"?>
+<webstructure>
+<domains reference="forward" count="#[domains]#">
+#{domains}#
+<domain host="#[domain]#" id="#[hash]#" date="#[date]#">
+#{citations}#
+  <citation host="#[refdom]#" id="#[refhash]#" count="#[refcount]#" />
+#{/citations}#
+</domain>
+#{/domains}#
+</domains>
+</webstructure>
