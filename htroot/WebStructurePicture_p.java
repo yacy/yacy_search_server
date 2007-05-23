@@ -81,7 +81,7 @@ public class WebStructurePicture_p {
         
         // recursively find domains, up to a specific depth
         ymageGraph graph = new ymageGraph();
-        place(graph, sb.webStructure, hash, host, 0.0, 0.0, 0, depth);
+        if (host != null) place(graph, sb.webStructure, hash, host, 0.0, 0.0, 0, depth);
         //graph.print();
         
         return graph.draw(width, height, 20, 20, 20, 20);

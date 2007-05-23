@@ -852,8 +852,8 @@ currentSkin=
 # table-types: RAM = 0, TREE = 1, FLEX = 2;
 tableTypeForPreNURL=0
 
-# flag to show surftipps on index.html page
-showSurftipps = true
+# flag to show surftips on Surftips.html page for non-administrator users
+publicSurftips = true
 
 # a Java Properties file containig a list of SOAP services that should deployed
 # additionally to the default services. E.g.

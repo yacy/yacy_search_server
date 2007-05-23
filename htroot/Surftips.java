@@ -57,17 +57,18 @@ public class Surftips {
         
         boolean showScore = ((post != null) && (post.containsKey("score")));
         
-        boolean surftipsOn = sb.getConfigBool("showSurftips", true);
-        if ((post != null) && (post.containsKey("surftips"))) {
-            if (!sb.verifyAuthentication(header, false)) {
+        boolean publicPage = sb.getConfigBool("publicSurftips", true);
+        boolean authorizedAccess = sb.verifyAuthentication(header, false);
+        if ((post != null) && (post.containsKey("publicPage"))) {
+            if (!authorizedAccess) {
                 prop.put("AUTHENTICATE", "admin log-in"); // force log-in
                 return prop;
             }
-            surftipsOn = post.get("surftips", "0").equals("1");
-            sb.setConfig("showSurftips", surftipsOn);
+            publicPage = post.get("publicPage", "0").equals("1");
+            sb.setConfig("publicSurftips", publicPage);
         }
         
-        if (surftipsOn) {
+        if ((publicPage) || (authorizedAccess)) {
         
             // read voting
             String hash;
