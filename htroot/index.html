@@ -111,7 +111,20 @@
       #(/searchoptions)#
       <p>This peer holds #[links]# URLs of #[total-links]# in the known network.</p>
     </form>
-    
+    #(searchoptions)#::
+    <p>
+    <form action="index.html" method="get" class="search">
+      <button type="submit" name="publicPage" value="0">
+        <img src="/env/grafics/lock.gif" alt="authentication required" />
+          Disable search function for users without autorization
+      </button>
+      <button type="submit" name="publicPage" value="1">
+        <img src="/env/grafics/lock.gif" alt="authentication required" />
+          Enable web search to everyone
+      </button>
+    </form>
+    </p>
+    #(/searchoptions)#
     #(display)#
     #%env/templates/simplefooter.template%#
     ::

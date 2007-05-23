@@ -90,6 +90,8 @@ public class yacysearch {
     public static serverObjects respond(httpHeader header, serverObjects post, serverSwitch env) {
         final plasmaSwitchboard sb = (plasmaSwitchboard) env;
 
+        boolean searchAllowed = sb.getConfigBool("publicSearchpage", true) || sb.verifyAuthentication(header, false);
+        
         boolean authenticated = sb.adminAuthenticated(header) >= 2;
         int display = (post == null) ? 0 : post.getInt("display", 0);
         if ((display == 1) && (!authenticated)) display = 0;
@@ -101,7 +103,7 @@ public class yacysearch {
         final String referer = (String) header.get("Referer");
         String querystring = (post == null) ? "" : post.get("search", "").trim();
         
-        if ((post == null) || (env == null) || (querystring.length() == 0)) {
+        if ((post == null) || (env == null) || (querystring.length() == 0) || (!searchAllowed)) {
 
             // save referrer
             // System.out.println("HEADER=" + header.toString());
@@ -145,10 +147,11 @@ public class yacysearch {
             prop.put("input_contentdomCheckApp", 0);
             prop.put("type", 0);
             prop.put("type_excluded", 0);
-            prop.put("type_num-results", 0);
             prop.put("type_combine", 0);
             prop.put("type_resultbottomline", 0);
             prop.put("type_results", "");
+            prop.put("num-results", (searchAllowed) ? 0 : 6);
+            
             return prop;
         }
 

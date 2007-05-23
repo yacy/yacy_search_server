@@ -57,6 +57,7 @@ public class Surftips {
         
         boolean showScore = ((post != null) && (post.containsKey("score")));
         
+        // access control
         boolean publicPage = sb.getConfigBool("publicSurftips", true);
         boolean authorizedAccess = sb.verifyAuthentication(header, false);
         if ((post != null) && (post.containsKey("publicPage"))) {

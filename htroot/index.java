@@ -49,6 +49,18 @@ public class index {
         final plasmaSwitchboard sb = (plasmaSwitchboard) env;
         final serverObjects prop = new serverObjects();
         
+        // access control
+        boolean publicPage = sb.getConfigBool("publicSearchpage", true);
+        boolean authorizedAccess = sb.verifyAuthentication(header, false);
+        if ((post != null) && (post.containsKey("publicPage"))) {
+            if (!authorizedAccess) {
+                prop.put("AUTHENTICATE", "admin log-in"); // force log-in
+                return prop;
+            }
+            publicPage = post.get("publicPage", "0").equals("1");
+            sb.setConfig("publicSearchpage", publicPage);
+        }
+        
         boolean global = (post == null) ? true : post.get("resource", "global").equals("global");
         final boolean authenticated = sb.adminAuthenticated(header) >= 2;
         final int display = ((post == null) || (!authenticated)) ? 0 : post.getInt("display", 0);
