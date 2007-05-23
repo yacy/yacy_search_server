@@ -1,0 +1,407 @@
+fra.lng
+# English-->French
+# -----------------------
+# part of YaCy
+# (C) by Michael Peter Christen; mc@anomic.de
+# first published on http://www.anomic.de
+# Frankfurt, Germany, 2005
+#
+# This file is maintained by gDupont
+# This file is written by gDupont
+
+# If you find any mistakes or untranslated strings in this file please don't hesitate to email them to the maintainer.
+
+#File: ConfigLanguage_p.html
+#---------------------------
+# Only part 1.
+# Contributors are in chronological ordern, not how much they did absolutely.
+# Thank you for your help!
+<!-- lang -->default\(english\)==french
+<!-- author -->==gDupont
+<!-- maintainer -->==gDupont
+#-----------------------------
+
+#File: Blacklist_p.html
+#---------------------------
+Blacklist Manager==Gestionnaire des listes noires
+#Blacklist==Liste noire
+Used Blacklist engine:==Moteur de liste noire utilisé:
+This function provides an URL filter to the proxy; any blacklisted URL is blocked from being loaded.==Cette fonction fournis un filtre d'URL sur le serveur Proxy. Tout URL sur la liste noire ne pourra être chargé.
+You can define several blacklists and activate them separately.==Vous pouvez définir de nombreuses listes noires et les activer séparément.
+You may also provide your blacklist to other peers by sharing them.==Vous pouvez aussi partager vos listes noires avec d'autres noeuds du réseau.
+in return you may collect blacklist entries from other peers.==En retour vous pourrez collectez celles des autres .
+Active list:==Liste active:
+No blacklist selected==Aucune liste noire sélectionnée
+Select list:==Sélectionner une liste:
+not shared::shared==non partagé::partagé
+"select"=="sélectionner"
+New list:==Nouvelle liste:
+"create"=="créer"
+Settings for this list==Paramètres de cette liste
+Save==Sauver
+Share/don't share this list==Partager/ne pas partager cette liste
+Delete this list==Supprimer cette liste
+Edit this list==Éditer cette liste
+These are the domain name / path patterns in this blacklist:==Noms de domaine et adresses dans la liste noires:
+You can select them here for deletion==Vous pouvez les sélectionner ici pour la suppression
+Delete URL pattern==Supprimer le modèle d'URL
+Add URL pattern==Ajouter un modèle d'URL
+Import blacklist items from...==Importer des listes noires depuis...
+other YaCy peers:==Autre noeud Yacy:
+file:==fichiers:
+"Load new blacklist items"=="Charger de nouvelles listes noires"
+#URL:==URL:
+was removed from blacklist==a(ont) été supprimé(s) de la liste noire
+was added to the blacklist==a(ont) été ajouté(s) à la liste noire
+Activate this list for==Activer cette liste pour
+#-----------------------------
+
+#File: Blog.html
+#---------------------------
+by==de
+>edit==>éditer
+>delete==>supprimer
+show more entries==montrer plus d'entrées
+new entry==nouvelle entrée
+import XML-File==importer des données XML
+export as XML==exporter en XML
+Blog-Home==Accueil du blog
+Author:==Auteur:
+Subject:==Titre:
+#Text:==Texte:
+You can use==Vous pouvez utiliser
+Yacy-Wiki Code==le code YaCy-Wiki 
+here.==ici.
+"Submit"=="Envoyer"
+"Preview"=="Aperçu"
+"Discard"=="Supprimer"
+>Preview==>Aperçu
+No changes have been submitted so far!==Aucun changement n'ont été pris en compte !
+Access denied==Accès refusé
+To edit or create blog-entries you need to be logged in as Admin or User who has Blog rights.==Pour éditer ou créer des entrées dans ce blog, vous devez être enregistré en tant qu'administrateur ou en tant qu'utilisateur avec des droits d'accès au blog.
+Are you sure==Êtes vous sûr 
+that you want to delete <strong>\#\[subject\]\#</strong> by \#\[author\]\#?==que vous souhaitez supprimer <strong>#[subject]#</strong> de #[author]# ?
+Yes, delete it.==Oui, le supprimer.
+No, leave it.==Non, le laisser.
+Import was successful!==L'importation a réussi !
+Import failed, maybe the supplied file was no valid blog-backup?==L'importation a échoué, peut-être que le fichier importé n'était pas une archive de blog valide?
+Please select the XML-file you want to import:==Sélectionnez le fichier XML que vous souhaitez importer :
+#-----------------------------
+
+#File: Bookmarks.html
+#---------------------------
+YaCy \'\#\[clientname\]\#\': Bookmarks==YaCy '#[clientname]#': Favoris
+<h2>Bookmarks==<h2> Favoris 
+Add Bookmark== Ajouter aux favoris
+Import XML Bookmarks==Importer des favoris à partir d'un fichier XML
+Edit Bookmark==Éditer les favoris
+#URL:==URL:
+Title:==Titre:
+Description:==Description:
+Tags \(comma separated\):==Tags (séparés par des virgules):
+Public:==Publique:
+yes==oui
+no==non
+"create"=="créer"
+"edit"=="modifer"
+File:==Fichier:
+import as Public== importer en publique
+"private bookmark"=="marque page privé"
+"public bookmark"=="marque page publique"
+Tagged with==Marqué par
+Edit==Éditer
+Delete==Supprimer
+Bookmark List==Liste des marques page
+previous page==page précédente
+next page==page suivante
+All==Tous
+Show==Montrer
+Bookmarks per page.==Marques page par site
+#-----------------------------
+
+#File: CacheAdmin_p.html
+#---------------------------
+Local Cache Management==Gestion du cache local
+>Local Cache==>Cache local
+The current cache size is==La taille actuelle du cache est
+The maximum cache size is==La taille maximale du cache est
+#-----------------------------
+
+#File: Config_p.html
+#---------------------------
+Advanced Config==Configuration avancée
+Here are all configuration options from YaCy.==toutes les options de configuration de YaCy sont ici.
+You can change anything, but some options need a restart, and some options can crash YaCy, if wrong values are used.==Vous pouvez tout changer, mais certaines options nécessitent un redémarrage et certaines autres peuvent provoquer l'arrêt de YaCy si elles sont mal choisies.
+For explanation please look into yacy.init==Pour des explications, regardez dans le fichier « yacy.init » s'il vous plait.
+"Save"=="Sauver"
+#-----------------------------
+
+#File: ConfigAdvanced_p.html
+#---------------------------
+Advanced Config==Configuration avancée
+Here are all configuration options from YaCy.==toutes les options de configuration de YaCy sont ici.
+You can change anything, but some options need a restart, and some options can crash YaCy, if wrong values are used.==Vous pouvez tout changer, mais certaines options nécessitent un redémarrage et certaines autres peuvent provoquer l'arrêt de YaCy si elles sont mal choisies.
+For explanation please look into yacy.init==Pour des explications, regardez dans le fichier « yacy.init » s'il vous plaît.
+"Save"=="Sauver"
+#-----------------------------
+
+#File: ConfigBasic.html
+#---------------------------
+Select a language for the interface==Choisissez un langage pour l'interface
+Basic Configuration==Configuration de base
+Your YaCy Peer needs some basic information to operate properly==Votre noeud YaCy a besoin de quelques informations de base pour fonctionner correctement
+Your peer name has not been customized==Le nom de votre noeud YaCy n'a pas été personnalisé
+please set your own peer name==Choisissez s'il vous plaît votre propre nom de noeud YaCy
+You have a nice peer name==Vous avez un joli nom de noeud
+Peer Name:==Nom de noeud:
+Please set a password for your peer to protect your settings==Choisissez s'il vous plaît un mot de passe pour protéger votre configuration
+> 3 characters==supérieur à 3 caractères
+if this is successful you will be asked to log in with these values immediately==Si le changement est opéré avec succès, il vous sera demander de vous identifier immédiatement avec ces valeurs.
+Password is set==Le mot de passe est activé
+Peer User:==Utilisateur du noeud:
+Peer Password:==Mot de passe du noeud :
+repeat same password==Répéter le même mot de passe
+Your peer cannot be reached from outside==Votre noeud ne peut pas être accéder de l'extérieur
+what is not fatal, but would be good for the YaCy network==ce qui n'est pas trop grave, mais ce serait mieux pour le réseau YaCy
+please open your firewall for this port and/or set a virtual server option in your router to allow connections on this port==Veuillez configurez votre firewall pour ouvrir ce port et/ou mettez en place un serveur virtuel sur votre routeur pour autoriser les connexions à ce port
+Your peer can be reached by other peers==Votre noeud n'est pas joignable par les autres noeuds du réseau
+Peer Port:==Port logiciel du noeud:
+Configure your router for YaCy:==Configurez votre routeur pour YaCy:
+Set Configuration==Sauver la configuration
+What you should do next:==Que devez-vous faire ensuite:
+#############################
+Your basic configuration is complete! You can now \(for example\)==Ihre Grundeinstellungen sind vollständig! Sie können jetzt (beispielsweise)
+just <==Einfach <
+start an uncensored search==eine unzensierte Suche beginnen
+start your own crawl</a> and contribute to the global index, or create your own private web index==einen eigenen Crawl starten</a> und zum globalen Index beitragen, oder einen eigenen privaten Webindex aufbauen
+set a personal peer profile</a> \(optional settings\)==ein eigenes Peer-Profil angeben</a> (freiwillige Angabe)
+monitor at the network page</a> what the other peers are doing==auf der Netzwerkseite beobachten</a> was andere Peers gerade machen
+Your Peer name is a default name; please set another peer name.==Ihr Peer-Name ist ein Standardname; bitte nutzen Sie einen anderen.
+If this does not work, the name is probably taken by someone else.==Falls das nicht funktioniert wird der Name wahrscheinlich bereits von jemand anderem verwendet.
+Please try to choose another one.==Bitte versuchen Sie einen anderen.
+You did not set a user name and/or a password.==Sie haben keinen Nutzernamen und/oder kein mot de passe gesetzt.
+Some pages are protected by
+ passwords.==Einige Seiten sind passwortgeschützt.
+You should set a password here to secure your YaCy peer.==Sie sollten hier ein mot de passe einstellen um Ihren YaCy-Peer zu sichern.
+You did not open a port in your firewall or your router does not forward the server port to your peer.==Sie haben keinen Port in Ihrer Firewall geöffnet oder Ihr Router leitet den Server-Port nicht zu Ihrem Peer weiter.
+This is needed if you want to fully participate in the YaCy network.==Dies ist jedoch erforderlich wenn Sie vollständig am YaCy-Netzwerk teilhaben möchten.
+You can also use your peer without opening it, but this is not recomended.==Sie können Ihren Peer auch nutzen ohne ihn zu öffnen, dies wird jedoch nicht empfohlen.
+#-----------------------------
+
+#File: ConfigLanguage_p.html
+#---------------------------
+Language selection==Sprachauswahl
+Language selection==Sprachauswahl
+You can change the language of the YaCy-webinterface with translation files.==Hier können Sie die Sprache ändern. Wählen Sie die gewünschte Sprache aus der Liste aus.
+Current language:==Aktuelle Sprache
+default\(english\)==Deutsch
+Languagefile Author\(s\) \(chronological\)\:==Autor(en) der Sprachdatei (chronologisch):
+Send additions to maintainer:==Schicken Sie Ergänzungen bitte an:
+Available Languages:==Verfügbare Sprachen:
+Install new language from URL:==Neue Sprachdatei herunterladen:
+Use this language==Diese Sprachdatei sofort benutzen
+"Use"==Benutzen
+"Delete"==Löschen
+"Install"==Installieren
+Unable to get URL:==Nicht möglich die angegebene Fichier von folgender URL zu installieren:
+Error saving the language file.==Es trat ein Fehler beim Speichern der Sprachdatei auf.
+#-----------------------------
+
+#File: ConfigProfile_p.html
+#---------------------------
+Your Personal Profile==Ihr persönliches Profil
+You can create a personal profile here. Other YaCy users can view these information using a link on the network page.==Hier können Sie Ihr persönliches Profil verwalten. Andere YaCy-Utilisateur können dieses Profil über einen Link auf ihrer Netzwerkseite ansehen.
+You do not need to provide any personal data here, but if you want to distribute your contact information, you can do that here.==Sie müssen hier keine persönlichen Daten eingeben, aber wenn Sie Kontaktinformationen bereitstellen möchten, können Sie das hier machen.
+#Name==Name
+#Nick Name==Nick Name
+#Homepage==Homepage
+#eMail==eMail
+#ICQ==ICQ
+#Jabber==Jabber
+#Yahoo!==Yahoo!
+#MSN==MSN
+Comment==Commentaire
+"Save"==Speichern
+You can use==Sie können
+here.==im Profil benutzen.
+#-----------------------------
+
+#File: ConfigSkins_p.html
+#---------------------------
+Skin Selection==Choix de thème
+You can change the appearance of YaCy with skins. Select one of the default skins, download new skins, or create your own skin.==Sie können hier das Aussehen von YaCy mit Skins ändern. Wählen Sie einen der mitgelieferten Skins, laden Sie einen neuen herunter oder basteln Sie sich selber einen neuen Skin.
+Current skin:==Aktueller Skin:
+Available Skins:==Verfügbare Skins:
+"Use"=="Benutzen"
+"Delete"=="Löschen"
+Install new skin from URL:==Installiere einen neuen Skin von folgender URL:
+Use this skin==Benutze diesen Skin
+"install"=="Installieren"
+Unable to get URL:==Nicht möglich die angegebene Fichier von folgender URL zu installieren:
+Error saving the skin.==Es trat ein Fehler beim Speichern des Skins auf.
+#-----------------------------
+
+#File: Connections_p.html
+#---------------------------
+Connection Tracking==Verbindungsstatus
+Incoming Connections==Eingehende Verbindungen
+Showing \#\[numActiveRunning\]\# active, \#\[numActivePending\]\# pending connections from a max. of \#\[numMax\]\# allowed incoming connections.==Es werden #[numActiveRunning]# aktive und #[numActivePending]# wartende Verbindungen von max. #[numMax]# erlaubten eingehenden Verbindungen angezeigt..
+Protocol==Protokoll
+Duration==Dauer
+Source IP\[:Port\]==Quell-IP[:Port]
+Dest. IP\[:Port\]==Ziel-IP[:Port]
+Command==Kommando
+Used==Benutzt
+Close==Schließen
+Waiting for new request nr.==Warte auf neue Anfrage Nr.
+#-----------------------------
+
+#File: CookieMonitorIncoming_p.html
+#---------------------------
+Incoming Cookies Monitor==Überwachung eingehender Cookies
+Cookie Monitor: Incoming Cookies==Cookie Überwachung: Eingehende Cookies
+This is a list of cookies that browsers using the YaCy proxy sent to webservers:==Dies ist eine Liste aller Cookies, die die Browser, die den YaCy-Proxy benutzen, an Webserver versandt haben:
+Showing==Angezeigt werden
+entries from a total of==Einträge von insgesamt
+Cookies==Cookies
+#-----------------------------
+
+#File: CookieMonitorOutgoing_p.html
+#---------------------------
+Outgoing Cookies Monitor==Überwachung ausgehender Cookies
+Cookie Monitor: Outgoing Cookies==Cookie Überwachung: Ausgehende Cookies
+This is a list of Cookies that a browser using the YaCy Proxy has sent to a web server:==Dies ist eine Auflistung aller Cookies, die Ihr Browser an einen Webserver geschickt hat:
+Showing==Angezeigt werden
+entries from a total of==Einträge von insgesamt
+Cookies==Cookies
+#-----------------------------
+
+#File: Help.html
+#---------------------------
+YaCy: Help==YaCy: Hilfeseiten
+>Help==>Hilfe
+This is a distributed web crawler and also a caching HTTP proxy. You are using the <em>online-interface</em> of the application. You can use this interface to configure your personal settings, proxy settings, access control and crawling properties. You can also use this interface to start crawls, send messages to other peers and monitor your index, cache status and crawling processes. Most important, you can use the search page to search either your own or the <em>global</em> index.==YaCy ist eine Suchmaschine,  die ähnlich dem Prinzip des verteilten Rechnens (distributed computing wie z.B. SETI@home) funktioniert. Das ganze heisst hier eher "verteiltes Durchsuchen und Indexieren" des Internets. Ausserdem bringt sie einen HTTP Proxy Server mit. Sie benutzen gerade das <em>Online-Interface</em> von YaCy. Sie können dieses Interface auch zum Konfigurieren Ihrer persönlichen Einstellungen, Proxy-Einstellungen, der Zugriffs-Kontrolle und den Crawl-Einstellungen benutzen. Sie können das Interface auch zum Starten von Crawls, Nachrichtenversand an andere YaCy-Nutzer und zur Überwachung Ihres Index, Cache-Status und des Crawl-Prozesses benutzen. Besonders wichtig ist, dass man die Suchseite benutzen kann, um entweder den eigenen oder den <em>globalen</em> Index zu durchsuchen.
+For more detailed information, visit the==Für weitergehende Informationen besuchen Sie bitte die
+YaCy homepage==YaCy-Homepage
+Local and Global Search: Options and Functions==Lokale und globale Suche: Optionen und Funktionen
+The proxy provides a search interface that accesses your local index, created from web pages that passed the proxy.==Der Proxy bringt eine Suchmaschine mit, die einen lokalen Index bildet, der sich aus den Webseiten zusammensetzt, die Sie mit dem Proxy besuchen.
+The search can also be applied globally, by searching other peers. You can use the following options to enhance your search results==Die Suche kann aber auch global ausgeweitet werden. Dazu werden die anderen Peers herangezogen und von ihnen Informationen abgefragt. Sie können aber auch folgende Optionen benutzen, um mehr Suchergebnisse zu erhalten
+Search Word List==Such Wort Liste
+You can search for several words simultanous. Words must be separated by a single space.==Sie können eine Suche mit mehreren Wörtern gleichzeitig starten. Die Wörter müssen durch ein Leerzeichen getrennt sein.
+The words are treated conjunctive, that means every must occur in the result, not any.==
+If you do a global search \(see below\) you may get different results each time you do a search.==Wenn Sie eine globale Suche (siehe unten) durchführen, kann es sein, dass Sie bei wiederholten Suchanfragen jedesmal andere Ergebnisse erhalten.
+Maximum Number of Results==Maximale Anzahl an Ergebnissen
+
+You can select the number of wanted maximum links. We do not yet support multiple result pages for virtually any possible link.==Sie können auswählen, wieviele Links Ihnen angezeigt werden sollen. Wir unterstützen im Moment keine mehrfachen Ergebnisseiten für jeden möglichen Link.
+Instead we encourage you to enhance the search result by submitting more search words.==Stattdessen möchten wir Sie dazu auffordern, Ihre Suchergebnisse durch das Eingeben von mehreren Suchwörtern, zu vergrößern.
+Result Order Options==Reihenfolge der Ergebnisse
+The search engine provides an experimental 'Quality' ranking. In contrast to other known search engines we provide also==Die Suchmaschine bietet ein experimentelles 'Qualitäts' Ranking an. Im Gegensatz zu anderen üblichen Suchmaschinen bieten wir
+a result order by date. If you change the order to 'Date-Quality' the most recently updated page from the search results is listed first.==auch die Sortierung nach Datum an. Wenn Sie die Reihenfolge in 'Datum-Qualität' ändern, werden die als letztes überarbeiteten Webseiten aus den Suchergebnissen ganz oben aufgelistet.
+For pages that have the same date the second order, 'Quality' is applied.==Für Seiten die das gleiche Datum haben, wird dann nach der 'Qualität' geordnet.
+Resource Domain==Quelle der Suche
+This search engine is constructed to search the web pages that pass the proxy. But the search index is distributed to other peers as well,==Diese Suchmaschine ist so aufgebaut, dass sie die Seiten durchsucht, die mit dem Proxy besucht wurden. Aber der Suchindex ist auch auf andere Peers verteilt,
+so you can search also globally: this function
+ is currently only rudimentary, but can be choosen for test cases. Future releases will==so dass Sie auch global suchen können: diese Funktion ist veraltet, aber Sie können sie zum testen benutzen. Neue Versionen werden
+automatically distribute index information <em>before</em> a search happends to form a performant distributed hash table -- a very fast global search.==automatisch einen verteilten Index erstellen <em>bevor</em> es geschieht, dass eine Suche, eine verteilte Hash-Tabelle erstellt --  eine sehr schnelle globale Suche.
+Maximum Search Time==Maximale Zeit zum Suchen
+Searching the local index is extremely fast, it happends within milliseconds, even for a large number \(millions\) of pages. But searching the==Den lokalen Index zu durchsuchen, geht extrem schnell. Es geschieht innerhalb von Millisekunden auch bei einer großen Anzahl (ein paar Millionen) von Seiten.
+global index needs more time to find the correct remote peer that contains best search results. This is especially the case while the==Im Gegensatz dazu braucht es mehr Zeit den globalen Index zu durchsuchen, da erst der richtige Peer, der die besten Ergbnisse liefern kann, gefunden werden muss. Dies ist vermutlich auch der Grund warum
+distributed index is in test mode. Search results get more stable \(repeated global search produce more similar results\) the longer==diese Art von Suchmaschine noch in der Testphase ist. Die Suchergebnisse werden immer besser (eine wiederholte globale Suche bringt mehr gleiche Ergebnisse), je länger
+the search time is.==die Zeit zum Suchen ist.
+You may want to use accesskeys to navigate through the YaCy webinterface:==Sie können durch das YaCy Web Interface auch mit Hilfe von Tastenkombinationen navigieren. Drücken Sie dazu eine der folgenden Kombinationen ('Taste' steht für einen der drei unten genannten Buchstaben):
+Windows and Internet Explorer: Alt \+ Accesskey \+ Enter==Windows und Internet Explorer: Alt + Taste + Enter
+Windows and Mozilla/Firefox/Netscape: Alt \+ Accesskey==Windows und Mozilla/Firefox/Netscape: Alt + Taste
+Windows and Opera: Shift \+ Esc \+ Accesskey==Windows und Opera: Shift + Esc + Taste
+Macintosh and Internet Explorer: Strg \+ Accesskey \+ Enter==Macintosh und Internet Explorer: Str + Taste + Enter
+Macintosh and Safari: Strg \+ Accesskey==Macintosh und Safari: Strg + Taste
+Macintosh and Mozilla/Firefox/Netscape: Strg \+ Accesskey==Macintosh und Mozilla/Firefox/Netscape: Strg + Taste
+Macintosh and Opera: Shift \+ Esc \+ Accesskey==Macintosh und Opera: Shift + Esc + Taste
+Linux Mandrake and Galeon/Mozilla: Alt \+ Accesskey==Linux Mandrake und Galeon/Mozilla: Alt + Taste
+All OS and Amaya: Strg \+ Accesskey==Alle OS Versionen und Amaya: Strg + Taste
+
+Search Page==Suchseite
+Network==Netzwerk
+Status==Status
+
+YaCy uses Regular Expressions for some functions, for example in the blacklist.==YaCy benutzt reguläre Ausdrücke für einige Funktionen, z.B. die Blacklist.
+There are some standards for these regexps, YaCy uses the syntax used by Perl 5.==Es gibt einige Standards für diese Ausdrücke, YaCy orientiert sich an der Syntax von Perl 5.
+Here ist a short overview about the functions, which should fir for most cases\:<==Hier finden Sie einen kurzen Überblick über die Funktionen, die die meisten Anwendungsfälle abdecken sollten:<
+
+
+arbitrary character==beliebiges Zeichen
+character x==Zeichen x
+not x==nicht x
+0 or more times x==0 oder mehr Vorkommen von x
+0 or 1 time x==0 oder 1 Vorkommen von x
+1 or more times x==1 oder mehr Vorkommen von x
+concatenation of x and y==Verkettung von x und y
+x or y==x oder y
+String "foo" or string "bar"==String "foo" oder String "bar"
+a or b or c \(same as a\|b\|c\)==a oder b oder c (dasselbe wie a|b|c)
+a or b or c \(same as above\)==a oder b oder c (dasselbe wie oben)
+exactly n appearances of x==genau n Vorkommen von x
+at least n appearances of x==mindestens n Vorkommen von x
+at least n, maximum m appearanches of x==mindestens n, maximal m Vorkommen von m
+Modify priority of instructions==Priorität der Befehle ändern
+Escape-Character, used to escape special characters \(for example "\[" or "\*"\), so that they loose their special meaning==Escape-Zeichen, das benutzt wird, um Zeichen mit Sonderbedeutung (z.B. "[" oder "*"),  zu "escapen", d.h. ihre Sonderbedeutung verlieren.
+Regex follow a special priority \(descending\)\: concatenation, unary operators \(\*,\+,\^,\{\}\), binary operators \(\|\). This can be overridden with brackets.==Regex folgen Prioritäten (absteigend): Verkettung, unäre Operatore (*,+,^,{}), binäre Operatoren (|). Die Reihenfolge kann durch setzen von Klammern geändert werden.
+Example:==Beispiel:
+This matches heise.de/ with a string in front of it, for example "http://www.", followed by any string, then a slash and a number. The dot in "heise.de" is not escaped with "\\", because it represents any character, thus the "." itself, too.==Dies erfüllt heise.de/ mit einem String davor, z.B. "http://www.". Es folgt ein beliebiger String, dann ein Slash und eine Zahl. Der Punkt in "heise.de" ist nicht escaped, weil der Punkt für ein beliebiges Zeichen steht, folglich auch für "." selbst.
+A possible URL which would match this regexp is\:==Eine URL, die den regulären Ausdruck erfüllen würde, ist:
+An URL which would not match is:==Eine URL die diese Regex nicht erfüllen würde ist:
+There is ".html" at the end, which is not included with the Regular Expression.==Hier ist ".html" am Ende angehängt, das nicht in der Regex enthalten ist.
+#-----------------------------
+
+#File: index.html
+#---------------------------
+YaCy \'\#\[clientname\]\#\': Search Page==YaCy '#[clientname]#': Suchseite
+"Search"=="Suchen"
+#Text==Text
+Images==Bilder
+#Audio==Audio
+V#ideo==Video
+Applications==Anwendungen
+more options...==mehr Optionen...
+Max. number of results:==Max. Anzahl Ergebnisse:
+order by:==sortieren nach:
+YBR-Date-Quality==YBR-Datum-Qualität
+YBR-Quality-Date==YBR-Qualität-Datum
+Date-YBR-Quality==Datum-YBR-Qualität
+Quality-YBR-Date==Qualität-YBR-Datum
+Date-Quality-YBR==Datum-Qualität-YBR
+Quality-Date-YBR==Qualität-Datum-YBR
+Resource:==Quelle:
+global==global
+local==lokal
+Max. search time==Max. Suchdauer
+\(seconds\)==(Sekunden)
+URL mask:==URL-Filter:
+restrict on==beschränken auf
+show all==alle zeigen
+#überarbeiten!!!
+Prefer mask:==Vorzugsmaske:
+Constraints:==Einschränkungen:
+only index pages==Nur Index Seiten
+#-----------------------------
+
+#File: IndexCleaner_p.html
+#---------------------------
+Index Cleaner==Index Aufräumer
+#ThreadAlive:
+#ThreadToString:
+Total URLs searched:==Insgesamt durchsuchte URLs:
+Blacklisted URLs found:==URLS auf Blacklist gefunden:
+Percentage blacklisted:==Prozent auf Blacklist:
+last searched URL:==zuletzt durchsuchte URL: 
+last blacklisted URL found:==zuletzt gefundene URL auf Blacklist:
+RWIs at Start:==RWIs beim Start:
+RWIs now:==RWIs jetzt: 
+wordHash in Progress:==Wort-Hash in Benutzung:
+last wordHash with deleted URLs:==letzter Wort-Hash mit gelöschten URLs:
+Number of deleted URLs in on this Hash:==Anzahl an gelöschten URLs in diesem Hash:
+UrldbCleaner - Clean up the database by deletion of blacklisted urls:==UrlDBCleaner - Räumen Sie Ihre Datenbank auf, indem Sie URLs die auf Ihrer Blacklist stehen löschen:
+Start/Resume==Start/Fortzsetzen
+Stop==Stopp
+Pause==Anhalten
+RWIDbCleaner - Clean up the database by deletion of words with reference to blacklisted urls:==RWIDBCleaner - Räumen Sie Ihre Datenbank auf, indem Sie Wörter die mit Ihrer Blacklist verbunden sind löschen:
+#-----------------------------
