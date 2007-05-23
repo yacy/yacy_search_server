@@ -165,8 +165,10 @@ public class DetailedSearch {
     public static serverObjects respond(httpHeader header, serverObjects post, serverSwitch env) {
         final plasmaSwitchboard sb = (plasmaSwitchboard) env;
 
+        boolean searchAllowed = sb.getConfigBool("publicSearchpage", true) || sb.verifyAuthentication(header, false);
+        
         // case if no values are requested
-        if (post == null || env == null) {
+        if ((post == null) || (env == null) || (!searchAllowed)) {
             // we create empty entries for template strings
             final serverObjects prop = defaultValues();
             plasmaSearchRankingProfile ranking = (sb.getConfig("rankingProfile", "").length() == 0) ? new plasmaSearchRankingProfile("text") : new plasmaSearchRankingProfile("", crypt.simpleDecode(sb.getConfig("rankingProfile", ""), null));
