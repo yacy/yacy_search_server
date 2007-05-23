@@ -47,6 +47,9 @@
 // if the shell's current path is HTROOT
 
 
+import java.io.File;
+import java.io.IOException;
+
 import de.anomic.http.httpHeader;
 import de.anomic.plasma.plasmaSwitchboard;
 import de.anomic.server.serverObjects;
@@ -77,8 +80,8 @@ public class Steering {
         }
 
         if (post.containsKey("restart")) {
-        	/*
-            // yacy.restart erstellen (wird im startscript ausgewertet)
+        	if ((sb.updaterCallback == null) && (System.getProperty("os.name").toLowerCase().startsWith("win"))) {
+            // create yacy.restart file which is used in Windows startscript
             final File yacyRestart = new File(sb.getRootPath(), "DATA/yacy.restart");
             if (!yacyRestart.exists()) {
                 try {
@@ -88,7 +91,8 @@ public class Steering {
                     e.printStackTrace();
                 }
             }
-            */
+        	}
+        	
             if (sb.updaterCallback != null) { 
             	sb.updaterCallback.signalYaCyRestart();
             } else {
