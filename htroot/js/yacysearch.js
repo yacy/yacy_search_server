@@ -60,7 +60,7 @@ function handleTextState(req) {
 	var urlHash = response.getElementsByTagName("urlHash")[0].firstChild.data;
 	var status = response.getElementsByTagName("status")[0].firstChild.data;
 	
-	var span = document.getElementById("h" + urlHash);
+	var span = document.getElementById("h" + urlHash)
 	removeAllChildren(span);
 	//span.removeChild(span.firstChild);
 	
