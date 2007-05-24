@@ -31,37 +31,45 @@ Built on Apr 22, 2006 (06:55:48 PDT)--><wsdl:types><schema targetNamespace="http
   <wsdl:message name="setRemoteProxyResponse">
 
   </wsdl:message>
+  <wsdl:message name="getLocalPeerProfileRequest">
+  </wsdl:message>
   <wsdl:message name="getConfigPropertyListRequest">
   </wsdl:message>
   <wsdl:message name="getPeerProfileResponse">
     <wsdl:part name="getPeerProfileReturn" type="apachesoap:Document"/>
   </wsdl:message>
   <wsdl:message name="enableRemoteProxyResponse">
+
   </wsdl:message>
   <wsdl:message name="getConfigPropertiesResponse">
-
     <wsdl:part name="getConfigPropertiesReturn" type="impl:ArrayOf_xsd_string"/>
   </wsdl:message>
   <wsdl:message name="createNewXMLDocumentResponse">
     <wsdl:part name="createNewXMLDocumentReturn" type="apachesoap:Document"/>
   </wsdl:message>
+  <wsdl:message name="getVersionRequest">
+  </wsdl:message>
+
   <wsdl:message name="getConfigPropertiesRequest">
     <wsdl:part name="keys" type="impl:ArrayOf_xsd_string"/>
   </wsdl:message>
-  <wsdl:message name="getVersionRequest">
-
+  <wsdl:message name="setLocalPeerProfileResponse">
   </wsdl:message>
   <wsdl:message name="setPeerPortResponse">
   </wsdl:message>
   <wsdl:message name="setTransferPropertiesRequest">
     <wsdl:part name="indexDistribution" type="xsd:boolean"/>
+
     <wsdl:part name="indexDistributeWhileCrawling" type="xsd:boolean"/>
     <wsdl:part name="indexReceive" type="xsd:boolean"/>
     <wsdl:part name="indexReceiveBlockBlacklist" type="xsd:boolean"/>
   </wsdl:message>
-
+  <wsdl:message name="getLocalPeerProfileResponse">
+    <wsdl:part name="getLocalPeerProfileReturn" type="apachesoap:Document"/>
+  </wsdl:message>
   <wsdl:message name="getServerLogRequest">
     <wsdl:part name="sequenceNumber" type="xsd:long"/>
+
   </wsdl:message>
   <wsdl:message name="getMessageForwardingResponse">
     <wsdl:part name="getMessageForwardingReturn" type="apachesoap:Document"/>
@@ -69,9 +77,9 @@ Built on Apr 22, 2006 (06:55:48 PDT)--><wsdl:types><schema targetNamespace="http
   <wsdl:message name="getConfigPropertyListResponse">
     <wsdl:part name="getConfigPropertyListReturn" type="apachesoap:Document"/>
   </wsdl:message>
-
   <wsdl:message name="setPeerPortRequest">
     <wsdl:part name="newPort" type="xsd:int"/>
+
   </wsdl:message>
   <wsdl:message name="getTransferPropertiesResponse">
     <wsdl:part name="getTransferPropertiesReturn" type="apachesoap:Document"/>
@@ -79,9 +87,9 @@ Built on Apr 22, 2006 (06:55:48 PDT)--><wsdl:types><schema targetNamespace="http
   <wsdl:message name="setMessageForwardingRequest">
     <wsdl:part name="enableForwarding" type="xsd:boolean"/>
     <wsdl:part name="forwardingCommand" type="xsd:string"/>
-
     <wsdl:part name="forwardingTo" type="xsd:string"/>
   </wsdl:message>
+
   <wsdl:message name="getConfigPropertyResponse">
     <wsdl:part name="getConfigPropertyReturn" type="xsd:string"/>
   </wsdl:message>
@@ -89,9 +97,9 @@ Built on Apr 22, 2006 (06:55:48 PDT)--><wsdl:types><schema targetNamespace="http
     <wsdl:part name="keys" type="impl:ArrayOf_xsd_string"/>
     <wsdl:part name="values" type="impl:ArrayOf_xsd_string"/>
   </wsdl:message>
-
   <wsdl:message name="setRemoteProxyRequest">
     <wsdl:part name="enableRemoteProxy" type="xsd:boolean"/>
+
     <wsdl:part name="proxyHost" type="xsd:string"/>
     <wsdl:part name="proxyPort" type="xsd:int"/>
     <wsdl:part name="proxyUserName" type="xsd:string"/>
@@ -99,13 +107,25 @@ Built on Apr 22, 2006 (06:55:48 PDT)--><wsdl:types><schema targetNamespace="http
     <wsdl:part name="noProxyList" type="xsd:string"/>
     <wsdl:part name="useProxy4YaCy" type="xsd:boolean"/>
     <wsdl:part name="useProxy4SSL" type="xsd:boolean"/>
-
   </wsdl:message>
   <wsdl:message name="setConfigPropertyResponse">
+
   </wsdl:message>
   <wsdl:message name="setDistributedCrawlingRequest">
     <wsdl:part name="enableRemoteTriggeredCrawls" type="xsd:boolean"/>
     <wsdl:part name="maximumAllowedPPM" type="xsd:int"/>
+  </wsdl:message>
+  <wsdl:message name="setLocalPeerProfileRequest">
+    <wsdl:part name="name" type="xsd:string"/>
+    <wsdl:part name="nickname" type="xsd:string"/>
+    <wsdl:part name="homepage" type="xsd:string"/>
+
+    <wsdl:part name="email" type="xsd:string"/>
+    <wsdl:part name="icq" type="xsd:string"/>
+    <wsdl:part name="jabber" type="xsd:string"/>
+    <wsdl:part name="yahoo" type="xsd:string"/>
+    <wsdl:part name="msn" type="xsd:string"/>
+    <wsdl:part name="comments" type="xsd:string"/>
   </wsdl:message>
   <wsdl:message name="getPeerProfileRequest">
     <wsdl:part name="peerhash" type="xsd:string"/>
@@ -128,6 +148,86 @@ Built on Apr 22, 2006 (06:55:48 PDT)--><wsdl:types><schema targetNamespace="http
   <wsdl:message name="shutdownPeerRequest">
   </wsdl:message>
   <wsdl:portType name="AdminService">
+    <wsdl:operation name="setConfigProperty" parameterOrder="key value">
+
+      <wsdl:input message="impl:setConfigPropertyRequest" name="setConfigPropertyRequest"/>
+      <wsdl:output message="impl:setConfigPropertyResponse" name="setConfigPropertyResponse"/>
+    </wsdl:operation>
+    <wsdl:operation name="getConfigProperty" parameterOrder="key">
+      <wsdl:input message="impl:getConfigPropertyRequest" name="getConfigPropertyRequest"/>
+      <wsdl:output message="impl:getConfigPropertyResponse" name="getConfigPropertyResponse"/>
+    </wsdl:operation>
+    <wsdl:operation name="getConfigProperties" parameterOrder="keys">
+      <wsdl:input message="impl:getConfigPropertiesRequest" name="getConfigPropertiesRequest"/>
+
+      <wsdl:output message="impl:getConfigPropertiesResponse" name="getConfigPropertiesResponse"/>
+    </wsdl:operation>
+    <wsdl:operation name="getConfigPropertyList">
+      <wsdl:input message="impl:getConfigPropertyListRequest" name="getConfigPropertyListRequest"/>
+      <wsdl:output message="impl:getConfigPropertyListResponse" name="getConfigPropertyListResponse"/>
+    </wsdl:operation>
+    <wsdl:operation name="setPeerName" parameterOrder="newName">
+      <wsdl:input message="impl:setPeerNameRequest" name="setPeerNameRequest"/>
+      <wsdl:output message="impl:setPeerNameResponse" name="setPeerNameResponse"/>
+
+    </wsdl:operation>
+    <wsdl:operation name="setPeerPort" parameterOrder="newPort">
+      <wsdl:input message="impl:setPeerPortRequest" name="setPeerPortRequest"/>
+      <wsdl:output message="impl:setPeerPortResponse" name="setPeerPortResponse"/>
+    </wsdl:operation>
+    <wsdl:operation name="enableRemoteProxy" parameterOrder="enableProxy">
+      <wsdl:input message="impl:enableRemoteProxyRequest" name="enableRemoteProxyRequest"/>
+      <wsdl:output message="impl:enableRemoteProxyResponse" name="enableRemoteProxyResponse"/>
+    </wsdl:operation>
+
+    <wsdl:operation name="setRemoteProxy" parameterOrder="enableRemoteProxy proxyHost proxyPort proxyUserName proxyPwd noProxyList useProxy4YaCy useProxy4SSL">
+      <wsdl:input message="impl:setRemoteProxyRequest" name="setRemoteProxyRequest"/>
+      <wsdl:output message="impl:setRemoteProxyResponse" name="setRemoteProxyResponse"/>
+    </wsdl:operation>
+    <wsdl:operation name="shutdownPeer">
+      <wsdl:input message="impl:shutdownPeerRequest" name="shutdownPeerRequest"/>
+      <wsdl:output message="impl:shutdownPeerResponse" name="shutdownPeerResponse"/>
+    </wsdl:operation>
+    <wsdl:operation name="setDistributedCrawling" parameterOrder="enableRemoteTriggeredCrawls maximumAllowedPPM">
+
+      <wsdl:input message="impl:setDistributedCrawlingRequest" name="setDistributedCrawlingRequest"/>
+      <wsdl:output message="impl:setDistributedCrawlingResponse" name="setDistributedCrawlingResponse"/>
+    </wsdl:operation>
+    <wsdl:operation name="setTransferProperties" parameterOrder="indexDistribution indexDistributeWhileCrawling indexReceive indexReceiveBlockBlacklist">
+      <wsdl:input message="impl:setTransferPropertiesRequest" name="setTransferPropertiesRequest"/>
+      <wsdl:output message="impl:setTransferPropertiesResponse" name="setTransferPropertiesResponse"/>
+    </wsdl:operation>
+    <wsdl:operation name="getTransferProperties">
+      <wsdl:input message="impl:getTransferPropertiesRequest" name="getTransferPropertiesRequest"/>
+
+      <wsdl:output message="impl:getTransferPropertiesResponse" name="getTransferPropertiesResponse"/>
+    </wsdl:operation>
+    <wsdl:operation name="setMessageForwarding" parameterOrder="enableForwarding forwardingCommand forwardingTo">
+      <wsdl:input message="impl:setMessageForwardingRequest" name="setMessageForwardingRequest"/>
+      <wsdl:output message="impl:setMessageForwardingResponse" name="setMessageForwardingResponse"/>
+    </wsdl:operation>
+    <wsdl:operation name="getMessageForwarding">
+      <wsdl:input message="impl:getMessageForwardingRequest" name="getMessageForwardingRequest"/>
+      <wsdl:output message="impl:getMessageForwardingResponse" name="getMessageForwardingResponse"/>
+
+    </wsdl:operation>
+    <wsdl:operation name="getServerLog" parameterOrder="sequenceNumber">
+      <wsdl:input message="impl:getServerLogRequest" name="getServerLogRequest"/>
+      <wsdl:output message="impl:getServerLogResponse" name="getServerLogResponse"/>
+    </wsdl:operation>
+    <wsdl:operation name="setLocalPeerProfile" parameterOrder="name nickname homepage email icq jabber yahoo msn comments">
+      <wsdl:input message="impl:setLocalPeerProfileRequest" name="setLocalPeerProfileRequest"/>
+      <wsdl:output message="impl:setLocalPeerProfileResponse" name="setLocalPeerProfileResponse"/>
+    </wsdl:operation>
+
+    <wsdl:operation name="getLocalPeerProfile">
+      <wsdl:input message="impl:getLocalPeerProfileRequest" name="getLocalPeerProfileRequest"/>
+      <wsdl:output message="impl:getLocalPeerProfileResponse" name="getLocalPeerProfileResponse"/>
+    </wsdl:operation>
+    <wsdl:operation name="getPeerProfile" parameterOrder="peerhash">
+      <wsdl:input message="impl:getPeerProfileRequest" name="getPeerProfileRequest"/>
+      <wsdl:output message="impl:getPeerProfileResponse" name="getPeerProfileResponse"/>
+    </wsdl:operation>
     <wsdl:operation name="setProperties" parameterOrder="keys values">
 
       <wsdl:input message="impl:setPropertiesRequest" name="setPropertiesRequest"/>
@@ -137,110 +237,19 @@ Built on Apr 22, 2006 (06:55:48 PDT)--><wsdl:types><schema targetNamespace="http
       <wsdl:input message="impl:getVersionRequest" name="getVersionRequest"/>
       <wsdl:output message="impl:getVersionResponse" name="getVersionResponse"/>
     </wsdl:operation>
-    <wsdl:operation name="setConfigProperty" parameterOrder="key value">
-      <wsdl:input message="impl:setConfigPropertyRequest" name="setConfigPropertyRequest"/>
-
-      <wsdl:output message="impl:setConfigPropertyResponse" name="setConfigPropertyResponse"/>
-    </wsdl:operation>
-    <wsdl:operation name="getConfigProperty" parameterOrder="key">
-      <wsdl:input message="impl:getConfigPropertyRequest" name="getConfigPropertyRequest"/>
-      <wsdl:output message="impl:getConfigPropertyResponse" name="getConfigPropertyResponse"/>
-    </wsdl:operation>
-    <wsdl:operation name="getConfigProperties" parameterOrder="keys">
-      <wsdl:input message="impl:getConfigPropertiesRequest" name="getConfigPropertiesRequest"/>
-      <wsdl:output message="impl:getConfigPropertiesResponse" name="getConfigPropertiesResponse"/>
-
-    </wsdl:operation>
-    <wsdl:operation name="getConfigPropertyList">
-      <wsdl:input message="impl:getConfigPropertyListRequest" name="getConfigPropertyListRequest"/>
-      <wsdl:output message="impl:getConfigPropertyListResponse" name="getConfigPropertyListResponse"/>
-    </wsdl:operation>
-    <wsdl:operation name="setPeerName" parameterOrder="newName">
-      <wsdl:input message="impl:setPeerNameRequest" name="setPeerNameRequest"/>
-      <wsdl:output message="impl:setPeerNameResponse" name="setPeerNameResponse"/>
-    </wsdl:operation>
-
-    <wsdl:operation name="setPeerPort" parameterOrder="newPort">
-      <wsdl:input message="impl:setPeerPortRequest" name="setPeerPortRequest"/>
-      <wsdl:output message="impl:setPeerPortResponse" name="setPeerPortResponse"/>
-    </wsdl:operation>
-    <wsdl:operation name="enableRemoteProxy" parameterOrder="enableProxy">
-      <wsdl:input message="impl:enableRemoteProxyRequest" name="enableRemoteProxyRequest"/>
-      <wsdl:output message="impl:enableRemoteProxyResponse" name="enableRemoteProxyResponse"/>
-    </wsdl:operation>
-    <wsdl:operation name="setRemoteProxy" parameterOrder="enableRemoteProxy proxyHost proxyPort proxyUserName proxyPwd noProxyList useProxy4YaCy useProxy4SSL">
-
-      <wsdl:input message="impl:setRemoteProxyRequest" name="setRemoteProxyRequest"/>
-      <wsdl:output message="impl:setRemoteProxyResponse" name="setRemoteProxyResponse"/>
-    </wsdl:operation>
-    <wsdl:operation name="shutdownPeer">
-      <wsdl:input message="impl:shutdownPeerRequest" name="shutdownPeerRequest"/>
-      <wsdl:output message="impl:shutdownPeerResponse" name="shutdownPeerResponse"/>
-    </wsdl:operation>
-    <wsdl:operation name="setDistributedCrawling" parameterOrder="enableRemoteTriggeredCrawls maximumAllowedPPM">
-      <wsdl:input message="impl:setDistributedCrawlingRequest" name="setDistributedCrawlingRequest"/>
-
-      <wsdl:output message="impl:setDistributedCrawlingResponse" name="setDistributedCrawlingResponse"/>
-    </wsdl:operation>
-    <wsdl:operation name="setTransferProperties" parameterOrder="indexDistribution indexDistributeWhileCrawling indexReceive indexReceiveBlockBlacklist">
-      <wsdl:input message="impl:setTransferPropertiesRequest" name="setTransferPropertiesRequest"/>
-      <wsdl:output message="impl:setTransferPropertiesResponse" name="setTransferPropertiesResponse"/>
-    </wsdl:operation>
-    <wsdl:operation name="getTransferProperties">
-      <wsdl:input message="impl:getTransferPropertiesRequest" name="getTransferPropertiesRequest"/>
-      <wsdl:output message="impl:getTransferPropertiesResponse" name="getTransferPropertiesResponse"/>
-
-    </wsdl:operation>
-    <wsdl:operation name="setMessageForwarding" parameterOrder="enableForwarding forwardingCommand forwardingTo">
-      <wsdl:input message="impl:setMessageForwardingRequest" name="setMessageForwardingRequest"/>
-      <wsdl:output message="impl:setMessageForwardingResponse" name="setMessageForwardingResponse"/>
-    </wsdl:operation>
-    <wsdl:operation name="getMessageForwarding">
-      <wsdl:input message="impl:getMessageForwardingRequest" name="getMessageForwardingRequest"/>
-      <wsdl:output message="impl:getMessageForwardingResponse" name="getMessageForwardingResponse"/>
-    </wsdl:operation>
-
-    <wsdl:operation name="getServerLog" parameterOrder="sequenceNumber">
-      <wsdl:input message="impl:getServerLogRequest" name="getServerLogRequest"/>
-      <wsdl:output message="impl:getServerLogResponse" name="getServerLogResponse"/>
-    </wsdl:operation>
-    <wsdl:operation name="getPeerProfile" parameterOrder="peerhash">
-      <wsdl:input message="impl:getPeerProfileRequest" name="getPeerProfileRequest"/>
-      <wsdl:output message="impl:getPeerProfileResponse" name="getPeerProfileResponse"/>
-    </wsdl:operation>
     <wsdl:operation name="createNewXMLDocument" parameterOrder="rootElementName">
-
       <wsdl:input message="impl:createNewXMLDocumentRequest" name="createNewXMLDocumentRequest"/>
+
       <wsdl:output message="impl:createNewXMLDocumentResponse" name="createNewXMLDocumentResponse"/>
     </wsdl:operation>
   </wsdl:portType>
   <wsdl:binding name="adminSoapBinding" type="impl:AdminService">
     <wsdlsoap:binding style="rpc" transport="http://schemas.xmlsoap.org/soap/http"/>
-    <wsdl:operation name="setProperties">
-      <wsdlsoap:operation soapAction=""/>
-      <wsdl:input name="setPropertiesRequest">
-
-        <wsdlsoap:body encodingStyle="http://schemas.xmlsoap.org/soap/encoding/" namespace="http://services.soap.anomic.de" use="encoded"/>
-      </wsdl:input>
-      <wsdl:output name="setPropertiesResponse">
-        <wsdlsoap:body encodingStyle="http://schemas.xmlsoap.org/soap/encoding/" namespace="http://yacy:8080/soap/admin" use="encoded"/>
-      </wsdl:output>
-    </wsdl:operation>
-    <wsdl:operation name="getVersion">
-      <wsdlsoap:operation soapAction=""/>
-      <wsdl:input name="getVersionRequest">
-
-        <wsdlsoap:body encodingStyle="http://schemas.xmlsoap.org/soap/encoding/" namespace="http://services.soap.anomic.de" use="encoded"/>
-      </wsdl:input>
-      <wsdl:output name="getVersionResponse">
-        <wsdlsoap:body encodingStyle="http://schemas.xmlsoap.org/soap/encoding/" namespace="http://yacy:8080/soap/admin" use="encoded"/>
-      </wsdl:output>
-    </wsdl:operation>
     <wsdl:operation name="setConfigProperty">
       <wsdlsoap:operation soapAction=""/>
       <wsdl:input name="setConfigPropertyRequest">
-
         <wsdlsoap:body encodingStyle="http://schemas.xmlsoap.org/soap/encoding/" namespace="http://services.soap.anomic.de" use="encoded"/>
+
       </wsdl:input>
       <wsdl:output name="setConfigPropertyResponse">
         <wsdlsoap:body encodingStyle="http://schemas.xmlsoap.org/soap/encoding/" namespace="http://yacy:8080/soap/admin" use="encoded"/>
@@ -249,8 +258,8 @@ Built on Apr 22, 2006 (06:55:48 PDT)--><wsdl:types><schema targetNamespace="http
     <wsdl:operation name="getConfigProperty">
       <wsdlsoap:operation soapAction=""/>
       <wsdl:input name="getConfigPropertyRequest">
-
         <wsdlsoap:body encodingStyle="http://schemas.xmlsoap.org/soap/encoding/" namespace="http://services.soap.anomic.de" use="encoded"/>
+
       </wsdl:input>
       <wsdl:output name="getConfigPropertyResponse">
         <wsdlsoap:body encodingStyle="http://schemas.xmlsoap.org/soap/encoding/" namespace="http://yacy:8080/soap/admin" use="encoded"/>
@@ -259,8 +268,8 @@ Built on Apr 22, 2006 (06:55:48 PDT)--><wsdl:types><schema targetNamespace="http
     <wsdl:operation name="getConfigProperties">
       <wsdlsoap:operation soapAction=""/>
       <wsdl:input name="getConfigPropertiesRequest">
-
         <wsdlsoap:body encodingStyle="http://schemas.xmlsoap.org/soap/encoding/" namespace="http://services.soap.anomic.de" use="encoded"/>
+
       </wsdl:input>
       <wsdl:output name="getConfigPropertiesResponse">
         <wsdlsoap:body encodingStyle="http://schemas.xmlsoap.org/soap/encoding/" namespace="http://yacy:8080/soap/admin" use="encoded"/>
@@ -269,8 +278,8 @@ Built on Apr 22, 2006 (06:55:48 PDT)--><wsdl:types><schema targetNamespace="http
     <wsdl:operation name="getConfigPropertyList">
       <wsdlsoap:operation soapAction=""/>
       <wsdl:input name="getConfigPropertyListRequest">
-
         <wsdlsoap:body encodingStyle="http://schemas.xmlsoap.org/soap/encoding/" namespace="http://services.soap.anomic.de" use="encoded"/>
+
       </wsdl:input>
       <wsdl:output name="getConfigPropertyListResponse">
         <wsdlsoap:body encodingStyle="http://schemas.xmlsoap.org/soap/encoding/" namespace="http://yacy:8080/soap/admin" use="encoded"/>
@@ -279,8 +288,8 @@ Built on Apr 22, 2006 (06:55:48 PDT)--><wsdl:types><schema targetNamespace="http
     <wsdl:operation name="setPeerName">
       <wsdlsoap:operation soapAction=""/>
       <wsdl:input name="setPeerNameRequest">
-
         <wsdlsoap:body encodingStyle="http://schemas.xmlsoap.org/soap/encoding/" namespace="http://services.soap.anomic.de" use="encoded"/>
+
       </wsdl:input>
       <wsdl:output name="setPeerNameResponse">
         <wsdlsoap:body encodingStyle="http://schemas.xmlsoap.org/soap/encoding/" namespace="http://yacy:8080/soap/admin" use="encoded"/>
@@ -289,8 +298,8 @@ Built on Apr 22, 2006 (06:55:48 PDT)--><wsdl:types><schema targetNamespace="http
     <wsdl:operation name="setPeerPort">
       <wsdlsoap:operation soapAction=""/>
       <wsdl:input name="setPeerPortRequest">
-
         <wsdlsoap:body encodingStyle="http://schemas.xmlsoap.org/soap/encoding/" namespace="http://services.soap.anomic.de" use="encoded"/>
+
       </wsdl:input>
       <wsdl:output name="setPeerPortResponse">
         <wsdlsoap:body encodingStyle="http://schemas.xmlsoap.org/soap/encoding/" namespace="http://yacy:8080/soap/admin" use="encoded"/>
@@ -299,8 +308,8 @@ Built on Apr 22, 2006 (06:55:48 PDT)--><wsdl:types><schema targetNamespace="http
     <wsdl:operation name="enableRemoteProxy">
       <wsdlsoap:operation soapAction=""/>
       <wsdl:input name="enableRemoteProxyRequest">
-
         <wsdlsoap:body encodingStyle="http://schemas.xmlsoap.org/soap/encoding/" namespace="http://services.soap.anomic.de" use="encoded"/>
+
       </wsdl:input>
       <wsdl:output name="enableRemoteProxyResponse">
         <wsdlsoap:body encodingStyle="http://schemas.xmlsoap.org/soap/encoding/" namespace="http://yacy:8080/soap/admin" use="encoded"/>
@@ -309,8 +318,8 @@ Built on Apr 22, 2006 (06:55:48 PDT)--><wsdl:types><schema targetNamespace="http
     <wsdl:operation name="setRemoteProxy">
       <wsdlsoap:operation soapAction=""/>
       <wsdl:input name="setRemoteProxyRequest">
-
         <wsdlsoap:body encodingStyle="http://schemas.xmlsoap.org/soap/encoding/" namespace="http://services.soap.anomic.de" use="encoded"/>
+
       </wsdl:input>
       <wsdl:output name="setRemoteProxyResponse">
         <wsdlsoap:body encodingStyle="http://schemas.xmlsoap.org/soap/encoding/" namespace="http://yacy:8080/soap/admin" use="encoded"/>
@@ -319,8 +328,8 @@ Built on Apr 22, 2006 (06:55:48 PDT)--><wsdl:types><schema targetNamespace="http
     <wsdl:operation name="shutdownPeer">
       <wsdlsoap:operation soapAction=""/>
       <wsdl:input name="shutdownPeerRequest">
-
         <wsdlsoap:body encodingStyle="http://schemas.xmlsoap.org/soap/encoding/" namespace="http://services.soap.anomic.de" use="encoded"/>
+
       </wsdl:input>
       <wsdl:output name="shutdownPeerResponse">
         <wsdlsoap:body encodingStyle="http://schemas.xmlsoap.org/soap/encoding/" namespace="http://yacy:8080/soap/admin" use="encoded"/>
@@ -329,8 +338,8 @@ Built on Apr 22, 2006 (06:55:48 PDT)--><wsdl:types><schema targetNamespace="http
     <wsdl:operation name="setDistributedCrawling">
       <wsdlsoap:operation soapAction=""/>
       <wsdl:input name="setDistributedCrawlingRequest">
-
         <wsdlsoap:body encodingStyle="http://schemas.xmlsoap.org/soap/encoding/" namespace="http://services.soap.anomic.de" use="encoded"/>
+
       </wsdl:input>
       <wsdl:output name="setDistributedCrawlingResponse">
         <wsdlsoap:body encodingStyle="http://schemas.xmlsoap.org/soap/encoding/" namespace="http://yacy:8080/soap/admin" use="encoded"/>
@@ -339,8 +348,8 @@ Built on Apr 22, 2006 (06:55:48 PDT)--><wsdl:types><schema targetNamespace="http
     <wsdl:operation name="setTransferProperties">
       <wsdlsoap:operation soapAction=""/>
       <wsdl:input name="setTransferPropertiesRequest">
-
         <wsdlsoap:body encodingStyle="http://schemas.xmlsoap.org/soap/encoding/" namespace="http://services.soap.anomic.de" use="encoded"/>
+
       </wsdl:input>
       <wsdl:output name="setTransferPropertiesResponse">
         <wsdlsoap:body encodingStyle="http://schemas.xmlsoap.org/soap/encoding/" namespace="http://yacy:8080/soap/admin" use="encoded"/>
@@ -349,8 +358,8 @@ Built on Apr 22, 2006 (06:55:48 PDT)--><wsdl:types><schema targetNamespace="http
     <wsdl:operation name="getTransferProperties">
       <wsdlsoap:operation soapAction=""/>
       <wsdl:input name="getTransferPropertiesRequest">
-
         <wsdlsoap:body encodingStyle="http://schemas.xmlsoap.org/soap/encoding/" namespace="http://services.soap.anomic.de" use="encoded"/>
+
       </wsdl:input>
       <wsdl:output name="getTransferPropertiesResponse">
         <wsdlsoap:body encodingStyle="http://schemas.xmlsoap.org/soap/encoding/" namespace="http://yacy:8080/soap/admin" use="encoded"/>
@@ -359,8 +368,8 @@ Built on Apr 22, 2006 (06:55:48 PDT)--><wsdl:types><schema targetNamespace="http
     <wsdl:operation name="setMessageForwarding">
       <wsdlsoap:operation soapAction=""/>
       <wsdl:input name="setMessageForwardingRequest">
-
         <wsdlsoap:body encodingStyle="http://schemas.xmlsoap.org/soap/encoding/" namespace="http://services.soap.anomic.de" use="encoded"/>
+
       </wsdl:input>
       <wsdl:output name="setMessageForwardingResponse">
         <wsdlsoap:body encodingStyle="http://schemas.xmlsoap.org/soap/encoding/" namespace="http://yacy:8080/soap/admin" use="encoded"/>
@@ -369,8 +378,8 @@ Built on Apr 22, 2006 (06:55:48 PDT)--><wsdl:types><schema targetNamespace="http
     <wsdl:operation name="getMessageForwarding">
       <wsdlsoap:operation soapAction=""/>
       <wsdl:input name="getMessageForwardingRequest">
-
         <wsdlsoap:body encodingStyle="http://schemas.xmlsoap.org/soap/encoding/" namespace="http://services.soap.anomic.de" use="encoded"/>
+
       </wsdl:input>
       <wsdl:output name="getMessageForwardingResponse">
         <wsdlsoap:body encodingStyle="http://schemas.xmlsoap.org/soap/encoding/" namespace="http://yacy:8080/soap/admin" use="encoded"/>
@@ -379,28 +388,68 @@ Built on Apr 22, 2006 (06:55:48 PDT)--><wsdl:types><schema targetNamespace="http
     <wsdl:operation name="getServerLog">
       <wsdlsoap:operation soapAction=""/>
       <wsdl:input name="getServerLogRequest">
-
         <wsdlsoap:body encodingStyle="http://schemas.xmlsoap.org/soap/encoding/" namespace="http://services.soap.anomic.de" use="encoded"/>
+
       </wsdl:input>
       <wsdl:output name="getServerLogResponse">
+        <wsdlsoap:body encodingStyle="http://schemas.xmlsoap.org/soap/encoding/" namespace="http://yacy:8080/soap/admin" use="encoded"/>
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="setLocalPeerProfile">
+      <wsdlsoap:operation soapAction=""/>
+      <wsdl:input name="setLocalPeerProfileRequest">
+        <wsdlsoap:body encodingStyle="http://schemas.xmlsoap.org/soap/encoding/" namespace="http://services.soap.anomic.de" use="encoded"/>
+
+      </wsdl:input>
+      <wsdl:output name="setLocalPeerProfileResponse">
+        <wsdlsoap:body encodingStyle="http://schemas.xmlsoap.org/soap/encoding/" namespace="http://yacy:8080/soap/admin" use="encoded"/>
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="getLocalPeerProfile">
+      <wsdlsoap:operation soapAction=""/>
+      <wsdl:input name="getLocalPeerProfileRequest">
+        <wsdlsoap:body encodingStyle="http://schemas.xmlsoap.org/soap/encoding/" namespace="http://services.soap.anomic.de" use="encoded"/>
+
+      </wsdl:input>
+      <wsdl:output name="getLocalPeerProfileResponse">
         <wsdlsoap:body encodingStyle="http://schemas.xmlsoap.org/soap/encoding/" namespace="http://yacy:8080/soap/admin" use="encoded"/>
       </wsdl:output>
     </wsdl:operation>
     <wsdl:operation name="getPeerProfile">
       <wsdlsoap:operation soapAction=""/>
       <wsdl:input name="getPeerProfileRequest">
-
         <wsdlsoap:body encodingStyle="http://schemas.xmlsoap.org/soap/encoding/" namespace="http://services.soap.anomic.de" use="encoded"/>
+
       </wsdl:input>
       <wsdl:output name="getPeerProfileResponse">
+        <wsdlsoap:body encodingStyle="http://schemas.xmlsoap.org/soap/encoding/" namespace="http://yacy:8080/soap/admin" use="encoded"/>
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="setProperties">
+      <wsdlsoap:operation soapAction=""/>
+      <wsdl:input name="setPropertiesRequest">
+        <wsdlsoap:body encodingStyle="http://schemas.xmlsoap.org/soap/encoding/" namespace="http://services.soap.anomic.de" use="encoded"/>
+
+      </wsdl:input>
+      <wsdl:output name="setPropertiesResponse">
+        <wsdlsoap:body encodingStyle="http://schemas.xmlsoap.org/soap/encoding/" namespace="http://yacy:8080/soap/admin" use="encoded"/>
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="getVersion">
+      <wsdlsoap:operation soapAction=""/>
+      <wsdl:input name="getVersionRequest">
+        <wsdlsoap:body encodingStyle="http://schemas.xmlsoap.org/soap/encoding/" namespace="http://services.soap.anomic.de" use="encoded"/>
+
+      </wsdl:input>
+      <wsdl:output name="getVersionResponse">
         <wsdlsoap:body encodingStyle="http://schemas.xmlsoap.org/soap/encoding/" namespace="http://yacy:8080/soap/admin" use="encoded"/>
       </wsdl:output>
     </wsdl:operation>
     <wsdl:operation name="createNewXMLDocument">
       <wsdlsoap:operation soapAction=""/>
       <wsdl:input name="createNewXMLDocumentRequest">
-
         <wsdlsoap:body encodingStyle="http://schemas.xmlsoap.org/soap/encoding/" namespace="http://soap.anomic.de" use="encoded"/>
+
       </wsdl:input>
       <wsdl:output name="createNewXMLDocumentResponse">
         <wsdlsoap:body encodingStyle="http://schemas.xmlsoap.org/soap/encoding/" namespace="http://yacy:8080/soap/admin" use="encoded"/>
@@ -409,8 +458,8 @@ Built on Apr 22, 2006 (06:55:48 PDT)--><wsdl:types><schema targetNamespace="http
   </wsdl:binding>
   <wsdl:service name="AdminServiceService">
     <wsdl:port binding="impl:adminSoapBinding" name="admin">
-
       <wsdlsoap:address location="http://yacy:8080/soap/admin"/>
+
     </wsdl:port>
   </wsdl:service>
 </wsdl:definitions>
