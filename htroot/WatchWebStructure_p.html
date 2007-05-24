@@ -4,12 +4,29 @@
 <title>YaCy '#[clientname]#': Web Structure</title>
 #%env/templates/metas.template%# 
 </head>
-<body id="WebStructure">
+<body id="WebStructure" style="margin:0px;">
 #%env/templates/header.template%# 
 #%env/templates/submenuCrawler.template%#
 <h2>Web Structure</h2>
-<img src="WebStructurePicture_p.png">
 
+<table>
+<tr>
+<td valign="top">
+<dl>
+<dt>host</dt><dd>#[host]#</dd>
+<dt>depth</dt><dd>#[depth]#<br/>
+  <a href="WatchWebStructure_p.html?host=#[host]#&depth=#[depthd]#&width=#[width]#&height=#[height]#"><img src="env/grafics/minus.gif" /></a>
+  <a href="WatchWebStructure_p.html?host=#[host]#&depth=#[depthi]#&width=#[width]#&height=#[height]#"><img src="env/grafics/plus.gif" /></a>
+</dd>
+</dl>
+</td>
+<td>
+  <img src="WebStructurePicture_p.png?host=#[host]#&depth=#[depth]#&width=#[width]#&height=#[height]#" />
+</td>
+<td>
+</td>
+</tr>
+</table>
 #%env/templates/footer.template%# 
 </body>
 </html>

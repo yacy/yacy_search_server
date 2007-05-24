@@ -1,3 +1,29 @@
+// ymageGraph.java
+// (C) 2007 by Michael Peter Christen; mc@yacy.net, Frankfurt a. M., Germany
+// first published 22.05.2007 on http://yacy.net
+//
+// This is a part of YaCy, a peer-to-peer based web search engine
+//
+// $LastChangedDate: 2006-04-02 22:40:07 +0200 (So, 02 Apr 2006) $
+// $LastChangedRevision: 1986 $
+// $LastChangedBy: orbiter $
+//
+// LICENSE
+// 
+// This program is free software; you can redistribute it and/or modify
+// it under the terms of the GNU General Public License as published by
+// the Free Software Foundation; either version 2 of the License, or
+// (at your option) any later version.
+//
+// This program is distributed in the hope that it will be useful,
+// but WITHOUT ANY WARRANTY; without even the implied warranty of
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+// GNU General Public License for more details.
+//
+// You should have received a copy of the GNU General Public License
+// along with this program; if not, write to the Free Software
+// Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
+
 package de.anomic.ymage;
 
 import java.util.HashMap;
@@ -5,7 +31,7 @@ import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Map;
 
-/* this class does not really draw graphes, it is only a container for graph coordinates.
+/* this class is a container for graph coordinates and it can draw such coordinates into a graph
  * all coordinates are given in a artificial corrdinate system, in the range from
  * -1 to +1. The lower left point of the graph has the coordinate -1, -1 and the upper
  * right is 1,1
@@ -99,16 +125,18 @@ public class ymageGraph {
     }
     
     private static final long color_back = ymageMatrix.SUBTRACTIVE_WHITE;
-    private static final long color_dot = 0x4444AA;
+    private static final long color_dot = 0x6633AA;
     private static final long color_line = 0x333333;
+    private static final long color_lineend = 0x555555;
     private static final long color_text = ymageMatrix.SUBTRACTIVE_BLACK;
     
     public ymageMatrix draw(int width, int height, int leftborder, int rightborder, int topborder, int bottomborder) {
         ymageMatrix image = new ymageMatrix(width, height, color_back);
-        double xfactor = (width - leftborder - rightborder) / (rightmost - leftmost);
-        double yfactor = (height - topborder - bottomborder) / (topmost - bottommost);
+        double xfactor = ((rightmost - leftmost) == 0.0) ? 0.0 : (width - leftborder - rightborder) / (rightmost - leftmost);
+        double yfactor = ((topmost - bottommost) == 0.0) ? 0.0 : (height - topborder - bottomborder) / (topmost - bottommost);
         image.setMode(ymageMatrix.MODE_SUB);
         
+        // draw dots and names
         Iterator i = points.entrySet().iterator();
         Map.Entry entry;
         String name;
@@ -118,25 +146,40 @@ public class ymageGraph {
             entry = (Map.Entry) i.next();
             name = (String) entry.getKey();
             c = (coordinate) entry.getValue();
-            x = (int) (leftborder + (c.x - leftmost) * xfactor);
-            y = (int) (height - bottomborder - (c.y - bottommost) * yfactor);
+            x = (xfactor == 0.0) ? width / 2 : (int) (leftborder + (c.x - leftmost) * xfactor);
+            y = (yfactor == 0.0) ? height / 2 : (int) (height - bottomborder - (c.y - bottommost) * yfactor);
             image.setColor(color_dot);
-            image.dot(x, y, 5, true);
+            image.dot(x, y, 6, true);
             image.setColor(color_text);
             ymageToolPrint.print(image, x, y + 10, 0, name.toUpperCase(), 0);
         }
+        
+        // draw lines
         i = borders.iterator();
         coordinate[] border;
         image.setColor(color_line);
+        int x0, x1, y0, y1;
         while (i.hasNext()) {
             border = getBorder((String) i.next());
             if (border == null) continue;
-            image.line(
-                    (int) (leftborder + (border[0].x - leftmost) * xfactor),
-                    (int) (height - bottomborder - (border[0].y - bottommost) * yfactor),
-                    (int) (leftborder + (border[1].x - leftmost) * xfactor),
-                    (int) (height - bottomborder - (border[1].y - bottommost) * yfactor));
+            if (xfactor == 0.0) {
+                x0 = width / 2;
+                x1 = width / 2;
+            } else {
+                x0 = (int) (leftborder + (border[0].x - leftmost) * xfactor);
+                x1 = (int) (leftborder + (border[1].x - leftmost) * xfactor);
+            }
+            if (yfactor == 0.0) {
+                y0 = height / 2;
+                y1 = height / 2;
+            } else {
+                y0 = (int) (height - bottomborder - (border[0].y - bottommost) * yfactor);
+                y1 = (int) (height - bottomborder - (border[1].y - bottommost) * yfactor);
+            }
+            // draw the line, with the dot at the beginning of the line
+            image.lineDot(x1, y1, x0, y0, 3, 4, color_line, color_lineend);
         }
         return image;
     }
+    
 }

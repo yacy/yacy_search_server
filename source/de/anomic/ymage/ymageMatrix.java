@@ -1,10 +1,15 @@
 // ymageMatrix.java 
-// ---------------------------
-// (C) by Michael Peter Christen; mc@anomic.de
-// first published on http://www.anomic.de
-// Frankfurt, Germany, 2005
-// last major change: 16.09.2005
+// (C) 2005 by Michael Peter Christen; mc@yacy.net, Frankfurt a. M., Germany
+// first published 16.09.2005 on http://yacy.net
 //
+// This is a part of YaCy, a peer-to-peer based web search engine
+//
+// $LastChangedDate: 2006-04-02 22:40:07 +0200 (So, 02 Apr 2006) $
+// $LastChangedRevision: 1986 $
+// $LastChangedBy: orbiter $
+//
+// LICENSE
+// 
 // This program is free software; you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
 // the Free Software Foundation; either version 2 of the License, or
@@ -18,25 +23,6 @@
 // You should have received a copy of the GNU General Public License
 // along with this program; if not, write to the Free Software
 // Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
-//
-// Using this software in any meaning (reading, learning, copying, compiling,
-// running) means that you agree that the Author(s) is (are) not responsible
-// for cost, loss of data or any harm that may be caused directly or indirectly
-// by usage of this softare or this documentation. The usage of this software
-// is on your own risk. The installation and usage (starting/running) of this
-// software may allow other people or application to access your computer and
-// any attached devices and is highly dependent on the configuration of the
-// software which must be done by the user of the software; the author(s) is
-// (are) also not responsible for proper configuration and usage of the
-// software, even if provoked by documentation provided together with
-// the software.
-//
-// Any changes to this file according to the GPL as documented in the file
-// gpl.txt aside this file in the shipment you received can be done to the
-// lines that follows this copyright notice here, but changes must not be
-// done inside the copyright notive above. A re-distribution must contain
-// the intact and unchanged copyright notice.
-// Contributions and changes to the program code must be marked as such.
 
 /*
  This Class implements some convenience-methods to support drawing of statistical Data
@@ -110,17 +96,18 @@ public class ymageMatrix /*implements Cloneable*/ {
         //gr.clearRect(0, 0, width, height);
         
         grid = image.getRaster();
-        
-        // fill grid with background color
-        byte bgR = (byte) (0xFF - (backgroundColor >> 16));
-        byte bgG = (byte) (0xFF - ((backgroundColor >> 8) & 0xff));
-        byte bgB = (byte) (0xFF - (backgroundColor & 0xff));
-        int[] c = new int[]{bgR, bgG, bgB};
-        for (int i = 0; i < width; i++) {
-            for (int j = 0; j < height; j++) {
-                grid.setPixel(i, j, c);
+        //if (backgroundColor != SUBTRACTIVE_WHITE) {
+            // fill grid with background color
+            byte bgR = (byte) (0xFF - (backgroundColor >> 16));
+            byte bgG = (byte) (0xFF - ((backgroundColor >> 8) & 0xff));
+            byte bgB = (byte) (0xFF - (backgroundColor & 0xff));
+            int[] c = new int[]{bgR, bgG, bgB};
+            for (int i = 0; i < width; i++) {
+                for (int j = 0; j < height; j++) {
+                    grid.setPixel(i, j, c);
+                }
             }
-        }
+        //}
     }
     
     public BufferedImage getImage() {
@@ -213,6 +200,32 @@ public class ymageMatrix /*implements Cloneable*/ {
                 }
             }
         }
+    }
+    
+    public void lineDot(int x0, int y0, int x1, int y1, int radius, int distance, long lineColor, long dotColor) {
+        // draw a line with a dot at the end.
+        // the radius value is the radius of the dot
+        // the distance value is the distance of the dot border to the endpoint
+        
+        // compute first the angle of the line between the points
+        double angle = (x1 - x0 > 0) ? Math.atan(((double) (y0 - y1)) / ((double) (x1 - x0))) : Math.PI - Math.atan(((double) (y0 - y1)) / ((double) (x0 - x1)));
+        // now find two more points in between
+        // first calculate the radius' of the points
+        double ra = Math.sqrt((double) ((x0 - x1) * (x0 - x1) + (y0 - y1) * (y0 - y1))); // from a known point x1, y1
+        double rb = ra - radius - distance;
+        double rc = rb - radius;
+        //System.out.println("CONTROL angle = " + angle);
+        //System.out.println("CONTROL x1 = " + x1 + ", x1calc = " + ((x0 + ((int) ra * Math.cos(angle)))));
+        //System.out.println("CONTROL y1 = " + y1 + ", y1calc = " + ((y0 - ((int) ra * Math.sin(angle)))));
+        // the points are on a circle with radius rb and rc
+        int x2 = x0 + ((int) (rb * Math.cos(angle)));
+        int y2 = y0 - ((int) (rb * Math.sin(angle)));
+        int x3 = x0 + ((int) (rc * Math.cos(angle)));
+        int y3 = y0 - ((int) (rc * Math.sin(angle)));
+        setColor(lineColor);
+        line(x0, y0, x3, y3);
+        setColor(dotColor);
+        dot(x2, y2, radius, true);
     }
     
     public int[] getColor(int x, int y) {

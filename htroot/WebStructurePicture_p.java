@@ -60,15 +60,15 @@ public class WebStructurePicture_p {
         }
         
         //too small values lead to an error, too big to huge CPU/memory consumption, resulting in possible DOS.
-        if (width < 320 ) width = 320;
+        if (width < 32 ) width = 32;
         if (width > 1920) width = 1920;
-        if (height < 240) height = 240;
+        if (height < 24) height = 24;
         if (height > 1920) height = 1920;
         if (depth > 8) depth = 8;
-        if (depth < 1) depth = 1;
+        if (depth < 0) depth = 0;
         
         // find start point
-        if (host == null) {
+        if ((host == null) || (host.length() == 0) || (host.equals("auto"))) {
             // find domain with most references
             host = sb.webStructure.hostWithMaxReferences();
         }
@@ -84,7 +84,7 @@ public class WebStructurePicture_p {
         if (host != null) place(graph, sb.webStructure, hash, host, 0.0, 0.0, 0, depth);
         //graph.print();
         
-        return graph.draw(width, height, 20, 20, 20, 20);
+        return graph.draw(width, height, 40, 40, 5, 15);
         
     }
     
@@ -110,7 +110,7 @@ public class WebStructurePicture_p {
             if (graph.getPoint(targethost) != null) continue;
             // set a new point. It is placed on a circle around the host point
             double angle = ((double) kelondroBase64Order.enhancedCoder.cardinal((targethash + "____").getBytes())) / maxlongd * 2 * Math.PI;
-            System.out.println("ANGLE = " + angle);
+            //System.out.println("ANGLE = " + angle);
             double radius = 1.0 / ((double) (1 << nextlayer));
             graph.addPoint(targethost, x + radius * Math.cos(angle), y + radius * Math.sin(angle), nextlayer);
         }
