@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<classpath>
+	<classpathentry kind="src" path="source"/>
+	<classpathentry excluding="htdocsdefault/|locale/|proxymsg/|yacy/|env/|env/" kind="src" output="htroot" path="htroot"/>
+	<classpathentry kind="src" path="htroot/htdocsdefault"/>
+	<classpathentry kind="src" path="htroot/yacy"/>
+	<classpathentry kind="src" path="htroot/env"/>
+	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER"/>
+	<classpathentry kind="lib" path="lib/commons-collections.jar"/>
+	<classpathentry kind="lib" path="lib/commons-pool.jar"/>
+	<classpathentry kind="lib" path="lib/tar.jar"/>
+	<classpathentry kind="lib" path="libx/axis-ant.jar"/>
+	<classpathentry kind="lib" path="libx/axis.jar"/>
+	<classpathentry kind="lib" path="libx/bzip2.jar"/>
+	<classpathentry kind="lib" path="libx/commons-codec-1.3.jar"/>
+	<classpathentry kind="lib" path="libx/commons-discovery.jar"/>
+	<classpathentry kind="lib" path="libx/commons-jxpath-1.1.jar"/>
+	<classpathentry kind="lib" path="libx/commons-logging.jar"/>
+	<classpathentry kind="lib" path="libx/informa-0.6.0.jar"/>
+	<classpathentry kind="lib" path="libx/jakarta-oro-2.0.7.jar"/>
+	<classpathentry kind="lib" path="libx/jaxrpc.jar"/>
+	<classpathentry kind="lib" path="libx/jdom.jar"/>
+	<classpathentry kind="lib" path="libx/jmimemagic-0.1.0.jar"/>
+	<classpathentry kind="lib" path="libx/jrpm-head.jar"/>
+	<classpathentry kind="lib" path="libx/jrpm-SNAPSHOT.jar"/>
+	<classpathentry kind="lib" path="libx/jsch-0.1.21.jar"/>
+	<classpathentry kind="lib" path="libx/log4j-1.2.9.jar"/>
+	<classpathentry kind="lib" path="libx/odf_utils_05_11_29.jar"/>
+	<classpathentry kind="lib" path="libx/PDFBox-0.7.2.jar"/>
+	<classpathentry kind="lib" path="libx/saaj.jar"/>
+	<classpathentry kind="lib" path="libx/sbbi-upnplib-1.0.3.jar"/>
+	<classpathentry kind="lib" path="libx/tm-extractors-0.4.jar"/>
+	<classpathentry kind="lib" path="libx/wsdl4j.jar"/>
+	<classpathentry kind="lib" path="libx/xerces.jar"/>
+	<classpathentry kind="lib" path="libx/poi-3.0-alpha2-20060616.jar"/>
+	<classpathentry kind="lib" path="libx/poi-scratchpad-3.0-alpha2-20060616.jar"/>
+	<classpathentry kind="lib" path="libx/inetlib.jar"/>
+	<classpathentry kind="lib" path="libx/gnumail.jar"/>
+	<classpathentry kind="lib" path="libx/activation.jar"/>
+	<classpathentry kind="lib" path="libx/webcat-0.1-swf.jar"/>
+	<classpathentry kind="lib" path="libx/J7Zip-modified.jar"/>
+	<classpathentry kind="output" path="gen"/>
+</classpath>
