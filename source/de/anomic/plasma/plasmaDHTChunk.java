@@ -286,7 +286,8 @@ public class plasmaDHTChunk {
             this.status = chunkStatus_FILLED;
             return refcount;
         } catch (kelondroException e) {
-            log.logSevere("selectTransferIndexes database corrupted: " + e.getMessage(), e);
+            //log.logSevere("selectTransferIndexes database corrupted: " + e.getMessage(), e);
+            log.logSevere("selectTransferIndexes database corrupted: " + e.getMessage());
             indexContainers = new indexContainer[0];
             urlCache = new HashMap();
             this.status = chunkStatus_FAILED;
