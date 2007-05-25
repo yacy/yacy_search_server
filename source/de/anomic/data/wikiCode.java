@@ -755,6 +755,11 @@ public class wikiCode extends abstractWikiParser implements wikiParser {
             }
             directory = "<table><tr><td><div class=\"WikiTOCBox\">\n" + directory + "</div></td></tr></table>\n";
         }
+        //(http://www.yacy-forum.de/viewtopic.php?t=4034) [MN]
+        if(!dirElements.isEmpty()){
+            dirElements.clear();
+            headlines = 0;
+        }
         return directory;
     }
 
