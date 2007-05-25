@@ -4,7 +4,7 @@
 // (C) by Michael Peter Christen; mc@anomic.de
 // first published on http://www.anomic.de
 // Frankfurt, Germany, 2004, 2005
-// last change: 25.02.2005
+// last change: 25.05.2007
 //
 // This program is free software; you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -54,21 +54,21 @@ import de.anomic.server.serverObjects;
 import de.anomic.server.serverSwitch;
 
 public class CookieMonitorIncoming_p {
-    
+
     public static serverObjects respond(httpHeader header, serverObjects post, serverSwitch sb) {
         plasmaSwitchboard switchboard = (plasmaSwitchboard) sb;
-        
+
         // return variable that accumulates replacements
         serverObjects prop = new serverObjects();
-        
+
         int maxCount = 100;
         int entCount = 0;
+        int tmpCount = 0;
         boolean dark = true;
         Iterator i = switchboard.incomingCookies.entrySet().iterator();
         Map.Entry entry;
         String host, client;
         Object[] cookies;
-        String ucl;
         Date date;
         Object[] oa;
         while ((entCount < maxCount) && (i.hasNext())) {
@@ -79,17 +79,19 @@ public class CookieMonitorIncoming_p {
             date = (Date) oa[0];
             client = (String) oa[1];
             cookies = (Object[]) oa[2];
-            ucl = "<ul>";
-            for (int j = 0; j < cookies.length; j++) ucl = ucl + "<li>" + ((String) cookies[j]) + "</li>";
-            ucl = ucl + "</ul>";
-            
+
             // put values in template
             prop.put("list_" + entCount + "_dark", ((dark) ? 1 : 0) ); dark =! dark;
             prop.put("list_" + entCount + "_host", host);
             prop.put("list_" + entCount + "_date", httpc.dateString(date));
             prop.put("list_" + entCount + "_client", client);
-            prop.put("list_" + entCount + "_cookie", ucl);
-            
+            while (tmpCount < cookies.length){
+                prop.put("list_" + entCount + "_cookies_" + tmpCount + "_item", ((String) cookies[tmpCount]));
+                tmpCount++;
+            }
+            prop.put("list_" + entCount + "_cookies", tmpCount);
+            tmpCount = 0;
+
             // next
             entCount++;
         }
@@ -99,5 +101,5 @@ public class CookieMonitorIncoming_p {
         // return rewrite properties
         return prop;
     }
-    
+
 }
