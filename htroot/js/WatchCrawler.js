@@ -33,7 +33,7 @@ function countdown(){
 	document.getElementById("nextUpdate").innerHTML=wait;
 	wait--;
 	if(wait==0){
-		refresh()
+		refresh();
 	}
 }
 function refresh(){
@@ -43,13 +43,13 @@ function refresh(){
 }
 
 function requestStatus(){
-	statusRPC=createRequestObject()
+	statusRPC=createRequestObject();
 	statusRPC.open('get', '/xml/status_p.xml');
 	statusRPC.onreadystatechange = handleStatus;
-	statusRPC.send(null)
+	statusRPC.send(null);
 }
 function requestQueues(){
-	queuesRPC=createRequestObject()
+	queuesRPC=createRequestObject();
 	queuesRPC.open('get', '/xml/queues_p.xml');
 	queuesRPC.onreadystatechange = handleQueues;
 	queuesRPC.send(null);
@@ -61,9 +61,9 @@ function handleStatus(){
 		return;
 	}
 	var statusResponse = statusRPC.responseXML;
-	statusTag=getFirstChild(statusResponse, "status")
+	statusTag=getFirstChild(statusResponse, "status");
 	
-	ppm=getValue(getFirstChild(statusTag, "ppm"))
+	ppm=getValue(getFirstChild(statusTag, "ppm"));
 	
 	var ppmNum = document.getElementById("ppmNum");
 	removeAllChildren(ppmNum);

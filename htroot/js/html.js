@@ -31,6 +31,6 @@ function createLinkCol(url, linktext){
 	link.setAttribute("target", "_blank");
 	text=document.createTextNode(linktext);
 	link.appendChild(text);
-	col.appendChild(link)
-	return col
+	col.appendChild(link);
+	return col;
 }
