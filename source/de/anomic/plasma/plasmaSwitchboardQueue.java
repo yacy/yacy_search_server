@@ -50,7 +50,6 @@ import java.net.MalformedURLException;
 import java.util.ArrayList;
 import java.util.Date;
 
-import de.anomic.plasma.plasmaURL;
 import de.anomic.index.indexURLEntry;
 import de.anomic.kelondro.kelondroBase64Order;
 import de.anomic.kelondro.kelondroException;
@@ -351,7 +350,7 @@ public class plasmaSwitchboardQueue {
             }
 
             // check profile
-            if ((!profile().indexText()) && (!profile().indexMedia())) {
+            if (!profile().indexText() && !profile().indexMedia()) {
                 return "Indexing_Not_Allowed";
             }
 
@@ -397,7 +396,7 @@ public class plasmaSwitchboardQueue {
          * this method returns null if the answer is 'YES'!
          * if the answer is 'NO' (do not index), it returns a string with the reason
          * to reject the crawling demand in clear text
-         * 
+         *
          * This function is used by plasmaSwitchboard#processResourceStack
          */
         public final String shallIndexCacheForCrawler() {
@@ -406,7 +405,9 @@ public class plasmaSwitchboardQueue {
             }
 
             // check profile
-            if ((!profile().indexText()) && (!profile().indexMedia())) { return "Indexing_Not_Allowed"; }
+            if (!profile().indexText() && !profile().indexMedia() && !profile().remoteIndexing()) {
+                return "Indexing_Not_Allowed";
+            }
 
             final String nURL = normalizedURLString();
             // -CGI access in request
