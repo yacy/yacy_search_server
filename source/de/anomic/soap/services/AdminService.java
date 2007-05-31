@@ -131,7 +131,8 @@ public class AdminService extends AbstractService {
 	 * ===================================================================== */
     private static final String TEMPLATE_CONFIG_XML = "xml/config_p.xml";   
     private static final String TEMPLATE_VERSION_XML = "xml/version.xml";
-    private static final String TEMPLATE_PROFILE_XML = "ViewProfile.xml";    
+    private static final String TEMPLATE_PROFILE_XML = "ViewProfile.xml";   
+    private static final String TEMPLATE_PERFORMANCE_QUEUES = "PerformanceQueues_p.xml";
     
     /**
      * This function can be used to set a configuration option
@@ -276,6 +277,17 @@ public class AdminService extends AbstractService {
         // sending back the result to the client
         return this.convertContentToXML(result);        
     }        
+    
+    public Document getPerformanceQueues() throws Exception {
+        // extracting the message context
+        extractMessageContext(AUTHENTICATION_NEEDED);          	
+        
+        // generating the template containing the network status information
+        byte[] result = this.serverContext.writeTemplate(TEMPLATE_PERFORMANCE_QUEUES, new serverObjects(), this.requestHeader);
+        
+        // sending back the result to the client
+        return this.convertContentToXML(result);        
+    }     
     
     /**
      * This function can be used to configure the peer name
