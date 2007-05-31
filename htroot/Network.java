@@ -116,6 +116,7 @@ public class Network {
 
                 // my-info
                 prop.put("table_my-name", seed.get(yacySeed.NAME, "-") );
+                prop.put("table_my-hash", seed.hash );
                 if (yacyCore.seedDB.mySeed.isVirgin()) {
                     prop.put("table_my-info", 0);
                 } else if(yacyCore.seedDB.mySeed.isJunior()) {
@@ -153,6 +154,13 @@ public class Network {
                 prop.put("table_my-totalqph", Double.toString(Math.round(6000d * sb.totalQPM) / 100d));
                 prop.put("table_my-seeds", seed.get(yacySeed.SCOUNT, "-"));
                 prop.put("table_my-connects", groupDigits(seed.get(yacySeed.CCOUNT, "0")));
+                prop.put("table_my-url", seed.get("seedURL", ""));
+                
+                // generating the location string
+                String location = httpc.userAgent;
+                int p = location.lastIndexOf(';');
+                location = (p > 0) ? location.substring(p + 1, location.length() - 1).trim(): "";
+                prop.put("table_my-location", location);
             }
 
             // overall results: Network statistics

@@ -58,6 +58,7 @@
   </all>
   <your>
         <name>#[my-name]#</name>
+        <hash>#[my-hash]#</hash>
         <type>#(my-info)#virgin::junior::senior::principal#(/my-info)#</type>
         <version>#[my-version]#</version>
         <utc>#[my-utc]#</utc>
@@ -74,6 +75,8 @@
 		<qph>#[my-qph]#</qph>
         <seeds>#[my-seeds]#</seeds>
         <connects>#[my-connects]#</connects>
+    	<location>#[my-location]#</location>
+    	<seedurl>#[my-url]#</seedurl>
   </your>
   <cluster>
   	<ppm>#[gppm]#</ppm>
