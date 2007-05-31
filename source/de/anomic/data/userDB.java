@@ -313,6 +313,7 @@ public final class userDB {
         public static final String BLOG_RIGHT = "blogRight";
         public static final String WIKIADMIN_RIGHT = "wikiAdminRight";
         public static final String BOOKMARK_RIGHT = "bookmarkRight";
+        public static final String SOAP_RIGHT = "soapRight";
         
         public static final int PROXY_ALLOK = 0; //can Surf
         public static final int PROXY_ERROR = 1; //unknown error
@@ -494,26 +495,50 @@ public final class userDB {
         public String getProperty(String propName, String defaultValue) {
             return (this.mem.containsKey(propName)?(String)this.mem.get(propName):defaultValue);
         }
+        public boolean hasRight(String rightName){
+        	return (this.mem.containsKey(rightName)?((String)this.mem.get(rightName)).equals("true"):false);
+        }
+        /**
+         * @deprecated use hasRight(UPLOAD_RIGHT) instead
+         */
         public boolean hasUploadRight() {
-            return (this.mem.containsKey(UPLOAD_RIGHT)?((String)this.mem.get(UPLOAD_RIGHT)).equals("true"):false);
+            return this.hasRight(UPLOAD_RIGHT);
         }
+        /**
+         * @deprecated use hasRight(DOWNLOAD_RIGHT) instead
+         */
         public boolean hasDownloadRight() {
-            return (this.mem.containsKey(DOWNLOAD_RIGHT)?((String)this.mem.get(DOWNLOAD_RIGHT)).equals("true"):false);
+        	return this.hasRight(DOWNLOAD_RIGHT);
         }
+        /**
+         * @deprecated use hasRight(PROXY_RIGHT) instead
+         */
         public boolean hasProxyRight() {
-            return (this.mem.containsKey(PROXY_RIGHT)?((String)this.mem.get(PROXY_RIGHT)).equals("true"):false);
+        	return this.hasRight(PROXY_RIGHT);
         }
+        /**
+         * @deprecated use hasRight(ADMIN_RIGHT) instead
+         */
         public boolean hasAdminRight() {
-            return (this.mem.containsKey(ADMIN_RIGHT)?((String)this.mem.get(ADMIN_RIGHT)).equals("true"):false);
+        	return this.hasRight(ADMIN_RIGHT);
         }
+        /**
+         * @deprecated use hasRight(BLOG_RIGHT) instead
+         */
         public boolean hasBlogRight() {
-            return (this.mem.containsKey(BLOG_RIGHT)?((String)this.mem.get(BLOG_RIGHT)).equals("true"):false);
+        	return this.hasRight(BLOG_RIGHT);
         }
+        /**
+         * @deprecated use hasRight(WIKIADMIN_RIGHT) instead
+         */
         public boolean hasWikiAdminRight() {
-            return (this.mem.containsKey(WIKIADMIN_RIGHT)?((String)this.mem.get(WIKIADMIN_RIGHT)).equals("true"):false);
+        	return this.hasRight(WIKIADMIN_RIGHT);
         }
+        /**
+         * @deprecated use hasRight(BOOKMARK_RIGHT) instead
+         */
         public boolean hasBookmarkRight() {
-            return (this.mem.containsKey(BOOKMARK_RIGHT)?((String)this.mem.get(BOOKMARK_RIGHT)).equals("true"):false);
+        	return this.hasRight(BOOKMARK_RIGHT);
         }
         public boolean isLoggedOut(){
         	   return (this.mem.containsKey(LOGGED_OUT)?((String)this.mem.get(LOGGED_OUT)).equals("true"):false);
