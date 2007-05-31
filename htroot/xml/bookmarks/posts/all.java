@@ -62,12 +62,17 @@ public class all {
         plasmaSwitchboard switchboard = (plasmaSwitchboard) env;
         boolean isAdmin=switchboard.verifyAuthentication(header, true);
         serverObjects prop = new serverObjects();
+        
         Iterator it;
         if(post != null && post.containsKey("tag")){
             it=switchboard.bookmarksDB.getBookmarksIterator((String) post.get("tag"), isAdmin);
         }else{
             it=switchboard.bookmarksDB.getBookmarksIterator(isAdmin);
         }
+        
+        // if an extended xml should be used
+        boolean extendedXML = (post != null && post.containsKey("extendedXML"));
+        
         int count=0;
         bookmarksDB.Bookmark bookmark;
         Date date;
@@ -80,6 +85,12 @@ public class all {
             date=new Date(bookmark.getTimeStamp());
             prop.putSafeXML("posts_"+count+"_time", serverDate.dateToiso8601(date));
             prop.putSafeXML("posts_"+count+"_tags", bookmark.getTagsString().replaceAll(","," "));
+            
+            // additional XML tags
+            prop.put("posts_"+count+"_isExtended",extendedXML ? 1:0);
+            if (extendedXML) {
+            	prop.putSafeXML("posts_"+count+"_isExtended_private", Boolean.toString(!bookmark.getPublic()));
+            }
             count++;
         }
         prop.put("posts", count);

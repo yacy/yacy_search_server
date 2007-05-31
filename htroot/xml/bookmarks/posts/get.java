@@ -50,6 +50,10 @@ public class get {
         }else{
             date=serverDate.dateToiso8601(new Date(System.currentTimeMillis()));
         }
+        
+        // if an extended xml should be used
+        boolean extendedXML = (post != null && post.containsKey("extendedXML"));
+        
         int count=0;
         
         Date parsedDate = null; 
@@ -73,6 +77,12 @@ public class get {
                 prop.putSafeXML("posts_"+count+"_md5", serverCodings.encodeMD5Hex(bookmark.getUrl()));
                 prop.putSafeXML("posts_"+count+"_time", date);
                 prop.putSafeXML("posts_"+count+"_tags", bookmark.getTagsString().replaceAll(","," "));
+                
+                // additional XML tags
+                prop.put("posts_"+count+"_isExtended",extendedXML ? 1:0);
+                if (extendedXML) {
+                	prop.putSafeXML("posts_"+count+"_isExtended_private", Boolean.toString(!bookmark.getPublic()));
+                }
                 count++;
             }
         }

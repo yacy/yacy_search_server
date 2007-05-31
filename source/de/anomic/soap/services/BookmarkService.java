@@ -415,6 +415,7 @@ public class BookmarkService extends AbstractService {
         
         // generating the template containing the network status information
         serverObjects args = new serverObjects();
+        args.put("extendedXML", "");
         if (tag != null) args.put("tag",tag);
         if (date != null) args.put("date",date);
         
