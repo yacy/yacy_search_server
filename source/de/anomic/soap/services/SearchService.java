@@ -70,7 +70,15 @@ public class SearchService extends AbstractService
     private static final String TEMPLATE_URLINFO = "ViewFile.soap";
     private static final String TEMPLATE_SNIPPET = "xml/snippet.xml";
     private static final String TEMPLATE_OPENSEARCH = "opensearchdescription.xml";
+    private static final String TEMPLATE_SEARCHSTATS = "SearchStatistics_p.html";
 
+	/* =====================================================================
+	 * Constants needed to get search statistic info
+	 * ===================================================================== */
+    private static final int SEARCHSTATS_LOCAL_SEARCH_LOG = 1;
+    private static final int SEARCHSTATS_LOCAL_SEARCH_TRACKER = 2;
+    private static final int SEARCHSTATS_REMOTE_SEARCH_LOG = 3;
+    private static final int SEARCHSTATS_REMOTE_SEARCH_TRACKER = 4;
         
     /**
      * Constructor of this class
@@ -301,6 +309,38 @@ public class SearchService extends AbstractService
        
        // sending back the result to the client
        return this.convertContentToXML(result);   	   
+   }
+   
+   private Document getSearchStatData(int page) throws Exception {
+	   if (page < 1 || page > 4) throw new IllegalArgumentException("Illegal page number.");
+	   
+	   // extracting the message context
+	   extractMessageContext(AUTHENTICATION_NEEDED); 
+	   
+	   serverObjects post = new serverObjects();
+	   post.put("page", Integer.toString(page));
+
+	   // generating the template containing the network status information
+	   byte[] result = this.serverContext.writeTemplate(TEMPLATE_SEARCHSTATS, post, this.requestHeader);
+
+	   // sending back the result to the client
+	   return this.convertContentToXML(result);
+   }
+   
+   public Document getLocalSearchLog() throws Exception {
+	   return this.getSearchStatData(SEARCHSTATS_LOCAL_SEARCH_LOG);
+   }
+   
+   public Document getLocalSearchTracker() throws Exception {
+	   return this.getSearchStatData(SEARCHSTATS_LOCAL_SEARCH_TRACKER);
+   }
+   
+   public Document getRemoteSearchLog() throws Exception {
+	   return this.getSearchStatData(SEARCHSTATS_REMOTE_SEARCH_LOG);
+   }
+   
+   public Document getRemoteSearchTracker() throws Exception {
+	   return this.getSearchStatData(SEARCHSTATS_REMOTE_SEARCH_TRACKER);
    }
 
 }

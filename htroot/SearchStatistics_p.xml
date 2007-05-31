@@ -1,0 +1,42 @@
+<?xml version="1.0"?>
+<SearchStatistics>
+#(page)#<!-- 0: info text -->
+	  ::<!-- 1: Search Statistics: Local Searches -->
+	  <localSearchLog>#{list}#
+        <host>#[host]#</host>
+        <date timestamp="#[timestamp]#">#[date]#</date>
+        <offset>#[offset]#</offset>
+        <querycount>#[querycount]#</querycount>
+        <resultcount>#[resultcount]#</resultcount>
+        <querytime>#[querytime]#</querytime>
+        <resulttime>#[resulttime]#</resulttime>
+        <querystring>#[querystring]#</querystring>	 
+	  #{/list}#</localSearchLog>
+	  
+	  ::<!-- 2: Search Statistics: Local Search Tracker -->
+	  <localSearchTracker>#{list}#
+	    <host>#[host]#</host>
+        <count>#[count]#</count>
+        <dates>#{dates}#
+        	<date timestamp="#[timestamp]#">#[date]#</date>
+        #{/dates}#</dates>
+	  #{/list}#</localSearchTracker>
+	  
+	  ::<!-- 3: Search Statistics: Remote Searches -->
+	  <remoteSearchLog>#{list}#
+	  	<host>#[host]#</host>
+        <peername>#[peername]#</peername>
+        <date timestamp="#[timestamp]#">#[date]#</date>
+        <querycount>#[querycount]#</>
+        <resultcount>#[resultcount]#</resultcount>
+        <querytime>#[querytime]#</querytime>
+        <resulttime>#[resulttime]#</resulttime>
+        <queryhashes>#[queryhashes]#</queryhashes>
+	  #{/list}#</remoteSearchLog>
+	  
+	  ::<!-- 4: Search Statistics: Remote Search Tracker -->
+	  <remoteSearchTracker>#{list}#
+	  #{/list}#</remoteSearchTracker>
+
+#(/page)#
+</SearchStatistics>

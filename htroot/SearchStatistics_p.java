@@ -67,6 +67,7 @@ public class SearchStatistics_p {
                 prop.put("page_list_" + entCount + "_dark", ((dark) ? 1 : 0) ); dark =! dark;
                 prop.put("page_list_" + entCount + "_host", (String) searchProfile.get("host"));
                 prop.put("page_list_" + entCount + "_date", yacyCore.universalDateShortString(new Date(trackerHandle.longValue())));
+                prop.put("page_list_" + entCount + "_timestamp", Long.toString(trackerHandle.longValue()));
                 if (page == 1) {
                     // local search
                     prop.put("page_list_" + entCount + "_offset", ((Integer) searchProfile.get("offset")).toString());
@@ -87,7 +88,7 @@ public class SearchStatistics_p {
         }
         if ((page == 2) || (page == 4)) {
             Iterator i = (page == 2) ? switchboard.localSearchTracker.entrySet().iterator() : switchboard.remoteSearchTracker.entrySet().iterator();
-            String host, handlestring;
+            String host;
             TreeSet handles;
             int entCount = 0;
             Map.Entry entry;
@@ -95,11 +96,17 @@ public class SearchStatistics_p {
                 entry = (Map.Entry) i.next();
                 host = (String) entry.getKey();
                 handles = (TreeSet) entry.getValue();
-                handlestring = "";
+                
+                int dateCount = 0;
                 Iterator ii = handles.iterator();
                 while (ii.hasNext()) {
-                    handlestring += yacyCore.universalDateShortString(new Date(((Long) ii.next()).longValue())) + " ";
+                	Long timestamp = (Long) ii.next();
+                	prop.put("page_list_" + entCount + "_dates_" + dateCount + "_date", yacyCore.universalDateShortString(new Date(timestamp.longValue())));
+                	prop.put("page_list_" + entCount + "_dates_" + dateCount + "_timestamp", timestamp.toString());
+                	dateCount++;
                 }
+                prop.put("page_list_" + entCount + "_dates", dateCount);
+                
                 prop.put("page_list_" + entCount + "_dark", ((dark) ? 1 : 0) ); dark =! dark;
                 prop.put("page_list_" + entCount + "_host", host);
                 if (page == 4) {
@@ -107,7 +114,7 @@ public class SearchStatistics_p {
                     prop.put("page_list_" + entCount + "_peername", (remotepeer == null) ? "UNKNOWN" : remotepeer.getName());
                 }
                 prop.put("page_list_" + entCount + "_count", new Integer(handles.size()).toString());
-                prop.put("page_list_" + entCount + "_dates", handlestring);
+
                 // next
                 entCount++;
             }
