@@ -814,4 +814,12 @@ public class AdminService extends AbstractService {
         // sending back the result to the client
         return this.convertContentToXML(result);     
     }
+    
+    public void doGarbageCollection() throws Exception {
+        // extracting the message context
+        extractMessageContext(AUTHENTICATION_NEEDED);  
+        
+        // execute garbage collection
+        System.gc();
+    } 
 }
