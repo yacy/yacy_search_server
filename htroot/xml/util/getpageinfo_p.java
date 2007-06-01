@@ -46,19 +46,21 @@
 // if the shell's current path is HTROOT
 package xml.util;
 import java.io.IOException;
+import java.io.Writer;
 import java.net.MalformedURLException;
 import java.util.ArrayList;
-import java.util.Iterator;
 
-import de.anomic.data.htmlTools;
+
 import de.anomic.data.robotsParser;
+import de.anomic.htmlFilter.htmlFilterContentScraper;
+import de.anomic.htmlFilter.htmlFilterWriter;
 import de.anomic.http.httpHeader;
 import de.anomic.http.httpc;
 import de.anomic.net.URL;
 import de.anomic.plasma.plasmaSwitchboard;
+import de.anomic.server.serverFileUtils;
 import de.anomic.server.serverObjects;
 import de.anomic.server.serverSwitch;
-import de.anomic.tools.nxTools;
 
 public class getpageinfo_p {
     public static serverObjects respond(httpHeader header, serverObjects post, serverSwitch env) {
@@ -81,22 +83,20 @@ public class getpageinfo_p {
             if (actions.indexOf("title")>=0) {
                 try {
                     URL u = new URL(url);
-                    content = nxTools.strings(httpc.wget(u, u.getHost(), 6000, null, null, ((plasmaSwitchboard) env).remoteProxyConfig, null));
-                    Iterator it = content.iterator();
-                    String line;
-                    String title;
-                    while (it.hasNext()) {
-                        line = (String) it.next();
-                        try {
-                            title = line.substring(line.toLowerCase().indexOf(
-                                    "<title>") + 7, line.toLowerCase().indexOf(
-                                    "</title>"));
-                            // de-replace html entities
-                            title = htmlTools.deReplaceHTML(title);
-                            prop.put("title", title);
-                        } catch (IndexOutOfBoundsException e) {
-                        }
+                    String contentString=new String(httpc.wget(u, u.getHost(), 6000, null, null, ((plasmaSwitchboard) env).remoteProxyConfig, null))	;
+                    
+                    htmlFilterContentScraper scraper = new htmlFilterContentScraper(u);
+                    //OutputStream os = new htmlFilterOutputStream(null, scraper, null, false);
+                    Writer writer = new htmlFilterWriter(null,null,scraper,null,false);
+                    serverFileUtils.write(contentString,writer);
+                    writer.close();
+                    
+                    prop.put("title", scraper.getTitle());
+                    String list[]=scraper.getKeywords();
+                    for(int i=0;i<list.length;i++){
+                    	prop.putSafeXML("tags_"+i+"_tag", list[i]);
                     }
+                    prop.put("tags", list.length);
 
                 } catch (MalformedURLException e) {
                 } catch (IOException e) {
@@ -116,7 +116,9 @@ public class getpageinfo_p {
                     // get the sitemap URL of the domain
                     URL sitemapURL = robotsParser.getSitemapURL(theURL);
                     prop.put("sitemap", (sitemapURL==null)?"":sitemapURL.toString());
-                } catch (MalformedURLException e) {}
+                } catch (MalformedURLException e) {
+                	   prop.put("sitemap", "");
+                }
             }
             
         }
