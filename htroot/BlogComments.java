@@ -193,7 +193,13 @@ public class BlogComments {
             }
         }   
 
-		if(post.containsKey("preview")) {
+        if(hasRights && post.containsKey("allow") && post.containsKey("page") && post.containsKey("comment")) {
+            blogBoardComments.CommentEntry entry = switchboard.blogCommentDB.read((String) post.get("comment"));
+            entry.allow();
+            switchboard.blogCommentDB.write(entry);
+        }
+        
+        if(post.containsKey("preview")) {
 			//preview the page
             prop.put("mode", 1);//preview
             prop.put("mode_pageid", pagename);
@@ -240,6 +246,7 @@ public class BlogComments {
                 //show all commments
                 try {
                     Iterator i = page.comments().iterator();
+                    int commentMode = page.getCommentMode();
                     String pageid;
                     blogBoardComments.CommentEntry entry;
                     boolean xml = false;
@@ -258,6 +265,9 @@ public class BlogComments {
                             continue;
                         entry = switchboard.blogCommentDB.read(pageid);
 
+                        if (commentMode == 2 && !hasRights && !entry.isAllowed())
+                            continue;
+                        
                         prop.put("mode", 0);
                         prop.put("mode_entries_"+count+"_pageid",entry.key());
                         if(!xml) {
@@ -277,6 +287,12 @@ public class BlogComments {
                             prop.put("mode_entries_"+count+"_admin", 1);
                             prop.put("mode_entries_"+count+"_admin_pageid",page.key());
                             prop.put("mode_entries_"+count+"_admin_commentid",pageid);
+                            if(!entry.isAllowed()) {
+                                prop.put("mode_entries_"+count+"_admin_moderate", 1);
+                                prop.put("mode_entries_"+count+"_admin_moderate_pageid",page.key());
+                                prop.put("mode_entries_"+count+"_admin_moderate_commentid",pageid);
+
+                            }
                         }
                         else prop.put("mode_entries_"+count+"_admin", 0);
                         ++count;

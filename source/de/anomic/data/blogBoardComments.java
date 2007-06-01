@@ -209,6 +209,16 @@ public class blogBoardComments {
 	    return b;
 	}        
 
+    public boolean isAllowed() {
+        Boolean moderated = (Boolean) record.get("moderated");
+        if (moderated == null) return false;
+        return moderated.booleanValue();
+    } 
+    
+    public void allow() {
+        record.put("moderated", new Boolean(true));
+    } 
+    
     }
 
     public String write(CommentEntry page) {
