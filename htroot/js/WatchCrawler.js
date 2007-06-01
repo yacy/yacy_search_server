@@ -18,19 +18,20 @@ function changeInterval(){
 	if(!changing){
 		window.clearInterval(countInterval);
 		counter=document.getElementById("nextUpdate");
-		counter.innerHTML='<input type="text" id="newInterval" onblur="newInterval()" size="2" />';
-		document.getElementById("newInterval").focus();
+		//counter.innerHTML='<input type="text" id="newInterval" onblur="newInterval()" size="2" />';
+		//document.getElementById("newInterval").focus();
+		counter.value=refreshInterval;
 		changing=true;
 	}
 }
 function newInterval(){
-	refreshInterval=document.getElementById("newInterval").value;
+	refreshInterval=document.getElementById("nextUpdate").value;
 	refresh();
 	countInterval=window.setInterval("countdown()", 1000);
 	changing=false;
 }
 function countdown(){
-	document.getElementById("nextUpdate").innerHTML=wait;
+	document.getElementById("nextUpdate").value=wait;
 	wait--;
 	if(wait==0){
 		refresh();

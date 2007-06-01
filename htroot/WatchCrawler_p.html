@@ -11,7 +11,7 @@
 #%env/templates/header.template%#
 #%env/templates/submenuCrawler.template%#
 <h2>Crawler Monitor</h2>
-<p> Next update in <span id="nextUpdate" onclick="changeInterval()"></span> seconds. <img src="/env/grafics/empty.gif" name="ajax" alt="empty"/>
+<p> Next update in <input type="text" id="nextUpdate" onfocus="changeInterval()" onblur="newInterval()" size="2" /> seconds. <img src="/env/grafics/empty.gif" name="ajax" alt="empty"/>
 </p>
       <table border="0" cellpadding="2" cellspacing="1" class="watchCrawler">
         <tbody>
