@@ -48,7 +48,6 @@ package xml.util;
 import java.io.IOException;
 import java.io.Writer;
 import java.net.MalformedURLException;
-import java.util.ArrayList;
 
 
 import de.anomic.data.robotsParser;
@@ -65,13 +64,13 @@ import de.anomic.server.serverSwitch;
 public class getpageinfo_p {
     public static serverObjects respond(httpHeader header, serverObjects post, serverSwitch env) {
         serverObjects prop = new serverObjects();
+        prop.put("sitemap", "");
         prop.put("title", "");
         prop.put("robots-allowed", 3); //unknown
         String actions="title";
         if(post!=null && post.containsKey("url")){
             if(post.containsKey("actions"))
                 actions=(String)post.get("actions");
-            ArrayList content;
             String url=(String) post.get("url");
 			if(url.toLowerCase().startsWith("ftp://")){
 				prop.put("robots-allowed", 1);
@@ -116,9 +115,7 @@ public class getpageinfo_p {
                     // get the sitemap URL of the domain
                     URL sitemapURL = robotsParser.getSitemapURL(theURL);
                     prop.put("sitemap", (sitemapURL==null)?"":sitemapURL.toString());
-                } catch (MalformedURLException e) {
-                	   prop.put("sitemap", "");
-                }
+                } catch (MalformedURLException e) {}
             }
             
         }
