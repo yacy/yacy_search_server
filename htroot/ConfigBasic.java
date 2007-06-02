@@ -102,6 +102,7 @@ public class ConfigBasic {
         } 
         
         // scan for Upnp routers
+        /*
         long begin = System.currentTimeMillis();
         boolean upnpRouterFound = false;
         if (yacyCore.seedDB.mySeed.isVirgin() || yacyCore.seedDB.mySeed.isJunior()) {
@@ -112,8 +113,8 @@ public class ConfigBasic {
         // if the upnp router scan has taken less than 3 sec, we need to wait
         // a little bit for success of peer ping
         if ((doPeerPing) && ((end - begin) < 3000 )) {
-            try {Thread.sleep(3000-(end - begin));} catch (InterruptedException e) {/* */} 
-        }
+            try {Thread.sleep(3000-(end - begin));} catch (InterruptedException e) {/* *///} 
+        /*}
         
         // if a UPnP router is available
         String currentForwarder = env.getConfig("portForwarding.Type", "none");
@@ -127,7 +128,7 @@ public class ConfigBasic {
         
         // if UPnp is already enabled
         prop.put("upnp_enabled", currentForwarder.equalsIgnoreCase("upnp") && forwardingEnabled ? 1 : 0);
-        
+        */
         // language settings
         if ((post != null) && (!(post.get("language", "default").equals(lang)))) {
             translator.changeLang(env, langPath, post.get("language", "default") + ".lng");
