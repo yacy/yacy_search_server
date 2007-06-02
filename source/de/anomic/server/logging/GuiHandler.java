@@ -131,6 +131,10 @@ public class GuiHandler extends Handler{
         this.count = 0;
     }
     
+    public int getSize() {
+    	return this.size;
+    }
+    
     public synchronized void publish(LogRecord record) {
         if (!isLoggable(record)) return;
         

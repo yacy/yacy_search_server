@@ -64,7 +64,7 @@ public class ViewLog_p {
         serverObjects prop = new serverObjects();
         String[] log = new String[0];
         boolean reversed = false;
-        int lines = 200;
+        int maxlines = 400, lines = 200;
         String filter = ".*.*";
         
         if(post != null){
@@ -85,6 +85,8 @@ public class ViewLog_p {
         boolean displaySubmenu = false;
         for (int i=0; i<handlers.length; i++) {
             if (handlers[i] instanceof GuiHandler) {
+                maxlines = ((GuiHandler)handlers[i]).getSize();
+                if (lines > maxlines) lines = maxlines;
                 log = ((GuiHandler)handlers[i]).getLogLines(reversed,lines);
             } else if (handlers[i] instanceof LogalizerHandler) {
                 displaySubmenu = true;
@@ -94,6 +96,7 @@ public class ViewLog_p {
         prop.put("submenu", (displaySubmenu) ? 1 : 0);
         prop.put("reverseChecked", reversed ? 1 : 0);
         prop.put("lines", lines);
+        prop.put("maxlines",maxlines);
         prop.put("filter", filter);
         
         // trying to compile the regular expression filter expression
