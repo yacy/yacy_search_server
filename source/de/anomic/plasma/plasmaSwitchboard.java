@@ -1679,8 +1679,14 @@ public final class plasmaSwitchboard extends serverAbstractSwitch implements ser
         errorURL.close();
         wordIndex.close();
         yc.close();
-        // signal shudown to the updater
-        if (updaterCallback != null) updaterCallback.signalYaCyShutdown();
+        // signal shutdown to the updater
+        if (updaterCallback != null) {
+        	if (sb.getConfigLong("Updater.shutdownSignal", -1) == 0)
+        		updaterCallback.signalYaCyShutdown();
+        	else if
+        		(sb.getConfigLong("Updater.shutdownSignal", -1) == 1)
+        		updaterCallback.signalYaCyRestart();
+        }
         log.logConfig("SWITCHBOARD SHUTDOWN TERMINATED");
     }
     
@@ -1691,7 +1697,7 @@ public final class plasmaSwitchboard extends serverAbstractSwitch implements ser
     
     public void enQueue(Object job) {
         if (!(job instanceof plasmaSwitchboardQueue.Entry)) {
-            System.out.println("internal error at plasmaSwitchboard.enQueue: wrong job type");
+            System.out.println("Internal error at plasmaSwitchboard.enQueue: wrong job type");
             System.exit(0);
         }
         try {

@@ -73,7 +73,7 @@ public class Steering {
         }
 
         if (post.containsKey("shutdown")) {
-        	if (sb.updaterCallback != null) { sb.updaterCallback.signalYaCyShutdown(); }
+        	if (sb.updaterCallback != null) { sb.setConfig("Updater.restartSignal", 0); }
             sb.terminate(3000);
             prop.put("info", 3);
             return prop;
@@ -94,9 +94,9 @@ public class Steering {
         	}
         	
             if (sb.updaterCallback != null) { 
-            	sb.updaterCallback.signalYaCyRestart();
+            	sb.setConfig("Updater.shutdownSignal", 1);
             } else {
-            	serverLog.logWarning("SHUTDOWN", "ERROR: no wrapper/updater running! Performing a normal shutdown...");
+            	serverLog.logWarning("SHUTDOWN", "No wrapper/updater running! Performing a normal shutdown...");
              }
             
         	sb.terminate(5000);
