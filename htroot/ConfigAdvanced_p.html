@@ -1,6 +1,11 @@
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml">
   <head>
+    <style>
+		.hidden{
+					display: none;
+		}
+	</style>
     <title>YaCy '#[clientname]#': Advanced Config</title>
     #%env/templates/metas.template%#
     <script type="text/javascript">
@@ -9,6 +14,21 @@
         document.getElementById("key").value=element.id.substring(1);
         document.getElementById("value").value=element.value;
       }
+	  function filterList(){
+			  list=document.getElementsByName("options")[0];
+			  node=list.firstChild;
+			  key=document.getElementById("key").value;
+			  while(node!=null){
+					  if(node.nodeType==1 && node.nodeName.toLowerCase()=="option"){
+							  if(key!="" && node.firstChild.nodeValue.indexOf(key)==-1){
+									  node.setAttribute("class", "hidden");
+							  }else{
+									  node.setAttribute("class", "");
+							  }
+					  }
+					  node=node.nextSibling;
+			  }
+	  }
       -->
     </script>
   </head>
@@ -33,7 +53,7 @@
   </select><br />
   <form action="Config_p.html" method="post">
     <fieldset>
-      <input type="text" id="key" name="key" size="40" />:<input type="text" id="value" name="value" size="40" />
+      <input type="text" id="key" name="key" size="40" onkeydown="filterList()" />:<input type="text" id="value" name="value" size="40" />
       <input type="submit" value="Save" />
     </fieldset>
   </form>
