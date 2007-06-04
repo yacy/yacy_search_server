@@ -55,8 +55,6 @@ import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Vector;
 
-import com.sun.tools.javac.comp.Env;
-
 import de.anomic.plasma.plasmaSwitchboard;
 import de.anomic.plasma.urlPattern.abstractURLPattern;
 import de.anomic.plasma.urlPattern.plasmaURLPattern.blacklistFile;
@@ -342,7 +340,7 @@ public class listManager {
         for (int i=0; i < supportedBlacklistTypes.length; i++) {
             blacklistFile blFile = new blacklistFile(
                     switchboard.getConfig(
-                    supportedBlacklistTypes[i] + ".BlackLists", switchboard.getConfig("lackLists.DefaultList", "url.default.black")),
+                    supportedBlacklistTypes[i] + ".BlackLists", switchboard.getConfig("BlackLists.DefaultList", "url.default.black")),
                     supportedBlacklistTypes[i]);
             blacklistFiles.add(blFile);
         }
