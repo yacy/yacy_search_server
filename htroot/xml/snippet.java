@@ -25,8 +25,8 @@ public class snippet {
         //get the timeout for snippet-fetching
         int mediasnippet_timeout = 15000;
         int textsnippet_timeout = 10000;
-        mediasnippet_timeout = Integer.parseInt((env.getConfig("timeout_text", "15000")));
-        textsnippet_timeout = Integer.parseInt((env.getConfig("timeout_media", "10000")));
+        mediasnippet_timeout = Integer.parseInt(env.getConfig("timeout_text", "15000"));
+        textsnippet_timeout = Integer.parseInt(env.getConfig("timeout_media", "10000"));
         	
         // getting url
         String urlString = post.get("url", "");

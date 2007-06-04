@@ -52,6 +52,7 @@ import java.net.MalformedURLException;
 import java.net.URLEncoder;
 import java.util.HashMap;
 import java.util.Iterator;
+import java.util.Set;
 import java.util.regex.PatternSyntaxException;
 import java.util.TreeSet;
 
@@ -69,6 +70,7 @@ import de.anomic.plasma.plasmaSearchPreOrder;
 import de.anomic.plasma.plasmaSearchQuery;
 import de.anomic.plasma.plasmaSearchRankingProfile;
 import de.anomic.plasma.plasmaSearchTimingProfile;
+import de.anomic.plasma.plasmaSnippetCache;
 import de.anomic.plasma.plasmaSwitchboard;
 import de.anomic.plasma.plasmaURL;
 import de.anomic.plasma.plasmaSearchResults;
@@ -266,9 +268,10 @@ public class yacysearch {
         final boolean globalsearch = (global) && (yacyonline) && (!samesearch);
         
         // do the search
+        TreeSet queryHashes = plasmaCondenser.words2hashes(query[0]);
         plasmaSearchQuery thisSearch = new plasmaSearchQuery(
         			querystring,
-        			plasmaCondenser.words2hashes(query[0]),
+        			queryHashes,
         			plasmaCondenser.words2hashes(query[1]),
                     maxDistance,
                     prefermask,
@@ -338,9 +341,47 @@ public class yacysearch {
                 if (result.hasSnippet()) {
                     prop.put("type_results_" + i + "_snippet", 1);
                     prop.putASIS("type_results_" + i + "_snippet_text", result.getSnippet().getLineMarked(results.getQuery().queryHashes));//FIXME: the ASIS should not be needed, if there is no html in .java
-                } else {
-                    prop.put("type_results_" + i + "_snippet", 0);
-                    prop.put("type_results_" + i + "_snippet_text", "");
+                } else {                	
+                	if (post.containsKey("fetchSnippet")) {
+                		/* fetch the snippet now */
+                        try {
+                        	// snippet fetch timeout
+                        	int textsnippet_timeout = Integer.parseInt(env.getConfig("timeout_media", "10000"));
+                        	
+                        	// boolean line_end_with_punctuation
+                        	boolean pre = post.get("pre", "false").equals("true");
+                        	
+//                        	 if 'remove' is set to true, then RWI references to URLs that do not have the snippet are removed
+                        	boolean remove = post.get("remove", "false").equals("true");
+                        	
+                        	URL resultURL = new URL(result.getUrl());                        	
+                        	plasmaSnippetCache.TextSnippet snippet = sb.snippetCache.retrieveTextSnippet(
+                        			resultURL, 
+                        			queryHashes, 
+                        			true, 
+                        			pre, 
+                        			260, 
+                        			textsnippet_timeout
+                        	);
+                        	                        	
+                            if (snippet.getErrorCode() < 11) {
+                                // no problems occurred
+                                //prop.put("text", (snippet.exists()) ? snippet.getLineMarked(queryHashes) : "unknown");
+                                prop.putASIS("type_results_" + i + "_snippet_text", (snippet.exists()) ? snippet.getLineMarked(queryHashes) : "unknown");
+                            } else {
+                                // problems with snippet fetch
+                               prop.put("type_results_" + i + "_snippet_text", (remove) ? sb.snippetCache.failConsequences(snippet, queryHashes) : snippet.getError());
+                            }          
+                            prop.put("type_results_" + i + "_snippet", 1);
+                        } catch (MalformedURLException e) {
+                    		prop.put("type_results_" + i + "_snippet", 0);
+                    		prop.put("type_results_" + i + "_snippet_text", "");
+                        }
+                	} else {
+                		/* no snippet available (will be fetched later via ajax) */
+                		prop.put("type_results_" + i + "_snippet", 0);
+                		prop.put("type_results_" + i + "_snippet_text", "");
+                	}
                 }
                 prop.put("type_results", results.numResults());
                 prop.put("references", results.getReferences());
