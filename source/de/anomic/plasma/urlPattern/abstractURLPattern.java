@@ -102,7 +102,7 @@ public abstract class abstractURLPattern implements plasmaURLPattern {
     
     protected HashMap getBlacklistMap(String blacklistType) {
         if (blacklistType == null) throw new IllegalArgumentException();
-        if (!BLACKLIST_TYPES.contains(blacklistType)) throw new IllegalArgumentException("Unknown backlist type.");        
+        if (!BLACKLIST_TYPES.contains(blacklistType)) throw new IllegalArgumentException("Unknown blacklist type: "+blacklistType+".");        
         
         return (HashMap) this.hostpaths.get(blacklistType);
     }
