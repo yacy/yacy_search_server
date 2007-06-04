@@ -55,7 +55,10 @@ import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Vector;
 
+import com.sun.tools.javac.comp.Env;
+
 import de.anomic.plasma.plasmaSwitchboard;
+import de.anomic.plasma.urlPattern.abstractURLPattern;
 import de.anomic.plasma.urlPattern.plasmaURLPattern.blacklistFile;
 import de.anomic.server.serverCore;
 
@@ -332,13 +335,14 @@ public class listManager {
 
     // load all active Blacklists in the Proxy
     public static void reloadBlacklists(){
-        String supportedBlacklistTypesStr = switchboard.getConfig("BlackLists.types", "");
+        String supportedBlacklistTypesStr = abstractURLPattern.BLACKLIST_TYPES_STRING;
         String[] supportedBlacklistTypes = supportedBlacklistTypesStr.split(",");
         
         ArrayList blacklistFiles = new ArrayList(supportedBlacklistTypes.length);
         for (int i=0; i < supportedBlacklistTypes.length; i++) {
             blacklistFile blFile = new blacklistFile(
-                    switchboard.getConfig(supportedBlacklistTypes[i] + ".BlackLists", ""),
+                    switchboard.getConfig(
+                    supportedBlacklistTypes[i] + ".BlackLists", switchboard.getConfig("lackLists.DefaultList", "url.default.black")),
                     supportedBlacklistTypes[i]);
             blacklistFiles.add(blFile);
         }

@@ -63,6 +63,7 @@ import java.util.regex.PatternSyntaxException;
 import de.anomic.data.listManager;
 import de.anomic.http.httpHeader;
 import de.anomic.plasma.plasmaSwitchboard;
+import de.anomic.plasma.urlPattern.abstractURLPattern;
 import de.anomic.plasma.urlPattern.defaultURLPattern;
 import de.anomic.plasma.urlPattern.plasmaURLPattern;
 import de.anomic.server.serverObjects;
@@ -96,7 +97,7 @@ public class BlacklistCleaner_p {
         String blacklistToUse = null;
         
         // getting the list of supported blacklist types
-        String supportedBlacklistTypesStr = env.getConfig("BlackLists.types", "");
+        String supportedBlacklistTypesStr = abstractURLPattern.BLACKLIST_TYPES_STRING;
         String[] supportedBlacklistTypes = supportedBlacklistTypesStr.split(","); 
         
         if (post == null) {

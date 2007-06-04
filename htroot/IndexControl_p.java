@@ -69,6 +69,7 @@ import de.anomic.kelondro.kelondroRotateIterator;
 import de.anomic.net.URL;
 import de.anomic.plasma.plasmaCondenser;
 import de.anomic.plasma.plasmaSwitchboard;
+import de.anomic.plasma.urlPattern.abstractURLPattern;
 import de.anomic.plasma.urlPattern.plasmaURLPattern;
 import de.anomic.server.serverObjects;
 import de.anomic.server.serverSwitch;
@@ -384,7 +385,7 @@ public class IndexControl_p {
             if (post.containsKey("blacklistdomains")) {
                 PrintWriter pw;
                 try {
-                    String[] supportedBlacklistTypes = env.getConfig("BlackLists.types", "").split(",");
+                    String[] supportedBlacklistTypes = abstractURLPattern.BLACKLIST_TYPES_STRING.split(",");
                     pw = new PrintWriter(new FileWriter(new File(listManager.listsPath, blacklist), true));
                     URL url;
                     for (int i=0; i<urlx.length; i++) {

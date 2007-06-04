@@ -248,13 +248,8 @@ proxyYellowList=yacy.yellow
 # instead always a 404 is returned
 # all these files will be placed in the listsPath
 BlackLists.class=de.anomic.plasma.urlPattern.defaultURLPattern
-BlackLists.types=proxy,crawler,dht,search
 BlackLists.Shared=url.default.black
-
-proxy.BlackLists=url.default.black
-crawler.BlackLists=url.default.black
-dht.BlackLists=url.default.black
-search.BlackLists=url.default.black
+BlackLists.DefaultList=url.default.black
 
 proxyCookieBlackList=cookie.default.black
 proxyCookieWhiteList=cookie.default.black

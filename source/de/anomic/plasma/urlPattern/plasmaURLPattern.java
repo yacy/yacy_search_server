@@ -10,6 +10,7 @@ public interface plasmaURLPattern {
     public static final String BLACKLIST_CRAWLER = "crawler";
     public static final String BLACKLIST_PROXY = "proxy";
     public static final String BLACKLIST_SEARCH = "search";
+    public static final String BLACKLIST_SURFTIPS = "surftips";
     
     public static final class blacklistFile {
         

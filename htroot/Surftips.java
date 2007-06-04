@@ -26,16 +26,19 @@
 
 
 import java.io.IOException;
+import java.net.MalformedURLException;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Iterator;
 
 import de.anomic.http.httpHeader;
+import de.anomic.net.URL;
 import de.anomic.plasma.plasmaURL;
 import de.anomic.kelondro.kelondroMScoreCluster;
 import de.anomic.kelondro.kelondroRow;
 import de.anomic.kelondro.kelondroNaturalOrder;
 import de.anomic.plasma.plasmaSwitchboard;
+import de.anomic.plasma.urlPattern.plasmaURLPattern;
 import de.anomic.server.serverObjects;
 import de.anomic.server.serverSwitch;
 import de.anomic.tools.crypt;
@@ -129,6 +132,10 @@ public class Surftips {
                 if (row == null) continue;
                 
                 url = row.getColString(0, null);
+                try{
+                	if(plasmaSwitchboard.urlBlacklist.isListed(plasmaURLPattern.BLACKLIST_SURFTIPS ,new URL(url)))
+                		continue;
+                }catch(MalformedURLException e){continue;};
                 title = row.getColString(1,"UTF-8");
                 description = row.getColString(2,"UTF-8");
                 if ((url == null) || (title == null) || (description == null)) continue;

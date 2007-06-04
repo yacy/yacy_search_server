@@ -251,8 +251,10 @@ public class migration {
             sb.setConfig("crawler.BlackLists", value);
             sb.setConfig("dht.BlackLists", value);
             sb.setConfig("search.BlackLists", value);
+            sb.setConfig("surftips.BlackLists", value);
             
             sb.setConfig("BlackLists.Shared",sb.getConfig("proxyBlackListsShared",""));
+            sb.setConfig("proxyBlackListsActive", "");
         }
         
         // migration of http specific crawler settings

@@ -60,6 +60,7 @@ import java.util.TreeMap;
 import de.anomic.data.listManager;
 import de.anomic.http.httpHeader;
 import de.anomic.plasma.plasmaSwitchboard;
+import de.anomic.plasma.urlPattern.abstractURLPattern;
 import de.anomic.server.serverObjects;
 import de.anomic.server.serverSwitch;
 import de.anomic.yacy.yacyCore;
@@ -77,7 +78,7 @@ public class Blacklist_p {
         listManager.listsPath = new File(listManager.switchboard.getRootPath(),listManager.switchboard.getConfig("listManager.listsPath", "DATA/LISTS"));
         
         // getting the list of supported blacklist types
-        String supportedBlacklistTypesStr = env.getConfig("BlackLists.types", "");
+        String supportedBlacklistTypesStr = abstractURLPattern.BLACKLIST_TYPES_STRING;
         String[] supportedBlacklistTypes = supportedBlacklistTypesStr.split(",");        
         
         String blacklistToUse = null;
