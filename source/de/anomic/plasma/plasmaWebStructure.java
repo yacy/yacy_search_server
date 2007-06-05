@@ -148,12 +148,17 @@ public class plasmaWebStructure {
         }
     }
     
+    private static int refstr2count(String refs) {
+        if ((refs == null) || (refs.length() <= 8)) return 0;
+        assert (refs.length() - 8) % 10 == 0;
+        return (refs.length() - 8) / 10;
+    }
+    
     private static TreeMap refstr2map(String refs) {
         if ((refs == null) || (refs.length() <= 8)) return new TreeMap();
         TreeMap map = new TreeMap();
         String c;
-        assert (refs.length() - 8) % 10 == 0;
-        int refsc = (refs.length() - 8) / 10;
+        int refsc = refstr2count(refs);
         for (int i = 0; i < refsc; i++) {
             c = refs.substring(8 + i * 10, 8 + (i + 1) * 10);
             map.put(c.substring(0, 6), new Integer(Integer.parseInt(c.substring(6), 16)));
@@ -198,6 +203,19 @@ public class plasmaWebStructure {
             return refstr2map((String) tailMap.get(key));
         } else {
             return new TreeMap();
+        }
+    }
+    
+    public int referencesCount(String domhash) {
+        // returns the number of domains that are referenced by this domhash
+        assert domhash.length() == 6 : "domhash = " + domhash;
+        SortedMap tailMap = structure.tailMap(domhash);
+        if ((tailMap == null) || (tailMap.size() == 0)) return 0;
+        String key = (String) tailMap.firstKey();
+        if (key.startsWith(domhash)) {
+            return refstr2count((String) tailMap.get(key));
+        } else {
+            return 0;
         }
     }
     

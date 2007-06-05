@@ -95,24 +95,30 @@ public class WebStructurePicture_p {
         if (center == null) center = graph.addPoint(centerhost, x, y, nextlayer);
         if (nextlayer == maxlayer) return;
         nextlayer++;
+        double radius = 1.0 / ((double) (1 << nextlayer));
         Map next = structure.references(centerhash);
         Map.Entry entry;
         String targethash, targethost;
         // first set points to next hosts
         Iterator i = next.entrySet().iterator();
         ArrayList targets = new ArrayList();
+        int maxrefs = 8;
+        int refcount;
+        double rr;
         while (i.hasNext()) {
             entry = (Map.Entry) i.next();
             targethash = (String) entry.getKey();
             targethost = structure.resolveDomHash2DomString(targethash);
             if (targethost == null) continue;
+            refcount = structure.referencesCount(targethash);
+            maxrefs = Math.max(refcount, maxrefs);
             targets.add(new String[] {targethash, targethost});
             if (graph.getPoint(targethost) != null) continue;
             // set a new point. It is placed on a circle around the host point
             double angle = ((double) kelondroBase64Order.enhancedCoder.cardinal((targethash + "____").getBytes())) / maxlongd * 2 * Math.PI;
             //System.out.println("ANGLE = " + angle);
-            double radius = 1.0 / ((double) (1 << nextlayer));
-            graph.addPoint(targethost, x + radius * Math.cos(angle), y + radius * Math.sin(angle), nextlayer);
+            rr = radius / 4 * (1 - refcount / maxrefs);
+            graph.addPoint(targethost, x + (radius - rr) * Math.cos(angle), y + (radius - rr) * Math.sin(angle), nextlayer);
         }
         // recursively set next hosts
         i = targets.iterator();
