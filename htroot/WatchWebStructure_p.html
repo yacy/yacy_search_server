@@ -10,15 +10,23 @@
 #%env/templates/submenuCrawler.template%#
 <h2>Web Structure</h2>
 
+<form action="/WatchWebStructure_p.html">
+<input type="hidden" name="width" value="#[width]#" />
+<input type="hidden" name="height" value="height]#" />
 <table>
 <tr>
 <td valign="top">
 <dl>
-<dt>host</dt><dd><input type="text" value="#[host]#" id="host" onblur="changeHost()" onkeydown="keydown(event)"/></dd>
-<dt>depth</dt><dd>#[depth]#<br/>
-  <a href="WatchWebStructure_p.html?host=#[host]#&depth=#[depthd]#&width=#[width]#&height=#[height]#"><img src="env/grafics/minus.gif" /></a>
-  <a href="WatchWebStructure_p.html?host=#[host]#&depth=#[depthi]#&width=#[width]#&height=#[height]#"><img src="env/grafics/plus.gif" /></a>
-</dd>
+	<dt>host</dt>
+	<dd>
+		<input type="text" value="#[host]#" name="host" id="host" />
+	</dd>
+	<dt>depth</dt>
+	<dd><input type="text" name="depth" value="#[depth]#" /></dd>
+  </dd>
+  <dt>
+  <input type="submit" value="change" />
+  </dt>
 </dl>
 </td>
 <td>
@@ -28,6 +36,7 @@
 </td>
 </tr>
 </table>
+</form>
 #%env/templates/footer.template%# 
 </body>
 </html>
