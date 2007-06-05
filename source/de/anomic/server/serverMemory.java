@@ -28,17 +28,60 @@ package de.anomic.server;
 
 import java.text.DecimalFormat;
 
+import de.anomic.server.logging.serverLog;
+
 public class serverMemory {
 
     public static boolean vm14 = System.getProperty("java.vm.version").startsWith("1.4");
     public static final long max = (vm14) ? computedMaxMemory() : Runtime.getRuntime().maxMemory() ; // patch for maxMemory bug in Java 1.4.2
     private static final Runtime runtime = Runtime.getRuntime();
     
+    private static final long[] gcs = new long[5];
+    private static int gcs_pos = 0;
+    
+    /** @return the amount of freed bytes by a forced GC this method performes */
+    private static long runGC() {
+        long memnow = available();
+        System.gc();
+        if (++gcs_pos >= gcs.length) gcs_pos = 0;
+        return (gcs[gcs_pos] = available() - memnow);
+    }
+    
+    /**
+     * This method calculates the average amount of bytes freed by the last GCs forced by this class
+     * @return the average amount of freed bytes of the last forced GCs or <code>0</code> if no
+     * GC has been run yet
+     */
+    public static long getAverageGCFree() {
+        long x = 0;
+        int y = 0;
+        for (int i=0; i<gcs.length; i++)
+            if (gcs[i] != 0) {
+                x += gcs[i];
+                y++;
+            }
+        return (y == 0) ? 0 : x / y;
+    }
+
     public static long free() {
         // memory that is free without increasing of total memory taken from os
         return runtime.freeMemory();
     }
-   
+    
+    /**
+     * Tries to free a specified amount of bytes. If the currently available memory is enough, the
+     * method returns <code>true</code> without performing additional steps. Otherwise - if
+     * <code>gciffail</code> is set - a Full GC is run, if <code>gciffail</code> is set to
+     * <code>false</code> and not enough memory is available, this method returns <code>false</code>.
+     * 
+     * @see serverMemory#request(long, boolean) for another implementation
+     * @param memory amount of bytes to be assured to be free
+     * @param gciffail if not enough memory is available, this parameter specifies whether to perform
+     * a Full GC to free enough RAM
+     * @return whether enough RAM is available
+     * @deprecated use {@link serverMemory#request(long, boolean)} instead to enable the collection of
+     * heuristics about explicit usage of Full GCs.
+     */
     public static boolean available(long memory, boolean gciffail) {
         if (available() >= memory) return true;
         if (!gciffail) return false;
@@ -49,6 +92,40 @@ public class serverMemory {
     public static long available() {
         // memory that is available including increasing total memory up to maximum
         return max - runtime.totalMemory() + runtime.freeMemory();
+    }
+    
+    /**
+     * <p>Tries to free a specified amount of bytes.</p>
+     * <p>
+     *   If the currently available memory is enough, the method returns <code>true</code> without
+     *   performing additional steps. If not, the behaviour depends on the parameter <code>force</code>.
+     *   If <code>false</code>, a Full GC is only performed if former GCs indicated that a GC should
+     *   provide enough free memory. If former GCs didn't but <code>force</code> is set to <code>true</code>
+     *   a Full GC is performed nevertheless.
+     * </p>
+     * <p>
+     *   Setting the <code>force</code> parameter to false doesn't necessarily mean, that no GC may be
+     *   performed by this method, if the currently available memory doesn't suffice!
+     * </p>
+     * <p><em>Be careful with this method as GCs should always be the last measure to take</em></p>
+     * 
+     * @param size the requested amount of free memory in bytes
+     * @param specifies whether a GC should be run even in case former GCs didn't provide enough memory
+     * @return whether enough memory could be freed (or is free) or not
+     */
+    public static boolean request(long size, boolean force) {
+        long avail = available();
+        if (avail >= size) return true;
+        long avg;
+        if (force || ((avg = getAverageGCFree()) == 0 || avg + avail >= size)) {
+            long freed = runGC();
+            avail = available();
+            serverLog.logInfo("MEMORY", "performed explicit GC, freed " + (freed / 1024) + " KB (requested/available: " + size + " / " + avail + " KB)");
+            return avail >= size;
+        } else {
+            serverLog.logInfo("MEMORY", "couldn't free enough memory (requested/available " + size + "/" + avail + " KB)");
+            return false;
+        }
     }
     
     public static long used() {

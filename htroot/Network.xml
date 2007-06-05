@@ -1,7 +1,6 @@
 <?xml version="1.0"?>
-#(table)#
-::
 <peers>
+#(table)#::
 #{list}#
   <peer>
     <hash>#[hash]#</hash>
@@ -33,9 +32,7 @@
     #(/complete)#    
   </peer>
 #{/list}#
-</peers>
 ::
-<peers>
   <active>
     <count>#[active-count]#</count>
     <links>#[active-links]#</links>
@@ -57,30 +54,31 @@
     <words>#[all-words]#</words>
   </all>
   <your>
-        <name>#[my-name]#</name>
-        <hash>#[my-hash]#</hash>
-        <type>#(my-info)#virgin::junior::senior::principal#(/my-info)#</type>
-        <version>#[my-version]#</version>
-        <utc>#[my-utc]#</utc>
-        <uptime>#[my-uptime]#</uptime>
-        <links>#[my-links]#</links>
-        <words>#[my-words]#</words> 
-        <acceptcrawl>#[my-acceptcrawl]#</acceptcrawl>
-        <acceptindex>#[my-dhtreceive]#</acceptindex>
-        <sentwords>#[my-sI]#</sentwords>
-        <senturls>#[my-sU]#</senturls>
-        <receivedwords>#[my-rI]#</receivedwords>
-        <receivedurls>#[my-rU]#</receivedurls>
-        <ppm>#[my-ppm]#</ppm>
-		<qph>#[my-qph]#</qph>
-        <seeds>#[my-seeds]#</seeds>
-        <connects>#[my-connects]#</connects>
-    	<location>#[my-location]#</location>
-    	<seedurl>#[my-url]#</seedurl>
+    <name>#[my-name]#</name>
+    <hash>#[my-hash]#</hash>
+    <type>#(my-info)#virgin::junior::senior::principal#(/my-info)#</type>
+    <version>#[my-version]#</version>
+    <utc>#[my-utc]#</utc>
+    <uptime>#[my-uptime]#</uptime>
+    <links>#[my-links]#</links>
+    <words>#[my-words]#</words> 
+    <acceptcrawl>#[my-acceptcrawl]#</acceptcrawl>
+    <acceptindex>#[my-dhtreceive]#</acceptindex>
+    <acceptranking>#[my-rankingreceive]#</acceptranking>
+    <sentwords>#[my-sI]#</sentwords>
+    <senturls>#[my-sU]#</senturls>
+    <receivedwords>#[my-rI]#</receivedwords>
+    <receivedurls>#[my-rU]#</receivedurls>
+    <ppm>#[my-ppm]#</ppm>
+    <qph>#[my-qph]#</qph>
+    <seeds>#[my-seeds]#</seeds>
+    <connects>#[my-connects]#</connects>
+    <location>#[my-location]#</location>
+    <seedurl>#[my-url]#</seedurl>
   </your>
   <cluster>
-  	<ppm>#[gppm]#</ppm>
-	<qph>#[gqph]#</qph>
+    <ppm>#[gppm]#</ppm>
+    <qph>#[gqph]#</qph>
   </cluster>
   <status>#[comment]#</status>
   <!--
@@ -88,5 +86,5 @@
   1 - online mode, but no Internet available
   2 - not in online mode
   -->
-</peers>
 #(/table)#
+</peers>

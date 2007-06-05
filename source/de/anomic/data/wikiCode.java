@@ -49,6 +49,8 @@ package de.anomic.data;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.HashMap;
 
 import de.anomic.data.wiki.abstractWikiParser;
 import de.anomic.data.wiki.wikiParser;
@@ -60,6 +62,23 @@ import de.anomic.yacy.yacyCore;
   * parts of YaCy that use this class, like the blog or the profile.
   */
 public class wikiCode extends abstractWikiParser implements wikiParser {
+    
+    /* Table properties */
+    private static final String[] tps = { "rowspan", "colspan", "vspace", "hspace", "cellspacing", "cellpadding", "border" };
+    private static final HashMap/* <String,String[]> */ ps = new HashMap();
+    static {
+        Arrays.sort(tps);
+        String[] array;
+        Arrays.sort(array = new String[] { "void", "above", "below", "hsides", "lhs", "rhs", "vsides", "box", "border" });
+        ps.put("frame", array);
+        Arrays.sort(array = new String[] { "none", "groups", "rows", "cols", "all" });
+        ps.put("rules", array);
+        Arrays.sort(array = new String[] { "top", "middle", "bottom", "baseline" });
+        ps.put("valign", array);
+        Arrays.sort(array = new String[] { "left", "right", "center" });
+        ps.put("align", array);
+    }
+    
     private String numListLevel="";
     private String ListLevel="";
     private String defListLevel="";
@@ -119,7 +138,7 @@ public class wikiCode extends abstractWikiParser implements wikiParser {
             newrowstart=true;
             line="<table";
             if (result.trim().length()>lenTableStart) {
-                line+=parseTableProperties(result.substring(lenTableStart).trim());
+                line+=parseTableProperties(result.substring(lenTableStart).trim()).toString();
             }
             line+=">";
             result=line;
@@ -157,7 +176,7 @@ public class wikiCode extends abstractWikiParser implements wikiParser {
                 propEnd=lenCellDivider;
             }
             else {
-                line+=parseTableProperties(result.substring(lenCellDivider,propEnd-lenAttribDivider).trim());
+                line+=parseTableProperties(result.substring(lenCellDivider,propEnd-lenAttribDivider).trim()).toString();
             }
             // quick&dirty fix for http://www.yacy-forum.de/viewtopic.php?t=2825 [MN]
             if(propEnd > cellEnd){
@@ -178,112 +197,44 @@ public class wikiCode extends abstractWikiParser implements wikiParser {
         }
         return result;
     }
-
-    //contributed by [MN]
+    
+    // contributed by [MN], changes by [FB]
     /** This method takes possible table properties and tests if they are valid.
       * Valid in this case means if they are a property for the table, tr or td
       * tag as stated in the HTML Pocket Reference by Jennifer Niederst (1st edition)
       * The method is important to avoid XSS attacks on the wiki via table properties.
-      * @param str A string that may contain several table properties and/or junk.
+      * @param properties A string that may contain several table properties and/or junk.
       * @return A string that only contains table properties.
       */
-    private String parseTableProperties(String str){
-        str = str.replaceAll("&quot;", "");      //killing all quotationmarks
-        String[] values = str.split("[= ]");     //splitting the string at = and blanks
-        str="";                                  //recycling... ;-)
-        int numberofvalues = values.length;
-        for(int i=0;i<numberofvalues;i++){
-            if((values[i].equals("rowspan")) ||
-               (values[i].equals("colspan")) ||
-               (values[i].equals("vspace")) ||
-               (values[i].equals("hspace")) ||
-               (values[i].equals("cellspacing")) ||
-               (values[i].equals("cellpadding")) ||
-               (values[i].equals("border"))){
-                if(i+1<numberofvalues){
-                    if(values[i+1].matches("\\d+")){
-                        str = str + " "+values[i]+"=\""+values[i+1]+"\"";
-                        i++;
-                    }
+    private static StringBuffer parseTableProperties(final String properties) {
+        final String[] values = properties.replaceAll("&quot;", "").split("[= ]");     //splitting the string at = and blanks
+        final StringBuffer sb = new StringBuffer(properties.length());
+        String key, value;
+        String[] posVals;
+        final int numberofvalues = values.length;
+        for (int i=0; i<numberofvalues; i++) {
+            key = values[i].trim();
+            if (key.equals("nowrap")) {
+                addPair("nowrap", "nowrap", sb);
+            } else if (i + 1 < numberofvalues) {
+                value = values[++i].trim();
+                if (
+                        (key.equals("summary")) ||
+                        (key.equals("bgcolor") && value.matches("#{0,1}[0-9a-fA-F]{1,6}|[a-zA-Z]{3,}")) ||
+                        ((key.equals("width") || key.equals("height")) && value.matches("\\d+%{0,1}")) ||
+                        ((posVals = (String[])ps.get(key)) != null && Arrays.binarySearch(posVals, value) >= 0) ||
+                        (Arrays.binarySearch(tps, key) >= 0 && value.matches("\\d+"))
+                ) {
+                    addPair(key, value, sb);
                 }
-            }
-            else if((values[i].equals("width"))||(values[i].equals("height"))){
-                if(i+1<numberofvalues){
-                    if(values[i+1].matches("\\d+%{0,1}")){
-                        str = str + " "+values[i]+"=\""+values[i+1]+"\"";
-                        i++;
-                    }
-                }
-            }
-            else if(values[i].equals("align")){
-                if(i+1<numberofvalues) {
-                    if((values[i+1].equals("left")) ||
-                       (values[i+1].equals("right")) ||
-                       (values[i+1].equals("center"))) {
-                        str = str + " "+values[i]+"=\""+values[i+1]+"\"";
-                        i++;
-                    }
-                }
-            }
-            else if(values[i].equals("valign")){
-                if(i+1<numberofvalues) {
-                    if((values[i+1].equals("top")) ||
-                       (values[i+1].equals("middle")) ||
-                       (values[i+1].equals("bottom")) ||
-                       (values[i+1].equals("baseline"))) {
-                        str = str + " "+values[i]+"=\""+values[i+1]+"\"";
-                        i++;
-                    }
-                }
-            }
-            else if(values[i].equals("bgcolor")){
-                if(i+1<numberofvalues){
-                    if(values[i+1].matches("#{0,1}[0-9a-fA-F]{1,6}|[a-zA-Z]{3,}")){
-                        str = str + " "+values[i]+"=\""+values[i+1]+"\"";
-                        i++;
-                    }
-                }
-            }
-            else if(values[i].equals("rules")){
-                if(i+1<numberofvalues) {
-                    if((values[i+1].equals("none")) ||
-                       (values[i+1].equals("groups")) ||
-                       (values[i+1].equals("rows")) ||
-                       (values[i+1].equals("cols")) ||
-                       (values[i+1].equals("all"))) {
-                        str = str + " "+values[i]+"=\""+values[i+1]+"\"";
-                        i++;
-                    }
-                }
-            }
-            else if(values[i].equals("frame")){
-                if(i+1<numberofvalues) {
-                    if((values[i+1].equals("void")) ||
-                       (values[i+1].equals("above")) ||
-                       (values[i+1].equals("below")) ||
-                       (values[i+1].equals("hsides")) ||
-                       (values[i+1].equals("lhs")) ||
-                       (values[i+1].equals("rhs")) ||
-                       (values[i+1].equals("vsides")) ||
-                       (values[i+1].equals("box")) ||
-                       (values[i+1].equals("border"))) {
-                        str = str + " "+values[i]+"=\""+values[i+1]+"\"";
-                        i++;
-                    }
-                }
-            }
-            else if(values[i].equals("summary")){
-                if(i+1<numberofvalues){
-                    str = str + " "+values[i]+"=\""+values[i+1]+"\"";
-                    i++;
-                }
-            }
-            else if(values[i].equals("nowrap")){
-                str = str + " nowrap";
             }
         }
-        return str;
-    } //end contrib [MN]
+        return sb;
+    }
+    
+    private static StringBuffer addPair(String key, String value, StringBuffer sb) {
+        return sb.append(" ").append(key).append("=\"").append(value).append("\"");
+    }
 
     /** This method processes ordered lists.
       */

@@ -47,6 +47,7 @@
 
 package de.anomic.data.wiki.tokens;
 
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.regex.Pattern;
 
@@ -92,10 +93,16 @@ public class TableToken extends AbstractToken {
 	private static final String[] tps = { "rowspan", "colspan", "vspace", "hspace", "cellspacing", "cellpadding", "border" };
     private static final HashMap/* <String,String[]> */ ps = new HashMap();
     static {
-    	ps.put("frame", 	new String[] { "void", "above", "below", "hsides", "lhs", "rhs", "vsides", "box", "border" });
-    	ps.put("rules", 	new String[] { "none", "groups", "rows", "cols", "all" });
-    	ps.put("valign", 	new String[] { "top", "middle", "bottom", "baseline" });
-    	ps.put("align", 	new String[] { "left", "right", "center" });
+        Arrays.sort(tps);
+        String[] array;
+        Arrays.sort(array = new String[] { "void", "above", "below", "hsides", "lhs", "rhs", "vsides", "box", "border" });
+        ps.put("frame", array);
+        Arrays.sort(array = new String[] { "none", "groups", "rows", "cols", "all" });
+    	ps.put("rules", array);
+        Arrays.sort(array = new String[] { "top", "middle", "bottom", "baseline" });
+    	ps.put("valign", array);
+        Arrays.sort(array = new String[] { "left", "right", "center" });
+    	ps.put("align", array);
     }
     
 	// contributed by [MN]
@@ -106,7 +113,7 @@ public class TableToken extends AbstractToken {
       * @param properties A string that may contain several table properties and/or junk.
       * @return A string that only contains table properties.
       */
-    private static StringBuffer parseTableProperties(final String properties){
+    private static StringBuffer parseTableProperties(final String properties) {
         String[] values = properties.replaceAll("&quot;", "").split("[= ]");     //splitting the string at = and blanks
         StringBuffer sb = new StringBuffer(properties.length());
         String key, value;
@@ -114,33 +121,26 @@ public class TableToken extends AbstractToken {
         int numberofvalues = values.length;
         for (int i=0; i<numberofvalues; i++) {
         	key = values[i].trim();
-        	if (i + 1 < numberofvalues) {
+            if (key.equals("nowrap")) {
+                addPair("nowrap", "nowrap", sb);
+            } else if (i + 1 < numberofvalues) {
         		value = values[++i].trim();
         		if (
         				(key.equals("summary")) ||
         				(key.equals("bgcolor") && value.matches("#{0,1}[0-9a-fA-F]{1,6}|[a-zA-Z]{3,}")) ||
         				((key.equals("width") || key.equals("height")) && value.matches("\\d+%{0,1}")) ||
-                        ((posVals = (String[])ps.get(key)) != null && isInArray(posVals, value)) ||
-        				(isInArray(tps, key) && value.matches("\\d+"))
+                        ((posVals = (String[])ps.get(key)) != null && Arrays.binarySearch(posVals, value) >= 0) ||
+        				(Arrays.binarySearch(tps, key) >= 0 && value.matches("\\d+"))
         		) {
                 	addPair(key, value, sb);
-                	continue;
         		}
         	}
-            if (key.equals("nowrap"))
-                addPair("nowrap", "nowrap", sb);
         }
         return sb;
     }
     
     private static StringBuffer addPair(String key, String value, StringBuffer sb) {
     	return sb.append(" ").append(key).append("=\"").append(value).append("\"");
-    }
-    
-    private static boolean isInArray(Object[] array, Object find) {
-    	for (int i=array.length-1; i>-1; i--)
-    		if (array[i].equals(find)) return true;
-    	return false;
     }
 	
 	public Pattern[] getRegex() { return pattern; }
