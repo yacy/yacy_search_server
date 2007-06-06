@@ -29,6 +29,7 @@ package de.anomic.plasma;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.ConcurrentModificationException;
 import java.util.Date;
 import java.util.Iterator;
 import java.util.Map;
@@ -222,12 +223,19 @@ public class plasmaWebStructure {
     public String resolveDomHash2DomString(String domhash) {
         // returns the domain as string, null if unknown
         assert domhash.length() == 6;
-        SortedMap tailMap = structure.tailMap(domhash);
-        if ((tailMap == null) || (tailMap.size() == 0)) return null;
-        String key = (String) tailMap.firstKey();
-        if (key.startsWith(domhash)) {
-            return key.substring(7);
-        } else {
+        try {
+            SortedMap tailMap = structure.tailMap(domhash);
+            if ((tailMap == null) || (tailMap.size() == 0)) return null;
+            String key = (String) tailMap.firstKey();
+            if (key.startsWith(domhash)) {
+                return key.substring(7);
+            } else {
+                return null;
+            }
+        } catch (ConcurrentModificationException e) {
+            // we dont want to implement a synchronization here,
+            // because this is 'only' used for a graphics application
+            // just return null
             return null;
         }
     }
