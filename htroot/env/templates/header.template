@@ -29,7 +29,7 @@
   <li class="menugroup" id="menugroupCrawlerControl">
     <h3>Your&nbsp;Web&nbsp;Index</h3>
     <ul class="menu">
-      <li><a href="/IndexCreate_p.html" class="MenuItemLink lock">Start a Web Crawl</a></li>
+      <li><a href="/CrawlStartSimple_p.html" class="MenuItemLink lock">Start a Web Crawl</a></li>
       <li><a href="/IndexControl_p.html" class="MenuItemLink lock">Moderate own Index</a></li>
       <li><a href="/Blacklist_p.html" class="MenuItemLink lock">Filter &amp; Blacklist</a></li>
       <li><a href="/ProxyIndexingMonitor_p.html" class="MenuItemLink lock">Indexing with Proxy</a></li>

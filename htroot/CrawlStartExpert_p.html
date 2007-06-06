@@ -1,7 +1,7 @@
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml">
   <head>
-    <title>YaCy '#[clientname]#': Index Creation</title>
+    <title>YaCy '#[clientname]#': Crawl Start (expert)</title>
     #%env/templates/metas.template%#
     <script type="text/javascript" src="/js/ajax.js"></script>
     <script type="text/javascript" src="/js/IndexCreate.js"></script>
@@ -9,7 +9,7 @@
   <body id="IndexCreate">
     #%env/templates/header.template%#
     #%env/templates/submenuIndexCreate.template%#
-    <h2>Index Creation</h2>
+    <h2>Expert Crawl Start</h2>
     
     <p id="startCrawling">
     <strong>Start Crawling Job:</strong>&nbsp;
@@ -217,100 +217,6 @@
         </tr>
       </table>
     </form>
-    
-    <p>
-      #(info)#
-      ::
-      Crawling paused successfully.
-      ::
-      Continue crawling.
-    #(/info)#
-    </p>
-    
-    #(refreshbutton)#
-    ::
-    <form action="IndexCreate_p.html" method="post" enctype="multipart/form-data">
-      <fieldset>
-        <input type="submit" name="refreshpage" value="refresh" />
-      </fieldset>
-    </form>
-    #(/refreshbutton)#
-    <form action="IndexCreate_p.html" method="post" enctype="multipart/form-data">
-      <fieldset>
-        #(crawler-paused)#
-        <input type="submit" name="continuecrawlqueue" value="continue crawling" />
-        ::
-        <input type="submit" name="pausecrawlqueue" value="pause crawling" />
-        #(/crawler-paused)#
-      </fieldset>
-    </form>
-    
-    <p id="crawlingStarts"><strong>Recently started remote crawls in progress:</strong></p>
-    <table border="0" cellpadding="2" cellspacing="1">
-      <tr class="TableHeader">
-        <td><strong>Start Time</strong></td>
-        <td><strong>Peer Name</strong></td>
-        <td><strong>Start URL</strong></td>
-        <td><strong>Intention/Description</strong></td>
-        <td><strong>Depth</strong></td>
-        <td><strong>Accept '?' URLs</strong></td>
-      </tr>
-    #{otherCrawlStartInProgress}#
-      <tr class="TableCell#(dark)#Light::Dark#(/dark)#" >
-        <td>#[cre]#</td>
-        <td>#[peername]#</td>
-        <td><a href="#[startURL]#">#[startURL]#</a></td>
-        <td>#[intention]#</td>
-        <td>#[generalDepth]#</td>
-        <td>#(crawlingQ)#no::yes#(/crawlingQ)#</td>
-      </tr>
-    #{/otherCrawlStartInProgress}#
-    </table>
-    <p><strong>Recently started remote crawls, finished:</strong></p>
-    <table border="0" cellpadding="2" cellspacing="1">
-      <tr class="TableHeader">
-        <td><strong>Start Time</strong></td>
-        <td><strong>Peer Name</strong></td>
-        <td><strong>Start URL</strong></td>
-        <td><strong>Intention/Description</strong></td>
-        <td><strong>Depth</strong></td>
-        <td><strong>Accept '?' URLs</strong></td>
-      </tr>
-      #{otherCrawlStartFinished}#
-      <tr class="TableCell#(dark)#Light::Dark#(/dark)#" >
-        <td>#[cre]#</td>
-        <td>#[peername]#</td>
-        <td><a href="#[startURL]#">#[startURL]#</a></td>
-        <td>#[intention]#</td>
-        <td>#[generalDepth]#</td>
-        <td>#(crawlingQ)#no::yes#(/crawlingQ)#</td>
-      </tr>
-      #{/otherCrawlStartFinished}#
-    </table>
-    <p id="remoteCrawlPeers"><strong>Remote Crawling Peers:</strong>&nbsp;</p>
-    #(remoteCrawlPeers)#
-    <p>No remote crawl peers available.</p>
-    ::
-    <p>#[num]# peers available for remote crawling.</p>
-    <table border="0" cellpadding="2" cellspacing="1">
-      <colgroup>
-        <col width="60" />
-        <col />
-      </colgroup>
-      <tr class="TableCellDark">
-        <th>Idle Peers</th>
-        <td>
-          #{available}##[name]# (#[due]# seconds due)&nbsp;&nbsp; #{/available}#
-        </td>
-      </tr>
-      <tr class="TableCellLight">
-        <th>Busy Peers</th>
-        <td>
-          #{busy}##[name]# (#[due]# seconds due)&nbsp;&nbsp;#{/busy}#
-        </td>
-      </tr>
-    </table>
-    #(/remoteCrawlPeers)#
     
     #%env/templates/footer.template%#
   </body>
