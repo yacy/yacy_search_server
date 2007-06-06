@@ -4,40 +4,51 @@
 <title>YaCy '#[clientname]#': Web Structure</title>
 #%env/templates/metas.template%# 
 <script type="text/javascript" src="/js/WatchWebStructure.js"></script>
+<style type="text/css">
+  #left {
+    float: left;
+    width: 240px;
+  }
+  form dt {
+    width: 60px;
+  }
+  form dd {
+    width: 140px;
+    text-align:right;
+  }
+</style>
 </head>
 <body id="WebStructure" style="margin:0px;">
 #%env/templates/header.template%# 
 #%env/templates/submenuCrawler.template%#
 <h2>Web Structure</h2>
 
+<div id="left">
 <form action="/WatchWebStructure_p.html">
-<table>
-<tr>
-<td valign="top">
 <dl>
 	<dt>host</dt>
 	<dd>
-		<input type="text" value="#[host]#" name="host" id="host" />
+		<input type="text" value="#[host]#" name="host" id="host" size="20" maxlength="80" />
 	</dd>
 	<dt>depth</dt>
-	<dd><input type="text" name="depth" value="#[depth]#" /></dd>
+	<dd>
+	<a href="WatchWebStructure_p.html?host=#[host]#&depth=#[depthd]#&width=#[width]#&height=#[height]#"><img src="env/grafics/minus.gif" /></a>
+    <a href="WatchWebStructure_p.html?host=#[host]#&depth=#[depthi]#&width=#[width]#&height=#[height]#"><img src="env/grafics/plus.gif" /></a>
+	<input type="text" name="depth" value="#[depth]#" size="1" maxlength="1" />
+	</dd>
 	<dt>width</dt>
-	<dd><input type="text" name="width" value="#[width]#" /></dd>
+	<dd><input type="text" name="width" value="#[width]#" size="4" maxlength="4" /></dd>
 	<dt>depth</dt>
-	<dd><input type="text" name="height" value="#[height]#" /></dd>
+	<dd><input type="text" name="height" value="#[height]#" size="4" maxlength="4" /></dd>
     <dt>
     <input type="submit" value="change" />
     </dt>
 </dl>
-</td>
-<td>
-  <img src="WebStructurePicture_p.png?host=#[host]#&depth=#[depth]#&width=#[width]#&height=#[height]#" />
-</td>
-<td>
-</td>
-</tr>
-</table>
 </form>
+</div>
+
+<img src="WebStructurePicture_p.png?host=#[host]#&depth=#[depth]#&width=#[width]#&height=#[height]#" />
+
 #%env/templates/footer.template%# 
 </body>
 </html>

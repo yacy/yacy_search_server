@@ -102,23 +102,26 @@ public class WebStructurePicture_p {
         // first set points to next hosts
         Iterator i = next.entrySet().iterator();
         ArrayList targets = new ArrayList();
-        int maxrefs = 8;
-        int refcount;
-        double rr;
+        int maxtargetrefs = 8, maxthisrefs = 8;
+        int targetrefs, thisrefs;
+        double rr, re;
         while (i.hasNext()) {
             entry = (Map.Entry) i.next();
             targethash = (String) entry.getKey();
             targethost = structure.resolveDomHash2DomString(targethash);
             if (targethost == null) continue;
-            refcount = structure.referencesCount(targethash);
-            maxrefs = Math.max(refcount, maxrefs);
+            thisrefs = ((Integer) entry.getValue()).intValue();
+            targetrefs = structure.referencesCount(targethash); // can be cpu/time-critical
+            maxtargetrefs = Math.max(targetrefs, maxtargetrefs);
+            maxthisrefs = Math.max(thisrefs, maxthisrefs);
             targets.add(new String[] {targethash, targethost});
             if (graph.getPoint(targethost) != null) continue;
             // set a new point. It is placed on a circle around the host point
             double angle = ((double) kelondroBase64Order.enhancedCoder.cardinal((targethash + "____").getBytes())) / maxlongd * 2 * Math.PI;
             //System.out.println("ANGLE = " + angle);
-            rr = radius / 4 * (1 - refcount / maxrefs);
-            graph.addPoint(targethost, x + (radius - rr) * Math.cos(angle), y + (radius - rr) * Math.sin(angle), nextlayer);
+            rr = radius * 0.25 * (1 - targetrefs / maxtargetrefs);
+            re = radius * 0.5 * (thisrefs / maxthisrefs);
+            graph.addPoint(targethost, x + (radius - rr - re) * Math.cos(angle), y + (radius - rr - re) * Math.sin(angle), nextlayer);
         }
         // recursively set next hosts
         i = targets.iterator();
