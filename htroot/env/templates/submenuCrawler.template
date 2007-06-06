@@ -1,7 +1,36 @@
 <div class="SubMenu">
-<h3>Crawler Monitor Menu</h3>
-<ul class="SubMenu">
-<li><a href="/WatchCrawler_p.html" class="MenuItemLink lock">Crawler Queues</a></li>
-<li><a href="/WatchWebStructure_p.html" class="MenuItemLink lock">Web Structure</a></li>
-</ul>
+  <h3>Crawler Monitor</h3>
+
+  <div class="SubMenugroup">
+    <h3>Activity Visualization</h3>
+    <ul class="SubMenu">
+      <li><a href="/WatchCrawler_p.html" class="MenuItemLink lock">Crawler Queues</a></li>
+      <li><a href="/WatchWebStructure_p.html" class="MenuItemLink lock">Web Structure</a></li>
+    </ul>
+  </div>
+
+  <div class="SubMenugroup">
+    <h3>Control Queues</h3>
+    <ul class="SubMenu">
+      <li><a href="/IndexCreateIndexingQueue_p.html" class="MenuItemLink lock">Indexing</a></li>
+      <li><a href="/IndexCreateLoaderQueue_p.html" class="MenuItemLink lock">Loader</a></li>
+    </ul>
+  </div>
+  <div class="SubMenugroup">
+    <h3>WWW Crawl Queues</h3>
+    <ul class="SubMenu">
+      <li><a href="/IndexCreateWWWLocalQueue_p.html" class="MenuItemLink lock">Local</a></li>
+      <li><a href="/IndexCreateWWWGlobalQueue_p.html" class="MenuItemLink lock">Global</a></li>
+      <li><a href="/IndexCreateWWWRemoteQueue_p.html" class="MenuItemLink lock">Remote</a></li>
+      <li><!--<a href="/IndexCreateWWWOverhangQueue_p.html" class="MenuItemLink">--><em class="lock">Overhang</em><!--</a>--></li>
+    </ul>
+  </div>
+  <div class="SubMenugroup">
+    <h3>Media Crawl Queues</h3>
+    <ul class="SubMenu">
+      <li><!--<a href="/IndexCreateImageQueue_p.html" class="MenuItemLink">--><em class="lock">Images</em><!--</a>--></li>
+      <li><!--<a href="/IndexCreateMovieQueue_p.html" class="MenuItemLink">--><em class="lock">Movies</em><!--</a>--></li>
+      <li><!--<a href="/IndexCreateMusicQueue_p.html" class="MenuItemLink">--><em class="lock">Music</em><!--</a>--></li>
+    </ul>
+  </div>
 </div>
