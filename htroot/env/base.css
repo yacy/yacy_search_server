@@ -94,11 +94,6 @@ td {
   padding:1px 2px;
 }
 
-form dd {
-  margin:0 0 0.5em 0.25em;
-  float:left;
-}
-
 fieldset {
   margin:10px 5px;
   padding:10px;
@@ -519,17 +514,19 @@ li.menugroup {
 <dl>, <dd>, <dt>
 */
 
-dl.pairs dd {
-  padding:0.2em 0.5em;
-  margin:0 0 2px 18.3em;
+dl.pairs dd, form dd {
+  padding:0.25%;
+  margin:0 0 0.25% 0.25%;
+  float:left;
+  width:74%;
 }
 
 form dt, dl.pairs dt {
   float:left;
   clear:left;
-  width:17em;
-  margin:0 0 2px;
-  padding:0.2em 0.5em;
+  width:24%;
+  margin:0 0 0.25% 0.25%;
+  padding:0.25% 0.25%;
   text-align:right;
 }
 
