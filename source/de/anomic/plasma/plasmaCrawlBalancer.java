@@ -398,25 +398,31 @@ public class plasmaCrawlBalancer {
         // finally: check minimumDelta and if necessary force a sleep
         long delta = lastAccessDelta(result);
         assert delta >= 0: "delta = " + delta;
-        if (delta < minimumDelta) {
+        int s = urlFileIndex.size();
+        kelondroRow.Entry rowEntry = urlFileIndex.remove(result.getBytes());
+        assert urlFileIndex.size() + 1 == s : "urlFileIndex.size() = " + urlFileIndex.size() + ", s = " + s + ", result = " + result;
+        if (rowEntry == null) {
+            serverLog.logSevere("PLASMA BALANCER", "get() found a valid urlhash, but failed to fetch the corresponding url entry - total size = " + size() + ", fileStack.size() = " + urlFileStack.size() + ", ramStack.size() = " + urlRAMStack.size() + ", domainStacks.size() = " + domainStacks.size());
+            return null;
+        }
+        plasmaCrawlEntry crawlEntry = new plasmaCrawlEntry(rowEntry);
+        plasmaCrawlRobotsTxt.Entry robotsEntry = plasmaSwitchboard.robots.getEntry(crawlEntry.url().getHost());
+        Integer hostDelay = (robotsEntry == null) ? null : robotsEntry.getCrawlDelay();
+        long genericDelta = ((robotsEntry == null) || (hostDelay == null)) ? minimumDelta : Math.max(minimumDelta, hostDelay.intValue() * 1000);
+        genericDelta = Math.min(10000, genericDelta); // prevent that ta robots file can stop our indexer completely
+        if (delta < genericDelta) {
             // force a busy waiting here
             // in best case, this should never happen if the balancer works propertly
             // this is only to protect against the worst case, where the crawler could
             // behave in a DoS-manner
-            long sleeptime = minimumDelta - delta;
+            long sleeptime = genericDelta - delta;
             try {synchronized(this) { this.wait(sleeptime); }} catch (InterruptedException e) {}
         }
         
         // update statistical data
         domainAccess.put(result.substring(6), new Long(System.currentTimeMillis()));
-        int s = urlFileIndex.size();
-        kelondroRow.Entry entry = urlFileIndex.remove(result.getBytes());
-        assert urlFileIndex.size() + 1 == s : "urlFileIndex.size() = " + urlFileIndex.size() + ", s = " + s + ", result = " + result;
-        if (entry == null) {
-        	serverLog.logSevere("PLASMA BALANCER", "get() found a valid urlhash, but failed to fetch the corresponding url entry - total size = " + size() + ", fileStack.size() = " + urlFileStack.size() + ", ramStack.size() = " + urlRAMStack.size() + ", domainStacks.size() = " + domainStacks.size());
-            return null;
-        }
-        return new plasmaCrawlEntry(entry);
+        
+        return crawlEntry;
     }
     
     private long lastAccessDelta(String hash) {
