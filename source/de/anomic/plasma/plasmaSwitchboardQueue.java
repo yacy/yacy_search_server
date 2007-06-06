@@ -405,7 +405,7 @@ public class plasmaSwitchboardQueue {
             }
 
             // check profile
-            if (!profile().indexText() && !profile().indexMedia() && !profile().remoteIndexing()) {
+            if (!profile().indexText() && !profile().indexMedia()) {
                 return "Indexing_Not_Allowed";
             }
 
