@@ -53,6 +53,7 @@ import java.io.FileWriter;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
@@ -119,10 +120,10 @@ public class BlacklistCleaner_p {
             
             if (post.containsKey("delete")) {
                 prop.put(RESULTS + "modified", 1);
-                prop.put(RESULTS + "modified_delCount", removeEntries(blacklistToUse, supportedBlacklistTypes, getByPrefix(post, "select", true)));
+                prop.put(RESULTS + "modified_delCount", removeEntries(blacklistToUse, supportedBlacklistTypes, getByPrefix(post, "select", true, true)));
             } else if (post.containsKey("alter")) {
                 prop.put(RESULTS + "modified", 2);
-                prop.put(RESULTS + "modified_alterCount", alterEntries(blacklistToUse, supportedBlacklistTypes, getByPrefix(post, "select", true), getByPrefix(post, "entry", false)));
+                prop.put(RESULTS + "modified_alterCount", alterEntries(blacklistToUse, supportedBlacklistTypes, getByPrefix(post, "select", true, false), getByPrefix(post, "entry", false, false)));
             }
             
             // list illegal entries
@@ -171,8 +172,13 @@ public class BlacklistCleaner_p {
         }
     }
     
-    private static String[] getByPrefix(serverObjects post, String prefix, boolean useKeys) {
-        ArrayList r = new ArrayList();
+    private static String[] getByPrefix(serverObjects post, String prefix, boolean useKeys, boolean useHashSet) {
+        Collection r;
+        if (useHashSet) {
+            r = new HashSet();
+        } else {
+            r = new ArrayList();
+        }
         Iterator it;
         String s;
         if (useKeys) {
@@ -280,9 +286,12 @@ public class BlacklistCleaner_p {
             // remove the entry from the running blacklist engine
             for (int blTypes=0; blTypes < supportedBlacklistTypes.length; blTypes++) {
                 if (listManager.ListInListslist(supportedBlacklistTypes[blTypes] + ".BlackLists", blacklistToUse)) {
+                    String host = (s.indexOf("/") == -1) ? s : s.substring(0, s.indexOf("/"));
+                    String path = (s.indexOf("/") == -1) ? ".*" : s.substring(s.indexOf("/") + 1);
+                    try {
                     plasmaSwitchboard.urlBlacklist.remove(supportedBlacklistTypes[blTypes],
-                            (s.indexOf("/") == -1) ? s : s.substring(0, s.indexOf("/")),
-                            (s.indexOf("/") == -1) ? ".*" : s.substring(s.indexOf("/") + 1));
+                            host,path);
+                    } catch (RuntimeException e) { System.err.println(e.getMessage() + ": " + host + "/" + path); }
                 }                
             }    
         }

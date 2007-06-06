@@ -51,6 +51,7 @@
  */
 
 import java.io.File;
+import java.io.FilenameFilter;
 import java.io.Writer;
 import java.util.Iterator;
 import java.util.Map;
@@ -61,6 +62,7 @@ import de.anomic.htmlFilter.htmlFilterImageEntry;
 import de.anomic.htmlFilter.htmlFilterWriter;
 import de.anomic.http.httpHeader;
 import de.anomic.net.URL;
+import de.anomic.plasma.plasmaHTCache;
 import de.anomic.plasma.plasmaParserDocument;
 import de.anomic.plasma.plasmaSwitchboard;
 import de.anomic.plasma.cache.IResourceInfo;
@@ -78,6 +80,15 @@ public class CacheAdmin_p {
 	private static final int HtmlFile = 0;
 	private static final int NotCached = 1;
 	private static final int Image = 2;
+    
+    public static final class Filter implements FilenameFilter {
+        private static final String EXCLUDE_NAME = plasmaHTCache.DB_NAME;
+        private final File EXCLUDE_DIR;
+        public Filter(File path) { this.EXCLUDE_DIR = path; }
+        public boolean accept(File dir, String name) {
+            return !dir.equals(EXCLUDE_DIR) && !name.equals(EXCLUDE_NAME);
+        }
+    }
 
     public static serverObjects respond(httpHeader header, serverObjects post, serverSwitch env) {
         final plasmaSwitchboard switchboard = (plasmaSwitchboard) env;
@@ -107,7 +118,7 @@ public class CacheAdmin_p {
         
         String urlstr = "";
         
-        if (action.equals("info") && !file.isDirectory()) {					// normal file
+        if (action.equals("info") && !file.isDirectory() && url != null) {					// normal file
             prop.put("info", TypeFILE);
             // path.append((pathString.length() == 0) ? linkPathString("/", true) : linkPathString(pathString, false));
             linkPathString(prop, ((pathString.length() == 0) ? ("/") : (pathString)), true);
@@ -187,7 +198,7 @@ public class CacheAdmin_p {
             }
 
             // generate sorted dir/file listing
-            final String[] list = dir.list();
+            final String[] list = dir.list(new Filter(new File(switchboard.getConfig(plasmaSwitchboard.HTCACHE_PATH, plasmaSwitchboard.HTCACHE_PATH_DEFAULT))));
             tree.ensureCapacity((list == null) ? 70 : (list.length + 1) * 256);
             linkPathString(prop, ((pathString.length() == 0) ? ("/") : (pathString)), true); 
             if (list == null) {
@@ -196,16 +207,12 @@ public class CacheAdmin_p {
             	prop.put("info_empty", 0);
                 final TreeSet dList = new TreeSet();
                 final TreeSet fList = new TreeSet();
-                File object;
                 int size = list.length - 1, i = size;
                 for (; i >= 0 ; i--) { // Rueckwaerts ist schneller
-                    object = new File(dir, list[i]);
-                    if (!object.getName().equalsIgnoreCase("responseHeader.db")) {
-                        if (object.isDirectory())
-                            dList.add(list[i]);
-                        else
-                            fList.add(list[i]);
-                    }
+                    if (new File(dir, list[i]).isDirectory())
+                        dList.add(list[i]);
+                    else
+                        fList.add(list[i]);
                 }
                 
                 Iterator iter = dList.iterator();
