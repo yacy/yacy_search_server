@@ -312,10 +312,12 @@ public class Surftips {
             // add/subtract votes and write record
             if (entry != null) {
                 urlhash = plasmaURL.urlHash(url);
-                if (urlhash == null) {
-                    System.out.println("Surftips: bad url '" + url + "' from news record " + record.toString());
-                    continue;
-                }
+                if (urlhash == null)
+                		urlhash=plasmaURL.urlHash("http://"+url);
+                		if(urlhash==null){
+                			System.out.println("Surftips: bad url '" + url + "' from news record " + record.toString());
+                			continue;
+                		}
                 if ((vote = (Integer) negativeHashes.get(urlhash)) != null) {
                     score = Math.max(0, score - vote.intValue()); // do not go below zero
                 }
