@@ -5,7 +5,13 @@
     #%env/templates/metas.template%#
   </head>
   <body id="Wiki">
+    #(display)#
+    #%env/templates/simpleheader.template%#
+    ::
     #%env/templates/header.template%#
+	::
+	#%env/templates/embeddedheader.template%#
+    #(/display)#
 
     #(mode)#
     <!-- 0: viewing -->

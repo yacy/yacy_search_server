@@ -82,6 +82,10 @@ public class Wiki {
             post.put("page", "start");
         }
 
+        final boolean authenticated = switchboard.adminAuthenticated(header) >= 2;
+        final int display = ((post == null) || (!authenticated)) ? 0 : post.getInt("display", 0);
+        prop.put("display", display);
+        
         String access = switchboard.getConfig("WikiAccess", "admin");
         String pagename = post.get("page", "start");
         String ip = post.get("CLIENTIP", "127.0.0.1");

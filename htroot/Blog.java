@@ -82,7 +82,11 @@ public class Blog {
 		final serverObjects prop = new serverObjects();
 		blogBoard.entry page = null;
 		
-		boolean hasRights = switchboard.verifyAuthentication(header, true);
+        final boolean authenticated = switchboard.adminAuthenticated(header) >= 2;
+        final int display = ((post == null) || (!authenticated)) ? 0 : post.getInt("display", 0);
+        prop.put("display", display);
+        
+        boolean hasRights = switchboard.verifyAuthentication(header, true);
         final boolean xml = ((String)header.get(httpHeader.CONNECTION_PROP_PATH)).endsWith(".xml");
         final String address = yacyCore.seedDB.mySeed.getPublicAddress();
 

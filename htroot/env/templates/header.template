@@ -25,8 +25,8 @@
     <h3>Monitoring</h3>
     <ul class="menu">
       <li><a href="/Network.html" accesskey="w" class="MenuItemLink">YaCy Network</a></li>
-      <li><a href="/WatchCrawler_p.html" class="MenuItemLink lock">Crawler Monitor</a></li>
-      <li><a href="/IndexMonitor.html" class="MenuItemLink">Web Crawl Results</a></li>
+      <li><a href="/WatchCrawler_p.html" class="MenuItemLink lock">Crawl Activity</a></li>
+      <li><a href="/IndexMonitor.html" class="MenuItemLink">Crawl Results</a></li>
       <li><a href="/SearchStatistics_p.html" class="MenuItemLink lock">Search Statistics</a></li>
       <li><a href="/ViewLog_p.html" class="MenuItemLink lock">Server Log</a></li>
       <li><a href="/Connections_p.html" class="MenuItemLink lock">Connections</a></li>
@@ -38,11 +38,10 @@
   <li class="menugroup" id="menugroupCommunicationPublication">
     <h3>Your Web</h3>
     <ul class="menu">
-      <li><a href="/www/" class="MenuItemLink">Home Page Demo</a></li>
-      <li><a href="/share/" class="MenuItemLink">Your File Share</a></li>
-      <li><a href="/Wiki.html" class="MenuItemLink">YaCy Wiki</a></li>
-      <li><a href="/Blog.html" class="MenuItemLink">YaCy Blog</a></li>
-      <li><a href="/Messages_p.html" class="MenuItemLink lock">Messages <img src="/notifier.gif" alt="New Messages" /></a></li>
+      <li><a href="/Wiki.html?display=1" class="MenuItemLink">YaCy Wiki</a></li>
+      <li><a href="/Blog.html?display=1" class="MenuItemLink">YaCy Blog</a></li>
+      <li><a href="/Messages_p.html" class="MenuItemLink lock">YaCy Messages <img src="/notifier.gif" alt="New Messages" /></a></li>
+      <li><a href="/share/" class="MenuItemLink">YaCy File Hosting</a></li>
     </ul>
   </li>
   <li class="menugroup" id="menugroupPeerControl">

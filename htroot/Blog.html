@@ -6,7 +6,13 @@
     <link rel="alternate" type="application/rss+xml" title="RSS" href="Blog.rss" />
   </head>
   <body id="Blog">
+    #(display)#
+    #%env/templates/simpleheader.template%#
+    ::
     #%env/templates/header.template%#
+	::
+	#%env/templates/embeddedheader.template%#
+    #(/display)#
     #(mode)#
     <!-- 0: viewing -->
     #{entries}#
