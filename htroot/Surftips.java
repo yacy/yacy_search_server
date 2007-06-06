@@ -224,6 +224,7 @@ public class Surftips {
             if (record.category().equals(yacyNewsPool.CATEGORY_CRAWL_START)) {
                 String intention = record.attribute("intention", "");
                 url = record.attribute("startURL", "");
+                if (url.length() < 12) continue;
                 entry = rowdef.newEntry(new byte[][]{
                                 url.getBytes(),
                                 ((intention.length() == 0) ? record.attribute("startURL", "") : intention).getBytes(),
@@ -235,7 +236,7 @@ public class Surftips {
             
             if (record.category().equals(yacyNewsPool.CATEGORY_PROFILE_UPDATE)) {
                 url = record.attribute("homepage", "");
-                if ((url == null) || (url.length() < 12)) continue;
+                if (url.length() < 12) continue;
                 entry = rowdef.newEntry(new byte[][]{
                                 url.getBytes(),
                                 ("Home Page of " + record.attribute("nickname", "")).getBytes("UTF-8"),
@@ -247,6 +248,7 @@ public class Surftips {
             
             if (record.category().equals(yacyNewsPool.CATEGORY_BOOKMARK_ADD)) {
                 url = record.attribute("url", "");
+                if (url.length() < 12) continue;
                 entry = rowdef.newEntry(new byte[][]{
                                 url.getBytes(),
                                 (record.attribute("title", "")).getBytes("UTF-8"),
@@ -258,6 +260,7 @@ public class Surftips {
             
             if (record.category().equals(yacyNewsPool.CATEGORY_SURFTIPP_ADD)) {
                 url = record.attribute("url", "");
+                if (url.length() < 12) continue;
                 entry = rowdef.newEntry(new byte[][]{
                                 url.getBytes(),
                                 (record.attribute("title", "")).getBytes("UTF-8"),
@@ -270,6 +273,7 @@ public class Surftips {
             if (record.category().equals(yacyNewsPool.CATEGORY_SURFTIPP_VOTE_ADD)) {
                 if (!(record.attribute("vote", "negative").equals("positive"))) continue;
                 url = record.attribute("url", "");
+                if (url.length() < 12) continue;
                 entry = rowdef.newEntry(new byte[][]{
                                 url.getBytes(),
                                 record.attribute("title", "").getBytes("UTF-8"),

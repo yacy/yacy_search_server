@@ -3,7 +3,7 @@
 </div>
 <ul id="menu">
   <li class="menugroup" id="menugroupGlobalIndex">
-    <h3>Global Index</h3>
+    <h3>Search&nbsp;&amp;&nbsp;Browse</h3>
     <ul class="menu">
       <li><a href="/index.html?display=1" accesskey="s" class="MenuItemLink">Search Page</a></li>
       <li><a href="/DetailedSearch.html" class="MenuItemLink">Detailed Search</a></li>
@@ -12,20 +12,11 @@
       <li><a href="/Help.html" class="MenuItemLink">Help</a></li>
     </ul>
   </li>
-  <li class="menugroup" id="menugroupCrawlerControl">
-    <h3>Web Crawler</h3>
-    <ul class="menu">
-      <li><a href="/IndexCreate_p.html" class="MenuItemLink lock">Start Web Crawl</a></li>
-      <li><a href="/IndexControl_p.html" class="MenuItemLink lock">Administrate Index</a></li>
-      <li><a href="/Blacklist_p.html" class="MenuItemLink lock">URL Blacklist</a></li>
-      <li><a href="/ProxyIndexingMonitor_p.html" class="MenuItemLink lock">Indexing with Proxy</a></li>
-    </ul>
-  </li>
   <li class="menugroup" id="menugroupMonitoring">
     <h3>Monitoring</h3>
     <ul class="menu">
       <li><a href="/Network.html" accesskey="w" class="MenuItemLink">YaCy Network</a></li>
-      <li><a href="/WatchCrawler_p.html" class="MenuItemLink lock">Crawl Activity</a></li>
+      <li><a href="/WatchWebStructure_p.html?host=auto&depth=2" class="MenuItemLink lock">Crawl Activity</a></li>
       <li><a href="/IndexMonitor.html" class="MenuItemLink">Crawl Results</a></li>
       <li><a href="/SearchStatistics_p.html" class="MenuItemLink lock">Search Statistics</a></li>
       <li><a href="/ViewLog_p.html" class="MenuItemLink lock">Server Log</a></li>
@@ -35,8 +26,17 @@
       <li><a href="/CookieMonitorIncoming_p.html" class="MenuItemLink lock">Cookies in Proxy</a></li>
     </ul>
   </li>
+  <li class="menugroup" id="menugroupCrawlerControl">
+    <h3>Your&nbsp;Web&nbsp;Index</h3>
+    <ul class="menu">
+      <li><a href="/IndexCreate_p.html" class="MenuItemLink lock">Start a Web Crawl</a></li>
+      <li><a href="/IndexControl_p.html" class="MenuItemLink lock">Moderate own Index</a></li>
+      <li><a href="/Blacklist_p.html" class="MenuItemLink lock">Filter &amp; Blacklist</a></li>
+      <li><a href="/ProxyIndexingMonitor_p.html" class="MenuItemLink lock">Indexing with Proxy</a></li>
+    </ul>
+  </li>
   <li class="menugroup" id="menugroupCommunicationPublication">
-    <h3>Your Web</h3>
+    <h3>Your Web Content</h3>
     <ul class="menu">
       <li><a href="/Wiki.html?display=1" class="MenuItemLink">YaCy Wiki</a></li>
       <li><a href="/Blog.html?display=1" class="MenuItemLink">YaCy Blog</a></li>

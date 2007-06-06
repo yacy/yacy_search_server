@@ -3,6 +3,11 @@
   <head>
     <title>YaCy '#[clientname]#': Network Overview</title>
     #%env/templates/metas.template%#
+    <style type="text/css">
+    #left {
+      float: left;
+    }
+    </style>
   </head>
   <body id="Network">
     #%env/templates/header.template%#
@@ -120,7 +125,7 @@
     </div>
     #(/progressbar)#
     ::
-    <p>All Peers:</p>
+    <div id="left">
     <table border="0" cellpadding="2" cellspacing="1">
       <tr class="TableHeader">
         <td>Branch</td>
@@ -153,13 +158,74 @@
         <td align="right">#[all-words]#</td>
       </tr>
     </table>
-    <p>
-    YaCy Cluster
+    </div>
+    <div id="left">
     <ul>
     <li>Indexing Speed: #[gppm]# Pages Per Minute (PPM)</li>
     <li>Query Frequency: #[gqph]# Queries Per Hour (QPH)</li>
     </ul>
-    </p>
+    </div>
+    
+    <div id="left">
+    #(comment)#
+    ::
+    <ul><li>
+    You are in online mode, but probably no internet resource is available.
+    Please check your internet connection.
+    </li></ul>    
+    ::
+    <ul><li>You are either not in online mode or you do not use the proxy option.
+    To get connection to the YaCy network, you must use the proxy by setting your browser's settings
+    ('on-demand - mode', see <a href="http://www.yacy.net/yacy/Installation.html#wininst">here</a>
+    for an installation guide) or you can go online by activating the permanent online mode.
+    To do this, press this button:</p>
+    <form action="SettingsAck_p.html" method="get">
+      <fieldset>
+        <input type="submit" name="pmode" value="go online" />
+      </fieldset>
+    </form>
+    </li></ul> 
+    #(/comment)#
+    </div>
+    
+    <div id="left">
+    <a href="NetworkPicture.png?width=768&amp;height=576"><img src="NetworkPicture.png" alt="The yacy Network" /></a>
+    </div>
+	<div id="left">
+    <table border="0">
+            <tr>
+                <td>&nbsp;</td>
+                    <td><strong>Network legend:</strong></td>
+                    <td></td>
+                    <td></td>
+            </tr>
+            <tr>
+                    <td style="background-color:#000000">&nbsp;</td>
+                    <td>dark font</td>
+                    <td>:</td>
+                    <td>senior/principal peers</td>
+            </tr>
+            <tr>
+                    <td style="background-color:#E7B7AF">&nbsp;</td>
+                    <td>lightred font</td>
+                    <td>:</td>
+                    <td>passiv peers ( &lt; 5 hour passiv time)</td>
+            </tr>
+            <tr>
+                    <td style="background-color:#A7A75F">&nbsp;</td>
+                    <td>turquoise font</td>
+                    <td>:</td>
+                    <td>junior peers</td>
+            </tr>
+            <tr>
+                    <td style="background-color:#C1A77F">&nbsp;</td>
+                    <td>red point</td>
+                    <td>:</td>
+                    <td>this peer</td>
+            </tr>
+    </table>
+    </div>
+    <div id="left">
     <p>Your Peer:</p>
     <table border="0" cellpadding="2" cellspacing="1">
       <tr class="TableHeader">
@@ -201,55 +267,8 @@
         <td align="right">#[my-connects]#</td>
       </tr>
     </table>
-    <p><a href="NetworkPicture.png?width=768&amp;height=576"><img src="NetworkPicture.png" alt="The yacy Network" /></a></p>
-    <table border="0">
-            <tr>
-                <td>&nbsp;</td>
-                    <td><strong>Network legend:</strong></td>
-                    <td></td>
-                    <td></td>
-            </tr>
-            <tr>
-                    <td style="background-color:#000000">&nbsp;</td>
-                    <td>dark font</td>
-                    <td>:</td>
-                    <td>senior/principal peers</td>
-            </tr>
-            <tr>
-                    <td style="background-color:#E7B7AF">&nbsp;</td>
-                    <td>lightred font</td>
-                    <td>:</td>
-                    <td>passiv peers ( &lt; 5 hour passiv time)</td>
-            </tr>
-            <tr>
-                    <td style="background-color:#A7A75F">&nbsp;</td>
-                    <td>turquoise font</td>
-                    <td>:</td>
-                    <td>junior peers</td>
-            </tr>
-            <tr>
-                    <td style="background-color:#C1A77F">&nbsp;</td>
-                    <td>red point</td>
-                    <td>:</td>
-                    <td>this peer</td>
-            </tr>
-    </table>
+    </div>
     
-    #(comment)#
-    ::
-    <p>You are in online mode, but probably no internet resource is available. Please check your internet connection.</p>
-    ::
-    <p>You are either not in online mode or you do not use the proxy option.
-    To get connection to the YaCy network, you must use the proxy by setting your browser's settings
-    ('on-demand - mode', see <a href="http://www.yacy.net/yacy/Installation.html#wininst">here</a>
-    for an installation guide) or you can go online by activating the permanent online mode.
-    To do this, press this button:</p>
-    <form action="SettingsAck_p.html" method="get">
-      <fieldset>
-        <input type="submit" name="pmode" value="go online" />
-      </fieldset>
-    </form>
-    #(/comment)#
     ::
     #(comment)#
     ::
