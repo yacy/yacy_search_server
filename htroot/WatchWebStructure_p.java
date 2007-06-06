@@ -1,12 +1,16 @@
 
+import java.util.Iterator;
+
 import de.anomic.http.httpHeader;
+import de.anomic.plasma.plasmaSwitchboard;
+import de.anomic.plasma.plasmaCrawlProfile.entry;
 import de.anomic.server.serverObjects;
 import de.anomic.server.serverSwitch;
 
 
 public class WatchWebStructure_p {
     public static serverObjects respond(httpHeader header, serverObjects post, serverSwitch env) {
-        //plasmaSwitchboard sb = (plasmaSwitchboard) env;
+        plasmaSwitchboard sb = (plasmaSwitchboard) env;
         serverObjects prop = new serverObjects();
         
         int width = 768;
@@ -19,6 +23,22 @@ public class WatchWebStructure_p {
             height = post.getInt("height", 576);
             depth = post.getInt("depth", 3);
             host = post.get("host", "auto");
+        }
+        
+        if (host.equals("auto")) {
+        	// try to find the host from the crawl profiles
+        	Iterator it = sb.profiles.profiles(true);
+            entry e;
+            while (it.hasNext()) {
+                e = (entry)it.next();
+                if (e.name().equals(plasmaSwitchboard.CRAWL_PROFILE_PROXY) ||
+                    e.name().equals(plasmaSwitchboard.CRAWL_PROFILE_REMOTE) ||
+                    e.name().equals(plasmaSwitchboard.CRAWL_PROFILE_SNIPPET_TEXT) ||
+                    e.name().equals(plasmaSwitchboard.CRAWL_PROFILE_SNIPPET_MEDIA))
+                   continue;
+                host = e.name();
+                break; // take the first one
+            }
         }
         
         prop.put("host", host);
