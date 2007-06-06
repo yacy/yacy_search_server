@@ -71,7 +71,10 @@
         </tr>
         <tr valign="top" class="TableCellDark">
           <td><label for="crawlingFilter">Crawling Filter</label>:</td>
-          <td><input name="crawlingFilter" id="crawlingFilter" type="text" size="20" maxlength="100" value="#[crawlingFilter]#" /></td>
+          <td>
+			<input name="crawlingFilter" id="crawlingFilter" type="text" size="20" maxlength="100" value="#[crawlingFilter]#" />
+			<input type="button" value="only one domain" onclick='var domain=prompt("please enter domain without \"www.\" (i.e. \"yacy.net\").");document.getElementById("crawlingFilter").value="*."+domain+"/.*"' />
+		  </td>
           <td>
             This is an emacs-like regular expression that must match with the URLs which are used to be crawled.
             Use this i.e. to crawl a single domain. If you set this filter it makes sense to increase
