@@ -114,14 +114,17 @@
     #(searchoptions)#::
     <p>
     <form action="index.html" method="get" class="search">
+    #(publicSearchpage)#
       <button type="submit" name="publicPage" value="0">
         <img src="/env/grafics/lock.gif" alt="authentication required" />
           Disable search function for users without autorization
       </button>
+      ::
       <button type="submit" name="publicPage" value="1">
         <img src="/env/grafics/lock.gif" alt="authentication required" />
           Enable web search to everyone
       </button>
+    #(/publicSearchpage)#
     </form>
     </p>
     #(/searchoptions)#

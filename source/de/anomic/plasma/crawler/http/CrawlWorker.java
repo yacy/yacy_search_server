@@ -119,7 +119,7 @@ public final class CrawlWorker extends AbstractCrawlWorker {
     }
 
     public void init() {
-        // refreshing timeout value        
+        // refreshing timeout value
         if (this.theMsg.timeout < 0) {
             this.socketTimeout = (int) this.sb.getConfigLong("crawler.clientTimeout", 10000);
         } else {
@@ -267,7 +267,7 @@ public final class CrawlWorker extends AbstractCrawlWorker {
                                     fos = new httpdBoundedSizeOutputStream(fos,this.maxFileSize);                     
                                 } else if (contentLength > this.maxFileSize) {
                                     remote.close();
-                                    this.log.logInfo("REJECTED URL " + this.url + " because file size '" + contentLength + "' exceeds max filesize limit.");
+                                    this.log.logInfo("REJECTED URL " + this.url + " because file size '" + contentLength + "' exceeds max filesize limit of " + this.maxFileSize + " bytes.");
                                     addURLtoErrorDB(plasmaCrawlEURL.DENIED_FILESIZE_LIMIT_EXCEEDED);                    
                                     return null;
                                 }
