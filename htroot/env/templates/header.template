@@ -12,6 +12,15 @@
       <li><a href="/Help.html" class="MenuItemLink">Help</a></li>
     </ul>
   </li>
+  <li class="menugroup" id="menugroupCrawlerControl">
+    <h3>Web&nbsp;Indexing</h3>
+    <ul class="menu">
+      <li><a href="/CrawlStartSimple_p.html" class="MenuItemLink lock">Start a Web Crawl</a></li>
+      <li><a href="/IndexControl_p.html" class="MenuItemLink lock">Moderate own Index</a></li>
+      <li><a href="/Blacklist_p.html" class="MenuItemLink lock">Filter &amp; Blacklist</a></li>
+      <li><a href="/ProxyIndexingMonitor_p.html" class="MenuItemLink lock">Indexing with Proxy</a></li>
+    </ul>
+  </li>
   <li class="menugroup" id="menugroupMonitoring">
     <h3>Monitoring</h3>
     <ul class="menu">
@@ -24,15 +33,6 @@
       <li><a href="/CacheAdmin_p.html" class="MenuItemLink lock">Web Cache</a></li>
       <li><a href="/News.html" accesskey="n" class="MenuItemLink">News Monitor</a></li>
       <li><a href="/CookieMonitorIncoming_p.html" class="MenuItemLink lock">Cookies in Proxy</a></li>
-    </ul>
-  </li>
-  <li class="menugroup" id="menugroupCrawlerControl">
-    <h3>Your&nbsp;Web&nbsp;Index</h3>
-    <ul class="menu">
-      <li><a href="/CrawlStartSimple_p.html" class="MenuItemLink lock">Start a Web Crawl</a></li>
-      <li><a href="/IndexControl_p.html" class="MenuItemLink lock">Moderate own Index</a></li>
-      <li><a href="/Blacklist_p.html" class="MenuItemLink lock">Filter &amp; Blacklist</a></li>
-      <li><a href="/ProxyIndexingMonitor_p.html" class="MenuItemLink lock">Indexing with Proxy</a></li>
     </ul>
   </li>
   <li class="menugroup" id="menugroupCommunicationPublication">
