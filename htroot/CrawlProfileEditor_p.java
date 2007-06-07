@@ -49,6 +49,7 @@ import java.util.Iterator;
 
 import de.anomic.http.httpHeader;
 import de.anomic.plasma.plasmaCrawlProfile.entry;
+import de.anomic.plasma.plasmaCrawlProfile;
 import de.anomic.plasma.plasmaSwitchboard;
 import de.anomic.server.serverObjects;
 import de.anomic.server.serverSwitch;
@@ -100,65 +101,129 @@ public class CrawlProfileEditor_p {
         final servletProperties prop = new servletProperties();
         final plasmaSwitchboard sb = (plasmaSwitchboard)env;
         
-        String handle = (post == null) ? "" : post.get("handle", "");
+        // read post for handle
+        String handle = "";
+        if (post != null) {
+        	handle = post.get("handle", "");
+
+			if (post.containsKey("deleteprofile")) {
+				// deletion of a crawl
+				if (handle != null) sb.profiles.removeEntry(handle);
+			}
+        }
         
+        // generate handle list
         int count = 0;
         Iterator it = sb.profiles.profiles(true);
-        entry e;
+        entry selentry;
         while (it.hasNext()) {
-            e = (entry)it.next();
-            if (e.name().equals(plasmaSwitchboard.CRAWL_PROFILE_PROXY) ||
-                    e.name().equals(plasmaSwitchboard.CRAWL_PROFILE_REMOTE) ||
-                    e.name().equals(plasmaSwitchboard.CRAWL_PROFILE_SNIPPET_TEXT) ||
-                    e.name().equals(plasmaSwitchboard.CRAWL_PROFILE_SNIPPET_MEDIA))
+            selentry = (entry)it.next();
+            if (selentry.name().equals(plasmaSwitchboard.CRAWL_PROFILE_PROXY) ||
+                    selentry.name().equals(plasmaSwitchboard.CRAWL_PROFILE_REMOTE) ||
+                    selentry.name().equals(plasmaSwitchboard.CRAWL_PROFILE_SNIPPET_TEXT) ||
+                    selentry.name().equals(plasmaSwitchboard.CRAWL_PROFILE_SNIPPET_MEDIA))
                 continue;
-            prop.put("profiles_" + count + "_name", e.name());
-            prop.put("profiles_" + count + "_handle", e.handle());
-            if (handle.equals(e.handle()))
+            prop.put("profiles_" + count + "_name", selentry.name());
+            prop.put("profiles_" + count + "_handle", selentry.handle());
+            if (handle.equals(selentry.handle()))
                 prop.put("profiles_" + count + "_selected", 1);
             count++;
         }
         prop.put("profiles", count);
+        selentry = sb.profiles.getEntry(handle);
         
-        e = sb.profiles.getEntry(handle);
-        if (e == null) return prop;
-        if (post.containsKey("submit")) try {
-            it = labels.iterator();
-            eentry tee;
-            while (it.hasNext()) {
-                tee = (eentry)it.next();
-                String cval = (String)e.map().get(tee.name);
-                String val = (tee.type == eentry.BOOLEAN)
-                        ? Boolean.toString(post.containsKey(tee.name))
-                        : post.get(tee.name, cval);
-                if (!cval.equals(val))
-                    e.changeEntry(tee.name, val);
-            }
-        } catch (IOException ex) {
-            prop.put("error", 1);
-            prop.put("error_message", ex.getMessage());
-        }
+        // read post for change submit
+        if ((post != null) && (selentry != null)) {
+			if (post.containsKey("submit")) {
+				try {
+					it = labels.iterator();
+					eentry tee;
+					while (it.hasNext()) {
+						tee = (eentry) it.next();
+						String cval = (String) selentry.map().get(tee.name);
+						String val = (tee.type == eentry.BOOLEAN) ? Boolean.toString(post.containsKey(tee.name)) : post.get(tee.name, cval);
+						if (!cval.equals(val)) selentry.changeEntry(tee.name, val);
+					}
+				} catch (IOException ex) {
+					prop.put("error", 1);
+					prop.put("error_message", ex.getMessage());
+				}
+			}
+		}
         
-        prop.put("edit", 1);
-        prop.put("edit_name", e.name());
-        prop.put("edit_handle", e.handle());
-        it = labels.iterator();
+        // generate crawl profile table
         count = 0;
+        int domlistlength = (post == null) ? 160 : post.getInt("domlistlength", 160);
+        it = sb.profiles.profiles(true);
+        plasmaCrawlProfile.entry profile;
+        boolean dark = true;
         while (it.hasNext()) {
-            eentry ee = (eentry)it.next();
-            Object val = e.map().get(ee.name);
-            prop.put("edit_entries_" + count + "_readonly", ee.readonly ? 1 : 0);
-            prop.put("edit_entries_" + count + "_readonly_name", ee.name);
-            prop.put("edit_entries_" + count + "_readonly_label", ee.label);
-            prop.put("edit_entries_" + count + "_readonly_type", ee.type);
-            if (ee.type == eentry.BOOLEAN) {
-                prop.put("edit_entries_" + count + "_readonly_type_checked", Boolean.valueOf((String)val).booleanValue() ? 1 : 0);
-            } else {
-                prop.put("edit_entries_" + count + "_readonly_type_value", val);
+            profile = (plasmaCrawlProfile.entry) it.next();
+            prop.put("crawlProfiles_"+count+"_dark", ((dark) ? 1 : 0));
+            prop.put("crawlProfiles_"+count+"_name", profile.name());
+            prop.put("crawlProfiles_"+count+"_startURL", profile.startURL());
+            prop.put("crawlProfiles_"+count+"_handle", profile.handle());
+            prop.put("crawlProfiles_"+count+"_depth", profile.generalDepth());
+            prop.put("crawlProfiles_"+count+"_filter", profile.generalFilter());
+            prop.put("crawlProfiles_"+count+"_crawlingIfOlder", (profile.recrawlIfOlder() == Long.MAX_VALUE) ? "no re-crawl" : ""+profile.recrawlIfOlder());
+            prop.put("crawlProfiles_"+count+"_crawlingDomFilterDepth", (profile.domFilterDepth() == Integer.MAX_VALUE) ? "inactive" : Integer.toString(profile.domFilterDepth()));
+
+            //start contrib [MN]
+            int i = 0;
+            String item;
+            while((i <= domlistlength) && !((item = profile.domName(true, i)).equals(""))){
+                if(i == domlistlength){
+                    item = item + " ...";
+                }
+                prop.put("crawlProfiles_"+count+"_crawlingDomFilterContent_"+i+"_item", item);
+                i++;
             }
+
+            prop.put("crawlProfiles_"+count+"_crawlingDomFilterContent", i);
+            //end contrib [MN]
+
+            prop.put("crawlProfiles_"+count+"_crawlingDomMaxPages", (profile.domMaxPages() == Integer.MAX_VALUE) ? "unlimited" : ""+profile.domMaxPages());
+            prop.put("crawlProfiles_"+count+"_withQuery", ((profile.crawlingQ()) ? 1 : 0));
+            prop.put("crawlProfiles_"+count+"_storeCache", ((profile.storeHTCache()) ? 1 : 0));
+            prop.put("crawlProfiles_"+count+"_indexText", ((profile.indexText()) ? 1 : 0));
+            prop.put("crawlProfiles_"+count+"_indexMedia", ((profile.indexMedia()) ? 1 : 0));
+            prop.put("crawlProfiles_"+count+"_remoteIndexing", ((profile.remoteIndexing()) ? 1 : 0));
+            prop.put("crawlProfiles_"+count+"_deleteButton", (((profile.name().equals("remote")) ||
+                                                               (profile.name().equals("proxy")) ||
+                                                               (profile.name().equals("snippetText")) ||
+                                                               (profile.name().equals("snippetMedia")) ? 0 : 1)));
+            prop.put("crawlProfiles_"+count+"_deleteButton_handle", profile.handle());
+            
+            dark = !dark;
             count++;
         }
-        prop.put("edit_entries", count);
+        prop.put("crawlProfiles", count);
+        
+        // generate edit field
+        if (selentry == null) {
+        	prop.put("edit", 0);
+        } else {
+        	prop.put("edit", 1);
+			prop.put("edit_name", selentry.name());
+			prop.put("edit_handle", selentry.handle());
+			it = labels.iterator();
+			count = 0;
+			while (it.hasNext()) {
+				eentry ee = (eentry) it.next();
+				Object val = selentry.map().get(ee.name);
+				prop.put("edit_entries_" + count + "_readonly", ee.readonly ? 1 : 0);
+				prop.put("edit_entries_" + count + "_readonly_name", ee.name);
+				prop.put("edit_entries_" + count + "_readonly_label", ee.label);
+				prop.put("edit_entries_" + count + "_readonly_type", ee.type);
+				if (ee.type == eentry.BOOLEAN) {
+					prop.put("edit_entries_" + count + "_readonly_type_checked", Boolean.valueOf((String) val).booleanValue() ? 1 : 0);
+				} else {
+					prop.put("edit_entries_" + count + "_readonly_type_value", val);
+				}
+				count++;
+			}
+			prop.put("edit_entries", count);
+		}
         
         return prop;
     }

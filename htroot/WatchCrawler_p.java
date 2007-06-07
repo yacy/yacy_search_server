@@ -71,12 +71,6 @@ public class WatchCrawler_p {
         } else {
             prop.put("info", 0);
             
-            if (post.containsKey("deleteprofile")) {
-                // deletion of a crawl
-                String handle = (String) post.get("handle");
-                if (handle != null) switchboard.profiles.removeEntry(handle);
-            }
-            
             if (post.containsKey("continue")) {
                 // continue queue
                 String queue = post.get("continue", "");
@@ -360,54 +354,6 @@ public class WatchCrawler_p {
                 setPerformance(switchboard, post);
             }
         }
-        
-        // crawl profiles
-        int count = 0;
-        int domlistlength = (post == null) ? 160 : post.getInt("domlistlength", 160);
-        Iterator it = switchboard.profiles.profiles(true);
-        plasmaCrawlProfile.entry profile;
-        boolean dark = true;
-        while (it.hasNext()) {
-            profile = (plasmaCrawlProfile.entry) it.next();
-            prop.put("crawlProfiles_"+count+"_dark", ((dark) ? 1 : 0));
-            prop.put("crawlProfiles_"+count+"_name", profile.name());
-            prop.put("crawlProfiles_"+count+"_startURL", profile.startURL());
-            prop.put("crawlProfiles_"+count+"_handle", profile.handle());
-            prop.put("crawlProfiles_"+count+"_depth", profile.generalDepth());
-            prop.put("crawlProfiles_"+count+"_filter", profile.generalFilter());
-            prop.put("crawlProfiles_"+count+"_crawlingIfOlder", (profile.recrawlIfOlder() == Long.MAX_VALUE) ? "no re-crawl" : ""+profile.recrawlIfOlder());
-            prop.put("crawlProfiles_"+count+"_crawlingDomFilterDepth", (profile.domFilterDepth() == Integer.MAX_VALUE) ? "inactive" : Integer.toString(profile.domFilterDepth()));
-
-            //start contrib [MN]
-            int i = 0;
-            String item;
-            while((i <= domlistlength) && !((item = profile.domName(true, i)).equals(""))){
-                if(i == domlistlength){
-                    item = item + " ...";
-                }
-                prop.put("crawlProfiles_"+count+"_crawlingDomFilterContent_"+i+"_item", item);
-                i++;
-            }
-
-            prop.put("crawlProfiles_"+count+"_crawlingDomFilterContent", i);
-            //end contrib [MN]
-
-            prop.put("crawlProfiles_"+count+"_crawlingDomMaxPages", (profile.domMaxPages() == Integer.MAX_VALUE) ? "unlimited" : ""+profile.domMaxPages());
-            prop.put("crawlProfiles_"+count+"_withQuery", ((profile.crawlingQ()) ? 1 : 0));
-            prop.put("crawlProfiles_"+count+"_storeCache", ((profile.storeHTCache()) ? 1 : 0));
-            prop.put("crawlProfiles_"+count+"_indexText", ((profile.indexText()) ? 1 : 0));
-            prop.put("crawlProfiles_"+count+"_indexMedia", ((profile.indexMedia()) ? 1 : 0));
-            prop.put("crawlProfiles_"+count+"_remoteIndexing", ((profile.remoteIndexing()) ? 1 : 0));
-            prop.put("crawlProfiles_"+count+"_deleteButton", (((profile.name().equals("remote")) ||
-                                                               (profile.name().equals("proxy")) ||
-                                                               (profile.name().equals("snippetText")) ||
-                                                               (profile.name().equals("snippetMedia")) ? 0 : 1)));
-            prop.put("crawlProfiles_"+count+"_deleteButton_handle", profile.handle());
-            
-            dark = !dark;
-            count++;
-        }
-        prop.put("crawlProfiles", count);
         
         // performance settings
         long LCbusySleep = Integer.parseInt(env.getConfig(plasmaSwitchboard.CRAWLJOB_LOCAL_CRAWL_BUSYSLEEP, "100"));

@@ -13,7 +13,66 @@
       The profiles for remote crawls, <a href="/ProxyIndexingMonitor_p.html">indexing via proxy</a> and snippet fetches
       cannot be altered here as they are hard-coded.
     </p>
-    <form action="/CrawlProfileEditor_p.html" method="post" enctype="multipart/form-data">
+    
+    
+<!-- crawl profile list -->
+<form action="CrawlProfileEditor_p.html" method="get" enctype="multipart/form-data">
+<fieldset><legend>Crawl Profile List</legend>
+<table border="0" cellpadding="2" cellspacing="1">
+  <colgroup>
+  <col width="120" />
+  <col />
+  <col width="16" />
+  <col width="60" />
+  <col width="10" span="2" />
+  <col />
+  <col width="10" span="5" />
+  </colgroup>
+  <tr class="TableHeader"> 
+    <td><strong>Crawl Thread</strong></td>
+    <td><strong>Start URL</strong></td>
+    <td><strong>Depth</strong></td>
+    <td><strong>Filter</strong></td>
+    <td><strong>MaxAge</strong></td>
+    <td><strong>Auto Filter Depth</strong></td>
+    <td><strong>Auto Filter Content</strong></td>
+    <td><strong>Max Page Per Domain</strong></td>
+    <td><strong>Accept '?' URLs</strong></td>
+    <td><strong>Fill Proxy Cache</strong></td>
+    <td><strong>Local Text Indexing</strong></td>
+    <td><strong>Local Media Indexing</strong></td>
+    <td><strong>Remote Indexing</strong></td>
+    <td></td>
+  </tr>
+  #{crawlProfiles}# 
+  <tr class="TableCell#(dark)#Light::Dark#(/dark)#"> 
+    <td>#[name]#</td>
+    <td><a  href="#[startURL]#">#[startURL]#</a></td>
+    <td>#[depth]#</td>
+    <td>#[filter]#</td>
+    <td>#[crawlingIfOlder]#</td>
+    <td>#[crawlingDomFilterDepth]#</td>
+    <td>#{crawlingDomFilterContent}##[item]#<br />#{/crawlingDomFilterContent}#</td>
+    <td>#[crawlingDomMaxPages]#</td>
+    <td>#(withQuery)#no::yes#(/withQuery)#</td>
+    <td>#(storeCache)#no::yes#(/storeCache)#</td>
+    <td>#(indexText)#no::yes#(/indexText)#</td>
+    <td>#(indexMedia)#no::yes#(/indexMedia)#</td>
+    <td>#(remoteIndexing)#no::yes#(/remoteIndexing)#</td>
+    <td>#(deleteButton)#::
+        <pre><input type="hidden" name="handle" value="#[handle]#" /></pre>
+        <pre><input type="submit" name="deleteprofile" value="Delete" /></pre>
+      #(/deleteButton)#
+			
+		</td>
+  </tr>
+  #{/crawlProfiles}# 
+</table>
+</fieldset>
+</form>
+
+<!-- crawl profile editor -->
+    <form action="CrawlProfileEditor_p.html" method="post" enctype="multipart/form-data">
       <fieldset><legend>Select the profile to edit</legend>
         <select name="handle">#{profiles}# 
           <option value="#[handle]#"#(selected)#:: selected="selected"#(/selected)#>#[name]#</option>#{/profiles}# 
