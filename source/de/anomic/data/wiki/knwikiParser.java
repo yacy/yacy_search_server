@@ -106,39 +106,47 @@ public class knwikiParser implements wikiParser {
 		String t = "[=] ein fucking [= test =]-text[=,ne?!=] joa, [=alles=]wunderbar," +
 				"[=denk ich=] mal =]";
 		long l = System.currentTimeMillis();
-		t = new knwikiParser(null).parse((args.length > 0) ? args[0] : text);
+		t = new knwikiParser(null).parse((args.length > 0) ? args[0] : text, "localhost:8080");
         System.out.println("parsing time: " + (System.currentTimeMillis() - l) + " ms");
         System.out.println("--- --- ---");
         System.out.println(t);
 	}
     
     public String transform(String content) {
-        return parse(content);
+        return parse(content, null);
     }
     
     public String transform(String content, plasmaSwitchboard sb) {
-        return parse(content);
+        return parse(content, null);
     }
     
     public String transform(byte[] content) throws UnsupportedEncodingException {
-        return parse(new String(content, "UTF-8"));
+        return parse(new String(content, "UTF-8"), null);
     }
     
     public String transform(
             byte[] content, String encoding,
             plasmaSwitchboard switchboard) throws UnsupportedEncodingException {
-        return parse(new String(content, encoding));
+        return parse(new String(content, encoding), null);
     }
     
     public String transform(byte[] content, String encoding) throws UnsupportedEncodingException {
-        return parse(new String(content, encoding));
+        return parse(new String(content, encoding), null);
+    }
+    
+    public String transform(byte[] text, String encoding, String publicAddress) throws UnsupportedEncodingException {
+        return parse(new String(text, encoding), publicAddress);
+    }
+    
+    public String transform(String text, String publicAddress) {
+        return parse(text, publicAddress);
     }
 	
-	public String parse(String text) {
+	public String parse(String text, String publicAddress) {
         tokens = new Token[] {
                 new SimpleToken('=', '=', new String[][] { null, { "h2" }, { "h3" }, { "h4" } }, true),
                 new SimpleToken('\'', '\'', new String[][] { null, { "i" }, { "b" }, null, { "b", "i" } }, false),
-                new LinkToken(yacyCore.seedDB.mySeed.getPublicAddress(), "Wiki.html?page=", sb),
+                new LinkToken((publicAddress == null) ? yacyCore.seedDB.mySeed.getPublicAddress() : publicAddress, "Wiki.html?page=", sb),
                 new ListToken('*', "ul"),
                 new ListToken('#', "ol"),
                 new ListToken(':', "blockquote", null),

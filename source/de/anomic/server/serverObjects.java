@@ -132,6 +132,16 @@ public class serverObjects extends Hashtable implements Cloneable {
             return this.putASIS(key, "Internal error pasting wiki-code: " + e.getMessage());
         }
     }
+    public String putWiki(Object key, String wikiCode, String publicAddress) {
+        return this.putASIS(key, plasmaSwitchboard.wikiParser.transform(wikiCode, publicAddress));
+    }
+    public String putWiki(Object key, byte[] wikiCode, String publicAddress) {
+        try {
+            return this.putASIS(key, plasmaSwitchboard.wikiParser.transform(wikiCode, "UTF-8", publicAddress));
+        } catch (UnsupportedEncodingException e) {
+            return this.putASIS(key, "Internal error pasting wiki-code: " + e.getMessage());
+        }
+    }
 
     // long variant
     public long put(String key, long value) {

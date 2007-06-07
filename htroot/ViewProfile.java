@@ -86,6 +86,7 @@ public class ViewProfile {
         
         // get the profile
         HashMap profile = null;
+        String address = null;
         if (hash.equals("localhash")) {
             // read the profile from local peer
             Properties p = new Properties();
@@ -102,6 +103,7 @@ public class ViewProfile {
             prop.put("localremotepeer", 0);
             prop.put("success_peername", yacyCore.seedDB.mySeed.getName());
             prop.put("success_peerhash", yacyCore.seedDB.mySeed.hash);
+            address = yacyCore.seedDB.mySeed.getPublicAddress();
         } else {
             // read the profile from remote peer
             yacySeed seed = yacyCore.seedDB.getConnected(hash);
@@ -128,6 +130,7 @@ public class ViewProfile {
                 }
                 prop.put("success_peername", seed.getName());
                 prop.put("success_peerhash", seed.hash);
+                address = seed.getPublicAddress();
             }
             prop.put("localremotepeer", 1);
         }
@@ -156,7 +159,7 @@ public class ViewProfile {
         while (it.hasNext()) {
             prop.put("success_" + (String) it.next(), 0);
         }
-
+        
         //number of not explicitly recognized but displayed items
         int numUnknown = 0;
         while (i.hasNext()) {
@@ -175,7 +178,8 @@ public class ViewProfile {
 					if(key.equals("comment")){
 						prop.putWiki(
 							"success_" + key + "_value",
-							((String) entry.getValue()).replaceAll("\r", "").replaceAll("\\\\n", "\n")
+							((String) entry.getValue()).replaceAll("\r", "").replaceAll("\\\\n", "\n"),
+                            address
 						);
 						prop.putASIS("success_" + key + "_b64value",kelondroBase64Order.standardCoder.encodeString((String) entry.getValue()));
 					}else{
