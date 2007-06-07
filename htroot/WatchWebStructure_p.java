@@ -50,6 +50,8 @@ public class WatchWebStructure_p {
         prop.put("width", width);
         prop.put("height", height);
         prop.put("nodes", nodes);
+        prop.put("nodesi", Math.min(1000, nodes + 50));
+        prop.put("nodesd", Math.max(0, nodes - 50));
         
         return prop;
     }
