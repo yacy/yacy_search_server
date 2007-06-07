@@ -40,12 +40,14 @@ function handleResponse(){
         }		
 		
 		// getting the sitemap URL contained in the robots.txt
-		sitemap="";		
-        if(response.getElementsByTagName("sitemap")[0].firstChild!=null){
-	        sitemap=response.getElementsByTagName("sitemap")[0].firstChild.nodeValue;
-	    }		
-		document.getElementsByName("sitemapURL")[0].value=sitemap;
-		document.getElementById("sitemap").disabled=false;
+		if (document.getElementsByName("sitemapURL").length > 0) {
+			sitemap="";		
+	        if(response.getElementsByTagName("sitemap")[0].firstChild!=null){
+		        sitemap=response.getElementsByTagName("sitemap")[0].firstChild.nodeValue;
+		    }		
+			document.getElementsByName("sitemapURL")[0].value=sitemap;
+			document.getElementById("sitemap").disabled=false;
+		}
         
 		// clear the ajax image
 		document.getElementsByName("ajax")[0].setAttribute("src", AJAX_OFF);
