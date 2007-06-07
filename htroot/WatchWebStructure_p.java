@@ -16,12 +16,14 @@ public class WatchWebStructure_p {
         int width = 768;
         int height = 576;
         int depth = 3;
+        int nodes = 100; // maximum number of host nodes that are painted
         String host = "auto";
         
         if (post != null) {
             width = post.getInt("width", 768);
             height = post.getInt("height", 576);
             depth = post.getInt("depth", 3);
+            nodes = post.getInt("nodes", width * height * 100 / 768 / 576);
             host = post.get("host", "auto");
         }
         
@@ -47,6 +49,7 @@ public class WatchWebStructure_p {
         prop.put("depthd", Math.max(0, depth - 1));
         prop.put("width", width);
         prop.put("height", height);
+        prop.put("nodes", nodes);
         
         return prop;
     }

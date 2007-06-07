@@ -50,12 +50,14 @@ public class WebStructurePicture_p {
         int width = 768;
         int height = 576;
         int depth = 3;
+        int nodes = 100; // maximum number of host nodes that are painted
         String host = null;
         
         if (post != null) {
             width = post.getInt("width", 768);
             height = post.getInt("height", 576);
             depth = post.getInt("depth", 3);
+            nodes = post.getInt("nodes", width * height * 100 / 768 / 576);
             host = post.get("host", null);
         }
         
@@ -81,19 +83,24 @@ public class WebStructurePicture_p {
         
         // recursively find domains, up to a specific depth
         ymageGraph graph = new ymageGraph();
-        if (host != null) place(graph, sb.webStructure, hash, host, 0.0, 0.0, 0, depth);
+        if (host != null) place(graph, sb.webStructure, hash, host, nodes, 0.0, 0.0, 0, depth);
         //graph.print();
         
         return graph.draw(width, height, 40, 40, 5, 15);
         
     }
     
-    private static final void place(ymageGraph graph, plasmaWebStructure structure, String centerhash, String centerhost, double x, double y, int nextlayer, int maxlayer) {
-        // returns the host string
+    private static final int place(ymageGraph graph, plasmaWebStructure structure, String centerhash, String centerhost, int maxnodes, double x, double y, int nextlayer, int maxlayer) {
+        // returns the number of nodes that had been placed
         assert centerhost != null;
         ymageGraph.coordinate center = graph.getPoint(centerhost);
-        if (center == null) center = graph.addPoint(centerhost, x, y, nextlayer);
-        if (nextlayer == maxlayer) return;
+        int mynodes = 0;
+        if (center == null) {
+        	center = graph.addPoint(centerhost, x, y, nextlayer);
+        	maxnodes--;
+        	mynodes++;
+        }
+        if (nextlayer == maxlayer) return mynodes;
         nextlayer++;
         double radius = 1.0 / ((double) (1 << nextlayer));
         Map next = structure.references(centerhash);
@@ -105,7 +112,7 @@ public class WebStructurePicture_p {
         int maxtargetrefs = 8, maxthisrefs = 8;
         int targetrefs, thisrefs;
         double rr, re;
-        while (i.hasNext()) {
+        while ((i.hasNext()) && (maxnodes > 0)) {
             entry = (Map.Entry) i.next();
             targethash = (String) entry.getKey();
             targethost = structure.resolveDomHash2DomString(targethash);
@@ -122,20 +129,25 @@ public class WebStructurePicture_p {
             rr = radius * 0.25 * (1 - targetrefs / maxtargetrefs);
             re = radius * 0.5 * (thisrefs / maxthisrefs);
             graph.addPoint(targethost, x + (radius - rr - re) * Math.cos(angle), y + (radius - rr - re) * Math.sin(angle), nextlayer);
+            maxnodes--;
+            mynodes++;
         }
         // recursively set next hosts
         i = targets.iterator();
         String[] target;
+        int nextnodes;
         while (i.hasNext()) {
             target = (String[]) i.next();
             targethash = target[0];
             targethost = target[1];
             ymageGraph.coordinate c = graph.getPoint(targethost);
             assert c != null;
-            place(graph, structure, targethash, targethost, c.x, c.y, nextlayer, maxlayer);
+            nextnodes = (maxnodes <= 0) ? 0 : place(graph, structure, targethash, targethost, maxnodes, c.x, c.y, nextlayer, maxlayer);
+            mynodes += nextnodes;
+            maxnodes -= nextnodes;
             graph.setBorder(centerhost, targethost);
         }
-        return;
+        return mynodes;
     }
     
 }
