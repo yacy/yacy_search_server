@@ -5,7 +5,14 @@ function handleResponse(){
     if(http.readyState == 4){
         var response = http.responseXML;
         title=response.getElementsByTagName("title")[0].firstChild.nodeValue;
-        document.getElementsByName("title")[0].value=title;
+        tags_field=document.getElementById("tags");
+        document.getElementById("title").value=title;
+        
+        tags=response.getElementsByTagName("tag");
+        for(i=0;i<tags.length-1;i++){
+        	tags_field.value+=tags[i].getAttribute("name")+",";
+        }
+        tags_field.value+=tags[tags.length-1].getAttribute("name");
 		
 		// remove the ajax image
 		document.getElementsByName("ajax")[0].setAttribute("src", AJAX_OFF);
