@@ -108,13 +108,13 @@ public class User_p {
     	                prop.put("address", entry.getAddress());
     	                prop.put("timelimit", entry.getTimeLimit());
     	                prop.put("timeused", entry.getTimeUsed());
-                    prop.put("proxyRight", (entry.hasProxyRight()?1:0));
-                    prop.put("uploadRight", (entry.hasUploadRight()?1:0));
-                    prop.put("downloadRight", (entry.hasDownloadRight()?1:0));
-                    prop.put("adminRight", (entry.hasAdminRight()?1:0));
-                    prop.put("blogRight", (entry.hasBlogRight()?1:0));
-                    prop.put("wikiAdminRight", (entry.hasWikiAdminRight()?1:0));
-                    prop.put("bookmarkRight", (entry.hasBookmarkRight()?1:0));
+                    prop.put("proxyRight", (entry.hasRight(userDB.Entry.PROXY_RIGHT)?1:0));
+                    prop.put("uploadRight", (entry.hasRight(userDB.Entry.UPLOAD_RIGHT)?1:0));
+                    prop.put("downloadRight", (entry.hasRight(userDB.Entry.DOWNLOAD_RIGHT)?1:0));
+                    prop.put("adminRight", (entry.hasRight(userDB.Entry.ADMIN_RIGHT)?1:0));
+                    prop.put("blogRight", (entry.hasRight(userDB.Entry.BLOG_RIGHT)?1:0));
+                    prop.put("wikiAdminRight", (entry.hasRight(userDB.Entry.WIKIADMIN_RIGHT)?1:0));
+                    prop.put("bookmarkRight", (entry.hasRight(userDB.Entry.BOOKMARK_RIGHT)?1:0));
                 }
 			}else if( post.containsKey("delete_user") && !((String)post.get("user")).equals("newuser") ){
 				sb.userDB.removeEntry((String)post.get("user"));
