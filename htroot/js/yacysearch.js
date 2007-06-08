@@ -49,6 +49,12 @@ function requestImageSnippet(url, query){
 	request.send(null);
 }
 
+function show_hidden_results(){
+		results=document.getElementsByName("searchresults");
+		for(i=0;i<results.length;i++){
+				results[i].setAttribute("style", "display: visible");
+		}
+}
 function handleTextState(req) {
     if(req.readyState != 4){
 		return;
@@ -68,6 +74,8 @@ function handleTextState(req) {
 		span.className = "snippetLoaded";
 	} else {
 		span.className = "snippetError";
+		span.parentNode.parentNode.setAttribute("style", "display: none");
+		document.getElementById("hidden_results").innerHTML='Some results were hidden, because they do not contain your searchwords anymore, or because they are not accessible. Click here to <a href="javascript:show_hidden_results()">show them</a>';
 	}
 
 	// replace "<b>" text by <strong> node
