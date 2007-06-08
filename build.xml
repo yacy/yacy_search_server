@@ -218,7 +218,7 @@
 
   <!-- compiling the main sources -->   
   <javac srcdir="${src}/" destdir="${build}"
-         excludes="de/anomic/plasma/parser/*/*,de/anomic/yacy/seedUpload/**,de/anomic/soap/**,yacy.java,de/anomic/server/portForwarding/*/*"
+         excludes="de/anomic/plasma/parser/*/*,de/anomic/yacy/seedUpload/**,de/anomic/soap/**,yacy.java,de/anomic/server/portForwarding/*/*,de/anomic/data/rssReader.java"
          debug="true" debuglevel="lines,vars,source" 
          source="${javacSource}" target="${javacTarget}">
     <classpath refid="project.class.path"/>
@@ -359,8 +359,18 @@
     </copy>      
 </target>   
     
-<target name="compileExtensions" 
-	    depends="compileMain,compileParsers,compileSeedUploaders,compileSoap,compilePortForwarding">
+<target name="compileExtensions" depends="compileMain,compileParsers,compileSeedUploaders,compileSoap,compilePortForwarding">
+	  <javac srcdir="${src}" destdir="${build}"
+	         debug="true" debuglevel="lines,vars,source" 
+	         source="${javacSource}" target="${javacTarget}">
+	    <classpath>
+	    	<path refid="project.class.path"/>
+		    <pathelement location="${libx}/informa-0.6.0.jar" />
+		    <pathelement location="${libx}/commons-logging.jar" />
+		    <pathelement location="${libx}/jdom.jar" />
+	    </classpath>
+	    <include name="de/anomic/data/rssReader.java" />
+	  </javac> 		    	
 </target>	
 	
 <target name="all" depends="compileMain,compileExtensions">
@@ -379,7 +389,7 @@
 <!-- ======================================================================================================= 
 	 putting all extensions together into a single zip file 
 	 ======================================================================================================= --> 	
-<target name="distExtensions" if="singleExtFile" depends="compileExtensions">
+<target name="distExtensions" if="singleExtFile" depends="copyExt4Dist">
       <tar destfile="${release}/${extensionFile}" compression="gzip" defaultexcludes="yes" longfile="gnu">
         <tarfileset dir="${release_ext}" prefix="${releaseDir}/" dirmode="${accessRightsDir}" mode="${accessRightsFile}" >
           <include name="**/*.*"/>
@@ -389,6 +399,23 @@
     <delete dir="${release_ext}"/>        
 </target>   
 
+<!-- copy extension files that are not copied elsewhere -->	
+<target name="copyExt4Dist" depends="compileExtensions">
+	<!-- copy extension classes -->
+	<copy todir="${release_ext}/classes" failonerror="false">		
+		<fileset dir="${build}">
+		    <include name="de/anomic/data/rssReader.class"/>
+		</fileset>
+	</copy>	
+	
+	<!-- copy extension source files -->
+	<copy todir="${release_ext}/source">
+	  <fileset dir="${src}">
+	    <include name="de/anomic/data/rssReader.java"/>
+	  </fileset>
+	</copy>
+</target>
+	
 <target name="copyMain4Dist" depends="compileMain,buildYacyBar">	
 	<!-- copy main class files -->
 	<copy todir="${release_main}/classes" failonerror="false">		
@@ -402,6 +429,8 @@
 		    <exclude name="de/anomic/soap/**"/>
 		    <!-- excluding the port forwarder --> 
 		    <exclude name="de/anomic/server/portForwarding/*/*"/> 
+			<!-- ecluding rss Reader class -->
+			<exclude name="de/anomic/data/rssReader.*"/>
 		</fileset>
 	
 		<!-- copy standard seed uploaders -->
@@ -500,6 +529,8 @@
 	    <exclude name="de/anomic/soap/**"/> 
 	    <!-- excluding the port forwarder --> 
 	    <exclude name="de/anomic/server/portForwarding/*/*"/> 
+		<!-- ecluding rss Reader class -->
+		<exclude name="de/anomic/data/rssReader.*"/>	  	
 	  </fileset>
 	  <fileset dir="${src}">
 	    <include name="de/anomic/yacy/seedUpload/yacySeedUploadFile.java"/>
@@ -570,7 +601,7 @@
   <!--<echo message="${releaseVersion}" file="${doc}/release.txt"/>-->
 </target>
 	
-<target name="distAllInOne" depends="copyMain4Dist,compileExtensions">
+<target name="distAllInOne" depends="compileExtensions,copyMain4Dist,copyExt4Dist">
 	<tar destfile="${release}/${allInOneFile}" compression="gzip" defaultexcludes="yes" longfile="fail">  	
   	 
 		<!-- packing all files into a gzipped tar -->
