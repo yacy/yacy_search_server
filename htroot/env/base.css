@@ -692,3 +692,12 @@ ul#menu a.MenuItemLink {
   width:80%;
   padding:1px 5% 1px 15%;
 }
+
+img.favicon{
+	margin-right: 3px;
+	width: 16px;
+	height: 16px;
+}
+p.iconindented{
+	padding-left: 19px;
+}
