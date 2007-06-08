@@ -81,6 +81,7 @@ public class User_p {
         prop.put("adminRight", 0);
         prop.put("wikiAdminRight", 0);
         prop.put("bookmarkRight", 0);
+        prop.put("soapRight", 0);
         
         prop.put("users", 0);
 
@@ -115,6 +116,7 @@ public class User_p {
                     prop.put("blogRight", (entry.hasRight(userDB.Entry.BLOG_RIGHT)?1:0));
                     prop.put("wikiAdminRight", (entry.hasRight(userDB.Entry.WIKIADMIN_RIGHT)?1:0));
                     prop.put("bookmarkRight", (entry.hasRight(userDB.Entry.BOOKMARK_RIGHT)?1:0));
+                    prop.put("soapRight", (entry.hasRight(userDB.Entry.SOAP_RIGHT)?1:0));
                 }
 			}else if( post.containsKey("delete_user") && !((String)post.get("user")).equals("newuser") ){
 				sb.userDB.removeEntry((String)post.get("user"));
@@ -143,6 +145,7 @@ public class User_p {
             String blogRight=( post.containsKey("blogRight")&&((String)post.get("blogRight")).equals("on") ? "true" : "false");
             String wikiAdminRight=( post.containsKey("wikiAdminRight")&&((String)post.get("wikiAdminRight")).equals("on") ? "true" : "false");
             String bookmarkRight=( post.containsKey("bookmarkRight")&&((String)post.get("bookmarkRight")).equals("on") ? "true" : "false");
+            String soapRight=( post.containsKey("soapRight")&&((String)post.get("soapRight")).equals("on") ? "true" : "false");
             HashMap mem=new HashMap();
             if( post.get("current_user").equals("newuser")){ //new user
                 
@@ -160,6 +163,7 @@ public class User_p {
 				mem.put(userDB.Entry.BLOG_RIGHT, blogRight);
 				mem.put(userDB.Entry.WIKIADMIN_RIGHT, wikiAdminRight);
 				mem.put(userDB.Entry.BOOKMARK_RIGHT, bookmarkRight);
+				mem.put(userDB.Entry.SOAP_RIGHT, soapRight);
 
                 try{
                     entry=sb.userDB.createEntry(username, mem);
@@ -191,6 +195,7 @@ public class User_p {
 						entry.setProperty(userDB.Entry.BLOG_RIGHT, blogRight);
 						entry.setProperty(userDB.Entry.WIKIADMIN_RIGHT, wikiAdminRight);
 						entry.setProperty(userDB.Entry.BOOKMARK_RIGHT, bookmarkRight);
+						entry.setProperty(userDB.Entry.SOAP_RIGHT, soapRight);
 		            }catch (IOException e){
 					}
                 }else{
