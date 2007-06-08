@@ -1,0 +1,24 @@
+<!--HEADER for FeedReader_p.html 
+ <title>#[clientname]#'s feed reader</title> 
+ end of HEADER-->
+#(page)#
+please select your feed with ?url=Feedurl&max=5&offset=1 (to be implemented in html ;))
+::
+<dl>
+	<dt>Title</dt>
+	<dd>#[title]#</dd>
+	#(hasAuthor)#::<dt>Author</dt>
+	<dd>#[author]#</dd>#(/hasAuthor)#
+	<dt>Description</dt>
+	<dd>#[description]#</dd>
+</dl>
+
+<dl>
+#{items}#
+	<dt><a href="#[link]#">#[title]#</a></dt>
+	<dd style="border: thin solid red">#[description]#</dd>
+#{/items}#
+</dl>
+::
+Error
+#(/page)#
