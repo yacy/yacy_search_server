@@ -87,8 +87,8 @@ import de.anomic.yacy.yacyCore;
  * A real example can be found here: http://www.xt-service.de/sitemap.xml
  * An example robots.txt containing a sitemap URL: http://notepad.emaillink.de/robots.txt
  * 
- * @see http://www.sitemaps.org/protocol.php
- * @see https://www.google.com/webmasters/tools/docs/en/protocol.html
+ * @see Protocol at sitemaps.org <a href="http://www.sitemaps.org/protocol.php">http://www.sitemaps.org/protocol.php</a>
+ * @see Protocol at google.com <a href="https://www.google.com/webmasters/tools/docs/en/protocol.html">https://www.google.com/webmasters/tools/docs/en/protocol.html</a>
  */
 public class SitemapParser extends DefaultHandler {
 	public static final String XMLNS_SITEMAPS_ORG = "http://www.sitemaps.org/schemas/sitemap/0.9";

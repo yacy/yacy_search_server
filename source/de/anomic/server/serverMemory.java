@@ -116,14 +116,17 @@ public class serverMemory {
     public static boolean request(long size, boolean force) {
         long avail = available();
         if (avail >= size) return true;
-        long avg;
-        if (force || ((avg = getAverageGCFree()) == 0 || avg + avail >= size)) {
+        long avg = getAverageGCFree();
+        if (force || avg == 0 || avg + avail >= size) {
             long freed = runGC();
             avail = available();
-            serverLog.logInfo("MEMORY", "performed explicit GC, freed " + (freed / 1024) + " KB (requested/available: " + size + " / " + avail + " KB)");
+            serverLog.logInfo("MEMORY", "performed explicit GC, freed " + (freed / 1024)
+                    + " KB (requested/available/average: " + (size / 1024) + " / "
+                    + (avail / 1024) + "/" + (avg / 1024) + " KB)");
             return avail >= size;
         } else {
-            serverLog.logInfo("MEMORY", "couldn't free enough memory (requested/available " + size + "/" + avail + " KB)");
+            serverLog.logInfo("MEMORY", "former GCs indicate to not be able to free enough memory (requested/available/average: "
+                    + (size / 1024) + "/" + (avail / 1024) + "/" + (avg / 1024) + " KB)");
             return false;
         }
     }

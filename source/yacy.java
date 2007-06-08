@@ -232,9 +232,6 @@ public final class yacy {
 				System.err.println("Error creating DATA-directory in " + homePath.toString() + " . Please check your write-permission for this folder. YaCy will now terminate."); 
 				System.exit(-1); 
 			}
-			
-			f = new File(homePath, "DATA/yacy.running");
-			if (!f.exists()) f.createNewFile(); f.deleteOnExit();
             
             // setting up logging
             f = new File(homePath, "DATA/LOG/"); if (!(f.exists())) f.mkdirs();
@@ -253,6 +250,16 @@ public final class yacy {
             serverLog.logConfig("STARTUP", "Application Root Path: " + homePath);
             serverLog.logConfig("STARTUP", "Time Zone: UTC" + serverDate.UTCDiffString() + "; UTC+0000 is " + System.currentTimeMillis());
             serverLog.logConfig("STARTUP", "Maximum file system path length: " + serverSystem.maxPathLength);
+            
+            f = new File(homePath, "DATA/yacy.running");
+            if (f.exists()) {                // another instance running? VM crash? User will have to care about this
+                serverLog.logSevere("STARTUP", "the file " + f + " exists, this usually means that another instance of YaCy is using this DATA-folder.");
+                serverLog.logSevere("STARTUP", "please make sure that DATA can be used exclusively by one YaCy. Quitting...");
+                System.exit(-1);
+            } else {
+                f.createNewFile();
+                f.deleteOnExit();
+            }
 
             /*
                 // Testing if the yacy archive file were unzipped correctly.
