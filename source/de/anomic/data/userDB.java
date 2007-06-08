@@ -235,14 +235,15 @@ public final class userDB {
     public Entry md5Auth(String user, String md5){
         Entry entry=this.getEntry(user);
         if( entry != null && entry.getMD5EncodedUserPwd().equals(md5)){
-                if(entry.isLoggedOut()){
-                    try{
-                        entry.setProperty(Entry.LOGGED_OUT, "false");
-                    }catch(IOException e){}
-                    return null;
-                }
+            if(entry.isLoggedOut()){
+                try{
+				    entry.setProperty(Entry.LOGGED_OUT, "false");
+                }catch(IOException e){}
+                return null;
+            }
+			return entry;
         }
-        return entry;
+		return null;
     }
     public Entry cookieAuth(String cookieString){
         String token=getLoginToken(cookieString);
