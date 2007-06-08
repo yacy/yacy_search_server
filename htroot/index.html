@@ -58,9 +58,16 @@
           <td><label for="resource">Resource</label>:</td>
           <td>
             <select id="resource" name="resource">
-              <option value="global" #(resource-global)#::selected="selected"#(/resource-global)#>global</option>
+              <option value="global" #(resource-global)#::selected="selected"#(/resource-global)#
+                      #(resource-global-disabled)#::disabled="disabled"#(/resource-global-disabled)#>global</option>
               <option value="local" #(resource-local)#::selected="selected"#(/resource-local)#>local</option>
             </select>
+            #(resource-global-disabled)#::
+            Global search is disabled because<br />#(reason)# 
+              <a class="lock" href="ConfigNetwork_p.html">DHT Distribution</a> is::
+              <a class="lock" href="ConfigNetwork_p.html">Index Receive</a> is::
+              <a class="lock" href="ConfigNetwork_p.html">DHT Distribution and Index Receive</a> are#(/reason)# 
+            disabled.#(/resource-global-disabled)#
           </td>
         </tr>
         <tr>

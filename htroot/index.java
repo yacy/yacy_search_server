@@ -74,11 +74,14 @@ public class index {
         final String cat = (post == null) ? "href" : post.get("cat", "href");
         final int type = (post == null) ? 0 : post.getInt("type", 0);
         
-        final boolean indexDistributeGranted = sb.getConfig(plasmaSwitchboard.INDEX_DIST_ALLOW, "true").equals("true");
-        final boolean indexReceiveGranted = sb.getConfig("allowReceiveIndex", "true").equals("true");
+        final boolean indexDistributeGranted = sb.getConfigBool(plasmaSwitchboard.INDEX_DIST_ALLOW, true);
+        final boolean indexReceiveGranted = sb.getConfigBool(plasmaSwitchboard.INDEX_RECEIVE_ALLOW, true);
         if (!indexDistributeGranted || !indexReceiveGranted) { global = false; }
+        final boolean clustersearch = sb.isRobinsonMode() &&
+                (sb.getConfig(plasmaSwitchboard.CLUSTER_MODE, "").equals(plasmaSwitchboard.CLUSTER_MODE_PRIVATE_CLUSTER) ||
+                 sb.getConfig(plasmaSwitchboard.CLUSTER_MODE, "").equals(plasmaSwitchboard.CLUSTER_MODE_PUBLIC_CLUSTER));
 
-        final String referer = (String) header.get("Referer");
+        final String referer = (String) header.get(httpHeader.REFERER);
         if (referer != null) {
             URL url;
             try {
@@ -89,8 +92,8 @@ public class index {
             if ((url != null) && (serverCore.isNotLocal(url))) {
                 final HashMap referrerprop = new HashMap();
                 referrerprop.put("count", "1");
-                referrerprop.put("clientip", header.get("CLIENTIP"));
-                referrerprop.put("useragent", header.get("User-Agent"));
+                referrerprop.put("clientip", header.get(httpHeader.CONNECTION_PROP_CLIENTIP));
+                referrerprop.put("useragent", header.get(httpHeader.USER_AGENT));
                 referrerprop.put("date", (new serverDate()).toShortString(false));
                 if (sb.facilityDB != null) try {sb.facilityDB.update("backlinks", referer, referrerprop);} catch (IOException e) {}
             }
@@ -126,6 +129,8 @@ public class index {
         prop.put("searchoptions_count-100", (count == 100) ? 1 : 0);
         prop.put("searchoptions_count-1000", (count == 1000) ? 1 : 0);
         prop.put("searchoptions_resource-global", ((global) ? 1 : 0));
+        prop.put("searchoptions_resource-global-disabled", (global || clustersearch) ? 0 : 1);
+        prop.put("searchoptions_resource-global-disabled_reason", (indexReceiveGranted) ? 0 : (indexDistributeGranted) ? 1 : 2);
         prop.put("searchoptions_resource-local", ((global) ? 0 : 1));
         prop.put("searchoptions_time-1", (time == 1) ? 1 : 0);
         prop.put("searchoptions_time-3", (time == 3) ? 1 : 0);

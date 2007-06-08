@@ -582,6 +582,10 @@ public final class plasmaSwitchboard extends serverAbstractSwitch implements ser
     public static final String PROXY_PREFETCH_DEPTH             = "proxyPrefetchDepth";
     public static final String PROXY_CRAWL_ORDER                = "proxyCrawlOrder";
     
+    public static final String PROXY_INDEXING_REMOTE            = "proxyIndexingRemote";
+    public static final String PROXY_INDEXING_LOCAL_TEXT        = "proxyIndexingLocalText";
+    public static final String PROXY_INDEXING_LOCAL_MEDIA       = "proxyIndexingLocalMedia";
+    
     public static final String PROXY_CACHE_SIZE                 = "proxyCacheSize";
     /**
      * <p><code>public static final String <strong>PROXY_CACHE_LAYOUT</strong> = "proxyCacheLayout"</code></p>
@@ -631,6 +635,16 @@ public final class plasmaSwitchboard extends serverAbstractSwitch implements ser
      */
     public static final String PROXY_CACHE_LAYOUT_HASH          = "hash";
     public static final String PROXY_CACHE_MIGRATION            = "proxyCacheMigration";
+    
+    //////////////////////////////////////////////////////////////////////////////////////////////
+    // Cluster settings
+    //////////////////////////////////////////////////////////////////////////////////////////////
+    
+    public static final String CLUSTER_MODE                     = "cluster.mode";
+    public static final String CLUSTER_MODE_PUBLIC_CLUSTER      = "publiccluster";
+    public static final String CLUSTER_MODE_PRIVATE_CLUSTER     = "privatecluster";
+    public static final String CLUSTER_MODE_PUBLIC_PEER         = "publicpeer";
+    public static final String CLUSTER_PEERS_IPPORT             = "cluster.peers.ipport";
     
     //////////////////////////////////////////////////////////////////////////////////////////////
     // Miscellaneous settings
@@ -1354,8 +1368,8 @@ public final class plasmaSwitchboard extends serverAbstractSwitch implements ser
     public boolean isPublicRobinson() {
     	// robinson peers may be member of robinson clusters, which can be public or private
     	// this does not check the robinson attribute, only the specific subtype of the cluster
-    	String clustermode = getConfig("cluster.mode", "publicpeer");
-    	return (clustermode.equals("publiccluster")) || (clustermode.equals("publicepeer"));
+    	String clustermode = getConfig(CLUSTER_MODE, CLUSTER_MODE_PUBLIC_PEER);
+    	return (clustermode.equals(CLUSTER_MODE_PUBLIC_CLUSTER)) || (clustermode.equals(CLUSTER_MODE_PUBLIC_PEER));
     }
     
     public boolean isInMyCluster(String peer) {
@@ -1364,12 +1378,12 @@ public final class plasmaSwitchboard extends serverAbstractSwitch implements ser
     	// or a ip:port String or simply a ip String
     	// if this robinson mode does not define a cluster membership, false is returned
     	if (!isRobinsonMode()) return false;
-    	String clustermode = getConfig("cluster.mode", "publicpeer");
-    	if (clustermode.equals("privatecluster")) {
+    	String clustermode = getConfig(CLUSTER_MODE, CLUSTER_MODE_PUBLIC_PEER);
+    	if (clustermode.equals(CLUSTER_MODE_PRIVATE_CLUSTER)) {
     		// check if we got the request from a peer in the private cluster
-    		String network = getConfig("cluster.peers.ipport", "");
+    		String network = getConfig(CLUSTER_PEERS_IPPORT, "");
             return network.indexOf(peer) >= 0;
-    	} else if (clustermode.equals("publiccluster")) {
+    	} else if (clustermode.equals(CLUSTER_MODE_PUBLIC_CLUSTER)) {
     		// check if we got the request from a peer in the public cluster
             return this.clusterhashes.containsKey(peer);
     	} else {
@@ -1382,12 +1396,12 @@ public final class plasmaSwitchboard extends serverAbstractSwitch implements ser
     	// if this robinson mode does not define a cluster membership, false is returned
     	if (seed == null) return false;
 		if (!isRobinsonMode()) return false;
-    	String clustermode = getConfig("cluster.mode", "publicpeer");
-    	if (clustermode.equals("privatecluster")) {
+    	String clustermode = getConfig(CLUSTER_MODE, CLUSTER_MODE_PUBLIC_PEER);
+    	if (clustermode.equals(CLUSTER_MODE_PRIVATE_CLUSTER)) {
     		// check if we got the request from a peer in the private cluster
-    		String network = getConfig("cluster.peers.ipport", "");
+    		String network = getConfig(CLUSTER_PEERS_IPPORT, "");
             return network.indexOf(seed.getPublicAddress()) >= 0;
-    	} else if (clustermode.equals("publiccluster")) {
+    	} else if (clustermode.equals(CLUSTER_MODE_PUBLIC_CLUSTER)) {
     	    // check if we got the request from a peer in the public cluster
             return this.clusterhashes.containsKey(seed.hash);
     	} else {
@@ -1463,13 +1477,13 @@ public final class plasmaSwitchboard extends serverAbstractSwitch implements ser
         if (this.defaultProxyProfile == null) {
             // generate new default entry for proxy crawling
             this.defaultProxyProfile = this.profiles.newEntry("proxy", "", ".*", ".*",
-                    Integer.parseInt(getConfig("proxyPrefetchDepth", "0")),
-                    Integer.parseInt(getConfig("proxyPrefetchDepth", "0")),
+                    Integer.parseInt(getConfig(PROXY_PREFETCH_DEPTH, "0")),
+                    Integer.parseInt(getConfig(PROXY_PREFETCH_DEPTH, "0")),
                     60 * 24, -1, -1, false,
-                    getConfigBool("proxyIndexingLocalText", true),
-                    getConfigBool("proxyIndexingLocalMedia", true),
+                    getConfigBool(PROXY_INDEXING_LOCAL_TEXT, true),
+                    getConfigBool(PROXY_INDEXING_LOCAL_MEDIA, true),
                     true, true,
-                    getConfigBool("proxyIndexingRemote", false), true, true, true);
+                    getConfigBool(PROXY_INDEXING_REMOTE, false), true, true, true);
         }
         if (this.defaultRemoteProfile == null) {
             // generate new default entry for remote crawling
@@ -2016,8 +2030,8 @@ public final class plasmaSwitchboard extends serverAbstractSwitch implements ser
             return false;
         }
         boolean robinsonPrivateCase = ((isRobinsonMode()) && 
-            	(!getConfig("cluster.mode", "").equals("publiccluster")) &&
-            	(!getConfig("cluster.mode", "").equals("privatecluster")));
+            	(!getConfig(CLUSTER_MODE, "").equals(CLUSTER_MODE_PUBLIC_CLUSTER)) &&
+            	(!getConfig(CLUSTER_MODE, "").equals(CLUSTER_MODE_PRIVATE_CLUSTER)));
         
         if ((robinsonPrivateCase) || ((coreCrawlJobSize() <= 20) && (limitCrawlTriggerJobSize() > 10))) {
             // it is not efficient if the core crawl job is empty and we have too much to do
@@ -2027,7 +2041,7 @@ public final class plasmaSwitchboard extends serverAbstractSwitch implements ser
             for (int i = 0; i < toshift; i++) {
                 noticeURL.shift(plasmaCrawlNURL.STACK_TYPE_LIMIT, plasmaCrawlNURL.STACK_TYPE_CORE);
             }
-            log.logInfo("shifted " + toshift + " jobs from global crawl to local crawl (coreCrawlJobSize()=" + coreCrawlJobSize() + ", limitCrawlTriggerJobSize()=" + limitCrawlTriggerJobSize() + ", cluster.mode=" + getConfig("cluster.mode", "") + ", robinsonMode=" + ((isRobinsonMode()) ? "on" : "off"));
+            log.logInfo("shifted " + toshift + " jobs from global crawl to local crawl (coreCrawlJobSize()=" + coreCrawlJobSize() + ", limitCrawlTriggerJobSize()=" + limitCrawlTriggerJobSize() + ", cluster.mode=" + getConfig(CLUSTER_MODE, "") + ", robinsonMode=" + ((isRobinsonMode()) ? "on" : "off"));
             if (robinsonPrivateCase) return false;
         }
         
