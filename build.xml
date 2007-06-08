@@ -359,7 +359,10 @@
     </copy>      
 </target>   
     
+<!-- compile optional classs that were not compiled elsewhere -->
 <target name="compileExtensions" depends="compileMain,compileParsers,compileSeedUploaders,compileSoap,compilePortForwarding">
+	
+	<!-- compile rss Reader -->
 	  <javac srcdir="${src}" destdir="${build}"
 	         debug="true" debuglevel="lines,vars,source" 
 	         source="${javacSource}" target="${javacTarget}">
@@ -391,7 +394,7 @@
 	 ======================================================================================================= --> 	
 <target name="distExtensions" if="singleExtFile" depends="copyExt4Dist">
       <tar destfile="${release}/${extensionFile}" compression="gzip" defaultexcludes="yes" longfile="gnu">
-        <tarfileset dir="${release_ext}" prefix="${releaseDir}/" dirmode="${accessRightsDir}" mode="${accessRightsFile}" >
+        <tarfileset dir="${release_ext}" prefix="${releaseFileParentDir}/" dirmode="${accessRightsDir}" mode="${accessRightsFile}" >
           <include name="**/*.*"/>
         </tarfileset>        
       </tar>
