@@ -694,6 +694,7 @@ public class bookmarksDB {
         public static final String BOOKMARK_PUBLIC="bookmarkPublic";
         public static final String BOOKMARK_TIMESTAMP="bookmarkTimestamp";
         public static final String BOOKMARK_OWNER="bookmarkOwner";
+        public static final String BOOKMARK_IS_FEED="bookmarkIsFeed";
         private String urlHash;
         private HashSet tags;
         private long timestamp;
@@ -796,11 +797,25 @@ public class bookmarksDB {
                 return false;
             }
         }
+        public boolean getFeed(){
+            if(entry.containsKey(BOOKMARK_IS_FEED)){
+                return ((String) entry.get(BOOKMARK_IS_FEED)).equals("true");
+            }else{
+                return false;
+            }
+        }
         public void setPublic(boolean isPublic){
         	if(isPublic){
                 entry.put(BOOKMARK_PUBLIC, "public");
         	}else{
                 entry.put(BOOKMARK_PUBLIC, "private");
+        	}
+        }
+        public void setFeed(boolean isFeed){
+        	if(isFeed){
+                entry.put(BOOKMARK_IS_FEED, "true");
+        	}else{
+                entry.put(BOOKMARK_IS_FEED, "false");
         	}
         }
         public void setProperty(String name, String value){

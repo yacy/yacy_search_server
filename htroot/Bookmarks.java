@@ -77,7 +77,7 @@ public class Bookmarks {
     String tagName="";
     int start=0;
     userDB.Entry user=switchboard.userDB.getUser(header);
-    boolean isAdmin=(switchboard.verifyAuthentication(header, true) || user!= null && user.hasBookmarkRight());
+    boolean isAdmin=(switchboard.verifyAuthentication(header, true) || user!= null && user.hasRight(userDB.Entry.BOOKMARK_RIGHT));
     String username="";
     if(user != null) username=user.getUserName();
     else if(isAdmin) username="admin";    
@@ -102,6 +102,7 @@ public class Bookmarks {
     prop.put("mode_url", "");
     prop.put("mode_tags", "");
     prop.put("mode_public", 1); //1=is public
+    prop.put("mode_feed", 0); //no newsfeed
     if(post != null){
         
         if(!isAdmin){
@@ -140,6 +141,11 @@ public class Bookmarks {
                 }else{
                     bookmark.setPublic(false);
                 }
+                if(((String) post.get("public")).equals("public")){
+                	bookmark.setFeed(true);
+                }else{
+                	bookmark.setFeed(false);
+                }
                 bookmark.setTags(tags, true);
                 switchboard.bookmarksDB.saveBookmark(bookmark);
                 
@@ -157,6 +163,7 @@ public class Bookmarks {
                 prop.put("mode_url", (String) post.get("url"));
                 prop.put("mode_tags", (String) post.get("tags"));
                 prop.put("mode_public", 0);
+                prop.put("mode_feed", 0);
             } else {
                     bookmarksDB.Bookmark bookmark = switchboard.bookmarksDB.getBookmark(urlHash);
                     if (bookmark == null) {
@@ -173,6 +180,7 @@ public class Bookmarks {
                             prop.put("mode_author", comp.author());
                             prop.put("mode_tags", (document == null) ? comp.tags() : document.getKeywords(','));
                             prop.put("mode_public", 0);
+                            prop.put("mode_feed", 0); //TODO: check if it IS a feed
                         }
                         if (document != null) document.close();
                     } else {
@@ -256,7 +264,10 @@ public class Bookmarks {
     while(count<max_count && it.hasNext()){
         bookmark=switchboard.bookmarksDB.getBookmark((String)it.next());
         if(bookmark!=null){
-            prop.put("bookmarks_"+count+"_link", de.anomic.data.htmlTools.replaceXMLEntities(bookmark.getUrl()));
+        	if(bookmark.getFeed())
+        		prop.put("bookmarks_"+count+"_link", "/FeedReader_p.html?url="+de.anomic.data.htmlTools.replaceXMLEntities(bookmark.getUrl()));
+        	else
+        		prop.put("bookmarks_"+count+"_link", de.anomic.data.htmlTools.replaceXMLEntities(bookmark.getUrl()));
             prop.put("bookmarks_"+count+"_title", bookmark.getTitle());
             prop.put("bookmarks_"+count+"_description", bookmark.getDescription());
             prop.put("bookmarks_"+count+"_date", serverDate.dateToiso8601(new Date(bookmark.getTimeStamp())));
