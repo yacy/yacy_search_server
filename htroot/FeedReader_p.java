@@ -39,7 +39,7 @@ public class FeedReader_p {
 	Class rssReaderClass;
 	String url;
 	Object reader;
-	public FeedReader_p(String url) throws ClassNotFoundException{
+	public FeedReader_p(String url) throws ClassNotFoundException, NoClassDefFoundError{
 		this.url=url;
 		//reflection
 		Class[] paramClasses=new Class[1];
@@ -99,7 +99,10 @@ public class FeedReader_p {
 				try {
 					self = new FeedReader_p(url.toString());
 				} catch (ClassNotFoundException e) {
-					System.out.println("DEBUG!!!");
+					prop.put("page", 2);
+					prop.put("page_error", 0);
+					return prop;
+				} catch (NoClassDefFoundError e) {
 					prop.put("page", 2);
 					prop.put("page_error", 0);
 					return prop;
