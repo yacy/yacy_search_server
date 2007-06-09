@@ -65,6 +65,7 @@ function handleTextState(req) {
 	var snippetText = response.getElementsByTagName("text")[0].firstChild.data;
 	var urlHash = response.getElementsByTagName("urlHash")[0].firstChild.data;
 	var status = response.getElementsByTagName("status")[0].firstChild.data;
+
 	
 	var span = document.getElementById("h" + urlHash);
 	removeAllChildren(span);
@@ -76,6 +77,12 @@ function handleTextState(req) {
 		span.className = "snippetError";
 		span.parentNode.parentNode.setAttribute("style", "display: none");
 		document.getElementById("hidden_results").innerHTML='Some results were hidden, because they do not contain your searchwords anymore, or because they are not accessible. Click here to <a href="javascript:show_hidden_results()">show them</a>';
+	}
+	
+	// set URL to favicon (if a link-tag was found in the document)
+	if (response.getElementsByTagName("favicon")[0].firstChild != null) {
+		var img = document.getElementById("f" + urlHash);
+		img.src = response.getElementsByTagName("favicon")[0].firstChild.data;
 	}
 
 	// replace "<b>" text by <strong> node

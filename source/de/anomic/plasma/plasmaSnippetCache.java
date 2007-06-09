@@ -89,6 +89,15 @@ public class plasmaSnippetCache {
     private int                   snippetsScoreCounter;
     private kelondroMScoreCluster snippetsScore;
     private HashMap               snippetsCache;
+    
+    /**
+     * a cache holding URLs to favicons specified by the page content, e.g. by using the html link-tag. e.g.
+     * <pre>
+     * 	 &lt;link rel="shortcut icon" type="image/x-icon" href="../src/favicon.ico"&gt;
+     * </pre>
+     */
+    private HashMap				  faviconCache;
+    
     private plasmaHTCache         cacheManager;
     private plasmaParser          parser;
     private serverLog             log;
@@ -106,7 +115,8 @@ public class plasmaSnippetCache {
         this.sb = theSb;
         this.snippetsScoreCounter = 0;
         this.snippetsScore = new kelondroMScoreCluster();
-        this.snippetsCache = new HashMap();        
+        this.snippetsCache = new HashMap(); 
+        this.faviconCache = new HashMap();
     }
     
     public class TextSnippet {
@@ -115,12 +125,19 @@ public class plasmaSnippetCache {
         private String error;
         private int errorCode;
         private Set remaingHashes;
+        private URL favicon;
+        
         public TextSnippet(URL url, String line, int errorCode, Set remaingHashes, String errortext) {
+        	this(url,line,errorCode,remaingHashes,errortext,null);
+        }
+        
+        public TextSnippet(URL url, String line, int errorCode, Set remaingHashes, String errortext, URL favicon) {
             this.url = url;
             this.line = line;
             this.errorCode = errorCode;
             this.error = errortext;
             this.remaingHashes = remaingHashes;
+            this.favicon = favicon;
         }
         public URL getUrl() {
             return this.url;
@@ -213,6 +230,10 @@ public class plasmaSnippetCache {
             }
             return l.toString().trim();
         }
+        
+        public URL getFavicon() {
+        	return this.favicon;
+        }
     }
     
     public class MediaSnippet {
@@ -244,9 +265,9 @@ public class plasmaSnippetCache {
         int source = SOURCE_CACHE;
         String wordhashes = yacySearch.set2string(queryhashes);
         String line = retrieveFromCache(wordhashes, urlhash);
-        if (line != null) {
+        if (line != null) {        	
             //System.out.println("found snippet for URL " + url + " in cache: " + line);
-            return new TextSnippet(url, line, source, null, null);
+            return new TextSnippet(url, line, source, null, null,(URL)this.faviconCache.get(urlhash));
         }
         
         /* ===========================================================================
@@ -300,7 +321,7 @@ public class plasmaSnippetCache {
          * =========================================================================== */
         plasmaParserDocument document = null;
         try {
-             document = parseDocument(url, resContentLength, resContent, resInfo);            
+             document = parseDocument(url, resContentLength, resContent, resInfo);
         } catch (ParserException e) {
             return new TextSnippet(url, null, ERROR_PARSER_FAILED, queryhashes, e.getMessage()); // cannot be parsed
         } finally {
@@ -311,12 +332,14 @@ public class plasmaSnippetCache {
         
         /* ===========================================================================
          * COMPUTE SNIPPET
-         * =========================================================================== */        
+         * =========================================================================== */    
+        URL resFavicon = document.getFavicon();
+        if (resFavicon != null) this.faviconCache.put(urlhash,resFavicon);
         // we have found a parseable non-empty file: use the lines
 
         // compute snippet from text
         final Iterator sentences = document.getSentences(pre);
-        if (sentences == null) return new TextSnippet(url, null, ERROR_PARSER_NO_LINES, queryhashes, "parser returned no sentences");
+        if (sentences == null) return new TextSnippet(url, null, ERROR_PARSER_NO_LINES, queryhashes, "parser returned no sentences",resFavicon);
         Object[] tsr = computeTextSnippet(sentences, queryhashes, snippetMaxLength);
         String textline = (tsr == null) ? null : (String) tsr[0];
         Set remainingHashes = (tsr == null) ? queryhashes : (Set) tsr[1];
@@ -335,13 +358,13 @@ public class plasmaSnippetCache {
         //if (hrefline  != null) line += (line.length() == 0) ? hrefline  : "<br />" + hrefline;
         if (textline  != null) line += (line.length() == 0) ? textline  : "<br />" + textline;
         
-        if ((line == null) || (remainingHashes.size() > 0)) return new TextSnippet(url, null, ERROR_NO_MATCH, remainingHashes, "no matching snippet found");
+        if ((line == null) || (remainingHashes.size() > 0)) return new TextSnippet(url, null, ERROR_NO_MATCH, remainingHashes, "no matching snippet found",resFavicon);
         if (line.length() > snippetMaxLength) line = line.substring(0, snippetMaxLength);
 
         // finally store this snippet in our own cache
         storeToCache(wordhashes, urlhash, line);
         document.close();
-        return new TextSnippet(url, line, source, null, null);
+        return new TextSnippet(url, line, source, null, null, resFavicon);
     }
 
     /**

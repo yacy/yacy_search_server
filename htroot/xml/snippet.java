@@ -70,6 +70,7 @@ public class snippet {
             }
             prop.put("link", 0);
             prop.put("links", 0);
+            prop.putSafeXML("favicon",snippet.getFavicon()==null?"":snippet.getFavicon().toString());
         } else {
             // attach media information
             ArrayList mediaSnippets = switchboard.snippetCache.retrieveMediaSnippets(url, queryHashes, media, true, mediasnippet_timeout);
@@ -85,6 +86,7 @@ public class snippet {
             prop.put("text", "");
             prop.put("link", mediaSnippets.size());
             prop.put("links", mediaSnippets.size());
+            prop.put("favicon","");
         }
         
         

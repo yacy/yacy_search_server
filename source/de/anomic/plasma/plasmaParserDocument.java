@@ -83,6 +83,7 @@ public class plasmaParserDocument {
     // text in image tags.
     private Map hyperlinks, audiolinks, videolinks, applinks;
     private Map emaillinks;
+    private URL favicon;
     private boolean resorted;
     private InputStream textStream;
     
@@ -393,6 +394,20 @@ public class plasmaParserDocument {
         
         anchors.putAll(doc.getAnchors());
         images.addAll(doc.getImages());
+    }
+    
+    /**
+     * @return the {@link URL} to the favicon that belongs to the document
+     */
+    public URL getFavicon() {
+    	return this.favicon;
+    }
+    
+    /**
+     * @param faviconURL the {@link URL} to the favicon that belongs to the document
+     */
+    public void setFavicon(URL faviconURL) {
+    	this.favicon = faviconURL;
     }
     
     public void close() {

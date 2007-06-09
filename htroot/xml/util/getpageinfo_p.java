@@ -66,6 +66,7 @@ public class getpageinfo_p {
         serverObjects prop = new serverObjects();
         prop.put("sitemap", "");
         prop.put("title", "");
+        prop.put("favicon","");
         prop.put("robots-allowed", 3); //unknown
         String actions="title";
         if(post!=null && post.containsKey("url")){
@@ -90,15 +91,21 @@ public class getpageinfo_p {
                     serverFileUtils.write(contentString,writer);
                     writer.close();
                     
+                    // put the document title 
                     prop.put("title", scraper.getTitle());
+                    
+                    // put the favicon that belongs to the document
+                    prop.putSafeXML("favicon", (scraper.getFavicon()==null)?"":scraper.getFavicon().toString());
+                    
+                    // put keywords
                     String list[]=scraper.getKeywords();
                     for(int i=0;i<list.length;i++){
                     	prop.putSafeXML("tags_"+i+"_tag", list[i]);
                     }
                     prop.put("tags", list.length);
 
-                } catch (MalformedURLException e) {
-                } catch (IOException e) {
+                } catch (MalformedURLException e) { /* ignore this */
+                } catch (IOException e) { /* ignore this */
                 }
             }
             if(actions.indexOf("robots")>=0){
@@ -106,11 +113,7 @@ public class getpageinfo_p {
                 	URL theURL = new URL(url);
                 	
                 	// determine if crawling of the current URL is allowed
-                    if(robotsParser.isDisallowed(theURL)){
-                        prop.put("robots-allowed", 0);
-                    }else{
-                        prop.put("robots-allowed", 1);
-                    }
+                	prop.put("robots-allowed", robotsParser.isDisallowed(theURL) ? 0:1);
                     
                     // get the sitemap URL of the domain
                     URL sitemapURL = robotsParser.getSitemapURL(theURL);

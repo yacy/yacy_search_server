@@ -4,6 +4,7 @@
 	<status>#[status]#</status>
 	<urlHash>#[urlHash]#</urlHash>
 	<links>#[links]#</links>
+	<favicon>#[favicon]#</favicon>
 	#{link}#
 	<link>
 		<type>#[type]#</type>

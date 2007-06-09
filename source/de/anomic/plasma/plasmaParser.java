@@ -765,7 +765,8 @@ public final class plasmaParser {
                     scraper.getText(),
                     scraper.getAnchors(),
                     scraper.getImages());
-            //scraper.close();
+            //scraper.close();            
+            ppd.setFavicon(scraper.getFavicon());
             return ppd;
         } catch (MalformedURLException e) {
             //e.printStackTrace();

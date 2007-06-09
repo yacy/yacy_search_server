@@ -109,6 +109,14 @@ public class htmlFilterContentScraper extends htmlFilterAbstractScraper implemen
     private serverCharBuffer content;
     private EventListenerList htmlFilterEventListeners = new EventListenerList();
     
+    /**
+     * {@link URL} to the favicon that belongs to the document
+     */
+    private URL favicon;
+    
+    /**
+     * The document root {@link URL} 
+     */
     private URL root;
 
     public htmlFilterContentScraper(URL root) {
@@ -207,7 +215,8 @@ public class htmlFilterContentScraper extends htmlFilterAbstractScraper implemen
 
                 if (type.equalsIgnoreCase("shortcut icon")) {
                     htmlFilterImageEntry ie = new htmlFilterImageEntry(newLink, linktitle, -1,-1);
-                    images.add(ie);                
+                    images.add(ie);    
+                    this.favicon = newLink;
                 } else if (!type.equalsIgnoreCase("stylesheet") && !type.equalsIgnoreCase("alternate stylesheet")) {
                     anchors.put(newLink.toString(), linktitle);                    
                 }
@@ -345,6 +354,13 @@ public class htmlFilterContentScraper extends htmlFilterAbstractScraper implemen
 
     public Map getMetas() {
         return metas;
+    }
+    
+    /**
+     * @return the {@link URL} to the favicon that belongs to the document
+     */    
+    public URL getFavicon() {
+    	return this.favicon;
     }
 
     public String getDescription() {

@@ -3,6 +3,7 @@
   <title>#[title]#</title>
   <robots>#(robots-allowed)#0::1::#(/robots-allowed)#</robots>
   <sitemap>#[sitemap]#</sitemap>
+  <favicon>#[favicon]#</favicon>
   <tags>
     #{tags}#
     <tag name="#[tag]#" />
