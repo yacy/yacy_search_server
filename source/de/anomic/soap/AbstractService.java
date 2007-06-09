@@ -59,8 +59,10 @@ import org.apache.axis.message.SOAPHeaderElement;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 
+import de.anomic.data.userDB;
 import de.anomic.http.httpHeader;
 import de.anomic.http.httpd;
+import de.anomic.plasma.plasmaSwitchboard;
 import de.anomic.server.serverSwitch;
 
 public abstract class AbstractService {
@@ -111,15 +113,27 @@ public abstract class AbstractService {
         
         // getting the proper soap header containing the authorization field
         SOAPHeaderElement authElement = envelope.getHeaderByName(httpdSoapHandler.serviceHeaderNamespace, "Authorization");
-        if (authElement != null) {        
+        if (authElement != null) {     
+            String adminAccountBase64MD5 = this.switchboard.getConfig(httpd.ADMIN_ACCOUNT_B64MD5,"");        	
+        	
             // the base64 encoded and md5 hashed authentication string 
             String authString = authElement.getValue();
+            if (authString.length() == 0) throw new AxisFault("log-in required");
+
+            // validate MD5 hash against the user-DB
+            SOAPHeaderElement userElement = envelope.getHeaderByName(httpdSoapHandler.serviceHeaderNamespace, "Username");
+            if (userElement != null) {
+            	String userName = userElement.getValue();
+            	userDB.Entry userEntry = ((plasmaSwitchboard)this.switchboard).userDB.md5Auth(userName,authString);
+            	if (userEntry.hasRight(userDB.Entry.SOAP_RIGHT))
+            		// we need to return the ADMIN_ACCOUNT_B64MD5 here because some servlets also do 
+            		// user/admin authentication
+            		return adminAccountBase64MD5;
+            }
             
-            String adminAccountBase64MD5 = this.switchboard.getConfig(httpd.ADMIN_ACCOUNT_B64MD5,"");
-            if (authString.length() == 0) {
-                throw new AxisFault("log-in required");
-            } else if (!(adminAccountBase64MD5.equals(authString))) {
-                throw new AxisFault("log-in required");
+            // validate MD5 hash against the static-admin account
+            if (!(adminAccountBase64MD5.equals(authString))) {
+            	throw new AxisFault("log-in required");
             }
             return adminAccountBase64MD5;
         }
