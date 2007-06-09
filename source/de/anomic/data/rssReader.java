@@ -35,15 +35,21 @@ import de.nava.informa.core.ParseException;
 import de.nava.informa.impl.basic.ChannelBuilder;
 import de.nava.informa.parsers.FeedParser;
 
+import de.anomic.yacy.yacyCore;
+
 public class rssReader {
 	URL url;
 	ChannelIF channel;
 	TreeSet feedItems;
 	public rssReader(String url) throws MalformedURLException{
 		this.url=new URL(url);
+		String yAddress=yacyCore.seedDB.resolveYacyAddress(this.url.getHost());
+		if(yAddress != null){
+			this.url=new URL(this.url.getProtocol()+"://"+yAddress+"/"+this.url.getPath());
+		}
 		ChannelBuilder builder=new ChannelBuilder();
 		try {
-			channel=FeedParser.parse(builder, url);
+			channel=FeedParser.parse(builder, this.url);
 			Collection oldfeedItems=channel.getItems();
 			feedItems=new TreeSet(new rssReaderItemComparator());
 			Iterator it=oldfeedItems.iterator();
