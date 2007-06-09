@@ -59,7 +59,6 @@ import de.anomic.server.serverSwitch;
 
 public class User_p {
     
-    
     public static serverObjects respond(httpHeader header, serverObjects post, serverSwitch env) {
         serverObjects prop = new serverObjects();
         plasmaSwitchboard sb = plasmaSwitchboard.getSwitchboard();
@@ -74,14 +73,15 @@ public class User_p {
         prop.put("address", "");
         prop.put("timelimit", "");
         prop.put("timeused", "");
-        prop.put("timerange", "");
-        prop.put("proxyRight", 1);
-        prop.put("downloadRight", 0);
-        prop.put("uploadRight", 0);
-        prop.put("adminRight", 0);
-        prop.put("wikiAdminRight", 0);
-        prop.put("bookmarkRight", 0);
-        prop.put("soapRight", 0);
+        String[] rightNames=userDB.Entry.RIGHT_NAMES.split(",");
+        String[] rights=userDB.Entry.RIGHT_TYPES.split(",");
+        int i;
+        for(i=0;i<rights.length;i++){
+        		prop.put("rights_"+i+"_name", rights[i]);
+        		prop.put("rights_"+i+"_friendlyName", rightNames[i]);
+        		prop.put("rights_"+i+"_set", 0);
+        }
+        prop.put("rights", i);
         
         prop.put("users", 0);
 
@@ -109,14 +109,10 @@ public class User_p {
     	                prop.put("address", entry.getAddress());
     	                prop.put("timelimit", entry.getTimeLimit());
     	                prop.put("timeused", entry.getTimeUsed());
-                    prop.put("proxyRight", (entry.hasRight(userDB.Entry.PROXY_RIGHT)?1:0));
-                    prop.put("uploadRight", (entry.hasRight(userDB.Entry.UPLOAD_RIGHT)?1:0));
-                    prop.put("downloadRight", (entry.hasRight(userDB.Entry.DOWNLOAD_RIGHT)?1:0));
-                    prop.put("adminRight", (entry.hasRight(userDB.Entry.ADMIN_RIGHT)?1:0));
-                    prop.put("blogRight", (entry.hasRight(userDB.Entry.BLOG_RIGHT)?1:0));
-                    prop.put("wikiAdminRight", (entry.hasRight(userDB.Entry.WIKIADMIN_RIGHT)?1:0));
-                    prop.put("bookmarkRight", (entry.hasRight(userDB.Entry.BOOKMARK_RIGHT)?1:0));
-                    prop.put("soapRight", (entry.hasRight(userDB.Entry.SOAP_RIGHT)?1:0));
+    	                for(i=0;i<rights.length;i++){
+    	                		prop.put("rights_"+i+"_set", (entry.hasRight(rights[i])?1:0));
+    	                }
+    	                prop.put("rights", i);
                 }
 			}else if( post.containsKey("delete_user") && !((String)post.get("user")).equals("newuser") ){
 				sb.userDB.removeEntry((String)post.get("user"));
@@ -138,14 +134,10 @@ public class User_p {
             String address=(String)post.get("address");
             String timeLimit=(String)post.get("timelimit");
             String timeUsed=(String)post.get("timeused");
-            String proxyRight=( post.containsKey("proxyRight")&&((String)post.get("proxyRight")).equals("on") ? "true" : "false");
-            String uploadRight=( post.containsKey("uploadRight")&&((String)post.get("uploadRight")).equals("on") ? "true" : "false");
-            String downloadRight=( post.containsKey("downloadRight")&&((String)post.get("downloadRight")).equals("on") ? "true" : "false");
-            String adminRight=( post.containsKey("adminRight")&&((String)post.get("adminRight")).equals("on") ? "true" : "false");
-            String blogRight=( post.containsKey("blogRight")&&((String)post.get("blogRight")).equals("on") ? "true" : "false");
-            String wikiAdminRight=( post.containsKey("wikiAdminRight")&&((String)post.get("wikiAdminRight")).equals("on") ? "true" : "false");
-            String bookmarkRight=( post.containsKey("bookmarkRight")&&((String)post.get("bookmarkRight")).equals("on") ? "true" : "false");
-            String soapRight=( post.containsKey("soapRight")&&((String)post.get("soapRight")).equals("on") ? "true" : "false");
+            HashMap rightsSet=new HashMap();
+            for(i=0;i<rights.length;i++){
+        	    		rightsSet.put(rights[i], post.containsKey(rights[i])&&((String)post.get(rights[i])).equals("on") ? "true" : "false");
+            }
             HashMap mem=new HashMap();
             if( post.get("current_user").equals("newuser")){ //new user
                 
@@ -157,13 +149,8 @@ public class User_p {
 				mem.put(userDB.Entry.USER_ADDRESS, address);
 				mem.put(userDB.Entry.TIME_LIMIT, timeLimit);
 				mem.put(userDB.Entry.TIME_USED, timeUsed);
-				mem.put(userDB.Entry.PROXY_RIGHT, proxyRight);
-				mem.put(userDB.Entry.UPLOAD_RIGHT, uploadRight);
-				mem.put(userDB.Entry.DOWNLOAD_RIGHT, downloadRight);
-				mem.put(userDB.Entry.BLOG_RIGHT, blogRight);
-				mem.put(userDB.Entry.WIKIADMIN_RIGHT, wikiAdminRight);
-				mem.put(userDB.Entry.BOOKMARK_RIGHT, bookmarkRight);
-				mem.put(userDB.Entry.SOAP_RIGHT, soapRight);
+				for(i=0;i<rights.length;i++)
+					mem.put(rights[i], (String)rightsSet.get(rights[i]));
 
                 try{
                     entry=sb.userDB.createEntry(username, mem);
@@ -188,14 +175,8 @@ public class User_p {
 						entry.setProperty(userDB.Entry.USER_ADDRESS, address);
 						entry.setProperty(userDB.Entry.TIME_LIMIT, timeLimit);
 						entry.setProperty(userDB.Entry.TIME_USED, timeUsed);
-						entry.setProperty(userDB.Entry.PROXY_RIGHT, proxyRight);
-						entry.setProperty(userDB.Entry.UPLOAD_RIGHT, uploadRight);
-						entry.setProperty(userDB.Entry.DOWNLOAD_RIGHT, downloadRight);
-						entry.setProperty(userDB.Entry.ADMIN_RIGHT, adminRight);
-						entry.setProperty(userDB.Entry.BLOG_RIGHT, blogRight);
-						entry.setProperty(userDB.Entry.WIKIADMIN_RIGHT, wikiAdminRight);
-						entry.setProperty(userDB.Entry.BOOKMARK_RIGHT, bookmarkRight);
-						entry.setProperty(userDB.Entry.SOAP_RIGHT, soapRight);
+						for(i=0;i<rights.length;i++)
+							entry.setProperty(rights[i], (String)rightsSet.get(rights[i]));
 		            }catch (IOException e){
 					}
                 }else{

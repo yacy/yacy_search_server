@@ -57,14 +57,9 @@
           <dd><input type="text" id="address" name="address" value="#[address]#" /></dd>
           <dt>Rights:</dt>
           <dd>
-            <input type="checkbox" id="proxy" name="proxyRight"#(proxyRight)#:: checked="checked"#(/proxyRight)# /><label for="proxy">Proxy</label><br />
-            <input type="checkbox" id="admin" name="adminRight"#(adminRight)#:: checked="checked"#(/adminRight)# /><label for="admin">Admin</label><br />
-            <input type="checkbox" id="share" name="uploadRight"#(uploadRight)#:: checked="checked"#(/uploadRight)# /><label for="share">Fileshare-Upload</label><br />
-            <input type="checkbox" id="dwnld" name="downloadRight"#(downloadRight)#:: checked="checked"#(/downloadRight)# /><label for="dwnld">Fileshare-Download</label><br />
-            <input type="checkbox" id="blog" name="blogRight"#(blogRight)#:: checked="checked"#(/blogRight)# /><label for="blog">Blog</label><br />
-            <input type="checkbox" id="wiki" name="wikiAdminRight"#(wikiAdminRight)#:: checked="checked"#(/wikiAdminRight)# /><label for="wiki">Wiki Admin</label><br />
-            <input type="checkbox" id="bkmark" name="bookmarkRight"#(bookmarkRight)#:: checked="checked"#(/bookmarkRight)# /><label for="bkmark">Bookmarks</label>
-            <input type="checkbox" id="soap" name="soapRight"#(soapRight)#:: checked="checked"#(/soapRight)# /><label for="soap">SOAP</label>
+          	#{rights}#
+            <input type="checkbox" id="#[name]#" name="#[name]#"#(set)#:: checked="checked"#(/set)# /><label for="#[name]#">#[friendlyName]# right</label><br />
+            #{/rights}#
           </dd>
           <dt><label for="tlimit">Timelimit</label>:</dt>
           <dd><input type="text" id="tlimit" name="timelimit" value="#[timelimit]#" /></dd>
