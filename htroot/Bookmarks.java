@@ -264,7 +264,7 @@ public class Bookmarks {
     while(count<max_count && it.hasNext()){
         bookmark=switchboard.bookmarksDB.getBookmark((String)it.next());
         if(bookmark!=null){
-        	if(bookmark.getFeed())
+        	if(bookmark.getFeed() && isAdmin)
         		prop.put("bookmarks_"+count+"_link", "/FeedReader_p.html?url="+de.anomic.data.htmlTools.replaceXMLEntities(bookmark.getUrl()));
         	else
         		prop.put("bookmarks_"+count+"_link", de.anomic.data.htmlTools.replaceXMLEntities(bookmark.getUrl()));
