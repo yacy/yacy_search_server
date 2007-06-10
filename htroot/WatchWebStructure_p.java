@@ -17,6 +17,7 @@ public class WatchWebStructure_p {
         int height = 576;
         int depth = 3;
         int nodes = 100; // maximum number of host nodes that are painted
+        int time = -1;
         String host = "auto";
         
         if (post != null) {
@@ -24,6 +25,7 @@ public class WatchWebStructure_p {
             height = post.getInt("height", 576);
             depth = post.getInt("depth", 3);
             nodes = post.getInt("nodes", width * height * 100 / 768 / 576);
+            time = post.getInt("time", -1);
             host = post.get("host", "auto");
         }
         
@@ -50,6 +52,7 @@ public class WatchWebStructure_p {
         prop.put("width", width);
         prop.put("height", height);
         prop.put("nodes", nodes);
+        prop.put("time", time);
         prop.put("nodesi", Math.min(1000, nodes + 50));
         prop.put("nodesd", Math.max(0, nodes - 50));
         

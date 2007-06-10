@@ -51,6 +51,7 @@ public class WebStructurePicture_p {
         int height = 576;
         int depth = 3;
         int nodes = 100; // maximum number of host nodes that are painted
+        int time = -1;
         String host = null;
         
         if (post != null) {
@@ -58,6 +59,7 @@ public class WebStructurePicture_p {
             height = post.getInt("height", 576);
             depth = post.getInt("depth", 3);
             nodes = post.getInt("nodes", width * height * 100 / 768 / 576);
+            time = post.getInt("time", -1);
             host = post.get("host", null);
         }
         
@@ -68,6 +70,9 @@ public class WebStructurePicture_p {
         if (height > 1920) height = 1920;
         if (depth > 8) depth = 8;
         if (depth < 0) depth = 0;
+        
+        // calculate target time
+        long timeout = (time < 0) ? Long.MAX_VALUE : System.currentTimeMillis() + time;
         
         // find start point
         if ((host == null) || (host.length() == 0) || (host.equals("auto"))) {
@@ -83,14 +88,14 @@ public class WebStructurePicture_p {
         
         // recursively find domains, up to a specific depth
         ymageGraph graph = new ymageGraph();
-        if (host != null) place(graph, sb.webStructure, hash, host, nodes, 0.0, 0.0, 0, depth);
+        if (host != null) place(graph, sb.webStructure, hash, host, nodes, timeout, 0.0, 0.0, 0, depth);
         //graph.print();
         
         return graph.draw(width, height, 40, 40, 5, 15);
         
     }
     
-    private static final int place(ymageGraph graph, plasmaWebStructure structure, String centerhash, String centerhost, int maxnodes, double x, double y, int nextlayer, int maxlayer) {
+    private static final int place(ymageGraph graph, plasmaWebStructure structure, String centerhash, String centerhost, int maxnodes, long timeout, double x, double y, int nextlayer, int maxlayer) {
         // returns the number of nodes that had been placed
         assert centerhost != null;
         ymageGraph.coordinate center = graph.getPoint(centerhost);
@@ -112,7 +117,7 @@ public class WebStructurePicture_p {
         int maxtargetrefs = 8, maxthisrefs = 8;
         int targetrefs, thisrefs;
         double rr, re;
-        while ((i.hasNext()) && (maxnodes > 0)) {
+        while ((i.hasNext()) && (maxnodes > 0) && (System.currentTimeMillis() < timeout)) {
             entry = (Map.Entry) i.next();
             targethash = (String) entry.getKey();
             targethost = structure.resolveDomHash2DomString(targethash);
@@ -142,7 +147,7 @@ public class WebStructurePicture_p {
             targethost = target[1];
             ymageGraph.coordinate c = graph.getPoint(targethost);
             assert c != null;
-            nextnodes = (maxnodes <= 0) ? 0 : place(graph, structure, targethash, targethost, maxnodes, c.x, c.y, nextlayer, maxlayer);
+            nextnodes = ((maxnodes <= 0) || (System.currentTimeMillis() >= timeout)) ? 0 : place(graph, structure, targethash, targethost, maxnodes, timeout, c.x, c.y, nextlayer, maxlayer);
             mynodes += nextnodes;
             maxnodes -= nextnodes;
             graph.setBorder(centerhost, targethost);

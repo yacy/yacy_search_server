@@ -33,8 +33,9 @@ import java.util.ConcurrentModificationException;
 import java.util.Date;
 import java.util.Iterator;
 import java.util.Map;
-import java.util.SortedMap;
+import java.util.HashMap;
 import java.util.TreeMap;
+import java.util.SortedMap;
 
 import de.anomic.kelondro.kelondroBase64Order;
 import de.anomic.net.URL;
@@ -155,9 +156,9 @@ public class plasmaWebStructure {
         return (refs.length() - 8) / 10;
     }
     
-    private static TreeMap refstr2map(String refs) {
-        if ((refs == null) || (refs.length() <= 8)) return new TreeMap();
-        TreeMap map = new TreeMap();
+    private static Map refstr2map(String refs) {
+        if ((refs == null) || (refs.length() <= 8)) return new HashMap();
+        Map map = new HashMap();
         String c;
         int refsc = refstr2count(refs);
         for (int i = 0; i < refsc; i++) {
@@ -167,7 +168,7 @@ public class plasmaWebStructure {
         return map;
     }
     
-    private static String map2refstr(TreeMap map) {
+    private static String map2refstr(Map map) {
         StringBuffer s = new StringBuffer(map.size() * 10);
         s.append(plasmaURL.shortDayFormatter.format(new Date()));
         Iterator i = map.entrySet().iterator();
@@ -194,16 +195,16 @@ public class plasmaWebStructure {
         return s.toString();
     }
     
-    public TreeMap references(String domhash) {
+    public Map references(String domhash) {
         // returns a map with a domhash(String):refcount(Integer) relation
         assert domhash.length() == 6;
         SortedMap tailMap = structure.tailMap(domhash);
-        if ((tailMap == null) || (tailMap.size() == 0)) return new TreeMap();
+        if ((tailMap == null) || (tailMap.size() == 0)) return new HashMap();
         String key = (String) tailMap.firstKey();
         if (key.startsWith(domhash)) {
             return refstr2map((String) tailMap.get(key));
         } else {
-            return new TreeMap();
+            return new HashMap();
         }
     }
     
@@ -244,7 +245,7 @@ public class plasmaWebStructure {
         String domhash = plasmaURL.urlHash(url).substring(6);
 
         // parse the new reference string and join it with the stored references
-        TreeMap refs = references(domhash);
+        Map refs = references(domhash);
         assert reference.length() % 12 == 0;
         String dom;
         int c;
