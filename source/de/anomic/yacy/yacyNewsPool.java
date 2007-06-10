@@ -47,6 +47,11 @@ package de.anomic.yacy;
 import java.io.File;
 import java.io.IOException;
 import java.util.HashSet;
+import java.util.Map;
+
+import de.anomic.net.URL;
+import de.anomic.plasma.plasmaSwitchboard;
+import de.anomic.plasma.urlPattern.plasmaURLPattern;
 
 public class yacyNewsPool {
     
@@ -300,6 +305,19 @@ public class yacyNewsPool {
         if (record.category() == null) return;
         if (!(categories.contains(record.category()))) return;
         if (record.created().getTime() == 0) return;
+        Map attributes = record.attributes();
+        if (attributes.containsKey("url")){
+            if(plasmaSwitchboard.urlBlacklist.isListed(plasmaURLPattern.BLACKLIST_NEWS, new URL((String) attributes.get("url")))){
+                System.out.println("DEBUG: ignored news-entry url blacklisted: " + attributes.get("url"));
+                return;
+            }
+        }
+        if (attributes.containsKey("startURL")){
+            if(plasmaSwitchboard.urlBlacklist.isListed(plasmaURLPattern.BLACKLIST_NEWS, new URL((String) attributes.get("startURL")))){
+                System.out.println("DEBUG: ignored news-entry url blacklisted: " + attributes.get("startURL"));
+                return;
+            }
+        }
         
         // double-check with old news
         if (newsDB.get(record.id()) != null) return;

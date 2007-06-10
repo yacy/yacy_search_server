@@ -64,9 +64,10 @@ public abstract class abstractURLPattern implements plasmaURLPattern {
             plasmaURLPattern.BLACKLIST_PROXY,
             plasmaURLPattern.BLACKLIST_DHT,
             plasmaURLPattern.BLACKLIST_SEARCH,
-            plasmaURLPattern.BLACKLIST_SURFTIPS
+            plasmaURLPattern.BLACKLIST_SURFTIPS,
+            plasmaURLPattern.BLACKLIST_NEWS
     }));
-    public static final String BLACKLIST_TYPES_STRING="proxy,crawler,dht,search,surftips";
+    public static final String BLACKLIST_TYPES_STRING="proxy,crawler,dht,search,surftips,news";
     
     protected File blacklistRootPath = null;
     protected HashMap cachedUrlHashs = null; 

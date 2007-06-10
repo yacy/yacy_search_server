@@ -257,6 +257,7 @@ crawler.BlackLists=url.default.black
 dht.BlackLists=url.default.black
 search.BlackLists=url.default.black
 surftips.BlackLists=url.default.black
+news.BlackLists=url.default.black
 
 
 proxyCookieBlackList=cookie.default.black
