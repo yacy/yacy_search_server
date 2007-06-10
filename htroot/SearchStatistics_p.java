@@ -106,6 +106,8 @@ public class SearchStatistics_p {
                 	dateCount++;
                 }
                 prop.put("page_list_" + entCount + "_dates", dateCount);
+                int qph = handles.tailSet(new Long(System.currentTimeMillis() - 1000 * 60 * 60)).size();
+                prop.put("page_list_" + entCount + "_qph", qph);
                 
                 prop.put("page_list_" + entCount + "_dark", ((dark) ? 1 : 0) ); dark =! dark;
                 prop.put("page_list_" + entCount + "_host", host);

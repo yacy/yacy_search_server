@@ -57,12 +57,14 @@
       <tr class="TableHeader">
         <td>Requesting Host</td>
         <td>Count</td>
+        <td>Queries Per Last Hour</td>
         <td>Access Dates</td>
       </tr>
       #{list}#
       <tr class="TableCell#(dark)#Light::Dark#(/dark)#">
         <td>#[host]#</td>
         <td>#[count]#</td>
+        <td>#[qph]#</td>
         <td>#{dates}##[date]# #{/dates}#</td>
       </tr>
       #{/list}#
@@ -104,6 +106,7 @@
         <td>Requesting Host</td>
         <td>Peer Name</td>
         <td>Count</td>
+        <td>Queries Per Last Hour</td>
         <td>Access Dates</td>
       </tr>
       #{list}#
@@ -111,6 +114,7 @@
         <td>#[host]#</td>
         <td>#[peername]#</td>
         <td>#[count]#</td>
+        <td>#[qph]#</td>
         <td>#{dates}##[date]# #{/dates}#</td>
       </tr>
       #{/list}#

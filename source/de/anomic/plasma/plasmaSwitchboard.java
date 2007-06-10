@@ -241,7 +241,7 @@ public final class plasmaSwitchboard extends serverAbstractSwitch implements ser
     public  plasmaDHTFlush              transferIdxThread = null;
     private plasmaDHTChunk              dhtTransferChunk = null;
     public  ArrayList                   localSearches, remoteSearches; // array of search result properties as HashMaps
-    public  HashMap                     localSearchTracker, remoteSearchTracker;
+    public  HashMap                     localSearchTracker, remoteSearchTracker; // mappings from requesting host to a TreeSet of Long(access time)
     public  long                        startupTime = 0;
     public  long                        lastseedcheckuptime = -1;
     public  long                        indexedPages = 0;
@@ -3026,6 +3026,14 @@ public final class plasmaSwitchboard extends serverAbstractSwitch implements ser
             thread.setIdleSleep(5000);
         }
         
+    }
+    
+    public static int accessFrequency(HashMap tracker, String host) {
+    	// returns the access frequency in queries per hour for a given host and a specific tracker
+    	long timeInterval = 1000 * 60 * 60;
+    	TreeSet accessSet = (TreeSet) tracker.get(host);
+    	if (accessSet == null) return 0;
+    	return accessSet.tailSet(new Long(System.currentTimeMillis() - timeInterval)).size();
     }
     
     public void startTransferWholeIndex(yacySeed seed, boolean delete) {

@@ -17,6 +17,7 @@
 	  <localSearchTracker>#{list}#
 	    <host>#[host]#</host>
         <count>#[count]#</count>
+        <qph>#[qph]#</qph>
         <dates>#{dates}#
         	<date timestamp="#[timestamp]#">#[date]#</date>
         #{/dates}#</dates>
@@ -27,7 +28,7 @@
 	  	<host>#[host]#</host>
         <peername>#[peername]#</peername>
         <date timestamp="#[timestamp]#">#[date]#</date>
-        <querycount>#[querycount]#</>
+        <querycount>#[querycount]#</querycount>
         <resultcount>#[resultcount]#</resultcount>
         <querytime>#[querytime]#</querytime>
         <resulttime>#[resulttime]#</resulttime>
@@ -36,6 +37,12 @@
 	  
 	  ::<!-- 4: Search Statistics: Remote Search Tracker -->
 	  <remoteSearchTracker>#{list}#
+	    <host>#[host]#</host>
+        <count>#[count]#</count>
+        <qph>#[qph]#</qph>
+        <dates>#{dates}#
+        	<date timestamp="#[timestamp]#">#[date]#</date>
+        #{/dates}#</dates>
 	  #{/list}#</remoteSearchTracker>
 
 #(/page)#
