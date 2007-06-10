@@ -277,12 +277,102 @@ public class Blacklist_p {
                 for (int blTypes=0; blTypes < supportedBlacklistTypes.length; blTypes++) {
                     if (listManager.ListInListslist(supportedBlacklistTypes[blTypes] + ".BlackLists",blacklistToUse)) {
                         plasmaSwitchboard.urlBlacklist.add(supportedBlacklistTypes[blTypes],newEntry.substring(0, pos), newEntry.substring(pos + 1));
-                    }                
-                }                                         
+                    }
+                }
+            } else if (post.containsKey("moveBlacklistEntry")) {
+
+                /* ===========================================================
+                 * First add entry to blacklist item moves to
+                 * =========================================================== */
+
+                blacklistToUse = (String)post.get("targetBlacklist");
+                if (blacklistToUse == null || blacklistToUse.trim().length() == 0) {
+                    prop.put("LOCATION","");
+                    return prop;
+                }
+
+                String entry = (String)post.get("selectedEntry");
+                if (entry == null || entry.trim().length() == 0) {
+                    prop.put("LOCATION",header.get("PATH") + "?selectList=&selectedListName=" + blacklistToUse);
+                    return prop;
+                }
+
+                // TODO: ignore empty entries
+
+                if (entry.startsWith("http://") ){
+                    entry = entry.substring(7);
+                }
+
+                int pos = entry.indexOf("/");
+                if (pos < 0) {
+                    // add default empty path pattern
+                    pos = entry.length();
+                    entry = entry + "/.*";
+                }
+
+                // append the line to the file
+                PrintWriter pw = null;
+                try {
+                    pw = new PrintWriter(new FileWriter(new File(listManager.listsPath, blacklistToUse), true));
+                    pw.println(entry);
+                    pw.close();
+                } catch (IOException e) {
+                    e.printStackTrace();
+                } finally {
+                    if (pw != null) try { pw.close(); } catch (Exception e){ /* */}
+                }
+
+                // add to blacklist
+                for (int blTypes=0; blTypes < supportedBlacklistTypes.length; blTypes++) {
+                    if (listManager.ListInListslist(supportedBlacklistTypes[blTypes] + ".BlackLists",blacklistToUse)) {
+                        plasmaSwitchboard.urlBlacklist.add(supportedBlacklistTypes[blTypes],entry.substring(0, pos), entry.substring(pos + 1));
+                    }
+                }
+
+                /* ===========================================================
+                 * Then delete item from blacklist it is moved away from
+                 * =========================================================== */
+
+                // get the current selected blacklist name
+                blacklistToUse = (String)post.get("currentBlacklist");
+                if (blacklistToUse == null || blacklistToUse.trim().length() == 0) {
+                    prop.put("LOCATION","");
+                    return prop;
+                }
+
+                // load blacklist data from file
+                ArrayList list = listManager.getListArray(new File(listManager.listsPath, blacklistToUse));
+
+                // delete the old entry from file
+                if (list != null) {
+                    for (int i=0; i < list.size(); i++) {
+                        if (((String)list.get(i)).equals(entry)) {
+                            list.remove(i);
+                            break;
+                        }
+                    }
+                    listManager.writeList(new File(listManager.listsPath, blacklistToUse), (String[])list.toArray(new String[list.size()]));
+                }
+
+                // remove the entry from the running blacklist engine
+                pos = entry.indexOf("/");
+                if (pos < 0) {
+                    // add default empty path pattern
+                    pos = entry.length();
+                    entry = entry + "/.*";
+                }
+                for (int blTypes=0; blTypes < supportedBlacklistTypes.length; blTypes++) {
+                    if (listManager.ListInListslist(supportedBlacklistTypes[blTypes] + ".BlackLists",blacklistToUse)) {
+                        plasmaSwitchboard.urlBlacklist.remove(supportedBlacklistTypes[blTypes],entry.substring(0, pos), entry.substring(pos + 1));
+                    }
+                }
+
+
+
             }
-            
-        } 
-        
+
+        }
+
         // loading all blacklist files located in the directory
         String[] dirlist = listManager.getDirListing(listManager.listsPath);
         

@@ -81,6 +81,14 @@
           </select>
           <br />
           <input type="submit" name="deleteBlacklistEntry" value="Delete URL pattern" />
+          <br />
+          <br />
+          <input type="submit" name="moveBlacklistEntry" value="Move URL pattern to" /> 
+          <select name="targetBlacklist" size="1">
+            #{blackLists}#
+            <option value="#[name]#">#[name]#</option>
+            #{/blackLists}#
+          </select>
         </div>
       </form>
       <form action="Blacklist_p.html" method="post" enctype="multipart/form-data">
