@@ -16,7 +16,7 @@ public class WatchWebStructure_p {
         int width = 768;
         int height = 576;
         int depth = 3;
-        int nodes = 100; // maximum number of host nodes that are painted
+        int nodes = 1000; // maximum number of host nodes that are painted
         int time = -1;
         String host = "auto";
         
@@ -49,12 +49,14 @@ public class WatchWebStructure_p {
         prop.put("depth", depth);
         prop.put("depthi", Math.min(8, depth + 1));
         prop.put("depthd", Math.max(0, depth - 1));
+        prop.put("nodes", nodes);
+        prop.put("nodesi", Math.min(1000, nodes + 100));
+        prop.put("nodesd", Math.max(100, nodes - 100));
+        prop.put("time", time);
+        prop.put("timei", (time > 9000) ? -1 : ((time < 0) ? -1 : Math.min(9999, time + 1000)));
+        prop.put("timed", (time < 0) ? 9000 : Math.max(1000, time - 1000));
         prop.put("width", width);
         prop.put("height", height);
-        prop.put("nodes", nodes);
-        prop.put("time", time);
-        prop.put("nodesi", Math.min(1000, nodes + 50));
-        prop.put("nodesd", Math.max(0, nodes - 50));
         
         return prop;
     }

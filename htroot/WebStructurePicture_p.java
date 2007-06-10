@@ -72,7 +72,7 @@ public class WebStructurePicture_p {
         if (depth < 0) depth = 0;
         
         // calculate target time
-        long timeout = (time < 0) ? Long.MAX_VALUE : System.currentTimeMillis() + time;
+        long timeout = (time < 0) ? Long.MAX_VALUE : System.currentTimeMillis() + (time * 8 / 10);
         
         // find start point
         if ((host == null) || (host.length() == 0) || (host.equals("auto"))) {
@@ -92,7 +92,6 @@ public class WebStructurePicture_p {
         //graph.print();
         
         return graph.draw(width, height, 40, 40, 5, 15);
-        
     }
     
     private static final int place(ymageGraph graph, plasmaWebStructure structure, String centerhash, String centerhost, int maxnodes, long timeout, double x, double y, int nextlayer, int maxlayer) {
