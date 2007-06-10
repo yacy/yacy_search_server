@@ -141,7 +141,7 @@ public class Bookmarks {
                 }else{
                     bookmark.setPublic(false);
                 }
-                if(((String) post.get("feed")).equals("feed")){
+                if(post.containsKey("feed") && ((String) post.get("feed")).equals("feed")){
                 	bookmark.setFeed(true);
                 }else{
                 	bookmark.setFeed(false);
@@ -194,6 +194,11 @@ public class Bookmarks {
                             prop.put("mode_public", 1);
                         } else {
                             prop.put("mode_public", 0);
+                        }
+                        if (bookmark.getFeed()) {
+                            prop.put("mode_feed", 1);
+                        } else {
+                            prop.put("mode_feed", 0);
                         }
                     }
                 }
