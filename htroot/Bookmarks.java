@@ -141,7 +141,7 @@ public class Bookmarks {
                 }else{
                     bookmark.setPublic(false);
                 }
-                if(((String) post.get("public")).equals("public")){
+                if(((String) post.get("feed")).equals("feed")){
                 	bookmark.setFeed(true);
                 }else{
                 	bookmark.setFeed(false);
