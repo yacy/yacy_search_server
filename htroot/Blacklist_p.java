@@ -52,6 +52,7 @@ import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.io.PrintWriter;
+import java.net.MalformedURLException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Enumeration;
@@ -59,8 +60,10 @@ import java.util.TreeMap;
 
 import de.anomic.data.listManager;
 import de.anomic.http.httpHeader;
+import de.anomic.net.URL;
 import de.anomic.plasma.plasmaSwitchboard;
 import de.anomic.plasma.urlPattern.abstractURLPattern;
+import de.anomic.plasma.urlPattern.plasmaURLPattern;
 import de.anomic.server.serverObjects;
 import de.anomic.server.serverSwitch;
 import de.anomic.yacy.yacyCore;
@@ -88,7 +91,32 @@ public class Blacklist_p {
         // do all post operations
         if (post != null) {
             
-            if (post.containsKey("selectList")) {
+            if(post.containsKey("testList")) {
+            	prop.put("testlist",1);
+            	String urlstring = post.get("testurl", "");
+            	if(!urlstring.startsWith("http://")) urlstring = "http://"+urlstring;
+            	URL testurl = null;
+				try {
+					testurl = new URL(urlstring);
+				} catch (MalformedURLException e) { }
+				if(testurl != null) {
+					prop.put("testlist_url",testurl.toString());
+					if(plasmaSwitchboard.urlBlacklist.isListed(plasmaURLPattern.BLACKLIST_CRAWLER, testurl))
+						prop.put("testlist_listedincrawler",1);
+					if(plasmaSwitchboard.urlBlacklist.isListed(plasmaURLPattern.BLACKLIST_DHT, testurl))
+						prop.put("testlist_listedindht",1);
+					if(plasmaSwitchboard.urlBlacklist.isListed(plasmaURLPattern.BLACKLIST_NEWS, testurl))
+						prop.put("testlist_listedinnews",1);
+					if(plasmaSwitchboard.urlBlacklist.isListed(plasmaURLPattern.BLACKLIST_PROXY, testurl))
+						prop.put("testlist_listedinproxy",1);
+					if(plasmaSwitchboard.urlBlacklist.isListed(plasmaURLPattern.BLACKLIST_SEARCH, testurl))
+						prop.put("testlist_listedinsearch",1);
+					if(plasmaSwitchboard.urlBlacklist.isListed(plasmaURLPattern.BLACKLIST_SURFTIPS, testurl))
+						prop.put("testlist_listedinsurftips",1);
+				}
+				else prop.put("testlist_url","not valid");
+            }
+        	if (post.containsKey("selectList")) {
                 blacklistToUse = (String)post.get("selectedListName"); 
                 if (blacklistToUse != null && blacklistToUse.length() == 0) blacklistToUse = null;
             }
