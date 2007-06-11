@@ -337,7 +337,6 @@ public class ViewFile {
                 int i = 0;
                 i += putMediaInfo(prop, wordArray, i, document.getVideolinks(), "video", (i % 2 == 0));
                 i += putMediaInfo(prop, wordArray, i, document.getAudiolinks(), "audio", (i % 2 == 0));
-                i += putMediaInfo(prop, wordArray, i, document.getApplinks(), "app", (i % 2 == 0));
                 dark = (i % 2 == 0);
                 
                 TreeSet ts = document.getImages();
@@ -358,6 +357,8 @@ public class ViewFile {
                     dark = !dark;
                     i++;
                 }
+                i += putMediaInfo(prop, wordArray, i, document.getApplinks(), "app", (i % 2 == 0));
+                i += putMediaInfo(prop, wordArray, i, document.getHyperlinks(), "href", (i % 2 == 0));
                 prop.put("viewMode_links", i);
 
             }
