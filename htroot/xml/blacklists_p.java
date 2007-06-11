@@ -24,6 +24,7 @@ import java.util.ArrayList;
 
 import de.anomic.data.listManager;
 import de.anomic.http.httpHeader;
+import de.anomic.plasma.urlPattern.abstractURLPattern;
 import de.anomic.server.serverObjects;
 import de.anomic.server.serverSwitch;
 
@@ -48,26 +49,15 @@ public class blacklists_p {
                 } else {
                     prop.put("lists_" + blacklistCount + "_shared", 0);
                 }
-                if (listManager.ListInListslist("dht" + ".BlackLists",dirlist[i])) {
-                    prop.put("lists_" + blacklistCount + "_dht", 1);
-                } else {
-                    prop.put("lists_" + blacklistCount + "_dht", 0);
+                
+                String[] types = abstractURLPattern.BLACKLIST_TYPES_STRING.split(",");
+                for (int j=0; j<types.length; j++) {
+                    prop.put("lists_" + blacklistCount + "_types_" + j + "_name", types[j]);
+                    prop.put("lists_" + blacklistCount + "_types_" + j + "_value",
+                            listManager.ListInListslist(types[j] + ".Blacklist", dirlist[i]) ? 1 : 0);
                 }
-                if (listManager.ListInListslist("crawler" + ".BlackLists",dirlist[i])) {
-                    prop.put("lists_" + blacklistCount + "_crawler", 1);
-                } else {
-                    prop.put("lists_" + blacklistCount + "_crawler", 0);
-                }
-                if (listManager.ListInListslist("proxy" + ".BlackLists",dirlist[i])) {
-                    prop.put("lists_" + blacklistCount + "_proxy", 1);
-                } else {
-                    prop.put("lists_" + blacklistCount + "_proxy", 0);
-                }
-                if (listManager.ListInListslist("search" + ".BlackLists",dirlist[i])) {
-                    prop.put("lists_" + blacklistCount + "_search", 1);
-                } else {
-                    prop.put("lists_" + blacklistCount + "_search", 0);
-                }
+                prop.put("lists_" + blacklistCount + "_types", types.length);
+                
                 list = listManager.getListArray(new File(listManager.listsPath, dirlist[i]));
                 
                 count=0;

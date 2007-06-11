@@ -1,7 +1,8 @@
 <?xml version="1.0"?>
 <blacklists>
 #{lists}#
-	<list name="#[name]#" shared="#[shared]#" proxy="#[proxy]#" crawler="#[crawler]#" dht="#[dht]#" search="#[search]#">
+	<list name="#[name]#" shared="#[shared]#" #{types}# 
+	      #[name]#="#[value]#"#{/types}#>
 	#{items}#
 		<item>#[item]#</item>
 	#{/items}#

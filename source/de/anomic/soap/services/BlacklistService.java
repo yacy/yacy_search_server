@@ -70,6 +70,7 @@ import org.w3c.dom.Document;
 import de.anomic.data.listManager;
 import de.anomic.net.URL;
 import de.anomic.plasma.plasmaSwitchboard;
+import de.anomic.plasma.urlPattern.abstractURLPattern;
 import de.anomic.plasma.urlPattern.plasmaURLPattern;
 import de.anomic.server.serverObjects;
 import de.anomic.soap.AbstractService;
@@ -526,7 +527,7 @@ public class BlacklistService extends AbstractService {
     */
     
     private String[] getSupportedBlacklistTypeArray() {
-        String supportedBlacklistTypesStr = this.switchboard.getConfig(BLACKLISTS_TYPES, "");
+        String supportedBlacklistTypesStr = abstractURLPattern.BLACKLIST_TYPES_STRING;
         String[] supportedBlacklistTypeArray = supportedBlacklistTypesStr.split(",");
         return supportedBlacklistTypeArray;
     }
