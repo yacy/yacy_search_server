@@ -410,6 +410,7 @@ public class ViewFile {
             prop.put("viewMode_links_" + c + "_type", name);
             prop.putASIS("viewMode_links_" + c + "_text", markup(wordArray, (String) entry.getValue()));
             prop.putASIS("viewMode_links_" + c + "_link", markup(wordArray, (String) entry.getKey()));
+            prop.put("viewMode_links_" + c + "_url", entry.getKey());
             prop.put("viewMode_links_" + c + "_attr", "");
             dark = !dark;
             c++;
