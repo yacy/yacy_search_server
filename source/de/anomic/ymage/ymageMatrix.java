@@ -84,7 +84,7 @@ public class ymageMatrix /*implements Cloneable*/ {
     }
     
     public ymageMatrix(int width, int height, long backgroundColor) {
-        if (!(serverMemory.available(1024 * 1024 + 3 * width * height, true))) throw new RuntimeException("ymage: not enough memory (" + serverMemory.available() + ") available");
+        if (!(serverMemory.request(1024 * 1024 + 3 * width * height, false))) throw new RuntimeException("ymage: not enough memory (" + serverMemory.available() + ") available");
         this.width = width;
         this.height = height;
         this.defaultCol = new int[]{0xFF, 0xFF, 0xFF};

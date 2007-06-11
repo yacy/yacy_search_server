@@ -128,9 +128,9 @@ public class dir {
             uploadAuthorization = (adminAuthorization ||(uploadAccountBase64MD5.length() != 0 && uploadAccountBase64MD5.equals(authorizationMD5)));
             downloadAuthorization = (adminAuthorization || uploadAuthorization || downloadAccountBase64MD5.length() == 0 || downloadAccountBase64MD5.equals(authorizationMD5));
         }else{ //userDB
-            adminAuthorization=entry.hasAdminRight();
-            uploadAuthorization=entry.hasUploadRight();
-            downloadAuthorization=entry.hasDownloadRight();
+            adminAuthorization=entry.hasRight(userDB.Entry.ADMIN_RIGHT);
+            uploadAuthorization=entry.hasRight(userDB.Entry.UPLOAD_RIGHT);
+            downloadAuthorization=entry.hasRight(userDB.Entry.DOWNLOAD_RIGHT);
         }
 
         // do authentitcate processes by triggering the http authenticate method

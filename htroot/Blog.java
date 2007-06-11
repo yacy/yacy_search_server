@@ -107,7 +107,7 @@ public class Blog {
         
         if(!hasRights){
             final userDB.Entry userentry = switchboard.userDB.proxyAuth((String)header.get("Authorization", "xxxxxx"));
-            if(userentry != null && userentry.hasBlogRight()){
+            if(userentry != null && userentry.hasRight(userDB.Entry.BLOG_RIGHT)){
                 hasRights=true;
             } else if(post.containsKey("login")) {
                 //opens login window if login link is clicked - contrib [MN]

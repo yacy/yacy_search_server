@@ -72,7 +72,7 @@ public class kelondroFlexTable extends kelondroFlexWidthArray implements kelondr
         long start = System.currentTimeMillis();
 
         
-        if (serverMemory.available(neededRAM, true)) {
+        if (serverMemory.request(neededRAM, true)) {
         	// we can use a RAM index
         	
         	if (indexfile.exists()) {
