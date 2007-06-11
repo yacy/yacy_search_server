@@ -36,6 +36,7 @@ import java.util.Map;
 import java.util.HashMap;
 import java.util.TreeMap;
 import java.util.SortedMap;
+import java.util.TreeSet;
 
 import de.anomic.kelondro.kelondroBase64Order;
 import de.anomic.net.URL;
@@ -47,8 +48,9 @@ public class plasmaWebStructure {
 
     public static int maxCRLDump = 500000;
     public static int maxCRGDump = 200000;
-    public static int maxref = 100; // maximum number of references, to avoid overflow when a large link farm occurs (i.e. wikipedia)
-
+    public static int maxref = 200; // maximum number of references, to avoid overflow when a large link farm occurs (i.e. wikipedia)
+    public static int maxhosts = 4000; // maximum number of hosts in web structure map
+    
     private StringBuffer crg;     // global citation references
     private serverLog    log;
     private File         rankingPath, structureFile;
@@ -63,8 +65,31 @@ public class plasmaWebStructure {
         this.crg = new StringBuffer(maxCRGDump);
         this.structure = new TreeMap();
         this.structureFile = structureFile;
+        
+        // load web structure
         Map loadedStructure = serverFileUtils.loadHashMap(this.structureFile);
         if (loadedStructure != null) this.structure.putAll(loadedStructure);
+        
+        // delete outdated entries in case the structure is too big
+        if (this.structure.size() > maxhosts) {
+        	// fill a set with last-modified - dates of the structure
+        	TreeSet delset = new TreeSet();
+        	Map.Entry entry;
+        	Iterator i = this.structure.entrySet().iterator();
+        	String key, value;
+        	while (i.hasNext()) {
+        		entry = (Map.Entry) i.next();
+        		key = (String) entry.getKey();
+        		value = (String) entry.getValue();
+        		delset.add(value.substring(0, 8) + key);
+        	}
+        	int delcount = this.structure.size() - (maxhosts * 9 / 10);
+        	i = delset.iterator();
+        	while ((delcount > 0) && (i.hasNext())) {
+        		this.structure.remove(((String) i.next()).substring(8));
+        		delcount--;
+        	}
+        }
     }
     
     public Integer[] /*(outlinksSame, outlinksOther)*/ generateCitationReference(URL url, String baseurlhash, Date docDate, plasmaParserDocument document, plasmaCondenser condenser) {
