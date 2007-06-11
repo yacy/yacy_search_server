@@ -43,6 +43,7 @@ package de.anomic.server;
 import java.io.File;
 import java.io.IOException;
 import java.net.InetAddress;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
@@ -51,6 +52,8 @@ import java.util.TreeMap;
 import de.anomic.server.logging.serverLog;
 
 public abstract class serverAbstractSwitch implements serverSwitch {
+    
+    private static final long maxTrackingTimeDefault = 1000 * 60 * 60; // store only access data from the last hour to save ram space
     
     // configuration management
     private final File      configFile;
@@ -63,6 +66,8 @@ public abstract class serverAbstractSwitch implements serverSwitch {
     private final TreeMap   switchActions;
     protected serverLog     log;
     protected int           serverJobs;
+    protected HashMap       accessTracker; // mappings from requesting host to an ArrayList of serverTrack-entries
+    protected long maxTrackingTime;
     
     public serverAbstractSwitch(String rootPath, String initPath, String configPath) {
         // we initialize the switchboard with a property file,
@@ -120,6 +125,7 @@ public abstract class serverAbstractSwitch implements serverSwitch {
 
         // other settings
         authorization = new HashMap();
+        accessTracker = new HashMap();
 
         // init thread control
         workerThreads = new TreeMap();
@@ -129,6 +135,9 @@ public abstract class serverAbstractSwitch implements serverSwitch {
 
         // init busy state control
         serverJobs = 0;
+        
+        // init server tracking
+        maxTrackingTime = getConfigLong("maxTrackingTime", maxTrackingTimeDefault);
     }
     
     // a logger for this switchboard
@@ -138,6 +147,49 @@ public abstract class serverAbstractSwitch implements serverSwitch {
 
     public serverLog getLog() {
 	return log;
+    }
+    
+    public void track(String host, String accessPath) {
+        // learn that a specific host has accessed a specific path
+        ArrayList access = (ArrayList) accessTracker.get(host);
+        if (access == null) access = new ArrayList();
+        access.add(new serverTrack(accessPath));
+
+        // clear too old entries
+        clearTooOldAccess(access);
+        
+        // write back to tracker
+        accessTracker.put(host, access);
+    }
+    
+    public ArrayList accessTrack(String host) {
+        // returns mapping from Long(accesstime) to path
+        
+        ArrayList access = (ArrayList) accessTracker.get(host);
+        if (access == null) return null;
+
+        // clear too old entries
+        if (clearTooOldAccess(access)) {
+            // write back to tracker
+            accessTracker.put(host, access);
+        }
+        
+        return access;
+    }
+    
+    private boolean clearTooOldAccess(ArrayList access) {
+        boolean changed = false;
+        while ((access.size() > 0) &&
+               (((serverTrack) access.get(0)).time < (System.currentTimeMillis() - maxTrackingTime))) {
+            access.remove(0);
+            changed = true;
+        }
+        return changed;
+    }
+    
+    public Iterator accessHosts() {
+        // returns an iterator of hosts in tracker (String)
+        return accessTracker.keySet().iterator();
     }
 
     public void setConfig(String key, boolean value) {

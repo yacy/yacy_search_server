@@ -50,9 +50,9 @@
 package de.anomic.server;
 
 import java.net.InetAddress;
+import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.Map;
-
 import de.anomic.server.logging.serverLog;
 
 public interface serverSwitch {
@@ -64,6 +64,11 @@ public interface serverSwitch {
     public void setLog(serverLog log);
     public serverLog getLog();
 
+    // access tracker
+    public void track(String host, String accessPath); // learn that a specific host has accessed a specific path
+    public ArrayList accessTrack(String host); // returns mapping from Long(accesstime) to path
+    public Iterator accessHosts(); // returns an iterator of hosts in tracker (String)
+        
     // a switchboard can have action listener
     // these listeners are hooks for numerous methods below
     public void deployAction(String actionName,

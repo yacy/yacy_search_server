@@ -1,30 +1,44 @@
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml">
   <head>
-    <title>YaCy '#[clientname]#': Search Statistics</title>
+    <title>YaCy '#[clientname]#': Access Tracker</title>
     #%env/templates/metas.template%#
   </head>
-  <body id="SearchStatistics">
+  <body id="AccessTracker">
     #%env/templates/header.template%#
 	<div class="SubMenu">
-    <h3>Search Statistics Menu</h3>
+    <h3>Access Tracker Menu</h3>
     <ul class="SubMenu">
-      <li><a href="/SearchStatistics_p.html?page=1" class="MenuItemLink lock">Local&nbsp;Search&nbsp;Log</a></li>
-      <li><a href="/SearchStatistics_p.html?page=2" class="MenuItemLink lock">Local&nbsp;Search&nbsp;Host&nbsp;Tracker</a></li>
-      <li><a href="/SearchStatistics_p.html?page=3" class="MenuItemLink lock">Remote&nbsp;Search&nbsp;Log</a></li>
-      <li><a href="/SearchStatistics_p.html?page=4" class="MenuItemLink lock">Remote&nbsp;Search&nbsp;Host&nbsp;Tracker</a></li>
+      <li><a href="/AccessTracker_p.html?page=0" class="MenuItemLink lock">Server&nbsp;Access&nbsp;Tracker</a></li>
+      <li><a href="/AccessTracker_p.html?page=2" class="MenuItemLink lock">Local&nbsp;Search&nbsp;Log</a></li>
+      <li><a href="/AccessTracker_p.html?page=3" class="MenuItemLink lock">Local&nbsp;Search&nbsp;Host&nbsp;Tracker</a></li>
+      <li><a href="/AccessTracker_p.html?page=4" class="MenuItemLink lock">Remote&nbsp;Search&nbsp;Log</a></li>
+      <li><a href="/AccessTracker_p.html?page=5" class="MenuItemLink lock">Remote&nbsp;Search&nbsp;Host&nbsp;Tracker</a></li>
     </ul>
     </div>
     #(page)#
-    <h2>Search Statistics</h2>
-    You can monitor search attempts at your own peer.
-    Local statistics apply for search attempts at your own search portal,
-    and remote statistics show search requests form other peer. Not all remote peers ask your peer during a global search,
-    therefore your cannot have a global view over all search requests within the complete YaCy network.
+    <h2>Server Access Tracker</h2>
+    <p>This is a list of requests to the local http server within the last hour.</p>
+    <p>Showing #[num]# requests.</p>
+    <table border="0" cellpadding="2" cellspacing="1">
+      <tr class="TableHeader">
+        <td>Host</td>
+        <td>Date</td>
+        <td>Path</td>
+      </tr>
+      #{list}#
+      <tr class="TableCell#(dark)#Light::Dark#(/dark)#">
+        <td>#[host]#</td>
+        <td>#[date]#</td>
+        <td>#[path]#</td>
+      </tr>
+      #{/list}#
+    </table>
     ::
-    <h2>Search Statistics: Local Searches</h2>
+    ::
+    <h2>Local Searches</h2>
     <p>This is a list of searches that had been requested from this' peer search interface</p>
-    <p>Showing #[num]# entries from a total of #[total]# Requests.</p>
+    <p>Showing #[num]# entries from a total of #[total]# requests.</p>
     <table border="0" cellpadding="2" cellspacing="1">
       <tr class="TableHeader">
         <td>Requesting Host</td>
@@ -50,9 +64,9 @@
       #{/list}#
     </table>
     ::
-    <h2>Search Statistics: Local Searche Tracker</h2>
+    <h2>Local Search Tracker</h2>
     <p>This is a list of searches that had been requested from this' peer search interface</p>
-    <p>Showing #[num]# entries from a total of #[total]# Requests.</p>
+    <p>Showing #[num]# entries from a total of #[total]# requests.</p>
     <table border="0" cellpadding="2" cellspacing="1">
       <tr class="TableHeader">
         <td>Requesting Host</td>
@@ -70,9 +84,9 @@
       #{/list}#
     </table>
     ::
-    <h2>Search Statistics: Remote Searches</h2>
+    <h2>Remote Searches</h2>
     <p>This is a list of searches that had been requested from remote peer search interface</p>
-    <p>Showing #[num]# entries from a total of #[total]# Requests.</p>
+    <p>Showing #[num]# entries from a total of #[total]# requests.</p>
     <table border="0" cellpadding="2" cellspacing="1">
       <tr class="TableHeader">
         <td>Requesting Host</td>
@@ -98,9 +112,9 @@
       #{/list}#
     </table>
     ::
-    <h2>Search Statistics: Remote Searche Tracker</h2>
+    <h2>Remote Search Tracker</h2>
     <p>This is a list of searches that had been requested from remote peer search interface</p>
-    <p>Showing #[num]# entries from a total of #[total]# Requests.</p>
+    <p>Showing #[num]# entries from a total of #[total]# requests.</p>
     <table border="0" cellpadding="2" cellspacing="1">
       <tr class="TableHeader">
         <td>Requesting Host</td>

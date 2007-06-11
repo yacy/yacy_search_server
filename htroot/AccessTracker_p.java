@@ -1,4 +1,4 @@
-// SearchStatistics_p.java
+// AccessStatistics_p.java
 // (C) 2006 by Michael Peter Christen; mc@anomic.de, Frankfurt a. M., Germany
 // first published 14.01.2007 on http://www.anomic.de
 //
@@ -38,10 +38,11 @@ import de.anomic.plasma.plasmaSearchQuery;
 import de.anomic.plasma.plasmaSwitchboard;
 import de.anomic.server.serverObjects;
 import de.anomic.server.serverSwitch;
+import de.anomic.server.serverTrack;
 import de.anomic.yacy.yacyCore;
 import de.anomic.yacy.yacySeed;
 
-public class SearchStatistics_p {
+public class AccessTracker_p {
  
     public static serverObjects respond(httpHeader header, serverObjects post, serverSwitch sb) {
         plasmaSwitchboard switchboard = (plasmaSwitchboard) sb;
@@ -52,10 +53,31 @@ public class SearchStatistics_p {
         if (post != null) page = post.getInt("page", 0);
         prop.put("page", page);
      
-        int maxCount = 100;
+        int maxCount = 1000;
         boolean dark = true;
-        if ((page == 1) || (page == 3)) {
-            ArrayList array = (page == 1) ? switchboard.localSearches : switchboard.remoteSearches;
+        if (page == 0) {
+            Iterator i = switchboard.accessHosts();
+            String host;
+            ArrayList access;
+            int entCount = 0;
+            serverTrack track;
+            while ((entCount < maxCount) && (i.hasNext())) {
+                host = (String) i.next();
+                access = switchboard.accessTrack(host);
+                
+                for (int j = access.size() - 1; j >= 0; j--) {
+                    track = (serverTrack) access.get(j);
+                    prop.put("page_list_" + entCount + "_host", host);
+                    prop.put("page_list_" + entCount + "_date", yacyCore.universalDateShortString(new Date(track.time)));
+                    prop.put("page_list_" + entCount + "_path", track.path);
+                    entCount++;
+                }
+            }
+            prop.put("page_list", entCount);
+            prop.put("page_num", entCount);
+        }
+        if ((page == 2) || (page == 4)) {
+            ArrayList array = (page == 2) ? switchboard.localSearches : switchboard.remoteSearches;
             Long trackerHandle;
             HashMap searchProfile;
             int m = Math.min(maxCount, array.size());
@@ -68,7 +90,7 @@ public class SearchStatistics_p {
                 prop.put("page_list_" + entCount + "_host", (String) searchProfile.get("host"));
                 prop.put("page_list_" + entCount + "_date", yacyCore.universalDateShortString(new Date(trackerHandle.longValue())));
                 prop.put("page_list_" + entCount + "_timestamp", Long.toString(trackerHandle.longValue()));
-                if (page == 1) {
+                if (page == 2) {
                     // local search
                     prop.put("page_list_" + entCount + "_offset", ((Integer) searchProfile.get("offset")).toString());
                     prop.put("page_list_" + entCount + "_querystring", searchProfile.get("querystring"));
@@ -84,10 +106,10 @@ public class SearchStatistics_p {
             }
             prop.put("page_list", m);
             prop.put("page_num", m);
-            prop.put("page_total", (page == 1) ? switchboard.localSearches.size() : switchboard.remoteSearches.size());
+            prop.put("page_total", (page == 2) ? switchboard.localSearches.size() : switchboard.remoteSearches.size());
         }
-        if ((page == 2) || (page == 4)) {
-            Iterator i = (page == 2) ? switchboard.localSearchTracker.entrySet().iterator() : switchboard.remoteSearchTracker.entrySet().iterator();
+        if ((page == 3) || (page == 5)) {
+            Iterator i = (page == 3) ? switchboard.localSearchTracker.entrySet().iterator() : switchboard.remoteSearchTracker.entrySet().iterator();
             String host;
             TreeSet handles;
             int entCount = 0;
@@ -111,7 +133,7 @@ public class SearchStatistics_p {
                 
                 prop.put("page_list_" + entCount + "_dark", ((dark) ? 1 : 0) ); dark =! dark;
                 prop.put("page_list_" + entCount + "_host", host);
-                if (page == 4) {
+                if (page == 5) {
                     yacySeed remotepeer = yacyCore.seedDB.lookupByIP(natLib.getInetAddress(host), true, true, true);
                     prop.put("page_list_" + entCount + "_peername", (remotepeer == null) ? "UNKNOWN" : remotepeer.getName());
                 }
@@ -122,7 +144,7 @@ public class SearchStatistics_p {
             }
             prop.put("page_list", entCount);
             prop.put("page_num", entCount);
-            prop.put("page_total", (page == 2) ? switchboard.localSearches.size() : switchboard.remoteSearches.size());
+            prop.put("page_total", (page == 3) ? switchboard.localSearches.size() : switchboard.remoteSearches.size());
         }
         // return rewrite properties
         return prop;

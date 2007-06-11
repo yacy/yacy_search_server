@@ -1,8 +1,17 @@
 <?xml version="1.0"?>
-<SearchStatistics>
-#(page)#<!-- 0: info text -->
-	  ::<!-- 1: Search Statistics: Local Searches -->
+<AccessTracker>
+#(page)#<!-- 0: access tracker -->
+      <localAccessTracker>#{list}#
+      <entry>
+        <host>#[host]#</host>
+        <date>#[date]#</date>
+        <path>#[path]#</path>
+      </entry>
+	  #{/list}#</localAccessTracker>
+	  ::<!-- 1: reserve -->
+	  ::<!-- 2: Search Statistics: Local Searches -->
 	  <localSearchLog>#{list}#
+      <entry>
         <host>#[host]#</host>
         <date timestamp="#[timestamp]#">#[date]#</date>
         <offset>#[offset]#</offset>
@@ -11,21 +20,25 @@
         <querytime>#[querytime]#</querytime>
         <resulttime>#[resulttime]#</resulttime>
         <querystring>#[querystring]#</querystring>	 
+	  </entry>
 	  #{/list}#</localSearchLog>
 	  
-	  ::<!-- 2: Search Statistics: Local Search Tracker -->
+	  ::<!-- 3: Search Statistics: Local Search Tracker -->
 	  <localSearchTracker>#{list}#
-	    <host>#[host]#</host>
+	  <entry>
+        <host>#[host]#</host>
         <count>#[count]#</count>
         <qph>#[qph]#</qph>
         <dates>#{dates}#
         	<date timestamp="#[timestamp]#">#[date]#</date>
         #{/dates}#</dates>
+	  </entry>
 	  #{/list}#</localSearchTracker>
 	  
-	  ::<!-- 3: Search Statistics: Remote Searches -->
+	  ::<!-- 4: Search Statistics: Remote Searches -->
 	  <remoteSearchLog>#{list}#
-	  	<host>#[host]#</host>
+	  <entry>
+      	<host>#[host]#</host>
         <peername>#[peername]#</peername>
         <date timestamp="#[timestamp]#">#[date]#</date>
         <querycount>#[querycount]#</querycount>
@@ -33,17 +46,20 @@
         <querytime>#[querytime]#</querytime>
         <resulttime>#[resulttime]#</resulttime>
         <queryhashes>#[queryhashes]#</queryhashes>
+	  </entry>
 	  #{/list}#</remoteSearchLog>
 	  
-	  ::<!-- 4: Search Statistics: Remote Search Tracker -->
+	  ::<!-- 5: Search Statistics: Remote Search Tracker -->
 	  <remoteSearchTracker>#{list}#
-	    <host>#[host]#</host>
+	  <entry>
+        <host>#[host]#</host>
         <count>#[count]#</count>
         <qph>#[qph]#</qph>
         <dates>#{dates}#
         	<date timestamp="#[timestamp]#">#[date]#</date>
         #{/dates}#</dates>
+	  </entry>
 	  #{/list}#</remoteSearchTracker>
 
 #(/page)#
-</SearchStatistics>
+</AccessTracker>

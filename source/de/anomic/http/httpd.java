@@ -767,6 +767,11 @@ public final class httpd implements serverHandler {
         // parsing the header
         httpHeader.parseRequestLine(cmd,s,this.prop,virtualHost);
         
+        // track the request
+        String path = this.prop.getProperty(httpHeader.CONNECTION_PROP_URL);
+        String args = this.prop.getProperty(httpHeader.CONNECTION_PROP_ARGS, "");
+        switchboard.track(this.userAddress.getHostName(), (args.length() > 0) ? path + "?" + args : path);
+        
         // reseting the empty request counter
         this.emptyRequestCount = 0;
         
@@ -777,13 +782,9 @@ public final class httpd implements serverHandler {
         this.prop.setProperty(httpHeader.CONNECTION_PROP_CLIENTIP, this.clientIP);
     }
     
-
-    
-    
     // some static methods that needs to be used from any CGI
     // and also by the httpdFileHandler
     // but this belongs to the protocol handler, this class.
-    
     
     public static int parseArgs(serverObjects args, InputStream in, int length) throws IOException {
         // this is a quick hack using a previously coded parseMultipart based on a buffer

@@ -60,6 +60,10 @@ keyStorePassword =
 pkcs12ImportFile = 
 pkcs12ImportPwd = 
 
+# server tracking: maximum time a track entry is hold in the internal cache
+# value is in milliseconds, default is one hour
+server.maxTrackingTime = 3600000
+
 # peer-to-peer construction for distributed search
 # we have several stages:
 # 1st: a file within every distribution that has a list of URLs:
