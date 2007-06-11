@@ -47,7 +47,7 @@ public class plasmaWebStructure {
 
     public static int maxCRLDump = 500000;
     public static int maxCRGDump = 200000;
-    public static int maxref = 10; // maximum number of references, to avoid overflow when a large link farm occurs (i.e. wikipedia)
+    public static int maxref = 100; // maximum number of references, to avoid overflow when a large link farm occurs (i.e. wikipedia)
 
     private StringBuffer crg;     // global citation references
     private serverLog    log;
@@ -260,21 +260,27 @@ public class plasmaWebStructure {
         
         // check if the maxref is exceeded
         if (refs.size() > maxref) {
-            // shrink the references: the entry with the smallest number of references is removed
-            int minrefcount = Integer.MAX_VALUE;
-            String minrefkey = null;
-            Iterator i = refs.entrySet().iterator();
-            Map.Entry entry;
-            while (i.hasNext()) {
-                entry = (Map.Entry) i.next();
-                if (((Integer) entry.getValue()).intValue() < minrefcount) {
-                    minrefcount = ((Integer) entry.getValue()).intValue();
-                    minrefkey = (String) entry.getKey();
-                }
-            }
-            // remove the smallest
-            if (minrefkey != null) refs.remove(minrefkey);
-        }
+        	int shrink = refs.size() - (maxref * 9 / 10);
+			delloop: while (shrink > 0) {
+				// shrink the references: the entry with the smallest number of references is removed
+				int minrefcount = Integer.MAX_VALUE;
+				String minrefkey = null;
+				Iterator i = refs.entrySet().iterator();
+				Map.Entry entry;
+				findloop: while (i.hasNext()) {
+					entry = (Map.Entry) i.next();
+					if (((Integer) entry.getValue()).intValue() < minrefcount) {
+						minrefcount = ((Integer) entry.getValue()).intValue();
+						minrefkey = (String) entry.getKey();
+					}
+					if (minrefcount == 1) break findloop;
+				}
+				// remove the smallest
+				if (minrefkey == null) break delloop;
+				refs.remove(minrefkey);
+				shrink--;
+			}
+		}
         
         // store the map back to the structure
         structure.put(domhash + "," + url.getHost(), map2refstr(refs));
