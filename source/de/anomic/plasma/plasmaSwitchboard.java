@@ -1510,6 +1510,28 @@ public final class plasmaSwitchboard extends serverAbstractSwitch implements ser
         initProfiles();
     }
     
+    /**
+     * {@link plasmaCrawlProfile Crawl Profiles} are saved independantly from the queues themselves
+     * and therefore have to be cleaned up from time to time. This method only performs the clean-up
+     * if - and only if - the {@link plasmaSwitchboardQueue switchboard},
+     * {@link plasmaCrawlLoader loader} and {@link plasmaCrawlNURL local crawl} queues are all empty.
+     * <p>
+     *   Then it iterates through all existing {@link plasmaCrawlProfile crawl profiles} and removes
+     *   all profiles which are not hardcoded.
+     * </p>
+     * <p>
+     *   <i>If this method encounters DB-failures, the profile DB will be resetted and</i>
+     *   <code>true</code><i> will be returned</i>
+     * </p>
+     * @see #CRAWL_PROFILE_PROXY hardcoded
+     * @see #CRAWL_PROFILE_REMOTE hardcoded
+     * @see #CRAWL_PROFILE_SNIPPET_TEXT hardcoded
+     * @see #CRAWL_PROFILE_SNIPPET_MEDIA hardcoded
+     * @return whether this method has done something or not (i.e. because the queues have been filled
+     * or there are no profiles left to clean up)
+     * @throws <b>InterruptedException</b> if the current thread has been interrupted, i.e. by the
+     * shutdown procedure
+     */
     public boolean cleanProfiles() throws InterruptedException {
         if ((sbQueue.size() > 0) || (cacheLoader.size() > 0) || (noticeURL.stackSize() > 0)) return false;
         final Iterator iter = profiles.profiles(true);

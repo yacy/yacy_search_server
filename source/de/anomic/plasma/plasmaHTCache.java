@@ -82,6 +82,7 @@ import de.anomic.kelondro.kelondroMapObjects;
 import de.anomic.net.URL;
 import de.anomic.plasma.cache.IResourceInfo;
 import de.anomic.plasma.cache.ResourceInfoFactory;
+import de.anomic.plasma.cache.UnsupportedProtocolException;
 import de.anomic.server.serverCodings;
 import de.anomic.server.serverFileUtils;
 import de.anomic.server.serverInstantThread;
@@ -496,11 +497,14 @@ public final class plasmaHTCache {
 
     /**
      * Returns an object containing metadata about a cached resource
-     * @param url the url of the resource
-     * @return an {@link IResourceInfo info object}  
-     * @throws Exception of the info object could not be created, e.g. if the protocol is not supported
+     * @param url the {@link URL} of the resource
+     * @return an {@link IResourceInfo info object}
+     * @throws <b>IllegalAccessException</b> if the {@link SecurityManager} doesn't allow instantiation
+     * of the info object with the given protocol
+     * @throws <b>UnsupportedProtocolException</b> if the protocol is not supported and therefore the
+     * info object couldn't be created
      */
-    public IResourceInfo loadResourceInfo(URL url) throws Exception {    
+    public IResourceInfo loadResourceInfo(URL url) throws UnsupportedProtocolException, IllegalAccessException {    
         
         // getting the URL hash
         String urlHash = plasmaURL.urlHash(url.toNormalform());

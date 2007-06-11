@@ -70,6 +70,14 @@ public class IndexCreateWWWLocalQueue_p {
         return dayFormatter.format(date);
     }
     
+    private static final int INVALID    = 0;
+    private static final int URL        = 1;
+    private static final int ANCHOR     = 2;
+    private static final int PROFILE    = 3;
+    private static final int DEPTH      = 4;
+    private static final int INITIATOR  = 5;
+    private static final int MODIFIED   = 6;
+    
     public static serverObjects respond(httpHeader header, serverObjects post, serverSwitch env) {
         // return variable that accumulates replacements
         plasmaSwitchboard switchboard = (plasmaSwitchboard) env;
@@ -87,55 +95,59 @@ public class IndexCreateWWWLocalQueue_p {
                 int c = 0;
                 
                 String pattern = post.get("pattern", ".*").trim();
-                String option  = post.get("option", ".*").trim();
+                final int option  = post.getInt("option", INVALID);
                 if (pattern.equals(".*")) {
                     c = switchboard.noticeURL.stackSize(plasmaCrawlNURL.STACK_TYPE_CORE);
                     switchboard.noticeURL.clear(plasmaCrawlNURL.STACK_TYPE_CORE);
                     try { switchboard.cleanProfiles(); } catch (InterruptedException e) {/* ignore this */}
-                } else{
+                } else if (option > INVALID) {
                     Pattern compiledPattern = null;
                     try {
                         // compiling the regular expression
                         compiledPattern = Pattern.compile(pattern);
                         
-                        // iterating through the list of URLs
-                        Iterator iter = switchboard.noticeURL.iterator(plasmaCrawlNURL.STACK_TYPE_CORE);
-                        plasmaCrawlEntry entry;
-                        while (iter.hasNext()) {
-                            if ((entry = (plasmaCrawlEntry) iter.next()) == null) continue;
-                            String value = null;
-                            String nextHash = entry.urlhash();
-                            if ((option.equals("URL")&&(entry.url() != null))) {
-                                value = entry.url().toString();
-                            } else if ((option.equals("AnchorName"))) {
-                                value = entry.name();
-                            } else if ((option.equals("Profile"))) {
-                                String profileHandle = entry.profileHandle();
-                                if (profileHandle == null) {
-                                    value = "unknown";
-                                } else {                                    
-                                    plasmaCrawlProfile.entry profile = switchboard.profiles.getEntry(profileHandle);
-                                    if (profile == null) {
-                                        value = "unknown";
-                                    } else {                                    
-                                        value = profile.name();
-                                    }
+                        if (option == PROFILE) {
+                            // search and delete the crawl profile (_much_ faster, independant of queue size)
+                            // XXX: what to do about the annoying LOST PROFILE messages in the log?
+                            Iterator it = switchboard.profiles.profiles(true);
+                            plasmaCrawlProfile.entry entry;
+                            while (it.hasNext()) {
+                                entry = (plasmaCrawlProfile.entry)it.next();
+                                final String name = entry.name();
+                                if (name.equals(plasmaSwitchboard.CRAWL_PROFILE_PROXY) ||
+                                        name.equals(plasmaSwitchboard.CRAWL_PROFILE_REMOTE) ||
+                                        name.equals(plasmaSwitchboard.CRAWL_PROFILE_SNIPPET_TEXT) ||
+                                        name.equals(plasmaSwitchboard.CRAWL_PROFILE_SNIPPET_MEDIA))
+                                    continue;
+                                if (compiledPattern.matcher(name).find())
+                                    switchboard.profiles.removeEntry(entry.handle());
+                            }
+                        } else {
+                            // iterating through the list of URLs
+                            Iterator iter = switchboard.noticeURL.iterator(plasmaCrawlNURL.STACK_TYPE_CORE);
+                            plasmaCrawlEntry entry;
+                            while (iter.hasNext()) {
+                                if ((entry = (plasmaCrawlEntry) iter.next()) == null) continue;
+                                String value = null;
+                                
+                                switch (option) {
+                                    case URL:       value = (entry.url() == null) ? null : entry.url().toString(); break;
+                                    case ANCHOR:    value = entry.name(); break;
+                                    case DEPTH:     value = Integer.toString(entry.depth()); break;
+                                    case INITIATOR:
+                                        value = (entry.initiator() == null) ? "proxy" : htmlTools.replaceHTML(entry.initiator());
+                                        break;
+                                    case MODIFIED:  value = daydate(entry.loaddate()); break;
+                                    default: value = null;
                                 }
-                            } else if ((option.equals("Depth"))) {
-                                value = Integer.toString(entry.depth());
-                            } else if ((option.equals("Initiator"))) {
-                                value = (entry.initiator()==null)?"proxy":htmlTools.replaceHTML(entry.initiator());
-                            } else if ((option.equals("ModifiedDate"))) {
-                                value = daydate(entry.loaddate());
+                                
+                                if (value != null) {
+                                    Matcher matcher = compiledPattern.matcher(value);
+                                    if (matcher.find()) {
+                                        switchboard.noticeURL.remove(entry.urlhash());
+                                    }                                    
+                                }
                             }
-                            
-                            if (value != null) {
-                                Matcher matcher = compiledPattern.matcher(value);
-                                if (matcher.find()) {
-                                    switchboard.noticeURL.remove(nextHash);
-                                }                                    
-                            }
-                            
                         }
                     } catch (PatternSyntaxException e) {
                         e.printStackTrace();

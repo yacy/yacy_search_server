@@ -96,7 +96,12 @@
        <span style="display: block;">#[line]#</span>#{/lines}#
      </span>
      ::<span class="error">- This file is not cached -</span>
-     ::<img src="CacheResource_p.html?path=#[src]#" alt="Cached image from #[src]#" />#(/type)#
+     ::<img src="CacheResource_p.html?path=#[src]#" alt="Cached image from #[src]#" />
+     ::<span class="error">- The protocol #[protoc]# is not supported by YaCy</span>
+     ::<span class="error">
+       - IllegalAccessException -Security Manager is blocking dynamic class loading
+       but should not be active. Please report this incident!
+     </span>#(/type)#
      <!-- TO-DO: CSS/XHTMLize end -->
    </div>::
    <div class="CacheAdminTree">

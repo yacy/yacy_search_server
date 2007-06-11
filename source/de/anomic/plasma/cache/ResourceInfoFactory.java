@@ -57,7 +57,7 @@ public class ResourceInfoFactory {
     public IResourceInfo buildResourceInfoObj(
             URL resourceURL,
             Map resourceMetadata
-    ) throws Exception {
+    ) throws UnsupportedProtocolException, IllegalAccessException {
         
         String protocString = resourceURL.getProtocol();
         
@@ -65,25 +65,37 @@ public class ResourceInfoFactory {
         if (protocString.equals("https")) protocString = "http";
         
         // the full qualified class name
-        String className = this.getClass().getPackage().getName() + "." + protocString + ".ResourceInfo";
+        final String className = this.getClass().getPackage().getName() + "." + protocString + ".ResourceInfo";
         
-        // loading class by name
-        Class moduleClass = Class.forName(className);
-
-        // getting the constructor
-        Constructor classConstructor = moduleClass.getConstructor( new Class[] { 
-                URL.class,
-                Map.class
-        } );
-
-        // instantiating class
-        IResourceInfo infoObject = (IResourceInfo) classConstructor.newInstance(new Object[] {
-              resourceURL,
-              resourceMetadata
-        });        
-        
-        // return the newly created object
-        return infoObject; 
-        
+        try {
+            // loading class by name
+            final Class moduleClass = Class.forName(className);
+            
+            // getting the constructor
+            final Constructor classConstructor = moduleClass.getConstructor( new Class[] { 
+                    URL.class,
+                    Map.class
+            } );
+            
+            // instantiating class
+            final IResourceInfo infoObject = (IResourceInfo) classConstructor.newInstance(new Object[] {
+                  resourceURL,
+                  resourceMetadata
+            });
+            
+            // return the newly created object
+            return infoObject;
+        } catch (Exception e) {
+            if (e instanceof RuntimeException) {
+                throw (RuntimeException)e;
+            } else if (e instanceof ClassNotFoundException) {
+                throw new UnsupportedProtocolException(protocString, e);
+            } else if (e instanceof IllegalAccessException) {
+                throw (IllegalAccessException)e;
+            } else {
+                e.printStackTrace();
+                return null;
+            }
+        }
     }
 }

@@ -52,6 +52,7 @@
 
 import java.io.File;
 import java.io.FilenameFilter;
+import java.io.IOException;
 import java.io.Writer;
 import java.util.Iterator;
 import java.util.Map;
@@ -66,6 +67,7 @@ import de.anomic.plasma.plasmaHTCache;
 import de.anomic.plasma.plasmaParserDocument;
 import de.anomic.plasma.plasmaSwitchboard;
 import de.anomic.plasma.cache.IResourceInfo;
+import de.anomic.plasma.cache.UnsupportedProtocolException;
 import de.anomic.server.serverFileUtils;
 import de.anomic.server.serverObjects;
 import de.anomic.server.serverSwitch;
@@ -80,6 +82,8 @@ public class CacheAdmin_p {
 	private static final int HtmlFile = 0;
 	private static final int NotCached = 1;
 	private static final int Image = 2;
+    private static final int ProtocolError = 3;
+    private static final int SecurityError = 4;
     
     public static final class Filter implements FilenameFilter {
         private static final String EXCLUDE_NAME = plasmaHTCache.DB_NAME;
@@ -105,7 +109,7 @@ public class CacheAdmin_p {
                 pathString = "/";
                 file = new File(switchboard.htCachePath, pathString);
             }
-        } catch (Exception e) {
+        } catch (IOException e) {
             pathString = "/";
             file = new File(switchboard.htCachePath, pathString);
         }
@@ -129,62 +133,69 @@ public class CacheAdmin_p {
             info.ensureCapacity(10000);
             try {
                 final IResourceInfo resInfo = switchboard.cacheManager.loadResourceInfo(url);
-                formatHeader(prop, resInfo.getMap());
-                
-                final String ff = file.toString();
-                final int dotpos = ff.lastIndexOf('.');
-                final String ext = (dotpos >= 0) ? ff.substring(dotpos + 1).toLowerCase() : "";
-                if (ext.equals("gif") || ext.equals("jpg") ||
-                    ext.equals("png") || ext.equals("jpeg")) {
-                	prop.put("info_type", Image);
-                    prop.put("info_type_src", pathString);
+                if (resInfo == null) {
+                    prop.put("info_type", NotCached);
                 } else {
-                	prop.put("info_type", HtmlFile);
-                	// fill the htmlFilerContentScraper object with the contents of the cached file
-                	// to retrieve all needed information
-                    final htmlFilterContentScraper scraper = new htmlFilterContentScraper(url);
-                    //final OutputStream os = new htmlFilterOutputStream(null, scraper, null, false);
-                    Writer writer = new htmlFilterWriter(null,null,scraper,null,false);                    
-                    String sourceCharset = resInfo.getCharacterEncoding();
-                    if (sourceCharset == null) sourceCharset = "UTF-8";
-                    String mimeType = resInfo.getMimeType();                    
-                    serverFileUtils.copy(file, sourceCharset, writer);
-                    writer.close();
+                    formatHeader(prop, resInfo.getMap());
                     
-                    final plasmaParserDocument document = switchboard.parser.transformScraper(url, mimeType, sourceCharset, scraper);
-                    
-                    prop.put("info_type_title", scraper.getTitle());
-                    
-                    int i;
-                    String[] t = document.getSectionTitles();
-                    prop.put("info_type_headlines", t.length);
-                    for (i = 0; i < t.length; i++)
-                    	prop.put("info_type_headlines_" + i + "_headline",
-                    			t[i].replaceAll("\n", "").trim());
-                    
-                    formatAnchor(prop, document.getHyperlinks(), "links");
-                    formatImageAnchor(prop, document.getImages());
-                    formatAnchor(prop, document.getAudiolinks(), "audio");
-                    formatAnchor(prop, document.getVideolinks(), "video");
-                    formatAnchor(prop, document.getApplinks(), "apps");
-                    formatAnchor(prop, document.getEmaillinks(), "email");
-                    
-                    prop.put("info_type_text",
-                    		de.anomic.data.htmlTools.replaceXMLEntities(new String(scraper.getText())));
-                    
-                    i = 0;
-                    final Iterator sentences = document.getSentences(false);
-                    if (sentences != null)
-                    	while (sentences.hasNext()) {
-                    		prop.put("info_type_lines_" + i + "_line",
-                    				new String((StringBuffer) sentences.next()).replaceAll("\n", "").trim());
-	                        i++;
-	                    }
-                    prop.put("info_type_lines", i);
-                    if (document != null) document.close();
+                    final String ff = file.toString();
+                    final int dotpos = ff.lastIndexOf('.');
+                    final String ext = (dotpos >= 0) ? ff.substring(dotpos + 1).toLowerCase() : "";
+                    if (ext.equals("gif") || ext.equals("jpg") ||
+                        ext.equals("png") || ext.equals("jpeg")) {
+                    	prop.put("info_type", Image);
+                        prop.put("info_type_src", pathString);
+                    } else {
+                    	prop.put("info_type", HtmlFile);
+                    	// fill the htmlFilerContentScraper object with the contents of the cached file
+                    	// to retrieve all needed information
+                        final htmlFilterContentScraper scraper = new htmlFilterContentScraper(url);
+                        //final OutputStream os = new htmlFilterOutputStream(null, scraper, null, false);
+                        Writer writer = new htmlFilterWriter(null,null,scraper,null,false);                    
+                        String sourceCharset = resInfo.getCharacterEncoding();
+                        if (sourceCharset == null) sourceCharset = "UTF-8";
+                        String mimeType = resInfo.getMimeType();                    
+                        serverFileUtils.copy(file, sourceCharset, writer);
+                        writer.close();
+                        
+                        final plasmaParserDocument document = switchboard.parser.transformScraper(url, mimeType, sourceCharset, scraper);
+                        
+                        prop.put("info_type_title", scraper.getTitle());
+                        
+                        int i;
+                        String[] t = document.getSectionTitles();
+                        prop.put("info_type_headlines", t.length);
+                        for (i = 0; i < t.length; i++)
+                        	prop.put("info_type_headlines_" + i + "_headline",
+                        			t[i].replaceAll("\n", "").trim());
+                        
+                        formatAnchor(prop, document.getHyperlinks(), "links");
+                        formatImageAnchor(prop, document.getImages());
+                        formatAnchor(prop, document.getAudiolinks(), "audio");
+                        formatAnchor(prop, document.getVideolinks(), "video");
+                        formatAnchor(prop, document.getApplinks(), "apps");
+                        formatAnchor(prop, document.getEmaillinks(), "email");
+                        
+                        prop.put("info_type_text", new String(scraper.getText()));
+                        
+                        i = 0;
+                        final Iterator sentences = document.getSentences(false);
+                        if (sentences != null)
+                        	while (sentences.hasNext()) {
+                        		prop.put("info_type_lines_" + i + "_line",
+                        				new String((StringBuffer) sentences.next()).replaceAll("\n", "").trim());
+    	                        i++;
+    	                    }
+                        prop.put("info_type_lines", i);
+                        if (document != null) document.close();
+                    }
                 }
-            } catch (Exception e) {
+            } catch (IOException e) {
             	prop.put("info_type", NotCached);
+            } catch (UnsupportedProtocolException e) {
+                prop.put("info_type", ProtocolError);
+            } catch (IllegalAccessException e) {
+                prop.put("info_type", SecurityError);
             }
         } else {
             prop.put("info", TypeDIR);
@@ -234,11 +245,12 @@ public class CacheAdmin_p {
                 }
             }
         }
-
+        
         prop.put("cachesize", Long.toString(switchboard.cacheManager.curCacheSize/1024));
         prop.put("cachemax", Long.toString(switchboard.cacheManager.maxCacheSize/1024));
         prop.put("path", path.toString());
         prop.put("info_info", info.toString());
+
         /* prop.put("info_tree", tree.toString()); */
         // return rewrite properties
         return prop;
