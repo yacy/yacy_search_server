@@ -26,6 +26,7 @@
 
 import java.net.MalformedURLException;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.Iterator;
 import java.util.Map;
 
@@ -39,6 +40,7 @@ import de.anomic.server.serverObjects;
 import de.anomic.server.serverSwitch;
 import de.anomic.ymage.ymageGraph;
 import de.anomic.ymage.ymageMatrix;
+import de.anomic.ymage.ymageToolPrint;
 
 public class WebStructurePicture_p {
     
@@ -91,7 +93,16 @@ public class WebStructurePicture_p {
         if (host != null) place(graph, sb.webStructure, hash, host, nodes, timeout, 0.0, 0.0, 0, depth);
         //graph.print();
         
-        return graph.draw(width, height, 40, 40, 5, 15);
+        ymageMatrix graphPicture = graph.draw(width, height, 40, 40, 16, 16);
+        
+        // print headline
+        graphPicture.setColor(ymageMatrix.SUBTRACTIVE_BLACK);
+        graphPicture.setMode(ymageMatrix.MODE_SUB);
+        ymageToolPrint.print(graphPicture, 2, 8, 0, "YACY WEB-STRUCTURE ANALYSIS", -1);
+        ymageToolPrint.print(graphPicture, 2, 16, 0, "LINK ENVIRONMENT OF DOMAIN " + host.toUpperCase(), -1);
+        ymageToolPrint.print(graphPicture, width - 2, 8, 0, "SNAPSHOT FROM " + new Date().toString().toUpperCase(), 1);
+
+        return graphPicture;
     }
     
     private static final int place(ymageGraph graph, plasmaWebStructure structure, String centerhash, String centerhost, int maxnodes, long timeout, double x, double y, int nextlayer, int maxlayer) {
