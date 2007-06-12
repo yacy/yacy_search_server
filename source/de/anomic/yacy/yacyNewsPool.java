@@ -71,6 +71,19 @@ public class yacyNewsPool {
      * a profile entry was updated (implemented)
      */
     public static final String CATEGORY_PROFILE_UPDATE = "prfleupd";
+    /**
+    * a peer starts up and renews its profile broadcast; used to implement supporter page
+    */
+    public static final String CATEGORY_PROFILE_BROADCAST = "prflecst";
+    /**
+     * a peer has done something good (i.e. served good search results)
+     * and gets a positive vote so it can rise on the supporter page
+     */
+    public static final String CATEGORY_PROFILE_VOTE_GOOD = "prflegvt";
+    /**
+     * a peer has done something bad (i.e. spammed) and gets a negative vote
+     */
+    public static final String CATEGORY_PROFILE_VOTE_BAD = "prflebvt";
     
     /* ------------------------------------------------------------------------
      * CRAWLING related CATEGORIES
@@ -201,6 +214,9 @@ public class yacyNewsPool {
     public static final String[] category = {
     	// PROFILE related CATEGORIES
     	CATEGORY_PROFILE_UPDATE,
+        CATEGORY_PROFILE_BROADCAST,
+        CATEGORY_PROFILE_VOTE_GOOD,
+        CATEGORY_PROFILE_VOTE_BAD,
     	
     	// CRAWLING related CATEGORIES
     	CATEGORY_CRAWL_START, 

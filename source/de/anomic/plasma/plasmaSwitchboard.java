@@ -104,6 +104,7 @@
 package de.anomic.plasma;
 
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.UnsupportedEncodingException;
@@ -117,6 +118,7 @@ import java.util.HashMap;
 import java.util.Hashtable;
 import java.util.Iterator;
 import java.util.Map;
+import java.util.Properties;
 import java.util.Set;
 import java.util.TreeMap;
 import java.util.TreeSet;
@@ -164,6 +166,7 @@ import de.anomic.tools.crypt;
 import de.anomic.yacy.yacyClient;
 import de.anomic.yacy.yacyCore;
 import de.anomic.yacy.yacyNewsPool;
+import de.anomic.yacy.yacyNewsRecord;
 import de.anomic.yacy.yacySeed;
 
 public final class plasmaSwitchboard extends serverAbstractSwitch implements serverSwitch {
@@ -1914,6 +1917,26 @@ public final class plasmaSwitchboard extends serverAbstractSwitch implements ser
                 if (yacyCore.newsPool.automaticProcess() > 0) hasDoneSomething = true;
             } catch (IOException e) {}
 
+            // initiate broadcast about peer startup to spread supporter url
+            if (yacyCore.newsPool.size(yacyNewsPool.OUTGOING_DB) == 0) {
+                // read profile
+                final Properties profile = new Properties();
+                FileInputStream fileIn = null;
+                try {
+                    fileIn = new FileInputStream(new File("DATA/SETTINGS/profile.txt"));
+                    profile.load(fileIn);
+                } catch(IOException e) {
+                } finally {
+                    if (fileIn != null) try { fileIn.close(); } catch (Exception e) {}
+                }
+                String homepage = (String) profile.get("homepage");
+                if ((homepage != null) && (homepage.length() > 10)) {
+                    Properties news = new Properties();
+                    news.put("homepage", profile.get("homepage"));
+                    yacyCore.newsPool.publishMyNews(new yacyNewsRecord(yacyNewsPool.CATEGORY_PROFILE_BROADCAST, news));
+                }
+            }
+            
             // set a maximum amount of memory for the caches
             long memprereq = Math.max(getConfigLong(INDEXER_MEMPREREQ, 0), wordIndex.minMem());
             // setConfig(INDEXER_MEMPREREQ, memprereq);
