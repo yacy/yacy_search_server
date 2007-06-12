@@ -236,12 +236,16 @@ public class plasmaWebStructure {
     public int referencesCount(String domhash) {
         // returns the number of domains that are referenced by this domhash
         assert domhash.length() == 6 : "domhash = " + domhash;
-        SortedMap tailMap = structure.tailMap(domhash);
-        if ((tailMap == null) || (tailMap.size() == 0)) return 0;
-        String key = (String) tailMap.firstKey();
-        if (key.startsWith(domhash)) {
-            return refstr2count((String) tailMap.get(key));
-        } else {
+        try {
+            SortedMap tailMap = structure.tailMap(domhash);
+            if ((tailMap == null) || (tailMap.size() == 0)) return 0;
+            String key = (String) tailMap.firstKey();
+            if (key.startsWith(domhash)) {
+                return refstr2count((String) tailMap.get(key));
+            } else {
+                return 0;
+            }
+        } catch (ConcurrentModificationException e) {
             return 0;
         }
     }
