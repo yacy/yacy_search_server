@@ -238,8 +238,8 @@ public class Status {
             prop.put("peerStatistics_uptime", serverDate.intervalToString(uptime));
             prop.put("peerStatistics_pagesperminute", yacyCore.seedDB.mySeed.get(yacySeed.ISPEED, "unknown"));
             prop.put("peerStatistics_queriesperhour", Double.toString(Math.round(6000d * yacyCore.seedDB.mySeed.getQPM()) / 100d));
-            prop.put("peerStatistics_links", yacyCore.seedDB.mySeed.get(yacySeed.LCOUNT, "unknown"));
-            prop.put("peerStatistics_words", yacyCore.seedDB.mySeed.get(yacySeed.ICOUNT, "unknown"));
+            prop.put("peerStatistics_links", groupDigits(yacyCore.seedDB.mySeed.get(yacySeed.LCOUNT, "0")));
+            prop.put("peerStatistics_words", groupDigits(yacyCore.seedDB.mySeed.get(yacySeed.ICOUNT, "0")));
             prop.put("peerStatistics_juniorConnects", yacyCore.peerActions.juniorConnects);
             prop.put("peerStatistics_seniorConnects", yacyCore.peerActions.seniorConnects);
             prop.put("peerStatistics_principalConnects", yacyCore.peerActions.principalConnects);
@@ -401,6 +401,26 @@ public class Status {
             return "unknown";
         }
 
+    }
+    
+    
+    //TODO: groupDigits-functions (Status.java & Network.java) should
+    //      be referenced in a single class (now double-implemented)
+    private static String groupDigits(String sValue) {
+        long lValue;
+        try {
+            if (sValue.endsWith(".0")) { sValue = sValue.substring(0, sValue.length() - 2); } // for Connects per hour, why float ?
+            lValue = Long.parseLong(sValue);
+        } catch (Exception e) {lValue = 0;}
+        if (lValue == 0) { return "-"; }
+        return groupDigits(lValue);
+    }
+    
+    private static String groupDigits(long Number) {
+        final String s = Long.toString(Number);
+        String t = "";
+        for (int i = 0; i < s.length(); i++) t = s.charAt(s.length() - i - 1) + (((i % 3) == 0) ? "." : "") + t;
+        return t.substring(0, t.length() - 1);
     }
 
 }

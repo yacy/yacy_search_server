@@ -142,8 +142,8 @@ public class Network {
                 prop.put("table_my-version", seed.get(yacySeed.VERSION, "-"));
                 prop.put("table_my-utc", seed.get(yacySeed.UTC, "-"));
                 prop.put("table_my-uptime", serverDate.intervalToString(60000 * Long.parseLong(seed.get(yacySeed.UPTIME, ""))));
-                prop.put("table_my-links", groupDigits(Long.toString(links)));
-                prop.put("table_my-words", groupDigits(Long.toString(words)));
+                prop.put("table_my-links", groupDigits(links));
+                prop.put("table_my-words", groupDigits(words));
                 prop.put("table_my-sI", groupDigits(seed.get(yacySeed.INDEX_OUT, "0")));
                 prop.put("table_my-sU", groupDigits(seed.get(yacySeed.URL_OUT, "0")));
                 prop.put("table_my-rI", groupDigits(seed.get(yacySeed.INDEX_IN, "0")));
@@ -523,10 +523,7 @@ public class Network {
             lValue = Long.parseLong(sValue);
         } catch (Exception e) {lValue = 0;}
         if (lValue == 0) { return "-"; }
-        sValue = Long.toString(lValue);
-        String rValue = "";
-        for (int i = 0; i < sValue.length(); i++) { rValue = sValue.charAt(sValue.length() - i - 1) + (((i % 3) == 0) ? "." : "") + rValue; }
-        return rValue.substring(0, rValue.length() - 1);
+        return groupDigits(lValue);
     }
 
     private static String groupDigits(long Number) {
