@@ -63,6 +63,7 @@ public final class httpdRobotsTxtConfig {
     public static final String LOCKED = "locked";
     public static final String DIRS = "dirs";
     public static final String NETWORK = "network";
+    public static final String PROFILE = "profile";
     public static final String ALL = "all";
     
     private boolean allDisallowed = false;
@@ -77,6 +78,7 @@ public final class httpdRobotsTxtConfig {
     private boolean networkDisallowed = false;
     private boolean surftipsDisallowed = false;
     private boolean bookmarksDisallowed = false;
+    private boolean profileDisallowed = true;
     
     public httpdRobotsTxtConfig() {  }
     
@@ -95,6 +97,7 @@ public final class httpdRobotsTxtConfig {
             if (active[i].equals(NETWORK)) { this.networkDisallowed = true; continue; }
             if (active[i].equals(LOCKED)) { this.lockedDisallowed = true; continue; }
             if (active[i].equals(DIRS)) { this.dirsDisallowed = true; continue; }
+            if (active[i].equals(PROFILE)) { this.profileDisallowed = true; continue; }
             if (active[i].equals(ALL)) { this.allDisallowed = true; continue; }
         }
     }
@@ -119,6 +122,7 @@ public final class httpdRobotsTxtConfig {
         if (this.statusDisallowed) sb.append(STATUS).append(",");
         if (this.surftipsDisallowed) sb.append(SURFTIPS).append(",");
         if (this.wikiDisallowed) sb.append(WIKI).append(",");
+        if (this.profileDisallowed) sb.append(PROFILE).append(",");
         return sb.toString();
     }
     
@@ -216,5 +220,13 @@ public final class httpdRobotsTxtConfig {
 
     public void setWikiDisallowed(boolean wikiDisallowed) {
         this.wikiDisallowed = wikiDisallowed;
+    }
+    
+    public boolean isProfileDisallowed() {
+        return profileDisallowed || this.allDisallowed;
+    }
+    
+    public void setProfileDisallowed(boolean profileDisallowed) {
+        this.profileDisallowed = profileDisallowed;
     }
 }

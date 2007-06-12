@@ -51,6 +51,12 @@ Disallow: /share#(/fileshare)#
 # surftips
 Disallow: /Surftips.html#(/surftips)#
 
+#(profile)#::
+# view profile
+Disallow: /ViewProfile.html
+Disallow: /ViewProfile.vcf
+Disallow: /ViewProfile.xml#(/profile)#
+
 ::
 # all
 Disallow: /

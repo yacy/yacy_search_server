@@ -28,6 +28,7 @@ public class robots {
             if (rbc.isStatusDisallowed()) prop.put(httpdRobotsTxtConfig.ALL + "_" + httpdRobotsTxtConfig.STATUS, 1);
             if (rbc.isSurftipsDisallowed()) prop.put(httpdRobotsTxtConfig.ALL + "_" + httpdRobotsTxtConfig.SURFTIPS, 1);
             if (rbc.isWikiDisallowed()) prop.put(httpdRobotsTxtConfig.ALL + "_" + httpdRobotsTxtConfig.WIKI, 1);
+            if (rbc.isProfileDisallowed()) prop.put(httpdRobotsTxtConfig.ALL + "_" + httpdRobotsTxtConfig.PROFILE, 1);
             
             if (rbc.isLockedDisallowed() || rbc.isDirsDisallowed()) {
                 final ArrayList[] p = getFiles(env.getConfig(plasmaSwitchboard.HTROOT_PATH, plasmaSwitchboard.HTROOT_PATH_DEFAULT));
@@ -60,8 +61,9 @@ public class robots {
             if (file.isDirectory()) {
                 htrootDirs.add(htroots[i]);
             } else if (
-                    (dot = htroots[i].lastIndexOf('.')) < 2 ||
-                    htroots[i].charAt(dot - 2) == '_' && htroots[i].charAt(dot - 1) == 'p'
+                    ((dot = htroots[i].lastIndexOf('.')) < 2 ||
+                    htroots[i].charAt(dot - 2) == '_' && htroots[i].charAt(dot - 1) == 'p') &&
+                    !(htroots[i].endsWith("java") || htroots[i].endsWith("class"))
             ) {
                 htrootFiles.add(htroots[i]);
             }

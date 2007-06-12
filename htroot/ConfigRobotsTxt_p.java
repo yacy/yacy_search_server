@@ -78,6 +78,7 @@ public class ConfigRobotsTxt_p {
                 rbc.setStatusDisallowed(post.containsKey(httpdRobotsTxtConfig.STATUS));
                 rbc.setSurftipsDisallowed(post.containsKey(httpdRobotsTxtConfig.SURFTIPS));
                 rbc.setWikiDisallowed(post.containsKey(httpdRobotsTxtConfig.WIKI));
+                rbc.setProfileDisallowed(post.containsKey(httpdRobotsTxtConfig.PROFILE));
                 env.setConfig(plasmaSwitchboard.ROBOTS_TXT, rbc.toString());
             }
         }
@@ -94,6 +95,7 @@ public class ConfigRobotsTxt_p {
         prop.put(httpdRobotsTxtConfig.STATUS + ".checked", (rbc.isStatusDisallowed()) ? 1 : 0);
         prop.put(httpdRobotsTxtConfig.SURFTIPS + ".checked", (rbc.isSurftipsDisallowed()) ? 1 : 0);
         prop.put(httpdRobotsTxtConfig.WIKI + ".checked", (rbc.isWikiDisallowed()) ? 1 : 0);
+        prop.put(httpdRobotsTxtConfig.PROFILE + ".checked", (rbc.isProfileDisallowed()) ? 1 : 0);
         return prop;
     }
 }
