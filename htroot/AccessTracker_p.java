@@ -65,8 +65,9 @@ public class AccessTracker_p {
                 host = (String) i.next();
                 access = switchboard.accessTrack(host);
                 
-                for (int j = access.size() - 1; j >= 0; j--) {
+                trackl: for (int j = access.size() - 1; j >= 0; j--) {
                     track = (serverTrack) access.get(j);
+                    if (track == null) continue trackl; 
                     prop.put("page_list_" + entCount + "_host", host);
                     prop.put("page_list_" + entCount + "_date", yacyCore.universalDateShortString(new Date(track.time)));
                     prop.put("page_list_" + entCount + "_path", track.path);
