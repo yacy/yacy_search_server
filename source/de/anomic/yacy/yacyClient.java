@@ -157,12 +157,17 @@ public final class yacyClient {
         yacySeed otherPeer = null;
         float otherPeerVersion = 0;
         if (otherHash != null && otherHash.length() > 0) {
-            otherPeer = yacySeed.genRemoteSeed((String) result.get("seed0"), key, true);
-            if (otherPeer == null || !otherPeer.hash.equals(otherHash)) {
-                yacyCore.log.logFine("yacyClient.publishMySeed: consistency error: other peer '" + ((otherPeer==null)?"unknown":otherPeer.getName()) + "' wrong");
-                return -1; // no success
+        	String seed = (String) result.get("seed0");
+        	if (seed.length() > yacySeed.maxsize) {
+            	yacyCore.log.logInfo("hello/client 0: rejected contacting seed; too large (" + seed.length() + " > " + yacySeed.maxsize + ")");
+            } else {
+            	otherPeer = yacySeed.genRemoteSeed(seed, key, true);
+            	if (otherPeer == null || !otherPeer.hash.equals(otherHash)) {
+            		yacyCore.log.logFine("yacyClient.publishMySeed: consistency error: other peer '" + ((otherPeer==null)?"unknown":otherPeer.getName()) + "' wrong");
+            		return -1; // no success
+            	}
+            	otherPeerVersion = otherPeer.getVersion();
             }
-            otherPeerVersion = otherPeer.getVersion();
         }
 
         // set my own seed according to new information
@@ -239,7 +244,11 @@ public final class yacyClient {
         while ((seedStr = (String) result.get("seed" + i++)) != null) {
             // integrate new seed into own database
             // the first seed, "seed0" is the seed of the responding peer
-            if (yacyCore.peerActions.peerArrival(yacySeed.genRemoteSeed(seedStr, key, true), (i == 1))) count++;
+        	if (seedStr.length() > yacySeed.maxsize) {
+            	yacyCore.log.logInfo("hello/client: rejected contacting seed; too large (" + seedStr.length() + " > " + yacySeed.maxsize + ")");
+            } else {
+            	if (yacyCore.peerActions.peerArrival(yacySeed.genRemoteSeed(seedStr, key, true), (i == 1))) count++;
+            }
         }
         return count;
     }

@@ -79,6 +79,10 @@ public final class hello {
         int  count = 0;
         try {count = (countStr == null) ? 0 : Integer.parseInt(countStr);} catch (NumberFormatException e) {count = 0;}
 //      final Date remoteTime = yacyCore.parseUniversalDate((String) post.get(MYTIME)); // read remote time
+        if (seed.length() > yacySeed.maxsize) {
+        	yacyCore.log.logInfo("hello/server: rejected contacting seed; too large (" + seed.length() + " > " + yacySeed.maxsize + ")");
+        	return null;
+        }
         final yacySeed remoteSeed = yacySeed.genRemoteSeed(seed, key, false);
 
 //      System.out.println("YACYHELLO: REMOTESEED=" + ((remoteSeed == null) ? "NULL" : remoteSeed.toString()));
