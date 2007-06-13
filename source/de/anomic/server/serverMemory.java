@@ -35,16 +35,21 @@ public class serverMemory {
     public static boolean vm14 = System.getProperty("java.vm.version").startsWith("1.4");
     public static final long max = (vm14) ? computedMaxMemory() : Runtime.getRuntime().maxMemory() ; // patch for maxMemory bug in Java 1.4.2
     private static final Runtime runtime = Runtime.getRuntime();
+    private static final serverLog log = new serverLog("MEMORY");
     
     private static final long[] gcs = new long[5];
     private static int gcs_pos = 0;
     
     /** @return the amount of freed bytes by a forced GC this method performes */
-    private static long runGC() {
-        long memnow = available();
+    private static long runGC(final boolean count) {
+        final long memnow = available();
         System.gc();
-        if (++gcs_pos >= gcs.length) gcs_pos = 0;
-        return (gcs[gcs_pos] = available() - memnow);
+        final long freed = available() - memnow;
+        if (count) {
+            gcs[gcs_pos] = freed;
+            gcs_pos = (gcs_pos + 1) % gcs.length;
+        }
+        return freed;
     }
     
     /**
@@ -113,20 +118,27 @@ public class serverMemory {
      * @param specifies whether a GC should be run even in case former GCs didn't provide enough memory
      * @return whether enough memory could be freed (or is free) or not
      */
-    public static boolean request(long size, boolean force) {
-        long avail = available();
-        if (avail >= size) return true;
-        long avg = getAverageGCFree();
-        if (force || avg == 0 || avg + avail >= size) {
-            long freed = runGC();
+    public static boolean request(final long size, final boolean force) {
+        long avail;
+        if (log.isFine()) {
+            String t = new Throwable("Stack trace").getStackTrace()[1].toString();
             avail = available();
-            serverLog.logInfo("MEMORY", "performed explicit GC, freed " + (freed / 1024)
-                    + " KB (requested/available/average: " + (size / 1024) + " / "
-                    + (avail / 1024) + "/" + (avg / 1024) + " KB)");
+            log.logFine(t + " requested " + (size >>> 10) + " KB, got " + (avail >>> 10) + " KB");
+        } else {
+            avail = available();
+        }
+        if (avail >= size) return true;
+        final long avg = getAverageGCFree();
+        if (force || avg == 0 || avg + avail >= size) {
+            final long freed = runGC(!force);
+            avail = available();
+            log.logInfo("performed " + ((force) ? "explicit" : "necessary") + " GC, freed " + (freed >>> 10)
+                    + " KB (requested/available/average: " + (size >>> 10) + " / "
+                    + (avail >>> 10) + " / " + (avg >>> 10) + " KB)");
             return avail >= size;
         } else {
-            serverLog.logInfo("MEMORY", "former GCs indicate to not be able to free enough memory (requested/available/average: "
-                    + (size / 1024) + "/" + (avail / 1024) + "/" + (avg / 1024) + " KB)");
+            log.logInfo("former GCs indicate to not be able to free enough memory (requested/available/average: "
+                    + (size >>> 10) + " / " + (avail >>> 10) + " / " + (avg >>> 10) + " KB)");
             return false;
         }
     }
