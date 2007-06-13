@@ -156,8 +156,10 @@ public final class yacyClient {
         // check consistency with expectation
         yacySeed otherPeer = null;
         float otherPeerVersion = 0;
-        if (otherHash != null && otherHash.length() > 0) {
-        	String seed = (String) result.get("seed0");
+        String seed;
+        if ((otherHash != null) &&
+            (otherHash.length() > 0) &&
+            ((seed = (String) result.get("seed0")) != null)) {
         	if (seed.length() > yacySeed.maxsize) {
             	yacyCore.log.logInfo("hello/client 0: rejected contacting seed; too large (" + seed.length() + " > " + yacySeed.maxsize + ")");
             } else {
