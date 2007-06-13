@@ -1,7 +1,7 @@
 <div class="SubMenu">
-  <h3>Blacklist Menu</h3>
+  <h3>Filter &amp; Blacklists</h3>
   <ul class="SubMenu">
-    <li><a href="/Blacklist_p.html" class="MenuItemLink lock">Manage Blacklists</a></li>
+    <li><a href="/Blacklist_p.html" class="MenuItemLink lock">Blacklist Administration</a></li>
     <li><a href="/BlacklistCleaner_p.html" class="MenuItemLink lock">Blacklist Cleaner</a></li>
   </ul>
 </div>

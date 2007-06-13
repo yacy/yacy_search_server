@@ -1,7 +1,7 @@
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml">
   <head>
-    <title>YaCy '#[clientname]#': News</title>
+    <title>YaCy '#[clientname]#': News Monitor</title>
     #(table)#
     <link rel="alternate" type="application/rss+xml" title="Incoming News" href="News.rss?page=1" />
     <link rel="alternate" type="application/rss+xml" title="Processed News" href="News.rss?page=2" />
@@ -15,9 +15,9 @@
   <body id="News">
     #%env/templates/header.template%#
     <div class="SubMenu">
-      <h3>News Menu</h3>
+      <h3>News Monitor</h3>
       <ul class="SubMenu">
-        <li><a href="/News.html" class="MenuItemLink">News&nbsp;Overview</a></li>
+        <li><a href="/News.html" class="MenuItemLink">Overview</a></li>
         <li><a href="/News.html?page=1" class="MenuItemLink">Incoming&nbsp;News</a></li>
         <li><a href="/News.html?page=2" class="MenuItemLink">Processed&nbsp;News</a></li>
         <li><a href="/News.html?page=3" class="MenuItemLink">Outgoing&nbsp;News</a></li>
@@ -25,7 +25,7 @@
       </ul>
     </div>
     #(page)#
-    <h2>News Overview</h2>
+    <h2>Overview</h2>
     ::
     <h2>Incoming&nbsp;News</h2>
     ::

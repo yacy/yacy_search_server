@@ -1,26 +1,26 @@
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml">
   <head>
-    <title>YaCy '#[clientname]#': Index Monitor</title>
+    <title>YaCy '#[clientname]#': Crawl Results</title>
     #%env/templates/metas.template%#
   </head>
-  <body id="IndexMonitor">
+  <body id="CrawlResults">
     #%env/templates/header.template%#
     <div class="SubMenu">
-      <h3>Index Monitor Menu</h3>
+      <h3>Crawl Results</h3>
       <ul class="SubMenu">
-        <li><a href="/IndexMonitor.html" class="MenuItemLink">Index Monitor Overview</a></li>
-        <li><a href="/IndexMonitor.html?process=1" class="MenuItemLink lock">(1) Receipts</a></li>
-        <li><a href="/IndexMonitor.html?process=2" class="MenuItemLink lock">(2) Queries</a></li>
-        <li><a href="/IndexMonitor.html?process=3" class="MenuItemLink lock">(3) DHT Transfer</a></li>
-        <li><a href="/IndexMonitor.html?process=4" class="MenuItemLink lock">(4) Proxy Use</a></li>
-        <li><a href="/IndexMonitor.html?process=5" class="MenuItemLink lock">(5) Local Crawling</a></li>
-        <li><a href="/IndexMonitor.html?process=6" class="MenuItemLink">(6) Global Crawling</a></li>
+        <li><a href="/CrawlResults.html" class="MenuItemLink">Overview</a></li>
+        <li><a href="/CrawlResults.html?process=1" class="MenuItemLink lock">(1) Receipts</a></li>
+        <li><a href="/CrawlResults.html?process=2" class="MenuItemLink lock">(2) Queries</a></li>
+        <li><a href="/CrawlResults.html?process=3" class="MenuItemLink lock">(3) DHT Transfer</a></li>
+        <li><a href="/CrawlResults.html?process=4" class="MenuItemLink lock">(4) Proxy Use</a></li>
+        <li><a href="/CrawlResults.html?process=5" class="MenuItemLink lock">(5) Local Crawling</a></li>
+        <li><a href="/CrawlResults.html?process=6" class="MenuItemLink">(6) Global Crawling</a></li>
       </ul>
     </div>
     
     #(process)#
-    <h2>Indexing Queues Monitor Overview</h2>
+    <h2>Crawl Results Overview</h2>
     <p>These are monitoring pages for the different indexing queues.</p>
     <p>YaCy knows 5 different ways to acquire web indexes. The details of these processes (1-5) are described within the submenu's listed
     above which also will show you a table with indexing results so far. The information in these tables is considered as private,
@@ -33,7 +33,7 @@
     Some processes occur double to document the complex index migration structure.
     </p>
     ::
-    <h2>(1) Index Monitor of Remote Crawl Receipts</h2>
+    <h2>(1) Results of Remote Crawl Receipts</h2>
     <p>This is the list of web pages that this peer initiated to crawl,
     but had been crawled by <em>other</em> peers.
     This is the 'mirror'-case of process (6).
@@ -42,18 +42,18 @@
     'Do Remote Indexing'-flag. Every page that a remote peer indexes upon this peer's request
     is reported back and can be monitored here.</p>
     ::
-    <h2>(2) Index Monitor for Result of Search Queries</h2>
+    <h2>(2) Results for Result of Search Queries</h2>
     <p>This index transfer was initiated by your peer by doing a search query.
     The index was crawled and contributed by other peers.</p>
     <p><em>Use Case:</em> This list fills up if you do a search query on the 'Search Page'</p>
     ::
-    <h2>(3) Index Monitor for Index Transfer.</h2>
+    <h2>(3) Results for Index Transfer</h2>
     <p>The url fetch was initiated and executed by other peers.
     These links here have been transmitted to you because your peer is the most appropriate for storage according to
     the logic of the Global Distributed Hash Table.</p>
     <p><em>Use Case:</em> This list may fill if you check the 'Index Receive'-flag on the 'Index Control' page</p>
     ::
-    <h2>(4) Index Monitor for Proxy Indexing</h2>
+    <h2>(4) Results for Proxy Indexing</h2>
     <p>These web pages had been indexed as result of your proxy usage.
     <strong>No personal or protected page is indexed</strong>;
     such pages are detected by Cookie-Use or POST-Parameters (either in URL or as HTTP protocol)
@@ -62,11 +62,11 @@
     Set the proxy settings of your browser to the same port as given
     on the 'Settings'-page in the 'Proxy and Administration Port' field.</p>
     ::
-    <h2>(5) Index Monitor for Local Crawling.</h2>
+    <h2>(5) Results for Local Crawling</h2>
     <p>These web pages had been crawled by your own crawl task.</p>
     <p><em>Use Case:</em> start a crawl by setting a crawl start point on the 'Index Create' page.</p>
     ::
-    <h2>(6) Index Monitor for Global Crawling</h2>
+    <h2>(6) Results for Global Crawling</h2>
     <p>These pages had been indexed by your peer, but the crawl was initiated by a remote peer.
     This is the 'mirror'-case of process (1).</p>
     <p><em>Use Case:</em> This list may fill if you check the 'Accept remote crawling requests'-flag on the 'Index Crate' page</p>

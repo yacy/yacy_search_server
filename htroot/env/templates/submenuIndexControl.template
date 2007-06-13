@@ -1,7 +1,7 @@
 <div class="SubMenu">
-  <h3>Index Control Menu</h3>
+  <h3>Index Administration</h3>
   <ul class="SubMenu">
-    <li><a href="/IndexControl_p.html" class="MenuItemLink lock">Index Administration</a></li>
+    <li><a href="/IndexControl_p.html" class="MenuItemLink lock">Index Monitoring/Deletion</a></li>
     <li><a href="/IndexImport_p.html" class="MenuItemLink lock">Index Import</a></li>
     <li><a href="/IndexTransfer_p.html" class="MenuItemLink lock">Index Transfer</a></li>
     <li><a href="/IndexCleaner_p.html" class="MenuItemLink lock">Index Cleaner</a></li>

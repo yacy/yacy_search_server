@@ -1,13 +1,14 @@
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml">
   <head>
-    <title>YaCy '#[clientname]#': Connection Tracking</title>
+    <title>YaCy '#[clientname]#': Server Connection Tracking</title>
     #%env/templates/metas.template%#
     <meta http-equiv="REFRESH" content="3" />
   </head>
   <body id="Connections">
     #%env/templates/header.template%#
-    <h2>Connection Tracking</h2>
+    #%env/templates/submenuAccessTracker.template%#
+    <h2>Server Connection Tracking</h2>
     <h3>Incoming Connections</h3>
     <p>Showing #[numActiveRunning]# active, #[numActivePending]# pending connections from a max. of #[numMax]# allowed incoming connections.</p>
     <table border="0" cellpadding="2" cellspacing="1">

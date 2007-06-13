@@ -1,5 +1,5 @@
 <div class="SubMenu">
-  <h3>Index Creation Menu</h3>
+  <h3>Start a Web Crawl</h3>
     <ul class="SubMenu">
       <li><a href="/CrawlStartSimple_p.html" class="MenuItemLink lock">Crawl Start (easy)</a></li>
       <li><a href="/CrawlStartExpert_p.html" class="MenuItemLink lock">Crawl Start (expert)</a></li>

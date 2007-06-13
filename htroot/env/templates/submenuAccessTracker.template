@@ -1,0 +1,26 @@
+<div class="SubMenu">
+    <h3>Access Tracker</h3>
+    <div class="SubMenugroup">
+      <h3>Server Access</h3>
+      <ul class="SubMenu">
+        <li><a href="/AccessTracker_p.html?page=0" class="MenuItemLink lock">Overview</a></li>
+        <li><a href="/AccessTracker_p.html?page=1" class="MenuItemLink lock">Details</a></li>
+        <li><a href="/Connections_p.html" class="MenuItemLink lock">Connections</a></li>
+      </ul>
+    </div>
+
+    <div class="SubMenugroup">
+      <h3>Local Search</h3>
+      <ul class="SubMenu">
+        <li><a href="/AccessTracker_p.html?page=2" class="MenuItemLink lock">Log</a></li>
+        <li><a href="/AccessTracker_p.html?page=3" class="MenuItemLink lock">Host Tracker</a></li>
+      </ul>
+    </div>
+    <div class="SubMenugroup">
+      <h3>Remote&nbsp;Search</h3>
+      <ul class="SubMenu">
+        <li><a href="/AccessTracker_p.html?page=4" class="MenuItemLink lock">Log</a></li>
+        <li><a href="/AccessTracker_p.html?page=5" class="MenuItemLink lock">Host Tracker</a></li>
+      </ul>
+    </div>
+</div>

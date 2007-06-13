@@ -1,14 +1,23 @@
 <?xml version="1.0"?>
 <AccessTracker>
-#(page)#<!-- 0: access tracker -->
-      <localAccessTracker>#{list}#
+#(page)#<!-- 0: server access overview -->
+      <serverAccessOverview>#{list}#
+      <entry>
+        <host>#[host]#</host>
+        <countSecond>#[countSecond]#</countSecond>
+        <countMinute>#[countMinute]#</countMinute>
+        <count10Minutes>#[count10Minutes]#</count10Minutes>
+        <countHour>#[countHour]#</countHour>
+      </entry>
+	  #{/list}#</serverAccessOverview>
+	  ::<!-- 1: server access details -->
+	  <serverAccessDetails>#{list}#
       <entry>
         <host>#[host]#</host>
         <date>#[date]#</date>
         <path>#[path]#</path>
       </entry>
-	  #{/list}#</localAccessTracker>
-	  ::<!-- 1: reserve -->
+	  #{/list}#</serverAccessDetails>
 	  ::<!-- 2: Search Statistics: Local Searches -->
 	  <localSearchLog>#{list}#
       <entry>
@@ -24,7 +33,7 @@
 	  #{/list}#</localSearchLog>
 	  
 	  ::<!-- 3: Search Statistics: Local Search Tracker -->
-	  <localSearchTracker>#{list}#
+	  <localSearchHostTracker>#{list}#
 	  <entry>
         <host>#[host]#</host>
         <count>#[count]#</count>
@@ -33,7 +42,7 @@
         	<date timestamp="#[timestamp]#">#[date]#</date>
         #{/dates}#</dates>
 	  </entry>
-	  #{/list}#</localSearchTracker>
+	  #{/list}#</localSearchHostTracker>
 	  
 	  ::<!-- 4: Search Statistics: Remote Searches -->
 	  <remoteSearchLog>#{list}#
@@ -50,7 +59,7 @@
 	  #{/list}#</remoteSearchLog>
 	  
 	  ::<!-- 5: Search Statistics: Remote Search Tracker -->
-	  <remoteSearchTracker>#{list}#
+	  <remoteSearchHostTracker>#{list}#
 	  <entry>
         <host>#[host]#</host>
         <count>#[count]#</count>
@@ -59,7 +68,7 @@
         	<date timestamp="#[timestamp]#">#[date]#</date>
         #{/dates}#</dates>
 	  </entry>
-	  #{/list}#</remoteSearchTracker>
+	  #{/list}#</remoteSearchHostTracker>
 
 #(/page)#
 </AccessTracker>

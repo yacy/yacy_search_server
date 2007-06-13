@@ -6,17 +6,7 @@
   </head>
   <body id="AccessTracker">
     #%env/templates/header.template%#
-	<div class="SubMenu">
-    <h3>Access Tracker Menu</h3>
-    <ul class="SubMenu">
-      <li><a href="/AccessTracker_p.html?page=0" class="MenuItemLink lock">Server&nbsp;Access&nbsp;Overview</a></li>
-      <li><a href="/AccessTracker_p.html?page=1" class="MenuItemLink lock">Server&nbsp;Access&nbsp;Details</a></li>
-      <li><a href="/AccessTracker_p.html?page=2" class="MenuItemLink lock">Local&nbsp;Search&nbsp;Log</a></li>
-      <li><a href="/AccessTracker_p.html?page=3" class="MenuItemLink lock">Local&nbsp;Search&nbsp;Host&nbsp;Tracker</a></li>
-      <li><a href="/AccessTracker_p.html?page=4" class="MenuItemLink lock">Remote&nbsp;Search&nbsp;Log</a></li>
-      <li><a href="/AccessTracker_p.html?page=5" class="MenuItemLink lock">Remote&nbsp;Search&nbsp;Host&nbsp;Tracker</a></li>
-    </ul>
-    </div>
+    #%env/templates/submenuAccessTracker.template%#
     #(page)#
     <h2>Server Access Overview</h2>
     <p>This is a list of requests to the local http server within the last hour.</p>
@@ -61,7 +51,7 @@
       #{/list}#
     </table>
     ::
-    <h2>Local Searches</h2>
+    <h2>Local Search Log</h2>
     <p>This is a list of searches that had been requested from this' peer search interface</p>
     <p>Showing #[num]# entries from a total of #[total]# requests.</p>
     <table border="0" cellpadding="2" cellspacing="1">
@@ -89,7 +79,7 @@
       #{/list}#
     </table>
     ::
-    <h2>Local Search Tracker</h2>
+    <h2>Local Search Host Tracker</h2>
     <p>This is a list of searches that had been requested from this' peer search interface</p>
     <p>Showing #[num]# entries from a total of #[total]# requests.</p>
     <table border="0" cellpadding="2" cellspacing="1">
@@ -109,7 +99,7 @@
       #{/list}#
     </table>
     ::
-    <h2>Remote Searches</h2>
+    <h2>Remote Search Log</h2>
     <p>This is a list of searches that had been requested from remote peer search interface</p>
     <p>Showing #[num]# entries from a total of #[total]# requests.</p>
     <table border="0" cellpadding="2" cellspacing="1">
@@ -137,7 +127,7 @@
       #{/list}#
     </table>
     ::
-    <h2>Remote Search Tracker</h2>
+    <h2>Remote Search Host Tracker</h2>
     <p>This is a list of searches that had been requested from remote peer search interface</p>
     <p>Showing #[num]# entries from a total of #[total]# requests.</p>
     <table border="0" cellpadding="2" cellspacing="1">
