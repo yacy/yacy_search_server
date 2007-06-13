@@ -43,7 +43,6 @@ package de.anomic.server;
 import java.io.File;
 import java.io.IOException;
 import java.net.InetAddress;
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
@@ -151,40 +150,37 @@ public abstract class serverAbstractSwitch implements serverSwitch {
     
     public void track(String host, String accessPath) {
         // learn that a specific host has accessed a specific path
-        ArrayList access = (ArrayList) accessTracker.get(host);
-        if (access == null) access = new ArrayList();
-        access.add(new serverTrack(accessPath));
+        if (accessPath == null) accessPath="NULL";
+        TreeMap access = (TreeMap) accessTracker.get(host);
+        if (access == null) access = new TreeMap();
+        access.put(new Long(System.currentTimeMillis()), accessPath);
 
-        // clear too old entries
-        clearTooOldAccess(access);
-        
         // write back to tracker
-        accessTracker.put(host, access);
+        accessTracker.put(host, clearTooOldAccess(access));
     }
     
-    public ArrayList accessTrack(String host) {
+    public TreeMap accessTrack(String host) {
         // returns mapping from Long(accesstime) to path
         
-        ArrayList access = (ArrayList) accessTracker.get(host);
+        TreeMap access = (TreeMap) accessTracker.get(host);
         if (access == null) return null;
 
         // clear too old entries
-        if (clearTooOldAccess(access)) {
+        int oldsize = access.size();
+        if ((access = clearTooOldAccess(access)).size() != oldsize) {
             // write back to tracker
-            accessTracker.put(host, access);
+            if (access.size() == 0) {
+                accessTracker.remove(host);
+            } else {
+                accessTracker.put(host, access);
+            }
         }
         
         return access;
     }
     
-    private boolean clearTooOldAccess(ArrayList access) {
-        boolean changed = false;
-        while ((access.size() > 0) &&
-               (((serverTrack) access.get(0)).time < (System.currentTimeMillis() - maxTrackingTime))) {
-            access.remove(0);
-            changed = true;
-        }
-        return changed;
+    private TreeMap clearTooOldAccess(TreeMap access) {
+        return new TreeMap(access.tailMap(new Long(System.currentTimeMillis() - maxTrackingTime)));
     }
     
     public Iterator accessHosts() {

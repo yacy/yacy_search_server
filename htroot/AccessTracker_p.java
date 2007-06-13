@@ -30,6 +30,7 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
 import java.util.Set;
+import java.util.TreeMap;
 import java.util.TreeSet;
 
 import de.anomic.http.httpHeader;
@@ -38,12 +39,11 @@ import de.anomic.plasma.plasmaSearchQuery;
 import de.anomic.plasma.plasmaSwitchboard;
 import de.anomic.server.serverObjects;
 import de.anomic.server.serverSwitch;
-import de.anomic.server.serverTrack;
 import de.anomic.yacy.yacyCore;
 import de.anomic.yacy.yacySeed;
 
 public class AccessTracker_p {
- 
+    
     public static serverObjects respond(httpHeader header, serverObjects post, serverSwitch sb) {
         plasmaSwitchboard switchboard = (plasmaSwitchboard) sb;
      
@@ -58,20 +58,51 @@ public class AccessTracker_p {
         if (page == 0) {
             Iterator i = switchboard.accessHosts();
             String host;
-            ArrayList access;
+            TreeMap access;
             int entCount = 0;
-            serverTrack track;
             while ((entCount < maxCount) && (i.hasNext())) {
                 host = (String) i.next();
                 access = switchboard.accessTrack(host);
-                
-                trackl: for (int j = access.size() - 1; j >= 0; j--) {
-                    track = (serverTrack) access.get(j);
-                    if (track == null) continue trackl; 
-                    prop.put("page_list_" + entCount + "_host", host);
-                    prop.put("page_list_" + entCount + "_date", yacyCore.universalDateShortString(new Date(track.time)));
-                    prop.put("page_list_" + entCount + "_path", track.path);
-                    entCount++;
+                prop.put("page_list_" + entCount + "_host", host);
+                prop.put("page_list_" + entCount + "_countSecond", access.tailMap(new Long(System.currentTimeMillis() - 1000)).size());
+                prop.put("page_list_" + entCount + "_countMinute", access.tailMap(new Long(System.currentTimeMillis() - 1000 * 60)).size());
+                prop.put("page_list_" + entCount + "_count10Minutes", access.tailMap(new Long(System.currentTimeMillis() - 1000 * 60 * 10)).size());
+                prop.put("page_list_" + entCount + "_countHour", access.tailMap(new Long(System.currentTimeMillis() - 1000 * 60 * 60)).size());
+                entCount++;
+            }
+            prop.put("page_list", entCount);
+            prop.put("page_num", entCount);
+        }
+        if (page == 1) {
+            String host = post.get("host", "");
+            int entCount = 0;
+            TreeMap access;
+            Map.Entry entry;
+            if (host.length() > 0) {
+                access = switchboard.accessTrack(host);
+                if (access != null) {
+                    Iterator ii = access.entrySet().iterator();
+                    while (ii.hasNext()) {
+                        entry = (Map.Entry) ii.next();
+                        prop.put("page_list_" + entCount + "_host", host);
+                        prop.put("page_list_" + entCount + "_date", yacyCore.universalDateShortString(new Date(((Long) entry.getKey()).longValue())));
+                        prop.put("page_list_" + entCount + "_path", (String) entry.getValue());
+                        entCount++;
+                    }
+                }
+            } else {
+                Iterator i = switchboard.accessHosts();
+                while ((entCount < maxCount) && (i.hasNext())) {
+                    host = (String) i.next();
+                    access = switchboard.accessTrack(host);
+                    Iterator ii = access.entrySet().iterator();
+                    while (ii.hasNext()) {
+                        entry = (Map.Entry) ii.next();
+                        prop.put("page_list_" + entCount + "_host", host);
+                        prop.put("page_list_" + entCount + "_date", yacyCore.universalDateShortString(new Date(((Long) entry.getKey()).longValue())));
+                        prop.put("page_list_" + entCount + "_path", (String) entry.getValue());
+                        entCount++;
+                    }
                 }
             }
             prop.put("page_list", entCount);

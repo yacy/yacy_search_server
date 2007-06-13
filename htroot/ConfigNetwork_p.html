@@ -138,6 +138,15 @@
         </dd>
         -->
         <dt>
+          <label for="cluster.modePublicpeer">Public Peer</label>
+          <input type="radio" value="publicpeer" id="cluster.modePublicpeer" name="cluster.mode"
+                 #(publicpeerChecked)#::checked="checked" #(/publicpeerChecked)#/>
+        </dt>
+        <dd>
+          You are visible to other peers and contact them to distribute your presence.<br />
+          Your peer does not accept any outside index data, but responds on all remote search requests.
+        </dd>
+        <dt>
           <label for="cluster.modePubliccluster">Public Cluster</label>
           <input type="radio" value="publiccluster" id="cluster.modePubliccluster" name="cluster.mode"
                  #(publicclusterChecked)#::checked="checked" #(/publicclusterChecked)#/>
@@ -149,15 +158,6 @@
           List of .yacy or .yacyh - domains of the cluster: (comma-separated)<br />
           <input type="text" name="cluster.peers.yacydomain" value="#[cluster.peers.yacydomain]#" size="80" maxlength="800" /><br />
           #[cluster.peers.yacydomain.hashes]#
-        </dd>
-        <dt>
-          <label for="cluster.modePublicpeer">Public Peer</label>
-          <input type="radio" value="publicpeer" id="cluster.modePublicpeer" name="cluster.mode"
-                 #(publicpeerChecked)#::checked="checked" #(/publicpeerChecked)#/>
-        </dt>
-        <dd>
-          You are visible to other peers and contact them to distribute your presence.<br />
-          Your peer does not accept any outside index data, but responds on all remote search requests.
         </dd>
         <dt><label for="peertags">Peer Tags</label></dt>
         <dd>

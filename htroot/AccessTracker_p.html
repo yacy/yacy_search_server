@@ -9,7 +9,8 @@
 	<div class="SubMenu">
     <h3>Access Tracker Menu</h3>
     <ul class="SubMenu">
-      <li><a href="/AccessTracker_p.html?page=0" class="MenuItemLink lock">Server&nbsp;Access&nbsp;Tracker</a></li>
+      <li><a href="/AccessTracker_p.html?page=0" class="MenuItemLink lock">Server&nbsp;Access&nbsp;Overview</a></li>
+      <li><a href="/AccessTracker_p.html?page=1" class="MenuItemLink lock">Server&nbsp;Access&nbsp;Details</a></li>
       <li><a href="/AccessTracker_p.html?page=2" class="MenuItemLink lock">Local&nbsp;Search&nbsp;Log</a></li>
       <li><a href="/AccessTracker_p.html?page=3" class="MenuItemLink lock">Local&nbsp;Search&nbsp;Host&nbsp;Tracker</a></li>
       <li><a href="/AccessTracker_p.html?page=4" class="MenuItemLink lock">Remote&nbsp;Search&nbsp;Log</a></li>
@@ -17,7 +18,32 @@
     </ul>
     </div>
     #(page)#
-    <h2>Server Access Tracker</h2>
+    <h2>Server Access Overview</h2>
+    <p>This is a list of requests to the local http server within the last hour.</p>
+    <p>Showing #[num]# requests.</p>
+    <table border="0" cellpadding="2" cellspacing="1">
+      <tr class="TableHeader">
+        <td rowspan="2">Host</td>
+        <td colspan="4">Access Count During</td>
+      </tr>
+      <tr class="TableHeader">
+        <td>last Second</td>
+        <td>last Minute</td>
+        <td>last 10 Minutes</td>
+        <td>last Hour</td>
+      </tr>
+      #{list}#
+      <tr class="TableCell#(dark)#Light::Dark#(/dark)#">
+        <td><a href="AccessTracker_p.html?page=1&host=#[host]#">#[host]#</a></td>
+        <td>#[countSecond]#</td>
+        <td>#[countMinute]#</td>
+        <td>#[count10Minutes]#</td>
+        <td>#[countHour]#</td>
+      </tr>
+      #{/list}#
+    </table>
+    ::
+    <h2>Server Access Details</h2>
     <p>This is a list of requests to the local http server within the last hour.</p>
     <p>Showing #[num]# requests.</p>
     <table border="0" cellpadding="2" cellspacing="1">
@@ -34,7 +60,6 @@
       </tr>
       #{/list}#
     </table>
-    ::
     ::
     <h2>Local Searches</h2>
     <p>This is a list of searches that had been requested from this' peer search interface</p>
