@@ -94,8 +94,8 @@ public final class search {
         String abstracts = post.get("abstracts", "");  // a string of word hashes for abstracts that shall be generated, or 'auto' (for maxcount-word), or '' (for none)
 //      final String  fwdep  = post.get("fwdep", "");  // forward depth. if "0" then peer may NOT ask another peer for more results
 //      final String  fwden  = post.get("fwden", "");  // forward deny, a list of seed hashes. They may NOT be target of forward hopping
-        final long    duetime= post.getLong("duetime", 3000);
-        final int     count  = post.getInt("count", 10); // maximum number of wanted results
+        final long    duetime= Math.min(60000, post.getLong("duetime", 3000));
+        final int     count  = Math.min(100, post.getInt("count", 10)); // maximum number of wanted results
         final int     maxdist= post.getInt("maxdist", Integer.MAX_VALUE);
         final String  prefer = post.get("prefer", "");
         final String  contentdom = post.get("contentdom", "text");
