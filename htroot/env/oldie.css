@@ -1,0 +1,6 @@
+/* Fixes for IE 5 and lower */
+
+/* IE 5 and lower can't display favicons, so hide them */
+img.favicon {
+  display: none;
+}

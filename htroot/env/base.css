@@ -333,7 +333,7 @@ h2.yacy { /* The heading in index.html */
 
 div.welcome { /* The heading in Status.html */
   float:left;
-  margin:10px auto;
+  margin:10px 0;
   padding-top:130px;
   text-align:left;
   width:44%;
@@ -343,7 +343,7 @@ div.welcome { /* The heading in Status.html */
 div.sidebar { /* sidebars on the right side */
   float:left;
   width:28%;
-  margin:10px auto;
+  margin:10px 0;
   padding-top:10px;
   text-align:left;
 }

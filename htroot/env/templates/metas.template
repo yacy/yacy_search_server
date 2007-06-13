@@ -6,4 +6,13 @@
   <meta name="copyright" content="Michael Christen et al." />
   <link rel="stylesheet" type="text/css" media="all" href="/env/base.css" />
   <link rel="stylesheet" type="text/css" media="screen" href="/env/style.css" />
+  <!--[if lt IE 6]>
+   <link rel="stylesheet" type="text/css" media="screen" href="/env/oldie.css" />
+  <![endif]-->
+  <!--[if lte IE 6.0]>
+   <link rel="stylesheet" type="text/css" media="screen" href="/env/ie6.css" />
+  <![endif]-->
+  <!--[if lte IE 7.0]>
+   <link rel="stylesheet" type="text/css" media="screen" href="/env/ie7.css" />
+  <![endif]-->
 <!-- (C), Architecture and Realisation: Michael Peter Christen; Contact: mc <at> anomic.de -->

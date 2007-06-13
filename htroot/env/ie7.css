@@ -1,0 +1,6 @@
+/* Fixes for IE 7 and lower */
+
+/* A class for elements that should get layout because this fixes many things */
+.gainlayout {
+  height: 1%;
+}
