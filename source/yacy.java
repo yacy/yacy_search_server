@@ -255,11 +255,10 @@ public final class yacy {
             if (f.exists()) {                // another instance running? VM crash? User will have to care about this
                 serverLog.logSevere("STARTUP", "the file " + f + " exists, this usually means that another instance of YaCy is using this DATA-folder.");
                 serverLog.logSevere("STARTUP", "please make sure that DATA can be used exclusively by one YaCy. Quitting...");
-                System.exit(-1);
-            } else {
-                f.createNewFile();
-                f.deleteOnExit();
+                f.delete();
             }
+            f.createNewFile();
+            f.deleteOnExit();
 
             /*
                 // Testing if the yacy archive file were unzipped correctly.
