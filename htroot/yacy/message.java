@@ -125,11 +125,14 @@ public final class message {
             yacySeed otherSeed = yacySeed.genRemoteSeed(otherSeedString, key, true);
 
             String subject = crypt.simpleDecode(post.get("subject", ""), key); // message's subject
-            subject = subject.trim();
             String message = crypt.simpleDecode(post.get("message", ""), key); // message body
+            if (subject == null || message == null) {
+                prop.putASIS("response", "-1"); // don't accept empty messages
+                return prop;
+            }
             message = message.trim();
-            
-            if (subject.length() == 0 && message.length() == 0) {
+            subject = subject.trim();
+            if (subject.length() == 0 || message.length() == 0) {
                 prop.putASIS("response", "-1"); // don't accept empty messages
                 return prop;
             }
