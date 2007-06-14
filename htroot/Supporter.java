@@ -1,6 +1,6 @@
-// Surftips.java
-// (C) 2006 by Michael Peter Christen; mc@anomic.de, Frankfurt a. M., Germany
-// first published 2006 on http://www.anomic.de
+// Supporter.java
+// (C) 2007 by Michael Peter Christen; mc@anomic.de, Frankfurt a. M., Germany
+// first published 13.6.2007 on http://yacy.net
 //
 // This is a part of YaCy, a peer-to-peer based web search engine
 //
@@ -48,7 +48,7 @@ import de.anomic.yacy.yacyNewsPool;
 import de.anomic.yacy.yacyNewsRecord;
 import de.anomic.yacy.yacySeed;
 
-public class Surftips {
+public class Supporter {
 
     public static serverObjects respond(httpHeader header, serverObjects post, serverSwitch env) {
         final plasmaSwitchboard sb = (plasmaSwitchboard) env;
@@ -63,14 +63,6 @@ public class Surftips {
         // access control
         boolean publicPage = sb.getConfigBool("publicSurftips", true);
         boolean authorizedAccess = sb.verifyAuthentication(header, false);
-        if ((post != null) && (post.containsKey("publicPage"))) {
-            if (!authorizedAccess) {
-                prop.put("AUTHENTICATE", "admin log-in"); // force log-in
-                return prop;
-            }
-            publicPage = post.get("publicPage", "0").equals("1");
-            sb.setConfig("publicSurftips", publicPage);
-        }
         
         if ((publicPage) || (authorizedAccess)) {
         
@@ -105,7 +97,7 @@ public class Surftips {
                 yacyCore.newsPool.publishMyNews(new yacyNewsRecord(yacyNewsPool.CATEGORY_SURFTIPP_VOTE_ADD, map));
             }
         
-            // create surftips
+            // create Supporter
             HashMap negativeHashes = new HashMap(); // a mapping from an url hash to Integer (count of votes)
             HashMap positiveHashes = new HashMap(); // a mapping from an url hash to Integer (count of votes)
             accumulateVotes(negativeHashes, positiveHashes, yacyNewsPool.INCOMING_DB);
@@ -113,10 +105,10 @@ public class Surftips {
             //accumulateVotes(negativeHashes, positiveHashes, yacyNewsPool.PUBLISHED_DB);
             kelondroMScoreCluster ranking = new kelondroMScoreCluster(); // score cluster for url hashes
             kelondroRow rowdef = new kelondroRow("String url-255, String title-120, String description-120, String refid-" + (yacyCore.universalDateShortPattern.length() + 12), kelondroNaturalOrder.naturalOrder, 0);
-            HashMap surftips = new HashMap(); // a mapping from an url hash to a kelondroRow.Entry with display properties
-            accumulateSurftips(surftips, ranking, rowdef, negativeHashes, positiveHashes, yacyNewsPool.INCOMING_DB);
-            //accumulateSurftips(surftips, ranking, rowdef, negativeHashes, positiveHashes, yacyNewsPool.OUTGOING_DB);
-            //accumulateSurftips(surftips, ranking, rowdef, negativeHashes, positiveHashes, yacyNewsPool.PUBLISHED_DB);
+            HashMap Supporter = new HashMap(); // a mapping from an url hash to a kelondroRow.Entry with display properties
+            accumulateSupporter(Supporter, ranking, rowdef, negativeHashes, positiveHashes, yacyNewsPool.INCOMING_DB);
+            //accumulateSupporter(Supporter, ranking, rowdef, negativeHashes, positiveHashes, yacyNewsPool.OUTGOING_DB);
+            //accumulateSupporter(Supporter, ranking, rowdef, negativeHashes, positiveHashes, yacyNewsPool.PUBLISHED_DB);
         
             // read out surftipp array and create property entries
             Iterator k = ranking.scores(false);
@@ -128,13 +120,13 @@ public class Surftips {
                 urlhash = (String) k.next();
                 if (urlhash == null) continue;
                 
-                row = (kelondroRow.Entry) surftips.get(urlhash);
+                row = (kelondroRow.Entry) Supporter.get(urlhash);
                 if (row == null) continue;
                 
                 url = row.getColString(0, null);
                 try{
-                	if(plasmaSwitchboard.urlBlacklist.isListed(plasmaURLPattern.BLACKLIST_SURFTIPS ,new URL(url)))
-                		continue;
+                    if(plasmaSwitchboard.urlBlacklist.isListed(plasmaURLPattern.BLACKLIST_SURFTIPS ,new URL(url)))
+                        continue;
                 }catch(MalformedURLException e){continue;};
                 title = row.getColString(1,"UTF-8");
                 description = row.getColString(2,"UTF-8");
@@ -143,35 +135,35 @@ public class Surftips {
                 voted = false;
                 try {
                     voted = (yacyCore.newsPool.getSpecific(yacyNewsPool.OUTGOING_DB, yacyNewsPool.CATEGORY_SURFTIPP_VOTE_ADD, "refid", refid) != null) || 
-                    		(yacyCore.newsPool.getSpecific(yacyNewsPool.PUBLISHED_DB, yacyNewsPool.CATEGORY_SURFTIPP_VOTE_ADD, "refid", refid) != null);
+                            (yacyCore.newsPool.getSpecific(yacyNewsPool.PUBLISHED_DB, yacyNewsPool.CATEGORY_SURFTIPP_VOTE_ADD, "refid", refid) != null);
                 } catch (IOException e) {
                     e.printStackTrace();
                 }
-                prop.put("surftips_results_" + i + "_authorized", (authenticated) ? 1 : 0);
-                prop.put("surftips_results_" + i + "_authorized_recommend", (voted) ? 0 : 1);
+                prop.put("supporter_results_" + i + "_authorized", (authenticated) ? 1 : 0);
+                prop.put("supporter_results_" + i + "_authorized_recommend", (voted) ? 0 : 1);
 
-				prop.put("surftips_results_" + i + "_authorized_recommend_urlhash", urlhash);
-				prop.put("surftips_results_" + i + "_authorized_recommend_refid", refid);
-				prop.putASIS("surftips_results_" + i + "_authorized_recommend_url", crypt.simpleEncode(url, null, 'b'));
-				prop.putASIS("surftips_results_" + i + "_authorized_recommend_title", crypt.simpleEncode(title, null, 'b'));
-				prop.putASIS("surftips_results_" + i + "_authorized_recommend_description", crypt.simpleEncode(description, null, 'b'));
-				prop.put("surftips_results_" + i + "_authorized_recommend_display", display);
-				prop.put("surftips_results_" + i + "_authorized_recommend_showScore", (showScore ? 1 : 0));
+                prop.put("supporter_results_" + i + "_authorized_recommend_urlhash", urlhash);
+                prop.put("supporter_results_" + i + "_authorized_recommend_refid", refid);
+                prop.putASIS("supporter_results_" + i + "_authorized_recommend_url", crypt.simpleEncode(url, null, 'b'));
+                prop.putASIS("supporter_results_" + i + "_authorized_recommend_title", crypt.simpleEncode(title, null, 'b'));
+                prop.putASIS("supporter_results_" + i + "_authorized_recommend_description", crypt.simpleEncode(description, null, 'b'));
+                prop.put("supporter_results_" + i + "_authorized_recommend_display", display);
+                prop.put("supporter_results_" + i + "_authorized_recommend_showScore", (showScore ? 1 : 0));
 
-                prop.put("surftips_results_" + i + "_authorized_urlhash", urlhash);
-                prop.put("surftips_results_" + i + "_url", de.anomic.data.htmlTools.replaceXMLEntities(url));
-                prop.put("surftips_results_" + i + "_urlname", nxTools.shortenURLString(url, 60));
-                prop.put("surftips_results_" + i + "_urlhash", urlhash);
-                prop.put("surftips_results_" + i + "_title", (showScore) ? ("(" + ranking.getScore(urlhash) + ") " + title) : title);
-                prop.put("surftips_results_" + i + "_description", description);
+                prop.put("supporter_results_" + i + "_authorized_urlhash", urlhash);
+                prop.put("supporter_results_" + i + "_url", de.anomic.data.htmlTools.replaceXMLEntities(url));
+                prop.put("supporter_results_" + i + "_urlname", nxTools.shortenURLString(url, 60));
+                prop.put("supporter_results_" + i + "_urlhash", urlhash);
+                prop.put("supporter_results_" + i + "_title", (showScore) ? ("(" + ranking.getScore(urlhash) + ") " + title) : title);
+                prop.put("supporter_results_" + i + "_description", description);
                 i++;
                 
                 if (i >= 50) break;
             }
-            prop.put("surftips_results", i);
-            prop.put("surftips", 1);
+            prop.put("supporter_results", i);
+            prop.put("supporter", 1);
         } else {
-            prop.put("surftips", 0);
+            prop.put("supporter", 0);
         }
         
         return prop;
@@ -207,8 +199,8 @@ public class Surftips {
         } catch (IOException e) {e.printStackTrace();}
     }
     
-    private static void accumulateSurftips(
-            HashMap surftips, kelondroMScoreCluster ranking, kelondroRow rowdef,
+    private static void accumulateSupporter(
+            HashMap Supporter, kelondroMScoreCluster ranking, kelondroRow rowdef,
             HashMap negativeHashes, HashMap positiveHashes, int dbtype) {
         int maxCount = Math.min(1000, yacyCore.newsPool.size(dbtype));
         yacyNewsRecord record;
@@ -216,100 +208,47 @@ public class Surftips {
         kelondroRow.Entry entry;
         int score = 0;
         Integer vote;
+        yacySeed seed;
         for (int j = 0; j < maxCount; j++) try {
             record = yacyCore.newsPool.get(dbtype, j);
             if (record == null) continue;
             
             entry = null;
-            if (record.category().equals(yacyNewsPool.CATEGORY_CRAWL_START)) {
-                String intention = record.attribute("intention", "");
-                url = record.attribute("startURL", "");
+            if ((record.category().equals(yacyNewsPool.CATEGORY_PROFILE_UPDATE)) &&
+                ((seed = yacyCore.seedDB.getConnected(record.originator())) != null)) {
+                url = record.attribute("homepage", "");
                 if (url.length() < 12) continue;
                 entry = rowdef.newEntry(new byte[][]{
                                 url.getBytes(),
-                                ((intention.length() == 0) ? record.attribute("startURL", "") : intention).getBytes(),
-                                ("Crawl Start Point").getBytes("UTF-8"),
+                                url.getBytes(),
+                                ("Home Page of " + seed.getName()).getBytes("UTF-8"),
                                 record.id().getBytes()
                         });
-                score = 2 + Math.min(10, intention.length() / 4) + timeFactor(record.created());
+                score = 1 + timeFactor(record.created());
             }
-            
-            if (record.category().equals(yacyNewsPool.CATEGORY_BOOKMARK_ADD)) {
-                url = record.attribute("url", "");
+
+            if ((record.category().equals(yacyNewsPool.CATEGORY_PROFILE_BROADCAST)) &&
+                ((seed = yacyCore.seedDB.getConnected(record.originator())) != null)) {
+                url = record.attribute("homepage", "");
                 if (url.length() < 12) continue;
                 entry = rowdef.newEntry(new byte[][]{
                                 url.getBytes(),
-                                (record.attribute("title", "")).getBytes("UTF-8"),
-                                ("Bookmark: " + record.attribute("description", "")).getBytes("UTF-8"),
+                                url.getBytes(),
+                                ("Home Page of " + seed.getName()).getBytes("UTF-8"),
                                 record.id().getBytes()
                         });
-                score = 8 + timeFactor(record.created());
-            }
-            
-            if (record.category().equals(yacyNewsPool.CATEGORY_SURFTIPP_ADD)) {
-                url = record.attribute("url", "");
-                if (url.length() < 12) continue;
-                entry = rowdef.newEntry(new byte[][]{
-                                url.getBytes(),
-                                (record.attribute("title", "")).getBytes("UTF-8"),
-                                ("Surf Tipp: " + record.attribute("description", "")).getBytes("UTF-8"),
-                                record.id().getBytes()
-                        });
-                score = 5 + timeFactor(record.created());
-            }
-            
-            if (record.category().equals(yacyNewsPool.CATEGORY_SURFTIPP_VOTE_ADD)) {
-                if (!(record.attribute("vote", "negative").equals("positive"))) continue;
-                url = record.attribute("url", "");
-                if (url.length() < 12) continue;
-                entry = rowdef.newEntry(new byte[][]{
-                                url.getBytes(),
-                                record.attribute("title", "").getBytes("UTF-8"),
-                                record.attribute("description", "").getBytes("UTF-8"),
-                                record.attribute("refid", "").getBytes()
-                        });
-                score = 5 + timeFactor(record.created());
-            }
-            
-            if (record.category().equals(yacyNewsPool.CATEGORY_WIKI_UPDATE)) {
-                yacySeed seed = yacyCore.seedDB.getConnected(record.originator());
-                if (seed == null) seed = yacyCore.seedDB.getDisconnected(record.originator());
-                if (seed != null) {
-                    url = "http://" + seed.getPublicAddress() + "/Wiki.html?page=" + record.attribute("page", "");
-                    entry = rowdef.newEntry(new byte[][]{
-                                url.getBytes(),
-                                (record.attribute("author", "Anonymous") + ": " + record.attribute("page", "")).getBytes("UTF-8"),
-                                ("Wiki Update: " + record.attribute("description", "")).getBytes("UTF-8"),
-                                record.id().getBytes()
-                        });
-                    score = 4 + timeFactor(record.created());
-                }
-            }
-            
-            if (record.category().equals(yacyNewsPool.CATEGORY_BLOG_ADD)) {
-                yacySeed seed = yacyCore.seedDB.getConnected(record.originator());
-                if (seed == null) seed = yacyCore.seedDB.getDisconnected(record.originator());
-                if (seed != null) {
-                    url = "http://" + seed.getPublicAddress() + "/Blog.html?page=" + record.attribute("page", "");
-                    entry = rowdef.newEntry(new byte[][]{
-                                url.getBytes(),
-                                (record.attribute("author", "Anonymous") + ": " + record.attribute("page", "")).getBytes("UTF-8"),
-                                ("Blog Entry: " + record.attribute("subject", "")).getBytes("UTF-8"),
-                                record.id().getBytes()
-                        });
-                    score = 4 + timeFactor(record.created());
-                }
+                score = 1 + timeFactor(record.created());
             }
 
             // add/subtract votes and write record
             if (entry != null) {
                 urlhash = plasmaURL.urlHash(url);
                 if (urlhash == null)
-                		urlhash=plasmaURL.urlHash("http://"+url);
-                		if(urlhash==null){
-                			System.out.println("Surftips: bad url '" + url + "' from news record " + record.toString());
-                			continue;
-                		}
+                        urlhash=plasmaURL.urlHash("http://"+url);
+                        if(urlhash==null){
+                            System.out.println("Supporter: bad url '" + url + "' from news record " + record.toString());
+                            continue;
+                        }
                 if ((vote = (Integer) negativeHashes.get(urlhash)) != null) {
                     score = Math.max(0, score - vote.intValue()); // do not go below zero
                 }
@@ -317,11 +256,11 @@ public class Surftips {
                     score += 2 * vote.intValue();
                 }
                 // consider double-entries
-                if (surftips.containsKey(urlhash)) {
+                if (Supporter.containsKey(urlhash)) {
                     ranking.addScore(urlhash, score);
                 } else {
                     ranking.setScore(urlhash, score);
-                    surftips.put(urlhash, entry);
+                    Supporter.put(urlhash, entry);
                 }
             }
             

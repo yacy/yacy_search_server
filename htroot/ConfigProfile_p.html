@@ -25,7 +25,7 @@
           <dd>
             <input type="text" name="nickname" id="nickname" size="40" maxlength="1000" value="#[nickname]#" />
           </dd>
-          <dt><label for="homepage">Homepage</label></dt>
+          <dt><label for="homepage">Homepage (appears on every <a href="/Supporter.html">Supporter Page</a> as long as your peer is online)</label></dt>
           <dd>
             <input type="text" name="homepage" id="homepage" size="40" maxlength="1000" value="#[homepage]#" />
           </dd>
@@ -63,7 +63,13 @@
             <p class="help">You can use <a href="WikiHelp.html" onclick="window.open('WikiHelp.html','WikiHelp','toolbar=0,scrollbars=1,location=0,statusbar=0,menubar=0,resizable=1,width=640,height=480');return false;">Wiki Code</a> here.</p>
           </dd>
         </dl>
-        <input type="submit" name="set" value="Save" />
+        <dl>
+          <dt>&nbsp;</dt>
+          <dd>
+            <input type="submit" name="set" value="Save" />
+          </dd>
+        </dl>
+        
       </fieldset>
     </form>
     #%env/templates/footer.template%#
