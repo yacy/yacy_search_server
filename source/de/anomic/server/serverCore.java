@@ -1119,11 +1119,10 @@ public final class serverCore extends serverAbstractThread implements serverThre
                 System.err.println("ERROR: (internal) " + e);        
     	    } finally {
         		try {
+        			if (this.controlSocket.isClosed()) return;
+        			
         			// flush data
                     this.out.flush();
-                    
-                    // sleep for a while
-                    try {Thread.sleep(1000);} catch (InterruptedException e) {}
                     
                     // maybe this doesn't work for all SSL socket implementations
                     if (!(this.controlSocket instanceof SSLSocket)) {
@@ -1135,6 +1134,8 @@ public final class serverCore extends serverAbstractThread implements serverThre
                     this.in.close();                    
                     this.out.close();                   
                     
+                    // sleep for a while
+                    try {Thread.sleep(1000);} catch (InterruptedException e) {}                                                           
                     
                     // close everything                    
                     this.controlSocket.close();
