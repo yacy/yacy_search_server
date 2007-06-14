@@ -813,7 +813,7 @@ public final class httpdFileHandler extends httpdAbstractHandler implements http
                     String contentEncoding = (zipContent)?"gzip":null;
                     httpd.sendRespondHeader(this.connectionProperties, out, httpVersion, 200, null, mimeType, contentLength, targetDate, null, tp.getOutgoingHeader(), contentEncoding, null, nocache);
                     if (! method.equals(httpHeader.METHOD_HEAD)) {
-                        Thread.sleep(200); // this solved the message problem (!!)
+                        //Thread.sleep(200); // this solved the message problem (!!)
                         serverFileUtils.write(result, out);
                     }                    
                     
