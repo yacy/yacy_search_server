@@ -191,8 +191,9 @@ public class plasmaCrawlNURL {
             entry = balancer.pop(minimumDelta, maximumDomAge);
             if (entry == null) {
                 if (s > balancer.size()) continue;
+                int aftersize = balancer.size();
                 balancer.clear(); // the balancer is broken and cannot shrink
-                throw new IOException("entry is null, balancer cannot shrink; reset of balancer");
+                throw new IOException("entry is null, balancer cannot shrink (bevore pop = " + s + ", after pop = " + aftersize + "); reset of balancer");
             }
             return entry;
         }

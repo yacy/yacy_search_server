@@ -124,11 +124,11 @@ public class ymageGraph {
         }
     }
     
-    private static final long color_back = ymageMatrix.SUBTRACTIVE_WHITE;
+    public  static final long color_back = ymageMatrix.SUBTRACTIVE_WHITE;
+    public  static final long color_text = ymageMatrix.SUBTRACTIVE_BLACK;
     private static final long color_dot = 0x6633AA;
     private static final long color_line = 0x333333;
     private static final long color_lineend = 0x555555;
-    private static final long color_text = ymageMatrix.SUBTRACTIVE_BLACK;
     
     public ymageMatrix draw(int width, int height, int leftborder, int rightborder, int topborder, int bottomborder) {
         ymageMatrix image = new ymageMatrix(width, height, color_back);

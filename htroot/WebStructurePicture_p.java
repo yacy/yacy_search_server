@@ -81,28 +81,37 @@ public class WebStructurePicture_p {
             // find domain with most references
             host = sb.webStructure.hostWithMaxReferences();
         }
-        // find start hash
-        String hash = null;
-        try {
-            hash = plasmaURL.urlHash(new URL("http://" + host)).substring(6);
-        } catch (MalformedURLException e) {e.printStackTrace();}
-        assert (sb.webStructure.references(hash) != null);
-        
-        // recursively find domains, up to a specific depth
-        ymageGraph graph = new ymageGraph();
-        if (host != null) place(graph, sb.webStructure, hash, host, nodes, timeout, 0.0, 0.0, 0, depth);
-        //graph.print();
-        
-        ymageMatrix graphPicture = graph.draw(width, height, 40, 40, 16, 16);
-        
+        ymageMatrix graphPicture;
+        if (host == null) {
+            // probably no information available
+            graphPicture = new ymageMatrix(width, height, ymageGraph.color_back);
+            graphPicture.setMode(ymageMatrix.MODE_SUB);
+            ymageToolPrint.print(graphPicture, width / 2, height / 2, 0, "NO WEB STRUCTURE DATA AVAILABLE.", 0);
+            ymageToolPrint.print(graphPicture, width / 2, height / 2 + 16, 0, "START A WEB CRAWL TO OBTAIN STRUCTURE DATA.", 0);
+        } else {
+            // find start hash
+            String hash = null;
+            try {
+                hash = plasmaURL.urlHash(new URL("http://" + host)).substring(6);
+            } catch (MalformedURLException e) {e.printStackTrace();}
+            assert (sb.webStructure.references(hash) != null);
+            
+            // recursively find domains, up to a specific depth
+            ymageGraph graph = new ymageGraph();
+            if (host != null) place(graph, sb.webStructure, hash, host, nodes, timeout, 0.0, 0.0, 0, depth);
+            //graph.print();
+            
+            graphPicture = graph.draw(width, height, 40, 40, 16, 16);
+        }
         // print headline
-        graphPicture.setColor(ymageMatrix.SUBTRACTIVE_BLACK);
+        graphPicture.setColor(ymageGraph.color_text);
         graphPicture.setMode(ymageMatrix.MODE_SUB);
         ymageToolPrint.print(graphPicture, 2, 8, 0, "YACY WEB-STRUCTURE ANALYSIS", -1);
-        ymageToolPrint.print(graphPicture, 2, 16, 0, "LINK ENVIRONMENT OF DOMAIN " + host.toUpperCase(), -1);
+        if (host != null) ymageToolPrint.print(graphPicture, 2, 16, 0, "LINK ENVIRONMENT OF DOMAIN " + host.toUpperCase(), -1);
         ymageToolPrint.print(graphPicture, width - 2, 8, 0, "SNAPSHOT FROM " + new Date().toString().toUpperCase(), 1);
 
         return graphPicture;
+        
     }
     
     private static final int place(ymageGraph graph, plasmaWebStructure structure, String centerhash, String centerhost, int maxnodes, long timeout, double x, double y, int nextlayer, int maxlayer) {

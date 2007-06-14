@@ -277,7 +277,9 @@ public final class plasmaCrawlLoader extends Thread {
             String referer, 
             String initiator, 
             int depth, 
-            plasmaCrawlProfile.entry profile
+            plasmaCrawlProfile.entry profile,
+            int timeout,
+            boolean keepInMemory
     ) {
 
         if (!this.crawlwerPool.isClosed) {            
@@ -293,8 +295,8 @@ public final class plasmaCrawlLoader extends Thread {
                     profile,            // crawling profile
                     crawlingPriority,   // crawling priority
                     false,              // only download documents whose mimetypes are enabled for the crawler
-                    -1,                 // use default crawler timeout
-                    false               // resource should not be kept in memory 
+                    timeout,            // -1 = use default crawler timeout
+                    keepInMemory        // kept in memory ?
             );
             
             // adding the message to the queue
