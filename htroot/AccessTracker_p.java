@@ -25,6 +25,7 @@
 // Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 
 import java.util.ArrayList;
+import java.util.ConcurrentModificationException;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Iterator;
@@ -60,6 +61,7 @@ public class AccessTracker_p {
             String host;
             TreeMap access;
             int entCount = 0;
+            try {
             while ((entCount < maxCount) && (i.hasNext())) {
                 host = (String) i.next();
                 access = switchboard.accessTrack(host);
@@ -70,6 +72,7 @@ public class AccessTracker_p {
                 prop.put("page_list_" + entCount + "_countHour", access.tailMap(new Long(System.currentTimeMillis() - 1000 * 60 * 60)).size());
                 entCount++;
             }
+            } catch (ConcurrentModificationException e) {} // we dont want to serialize this
             prop.put("page_list", entCount);
             prop.put("page_num", entCount);
         }
