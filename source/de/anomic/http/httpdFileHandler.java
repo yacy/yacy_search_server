@@ -533,7 +533,7 @@ public final class httpdFileHandler extends httpdAbstractHandler implements http
                                 result.length, targetDate, null, null, null,
                                 null, nocache);
                         if (!method.equals(httpHeader.METHOD_HEAD)) {
-                            Thread.sleep(200); // see below
+                            //Thread.sleep(200); // see below
                             serverFileUtils.write(result, out);
                         }
                     }
@@ -562,7 +562,7 @@ public final class httpdFileHandler extends httpdAbstractHandler implements http
                                 result.length, targetDate, null, null, null,
                                 null, nocache);
                         if (!method.equals(httpHeader.METHOD_HEAD)) {
-                            Thread.sleep(200); // see below
+                            //Thread.sleep(200); // see below
                             serverFileUtils.write(result, out);
                         }
                     }
