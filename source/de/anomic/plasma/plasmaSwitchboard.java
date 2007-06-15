@@ -2992,7 +2992,6 @@ public final class plasmaSwitchboard extends serverAbstractSwitch implements ser
         
         // authorization by encoded password, only for localhost access
         if ((((String) header.get("CLIENTIP", "")).equals("localhost")) && (adminAccountBase64MD5.equals(authorization))) return 3; // soft-authenticated for localhost
-        if ((((String) header.get("CLIENTIP", "")).equals("localhost")) && (adminAccountBase64MD5.equals(""))) return 2; // no password set, yet. only for localhost
 
         // authorization by hit in userDB
         if (userDB.hasAdminRight((String) header.get(httpHeader.AUTHORIZATION, "xxxxxx"), ((String) header.get("CLIENTIP", "")), header.getHeaderCookies())) return 4; //return, because 4=max
