@@ -36,6 +36,7 @@ import de.anomic.kelondro.kelondroBase64Order;
 import de.anomic.kelondro.kelondroFlexTable;
 import de.anomic.kelondro.kelondroIndex;
 import de.anomic.kelondro.kelondroRow;
+import de.anomic.kelondro.kelondroRowSet;
 import de.anomic.net.URL;
 import de.anomic.yacy.yacyCore;
 import de.anomic.yacy.yacySeedDB;
@@ -57,8 +58,14 @@ public class plasmaCrawlZURL {
     private LinkedList rejectedStack = new LinkedList(); // strings: url
     
     public plasmaCrawlZURL(File cachePath, String tablename) {
+    	// creates a new ZURL in a file
         cachePath.mkdirs();
         urlIndexFile = new kelondroFlexTable(cachePath, tablename, -1, rowdef, true);
+    }
+    
+    public plasmaCrawlZURL() {
+    	// creates a new ZUR in RAM
+        urlIndexFile = new kelondroRowSet(rowdef, 0);
     }
     
     public int size() {

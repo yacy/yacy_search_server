@@ -61,9 +61,9 @@ public final class query {
 
         // return variable that accumulates replacements
         final plasmaSwitchboard sb = (plasmaSwitchboard) ss;
+        if (sb == null) { return null; }
         final serverObjects prop = new serverObjects();
-        if (prop == null || sb == null) { return null; }
-
+        
         if ((sb.isRobinsonMode()) &&
             (!sb.isPublicRobinson()) &&
             (!sb.isInMyCluster((String)header.get(httpHeader.CONNECTION_PROP_CLIENTIP)))) {

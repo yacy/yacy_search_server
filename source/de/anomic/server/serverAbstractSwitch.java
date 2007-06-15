@@ -43,6 +43,7 @@ package de.anomic.server;
 import java.io.File;
 import java.io.IOException;
 import java.net.InetAddress;
+import java.util.ConcurrentModificationException;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
@@ -156,7 +157,9 @@ public abstract class serverAbstractSwitch implements serverSwitch {
         access.put(new Long(System.currentTimeMillis()), accessPath);
 
         // write back to tracker
-        accessTracker.put(host, clearTooOldAccess(access));
+        try {
+        	accessTracker.put(host, clearTooOldAccess(access));
+        } catch (ConcurrentModificationException e) {};
     }
     
     public TreeMap accessTrack(String host) {

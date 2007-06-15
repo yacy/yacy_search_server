@@ -65,7 +65,7 @@ public class IndexCreateIndexingQueue_p {
         plasmaSwitchboard switchboard = (plasmaSwitchboard) env;
         serverObjects prop = new serverObjects();
         prop.put("rejected", 0);
-        int showRejectedCount = 10;
+        int showRejectedCount = 100;
         
         int showLimit = 100;
         if (post != null) {

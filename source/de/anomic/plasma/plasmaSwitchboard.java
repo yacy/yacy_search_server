@@ -1067,7 +1067,8 @@ public final class plasmaSwitchboard extends serverAbstractSwitch implements ser
         // start indexing management
         log.logConfig("Starting Indexing Management");
         noticeURL = new plasmaCrawlNURL(plasmaPath);
-        errorURL = new plasmaCrawlZURL(plasmaPath, "urlError.db");
+        errorURL = new plasmaCrawlZURL(); // fresh error DB each startup; can be hold in RAM and reduces IO;
+        //errorURL = new plasmaCrawlZURL(plasmaPath, "urlError.db");
         delegatedURL = new plasmaCrawlZURL(plasmaPath, "urlDelegated.db");
         wordIndex = new plasmaWordIndex(indexPrimaryPath, indexSecondaryPath, ramRWI_time, log);
         

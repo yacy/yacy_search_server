@@ -131,7 +131,7 @@ public final class yacyClient {
             result = nxTools.table(
                     httpc.wput(url,
                                yacySeed.b64Hash2hexHash(otherHash) + ".yacyh",
-                               105000, 
+                               12000, 
                                null, 
                                null,
                                (useProxy)?yacyCore.seedDB.sb.remoteProxyConfig:null,
@@ -275,7 +275,7 @@ public final class yacyClient {
                                     "&env=" + seedHash
                             ),
                             target.getHexHash() + ".yacyh",
-                            10000, 
+                            8000, 
                             null, 
                             null, 
                             (useProxy)?yacyCore.seedDB.sb.remoteProxyConfig:null,

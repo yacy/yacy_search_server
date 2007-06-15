@@ -383,7 +383,7 @@ public final class plasmaCrawlStacker {
         // apply recrawl rule
         if ((dbocc != null) && (!(recrawl))) {
             reason = plasmaCrawlEURL.DOUBLE_REGISTERED + dbocc + ")";
-            //this.log.logFine("URL '" + nexturlString + "' is double registered in '" + dbocc + "'. " + "Stack processing time: " + (System.currentTimeMillis()-startTime) + "ms");
+            this.log.logFine("URL '" + nexturlString + "' is double registered in '" + dbocc + "'. " + "Stack processing time: " + (System.currentTimeMillis()-startTime) + "ms");
             return reason;
         }
 

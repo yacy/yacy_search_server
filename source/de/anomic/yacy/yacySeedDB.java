@@ -255,7 +255,7 @@ public final class yacySeedDB {
     	// address has therefore the form
     	// address    ::= (<peername>'.yacy'|<peerhexhash>'.yacyh'){'='<ip>{':'<port}}
     	// clusterdef ::= {address}{','address}*
-    	String[] addresses = clusterdefinition.split(",");
+    	String[] addresses = (clusterdefinition.length() == 0) ? new String[0] : clusterdefinition.split(",");
     	TreeMap clustermap = new TreeMap(kelondroBase64Order.enhancedCoder);
     	yacySeed seed;
     	String hash, yacydom, ipport;
