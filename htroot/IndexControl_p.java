@@ -137,7 +137,7 @@ public class IndexControl_p {
             }
             if (delurl || delurlref) {
                 for (int i = 0; i < urlx.length; i++) {
-                    switchboard.wordIndex.loadedURL.remove(urlx[i]);
+                    switchboard.urlRemove(urlx[i]);
                 }
             }
             switchboard.wordIndex.deleteContainer(keyhash);
@@ -157,7 +157,7 @@ public class IndexControl_p {
             }
             if (delurl || delurlref) {
                 for (int i = 0; i < urlx.length; i++) {
-                    switchboard.wordIndex.loadedURL.remove(urlx[i]);
+                    switchboard.urlRemove(urlx[i]);
                 }
             }
             Set urlHashes = new HashSet();
@@ -190,7 +190,17 @@ public class IndexControl_p {
             } else {
                 urlstring = entry.comp().url().toNormalform();
                 prop.put("urlstring", "");
-                switchboard.wordIndex.loadedURL.remove(urlhash);
+                switchboard.urlRemove(urlhash);
+                prop.put("result", "Removed URL " + urlstring);
+            }
+        }
+
+        if (post.containsKey("urldelete")) {
+            urlhash = plasmaURL.urlHash(urlstring);
+            if ((urlhash == null) || (urlstring == null)) {
+                prop.put("result", "No input given; nothing deleted.");
+            } else {
+                switchboard.urlRemove(urlhash);
                 prop.put("result", "Removed URL " + urlstring);
             }
         }

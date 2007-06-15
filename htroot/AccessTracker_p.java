@@ -72,7 +72,7 @@ public class AccessTracker_p {
                 prop.put("page_list_" + entCount + "_countHour", access.tailMap(new Long(System.currentTimeMillis() - 1000 * 60 * 60)).size());
                 entCount++;
             }
-            } catch (ConcurrentModificationException e) {} // we dont want to serialize this
+            } catch (ConcurrentModificationException e) {} // we dont want to synchronize this
             prop.put("page_list", entCount);
             prop.put("page_num", entCount);
         }
@@ -84,6 +84,7 @@ public class AccessTracker_p {
             if (host.length() > 0) {
                 access = switchboard.accessTrack(host);
                 if (access != null) {
+                    try {
                     Iterator ii = access.entrySet().iterator();
                     while (ii.hasNext()) {
                         entry = (Map.Entry) ii.next();
@@ -91,13 +92,15 @@ public class AccessTracker_p {
                         prop.put("page_list_" + entCount + "_date", yacyCore.universalDateShortString(new Date(((Long) entry.getKey()).longValue())));
                         prop.put("page_list_" + entCount + "_path", (String) entry.getValue());
                         entCount++;
-                    }
+                    }} catch (ConcurrentModificationException e) {} // we dont want to synchronize this
+                    
                 }
             } else {
                 Iterator i = switchboard.accessHosts();
                 while ((entCount < maxCount) && (i.hasNext())) {
                     host = (String) i.next();
                     access = switchboard.accessTrack(host);
+                    try {
                     Iterator ii = access.entrySet().iterator();
                     while (ii.hasNext()) {
                         entry = (Map.Entry) ii.next();
@@ -105,7 +108,8 @@ public class AccessTracker_p {
                         prop.put("page_list_" + entCount + "_date", yacyCore.universalDateShortString(new Date(((Long) entry.getKey()).longValue())));
                         prop.put("page_list_" + entCount + "_path", (String) entry.getValue());
                         entCount++;
-                    }
+                    }} catch (ConcurrentModificationException e) {} // we dont want to synchronize this
+                    
                 }
             }
             prop.put("page_list", entCount);
@@ -149,6 +153,7 @@ public class AccessTracker_p {
             TreeSet handles;
             int entCount = 0;
             Map.Entry entry;
+            try {
             while ((entCount < maxCount) && (i.hasNext())) {
                 entry = (Map.Entry) i.next();
                 host = (String) entry.getKey();
@@ -177,6 +182,7 @@ public class AccessTracker_p {
                 // next
                 entCount++;
             }
+            } catch (ConcurrentModificationException e) {} // we dont want to synchronize this
             prop.put("page_list", entCount);
             prop.put("page_num", entCount);
             prop.put("page_total", (page == 3) ? switchboard.localSearches.size() : switchboard.remoteSearches.size());

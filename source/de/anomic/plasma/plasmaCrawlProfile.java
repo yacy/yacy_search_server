@@ -346,8 +346,8 @@ public class plasmaCrawlProfile {
             // an antry must have to be re-crawled
             String r = (String) mem.get(RECRAWL_IF_OLDER);
             if (r == null) return Long.MAX_VALUE; else try {
-                long l = Long.parseLong(r) * ((long) 60000);
-                if (l < 0) return Long.MAX_VALUE; else return l;
+                long l = Long.parseLong(r) * 60000L;
+                return (l < 0) ? Long.MAX_VALUE : l;
             } catch (NumberFormatException e) {
                 return 0;
             }

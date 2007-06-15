@@ -119,17 +119,15 @@ public class serverMemory {
      * @return whether enough memory could be freed (or is free) or not
      */
     public static boolean request(final long size, final boolean force) {
-        long avail;
+        long avail = available();
+        if (avail >= size) return true;
         if (log.isFine()) {
             String t = new Throwable("Stack trace").getStackTrace()[1].toString();
-            avail = available();
             log.logFine(t + " requested " + (size >>> 10) + " KB, got " + (avail >>> 10) + " KB");
-        } else {
-            avail = available();
-        }
-        if (avail >= size) return true;
+        } 
         final long avg = getAverageGCFree();
         if (force || avg == 0 || avg + avail >= size) {
+            // this is only called if we expect that an allocation of <size> bytes would cause the jvm to call the GC anyway
             final long freed = runGC(!force);
             avail = available();
             log.logInfo("performed " + ((force) ? "explicit" : "necessary") + " GC, freed " + (freed >>> 10)

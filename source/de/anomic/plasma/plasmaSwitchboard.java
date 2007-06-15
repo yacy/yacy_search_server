@@ -1423,6 +1423,13 @@ public final class plasmaSwitchboard extends serverAbstractSwitch implements ser
         return null;
     }
     
+    public void urlRemove(String hash) {
+        wordIndex.loadedURL.remove(hash);
+        noticeURL.remove(hash);
+        delegatedURL.remove(hash);
+        errorURL.remove(hash);
+    }
+    
     public URL getURL(String urlhash) throws IOException {
         if (urlhash.equals(plasmaURL.dummyHash)) return null;
         plasmaCrawlEntry ne = noticeURL.get(urlhash);
