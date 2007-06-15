@@ -303,7 +303,6 @@ public final class httpd implements serverHandler {
         //if (authorization.length() < 6) return 1; // no authentication information given
         //authorization = authorization.trim().substring(6);
         String adminAccountBase64MD5 = sw.getConfig(ADMIN_ACCOUNT_B64MD5, "");
-        if (adminAccountBase64MD5.length() == 0) return 2; // no passwrd stored
         if (adminAccountBase64MD5.equals(serverCodings.encodeMD5Hex(authorization))) return 4; // hard-authenticated, all ok
         return 0;
     }
