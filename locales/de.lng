@@ -144,6 +144,7 @@ Tags \(comma separated\):==Tags (durch Komma trennen):
 Public:==&Ouml;ffentlich:
 yes==ja
 no==nein
+Bookmark is a newsfeed==Lesezeichen ist ein Newsfeed
 "create"=="erzeugen"
 "edit"=="bearbeiten"
 File:==Datei:
@@ -306,7 +307,7 @@ You can create a personal profile here, which can be seen by other YaCy-members.
 You do not need to provide any personal data here, but if you want to distribute your contact information, you can do that here.==Sie m&uuml;ssen hier keine pers&ouml;nlichen Daten eingeben, aber wenn Sie Kontaktinformationen bereitstellen m&ouml;chten, k&ouml;nnen Sie das hier machen.
 #Name==Name
 #Nick Name==Nick Name
-#Homepage==Homepage
+Homepage \(appears on every <a href="/Supporter.html">Supporter Page</a> as long as your peer is online\)==Homepage (erscheint auf der <a href="/Supporter.html">Supporter Seite, so lange wie Ihr Peer online ist</a>
 #eMail==eMail
 #ICQ==ICQ
 #Jabber==Jabber
@@ -392,6 +393,71 @@ Date</td>==Datum</td>
 Sending Client==Sendender Client
 #Cookie==Cookie
 #-----------------------------
+
+#File: CrawlResults.html
+#---------------------------
+YaCy '#[clientname]#': Crawl Results==YaCy '#[clientname]#': Crawl Ergebnisse
+Crawl Results Menu==Crawl Ergebnisse Men&uuml;
+Overview==&Uuml;berblick
+Receipts</a>==R&uuml;ckmeldungen</a>
+Queries</a>==Suchanfragen</a>
+DHT Transfer==DHT-Verteilung
+Proxy Use==Proxy Benutzung
+Local Crawling==Lokales Crawlen
+Global Crawling==Globales Crawlen
+Indexing Queues Monitor Overview==Index Reihen Monitor &Uuml;berblick
+These are monitoring pages for the different indexing queues.==Dies sind die Monitor Seiten f&uuml;r die unterschiedlichen Index Varianten.
+YaCy knows 5 different ways to acquire web indexes. The details of these processes \(1-5\) are described within the submenu's listed==YaCy kennt 5 verschiedene Arten, um zu indexieren. Die Details zu diesen Prozessen (1-5) sind in den Untermen&uuml;s oben beschrieben.
+above which also will show you a table with indexing results so far. The information in these tables is considered as private,==Dort kann man ausserdem eine Tabelle mit den Resultaten des Index sehen. Informationen in diesen Tabellen sind als privat eingestuft,
+so you need to log-in with your administration password.==also m&uuml;ssen Sie sich mit Ihrem Administrator Passwort einloggen, um sie zu sehen.
+Case \(6\) is a monitor of the local receipt-generator, the opposed case of \(1\). It contains also an indexing result monitor but is not considered private==Fall (6) ist ein Monitor des lokalen Empfangs-Generator, der Gegensatz zu (1). Er enth&auml;lt ausserdem einen Index Resulate Monitor, ist aber nicht privat,
+since it shows crawl requests from other peers.==da er Crawl Anfragen von anderen Peers zeigt.
+The image above illustrates the data flow initiated by web index acquisition.==Das obige Bild zeigt den Datenfluss, der durch die Index Erwerbung &uuml;ber das Internet entsteht.
+Some processes occur double to document the complex index migration structure.==Einige Prozesse erscheinen doppelt, um die Komplexizit&auml;t der Index Verteilungs Struktur zu erkl&auml;ren.
+\(1\) Index Monitor of Remote Crawl Receipts==(1) Index Monitor f&uuml;r Remote Crawl R&uuml;ckmeldungen
+This is the list of web pages that this peer initiated to crawl,==Dies ist eine Liste von Internetseiten, bei der Ihr Peer den Crawl initiiert hat,
+but had been crawled by <em>other</em> peers.==die aber von <em>anderen</em> Peers gecrawlt wurden.
+This is the 'mirror'-case of process \(6\).==Dies ist der 'Gegensatz' Prozess zu (6)
+<em>Use Case:</em> You get entries here, if you start a local crawl on the 'Index Creation'-Page and check the==<em>Anwendungsfall:</em> Sie erhalten hier Eintr&auml;ge, wenn Sie einen lokalen Crawl auf der 'Index erzeugen' Seite starten und
+'Do Remote Indexing'-flag. Every page that a remote peer indexes upon this peer's request==die 'Remote Indexierung' aktivieren. Jede Seite, die von einem remote Peer durch Ihre Anfrage indexiert wurde,
+is reported back and can be monitored here.==wird nun zur&uuml;ck gemeldet und hier angezeigt.
+\(2\) Index Monitor for Result of Search Queries==(2) Index Monitor f&uuml;r Resultate bei Suchanfragen
+This index transfer was initiated by your peer by doing a search query.==Dieser Index Transfer wurde von Ihrem Peer dadurch initiiert, dass Sie eine Suchanfrage gestartet haben.
+The index was crawled and contributed by other peers.==Der Index wurde von anderen Peers gecrawlt und nun Ihnen breitgestellt.
+<em>Use Case:</em> This list fills up if you do a search query on the 'Search Page'==<em>Anwendungsfall:</em> Diese Liste f&uuml;llt sich, wenn Sie eine Suchanfrage auf der 'Suchseite' starten.
+\(3\) Index Monitor for Index Transfer.==(3) Index Monitor f&uuml;r die DHT-Verteilung
+The url fetch was initiated and executed by other peers.==Die URL Indexierung wurde von anderen Peers initiiert und durchgef&uuml;hrt.
+These links here have been transmitted to you because your peer is the most appropriate for storage according to==Diese Links wurden an Ihren Peer &uuml;bermittelt, da er am angemessensten zur Speicherung
+the logic of the Global Distributed Hash Table.==&uuml;bereinstimmend mit der Logic der verteilten Hash Tabelle ist.
+<em>Use Case:</em> This list may fill if you check the 'Index Receive'-flag on the 'Index Control' page==<em>Anwendung:</em> Dies Liste f&uuml;llt sich, wenn Sie die 'Index Empfang' Option auf der 'Index Kontrolle' Seite aktiviert haben.
+\(4\) Index Monitor for Proxy Indexing==(4) Index Monitor f&uuml;r die Proxy Indexierung
+These web pages had been indexed as result of your proxy usage.==Diese Internetseiten wurden durch die Benutzung des Proxy indexiert.
+No personal or protected page is indexed==Weder pers&ouml;nliche noch gesch&uuml;tzte Seiten werden indexiert
+such pages are detected by Cookie-Use or POST-Parameters \(either in URL or as HTTP protocol\)==Solche Seiten werden durch die Benutzung von Cookies oder POST-Parametern (in der URL oder im HTTP Protokoll) identifiziert
+and automatically excluded from indexing.==und automatisch von der Indexierung ausgeschlossen.
+<em>Use Case:</em> You must use YaCy as proxy to fill up this table.==<em>Anwendung:</em> Sie m&uuml;ssen YaCy als Proxy benutzen, um diese Tabelle zu f&uuml;llen.
+Set the proxy settings of your browser to the same port as given==Setzen Sie dazu die Proxy Einstellungen Ihres Browsers auf den selben Port, der
+on the 'Settings'-page in the 'Proxy and Administration Port' field.==auf der 'Einstellungen' Seite im 'Proxy und Administration Port' angegeben ist.
+\(5\) Index Monitor for Local Crawling.==(5) Index Monitor f&uuml;r das lokale Crawlen
+These web pages had been crawled by your own crawl task.==Diese Internetseiten wurden gecrawlt, da Sie einen Crawl auf der 'Index erzeugen' Seite gestartet haben.
+<em>Use Case:</em> start a crawl by setting a crawl start point on the 'Index Create' page.==<em>Anwendung:</em> Starten Sie einen Crawl, indem Sie auf der 'Index erzeugen' Seite einen Startpunkt eintragen.
+\(6\) Index Monitor for Global Crawling==(6) Index Monitor f&uuml;r das globale Crawlen
+These pages had been indexed by your peer, but the crawl was initiated by a remote peer.==Diese Seiten wurden von Ihrem Peer indexiert, der Crawl wurde aber von einem anderen Peer initiiert (remote-Crawl).
+This is the 'mirror'-case of process \(1\).==Dies ist der 'Gegensatz' Prozess zu (1).
+<em>Use Case:</em> This list may fill if you check the 'Accept remote crawling requests'-flag on the 'Index Crate' page==<em>Anwendung:</em> Diese Liste f&uuml;llt sich, wenn Sie 'Akzeptiere remote Crawling Anfragen' auf der 'Index erzeugen' Seite aktiviert haben.
+The stack is empty.==Die Liste ist leer.
+Showing all \#\[all\]\# entries in this stack.==Zeigt alle #[all]# Eintr&auml;ge in diesem Bereich.
+Showing latest \#\[count\]\# lines from a stack of \#\[all\]\# entries.==Zeigt die letzten #[count]# Eintr&auml;ge aus diesem Bereich von insgesamt #[all]# Eintr&auml;gen.
+"clear list"=="Liste leeren"
+#Initiator==Initiator
+Executor==Ausf&uuml;hrender
+Modified Date==&Auml;nderungsdatum
+Words==W&ouml;rter
+Title==Titel
+#URL==URL
+"delete"=="L&ouml;schen"
+#-----------------------------
+
 
 #File: DetailedSearch.html
 #---------------------------
@@ -546,6 +612,9 @@ Prefer mask==Vorzugsmaske
 Constraints==Einschr&auml;nkungen
 only index pages==Nur Index Seiten
 This peer holds \#\[links\]\# URLs of \#\[total-links\]\# in the known network.==Dieser Peer speichert #[links]# von #[total-links]# der dem Netzwerk bekannten URLs.
+"authentication required"=="Autorisierung erforderlich"
+Disable search function for users without autorization==Deaktiviere Suchfunktion f&uuml;r Benutzer ohne Autorisierung
+Enable web search to everyone==Aktiviere Suchfunktion f&uuml;r alle Nutzer
 #-----------------------------
 
 #File: IndexCleaner_p.html
@@ -835,70 +904,6 @@ Crawling Queue Import:==Crawler-Puffer-Import:
 Contains data about the crawljob an URL belongs to==Enth&auml;lt Daten &uuml;ber den Crawljob zu dem eine URL geh&ouml;rt
 The crawling queue==Der Crawler-Puffer
 Various stack files that belong to the crawling queue==Verschiedene Stack-Dateien, die zum Crawler-Puffer geh&ouml;ren
-#-----------------------------
-
-#File: IndexMonitor.html
-#---------------------------
-#YaCy '#[clientname]#': Index Monitor
-Index Monitor Menu==Index Monitor Men&uuml;
-Index Monitor Overview==Index Monitor &Uuml;berblick
-Receipts</a>==R&uuml;ckmeldungen</a>
-Queries</a>==Suchanfragen</a>
-DHT Transfer==DHT-Verteilung
-Proxy Use==Proxy Benutzung
-Local Crawling==Lokales Crawlen
-Global Crawling==Globales Crawlen
-Indexing Queues Monitor Overview==Index Reihen Monitor &Uuml;berblick
-These are monitoring pages for the different indexing queues.==Dies sind die Monitor Seiten f&uuml;r die unterschiedlichen Index Varianten.
-YaCy knows 5 different ways to acquire web indexes. The details of these processes \(1-5\) are described within the submenu's listed==YaCy kennt 5 verschiedene Arten, um zu indexieren. Die Details zu diesen Prozessen (1-5) sind in den Untermen&uuml;s oben beschrieben.
-above which also will show you a table with indexing results so far. The information in these tables is considered as private,==Dort kann man ausserdem eine Tabelle mit den Resultaten des Index sehen. Informationen in diesen Tabellen sind als privat eingestuft,
-so you need to log-in with your administration password.==also m&uuml;ssen Sie sich mit Ihrem Administrator Passwort einloggen, um sie zu sehen.
-Case \(6\) is a monitor of the local receipt-generator, the opposed case of \(1\). It contains also an indexing result monitor but is not considered private==Fall (6) ist ein Monitor des lokalen Empfangs-Generator, der Gegensatz zu (1). Er enth&auml;lt ausserdem einen Index Resulate Monitor, ist aber nicht privat,
-since it shows crawl requests from other peers.==da er Crawl Anfragen von anderen Peers zeigt.
-The image above illustrates the data flow initiated by web index acquisition.==Das obige Bild zeigt den Datenfluss, der durch die Index Erwerbung &uuml;ber das Internet entsteht.
-Some processes occur double to document the complex index migration structure.==Einige Prozesse erscheinen doppelt, um die Komplexizit&auml;t der Index Verteilungs Struktur zu erkl&auml;ren.
-\(1\) Index Monitor of Remote Crawl Receipts==(1) Index Monitor f&uuml;r Remote Crawl R&uuml;ckmeldungen
-This is the list of web pages that this peer initiated to crawl,==Dies ist eine Liste von Internetseiten, bei der Ihr Peer den Crawl initiiert hat,
-but had been crawled by <em>other</em> peers.==die aber von <em>anderen</em> Peers gecrawlt wurden.
-This is the 'mirror'-case of process \(6\).==Dies ist der 'Gegensatz' Prozess zu (6)
-<em>Use Case:</em> You get entries here, if you start a local crawl on the 'Index Creation'-Page and check the==<em>Anwendungsfall:</em> Sie erhalten hier Eintr&auml;ge, wenn Sie einen lokalen Crawl auf der 'Index erzeugen' Seite starten und
-'Do Remote Indexing'-flag. Every page that a remote peer indexes upon this peer's request==die 'Remote Indexierung' aktivieren. Jede Seite, die von einem remote Peer durch Ihre Anfrage indexiert wurde,
-is reported back and can be monitored here.==wird nun zur&uuml;ck gemeldet und hier angezeigt.
-\(2\) Index Monitor for Result of Search Queries==(2) Index Monitor f&uuml;r Resultate bei Suchanfragen
-This index transfer was initiated by your peer by doing a search query.==Dieser Index Transfer wurde von Ihrem Peer dadurch initiiert, dass Sie eine Suchanfrage gestartet haben.
-The index was crawled and contributed by other peers.==Der Index wurde von anderen Peers gecrawlt und nun Ihnen breitgestellt.
-<em>Use Case:</em> This list fills up if you do a search query on the 'Search Page'==<em>Anwendungsfall:</em> Diese Liste f&uuml;llt sich, wenn Sie eine Suchanfrage auf der 'Suchseite' starten.
-\(3\) Index Monitor for Index Transfer.==(3) Index Monitor f&uuml;r die DHT-Verteilung
-The url fetch was initiated and executed by other peers.==Die URL Indexierung wurde von anderen Peers initiiert und durchgef&uuml;hrt.
-These links here have been transmitted to you because your peer is the most appropriate for storage according to==Diese Links wurden an Ihren Peer &uuml;bermittelt, da er am angemessensten zur Speicherung
-the logic of the Global Distributed Hash Table.==&uuml;bereinstimmend mit der Logic der verteilten Hash Tabelle ist.
-<em>Use Case:</em> This list may fill if you check the 'Index Receive'-flag on the 'Index Control' page==<em>Anwendung:</em> Dies Liste f&uuml;llt sich, wenn Sie die 'Index Empfang' Option auf der 'Index Kontrolle' Seite aktiviert haben.
-\(4\) Index Monitor for Proxy Indexing==(4) Index Monitor f&uuml;r die Proxy Indexierung
-These web pages had been indexed as result of your proxy usage.==Diese Internetseiten wurden durch die Benutzung des Proxy indexiert.
-No personal or protected page is indexed==Weder pers&ouml;nliche noch gesch&uuml;tzte Seiten werden indexiert
-such pages are detected by Cookie-Use or POST-Parameters \(either in URL or as HTTP protocol\)==Solche Seiten werden durch die Benutzung von Cookies oder POST-Parametern (in der URL oder im HTTP Protokoll) identifiziert
-and automatically excluded from indexing.==und automatisch von der Indexierung ausgeschlossen.
-<em>Use Case:</em> You must use YaCy as proxy to fill up this table.==<em>Anwendung:</em> Sie m&uuml;ssen YaCy als Proxy benutzen, um diese Tabelle zu f&uuml;llen.
-Set the proxy settings of your browser to the same port as given==Setzen Sie dazu die Proxy Einstellungen Ihres Browsers auf den selben Port, der
-on the 'Settings'-page in the 'Proxy and Administration Port' field.==auf der 'Einstellungen' Seite im 'Proxy und Administration Port' angegeben ist.
-\(5\) Index Monitor for Local Crawling.==(5) Index Monitor f&uuml;r das lokale Crawlen
-These web pages had been crawled by your own crawl task.==Diese Internetseiten wurden gecrawlt, da Sie einen Crawl auf der 'Index erzeugen' Seite gestartet haben.
-<em>Use Case:</em> start a crawl by setting a crawl start point on the 'Index Create' page.==<em>Anwendung:</em> Starten Sie einen Crawl, indem Sie auf der 'Index erzeugen' Seite einen Startpunkt eintragen.
-\(6\) Index Monitor for Global Crawling==(6) Index Monitor f&uuml;r das globale Crawlen
-These pages had been indexed by your peer, but the crawl was initiated by a remote peer.==Diese Seiten wurden von Ihrem Peer indexiert, der Crawl wurde aber von einem anderen Peer initiiert (remote-Crawl).
-This is the 'mirror'-case of process \(1\).==Dies ist der 'Gegensatz' Prozess zu (1).
-<em>Use Case:</em> This list may fill if you check the 'Accept remote crawling requests'-flag on the 'Index Crate' page==<em>Anwendung:</em> Diese Liste f&uuml;llt sich, wenn Sie 'Akzeptiere remote Crawling Anfragen' auf der 'Index erzeugen' Seite aktiviert haben.
-The stack is empty.==Die Liste ist leer.
-Showing all \#\[all\]\# entries in this stack.==Zeigt alle #[all]# Eintr&auml;ge in diesem Bereich.
-Showing latest \#\[count\]\# lines from a stack of \#\[all\]\# entries.==Zeigt die letzten #[count]# Eintr&auml;ge aus diesem Bereich von insgesamt #[all]# Eintr&auml;gen.
-"clear list"=="Liste leeren"
-#Initiator==Initiator
-Executor==Ausf&uuml;hrender
-Modified Date==&Auml;nderungsdatum
-Words==W&ouml;rter
-Title==Titel
-#URL==URL
-"delete"=="L&ouml;schen"
 #-----------------------------
 
 #File: IndexTransfer_p.html
@@ -1792,7 +1797,7 @@ You are running a server in senior mode and you support the global internet inde
 which you can also <a href="index.html">search yourself</a>.==den Sie auch selbst <a href="index.html">durchsuchen</a> k&ouml;nnen.
 You have a principal peer because you publish your seed-list to a public accessible server==Sie haben einen Principal Peer, weil Sie Ihre Seed-Liste auf einen &ouml;ffentlich zug&auml;nglichen Server hoch laden,
 where it can be retrieved using the URL==von wo aus sie unter folgender Adresse erreichbar ist:
-Your Web Page Indexer is idle. You can start your own web crawl <a href="IndexCreate_p.html">here</a>==Ihr Webseiten Indexierer ist unt&auml;tig. Sie k&ouml;nnen <a href="IndexCreate_p.html">hier</a> einen Web Crawl starten 
+Your Web Page Indexer is idle. You can start your own web crawl <a href="CrawlStartSimple_p.html">here</a>==Ihr Webseiten Indexierer ist unt&auml;tig. Sie k&ouml;nnen <a href="CrawlStartSimple_p.html">hier</a> einen Web Crawl starten 
 Your Web Page Indexer is busy. You can monitor your web crawl <a href="WatchCrawler_p.html">here</a>==Ihr Webseiten Indexierer ist besch&auml;ftigt. Sie k&ouml;nnen Ihren Web Crawl <a href="WatchCrawler_p.html">hier</a> kontrollieren
 Restart==Neustarten
 "Only the administrator may restart this peer"=="Nur der Administrator darf den Peer neustarten"
@@ -1895,7 +1900,6 @@ You can now go back to the <a href="Settings_p.html">Settings</a> page if you wa
 Surftips</title>==Surftipps</title>
 Surftips</h2>==Surftipps</h2>
 Surftips are switched off==Surftipps sind ausgeschaltet
-Show surftips==Zeige Surftipps
 title="bookmark"==title="Lesezeichen"
 alt="Add to bookmarks"==alt="Zu den Lesezeichen hinzufügen"
 title="positive vote"==title="Positive Bewertung"
@@ -1903,8 +1907,10 @@ alt="Give positive vote"==alt="Link positiv bewerten"
 title="negative vote"==title="Negative Bewertung"
 alt="Give negative vote"==alt="Link negativ bewerten"
 provided by YaCy peers using public bookmarks, link votes and crawl start points==automatisch erzeugt durch öffentliche Lesezeichen, Link Bewertungen und Crawl Startpunkte anderer YaCy-Peers
-Hide surftips==Verberge Surftipps
 "Please enter a comment to your link recommendation. \(Your Vote is also considered without a comment.\)"=="Bitte geben Sie zu Ihrer Linkempfehlung einen Kommentar ein. (Ihre Stimme wird auch ohne Kommentar angenommen.)"
+"authentication required"=="Autorisierung erforderlich"
+Hide surftips for users without autorization==Verberge Surftipps f&uuml;r Benutzer ohne Autorisierung
+Show surftips to everyone==Zeige Surftipps allen Benutzern
 
 #File: User_p.html
 #---------------------------
@@ -2197,28 +2203,26 @@ Detailed Search==Detaillierte Suche
 >Surftips==>Surftipps
 >Bookmarks==>Lesezeichen
 >Help==>Hilfe
-Your Web==Dein Web
-Home Page Demo==Homepage Demo
-Your File Share==Deine Dateifreigabe
-#YaCy Wiki==YaCy Wiki
-#YaCy Blog==YaCy Blog
->Messages==>Nachrichten
-"New Messages"=="Neue Nachrichten"
+Web&nbsp;Indexing==Web Indexierung
+Start a Web Crawl==Starte einen Web Crawl
+Index Administration==Indexverwaltung
+#Filter &amp; Blacklists==Filter &amp; Blacklists
+Indexing with Proxy==Indexierung per Proxy
 Monitoring==Kontrolle
 YaCy Network==YaCy Netzwerk
-Crawler Monitor==Crawler Kontrolle
-Web Crawl Results==Crawl Ergebnisse
-Search Statistics==Suchstatistik
+Crawl Activity==Crawler Aktivit&auml;t
+Crawl Results==Crawl Ergebnisse
+Access Tracker==Zugriffs Tracker
 #Server Log==Server Log
->Connections==>Verbindungen
 #Web Cache==Web Cache
 News Monitor==News Anzeige
 Cookies in Proxy==Cookies per Proxy
-#Web Crawler==Web Crawler
-Start Web Crawl==Starte Web Crawl
-Administrate Index==Indexverwaltung
-#URL Blacklist==URL Blacklist
-Indexing with Proxy==Indexierung per Proxy
+Your Web Content==Dein Web
+#YaCy Wiki==YaCy Wiki
+#YaCy Blog==YaCy Blog
+YaCy Messages==YaCy Nachrichten
+"New Messages"=="Neue Nachrichten"
+YaCy File Hosting==YaCy Dateifreigaben
 Peer Configuration==Peer Einstellungen
 #Status &amp; Shutdown==Status &amp; Shutdown
 Basic Configuration==Grund-<br />einstellungen
