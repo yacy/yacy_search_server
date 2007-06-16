@@ -48,7 +48,6 @@
 // if the shell's current path is HTROOT
 
 import java.io.File;
-import java.lang.reflect.Method;
 import java.lang.Integer;
 import java.util.regex.Pattern;
 
@@ -63,7 +62,6 @@ import de.anomic.server.serverCore;
 import de.anomic.server.serverInstantThread;
 import de.anomic.server.serverObjects;
 import de.anomic.server.serverSwitch;
-import de.anomic.server.portForwarding.serverPortForwarding;
 import de.anomic.yacy.yacyCore;
 import de.anomic.yacy.yacySeed;
 
@@ -241,7 +239,7 @@ public class ConfigBasic {
         }
         return prop;
     }
-    
+    /*
     private boolean findUPnPRouter(int timeout) {
         
         // determine if the upnp port forwarding class is available and load it dynamically        
@@ -256,8 +254,8 @@ public class ConfigBasic {
             if ((result != null)&&(result instanceof Boolean)) {
                 return ((Boolean)result).booleanValue();                        
             }
-        } catch (Exception e) {/* ignore this error */
-        } catch (Error e)     {/* ignore this error */}
+        } catch (Exception e) {  // ignore this error            
+        } catch (Error e)     {} // ignore this error
         return false;
     }
     
@@ -274,12 +272,12 @@ public class ConfigBasic {
             // trying to get the proper method for router scanning
             scanForRouter = upnp.getClass().getMethod("routerAvailable", new Class[] {int.class});
             
-        } catch (Exception e) {/* ignore this error */            
-        } catch (Error e)     {/* ignore this error */}   
+        } catch (Exception e) {  // ignore this error            
+        } catch (Error e)     {} // ignore this error    
 
         return new Object[]{upnp,scanForRouter};
     }
-    
+    */
     private void reinitPortForwarding(serverObjects post, serverSwitch env) {
         if ((post != null)) {
             try {                

@@ -82,36 +82,36 @@ public class AccessTracker_p {
             TreeMap access;
             Map.Entry entry;
             if (host.length() > 0) {
-                access = switchboard.accessTrack(host);
-                if (access != null) {
-                    try {
-                    Iterator ii = access.entrySet().iterator();
-                    while (ii.hasNext()) {
-                        entry = (Map.Entry) ii.next();
-                        prop.put("page_list_" + entCount + "_host", host);
-                        prop.put("page_list_" + entCount + "_date", yacyCore.universalDateShortString(new Date(((Long) entry.getKey()).longValue())));
-                        prop.put("page_list_" + entCount + "_path", (String) entry.getValue());
-                        entCount++;
-                    }} catch (ConcurrentModificationException e) {} // we dont want to synchronize this
-                    
-                }
-            } else {
-                Iterator i = switchboard.accessHosts();
-                while ((entCount < maxCount) && (i.hasNext())) {
-                    host = (String) i.next();
-                    access = switchboard.accessTrack(host);
-                    try {
-                    Iterator ii = access.entrySet().iterator();
-                    while (ii.hasNext()) {
-                        entry = (Map.Entry) ii.next();
-                        prop.put("page_list_" + entCount + "_host", host);
-                        prop.put("page_list_" + entCount + "_date", yacyCore.universalDateShortString(new Date(((Long) entry.getKey()).longValue())));
-                        prop.put("page_list_" + entCount + "_path", (String) entry.getValue());
-                        entCount++;
-                    }} catch (ConcurrentModificationException e) {} // we dont want to synchronize this
-                    
-                }
-            }
+				access = switchboard.accessTrack(host);
+				if (access != null) {
+					try {
+						Iterator ii = access.entrySet().iterator();
+						while (ii.hasNext()) {
+							entry = (Map.Entry) ii.next();
+							prop.put("page_list_" + entCount + "_host", host);
+							prop.put("page_list_" + entCount + "_date", yacyCore.universalDateShortString(new Date(((Long) entry.getKey()).longValue())));
+							prop.put("page_list_" + entCount + "_path", (String) entry.getValue());
+							entCount++;
+						}
+					} catch (ConcurrentModificationException e) {} // we dont want to synchronize this
+				}
+			} else {
+                try {
+                	Iterator i = switchboard.accessHosts();
+                    while ((entCount < maxCount) && (i.hasNext())) {
+						host = (String) i.next();
+						access = switchboard.accessTrack(host);
+						Iterator ii = access.entrySet().iterator();
+						while (ii.hasNext()) {
+							entry = (Map.Entry) ii.next();
+							prop.put("page_list_" + entCount + "_host", host);
+							prop.put("page_list_" + entCount + "_date", yacyCore.universalDateShortString(new Date(((Long) entry.getKey()).longValue())));
+							prop.put("page_list_" + entCount + "_path", (String) entry.getValue());
+							entCount++;
+						}
+					}
+				} catch (ConcurrentModificationException e) {} // we dont want to synchronize this
+			}
             prop.put("page_list", entCount);
             prop.put("page_num", entCount);
         }

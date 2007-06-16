@@ -28,8 +28,8 @@ package de.anomic.server;
 
 public class serverPlainSwitch extends serverAbstractSwitch implements serverSwitch {
 
-    public serverPlainSwitch(String rootPath, String initPath, String configPath) {
-        super(rootPath, initPath, configPath);
+    public serverPlainSwitch(String rootPath, String initPath, String configPath, boolean applyPro) {
+        super(rootPath, initPath, configPath, applyPro);
     }
         
     public int queueSize() {

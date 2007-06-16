@@ -174,8 +174,9 @@
 
   <!--<mkdir dir="${doc}"/>-->
   <mkdir dir="${data}"/>
-  <mkdir dir="${release}"/>	
-	
+  <mkdir dir="${release}"/>
+
+  <!-- YaCy Release Date -->
   <filter token="REPL_DATE" value="${DSTAMP}"/>
   <filter token="REPL_RELEASE" value="${releaseFile}"/>
 
@@ -194,6 +195,7 @@
   <delete file="${build}/yacy.java" failonerror="false"/>
   <copy file="${src}/yacy.java" tofile="${build}/yacy.java" overwrite="true" filtering="true" />
   <!--<copy file="${doc}/Download.html" tofile="${doc}/Download.html.up" filtering="true" />-->
+	  
 </target>
   	
 <target name="compileMain" depends="init" description="Compiling the yacy sources ...">
@@ -273,7 +275,6 @@
     <property name="lib" location="${lib}"/>
     <property name="libx" location="${libx}"/>
     <property name="release" location="${release_ext}"/>
-    <property name="releaseDir" value="${releaseDir}"/>
     <property name="javacSource" value="${javacSource}"/>
     <property name="javacTarget" value="${javacTarget}"/>
     <!-- each optional parser must have its own build file --> 
@@ -289,7 +290,6 @@
     <property name="libx" location="${libx}"/>
     <property name="htroot" value="${htroot}"/>    
     <property name="release" location="${release_ext}"/>
-    <property name="releaseDir" value="${releaseDir}"/> 
     <property name="javacSource" value="${javacSource}"/>
     <property name="javacTarget" value="${javacTarget}"/>
     <!-- each optionl uploader module must have its own build file --> 
@@ -305,7 +305,6 @@
     <property name="libx" location="${libx}"/>
     <property name="htroot" value="${htroot}"/>    
     <property name="release" location="${release_ext}"/>
-    <property name="releaseDir" value="${releaseDir}"/> 
     <property name="javacSource" value="${javacSource}"/>
     <property name="javacTarget" value="${javacTarget}"/>
     <fileset dir="${src}/" includes="de/anomic/soap/build.xml"/>
@@ -319,7 +318,6 @@
     <property name="libx" location="${libx}"/>
     <property name="htroot" value="${htroot}"/>    
     <property name="release" location="${release_ext}"/>
-    <property name="releaseDir" value="${releaseDir}"/> 
     <property name="javacSource" value="${javacSource}"/>
     <property name="javacTarget" value="${javacTarget}"/>
     <fileset dir="${src}/" includes="de/anomic/soap/build.xml"/>
@@ -392,7 +390,7 @@
 <!-- ======================================================================================================= 
 	 putting all extensions together into a single zip file 
 	 ======================================================================================================= --> 	
-<target name="distExtensions" if="singleExtFile" depends="copyExt4Dist">
+<target name="distExt" if="singleExtFile" depends="copyExt4Dist">
       <tar destfile="${release}/${extensionFile}" compression="gzip" defaultexcludes="yes" longfile="gnu">
         <tarfileset dir="${release_ext}" prefix="${releaseFileParentDir}/" dirmode="${accessRightsDir}" mode="${accessRightsFile}" >
           <include name="**/*.*"/>
@@ -581,7 +579,7 @@
 <!-- ======================================================================================================= 
 	 making a release file for yacy 
 	 ======================================================================================================= -->   
-<target name="distMain" depends="copyMain4Dist" description="Compiling sources and make a release file ...">
+<target name="dist" depends="copyMain4Dist" description="Compiling sources and make a release file ...">
 
 	<tar destfile="${release}/${releaseFile}" compression="gzip" defaultexcludes="yes" longfile="fail">  	
   	 
@@ -604,8 +602,8 @@
   <!--<echo message="${releaseVersion}" file="${doc}/release.txt"/>-->
 </target>
 	
-<target name="distAllInOne" depends="compileExtensions,copyMain4Dist,copyExt4Dist">
-	<tar destfile="${release}/${allInOneFile}" compression="gzip" defaultexcludes="yes" longfile="fail">  	
+<target name="distPro" depends="compileExtensions,copyMain4Dist,copyExt4Dist">
+	<tar destfile="${release}/${proReleaseFile}" compression="gzip" defaultexcludes="yes" longfile="fail">  	
   	 
 		<!-- packing all files into a gzipped tar -->
   		<tarfileset dir="${release_main}" prefix="${releaseFileParentDir}/" dirmode="${accessRightsDir}" mode="${accessRightsExecutable}">
@@ -628,10 +626,6 @@
 	<delete dir="${release}/WINDOWS" failonerror="false" />
 	<delete dir="${release}/SPECS" failonerror="false" />
 </target>
-
-<!-- make dist file including main sources and extensions -->   
-<target name="dist" depends="distMain,distExtensions">     
-</target>	
 	
 <!-- make clean -->   
 <target name="clean" description="make clean"> 
@@ -813,7 +807,7 @@ This needs nsis-ant-1.2.jar in the yacyfolder.
 
 -->
 
-<target name="distWithWinStartExe" depends="makeWinStartExe,distAllInOne">	
+<target name="distWithWinStartExe" depends="makeWinStartExe,distPro">	
 </target>
 
 <target name="rpm" depends="all" description="Creates the main rpm-package and another for libx">

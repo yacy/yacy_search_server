@@ -279,8 +279,8 @@ public final class yacy {
                     System.exit(1); 
                 }
             */                    
-            
-            sb = new plasmaSwitchboard(homePath, "yacy.init", "DATA/SETTINGS/httpProxy.conf");
+            boolean pro = new File(homePath, "libx").exists();
+            sb = new plasmaSwitchboard(homePath, "yacy.init", "DATA/SETTINGS/httpProxy.conf", pro);
             sbSync.V(); // signal that the sb reference was set
             
             // save information about available memory at startup time
@@ -857,7 +857,7 @@ public final class yacy {
     	
     	File root = new File(homePath);
         try {
-            final plasmaSwitchboard sb = new plasmaSwitchboard(homePath, "yacy.init", "DATA/SETTINGS/httpProxy.conf");
+            final plasmaSwitchboard sb = new plasmaSwitchboard(homePath, "yacy.init", "DATA/SETTINGS/httpProxy.conf", false);
             HashMap doms = new HashMap();
             System.out.println("Started domain list extraction from " + sb.wordIndex.loadedURL.size() + " url entries.");
             System.out.println("a dump will be written after double-check of all extracted domains.");
@@ -973,7 +973,7 @@ public final class yacy {
     private static void urllist(String homePath, String source, boolean html, String targetName) {
         File root = new File(homePath);
         try {
-            final plasmaSwitchboard sb = new plasmaSwitchboard(homePath, "yacy.init", "DATA/SETTINGS/httpProxy.conf");
+            final plasmaSwitchboard sb = new plasmaSwitchboard(homePath, "yacy.init", "DATA/SETTINGS/httpProxy.conf", false);
             File file = new File(root, targetName);
             BufferedOutputStream bos = new BufferedOutputStream(new FileOutputStream(file));
             

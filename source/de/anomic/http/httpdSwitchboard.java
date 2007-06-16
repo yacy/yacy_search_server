@@ -50,8 +50,8 @@ public final class httpdSwitchboard extends serverAbstractSwitch implements serv
 
     private final LinkedList cacheStack;
         
-    public httpdSwitchboard(String rootPath, String initPath, String configPath) {
-        super(rootPath, initPath, configPath);
+    public httpdSwitchboard(String rootPath, String initPath, String configPath, boolean applyPro) {
+        super(rootPath, initPath, configPath, applyPro);
         cacheStack = new LinkedList();
      }
 

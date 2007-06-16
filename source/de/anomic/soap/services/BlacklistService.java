@@ -80,7 +80,7 @@ public class BlacklistService extends AbstractService {
 
 	private static final String LIST_MANAGER_LISTS_PATH = "listManager.listsPath";
 	private static final String BLACKLISTS = ".BlackLists";
-	private static final String BLACKLISTS_TYPES = "BlackLists.types";
+	//private static final String BLACKLISTS_TYPES = "BlackLists.types";
     private final static String BLACKLIST_SHARED = "BlackLists.Shared";	
 
 	/* =====================================================================

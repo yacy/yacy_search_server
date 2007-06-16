@@ -886,12 +886,14 @@ public final class plasmaSwitchboard extends serverAbstractSwitch implements ser
     
     private static plasmaSwitchboard sb;
 
-    public plasmaSwitchboard(String rootPath, String initPath, String configPath) {
-        super(rootPath, initPath, configPath);
+    public plasmaSwitchboard(String rootPath, String initPath, String configPath, boolean applyPro) {
+        super(rootPath, initPath, configPath, applyPro);
         sb=this;
         
         // set loglevel and log
         setLog(new serverLog("PLASMA"));
+        
+        if (applyPro) this.log.logInfo("This is the pro-version of YaCy");
         
         // load values from configs
         this.plasmaPath   = new File(rootPath, getConfig(DBPATH, DBPATH_DEFAULT));
@@ -1067,9 +1069,9 @@ public final class plasmaSwitchboard extends serverAbstractSwitch implements ser
         // start indexing management
         log.logConfig("Starting Indexing Management");
         noticeURL = new plasmaCrawlNURL(plasmaPath);
-        errorURL = new plasmaCrawlZURL(); // fresh error DB each startup; can be hold in RAM and reduces IO;
-        //errorURL = new plasmaCrawlZURL(plasmaPath, "urlError.db");
-        delegatedURL = new plasmaCrawlZURL(plasmaPath, "urlDelegated.db");
+        //errorURL = new plasmaCrawlZURL(); // fresh error DB each startup; can be hold in RAM and reduces IO;
+        errorURL = new plasmaCrawlZURL(plasmaPath, "urlError.db", true);
+        delegatedURL = new plasmaCrawlZURL(plasmaPath, "urlDelegated.db", false);
         wordIndex = new plasmaWordIndex(indexPrimaryPath, indexSecondaryPath, ramRWI_time, log);
         
         // set a high maximum cache size to current size; this is adopted later automatically

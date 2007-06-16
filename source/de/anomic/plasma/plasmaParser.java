@@ -100,18 +100,18 @@ public final class plasmaParser {
      * A list containing all installed parsers and the mimeType that they support
      * @see #loadAvailableParserList()
      */
-    static final Properties availableParserList = new Properties();
+    public static final Properties availableParserList = new Properties();
     
     /**
      * A list of file extensions that are supported by the html-parser and can
      * be parsed in realtime.
      */
-    static final HashSet supportedRealtimeFileExt = new HashSet();
+    public static final HashSet supportedRealtimeFileExt = new HashSet();
     
     /**
      * A list of mimeTypes that can be parsed in Realtime (on the fly)
      */
-    static final HashSet realtimeParsableMimeTypes = new HashSet();    
+    public static final HashSet realtimeParsableMimeTypes = new HashSet();    
     
     private static final Properties mimeTypeLookupByFileExt = new Properties();
     static {

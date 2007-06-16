@@ -69,14 +69,14 @@ public abstract class serverAbstractSwitch implements serverSwitch {
     protected HashMap       accessTracker; // mappings from requesting host to an ArrayList of serverTrack-entries
     protected long maxTrackingTime;
     
-    public serverAbstractSwitch(String rootPath, String initPath, String configPath) {
+    public serverAbstractSwitch(String rootPath, String initPath, String configPath, boolean applyPro) {
         // we initialize the switchboard with a property file,
         // but maintain these properties then later in a new 'config' file
         // to reset all changed configs, the config file must
         // be deleted, but not the init file
         // the only attribute that will always be read from the init is the
         // file name of the config file
-        this.rootPath = rootPath;
+    	this.rootPath = rootPath;
         configComment = "This is an automatically generated file, updated by serverAbstractSwitch and initialized by " + initPath;
         File initFile = new File(rootPath, initPath);
         configFile = new File(rootPath, configPath); // propertiesFile(config);
@@ -89,7 +89,28 @@ public abstract class serverAbstractSwitch implements serverSwitch {
             initProps = serverFileUtils.loadHashMap(initFile);
         else
             initProps = new HashMap();
-
+        
+        // if 'pro'-version is selected, overload standard settings with 'pro'-settings
+        Iterator i;
+        String prop;
+    	if (applyPro) {
+        	i = new HashMap(initProps).keySet().iterator(); // clone the map to avoid concurrent modification exceptions
+        	while (i.hasNext()) {
+        		prop = (String) i.next();
+        		if (prop.endsWith("__pro")) {
+        			initProps.put(prop.substring(0, prop.length() - 5), initProps.get(prop));
+        		}
+        	}
+        }
+        // delete the 'pro' init settings
+        i = initProps.keySet().iterator();
+        while (i.hasNext()) {
+        	prop = (String) i.next();
+        	if (prop.endsWith("__pro")) {
+        		i.remove();
+        	}
+        }
+        
         // load config's from last save
         if (configFile.exists())
             configProps = serverFileUtils.loadHashMap(configFile);
@@ -99,7 +120,7 @@ public abstract class serverAbstractSwitch implements serverSwitch {
         synchronized (configProps) {
             // remove all values from config that do not appear in init
             // (out-dated settings)
-            Iterator i = configProps.keySet().iterator();
+            i = configProps.keySet().iterator();
             String key;
             while (i.hasNext()) {
                 key = (String) i.next();

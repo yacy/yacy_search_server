@@ -167,7 +167,8 @@ public class kelondroFlexWidthArray implements kelondroArray {
     
     public static void delete(File path, String tablename) {
         File tabledir = new File(path, tablename);
-        if ((tabledir.exists()) && (!(tabledir.isDirectory()))) {
+        if (!(tabledir.exists())) return;
+        if ((!(tabledir.isDirectory()))) {
             tabledir.delete();
             return;
         }

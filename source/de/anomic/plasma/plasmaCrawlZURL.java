@@ -57,9 +57,10 @@ public class plasmaCrawlZURL {
     private kelondroIndex urlIndexFile = null;
     private LinkedList rejectedStack = new LinkedList(); // strings: url
     
-    public plasmaCrawlZURL(File cachePath, String tablename) {
+    public plasmaCrawlZURL(File cachePath, String tablename, boolean startWithEmptyFile) {
     	// creates a new ZURL in a file
         cachePath.mkdirs();
+        if (startWithEmptyFile) kelondroFlexTable.delete(cachePath, tablename);
         urlIndexFile = new kelondroFlexTable(cachePath, tablename, -1, rowdef, true);
     }
     

@@ -183,7 +183,8 @@ mimeConfig = httpd.mime
 proxyCache = DATA/HTCACHE
 
 # the maximum disc cache size for files in proxyCache in megabytes
-proxyCacheSize = 200
+proxyCacheSize = 100
+proxyCacheSize__pro = 600
 
 # use the mostly direct mapping of URLs to Filenames
 # makes it easy watching the content of the cache using file browsers
@@ -262,7 +263,6 @@ dht.BlackLists=url.default.black
 search.BlackLists=url.default.black
 surftips.BlackLists=url.default.black
 news.BlackLists=url.default.black
-
 
 proxyCookieBlackList=cookie.default.black
 proxyCookieWhiteList=cookie.default.black
@@ -465,8 +465,8 @@ proxyIndexingLocalMedia=true
 # The crawling works the same way as the prefetch, but it is possible to
 # assign a different crawling depth.
 # Be careful with this number. Consider a branching factor of average 20;
-# A prefect-depth of 8 would index 25.600.000.000 pages, maybe the whole WWW.
-crawlingDepth=2
+# A prefetch-depth of 8 would index 25.600.000.000 pages, maybe the whole WWW.
+crawlingDepth=3
 crawlingIfOlder=525600
 crawlingDomFilterDepth=-1
 crawlingDomMaxPages=-1
@@ -517,7 +517,7 @@ filterOutStopwordsFromTopwords=true
 # and another idlesleep is performed
 20_dhtdistribution_idlesleep=30000
 20_dhtdistribution_busysleep=10000
-20_dhtdistribution_memprereq=4194304
+20_dhtdistribution_memprereq=6291456
 30_peerping_idlesleep=120000
 30_peerping_busysleep=120000
 30_peerping_memprereq=1048576
@@ -526,6 +526,7 @@ filterOutStopwordsFromTopwords=true
 40_peerseedcycle_memprereq=2097152
 50_localcrawl_idlesleep=2000
 50_localcrawl_busysleep=250
+50_localcrawl_busysleep__pro=100
 50_localcrawl_memprereq=4194304
 50_localcrawl_isPaused=false
 61_globalcrawltrigger_idlesleep=10000
@@ -534,16 +535,18 @@ filterOutStopwordsFromTopwords=true
 61_globalcrawltrigger_isPaused=false
 62_remotetriggeredcrawl_idlesleep=10000
 62_remotetriggeredcrawl_busysleep=1000
-62_remotetriggeredcrawl_memprereq=4194304
+62_remotetriggeredcrawl_memprereq=6291456
 62_remotetriggeredcrawl_isPaused=false
 70_cachemanager_idlesleep=1000
 70_cachemanager_busysleep=0
 70_cachemanager_memprereq=1048576
 80_indexing_idlesleep=1000
-80_indexing_busysleep=125
+80_indexing_busysleep=200
+80_indexing_busysleep__pro=10
 80_indexing_memprereq=6291456
 82_crawlstack_idlesleep=5000
-82_crawlstack_busysleep=10
+82_crawlstack_busysleep=50
+82_crawlstack_busysleep__pro=10
 82_crawlstack_memprereq=1048576
 90_cleanup_idlesleep=300000
 90_cleanup_busysleep=300000
@@ -558,7 +561,7 @@ filterOutStopwordsFromTopwords=true
 # a cluster value of '2' would be appropriate
 80_indexing_cluster=1
 
-# ram cache for database files
+# ram cache init timeout for database files
 
 # ram cache for collection index
 ramCacheRWI_time     =    30000
@@ -608,6 +611,8 @@ ramCacheProfiles_time=      500
 # othervise the YaCy-internal memory supervision does not work
 javastart_Xmx=Xmx96m
 javastart_Xms=Xms96m
+javastart_Xmx__pro=Xmx512m
+javastart_Xms__pro=Xms512m
 
 # priority of the yacy-process
 # is valid in unix/shell and windows environments but
@@ -623,6 +628,9 @@ javastart_priority=0
 wordCacheMaxCount = 20000
 wordCacheInitCount = 30000
 wordFlushSize = 500;
+wordCacheMaxCount__pro = 60000
+wordCacheInitCount__pro = 80000
+wordFlushSize__pro = 1000;
 
 # Specifies if yacy can be used as transparent http proxy.
 # 
@@ -682,10 +690,12 @@ crawler.clientTimeout=9000
 crawler.http.acceptEncoding=gzip
 crawler.http.acceptLanguage=en-us,en;q=0.5
 crawler.http.acceptCharset=ISO-8859-1,utf-8;q=0.7,*;q=0.7
-crawler.http.maxFileSize=262144
+crawler.http.maxFileSize=131072
+crawler.http.maxFileSize__pro=524288
 
 # ftp crawler specific settings
-crawler.ftp.maxFileSize=262144
+crawler.ftp.maxFileSize=131072
+crawler.ftp.maxFileSize__pro=524288
 
 # maximum number of crawler threads
 crawler.MaxActiveThreads = 30
@@ -697,11 +707,13 @@ stacker.MaxIdleThreads = 10
 stacker.MinIdleThreads = 5
 
 # maximum size of indexing queue
-indexer.slots = 60
+indexer.slots = 40
+indexer.slots__pro = 80
 
 # specifies if yacy should set it's own referer if no referer URL
 # was set by the client.
 useYacyReferer = true
+useYacyReferer__pro = false
 
 # allow only 443(https-port) for https-proxy?
 # if you want to tunnel other protokols, set to false
