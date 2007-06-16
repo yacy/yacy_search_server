@@ -193,17 +193,27 @@ document.getElementById("Enter").value = "search again - catch up more links";
 	
 	<!-- linklist end -->
 	::<!-- type 2: image search: presents image thumbnails -->
-	<!-- linklist begin -->
-	#{results}#
-	<!-- link begin -->
-	    <div class="snippetLoading" id="#[urlhash]#">loading snippet from <a href="#[url]#" id="url#[urlhash]#">#[urlname]#</a></div>
-	<!-- link end -->
-	#{/results}#
-	<script type="text/javascript">
-	AllImageSnippets("#[former]#");
-	addHover();
-	</script> 
+  <noscript>
+    <p>
+      Sorry, but in order to use the image search, you need JavaScript. But here are the urls, yacy would have looked for the images you want. Perhaps you can find them there. Sorry for the inconvenience. If you want a non-JavaScript image search, beg the developers for it.
+    </p>
+    <ul>
+    #{results}#
+      <li><a href="#[url]#">#[urlname]#</a></li>
+    #{/results}#
+    </ul>
+  </noscript>
+  <!-- linklist start -->
+  <div id="results">
+  </div>
 	<!-- linklist end -->
+	<script type="text/javascript">
+    var urls = "#{results}##[urlname]# #{/results}#".split(" ");
+    // the last element is always empty because the split gets a space at the end of the string
+    urls.length --;
+    if(urls.length > 0)
+      AllImageSnippets(urls, "#[former]#");
+	</script>
 	<br style="clear:left;" />
 	::<!-- type 3: image thumbnail list for one single url -->
 	<table border="0" cellspacing="16" cellpadding="0">

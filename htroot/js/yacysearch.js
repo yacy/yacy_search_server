@@ -1,3 +1,56 @@
+function Progressbar(length, parent) {
+  // the description, should be translated
+  var DESCRIPTION_STRING = "Loading results...";
+
+  // the number of steps of the bar
+  this.length = length;
+  // the current position, expressed in steps (so 100% = length)
+  this.position = 0;
+  // the current percentage of the bar
+  this.percentage = 0
+
+
+  // use this function to display the progress, because it updates everything
+  this.step = function(count) {
+    this.position += count;
+    // update the bar
+    this.percentage = this.position*(100/this.length);
+    this.fill.style.width = this.percentage + "%";
+
+    // if the end is reached, the bar is hidden/removed
+    if(this.position==this.length)
+      removeAllChildren(this.element);
+  }
+
+  // the actual progressbar
+  var bar = document.createElement("div");
+  bar.className = "ProgressBar";
+  bar.style.width = "100%";
+  bar.style.height = "20px";
+  bar.style.margin = "10px auto";
+  bar.style.textAlign = "left";
+
+  // the actual bar
+  this.fill = document.createElement("div");
+  this.fill.className = "ProgressBarFill";
+  this.fill.style.width = "0%"
+  bar.appendChild(this.fill);
+
+  // a description for the bar
+  var description = document.createTextNode(DESCRIPTION_STRING);
+  var textcontainer = document.createElement("strong");
+  textcontainer.appendChild(description);
+
+  // the container for the elements used by the Progressbar
+  this.element = document.createElement("div");
+  this.element.style.textAlign = "center";
+  // get hasLayout in IE, needed because of the percentage as width of the bar
+  this.element.className = "gainlayout";
+  this.element.appendChild(textcontainer);
+  this.element.appendChild(bar);
+  parent.appendChild(this.element);
+}
+
 function AllTextSnippets(query) {
 	var span = document.getElementsByTagName("span");
 	for(var x=0;x<span.length;x++) {
@@ -18,14 +71,13 @@ function AllMediaSnippets(query, mediatype) {
 	}
 }
 
-function AllImageSnippets(query) {
-	var div = document.getElementsByTagName("div");
-	for(var x=0;x<div.length;x++) {
-		if (div[x].className == 'snippetLoading') {
-				var url = document.getElementById("url" + div[x].id);
-				requestImageSnippet(url,query);
-		}
-	}
+function AllImageSnippets(urls, query) {
+  document.getElementById("linkcount").innerHTML = 0;
+  var container = document.getElementById("results");
+  var progressbar = new Progressbar(urls.length, container);
+  for(url in urls) {
+    requestImageSnippet(urls[url],query,progressbar);
+  }
 }
 
 function requestTextSnippet(url, query){
@@ -42,10 +94,10 @@ function requestMediaSnippet(url, query, mediatype){
 	request.send(null);
 }
 
-function requestImageSnippet(url, query){
+function requestImageSnippet(url, query, progressbar){
 	var request=createRequestObject();
 	request.open('get', '/xml/snippet.xml?url=' + escape(url) + '&remove=true&media=image&search=' + escape(query),true);
-	request.onreadystatechange = function () {handleImageState(request)};
+	request.onreadystatechange = function () {handleImageState(request, progressbar)};
 	request.send(null);
 }
 
@@ -160,55 +212,56 @@ function handleMediaState(req) {
 	}
 }
 
-function handleImageState(req) {
-    if(req.readyState != 4){
+function handleImageState(req, progressbar) {
+  if(req.readyState != 4)
 		return;
-	}
 	
 	var response = req.responseXML;
-	var urlHash = response.getElementsByTagName("urlHash")[0].firstChild.data;
-	var links = response.getElementsByTagName("links")[0].firstChild.data;
-	var div = document.getElementById(urlHash)
-	removeAllChildren(div);
+  // on errors, the result might not contain the expected elements and would throw an error, so we check for it here
+  if (response.getElementsByTagName("urlHash")) {
+    // the urlHash is not needed anymore at the moment
+	  //var urlHash = response.getElementsByTagName("urlHash")[0].firstChild.data;
+	  var links = response.getElementsByTagName("links")[0].firstChild.data;
+	  var div = document.getElementById("results")
 	
-	if (links > 0) {
-		div.className = "snippetLoaded";
-		for (i = 0; i < links; i++) {
-			var type = response.getElementsByTagName("type")[i].firstChild.data;
-			var href = response.getElementsByTagName("href")[i].firstChild.data;
-			var name = response.getElementsByTagName("name")[i].firstChild.data;
-			var attr = response.getElementsByTagName("attr")[i].firstChild.data;
+	  if (links > 0) {
+		  for (i = 0; i < links; i++) {
+			  var type = response.getElementsByTagName("type")[i].firstChild.data;
+			  var href = response.getElementsByTagName("href")[i].firstChild.data;
+			  var name = response.getElementsByTagName("name")[i].firstChild.data;
+			  var attr = response.getElementsByTagName("attr")[i].firstChild.data;
 
             // <a href="#[url]#"><img src="/ViewImage.png?maxwidth=96&amp;maxheight=96&amp;url=#[url]#" /></a><br /><a href="#[url]#">#[name]#</a>
-			var img = document.createElement("img");
-			img.setAttribute("src", "/ViewImage.png?maxwidth=96&maxheight=96&url=" + href);
-			img.setAttribute("alt", name);
+			  var img = document.createElement("img");
+			  img.setAttribute("src", "/ViewImage.png?maxwidth=96&maxheight=96&url=" + href);
+			  img.setAttribute("alt", name);
 			
-			var imganchor = document.createElement("a");
-			imganchor.setAttribute("href", href);
-			imganchor.className = "thumblink";
-			imganchor.appendChild(img);
+			  var imganchor = document.createElement("a");
+			  imganchor.setAttribute("href", href);
+			  imganchor.className = "thumblink";
+			  imganchor.appendChild(img);
 			
-			var nameanchor = document.createElement("a");
-			nameanchor.setAttribute("href", href);
-			nameanchor.appendChild(document.createTextNode(name));
+			  var nameanchor = document.createElement("a");
+			  nameanchor.setAttribute("href", href);
+			  nameanchor.appendChild(document.createTextNode(name));
 			
 			
-			var textcontainer = document.createElement("div");
-			textcontainer.className = "TableCellDark";
-			textcontainer.appendChild(nameanchor);
+			  var textcontainer = document.createElement("div");
+			  textcontainer.className = "TableCellDark";
+			  textcontainer.appendChild(nameanchor);
 			
-			var thumbcontainer = document.createElement("div");
-			thumbcontainer.className = "thumbcontainer";
-			thumbcontainer.appendChild(imganchor);
-			thumbcontainer.appendChild(textcontainer);
-			div.appendChild(thumbcontainer);
-			//span.appendChild(imganchor);
-		}
-	} else {
-		div.className = "snippetError";
-		div.appendChild(document.createTextNode(""));
-	}
+			  var thumbcontainer = document.createElement("div");
+			  thumbcontainer.className = "thumbcontainer";
+			  thumbcontainer.appendChild(imganchor);
+			  thumbcontainer.appendChild(textcontainer);
+			  div.appendChild(thumbcontainer);
+			  //span.appendChild(imganchor);
+
+        document.getElementById("linkcount").innerHTML ++
+		  }
+    }
+  }
+  progressbar.step(1);
 }
 
 
