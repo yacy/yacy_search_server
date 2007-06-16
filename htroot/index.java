@@ -76,10 +76,7 @@ public class index {
         
         final boolean indexDistributeGranted = sb.getConfigBool(plasmaSwitchboard.INDEX_DIST_ALLOW, true);
         final boolean indexReceiveGranted = sb.getConfigBool(plasmaSwitchboard.INDEX_RECEIVE_ALLOW, true);
-        if (!indexDistributeGranted || !indexReceiveGranted) { global = false; }
-        final boolean clustersearch = sb.isRobinsonMode() &&
-                (sb.getConfig(plasmaSwitchboard.CLUSTER_MODE, "").equals(plasmaSwitchboard.CLUSTER_MODE_PRIVATE_CLUSTER) ||
-                 sb.getConfig(plasmaSwitchboard.CLUSTER_MODE, "").equals(plasmaSwitchboard.CLUSTER_MODE_PUBLIC_CLUSTER));
+        global = global && indexDistributeGranted && indexReceiveGranted;
 
         final String referer = (String) header.get(httpHeader.REFERER);
         if (referer != null) {
@@ -128,7 +125,7 @@ public class index {
         prop.put("searchoptions_count-50", (count == 50) ? 1 : 0);
         prop.put("searchoptions_count-100", (count == 100) ? 1 : 0);
         prop.put("searchoptions_resource-global", ((global) ? 1 : 0));
-        prop.put("searchoptions_resource-global-disabled", (global || clustersearch) ? 0 : 1);
+        prop.put("searchoptions_resource-global-disabled", (indexReceiveGranted && indexDistributeGranted) ? 0 : 1);
         prop.put("searchoptions_resource-global-disabled_reason", (indexReceiveGranted) ? 0 : (indexDistributeGranted) ? 1 : 2);
         prop.put("searchoptions_resource-local", ((global) ? 0 : 1));
         prop.put("searchoptions_time-1", (time == 1) ? 1 : 0);
