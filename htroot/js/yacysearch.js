@@ -257,7 +257,7 @@ function handleImageState(req, progressbar) {
 			  div.appendChild(thumbcontainer);
 			  //span.appendChild(imganchor);
 
-        document.getElementById("linkcount").innerHTML ++
+        document.getElementById("linkcount").innerHTML++;
 		  }
     }
   }

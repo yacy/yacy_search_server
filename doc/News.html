@@ -85,6 +85,45 @@ globalheader();
 </ul>
 -->
 
+<br><p><a name="3912">v0.53_20070619_3914</a>
+<ul>
+<li>Enhance Search Interface</li>
+  <ul>
+  <li>Faster search (defaul search time is now 4 seconds; in case that too less results are displayed use the search-again button)</li>
+  <li>Search results without snippets are blinded out</li>
+  <li>Search results show the favicon of the referenced page</li>
+  <li>Better display of image search page / animation after search request</li>
+  <li>Speed-up of web interface (more responsive)</li>
+  <li>The opensearch rss search result (/yacysearch.rss) can now be enriched with snippets using the query parameter "fetchSnippet="</li>
+  </ul>
+<li>Web Structure Analysis</li>
+  <ul>
+  <li>During web crawling the link structure between domains is recognized</li>
+  <li>The web structure can be painted to a diagram and is visible as Crawler Visalization (/WatchWebStructure_p.html)</li>
+  <li>The web structure can be exported via xml (/xml/webstructure.xml)</li>
+  </ul>
+<li>Better Usability and Enriched Interface Features</li>
+  <ul>
+  <li>Bookmarks have now an integrated rss feed reader</li>
+  <li>Splitted index-creation page into two pages; one for a simple crawl start, one for a expert start</li>
+  <li>Blog-comments can now be moderated</li>
+  <li>Refactoring of interface pages; fewer main memu items and better submenu-structure</li>
+  <li>New supporter page containing urls from personal profiles when peers are online; access can be blocked by blocking the surf</li>
+  <li>Blacklists can be splitted, entries can be moved from one list to another</li>
+  <li>Blacklist are now also applied to urls in news</li>
+  <li>Added a httpd access tracker, showing from which IP the peer was accessed, and how frequently the acess was in the past</li>
+  </ul>
+<li>Better Web Crawler</li>
+  <ul>
+  <li>robots.txt now supports crawl-delay; the crawl balancer recognizes the assigned delay but tries to avoid waiting-times by using different domains meanwhile</li>
+  </ul>
+<li>New Release Strategy</li>
+  <ul>
+  <li>There will be a 'pro' release containing all parsers (pdf, rtf, doc, etc...)</li>
+  <li>The 'pro'-release will use different, high-performance default settings</li>
+  </ul>
+</ul>
+
 <br><p><a name="3715">v0.52_20070512_3715</a>
 <ul>
 <li>New Functions</li>
