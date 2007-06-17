@@ -1,5 +1,5 @@
 function Progressbar(length, parent) {
-  // the description, should be translated
+  // the description (displayed above the progressbar while loading the results), should be translated
   var DESCRIPTION_STRING = "Loading results...";
 
   // the number of steps of the bar

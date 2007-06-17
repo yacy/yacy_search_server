@@ -115,7 +115,7 @@ public class serverMemory {
      * <p><em>Be careful with this method as GCs should always be the last measure to take</em></p>
      * 
      * @param size the requested amount of free memory in bytes
-     * @param specifies whether a GC should be run even in case former GCs didn't provide enough memory
+     * @param force specifies whether a GC should be run even in case former GCs didn't provide enough memory
      * @return whether enough memory could be freed (or is free) or not
      */
     public static boolean request(final long size, final boolean force) {
@@ -123,20 +123,20 @@ public class serverMemory {
         if (avail >= size) return true;
         if (log.isFine()) {
             String t = new Throwable("Stack trace").getStackTrace()[1].toString();
-            log.logFine(t + " requested " + (size >>> 10) + " KB, got " + (avail >>> 10) + " KB");
+            log.logFine(t + " requested " + (size >> 10) + " KB, got " + (avail >> 10) + " KB");
         } 
         final long avg = getAverageGCFree();
         if (force || avg == 0 || avg + avail >= size) {
             // this is only called if we expect that an allocation of <size> bytes would cause the jvm to call the GC anyway
             final long freed = runGC(!force);
             avail = available();
-            log.logInfo("performed " + ((force) ? "explicit" : "necessary") + " GC, freed " + (freed >>> 10)
-                    + " KB (requested/available/average: " + (size >>> 10) + " / "
-                    + (avail >>> 10) + " / " + (avg >>> 10) + " KB)");
+            log.logInfo("performed " + ((force) ? "explicit" : "necessary") + " GC, freed " + (freed >> 10)
+                    + " KB (requested/available/average: " + (size >> 10) + " / "
+                    + (avail >> 10) + " / " + (avg >> 10) + " KB)");
             return avail >= size;
         } else {
             log.logInfo("former GCs indicate to not be able to free enough memory (requested/available/average: "
-                    + (size >>> 10) + " / " + (avail >>> 10) + " / " + (avg >>> 10) + " KB)");
+                    + (size >> 10) + " / " + (avail >> 10) + " / " + (avg >> 10) + " KB)");
             return false;
         }
     }
