@@ -458,6 +458,139 @@ Title==Titel
 "delete"=="L&ouml;schen"
 #-----------------------------
 
+#File: CrawlStartExpert_p.html
+#---------------------------
+Index Creation==Index Erzeugung
+Start Crawling Job:==Starte Crawling Aufgabe:
+You can define URLs as start points for Web page crawling and start crawling here. \"Crawling\" means that YaCy will download the given website, extract all links in it and then download the content behind these links. This is repeated as long as specified under \"Crawling Depth\".==Sie k&ouml;nnen hier URLs angeben, die gecrawlt werden sollen und dann das Crawling starten. "Crawling" bedeutet, dass YaCy die angegebene Webseite runterl&auml;dt, alle Links extrahiert und dann den Inhalt hinter diesen Links runterl&auml;dt. Dies wird solange wiederholt wie unter "Crawling Tiefe" angegeben.
+#Attribut==Attribut
+Value==Wert
+Description</strong>==Beschreibung</strong>
+Crawling Depth:==Crawling-Tiefe:
+This defines how often the Crawler will follow links embedded in websites.==Dies definiert, wie oft der Crawler eingebetteten Links in Webseiten folgen wird.
+A minimum of 1 is recommended and means that the page you enter under \"Starting Point\" will be added to the index, but no linked content is indexed. 2-4 is good for normal indexing.==Ein Minimum von 1 wird empfohlen und bedeutet, dass die Seite, die Sie unter "Startpunkt" angegeben haben, dem Index zugef&uuml;gt wird, verlinkter Inhalt allerdings nicht. 2-4 ist gut f&uuml;r normales Indexieren.
+Be careful with the depth. Consider a branching factor of average 20;==Seien Sie vorsichtig mit der Crawl-Tiefe. Erw&auml;gen Sie einen durschnittlichen Verzweigungsfaktor von 20;
+A prefetch-depth of 8 would index 25.600.000.000 pages, maybe this is the whole WWW.==eine Crawl-Tiefe 8 wird 25.600.000.000 Seiten indexieren, vielleicht sogar das ganze WWW.
+Crawling Filter:==Crawling Filter:
+This is an emacs-like regular expression that must match with the URLs which are used to be crawled.==Dies ist ein emacs-&auml;hnlicher regul&auml;rer Ausdruck, der mit der gecrawlten URL &uuml;bereinstimmen muss.
+Use this i.e. to crawl a single domain. If you set this filter it makes sense to increase==Benutzen Sie dies z.B., um nur eine einzelne Domain zu crawlen. Wenn Sie diese Maske aktivieren, macht es Sinn
+the crawling depth.==die Crawling Tiefe zu erh&ouml;hen.
+#Re-Crawl Option:==Re-Crawl Option:
+Use:==Benutzen:
+Interval:==Intervall:
+Year\(s\)==Jahr(e)
+Month\(s\)==Monat(e)
+Day\(s\)==Tag(e)
+Hour\(s\)==Stunde(n)
+Minute\(s\)==Minute(n)
+If you use this option, web pages that are already existent in your database are crawled and indexed again.==Ist diese Option aktiviert, werden bereits in Ihrer Datenbank existierende Internetseite erneut gecrawlet und indexiert.
+It depends on the age of the last crawl if this is done or not: if the last crawl is older than the given==Es h&auml;ngt vom Alter des letzten Crawls ab, ob dies getan oder nicht getan wird: wenn der letzte Crawl &auml;lter als das angegebene
+date, the page is crawled again, otherwise it is treated as 'double' and not loaded or indexed again.==Datum ist, wird die Seite erneut gecrawlet, sonst wird sie als 'double' markiert und weder geladen noch indexiert.
+Auto-Dom-Filter:==Auto-Dom-Filter:
+Depth:==Tiefe:
+This option will automatically create a domain-filter which limits the crawl on domains the crawler==Diese Option erzeugt automatisch einen Domain-Filter der den Crawl auf die Domains beschr&auml;nkt ,
+will find on the given depth. You can use this option i.e. to crawl a page with bookmarks while==die auf der angegebenen Tiefe gefunden werden. Diese Option kann man beispielsweise benutzen, um eine Seite mit Bookmarks zu crawlen
+restricting the crawl on only those domains that appear on the bookmark-page. The adequate depth==und dann den folgenden Crawl automatisch auf die Domains zu beschr&auml;nken, die in der Bookmarkliste vorkamen. Die einzustellende Tiefe f&uuml;r
+for this example would be 1.==dieses Beispiel w&auml;re 1.
+The default value 0 gives no restrictions.==Der Vorgabewert 0 bedeutet, dass nichts eingeschr&auml;nkt wird.
+Maximum Pages per Domain:==Maximale Seiten pro Domain:
+Page-Count:==Seitenanzahl:
+You can limit the maxmimum number of pages that are fetched and indexed from a single domain with this option.==Sie k&ouml;nnen die maximale Anzahl an Seiten, die von einer einzelnen Domain gefunden und indexiert werden, mit dieser Option begrenzen.
+You can combine this limitation with the 'Auto-Dom-Filter', so that the limit is applied to all the domains within==Sie k&ouml;nnen diese Option auch mit dem 'Auto-Dom-Filter' kombinieren, so dass das Limit f&uuml;r alle Domains mit der
+the given depth. Domains outside the given depth are then sorted-out anyway.==angegebenen Tiefe gilt. Domains ausserhalb der angegebenen Tiefe werden einfach aussortiert.
+Accept URLs with \'?\' / dynamic URLs:==Akzeptiere URLs mit '?' / dynamische URLs:
+A questionmark is usually a hint for a dynamic page. URLs pointing to dynamic content should usually not be crawled. However, there are sometimes web pages with static content that==Ein Fragezeichen ist normalerweise ein Hinweis auf eine dynamische Seite. URLs mit dynamischem Inhalt sollten normalerweise nicht gecrawlt werden. Wie auch immer, manchmal gibt es Seiten mit festem Inhalt, die
+is accessed with URLs containing question marks. If you are unsure, do not check this to avoid crawl loops.==nur von URLs zu erreichen sind, die ein Fragezeichen enthalten. Wenn Sie unsicher sind, aktivieren Sie diese Funktion nicht, um Crawl Schleifen zu vermeiden.
+Store to Proxy Cache:==Speichern im Proxy-Cache:
+This option is used by default for proxy prefetch, but is not needed for explicit crawling.==Diese Option ist standardm&auml;ssig beim Proxy aktiviert, wird aber zum reinen Crawlen nicht gebraucht.
+We recommend to leave this switched off unless you want to control the crawl results with the==Wir raten Ihnen, sie nicht zu aktivieren, ausser Sie wollen die Crawl Resulate mit
+Cache Monitor==Cache Monitor kontrollieren.
+Do Local Indexing:==Lokales Indexieren:
+index text:==Indexiere Text:
+index media:==Indexiere Media:
+This enables indexing of the wepages the crawler will download. This should be switched on by default, unless you want to crawl only to fill the==Dies aktiviert die Indexierung von Webseiten, die der Crawler runterl&auml;dt. Dies sollte standardm&auml;ssig aktiviert sein, ausser Sie wollen den
+Proxy Cache</a> without indexing.==Proxy Cache</a> ohne Indexierung f&uuml;llen.
+Do Remote Indexing:==Indexieren auf anderen Peers:
+Describe your intention to start this global crawl \(optional\):==Beschreiben Sie warum Sie diesen globalen Crawl starten (optional):
+This message will appear in the 'Other Peer Crawl Start' table of other peers.==Diese Nachricht wird bei anderen Peers in der 'Anderer Peer Crawl Start' Tabelle angezeigt.
+If checked, the crawler will contact other peers and use them as remote indexers for your crawl.==Wenn aktiviert, wird der Crawler mit anderen Peers Kontakt aufnehmen und diese als Remote Indexierer f&uuml;r Ihren Crawl benutzen.
+If you need your crawling results locally, you should switch this off.==Wenn Sie die Crawling Ergebnisse lokal ben&ouml;tigen, sollten Sie diese Funktion deaktivieren.
+Only senior and principal peers can initiate or receive remote crawls.==Nur Senior und Principal Peers k&ouml;nnen einen remote Crawl initiieren oder erhalten.
+<strong>A YaCyNews message will be created to inform all peers about a global crawl</strong>, so they can omit starting a crawl with the same start point.==<strong>Eine Nachricht wird im YaCy News Bereich angezeigt, um alle Peers von diesem globalen Crawl zu informieren</strong>, damit sie es vermeiden k&ouml;nnen, einen Crawl vom selben Startpunkt zu starten.
+Exclude <em>static</em> Stop-Words==<em>Statische</em> Stop-Words ausschlie&szlig;en:
+This can be useful to circumvent that extremely common words are added to the database, i.e. \"the\", \"he\", \"she\", \"it\"... To exclude all words given in the file <tt>yacy.stopwords</tt> from indexing,==Dies ist sinnvoll, um zu verhindern, dass extrem h&auml;ufig vorkommende W&ouml;rter wie z.B. "der", "die", "das", "und", "er", "sie" etc in die Datenbank aufgenommen werden. Um alle W&ouml;rter von der Indexierung auszuschliessen, die in der Datei <tt>yacy.stopwords</tt> enthalten sind,
+check this box.==aktivieren Sie diese Box.
+Starting Point:==Startpunkt:
+From&nbsp;File:==Aus Datei:
+From&nbsp;URL:==Von URL:
+Existing start URLs are re-crawled.==Die existierende Start URL wird wieder gecrawlt.
+Other already visited URLs are sorted out as \"double\".==Andere bereits besuchte Seiten werden als 'doppelt' aussortiert.
+A complete re-crawl will be available soon.==Ein kompletter Re-Crawl wird bald m&ouml;glich sein.
+"Start New Crawl"=="Neuen Crawl starten"
+Distributed Indexing:==Verteiltes Indexieren:
+Crawling and indexing can be done by remote peers.==Crawlen und Indexieren kann von anderen Peers durchgef&uuml;hrt werden.
+Your peer can search and index for other peers and they can search for you.==Ihr Peer kann suchen und indexieren f&uuml;r andere Peers und diese k&ouml;nnen f&uuml;r Sie suchen.
+Accept remote crawling requests and perform crawl at maximum load==Akzeptiere Remote-Crawling Anfragen und crawle bis zur maximalen Auslastung.
+Accept remote crawling requests and perform crawl at maximum of==Akzeptiere Remote-Crawling Anfragen und crawle bis zu einem Maximum von
+Pages Per Minute \(minimum is 1, low system load usually at PPM &ge; 30\)==Seiten pro Minute (Minimum ist 1, langsame Systeme sollten normalerweise unter 30 Seiten pro Minute laden)
+Do not accept remote crawling requests \(please set this only if you cannot accept to crawl only one page per minute; see option above\)==Akzeptiere keine Remote-Crawling Anfragen (bitte aktivieren Sie dies nur, wenn Sie nicht eine Seite pro Minute crawlen k&ouml;nnen; siehe Option oben)
+"set"=="Speichern"
+Crawling paused successfully.==Crawling wurde erfolgreich unterbrochen (Pause).
+Continue crawling.==Crawling wird fortgesetzt.
+"refresh"=="Aktualisieren"
+"continue crawling"=="Crawling fortsetzen"
+"pause crawling"=="Crawling pausieren"
+Start URL==Start URL
+Depth</strong>==Tiefe</strong>
+Accept \'?\' URLs</strong>==URLs mit "?" akzeptieren</strong>
+Recently started remote crawls in progress:==Gerade gestartetes Indexieren auf anderen Peers in Bearbeitung:
+Start Time==Startzeit
+Peer Name==Peer Name
+Start URL==Start URL
+Intention/Description==Absicht/Beschreibung
+Recently started remote crawls, finished:==Gerade gestartete Remote-Crawls anderer Peers, beendete:
+Remote Crawling Peers:==Remote-Crawl Peers:
+No remote crawl peers available.==Kein Peer zum Remote-Crawl erreichbar.
+peers available for remote crawling.==Peers erreichbar zum Remote-Crawling.
+Idle Peers==Unt&auml;tige Peers
+Busy Peers==Besch&auml;tigte Peers
+\#no::yes\#==#nein::ja#
+#-----------------------------
+
+#File: CrawlStartSimple_p.html
+#---------------------------
+Crawl Start \(easy\)==Crawl Start (Anf&auml;nger)
+Easy Crawl Start==Einfacher Crawl Start
+Start Crawling Job:==Starte Crawling Aufgabe:
+You can define URLs as start points for Web page crawling and start crawling here.==Sie k&ouml;nnen hier URLs angeben, die gecrawlt werden sollen und dann das Crawling starten. 
+\"Crawling\" means that YaCy will download the given website, extract all links in it=="Crawling" bedeutet, dass YaCy die angegebene Webseite runterl&auml;dt, alle Links extrahiert
+and then download the content behind these links.==und dann den Inhalt hinter diesen Links runterl&auml;dt.
+This is repeated as long as specified under \"Crawling Depth\".==Dies wird solange wiederholt wie unter "Crawling Tiefe" angegeben.
+#Attribut==Attribut
+Value==Wert
+Description</strong>==Beschreibung</strong>
+Starting Point:==Startpunkt:
+Enter here the start url of the web crawl.==Geben Sie hier den Startpunkt f&uuml;r Ihren Web Crawl ein.
+Crawling Depth==Crawling-Tiefe
+The depth defines how deep the Crawler will follow links of links \(...\) and so on.==Die Tiefe definiert, wie tief der Crawler den Links der Links (...) folgen wird und so weiter.
+"Start New Distributed Crawl \(will be visible at other peers\)"=="Starte einen neuen verteilten Crawl (sichtbar f&uuml;r alle anderen Peers)" 
+Recently started remote crawls in progress:==Gerade gestartetes Indexieren auf anderen Peers in Bearbeitung:
+Start Time==Startzeit
+Peer Name==Peer Name
+Start URL==Start URL
+Intention/Description==Absicht/Beschreibung
+Depth</strong>==Tiefe</strong>
+Accept \'?\' URLs==Akzeptiere '?' URLs
+\#no::yes\#==#nein::ja#
+Recently started remote crawls, finished:==Gerade gestartete Remote-Crawls anderer Peers, beendete:
+Recently started remote crawls, finished:</strong></p>
+Remote Crawling Peers:==Remote-Crawl Peers:
+No remote crawl peers available.==Kein Peer zum Remote-Crawl erreichbar.
+peers available for remote crawling.==Peers erreichbar zum Remote-Crawling.
+Idle Peers==Unt&auml;tige Peers
+Busy Peers==Besch&auml;tigte Peers
+#-----------------------------
+
 
 #File: DetailedSearch.html
 #---------------------------
@@ -674,104 +807,6 @@ Word:</td>==Wort:</td>
 Word-Hash:</td>==Wort-Hash:</td>
 #-----------------------------
 
-#File: IndexCreate_p.html
-#---------------------------
-Index Creation==Index Erzeugung
-Start Crawling Job:==Starte Crawling Aufgabe:
-You can define URLs as start points for Web page crawling and start crawling here. \"Crawling\" means that YaCy will download the given website, extract all links in it and then download the content behind these links. This is repeated as long as specified under \"Crawling Depth\".==Sie k&ouml;nnen hier URLs angeben, die gecrawlt werden sollen und dann das Crawling starten. "Crawling" bedeutet, dass YaCy die angegebene Webseite runterl&auml;dt, alle Links extrahiert und dann den Inhalt hinter diesen Links runterl&auml;dt. Dies wird solange wiederholt wie unter "Crawling Tiefe" angegeben.
-#Attribut==Attribut
-Value==Wert
-Description</strong>==Beschreibung</strong>
-Crawling Depth:==Crawling-Tiefe:
-This defines how often the Crawler will follow links embedded in websites.==Dies definiert, wie oft der Crawler eingebetteten Links in Webseiten folgen wird.
-A minimum of 1 is recommended and means that the page you enter under \"Starting Point\" will be added to the index, but no linked content is indexed. 2-4 is good for normal indexing.==Ein Minimum von 1 wird empfohlen und bedeutet, dass die Seite, die Sie unter "Startpunkt" angegeben haben, dem Index zugef&uuml;gt wird, verlinkter Inhalt allerdings nicht. 2-4 ist gut f&uuml;r normales Indexieren.
-Be careful with the depth. Consider a branching factor of average 20;==Seien Sie vorsichtig mit der Crawl-Tiefe. Erw&auml;gen Sie einen durschnittlichen Verzweigungsfaktor von 20;
-A prefetch-depth of 8 would index 25.600.000.000 pages, maybe this is the whole WWW.==eine Crawl-Tiefe 8 wird 25.600.000.000 Seiten indexieren, vielleicht sogar das ganze WWW.
-Crawling Filter:==Crawling Filter:
-This is an emacs-like regular expression that must match with the URLs which are used to be crawled.==Dies ist ein emacs-&auml;hnlicher regul&auml;rer Ausdruck, der mit der gecrawlten URL &uuml;bereinstimmen muss.
-Use this i.e. to crawl a single domain. If you set this filter it makes sense to increase==Benutzen Sie dies z.B., um nur eine einzelne Domain zu crawlen. Wenn Sie diese Maske aktivieren, macht es Sinn
-the crawling depth.==die Crawling Tiefe zu erh&ouml;hen.
-#Re-Crawl Option:==Re-Crawl Option:
-Use:==Benutzen:
-Interval:==Intervall:
-Year\(s\)==Jahr(e)
-Month\(s\)==Monat(e)
-Day\(s\)==Tag(e)
-Hour\(s\)==Stunde(n)
-Minute\(s\)==Minute(n)
-If you use this option, web pages that are already existent in your database are crawled and indexed again.==Ist diese Option aktiviert, werden bereits in Ihrer Datenbank existierende Internetseite erneut gecrawlet und indexiert.
-It depends on the age of the last crawl if this is done or not: if the last crawl is older than the given==Es h&auml;ngt vom Alter des letzten Crawls ab, ob dies getan oder nicht getan wird: wenn der letzte Crawl &auml;lter als das angegebene
-date, the page is crawled again, otherwise it is treated as 'double' and not loaded or indexed again.==Datum ist, wird die Seite erneut gecrawlet, sonst wird sie als 'double' markiert und weder geladen noch indexiert.
-Auto-Dom-Filter:==Auto-Dom-Filter:
-Depth:==Tiefe:
-This option will automatically create a domain-filter which limits the crawl on domains the crawler==Diese Option erzeugt automatisch einen Domain-Filter der den Crawl auf die Domains beschr&auml;nkt ,
-will find on the given depth. You can use this option i.e. to crawl a page with bookmarks while==die auf der angegebenen Tiefe gefunden werden. Diese Option kann man beispielsweise benutzen, um eine Seite mit Bookmarks zu crawlen
-restricting the crawl on only those domains that appear on the bookmark-page. The adequate depth==und dann den folgenden Crawl automatisch auf die Domains zu beschr&auml;nken, die in der Bookmarkliste vorkamen. Die einzustellende Tiefe f&uuml;r
-for this example would be 1.==dieses Beispiel w&auml;re 1.
-The default value 0 gives no restrictions.==Der Vorgabewert 0 bedeutet, dass nichts eingeschr&auml;nkt wird.
-Maximum Pages per Domain:==Maximale Seiten pro Domain:
-Page-Count:==Seitenanzahl:
-You can limit the maxmimum number of pages that are fetched and indexed from a single domain with this option.==Sie k&ouml;nnen die maximale Anzahl an Seiten, die von einer einzelnen Domain gefunden und indexiert werden, mit dieser Option begrenzen.
-You can combine this limitation with the 'Auto-Dom-Filter', so that the limit is applied to all the domains within==Sie k&ouml;nnen diese Option auch mit dem 'Auto-Dom-Filter' kombinieren, so dass das Limit f&uuml;r alle Domains mit der
-the given depth. Domains outside the given depth are then sorted-out anyway.==angegebenen Tiefe gilt. Domains ausserhalb der angegebenen Tiefe werden einfach aussortiert.
-Accept URLs with \'?\' / dynamic URLs:==Akzeptiere URLs mit '?' / dynamische URLs:
-A questionmark is usually a hint for a dynamic page. URLs pointing to dynamic content should usually not be crawled. However, there are sometimes web pages with static content that==Ein Fragezeichen ist normalerweise ein Hinweis auf eine dynamische Seite. URLs mit dynamischem Inhalt sollten normalerweise nicht gecrawlt werden. Wie auch immer, manchmal gibt es Seiten mit festem Inhalt, die
-is accessed with URLs containing question marks. If you are unsure, do not check this to avoid crawl loops.==nur von URLs zu erreichen sind, die ein Fragezeichen enthalten. Wenn Sie unsicher sind, aktivieren Sie diese Funktion nicht, um Crawl Schleifen zu vermeiden.
-Store to Proxy Cache:==Speichern im Proxy-Cache:
-This option is used by default for proxy prefetch, but is not needed for explicit crawling.==Diese Option ist standardm&auml;ssig beim Proxy aktiviert, wird aber zum reinen Crawlen nicht gebraucht.
-We recommend to leave this switched off unless you want to control the crawl results with the==Wir raten Ihnen, sie nicht zu aktivieren, ausser Sie wollen die Crawl Resulate mit
-Cache Monitor==Cache Monitor kontrollieren.
-Do Local Indexing:==Lokales Indexieren:
-index text:==Indexiere Text:
-index media:==Indexiere Media:
-This enables indexing of the wepages the crawler will download. This should be switched on by default, unless you want to crawl only to fill the==Dies aktiviert die Indexierung von Webseiten, die der Crawler runterl&auml;dt. Dies sollte standardm&auml;ssig aktiviert sein, ausser Sie wollen den
-Proxy Cache</a> without indexing.==Proxy Cache</a> ohne Indexierung f&uuml;llen.
-Do Remote Indexing:==Indexieren auf anderen Peers:
-Describe your intention to start this global crawl \(optional\):==Beschreiben Sie warum Sie diesen globalen Crawl starten (optional):
-This message will appear in the 'Other Peer Crawl Start' table of other peers.==Diese Nachricht wird bei anderen Peers in der 'Anderer Peer Crawl Start' Tabelle angezeigt.
-If checked, the crawler will contact other peers and use them as remote indexers for your crawl.==Wenn aktiviert, wird der Crawler mit anderen Peers Kontakt aufnehmen und diese als Remote Indexierer f&uuml;r Ihren Crawl benutzen.
-If you need your crawling results locally, you should switch this off.==Wenn Sie die Crawling Ergebnisse lokal ben&ouml;tigen, sollten Sie diese Funktion deaktivieren.
-Only senior and principal peers can initiate or receive remote crawls.==Nur Senior und Principal Peers k&ouml;nnen einen remote Crawl initiieren oder erhalten.
-<strong>A YaCyNews message will be created to inform all peers about a global crawl</strong>, so they can omit starting a crawl with the same start point.==<strong>Eine Nachricht wird im YaCy News Bereich angezeigt, um alle Peers von diesem globalen Crawl zu informieren</strong>, damit sie es vermeiden k&ouml;nnen, einen Crawl vom selben Startpunkt zu starten.
-Exclude <em>static</em> Stop-Words==<em>Statische</em> Stop-Words ausschlie&szlig;en:
-This can be useful to circumvent that extremely common words are added to the database, i.e. \"the\", \"he\", \"she\", \"it\"... To exclude all words given in the file <tt>yacy.stopwords</tt> from indexing,==Dies ist sinnvoll, um zu verhindern, dass extrem h&auml;ufig vorkommende W&ouml;rter wie z.B. "der", "die", "das", "und", "er", "sie" etc in die Datenbank aufgenommen werden. Um alle W&ouml;rter von der Indexierung auszuschliessen, die in der Datei <tt>yacy.stopwords</tt> enthalten sind,
-check this box.==aktivieren Sie diese Box.
-Starting Point:==Startpunkt:
-From&nbsp;File:==Aus Datei:
-From&nbsp;URL:==Von URL:
-Existing start URLs are re-crawled.==Die existierende Start URL wird wieder gecrawlt.
-Other already visited URLs are sorted out as \"double\".==Andere bereits besuchte Seiten werden als 'doppelt' aussortiert.
-A complete re-crawl will be available soon.==Ein kompletter Re-Crawl wird bald m&ouml;glich sein.
-"Start New Crawl"=="Neuen Crawl starten"
-Distributed Indexing:==Verteiltes Indexieren:
-Crawling and indexing can be done by remote peers.==Crawlen und Indexieren kann von anderen Peers durchgef&uuml;hrt werden.
-Your peer can search and index for other peers and they can search for you.==Ihr Peer kann suchen und indexieren f&uuml;r andere Peers und diese k&ouml;nnen f&uuml;r Sie suchen.
-Accept remote crawling requests and perform crawl at maximum load==Akzeptiere Remote-Crawling Anfragen und crawle bis zur maximalen Auslastung.
-Accept remote crawling requests and perform crawl at maximum of==Akzeptiere Remote-Crawling Anfragen und crawle bis zu einem Maximum von
-Pages Per Minute \(minimum is 1, low system load usually at PPM &ge; 30\)==Seiten pro Minute (Minimum ist 1, langsame Systeme sollten normalerweise unter 30 Seiten pro Minute laden)
-Do not accept remote crawling requests \(please set this only if you cannot accept to crawl only one page per minute; see option above\)==Akzeptiere keine Remote-Crawling Anfragen (bitte aktivieren Sie dies nur, wenn Sie nicht eine Seite pro Minute crawlen k&ouml;nnen; siehe Option oben)
-"set"=="Speichern"
-Crawling paused successfully.==Crawling wurde erfolgreich unterbrochen (Pause).
-Continue crawling.==Crawling wird fortgesetzt.
-"refresh"=="Aktualisieren"
-"continue crawling"=="Crawling fortsetzen"
-"pause crawling"=="Crawling pausieren"
-Start URL==Start URL
-Depth</strong>==Tiefe</strong>
-Accept \'?\' URLs</strong>==URLs mit "?" akzeptieren</strong>
-Recently started remote crawls in progress:==Gerade gestartetes Indexieren auf anderen Peers in Bearbeitung:
-Start Time==Startzeit
-Peer Name==Peer Name
-Start URL==Start URL
-Intention/Description==Absicht/Beschreibung
-Recently started remote crawls, finished:==Gerade gestartete Remote-Crawls anderer Peers, beendete:
-Remote Crawling Peers:==Remote-Crawl Peers:
-No remote crawl peers available.==Kein Peer zum Remote-Crawl erreichbar.
-peers available for remote crawling.==Peers erreichbar zum Remote-Crawling.
-Idle Peers==Unt&auml;tige Peers
-Busy Peers==Besch&auml;tigte Peers
-\#no::yes\#==#nein::ja#
-#-----------------------------
 
 #File: IndexCreateIndexingQueue_p.html
 #---------------------------
@@ -2061,6 +2096,17 @@ Indicator==Indikator
 Level==Stufe
 #-----------------------------
 
+#File: WatchWebStructure_p.html
+#---------------------------
+Web Structure==Netz Struktur
+host<==Host<
+depth<==Tiefe<
+nodes<==Knoten<
+time<==Zeit<
+size<==Gr&ouml;sse
+"change"=="&auml;ndern"
+#-----------------------------
+
 #File: Wiki.html
 #---------------------------
 YaCyWiki page:==YaCyWiki Seite:
@@ -2175,7 +2221,9 @@ You cannot get global search results because you are not connected to another Ya
 "bookmark"=="Lesezeichen"
 "recommend"=="empfehlen"
 "delete"=="l&ouml;schen"
-loading snippet==Auszug wird geladen
+loading snippet ...==Auszug wird geladen ...
+loading snippet from==Auszug wird geladen von
+Sorry, but in order to use the image search, you need JavaScript. But here are the urls, yacy would have looked for the images you want. Perhaps you can find them there. Sorry for the inconvenience. If you want a non-JavaScript image search, beg the developers for it.==Entschuldigung, aber um die Bildersuche benutzen zu k&ouml;nnen, brauchen Sie JavaScript. Aber hier sind die URLs, die YaCy benutzt hat, um nach Ihren gesuchten Bildern zu suchen. Vielleicht finden Sie diese dort. Entschuldigen Sie die Unanehmlichkeiten. Wenn Sie eine Bildersuche ohne JavaScript wollen, bitten Sie die Entwickler darum.
 Pictures==Bilder
 The global search resulted in \#\[globalresults\]\# link contributions from other YaCy peers.==Die globale Suche enth&auml;lt #[globalresults]# Ergebnisse, die von anderen Peers geliefert wurden.
 YaCy is a GPL'ed project==YaCy ist ein GPL Projekt
@@ -2266,6 +2314,26 @@ Incoming&nbsp;Cookies==Eingehende Cookies
 Outgoing&nbsp;Cookies==Ausgehende Cookies
 #-----------------------------
 
+#File: env/templates/submenuCrawler.template
+#---------------------------
+Crawler Activity==Crawler Aktivit&auml;t
+Activity Visualization==Visualisierung der Aktivit&auml;t 
+Web Structure==Netz Struktur
+Crawler Queues==Crawler Puffer
+Control Queues==Kontolle des Puffers
+Indexing<==Indexierung<
+Loader<==Lader<
+WWW Crawl Queues==WWW Crawl-Puffer
+Local<==Lokal<
+#Global<==Global<
+#Remote<==Remote<
+Overhang<==&Uuml;berhang<
+Media Crawl Queues==Medien Crawl-Puffer
+>Images==>Bilder
+>Movies==>Filme
+>Music==>Musik
+#-----------------------------
+
 #File: env/templates/submenuIndexControl.template
 #---------------------------
 Index Control Menu==Index Verwalten Men&uuml;
@@ -2277,20 +2345,11 @@ Index Cleaner==Index Aufr&auml;umer
 
 #File: env/templates/submenuIndexCreate.template
 #---------------------------
-Index Creation Menu==Index-erzeugen Men&uuml;
-Control Queues==Kontrolle der Puffer
-WWW Crawl Queues==WWW Crawl-Puffer
-Media Crawl Queues==Medien Crawl-Puffer
-#Crawl Start==Crawl Start
->Indexing==>Indexieren
->Loader==>Lader
->Local==>Lokal
-#Global==Global
->Overhang==>Overhang
->Images==>Bilder
->Movies==>Filme
->Music==>Musik
-#-----------------------------
+Start a Web Crawl==Starte einen Web Crawl
+Crawl Start \(easy\)==Crawl starten (Anf&auml;nger)
+Crawl Start \(expert\)==Crawl starten (Experte)
+Crawl Profile Editor==Crawl Profil Editor
+
 
 #File: env/templates/submenuPerformance.template
 #---------------------------
