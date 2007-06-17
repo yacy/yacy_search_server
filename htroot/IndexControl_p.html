@@ -92,25 +92,23 @@
       <fieldset><legend>Reference Deletion</legend>
         <dl>
           <dt><input type="checkbox" id="delurl" name="delurl" value="" align="top" checked /></dt>
-          <dd>
-            <label for="delurl" class="small">
-              delete also the referenced URL itself (reasonable and recommended, may produce unresolved references<br />
+          <dd>delete also the referenced URL itself (reasonable and recommended, may produce unresolved references<br />
               at other word indexes but they do not harm)
-            </label>
-          </dt>
+          </dd>
           <dt><input type="checkbox" id="delurlref" name="delurlref" value="" align="top" /></dt>
-          <dd>
-            <label for="delurlref" class="small">
-              for every resolveable and deleted URL reference, delete the same reference at every other word where<br />
+          <dd>for every resolveable and deleted URL reference, delete the same reference at every other word where<br />
               the reference exists (very extensive, but prevents further unresolved references)
-            </label>
-          </dt>
+          </dd>
           <dt>&nbsp;</dt>
           <dd>
             <input type="submit" value="Delete reference to selected URLs" name="keyhashdelete" /><br />
             <input type="submit" value="Delete reference to ALL URLs" name="keyhashdeleteall" /><span class="small">&nbsp;&nbsp;(= delete Word)</span>
           </dd>
-          <dt>
+        </dl>
+      </fieldset>
+      <fieldset><legend>Blacklist Extension</legend>
+        <dl>
+           <dt>
             <select name="blacklist" size="1">#{blacklists}# 
               <option value="#[name]#">#[name]#</option>#{/blacklists}# 
             </select>
