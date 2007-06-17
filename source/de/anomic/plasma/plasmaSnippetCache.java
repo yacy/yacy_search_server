@@ -183,7 +183,7 @@ public class plasmaSnippetCache {
 
                     // cut off prefix if it contains of non-characters or non-numbers
                     while(w[j].matches("\\A[^\\p{L}\\p{N}].+")) {
-                        prefix = w[j].substring(0,1) + prefix;
+                        prefix = prefix + w[j].substring(0,1);
                         w[j] = w[j].substring(1);
                     }
 
