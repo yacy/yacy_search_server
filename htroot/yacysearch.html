@@ -210,9 +210,10 @@ document.getElementById("Enter").value = "search again - catch up more links";
 	<script type="text/javascript">
     var urls = "#{results}##[urlname]# #{/results}#".split(" ");
     // the last element is always empty because the split gets a space at the end of the string
-    urls.length --;
-    if(urls.length > 0)
+    urls.length--;
+    if(urls.length > 0) {
       AllImageSnippets(urls, "#[former]#");
+    }
 	</script>
 	<br style="clear:left;" />
 	::<!-- type 3: image thumbnail list for one single url -->
