@@ -1,7 +1,18 @@
 #!/bin/sh
 JAVA="`which java`"
 LOGFILE="yacy.log"
-if [ "`id -u`" -eq 0 ]
+
+#check if OS is Sun Solaris or one of the OpenSolaris distributions and use different version of id if necessary
+if [ "`uname`" = "SunOS" ]
+then
+    # only this version of id supports the parameter -u
+    ID="/usr/xpg4/bin/id"
+else
+    # regular id for any other case (especially Linux and OSX)
+    ID="id"
+fi
+
+if [ "`$ID -u`" -eq 0 ]
 then
 	echo
 	echo "For security reasons you should not run this script as root!"
