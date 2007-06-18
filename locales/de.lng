@@ -21,6 +21,41 @@
 <!-- maintainer -->==&lt;admin@yacy-forum.de&gt;
 #-----------------------------
 
+#File: AccessTracker_p.html
+#---------------------------
+Server Access Overview==Server Zugriff &Uuml;berblick
+This is a list of requests to the local http server within the last hour.==Dies ist eine Liste aller Anfragen, die an den lokalen http Server innerhalb der letzten Stunde gestellt wurden.
+Showing \#\[num\]\# requests.==Gezeigt werden #[num]# Anfragen.
+Local Search Log==Lokale Suche Log
+Local Search Host Tracker==Lokale Suche Host Tracker
+Remote Search Log==Remote Suche Log
+Remote Search Host Tracker==Remote Suche Host Tracker
+Search Statistics</h2>==Suchstatistik</h2>
+You can monitor search attempts at your own peer.==Sie k&ouml;nnen hier die Suchanfragen an Ihren Peer einsehen.
+Local statistics apply for search attempts at your own search portal,==Die lokale Statistik zeigt Suchanfragen, die von Ihrem eigenen Such Portal gestartet wurden.
+and remote statistics show search requests form other peer. Not all remote peers ask your peer during a global search,==Die Remote Statistik zeigt Suchanfragen von anderen Peers an. Nicht alle Peers fragen w&auml;hrend einer Suche Ihren Peer an, 
+therefore your cannot have a global view over all search requests within the complete YaCy network.==deswegen k&ouml;nnen Sie keine Gesamt&uuml;bersicht f&uuml;r das komplette YaCy Netzwerk haben.
+Search Statistics: Local Searches==Suchstatistik: Lokale Suche
+Search Statistics: Local Searche Tracker==Suchstatistik: Lokale Suche Tracker
+This is a list of searches that had been requested from this\' peer search interface==Dies ist eine Liste aller Suchanfragen, die von diesem Peer ausgef&uuml;hrt wurden. 
+Showing \#\[num\]\# entries from a total of \#\[total\]\# requests.==Es werden #[num]# Eintr&auml;ge von insgesamt #[total]# Anfragen angezeigt.
+Requesting Host==Anfragender Host
+Date</td>==Datum</td>
+Offset==Versatz
+Expected Results==Erwartete Ergebnisse
+Returned Results==Gefundene Ergebnisse
+Expected Time==Erwartete Zeit
+Used Time==Gebrauchte Zeit
+Search Words==Such Wort
+Count==Anzahl
+Access Dates==Zugriffsdaten
+Search Statistics: Remote Searches==Suchstatistik: Remote Suche
+Search Statistics: Remote Searche Tracker==Suchstatistik: Remote Suche Tracker
+This is a list of searches that had been requested from remote peer search interface==Dies ist eine Liste aller Suchanfragen, die von einem anderen Peer gestellt wurden. 
+
+#---------------------------
+
+
 #File: Blacklist_p.html
 #---------------------------
 Blacklist Manager==Blacklist Manager
@@ -460,23 +495,30 @@ Title==Titel
 
 #File: CrawlStartExpert_p.html
 #---------------------------
-Index Creation==Index Erzeugung
+Crawl Start \(expert\)==Crawl Start (Experte)
+Expert Crawl Start==Experten Crawl Start
 Start Crawling Job:==Starte Crawling Aufgabe:
 You can define URLs as start points for Web page crawling and start crawling here. \"Crawling\" means that YaCy will download the given website, extract all links in it and then download the content behind these links. This is repeated as long as specified under \"Crawling Depth\".==Sie k&ouml;nnen hier URLs angeben, die gecrawlt werden sollen und dann das Crawling starten. "Crawling" bedeutet, dass YaCy die angegebene Webseite runterl&auml;dt, alle Links extrahiert und dann den Inhalt hinter diesen Links runterl&auml;dt. Dies wird solange wiederholt wie unter "Crawling Tiefe" angegeben.
 #Attribut==Attribut
 Value==Wert
 Description</strong>==Beschreibung</strong>
-Crawling Depth:==Crawling-Tiefe:
+Starting Point:==Startpunkt:
+From URL==Von URL
+From Sitemap==Von Sitemap
+From File==Von Datei
+Crawling Depth</label>==Crawling-Tiefe</label>
 This defines how often the Crawler will follow links embedded in websites.==Dies definiert, wie oft der Crawler eingebetteten Links in Webseiten folgen wird.
-A minimum of 1 is recommended and means that the page you enter under \"Starting Point\" will be added to the index, but no linked content is indexed. 2-4 is good for normal indexing.==Ein Minimum von 1 wird empfohlen und bedeutet, dass die Seite, die Sie unter "Startpunkt" angegeben haben, dem Index zugef&uuml;gt wird, verlinkter Inhalt allerdings nicht. 2-4 ist gut f&uuml;r normales Indexieren.
+A minimum of 0 is recommended and means that the page you enter under \"Starting Point\" will be added==Ein Minimum von 0 wird empfohlen und bedeutet, dass die Seite, die Sie unter "Startpunkt" angegeben haben, 
+to the index, but no linked content is indexed. 2-4 is good for normal indexing.==dem Index zugef&uuml;gt wird, verlinkter Inhalt allerdings nicht. 2-4 ist gut f&uuml;r normales Indexieren.
 Be careful with the depth. Consider a branching factor of average 20;==Seien Sie vorsichtig mit der Crawl-Tiefe. Erw&auml;gen Sie einen durschnittlichen Verzweigungsfaktor von 20;
 A prefetch-depth of 8 would index 25.600.000.000 pages, maybe this is the whole WWW.==eine Crawl-Tiefe 8 wird 25.600.000.000 Seiten indexieren, vielleicht sogar das ganze WWW.
-Crawling Filter:==Crawling Filter:
+Crawling Filter==Crawling Filter
+"only one domain"=="Nur eine Domain"
 This is an emacs-like regular expression that must match with the URLs which are used to be crawled.==Dies ist ein emacs-&auml;hnlicher regul&auml;rer Ausdruck, der mit der gecrawlten URL &uuml;bereinstimmen muss.
 Use this i.e. to crawl a single domain. If you set this filter it makes sense to increase==Benutzen Sie dies z.B., um nur eine einzelne Domain zu crawlen. Wenn Sie diese Maske aktivieren, macht es Sinn
 the crawling depth.==die Crawling Tiefe zu erh&ouml;hen.
 #Re-Crawl Option:==Re-Crawl Option:
-Use:==Benutzen:
+Use==Benutzen
 Interval:==Intervall:
 Year\(s\)==Jahr(e)
 Month\(s\)==Monat(e)
@@ -506,55 +548,27 @@ This option is used by default for proxy prefetch, but is not needed for explici
 We recommend to leave this switched off unless you want to control the crawl results with the==Wir raten Ihnen, sie nicht zu aktivieren, ausser Sie wollen die Crawl Resulate mit
 Cache Monitor==Cache Monitor kontrollieren.
 Do Local Indexing:==Lokales Indexieren:
-index text:==Indexiere Text:
-index media:==Indexiere Media:
+index text==Indexiere Text
+index media==Indexiere Media
 This enables indexing of the wepages the crawler will download. This should be switched on by default, unless you want to crawl only to fill the==Dies aktiviert die Indexierung von Webseiten, die der Crawler runterl&auml;dt. Dies sollte standardm&auml;ssig aktiviert sein, ausser Sie wollen den
 Proxy Cache</a> without indexing.==Proxy Cache</a> ohne Indexierung f&uuml;llen.
-Do Remote Indexing:==Indexieren auf anderen Peers:
-Describe your intention to start this global crawl \(optional\):==Beschreiben Sie warum Sie diesen globalen Crawl starten (optional):
+Do Remote Indexing==Indexieren auf anderen Peers
+Describe your intention to start this global crawl \(optional\)==Beschreiben Sie warum Sie diesen globalen Crawl starten (optional)
 This message will appear in the 'Other Peer Crawl Start' table of other peers.==Diese Nachricht wird bei anderen Peers in der 'Anderer Peer Crawl Start' Tabelle angezeigt.
 If checked, the crawler will contact other peers and use them as remote indexers for your crawl.==Wenn aktiviert, wird der Crawler mit anderen Peers Kontakt aufnehmen und diese als Remote Indexierer f&uuml;r Ihren Crawl benutzen.
 If you need your crawling results locally, you should switch this off.==Wenn Sie die Crawling Ergebnisse lokal ben&ouml;tigen, sollten Sie diese Funktion deaktivieren.
 Only senior and principal peers can initiate or receive remote crawls.==Nur Senior und Principal Peers k&ouml;nnen einen remote Crawl initiieren oder erhalten.
-<strong>A YaCyNews message will be created to inform all peers about a global crawl</strong>, so they can omit starting a crawl with the same start point.==<strong>Eine Nachricht wird im YaCy News Bereich angezeigt, um alle Peers von diesem globalen Crawl zu informieren</strong>, damit sie es vermeiden k&ouml;nnen, einen Crawl vom selben Startpunkt zu starten.
+A YaCyNews message will be created to inform all peers about a global crawl==Eine Nachricht wird im YaCy News Bereich angezeigt, um alle Peers von diesem globalen Crawl zu informieren 
+so they can omit starting a crawl with the same start point.==damit sie es vermeiden k&ouml;nnen, einen Crawl vom selben Startpunkt zu starten.
 Exclude <em>static</em> Stop-Words==<em>Statische</em> Stop-Words ausschlie&szlig;en:
 This can be useful to circumvent that extremely common words are added to the database, i.e. \"the\", \"he\", \"she\", \"it\"... To exclude all words given in the file <tt>yacy.stopwords</tt> from indexing,==Dies ist sinnvoll, um zu verhindern, dass extrem h&auml;ufig vorkommende W&ouml;rter wie z.B. "der", "die", "das", "und", "er", "sie" etc in die Datenbank aufgenommen werden. Um alle W&ouml;rter von der Indexierung auszuschliessen, die in der Datei <tt>yacy.stopwords</tt> enthalten sind,
 check this box.==aktivieren Sie diese Box.
-Starting Point:==Startpunkt:
-From&nbsp;File:==Aus Datei:
-From&nbsp;URL:==Von URL:
 Existing start URLs are re-crawled.==Die existierende Start URL wird wieder gecrawlt.
 Other already visited URLs are sorted out as \"double\".==Andere bereits besuchte Seiten werden als 'doppelt' aussortiert.
 A complete re-crawl will be available soon.==Ein kompletter Re-Crawl wird bald m&ouml;glich sein.
 "Start New Crawl"=="Neuen Crawl starten"
-Distributed Indexing:==Verteiltes Indexieren:
-Crawling and indexing can be done by remote peers.==Crawlen und Indexieren kann von anderen Peers durchgef&uuml;hrt werden.
-Your peer can search and index for other peers and they can search for you.==Ihr Peer kann suchen und indexieren f&uuml;r andere Peers und diese k&ouml;nnen f&uuml;r Sie suchen.
-Accept remote crawling requests and perform crawl at maximum load==Akzeptiere Remote-Crawling Anfragen und crawle bis zur maximalen Auslastung.
-Accept remote crawling requests and perform crawl at maximum of==Akzeptiere Remote-Crawling Anfragen und crawle bis zu einem Maximum von
-Pages Per Minute \(minimum is 1, low system load usually at PPM &ge; 30\)==Seiten pro Minute (Minimum ist 1, langsame Systeme sollten normalerweise unter 30 Seiten pro Minute laden)
-Do not accept remote crawling requests \(please set this only if you cannot accept to crawl only one page per minute; see option above\)==Akzeptiere keine Remote-Crawling Anfragen (bitte aktivieren Sie dies nur, wenn Sie nicht eine Seite pro Minute crawlen k&ouml;nnen; siehe Option oben)
-"set"=="Speichern"
-Crawling paused successfully.==Crawling wurde erfolgreich unterbrochen (Pause).
-Continue crawling.==Crawling wird fortgesetzt.
-"refresh"=="Aktualisieren"
-"continue crawling"=="Crawling fortsetzen"
-"pause crawling"=="Crawling pausieren"
-Start URL==Start URL
-Depth</strong>==Tiefe</strong>
+Depth</label>:==Tiefe</label>:
 Accept \'?\' URLs</strong>==URLs mit "?" akzeptieren</strong>
-Recently started remote crawls in progress:==Gerade gestartetes Indexieren auf anderen Peers in Bearbeitung:
-Start Time==Startzeit
-Peer Name==Peer Name
-Start URL==Start URL
-Intention/Description==Absicht/Beschreibung
-Recently started remote crawls, finished:==Gerade gestartete Remote-Crawls anderer Peers, beendete:
-Remote Crawling Peers:==Remote-Crawl Peers:
-No remote crawl peers available.==Kein Peer zum Remote-Crawl erreichbar.
-peers available for remote crawling.==Peers erreichbar zum Remote-Crawling.
-Idle Peers==Unt&auml;tige Peers
-Busy Peers==Besch&auml;tigte Peers
-\#no::yes\#==#nein::ja#
 #-----------------------------
 
 #File: CrawlStartSimple_p.html
@@ -1434,37 +1448,6 @@ Unable to create new crawling profile for URL:==Es ist nicht m&ouml;glich f&uuml
 Unable to add URL to crawler queue:==Es ist nicht m&ouml;glich die URL zum Crawler-Puffer hinzuzuf&uuml;gen:
 #-----------------------------
 
-#File: SearchStatistics_p.html
-#---------------------------
-Search Statistics Menu==Suchstatistik Men&uuml;
-Local&nbsp;Search&nbsp;Log==Lokale Suche Log
-Local&nbsp;Search&nbsp;Host&nbsp;Tracker==Lokale Suche Host Tracker
-Remote&nbsp;Search&nbsp;Log==Remote Suche Log
-Remote&nbsp;Search&nbsp;Host&nbsp;Tracker==Remote Suche Host Tracker
-Search Statistics</h2>==Suchstatistik</h2>
-You can monitor search attempts at your own peer.==Sie k&ouml;nnen hier die Suchanfragen an Ihren Peer einsehen.
-Local statistics apply for search attempts at your own search portal,==Die lokale Statistik zeigt Suchanfragen, die von Ihrem eigenen Such Portal gestartet wurden.
-and remote statistics show search requests form other peer. Not all remote peers ask your peer during a global search,==Die Remote Statistik zeigt Suchanfragen von anderen Peers an. Nicht alle Peers fragen w&auml;hrend einer Suche Ihren Peer an, 
-therefore your cannot have a global view over all search requests within the complete YaCy network.==deswegen k&ouml;nnen Sie keine Gesamt&uuml;bersicht f&uuml;r das komplette YaCy Netzwerk haben.
-Search Statistics: Local Searches==Suchstatistik: Lokale Suche
-Search Statistics: Local Searche Tracker==Suchstatistik: Lokale Suche Tracker
-This is a list of searches that had been requested from this\' peer search interface==Dies ist eine Liste aller Suchanfragen, die von diesem Peer ausgef&uuml;hrt wurden. 
-Showing \#\[num\]\# entries from a total of \#\[total\]\# Requests.==Es werden #[num]# Eintr&auml;ge von insgesamt #[total]# Anfragen angezeigt.
-Requesting Host==Anfragender Host
-Date</td>==Datum</td>
-Offset==Versatz
-Expected Results==Erwartete Ergebnisse
-Returned Results==Gefundene Ergebnisse
-Expected Time==Erwartete Zeit
-Used Time==Gebrauchte Zeit
-Search Words==Such Wort
-Count==Anzahl
-Access Dates==Zugriffsdaten
-Search Statistics: Remote Searches==Suchstatistik: Remote Suche
-Search Statistics: Remote Searche Tracker==Suchstatistik: Remote Suche Tracker
-This is a list of searches that had been requested from remote peer search interface==Dies ist eine Liste aller Suchanfragen, die von einem anderen Peer gestellt wurden. 
-
-#---------------------------
 
 #File: Settings_p.html
 #---------------------------
@@ -2223,7 +2206,7 @@ You cannot get global search results because you are not connected to another Ya
 "delete"=="l&ouml;schen"
 loading snippet ...==Auszug wird geladen ...
 loading snippet from==Auszug wird geladen von
-Sorry, but in order to use the image search, you need JavaScript. But here are the urls, yacy would have looked for the images you want. Perhaps you can find them there. Sorry for the inconvenience. If you want a non-JavaScript image search, beg the developers for it.==Entschuldigung, aber um die Bildersuche benutzen zu k&ouml;nnen, brauchen Sie JavaScript. Aber hier sind die URLs, die YaCy benutzt hat, um nach Ihren gesuchten Bildern zu suchen. Vielleicht finden Sie diese dort. Entschuldigen Sie die Unanehmlichkeiten. Wenn Sie eine Bildersuche ohne JavaScript wollen, bitten Sie die Entwickler darum.
+Sorry, but in order to use the image search, you need JavaScript. But here are the urls, YaCy would have looked for the images you want. Perhaps you can find them there. Sorry for the inconvenience. If you want a non-JavaScript image search, beg the developers for it.==Entschuldigung, aber um die Bildersuche benutzen zu k&ouml;nnen, brauchen Sie JavaScript. Aber hier sind die URLs, die YaCy benutzt hat, um nach Ihren gesuchten Bildern zu suchen. Vielleicht finden Sie diese dort. Entschuldigen Sie die Unanehmlichkeiten. Wenn Sie eine Bildersuche ohne JavaScript wollen, bitten Sie die Entwickler darum.
 Pictures==Bilder
 The global search resulted in \#\[globalresults\]\# link contributions from other YaCy peers.==Die globale Suche enth&auml;lt #[globalresults]# Ergebnisse, die von anderen Peers geliefert wurden.
 YaCy is a GPL'ed project==YaCy ist ein GPL Projekt
@@ -2287,6 +2270,20 @@ Download YaCy==YaCy herunterladen
 YaCy Project Wiki==YaCy Projekt Wiki
 Contact YaCy Developer==Kontakt mit YaCy Entwicklern
 #-----------------------------
+
+#File: env/templates/submenuAccessTracker.template
+#---------------------------
+Access Tracker==Zugriffs Tracker
+Server Access==Server Zugriff
+Overview==&Uuml;berblick
+#Details==Details
+Connections</a>==Verbindungen</a>
+Local Search==Lokale Suche
+#Log==Log
+#Host Tracker==Host Tracker
+Remote&nbsp;Search==Remote Suche
+#-----------------------------
+
 
 #File: env/templates/submenuBlacklist.template
 #---------------------------
