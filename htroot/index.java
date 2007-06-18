@@ -67,7 +67,7 @@ public class index {
         final int searchoptions = (post == null) ? 0 : post.getInt("searchoptions", 0);
         final String former = (post == null) ? "" : post.get("former", "");
         final int count = Math.min(100, (post == null) ? 10 : post.getInt("count", 10));
-        final int time = Math.min(60, (post == null) ? 4 : post.getInt("time", 4));
+        final int time = Math.min(60, (post == null) ? 6 : post.getInt("time", 6));
         final String urlmaskfilter = (post == null) ? ".*" : post.get("urlmaskfilter", ".*");
         final String prefermaskfilter = (post == null) ? "" : post.get("prefermaskfilter", "");
         final String constraint = (post == null) ? plasmaSearchQuery.catchall_constraint.exportB64() : post.get("constraint", "______");
