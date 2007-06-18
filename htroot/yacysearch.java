@@ -209,7 +209,7 @@ public class yacysearch {
         serverObjects prop = new serverObjects();
         if (post.get("cat", "href").equals("href")) {
 
-        final TreeSet[] query = plasmaSearchQuery.cleanQuery(querystring);
+        final TreeSet[] query = plasmaSearchQuery.cleanQuery(querystring); // converts also umlaute
         // filter out stopwords
         final TreeSet filtered = kelondroMSetTools.joinConstructive(query[0], plasmaSwitchboard.stopwords);
         if (filtered.size() > 0) {

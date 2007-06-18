@@ -227,7 +227,7 @@ public class Surftips {
                 if (url.length() < 12) continue;
                 entry = rowdef.newEntry(new byte[][]{
                                 url.getBytes(),
-                                ((intention.length() == 0) ? record.attribute("startURL", "") : intention).getBytes(),
+                                (((intention.length() == 0) || (intention.equals("simple web crawl"))) ? record.attribute("startURL", "") : intention).getBytes(),
                                 ("Crawl Start Point").getBytes("UTF-8"),
                                 record.id().getBytes()
                         });
