@@ -935,5 +935,9 @@ httpd.robots.txt = locked,dirs
 # class to use for parsing wikicode
 wikiParser.class = de.anomic.data.wikiCode
 
-# if true the passive and potential Seed-dbs will never be cleaned from old (lastseen > 7 days) peers
-never_delete_old_seeds = false
+# settings for automatic deletion of old entries in passive and potential seed-db
+# time means max time (in days) a peer may not have been seen before it is deleted
+routing.deleteOldSeeds.permission = true
+routing.deleteOldSeeds.permission__pro = false
+routing.deleteOldSeeds.time = 7
+routing.deleteOldSeeds.time__pro = 30

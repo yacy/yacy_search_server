@@ -255,7 +255,6 @@ public final class plasmaSwitchboard extends serverAbstractSwitch implements ser
     public  int                         totalPPM = 0;
     public  double                      totalQPM = 0d;
     public  TreeMap                     clusterhashes; // map of peerhash(String)/alternative-local-address as ip:port or only ip (String) or null if address in seed should be used
-    public  long                        maxLastSeen = 604800000; // maximum time (in ms) a peer may not have been seen before it is removed from passive and potential dbs
     
     /*
      * Remote Proxy configuration
@@ -1930,7 +1929,8 @@ public final class plasmaSwitchboard extends serverAbstractSwitch implements ser
             } catch (IOException e) {}
             
             // clean up seed-dbs
-            if(!getConfigBool("never_delete_old_seeds",false)) {
+            if(getConfigBool("routing.deleteOldSeeds.permission",true)) {
+            	final long deleteOldSeedsTime = getConfigLong("routing.deleteOldSeeds.time",7)*24*3600000;
                 Enumeration e = yacyCore.seedDB.seedsSortedDisconnected(true,yacySeed.LASTSEEN);
                 yacySeed seed = null;
                 ArrayList deleteQueue = new ArrayList();
@@ -1940,7 +1940,7 @@ public final class plasmaSwitchboard extends serverAbstractSwitch implements ser
                 	seed = (yacySeed)e.nextElement();
                 	if(seed != null) {
                 		//list is sorted -> break when peers are too young to delete
-                		if(seed.getLastSeenUTC() > (System.currentTimeMillis()-maxLastSeen))
+                		if(seed.getLastSeenUTC() > (System.currentTimeMillis()-deleteOldSeedsTime))
                 				break;
                 		deleteQueue.add(seed.hash);
                 	}
@@ -1954,7 +1954,7 @@ public final class plasmaSwitchboard extends serverAbstractSwitch implements ser
                 	seed = (yacySeed)e.nextElement();
                 	if(seed != null) {
                 		//list is sorted -> break when peers are too young to delete
-                		if(seed.getLastSeenUTC() > (System.currentTimeMillis()-maxLastSeen))
+                		if(seed.getLastSeenUTC() > (System.currentTimeMillis()-deleteOldSeedsTime))
                 				break;
                 		deleteQueue.add(seed.hash);
                 	}
