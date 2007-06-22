@@ -114,6 +114,7 @@ import java.net.MalformedURLException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
+import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.Hashtable;
 import java.util.Iterator;
@@ -254,6 +255,7 @@ public final class plasmaSwitchboard extends serverAbstractSwitch implements ser
     public  int                         totalPPM = 0;
     public  double                      totalQPM = 0d;
     public  TreeMap                     clusterhashes; // map of peerhash(String)/alternative-local-address as ip:port or only ip (String) or null if address in seed should be used
+    public  long                        maxLastSeen = 604800000; // maximum time (in ms) a peer may not have been seen before it is removed from passive and potential dbs
     
     /*
      * Remote Proxy configuration
@@ -1926,6 +1928,40 @@ public final class plasmaSwitchboard extends serverAbstractSwitch implements ser
                 log.logFine("Cleaning Incoming News, " + yacyCore.newsPool.size(yacyNewsPool.INCOMING_DB) + " entries on stack");
                 if (yacyCore.newsPool.automaticProcess() > 0) hasDoneSomething = true;
             } catch (IOException e) {}
+            
+            // clean up seed-dbs
+            if(!getConfigBool("never_delete_old_seeds",false)) {
+                Enumeration e = yacyCore.seedDB.seedsSortedDisconnected(true,yacySeed.LASTSEEN);
+                yacySeed seed = null;
+                ArrayList deleteQueue = new ArrayList();
+                checkInterruption();
+                //clean passive seeds
+                while(e.hasMoreElements()) {
+                	seed = (yacySeed)e.nextElement();
+                	if(seed != null) {
+                		//list is sorted -> break when peers are too young to delete
+                		if(seed.getLastSeenUTC() > (System.currentTimeMillis()-maxLastSeen))
+                				break;
+                		deleteQueue.add(seed.hash);
+                	}
+                }
+                for(int i=0;i<deleteQueue.size();++i) yacyCore.seedDB.removeDisconnected((String)deleteQueue.get(i));
+                deleteQueue.clear();
+                e = yacyCore.seedDB.seedsSortedPotential(true,yacySeed.LASTSEEN);
+                checkInterruption();
+                //clean potential seeds
+                while(e.hasMoreElements()) {
+                	seed = (yacySeed)e.nextElement();
+                	if(seed != null) {
+                		//list is sorted -> break when peers are too young to delete
+                		if(seed.getLastSeenUTC() > (System.currentTimeMillis()-maxLastSeen))
+                				break;
+                		deleteQueue.add(seed.hash);
+                	}
+                }
+                for(int i=0;i<deleteQueue.size();++i) yacyCore.seedDB.removePotential((String)deleteQueue.get(i));
+            }
+            
 
             // initiate broadcast about peer startup to spread supporter url
             if (yacyCore.newsPool.size(yacyNewsPool.OUTGOING_DB) == 0) {

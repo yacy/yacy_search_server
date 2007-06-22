@@ -462,6 +462,20 @@ public final class yacySeedDB {
         resetPotentialTable();
     }
     }
+    
+    public synchronized void removeDisconnected(String peerHash) {
+    	if(peerHash == null) return;
+    	try {
+			seedPassiveDB.remove(peerHash);
+		} catch (IOException e) { }
+    }
+    
+    public synchronized void removePotential(String peerHash) {
+    	if(peerHash == null) return;
+    	try {
+			seedPotentialDB.remove(peerHash);
+		} catch (IOException e) { }
+    }
         
     public boolean hasConnected(String hash) {
     try {
