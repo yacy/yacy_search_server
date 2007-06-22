@@ -259,9 +259,9 @@ public final class yacyClient {
         final String key = crypt.randomSalt();
         try {
             // should we use the proxy?
-            boolean useProxy = (yacyCore.seedDB.sb.remoteProxyConfig != null) &&  
-                               (yacyCore.seedDB.sb.remoteProxyConfig.useProxy()) && 
-                               (yacyCore.seedDB.sb.remoteProxyConfig.useProxy4Yacy());
+            boolean useProxy = (plasmaSwitchboard.getSwitchboard().remoteProxyConfig != null) &&  
+                               (plasmaSwitchboard.getSwitchboard().remoteProxyConfig.useProxy()) && 
+                               (plasmaSwitchboard.getSwitchboard().remoteProxyConfig.useProxy4Yacy());
             
             // sending request
             final HashMap result = nxTools.table(
@@ -278,7 +278,7 @@ public final class yacyClient {
                             8000, 
                             null, 
                             null, 
-                            (useProxy)?yacyCore.seedDB.sb.remoteProxyConfig:null,
+                            (useProxy)? plasmaSwitchboard.getSwitchboard().remoteProxyConfig:null,
                             null
                     )
                     , "UTF-8");
@@ -526,18 +526,28 @@ public final class yacyClient {
                 assert (urlEntry.hash().length() == 12) : "urlEntry.hash() = " + urlEntry.hash();
                 if (urlEntry.hash().length() != 12) continue; // bad url hash
                 indexURLEntry.Components comp = urlEntry.comp();
-                if (blacklist.isListed(plasmaURLPattern.BLACKLIST_SEARCH, comp.url())) continue; // block with backlist
-                urlManager.store(urlEntry);
-                urlManager.stack(urlEntry, yacyCore.seedDB.mySeed.hash, targetPeer.hash, 2);
-
+                if (blacklist.isListed(plasmaURLPattern.BLACKLIST_SEARCH, comp.url())) {
+                    yacyCore.log.logInfo("remote search (client): filtered blacklisted url " + comp.url() + " from peer " + targetPeer.getName());
+                    continue; // block with backlist
+                }
+                
                 // save the url entry
                 indexRWIEntry entry;
                 if (urlEntry.word() == null) {
-                    yacyCore.log.logWarning("DEBUG-SEARCH: no word attached from peer " + targetPeer.getName() + ", version " + targetPeer.getVersion());
+                    yacyCore.log.logWarning("remote search (client): no word attached from peer " + targetPeer.getName() + ", version " + targetPeer.getVersion());
                     continue; // no word attached
                 }
+                
                 // the search-result-url transports all the attributes of word indexes
                 entry = urlEntry.word();
+                if (!(entry.urlHash().equals(urlEntry.hash()))) {
+                    yacyCore.log.logInfo("remote search (client): url-hash " + urlEntry.hash() + " does not belong to word-attached-hash " + entry.urlHash() + "; url = " + comp.url() + " from peer " + targetPeer.getName());
+                    continue; // spammed
+                }
+
+                // passed all checks, store url
+                urlManager.store(urlEntry);
+                urlManager.stack(urlEntry, yacyCore.seedDB.mySeed.hash, targetPeer.hash, 2);
 
                 if (urlEntry.snippet() != null) {
                     // we don't store the snippets along the url entry, because they are search-specific.

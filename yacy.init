@@ -64,43 +64,14 @@ pkcs12ImportPwd =
 # value is in milliseconds, default is one hour
 server.maxTrackingTime = 3600000
 
-# peer-to-peer construction for distributed search
-# we have several stages:
-# 1st: a file within every distribution that has a list of URLs:
-#      -> this is the superseed file
-# 2nd: the files that can be retrieved by the superseeds' URLs
-#      are called seed list-files.
-#      -> the seed list-files contain IP/port combinations of running
-#         AnomicHTTPProxies
-# 3rd: the peers that are targeted within the seed files are called superpeers
-# 4th: the superpeers hold and share a list of all client/search/crawl peers
-#
-# some superpeers should be able to create again seed list-files.
-# These superpeers must upload their IP or their list of peer-IP's to a
-# ftp location to create the seed list-file.
-# Everyone who do so should mail his/her new seed location to mc<at>anomic.de
-# The seed list-file location will then be included in the superseed file.
-# This superseed file is available then at two localtions:
-# - it is included in every distribution and
-# - updated through a specific URL-location
-# we see the file name and the URL of the superseed here:
-superseedFile=superseed.txt
-superseedLocation=http://www.yacy.net/superseed.txt
-
-# network definition
-# we distiguish local and global networks. Each network type can have different user groups
-# groups can be uncontrolled, moderated or controlled
-# Each group has a group master, but in case the group is uncontrolled the only task of the
-# group master is to provide a bootstrap file which contains peer addresses of peers that
-# are member of the group. All attributes are given in a single network description string
-# of the form:
-# network = <group-name>:<network-name>:<network-domain>:{'uncontrolled'|'moderated'|'controlled'}:<bootstrap-uri>
-# in case that the network is the uncontrolled global dht-managed community for everybody,
-# the details defaults to:
-# network = all:world:global:uncontrolled:http://yacy.net/
-# the network-uri must have a sub-path yacy/seed.txt containing a list of urls pointing to the
-# peer-address of peers within the group of that network
-# several network definition strings can be listed
+# Network Definition
+# There can be separate YaCy networks, and managed sub-groups of the general network.
+# The essentials of the network definition are attached in separate property files.
+# The property here can also be a url where the definition can be loaded.
+# In case of privately managed networks, this configuration must be changed BEFORE it is released
+# to the members of the separated network peers.
+network.unit.definition = yacy.network.unit
+network.group.definition = yacy.network.group
 
 # clusters within a network:
 # every network can have an unlimited number of clusters. Clusters may be also completely
@@ -716,7 +687,7 @@ useYacyReferer = true
 useYacyReferer__pro = false
 
 # allow only 443(https-port) for https-proxy?
-# if you want to tunnel other protokols, set to false
+# if you want to tunnel other protocols, set to false
 secureHttps = true
 
 # specifies if the httpdFileHandler should cache 

@@ -1,0 +1,72 @@
+# YaCy Network Unit Definition
+# ----------------------------
+# There is not only a single global YaCy network, but there can be also separated networks
+# This file describes the properties of the network, how it is bootstraped, if it is moderated
+# and so on. It is also possible to describe authentification methods for in-protocol communication
+# To distinguish between index areas where the shared web index is for a intranet or the public internet,
+# we distinguish local and global networks. Each network type can have different user groups.
+# Groups can be uncontrolled, moderated or controlled. The whole network may also have a global master.
+# This file is adressed by the network.unit.definition property in yacy.init. If necessary this
+# property can also address a URL where a network definition file can be hosted, so that a network
+# can easily be moderated from a single central. In case of the public network of all independent peers
+# for global indexing, the network definition is attached to the release and defines no network master or
+# any other supervision.
+
+# peer-to-peer construction using the bootstrap properties:
+# 1st: a file within every distribution that has a list of URLs,
+#      or a location with a file containing a list of URLs:
+#      -> these are the superseed files (there are only two of these files)
+# 2nd: the files that can be retrieved by the superseeds' URLs
+#      are called seed list-files. (there can be many of those)
+#      -> the seed list-files contain b.o. IP/port combinations of running YaCy peers
+#      -> seed-list files are written by principal peers
+
+# Control Modes for Peer Groups:
+# we have three different types of moderation:
+# uncontrolled: only the peer's administrator may use protected pages of the YaCy interface
+# moderated   : the unit/group moderator may access some protected pages i.e. Crawl Start
+# controlled  : the unit/group moderator may access all pages of the peers within the same unit/group
+
+# Defintion of property domains:
+#     network.unit.name = <any word, name of network; appears in network graphic>
+#     network.unit.description = <any string, just informal; appears in network graphic>
+#     network.unit.domain = 'global'|'local'
+#     network.unit.dhtredundancy = <integer number, 0 means no DHT enabled>
+#     network.unit.bootstrap.file = <a file in the application directory containing urls to seedlists>
+#     network.unit.bootstrap.url = <a url to a bootstrap.file containing urls to seedlists>
+#     network.unit.protocol.control = 'uncontrolled'|'moderated'|'controlled'
+#     network.unit.protocol.request.authentification.method = 'salted-magic'
+#     network.unit.protocol.request.authentification.essentials = <any string, a secret password>
+#     network.unit.protocol.response.authentification.method = 'challenge-pwresponse'
+#     network.unit.protocol.response.authentification.essentials = <a challenge string>':'<a secret response-string>
+#     network.unit.administration.control = 'uncontrolled'|'moderated'|'controlled'
+#     network.unit.administration.manager = <a .yacy or .yacyh - domain, naming the manager peer>
+#     network.unit.administration.request.authentification.method = 'salted-magic'
+#     network.unit.administration.request.authentification.essentials = <any string, a secret password>
+
+
+# -----------------------------------------------------------------#
+# this is a work in progress. disabled properties are not yet used #
+# -----------------------------------------------------------------#
+
+# general network definition
+network.unit.name = freeworld
+network.unit.description = Public YaCy Community
+#network.unit.domain = global
+network.unit.dhtredundancy.junior = 1
+network.unit.dhtredundancy.senior = 3
+network.unit.bootstrap.file = superseed.txt
+network.unit.bootstrap.url = http://www.yacy.net/superseed.txt
+
+# properties for in-protocol response authentification:
+#network.unit.protocol.control = uncontrolled
+#network.unit.protocol.request.authentification.method = salted-magic
+#network.unit.protocol.request.authentification.essentials =
+#network.unit.protocol.response.authentification.method = challenge-pwresponse
+#network.unit.protocol.response.authentification.essentials =
+
+# properties for unit access administrator-authentification:
+#network.unit.administration.control = uncontrolled
+#network.unit.administration.manager =
+#network.unit.administration.request.authentification.method = salted-magic
+#network.unit.administration.request.authentification.essentials =

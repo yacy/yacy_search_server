@@ -893,9 +893,47 @@ public final class plasmaSwitchboard extends serverAbstractSwitch implements ser
         
         // set loglevel and log
         setLog(new serverLog("PLASMA"));
-        
         if (applyPro) this.log.logInfo("This is the pro-version of YaCy");
         
+        // remote proxy configuration
+        this.remoteProxyConfig = httpRemoteProxyConfig.init(this);
+        this.log.logConfig("Remote proxy configuration:\n" + this.remoteProxyConfig.toString());
+        
+        // load network configuration into settings
+        String networkUnitDefinition = getConfig("network.unit.definition", "yacy.network.unit");
+        String networkGroupDefinition = getConfig("network.group.definition", "yacy.network.group");
+        
+        // include additional network definition properties into our settings
+        // note that these properties cannot be set in the application because they are
+        // _always_ overwritten each time with the default values. This is done so on purpose.
+        // the network definition should be made either consistent for all peers,
+        // or independently using a bootstrap URL
+        Map initProps;
+        if (networkUnitDefinition.startsWith("http://")) {
+            try {
+                this.setConfig(httpc.loadHashMap(new URL(networkUnitDefinition), remoteProxyConfig));
+            } catch (MalformedURLException e) {
+            }
+        } else {
+            File networkUnitDefinitionFile = new File(rootPath, networkUnitDefinition);
+            if (networkUnitDefinitionFile.exists()) {
+                initProps = serverFileUtils.loadHashMap(networkUnitDefinitionFile);
+                this.setConfig(initProps);
+            }
+        }
+        if (networkGroupDefinition.startsWith("http://")) {
+            try {
+                this.setConfig(httpc.loadHashMap(new URL(networkGroupDefinition), remoteProxyConfig));
+            } catch (MalformedURLException e) {
+            }
+        } else {
+            File networkGroupDefinitionFile = new File(rootPath, networkGroupDefinition);
+            if (networkGroupDefinitionFile.exists()) {
+                initProps = serverFileUtils.loadHashMap(networkGroupDefinitionFile);
+                this.setConfig(initProps);
+            }
+        }
+
         // load values from configs
         this.plasmaPath   = new File(rootPath, getConfig(DBPATH, DBPATH_DEFAULT));
         this.log.logConfig("Plasma DB Path: " + this.plasmaPath.toString());
@@ -912,12 +950,6 @@ public final class plasmaSwitchboard extends serverAbstractSwitch implements ser
         this.rankingPermissions = new HashMap(); // mapping of permission - to filename.
         this.workPath   = new File(rootPath, getConfig(WORK_PATH, WORK_PATH_DEFAULT));
         this.log.logConfig("Work Path:    " + this.workPath.toString());
-        
-        /* ============================================================================
-         * Remote Proxy configuration
-         * ============================================================================ */
-        this.remoteProxyConfig = httpRemoteProxyConfig.init(this);
-        this.log.logConfig("Remote proxy configuration:\n" + this.remoteProxyConfig.toString());
         
         // set up local robots.txt
         this.robotstxtConfig = httpdRobotsTxtConfig.init(this);

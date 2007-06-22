@@ -43,7 +43,6 @@
 // the intact and unchanged copyright notice.
 // Contributions and changes to the program code must be marked as such.
 
-
 import de.anomic.http.httpHeader;
 import de.anomic.plasma.plasmaGrafics;
 import de.anomic.server.serverObjects;
@@ -79,7 +78,7 @@ public class NetworkPicture {
         if (passiveLimit > 1000000) passiveLimit = 1000000;
         if (potentialLimit > 1000000) potentialLimit = 1000000;
         if (maxCount > 1000) maxCount = 1000;
-        return plasmaGrafics.getNetworkPicture(10000, width, height, passiveLimit, potentialLimit, maxCount, corona);
+        return plasmaGrafics.getNetworkPicture(10000, width, height, passiveLimit, potentialLimit, maxCount, corona, env.getConfig("network.unit.name", "unspecified"), env.getConfig("network.unit.description", "unspecified"));
     }
     
 }

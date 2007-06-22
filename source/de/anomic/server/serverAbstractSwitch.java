@@ -84,7 +84,6 @@ public abstract class serverAbstractSwitch implements serverSwitch {
 
         // predefine init's
         Map initProps;
-        configRemoved = new HashMap();
         if (initFile.exists())
             initProps = serverFileUtils.loadHashMap(initFile);
         else
@@ -117,9 +116,9 @@ public abstract class serverAbstractSwitch implements serverSwitch {
         else
             configProps = new HashMap();
 
+        // remove all values from config that do not appear in init
+        configRemoved = new HashMap();
         synchronized (configProps) {
-            // remove all values from config that do not appear in init
-            // (out-dated settings)
             i = configProps.keySet().iterator();
             String key;
             while (i.hasNext()) {
@@ -210,6 +209,15 @@ public abstract class serverAbstractSwitch implements serverSwitch {
     public Iterator accessHosts() {
         // returns an iterator of hosts in tracker (String)
         return accessTracker.keySet().iterator();
+    }
+
+    public void setConfig(Map otherConfigs) {
+        Iterator i = otherConfigs.entrySet().iterator();
+        Map.Entry entry;
+        while (i.hasNext()) {
+            entry = (Map.Entry) i.next();
+            setConfig((String) entry.getKey(), (String) entry.getValue());
+        }
     }
 
     public void setConfig(String key, boolean value) {

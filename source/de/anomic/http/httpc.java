@@ -1372,6 +1372,33 @@ do upload
         // return result
         return a;
     }
+    
+    public static Map loadHashMap(URL url, httpRemoteProxyConfig proxy) {
+        try {
+            // should we use the proxy?
+            boolean useProxy = (proxy != null) &&  
+                               (proxy.useProxy()) && 
+                               (proxy.useProxy4Yacy());
+            
+            // sending request
+            final HashMap result = nxTools.table(
+                    httpc.wget(
+                            url,
+                            url.getHost(),
+                            8000, 
+                            null, 
+                            null, 
+                            (useProxy) ? proxy : null,
+                            null
+                    )
+                    , "UTF-8");
+            
+            if (result == null) return new HashMap();
+            return result;
+        } catch (Exception e) {
+            return new HashMap();
+        }
+    }
 
     public static httpHeader whead(
             URL url,

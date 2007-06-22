@@ -187,6 +187,7 @@ public final class plasmaCrawlLURL {
                 oldEntry = null;
             }
         } catch (Exception e) {
+            e.printStackTrace();
             oldEntry = null;
         }
         if ((oldEntry != null) && (entry.isOlder(oldEntry))) {

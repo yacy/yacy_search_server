@@ -127,7 +127,7 @@ public class plasmaGrafics {
         if (primarySearches == null) return null; // this was a local search and there are no threads
 
         // get a copy of a recent network picture
-        ymageMatrix eventPicture = getNetworkPicture(120000);
+        ymageMatrix eventPicture = getNetworkPicture(120000, plasmaSwitchboard.getSwitchboard().getConfig("network.unit.name", "unspecified"), plasmaSwitchboard.getSwitchboard().getConfig("network.unit.description", "unspecified"));
         if (eventPicture instanceof ymageMatrix) eventPicture = (ymageMatrix) eventPicture; //new ymageMatrix((ymageMatrix) eventPicture);
         // TODO: fix cloning of ymageMatrix pictures
         
@@ -172,18 +172,18 @@ public class plasmaGrafics {
         return eventPicture;
     }
 
-    public static ymageMatrix getNetworkPicture(long maxAge) {
-        return getNetworkPicture(maxAge, 640, 480, 300, 300, 1000, true);
+    public static ymageMatrix getNetworkPicture(long maxAge, String networkName, String networkTitle) {
+        return getNetworkPicture(maxAge, 640, 480, 300, 300, 1000, true, networkName, networkTitle);
     }
 
-    public static ymageMatrix getNetworkPicture(long maxAge, int width, int height, int passiveLimit, int potentialLimit, int maxCount, boolean corona) {
+    public static ymageMatrix getNetworkPicture(long maxAge, int width, int height, int passiveLimit, int potentialLimit, int maxCount, boolean corona, String networkName, String networkTitle) {
         if ((networkPicture == null) || ((System.currentTimeMillis() - networkPictureDate) > maxAge)) {
-            drawNetworkPicture(width, height, passiveLimit, potentialLimit, maxCount, corona);
+            drawNetworkPicture(width, height, passiveLimit, potentialLimit, maxCount, corona, networkName, networkTitle);
         }
         return networkPicture;
     }
 
-    private static void drawNetworkPicture(int width, int height, int passiveLimit, int potentialLimit, int maxCount, boolean corona) {
+    private static void drawNetworkPicture(int width, int height, int passiveLimit, int potentialLimit, int maxCount, boolean corona, String networkName, String networkTitle) {
 
         int innerradius = Math.min(width, height) / 5;
         int outerradius = innerradius + innerradius * yacyCore.seedDB.sizeConnected() / 100;
@@ -196,7 +196,7 @@ public class plasmaGrafics {
 
         // draw network circle
         networkPicture.setColor(COL_DHTCIRCLE);
-        networkPicture.arc(width / 2, height / 2, innerradius - 20, innerradius + 20, 0, 360);
+        networkPicture.arc(width / 2, height / 2 + 20, innerradius - 20, innerradius + 20, 0, 360);
 
         //System.out.println("Seed Maximum distance is       " + yacySeed.maxDHTDistance);
         //System.out.println("Seed Minimum distance is       " + yacySeed.minDHTNumber);
@@ -212,7 +212,7 @@ public class plasmaGrafics {
         while (e.hasMoreElements() && count < maxCount) {
             seed = (yacySeed) e.nextElement();
             if (seed != null) {
-                drawNetworkPicturePeer(networkPicture, width / 2, height / 2, innerradius, outerradius, seed, COL_ACTIVE_DOT, COL_ACTIVE_LINE, COL_ACTIVE_TEXT, corona);
+                drawNetworkPicturePeer(networkPicture, width / 2, height / 2 + 20, innerradius, outerradius, seed, COL_ACTIVE_DOT, COL_ACTIVE_LINE, COL_ACTIVE_TEXT, corona);
                 count++;
             }
         }
@@ -226,7 +226,7 @@ public class plasmaGrafics {
             if (seed != null) {
                 lastseen = Math.abs((System.currentTimeMillis() - seed.getLastSeenUTC()) / 1000 / 60);
                 if (lastseen > passiveLimit) break; // we have enough, this list is sorted so we don't miss anything
-                drawNetworkPicturePeer(networkPicture, width / 2, height / 2, innerradius, outerradius, seed, COL_PASSIVE_DOT, COL_PASSIVE_LINE, COL_PASSIVE_TEXT, corona);
+                drawNetworkPicturePeer(networkPicture, width / 2, height / 2 + 20, innerradius, outerradius, seed, COL_PASSIVE_DOT, COL_PASSIVE_LINE, COL_PASSIVE_TEXT, corona);
                 count++;
             }
         }
@@ -240,22 +240,23 @@ public class plasmaGrafics {
             if (seed != null) {
                 lastseen = Math.abs((System.currentTimeMillis() - seed.getLastSeenUTC()) / 1000 / 60);
                 if (lastseen > potentialLimit) break; // we have enough, this list is sorted so we don't miss anything
-                drawNetworkPicturePeer(networkPicture, width / 2, height / 2, innerradius, outerradius, seed, COL_POTENTIAL_DOT, COL_POTENTIAL_LINE, COL_POTENTIAL_TEXT, corona);
+                drawNetworkPicturePeer(networkPicture, width / 2, height / 2 + 20, innerradius, outerradius, seed, COL_POTENTIAL_DOT, COL_POTENTIAL_LINE, COL_POTENTIAL_TEXT, corona);
                 count++;
             }
         }
         totalCount += count;
 
         // draw my own peer
-        drawNetworkPicturePeer(networkPicture, width / 2, height / 2, innerradius, outerradius, yacyCore.seedDB.mySeed, COL_WE_DOT, COL_WE_LINE, COL_WE_TEXT, corona);
+        drawNetworkPicturePeer(networkPicture, width / 2, height / 2 + 20, innerradius, outerradius, yacyCore.seedDB.mySeed, COL_WE_DOT, COL_WE_LINE, COL_WE_TEXT, corona);
 
         // draw description
         networkPicture.setColor(COL_HEADLINE);
         networkPicture.setMode(ymageMatrix.MODE_SUB);
-        ymageToolPrint.print(networkPicture, 2, 8, 0, "THE YACY NETWORK", -1);
-        ymageToolPrint.print(networkPicture, 2, 16, 0, "DRAWING OF " + totalCount + " SELECTED PEERS", -1);
+        ymageToolPrint.print(networkPicture, 2, 8, 0, "YACY NETWORK '" + networkName.toUpperCase() + "'", -1);
+        ymageToolPrint.print(networkPicture, 2, 16, 0, networkTitle.toUpperCase(), -1);
         ymageToolPrint.print(networkPicture, width - 2, 8, 0, "SNAPSHOT FROM " + new Date().toString().toUpperCase(), 1);
-
+        ymageToolPrint.print(networkPicture, width - 2, 16, 0, "DRAWING OF " + totalCount + " SELECTED PEERS", 1);
+        
         // set timestamp
         networkPictureDate = System.currentTimeMillis();
     }

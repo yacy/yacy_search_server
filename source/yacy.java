@@ -253,8 +253,7 @@ public final class yacy {
             
             f = new File(homePath, "DATA/yacy.running");
             if (f.exists()) {                // another instance running? VM crash? User will have to care about this
-                serverLog.logSevere("STARTUP", "the file " + f + " exists, this usually means that another instance of YaCy is using this DATA-folder.");
-                serverLog.logSevere("STARTUP", "please make sure that DATA can be used exclusively by one YaCy. Quitting...");
+                serverLog.logSevere("STARTUP", "WARNING: the file " + f + " exists, this usually means that a YaCy instance is still running");
                 f.delete();
             }
             f.createNewFile();

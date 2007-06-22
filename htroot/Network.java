@@ -78,6 +78,8 @@ public class Network {
         
         // return variable that accumulates replacements
         final serverObjects prop = new serverObjects();
+        prop.put("page_networkTitle", sb.getConfig("network.unit.description", "unspecified"));
+        prop.put("page_networkName", sb.getConfig("network.unit.name", "unspecified"));
         final boolean overview = (post == null) || (post.get("page", "0").equals("0"));
 
         final String mySeedType = yacyCore.seedDB.mySeed.get(yacySeed.PEERTYPE, yacySeed.PEERTYPE_VIRGIN);

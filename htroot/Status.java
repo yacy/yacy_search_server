@@ -119,10 +119,6 @@ public class Status {
         	}
         }
         
-        /*
-          versionProbe=http://www.anomic.de/AnomicHTTPProxy/release.txt
-          superseedFile=superseed.txt
-         */
         // update seed info
         yacyCore.peerActions.updateMySeed();
 

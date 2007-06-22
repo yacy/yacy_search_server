@@ -1,0 +1,29 @@
+# YaCy Network Group Definition
+# -----------------------------
+# This is an addition to the yacy.network.unit configuration file.
+# This file is adressed by the network.group.definition property in yacy.init
+# The purpose of a group within a network is that some parts of a network may be managed independently,
+# while the content of the network stays private for the whole network, mostly for a special purpose.
+# This file needs to be configured if someone wants to participate with several peers to the network,
+# but wants to manage the group of own peers with a single master peer.
+# One example application would be the use of computing-teams
+
+# Defintion of property domains:
+#     network.group.name = <any word, name of network>
+#     network.group.description = <any string, just informal; appears in network graphic>
+#     network.group.administration.control = 'uncontrolled'|'moderated'|'controlled'
+#     network.group.administration.manager = <a .yacy or .yacyh - domain, naming the manager peer>
+#     network.group.administration.request.authentification.method = 'salted-magic'
+#     network.group.administration.request.authentification.essentials = <any string, a secret password>
+
+# -----------------------------------------------------------------#
+# this is a work in progress. disabled properties are not yet used #
+# -----------------------------------------------------------------#
+
+# properties for group access administrator-authentification:
+#network.group.name = everybody
+#network.group.description = Our Peer-Group
+#network.group.administration.control = uncontrolled
+#network.group.administration.manager = 
+#network.group.administration.request.authentification.method = salted-magic
+#network.group.administration.request.authentification.essentials =
