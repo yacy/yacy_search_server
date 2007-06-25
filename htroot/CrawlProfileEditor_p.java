@@ -102,14 +102,10 @@ public class CrawlProfileEditor_p {
         final plasmaSwitchboard sb = (plasmaSwitchboard)env;
         
         // read post for handle
-        String handle = "";
-        if (post != null) {
-        	handle = post.get("handle", "");
-
-			if (post.containsKey("deleteprofile")) {
-				// deletion of a crawl
-				if (handle != null) sb.profiles.removeEntry(handle);
-			}
+        String handle = (post == null) ? "" : post.get("handle", "");
+        if ((post != null) &&  (post.containsKey("deleteprofile"))) {
+            // deletion of a crawl
+            sb.profiles.removeEntry(handle);
         }
         
         // generate handle list

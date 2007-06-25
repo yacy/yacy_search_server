@@ -16,7 +16,6 @@
     
     
 <!-- crawl profile list -->
-<form action="CrawlProfileEditor_p.html" method="get" enctype="multipart/form-data">
 <fieldset><legend>Crawl Profile List</legend>
 <table border="0" cellpadding="2" cellspacing="1">
   <colgroup>
@@ -60,16 +59,17 @@
     <td>#(indexMedia)#no::yes#(/indexMedia)#</td>
     <td>#(remoteIndexing)#no::yes#(/remoteIndexing)#</td>
     <td>#(deleteButton)#::
+    <form action="CrawlProfileEditor_p.html" method="get" enctype="multipart/form-data">
         <pre><input type="hidden" name="handle" value="#[handle]#" /></pre>
         <pre><input type="submit" name="deleteprofile" value="Delete" /></pre>
       #(/deleteButton)#
-			
-		</td>
+    </form>
+	</td>
   </tr>
   #{/crawlProfiles}# 
 </table>
 </fieldset>
-</form>
+
 
 <!-- crawl profile editor -->
     <form action="CrawlProfileEditor_p.html" method="post" enctype="multipart/form-data">
