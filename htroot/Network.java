@@ -53,6 +53,7 @@ import java.util.HashSet;
 import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+import java.util.regex.PatternSyntaxException;
 
 import de.anomic.http.httpHeader;
 import de.anomic.http.httpc;
@@ -307,13 +308,23 @@ public class Network {
                     double QPM;
                     long myValue=0, nextValue=0, prevValue=0, nextPPM=0, myPPM=0;
                     Pattern peerSearchPattern = null;
+                    String wrongregex = null;
+                    prop.put("regexerror", 0);
+                    prop.put("wrongregex", (String)null);
                     if(post.containsKey("search")) {
-                        peerSearchPattern = Pattern.compile(post.get("match", ""), Pattern.CASE_INSENSITIVE);
+                        try{
+                            peerSearchPattern = Pattern.compile(post.get("match", ""), Pattern.CASE_INSENSITIVE);
+                        }
+                        catch (PatternSyntaxException pse){
+                            wrongregex = pse.getPattern();
+                            prop.put("regexerror", 1);
+                            prop.put("regexerror_wrongregex", wrongregex);
+                        }
                     }
                     while (e.hasMoreElements() && conCount < maxCount) {
                         seed = (yacySeed) e.nextElement();
                         if (seed != null) {
-                            if(post.containsKey("search")) {
+                            if((post.containsKey("search"))  && (wrongregex == null)) {
                                 boolean abort = true;
                                 Matcher m = peerSearchPattern.matcher (seed.getName());
                                 if (m.find ()) {
