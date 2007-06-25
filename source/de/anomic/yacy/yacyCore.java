@@ -214,9 +214,7 @@ public class yacyCore {
         loadSeedUploadMethods();
 
         // deploy peer actions
-        peerActions = new yacyPeerActions(seedDB, switchboard,
-                new File(sb.getRootPath(), sb.getConfig("network.unit.bootstrap.file", "superseed.txt")),
-                switchboard.getConfig("network.unit.bootstrap.url", "http://www.yacy.net/yacy/superseed.txt"));
+        peerActions = new yacyPeerActions(seedDB, switchboard);
         dhtAgent = new yacyDHTAction(seedDB);
         peerActions.deploy(dhtAgent);
         peerActions.deploy(new yacyNewsAction(newsPool));

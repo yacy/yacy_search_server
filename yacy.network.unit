@@ -32,8 +32,7 @@
 #     network.unit.description = <any string, just informal; appears in network graphic>
 #     network.unit.domain = 'global'|'local'
 #     network.unit.dhtredundancy = <integer number, 0 means no DHT enabled>
-#     network.unit.bootstrap.file = <a file in the application directory containing urls to seedlists>
-#     network.unit.bootstrap.url = <a url to a bootstrap.file containing urls to seedlists>
+#     network.unit.bootstrap.seedlist<n> = <an url to a seedlists-file, which is stored by a principal peer>
 #     network.unit.protocol.control = 'uncontrolled'|'moderated'|'controlled'
 #     network.unit.protocol.request.authentification.method = 'salted-magic'
 #     network.unit.protocol.request.authentification.essentials = <any string, a secret password>
@@ -55,8 +54,13 @@ network.unit.description = Public YaCy Community
 #network.unit.domain = global
 network.unit.dhtredundancy.junior = 1
 network.unit.dhtredundancy.senior = 3
-network.unit.bootstrap.file = superseed.txt
-network.unit.bootstrap.url = http://www.yacy.net/superseed.txt
+network.unit.bootstrap.seedlist0 = http://de.geocities.com/d15511z/yacy/angel/seed.txt
+network.unit.bootstrap.seedlist1 = http://home.arcor.de/hermens/yacy/seed.txt
+network.unit.bootstrap.seedlist2 = http://low.audioattack.de/yacy/seed.txt
+network.unit.bootstrap.seedlist3 = http://www.lulabad.de/seed.txt
+network.unit.bootstrap.seedlist4 = http://www.yacy.net/yacy/seed.txt
+network.unit.bootstrap.seedlist5 = http://www.marcelhenseler.de/yacy/seed.txt
+network.unit.bootstrap.seedlist6 = http://www.dc-art.de/yacy/seed.txt
 
 # properties for in-protocol response authentification:
 #network.unit.protocol.control = uncontrolled

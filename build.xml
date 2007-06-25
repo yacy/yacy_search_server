@@ -459,6 +459,8 @@
 	    <include name="yacy.badwords.example"/>
 	    <include name="yacy.stopwords"/>
 	    <include name="yacy.parser"/>
+	  	<include name="yacy.network.group"/>
+	  	<include name="yacy.network.unit"/>
 	    <include name="httpd.mime"/>
 	    <include name="superseed.txt"/>
 	  </fileset>

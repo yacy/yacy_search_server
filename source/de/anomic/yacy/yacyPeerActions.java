@@ -43,11 +43,7 @@
 
 package de.anomic.yacy;
 
-import java.io.BufferedReader;
-import java.io.File;
-import java.io.FileInputStream;
 import java.io.IOException;
-import java.io.InputStreamReader;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -59,7 +55,6 @@ import de.anomic.net.URL;
 import de.anomic.plasma.plasmaSwitchboard;
 import de.anomic.server.serverCore;
 import de.anomic.server.serverDate;
-import de.anomic.tools.disorderSet;
 import de.anomic.tools.nxTools;
 
 public class yacyPeerActions {
@@ -68,22 +63,17 @@ public class yacyPeerActions {
     private plasmaSwitchboard sb;
     private HashSet actions;
     private HashMap userAgents;
-    private File superseedFile;
-    private String superseedURL;
     public  long juniorConnects;
     public  long seniorConnects;
     public  long principalConnects;
     public  long disconnects;
     private int  bootstrapLoadTimeout;
     
-    public yacyPeerActions(yacySeedDB seedDB, plasmaSwitchboard switchboard, File superseedFile, String superseedURL) {
+    public yacyPeerActions(yacySeedDB seedDB, plasmaSwitchboard switchboard) {
         this.seedDB = seedDB;
         this.sb = switchboard;
         this.actions = new HashSet();
         this.userAgents = new HashMap();
-        this.superseedFile = superseedFile;
-        this.superseedURL = superseedURL;
-        this.superseedURL = superseedURL;
         this.juniorConnects = 0;
         this.seniorConnects = 0;
         this.principalConnects = 0;
@@ -162,14 +152,13 @@ public class yacyPeerActions {
         
         yacyCore.log.logInfo("BOOTSTRAP: " + sc + " seeds known from previous run");
         
-        // - load the superseed: a list of URLs
-        disorderSet superseed = loadSuperseed(superseedFile, superseedURL);
-        
         // - use the superseed to further fill up the seedDB
-        int ssc = 0;
-        for (int i = 0; i < superseed.size(); i++) {
+        int ssc = 0, c = 0;
+        while (true) {
             if (Thread.currentThread().isInterrupted()) break;
-            seedListFileURL = (String) superseed.any();
+            seedListFileURL = sb.getConfig("network.unit.bootstrap.seedlist" + c, "");
+            if (seedListFileURL.length() == 0) break;
+            c++;
             if (
                     seedListFileURL.startsWith("http://") || 
                     seedListFileURL.startsWith("https://")
@@ -214,53 +203,6 @@ public class yacyPeerActions {
             }
         }
         yacyCore.log.logInfo("BOOTSTRAP: " + (seedDB.sizeConnected() - sc) + " new seeds while bootstraping.");
-    }
-
-    private disorderSet loadSuperseed(File local, String url) {
-        // this returns a list of locations where seed list-files can be found
-        disorderSet supsee = new disorderSet();
-        String line;
-        // read in local file
-        int lc = 0;
-        BufferedReader br = null;
-        try {
-            br = new BufferedReader(new InputStreamReader(new FileInputStream(local)));
-            while ((line = br.readLine()) != null) {
-                line = line.trim();
-                //System.out.println("one line in file:" + line);
-                if (line.length() > 0) supsee.add(line);
-            }
-            br.close();
-            lc = supsee.size();
-            yacyCore.log.logInfo("BOOTSTRAP: " + lc + " seed-list URLs from superseed file " + local.toString());
-        } catch (IOException e) {
-            //e.printStackTrace();
-            supsee = new disorderSet();
-            yacyCore.log.logInfo("BOOTSTRAP: failed to load seed-list URLs from superseed file " + local.toString() + ": " + e.getMessage());
-        } finally {
-            if (br!=null)try{br.close();}catch(Exception e){}
-        }
-        
-        // read in remote file from url
-        try {
-            URL u = new URL(url);
-            ArrayList remote = nxTools.strings(httpc.wget(u, u.getHost(), 5000, null, null, this.sb.remoteProxyConfig), "UTF-8");
-            if ((remote != null) && (remote.size() > 0)) {
-                Iterator e = remote.iterator();
-                while (e.hasNext()) {
-                    line = (String) e.next();
-                    if (line != null) {
-                        line = line.trim();
-                        supsee.add(line);
-                    }
-                }
-            }
-            yacyCore.log.logInfo("BOOTSTRAP: " + (supsee.size() - lc) + " seed-list URLs from superseed URL " + url);
-        } catch (Exception e) {
-	    supsee = new disorderSet();
-            yacyCore.log.logInfo("BOOTSTRAP: failed to load seed-list URLs from superseed URL " + url + ": " + e.getMessage());        
-        }
-	return supsee;
     }
 
     private synchronized boolean connectPeer(yacySeed seed, boolean direct) {
