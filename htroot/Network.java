@@ -310,7 +310,7 @@ public class Network {
                     Pattern peerSearchPattern = null;
                     String wrongregex = null;
                     prop.put("regexerror", 0);
-                    prop.put("wrongregex", (String)null);
+                    prop.put("regexerror_wrongregex", (String)null);
                     if(post.containsKey("search")) {
                         try{
                             peerSearchPattern = Pattern.compile(post.get("match", ""), Pattern.CASE_INSENSITIVE);
