@@ -706,7 +706,7 @@ public final class httpdFileHandler extends httpdAbstractHandler implements http
                     // we can do that either in standard mode (whole thing completely) or in chunked mode
                     // since yacy clients do not understand chunked mode, we use this only for communication with the administrator
                     boolean yacyClient = requestHeader.userAgent().startsWith("yacy");
-                    boolean chunked = !method.equals(httpHeader.METHOD_HEAD) && !yacyClient;
+                    boolean chunked = !method.equals(httpHeader.METHOD_HEAD) && !yacyClient && httpVersion.equals(httpHeader.HTTP_VERSION_1_1);
                     if (chunked) {
                         // send page in chunks and parse SSIs
                         serverByteBuffer o = new serverByteBuffer();

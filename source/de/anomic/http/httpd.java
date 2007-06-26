@@ -1358,7 +1358,7 @@ public final class httpd implements serverHandler {
         String reqMethod = conProp.getProperty(httpHeader.CONNECTION_PROP_METHOD);
         
         if ((transferEnc != null) && !httpVersion.equals(httpHeader.HTTP_VERSION_1_1)) { 
-            throw new IllegalArgumentException("Transfer encoding is only supported for http/1.1 connections.");
+            throw new IllegalArgumentException("Transfer encoding is only supported for http/1.1 connections. The current connection version is " + httpVersion);
         }
 
         if (!reqMethod.equals(httpHeader.METHOD_HEAD)){
