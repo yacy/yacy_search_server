@@ -204,12 +204,7 @@ public class yacyCore {
 
         // create or init news database
         long memNews_time = Long.parseLong(switchboard.getConfig("ramCacheNews_time", "1000"));
-        try {
-            newsPool = new yacyNewsPool(yacyDBPath, memNews_time);
-        } catch (IOException e) {
-            e.printStackTrace();
-            System.exit(-1);
-        }
+        newsPool = new yacyNewsPool(yacyDBPath, memNews_time);
 
         loadSeedUploadMethods();
 

@@ -24,7 +24,6 @@
 
 package de.anomic.kelondro;
 
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.Iterator;
@@ -55,7 +54,7 @@ public class kelondroIntBytesMap {
             return index1.memoryNeededForGrow();
     }
     
-    public kelondroRow row() throws IOException {
+    public kelondroRow row() {
         return index0.row();
     }
     

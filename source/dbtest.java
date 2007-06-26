@@ -640,7 +640,7 @@ final class dbTable implements kelondroIndex {
         throw new UnsupportedOperationException();
     }
     
-    public synchronized void addUnique(kelondroRow.Entry row, Date entryDate) throws IOException {
+    public synchronized void addUnique(kelondroRow.Entry row, Date entryDate) {
         throw new UnsupportedOperationException();
     }
     

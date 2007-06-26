@@ -229,8 +229,8 @@ public final class httpTemplate {
         return false;
     }
 
-    public static byte[] writeTemplate(InputStream in, OutputStream out, Hashtable pattern, byte[] dflt) throws IOException {
-        return writeTemplate(in, out, pattern, dflt, new byte[0]);
+    public static void writeTemplate(InputStream in, OutputStream out, Hashtable pattern, byte[] dflt) throws IOException {
+        writeTemplate(in, out, pattern, dflt, new byte[0]);
     }
 
     /**

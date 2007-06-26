@@ -264,7 +264,7 @@ public class kelondroCollectionIndex {
         }
     }
     
-    public int size() throws IOException {
+    public int size() {
         return index.size();
     }
     
@@ -1000,7 +1000,7 @@ public class kelondroCollectionIndex {
         
     }
     
-    public synchronized void close() throws IOException {
+    public synchronized void close() {
         this.index.close();
         Iterator i = arrays.values().iterator();
         while (i.hasNext()) {

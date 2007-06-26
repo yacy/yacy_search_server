@@ -46,14 +46,14 @@ public class kelondroFlexSplitTable implements kelondroIndex {
     private File path;
     private String tablename;
     
-    public kelondroFlexSplitTable(File path, String tablename, long preloadTime, kelondroRow rowdef, boolean resetOnFail) throws IOException {
+    public kelondroFlexSplitTable(File path, String tablename, long preloadTime, kelondroRow rowdef, boolean resetOnFail) {
         this.path = path;
         this.tablename = tablename;
         this.rowdef = rowdef;
         init(preloadTime, resetOnFail);
     }
     
-    public void init(long preloadTime, boolean resetOnFail) throws IOException {
+    public void init(long preloadTime, boolean resetOnFail) {
         
         // initialized tables map
         this.tables = new HashMap();

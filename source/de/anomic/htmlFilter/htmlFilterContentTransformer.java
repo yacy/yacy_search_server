@@ -78,17 +78,13 @@ public class htmlFilterContentTransformer extends htmlFilterAbstractTransformer 
     }
 
     private ArrayList bluelist = null;
-    private boolean gettext = false;
 
     public htmlFilterContentTransformer() {
         super(linkTags0, linkTags1);
     }
 
     public void init(String initarg) {
-        if (initarg.equals("gettext")) {
-            // the initarg declares that the transformer applies a gettext-quotation on strings
-            gettext = true;
-        } else if (bluelist == null) {
+        if (bluelist == null) {
             // here, the initarg is used to load a list of bluelisted words
             bluelist = new ArrayList();
             File f = new File(initarg);
@@ -108,7 +104,7 @@ public class htmlFilterContentTransformer extends htmlFilterAbstractTransformer 
     }
 
     public boolean isIdentityTransformer() {
-        return (bluelist.size() == 0) && (!gettext);
+        return (bluelist.size() == 0);
     }
 
     private static char[] genBlueLetters(int length) {
@@ -154,33 +150,6 @@ public class htmlFilterContentTransformer extends htmlFilterAbstractTransformer 
         return result;
     }
     public char[] transformText(char[] text) {
-        if (gettext) {
-//            serverCharBuffer sbb = new serverCharBuffer(text);
-//            //if (sbb.length() > 0) System.out.println("   TEXT: " + sbb.toString());
-//            serverCharBuffer[] sbbs = httpTemplate.splitQuotations(sbb);
-//            sbb = new serverCharBuffer();
-//            for (int i = 0; i < sbbs.length; i++) {
-//                if (sbbs[i].isWhitespace(true)) {
-//                    sbb.append(sbbs[i]);
-//                } else if ((sbbs[i].byteAt(0) == httpTemplate.hash) ||
-//                           (sbbs[i].startsWith(httpTemplate.dpdpa))) {
-//                    // this is a template or a part of a template
-//                    sbb.append(sbbs[i]);
-//                } else {
-//                    // this is a text fragment, generate gettext quotation
-//                    int ws = sbbs[i].whitespaceStart(true);
-//                    int we = sbbs[i].whitespaceEnd(true);
-//                    sbb.append(sbbs[i].getBytes(0, ws));
-//                    sbb.append('_');
-//                    sbb.append('(');
-//                    sbb.append(sbbs[i].getBytes(ws, we));
-//                    sbb.append(')');
-//                    sbb.append(sbbs[i].getBytes(we));
-//                }
-//            }
-//            //if (sbb.length() > 0) System.out.println("GETTEXT: " + sbb.toString());
-//            return sbb.getChars();
-        }
         if (bluelist != null) {
             if (bluelistHit(text)) {
                 // System.out.println("FILTERHIT: " + text);

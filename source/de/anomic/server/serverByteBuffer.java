@@ -277,9 +277,13 @@ public final class serverByteBuffer extends OutputStream {
     }
 
     public boolean startsWith(byte[] bs) {
-        if (length < bs.length) return false;
+        return startsWith(bs, 0);
+    }
+    
+    public boolean startsWith(byte[] bs, int start) {
+        if (length - start < bs.length) return false;
         for (int i = 0; i < bs.length; i++) {
-            if (buffer[offset + i] != bs[i]) return false;
+            if (buffer[offset + i + start] != bs[i]) return false;
         }
         return true;
     }

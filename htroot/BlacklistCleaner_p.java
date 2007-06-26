@@ -216,9 +216,8 @@ public class BlacklistCleaner_p {
                 if (ok.contains(s)) {
                     r.put(s, new Integer(ERR_DOUBLE_OCCURANCE));
                     continue;
-                } else {
-                    ok.add(s);
                 }
+                ok.add(s);
                 
                 if ((slashPos = s.indexOf("/")) == -1) {
                     host = s;
@@ -235,10 +234,9 @@ public class BlacklistCleaner_p {
                     if (i == 0 && host.length() > 1 && host.charAt(1) != '.') {
                         r.put(s, new Integer(ERR_SUBDOMAIN_XOR_WILDCARD));
                         continue;
-                    } else {
-                        r.put(s, new Integer(ERR_HOST_WRONG_CHARS));
-                        continue;
                     }
+                    r.put(s, new Integer(ERR_HOST_WRONG_CHARS));
+                    continue;
                 }
                 
                 // in host-part only full sub-domains may be wildcards

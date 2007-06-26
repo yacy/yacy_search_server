@@ -130,7 +130,6 @@ public class CrawlURLFetch_p {
                 
                 if (fetcher != null) fetcher.interrupt();
                 fetcher = null;
-                try {
                     if (post.get("source", "").equals("peer") &&
                             post.get("peerhash", "").equals("random")) {
                         fetcher = new URLFetcher(
@@ -184,11 +183,7 @@ public class CrawlURLFetch_p {
                                     frequency);
                         }
                     }
-                    if (fetcher != null)
-                        fetcher.start();
-                } catch (IOException e) {
-                    e.printStackTrace();
-                }
+                    if (fetcher != null) fetcher.start();
             }
             else if (post.containsKey("stop")) {
                 if (fetcher != null) {
@@ -199,7 +194,6 @@ public class CrawlURLFetch_p {
             }
             else if (post.containsKey("restart")) {
                 if (fetcher != null) {
-                    try {
                         fetcher.interrupt();
                         if (fetcher.url == null) {
                             fetcher = new URLFetcher(
@@ -216,9 +210,6 @@ public class CrawlURLFetch_p {
                                     fetcher.delay);
                         }
                         fetcher.start();
-                    } catch (IOException e) {
-                        e.printStackTrace();
-                    }
                 } else {
                     prop.put("threadError", ERR_THREAD_RESUME);
                 }
@@ -397,7 +388,7 @@ public class CrawlURLFetch_p {
                 plasmaCrawlProfile.entry profile,
                 URL url,
                 int count,
-                long delayMs) throws IOException {
+                long delayMs) {
             if (env == null || profile == null || url == null)
                 throw new NullPointerException("env, profile or url must not be null");
             this.sb = (plasmaSwitchboard)env;
@@ -412,7 +403,7 @@ public class CrawlURLFetch_p {
                 serverSwitch env,
                 plasmaCrawlProfile.entry profile,
                 int count,
-                long delayMs) throws IOException {
+                long delayMs) {
             if (env == null || profile == null)
                 throw new NullPointerException("env or profile must not be null");
             this.sb = (plasmaSwitchboard)env;

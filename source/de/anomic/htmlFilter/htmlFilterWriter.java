@@ -512,7 +512,6 @@ public final class htmlFilterWriter extends Writer {
             htmlFilterTransformer transformer = new htmlFilterContentTransformer();            
             // TODO: this does not work at the moment
             System.exit(0);
-            transformer.init("gettext");
             Reader is = new FileReader(args[0]);
             FileOutputStream fos = new FileOutputStream(new File(args[0] + ".out"));
             Writer os = new htmlFilterWriter(fos, "UTF-8",scraper, transformer, false);

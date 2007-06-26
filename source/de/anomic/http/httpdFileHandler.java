@@ -77,13 +77,11 @@ package de.anomic.http;
 import java.awt.Image;
 import java.awt.image.BufferedImage;
 import java.io.BufferedInputStream;
-import java.io.BufferedReader;
 import java.io.ByteArrayInputStream;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.io.PushbackInputStream;
 import java.io.UnsupportedEncodingException;
@@ -91,8 +89,6 @@ import java.lang.ref.SoftReference;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.net.URLDecoder;
-import java.security.MessageDigest;
-import java.security.NoSuchAlgorithmException;
 import java.util.Date;
 import java.util.Enumeration;
 import java.util.HashMap;
@@ -134,9 +130,6 @@ public final class httpdFileHandler extends httpdAbstractHandler implements http
     private static String[] defaultFiles = null;
     private static File htDefaultPath = null;
     private static File htLocalePath = null;
-    
-    private MessageDigest md5Digest = null;
-    
 
     private static final HashMap templateCache;    
     private static final HashMap templateMethodCache;
@@ -205,12 +198,6 @@ public final class httpdFileHandler extends httpdAbstractHandler implements http
             //htLocaleSelection = switchboard.getConfig("htLocaleSelection","default");
         }
         
-        // initialise an message digest for Content-MD5 support ...
-        try {
-            this.md5Digest = MessageDigest.getInstance("MD5");
-        } catch (NoSuchAlgorithmException e) {
-            serverLog.logWarning("HTTPDFileHandler", "Content-MD5 support not availabel ...");
-        }
     }
     
     public static final void initDefaultPath() {
@@ -585,7 +572,6 @@ public final class httpdFileHandler extends httpdAbstractHandler implements http
                 // if this file uses templates, then we use the template
                 // re-write - method to create an result
                 String mimeType = mimeTable.getProperty(targetExt,"text/html");
-                byte[] result;
                 boolean zipContent = requestHeader.acceptGzip() && httpd.shallTransportZipped("." + conProp.getProperty("EXT",""));
                 if (path.endsWith("html") || 
                         path.endsWith("xml") || 
@@ -675,148 +661,96 @@ public final class httpdFileHandler extends httpdAbstractHandler implements http
                     tp.putAll(templates);
                     
                     // rewrite the file
-                    serverByteBuffer o = null;
                     InputStream fis = null;
-                    GZIPOutputStream zippedOut = null;
-                    try {
-                        // do fileCaching here
-                        byte[] templateContent = null;
-                        if (useTemplateCache) {
-                            long fileSize = targetFile.length();
-                            if (fileSize <= 512*1024) {
-                                SoftReference ref = (SoftReference) templateCache.get(targetFile);
-                                if (ref != null) {
-                                    templateContent = (byte[]) ref.get();
-                                    if (templateContent == null) 
-                                        templateCache.remove(targetFile);                               
-                                }
-                                
-                                if (templateContent == null) {
-                                    // loading the content of the template file into a byte array
-                                    templateContent = serverFileUtils.read(targetFile);
-                                    
-                                    // storing the content into the cache
-                                    ref = new SoftReference(templateContent);
-                                    templateCache.put(targetFile,ref);
-                                    if (this.theLogger.isLoggable(Level.FINEST))
-                                        this.theLogger.logFinest("Cache MISS for file " + targetFile);
-                                } else {
-                                    if (this.theLogger.isLoggable(Level.FINEST))
-                                        this.theLogger.logFinest("Cache HIT for file " + targetFile);
-                                }
-                                
-                                // creating an inputstream needed by the template rewrite function
-                                fis = new ByteArrayInputStream(templateContent);                            
-                                templateContent = null;
-                            } else {
-                                fis = new BufferedInputStream(new FileInputStream(targetFile));
+                    
+                    // read the file/template
+                    byte[] templateContent = null;
+                    if (useTemplateCache) {
+                        long fileSize = targetFile.length();
+                        if (fileSize <= 512 * 1024) {
+                            // read from cache
+                            SoftReference ref = (SoftReference) templateCache.get(targetFile);
+                            if (ref != null) {
+                                templateContent = (byte[]) ref.get();
+                                if (templateContent == null) templateCache.remove(targetFile);
                             }
+
+                            if (templateContent == null) {
+                                // loading the content of the template file into
+                                // a byte array
+                                templateContent = serverFileUtils.read(targetFile);
+
+                                // storing the content into the cache
+                                ref = new SoftReference(templateContent);
+                                templateCache.put(targetFile, ref);
+                                if (this.theLogger.isLoggable(Level.FINEST))
+                                    this.theLogger.logFinest("Cache MISS for file " + targetFile);
+                            } else {
+                                if (this.theLogger.isLoggable(Level.FINEST))
+                                    this.theLogger.logFinest("Cache HIT for file " + targetFile);
+                            }
+
+                            // creating an inputstream needed by the template
+                            // rewrite function
+                            fis = new ByteArrayInputStream(templateContent);
+                            templateContent = null;
                         } else {
+                            // read from file directly
                             fis = new BufferedInputStream(new FileInputStream(targetFile));
                         }
-                        
-                        //use the page template
-                        String supertemplate="";
-                        if(tp.containsKey("SUPERTEMPLATE")){
-                            supertemplate=(String) tp.get("SUPERTEMPLATE");
-                        }
-                        //if(sb.getConfig("usePageTemplate", "false").equals("true")){    
-                        if(!supertemplate.equals("")){
-                            File pageFile=getOverlayedFile(supertemplate); //typically /env/page.html
-                            File pageClass=getOverlayedClass(supertemplate);
-                            if(pageFile != null && pageFile.exists()){
-                                //warning: o,tp and fis are reused
-                                //this replaces the normal template function (below), and the
-                                //normal function is used for supertemplates.
-                                
-                                //search for header Data
-                                //XXX: This part may be slow :-(
-                                BufferedReader br=new BufferedReader(new InputStreamReader(fis));
-                                String line;
-                                boolean inheader=false;
-                                StringBuffer header=new StringBuffer();
-                                StringBuffer content=new StringBuffer();
-                                String content_s,header_s;
-                                while((line=br.readLine())!=null){
-                                    if(!inheader){
-                                        if(line.startsWith("<!--HEADER")){
-                                            inheader=true;
-                                        }else{
-                                            content.append(line);
-                                        }
-                                    }else{
-                                        if(line.endsWith("HEADER-->")){
-                                            inheader=false;
-                                        }else{
-                                            header.append(line);
-                                        }
-                                    }
-                                }
-                                
-                                //tp is from the servlet, fis is the content-only from the servlet
-                                //this resolvs templates in both header and content
-                                o = new serverByteBuffer();
-                                fis=new ByteArrayInputStream((new String(content)).getBytes());
-                                httpTemplate.writeTemplate(fis, o, tp, "-UNRESOLVED_PATTERN-".getBytes());
-                                content_s=o.toString();
-                                o = new serverByteBuffer();
-                                fis=new ByteArrayInputStream(header.toString().getBytes());
-                                httpTemplate.writeTemplate(fis, o, tp, "-UNRESOLVED_PATTERN-".getBytes());
-                                header_s=o.toString();
-                                
-                                //further processing of page.html (via page.class)?
-                                if (pageClass != null && pageClass.exists()){
-                                    Object tmp = invokeServlet(pageClass, requestHeader, args); 
-                                    if(tmp instanceof serverObjects){
-                                        tp=new servletProperties((serverObjects)tmp);
-                                    }else{
-                                        tp=(servletProperties)tmp;
-                                    }
-                                }else
-                                    tp = new servletProperties();
-                                tp.putASIS("header", header_s);
-                                tp.putASIS("page", content_s);
-                                fis=new BufferedInputStream(new FileInputStream(pageFile));
-                                
-                            }
-                        }
-                            
-                        o = new serverByteBuffer();
-                        if (zipContent) zippedOut = new GZIPOutputStream(o);
-                        httpTemplate.writeTemplate(fis, (zipContent) ? (OutputStream)zippedOut: (OutputStream)o, tp, "-UNRESOLVED_PATTERN-".getBytes("UTF-8"));
+                    } else {
+                        fis = new BufferedInputStream(new FileInputStream(targetFile));
+                    }
+
+                    // write the array to the client
+                    // we can do that either in standard mode (whole thing completely) or in chunked mode
+                    // since yacy clients do not understand chunked mode, we use this only for communication with the administrator
+                    boolean yacyClient = requestHeader.userAgent().startsWith("yacy");
+                    boolean chunked = !method.equals(httpHeader.METHOD_HEAD) && !yacyClient;
+                    if (chunked) {
+                        // send page in chunks and parse SSIs
+                        serverByteBuffer o = new serverByteBuffer();
+                        // apply templates
+                        httpTemplate.writeTemplate(fis, o, tp, "-UNRESOLVED_PATTERN-".getBytes("UTF-8"));
+                        httpd.sendRespondHeader(this.connectionProperties, out,
+                                httpVersion, 200, null, mimeType, -1,
+                                targetDate, null, tp.getOutgoingHeader(),
+                                null, "chunked", nocache);
+                        // send the content in chunked parts, see RFC 2616 section 3.6.1
+                        //byte[] result = o.toByteArray(); // this interrupts streaming (bad idea!)
+                        httpChunkedOutputStream chos = new httpChunkedOutputStream(out);
+                        httpSSI.writeSSI(targetFile, o, chos);
+                        //chos.write(result);
+                        chos.finish();
+                    } else {
+                        // send page as whole thing, SSIs are not possible
+                        String contentEncoding = (zipContent) ? "gzip" : null;
+                        // apply templates
+                        serverByteBuffer o = new serverByteBuffer();
                         if (zipContent) {
+                            GZIPOutputStream zippedOut = new GZIPOutputStream(o);
+                            httpTemplate.writeTemplate(fis, zippedOut, tp, "-UNRESOLVED_PATTERN-".getBytes("UTF-8"));
                             zippedOut.finish();
                             zippedOut.flush();
                             zippedOut.close();
                             zippedOut = null;
+                        } else {
+                            httpTemplate.writeTemplate(fis, o, tp, "-UNRESOLVED_PATTERN-".getBytes("UTF-8"));
                         }
-                        
-                        result = o.toByteArray();
-                        
-                        if (this.md5Digest != null) {
-                            this.md5Digest.reset();
-                            this.md5Digest.update(result);
-                            byte[] digest = this.md5Digest.digest();
-                            StringBuffer digestString = new StringBuffer();
-                            for ( int i = 0; i < digest.length; i++ )
-                                digestString.append(Integer.toHexString( digest[i]&0xff));
-
-                        }                        
-                    } finally {
-                        if (zippedOut != null) try {zippedOut.close();} catch(Exception e) {}
-                        if (o != null) try {o.close(); o = null;} catch(Exception e) {}
-                        if (fis != null) try {fis.close(); fis=null;} catch(Exception e) {}
+                        if (method.equals(httpHeader.METHOD_HEAD)) {
+                            httpd.sendRespondHeader(this.connectionProperties, out,
+                                    httpVersion, 200, null, mimeType, o.length(),
+                                    targetDate, null, tp.getOutgoingHeader(),
+                                    contentEncoding, null, nocache);
+                        } else {
+                            byte[] result = o.toByteArray(); // this interrupts streaming (bad idea!)
+                            httpd.sendRespondHeader(this.connectionProperties, out,
+                                    httpVersion, 200, null, mimeType, result.length,
+                                    targetDate, null, tp.getOutgoingHeader(),
+                                    contentEncoding, null, nocache);
+                            serverFileUtils.write(result, out);
+                        }  
                     }
-                    
-                    // write the array to the client
-                    long contentLength     = result.length;
-                    String contentEncoding = (zipContent)?"gzip":null;
-                    httpd.sendRespondHeader(this.connectionProperties, out, httpVersion, 200, null, mimeType, contentLength, targetDate, null, tp.getOutgoingHeader(), contentEncoding, null, nocache);
-                    if (! method.equals(httpHeader.METHOD_HEAD)) {
-                        //Thread.sleep(200); // this solved the message problem (!!)
-                        serverFileUtils.write(result, out);
-                    }                    
-                    
                 } else { // no html
                     
                     int statusCode = 200;

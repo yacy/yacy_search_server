@@ -68,7 +68,7 @@ public class kelondroDynTree {
     private Hashtable buffer, cache;
     private long cycleBuffer;
     
-    public kelondroDynTree(File file, long preloadTime, int keylength, int nodesize, kelondroRow rowdef, char fillChar, boolean resetOnFail) throws IOException {
+    public kelondroDynTree(File file, long preloadTime, int keylength, int nodesize, kelondroRow rowdef, char fillChar, boolean resetOnFail) {
         // creates or opens a DynTree
         this.file = file;
         this.preloadTime = preloadTime;

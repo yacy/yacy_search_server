@@ -93,11 +93,12 @@ public class ConfigBasic {
         if ((post != null)) config.reinitPortForwarding(post, env);
         
         // starting a peer ping
-        boolean doPeerPing = false;
+        
+        //boolean doPeerPing = false;
         if ((yacyCore.seedDB.mySeed.isVirgin()) || (yacyCore.seedDB.mySeed.isJunior())) {
             serverInstantThread.oneTimeJob(sb.yc, "peerPing", null, 0);
-            doPeerPing = true;
-        } 
+            //doPeerPing = true;
+        }
         
         // scan for Upnp routers
         /*

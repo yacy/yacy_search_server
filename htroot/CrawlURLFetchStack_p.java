@@ -151,80 +151,79 @@ public class CrawlURLFetchStack_p {
             } catch (IOException e) { e.printStackTrace(); }
             outw.flush();
             return null;
-        } else {
-            /* =================================================================
-             * 'normal' request
-             * ================================================================= */
-            if (post != null) {
-                if (post.containsKey("addurls")) {
-                    prop.put("addedUrls", 1);
-                    prop.put("addedUrls_added", addURLs(post, post.getInt("addurls", -1), getURLFetcherStack(env)));
+        }
+        /* =================================================================
+         * 'normal' request
+         * ================================================================= */
+        if (post != null) {
+            if (post.containsKey("addurls")) {
+                prop.put("addedUrls", 1);
+                prop.put("addedUrls_added", addURLs(post, post.getInt("addurls", -1), getURLFetcherStack(env)));
+            }
+            else if (post.containsKey("setMaxSize")) {
+                final int count = post.getInt("maxSize", maxURLsPerFetch);
+                if (count > 0) {
+                    maxURLsPerFetch = count;
+                    prop.put("set", 1);
+                    prop.put("set_value", maxURLsPerFetch);
+                } else {
+                    prop.put("set", 2);
+                    prop.put("set_value", count);
                 }
-                else if (post.containsKey("setMaxSize")) {
-                    final int count = post.getInt("maxSize", maxURLsPerFetch);
-                    if (count > 0) {
-                        maxURLsPerFetch = count;
-                        prop.put("set", 1);
-                        prop.put("set_value", maxURLsPerFetch);
-                    } else {
-                        prop.put("set", 2);
-                        prop.put("set_value", count);
-                    }
-                }
-                else if (post.containsKey("shiftlcq")) {
-                    final int count = Math.min(post.getInt("shiftloc", 0), sb.noticeURL.stackSize(plasmaCrawlNURL.STACK_TYPE_CORE));
-                    final int failed = shiftFromNotice(sb.noticeURL, plasmaCrawlNURL.STACK_TYPE_CORE, getURLFetcherStack(env), count);
-                    prop.put("shiftloc", 1);
-                    prop.put("shiftloc_value", count - failed);
-                    prop.put("shiftloc_failed", failed);
-                }
-                else if (post.containsKey("shiftrcq")) {
-                    final int count = post.getInt("shiftrem", 0);
-                    final int failed = shiftFromNotice(sb.noticeURL, plasmaCrawlNURL.STACK_TYPE_LIMIT, getURLFetcherStack(env), count);
-                    prop.put("shiftrem", 1);
-                    prop.put("shiftrem_value", count - failed);
-                    prop.put("shiftrem_failed", failed);
-                }
-                else if (post.containsKey("subupload")) {
-                    if (post.get("upload", "").length() == 0) {
-                        prop.put("uploadError", 1);
-                    } else {
-                        final File file = new File(post.get("upload", ""));
-                        final String content = new String((byte[])post.get("upload$file"));
-                        
-                        final String type = post.get("uploadType", "");
-                        final boolean blCheck = post.containsKey("blacklistCheck");
-                        if (type.equals("plain")) {
-                            prop.put("upload_added", addURLs(content.split("\n"), blCheck, getURLFetcherStack(env)));
-                            prop.put("upload_failed", 0);
+            }
+            else if (post.containsKey("shiftlcq")) {
+                final int count = Math.min(post.getInt("shiftloc", 0), sb.noticeURL.stackSize(plasmaCrawlNURL.STACK_TYPE_CORE));
+                final int failed = shiftFromNotice(sb.noticeURL, plasmaCrawlNURL.STACK_TYPE_CORE, getURLFetcherStack(env), count);
+                prop.put("shiftloc", 1);
+                prop.put("shiftloc_value", count - failed);
+                prop.put("shiftloc_failed", failed);
+            }
+            else if (post.containsKey("shiftrcq")) {
+                final int count = post.getInt("shiftrem", 0);
+                final int failed = shiftFromNotice(sb.noticeURL, plasmaCrawlNURL.STACK_TYPE_LIMIT, getURLFetcherStack(env), count);
+                prop.put("shiftrem", 1);
+                prop.put("shiftrem_value", count - failed);
+                prop.put("shiftrem_failed", failed);
+            }
+            else if (post.containsKey("subupload")) {
+                if (post.get("upload", "").length() == 0) {
+                    prop.put("uploadError", 1);
+                } else {
+                    final File file = new File(post.get("upload", ""));
+                    final String content = new String((byte[])post.get("upload$file"));
+                    
+                    final String type = post.get("uploadType", "");
+                    final boolean blCheck = post.containsKey("blacklistCheck");
+                    if (type.equals("plain")) {
+                        prop.put("upload_added", addURLs(content.split("\n"), blCheck, getURLFetcherStack(env)));
+                        prop.put("upload_failed", 0);
+                        prop.put("upload", 1);
+                    } else if (type.equals("html")) {
+                        try {
+                            final htmlFilterContentScraper scraper = new htmlFilterContentScraper(new URL(file));
+                            final Writer writer = new htmlFilterWriter(null, null, scraper, null, false);
+                            serverFileUtils.write(content, writer);
+                            writer.close();
+                            
+                            final Iterator it = ((HashMap)scraper.getAnchors()).keySet().iterator();
+                            int added = 0, failed = 0;
+                            URL url;
+                            while (it.hasNext()) try {
+                                url = new URL((String)it.next());
+                                if (blCheck && plasmaSwitchboard.urlBlacklist.isListed(plasmaURLPattern.BLACKLIST_CRAWLER, url)) {
+                                    failed++;
+                                    continue;
+                                }
+                                getURLFetcherStack(env).push(url);
+                                added++;
+                            } catch (MalformedURLException e) { failed++; }
                             prop.put("upload", 1);
-                        } else if (type.equals("html")) {
-                            try {
-                                final htmlFilterContentScraper scraper = new htmlFilterContentScraper(new URL(file));
-                                final Writer writer = new htmlFilterWriter(null, null, scraper, null, false);
-                                serverFileUtils.write(content, writer);
-                                writer.close();
-                                
-                                final Iterator it = ((HashMap)scraper.getAnchors()).keySet().iterator();
-                                int added = 0, failed = 0;
-                                URL url;
-                                while (it.hasNext()) try {
-                                    url = new URL((String)it.next());
-                                    if (blCheck && plasmaSwitchboard.urlBlacklist.isListed(plasmaURLPattern.BLACKLIST_CRAWLER, url)) {
-                                        failed++;
-                                        continue;
-                                    }
-                                    getURLFetcherStack(env).push(url);
-                                    added++;
-                                } catch (MalformedURLException e) { failed++; }
-                                prop.put("upload", 1);
-                                prop.put("upload_added", added);
-                                prop.put("upload_failed", failed);
-                            } catch (Exception e) {
-                                e.printStackTrace();
-                                prop.put("upload", 2);
-                                prop.put("upload_error", e.getMessage());
-                            }
+                            prop.put("upload_added", added);
+                            prop.put("upload_failed", failed);
+                        } catch (Exception e) {
+                            e.printStackTrace();
+                            prop.put("upload", 2);
+                            prop.put("upload_error", e.getMessage());
                         }
                     }
                 }

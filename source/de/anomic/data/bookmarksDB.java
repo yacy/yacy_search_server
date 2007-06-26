@@ -783,9 +783,8 @@ public class bookmarksDB {
         public String getOwner(){
             if(entry.containsKey(BOOKMARK_OWNER)){
                 return (String) entry.get(BOOKMARK_OWNER);
-            }else{
-                return null; //null means admin
             }
+            return null; //null means admin
         }
         public void setOwner(String owner){
             entry.put(BOOKMARK_OWNER, owner);
@@ -793,16 +792,14 @@ public class bookmarksDB {
         public boolean getPublic(){
             if(entry.containsKey(BOOKMARK_PUBLIC)){
                 return ((String) entry.get(BOOKMARK_PUBLIC)).equals("public");
-            }else{
-                return false;
             }
+            return false;
         }
         public boolean getFeed(){
             if(entry.containsKey(BOOKMARK_IS_FEED)){
                 return ((String) entry.get(BOOKMARK_IS_FEED)).equals("true");
-            }else{
-                return false;
             }
+            return false;
         }
         public void setPublic(boolean isPublic){
         	if(isPublic){
@@ -888,8 +885,8 @@ public class bookmarksDB {
         public void remove() {
             if (this.nextEntry != null) {
                 try {
-                    String tagHash = (String)this.nextEntry.getTagHash();
-                    if (tagHash != null) removeTag((String) tagHash);
+                    String tagHash = this.nextEntry.getTagHash();
+                    if (tagHash != null) removeTag(tagHash);
                 } catch (kelondroException e) {
                     //resetDatabase();
                 }
@@ -949,16 +946,11 @@ public class bookmarksDB {
 			if(bm1==null || bm2==null)
 				return 0; //XXX: i think this should not happen? maybe this needs further tracing of the bug
             if(this.newestFirst){
-                if(bm2.getTimeStamp() - bm1.getTimeStamp() >0)
-                    return 1;
-                else
-                    return -1;
-            }else{
-                if(bm1.getTimeStamp() - bm2.getTimeStamp() >0)
-                    return 1;
-                else
-                    return -1;
+                if(bm2.getTimeStamp() - bm1.getTimeStamp() >0) return 1;
+                return -1;
             }
+            if(bm1.getTimeStamp() - bm2.getTimeStamp() >0) return 1;
+            return -1;
         }
     }
     /**

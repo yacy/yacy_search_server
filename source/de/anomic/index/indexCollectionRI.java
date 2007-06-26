@@ -68,12 +68,7 @@ public class indexCollectionRI implements indexRI {
     }
     
     public int size() {
-        try {
-            return collectionIndex.size();
-        } catch (IOException e) {
-            e.printStackTrace();
-            return 0;
-        }
+        return collectionIndex.size();
     }
     
     public synchronized int indexSize(String wordHash) {
@@ -196,11 +191,7 @@ public class indexCollectionRI implements indexRI {
     }
 
     public synchronized void close() {
-        try {
-            collectionIndex.close();
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
+        collectionIndex.close();
     }
     
 }

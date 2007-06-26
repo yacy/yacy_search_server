@@ -301,7 +301,7 @@ public class kelondroRowCollection {
         addUnique(r, 0, r.length);
     }
 
-    public synchronized void addUniqueMultiple(List rows) throws IOException {
+    public synchronized void addUniqueMultiple(List rows) {
         assert this.sortBound == 0 : "sortBound = " + this.sortBound + ", chunkcount = " + this.chunkcount;
         Iterator i = rows.iterator();
         while (i.hasNext()) addUnique((kelondroRow.Entry) i.next());

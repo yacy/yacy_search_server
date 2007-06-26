@@ -27,6 +27,8 @@ import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.Collection;
+import java.util.Comparator;
+import java.util.Date;
 import java.util.Iterator;
 import java.util.TreeSet;
 
@@ -51,12 +53,12 @@ public class rssReader {
 		try {
 			channel=FeedParser.parse(builder, this.url);
 			Collection oldfeedItems=channel.getItems();
-			feedItems=new TreeSet(new rssReaderItemComparator());
+			feedItems=new TreeSet(new ItemComparator());
 			Iterator it=oldfeedItems.iterator();
 			int count=0;
 			while(it.hasNext()){
 				de.nava.informa.impl.basic.Item item=(de.nava.informa.impl.basic.Item) it.next();
-				rssReaderItem newItem=new rssReaderItem(count++, item.getLink(), item.getTitle(), item.getDescription(), item.getDate(), item.getCreator());
+				Item newItem=new Item(count++, item.getLink(), item.getTitle(), item.getDescription(), item.getDate(), item.getCreator());
 				feedItems.add(newItem);
 			}
 		}
@@ -75,5 +77,50 @@ public class rssReader {
 	public Collection getFeedItems(){
 		return feedItems;
 	}
+    
+    public class Item{
+        String creator, title, description;
+        Date date;
+        URL link;
+        int num;
+        public Item(int num, URL link, String title, String description, Date date, String creator){
+            this.link=link;
+            this.title=title;
+            this.description=description;
+            this.date=date;
+            this.creator=creator;
+            this.num=num;
+        }
+        public URL getLink(){
+            return link;
+        }
+        public String getTitle(){
+            return (title!=null)? title: "";
+        }
+        public String getDescription(){
+            return (description!=null)? description: "";
+        }
+        public Date getDate(){
+            return (date!=null)? date: new Date();
+        }
+        public String getCreator(){
+            return (creator!=null)? creator: "";
+        }
+        public int getNum(){
+            return num;
+        }
+        
+    }
+    
+    public class ItemComparator implements Comparator {
+        public int compare(Object o1, Object o2){
+            int num1=((Item)o1).getNum();
+            int num2=((Item)o2).getNum();
+            return num2-num1;
+        }
+        public boolean equals(Object o1, Object o2){
+            return compare(o1, o2)==0;
+        }
+    }
 	
 }

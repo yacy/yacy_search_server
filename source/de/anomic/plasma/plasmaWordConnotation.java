@@ -59,7 +59,7 @@ public class plasmaWordConnotation {
     private static final int nodesize = 4048;
     private kelondroDynTree refDB;
     
-    public plasmaWordConnotation(File refDBfile, long preloadTime, char fillChar) throws IOException {
+    public plasmaWordConnotation(File refDBfile, long preloadTime, char fillChar) {
         refDB = new kelondroDynTree(refDBfile, preloadTime, wordlength, nodesize, new kelondroRow("byte[] word-" + wordlength + ", Cardinal count-" + countlength, kelondroNaturalOrder.naturalOrder, 0), fillChar, true);
     }
 

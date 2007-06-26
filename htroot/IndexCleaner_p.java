@@ -93,9 +93,7 @@ public class IndexCleaner_p {
             prop.put("LOCATION","");
             return prop;
         }
-        else {
-            prop.put("bla", "post==null");
-        }
+        prop.put("bla", "post==null");
         if (urldbCleanerThread!=null) {
             prop.put("urldb", 1);
             prop.put("urldb_percentUrls", ((double)urldbCleanerThread.totalSearchedUrls/sb.wordIndex.loadedURL.size())*100 + "");

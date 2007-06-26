@@ -27,7 +27,6 @@
 
 package de.anomic.index;
 
-import java.io.IOException;
 import java.net.MalformedURLException;
 import java.text.ParseException;
 import java.util.ArrayList;
@@ -285,7 +284,7 @@ public class indexURLEntry {
         }
     }
 
-    public kelondroRow.Entry toRowEntry() throws IOException {
+    public kelondroRow.Entry toRowEntry() {
         return this.entry;
     }
 

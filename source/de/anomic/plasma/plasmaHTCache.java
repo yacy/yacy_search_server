@@ -1076,7 +1076,7 @@ public final class plasmaHTCache {
         return this.resInfo;
     }
     
-    public boolean writeResourceInfo() throws IOException {
+    public boolean writeResourceInfo() {
         assert(this.nomalizedURLHash != null) : "URL Hash is null";
         if (this.resInfo == null) return false;
         try {

@@ -143,13 +143,9 @@ public final class plasmaCrawlStacker {
             this.log.logSevere("Unable to shutdown all remaining stackCrawl threads", e1);
         }
         
-        try {
-            this.log.logFine("Shutdown. Closing stackCrawl queue.");
-            if (this.queue != null) this.queue.close();
-            this.queue = null;
-        } catch (IOException e) {
-            this.log.logSevere("DB could not be closed properly.", e);
-        }
+        this.log.logFine("Shutdown. Closing stackCrawl queue.");
+        if (this.queue != null) this.queue.close();
+        this.queue = null;
     }
     
     public int getNumActiveWorker() {
@@ -540,7 +536,7 @@ public final class plasmaCrawlStacker {
             }
         }
         
-        public void close() throws IOException {
+        public void close() {
             // closing the db
             this.urlEntryCache.close();
             

@@ -123,7 +123,7 @@ public class kelondroDyn {
         return this.rowdef;
     }
     
-    public synchronized int sizeDyn() throws IOException {
+    public synchronized int sizeDyn() {
         //this.segmentCount = 0;
         //Iterator i = keys(true); while (i.hasNext()) segmentCount++;
         //return segmentCount;

@@ -32,7 +32,7 @@ public class kelondroBytesIntMap {
     private kelondroRow rowdef;
     private kelondroIndex index0, index1;
     
-    public kelondroBytesIntMap(kelondroIndex ki) throws IOException {
+    public kelondroBytesIntMap(kelondroIndex ki) {
         assert (ki.row().columns() == 2); // must be a key/index relation
         assert (ki.row().width(1) == 4);  // the value must be a b256-encoded int, 4 bytes long
         this.index0 = null; // not used
@@ -46,7 +46,7 @@ public class kelondroBytesIntMap {
         this.index1 = null; // to show that this is the initialization phase
     }
     
-    public kelondroRow row() throws IOException {
+    public kelondroRow row() {
         return index0.row();
     }
     

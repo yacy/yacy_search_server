@@ -491,6 +491,10 @@ public final class httpHeader extends TreeMap implements Map {
         return null;
     }
     
+    public String userAgent() {
+        return (String) get(USER_AGENT);
+    }
+    
     public long age() {
         Date lm = lastModified();
         Date sd = date();

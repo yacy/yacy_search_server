@@ -64,13 +64,13 @@ public class yacyNewsDB {
     private long preloadTime;
     protected kelondroIndex news;
 
-    public yacyNewsDB(File path, long preloadTime) throws IOException {
+    public yacyNewsDB(File path, long preloadTime) {
         this.path = path;
         this.preloadTime = preloadTime;
         this.news = new kelondroCache(kelondroTree.open(path, true, preloadTime, yacyNewsRecord.rowdef), true, false);
     }
 
-    private void resetDB() throws IOException {
+    private void resetDB() {
         try {close();} catch (Exception e) {}
         if (path.exists()) path.delete();
         this.news = new kelondroCache(kelondroTree.open(path, true, preloadTime, yacyNewsRecord.rowdef), true, false);
@@ -85,7 +85,7 @@ public class yacyNewsDB {
         close();
     }
 
-    public int size() throws IOException {
+    public int size() {
         return news.size();
     }
 
@@ -148,7 +148,7 @@ public class yacyNewsDB {
         );
     }
 
-    protected final kelondroRow.Entry r2b(yacyNewsRecord r) throws IOException {
+    protected final kelondroRow.Entry r2b(yacyNewsRecord r) {
         try {
             if (r == null) return null;
             String attributes = r.attributes().toString();

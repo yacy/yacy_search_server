@@ -18,16 +18,10 @@
 // Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 
 import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileNotFoundException;
-import java.io.IOException;
-import java.io.OutputStream;
-import java.io.UnsupportedEncodingException;
 import java.lang.reflect.InvocationTargetException;
 import java.util.Iterator;
 
 import de.anomic.http.httpHeader;
-import de.anomic.http.httpTemplate;
 import de.anomic.http.httpdFileHandler;
 import de.anomic.plasma.plasmaSwitchboard;
 import de.anomic.server.serverByteBuffer;
@@ -56,19 +50,18 @@ public class TestApplet {
     }
     
     prop.put("mode", "1");
-    File templatefile=filehandler.getOverlayedFile((String)post.get("url"));
+    //File templatefile=filehandler.getOverlayedFile((String)post.get("url"));
     File classfile=filehandler.getOverlayedClass((String)post.get("url"));
     httpHeader header2=new httpHeader();
     header2.put("CLIENTIP", "127.0.0.1");
-    header2.put("PATH", (String)post.get("url"));
+    header2.put("PATH", post.get("url"));
     serverObjects tp=null;
     try {
         if(classfile==null || !classfile.exists()){
             prop.put("mode_templates", "classfile does not exist");
             return prop;
-        }else{
-            tp=(serverObjects)filehandler.invokeServlet(classfile, header2, args);
         }
+        tp=(serverObjects)filehandler.invokeServlet(classfile, header2, args);
     }
     catch (IllegalArgumentException e) {}
     catch (IllegalAccessException e) {}
@@ -87,22 +80,22 @@ public class TestApplet {
         tmp.append(key).append("=").append(tp.get(key)).append("\n");
     }
     prop.put("mode_templates", tmp.toString());
-    FileInputStream fis=null;
-    try {
-        fis=new FileInputStream(templatefile);
+    //FileInputStream fis=null;
+    //try {
+        //fis=new FileInputStream(templatefile);
 
         serverByteBuffer o=new serverByteBuffer();
-        byte[] structure=httpTemplate.writeTemplate(fis, (OutputStream)o, tp, "-UNRESOLVED_PATTERN-".getBytes("UTF-8"));
-        prop.put("mode_structure", structure);
+        //byte[] structure=httpTemplate.writeTemplate(fis, o, tp, "-UNRESOLVED_PATTERN-".getBytes("UTF-8"));
+        //prop.put("mode_structure", structure);
         prop.put("mode_text", o.toString());
         return prop;
-    }
-    catch (FileNotFoundException e) {}
-    catch (UnsupportedEncodingException e) {}
-    catch (IOException e) {}
+    //}
+    //catch (FileNotFoundException e) {}
+    //catch (UnsupportedEncodingException e) {}
+    //catch (IOException e) {}
     
-    prop.put("mode_text", "could not finish correctly"); //very informative errormessage
-    return prop;
+    //prop.put("mode_text", "could not finish correctly"); //very informative errormessage
+    //return prop;
 
     }
 

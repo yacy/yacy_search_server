@@ -45,12 +45,15 @@ package de.anomic.http;
 
 import java.io.FilterOutputStream;
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.OutputStream;
 
-public final class httpChunkedOutputStream extends FilterOutputStream
-{
-    private boolean finished = false;
-    private static final byte[] crlf = {(byte)13,(byte)10};    
+import de.anomic.server.serverByteBuffer;
+import de.anomic.server.serverCore;
+import de.anomic.server.serverFileUtils;
+
+public final class httpChunkedOutputStream extends FilterOutputStream {
+    private boolean finished = false; 
     
     public httpChunkedOutputStream(OutputStream out) {
         super(out);
@@ -63,7 +66,9 @@ public final class httpChunkedOutputStream extends FilterOutputStream
     
     public void finish() throws IOException {
         if (!this.finished) {
-            this.out.write("0\r\n\r\n".getBytes());
+            this.out.write((byte) 48);
+            this.out.write(serverCore.crlf);
+            this.out.write(serverCore.crlf);
             this.out.flush();
             this.finished = true;
         }
@@ -74,9 +79,9 @@ public final class httpChunkedOutputStream extends FilterOutputStream
         if (b.length == 0) return;
             
         this.out.write(Integer.toHexString(b.length).getBytes());
-        this.out.write(crlf);
+        this.out.write(serverCore.crlf);
         this.out.write(b);
-        this.out.write(crlf);
+        this.out.write(serverCore.crlf);
         this.out.flush();
     }
     
@@ -85,9 +90,32 @@ public final class httpChunkedOutputStream extends FilterOutputStream
         if (len == 0) return;
         
         this.out.write(Integer.toHexString(len).getBytes());
-        this.out.write(crlf);
+        this.out.write(serverCore.crlf);
         this.out.write(b, off, len);
-        this.out.write(crlf);
+        this.out.write(serverCore.crlf);
+        this.out.flush();
+    }
+    
+    public void write(serverByteBuffer b, int off, int len) throws IOException {
+        if (this.finished) throw new IOException("ChunkedOutputStream already finalized.");
+        if (len == 0) return;
+        
+        this.out.write(Integer.toHexString(len).getBytes());
+        this.out.write(serverCore.crlf);
+        this.out.write(b.getBytes(off, off + len));
+        this.out.write(serverCore.crlf);
+        this.out.flush();
+    }
+    
+    public void write(InputStream b) throws IOException {
+        if (this.finished) throw new IOException("ChunkedOutputStream already finalized.");
+        int len = b.available();
+        if (len == 0) return;
+        
+        this.out.write(Integer.toHexString(len).getBytes());
+        this.out.write(serverCore.crlf);
+        serverFileUtils.copy(b, out, len);
+        this.out.write(serverCore.crlf);
         this.out.flush();
     }
     
@@ -95,9 +123,9 @@ public final class httpChunkedOutputStream extends FilterOutputStream
         if (this.finished) throw new IOException("ChunkedOutputStream already finalized.");
         
         this.out.write("1".getBytes());
-        this.out.write(crlf);
+        this.out.write(serverCore.crlf);
         this.out.write(b);
-        this.out.write(crlf);
+        this.out.write(serverCore.crlf);
         this.out.flush();
     }
 }

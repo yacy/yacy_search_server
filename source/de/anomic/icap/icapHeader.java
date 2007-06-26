@@ -147,7 +147,8 @@ public class icapHeader extends TreeMap implements Map {
     // to make the occurrence of multiple keys possible, we add them using a counter
     public Object add(Object key, Object value) {
         int c = keyCount((String) key);
-        if (c == 0) return put(key, value); else return put("*" + key + "-" + c, value);
+        if (c == 0) return put(key, value);
+        return put("*" + key + "-" + c, value);
     }
     
     public int keyCount(String key) {
@@ -160,7 +161,8 @@ public class icapHeader extends TreeMap implements Map {
     // a convenience method to access the map with fail-over defaults
     public Object get(Object key, Object dflt) {
         Object result = get(key);
-        if (result == null) return dflt; else return result;
+        if (result == null) return dflt;
+        return result;
     }
     
     // return multiple results

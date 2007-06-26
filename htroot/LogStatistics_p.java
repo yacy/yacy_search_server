@@ -84,100 +84,99 @@ public class LogStatistics_p {
         if (r == null) {
             prop.put("results", 0);
             return prop;
-        } else {
-            prop.put("results", 1);
-            String[] t;
-            float l;
-            prop.put(RESULTS + LogParserPLASMA.DHT_DISTANCE_AVERAGE, r.get(LogParserPLASMA.DHT_DISTANCE_AVERAGE));
-            prop.put(RESULTS + LogParserPLASMA.DHT_DISTANCE_MAX, r.get(LogParserPLASMA.DHT_DISTANCE_MAX));
-            prop.put(RESULTS + LogParserPLASMA.DHT_DISTANCE_MIN, r.get(LogParserPLASMA.DHT_DISTANCE_MIN));
-            prop.put(RESULTS + LogParserPLASMA.DHT_REJECTED, r.get(LogParserPLASMA.DHT_REJECTED));
-            prop.put(RESULTS + LogParserPLASMA.DHT_SELECTED, r.get(LogParserPLASMA.DHT_SELECTED));
-            prop.put(RESULTS + LogParserPLASMA.DHT_SENT_FAILED, r.get(LogParserPLASMA.DHT_SENT_FAILED));
-            t = transformMem(((Long)r.get(LogParserPLASMA.DHT_TRAFFIC_SENT)).longValue());
-            prop.put(RESULTS + LogParserPLASMA.DHT_TRAFFIC_SENT, t[0]);
-            prop.put(RESULTS + LogParserPLASMA.DHT_TRAFFIC_SENT + "Unit", t[1]);
-            prop.put(RESULTS + LogParserPLASMA.DHT_URLS_SENT, r.get(LogParserPLASMA.DHT_URLS_SENT));
-            prop.put(RESULTS + LogParserPLASMA.DHT_WORDS_SELECTED, r.get(LogParserPLASMA.DHT_WORDS_SELECTED));
-            t = transformTime(((Integer)r.get(LogParserPLASMA.DHT_WORDS_SELECTED_TIME)).longValue() * 1000L);
-            prop.put(RESULTS + LogParserPLASMA.DHT_WORDS_SELECTED_TIME, t[0]);
-            prop.put(RESULTS + LogParserPLASMA.DHT_WORDS_SELECTED_TIME + "Unit", t[1]);
-            prop.put(RESULTS + LogParserPLASMA.ERROR_CHILD_TWICE_LEFT, r.get(LogParserPLASMA.ERROR_CHILD_TWICE_LEFT));
-            prop.put(RESULTS + LogParserPLASMA.ERROR_CHILD_TWICE_RIGHT, r.get(LogParserPLASMA.ERROR_CHILD_TWICE_RIGHT));
-            prop.put(RESULTS + LogParserPLASMA.ERROR_MALFORMED_URL, r.get(LogParserPLASMA.ERROR_MALFORMED_URL));
-            prop.put(RESULTS + LogParserPLASMA.INDEXED_ANCHORS, r.get(LogParserPLASMA.INDEXED_ANCHORS));
-            t = transformTime(((Integer)r.get(LogParserPLASMA.INDEXED_INDEX_TIME)).longValue());
-            prop.put(RESULTS + LogParserPLASMA.INDEXED_INDEX_TIME, t[0]);
-            prop.put(RESULTS + LogParserPLASMA.INDEXED_INDEX_TIME + "Unit", t[1]);
-            t = transformTime(((Integer)r.get(LogParserPLASMA.INDEXED_PARSE_TIME)).longValue());
-            prop.put(RESULTS + LogParserPLASMA.INDEXED_PARSE_TIME, t[0]);
-            prop.put(RESULTS + LogParserPLASMA.INDEXED_PARSE_TIME + "Unit", t[1]);
-            prop.put(RESULTS + LogParserPLASMA.INDEXED_SITES, r.get(LogParserPLASMA.INDEXED_SITES));
-            t = transformMem(((Integer)r.get(LogParserPLASMA.INDEXED_SITES_SIZE)).longValue());
-            prop.put(RESULTS + LogParserPLASMA.INDEXED_SITES_SIZE, t[0]);
-            prop.put(RESULTS + LogParserPLASMA.INDEXED_SITES_SIZE + "Unit", t[1]);
-            t = transformTime(((Integer)r.get(LogParserPLASMA.INDEXED_STACK_TIME)).longValue());
-            prop.put(RESULTS + LogParserPLASMA.INDEXED_STACK_TIME, t[0]);
-            prop.put(RESULTS + LogParserPLASMA.INDEXED_STACK_TIME + "Unit", t[1]);
-            t = transformTime(((Integer)r.get(LogParserPLASMA.INDEXED_STORE_TIME)).longValue());
-            prop.put(RESULTS + LogParserPLASMA.INDEXED_STORE_TIME, t[0]);
-            prop.put(RESULTS + LogParserPLASMA.INDEXED_STORE_TIME + "Unit", t[1]);
-            prop.put(RESULTS + LogParserPLASMA.INDEXED_WORDS, r.get(LogParserPLASMA.INDEXED_WORDS));
-            prop.put(RESULTS + LogParserPLASMA.PEERS_BUSY, r.get(LogParserPLASMA.PEERS_BUSY));
-            prop.put(RESULTS + LogParserPLASMA.PEERS_TOO_LESS, r.get(LogParserPLASMA.PEERS_TOO_LESS));
-            prop.put(RESULTS + LogParserPLASMA.RANKING_DIST, r.get(LogParserPLASMA.RANKING_DIST));
-            prop.put(RESULTS + LogParserPLASMA.RANKING_DIST_FAILED, r.get(LogParserPLASMA.RANKING_DIST_FAILED));
-            t = transformTime(((Integer)r.get(LogParserPLASMA.RANKING_DIST_TIME)).longValue());
-            prop.put(RESULTS + LogParserPLASMA.RANKING_DIST_TIME, t[0]);
-            prop.put(RESULTS + LogParserPLASMA.RANKING_DIST_TIME + "Unit", t[1]);
-            prop.put(RESULTS + LogParserPLASMA.RWIS_BLOCKED, r.get(LogParserPLASMA.RWIS_BLOCKED));
-            prop.put(RESULTS + LogParserPLASMA.RWIS_RECEIVED, r.get(LogParserPLASMA.RWIS_RECEIVED));
-            t = transformTime(((Long)r.get(LogParserPLASMA.RWIS_RECEIVED_TIME)).longValue());
-            prop.put(RESULTS + LogParserPLASMA.RWIS_RECEIVED_TIME, t[0]);
-            prop.put(RESULTS + LogParserPLASMA.RWIS_RECEIVED_TIME + "Unit", t[1]);
-            prop.put(RESULTS + LogParserPLASMA.URLS_BLOCKED, r.get(LogParserPLASMA.URLS_BLOCKED));
-            prop.put(RESULTS + LogParserPLASMA.URLS_RECEIVED, r.get(LogParserPLASMA.URLS_RECEIVED));
-            t = transformTime(((Long)r.get(LogParserPLASMA.URLS_RECEIVED_TIME)).longValue());
-            prop.put(RESULTS + LogParserPLASMA.URLS_RECEIVED_TIME, t[0]);
-            prop.put(RESULTS + LogParserPLASMA.URLS_RECEIVED_TIME + "Unit", t[1]);
-            prop.put(RESULTS + LogParserPLASMA.URLS_REQUESTED, r.get(LogParserPLASMA.URLS_REQUESTED));
-            prop.put(RESULTS + LogParserPLASMA.WORDS_RECEIVED, r.get(LogParserPLASMA.WORDS_RECEIVED));
-            l = ((Long)r.get(LogParserPLASMA.TOTAL_PARSER_TIME)).floatValue();
-            t = transformTime((long)l);
-            prop.put(RESULTS + LogParserPLASMA.TOTAL_PARSER_TIME, t[0]);
-            prop.put(RESULTS + LogParserPLASMA.TOTAL_PARSER_TIME + "Unit", t[1]);
-            prop.put(RESULTS + LogParserPLASMA.TOTAL_PARSER_RUNS, r.get(LogParserPLASMA.TOTAL_PARSER_RUNS));
-            if ((l /= 1000) == 0) {
-                prop.put(RESULTS + "avgExists", 0);
-            } else {
-                prop.put(RESULTS + "avgExists", 1);
-                prop.put(RESULTS + "avgExists_avgParserRunsPerMinute", (int) (((Integer) r.get(LogParserPLASMA.TOTAL_PARSER_RUNS)).floatValue() / l)); 
-            }
-            
-            Object[] names = ((HashSet)r.get(LogParserPLASMA.DHT_REJECTED_PEERS_NAME)).toArray();
-            Object[] hashes = ((HashSet)r.get(LogParserPLASMA.DHT_REJECTED_PEERS_HASH)).toArray();
-            int i = 0;
-            for (; i<names.length && i<hashes.length; i++) {
-                prop.put(RESULTS + "useDHTRejectPeers_DHTRejectPeers_" + i + "_name", names[i]);
-                prop.put(RESULTS + "useDHTRejectPeers_DHTRejectPeers_" + i + "_hash", hashes[i]);
-            }
-            prop.put(RESULTS + "DHTRejectPeers", i);
-            prop.put(RESULTS + "useDHTRejectPeers", (i > 0) ? 1 : 0);
-            prop.put(RESULTS + "useDHTRejectPeers_DHTRejectPeers", i);
-            
-            names = ((HashSet)r.get(LogParserPLASMA.DHT_SENT_PEERS_NAME)).toArray();
-            hashes = ((HashSet)r.get(LogParserPLASMA.DHT_SENT_PEERS_HASH)).toArray();
-            i = 0;
-            for (; i<names.length && i<hashes.length; i++) {
-                prop.put(RESULTS + "useDHTPeers_DHTPeers_" + i + "_name", names[i]);
-                prop.put(RESULTS + "useDHTPeers_DHTPeers_" + i + "_hash", hashes[i]);
-            }
-            prop.put(RESULTS + "DHTPeers", i);
-            prop.put(RESULTS + "useDHTPeers", (i > 0) ? 1 : 0);
-            prop.put(RESULTS + "useDHTPeers_DHTPeers", i);
-            
-            return prop;
         }
+        prop.put("results", 1);
+        String[] t;
+        float l;
+        prop.put(RESULTS + LogParserPLASMA.DHT_DISTANCE_AVERAGE, r.get(LogParserPLASMA.DHT_DISTANCE_AVERAGE));
+        prop.put(RESULTS + LogParserPLASMA.DHT_DISTANCE_MAX, r.get(LogParserPLASMA.DHT_DISTANCE_MAX));
+        prop.put(RESULTS + LogParserPLASMA.DHT_DISTANCE_MIN, r.get(LogParserPLASMA.DHT_DISTANCE_MIN));
+        prop.put(RESULTS + LogParserPLASMA.DHT_REJECTED, r.get(LogParserPLASMA.DHT_REJECTED));
+        prop.put(RESULTS + LogParserPLASMA.DHT_SELECTED, r.get(LogParserPLASMA.DHT_SELECTED));
+        prop.put(RESULTS + LogParserPLASMA.DHT_SENT_FAILED, r.get(LogParserPLASMA.DHT_SENT_FAILED));
+        t = transformMem(((Long)r.get(LogParserPLASMA.DHT_TRAFFIC_SENT)).longValue());
+        prop.put(RESULTS + LogParserPLASMA.DHT_TRAFFIC_SENT, t[0]);
+        prop.put(RESULTS + LogParserPLASMA.DHT_TRAFFIC_SENT + "Unit", t[1]);
+        prop.put(RESULTS + LogParserPLASMA.DHT_URLS_SENT, r.get(LogParserPLASMA.DHT_URLS_SENT));
+        prop.put(RESULTS + LogParserPLASMA.DHT_WORDS_SELECTED, r.get(LogParserPLASMA.DHT_WORDS_SELECTED));
+        t = transformTime(((Integer)r.get(LogParserPLASMA.DHT_WORDS_SELECTED_TIME)).longValue() * 1000L);
+        prop.put(RESULTS + LogParserPLASMA.DHT_WORDS_SELECTED_TIME, t[0]);
+        prop.put(RESULTS + LogParserPLASMA.DHT_WORDS_SELECTED_TIME + "Unit", t[1]);
+        prop.put(RESULTS + LogParserPLASMA.ERROR_CHILD_TWICE_LEFT, r.get(LogParserPLASMA.ERROR_CHILD_TWICE_LEFT));
+        prop.put(RESULTS + LogParserPLASMA.ERROR_CHILD_TWICE_RIGHT, r.get(LogParserPLASMA.ERROR_CHILD_TWICE_RIGHT));
+        prop.put(RESULTS + LogParserPLASMA.ERROR_MALFORMED_URL, r.get(LogParserPLASMA.ERROR_MALFORMED_URL));
+        prop.put(RESULTS + LogParserPLASMA.INDEXED_ANCHORS, r.get(LogParserPLASMA.INDEXED_ANCHORS));
+        t = transformTime(((Integer)r.get(LogParserPLASMA.INDEXED_INDEX_TIME)).longValue());
+        prop.put(RESULTS + LogParserPLASMA.INDEXED_INDEX_TIME, t[0]);
+        prop.put(RESULTS + LogParserPLASMA.INDEXED_INDEX_TIME + "Unit", t[1]);
+        t = transformTime(((Integer)r.get(LogParserPLASMA.INDEXED_PARSE_TIME)).longValue());
+        prop.put(RESULTS + LogParserPLASMA.INDEXED_PARSE_TIME, t[0]);
+        prop.put(RESULTS + LogParserPLASMA.INDEXED_PARSE_TIME + "Unit", t[1]);
+        prop.put(RESULTS + LogParserPLASMA.INDEXED_SITES, r.get(LogParserPLASMA.INDEXED_SITES));
+        t = transformMem(((Integer)r.get(LogParserPLASMA.INDEXED_SITES_SIZE)).longValue());
+        prop.put(RESULTS + LogParserPLASMA.INDEXED_SITES_SIZE, t[0]);
+        prop.put(RESULTS + LogParserPLASMA.INDEXED_SITES_SIZE + "Unit", t[1]);
+        t = transformTime(((Integer)r.get(LogParserPLASMA.INDEXED_STACK_TIME)).longValue());
+        prop.put(RESULTS + LogParserPLASMA.INDEXED_STACK_TIME, t[0]);
+        prop.put(RESULTS + LogParserPLASMA.INDEXED_STACK_TIME + "Unit", t[1]);
+        t = transformTime(((Integer)r.get(LogParserPLASMA.INDEXED_STORE_TIME)).longValue());
+        prop.put(RESULTS + LogParserPLASMA.INDEXED_STORE_TIME, t[0]);
+        prop.put(RESULTS + LogParserPLASMA.INDEXED_STORE_TIME + "Unit", t[1]);
+        prop.put(RESULTS + LogParserPLASMA.INDEXED_WORDS, r.get(LogParserPLASMA.INDEXED_WORDS));
+        prop.put(RESULTS + LogParserPLASMA.PEERS_BUSY, r.get(LogParserPLASMA.PEERS_BUSY));
+        prop.put(RESULTS + LogParserPLASMA.PEERS_TOO_LESS, r.get(LogParserPLASMA.PEERS_TOO_LESS));
+        prop.put(RESULTS + LogParserPLASMA.RANKING_DIST, r.get(LogParserPLASMA.RANKING_DIST));
+        prop.put(RESULTS + LogParserPLASMA.RANKING_DIST_FAILED, r.get(LogParserPLASMA.RANKING_DIST_FAILED));
+        t = transformTime(((Integer)r.get(LogParserPLASMA.RANKING_DIST_TIME)).longValue());
+        prop.put(RESULTS + LogParserPLASMA.RANKING_DIST_TIME, t[0]);
+        prop.put(RESULTS + LogParserPLASMA.RANKING_DIST_TIME + "Unit", t[1]);
+        prop.put(RESULTS + LogParserPLASMA.RWIS_BLOCKED, r.get(LogParserPLASMA.RWIS_BLOCKED));
+        prop.put(RESULTS + LogParserPLASMA.RWIS_RECEIVED, r.get(LogParserPLASMA.RWIS_RECEIVED));
+        t = transformTime(((Long)r.get(LogParserPLASMA.RWIS_RECEIVED_TIME)).longValue());
+        prop.put(RESULTS + LogParserPLASMA.RWIS_RECEIVED_TIME, t[0]);
+        prop.put(RESULTS + LogParserPLASMA.RWIS_RECEIVED_TIME + "Unit", t[1]);
+        prop.put(RESULTS + LogParserPLASMA.URLS_BLOCKED, r.get(LogParserPLASMA.URLS_BLOCKED));
+        prop.put(RESULTS + LogParserPLASMA.URLS_RECEIVED, r.get(LogParserPLASMA.URLS_RECEIVED));
+        t = transformTime(((Long)r.get(LogParserPLASMA.URLS_RECEIVED_TIME)).longValue());
+        prop.put(RESULTS + LogParserPLASMA.URLS_RECEIVED_TIME, t[0]);
+        prop.put(RESULTS + LogParserPLASMA.URLS_RECEIVED_TIME + "Unit", t[1]);
+        prop.put(RESULTS + LogParserPLASMA.URLS_REQUESTED, r.get(LogParserPLASMA.URLS_REQUESTED));
+        prop.put(RESULTS + LogParserPLASMA.WORDS_RECEIVED, r.get(LogParserPLASMA.WORDS_RECEIVED));
+        l = ((Long)r.get(LogParserPLASMA.TOTAL_PARSER_TIME)).floatValue();
+        t = transformTime((long)l);
+        prop.put(RESULTS + LogParserPLASMA.TOTAL_PARSER_TIME, t[0]);
+        prop.put(RESULTS + LogParserPLASMA.TOTAL_PARSER_TIME + "Unit", t[1]);
+        prop.put(RESULTS + LogParserPLASMA.TOTAL_PARSER_RUNS, r.get(LogParserPLASMA.TOTAL_PARSER_RUNS));
+        if ((l /= 1000) == 0) {
+            prop.put(RESULTS + "avgExists", 0);
+        } else {
+            prop.put(RESULTS + "avgExists", 1);
+            prop.put(RESULTS + "avgExists_avgParserRunsPerMinute", (int) (((Integer) r.get(LogParserPLASMA.TOTAL_PARSER_RUNS)).floatValue() / l)); 
+        }
+        
+        Object[] names = ((HashSet)r.get(LogParserPLASMA.DHT_REJECTED_PEERS_NAME)).toArray();
+        Object[] hashes = ((HashSet)r.get(LogParserPLASMA.DHT_REJECTED_PEERS_HASH)).toArray();
+        int i = 0;
+        for (; i<names.length && i<hashes.length; i++) {
+            prop.put(RESULTS + "useDHTRejectPeers_DHTRejectPeers_" + i + "_name", names[i]);
+            prop.put(RESULTS + "useDHTRejectPeers_DHTRejectPeers_" + i + "_hash", hashes[i]);
+        }
+        prop.put(RESULTS + "DHTRejectPeers", i);
+        prop.put(RESULTS + "useDHTRejectPeers", (i > 0) ? 1 : 0);
+        prop.put(RESULTS + "useDHTRejectPeers_DHTRejectPeers", i);
+        
+        names = ((HashSet)r.get(LogParserPLASMA.DHT_SENT_PEERS_NAME)).toArray();
+        hashes = ((HashSet)r.get(LogParserPLASMA.DHT_SENT_PEERS_HASH)).toArray();
+        i = 0;
+        for (; i<names.length && i<hashes.length; i++) {
+            prop.put(RESULTS + "useDHTPeers_DHTPeers_" + i + "_name", names[i]);
+            prop.put(RESULTS + "useDHTPeers_DHTPeers_" + i + "_hash", hashes[i]);
+        }
+        prop.put(RESULTS + "DHTPeers", i);
+        prop.put(RESULTS + "useDHTPeers", (i > 0) ? 1 : 0);
+        prop.put(RESULTS + "useDHTPeers_DHTPeers", i);
+        
+        return prop;
     }
     
     private static final String MILLISECONDS = "ms";

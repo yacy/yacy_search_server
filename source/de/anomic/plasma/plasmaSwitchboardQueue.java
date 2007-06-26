@@ -155,7 +155,7 @@ public class plasmaSwitchboardQueue {
         }
     }
 
-    public void clear() throws IOException {
+    public void clear() {
         sbQueueStack = kelondroStack.reset(sbQueueStack);
     }
 

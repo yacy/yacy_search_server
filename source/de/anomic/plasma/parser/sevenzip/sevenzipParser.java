@@ -76,7 +76,7 @@ public class sevenzipParser extends AbstractParser implements Parser {
      */
     private static final String[] LIBX_DEPENDENCIES = new String[] { "J7Zip-modified.jar" };
     
-    public sevenzipParser() throws IOException {
+    public sevenzipParser() {
         super(LIBX_DEPENDENCIES);
         super.parserName = "7zip Archive Parser";
     }

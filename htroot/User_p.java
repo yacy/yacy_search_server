@@ -63,7 +63,6 @@ public class User_p {
         serverObjects prop = new serverObjects();
         plasmaSwitchboard sb = plasmaSwitchboard.getSwitchboard();
         userDB.Entry entry=null;
-		prop.put("SUPERTEMPLATE", "/env/page.html"); //user Supertemplates
 
         //default values
         prop.put("current_user", "newuser");

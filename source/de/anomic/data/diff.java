@@ -6,7 +6,7 @@
 // Frankfurt, Germany, 2007
 // Created 03.02.2007
 //
-// This file is contributed by Franz Brau√üe
+// This file is contributed by Franz Brauße
 //
 // $LastChangedDate: $
 // $LastChangedRevision: $
@@ -52,7 +52,7 @@ import java.util.ArrayList;
 /**
  * This class provides a diff-functionality.
  */
-public class Diff {
+public class diff {
     
     private final ArrayList /* of Part */ parts = new ArrayList();
     private final Object[] o;
@@ -63,7 +63,7 @@ public class Diff {
      * @param n the new <code>String</code>
      * @throws NullPointerException if one of the arguments is <code>null</code>
      */
-    public Diff(String o, String n) {
+    public diff(String o, String n) {
         this(o, n, 1);
     }
     
@@ -76,7 +76,7 @@ public class Diff {
      * @throws NullPointerException if <code>o</code> or <code>n</code> is
      * <code>null</code>
      */
-    public Diff(String o, String n, int minConsecutive) {
+    public diff(String o, String n, int minConsecutive) {
         if (o == null || n == null) throw new NullPointerException("neither o nor n must be null");
         this.o = new Comparable[o.length()];
         for (int i=0; i<o.length(); i++)
@@ -87,7 +87,7 @@ public class Diff {
         parse((minConsecutive > 0) ? minConsecutive : 1);
     }
     
-    public Diff(Object[] o, Object[] n, int minConsecutive) {
+    public diff(Object[] o, Object[] n, int minConsecutive) {
         if (o == null || n == null) throw new NullPointerException("neither o nor n must be null");
         this.o = o;
         this.n = n;
@@ -237,10 +237,10 @@ public class Diff {
             final StringBuffer sb = new StringBuffer(this.posNew - this.posOld);
             if (this.action == ADDED) {
                 for (int i=this.posOld; i<this.posNew; i++)
-                    sb.append(Diff.this.n[i]);
+                    sb.append(diff.this.n[i]);
             } else {
                 for (int i=this.posOld; i<this.posNew; i++)
-                    sb.append(Diff.this.o[i]);
+                    sb.append(diff.this.o[i]);
             }
             return new String(sb);
         }
@@ -259,18 +259,18 @@ public class Diff {
         }
     }
     
-    public static String toHTML(Diff[] diffs) {
+    public static String toHTML(diff[] diffs) {
         StringBuffer sb = new StringBuffer(diffs.length * 60);
-        Diff.Part[] ps;
+        diff.Part[] ps;
         for (int i=0; i<diffs.length; i++) {
             sb.append("<p class=\"diff\">\n");
             ps = diffs[i].getParts();
             for (int j=0; j<ps.length; j++) {
                 sb.append("<span\nclass=\"");
                 switch (ps[j].getAction()) {
-                case Diff.Part.UNCHANGED: sb.append("unchanged"); break;
-                case Diff.Part.ADDED: sb.append("added"); break;
-                case Diff.Part.DELETED: sb.append("deleted"); break;
+                case diff.Part.UNCHANGED: sb.append("unchanged"); break;
+                case diff.Part.ADDED: sb.append("added"); break;
+                case diff.Part.DELETED: sb.append("deleted"); break;
                 }
                 sb.append("\">").append(htmlTools.replaceXMLEntities(ps[j].getString()).replaceAll("\n", "<br />"));
                 sb.append("</span>");

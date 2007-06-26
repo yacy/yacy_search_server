@@ -126,6 +126,7 @@ public final class yacyClient {
                 obj.put("mytime", yacyCore.universalDateShortString(new Date()));
                 obj.put("myUTC", System.currentTimeMillis());
                 obj.put("seed", yacyCore.seedDB.mySeed.genSeedStr(key));
+                obj.put("network.unit.name", plasmaSwitchboard.getSwitchboard().getConfig("network.unit.name", yacySeed.DFLT_NETWORK_UNIT));
             
             // sending request
             result = nxTools.table(
@@ -272,7 +273,8 @@ public final class yacyClient {
                                     "&youare=" + target.hash + 
                                     "&key=" + key +
                                     "&object=seed" +
-                                    "&env=" + seedHash
+                                    "&env=" + seedHash +
+                                    "&network.unit.name=" + plasmaSwitchboard.getSwitchboard().getConfig("network.unit.name", yacySeed.DFLT_NETWORK_UNIT)
                             ),
                             target.getHexHash() + ".yacyh",
                             8000, 
@@ -309,7 +311,8 @@ public final class yacyClient {
                                     "&key=" +
                                     "&object=rwicount" +
                                     "&env=" + wordHash +
-                                    "&ttl=0"
+                                    "&ttl=0" +
+                                    "&network.unit.name=" + plasmaSwitchboard.getSwitchboard().getConfig("network.unit.name", yacySeed.DFLT_NETWORK_UNIT)
                             ),
                             target.getHexHash() + ".yacyh",
                             10000, 
@@ -345,7 +348,8 @@ public final class yacyClient {
             "&key=" +
             "&object=lurlcount" +
             "&env=" +
-            "&ttl=0";
+            "&ttl=0" +
+            "&network.unit.name=" + plasmaSwitchboard.getSwitchboard().getConfig("network.unit.name", yacySeed.DFLT_NETWORK_UNIT);
         
         // seinding request
         try {
@@ -452,6 +456,7 @@ public final class yacyClient {
             obj.put("profile", crypt.simpleEncode(rankingProfile.toExternalString()));
             obj.put("constraint", constraint.exportB64());
             obj.put("mytime", yacyCore.universalDateShortString(new Date()));
+            obj.put("network.unit.name", plasmaSwitchboard.getSwitchboard().getConfig("network.unit.name", yacySeed.DFLT_NETWORK_UNIT));
             if (abstractCache != null) obj.put("abstracts", "auto");
             
             //yacyCore.log.logDebug("yacyClient.search url=" + url);
@@ -622,6 +627,7 @@ public final class yacyClient {
             post.put("iam", yacyCore.seedDB.mySeed.hash);
             post.put("youare", targetHash);
             post.put("mytime", yacyCore.universalDateShortString(new Date()));
+            post.put("network.unit.name", plasmaSwitchboard.getSwitchboard().getConfig("network.unit.name", yacySeed.DFLT_NETWORK_UNIT));
             
         // get target address    
         String address = targetAddress(targetHash);
@@ -664,6 +670,7 @@ public final class yacyClient {
             post.put("youare", targetHash);
             post.put("subject", subject);
             post.put("mytime", yacyCore.universalDateShortString(new Date()));
+            post.put("network.unit.name", plasmaSwitchboard.getSwitchboard().getConfig("network.unit.name", yacySeed.DFLT_NETWORK_UNIT));
             try {
                 post.put("message", new String(message, "UTF-8"));
             } catch (UnsupportedEncodingException e) {
@@ -722,6 +729,7 @@ public final class yacyClient {
         post.put("filename", filename);
         post.put("filesize", Long.toString(filesize));
         post.put("can-send-protocol", "http");
+        post.put("network.unit.name", plasmaSwitchboard.getSwitchboard().getConfig("network.unit.name", yacySeed.DFLT_NETWORK_UNIT));
         
         // send request
         try {
@@ -763,6 +771,7 @@ public final class yacyClient {
         post.put("filesize", Long.toString(file.length));
         post.put("md5", serverCodings.encodeMD5Hex(file));
         post.put("access", access);
+        post.put("network.unit.name", plasmaSwitchboard.getSwitchboard().getConfig("network.unit.name", yacySeed.DFLT_NETWORK_UNIT));
         HashMap files = new HashMap();
         files.put("filename", file);
         
@@ -845,7 +854,8 @@ public final class yacyClient {
         }
         post.put("depth", "0");
         post.put("ttl", "0");
-
+        post.put("network.unit.name", plasmaSwitchboard.getSwitchboard().getConfig("network.unit.name", yacySeed.DFLT_NETWORK_UNIT));
+        
         // determining target address
         final String address = targetSeed.getClusterAddress();
         if (address == null) { return null; }
@@ -928,7 +938,8 @@ public final class yacyClient {
                                     "&result=" + result +
                                     "&reason=" + reason +
                                     "&wordh=" + wordhashes +
-                                    "&lurlEntry=" + ((entry == null) ? "" : crypt.simpleEncode(entry.toString(), key))
+                                    "&lurlEntry=" + ((entry == null) ? "" : crypt.simpleEncode(entry.toString(), key)) +
+                                    "&network.unit.name=" + plasmaSwitchboard.getSwitchboard().getConfig("network.unit.name", yacySeed.DFLT_NETWORK_UNIT)
                             ),
                             targetSeed.getHexHash() + ".yacyh",
                             60000, 
@@ -1055,7 +1066,7 @@ public final class yacyClient {
         post.put("iam", yacyCore.seedDB.mySeed.hash);
         post.put("youare", targetSeed.hash);
         post.put("wordc", Integer.toString(indexes.length));
-        
+        post.put("network.unit.name", plasmaSwitchboard.getSwitchboard().getConfig("network.unit.name", yacySeed.DFLT_NETWORK_UNIT));
         
         int indexcount = 0;
         final StringBuffer entrypost = new StringBuffer(indexes.length*73);
@@ -1131,6 +1142,8 @@ public final class yacyClient {
         post.put("key", key);
         post.put("iam", yacyCore.seedDB.mySeed.hash);
         post.put("youare", targetSeed.hash);
+        post.put("network.unit.name", plasmaSwitchboard.getSwitchboard().getConfig("network.unit.name", yacySeed.DFLT_NETWORK_UNIT));
+        
         String resource = "";
         int urlc = 0;
         int urlPayloadSize = 0;
@@ -1183,6 +1196,8 @@ public final class yacyClient {
         final serverObjects post = new serverObjects(2);
         post.put("iam", yacyCore.seedDB.mySeed.hash);
         post.put("youare", targetSeed.hash);
+        post.put("network.unit.name", plasmaSwitchboard.getSwitchboard().getConfig("network.unit.name", yacySeed.DFLT_NETWORK_UNIT));
+        
         String address = targetSeed.getClusterAddress();
         if (address == null) { address = "localhost:8080"; }
         try {
@@ -1226,7 +1241,8 @@ public final class yacyClient {
                                     "&myseed=" + yacyCore.seedDB.mySeed.genSeedStr(null) +
                                     "&count=10" +
                                     "&resource=global" +
-                                    "&query=" + wordhashe),
+                                    "&query=" + wordhashe +
+                                    "&network.unit.name=" + plasmaSwitchboard.getSwitchboard().getConfig("network.unit.name", yacySeed.DFLT_NETWORK_UNIT)),
                                     target.getHexHash() + ".yacyh",
                                     5000, 
                                     null, 

@@ -168,6 +168,9 @@ public class yacySeed {
     /** zero-value */
     public static final String ZERO      = "0";
     
+    public static final String DFLT_NETWORK_UNIT = "freeworld";
+    public static final String DFLT_NETWORK_GROUP = "";
+    
     // class variables
     /** the peer-hash */
     public String hash;

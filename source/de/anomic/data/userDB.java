@@ -439,10 +439,8 @@ public final class userDB {
             return PROXY_ALLOK;
         }
 		public boolean canSurf(){
-            if(this.surfRight()==PROXY_ALLOK)
-                return true;
-            else
-                return false;
+            if(this.surfRight()==PROXY_ALLOK) return true;
+            return false;
 		}
         public long updateLastAccess(boolean incrementTimeUsed) {
 			return updateLastAccess(System.currentTimeMillis(), incrementTimeUsed);

@@ -340,7 +340,7 @@ public final class httpd implements serverHandler {
         return true;
     }
     
-    private boolean handleYaCyHopAuthentication(httpHeader header) throws IOException {
+    private boolean handleYaCyHopAuthentication(httpHeader header) {
         // check if the user has allowed that his/her peer is used for hops
         if (!this.allowYaCyHop) return false;
         
@@ -1364,7 +1364,7 @@ public final class httpd implements serverHandler {
         if (!reqMethod.equals(httpHeader.METHOD_HEAD)){
             if (!conProp.getProperty(httpHeader.CONNECTION_PROP_PERSISTENT,"close").equals("close")) {
                 if (transferEnc == null && contentLength < 0) {
-                    throw new IllegalArgumentException("Message MUST contain a Content-Length or a non-identity transfer-coding heder field.");
+                    throw new IllegalArgumentException("Message MUST contain a Content-Length or a non-identity transfer-coding header field.");
                 }
             }
             if (transferEnc != null && contentLength >= 0) {

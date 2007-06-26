@@ -423,12 +423,9 @@ public class kelondroFlexTable extends kelondroFlexWidthArray implements kelondr
     private final Map memoryStats() {
         // returns statistical data about this object
         HashMap map = new HashMap();
-        try {
-            map.put("tableIndexChunkSize", (!RAMIndex) ? "0" : Integer.toString(index.row().objectsize));
-            map.put("tableIndexCount", (!RAMIndex) ? "0" : Integer.toString(index.size()));
-            map.put("tableIndexMem", (!RAMIndex) ? "0" : Integer.toString((int) (index.row().objectsize * index.size() * kelondroRowCollection.growfactor)));
-        } catch (IOException e) {
-        }
+        map.put("tableIndexChunkSize", (!RAMIndex) ? "0" : Integer.toString(index.row().objectsize));
+        map.put("tableIndexCount", (!RAMIndex) ? "0" : Integer.toString(index.size()));
+        map.put("tableIndexMem", (!RAMIndex) ? "0" : Integer.toString((int) (index.row().objectsize * index.size() * kelondroRowCollection.growfactor)));
         return map;
     }
     

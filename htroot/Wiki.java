@@ -53,7 +53,7 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.Iterator;
 
-import de.anomic.data.Diff;
+import de.anomic.data.diff;
 import de.anomic.data.wikiBoard;
 import de.anomic.http.httpHeader;
 import de.anomic.plasma.plasmaSwitchboard;
@@ -244,10 +244,10 @@ public class Wiki {
                 if (nentry == null) nentry = entry;
                 if (post.containsKey("compare") && oentry != null && nentry != null) {
                     // TODO: split into paragraphs and compare them with the same diff-algo
-                    Diff diff = new Diff(
+                    diff diff = new diff(
                             new String(oentry.page(), "UTF-8"),
                             new String(nentry.page(), "UTF-8"), 3);
-                    prop.putASIS("mode_versioning_diff", Diff.toHTML(new Diff[] { diff }));
+                    prop.putASIS("mode_versioning_diff", de.anomic.data.diff.toHTML(new diff[] { diff }));
                     prop.put("mode_versioning", 1);
                 } else if (post.containsKey("viewold") && oentry != null) {
                     prop.put("mode_versioning", 2);

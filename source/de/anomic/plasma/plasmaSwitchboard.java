@@ -1609,14 +1609,14 @@ public final class plasmaSwitchboard extends serverAbstractSwitch implements ser
         return cacheManager;
     }
     
-    synchronized public void htEntryStoreEnqueued(plasmaHTCache.Entry entry) throws IOException {
+    synchronized public void htEntryStoreEnqueued(plasmaHTCache.Entry entry) {
         if (cacheManager.full())
             htEntryStoreProcess(entry);
         else
             cacheManager.push(entry);
     }
     
-    synchronized public boolean htEntryStoreProcess(plasmaHTCache.Entry entry) throws IOException {
+    synchronized public boolean htEntryStoreProcess(plasmaHTCache.Entry entry) {
         
         if (entry == null) return false;
 
@@ -1721,11 +1721,7 @@ public final class plasmaSwitchboard extends serverAbstractSwitch implements ser
     
     public boolean htEntryStoreJob() {
         if (cacheManager.empty()) return false;
-        try {
-            return htEntryStoreProcess(cacheManager.pop());
-        } catch (IOException e) {
-            return false;
-        }
+        return htEntryStoreProcess(cacheManager.pop());
     }
     
     public int htEntrySize() {

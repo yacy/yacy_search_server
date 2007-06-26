@@ -149,11 +149,7 @@ public class kelondroObjects {
     }
 
     public synchronized int size() {
-        try {
-            return dyn.sizeDyn();
-        } catch (IOException e) {
-            return 0;
-        }
+        return dyn.sizeDyn();
     }
 
     public void close() {

@@ -28,7 +28,7 @@ import java.net.URL;
 import java.util.Collection;
 import java.util.Iterator;
 
-import de.anomic.data.rssReaderItem;
+import de.anomic.data.rssReader;
 import de.anomic.http.httpHeader;
 import de.anomic.server.serverObjects;
 import de.anomic.server.serverSwitch;
@@ -86,7 +86,6 @@ public class FeedReader_p {
 	}
     public static servletProperties respond(httpHeader header, serverObjects post, serverSwitch env) {
         servletProperties prop = new servletProperties();
-        prop.put("SUPERTEMPLATE", "/env/page.html");
         
         URL url;
         prop.put("page", 0);
@@ -122,7 +121,7 @@ public class FeedReader_p {
 					Iterator it=feedItems.iterator();
 					int count=0;
 					while(it.hasNext() && (maxitems==0 || count<maxitems)){
-						rssReaderItem item=(rssReaderItem)it.next();
+						rssReader.Item item=(rssReader.Item)it.next();
 						prop.put("page_items_"+count+"_author", item.getCreator());
 						prop.put("page_items_"+count+"_title", item.getTitle());
 						prop.put("page_items_"+count+"_link", item.getLink().toString());
