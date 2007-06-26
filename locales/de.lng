@@ -26,6 +26,12 @@
 Server Access Overview==Server Zugriff &Uuml;berblick
 This is a list of requests to the local http server within the last hour.==Dies ist eine Liste aller Anfragen, die an den lokalen http Server innerhalb der letzten Stunde gestellt wurden.
 Showing \#\[num\]\# requests.==Gezeigt werden #[num]# Anfragen.
+Access Count During==Erfasster Zugriff w&auml;hrend der
+last Second==letzten Sekunde
+last Minute==letzten Minute
+last 10 Minutes==letzten 10 Minuten
+last Hour==letzten Stunde
+Server Access Details==Server Zugriffs Details
 Local Search Log==Lokale Suche Log
 Local Search Host Tracker==Lokale Suche Host Tracker
 Remote Search Log==Remote Suche Log
@@ -46,8 +52,10 @@ Expected Results==Erwartete Ergebnisse
 Returned Results==Gefundene Ergebnisse
 Expected Time==Erwartete Zeit
 Used Time==Gebrauchte Zeit
-Search Words==Such Wort
-Count==Anzahl
+Query==Such Wort
+Search Word Hashes==Such Wort Hash
+Count</td>==Anzahl</td>
+Queries Per Last Hour==Suchanfragen pro letzter Stunde
 Access Dates==Zugriffsdaten
 Search Statistics: Remote Searches==Suchstatistik: Remote Suche
 Search Statistics: Remote Searche Tracker==Suchstatistik: Remote Suche Tracker
@@ -67,6 +75,16 @@ You may also provide your blacklist to other peers by sharing them; in return yo
 collect blacklist entries from other peers.==Im Gegenzug k&ouml;nnen Sie sich selber von anderen Peers Blacklists runterladen.
 Active list:==Aktivierte Liste:
 No blacklist selected==Keine Blacklist gew&auml;hlt
+Test list:==Teste Liste:
+"Test"=="Testen"
+The tested URL was==Die geteste URL war
+It is blocked for the following cases:==Sie wird in den folgenden F&auml;llen geblockt:
+#Crawling==Crawling
+#DHT==DHT
+#News==News
+#Proxy==Proxy
+Search==Suche
+Surftips==Surftipps
 Select list:==Liste ausw&auml;hlen:
 not shared::shared==nicht freigegeben::freigegeben
 "select"=="w&auml;hlen"
@@ -80,6 +98,7 @@ Edit this list==Diese Liste bearbeiten
 These are the domain name / path patterns in this blacklist:==Dies sind die Domainnamen / -pfade die in der Blacklist sind:
 You can select them here for deletion==Sie k&ouml;nnen sie einzeln zum L&ouml;schen w&auml;hlen
 Delete URL pattern==URL aus der Liste l&ouml;schen
+"Move URL pattern to"=="Verschiebe URL zu"
 Add URL pattern==F&uuml;ge URL hinzu
 Import blacklist items from...==Importiere Blacklist von...
 other YaCy peers:==anderen YaCy Peers:
@@ -116,6 +135,7 @@ No Blacklist selected==Es wurde keine Blacklist ausgew&auml;hlt
 #File: Blog.html
 #---------------------------
 by==von
+Comments</a>==Kommentare</a>
 >edit==>bearbeiten
 >delete==>l&ouml;schen
 show more entries==zeige weitere Eintr&auml;ge
@@ -130,6 +150,10 @@ Subject:==Titel:
 You can use==Sie k&ouml;nnen hier
 Yacy-Wiki Code==YaCy-Wiki Befehle
 here.==benutzen.
+Comments:==Kommentare:
+deactivated==deaktiviert
+activated==aktiviert
+moderated==moderiert
 "Submit"=="Absenden"
 "Preview"=="Vorschau"
 "Discard"=="Verwerfen"
@@ -138,8 +162,8 @@ No changes have been submitted so far!==Es wurden noch keine &Auml;nderungen &uu
 Access denied==Zugriff verweigert
 To edit or create blog-entries you need to be logged in as Admin or User who has Blog rights.==Um Blogeintr&auml;ge zu ver&auml;ndern oder zu erstellen m&uuml;ssen Sie als Admin oder User mit Blog-Rechten eingeloggt sein.
 Are you sure==Sind Sie sicher
-# Matcht nicht, muss überarbeitet werden
-that you want to delete <strong>\#\[subject\]\#</strong> by \#\[author\]\#?==dass Sie <strong>#[subject]#</strong> von #[author]# l&ouml;schen wollen?
+that you want to delete==dass Sie folgendes l&ouml;schen wollen:
+Confirm deletion==Best&auml;tige L&ouml;schung
 Yes, delete it.==Ja, l&ouml;schen.
 No, leave it.==Nein, belassen.
 Import was successful!==Import war erfolgreich!
@@ -154,6 +178,7 @@ Comments</a>==Kommentare</a>
 Login==Einloggen
 Blog-Home==Blog-Startseite
 delete</a>==l&ouml;schen</a>
+allow</a>==erlauben</a>
 Author:==Autor:
 Subject:==Titel:
 #Text:==Text:
@@ -433,14 +458,14 @@ Sending Client==Sendender Client
 #---------------------------
 YaCy '#[clientname]#': Crawl Results==YaCy '#[clientname]#': Crawl Ergebnisse
 Crawl Results Menu==Crawl Ergebnisse Men&uuml;
-Overview==&Uuml;berblick
+Overview</a>==&Uuml;berblick</a>
 Receipts</a>==R&uuml;ckmeldungen</a>
 Queries</a>==Suchanfragen</a>
 DHT Transfer==DHT-Verteilung
 Proxy Use==Proxy Benutzung
-Local Crawling==Lokales Crawlen
-Global Crawling==Globales Crawlen
-Indexing Queues Monitor Overview==Index Reihen Monitor &Uuml;berblick
+Local Crawling</a>==Lokales Crawlen</a>
+Global Crawling</a>==Globales Crawlen</a>
+Crawl Results Overview==Crawl Ergebnisse &Uuml;berblick
 These are monitoring pages for the different indexing queues.==Dies sind die Monitor Seiten f&uuml;r die unterschiedlichen Index Varianten.
 YaCy knows 5 different ways to acquire web indexes. The details of these processes \(1-5\) are described within the submenu's listed==YaCy kennt 5 verschiedene Arten, um zu indexieren. Die Details zu diesen Prozessen (1-5) sind in den Untermen&uuml;s oben beschrieben.
 above which also will show you a table with indexing results so far. The information in these tables is considered as private,==Dort kann man ausserdem eine Tabelle mit den Resultaten des Index sehen. Informationen in diesen Tabellen sind als privat eingestuft,
@@ -449,23 +474,23 @@ Case \(6\) is a monitor of the local receipt-generator, the opposed case of \(1\
 since it shows crawl requests from other peers.==da er Crawl Anfragen von anderen Peers zeigt.
 The image above illustrates the data flow initiated by web index acquisition.==Das obige Bild zeigt den Datenfluss, der durch die Index Erwerbung &uuml;ber das Internet entsteht.
 Some processes occur double to document the complex index migration structure.==Einige Prozesse erscheinen doppelt, um die Komplexizit&auml;t der Index Verteilungs Struktur zu erkl&auml;ren.
-\(1\) Index Monitor of Remote Crawl Receipts==(1) Index Monitor f&uuml;r Remote Crawl R&uuml;ckmeldungen
+\(1\) Results of Remote Crawl Receipts==(1) Ergebnisse der Remote Crawl R&uuml;ckmeldungen
 This is the list of web pages that this peer initiated to crawl,==Dies ist eine Liste von Internetseiten, bei der Ihr Peer den Crawl initiiert hat,
 but had been crawled by <em>other</em> peers.==die aber von <em>anderen</em> Peers gecrawlt wurden.
 This is the 'mirror'-case of process \(6\).==Dies ist der 'Gegensatz' Prozess zu (6)
 <em>Use Case:</em> You get entries here, if you start a local crawl on the 'Index Creation'-Page and check the==<em>Anwendungsfall:</em> Sie erhalten hier Eintr&auml;ge, wenn Sie einen lokalen Crawl auf der 'Index erzeugen' Seite starten und
 'Do Remote Indexing'-flag. Every page that a remote peer indexes upon this peer's request==die 'Remote Indexierung' aktivieren. Jede Seite, die von einem remote Peer durch Ihre Anfrage indexiert wurde,
 is reported back and can be monitored here.==wird nun zur&uuml;ck gemeldet und hier angezeigt.
-\(2\) Index Monitor for Result of Search Queries==(2) Index Monitor f&uuml;r Resultate bei Suchanfragen
+\(2\) Results for Result of Search Queries==(2) Ergebnisse der Resultate bei Suchanfragen
 This index transfer was initiated by your peer by doing a search query.==Dieser Index Transfer wurde von Ihrem Peer dadurch initiiert, dass Sie eine Suchanfrage gestartet haben.
 The index was crawled and contributed by other peers.==Der Index wurde von anderen Peers gecrawlt und nun Ihnen breitgestellt.
 <em>Use Case:</em> This list fills up if you do a search query on the 'Search Page'==<em>Anwendungsfall:</em> Diese Liste f&uuml;llt sich, wenn Sie eine Suchanfrage auf der 'Suchseite' starten.
-\(3\) Index Monitor for Index Transfer.==(3) Index Monitor f&uuml;r die DHT-Verteilung
+\(3\) Results for Index Transfer==(3) Ergebnisse der DHT-Verteilung
 The url fetch was initiated and executed by other peers.==Die URL Indexierung wurde von anderen Peers initiiert und durchgef&uuml;hrt.
 These links here have been transmitted to you because your peer is the most appropriate for storage according to==Diese Links wurden an Ihren Peer &uuml;bermittelt, da er am angemessensten zur Speicherung
 the logic of the Global Distributed Hash Table.==&uuml;bereinstimmend mit der Logic der verteilten Hash Tabelle ist.
 <em>Use Case:</em> This list may fill if you check the 'Index Receive'-flag on the 'Index Control' page==<em>Anwendung:</em> Dies Liste f&uuml;llt sich, wenn Sie die 'Index Empfang' Option auf der 'Index Kontrolle' Seite aktiviert haben.
-\(4\) Index Monitor for Proxy Indexing==(4) Index Monitor f&uuml;r die Proxy Indexierung
+\(4\) Results for Proxy Indexing==(4) Ergebnisse der Proxy Indexierung
 These web pages had been indexed as result of your proxy usage.==Diese Internetseiten wurden durch die Benutzung des Proxy indexiert.
 No personal or protected page is indexed==Weder pers&ouml;nliche noch gesch&uuml;tzte Seiten werden indexiert
 such pages are detected by Cookie-Use or POST-Parameters \(either in URL or as HTTP protocol\)==Solche Seiten werden durch die Benutzung von Cookies oder POST-Parametern (in der URL oder im HTTP Protokoll) identifiziert
@@ -473,10 +498,10 @@ and automatically excluded from indexing.==und automatisch von der Indexierung a
 <em>Use Case:</em> You must use YaCy as proxy to fill up this table.==<em>Anwendung:</em> Sie m&uuml;ssen YaCy als Proxy benutzen, um diese Tabelle zu f&uuml;llen.
 Set the proxy settings of your browser to the same port as given==Setzen Sie dazu die Proxy Einstellungen Ihres Browsers auf den selben Port, der
 on the 'Settings'-page in the 'Proxy and Administration Port' field.==auf der 'Einstellungen' Seite im 'Proxy und Administration Port' angegeben ist.
-\(5\) Index Monitor for Local Crawling.==(5) Index Monitor f&uuml;r das lokale Crawlen
+\(5\) Results for Local Crawling==(5) Ergebnisse des lokalen Crawlens
 These web pages had been crawled by your own crawl task.==Diese Internetseiten wurden gecrawlt, da Sie einen Crawl auf der 'Index erzeugen' Seite gestartet haben.
 <em>Use Case:</em> start a crawl by setting a crawl start point on the 'Index Create' page.==<em>Anwendung:</em> Starten Sie einen Crawl, indem Sie auf der 'Index erzeugen' Seite einen Startpunkt eintragen.
-\(6\) Index Monitor for Global Crawling==(6) Index Monitor f&uuml;r das globale Crawlen
+\(6\) Results for Global Crawling==(6) Ergebnisse des globalen Crawlens
 These pages had been indexed by your peer, but the crawl was initiated by a remote peer.==Diese Seiten wurden von Ihrem Peer indexiert, der Crawl wurde aber von einem anderen Peer initiiert (remote-Crawl).
 This is the 'mirror'-case of process \(1\).==Dies ist der 'Gegensatz' Prozess zu (1).
 <em>Use Case:</em> This list may fill if you check the 'Accept remote crawling requests'-flag on the 'Index Crate' page==<em>Anwendung:</em> Diese Liste f&uuml;llt sich, wenn Sie 'Akzeptiere remote Crawling Anfragen' auf der 'Index erzeugen' Seite aktiviert haben.
@@ -1105,15 +1130,15 @@ Network&nbsp;Overview==Netzwerk&uuml;bersicht
 Active&nbsp;Peers==Aktive Peers
 Passive&nbsp;Peers==Passive Peers
 Potential&nbsp;Peers==Potenzielle Peers
-Network Overview==Netzwerk &Uuml;berblick
-Active Peers==Aktive Peers
-Passive Peers==Passive Peers
-Potential Peers==Potenzielle Peers
+Overview of \'\#\[networkName\]\#\' Network==&Uuml;berblick des '#[networkName]#' Netzwerks 
+Active Peers in \'\#\[networkName\]\#\' Network==Aktive Peers im '#[networkName]#' Netzwerk
+Passive Peers in \'\#\[networkName\]\#\' Network==Passive Peers Peers im '#[networkName]#' Netzwerk
+Potential Peers in \'\#\[networkName\]\#\' Network==Potentielle Peers Peers im '#[networkName]#' Netzwerk
 Manually contacting Peer==Kontaktiere Peer manuell
 no remote \#\[peertype\]\# peer for this list known==Kein remote Peer #[peertype]# bekannt oder online.
 Showing \#\[num\]\# entries from a total of \#\[total\]\# peers.==Gezeigt werden #[num]# Eintr&auml;ge von insgesamt #[total]# Peers.
 send&nbsp;<strong>M</strong>essage/<br />show&nbsp;<strong>P</strong>rofile/<br />edit&nbsp;<strong>W</strong>iki==Sende Nachricht (<strong>m</strong>)/<br />Zeige Profil (<strong>p</strong>)/<br />&Auml;ndere Wiki (<strong>w</strong>)
-Search for a peername \(RegExp allowed\):==Suche nach Peernamen (RegExp erlaubt):
+Search for a peername \(RegExp allowed\)==Suche nach Peernamen (RegExp erlaubt)
 "Search"=="Suche"
 Name==Name
 Address==Adresse
