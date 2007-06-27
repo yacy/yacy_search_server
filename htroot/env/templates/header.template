@@ -58,8 +58,7 @@
     <ul class="menu">
       <li><a href="http://www.yacy.net/yacy/" class="MenuItemLink">Project Home</a></li>
       <li><a href="http://www.yacy.net/yacy/News.html" class="MenuItemLink">Project News</a></li>
-      <li><a href="http://www.yacy-forum.de" class="MenuItemLink">Deutsches Forum</a></li>
-      <li><a href="http://newsletters.yacy-forum.de" class="MenuItemLink">Newsletters</a></li>
+      <li><a href="http://forum.yacy.de" class="MenuItemLink">Deutsches Forum</a></li>
       <li><a href="http://www.yacy.net/yacy/Download.html" class="MenuItemLink">Download YaCy</a></li>
       <li><a href="http://www.yacy-websuche.de/wiki/index.php/Hauptseite" class="MenuItemLink">YaCy Project Wiki</a></li>
       <li><a href="http://www.yacy.net/yacy/Contact.html" class="MenuItemLink">Contact YaCy Developer</a></li>
