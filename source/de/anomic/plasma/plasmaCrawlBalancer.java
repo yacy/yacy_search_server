@@ -190,7 +190,7 @@ public class plasmaCrawlBalancer {
         }
     }
     
-    public synchronized int size() {
+    public int size() {
         int componentsize = urlFileStack.size() + urlRAMStack.size() + sizeDomainStacks();
         if (componentsize != urlFileIndex.size()) {
 		    // here is urlIndexFile.size() always smaller. why?

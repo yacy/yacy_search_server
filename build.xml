@@ -472,6 +472,7 @@
 	    <include name="startYACY.sh"/>
 	    <include name="stopYACY.sh"/>
 	    <include name="killYACY.sh"/>
+	  	<include name="restart.sh"/>
 	    <include name="startYACY.command"/>
 	    <include name="stopYACY.command"/>
 	  </fileset>	

@@ -265,7 +265,7 @@ public final class yacyVersion implements Comparator, Comparable {
     }
     
     public static void writeDeployScript(String release) {
-        byte[] script = ("tar xfz " + release + ";cp -Rf yacy/* ../../;rm -Rf yacy;cd ../../;startYACY.sh").getBytes();
+        byte[] script = ("cd `dirname $0`;while [ -e ../yacy.running ]; do sleep 1;done;tar xfz " + release + ";cp -Rf yacy/* ../../;rm -Rf yacy;cd ../../;startYACY.sh").getBytes();
         
     }
 }
