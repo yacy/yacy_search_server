@@ -1,7 +1,10 @@
 var thismenu = new Array(
     "index","Technology","Details","Platforms","News","Demo","License","Download",
     "FAQ","Volunteers","Material","Links","Contact","",
-    "Deutsches Forum@http://www.yacy-forum.de","English Forum@http://www.yacy-forum.de/viewforum.php?f=18","",
+    "Deutsches Forum@http://forum.yacy.de",
+    "English Forum@http://yacy-forum.huzzaar.com",
+    "Network-Statistics@http://www.yacystats.de",
+    "",
     "Impressum");
 var root = "http://www.yacy.net/";
 

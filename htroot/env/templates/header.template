@@ -59,8 +59,10 @@
       <li><a href="http://www.yacy.net/yacy/" class="MenuItemLink">Project Home</a></li>
       <li><a href="http://www.yacy.net/yacy/News.html" class="MenuItemLink">Project News</a></li>
       <li><a href="http://forum.yacy.de" class="MenuItemLink">Deutsches Forum</a></li>
+      <li><a href="http://yacy-forum.huzzaar.com" class="MenuItemLink">English Forum</a></li>
       <li><a href="http://www.yacy.net/yacy/Download.html" class="MenuItemLink">Download YaCy</a></li>
       <li><a href="http://www.yacy-websuche.de/wiki/index.php/Hauptseite" class="MenuItemLink">YaCy Project Wiki</a></li>
+      <li><a href="http://www.yacystats.de" class="MenuItemLink">YaCy Community Statistics</a></li>
       <li><a href="http://www.yacy.net/yacy/Contact.html" class="MenuItemLink">Contact YaCy Developer</a></li>
     </ul>
   </li>
