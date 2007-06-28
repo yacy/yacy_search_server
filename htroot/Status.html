@@ -136,11 +136,10 @@
     
     <form action="Steering.html" method="get" class="PeerControl">
       <fieldset>
-      #(restartEnabled)#::
         <button type="submit" name="restart" value="Restart">
           <img src="/env/grafics/lock.gif" alt="Only the administrator may restart this peer" />
           Restart
-        </button>#(/restartEnabled)#
+        </button>
         <button type="submit" name="shutdown" value="Shutdown">
           <img src="/env/grafics/lock.gif" alt="Only the administrator may shutdown this peer" />
           Shutdown
@@ -148,6 +147,7 @@
       </fieldset>
     </form>
     
+    #(candeploy)#::
     <form action="Status.html" method="get">
       <fieldset>
       <legend>System Update</legend>
@@ -177,6 +177,7 @@
       </dl>
       </fieldset>
     </form>
+    #(/candeploy)#
     
     <fieldset>
     <legend>Public System Properties</legend>

@@ -46,7 +46,6 @@
 // javac -classpath .:../Classes SettingsAck_p.java
 // if the shell's current path is HTROOT
 
-
 import java.io.File;
 import java.io.IOException;
 
@@ -55,6 +54,7 @@ import de.anomic.plasma.plasmaSwitchboard;
 import de.anomic.server.serverObjects;
 import de.anomic.server.serverSwitch;
 import de.anomic.server.logging.serverLog;
+import de.anomic.server.serverSystem;
 
 public class Steering {
 
@@ -80,18 +80,32 @@ public class Steering {
 
         if (post.containsKey("restart")) {
         	if (System.getProperty("os.name").toLowerCase().startsWith("win")) {
-            // create yacy.restart file which is used in Windows startscript
-            final File yacyRestart = new File(sb.getRootPath(), "DATA/yacy.restart");
-            if (!yacyRestart.exists()) {
+        	    // create yacy.restart file which is used in Windows startscript
+        	    final File yacyRestart = new File(sb.getRootPath(), "DATA/yacy.restart");
+        	    if (!yacyRestart.exists()) {
+        	        try {
+        	            yacyRestart.createNewFile();
+        	        } catch (IOException e) {
+        	            serverLog.logConfig("SHUTDOWN", "ERROR: no restart !");
+        	            e.printStackTrace();
+        	        }
+        	    }
+        	} else if (serverSystem.canExecUnix) {
+        	    // start a re-start daemon
                 try {
-                    yacyRestart.createNewFile();
+                    /*Process p =*/ Runtime.getRuntime().exec("/bin/sh " + sb.getRootPath() + "/restart.sh &");
+                    /*
+                    BufferedReader in = new BufferedReader(new InputStreamReader(p.getInputStream()));
+                    PrintWriter out = new PrintWriter(System.out);
+                    String text;
+                    while ((text = in.readLine()) != null) {
+                      out.println(text); out.flush();
+                    }
+                    */
                 } catch (IOException e) {
-                    serverLog.logConfig("SHUTDOWN", "ERROR: no restart !");
                     e.printStackTrace();
                 }
             }
-        	}
-            
         	sb.terminate(5000);
             prop.put("info", 4);
 

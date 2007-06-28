@@ -168,8 +168,8 @@ public final class yacyVersion implements Comparator, Comparable {
         TreeSet s;
         for (int i = 0; i < 4; i++) {
             s = new TreeSet();
-            if (b[i] != null) s.addAll((TreeSet) b[i]);
-            if (a[i] != null) s.addAll((TreeSet) a[i]);
+            if ((b != null) && (b[i] != null)) s.addAll((TreeSet) b[i]);
+            if ((a != null) && (a[i] != null)) s.addAll((TreeSet) a[i]);
             r[i] = s;
         }
         return r;
@@ -262,5 +262,10 @@ public final class yacyVersion implements Comparator, Comparable {
         if (file == null) throw new IOException("wget of url " + release.url + " failed");
         // save file
         serverFileUtils.write(file, new File(storagePath, release.url.getFileName()));
+    }
+    
+    public static void writeDeployScript(String release) {
+        byte[] script = ("tar xfz " + release + ";cp -Rf yacy/* ../../;rm -Rf yacy;cd ../../;startYACY.sh").getBytes();
+        
     }
 }
