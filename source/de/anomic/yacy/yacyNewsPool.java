@@ -460,8 +460,7 @@ public class yacyNewsPool {
     }
     
     public void clear(int dbKey) {
-        // this is called if a queue element shall be moved to another queue or off the queue
-        // it depends on the dbKey how the record is handled
+        // clear a table
         switch (dbKey) {
             case INCOMING_DB:	incomingNews.clear(); break;
             case PROCESSED_DB:  processedNews.clear(); break;
