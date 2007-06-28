@@ -74,7 +74,15 @@
           <input type="radio" value="off" id="indexDistributeWhileCrawlingOff"
                  name="indexDistributeWhileCrawling"
                  #(indexDistributeWhileCrawling.off)#::checked="checked" #(/indexDistributeWhileCrawling.off)#/>
-          <label for="indexDistributeWhileCrawlingOff">disabled during crawling</label>.
+          <label for="indexDistributeWhileCrawlingOff">disabled during crawling</label>.<br>
+          <input type="radio" value="on" id="indexDistributeWhileIndexingOn"
+                 name="indexDistributeWhileIndexing"
+                 #(indexDistributeWhileIndexing.on)#::checked="checked" #(/indexDistributeWhileIndexing.on)#/>
+          <label for="indexDistributeWhileIndexingOn">enabled</label> /
+          <input type="radio" value="off" id="indexDistributeWhileIndexingOff"
+                 name="indexDistributeWhileIndexing"
+                 #(indexDistributeWhileIndexing.off)#::checked="checked" #(/indexDistributeWhileIndexing.off)#/>
+          <label for="indexDistributeWhileIndexingOff">disabled during indexing</label>.
 		</dd>
 		<dt>
 		  <label for="indexReceive">Index Receive</label>

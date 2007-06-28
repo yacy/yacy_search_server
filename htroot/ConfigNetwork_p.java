@@ -89,6 +89,12 @@ public class ConfigNetwork_p {
                 sb.setConfig(plasmaSwitchboard.INDEX_DIST_ALLOW_WHILE_CRAWLING, "false");
             }
 
+            if (post.get("indexDistributeWhileIndexing","").equals("on")) {
+                sb.setConfig(plasmaSwitchboard.INDEX_DIST_ALLOW_WHILE_INDEXING, "true");
+            } else {
+                sb.setConfig(plasmaSwitchboard.INDEX_DIST_ALLOW_WHILE_INDEXING, "false");
+            }
+
             if (indexReceive) {
                 sb.setConfig("allowReceiveIndex", "true");
                 yacyCore.seedDB.mySeed.setFlagAcceptRemoteIndex(true);
@@ -139,6 +145,8 @@ public class ConfigNetwork_p {
         prop.put("indexDistributeChecked", (indexDistribute) ? 1 : 0);
         prop.put("indexDistributeWhileCrawling.on", (sb.getConfig(plasmaSwitchboard.INDEX_DIST_ALLOW_WHILE_CRAWLING, "true").equals("true")) ? 1 : 0);
         prop.put("indexDistributeWhileCrawling.off", (sb.getConfig(plasmaSwitchboard.INDEX_DIST_ALLOW_WHILE_CRAWLING, "true").equals("true")) ? 0 : 1);
+        prop.put("indexDistributeWhileIndexing.on", (sb.getConfig(plasmaSwitchboard.INDEX_DIST_ALLOW_WHILE_INDEXING, "true").equals("true")) ? 1 : 0);
+        prop.put("indexDistributeWhileIndexing.off", (sb.getConfig(plasmaSwitchboard.INDEX_DIST_ALLOW_WHILE_INDEXING, "true").equals("true")) ? 0 : 1);
         prop.put("indexReceiveChecked", (indexReceive) ? 1 : 0);
         prop.put("indexReceiveBlockBlacklistChecked.on", (sb.getConfig("indexReceiveBlockBlacklist", "true").equals("true")) ? 1 : 0);
         prop.put("indexReceiveBlockBlacklistChecked.off", (sb.getConfig("indexReceiveBlockBlacklist", "true").equals("true")) ? 0 : 1);

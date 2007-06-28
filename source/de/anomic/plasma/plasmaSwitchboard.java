@@ -537,6 +537,7 @@ public final class plasmaSwitchboard extends serverAbstractSwitch implements ser
      * @see plasmaSwitchboard#INDEX_DIST_ALLOW
      */
     public static final String INDEX_DIST_ALLOW_WHILE_CRAWLING  = "allowDistributeIndexWhileCrawling";
+    public static final String INDEX_DIST_ALLOW_WHILE_INDEXING  = "allowDistributeIndexWhileIndexing";
     public static final String INDEX_TRANSFER_TIMEOUT           = "indexTransfer.timeout";
     public static final String INDEX_TRANSFER_GZIP_BODY         = "indexTransfer.gzipBody";
     
@@ -3209,9 +3210,11 @@ public final class plasmaSwitchboard extends serverAbstractSwitch implements ser
         if (wordIndex.size() < 100) {
             return "no DHT distribution: not enough words - wordIndex.size() = " + wordIndex.size();
         }
-        if ((getConfig(INDEX_DIST_ALLOW_WHILE_CRAWLING, "false").equalsIgnoreCase("false")) &&
-            ((noticeURL.stackSize() > 0) /*|| (sbQueue.size() > 3)*/)) {
+        if ((getConfig(INDEX_DIST_ALLOW_WHILE_CRAWLING, "false").equalsIgnoreCase("false")) && (noticeURL.stackSize() > 0)) {
             return "no DHT distribution: crawl in progress: noticeURL.stackSize() = " + noticeURL.stackSize() + ", sbQueue.size() = " + sbQueue.size();
+        }
+        if ((getConfig(INDEX_DIST_ALLOW_WHILE_INDEXING, "false").equalsIgnoreCase("false")) && (sbQueue.size() > 1)) {
+            return "no DHT distribution: indexing in progress: noticeURL.stackSize() = " + noticeURL.stackSize() + ", sbQueue.size() = " + sbQueue.size();
         }
         return null;
     }

@@ -410,6 +410,7 @@ yacyDB=DATA/YACYDB
 # you may switch this off
 allowDistributeIndex=true
 allowDistributeIndexWhileCrawling=false
+allowDistributeIndexWhileIndexing=true
 allowReceiveIndex=true
 allowUnlimitedReceiveIndexFrom=
 indexReceiveBlockBlacklist=true
