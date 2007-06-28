@@ -62,6 +62,11 @@ network.unit.bootstrap.seedlist4 = http://www.yacy.net/yacy/seed.txt
 network.unit.bootstrap.seedlist5 = http://www.marcelhenseler.de/yacy/seed.txt
 network.unit.bootstrap.seedlist6 = http://www.dc-art.de/yacy/seed.txt
 
+# each network may use different yacy distributions.
+# the auto-updater can access network-specific update locations
+network.unit.update.location.dev = http://latest.yacy-forum.net
+network.unit.update.location.main = http://yacy.net/yacy/Download.html
+
 # properties for in-protocol response authentification:
 #network.unit.protocol.control = uncontrolled
 #network.unit.protocol.request.authentification.method = salted-magic

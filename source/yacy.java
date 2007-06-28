@@ -90,7 +90,6 @@ import de.anomic.server.serverFileUtils;
 import de.anomic.server.serverMemory;
 import de.anomic.server.serverSemaphore;
 import de.anomic.server.serverSystem;
-import de.anomic.server.serverUpdaterCallback;
 import de.anomic.server.logging.serverLog;
 import de.anomic.tools.enumerateFiles;
 import de.anomic.yacy.yacyClient;
@@ -137,7 +136,8 @@ public final class yacy {
     // static objects
     private static String vString = "@REPL_VERSION@";
     private static double version = 0.1;
-
+    public static  boolean pro;
+    
     private static final String vDATE   = "@REPL_DATE@";
     private static final String copyright = "[ YaCy v" + vString + ", build " + vDATE + " by Michael Christen / www.yacy.net ]";
     private static final String hline = "-------------------------------------------------------------------------------";
@@ -258,27 +258,8 @@ public final class yacy {
             }
             f.createNewFile();
             f.deleteOnExit();
-
-            /*
-                // Testing if the yacy archive file were unzipped correctly.
-                // This test is needed because of classfile-names longer than 100 chars
-                // which could cause problems with incompatible unzip software.
-                // See:
-                // - http://www.yacy-forum.de/viewtopic.php?t=1763
-                // - http://www.yacy-forum.de/viewtopic.php?t=715
-                // - http://www.yacy-forum.de/viewtopic.php?t=1674
-                File unzipTest = new File(homePath,"doc/This_is_a_test_if_the_archive_file_containing_YaCy_was_unpacked_correctly_If_not_please_use_gnu_tar_instead.txt");
-                if (!unzipTest.exists()) {
-                    String errorMsg = "The archive file containing YaCy was not unpacked correctly. " +
-                                      "Please use 'GNU-Tar' or upgrade to a newer version of your unzip software.\n" +
-                                      "For detailed information on this bug see: " + 
-                                      "http://www.yacy-forum.de/viewtopic.php?t=715";
-                    System.err.println(errorMsg);
-                    serverLog.logSevere("STARTUP", errorMsg);
-                    System.exit(1); 
-                }
-            */                    
-            boolean pro = new File(homePath, "libx").exists();
+            
+            pro = new File(homePath, "libx").exists();
             sb = new plasmaSwitchboard(homePath, "yacy.init", "DATA/SETTINGS/httpProxy.conf", pro);
             sbSync.V(); // signal that the sb reference was set
             
@@ -546,26 +527,6 @@ public final class yacy {
     		String applicationRoot = System.getProperty("user.dir").replace('\\', '/');
     		shutdown(applicationRoot);
     	}
-    }
-    
-    /**
-     * Function to set the updater callback class
-     * @param updaterCallback
-     * @throws InterruptedException 
-     */
-    public static void setUpdaterCallback(serverUpdaterCallback updaterCallback) throws InterruptedException {
-    	sbSync.P();    	
-    	sb.updaterCallback = updaterCallback;
-    	sbSync.V();
-    }
-    
-    /**
-     * Function allowing the updater to block until the startup has finished 
-     * @throws InterruptedException
-     */
-    public static void waitForFinishedStartup() throws InterruptedException {
-    	startupFinishedSync.P();
-    	startupFinishedSync.V();
     }
     
     /**

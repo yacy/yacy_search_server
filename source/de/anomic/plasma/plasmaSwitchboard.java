@@ -161,9 +161,9 @@ import de.anomic.server.serverObjects;
 import de.anomic.server.serverSemaphore;
 import de.anomic.server.serverSwitch;
 import de.anomic.server.serverThread;
-import de.anomic.server.serverUpdaterCallback;
 import de.anomic.server.logging.serverLog;
 import de.anomic.tools.crypt;
+import de.anomic.yacy.yacyVersion;
 import de.anomic.yacy.yacyClient;
 import de.anomic.yacy.yacyCore;
 import de.anomic.yacy.yacyNewsPool;
@@ -210,6 +210,7 @@ public final class plasmaSwitchboard extends serverAbstractSwitch implements ser
     public  File                        htDocsPath;
     public  File                        rankingPath;
     public  File                        workPath;
+    public  File                        releasePath;
     public  HashMap                     rankingPermissions;
     public  plasmaCrawlNURL             noticeURL;
     public  plasmaCrawlZURL             errorURL, delegatedURL;
@@ -277,11 +278,6 @@ public final class plasmaSwitchboard extends serverAbstractSwitch implements ser
     
     private serverSemaphore shutdownSync = new serverSemaphore(0);
     private boolean terminate = false;
-    
-    /**
-     * Reference to the Updater callback class
-     */
-    public serverUpdaterCallback updaterCallback = null;
     
     //private Object  crawlingPausedSync = new Object();
     //private boolean crawlingIsPaused = false;    
@@ -735,6 +731,8 @@ public final class plasmaSwitchboard extends serverAbstractSwitch implements ser
      */
     public static final String HTCACHE_PATH             = "proxyCache";
     public static final String HTCACHE_PATH_DEFAULT     = "DATA/HTCACHE";
+    public static final String RELEASE_PATH             = "releases";
+    public static final String RELEASE_PATH_DEFAULT     = "DATA/RELEASE";
     /**
      * <p><code>public static final String <strong>HTDOCS_PATH</strong> = "htDocsPath"</code></p>
      * <p>Name of the setting specifying the folder beginning from the YaCy-installation's top-folder, where all
@@ -934,6 +932,10 @@ public final class plasmaSwitchboard extends serverAbstractSwitch implements ser
             }
         }
 
+        // set auto-updater locations
+        yacyVersion.latestDevReleaseLocation = getConfig("network.unit.update.location.dev", "");
+        yacyVersion.latestMainReleaseLocation = getConfig("network.unit.update.location.main", "");
+        
         // load values from configs
         this.plasmaPath   = new File(rootPath, getConfig(DBPATH, DBPATH_DEFAULT));
         this.log.logConfig("Plasma DB Path: " + this.plasmaPath.toString());
@@ -1079,6 +1081,18 @@ public final class plasmaSwitchboard extends serverAbstractSwitch implements ser
         boolean cacheMigration = getConfigBool(PROXY_CACHE_MIGRATION, true);
         this.cacheManager = new plasmaHTCache(htCachePath, maxCacheSize, ramHTTP_time, cacheLayout, cacheMigration);
         
+        // create the release download directory
+        String release = getConfig(RELEASE_PATH, RELEASE_PATH_DEFAULT);
+        release = release.replace('\\', '/');
+        if (release.endsWith("/")) { release = release.substring(0, release.length() - 1); }
+        if (new File(release).isAbsolute()) {
+            releasePath = new File(release); // don't use rootPath
+        } else {
+            releasePath = new File(rootPath, release);
+        }
+        releasePath.mkdirs();
+        this.log.logInfo("RELEASE Path = " + releasePath.getAbsolutePath());
+       
         // starting message board
         initMessages(ramMessage_time);
         
@@ -1225,7 +1239,7 @@ public final class plasmaSwitchboard extends serverAbstractSwitch implements ser
         CRDist1Percent = 30
         CRDist1Target  = kaskelix.de:8080,yacy.dyndns.org:8000,suma-lab.de:8080
          **/
-        rankingOn = getConfig(RANKING_DIST_ON, "true").equals("true");
+        rankingOn = getConfig(RANKING_DIST_ON, "true").equals("true") && getConfig("network.unit.name", "").equals("freeworld");
         rankingOwnDistribution = new plasmaRankingDistribution(log, new File(rankingPath, getConfig(RANKING_DIST_0_PATH, plasmaRankingDistribution.CR_OWN)), (int) getConfigLong(RANKING_DIST_0_METHOD, plasmaRankingDistribution.METHOD_ANYSENIOR), (int) getConfigLong(RANKING_DIST_0_METHOD, 0), getConfig(RANKING_DIST_0_TARGET, ""));
         rankingOtherDistribution = new plasmaRankingDistribution(log, new File(rankingPath, getConfig(RANKING_DIST_1_PATH, plasmaRankingDistribution.CR_OTHER)), (int) getConfigLong(RANKING_DIST_1_METHOD, plasmaRankingDistribution.METHOD_MIXEDSENIOR), (int) getConfigLong(RANKING_DIST_1_METHOD, 30), getConfig(RANKING_DIST_1_TARGET, "kaskelix.de:8080,yacy.dyndns.org:8000,suma-lab.de:8080"));
         
@@ -1757,14 +1771,6 @@ public final class plasmaSwitchboard extends serverAbstractSwitch implements ser
         errorURL.close();
         wordIndex.close();
         yc.close();
-        // signal shutdown to the updater
-        if (updaterCallback != null) {
-        	if (sb.getConfigLong("Updater.shutdownSignal", -1) == 0)
-        		updaterCallback.signalYaCyShutdown();
-        	else if
-        		(sb.getConfigLong("Updater.shutdownSignal", -1) == 1)
-        		updaterCallback.signalYaCyRestart();
-        }
         log.logConfig("SWITCHBOARD SHUTDOWN TERMINATED");
     }
     
@@ -1916,9 +1922,11 @@ public final class plasmaSwitchboard extends serverAbstractSwitch implements ser
             int count = rankingOwnDistribution.size() / 100;
             if (count == 0) count = 1;
             if (count > 5) count = 5;
-            rankingOwnDistribution.transferRanking(count);
-            rankingOtherDistribution.transferRanking(1);
-
+            if (rankingOn) {
+                rankingOwnDistribution.transferRanking(count);
+                rankingOtherDistribution.transferRanking(1);
+            }
+            
             // clean up delegated stack
             checkInterruption();
             if ((delegatedURL.stackSize() > 1000)) {

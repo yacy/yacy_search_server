@@ -46,13 +46,17 @@
 // javac -classpath .:../Classes Status.java
 // if the shell's current path is HTROOT
 
+import java.io.IOException;
 import java.text.DecimalFormat;
 import java.util.Date;
+import java.util.Iterator;
+import java.util.TreeSet;
 
 import de.anomic.http.httpHeader;
 import de.anomic.http.httpd;
 import de.anomic.http.httpdByteCountInputStream;
 import de.anomic.http.httpdByteCountOutputStream;
+import de.anomic.net.URL;
 import de.anomic.plasma.plasmaSwitchboard;
 import de.anomic.server.serverCore;
 import de.anomic.server.serverDate;
@@ -61,6 +65,7 @@ import de.anomic.server.serverObjects;
 import de.anomic.server.serverSwitch;
 import de.anomic.yacy.yacyCore;
 import de.anomic.yacy.yacySeed;
+import de.anomic.yacy.yacyVersion;
 
 public class Status {
 
@@ -72,16 +77,16 @@ public class Status {
         final serverObjects prop = new serverObjects();
         final plasmaSwitchboard sb = (plasmaSwitchboard) env;
 
-        if ((post != null) && (post.containsKey("login"))) {
+        if (post != null) {
             if (sb.adminAuthenticated(header) < 2) {
                 prop.put("AUTHENTICATE","admin log-in");
-            } else {
-                prop.put("LOCATION","");
+                return prop;
             }
-            return prop;
-        } else if (post != null) {
-        	boolean redirect = false;
-        	if (post.containsKey("pauseCrawlJob")) {
+            boolean redirect = false;
+            if (post.containsKey("login")) {
+                prop.put("LOCATION","");
+                return prop;
+            } else if (post.containsKey("pauseCrawlJob")) {
         		String jobType = (String) post.get("jobType");
         		if (jobType.equals("localCrawl")) 
                     sb.pauseCrawlJob(plasmaSwitchboard.CRAWLJOB_LOCAL_CRAWL);
@@ -111,7 +116,18 @@ public class Status {
                     sb.setConfig("browserPopUpTrigger", "true");
                 }
                 redirect = true;
-        	}
+        	} else if (post.containsKey("downloadRelease")) {
+                // download a release
+                String release = post.get("releasedownload", "");
+                if (release.length() > 0) {
+                    try {
+                        yacyVersion.downloadRelease(new yacyVersion(new URL(release)));
+                    } catch (IOException e) {
+                        // TODO Auto-generated catch block
+                        e.printStackTrace();
+                    }
+                }
+            }
         	
         	if (redirect) {
         		prop.put("LOCATION","");
@@ -140,24 +156,64 @@ public class Status {
         }
 
         // if running on Windows or with updater/wrapper enable restart button
-        if ((sb.updaterCallback != null) || (System.getProperty("os.name").toLowerCase().startsWith("win"))) {
+        if (System.getProperty("os.name").toLowerCase().startsWith("win")) {
         prop.put("restartEnabled", 1); }
 		
         // version information
         prop.put("versionpp", yacy.combined2prettyVersion(sb.getConfig("version","0.1")));
-        
-        
+
         double thisVersion = Double.parseDouble(sb.getConfig("version","0.1"));
         // cut off the SVN Rev in the Version
         try {thisVersion = Math.round(thisVersion*1000.0)/1000.0;} catch (NumberFormatException e) {}
-        
-        if ((adminaccess) && (sb.updaterCallback != null) && (sb.updaterCallback.updateYaCyIsPossible())){
-        	prop.put("hintVersionAvailable", 1);
-            prop.put("hintVersionAvailable_latestVersion", sb.updaterCallback.getYaCyUpdateReleaseVersion());
-            if ((post != null) && (post.containsKey("aquirerelease"))) {
-                sb.updaterCallback.grantYaCyUpdate();
-            }
+
+        // list downloaded releases
+        yacyVersion release, dflt;
+        String[] downloaded = sb.releasePath.list();
+        TreeSet downloadedreleases = new TreeSet();
+        for (int j = 0; j < downloaded.length; j++) {
+            release = (yacyVersion) new yacyVersion(downloaded[j]);
+            downloadedreleases.add(release);
         }
+        dflt = (downloadedreleases.size() == 0) ? null : (yacyVersion) downloadedreleases.last();
+        Iterator i = downloadedreleases.iterator();
+        int relcount = 0;
+        while (i.hasNext()) {
+            release = (yacyVersion) i.next();
+            prop.put("downloadedreleases_" + relcount + "_name", (release.proRelease ? "pro" : "standard") + "/" + ((release.mainRelease) ? "main" : "dev") + " " + release.releaseNr + "/" + release.svn);
+            prop.put("downloadedreleases_" + relcount + "_file", release.name);
+            prop.put("downloadedreleases_" + relcount + "_selected", (release == dflt) ? 1 : 0);
+            relcount++;
+        }
+        prop.put("downloadedreleases", relcount);
+        
+        // list remotely available releases
+        TreeSet[] releasess = yacyVersion.allReleases(); // {0=promain, 1=prodev, 2=stdmain, 3=stddev} 
+        relcount = 0;
+        // main
+        TreeSet releases = releasess[(yacy.pro) ? 0 : 2];
+        releases.removeAll(downloadedreleases);
+        i = releases.iterator();
+        while (i.hasNext()) {
+            release = (yacyVersion) i.next();
+            prop.put("availreleases_" + relcount + "_name", (release.proRelease ? "pro" : "standard") + "/" + ((release.mainRelease) ? "main" : "dev") + " " + release.releaseNr + "/" + release.svn);
+            prop.put("availreleases_" + relcount + "_url", release.url.toString());
+            prop.put("availreleases_" + relcount + "_selected", 0);
+            relcount++;
+        }
+        // dev
+        dflt = (releasess[(yacy.pro) ? 1 : 3].size() == 0) ? null : (yacyVersion) releasess[(yacy.pro) ? 1 : 3].last();
+        releases = releasess[(yacy.pro) ? 1 : 3];
+        releases.removeAll(downloadedreleases);
+        i = releases.iterator();
+        while (i.hasNext()) {
+            release = (yacyVersion) i.next();
+            prop.put("availreleases_" + relcount + "_name", (release.proRelease ? "pro" : "standard") + "/" + ((release.mainRelease) ? "main" : "dev") + " " + release.releaseNr + "/" + release.svn);
+            prop.put("availreleases_" + relcount + "_url", release.url.toString());
+            prop.put("availreleases_" + relcount + "_selected", (release == dflt) ? 1 : 0);
+            relcount++;
+        }
+        prop.put("availreleases", relcount);
+        
         
         /*
         if ((adminaccess) && (yacyVersion.latestRelease >= (thisVersion+0.01))) { // only new Versions(not new SVN)
@@ -171,11 +227,12 @@ public class Status {
                 prop.put("hintVersionAvailable", 1);
             }
         }
+        prop.put("hintVersionAvailable", 1); // for testing
+        
         prop.putASIS("hintVersionDownload_versionResMain", (yacyVersion.latestMainRelease == null) ? "-" : yacyVersion.latestMainRelease.toAnchor());
         prop.putASIS("hintVersionDownload_versionResDev", (yacyVersion.latestDevRelease == null) ? "-" : yacyVersion.latestDevRelease.toAnchor());
         prop.put("hintVersionAvailable_latestVersion", Double.toString(yacyVersion.latestRelease));
-		*/
-        
+         */
         // place some more hints
         if ((adminaccess) && (sb.getThread(plasmaSwitchboard.CRAWLJOB_LOCAL_CRAWL).getJobCount() == 0) && (sb.getThread(plasmaSwitchboard.INDEXER).getJobCount() == 0)) {
             prop.put("hintCrawlStart", 1);

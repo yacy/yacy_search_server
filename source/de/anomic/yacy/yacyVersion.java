@@ -27,6 +27,7 @@
 
 package de.anomic.yacy;
 
+import java.io.File;
 import java.io.IOException;
 import java.net.MalformedURLException;
 import java.util.Comparator;
@@ -35,7 +36,10 @@ import java.util.Map;
 import java.util.TreeSet;
 
 import de.anomic.htmlFilter.htmlFilterContentScraper;
+import de.anomic.http.httpc;
 import de.anomic.net.URL;
+import de.anomic.plasma.plasmaSwitchboard;
+import de.anomic.server.serverFileUtils;
 
 public final class yacyVersion implements Comparator, Comparable {
     
@@ -50,16 +54,20 @@ public final class yacyVersion implements Comparator, Comparable {
     public static double latestRelease = 0.1; // this value is overwritten when a peer with later version appears
 
     // information about latest release, retrieved from download pages
-    public static yacyVersion latestDevRelease = null;
-    public static yacyVersion latestMainRelease = null;
-    
+    // this static information should be overwritten by network-specific locations
+    // for details see yacy.network.unit
+    private static TreeSet[] allDevReleases = null;
+    private static TreeSet[] allMainReleases = null;
+    public  static String latestDevReleaseLocation = ""; // will be initialized with value in yacy.network.unit
+    public  static String latestMainReleaseLocation = ""; // will be initialized with value in yacy.network.unit
     
     // class variables
     public float releaseNr;
     public String dateStamp;
     public int svn;
-    public boolean mainRelease;
+    public boolean proRelease, mainRelease;
     public URL url;
+    public String name;
     
     public yacyVersion(URL url) {
         this(url.getFileName());
@@ -73,16 +81,17 @@ public final class yacyVersion implements Comparator, Comparable {
         // yacy_v${releaseVersion}_${DSTAMP}_${releaseNr}.tar.gz
         // i.e. yacy_v0.51_20070321_3501.tar.gz
         this.url = null;
+        this.name = release;
         if ((release == null) || (!release.endsWith(".tar.gz"))) {
             throw new RuntimeException("release file name '" + release + "' is not valid, no tar.gz");
         }
         // cut off tail
         release = release.substring(0, release.length() - 7);
-        if (release.startsWith("yacy_dev_v")) {
-            mainRelease = false;
+        if (release.startsWith("yacy_pro_v")) {
+            proRelease = true;
             release = release.substring(10);
         } else if (release.startsWith("yacy_v")) {
-            mainRelease = true;
+            proRelease = false;
             release = release.substring(6);
         } else {
             throw new RuntimeException("release file name '" + release + "' is not valid, wrong prefix");
@@ -98,6 +107,8 @@ public final class yacyVersion implements Comparator, Comparable {
         } catch (NumberFormatException e) {
             throw new RuntimeException("release file name '" + release + "' is not valid, '" + comp[0] + "' should be a float number");
         }
+        this.mainRelease = ((int) (this.releaseNr * (float) 1000)) % 10 == 0;
+        //System.out.println("Release version " + this.releaseNr + " is " + ((this.mainRelease) ? "main" : "std"));
         this.dateStamp = comp[1];
         if (this.dateStamp.length() != 8) {
             throw new RuntimeException("release file name '" + release + "' is not valid, '" + comp[1] + "' should be a 8-digit date string");
@@ -109,16 +120,6 @@ public final class yacyVersion implements Comparator, Comparable {
         }
         // finished! we parsed a relase string
     }
-    
-    /*
-    public yacyVersion(URL url, float releaseNr, String dateStamp, int svn, boolean mainRelease) {
-        this.url = url;
-        this.releaseNr = releaseNr;
-        this.dateStamp = dateStamp;
-        this.svn = svn;
-        this.mainRelease = mainRelease;
-    }
-    */
     
     public int compareTo(Object obj) {
         yacyVersion v = (yacyVersion) obj;
@@ -144,35 +145,67 @@ public final class yacyVersion implements Comparator, Comparable {
     
     public String toAnchor() {
         // generates an anchor string that can be used to embed in an html for direct download
-        return "<a href=" + this.url.toNormalform() + ">YaCy " + ((this.mainRelease) ? "main release" : "developer release") + " v" + this.releaseNr + ", SVN " + this.svn + "</a>";
+        return "<a href=" + this.url.toNormalform() + ">YaCy " + ((this.proRelease) ? "pro release" : "standard release") + " v" + this.releaseNr + ", SVN " + this.svn + "</a>";
     }
-    
-    public static void aquireLatestReleaseInfo() {
-        if ((latestDevRelease == null) && (latestMainRelease == null)) {
-            if (latestDevRelease == null) latestDevRelease = aquireLatestDevRelease();
-            if (latestMainRelease == null) latestMainRelease = aquireLatestMainRelease();
-        }
-    }
-    
-    public static yacyVersion aquireLatestDevRelease() {
+    /*
+    public static yacyVersion latestStandardRelease() {
         // get the latest release info from a internet resource
-        try {
-            return latestReleaseFrom(new URL("http://latest.yacy-forum.net"));
+        yacyVersion devrel =  (yacyVersion) allDevReleases().last();
+        yacyVersion mainrel =  (yacyVersion) allDevReleases().last();
+    }
+    
+    public static yacyVersion latestProRelease() {
+        // get the latest release info from a internet resource
+        return (yacyVersion) allMainReleases().last();
+    }
+    */
+    public static TreeSet[] allReleases() {
+        // join the release infos
+        // {promainreleases, prodevreleases, stdmainreleases, stddevreleases} 
+        TreeSet[] a = allMainReleases();
+        TreeSet[] b = allDevReleases();
+        TreeSet[] r = new TreeSet[4];
+        TreeSet s;
+        for (int i = 0; i < 4; i++) {
+            s = new TreeSet();
+            if (b[i] != null) s.addAll((TreeSet) b[i]);
+            if (a[i] != null) s.addAll((TreeSet) a[i]);
+            r[i] = s;
+        }
+        return r;
+    }
+    
+    private static TreeSet[] allDevReleases() {
+        // get release info from a internet resource
+        // {promainreleases, prodevreleases, stdmainreleases, stddevreleases} 
+        if ((allDevReleases == null) ||
+            ((allDevReleases[0].size() == 0) &&
+             (allDevReleases[1].size() == 0) &&
+             (allDevReleases[2].size() == 0) &&
+             (allDevReleases[3].size() == 0) )) try {
+            allDevReleases = allReleaseFrom(new URL(latestDevReleaseLocation));
         } catch (MalformedURLException e) {
             return null;
         }
+        return allDevReleases;
     }
     
-    public static yacyVersion aquireLatestMainRelease() {
-        // get the latest release info from a internet resource
-        try {
-            return latestReleaseFrom(new URL("http://yacy.net/yacy/Download.html"));
+    private static TreeSet[] allMainReleases() {
+        // get release info from a internet resource
+        // {promainreleases, prodevreleases, stdmainreleases, stddevreleases} 
+        if ((allMainReleases == null)  ||
+            ((allMainReleases[0].size() == 0) &&
+             (allMainReleases[1].size() == 0) &&
+             (allMainReleases[2].size() == 0) &&
+             (allMainReleases[3].size() == 0) )) try {
+            allMainReleases = allReleaseFrom(new URL(latestMainReleaseLocation));
         } catch (MalformedURLException e) {
             return null;
         }
+        return allMainReleases;
     }
     
-    public static yacyVersion latestReleaseFrom(URL url) {
+    private static TreeSet[] allReleaseFrom(URL url) {
         // retrieves the latest info about releases
         // this is done by contacting a release location,
         // parsing the content and filtering+parsing links
@@ -187,7 +220,10 @@ public final class yacyVersion implements Comparator, Comparable {
         // analyse links in scraper resource, and find link to latest release in it
         Map anchors = scraper.getAnchors(); // a url (String) / name (String) relation
         Iterator i = anchors.keySet().iterator();
-        TreeSet releases = new TreeSet(); // will contain a release (Float) / url (String) relation
+        TreeSet stddevreleases = new TreeSet();
+        TreeSet prodevreleases = new TreeSet();
+        TreeSet stdmainreleases = new TreeSet();
+        TreeSet promainreleases = new TreeSet();
         yacyVersion release;
         while (i.hasNext()) {
             try {
@@ -198,7 +234,10 @@ public final class yacyVersion implements Comparator, Comparable {
             try {
                 release = new yacyVersion(url);
                 //System.out.println("r " + release.toAnchor());
-                releases.add(release);
+                if ( release.proRelease &&  release.mainRelease) promainreleases.add(release);
+                if ( release.proRelease && !release.mainRelease) prodevreleases.add(release);
+                if (!release.proRelease &&  release.mainRelease) stdmainreleases.add(release);
+                if (!release.proRelease && !release.mainRelease) stddevreleases.add(release);
             } catch (RuntimeException e) {
                 // the release string was not well-formed.
                 // that might have been another link
@@ -206,8 +245,22 @@ public final class yacyVersion implements Comparator, Comparable {
                 continue;
             }
         }
-        if (releases.size() == 0) return null;
-        //i = releases.iterator(); while (i.hasNext()) {System.out.println("v " + ((yacyVersion) i.next()).toAnchor());}
-        return (yacyVersion) releases.last();
+        return new TreeSet[] {promainreleases, prodevreleases, stdmainreleases, stddevreleases} ;
+    }
+    
+    public static void downloadRelease(yacyVersion release) throws IOException {
+        File storagePath = plasmaSwitchboard.getSwitchboard().releasePath;
+        // load file
+        byte[] file = httpc.wget(
+                release.url,
+                release.url.getHost(),
+                10000, 
+                null, 
+                null, 
+                plasmaSwitchboard.getSwitchboard().remoteProxyConfig
+        );
+        if (file == null) throw new IOException("wget of url " + release.url + " failed");
+        // save file
+        serverFileUtils.write(file, new File(storagePath, release.url.getFileName()));
     }
 }

@@ -717,7 +717,6 @@ public final class httpdFileHandler extends httpdAbstractHandler implements http
                                 targetDate, null, tp.getOutgoingHeader(),
                                 null, "chunked", nocache);
                         // send the content in chunked parts, see RFC 2616 section 3.6.1
-                        //byte[] result = o.toByteArray(); // this interrupts streaming (bad idea!)
                         httpChunkedOutputStream chos = new httpChunkedOutputStream(out);
                         httpSSI.writeSSI(targetFile, o, chos);
                         //chos.write(result);

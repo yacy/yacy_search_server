@@ -75,7 +75,7 @@ public class URL {
             }
             
             path = resolveBackpath(path);
-            identPort(url);
+            identPort(url, (protocol.equals("http") ? 80 : ((protocol.equals("https")) ? 443 : ((protocol.equals("ftp")) ? 21 : -1))));
             identRef();
             identQuest();
             escape();
@@ -370,11 +370,11 @@ public class URL {
         return sbuf.toString();
     }
     
-    private void identPort(String inputURL) throws MalformedURLException {
+    private void identPort(String inputURL, int dflt) throws MalformedURLException {
         // identify ref in file
         int r = this.host.indexOf(':');
         if (r < 0) {
-            this.port = -1;
+            this.port = dflt;
         } else {        	
             try {
             	String portStr = this.host.substring(r + 1);

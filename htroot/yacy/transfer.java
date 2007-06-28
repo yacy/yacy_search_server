@@ -79,12 +79,10 @@ public final class transfer {
         prop.putASIS("process_path", "");
         prop.putASIS("process_maxsize", "0");
 
-        if (sb.isRobinsonMode()) {
+        if (sb.isRobinsonMode() || !sb.rankingOn) {
         	// in a robinson environment, do not answer. We do not do any transfer in a robinson cluster.
         	return prop;
         }
-        
-        if (!sb.rankingOn) { return prop; }
 
         yacySeed otherseed = yacyCore.seedDB.get(otherpeer);
         if ((otherseed == null) || (filename.indexOf("..") >= 0)) {

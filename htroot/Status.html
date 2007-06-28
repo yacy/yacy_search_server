@@ -68,6 +68,7 @@
       </form>
     </dd>
     #(/hintVersionAvailable)#
+    
     <!--
     #(hintVersionDownload)#::
     <dt class="hintIcon"><img src="env/grafics/start.gif" alt="Start"/></dt>
@@ -76,6 +77,7 @@
     </dd>
     #(/hintVersionDownload)#
     -->
+    
     #(hintStatusSenior)#::
     <dt class="hintIcon"><img src="env/grafics/good.png" width="32" height="32" alt="good"/></dt>
     <dd class="hint">You are running a server in senior mode and you support the global internet index,
@@ -143,6 +145,36 @@
           <img src="/env/grafics/lock.gif" alt="Only the administrator may shutdown this peer" />
           Shutdown
         </button>
+      </fieldset>
+    </form>
+    
+    <form action="Status.html" method="get">
+      <fieldset>
+      <legend>System Update</legend>
+      <dl>
+      <dt>Available Releases</dt>
+      <dd>&nbsp;<select name="releasedownload">
+        #{availreleases}#
+        <option #(selected)#::selected#(/selected)# value="#[url]#">#[name]#</option>
+        #{/availreleases}#
+        </select>
+    	&nbsp;&nbsp;<button type="submit" name="downloadRelease" value="DownloadRelease">
+          <img src="/env/grafics/lock.gif" alt="" />
+          Download Release
+        </button><br>
+      </dd>
+      <dt>Downloaded Releases</dt>
+      <dd>&nbsp;<select name="releaseinstall">
+        #{downloadedreleases}#
+        <option #(selected)#::selected#(/selected)# value="#[file]#">#[name]#</option>
+        #{/downloadedreleases}#
+        </select><!-- 
+    	&nbsp;&nbsp;<button type="submit" name="installRelease" value="InstallRelease">
+          <img src="/env/grafics/lock.gif" alt="" />
+          Install Release
+        </button> -->
+      </dd>
+      </dl>
       </fieldset>
     </form>
     

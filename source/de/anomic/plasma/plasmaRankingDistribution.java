@@ -88,14 +88,6 @@ public final class plasmaRankingDistribution {
         while (st.hasMoreTokens()) {this.address[c++] = st.nextToken();}
     }
 
-    public plasmaRankingDistribution(serverLog log, File sourcePath, int method, int percentage, String address[]) {
-        this.log        = log;
-        this.sourcePath = sourcePath;
-        this.method     = method;
-        this.percentage = percentage;
-        this.address    = address;
-    }
-
     public void setMethod(int method, int percentage, String address[]) {
         this.method     = method;
         this.percentage = percentage;

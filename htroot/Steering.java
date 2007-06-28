@@ -73,14 +73,13 @@ public class Steering {
         }
 
         if (post.containsKey("shutdown")) {
-        	if (sb.updaterCallback != null) { sb.setConfig("Updater.restartSignal", 0); }
             sb.terminate(3000);
             prop.put("info", 3);
             return prop;
         }
 
         if (post.containsKey("restart")) {
-        	if ((sb.updaterCallback == null) && (System.getProperty("os.name").toLowerCase().startsWith("win"))) {
+        	if (System.getProperty("os.name").toLowerCase().startsWith("win")) {
             // create yacy.restart file which is used in Windows startscript
             final File yacyRestart = new File(sb.getRootPath(), "DATA/yacy.restart");
             if (!yacyRestart.exists()) {
@@ -92,12 +91,6 @@ public class Steering {
                 }
             }
         	}
-        	
-            if (sb.updaterCallback != null) { 
-            	sb.setConfig("Updater.shutdownSignal", 1);
-            } else {
-            	serverLog.logWarning("SHUTDOWN", "No wrapper/updater running! Performing a normal shutdown...");
-             }
             
         	sb.terminate(5000);
             prop.put("info", 4);

@@ -157,6 +157,9 @@ proxyCache = DATA/HTCACHE
 proxyCacheSize = 100
 proxyCacheSize__pro = 600
 
+# storage place for new releases
+releases = DATA/RELEASE
+
 # use the mostly direct mapping of URLs to Filenames
 # makes it easy watching the content of the cache using file browsers
 # problems arise when a file already exists where a new entry expects a directory
