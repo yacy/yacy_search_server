@@ -4,7 +4,8 @@
 # in case that YaCy is terminated with the restart option
 
 # navigate into the own directory path
-cd `dirname $0`
+# the path is handed over upon start of this script
+cd $1
 
 # waiting for shutdown
 while [ -e DATA/yacy.running ]; do
@@ -12,4 +13,4 @@ sleep 1
 done
 
 # shutdown complete, start up yacy
-./startYaCy.sh
+./startYACY.sh

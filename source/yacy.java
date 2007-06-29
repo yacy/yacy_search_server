@@ -246,9 +246,10 @@ public final class yacy {
                 System.out.println("could not find logging properties in homePath=" + homePath);
                 e.printStackTrace();
             }
-            serverLog.logConfig("STARTUP", "java version " + System.getProperty("java.version", "no-java-version"));
-            serverLog.logConfig("STARTUP", "Application Root Path: " + homePath);
-            serverLog.logConfig("STARTUP", "Time Zone: UTC" + serverDate.UTCDiffString() + "; UTC+0000 is " + System.currentTimeMillis());
+            serverLog.logConfig("STARTUP", "Java version: " + System.getProperty("java.version", "no-java-version"));
+            serverLog.logConfig("STARTUP", "Operation system: " + System.getProperty("os.name","unknown"));
+            serverLog.logConfig("STARTUP", "Application root-ath: " + homePath);
+            serverLog.logConfig("STARTUP", "Time zone: UTC" + serverDate.UTCDiffString() + "; UTC+0000 is " + System.currentTimeMillis());
             serverLog.logConfig("STARTUP", "Maximum file system path length: " + serverSystem.maxPathLength);
             
             f = new File(homePath, "DATA/yacy.running");

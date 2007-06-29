@@ -98,7 +98,7 @@ public final class serverSystem {
 
 	isMacArchitecture = ((systemOS == systemMacOSC) || (systemOS == systemMacOSX));
 	isUnixFS = ((systemOS == systemMacOSX) || (systemOS == systemUnix));
-	canExecUnix = ((isUnixFS) || (!((systemOS == systemMacOSC) || (systemOS == systemWindows))));
+    canExecUnix = ((isUnixFS) || (!((systemOS == systemMacOSC) || (systemOS == systemWindows))));
 
 	// set up the MRJ Methods through reflection
 	if (isMacArchitecture) try {
