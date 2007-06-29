@@ -46,6 +46,7 @@
 // javac -classpath .:../Classes Status.java
 // if the shell's current path is HTROOT
 
+import java.io.File;
 import java.io.IOException;
 import java.text.DecimalFormat;
 import java.util.Date;
@@ -174,8 +175,13 @@ public class Status {
             String[] downloaded = sb.releasePath.list();
             TreeSet downloadedreleases = new TreeSet();
             for (int j = 0; j < downloaded.length; j++) {
-                release = (yacyVersion) new yacyVersion(downloaded[j]);
-                downloadedreleases.add(release);
+                try {
+                    release = (yacyVersion) new yacyVersion(downloaded[j]);
+                    downloadedreleases.add(release);
+                } catch (RuntimeException e) {
+                    // not a valid release
+                    new File(sb.releasePath, downloaded[j]).deleteOnExit(); // can be also a restart- or deploy-file
+                }
             }
             dflt = (downloadedreleases.size() == 0) ? null : (yacyVersion) downloadedreleases.last();
         Iterator i = downloadedreleases.iterator();

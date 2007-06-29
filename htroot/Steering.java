@@ -46,17 +46,11 @@
 // javac -classpath .:../Classes SettingsAck_p.java
 // if the shell's current path is HTROOT
 
-import java.io.BufferedReader;
-import java.io.File;
-import java.io.IOException;
-import java.io.InputStreamReader;
-
 import de.anomic.http.httpHeader;
 import de.anomic.plasma.plasmaSwitchboard;
 import de.anomic.server.serverObjects;
 import de.anomic.server.serverSwitch;
-import de.anomic.server.logging.serverLog;
-import de.anomic.server.serverSystem;
+import de.anomic.yacy.yacyVersion;
 
 public class Steering {
 
@@ -81,31 +75,7 @@ public class Steering {
         }
 
         if (post.containsKey("restart")) {
-        	if (System.getProperty("os.name").toLowerCase().startsWith("win")) {
-        	    // create yacy.restart file which is used in Windows startscript
-        	    final File yacyRestart = new File(sb.getRootPath(), "DATA/yacy.restart");
-        	    if (!yacyRestart.exists()) {
-        	        try {
-        	            yacyRestart.createNewFile();
-        	        } catch (IOException e) {
-        	            serverLog.logConfig("SHUTDOWN", "ERROR: no restart !");
-        	            e.printStackTrace();
-        	        }
-        	    }
-        	} else if (serverSystem.canExecUnix) {
-        	    // start a re-start daemon
-                try {
-                    Process p = Runtime.getRuntime().exec("source " + sb.getRootPath() + "/restart.sh " + sb.getRootPath() + " &");
-                    BufferedReader in = new BufferedReader(new InputStreamReader(p.getInputStream()));
-                    String text;
-                    while ((text = in.readLine()) != null) {
-                      sb.getLog().logInfo("RESTART -- " + text);
-                    }
-                } catch (IOException e) {
-                    sb.getLog().logSevere("restart failed", e);
-                }
-            }
-        	sb.terminate(5000);
+            yacyVersion.restart();
             prop.put("info", 4);
 
             return prop;

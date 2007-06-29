@@ -27,8 +27,10 @@
 
 package de.anomic.yacy;
 
+import java.io.BufferedReader;
 import java.io.File;
 import java.io.IOException;
+import java.io.InputStreamReader;
 import java.net.MalformedURLException;
 import java.util.Comparator;
 import java.util.Iterator;
@@ -39,7 +41,10 @@ import de.anomic.htmlFilter.htmlFilterContentScraper;
 import de.anomic.http.httpc;
 import de.anomic.net.URL;
 import de.anomic.plasma.plasmaSwitchboard;
+import de.anomic.server.serverCore;
 import de.anomic.server.serverFileUtils;
+import de.anomic.server.serverSystem;
+import de.anomic.server.logging.serverLog;
 
 public final class yacyVersion implements Comparator, Comparable {
     
@@ -264,8 +269,44 @@ public final class yacyVersion implements Comparator, Comparable {
         serverFileUtils.write(file, new File(storagePath, release.url.getFileName()));
     }
     
+    
+    public static void restart() {
+        if (System.getProperty("os.name").toLowerCase().startsWith("win")) {
+            // create yacy.restart file which is used in Windows startscript
+            final File yacyRestart = new File(plasmaSwitchboard.getSwitchboard().getRootPath(), "DATA/yacy.restart");
+            if (!yacyRestart.exists()) {
+                try {
+                    yacyRestart.createNewFile();
+                    plasmaSwitchboard.getSwitchboard().terminate(5000);
+                } catch (IOException e) {
+                    serverLog.logSevere("SHUTDOWN", "restart failed", e);
+                }
+            }
+            
+        }
+        
+        if (serverSystem.canExecUnix) {
+            // start a re-start daemon
+            try {
+                String script = "#!/bin/sh" + serverCore.crlfString + "cd " + plasmaSwitchboard.getSwitchboard().getRootPath() + "/DATA/RELEASE/;while [ -e ../yacy.running ]; do sleep 1;done;cd ../../;./startYACY.sh";
+                File scriptFile = new File(plasmaSwitchboard.getSwitchboard().getRootPath(), "DATA/RELEASE/restart.sh");
+                serverFileUtils.write(script.getBytes(), scriptFile);
+                Process p = Runtime.getRuntime().exec("/bin/sh chmod 755 " + scriptFile.getAbsolutePath() + ";" + scriptFile.getAbsolutePath() + " &");
+                BufferedReader in = new BufferedReader(new InputStreamReader(p.getInputStream()));
+                String text;
+                while ((text = in.readLine()) != null) {
+                    serverLog.logInfo("RESTART", " -- " + text);
+                }
+                plasmaSwitchboard.getSwitchboard().terminate(5000);
+            } catch (IOException e) {
+                serverLog.logSevere("RESTART", "restart failed", e);
+            }
+        }
+    }
+    
+    
     public static void writeDeployScript(String release) {
-        byte[] script = ("cd `dirname $0`;while [ -e ../yacy.running ]; do sleep 1;done;tar xfz " + release + ";cp -Rf yacy/* ../../;rm -Rf yacy;cd ../../;startYACY.sh").getBytes();
+        //byte[] script = ("cd " + plasmaSwitchboard.getSwitchboard().getRootPath() + ";while [ -e ../yacy.running ]; do sleep 1;done;tar xfz " + release + ";cp -Rf yacy/* ../../;rm -Rf yacy;cd ../../;startYACY.sh").getBytes();
         
     }
 }
