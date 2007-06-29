@@ -48,6 +48,10 @@ import java.lang.reflect.Constructor;
 import java.lang.reflect.Method;
 import java.util.Hashtable;
 import java.util.Properties;
+import java.util.Vector;
+
+import de.anomic.plasma.plasmaSwitchboard;
+import de.anomic.server.logging.serverLog;
 
 public final class serverSystem {
 
@@ -326,6 +330,40 @@ public final class serverSystem {
 	}
     }
 
+    public static void deployScript(File scriptFile, String theScript) throws IOException {
+        serverFileUtils.write(theScript.getBytes(), scriptFile);
+        try {
+            Runtime.getRuntime().exec("chmod 755 " + scriptFile.getAbsolutePath()).waitFor();
+        } catch (InterruptedException e) {
+            throw new IOException(e.getMessage());
+        }
+    }
+    
+    public static void execAsynchronous(File scriptFile) throws IOException {
+        // runs a unix/linux script as separate thread
+        File starterFile = new File(scriptFile.getAbsolutePath() + ".starter.sh");
+        deployScript(starterFile, scriptFile.getAbsolutePath() + " &");
+        try {
+            Runtime.getRuntime().exec(starterFile.getAbsolutePath()).waitFor();
+        } catch (InterruptedException e) {
+            throw new IOException(e.getMessage());
+        }
+        starterFile.delete();
+    }
+    
+    public static Vector execSynchronous(String command) throws IOException {
+        // runs a unix/linux command and returns output as Vector of Strings
+        // this method blocks until the command is executed
+        Process p = Runtime.getRuntime().exec(command);
+        BufferedReader in = new BufferedReader(new InputStreamReader(p.getInputStream()));
+        String text;
+        Vector output = new Vector();
+        while ((text = in.readLine()) != null) {
+            output.add(text);
+        }
+        return output;
+    }
+    
     public static void main(String[] args) {
 	//try{System.getProperties().list(new PrintStream(new FileOutputStream(new File("system.properties.txt"))));} catch (FileNotFoundException e) {}
 	//System.out.println("nullstr=" + macMRJOSNullObj.toString());
