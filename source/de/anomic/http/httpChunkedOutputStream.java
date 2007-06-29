@@ -102,7 +102,7 @@ public final class httpChunkedOutputStream extends FilterOutputStream {
         
         this.out.write(Integer.toHexString(len).getBytes());
         this.out.write(serverCore.crlf);
-        this.out.write(b.getBytes(off, off + len));
+        this.out.write(b.getBytes(off, len));
         this.out.write(serverCore.crlf);
         this.out.flush();
     }

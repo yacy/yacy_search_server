@@ -48,7 +48,7 @@ public class httpSSI {
             parseSSI(referenceFile, in, start,  q + 3 - start, out);
             writeSSI(referenceFile, in, start + q + 3, out);
         } else if (p > 0) {
-            int q = in.indexOf("-->".getBytes(), start + 10);
+            int q = in.indexOf("-->".getBytes(), p + 10);
             out.write(in, start, p - start);
             parseSSI(referenceFile, in, start + p, q + 3 - start - p, out);
             writeSSI(referenceFile, in, start + q + 3, out);

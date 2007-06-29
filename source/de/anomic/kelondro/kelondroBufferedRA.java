@@ -80,7 +80,7 @@ public class kelondroBufferedRA extends kelondroAbstractRA implements kelondroRA
     }
 
     public int read(byte[] b, int off, int len) throws IOException {
-        byte[] g = sbb.getBytes((int) pos, (int) pos + len);
+        byte[] g = sbb.getBytes((int) pos, len);
         pos += g.length;
         System.arraycopy(g, 0, b, off, g.length);
         return g.length;

@@ -179,7 +179,7 @@ public final class httpTemplate {
             if (q >= 0) {
                 // found a pattern
                 l.addAll(splitQuotation(new serverByteBuffer(text.getBytes(0, p)), qoff));
-                l.add(new serverByteBuffer(text.getBytes(p, q + right.length)));
+                l.add(new serverByteBuffer(text.getBytes(p, q + right.length - p)));
                 text = new serverByteBuffer(text.getBytes(q + right.length));
             } else {
                 // found only pattern start, no closing parantesis (a syntax error that is silently accepted here)

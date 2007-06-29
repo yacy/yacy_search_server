@@ -295,13 +295,13 @@ public final class serverByteBuffer extends OutputStream {
     public byte[] getBytes(int start) {
         return getBytes(start, length);
     }
-
-    public byte[] getBytes(int start, int end) {
+    
+    public byte[] getBytes(int start, int len) {
         // start is inclusive, end is exclusive
-        if (end > length) throw new IndexOutOfBoundsException("getBytes: end > length");
+        if (len > length) throw new IndexOutOfBoundsException("getBytes: len > length");
         if (start > length) throw new IndexOutOfBoundsException("getBytes: start > length");
-        byte[] tmp = new byte[end - start];
-        System.arraycopy(buffer, offset + start, tmp, 0, end - start);
+        byte[] tmp = new byte[len];
+        System.arraycopy(buffer, offset + start, tmp, 0, len);
         return tmp;
     }
 
@@ -313,13 +313,12 @@ public final class serverByteBuffer extends OutputStream {
         return this;
     }
 
-    public serverByteBuffer trim(int start, int end) {
+    public serverByteBuffer trim(int start, int len) {
         // the end value is outside (+1) of the wanted target array
         if (start > length) throw new IndexOutOfBoundsException("trim: start > length");
-        if (end > length) throw new IndexOutOfBoundsException("trim: end > length");
-        if (start > end) throw new IndexOutOfBoundsException("trim: start > end");
+        if (start + len > length) throw new IndexOutOfBoundsException("trim: start + len > length");
         offset = offset + start;
-        length = end - start;
+        length = len;
         return this;
     }
 
@@ -337,7 +336,7 @@ public final class serverByteBuffer extends OutputStream {
             r--;
         }
         if (l > r) r = l;
-        return trim(l, r);
+        return trim(l, r - l);
     }
     
     public int isUTF8char(int start) {

@@ -144,7 +144,7 @@ public class htmlFilterContentTransformer extends htmlFilterAbstractTransformer 
                 // this is a text fragment, generate gettext quotation
                 int ws = sbbs[i].whitespaceStart(true);
                 int we = sbbs[i].whitespaceEnd(true);
-                result.add(new String(sbbs[i].getBytes(ws, we)));
+                result.add(new String(sbbs[i].getBytes(ws, we - ws)));
             }
         }
         return result;
