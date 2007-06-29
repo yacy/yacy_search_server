@@ -64,9 +64,9 @@ public class plasmaGrafics {
     private static int shortestName = 10;
     private static int longestName = 12;
 
+    public  static final String COL_BACKGROUND = "080808"; /*"FFFFE0"*/
     private static final String COL_DHTCIRCLE = "400030"; /*"008020"*/
     private static final long   COL_HEADLINE   = ymageMatrix.SUBTRACTIVE_BLACK;
-    private static final String COL_BACKGROUND = "080808"; /*"FFFFE0"*/
     private static final String COL_ACTIVE_DOT     = "181808";
     private static final String COL_ACTIVE_LINE    = "604040";
     private static final String COL_ACTIVE_TEXT    = "b080b0";
@@ -127,7 +127,7 @@ public class plasmaGrafics {
         if (primarySearches == null) return null; // this was a local search and there are no threads
 
         // get a copy of a recent network picture
-        ymageMatrix eventPicture = getNetworkPicture(120000, plasmaSwitchboard.getSwitchboard().getConfig("network.unit.name", "unspecified"), plasmaSwitchboard.getSwitchboard().getConfig("network.unit.description", "unspecified"));
+        ymageMatrix eventPicture = getNetworkPicture(120000, plasmaSwitchboard.getSwitchboard().getConfig("network.unit.name", "unspecified"), plasmaSwitchboard.getSwitchboard().getConfig("network.unit.description", "unspecified"), COL_BACKGROUND);
         if (eventPicture instanceof ymageMatrix) eventPicture = (ymageMatrix) eventPicture; //new ymageMatrix((ymageMatrix) eventPicture);
         // TODO: fix cloning of ymageMatrix pictures
         
@@ -172,18 +172,18 @@ public class plasmaGrafics {
         return eventPicture;
     }
 
-    public static ymageMatrix getNetworkPicture(long maxAge, String networkName, String networkTitle) {
-        return getNetworkPicture(maxAge, 640, 480, 300, 300, 1000, true, networkName, networkTitle);
+    public static ymageMatrix getNetworkPicture(long maxAge, String networkName, String networkTitle, String bgcolor) {
+        return getNetworkPicture(maxAge, 640, 480, 300, 300, 1000, true, networkName, networkTitle, bgcolor);
     }
 
-    public static ymageMatrix getNetworkPicture(long maxAge, int width, int height, int passiveLimit, int potentialLimit, int maxCount, boolean corona, String networkName, String networkTitle) {
+    public static ymageMatrix getNetworkPicture(long maxAge, int width, int height, int passiveLimit, int potentialLimit, int maxCount, boolean corona, String networkName, String networkTitle, String bgcolor) {
         if ((networkPicture == null) || ((System.currentTimeMillis() - networkPictureDate) > maxAge)) {
-            drawNetworkPicture(width, height, passiveLimit, potentialLimit, maxCount, corona, networkName, networkTitle);
+            drawNetworkPicture(width, height, passiveLimit, potentialLimit, maxCount, corona, networkName, networkTitle, bgcolor);
         }
         return networkPicture;
     }
 
-    private static void drawNetworkPicture(int width, int height, int passiveLimit, int potentialLimit, int maxCount, boolean corona, String networkName, String networkTitle) {
+    private static void drawNetworkPicture(int width, int height, int passiveLimit, int potentialLimit, int maxCount, boolean corona, String networkName, String networkTitle, String bgcolor) {
 
         int innerradius = Math.min(width, height) / 5;
         int outerradius = innerradius + innerradius * yacyCore.seedDB.sizeConnected() / 100;
@@ -191,7 +191,7 @@ public class plasmaGrafics {
 
         if (yacyCore.seedDB == null) return; // no other peers known
 
-        networkPicture = new ymageMatrix(width, height, COL_BACKGROUND);
+        networkPicture = new ymageMatrix(width, height, bgcolor);
         networkPicture.setMode(ymageMatrix.MODE_SUB);
 
         // draw network circle

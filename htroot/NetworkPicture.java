@@ -59,6 +59,7 @@ public class NetworkPicture {
         int passiveLimit = 300;
         int potentialLimit = 300;
         int maxCount = 1000;
+        String bgcolor = plasmaGrafics.COL_BACKGROUND;
         boolean corona = true;
         
         if (post != null) {
@@ -68,6 +69,7 @@ public class NetworkPicture {
             potentialLimit = post.getInt("pol", 300);
             maxCount = post.getInt("max", 1000);
             corona = post.get("corona", "true").equals("true");
+            bgcolor = post.get("bgcolor", bgcolor);
         }
         
         //too small values lead to an error, too big to huge CPU/memory consumption, resulting in possible DOS.
@@ -78,7 +80,7 @@ public class NetworkPicture {
         if (passiveLimit > 1000000) passiveLimit = 1000000;
         if (potentialLimit > 1000000) potentialLimit = 1000000;
         if (maxCount > 1000) maxCount = 1000;
-        return plasmaGrafics.getNetworkPicture(10000, width, height, passiveLimit, potentialLimit, maxCount, corona, env.getConfig("network.unit.name", "unspecified"), env.getConfig("network.unit.description", "unspecified"));
+        return plasmaGrafics.getNetworkPicture(10000, width, height, passiveLimit, potentialLimit, maxCount, corona, env.getConfig("network.unit.name", "unspecified"), env.getConfig("network.unit.description", "unspecified"), bgcolor);
     }
     
 }
