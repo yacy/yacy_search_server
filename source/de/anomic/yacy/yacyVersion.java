@@ -41,7 +41,6 @@ import de.anomic.htmlFilter.htmlFilterContentScraper;
 import de.anomic.http.httpc;
 import de.anomic.net.URL;
 import de.anomic.plasma.plasmaSwitchboard;
-import de.anomic.server.serverCore;
 import de.anomic.server.serverFileUtils;
 import de.anomic.server.serverSystem;
 import de.anomic.server.logging.serverLog;
@@ -288,17 +287,24 @@ public final class yacyVersion implements Comparator, Comparable {
         if (serverSystem.canExecUnix) {
             // start a re-start daemon
             try {
-                String script = "#!/bin/sh" + serverCore.crlfString + "cd " + plasmaSwitchboard.getSwitchboard().getRootPath() + "/DATA/RELEASE/;while [ -e ../yacy.running ]; do sleep 1;done;cd ../../;./startYACY.sh";
+                serverLog.logInfo("RESTART", "INITIATED");
+                String script = "cd " + plasmaSwitchboard.getSwitchboard().getRootPath() + "/DATA/RELEASE/;while [ -e ../yacy.running ]; do sleep 1;done;cd ../../;./startYACY.sh";
                 File scriptFile = new File(plasmaSwitchboard.getSwitchboard().getRootPath(), "DATA/RELEASE/restart.sh");
                 serverFileUtils.write(script.getBytes(), scriptFile);
-                Process p = Runtime.getRuntime().exec("/bin/sh chmod 755 " + scriptFile.getAbsolutePath() + ";" + scriptFile.getAbsolutePath() + " &");
+                serverLog.logInfo("RESTART", "wrote restart-script to " + scriptFile.getAbsolutePath());
+                Runtime.getRuntime().exec("chmod 755 " + scriptFile.getAbsolutePath()).waitFor();
+                /*Process p =*/ Runtime.getRuntime().exec(scriptFile.getAbsolutePath() + " &");
+                /*serverLog.logInfo("RESTART", "script started");
                 BufferedReader in = new BufferedReader(new InputStreamReader(p.getInputStream()));
                 String text;
                 while ((text = in.readLine()) != null) {
-                    serverLog.logInfo("RESTART", " -- " + text);
-                }
+                    serverLog.logInfo("RESTART", " SCRIPT-LOG " + text);
+                }*/
+                serverLog.logInfo("RESTART", "script is running");
                 plasmaSwitchboard.getSwitchboard().terminate(5000);
             } catch (IOException e) {
+                serverLog.logSevere("RESTART", "restart failed", e);
+            } catch (InterruptedException e) {
                 serverLog.logSevere("RESTART", "restart failed", e);
             }
         }
