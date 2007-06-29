@@ -4,22 +4,23 @@
     <title>YaCy '#[clientname]#': Search Page</title>
     #%env/templates/metas.template%#
     <link rel="alternate" type="application/rss+xml" title="Search for #[former]#" href="yacysearch.rss?search=#[former]#" />
-	<link rel="search" type="application/opensearchdescription+xml" title="YaCy Search on '#[clientname]#'" href="opensearchdescription.xml" /> 
+    <link rel="search" type="application/opensearchdescription+xml" title="YaCy Search on '#[clientname]#'" href="opensearchdescription.xml" /> 
+    <script type="text/javascript" src="js/html.js"></script>
   </head>
   <body id="index" onload="document.getElementById('search').focus()">
     #(display)#
     #%env/templates/simpleheader.template%#
     ::
     #%env/templates/header.template%#
-	::
-	#%env/templates/embeddedheader.template%#
+    ::
+    #%env/templates/embeddedheader.template%#
     #(/display)#
 
     <h2 class="yacy">
       #[promoteSearchPageGreeting]#
     </h2>
   
-    <form class="search" action="yacysearch.html" method="get" name="searchform" accept-charset="UTF-8">
+    <form class="search" action="yacysearch.html" method="get" id="searchform" accept-charset="UTF-8">
       <fieldset class="maininput">
         <input type="hidden" name="display" value="#[display]#" />
         <input name="search" id="search" type="text" size="52" maxlength="80" value="#[former]#" />
@@ -38,7 +39,7 @@
         <input type="hidden" name="prefermaskfilter" value="" />
         <input type="hidden" name="indexof" value="off" />-->
       </fieldset>
-      <p><a href="/index.html?searchoptions=1&amp;display=#[display]#" onclick="this.href='/index.html?searchoptions=1&amp;display=#[display]#&amp;handover='+document.searchform.search.value">more options...</a></p>
+      <p><a href="/index.html?searchoptions=1&amp;display=#[display]#" onclick="this.href='/index.html?searchoptions=1&amp;display=#[display]#&amp;former='+document.getElementById('searchform').search.value+'&amp;contentdom='+radioValue(document.getElementById('searchform').contentdom)">more options...</a></p>
       ::
       </fieldset>
        
@@ -118,28 +119,28 @@
       <p>This peer holds #[links]# URLs</p>
     </form>
     #(searchoptions)#::
-    <p>
     <form action="index.html" method="get" class="search">
-    #(publicSearchpage)#
-      <button type="submit" name="publicPage" value="0">
-        <img src="/env/grafics/lock.gif" alt="authentication required" />
+      <p>
+        #(publicSearchpage)#
+        <button type="submit" name="publicPage" value="0">
+          <img src="/env/grafics/lock.gif" alt="authentication required" />
           Disable search function for users without autorization
-      </button>
-      ::
-      <button type="submit" name="publicPage" value="1">
-        <img src="/env/grafics/lock.gif" alt="authentication required" />
+        </button>
+        ::
+        <button type="submit" name="publicPage" value="1">
+          <img src="/env/grafics/lock.gif" alt="authentication required" />
           Enable web search to everyone
-      </button>
-    #(/publicSearchpage)#
+        </button>
+       #(/publicSearchpage)#
+     </p>
     </form>
-    </p>
     #(/searchoptions)#
     #(display)#
     #%env/templates/simplefooter.template%#
     ::
     #%env/templates/footer.template%#
-	::
-	#%env/templates/embeddedfooter.template%#
+    ::
+    #%env/templates/embeddedfooter.template%#
     #(/display)#
   </body>
 </html>

@@ -34,3 +34,8 @@ function createLinkCol(url, linktext){
 	col.appendChild(link);
 	return col;
 }
+
+function radioValue(inputs) {
+  for (var i=0; i<inputs.length; i++) if (inputs[i].checked) return inputs[i].value;
+  return false;
+}
