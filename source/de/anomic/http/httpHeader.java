@@ -492,7 +492,7 @@ public final class httpHeader extends TreeMap implements Map {
     }
     
     public String userAgent() {
-        return (String) get(USER_AGENT);
+        return (String) get(USER_AGENT, "");
     }
     
     public long age() {
