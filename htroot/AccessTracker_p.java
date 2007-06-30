@@ -45,6 +45,14 @@ import de.anomic.yacy.yacySeed;
 
 public class AccessTracker_p {
     
+	private static final TreeMap treemapclone(TreeMap m) {
+		TreeMap accessClone = new TreeMap();
+		try {
+			accessClone.putAll(m);
+		} catch (ConcurrentModificationException e) {}
+		return accessClone;
+	}
+	
     public static serverObjects respond(httpHeader header, serverObjects post, serverSwitch sb) {
         plasmaSwitchboard switchboard = (plasmaSwitchboard) sb;
      
@@ -85,7 +93,7 @@ public class AccessTracker_p {
 				access = switchboard.accessTrack(host);
 				if (access != null) {
 					try {
-						Iterator ii = access.entrySet().iterator();
+						Iterator ii = treemapclone(access).entrySet().iterator();
 						while (ii.hasNext()) {
 							entry = (Map.Entry) ii.next();
 							prop.put("page_list_" + entCount + "_host", host);
@@ -101,7 +109,7 @@ public class AccessTracker_p {
                     while ((entCount < maxCount) && (i.hasNext())) {
 						host = (String) i.next();
 						access = switchboard.accessTrack(host);
-						Iterator ii = access.entrySet().iterator();
+						Iterator ii = treemapclone(access).entrySet().iterator();
 						while (ii.hasNext()) {
 							entry = (Map.Entry) ii.next();
 							prop.put("page_list_" + entCount + "_host", host);

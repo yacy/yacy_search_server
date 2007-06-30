@@ -208,7 +208,11 @@ public abstract class serverAbstractSwitch implements serverSwitch {
     
     public Iterator accessHosts() {
         // returns an iterator of hosts in tracker (String)
-        return accessTracker.keySet().iterator();
+    	HashMap accessTrackerClone = new HashMap();
+    	try {
+    		accessTrackerClone.putAll(accessTracker);
+    	} catch (ConcurrentModificationException e) {}
+    	return accessTrackerClone.keySet().iterator();
     }
 
     public void setConfig(Map otherConfigs) {
