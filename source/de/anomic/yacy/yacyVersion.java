@@ -27,10 +27,8 @@
 
 package de.anomic.yacy;
 
-import java.io.BufferedReader;
 import java.io.File;
 import java.io.IOException;
-import java.io.InputStreamReader;
 import java.net.MalformedURLException;
 import java.util.Comparator;
 import java.util.Iterator;
@@ -41,6 +39,7 @@ import de.anomic.htmlFilter.htmlFilterContentScraper;
 import de.anomic.http.httpc;
 import de.anomic.net.URL;
 import de.anomic.plasma.plasmaSwitchboard;
+import de.anomic.server.serverCore;
 import de.anomic.server.serverFileUtils;
 import de.anomic.server.serverSystem;
 import de.anomic.server.logging.serverLog;
@@ -288,8 +287,8 @@ public final class yacyVersion implements Comparator, Comparable {
             // start a re-start daemon
             try {
                 serverLog.logInfo("RESTART", "INITIATED");
-                String script = "cd " + plasmaSwitchboard.getSwitchboard().getRootPath() + "/DATA/RELEASE/;while [ -e ../yacy.running ]; do sleep 1;done;cd ../../;./startYACY.sh";
-                File scriptFile = new File(plasmaSwitchboard.getSwitchboard().getRootPath(), "DATA/RELEASE/restart.sh");
+                String script = "cd " + plasmaSwitchboard.getSwitchboard().getRootPath() + "/DATA/RELEASE/" + serverCore.lfstring + "while [ -e ../yacy.running ]; do" + serverCore.lfstring + "sleep 1" + serverCore.lfstring + "done" + serverCore.lfstring + "cd ../../" + serverCore.lfstring + "nohup ./startYACY.sh > /dev/null";
+    			File scriptFile = new File(plasmaSwitchboard.getSwitchboard().getRootPath(), "DATA/RELEASE/restart.sh");
                 serverSystem.deployScript(scriptFile, script);
                 serverLog.logInfo("RESTART", "wrote restart-script to " + scriptFile.getAbsolutePath());
                 serverSystem.execAsynchronous(scriptFile);
@@ -299,28 +298,7 @@ public final class yacyVersion implements Comparator, Comparable {
                 serverLog.logSevere("RESTART", "restart failed", e);
             }
         }
-/*
-        if (serverSystem.canExecUnix) {
-            // start a re-start daemon
-            try {
-                serverLog.logInfo("RESTART", "INITIATED");
-                String script = "cd " + plasmaSwitchboard.getSwitchboard().getRootPath() + "/DATA/RELEASE/;while [ -e ../yacy.running ]; do sleep 1;done;cd ../../;./startYACY.sh";
-                File scriptFile = new File(plasmaSwitchboard.getSwitchboard().getRootPath(), "DATA/RELEASE/restart.sh");
-                serverFileUtils.write(script.getBytes(), scriptFile);
-                serverLog.logInfo("RESTART", "wrote restart-script to " + scriptFile.getAbsolutePath());
-                Runtime.getRuntime().exec("chmod 755 " + scriptFile.getAbsolutePath()).waitFor();
-                Runtime.getRuntime().exec(scriptFile.getAbsolutePath() + " &");
-                serverLog.logInfo("RESTART", "script is running");
-                plasmaSwitchboard.getSwitchboard().terminate(5000);
-            } catch (IOException e) {
-                serverLog.logSevere("RESTART", "restart failed", e);
-            } catch (InterruptedException e) {
-                serverLog.logSevere("RESTART", "restart failed", e);
-            }
-        }
-*/
     }
-    
     
     public static void writeDeployScript(String release) {
         //byte[] script = ("cd " + plasmaSwitchboard.getSwitchboard().getRootPath() + ";while [ -e ../yacy.running ]; do sleep 1;done;tar xfz " + release + ";cp -Rf yacy/* ../../;rm -Rf yacy;cd ../../;startYACY.sh").getBytes();

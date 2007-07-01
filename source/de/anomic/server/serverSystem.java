@@ -50,9 +50,6 @@ import java.util.Hashtable;
 import java.util.Properties;
 import java.util.Vector;
 
-import de.anomic.plasma.plasmaSwitchboard;
-import de.anomic.server.logging.serverLog;
-
 public final class serverSystem {
 
     // constants for system identification
@@ -342,7 +339,8 @@ public final class serverSystem {
     public static void execAsynchronous(File scriptFile) throws IOException {
         // runs a unix/linux script as separate thread
         File starterFile = new File(scriptFile.getAbsolutePath() + ".starter.sh");
-        deployScript(starterFile, scriptFile.getAbsolutePath() + " &");
+        //deployScript(starterFile, "touch restart.starter.startet1");
+        deployScript(starterFile, scriptFile.getAbsolutePath() + " &" + serverCore.lfstring);
         try {
             Runtime.getRuntime().exec(starterFile.getAbsolutePath()).waitFor();
         } catch (InterruptedException e) {
