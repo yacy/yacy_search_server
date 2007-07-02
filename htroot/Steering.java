@@ -46,6 +46,8 @@
 // javac -classpath .:../Classes SettingsAck_p.java
 // if the shell's current path is HTROOT
 
+import java.io.File;
+
 import de.anomic.http.httpHeader;
 import de.anomic.plasma.plasmaSwitchboard;
 import de.anomic.server.serverObjects;
@@ -80,7 +82,19 @@ public class Steering {
 
             return prop;
         }
+        
+        if (post.containsKey("update")) {
+            boolean devenvironment = yacy.combined2prettyVersion(sb.getConfig("version","0.1")).startsWith("dev");
+            String releaseFileName = post.get("releaseinstall", "");
+            File releaseFile = new File(sb.getRootPath(), "DATA/RELEASE/" + releaseFileName);
+            if ((!devenvironment) && (releaseFile.length() > 0) && (releaseFile.exists())) {
+                yacyVersion.deployRelease(releaseFileName);
+            }
+            prop.put("info", 5);
+            prop.put("info_release", releaseFileName);
 
+            return prop;
+        }
         return prop;
     }
 

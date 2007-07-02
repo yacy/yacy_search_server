@@ -30,7 +30,9 @@ package de.anomic.yacy;
 import java.io.File;
 import java.io.IOException;
 import java.net.MalformedURLException;
+import java.util.ArrayList;
 import java.util.Comparator;
+import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
 import java.util.TreeSet;
@@ -59,10 +61,8 @@ public final class yacyVersion implements Comparator, Comparable {
     // information about latest release, retrieved from download pages
     // this static information should be overwritten by network-specific locations
     // for details see yacy.network.unit
-    private static TreeSet[] allDevReleases = null;
-    private static TreeSet[] allMainReleases = null;
-    public  static String latestDevReleaseLocation = ""; // will be initialized with value in yacy.network.unit
-    public  static String latestMainReleaseLocation = ""; // will be initialized with value in yacy.network.unit
+    private static HashMap /* URL:TreeSet[]*/ latestReleases = new HashMap();
+    public  static ArrayList latestReleaseLocations /*string*/ = new ArrayList(); // will be initialized with value in yacy.network.unit
     
     // class variables
     public float releaseNr;
@@ -150,62 +150,38 @@ public final class yacyVersion implements Comparator, Comparable {
         // generates an anchor string that can be used to embed in an html for direct download
         return "<a href=" + this.url.toNormalform() + ">YaCy " + ((this.proRelease) ? "pro release" : "standard release") + " v" + this.releaseNr + ", SVN " + this.svn + "</a>";
     }
-    /*
-    public static yacyVersion latestStandardRelease() {
-        // get the latest release info from a internet resource
-        yacyVersion devrel =  (yacyVersion) allDevReleases().last();
-        yacyVersion mainrel =  (yacyVersion) allDevReleases().last();
-    }
     
-    public static yacyVersion latestProRelease() {
-        // get the latest release info from a internet resource
-        return (yacyVersion) allMainReleases().last();
-    }
-    */
     public static TreeSet[] allReleases() {
         // join the release infos
-        // {promainreleases, prodevreleases, stdmainreleases, stddevreleases} 
-        TreeSet[] a = allMainReleases();
-        TreeSet[] b = allDevReleases();
+        // {promainreleases, prodevreleases, stdmainreleases, stddevreleases}
+        Object[] a = new Object[latestReleaseLocations.size()];
+        for (int j = 0; j < latestReleaseLocations.size(); j++) {
+            a[j] = getReleases((URL) latestReleaseLocations.get(j));
+        }
         TreeSet[] r = new TreeSet[4];
         TreeSet s;
         for (int i = 0; i < 4; i++) {
             s = new TreeSet();
-            if ((b != null) && (b[i] != null)) s.addAll((TreeSet) b[i]);
-            if ((a != null) && (a[i] != null)) s.addAll((TreeSet) a[i]);
+            for (int j = 0; j < a.length; j++) {
+                if ((a[j] != null) && (((TreeSet[]) a[j])[i] != null)) s.addAll(((TreeSet[]) a[j])[i]);
+            }
             r[i] = s;
         }
         return r;
     }
     
-    private static TreeSet[] allDevReleases() {
+    private static TreeSet[] getReleases(URL location) {
         // get release info from a internet resource
         // {promainreleases, prodevreleases, stdmainreleases, stddevreleases} 
-        if ((allDevReleases == null) ||
-            ((allDevReleases[0].size() == 0) &&
-             (allDevReleases[1].size() == 0) &&
-             (allDevReleases[2].size() == 0) &&
-             (allDevReleases[3].size() == 0) )) try {
-            allDevReleases = allReleaseFrom(new URL(latestDevReleaseLocation));
-        } catch (MalformedURLException e) {
-            return null;
+        TreeSet[] latestRelease = (TreeSet[]) latestReleases.get(location);
+        if ((latestRelease == null) ||
+            ((latestRelease[0].size() == 0) &&
+             (latestRelease[1].size() == 0) &&
+             (latestRelease[2].size() == 0) &&
+             (latestRelease[3].size() == 0) )) {
+            latestRelease = allReleaseFrom(location);
         }
-        return allDevReleases;
-    }
-    
-    private static TreeSet[] allMainReleases() {
-        // get release info from a internet resource
-        // {promainreleases, prodevreleases, stdmainreleases, stddevreleases} 
-        if ((allMainReleases == null)  ||
-            ((allMainReleases[0].size() == 0) &&
-             (allMainReleases[1].size() == 0) &&
-             (allMainReleases[2].size() == 0) &&
-             (allMainReleases[3].size() == 0) )) try {
-            allMainReleases = allReleaseFrom(new URL(latestMainReleaseLocation));
-        } catch (MalformedURLException e) {
-            return null;
-        }
-        return allMainReleases;
+        return latestRelease;
     }
     
     private static TreeSet[] allReleaseFrom(URL url) {
@@ -257,7 +233,7 @@ public final class yacyVersion implements Comparator, Comparable {
         byte[] file = httpc.wget(
                 release.url,
                 release.url.getHost(),
-                10000, 
+                1000, 
                 null, 
                 null, 
                 plasmaSwitchboard.getSwitchboard().remoteProxyConfig
@@ -287,7 +263,13 @@ public final class yacyVersion implements Comparator, Comparable {
             // start a re-start daemon
             try {
                 serverLog.logInfo("RESTART", "INITIATED");
-                String script = "cd " + plasmaSwitchboard.getSwitchboard().getRootPath() + "/DATA/RELEASE/" + serverCore.lfstring + "while [ -e ../yacy.running ]; do" + serverCore.lfstring + "sleep 1" + serverCore.lfstring + "done" + serverCore.lfstring + "cd ../../" + serverCore.lfstring + "nohup ./startYACY.sh > /dev/null";
+                String script =
+                    "cd " + plasmaSwitchboard.getSwitchboard().getRootPath() + "/DATA/RELEASE/" + serverCore.lfstring +
+                    "while [ -e ../yacy.running ]; do" + serverCore.lfstring +
+                    "sleep 1" + serverCore.lfstring +
+                    "done" + serverCore.lfstring +
+                    "cd ../../" + serverCore.lfstring +
+                    "nohup ./startYACY.sh > /dev/null" + serverCore.lfstring;
     			File scriptFile = new File(plasmaSwitchboard.getSwitchboard().getRootPath(), "DATA/RELEASE/restart.sh");
                 serverSystem.deployScript(scriptFile, script);
                 serverLog.logInfo("RESTART", "wrote restart-script to " + scriptFile.getAbsolutePath());
@@ -300,8 +282,28 @@ public final class yacyVersion implements Comparator, Comparable {
         }
     }
     
-    public static void writeDeployScript(String release) {
+    public static void deployRelease(String release) {
         //byte[] script = ("cd " + plasmaSwitchboard.getSwitchboard().getRootPath() + ";while [ -e ../yacy.running ]; do sleep 1;done;tar xfz " + release + ";cp -Rf yacy/* ../../;rm -Rf yacy;cd ../../;startYACY.sh").getBytes();
-        
+        try {
+            serverLog.logInfo("UPDATE", "INITIATED");
+            String script =
+                "cd " + plasmaSwitchboard.getSwitchboard().getRootPath() + "/DATA/RELEASE/" + serverCore.lfstring +
+                "tar xfz " + release + serverCore.lfstring +
+                "while [ -e ../yacy.running ]; do" + serverCore.lfstring +
+                "sleep 1" + serverCore.lfstring +
+                "done" + serverCore.lfstring +
+                "cp -Rf yacy/* ../../" + serverCore.lfstring +
+                "rm -Rf yacy" + serverCore.lfstring +
+                "cd ../../" + serverCore.lfstring +
+                "nohup ./startYACY.sh > /dev/null" + serverCore.lfstring;
+            File scriptFile = new File(plasmaSwitchboard.getSwitchboard().getRootPath(), "DATA/RELEASE/update.sh");
+            serverSystem.deployScript(scriptFile, script);
+            serverLog.logInfo("UPDATE", "wrote update-script to " + scriptFile.getAbsolutePath());
+            serverSystem.execAsynchronous(scriptFile);
+            serverLog.logInfo("UPDATE", "script is running");
+            plasmaSwitchboard.getSwitchboard().terminate(5000);
+        } catch (IOException e) {
+            serverLog.logSevere("UPDATE", "update failed", e);
+        }
     }
 }

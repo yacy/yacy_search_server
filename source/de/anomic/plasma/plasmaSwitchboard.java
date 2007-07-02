@@ -933,9 +933,19 @@ public final class plasmaSwitchboard extends serverAbstractSwitch implements ser
             }
         }
 
-        // set auto-updater locations
-        yacyVersion.latestDevReleaseLocation = getConfig("network.unit.update.location.dev", "");
-        yacyVersion.latestMainReleaseLocation = getConfig("network.unit.update.location.main", "");
+        // set release locations
+        int i = 0;
+        String location;
+        while (true) {
+            location = getConfig("network.unit.update.location" + i, "");
+            if (location.length() == 0) break;
+            try {
+                yacyVersion.latestReleaseLocations.add(new URL(location));
+            } catch (MalformedURLException e) {
+                break;
+            }
+            i++;
+        }
         
         // load values from configs
         this.plasmaPath   = new File(rootPath, getConfig(DBPATH, DBPATH_DEFAULT));
@@ -1159,7 +1169,7 @@ public final class plasmaSwitchboard extends serverAbstractSwitch implements ser
         int count = 0;
         try {
             ArrayList sbQueueEntries = this.sbQueue.list();
-            for (int i = 0; i < sbQueueEntries.size(); i++) {
+            for (i = 0; i < sbQueueEntries.size(); i++) {
                 plasmaSwitchboardQueue.Entry entry = (plasmaSwitchboardQueue.Entry) sbQueueEntries.get(i);
                 if ((entry != null) && (entry.url() != null) && (entry.cacheFile().exists())) {
                     plasmaHTCache.filesInUse.add(entry.cacheFile());
@@ -1269,7 +1279,7 @@ public final class plasmaSwitchboard extends serverAbstractSwitch implements ser
         // init nameCacheNoCachingList
         String noCachingList = getConfig(HTTPC_NAME_CACHE_CACHING_PATTERNS_NO,"");
         String[] noCachingEntries = noCachingList.split(",");
-        for (int i=0; i<noCachingEntries.length; i++) {
+        for (i = 0; i < noCachingEntries.length; i++) {
             String entry = noCachingEntries[i].trim();
             httpc.nameCacheNoCachingPatterns.add(entry);
         }
@@ -1320,7 +1330,7 @@ public final class plasmaSwitchboard extends serverAbstractSwitch implements ser
 
         deployThread(INDEXER, "Parsing/Indexing", "thread that performes document parsing and indexing", "/IndexCreateIndexingQueue_p.html",
         new serverInstantThread(this, INDEXER_METHOD_START, INDEXER_METHOD_JOBCOUNT, INDEXER_METHOD_FREEMEM), 10000);
-        for (int i = 1; i < indexing_cluster; i++) {
+        for (i = 1; i < indexing_cluster; i++) {
             setConfig((i + 80) + "_indexing_idlesleep", getConfig(INDEXER_IDLESLEEP, ""));
             setConfig((i + 80) + "_indexing_busysleep", getConfig(INDEXER_BUSYSLEEP, ""));
             deployThread((i + 80) + "_indexing", "Parsing/Indexing (cluster job)", "thread that performes document parsing and indexing", null,

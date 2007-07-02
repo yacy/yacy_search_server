@@ -148,12 +148,12 @@
     </form>
     
     #(candeploy)#::
-    <form action="Status.html" method="get">
       <fieldset>
       <legend>System Update</legend>
       <dl>
       <dt>Available Releases</dt>
-      <dd>&nbsp;<select name="releasedownload">
+      <dd><form action="Status.html" method="get">
+        &nbsp;<select name="releasedownload">
         #{availreleases}#
         <option #(selected)#::selected#(/selected)# value="#[url]#">#[name]#</option>
         #{/availreleases}#
@@ -161,22 +161,22 @@
     	&nbsp;&nbsp;<button type="submit" name="downloadRelease" value="DownloadRelease">
           <img src="/env/grafics/lock.gif" alt="" />
           Download Release
-        </button><br>
-      </dd>
+        </button><br><br>
+      </form></dd>
       <dt>Downloaded Releases</dt>
-      <dd>&nbsp;<select name="releaseinstall">
+      <dd><form action="Steering.html" method="get">
+        &nbsp;<select name="releaseinstall">
         #{downloadedreleases}#
         <option #(selected)#::selected#(/selected)# value="#[file]#">#[name]#</option>
         #{/downloadedreleases}#
-        </select><!-- 
-    	&nbsp;&nbsp;<button type="submit" name="installRelease" value="InstallRelease">
+        </select>#(deployenabled)#::no&nbsp;automated installation on development environments::
+    	&nbsp;&nbsp;<button type="submit" name="update" value="InstallRelease">
           <img src="/env/grafics/lock.gif" alt="" />
           Install Release
-        </button> -->
-      </dd>
+        </button>#(/deployenabled)#
+      </form></dd>
       </dl>
       </fieldset>
-    </form>
     #(/candeploy)#
     
     <fieldset>

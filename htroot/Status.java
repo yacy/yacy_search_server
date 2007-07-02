@@ -158,8 +158,9 @@ public class Status {
         }
         
         // version information
-        prop.put("versionpp", yacy.combined2prettyVersion(sb.getConfig("version","0.1")));
-
+        String versionstring = yacy.combined2prettyVersion(sb.getConfig("version","0.1"));
+        prop.put("versionpp", versionstring);
+        boolean devenvironment = versionstring.startsWith("dev");
         double thisVersion = Double.parseDouble(sb.getConfig("version","0.1"));
         // cut off the SVN Rev in the Version
         try {thisVersion = Math.round(thisVersion*1000.0)/1000.0;} catch (NumberFormatException e) {}
@@ -168,11 +169,12 @@ public class Status {
             // we can deploy a new system with (i.e.)
             // cd DATA/RELEASE;tar xfz $1;cp -Rf yacy/* ../../;rm -Rf yacy
             
-            prop.put("candeploy", 1);
-            
             // list downloaded releases
             yacyVersion release, dflt;
             String[] downloaded = sb.releasePath.list();
+            prop.put("candeploy", 1);
+            prop.put("candeploy_deployenabled", (downloaded.length == 0) ? 0 : ((devenvironment) ? 1 : 2)); // prevent that a developer-version is over-deployed
+            
             TreeSet downloadedreleases = new TreeSet();
             for (int j = 0; j < downloaded.length; j++) {
                 try {
@@ -184,44 +186,44 @@ public class Status {
                 }
             }
             dflt = (downloadedreleases.size() == 0) ? null : (yacyVersion) downloadedreleases.last();
-        Iterator i = downloadedreleases.iterator();
-        int relcount = 0;
-        while (i.hasNext()) {
-            release = (yacyVersion) i.next();
-            prop.put("candeploy_downloadedreleases_" + relcount + "_name", (release.proRelease ? "pro" : "standard") + "/" + ((release.mainRelease) ? "main" : "dev") + " " + release.releaseNr + "/" + release.svn);
-            prop.put("candeploy_downloadedreleases_" + relcount + "_file", release.name);
-            prop.put("candeploy_downloadedreleases_" + relcount + "_selected", (release == dflt) ? 1 : 0);
-            relcount++;
-        }
-        prop.put("candeploy_downloadedreleases", relcount);
-        
-        // list remotely available releases
-        TreeSet[] releasess = yacyVersion.allReleases(); // {0=promain, 1=prodev, 2=stdmain, 3=stddev} 
-        relcount = 0;
-        // main
-        TreeSet releases = releasess[(yacy.pro) ? 0 : 2];
-        releases.removeAll(downloadedreleases);
-        i = releases.iterator();
-        while (i.hasNext()) {
-            release = (yacyVersion) i.next();
-            prop.put("candeploy_availreleases_" + relcount + "_name", (release.proRelease ? "pro" : "standard") + "/" + ((release.mainRelease) ? "main" : "dev") + " " + release.releaseNr + "/" + release.svn);
-            prop.put("candeploy_availreleases_" + relcount + "_url", release.url.toString());
-            prop.put("candeploy_availreleases_" + relcount + "_selected", 0);
-            relcount++;
-        }
-        // dev
-        dflt = (releasess[(yacy.pro) ? 1 : 3].size() == 0) ? null : (yacyVersion) releasess[(yacy.pro) ? 1 : 3].last();
-        releases = releasess[(yacy.pro) ? 1 : 3];
-        releases.removeAll(downloadedreleases);
-        i = releases.iterator();
-        while (i.hasNext()) {
-            release = (yacyVersion) i.next();
-            prop.put("candeploy_availreleases_" + relcount + "_name", (release.proRelease ? "pro" : "standard") + "/" + ((release.mainRelease) ? "main" : "dev") + " " + release.releaseNr + "/" + release.svn);
-            prop.put("candeploy_availreleases_" + relcount + "_url", release.url.toString());
-            prop.put("candeploy_availreleases_" + relcount + "_selected", (release == dflt) ? 1 : 0);
-            relcount++;
-        }
-        prop.put("candeploy_availreleases", relcount);
+            Iterator i = downloadedreleases.iterator();
+            int relcount = 0;
+            while (i.hasNext()) {
+                release = (yacyVersion) i.next();
+                prop.put("candeploy_downloadedreleases_" + relcount + "_name", (release.proRelease ? "pro" : "standard") + "/" + ((release.mainRelease) ? "main" : "dev") + " " + release.releaseNr + "/" + release.svn);
+                prop.put("candeploy_downloadedreleases_" + relcount + "_file", release.name);
+                prop.put("candeploy_downloadedreleases_" + relcount + "_selected", (release == dflt) ? 1 : 0);
+                relcount++;
+            }
+            prop.put("candeploy_downloadedreleases", relcount);
+
+            // list remotely available releases
+            TreeSet[] releasess = yacyVersion.allReleases(); // {0=promain, 1=prodev, 2=stdmain, 3=stddev}
+            relcount = 0;
+            // main
+            TreeSet releases = releasess[(yacy.pro) ? 0 : 2];
+            releases.removeAll(downloadedreleases);
+            i = releases.iterator();
+            while (i.hasNext()) {
+                release = (yacyVersion) i.next();
+                prop.put("candeploy_availreleases_" + relcount + "_name", (release.proRelease ? "pro" : "standard") + "/" + ((release.mainRelease) ? "main" : "dev") + " " + release.releaseNr + "/" + release.svn);
+                prop.put("candeploy_availreleases_" + relcount + "_url", release.url.toString());
+                prop.put("candeploy_availreleases_" + relcount + "_selected", 0);
+                relcount++;
+            }
+            // dev
+            dflt = (releasess[(yacy.pro) ? 1 : 3].size() == 0) ? null : (yacyVersion) releasess[(yacy.pro) ? 1 : 3].last();
+            releases = releasess[(yacy.pro) ? 1 : 3];
+            releases.removeAll(downloadedreleases);
+            i = releases.iterator();
+            while (i.hasNext()) {
+                release = (yacyVersion) i.next();
+                prop.put("candeploy_availreleases_" + relcount + "_name", (release.proRelease ? "pro" : "standard") + "/" + ((release.mainRelease) ? "main" : "dev") + " " + release.releaseNr + "/" + release.svn);
+                prop.put("candeploy_availreleases_" + relcount + "_url", release.url.toString());
+                prop.put("candeploy_availreleases_" + relcount + "_selected", (release == dflt) ? 1 : 0);
+                relcount++;
+            }
+            prop.put("candeploy_availreleases", relcount);
         } else {
             prop.put("candeploy", 0);
         }
