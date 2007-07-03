@@ -281,6 +281,7 @@ public final class yacyClient {
                             null, 
                             null, 
                             (useProxy)? plasmaSwitchboard.getSwitchboard().remoteProxyConfig:null,
+                            null,
                             null
                     )
                     , "UTF-8");
@@ -318,7 +319,9 @@ public final class yacyClient {
                             10000, 
                             null, 
                             null, 
-                            (useProxy)?yacyCore.seedDB.sb.remoteProxyConfig:null
+                            (useProxy)?yacyCore.seedDB.sb.remoteProxyConfig:null,
+                            null,
+                            null
                     )
                     , "UTF-8");
             
@@ -360,7 +363,9 @@ public final class yacyClient {
                             6000, 
                             null, 
                             null,
-                            (useProxy)?yacyCore.seedDB.sb.remoteProxyConfig:null
+                            (useProxy)?yacyCore.seedDB.sb.remoteProxyConfig:null,
+                            null,
+                            null
                     )
                     , "UTF-8");
             
@@ -945,7 +950,9 @@ public final class yacyClient {
                             60000, 
                             null, 
                             null,             
-                            (useProxy)?yacyCore.seedDB.sb.remoteProxyConfig:null
+                            (useProxy)?yacyCore.seedDB.sb.remoteProxyConfig:null,
+                            null,
+                            null
                     )
                     , "UTF-8");
         } catch (Exception e) {
@@ -1247,7 +1254,9 @@ public final class yacyClient {
                                     5000, 
                                     null, 
                                     null, 
-                                    (useProxy)?yacyCore.seedDB.sb.remoteProxyConfig:null
+                                    (useProxy)?yacyCore.seedDB.sb.remoteProxyConfig:null,
+                                    null,
+                                    null
                     )
                     , "UTF-8");
             System.out.println("Result=" + result.toString());

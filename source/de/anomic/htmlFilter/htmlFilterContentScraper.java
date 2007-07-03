@@ -482,7 +482,9 @@ public class htmlFilterContentScraper extends htmlFilterAbstractScraper implemen
                 10000, 
                 null, 
                 null, 
-                plasmaSwitchboard.getSwitchboard().remoteProxyConfig
+                plasmaSwitchboard.getSwitchboard().remoteProxyConfig,
+                null,
+                null
         );
         if (page == null) throw new IOException("no response from url " + location.toString());
         

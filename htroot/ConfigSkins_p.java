@@ -127,7 +127,7 @@ public class ConfigSkins_p {
 			ArrayList skinVector;
 			try{
                 URL u = new URL(url);
-				skinVector = nxTools.strings(httpc.wget(u, u.getHost(), 6000, null, null, switchboard.remoteProxyConfig), "UTF-8");
+				skinVector = nxTools.strings(httpc.wget(u, u.getHost(), 6000, null, null, switchboard.remoteProxyConfig, null, null), "UTF-8");
 			}catch(IOException e){
 				prop.put("status", 1);//unable to get URL
 				prop.put("status_url", url);

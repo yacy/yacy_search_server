@@ -300,6 +300,7 @@ public final class serverByteBuffer extends OutputStream {
         // start is inclusive, end is exclusive
         if (len > length) throw new IndexOutOfBoundsException("getBytes: len > length");
         if (start > length) throw new IndexOutOfBoundsException("getBytes: start > length");
+        if ((start == 0) && (len == length) && (len == buffer.length)) return buffer;
         byte[] tmp = new byte[len];
         System.arraycopy(buffer, offset + start, tmp, 0, len);
         return tmp;

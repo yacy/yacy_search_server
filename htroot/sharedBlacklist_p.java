@@ -132,7 +132,7 @@ public class sharedBlacklist_p {
 
                         // get List
                         URL u = new URL(downloadURL);
-                        otherBlacklist = nxTools.strings(httpc.wget(u, u.getHost(), 12000, null, null, switchboard.remoteProxyConfig,reqHeader), "UTF-8"); 
+                        otherBlacklist = nxTools.strings(httpc.wget(u, u.getHost(), 12000, null, null, switchboard.remoteProxyConfig,reqHeader, null), "UTF-8"); 
                     } catch (Exception e) {
                         prop.put("status", STATUS_PEER_UNKNOWN);
                         prop.put("page", 1);                      
@@ -148,7 +148,7 @@ public class sharedBlacklist_p {
 
                 try {
                     URL u = new URL(downloadURL);
-                    otherBlacklist = nxTools.strings(httpc.wget(u, u.getHost(), 6000, null, null, switchboard.remoteProxyConfig), "UTF-8"); //get List
+                    otherBlacklist = nxTools.strings(httpc.wget(u, u.getHost(), 6000, null, null, switchboard.remoteProxyConfig, null, null), "UTF-8"); //get List
                 } catch (Exception e) {
                     prop.put("status", STATUS_URL_PROBLEM);
                     prop.put("status_address",downloadURL);

@@ -40,15 +40,10 @@
 
 package de.anomic.net;
 
-
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
-import java.util.ArrayList;
 import java.util.Properties;
-
-import de.anomic.http.httpc;
-import de.anomic.tools.nxTools;
 
 public class whois {
 
@@ -85,33 +80,5 @@ public class whois {
         info2 = p.getProperty("name");
         if ((info1 != null) && (info2 != null) && (info1.toLowerCase().startsWith("person"))) return "Person: " + info2;
         return "unknown";
-    }
-
-    public static String reversedns(String ip) {
-        try {
-            ArrayList x = nxTools.strings(httpc.wget(new URL("http://www.dnsstuff.com/tools/ptr.ch?ip=" + ip)));
-            x = nxTools.grep(x, 0, "PTR record:");
-            if ((x == null) || (x.size() == 0)) return null;
-            String line = nxTools.tail1(x);
-            int p = line.indexOf("<B>");
-            int q = line.indexOf("</B>");
-            if ((p > 0) && (q > 0)) return line.substring(p + 3, q);
-        } catch (Exception e) {
-            return null;
-        }
-        return null;
-    }
-    
-    public static void main(String[] args) {
-        /*
-        Properties p = Whois(args[0]);
-        if (p != null) {
-            System.out.println(p);
-            System.out.println("---" + evaluateWhois(p));
-        } else {
-            System.out.println("whois cannot execute");
-        }
-        */
-        System.out.println(reversedns("85.212.45.94"));
     }
 }

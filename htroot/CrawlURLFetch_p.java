@@ -53,6 +53,7 @@ import de.anomic.net.URL;
 import de.anomic.plasma.plasmaCrawlProfile;
 import de.anomic.plasma.plasmaCrawlZURL;
 import de.anomic.plasma.plasmaSwitchboard;
+import de.anomic.server.serverByteBuffer;
 import de.anomic.server.serverSwitch;
 import de.anomic.http.httpHeader;
 import de.anomic.http.httpRemoteProxyConfig;
@@ -306,7 +307,9 @@ public class CrawlURLFetch_p {
                     seed.getIP(),
                     5000,
                     null, null,
-                    theRemoteProxyConfig));
+                    theRemoteProxyConfig,
+                    null,
+                    null));
             if (answer.matches("\\d+"))
                 return Integer.parseInt(answer);
             else {
@@ -519,11 +522,13 @@ public class CrawlURLFetch_p {
                 serverLog.logFine(this.getName(), "downloaded URL-list from " + url + " (" + res.statusCode + ")");
                 this.lastServerResponse = res.statusCode + " (" + res.statusText + ")";
                 if (res.status.startsWith("2")) {
-                    byte[] cbs = res.writeContent();
+                	serverByteBuffer sbb = new serverByteBuffer();
+                    //byte[] cbs = res.writeContent();
+                	res.writeContent(sbb, null);
                     String encoding = res.responseHeader.getCharacterEncoding();
                     
                     if (encoding == null) encoding = "US-ASCII";
-                    r = parseText(new String(cbs, encoding));
+                    r = parseText(new String(sbb.getBytes(), encoding));
                 }
                 httpc.returnInstance(con);
             } catch (IOException e) {  }

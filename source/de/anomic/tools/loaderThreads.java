@@ -146,7 +146,7 @@ public class loaderThreads {
 
         public void run() {
             try {
-                page = httpc.wget(url, url.getHost(), timeout, user, password, remoteProxyConfig);
+                page = httpc.wget(url, url.getHost(), timeout, user, password, remoteProxyConfig, null, null);
                 loaded = true;
                 process.feed(page);
                 if (process.status() == loaderCore.STATUS_FAILED) {

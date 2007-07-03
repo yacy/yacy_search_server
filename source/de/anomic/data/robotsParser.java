@@ -59,6 +59,7 @@ import de.anomic.http.httpc;
 import de.anomic.net.URL;
 import de.anomic.plasma.plasmaCrawlRobotsTxt;
 import de.anomic.plasma.plasmaSwitchboard;
+import de.anomic.server.serverByteBuffer;
 import de.anomic.server.logging.serverLog;
 
 /*
@@ -433,7 +434,9 @@ public final class robotsParser{
                     }
                     
                     // downloading the content
-                    robotsTxt = res.writeContent();
+                    serverByteBuffer sbb = new serverByteBuffer();
+                    res.writeContent(sbb, null);
+                    robotsTxt = sbb.getBytes();
                     con.close();
                     
                     downloadEnd = System.currentTimeMillis();                    

@@ -83,7 +83,7 @@ public class getpageinfo_p {
             if (actions.indexOf("title")>=0) {
                 try {
                     URL u = new URL(url);
-                    String contentString=new String(httpc.wget(u, u.getHost(), 6000, null, null, ((plasmaSwitchboard) env).remoteProxyConfig, null))	;
+                    String contentString=new String(httpc.wget(u, u.getHost(), 6000, null, null, ((plasmaSwitchboard) env).remoteProxyConfig, null, null))	;
                     
                     htmlFilterContentScraper scraper = new htmlFilterContentScraper(u);
                     //OutputStream os = new htmlFilterOutputStream(null, scraper, null, false);

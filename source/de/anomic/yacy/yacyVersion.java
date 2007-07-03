@@ -42,7 +42,6 @@ import de.anomic.http.httpc;
 import de.anomic.net.URL;
 import de.anomic.plasma.plasmaSwitchboard;
 import de.anomic.server.serverCore;
-import de.anomic.server.serverFileUtils;
 import de.anomic.server.serverSystem;
 import de.anomic.server.logging.serverLog;
 
@@ -230,17 +229,18 @@ public final class yacyVersion implements Comparator, Comparable {
     public static void downloadRelease(yacyVersion release) throws IOException {
         File storagePath = plasmaSwitchboard.getSwitchboard().releasePath;
         // load file
-        byte[] file = httpc.wget(
+        File download = new File(storagePath, release.url.getFileName());
+        httpc.wget(
                 release.url,
                 release.url.getHost(),
                 1000, 
                 null, 
                 null, 
-                plasmaSwitchboard.getSwitchboard().remoteProxyConfig
+                plasmaSwitchboard.getSwitchboard().remoteProxyConfig,
+                null,
+                download
         );
-        if (file == null) throw new IOException("wget of url " + release.url + " failed");
-        // save file
-        serverFileUtils.write(file, new File(storagePath, release.url.getFileName()));
+        if ((!download.exists()) || (download.length() == 0)) throw new IOException("wget of url " + release.url + " failed");
     }
     
     

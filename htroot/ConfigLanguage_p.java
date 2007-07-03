@@ -98,7 +98,7 @@ public class ConfigLanguage_p {
 			ArrayList langVector;
 			try{
                 URL u = new URL(url);
-				langVector = nxTools.strings(httpc.wget(u, u.getHost(), 6000, null, null, switchboard.remoteProxyConfig), "UTF-8");
+				langVector = nxTools.strings(httpc.wget(u, u.getHost(), 6000, null, null, switchboard.remoteProxyConfig, null, null), "UTF-8");
 			}catch(IOException e){
 				prop.put("status", 1);//unable to get url
 				prop.put("status_url", url);

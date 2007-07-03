@@ -458,7 +458,7 @@ public final class yacy {
                     server.interrupt();
                     if (server.isAlive()) try {
                         URL u = new URL((server.withSSL()?"https":"http")+"://localhost:" + serverCore.getPortNr(port));
-                        httpc.wget(u, u.getHost(), 1000, null, null, null); // kick server
+                        httpc.wget(u, u.getHost(), 1000, null, null, null, null, null); // kick server
                         serverLog.logConfig("SHUTDOWN", "sent termination signal to server socket");
                     } catch (IOException ee) {
                         serverLog.logConfig("SHUTDOWN", "termination signal to server socket missed (server shutdown, ok)");

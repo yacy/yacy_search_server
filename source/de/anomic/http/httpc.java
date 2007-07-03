@@ -1101,60 +1101,6 @@ public final class httpc {
         return new response(false);
     }
 
-    /*
-DEBUG: PUT BODY=------------1090358578442
-Content-Disposition: form-data; name="youare"
-
-Ty2F86ekSWM5
-------------1090358578442
-Content-Disposition: form-data; name="key"
-
-6EkPPOl7
-------------1090358578442
-Content-Disposition: form-data; name="iam"
-
-HnTvzwV7SCJR
-------------1090358578442
-Content-Disposition: form-data; name="process"
-
-permission
-------------1090358578442
-
-     */
-
-    /*
-------------0xKhTmLbOuNdArY
-Content-Disposition: form-data; name="file1"; filename="dir.gif"
-Content-Type: image/gif
-
-GIF89
-------------0xKhTmLbOuNdArY
-Content-Disposition: form-data; name="file2"; filename=""
-
-
-------------0xKhTmLbOuNdArY
-Content-Disposition: form-data; name="upload"
-
-do upload
-------------0xKhTmLbOuNdArY--
-
-###### Listing Properties ######
-# METHOD=POST
-### Header Values:
-# EXT=html
-# HTTP=HTTP/1.1
-# ACCEPT-ENCODING=gzip, deflate;q=1.0, identity;q=0.5, *;q=0
-# HOST=localhost:8080
-# PATH=/testcgi/doit.html
-# CONTENT-LENGTH=474
-# CONTENT-TYPE=multipart/form-data; boundary=----------0xKhTmLbOuNdArY
-# ARGC=0
-# CONNECTION=close
-# USER-AGENT=Mozilla/5.0 (Macintosh; U; PPC Mac OS X; de-de) AppleWebKit/103u (KHTML, like Gecko) Safari/100.1
-### Call Properties:
-###### End OfList ######
-     */
-
     public static byte[] singleGET(
             String realhost,
             String virtualhost,
@@ -1165,8 +1111,11 @@ do upload
             String password, 
             boolean ssl,
             httpRemoteProxyConfig theRemoteProxyConfig,
-            httpHeader requestHeader
+            httpHeader requestHeader,
+            File download
     ) throws IOException {
+    	// if download == null, the get result is stored to a byte[]Êand returned,
+    	// othervise the get is streamed to the file and null is returned
         if (requestHeader == null) requestHeader = new httpHeader();
         
         // setting host authorization header
@@ -1184,7 +1133,16 @@ do upload
 
             httpc.response res = con.GET(path, requestHeader);
             if (res.status.startsWith("2")) {
-                return res.writeContent();
+            	if (download == null) {
+            		// stream to byte[]
+            		serverByteBuffer sbb = new serverByteBuffer();
+            		res.writeContent(sbb, null);
+            		return sbb.getBytes();
+            	} else {
+            		// stream to file and return null
+            		res.writeContent(null, download);
+            		return null;
+            	}
             }
             return res.status.getBytes();
         } catch (Exception e) {
@@ -1201,7 +1159,8 @@ do upload
             int timeout,
             String user, 
             String password,
-            httpRemoteProxyConfig theRemoteProxyConfig
+            httpRemoteProxyConfig theRemoteProxyConfig,
+            File download
     ) throws IOException {
         int port = u.getPort();
         boolean ssl = u.getProtocol().equals("https");
@@ -1209,18 +1168,8 @@ do upload
         String path = u.getPath();
         String query = u.getQuery();
         if ((query != null) && (query.length() > 0)) path = path + "?" + query;
-        return singleGET(u.getHost(), vhost, port, path, timeout, user, password, ssl, theRemoteProxyConfig, null);
+        return singleGET(u.getHost(), vhost, port, path, timeout, user, password, ssl, theRemoteProxyConfig, null, download);
     }
-
-    /*
-    public static byte[] singleGET(String url, int timeout) throws IOException {
-        try {
-            return singleGET(new URL(url), timeout, null, null, null, 0);
-        } catch (MalformedURLException e) {
-            throw new IOException("Malformed URL: " + e.getMessage());
-        }
-    }
-     */
 
     public static byte[] singlePOST(
             String realhost, 
@@ -1253,7 +1202,9 @@ do upload
 
             //System.out.println("response=" + res.toString());
             if (res.status.startsWith("2")) {
-                return res.writeContent();
+            	serverByteBuffer sbb = new serverByteBuffer();
+            	res.writeContent(sbb, null);
+                return sbb.getBytes();
             }
             return res.status.getBytes();
         } catch (Exception e) {
@@ -1295,43 +1246,6 @@ do upload
                 files
         );
     }
-
-    public static byte[] singlePOST(
-            String url, 
-            int timeout, 
-            serverObjects props
-    ) throws IOException {
-        try {
-            URL u = new URL(url);
-            return singlePOST(
-                    u,
-                    u.getHost(),
-                    timeout, 
-                    null, 
-                    null, 
-                    null, 
-                    props,
-                    null
-            );
-        } catch (MalformedURLException e) {
-            throw new IOException("Malformed URL: " + e.getMessage());
-        }
-    }
-
-    public static byte[] wget(
-            URL url,
-            String vhost,
-            int timeout, 
-            String user, 
-            String password, 
-            httpRemoteProxyConfig theRemoteProxyConfig
-    ) throws IOException {
-        return wget(url, vhost,timeout,user,password,theRemoteProxyConfig,null);
-    }
-    
-    public static byte[] wget(URL url) throws IOException{
-        return wget(url, url.getHost(), 10000, null, null, null, null);
-    }
     
     public static byte[] wget(
             URL url,
@@ -1340,7 +1254,8 @@ do upload
             String user, 
             String password, 
             httpRemoteProxyConfig theRemoteProxyConfig,
-            httpHeader requestHeader
+            httpHeader requestHeader,
+            File download
     ) throws IOException {
         
         int port = url.getPort();
@@ -1361,7 +1276,8 @@ do upload
                 password, 
                 ssl, 
                 theRemoteProxyConfig, 
-                requestHeader
+                requestHeader,
+                download
         );
         
         if (a == null) return null;
@@ -1389,6 +1305,7 @@ do upload
                             null, 
                             null, 
                             (useProxy) ? proxy : null,
+                            null,
                             null
                     )
                     , "UTF-8");
@@ -1503,7 +1420,7 @@ do upload
             httpRemoteProxyConfig theRemoteProxyConfig = httpRemoteProxyConfig.init(proxyHost,proxyPort);
             try {
                 URL u = new URL(url);
-                text = nxTools.strings(wget(u, u.getHost(), timeout, null, null, theRemoteProxyConfig));
+                text = nxTools.strings(wget(u, u.getHost(), timeout, null, null, theRemoteProxyConfig, null, null));
             } catch (MalformedURLException e) {
                 System.out.println("The url '" + url + "' is wrong.");
             } catch (IOException e) {
@@ -1864,7 +1781,7 @@ do upload
         *
         * @return the found content
         * @throws IOException 
-        */
+        */ /*
         public byte[] writeContent() throws IOException {
 //            int contentLength = (int) this.responseHeader.contentLength();
 //            serverByteBuffer sbb = new serverByteBuffer((contentLength==-1)?8192:contentLength);
@@ -1872,7 +1789,19 @@ do upload
 //            return sbb.getBytes();
             return serverFileUtils.read(this.getContentInputStream());
         }
-        
+        public void writeContent(File file) throws IOException {
+            // this writes the input stream to a file
+            FileOutputStream bufferOS = null;
+            try {
+                if (file != null) bufferOS = new FileOutputStream(file);
+                serverFileUtils.writeX(this.getContentInputStream(), null, bufferOS);
+            } finally {
+                if (bufferOS != null) {
+                    bufferOS.close();
+                    if (file.length() == 0) file.delete();
+                }
+            }
+        }*/
         /**
         * This method outputs the found content into an byte-array and
         * additionally outputs it to procOS.
@@ -1917,7 +1846,9 @@ do upload
             FileOutputStream bufferOS = null;
             try {
                 if (file != null) bufferOS = new FileOutputStream(file);
-                if (procOS instanceof OutputStream) {
+                if (procOS == null) {
+                	serverFileUtils.writeX(this.getContentInputStream(), null, bufferOS);
+                } else if (procOS instanceof OutputStream) {
                     serverFileUtils.writeX(this.getContentInputStream(), (OutputStream) procOS, bufferOS);
                     //writeContentX(httpc.this.clientInput, this.gzip, this.responseHeader.contentLength(), procOS, bufferOS);
                 } else if (procOS instanceof Writer) {
@@ -1929,6 +1860,7 @@ do upload
                 }
             } finally {
                 if (bufferOS != null) {
+                	bufferOS.flush();
                     bufferOS.close();
                     if (file.length() == 0) file.delete();
                 }

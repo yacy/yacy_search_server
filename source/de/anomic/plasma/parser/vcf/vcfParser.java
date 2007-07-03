@@ -271,7 +271,7 @@ public class vcfParser extends AbstractParser implements Parser {
             URL contentUrl = new URL(args[0]);
             
             vcfParser testParser = new vcfParser();
-            byte[] content = httpc.singleGET(contentUrl, contentUrl.getHost(), 10000, null, null, null);
+            byte[] content = httpc.singleGET(contentUrl, contentUrl.getHost(), 10000, null, null, null, null);
             ByteArrayInputStream input = new ByteArrayInputStream(content);
             testParser.parse(contentUrl, "text/x-vcard", "UTF-8",input);
         } catch (Exception e) {
