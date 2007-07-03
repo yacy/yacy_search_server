@@ -6,7 +6,7 @@
 # first published on http://www.anomic.de
 # Frankfurt, Germany, 2005
 #
-# This file is maintained by Roland Ramthun <admin@yacy-forum.de>
+# This file is maintained by Oliver Wunder <webmaster@daburna.de>
 # This file is written by (chronological order) Roland Ramthun <admin@yacy-forum.de>, Oliver Wunder <webmaster@daburna.de>, Jan Sandbrink
 
 # If you find any mistakes or untranslated strings in this file please don't hesitate to email them to the maintainer.
@@ -18,7 +18,7 @@
 # Thank you for your help!
 <!-- lang -->default\(english\)==Deutsch
 <!-- author -->==Roland Ramthun, Oliver Wunder, Jan Sandbrink
-<!-- maintainer -->==&lt;admin@yacy-forum.de&gt;
+<!-- maintainer -->==&lt;webmaster@daburna.de&gt;
 #-----------------------------
 
 #File: AccessTracker_p.html
@@ -1846,6 +1846,13 @@ Restart==Neustarten
 "Only the administrator may restart this peer"=="Nur der Administrator darf den Peer neustarten"
 Shutdown==Herunterfahren
 "Only the administrator may shutdown this peer"=="Nur der Administrator darf den Peer herunterfahren"
+System Update==Systemaktualisierung
+Available Releases==Verf&uuml;gbare Versionen
+"DownloadRelease"=="Herunterladen"
+Download Release==Ver&ouml;ffentlichung Herunterladen
+Downloaded Releases==Heruntergeladene Ver&ouml;ffentlichungen
+"InstallRelease"=="Installieren"
+Install Release==Ver&ouml;ffentlichung installieren
 Public System Properties==Allgemeine Systemangaben
 System version==Systemversion
 This&nbsp;peer's&nbsp;address==Adresse dieses Peers
