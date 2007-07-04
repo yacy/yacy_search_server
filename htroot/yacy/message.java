@@ -62,6 +62,7 @@ import de.anomic.server.serverSwitch;
 import de.anomic.server.logging.serverLog;
 import de.anomic.tools.crypt;
 import de.anomic.yacy.yacyCore;
+import de.anomic.yacy.yacyNetwork;
 import de.anomic.yacy.yacySeed;
 
 public final class message {
@@ -71,13 +72,14 @@ public final class message {
         return SimpleFormatter.format(date);
     }
 
-    public static serverObjects respond(httpHeader header, serverObjects post, serverSwitch ss) {
-        if (post == null || ss == null) { return null; }
+    public static serverObjects respond(httpHeader header, serverObjects post, serverSwitch env) {
+        if (post == null || env == null) { return null; }
 
         // return variable that accumulates replacements
-        plasmaSwitchboard sb = (plasmaSwitchboard) ss;
+        plasmaSwitchboard sb = (plasmaSwitchboard) env;
         serverObjects prop = new serverObjects();
-        if (prop == null || sb == null) { return null; }
+        if ((post == null) || (env == null)) return prop;
+        if (!yacyNetwork.authentifyRequest(post, env)) return prop;
 
         String process = post.get("process", "permission");
         String key =  post.get("key", "");
@@ -153,7 +155,7 @@ public final class message {
                     yacyCore.seedDB.mySeed.getName(), yacyCore.seedDB.mySeed.hash,
                     subject, mb));
 
-            messageForwardingViaEmail(ss, msgEntry);
+            messageForwardingViaEmail(env, msgEntry);
 
             // finally write notification
             File notifierSource = new File(sb.getRootPath(), sb.getConfig("htRootPath","htroot") + "/env/grafics/message.gif");

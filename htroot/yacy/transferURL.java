@@ -57,22 +57,22 @@ import de.anomic.server.serverCore;
 import de.anomic.server.serverObjects;
 import de.anomic.server.serverSwitch;
 import de.anomic.yacy.yacyCore;
+import de.anomic.yacy.yacyNetwork;
 import de.anomic.yacy.yacySeed;
 
 public final class transferURL {
 
     
-    public static serverObjects respond(httpHeader header, serverObjects post, serverSwitch ss) throws InterruptedException {
-        if (post == null || ss == null) { return null; }
-
+    public static serverObjects respond(httpHeader header, serverObjects post, serverSwitch env) throws InterruptedException {
         long start = System.currentTimeMillis();
         long freshdate = 0;
         try {freshdate = plasmaURL.shortDayFormatter.parse("20061101").getTime();} catch (ParseException e1) {}
         
         // return variable that accumulates replacements
-        final plasmaSwitchboard sb = (plasmaSwitchboard) ss;
+        final plasmaSwitchboard sb = (plasmaSwitchboard) env;
         final serverObjects prop = new serverObjects();
-        if (prop == null || sb == null) { return null; }
+        if ((post == null) || (env == null)) return prop;
+        if (!yacyNetwork.authentifyRequest(post, env)) return prop;
 
         // request values
         final String iam      = post.get("iam", "");      // seed hash of requester

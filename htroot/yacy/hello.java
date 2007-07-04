@@ -57,21 +57,22 @@ import de.anomic.server.serverObjects;
 import de.anomic.server.serverSwitch;
 import de.anomic.yacy.yacyClient;
 import de.anomic.yacy.yacyCore;
+import de.anomic.yacy.yacyNetwork;
 import de.anomic.yacy.yacySeed;
 import de.anomic.yacy.yacyVersion;
 
 public final class hello {
 
-    public static serverObjects respond(httpHeader header, serverObjects post, serverSwitch ss) throws InterruptedException {
-        if (post == null || ss == null || yacyCore.seedDB == null || yacyCore.seedDB.mySeed == null) { return null; }
+    public static serverObjects respond(httpHeader header, serverObjects post, serverSwitch env) throws InterruptedException {
+        if (post == null || env == null || yacyCore.seedDB == null || yacyCore.seedDB.mySeed == null) { return null; }
 
-        plasmaSwitchboard sb = (plasmaSwitchboard) ss;
+        plasmaSwitchboard sb = (plasmaSwitchboard) env;
         // return variable that accumulates replacements
         final serverObjects prop = new serverObjects();
-        if (prop == null) { return null; }
+        if ((post == null) || (env == null)) return prop;
+        if (!yacyNetwork.authentifyRequest(post, env)) return prop;
         
 //      final String iam      = (String) post.get("iam", "");      // complete seed of the requesting peer
-//      final String pattern  = (String) post.get("pattern", "");  //        
 //      final String mytime   = (String) post.get(MYTIME, ""); //
         final String key      = post.get("key", "");      // transmission key for response
         final String seed     = post.get("seed", "");

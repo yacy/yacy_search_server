@@ -60,17 +60,18 @@ import de.anomic.server.serverSwitch;
 import de.anomic.tools.nxTools;
 import de.anomic.yacy.yacyCore;
 import de.anomic.yacy.yacyDHTAction;
+import de.anomic.yacy.yacyNetwork;
 import de.anomic.yacy.yacySeed;
 
 public final class transferRWI {
 
-    public static serverObjects respond(httpHeader header, serverObjects post, serverSwitch ss) throws InterruptedException {
-        if (post == null || ss == null) { return null; }
-
+    public static serverObjects respond(httpHeader header, serverObjects post, serverSwitch env) throws InterruptedException {
+        
         // return variable that accumulates replacements
-        final plasmaSwitchboard sb = (plasmaSwitchboard) ss;
+        final plasmaSwitchboard sb = (plasmaSwitchboard) env;
         final serverObjects prop = new serverObjects();
-        if (prop == null || sb == null) { return null; }
+        if ((post == null) || (env == null)) return prop;
+        if (!yacyNetwork.authentifyRequest(post, env)) return prop;
 
         // request values
         final String iam      = post.get("iam", "");                      // seed hash of requester

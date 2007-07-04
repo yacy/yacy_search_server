@@ -53,6 +53,7 @@ import de.anomic.plasma.plasmaSwitchboard;
 import de.anomic.server.serverObjects;
 import de.anomic.server.serverSwitch;
 import de.anomic.yacy.yacyCore;
+import de.anomic.yacy.yacyNetwork;
 
 public final class query {
 
@@ -61,8 +62,10 @@ public final class query {
 
         // return variable that accumulates replacements
         final plasmaSwitchboard sb = (plasmaSwitchboard) ss;
-        if (sb == null) { return null; }
         final serverObjects prop = new serverObjects();
+        if ((post == null) || (ss == null)) return prop;
+        if (!yacyNetwork.authentifyRequest(post, ss)) return prop;
+        
         
         if ((sb.isRobinsonMode()) &&
             (!sb.isPublicRobinson()) &&

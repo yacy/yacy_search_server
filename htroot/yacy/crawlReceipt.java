@@ -57,6 +57,7 @@ import de.anomic.server.serverSwitch;
 import de.anomic.server.logging.serverLog;
 import de.anomic.tools.crypt;
 import de.anomic.yacy.yacyCore;
+import de.anomic.yacy.yacyNetwork;
 import de.anomic.yacy.yacySeed;
 
 public final class crawlReceipt {
@@ -73,6 +74,7 @@ public final class crawlReceipt {
         serverLog log = switchboard.getLog();
         
         if ((post == null) || (env == null)) return prop;
+        if (!yacyNetwork.authentifyRequest(post, env)) return prop;
 
         //int proxyPrefetchDepth = Integer.parseInt(env.getConfig("proxyPrefetchDepth", "0"));
         //int crawlingDepth = Integer.parseInt(env.getConfig("crawlingDepth", "0"));

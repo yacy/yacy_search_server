@@ -57,6 +57,7 @@ import de.anomic.server.serverObjects;
 import de.anomic.server.serverSwitch;
 import de.anomic.tools.crypt;
 import de.anomic.yacy.yacyCore;
+import de.anomic.yacy.yacyNetwork;
 import de.anomic.yacy.yacySeed;
 
 public final class crawlOrder {
@@ -65,9 +66,9 @@ public final class crawlOrder {
         // return variable that accumulates replacements
         plasmaSwitchboard switchboard = (plasmaSwitchboard) env;
         serverObjects prop = new serverObjects();
-        
         if ((post == null) || (env == null)) return prop;
-
+        if (!yacyNetwork.authentifyRequest(post, env)) return prop;
+        
         //int proxyPrefetchDepth = Integer.parseInt(env.getConfig("proxyPrefetchDepth", "0"));
         //int crawlingdepth = Integer.parseInt(env.getConfig("crawlingDepth", "0"));
 
@@ -77,6 +78,8 @@ public final class crawlOrder {
         String process    = post.get("process", "");   // process type
         String key        = post.get("key", "");       // transmission key
         int    orderDepth = post.getInt("depth", 0);   // crawl depth
+        String unitName   = post.get("network.unit.name", yacySeed.DFLT_NETWORK_UNIT); // the network unit        
+        if (!unitName.equals(env.getConfig("network.unit.name", yacySeed.DFLT_NETWORK_UNIT))) return null;
         
         // response values
         /*

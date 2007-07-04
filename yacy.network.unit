@@ -69,8 +69,8 @@ network.unit.update.location1 = http://latest.yacy.net
 network.unit.update.location2 = http://latest.yacy-forum.net
 
 # properties for in-protocol response authentification:
-#network.unit.protocol.control = uncontrolled
-#network.unit.protocol.request.authentification.method = salted-magic
+network.unit.protocol.control = uncontrolled
+#network.unit.protocol.request.authentification.method = salted-magic-sim
 #network.unit.protocol.request.authentification.essentials =
 #network.unit.protocol.response.authentification.method = challenge-pwresponse
 #network.unit.protocol.response.authentification.essentials =

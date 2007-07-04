@@ -59,14 +59,16 @@ import de.anomic.http.httpHeader;
 import de.anomic.plasma.plasmaSwitchboard;
 import de.anomic.server.serverObjects;
 import de.anomic.server.serverSwitch;
+import de.anomic.yacy.yacyNetwork;
 
 public final class profile {
 
-    public static serverObjects respond(httpHeader header, serverObjects post, serverSwitch ss) {
+    public static serverObjects respond(httpHeader header, serverObjects post, serverSwitch env) {
         // return variable that accumulates replacements
         serverObjects prop = new serverObjects();
-        plasmaSwitchboard sb = (plasmaSwitchboard) ss;
-        if (prop == null) { return null; }
+        plasmaSwitchboard sb = (plasmaSwitchboard) env;
+        if ((post == null) || (env == null)) return prop;
+        if (!yacyNetwork.authentifyRequest(post, env)) return prop;
 
         if ((sb.isRobinsonMode()) &&
            	(!sb.isPublicRobinson()) &&

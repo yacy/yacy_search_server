@@ -55,15 +55,17 @@ import de.anomic.server.serverFileUtils;
 import de.anomic.server.serverObjects;
 import de.anomic.server.serverSwitch;
 import de.anomic.yacy.yacyCore;
+import de.anomic.yacy.yacyNetwork;
 import de.anomic.yacy.yacySeed;
 
 public final class transfer {
 
     public static serverObjects respond(httpHeader header, serverObjects post, serverSwitch env) {
-        if (post == null || env == null) return null;
         plasmaSwitchboard sb = (plasmaSwitchboard) env;
         serverObjects prop = new serverObjects();
-
+        if ((post == null) || (env == null)) return prop;
+        if (!yacyNetwork.authentifyRequest(post, env)) return prop;
+        
         String process   = post.get("process", "");  // permission or store
         //String key       = post.get("key", "");      // a transmission key from the client
         String otherpeer = post.get("iam", "");      // identification of the client (a peer-hash)

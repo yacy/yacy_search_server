@@ -72,16 +72,18 @@ import de.anomic.server.serverObjects;
 import de.anomic.server.serverSwitch;
 import de.anomic.yacy.yacyCore;
 import de.anomic.yacy.yacyDHTAction;
+import de.anomic.yacy.yacyNetwork;
 import de.anomic.yacy.yacySeed;
 import de.anomic.tools.crypt;
 
 public final class search {
 
-    public static serverObjects respond(httpHeader header, serverObjects post, serverSwitch ss) {
-        if (post == null || ss == null) { return null; }
-
+    public static serverObjects respond(httpHeader header, serverObjects post, serverSwitch env) {
         // return variable that accumulates replacements
-        final plasmaSwitchboard sb = (plasmaSwitchboard) ss;
+        final plasmaSwitchboard sb = (plasmaSwitchboard) env;
+        serverObjects prop = new serverObjects();
+        if ((post == null) || (env == null)) return prop;
+        if (!yacyNetwork.authentifyRequest(post, env)) return prop;
         
         //System.out.println("yacy: search received request = " + post.toString());
 
@@ -113,9 +115,7 @@ public final class search {
         // http://localhost:8080/yacy/search.html?query=gh8DKIhGKXws (search for book)
         // http://localhost:8080/yacy/search.html?query=4galTpdpDM5Qgh8DKIhGKXws&abstracts=auto (search for linux and book, generate abstract automatically)
         // http://localhost:8080/yacy/search.html?query=&abstracts=4galTpdpDM5Q (only abstracts for linux)
-        
-        serverObjects prop = new serverObjects();
-        
+
         if ((sb.isRobinsonMode()) &&
              	 (!((sb.isPublicRobinson()) ||
              	    (sb.isInMyCluster((String)header.get(httpHeader.CONNECTION_PROP_CLIENTIP)))))) {

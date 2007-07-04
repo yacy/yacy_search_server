@@ -63,20 +63,23 @@ import de.anomic.server.serverObjects;
 import de.anomic.server.serverSwitch;
 import de.anomic.server.logging.serverLog;
 import de.anomic.yacy.yacyCore;
+import de.anomic.yacy.yacyNetwork;
 import de.anomic.yacy.yacySeed;
 
 public final class list {
 
-    public static serverObjects respond(httpHeader header, serverObjects post, serverSwitch ss) {
-        if (post == null || ss == null)
-            throw new NullPointerException("post: " + post + ", sb: " + ss);
-        plasmaSwitchboard sb = (plasmaSwitchboard) ss;
+    public static serverObjects respond(httpHeader header, serverObjects post, serverSwitch env) {
+        if (post == null || env == null)
+            throw new NullPointerException("post: " + post + ", sb: " + env);
+        plasmaSwitchboard sb = (plasmaSwitchboard) env;
         
         // return variable that accumulates replacements
         final serverObjects prop = new serverObjects();
+        if ((post == null) || (env == null)) return prop;
+        if (!yacyNetwork.authentifyRequest(post, env)) return prop;
         
         final String col = post.get("col", "");
-        final File listsPath = new File(ss.getRootPath(),ss.getConfig("listsPath", "DATA/LISTS"));
+        final File listsPath = new File(env.getRootPath(),env.getConfig("listsPath", "DATA/LISTS"));
         
         String otherPeerName = null;
         if (post.containsKey("iam")) {
@@ -93,7 +96,7 @@ public final class list {
         if (col.equals("black")) {
             final StringBuffer out = new StringBuffer();
 
-            final String filenames=ss.getConfig("BlackLists.Shared", "");
+            final String filenames=env.getConfig("BlackLists.Shared", "");
             final String[] filenamesarray = filenames.split(",");
 
             if(filenamesarray.length > 0){
@@ -109,7 +112,7 @@ public final class list {
         }
         // start contrib by [FB]
         else if (col.length() == 0 && post.get("list", "").equals("queueUrls")) {
-            final URLFetcherStack db = CrawlURLFetchStack_p.getURLFetcherStack(ss);
+            final URLFetcherStack db = CrawlURLFetchStack_p.getURLFetcherStack(env);
             final String display = post.get("display", "list");
             if (display.equals("list")) {
                 // list urls from remote crawler queue for other peers
