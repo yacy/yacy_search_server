@@ -383,50 +383,47 @@ public final class yacy {
                         serverSystem.openBrowser((server.withSSL()?"https":"http") + "://localhost:" + serverCore.getPortNr(port) + "/" + browserPopUpPage, browserPopUpApplication);
                     }
 
-                    //Copy the shipped locales into DATA
-                    final File localesPath = new File(homePath, sb.getConfig("localesPath", "DATA/LOCALE"));
-                    final File defaultLocalesPath = new File(homePath, "locales");
-                    
-
+                    // Copy the shipped locales into DATA, existing files are overwritten
+                    final File locale_work   = new File(homePath, sb.getConfig("locale.work", "DATA/LOCALE/locales"));
+                    final File locale_source = new File(homePath, sb.getConfig("locale.source", "locales"));
                     try{
-                        final File[] defaultLocales = defaultLocalesPath.listFiles();
-                        localesPath.mkdirs();
-                        for(int i=0;i < defaultLocales.length; i++){
-                            if(defaultLocales[i].getName().endsWith(".lng"))
-                                serverFileUtils.copy(defaultLocales[i], new File(localesPath, defaultLocales[i].getName()));
+                        final File[] locale_source_files = locale_source.listFiles();
+                        locale_work.mkdirs();
+                        File target;
+                        for (int i=0; i < locale_source_files.length; i++){
+                        	target = new File(locale_work, locale_source_files[i].getName());
+                            if (locale_source_files[i].getName().endsWith(".lng")) {
+                            	if (target.exists()) target.delete();
+                                serverFileUtils.copy(locale_source_files[i], target);
+                            }
                         }
-                        serverLog.logInfo("STARTUP", "Copied the default locales to DATA/LOCALE");
+                        serverLog.logInfo("STARTUP", "Copied the default locales to " + locale_work.toString());
                     }catch(NullPointerException e){
                         serverLog.logSevere("STARTUP", "Nullpointer Exception while copying the default Locales");
                     }
 
                     //regenerate Locales from Translationlist, if needed
-                    final String lang = sb.getConfig("htLocaleSelection", "");
-                    if(! lang.equals("") && ! lang.equals("default") ){ //locale is used
+                    final String lang = sb.getConfig("locale.language", "");
+                    if (!lang.equals("") && !lang.equals("default")) { //locale is used
                         String currentRev = "";
                         try{
-                            final BufferedReader br = new BufferedReader(new InputStreamReader(new FileInputStream(new File( sb.getConfig("htLocalePath", "DATA/HTDOCS/locale"), lang+"/version" ))));
+                            final BufferedReader br = new BufferedReader(new InputStreamReader(new FileInputStream(new File(sb.getConfig("locale.translated_html", "DATA/LOCALE/htroot"), lang+"/version" ))));
                             currentRev = br.readLine();
                             br.close();
                         }catch(IOException e){
                             //Error
                         }
 
-                        try{ //seperate try, because we want this, even if the file "version" does not exist.
-                            if(! currentRev.equals(sb.getConfig("svnRevision", "")) ){ //is this another version?!
-                                final File sourceDir = new File(sb.getConfig("htRootPath", "htroot"));
-                                final File destDir = new File(sb.getConfig("htLocalePath", "DATA/HTDOCS/locale"), lang);
-                                
-                              if(translator.translateFilesRecursive(sourceDir, destDir, new File("DATA/LOCALE/"+lang+".lng"), "html,template,inc", "locale")){ //translate it
-                                    //write the new Versionnumber
-                                    final BufferedWriter bw = new BufferedWriter(new PrintWriter(new FileWriter(new File(destDir, "version"))));
-                                    bw.write(sb.getConfig("svnRevision", "Error getting Version"));
-                                    bw.close();
-                                }
+                        if (!currentRev.equals(sb.getConfig("svnRevision", ""))) try { //is this another version?!
+                            final File sourceDir = new File(sb.getConfig("htRootPath", "htroot"));
+                            final File destDir = new File(sb.getConfig("locale.translated_html", "DATA/LOCALE/htroot"), lang);
+                            if (translator.translateFilesRecursive(sourceDir, destDir, new File(locale_work, lang + ".lng"), "html,template,inc", "locale")){ //translate it
+                                //write the new Versionnumber
+                                final BufferedWriter bw = new BufferedWriter(new PrintWriter(new FileWriter(new File(destDir, "version"))));
+                                bw.write(sb.getConfig("svnRevision", "Error getting Version"));
+                                bw.close();
                             }
-                        }catch(IOException e){
-                            //Error
-                        }
+                        } catch (IOException e) {}
                     }
 
                     // registering shutdown hook

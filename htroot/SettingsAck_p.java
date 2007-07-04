@@ -79,19 +79,6 @@ import de.anomic.yacy.yacySeedUploader;
 public class SettingsAck_p {
     
     private static boolean nothingChanged;
-
-    /*
-    public static HashMap langMap(serverSwitch env) {
-	String[] ms = env.getConfig("htLocaleLang", "").split(",");
-	HashMap map = new HashMap();
-	int p;
-	for (int i = 0; i < ms.length; i++) {
-	    p = ms[i].indexOf("/");
-	    if (p > 0) map.put(ms[i].substring(0, p), ms[i].substring(p + 1));
-	}
-	return map;
-    }
-    */
     
     public static serverObjects respond(httpHeader header, serverObjects post, serverSwitch env) {
         // return variable that accumulates replacements

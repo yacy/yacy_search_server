@@ -194,8 +194,7 @@ public final class httpdFileHandler extends httpdAbstractHandler implements http
             
             // create htLocaleDefault, htLocalePath
             if (htDefaultPath == null) htDefaultPath = new File(switchboard.getRootPath(), switchboard.getConfig("htDefaultPath","htroot"));
-            if (htLocalePath == null) htLocalePath = new File(switchboard.getConfig("htLocalePath","DATA/HTDOCS/locale"));
-            //htLocaleSelection = switchboard.getConfig("htLocaleSelection","default");
+            if (htLocalePath == null) htLocalePath = new File(switchboard.getConfig("locale.translated_html","DATA/LOCALE/htroot"));
         }
         
     }
@@ -206,18 +205,18 @@ public final class httpdFileHandler extends httpdAbstractHandler implements http
         if (defaultFiles.length == 0) defaultFiles = new String[] {"index.html"};
     }
     
-    /** Returns a path to the localized or default file according to the htLocaleSelection (from he switchboard)
+    /** Returns a path to the localized or default file according to the locale.language (from he switchboard)
      * @param path relative from htroot */
     public static File getLocalizedFile(String path){
-        return getLocalizedFile(path, switchboard.getConfig("htLocaleSelection","default"));
+        return getLocalizedFile(path, switchboard.getConfig("locale.language","default"));
     }
     
     /** Returns a path to the localized or default file according to the parameter localeSelection
 	 * @param path relative from htroot
-	 * @param localeSelection language of localized file; htLocaleSelection from switchboard is used if localeSelection.equals("") */
+	 * @param localeSelection language of localized file; locale.language from switchboard is used if localeSelection.equals("") */
 	public static File getLocalizedFile(String path, String localeSelection){
         if (htDefaultPath == null) htDefaultPath = new File(switchboard.getRootPath(), switchboard.getConfig("htDefaultPath","htroot"));
-        if (htLocalePath == null) htLocalePath = new File(switchboard.getRootPath(), switchboard.getConfig("htLocalePath","htroot/locale"));
+        if (htLocalePath == null) htLocalePath = new File(switchboard.getRootPath(), switchboard.getConfig("locale.translated_html","DATA/LOCALE/htroot"));
 
         if (!(localeSelection.equals("default"))) {
             File localePath = new File(htLocalePath, localeSelection + "/" + path);
@@ -423,8 +422,8 @@ public final class httpdFileHandler extends httpdAbstractHandler implements http
             // locate the file
             if (!(path.startsWith("/"))) path = "/" + path; // attach leading slash
             
-            // a different language can be desired (by i.e. ConfigBasic.html) than the one stored in the htLocaleSelection
-            String localeSelection = switchboard.getConfig("htLocaleSelection","default");
+            // a different language can be desired (by i.e. ConfigBasic.html) than the one stored in the locale.language
+            String localeSelection = switchboard.getConfig("locale.language","default");
             if (args != null && (args.containsKey("language"))) 
             {
                 // TODO 9.11.06 Bost: a class with information about available languages is needed. 

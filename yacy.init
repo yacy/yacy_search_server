@@ -116,6 +116,10 @@ httpdMinIdleSessions = 5
 htRootPath = htroot
 htTemplatePath = htroot/env/templates
 
+# the htroot path
+# root path for the httpd file server
+htDefaultPath=htroot
+
 # individual htroot folder
 # every user may publicise her/his own web pages
 # these pages shall be placed in the path defined here
@@ -133,10 +137,11 @@ defaultFiles = ConfigBasic.html,index.html,default.html,search.html,console.html
 # The htLocaleLang defines a list of language options as <dir>/<named-language>
 # the <dir> must exist as sub-path to htLocalePath
 # the htLocaleSelection selects from the given locales, value=one-of-<dir>
-htDefaultPath=htroot
-htLocalePath=DATA/HTROOT/locale
-htLocaleLang=default/English,de/Deutsch,fr/Fran&ccedil;ais,nl/Nederlands,it/Italiano,es/Espa&ntilde;ol,pt/Portug&ecirc;s,fi/Suomi,se/Svenska,dk/Dansk,gr/E&lambda;&lambda;&eta;v&iota;&kappa;&alpha;,sk/Slovensky
-htLocaleSelection=default
+locale.source=locales
+locale.work=DATA/LOCALE/locales
+locale.translated_html=DATA/LOCALE/htroot
+locale.lang=default/English,de/Deutsch,fr/Fran&ccedil;ais,nl/Nederlands,it/Italiano,es/Espa&ntilde;ol,pt/Portug&ecirc;s,fi/Suomi,se/Svenska,dk/Dansk,gr/E&lambda;&lambda;&eta;v&iota;&kappa;&alpha;,sk/Slovensky
+locale.language=default
 
 # virtual host for httpdFileServlet access
 # for example http://<fileHost>/ shall access the file servlet and

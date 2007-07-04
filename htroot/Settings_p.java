@@ -105,7 +105,7 @@ public final class Settings_p {
         
         prop.put("peerName", env.getConfig("peerName", "nameless"));
         prop.put("staticIP", env.getConfig("staticIP", ""));
-        String peerLang = env.getConfig("htLocaleSelection", "default");
+        String peerLang = env.getConfig("locale.language", "default");
         if (peerLang.equals("default")) peerLang = "en";
         prop.put("peerLang", peerLang);
         

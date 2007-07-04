@@ -226,8 +226,8 @@ public class migration {
             sb.setConfig("parseableMimeTypes.ICAP", value);
         }
         //Locales in DATA, because DATA must be writable, htroot not.
-        if(sb.getConfig("htLocalePath", "htroot/locale").equals("htroot/locale")){
-        	sb.setConfig("htLocalePath", "DATA/HTDOCS/locale");
+        if(sb.getConfig("locale.translated_html", "DATA/LOCALE/htroot").equals("htroot/locale")){
+        	sb.setConfig("locale.translated_html", "DATA/LOCALE/htroot");
         }
         
         // migration for port forwarding settings

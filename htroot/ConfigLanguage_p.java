@@ -71,7 +71,7 @@ public class ConfigLanguage_p {
 	//listManager.switchboard = (plasmaSwitchboard) env;
 	serverObjects prop = new serverObjects();
 	plasmaSwitchboard switchboard = (plasmaSwitchboard) env;
-	String langPath = new File(env.getRootPath(), env.getConfig("langPath", "DATA/LOCALE")).toString();
+	String langPath = new File(env.getRootPath(), env.getConfig("locale.work", "DATA/LOCALE/locales")).toString();
 
 	//Fallback
 	//prop.put("currentlang", ""); //is done by Translationtemplate
@@ -141,7 +141,7 @@ public class ConfigLanguage_p {
                         langName = (String) langNames.get(langKey);
 			prop.put("langlist_"+(i+1)+"_file", langFiles[i]);
 			prop.put("langlist_"+(i+1)+"_name", ((langName == null) ? langKey : langName));
-			if(env.getConfig("htLocaleSelection", "default").equals(langKey)) {
+			if(env.getConfig("locale.language", "default").equals(langKey)) {
 				prop.put("langlist_"+(i+1)+"_selected", "selected");
 				prop.put("langlist_0_selected", " "); // reset Default
 			} else {
@@ -152,7 +152,7 @@ public class ConfigLanguage_p {
 	prop.put("langlist", (i+1));
 
 	//is done by Translationtemplate
-    //langName = (String) langNames.get(env.getConfig("htLocaleSelection", "default"));
+    //langName = (String) langNames.get(env.getConfig("locale.language", "default"));
 	//prop.put("currentlang", ((langName == null) ? "default" : langName));
 	return prop;
     }

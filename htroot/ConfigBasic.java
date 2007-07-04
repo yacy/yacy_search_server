@@ -79,8 +79,8 @@ public class ConfigBasic {
         ConfigBasic config = new ConfigBasic();
         plasmaSwitchboard sb = (plasmaSwitchboard) env;
         serverObjects prop = new serverObjects();
-        String langPath = new File(env.getRootPath(), env.getConfig("langPath", "DATA/LOCALE")).toString();
-        String lang = env.getConfig("htLocaleSelection", "default");
+        String langPath = new File(env.getRootPath(), env.getConfig("locale.work", "DATA/LOCALE/locales")).toString();
+        String lang = env.getConfig("locale.language", "default");
         
         int authentication = sb.adminAuthenticated(header);
         if (authentication < 2) {
@@ -227,7 +227,7 @@ public class ConfigBasic {
         prop.put("defaultName", env.getConfig("peerName", ""));
         prop.put("defaultUser", "admin");
         prop.put("defaultPort", env.getConfig("port", "8080"));
-        lang = env.getConfig("htLocaleSelection", "default"); // re-assign lang, may have changed
+        lang = env.getConfig("locale.language", "default"); // re-assign lang, may have changed
         if (lang.equals("default")) {
             prop.put("langDeutsch", 0);
             prop.put("langEnglish", 1);

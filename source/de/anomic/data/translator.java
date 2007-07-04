@@ -10,7 +10,7 @@
 //
 // $LastChangedDate$
 // $LastChangedRevision$
-// $LastChangedBy$
+// $LastChangedBy: $
 //
 // This program is free software; you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -238,7 +238,7 @@ public class translator {
     }
 
     public static HashMap langMap(serverSwitch env) {
-        String[] ms = env.getConfig("htLocaleLang", "").split(",");
+        String[] ms = env.getConfig("locale.lang", "").split(",");
         HashMap map = new HashMap();
         int p;
         for (int i = 0; i < ms.length; i++) {
@@ -251,12 +251,12 @@ public class translator {
         
     public static boolean changeLang(serverSwitch env, String langPath, String lang) {
         if ((lang.equals("default")) || (lang.equals("default.lng"))) {
-            env.setConfig("htLocaleSelection", "default");
+            env.setConfig("locale.language", "default");
             return true;
         }
         String htRootPath = env.getConfig("htRootPath", "htroot");
         File sourceDir = new File(env.getRootPath(), htRootPath);
-        File destDir = new File(env.getConfig("htLocalePath","DATA/HTDOCS/locale"), lang.substring(0, lang.length() - 4));// cut
+        File destDir = new File(env.getConfig("locale.translated_html","DATA/LOCALE/htroot"), lang.substring(0, lang.length() - 4));// cut
         // .lng
         //File destDir = new File(env.getRootPath(), htRootPath + "/locale/" + lang.substring(0, lang.length() - 4));// cut
         // .lng
@@ -265,7 +265,7 @@ public class translator {
         //if (translator.translateFiles(sourceDir, destDir, translationFile, "html")) {
         if(translator.translateFilesRecursive(sourceDir, destDir,
         translationFile, "html,template,inc", "locale")){
-            env.setConfig("htLocaleSelection", lang.substring(0, lang.length() - 4));
+            env.setConfig("locale.language", lang.substring(0, lang.length() - 4));
             try {
                 BufferedWriter bw = new BufferedWriter(new PrintWriter(new FileWriter(new File(destDir, "version"))));
                 bw.write(env.getConfig("svnRevision", "Error getting Version"));
