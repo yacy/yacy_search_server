@@ -141,7 +141,7 @@ public class Surftips {
                 if ((url == null) || (title == null) || (description == null)) continue;
                 refid = row.getColString(3, null);
                 voted = false;
-                try {
+                try {  // performance problem if published news is too full
                     voted = (yacyCore.newsPool.getSpecific(yacyNewsPool.OUTGOING_DB, yacyNewsPool.CATEGORY_SURFTIPP_VOTE_ADD, "refid", refid) != null) || 
                     		(yacyCore.newsPool.getSpecific(yacyNewsPool.PUBLISHED_DB, yacyNewsPool.CATEGORY_SURFTIPP_VOTE_ADD, "refid", refid) != null);
                 } catch (IOException e) {
@@ -184,9 +184,10 @@ public class Surftips {
     private static void accumulateVotes(HashMap negativeHashes, HashMap positiveHashes, int dbtype) {
         int maxCount = Math.min(1000, yacyCore.newsPool.size(dbtype));
         yacyNewsRecord record;
-        
-        for (int j = 0; j < maxCount; j++) try {
-            record = yacyCore.newsPool.get(dbtype, j);
+        Iterator recordIterator = yacyCore.newsPool.recordIterator(dbtype, true);
+        int j = 0;
+        while ((recordIterator.hasNext()) && (j++ < maxCount)) {
+            record = (yacyNewsRecord) recordIterator.next();
             if (record == null) continue;
             
             if (record.category().equals(yacyNewsPool.CATEGORY_SURFTIPP_VOTE_ADD)) {
@@ -204,7 +205,7 @@ public class Surftips {
                     else positiveHashes.put(urlhash, new Integer(i.intValue() + factor));
                 }
             }
-        } catch (IOException e) {e.printStackTrace();}
+        }
     }
     
     private static void accumulateSurftips(
@@ -212,16 +213,18 @@ public class Surftips {
             HashMap negativeHashes, HashMap positiveHashes, int dbtype) {
         int maxCount = Math.min(1000, yacyCore.newsPool.size(dbtype));
         yacyNewsRecord record;
+        Iterator recordIterator = yacyCore.newsPool.recordIterator(dbtype, true);
+        int j = 0;
         String url = "", urlhash;
         kelondroRow.Entry entry;
         int score = 0;
         Integer vote;
-        for (int j = 0; j < maxCount; j++) try {
-            record = yacyCore.newsPool.get(dbtype, j);
+        while ((recordIterator.hasNext()) && (j++ < maxCount)) {
+            record = (yacyNewsRecord) recordIterator.next();
             if (record == null) continue;
             
             entry = null;
-            if (record.category().equals(yacyNewsPool.CATEGORY_CRAWL_START)) {
+            if (record.category().equals(yacyNewsPool.CATEGORY_CRAWL_START)) try {
                 String intention = record.attribute("intention", "");
                 url = record.attribute("startURL", "");
                 if (url.length() < 12) continue;
@@ -232,9 +235,9 @@ public class Surftips {
                                 record.id().getBytes()
                         });
                 score = 2 + Math.min(10, intention.length() / 4) + timeFactor(record.created());
-            }
+            } catch (IOException e) {}
             
-            if (record.category().equals(yacyNewsPool.CATEGORY_BOOKMARK_ADD)) {
+            if (record.category().equals(yacyNewsPool.CATEGORY_BOOKMARK_ADD)) try {
                 url = record.attribute("url", "");
                 if (url.length() < 12) continue;
                 entry = rowdef.newEntry(new byte[][]{
@@ -244,9 +247,9 @@ public class Surftips {
                                 record.id().getBytes()
                         });
                 score = 8 + timeFactor(record.created());
-            }
+            } catch (IOException e) {}
             
-            if (record.category().equals(yacyNewsPool.CATEGORY_SURFTIPP_ADD)) {
+            if (record.category().equals(yacyNewsPool.CATEGORY_SURFTIPP_ADD)) try {
                 url = record.attribute("url", "");
                 if (url.length() < 12) continue;
                 entry = rowdef.newEntry(new byte[][]{
@@ -256,9 +259,9 @@ public class Surftips {
                                 record.id().getBytes()
                         });
                 score = 5 + timeFactor(record.created());
-            }
+            } catch (IOException e) {}
             
-            if (record.category().equals(yacyNewsPool.CATEGORY_SURFTIPP_VOTE_ADD)) {
+            if (record.category().equals(yacyNewsPool.CATEGORY_SURFTIPP_VOTE_ADD)) try {
                 if (!(record.attribute("vote", "negative").equals("positive"))) continue;
                 url = record.attribute("url", "");
                 if (url.length() < 12) continue;
@@ -269,9 +272,9 @@ public class Surftips {
                                 record.attribute("refid", "").getBytes()
                         });
                 score = 5 + timeFactor(record.created());
-            }
+            } catch (IOException e) {}
             
-            if (record.category().equals(yacyNewsPool.CATEGORY_WIKI_UPDATE)) {
+            if (record.category().equals(yacyNewsPool.CATEGORY_WIKI_UPDATE)) try {
                 yacySeed seed = yacyCore.seedDB.getConnected(record.originator());
                 if (seed == null) seed = yacyCore.seedDB.getDisconnected(record.originator());
                 if (seed != null) {
@@ -284,9 +287,9 @@ public class Surftips {
                         });
                     score = 4 + timeFactor(record.created());
                 }
-            }
+            } catch (IOException e) {}
             
-            if (record.category().equals(yacyNewsPool.CATEGORY_BLOG_ADD)) {
+            if (record.category().equals(yacyNewsPool.CATEGORY_BLOG_ADD)) try {
                 yacySeed seed = yacyCore.seedDB.getConnected(record.originator());
                 if (seed == null) seed = yacyCore.seedDB.getDisconnected(record.originator());
                 if (seed != null) {
@@ -299,7 +302,7 @@ public class Surftips {
                         });
                     score = 4 + timeFactor(record.created());
                 }
-            }
+            } catch (IOException e) {}
 
             // add/subtract votes and write record
             if (entry != null) {
@@ -325,7 +328,7 @@ public class Surftips {
                 }
             }
             
-        } catch (IOException e) {e.printStackTrace();}
+        }
         
     }
     

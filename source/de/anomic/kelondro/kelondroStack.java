@@ -107,12 +107,20 @@ public final class kelondroStack extends kelondroRecords {
         return open(f, row);
     }
 
-    public class Counter implements Iterator {
+    public Iterator iterator(boolean up) {
+        // iterates the elements in an ordered way.
+        // returns kelondroRecords.Node - type Objects
+        return new nodeIterator(up);
+    }
+
+    public class nodeIterator implements Iterator {
         Handle nextHandle = null;
         Handle lastHandle = null;
+        boolean up;
 
-        public Counter() {
-            nextHandle = getHandle(root);
+        public nodeIterator(boolean up) {
+            this.up = up;
+            nextHandle = getHandle((up) ? root : toor);
         }
 
         public boolean hasNext() {
@@ -122,7 +130,7 @@ public final class kelondroStack extends kelondroRecords {
         public Object next() {
         	lastHandle = nextHandle;
             try {
-                nextHandle = getNode(nextHandle, null, 0, false).getOHHandle(right);
+                nextHandle = getNode(nextHandle, null, 0, false).getOHHandle((up) ? right : left);
                 return getNode(lastHandle, null, 0, true);
             } catch (IOException e) {
                 throw new kelondroException(filename, "IO error at Counter:next()");
@@ -288,39 +296,6 @@ public final class kelondroStack extends kelondroRecords {
         if (h == null) return null; else return getNode(h, true);
     }
 
-    public Iterator iterator() {
-        // iterates the elements in an ordered way.
-        // returns Node - type Objects
-        return new Counter();
-    }
-
-    public Iterator keyIterator() {
-        // iterates byte[] - objects
-        return new keyIterator(iterator());
-    }
-    
-    public class keyIterator implements Iterator {
-
-        Iterator ni;
-        
-        public keyIterator(Iterator i) {
-            ni = i;
-        }
-        
-        public boolean hasNext() {
-            return ni.hasNext();
-        }
-        
-        public Object next() {
-            return ((kelondroRecords.Node) ni.next()).getKey();
-        }
-        
-        public void remove() {
-            ni.remove();
-        }
-        
-    }
-    
     public int imp(File file, String separator) throws IOException {
         // imports a value-separated file, returns number of records that have been read
         RandomAccessFile f = null;
@@ -368,7 +343,7 @@ public final class kelondroStack extends kelondroRecords {
         super.print(false);
         Node n;
         try {
-            Iterator it = iterator();
+            Iterator it = iterator(true);
             kelondroRow.Entry r;
             while (it.hasNext()) {
                 n = (Node) it.next();

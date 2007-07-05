@@ -532,6 +532,11 @@ filterOutStopwordsFromTopwords=true
 90_cleanup_busysleep=300000
 90_cleanup_memprereq=0
 
+# cleanup-process:
+# properties for tasks that are performed during cleanup
+cleanup.deletionProcessedNews = true
+cleanup.deletionPublishedNews = true
+
 # multiprocessor-settings
 # you may want to run time-consuming processes on several processors
 # the most time-consuming process is the indexing-Process

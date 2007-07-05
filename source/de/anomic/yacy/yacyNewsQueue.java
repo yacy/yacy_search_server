@@ -47,9 +47,11 @@ package de.anomic.yacy;
 import java.io.File;
 import java.io.IOException;
 import java.util.Date;
+import java.util.Iterator;
 
 import de.anomic.kelondro.kelondroColumn;
 import de.anomic.kelondro.kelondroNaturalOrder;
+import de.anomic.kelondro.kelondroRecords;
 import de.anomic.kelondro.kelondroRow;
 import de.anomic.kelondro.kelondroStack;
 
@@ -62,8 +64,8 @@ public class yacyNewsQueue {
     public static final kelondroRow rowdef = new kelondroRow(new kelondroColumn[]{
             new kelondroColumn("newsid", kelondroColumn.celltype_string, kelondroColumn.encoder_bytes, yacyNewsRecord.idLength, "id = created + originator"),
             new kelondroColumn("last touched", kelondroColumn.celltype_string, kelondroColumn.encoder_bytes, yacyCore.universalDateShortPattern.length(), "")
-    },
-    kelondroNaturalOrder.naturalOrder, 0
+        },
+        kelondroNaturalOrder.naturalOrder, 0
     );
 
     public yacyNewsQueue(File path, yacyNewsDB newsDB) {
@@ -159,6 +161,39 @@ public class yacyNewsQueue {
                 r.id().getBytes(),
                 yacyCore.universalDateShortString(new Date()).getBytes()});
         return b;
+    }
+    
+    public Iterator records(boolean up) {
+        return new newsIterator(up);
+    }
+    
+    public class newsIterator implements Iterator {
+        // iterates yacyNewsRecord-type objects
+        
+        Iterator stackNodeIterator;
+        
+        public newsIterator(boolean up) {
+            stackNodeIterator = queueStack.iterator(up);
+        }
+        
+        public boolean hasNext() {
+            return stackNodeIterator.hasNext();
+        }
+
+        public Object next() {
+            kelondroRecords.Node n = (kelondroRecords.Node) stackNodeIterator.next();
+            try {
+                kelondroRow.Entry entry = queueStack.row().newEntry(n.getValueRow());
+                return b2r(entry);
+            } catch (IOException e) {
+                return null;
+            }
+        }
+
+        public void remove() {
+            stackNodeIterator.remove();
+        }
+        
     }
 
 }

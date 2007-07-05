@@ -99,7 +99,7 @@ public class News {
                         yacyCore.newsPool.clear(tableID);
                     } else {
                         while (yacyCore.newsPool.size(tableID) > 0) {
-                            record = yacyCore.newsPool.get(tableID, 0);
+                            record = (yacyNewsRecord) yacyCore.newsPool.recordIterator(tableID, true).next();
                             yacyCore.newsPool.moveOff(tableID, record.id());
                         }
                     }
@@ -127,14 +127,15 @@ public class News {
             if (yacyCore.seedDB == null) {
                 
             } else {
-                int maxCount = yacyCore.newsPool.size(tableID);
-                if (maxCount > 300) maxCount = 300;
-                
+                int maxCount = Math.min(1000, yacyCore.newsPool.size(tableID));
+                Iterator recordIterator = yacyCore.newsPool.recordIterator(tableID, false);
                 yacyNewsRecord record;
                 yacySeed seed;
-                for (int i = 0; i < maxCount; i++) try {
-                    record = yacyCore.newsPool.get(tableID, i);
+                int i = 0;
+                while ((recordIterator.hasNext()) && (i < maxCount)) {
+                    record = (yacyNewsRecord) recordIterator.next();
                     if (record == null) continue;
+                    
                     seed = yacyCore.seedDB.getConnected(record.originator());
                     if (seed == null) seed = yacyCore.seedDB.getDisconnected(record.originator());
                     String category = record.category();
@@ -199,8 +200,10 @@ public class News {
                     prop.put("table_list_" + i + "_link", link);
                     prop.put("table_list_" + i + "_title", title);
                     prop.put("table_list_" + i + "_description", description);
-                } catch (IOException e) {e.printStackTrace();}
-                prop.put("table_list", maxCount);
+                    
+                    i++;
+                }
+                prop.put("table_list", i);
             }
         }
         

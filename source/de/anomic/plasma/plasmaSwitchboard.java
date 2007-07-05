@@ -1974,6 +1974,12 @@ public final class plasmaSwitchboard extends serverAbstractSwitch implements ser
                 log.logFine("Cleaning Incoming News, " + yacyCore.newsPool.size(yacyNewsPool.INCOMING_DB) + " entries on stack");
                 if (yacyCore.newsPool.automaticProcess() > 0) hasDoneSomething = true;
             } catch (IOException e) {}
+            if (getConfigBool("cleanup.deletionProcessedNews", true)) {
+                yacyCore.newsPool.clear(yacyNewsPool.PROCESSED_DB);
+            }
+            if (getConfigBool("cleanup.deletionPublishedNews", true)) {
+                yacyCore.newsPool.clear(yacyNewsPool.PUBLISHED_DB);
+            }
             
             // clean up seed-dbs
             if(getConfigBool("routing.deleteOldSeeds.permission",true)) {

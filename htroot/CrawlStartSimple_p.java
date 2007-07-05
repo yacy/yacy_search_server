@@ -24,8 +24,8 @@
 // along with this program; if not, write to the Free Software
 // Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 
-import java.io.IOException;
 import java.util.Enumeration;
+import java.util.Iterator;
 
 import de.anomic.http.httpHeader;
 import de.anomic.plasma.plasmaURL;
@@ -101,56 +101,50 @@ public class CrawlStartSimple_p {
         boolean dark = true;   
         
         // create other peer crawl table using YaCyNews
-        int availableNews = yacyCore.newsPool.size(yacyNewsPool.INCOMING_DB);
+        Iterator recordIterator = yacyCore.newsPool.recordIterator(yacyNewsPool.INCOMING_DB, true);
         int showedCrawl = 0;
         yacyNewsRecord record;
         yacySeed peer;
         String peername;
-        try {
-            for (int c = 0; c < availableNews; c++) {
-                record = yacyCore.newsPool.get(yacyNewsPool.INCOMING_DB, c);
-                if (record == null) continue;
-                if (record.category().equals(yacyNewsPool.CATEGORY_CRAWL_START)) {
-                    peer = yacyCore.seedDB.get(record.originator());
-                    if (peer == null) peername = record.originator(); else peername = peer.getName();
-                    prop.put("otherCrawlStartInProgress_" + showedCrawl + "_dark", ((dark) ? 1 : 0));
-                    prop.put("otherCrawlStartInProgress_" + showedCrawl + "_cre", record.created());
-                    prop.put("otherCrawlStartInProgress_" + showedCrawl + "_peername", peername);
-                    prop.put("otherCrawlStartInProgress_" + showedCrawl + "_startURL", record.attributes().get("startURL").toString());
-                    prop.put("otherCrawlStartInProgress_" + showedCrawl + "_intention", record.attributes().get("intention").toString());
-                    prop.put("otherCrawlStartInProgress_" + showedCrawl + "_generalDepth", record.attributes().get("generalDepth"));
-                    prop.put("otherCrawlStartInProgress_" + showedCrawl + "_crawlingQ", (record.attributes().get("crawlingQ").equals("true")) ? 1 : 0);
-                    showedCrawl++;
-                    if (showedCrawl > 20) break;
-                }
-                
+        while (recordIterator.hasNext()) {
+            record = (yacyNewsRecord) recordIterator.next();
+            if (record == null) continue;
+            if (record.category().equals(yacyNewsPool.CATEGORY_CRAWL_START)) {
+                peer = yacyCore.seedDB.get(record.originator());
+                if (peer == null) peername = record.originator(); else peername = peer.getName();
+                prop.put("otherCrawlStartInProgress_" + showedCrawl + "_dark", ((dark) ? 1 : 0));
+                prop.put("otherCrawlStartInProgress_" + showedCrawl + "_cre", record.created());
+                prop.put("otherCrawlStartInProgress_" + showedCrawl + "_peername", peername);
+                prop.put("otherCrawlStartInProgress_" + showedCrawl + "_startURL", record.attributes().get("startURL").toString());
+                prop.put("otherCrawlStartInProgress_" + showedCrawl + "_intention", record.attributes().get("intention").toString());
+                prop.put("otherCrawlStartInProgress_" + showedCrawl + "_generalDepth", record.attributes().get("generalDepth"));
+                prop.put("otherCrawlStartInProgress_" + showedCrawl + "_crawlingQ", (record.attributes().get("crawlingQ").equals("true")) ? 1 : 0);
+                showedCrawl++;
+                if (showedCrawl > 20) break;
             }
-        } catch (IOException e) {}
+        }
         prop.put("otherCrawlStartInProgress", showedCrawl);
         
         // finished remote crawls
-        availableNews = yacyCore.newsPool.size(yacyNewsPool.PROCESSED_DB);
+        recordIterator = yacyCore.newsPool.recordIterator(yacyNewsPool.PROCESSED_DB, true);
         showedCrawl = 0;
-        try {
-            for (int c = 0; c < availableNews; c++) {
-                record = yacyCore.newsPool.get(yacyNewsPool.PROCESSED_DB, c);
-                if (record == null) continue;
-                if (record.category().equals(yacyNewsPool.CATEGORY_CRAWL_START)) {
-                    peer = yacyCore.seedDB.get(record.originator());
-                    if (peer == null) peername = record.originator(); else peername = peer.getName();
-                    prop.put("otherCrawlStartFinished_" + showedCrawl + "_dark", ((dark) ? 1 : 0));
-                    prop.put("otherCrawlStartFinished_" + showedCrawl + "_cre", record.created());
-                    prop.put("otherCrawlStartFinished_" + showedCrawl + "_peername", peername);
-                    prop.put("otherCrawlStartFinished_" + showedCrawl + "_startURL", record.attributes().get("startURL").toString());
-                    prop.put("otherCrawlStartFinished_" + showedCrawl + "_intention", record.attributes().get("intention").toString());
-                    prop.put("otherCrawlStartFinished_" + showedCrawl + "_generalDepth", record.attributes().get("generalDepth"));
-                    prop.put("otherCrawlStartFinished_" + showedCrawl + "_crawlingQ", (record.attributes().get("crawlingQ").equals("true")) ? 1 : 0);
-                    showedCrawl++;
-                    if (showedCrawl > 20) break;
-                }
-                
+        while (recordIterator.hasNext()) {
+            record = (yacyNewsRecord) recordIterator.next();
+            if (record == null) continue;
+            if (record.category().equals(yacyNewsPool.CATEGORY_CRAWL_START)) {
+                peer = yacyCore.seedDB.get(record.originator());
+                if (peer == null) peername = record.originator(); else peername = peer.getName();
+                prop.put("otherCrawlStartFinished_" + showedCrawl + "_dark", ((dark) ? 1 : 0));
+                prop.put("otherCrawlStartFinished_" + showedCrawl + "_cre", record.created());
+                prop.put("otherCrawlStartFinished_" + showedCrawl + "_peername", peername);
+                prop.put("otherCrawlStartFinished_" + showedCrawl + "_startURL", record.attributes().get("startURL").toString());
+                prop.put("otherCrawlStartFinished_" + showedCrawl + "_intention", record.attributes().get("intention").toString());
+                prop.put("otherCrawlStartFinished_" + showedCrawl + "_generalDepth", record.attributes().get("generalDepth"));
+                prop.put("otherCrawlStartFinished_" + showedCrawl + "_crawlingQ", (record.attributes().get("crawlingQ").equals("true")) ? 1 : 0);
+                showedCrawl++;
+                if (showedCrawl > 20) break;
             }
-        } catch (IOException e) {}
+        }
         prop.put("otherCrawlStartFinished", showedCrawl);
 
         

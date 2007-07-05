@@ -46,10 +46,10 @@
 // javac -classpath .:../classes Network.java
 // if the shell's current path is HTROOT
 
-import java.io.IOException;
 import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Iterator;
 import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -269,25 +269,22 @@ public class Network {
                     final HashMap updatedWiki = new HashMap();
                     final HashMap updatedBlog = new HashMap();
                     final HashMap isCrawling = new HashMap();
-                    int availableNews = yacyCore.newsPool.size(yacyNewsPool.INCOMING_DB);
-                    if (availableNews > 300) { availableNews = 300; }
                     yacyNewsRecord record;
-                    try {
-                        for (int c = availableNews - 1; c >= 0; c--) {
-                            record = yacyCore.newsPool.get(yacyNewsPool.INCOMING_DB, c);
-                            if (record == null) {
-                                break;
-                            } else if (record.category().equals(yacyNewsPool.CATEGORY_PROFILE_UPDATE)) {
-                                updatedProfile.add(record.originator());
-                            } else if (record.category().equals(yacyNewsPool.CATEGORY_WIKI_UPDATE)) {
-                                updatedWiki.put(record.originator(), record.attributes());
-                            } else if (record.category().equals(yacyNewsPool.CATEGORY_BLOG_ADD)) {
-                                updatedBlog.put(record.originator(), record.attributes());
-                            } else if (record.category().equals(yacyNewsPool.CATEGORY_CRAWL_START)) {
-                                isCrawling.put(record.originator(), record.attributes().get("startURL"));
-                            }
+                    Iterator recordIterator = yacyCore.newsPool.recordIterator(yacyNewsPool.INCOMING_DB, true);
+                    while (recordIterator.hasNext()) {
+                        record = (yacyNewsRecord) recordIterator.next();
+                        if (record == null) {
+                            continue;
+                        } else if (record.category().equals(yacyNewsPool.CATEGORY_PROFILE_UPDATE)) {
+                            updatedProfile.add(record.originator());
+                        } else if (record.category().equals(yacyNewsPool.CATEGORY_WIKI_UPDATE)) {
+                            updatedWiki.put(record.originator(), record.attributes());
+                        } else if (record.category().equals(yacyNewsPool.CATEGORY_BLOG_ADD)) {
+                            updatedBlog.put(record.originator(), record.attributes());
+                        } else if (record.category().equals(yacyNewsPool.CATEGORY_CRAWL_START)) {
+                            isCrawling.put(record.originator(), record.attributes().get("startURL"));
                         }
-                    } catch (IOException e) {}
+                    }
 
                     boolean dark = true;
                     yacySeed seed;

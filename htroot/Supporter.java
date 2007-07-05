@@ -176,9 +176,10 @@ public class Supporter {
     private static void accumulateVotes(HashMap negativeHashes, HashMap positiveHashes, int dbtype) {
         int maxCount = Math.min(1000, yacyCore.newsPool.size(dbtype));
         yacyNewsRecord record;
-        
-        for (int j = 0; j < maxCount; j++) try {
-            record = yacyCore.newsPool.get(dbtype, j);
+        Iterator recordIterator = yacyCore.newsPool.recordIterator(dbtype, true);
+        int j = 0;
+        while ((recordIterator.hasNext()) && (j++ < maxCount)) {
+            record = (yacyNewsRecord) recordIterator.next();
             if (record == null) continue;
             
             if (record.category().equals(yacyNewsPool.CATEGORY_SURFTIPP_VOTE_ADD)) {
@@ -196,7 +197,7 @@ public class Supporter {
                     else positiveHashes.put(urlhash, new Integer(i.intValue() + factor));
                 }
             }
-        } catch (IOException e) {e.printStackTrace();}
+        }
     }
     
     private static void accumulateSupporter(
@@ -204,18 +205,20 @@ public class Supporter {
             HashMap negativeHashes, HashMap positiveHashes, int dbtype) {
         int maxCount = Math.min(1000, yacyCore.newsPool.size(dbtype));
         yacyNewsRecord record;
+        Iterator recordIterator = yacyCore.newsPool.recordIterator(dbtype, true);
+        int j = 0;
         String url = "", urlhash;
         kelondroRow.Entry entry;
         int score = 0;
         Integer vote;
         yacySeed seed;
-        for (int j = 0; j < maxCount; j++) try {
-            record = yacyCore.newsPool.get(dbtype, j);
+        while ((recordIterator.hasNext()) && (j++ < maxCount)) {
+            record = (yacyNewsRecord) recordIterator.next();
             if (record == null) continue;
             
             entry = null;
             if ((record.category().equals(yacyNewsPool.CATEGORY_PROFILE_UPDATE)) &&
-                ((seed = yacyCore.seedDB.getConnected(record.originator())) != null)) {
+                ((seed = yacyCore.seedDB.getConnected(record.originator())) != null)) try {
                 url = record.attribute("homepage", "");
                 if (url.length() < 12) continue;
                 entry = rowdef.newEntry(new byte[][]{
@@ -225,10 +228,10 @@ public class Supporter {
                                 record.id().getBytes()
                         });
                 score = 1 + timeFactor(record.created());
-            }
+            } catch (IOException e) {}
 
             if ((record.category().equals(yacyNewsPool.CATEGORY_PROFILE_BROADCAST)) &&
-                ((seed = yacyCore.seedDB.getConnected(record.originator())) != null)) {
+                ((seed = yacyCore.seedDB.getConnected(record.originator())) != null)) try {
                 url = record.attribute("homepage", "");
                 if (url.length() < 12) continue;
                 entry = rowdef.newEntry(new byte[][]{
@@ -238,7 +241,7 @@ public class Supporter {
                                 record.id().getBytes()
                         });
                 score = 1 + timeFactor(record.created());
-            }
+            } catch (IOException e) {}
 
             // add/subtract votes and write record
             if (entry != null) {
@@ -264,7 +267,7 @@ public class Supporter {
                 }
             }
             
-        } catch (IOException e) {e.printStackTrace();}
+        }
         
     }
     

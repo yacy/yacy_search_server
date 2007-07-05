@@ -47,6 +47,7 @@ package de.anomic.yacy;
 import java.io.File;
 import java.io.IOException;
 import java.util.HashSet;
+import java.util.Iterator;
 import java.util.Map;
 
 import de.anomic.net.URL;
@@ -286,6 +287,12 @@ public class yacyNewsPool {
         return newsDB.size();
     }
     
+    public Iterator recordIterator(int dbKey, boolean up) {
+        // returns an iterator of yacyNewsRecord-type objects
+        yacyNewsQueue queue = switchQueue(dbKey);
+        return queue.records(up);
+    }
+    
     public void publishMyNews(yacyNewsRecord record) {
         // this shall be called if our peer generated a new news record and wants to publish it
         try {
@@ -395,6 +402,7 @@ public class yacyNewsPool {
         return false;
     }
     
+    /*
     public yacyNewsRecord get(int dbKey, int element) throws IOException {
         yacyNewsQueue queue = switchQueue(dbKey);
         yacyNewsRecord record = null;
@@ -410,6 +418,7 @@ public class yacyNewsPool {
         }
         return record;
     }
+    */
     
     public synchronized yacyNewsRecord getSpecific(int dbKey, String category, String key, String value) throws IOException {
         yacyNewsQueue queue = switchQueue(dbKey);
