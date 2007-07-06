@@ -90,6 +90,7 @@ public class kelondroMapObjects extends kelondroObjects {
             long valuel;
             double valued;
             Map map;
+            this.elementCount = 0;
             while (it.hasNext()) {
                 mapname = (String) it.next();
                 map = getMap(mapname);
@@ -167,6 +168,7 @@ public class kelondroMapObjects extends kelondroObjects {
             	}
             }
         }
+        this.elementCount = 0;
     }
     
     public synchronized void set(String key, Map newMap) throws IOException {
