@@ -1114,8 +1114,8 @@ public final class httpc {
             httpHeader requestHeader,
             File download
     ) throws IOException {
-    	// if download == null, the get result is stored to a byte[]Êand returned,
-    	// othervise the get is streamed to the file and null is returned
+    	// if download == null, the get result is stored to a byte[] and returned,
+    	// otherwise the get is streamed to the file and null is returned
         if (requestHeader == null) requestHeader = new httpHeader();
         
         // setting host authorization header
