@@ -1,0 +1,47 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <title>YaCy '#[clientname]#': System Update</title>
+    #%env/templates/metas.template%#
+    <meta http-equiv="REFRESH" content="30" />
+  </head>
+  <body style="margin:0px;">
+    #%env/templates/header.template%#
+    #%env/templates/submenuConfig.template%#
+	<h2>System Update</h2>
+	
+    #(candeploy)#::
+      <fieldset>
+      <legend>System Update</legend>
+      <dl>
+      <dt>Available Releases</dt>
+      <dd><form action="ConfigUpdate_p.html" method="get">
+        &nbsp;<select name="releasedownload">
+        #{availreleases}#
+        <option #(selected)#::selected#(/selected)# value="#[url]#">#[name]#</option>
+        #{/availreleases}#
+        </select>
+    	&nbsp;&nbsp;<button type="submit" name="downloadRelease" value="DownloadRelease">
+          <img src="/env/grafics/lock.gif" alt="" />
+          Download Release
+        </button><br><br>
+      </form></dd>
+      <dt>Downloaded Releases</dt>
+      <dd><form action="Steering.html" method="get">
+        &nbsp;<select name="releaseinstall">
+        #{downloadedreleases}#
+        <option #(selected)#::selected#(/selected)# value="#[file]#">#[name]#</option>
+        #{/downloadedreleases}#
+        </select>#(deployenabled)#::no&nbsp;automated installation on development environments::
+    	&nbsp;&nbsp;<button type="submit" name="update" value="InstallRelease">
+          <img src="/env/grafics/lock.gif" alt="" />
+          Install Release
+        </button>#(/deployenabled)#
+      </form></dd>
+      </dl>
+      </fieldset>
+    #(/candeploy)#
+    
+    #%env/templates/footer.template%#
+  </body>
+</html>

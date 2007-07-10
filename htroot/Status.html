@@ -1,17 +1,19 @@
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml">
   <head>
-    <title>YaCy '#[clientname]#': Status</title>
+    <title>YaCy '#[clientname]#': Console Status</title>
     #%env/templates/metas.template%#
     <meta http-equiv="REFRESH" content="30" />
   </head>
   <body style="margin:0px;">
     #%env/templates/header.template%#
+    #%env/templates/submenuConfig.template%#
     <!--[if IE]>
     <div class="gainlayout">
     <![endif]-->
     
-    <div class="welcome"><center><h2>Welcome to YaCy!</h2></center>
+    <div class="welcome">
+    <center><h2>Welcome to YaCy!</h2></center>
     
     <dl>
     
@@ -133,51 +135,6 @@
     </div>
     
     <div class="sidebar">
-    
-    <form action="Steering.html" method="get" class="PeerControl">
-      <fieldset>
-        <button type="submit" name="restart" value="Restart">
-          <img src="/env/grafics/lock.gif" alt="Only the administrator may restart this peer" />
-          Restart
-        </button>
-        <button type="submit" name="shutdown" value="Shutdown">
-          <img src="/env/grafics/lock.gif" alt="Only the administrator may shutdown this peer" />
-          Shutdown
-        </button>
-      </fieldset>
-    </form>
-    
-    #(candeploy)#::
-      <fieldset>
-      <legend>System Update</legend>
-      <dl>
-      <dt>Available Releases</dt>
-      <dd><form action="Status.html" method="get">
-        &nbsp;<select name="releasedownload">
-        #{availreleases}#
-        <option #(selected)#::selected#(/selected)# value="#[url]#">#[name]#</option>
-        #{/availreleases}#
-        </select>
-    	&nbsp;&nbsp;<button type="submit" name="downloadRelease" value="DownloadRelease">
-          <img src="/env/grafics/lock.gif" alt="" />
-          Download Release
-        </button><br><br>
-      </form></dd>
-      <dt>Downloaded Releases</dt>
-      <dd><form action="Steering.html" method="get">
-        &nbsp;<select name="releaseinstall">
-        #{downloadedreleases}#
-        <option #(selected)#::selected#(/selected)# value="#[file]#">#[name]#</option>
-        #{/downloadedreleases}#
-        </select>#(deployenabled)#::no&nbsp;automated installation on development environments::
-    	&nbsp;&nbsp;<button type="submit" name="update" value="InstallRelease">
-          <img src="/env/grafics/lock.gif" alt="" />
-          Install Release
-        </button>#(/deployenabled)#
-      </form></dd>
-      </dl>
-      </fieldset>
-    #(/candeploy)#
     
     <fieldset>
     <legend>Public System Properties</legend>

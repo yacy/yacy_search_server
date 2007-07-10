@@ -44,26 +44,22 @@
     </ul>
   </li>
   <li class="menugroup" id="menugroupPeerControl">
-    <h3>Peer Configuration</h3>
+    <h3>Peer Control</h3>
     <ul class="menu">
-      <li><a href="/Status.html" accesskey="t" class="MenuItemLink">Status &amp; Shutdown</a></li>
-      <li><a href="/ConfigBasic.html" class="MenuItemLink lock">Basic Configuration</a></li>
-      <li><a href="/Settings_p.html" class="MenuItemLink lock">Advanced Settings</a></li>
-      <li><a href="/User_p.html" class="MenuItemLink lock">User Administration</a></li>
-      <li><a href="/PerformanceQueues_p.html" class="MenuItemLink lock">Performance</a></li>
+      <li><a href="/Status.html" accesskey="t" class="MenuItemLink">Admin Console</a></li>
+      <li><a href="/Steering.html?restart=" class="MenuItemLink lock">Re-Start</a></li>
+      <li><a href="/Steering.html?shutdown=" class="MenuItemLink lock">Shutdown</a></li>
     </ul>
   </li>
   <li class="menugroup" id="menugroupTheProjekt">
     <h3>The Project</h3>
     <ul class="menu">
       <li><a href="http://www.yacy.net/yacy/" class="MenuItemLink">Project Home</a></li>
-      <li><a href="http://www.yacy.net/yacy/News.html" class="MenuItemLink">Project News</a></li>
       <li><a href="http://forum.yacy.de" class="MenuItemLink">Deutsches Forum</a></li>
       <li><a href="http://yacy-forum.huzzaar.com" class="MenuItemLink">English Forum</a></li>
       <li><a href="http://www.yacy.net/yacy/Download.html" class="MenuItemLink">Download YaCy</a></li>
       <li><a href="http://www.yacy-websuche.de/wiki/index.php/Hauptseite" class="MenuItemLink">YaCy Project Wiki</a></li>
       <li><a href="http://www.yacystats.de" class="MenuItemLink">YaCy Community Statistics</a></li>
-      <li><a href="http://www.yacy.net/yacy/Contact.html" class="MenuItemLink">Contact YaCy Developer</a></li>
     </ul>
   </li>
 </ul>

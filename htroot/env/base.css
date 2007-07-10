@@ -332,6 +332,7 @@ h2.yacy { /* The heading in index.html */
 }
 
 div.welcome { /* The heading in Status.html */
+  clear:left;
   float:left;
   margin:10px 0;
   padding-top:130px;
@@ -358,7 +359,7 @@ li.menugroup h3{
 	margin: 0; padding: 1px 10px;
 }
 
-div.SubMenugroup h3{
+div.SubMenugroup h3 {
   font-size:1em;
   font-weight:bold;
   margin:0;
@@ -439,7 +440,7 @@ a.deletelink:hover, div.searchresults:hover a.deletelink, div.searchresults.hove
   background:url(/env/grafics/minus.gif) center center no-repeat;
 }
 
-ul.SubMenu a.MenuItemLink{
+ul.SubMenu a.MenuItemLink {
   margin-top:0;
 }
 
@@ -487,6 +488,7 @@ ul.tagList {
 
 
 ul.menu, ul.SubMenu {
+  clear:left;
   padding:0;
   margin:0;
 }

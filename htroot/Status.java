@@ -46,12 +46,9 @@
 // javac -classpath .:../Classes Status.java
 // if the shell's current path is HTROOT
 
-import java.io.File;
 import java.io.IOException;
 import java.text.DecimalFormat;
 import java.util.Date;
-import java.util.Iterator;
-import java.util.TreeSet;
 
 import de.anomic.http.httpHeader;
 import de.anomic.http.httpd;
@@ -64,7 +61,6 @@ import de.anomic.server.serverDate;
 import de.anomic.server.serverMemory;
 import de.anomic.server.serverObjects;
 import de.anomic.server.serverSwitch;
-import de.anomic.server.serverSystem;
 import de.anomic.yacy.yacyCore;
 import de.anomic.yacy.yacySeed;
 import de.anomic.yacy.yacyVersion;
@@ -160,92 +156,11 @@ public class Status {
         // version information
         String versionstring = yacy.combined2prettyVersion(sb.getConfig("version","0.1"));
         prop.put("versionpp", versionstring);
-        boolean devenvironment = versionstring.startsWith("dev");
         double thisVersion = Double.parseDouble(sb.getConfig("version","0.1"));
+        
         // cut off the SVN Rev in the Version
         try {thisVersion = Math.round(thisVersion*1000.0)/1000.0;} catch (NumberFormatException e) {}
 
-        if (serverSystem.canExecUnix) {
-            // we can deploy a new system with (i.e.)
-            // cd DATA/RELEASE;tar xfz $1;cp -Rf yacy/* ../../;rm -Rf yacy
-            
-            // list downloaded releases
-            yacyVersion release, dflt;
-            String[] downloaded = sb.releasePath.list();
-            prop.put("candeploy", 1);
-            prop.put("candeploy_deployenabled", (downloaded.length == 0) ? 0 : ((devenvironment) ? 1 : 2)); // prevent that a developer-version is over-deployed
-            
-            TreeSet downloadedreleases = new TreeSet();
-            for (int j = 0; j < downloaded.length; j++) {
-                try {
-                    release = (yacyVersion) new yacyVersion(downloaded[j]);
-                    downloadedreleases.add(release);
-                } catch (RuntimeException e) {
-                    // not a valid release
-                    new File(sb.releasePath, downloaded[j]).deleteOnExit(); // can be also a restart- or deploy-file
-                }
-            }
-            dflt = (downloadedreleases.size() == 0) ? null : (yacyVersion) downloadedreleases.last();
-            Iterator i = downloadedreleases.iterator();
-            int relcount = 0;
-            while (i.hasNext()) {
-                release = (yacyVersion) i.next();
-                prop.put("candeploy_downloadedreleases_" + relcount + "_name", (release.proRelease ? "pro" : "standard") + "/" + ((release.mainRelease) ? "main" : "dev") + " " + release.releaseNr + "/" + release.svn);
-                prop.put("candeploy_downloadedreleases_" + relcount + "_file", release.name);
-                prop.put("candeploy_downloadedreleases_" + relcount + "_selected", (release == dflt) ? 1 : 0);
-                relcount++;
-            }
-            prop.put("candeploy_downloadedreleases", relcount);
-
-            // list remotely available releases
-            TreeSet[] releasess = yacyVersion.allReleases(); // {0=promain, 1=prodev, 2=stdmain, 3=stddev}
-            relcount = 0;
-            // main
-            TreeSet releases = releasess[(yacy.pro) ? 0 : 2];
-            releases.removeAll(downloadedreleases);
-            i = releases.iterator();
-            while (i.hasNext()) {
-                release = (yacyVersion) i.next();
-                prop.put("candeploy_availreleases_" + relcount + "_name", (release.proRelease ? "pro" : "standard") + "/" + ((release.mainRelease) ? "main" : "dev") + " " + release.releaseNr + "/" + release.svn);
-                prop.put("candeploy_availreleases_" + relcount + "_url", release.url.toString());
-                prop.put("candeploy_availreleases_" + relcount + "_selected", 0);
-                relcount++;
-            }
-            // dev
-            dflt = (releasess[(yacy.pro) ? 1 : 3].size() == 0) ? null : (yacyVersion) releasess[(yacy.pro) ? 1 : 3].last();
-            releases = releasess[(yacy.pro) ? 1 : 3];
-            releases.removeAll(downloadedreleases);
-            i = releases.iterator();
-            while (i.hasNext()) {
-                release = (yacyVersion) i.next();
-                prop.put("candeploy_availreleases_" + relcount + "_name", (release.proRelease ? "pro" : "standard") + "/" + ((release.mainRelease) ? "main" : "dev") + " " + release.releaseNr + "/" + release.svn);
-                prop.put("candeploy_availreleases_" + relcount + "_url", release.url.toString());
-                prop.put("candeploy_availreleases_" + relcount + "_selected", (release == dflt) ? 1 : 0);
-                relcount++;
-            }
-            prop.put("candeploy_availreleases", relcount);
-        } else {
-            prop.put("candeploy", 0);
-        }
-        
-        /*
-        if ((adminaccess) && (yacyVersion.latestRelease >= (thisVersion+0.01))) { // only new Versions(not new SVN)
-            if ((yacyVersion.latestMainRelease != null) ||
-                (yacyVersion.latestDevRelease != null)) {
-                prop.put("hintVersionDownload", 1);
-            } else if ((post != null) && (post.containsKey("aquirerelease"))) {
-                yacyVersion.aquireLatestReleaseInfo();
-                prop.put("hintVersionDownload", 1);
-            } else {
-                prop.put("hintVersionAvailable", 1);
-            }
-        }
-        prop.put("hintVersionAvailable", 1); // for testing
-        
-        prop.putASIS("hintVersionDownload_versionResMain", (yacyVersion.latestMainRelease == null) ? "-" : yacyVersion.latestMainRelease.toAnchor());
-        prop.putASIS("hintVersionDownload_versionResDev", (yacyVersion.latestDevRelease == null) ? "-" : yacyVersion.latestDevRelease.toAnchor());
-        prop.put("hintVersionAvailable_latestVersion", Double.toString(yacyVersion.latestRelease));
-         */
         // place some more hints
         if ((adminaccess) && (sb.getThread(plasmaSwitchboard.CRAWLJOB_LOCAL_CRAWL).getJobCount() == 0) && (sb.getThread(plasmaSwitchboard.INDEXER).getJobCount() == 0)) {
             prop.put("hintCrawlStart", 1);
@@ -254,8 +169,6 @@ public class Status {
         if ((adminaccess) && (sb.getThread(plasmaSwitchboard.CRAWLJOB_LOCAL_CRAWL).getJobCount() > 500)) {
             prop.put("hintCrawlMonitor", 1);
         }
-        
-        
         
         // hostname and port
         String extendedPortString = sb.getConfig("port", "8080");

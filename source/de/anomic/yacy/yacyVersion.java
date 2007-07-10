@@ -63,6 +63,9 @@ public final class yacyVersion implements Comparator, Comparable {
     private static HashMap /* URL:TreeSet[]*/ latestReleases = new HashMap();
     public  static ArrayList latestReleaseLocations /*string*/ = new ArrayList(); // will be initialized with value in yacy.network.unit
     
+    // private static release info about this release; is generated only once and can be retrieved by thisVersion()
+    private static yacyVersion thisVersion = null;
+    
     // class variables
     public float releaseNr;
     public String dateStamp;
@@ -124,6 +127,7 @@ public final class yacyVersion implements Comparator, Comparable {
     }
     
     public int compareTo(Object obj) {
+        // returns 0 if this object is equal to the obj, -1 if this is smaller than obj and 1 if this is greater than obj
         yacyVersion v = (yacyVersion) obj;
         return compare(this, v);
     }
@@ -150,12 +154,83 @@ public final class yacyVersion implements Comparator, Comparable {
         return "<a href=" + this.url.toNormalform() + ">YaCy " + ((this.proRelease) ? "pro release" : "standard release") + " v" + this.releaseNr + ", SVN " + this.svn + "</a>";
     }
     
-    public static TreeSet[] allReleases() {
+    // static methods:
+
+    public static final yacyVersion thisVersion() {
+        // construct a virtual release name for this release
+        if (thisVersion == null) {
+            plasmaSwitchboard sb = plasmaSwitchboard.getSwitchboard();
+            boolean pro = new File(sb.getRootPath(), "libx").exists();
+            thisVersion = new yacyVersion(
+                "yacy" + ((pro) ? "_pro" : "") +
+                "_v" + sb.getConfig("version", "0.1") + "_" +
+                sb.getConfig("vdate", "19700101") + "_" +
+                sb.getConfig("svnRevision", "0") + ".tar.gz");
+        }
+        return thisVersion;
+    }
+    
+    public static final boolean shallRetrieveUpdateInfo() {
+        // according to update properties, decide if we should retrieve update information
+        plasmaSwitchboard sb = plasmaSwitchboard.getSwitchboard();
+        
+        // check if update process allowes update retrieve
+        String process = sb.getConfig("update.process", "manual");
+        if (process.equals("manual")) return false; // no, its a manual process
+        
+        // check if the last retrieve time is a minimum time ago
+        long cycle = Math.max(1, sb.getConfigLong("update.cycle", 168)) * 24 * 60 * 60 * 1000;
+        long timeLookup = sb.getConfigLong("update.time.lookup", System.currentTimeMillis());
+        if (timeLookup + cycle > System.currentTimeMillis()) return false; // no we have recently made a lookup
+        
+        // ok, we may do a lookup
+        return true;
+    }
+    
+    public static final yacyVersion shallRetrieveReleaseAutomatically() {
+        // according to update properties, decide if we should retrieve update information
+        // if true, the release that can be obtained is returned.
+        // if false, null is returned
+        
+        plasmaSwitchboard sb = plasmaSwitchboard.getSwitchboard();
+        
+        // check if update process allowes automatic update retrieve
+        String process = sb.getConfig("update.process", "manual");
+        if (!process.equals("auto")) return null; // no, its a manual or guided process
+        
+        // check if we have a release info
+        if ((latestReleases == null) || (latestReleases.size() == 0)) return null; // no info available
+        
+        // check if we know that there is a release that is more recent that that which we are using
+        TreeSet[] releasess = yacyVersion.allReleases(true); // {0=promain, 1=prodev, 2=stdmain, 3=stddev}
+        boolean pro = new File(sb.getRootPath(), "libx").exists();
+        yacyVersion latestmain = (yacyVersion) releasess[(pro) ? 0 : 2].first();
+        yacyVersion latestdev  = (yacyVersion) releasess[(pro) ? 1 : 3].first();
+        String concept = sb.getConfig("update.concept", "any");
+        String blacklist = sb.getConfig("update.blacklist", ".\\...[123]");
+        if (concept.equals("any")) {
+            // return a dev-release or a main-release
+            if ((latestdev.compareTo(latestmain) > 0) && (!(Float.toString(latestdev.releaseNr).matches(blacklist)))) {
+                return (latestdev.compareTo(thisVersion()) > 0) ? latestdev : null;
+            } else {
+                if ((Float.toString(latestmain.releaseNr).matches(blacklist))) return null;
+                return (latestmain.compareTo(thisVersion()) > 0) ? latestmain : null;
+            }
+        }
+        if (concept.equals("main")) {
+            // return a main-release
+            if ((Float.toString(latestmain.releaseNr).matches(blacklist))) return null;
+            return (latestmain.compareTo(thisVersion()) > 0) ? latestmain : null; 
+        }
+        return null;
+    }
+    
+    public static TreeSet[] allReleases(boolean force) {
         // join the release infos
         // {promainreleases, prodevreleases, stdmainreleases, stddevreleases}
         Object[] a = new Object[latestReleaseLocations.size()];
         for (int j = 0; j < latestReleaseLocations.size(); j++) {
-            a[j] = getReleases((URL) latestReleaseLocations.get(j));
+            a[j] = getReleases((URL) latestReleaseLocations.get(j), force);
         }
         TreeSet[] r = new TreeSet[4];
         TreeSet s;
@@ -169,11 +244,12 @@ public final class yacyVersion implements Comparator, Comparable {
         return r;
     }
     
-    private static TreeSet[] getReleases(URL location) {
+    private static TreeSet[] getReleases(URL location, boolean force) {
         // get release info from a internet resource
         // {promainreleases, prodevreleases, stdmainreleases, stddevreleases} 
         TreeSet[] latestRelease = (TreeSet[]) latestReleases.get(location);
-        if ((latestRelease == null) ||
+        if (force ||
+            (latestRelease == null) ||
             ((latestRelease[0].size() == 0) &&
              (latestRelease[1].size() == 0) &&
              (latestRelease[2].size() == 0) &&
@@ -223,6 +299,7 @@ public final class yacyVersion implements Comparator, Comparable {
                 continue;
             }
         }
+        plasmaSwitchboard.getSwitchboard().setConfig("update.time.lookup", System.currentTimeMillis());
         return new TreeSet[] {promainreleases, prodevreleases, stdmainreleases, stddevreleases} ;
     }
     
@@ -241,13 +318,16 @@ public final class yacyVersion implements Comparator, Comparable {
                 download
         );
         if ((!download.exists()) || (download.length() == 0)) throw new IOException("wget of url " + release.url + " failed");
+        plasmaSwitchboard.getSwitchboard().setConfig("update.time.download", System.currentTimeMillis());
     }
     
     
     public static void restart() {
+        plasmaSwitchboard sb = plasmaSwitchboard.getSwitchboard();
+        
         if (System.getProperty("os.name").toLowerCase().startsWith("win")) {
             // create yacy.restart file which is used in Windows startscript
-            final File yacyRestart = new File(plasmaSwitchboard.getSwitchboard().getRootPath(), "DATA/yacy.restart");
+            final File yacyRestart = new File(sb.getRootPath(), "DATA/yacy.restart");
             if (!yacyRestart.exists()) {
                 try {
                     yacyRestart.createNewFile();
@@ -264,18 +344,18 @@ public final class yacyVersion implements Comparator, Comparable {
             try {
                 serverLog.logInfo("RESTART", "INITIATED");
                 String script =
-                    "cd " + plasmaSwitchboard.getSwitchboard().getRootPath() + "/DATA/RELEASE/" + serverCore.lfstring +
+                    "cd " + sb.getRootPath() + "/DATA/RELEASE/" + serverCore.lfstring +
                     "while [ -e ../yacy.running ]; do" + serverCore.lfstring +
                     "sleep 1" + serverCore.lfstring +
                     "done" + serverCore.lfstring +
                     "cd ../../" + serverCore.lfstring +
                     "nohup ./startYACY.sh > /dev/null" + serverCore.lfstring;
-    			File scriptFile = new File(plasmaSwitchboard.getSwitchboard().getRootPath(), "DATA/RELEASE/restart.sh");
+    			File scriptFile = new File(sb.getRootPath(), "DATA/RELEASE/restart.sh");
                 serverSystem.deployScript(scriptFile, script);
                 serverLog.logInfo("RESTART", "wrote restart-script to " + scriptFile.getAbsolutePath());
                 serverSystem.execAsynchronous(scriptFile);
                 serverLog.logInfo("RESTART", "script is running");
-                plasmaSwitchboard.getSwitchboard().terminate(5000);
+                sb.terminate(5000);
             } catch (IOException e) {
                 serverLog.logSevere("RESTART", "restart failed", e);
             }
@@ -285,9 +365,10 @@ public final class yacyVersion implements Comparator, Comparable {
     public static void deployRelease(String release) {
         //byte[] script = ("cd " + plasmaSwitchboard.getSwitchboard().getRootPath() + ";while [ -e ../yacy.running ]; do sleep 1;done;tar xfz " + release + ";cp -Rf yacy/* ../../;rm -Rf yacy;cd ../../;startYACY.sh").getBytes();
         try {
+            plasmaSwitchboard sb = plasmaSwitchboard.getSwitchboard();
             serverLog.logInfo("UPDATE", "INITIATED");
             String script =
-                "cd " + plasmaSwitchboard.getSwitchboard().getRootPath() + "/DATA/RELEASE/" + serverCore.lfstring +
+                "cd " + sb.getRootPath() + "/DATA/RELEASE/" + serverCore.lfstring +
                 "tar xfz " + release + serverCore.lfstring +
                 "while [ -e ../yacy.running ]; do" + serverCore.lfstring +
                 "sleep 1" + serverCore.lfstring +
@@ -296,12 +377,13 @@ public final class yacyVersion implements Comparator, Comparable {
                 "rm -Rf yacy" + serverCore.lfstring +
                 "cd ../../" + serverCore.lfstring +
                 "nohup ./startYACY.sh > /dev/null" + serverCore.lfstring;
-            File scriptFile = new File(plasmaSwitchboard.getSwitchboard().getRootPath(), "DATA/RELEASE/update.sh");
+            File scriptFile = new File(sb.getRootPath(), "DATA/RELEASE/update.sh");
             serverSystem.deployScript(scriptFile, script);
             serverLog.logInfo("UPDATE", "wrote update-script to " + scriptFile.getAbsolutePath());
             serverSystem.execAsynchronous(scriptFile);
             serverLog.logInfo("UPDATE", "script is running");
-            plasmaSwitchboard.getSwitchboard().terminate(5000);
+            sb.setConfig("update.time.deploy", System.currentTimeMillis());
+            sb.terminate(5000);
         } catch (IOException e) {
             serverLog.logSevere("UPDATE", "update failed", e);
         }

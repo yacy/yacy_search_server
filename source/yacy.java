@@ -133,14 +133,15 @@ import de.anomic.yacy.yacyVersion;
 */
 
 public final class yacy {
-    // static objects
-    private static String vString = "@REPL_VERSION@";
-    private static double version = 0.1;
-    public static  boolean pro;
     
-    private static final String vDATE   = "@REPL_DATE@";
-    private static final String copyright = "[ YaCy v" + vString + ", build " + vDATE + " by Michael Christen / www.yacy.net ]";
-    private static final String hline = "-------------------------------------------------------------------------------";
+    // static objects
+    public static final String vString = "@REPL_VERSION@";
+    public static double version = 0.1;
+    public static boolean pro;
+    
+    public static final String vDATE   = "@REPL_DATE@";
+    public static final String copyright = "[ YaCy v" + vString + ", build " + vDATE + " by Michael Christen / www.yacy.net ]";
+    public static final String hline = "-------------------------------------------------------------------------------";
    
     /**
      * a reference to the {@link plasmaSwitchboard} created by the

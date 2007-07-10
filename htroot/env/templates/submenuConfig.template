@@ -1,12 +1,27 @@
 <div class="SubMenu">
-  <h3>Peer Configuration Menu</h3>
+  <h3>Peer Administration Console</h3>
   <ul class="SubMenu">
-    <li><a href="/ConfigBasic.html" class="MenuItemLink lock">Basic Configuraton</a></li>
+    <li><a href="/Status.html" class="MenuItemLink lock">Status</a></li>
+    <li><a href="/ConfigBasic.html" class="MenuItemLink lock">Access Config</a></li>
     <li><a href="/ConfigLanguage_p.html" class="MenuItemLink lock">Language</a></li>
+    <li><a href="/ConfigProfile_p.html" class="MenuItemLink lock">Profile</a></li>
+    <li><a href="/ConfigSkins_p.html" class="MenuItemLink lock">Skins</a></li>
+    <li><a href="/ConfigUpdate_p.html" class="MenuItemLink lock">System Update</a></li>
+  </ul>
+</div>
+<div class="SubMenu">
+  <ul class="SubMenu">
     <li><a href="/ConfigNetwork_p.html" class="MenuItemLink lock">Network</a></li>
-    <li><a href="/ConfigProfile_p.html" class="MenuItemLink lock">Peer Profile</a></li>
-    <li><a href="/ConfigSkins_p.html" class="MenuItemLink lock">Interface Skins</a></li>
     <li><a href="/ConfigRobotsTxt_p.html" class ="MenuItemLink lock">Local robots.txt</a></li>
-    <li><a href="/ConfigAdvanced_p.html" class="MenuItemLink lock">Advanced</a></li>
+    <li><a href="/User_p.html" class="MenuItemLink lock">User Administration</a></li>
+    <li><a href="/Settings_p.html" class="MenuItemLink lock">Advanced Settings</a></li>
+    <li><a href="/ConfigProperties_p.html" class="MenuItemLink lock">Advanced Properties</a></li>
+  </ul>
+</div>
+<div class="SubMenu">
+  <ul class="SubMenu">
+    <li><a href="/PerformanceQueues_p.html" class="MenuItemLink lock">Queues Performance Settings</a></li>
+    <li><a href="/PerformanceMemory_p.html" class="MenuItemLink lock">Memory Settings for Database Caches</a></li>
+    <li><a href="/PerformanceSearch_p.html" class="MenuItemLink lock">Timing Settings for Search Sequence</a></li>
   </ul>
 </div>

@@ -73,6 +73,32 @@ server.maxTrackingTime = 3600000
 network.unit.definition = yacy.network.unit
 network.group.definition = yacy.network.group
 
+# Update process properties
+# The update server location is given in the network.unit.definition,
+# but the settings for update processing and cycles are individual.
+# the update process can be either 'manual' (no automatic lookup for new versions),
+# 'guided' (automatic lookup, but user is asked before update is performed',
+# or 'auto' (whenever an update is available, the update is loaded and installed)
+update.process = manual
+# the cycle value applies only if the process is automatic or guided. The value means hours.
+# There is currently a fixed minimum number of hours of 24 hours for updates
+update.cycle = 168
+# a version number blacklist can restrict automatic or guided updates to a specific
+# range of version numbers. The restriction is done with a blacklist (standard regexpr)
+# It is recommended to set this list to low developer version numbers
+update.blacklist = .\...[123]
+# a update can also restricted with a concept property, which can decide if an
+# update is only valid if it either is a main release or any svn release including new development releases
+# Valid keywords are 'main' and 'any'
+update.concept = any
+# the following values are set automatically:
+# the lookup time when the last time a lookup to the network update server(s) where done 
+update.time.lookup = 0
+# the download time when the last time a release was downloaded
+update.time.download = 0
+# the deploy time when the last update was done; milliseconds since epoch
+update.time.deploy = 0
+
 # clusters within a network:
 # every network can have an unlimited number of clusters. Clusters may be also completely
 # sealed and have no connection to other peers. When a cluster does not use the
