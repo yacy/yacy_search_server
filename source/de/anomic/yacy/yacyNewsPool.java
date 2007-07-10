@@ -402,30 +402,13 @@ public class yacyNewsPool {
         return false;
     }
     
-    /*
-    public yacyNewsRecord get(int dbKey, int element) throws IOException {
-        yacyNewsQueue queue = switchQueue(dbKey);
-        yacyNewsRecord record = null;
-        int s;
-        synchronized (queue) {
-            while ((record == null) && ((s = queue.size()) > 0)) {
-                record = queue.top(element);
-                if (record == null) {
-                    queue.pop(element);
-                    if (queue.size() == s) break;
-                }
-            }
-        }
-        return record;
-    }
-    */
-    
     public synchronized yacyNewsRecord getSpecific(int dbKey, String category, String key, String value) throws IOException {
         yacyNewsQueue queue = switchQueue(dbKey);
         yacyNewsRecord record;
         String s;
-        for (int i = queue.size() - 1; i >= 0; i--) {
-            record = queue.top(i);
+        Iterator i = queue.records(true);
+        while (i.hasNext()) {
+            record = (yacyNewsRecord) i.next();
             if ((record != null) && (record.category().equals(category))) {
                 s = (String) record.attributes().get(key);
                 if ((s != null) && (s.equals(value))) return record;

@@ -164,6 +164,7 @@ public class yacyNewsQueue {
     }
     
     public Iterator records(boolean up) {
+        // iterates yacyNewsRecord-type objects
         return new newsIterator(up);
     }
     
