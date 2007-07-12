@@ -3,16 +3,18 @@
   <head>
     <title>YaCy '#[clientname]#': System Update</title>
     #%env/templates/metas.template%#
-    <meta http-equiv="REFRESH" content="30" />
   </head>
   <body style="margin:0px;">
     #%env/templates/header.template%#
     #%env/templates/submenuConfig.template%#
 	<h2>System Update</h2>
 	
-    #(candeploy)#::
+    #(candeploy)#
+    This servlet can only be used on operation systems that are currently supported for deploy functions.
+    If you see this message this means that your operation sytem ist not supported.
+    ::
       <fieldset>
-      <legend>System Update</legend>
+      <legend>Manual System Update</legend>
       <dl>
       <dt>Available Releases</dt>
       <dd><form action="ConfigUpdate_p.html" method="get">
@@ -21,10 +23,7 @@
         <option #(selected)#::selected#(/selected)# value="#[url]#">#[name]#</option>
         #{/availreleases}#
         </select>
-    	&nbsp;&nbsp;<button type="submit" name="downloadRelease" value="DownloadRelease">
-          <img src="/env/grafics/lock.gif" alt="" />
-          Download Release
-        </button><br><br>
+    	&nbsp;&nbsp;<input type="submit" name="downloadRelease" value="DownloadRelease" />
       </form></dd>
       <dt>Downloaded Releases</dt>
       <dd><form action="Steering.html" method="get">
@@ -38,6 +37,52 @@
           Install Release
         </button>#(/deployenabled)#
       </form></dd>
+      </dl>
+      </fieldset>
+      
+      <form action="ConfigUpdate_p.html" method="get">
+      <fieldset>
+      <legend>Automated System Update</legend>
+      <dl>
+      
+      <dt>
+        manual update&nbsp;<input type="radio" name="updateMode" value="manual" #(manualUpdateChecked)#::checked="checked" #(/manualUpdateChecked)#/>&nbsp;
+      </dt>
+      <dd>
+        no automatic look-up, updates can be made manually using this interface (see options above)<br /><br />
+      </dd>
+      
+      <dt>
+        automatic update&nbsp;<input type="radio" name="updateMode" value="auto" #(autoUpdateChecked)#::checked="checked" #(/autoUpdateChecked)#/>&nbsp;
+      </dt>
+      <dd>
+        updates are made within fixed cycles:
+        <fieldset>
+        <dl>
+        <dt>Time beween lookup</dt>
+        <dd><input type="text" name="cycle" value="#[cycle]#" size="4" maxlength="4" />hours</dd>
+        <dt>Release blacklist</dt>
+        <dd><input type="text" name="blacklist" value="#[blacklist]#" size="20" maxlength="20" />(regex on release number strings)</dd>
+        <dt>Release type</dt>
+        <dd>
+          <input type="radio" name="releaseType" value="main" #(releaseTypeMainChecked)#::checked="checked" #(/releaseTypeMainChecked)#/>only main releases&nbsp;&nbsp;
+          <input type="radio" name="releaseType" value="any" #(releaseTypeAnyChecked)#::checked="checked" #(/releaseTypeAnyChecked)#/>any release including developer releases
+        </dd>
+        </dl>
+        </fieldset>
+      </dd>
+      <dt><input type="submit" name="configSubmit" value="Submit"></dt>
+      <dd>#(configCommit)#::<div class="commit">Accepted Changes.</div>#(/configCommit)#</dd>
+      </dl>
+      </fieldset>
+      </form>
+      
+      <fieldset>
+      <legend>System Update Statistics</legend>
+      <dl>
+      <dt>Last System Lookup</dt><dd><p>#(lastlookup)#never::#[time]##(/lastlookup)#</p></dd>
+      <dt>Last Release Download</dt><dd><p>#(lastdownload)#never::#[time]##(/lastdownload)#</p></dd>
+      <dt>Last Deploy</dt><dd><p>#(lastdeploy)#never::#[time]##(/lastdeploy)#</p></dd>
       </dl>
       </fieldset>
     #(/candeploy)#

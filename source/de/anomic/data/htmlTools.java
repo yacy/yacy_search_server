@@ -95,6 +95,7 @@ public class htmlTools {
     //patterns that will be replaced. To add new codes or patterns, just put them at the end
     //of the list. Codes or patterns in this list can not be escaped with [= or <pre>
     public static final String[] htmlentities={
+        "\\",    "&#092;",  // Backslash
         "\u005E","&#094;",  // Caret
 
         "\u0060","&#096;",  // Accent Grave `

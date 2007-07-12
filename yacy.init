@@ -86,7 +86,7 @@ update.cycle = 168
 # a version number blacklist can restrict automatic or guided updates to a specific
 # range of version numbers. The restriction is done with a blacklist (standard regexpr)
 # It is recommended to set this list to low developer version numbers
-update.blacklist = .\...[123]
+update.blacklist = ....[123]
 # a update can also restricted with a concept property, which can decide if an
 # update is only valid if it either is a main release or any svn release including new development releases
 # Valid keywords are 'main' and 'any'

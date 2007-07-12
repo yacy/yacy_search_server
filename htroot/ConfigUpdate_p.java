@@ -26,6 +26,7 @@
 
 import java.io.File;
 import java.io.IOException;
+import java.util.Date;
 import java.util.Iterator;
 import java.util.TreeSet;
 
@@ -44,6 +45,8 @@ public class ConfigUpdate_p {
         final serverObjects prop = new serverObjects();
         final plasmaSwitchboard sb = (plasmaSwitchboard) env;
 
+        prop.put("candeploy_configCommit", 0);
+        
         if (post != null) {
             if (post.containsKey("downloadRelease")) {
                 // download a release
@@ -57,79 +60,103 @@ public class ConfigUpdate_p {
                     }
                 }
             }
-            
+         
+            if (post.containsKey("configSubmit")) {
+                prop.put("candeploy_configCommit", 1);
+                sb.setConfig("update.process", (post.get("updateMode", "manual").equals("manual")) ? "manual" : "auto");
+                sb.setConfig("update.cycle", Math.max(12, post.getLong("cycle", 168)));
+                sb.setConfig("update.blacklist", post.get("blacklist", ""));
+                sb.setConfig("update.concept", (post.get("releaseType", "any").equals("any")) ? "any" : "main");
+            }
         }
-
+        
+        // set if this should be visible
+        if (serverSystem.canExecUnix) {
+            // we can deploy a new system with (i.e.)
+            // cd DATA/RELEASE;tar xfz $1;cp -Rf yacy/* ../../;rm -Rf yacy
+            prop.put("candeploy", 1);
+        } else {
+            prop.put("candeploy", 0);
+        }
+        
         // version information
-        String versionstring = yacy.combined2prettyVersion(sb.getConfig("version","0.1"));
+        String versionstring = yacyVersion.combined2prettyVersion(sb.getConfig("version","0.1"));
         prop.put("versionpp", versionstring);
         boolean devenvironment = versionstring.startsWith("dev");
         double thisVersion = Double.parseDouble(sb.getConfig("version","0.1"));
         // cut off the SVN Rev in the Version
         try {thisVersion = Math.round(thisVersion*1000.0)/1000.0;} catch (NumberFormatException e) {}
 
-        if (serverSystem.canExecUnix) {
-            // we can deploy a new system with (i.e.)
-            // cd DATA/RELEASE;tar xfz $1;cp -Rf yacy/* ../../;rm -Rf yacy
             
-            // list downloaded releases
-            yacyVersion release, dflt;
-            String[] downloaded = sb.releasePath.list();
-            prop.put("candeploy", 1);
-            prop.put("candeploy_deployenabled", (downloaded.length == 0) ? 0 : ((devenvironment) ? 1 : 2)); // prevent that a developer-version is over-deployed
+        // list downloaded releases
+        yacyVersion release, dflt;
+        String[] downloaded = sb.releasePath.list();
             
-            TreeSet downloadedreleases = new TreeSet();
-            for (int j = 0; j < downloaded.length; j++) {
-                try {
-                    release = (yacyVersion) new yacyVersion(downloaded[j]);
-                    downloadedreleases.add(release);
-                } catch (RuntimeException e) {
-                    // not a valid release
-                    new File(sb.releasePath, downloaded[j]).deleteOnExit(); // can be also a restart- or deploy-file
-                }
+        prop.put("candeploy_deployenabled", (downloaded.length == 0) ? 0 : ((devenvironment) ? 1 : 2)); // prevent that a developer-version is over-deployed
+          
+        TreeSet downloadedreleases = new TreeSet();
+        for (int j = 0; j < downloaded.length; j++) {
+            try {
+                release = (yacyVersion) new yacyVersion(downloaded[j]);
+                downloadedreleases.add(release);
+            } catch (RuntimeException e) {
+                // not a valid release
+                new File(sb.releasePath, downloaded[j]).deleteOnExit(); // can be also a restart- or deploy-file
             }
-            dflt = (downloadedreleases.size() == 0) ? null : (yacyVersion) downloadedreleases.last();
-            Iterator i = downloadedreleases.iterator();
-            int relcount = 0;
-            while (i.hasNext()) {
-                release = (yacyVersion) i.next();
-                prop.put("candeploy_downloadedreleases_" + relcount + "_name", (release.proRelease ? "pro" : "standard") + "/" + ((release.mainRelease) ? "main" : "dev") + " " + release.releaseNr + "/" + release.svn);
-                prop.put("candeploy_downloadedreleases_" + relcount + "_file", release.name);
-                prop.put("candeploy_downloadedreleases_" + relcount + "_selected", (release == dflt) ? 1 : 0);
-                relcount++;
-            }
-            prop.put("candeploy_downloadedreleases", relcount);
-
-            // list remotely available releases
-            TreeSet[] releasess = yacyVersion.allReleases(false); // {0=promain, 1=prodev, 2=stdmain, 3=stddev}
-            relcount = 0;
-            // main
-            TreeSet releases = releasess[(yacy.pro) ? 0 : 2];
-            releases.removeAll(downloadedreleases);
-            i = releases.iterator();
-            while (i.hasNext()) {
-                release = (yacyVersion) i.next();
-                prop.put("candeploy_availreleases_" + relcount + "_name", (release.proRelease ? "pro" : "standard") + "/" + ((release.mainRelease) ? "main" : "dev") + " " + release.releaseNr + "/" + release.svn);
-                prop.put("candeploy_availreleases_" + relcount + "_url", release.url.toString());
-                prop.put("candeploy_availreleases_" + relcount + "_selected", 0);
-                relcount++;
-            }
-            // dev
-            dflt = (releasess[(yacy.pro) ? 1 : 3].size() == 0) ? null : (yacyVersion) releasess[(yacy.pro) ? 1 : 3].last();
-            releases = releasess[(yacy.pro) ? 1 : 3];
-            releases.removeAll(downloadedreleases);
-            i = releases.iterator();
-            while (i.hasNext()) {
-                release = (yacyVersion) i.next();
-                prop.put("candeploy_availreleases_" + relcount + "_name", (release.proRelease ? "pro" : "standard") + "/" + ((release.mainRelease) ? "main" : "dev") + " " + release.releaseNr + "/" + release.svn);
-                prop.put("candeploy_availreleases_" + relcount + "_url", release.url.toString());
-                prop.put("candeploy_availreleases_" + relcount + "_selected", (release == dflt) ? 1 : 0);
-                relcount++;
-            }
-            prop.put("candeploy_availreleases", relcount);
-        } else {
-            prop.put("candeploy", 0);
         }
+        dflt = (downloadedreleases.size() == 0) ? null : (yacyVersion) downloadedreleases.last();
+        Iterator i = downloadedreleases.iterator();
+        int relcount = 0;
+        while (i.hasNext()) {
+            release = (yacyVersion) i.next();
+            prop.put("candeploy_downloadedreleases_" + relcount + "_name", (release.proRelease ? "pro" : "standard") + "/" + ((release.mainRelease) ? "main" : "dev") + " " + release.releaseNr + "/" + release.svn);
+            prop.put("candeploy_downloadedreleases_" + relcount + "_file", release.name);
+            prop.put("candeploy_downloadedreleases_" + relcount + "_selected", (release == dflt) ? 1 : 0);
+            relcount++;
+        }
+        prop.put("candeploy_downloadedreleases", relcount);
+
+        // list remotely available releases
+        TreeSet[] releasess = yacyVersion.allReleases(false); // {0=promain, 1=prodev, 2=stdmain, 3=stddev}
+        relcount = 0;
+        // main
+        TreeSet releases = releasess[(yacy.pro) ? 0 : 2];
+        releases.removeAll(downloadedreleases);
+        i = releases.iterator();
+        while (i.hasNext()) {
+            release = (yacyVersion) i.next();
+            prop.put("candeploy_availreleases_" + relcount + "_name", (release.proRelease ? "pro" : "standard") + "/" + ((release.mainRelease) ? "main" : "dev") + " " + release.releaseNr + "/" + release.svn);
+            prop.put("candeploy_availreleases_" + relcount + "_url", release.url.toString());
+            prop.put("candeploy_availreleases_" + relcount + "_selected", 0);
+            relcount++;
+        }
+        // dev
+        dflt = (releasess[(yacy.pro) ? 1 : 3].size() == 0) ? null : (yacyVersion) releasess[(yacy.pro) ? 1 : 3].last();
+        releases = releasess[(yacy.pro) ? 1 : 3];
+        releases.removeAll(downloadedreleases);
+        i = releases.iterator();
+        while (i.hasNext()) {
+            release = (yacyVersion) i.next();
+            prop.put("candeploy_availreleases_" + relcount + "_name", (release.proRelease ? "pro" : "standard") + "/" + ((release.mainRelease) ? "main" : "dev") + " " + release.releaseNr + "/" + release.svn);
+            prop.put("candeploy_availreleases_" + relcount + "_url", release.url.toString());
+            prop.put("candeploy_availreleases_" + relcount + "_selected", (release == dflt) ? 1 : 0);
+            relcount++;
+        }
+        prop.put("candeploy_availreleases", relcount);
+
+        // properties for automated system update
+        prop.put("candeploy_manualUpdateChecked", (sb.getConfig("update.process", "manual").equals("manual")) ? 1 : 0);
+        prop.put("candeploy_autoUpdateChecked", (sb.getConfig("update.process", "manual").equals("auto")) ? 1 : 0);
+        prop.put("candeploy_cycle", sb.getConfigLong("update.cycle", 168));
+        prop.put("candeploy_blacklist", sb.getConfig("update.blacklist", ""));
+        prop.put("candeploy_releaseTypeMainChecked", (sb.getConfig("update.concept", "any").equals("any")) ? 0 : 1);
+        prop.put("candeploy_releaseTypeAnyChecked", (sb.getConfig("update.concept", "any").equals("any")) ? 1 : 0);
+        prop.put("candeploy_lastlookup", (sb.getConfigLong("update.time.lookup", 0) == 0) ? 0 : 1);
+        prop.put("candeploy_lastlookup_time", new Date(sb.getConfigLong("update.time.lookup", 0)).toString());
+        prop.put("candeploy_lastdownload", (sb.getConfigLong("update.time.download", 0) == 0) ? 0 : 1);
+        prop.put("candeploy_lastdownload_time", new Date(sb.getConfigLong("update.time.download", 0)).toString());
+        prop.put("candeploy_lastdeploy", (sb.getConfigLong("update.time.deploy", 0) == 0) ? 0 : 1);
+        prop.put("candeploy_lastdeploy_time", new Date(sb.getConfigLong("update.time.deploy", 0)).toString());
         
         /*
         if ((adminaccess) && (yacyVersion.latestRelease >= (thisVersion+0.01))) { // only new Versions(not new SVN)

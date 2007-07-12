@@ -160,44 +160,6 @@ public final class yacy {
      * until startup has finished
      */
     private static serverSemaphore startupFinishedSync = new serverSemaphore(0);
-    
-    /**
-    * Converts combined version-string to a pretty string, e.g. "0.435/01818" or "dev/01818" (development version) or "dev/00000" (in case of wrong input)
-    *
-    * @param ver Combined version string matching regular expression:  "\A(\d+\.\d{3})(\d{4}|\d{5})\z" <br>
-    *  (i.e.: start of input, 1 or more digits in front of decimal point, decimal point followed by 3 digits as major version, 4 or 5 digits for SVN-Version, end of input) 
-    * @return If the major version is &lt; 0.11  - major version is separated from SVN-version by '/', e.g. "0.435/01818" <br>
-    *         If the major version is &gt;= 0.11 - major version is replaced by "dev" and separated SVN-version by '/', e.g."dev/01818" <br> 
-    *         "dev/00000" - If the input does not matcht the regular expression above 
-    */
-    public static String combined2prettyVersion(String ver) {
-        return combined2prettyVersion(ver, "");
-    }
-    public static String combined2prettyVersion(String ver, String computerName) {
-        final Matcher matcher = Pattern.compile("\\A(\\d+\\.\\d{1,3})(\\d{0,5})\\z").matcher(ver); 
-
-        if (!matcher.find()) { 
-            serverLog.logWarning("STARTUP", "Peer '"+computerName+"': wrong format of version-string: '" + ver + "'. Using default string 'dev/00000' instead");   
-            return "dev/00000";
-        }
-        
-        String mainversion = (Double.parseDouble(matcher.group(1)) < 0.11 ? "dev" : matcher.group(1));
-		String revision = matcher.group(2);
-		for(int i=revision.length();i<5;++i) revision += "0";
-		return mainversion+"/"+revision;
-    }
-       
-    /**
-    * Combines the version of YaCy with the versionnumber from SVN to a
-    * combined version
-    *
-    * @param version Current given version.
-    * @param svn Current version given from SVN.
-    * @return String with the combined version.
-    */
-    public static double versvn2combinedVersion(double v, int svn) {
-    	return (Math.rint((v*100000000.0) + ((double)svn))/100000000);
-    }
 
     /**
     * Starts up the whole application. Sets up all datastructures and starts
@@ -294,7 +256,7 @@ public final class yacy {
                         final String svrReleaseNr = matcher.group(1);
                         try {
                             try {version = Double.parseDouble(vString);} catch (NumberFormatException e) {version = (float) 0.1;}
-                            version = versvn2combinedVersion(version, Integer.parseInt(svrReleaseNr));
+                            version = yacyVersion.versvn2combinedVersion(version, Integer.parseInt(svrReleaseNr));
                         } catch (NumberFormatException e) {}
                         sb.setConfig("svnRevision", svrReleaseNr);
                     }
@@ -305,7 +267,7 @@ public final class yacy {
             }
 
             sb.setConfig("version", Double.toString(version));
-            sb.setConfig("vString", combined2prettyVersion(Double.toString(version)));
+            sb.setConfig("vString", yacyVersion.combined2prettyVersion(Double.toString(version)));
             sb.setConfig("vdate", vDATE);
             sb.setConfig("applicationRoot", homePath);
             sb.startupTime = startup;

@@ -154,7 +154,7 @@ public class Status {
         }
         
         // version information
-        String versionstring = yacy.combined2prettyVersion(sb.getConfig("version","0.1"));
+        String versionstring = yacyVersion.combined2prettyVersion(sb.getConfig("version","0.1"));
         prop.put("versionpp", versionstring);
         double thisVersion = Double.parseDouble(sb.getConfig("version","0.1"));
         

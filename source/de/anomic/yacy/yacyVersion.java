@@ -36,6 +36,8 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
 import java.util.TreeSet;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import de.anomic.htmlFilter.htmlFilterContentScraper;
 import de.anomic.http.httpc;
@@ -172,6 +174,8 @@ public final class yacyVersion implements Comparator, Comparable {
     
     public static final boolean shallRetrieveUpdateInfo() {
         // according to update properties, decide if we should retrieve update information
+        // if true, the release that can be obtained is returned.
+        // if false, null is returned
         plasmaSwitchboard sb = plasmaSwitchboard.getSwitchboard();
         
         // check if update process allowes update retrieve
@@ -187,21 +191,22 @@ public final class yacyVersion implements Comparator, Comparable {
         return true;
     }
     
-    public static final yacyVersion shallRetrieveReleaseAutomatically() {
+    public static final yacyVersion rulebasedUpdateInfo() {
         // according to update properties, decide if we should retrieve update information
         // if true, the release that can be obtained is returned.
         // if false, null is returned
-        
         plasmaSwitchboard sb = plasmaSwitchboard.getSwitchboard();
         
-        // check if update process allowes automatic update retrieve
+        // check if update process allowes update retrieve
         String process = sb.getConfig("update.process", "manual");
         if (!process.equals("auto")) return null; // no, its a manual or guided process
         
-        // check if we have a release info
-        if ((latestReleases == null) || (latestReleases.size() == 0)) return null; // no info available
+        // check if the last retrieve time is a minimum time ago
+        long cycle = Math.max(1, sb.getConfigLong("update.cycle", 168)) * 24 * 60 * 60 * 1000;
+        long timeLookup = sb.getConfigLong("update.time.lookup", System.currentTimeMillis());
+        if (timeLookup + cycle > System.currentTimeMillis()) return null; // no we have recently made a lookup
         
-        // check if we know that there is a release that is more recent that that which we are using
+        // check if we know that there is a release that is more recent than that which we are using
         TreeSet[] releasess = yacyVersion.allReleases(true); // {0=promain, 1=prodev, 2=stdmain, 3=stddev}
         boolean pro = new File(sb.getRootPath(), "libx").exists();
         yacyVersion latestmain = (yacyVersion) releasess[(pro) ? 0 : 2].first();
@@ -249,12 +254,13 @@ public final class yacyVersion implements Comparator, Comparable {
         // {promainreleases, prodevreleases, stdmainreleases, stddevreleases} 
         TreeSet[] latestRelease = (TreeSet[]) latestReleases.get(location);
         if (force ||
-            (latestRelease == null) ||
+            (latestRelease == null) /*||
             ((latestRelease[0].size() == 0) &&
              (latestRelease[1].size() == 0) &&
              (latestRelease[2].size() == 0) &&
-             (latestRelease[3].size() == 0) )) {
+             (latestRelease[3].size() == 0) )*/) {
             latestRelease = allReleaseFrom(location);
+            latestReleases.put(location, latestRelease);
         }
         return latestRelease;
     }
@@ -388,4 +394,53 @@ public final class yacyVersion implements Comparator, Comparable {
             serverLog.logSevere("UPDATE", "update failed", e);
         }
     }
+    
+    /**
+     * Converts combined version-string to a pretty string, e.g. "0.435/01818" or "dev/01818" (development version) or "dev/00000" (in case of wrong input)
+     *
+     * @param ver Combined version string matching regular expression:  "\A(\d+\.\d{3})(\d{4}|\d{5})\z" <br>
+     *  (i.e.: start of input, 1 or more digits in front of decimal point, decimal point followed by 3 digits as major version, 4 or 5 digits for SVN-Version, end of input) 
+     * @return If the major version is &lt; 0.11  - major version is separated from SVN-version by '/', e.g. "0.435/01818" <br>
+     *         If the major version is &gt;= 0.11 - major version is replaced by "dev" and separated SVN-version by '/', e.g."dev/01818" <br> 
+     *         "dev/00000" - If the input does not matcht the regular expression above 
+     */
+     public static String combined2prettyVersion(String ver) {
+         return combined2prettyVersion(ver, "");
+     }
+     public static String combined2prettyVersion(String ver, String computerName) {
+         final Matcher matcher = Pattern.compile("\\A(\\d+\\.\\d{1,3})(\\d{0,5})\\z").matcher(ver); 
+
+         if (!matcher.find()) { 
+             serverLog.logWarning("STARTUP", "Peer '"+computerName+"': wrong format of version-string: '" + ver + "'. Using default string 'dev/00000' instead");   
+             return "dev/00000";
+         }
+         
+         String mainversion = (Double.parseDouble(matcher.group(1)) < 0.11 ? "dev" : matcher.group(1));
+        String revision = matcher.group(2);
+        for(int i=revision.length();i<5;++i) revision += "0";
+        return mainversion+"/"+revision;
+     }
+        
+     /**
+     * Combines the version of YaCy with the versionnumber from SVN to a
+     * combined version
+     *
+     * @param version Current given version.
+     * @param svn Current version given from SVN.
+     * @return String with the combined version.
+     */
+     public static double versvn2combinedVersion(double v, int svn) {
+        return (Math.rint((v*100000000.0) + ((double)svn))/100000000);
+     }
+     
+     public static void main(String[] args) {
+         float base = (float) 0.53;
+         String blacklist = "....[123]";
+         String test;
+         for (int i = 0; i < 20; i++) {
+             test = Float.toString(base + (((float) i) / 1000));
+             System.out.println(test + " is " + ((test.matches(blacklist)) ? "blacklisted" : " not blacklisted"));
+         }
+     }
+     
 }
