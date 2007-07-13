@@ -295,6 +295,7 @@ public class yacyNewsPool {
     
     public void publishMyNews(yacyNewsRecord record) {
         // this shall be called if our peer generated a new news record and wants to publish it
+        if (record == null) return;
         try {
             if (newsDB.get(record.id()) == null) {
                 incomingNews.push(record); // we want to see our own news..

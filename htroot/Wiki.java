@@ -136,7 +136,7 @@ public class Wiki {
             map.put("page", pagename);
             map.put("author", author.replace(',', ' '));
             if (post.get("content", "").trim().length() > 0 && !page.page().equals(content))
-                yacyCore.newsPool.publishMyNews(new yacyNewsRecord(yacyNewsPool.CATEGORY_WIKI_UPDATE, map));
+                yacyCore.newsPool.publishMyNews(yacyNewsRecord.newRecord(yacyNewsPool.CATEGORY_WIKI_UPDATE, map));
             page = newEntry;
             prop.put("LOCATION", "/Wiki.html?page=" + pagename);
         }

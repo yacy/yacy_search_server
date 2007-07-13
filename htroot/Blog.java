@@ -188,7 +188,7 @@ public class Blog {
 			map.put("page", pagename);
 			map.put("subject", StrSubject.replace(',', ' '));
 			map.put("author", StrAuthor.replace(',', ' '));
-			yacyCore.newsPool.publishMyNews(new yacyNewsRecord(yacyNewsPool.CATEGORY_BLOG_ADD, map));
+			yacyCore.newsPool.publishMyNews(yacyNewsRecord.newRecord(yacyNewsPool.CATEGORY_BLOG_ADD, map));
 		}
 
 		page = switchboard.blogDB.read(pagename); //maybe "if(page == null)"

@@ -139,7 +139,7 @@ public class yacyNewsDB {
 
     protected final static yacyNewsRecord b2r(kelondroRow.Entry b) {
         if (b == null) return null;
-        return new yacyNewsRecord(
+        return yacyNewsRecord.newRecord(
             b.getColString(0, null),
             b.getColString(1, "UTF-8"),
             (b.empty(2)) ? null : yacyCore.parseUniversalDate(b.getColString(2, null), serverDate.UTCDiffString()),
@@ -149,8 +149,8 @@ public class yacyNewsDB {
     }
 
     protected final kelondroRow.Entry r2b(yacyNewsRecord r) {
+        if (r == null) return null;
         try {
-            if (r == null) return null;
             String attributes = r.attributes().toString();
             if (attributes.length() > yacyNewsRecord.attributesMaxLength) throw new IllegalArgumentException("attribute length=" + attributes.length() + " exceeds maximum size=" + yacyNewsRecord.attributesMaxLength);
             kelondroRow.Entry entry = this.news.row().newEntry();

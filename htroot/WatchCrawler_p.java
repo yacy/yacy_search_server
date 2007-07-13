@@ -210,7 +210,7 @@ public class WatchCrawler_p {
                                     m.remove("generalFilter");
                                     m.remove("specificFilter");
                                     m.put("intention", post.get("intention", "").replace(',', '/'));
-                                    yacyCore.newsPool.publishMyNews(new yacyNewsRecord(yacyNewsPool.CATEGORY_CRAWL_START, m));
+                                    yacyCore.newsPool.publishMyNews(yacyNewsRecord.newRecord(yacyNewsPool.CATEGORY_CRAWL_START, m));
                                 }
                                 
                             } else {

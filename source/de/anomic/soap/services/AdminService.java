@@ -760,7 +760,7 @@ public class AdminService extends AbstractService {
             // generate a news message
             Properties news = profile;
             news.remove(PEERPROFILE_COMMENT);
-            yacyCore.newsPool.publishMyNews(new yacyNewsRecord(yacyNewsPool.CATEGORY_PROFILE_UPDATE, news));
+            yacyCore.newsPool.publishMyNews(yacyNewsRecord.newRecord(yacyNewsPool.CATEGORY_PROFILE_UPDATE, news));
         } catch(IOException e) {
         	throw new AxisFault("Unable to write profile data to file");
         } finally {

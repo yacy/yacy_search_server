@@ -322,7 +322,7 @@ public class Bookmarks {
         map.put("title", title.replace(',', ' '));
         map.put("description", description.replace(',', ' '));
         map.put("tags", tagsString.replace(',', ' '));
-        yacyCore.newsPool.publishMyNews(new yacyNewsRecord(yacyNewsPool.CATEGORY_BOOKMARK_ADD, map));
+        yacyCore.newsPool.publishMyNews(yacyNewsRecord.newRecord(yacyNewsPool.CATEGORY_BOOKMARK_ADD, map));
     }
 
 }

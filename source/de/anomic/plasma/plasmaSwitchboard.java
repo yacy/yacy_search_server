@@ -2053,7 +2053,7 @@ public final class plasmaSwitchboard extends serverAbstractSwitch implements ser
                 if ((homepage != null) && (homepage.length() > 10)) {
                     Properties news = new Properties();
                     news.put("homepage", profile.get("homepage"));
-                    yacyCore.newsPool.publishMyNews(new yacyNewsRecord(yacyNewsPool.CATEGORY_PROFILE_BROADCAST, news));
+                    yacyCore.newsPool.publishMyNews(yacyNewsRecord.newRecord(yacyNewsPool.CATEGORY_PROFILE_BROADCAST, news));
                 }
             }
 

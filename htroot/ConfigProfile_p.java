@@ -113,7 +113,7 @@ public class ConfigProfile_p {
                 // generate a news message
                 Properties news = profile;
                 news.remove("comment");
-                yacyCore.newsPool.publishMyNews(new yacyNewsRecord(yacyNewsPool.CATEGORY_PROFILE_UPDATE, news));
+                yacyCore.newsPool.publishMyNews(yacyNewsRecord.newRecord(yacyNewsPool.CATEGORY_PROFILE_UPDATE, news));
                 //yacyCore.newsPool.publishMyNews(new yacyNewsRecord(yacyNewsRecord.CATEGORY_PROFILE_UPDATE, profile));
             } catch(IOException e) {
             } finally {

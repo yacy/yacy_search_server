@@ -232,7 +232,7 @@ public class yacysearch {
             map.put("urlhash", delHash);
             map.put("vote", "negative");
             map.put("refid", "");
-            yacyCore.newsPool.publishMyNews(new yacyNewsRecord(yacyNewsPool.CATEGORY_SURFTIPP_VOTE_ADD, map));
+            yacyCore.newsPool.publishMyNews(yacyNewsRecord.newRecord(yacyNewsPool.CATEGORY_SURFTIPP_VOTE_ADD, map));
         }
 
         // if aplus-button was hit, create new voting message

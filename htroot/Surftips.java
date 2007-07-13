@@ -86,7 +86,7 @@ public class Surftips {
                 map.put("urlhash", hash);
                 map.put("vote", "negative");
                 map.put("refid", post.get("refid", ""));
-                yacyCore.newsPool.publishMyNews(new yacyNewsRecord(yacyNewsPool.CATEGORY_SURFTIPP_VOTE_ADD, map));
+                yacyCore.newsPool.publishMyNews(yacyNewsRecord.newRecord(yacyNewsPool.CATEGORY_SURFTIPP_VOTE_ADD, map));
             }
             if ((post != null) && ((hash = post.get("votePositive", null)) != null)) {
                 if (!sb.verifyAuthentication(header, false)) {
