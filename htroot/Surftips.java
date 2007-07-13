@@ -140,13 +140,8 @@ public class Surftips {
                 description = row.getColString(2,"UTF-8");
                 if ((url == null) || (title == null) || (description == null)) continue;
                 refid = row.getColString(3, null);
-                voted = false;
-                try {  // performance problem if published news is too full
-                    voted = (yacyCore.newsPool.getSpecific(yacyNewsPool.OUTGOING_DB, yacyNewsPool.CATEGORY_SURFTIPP_VOTE_ADD, "refid", refid) != null) || 
-                    		(yacyCore.newsPool.getSpecific(yacyNewsPool.PUBLISHED_DB, yacyNewsPool.CATEGORY_SURFTIPP_VOTE_ADD, "refid", refid) != null);
-                } catch (IOException e) {
-                    e.printStackTrace();
-                }
+                voted = (yacyCore.newsPool.getSpecific(yacyNewsPool.OUTGOING_DB, yacyNewsPool.CATEGORY_SURFTIPP_VOTE_ADD, "refid", refid) != null) || 
+                		(yacyCore.newsPool.getSpecific(yacyNewsPool.PUBLISHED_DB, yacyNewsPool.CATEGORY_SURFTIPP_VOTE_ADD, "refid", refid) != null);
                 prop.put("surftips_results_" + i + "_authorized", (authenticated) ? 1 : 0);
                 prop.put("surftips_results_" + i + "_authorized_recommend", (voted) ? 0 : 1);
 

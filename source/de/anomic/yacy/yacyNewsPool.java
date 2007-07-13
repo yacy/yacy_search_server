@@ -403,7 +403,7 @@ public class yacyNewsPool {
         return false;
     }
     
-    public synchronized yacyNewsRecord getSpecific(int dbKey, String category, String key, String value) throws IOException {
+    public synchronized yacyNewsRecord getSpecific(int dbKey, String category, String key, String value) {
         yacyNewsQueue queue = switchQueue(dbKey);
         yacyNewsRecord record;
         String s;
@@ -418,7 +418,7 @@ public class yacyNewsPool {
         return null;
     }
 
-    public synchronized yacyNewsRecord getByOriginator(int dbKey, String category, String originatorHash) throws IOException {
+    public synchronized yacyNewsRecord getByOriginator(int dbKey, String category, String originatorHash) {
         yacyNewsQueue queue = switchQueue(dbKey);
         yacyNewsRecord record;
         Iterator i = queue.records(true);
@@ -433,7 +433,7 @@ public class yacyNewsPool {
         return null;
     }
 
-    public synchronized yacyNewsRecord getByID(int dbKey, String id) throws IOException {
+    public synchronized yacyNewsRecord getByID(int dbKey, String id) {
         switch (dbKey) {
             case INCOMING_DB:   return incomingNews.get(id);
             case PROCESSED_DB:  return processedNews.get(id);

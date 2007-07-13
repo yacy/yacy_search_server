@@ -47,7 +47,6 @@
 // javac -classpath .:../classes index.java
 // if the shell's current path is HTROOT
 
-import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
 import java.util.HashMap;
@@ -266,9 +265,7 @@ public class DetailedSearch {
             prop.put("num-results_globalresults", results.getGlobalresults());
             for(int i=0;i<results.numResults();i++){
                 plasmaSearchResults.searchResult result=results.getResult(i);
-                try {
-                    prop.put("type_results_" + i + "_authorized_recommend", (yacyCore.newsPool.getSpecific(yacyNewsPool.OUTGOING_DB, yacyNewsPool.CATEGORY_SURFTIPP_ADD, "url", result.getUrl()) == null) ? 1 : 0);
-                } catch (IOException e) {}
+                prop.put("type_results_" + i + "_authorized_recommend", (yacyCore.newsPool.getSpecific(yacyNewsPool.OUTGOING_DB, yacyNewsPool.CATEGORY_SURFTIPP_ADD, "url", result.getUrl()) == null) ? 1 : 0);
                 prop.put("type_results_" + i + "_authorized_recommend_deletelink", "/yacysearch.html?search=" + results.getFormerSearch() + "&Enter=Search&count=" + results.getQuery().wantedResults + "&order=" + crypt.simpleEncode(results.getRanking().toExternalString()) + "&resource=local&time=3&deleteref=" + result.getUrlhash() + "&urlmaskfilter=.*");
                 prop.put("type_results_" + i + "_authorized_recommend_recommendlink", "/yacysearch.html?search=" + results.getFormerSearch() + "&Enter=Search&count=" + results.getQuery().wantedResults + "&order=" + crypt.simpleEncode(results.getRanking().toExternalString()) + "&resource=local&time=3&recommendref=" + result.getUrlhash() + "&urlmaskfilter=.*");
                 prop.put("type_results_" + i + "_authorized_urlhash", result.getUrlhash());

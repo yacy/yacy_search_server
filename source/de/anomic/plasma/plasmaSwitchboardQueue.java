@@ -124,7 +124,7 @@ public class plasmaSwitchboardQueue {
         return new Entry(b);
     }
 
-    public synchronized Entry remove(String urlHash) throws IOException {
+    public synchronized Entry remove(String urlHash) {
         Iterator i = sbQueueStack.stackIterator(true);
         kelondroRow.Entry rowentry;
         Entry entry;

@@ -120,7 +120,7 @@ public class yacyNewsQueue {
         return entry;
     }
 
-    public synchronized yacyNewsRecord get(String id) throws IOException {
+    public synchronized yacyNewsRecord get(String id) {
         yacyNewsRecord record;
         Iterator i = records(true);
         while (i.hasNext()) {
@@ -130,7 +130,7 @@ public class yacyNewsQueue {
         return null;
     }
 
-    public synchronized yacyNewsRecord remove(String id) throws IOException {
+    public synchronized yacyNewsRecord remove(String id) {
         yacyNewsRecord record;
         Iterator i = records(true);
         while (i.hasNext()) {
