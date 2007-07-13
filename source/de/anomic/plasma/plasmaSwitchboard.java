@@ -1167,19 +1167,17 @@ public final class plasmaSwitchboard extends serverAbstractSwitch implements ser
         
         // going through the sbQueue Entries and registering all content files as in use
         int count = 0;
-        try {
-            ArrayList sbQueueEntries = this.sbQueue.list();
-            for (i = 0; i < sbQueueEntries.size(); i++) {
-                plasmaSwitchboardQueue.Entry entry = (plasmaSwitchboardQueue.Entry) sbQueueEntries.get(i);
-                if ((entry != null) && (entry.url() != null) && (entry.cacheFile().exists())) {
-                    plasmaHTCache.filesInUse.add(entry.cacheFile());
-                    count++;
-                }
+        plasmaSwitchboardQueue.Entry queueEntry;
+        Iterator i1 = sbQueue.entryIterator(true);
+        while (i1.hasNext()) {
+            queueEntry = (plasmaSwitchboardQueue.Entry) i1.next();
+            if ((queueEntry != null) && (queueEntry.url() != null) && (queueEntry.cacheFile().exists())) {
+                plasmaHTCache.filesInUse.add(queueEntry.cacheFile());
+                count++;
             }
-            this.log.logConfig(count + " files in htcache reported to the cachemanager as in use.");
-        } catch (IOException e) {
-            this.log.logSevere("cannot find any files in htcache reported to the cachemanager: " + e.getMessage());
         }
+        this.log.logConfig(count + " files in htcache reported to the cachemanager as in use.");
+        
         // define an extension-blacklist
         log.logConfig("Parser: Initializing Extension Mappings for Media/Parser");
         plasmaParser.initMediaExt(plasmaParser.extString2extList(getConfig(PARSER_MEDIA_EXT,"")));

@@ -47,12 +47,11 @@ package de.anomic.plasma;
 import java.io.File;
 import java.io.IOException;
 import java.net.MalformedURLException;
-import java.util.ArrayList;
 import java.util.Date;
+import java.util.Iterator;
 
 import de.anomic.index.indexURLEntry;
 import de.anomic.kelondro.kelondroBase64Order;
-import de.anomic.kelondro.kelondroException;
 import de.anomic.kelondro.kelondroNaturalOrder;
 import de.anomic.kelondro.kelondroRow;
 import de.anomic.kelondro.kelondroStack;
@@ -94,17 +93,18 @@ public class plasmaSwitchboardQueue {
         sbQueueStack = kelondroStack.open(sbQueueStackPath, rowdef);
     }
     
+    /*
     private void resetQueueStack() {
         try {sbQueueStack.close();} catch (Exception e) {}
         if (sbQueueStackPath.exists()) sbQueueStackPath.delete();
         initQueueStack();
     }
-    
+    */
     public int size() {
         return sbQueueStack.size();
     }
 
-    public void push(Entry entry) throws IOException {
+    public synchronized void push(Entry entry) throws IOException {
         sbQueueStack.push(sbQueueStack.row().newEntry(new byte[][]{
             entry.url.toString().getBytes(),
             (entry.referrerHash == null) ? plasmaURL.dummyHash.getBytes() : entry.referrerHash.getBytes(),
@@ -117,42 +117,26 @@ public class plasmaSwitchboardQueue {
         }));
     }
 
-    public Entry pop() throws IOException {
+    public synchronized Entry pop() throws IOException {
         if (sbQueueStack.size() == 0) return null;
         kelondroRow.Entry b = sbQueueStack.pot();
         if (b == null) return null;
         return new Entry(b);
     }
 
-    public Entry remove(int index) throws IOException {
-        if (sbQueueStack.size() == 0) return null;
-        return new Entry(sbQueueStack.pot(index));
-    }
-
-    public Entry get(int index) throws IOException {
-        if ((index < 0) || (index >= sbQueueStack.size())) throw new ArrayIndexOutOfBoundsException();
-        return new Entry(sbQueueStack.bot(index));
-    }
-
-    public ArrayList list() throws IOException {
-        return list(0);
-    }
-
-    public ArrayList list(int index) throws IOException {
-        if ((index == 0) && (sbQueueStack.size() == 0)) return new ArrayList(0);
-        if ((index < 0) || (index >= sbQueueStack.size())) throw new ArrayIndexOutOfBoundsException();
-        try {
-            ArrayList list = sbQueueStack.botList(index);
-            kelondroRow.Entry entry;
-            for (int i = 0; i < list.size(); i++) {
-                entry = (kelondroRow.Entry) list.get(i);
-                list.set(i, (entry == null) ? null : new Entry(entry));
+    public synchronized Entry remove(String urlHash) throws IOException {
+        Iterator i = sbQueueStack.stackIterator(true);
+        kelondroRow.Entry rowentry;
+        Entry entry;
+        while (i.hasNext()) {
+            rowentry = (kelondroRow.Entry) i.next();
+            entry = new Entry(rowentry);
+            if (entry.urlHash().equals(urlHash)) {
+                i.remove();
+                return entry;
             }
-            return list;
-        } catch (kelondroException e) {
-            resetQueueStack();
-            return new ArrayList();
         }
+        return null;
     }
 
     public void clear() {
@@ -175,6 +159,33 @@ public class plasmaSwitchboardQueue {
         super.finalize();
     }
 
+    public Iterator entryIterator(boolean up) {
+        // iterates the elements in an ordered way.
+        // returns plasmaSwitchboardQueue.Entry - type Objects
+        return new entryIterator(up);
+    }
+
+    public class entryIterator implements Iterator {
+
+        Iterator rows;
+        
+        public entryIterator(boolean up) {
+            rows = sbQueueStack.stackIterator(up);
+        }
+
+        public boolean hasNext() {
+            return rows.hasNext();
+        }
+
+        public Object next() {
+            return new Entry((kelondroRow.Entry) rows.next());
+        }
+
+        public void remove() {
+            rows.remove();
+        }
+    }
+    
     public Entry newEntry(URL url, String referrer, Date ifModifiedSince, boolean requestWithCookie,
                      String initiator, int depth, String profilehandle, String anchorName) {
         return new Entry(url, referrer, ifModifiedSince, requestWithCookie, initiator, depth, profilehandle, anchorName);

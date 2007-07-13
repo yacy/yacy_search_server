@@ -46,6 +46,7 @@
 import java.io.IOException;
 import java.text.DecimalFormat;
 import java.util.ArrayList;
+import java.util.Iterator;
 
 import de.anomic.data.htmlTools;
 import de.anomic.http.httpHeader;
@@ -95,19 +96,7 @@ public class IndexCreateIndexingQueue_p {
             } else if (post.containsKey("deleteEntry")) {
                 String urlHash = (String) post.get("deleteEntry");
                 try {
-                    synchronized (switchboard.sbQueue) {
-                        ArrayList entries = switchboard.sbQueue.list(0);
-                        for (int i=entries.size()-1; i >= 0; i--) {
-                            plasmaSwitchboardQueue.Entry pcentry = (plasmaSwitchboardQueue.Entry) entries.get(i);
-                            if (pcentry.urlHash().equals(urlHash)) {
-                                plasmaSwitchboardQueue.Entry entry = switchboard.sbQueue.remove(i);
-                                if ((entry != null) && (entry.profile() != null) && (!(entry.profile().storeHTCache()))) {
-                                    switchboard.cacheManager.deleteFile(entry.url());
-                                }
-                                break;
-                            }
-                        }
-                    } 
+                    switchboard.sbQueue.remove(urlHash);
                 } catch (Exception e) {}
                 prop.put("LOCATION","");
                 return prop;
@@ -126,44 +115,43 @@ public class IndexCreateIndexingQueue_p {
             plasmaSwitchboardQueue.Entry pcentry;
             int inProcessCount = 0, entryCount = 0, totalCount = 0; 
             long totalSize = 0;
-            try {
-                ArrayList entryList = new ArrayList();
-                
-                // getting all entries that are currently in process
-                synchronized (switchboard.indexingTasksInProcess) {
-                    inProcessCount = switchboard.indexingTasksInProcess.size();
-                    entryList.addAll(switchboard.indexingTasksInProcess.values());
-                }
-                
-                // getting all enqueued entries
-                if ((switchboard.sbQueue.size() > 0)) {
-                    entryList.addAll(switchboard.sbQueue.list(0));
-                }
-                                
-                int count=entryList.size();
-                totalCount = count;
-                for (int i = 0; (i < count) && (entryCount < showLimit); i++) {
+            ArrayList entryList = new ArrayList();
+            
+            // getting all entries that are currently in process
+            synchronized (switchboard.indexingTasksInProcess) {
+                inProcessCount = switchboard.indexingTasksInProcess.size();
+                entryList.addAll(switchboard.indexingTasksInProcess.values());
+            }
+            
+            // getting all enqueued entries
+            if ((switchboard.sbQueue.size() > 0)) {
+                Iterator i = switchboard.sbQueue.entryIterator(false);
+                while (i.hasNext()) entryList.add((plasmaSwitchboardQueue.Entry) i.next());
+            }
+                            
+            int count=entryList.size();
+            totalCount = count;
+            for (int i = 0; (i < count) && (entryCount < showLimit); i++) {
 
-                    boolean inProcess = i < inProcessCount;
-                    pcentry = (plasmaSwitchboardQueue.Entry) entryList.get(i);
-                    if ((pcentry != null)&&(pcentry.url() != null)) {
-                        long entrySize = pcentry.size();
-                        totalSize += entrySize;
-                        initiator = yacyCore.seedDB.getConnected(pcentry.initiator());
-                        prop.put("indexing-queue_list_"+entryCount+"_dark", (inProcess)? 2: ((dark) ? 1 : 0));
-                        prop.put("indexing-queue_list_"+entryCount+"_initiator", ((initiator == null) ? "proxy" : htmlTools.replaceHTML(initiator.getName())));
-                        prop.put("indexing-queue_list_"+entryCount+"_depth", pcentry.depth());
-                        prop.put("indexing-queue_list_"+entryCount+"_modified", pcentry.getModificationDate());
-                        prop.put("indexing-queue_list_"+entryCount+"_anchor", (pcentry.anchorName()==null)?"":htmlTools.replaceHTML(pcentry.anchorName()));
-                        prop.put("indexing-queue_list_"+entryCount+"_url", htmlTools.replaceHTML(pcentry.normalizedURLString()));
-                        prop.put("indexing-queue_list_"+entryCount+"_size", bytesToString(entrySize));
-                        prop.put("indexing-queue_list_"+entryCount+"_inProcess", (inProcess)?1:0);
-                        prop.put("indexing-queue_list_"+entryCount+"_inProcess_hash", pcentry.urlHash());
-                        dark = !dark;
-                        entryCount++;
-                    }
+                boolean inProcess = i < inProcessCount;
+                pcentry = (plasmaSwitchboardQueue.Entry) entryList.get(i);
+                if ((pcentry != null)&&(pcentry.url() != null)) {
+                    long entrySize = pcentry.size();
+                    totalSize += entrySize;
+                    initiator = yacyCore.seedDB.getConnected(pcentry.initiator());
+                    prop.put("indexing-queue_list_"+entryCount+"_dark", (inProcess)? 2: ((dark) ? 1 : 0));
+                    prop.put("indexing-queue_list_"+entryCount+"_initiator", ((initiator == null) ? "proxy" : htmlTools.replaceHTML(initiator.getName())));
+                    prop.put("indexing-queue_list_"+entryCount+"_depth", pcentry.depth());
+                    prop.put("indexing-queue_list_"+entryCount+"_modified", pcentry.getModificationDate());
+                    prop.put("indexing-queue_list_"+entryCount+"_anchor", (pcentry.anchorName()==null)?"":htmlTools.replaceHTML(pcentry.anchorName()));
+                    prop.put("indexing-queue_list_"+entryCount+"_url", htmlTools.replaceHTML(pcentry.normalizedURLString()));
+                    prop.put("indexing-queue_list_"+entryCount+"_size", bytesToString(entrySize));
+                    prop.put("indexing-queue_list_"+entryCount+"_inProcess", (inProcess)?1:0);
+                    prop.put("indexing-queue_list_"+entryCount+"_inProcess_hash", pcentry.urlHash());
+                    dark = !dark;
+                    entryCount++;
                 }
-            } catch (IOException e) {}
+            }
             
             prop.put("indexing-queue_show", entryCount);//show shown entries
             prop.put("indexing-queue_num", totalCount);//num entries in queue 

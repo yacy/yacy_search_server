@@ -51,7 +51,6 @@ import java.util.Iterator;
 
 import de.anomic.kelondro.kelondroColumn;
 import de.anomic.kelondro.kelondroNaturalOrder;
-import de.anomic.kelondro.kelondroRecords;
 import de.anomic.kelondro.kelondroRow;
 import de.anomic.kelondro.kelondroStack;
 
@@ -101,19 +100,19 @@ public class yacyNewsQueue {
         queueStack.push(r2b(entry, true));
     }
 
-    public synchronized yacyNewsRecord pop(int dist) throws IOException {
+    public synchronized yacyNewsRecord pop() throws IOException {
         if (queueStack.size() == 0) return null;
-        return b2r(queueStack.pop(dist));
+        return b2r(queueStack.pop());
     }
 
-    public synchronized yacyNewsRecord top(int dist) throws IOException {
+    public synchronized yacyNewsRecord top() throws IOException {
         if (queueStack.size() == 0) return null;
-        return b2r(queueStack.top(dist));
+        return b2r(queueStack.top());
     }
 
     public synchronized yacyNewsRecord topInc() throws IOException {
         if (queueStack.size() == 0) return null;
-        yacyNewsRecord entry = pop(0);
+        yacyNewsRecord entry = pop();
         if (entry != null) {
             entry.incDistribution();
             push(entry);
@@ -123,8 +122,9 @@ public class yacyNewsQueue {
 
     public synchronized yacyNewsRecord get(String id) throws IOException {
         yacyNewsRecord record;
-        for (int i = 0; i < size(); i++) {
-            record = top(i);
+        Iterator i = records(true);
+        while (i.hasNext()) {
+            record = (yacyNewsRecord) i.next();
             if ((record != null) && (record.id().equals(id))) return record;
         }
         return null;
@@ -132,10 +132,11 @@ public class yacyNewsQueue {
 
     public synchronized yacyNewsRecord remove(String id) throws IOException {
         yacyNewsRecord record;
-        for (int i = 0; i < size(); i++) {
-            record = top(i);
+        Iterator i = records(true);
+        while (i.hasNext()) {
+            record = (yacyNewsRecord) i.next();
             if ((record != null) && (record.id().equals(id))) {
-                pop(i);
+                i.remove();
                 return record;
             }
         }
@@ -174,7 +175,7 @@ public class yacyNewsQueue {
         Iterator stackNodeIterator;
         
         public newsIterator(boolean up) {
-            stackNodeIterator = queueStack.iterator(up);
+            stackNodeIterator = queueStack.stackIterator(up);
         }
         
         public boolean hasNext() {
@@ -182,10 +183,9 @@ public class yacyNewsQueue {
         }
 
         public Object next() {
-            kelondroRecords.Node n = (kelondroRecords.Node) stackNodeIterator.next();
+            kelondroRow.Entry row = (kelondroRow.Entry) stackNodeIterator.next();
             try {
-                kelondroRow.Entry entry = queueStack.row().newEntry(n.getValueRow());
-                return b2r(entry);
+                return b2r(row);
             } catch (IOException e) {
                 return null;
             }

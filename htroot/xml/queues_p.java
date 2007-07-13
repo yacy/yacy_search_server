@@ -46,10 +46,11 @@
 
 //package xml.queues;
 package xml;
-import java.io.IOException;
+
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
+import java.util.Iterator;
 import java.util.Locale;
 
 import de.anomic.data.htmlTools;
@@ -98,44 +99,44 @@ public class queues_p {
             int inProcessCount = 0;
             long totalSize = 0;
             int i=0; //counter
-            try {
-                ArrayList entryList = new ArrayList();
-                
-                // getting all entries that are currently in process
-                synchronized (switchboard.indexingTasksInProcess) {
-                    inProcessCount = switchboard.indexingTasksInProcess.size();
-                    entryList.addAll(switchboard.indexingTasksInProcess.values());
+            ArrayList entryList = new ArrayList();
+            
+            // getting all entries that are currently in process
+            synchronized (switchboard.indexingTasksInProcess) {
+                inProcessCount = switchboard.indexingTasksInProcess.size();
+                entryList.addAll(switchboard.indexingTasksInProcess.values());
+            }
+            
+            // getting all enqueued entries
+            if ((switchboard.sbQueue.size() > 0)) {
+                Iterator i1 = switchboard.sbQueue.entryIterator(false);
+                while (i1.hasNext()) entryList.add((plasmaSwitchboardQueue.Entry) i1.next());
+            }
+            
+            int size = (post == null) ? entryList.size() : post.getInt("num", entryList.size());
+            if (size > entryList.size()) size = entryList.size();
+            
+            int ok = 0;
+            for (i = 0; i < size; i++) {
+                boolean inProcess = i < inProcessCount;
+                pcentry = (plasmaSwitchboardQueue.Entry) entryList.get(i);
+                if ((pcentry != null)&&(pcentry.url() != null)) {
+                    long entrySize = pcentry.size();
+                    totalSize += entrySize;
+                    initiator = yacyCore.seedDB.getConnected(pcentry.initiator());
+                    prop.put("list-indexing_"+i+"_profile", (pcentry.profile() != null) ? pcentry.profile().name() : "deleted");
+                    prop.putSafeXML("list-indexing_"+i+"_initiator", ((initiator == null) ? "proxy" : htmlTools.replaceHTML(initiator.getName())));
+                    prop.put("list-indexing_"+i+"_depth", pcentry.depth());
+                    prop.put("list-indexing_"+i+"_modified", pcentry.getModificationDate());
+                    prop.putSafeXML("list-indexing_"+i+"_anchor", (pcentry.anchorName()==null)?"":htmlTools.replaceHTML(pcentry.anchorName()));
+                    prop.putSafeXML("list-indexing_"+i+"_url", pcentry.normalizedURLString());
+                    prop.put("list-indexing_"+i+"_size", entrySize);
+                    prop.put("list-indexing_"+i+"_inProcess", (inProcess)?1:0);
+                    prop.put("list-indexing_"+i+"_hash", pcentry.urlHash());
+                    ok++;
                 }
-                
-                // getting all enqueued entries
-                if ((switchboard.sbQueue.size() > 0)) {
-                    entryList.addAll(switchboard.sbQueue.list(0));
-                }
-                int size = (post == null) ? entryList.size() : post.getInt("num", entryList.size());
-                if (size > entryList.size()) size = entryList.size();
-                
-                int ok = 0;
-                for (i = 0; i < size; i++) {
-                    boolean inProcess = i < inProcessCount;
-                    pcentry = (plasmaSwitchboardQueue.Entry) entryList.get(i);
-                    if ((pcentry != null)&&(pcentry.url() != null)) {
-                        long entrySize = pcentry.size();
-                        totalSize += entrySize;
-                        initiator = yacyCore.seedDB.getConnected(pcentry.initiator());
-                        prop.put("list-indexing_"+i+"_profile", (pcentry.profile() != null) ? pcentry.profile().name() : "deleted");
-                        prop.putSafeXML("list-indexing_"+i+"_initiator", ((initiator == null) ? "proxy" : htmlTools.replaceHTML(initiator.getName())));
-                        prop.put("list-indexing_"+i+"_depth", pcentry.depth());
-                        prop.put("list-indexing_"+i+"_modified", pcentry.getModificationDate());
-                        prop.putSafeXML("list-indexing_"+i+"_anchor", (pcentry.anchorName()==null)?"":htmlTools.replaceHTML(pcentry.anchorName()));
-                        prop.putSafeXML("list-indexing_"+i+"_url", pcentry.normalizedURLString());
-                        prop.put("list-indexing_"+i+"_size", entrySize);
-                        prop.put("list-indexing_"+i+"_inProcess", (inProcess)?1:0);
-                        prop.put("list-indexing_"+i+"_hash", pcentry.urlHash());
-                        ok++;
-                    }
-                }
-                prop.put("list-indexing", ok);
-            } catch (IOException e) {}
+            }
+            prop.put("list-indexing", ok);
         }
         
         //loader queue

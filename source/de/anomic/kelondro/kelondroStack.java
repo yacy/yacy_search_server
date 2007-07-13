@@ -50,7 +50,6 @@ import java.io.File;
 import java.io.FileReader;
 import java.io.IOException;
 import java.io.RandomAccessFile;
-import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.StringTokenizer;
 
@@ -107,18 +106,18 @@ public final class kelondroStack extends kelondroRecords {
         return open(f, row);
     }
 
-    public Iterator iterator(boolean up) {
+    public Iterator stackIterator(boolean up) {
         // iterates the elements in an ordered way.
-        // returns kelondroRecords.Node - type Objects
-        return new nodeIterator(up);
+        // returns kelondroRow.Entry - type Objects
+        return new stackIterator(up);
     }
 
-    public class nodeIterator implements Iterator {
+    public class stackIterator implements Iterator {
         Handle nextHandle = null;
         Handle lastHandle = null;
         boolean up;
 
-        public nodeIterator(boolean up) {
+        public stackIterator(boolean up) {
             this.up = up;
             nextHandle = getHandle((up) ? root : toor);
         }
@@ -131,7 +130,7 @@ public final class kelondroStack extends kelondroRecords {
         	lastHandle = nextHandle;
             try {
                 nextHandle = getNode(nextHandle, null, 0, false).getOHHandle((up) ? right : left);
-                return getNode(lastHandle, null, 0, true);
+                return row().newEntry(getNode(lastHandle, null, 0, true).getValueRow());
             } catch (IOException e) {
                 throw new kelondroException(filename, "IO error at Counter:next()");
             }
@@ -180,12 +179,7 @@ public final class kelondroStack extends kelondroRecords {
 
     public synchronized kelondroRow.Entry pop() throws IOException {
         // return row ontop of the stack and shrink stack by one
-        return pop(0);
-    }
-
-    public synchronized kelondroRow.Entry pop(int dist) throws IOException {
-        // return row relative to top of the stack and remove addressed element
-        Node n = topNode(dist);
+        Node n = topNode();
         if (n == null) return null;
         kelondroRow.Entry ret = row().newEntry(n.getValueRow());
 
@@ -198,25 +192,14 @@ public final class kelondroStack extends kelondroRecords {
     
     public synchronized kelondroRow.Entry top() throws IOException {
         // return row ontop of the stack
-        return top(0);
-    }
-
-    public synchronized kelondroRow.Entry top(int dist) throws IOException {
-        // return row ontop of the stack
-        // with dist == 0 this is the same function as with top()
-        Node n = topNode(dist);
+        Node n = topNode();
         if (n == null) return null;
         return row().newEntry(n.getValueRow());
     }
 
     public synchronized kelondroRow.Entry pot() throws IOException {
         // return row on the bottom of the stack and remove record
-        return pot(0);
-    }
-
-    public synchronized kelondroRow.Entry pot(int dist) throws IOException {
-        // return row relative to the bottom of the stack and remove addressed element
-        Node n = botNode(dist);
+        Node n = botNode();
         if (n == null) return null;
         kelondroRow.Entry ret = row().newEntry(n.getValueRow());
 
@@ -226,26 +209,12 @@ public final class kelondroStack extends kelondroRecords {
 
         return ret;
     }
-
+    
     public synchronized kelondroRow.Entry bot() throws IOException {
         // return row on the bottom of the stack
-        return bot(0);
-    }
-
-    public synchronized kelondroRow.Entry bot(int dist) throws IOException {
-        // return row on bottom of the stack
-        // with dist == 0 this is the same function as with bot()
-        Node n = botNode(dist);
+        Node n = botNode();
         if (n == null) return null;
         return row().newEntry(n.getValueRow());
-    }
-    
-    public synchronized ArrayList botList(int dist) throws IOException {
-        ArrayList botList = new ArrayList(size());
-        for (int i=dist; i < size(); i++) {
-            botList.add(bot(i));
-        }
-        return botList;
     }
     
     private void unlinkNode(Node n) throws IOException {
@@ -276,26 +245,32 @@ public final class kelondroStack extends kelondroRecords {
         }
     }
     
-    private Node topNode(int dist) throws IOException {
+    private Node topNode() throws IOException {
         // return node ontop of the stack
-        return queueNode(dist, toor, left);
+        if (size() == 0) return null;
+        Handle h = getHandle(toor);
+        if (h == null) return null;
+        return getNode(h, true);
     }
     
-    private Node botNode(int dist) throws IOException {
+    private Node botNode() throws IOException {
         // return node on bottom of the stack
-        return queueNode(dist, root, right);
+        if (size() == 0) return null;
+        Handle h = getHandle(root);
+        if (h == null) return null;
+        return getNode(h, true);
     }
-    
+    /*
     private Node queueNode(int dist, int side, int dir) throws IOException {
         // with dist == 0 this is the same function as with
         // getNode(getHandle(side), null, 0)
+        if (dist >= size()) return null; // that would exceed the stack
         Handle h = getHandle(side);
         if (h == null) return null;
-        if (dist >= size()) return null; // that would exceed the stack
         while ((dist-- > 0) && (h != null)) h = getNode(h, false).getOHHandle(dir); // track through elements
         if (h == null) return null; else return getNode(h, true);
     }
-
+*/
     public int imp(File file, String separator) throws IOException {
         // imports a value-separated file, returns number of records that have been read
         RandomAccessFile f = null;
@@ -341,26 +316,16 @@ public final class kelondroStack extends kelondroRecords {
 
     public void print() throws IOException {
         super.print(false);
-        Node n;
-        try {
-            Iterator it = iterator(true);
-            kelondroRow.Entry r;
-            while (it.hasNext()) {
-                n = (Node) it.next();
-                r = row().newEntry(n.getValueRow());
-                // n = getNode(h, null, 0);
-                System.out.println("> NODE " + hp(n.handle()) + "; left "
-                        + hp(n.getOHHandle(left)) + ", right "
-                        + hp(n.getOHHandle(right)));
-                System.out.print("  KEY:'" + r.getColString(0, null) + "'");
-                for (int j = 1; j < row().columns(); j++)
-                    System.out.print(", V[" + j + "]:'" + r.getColString(j, null) + "'");
-                System.out.println();
-            }
+        Iterator it = stackIterator(true);
+        kelondroRow.Entry r;
+        while (it.hasNext()) {
+            r = (kelondroRow.Entry) it.next();
+            System.out.print("  KEY:'" + r.getColString(0, null) + "'");
+            for (int j = 1; j < row().columns(); j++)
+                System.out.print(", V[" + j + "]:'" + r.getColString(j, null) + "'");
             System.out.println();
-        } catch (IOException e) {
-            System.out.println("File error: " + e.getMessage());
         }
+        System.out.println();
     }
 
     private static void cmd(String[] args) {
@@ -413,7 +378,7 @@ public final class kelondroStack extends kelondroRecords {
             }
 		} else if (args[0].equals("-g")) {
 		    kelondroStack fm = new kelondroStack(new File(args[2]), lens);
-            kelondroRow.Entry ret2 = fm.pop(Integer.parseInt(args[1]));
+            kelondroRow.Entry ret2 = fm.pop();
 		    ret = ((ret2 == null) ? null : ret2.getColBytes(1)); 
 		    fm.close();
 		}

@@ -166,9 +166,9 @@ public class plasmaCrawlBalancer {
        
        // iterate through the file stack
        // in general this is a bad idea. But this can only be avoided by avoidance of this method
-       i = urlFileStack.iterator(true);
+       i = urlFileStack.stackIterator(true);
        while (i.hasNext()) {
-           h = new String(((kelondroRecords.Node) i.next()).getKey());
+           h = new String(((kelondroRow.Entry) i.next()).getColBytes(0));
            if (h.equals(urlhash)) {
                i.remove();
                return new plasmaCrawlEntry(entry);

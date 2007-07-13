@@ -310,7 +310,7 @@ public class yacyNewsPool {
         yacyNewsRecord record = outgoingNews.topInc();
         if ((record != null) && (record.distributed() >= maxDistribution)) {
             // move record to its final position. This is only for history
-            publishedNews.push(outgoingNews.pop(0));
+            publishedNews.push(outgoingNews.pop());
         }
         return record;
     }
@@ -353,16 +353,16 @@ public class yacyNewsPool {
         yacyNewsRecord record;
         int pc = 0;
         synchronized (this.incomingNews) {
-            for (int i = this.incomingNews.size() - 1; i >= 0; i--) {
+            Iterator i = incomingNews.records(true);
+            while (i.hasNext()) {
                 // check for interruption
                 if (Thread.currentThread().isInterrupted()) throw new InterruptedException("Shutdown in progress");
                 
                 // get next news record
-                record = this.incomingNews.top(i);
-                if ((i > 500) || (automaticProcessP(record))) {
-                    this.incomingNews.pop(i);
+                record = (yacyNewsRecord) i.next();
+                if (automaticProcessP(record)) {
                     this.processedNews.push(record);
-                    //newsDB.remove(id);
+                    i.remove();
                     pc++;
                 }
             }
@@ -421,8 +421,9 @@ public class yacyNewsPool {
     public synchronized yacyNewsRecord getByOriginator(int dbKey, String category, String originatorHash) throws IOException {
         yacyNewsQueue queue = switchQueue(dbKey);
         yacyNewsRecord record;
-        for (int i = queue.size() - 1; i >= 0; i--) {
-            record = queue.top(i);
+        Iterator i = queue.records(true);
+        while (i.hasNext()) {
+            record = (yacyNewsRecord) i.next();
             if ((record != null) &&
                 (record.category().equals(category)) &&
                 (record.originator().equals(originatorHash))) {
