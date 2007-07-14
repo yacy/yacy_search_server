@@ -255,7 +255,7 @@ public class yacysearch {
                     map.put("description", ((document == null) ? comp.title() : document.getTitle()).replace(',', ' '));
                     map.put("author", ((document == null) ? "" : document.getAuthor()));
                     map.put("tags", ((document == null) ? "" : document.getKeywords(' ')));
-                    yacyCore.newsPool.publishMyNews(new yacyNewsRecord(yacyNewsPool.CATEGORY_SURFTIPP_ADD, map));
+                    yacyCore.newsPool.publishMyNews(yacyNewsRecord.newRecord(yacyNewsPool.CATEGORY_SURFTIPP_ADD, map));
                     document.close();
                 }
             }
@@ -325,7 +325,7 @@ public class yacysearch {
                 		URL url=new URL(result.getUrl());
                 		int port=url.getPort();
                 		//TODO: parse <link rel="favicon" /> ...
-                		prop.put("type_results_" + i + "_favicon", url.getProtocol()+"://"+url.getHost()+((port!=-1)?String.valueOf(port)+":":"")+"/favicon.ico");
+                		prop.put("type_results_" + i + "_favicon", url.getProtocol() + "://" + url.getHost() + ((port != -1) ? (":" + String.valueOf(port)) : "") + "/favicon.ico");
                 }catch(MalformedURLException e){}
                 prop.put("type_results_" + i + "_urlhash", result.getUrlhash());
                 prop.put("type_results_" + i + "_urlhexhash", yacySeed.b64Hash2hexHash(result.getUrlhash()));
