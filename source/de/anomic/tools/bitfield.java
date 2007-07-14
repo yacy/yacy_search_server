@@ -109,7 +109,7 @@ public class bitfield {
         bitfield test = new bitfield(4);
         int l = test.length();
         System.out.println("available: " + l);
-        System.out.println("bevore:    " + test.toString());
+        System.out.println("before:    " + test.toString());
         for (int i = 0; i < l/2; i++) {
             test.set(i, true);
             System.out.println(i + ":" + test.toString()); 
