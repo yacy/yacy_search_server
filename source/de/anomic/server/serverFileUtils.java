@@ -40,7 +40,6 @@
 
 package de.anomic.server;
 
-import java.io.BufferedInputStream;
 import java.io.BufferedOutputStream;
 import java.io.BufferedReader;
 import java.io.ByteArrayInputStream;
@@ -57,10 +56,8 @@ import java.io.PrintWriter;
 import java.io.Reader;
 import java.io.Writer;
 import java.util.HashSet;
-import java.util.Hashtable;
 import java.util.Iterator;
 import java.util.Map;
-import java.util.Properties;
 import java.util.Set;
 import java.util.StringTokenizer;
 import java.util.TreeSet;
@@ -71,6 +68,7 @@ import java.util.zip.ZipOutputStream;
 
 import de.anomic.kelondro.kelondroRow;
 import de.anomic.kelondro.kelondroRowSet;
+import de.anomic.tools.nxTools;
 
 public final class serverFileUtils {
 
@@ -411,6 +409,18 @@ public final class serverFileUtils {
 
     public static Map loadHashMap(File f) {
         // load props
+        try {
+            byte[] b = read(f);
+            return nxTools.table(nxTools.strings(b));
+        } catch (IOException e2) {
+            System.err.println("ERROR: " + f.toString() + " not found in settings path");
+            return null;
+        }
+    }
+
+    /* 
+    public static Map loadHashMap(File f) {
+        // load props
         Properties prop = new Properties();
         BufferedInputStream bufferedIn = null;
         try {
@@ -423,7 +433,7 @@ public final class serverFileUtils {
         }
         return (Hashtable) prop;
     }
-
+     */
     public static void saveMap(File file, Map props, String comment) throws IOException {
         PrintWriter pw = null;
         File tf = new File(file.toString() + "." + (System.currentTimeMillis() % 1000));
