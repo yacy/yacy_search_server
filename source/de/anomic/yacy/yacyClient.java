@@ -529,7 +529,7 @@ public final class yacyClient {
 						singleAbstract = (TreeMap) abstractCache.get(wordhash); // a mapping from url-hashes to a string of peer-hashes
 						if (singleAbstract == null) singleAbstract = new TreeMap();
 						ci = new serverByteBuffer(((String) entry.getValue()).getBytes());
-						System.out.println("DEBUG-ABSTRACTFETCH: for word hash " + wordhash + " received " + ci.toString());
+						//System.out.println("DEBUG-ABSTRACTFETCH: for word hash " + wordhash + " received " + ci.toString());
 						plasmaURL.decompressIndex(singleAbstract, ci, target.hash);
 						abstractCache.put(wordhash, singleAbstract);
 					}

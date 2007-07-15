@@ -307,37 +307,25 @@ public final class serverByteBuffer extends OutputStream {
     }
 
     public serverByteBuffer trim(int start) {
-        // the end value is outside (+1) of the wanted target array
-        if (start > length) throw new IndexOutOfBoundsException("trim: start > length");
-        offset = offset + start;
-        length = length - start;
+        trim(start, this.length - start);
         return this;
     }
 
     public serverByteBuffer trim(int start, int len) {
-        // the end value is outside (+1) of the wanted target array
-        if (start > length) throw new IndexOutOfBoundsException("trim: start > length");
-        if (start + len > length) throw new IndexOutOfBoundsException("trim: start + len > length");
-        offset = offset + start;
-        length = len;
+        if (start + len > this.length) throw new IndexOutOfBoundsException("trim: start + len > length; this.offset = " + this.offset + ", this.length = " + this.length + ", start = " + start + ", len = " + len);
+        this.offset = this.offset + start;
+        this.length = len;
         return this;
     }
 
     public serverByteBuffer trim() {
         int l = 0;
-        while ((l < length) && (buffer[offset + l] <= 32)) l++;
-        int r = length;
-        int u;
-        while ((r > 0) && (buffer[offset + r - 1] <= 32)) {
-            u = isUTF8char(r - 1);
-            if (u > 0) {
-                r += u - 1;
-                break;
-            }
-            r--;
+        while ((l < length) && (buffer[offset + l] <= 32)) {
+            l++;
         }
-        if (l > r) r = l;
-        return trim(l, r - l);
+        int r = length - 1;
+        while ((r > l) && (buffer[offset + r] <= 32)) r--;
+        return trim(l, r - l + 1);
     }
     
     public int isUTF8char(int start) {

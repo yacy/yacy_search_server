@@ -589,7 +589,6 @@ public class plasmaURL {
                 bb.append(',');
         }
         bb.append('}');
-        bb.trim();
         return bb;
     }
 
@@ -597,12 +596,14 @@ public class plasmaURL {
         // target is a mapping from url-hashes to a string of peer-hashes
         if ((ci.byteAt(0) == '{') && (ci.byteAt(ci.length() - 1) == '}')) {
             //System.out.println("DEBUG-DECOMPRESS: input is " + ci.toString());
-            ci = ci.trim(1, ci.length() - 1);
+            ci = ci.trim(1, ci.length() - 2);
             String dom, url, peers;
             while ((ci.length() >= 13) && (ci.byteAt(6) == ':')) {
+                assert ci.length() >= 6 : "ci.length() = " + ci.length();
                 dom = ci.toString(0, 6);
                 ci.trim(7);
                 while ((ci.length() > 0) && (ci.byteAt(0) != ',')) {
+                    assert ci.length() >= 6 : "ci.length() = " + ci.length();
                     url = ci.toString(0, 6) + dom;
                     ci.trim(6);
                     peers = (String) target.get(url);
