@@ -170,7 +170,7 @@ public class ymageBMPParser {
             int n = 0;
             int b;
             for (int rows = 0; rows < height; rows++) {
-                for (int columns = 0; columns < width; columns = columns + 2) {
+                for (int columns = 0; columns < width; columns = columns + 4) {
                     b = ((int) s[offset + n] & 0xff);
                     n++;
                     image.setRGB(columns,     (height - rows - 1), colortable.colorindex[(b & 0xc0) >> 6]);
