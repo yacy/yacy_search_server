@@ -175,7 +175,7 @@ public final class plasmaParser {
         String apps = "sit,hqx,img,dmg,exe,com,bat,sh,vbs,zip,jar";
         String audio = "mp2,mp3,ogg,aac,aif,aiff,wav";
         String video = "swf,avi,wmv,rm,mov,mpg,mpeg,ram,m4v";
-        String image = "jpg,jpeg,jpe,gif,png";
+        String image = "jpg,jpeg,jpe,gif,png,ico,bmp";
         initMediaExt(extString2extList(
                 apps + "," +  // application container
                 "tar,gz,bz2,arj,zip,rar," + // archive formats

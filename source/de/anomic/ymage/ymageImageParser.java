@@ -24,7 +24,7 @@ public class ymageImageParser {
             image = icoparser.getImage(0);
             if (image == null) return null;
         } else {
-            // awt can handle jpg, bmp and gif formats, try it
+            // awt can handle jpg, png and gif formats, try it
             image = Toolkit.getDefaultToolkit().createImage(source);
         }
         

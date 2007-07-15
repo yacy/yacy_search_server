@@ -291,7 +291,7 @@ public class dir {
                         prop.putSafeXML("dirlist_" + fileIdx + "_dir_URL","http://" + yacyCore.seedDB.mySeed.getPublicAddress() + path + fileName + "/");
                     } else {
                         // determine if we should display the description string or a preview image
-                        boolean showImage = /* (description.length() == 0) && */ (fileName.endsWith(".jpg") || fileName.endsWith(".gif") || fileName.endsWith(".png"));
+                        boolean showImage = /* (description.length() == 0) && */ (fileName.endsWith(".jpg") || fileName.endsWith(".gif") || fileName.endsWith(".png") || fileName.endsWith(".ico") || fileName.endsWith(".bmp"));
 
                         // the entry is a file
                         prop.put("dirlist_" + fileIdx + "_dir" , 0);

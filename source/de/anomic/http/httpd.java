@@ -108,7 +108,7 @@ public final class httpd implements serverHandler {
      
      //TODO: Load this from a file
     private static final HashSet disallowZippedContentEncoding = new HashSet(Arrays.asList(new String[]{
-            ".gz", ".tgz", ".jpg", ".jpeg", ".gif", ".zip", ".rar", ".bz2", ".lha", ".jar", ".rpm", ".arc", ".arj", ".wmv"
+            ".gz", ".tgz", ".jpg", ".jpeg", ".gif", ".zip", ".rar", ".bz2", ".lha", ".jar", ".rpm", ".arc", ".arj", ".wmv", ".png", ".ico", ".bmp"
     }));    
     
     // static objects

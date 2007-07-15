@@ -667,10 +667,12 @@ public class plasmaURL {
 
     // doctype calculation
     public static char docType(URL url) {
-        String path = url.getPath();
+        String path = url.getPath().toLowerCase();
         // serverLog.logFinest("PLASMA", "docType URL=" + path);
         char doctype = DT_UNKNOWN;
         if (path.endsWith(".gif"))       { doctype = DT_IMAGE; }
+        else if (path.endsWith(".ico"))  { doctype = DT_IMAGE; }
+        else if (path.endsWith(".bmp"))  { doctype = DT_IMAGE; }
         else if (path.endsWith(".jpg"))  { doctype = DT_IMAGE; }
         else if (path.endsWith(".jpeg")) { doctype = DT_IMAGE; }
         else if (path.endsWith(".png"))  { doctype = DT_IMAGE; }

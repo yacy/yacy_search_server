@@ -142,7 +142,8 @@ public class CacheAdmin_p {
                     final int dotpos = ff.lastIndexOf('.');
                     final String ext = (dotpos >= 0) ? ff.substring(dotpos + 1).toLowerCase() : "";
                     if (ext.equals("gif") || ext.equals("jpg") ||
-                        ext.equals("png") || ext.equals("jpeg")) {
+                        ext.equals("png") || ext.equals("jpeg") ||
+                        ext.equals("ico") || ext.equals("bmp")) {
                     	prop.put("info_type", Image);
                         prop.put("info_type_src", pathString);
                     } else {
