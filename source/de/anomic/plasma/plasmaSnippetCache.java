@@ -97,7 +97,6 @@ public class plasmaSnippetCache {
      * </pre>
      */
     private HashMap				  faviconCache;
-    
     private plasmaHTCache         cacheManager;
     private plasmaParser          parser;
     private serverLog             log;

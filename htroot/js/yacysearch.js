@@ -134,7 +134,7 @@ function handleTextState(req) {
 	// set URL to favicon (if a link-tag was found in the document)
 	if (response.getElementsByTagName("favicon")[0].firstChild != null) {
 		var img = document.getElementById("f" + urlHash);
-		img.src = response.getElementsByTagName("favicon")[0].firstChild.data;
+		img.src = "ViewImage.png?width=16&height=16&url=" + response.getElementsByTagName("favicon")[0].firstChild.data;
 	}
 
 	// replace "<b>" text by <strong> node

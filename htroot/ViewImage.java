@@ -42,7 +42,7 @@
 import java.awt.Container;
 import java.awt.Image;
 import java.awt.MediaTracker;
-import java.awt.Toolkit;
+import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.MalformedURLException;
@@ -53,6 +53,7 @@ import de.anomic.plasma.plasmaSwitchboard;
 import de.anomic.server.serverFileUtils;
 import de.anomic.server.serverObjects;
 import de.anomic.server.serverSwitch;
+import de.anomic.ymage.ymageImageParser;
 
 public class ViewImage {
 
@@ -75,32 +76,41 @@ public class ViewImage {
         
         // getting the image as stream
         Object[] resource = sb.snippetCache.getResource(url, true, timeout, false);
-        if (resource == null) return null;
-        InputStream imgStream = (InputStream) resource[0];
-        if (imgStream == null) return null;
-        
-        // read image data
         byte[] imgb = null;
-        try {
-            imgb = serverFileUtils.read(imgStream);
-        } catch (IOException e) {
-            return null;
-        } finally {
-            try { imgStream.close(); } catch (Exception e) {/* ignore this */}
+        if (resource == null) {
+            if (urls.endsWith(".ico")) {
+                // load default favicon dfltfvcn.ico
+                try {
+                    imgb = serverFileUtils.read(new File(sb.getRootPath(), "htroot/env/grafics/dfltfvcn.ico"));
+                } catch (IOException e) {
+                    return null;
+                }
+            } else {
+                return null;
+            }
+        } else {
+            InputStream imgStream = (InputStream) resource[0];
+            if (imgStream == null) return null;
+        
+            // read image data
+            try {
+                imgb = serverFileUtils.read(imgStream);
+            } catch (IOException e) {
+                return null;
+            } finally {
+                try { imgStream.close(); } catch (Exception e) {/* ignore this */}
+            }
         }
         
-        // create image 
-        MediaTracker mediaTracker = new MediaTracker(new Container()); 
-        Image original = Toolkit.getDefaultToolkit().createImage(imgb);
-        int handle = original.hashCode();
-        mediaTracker.addImage(original, handle); 
-        try {mediaTracker.waitForID(handle);} catch (InterruptedException e) {} 
+        // read image
+        Image image = ymageImageParser.parse(urls.toString(), imgb);
+        
         boolean auth = ((String) header.get("CLIENTIP", "")).equals("localhost") || sb.verifyAuthentication(header, false); // handle access rights
-        if ((auth) && ((width == 0) || (height == 0)) && (maxwidth == 0) && (maxheight == 0)) return original;
+        if ((auth) && ((width == 0) || (height == 0)) && (maxwidth == 0) && (maxheight == 0)) return image;
 
         // find original size
-        int h = original.getHeight(null);
-        int w = original.getWidth(null);
+        int h = image.getHeight(null);
+        int w = image.getWidth(null);
         
         //System.out.println("DEBUG: get access to image " + url.toNormalform() + " is " + ((auth) ? "authorized" : "NOT authorized"));
         
@@ -134,7 +144,8 @@ public class ViewImage {
         height = Math.max(height, 1);
         
         // scale image 
-        Image scaled = original.getScaledInstance(width, height, Image.SCALE_AREA_AVERAGING); 
+        Image scaled = image.getScaledInstance(width, height, Image.SCALE_AREA_AVERAGING); 
+        MediaTracker mediaTracker = new MediaTracker(new Container()); 
         mediaTracker.addImage(scaled, 0); 
         try {mediaTracker.waitForID(0);} catch (InterruptedException e) {} 
 

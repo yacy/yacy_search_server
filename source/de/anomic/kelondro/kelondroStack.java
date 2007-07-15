@@ -260,17 +260,7 @@ public final class kelondroStack extends kelondroRecords {
         if (h == null) return null;
         return getNode(h, true);
     }
-    /*
-    private Node queueNode(int dist, int side, int dir) throws IOException {
-        // with dist == 0 this is the same function as with
-        // getNode(getHandle(side), null, 0)
-        if (dist >= size()) return null; // that would exceed the stack
-        Handle h = getHandle(side);
-        if (h == null) return null;
-        while ((dist-- > 0) && (h != null)) h = getNode(h, false).getOHHandle(dir); // track through elements
-        if (h == null) return null; else return getNode(h, true);
-    }
-*/
+    
     public int imp(File file, String separator) throws IOException {
         // imports a value-separated file, returns number of records that have been read
         RandomAccessFile f = null;
