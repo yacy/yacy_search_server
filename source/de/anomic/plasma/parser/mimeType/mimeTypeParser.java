@@ -159,8 +159,8 @@ implements Parser {
                 }
                 
                 // to avoid loops we have to test if the mimetype has changed ...
-                if (this.getSupportedMimeTypes().containsKey(mimeType)) throw new ParserException("Unable to detect mimetype of resource.",location);
-                if (orgMimeType.equals(mimeType)) throw new ParserException("Unable to detect mimetype of resource.",location);
+                if (this.getSupportedMimeTypes().containsKey(mimeType)) throw new ParserException("Unable to detect mimetype of resource (1).",location);
+                if (orgMimeType.equals(mimeType)) throw new ParserException("Unable to detect mimetype of resource (2).",location);
                                 
                 // check for interruption
                 checkInterruption();
@@ -169,9 +169,9 @@ implements Parser {
                 plasmaParser theParser = new plasmaParser();
                 return theParser.parseSource(location,mimeType,charset,sourceFile);
             }
-            throw new ParserException("Unable to detect mimetype of resource.",location);
+            throw new ParserException("Unable to detect mimetype of resource (3).",location);
         } catch (MagicMatchNotFoundException e) {
-            throw new ParserException("Unable to detect mimetype of resource.",location);
+            throw new ParserException("Unable to detect mimetype of resource (4).",location);
         } catch (Exception e) {
             if (e instanceof InterruptedException) throw (InterruptedException) e;
             if (e instanceof ParserException) throw (ParserException) e;
