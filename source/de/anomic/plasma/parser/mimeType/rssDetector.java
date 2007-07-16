@@ -48,7 +48,6 @@ import java.io.ByteArrayInputStream;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.InputStream;
-import java.lang.reflect.Method;
 import java.util.Map;
 
 import net.sf.jmimemagic.MagicDetector;
@@ -93,26 +92,7 @@ public class rssDetector implements MagicDetector {
     }
     
     private String[] detect(InputStream input) {
-        try {
-
-            // getting the format detector class
-            Class formatDetector = Class.forName("de.nava.informa.utils.FormatDetector");
-            
-            // getting the proper method
-            Method getFormat = formatDetector.getMethod("getFormat", new Class[]{InputStream.class});
-            
-            // invoke the method
-            Object format = getFormat.invoke(null, new Object[] {input});
-            
-            if (format == null) return null;
-            else if (format.toString().startsWith("RSS ")) return new String[]{"application/rss+xml"};
-            else if (format.toString().startsWith("Atom ")) return new String[]{"application/atom+xml"};
-            else return null;
-        } catch (Exception e) {
-            return null;
-        } catch (Error e) {
-            return null;
-        }        
+        return new String[]{"application/rss+xml"};
     }
 
 }

@@ -46,10 +46,8 @@ package de.anomic.plasma.parser.rss;
 import java.io.ByteArrayInputStream;
 import java.io.InputStream;
 import java.io.Writer;
-import java.util.Collection;
 import java.util.HashMap;
 import java.util.Hashtable;
-import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.Map;
 import java.util.TreeSet;
@@ -66,11 +64,8 @@ import de.anomic.plasma.parser.ParserException;
 import de.anomic.server.serverByteBuffer;
 import de.anomic.server.serverCharBuffer;
 import de.anomic.server.serverFileUtils;
-import de.nava.informa.core.ChannelIF;
-import de.nava.informa.core.ImageIF;
-import de.nava.informa.impl.basic.ChannelBuilder;
-import de.nava.informa.impl.basic.Item;
-import de.nava.informa.parsers.FeedParser;
+import de.anomic.xml.rssReader;
+import de.anomic.xml.rssReader.Item;
 
 public class rssParser extends AbstractParser implements Parser {
 
@@ -79,7 +74,7 @@ public class rssParser extends AbstractParser implements Parser {
      * @see #getSupportedMimeTypes()
      */  
     public static final Hashtable SUPPORTED_MIME_TYPES = new Hashtable();    
-    static { 
+    static {
         SUPPORTED_MIME_TYPES.put("text/rss","xml,rss,rdf"); 
         SUPPORTED_MIME_TYPES.put("application/rdf+xml","xml,rss,rdf");
         SUPPORTED_MIME_TYPES.put("application/rss+xml","xml,rss,rdf");
@@ -90,11 +85,7 @@ public class rssParser extends AbstractParser implements Parser {
      * a list of library names that are needed by this parser
      * @see Parser#getLibxDependences()
      */
-    private static final String[] LIBX_DEPENDENCIES = new String[] {
-        "informa-0.6.0.jar",
-        "commons-logging.jar",
-        "jdom.jar"
-    };       
+    private static final String[] LIBX_DEPENDENCIES = new String[] {};       
     
 	public rssParser() {
 		super(LIBX_DEPENDENCIES);
@@ -110,44 +101,32 @@ public class rssParser extends AbstractParser implements Parser {
             serverByteBuffer text = new serverByteBuffer();
             serverCharBuffer authors = new serverCharBuffer();
             
-            
-	        // creating a channel-builder
-	        ChannelBuilder builder = new ChannelBuilder();   
-            
-            // parsing the rss/atom feed
-	        ChannelIF channel = FeedParser.parse(builder, source);
+            rssReader reader = new rssReader(source);
             
             // getting the rss feed title and description
-            String feedTitle = channel.getTitle();
+            String feedTitle = reader.getChannel().getTitle();
 
             // getting feed creator
-			String feedCreator = channel.getCreator();
+			String feedCreator = reader.getChannel().getAuthor();
 			if (feedCreator != null && feedCreator.length() > 0) authors.append(",").append(feedCreator);            
             
             // getting the feed description
-            String feedDescription = channel.getDescription();
+            String feedDescription = reader.getChannel().getDescription();
             
-            // getting the channel site url
-            //URL	channelSiteURL = channel.getSite();
-            
-            ImageIF channelImage = channel.getImage();
-            if (channelImage != null) {
-                images.add(new htmlFilterImageEntry(new URL(channelImage.getLocation().toExternalForm()), channelImage.getTitle(), -1, -1));
+            if (reader.getImage() != null) {
+                images.add(new htmlFilterImageEntry(new URL(reader.getImage()), feedTitle, -1, -1));
             }            
             
             // loop through the feed items
-            Collection feedItemCollection = channel.getItems();
-            if (!feedItemCollection.isEmpty()) {
-				Iterator feedItemIterator = feedItemCollection.iterator();
-                while (feedItemIterator.hasNext()) {
+            for (int i = 0; i < reader.items(); i++) {
                     // check for interruption
                     checkInterruption();
                     
                     // getting the next item
-					Item item = (Item)feedItemIterator.next();	
+					Item item = reader.getItem(i);	
                     
         			String itemTitle = item.getTitle();
-        			URL    itemURL   = new URL(item.getLink().toExternalForm());
+        			URL    itemURL   = new URL(item.getLink());
         			String itemDescr = item.getDescription();
         			String itemCreator = item.getCreator();
         			if (itemCreator != null && itemCreator.length() > 0) authors.append(",").append(itemCreator);
@@ -158,7 +137,7 @@ public class rssParser extends AbstractParser implements Parser {
                 	if ((text.length() != 0) && (text.byteAt(text.length() - 1) != 32)) text.append((byte) 32);
                 	text.append(new serverCharBuffer(htmlFilterAbstractScraper.stripAll(new serverCharBuffer(itemDescr.toCharArray()))).trim().toString()).append(' ');
                     
-                    String itemContent = item.getElementValue("content");
+                    String itemContent = item.getDescription();
                     if ((itemContent != null) && (itemContent.length() > 0)) {
                         
                         htmlFilterContentScraper scraper = new htmlFilterContentScraper(itemURL);
@@ -187,7 +166,6 @@ public class rssParser extends AbstractParser implements Parser {
                         }
                         
                     }
-                }
             }
             
             plasmaParserDocument theDoc = new plasmaParserDocument(

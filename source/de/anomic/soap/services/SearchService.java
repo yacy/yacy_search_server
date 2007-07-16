@@ -186,7 +186,7 @@ public class SearchService extends AbstractService
     
     
     /**
-    * @param url the url
+    * @param link the url
     * @param viewMode one of (VIEW_MODE_AS_PLAIN_TEXT = 1,
     * VIEW_MODE_AS_PARSED_TEXT = 2,
     * VIEW_MODE_AS_PARSED_SENTENCES = 3) [Source: ViewFile.java]

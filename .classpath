@@ -16,7 +16,6 @@
 	<classpathentry kind="lib" path="libx/commons-discovery.jar"/>
 	<classpathentry kind="lib" path="libx/commons-jxpath-1.1.jar"/>
 	<classpathentry kind="lib" path="libx/commons-logging.jar"/>
-	<classpathentry kind="lib" path="libx/informa-0.6.0.jar"/>
 	<classpathentry kind="lib" path="libx/jakarta-oro-2.0.7.jar"/>
 	<classpathentry kind="lib" path="libx/jaxrpc.jar"/>
 	<classpathentry kind="lib" path="libx/jdom.jar"/>
