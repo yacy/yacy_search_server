@@ -357,7 +357,7 @@ public class WatchCrawler_p {
         
         // performance settings
         long LCbusySleep = Integer.parseInt(env.getConfig(plasmaSwitchboard.CRAWLJOB_LOCAL_CRAWL_BUSYSLEEP, "100"));
-        int LCppm = (int) (60000L / LCbusySleep);
+        int LCppm = (int) (60000L / Math.max(1,LCbusySleep));
         prop.put("crawlingSpeedMaxChecked", (LCppm >= 1000) ? 1 : 0);
         prop.put("crawlingSpeedCustChecked", ((LCppm > 10) && (LCppm < 1000)) ? 1 : 0);
         prop.put("crawlingSpeedMinChecked", (LCppm <= 10) ? 1 : 0);
