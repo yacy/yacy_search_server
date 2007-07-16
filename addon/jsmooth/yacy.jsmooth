@@ -22,11 +22,8 @@
        <classPath>..\..\libx\commons-codec-1.3.jar</classPath>
        <classPath>..\..\libx\commons-discovery.jar</classPath>
        <classPath>..\..\libx\commons-jxpath-1.1.jar</classPath>
-       <classPath>..\..\libx\commons-logging.jar</classPath>
-       <classPath>..\..\libx\informa-0.6.0.jar</classPath>
        <classPath>..\..\libx\jakarta-oro-2.0.7.jar</classPath>
        <classPath>..\..\libx\jaxrpc.jar</classPath>
-       <classPath>..\..\libx\jdom.jar</classPath>
        <classPath>..\..\libx\jmimemagic-0.0.4a.jar</classPath>
        <classPath>..\..\libx\jrpm-head.jar</classPath>
        <classPath>..\..\libx\jrpm-SNAPSHOT.jar</classPath>

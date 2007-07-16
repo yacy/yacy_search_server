@@ -334,14 +334,12 @@
           <pathelement location="${libx}/jsch-0.1.21.jar" />                    
         	
           <!-- libs needed by the upnp port forwarder -->
-          	<pathelement location="${libx}/commons-logging.jar" />
    			<pathelement location="${libx}/commons-jxpath-1.1.jar" />        	
       		<pathelement location="${libx}/sbbi-upnplib-1.0.3.jar" />
         </classpath>
     </javac>      
     <copy todir="${release_ext}/libx/">
         <fileset dir="${libx}" includes="jsch-0.1.21.*"/> 
-	   	<fileset dir="${libx}" includes="commons-logging.*"/>
         <fileset dir="${libx}" includes="commons-jxpath-1.1.*"/>    	
         <fileset dir="${libx}" includes="sbbi-upnplib-1.0.3.*"/>
     </copy>
@@ -366,9 +364,6 @@
 	         source="${javacSource}" target="${javacTarget}">
 	    <classpath>
 	    	<path refid="project.class.path"/>
-		    <pathelement location="${libx}/informa-0.6.0.jar" />
-		    <pathelement location="${libx}/commons-logging.jar" />
-		    <pathelement location="${libx}/jdom.jar" />
 	    </classpath>
 	    <include name="de/anomic/data/rssReader.java" />
 	  </javac> 		    	

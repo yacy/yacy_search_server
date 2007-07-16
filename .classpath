@@ -15,10 +15,8 @@
 	<classpathentry kind="lib" path="libx/commons-codec-1.3.jar"/>
 	<classpathentry kind="lib" path="libx/commons-discovery.jar"/>
 	<classpathentry kind="lib" path="libx/commons-jxpath-1.1.jar"/>
-	<classpathentry kind="lib" path="libx/commons-logging.jar"/>
 	<classpathentry kind="lib" path="libx/jakarta-oro-2.0.7.jar"/>
 	<classpathentry kind="lib" path="libx/jaxrpc.jar"/>
-	<classpathentry kind="lib" path="libx/jdom.jar"/>
 	<classpathentry kind="lib" path="libx/jmimemagic-0.1.0.jar"/>
 	<classpathentry kind="lib" path="libx/jrpm-head.jar"/>
 	<classpathentry kind="lib" path="libx/jrpm-SNAPSHOT.jar"/>

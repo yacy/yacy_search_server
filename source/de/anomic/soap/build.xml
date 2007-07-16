@@ -24,8 +24,7 @@
 		  <!-- all needed libs -->  	
  		  <pathelement location="${libx}/axis.jar" />  	  		    	
  		  <pathelement location="${libx}/axis-ant.jar" />
- 		  <pathelement location="${libx}/commons-discovery.jar" />   		  
- 		  <pathelement location="${libx}/commons-logging.jar" />   		     		  
+ 		  <pathelement location="${libx}/commons-discovery.jar" />	     		  
  		  <pathelement location="${libx}/jaxrpc.jar" />   		     		  
  		  <pathelement location="${libx}/saaj.jar" />   		     		  
  		  <pathelement location="${libx}/wsdl4j.jar" />    
@@ -59,7 +58,7 @@
     <target name="zip" depends="compile">
   	  <tar destfile="${addonArchive}" compression="gzip">
   	  	<tarfileset dir="${libx}" 
-  	  				includes="axis.jar,axis-ant.jar,commons-discovery.jar,commons-logging.jar,jaxrpc.jar,saaj.jar,wsdl4j.jar,gnumail.jar,activation.jar,inetlib.jar" 
+  	  				includes="axis.jar,axis-ant.jar,commons-discovery.jar,jaxrpc.jar,saaj.jar,wsdl4j.jar,gnumail.jar,activation.jar,inetlib.jar" 
   	  				prefix="${releaseDir}/libx/"
 			  		dirmode="755" mode="644"/>
   	  	<tarfileset dir="${src}/de/anomic/soap/" 
@@ -77,7 +76,7 @@
     <target name="copy" depends="compile">
     	<!-- copy libx -->
         <copy todir="${release}/libx/">
-             <fileset dir="${libx}" includes="axis.jar,axis-ant.jar,commons-discovery.jar,commons-logging.jar,jaxrpc.jar,saaj.jar,wsdl4j.jar,gnumail.jar,activation.jar,inetlib.jar"/> 
+             <fileset dir="${libx}" includes="axis.jar,axis-ant.jar,commons-discovery.jar,jaxrpc.jar,saaj.jar,wsdl4j.jar,gnumail.jar,activation.jar,inetlib.jar"/> 
         </copy>
         <!-- copy source files -->
         <copy todir="${release}/source/de/anomic/soap/">

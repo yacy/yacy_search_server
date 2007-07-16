@@ -14,14 +14,7 @@
     <target name="compile">
   	  <javac srcdir="${src}/de/anomic/plasma/parser/${parserShortName}" destdir="${build}" source="${javacSource}" target="${javacTarget}" debug="true" debuglevel="lines,vars,source">
   	  	<classpath>
-  	  	  <pathelement location="${build}" />	
-  	  	
-		  <!-- main lib needed to parse rss/atom feed files -->  	
-   		  <pathelement location="${libx}/informa-0.6.0.jar" />  	  		    	
-  		  	
-  		  <!-- libs needed by the main lib -->  	  	  		  	
-    	  	  <pathelement location="${libx}/commons-logging.jar" />     
-    	  	  <pathelement location="${libx}/jdom.jar" />     
+  	  	  <pathelement location="${build}" />
   	  	</classpath>
   	  </javac>    	
     </target>
@@ -29,10 +22,6 @@
 
     <target name="zip" depends="compile">
   	  <tar destfile="${parserArchive}" compression="gzip">
-  	  	<tarfileset dir="${libx}" 
-  	  				includes="informa-0.6.0.*,commons-logging.jar,jdom.jar" 
-  	  				prefix="${releaseFileParentDir}/libx/"
-			  	  	dirmode="755" mode="644"/>
   	  	<tarfileset dir="${src}/de/anomic/plasma/parser/${parserShortName}" 
   	  				prefix="${releaseFileParentDir}/source/de/anomic/plasma/parser/${parserShortName}"
 			  	  	dirmode="755" mode="644"/>
@@ -43,9 +32,6 @@
     </target>	
 
     <target name="copy" depends="compile">
-        <copy todir="${release}/libx/">
-             <fileset dir="${libx}" includes="informa-0.6.0.*,commons-logging.jar,jdom.jar"/> 
-        </copy>
         <copy todir="${release}/source/de/anomic/plasma/parser/${parserShortName}">
              <fileset dir="${src}/de/anomic/plasma/parser/${parserShortName}" includes="**/*"/> 
         </copy>        
