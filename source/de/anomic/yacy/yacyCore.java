@@ -62,23 +62,17 @@ import java.io.FilenameFilter;
 import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.URI;
-import java.text.ParseException;
-import java.text.SimpleDateFormat;
 import java.util.Collections;
-import java.util.Date;
-import java.util.GregorianCalendar;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
-import java.util.TimeZone;
 
 import de.anomic.http.httpc;
 import de.anomic.net.URL;
 import de.anomic.plasma.plasmaSwitchboard;
 import de.anomic.server.serverCore;
-import de.anomic.server.serverDate;
 import de.anomic.server.serverSemaphore;
 import de.anomic.server.serverSwitch;
 import de.anomic.server.logging.serverLog;
@@ -118,62 +112,6 @@ public class yacyCore {
 
     private static int onlineMode = 1;
     private plasmaSwitchboard switchboard;
-
-    private static TimeZone GMTTimeZone = TimeZone.getTimeZone("America/Los_Angeles");
-    public static String universalDateShortPattern = "yyyyMMddHHmmss";
-    private static SimpleDateFormat shortFormatter = new SimpleDateFormat(universalDateShortPattern);
-
-    public static long universalTime() {
-        return universalDate().getTime();
-    }
-
-    public static Date universalDate() {
-        return new GregorianCalendar(GMTTimeZone).getTime();
-    }
-
-    public static String universalDateShortString() {
-        return universalDateShortString(universalDate());
-    }
-
-    public static String universalDateShortString(Date date) {
-        /*
-         * This synchronized is needed because SimpleDateFormat is not thread-safe.
-         * See: http://bugs.sun.com/bugdatabase/view_bug.do?bug_id=6231579
-         */
-    	synchronized(yacyCore.shortFormatter) {    	
-    		return shortFormatter.format(date);
-    	}
-    }
-    
-    public static Date parseUniversalDate(String timeString) throws ParseException {
-        /*
-         * This synchronized is needed because SimpleDateFormat is not thread-safe.
-         * See: http://bugs.sun.com/bugdatabase/view_bug.do?bug_id=6231579
-         */
-    	synchronized(yacyCore.shortFormatter) {
-    		return yacyCore.shortFormatter.parse(timeString);
-    	}
-    }
-
-    public static Date parseUniversalDate(String remoteTimeString, String remoteUTCOffset) {
-        if (remoteTimeString == null || remoteTimeString.length() == 0) { return new Date(); }
-        if (remoteUTCOffset == null || remoteUTCOffset.length() == 0) { return new Date(); }
-        try {
-            /*
-             * This synchronized is needed because SimpleDateFormat is not thread-safe.
-             * See: http://bugs.sun.com/bugdatabase/view_bug.do?bug_id=6231579
-             */        	
-        	synchronized(yacyCore.shortFormatter) {
-        		return new Date(yacyCore.shortFormatter.parse(remoteTimeString).getTime() - serverDate.UTCDiff() + serverDate.UTCDiff(remoteUTCOffset));
-        	}
-        } catch (java.text.ParseException e) {
-            log.logFinest("parseUniversalDate " + e.getMessage() + ", remoteTimeString=[" + remoteTimeString + "]");
-            return new Date();
-        } catch (java.lang.NumberFormatException e) {
-            log.logFinest("parseUniversalDate " + e.getMessage() + ", remoteTimeString=[" + remoteTimeString + "]");
-            return new Date();
-        }
-    }
 
     public static int yacyTime() {
         // the time since startup of yacy in seconds

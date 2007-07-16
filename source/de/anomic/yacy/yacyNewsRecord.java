@@ -56,7 +56,7 @@ public class yacyNewsRecord {
 
     public static final int maxNewsRecordLength  = 512;
     public static final int categoryStringLength = 8;
-    public static final int idLength = yacyCore.universalDateShortPattern.length() + yacySeedDB.commonHashLength;
+    public static final int idLength = serverDate.shortSecondFormatterPattern.length() + yacySeedDB.commonHashLength;
 
     private String originator;  // hash of originating peer
     private Date   created;     // Date when news was created by originator
@@ -68,13 +68,13 @@ public class yacyNewsRecord {
     public static final int attributesMaxLength = maxNewsRecordLength
                                                   - idLength
                                                   - categoryStringLength
-                                                  - yacyCore.universalDateShortPattern.length()
+                                                  - serverDate.shortSecondFormatterPattern.length()
                                                   - 2;
     
     public static final kelondroRow rowdef = new kelondroRow(
             "String idx-" + idLength + " \"id = created + originator\"," +
             "String cat-" + categoryStringLength + "," +
-            "String rec-" + yacyCore.universalDateShortPattern.length() + "," +
+            "String rec-" + serverDate.shortSecondFormatterPattern.length() + "," +
             "short  dis-2 {b64e}," +
             "String att-" + attributesMaxLength,
             kelondroNaturalOrder.naturalOrder, 0
@@ -112,8 +112,8 @@ public class yacyNewsRecord {
         if (attributes.toString().length() > attributesMaxLength) throw new IllegalArgumentException("attributes length (" + attributes.toString().length() + ") exceeds maximum (" + attributesMaxLength + ")");
         this.category = (attributes.containsKey("cat")) ? (String) attributes.get("cat") : "";
         if (category.length() > categoryStringLength) throw new IllegalArgumentException("category length (" + category.length() + ") exceeds maximum (" + categoryStringLength + ")");
-        this.received = (attributes.containsKey("rec")) ? yacyCore.parseUniversalDate((String) attributes.get("rec"), serverDate.UTCDiffString()) : new Date();
-        this.created = (attributes.containsKey("cre")) ? yacyCore.parseUniversalDate((String) attributes.get("cre"), serverDate.UTCDiffString()) : new Date();
+        this.received = (attributes.containsKey("rec")) ? serverDate.parseShortSecondTime((String) attributes.get("rec"), serverDate.UTCDiffString()) : new Date();
+        this.created = (attributes.containsKey("cre")) ? serverDate.parseShortSecondTime((String) attributes.get("cre"), serverDate.UTCDiffString()) : new Date();
         this.distributed = (attributes.containsKey("dis")) ? Integer.parseInt((String) attributes.get("dis")) : 0;
         this.originator = (attributes.containsKey("ori")) ? (String) attributes.get("ori") : "";
         removeStandards();
@@ -136,10 +136,10 @@ public class yacyNewsRecord {
         if (attributes.toString().length() > attributesMaxLength) throw new IllegalArgumentException("attributes length (" + attributes.toString().length() + ") exceeds maximum (" + attributesMaxLength + ")");
         this.attributes = attributes;
         this.received = received;
-        this.created = yacyCore.parseUniversalDate(id.substring(0, yacyCore.universalDateShortPattern.length()), serverDate.UTCDiffString());
+        this.created = serverDate.parseShortSecondTime(id.substring(0, serverDate.shortSecondFormatterPattern.length()), serverDate.UTCDiffString());
         this.category = category;
         this.distributed = distributed;
-        this.originator = id.substring(yacyCore.universalDateShortPattern.length());
+        this.originator = id.substring(serverDate.shortSecondFormatterPattern.length());
         removeStandards();
     }
 
@@ -156,8 +156,8 @@ public class yacyNewsRecord {
         // attention: this has no additional encoding
         if (this.originator != null) attributes.put("ori", this.originator);
         if (this.category != null)   attributes.put("cat", this.category);
-        if (this.created != null)    attributes.put("cre", yacyCore.universalDateShortString(this.created));
-        if (this.received != null)   attributes.put("rec", yacyCore.universalDateShortString(this.received));
+        if (this.created != null)    attributes.put("cre", serverDate.shortSecondTime(this.created));
+        if (this.received != null)   attributes.put("rec", serverDate.shortSecondTime(this.received));
         attributes.put("dis", Integer.toString(this.distributed));
         String theString = attributes.toString();
         removeStandards();
@@ -165,7 +165,7 @@ public class yacyNewsRecord {
     }
 
     public String id() {
-        return yacyCore.universalDateShortString(created) + originator;
+        return serverDate.shortSecondTime(created) + originator;
     }
 
     public String originator() {

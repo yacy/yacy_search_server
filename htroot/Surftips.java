@@ -39,6 +39,7 @@ import de.anomic.kelondro.kelondroRow;
 import de.anomic.kelondro.kelondroNaturalOrder;
 import de.anomic.plasma.plasmaSwitchboard;
 import de.anomic.plasma.urlPattern.plasmaURLPattern;
+import de.anomic.server.serverDate;
 import de.anomic.server.serverObjects;
 import de.anomic.server.serverSwitch;
 import de.anomic.tools.crypt;
@@ -112,7 +113,7 @@ public class Surftips {
             //accumulateVotes(negativeHashes, positiveHashes, yacyNewsPool.OUTGOING_DB);
             //accumulateVotes(negativeHashes, positiveHashes, yacyNewsPool.PUBLISHED_DB);
             kelondroMScoreCluster ranking = new kelondroMScoreCluster(); // score cluster for url hashes
-            kelondroRow rowdef = new kelondroRow("String url-255, String title-120, String description-120, String refid-" + (yacyCore.universalDateShortPattern.length() + 12), kelondroNaturalOrder.naturalOrder, 0);
+            kelondroRow rowdef = new kelondroRow("String url-255, String title-120, String description-120, String refid-" + (serverDate.shortSecondFormatterPattern.length() + 12), kelondroNaturalOrder.naturalOrder, 0);
             HashMap surftips = new HashMap(); // a mapping from an url hash to a kelondroRow.Entry with display properties
             accumulateSurftips(surftips, ranking, rowdef, negativeHashes, positiveHashes, yacyNewsPool.INCOMING_DB);
             //accumulateSurftips(surftips, ranking, rowdef, negativeHashes, positiveHashes, yacyNewsPool.OUTGOING_DB);

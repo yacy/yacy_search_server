@@ -191,7 +191,7 @@ public final class yacyVersion implements Comparator, Comparable {
         return true;
     }
     
-    public static final yacyVersion rulebasedUpdateInfo() {
+    public static final yacyVersion rulebasedUpdateInfo(boolean manual) {
         // according to update properties, decide if we should retrieve update information
         // if true, the release that can be obtained is returned.
         // if false, null is returned
@@ -199,12 +199,18 @@ public final class yacyVersion implements Comparator, Comparable {
         
         // check if update process allowes update retrieve
         String process = sb.getConfig("update.process", "manual");
-        if (!process.equals("auto")) return null; // no, its a manual or guided process
+        if ((!manual) && (!process.equals("auto"))) {
+            yacyCore.log.logInfo("rulebasedUpdateInfo: not a automatic update selected");
+            return null; // no, its a manual or guided process
+        }
         
         // check if the last retrieve time is a minimum time ago
         long cycle = Math.max(1, sb.getConfigLong("update.cycle", 168)) * 24 * 60 * 60 * 1000;
         long timeLookup = sb.getConfigLong("update.time.lookup", System.currentTimeMillis());
-        if (timeLookup + cycle > System.currentTimeMillis()) return null; // no we have recently made a lookup
+        if ((!manual) && (timeLookup + cycle > System.currentTimeMillis())) {
+            yacyCore.log.logInfo("rulebasedUpdateInfo: too early for a lookup for a new release");
+            return null; // no we have recently made a lookup
+        }
         
         // check if we know that there is a release that is more recent than that which we are using
         TreeSet[] releasess = yacyVersion.allReleases(true); // {0=promain, 1=prodev, 2=stdmain, 3=stddev}
@@ -213,20 +219,36 @@ public final class yacyVersion implements Comparator, Comparable {
         yacyVersion latestdev  = (yacyVersion) releasess[(pro) ? 1 : 3].first();
         String concept = sb.getConfig("update.concept", "any");
         String blacklist = sb.getConfig("update.blacklist", ".\\...[123]");
-        if (concept.equals("any")) {
+        if ((manual) || (concept.equals("any"))) {
             // return a dev-release or a main-release
             if ((latestdev.compareTo(latestmain) > 0) && (!(Float.toString(latestdev.releaseNr).matches(blacklist)))) {
-                return (latestdev.compareTo(thisVersion()) > 0) ? latestdev : null;
+                if (latestdev.compareTo(thisVersion()) > 0) return latestdev; else {
+                    yacyCore.log.logInfo("rulebasedUpdateInfo: latest dev is not more recent than installed release");
+                    return null;
+                }
             } else {
-                if ((Float.toString(latestmain.releaseNr).matches(blacklist))) return null;
-                return (latestmain.compareTo(thisVersion()) > 0) ? latestmain : null;
+                if ((Float.toString(latestmain.releaseNr).matches(blacklist))) {
+                    yacyCore.log.logInfo("rulebasedUpdateInfo: latest dev matches with blacklist");
+                    return null;
+                }
+                if (latestmain.compareTo(thisVersion()) > 0) return latestmain; else {
+                    yacyCore.log.logInfo("rulebasedUpdateInfo: latest main is not more recent than installed release (1)");
+                    return null;
+                }
             }
         }
         if (concept.equals("main")) {
             // return a main-release
-            if ((Float.toString(latestmain.releaseNr).matches(blacklist))) return null;
-            return (latestmain.compareTo(thisVersion()) > 0) ? latestmain : null; 
+            if ((Float.toString(latestmain.releaseNr).matches(blacklist))) {
+                yacyCore.log.logInfo("rulebasedUpdateInfo: latest main matches with blacklist");
+                return null;
+            }
+            if (latestmain.compareTo(thisVersion()) > 0) return latestmain; else {
+                yacyCore.log.logInfo("rulebasedUpdateInfo: latest main is not more recent than installed release (2)");
+                return null; 
+            }
         }
+        yacyCore.log.logInfo("rulebasedUpdateInfo: failed to find more recent release");
         return null;
     }
     
@@ -316,7 +338,7 @@ public final class yacyVersion implements Comparator, Comparable {
         httpc.wget(
                 release.url,
                 release.url.getHost(),
-                1000, 
+                300000, 
                 null, 
                 null, 
                 plasmaSwitchboard.getSwitchboard().remoteProxyConfig,

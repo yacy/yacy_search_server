@@ -195,7 +195,7 @@ public class plasmaWebStructure {
     
     private static String map2refstr(Map map) {
         StringBuffer s = new StringBuffer(map.size() * 10);
-        s.append(plasmaURL.shortDayFormatter.format(new Date()));
+        s.append(serverDate.shortDayFormatter.format(new Date()));
         Iterator i = map.entrySet().iterator();
         Map.Entry entry;
         String h;

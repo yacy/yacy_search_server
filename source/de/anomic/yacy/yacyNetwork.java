@@ -31,6 +31,7 @@ import java.util.Date;
 
 import de.anomic.plasma.plasmaSwitchboard;
 import de.anomic.server.serverCodings;
+import de.anomic.server.serverDate;
 import de.anomic.server.serverObjects;
 import de.anomic.server.serverSwitch;
 import de.anomic.tools.crypt;
@@ -77,7 +78,7 @@ public class yacyNetwork {
 		if (targetHash != null) post.put("youare", targetHash);
         
         // time information for synchronization
-		post.put("mytime", yacyCore.universalDateShortString(new Date()));
+		post.put("mytime", serverDate.shortSecondTime(new Date()));
 		post.put("myUTC", System.currentTimeMillis());
 
         // network identification

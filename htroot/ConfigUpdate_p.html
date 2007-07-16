@@ -23,19 +23,30 @@
         <option #(selected)#::selected#(/selected)# value="#[url]#">#[name]#</option>
         #{/availreleases}#
         </select>
-    	&nbsp;&nbsp;<input type="submit" name="downloadRelease" value="DownloadRelease" />
+    	&nbsp;&nbsp;<input type="submit" name="downloadRelease" value="Download Release" />
+    	&nbsp;&nbsp;<input type="submit" name="checkRelease" value="Check for new Release" />
       </form></dd>
-      <dt>Downloaded Releases</dt>
+      <dt><br />Downloaded Releases</dt>
       <dd><form action="Steering.html" method="get">
         &nbsp;<select name="releaseinstall">
         #{downloadedreleases}#
         <option #(selected)#::selected#(/selected)# value="#[file]#">#[name]#</option>
         #{/downloadedreleases}#
-        </select>#(deployenabled)#::no&nbsp;automated installation on development environments::
-    	&nbsp;&nbsp;<button type="submit" name="update" value="InstallRelease">
-          <img src="/env/grafics/lock.gif" alt="" />
-          Install Release
-        </button>#(/deployenabled)#
+        </select>
+        #(deployenabled)#::no&nbsp;automated installation on development environments::
+    	&nbsp;&nbsp;<input type="submit" name="update" value="Install Release" />
+        #(/deployenabled)#
+      </form></dd>
+      <dt><br />Automatic Update</dt>
+      <dd><form action="ConfigUpdate_p.html" method="get">
+        &nbsp;check for new releases, download if available and restart with downloaded release<br />
+        &nbsp;&nbsp;<input type="submit" name="autoUpdate" value="Check + Download + Install Release Now" /><br />
+        #(autoUpdate)#::
+        <div class="commit">Download of release #[downloadedRelease]# finished. Restart Initiated.</div>::
+        <div class="error">No more recent release found.</div>::
+        <div class="error">Omiting update because this is a development environment.</div>::
+        <div class="error">Omiting update because download of relase #[downloadedRelease]# failed.</div>
+        #(/autoUpdate)#
       </form></dd>
       </dl>
       </fieldset>

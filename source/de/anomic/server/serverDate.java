@@ -51,8 +51,84 @@ import java.util.GregorianCalendar;
 import java.util.Locale;
 import java.util.TimeZone;
 
+import de.anomic.server.logging.serverLog;
+
 public final class serverDate {
     
+    // standard date formatters
+    public static final String shortDayFormatterPattern = "yyyyMMdd";
+    public static final String shortSecondFormatterPattern = "yyyyMMddHHmmss";
+    public static final SimpleDateFormat shortDayFormatter = new SimpleDateFormat(shortDayFormatterPattern);
+    public static final SimpleDateFormat shortSecondFormatter = new SimpleDateFormat(shortSecondFormatterPattern);
+    public static final SimpleDateFormat longFullFormatter = new SimpleDateFormat("EEE, dd MMM yyyy HH:mm:ss 'GMT'", Locale.US);
+
+    private static TimeZone GMTTimeZone = TimeZone.getTimeZone("GMT");
+    
+    public static long nowTime() {
+        return nowDate().getTime();
+    }
+
+    public static Date nowDate() {
+        return new GregorianCalendar(GMTTimeZone).getTime();
+    }
+  
+    /*
+     * Synchronization of formatters is needed because SimpleDateFormat is not thread-safe.
+     * See: http://bugs.sun.com/bugdatabase/view_bug.do?bug_id=6231579
+     */
+    
+    public static String shortDayTime() {
+        return shortDayTime(nowDate());
+    }
+
+    public static String shortDayTime(Date date) {
+        synchronized (serverDate.shortDayFormatter) {
+            return shortDayFormatter.format(date);
+        }
+    }
+    
+    public static Date parseShortDayTime(String timeString) throws ParseException {
+        synchronized (serverDate.shortDayFormatter) {
+            return serverDate.shortDayFormatter.parse(timeString);
+        }
+    }
+
+    public static String shortSecondTime() {
+        return shortSecondTime(nowDate());
+    }
+
+    public static String shortSecondTime(Date date) {
+        synchronized (serverDate.shortSecondFormatter) {       
+            return serverDate.shortSecondFormatter.format(date);
+        }
+    }
+    
+    public static Date parseShortSecondTime(String timeString) throws ParseException {
+        synchronized (serverDate.shortSecondFormatter) {
+            return serverDate.shortSecondFormatter.parse(timeString);
+        }
+    }
+
+    public static Date parseShortSecondTime(String remoteTimeString, String remoteUTCOffset) {
+        if (remoteTimeString == null || remoteTimeString.length() == 0) { return new Date(); }
+        if (remoteUTCOffset == null || remoteUTCOffset.length() == 0) { return new Date(); }
+        try {
+            /*
+             * This synchronized is needed because SimpleDateFormat is not thread-safe.
+             * See: http://bugs.sun.com/bugdatabase/view_bug.do?bug_id=6231579
+             */         
+            synchronized(serverDate.shortSecondFormatter) {
+                return new Date(serverDate.shortSecondFormatter.parse(remoteTimeString).getTime() - serverDate.UTCDiff() + serverDate.UTCDiff(remoteUTCOffset));
+            }
+        } catch (java.text.ParseException e) {
+            serverLog.logFinest("parseUniversalDate", e.getMessage() + ", remoteTimeString=[" + remoteTimeString + "]");
+            return new Date();
+        } catch (java.lang.NumberFormatException e) {
+            serverLog.logFinest("parseUniversalDate", e.getMessage() + ", remoteTimeString=[" + remoteTimeString + "]");
+            return new Date();
+        }
+    }
+
     
     // statics
     public final static long secondMillis = 1000;
@@ -294,16 +370,6 @@ public final class serverDate {
 	public static String dateToiso8601(Date date){
 		return new SimpleDateFormat("yyyy-MM-dd").format(date)+"T"+(new SimpleDateFormat("HH:mm:ss")).format(date)+"Z";
 	}
-
-	// the following is only here to compare the kelondroDate with java-Date:
-    private static TimeZone GMTTimeZone = TimeZone.getTimeZone("GMT");
-    private static Calendar gregorian = new GregorianCalendar(GMTTimeZone);
-    private static SimpleDateFormat testSFormatter = new SimpleDateFormat("yyyyMMddHHmmss");
-    private static SimpleDateFormat testLFormatter = new SimpleDateFormat("EEE, dd MMM yyyy HH:mm:ss 'GMT'", Locale.US);
-
-    public static String testSDateShortString() {
-	return testSFormatter.format(gregorian.getTime());
-    }
     
     public static String intervalToString(long millis) {
         try {
@@ -339,13 +405,13 @@ public final class serverDate {
         //System.out.println("kelondroDate is (" + new kelondroDate().toString() + ")");
         System.out.println("offset is " + (UTCDiff()/1000/60/60) + " hours, javaDate is " + new Date() + ", correctedDate is " + new Date(correctedUTCTime()));
         System.out.println("serverDate : " + new serverDate().toShortString(false));
-        System.out.println("  javaDate : " + testSDateShortString());
+        System.out.println("  javaDate : " + shortSecondTime());
         System.out.println("serverDate : " + new serverDate().toString());
-        System.out.println("  JavaDate : " + testLFormatter.format(new Date()));
+        System.out.println("  JavaDate : " + longFullFormatter.format(new Date()));
         System.out.println("serverDate0: " + new serverDate(0).toShortString(false));
-        System.out.println("  JavaDate0: " + testSFormatter.format(new Date(0)));
+        System.out.println("  JavaDate0: " + shortSecondFormatter.format(new Date(0)));
         System.out.println("serverDate0: " + new serverDate(0).toString());
-        System.out.println("  JavaDate0: " + testLFormatter.format(new Date(0)));
+        System.out.println("  JavaDate0: " + longFullFormatter.format(new Date(0)));
         // parse test
         try {
             System.out.println("serverDate re-parse short: " + new serverDate(new serverDate().toShortString(false)).toShortString(true));
@@ -362,7 +428,7 @@ public final class serverDate {
         System.out.println("time for " + cycles + " calls to serverDate:" + (System.currentTimeMillis() - start) + " milliseconds");
         
         start = System.currentTimeMillis();
-        for (int i = 0; i < cycles; i++) /*testresult =*/ testSDateShortString();
+        for (int i = 0; i < cycles; i++) /*testresult =*/ shortSecondTime();
         System.out.println("time for " + cycles + " calls to   javaDate:" + (System.currentTimeMillis() - start) + " milliseconds");
     }    
 }

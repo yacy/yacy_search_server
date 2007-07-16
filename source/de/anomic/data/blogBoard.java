@@ -48,14 +48,11 @@ import java.io.File;
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.text.ParseException;
-import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
-import java.util.GregorianCalendar;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
-import java.util.TimeZone;
 
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
@@ -70,16 +67,13 @@ import de.anomic.kelondro.kelondroBase64Order;
 import de.anomic.kelondro.kelondroDyn;
 import de.anomic.kelondro.kelondroMapObjects;
 import de.anomic.kelondro.kelondroNaturalOrder;
+import de.anomic.server.serverDate;
 
 public class blogBoard {
     
     public  static final int keyLength = 64;
-    private static final String dateFormat = "yyyyMMddHHmmss";
     private static final int recordSize = 512;
-
-    private static TimeZone GMTTimeZone = TimeZone.getTimeZone("PST");
-    private static SimpleDateFormat SimpleFormatter = new SimpleDateFormat(dateFormat);
-
+    
     private kelondroMapObjects datbase = null;
     
     public blogBoard(File actpath, long preloadTime) {
@@ -95,10 +89,6 @@ public class blogBoard {
     
     public void close() {
         datbase.close();
-    }
-
-    private static String dateString(Date date) {
-	return SimpleFormatter.format(date);
     }
 
     private static String normalize(String key) {
@@ -132,8 +122,8 @@ public class blogBoard {
 	    record = new HashMap();
 	    key = nkey;
 	    if (key.length() > keyLength) key = key.substring(0, keyLength);
-	    if(date == null) date = new GregorianCalendar(GMTTimeZone).getTime(); 
-	    record.put("date", dateString(date));
+	    if(date == null) date = serverDate.nowDate();
+	    record.put("date", serverDate.shortSecondTime(date));
 	    if (subject == null) record.put("subject","");
 	    else record.put("subject", kelondroBase64Order.enhancedCoder.encode(subject));
 	    if (author == null) record.put("author","");
@@ -177,7 +167,7 @@ public class blogBoard {
             System.out.println("DEBUG - ERROR: date field missing in blogBoard");
             return new Date();
         }
-		return SimpleFormatter.parse(c);
+		return serverDate.shortSecondFormatter.parse(c);
 	    } catch (ParseException e) {
 		return new Date();
 	    }
@@ -187,7 +177,7 @@ public class blogBoard {
 		String c = (String) record.get("date");
 		if (c == null) {
 	        System.out.println("DEBUG - ERROR: date field missing in blogBoard");
-	        return dateString(new Date());
+	        return serverDate.shortSecondTime();
 		}
 		return c;
 	}
@@ -264,7 +254,7 @@ public class blogBoard {
     	key = normalize(key);
         if (key.length() > keyLength) key = key.substring(0, keyLength);
         Map record = base.getMap(key);
-        if (record == null) return newEntry(key, "".getBytes(), "anonymous".getBytes(), "127.0.0.1", new GregorianCalendar(GMTTimeZone).getTime(), "".getBytes(), null, null);
+        if (record == null) return newEntry(key, "".getBytes(), "anonymous".getBytes(), "127.0.0.1", serverDate.nowDate(), "".getBytes(), null, null);
         return new entry(key, record);
     }
     
@@ -315,7 +305,7 @@ public class blogBoard {
     		}
     		
     		try {
-				date = SimpleFormatter.parse(StrDate);
+				date = serverDate.shortSecondFormatter.parse(StrDate);
 			} catch (ParseException e1) {
 				date = new Date();
 			}

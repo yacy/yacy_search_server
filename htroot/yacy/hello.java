@@ -46,13 +46,13 @@
 // javac -classpath .:../../classes hello.java
 // if the shell's current path is HTROOT
 
-import java.util.Date;
 import java.util.Iterator;
 import java.util.Map;
 
 import de.anomic.http.httpHeader;
 import de.anomic.plasma.plasmaSwitchboard;
 import de.anomic.server.serverCore;
+import de.anomic.server.serverDate;
 import de.anomic.server.serverObjects;
 import de.anomic.server.serverSwitch;
 import de.anomic.yacy.yacyClient;
@@ -205,7 +205,7 @@ public final class hello {
             seeds.append("seed0=").append(yacyCore.seedDB.mySeed.genSeedStr(key)).append(serverCore.crlfString);
         }
 
-        prop.putASIS("mytime", yacyCore.universalDateShortString(new Date()));
+        prop.putASIS("mytime", serverDate.shortSecondTime());
         prop.putASIS("seedlist", seeds.toString());
         // return rewrite properties
         return prop;

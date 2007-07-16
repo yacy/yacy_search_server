@@ -2015,7 +2015,7 @@ public final class plasmaSwitchboard extends serverAbstractSwitch implements ser
             
             // check if update is available and
             // if auto-update is activated perform an automatic installation and restart
-            yacyVersion updateVersion = yacyVersion.rulebasedUpdateInfo();
+            yacyVersion updateVersion = yacyVersion.rulebasedUpdateInfo(false);
             if (updateVersion != null) try {
                 // there is a version that is more recent. Load it and re-start with it
                 log.logInfo("AUTO-UPDATE: downloading more recent release " + updateVersion.url);

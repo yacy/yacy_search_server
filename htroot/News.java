@@ -51,6 +51,7 @@ import java.util.Map;
 import de.anomic.http.httpHeader;
 import de.anomic.http.httpc;
 import de.anomic.plasma.plasmaSwitchboard;
+import de.anomic.server.serverDate;
 import de.anomic.server.serverObjects;
 import de.anomic.server.serverSwitch;
 import de.anomic.yacy.yacyCore;
@@ -137,10 +138,10 @@ public class News {
                     String category = record.category();
                     prop.put("table_list_" + i + "_id", record.id());
                     prop.put("table_list_" + i + "_ori", (seed == null) ? record.originator() : seed.getName());
-                    prop.put("table_list_" + i + "_cre", yacyCore.universalDateShortString(record.created()));
+                    prop.put("table_list_" + i + "_cre", serverDate.shortSecondTime(record.created()));
                     prop.put("table_list_" + i + "_crerfcdate", httpc.dateString(record.created()));
                     prop.put("table_list_" + i + "_cat", category);
-                    prop.put("table_list_" + i + "_rec", (record.received() == null) ? "-" : yacyCore.universalDateShortString(record.received()));
+                    prop.put("table_list_" + i + "_rec", (record.received() == null) ? "-" : serverDate.shortSecondTime(record.received()));
                     prop.put("table_list_" + i + "_dis", record.distributed());
                     
                     Map attributeMap = record.attributes();

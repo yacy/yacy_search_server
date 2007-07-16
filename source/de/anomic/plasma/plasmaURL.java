@@ -27,7 +27,6 @@
 package de.anomic.plasma;
 
 import java.net.MalformedURLException;
-import java.text.SimpleDateFormat;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
@@ -44,9 +43,6 @@ import de.anomic.server.serverCore;
 import de.anomic.yacy.yacySeedDB;
 
 public class plasmaURL {
-
-    // day formatter for entry export
-    public static final SimpleDateFormat shortDayFormatter = new SimpleDateFormat("yyyyMMdd");
 
     // TLD separation in political and cultural parts
     // https://www.cia.gov/cia/publications/factbook/index.html

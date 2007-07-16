@@ -46,10 +46,9 @@
 // javac -classpath .:../../classes query.java
 // if the shell's current path is HTROOT
 
-import java.util.Date;
-
 import de.anomic.http.httpHeader;
 import de.anomic.plasma.plasmaSwitchboard;
+import de.anomic.server.serverDate;
 import de.anomic.server.serverObjects;
 import de.anomic.server.serverSwitch;
 import de.anomic.yacy.yacyCore;
@@ -86,7 +85,7 @@ public final class query {
         final String obj    = post.get("object", ""); // keyword for query subject
         final String env    = post.get("env", "");    // argument to query
 
-        prop.putASIS("mytime", yacyCore.universalDateShortString(new Date()));
+        prop.putASIS("mytime", serverDate.shortSecondTime());
 
         // check if we are the right target and requester has correct information about this peer
         if (yacyCore.seedDB.mySeed == null || !yacyCore.seedDB.mySeed.hash.equals(youare)) {

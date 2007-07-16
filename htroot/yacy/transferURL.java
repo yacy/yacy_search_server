@@ -51,11 +51,11 @@ import java.text.ParseException;
 import de.anomic.http.httpHeader;
 import de.anomic.index.indexURLEntry;
 import de.anomic.plasma.plasmaSwitchboard;
-import de.anomic.plasma.plasmaURL;
 import de.anomic.plasma.urlPattern.plasmaURLPattern;
 import de.anomic.server.serverCore;
 import de.anomic.server.serverObjects;
 import de.anomic.server.serverSwitch;
+import de.anomic.server.serverDate;
 import de.anomic.yacy.yacyCore;
 import de.anomic.yacy.yacyNetwork;
 import de.anomic.yacy.yacySeed;
@@ -66,7 +66,7 @@ public final class transferURL {
     public static serverObjects respond(httpHeader header, serverObjects post, serverSwitch env) throws InterruptedException {
         long start = System.currentTimeMillis();
         long freshdate = 0;
-        try {freshdate = plasmaURL.shortDayFormatter.parse("20061101").getTime();} catch (ParseException e1) {}
+        try {freshdate = serverDate.shortDayFormatter.parse("20061101").getTime();} catch (ParseException e1) {}
         
         // return variable that accumulates replacements
         final plasmaSwitchboard sb = (plasmaSwitchboard) env;

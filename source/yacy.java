@@ -268,10 +268,10 @@ public final class yacy {
 
             sb.setConfig("version", Double.toString(version));
             sb.setConfig("vString", yacyVersion.combined2prettyVersion(Double.toString(version)));
-            sb.setConfig("vdate", vDATE);
+            sb.setConfig("vdate", (vDATE.startsWith("@")) ? serverDate.shortDayTime() : vDATE);
             sb.setConfig("applicationRoot", homePath);
             sb.startupTime = startup;
-            serverLog.logConfig("STARTUP", "YACY Version: " + version + ", Built " + vDATE);
+            serverLog.logConfig("STARTUP", "YACY Version: " + version + ", Built " + sb.getConfig("vdate", "00000000"));
             yacyVersion.latestRelease = version;
 
             // read environment

@@ -44,6 +44,7 @@ import de.anomic.plasma.plasmaSearchQuery;
 import de.anomic.plasma.plasmaURL;
 import de.anomic.server.serverCharBuffer;
 import de.anomic.server.serverCodings;
+import de.anomic.server.serverDate;
 import de.anomic.tools.crypt;
 import de.anomic.tools.nxTools;
 import de.anomic.index.indexRWIEntry;
@@ -204,17 +205,17 @@ public class indexURLEntry {
         this.entry.setCol(col_hash, plasmaURL.urlHash(url), null);
         this.entry.setCol(col_comp, encodeComp(url, descr, author, tags, ETag));
         try {
-            this.entry.setCol(col_mod, encodeDate(plasmaURL.shortDayFormatter.parse(prop.getProperty("mod", "20000101"))));
+            this.entry.setCol(col_mod, encodeDate(serverDate.shortDayFormatter.parse(prop.getProperty("mod", "20000101"))));
         } catch (ParseException e) {
             this.entry.setCol(col_mod, encodeDate(new Date()));
         }
         try {
-            this.entry.setCol(col_load, encodeDate(plasmaURL.shortDayFormatter.parse(prop.getProperty("load", "20000101"))));
+            this.entry.setCol(col_load, encodeDate(serverDate.shortDayFormatter.parse(prop.getProperty("load", "20000101"))));
         } catch (ParseException e) {
             this.entry.setCol(col_load, encodeDate(new Date()));
         }
         try {
-            this.entry.setCol(col_fresh, encodeDate(plasmaURL.shortDayFormatter.parse(prop.getProperty("fresh", "20000101"))));
+            this.entry.setCol(col_fresh, encodeDate(serverDate.shortDayFormatter.parse(prop.getProperty("fresh", "20000101"))));
         } catch (ParseException e) {
             this.entry.setCol(col_fresh, encodeDate(new Date()));
         }
@@ -252,9 +253,9 @@ public class indexURLEntry {
             s.append(",author=").append(crypt.simpleEncode(comp.author()));
             s.append(",tags=").append(crypt.simpleEncode(comp.tags()));
             s.append(",ETag=").append(crypt.simpleEncode(comp.ETag()));
-            s.append(",mod=").append(plasmaURL.shortDayFormatter.format(moddate()));
-            s.append(",load=").append(plasmaURL.shortDayFormatter.format(loaddate()));
-            s.append(",fresh=").append(plasmaURL.shortDayFormatter.format(freshdate()));
+            s.append(",mod=").append(serverDate.shortDayFormatter.format(moddate()));
+            s.append(",load=").append(serverDate.shortDayFormatter.format(loaddate()));
+            s.append(",fresh=").append(serverDate.shortDayFormatter.format(freshdate()));
             s.append(",referrer=").append(referrerHash());
             s.append(",md5=").append(md5());
             s.append(",size=").append(size());
