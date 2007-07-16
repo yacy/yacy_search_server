@@ -93,15 +93,11 @@ public class News {
                     prop.put("AUTHENTICATE", "admin log-in");
                     return prop; // this button needs authentication, force log-in
                 }
-                yacyNewsRecord record;
                 try {
                     if ((tableID == yacyNewsPool.PROCESSED_DB) || (tableID == yacyNewsPool.PUBLISHED_DB)) {
                         yacyCore.newsPool.clear(tableID);
                     } else {
-                        while (yacyCore.newsPool.size(tableID) > 0) {
-                            record = (yacyNewsRecord) yacyCore.newsPool.recordIterator(tableID, true).next();
-                            yacyCore.newsPool.moveOff(tableID, record.id());
-                        }
+                        yacyCore.newsPool.moveOffAll(tableID);
                     }
                 } catch (IOException e) {
                     e.printStackTrace();

@@ -478,20 +478,41 @@ public class yacyNewsPool {
         // called if a published news shall be removed
         yacyNewsRecord record = fromqueue.remove(id);
         if (record == null) {
-            //System.out.println("DEBUG: record == null");
             return false;
         }
-        if (toqueue != null) toqueue.push(record);
-        else if ((incomingNews.get(id) == null) && (processedNews.get(id) == null) && (outgoingNews.get(id) == null) && (publishedNews.get(id) == null)){
+        if (toqueue != null) {
+            toqueue.push(record);
+        } else if ((incomingNews.get(id) == null) && (processedNews.get(id) == null) && (outgoingNews.get(id) == null) && (publishedNews.get(id) == null)) {
             newsDB.remove(id);
-            //System.out.println("DEBUG: News-ID " + id + " deleted");
         }
-        //if (incomingNews.get(id) != null) System.out.println("DEBUG: News-ID " + id + " in incomingNews");
-        //if (processedNews.get(id) != null) System.out.println("DEBUG: News-ID " + id + " in processedNews");
-        //if (outgoingNews.get(id) != null) System.out.println("DEBUG: News-ID " + id + " in outgoingNews");
-        //if (publishedNews.get(id) != null) System.out.println("DEBUG: News-ID " + id + " in publishedNews");
         return true;
     }
     
+    public void moveOffAll(int dbKey) throws IOException {
+        // this is called if a queue element shall be moved to another queue or off the queue
+        // it depends on the dbKey how the record is handled
+        switch (dbKey) {
+            case INCOMING_DB:   moveOffAll(incomingNews, processedNews); break;
+            case PROCESSED_DB:  processedNews.clear(); break;
+            case OUTGOING_DB:   moveOffAll(outgoingNews, publishedNews); break;
+            case PUBLISHED_DB:  publishedNews.clear(); break;
+        }
+    }
+
+    private int moveOffAll(yacyNewsQueue fromqueue, yacyNewsQueue toqueue) throws IOException {
+        // move off all news from a specific queue to another queue
+        Iterator i = fromqueue.records(true);
+        yacyNewsRecord record;
+        if (toqueue == null) return 0;
+        int c = 0;
+        while (i.hasNext()) {
+            record = (yacyNewsRecord) i.next();
+            if (record == null) continue;
+            toqueue.push(record);
+            c++;
+        }
+        fromqueue.clear();
+        return c;
+    }
     
 }
