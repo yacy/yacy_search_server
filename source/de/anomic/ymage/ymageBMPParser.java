@@ -173,10 +173,14 @@ public class ymageBMPParser {
                 for (int columns = 0; columns < width; columns = columns + 4) {
                     b = ((int) s[offset + n] & 0xff);
                     n++;
-                    image.setRGB(columns,     (height - rows - 1), colortable.colorindex[(b & 0xc0) >> 6]);
-                    image.setRGB(columns + 1, (height - rows - 1), colortable.colorindex[(b & 0x30) >> 4]);
-                    image.setRGB(columns + 2, (height - rows - 1), colortable.colorindex[(b &  0xc) >> 2]);
-                    image.setRGB(columns + 3, (height - rows - 1), colortable.colorindex[b & 0x3]);
+                    image.setRGB(columns,     (height - rows - 1), colortable.colorindex[(b & 0x80) >> 7]);
+                    image.setRGB(columns + 1, (height - rows - 1), colortable.colorindex[(b & 0x40) >> 6]);
+                    image.setRGB(columns + 2, (height - rows - 1), colortable.colorindex[(b & 0x20) >> 5]);
+                    image.setRGB(columns + 3, (height - rows - 1), colortable.colorindex[(b & 0x10) >> 4]);
+                    image.setRGB(columns + 4, (height - rows - 1), colortable.colorindex[(b & 0x08) >> 3]);
+                    image.setRGB(columns + 5, (height - rows - 1), colortable.colorindex[(b & 0x04) >> 2]);
+                    image.setRGB(columns + 6, (height - rows - 1), colortable.colorindex[(b & 0x02) >> 1]);
+                    image.setRGB(columns + 7, (height - rows - 1), colortable.colorindex[ b & 0x01]);
                 }
                 n += fill4(n);
             }
