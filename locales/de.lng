@@ -415,6 +415,43 @@ Unable to get URL:==Nicht m&ouml;glich die angegebene Datei von folgender URL zu
 Error saving the skin.==Es trat ein Fehler beim Speichern des Skins auf.
 #-----------------------------
 
+#File: ConfigUpdate_p.html
+#---------------------------
+
+Manual System Update==Manuelle Systemaktualisierung
+Available Releases==Verf&uuml;gbare Versionen
+"Download Release"=="Version Herunterladen"
+"Check for new Release"=="Nach neuer Version suchen"
+Downloaded Releases==Heruntergeladene Versionen
+"Install Release"=="Version Installieren"
+Automatic Update==Automatische Aktualisierung
+check for new releases, download if available and restart with downloaded release==suche nach neuer Version, lade sie herunter und starte neu mit dieser Version
+"Check + Download + Install Release Now"=="Suchen + Herunterladen + Version nun installieren"
+Download of release #[downloadedRelease]# finished. Restart Initiated.
+No more recent release found.
+Omiting update because this is a development environment.
+Omiting update because download of relase #[downloadedRelease]# failed.
+Automated System Update==Automatische Systemaktualisierung
+manual update==manuelle Aktualisierung
+no automatic look-up, updates can be made manually using this interface \(see options above\)==Keine automatische Aktualisierung. Updates k&ouml;nnen manuell gemacht werden (siehe die Optionen oben). 
+automatic update==automatische Aktualisierung
+updates are made within fixed cycles:==Aktualisierungen werden nach festen Regeln gemacht:
+Time beween lookup==Zeit zwischen Checks
+Release blacklist==Versionen Blacklist
+regex on release number strings==regex mit Versionsnummern
+Release type==Release Typ
+only main releases==nur offizielle Versionen
+any release including developer releases==jede Version, auch Entwickler Versionen
+"Submit"=="Speichern"
+Accepted Changes.==A&uml;nderungen akzeptiert.
+System Update Statistics==System Aktualisierungs Statistiken
+Last System Lookup==Letzter System Check
+never==niemals
+Last Release Download==Letzter Download
+Last Deploy==Letzte Anwendung
+#noch ungünstig
+#-----------------------------
+
 #File: Connections_p.html
 #---------------------------
 Connection Tracking==Verbindungsstatus
@@ -783,7 +820,7 @@ show all==alle zeigen
 Prefer mask==Vorzugsmaske
 Constraints==Einschr&auml;nkungen
 only index pages==Nur Index Seiten
-This peer holds \#\[links\]\# URLs of \#\[total-links\]\# in the known network.==Dieser Peer speichert #[links]# von #[total-links]# der dem Netzwerk bekannten URLs.
+This peer holds \#\[links\]\# URLs==Dieser Peer speichert #[links]# URLs.
 "authentication required"=="Autorisierung erforderlich"
 Disable search function for users without autorization==Deaktiviere Suchfunktion f&uuml;r Benutzer ohne Autorisierung
 Enable web search to everyone==Aktiviere Suchfunktion f&uuml;r alle Nutzer
@@ -1842,17 +1879,6 @@ You have a principal peer because you publish your seed-list to a public accessi
 where it can be retrieved using the URL==von wo aus sie unter folgender Adresse erreichbar ist:
 Your Web Page Indexer is idle. You can start your own web crawl <a href="CrawlStartSimple_p.html">here</a>==Ihr Webseiten Indexierer ist unt&auml;tig. Sie k&ouml;nnen <a href="CrawlStartSimple_p.html">hier</a> einen Web Crawl starten 
 Your Web Page Indexer is busy. You can monitor your web crawl <a href="WatchCrawler_p.html">here</a>==Ihr Webseiten Indexierer ist besch&auml;ftigt. Sie k&ouml;nnen Ihren Web Crawl <a href="WatchCrawler_p.html">hier</a> kontrollieren
-Restart==Neustarten
-"Only the administrator may restart this peer"=="Nur der Administrator darf den Peer neustarten"
-Shutdown==Herunterfahren
-"Only the administrator may shutdown this peer"=="Nur der Administrator darf den Peer herunterfahren"
-System Update==Systemaktualisierung
-Available Releases==Verf&uuml;gbare Versionen
-"DownloadRelease"=="Herunterladen"
-Download Release==Ver&ouml;ffentlichung Herunterladen
-Downloaded Releases==Heruntergeladene Ver&ouml;ffentlichungen
-"InstallRelease"=="Installieren"
-Install Release==Ver&ouml;ffentlichung installieren
 Public System Properties==Allgemeine Systemangaben
 System version==Systemversion
 This&nbsp;peer's&nbsp;address==Adresse dieses Peers
@@ -2286,12 +2312,11 @@ Your Web Content==Dein Web
 YaCy Messages==YaCy Nachrichten
 "New Messages"=="Neue Nachrichten"
 YaCy File Hosting==YaCy Dateifreigaben
-Peer Configuration==Peer Einstellungen
-#Status &amp; Shutdown==Status &amp; Shutdown
-Basic Configuration==Grund-<br />einstellungen
-Advanced Settings==erweiterte Einstellungen
-User Administration==Benutzer Verwaltung
-#Performance==Performance
+Peer Control==Peer Kontrolle
+Admin Console==Admin Konsole
+Confirm Restart==Best&auml;tige Neustart
+Re-Start</a>==Neustarten</a>
+Confirm Shutdown==Best&auml;tige Herunterfahren
 The Project==Das Projekt
 Project Home==Projektseite
 Project News==Neuigkeiten
@@ -2300,7 +2325,7 @@ Newsletters==Newsletter
 #Deutsches Forum==Deutsches Forum
 Download YaCy==YaCy herunterladen
 YaCy Project Wiki==YaCy Projekt Wiki
-Contact YaCy Developer==Kontakt mit YaCy Entwicklern
+YaCy Community Statistics==YaCy Gemeinschaft Statistiken
 #-----------------------------
 
 #File: env/templates/submenuAccessTracker.template
