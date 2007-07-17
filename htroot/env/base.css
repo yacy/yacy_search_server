@@ -343,7 +343,7 @@ div.welcome { /* The heading in Status.html */
 
 div.sidebar { /* sidebars on the right side */
   float:left;
-  width:28%;
+  width:27%;
   margin:10px 0;
   padding-top:10px;
   text-align:left;

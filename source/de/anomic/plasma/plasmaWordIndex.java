@@ -6,7 +6,7 @@
 //
 // $LastChangedDate$
 // $LastChangedRevision$
-// $LastChangedBy: $
+// $LastChangedBy$
 //
 // LICENSE
 //
