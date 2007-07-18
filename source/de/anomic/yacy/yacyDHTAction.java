@@ -313,12 +313,14 @@ public class yacyDHTAction implements yacyPeerAction {
             if (seeds != null) {
             	firstdist = yacyDHTAction.dhtDistance(seed.hash, firstKey);
             	lastdist = yacyDHTAction.dhtDistance(seed.hash, lastKey);
-                if ((lastdist < maxDist) && (!(doublecheck.contains(seed.hash)))) {
+                if (lastdist > maxDist) {
+                    if (log != null) log.logFine("Discarded too distant DHT target peer " + seed.getName() + ":" + seed.hash + ", distance2first = " + firstdist + ", distance2last = " + lastdist);
+                } else if (doublecheck.contains(seed.hash)) {
+                    if (log != null) log.logFine("Discarded double DHT target peer " + seed.getName() + ":" + seed.hash + ", distance2first = " + firstdist + ", distance2last = " + lastdist);
+                } else {
                     if (log != null) log.logInfo("Selected  " + ((seeds.size() < primaryPeerCount) ? "primary" : "reserve") + "  DHT target peer " + seed.getName() + ":" + seed.hash + ", distance2first = " + firstdist + ", distance2last = " + lastdist);
                     seeds.add(seed);
                     doublecheck.add(seed.hash);
-                } else {
-                	if (log != null) log.logInfo("Discarded improper DHT target peer " + seed.getName() + ":" + seed.hash + ", distance2first = " + firstdist + ", distance2last = " + lastdist);
                 }
             }
         }

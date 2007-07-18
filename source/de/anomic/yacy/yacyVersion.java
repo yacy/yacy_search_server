@@ -200,7 +200,7 @@ public final class yacyVersion implements Comparator, Comparable {
         // check if update process allowes update retrieve
         String process = sb.getConfig("update.process", "manual");
         if ((!manual) && (!process.equals("auto"))) {
-            yacyCore.log.logInfo("rulebasedUpdateInfo: not a automatic update selected");
+            yacyCore.log.logInfo("rulebasedUpdateInfo: not an automatic update selected");
             return null; // no, its a manual or guided process
         }
         
@@ -208,31 +208,31 @@ public final class yacyVersion implements Comparator, Comparable {
         long cycle = Math.max(1, sb.getConfigLong("update.cycle", 168)) * 24 * 60 * 60 * 1000;
         long timeLookup = sb.getConfigLong("update.time.lookup", System.currentTimeMillis());
         if ((!manual) && (timeLookup + cycle > System.currentTimeMillis())) {
-            yacyCore.log.logInfo("rulebasedUpdateInfo: too early for a lookup for a new release");
+            yacyCore.log.logInfo("rulebasedUpdateInfo: too early for a lookup for a new release (timeLookup = " + timeLookup + ", cycle = " + cycle + ", now = " + System.currentTimeMillis() + ")");
             return null; // no we have recently made a lookup
         }
         
         // check if we know that there is a release that is more recent than that which we are using
         TreeSet[] releasess = yacyVersion.allReleases(true); // {0=promain, 1=prodev, 2=stdmain, 3=stddev}
         boolean pro = new File(sb.getRootPath(), "libx").exists();
-        yacyVersion latestmain = (yacyVersion) releasess[(pro) ? 0 : 2].first();
-        yacyVersion latestdev  = (yacyVersion) releasess[(pro) ? 1 : 3].first();
+        yacyVersion latestmain = (yacyVersion) releasess[(pro) ? 0 : 2].last();
+        yacyVersion latestdev  = (yacyVersion) releasess[(pro) ? 1 : 3].last();
         String concept = sb.getConfig("update.concept", "any");
         String blacklist = sb.getConfig("update.blacklist", ".\\...[123]");
         if ((manual) || (concept.equals("any"))) {
             // return a dev-release or a main-release
             if ((latestdev.compareTo(latestmain) > 0) && (!(Float.toString(latestdev.releaseNr).matches(blacklist)))) {
                 if (latestdev.compareTo(thisVersion()) > 0) return latestdev; else {
-                    yacyCore.log.logInfo("rulebasedUpdateInfo: latest dev is not more recent than installed release");
+                    yacyCore.log.logInfo("rulebasedUpdateInfo: latest dev " + latestdev.name + " is not more recent than installed release " + thisVersion().name);
                     return null;
                 }
             } else {
                 if ((Float.toString(latestmain.releaseNr).matches(blacklist))) {
-                    yacyCore.log.logInfo("rulebasedUpdateInfo: latest dev matches with blacklist");
+                    yacyCore.log.logInfo("rulebasedUpdateInfo: latest dev " + latestdev.name + " matches with blacklist '" + blacklist + "'");
                     return null;
                 }
                 if (latestmain.compareTo(thisVersion()) > 0) return latestmain; else {
-                    yacyCore.log.logInfo("rulebasedUpdateInfo: latest main is not more recent than installed release (1)");
+                    yacyCore.log.logInfo("rulebasedUpdateInfo: latest main " + latestmain.name + " is not more recent than installed release (1) " + thisVersion().name);
                     return null;
                 }
             }
@@ -240,11 +240,11 @@ public final class yacyVersion implements Comparator, Comparable {
         if (concept.equals("main")) {
             // return a main-release
             if ((Float.toString(latestmain.releaseNr).matches(blacklist))) {
-                yacyCore.log.logInfo("rulebasedUpdateInfo: latest main matches with blacklist");
+                yacyCore.log.logInfo("rulebasedUpdateInfo: latest main " + latestmain.name + " matches with blacklist'" + blacklist + "'");
                 return null;
             }
             if (latestmain.compareTo(thisVersion()) > 0) return latestmain; else {
-                yacyCore.log.logInfo("rulebasedUpdateInfo: latest main is not more recent than installed release (2)");
+                yacyCore.log.logInfo("rulebasedUpdateInfo: latest main " + latestmain.name + " is not more recent than installed release (2) " + thisVersion().name);
                 return null; 
             }
         }
