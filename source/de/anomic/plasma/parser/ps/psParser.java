@@ -108,8 +108,8 @@ public class psParser extends AbstractParser implements Parser {
             int returnCode = ps2asciiProc.waitFor();
             return (returnCode == 0);
         } catch (Exception e) {
-        	this.theLogger.logInfo("ps2ascii not found. Switching to java parser mode.");
-        	return false;
+            if (this.theLogger != null) this.theLogger.logInfo("ps2ascii not found. Switching to java parser mode.");
+            return false;
         }
     }
     

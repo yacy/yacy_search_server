@@ -183,7 +183,7 @@ public final class yacyVersion implements Comparator, Comparable {
         if (process.equals("manual")) return false; // no, its a manual process
         
         // check if the last retrieve time is a minimum time ago
-        long cycle = Math.max(1, sb.getConfigLong("update.cycle", 168)) * 24 * 60 * 60 * 1000;
+        long cycle = Math.max(1, sb.getConfigLong("update.cycle", 168)) * 60 * 60 * 1000; // update.cycle is hours
         long timeLookup = sb.getConfigLong("update.time.lookup", System.currentTimeMillis());
         if (timeLookup + cycle > System.currentTimeMillis()) return false; // no we have recently made a lookup
         
@@ -205,7 +205,7 @@ public final class yacyVersion implements Comparator, Comparable {
         }
         
         // check if the last retrieve time is a minimum time ago
-        long cycle = Math.max(1, sb.getConfigLong("update.cycle", 168)) * 24 * 60 * 60 * 1000;
+        long cycle = Math.max(1, sb.getConfigLong("update.cycle", 168)) * 60 * 60 * 1000; // update.cycle is hours
         long timeLookup = sb.getConfigLong("update.time.lookup", System.currentTimeMillis());
         if ((!manual) && (timeLookup + cycle > System.currentTimeMillis())) {
             yacyCore.log.logInfo("rulebasedUpdateInfo: too early for a lookup for a new release (timeLookup = " + timeLookup + ", cycle = " + cycle + ", now = " + System.currentTimeMillis() + ")");
