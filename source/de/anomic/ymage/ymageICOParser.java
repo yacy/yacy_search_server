@@ -44,7 +44,7 @@ public class ymageICOParser {
     
     public static final boolean isICO(byte[] source) {
         // check the file magic
-        return (source[0] == 0) && (source[1] == 0) && (source[2] == 1) && (source[3] == 0);
+        return (source != null) && (source.length >= 4) && (source[0] == 0) && (source[1] == 0) && (source[2] == 1) && (source[3] == 0);
     }
     
     public ymageICOParser(byte[] source) {

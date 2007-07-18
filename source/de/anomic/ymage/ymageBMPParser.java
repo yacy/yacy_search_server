@@ -52,7 +52,7 @@ public class ymageBMPParser {
     
     public static final boolean isBMP(byte[] source) {
         // check the file magic
-        return (source[0] == 'B') && (source[1] == 'M');
+        return (source != null) && (source.length >= 2) && (source[0] == 'B') && (source[1] == 'M');
     }
     
     public ymageBMPParser(byte[] source) {
