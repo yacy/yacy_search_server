@@ -87,6 +87,7 @@ implements Parser {
      * @see Parser#getLibxDependences()
      */
     private static final String[] LIBX_DEPENDENCIES = new String[] {
+        "commons-logging.jar",
         "jmimemagic-0.1.0.jar",
         "jakarta-oro-2.0.7.jar",
         "log4j-1.2.9.jar",

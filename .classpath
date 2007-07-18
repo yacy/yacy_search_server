@@ -36,5 +36,6 @@
 	<classpathentry kind="lib" path="libx/activation.jar"/>
 	<classpathentry kind="lib" path="libx/webcat-0.1-swf.jar"/>
 	<classpathentry kind="lib" path="libx/J7Zip-modified.jar"/>
+	<classpathentry kind="lib" path="libx/commons-logging.jar"/>
 	<classpathentry kind="output" path="gen"/>
 </classpath>
