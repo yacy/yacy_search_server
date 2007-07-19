@@ -102,10 +102,13 @@ function requestImageSnippet(url, query, progressbar){
 }
 
 function show_hidden_results(){
-		results=document.getElementsByName("searchresults");
-		for(i=0;i<results.length;i++){
-				results[i].setAttribute("style", "display: visible");
-		}
+  var results = document.getElementsByTagName("div");
+  for (var i = 0; i < results.length; i++) {
+    var result = results[i];
+    if (result.className == "searchresults hidden")
+      result.className = "searchresults";
+  }
+  document.getElementById("hidden_results").innerHTML = "";
 }
 function handleTextState(req) {
     if(req.readyState != 4){
@@ -127,7 +130,7 @@ function handleTextState(req) {
 		span.className = "snippetLoaded";
 	} else {
 		span.className = "snippetError";
-		span.parentNode.parentNode.setAttribute("style", "display: none");
+		span.parentNode.parentNode.className = "searchresults hidden";
 		document.getElementById("hidden_results").innerHTML='Some results were hidden, because they do not contain your searchwords anymore, or because they are not accessible. Click here to <a href="javascript:show_hidden_results()">show them</a>';
 	}
 	

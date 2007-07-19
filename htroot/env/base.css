@@ -253,6 +253,10 @@ div.searchresults {
   margin-bottom:1em;
 }
 
+div.searchresults.hidden {
+  display:none;
+}
+
 div.SubMenugroup{
   float:left;
   margin-right:1px;
