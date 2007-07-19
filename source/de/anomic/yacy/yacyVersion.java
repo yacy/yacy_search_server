@@ -172,25 +172,6 @@ public final class yacyVersion implements Comparator, Comparable {
         return thisVersion;
     }
     
-    public static final boolean shallRetrieveUpdateInfo() {
-        // according to update properties, decide if we should retrieve update information
-        // if true, the release that can be obtained is returned.
-        // if false, null is returned
-        plasmaSwitchboard sb = plasmaSwitchboard.getSwitchboard();
-        
-        // check if update process allowes update retrieve
-        String process = sb.getConfig("update.process", "manual");
-        if (process.equals("manual")) return false; // no, its a manual process
-        
-        // check if the last retrieve time is a minimum time ago
-        long cycle = Math.max(1, sb.getConfigLong("update.cycle", 168)) * 60 * 60 * 1000; // update.cycle is hours
-        long timeLookup = sb.getConfigLong("update.time.lookup", System.currentTimeMillis());
-        if (timeLookup + cycle > System.currentTimeMillis()) return false; // no we have recently made a lookup
-        
-        // ok, we may do a lookup
-        return true;
-    }
-    
     public static final yacyVersion rulebasedUpdateInfo(boolean manual) {
         // according to update properties, decide if we should retrieve update information
         // if true, the release that can be obtained is returned.

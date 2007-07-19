@@ -75,6 +75,7 @@ public class ymageBMPParser {
     }
 
     public static final int DWORD(byte[] b, int offset) {
+        if (offset + 3 >= b.length) return 0;
         int ret = ((int) b[offset + 3] & 0xff);
         ret = (ret << 8) | ((int) b[offset + 2] & 0xff);
         ret = (ret << 8) | ((int) b[offset + 1] & 0xff);
