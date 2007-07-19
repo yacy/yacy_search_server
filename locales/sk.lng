@@ -23,7 +23,6 @@
 
 #-----------------------------------------------------------
 #File: Blacklist_p.html
-#Completely translated. If you find any untranslated string in the webinterface, send it to <admin@yacy-forum.de>
 
 Blacklist Manager==Spravca blacklistu
 Blacklist==Blacklist
@@ -152,7 +151,6 @@ The maximum cache size is==Maximalna velkost cache je
 
 #-----------------------------------------------------------
 #File: Config_p.html
-#Completely translated. If you find any untranslated string in the webinterface, send it to <admin@yacy-forum.de>
 
 Advanced Config==Pokrocile nastavenia
 Here are all configuration options from YaCy.==Tu sa nachadzaju vsetky konfiguracne nastavenia YaCy.
@@ -164,7 +162,6 @@ You can change anything, but some options need a restart, and some options can c
 
 #-----------------------------------------------------------
 #File: ConfigAdvanced_p.html
-#Completely translated. If you find any untranslated string in the webinterface, send it to <admin@yacy-forum.de>
 
 Advanced Config==Pokrocile nastavenia
 Here are all configuration options from YaCy.==Tu sa nachadzaju vsetky konfiguracne nastavenia YaCy.
@@ -216,7 +213,6 @@ location</a> in 10 seconds.==adresu</a> za 10 sekund.
 
 #-------------------------------------------------------
 #File: ConfigLanguage_p.html
-#Completely translated. If you find any untranslated string in the webinterface, send it to <admin@yacy-forum.de>
 
 Language selection==V&yacute;ber jazyka
 Language selection==V&yacute;ber jazyka
@@ -254,7 +250,6 @@ Comment==Koment&aacute;r
 
 #-------------------------------------------------------
 #File: ConfigSkins_p.html
-#Completely translated. If you find any untranslated string in the webinterface, send it to <admin@yacy-forum.de>
 
 Skin Selection==Vyber skinov
 You can change the appearance of YaCy with skins. Select one of the default skins, download new skins, or create your own skin.==Vzhlad YaCy mozete zmenit pomocou skinov. Zvolte jeden z predvytvorenych skinov, stiahnite si nove, alebo vytvorte vlastne skiny.
@@ -270,7 +265,6 @@ Error saving the skin.==Chyba pri stahovani skinu.
 
 #-----------------------------------------------------------
 #File: Connections_p.html
-#Completely translated. If you find any untranslated string in the webinterface, send it to <admin@yacy-forum.de>
 
 Connection Tracking==Stav spojenia
 Incoming Connections==Prichadzajuce spojenia
@@ -286,7 +280,6 @@ Waiting for new request nr.==Caka sa na poziadavku cislo.
 
 #-------------------------------------------------------
 #File: CookieMonitorIncoming_p.html
-#Completely translated. If you find any untranslated string in the webinterface, send it to <admin@yacy-forum.de>
 
 Incoming Cookies Monitor==Sledovanie prichadzajucich cookies
 Cookie Monitor: Incoming Cookies==Sledovanie cookies: Prichadzajuce cookies
@@ -301,7 +294,6 @@ Cookie==Cookie
 
 #-------------------------------------------------------
 #File: CookieMonitorOutgoing_p.html
-#Completely translated. If you find any untranslated string in the webinterface, send it to <admin@yacy-forum.de>
 
 Outgoing Cookies Monitor==Sledovanie odchadzajucich cookies
 Cookie Monitor: Outgoing Cookies==Sledovanie cookies: Odchadzajuce cookies
@@ -397,7 +389,6 @@ There is ".html" at the end, which is not included with the Regular Expression.=
 
 #-----------------------------------------------------------
 #File: index.html
-#Completely translated. If you find any untranslated string in the webinterface, send it to <admin@yacy-forum.de>
 
 YaCy \'\#\[clientname\]\#\': Search Page==YaCy '#[clientname]#': Vyhladavacia stranka
 # NOT USED
@@ -499,7 +490,6 @@ show all==zobrazit vsetko
 
 #-------------------------------------------------------
 #File: IndexCleaner_p.html
-#Completely translated. If you find any untranslated string in the webinterface, send it to <admin@yacy-forum.de>
 
 # NOT USED
 #Index Control==Kontrola indexu
@@ -558,7 +548,6 @@ Word-Hash:</td>==Hash-slovo:</td>
 
 #-------------------------------------------------------
 #File: IndexCreate_p.html
-#Completely translated. If you find any untranslated string in the webinterface, send it to <admin@yacy-forum.de>
 
 Index Creation==Tvorba indexu
 Start Crawling Job:==Odstartuj crawling:
@@ -717,7 +706,6 @@ Busy Peers==Vytazeni peeri
 
 #-------------------------------------------------------
 #File: IndexCreateIndexingQueue_p.html
-#Completely translated. If you find any untranslated string in the webinterface, send it to <admin@yacy-forum.de>
 
 Index Creation/Indexing Queue==Vytvorenie indexu/Cakacia listina indexu 
 Index Creation: Indexing Queue==Vytvorenie indexu: Cakacia listina indexu
@@ -745,7 +733,6 @@ Fail-Reason==Dovod zlyhania
 
 #-------------------------------------------------------
 #File: IndexCreateLoaderQueue_p.html
-#Completely translated. If you find any untranslated string in the webinterface, send it to <admin@yacy-forum.de>
 
 Index Creation / Loader Queue==Vytvorenie indexu / Cakacia listina nahravaca
 Index Creation: Loader Queue==Vytvorenie indexu: Cakacia listina nahravaca
@@ -757,7 +744,6 @@ URL==URL adresa
 
 #-------------------------------------------------------
 #File: IndexCreateWWWGlobalQueue_p.html
-#Completely translated. If you find any untranslated string in the webinterface, send it to <admin@yacy-forum.de>
 
 # NOT USED
 #YaCy '\#\[clientname\]\#': Index Creation / WWW Global Crawl Crawl Queue==YaCy '#[clientname]#': Vytvorenie indexu / Globalna WWW cakacia listina
@@ -779,7 +765,6 @@ Anchor Name==Meno kotvy
 
 #-------------------------------------------------------
 #File: IndexCreateWWWLocalQueue_p.html
-#Completely translated. If you find any untranslated string in the webinterface, send it to <admin@yacy-forum.de>
 
 YaCy '\#\[clientname\]\#': Index Creation / WWW Local Crawl Queue==YaCy '#[clientname]#': Vytvorenie indexu / Lokalna WWW cakacia listina
 Index Creation: WWW Local Crawl Queue==Vytvorenie indexu: Lokalna WWW cakacia listina
@@ -808,7 +793,6 @@ This may take a quite long time.==Toto moze chvilku trvat.
 
 #-------------------------------------------------------
 #File: IndexImport_p.html
-#Completely translated. If you find any untranslated string in the webinterface, send it to <admin@yacy-forum.de>
 
 YaCy \'\#\[clientname\]\#\': Index Import==YaCy '#[clientname]#': Import indexu
 Index DB Import==Import databazoveho indexu 
@@ -873,7 +857,6 @@ Continue==Pokracuj
 
 #-------------------------------------------------------
 #File: IndexMonitor.html
-#Completely translated. If you find any untranslated string in the webinterface, send it to <admin@yacy-forum.de>
 
 #YaCy '#[clientname]#': Index Monitor
 Index Monitor Menu==Menu monitoringu indexu 
@@ -950,7 +933,6 @@ URL==URL adresa
 
 #-------------------------------------------------------
 #File: IndexTransfer_p.html
-#Completely translated. If you find any untranslated string in the webinterface, send it to <admin@yacy-forum.de>
 
 The local index currently consists of \(at least\) \#\[wcount\]\# reverse word indexes and \#\[ucount\]\# URL references.==	Lokalny index momentalne pozostava z (priblizne) #[wcount]# slov a #[ucount]# URL adries.
 # NOT USED 
@@ -975,7 +957,6 @@ Start/Stop Transfer==Start/Stop prenosu
 
 #-------------------------------------------------------
 #File: Language_p.html
-#Completely translated. If you find any untranslated string in the webinterface, send it to <admin@yacy-forum.de>
 
 Language selection==Vyber jazyka
 Language selection==Vyber jazyka
@@ -995,7 +976,6 @@ Error saving the language file.==Pri ukladani jazykoveho suboru doslo k chybe.
 
 #-------------------------------------------------------
 #File: Lab.html
-#Completely translated. If you find any untranslated string in the webinterface, send it to <admin@yacy-forum.de>
 
 # NOT USED
 #YaCy \'\#\[clientname\]\#\': Lab==YaCy '#[clientname]#': Laboratorium
@@ -1010,7 +990,6 @@ Configuration</a>==Nastavenia</a>
 
 #-------------------------------------------------------
 #File: Messages_p.html
-#Completely translated. If you find any untranslated string in the webinterface, send it to <admin@yacy-forum.de>
 
 >Messages==>Spravy
 >Date==>Datum
@@ -1028,7 +1007,6 @@ I/O error reading message table: ==Vstupno/Vystupna chyba pri citani tabulky spr
 
 #-------------------------------------------------------
 #File: MessageSend_p.html
-#Completely translated. If you find any untranslated string in the webinterface, send it to <admin@yacy-forum.de>
 
 Send message==Posli spravu
 You cannot send a message to==Nemozete poslat spravu pre
@@ -1053,7 +1031,6 @@ Network</a> page.==stranku siete</a>.
 	
 #-------------------------------------------------------
 #File: Network.html
-#Completely translated. If you find any untranslated string in the webinterface, send it to <admin@yacy-forum.de>
 
 Network Overview==Prehlad stavu siete
 Network Menu==Menu siet
@@ -1167,7 +1144,6 @@ add Peer==Pridaj peera
 	
 #-------------------------------------------------------
 #File: News.html
-#Completely translated. If you find any untranslated string in the webinterface, send it to <admin@yacy-forum.de>
 
 Network Menu==Menu siete
 News&nbsp;Overview==Prehlad sprav
@@ -1421,7 +1397,6 @@ The network picture below shows how the latest search query was solved by asking
 
 #-------------------------------------------------------
 #File: ProxyIndexingMonitor_p.html
-#Completely translated. If you find any untranslated string in the webinterface, send it to <admin@yacy-forum.de>
 
 Index Monitor for Proxy Indexing==Monitor indexu pre indexaciu proxy
 This is the control page for web pages that your peer has indexed during the current application run-time==Toto je kontrolna stranke pre web stranky, ktore Vas peer indexoval pocas aktualneho behu aplikacie 
@@ -1467,7 +1442,6 @@ Page.==stranke.
 
 #-------------------------------------------------------
 #File: QuickCrawlLink_p.html
-#Completely translated. If you find any untranslated string in the webinterface, send it to <admin@yacy-forum.de>
 
 YaCy \'\#\[clientname\]\#\': Quick Crawl Link==YaCy '#[clientname]#''#[clientname]#': Rychly Crawl Link
 Quick Crawl Link==Rychly Crawl Link
@@ -1485,7 +1459,6 @@ Unable to add URL to crawler queue:==Nie je mozne pridat URL adresu do cakacej l
 
 #-------------------------------------------------------
 #File: Settings_p.html
-#Completely translated. If you find any untranslated string in the webinterface, send it to <admin@yacy-forum.de>
 
 YaCy \'\#\[clientname\]\#\': Settings==YaCy '#[clientname]#': Nastavenia
 <h2>Settings</h2>==<h2>Nastavenia</h2>
@@ -1762,7 +1735,6 @@ You can reach your YaCy server under the new location==Vas YaCy server je pristu
 
 #-------------------------------------------------------
 #File: Settings_Admin.inc
-#Completely translated. If you find any untranslated string in the webinterface, send it to <admin@yacy-forum.de>
 
 Administration Account Settings==Nastavenia konta administratora
 This is the account that restricts access to this 'Settings' page. If you have not customized it yet, you should do so now:==Toto je konto ktore obmedzuje pristum na tuto stranku 'Nastaveni'. Ak ste toto konte este nevytvorili, mali by ste teraz tak urobit.
@@ -1773,7 +1745,6 @@ value="submit">==value="Uloz">
 
 #-------------------------------------------------------
 #File: Settings_SystemBehaviour.inc
-#Completely translated. If you find any untranslated string in the webinterface, send it to <admin@yacy-forum.de>
 
 System Behaviour Settings==Systemove nastavenia
 Auto pop-up of status page on start-up:==Automaticky pop-up stranky stavu pri starte YaCy:
@@ -1782,7 +1753,6 @@ Auto pop-up of status page on start-up:==Automaticky pop-up stranky stavu pri st
 
 #-------------------------------------------------------
 #File: simple_search.html
-#Completely translated. If you find any untranslated string in the webinterface, send it to <admin@yacy-forum.de>
 
 YaCy \'\#\[clientname\]\#\': Search Page==YaCy '#[clientname]#': Vyhladavacia stranka
 "Search for \#\[former\]\#"=="Hladaj #[former]#"
@@ -1815,7 +1785,6 @@ from 'late' peers to enrich this search result.==z pomalych peerov na zlepsenie 
 
 #-------------------------------------------------------
 #File: Status.html
-#Completely translated. If you find any untranslated string in the webinterface, send it to <admin@yacy-forum.de>
 
 System-, Index- and Peer-Status==Stav systemu, indexu a peera
 Welcome to YaCy!==Vitajte v YaCy!
@@ -1835,7 +1804,7 @@ Not assigned. The peer must go online to get an address.==Nepriradena. Vas pees 
 The peer does not go online until you use the proxy to surf the internet,==Vas peer neprejde do online modu pokym nepouzijete proxy na surfovanie v internete, 
 thus proving that you <i>want</i> to go online.==cim signalizujete ze <i>chcete</i> prejst do online modu.
 #---
-If you don't know how to configure your system to use a proxy,==Navod ako nakonfigurovat system tak aby ste pouzivali proxy, 
+If you don't know how to configure your system,==Navod ako nakonfigurovat system, 
 see the <a==precitajte si <a
 installation instructions</a>.==instalacne instrukcie</a>.
 #---
@@ -1893,7 +1862,6 @@ Last Refresh:==Posledna aktualizacia:
 
 #--------------------------------------------------------
 #File: Status_p.inc
-#Completely translated. If you find any untranslated string in the webinterface, send it to <admin@yacy-forum.de>
 
 Private System Properties==Sukromne systemove vlastnosti
 System Resources==Systemove zdroje
@@ -1936,7 +1904,6 @@ Global Crawl Trigger==odchadzajuce vzialene crawly
 
 #-------------------------------------------------------
 #File: Steering.html
-#Completely translated. If you find any untranslated string in the webinterface, send it to <admin@yacy-forum.de>
 
 Steering==Ovladanie
 Steering Receipt:==Navod na ovladanie
@@ -1974,7 +1941,6 @@ user</a> page.==stranky pouzivatelov</a>.
 
 #-------------------------------------------------------
 #File: ViewFile.html
-#Completely translated. If you find any untranslated string in the webinterface, send it to <admin@yacy-forum.de>
 
 YaCy \'\#\[clientname\]\#\': View URL Content==YaCy '#[clientname]#': Zobraz obsah URL adresy
 View URL Content==Zobraz obsah URL adresy
@@ -2001,7 +1967,6 @@ Original Resource Content==Originalny obsah zdroja
 
 #-------------------------------------------------------
 #File: ViewLog_p.html
-#Completely translated. If you find any untranslated string in the webinterface, send it to <admin@yacy-forum.de>
 
 Lines==Riadkov
 reversed order==v prevratenom poradi
@@ -2009,7 +1974,6 @@ reversed order==v prevratenom poradi
 
 #-------------------------------------------------------
 #File: ViewProfile.html
-#Completely translated. If you find any untranslated string in the webinterface, send it to <admin@yacy-forum.de>
 
 Remote Peer Profile==Profil vzdialeneho peera
 Remote Peer Profile:==Profil vzdialeneho peera:
@@ -2090,7 +2054,6 @@ Architecture \(C\) by Michael Peter Christen==Architektur (C) von Michael Peter 
 
 #--------------------------------------------------------
 #File: env/templates/simpleheader.template
-#Completely translated. If you find any untranslated string in the webinterface, send it to <admin@yacy-forum.de>
 
 Project Home==Domovsk&aacute; str&aacute;nka
 Help / Wiki==Pomoc / Wiki
@@ -2098,7 +2061,6 @@ Peer Owner Profile==Profi vlastn&iacute;ka peera
 
 #--------------------------------------------------------
 #File: env/templates/header.template
-#Completely translated. If you find any untranslated string in the webinterface, send it to <admin@yacy-forum.de>
 
 # NOT USED
 #YaCy&nbsp;-&nbsp;Distributed&nbsp;Web&nbsp;Indexing&nbsp;-&nbsp;Administration==YaCy - Indexovanie Distribuovan&eacute;ho Internetu - Administr&aacute;cia
@@ -2156,7 +2118,6 @@ Interface Skins==Nastavenie vzhladu
 
 #--------------------------------------------------------
 #File: env/templates/submenuCookie.template
-#Completely translated. If you find any untranslated string in the webinterface, send it to <admin@yacy-forum.de>
 
 Cookie Menu==Cookie Menu
 Incoming&nbsp;Cookies==Prichadzajuce cookies
@@ -2164,7 +2125,6 @@ Outgoing&nbsp;Cookies==Odchadzajuce cookies
 
 #--------------------------------------------------------
 #File: env/templates/submenuIndexControl.template
-#Completely translated. If you find any untranslated string in the webinterface, send it to <admin@yacy-forum.de>
 
 Index Control Menu==Menu spravy indexu
 #Index Administration==Administracia indexu 
@@ -2173,7 +2133,6 @@ Index Control Menu==Menu spravy indexu
 
 #--------------------------------------------------------
 #File: env/templates/submenuIndexCreate.template
-#Completely translated. If you find any untranslated string in the webinterface, send it to <admin@yacy-forum.de>
 
 Index Creation Menu==Menu vytvorenia indexu
 Control Queues==Kontrola cakacej listiny
@@ -2191,7 +2150,6 @@ Media Crawl Queues==Cakacia listina Media crawlu
 
 #--------------------------------------------------------
 #File: env/templates/submenuPerformance.template
-#Completely translated. If you find any untranslated string in the webinterface, send it to <admin@yacy-forum.de>
 
 Performance Menu==Menu vykonu
 Queues Performance Settings==Cakacia listina nastaveny vykonu

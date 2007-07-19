@@ -2444,7 +2444,7 @@ public final class plasmaSwitchboard extends serverAbstractSwitch implements ser
                         sbStackCrawlThread.enqueue(nextUrl, entry.urlHash(), initiatorPeerHash, (String) nextEntry.getValue(), docDate, entry.depth() + 1, entry.profile());                        
                     } catch (MalformedURLException e1) {}                    
                 }
-                log.logInfo("CRAWL: ADDED " + hl.size() + " LINKS FROM " + entry.normalizedURLString() +
+                log.logInfo("CRAWL: ADDED " + hl.size() + " LINKS FROM " + entry.url().toNormalform(false, true) +
                         ", NEW CRAWL STACK SIZE IS " + noticeURL.stackSize(plasmaCrawlNURL.STACK_TYPE_CORE));
             }
             stackEndTime = System.currentTimeMillis();
@@ -2471,7 +2471,7 @@ public final class plasmaSwitchboard extends serverAbstractSwitch implements ser
                 indexingStartTime = System.currentTimeMillis();
                 
                 checkInterruption();
-                log.logFine("Condensing for '" + entry.normalizedURLString() + "'");
+                log.logFine("Condensing for '" + entry.url().toNormalform(false, true) + "'");
                 plasmaCondenser condenser = new plasmaCondenser(document, entry.profile().indexText(), entry.profile().indexMedia());
                 
                 // generate citation reference
@@ -2575,8 +2575,8 @@ public final class plasmaSwitchboard extends serverAbstractSwitch implements ser
                             String language = plasmaURL.language(entry.url());                            
                             char doctype = plasmaURL.docType(document.getMimeType());
                             indexURLEntry.Components comp = newEntry.comp();
-                            int urlLength = comp.url().toNormalform().length();
-                            int urlComps = htmlFilterContentScraper.urlComps(comp.url().toNormalform()).length;
+                            int urlLength = comp.url().toNormalform(true, true).length();
+                            int urlComps = htmlFilterContentScraper.urlComps(comp.url().toNormalform(true, true)).length;
 
                             // iterate over all words
                             Iterator i = condenser.words().entrySet().iterator();
@@ -2672,12 +2672,12 @@ public final class plasmaSwitchboard extends serverAbstractSwitch implements ser
                         
                         // if this was performed for a remote crawl request, notify requester
                         if ((processCase == PROCESSCASE_6_GLOBAL_CRAWLING) && (initiatorPeer != null)) {
-                            log.logInfo("Sending crawl receipt for '" + entry.normalizedURLString() + "' to " + initiatorPeer.getName());
+                            log.logInfo("Sending crawl receipt for '" + entry.url().toNormalform(false, true) + "' to " + initiatorPeer.getName());
                             if (clusterhashes != null) initiatorPeer.setAlternativeAddress((String) clusterhashes.get(initiatorPeer.hash));
                             yacyClient.crawlReceipt(initiatorPeer, "crawl", "fill", "indexed", newEntry, "");
                         }
                     } else {
-                        log.logFine("Not Indexed Resource '" + entry.normalizedURLString() + "': process case=" + processCase);
+                        log.logFine("Not Indexed Resource '" + entry.url().toNormalform(false, true) + "': process case=" + processCase);
                         addURLtoErrorDB(entry.url(), referrerUrlHash, initiatorPeerHash, docDescription, plasmaCrawlEURL.DENIED_UNKNOWN_INDEXING_PROCESS_CASE, new kelondroBitfield());
                     }
                 } catch (Exception ee) {
@@ -2956,7 +2956,7 @@ public final class plasmaSwitchboard extends serverAbstractSwitch implements ser
                         urlname = "http://share." + seed.getName() + ".yacy" + filename;
                         if ((p = urlname.indexOf("?")) > 0) urlname = urlname.substring(0, p);
                     } else {
-                        urlstring = comp.url().toNormalform();
+                        urlstring = comp.url().toNormalform(false, true);
                         urlname = urlstring;
                     }
                     

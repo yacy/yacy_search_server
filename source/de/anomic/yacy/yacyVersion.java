@@ -144,16 +144,16 @@ public final class yacyVersion implements Comparator, Comparable {
     
     public boolean equals(Object obj) {
         yacyVersion v = (yacyVersion) obj;
-        return (this.svn == v.svn) && (this.url.toNormalform().equals(v.url.toNormalform()));
+        return (this.svn == v.svn) && (this.url.toNormalform(true, true).equals(v.url.toNormalform(true, true)));
     }
     
     public int hashCode() {
-        return this.url.toNormalform().hashCode();
+        return this.url.toNormalform(true, true).hashCode();
     }
     
     public String toAnchor() {
         // generates an anchor string that can be used to embed in an html for direct download
-        return "<a href=" + this.url.toNormalform() + ">YaCy " + ((this.proRelease) ? "pro release" : "standard release") + " v" + this.releaseNr + ", SVN " + this.svn + "</a>";
+        return "<a href=" + this.url.toNormalform(true, true) + ">YaCy " + ((this.proRelease) ? "pro release" : "standard release") + " v" + this.releaseNr + ", SVN " + this.svn + "</a>";
     }
     
     // static methods:
@@ -215,36 +215,54 @@ public final class yacyVersion implements Comparator, Comparable {
         // check if we know that there is a release that is more recent than that which we are using
         TreeSet[] releasess = yacyVersion.allReleases(true); // {0=promain, 1=prodev, 2=stdmain, 3=stddev}
         boolean pro = new File(sb.getRootPath(), "libx").exists();
-        yacyVersion latestmain = (yacyVersion) releasess[(pro) ? 0 : 2].last();
-        yacyVersion latestdev  = (yacyVersion) releasess[(pro) ? 1 : 3].last();
+        yacyVersion latestmain = (releasess[(pro) ? 0 : 2].size() == 0) ? null : (yacyVersion) releasess[(pro) ? 0 : 2].last();
+        yacyVersion latestdev  = (releasess[(pro) ? 1 : 3].size() == 0) ? null : (yacyVersion) releasess[(pro) ? 1 : 3].last();
         String concept = sb.getConfig("update.concept", "any");
         String blacklist = sb.getConfig("update.blacklist", ".\\...[123]");
+        
         if ((manual) || (concept.equals("any"))) {
             // return a dev-release or a main-release
-            if ((latestdev.compareTo(latestmain) > 0) && (!(Float.toString(latestdev.releaseNr).matches(blacklist)))) {
-                if (latestdev.compareTo(thisVersion()) > 0) return latestdev; else {
-                    yacyCore.log.logInfo("rulebasedUpdateInfo: latest dev " + latestdev.name + " is not more recent than installed release " + thisVersion().name);
+            if ((latestdev != null) &&
+                ((latestmain == null) || (latestdev.compareTo(latestmain) > 0)) &&
+                (!(Float.toString(latestdev.releaseNr).matches(blacklist)))) {
+                // consider a dev-release
+                if (latestdev.compareTo(thisVersion()) > 0) {
+                    return latestdev;
+                } else {
+                    yacyCore.log.logInfo(
+                            "rulebasedUpdateInfo: latest dev " + latestdev.name +
+                            " is not more recent than installed release " + thisVersion().name);
                     return null;
                 }
-            } else {
+            }
+            if (latestmain != null) {
+                // consider a main release
                 if ((Float.toString(latestmain.releaseNr).matches(blacklist))) {
-                    yacyCore.log.logInfo("rulebasedUpdateInfo: latest dev " + latestdev.name + " matches with blacklist '" + blacklist + "'");
+                    yacyCore.log.logInfo(
+                            "rulebasedUpdateInfo: latest dev " + latestdev.name +
+                            " matches with blacklist '" + blacklist + "'");
                     return null;
                 }
                 if (latestmain.compareTo(thisVersion()) > 0) return latestmain; else {
-                    yacyCore.log.logInfo("rulebasedUpdateInfo: latest main " + latestmain.name + " is not more recent than installed release (1) " + thisVersion().name);
+                    yacyCore.log.logInfo(
+                            "rulebasedUpdateInfo: latest main " + latestmain.name +
+                            " is not more recent than installed release (1) " + thisVersion().name);
                     return null;
                 }
             }
         }
-        if (concept.equals("main")) {
+        if ((concept.equals("main")) && (latestmain != null)) {
             // return a main-release
             if ((Float.toString(latestmain.releaseNr).matches(blacklist))) {
-                yacyCore.log.logInfo("rulebasedUpdateInfo: latest main " + latestmain.name + " matches with blacklist'" + blacklist + "'");
+                yacyCore.log.logInfo(
+                        "rulebasedUpdateInfo: latest main " + latestmain.name +
+                        " matches with blacklist'" + blacklist + "'");
                 return null;
             }
             if (latestmain.compareTo(thisVersion()) > 0) return latestmain; else {
-                yacyCore.log.logInfo("rulebasedUpdateInfo: latest main " + latestmain.name + " is not more recent than installed release (2) " + thisVersion().name);
+                yacyCore.log.logInfo(
+                        "rulebasedUpdateInfo: latest main " + latestmain.name +
+                        " is not more recent than installed release (2) " + thisVersion().name);
                 return null; 
             }
         }

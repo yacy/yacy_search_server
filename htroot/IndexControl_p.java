@@ -188,7 +188,7 @@ public class IndexControl_p {
             if (entry == null) {
                 prop.put("result", "No Entry for URL hash " + urlhash + "; nothing deleted.");
             } else {
-                urlstring = entry.comp().url().toNormalform();
+                urlstring = entry.comp().url().toNormalform(false, true);
                 prop.put("urlstring", "");
                 switchboard.urlRemove(urlhash);
                 prop.put("result", "Removed URL " + urlstring);
@@ -328,7 +328,7 @@ public class IndexControl_p {
             if (entry == null) {
                 prop.put("result", "No Entry for URL hash " + urlhash);
             } else {
-                prop.put("urlstring", entry.comp().url().toNormalform());
+                prop.put("urlstring", entry.comp().url().toNormalform(false, true));
                 prop.putAll(genUrlProfile(switchboard, entry, urlhash));
             }
         }
@@ -464,7 +464,7 @@ public class IndexControl_p {
         if (le == null) {
             referrer = "<unknown>";
         } else {
-            referrer = le.comp().url().toNormalform();
+            referrer = le.comp().url().toNormalform(false, true);
         }
         if (comp.url() == null) {
             prop.put("genUrlProfile", 1);
@@ -472,7 +472,7 @@ public class IndexControl_p {
             return prop;
         }
         prop.put("genUrlProfile", 2);
-        prop.put("genUrlProfile_urlNormalform", comp.url().toNormalform());
+        prop.put("genUrlProfile_urlNormalform", comp.url().toNormalform(false, true));
         prop.put("genUrlProfile_urlhash", urlhash);
         prop.put("genUrlProfile_urlDescr", comp.title());
         prop.put("genUrlProfile_moddate", entry.moddate());
@@ -513,7 +513,7 @@ public class IndexControl_p {
                     if (le == null) {
                         tm.put(uh[0], uh);
                     } else {
-                        us = le.comp().url().toNormalform();
+                        us = le.comp().url().toNormalform(false, true);
                         tm.put(us, uh);
 
                     }

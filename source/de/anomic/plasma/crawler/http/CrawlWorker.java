@@ -318,7 +318,7 @@ public final class CrawlWorker extends AbstractCrawlWorker {
                         }
                         
                         // normalizing URL
-                        redirectionUrlString = new URL(this.url, redirectionUrlString).toNormalform();
+                        redirectionUrlString = new URL(redirectionUrlString).toNormalform(true, true);
 
                         // generating the new URL object
                         URL redirectionUrl = new URL(redirectionUrlString);
@@ -351,16 +351,15 @@ public final class CrawlWorker extends AbstractCrawlWorker {
                         if (redirectedEntry != null) {
 //                            TODO: Here we can store the content of the redirection
 //                            as content of the original URL if some criterias are met
-//                            See: http://www.yacy-forum.de/viewtopic.php?t=1719                                                                                   
 //                            
 //                            plasmaHTCache.Entry newEntry = (plasmaHTCache.Entry) redirectedEntry.clone();
 //                            newEntry.url = url;
-//                            TODO: which http header should we store here?    
+//                            TODO: which http header should we store here?
 //                                                      
 //                            // enQueue new entry with response header
 //                            if (profile != null) {
-//                                cacheManager.push(newEntry);                                
-//                            }                            
+//                                cacheManager.push(newEntry);
+//                            }
 //                            htCache = newEntry;
                         }
                     }

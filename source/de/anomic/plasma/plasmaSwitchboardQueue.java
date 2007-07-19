@@ -268,10 +268,6 @@ public class plasmaSwitchboardQueue {
             return url;
         }
 
-        public String normalizedURLString() {
-            return url.toNormalform();
-        }
-
         public String urlHash() {
             return plasmaURL.urlHash(url);
         }
@@ -365,7 +361,7 @@ public class plasmaSwitchboardQueue {
                 return "Indexing_Not_Allowed";
             }
 
-            String nURL = normalizedURLString();
+            String nURL = url.toNormalform(true, true);
             // -CGI access in request
             // CGI access makes the page very individual, and therefore not usable in caches
             if (!profile().crawlingQ()) {
@@ -420,7 +416,7 @@ public class plasmaSwitchboardQueue {
                 return "Indexing_Not_Allowed";
             }
 
-            final String nURL = normalizedURLString();
+            final String nURL = url().toNormalform(true, true);
             // -CGI access in request
             // CGI access makes the page very individual, and therefore not usable in caches
             if (!profile().crawlingQ()) {

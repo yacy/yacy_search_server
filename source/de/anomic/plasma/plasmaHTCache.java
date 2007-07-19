@@ -303,7 +303,7 @@ public final class plasmaHTCache {
         if (deleteFileandDirs(key, getCachePath(url), msg)) {
             try {
                 // As the file is gone, the entry in responseHeader.db is not needed anymore
-                this.log.logFinest("Trying to remove responseHeader from URL: " + url.toString());
+                this.log.logFinest("Trying to remove responseHeader from URL: " + url.toNormalform(false, true));
                 this.responseHeaderDB.remove(plasmaURL.urlHash(url));
             } catch (IOException e) {
                 resetResponseHeaderDB();
@@ -365,7 +365,7 @@ public final class plasmaHTCache {
                             } else {
                                 URL url = getURL(file);
                                 if (url != null) {
-                                    this.log.logFinest("Trying to remove responseHeader for URL: " + url.toString());
+                                    this.log.logFinest("Trying to remove responseHeader for URL: " + url.toNormalform(false, true));
                                     this.responseHeaderDB.remove(plasmaURL.urlHash(url));
                                 }
                             }
@@ -507,7 +507,7 @@ public final class plasmaHTCache {
     public IResourceInfo loadResourceInfo(URL url) throws UnsupportedProtocolException, IllegalAccessException {    
         
         // getting the URL hash
-        String urlHash = plasmaURL.urlHash(url.toNormalform());
+        String urlHash = plasmaURL.urlHash(url.toNormalform(true, true));
         
         // loading data from database
         Map hdb = this.responseHeaderDB.getMap(urlHash);
@@ -976,7 +976,7 @@ public final class plasmaHTCache {
         
         
         // normalize url
-        this.nomalizedURLString = url.toNormalform();
+        this.nomalizedURLString = url.toNormalform(true, true);
 
         try {
             this.url            = new URL(this.nomalizedURLString);

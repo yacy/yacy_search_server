@@ -149,7 +149,7 @@ public class zipParser extends AbstractParser implements Parser {
                     serverFileUtils.copy(zippedContent,subDocTempFile,entry.getSize());                    
                     
                     // parsing the zip file entry
-                    subDoc = theParser.parseSource(new URL(location,"#" + entryName),entryMime,null, subDocTempFile);
+                    subDoc = theParser.parseSource(URL.newURL(location,"#" + entryName),entryMime,null, subDocTempFile);
                 } catch (ParserException e) {
                     this.theLogger.logInfo("Unable to parse zip file entry '" + entryName + "'. " + e.getMessage());
                 } finally {

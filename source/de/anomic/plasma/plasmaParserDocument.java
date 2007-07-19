@@ -331,7 +331,7 @@ public class plasmaParserDocument {
                     }
                     try {
                         url = new URL(u);
-                        u = url.toNormalform();
+                        u = url.toNormalform(true, true);
                         if (plasmaParser.mediaExtContains(ext)) {
                             // this is not a normal anchor, its a media link
                             if (plasmaParser.imageExtContains(ext)) {

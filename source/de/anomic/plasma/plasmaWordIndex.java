@@ -279,7 +279,7 @@ public final class plasmaWordIndex implements indexRI {
         // use all the words in one condenser object to simultanous create index entries
         
         int wordCount = 0;
-        int urlLength = url.toString().length();
+        int urlLength = url.toNormalform(true, true).length();
         int urlComps = htmlFilterContentScraper.urlComps(url.toString()).length;
         
         // iterate over all words of context text
@@ -542,7 +542,6 @@ public final class plasmaWordIndex implements indexRI {
     }
     
     //  The Cleaner class was provided as "UrldbCleaner" by Hydrox
-    //  see http://www.yacy-forum.de/viewtopic.php?p=18093#18093
     public synchronized Cleaner makeCleaner(plasmaCrawlLURL lurl, String startHash) {
         return new Cleaner(lurl, startHash);
     }

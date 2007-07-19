@@ -144,7 +144,7 @@ public class diff {
      *           <code>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;,{__,_1,__} </code><br>
      *           <code>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;,{__,__,_1} </code><br> 
      * <ul>
-     * TODO: some optimisation ideas see the discusion <a href="http://www.yacy-forum.de/viewtopic.php?t=3557">Diff.findDiagonal(..) buggy????</a>
+     * TODO: some optimisation ideas
      * <li>search for a better algorithm on the inet!!! :) </li> 
      * <li>pass only the part of the matrix where the search takes place - not the whole matrix everytime</li> 
      * <li>break the inner loop if the rest of the matrix is smaller than minLength (and no diagonal has been found yet) </li> 
@@ -272,7 +272,7 @@ public class diff {
                 case diff.Part.ADDED: sb.append("added"); break;
                 case diff.Part.DELETED: sb.append("deleted"); break;
                 }
-                sb.append("\">").append(htmlTools.replaceXMLEntities(ps[j].getString()).replaceAll("\n", "<br />"));
+                sb.append("\">").append(htmlTools.encodeUnicode2html(ps[j].getString(), true).replaceAll("\n", "<br />"));
                 sb.append("</span>");
             }
             sb.append("</p>");

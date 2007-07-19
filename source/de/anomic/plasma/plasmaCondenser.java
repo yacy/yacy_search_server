@@ -208,7 +208,7 @@ public final class plasmaCondenser {
             htmlFilterImageEntry ientry;
             while (i.hasNext()) {
                 ientry = (htmlFilterImageEntry) i.next();
-                insertTextToWords((String) ientry.url().toNormalform(), 99, flag_cat_hasimage, wflags);
+                insertTextToWords((String) ientry.url().toNormalform(false, true), 99, flag_cat_hasimage, wflags);
                 insertTextToWords((String) ientry.alt(), 99, flag_cat_hasimage, wflags);
             }
         

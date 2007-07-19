@@ -62,8 +62,8 @@ public class config_p {
         int count=0;
         while(keys.hasNext()){
             key = (String) keys.next();
-            prop.put("options_"+count+"_key", htmlTools.replaceXMLEntities(key));
-            prop.put("options_"+count+"_value", htmlTools.replaceXMLEntities(env.getConfig(key, "ERROR")));
+            prop.put("options_"+count+"_key", htmlTools.encodeUnicode2html(key, true));
+            prop.put("options_"+count+"_value", htmlTools.encodeUnicode2html(env.getConfig(key, "ERROR"), true));
             count++;        
         }
         prop.put("options", count);

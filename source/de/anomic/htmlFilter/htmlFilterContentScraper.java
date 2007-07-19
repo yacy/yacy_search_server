@@ -161,7 +161,7 @@ public class htmlFilterContentScraper extends htmlFilterAbstractScraper implemen
     
     private String absolutePath(String relativePath) {
         try {
-            return new URL(root, relativePath).toString();
+            return URL.newURL(root, relativePath).toNormalform(false, true);
         } catch (Exception e) {
             return "";
         }

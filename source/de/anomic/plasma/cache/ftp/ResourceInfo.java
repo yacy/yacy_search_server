@@ -77,7 +77,7 @@ public class ResourceInfo implements IResourceInfo {
         
         // generating the url hash
         this.url = objectURL;
-        this.urlHash = plasmaURL.urlHash(this.url.toNormalform());
+        this.urlHash = plasmaURL.urlHash(this.url.toNormalform(true, true));
         
         // create the http header object
         this.propertyMap =  new HashMap(objectInfo);
@@ -88,7 +88,7 @@ public class ResourceInfo implements IResourceInfo {
         
         // generating the url hash
         this.url = objectURL;
-        this.urlHash = plasmaURL.urlHash(this.url.toNormalform());
+        this.urlHash = plasmaURL.urlHash(this.url.toNormalform(true, true));
         
         // create the http header object
         this.propertyMap =  new HashMap();

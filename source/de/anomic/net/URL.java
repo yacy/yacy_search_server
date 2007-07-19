@@ -104,50 +104,76 @@ public class URL {
         this("file", "", -1, file.getAbsolutePath());
     }
 
-    public URL(URL baseURL, String relPath) throws MalformedURLException {
+    public static URL newURL(String baseURL, String relPath) throws MalformedURLException {
+        if ((baseURL == null) ||
+            (relPath.startsWith("http://")) ||
+            (relPath.startsWith("https://")) ||
+            (relPath.startsWith("ftp://")) ||
+            (relPath.startsWith("file://")) ||
+            (relPath.startsWith("smb://"))) {
+            return new URL(relPath);
+        } else {
+            return new URL(new URL(baseURL), relPath);
+        }
+    }
+    
+    public static URL newURL(URL baseURL, String relPath) throws MalformedURLException {
+        if ((baseURL == null) ||
+            (relPath.startsWith("http://")) ||
+            (relPath.startsWith("https://")) ||
+            (relPath.startsWith("ftp://")) ||
+            (relPath.startsWith("file://")) ||
+            (relPath.startsWith("smb://"))) {
+            return new URL(relPath);
+        } else {
+            return new URL(baseURL, relPath);
+        }
+    }
+    
+    private URL(URL baseURL, String relPath) throws MalformedURLException {
         if (baseURL == null) throw new MalformedURLException("base URL is null");
         if (relPath == null) throw new MalformedURLException("relPath is null");
-        int p = relPath.indexOf(':');
-        String relprotocol = (p < 0) ? null : relPath.substring(0, p).toLowerCase();
-        if (relprotocol != null && "http.https.ftp.mailto".indexOf(relprotocol) >= 0) {
-            parseURLString(relPath);
-        } else if (relprotocol == null || relprotocol.equals("javascript")) {
-            this.protocol = baseURL.protocol;
-            this.host = baseURL.host;
-            this.port = baseURL.port;
-            this.userInfo = baseURL.userInfo;
-            if (relPath.toLowerCase().startsWith("javascript:")) {
-                this.path = baseURL.path;
-            } else if (relPath.startsWith("/")) {
-                this.path = relPath;
-            } else if (baseURL.path.endsWith("/")) {
-                if (relPath.startsWith("#") || relPath.startsWith("?")) {
-                    throw new MalformedURLException("relative path malformed: " + relPath);
-                } else {
-                    this.path = baseURL.path + relPath;
-                }
+
+        this.protocol = baseURL.protocol;
+        this.host = baseURL.host;
+        this.port = baseURL.port;
+        this.userInfo = baseURL.userInfo;
+        if (relPath.toLowerCase().startsWith("javascript:")) {
+            this.path = baseURL.path;
+        } else if (
+                (relPath.startsWith("http://")) ||
+                (relPath.startsWith("https://")) ||
+                (relPath.startsWith("ftp://")) ||
+                (relPath.startsWith("file://")) ||
+                (relPath.startsWith("smb://"))) {
+            this.path = baseURL.path;
+        } else if (relPath.startsWith("/")) {
+            this.path = relPath;
+        } else if (baseURL.path.endsWith("/")) {
+            if (relPath.startsWith("#") || relPath.startsWith("?")) {
+                throw new MalformedURLException("relative path malformed: " + relPath);
             } else {
-                if (relPath.startsWith("#") || relPath.startsWith("?")) {
-                    this.path = baseURL.path + relPath;
+                this.path = baseURL.path + relPath;
+            }
+        } else {
+            if (relPath.startsWith("#") || relPath.startsWith("?")) {
+                this.path = baseURL.path + relPath;
+            } else {
+                int q = baseURL.path.lastIndexOf('/');
+                if (q < 0) {
+                    this.path = relPath;
                 } else {
-                    int q = baseURL.path.lastIndexOf('/');
-                    if (q < 0) {
-                        this.path = relPath;
-                    } else {
-                        this.path = baseURL.path.substring(0, q + 1) + relPath;
-                    }
+                    this.path = baseURL.path.substring(0, q + 1) + relPath;
                 }
             }
-            this.quest = baseURL.quest;
-            this.ref = baseURL.ref;
-
-            path = resolveBackpath(path);
-            identRef();
-            identQuest();
-            escape();
-        } else {
-            throw new MalformedURLException("unknown protocol: " + relprotocol);
         }
+        this.quest = baseURL.quest;
+        this.ref = baseURL.ref;
+
+        path = resolveBackpath(path);
+        identRef();
+        identQuest();
+        escape();
     }
     
     public URL(String protocol, String host, int port, String path) throws MalformedURLException {
@@ -181,8 +207,6 @@ public class URL {
             path = matcher.replaceAll("");
             matcher.reset(path);
         }
-        
-        /* another version at http://www.yacy-forum.de/viewtopic.php?p=26871#26871 */
         
         return path.equals("")?"/":path;
     }
@@ -228,7 +252,7 @@ public class URL {
         quest = qtmp.substring((qtmp.length() > 0) ? 1 : 0);
     }
     
-    final static String[] hex = {
+    private final static String[] hex = {
         "%00", "%01", "%02", "%03", "%04", "%05", "%06", "%07",
         "%08", "%09", "%0A", "%0B", "%0C", "%0D", "%0E", "%0F",
         "%10", "%11", "%12", "%13", "%14", "%15", "%16", "%17",
@@ -301,7 +325,8 @@ public class URL {
                 sbuf.append((char)ch);
             } else if (ch == ' ') {                 // space
                 sbuf.append("%20");
-            } else if (ch == '-' || ch == '_'       // unreserved
+            } else if (ch == '&' || ch == ':'       // unreserved
+                    || ch == '-' || ch == '_'
                     || ch == '.' || ch == '!'
                     || ch == '~' || ch == '*'
                     || ch == '\'' || ch == '('
@@ -462,15 +487,18 @@ public class URL {
         return quest;
     }
 
-    public String toNormalform() {
-        return toString(false);
-    }
-    
     public String toString() {
-        return toString(true);
+        return toNormalform(false, true);
     }
     
-    public String toString(boolean includeReference) {
+    public String toNormalform(boolean stripReference, boolean stripAmp) {
+        if (stripAmp)
+            return toNormalform(!stripReference).replaceAll("&amp;", "&");
+        else
+            return toNormalform(!stripReference);
+    }
+    
+    private String toNormalform(boolean includeReference) {
         // generates a normal form of the URL
         boolean defaultPort = false;
         if (this.protocol.equals("mailto")) {
@@ -537,27 +565,44 @@ public class URL {
           new String[]{"http://www.anomic.de/home", "ftp://ftp.delegate.org/"},
           new String[]{"http://www.anomic.de","mailto:yacy@weltherrschaft.org"},
           new String[]{"http://www.anomic.de","javascipt:temp"},
+          new String[]{null,"http://yacy-websuche.de/wiki/index.php?title=De:IntroInformationFreedom&action=history"},
+          new String[]{null, "http://diskusjion.no/index.php?s=5bad5f431a106d9a8355429b81bb0ca5&showuser=23585"},
           new String[]{null, "http://diskusjion.no/index.php?s=5bad5f431a106d9a8355429b81bb0ca5&amp;showuser=23585"}
           };
         String environment, url;
-        de.anomic.net.URL aURL = null;
-        java.net.URL jURL = null;
+        de.anomic.net.URL aURL, aURL1;
+        java.net.URL jURL;
         for (int i = 0; i < test.length; i++) {
             environment = test[i][0];
             url = test[i][1];
+            try {aURL = de.anomic.net.URL.newURL(environment, url);} catch (MalformedURLException e) {aURL = null;}
             if (environment == null) {
-                try {aURL = new de.anomic.net.URL(url);} catch (MalformedURLException e) {aURL = null;}
                 try {jURL = new java.net.URL(url);} catch (MalformedURLException e) {jURL = null;}
             } else {
-                try {aURL = new de.anomic.net.URL(new de.anomic.net.URL(environment), url);} catch (MalformedURLException e) {aURL = null;}
                 try {jURL = new java.net.URL(new java.net.URL(environment), url);} catch (MalformedURLException e) {jURL = null;}
             }
+            
+            // check equality to java.net.URL
             if (((aURL == null) && (jURL != null)) ||
                 ((aURL != null) && (jURL == null)) ||
                 ((aURL != null) && (jURL != null) && (!(jURL.toString().equals(aURL.toString()))))) {
                 System.out.println("Difference for environment=" + environment + ", url=" + url + ":");
                 System.out.println((jURL == null) ? "jURL rejected input" : "jURL=" + jURL.toString());
                 System.out.println((aURL == null) ? "aURL rejected input" : "aURL=" + aURL.toString());
+            }
+            
+            // check stability: the normalform of the normalform must be equal to the normalform
+            if (aURL != null) try {
+                aURL1 = new de.anomic.net.URL(aURL.toNormalform(false, true));
+                if (!(aURL1.toNormalform(false, true).equals(aURL.toNormalform(false, true)))) {
+                    System.out.println("no stability for url:");
+                    System.out.println("aURL0=" + aURL.toString());
+                    System.out.println("aURL1=" + aURL1.toString());
+                }
+            } catch (MalformedURLException e) {
+                System.out.println("no stability for url:");
+                System.out.println("aURL0=" + aURL.toString());
+                System.out.println("aURL1 cannot be computed:" + e.getMessage());
             }
         }
     }

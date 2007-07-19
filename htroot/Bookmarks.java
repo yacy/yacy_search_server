@@ -174,7 +174,7 @@ public class Bookmarks {
                             indexURLEntry.Components comp = urlentry.comp();
                             document = switchboard.snippetCache.retrieveDocument(comp.url(), true, 5000, true);
                             prop.put("mode_edit", 0); // create mode
-                            prop.put("mode_url", comp.url().toNormalform());
+                            prop.put("mode_url", comp.url().toNormalform(false, true));
                             prop.put("mode_title", comp.title());
                             prop.put("mode_description", (document == null) ? comp.title(): document.getTitle());
                             prop.put("mode_author", comp.author());
@@ -270,9 +270,9 @@ public class Bookmarks {
         bookmark=switchboard.bookmarksDB.getBookmark((String)it.next());
         if(bookmark!=null){
         	if(bookmark.getFeed() && isAdmin)
-        		prop.put("bookmarks_"+count+"_link", "/FeedReader_p.html?url="+de.anomic.data.htmlTools.replaceXMLEntities(bookmark.getUrl()));
+        		prop.put("bookmarks_"+count+"_link", "/FeedReader_p.html?url="+de.anomic.data.htmlTools.encodeUnicode2html(bookmark.getUrl(), false));
         	else
-        		prop.put("bookmarks_"+count+"_link", de.anomic.data.htmlTools.replaceXMLEntities(bookmark.getUrl()));
+        		prop.put("bookmarks_"+count+"_link", de.anomic.data.htmlTools.encodeUnicode2html(bookmark.getUrl(), false));
             prop.put("bookmarks_"+count+"_title", bookmark.getTitle());
             prop.put("bookmarks_"+count+"_description", bookmark.getDescription());
             prop.put("bookmarks_"+count+"_date", serverDate.dateToiso8601(new Date(bookmark.getTimeStamp())));

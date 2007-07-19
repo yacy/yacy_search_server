@@ -344,7 +344,7 @@ public final class httpdProxyHandler extends httpdAbstractHandler implements htt
                 //redirector
                 if (redirectorEnabled){
                     synchronized(redirectorProcess){
-                        redirectorWriter.println(url.toString());
+                        redirectorWriter.println(url.toNormalform(false, true));
                         redirectorWriter.flush();
                     }
                     String newUrl=redirectorReader.readLine();

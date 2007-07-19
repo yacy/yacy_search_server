@@ -17,7 +17,6 @@ WHERE IS THE DOCUMENTATION?
 
 The complete documentation can be found at:
 (English)  http://yacy.net/yacy
-(Deutsch)  http://www.yacy-websuche.de
 (Wiki:de)  http://www.yacy-websuche.de/wiki/index.php/De:Start
 (Wiki:en)  http://www.yacy-websearch.net/wiki/index.php/En:Start
 
@@ -72,17 +71,16 @@ ANY MORE CONFIGURATIONS?
 - after startup, you see the configuration page in your web browser.
   just open http://localhost:8080
   all you have to do (should do) is to enter a password for your peer
-- You can use YaCy as your web proxy. But you don't need to do that.
+
+- You can use YaCy as your web proxy. This is an option, you don't need to do that.
   Simply configure your internet connection to use a proxy at port 8080.
-- You can add a YaCy toolbar to your Firefox web browser.
-  This release contains the yacybar.xpi file from Alexander Schier
-  and Martin Thelian. Please install this file as a Firefox extension.
+
 
 
 CONTACT:
 
 If you have any questions, please do not hesitate to contact the author:
-Send an email to Michael Christen (mc@anomic.de) with a meaningful subject
+Send an email to Michael Christen (mc@yacy.net) with a meaningful subject
 including the word 'yacy' to prevent that your email gets stuck
 in my anti-spam filter.
 
@@ -91,5 +89,5 @@ feel free to ask the author for a business proposal to customize YaCy
 according to your needs. We also provide integration solutions if the
 software is about to be integrated into your enterprise application.
 
-Germany, Frankfurt a.M., 02.12.2006
+Germany, Frankfurt a.M., 19.07.2007
 Michael Peter Christen

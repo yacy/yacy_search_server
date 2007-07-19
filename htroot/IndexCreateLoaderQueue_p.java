@@ -80,9 +80,9 @@ public class IndexCreateLoaderQueue_p {
                 
                 initiator = yacyCore.seedDB.getConnected(theMsg.initiator);
                 prop.put("loader-set_list_"+count+"_dark", ((dark) ? 1 : 0) );
-                prop.put("loader-set_list_"+count+"_initiator", ((initiator == null) ? "proxy" : htmlTools.replaceHTML(initiator.getName())) );
+                prop.put("loader-set_list_"+count+"_initiator", ((initiator == null) ? "proxy" : htmlTools.encodeUnicode2html(initiator.getName(), true)) );
                 prop.put("loader-set_list_"+count+"_depth", theMsg.depth );
-                prop.put("loader-set_list_"+count+"_url", htmlTools.replaceHTML(theMsg.url.toString())); // null pointer exception here !!! maybe url = null; check reason.
+                prop.put("loader-set_list_"+count+"_url", htmlTools.encodeUnicode2html(theMsg.url.toNormalform(false, true), false)); // null pointer exception here !!! maybe url = null; check reason.
                 dark = !dark;
                 count++;
             }

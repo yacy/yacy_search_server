@@ -90,7 +90,7 @@ public class serverObjects extends Hashtable implements Cloneable {
      * like put, but it replaces any HTML special chars.
      */
     public Object putSafeXML(Object key, String value){
-        return put(key, htmlTools.replaceXMLEntities(value));
+        return put(key, htmlTools.encodeUnicode2html(value, true));
     }
 
     // new put takes also null values

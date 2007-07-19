@@ -250,7 +250,7 @@ public class yacysearch {
                 if (document != null) {
                     // create a news message
                     HashMap map = new HashMap();
-                    map.put("url", comp.url().toNormalform().replace(',', '|'));
+                    map.put("url", comp.url().toNormalform(false, true).replace(',', '|'));
                     map.put("title", comp.title().replace(',', ' '));
                     map.put("description", ((document == null) ? comp.title() : document.getTitle()).replace(',', ' '));
                     map.put("author", ((document == null) ? "" : document.getAuthor()));
@@ -314,8 +314,6 @@ public class yacysearch {
             for(int i=0;i<results.numResults();i++){
                 plasmaSearchResults.searchResult result=results.getResult(i);
                 prop.put("type_results_" + i + "_authorized_recommend", (yacyCore.newsPool.getSpecific(yacyNewsPool.OUTGOING_DB, yacyNewsPool.CATEGORY_SURFTIPP_ADD, "url", result.getUrl()) == null) ? 1 : 0);
-                //prop.put("type_results_" + i + "_authorized_recommend_deletelink", "/yacysearch.html?search=" + results.getFormerSearch() + "&amp;Enter=Search&amp;count=" + results.getQuery().wantedResults + "&amp;order=" + crypt.simpleEncode(results.getRanking().toExternalString()) + "&amp;resource=local&amp;time=3&amp;deleteref=" + result.getUrlhash() + "&amp;urlmaskfilter=.*");
-                //prop.put("type_results_" + i + "_authorized_recommend_recommendlink", "/yacysearch.html?search=" + results.getFormerSearch() + "&amp;Enter=Search&amp;count=" + results.getQuery().wantedResults + "&amp;order=" + crypt.simpleEncode(results.getRanking().toExternalString()) + "&amp;resource=local&amp;time=3&amp;recommendref=" + result.getUrlhash() + "&amp;urlmaskfilter=.*");
                 prop.put("type_results_" + i + "_authorized_recommend_deletelink", "/yacysearch.html?search=" + results.getFormerSearch() + "&Enter=Search&count=" + results.getQuery().wantedResults + "&order=" + crypt.simpleEncode(results.getRanking().toExternalString()) + "&resource=local&time=3&deleteref=" + result.getUrlhash() + "&urlmaskfilter=.*");
                 prop.put("type_results_" + i + "_authorized_recommend_recommendlink", "/yacysearch.html?search=" + results.getFormerSearch() + "&Enter=Search&count=" + results.getQuery().wantedResults + "&order=" + crypt.simpleEncode(results.getRanking().toExternalString()) + "&resource=local&time=3&recommendref=" + result.getUrlhash() + "&urlmaskfilter=.*");
                 prop.put("type_results_" + i + "_authorized_urlhash", result.getUrlhash());
@@ -339,7 +337,7 @@ public class yacysearch {
                 prop.put("type_results_" + i + "_former", results.getFormerSearch());
                 prop.put("type_results_" + i + "_rankingprops", result.getUrlentry().word().toPropertyForm() + ", domLengthEstimated=" + plasmaURL.domLengthEstimation(result.getUrlhash()) +
                         ((plasmaURL.probablyRootURL(result.getUrlhash())) ? ", probablyRootURL" : "") + 
-                        (((wordURL = plasmaURL.probablyWordURL(result.getUrlhash(), query[0])) != null) ? ", probablyWordURL=" + wordURL.toNormalform() : ""));
+                        (((wordURL = plasmaURL.probablyWordURL(result.getUrlhash(), query[0])) != null) ? ", probablyWordURL=" + wordURL.toNormalform(false, true) : ""));
                 // adding snippet if available
                 if (result.hasSnippet()) {
                     prop.put("type_results_" + i + "_snippet", 1);

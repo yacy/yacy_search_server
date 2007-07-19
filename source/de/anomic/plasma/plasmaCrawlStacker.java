@@ -223,7 +223,7 @@ public final class plasmaCrawlStacker {
         }
         
         return stackCrawl(
-                theMsg.url().toString(),
+                theMsg.url().toNormalform(true, true),
                 theMsg.referrerhash(),
                 theMsg.initiator(),
                 theMsg.name(),

@@ -454,7 +454,6 @@ public final class plasmaCrawlLURL {
     }
 
     //  The Cleaner class was provided as "UrldbCleaner" by Hydrox
-    //  see http://www.yacy-forum.de/viewtopic.php?p=18093#18093
     public Cleaner makeCleaner() {
         return new Cleaner();
     }
@@ -502,15 +501,15 @@ public final class plasmaCrawlLURL {
                             remove(entry.hash());
                         } else if (plasmaSwitchboard.urlBlacklist.isListed(plasmaURLPattern.BLACKLIST_CRAWLER, comp.url()) ||
                                    plasmaSwitchboard.urlBlacklist.isListed(plasmaURLPattern.BLACKLIST_DHT, comp.url())) {
-                            lastBlacklistedUrl = comp.url().toNormalform();
+                            lastBlacklistedUrl = comp.url().toNormalform(true, true);
                             lastBlacklistedHash = entry.hash();
-                            serverLog.logFine("URLDBCLEANER", ++blacklistedUrls + " blacklisted (" + ((double) blacklistedUrls / totalSearchedUrls) * 100 + "%): " + entry.hash() + " " + comp.url().toNormalform());
+                            serverLog.logFine("URLDBCLEANER", ++blacklistedUrls + " blacklisted (" + ((double) blacklistedUrls / totalSearchedUrls) * 100 + "%): " + entry.hash() + " " + comp.url().toNormalform(false, true));
                             remove(entry.hash());
                             if (blacklistedUrls % 100 == 0) {
                                 serverLog.logInfo("URLDBCLEANER", "Deleted " + blacklistedUrls + " URLs until now. Last deleted URL-Hash: " + lastBlacklistedUrl);
                             }
                         }
-                        lastUrl = comp.url().toNormalform();
+                        lastUrl = comp.url().toNormalform(true, true);
                         lastHash = entry.hash();
                     }
                 }

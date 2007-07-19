@@ -153,7 +153,7 @@ public abstract class AbstractParser implements Parser{
             if (file.isDirectory()) {
                 result += parseDir(location, prefix, file, doc);
             } else try {
-                URL url = new URL(location, "/" + prefix + "/"
+                URL url = URL.newURL(location, "/" + prefix + "/"
                         // XXX: workaround for relative paths within document
                         + file.getPath().substring(file.getPath().indexOf(File.separatorChar) + 1)
                         + "/" + file.getName());

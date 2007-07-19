@@ -270,7 +270,7 @@ public class ViewFile {
             
         } else if (viewMode.equals("iframe")) {
             prop.put("viewMode", VIEW_MODE_AS_IFRAME);
-            prop.put("viewMode_url", url.toNormalform());
+            prop.put("viewMode_url", url.toNormalform(false, true));
             
         } else if (viewMode.equals("parsed") || viewMode.equals("sentences") || viewMode.equals("links")) {
             // parsing the resource content
@@ -348,8 +348,8 @@ public class ViewFile {
                     prop.put("viewMode_links_" + i + "_dark", ((dark) ? 1 : 0));
                     prop.put("viewMode_links_" + i + "_type", "image");
                     prop.putASIS("viewMode_links_" + i + "_text", markup(wordArray, entry.alt()));
-                    prop.put("viewMode_links_" + i + "_url", (String) entry.url().toNormalform());
-                    prop.putASIS("viewMode_links_" + i + "_link", markup(wordArray, (String) entry.url().toNormalform()));
+                    prop.put("viewMode_links_" + i + "_url", (String) entry.url().toNormalform(false, true));
+                    prop.putASIS("viewMode_links_" + i + "_link", markup(wordArray, (String) entry.url().toNormalform(false, true)));
                     if (entry.width() > 0 && entry.height() > 0)
                         prop.putASIS("viewMode_links_" + i + "_attr", entry.width() + "x" + entry.height() + " Pixel");
                     else
@@ -365,7 +365,7 @@ public class ViewFile {
             if (document != null) document.close();
         }
         prop.put("error", 0);
-        prop.put("error_url", url.toNormalform());
+        prop.put("error_url", url.toNormalform(false, true));
         prop.put("error_hash", urlHash);
         prop.put("error_wordCount", Integer.toString(wordCount));
         prop.put("error_desc", descr);
@@ -386,7 +386,7 @@ public class ViewFile {
     }
     
     private static final String markup(String[] wordArray, String message) {
-        message = htmlTools.replaceXMLEntities(message);
+        message = htmlTools.encodeUnicode2html(message, true);
         if (wordArray != null)
             for (int j = 0; j < wordArray.length; j++) {
                 String currentWord = wordArray[j].trim();

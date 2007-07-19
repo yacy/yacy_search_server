@@ -1859,7 +1859,7 @@ and set an administration password.==und geben Sie ein Administrator Passwort ei
 You have not published your peer seed yet. This happens automatically, just wait.==Ihr Peer ist dem Netzwerk noch nicht bekannt. Warten Sie noch ein wenig, dies geschieht automatisch.
 While you have this status you are not allowed to search other peers.==W&auml;hrend Sie diesen Status haben, ist es Ihnen nicht erlaubt andere Peers zu durchsuchen.
 The peer must go online to get a peer address.==Ihr Peer muss online gehen, um eine Adresse zu bekommen.
-If you don't know how to configure your system to use a proxy,==Wenn Sie nicht wissen, wie Sie Ihr System konfigurieren, sodass es einen Proxy benutzt,
+If you don't know how to configure your system,==Wenn Sie nicht wissen, wie Sie Ihr System konfigurieren,
 see the <a==lesen Sie die <a
 installation instructions</a>.==Installationsanleitung</a>.
 You cannot be reached from outside.==Ihr Peer kann nicht von au&szlig;en erreicht werden.

@@ -460,7 +460,7 @@ public class plasmaURL {
         // combine the attributes
         StringBuffer hash = new StringBuffer(12);
         // form the 'local' part of the hash
-        hash.append(kelondroBase64Order.enhancedCoder.encode(serverCodings.encodeMD5Raw(url.toNormalform())).substring(0, 5)); // 5 chars
+        hash.append(kelondroBase64Order.enhancedCoder.encode(serverCodings.encodeMD5Raw(url.toNormalform(true, true))).substring(0, 5)); // 5 chars
         hash.append(subdomPortPath(subdom, port, rootpath)); // 1 char
         // form the 'global' part of the hash
         hash.append(protocolHostPort(url.getProtocol(), host, port)); // 5 chars

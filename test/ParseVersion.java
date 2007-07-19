@@ -5,7 +5,6 @@ public class ParseVersion extends TestCase {
 	/**
 	 * Test method for 'yacy.combinedVersionString2PrettyString(String)'
 	 * @author Bost
-	 * @link <a href="http://www.yacy-forum.de/viewtopic.php?t=2717">yacy-forum.de: ne Verbesserung von combinedVersionString2PrettyString(...)</a>
 	 */
 	public void testCombinedVersionString2PrettyString() {
         assertEquals("dev/00000",       yacy.combined2prettyVersion(""));                 // not a number

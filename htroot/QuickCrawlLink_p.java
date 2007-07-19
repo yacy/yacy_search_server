@@ -53,6 +53,7 @@ import java.net.MalformedURLException;
 import java.net.URLDecoder;
 import java.util.Date;
 
+import de.anomic.data.htmlTools;
 import de.anomic.http.httpHeader;
 import de.anomic.plasma.plasmaURL;
 import de.anomic.net.URL;
@@ -121,23 +122,13 @@ public class QuickCrawlLink_p {
         boolean xsstopw        = post.get("xsstopw", "").equals("on");
         boolean xdstopw        = post.get("xdstopw", "").equals("on");
         boolean xpstopw        = post.get("xpstopw", "").equals("on");
-  
-        String escapedTitle = (title==null)?"unknown":title.replaceAll("&","&amp;")
-                                   .replaceAll("<", "&lt;")
-                                   .replaceAll(">", "&gt;")
-                                   .replaceAll("\"", "&quot;");
-        
-        String escapedURL = (crawlingStart==null)?"unknown":crawlingStart.replaceAll("&","&amp;")
-                                         .replaceAll("<", "&lt;")
-                                         .replaceAll(">", "&gt;")
-                                         .replaceAll("\"", "&quot;");        
 
-        prop.put("mode_url",escapedURL);
-        prop.put("mode_title",escapedTitle);
+        prop.put("mode_url", (crawlingStart == null) ? "unknown" : htmlTools.encodeUnicode2html(crawlingStart, false));
+        prop.put("mode_title", (title == null) ? "unknown" : htmlTools.encodeUnicode2html(title, true));
         
         if (crawlingStart != null) {
             crawlingStart = crawlingStart.trim();
-            try {crawlingStart = new URL(crawlingStart).toNormalform();} catch (MalformedURLException e1) {}
+            try {crawlingStart = new URL(crawlingStart).toNormalform(true, true);} catch (MalformedURLException e1) {}
             
             // check if url is proper
             URL crawlingStartURL = null;

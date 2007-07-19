@@ -151,7 +151,7 @@ public final class crawlReceipt {
             switchboard.wordIndex.loadedURL.store(entry);
             switchboard.wordIndex.loadedURL.stack(entry, youare, iam, 1);
             switchboard.delegatedURL.remove(entry.hash()); // the delegated work has been done
-            log.logInfo("crawlReceipt: RECEIVED RECEIPT from " + otherPeerName + " for URL " + entry.hash() + ":" + comp.url().toNormalform());
+            log.logInfo("crawlReceipt: RECEIVED RECEIPT from " + otherPeerName + " for URL " + entry.hash() + ":" + comp.url().toNormalform(false, true));
 
             // ready for more
             prop.putASIS("delay", "10");

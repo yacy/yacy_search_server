@@ -400,7 +400,7 @@ public final class robotsParser{
             httpHeader reqHeaders = new httpHeader();
             
             // adding referer
-            reqHeaders.put(httpHeader.REFERER, (new URL(robotsURL,"/")).toString());
+            reqHeaders.put(httpHeader.REFERER, (URL.newURL(robotsURL,"/")).toNormalform(true, true));
             
             if (entry != null) {
                 oldEtag = entry.getETag();
@@ -455,7 +455,7 @@ public final class robotsParser{
                 redirectionUrlString = redirectionUrlString.trim();
                 
                 // generating the new URL object
-                URL redirectionUrl = new URL(robotsURL, redirectionUrlString);
+                URL redirectionUrl = URL.newURL(robotsURL, redirectionUrlString);
                 
                 // returning the used httpc
                 httpc.returnInstance(con); 

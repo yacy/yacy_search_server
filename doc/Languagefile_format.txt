@@ -37,7 +37,6 @@ Example:
 # first published on http://www.anomic.de
 # Frankfurt, Germany, 2005
 #
-# This file is maintained by Roland Ramthun <admin@yacy-forum.de>
 # This file is written by (chronological order) Roland Ramthun <admin@yacy-forum.de>, Oliver Wunder <webmaster@daburna.de>, Jan Sandbrink
 
 # If you find any mistakes or untranslated strings in this file please don't hesitate to email them to the maintainer.
@@ -94,7 +93,6 @@ Full example:
 # first published on http://www.anomic.de
 # Frankfurt, Germany, 2005
 #
-# This file is maintained by Roland Ramthun <admin@yacy-forum.de>
 # This file is written by (chronological order) Roland Ramthun <admin@yacy-forum.de>, Oliver Wunder <webmaster@daburna.de>, Jan Sandbrink
 
 # If you find any mistakes or untranslated strings in this file please don't hesitate to email them to the maintainer.
@@ -106,7 +104,7 @@ Full example:
 # Thank you for your help!
 <!-- lang -->default\(english\)==Deutsch
 <!-- author -->==Roland Ramthun, Oliver Wunder, Jan Sandbrink
-<!-- maintainer -->==&lt;admin@yacy-forum.de&gt;
+<!-- maintainer -->==
 #-----------------------------
 
 #File: Blacklist_p.html

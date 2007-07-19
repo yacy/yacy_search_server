@@ -188,7 +188,7 @@ public class CrawlWorker extends AbstractCrawlWorker implements plasmaCrawlWorke
                 if (isFolder) {
                     fullPath = fullPath + "/";
                     file = "";
-                    this.url = new URL(this.url,fullPath);
+                    this.url = URL.newURL(this.url,fullPath);
                 }
             }
 

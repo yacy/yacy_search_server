@@ -91,7 +91,6 @@ public class wikiCode extends abstractWikiParser implements wikiParser {
     private boolean preformatted = false;       //needed for preformatted text
     private boolean preformattedSpan = false;   //needed for <pre> and </pre> spanning over several lines
     private boolean replacedHTML = false;       //indicates if method replaceHTML has been used with line already
-    private boolean replacedCharacters = false; //indicates if method replaceCharachters has been used with line
     private boolean table = false;              //needed for tables, because they reach over several lines
     private int preindented = 0;                //needed for indented <pre>s
     private int escindented = 0;                //needed for indented [=s
@@ -178,7 +177,7 @@ public class wikiCode extends abstractWikiParser implements wikiParser {
             else {
                 line+=parseTableProperties(result.substring(lenCellDivider,propEnd-lenAttribDivider).trim()).toString();
             }
-            // quick&dirty fix for http://www.yacy-forum.de/viewtopic.php?t=2825 [MN]
+            // quick&dirty fix [MN]
             if(propEnd > cellEnd){
                 propEnd = lenCellDivider;
             }
@@ -707,7 +706,7 @@ public class wikiCode extends abstractWikiParser implements wikiParser {
             }
             directory = "<table><tr><td><div class=\"WikiTOCBox\">\n" + directory + "</div></td></tr></table>\n";
         }
-        //(http://www.yacy-forum.de/viewtopic.php?t=4034) [MN]
+        // [MN]
         if(!dirElements.isEmpty()){
             dirElements.clear();
             headlines = 0;
@@ -777,13 +776,8 @@ public class wikiCode extends abstractWikiParser implements wikiParser {
     public String transformLine(String result, String publicAddress, plasmaSwitchboard switchboard) {
         //If HTML has not bee replaced yet (can happen if method gets called in recursion), replace now!
         if (!replacedHTML || preformattedSpan){
-            result = htmlTools.replaceXMLEntities(result);
+            result = htmlTools.encodeUnicode2html(result, true);
             replacedHTML = true;
-        }
-        //If special characters have not bee replaced yet, replace now!
-        if (!replacedCharacters || preformattedSpan){
-            result = htmlTools.replaceHTMLEntities(result);
-            replacedCharacters = true;
         }
 
         //check if line contains escape symbols([= =]) or if we are in an escape sequence already.
@@ -837,7 +831,6 @@ public class wikiCode extends abstractWikiParser implements wikiParser {
         }
 
         if (!preformatted) replacedHTML = false;
-        replacedCharacters = false;
         if ((result.endsWith("</li>"))||(defList)||(escape)||(preformatted)||(table)||(cellprocessing)) return result;
         return result + "<br />";
     }

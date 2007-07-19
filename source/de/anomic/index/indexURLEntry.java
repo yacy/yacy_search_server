@@ -172,7 +172,7 @@ public class indexURLEntry {
     
     public static byte[] encodeComp(URL url, String descr, String author, String tags, String ETag) {
         serverCharBuffer s = new serverCharBuffer(200);
-        s.append(url.toNormalform()).append(10);
+        s.append(url.toNormalform(false, true)).append(10);
         s.append(descr).append(10);
         s.append(author).append(10);
         s.append(tags).append(10);
@@ -248,7 +248,7 @@ public class indexURLEntry {
         //System.out.println("author=" + comp.author());
         try {
             s.append("hash=").append(hash());
-            s.append(",url=").append(crypt.simpleEncode(comp.url().toNormalform()));
+            s.append(",url=").append(crypt.simpleEncode(comp.url().toNormalform(false, true)));
             s.append(",descr=").append(crypt.simpleEncode(comp.title()));
             s.append(",author=").append(crypt.simpleEncode(comp.author()));
             s.append(",tags=").append(crypt.simpleEncode(comp.tags()));

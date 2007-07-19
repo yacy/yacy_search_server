@@ -682,7 +682,7 @@ public class plasmaSnippetCache {
         ArrayList result = new ArrayList();
         while (i.hasNext()) {
             ientry = (htmlFilterImageEntry) i.next();
-            url = (String) ientry.url().toNormalform();
+            url = (String) ientry.url().toNormalform(true, true);
             desc = (String) ientry.alt();
             //result.add(new MediaSnippet("image", url, (desc.length() == 0) ? url : desc, ientry.width() + " x " + ientry.height()));
             s = removeAppearanceHashes(url, queryhashes);
@@ -882,12 +882,12 @@ public class plasmaSnippetCache {
             (snippet.getErrorCode() == ERROR_RESOURCE_LOADING) ||
             (snippet.getErrorCode() == ERROR_PARSER_FAILED) ||
             (snippet.getErrorCode() == ERROR_PARSER_NO_LINES)) {
-            log.logInfo("error: '" + snippet.getError() + "', remove url = " + snippet.getUrl().toNormalform() + ", cause: " + snippet.getError());
+            log.logInfo("error: '" + snippet.getError() + "', remove url = " + snippet.getUrl().toNormalform(false, true) + ", cause: " + snippet.getError());
             sb.wordIndex.loadedURL.remove(urlHash);
             sb.wordIndex.removeHashReferences(queryhashes, urlHash);
         }
         if (snippet.getErrorCode() == ERROR_NO_MATCH) {
-            log.logInfo("error: '" + snippet.getError() + "', remove words '" + querystring + "' for url = " + snippet.getUrl().toNormalform() + ", cause: " + snippet.getError());
+            log.logInfo("error: '" + snippet.getError() + "', remove words '" + querystring + "' for url = " + snippet.getUrl().toNormalform(false, true) + ", cause: " + snippet.getError());
             sb.wordIndex.removeHashReferences(snippet.remaingHashes, urlHash);
         }
         return snippet.getError();

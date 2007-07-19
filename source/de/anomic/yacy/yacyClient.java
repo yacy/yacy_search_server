@@ -749,12 +749,12 @@ public final class yacyClient {
         yacyNetwork.enrichRequestPost(post, plasmaSwitchboard.getSwitchboard(), target.hash);
         post.put("process", "crawl");
         if (url.length == 1) {
-            post.put("url", crypt.simpleEncode(url[0].toString()));
-            post.put("referrer", crypt.simpleEncode((referrer[0] == null) ? "" : referrer[0].toString()));
+            post.put("url", crypt.simpleEncode(url[0].toNormalform(true, true)));
+            post.put("referrer", crypt.simpleEncode((referrer[0] == null) ? "" : referrer[0].toNormalform(true, true)));
         } else {
             for (int i=0; i< url.length; i++) {
-                post.put("url" + i, crypt.simpleEncode(url[i].toString()));
-                post.put("ref" + i, crypt.simpleEncode((referrer[i] == null) ? "" : referrer[i].toString()));
+                post.put("url" + i, crypt.simpleEncode(url[i].toNormalform(true, true)));
+                post.put("ref" + i, crypt.simpleEncode((referrer[i] == null) ? "" : referrer[i].toNormalform(true, true)));
             }
         }
         post.put("depth", "0");

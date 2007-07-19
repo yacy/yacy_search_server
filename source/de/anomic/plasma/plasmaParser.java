@@ -756,7 +756,7 @@ public final class plasmaParser {
             int p = 0;
             for (int i = 1; i <= 4; i++) for (int j = 0; j < scraper.getHeadlines(i).length; j++) sections[p++] = scraper.getHeadlines(i)[j];
             plasmaParserDocument ppd =  new plasmaParserDocument(
-                    new URL(location.toNormalform()),
+                    new URL(location.toNormalform(true, true)),
                     mimeType,
                     charSet,
                     scraper.getKeywords(),
@@ -841,7 +841,7 @@ public final class plasmaParser {
         loop: while (i.hasNext()) {
             o = i.next();
             if (o instanceof String) url = (String) o;
-            else if (o instanceof htmlFilterImageEntry) url = ((htmlFilterImageEntry) o).url().toNormalform();
+            else if (o instanceof htmlFilterImageEntry) url = ((htmlFilterImageEntry) o).url().toNormalform(true, true);
             else {
                 assert false;
                 continue;
@@ -874,7 +874,7 @@ public final class plasmaParser {
         while (i.hasNext()) {
             o = i.next();
             if (o instanceof String) url = (String) o;
-            else if (o instanceof htmlFilterImageEntry) url = ((htmlFilterImageEntry) o).url().toNormalform();
+            else if (o instanceof htmlFilterImageEntry) url = ((htmlFilterImageEntry) o).url().toNormalform(true, true);
             else {
                 assert false;
                 continue;

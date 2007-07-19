@@ -95,6 +95,8 @@ public class kelondroObjects {
 
     protected synchronized kelondroObjectsEntry get(final String key, final boolean storeCache) throws IOException {
         // load map from cache
+        assert cache != null;
+        assert key != null;
         kelondroObjectsEntry map = (kelondroObjectsEntry) cache.get(key);
         if (map != null) return map;
 

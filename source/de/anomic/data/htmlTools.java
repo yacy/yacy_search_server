@@ -2,99 +2,65 @@ package de.anomic.data;
 
 public class htmlTools {
 
-    /** Replaces special characters from a string. Avoids XSS attacks and ensures correct display of
-      * special characters in non UTF-8 capable browsers.
-      * @param text a string that possibly contains HTML
-      * @return the string with all special characters encoded
-      */
-      //[MN]
-    public static String replaceHTML(String text) {
-        text = replace(text, xmlentities);
-        text = replace(text, htmlentities);
-        return text;
-    }
-
-    /** Replaces special characters from a string. Ensures correct display of
-      * special characters in non UTF-8 capable browsers.
-      * @param text a string that possibly contains special characters
-      * @return the string with all special characters encoded
-      */
-      //[MN]
-    public static String replaceHTMLEntities(String text) {
-        text = replace(text, htmlentities);
-        return text;
-    }
-
-    /** Replaces special characters from a string. Avoids XSS attacks.
-      * @param text a string that possibly contains HTML
-      * @return the string without any HTML-tags that can be used for XSS
-      */
-      //[MN]
-    public static String replaceXMLEntities(String text) {
-        text = replace(text, xmlentities);
-        return text;
-    }
-
     /** Replaces characters in a string with other characters defined in an array.
       * @param text a string that possibly contains special characters
       * @param entities array that contains characters to be replaced and characters it will be replaced by
       * @return the string with all characters replaced by the corresponding character from array
       */
-      //[FB], changes by [MN]
-    public static String replace(String text, String[] entities) {
-        if (text==null) { return null; }
-        for (int x=0;x<=entities.length-1;x=x+2) {
-            int p=0;
-            while ((p=text.indexOf(entities[x],p))>=0) {
-                text=text.substring(0,p)+entities[x+1]+text.substring(p+entities[x].length());
-                p+=entities[x+1].length();
-            }
-        }
-        return text;
-    }
-    
-    public static String deReplaceHTML(String text) {
-        text = deReplaceHTMLEntities(text);
-        text = deReplaceXMLEntities(text);
-        return text;
-    }
-    
-    public static String deReplaceHTMLEntities(String text) {
-        return deReplace(text, htmlentities);
-    }
-    
-    public static String deReplaceXMLEntities(String text) {
-        return deReplace(text, xmlentities);
-    }
-    
-    public static String deReplace(String text, String[] entities) {
+      //[FB], changes by [MN], re-implemented by [MC]
+    public static String encodeUnicode2html(String text, boolean includingAmpersand) {
         if (text == null) return null;
-        for (int i=entities.length-1; i>0; i-=2) {
-            int p = 0;
-            while ((p = text.indexOf(entities[i])) >= 0) {
-                text = text.substring(0, p) + entities[i - 1] + text.substring(p + entities[i].length());
-                p += entities[i - 1].length();
+        int pos = 0;
+        StringBuffer sb = new StringBuffer(text.length());
+        search: while (pos < text.length()) {
+            // find a (forward) mapping
+            loop: for (int i = (includingAmpersand) ? 0 : 2; i < mapping.length; i += 2) {
+                if (text.charAt(pos) != mapping[i].charAt(0)) continue loop;
+                // found match
+                sb.append(mapping[i + 1]);
+                pos++;
+                continue search;
             }
+            // not found match
+            sb.append(text.charAt(pos));
+            pos++;
         }
-        return text;
+        return new String(sb);
+    }
+    
+    public static String decodeHtml2Unicode(String text) {
+        if (text == null) return null;
+        int pos = 0;
+        StringBuffer sb = new StringBuffer(text.length());
+        search: while (pos < text.length()) {
+            // find a reverse mapping. TODO: replace matching with hashtable(s)
+            loop: for (int i = 0; i < mapping.length; i += 2) {
+                if (pos + mapping[i + 1].length() > text.length()) continue loop;
+                for (int j = mapping[i + 1].length() - 1; j >= 0; j--) {
+                    if (text.charAt(pos + j) != mapping[i + 1].charAt(j)) continue loop;
+                }
+                // found match
+                sb.append(mapping[i]);
+                pos = pos + mapping[i + 1].length();
+                continue search;
+            }
+            // not found match
+            sb.append(text.charAt(pos));
+            pos++;
+        }
+        return new String(sb);
     }
 
     //This array contains codes (see http://mindprod.com/jgloss/unicode.html for details) 
     //that will be replaced. To add new codes or patterns, just put them at the end
     //of the list. Codes or patterns in this list can not be escaped with [= or <pre>
-    public static final String[] xmlentities={
+    private static final String[] mapping = {
         // Ampersands _have_ to be replaced first. If they were replaced later,
         // other replaced characters containing ampersands would get messed up.
         "\u0026","&amp;",      //ampersand
         "\"","&quot;",         //quotation mark
         "\u003C","&lt;",       //less than
         "\u003E","&gt;",       //greater than
-    };
-
-    //This array contains codes (see http://mindprod.com/jgloss/unicode.html for details) and
-    //patterns that will be replaced. To add new codes or patterns, just put them at the end
-    //of the list. Codes or patterns in this list can not be escaped with [= or <pre>
-    public static final String[] htmlentities={
         "\\",    "&#092;",  // Backslash
         "\u005E","&#094;",  // Caret
 
@@ -230,4 +196,12 @@ public class htmlTools {
         "\u00FE","&thorn;",
         "\u00FF","&yuml;"
     };
+    
+    public static void main(String[] args) {
+        String text = "Test-Text mit & um zyklische &uuml; &amp; Ersetzungen auszuschliessen ŠšŸ";
+        String txet = encodeUnicode2html(text, true);
+        System.out.println(txet);
+        System.out.println(decodeHtml2Unicode(txet));
+        if (decodeHtml2Unicode(txet).equals(text)) System.out.println("correct");
+    }
 }

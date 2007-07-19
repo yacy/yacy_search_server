@@ -906,10 +906,10 @@ public final class yacy {
                     indexURLEntry.Components comp = entry.comp();
                     if ((entry != null) && (comp.url() != null)) {
                         if (html) {
-                            bos.write(("<a href=\"" + comp.url().toNormalform() + "\">" + comp.title() + "</a><br>").getBytes("UTF-8"));
+                            bos.write(("<a href=\"" + comp.url().toNormalform(false, true) + "\">" + comp.title() + "</a><br>").getBytes("UTF-8"));
                             bos.write(serverCore.crlf);
                         } else {
-                            bos.write(comp.url().toNormalform().getBytes());
+                            bos.write(comp.url().toNormalform(false, true).getBytes());
                             bos.write(serverCore.crlf);
                         }
                     }
@@ -1037,9 +1037,8 @@ public final class yacy {
     }
     
     /**
-     * Searching for peers affected by Bug documented in <a href="http://www.yacy-forum.de/viewtopic.php?p=16056#16056">YaCy-Forum Posting 16056</a>
+     * Searching for peers affected by Bug
      * @param homePath
-     * @see <a href="http://www.yacy-forum.de/viewtopic.php?p=16056#16056">YaCy-Forum Posting 16056</a>
      */
     public static void testPeerDB(String homePath) {
         

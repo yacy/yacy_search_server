@@ -127,7 +127,7 @@ public class CacheAdmin_p {
             // path.append((pathString.length() == 0) ? linkPathString("/", true) : linkPathString(pathString, false));
             linkPathString(prop, ((pathString.length() == 0) ? ("/") : (pathString)), true);
 
-            urlstr = url.toNormalform();
+            urlstr = url.toNormalform(true, true);
             prop.put("info_url", urlstr);
 
             info.ensureCapacity(10000);
@@ -286,9 +286,9 @@ public class CacheAdmin_p {
             descr = ((String) entry.getValue()).trim();
             if (descr.length() == 0) { descr = "-"; }
             prop.put("info_type_use." + extension + "_" + extension + "_" + i + "_name",
-            		de.anomic.data.htmlTools.replaceXMLEntities(descr.replaceAll("\n", "").trim()));
+            		de.anomic.data.htmlTools.encodeUnicode2html(descr.replaceAll("\n", "").trim(), true));
             prop.put("info_type_use." + extension + "_" + extension + "_" + i + "_link",
-            		de.anomic.data.htmlTools.replaceXMLEntities(entry.getKey().toString()));
+            		de.anomic.data.htmlTools.encodeUnicode2html(entry.getKey().toString(), true));
             i++;
         }
         prop.put("info_type_use." + extension, (i == 0) ? 0 : 1);
@@ -303,7 +303,7 @@ public class CacheAdmin_p {
             ie = (htmlFilterImageEntry) iter.next();
             prop.put("info_type_use.images_images_" + i + "_name", ie.alt().replaceAll("\n", "").trim());
             prop.put("info_type_use.images_images_" + i + "_link",
-            		de.anomic.data.htmlTools.replaceXMLEntities(ie.url().toNormalform()));
+            		de.anomic.data.htmlTools.encodeUnicode2html(ie.url().toNormalform(false, true), false));
             i++;
         }
         prop.put("info_type_use.images", (i == 0) ? 0 : 1);

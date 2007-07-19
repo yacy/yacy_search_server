@@ -166,7 +166,7 @@ public class tarParser extends AbstractParser implements Parser {
                     checkInterruption();
                     
                     // parsing the content                    
-                    subDoc = theParser.parseSource(new URL(location,"#" + entryName),entryMime,null,subDocTempFile);
+                    subDoc = theParser.parseSource(URL.newURL(location,"#" + entryName),entryMime,null,subDocTempFile);
                 } catch (ParserException e) {
                     this.theLogger.logInfo("Unable to parse tar file entry '" + entryName + "'. " + e.getMessage());
                 } finally {

@@ -87,7 +87,7 @@ public class URLFetcherStack {
     public boolean push(URL url) {
         try {
             this.db.push(this.db.row().newEntry(
-                    new byte[][] { url.toNormalform().getBytes() }
+                    new byte[][] { url.toNormalform(true, true).getBytes() }
             ));
             this.pushed++;
             return true;

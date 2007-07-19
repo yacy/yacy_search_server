@@ -152,7 +152,7 @@ public class WatchCrawler_p {
                         if (pos == -1) crawlingStart = "http://" + crawlingStart;
 
                         // normalizing URL
-                        try {crawlingStart = new URL(crawlingStart).toNormalform();} catch (MalformedURLException e1) {}
+                        try {crawlingStart = new URL(crawlingStart).toNormalform(true, true);} catch (MalformedURLException e1) {}
                         
                         // check if url is proper
                         URL crawlingStartURL = null;
@@ -276,7 +276,7 @@ public class WatchCrawler_p {
                                     nexturlstring = nexturlstring.trim();
                                     
                                     // normalizing URL
-                                    nexturlstring = new URL(nexturlstring).toNormalform();                                    
+                                    nexturlstring = new URL(nexturlstring).toNormalform(true, true);                                    
                                     
                                     // generating an url object
                                     URL nexturlURL = null;

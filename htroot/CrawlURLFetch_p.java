@@ -143,8 +143,8 @@ public class CrawlURLFetch_p {
                         if (post.get("source", "").equals("url")) {
                             try {
                                 url = new URL(post.get("host", null));
-                                if (!savedURLs.contains(url.toNormalform()))
-                                    savedURLs.add(url.toNormalform());
+                                if (!savedURLs.contains(url.toNormalform(true, true)))
+                                    savedURLs.add(url.toNormalform(true, true));
                                 prop.put("host", post.get("host", url.toString()));
                             } catch (MalformedURLException e) {
                                 prop.put("host", post.get("host", ""));

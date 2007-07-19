@@ -120,12 +120,12 @@ public class IndexCreateWWWGlobalQueue_p {
                     profileHandle = urle.profileHandle();
                     profileEntry = (profileHandle == null) ? null : switchboard.profiles.getEntry(profileHandle);
                     prop.put("crawler-queue_list_"+showNum+"_dark", ((dark) ? 1 : 0) );
-                    prop.put("crawler-queue_list_"+showNum+"_initiator", ((initiator == null) ? "proxy" : htmlTools.replaceHTML(initiator.getName())) );
-                    prop.put("crawler-queue_list_"+showNum+"_profile", ((profileEntry == null) ? "unknown" : htmlTools.replaceHTML(profileEntry.name())));
+                    prop.put("crawler-queue_list_"+showNum+"_initiator", ((initiator == null) ? "proxy" : htmlTools.encodeUnicode2html(initiator.getName(), true)) );
+                    prop.put("crawler-queue_list_"+showNum+"_profile", ((profileEntry == null) ? "unknown" : htmlTools.encodeUnicode2html(profileEntry.name(), true)));
                     prop.put("crawler-queue_list_"+showNum+"_depth", urle.depth());
                     prop.put("crawler-queue_list_"+showNum+"_modified", daydate(urle.loaddate()) );
-                    prop.put("crawler-queue_list_"+showNum+"_anchor", htmlTools.replaceHTML(urle.name()));
-                    prop.put("crawler-queue_list_"+showNum+"_url", htmlTools.replaceHTML(urle.url().toString()));
+                    prop.put("crawler-queue_list_"+showNum+"_anchor", htmlTools.encodeUnicode2html(urle.name(), true));
+                    prop.put("crawler-queue_list_"+showNum+"_url", htmlTools.encodeUnicode2html(urle.url().toNormalform(false, true), false));
                     prop.put("crawler-queue_list_"+showNum+"_hash", urle.urlhash());
                     dark = !dark;
                     showNum++;

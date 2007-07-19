@@ -147,7 +147,7 @@ public class Supporter {
                 prop.put("supporter_results_" + i + "_authorized_recommend_showScore", (showScore ? 1 : 0));
 
                 prop.put("supporter_results_" + i + "_authorized_urlhash", urlhash);
-                prop.put("supporter_results_" + i + "_url", de.anomic.data.htmlTools.replaceXMLEntities(url));
+                prop.put("supporter_results_" + i + "_url", de.anomic.data.htmlTools.encodeUnicode2html(url, false));
                 prop.put("supporter_results_" + i + "_urlname", nxTools.shortenURLString(url, 60));
                 prop.put("supporter_results_" + i + "_urlhash", urlhash);
                 prop.put("supporter_results_" + i + "_title", (showScore) ? ("(" + ranking.getScore(urlhash) + ") " + title) : title);

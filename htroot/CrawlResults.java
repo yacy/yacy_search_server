@@ -171,7 +171,7 @@ public class CrawlResults {
                     initiatorSeed = yacyCore.seedDB.getConnected(initiatorHash);
                     executorSeed = yacyCore.seedDB.getConnected(executorHash);
 
-                    urlstr = comp.url().toNormalform();
+                    urlstr = comp.url().toNormalform(false, true);
                     urltxt = nxTools.shortenURLString(urlstr, 72); // shorten the string text like a URL
                     cachepath = cacheManager.getCachePath(new URL(urlstr)).toString().replace('\\', '/').substring(cacheManager.cachePath.toString().length() + 1);
 

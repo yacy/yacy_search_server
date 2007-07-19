@@ -112,7 +112,7 @@ public final class plasmaSearchPostOrder {
         // take out relevant information for reference computation
         indexURLEntry.Components comp = page.comp();
         if ((comp.url() == null) || (comp.title() == null)) return;
-        String[] urlcomps = htmlFilterContentScraper.urlComps(comp.url().toNormalform()); // word components of the url
+        String[] urlcomps = htmlFilterContentScraper.urlComps(comp.url().toNormalform(true, true)); // word components of the url
         String[] descrcomps = comp.title().toLowerCase().split(htmlFilterContentScraper.splitrex); // words in the description
         
         // store everything
@@ -173,7 +173,7 @@ public final class plasmaSearchPostOrder {
         // first scan all entries and find all urls that are referenced
         while (i.hasNext()) {
             entry = (Map.Entry) i.next();
-            paths.put(((indexURLEntry) entry.getValue()).comp().url().toNormalform(), entry.getKey());
+            paths.put(((indexURLEntry) entry.getValue()).comp().url().toNormalform(true, true), entry.getKey());
             //if (path != null) path = shortenPath(path);
             //if (path != null) paths.put(path, entry.getKey());
         }
@@ -183,7 +183,7 @@ public final class plasmaSearchPostOrder {
         String shorten;
         while (i.hasNext()) {
             entry = (Map.Entry) i.next();
-            shorten = shortenPath(((indexURLEntry) entry.getValue()).comp().url().toNormalform());
+            shorten = shortenPath(((indexURLEntry) entry.getValue()).comp().url().toNormalform(true, true));
             // scan all subpaths of the url
             while (shorten != null) {
                 if (pageAcc.size() <= query.wantedResults) break;
@@ -259,7 +259,7 @@ public final class plasmaSearchPostOrder {
             String hash, fill;
             String[] paths1 = new String[urls.length]; for (int i = 0; i < urls.length; i++) {
                 fill = ""; for (int j = 0; j < 35 - urls[i].toString().length(); j++) fill +=" ";
-                paths1[i] = urls[i].toNormalform();
+                paths1[i] = urls[i].toNormalform(true, true);
                 hash = plasmaURL.urlHash(urls[i]);
                 System.out.println("paths1[" + urls[i] + fill +"] = " + hash + ", typeID=" + plasmaURL.flagTypeID(hash) + ", tldID=" + plasmaURL.flagTLDID(hash) + ", lengthID=" + plasmaURL.flagLengthID(hash) + " / " + paths1[i]);
             }

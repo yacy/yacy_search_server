@@ -125,7 +125,7 @@ public final class list {
                     int cnt = 0;
                     for (int i=0; i<count; i++) {
                         if ((url = db.pop()) == null) continue;
-                        b.append(htmlTools.deReplaceHTMLEntities(url.toNormalform())).append("\n");
+                        b.append(htmlTools.decodeHtml2Unicode(url.toNormalform(false, true))).append("\n");
                         cnt++;
                     }
                     prop.put("list", b);

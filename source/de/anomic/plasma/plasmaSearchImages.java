@@ -87,7 +87,7 @@ public final class plasmaSearchImages {
                         Map.Entry e = (Map.Entry) i.next();
                         String nexturlstring;
                         try {
-                            nexturlstring = new URL((String) e.getKey()).toNormalform();
+                            nexturlstring = new URL((String) e.getKey()).toNormalform(true, true);
                             addAll(new plasmaSearchImages(sc, serverDate.remainingTime(start, maxTime, 10), new URL(nexturlstring), depth - 1));
                         } catch (MalformedURLException e1) {
                             e1.printStackTrace();

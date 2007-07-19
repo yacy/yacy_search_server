@@ -93,7 +93,7 @@ public class htmlFilterImageEntry implements Comparable {
         // create a total ordering on images with respect on the image size
         assert (url != null);
         assert (h instanceof htmlFilterImageEntry);
-        if (this.url.toString().equals(((htmlFilterImageEntry) h).url.toString())) return 0;
+        if (this.url.toNormalform(true, true).equals(((htmlFilterImageEntry) h).url.toNormalform(true, true))) return 0;
         int thc = this.hashCode();
         int ohc = ((htmlFilterImageEntry) h).hashCode();
         if (thc < ohc) return -1;

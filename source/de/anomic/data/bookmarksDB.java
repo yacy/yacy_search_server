@@ -731,7 +731,7 @@ public class bookmarksDB {
         public Bookmark(String urlHash, URL url){
             super();
             this.urlHash=urlHash;
-            entry.put(BOOKMARK_URL, url.toString());
+            entry.put(BOOKMARK_URL, url.toNormalform(false, true));
             tags=new HashSet();
             timestamp=System.currentTimeMillis();
         }

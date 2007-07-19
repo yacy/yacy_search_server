@@ -117,7 +117,7 @@ public class SZParserExtractCallback extends ArchiveExtractCallback {
                 plasmaParserDocument theDoc;
                 // workaround for relative links in file, normally '#' shall be used behind the location, see
                 // below for reversion of the effects
-                URL url = new URL(doc.getLocation(), this.prefix + "/" + super.filePath);
+                URL url = URL.newURL(doc.getLocation(), this.prefix + "/" + super.filePath);
                 String mime = plasmaParser.getMimeTypeByFileExt(super.filePath.substring(super.filePath.lastIndexOf('.') + 1));
                 if (this.cfos.isFallback()) {
                     theDoc = this.parser.parseSource(url, mime, null, this.cfos.getContentFile());
@@ -129,7 +129,7 @@ public class SZParserExtractCallback extends ArchiveExtractCallback {
                 Map nanchors = new HashMap(theDoc.getAnchors().size(), 1f);
                 Iterator it = theDoc.getAnchors().entrySet().iterator();
                 Map.Entry entry;
-                String base = doc.getLocation().toNormalform();
+                String base = doc.getLocation().toNormalform(false, true);
                 while (it.hasNext()) {
                     entry = (Map.Entry)it.next();
                     if (((String)entry.getKey()).startsWith(base + "/")) {

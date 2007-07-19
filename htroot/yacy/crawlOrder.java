@@ -182,11 +182,11 @@ public final class crawlOrder {
                     // old method: only one url
 
                     // normalizing URL
-                    String newURL = new URL((String) urlv.get(0)).toNormalform();
+                    String newURL = new URL((String) urlv.get(0)).toNormalform(true, true);
                     if (!newURL.equals(urlv.get(0))) {
                         env.getLog().logWarning("crawlOrder: Received not normalized URL " + urlv.get(0));    
                     }
-                    String refURL = (refv.get(0) == null) ? null : new URL((String) refv.get(0)).toNormalform();
+                    String refURL = (refv.get(0) == null) ? null : new URL((String) refv.get(0)).toNormalform(true, true);
                     if ((refURL != null) && (!refURL.equals(refv.get(0)))) {
                         env.getLog().logWarning("crawlOrder: Received not normalized Referer URL " + refv.get(0) + " of URL " + urlv.get(0));    
                     }

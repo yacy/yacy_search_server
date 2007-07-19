@@ -169,9 +169,9 @@ public class SearchService extends AbstractService
             // Postprocess search ...
             int count = Integer.valueOf(searchResult.get("type_results","0")).intValue();
             for (int i=0; i < count; i++) {
-            	searchResult.put("type_results_" + i + "_url",htmlTools.replaceXMLEntities(searchResult.get("type_results_" + i + "_url","")));
-            	searchResult.put("type_results_" + i + "_description",htmlTools.replaceXMLEntities(searchResult.get("type_results_" + i + "_description","")));
-            	searchResult.put("type_results_" + i + "_urlname",htmlTools.replaceXMLEntities(searchResult.get("type_results_" + i + "_urlname","")));
+            	searchResult.put("type_results_" + i + "_url",htmlTools.encodeUnicode2html(searchResult.get("type_results_" + i + "_url",""), false));
+            	searchResult.put("type_results_" + i + "_description",htmlTools.encodeUnicode2html(searchResult.get("type_results_" + i + "_description",""), true));
+            	searchResult.put("type_results_" + i + "_urlname",htmlTools.encodeUnicode2html(searchResult.get("type_results_" + i + "_urlname",""), true));
             }
             
             // format the result

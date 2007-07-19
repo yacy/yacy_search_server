@@ -27,7 +27,7 @@ Echo **** (C) by Michael Peter Christen, usage granted under the GPL Version 2  
 Echo **** USE AT YOUR OWN RISK! Project home and releases: http://yacy.net/yacy ****
 Echo **  LOG of       YaCy: DATA/LOG/yacy00.log (and yacy^<xx^>.log)              **
 Echo **  STOP         YaCy: execute stopYACY.bat and wait some seconds            **
-Echo **  GET HELP for YaCy: see www.yacy-websearch.net/wiki and www.yacy-forum.de **
+Echo **  GET HELP for YaCy: see www.yacy-websearch.net/wiki and forum.yacy.de     **
 Echo *******************************************************************************
 Echo  ^>^> YaCy started as daemon process. Administration at http://localhost:%port% ^<^<
 
