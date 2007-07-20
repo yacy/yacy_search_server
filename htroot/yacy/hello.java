@@ -87,7 +87,7 @@ public final class hello {
         final yacySeed remoteSeed = yacySeed.genRemoteSeed(seed, key, false);
 
 //      System.out.println("YACYHELLO: REMOTESEED=" + ((remoteSeed == null) ? "NULL" : remoteSeed.toString()));
-        if (remoteSeed == null) { return null; }
+        if ((remoteSeed == null) || (remoteSeed.hash == null)) { return null; }
         
 //      final String properTest = remoteSeed.isProper();
         // The remote peer might not know its IP yet, so don't abort if the IP check fails
