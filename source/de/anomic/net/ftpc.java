@@ -269,14 +269,6 @@ public class ftpc {
     st = null;
     return args;
   }
-  
-  private static String[] shift(String args[]) {
-    if ((args == null) || (args.length == 0)) return args; else {
-      String[] newArgs = new String[args.length-1];
-      System.arraycopy(args, 1, newArgs, 0, args.length-1);
-      return newArgs;
-    }
-  }
 
   class cl extends ClassLoader {
   		
@@ -638,12 +630,20 @@ public class ftpc {
     return true;
   }
 
+  /*
+  private static String[] shift(String args[]) {
+    if ((args == null) || (args.length == 0)) return args; else {
+      String[] newArgs = new String[args.length-1];
+      System.arraycopy(args, 1, newArgs, 0, args.length-1);
+      return newArgs;
+    }
+  }
   public boolean JAR() {
-	  /*Sun proprietary API may be removed in a future Java release*/
+	//Sun proprietary API may be removed in a future Java release
     sun.tools.jar.Main.main(shift(cmd));
     return true;
   }
-
+  */
   
   public boolean JJENCODE() {
     if (cmd.length != 2) {
