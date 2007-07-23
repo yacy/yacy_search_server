@@ -79,6 +79,7 @@ public class nxTools {
         HashMap props = new HashMap(list.size());
         while (i.hasNext()) {
             line = ((String) i.next()).trim();
+            if (line.startsWith("#")) continue; // exclude comments
             //System.out.println("NXTOOLS_PROPS - LINE:" + line);
             pos = line.indexOf("=");
             if (pos > 0) props.put(line.substring(0, pos).trim(), line.substring(pos + 1).trim());
