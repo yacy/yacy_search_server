@@ -71,17 +71,17 @@ public class get {
             if(serverDate.dateToiso8601(new Date(bookmark.getTimeStamp())) == date &&
                     tag==null || bookmark.getTags().contains(tag) &&
                     isAdmin || bookmark.getPublic()){
-                prop.putSafeXML("posts_"+count+"_url", bookmark.getUrl());
-                prop.putSafeXML("posts_"+count+"_title", bookmark.getTitle());
-                prop.putSafeXML("posts_"+count+"_description", bookmark.getDescription());
-                prop.putSafeXML("posts_"+count+"_md5", serverCodings.encodeMD5Hex(bookmark.getUrl()));
-                prop.putSafeXML("posts_"+count+"_time", date);
-                prop.putSafeXML("posts_"+count+"_tags", bookmark.getTagsString().replaceAll(","," "));
+                prop.put("posts_"+count+"_url", bookmark.getUrl());
+                prop.put("posts_"+count+"_title", bookmark.getTitle());
+                prop.put("posts_"+count+"_description", bookmark.getDescription());
+                prop.putASIS("posts_"+count+"_md5", serverCodings.encodeMD5Hex(bookmark.getUrl()));
+                prop.put("posts_"+count+"_time", date);
+                prop.put("posts_"+count+"_tags", bookmark.getTagsString().replaceAll(","," "));
                 
                 // additional XML tags
                 prop.put("posts_"+count+"_isExtended",extendedXML ? 1:0);
                 if (extendedXML) {
-                	prop.putSafeXML("posts_"+count+"_isExtended_private", Boolean.toString(!bookmark.getPublic()));
+                	prop.putASIS("posts_"+count+"_isExtended_private", Boolean.toString(!bookmark.getPublic()));
                 }
                 count++;
             }

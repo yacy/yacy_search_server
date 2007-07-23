@@ -129,7 +129,7 @@ public class BlacklistCleaner_p {
             // list illegal entries
             HashMap ies = getIllegalEntries(blacklistToUse, supportedBlacklistTypes, plasmaSwitchboard.urlBlacklist);
             prop.put(RESULTS + "entries", ies.size());
-            prop.putSafeXML(RESULTS + "blEngine", plasmaSwitchboard.urlBlacklist.getEngineInfo());
+            prop.put(RESULTS + "blEngine", plasmaSwitchboard.urlBlacklist.getEngineInfo());
             prop.put(RESULTS + "disabled", (ies.size() == 0) ? 1 : 0);
             if (ies.size() > 0) {
                 prop.put(RESULTS + DISABLED + "entries", ies.size());
@@ -139,7 +139,7 @@ public class BlacklistCleaner_p {
                 while (it.hasNext()) {
                     s = (String)it.next();
                     prop.put(RESULTS + DISABLED + ENTRIES + i + "_error", ((Integer)ies.get(s)).longValue());
-                    prop.putSafeXML(RESULTS + DISABLED + ENTRIES + i + "_entry", s);
+                    prop.put(RESULTS + DISABLED + ENTRIES + i + "_entry", s);
                     i++;
                 }
             }

@@ -238,7 +238,7 @@ public class dir {
             // tree += "<span class=\"tt\">path&nbsp;=&nbsp;" + path + "</span><br><br>";
             if (list != null) {
                 int filecount = 0, fileIdx = 0;
-                prop.putSafeXML("path", path);
+                prop.put("path", path);
                 
                 boolean dark = false;
                 for (int i = 0; i < list.length; i++) {
@@ -283,12 +283,12 @@ public class dir {
                     prop.put("dirlist_" + fileIdx + "_dir_rfc822date" , httpc.dateString(new Date(f.lastModified())));
                     prop.put("dirlist_" + fileIdx + "_dir_timestamp" , Long.toString(f.lastModified()));
                     // the entry name
-                    prop.putSafeXML("dirlist_" + fileIdx + "_dir_name" , fileName);                     
+                    prop.put("dirlist_" + fileIdx + "_dir_name" , fileName);                     
 
                     if (f.isDirectory()) {
                         // the entry is a directory
                         prop.put("dirlist_" + fileIdx + "_dir" , 1);
-                        prop.putSafeXML("dirlist_" + fileIdx + "_dir_URL","http://" + yacyCore.seedDB.mySeed.getPublicAddress() + path + fileName + "/");
+                        prop.put("dirlist_" + fileIdx + "_dir_URL","http://" + yacyCore.seedDB.mySeed.getPublicAddress() + path + fileName + "/");
                     } else {
                         // determine if we should display the description string or a preview image
                         boolean showImage = /* (description.length() == 0) && */ (fileName.endsWith(".jpg") || fileName.endsWith(".gif") || fileName.endsWith(".png") || fileName.endsWith(".ico") || fileName.endsWith(".bmp"));
@@ -299,8 +299,8 @@ public class dir {
                         prop.put("dirlist_" + fileIdx + "_dir_size" , serverMemory.bytesToString(f.length()));
                         prop.put("dirlist_" + fileIdx + "_dir_sizeBytes" , Long.toString(f.length()));
                         // the unique url
-                        prop.putSafeXML("dirlist_" + fileIdx + "_dir_yacyhURL",yacyhURL(yacyCore.seedDB.mySeed, fileName, md5s));  
-                        prop.putSafeXML("dirlist_" + fileIdx + "_dir_URL","http://" + yacyCore.seedDB.mySeed.getPublicAddress() + path + fileName);
+                        prop.put("dirlist_" + fileIdx + "_dir_yacyhURL",yacyhURL(yacyCore.seedDB.mySeed, fileName, md5s));  
+                        prop.put("dirlist_" + fileIdx + "_dir_URL","http://" + yacyCore.seedDB.mySeed.getPublicAddress() + path + fileName);
                         // the md5 sum of the file
                         prop.put("dirlist_" + fileIdx + "_dir_md5s",md5s);
                         // description mode: 0...image preview, 1...description text 
@@ -309,7 +309,7 @@ public class dir {
                             prop.put("dirlist_" + fileIdx + "_dir_descriptionMode_image",fileName);
                         }
                         // always set the description tag (needed by rss and xml)
-                        prop.putSafeXML("dirlist_" + fileIdx + "_dir_descriptionMode_text",description);                                                   
+                        prop.put("dirlist_" + fileIdx + "_dir_descriptionMode_text",description);                                                   
                     }
 
                     prop.put("dirlist_" + fileIdx + "_adminAuthorization",adminAuthorization?1:0);

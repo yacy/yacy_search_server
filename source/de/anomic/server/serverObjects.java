@@ -86,13 +86,6 @@ public class serverObjects extends Hashtable implements Cloneable {
         super(input);
     }
 
-    /**
-     * like put, but it replaces any HTML special chars.
-     */
-    public Object putSafeXML(Object key, String value){
-        return put(key, htmlTools.encodeUnicode2html(value, true));
-    }
-
     // new put takes also null values
     public Object put(Object key, Object value) {
         if (key == null) {
@@ -113,8 +106,7 @@ public class serverObjects extends Hashtable implements Cloneable {
 
     // string variant
     public String put(String key, String value) {
-        //return putASIS(key, value);
-        return (String)putSafeXML(key, value); //XSS Safe!
+        return (String) put((Object) key, (Object) htmlTools.encodeUnicode2html(value, true));
     }
     public byte[] putASIS(String key, byte[] value) {
         return (byte[]) this.put((Object) key, (Object) value);

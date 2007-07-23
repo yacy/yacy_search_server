@@ -95,12 +95,12 @@ public class getpageinfo_p {
                     prop.put("title", scraper.getTitle());
                     
                     // put the favicon that belongs to the document
-                    prop.putSafeXML("favicon", (scraper.getFavicon()==null)?"":scraper.getFavicon().toString());
+                    prop.put("favicon", (scraper.getFavicon()==null)?"":scraper.getFavicon().toString());
                     
                     // put keywords
                     String list[]=scraper.getKeywords();
                     for(int i=0;i<list.length;i++){
-                    	prop.putSafeXML("tags_"+i+"_tag", list[i]);
+                    	prop.put("tags_"+i+"_tag", list[i]);
                     }
                     prop.put("tags", list.length);
 

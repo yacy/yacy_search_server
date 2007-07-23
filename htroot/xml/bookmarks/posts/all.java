@@ -78,18 +78,18 @@ public class all {
         Date date;
         while(it.hasNext()){
             bookmark=switchboard.bookmarksDB.getBookmark((String) it.next());
-            prop.putSafeXML("posts_"+count+"_url", bookmark.getUrl());
-            prop.putSafeXML("posts_"+count+"_title", bookmark.getTitle());
-            prop.putSafeXML("posts_"+count+"_description", bookmark.getDescription());
-            prop.putSafeXML("posts_"+count+"_md5", serverCodings.encodeMD5Hex(bookmark.getUrl()));
+            prop.put("posts_"+count+"_url", bookmark.getUrl());
+            prop.put("posts_"+count+"_title", bookmark.getTitle());
+            prop.put("posts_"+count+"_description", bookmark.getDescription());
+            prop.put("posts_"+count+"_md5", serverCodings.encodeMD5Hex(bookmark.getUrl()));
             date=new Date(bookmark.getTimeStamp());
-            prop.putSafeXML("posts_"+count+"_time", serverDate.dateToiso8601(date));
-            prop.putSafeXML("posts_"+count+"_tags", bookmark.getTagsString().replaceAll(","," "));
+            prop.put("posts_"+count+"_time", serverDate.dateToiso8601(date));
+            prop.put("posts_"+count+"_tags", bookmark.getTagsString().replaceAll(","," "));
             
             // additional XML tags
             prop.put("posts_"+count+"_isExtended",extendedXML ? 1:0);
             if (extendedXML) {
-            	prop.putSafeXML("posts_"+count+"_isExtended_private", Boolean.toString(!bookmark.getPublic()));
+            	prop.put("posts_"+count+"_isExtended_private", Boolean.toString(!bookmark.getPublic()));
             }
             count++;
         }

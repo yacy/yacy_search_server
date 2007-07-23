@@ -125,11 +125,11 @@ public class queues_p {
                     totalSize += entrySize;
                     initiator = yacyCore.seedDB.getConnected(pcentry.initiator());
                     prop.put("list-indexing_"+i+"_profile", (pcentry.profile() != null) ? pcentry.profile().name() : "deleted");
-                    prop.putSafeXML("list-indexing_"+i+"_initiator", ((initiator == null) ? "proxy" : htmlTools.encodeUnicode2html(initiator.getName(), true)));
+                    prop.put("list-indexing_"+i+"_initiator", ((initiator == null) ? "proxy" : htmlTools.encodeUnicode2html(initiator.getName(), true)));
                     prop.put("list-indexing_"+i+"_depth", pcentry.depth());
                     prop.put("list-indexing_"+i+"_modified", pcentry.getModificationDate());
-                    prop.putSafeXML("list-indexing_"+i+"_anchor", (pcentry.anchorName()==null)?"":htmlTools.encodeUnicode2html(pcentry.anchorName(), true));
-                    prop.putSafeXML("list-indexing_"+i+"_url", pcentry.url().toNormalform(false, true));
+                    prop.put("list-indexing_"+i+"_anchor", (pcentry.anchorName()==null)?"":htmlTools.encodeUnicode2html(pcentry.anchorName(), true));
+                    prop.put("list-indexing_"+i+"_url", pcentry.url().toNormalform(false, true));
                     prop.put("list-indexing_"+i+"_size", entrySize);
                     prop.put("list-indexing_"+i+"_inProcess", (inProcess)?1:0);
                     prop.put("list-indexing_"+i+"_hash", pcentry.urlHash());
@@ -156,9 +156,9 @@ public class queues_p {
                 if (theMsg == null) continue;
                 prop.put("list-loader_"+count+"_profile", theMsg.profile.name());
                 initiator = yacyCore.seedDB.getConnected(theMsg.initiator);
-                prop.putSafeXML("list-loader_"+count+"_initiator", ((initiator == null) ? "proxy" : initiator.getName()));
+                prop.put("list-loader_"+count+"_initiator", ((initiator == null) ? "proxy" : initiator.getName()));
                 prop.put("list-loader_"+count+"_depth", theMsg.depth );
-                prop.putSafeXML("list-loader_"+count+"_url", theMsg.url.toString()); // null pointer exception here !!! maybe url = null; check reason.
+                prop.put("list-loader_"+count+"_url", theMsg.url.toString()); // null pointer exception here !!! maybe url = null; check reason.
                 count++;
             }
             prop.put("list-loader", count );
@@ -198,8 +198,8 @@ public class queues_p {
                 prop.put(tableName + "_" + showNum + "_initiator", ((initiator == null) ? "proxy" : initiator.getName()));
                 prop.put(tableName + "_" + showNum + "_depth", urle.depth());
                 prop.put(tableName + "_" + showNum + "_modified", daydate(urle.loaddate()));
-                prop.putSafeXML(tableName + "_" + showNum + "_anchor", urle.name());
-                prop.putSafeXML(tableName + "_" + showNum + "_url", urle.url().toNormalform(false, true));
+                prop.put(tableName + "_" + showNum + "_anchor", urle.name());
+                prop.put(tableName + "_" + showNum + "_url", urle.url().toNormalform(false, true));
                 prop.put(tableName + "_" + showNum + "_hash", urle.urlhash());
                 showNum++;
             }
