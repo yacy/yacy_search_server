@@ -1475,11 +1475,15 @@ public final class plasmaSwitchboard extends serverAbstractSwitch implements ser
    
     public boolean acceptURL(URL url) {
         // returns true if the url can be accepted accoring to network.unit.domain
-        return acceptURL(serverDomains.dnsResolve(url.getHost()));
+        if (url == null) return false;
+        String host = url.getHost();
+        if (host == null) return false;
+        return acceptURL(serverDomains.dnsResolve(host));
     }
         
     public boolean acceptURL(InetAddress hostAddress) {
         // returns true if the url can be accepted accoring to network.unit.domain
+        if (hostAddress == null) return false; // if we don't know the host, we cannot load that resource anyway
         if (this.acceptGlobalURLs && this.acceptLocalURLs) return true; // fast shortcut
         boolean local = hostAddress.isSiteLocalAddress() || hostAddress.isLoopbackAddress();
         return (this.acceptGlobalURLs && !local) || (this.acceptLocalURLs && local);
