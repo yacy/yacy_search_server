@@ -49,11 +49,11 @@ import java.util.Iterator;
 import java.util.Map;
 
 import de.anomic.http.httpHeader;
-import de.anomic.http.httpc;
 import de.anomic.kelondro.kelondroCache;
 import de.anomic.kelondro.kelondroFlexTable;
 import de.anomic.kelondro.kelondroRecords;
 import de.anomic.plasma.plasmaSwitchboard;
+import de.anomic.server.serverDomains;
 import de.anomic.server.serverFileUtils;
 import de.anomic.server.serverMemory;
 import de.anomic.server.serverObjects;
@@ -211,9 +211,9 @@ public class PerformanceMemory_p {
         prop.put("Xms", Xms.substring(0, Xms.length() - 1));
         
         // other caching structures
-        long amount = httpc.nameCacheHitSize();
+        long amount = serverDomains.nameCacheHitSize();
         prop.put("namecache.hit",Long.toString(amount));
-        amount = httpc.nameCacheNoCachingListSize();
+        amount = serverDomains.nameCacheNoCachingListSize();
         prop.put("namecache.noCache",Long.toString(amount));
         amount = plasmaSwitchboard.urlBlacklist.blacklistCacheSize();
         prop.put("blacklistcache.size",Long.toString(amount));

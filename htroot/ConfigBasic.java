@@ -59,6 +59,7 @@ import de.anomic.kelondro.kelondroBase64Order;
 import de.anomic.plasma.plasmaSwitchboard;
 import de.anomic.server.serverCodings;
 import de.anomic.server.serverCore;
+import de.anomic.server.serverDomains;
 import de.anomic.server.serverInstantThread;
 import de.anomic.server.serverObjects;
 import de.anomic.server.serverSwitch;
@@ -181,7 +182,7 @@ public class ConfigBasic {
                 int idx = host.indexOf(":");
                 if (idx != -1) host = host.substring(0,idx);
             } else {
-                host = serverCore.publicLocalIP().getHostAddress();
+                host = serverDomains.myPublicLocalIP().getHostAddress();
             }
             
             prop.put("reconnect", 1);

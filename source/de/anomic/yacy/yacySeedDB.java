@@ -71,6 +71,7 @@ import de.anomic.kelondro.kelondroBase64Order;
 import de.anomic.net.URL;
 import de.anomic.plasma.plasmaSwitchboard;
 import de.anomic.server.serverCore;
+import de.anomic.server.serverDomains;
 import de.anomic.server.serverDate;
 import de.anomic.server.serverFileUtils;
 import de.anomic.server.serverSwitch;
@@ -838,9 +839,9 @@ public final class yacySeedDB {
         if ((check == null) || (uv == null) || (uv.size() != check.size())) {
             serverLog.logFine("YACY","SaveSeedList: Local and uploades seed-list " +
                                "contains varying numbers of entries." +
-                               "\n\tLocal seed-list:  " + uv.size() + " entries" + 
-                               "\n\tRemote seed-list: " + check.size() + " enties");
-            return "Entry count is different";
+                               "\n\tLocal seed-list:  " + ((uv == null) ? "null" : Integer.toString(uv.size())) + " entries" + 
+                               "\n\tRemote seed-list: " + ((check == null) ? "null" : Integer.toString(check.size())) + " enties");
+            return "Entry count is different: uv.size() = " + ((uv == null) ? "null" : Integer.toString(uv.size())) + ", check = " + ((check == null) ? "null" : Integer.toString(check.size()));
         } 
         	
         serverLog.logFine("YACY","SaveSeedList: Comparing local and uploades seed-list entries ...");
@@ -893,7 +894,7 @@ public final class yacySeedDB {
             if (seed == null) return null;
             if ((seed == mySeed) && (!(seed.isOnline()))) {
                 // take local ip instead of external
-                return serverCore.publicIP() + ":" + serverCore.getPortNr(sb.getConfig("port", "8080")) + ((subdom == null) ? "" : ("/" + subdom));
+                return serverDomains.myPublicIP() + ":" + serverCore.getPortNr(sb.getConfig("port", "8080")) + ((subdom == null) ? "" : ("/" + subdom));
             }
             return seed.getPublicAddress() + ((subdom == null) ? "" : ("/" + subdom));
         } else {

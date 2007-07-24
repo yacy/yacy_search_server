@@ -30,7 +30,7 @@
 # Defintion of property domains:
 #     network.unit.name = <any word, name of network; appears in network graphic>
 #     network.unit.description = <any string, just informal; appears in network graphic>
-#     network.unit.domain = 'global'|'local'
+#     network.unit.domain = 'global'|'local'|'any'
 #     network.unit.dhtredundancy = <integer number, 0 means no DHT enabled>
 #     network.unit.bootstrap.seedlist<n> = <an url to a seedlists-file, which is stored by a principal peer>
 #     network.unit.protocol.control = 'uncontrolled'|'moderated'|'controlled'

@@ -191,6 +191,11 @@ public final class crawlOrder {
                         env.getLog().logWarning("crawlOrder: Received not normalized Referer URL " + refv.get(0) + " of URL " + urlv.get(0));    
                     }
                     
+                    if (!switchboard.acceptURL(new URL(newURL))) {
+                        env.getLog().logWarning("crawlOrder: Received URL outside of our domain: " + newURL);
+                        return null;
+                    }
+                    
                     // adding URL to noticeURL Queue
                     env.getLog().logFinest("crawlOrder: a: url='" + newURL + "'");
                     

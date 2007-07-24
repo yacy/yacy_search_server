@@ -155,6 +155,7 @@ import de.anomic.plasma.parser.ParserException;
 import de.anomic.plasma.urlPattern.defaultURLPattern;
 import de.anomic.plasma.urlPattern.plasmaURLPattern;
 import de.anomic.server.serverAbstractSwitch;
+import de.anomic.server.serverDomains;
 import de.anomic.server.serverFileUtils;
 import de.anomic.server.serverInstantThread;
 import de.anomic.server.serverObjects;
@@ -256,7 +257,7 @@ public final class plasmaSwitchboard extends serverAbstractSwitch implements ser
     public  int                         totalPPM = 0;
     public  double                      totalQPM = 0d;
     public  TreeMap                     clusterhashes; // map of peerhash(String)/alternative-local-address as ip:port or only ip (String) or null if address in seed should be used
-    
+    public  boolean                     acceptLocalURLs, acceptGlobalURLs;
     /*
      * Remote Proxy configuration
      */
@@ -947,6 +948,10 @@ public final class plasmaSwitchboard extends serverAbstractSwitch implements ser
             i++;
         }
         
+        // set URL domain acceptance
+        this.acceptGlobalURLs = "global.any".indexOf(getConfig("network.unit.domain", "global")) >= 0;
+        this.acceptLocalURLs = "local.any".indexOf(getConfig("network.unit.domain", "global")) >= 0;
+        
         // load values from configs
         this.plasmaPath   = new File(rootPath, getConfig(DBPATH, DBPATH_DEFAULT));
         this.log.logConfig("Plasma DB Path: " + this.plasmaPath.toString());
@@ -1136,11 +1141,8 @@ public final class plasmaSwitchboard extends serverAbstractSwitch implements ser
         int wordCacheMaxCount = Math.max((int) getConfigLong(WORDCACHE_INIT_COUNT, 30000),
                                          (int) getConfigLong(WORDCACHE_MAX_COUNT, 20000));
         setConfig(WORDCACHE_MAX_COUNT, Integer.toString(wordCacheMaxCount));
-        wordIndex.setMaxWordCount(wordCacheMaxCount); 
-
-        int wordInCacheMaxCount = (int) getConfigLong(INDEX_DIST_DHT_RECEIPT_LIMIT, 1000);
-        wordIndex.setInMaxWordCount(wordInCacheMaxCount);
-        wordIndex.setWordFlushSize((int) getConfigLong("wordFlushSize", 1000));
+        wordIndex.setMaxWordCount(wordCacheMaxCount);
+        wordIndex.setWordFlushSize((int) getConfigLong("wordFlushSize", 10000));
         
         // set a maximum amount of memory for the caches
         long memprereq = Math.max(getConfigLong(INDEXER_MEMPREREQ, 0), wordIndex.minMem());
@@ -1279,7 +1281,7 @@ public final class plasmaSwitchboard extends serverAbstractSwitch implements ser
         String[] noCachingEntries = noCachingList.split(",");
         for (i = 0; i < noCachingEntries.length; i++) {
             String entry = noCachingEntries[i].trim();
-            httpc.nameCacheNoCachingPatterns.add(entry);
+            serverDomains.nameCacheNoCachingPatterns.add(entry);
         }
         
         // generate snippets cache
@@ -1338,7 +1340,7 @@ public final class plasmaSwitchboard extends serverAbstractSwitch implements ser
             Long.parseLong(getConfig(INDEXER_MEMPREREQ , "1000000")));
         }
 
-        deployThread(PROXY_CACHE_ENQUEUE, "Proxy Cache Enqueue", "job takes new proxy files from RAM stack, stores them, and hands over to the Indexing Stack", null,
+        deployThread(PROXY_CACHE_ENQUEUE, "Proxy Cache Enqueue", "job takes new input files from RAM stack, stores them, and hands over to the Indexing Stack", null,
         new serverInstantThread(this, PROXY_CACHE_ENQUEUE_METHOD_START, PROXY_CACHE_ENQUEUE_METHOD_JOBCOUNT, PROXY_CACHE_ENQUEUE_METHOD_FREEMEM), 10000);
         deployThread(CRAWLJOB_REMOTE_TRIGGERED_CRAWL, "Remote Crawl Job", "thread that performes a single crawl/indexing step triggered by a remote peer", null,
         new serverInstantThread(this, CRAWLJOB_REMOTE_TRIGGERED_CRAWL_METHOD_START, CRAWLJOB_REMOTE_TRIGGERED_CRAWL_METHOD_JOBCOUNT, CRAWLJOB_REMOTE_TRIGGERED_CRAWL_METHOD_FREEMEM), 30000);
@@ -1371,8 +1373,7 @@ public final class plasmaSwitchboard extends serverAbstractSwitch implements ser
         
         log.logConfig("Finished Switchboard Initialization");
     }
-
-
+    
     public void initMessages(long ramMessage_time) {
         this.log.logConfig("Starting Message Board");
         File messageDbFile = new File(workPath, DBFILE_MESSAGE);
@@ -1381,8 +1382,7 @@ public final class plasmaSwitchboard extends serverAbstractSwitch implements ser
         ", " + this.messageDB.size() + " entries" +
         ", " + ppRamString(messageDbFile.length()/1024));
     }
-
-
+    
     public void initWiki(long ramWiki_time) {
         this.log.logConfig("Starting Wiki Board");
         File wikiDbFile = new File(workPath, DBFILE_WIKI);
@@ -1391,6 +1391,7 @@ public final class plasmaSwitchboard extends serverAbstractSwitch implements ser
         ", " + this.wikiDB.size() + " entries" +
         ", " + ppRamString(wikiDbFile.length()/1024));
     }
+    
     public void initBlog(long ramBlog_time) {
         this.log.logConfig("Starting Blog");
         File blogDbFile = new File(workPath, DBFILE_BLOG);
@@ -1405,6 +1406,7 @@ public final class plasmaSwitchboard extends serverAbstractSwitch implements ser
         ", " + this.blogCommentDB.size() + " entries" +
         ", " + ppRamString(blogCommentDbFile.length()/1024));
     }
+    
     public void initBookmarks(){
         this.log.logConfig("Loading Bookmarks DB");
         File bookmarksFile = new File(workPath, DBFILE_BOOKMARKS);
@@ -1414,7 +1416,6 @@ public final class plasmaSwitchboard extends serverAbstractSwitch implements ser
         this.log.logConfig("Loaded Bookmarks DB from files "+ bookmarksFile.getName()+ ", "+tagsFile.getName());
         this.log.logConfig(this.bookmarksDB.tagsSize()+" Tag, "+this.bookmarksDB.bookmarksSize()+" Bookmarks");
     }
-    
     
     public static plasmaSwitchboard getSwitchboard(){
         return sb;
@@ -1439,6 +1440,7 @@ public final class plasmaSwitchboard extends serverAbstractSwitch implements ser
     	// depending on the robinson cluster type, the peer String may be a peerhash (b64-hash)
     	// or a ip:port String or simply a ip String
     	// if this robinson mode does not define a cluster membership, false is returned
+        if (peer == null) return false;
     	if (!isRobinsonMode()) return false;
     	String clustermode = getConfig(CLUSTER_MODE, CLUSTER_MODE_PUBLIC_PEER);
     	if (clustermode.equals(CLUSTER_MODE_PRIVATE_CLUSTER)) {
@@ -1469,6 +1471,18 @@ public final class plasmaSwitchboard extends serverAbstractSwitch implements ser
     	} else {
     		return false;
     	}
+    }
+   
+    public boolean acceptURL(URL url) {
+        // returns true if the url can be accepted accoring to network.unit.domain
+        return acceptURL(serverDomains.dnsResolve(url.getHost()));
+    }
+        
+    public boolean acceptURL(InetAddress hostAddress) {
+        // returns true if the url can be accepted accoring to network.unit.domain
+        if (this.acceptGlobalURLs && this.acceptLocalURLs) return true; // fast shortcut
+        boolean local = hostAddress.isSiteLocalAddress() || hostAddress.isLoopbackAddress();
+        return (this.acceptGlobalURLs && !local) || (this.acceptLocalURLs && local);
     }
     
     public String urlExists(String hash) {
@@ -1668,18 +1682,15 @@ public final class plasmaSwitchboard extends serverAbstractSwitch implements ser
          * 
          * check if ip is local ip address // TODO: remove this procotol specific code here
          * ========================================================================= */
-        InetAddress hostAddress = httpc.dnsResolve(entry.url().getHost());
+        InetAddress hostAddress = serverDomains.dnsResolve(entry.url().getHost());
         if (hostAddress == null) {
             if (this.remoteProxyConfig == null || !this.remoteProxyConfig.useProxy()) {
                 this.log.logFine("Unknown host in URL '" + entry.url() + "'. Will not be indexed.");
                 doIndexing = false;             
             }
-        } else if (hostAddress.isSiteLocalAddress()) {
+        } else if (!acceptURL(hostAddress)) {
             this.log.logFine("Host in URL '" + entry.url() + "' has private ip address. Will not be indexed.");
-            doIndexing = false;               
-        } else if (hostAddress.isLoopbackAddress()) {
-            this.log.logFine("Host in URL '" + entry.url() + "' has loopback ip address. Will not be indexed.");
-            doIndexing = false;                  
+            doIndexing = false;
         }
         
         /* =========================================================================
@@ -3270,7 +3281,9 @@ public final class plasmaSwitchboard extends serverAbstractSwitch implements ser
         }
         
         // do the transfer
-        int peerCount = (yacyCore.seedDB.mySeed.isJunior()) ? 1 : 3;
+        int peerCount = Math.max(1, (yacyCore.seedDB.mySeed.isJunior()) ?
+                           (int) getConfigLong("network.unit.dhtredundancy.junior", 1) :
+                           (int) getConfigLong("network.unit.dhtredundancy.senior", 1)); // set redundancy factor
         long starttime = System.currentTimeMillis();
         
         boolean ok = dhtTransferProcess(dhtTransferChunk, peerCount);

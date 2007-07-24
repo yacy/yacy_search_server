@@ -109,6 +109,7 @@ public final class transferURL {
                 urls = (String) post.get("url" + i);
                 if (urls == null) {
                     yacyCore.log.logFine("transferURL: got null URL-string from peer " + otherPeerName);
+                    blocked++;
                     continue;
                 }
 
@@ -116,6 +117,7 @@ public final class transferURL {
                 lEntry = sb.wordIndex.loadedURL.newEntry(urls);
                 if (lEntry == null) {
                     yacyCore.log.logWarning("transferURL: received invalid URL (entry null) from peer " + otherPeerName + "\n\tURL Property: " + urls);
+                    blocked++;
                     continue;
                 }
                 
@@ -123,12 +125,14 @@ public final class transferURL {
                 indexURLEntry.Components comp = lEntry.comp();
                 if (comp.url() == null) {
                     yacyCore.log.logWarning("transferURL: received invalid URL from peer " + otherPeerName + "\n\tURL Property: " + urls);
+                    blocked++;
                     continue;
                 }
                 
                 // check whether entry is too old
                 if (lEntry.freshdate().getTime() <= freshdate) {
                     yacyCore.log.logFine("transerURL: received too old URL from peer " + otherPeerName + ": " + lEntry.freshdate());
+                    blocked++;
                     continue;
                 }
                 
@@ -136,6 +140,14 @@ public final class transferURL {
                 if ((blockBlacklist) && (plasmaSwitchboard.urlBlacklist.isListed(plasmaURLPattern.BLACKLIST_DHT, lEntry.hash(), comp.url()))) {
                     int deleted = sb.wordIndex.tryRemoveURLs(lEntry.hash());
                     yacyCore.log.logFine("transferURL: blocked blacklisted URL '" + comp.url().toNormalform(false, true) + "' from peer " + otherPeerName + "; deleted " + deleted + " URL entries from RWIs");
+                    lEntry = null;
+                    blocked++;
+                    continue;
+                }
+                
+                // check if the entry is in our network domain
+                if (!sb.acceptURL(comp.url())) {
+                    yacyCore.log.logFine("transferURL: blocked URL outside of our domain '" + comp.url().toNormalform(false, true) + "' from peer " + otherPeerName);
                     lEntry = null;
                     blocked++;
                     continue;

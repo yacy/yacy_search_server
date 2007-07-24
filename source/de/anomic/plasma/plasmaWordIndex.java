@@ -128,9 +128,6 @@ public final class plasmaWordIndex implements indexRI {
 
     public void setMaxWordCount(int maxWords) {
         dhtOutCache.setMaxWordCount(maxWords);
-    }
-
-    public void setInMaxWordCount(int maxWords) {
         dhtInCache.setMaxWordCount(maxWords);
     }
 

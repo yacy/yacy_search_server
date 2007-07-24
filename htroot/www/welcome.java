@@ -52,6 +52,7 @@ import java.net.UnknownHostException;
 
 import de.anomic.http.httpHeader;
 import de.anomic.server.serverCore;
+import de.anomic.server.serverDomains;
 import de.anomic.server.serverObjects;
 import de.anomic.server.serverSwitch;
 import de.anomic.yacy.yacyCore;
@@ -69,9 +70,9 @@ public class welcome {
         prop.put("peername", env.getConfig("peerName", "<nameless>"));
         prop.put("peerdomain", env.getConfig("peerName", "<nameless>").toLowerCase());
         prop.put("peeraddress", yacyCore.seedDB.mySeed.getPublicAddress());
-        prop.put("hostname", serverCore.publicIP());
+        prop.put("hostname", serverDomains.myPublicIP());
         try{
-            prop.put("hostip", InetAddress.getByName(serverCore.publicIP()).getHostAddress());
+            prop.put("hostip", InetAddress.getByName(serverDomains.myPublicIP()).getHostAddress());
         }catch(UnknownHostException e){
             prop.put("hostip", "Unknown Host Exception");
         }       

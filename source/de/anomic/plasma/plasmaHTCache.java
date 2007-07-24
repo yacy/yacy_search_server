@@ -72,7 +72,6 @@ import java.util.TreeMap;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import de.anomic.http.httpc;
 import de.anomic.http.httpHeader;
 import de.anomic.plasma.plasmaURL;
 import de.anomic.kelondro.kelondroBase64Order;
@@ -84,6 +83,7 @@ import de.anomic.plasma.cache.IResourceInfo;
 import de.anomic.plasma.cache.ResourceInfoFactory;
 import de.anomic.plasma.cache.UnsupportedProtocolException;
 import de.anomic.server.serverCodings;
+import de.anomic.server.serverDomains;
 import de.anomic.server.serverFileUtils;
 import de.anomic.server.serverInstantThread;
 import de.anomic.server.serverSystem;
@@ -456,7 +456,7 @@ public final class plasmaHTCache {
         while ((doms.size() > 0) && (fileCount < 50) && ((System.currentTimeMillis() - start) < 60000)) {
             if (Thread.currentThread().isInterrupted()) return;
             dom = (String) doms.getMaxObject();
-            InetAddress ip = httpc.dnsResolve(dom);
+            InetAddress ip = serverDomains.dnsResolve(dom);
             if (ip == null) continue;
             result += ", " + dom + "=" + ip.getHostAddress();
             this.log.logConfig("PRE-FILLED " + dom + "=" + ip.getHostAddress());

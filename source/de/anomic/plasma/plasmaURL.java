@@ -39,7 +39,7 @@ import de.anomic.kelondro.kelondroBase64Order;
 import de.anomic.net.URL;
 import de.anomic.server.serverByteBuffer;
 import de.anomic.server.serverCodings;
-import de.anomic.server.serverCore;
+import de.anomic.server.serverDomains;
 import de.anomic.yacy.yacySeedDB;
 
 public class plasmaURL {
@@ -421,7 +421,7 @@ public class plasmaURL {
             tld = host.substring(p + 1);
             dom = host.substring(0, p);
         }
-        Integer ID = (serverCore.isNotLocal(tld)) ? (Integer) TLDID.get(tld) : null; // identify local addresses
+        Integer ID = (serverDomains.isLocal(tld)) ? null : (Integer) TLDID.get(tld); // identify local addresses
         int id = (ID == null) ? 7 : ID.intValue(); // local addresses are flagged with id=7
         boolean isHTTP = url.getProtocol().equals("http");
         p = dom.lastIndexOf('.'); // locate subdomain

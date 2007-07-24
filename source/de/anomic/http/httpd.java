@@ -72,6 +72,7 @@ import de.anomic.plasma.plasmaSwitchboard;
 import de.anomic.server.serverByteBuffer;
 import de.anomic.server.serverCodings;
 import de.anomic.server.serverCore;
+import de.anomic.server.serverDomains;
 import de.anomic.server.serverFileUtils;
 import de.anomic.server.serverHandler;
 import de.anomic.server.serverObjects;
@@ -1218,15 +1219,15 @@ public final class httpd implements serverHandler {
             String clientIP = conProp.getProperty(httpHeader.CONNECTION_PROP_CLIENTIP,"127.0.0.1");
             
             // check if ip is local ip address
-            InetAddress hostAddress = httpc.dnsResolve(clientIP);
+            InetAddress hostAddress = serverDomains.dnsResolve(clientIP);
             if (hostAddress == null) {
-                tp.put("host", serverCore.publicLocalIP().getHostAddress());
+                tp.put("host", serverDomains.myPublicLocalIP().getHostAddress());
                 tp.put("port", serverCore.getPortNr(switchboard.getConfig("port", "8080")));                    
             } else if (hostAddress.isSiteLocalAddress() || hostAddress.isLoopbackAddress()) {
-                tp.put("host", serverCore.publicLocalIP().getHostAddress());
+                tp.put("host", serverDomains.myPublicLocalIP().getHostAddress());
                 tp.put("port", serverCore.getPortNr(switchboard.getConfig("port", "8080")));
             } else {
-                tp.put("host", serverCore.publicIP());
+                tp.put("host", serverDomains.myPublicIP());
                 tp.put("port", (serverCore.portForwardingEnabled && (serverCore.portForwarding != null)) 
                         ? Integer.toString(serverCore.portForwarding.getPort()) 
                         : Integer.toString(serverCore.getPortNr(switchboard.getConfig("port", "8080"))));
@@ -1539,9 +1540,9 @@ public final class httpd implements serverHandler {
         boolean isThisHostIP = false;
         try {
             //InetAddress hostAddress = InetAddress.getByName(hostName);
-            InetAddress hostAddress = httpc.dnsResolve(hostName);
+            InetAddress hostAddress = serverDomains.dnsResolve(hostName);
             //InetAddress forwardingAddress = InetAddress.getByName(serverCore.portForwarding.getHost());
-            InetAddress forwardingAddress = httpc.dnsResolve(serverCore.portForwarding.getHost());
+            InetAddress forwardingAddress = serverDomains.dnsResolve(serverCore.portForwarding.getHost());
             
             if ((hostAddress==null)||(forwardingAddress==null)) return false;
             if (hostAddress.equals(forwardingAddress)) return true;              
@@ -1559,8 +1560,8 @@ public final class httpd implements serverHandler {
         
         // resolve ip addresses
         if (thisSeedIP == null || thisSeedPort == null) return false;
-        InetAddress seedInetAddress = httpc.dnsResolve(thisSeedIP);
-        InetAddress hostInetAddress = httpc.dnsResolve(hostName);
+        InetAddress seedInetAddress = serverDomains.dnsResolve(thisSeedIP);
+        InetAddress hostInetAddress = serverDomains.dnsResolve(hostName);
         if (seedInetAddress == null || hostInetAddress == null) return false;
         
         // if it's equal, the hostname points to this seed
@@ -1573,7 +1574,7 @@ public final class httpd implements serverHandler {
         boolean isThisHostIP = false;
         try {
 //             final InetAddress clientAddress = InetAddress.getByName(hostName);
-            final InetAddress clientAddress = httpc.dnsResolve(hostName);
+            final InetAddress clientAddress = serverDomains.dnsResolve(hostName);
             if (clientAddress == null) return false;
             
             if (clientAddress.isAnyLocalAddress() || clientAddress.isLoopbackAddress()) return true;

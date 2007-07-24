@@ -50,7 +50,7 @@ import java.util.ArrayList;
 
 import de.anomic.http.httpc;
 import de.anomic.plasma.plasmaSwitchboard;
-import de.anomic.server.serverCore;
+import de.anomic.server.serverDomains;
 import de.anomic.tools.disorderHeap;
 import de.anomic.tools.nxTools;
 
@@ -192,7 +192,7 @@ public class natLib {
 	    ip = ia.getHostAddress();
 	    if (isProper(ip)) return ip;
 	}*/
-	ip = serverCore.publicIP();
+	ip = serverDomains.myPublicIP();
 	if (isProper(ip)) return ip;
 
 	// now go the uneasy way and ask some web responder

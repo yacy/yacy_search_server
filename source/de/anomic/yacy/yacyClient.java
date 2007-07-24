@@ -71,6 +71,7 @@ import de.anomic.plasma.urlPattern.plasmaURLPattern;
 import de.anomic.server.serverByteBuffer;
 import de.anomic.server.serverCodings;
 import de.anomic.server.serverCore;
+import de.anomic.server.serverDomains;
 import de.anomic.server.serverObjects;
 import de.anomic.tools.crypt;
 import de.anomic.tools.nxTools;
@@ -155,7 +156,7 @@ public final class yacyClient {
 
         // we overwrite our own IP number only, if we do not portForwarding
         if (serverCore.portForwardingEnabled || serverCore.useStaticIP) {
-            yacyCore.seedDB.mySeed.put(yacySeed.IP, serverCore.publicIP());
+            yacyCore.seedDB.mySeed.put(yacySeed.IP, serverDomains.myPublicIP());
         } else {
             yacyCore.seedDB.mySeed.put(yacySeed.IP, (String) result.get("yourip"));
         }
@@ -468,6 +469,11 @@ public final class yacyClient {
 				yacyCore.log.logInfo("remote search (client): filtered blacklisted url " + comp.url() + " from peer " + target.getName());
 				continue; // block with backlist
 			}
+            
+            if (!plasmaSwitchboard.getSwitchboard().acceptURL(comp.url())) {
+                yacyCore.log.logInfo("remote search (client): rejected url outside of our domain " + comp.url() + " from peer " + target.getName());
+                continue; // reject url outside of our domain
+            }
 
 			// save the url entry
 			indexRWIEntry entry;

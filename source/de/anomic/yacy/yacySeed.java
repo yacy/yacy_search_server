@@ -78,6 +78,7 @@ import de.anomic.plasma.plasmaCondenser;
 import de.anomic.plasma.plasmaSwitchboard;
 import de.anomic.server.serverCodings;
 import de.anomic.server.serverCore;
+import de.anomic.server.serverDomains;
 import de.anomic.server.serverDate;
 import de.anomic.server.serverSystem;
 import de.anomic.tools.bitfield;
@@ -242,7 +243,7 @@ public class yacySeed {
     /**
      * Generate a default peer name assembled of the following fragments in order:
      * <ul>
-     *   <li>the public IP (may be an IPv4- or IPv6-IP) obtained by {@link serverCore#publicIP()} followed by a minus sign (<code>-</code>)</li>
+     *   <li>the public IP (may be an IPv4- or IPv6-IP) obtained by {@link serverCore#myPublicIP()} followed by a minus sign (<code>-</code>)</li>
      *   <li>a pseudo-random value, the {@link yacyCore#speedKey}</li>
      *   <li>the string '<code>dpn</code>' which assumingly stands for Default Peer Name</li>
      *   <li>shortened OS information, the {@link serverSystem#infoKey()}</li>
@@ -251,7 +252,7 @@ public class yacySeed {
      * @return a default peer name following the above pattern whereas dots, underscores and colons are replaced by minus signs
      */
     public static String makeDefaultPeerName() {
-        String name = serverCore.publicIP() + "-" + yacyCore.speedKey  + "dpn" + serverSystem.infoKey() + (System.currentTimeMillis() & 99);
+        String name = serverDomains.myPublicIP() + "-" + yacyCore.speedKey  + "dpn" + serverSystem.infoKey() + (System.currentTimeMillis() & 99);
         name = name.replace('.', '-');
         name = name.replace('_', '-');
         name = name.replace(':', '-');

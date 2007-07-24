@@ -36,7 +36,7 @@ import de.anomic.http.httpHeader;
 import de.anomic.net.URL;
 import de.anomic.plasma.plasmaSearchQuery;
 import de.anomic.plasma.plasmaSwitchboard;
-import de.anomic.server.serverCore;
+import de.anomic.server.serverDomains;
 import de.anomic.server.serverDate;
 import de.anomic.server.serverObjects;
 import de.anomic.server.serverSwitch;
@@ -86,7 +86,7 @@ public class index {
             } catch (MalformedURLException e) {
                 url = null;
             }
-            if ((url != null) && (serverCore.isNotLocal(url))) {
+            if ((url != null) && (!serverDomains.isLocal(url))) {
                 final HashMap referrerprop = new HashMap();
                 referrerprop.put("count", "1");
                 referrerprop.put("clientip", header.get(httpHeader.CONNECTION_PROP_CLIENTIP));

@@ -146,6 +146,13 @@ public final class crawlReceipt {
             return prop;
         }
         
+        // check if the entry is in our network domain
+        if (!switchboard.acceptURL(comp.url())) {
+            log.logWarning("crawlReceipt: RECEIVED wrong RECEIPT (url outside of our domain) for hash " + entry.hash() + " from peer " + iam + "\n\tURL properties: "+ propStr);
+            prop.putASIS("delay", "9999");
+            return prop;
+        }
+        
         if (result.equals("fill")) try {
             // put new entry into database
             switchboard.wordIndex.loadedURL.store(entry);

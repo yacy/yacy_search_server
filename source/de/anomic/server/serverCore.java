@@ -61,7 +61,6 @@ import java.net.NetworkInterface;
 import java.net.ServerSocket;
 import java.net.Socket;
 import java.net.SocketException;
-import java.net.UnknownHostException;
 import java.nio.channels.ClosedByInterruptException;
 import java.security.KeyStore;
 import java.util.Enumeration;
@@ -79,8 +78,6 @@ import org.apache.commons.pool.impl.GenericObjectPool.Config;
 
 import de.anomic.http.httpc;
 import de.anomic.icap.icapd;
-import de.anomic.net.URL;
-import de.anomic.plasma.plasmaSwitchboard;
 import de.anomic.server.logging.serverLog;
 import de.anomic.server.portForwarding.serverPortForwarding;
 import de.anomic.tools.PKCS12Tool;
@@ -126,15 +123,7 @@ public final class serverCore extends serverAbstractThread implements serverThre
     private serverSwitch switchboard;      // the command class switchboard
     Hashtable denyHost;
     int commandMaxLength;
-    
-    private static InetAddress[] localAddresses = null;
-    static {
-        try {
-            localAddresses = InetAddress.getAllByName(InetAddress.getLocalHost().getHostName());
-        } catch (UnknownHostException e) {
-            localAddresses = new InetAddress[0];
-        }
-    }
+
     
     /**
      * The session-object pool
@@ -389,7 +378,7 @@ public final class serverCore extends serverAbstractThread implements serverThre
                 serverCore.portForwarding.connect();
                 
                 serverCore.portForwardingEnabled = true;
-                yacyCore.seedDB.mySeed.put(yacySeed.IP,publicIP());
+                yacyCore.seedDB.mySeed.put(yacySeed.IP, serverDomains.myPublicIP());
                 yacyCore.seedDB.mySeed.put(yacySeed.PORT,Integer.toString(serverCore.portForwarding.getPort()));                               
             } catch (Exception e) {
                 serverCore.portForwardingEnabled = false;
@@ -404,7 +393,7 @@ public final class serverCore extends serverAbstractThread implements serverThre
         } else {
             serverCore.portForwardingEnabled = false;
             serverCore.portForwarding = null;
-            yacyCore.seedDB.mySeed.put(yacySeed.IP,publicIP());
+            yacyCore.seedDB.mySeed.put(yacySeed.IP, serverDomains.myPublicIP());
             yacyCore.seedDB.mySeed.put(yacySeed.PORT,Integer.toString(serverCore.getPortNr(this.switchboard.getConfig("port", "8080"))));             
         }
         if(! this.switchboard.getConfig("staticIP", "").equals(""))
@@ -418,142 +407,10 @@ public final class serverCore extends serverAbstractThread implements serverThre
     
     public void setPoolConfig(GenericObjectPool.Config newConfig) {
         this.theSessionPool.setConfig(newConfig);
-    }    
-    
-    public static boolean isNotLocal(URL url) {
-        return isNotLocal(url.getHost());
-    }
-    
-    /**
-     * Checks if a given address (hostname or IP) is *not* a local address
-     *
-     * @param address Address to check
-     * @return boolean, true if address is public, false if address is private 
-     */
-    public static boolean isNotLocal(String address) {
-
-        assert (address != null);
-        
-        // check local ip addresses
-        if (address.equals("localhost")   ||
-            address.startsWith("127")     ||
-            address.startsWith("192.168") ||
-            address.startsWith("10.")     ||
-            address.startsWith("169.254") ||
-            // 172.16.0.0-172.31.255.255 (I think this is faster than a regex)
-            (address.startsWith("172.") && ( 
-             address.startsWith("172.16.") || address.startsWith("172.17.") ||
-             address.startsWith("172.18.") || address.startsWith("172.19.") ||
-             address.startsWith("172.20.") || address.startsWith("172.21.") ||
-             address.startsWith("172.22.") || address.startsWith("172.23.") ||
-             address.startsWith("172.24.") || address.startsWith("172.25.") ||
-             address.startsWith("172.26.") || address.startsWith("172.27.") ||
-             address.startsWith("172.28.") || address.startsWith("172.29.") ||
-             address.startsWith("172.30.") || address.startsWith("172.31.")
-            ))
-           ) return false;
-        
-        // make a dns resolve if a hostname is given and check again
-        final InetAddress clientAddress = httpc.dnsResolve(address);
-        if (clientAddress != null) {
-            if ((clientAddress.isAnyLocalAddress()) || (clientAddress.isLoopbackAddress())) return false;
-            if (address.charAt(0) > '9') address = clientAddress.getHostAddress();
-        }
-        
-        // finally check if there are other local IP adresses that are not in the standard IP range
-        for (int i = 0; i < localAddresses.length; i++) {
-            if (localAddresses[i].equals(clientAddress)) return false;
-        }
-        
-        // the address must be a global address
-        return true;
-    }
-    
-    public static String publicIP() {
-        try {
-            
-            // if a static IP was configured, we have to return it here ...
-            plasmaSwitchboard sb = plasmaSwitchboard.getSwitchboard();
-            if(sb != null){
-                String staticIP=sb.getConfig("staticIP", "");
-                if( (!staticIP.equals("")) ){
-                    return staticIP;
-                }
-            }
-            
-            // If port forwarding was enabled we need to return the remote IP Address
-            if ((serverCore.portForwardingEnabled)&&(serverCore.portForwarding != null)) {
-                //does not return serverCore.portForwarding.getHost(), because hostnames are not valid, except in DebugMode
-                return InetAddress.getByName(serverCore.portForwarding.getHost()).getHostAddress();
-            }
-            
-            // otherwise we return the real IP address of this host
-            InetAddress pLIP = publicLocalIP();
-            if (pLIP != null) return pLIP.getHostAddress();
-            return null;
-        } catch (java.net.UnknownHostException e) {
-            System.err.println("ERROR: (internal) " + e.getMessage());
-            return null;
-        }
-    }
-    
-    public static InetAddress publicLocalIP() {            
-        try {
-            String hostName;
-            try {
-                hostName = InetAddress.getLocalHost().getHostName();
-            } catch (java.net.UnknownHostException e) {
-                hostName = "localhost";  // hopin' nothing serious happened only the hostname changed while running yacy   
-                System.err.println("ERROR: (internal) " + e.getMessage());
-            }
-            // list all addresses
-            InetAddress[] ia = InetAddress.getAllByName(hostName);
-            //for (int i = 0; i < ia.length; i++) System.out.println("IP: " + ia[i].getHostAddress()); // DEBUG
-            if (ia.length == 0) {
-                try {
-                    return InetAddress.getLocalHost();
-                } catch (UnknownHostException e) {
-                    try {
-                        return InetAddress.getByName("127.0.0.1");
-                    } catch (UnknownHostException ee) {
-                        return null;
-                    }
-                }
-            }
-            if (ia.length == 1) {
-                // only one network connection available
-                return ia[0];
-            }
-            // we have more addresses, find an address that is not local
-            int b0, b1;
-            for (int i = 0; i < ia.length; i++) {
-                b0 = 0Xff & ia[i].getAddress()[0];
-                b1 = 0Xff & ia[i].getAddress()[1];
-                if ((b0 != 10) && // class A reserved
-                        (b0 != 127) && // loopback
-                        ((b0 != 172) || (b1 < 16) || (b1 > 31)) && // class B reserved
-                        ((b0 != 192) || (b1 != 168)) && // class C reserved
-                        (ia[i].getHostAddress().indexOf(":") < 0)
-                ) return ia[i];
-            }
-            // there is only a local address, we filter out the possibly returned loopback address 127.0.0.1
-            for (int i = 0; i < ia.length; i++) {
-                if (((0Xff & ia[i].getAddress()[0]) != 127) &&
-                        (ia[i].getHostAddress().indexOf(":") < 0)) return ia[i];
-            }
-            // if all fails, give back whatever we have
-            for (int i = 0; i < ia.length; i++) {
-                if (ia[i].getHostAddress().indexOf(":") < 0) return ia[i];
-            }
-            return ia[0];
-        } catch (java.net.UnknownHostException e) {
-            System.err.println("ERROR: (internal) " + e.getMessage());
-            return null;
-        }
     }
 
     public void open() {
-        this.log.logConfig("* server started on " + publicLocalIP() + ":" + this.extendedPort);
+        this.log.logConfig("* server started on " + serverDomains.myPublicLocalIP() + ":" + this.extendedPort);
     }
     
     public void freemem() {
@@ -1275,7 +1132,7 @@ public final class serverCore extends serverAbstractThread implements serverThre
                         writeLine(this.commandObj.error(ite.getTargetException()));
                     } catch (NoSuchMethodException nsme) {
                         System.out.println("ERROR B " + this.userAddress.getHostAddress());
-                        if (isNotLocal(this.userAddress.getHostAddress().toString())) {
+                        if (!this.userAddress.isSiteLocalAddress()) {
                             if (serverCore.this.denyHost != null) {
                                 serverCore.this.denyHost.put((""+this.userAddress.getHostAddress()), "deny"); // block client: hacker attempt
                             }

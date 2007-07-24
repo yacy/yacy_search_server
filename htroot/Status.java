@@ -57,6 +57,7 @@ import de.anomic.http.httpdByteCountOutputStream;
 import de.anomic.net.URL;
 import de.anomic.plasma.plasmaSwitchboard;
 import de.anomic.server.serverCore;
+import de.anomic.server.serverDomains;
 import de.anomic.server.serverDate;
 import de.anomic.server.serverMemory;
 import de.anomic.server.serverObjects;
@@ -180,7 +181,7 @@ public class Status {
         } else {
             prop.put("extPortFormat",0);
         }
-        prop.put("host", serverCore.publicLocalIP().getHostAddress());
+        prop.put("host", serverDomains.myPublicLocalIP().getHostAddress());
         
         // ssl support
         prop.put("sslSupport",sb.getConfig("keyStore", "").length() == 0 ? 0:1);

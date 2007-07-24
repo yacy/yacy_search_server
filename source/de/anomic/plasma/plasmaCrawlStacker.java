@@ -70,6 +70,7 @@ import de.anomic.kelondro.kelondroRowSet;
 import de.anomic.kelondro.kelondroTree;
 import de.anomic.net.URL;
 import de.anomic.plasma.urlPattern.plasmaURLPattern;
+import de.anomic.server.serverDomains;
 import de.anomic.server.serverSemaphore;
 import de.anomic.server.logging.serverLog;
 import de.anomic.yacy.yacyCore;
@@ -288,8 +289,8 @@ public final class plasmaCrawlStacker {
         }
         
         // check if ip is local ip address
-        checkInterruption();        // TODO: this is protocol specific
-        InetAddress hostAddress = httpc.dnsResolve(nexturl.getHost());
+        checkInterruption(); // TODO: this is protocol specific
+        InetAddress hostAddress = serverDomains.dnsResolve(nexturl.getHost());
 		if(this.sb.getConfig("yacyDebugMode", "true").equals("true")){
 			//just ignore the check in debugmode (useful for tor(.eff.org)
         }else if (hostAddress == null) {
@@ -300,16 +301,11 @@ public final class plasmaCrawlStacker {
                         "Stack processing time: " + (System.currentTimeMillis()-startTime) + "ms");
                 return reason;                
             }
-        } else if (hostAddress.isSiteLocalAddress()) {
-            reason = plasmaCrawlEURL.DENIED_PRIVATE_IP_ADDRESS;
-            this.log.logFine("Host in URL '" + nexturlString + "' has private IP address. " +
+        } else if (!sb.acceptURL(hostAddress)) {
+            reason = plasmaCrawlEURL.DENIED_IP_ADDRESS_NOT_IN_DECLARED_DOMAIN + "[" + sb.getConfig("network.unit.domain", "unknown") + "]";
+            this.log.logFine("Host in URL '" + nexturlString + "' has IP address outside of declared range (" + sb.getConfig("network.unit.domain", "unknown") + "). " +
                     "Stack processing time: " + (System.currentTimeMillis()-startTime) + "ms");
             return reason;                
-        } else if (hostAddress.isLoopbackAddress()) {
-            reason = plasmaCrawlEURL.DENIED_LOOPBACK_IP_ADDRESS;
-            this.log.logFine("Host in URL '" + nexturlString + "' has loopback IP address. " + 
-                    "Stack processing time: " + (System.currentTimeMillis()-startTime) + "ms");
-            return reason;                  
         }
         
         // check blacklist

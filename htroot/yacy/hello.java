@@ -46,6 +46,7 @@
 // javac -classpath .:../../classes hello.java
 // if the shell's current path is HTROOT
 
+import java.net.InetAddress;
 import java.util.Iterator;
 import java.util.Map;
 
@@ -53,6 +54,7 @@ import de.anomic.http.httpHeader;
 import de.anomic.plasma.plasmaSwitchboard;
 import de.anomic.server.serverCore;
 import de.anomic.server.serverDate;
+import de.anomic.server.serverDomains;
 import de.anomic.server.serverObjects;
 import de.anomic.server.serverSwitch;
 import de.anomic.yacy.yacyClient;
@@ -95,6 +97,8 @@ public final class hello {
 
         // we easily know the caller's IP:
         final String clientip = (String) header.get("CLIENTIP", "<unknown>"); // read an artificial header addendum
+        InetAddress ias = serverDomains.dnsResolve(clientip);
+        if (ias == null) return null;
         final String userAgent = (String) header.get(httpHeader.USER_AGENT, "<unknown>");
         final String reportedip = remoteSeed.get(yacySeed.IP, "");
         final String reportedPeerType = remoteSeed.get(yacySeed.PEERTYPE, yacySeed.PEERTYPE_JUNIOR);
@@ -126,10 +130,10 @@ public final class hello {
         	boolean isNotLocal = true;
         	
         	// we are only allowed to connect to the client IP address if it's not our own address
-        	if(serverCore.portForwardingEnabled || serverCore.useStaticIP)
-        		isNotLocal = serverCore.isNotLocal(clientip);
-            
-        	if(isNotLocal) {
+        	if (serverCore.portForwardingEnabled || serverCore.useStaticIP) {
+        		isNotLocal = !ias.isSiteLocalAddress();
+            }
+        	if (isNotLocal) {
         		serverCore.checkInterruption();
                 
                 prop.putASIS("yourip", clientip);

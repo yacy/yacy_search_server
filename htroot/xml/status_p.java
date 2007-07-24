@@ -63,7 +63,7 @@ public class status_p {
         prop.put("wordCacheSize", switchboard.wordIndex.dhtOutCacheSize() + switchboard.wordIndex.dhtInCacheSize());
         prop.put("wordCacheWSize", switchboard.wordIndex.dhtOutCacheSize());
         prop.put("wordCacheKSize", switchboard.wordIndex.dhtInCacheSize());
-        prop.put("wordCacheMaxCount", switchboard.getConfig("wordCacheMaxCount", "10000"));
+        prop.put("wordCacheMaxCount", switchboard.getConfig(plasmaSwitchboard.WORDCACHE_MAX_COUNT, "10000"));
 
 		//
 		// memory usage and system attributes

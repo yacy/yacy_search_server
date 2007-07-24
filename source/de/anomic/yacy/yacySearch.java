@@ -260,9 +260,9 @@ public class yacySearch extends Thread {
 
         // prepare seed targets and threads
         final yacySeed[] targetPeers = (clusterselection == null) ? selectDHTPeers(plasmaSearchQuery.hashes2Set(wordhashes), targets) : selectClusterPeers(clusterselection);
-        if (targetPeers == null) return null;
+        if (targetPeers == null) return new yacySearch[0];
         targets = targetPeers.length;
-        if (targets == 0) return null;
+        if (targets == 0) return new yacySearch[0];
         yacySearch[] searchThreads = new yacySearch[targets];
         for (int i = 0; i < targets; i++) {
             searchThreads[i]= new yacySearch(wordhashes, excludehashes, urlhashes, prefer, filter, maxDist, true, targets, targetPeers[i],

@@ -69,6 +69,7 @@ import de.anomic.plasma.plasmaCondenser;
 import de.anomic.plasma.plasmaSwitchboard;
 import de.anomic.server.serverCodings;
 import de.anomic.server.serverCore;
+import de.anomic.server.serverDomains;
 import de.anomic.server.serverFileUtils;
 import de.anomic.server.serverMemory;
 import de.anomic.server.serverObjects;
@@ -106,9 +107,9 @@ public class dir {
         prop.put("peername", env.getConfig("peerName", "<nameless>"));
         prop.put("peerdomain", env.getConfig("peerName", "<nameless>").toLowerCase());
         prop.put("peeraddress", yacyCore.seedDB.mySeed.getPublicAddress());
-        prop.put("hostname", serverCore.publicIP());
+        prop.put("hostname", serverDomains.myPublicIP());
         try{
-            prop.put("hostip", InetAddress.getByName(serverCore.publicIP()).getHostAddress());
+            prop.put("hostip", InetAddress.getByName(serverDomains.myPublicIP()));
         }catch(UnknownHostException e){
             prop.put("hostip", "Unknown Host Exception");
         }      

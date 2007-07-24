@@ -72,7 +72,7 @@ import java.util.StringTokenizer;
 import java.util.TimeZone;
 import java.util.Vector;
 
-import de.anomic.server.serverCore;
+import de.anomic.server.serverDomains;
 
 public class ftpc {
 
@@ -1609,7 +1609,7 @@ cd ..
       
     // save ip address in high byte order
     //byte[] Bytes = LocalIp.getAddress();
-    byte[] Bytes = serverCore.publicIP().getBytes();
+    byte[] Bytes = serverDomains.myPublicIP().getBytes();
 
     // bytes greater than 127 should not be printed as negative
     short[] Shorts = new short[4];

@@ -182,16 +182,12 @@ public class PerformanceQueues_p {
         prop.put("table", c);
         
         if ((post != null) && (post.containsKey("cacheSizeSubmit"))) {
-            int wordOutCacheMaxCount = post.getInt("wordOutCacheMaxCount", 20000);
-            switchboard.setConfig("wordCacheMaxCount", Integer.toString(wordOutCacheMaxCount));
-            switchboard.wordIndex.setMaxWordCount(wordOutCacheMaxCount);
-
-            int wordInCacheMaxCount = post.getInt("wordInCacheMaxCount", 1000);
-            switchboard.setConfig("indexDistribution.dhtReceiptLimit", Integer.toString(wordInCacheMaxCount));
-            switchboard.wordIndex.setInMaxWordCount(wordInCacheMaxCount);
+            int wordCacheMaxCount = post.getInt("wordCacheMaxCount", 20000);
+            switchboard.setConfig(plasmaSwitchboard.WORDCACHE_MAX_COUNT, Integer.toString(wordCacheMaxCount));
+            switchboard.wordIndex.setMaxWordCount(wordCacheMaxCount);
             
-            int wordCacheInitCount = post.getInt("wordCacheInitCount", 30000);
-            switchboard.setConfig("wordCacheInitCount", Integer.toString(wordCacheInitCount));
+            int wordCacheInitCount = post.getInt(plasmaSwitchboard.WORDCACHE_INIT_COUNT, 30000);
+            switchboard.setConfig(plasmaSwitchboard.WORDCACHE_INIT_COUNT, Integer.toString(wordCacheInitCount));
             
             int flushsize = post.getInt("wordFlushSize", 2000);
             switchboard.setConfig("wordFlushSize", Integer.toString(flushsize));
@@ -282,9 +278,8 @@ public class PerformanceQueues_p {
         prop.put("minAgeOfWCache", "" + (switchboard.wordIndex.minAgeOfDHTOutCache() / 1000 / 60)); // minutes
         prop.put("minAgeOfKCache", "" + (switchboard.wordIndex.minAgeOfDHTInCache() / 1000 / 60)); // minutes
         prop.put("maxWaitingWordFlush", switchboard.getConfig("maxWaitingWordFlush", "180"));
-        prop.put("wordOutCacheMaxCount", switchboard.getConfigLong("wordCacheMaxCount", 20000));
-        prop.put("wordInCacheMaxCount", switchboard.getConfigLong("indexDistribution.dhtReceiptLimit", 1000));
-        prop.put("wordCacheInitCount", switchboard.getConfigLong("wordCacheInitCount", 30000));
+        prop.put("wordCacheMaxCount", switchboard.getConfigLong(plasmaSwitchboard.WORDCACHE_MAX_COUNT, 20000));
+        prop.put("wordCacheInitCount", switchboard.getConfigLong(plasmaSwitchboard.WORDCACHE_INIT_COUNT, 30000));
         prop.put("wordFlushSize", switchboard.getConfigLong("wordFlushSize", 2000));
         prop.put("onlineCautionDelay", switchboard.getConfig("onlineCautionDelay", "30000"));
         prop.put("onlineCautionDelayCurrent", System.currentTimeMillis() - switchboard.proxyLastAccess);

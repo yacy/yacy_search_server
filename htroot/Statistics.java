@@ -50,7 +50,7 @@ import java.util.Map;
 import de.anomic.http.httpHeader;
 import de.anomic.net.URL;
 import de.anomic.plasma.plasmaSwitchboard;
-import de.anomic.server.serverCore;
+import de.anomic.server.serverDomains;
 import de.anomic.server.serverObjects;
 import de.anomic.server.serverSwitch;
 
@@ -81,7 +81,7 @@ public class Statistics {
                         if (count >= maxCount) break;
                         urlString = (String) map.get("key");
                         try { url = new URL(urlString); } catch (MalformedURLException e) { url = null; }
-                        if ((url != null) && (serverCore.isNotLocal(url))) {
+                        if ((url != null) && (!serverDomains.isLocal(url))) {
                             prop.put("page_backlinks_list_" + count + "_dark", ((dark) ? 1 : 0)); dark =! dark;
                             prop.put("page_backlinks_list_" + count + "_url", urlString);
                             prop.put("page_backlinks_list_" + count + "_date", map.get("date"));

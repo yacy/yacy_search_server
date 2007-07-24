@@ -55,18 +55,13 @@ import java.net.SocketException;
 import java.net.UnknownHostException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.Date;
 import java.util.Enumeration;
 import java.util.GregorianCalendar;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.Iterator;
-import java.util.LinkedList;
-import java.util.List;
 import java.util.Locale;
 import java.util.Map;
-import java.util.Set;
 import java.util.TimeZone;
 import java.util.zip.GZIPInputStream;
 import java.util.zip.GZIPOutputStream;
@@ -81,10 +76,10 @@ import javax.net.ssl.X509TrustManager;
 import org.apache.commons.pool.impl.GenericObjectPool;
 
 import de.anomic.kelondro.kelondroBase64Order;
-import de.anomic.kelondro.kelondroMScoreCluster;
 import de.anomic.net.URL;
 import de.anomic.server.serverByteBuffer;
 import de.anomic.server.serverCore;
+import de.anomic.server.serverDomains;
 import de.anomic.server.serverFileUtils;
 import de.anomic.server.serverObjects;
 import de.anomic.server.logging.serverLog;
@@ -112,6 +107,7 @@ public final class httpc {
     public static String userAgent;
     private static final int terminalMaxLength = 30000;
     private static final TimeZone GMTTimeZone = TimeZone.getTimeZone("GMT");
+    
     /**
     * This string is initialized on loading of this class and contains
     * information about the current OS.
@@ -123,20 +119,6 @@ public final class httpc {
     static {
          HTTPGMTFormatter.setTimeZone(GMTTimeZone);
     }
-    static final HashMap reverseMappingCache = new HashMap();
-
-    // the dns cache
-    private static final Map nameCacheHit = Collections.synchronizedMap(new HashMap()); // a not-synchronized map resulted in deadlocks
-    private static final Set nameCacheMiss = Collections.synchronizedSet(new HashSet());
-    private static final kelondroMScoreCluster nameCacheHitAges = new kelondroMScoreCluster();
-    private static final kelondroMScoreCluster nameCacheMissAges = new kelondroMScoreCluster();
-    private static final long startTime = System.currentTimeMillis();
-    private static final int maxNameCacheHitAge = 24 * 60 * 60; // 24 hours in minutes
-    private static final int maxNameCacheMissAge = 24 * 60 * 60; // 24 hours in minutes
-    private static final int maxNameCacheHitSize = 3000; 
-    private static final int maxNameCacheMissSize = 3000; 
-    public  static final List nameCacheNoCachingPatterns = Collections.synchronizedList(new LinkedList());
-    private static final Set nameCacheNoCachingList = Collections.synchronizedSet(new HashSet());
     
     /**
      * A Object Pool containing all pooled httpc-objects.
@@ -164,6 +146,8 @@ public final class httpc {
     String  requestPath = null;
     private boolean allowContentEncoding = true;
 	public static boolean yacyDebugMode = false;
+
+    static final HashMap reverseMappingCache = new HashMap();
     
     /**
      * Indicates if the current object was removed from pool because the maximum limit
@@ -418,147 +402,6 @@ public final class httpc {
     }
 
     /**
-    * Does an DNS-Check to resolve a hostname to an IP.
-    *
-    * @param host Hostname of the host in demand.
-    * @return String with the ip. null, if the host could not be resolved.
-    */
-    public static InetAddress dnsResolve(String host) {
-        if ((host == null)||(host.length() == 0)) return null;
-        host = host.toLowerCase().trim();        
-        
-        // trying to resolve host by doing a name cache lookup
-        InetAddress ip = (InetAddress) nameCacheHit.get(host);
-        if (ip != null) return ip;
-        
-        if (nameCacheMiss.contains(host)) return null;
-        try {
-            boolean doCaching = true;
-            ip = InetAddress.getByName(host);
-            if (
-                    (ip == null) ||
-                    (ip.isLoopbackAddress()) ||
-                    (nameCacheNoCachingList.contains(ip.getHostName()))
-            ) {
-                doCaching = false;
-            } else {
-                Iterator noCachingPatternIter = nameCacheNoCachingPatterns.iterator();
-                while (noCachingPatternIter.hasNext()) {
-                    String nextPattern = (String) noCachingPatternIter.next();
-                    if (ip.getHostName().matches(nextPattern)) {
-                        // disallow dns caching for this host
-                        nameCacheNoCachingList.add(ip.getHostName());
-                        doCaching = false;
-                        break;
-                    }
-                }
-            }
-            
-            if (doCaching) {
-                // remove old entries
-                flushHitNameCache();
-                
-                // add new entries
-                synchronized (nameCacheHit) {
-                    nameCacheHit.put(ip.getHostName(), ip);
-                    nameCacheHitAges.setScore(ip.getHostName(), intTime(System.currentTimeMillis()));
-                }
-            }
-            return ip;
-        } catch (UnknownHostException e) {
-            // remove old entries
-            flushMissNameCache();
-            
-            // add new entries
-            nameCacheMiss.add(host);
-            nameCacheMissAges.setScore(host, intTime(System.currentTimeMillis()));
-        }
-        return null;
-    }
-
-//    /**
-//    * Checks wether an hostname already is in the DNS-cache.
-//    * FIXME: This method should use dnsResolve, as the code is 90% identical?
-//    *
-//    * @param host Searched for hostname.
-//    * @return true, if the hostname already is in the cache.
-//    */
-//    public static boolean dnsFetch(String host) {
-//        if ((nameCacheHit.get(host) != null) /*|| (nameCacheMiss.contains(host)) */) return false;
-//        try {
-//            String ip = InetAddress.getByName(host).getHostAddress();
-//            if ((ip != null) && (!(ip.equals("127.0.0.1"))) && (!(ip.equals("localhost")))) {
-//                nameCacheHit.put(host, ip);
-//                return true;
-//            }
-//            return false;
-//        } catch (UnknownHostException e) {
-//            //nameCacheMiss.add(host);
-//            return false;
-//        }
-//    }
-
-    /**
-    * Returns the number of entries in the nameCacheHit map
-    *
-    * @return int The number of entries in the nameCacheHit map
-    */
-    public static int nameCacheHitSize() {
-        return nameCacheHit.size();
-    }
-
-    public static int nameCacheMissSize() {
-        return nameCacheMiss.size();
-    }
-
-    /**
-    * Returns the number of entries in the nameCacheNoCachingList list
-    *
-    * @return int The number of entries in the nameCacheNoCachingList list
-    */
-    public static int nameCacheNoCachingListSize() {
-        return nameCacheNoCachingList.size();
-    }
-
-    /**
-    * Converts the time to a non negative int
-    *
-    * @param longTime Time in miliseconds since 01/01/1970 00:00 GMT
-    * @return int seconds since startTime
-    */
-    private static int intTime(long longTime) {
-        return (int) Math.max(0, ((longTime - startTime) / 1000));
-    }
-
-    /**
-    * Removes old entries from the dns hit cache
-    */
-    public static void flushHitNameCache() {
-        int cutofftime = intTime(System.currentTimeMillis()) - maxNameCacheHitAge;
-        String k;
-        while ((nameCacheHitAges.size() > maxNameCacheHitSize) || (nameCacheHitAges.getMinScore() < cutofftime)) {
-            k = (String) nameCacheHitAges.getMinObject();
-            if (nameCacheHit.remove(k) == null) break; // ensure termination
-            nameCacheHitAges.deleteScore(k);
-        }
-        
-    }
-    
-    /**
-     * Removes old entries from the dns miss cache
-     */
-     public static void flushMissNameCache() {
-        int cutofftime = intTime(System.currentTimeMillis()) - maxNameCacheMissAge;
-        String k;
-        while ((nameCacheMissAges.size() > maxNameCacheMissSize) || (nameCacheMissAges.getMinScore() < cutofftime)) {
-            k = (String) nameCacheMissAges.getMinObject();
-            if (!nameCacheMiss.remove(k)) break; // ensure termination
-            nameCacheMissAges.deleteScore(k);
-        }
-        
-    }
-
-    /**
     * Returns the given date in an HTTP-usable format.
     * (according to RFC822)
     *
@@ -664,7 +507,7 @@ public final class httpc {
             InetSocketAddress address = null;
             if (!this.remoteProxyUse) {
                 // only try to resolve the address if we are not using a proxy
-                InetAddress hostip = dnsResolve(server);
+                InetAddress hostip = serverDomains.dnsResolve(server);
                 if (hostip == null) throw new UnknownHostException(server);
                 address = new InetSocketAddress(hostip, port);
             } else {

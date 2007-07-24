@@ -101,6 +101,7 @@ import de.anomic.plasma.cache.IResourceInfo;
 import de.anomic.plasma.cache.http.ResourceInfo;
 import de.anomic.plasma.urlPattern.plasmaURLPattern;
 import de.anomic.server.serverCore;
+import de.anomic.server.serverDomains;
 import de.anomic.server.serverFileUtils;
 import de.anomic.server.serverObjects;
 import de.anomic.server.serverSwitch;
@@ -1491,16 +1492,16 @@ public final class httpdProxyHandler extends httpdAbstractHandler implements htt
         String testHostName = null;
         if (!orgHostName.startsWith("www.")) {
             testHostName = "www." + orgHostName;
-            InetAddress addr = httpc.dnsResolve(testHostName);
+            InetAddress addr = serverDomains.dnsResolve(testHostName);
             if (addr != null) testHostNames.add(testHostName);
         } else if (orgHostName.startsWith("www.")) {
             testHostName = orgHostName.substring(4);
-            InetAddress addr = httpc.dnsResolve(testHostName);
+            InetAddress addr = serverDomains.dnsResolve(testHostName);
             if (addr != null) if (addr != null) testHostNames.add(testHostName);                      
         } 
         if (orgHostName.length()>4 && orgHostName.startsWith("www") && (orgHostName.charAt(3) != '.')) {
             testHostName = orgHostName.substring(0,3) + "." + orgHostName.substring(3);
-            InetAddress addr = httpc.dnsResolve(testHostName);
+            InetAddress addr = serverDomains.dnsResolve(testHostName);
             if (addr != null) if (addr != null) testHostNames.add(testHostName);                             
         }
         
@@ -1510,7 +1511,7 @@ public final class httpdProxyHandler extends httpdAbstractHandler implements htt
             while (iter.hasNext()) {
                 String topLevelDomain = (String) iter.next();
                 testHostName = orgHostName.substring(0,pos) + "." + topLevelDomain;
-                InetAddress addr = httpc.dnsResolve(testHostName);
+                InetAddress addr = serverDomains.dnsResolve(testHostName);
                 if (addr != null) if (addr != null) testHostNames.add(testHostName);                        
             }
         }

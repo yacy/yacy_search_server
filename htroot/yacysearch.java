@@ -74,6 +74,7 @@ import de.anomic.plasma.plasmaSwitchboard;
 import de.anomic.plasma.plasmaURL;
 import de.anomic.plasma.plasmaSearchResults;
 import de.anomic.server.serverCore;
+import de.anomic.server.serverDomains;
 import de.anomic.server.serverDate;
 import de.anomic.server.serverObjects;
 import de.anomic.server.serverSwitch;
@@ -111,7 +112,7 @@ public class yacysearch {
             if (referer != null) {
                 URL url;
                 try { url = new URL(referer); } catch (MalformedURLException e) { url = null; }
-                if ((url != null) && (serverCore.isNotLocal(url))) {
+                if ((url != null) && (!serverDomains.isLocal(url))) {
                     final HashMap referrerprop = new HashMap();
                     referrerprop.put("count", "1");
                     referrerprop.put("clientip", header.get("CLIENTIP"));
