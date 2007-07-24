@@ -1,0 +1,8 @@
+<div class="SubMenu">
+  <h3>Publication</h3>
+    <ul class="SubMenu">
+      <li><a href="/Wiki.html?display=1" class="MenuItemLink lock">Wiki</a></li>
+      <li><a href="/Blog.html?display=1" class="MenuItemLink lock">Blog</a></li>
+      <li><a href="/share/" class="MenuItemLink lock">File Hosting</a></li>
+    </ul>
+</div>
