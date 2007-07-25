@@ -58,8 +58,9 @@ import de.anomic.server.serverCodings;
 
 public class plasmaCrawlProfile {
     
+    private static HashMap domsCache = new HashMap();
+    
     private kelondroMapObjects profileTable;
-    private HashMap domsCache;
     private File profileTableFile;
     private long preloadTime;
     
@@ -71,7 +72,6 @@ public class plasmaCrawlProfile {
         profileTableFile.getParentFile().mkdirs();
         kelondroDyn dyn = new kelondroDyn(profileTableFile, true, true, preloadTime, crawlProfileHandleLength, 2000, '#', kelondroNaturalOrder.naturalOrder, true, false, true);
         profileTable = new kelondroMapObjects(dyn, 500);
-        domsCache = new HashMap();
     }
     
     private void resetDatabase() {
@@ -208,8 +208,13 @@ public class plasmaCrawlProfile {
         if (m == null) return null;
         return new entry(m);
     }
+
+    public void changeEntry(entry e, String propName, String newValue) throws IOException {
+        e.mem.put(propName,  newValue);
+        profileTable.set(e.handle(), e.mem);
+    }
     
-    public class DomProfile {
+    public static class DomProfile {
         
         public String referrer;
         public int depth, count;
@@ -226,7 +231,7 @@ public class plasmaCrawlProfile {
         
     }
     
-    public class entry {
+    public static class entry {
         // this is a simple record structure that hold all properties of a single crawl start
         
         public static final String HANDLE           = "handle";
@@ -412,10 +417,6 @@ public class plasmaCrawlProfile {
         public boolean excludeParentStopwords() {
             String r = (String) mem.get(XPSTOPW);
             if (r == null) return false; else return (r.equals(Boolean.TRUE.toString()));
-        }
-        public void changeEntry(String propName, String newValue) throws IOException {
-            mem.put(propName,  newValue);
-            profileTable.set(handle(), mem);
         }
         public void domInc(String domain, String referrer, int depth) {
             synchronized (domain.intern()) {

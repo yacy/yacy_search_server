@@ -152,7 +152,7 @@ public class urlRedirectord implements serverHandler {
                     if (pos != -1) {
                         String newDepth = line.substring(pos).trim();
                         this.theLogger.logFine("Changing crawling depth to '" + newDepth + "'.");
-                        profile.changeEntry("generalDepth",newDepth);
+                        switchboard.profiles.changeEntry(profile, "generalDepth",newDepth);
                     }
                     outputWriter.print("\r\n");
                     outputWriter.flush();
@@ -161,7 +161,7 @@ public class urlRedirectord implements serverHandler {
                     if (pos != -1) {
                         String newValue = line.substring(pos).trim();
                         this.theLogger.logFine("Changing crawl dynamic setting to '" + newValue + "'");
-                        profile.changeEntry("crawlingQ",newValue);
+                        switchboard.profiles.changeEntry(profile, "crawlingQ",newValue);
                     }
                     outputWriter.print("\r\n");
                     outputWriter.flush();                    

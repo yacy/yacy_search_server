@@ -6,7 +6,7 @@
     <h3>Search&nbsp;&amp;&nbsp;Browse</h3>
     <ul class="menu">
       <li><a href="/index.html?display=1" accesskey="s" class="MenuItemLink">Search Page</a></li>
-      <li><a href="/DetailedSearch.html" class="MenuItemLink">Detailed Search</a></li>
+      <li><a href="/Ranking_p.html" class="MenuItemLink lock">Ranking Config</a></li>
       <li><a href="/Surftips.html?display=1" class="MenuItemLink">Surftips</a></li>
       <li><a href="/Wiki.html?display=1" class="MenuItemLink">Publication</a></li>
       <li><a href="/Bookmarks.html" class="MenuItemLink">Bookmarks</a></li>
@@ -52,7 +52,7 @@
       <li><a href="http://yacy-forum.huzzaar.com" class="MenuItemLink">English Forum</a></li>
       <li><a href="http://www.yacy.net/yacy/Download.html" class="MenuItemLink">Download YaCy</a></li>
       <li><a href="http://www.yacy-websuche.de/wiki/index.php/Hauptseite" class="MenuItemLink">YaCy Project Wiki</a></li>
-      <li><a href="http://www.yacystats.de" class="MenuItemLink">YaCy Community Statistics</a></li>
+      <li><a href="http://www.yacystats.de" class="MenuItemLink">YaCy Statistics</a></li>
     </ul>
   </li>
 </ul>

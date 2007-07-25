@@ -138,7 +138,7 @@ public class CrawlProfileEditor_p {
 						tee = (eentry) it.next();
 						String cval = (String) selentry.map().get(tee.name);
 						String val = (tee.type == eentry.BOOLEAN) ? Boolean.toString(post.containsKey(tee.name)) : post.get(tee.name, cval);
-						if (!cval.equals(val)) selentry.changeEntry(tee.name, val);
+						if (!cval.equals(val)) sb.profiles.changeEntry(selentry, tee.name, val);
 					}
 				} catch (IOException ex) {
 					prop.put("error", 1);

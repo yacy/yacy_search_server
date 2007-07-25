@@ -1,0 +1,39 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <title>YaCy '#[clientname]#': Ranking Configuration</title>
+    #%env/templates/metas.template%#
+  </head>
+  <body id="Ranking_p">
+    #%env/templates/header.template%#
+    <h2>Ranking Configuration</h2>
+    <form class="dsearch" action="Ranking_p.html" method="put" enctype="multipart/form-data">
+      <fieldset>
+        <legend>Pre-Ranking</legend>
+        <dl>#{attrPre}# 
+          <dt><label for="#[nameorg]#">#[name]#</label>:</dt>
+          <dd id="#[nameorg]#">#{select}# 
+            <input type="radio" name="#[nameorg]#" value="#[value]#"#(checked)#:: checked="checked"#(/checked)# />#{/select}# 
+            #[value]#
+          </dd>#{/attrPre}# 
+        </dl>
+      </fieldset>
+      <fieldset>
+        <legend>Post-Ranking</legend>
+        <dl>#{attrPost}# 
+          <dt><label for="#[nameorg]#">#[name]#</label></dt>
+          <dd id="#[nameorg]#">#{select}# 
+            <input type="radio" name="#[nameorg]#" value="#[value]#"#(checked)#:: checked="checked"#(/checked)# />#{/select}# 
+            #[value]#
+          </dd>#{/attrPost}# 
+        </dl>
+      </fieldset>
+      <fieldset>
+        <input type="submit" name="EnterRanking" value="Set as Default Ranking" />
+        <input type="submit" name="ResetRanking" value="Re-Set to Built-In Ranking" />
+      </fieldset>
+    </form>
+
+  #%env/templates/footer.template%#
+  </body>
+</html>
