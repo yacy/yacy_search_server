@@ -1,9 +1,10 @@
 #!/bin/sh
 JAVA="`which java`"
 LOGFILE="yacy.log"
+OS="`uname`"
 
 #check if OS is Sun Solaris or one of the OpenSolaris distributions and use different version of id if necessary
-if [ "`uname`" = "SunOS" ]
+if [ $OS = "SunOS" ]
 then
     # only this version of id supports the parameter -u
     ID="/usr/xpg4/bin/id"
@@ -74,6 +75,12 @@ done
 
 #echo $options;exit 0 #DEBUG for getopts
 
+# generating the proper classpath
+CLASSPATH=""
+for N in lib/*.jar; do CLASSPATH="$CLASSPATH$N:"; done	
+for N in libx/*.jar; do CLASSPATH="$CLASSPATH$N:"; done
+CLASSPATH="classes:.:htroot:$CLASSPATH"
+
 #get javastart args
 java_args=""
 if [ -f DATA/SETTINGS/httpProxy.conf ]
@@ -81,13 +88,25 @@ then
 	# startup memory
 	for i in Xmx Xms; do
 		j=`grep javastart_$i DATA/SETTINGS/httpProxy.conf`;
-		j="${j#javastart_$i=}";
+                if [ $OS = "SunOS" ]
+                then
+                        j=`$JAVA -classpath $CLASSPATH truncate "$j" "javastart_$i="`;
+                else
+                        j="${j#javastart_$i=}";
+                fi
 		if [ -n $j ]; then JAVA_ARGS="-$j $JAVA_ARGS"; fi;
 	done
 	
 	# Priority
 	j=`grep javastart_priority DATA/SETTINGS/httpProxy.conf`;
-	j="${j#javastart_priority=}"
+
+        if [ $OS = "SunOS" ]
+        then
+               j=`$JAVA -classpath $CLASSPATH truncate "$j" "javastart_priority="`;
+        else
+	       j="${j#javastart_priority=}"
+        fi
+
 	if [ ! -z "$j" ];then
 		if [ -n $j ]; then JAVA="nice -n $j $JAVA"; fi;
 	fi
@@ -99,13 +118,6 @@ then
 fi
 #echo "JAVA_ARGS: $JAVA_ARGS"
 #echo "JAVA: $JAVA"
-
-# generating the proper classpath
-CLASSPATH=""
-for N in lib/*.jar; do CLASSPATH="$CLASSPATH$N:"; done	
-for N in libx/*.jar; do CLASSPATH="$CLASSPATH$N:"; done
-CLASSPATH="classes:.:htroot:$CLASSPATH"
-
 
 cmdline="";
 if [ $DEBUG -eq 1 ] #debug
