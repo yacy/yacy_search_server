@@ -75,37 +75,18 @@ done
 
 #echo $options;exit 0 #DEBUG for getopts
 
-# generating the proper classpath
-CLASSPATH=""
-for N in lib/*.jar; do CLASSPATH="$CLASSPATH$N:"; done	
-for N in libx/*.jar; do CLASSPATH="$CLASSPATH$N:"; done
-CLASSPATH="classes:.:htroot:$CLASSPATH"
-
 #get javastart args
 java_args=""
 if [ -f DATA/SETTINGS/httpProxy.conf ]
 then
 	# startup memory
 	for i in Xmx Xms; do
-		j=`grep javastart_$i DATA/SETTINGS/httpProxy.conf`;
-                if [ $OS = "SunOS" ]
-                then
-                        j=`$JAVA -classpath $CLASSPATH truncate "$j" "javastart_$i="`;
-                else
-                        j="${j#javastart_$i=}";
-                fi
+		j=$(grep javastart_$i DATA/SETTINGS/httpProxy.conf | sed 's/^[^=]*=//');
 		if [ -n $j ]; then JAVA_ARGS="-$j $JAVA_ARGS"; fi;
 	done
 	
 	# Priority
-	j=`grep javastart_priority DATA/SETTINGS/httpProxy.conf`;
-
-        if [ $OS = "SunOS" ]
-        then
-               j=`$JAVA -classpath $CLASSPATH truncate "$j" "javastart_priority="`;
-        else
-	       j="${j#javastart_priority=}"
-        fi
+	j=$(grep javastart_priority DATA/SETTINGS/httpProxy.conf | sed 's/^[^=]*=//');
 
 	if [ ! -z "$j" ];then
 		if [ -n $j ]; then JAVA="nice -n $j $JAVA"; fi;
@@ -118,6 +99,12 @@ then
 fi
 #echo "JAVA_ARGS: $JAVA_ARGS"
 #echo "JAVA: $JAVA"
+
+# generating the proper classpath
+CLASSPATH=""
+for N in lib/*.jar; do CLASSPATH="$CLASSPATH$N:"; done	
+for N in libx/*.jar; do CLASSPATH="$CLASSPATH$N:"; done
+CLASSPATH="classes:.:htroot:$CLASSPATH"
 
 cmdline="";
 if [ $DEBUG -eq 1 ] #debug
