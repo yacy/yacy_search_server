@@ -85,7 +85,7 @@ public class languageDataExtractor {
         String output = "";
         String sKey = "";
 
-        //Program started with arguments 'input' or 'output'?
+        //Program started with arguments 'input', 'output', 'data', 'name'?
         if (args.length <= 4) {
 
             for(int i=0;i<args.length;i++){
@@ -174,7 +174,7 @@ public class languageDataExtractor {
         while(mapiter.hasNext()){
             key = mapiter.next().toString().charAt(0);
             sKey = "" + key; 
-            file += "\n  <letter>\n    <name>"+key+"</name>\n    <quantity>"+(Float.parseFloat(map.get(sKey).toString())/quantity*100)+"</quantity>\n  <letter>\n";
+            file += "\n  <letter>\n    <name>"+key+"</name>\n    <quantity>"+(Float.parseFloat(map.get(sKey).toString())/quantity*100)+"</quantity>\n  </letter>\n";
         }
         file += "\n</language>";
 
