@@ -85,7 +85,7 @@ public class languageDataExtractor {
         String output = "";
         String sKey = "";
 
-        //Program started with arguments 'input', 'output', 'data', 'name'?
+        //Program started with arguments 'input', 'data', 'name'?
         if (args.length <= 4) {
 
             for(int i=0;i<args.length;i++){
@@ -94,8 +94,6 @@ public class languageDataExtractor {
 
                 if (temp.startsWith("input=")) {
                     input = temp.substring(6);
-                } else if (temp.startsWith("output=")) {
-                    output = temp.substring(7);
                 } else if (temp.startsWith("name=")) {
                     name = temp.substring(5);
                 } else if (temp.startsWith("code=")) {
@@ -106,24 +104,20 @@ public class languageDataExtractor {
         }
 
         //Ask user if arguments were not used when starting program.
-        if ((input == "") || (output == "") || (name == "") || (code == "")) {
+        if ((input.equals("")) || (output.equals("")) || (name.equals("")) || (code.equals(""))) {
             BufferedReader in = new BufferedReader(new InputStreamReader(System.in));
             try {
-                if(input == "") {
+                if(input.equals("")) {
                     System.out.print("Name of file text is to be read from: ");
                     input = in.readLine();
                 }
-                if(name == "") {
+                if(name.equals("")) {
                     System.out.print("Name of the language the text is written in: ");
                     name = in.readLine();
                 }
-                if(code == "") {
+                if(code.equals("")) {
                     System.out.print("Code of the language the text is writen in (e.g. en-GB): ");
                     code = in.readLine();
-                }
-                if(output == "") {
-                    System.out.print("Name of file data is to be written to: ");
-                    output = in.readLine();
                 }
             }
             catch (IOException e) {
@@ -131,6 +125,9 @@ public class languageDataExtractor {
                 System.out.println("Program aborted!");
             }
         }
+
+        //Creating filename from language code plus .ldf (language data file)
+        output = code + ".ldf";
 
         //Trying to open input file.
         try {
