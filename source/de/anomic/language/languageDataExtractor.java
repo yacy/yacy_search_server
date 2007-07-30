@@ -104,7 +104,7 @@ public class languageDataExtractor {
         }
 
         //Ask user if arguments were not used when starting program.
-        if ((input.equals("")) || (output.equals("")) || (name.equals("")) || (code.equals(""))) {
+        if ((input.equals("")) || (name.equals("")) || (code.equals(""))) {
             BufferedReader in = new BufferedReader(new InputStreamReader(System.in));
             try {
                 if(input.equals("")) {
