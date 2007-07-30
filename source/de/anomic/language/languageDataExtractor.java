@@ -56,6 +56,8 @@
 // name=langugaename  name of the language the text is written in
 // name=code          code of the language the text is written in (e.g. en-GB)
 
+package de.anomic.language;
+
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
 import java.io.FileInputStream;
