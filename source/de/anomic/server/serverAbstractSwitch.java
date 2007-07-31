@@ -174,12 +174,14 @@ public abstract class serverAbstractSwitch implements serverSwitch {
         if (accessPath == null) accessPath="NULL";
         TreeMap access = (TreeMap) accessTracker.get(host);
         if (access == null) access = new TreeMap();
-        access.put(new Long(System.currentTimeMillis()), accessPath);
+        synchronized (access) {
+            access.put(new Long(System.currentTimeMillis()), accessPath);
 
-        // write back to tracker
-        try {
-        	accessTracker.put(host, clearTooOldAccess(access));
-        } catch (ConcurrentModificationException e) {};
+            // write back to tracker
+            try {
+                accessTracker.put(host, clearTooOldAccess(access));
+            } catch (ConcurrentModificationException e) {};
+        }
     }
     
     public TreeMap accessTrack(String host) {
@@ -187,19 +189,20 @@ public abstract class serverAbstractSwitch implements serverSwitch {
         
         TreeMap access = (TreeMap) accessTracker.get(host);
         if (access == null) return null;
-
-        // clear too old entries
-        int oldsize = access.size();
-        if ((access = clearTooOldAccess(access)).size() != oldsize) {
-            // write back to tracker
-            if (access.size() == 0) {
-                accessTracker.remove(host);
-            } else {
-                accessTracker.put(host, access);
+        synchronized (access) {
+            // clear too old entries
+            int oldsize = access.size();
+            if ((access = clearTooOldAccess(access)).size() != oldsize) {
+                // write back to tracker
+                if (access.size() == 0) {
+                    accessTracker.remove(host);
+                } else {
+                    accessTracker.put(host, access);
+                }
             }
-        }
         
-        return access;
+            return access;
+        }
     }
     
     private TreeMap clearTooOldAccess(TreeMap access) {
