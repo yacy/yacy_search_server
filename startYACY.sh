@@ -81,12 +81,12 @@ if [ -f DATA/SETTINGS/httpProxy.conf ]
 then
 	# startup memory
 	for i in Xmx Xms; do
-		j=$(grep javastart_$i DATA/SETTINGS/httpProxy.conf | sed 's/^[^=]*=//');
+		j="`grep javastart_$i DATA/SETTINGS/httpProxy.conf | sed 's/^[^=]*=//'`";
 		if [ -n $j ]; then JAVA_ARGS="-$j $JAVA_ARGS"; fi;
 	done
 	
 	# Priority
-	j=$(grep javastart_priority DATA/SETTINGS/httpProxy.conf | sed 's/^[^=]*=//');
+	j="`grep javastart_priority DATA/SETTINGS/httpProxy.conf | sed 's/^[^=]*=//'`";
 
 	if [ ! -z "$j" ];then
 		if [ -n $j ]; then JAVA="nice -n $j $JAVA"; fi;
@@ -102,7 +102,7 @@ fi
 
 # generating the proper classpath
 CLASSPATH=""
-for N in lib/*.jar; do CLASSPATH="$CLASSPATH$N:"; done	
+for N in lib/*.jar; do CLASSPATH="$CLASSPATH$N:"; done
 for N in libx/*.jar; do CLASSPATH="$CLASSPATH$N:"; done
 CLASSPATH="classes:.:htroot:$CLASSPATH"
 
