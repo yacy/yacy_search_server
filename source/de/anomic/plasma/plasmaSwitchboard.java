@@ -178,7 +178,7 @@ public final class plasmaSwitchboard extends serverAbstractSwitch implements ser
     public static int indexingSlots         = 30;
     public static int stackCrawlSlots       = 1000000;
     
-    private int       dhtTransferIndexCount = 50;    
+    private int       dhtTransferIndexCount = 100;    
     
     // we must distinguish the following cases: resource-load was initiated by
     // 1) global crawling: the index is extern, not here (not possible here)

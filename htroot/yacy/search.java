@@ -145,6 +145,7 @@ public final class search {
         
         // prepare an abstract result
         StringBuffer indexabstract = new StringBuffer();
+        int indexabstractContainercount = 0;
         int joincount = 0;
         plasmaSearchPostOrder acc = null;
         plasmaSearchQuery squery = null;
@@ -170,6 +171,7 @@ public final class search {
                     entry = (Map.Entry) ci.next();
                     wordhash = (String) entry.getKey();
                     indexContainer container = (indexContainer) entry.getValue();
+                    indexabstractContainercount += container.size();
                     indexabstract.append("indexabstract." + wordhash + "=").append(plasmaURL.compressIndex(container, null, 1000).toString()).append(serverCore.crlfString);                
                 }
             }
@@ -215,11 +217,14 @@ public final class search {
                     }
                     d = yacyDHTAction.dhtDistance(yacyCore.seedDB.mySeed.hash, wordhash);
                     if (d < mindhtdistance) {
+                        // calculate the word hash that is closest to our dht position
                         mindhtdistance = d;
                         neardhthash = wordhash;
                     }
                     indexcount.append("indexcount.").append(container.getWordHash()).append('=').append(Integer.toString(container.size())).append(serverCore.crlfString);
                     if ((abstractSet != null) && (abstractSet.contains(wordhash))) {
+                        // if a specific index-abstract is demanded, attach it here
+                        indexabstractContainercount += container.size();
                         indexabstract.append("indexabstract." + wordhash + "=").append(plasmaURL.compressIndex(container, null,1000).toString()).append(serverCore.crlfString);
                     }
                 }
@@ -242,10 +247,15 @@ public final class search {
                 if ((maxcounthash == null) || (urls.length() != 0) || (queryhashes.size() == 1) || (abstracts.length() == 0)) {
                     prop.putASIS("indexabstract", "");
                 } else if (abstracts.equals("auto")) {
-                    indexabstract.append("indexabstract." + maxcounthash + "=").append(plasmaURL.compressIndex(((indexContainer) containers[0].get(maxcounthash)),localResults, 1000).toString()).append(serverCore.crlfString);
-                    if ((neardhthash != null)
-                            && (!(neardhthash.equals(maxcounthash)))) {
-                        indexabstract.append("indexabstract." + neardhthash + "=").append(plasmaURL.compressIndex(((indexContainer) containers[0].get(neardhthash)), localResults, 1000).toString()).append(serverCore.crlfString);
+                    // automatically attach the index abstract for the index that has the most references. This should be our target dht position
+                    indexContainer container = (indexContainer) containers[0].get(maxcounthash);
+                    indexabstractContainercount += container.size();
+                    indexabstract.append("indexabstract." + maxcounthash + "=").append(plasmaURL.compressIndex(container,localResults, 1000).toString()).append(serverCore.crlfString);
+                    if ((neardhthash != null) && (!(neardhthash.equals(maxcounthash)))) {
+                        // in case that the neardhthash is different from the maxcounthash attach also the neardhthash-container
+                        container = (indexContainer) containers[0].get(neardhthash);
+                        indexabstractContainercount += container.size();
+                        indexabstract.append("indexabstract." + neardhthash + "=").append(plasmaURL.compressIndex(container, localResults, 1000).toString()).append(serverCore.crlfString);
                     }
                     //System.out.println("DEBUG-ABSTRACTGENERATION: maxcounthash = " + maxcounthash);
                     //System.out.println("DEBUG-ABSTRACTGENERATION: neardhthash  = "+ neardhthash);
@@ -321,7 +331,11 @@ public final class search {
         prop.putASIS("fwrec", ""); // peers that would have helped to construct this result (recommendations)
         
         // log
-        yacyCore.log.logInfo("EXIT HASH SEARCH: " + plasmaSearchQuery.anonymizedQueryHashes(squery.queryHashes) + " - " + joincount + " links found, " + prop.get("linkcount", "?") + " links selected, " + ((System.currentTimeMillis() - timestamp) / 1000) + " seconds");
+        yacyCore.log.logInfo("EXIT HASH SEARCH: " +
+                plasmaSearchQuery.anonymizedQueryHashes(squery.queryHashes) + " - " + joincount + " links found, " +
+                prop.get("linkcount", "?") + " links selected, " +
+                indexabstractContainercount + " index abstract references attached, " +
+                (System.currentTimeMillis() - timestamp) + " milliseconds");
  
         prop.putASIS("searchtime", Long.toString(System.currentTimeMillis() - timestamp));
 

@@ -6,7 +6,7 @@
 // Frankfurt, Germany, 2005
 // Created 16.01.2007
 //
-// This File is contributed by Franz Brauße
+// This File is contributed by Franz Brausse
 //
 // $LastChangedDate: 2007-01-17 12:00:00 +0100 (Di, 17 Jan 2007) $
 // $LastChangedRevision: 3216 $

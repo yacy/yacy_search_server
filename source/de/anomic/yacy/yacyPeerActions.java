@@ -170,9 +170,17 @@ public class yacyPeerActions {
                     reqHeader.put(httpHeader.CACHE_CONTROL,"no-cache");
                     
                     url = new URL(seedListFileURL);
+                    long start = System.currentTimeMillis();
                     header = httpc.whead(url, url.getHost(), this.bootstrapLoadTimeout, null, null, this.sb.remoteProxyConfig,reqHeader);
-                    if ((header == null) || (header.lastModified() == null)) {
-                        yacyCore.log.logWarning("BOOTSTRAP: seed-list URL " + seedListFileURL + " not available");
+                    long loadtime = System.currentTimeMillis() - start;
+                    if (header == null) {
+                        if (loadtime > this.bootstrapLoadTimeout) {
+                            yacyCore.log.logWarning("BOOTSTRAP: seed-list URL " + seedListFileURL + " not available, time-out after " + loadtime + " milliseconds");
+                        } else {
+                            yacyCore.log.logWarning("BOOTSTRAP: seed-list URL " + seedListFileURL + " not available, no content");
+                        }
+                    } else if (header.lastModified() == null) {
+                        yacyCore.log.logWarning("BOOTSTRAP: seed-list URL " + seedListFileURL + " not usable, last-modified is missing");
                     } else if ((header.age() > 86400000) && (ssc > 0)) {
                         yacyCore.log.logInfo("BOOTSTRAP: seed-list URL " + seedListFileURL + " too old (" + (header.age() / 86400000) + " days)");
                     } else {

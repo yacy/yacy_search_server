@@ -756,9 +756,9 @@ indexDistribution.maxOpenFiles = 800
 indexTransfer.maxOpenFiles = 800
 
 # sizes for index distribution
-indexDistribution.minChunkSize = 5
+indexDistribution.minChunkSize = 10
 indexDistribution.maxChunkSize = 1000
-indexDistribution.startChunkSize = 50
+indexDistribution.startChunkSize = 200
 
 indexDistribution.maxChunkFails = 1
 
