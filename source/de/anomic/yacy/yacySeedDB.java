@@ -344,7 +344,7 @@ public final class yacySeedDB {
             while ((c < count) && (it.hasNext())) {
             	c++;
             	ys = getConnected((String) it.next());
-            	result.put(ys.hash, ys);
+            	if ((ys != null) && (ys.hash != null)) result.put(ys.hash, ys);
             }
             return result;
         } catch (kelondroException e) {
