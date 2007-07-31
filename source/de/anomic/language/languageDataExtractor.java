@@ -7,7 +7,7 @@
 //
 // This File is contributed by Marc Nause
 //
-// $LastChangedDate: 2007-07-29 $
+// $LastChangedDate: 2007-07-31 $
 // $LastChangedRevision: $
 // $LastChangedBy: low012 $
 //
@@ -52,7 +52,6 @@
 // The program can be started with the following arguments:
 //
 // input=filename     name of the file the text is stored in
-// output=filename    name of the file the data will be stored in
 // name=langugaename  name of the language the text is written in
 // name=code          code of the language the text is written in (e.g. en-GB)
 
@@ -143,21 +142,29 @@ public class languageDataExtractor {
 
         //Trying to read from input file and put quantity of letters into map.
         try {
-            while ((line = inputFile.readLine()) != null) {
-                for(int i=0;i<line.length();i++){
-                    key = line.charAt(i);
-                    if(Character.isLetter(key)){
-                        key = Character.toLowerCase(key);
-                        sKey = "" + key;
-                        if (map.containsKey(sKey)) {
-                            fValue = new Float(Float.parseFloat(map.get(sKey).toString()) + 1);
-                        }
-                        else {
-                            fValue = new Float(1);
-                        }
-                        map.put(sKey, fValue);
-                        quantity++;
+            while (inputFile.ready()) {
+                key = (char)inputFile.read();
+
+                if(Character.isLetter(key)){
+
+                    key = Character.toLowerCase(key);
+                    sKey=Integer.toHexString((int)key);
+                    switch (sKey.length()){
+                        case 1: sKey = "\\u000"+sKey; break;
+                        case 2: sKey = "\\u00"+sKey; break;
+                        case 3: sKey = "\\u0"+sKey; break;
+                        case 4: sKey = "\\u"+sKey; break;
+                        default: throw new RuntimeException(key+" too long to be a character");
                     }
+
+                    if (map.containsKey(sKey)) {
+                        fValue = new Float(Float.parseFloat(map.get(sKey).toString()) + 1);
+                    }
+                    else {
+                        fValue = new Float(1);
+                    }
+                    map.put(sKey, fValue);
+                    quantity++;
                 }
             }
         }
@@ -171,9 +178,9 @@ public class languageDataExtractor {
         file = "<language name=\""+name+"\" code=\""+code+"\">\n";
         mapiter = map.keySet().iterator();
         while(mapiter.hasNext()){
-            key = mapiter.next().toString().charAt(0);
-            sKey = "" + key; 
-            file += "\n  <letter>\n    <name>"+key+"</name>\n    <quantity>"+(Float.parseFloat(map.get(sKey).toString())/quantity*100)+"</quantity>\n  </letter>\n";
+
+            sKey = mapiter.next().toString();
+            file += "\n  <letter>\n    <name>"+sKey+"</name>\n    <quantity>"+(Float.parseFloat(map.get(sKey).toString())/quantity*100)+"</quantity>\n  </letter>\n";
         }
         file += "\n</language>";
 
