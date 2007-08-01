@@ -2,7 +2,7 @@
 // -------------------------------------
 // part of YACY
 //
-// (C) 2007 by Franz Brausse
+// (C) 2007 by Franz Brausze
 //
 // last change: $LastChangedDate: $ by $LastChangedBy: $
 //

@@ -5,7 +5,7 @@
 // first published on http://www.anomic.de
 // Frankfurt, Germany, 2004
 // 
-// This file ist contributed by Franz Brausse
+// This file ist contributed by Franz Brausze
 // 
 // This program is free software; you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by

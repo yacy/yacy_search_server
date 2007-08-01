@@ -5,7 +5,7 @@
 // first published on http://www.anomic.de
 // Frankfurt, Germany, 2004
 //
-// This File is contributed by Franz Brausse
+// This File is contributed by Franz Brausze
 //
 // $LastChangedDate: 2007-01-27 14:07:54 +0000 (Sa, 27 Jan 2007) $
 // $LastChangedRevision: 3217 $

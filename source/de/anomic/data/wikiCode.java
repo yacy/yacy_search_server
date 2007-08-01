@@ -3,7 +3,7 @@
 // part of YACY
 //
 // (C) 2005, 2006 by Alexander Schier 
-//                   Marc Nause, Franz Brausse
+//                   Marc Nause, Franz Brausze
 //
 //
 // last change: $LastChangedDate: $ by $LastChangedBy: $
@@ -42,7 +42,7 @@
 // Contributions and changes to the program code must be marked as such.
 
 // Contains contributions from Alexander Schier [AS]
-// Franz Brausse [FB] and Marc Nause [MN]
+// Franz Brausze [FB] and Marc Nause [MN]
 
 package de.anomic.data;
 
