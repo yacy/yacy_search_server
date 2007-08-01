@@ -11,7 +11,7 @@
 <script src="navigation.js" type="text/javascript"></script>
 <link rel="stylesheet" media="all" href="style.css">
 <link rel="alternate" type="application/rss+xml" title="RSS" href="News.rss" />
-<!-- Realisation: Michael Christen; Contact: mc<at>anomic.de-->
+<!-- Realisation: Michael Christen; Contact: mc<at>yacy.net-->
 </head>
 <body bgcolor="#fefefe" marginheight="0" marginwidth="0" leftmargin="0" topmargin="0">
 <SCRIPT LANGUAGE="JavaScript1.1"><!--
@@ -84,6 +84,45 @@ globalheader();
   </ul>
 </ul>
 -->
+
+<br><p><a name="4021">v0.54_20070802_4021</a>
+<ul>
+<li>Option to define separated YaCy networks</li>
+  <ul>
+  <li>Bootstraping is now done completely decentralized, no more superseed files; seedlist-urls are given in the network definition file</li>
+  <li>Added client-side and server-side network unit identification</li>
+  <li>Added server-side network access authorization</li>
+  <li>Separated networks are allowed to index and exchange local URL addresses. Therefore, in the context of separated networks, the indexing of intranets is now possible.</li>
+  <li>Added blocking methods for local URL addresses in environments where this is not allowed by the network definition.</li>
+  </ul>
+<li>Added Auto-Updater</li>
+  <ul>
+  <li>A peer can now update itself if a special update option is selected. Default is auto-update-off.</li>
+  <li>An Update can be made manually or automatically, filter lists for automated updates are possible (to avoid updates from too early developer versions)</li>
+  <li>New Download location of for auto-updater</li>
+  <li>Update-locations can be network-dependently, that means every YaCy network can have its own update location.</li>
+  <li>A downgrade to previously installed versions is also possible without a download.</li>
+  </ul>
+<li>Other Enhancements</li>
+  <ul>
+  <li>Added SSI directive; added chunked file transfer to httpd for non-yacy clients (browsers); SSIs are streamed using chunked transfer, partly delivered pages can be seen in browser before transmission is finished</li>
+  <li>Added restart-button that works also on Mac and Linux (there was already a button for Windows)</li>
+  <li>Enhanced handling of news records: result is a speedup of Switchboard queue processing, Surftips, Supporter, and Network page</li>
+  <li>Added a new rss feed reader, replaced old parser; the rss parser libraries had been removed</li>
+  <li>Added option to allow/disallow DHT transmission during indexing</li>
+  <li>Old (lastseen > 7d) peers are now automatically removed from passive and potential seed-dbs</li>
+  <li>Enhanced html/unicode en/de-coding</li>
+  <li>Replaced detailed search page by ranking definition page</li>
+  <li>Re-sructuring of configuration menus; moved shutdown and restart to main menu</li>
+  </ul>
+<li>Bugfixes</li>
+  <ul>
+  <li>Fixed startYACY.sh, it is compatible with OpenSolaris now</li>
+  <li>Fixed URL parser which avoided that Wiki pages could be fetched correctly</li>
+  <li>Fix for long waiting time during deletion of processed news</li>
+  <li>Fixed security problem with favicons: the icons are now not loaded by the browser, but by YaCy. This avoids a hand-over of referer information to the target server, but needed an implementation of a BMP and ICO parser, which is now included in YaCy</li>
+  </ul>
+</ul>
 
 <br><p><a name="3914">v0.53_20070618_3914</a>
 <ul>
