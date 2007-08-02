@@ -196,9 +196,7 @@ public final class CrawlWorker extends AbstractCrawlWorker {
                 requestHeader.put(httpHeader.ACCEPT_ENCODING, this.acceptEncoding);
 
             // open the connection
-            remote = ((this.remoteProxyConfig != null) && (this.remoteProxyConfig.useProxy()))
-                   ? httpc.getInstance(host, host, port, this.socketTimeout, ssl, this.remoteProxyConfig,"CRAWLER",null)
-                   : httpc.getInstance(host, host, port, this.socketTimeout, ssl, "CRAWLER",null);
+            remote = httpc.getInstance(host, host, port, this.socketTimeout, ssl, this.remoteProxyConfig,"CRAWLER",null);
 
             // specifying if content encoding is allowed
             remote.setAllowContentEncoding((this.acceptEncoding != null && this.acceptEncoding.length() > 0));

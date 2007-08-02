@@ -512,7 +512,8 @@ public class CrawlURLFetch_p {
                         url.getHost(),
                         url.getPort(),
                         15000,
-                        url.getProtocol().equals("https"));
+                        url.getProtocol().equals("https"),
+                        plasmaSwitchboard.getSwitchboard().remoteProxyConfig);
                 
                 httpHeader header = new httpHeader();
                 header.put(httpHeader.ACCEPT_ENCODING, "US-ASCII");

@@ -919,7 +919,8 @@ public final class plasmaParser {
                 		contentURL.getHost(),
                 		contentURL.getPort(),
                 		5000,
-                		contentURL.getProtocol().equalsIgnoreCase("https"));
+                		contentURL.getProtocol().equalsIgnoreCase("https"),
+                        null);
                 
                 httpc.response res = remote.GET(contentURL.getFile(), null);
                 if (res.statusCode != 200) {

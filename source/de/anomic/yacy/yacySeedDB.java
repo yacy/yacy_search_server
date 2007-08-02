@@ -763,22 +763,13 @@ public final class yacySeedDB {
     	httpc remote = null;
         try {
             // init httpc
-        	if ((sb.remoteProxyConfig == null)||(!sb.remoteProxyConfig.useProxy())) {
-            remote = httpc.getInstance(
-            		seedURL.getHost(),
-            		seedURL.getHost(),
-            		seedURL.getPort(),
-            		10000,
-            		seedURL.getProtocol().equalsIgnoreCase("https"));
-        	} else {
-                remote = httpc.getInstance(
+        	remote = httpc.getInstance(
                 		seedURL.getHost(),
                 		seedURL.getHost(),
                 		seedURL.getPort(),
                 		10000,
                 		seedURL.getProtocol().equalsIgnoreCase("https"),
-                		sb.remoteProxyConfig);        		
-        	}
+                		sb.remoteProxyConfig);
             
             // Configure http headers
             httpHeader reqHeader = new httpHeader();

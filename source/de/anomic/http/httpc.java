@@ -308,62 +308,7 @@ public final class httpc {
             boolean ssl,
             httpRemoteProxyConfig remoteProxyConfig
             ) throws IOException {
-    	if (remoteProxyConfig == null) throw new NullPointerException("Proxy object must not be null.");
-    	
-        return getInstance(server,vhost,port,timeout,ssl,remoteProxyConfig,null,null);
-    }
-
-    public static httpc getInstance(
-            String server, 
-            String vhost,
-            int port, 
-            int timeout, 
-            boolean ssl
-    ) throws IOException {
-        return getInstance(server,vhost,port,timeout,ssl,null,null);
-    }
-
-    
-    /**
-    * This method gets a new httpc instance from the object pool and
-    * initializes it with the given parameters.
-    *
-    * @param server
-    * @param port
-    * @param timeout
-    * @param ssl
-    * @throws IOException
-    * @see httpc#init
-    */
-    public static httpc getInstance(
-            String server, 
-            String vhost,
-            int port, 
-            int timeout, 
-            boolean ssl,
-            String incomingByteCountAccounting,
-            String outgoingByteCountAccounting
-    ) throws IOException {
-
-        httpc newHttpc = null;
-        // fetching a new httpc from the object pool
-        try {
-            newHttpc = (httpc) httpc.theHttpcPool.borrowObject();
-
-        } catch (Exception e) {
-            throw new IOException("Unable to fetch a new httpc from pool. " + e.getMessage());
-        }
-
-        // initialize it
-        try {
-            newHttpc.init(server,vhost,port,timeout,ssl,incomingByteCountAccounting,outgoingByteCountAccounting);
-        } catch (IOException e) {
-            try{ httpc.theHttpcPool.returnObject(newHttpc); } catch (Exception e1) {}
-            throw e;
-        }
-        return newHttpc;
-
-
+    	return getInstance(server,vhost,port,timeout,ssl,remoteProxyConfig,null,null);
     }
 
     /**
@@ -439,7 +384,7 @@ public final class httpc {
     * @param remoteProxyPort
     * @throws IOException
     */
-    void init(
+    private void init(
             String server, 
             String vhost,
             int port, 
@@ -450,6 +395,20 @@ public final class httpc {
             String outgoingByteCountAccounting            
     ) throws IOException {
         
+        if ((theRemoteProxyConfig == null) ||
+            (!theRemoteProxyConfig.useProxy())) {
+            initN(
+                    server, 
+                    vhost,
+                    port, 
+                    timeout, 
+                    ssl,
+                    incomingByteCountAccounting,
+                    outgoingByteCountAccounting            
+            );
+            return;
+        }
+        
         if (port == -1) {
             port = (ssl)? 443 : 80;
         }
@@ -457,7 +416,14 @@ public final class httpc {
         String remoteProxyHost = theRemoteProxyConfig.getProxyHost();
         int    remoteProxyPort = theRemoteProxyConfig.getProxyPort();
         
-        this.init(remoteProxyHost, vhost, remoteProxyPort, timeout, ssl,incomingByteCountAccounting,outgoingByteCountAccounting);
+        this.initN(
+                remoteProxyHost,
+                vhost,
+                remoteProxyPort,
+                timeout,
+                ssl,
+                incomingByteCountAccounting,
+                outgoingByteCountAccounting);
         
         this.remoteProxyUse = true;
         this.adressed_host = server;
@@ -476,7 +442,7 @@ public final class httpc {
     * @param ssl Wether we should use SSL.
     * @throws IOException
     */
-    void init(
+    private void initN(
             String server,
             String vhost,
             int port, 
@@ -968,11 +934,7 @@ public final class httpc {
 
         httpc con = null;
         try {
-            if ((theRemoteProxyConfig == null)||(!theRemoteProxyConfig.useProxy())) {
-                con = httpc.getInstance(realhost, virtualhost, port, timeout, ssl);
-            } else {
-                con = httpc.getInstance(realhost, virtualhost, port, timeout, ssl, theRemoteProxyConfig);
-            }
+            con = httpc.getInstance(realhost, virtualhost, port, timeout, ssl, theRemoteProxyConfig);
 
             httpc.response res = con.GET(path, requestHeader);
             if (res.status.startsWith("2")) {
@@ -1036,11 +998,7 @@ public final class httpc {
 
         httpc con = null;
         try {
-            if ((theRemoteProxyConfig == null)||(!theRemoteProxyConfig.useProxy())) {
-                con = httpc.getInstance(realhost, virtualhost, port, timeout, ssl);
-            } else {
-                con = httpc.getInstance(realhost, virtualhost, port, timeout, ssl, theRemoteProxyConfig);
-            }
+            con = httpc.getInstance(realhost, virtualhost, port, timeout, ssl, theRemoteProxyConfig);
             httpc.response res = con.POST(path, requestHeader, props, files);
 
             //System.out.println("response=" + res.toString());
@@ -1198,10 +1156,7 @@ public final class httpc {
         // start connection
         httpc con = null;
         try {
-            if ((theRemoteProxyConfig == null)||(!theRemoteProxyConfig.useProxy()))
-                con = httpc.getInstance(realhost, vhost, port, timeout, ssl);
-            else con = httpc.getInstance(realhost, vhost, port, timeout, ssl, theRemoteProxyConfig);
-
+            con = httpc.getInstance(realhost, vhost, port, timeout, ssl, theRemoteProxyConfig);
             httpc.response res = con.HEAD(path, requestHeader);
             if (res.status.startsWith("2")) {
                 // success

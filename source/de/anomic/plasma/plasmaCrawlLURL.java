@@ -424,7 +424,7 @@ public final class plasmaCrawlLURL {
                         URL newUrl = new URL(newUrlStr);
 
                         // doing a http head request to test if the url is correct
-                        theHttpc = httpc.getInstance(newUrl.getHost(), newUrl.getHost(), newUrl.getPort(), 30000, false);
+                        theHttpc = httpc.getInstance(newUrl.getHost(), newUrl.getHost(), newUrl.getPort(), 30000, false, plasmaSwitchboard.getSwitchboard().remoteProxyConfig);
                         response res = theHttpc.HEAD(newUrl.getPath(), null);
 
                         if (res.statusCode == 200) {

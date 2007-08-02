@@ -386,15 +386,7 @@ public final class robotsParser{
             downloadStart = System.currentTimeMillis();
             plasmaSwitchboard sb = plasmaSwitchboard.getSwitchboard();
             //TODO: adding Traffic statistic for robots download?
-            if (
-                    (sb == null) || 
-                    (sb.remoteProxyConfig == null) || 
-                    (!sb.remoteProxyConfig.useProxy())
-            ) {
-                con = httpc.getInstance(robotsURL.getHost(), robotsURL.getHost(), robotsURL.getPort(), 10000, robotsURL.getProtocol().equalsIgnoreCase("https"));
-            } else {
-                con = httpc.getInstance(robotsURL.getHost(), robotsURL.getHost(), robotsURL.getPort(), 10000, robotsURL.getProtocol().equalsIgnoreCase("https"), sb.remoteProxyConfig);
-            }
+            con = httpc.getInstance(robotsURL.getHost(), robotsURL.getHost(), robotsURL.getPort(), 10000, robotsURL.getProtocol().equalsIgnoreCase("https"), sb.remoteProxyConfig);
             
             // if we previously have downloaded this robots.txt then we can set the if-modified-since header
             httpHeader reqHeaders = new httpHeader();

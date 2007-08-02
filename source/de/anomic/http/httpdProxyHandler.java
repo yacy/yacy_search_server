@@ -1265,15 +1265,13 @@ public final class httpdProxyHandler extends httpdAbstractHandler implements htt
         httpRemoteProxyConfig remProxyConfig = switchboard.remoteProxyConfig;
         
         // a new httpc connection, combined with possible remote proxy
-        boolean useProxy = (remProxyConfig!=null)&&(remProxyConfig.useProxy());
-        
         // check no-proxy rule
         if (
-                (switchboard.remoteProxyConfig != null) &&
-                (switchboard.remoteProxyConfig.useProxy()) && 
-                (!(switchboard.remoteProxyConfig.remoteProxyAllowProxySet.contains(server)))) {
-            if (switchboard.remoteProxyConfig.remoteProxyDisallowProxySet.contains(server)) {
-                useProxy = false;
+                (remProxyConfig != null) &&
+                (remProxyConfig.useProxy()) && 
+                (!(remProxyConfig.remoteProxyAllowProxySet.contains(server)))) {
+            if (remProxyConfig.remoteProxyDisallowProxySet.contains(server)) {
+                remProxyConfig = null;
             } else {
                 // analyse remoteProxyNoProxy;
                 // set either remoteProxyAllowProxySet or remoteProxyDisallowProxySet accordingly
@@ -1282,7 +1280,7 @@ public final class httpdProxyHandler extends httpdAbstractHandler implements htt
                     if (server.matches(remProxyConfig.getProxyNoProxyPatterns()[i])) {
                         // disallow proxy for this server
                         switchboard.remoteProxyConfig.remoteProxyDisallowProxySet.add(server);
-                        useProxy = false;
+                        remProxyConfig = null;
                         break;
                     }
                     i++;
@@ -1295,8 +1293,7 @@ public final class httpdProxyHandler extends httpdAbstractHandler implements htt
         }
         
         // branch to server/proxy
-        if (useProxy) {
-            return httpc.getInstance(
+        return httpc.getInstance(
                     server, 
                     server,
                     port, 
@@ -1304,14 +1301,6 @@ public final class httpdProxyHandler extends httpdAbstractHandler implements htt
                     false, 
                     remProxyConfig
             );
-        }
-        return httpc.getInstance(
-                server,
-                server,
-                port, 
-                timeout, 
-                false
-        );
     }
     
     private httpc newhttpc(String address, int timeout) throws IOException {

@@ -117,7 +117,7 @@ public class kelondroMSetTools {
             k = (Long) orderMap.firstKey(); // the next smallest...
             mapA = joinResult;
             mapB = (TreeMap) orderMap.remove(k);
-            joinResult = joinConstructiveByTest(mapA, mapB, concatStrings);
+            joinResult = joinConstructiveByTest(mapA, mapB, concatStrings); // TODO: better with enumeration?
             // free resources
             mapA = null;
             mapB = null;

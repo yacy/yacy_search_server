@@ -180,7 +180,8 @@ public class SitemapParser extends DefaultHandler {
 					this.siteMapURL.getHost(),
 					this.siteMapURL.getPort(),
 					5000,
-					this.siteMapURL.getProtocol().equalsIgnoreCase("https"));
+					this.siteMapURL.getProtocol().equalsIgnoreCase("https"),
+                    switchboard.remoteProxyConfig);
 			
 			httpc.response res = remote.GET(this.siteMapURL.getFile(), null);
 			if (res.statusCode != 200) {
