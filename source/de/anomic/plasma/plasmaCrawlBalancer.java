@@ -55,9 +55,9 @@ import de.anomic.kelondro.kelondroBase64Order;
 import de.anomic.kelondro.kelondroCache;
 import de.anomic.kelondro.kelondroFlexTable;
 import de.anomic.kelondro.kelondroIndex;
-import de.anomic.kelondro.kelondroRecords;
 import de.anomic.kelondro.kelondroRow;
 import de.anomic.kelondro.kelondroStack;
+import de.anomic.kelondro.kelondroAbstractRecords;
 import de.anomic.server.logging.serverLog;
 import de.anomic.yacy.yacySeedDB;
 
@@ -175,7 +175,7 @@ public class plasmaCrawlBalancer {
            }
        }
        
-       if (kelondroRecords.debugmode) {
+       if (kelondroAbstractRecords.debugmode) {
            serverLog.logWarning("PLASMA BALANCER", "remove: not found urlhash " + urlhash + " in " + stackname);
        }
        return new plasmaCrawlEntry(entry);
@@ -194,7 +194,7 @@ public class plasmaCrawlBalancer {
         int componentsize = urlFileStack.size() + urlRAMStack.size() + sizeDomainStacks();
         if (componentsize != urlFileIndex.size()) {
 		    // here is urlIndexFile.size() always smaller. why?
-		    if (kelondroRecords.debugmode) {
+		    if (kelondroAbstractRecords.debugmode) {
 		        serverLog.logWarning("PLASMA BALANCER", "size operation wrong in " + stackname + " - componentsize = " + componentsize + ", urlFileIndex.size() = " + urlFileIndex.size());
 		    }
 		    if ((componentsize == 0) && (urlFileIndex.size() > 0)) {
@@ -207,8 +207,10 @@ public class plasmaCrawlBalancer {
     private int sizeDomainStacks() {
         if (domainStacks == null) return 0;
         int sum = 0;
-        Iterator i = domainStacks.values().iterator();
-        while (i.hasNext()) sum += ((LinkedList) i.next()).size();
+        synchronized (domainStacks) {
+            Iterator i = domainStacks.values().iterator();
+            while (i.hasNext()) sum += ((LinkedList) i.next()).size();
+        }
         return sum;
     }
     
@@ -451,7 +453,7 @@ public class plasmaCrawlBalancer {
         String urlhash = (String) urlRAMStack.get(dist);
         kelondroRow.Entry entry = urlFileIndex.get(urlhash.getBytes());
         if (entry == null) {
-            if (kelondroRecords.debugmode) serverLog.logWarning("PLASMA BALANCER", "no entry in index for urlhash " + urlhash);
+            if (kelondroAbstractRecords.debugmode) serverLog.logWarning("PLASMA BALANCER", "no entry in index for urlhash " + urlhash);
             return null;
         }
         return new plasmaCrawlEntry(entry);

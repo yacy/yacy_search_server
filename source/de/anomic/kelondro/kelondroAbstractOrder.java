@@ -45,8 +45,6 @@
 
 package de.anomic.kelondro;
 
-import de.anomic.kelondro.kelondroRecords.Node;
-
 public abstract class kelondroAbstractOrder implements kelondroOrder {
 
     protected byte[] zero = null;
@@ -66,8 +64,8 @@ public abstract class kelondroAbstractOrder implements kelondroOrder {
     public int compare(Object a, Object b) {
         if ((a instanceof byte[]) && (b instanceof byte[])) {
             return compare((byte[]) a, (byte[]) b);
-        } else if ((a instanceof Node) && (b instanceof Node)) {
-            return compare(((Node) a).getKey(), ((Node) b).getKey());
+        } else if ((a instanceof kelondroNode) && (b instanceof kelondroNode)) {
+            return compare(((kelondroNode) a).getKey(), ((kelondroNode) b).getKey());
         } else if ((a instanceof String) && (b instanceof String)) {
             return compare(((String) a).getBytes(), ((String) b).getBytes());
         } else if ((a instanceof kelondroRow.Entry) && (b instanceof kelondroRow.Entry)) {

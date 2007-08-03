@@ -144,11 +144,11 @@ import de.anomic.plasma.plasmaURL;
 import de.anomic.index.indexURLEntry;
 import de.anomic.kelondro.kelondroBitfield;
 import de.anomic.kelondro.kelondroCache;
+import de.anomic.kelondro.kelondroCachedRecords;
 import de.anomic.kelondro.kelondroException;
 import de.anomic.kelondro.kelondroMSetTools;
 import de.anomic.kelondro.kelondroMapTable;
 import de.anomic.kelondro.kelondroNaturalOrder;
-import de.anomic.kelondro.kelondroRecords;
 import de.anomic.net.URL;
 import de.anomic.plasma.dbImport.dbImportManager;
 import de.anomic.plasma.parser.ParserException;
@@ -1148,7 +1148,7 @@ public final class plasmaSwitchboard extends serverAbstractSwitch implements ser
         long memprereq = Math.max(getConfigLong(INDEXER_MEMPREREQ, 0), wordIndex.minMem());
         // setConfig(INDEXER_MEMPREREQ, memprereq);
         //setThreadPerformance(INDEXER, getConfigLong(INDEXER_IDLESLEEP, 0), getConfigLong(INDEXER_BUSYSLEEP, 0), memprereq);
-        kelondroRecords.setCacheGrowStati(memprereq + 4 * 1024 * 1024, memprereq + 2 * 1024 * 1024);
+        kelondroCachedRecords.setCacheGrowStati(memprereq + 4 * 1024 * 1024, memprereq + 2 * 1024 * 1024);
         kelondroCache.setCacheGrowStati(memprereq + 4 * 1024 * 1024, memprereq + 2 * 1024 * 1024);
         
         // make parser
@@ -1620,7 +1620,7 @@ public final class plasmaSwitchboard extends serverAbstractSwitch implements ser
      * shutdown procedure
      */
     public boolean cleanProfiles() throws InterruptedException {
-        if ((sbQueue.size() > 0) || (cacheLoader.size() > 0) || (noticeURL.stackSize() > 0)) return false;
+        if ((sbQueue.size() > 0) || (cacheLoader.size() > 0) || (noticeURL.size() > 0)) return false;
         final Iterator iter = profiles.profiles(true);
         plasmaCrawlProfile.entry entry;
         boolean hasDoneSomething = false;
@@ -2074,7 +2074,7 @@ public final class plasmaSwitchboard extends serverAbstractSwitch implements ser
             long memprereq = Math.max(getConfigLong(INDEXER_MEMPREREQ, 0), wordIndex.minMem());
             // setConfig(INDEXER_MEMPREREQ, memprereq);
             //setThreadPerformance(INDEXER, getConfigLong(INDEXER_IDLESLEEP, 0), getConfigLong(INDEXER_BUSYSLEEP, 0), memprereq);
-            kelondroRecords.setCacheGrowStati(memprereq + 4 * 1024 * 1024, memprereq + 2 * 1024 * 1024);
+            kelondroCachedRecords.setCacheGrowStati(memprereq + 4 * 1024 * 1024, memprereq + 2 * 1024 * 1024);
             kelondroCache.setCacheGrowStati(memprereq + 4 * 1024 * 1024, memprereq + 2 * 1024 * 1024);
             
             // update the cluster set
@@ -3260,11 +3260,11 @@ public final class plasmaSwitchboard extends serverAbstractSwitch implements ser
         if (wordIndex.size() < 100) {
             return "no DHT distribution: not enough words - wordIndex.size() = " + wordIndex.size();
         }
-        if ((getConfig(INDEX_DIST_ALLOW_WHILE_CRAWLING, "false").equalsIgnoreCase("false")) && (noticeURL.stackSize() > 0)) {
-            return "no DHT distribution: crawl in progress: noticeURL.stackSize() = " + noticeURL.stackSize() + ", sbQueue.size() = " + sbQueue.size();
+        if ((getConfig(INDEX_DIST_ALLOW_WHILE_CRAWLING, "false").equalsIgnoreCase("false")) && (noticeURL.size() > 0)) {
+            return "no DHT distribution: crawl in progress: noticeURL.stackSize() = " + noticeURL.size() + ", sbQueue.size() = " + sbQueue.size();
         }
         if ((getConfig(INDEX_DIST_ALLOW_WHILE_INDEXING, "false").equalsIgnoreCase("false")) && (sbQueue.size() > 1)) {
-            return "no DHT distribution: indexing in progress: noticeURL.stackSize() = " + noticeURL.stackSize() + ", sbQueue.size() = " + sbQueue.size();
+            return "no DHT distribution: indexing in progress: noticeURL.stackSize() = " + noticeURL.size() + ", sbQueue.size() = " + sbQueue.size();
         }
         return null;
     }

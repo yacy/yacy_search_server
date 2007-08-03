@@ -83,7 +83,7 @@ public final class kelondroBufferedIOChunks extends kelondroAbstractIOChunks imp
         
         // check commit time
         if ((bufferCurrSize > bufferMaxSize) ||
-            (this.lastCommit + this.commitTimeout < System.currentTimeMillis())) {
+            (this.lastCommit + this.commitTimeout > System.currentTimeMillis())) {
             commit();
             this.lastCommit = System.currentTimeMillis();
         }
@@ -120,12 +120,12 @@ public final class kelondroBufferedIOChunks extends kelondroAbstractIOChunks imp
         System.arraycopy(b, off, bb, 0, len);
         synchronized (buffer) {
             buffer.put(new Long(pos + off), bb);
-            bufferCurrSize += overhead + pos + off;
+            bufferCurrSize += overhead + len;
         }
         
         // check commit time
         if ((bufferCurrSize > bufferMaxSize) ||
-            (this.lastCommit + this.commitTimeout < System.currentTimeMillis())) {
+            (this.lastCommit + this.commitTimeout > System.currentTimeMillis())) {
             commit();
             this.lastCommit = System.currentTimeMillis();
         }

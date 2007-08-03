@@ -147,7 +147,7 @@ public class kelondroFlexTable extends kelondroFlexWidthArray implements kelondr
     public synchronized boolean has(byte[] key) throws IOException {
         // it is not recommended to implement or use a has predicate unless
         // it can be ensured that it causes no IO
-        if ((kelondroRecords.debugmode) && (RAMIndex != true)) serverLog.logWarning("kelondroFlexTable", "RAM index warning in file " + super.tablename);
+        if ((kelondroAbstractRecords.debugmode) && (RAMIndex != true)) serverLog.logWarning("kelondroFlexTable", "RAM index warning in file " + super.tablename);
         assert this.size() == index.size() : "content.size() = " + this.size() + ", index.size() = " + index.size();
         return index.geti(key) >= 0;
     }
@@ -157,11 +157,11 @@ public class kelondroFlexTable extends kelondroFlexWidthArray implements kelondr
     	if (space < 0) throw new kelondroException("wrong space: " + space);
         kelondroBytesIntMap ri = new kelondroBytesIntMap(super.row().column(0).cellwidth(), super.rowdef.objectOrder, space);
         Iterator content = super.col[0].contentNodes(-1);
-        kelondroRecords.Node node;
+        kelondroNode node;
         int i;
         byte[] key;
         while (content.hasNext()) {
-            node = (kelondroRecords.Node) content.next();
+            node = (kelondroNode) content.next();
             i = node.handle().hashCode();
             key = node.getKey();
             assert (key != null) : "DEBUG: empty key in initializeRamIndex"; // should not happen; if it does, it is an error of the condentNodes iterator
@@ -182,13 +182,13 @@ public class kelondroFlexTable extends kelondroFlexWidthArray implements kelondr
     private kelondroIndex initializeTreeIndex(File indexfile, long preloadTime, kelondroOrder objectOrder, int primaryKey) throws IOException {
         kelondroIndex treeindex = new kelondroCache(new kelondroTree(indexfile, true, preloadTime, treeIndexRow(rowdef.width(0), objectOrder), 2, 80), true, false);
         Iterator content = super.col[0].contentNodes(-1);
-        kelondroRecords.Node node;
+        kelondroNode node;
         kelondroRow.Entry indexentry;
         int i, c = 0, all = super.col[0].size();
         long start = System.currentTimeMillis();
         long last = start;
         while (content.hasNext()) {
-            node = (kelondroRecords.Node) content.next();
+            node = (kelondroNode) content.next();
             i = node.handle().hashCode();
             indexentry = treeindex.row().newEntry();
             indexentry.setCol(0, node.getValueRow());

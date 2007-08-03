@@ -161,7 +161,7 @@ public class kelondroCache implements kelondroIndex {
     }
     
     private int cacheGrowStatus() {
-        return kelondroRecords.cacheGrowStatus(serverMemory.available(), memStopGrow, memStartShrink);
+        return kelondroCachedRecords.cacheGrowStatus(serverMemory.available(), memStopGrow, memStartShrink);
     }
     
     private void flushUnique() throws IOException {

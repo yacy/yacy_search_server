@@ -52,7 +52,7 @@ import java.util.Iterator;
 import java.util.Map;
 import java.util.TreeMap;
 
-public class kelondroFixedWidthArray extends kelondroRecords implements kelondroArray {
+public class kelondroFixedWidthArray extends kelondroEcoRecords implements kelondroArray {
 
     // define the Over-Head-Array
     private static short thisOHBytes   = 0; // our record definition does not need extra bytes
@@ -60,10 +60,10 @@ public class kelondroFixedWidthArray extends kelondroRecords implements kelondro
     
     public kelondroFixedWidthArray(File file, kelondroRow rowdef, int intprops) throws IOException {
         // this creates a new array
-        super(file, false, 0, thisOHBytes, thisOHHandles, rowdef, intprops, rowdef.columns() /* txtProps */, 80 /* txtPropWidth */);
+        super(file, thisOHBytes, thisOHHandles, rowdef, intprops, rowdef.columns() /* txtProps */, 80 /* txtPropWidth */);
         if (!(super.fileExisted)) {
             for (int i = 0; i < intprops; i++) {
-                setHandle(i, new Handle(NUL));
+                setHandle(i, new kelondroHandle(kelondroHandle.NUL));
             }
             // store column description
             for (int i = 0; i < rowdef.columns(); i++) {
@@ -74,9 +74,9 @@ public class kelondroFixedWidthArray extends kelondroRecords implements kelondro
     
     public kelondroFixedWidthArray(kelondroRA ra, String filename, kelondroRow rowdef, int intprops) throws IOException {
         // this creates a new array
-        super(ra, filename, false, 0, thisOHBytes, thisOHHandles, rowdef, intprops, rowdef.columns() /* txtProps */, 80 /* txtPropWidth */, false);
+        super(ra, filename, thisOHBytes, thisOHHandles, rowdef, intprops, rowdef.columns() /* txtProps */, 80 /* txtPropWidth */, false);
         for (int i = 0; i < intprops; i++) {
-            setHandle(i, new Handle(0));
+            setHandle(i, new kelondroHandle(0));
         }
         // store column description
         for (int i = 0; i < rowdef.columns(); i++) {
@@ -104,8 +104,8 @@ public class kelondroFixedWidthArray extends kelondroRecords implements kelondro
         // this writes a row without reading the row from the file system first
         
         // create a node at position index with rowentry
-    	Handle h = new Handle(index);
-        commit(newNode(h, (rowentry == null) ? null : rowentry.bytes(), 0), CP_NONE);
+        kelondroHandle h = new kelondroHandle(index);
+        (new EcoNode(h, (rowentry == null) ? null : rowentry.bytes(), 0)).commit();
         // attention! this newNode call wants that the OH bytes are passed within the bulkchunk
         // field. Here, only the rowentry.bytes() raw payload is passed. This is valid, because
         // the OHbytes and OHhandles are zero.
@@ -123,19 +123,19 @@ public class kelondroFixedWidthArray extends kelondroRecords implements kelondro
     }
    
     public synchronized kelondroRow.Entry getIfValid(int index) throws IOException {
-    	byte[] b = getNode(new Handle(index), true).getValueRow();
+    	byte[] b = (new EcoNode(new kelondroHandle(index))).getValueRow();
     	if (b[0] == 0) return null;
     	if ((b[0] == -128) && (b[1] == 0)) return null;
     	return row().newEntry(b);
     }
     
     public synchronized kelondroRow.Entry get(int index) throws IOException {
-    	return row().newEntry(getNode(new Handle(index), true).getValueRow());
+    	return row().newEntry(new EcoNode(new kelondroHandle(index)).getValueRow());
     }
 
     protected synchronized int seti(int index, int value) throws IOException {
         int before = getHandle(index).hashCode();
-        setHandle(index, new Handle(value));
+        setHandle(index, new kelondroHandle(value));
         return before;
     }
 
@@ -145,8 +145,8 @@ public class kelondroFixedWidthArray extends kelondroRecords implements kelondro
 
     public synchronized int add(kelondroRow.Entry rowentry) throws IOException {
         // adds a new rowentry, but re-uses a previously as-deleted marked entry
-        Node n = newNode(rowentry.bytes());
-        commit(n, CP_NONE);
+        kelondroNode n = new EcoNode(rowentry.bytes());
+        n.commit();
         return n.handle().hashCode();
     }
     
@@ -154,12 +154,12 @@ public class kelondroFixedWidthArray extends kelondroRecords implements kelondro
         assert (index < (super.free() + super.size())) : "remove: index " + index + " out of bounds " + (super.free() + super.size());
 
         // get the node at position index
-		Handle h = new Handle(index);
-		Node n = getNode(h, false);
+        kelondroHandle h = new kelondroHandle(index);
+        kelondroNode n = new EcoNode(h);
 
 		// erase the row
 		n.setValueRow(null);
-		commit(n, CP_NONE);
+		n.commit();
 
 		// mark row as deleted so it can be re-used
 		deleteNode(h);
@@ -211,7 +211,7 @@ public class kelondroFixedWidthArray extends kelondroRecords implements kelondro
             k.remove(1);
             
             k.print();
-            k.print(true);
+            k.print();
             k.close();
             
             
@@ -227,7 +227,7 @@ public class kelondroFixedWidthArray extends kelondroRecords implements kelondro
                 }
             }
             k.print();
-            k.print(true);
+            k.print();
             k.close();
             
         } catch (IOException e) {

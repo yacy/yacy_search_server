@@ -162,7 +162,7 @@ public class kelondroFlexWidthArray implements kelondroArray {
 
         // open existing files
         File file = new File(tabledir, "col.000.list");
-        return kelondroRecords.staticsize(file);
+        return kelondroCachedRecords.staticsize(file);
     }
     
     public static void delete(File path, String tablename) {
@@ -368,8 +368,8 @@ public class kelondroFlexWidthArray implements kelondroArray {
             k.remove(1);
             
             k.print();
-            k.col[0].print(true);
-            k.col[1].print(true);
+            k.col[0].print();
+            k.col[1].print();
             k.close();
             
             
@@ -391,7 +391,7 @@ public class kelondroFlexWidthArray implements kelondroArray {
             }
             k = new kelondroFlexWidthArray(f, "flextest", rowdef, true);
             k.print();
-            k.col[0].print(true);
+            k.col[0].print();
             k.close();
             
         } catch (IOException e) {

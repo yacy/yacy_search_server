@@ -65,7 +65,7 @@ import java.util.logging.Logger;
 import de.anomic.kelondro.kelondroRow.Entry;
 import de.anomic.server.logging.serverLog;
 
-public class kelondroTree extends kelondroRecords implements kelondroIndex {
+public class kelondroTree extends kelondroCachedRecords implements kelondroIndex {
 	
     // logging (This probably needs someone to initialize the java.util.logging.* facilities);
     public static final Logger log = Logger.getLogger("KELONDRO");
@@ -161,13 +161,10 @@ public class kelondroTree extends kelondroRecords implements kelondroIndex {
         setHandle(root, null); 
 	}
     
-    private void commitNode(Node n) throws IOException {
-        Handle left = n.getOHHandle(leftchild);
-        Handle right = n.getOHHandle(rightchild);
-        if ((left == null) && (right == null)) commit(n, CP_LOW);
-        else if (left == null) commit(n, CP_MEDIUM);
-        else if (right == null) commit(n, CP_MEDIUM);
-        else commit(n, CP_HIGH);
+    private void commitNode(kelondroNode n) throws IOException {
+        //kelondroHandle left = n.getOHHandle(leftchild);
+        //kelondroHandle right = n.getOHHandle(rightchild);
+        n.commit();
     }
 
     public boolean has(byte[] key) throws IOException {
@@ -196,12 +193,12 @@ public class kelondroTree extends kelondroRecords implements kelondroIndex {
         //   can be returned, together with the information wether the new key shall
         //   be left or right child.
 
-        private Node thenode, parentnode;
+        private CacheNode thenode, parentnode;
         private boolean found; // property if node was found
         private byte child; // -1: left child; 0: root node; 1: right child
 
         // temporary variables
-        private Handle thisHandle;
+        private kelondroHandle thisHandle;
         byte[] keybuffer;
         
         protected Search() {
@@ -237,7 +234,7 @@ public class kelondroTree extends kelondroRecords implements kelondroIndex {
             while (thisHandle != null) {
                 try {
                     parentnode = thenode;
-                    thenode = getNode(thisHandle, thenode, (child == -1) ? leftchild : rightchild, true);
+                    thenode = new CacheNode(thisHandle, thenode, (child == -1) ? leftchild : rightchild, true);
                 } catch (IllegalArgumentException e) {
                     logWarning("kelondroTree.Search.process: fixed a broken handle");
                     found = false;
@@ -269,7 +266,7 @@ public class kelondroTree extends kelondroRecords implements kelondroIndex {
                     thenode.setOHHandle(parent, null);
                     thenode.setOHHandle(leftchild, null);
                     thenode.setOHHandle(rightchild, null);
-                    commit(thenode, CP_NONE);
+                    thenode.commit();
                     logWarning("kelondroTree.Search.process: database contains loops; the loop-nodes have been auto-fixed");
                     found = false;
                     return;
@@ -300,12 +297,12 @@ public class kelondroTree extends kelondroRecords implements kelondroIndex {
             return found;
         }
 
-        public Node getMatcher() {
+        public CacheNode getMatcher() {
             if (found) return thenode;
             throw new IllegalArgumentException("wrong access of matcher");
         }
 
-        public Node getParent() {
+        public CacheNode getParent() {
             if (found) return parentnode;
             return thenode;
         }
@@ -326,9 +323,9 @@ public class kelondroTree extends kelondroRecords implements kelondroIndex {
         }
     }
 
-    public synchronized boolean isChild(Node childn, Node parentn, int child) {
+    public synchronized boolean isChild(kelondroNode childn, kelondroNode parentn, int child) {
         if (childn == null) throw new IllegalArgumentException("isLeftChild: Node parameter is NULL");
-        Handle lc = parentn.getOHHandle(child);
+        kelondroHandle lc = parentn.getOHHandle(child);
         if (lc == null) return false;
         return (lc.equals(childn.handle()));
     }
@@ -355,8 +352,9 @@ public class kelondroTree extends kelondroRecords implements kelondroIndex {
             writeSearchObj.process(newrow.getColBytes(0));
             if (writeSearchObj.found()) {
                 // a node with this key exist. simply overwrite the content and return old content
-                Node e = writeSearchObj.getMatcher();
-                result = row().newEntry(e.setValueRow(newrow.bytes()));
+                kelondroNode e = writeSearchObj.getMatcher();
+                result = row().newEntry(e.getValueRow());
+                e.setValueRow(newrow.bytes());
                 commitNode(e);
             } else if (writeSearchObj.isRoot()) {
                 // a node with this key does not exist and there is no node at all
@@ -364,7 +362,7 @@ public class kelondroTree extends kelondroRecords implements kelondroIndex {
                 if (getHandle(root) != null)
                     throw new kelondroException(filename, "tried to create root node twice");
                 // we dont have any Nodes in the file, so start here to create one
-                Node e = newNode(newrow.bytes());
+                kelondroNode e = new CacheNode(newrow.bytes());
                 // write the propetries
                 e.setOHByte(magic,   (byte) 1);
                 e.setOHByte(balance, (byte) 0);
@@ -372,7 +370,7 @@ public class kelondroTree extends kelondroRecords implements kelondroIndex {
                 e.setOHHandle(leftchild, null);
                 e.setOHHandle(rightchild, null);
                 // do updates
-                commit(e, CP_LOW);
+                e.commit();
                 setHandle(root, e.handle());
                 result = null;
             } else {
@@ -384,22 +382,22 @@ public class kelondroTree extends kelondroRecords implements kelondroIndex {
                 // that side, but not if the assigned position is appropriate.
                 
                 // create new node and assign values
-                Node parentNode = writeSearchObj.getParent();
-                Node theNode = newNode(newrow.bytes());
+                CacheNode parentNode = writeSearchObj.getParent();
+                CacheNode theNode = new CacheNode(newrow.bytes());
                 theNode.setOHByte(0, (byte) 1); // fresh magic
                 theNode.setOHByte(1, (byte) 0); // fresh balance
                 theNode.setOHHandle(parent, parentNode.handle());
                 theNode.setOHHandle(leftchild, null);
                 theNode.setOHHandle(rightchild, null);
-                commit(theNode, CP_LOW);
+                theNode.commit();
                 
                 // check consistency and link new node to parent node
                 byte parentBalance;
                 if (writeSearchObj.isLeft()) {
-                    if (parentNode.getOHHandle(leftchild) != null) throw new kelondroException(filename, "tried to create leftchild node twice. parent=" + new String(parentNode.getKey()) + ", leftchild=" + new String(getNode(parentNode.getOHHandle(leftchild), (Node) null, 0, true).getKey()));
+                    if (parentNode.getOHHandle(leftchild) != null) throw new kelondroException(filename, "tried to create leftchild node twice. parent=" + new String(parentNode.getKey()) + ", leftchild=" + new String(new CacheNode(parentNode.getOHHandle(leftchild), (CacheNode) null, 0, true).getKey()));
                     parentNode.setOHHandle(leftchild, theNode.handle());
                 } else if (writeSearchObj.isRight()) {
-                    if (parentNode.getOHHandle(rightchild) != null) throw new kelondroException(filename, "tried to create rightchild node twice. parent=" + new String(parentNode.getKey()) + ", rightchild=" + new String(getNode(parentNode.getOHHandle(rightchild), (Node) null, 0, true).getKey()));
+                    if (parentNode.getOHHandle(rightchild) != null) throw new kelondroException(filename, "tried to create rightchild node twice. parent=" + new String(parentNode.getKey()) + ", rightchild=" + new String(new CacheNode(parentNode.getOHHandle(rightchild), (CacheNode) null, 0, true).getKey()));
                     parentNode.setOHHandle(rightchild, theNode.handle());
                 } else {
                     throw new kelondroException(filename, "neither left nor right child");
@@ -415,7 +413,7 @@ public class kelondroTree extends kelondroRecords implements kelondroIndex {
                 boolean increasedHight = true;
                 String path = "";
                 byte prevHight;
-                Handle parentSideHandle;
+                kelondroHandle parentSideHandle;
                 while (increasedHight) {
                     
                     // update balance
@@ -455,17 +453,17 @@ public class kelondroTree extends kelondroRecords implements kelondroIndex {
                             break;
                         }
                         if (path.startsWith("RL")) {
-                            Handle parentHandle = parentNode.handle();
-                            LL_RightRotation(theNode, getNode(theNode.getOHHandle(leftchild), theNode, leftchild, false));
-                            parentNode = getNode(parentHandle, null, 0, false); // reload the parent node
-                            RR_LeftRotation(parentNode, getNode(parentNode.getOHHandle(rightchild), parentNode, rightchild, false));
+                            kelondroHandle parentHandle = parentNode.handle();
+                            LL_RightRotation(theNode, new CacheNode(theNode.getOHHandle(leftchild), theNode, leftchild, false));
+                            parentNode = new CacheNode(parentHandle, null, 0, false); // reload the parent node
+                            RR_LeftRotation(parentNode, new CacheNode(parentNode.getOHHandle(rightchild), parentNode, rightchild, false));
                             break;
                         }
                         if (path.startsWith("LR")) {
-                            Handle parentHandle = parentNode.handle();
-                            RR_LeftRotation(theNode, getNode(theNode.getOHHandle(rightchild), theNode, rightchild, false));
-                            parentNode = getNode(parentHandle, null, 0, false); // reload the parent node
-                            LL_RightRotation(parentNode, getNode(parentNode.getOHHandle(leftchild), parentNode, leftchild, false));
+                            kelondroHandle parentHandle = parentNode.handle();
+                            RR_LeftRotation(theNode, new CacheNode(theNode.getOHHandle(rightchild), theNode, rightchild, false));
+                            parentNode = new CacheNode(parentHandle, null, 0, false); // reload the parent node
+                            LL_RightRotation(parentNode, new CacheNode(parentNode.getOHHandle(leftchild), parentNode, leftchild, false));
                             break;
                         }
                         break;
@@ -473,7 +471,7 @@ public class kelondroTree extends kelondroRecords implements kelondroIndex {
                     // crawl up the tree
                     if (parentNode.getOHHandle(parent) == null) break; // root reached: stop
                     theNode = parentNode;
-                    parentNode = getNode(parentNode.getOHHandle(parent), null, 0, false);
+                    parentNode = new CacheNode(parentNode.getOHHandle(parent), null, 0, false);
                 }
                 
                 result = null; // that means: no previous stored value present
@@ -496,14 +494,14 @@ public class kelondroTree extends kelondroRecords implements kelondroIndex {
         while (i.hasNext()) addUnique((kelondroRow.Entry) i.next());
     }
     
-    private void assignChild(Node parentNode, Node childNode, int childType) throws IOException {
+    private void assignChild(kelondroNode parentNode, kelondroNode childNode, int childType) throws IOException {
         parentNode.setOHHandle(childType, childNode.handle());
         childNode.setOHHandle(parent, parentNode.handle());
         commitNode(parentNode);
         commitNode(childNode);
     }
 
-    private void replace(Node oldNode, Node oldNodeParent, Node newNode) throws IOException {
+    private void replace(kelondroNode oldNode, kelondroNode oldNodeParent, kelondroNode newNode) throws IOException {
 	// this routine looks where the oldNode is connected to, and replaces
 	// the anchor's link to the oldNode by the newNode-link
 	// the new link gets the anchor as parent link assigned
@@ -519,20 +517,20 @@ public class kelondroTree extends kelondroRecords implements kelondroIndex {
 	    // not the root, find parent
 	    // ok, we have the parent, but for updating the child link we must know
 	    // if the oldNode was left or right child
-            Handle parentSideHandle = oldNodeParent.getOHHandle(leftchild);
-            if ((parentSideHandle != null) && (parentSideHandle.equals(oldNode.handle()))) {
-		// update left node from parent
-                oldNodeParent.setOHHandle(leftchild, newNode.handle());
+        kelondroHandle parentSideHandle = oldNodeParent.getOHHandle(leftchild);
+        if ((parentSideHandle != null) && (parentSideHandle.equals(oldNode.handle()))) {
+            // update left node from parent
+            oldNodeParent.setOHHandle(leftchild, newNode.handle());
 	    }
 	    parentSideHandle = oldNodeParent.getOHHandle(rightchild);
 	    if ((parentSideHandle != null) && (parentSideHandle.equals(oldNode.handle()))) {
-		// update right node from parent
-                oldNodeParent.setOHHandle(rightchild, newNode.handle());
+	        // update right node from parent
+            oldNodeParent.setOHHandle(rightchild, newNode.handle());
 	    }
 	    commitNode(oldNodeParent);
 	    // update new Node
 	    newNode.setOHHandle(parent, oldNodeParent.handle());
-            commitNode(newNode);
+        commitNode(newNode);
 	}
 	// finished. remember that we did not set the links to the oldNode
         // we have also not set the children of the newNode.
@@ -550,18 +548,18 @@ public class kelondroTree extends kelondroRecords implements kelondroIndex {
         return 0;
     }
 
-    private void LL_RightRotation(Node parentNode, Node childNode) throws IOException {
+    private void LL_RightRotation(kelondroNode parentNode, CacheNode childNode) throws IOException {
         // replace the parent node; the parent is afterwards unlinked
-        Handle p2Handle = parentNode.getOHHandle(parent);
-        Node p2Node = (p2Handle == null) ? null : getNode(p2Handle, null, 0, false);
+        kelondroHandle p2Handle = parentNode.getOHHandle(parent);
+        kelondroNode p2Node = (p2Handle == null) ? null : new CacheNode(p2Handle, null, 0, false);
         replace(parentNode, p2Node, childNode);
 
         // set the left son of the parent to the right son of the childNode
-        Handle childOfChild = childNode.getOHHandle(rightchild);
+        kelondroHandle childOfChild = childNode.getOHHandle(rightchild);
         if (childOfChild == null) {
             parentNode.setOHHandle(leftchild, null);
         } else {
-            assignChild(parentNode, getNode(childOfChild, childNode, rightchild, false), leftchild);
+            assignChild(parentNode, new CacheNode(childOfChild, childNode, rightchild, false), leftchild);
         }
 
         // link the old parent node as the right child of childNode
@@ -581,18 +579,18 @@ public class kelondroTree extends kelondroRecords implements kelondroIndex {
         commitNode(childNode);
     }
 
-    private void RR_LeftRotation(Node parentNode, Node childNode) throws IOException {
+    private void RR_LeftRotation(kelondroNode parentNode, CacheNode childNode) throws IOException {
         // replace the parent node; the parent is afterwards unlinked
-        Handle p2Handle = parentNode.getOHHandle(parent);
-        Node p2Node = (p2Handle == null) ? null : getNode(p2Handle, null, 0, false);
+        kelondroHandle p2Handle = parentNode.getOHHandle(parent);
+        kelondroNode p2Node = (p2Handle == null) ? null : new CacheNode(p2Handle, null, 0, false);
         replace(parentNode, p2Node, childNode);
 
         // set the left son of the parent to the right son of the childNode
-        Handle childOfChild = childNode.getOHHandle(leftchild);
+        kelondroHandle childOfChild = childNode.getOHHandle(leftchild);
         if (childOfChild == null) {
             parentNode.setOHHandle(rightchild, null);
         } else {
-            assignChild(parentNode, getNode(childOfChild, childNode, leftchild, false), rightchild);
+            assignChild(parentNode, new CacheNode(childOfChild, childNode, leftchild, false), rightchild);
         }
 
         // link the old parent node as the left child of childNode
@@ -625,7 +623,7 @@ public class kelondroTree extends kelondroRecords implements kelondroIndex {
         synchronized(writeSearchObj) {
             writeSearchObj.process(key);
             if (writeSearchObj.found()) {
-                Node result = writeSearchObj.getMatcher();
+                CacheNode result = writeSearchObj.getMatcher();
                 kelondroRow.Entry values = row().newEntry(result.getValueRow());
                 remove(result, writeSearchObj.getParent());
                 return values;
@@ -638,7 +636,7 @@ public class kelondroTree extends kelondroRecords implements kelondroIndex {
     public kelondroRow.Entry removeOne() throws IOException {
         // removes just any entry and removes that entry
         synchronized(writeSearchObj) {
-            Node theOne = lastNode();
+            CacheNode theOne = lastNode();
             kelondroRow.Entry values = row().newEntry(theOne.getValueRow());
             remove(theOne, null);
             return values;
@@ -649,44 +647,44 @@ public class kelondroTree extends kelondroRecords implements kelondroIndex {
         while (size() > 0) remove(lastNode(), null);
     }
     
-    private void remove(Node node, Node parentOfNode) throws IOException {
-	// there are three cases when removing a node
-	// - the node is a leaf - it can be removed easily
-	// - the node has one child - the child replaces the node
-	// - the node has two childs - it can be replaced either
-	//   by the greatest node of the left child or the smallest
-	//   node of the right child
+    private void remove(CacheNode node, kelondroNode parentOfNode) throws IOException {
+        // there are three cases when removing a node
+        // - the node is a leaf - it can be removed easily
+        // - the node has one child - the child replaces the node
+        // - the node has two childs - it can be replaced either
+        //   by the greatest node of the left child or the smallest
+        //   node of the right child
 
-	Node childnode;
-	if ((node.getOHHandle(leftchild) == null) && (node.getOHHandle(rightchild) == null)) {
+        kelondroNode childnode;
+        if ((node.getOHHandle(leftchild) == null) && (node.getOHHandle(rightchild) == null)) {
 	    // easy case: the node is a leaf
 	    if (parentOfNode == null) {
 		// this is the root!
 		setHandle(root, null);
 	    } else {
-                Handle h = parentOfNode.getOHHandle(leftchild);
-		if ((h != null) && (h.equals(node.handle()))) parentOfNode.setOHHandle(leftchild, null);
-                h = parentOfNode.getOHHandle(rightchild);
-		if ((h != null) && (h.equals(node.handle()))) parentOfNode.setOHHandle(rightchild, null);
-                commitNode(parentOfNode);
+            kelondroHandle h = parentOfNode.getOHHandle(leftchild);
+            if ((h != null) && (h.equals(node.handle()))) parentOfNode.setOHHandle(leftchild, null);
+            h = parentOfNode.getOHHandle(rightchild);
+            if ((h != null) && (h.equals(node.handle()))) parentOfNode.setOHHandle(rightchild, null);
+            commitNode(parentOfNode);
 	    }
 	} else if ((node.getOHHandle(leftchild) != null) && (node.getOHHandle(rightchild) == null)) {
-	    replace(node, parentOfNode, getNode(node.getOHHandle(leftchild), node, leftchild, false));
+	    replace(node, parentOfNode, new CacheNode(node.getOHHandle(leftchild), node, leftchild, false));
 	} else if ((node.getOHHandle(leftchild) == null) && (node.getOHHandle(rightchild) != null)) {
-	    replace(node, parentOfNode, getNode(node.getOHHandle(rightchild), node, rightchild, false));
+	    replace(node, parentOfNode, new CacheNode(node.getOHHandle(rightchild), node, rightchild, false));
 	} else {
 	    // difficult case: node has two children
-	    Node repl = lastNode(getNode(node.getOHHandle(leftchild), node, leftchild, false));
+	    CacheNode repl = lastNode(new CacheNode(node.getOHHandle(leftchild), node, leftchild, false));
 	    //System.out.println("last node is " + repl.toString());
 	    // we remove that replacement node and put it where the node was
 	    // this seems to be recursive, but is not since the replacement
 	    // node cannot have two children (it would not have been the smallest or greatest)
-	    Node n;
-	    Handle h;
+	    kelondroNode n;
+        kelondroHandle h;
             // remove leaf
 	    if ((repl.getOHHandle(leftchild) == null) && (repl.getOHHandle(rightchild) == null)) {
 		// the replacement cannot be the root, so simply remove from parent node
-		n = getNode(repl.getOHHandle(parent), null, 0, false); // parent node of replacement node
+		n = new CacheNode(repl.getOHHandle(parent), null, 0, false); // parent node of replacement node
 		h = n.getOHHandle(leftchild);
 		if ((h != null) && (h.equals(repl.handle()))) n.setOHHandle(leftchild, null);
                 h = n.getOHHandle(rightchild);
@@ -694,11 +692,11 @@ public class kelondroTree extends kelondroRecords implements kelondroIndex {
                 commitNode(n);
 	    } else if ((repl.getOHHandle(leftchild) != null) && (repl.getOHHandle(rightchild) == null)) {
                 try {
-                    childnode = getNode(repl.getOHHandle(leftchild), repl, leftchild, false);
-                    replace(repl, getNode(repl.getOHHandle(parent), null, 0, false), childnode);
+                    childnode = new CacheNode(repl.getOHHandle(leftchild), repl, leftchild, false);
+                    replace(repl, new CacheNode(repl.getOHHandle(parent), null, 0, false), childnode);
                 } catch (IllegalArgumentException e) {
                     // now treat the situation as if that link had been null before
-                    n = getNode(repl.getOHHandle(parent), null, 0, false); // parent node of replacement node
+                    n = new CacheNode(repl.getOHHandle(parent), null, 0, false); // parent node of replacement node
                     h = n.getOHHandle(leftchild);
                     if ((h != null) && (h.equals(repl.handle()))) n.setOHHandle(leftchild, null);
                     h = n.getOHHandle(rightchild);
@@ -707,11 +705,11 @@ public class kelondroTree extends kelondroRecords implements kelondroIndex {
                 }
 	    } else if ((repl.getOHHandle(leftchild) == null) && (repl.getOHHandle(rightchild) != null)) {
                 try {
-                    childnode = getNode(repl.getOHHandle(rightchild), repl, rightchild, false);
-                    replace(repl, getNode(repl.getOHHandle(parent), null, 0, false), childnode);
+                    childnode = new CacheNode(repl.getOHHandle(rightchild), repl, rightchild, false);
+                    replace(repl, new CacheNode(repl.getOHHandle(parent), null, 0, false), childnode);
                 } catch (IllegalArgumentException e) {
                     // now treat the situation as if that link had been null before
-                    n = getNode(repl.getOHHandle(parent), null, 0, false); // parent node of replacement node
+                    n = new CacheNode(repl.getOHHandle(parent), null, 0, false); // parent node of replacement node
                     h = n.getOHHandle(leftchild);
                     if ((h != null) && (h.equals(repl.handle()))) n.setOHHandle(leftchild, null);
                     h = n.getOHHandle(rightchild);
@@ -720,30 +718,30 @@ public class kelondroTree extends kelondroRecords implements kelondroIndex {
                 }
 	    }
 	    //System.out.println("node before reload is " + node.toString());
-	    node = getNode(node.handle(), null, 0, false); // reload the node, it is possible that it has been changed
+	    node = new CacheNode(node.handle(), null, 0, false); // reload the node, it is possible that it has been changed
 	    //System.out.println("node after reload is " + node.toString());
             
             // now plant in the replha node
 	    byte b = node.getOHByte(balance); // save balance of disappearing node
-            Handle parentHandle = node.getOHHandle(parent);
-            Handle leftchildHandle = node.getOHHandle(leftchild);
-            Handle rightchildHandle = node.getOHHandle(rightchild);
+        kelondroHandle parentHandle = node.getOHHandle(parent);
+        kelondroHandle leftchildHandle = node.getOHHandle(leftchild);
+        kelondroHandle rightchildHandle = node.getOHHandle(rightchild);
 	    replace(node, parentOfNode, repl);
 	    repl.setOHByte(balance, b); // restore balance
 	    repl.setOHHandle(parent, parentHandle); // restore handles
-            repl.setOHHandle(leftchild, leftchildHandle);
-            repl.setOHHandle(rightchild, rightchildHandle);
-            commitNode(repl);
+        repl.setOHHandle(leftchild, leftchildHandle);
+        repl.setOHHandle(rightchild, rightchildHandle);
+        commitNode(repl);
 	    // last thing to do: change uplinks of children to this new node
 	    if (leftchildHandle != null) {
-		n = getNode(leftchildHandle, node, leftchild, false);
-                n.setOHHandle(parent, repl.handle());
-                commitNode(n);
+	        n = new CacheNode(leftchildHandle, node, leftchild, false);
+            n.setOHHandle(parent, repl.handle());
+            commitNode(n);
 	    }
 	    if (rightchildHandle != null) {
-		n = getNode(rightchildHandle, node, rightchild, false);
-                n.setOHHandle(parent, repl.handle());
-                commitNode(n);
+	        n = new CacheNode(rightchildHandle, node, rightchild, false);
+            n.setOHHandle(parent, repl.handle());
+            commitNode(n);
 	    }
  	}
         // move node to recycling queue
@@ -752,20 +750,20 @@ public class kelondroTree extends kelondroRecords implements kelondroIndex {
         }
     }
 
-    protected Node firstNode() throws IOException {
-        Handle h = getHandle(root);
+    protected CacheNode firstNode() throws IOException {
+        kelondroHandle h = getHandle(root);
         if (h == null) return null;
-        return firstNode(getNode(h, null, 0, true));
+        return firstNode(new CacheNode(h, null, 0, true));
     }
     
-    protected Node firstNode(Node node) throws IOException {
+    protected CacheNode firstNode(CacheNode node) throws IOException {
         if (node == null) throw new IllegalArgumentException("firstNode: node=null"); 
-        Handle h = node.getOHHandle(leftchild);
+        kelondroHandle h = node.getOHHandle(leftchild);
         HashSet visitedNodeKeys = new HashSet(); // to detect loops
         String nodeKey;
         while (h != null) {
             try {
-                node = getNode(h, node, leftchild, true);
+                node = new CacheNode(h, node, leftchild, true);
                 nodeKey = new String(node.getKey());
                 if (visitedNodeKeys.contains(nodeKey)) throw new kelondroException(this.filename, "firstNode: database contains loops: '" + nodeKey + "' appears twice.");
                 visitedNodeKeys.add(nodeKey);
@@ -778,20 +776,20 @@ public class kelondroTree extends kelondroRecords implements kelondroIndex {
         return node;
     }
     
-    protected Node lastNode() throws IOException {
-        Handle h = getHandle(root);
+    protected CacheNode lastNode() throws IOException {
+        kelondroHandle h = getHandle(root);
         if (h == null) return null;
-        return lastNode(getNode(h, null, 0, true));
+        return lastNode(new CacheNode(h, null, 0, true));
     }
 
-    protected Node lastNode(Node node) throws IOException {
+    protected CacheNode lastNode(CacheNode node) throws IOException {
         if (node == null) throw new IllegalArgumentException("lastNode: node=null"); 
-        Handle h = node.getOHHandle(rightchild);
+        kelondroHandle h = node.getOHHandle(rightchild);
         HashSet visitedNodeKeys = new HashSet(); // to detect loops
         String nodeKey;
         while (h != null) {
 	    try {
-                node = getNode(h, node, rightchild, true);
+                node = new CacheNode(h, node, rightchild, true);
                 nodeKey = new String(node.getKey());
                 if (visitedNodeKeys.contains(nodeKey)) throw new kelondroException(this.filename, "lastNode: database contains loops: '" + nodeKey + "' appears twice.");
                 visitedNodeKeys.add(nodeKey);
@@ -807,7 +805,7 @@ public class kelondroTree extends kelondroRecords implements kelondroIndex {
     private class nodeIterator implements Iterator {
         // we implement an iteration! (not a recursive function as the structure would suggest...)
         // the iterator iterates Node objects
-        Node nextNode = null;
+        CacheNode nextNode = null;
         boolean up, rot;
         LinkedList nodeStack;
         int count;
@@ -831,7 +829,7 @@ public class kelondroTree extends kelondroRecords implements kelondroIndex {
             if (search.found()) {
                 init(search.getMatcher());
             } else {
-                Node nn = search.getParent();
+                CacheNode nn = search.getParent();
                 if (nn == null) {
                     this.nextNode = null;
                 } else {
@@ -872,16 +870,16 @@ public class kelondroTree extends kelondroRecords implements kelondroIndex {
             }
         }
         
-        private void init(Node start) throws IOException {
+        private void init(CacheNode start) throws IOException {
             this.nextNode = start;
             
             // fill node stack for start node
             nodeStack = new LinkedList();
             
-            Handle searchHandle = getHandle(root);
+            kelondroHandle searchHandle = getHandle(root);
             if (searchHandle == null) {nextNode = null; return;}
 
-            Node searchNode = getNode(searchHandle, null, 0, false);            
+            CacheNode searchNode = new CacheNode(searchHandle, null, 0, false);            
             byte[] startKey = start.getKey();
             int c, ct;
             while ((c = row().objectOrder.compare(startKey, searchNode.getKey())) != 0) {
@@ -892,7 +890,7 @@ public class kelondroTree extends kelondroRecords implements kelondroIndex {
                 // go to next node
                 searchHandle = searchNode.getOHHandle(ct);
                 if (searchHandle == null) throw new kelondroException(filename, "nodeIterator.init: start node does not exist (handle null)");
-                searchNode = getNode(searchHandle, searchNode, ct, false);
+                searchNode = new CacheNode(searchHandle, searchNode, ct, false);
                 if (searchNode == null) throw new kelondroException(filename, "nodeIterator.init: start node does not exist (node null)");
             }
             // now every parent node to the start node is on the stack
@@ -921,26 +919,26 @@ public class kelondroTree extends kelondroRecords implements kelondroIndex {
             // middle-case
             try {
                 int childtype = (up) ? rightchild : leftchild;
-                Handle childHandle = nextNode.getOHHandle(childtype);
+                kelondroHandle childHandle = nextNode.getOHHandle(childtype);
                 if (childHandle != null) {
                     //System.out.println("go to other leg, stack size=" + nodeStack.size());
                     // we have walked one leg of the tree; now go to the other one: step down to next child
                     HashSet visitedNodeHandles = new HashSet(); // to detect loops
                     nodeStack.addLast(new Object[]{nextNode, new Integer(childtype)});
-                    nextNode = getNode(childHandle, nextNode, childtype, false);
+                    nextNode = new CacheNode(childHandle, nextNode, childtype, false);
                     childtype = (up) ? leftchild : rightchild;
                     while ((childHandle = nextNode.getOHHandle(childtype)) != null) {
                         if (visitedNodeHandles.contains(childHandle)) {
                             // try to repair the nextNode
                             nextNode.setOHHandle(childtype, null);
-                            commit(nextNode, CP_NONE);
+                            nextNode.commit();
                             logWarning("nodeIterator.next: internal loopback; fixed loop and try to go on");
                             break;
                         }
                         visitedNodeHandles.add(childHandle);
                         try {
                             nodeStack.addLast(new Object[]{nextNode, new Integer(childtype)});
-                            nextNode = getNode(childHandle, nextNode, childtype, false);
+                            nextNode = new CacheNode(childHandle, nextNode, childtype, false);
                         } catch (IllegalArgumentException e) {
                             // return what we have
                             nodeStack.removeLast();
@@ -958,13 +956,13 @@ public class kelondroTree extends kelondroRecords implements kelondroIndex {
                         nextNode = null;
                     } else {
                         Object[] stacktop;
-                        Node parentNode = null;
+                        CacheNode parentNode = null;
                         int parentpointer = (up) ? rightchild : leftchild;
                         while ((nodeStack.size() != 0) && (parentpointer == ((up) ? rightchild : leftchild))) {
                             //System.out.println("step up");
                             // go on, walk up further
                             stacktop = (Object[]) nodeStack.removeLast(); // top of stack: Node/parentpointer pair
-                            parentNode = (Node) stacktop[0];
+                            parentNode = (CacheNode) stacktop[0];
                             parentpointer = ((Integer) stacktop[1]).intValue();
                         }
                         if ((nodeStack.size() == 0) && (parentpointer == ((up) ? rightchild : leftchild))) {
@@ -992,12 +990,12 @@ public class kelondroTree extends kelondroRecords implements kelondroIndex {
         setOrder.direction(up);
         setOrder.rotate(firstKey);
         TreeMap rows = new TreeMap(setOrder);
-        Node n;
+        kelondroNode n;
         String key;
         synchronized (this) {
             Iterator i = (firstKey == null) ? new nodeIterator(up, false) : new nodeIterator(up, false, firstKey, including);
             while ((rows.size() < count) && (i.hasNext())) {
-                n = (Node) i.next();
+                n = (kelondroNode) i.next();
                 if (n == null) return rows;
                 key = new String(n.getKey());
                 if (rows.put(key, row().newEntry(n.getValueRow())) != null) return rows; // protection against loops
@@ -1012,11 +1010,11 @@ public class kelondroTree extends kelondroRecords implements kelondroIndex {
         setOrder.direction(up);
         setOrder.rotate(firstKey);
         TreeSet set = new TreeSet(setOrder);
-        Node n;
+        kelondroNode n;
         synchronized (this) {
             Iterator i = (firstKey == null) ? new nodeIterator(up, rotating) : new nodeIterator(up, rotating, firstKey, including);
             while ((set.size() < count) && (i.hasNext())) {
-                n = (Node) i.next();
+                n = (kelondroNode) i.next();
                 if ((n != null) && (n.getKey() != null)) set.add(new String(n.getKey()));
             }
         }
@@ -1134,45 +1132,45 @@ public class kelondroTree extends kelondroRecords implements kelondroIndex {
 
     public synchronized int height() {
         try {
-            Handle h = getHandle(root);
+            kelondroHandle h = getHandle(root);
             if (h == null) return 0;
-            return height(getNode(h, null, 0, false));
+            return height(new CacheNode(h, null, 0, false));
         } catch (IOException e) {
             return 0;
         }
     }
     
-    private int height(Node node) throws IOException {
+    private int height(CacheNode node) throws IOException {
         if (node == null) return 0;
-        Handle h = node.getOHHandle(leftchild);
-        int hl = (h == null) ? 0 : height(getNode(h, node, leftchild, false));
+        kelondroHandle h = node.getOHHandle(leftchild);
+        int hl = (h == null) ? 0 : height(new CacheNode(h, node, leftchild, false));
         h = node.getOHHandle(rightchild);
-        int hr = (h == null) ? 0 : height(getNode(h, node, rightchild, false));
+        int hr = (h == null) ? 0 : height(new CacheNode(h, node, rightchild, false));
         if (hl > hr) return hl + 1;
         return hr + 1;
     }
     
     public void print() throws IOException {
-        super.print(false);
+        super.print();
         int height = height();
         System.out.println("HEIGHT = " + height);
         Vector thisline = new Vector();
         thisline.add(getHandle(root));
         Vector nextline;
-        Handle handle;
-        Node node;
+        kelondroHandle handle;
+        kelondroNode node;
         int linelength, width = (1 << (height - 1)) * (row().width(0) + 1);
         String key;
         for (int h = 1; h < height; h++) {
             linelength = width / (thisline.size() * 2);
             nextline = new Vector();
             for (int i = 0; i < thisline.size(); i++) {
-                handle = (Handle) thisline.elementAt(i);
+                handle = (kelondroHandle) thisline.elementAt(i);
                 if (handle == null) {
                     node = null;
                     key = "[..]";
                 } else {
-                    node = getNode(handle, null, 0, false);
+                    node = new CacheNode(handle, null, 0, false);
                     if (node == null) key = "NULL"; else key = new String(node.getKey());
                 }
                 System.out.print(key);
@@ -1202,12 +1200,12 @@ public class kelondroTree extends kelondroRecords implements kelondroIndex {
         if ((thisline != null) && (width >= 0)) {
             linelength = width / thisline.size();
             for (int i = 0; i < thisline.size(); i++) {
-                handle = (Handle) thisline.elementAt(i);
+                handle = (kelondroHandle) thisline.elementAt(i);
                 if (handle == null) {
                     node = null;
                     key = "NULL";
                 } else {
-                    node = getNode(handle, null, 0, false);
+                    node = new CacheNode(handle, null, 0, false);
                     if (node == null) key = "NULL"; else key = new String(node.getKey());
                 }
                 System.out.print(key);

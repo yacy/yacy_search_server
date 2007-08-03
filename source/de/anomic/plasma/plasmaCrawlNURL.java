@@ -79,10 +79,6 @@ public class plasmaCrawlNURL {
         remoteStack = new plasmaCrawlBalancer(cachePath, "urlNoticeRemoteStack");
     }
 
-    public int size() {
-        return coreStack.size() + limitStack.size() + remoteStack.size();
-    }
-    
     public void close() {
         coreStack.close();
         limitStack.close();
@@ -90,7 +86,7 @@ public class plasmaCrawlNURL {
         remoteStack.close();
     }
     
-    public int stackSize() {
+    public int size() {
         // this does not count the overhang stack size
         return coreStack.size()  + limitStack.size() + remoteStack.size();
     }

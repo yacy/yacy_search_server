@@ -81,7 +81,7 @@ public class languageDataExtractor {
         String code = "";
         String file = "";
         String input = "";
-        String line = "";
+        //String line = "";
         String name = "";
         String output = "";
         String sKey = "";

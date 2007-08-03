@@ -1,6 +1,6 @@
-// kelondroRecords.java
-// (C) 2007 by Michael Peter Christen; mc@yacy.net, Frankfurt a. M., Germany
-// first published 03.08.2007 on http://yacy.net
+// kelondroNode.java
+// (C) 2003 - 2007 by Michael Peter Christen; mc@yacy.net, Frankfurt a. M., Germany
+// first published 2003 on http://yacy.net
 //
 // This is a part of YaCy, a peer-to-peer based web search engine
 //
@@ -28,12 +28,18 @@ package de.anomic.kelondro;
 
 import java.io.IOException;
 
-public interface kelondroRecords {
-    
-    // this is now implemented by kelondroTray
-    // the newNode method is used to define a enumeration in kelondroTray, but is still there abstract
-    // the real implementation is done in kelondroEcoRecords and kelondroCachedRecords
-    
-    public kelondroNode newNode(kelondroHandle handle, byte[] bulk, int offset) throws IOException;
-    
+public interface kelondroNode {
+
+    public kelondroHandle handle();
+    public void setOHByte(int i, byte b);
+    public void setOHHandle(int i, kelondroHandle otherhandle);
+    public byte getOHByte(int i);
+    public kelondroHandle getOHHandle(int i);
+    public void commit() throws IOException;
+    public void setValueRow(byte[] row) throws IOException;
+    public boolean valid();
+    public byte[] getKey();
+    public byte[] getValueRow() throws IOException;
+    public String toString();
+
 }
