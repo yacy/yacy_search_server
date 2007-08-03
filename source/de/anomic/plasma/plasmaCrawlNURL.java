@@ -86,6 +86,10 @@ public class plasmaCrawlNURL {
         remoteStack.close();
     }
     
+    public boolean notEmpty() {
+        return coreStack.notEmpty() || limitStack.notEmpty() || remoteStack.notEmpty();
+    }
+    
     public int size() {
         // this does not count the overhang stack size
         return coreStack.size()  + limitStack.size() + remoteStack.size();

@@ -1620,7 +1620,7 @@ public final class plasmaSwitchboard extends serverAbstractSwitch implements ser
      * shutdown procedure
      */
     public boolean cleanProfiles() throws InterruptedException {
-        if ((sbQueue.size() > 0) || (cacheLoader.size() > 0) || (noticeURL.size() > 0)) return false;
+        if ((sbQueue.size() > 0) || (cacheLoader.size() > 0) || (noticeURL.notEmpty())) return false;
         final Iterator iter = profiles.profiles(true);
         plasmaCrawlProfile.entry entry;
         boolean hasDoneSomething = false;
@@ -3260,7 +3260,7 @@ public final class plasmaSwitchboard extends serverAbstractSwitch implements ser
         if (wordIndex.size() < 100) {
             return "no DHT distribution: not enough words - wordIndex.size() = " + wordIndex.size();
         }
-        if ((getConfig(INDEX_DIST_ALLOW_WHILE_CRAWLING, "false").equalsIgnoreCase("false")) && (noticeURL.size() > 0)) {
+        if ((getConfig(INDEX_DIST_ALLOW_WHILE_CRAWLING, "false").equalsIgnoreCase("false")) && (noticeURL.notEmpty())) {
             return "no DHT distribution: crawl in progress: noticeURL.stackSize() = " + noticeURL.size() + ", sbQueue.size() = " + sbQueue.size();
         }
         if ((getConfig(INDEX_DIST_ALLOW_WHILE_INDEXING, "false").equalsIgnoreCase("false")) && (sbQueue.size() > 1)) {

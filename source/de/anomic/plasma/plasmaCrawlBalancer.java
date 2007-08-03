@@ -96,7 +96,7 @@ public class plasmaCrawlBalancer {
     }
 
     public synchronized void close() {
-        while (sizeDomainStacks() > 0) flushOnceDomStacks(0, true); // flush to ram, because the ram flush is optimized
+        while (domainStacksNotEmpty()) flushOnceDomStacks(0, true); // flush to ram, because the ram flush is optimized
         try { flushAllRamStack(); } catch (IOException e) {}
         if (urlFileIndex != null) {
             urlFileIndex.close();
@@ -190,6 +190,12 @@ public class plasmaCrawlBalancer {
         }
     }
     
+    public boolean notEmpty() {
+        // alternative method to the property size() > 0
+        // this is better because it may avoid synchronized access to domain stack summarization
+        return urlRAMStack.size() > 0 || urlFileStack.size() > 0 || domainStacksNotEmpty();
+    }
+    
     public int size() {
         int componentsize = urlFileStack.size() + urlRAMStack.size() + sizeDomainStacks();
         if (componentsize != urlFileIndex.size()) {
@@ -202,6 +208,17 @@ public class plasmaCrawlBalancer {
 		    }
 		}
         return componentsize;
+    }
+    
+    private boolean domainStacksNotEmpty() {
+        if (domainStacks == null) return false;
+        synchronized (domainStacks) {
+            Iterator i = domainStacks.values().iterator();
+            while (i.hasNext()) {
+                if (((LinkedList) i.next()).size() > 0) return true;
+            }
+        }
+        return false;
     }
     
     private int sizeDomainStacks() {
@@ -218,22 +235,24 @@ public class plasmaCrawlBalancer {
         // takes one entry from every domain stack and puts it on the ram or file stack
         // the minimumleft value is a limit for the number of entries that should be left
         if (domainStacks.size() == 0) return;
-        Iterator i = domainStacks.entrySet().iterator();
-        Map.Entry entry;
-        LinkedList list;
-        while (i.hasNext()) {
-            entry = (Map.Entry) i.next();
-            list = (LinkedList) entry.getValue();
-            if (list.size() > minimumleft) {
-                if (ram) {
-                    urlRAMStack.add(list.removeFirst());
-                } else try {
-                    urlFileStack.push(urlFileStack.row().newEntry(new byte[][]{((String) list.removeFirst()).getBytes()}));
-                } catch (IOException e) {
-                    e.printStackTrace();
+        synchronized (domainStacks) {
+            Iterator i = domainStacks.entrySet().iterator();
+            Map.Entry entry;
+            LinkedList list;
+            while (i.hasNext()) {
+                entry = (Map.Entry) i.next();
+                list = (LinkedList) entry.getValue();
+                if (list.size() > minimumleft) {
+                    if (ram) {
+                        urlRAMStack.add(list.removeFirst());
+                    } else try {
+                        urlFileStack.push(urlFileStack.row().newEntry(new byte[][] { ((String) list.removeFirst()).getBytes() }));
+                    } catch (IOException e) {
+                        e.printStackTrace();
+                    }
                 }
+                if (list.size() == 0)  i.remove();
             }
-            if (list.size() == 0) i.remove();
         }
     }
     
@@ -260,8 +279,10 @@ public class plasmaCrawlBalancer {
         if (domainList == null) {
             // create new list
             domainList = new LinkedList();
-            domainList.add(entry.urlhash());
-            domainStacks.put(dom, domainList);
+            synchronized (domainStacks) {
+                domainList.add(entry.urlhash());
+                domainStacks.put(dom, domainList);
+            }
         } else {
             // extend existent domain list
             domainList.addLast(entry.urlhash());
@@ -288,7 +309,7 @@ public class plasmaCrawlBalancer {
         }
         
         // 2nd-a: check domainStacks for latest arrivals
-        if ((result == null) && (domainStacks.size() > 0)) {
+        if ((result == null) && (domainStacks.size() > 0)) synchronized (domainStacks) {
             // we select specific domains that have not been used for a long time
             // i.e. 60 seconds. Latest arrivals that have not yet been crawled
             // fit also in that scheme
@@ -323,7 +344,7 @@ public class plasmaCrawlBalancer {
         }
         
         // 2nd-b: check domainStacks for best match between stack size and retrieval time
-        if ((result == null) && (domainStacks.size() > 0)) {
+        if ((result == null) && (domainStacks.size() > 0)) synchronized (domainStacks) {
             // we order all domains by the number of entries per domain
             // then we iterate through these domains in descending entry order
             // and that that one, that has a delta > minimumDelta
@@ -437,7 +458,7 @@ public class plasmaCrawlBalancer {
     public synchronized plasmaCrawlEntry top(int dist) throws IOException {
         // if we need to flush anything, then flush the domain stack first,
         // to avoid that new urls get hidden by old entries from the file stack
-        while ((sizeDomainStacks() > 0) && (urlRAMStack.size() <= dist)) {
+        while ((domainStacksNotEmpty()) && (urlRAMStack.size() <= dist)) {
             // flush only that much as we need to display
             flushOnceDomStacks(0, true); 
         }
