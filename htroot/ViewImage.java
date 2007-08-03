@@ -61,13 +61,29 @@ public class ViewImage {
         
         plasmaSwitchboard sb = (plasmaSwitchboard)env;     
         
-        String urls = post.get("url", "");
-        URL url;
-        try {
-            url = new URL(urls);
+        // the url to the image can be either submitted with an url in clear text, or using a license key
+        // if the url is given as clear text, the user must be authorized as admin
+        // the license can be used also from non-authorized users
+        
+        String urlString = post.get("url", "");
+        String urlLicense = post.get("code", "");
+        boolean auth = ((String) header.get("CLIENTIP", "")).equals("localhost") || sb.verifyAuthentication(header, true); // handle access rights
+        
+        URL url = null;
+        if ((urlString.length() > 0) && (auth)) try {
+            url = new URL(urlString);
         } catch (MalformedURLException e1) {
-            return null;
+            url = null;
         }
+        
+        if ((url == null) && (urlLicense.length() > 0)) {
+            url = sb.licensedURLs.releaseLicense(urlLicense);
+            urlString = url.toNormalform(true, true);
+        }
+        
+        if (url == null) return null;
+        System.out.println("loading image from " + url.toString());
+        
         int width = post.getInt("width", 0);
         int height = post.getInt("height", 0);
         int maxwidth = post.getInt("maxwidth", 0);
@@ -78,7 +94,7 @@ public class ViewImage {
         Object[] resource = sb.snippetCache.getResource(url, true, timeout, false);
         byte[] imgb = null;
         if (resource == null) {
-            if (urls.endsWith(".ico")) {
+            if (urlString.endsWith(".ico")) {
                 // load default favicon dfltfvcn.ico
                 try {
                     imgb = serverFileUtils.read(new File(sb.getRootPath(), "htroot/env/grafics/dfltfvcn.ico"));
@@ -103,9 +119,8 @@ public class ViewImage {
         }
         
         // read image
-        Image image = ymageImageParser.parse(urls.toString(), imgb);
+        Image image = ymageImageParser.parse(urlString.toString(), imgb);
         
-        boolean auth = ((String) header.get("CLIENTIP", "")).equals("localhost") || sb.verifyAuthentication(header, false); // handle access rights
         if ((auth) && ((width == 0) || (height == 0)) && (maxwidth == 0) && (maxheight == 0)) return image;
 
         // find original size

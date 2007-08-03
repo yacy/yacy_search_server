@@ -231,12 +231,12 @@ function handleImageState(req, progressbar) {
 		  for (i = 0; i < links; i++) {
 			  var type = response.getElementsByTagName("type")[i].firstChild.data;
 			  var href = response.getElementsByTagName("href")[i].firstChild.data;
+			  var code = response.getElementsByTagName("code")[i].firstChild.data;
 			  var name = response.getElementsByTagName("name")[i].firstChild.data;
 			  var attr = response.getElementsByTagName("attr")[i].firstChild.data;
 
-            // <a href="#[url]#"><img src="/ViewImage.png?maxwidth=96&amp;maxheight=96&amp;url=#[url]#" /></a><br /><a href="#[url]#">#[name]#</a>
-			  var img = document.createElement("img");
-			  img.setAttribute("src", "/ViewImage.png?maxwidth=96&maxheight=96&url=" + href);
+              var img = document.createElement("img");
+			  img.setAttribute("src", "/ViewImage.png?maxwidth=96&maxheight=96&code=" + code);
 			  img.setAttribute("alt", name);
 			
 			  var imganchor = document.createElement("a");

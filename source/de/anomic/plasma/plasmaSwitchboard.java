@@ -124,6 +124,7 @@ import java.util.Set;
 import java.util.TreeMap;
 import java.util.TreeSet;
 
+import de.anomic.data.URLLicense;
 import de.anomic.data.blogBoard;
 import de.anomic.data.blogBoardComments;
 import de.anomic.data.bookmarksDB;
@@ -258,6 +259,8 @@ public final class plasmaSwitchboard extends serverAbstractSwitch implements ser
     public  double                      totalQPM = 0d;
     public  TreeMap                     clusterhashes; // map of peerhash(String)/alternative-local-address as ip:port or only ip (String) or null if address in seed should be used
     public  boolean                     acceptLocalURLs, acceptGlobalURLs;
+    public  URLLicense                  licensedURLs;
+    
     /*
      * Remote Proxy configuration
      */
@@ -947,6 +950,9 @@ public final class plasmaSwitchboard extends serverAbstractSwitch implements ser
             }
             i++;
         }
+        
+        // initiate url license object
+        licensedURLs = new URLLicense(8);
         
         // set URL domain acceptance
         this.acceptGlobalURLs = "global.any".indexOf(getConfig("network.unit.domain", "global")) >= 0;

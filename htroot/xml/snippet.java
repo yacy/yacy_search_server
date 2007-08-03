@@ -77,8 +77,14 @@ public class snippet {
             plasmaSnippetCache.MediaSnippet ms;
             for (int i = 0; i < mediaSnippets.size(); i++) {
                 ms = (plasmaSnippetCache.MediaSnippet) mediaSnippets.get(i);
+                try {
+                    url = new URL(ms.href);
+                } catch (MalformedURLException e) {
+                    continue;
+                }
                 prop.put("link_" + i + "_type", ms.type);
                 prop.put("link_" + i + "_href", ms.href);
+                prop.put("link_" + i + "_code", switchboard.licensedURLs.aquireLicense(url));
                 prop.put("link_" + i + "_name", ms.name);
                 prop.put("link_" + i + "_attr", ms.attr);
             }

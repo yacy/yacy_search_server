@@ -323,8 +323,10 @@ public class yacysearch {
                 try{
                 		URL url=new URL(result.getUrl());
                 		int port=url.getPort();
-                		//TODO: parse <link rel="favicon" /> ...
-                		prop.put("type_results_" + i + "_favicon", url.getProtocol() + "://" + url.getHost() + ((port != -1) ? (":" + String.valueOf(port)) : "") + "/favicon.ico");
+                        URL faviconURL = new URL(url.getProtocol() + "://" + url.getHost() + ((port != -1) ? (":" + String.valueOf(port)) : "") + "/favicon.ico");
+                        // TODO: parse <link rel="favicon" /> ...
+                        // aquire license for favicon url loading
+                        prop.put("type_results_" + i + "_faviconCode", sb.licensedURLs.aquireLicense(faviconURL));
                 }catch(MalformedURLException e){}
                 prop.put("type_results_" + i + "_urlhash", result.getUrlhash());
                 prop.put("type_results_" + i + "_urlhexhash", yacySeed.b64Hash2hexHash(result.getUrlhash()));
