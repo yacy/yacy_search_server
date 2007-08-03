@@ -69,9 +69,7 @@ public class kelondroEcoRecords extends kelondroAbstractRecords {
     }
     
     public synchronized void close() {
-        if (recordTracker.get(this.filename) != null) {
-            theLogger.severe("close(): file '" + this.filename + "' was tracked with record tracker, but it should not.");
-        }
+        recordTracker.remove(this.filename);
         super.close();
     }
     
