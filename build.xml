@@ -340,6 +340,7 @@
     </javac>      
     <copy todir="${release_ext}/libx/">
         <fileset dir="${libx}" includes="jsch-0.1.21.*"/> 
+        <fileset dir="${libx}" includes="commons-logging.*"/>
         <fileset dir="${libx}" includes="commons-jxpath-1.1.*"/>    	
         <fileset dir="${libx}" includes="sbbi-upnplib-1.0.3.*"/>
     </copy>
