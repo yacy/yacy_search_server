@@ -11,10 +11,9 @@
 # YOU NEED APACHE ANT TO USE THIS SCRIPT
 # ==========================================
 # This Software is Copyrighted
-# (C) by Michael Peter Christen; mc@anomic.de
-# first published on http://www.anomic.de
-# Frankfurt, Germany, 2005
-# last major change: 06.05.2005
+# (C) by Michael Peter Christen; mc@yacy.net
+# first published on http://yacy.net
+# Frankfurt, Germany, 2005-2007
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -334,6 +333,7 @@
           <pathelement location="${libx}/jsch-0.1.21.jar" />                    
         	
           <!-- libs needed by the upnp port forwarder -->
+        	<pathelement location="${libx}/commons-logging.jar" />
    			<pathelement location="${libx}/commons-jxpath-1.1.jar" />        	
       		<pathelement location="${libx}/sbbi-upnplib-1.0.3.jar" />
         </classpath>
