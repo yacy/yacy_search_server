@@ -68,7 +68,7 @@ import de.anomic.plasma.plasmaSearchImages;
 import de.anomic.plasma.plasmaSearchPreOrder;
 import de.anomic.plasma.plasmaSearchQuery;
 import de.anomic.plasma.plasmaSearchRankingProfile;
-import de.anomic.plasma.plasmaSearchTimingProfile;
+import de.anomic.plasma.plasmaSearchProcessing;
 import de.anomic.plasma.plasmaSnippetCache;
 import de.anomic.plasma.plasmaSwitchboard;
 import de.anomic.plasma.plasmaURL;
@@ -285,8 +285,8 @@ public class yacysearch {
                     20,
                     constraint);
         plasmaSearchRankingProfile ranking = (sb.getConfig("rankingProfile", "").length() == 0) ? new plasmaSearchRankingProfile(contentdomString) : new plasmaSearchRankingProfile("", crypt.simpleDecode(sb.getConfig("rankingProfile", ""), null));
-        plasmaSearchTimingProfile localTiming = new plasmaSearchTimingProfile(4 * thisSearch.maximumTime / 10, thisSearch.wantedResults);
-        plasmaSearchTimingProfile remoteTiming = new plasmaSearchTimingProfile(6 * thisSearch.maximumTime / 10, thisSearch.wantedResults);
+        plasmaSearchProcessing localTiming = new plasmaSearchProcessing(4 * thisSearch.maximumTime / 10, thisSearch.wantedResults);
+        plasmaSearchProcessing remoteTiming = new plasmaSearchProcessing(6 * thisSearch.maximumTime / 10, thisSearch.wantedResults);
 
         plasmaSearchResults results = new plasmaSearchResults();
         String wrongregex = null;

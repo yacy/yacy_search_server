@@ -34,7 +34,6 @@ import java.util.HashSet;
 import javax.xml.parsers.SAXParser;
 import javax.xml.parsers.SAXParserFactory;
 
-import org.xml.sax.SAXException;
 import org.xml.sax.helpers.DefaultHandler;
 
 public class crawlHandler extends DefaultHandler {
@@ -110,7 +109,7 @@ public class crawlHandler extends DefaultHandler {
         }
     }
 
-    public void startElement(String uri, String name, String tag, Attributes atts) throws SAXException {
+    public void startElement(String uri, String name, String tag, Attributes atts) {
         if ("channel".equals(tag)) {
             channel = new Startpoint();
             parsingAttributes = true;

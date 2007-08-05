@@ -48,7 +48,7 @@ import java.util.Map;
 
 import de.anomic.http.httpHeader;
 import de.anomic.plasma.plasmaSearchEvent;
-import de.anomic.plasma.plasmaSearchTimingProfile;
+import de.anomic.plasma.plasmaSearchProcessing;
 import de.anomic.plasma.plasmaSwitchboard;
 import de.anomic.server.serverFileUtils;
 import de.anomic.server.serverObjects;
@@ -70,14 +70,14 @@ public class PerformanceSearch_p {
             if (post.containsKey("submitlocalprofilecustom")) {
                 // first count percentages
                 int c = 0;
-                for (int i = 0; i < plasmaSearchTimingProfile.sequence.length; i++) {
-                    c += post.getInt("searchProcessLocalTime_" + plasmaSearchTimingProfile.sequence[i], 0);
+                for (int i = 0; i < plasmaSearchProcessing.sequence.length; i++) {
+                    c += post.getInt("searchProcessLocalTime_" + plasmaSearchProcessing.sequence[i], 0);
                 }
                 // if check is ok set new values
                 if (c == 100) {
-                    for (int i = 0; i < plasmaSearchTimingProfile.sequence.length; i++) {
-                        sb.setConfig("searchProcessLocalTime_" + plasmaSearchTimingProfile.sequence[i], post.get("searchProcessLocalTime_" + plasmaSearchTimingProfile.sequence[i], ""));
-                        sb.setConfig("searchProcessLocalCount_" + plasmaSearchTimingProfile.sequence[i], post.get("searchProcessLocalCount_" + plasmaSearchTimingProfile.sequence[i], ""));
+                    for (int i = 0; i < plasmaSearchProcessing.sequence.length; i++) {
+                        sb.setConfig("searchProcessLocalTime_" + plasmaSearchProcessing.sequence[i], post.get("searchProcessLocalTime_" + plasmaSearchProcessing.sequence[i], ""));
+                        sb.setConfig("searchProcessLocalCount_" + plasmaSearchProcessing.sequence[i], post.get("searchProcessLocalCount_" + plasmaSearchProcessing.sequence[i], ""));
                     }
                     prop.put("submitlocalrespond", 1);
                 } else {
@@ -85,9 +85,9 @@ public class PerformanceSearch_p {
                 }
             }
             if (post.containsKey("submitlocalprofiledefault")) {
-                for (int i = 0; i < plasmaSearchTimingProfile.sequence.length; i++) {
-                    sb.setConfig("searchProcessLocalTime_" + plasmaSearchTimingProfile.sequence[i], (String) defaultSettings.get("searchProcessLocalTime_" + plasmaSearchTimingProfile.sequence[i]));
-                    sb.setConfig("searchProcessLocalCount_" + plasmaSearchTimingProfile.sequence[i], (String) defaultSettings.get("searchProcessLocalCount_" + plasmaSearchTimingProfile.sequence[i]));
+                for (int i = 0; i < plasmaSearchProcessing.sequence.length; i++) {
+                    sb.setConfig("searchProcessLocalTime_" + plasmaSearchProcessing.sequence[i], (String) defaultSettings.get("searchProcessLocalTime_" + plasmaSearchProcessing.sequence[i]));
+                    sb.setConfig("searchProcessLocalCount_" + plasmaSearchProcessing.sequence[i], (String) defaultSettings.get("searchProcessLocalCount_" + plasmaSearchProcessing.sequence[i]));
                 }
                 prop.put("submitlocalrespond", 2);
             }
@@ -100,12 +100,12 @@ public class PerformanceSearch_p {
         long t;
         int c;
         char sequence;
-        if (se != null) for (int i = 0; i < plasmaSearchTimingProfile.sequence.length; i++) {
-            t = se.getLocalTiming().getYieldTime(plasmaSearchTimingProfile.sequence[i]);
+        if (se != null) for (int i = 0; i < plasmaSearchProcessing.sequence.length; i++) {
+            t = se.getLocalTiming().getYieldTime(plasmaSearchProcessing.sequence[i]);
             if (t > 0) time += t;
         }
-        for (int i = 0; i < plasmaSearchTimingProfile.sequence.length; i++) {
-            sequence = plasmaSearchTimingProfile.sequence[i];
+        for (int i = 0; i < plasmaSearchProcessing.sequence.length; i++) {
+            sequence = plasmaSearchProcessing.sequence[i];
             prop.put("searchProcessLocalTime_" + sequence, sb.getConfig("searchProcessLocalTime_" + sequence, ""));
             prop.put("searchProcessLocalCount_" + sequence, sb.getConfig("searchProcessLocalCount_" + sequence, ""));
             if (se == null) {

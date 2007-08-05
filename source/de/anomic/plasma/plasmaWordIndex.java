@@ -162,7 +162,7 @@ public final class plasmaWordIndex implements indexRI {
         return entries.updated();
     }
     
-    public indexContainer emptyContainer(String wordHash) {
+    public static indexContainer emptyContainer(String wordHash) {
     	return new indexContainer(wordHash, indexRWIEntry.urlEntryRow);
     }
 

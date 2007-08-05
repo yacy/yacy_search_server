@@ -63,7 +63,7 @@ import de.anomic.net.URL;
 import de.anomic.plasma.plasmaCondenser;
 import de.anomic.plasma.plasmaCrawlLURL;
 import de.anomic.plasma.plasmaSearchRankingProfile;
-import de.anomic.plasma.plasmaSearchTimingProfile;
+import de.anomic.plasma.plasmaSearchProcessing;
 import de.anomic.plasma.plasmaSnippetCache;
 import de.anomic.plasma.plasmaSwitchboard;
 import de.anomic.plasma.plasmaWordIndex;
@@ -350,7 +350,7 @@ public final class yacyClient {
             Map abstractCache,
             plasmaURLPattern blacklist, 
             plasmaSnippetCache snippets, 
-            plasmaSearchTimingProfile timingProfile,
+            plasmaSearchProcessing timingProfile,
             plasmaSearchRankingProfile rankingProfile,
             kelondroBitfield constraint
     ) {
@@ -375,7 +375,7 @@ public final class yacyClient {
         final String salt = yacyNetwork.enrichRequestPost(post, plasmaSwitchboard.getSwitchboard(), target.hash);
         long duetime = timingProfile.duetime();
         post.putASIS("myseed", yacyCore.seedDB.mySeed.genSeedStr(salt));
-        post.put("count", timingProfile.getTargetCount(plasmaSearchTimingProfile.PROCESS_POSTSORT));
+        post.put("count", timingProfile.getTargetCount(plasmaSearchProcessing.PROCESS_POSTSORT));
         post.putASIS("resource", ((global) ? "global" : "local"));
         post.put("partitions", partitions);
         post.putASIS("query", wordhashes);
@@ -452,7 +452,7 @@ public final class yacyClient {
 		final int words = wordhashes.length() / yacySeedDB.commonHashLength;
 		indexContainer[] container = new indexContainer[words];
 		for (int i = 0; i < words; i++) {
-			container[i] = wordIndex.emptyContainer(wordhashes.substring(i * yacySeedDB.commonHashLength, (i + 1) * yacySeedDB.commonHashLength));
+			container[i] = plasmaWordIndex.emptyContainer(wordhashes.substring(i * yacySeedDB.commonHashLength, (i + 1) * yacySeedDB.commonHashLength));
 		}
 
 		// insert results to containers

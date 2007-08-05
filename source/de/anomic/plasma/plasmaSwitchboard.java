@@ -2628,7 +2628,7 @@ public final class plasmaSwitchboard extends serverAbstractSwitch implements ser
                                             ioLinks[1].intValue(),
                                             condenser.RESULT_FLAGS
                                         );
-                                indexContainer wordIdxContainer = wordIndex.emptyContainer(wordHash);
+                                indexContainer wordIdxContainer = plasmaWordIndex.emptyContainer(wordHash);
                                 wordIdxContainer.add(wordIdxEntry);
                                 tmpContainers.add(wordIdxContainer);
                             }
@@ -2894,8 +2894,8 @@ public final class plasmaSwitchboard extends serverAbstractSwitch implements ser
     
     public plasmaSearchResults searchFromLocal(plasmaSearchQuery query,
                                          plasmaSearchRankingProfile ranking,
-                                         plasmaSearchTimingProfile  localTiming,
-                                         plasmaSearchTimingProfile  remoteTiming,
+                                         plasmaSearchProcessing  localTiming,
+                                         plasmaSearchProcessing  remoteTiming,
                                          boolean postsort,
                                          String client) {
         
@@ -2924,7 +2924,7 @@ public final class plasmaSwitchboard extends serverAbstractSwitch implements ser
             //}
             
             // create a new search event
-            plasmaSearchEvent theSearch = new plasmaSearchEvent(query, ranking, localTiming, remoteTiming, postsort, log, wordIndex, wordIndex.loadedURL, snippetCache, (isRobinsonMode()) ? this.clusterhashes : null);
+            plasmaSearchEvent theSearch = new plasmaSearchEvent(query, ranking, localTiming, remoteTiming, postsort, log, wordIndex, snippetCache, (isRobinsonMode()) ? this.clusterhashes : null);
             plasmaSearchPostOrder acc = theSearch.search();
             
             // fetch snippets
