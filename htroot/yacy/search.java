@@ -61,6 +61,7 @@ import de.anomic.plasma.plasmaURL;
 import de.anomic.index.indexURLEntry;
 import de.anomic.plasma.plasmaCondenser;
 import de.anomic.plasma.plasmaSearchEvent;
+import de.anomic.plasma.plasmaSearchPreOrder;
 import de.anomic.plasma.plasmaSearchQuery;
 import de.anomic.plasma.plasmaSearchRankingProfile;
 import de.anomic.plasma.plasmaSearchPostOrder;
@@ -187,14 +188,14 @@ public final class search {
 
             // prepare a search profile
             plasmaSearchRankingProfile rankingProfile = (profile.length() == 0) ? new plasmaSearchRankingProfile(contentdom) : new plasmaSearchRankingProfile("", profile);
-            plasmaSearchProcessing localTiming  = new plasmaSearchProcessing(squery.maximumTime, squery.wantedResults);
-            plasmaSearchProcessing remoteTiming = null;
+            plasmaSearchProcessing localProcess  = new plasmaSearchProcessing(squery.maximumTime, squery.wantedResults);
+            plasmaSearchProcessing remoteProcess = null;
 
             theSearch = new plasmaSearchEvent(squery,
-                    rankingProfile, localTiming, remoteTiming, true,
+                    rankingProfile, localProcess, remoteProcess, true,
                     yacyCore.log, sb.wordIndex,
                     sb.snippetCache, null);
-            Map[] containers = localTiming.localSearchContainers(squery, sb.wordIndex, plasmaSearchQuery.hashes2Set(urls));
+            Map[] containers = localProcess.localSearchContainers(squery, sb.wordIndex, plasmaSearchQuery.hashes2Set(urls));
             // set statistic details of search result and find best result index set
             if (containers == null) {
                 prop.putASIS("indexcount", "");
@@ -234,12 +235,12 @@ public final class search {
                 indexContainer localResults =
                     (containers == null) ?
                       plasmaWordIndex.emptyContainer(null) :
-                          localTiming.localSearchJoinExclude(
+                          localProcess.localSearchJoinExclude(
                               containers[0].values(),
                               containers[1].values(),
                               (squery.queryHashes.size() == 0) ?
                                 0 :
-                                localTiming.getTargetTime(plasmaSearchProcessing.PROCESS_JOIN) * squery.queryHashes.size() / (squery.queryHashes.size() + squery.excludeHashes.size()),
+                                localProcess.getTargetTime(plasmaSearchProcessing.PROCESS_JOIN) * squery.queryHashes.size() / (squery.queryHashes.size() + squery.excludeHashes.size()),
                               squery.maxDistance);
                 if (localResults == null) {
                     joincount = 0;
@@ -248,10 +249,13 @@ public final class search {
                 } else {
                     joincount = localResults.size();
                     prop.putASIS("joincount", Integer.toString(joincount));
-                    acc = localTiming.orderFinal(squery, rankingProfile, sb.wordIndex, true, localResults);
-                    
-                    
+                    plasmaSearchPreOrder pre = localProcess.preSort(squery, rankingProfile, localResults);
+                    acc = localProcess.urlFetch(squery, rankingProfile, sb.wordIndex, pre);
+                    acc.localContributions = (localResults == null) ? 0 : localResults.size();
+                    localProcess.postSort(true, acc);
+                    localProcess.applyFilter(acc);
                 }
+                
                 // generate compressed index for maxcounthash
                 // this is not needed if the search is restricted to specific
                 // urls, because it is a re-search

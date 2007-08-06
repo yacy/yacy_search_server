@@ -1,11 +1,15 @@
-// plasmaSearchEvent.java 
-// -----------------------
-// part of YACY
-// (C) by Michael Peter Christen; mc@anomic.de
-// first published on http://www.anomic.de
-// Frankfurt, Germany, 2005
-// Created: 10.10.2005
+// plasmaSearchEvent.java
+// (C) 2005 by Michael Peter Christen; mc@yacy.net, Frankfurt a. M., Germany
+// first published 10.10.2005 on http://yacy.net
 //
+// This is a part of YaCy, a peer-to-peer based web search engine
+//
+// $LastChangedDate: 2006-04-02 22:40:07 +0200 (So, 02 Apr 2006) $
+// $LastChangedRevision: 1986 $
+// $LastChangedBy: orbiter $
+//
+// LICENSE
+// 
 // This program is free software; you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
 // the Free Software Foundation; either version 2 of the License, or
@@ -19,25 +23,6 @@
 // You should have received a copy of the GNU General Public License
 // along with this program; if not, write to the Free Software
 // Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
-//
-// Using this software in any meaning (reading, learning, copying, compiling,
-// running) means that you agree that the Author(s) is (are) not responsible
-// for cost, loss of data or any harm that may be caused directly or indirectly
-// by usage of this softare or this documentation. The usage of this software
-// is on your own risk. The installation and usage (starting/running) of this
-// software may allow other people or application to access your computer and
-// any attached devices and is highly dependent on the configuration of the
-// software which must be done by the user of the software; the author(s) is
-// (are) also not responsible for proper configuration and usage of the
-// software, even if provoked by documentation provided together with
-// the software.
-//
-// Any changes to this file according to the GPL as documented in the file
-// gpl.txt aside this file in the shipment you received can be done to the
-// lines that follows this copyright notice here, but changes must not be
-// done inside the copyright notive above. A re-distribution must contain
-// the intact and unchanged copyright notice.
-// Contributions and changes to the program code must be marked as such.
 
 package de.anomic.plasma;
 
@@ -48,8 +33,6 @@ import java.util.Map;
 import java.util.TreeMap;
 
 import de.anomic.index.indexContainer;
-import de.anomic.index.indexRWIEntry;
-import de.anomic.kelondro.kelondroException;
 import de.anomic.kelondro.kelondroMSetTools;
 import de.anomic.server.logging.serverLog;
 import de.anomic.yacy.yacyCore;
@@ -195,7 +178,6 @@ public final class plasmaSearchEvent extends Thread implements Runnable {
                                 0 :
                                 profileLocal.getTargetTime(plasmaSearchProcessing.PROCESS_JOIN) * query.queryHashes.size() / (query.queryHashes.size() + query.excludeHashes.size()),
                               query.maxDistance);
-                prefetchLocal(rcLocal, secondaryTimeout);
                 
                 // this is temporary debugging code to learn that the index abstracts are fetched correctly
                 while (System.currentTimeMillis() < secondaryTimeout) {
@@ -224,8 +206,13 @@ public final class plasmaSearchEvent extends Thread implements Runnable {
                 searchResult.addAllUnique(rcContainers);
                 searchResult.sort();
                 searchResult.uniq(1000);
-                result = profileLocal.orderFinal(query, ranking, wordIndex, postsort, searchResult);
-
+                plasmaSearchPreOrder pre = profileLocal.preSort(query, ranking, searchResult);
+                result = profileLocal.urlFetch(query, ranking, wordIndex, pre);
+                result.localContributions = (rcLocal == null) ? 0 : rcLocal.size();
+                profileLocal.postSort(postsort, result);
+                profileLocal.applyFilter(result);
+                
+                
                 if (result != null) {
                     result.globalContributions = globalContributions;
 
@@ -245,7 +232,12 @@ public final class plasmaSearchEvent extends Thread implements Runnable {
                                 0 :
                                 profileLocal.getTargetTime(plasmaSearchProcessing.PROCESS_JOIN) * query.queryHashes.size() / (query.queryHashes.size() + query.excludeHashes.size()),
                               query.maxDistance);
-                result = profileLocal.orderFinal(query, ranking, wordIndex, postsort, rcLocal);
+                plasmaSearchPreOrder pre = profileLocal.preSort(query, ranking, rcLocal);
+                result = profileLocal.urlFetch(query, ranking, wordIndex, pre);
+                result.localContributions = (rcLocal == null) ? 0 : rcLocal.size();
+                profileLocal.postSort(postsort, result);
+                profileLocal.applyFilter(result);
+                
                 result.globalContributions = 0;
             }
 
@@ -352,27 +344,6 @@ public final class plasmaSearchEvent extends Thread implements Runnable {
             }
         }
         return wordlist;
-    }
-    
-    private void prefetchLocal(indexContainer rcLocal, long timeout) {
-        // pre-fetch some urls to fill LURL ram cache
-
-        if (rcLocal == null) return;
-        plasmaSearchPreOrder preorder = new plasmaSearchPreOrder(query, ranking, rcLocal, timeout - System.currentTimeMillis());
-        if (preorder.filteredCount() > query.wantedResults) preorder.remove(true, true);
-        
-        // start url-fetch
-        indexRWIEntry entry;
-        try {
-            while (preorder.hasNext()) {
-                if (System.currentTimeMillis() >= timeout) break;
-                entry = (indexRWIEntry) (preorder.next()[0]);
-                // find and fetch the url entry
-                urlStore.load(entry.urlHash(), entry);
-            }
-        } catch (kelondroException ee) {
-            serverLog.logSevere("PLASMA", "Database Failure during plasmaSearch.order: " + ee.getMessage(), ee);
-        }
     }
     
     public void run() {

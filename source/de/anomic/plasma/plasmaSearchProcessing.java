@@ -1,4 +1,4 @@
-// plasmaSearchProcess.java
+// plasmaSearchProcessing.java
 // (C) 2005 by Michael Peter Christen; mc@yacy.net, Frankfurt a. M., Germany
 // first published 17.10.2005 on http://yacy.net
 //
@@ -276,6 +276,7 @@ public class plasmaSearchProcessing implements Cloneable {
     
     // the processes
 
+    // collection
     public Map[] localSearchContainers(
             plasmaSearchQuery query,
             plasmaWordIndex wordIndex,
@@ -305,6 +306,7 @@ public class plasmaSearchProcessing implements Cloneable {
         return new Map[]{inclusionContainers, exclusionContainers};
     }
     
+    // join
     public indexContainer localSearchJoinExclude(
             Collection includeContainers,
             Collection excludeContainers,
@@ -329,11 +331,10 @@ public class plasmaSearchProcessing implements Cloneable {
         return rcLocal;
     }
     
-    public plasmaSearchPostOrder orderFinal(
+    // presort
+    public plasmaSearchPreOrder preSort(
             plasmaSearchQuery query,
             plasmaSearchRankingProfile ranking,
-            plasmaWordIndex wordIndex,
-            boolean postsort,
             indexContainer resultIndex) {
         // we collect the urlhashes and construct a list with urlEntry objects
         // attention: if minEntries is too high, this method will not terminate within the maxTime
@@ -353,6 +354,16 @@ public class plasmaSearchProcessing implements Cloneable {
         setYieldTime(plasmaSearchProcessing.PROCESS_PRESORT);
         setYieldCount(plasmaSearchProcessing.PROCESS_PRESORT, resultIndex.size());
         
+        return preorder;
+    }
+    
+    // urlfetch
+    public plasmaSearchPostOrder urlFetch(
+            plasmaSearchQuery query,
+            plasmaSearchRankingProfile ranking,
+            plasmaWordIndex wordIndex,
+            plasmaSearchPreOrder preorder) {
+
         // start url-fetch
         long postorderTime = getTargetTime(plasmaSearchProcessing.PROCESS_POSTSORT);
         //System.out.println("DEBUG: postorder-final (urlfetch) maxtime = " + postorderTime);
@@ -415,21 +426,33 @@ public class plasmaSearchProcessing implements Cloneable {
         setYieldTime(plasmaSearchProcessing.PROCESS_URLFETCH);
         setYieldCount(plasmaSearchProcessing.PROCESS_URLFETCH, acc.sizeFetched());
 
+        acc.filteredResults = preorder.filteredCount();
+        
+        return acc;
+    }
+
+    //acc.localContributions = (resultIndex == null) ? 0 : resultIndex.size();
+    
+    // postsort
+    public void postSort(
+            boolean postsort,
+            plasmaSearchPostOrder acc) {
+
         // start postsorting
         startTimer();
         acc.sortPages(postsort);
         setYieldTime(plasmaSearchProcessing.PROCESS_POSTSORT);
         setYieldCount(plasmaSearchProcessing.PROCESS_POSTSORT, acc.sizeOrdered());
-        
+    }
+    
+    // filter
+    public void applyFilter(
+            plasmaSearchPostOrder acc) {
+
         // apply filter
         startTimer();
         acc.removeRedundant();
         setYieldTime(plasmaSearchProcessing.PROCESS_FILTER);
         setYieldCount(plasmaSearchProcessing.PROCESS_FILTER, acc.sizeOrdered());
-        
-        acc.localContributions = (resultIndex == null) ? 0 : resultIndex.size();
-        acc.filteredResults = preorder.filteredCount();
-        return acc;
     }
-
 }
