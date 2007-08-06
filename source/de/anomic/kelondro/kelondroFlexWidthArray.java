@@ -214,6 +214,7 @@ public class kelondroFlexWidthArray implements kelondroArray {
     }
     
     public int size() {
+        //assert ((rowdef.columns() == 1) || (col[0].size() == col[1].size())) : "col[0].size() = " + col[0].size() + ", col[1].size() = " + col[1].size() + ", file = " + filename;
         return col[0].size();
     }
     

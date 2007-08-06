@@ -91,15 +91,15 @@ public class kelondroEcoRecords extends kelondroAbstractRecords {
             
             // create chunks
             this.ohChunk = new byte[overhead];
+            this.bodyChunk = new byte[ROW.objectsize()];
             for (int i = this.ohChunk.length - 1; i >= 0; i--) this.ohChunk[i] = (byte) 0xff;
             if (rowinstance == null) {
-                this.bodyChunk = new byte[ROW.objectsize()];
                 for (int i = this.bodyChunk.length - 1; i >= 0; i--) this.bodyChunk[i] = (byte) 0xff;
             } else {
-                this.bodyChunk = rowinstance;
+               System.arraycopy(rowinstance, 0, this.bodyChunk, 0, this.bodyChunk.length);
             }
             
-            // mark chunks as not changed
+            // mark chunks as not changed, we wrote that already during allocatePayload
             this.ohChanged = false;
             this.bodyChanged = false;
         }
@@ -120,24 +120,24 @@ public class kelondroEcoRecords extends kelondroAbstractRecords {
             }
             assert ((bulkchunk == null) || (bulkchunk.length - offset >= recordsize)) : "bulkchunk.length = " + bulkchunk.length + ", offset = " + offset + ", recordsize = " + recordsize;
             
-            if ((offset == 0) && (overhead == 0) && ((bulkchunk == null) || (bulkchunk.length == ROW.objectsize()))) {
+            /*if ((offset == 0) && (overhead == 0) && ((bulkchunk == null) || (bulkchunk.length == ROW.objectsize()))) {
                 this.ohChunk = new byte[0];
                 if (bulkchunk == null) {
                     this.bodyChunk = new byte[ROW.objectsize()];
                 } else {
                     this.bodyChunk = bulkchunk;
                 }
-            } else {
+            } else { */
                 // create empty chunks
                 this.ohChunk = new byte[overhead];
                 this.bodyChunk = new byte[ROW.objectsize()];
                 
                 // write content to chunks
                 if (bulkchunk != null) {
-                    System.arraycopy(bulkchunk, offset, this.ohChunk, 0, overhead);
+                    if (overhead > 0) System.arraycopy(bulkchunk, offset, this.ohChunk, 0, overhead);
                     System.arraycopy(bulkchunk, offset + overhead, this.bodyChunk, 0, ROW.objectsize());
                 }
-            }
+            //}
             
             // mark chunks as changed
             this.ohChanged = changed;
@@ -150,9 +150,7 @@ public class kelondroEcoRecords extends kelondroAbstractRecords {
             // but we expect that values are already there in the file.
             assert (handle != null): "node handle is null";
             assert (handle.index >= 0): "node handle too low: " + handle.index;
-            //assert (handle.index < USAGE.allCount()) : "node handle too high: " + handle.index + ", USEDC=" + USAGE.USEDC + ", FREEC=" + USAGE.FREEC;
-            
-            // the parentNode can be given if an auto-fix in the following case is wanted
+           
             if (handle == null) throw new kelondroException(filename, "INTERNAL ERROR: node handle is null.");
             if (handle.index >= USAGE.allCount()) {
                 throw new kelondroException(filename, "INTERNAL ERROR, Node/init: node handle index " + handle.index + " exceeds size. No auto-fix node was submitted. This is a serious failure.");
@@ -161,24 +159,11 @@ public class kelondroEcoRecords extends kelondroAbstractRecords {
             // use given handle
             this.handle = new kelondroHandle(handle.index);
 
-            // read complete record
-            byte[] bulkchunk = new byte[recordsize];
-            entryFile.readFully(seekpos(this.handle), bulkchunk, 0, recordsize);
-
-            if ((overhead == 0) && (bulkchunk.length == ROW.objectsize())) {
-                this.ohChunk = new byte[0];
-                this.bodyChunk = bulkchunk;
-            } else {
-                // create empty chunks
-                this.ohChunk = new byte[overhead];
-                this.bodyChunk = new byte[ROW.objectsize()];
-
-                // write content to chunks
-                if (bulkchunk != null) {
-                    System.arraycopy(bulkchunk, 0, this.ohChunk, 0, overhead);
-                    System.arraycopy(bulkchunk, 0 + overhead, this.bodyChunk, 0, ROW.objectsize());
-                }
-            }
+            // read record
+            this.ohChunk = new byte[overhead];
+            this.bodyChunk = new byte[ROW.objectsize()];
+            if (overhead > 0) entryFile.readFully(seekpos(this.handle), this.ohChunk, 0, overhead);
+            entryFile.readFully(seekpos(this.handle) + overhead, this.bodyChunk, 0, this.bodyChunk.length);
             
             // mark chunks as not changed
             this.ohChanged = false;
@@ -268,7 +253,7 @@ public class kelondroEcoRecords extends kelondroAbstractRecords {
             synchronized (entryFile) {
             if (this.ohChanged) {
                 //System.out.println("WRITEH(" + filename + ", " + seekpos(this.handle) + ", " + this.headChunk.length + ")");
-                assert (ohChunk == null) || (ohChunk.length == headchunksize);
+                assert (ohChunk == null) || (ohChunk.length == overhead);
                 entryFile.write(seekpos(this.handle), (this.ohChunk == null) ? new byte[overhead] : this.ohChunk);
                 this.ohChanged = false;
             }

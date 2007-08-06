@@ -60,6 +60,7 @@ public class kelondroFixedWidthArray extends kelondroEcoRecords implements kelon
     
     public kelondroFixedWidthArray(File file, kelondroRow rowdef, int intprops) throws IOException {
         // this creates a new array
+        //super(file, true, -1, thisOHBytes, thisOHHandles, rowdef, intprops, rowdef.columns() /* txtProps */, 80 /* txtPropWidth */);
         super(file, thisOHBytes, thisOHHandles, rowdef, intprops, rowdef.columns() /* txtProps */, 80 /* txtPropWidth */);
         if (!(super.fileExisted)) {
             for (int i = 0; i < intprops; i++) {
@@ -74,6 +75,7 @@ public class kelondroFixedWidthArray extends kelondroEcoRecords implements kelon
     
     public kelondroFixedWidthArray(kelondroRA ra, String filename, kelondroRow rowdef, int intprops) throws IOException {
         // this creates a new array
+        //super(ra, filename, true, -1, thisOHBytes, thisOHHandles, rowdef, intprops, rowdef.columns() /* txtProps */, 80 /* txtPropWidth */, false);
         super(ra, filename, thisOHBytes, thisOHHandles, rowdef, intprops, rowdef.columns() /* txtProps */, 80 /* txtPropWidth */, false);
         for (int i = 0; i < intprops; i++) {
             setHandle(i, new kelondroHandle(0));
