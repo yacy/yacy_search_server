@@ -239,14 +239,6 @@ For explanation please look into yacy.init==F&uuml;r eine Erkl&auml;rung sehen S
 "Save"=="Speichern"
 #-----------------------------
 
-#File: ConfigAdvanced_p.html
-#---------------------------
-Advanced Config==Erweiterte Einstellungen
-Here are all configuration options from YaCy.==Hier sind alle Konfigurationseinstellungen von YaCy.
-You can change anything, but some options need a restart, and some options can crash YaCy, if wrong values are used.==Sie k&ouml;nnen alles &auml;ndern, bedenken Sie aber, dass einige &Auml;nderungen einen Neustart von YaCy erfordern und andere &Auml;nderungen YaCy ganz zum Absturz bringen k&ouml;nnen.
-For explanation please look into yacy.init==Eine Erkl&auml;rung finden Sie in der Datei yacy.init
-"Save"=="Speichern"
-#-----------------------------
 
 #File: ConfigBasic.html
 #---------------------------
@@ -378,6 +370,15 @@ Comment==Kommentar
 "Save"==Speichern
 You can use==Sie können
 here.==im Profil benutzen.
+#-----------------------------
+
+#File: ConfigProperties_p.html
+#---------------------------
+Advanced Config==Erweiterte Einstellungen
+Here are all configuration options from YaCy.==Hier sind alle Konfigurationseinstellungen von YaCy.
+You can change anything, but some options need a restart, and some options can crash YaCy, if wrong values are used.==Sie k&ouml;nnen alles &auml;ndern, bedenken Sie aber, dass einige &Auml;nderungen einen Neustart von YaCy erfordern und andere &Auml;nderungen YaCy ganz zum Absturz bringen k&ouml;nnen.
+For explanation please look into yacy.init==Eine Erkl&auml;rung finden Sie in der Datei yacy.init
+"Save"=="Speichern"
 #-----------------------------
 
 #File: ConfigRobotsTxt_p.html
@@ -667,60 +668,6 @@ Idle Peers==Unt&auml;tige Peers
 Busy Peers==Besch&auml;tigte Peers
 #-----------------------------
 
-
-#File: DetailedSearch.html
-#---------------------------
-Search Page==Suchseite
-Detailed Search</h2>==Detaillierte Suche</h2>
-"Search"=="Suche"
-Query Attributes==Such Attribute
-#Global:==Global
-Post-Sort:
-Max. number of results:==Max. Anzahl Ergebnisse:
-Max. search time \(seconds\):==Max. Suchzeit (in Sekunden):
-Max. word distance:==Max. Wort Distanz:
-Pre-Ranking==Vor-Ranking
-
-#auskommentierte Übersetzung, vielleicht später wieder einsetzbar - daburna 04.01.07
-
-#"Domain Length"=="Domain L&auml;nge"
-#"YaCy Block Rank"=="YaCY Block Rank"
-#"Date"=="Datum"
-#"Words In Title"=="W&ouml;rter im Titel"
-#"Words In Text"=="W&ouml;rter im Text"
-#"Phrases In Text"=="Phrasen im Text"
-#"Links To Local Domain"=="Links zu lokaler Domain"
-#"Links To Other Domain"=="Links zu anderer Domain" 
-#"URL Length"=="URL L&auml;nge"
-#"URL Components"=="URL Komponenten"
-#"Hit Count"=="Treffer Anzahl"
-#"Position In Text"=="Position im Text"
-#"Position Of Phrase"=="Position der Phrase"
-#"Word Distance"=="Wort Distanz"
-#"Appearance in URL"=="Taucht in URL auf"
-#"Appearance in Description"=="Vorkommen in Beschreibung"
-#"Appearance in Author"=="Vorkommen im Autor"
-#"Appearance in Tags"=="Vorkommen in Tags"
-#"Appearance in Reference"=="Vorkommen in Referenz"
-#"Appearance in Emphasized Text"=="Vork. in hervorgehobenem Text"
-#"Category Index Page"=="Kategorie Index Seite"
-#"Category Image Appearance"=="Vorkommen in Bilder Kategorie" 
-#"Category Audio Appearance"=="Vorkommen in Audio Kategorie"
-#"Category Video Appearance"=="Vorkommen in Video Kategorie"
-#"Category App. Appearance"=="Vorkommen in Anwendungen Kategorie"
-Post-Ranking==Nach-Ranking
-#"URL Component Appears In Toplist"=="URL Komponente kommt in Topliste vor"
-#"Description Comp. Appears In Toplist"=="Beschreibung kommt in Topliste vor"
-#"Application Of Prefer Pattern"=="Anwendung der bervorzugten Form"
-"Set as Default Ranking"=="Speicher als Standard Ranking"
-"Re-Set to Built-In Ranking"=="Stelle auf urspr&uuml;ngliche Werte zur&uuml;ck"
-The following words are stop-words and had been excluded from the search:==Folgende W&ouml;rter sind Stopwords und wurden von der Suche ausgeschlossen:
-results from <strong>\#\[orderedcount\]\#</strong> ordered links of a total number of <strong>\#\[totalcount\]\#</strong> known.==Ergebnisse von <strong>#[orderedcount]#</strong> angeforderten Links von insgesamt <strong>#[totalcount]#</strong> bekannten Links.
-Topwords</strong> \(to refine search\):==Topw&ouml;rter</strong> (um Suche zu verfeinern):
-#"delete"=="l&ouml;schen"
-#Info==Info
-
-#-----------------------------
 
 #File: Help.html
 #---------------------------
@@ -1510,11 +1457,55 @@ Unable to create new crawling profile for URL:==Es ist nicht m&ouml;glich f&uuml
 Unable to add URL to crawler queue:==Es ist nicht m&ouml;glich die URL zum Crawler-Puffer hinzuzuf&uuml;gen:
 #-----------------------------
 
+#File: Ranking_p.html
+#---------------------------
+Ranking Configuration==Ranking Einstellungen
+Pre-Ranking==Vor-Ranking
+
+#auskommentierte Übersetzung, vielleicht später wieder einsetzbar - daburna 04.01.07
+
+#"Domain Length"=="Domain L&auml;nge"
+#"YaCy Block Rank"=="YaCY Block Rank"
+#"Date"=="Datum"
+#"Words In Title"=="W&ouml;rter im Titel"
+#"Words In Text"=="W&ouml;rter im Text"
+#"Phrases In Text"=="Phrasen im Text"
+#"Links To Local Domain"=="Links zu lokaler Domain"
+#"Links To Other Domain"=="Links zu anderer Domain" 
+#"URL Length"=="URL L&auml;nge"
+#"URL Components"=="URL Komponenten"
+#"Hit Count"=="Treffer Anzahl"
+#"Position In Text"=="Position im Text"
+#"Position Of Phrase"=="Position der Phrase"
+#"Word Distance"=="Wort Distanz"
+#"Appearance in URL"=="Taucht in URL auf"
+#"Appearance in Description"=="Vorkommen in Beschreibung"
+#"Appearance in Author"=="Vorkommen im Autor"
+#"Appearance in Tags"=="Vorkommen in Tags"
+#"Appearance in Reference"=="Vorkommen in Referenz"
+#"Appearance in Emphasized Text"=="Vork. in hervorgehobenem Text"
+#"Category Index Page"=="Kategorie Index Seite"
+#"Category Image Appearance"=="Vorkommen in Bilder Kategorie" 
+#"Category Audio Appearance"=="Vorkommen in Audio Kategorie"
+#"Category Video Appearance"=="Vorkommen in Video Kategorie"
+#"Category App. Appearance"=="Vorkommen in Anwendungen Kategorie"
+Post-Ranking==Nach-Ranking
+#"URL Component Appears In Toplist"=="URL Komponente kommt in Topliste vor"
+#"Description Comp. Appears In Toplist"=="Beschreibung kommt in Topliste vor"
+#"Application Of Prefer Pattern"=="Anwendung der bervorzugten Form"
+"Set as Default Ranking"=="Speicher als Standard Ranking"
+"Re-Set to Built-In Ranking"=="Stelle auf urspr&uuml;ngliche Werte zur&uuml;ck"
+The following words are stop-words and had been excluded from the search:==Folgende W&ouml;rter sind Stopwords und wurden von der Suche ausgeschlossen:
+results from <strong>\#\[orderedcount\]\#</strong> ordered links of a total number of <strong>\#\[totalcount\]\#</strong> known.==Ergebnisse von <strong>#[orderedcount]#</strong> angeforderten Links von insgesamt <strong>#[totalcount]#</strong> bekannten Links.
+Topwords</strong> \(to refine search\):==Topw&ouml;rter</strong> (um Suche zu verfeinern):
+#"delete"=="l&ouml;schen"
+#Info==Info
+
+#-----------------------------
 
 #File: Settings_p.html
 #---------------------------
-YaCy \'\#\[clientname\]\#\': Settings==YaCy '#[clientname]#': Einstellungen
-<h2>Settings</h2>==<h2>Einstellungen</h2>
+Advanced Settings==Erweiterte Einstellungen
 If you want to restore all settings to the default values,==Wenn Sie alle Einstellungen auf die urspr&uuml;nglichen Werte zur&uuml;cksetzen wollen,
 but <strong>forgot your administration password</strong>, you must stop the proxy,==aber Ihr <strong>Administatorpasswort vergessen haben</strong>, m&uuml;ssen Sie YaCy stoppen,
 delete the file 'DATA/SETTINGS/httpProxy.conf' in the YaCy application root folder and start YaCy again.==die Datei 'DATA/SETTINGS/httpProxy.conf' im YaCy Hauptordner l&ouml;schen und YaCy neu starten.
@@ -2285,11 +2276,12 @@ Project Home==Projektseite
 
 #File: env/templates/header.template
 #---------------------------
-YaCy - Distributed Web Indexing - Administration==YaCy - Verteiltes Internet-Indexieren - Administration
-Global Index==Globaler Index
+YaCy - Distributed Web Search==YaCy - Verteilte Internet Suche
+Search&nbsp;&amp;&nbsp;Browse==Suchen&nbsp;&amp;&nbsp;Surfen
 Search Page==Suchseite
-Detailed Search==Detaillierte Suche
+Ranking Config==Ranking einstellen
 >Surftips==>Surftipps
+Publication==Ver&ouml;ffentlichung
 >Bookmarks==>Lesezeichen
 >Help==>Hilfe
 Web&nbsp;Indexing==Web Indexierung
@@ -2306,26 +2298,21 @@ Access Tracker==Zugriffs Tracker
 #Web Cache==Web Cache
 News Monitor==News Anzeige
 Cookies in Proxy==Cookies per Proxy
-Your Web Content==Dein Web
-#YaCy Wiki==YaCy Wiki
-#YaCy Blog==YaCy Blog
-YaCy Messages==YaCy Nachrichten
-"New Messages"=="Neue Nachrichten"
-YaCy File Hosting==YaCy Dateifreigaben
 Peer Control==Peer Kontrolle
 Admin Console==Admin Konsole
+>Messages==>Nachrichten
+"New Messages"=="Neue Nachrichten"
 Confirm Restart==Best&auml;tige Neustart
 Re-Start</a>==Neustarten</a>
 Confirm Shutdown==Best&auml;tige Herunterfahren
+>Shutdown==>Herunterfahren
 The Project==Das Projekt
 Project Home==Projektseite
-Project News==Neuigkeiten
 English Forum==Englisches Forum
-Newsletters==Newsletter
 #Deutsches Forum==Deutsches Forum
 Download YaCy==YaCy herunterladen
 YaCy Project Wiki==YaCy Projekt Wiki
-YaCy Community Statistics==YaCy Gemeinschaft Statistiken
+YaCy Statistics==YaCy Statistiken
 #-----------------------------
 
 #File: env/templates/submenuAccessTracker.template
@@ -2351,14 +2338,21 @@ Blacklist Cleaner==Blacklist aufr&auml;men
 
 #File: env/templates/submenuConfig.template
 #---------------------------
-Peer Configuration Menu==Peerkonfigurationsmen&uuml;
-Basic Configuraton==Grundeinstellungen
+Peer Administration Console==Peer Administrations Konsole
+#Status==Status
+Access Config==Eingangskonfiguration
 >Language==>Sprache
+>Profile==>Profil
+>Skins==>Skin Auswahl
+System Update==System Aktualisierung
 >Network==>Netzwerk
-Peer Profile==Profil
-Interface Skins==Skin Auswahl
->Advanced==>Erweitert
 Local robots.txt==Lokale robots.txt
+User Administration==Benutzer Verwaltung
+Advanced Settings==Erweiterte Einstellungen
+Advanced Properties==Erweitertes Verhalten
+Queues Performance Settings==Performanceeinstellungen f&uuml;r Puffer und Prozesse
+Memory Settings for Database Caches==Performanceeinstellungen f&uuml;r Speicher
+Timing Settings for Search Sequence==Timing-Einstellungen des Suchablaufs
 #-----------------------------
 
 #File: env/templates/submenuCookie.template
@@ -2411,6 +2405,14 @@ Performance Menu==Performance Men&uuml;
 Queues Performance Settings==Puffer Performance Einstellungen
 Memory Settings for Database Caches==Speicher Einstellungen des Datenbank Caches
 Timing Settings for Search Sequence==Zeit Einstellungen f&uuml;r die Such Sequenz
+#-----------------------------
+
+#File: env/templates/submenuPublication.template
+#---------------------------
+Publication==Ver&ouml;ffentlichung
+#Wiki==Wiki
+#Blog==Blog
+File Hosting==Datei Freigabe
 #-----------------------------
 
 #File: env/templates/submenuViewLog.template
