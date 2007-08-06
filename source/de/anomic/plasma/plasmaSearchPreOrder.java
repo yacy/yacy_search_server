@@ -110,7 +110,7 @@ public final class plasmaSearchPreOrder {
                 if ((query.contentdom == plasmaSearchQuery.CONTENTDOM_IMAGE) && (!(iEntry.flags().get(plasmaCondenser.flag_cat_hasimage)))) continue;
                 if ((query.contentdom == plasmaSearchQuery.CONTENTDOM_APP  ) && (!(iEntry.flags().get(plasmaCondenser.flag_cat_hasapp  )))) continue;
             }
-            pageAcc.put(serverCodings.encodeHex(Long.MAX_VALUE - this.ranking.preRanking(iEntry.generateNormalized(this.entryMin, this.entryMax), searchWords), 16) + iEntry.urlHash(), iEntry);
+            pageAcc.put(serverCodings.encodeHex(Long.MAX_VALUE - this.ranking.preRanking(iEntry, this.entryMin, this.entryMax, searchWords), 16) + iEntry.urlHash(), iEntry);
         }
         this.filteredCount = pageAcc.size();
     }

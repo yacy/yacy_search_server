@@ -380,7 +380,7 @@ public class plasmaSearchProcessing implements Cloneable {
         int minEntries = getTargetCount(plasmaSearchProcessing.PROCESS_POSTSORT);
         try {
             ordering: while (preorder.hasNext()) {
-                if ((System.currentTimeMillis() >= postorderLimitTime) || (acc.sizeFetched() >= minEntries)) break;
+                if ((System.currentTimeMillis() >= postorderLimitTime) || (acc.sizeFetched() >= 5 * minEntries)) break;
                 preorderEntry = preorder.next();
                 entry = (indexRWIEntry) preorderEntry[0];
                 // load only urls if there was not yet a root url of that hash

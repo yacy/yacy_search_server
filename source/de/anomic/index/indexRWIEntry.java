@@ -194,7 +194,7 @@ public class indexRWIEntry implements Cloneable {
     }
 
     public int virtualAge() {
-        return plasmaWordIndex.microDateDays(lastModified()); 
+        return (int) this.entry.getColLong(col_lastModified);  // this is the time in MicoDateDays format
     }
 
     public long lastModified() {
@@ -284,31 +284,35 @@ public class indexRWIEntry implements Cloneable {
     }
     
     public static final void min(indexRWIEntry t, indexRWIEntry other) {
-        if (t.hitcount() > other.hitcount()) t.entry.setCol(col_hitcount, other.hitcount());
-        if (t.wordsintext() > other.wordsintext()) t.entry.setCol(col_wordsInText, other.wordsintext());
-        if (t.phrasesintext() > other.phrasesintext()) t.entry.setCol(col_phrasesInText, other.phrasesintext());
-        if (t.posintext() > other.posintext()) t.entry.setCol(col_posintext, other.posintext());
-        if (t.posinphrase() > other.posinphrase()) t.entry.setCol(col_posinphrase, other.posinphrase());
-        if (t.posofphrase() > other.posofphrase()) t.entry.setCol(col_posofphrase, other.posofphrase());
-        if (t.worddistance() > other.worddistance()) t.entry.setCol(col_worddistance, other.worddistance());
-        if (t.lastModified() > other.lastModified()) t.entry.setCol(col_lastModified, other.lastModified());
-        if (t.urllength() > other.urllength()) t.entry.setCol(col_urlLength, other.urllength());
-        if (t.urlcomps() > other.urlcomps()) t.entry.setCol(col_urlComps, other.urlcomps());
-        if (t.wordsintitle() > other.wordsintitle() ) t.entry.setCol(col_wordsInTitle, other.wordsintitle());
+        int v;
+        long w;
+        if (t.hitcount() > (v = other.hitcount())) t.entry.setCol(col_hitcount, other.hitcount());
+        if (t.wordsintext() > (v = other.wordsintext())) t.entry.setCol(col_wordsInText, v);
+        if (t.phrasesintext() > (v = other.phrasesintext())) t.entry.setCol(col_phrasesInText, v);
+        if (t.posintext() > (v = other.posintext())) t.entry.setCol(col_posintext, v);
+        if (t.posinphrase() > (v = other.posinphrase())) t.entry.setCol(col_posinphrase, v);
+        if (t.posofphrase() > (v = other.posofphrase())) t.entry.setCol(col_posofphrase, v);
+        if (t.worddistance() > (v = other.worddistance())) t.entry.setCol(col_worddistance, v);
+        if (t.lastModified() > (w = other.lastModified())) t.entry.setCol(col_lastModified, w);
+        if (t.urllength() > (v = other.urllength())) t.entry.setCol(col_urlLength, v);
+        if (t.urlcomps() > (v = other.urlcomps())) t.entry.setCol(col_urlComps, v);
+        if (t.wordsintitle() > (v = other.wordsintitle())) t.entry.setCol(col_wordsInTitle, v);
     }
     
     public static final void max(indexRWIEntry t, indexRWIEntry other) {
-        if (t.hitcount() < other.hitcount()) t.entry.setCol(col_hitcount, other.hitcount());
-        if (t.wordsintext() < other.wordsintext()) t.entry.setCol(col_wordsInText, other.wordsintext());
-        if (t.phrasesintext() < other.phrasesintext()) t.entry.setCol(col_phrasesInText, other.phrasesintext());
-        if (t.posintext() < other.posintext()) t.entry.setCol(col_posintext, other.posintext());
-        if (t.posinphrase() < other.posinphrase()) t.entry.setCol(col_posinphrase, other.posinphrase());
-        if (t.posofphrase() < other.posofphrase()) t.entry.setCol(col_posofphrase, other.posofphrase());
-        if (t.worddistance() < other.worddistance()) t.entry.setCol(col_worddistance, other.worddistance());
-        if (t.lastModified() < other.lastModified()) t.entry.setCol(col_lastModified, other.lastModified());
-        if (t.urllength() < other.urllength()) t.entry.setCol(col_urlLength, other.urllength());
-        if (t.urlcomps() < other.urlcomps()) t.entry.setCol(col_urlComps, other.urlcomps());
-        if (t.wordsintitle() < other.wordsintitle() ) t.entry.setCol(col_wordsInTitle, other.wordsintitle());
+        int v;
+        long w;
+        if (t.hitcount() < (v = other.hitcount())) t.entry.setCol(col_hitcount, v);
+        if (t.wordsintext() < (v = other.wordsintext())) t.entry.setCol(col_wordsInText, v);
+        if (t.phrasesintext() < (v = other.phrasesintext())) t.entry.setCol(col_phrasesInText, v);
+        if (t.posintext() < (v = other.posintext())) t.entry.setCol(col_posintext, v);
+        if (t.posinphrase() < (v = other.posinphrase())) t.entry.setCol(col_posinphrase, v);
+        if (t.posofphrase() < (v = other.posofphrase())) t.entry.setCol(col_posofphrase, v);
+        if (t.worddistance() < (v = other.worddistance())) t.entry.setCol(col_worddistance, v);
+        if (t.lastModified() < (w = other.lastModified())) t.entry.setCol(col_lastModified, w);
+        if (t.urllength() < (v = other.urllength())) t.entry.setCol(col_urlLength, v);
+        if (t.urlcomps() < (v = other.urlcomps())) t.entry.setCol(col_urlComps, v);
+        if (t.wordsintitle() < (v = other.wordsintitle())) t.entry.setCol(col_wordsInTitle, v);
     }
     
     
@@ -318,40 +322,6 @@ public class indexRWIEntry implements Cloneable {
 
     public void max(indexRWIEntry other) {
         max(this, other);
-    }
-
-    static void normalize(indexRWIEntry t, indexRWIEntry min, indexRWIEntry max) {
-        assert (t.urlHash().length() == 12) : "turlhash = " + t.urlHash();
-        assert (min.urlHash().length() == 12) : "minurlhash = " + min.urlHash();
-        assert (max.urlHash().length() == 12) : "maxurlhash = " + max.urlHash();
-        if (1 + max.worddistance() - min.worddistance() == 0) System.out.println("min = " + min.toPropertyForm() + "\nmax=" + max.toPropertyForm());
-        //System.out.println("Normalize:\nentry = " + t.toPropertyForm(true));
-        //System.out.println("min   = " + min.toPropertyForm(true));
-        //System.out.println("max   = " + max.toPropertyForm(true));
-        t.entry.setCol(col_hitcount     , (t.hitcount()     == 0) ? 0 : 1 + 255 * (t.hitcount()     - min.hitcount()    ) / (1 + max.hitcount()     - min.hitcount()));
-        t.entry.setCol(col_wordsInText  , (t.wordsintext()    == 0) ? 0 : 1 + 255 * (t.wordsintext()    - min.wordsintext()   ) / (1 + max.wordsintext()    - min.wordsintext()));
-        t.entry.setCol(col_phrasesInText, (t.phrasesintext()  == 0) ? 0 : 1 + 255 * (t.phrasesintext()  - min.phrasesintext() ) / (1 + max.phrasesintext()  - min.phrasesintext()));
-        t.entry.setCol(col_posintext    , (t.posintext()    == 0) ? 0 : 1 + 255 * (t.posintext()    - min.posintext()   ) / (1 + max.posintext()    - min.posintext()));
-        t.entry.setCol(col_posinphrase  , (t.posinphrase()  == 0) ? 0 : 1 + 255 * (t.posinphrase()  - min.posinphrase() ) / (1 + max.posinphrase()  - min.posinphrase()));
-        t.entry.setCol(col_posofphrase  , (t.posofphrase()  == 0) ? 0 : 1 + 255 * (t.posofphrase()  - min.posofphrase() ) / (1 + max.posofphrase()  - min.posofphrase()));
-        t.entry.setCol(col_worddistance , (t.worddistance() == 0) ? 0 : 1 + 255 * (t.worddistance() - min.worddistance()) / (1 + max.worddistance() - min.worddistance())); // FIXME: hier gibts ein division by zero, was nur sein kann wenn die Normalisierung nicht geklappt hat.
-        t.entry.setCol(col_lastModified , (t.lastModified() == 0) ? 0 : 1 + 255 * (t.lastModified() - min.lastModified()) / (1 + max.lastModified() - min.lastModified()));
-        t.entry.setCol(col_urlLength    , (t.urllength()    == 0) ? 0 : 1 + 255 * (t.urllength()    - min.urllength()   ) / (1 + max.urllength()    - min.urllength()));
-        t.entry.setCol(col_urlComps     , (t.urlcomps()     == 0) ? 0 : 1 + 255 * (t.urlcomps()     - min.urlcomps()    ) / (1 + max.urlcomps()     - min.urlcomps()));
-        t.entry.setCol(col_wordsInTitle , (t.wordsintitle() == 0) ? 0 : 1 + 255 * (t.wordsintitle() - min.wordsintitle()) / (1 + max.wordsintitle() - min.wordsintitle()));
-        
-        //System.out.println("out   = " + t.toPropertyForm(true));
-    }
-    
-    public void normalize(indexRWIEntry min, indexRWIEntry max) {
-        normalize(this, min, max);
-    }
-
-    public indexRWIEntry generateNormalized(indexRWIEntry min, indexRWIEntry max) {
-        assert (this.urlHash().length() == 12) : "this.urlhash = " + this.urlHash();
-        indexRWIEntry e = (indexRWIEntry) this.clone();
-        e.normalize(min, max);
-        return e;
     }
     
     public boolean isNewer(indexRWIEntry other) {
