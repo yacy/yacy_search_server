@@ -36,13 +36,6 @@ Local Search Log==Lokale Suche Log
 Local Search Host Tracker==Lokale Suche Host Tracker
 Remote Search Log==Remote Suche Log
 Remote Search Host Tracker==Remote Suche Host Tracker
-Search Statistics</h2>==Suchstatistik</h2>
-You can monitor search attempts at your own peer.==Sie k&ouml;nnen hier die Suchanfragen an Ihren Peer einsehen.
-Local statistics apply for search attempts at your own search portal,==Die lokale Statistik zeigt Suchanfragen, die von Ihrem eigenen Such Portal gestartet wurden.
-and remote statistics show search requests form other peer. Not all remote peers ask your peer during a global search,==Die Remote Statistik zeigt Suchanfragen von anderen Peers an. Nicht alle Peers fragen w&auml;hrend einer Suche Ihren Peer an, 
-therefore your cannot have a global view over all search requests within the complete YaCy network.==deswegen k&ouml;nnen Sie keine Gesamt&uuml;bersicht f&uuml;r das komplette YaCy Netzwerk haben.
-Search Statistics: Local Searches==Suchstatistik: Lokale Suche
-Search Statistics: Local Searche Tracker==Suchstatistik: Lokale Suche Tracker
 This is a list of searches that had been requested from this\' peer search interface==Dies ist eine Liste aller Suchanfragen, die von diesem Peer ausgef&uuml;hrt wurden. 
 Showing \#\[num\]\# entries from a total of \#\[total\]\# requests.==Es werden #[num]# Eintr&auml;ge von insgesamt #[total]# Anfragen angezeigt.
 Requesting Host==Anfragender Host
@@ -57,8 +50,6 @@ Search Word Hashes==Such Wort Hash
 Count</td>==Anzahl</td>
 Queries Per Last Hour==Suchanfragen pro letzter Stunde
 Access Dates==Zugriffsdaten
-Search Statistics: Remote Searches==Suchstatistik: Remote Suche
-Search Statistics: Remote Searche Tracker==Suchstatistik: Remote Suche Tracker
 This is a list of searches that had been requested from remote peer search interface==Dies ist eine Liste aller Suchanfragen, die von einem anderen Peer gestellt wurden. 
 
 #---------------------------
@@ -66,8 +57,7 @@ This is a list of searches that had been requested from remote peer search inter
 
 #File: Blacklist_p.html
 #---------------------------
-Blacklist Manager==Blacklist Manager
-#Blacklist==Blacklist
+Blacklist Administration==Blacklist Verwaltung
 Used Blacklist engine:==Benutzte Blacklist Verwaltung:
 This function provides an URL filter to the proxy; any blacklisted URL is blocked==Diese Funktion stellt einen URL-Filter vor den Proxy. Das Laden einer URL aus der Blacklist wird geblockt.
 from being loaded. You can define several blacklists and activate them separately.==Sie k&ouml;nnen mehrere Blacklists anlegen und getrennt aktivieren.
@@ -385,9 +375,9 @@ For explanation please look into yacy.init==Eine Erkl&auml;rung finden Sie in de
 #---------------------------
 Exclude Web-Spiders==Web-Spider ausschlie&szlig;en
 Here you can set up a robots.txt for all webcrawlers that try to access the webinterface of your peer.==Hier können Sie eine robots.txt für alle Webcrawler die das Webinterface Ihres Peers indexieren wollen, erstellen.
-is a volunteer agreement most search-engines (including YaCy) follow.==ist ein freiwilliger Standard den die meisten Suchmaschinen (inkl. YaCy) befolgen.
+is a volunteer agreement most search-engines \(including YaCy\) follow.==ist ein freiwilliger Standard den die meisten Suchmaschinen (inkl. YaCy) befolgen.
 It disallows crawlers to access webpages or even entire domains.==Er kann Crawlern den Zugriff auf Webseiten oder sogar ganze Domains verbieten.
-Deny indexing of==Verbiete die Erfassung
+Deny access to==Verbiete die Erfassung
 Entire Peer==des ganzen Peers
 Status page==der Statusseite
 Network pages==der Netzwerkseiten
@@ -494,8 +484,7 @@ Sending Client==Sendender Client
 
 #File: CrawlResults.html
 #---------------------------
-YaCy '#[clientname]#': Crawl Results==YaCy '#[clientname]#': Crawl Ergebnisse
-Crawl Results Menu==Crawl Ergebnisse Men&uuml;
+Crawl Results<==Crawl Ergebnisse<
 Overview</a>==&Uuml;berblick</a>
 Receipts</a>==R&uuml;ckmeldungen</a>
 Queries</a>==Suchanfragen</a>
@@ -549,7 +538,7 @@ Showing latest \#\[count\]\# lines from a stack of \#\[all\]\# entries.==Zeigt d
 "clear list"=="Liste leeren"
 #Initiator==Initiator
 Executor==Ausf&uuml;hrender
-Modified Date==&Auml;nderungsdatum
+Modified==&Auml;nderungsdatum
 Words==W&ouml;rter
 Title==Titel
 #URL==URL
@@ -769,7 +758,7 @@ Constraints==Einschr&auml;nkungen
 only index pages==Nur Index Seiten
 This peer holds \#\[links\]\# URLs==Dieser Peer speichert #[links]# URLs.
 "authentication required"=="Autorisierung erforderlich"
-Disable search function for users without autorization==Deaktiviere Suchfunktion f&uuml;r Benutzer ohne Autorisierung
+Disable search function for users without authorization==Deaktiviere Suchfunktion f&uuml;r Benutzer ohne Autorisierung
 Enable web search to everyone==Aktiviere Suchfunktion f&uuml;r alle Nutzer
 #-----------------------------
 
@@ -874,7 +863,7 @@ This queue stores the urls that shall be sent to other peers to perform a remote
 If there is no peer for remote crawling available, the links are crawled locally.==Wenn kein Peer zum Remote Crawl vorhanden ist, werden die Links lokal gecrawlt.
 The global crawler queue is empty==Der globale Crawler-Puffer ist leer.
 "clear global crawl queue"=="L&ouml;sche globalen Crawler-Puffer"
-There are <strong>\#\[num\]\#</strong> entries in the global crawler queue. Showing <strong>\#\[show-num\]\#</strong> most recent entries.==Es befinden sich <strong>#[num]#</strong> Eintr&auml;ge in dem globalen Crawler-Puffer. Gezeigt werden die <strong>#[show-num]#</strong> neusten Eintr&auml;ge.
+There are <strong>\#\[num\]\#</strong> entries in the global crawler queue. Showing <strong>\#\[show-num\]\#</strong> most recent entries.==Es befinden sich <strong>#[num]#</strong> Eintr&auml;ge in dem globalen Crawler-Puffer. Gezeigt werden die <strong>#[show-num]#</strong> neuesten Eintr&auml;ge.
 Show last==Zeige die letzten
 </a> entries.==</a> Eintr&auml;ge.
 Initiator==Initiator
@@ -892,7 +881,7 @@ Index Creation: WWW Local Crawl Queue==Index Erzeugung: Lokaler WWW-Puffer
 This queue stores the urls that shall be crawled localy by this peer.==Dieser Puffer enth&auml;lt URLs, die von diesem Peer lokal gecrawlt werden sollen.
 It may also contain urls that are computed by the proxy-prefetch.==Sie enth&auml;lt auch URLs, die vom Proxy durch tieferes Indexieren bereitgestellt werden.
 The local crawler queue is empty==Der lokale Crawler-Puffer ist leer.
-There are <strong>\#\[num\]\#</strong> entries in the local crawler queue. Showing <strong>\#\[show-num\]\#</strong> most recent entries.==Es befinden sich <strong>#[num]#</strong> Eintr&auml;ge in dem lokalen Crawler-Pufferl. Gezeigt werden die <strong>#[show-num]#</strong> neusten Eintr&auml;ge.
+There are <strong>\#\[num\]\#</strong> entries in the local crawler queue. Showing <strong>\#\[show-num\]\#</strong> most recent entries.==Es befinden sich <strong>#[num]#</strong> Eintr&auml;ge in dem lokalen Crawler-Puffer. Gezeigt werden die <strong>#[show-num]#</strong> neuesten Eintr&auml;ge.
 Show last==Zeige die letzten
 </a> entries.==</a> Eintr&auml;ge.
 Initiator==Initiator
@@ -906,6 +895,25 @@ Delete Entries:==L&ouml;sche Eintr&auml;ge:
 "Delete"=="L&ouml;schen"
 This may take a quite long time.==Dies wird vielleicht einige Zeit dauern.
 #-----------------------------
+
+#File: IndexCreateWWWRemoteQueue_p.html
+#---------------------------
+Remote Crawl Queue==Remote Crawl Puffer
+This queue stores the urls that other peers sent to you in order to perform a remote crawl for them.==Dieser Puffer enth&auml;lt die URLS, die Ihnen andere Peers zugeschickt haben, um für diese einen Remote Crawl durchzuf&uuml;hren.
+The remote crawler queue is empty==Der Remote Crawler-Puffer ist leer
+"clear remote crawl queue"=="leere Remote Crawl Puffer"
+There are <strong>\#\[num\]\#</strong> entries in the remote crawler queue.==Es befinden sich <strong>#[num]#</strong> Eintr&auml;ge in dem Remote Crawler-Puffer.
+Showing <strong>\#\[show-num\]\#</strong> most recent entries.==Gezeigt werden die <strong>#[show-num]#</strong> neuesten Eintr&auml;ge.
+Show last==Zeige die letzten
+</a> entries.==</a> Eintr&auml;ge.
+Initiator==Initiator
+Profile==Profil
+Depth==Tiefe
+Modified Date==&Auml;nderungsdatum
+Anchor Name==Anker Name
+URL==URL
+Delete==L&ouml;schen
+#-----------------------------        
 
 #File: IndexImport_p.html
 #---------------------------
@@ -1003,18 +1011,6 @@ Unable to get URL:==Nicht m&ouml;glich die angegebene Datei von folgender URL zu
 Error saving the language file.==Es trat ein Fehler beim Speichern der Sprachdatei auf.
 #---------------------------
 
-#File: Lab.html
-#---------------------------
-
-The YaCy Lab==Das YaCy Labor
-This is the place where we try new functions of the YaCy search engine.==Dies ist ein Platz, an dem wir neue Funktionen der YaCy Suchmaschine testen.
-All these things here are to be considered as probably unstable, and/or experimental.==Alle neuen Funktionen hier sind wahrscheinlich noch unstabil und in einer Experementierphase.
-You may try out these things but please do not care about bugs.==Sie k&ouml;nnen die neuen Funktionen gerne ausprobieren. K&uuml;mmern Sie sich bitte nicht um die Fehler.
-The <a==Das <a
-Advanced <a==erweiterte <a
-Configuration</a>==Einstellungen</a>
-#---------------------------
-
 #File: LogStatistics_p.html
 #---------------------------
 Log Statistics==Log Statistik
@@ -1108,9 +1104,8 @@ You cannot call this page directly. Instead, use a link on the <a href="Network.
 
 #File: Network.html
 #---------------------------
+YaCy Network==YaCy Netzwerk
 Network Overview==Netzwerk&uuml;bersicht
-Network Menu==Netzwerkmen&uuml;
-Network&nbsp;Overview==Netzwerk&uuml;bersicht
 Active&nbsp;Peers==Aktive Peers
 Passive&nbsp;Peers==Passive Peers
 Potential&nbsp;Peers==Potenzielle Peers
@@ -1146,9 +1141,8 @@ Connects<br />per hour==Verbindungen<br />pro Stunde
 Send message to peer==Sende Nachricht an Peer
 View profile of peer==Zeige Profil des Peers
 Read and edit wiki on peer==Lese und &auml;ndere Wiki des Peers
-All Peers:==Alle Peers:
 Branch==Typ
-Peers==Peers
+#Peers==Peers
 All Links==Alle Links
 All Words==Alle W&ouml;rter
 Active \(connected Senior and Principal\)==Aktiv (verbundene Senior und Principal)
@@ -1171,7 +1165,8 @@ turquoise font==t&uuml;rkise Schrift
 junior peers==Junior Peers
 red point==roter Punkt
 this peer==Ihr Peer
-You are in online mode, but probably no internet resource is available. Please check your internet connection.==Sie befinden sich im Online-Modus, aber zur Zeit besteht keine Internetverbindung. Bitte &uuml;berpr&uuml;fen Sie Ihre Internetverbindung.
+You are in online mode, but probably no internet resource is available.==Sie befinden sich im Online-Modus, aber zur Zeit besteht keine Internetverbindung.You are in online mode, but probably no internet resource is available.
+Please check your internet connection.==Bitte &uuml;berpr&uuml;fen Sie Ihre Internetverbindung.
 You are either not in online mode or you do not use the proxy option.==Sie sind entweder nicht im Online-Modus oder Sie benutzen nicht die Proxy-Option.
 'on-demand - mode', see=='on-demand - Modus', siehe
 here</a>==hier</a>
@@ -1199,7 +1194,7 @@ profile entries on the Network page, where that profile change is visualized wit
 More news services will follow.==Mehr News Services werden folgen.
 
 Above you can see four menues:==Sie k&ouml;nnen diese vier Men&uuml;s sehen:
-<strong>Incoming News \(\#\[insize\]\#\)</strong>: latest news that arrived your peer.==<strong>Eingehende News(#[insize]#)</strong>: Die neusten News, die Ihren Peer erreicht haben.
+<strong>Incoming News \(\#\[insize\]\#\)</strong>: latest news that arrived your peer.==<strong>Eingehende News(#[insize]#)</strong>: Die neuesten News, die Ihren Peer erreicht haben.
 Only these news will be used to display specific news services as explained above.==Nur diese News werden benutzt, um spezifische News Services anzuzeigen.
 You can process these news with a button on the page to remove their appearance from the IndexCreate and Network page==Sie k&ouml;nnen diese News mit einem Button auf der Seite abarbeiten (als "gelesen" markieren). Dann werden diese Nachrichten nicht mehr auf der Netzwerk und der Index Create Seite erscheinen.
 <strong>Processed News \(\#\[prsize\]\#\)</strong>: this is simply an archive of incoming news that you removed by processing.==<strong>Gelesene News (#[prsize]#)</strong>: Hier ist ein simples Archiv der bereits gelesenen News.
@@ -1495,9 +1490,6 @@ Post-Ranking==Nach-Ranking
 #"Application Of Prefer Pattern"=="Anwendung der bervorzugten Form"
 "Set as Default Ranking"=="Speicher als Standard Ranking"
 "Re-Set to Built-In Ranking"=="Stelle auf urspr&uuml;ngliche Werte zur&uuml;ck"
-The following words are stop-words and had been excluded from the search:==Folgende W&ouml;rter sind Stopwords und wurden von der Suche ausgeschlossen:
-results from <strong>\#\[orderedcount\]\#</strong> ordered links of a total number of <strong>\#\[totalcount\]\#</strong> known.==Ergebnisse von <strong>#[orderedcount]#</strong> angeforderten Links von insgesamt <strong>#[totalcount]#</strong> bekannten Links.
-Topwords</strong> \(to refine search\):==Topw&ouml;rter</strong> (um Suche zu verfeinern):
 #"delete"=="l&ouml;schen"
 #Info==Info
 
@@ -1842,7 +1834,7 @@ Auto pop-up of status page on start-up:==Automatisches Pop-Up der Status-Seite b
 
 #File: Status.html
 #---------------------------
-System-, Index- and Peer-Status==System-, Index- und Peer-Status
+Console Status==Konsolen Status
 Welcome to YaCy!==Willkommen bei YaCy!
 Your settings are _not_ protected!</strong>==Ihre Einstellungen sind _nicht_ mit einem Kennwort gesch&uuml;tzt!</strong>
 Please open the <a href="ConfigBasic.html">settings</a> page <strong>immediately</strong>==Bitte &ouml;ffnen Sie die <a href="ConfigBasic.html">Einstellungen-Seite</a> <strong>sofort</strong>
@@ -1869,9 +1861,9 @@ which you can also <a href="index.html">search yourself</a>.==den Sie auch selbs
 You have a principal peer because you publish your seed-list to a public accessible server==Sie haben einen Principal Peer, weil Sie Ihre Seed-Liste auf einen &ouml;ffentlich zug&auml;nglichen Server hoch laden,
 where it can be retrieved using the URL==von wo aus sie unter folgender Adresse erreichbar ist:
 Your Web Page Indexer is idle. You can start your own web crawl <a href="CrawlStartSimple_p.html">here</a>==Ihr Webseiten Indexierer ist unt&auml;tig. Sie k&ouml;nnen <a href="CrawlStartSimple_p.html">hier</a> einen Web Crawl starten 
-Your Web Page Indexer is busy. You can monitor your web crawl <a href="WatchCrawler_p.html">here</a>==Ihr Webseiten Indexierer ist besch&auml;ftigt. Sie k&ouml;nnen Ihren Web Crawl <a href="WatchCrawler_p.html">hier</a> kontrollieren
+Your Web Page Indexer is busy. You can <a href="WatchCrawler_p.html">monitor your web crawl</a> here.==Ihr Webseiten Indexierer ist besch&auml;ftigt. Sie k&ouml;nnen Ihren Web Crawl <a href="WatchCrawler_p.html">hier</a> kontrollieren
 Public System Properties==Allgemeine Systemangaben
-System version==Systemversion
+System Version==Systemversion
 This&nbsp;peer's&nbsp;address==Adresse dieses Peers
 Not assigned==nicht zugewiesen
 This peer's name==Name dieses Peers
@@ -2180,32 +2172,36 @@ Changes will be published as announcement on YaCyNews==&Auml;nderungen werden &u
 #-----------------------------
 Wiki Help==Wiki Hilfe
 Wiki-Code==Wiki-Befehle
-This table contains a short description of the tags that can be used in the Wiki and several other servlets of YaCy. For a more detailed description visit the==Diese Tabelle ent&auml;lt eine kurze Beschreibung der Tags, die in diesem Wiki und an anderen Stellen in YaCy benutzen k&ouml;nnen. F&uuml;r eine detailliertere Beschreibung besuchen Sie bitte das 
+This table contains a short description of the tags that can be used in the Wiki and several other servlets==Diese Tabelle ent&auml;lt eine kurze Beschreibung der Tags, die in diesem Wiki und an anderen Stellen 
+of YaCy. For a more detailed description visit the==in YaCy benutzen k&ouml;nnen. F&uuml;r eine detailliertere Beschreibung besuchen Sie bitte das
 #YaCy Wiki==YaCy Wiki
 Description==Beschreibung
 \=\=headline====&Uuml;berschrift
-This tags create headlines. If a page has three or more headlines, a directory will be created automaticly.==Diese Tags erzeugen &Uuml;berschriften. Wenn die Seite drei oder mehr &Uuml;berschriften enth&auml;lt, wird automatisch ein Inhaltsverzeichnis erstellt.
+These tags create headlines. If a page has three or more headlines, a directory will be created automaticly.==Diese Tags erzeugen &Uuml;berschriften. Wenn die Seite drei oder mehr &Uuml;berschriften enth&auml;lt, wird automatisch ein Inhaltsverzeichnis erstellt.
 #text==Text
-This tags create stressed texts. Most browsers will display the texts in italics, bold, and a combination of both.==Diese Tags erzeugen hervorgehobenen Text. Die meissten Browser zeigen die Texte kursiv, fett und in einer Kombination aus beidem.
-Lines will be indented. This tag is supposed to mark citations.==Der Text erscheint einger&uuml;ckt. Dieser Tag eigenet sich, um Zitate zu markieren.  
+These tags create stressed texts. The first pair emphasizes the text \(most browsers will display it in italics\),==Diese Tags erzeugen hervorgehobenen Text. Das erste Paar betont den Text (die meissten Browser zeigen die Texte kursiv),
+the second one emphazises it more strongly \(i.e. bold\) and the last tags create a combination of both.==das Zweite betont den Text st&auml;rker (z.B. fett) und der letzte Tag erzeugt eine Mischung aus beidem.
+Lines will be indented. This tag is supposed to mark citations, but may as well be used for styling purposes.==Der Text erscheint einger&uuml;ckt. Dieser Tag eigenet sich, um Zitate zu markieren, wird aber auch zum Designen benutzt.   
 point==Punkt
-This tags create a numbered list.==Diese Tags erstellen eine nummerierte Liste.
+These tags create a numbered list.==Diese Tags erstellen eine nummerierte Liste.
 something==etwas
 another thing==was anderes
 and yet another==und wieder was anderes
 something else==irgendwas
-This tags create a unnumbered list.==Diese Tags erstellen eine unnummerierte Liste.
+These tags create a unnumbered list.==Diese Tags erstellen eine unnummerierte Liste.
 word==Wort
 \:definition==:Definition
-This tags create a definition list.==Diese Tags erstellen eine definierte Liste.
+These tags create a definition list.==Diese Tags erstellen eine definierte Liste.
 This tag creates a horizontal line.==Dieser Tag erzeugt eine horizontale Linie.
 pagename==Seitenname
 description==Beschreibung
 This tag creates links to other pages of the wiki.==Dieser Tag erzeugt einen Link zu einer anderen Seite im Wiki.
 This tag displays an image, it can be aligned left, right or center.==Dieser Tag f&uuml;gt ein Bild ein, es kann links (left), rechts (right) oder mittig (center) ausgerichtet werden.
-This tags create a table.==Diese Tags erstellen eine Tabelle.
-The escape tags will cause all tags in the text between the starting and the closing tag to not be treated as regular text.==Durch diesen Tag wird der Text, der zwischen den Klammern steht, nicht interpretiert und unformatiert als normaler Text ausgegeben. 
-A text between this tags will keep all the spaces and linebreaks in it. Great for ASCII-art and program code.==Ein Text zwischen diesen Tags wird alle Leerzeichen und Zeilenumbr&uuml;che beinhalten. Gut geeignet f&uuml;r ASCII-Kunst und Programm Code.  
+These tags create a table, whereas the first marks the beginning of the table, the second starts==Diese Tags erstellen eine Tabelle, wobei der erste den Anfang der Tabelle markiert, der zweite beginnt 
+a new line, the third and fourth each create a new cell in the line. The last displayed tag closes==eine neue Zeile, der dritte und vierte erzeugen eine neue Zelle in der Zeile. Der zuletztt dargestellte Tag schliesst
+the table.==die Tabelle.
+The escape tags will cause all tags in the text between the starting and the closing tag to not be treated as wiki-code.==Durch diesen Tag wird der Text, der zwischen den Klammern steht, nicht interpretiert und unformatiert als normaler Text ausgegeben.
+A text between these tags will keep all the spaces and linebreaks in it. Great for ASCII-art and program code.==Ein Text zwischen diesen Tags wird alle Leerzeichen und Zeilenumbr&uuml;che beinhalten. Gut geeignet f&uuml;r ASCII-Kunst und Programm Code.  
 If a line starts with a space, it will be displayed in a non-proportional font.==Wenn eine Zeile mit einem Leerzeichen anf&auml;ngt, wird diese als nicht-proportionale Schriftart dargestellt.
 url==URL
 This tag creates links to external websites.==Dieser Tag erstellt einen Link zu einer externen Internetseite.
@@ -2331,9 +2327,9 @@ Remote&nbsp;Search==Remote Suche
 
 #File: env/templates/submenuBlacklist.template
 #---------------------------
-Blacklist Menu==Blacklist Men&uuml;
-Manage Blacklists==Blacklist verwalten
-Blacklist Cleaner==Blacklist aufr&auml;men
+#Filter &amp; Blacklistsu==Filter &amp; Blacklists
+Blacklist Administration==Blacklist Verwaltung
+Blacklist Cleaner==Blacklist aufr&auml;umen
 #-----------------------------
 
 #File: env/templates/submenuConfig.template
@@ -2384,8 +2380,8 @@ Media Crawl Queues==Medien Crawl-Puffer
 
 #File: env/templates/submenuIndexControl.template
 #---------------------------
-Index Control Menu==Index Verwalten Men&uuml;
 #Index Administration==Index Administration
+Index Monitoring/Deletion==Index Verwalten/L&ouml;schen
 #Index Import==Index Import
 #Index Transfer==Index Transfer
 Index Cleaner==Index Aufr&auml;umer
