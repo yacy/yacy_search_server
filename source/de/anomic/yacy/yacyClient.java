@@ -609,11 +609,11 @@ public final class yacyClient {
         post.putASIS("myseed", yacyCore.seedDB.mySeed.genSeedStr(salt));
         post.putASIS("subject", subject);
         try {
-            post.put("message", new String(message, "UTF-8"));
+            post.putASIS("message", new String(message, "UTF-8"));
         } catch (UnsupportedEncodingException e) {
-            post.put("message", new String(message));
+            post.putASIS("message", new String(message));
         }
-        
+
         // send request
         try {
             final HashMap result = nxTools.table(

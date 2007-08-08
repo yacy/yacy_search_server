@@ -67,20 +67,22 @@ public class MessageSend_p {
     public static serverObjects respond(httpHeader header, serverObjects post, serverSwitch env) {
 	serverObjects prop = new serverObjects();
 
-	//String body = "";
 	if ((post == null) || (post.get("hash","").length() == 0)) {
-        prop.put("mode",2);
-	    // prop.put("body", "<p>You cannot call this page directly. Instead, use a link on the <a href=\"Network.html\">Network</a> page.</p>");
+            prop.put("mode",2);
 	    return prop;
 	}
 	
 	String hash    = post.get("hash", "");
 	String subject = post.get("subject", "");
 	String message = post.get("message", "");
-            
-	if (message.length() == 0) {
-        prop.put("mode", 0);
-        
+
+	if ((message.length() == 0) || (post.containsKey("preview"))) {
+            if (post.containsKey("preview")) {
+	       prop.put("mode", 1);
+            } else {
+                prop.put("mode", 0);
+            }
+
 	    // open an editor page for the message
 	    // first ask if the other peer is online, and also what kind of document it accepts
 	    HashMap result = yacyClient.permissionMessage(hash);
@@ -96,56 +98,48 @@ public class MessageSend_p {
 	        else
 	            peerName = targetPeer.get(yacySeed.NAME,"nameless");
 	    }
-        
-        prop.put("mode_permission_peerName", peerName);
+
+            prop.put("mode_permission_peerName", peerName);
 	    String response = (result == null) ? "-1" : (String) result.get("response");
 	    if ((response == null) || (response.equals("-1"))) {
-            prop.put("mode_permission",0);            
-            
 	        // we don't have permission or other peer does not exist
-	        //body += "<p>You cannot send a message to '" + peerName + "'. The peer does not respond. It was now removed from the peer-list.</p>";
+                prop.put("mode_permission",0);
+
 	        if (targetPeer != null) {
 	            yacyCore.peerActions.peerDeparture(targetPeer);
 	        }
 	    } else {
             prop.put("mode_permission",1);
-            
-            // write input form
-            try {
-                int messagesize = Integer.parseInt((String) result.get("messagesize"));
-                int attachmentsize = Integer.parseInt((String) result.get("attachmentsize"));
-                
-                prop.put("mode_permission_response", response);
-                prop.put("mode_permission_messagesize", messagesize);
-                prop.put("mode_permission_attachmentsize", attachmentsize);
-                prop.put("mode_permission_subject", subject);
-                prop.put("mode_permission_message", message);
-                prop.put("mode_permission_hash", hash);
-                
-//                body += "<p>The peer '" + peerName + "' is alive and responded:<br>";
-//                body += "'" + response + " You are allowed to send me a message &le; " + messagesize + " kb and an attachment &le; " + attachmentsize + ".'</p>";
-//                body += "<form action=\"MessageSend_p.html\" method=\"post\" enctype=\"multipart/form-data\" accept-charset=\"UTF-8\"><br><br>";
-//                body += "<p><h3>Your Message</h3></p>";
-//                body += "<p>Subject:<br><input name=\"subject\" type=\"text\" size=\"80\" maxlength=\"80\" value=\"" + subject + "\"></p>";
-//                body += "<p>Text:<br><textarea name=\"message\" cols=\"80\" rows=\"8\"></textarea></p>";
-//                body += "<input type=\"hidden\" name=\"hash\" value=\"" + hash + "\">";
-//                body += "<input type=\"hidden\" name=\"messagesize\" value=\"" + messagesize + "\">";
-//                body += "<input type=\"hidden\" name=\"attachmentsize\" value=\"" + attachmentsize + "\">";
-//                body += "<input name=\"new\" type=\"submit\" value=\"Enter\"></form>";
-            } catch (NumberFormatException e) {
-                // "unresolved pattern", the remote peer is alive but had an exception
-                //body += "<p>The peer '" + peerName + "' is alive but cannot respond. Sorry..</p>";
-                prop.put("mode_permission",2);
-            }
+
+                // write input form
+                try {
+                    int messagesize = Integer.parseInt((String) result.get("messagesize"));
+                    int attachmentsize = Integer.parseInt((String) result.get("attachmentsize"));
+
+                    prop.put("mode_permission_response", response);
+                    prop.put("mode_permission_messagesize", messagesize);
+                    prop.put("mode_permission_attachmentsize", attachmentsize);
+                    prop.put("mode_permission_subject", subject);
+                    prop.put("mode_permission_message", message);
+                    prop.put("mode_permission_hash", hash);
+                    if (post.containsKey("preview")) {
+                        prop.putWiki("mode_permission_previewmessage", message);
+
+                    }
+
+                } catch (NumberFormatException e) {
+                    // "unresolved pattern", the remote peer is alive but had an exception
+                    prop.put("mode_permission",2);
+                }
 	    }
 	} else {
-	    prop.put("mode", 1);
+	    prop.put("mode", 2);
 	    // send written message to peer
 	    try {
             prop.put("mode_status", 0);
 	        int messagesize = Integer.parseInt(post.get("messagesize", "0"));
 	        //int attachmentsize = Integer.parseInt(post.get("attachmentsize", "0"));
-	        
+
 	        if (messagesize < 1000) messagesize = 1000; // debug
 	        if (subject.length() > 100) subject = subject.substring(0, 100);
 	        if (message.length() > messagesize) message = message.substring(0, messagesize);
@@ -156,23 +150,18 @@ public class MessageSend_p {
 	            mb = message.getBytes();
 	        }
 	        HashMap result = yacyClient.postMessage(hash, subject, mb);
-            
-            prop.put("mode_status_response", result.get("response"));
-//	        body += "<p>Your message has been sent. The target peer responded:</p>";
-//	        body += "<p><i>" + result.get("response") + "</i></p>";
+
+                //message has been sent
+                prop.put("mode_status_response", result.get("response"));
+
 	    } catch (NumberFormatException e) {
-            prop.put("mode_status", 1);
+                prop.put("mode_status", 1);
+
 	        // "unresolved pattern", the remote peer is alive but had an exception
-            prop.put("mode_status_message", message);
-//	        body += "<p>The target peer is alive but did not receive your message. Sorry..</p>";
-//	        body += "<p>Here is a copy of your message, so you can copy it to save it for further attempts:<br>";
-//	        body += message;
-//	        body += "</p>";
+                prop.put("mode_status_message", message);
 	    }
 	}
 
-	// return rewrite properties
-	//prop.put("body", body);
 	return prop;
     }
 

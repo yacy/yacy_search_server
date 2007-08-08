@@ -74,7 +74,7 @@ public class Messages_p {
     public static serverObjects respond(httpHeader header, serverObjects post, serverSwitch env) {
         plasmaSwitchboard switchboard = (plasmaSwitchboard) env;
         serverObjects prop = new serverObjects();
-        
+
         // set peer address / name
         final String peerAddress = yacyCore.seedDB.mySeed.getPublicAddress();
         final String peerName = yacyCore.seedDB.mySeed.getName();
@@ -106,10 +106,9 @@ public class Messages_p {
         } else {
             prop.put("peersKnown", 0);
         }
-        
+
         prop.put("mode", 0);
         prop.put("mode_error", 0);
-        //wikiCode wikiTransformer = new wikiCode(switchboard);
 
         String action = ((post == null) ? "list" : post.get("action", "list"));
         messageBoard.entry message;
@@ -143,28 +142,26 @@ public class Messages_p {
                     prop.put("mode_messages_"+count+"_date", dateString(message.date()));
                     prop.put("mode_messages_"+count+"_from", message.author());
                     prop.put("mode_messages_"+count+"_to", message.recipient());
-                    //prop.put("mode_messages_"+count+"_subject", wikiTransformer.transform(message.subject()));
-                    //TODO: not needed, when all templates will be cleaned via replaceHTML
                     prop.put("mode_messages_"+count+"_subject", message.subject());
                     prop.put("mode_messages_"+count+"_category", message.category());
                     prop.put("mode_messages_"+count+"_key", key);
                     prop.put("mode_messages_"+count+"_hash", message.authorHash());
-                                        
+
                     if (((String)header.get(httpHeader.CONNECTION_PROP_PATH)).endsWith(".rss")) {
                     	// set the peer address
                     	prop.put("mode_messages_"+count+"_peerAddress", peerAddress);
-                    	
+
                     	// set the rfc822 date
                     	prop.put("mode_messages_"+count+"_rfc822Date",httpc.dateString(message.date()));
-                    	
+
                     	// also write out the message body (needed for the RSS feed)
                         try {
                         	prop.put("mode_messages_"+count+"_body",new String(message.message(), "UTF-8"));
                         } catch (UnsupportedEncodingException e) {
                             // can not happen, because UTF-8 must be supported by every JVM
-                        }                    	
+                        }
                     }
-                    
+
                     dark = !dark;
                     count++;
                 }
@@ -180,12 +177,10 @@ public class Messages_p {
             String key = post.get("object", "");
             message = switchboard.messageDB.read(key);
             if (message == null) throw new NullPointerException("Message with ID " + key + " does not exist");
-            
+
             prop.put("mode_from", message.author());
             prop.put("mode_to", message.recipient());
             prop.put("mode_date", dateString(message.date()));
-            //prop.put("mode_messages_subject", wikiTransformer.transform(message.subject()));
-            //TODO: not needed, when all templates will be cleaned via replaceHTML
             prop.put("mode_subject", message.subject());
             String theMessage = null;
             try {
