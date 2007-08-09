@@ -23,7 +23,6 @@ import java.util.Iterator;
 
 import de.anomic.http.httpHeader;
 import de.anomic.http.httpdFileHandler;
-import de.anomic.plasma.plasmaSwitchboard;
 import de.anomic.server.serverByteBuffer;
 import de.anomic.server.serverObjects;
 import de.anomic.server.serverSwitch;
@@ -31,8 +30,6 @@ import de.anomic.server.serverSwitch;
 public class TestApplet {
     public static serverObjects respond(httpHeader header, serverObjects post, serverSwitch env) {
     serverObjects prop = new serverObjects();
-    plasmaSwitchboard sb = (plasmaSwitchboard) env;
-    httpdFileHandler filehandler=new httpdFileHandler(sb);
     
     if(post== null || !post.containsKey("url")){
         prop.put("mode", "0");
@@ -51,7 +48,7 @@ public class TestApplet {
     
     prop.put("mode", "1");
     //File templatefile=filehandler.getOverlayedFile((String)post.get("url"));
-    File classfile=filehandler.getOverlayedClass((String)post.get("url"));
+    File classfile = httpdFileHandler.getOverlayedClass((String)post.get("url"));
     httpHeader header2=new httpHeader();
     header2.put("CLIENTIP", "127.0.0.1");
     header2.put("PATH", post.get("url"));
@@ -61,7 +58,7 @@ public class TestApplet {
             prop.put("mode_templates", "classfile does not exist");
             return prop;
         }
-        tp=(serverObjects)filehandler.invokeServlet(classfile, header2, args);
+        tp=(serverObjects) httpdFileHandler.invokeServlet(classfile, header2, args);
     }
     catch (IllegalArgumentException e) {}
     catch (IllegalAccessException e) {}

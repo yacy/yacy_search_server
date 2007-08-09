@@ -81,8 +81,6 @@ import de.anomic.http.httpChunkedOutputStream;
 import de.anomic.http.httpContentLengthInputStream;
 import de.anomic.http.httpHeader;
 import de.anomic.http.httpd;
-import de.anomic.http.httpdAbstractHandler;
-import de.anomic.http.httpdHandler;
 import de.anomic.plasma.plasmaParser;
 import de.anomic.server.serverClassLoader;
 import de.anomic.server.serverCore;
@@ -118,11 +116,11 @@ import de.anomic.server.logging.serverLog;
  *  
  * @author Martin Thelian
  */
-public final class httpdSoapHandler extends httpdAbstractHandler implements httpdHandler 
-{
+public final class httpdSoapHandler {
 	public static final String SOAP_HANDLER_VERSION = "YaCySOAP V0.1";
 	
- 
+    private serverLog theLogger;
+    
     /* ===============================================================
      * Constants needed to set some SOAP properties
      * =============================================================== */    

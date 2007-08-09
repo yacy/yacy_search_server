@@ -27,50 +27,70 @@
 
 package de.anomic.http;
 
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileNotFoundException;
 import java.io.IOException;
+import java.io.OutputStream;
+import java.util.Properties;
 
 import de.anomic.server.serverByteBuffer;
 
 public class httpSSI {
 
-    public static void writeSSI(File referenceFile, serverByteBuffer in, httpChunkedOutputStream out) throws IOException {
-        writeSSI(referenceFile, in, 0, out);
+    public static void writeSSI(serverByteBuffer in, OutputStream out) throws IOException {
+        writeSSI(in, 0, out);
     }
     
-    public static void writeSSI(File referenceFile, serverByteBuffer in, int start, httpChunkedOutputStream out) throws IOException {
-        int p = in.indexOf("<!--#".getBytes(), start);
-        if (p == 0) {
-            int q = in.indexOf("-->".getBytes(), start + 10);
-            assert q >= 0;
-            parseSSI(referenceFile, in, start,  q + 3 - start, out);
-            writeSSI(referenceFile, in, start + q + 3, out);
-        } else if (p > 0) {
+    public static void writeSSI(serverByteBuffer in, int off, OutputStream out) throws IOException {
+        int p = in.indexOf("<!--#".getBytes(), off);
+        if (p >= 0) {
             int q = in.indexOf("-->".getBytes(), p + 10);
-            out.write(in, start, p - start);
-            parseSSI(referenceFile, in, start + p, q + 3 - start - p, out);
-            writeSSI(referenceFile, in, start + q + 3, out);
+            if (out instanceof httpChunkedOutputStream) {
+                ((httpChunkedOutputStream) out).write(in, off, p - off);
+            } else {
+                out.write(in.getBytes(off, p - off));
+            }
+            parseSSI(in, p, q + 3 - p, out);
+            writeSSI(in, q + 3, out);
         } else /* p < 0 */ {
-            out.write(in, start, in.length() - start);
+            if (out instanceof httpChunkedOutputStream) {
+                ((httpChunkedOutputStream) out).write(in, off, in.length() - off);
+            } else {
+                out.write(in.getBytes(off, in.length() - off));
+            }
         }
     }
     
-    private static void parseSSI(File referenceFile, serverByteBuffer in, int start, int length, httpChunkedOutputStream out) {
-        if (in.startsWith("<!--#include virtual=\"".getBytes(), start)) {
-            int q = in.indexOf("\"".getBytes(), start + 22);
+    private static void parseSSI(serverByteBuffer in, int off, int len, OutputStream out) {
+        if (in.startsWith("<!--#include virtual=\"".getBytes(), off)) {
+            int q = in.indexOf("\"".getBytes(), off + 22);
             if (q > 0) {
-                String path = in.toString(start + 22, q);
-                File loadFile = new File(referenceFile.getParentFile(), path);
-                try {
-                    out.write(new FileInputStream(loadFile));
-                } catch (FileNotFoundException e) {
-                    // do nothing
-                } catch (IOException e) {
-                    // do nothing
-                }
+                String path = in.toString(off + 22, q);
+                writeContent(path, out);
             }
+        }
+    }
+    
+    private static void writeContent(String path, OutputStream out) {
+        // check if there are arguments in path string
+        String args = "";
+        int argpos = path.indexOf('?');
+        if (argpos > 0) {
+            args = path.substring(argpos + 1);
+            path = path.substring(0, argpos);
+        }
+        
+        // set up virtual connection properties to call httpdFileHander.doGet()
+        Properties conProp = new Properties();
+        httpHeader header = new httpHeader(httpd.reverseMappingCache);
+        conProp.setProperty(httpHeader.CONNECTION_PROP_METHOD, httpHeader.METHOD_GET);
+        conProp.setProperty(httpHeader.CONNECTION_PROP_PATH, path);
+        conProp.setProperty(httpHeader.CONNECTION_PROP_ARGS, args);
+        conProp.setProperty(httpHeader.CONNECTION_PROP_HTTP_VER, httpHeader.HTTP_VERSION_0_9);
+        conProp.setProperty("CLIENTIP", "127.0.0.1");
+        
+        try {
+            httpdFileHandler.doGet(conProp, header, out);
+        } catch (IOException e) {
+            // do nothing
         }
     }
 }

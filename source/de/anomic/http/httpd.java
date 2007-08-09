@@ -78,6 +78,7 @@ import de.anomic.server.serverHandler;
 import de.anomic.server.serverObjects;
 import de.anomic.server.serverSwitch;
 import de.anomic.server.logging.serverLog;
+import de.anomic.soap.httpdSoapHandler;
 import de.anomic.yacy.yacyCore;
 import de.anomic.yacy.yacySeed;
 
@@ -118,9 +119,7 @@ public final class httpd implements serverHandler {
     public static final String hline = "-------------------------------------------------------------------------------";
     
     public static HashMap reverseMappingCache = new HashMap();
-    private httpdHandler proxyHandler = null;   // a servlet that holds the proxy functions
-    private httpdHandler fileHandler = null;    // a servlet that holds the file serving functions
-    private httpdHandler soapHandler = null;
+    private httpdSoapHandler soapHandler = null;
     private static plasmaSwitchboard switchboard = null;
     private static String virtualHost = null;
     
@@ -151,11 +150,9 @@ public final class httpd implements serverHandler {
     private final serverLog log = new serverLog("HTTPD");
 
     // class methods
-    public httpd(serverSwitch s, httpdHandler fileHandler, httpdHandler proxyHandler) {
+    public httpd(serverSwitch s) {
         // handler info
         httpd.switchboard = (plasmaSwitchboard)s;
-        this.fileHandler = fileHandler;
-        this.proxyHandler = proxyHandler;
         httpd.virtualHost = switchboard.getConfig("fileHost","localhost");
         
         // authentication: by default none
@@ -500,7 +497,7 @@ public final class httpd implements serverHandler {
                             try {
                                 Class soapHandlerClass = Class.forName("de.anomic.soap.httpdSoapHandler");
                                 Constructor classConstructor = soapHandlerClass.getConstructor( new Class[] { serverSwitch.class } );
-                                this.soapHandler  = (httpdHandler) classConstructor.newInstance(new Object[] { switchboard });
+                                this.soapHandler  = (httpdSoapHandler) classConstructor.newInstance(new Object[] { switchboard });
                             } catch (Exception e) {
                                 sendRespondError(this.prop,this.session.out,4,501,null,"Error while initializing SOAP Excension",e);
                                 return serverCore.TERMINATE_CONNECTION;
@@ -519,8 +516,7 @@ public final class httpd implements serverHandler {
                          */
                     } else {              
                         if (this.handleServerAuthentication(header)) {
-                            if (fileHandler == null) fileHandler  = new httpdFileHandler(switchboard);
-                            fileHandler.doGet(this.prop, header, this.session.out);
+                            httpdFileHandler.doGet(this.prop, header, this.session.out);
                         }
                     }
                 } else {
@@ -532,7 +528,7 @@ public final class httpd implements serverHandler {
                 // pass to proxy
                 if (((this.allowYaCyHop) && (handleYaCyHopAuthentication(header))) ||
                     ((this.allowProxy) && (handleProxyAuthentication(header)))) {
-                    proxyHandler.doGet(this.prop, header, this.session.out);
+                    httpdProxyHandler.doGet(this.prop, header, this.session.out);
                 } else {
                     // not authorized through firewall blocking (ip does not match filter)
                     this.session.out.write((httpVersion + " 403 refused (IP not granted)" + serverCore.crlfString + serverCore.crlfString + "you are not allowed to connect to this proxy, because you are using the non-granted IP " + clientIP + ". allowed are only connections that match with the following filter: " + switchboard.getConfig("proxyClient", "*") + serverCore.crlfString).getBytes());
@@ -592,8 +588,7 @@ public final class httpd implements serverHandler {
                 // pass to server
                 if (allowServer) {
                     if (handleServerAuthentication(header)) {
-                        if (fileHandler == null) fileHandler  = new httpdFileHandler(switchboard);
-                        fileHandler.doHead(prop, header, this.session.out);
+                        httpdFileHandler.doHead(prop, header, this.session.out);
                     }
                 } else {
                     // not authorized through firewall blocking (ip does not match filter)
@@ -605,7 +600,7 @@ public final class httpd implements serverHandler {
                 // pass to proxy
                 if (((this.allowYaCyHop) && (handleYaCyHopAuthentication(header))) ||
                     ((this.allowProxy) && (handleProxyAuthentication(header)))) {
-                    proxyHandler.doHead(prop, header, this.session.out);
+                    httpdProxyHandler.doHead(prop, header, this.session.out);
                 } else {
                     // not authorized through firewall blocking (ip does not match filter)
                     session.out.write((httpVersion + " 403 refused (IP not granted)" +
@@ -656,7 +651,7 @@ public final class httpd implements serverHandler {
                                 Constructor soapHandlerConstructor = soapHandlerClass.getConstructor( new Class[] { serverSwitch.class } );
                                 
                                 // creating the new object
-                                this.soapHandler = (httpdHandler)soapHandlerConstructor.newInstance( new Object[] { switchboard } );   
+                                this.soapHandler = (httpdSoapHandler)soapHandlerConstructor.newInstance( new Object[] { switchboard } );   
                             } catch (Exception e) {
                             	sendRespondError(this.prop,this.session.out,4,501,null,"Error while initializing SOAP Excension",e);
                                 return serverCore.TERMINATE_CONNECTION;
@@ -674,8 +669,7 @@ public final class httpd implements serverHandler {
                          */
                     } else {       
                         if (handleServerAuthentication(header)) {
-                            if (fileHandler == null) fileHandler  = new httpdFileHandler(switchboard);
-                            fileHandler.doPost(prop, header, this.session.out, this.session.in);
+                            httpdFileHandler.doPost(prop, header, this.session.out, this.session.in);
                         }
                     }
                 } else {
@@ -687,7 +681,7 @@ public final class httpd implements serverHandler {
                 // pass to proxy
                 if (((this.allowYaCyHop) && (handleYaCyHopAuthentication(header))) ||
                     ((this.allowProxy) && (handleProxyAuthentication(header)))) {
-                    proxyHandler.doPost(prop, header, this.session.out, this.session.in);
+                    httpdProxyHandler.doPost(prop, header, this.session.out, this.session.in);
                 } else {
                     // not authorized through firewall blocking (ip does not match filter)
                     session.out.write((httpVersion + " 403 refused (IP not granted)" + serverCore.crlfString + serverCore.crlfString + "you are not allowed to connect to this proxy, because you are using the non-granted IP " + clientIP + ". allowed are only connections that match with the following filter: " + switchboard.getConfig("proxyClient", "*") + serverCore.crlfString).getBytes());
@@ -754,7 +748,7 @@ public final class httpd implements serverHandler {
         // pass to proxy
         if (((this.allowYaCyHop) && (handleYaCyHopAuthentication(header))) ||
             ((this.allowProxy) && (this.handleProxyAuthentication(header)))) {
-            proxyHandler.doConnect(prop, header, this.session.in, this.session.out);
+            httpdProxyHandler.doConnect(prop, header, this.session.in, this.session.out);
         } else {
             // not authorized through firewall blocking (ip does not match filter)
             session.out.write((httpVersion + " 403 refused (IP not granted)" + serverCore.crlfString + serverCore.crlfString + "you are not allowed to connect to this proxy, because you are using the non-granted IP " + clientIP + ". allowed are only connections that match with the following filter: " + switchboard.getConfig("proxyClient", "*") + serverCore.crlfString).getBytes());
@@ -1106,7 +1100,7 @@ public final class httpd implements serverHandler {
     }
     
     public Object clone() {
-        return new httpd(switchboard, new httpdFileHandler(switchboard), new httpdProxyHandler(switchboard));        
+        return new httpd(switchboard);        
     }
     
     public static final void sendRespondBody(

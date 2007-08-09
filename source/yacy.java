@@ -67,8 +67,6 @@ import de.anomic.data.translator;
 import de.anomic.http.httpHeader;
 import de.anomic.http.httpc;
 import de.anomic.http.httpd;
-import de.anomic.http.httpdFileHandler;
-import de.anomic.http.httpdProxyHandler;
 import de.anomic.index.indexContainer;
 import de.anomic.index.indexRWIEntry;
 import de.anomic.index.indexURLEntry;
@@ -319,7 +317,7 @@ public final class yacy {
             // start main threads
             final String port = sb.getConfig("port", "8080");
             try {
-                final httpd protocolHandler = new httpd(sb, new httpdFileHandler(sb), new httpdProxyHandler(sb));
+                final httpd protocolHandler = new httpd(sb);
                 final serverCore server = new serverCore(
                         timeout /*control socket timeout in milliseconds*/,
                         true /* block attacks (wrong protocol) */,

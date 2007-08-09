@@ -113,7 +113,7 @@ import de.anomic.server.servletProperties;
 import de.anomic.server.logging.serverLog;
 import de.anomic.ymage.ymageMatrix;
 
-public final class httpdFileHandler extends httpdAbstractHandler implements httpdHandler {
+public final class httpdFileHandler {
     
     private static final boolean safeServletsMode = false; // if true then all servlets are called synchronized
     
@@ -136,19 +136,20 @@ public final class httpdFileHandler extends httpdAbstractHandler implements http
     
     public static boolean useTemplateCache = false;
     
+    //private Properties connectionProperties = null;
+    private static serverLog theLogger;
+    
     static {
-        useTemplateCache = plasmaSwitchboard.getSwitchboard().getConfig("enableTemplateCache","true").equalsIgnoreCase("true");
+        serverSwitch switchboard = plasmaSwitchboard.getSwitchboard();
+        useTemplateCache = switchboard.getConfig("enableTemplateCache","true").equalsIgnoreCase("true");
         templateCache = (useTemplateCache)? new HashMap() : new HashMap(0);
         templateMethodCache = (useTemplateCache) ? new HashMap() : new HashMap(0);
         
         // create a class loader
         provider = new serverClassLoader(/*this.getClass().getClassLoader()*/);
-    }
-    
-    public httpdFileHandler(serverSwitch switchboard) {
-        
+
         // creating a logger
-        this.theLogger = new serverLog("FILEHANDLER");
+        theLogger = new serverLog("FILEHANDLER");
         
         if (httpdFileHandler.switchboard == null) {
             httpdFileHandler.switchboard = switchboard;
@@ -244,7 +245,7 @@ public final class httpdFileHandler extends httpdAbstractHandler implements http
 //        out.flush();
 //    }
     
-    private httpHeader getDefaultHeaders(String path) {
+    private static final httpHeader getDefaultHeaders(String path) {
         httpHeader headers = new httpHeader();
 		String ext;
 		int pos;
@@ -261,21 +262,19 @@ public final class httpdFileHandler extends httpdAbstractHandler implements http
         return headers;
     }
     
-    public void doGet(Properties conProp, httpHeader requestHeader, OutputStream response) throws IOException {
+    public static void doGet(Properties conProp, httpHeader requestHeader, OutputStream response) throws IOException {
         doResponse(conProp, requestHeader, response, null);
     }
     
-    public void doHead(Properties conProp, httpHeader requestHeader, OutputStream response) throws IOException {
+    public static void doHead(Properties conProp, httpHeader requestHeader, OutputStream response) throws IOException {
         doResponse(conProp, requestHeader, response, null);
     }
     
-    public void doPost(Properties conProp, httpHeader requestHeader, OutputStream response, PushbackInputStream body) throws IOException {
+    public static void doPost(Properties conProp, httpHeader requestHeader, OutputStream response, PushbackInputStream body) throws IOException {
         doResponse(conProp, requestHeader, response, body);
     }
     
-    public void doResponse(Properties conProp, httpHeader requestHeader, OutputStream out, InputStream body) {
-        
-        this.connectionProperties = conProp;
+    public static void doResponse(Properties conProp, httpHeader requestHeader, OutputStream out, InputStream body) {
         
         String path = null;
         try {
@@ -456,7 +455,7 @@ public final class httpdFileHandler extends httpdAbstractHandler implements http
                     targetFile = getOverlayedFile("/htdocsdefault/dir." + dirlistFormat);
                     targetClass=getOverlayedClass("/htdocsdefault/dir." + dirlistFormat);
                     if(! (( targetFile != null && targetFile.exists()) && ( targetClass != null && targetClass.exists())) ){
-                        httpd.sendRespondError(this.connectionProperties,out,3,500,"dir." + dirlistFormat + " or dir.class not found.",null,null);
+                        httpd.sendRespondError(conProp, out, 3, 500, "dir." + dirlistFormat + " or dir.class not found.", null, null);
                     }
                 }
             }else{
@@ -483,7 +482,7 @@ public final class httpdFileHandler extends httpdAbstractHandler implements http
                     // in case that there are no args given, args = null or empty hashmap
                     img = invokeServlet(targetClass, requestHeader, args);
                 } catch (InvocationTargetException e) {
-                    this.theLogger.logSevere("INTERNAL ERROR: " + e.toString() + ":" +
+                    theLogger.logSevere("INTERNAL ERROR: " + e.toString() + ":" +
                     e.getMessage() +
                     " target exception at " + targetClass + ": " +
                     e.getTargetException().toString() + ":" +
@@ -493,7 +492,7 @@ public final class httpdFileHandler extends httpdAbstractHandler implements http
                 }
                 if (img == null) {
                     // error with image generation; send file-not-found
-                    httpd.sendRespondError(this.connectionProperties,out,3,404,"File not Found",null,null);
+                    httpd.sendRespondError(conProp, out, 3, 404, "File not Found", null, null);
                 } else {
                     if (img instanceof ymageMatrix) {
                         ymageMatrix yp = (ymageMatrix) img;
@@ -514,10 +513,7 @@ public final class httpdFileHandler extends httpdAbstractHandler implements http
                         baos = null;
 
                         // write the array to the client
-                        httpd.sendRespondHeader(this.connectionProperties, out,
-                                httpVersion, 200, null, mimeType,
-                                result.length, targetDate, null, null, null,
-                                null, nocache);
+                        httpd.sendRespondHeader(conProp, out, httpVersion, 200, null, mimeType, result.length, targetDate, null, null, null, null, nocache);
                         if (!method.equals(httpHeader.METHOD_HEAD)) {
                             //Thread.sleep(200); // see below
                             serverFileUtils.write(result, out);
@@ -543,10 +539,7 @@ public final class httpdFileHandler extends httpdAbstractHandler implements http
                         baos = null;
 
                         // write the array to the client
-                        httpd.sendRespondHeader(this.connectionProperties, out,
-                                httpVersion, 200, null, mimeType,
-                                result.length, targetDate, null, null, null,
-                                null, nocache);
+                        httpd.sendRespondHeader(conProp, out, httpVersion, 200, null, mimeType, result.length, targetDate, null, null, null, null, nocache);
                         if (!method.equals(httpHeader.METHOD_HEAD)) {
                             //Thread.sleep(200); // see below
                             serverFileUtils.write(result, out);
@@ -560,11 +553,11 @@ public final class httpdFileHandler extends httpdAbstractHandler implements http
                 requestHeader.put(httpHeader.CONNECTION_PROP_INPUTSTREAM, body);
                 requestHeader.put(httpHeader.CONNECTION_PROP_OUTPUTSTREAM, out);
              
-                httpd.sendRespondHeader(this.connectionProperties, out, httpVersion, 200, null);                
+                httpd.sendRespondHeader(conProp, out, httpVersion, 200, null);                
                 
                 // in case that there are no args given, args = null or empty hashmap
                 /* servletProperties tp = (servlerObjects) */ invokeServlet(targetClass, requestHeader, args);
-                this.forceConnectionClose();
+                forceConnectionClose(conProp);
                 return;                
             } else if ((targetFile.exists()) && (targetFile.canRead())) {
                 // we have found a file that can be written to the client
@@ -646,7 +639,7 @@ public final class httpdFileHandler extends httpdAbstractHandler implements http
                                 throw new InterruptedException(e.getCause().getMessage());
                             }                            
                             
-                            this.theLogger.logSevere("INTERNAL ERROR: " + e.toString() + ":" +
+                            theLogger.logSevere("INTERNAL ERROR: " + e.toString() + ":" +
                                     e.getMessage() +
                                     " target exception at " + targetClass + ": " +
                                     e.getTargetException().toString() + ":" +
@@ -683,11 +676,11 @@ public final class httpdFileHandler extends httpdAbstractHandler implements http
                                 // storing the content into the cache
                                 ref = new SoftReference(templateContent);
                                 templateCache.put(targetFile, ref);
-                                if (this.theLogger.isLoggable(Level.FINEST))
-                                    this.theLogger.logFinest("Cache MISS for file " + targetFile);
+                                if (theLogger.isLoggable(Level.FINEST))
+                                    theLogger.logFinest("Cache MISS for file " + targetFile);
                             } else {
-                                if (this.theLogger.isLoggable(Level.FINEST))
-                                    this.theLogger.logFinest("Cache HIT for file " + targetFile);
+                                if (theLogger.isLoggable(Level.FINEST))
+                                    theLogger.logFinest("Cache HIT for file " + targetFile);
                             }
 
                             // creating an inputstream needed by the template
@@ -704,7 +697,7 @@ public final class httpdFileHandler extends httpdAbstractHandler implements http
 
                     // write the array to the client
                     // we can do that either in standard mode (whole thing completely) or in chunked mode
-                    // since yacy clients do not understand chunked mode, we use this only for communication with the administrator
+                    // since yacy clients do not understand chunked mode (yet), we use this only for communication with the administrator
                     boolean yacyClient = requestHeader.userAgent().startsWith("yacy");
                     boolean chunked = !method.equals(httpHeader.METHOD_HEAD) && !yacyClient && httpVersion.equals(httpHeader.HTTP_VERSION_1_1);
                     if (chunked) {
@@ -712,38 +705,41 @@ public final class httpdFileHandler extends httpdAbstractHandler implements http
                         serverByteBuffer o = new serverByteBuffer();
                         // apply templates
                         httpTemplate.writeTemplate(fis, o, tp, "-UNRESOLVED_PATTERN-".getBytes("UTF-8"));
-                        httpd.sendRespondHeader(this.connectionProperties, out,
-                                httpVersion, 200, null, mimeType, -1,
-                                targetDate, null, tp.getOutgoingHeader(),
-                                null, "chunked", nocache);
+                        httpd.sendRespondHeader(conProp, out, httpVersion, 200, null, mimeType, -1, targetDate, null, tp.getOutgoingHeader(), null, "chunked", nocache);
                         // send the content in chunked parts, see RFC 2616 section 3.6.1
                         httpChunkedOutputStream chos = new httpChunkedOutputStream(out);
-                        httpSSI.writeSSI(targetFile, o, chos);
+                        httpSSI.writeSSI(o, chos);
                         //chos.write(result);
                         chos.finish();
                     } else {
                         // send page as whole thing, SSIs are not possible
                         String contentEncoding = (zipContent) ? "gzip" : null;
                         // apply templates
+                        serverByteBuffer o1 = new serverByteBuffer();
+                        httpTemplate.writeTemplate(fis, o1, tp, "-UNRESOLVED_PATTERN-".getBytes("UTF-8"));
+                        
                         serverByteBuffer o = new serverByteBuffer();
+                        
                         if (zipContent) {
                             GZIPOutputStream zippedOut = new GZIPOutputStream(o);
-                            httpTemplate.writeTemplate(fis, zippedOut, tp, "-UNRESOLVED_PATTERN-".getBytes("UTF-8"));
+                            httpSSI.writeSSI(o1, zippedOut);
+                            //httpTemplate.writeTemplate(fis, zippedOut, tp, "-UNRESOLVED_PATTERN-".getBytes("UTF-8"));
                             zippedOut.finish();
                             zippedOut.flush();
                             zippedOut.close();
                             zippedOut = null;
                         } else {
-                            httpTemplate.writeTemplate(fis, o, tp, "-UNRESOLVED_PATTERN-".getBytes("UTF-8"));
+                            httpSSI.writeSSI(o1, o);
+                            //httpTemplate.writeTemplate(fis, o, tp, "-UNRESOLVED_PATTERN-".getBytes("UTF-8"));
                         }
                         if (method.equals(httpHeader.METHOD_HEAD)) {
-                            httpd.sendRespondHeader(this.connectionProperties, out,
+                            httpd.sendRespondHeader(conProp, out,
                                     httpVersion, 200, null, mimeType, o.length(),
                                     targetDate, null, tp.getOutgoingHeader(),
                                     contentEncoding, null, nocache);
                         } else {
                             byte[] result = o.toByteArray(); // this interrupts streaming (bad idea!)
-                            httpd.sendRespondHeader(this.connectionProperties, out,
+                            httpd.sendRespondHeader(conProp, out,
                                     httpVersion, 200, null, mimeType, result.length,
                                     targetDate, null, tp.getOutgoingHeader(),
                                     contentEncoding, null, nocache);
@@ -803,9 +799,9 @@ public final class httpdFileHandler extends httpdAbstractHandler implements http
                     long   contentLength    = (zipContent)?-1:targetFile.length()-rangeStartOffset;
                     String contentEncoding  = (zipContent)?"gzip":null;
                     String transferEncoding = (!httpVersion.equals(httpHeader.HTTP_VERSION_1_1))?null:(zipContent)?"chunked":null;
-                    if (!httpVersion.equals(httpHeader.HTTP_VERSION_1_1) && zipContent) forceConnectionClose();
+                    if (!httpVersion.equals(httpHeader.HTTP_VERSION_1_1) && zipContent) forceConnectionClose(conProp);
                     
-                    httpd.sendRespondHeader(this.connectionProperties, out, httpVersion, statusCode, null, mimeType, contentLength, targetDate, null, header, contentEncoding, transferEncoding, nocache);
+                    httpd.sendRespondHeader(conProp, out, httpVersion, statusCode, null, mimeType, contentLength, targetDate, null, header, contentEncoding, transferEncoding, nocache);
                 
                     if (!method.equals(httpHeader.METHOD_HEAD)) {                        
                         httpChunkedOutputStream chunkedOut = null;
@@ -886,16 +882,16 @@ public final class httpdFileHandler extends httpdAbstractHandler implements http
                     httpd.sendRespondError(conProp,out, 4, httpStatusCode, httpStatusText, new String(errorMessage),errorExc);
                 } else {
                     // otherwise we close the connection
-                    this.forceConnectionClose();
+                    forceConnectionClose(conProp);
                 }    
                 
                 // if it is an unexpected error we log it 
                 if (httpStatusCode == 500) {
-                    this.theLogger.logWarning(new String(errorMessage),e);
+                    theLogger.logWarning(new String(errorMessage),e);
                 }
                 
             } catch (Exception ee) {
-                this.forceConnectionClose();
+                forceConnectionClose(conProp);
             }            
             
         } finally {
@@ -907,7 +903,7 @@ public final class httpdFileHandler extends httpdAbstractHandler implements http
         }
     }
     
-    public File getOverlayedClass(String path) {
+    public static final File getOverlayedClass(String path) {
         File targetClass;
         targetClass=rewriteClassFile(new File(htDefaultPath, path)); //works for default and localized files
         if(targetClass == null || !targetClass.exists()){
@@ -917,7 +913,7 @@ public final class httpdFileHandler extends httpdAbstractHandler implements http
         return targetClass;
     }
 
-    public File getOverlayedFile(String path) {
+    public static final File getOverlayedFile(String path) {
         File targetFile;
         targetFile = getLocalizedFile(path);
         if (!(targetFile.exists())){
@@ -926,13 +922,13 @@ public final class httpdFileHandler extends httpdAbstractHandler implements http
         return targetFile;
     }
     
-    private void forceConnectionClose() {
-        if (this.connectionProperties != null) {
-            this.connectionProperties.setProperty(httpHeader.CONNECTION_PROP_PERSISTENT,"close");            
+    private static final void forceConnectionClose(Properties conprop) {
+        if (conprop != null) {
+            conprop.setProperty(httpHeader.CONNECTION_PROP_PERSISTENT,"close");            
         }
     }
 
-    private File rewriteClassFile(File template) {
+    private static final File rewriteClassFile(File template) {
         try {
             String f = template.getCanonicalPath();
             int p = f.lastIndexOf(".");
@@ -947,7 +943,7 @@ public final class httpdFileHandler extends httpdAbstractHandler implements http
         }
     }
     
-    private final Method rewriteMethod(File classFile) {                
+    private static final Method rewriteMethod(File classFile) {                
         Method m = null;
         // now make a class out of the stream
         try {
@@ -958,7 +954,6 @@ public final class httpdFileHandler extends httpdAbstractHandler implements http
                     if (m == null) {
                         templateMethodCache.remove(classFile);
                     } else {
-                        this.theLogger.logFine("Cache HIT for file " + classFile);
                         return m;
                     }
                     
@@ -977,7 +972,6 @@ public final class httpdFileHandler extends httpdAbstractHandler implements http
                 // storing the method into the cache
                 SoftReference ref = new SoftReference(m);
                 templateMethodCache.put(classFile,ref);
-                this.theLogger.logFine("Cache MISS for file " + classFile);
             }
             
         } catch (ClassNotFoundException e) {
@@ -989,7 +983,7 @@ public final class httpdFileHandler extends httpdAbstractHandler implements http
         return m;
     }
     
-    public Object invokeServlet(File targetClass, httpHeader request, serverObjects args) throws IllegalArgumentException, IllegalAccessException, InvocationTargetException {
+    public static final Object invokeServlet(File targetClass, httpHeader request, serverObjects args) throws IllegalArgumentException, IllegalAccessException, InvocationTargetException {
         Object result;
         if (safeServletsMode) synchronized (switchboard) {
             result = rewriteMethod(targetClass).invoke(null, new Object[] {request, args, switchboard});
