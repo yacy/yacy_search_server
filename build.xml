@@ -208,6 +208,8 @@
     <pathelement location="${lib}/commons-collections.jar" />
     <pathelement location="${lib}/commons-pool.jar" />    
 	<pathelement location="${lib}/tar.jar" />
+  	<pathelement location="${libx}/saaj.jar" />
+  	<pathelement location="${libx}/axis.jar" />
   </path>
     
   <!-- compiling yacy.java -->   
