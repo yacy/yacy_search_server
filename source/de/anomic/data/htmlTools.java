@@ -198,7 +198,7 @@ public class htmlTools {
     };
     
     public static void main(String[] args) {
-        String text = "Test-Text mit & um zyklische &uuml; &amp; Ersetzungen auszuschliessen ŠšŸ";
+        String text = "Test-Text mit & um zyklische &uuml; &amp; Ersetzungen auszuschliessen";
         String txet = encodeUnicode2html(text, true);
         System.out.println(txet);
         System.out.println(decodeHtml2Unicode(txet));
