@@ -4,35 +4,26 @@
 
 import java.io.File;
 import java.io.IOException;
-import java.sql.Connection;
-import java.sql.DriverManager;
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
-import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashSet;
 import java.util.Iterator;
-import java.util.List;
 import java.util.Random;
 
 import javax.imageio.ImageIO;
 
 import de.anomic.kelondro.kelondroBase64Order;
 import de.anomic.kelondro.kelondroCache;
-import de.anomic.kelondro.kelondroCloneableIterator;
 import de.anomic.kelondro.kelondroFlexSplitTable;
 import de.anomic.kelondro.kelondroFlexTable;
 import de.anomic.kelondro.kelondroIndex;
 import de.anomic.kelondro.kelondroIntBytesMap;
-import de.anomic.kelondro.kelondroNaturalOrder;
-import de.anomic.kelondro.kelondroOrder;
 import de.anomic.kelondro.kelondroProfile;
 import de.anomic.kelondro.kelondroRow;
 import de.anomic.kelondro.kelondroRowSet;
+import de.anomic.kelondro.kelondroSQLTable;
 import de.anomic.kelondro.kelondroSplittedTree;
 import de.anomic.kelondro.kelondroTree;
-import de.anomic.kelondro.kelondroRow.Entry;
 import de.anomic.server.serverInstantThread;
 import de.anomic.server.serverMemory;
 import de.anomic.server.logging.serverLog;
@@ -223,11 +214,11 @@ public class dbtest {
                 table = new kelondroFlexSplitTable(tablepath, new File(tablename).getName(), preload, testRow, true);
             }
             if (dbe.equals("mysql")) {
-                table = new dbTable("mysql", testRow);
+                table = new kelondroSQLTable("mysql", testRow);
             }
             
             if (dbe.equals("pgsql")) {
-                table = new dbTable("pgsql", testRow);
+                table = new kelondroSQLTable("pgsql", testRow);
             }
             
             long afterinit = System.currentTimeMillis();
@@ -369,7 +360,7 @@ public class dbtest {
                 Iterator i = null;
                 if (table instanceof kelondroSplittedTree) i = ((kelondroSplittedTree) table).rows(true, null);
                 if (table instanceof kelondroTree) i = ((kelondroTree) table).rows(true, null);
-                if (table instanceof dbTable) i = ((dbTable) table).rows(true, null);
+                if (table instanceof kelondroSQLTable) i = ((kelondroSQLTable) table).rows(true, null);
                 byte[][] row;
                 while (i.hasNext()) {
                     row = (byte[][]) i.next();
@@ -470,266 +461,6 @@ public class dbtest {
         }
     }
 }
-
-/*
- * Commands to create a database using mysql:
- * 
- * CREATE database yacy;
- * USE yacy;
- * CREATE TABLE hash CHAR(12) not null primary key, value BLOB);
- * insert into user (Host, User, Password) values ('%','yacy',password('yacy'));
- * insert into db (User, Db, Select_priv, Insert_priv, Update_priv, Delete_priv) values ('yacy@%','yacy','Y','Y','Y','Y')
- * grant ALL on yacy.* to yacy;
- */
-final class dbTable implements kelondroIndex {
-
-    private final String db_driver_str_mysql = "org.gjt.mm.mysql.Driver";
-    private final String db_driver_str_pgsql = "org.postgresql.Driver";
-    
-    private final String db_conn_str_mysql    = "jdbc:mysql://192.168.0.2:3306/yacy";
-    private final String db_conn_str_pgsql   = "jdbc:postgresql://192.168.0.2:5432";
-    
-    private final String db_usr_str    = "yacy";
-    private final String db_pwd_str    = "yacy";
-    
-    private Connection theDBConnection = null;
-    private final kelondroOrder order = new kelondroNaturalOrder(true);
-    private kelondroRow rowdef;
-    
-    public dbTable(String dbType, kelondroRow rowdef) throws Exception {
-        this.rowdef = rowdef;
-        openDatabaseConnection(dbType);
-    }
-    
-    private void openDatabaseConnection(String dbType) throws Exception{
-
-        if (dbType == null) throw new IllegalArgumentException(); 
-
-        String dbDriverStr = null, dbConnStr = null;            
-        if (dbType.equalsIgnoreCase("mysql")) {
-            dbDriverStr = db_driver_str_mysql;
-            dbConnStr = db_conn_str_mysql;
-        } else if (dbType.equalsIgnoreCase("pgsql")) {
-            dbDriverStr = db_driver_str_pgsql;
-            dbConnStr = db_conn_str_pgsql;
-        }                
-        try {            
-            Class.forName(dbDriverStr).newInstance();
-        } catch (Exception e) {
-            throw new Exception ("Unable to load the jdbc driver: " + e.getMessage(),e);
-        }
-        try {
-            this.theDBConnection = DriverManager.getConnection (dbConnStr,this.db_usr_str,this.db_pwd_str);
-        } catch (Exception e) {
-            throw new Exception ("Unable to establish a database connection: " + e.getMessage(),e);
-        }
-        
-    }
-    
-    public String filename() {
-        return "dbtest." + theDBConnection.hashCode();
-    }
-    
-    public void close() {
-        if (this.theDBConnection != null) try {
-            this.theDBConnection.close();
-        } catch (SQLException e) {
-            e.printStackTrace();
-        }
-        this.theDBConnection = null;
-    }
-    
-    public int size() {
-        int size = -1;
-        try {
-            String sqlQuery = new String
-            (
-                "SELECT count(value) from test"
-            );
-            
-            PreparedStatement sqlStatement = this.theDBConnection.prepareStatement(sqlQuery); 
-            ResultSet result = sqlStatement.executeQuery();
-            
-            while (result.next()) {
-                size = result.getInt(1);
-            }  
-            
-            result.close();
-            sqlStatement.close();
-            
-            return size;
-        } catch (Exception e) {
-        	e.printStackTrace();
-        	return -1;
-        }
-    }
-    
-    public kelondroRow row() {
-        return this.rowdef;
-    }
-    
-    public boolean has(byte[] key) throws IOException {
-        return (get(key) != null);
-    }
-    
-    public kelondroRow.Entry get(byte[] key) throws IOException {
-        try {
-            String sqlQuery = new String
-            (
-                "SELECT value from test where hash = ?"
-            );
-            
-            PreparedStatement sqlStatement = this.theDBConnection.prepareStatement(sqlQuery); 
-            sqlStatement.setString(1, new String(key));
-            
-            byte[] value = null;
-            ResultSet result = sqlStatement.executeQuery();
-            while (result.next()) {
-                value = result.getBytes("value");
-            }  
-            
-            result.close();
-            sqlStatement.close();
-            
-            if (value == null) return null;
-            kelondroRow.Entry entry = this.rowdef.newEntry(value);
-            return entry;
-        } catch (Exception e) {
-            throw new IOException(e.getMessage());
-        }
-    }
-
-    public synchronized void putMultiple(List rows) throws IOException {
-        Iterator i = rows.iterator();
-        while (i.hasNext()) put((Entry) i.next());
-    }
-    
-    public kelondroRow.Entry put(kelondroRow.Entry row, Date entryDate) throws IOException {
-        return put(row);
-    }
-    
-    public kelondroRow.Entry put(kelondroRow.Entry row) throws IOException {
-        try {
-            
-            kelondroRow.Entry oldEntry = remove(row.getColBytes(0));            
-            
-            String sqlQuery = new String
-            (
-                    "INSERT INTO test (" +
-                    "hash, " +
-                    "value) " +
-                    "VALUES (?,?)"
-            );                
-            
-            
-            PreparedStatement sqlStatement = this.theDBConnection.prepareStatement(sqlQuery);     
-            
-            sqlStatement.setString(1, new String(row.getColString(0, null)));
-            sqlStatement.setBytes(2, row.bytes());
-            sqlStatement.execute();
-            
-            sqlStatement.close();
-            
-            return oldEntry;
-        } catch (Exception e) {
-            throw new IOException(e.getMessage());
-        }
-    }
-
-    public synchronized void addUnique(kelondroRow.Entry row) throws IOException {
-        throw new UnsupportedOperationException();
-    }
-    
-    public synchronized void addUnique(kelondroRow.Entry row, Date entryDate) {
-        throw new UnsupportedOperationException();
-    }
-    
-    public synchronized void addUniqueMultiple(List rows) throws IOException {
-        throw new UnsupportedOperationException();
-    }
-    
-    public kelondroRow.Entry remove(byte[] key) throws IOException {
-        try {
-            
-            kelondroRow.Entry entry =  this.get(key);
-            if (entry == null) return entry;
-            
-            String sqlQuery = new String
-            (
-                    "DELETE FROM test WHERE hash = ?"
-            );                
-            
-            
-            PreparedStatement sqlStatement = this.theDBConnection.prepareStatement(sqlQuery);                 
-            sqlStatement.setString(1, new String(key));
-            sqlStatement.execute();
-            
-            return entry;
-        } catch (Exception e) {
-            throw new IOException(e.getMessage());
-        }
-    }
-    
-    public kelondroRow.Entry removeOne() {
-        return null;
-    }
-    
-    public kelondroCloneableIterator rows(boolean up, byte[] startKey) throws IOException {
-        // Objects are of type byte[][]
-        return null;
-    }
-
-    public Iterator keys(boolean up, boolean rotating, byte[] startKey) {
-        // Objects are of type String
-        return null;
-    }
-
-    public int columns() {
-        // TODO Auto-generated method stub
-        return 0;
-    }
-
-    public int columnSize(int column) {
-        // TODO Auto-generated method stub
-        return 0;
-    }
-
-    public kelondroOrder order() {
-        return this.order;
-    }
-    
-    public int primarykey() {
-        return 0;
-    }
-    
-    public kelondroProfile profile() {
-        return new kelondroProfile();
-    }
-    
-    public final int cacheObjectChunkSize() {
-        // dummy method
-        return -1;
-    }
-    
-    public long[] cacheObjectStatus() {
-        // dummy method
-        return null;
-    }
-    
-    public final int cacheNodeChunkSize() {
-        return -1;
-    }
-    
-    public final int[] cacheNodeStatus() {
-        return new int[]{0,0,0,0,0,0,0,0,0,0};
-    }
-
-	public void reset() {
-		// TODO Auto-generated method stub
-		
-	}
-}
-
 
 final class memprofiler extends Thread {
     
