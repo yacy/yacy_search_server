@@ -180,22 +180,38 @@ document.getElementById("Enter").value = "search again - catch up more links";
 	</p>
 	#(/resultbottomline)#
 	::<!-- type 1: media search -->
-	<!-- linklist begin -->
-	#{results}#
-	<!-- link begin -->
-	    <span class="snippetLoading" id="#[urlhash]#">loading snippet from <a href="#[url]#" id="url#[urlhash]#">#[urlname]#</a><br /></span>
-	<!-- link end -->
-	#{/results}#
+  <!-- non-js variant -->
+  <noscript>
+    <p>
+      Sorry, at the moment you need JavaScript in order to use this search. But here are the urls where YaCy would have looked for your searchresults. Perhaps you can find them there. Sorry for the inconvenience. If you want a non-JavaScript search, beg the developers for it.
+    </p>
+    <!-- linklist begin -->
+    <ul>
+	    #{results}#
+      <!-- link begin -->
+      <li><a href="#[url]#">#[urlname]#</a></li>
+	    <!-- link end -->
+	    #{/results}#
+    </ul>
+	  <!-- linklist end -->
+  </noscript>
+  <!-- linklist start-->
+  <div id="results">
+  </div>
+  <!-- linklist end-->
 	<script type="text/javascript">
-	AllMediaSnippets("#[former]#", "#[mediatype]#");
-	addHover();
+    var urls = "#{results}##[urlname]# #{/results}#".split(" ");
+    // the last element is always empty because the split gets a space at the end of the string
+    urls.length--;
+    if(urls.length > 0) {
+	    AllMediaSnippets(urls, "#[former]#", "#[mediatype]#");
+    }
 	</script> 
 	
-	<!-- linklist end -->
 	::<!-- type 2: image search: presents image thumbnails -->
   <noscript>
     <p>
-      Sorry, but in order to use the image search, you need JavaScript. But here are the urls, YaCy would have looked for the images you want. Perhaps you can find them there. Sorry for the inconvenience. If you want a non-JavaScript image search, beg the developers for it.
+      Sorry, but in order to use the image search, you need JavaScript. But here are the urls where YaCy would have looked for the images you want. Perhaps you can find them there. Sorry for the inconvenience. If you want a non-JavaScript image search, beg the developers for it.
     </p>
     <ul>
     #{results}#

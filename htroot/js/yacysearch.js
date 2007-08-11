@@ -61,14 +61,13 @@ function AllTextSnippets(query) {
 	}
 }
 
-function AllMediaSnippets(query, mediatype) {
-	var span = document.getElementsByTagName("span");
-	for(var x=0;x<span.length;x++) {
-		if (span[x].className == 'snippetLoading') {
-				var url = document.getElementById("url" + span[x].id);
-				requestMediaSnippet(url,query,mediatype);
-		}
-	}
+function AllMediaSnippets(urls, query, mediatype) {
+  document.getElementById("linkcount").innerHTML = 0;
+  var container = document.getElementById("results");
+  var progressbar = new Progressbar(urls.length, container);
+  for (url in urls) {
+    requestMediaSnippet(urls[url],query,mediatype,progressbar);
+  }
 }
 
 function AllImageSnippets(urls, query) {
@@ -87,10 +86,10 @@ function requestTextSnippet(url, query){
 	request.send(null);
 }
 
-function requestMediaSnippet(url, query, mediatype){
+function requestMediaSnippet(url, query, mediatype, progressbar){
 	var request=createRequestObject();
 	request.open('get', '/xml/snippet.xml?url=' + escape(url) + '&remove=true&media=' + escape(mediatype) + '&search=' + escape(query),true);
-	request.onreadystatechange = function () {handleMediaState(request)};
+	request.onreadystatechange = function () {handleMediaState(request, progressbar)};
 	request.send(null);
 }
 
@@ -165,54 +164,55 @@ function handleTextState(req) {
 	}
 }
 
-function handleMediaState(req) {
-    if(req.readyState != 4){
-		return;
-	}
-	
-	var response = req.responseXML;
-	var urlHash = response.getElementsByTagName("urlHash")[0].firstChild.data;
-	var links = response.getElementsByTagName("links")[0].firstChild.data;
-	var span = document.getElementById(urlHash)
-	removeAllChildren(span);
-	
-	if (links > 0) {
-		span.className = "snippetLoaded";
-		for (i = 0; i < links; i++) {
-			var type = response.getElementsByTagName("type")[i].firstChild.data;
-			var href = response.getElementsByTagName("href")[i].firstChild.data;
-			var name = response.getElementsByTagName("name")[i].firstChild.data;
-			var attr = response.getElementsByTagName("attr")[i].firstChild.data;
+function handleMediaState(req, progressbar) {
+  if(req.readyState != 4){
+    return;
+  }
 
-			var nameanchor = document.createElement("a");
-			nameanchor.setAttribute("href", href);
-			nameanchor.appendChild(document.createTextNode(name));
-			
-			var linkanchor = document.createElement("a");
-			linkanchor.setAttribute("href", href);
-			linkanchor.appendChild(document.createTextNode(href));
-			
-			var col1 = document.createElement("td");
-			col1.setAttribute("width", "200");
-			col1.appendChild(nameanchor);
-			
-			var col2 = document.createElement("td");
-			col2.setAttribute("width", "500");
-			col2.appendChild(linkanchor);
-			
-			var row = document.createElement("tr");
-			row.className = "TableCellDark";
-			row.appendChild(col1);
-			row.appendChild(col2);
+  var response = req.responseXML;
+  // On errors, the result might not contain what we look for...
+  if (response.getElementsByTagName("urlHash")) {
+    var urlHash = response.getElementsByTagName("urlHash")[0].firstChild.data;
+    var links = response.getElementsByTagName("links")[0].firstChild.data;
+    var container = document.getElementById("results");
+	
+    if (links > 0) {
+      for (i = 0; i < links; i++) {
+        var type = response.getElementsByTagName("type")[i].firstChild.data;
+        var href = response.getElementsByTagName("href")[i].firstChild.data;
+        var name = response.getElementsByTagName("name")[i].firstChild.data;
+        var attr = response.getElementsByTagName("attr")[i].firstChild.data;
 
-			var table = document.createElement("table");
-			table.appendChild(row);
-			span.appendChild(table);
-		}
-	} else {
-		span.className = "snippetError";
-		span.appendChild(document.createTextNode(""));
-	}
+        var link = document.createElement("a");
+        link.setAttribute("href", href);
+        link.setAttribute("target", "_parent");
+        link.appendChild(document.createTextNode(name));
+
+        var title = document.createElement("h4");
+        title.className = "linktitle";
+        title.appendChild(link);
+
+        var urllink = document.createElement("a");
+        urllink.setAttribute("href", href);
+        urllink.setAttribute("target", "_parent");
+        urllink.appendChild(document.createTextNode(href));
+
+        var url = document.createElement("p");
+        url.className = "url";
+        url.appendChild(urllink);
+
+        var searchresultcontainer = document.createElement("div");
+        searchresultcontainer.className = "searchresults";
+        searchresultcontainer.appendChild(title);
+        searchresultcontainer.appendChild(url);
+
+        container.appendChild(searchresultcontainer);
+
+        document.getElementById("linkcount").innerHTML++;
+      }
+    }
+  }
+  progressbar.step(1);
 }
 
 function handleImageState(req, progressbar) {
