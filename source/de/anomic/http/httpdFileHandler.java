@@ -262,15 +262,15 @@ public final class httpdFileHandler {
         return headers;
     }
     
-    public static void doGet(Properties conProp, httpHeader requestHeader, OutputStream response) throws IOException {
+    public static void doGet(Properties conProp, httpHeader requestHeader, OutputStream response) {
         doResponse(conProp, requestHeader, response, null);
     }
     
-    public static void doHead(Properties conProp, httpHeader requestHeader, OutputStream response) throws IOException {
+    public static void doHead(Properties conProp, httpHeader requestHeader, OutputStream response) {
         doResponse(conProp, requestHeader, response, null);
     }
     
-    public static void doPost(Properties conProp, httpHeader requestHeader, OutputStream response, PushbackInputStream body) throws IOException {
+    public static void doPost(Properties conProp, httpHeader requestHeader, OutputStream response, PushbackInputStream body) {
         doResponse(conProp, requestHeader, response, body);
     }
     

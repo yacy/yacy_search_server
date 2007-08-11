@@ -303,7 +303,7 @@ public final class httpdProxyHandler {
      * @param respond the OutputStream to the client
      * @see de.anomic.http.httpdHandler#doGet(java.util.Properties, de.anomic.http.httpHeader, java.io.OutputStream)
      */
-    public static void doGet(Properties conProp, httpHeader requestHeader, OutputStream respond) throws IOException {
+    public static void doGet(Properties conProp, httpHeader requestHeader, OutputStream respond) {
 
         try {
             // remembering the starting time of the request

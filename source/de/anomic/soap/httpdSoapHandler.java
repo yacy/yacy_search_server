@@ -395,7 +395,7 @@ public final class httpdSoapHandler {
      * 
      * @see de.anomic.http.httpdHandler#doGet(java.util.Properties, de.anomic.http.httpHeader, java.io.OutputStream)
      */
-    public void doGet(Properties conProp, httpHeader requestHeader, OutputStream response) throws IOException {
+    public void doGet(Properties conProp, httpHeader requestHeader, OutputStream response) {
     	MessageContext msgContext = null;
         String path = conProp.getProperty(httpHeader.CONNECTION_PROP_PATH);
         
