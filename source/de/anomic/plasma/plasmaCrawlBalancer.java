@@ -58,6 +58,7 @@ import de.anomic.kelondro.kelondroIndex;
 import de.anomic.kelondro.kelondroRow;
 import de.anomic.kelondro.kelondroStack;
 import de.anomic.kelondro.kelondroAbstractRecords;
+import de.anomic.server.serverDomains;
 import de.anomic.server.logging.serverLog;
 import de.anomic.yacy.yacySeedDB;
 
@@ -297,7 +298,7 @@ public class plasmaCrawlBalancer {
         }
     }
     
-    public synchronized plasmaCrawlEntry pop(long minimumDelta, long maximumAge) throws IOException {
+    public synchronized plasmaCrawlEntry pop(long minimumLocalDelta, long minimumGlobalDelta, long maximumAge) throws IOException {
         // returns an url-hash from the stack and ensures minimum delta times
         // we have 3 sources to choose from: the ramStack, the domainStacks and the fileStack
         
@@ -370,7 +371,7 @@ public class plasmaCrawlBalancer {
                 domhash = (String) hitlist.remove(hitlist.lastKey());
                 if (maxhash == null) maxhash = domhash; // remember first entry
                 delta = lastAccessDelta(domhash);
-                if (delta > minimumDelta) {
+                if (delta > minimumGlobalDelta) {
                     domlist = (LinkedList) domainStacks.get(domhash);
                     result = (String) domlist.removeFirst();
                     if (domlist.size() == 0) domainStacks.remove(domhash);
@@ -400,7 +401,7 @@ public class plasmaCrawlBalancer {
                 // check if the time after retrieval of last hash from same
                 // domain is not shorter than the minimumDelta
                 long delta = lastAccessDelta(nexthash);
-                if (delta > minimumDelta) {
+                if (delta > minimumGlobalDelta) {
                     // the entry is fine
                     result = new String((top) ? urlFileStack.pop().getColBytes(0) : urlFileStack.pot().getColBytes(0));
                 } else {
@@ -429,6 +430,7 @@ public class plasmaCrawlBalancer {
             return null;
         }
         plasmaCrawlEntry crawlEntry = new plasmaCrawlEntry(rowEntry);
+        long minimumDelta = (serverDomains.isLocal(crawlEntry.url())) ? minimumLocalDelta : minimumGlobalDelta;
         plasmaCrawlRobotsTxt.Entry robotsEntry = plasmaSwitchboard.robots.getEntry(crawlEntry.url().getHost());
         Integer hostDelay = (robotsEntry == null) ? null : robotsEntry.getCrawlDelay();
         long genericDelta = ((robotsEntry == null) || (hostDelay == null)) ? minimumDelta : Math.max(minimumDelta, hostDelay.intValue() * 1000);

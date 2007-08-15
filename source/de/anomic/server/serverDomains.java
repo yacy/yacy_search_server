@@ -197,9 +197,9 @@ public class serverDomains {
     }
 
     // checks for local/global IP range and local IP
-    
     public static boolean isLocal(URL url) {
-        return dnsResolve(url.getHost()).isSiteLocalAddress();
+        InetAddress hostAddress = dnsResolve(url.getHost());
+        return hostAddress.isSiteLocalAddress() || hostAddress.isLoopbackAddress();
     }
 
     private static InetAddress[] localAddresses = null;
