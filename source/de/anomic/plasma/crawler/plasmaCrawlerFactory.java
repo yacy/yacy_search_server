@@ -50,7 +50,6 @@ import java.lang.reflect.Constructor;
 
 import org.apache.commons.pool.KeyedPoolableObjectFactory;
 
-import de.anomic.plasma.plasmaHTCache;
 import de.anomic.plasma.plasmaSwitchboard;
 import de.anomic.server.logging.serverLog;
 
@@ -58,14 +57,12 @@ public final class plasmaCrawlerFactory implements KeyedPoolableObjectFactory {
 
     private plasmaCrawlerPool thePool;
     private final ThreadGroup theThreadGroup;
-    private final plasmaHTCache   cacheManager;
     private final serverLog       theLog;
     private final plasmaSwitchboard sb;
 
     public plasmaCrawlerFactory(           
             ThreadGroup threadGroup,
             plasmaSwitchboard theSb,
-            plasmaHTCache theCacheManager,
             serverLog log
     ) {
 
@@ -75,7 +72,6 @@ public final class plasmaCrawlerFactory implements KeyedPoolableObjectFactory {
             throw new IllegalArgumentException("The threadgroup object must not be null.");
 
         this.theThreadGroup = threadGroup;
-        this.cacheManager = theCacheManager;
         this.sb = theSb;  
         this.theLog = log;
     }
@@ -106,7 +102,6 @@ public final class plasmaCrawlerFactory implements KeyedPoolableObjectFactory {
                 ThreadGroup.class,
                 plasmaCrawlerPool.class,
                 plasmaSwitchboard.class,
-                plasmaHTCache.class,
                 serverLog.class
         } );
 
@@ -115,7 +110,6 @@ public final class plasmaCrawlerFactory implements KeyedPoolableObjectFactory {
               this.theThreadGroup,
               (usePool)?this.thePool:null,
               this.sb,
-              this.cacheManager,
               this.theLog
         });           
         

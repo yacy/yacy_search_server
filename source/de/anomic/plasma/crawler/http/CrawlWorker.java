@@ -103,16 +103,14 @@ public final class CrawlWorker extends AbstractCrawlWorker {
      * @param theTG
      * @param thePool
      * @param theSb
-     * @param theCacheManager
      * @param theLog
      */
     public CrawlWorker(
             ThreadGroup theTG,
             plasmaCrawlerPool thePool,
             plasmaSwitchboard theSb,
-            plasmaHTCache theCacheManager,
             serverLog theLog) {
-        super(theTG,thePool,theSb,theCacheManager,theLog);
+        super(theTG,thePool,theSb,theLog);
 
         // this crawler supports http
         this.protocol = "http";        
@@ -144,7 +142,7 @@ public final class CrawlWorker extends AbstractCrawlWorker {
 
     protected plasmaHTCache.Entry createCacheEntry(URL requestUrl, Date requestDate, httpHeader requestHeader, httpc.response response) {
         IResourceInfo resourceInfo = new ResourceInfo(requestUrl,requestHeader,response.responseHeader);
-        return this.cacheManager.newEntry(
+        return plasmaHTCache.newEntry(
                 requestDate, 
                 this.depth, 
                 this.url, 
@@ -213,29 +211,29 @@ public final class CrawlWorker extends AbstractCrawlWorker {
                 // aborting download if content is to long ...
                 if (htCache.cacheFile().getAbsolutePath().length() > serverSystem.maxPathLength) {
                     remote.close();
-                    this.log.logInfo("REJECTED URL " + this.url.toString() + " because path too long '" + this.cacheManager.cachePath.getAbsolutePath() + "'");
+                    this.log.logInfo("REJECTED URL " + this.url.toString() + " because path too long '" + plasmaHTCache.cachePath.getAbsolutePath() + "'");
                     addURLtoErrorDB(plasmaCrawlEURL.DENIED_CACHEFILE_PATH_TOO_LONG);                    
                     return (htCache = null);
                 }
 
                 // reserve cache entry
-                if (!htCache.cacheFile().getCanonicalPath().startsWith(this.cacheManager.cachePath.getCanonicalPath())) {
+                if (!htCache.cacheFile().getCanonicalPath().startsWith(plasmaHTCache.cachePath.getCanonicalPath())) {
                     // if the response has not the right file type then reject file
                     remote.close();
                     this.log.logInfo("REJECTED URL " + this.url.toString() + " because of an invalid file path ('" +
                                 htCache.cacheFile().getCanonicalPath() + "' does not start with '" +
-                                this.cacheManager.cachePath.getAbsolutePath() + "').");
+                                plasmaHTCache.cachePath.getAbsolutePath() + "').");
                     addURLtoErrorDB(plasmaCrawlEURL.DENIED_INVALID_CACHEFILE_PATH);
                     return (htCache = null);
                 }
 
                 // request has been placed and result has been returned. work off response
-                File cacheFile = this.cacheManager.getCachePath(this.url);
+                File cacheFile = plasmaHTCache.getCachePath(this.url);
                 try {
                     if ((this.acceptAllContent) || (plasmaParser.supportedContent(plasmaParser.PARSER_MODE_CRAWLER,this.url,res.responseHeader.mime()))) {
                         // delete old content
                         if (cacheFile.isFile()) {
-                            this.cacheManager.deleteFile(this.url);
+                            plasmaHTCache.deleteFile(this.url);
                         }
                         
                         // create parent directories
@@ -275,14 +273,14 @@ public final class CrawlWorker extends AbstractCrawlWorker {
                             byte[] cacheArray = null;
                             cacheArray = res.writeContent(fos,this.keepInMemory);
                             htCache.setCacheArray(cacheArray);
-                            this.cacheManager.writeFileAnnouncement(cacheFile);
+                            plasmaHTCache.writeFileAnnouncement(cacheFile);
                         } finally {
                             if (fos!=null)try{fos.close();}catch(Exception e){/* ignore this */}
                         }
                         
                         // enQueue new entry with response header
                         if (this.profile != null) {
-                            this.cacheManager.push(htCache);
+                            plasmaHTCache.push(htCache);
                         }
                     } else {
                         // if the response has not the right file type then reject file

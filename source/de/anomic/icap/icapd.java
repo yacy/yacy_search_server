@@ -92,7 +92,6 @@ public class icapd implements serverHandler {
     private final serverLog log = new serverLog("ICAPD");
     
     private static plasmaSwitchboard switchboard = null;
-    private static plasmaHTCache cacheManager = null;
     private static String virtualHost = null;
     private static boolean keepAliveSupport = true;
     
@@ -101,7 +100,6 @@ public class icapd implements serverHandler {
     public icapd() {
         if (switchboard == null) {
             switchboard = plasmaSwitchboard.getSwitchboard();
-            cacheManager = switchboard.cacheManager;
             virtualHost = switchboard.getConfig("fileHost","localhost");
         }
         
@@ -388,7 +386,7 @@ public class icapd implements serverHandler {
             
             // generating a htcache entry object
             IResourceInfo resInfo = new ResourceInfo(httpRequestURL,httpReqHeader,httpResHeader);
-            plasmaHTCache.Entry cacheEntry = cacheManager.newEntry(
+            plasmaHTCache.Entry cacheEntry = plasmaHTCache.newEntry(
                     new Date(),  
                     0, 
                     httpRequestURL,
@@ -400,11 +398,11 @@ public class icapd implements serverHandler {
             );
             
             // getting the filename/path to store the response body
-            File cacheFile = cacheManager.getCachePath(httpRequestURL);
+            File cacheFile = plasmaHTCache.getCachePath(httpRequestURL);
             
             // if the file already exits we delete it
             if (cacheFile.isFile()) {
-                cacheManager.deleteFile(httpRequestURL);
+                plasmaHTCache.deleteFile(httpRequestURL);
             }                        
             // we write the new cache entry to file system directly
             cacheFile.getParentFile().mkdirs();            
@@ -414,7 +412,7 @@ public class icapd implements serverHandler {
             resBodyStream.close(); resBodyStream = null;
             
             // indexing the response
-            cacheManager.push(cacheEntry);    
+            plasmaHTCache.push(cacheEntry);    
         } catch (Exception e) {
             e.printStackTrace();
         }

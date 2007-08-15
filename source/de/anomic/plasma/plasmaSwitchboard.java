@@ -217,7 +217,6 @@ public final class plasmaSwitchboard extends serverAbstractSwitch implements ser
     public  plasmaCrawlNURL             noticeURL;
     public  plasmaCrawlZURL             errorURL, delegatedURL;
     public  plasmaWordIndex             wordIndex;
-    public  plasmaHTCache               cacheManager;
     public  plasmaCrawlLoader           cacheLoader;
     public  plasmaSwitchboardQueue      sbQueue;
     public  plasmaCrawlStacker          sbStackCrawlThread;
@@ -1100,7 +1099,7 @@ public final class plasmaSwitchboard extends serverAbstractSwitch implements ser
         long maxCacheSize = 1024 * 1024 * Long.parseLong(getConfig(PROXY_CACHE_SIZE, "2")); // this is megabyte
         String cacheLayout = getConfig(PROXY_CACHE_LAYOUT, PROXY_CACHE_LAYOUT_TREE);
         boolean cacheMigration = getConfigBool(PROXY_CACHE_MIGRATION, true);
-        this.cacheManager = new plasmaHTCache(htCachePath, maxCacheSize, ramHTTP_time, cacheLayout, cacheMigration);
+        plasmaHTCache.init(htCachePath, maxCacheSize, ramHTTP_time, cacheLayout, cacheMigration);
         
         // create the release download directory
         String release = getConfig(RELEASE_PATH, RELEASE_PATH_DEFAULT);
@@ -1164,7 +1163,7 @@ public final class plasmaSwitchboard extends serverAbstractSwitch implements ser
          * initialize switchboard queue
          * ====================================================================== */
         // create queue
-        this.sbQueue = new plasmaSwitchboardQueue(this.cacheManager, this.wordIndex.loadedURL, new File(this.plasmaPath, "switchboardQueue1.stack"), this.profiles);
+        this.sbQueue = new plasmaSwitchboardQueue(this.wordIndex.loadedURL, new File(this.plasmaPath, "switchboardQueue1.stack"), this.profiles);
         
         // setting the indexing queue slots
         indexingSlots = (int) getConfigLong(INDEXER_SLOTS, 30);
@@ -1202,7 +1201,7 @@ public final class plasmaSwitchboard extends serverAbstractSwitch implements ser
         log.logConfig("Starting Crawl Loader");
         crawlSlots = Integer.parseInt(getConfig(CRAWLER_THREADS_ACTIVE_MAX, "10"));
         plasmaCrawlLoader.switchboard = this;
-        this.cacheLoader = new plasmaCrawlLoader(this.cacheManager, this.log);
+        this.cacheLoader = new plasmaCrawlLoader(this.log);
                 
         /*
          * Creating sync objects and loading status for the crawl jobs
@@ -1291,7 +1290,7 @@ public final class plasmaSwitchboard extends serverAbstractSwitch implements ser
         
         // generate snippets cache
         log.logConfig("Initializing Snippet Cache");
-        plasmaSnippetCache.init(cacheManager, parser,log);
+        plasmaSnippetCache.init(parser, log);
         
         // start yacy core
         log.logConfig("Starting YaCy Protocol Core");
@@ -1530,7 +1529,7 @@ public final class plasmaSwitchboard extends serverAbstractSwitch implements ser
      * @param newCacheSize in MB
      */
     public final void setCacheSize(long newCacheSize) {
-        this.cacheManager.setCacheSize(1048576 * newCacheSize);
+        plasmaHTCache.setCacheSize(1048576 * newCacheSize);
     }
     
     public boolean onlineCaution() {
@@ -1651,15 +1650,11 @@ public final class plasmaSwitchboard extends serverAbstractSwitch implements ser
         return hasDoneSomething;
     }
     
-    public plasmaHTCache getCacheManager() {
-        return cacheManager;
-    }
-    
     synchronized public void htEntryStoreEnqueued(plasmaHTCache.Entry entry) {
-        if (cacheManager.full())
+        if (plasmaHTCache.full())
             htEntryStoreProcess(entry);
         else
-            cacheManager.push(entry);
+            plasmaHTCache.push(entry);
     }
     
     synchronized public boolean htEntryStoreProcess(plasmaHTCache.Entry entry) {
@@ -1724,7 +1719,7 @@ public final class plasmaSwitchboard extends serverAbstractSwitch implements ser
             } else {
                 String error = entry.shallStoreCacheForProxy();
                 if (error == null) {
-                    this.cacheManager.writeResourceContent(entry.url(), entry.cacheArray());
+                    plasmaHTCache.writeResourceContent(entry.url(), entry.cacheArray());
                     this.log.logFine("WROTE FILE (" + entry.cacheArray().length + " bytes) for " + entry.cacheFile());
                 } else {
                     this.log.logFine("WRITE OF FILE " + entry.cacheFile() + " FORBIDDEN: " + error);
@@ -1755,7 +1750,7 @@ public final class plasmaSwitchboard extends serverAbstractSwitch implements ser
             ));
         } else {
             if (!entry.profile().storeHTCache() && entry.cacheFile().exists()) {
-                this.cacheManager.deleteFile(entry.url());                
+                plasmaHTCache.deleteFile(entry.url());                
             }
         }
         
@@ -1763,12 +1758,12 @@ public final class plasmaSwitchboard extends serverAbstractSwitch implements ser
     }
     
     public boolean htEntryStoreJob() {
-        if (cacheManager.empty()) return false;
-        return htEntryStoreProcess(cacheManager.pop());
+        if (plasmaHTCache.empty()) return false;
+        return htEntryStoreProcess(plasmaHTCache.pop());
     }
     
     public int htEntrySize() {
-        return cacheManager.size();
+        return plasmaHTCache.size();
     }
     
     public void close() {
@@ -1790,7 +1785,7 @@ public final class plasmaSwitchboard extends serverAbstractSwitch implements ser
         profiles.close();
         robots.close();
         parser.close();
-        cacheManager.close();
+        plasmaHTCache.close();
         sbQueue.close();
         webStructure.flushCitationReference("crg");
         webStructure.close();
@@ -2754,7 +2749,7 @@ public final class plasmaSwitchboard extends serverAbstractSwitch implements ser
             // explicit delete/free resources
             if ((entry != null) && (entry.profile() != null) && (!(entry.profile().storeHTCache()))) {
                 plasmaHTCache.filesInUse.remove(entry.cacheFile());
-                cacheManager.deleteFile(entry.url());
+                plasmaHTCache.deleteFile(entry.url());
             }
             entry = null;
             

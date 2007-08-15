@@ -69,6 +69,7 @@ import de.anomic.kelondro.kelondroMScoreCluster;
 import de.anomic.kelondro.kelondroMapObjects;
 import de.anomic.kelondro.kelondroBase64Order;
 import de.anomic.net.URL;
+import de.anomic.plasma.plasmaHTCache;
 import de.anomic.plasma.plasmaSwitchboard;
 import de.anomic.server.serverCore;
 import de.anomic.server.serverDomains;
@@ -732,7 +733,7 @@ public final class yacySeedDB {
         File seedFile = null;
         try {            
             // create a seed file which for uploading ...    
-            seedFile = File.createTempFile("seedFile",".txt",((plasmaSwitchboard)sb).cacheManager.cachePath);
+            seedFile = File.createTempFile("seedFile",".txt", plasmaHTCache.cachePath);
             seedFile.deleteOnExit();
             serverLog.logFine("YACY","SaveSeedList: Storing seedlist into tempfile " + seedFile.toString());
             ArrayList uv = storeCache(seedFile, true);            

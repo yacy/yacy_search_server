@@ -52,6 +52,7 @@ import de.anomic.data.htmlTools;
 import de.anomic.http.httpHeader;
 import de.anomic.net.URL;
 import de.anomic.plasma.plasmaCrawlZURL;
+import de.anomic.plasma.plasmaHTCache;
 import de.anomic.plasma.plasmaSwitchboard;
 import de.anomic.plasma.plasmaSwitchboardQueue;
 import de.anomic.server.serverObjects;
@@ -88,7 +89,7 @@ public class IndexCreateIndexingQueue_p {
                         plasmaSwitchboardQueue.Entry entry = null;
                         while ((entry = switchboard.sbQueue.pop()) != null) {
                             if ((entry != null) && (entry.profile() != null) && (!(entry.profile().storeHTCache()))) {
-                                switchboard.cacheManager.deleteFile(entry.url());
+                                plasmaHTCache.deleteFile(entry.url());
                             }                            
                         }
                     } 

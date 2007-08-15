@@ -59,8 +59,9 @@ public final class serverInstantThread extends serverAbstractThread implements s
         // jobExec is the name of a method of the object 'env' that executes the one-step-run
         // jobCount is the name of a method that returns the size of the job
         // freemem is the name of a method that tries to free memory and returns void
+        Class theClass = (env instanceof Class) ? (Class) env : env.getClass();
         try {
-            this.jobExecMethod = env.getClass().getMethod(jobExec, new Class[0]);
+            this.jobExecMethod = theClass.getMethod(jobExec, new Class[0]);
         } catch (NoSuchMethodException e) {
             throw new RuntimeException("serverInstantThread, wrong declaration of jobExec: " + e.getMessage());
         }
@@ -68,7 +69,7 @@ public final class serverInstantThread extends serverAbstractThread implements s
             if (jobCount == null)
                 this.jobCountMethod = null;
             else
-                this.jobCountMethod = env.getClass().getMethod(jobCount, new Class[0]);
+                this.jobCountMethod = theClass.getMethod(jobCount, new Class[0]);
             
         } catch (NoSuchMethodException e) {
             throw new RuntimeException("serverInstantThread, wrong declaration of jobCount: " + e.getMessage());
@@ -77,13 +78,13 @@ public final class serverInstantThread extends serverAbstractThread implements s
             if (freemem == null)
                 this.freememExecMethod = null;
             else
-                this.freememExecMethod = env.getClass().getMethod(freemem, new Class[0]);
+                this.freememExecMethod = theClass.getMethod(freemem, new Class[0]);
             
         } catch (NoSuchMethodException e) {
             throw new RuntimeException("serverInstantThread, wrong declaration of freemem: " + e.getMessage());
         }
-        this.environment = env;
-        this.setName(env.getClass().getName() + "." + jobExec);
+        this.environment = (env instanceof Class) ? null : env;
+        this.setName(theClass.getName() + "." + jobExec);
         this.handle = new Long(System.currentTimeMillis() + this.getName().hashCode());
     }
     

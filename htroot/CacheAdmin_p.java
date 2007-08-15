@@ -118,7 +118,7 @@ public class CacheAdmin_p {
         final StringBuffer tree = new StringBuffer();
         final StringBuffer info = new StringBuffer();
 
-        final URL  url  = switchboard.cacheManager.getURL(file);
+        final URL  url  = plasmaHTCache.getURL(file);
         
         String urlstr = "";
         
@@ -132,7 +132,7 @@ public class CacheAdmin_p {
 
             info.ensureCapacity(10000);
             try {
-                final IResourceInfo resInfo = switchboard.cacheManager.loadResourceInfo(url);
+                final IResourceInfo resInfo = plasmaHTCache.loadResourceInfo(url);
                 if (resInfo == null) {
                     prop.put("info_type", NotCached);
                 } else {
@@ -247,8 +247,8 @@ public class CacheAdmin_p {
             }
         }
         
-        prop.put("cachesize", Long.toString(switchboard.cacheManager.curCacheSize/1024));
-        prop.put("cachemax", Long.toString(switchboard.cacheManager.maxCacheSize/1024));
+        prop.put("cachesize", Long.toString(plasmaHTCache.curCacheSize/1024));
+        prop.put("cachemax", Long.toString(plasmaHTCache.maxCacheSize/1024));
         prop.put("path", path.toString());
         prop.put("info_info", info.toString());
 

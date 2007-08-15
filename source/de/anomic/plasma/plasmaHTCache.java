@@ -100,37 +100,34 @@ public final class plasmaHTCache {
     private static final int stackLimit = 150; // if we exceed that limit, we do not check idle
     public  static final long oneday = 1000 * 60 * 60 * 24; // milliseconds of a day
 
-    kelondroMapObjects responseHeaderDB = null;
-    private final LinkedList cacheStack;
-    private final Map cacheAge; // a <date+hash, cache-path> - relation
-    public long curCacheSize;
-    public long maxCacheSize;
-    public final File cachePath;
-    public final serverLog log;
+    private static kelondroMapObjects responseHeaderDB = null;
+    private static final LinkedList cacheStack = new LinkedList();
+    private static final Map cacheAge = Collections.synchronizedMap(new TreeMap()); // a <date+hash, cache-path> - relation
+    public static long curCacheSize = 0;
+    public static long maxCacheSize;
+    public static File cachePath;
+    public static final serverLog log = new serverLog("HTCACHE");
     public static final HashSet filesInUse = new HashSet(); // can we delete this file
-    public String cacheLayout;
-    public boolean cacheMigration;
+    public static String cacheLayout;
+    public static boolean cacheMigration;
 
-    private ResourceInfoFactory objFactory;
-    private serverThread cacheScanThread;
+    private static ResourceInfoFactory objFactory = new ResourceInfoFactory();
+    private static serverThread cacheScanThread;
 
-    public plasmaHTCache(File htCachePath, long maxCacheSize, long preloadTime, String cacheLayout, boolean cacheMigration) {
-        // this.switchboard = switchboard;
-
-        this.log = new serverLog("HTCACHE");
-        this.cachePath = htCachePath;
-        this.cacheLayout = cacheLayout;
-        this.cacheMigration = cacheMigration;
+    public static void init(File htCachePath, long CacheSizeMax, long preloadTime, String layout, boolean migration) {
         
-        // create the object factory
-        this.objFactory = new ResourceInfoFactory();
+        cachePath = htCachePath;
+        cacheLayout = layout;
+        cacheMigration = migration;
+        maxCacheSize = CacheSizeMax;
+        
 
         // reset old HTCache ?
-        String[] list = this.cachePath.list();
+        String[] list = cachePath.list();
         if (list != null) {
             File object;
             for (int i = list.length - 1; i >= 0; i--) {
-                object = new File(this.cachePath, list[i]);
+                object = new File(cachePath, list[i]);
 
                 if (!object.isDirectory()) { continue; }
 
@@ -138,13 +135,13 @@ public final class plasmaHTCache {
                     !object.getName().equals("yacy") &&
                     !object.getName().equals("https") &&
                     !object.getName().equals("ftp")) {
-                    deleteOldHTCache(this.cachePath);
+                    deleteOldHTCache(cachePath);
                     break;
 
                 }
             }
         }
-        File testpath = new File(this.cachePath, "/http/");
+        File testpath = new File(cachePath, "/http/");
         list = testpath.list();
         if (list != null) {
             File object;
@@ -156,7 +153,7 @@ public final class plasmaHTCache {
                 if (!object.getName().equals("ip") &&
                     !object.getName().equals("other") &&
                     !object.getName().equals("www")) {
-                    deleteOldHTCache(this.cachePath);
+                    deleteOldHTCache(cachePath);
                     break;
                 }
             }
@@ -170,40 +167,36 @@ public final class plasmaHTCache {
         }
         if (!htCachePath.isDirectory()) {
             // if the cache does not exists or is a file and not a directory, panic
-            this.log.logSevere("the cache path " + htCachePath.toString() + " is not a directory or does not exists and cannot be created");
+            log.logSevere("the cache path " + htCachePath.toString() + " is not a directory or does not exists and cannot be created");
             System.exit(0);
         }
 
         // open the response header database
         openResponseHeaderDB(preloadTime);
 
-        // init stack
-        this.cacheStack = new LinkedList();
-
-        // init cache age and size management
-        this.cacheAge = Collections.synchronizedMap(new TreeMap());
-        this.curCacheSize = 0;
-        this.maxCacheSize = maxCacheSize;
-
         // start the cache startup thread
         // this will collect information about the current cache size and elements
-        this.cacheScanThread = serverInstantThread.oneTimeJob(this, "cacheScan", this.log, 120000);
+        try {
+            cacheScanThread = serverInstantThread.oneTimeJob(Class.forName("de.anomic.plasma.plasmaHTCache"), "cacheScan", log, 120000);
+        } catch (ClassNotFoundException e) {
+            e.printStackTrace();
+        }
     }
 
-    private void resetResponseHeaderDB() {
-        if (this.responseHeaderDB != null) this.responseHeaderDB.close();
-        File dbfile = new File(this.cachePath, DB_NAME);
+    private static void resetResponseHeaderDB() {
+        if (responseHeaderDB != null) responseHeaderDB.close();
+        File dbfile = new File(cachePath, DB_NAME);
         if (dbfile.exists()) dbfile.delete();
         openResponseHeaderDB(0);
     }
     
-    private void openResponseHeaderDB(long preloadTime) {
+    private static void openResponseHeaderDB(long preloadTime) {
         // open the response header database
-        File dbfile = new File(this.cachePath, DB_NAME);
-        this.responseHeaderDB = new kelondroMapObjects(new kelondroDyn(dbfile, true, true, preloadTime, yacySeedDB.commonHashLength, 150, '#', kelondroBase64Order.enhancedCoder, true, false, true), 500);
+        File dbfile = new File(cachePath, DB_NAME);
+        responseHeaderDB = new kelondroMapObjects(new kelondroDyn(dbfile, true, true, preloadTime, yacySeedDB.commonHashLength, 150, '#', kelondroBase64Order.enhancedCoder, true, false, true), 500);
     }
     
-    private void deleteOldHTCache(File directory) {
+    private static void deleteOldHTCache(File directory) {
         String[] list = directory.list();
         if (list != null) {
             File object;
@@ -219,26 +212,26 @@ public final class plasmaHTCache {
         directory.delete();
     }
 
-    public int size() {
-        synchronized (this.cacheStack) {
-            return this.cacheStack.size();
+    public static int size() {
+        synchronized (cacheStack) {
+            return cacheStack.size();
         }
     }
 
-    public int dbSize() {
-        return this.responseHeaderDB.size();
+    public static int dbSize() {
+        return responseHeaderDB.size();
     }
     
-    public void push(Entry entry) {
-        synchronized (this.cacheStack) {
-            this.cacheStack.add(entry);
+    public static void push(Entry entry) {
+        synchronized (cacheStack) {
+            cacheStack.add(entry);
         }
     }
 
-    public Entry pop() {
-        synchronized (this.cacheStack) {
-        if (this.cacheStack.size() > 0)
-            return (Entry) this.cacheStack.removeFirst();
+    public static Entry pop() {
+        synchronized (cacheStack) {
+        if (cacheStack.size() > 0)
+            return (Entry) cacheStack.removeFirst();
         return null;
         }
     }
@@ -247,19 +240,19 @@ public final class plasmaHTCache {
      * This method changes the HTCache size.<br>
      * @param the new cache size in bytes
      */
-    public void setCacheSize(long newCacheSize) {
-        this.maxCacheSize = newCacheSize;
+    public static void setCacheSize(long newCacheSize) {
+        maxCacheSize = newCacheSize;
     }
 
     /**
      * This method returns the free HTCache size.<br>
      * @return the cache size in bytes
      */
-    public long getFreeSize() {
-        return (this.curCacheSize >= this.maxCacheSize) ? 0 : this.maxCacheSize - this.curCacheSize;
+    public static long getFreeSize() {
+        return (curCacheSize >= maxCacheSize) ? 0 : maxCacheSize - curCacheSize;
     }
 
-    public boolean writeResourceContent(URL url, byte[] array) {
+    public static boolean writeResourceContent(URL url, byte[] array) {
         if (array == null) return false;
         File file = getCachePath(url);
         try {
@@ -270,69 +263,69 @@ public final class plasmaHTCache {
             // this is the case of a "(Not a directory)" error, which should be prohibited
             // by the shallStoreCache() property. However, sometimes the error still occurs
             // In this case do nothing.
-            this.log.logSevere("File storage failed (not a directory): " + e.getMessage());
+            log.logSevere("File storage failed (not a directory): " + e.getMessage());
             return false;
         } catch (IOException e) {
-            this.log.logSevere("File storage failed (IO error): " + e.getMessage());
+            log.logSevere("File storage failed (IO error): " + e.getMessage());
             return false;
         }
         writeFileAnnouncement(file);
         return true;
     }
 
-    private long lastcleanup = System.currentTimeMillis();
-    public void writeFileAnnouncement(File file) {
-        synchronized (this.cacheAge) {
+    private static long lastcleanup = System.currentTimeMillis();
+    public static void writeFileAnnouncement(File file) {
+        synchronized (cacheAge) {
             if (file.exists()) {
-                this.curCacheSize += file.length();
+                curCacheSize += file.length();
                 if (System.currentTimeMillis() - lastcleanup > 300000) {
                     // call the cleanup job only every 5 minutes
                     cleanup();
                     lastcleanup = System.currentTimeMillis();
                 }
-                this.cacheAge.put(ageString(file.lastModified(), file), file);
+                cacheAge.put(ageString(file.lastModified(), file), file);
             }
         }
     }
 
-    public boolean deleteFile(URL url) {
+    public static boolean deleteFile(URL url) {
         return deleteURLfromCache("", url, "FROM");
     }
 
-    private boolean deleteURLfromCache(String key, URL url, String msg) {
+    private static boolean deleteURLfromCache(String key, URL url, String msg) {
         if (deleteFileandDirs(key, getCachePath(url), msg)) {
             try {
                 // As the file is gone, the entry in responseHeader.db is not needed anymore
-                this.log.logFinest("Trying to remove responseHeader from URL: " + url.toNormalform(false, true));
-                this.responseHeaderDB.remove(plasmaURL.urlHash(url));
+                log.logFinest("Trying to remove responseHeader from URL: " + url.toNormalform(false, true));
+                responseHeaderDB.remove(plasmaURL.urlHash(url));
             } catch (IOException e) {
                 resetResponseHeaderDB();
-                this.log.logInfo("IOExeption removing response header from DB: " + e.getMessage(), e);
+                log.logInfo("IOExeption removing response header from DB: " + e.getMessage(), e);
             }
            return true;
        }
         return false;
     }
 
-    private boolean deleteFile(File obj) {
+    private static boolean deleteFile(File obj) {
         if (obj.exists() && !filesInUse.contains(obj)) {
             long size = obj.length();
             if (obj.delete()) {
-                this.curCacheSize -= size;
+                curCacheSize -= size;
                 return true;
             }
         }
        return false;
     }
 
-    private boolean deleteFileandDirs(String key, File obj, String msg) {
+    private static boolean deleteFileandDirs(String key, File obj, String msg) {
         if (deleteFile(obj)) {
-            this.log.logInfo("DELETED " + msg + " CACHE [" + key + "]: " + obj.toString());
+            log.logInfo("DELETED " + msg + " CACHE [" + key + "]: " + obj.toString());
             obj = obj.getParentFile();
             // If the has been emptied, remove it
             // Loop as long as we produce empty driectoriers, but stop at HTCACHE
-            while ((!(obj.equals(this.cachePath))) && (obj.isDirectory()) && (obj.list().length == 0)) {
-                if (obj.delete()) this.log.logFine("DELETED EMPTY DIRECTORY : " + obj.toString());
+            while ((!(obj.equals(cachePath))) && (obj.isDirectory()) && (obj.list().length == 0)) {
+                if (obj.delete()) log.logFine("DELETED EMPTY DIRECTORY : " + obj.toString());
                 obj = obj.getParentFile();
             }
             return true;
@@ -340,12 +333,12 @@ public final class plasmaHTCache {
         return false;
     }
 
-    private void cleanupDoIt(long newCacheSize) {
+    private static void cleanupDoIt(long newCacheSize) {
         File file;
         synchronized (cacheAge) {
-            Iterator iter = this.cacheAge.entrySet().iterator();
+            Iterator iter = cacheAge.entrySet().iterator();
             Map.Entry entry;
-            while (iter.hasNext() && this.curCacheSize >= newCacheSize) {
+            while (iter.hasNext() && curCacheSize >= newCacheSize) {
                 if (Thread.currentThread().isInterrupted()) return;
                 entry = (Map.Entry) iter.next();
                 String key = (String) entry.getKey();
@@ -354,23 +347,23 @@ public final class plasmaHTCache {
                 if (System.currentTimeMillis() - t < 300000) break; // files must have been at least 5 minutes in the cache before they are deleted
                 if (file != null) {
                     if (filesInUse.contains(file)) continue;
-                    this.log.logFinest("Trying to delete [" + key + "] = old file: " + file.toString());
+                    log.logFinest("Trying to delete [" + key + "] = old file: " + file.toString());
                     if (deleteFileandDirs(key, file, "OLD")) {
                         try {
                             // As the file is gone, the entry in responseHeader.db is not needed anymore
                             String urlHash = getHash(file);
                             if (urlHash != null) {
-                                this.log.logFinest("Trying to remove responseHeader for URLhash: " + urlHash);
-                                this.responseHeaderDB.remove(urlHash);
+                                log.logFinest("Trying to remove responseHeader for URLhash: " + urlHash);
+                                responseHeaderDB.remove(urlHash);
                             } else {
                                 URL url = getURL(file);
                                 if (url != null) {
-                                    this.log.logFinest("Trying to remove responseHeader for URL: " + url.toNormalform(false, true));
-                                    this.responseHeaderDB.remove(plasmaURL.urlHash(url));
+                                    log.logFinest("Trying to remove responseHeader for URL: " + url.toNormalform(false, true));
+                                    responseHeaderDB.remove(plasmaURL.urlHash(url));
                                 }
                             }
                         } catch (IOException e) {
-                            this.log.logInfo("IOExeption removing response header from DB: " + e.getMessage(), e);
+                            log.logInfo("IOExeption removing response header from DB: " + e.getMessage(), e);
                         }
                     }
                 }
@@ -379,26 +372,26 @@ public final class plasmaHTCache {
         }
     }
 
-    private void cleanup() {
+    private static void cleanup() {
         // clean up cache to have 4% (enough) space for next entries
-        if (this.cacheAge.size() > 0 &&
-            this.curCacheSize >= this.maxCacheSize &&
-            this.maxCacheSize > 0) {
-            cleanupDoIt(this.maxCacheSize - (this.maxCacheSize / 100) * 4);
+        if (cacheAge.size() > 0 &&
+            curCacheSize >= maxCacheSize &&
+            maxCacheSize > 0) {
+            cleanupDoIt(maxCacheSize - (maxCacheSize / 100) * 4);
         }
     }
 
-    public void close() {
+    public static void close() {
         // closing cache scan if still running
-        if ((this.cacheScanThread != null) && (this.cacheScanThread.isAlive())) {
-            this.cacheScanThread.terminate(true);
+        if ((cacheScanThread != null) && (cacheScanThread.isAlive())) {
+            cacheScanThread.terminate(true);
         }
         
         // closing DB
-        this.responseHeaderDB.close();
+        responseHeaderDB.close();
     }
 
-    private String ageString(long date, File f) {
+    private static String ageString(long date, File f) {
         StringBuffer sb = new StringBuffer(32);
         String s = Long.toHexString(date);
         for (int i = s.length(); i < 16; i++) sb.append('0');
@@ -409,12 +402,12 @@ public final class plasmaHTCache {
         return sb.toString();
     }
 
-    public void cacheScan() {
+    public static void cacheScan() {
         log.logConfig("STARTING HTCACHE SCANNING");
         kelondroMScoreCluster doms = new kelondroMScoreCluster();
         int fileCount = 0;
-        enumerateFiles fileEnum = new enumerateFiles(this.cachePath, true, false, true, true);
-        File dbfile = new File(this.cachePath, "responseHeader.db");
+        enumerateFiles fileEnum = new enumerateFiles(cachePath, true, false, true, true);
+        File dbfile = new File(cachePath, "responseHeader.db");
         while (fileEnum.hasMoreElements()) {
             if (Thread.currentThread().isInterrupted()) return;
             fileCount++;
@@ -422,8 +415,8 @@ public final class plasmaHTCache {
             long nextFileModDate = nextFile.lastModified();
             //System.out.println("Cache: " + dom(f));
             doms.incScore(dom(nextFile));
-            this.curCacheSize += nextFile.length();
-            if (!dbfile.equals(nextFile)) this.cacheAge.put(ageString(nextFileModDate, nextFile), nextFile);
+            curCacheSize += nextFile.length();
+            if (!dbfile.equals(nextFile)) cacheAge.put(ageString(nextFileModDate, nextFile), nextFile);
             try {
                 Thread.sleep(10);
             } catch (InterruptedException e) {
@@ -432,8 +425,8 @@ public final class plasmaHTCache {
         }
         //System.out.println("%" + (String) cacheAge.firstKey() + "=" + cacheAge.get(cacheAge.firstKey()));
         long ageHours = 0;
-        if (!this.cacheAge.isEmpty()) {
-            Iterator i = this.cacheAge.keySet().iterator();
+        if (!cacheAge.isEmpty()) {
+            Iterator i = cacheAge.keySet().iterator();
             if (i.hasNext()) try {
                 ageHours = (System.currentTimeMillis() - Long.parseLong(((String) i.next()).substring(0, 16), 16)) / 3600000;
             } catch (NumberFormatException e) {
@@ -442,8 +435,8 @@ public final class plasmaHTCache {
                 ageHours = 0;
             }
         }
-        this.log.logConfig("CACHE SCANNED, CONTAINS " + fileCount +
-                      " FILES = " + this.curCacheSize/1048576 + "MB, OLDEST IS " + 
+        log.logConfig("CACHE SCANNED, CONTAINS " + fileCount +
+                      " FILES = " + curCacheSize/1048576 + "MB, OLDEST IS " + 
             ((ageHours < 24) ? (ageHours + " HOURS") : ((ageHours / 24) + " DAYS")) + " OLD");
         cleanup();
 
@@ -459,7 +452,7 @@ public final class plasmaHTCache {
             InetAddress ip = serverDomains.dnsResolve(dom);
             if (ip == null) continue;
             result += ", " + dom + "=" + ip.getHostAddress();
-            this.log.logConfig("PRE-FILLED " + dom + "=" + ip.getHostAddress());
+            log.logConfig("PRE-FILLED " + dom + "=" + ip.getHostAddress());
             fileCount++;
             doms.deleteScore(dom);
             // wait a short while to prevent that this looks like a DoS
@@ -469,12 +462,12 @@ public final class plasmaHTCache {
                 return;
             }
         }
-        if (result.length() > 2) this.log.logConfig("PRE-FILLED DNS CACHE, FETCHED " + fileCount +
+        if (result.length() > 2) log.logConfig("PRE-FILLED DNS CACHE, FETCHED " + fileCount +
                                                " ADDRESSES: " + result.substring(2));
     }
 
-    private String dom(File f) {
-        String s = f.toString().substring(this.cachePath.toString().length() + 1);
+    private static String dom(File f) {
+        String s = f.toString().substring(cachePath.toString().length() + 1);
         int p = s.indexOf("/");
         if (p < 0) p = s.indexOf("\\");
         if (p < 0) return null;
@@ -504,30 +497,30 @@ public final class plasmaHTCache {
      * @throws <b>UnsupportedProtocolException</b> if the protocol is not supported and therefore the
      * info object couldn't be created
      */
-    public IResourceInfo loadResourceInfo(URL url) throws UnsupportedProtocolException, IllegalAccessException {    
+    public static IResourceInfo loadResourceInfo(URL url) throws UnsupportedProtocolException, IllegalAccessException {    
         
         // getting the URL hash
         String urlHash = plasmaURL.urlHash(url.toNormalform(true, true));
         
         // loading data from database
-        Map hdb = this.responseHeaderDB.getMap(urlHash);
+        Map hdb = responseHeaderDB.getMap(urlHash);
         if (hdb == null) return null;
         
         // generate the cached object
-        IResourceInfo cachedObj = this.objFactory.buildResourceInfoObj(url, hdb);
+        IResourceInfo cachedObj = objFactory.buildResourceInfoObj(url, hdb);
         return cachedObj;
     }
     
-    public ResourceInfoFactory getResourceInfoFactory() {
-        return this.objFactory;
+    public static ResourceInfoFactory getResourceInfoFactory() {
+        return objFactory;
     }
 
-    public boolean full() {
-        return (this.cacheStack.size() > stackLimit);
+    public static boolean full() {
+        return (cacheStack.size() > stackLimit);
     }
 
-    public boolean empty() {
-        return (this.cacheStack.size() == 0);
+    public static boolean empty() {
+        return (cacheStack.size() == 0);
     }
 
     public static boolean isPicture(String mimeType) {
@@ -565,7 +558,7 @@ public final class plasmaHTCache {
     /**
      * This function moves an old cached object (if it exists) to the new position
      */
-    private void moveCachedObject(File oldpath, File newpath) {
+    private static void moveCachedObject(File oldpath, File newpath) {
         try {
             if (oldpath.exists() && oldpath.isFile() && (!newpath.exists())) {
                 long d = oldpath.lastModified();
@@ -573,8 +566,8 @@ public final class plasmaHTCache {
                 if (oldpath.renameTo(newpath)) {
                     cacheAge.put(ageString(d, newpath), newpath);
                     File obj = oldpath.getParentFile();
-                    while ((!(obj.equals(this.cachePath))) && (obj.isDirectory()) && (obj.list().length == 0)) {
-                        if (obj.delete()) this.log.logFine("DELETED EMPTY DIRECTORY : " + obj.toString());
+                    while ((!(obj.equals(cachePath))) && (obj.isDirectory()) && (obj.list().length == 0)) {
+                        if (obj.delete()) log.logFine("DELETED EMPTY DIRECTORY : " + obj.toString());
                         obj = obj.getParentFile();
                     }
                 }
@@ -585,7 +578,7 @@ public final class plasmaHTCache {
         }
     }
 
-    private String replaceRegex(String input, String regex, String replacement) {
+    private static String replaceRegex(String input, String regex, String replacement) {
         if (input == null) { return ""; }
         if (input.length() > 0) {
             final Pattern searchPattern = Pattern.compile(regex);
@@ -608,7 +601,7 @@ public final class plasmaHTCache {
      * that path will be generated
      * @return new File
      */
-    public File getCachePath(final URL url) {
+    public static File getCachePath(final URL url) {
 //      this.log.logFinest("plasmaHTCache: getCachePath:  IN=" + url.toString());
 
         // peer.yacy || www.peer.yacy  = http/yacy/peer
@@ -687,22 +680,22 @@ public final class plasmaHTCache {
         return null;
     }
 
-    private File treeFile(StringBuffer fileName, String prefix, String path) {
+    private static File treeFile(StringBuffer fileName, String prefix, String path) {
         StringBuffer f = new StringBuffer(fileName.length() + 30);
         f.append(fileName);
         if (prefix != null) f.append('/').append(prefix);
         f.append(path);
-        return new File(this.cachePath, f.toString());
+        return new File(cachePath, f.toString());
     }
     
-    private File hashFile(StringBuffer fileName, String prefix, String extention, URL url) {
+    private static File hashFile(StringBuffer fileName, String prefix, String extention, URL url) {
         String hexHash = yacySeed.b64Hash2hexHash(plasmaURL.urlHash(url));
         StringBuffer f = new StringBuffer(fileName.length() + 30);
         f.append(fileName);
         if (prefix != null) f.append('/').append(prefix);
         f.append('/').append(hexHash.substring(0,2)).append('/').append(hexHash.substring(2,4)).append('/').append(hexHash);
         if (extention != null) fileName.append(extention);
-        return new File(this.cachePath, f.toString());
+        return new File(cachePath, f.toString());
     }
     
     
@@ -727,7 +720,7 @@ public final class plasmaHTCache {
      * this is the reverse function to getCachePath: it constructs the url as string
      * from a given storage path
      */
-    public URL getURL(final File f) {
+    public static URL getURL(final File f) {
 //      this.log.logFinest("plasmaHTCache: getURL:  IN: Path=[" + cachePath + "] File=[" + f + "]");
         final String urlHash = getHash(f);
         if (urlHash != null) {
@@ -742,7 +735,7 @@ public final class plasmaHTCache {
             if (url != null) return url;
             // try responseHeaderDB
             Map hdb;
-            hdb = this.responseHeaderDB.getMap(urlHash);
+            hdb = responseHeaderDB.getMap(urlHash);
             if (hdb != null) {
                 Object origRequestLine = hdb.get(httpHeader.X_YACY_ORIGINAL_REQUEST_LINE);
                 if ((origRequestLine != null)&&(origRequestLine instanceof String)) {
@@ -853,19 +846,19 @@ public final class plasmaHTCache {
      * is available or the cached file is not readable, <code>null</code>
      * is returned.
      */
-    public InputStream getResourceContentStream(URL url) {
+    public static InputStream getResourceContentStream(URL url) {
         // load the url as resource from the cache
         File f = getCachePath(url);
         if (f.exists() && f.canRead()) try {
             return new BufferedInputStream(new FileInputStream(f));
         } catch (IOException e) {
-            this.log.logSevere("Unable to create a BufferedInputStream from file " + f,e);
+            log.logSevere("Unable to create a BufferedInputStream from file " + f,e);
             return null;
         }
         return null;        
     }
     
-    public long getResourceContentLength(URL url) {
+    public static long getResourceContentLength(URL url) {
         // load the url as resource from the cache
         File f = getCachePath(url);
         if (f.exists() && f.canRead()) {
@@ -890,7 +883,7 @@ public final class plasmaHTCache {
                 (ls.indexOf("memberlist.php?sid=") >= 0));
     }
 
-    public Entry newEntry(
+    public static Entry newEntry(
             Date initDate, 
             int depth, 
             URL url, 
@@ -916,7 +909,7 @@ public final class plasmaHTCache {
         );
     }
 
-    public final class Entry {
+    public final static class Entry {
 
     // the class objects
     private Date                     initDate;       // the date when the request happened; will be used as a key
@@ -1080,7 +1073,7 @@ public final class plasmaHTCache {
         assert(this.nomalizedURLHash != null) : "URL Hash is null";
         if (this.resInfo == null) return false;
         try {
-            plasmaHTCache.this.responseHeaderDB.set(this.nomalizedURLHash, this.resInfo.getMap());
+            responseHeaderDB.set(this.nomalizedURLHash, this.resInfo.getMap());
         } catch (Exception e) {
             resetResponseHeaderDB();
             return false;

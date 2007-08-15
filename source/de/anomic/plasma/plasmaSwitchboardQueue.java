@@ -64,14 +64,12 @@ public class plasmaSwitchboardQueue {
 
     private kelondroStack sbQueueStack;
     private plasmaCrawlProfile profiles;
-    plasmaHTCache htCache;
     private plasmaCrawlLURL lurls;
     private File sbQueueStackPath;
     
-    public plasmaSwitchboardQueue(plasmaHTCache htCache, plasmaCrawlLURL lurls, File sbQueueStackPath, plasmaCrawlProfile profiles) {
+    public plasmaSwitchboardQueue(plasmaCrawlLURL lurls, File sbQueueStackPath, plasmaCrawlProfile profiles) {
         this.sbQueueStackPath = sbQueueStackPath;
         this.profiles = profiles;
-        this.htCache = htCache;
         this.lurls = lurls;
 
         initQueueStack();
@@ -277,7 +275,7 @@ public class plasmaSwitchboardQueue {
         }
 
         public File cacheFile() {
-            return htCache.getCachePath(url);
+            return plasmaHTCache.getCachePath(url);
         }
 
         public boolean proxy() {
@@ -303,7 +301,7 @@ public class plasmaSwitchboardQueue {
 
         private IResourceInfo getCachedObjectInfo() {
             if (this.contentInfo == null) try {
-                this.contentInfo = plasmaSwitchboardQueue.this.htCache.loadResourceInfo(this.url);
+                this.contentInfo = plasmaHTCache.loadResourceInfo(this.url);
             } catch (Exception e) {
                 serverLog.logSevere("PLASMA", "responseHeader: failed to get header", e);
                 return null;

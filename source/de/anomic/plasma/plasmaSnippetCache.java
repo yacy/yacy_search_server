@@ -97,16 +97,13 @@ public class plasmaSnippetCache {
      * </pre>
      */
     private static HashMap               faviconCache;
-    private static plasmaHTCache         cacheManager;
     private static plasmaParser          parser;
     private static serverLog             log;
     
     public static void init(
-            plasmaHTCache cacheManagerx, 
             plasmaParser parserx,
             serverLog logx
     ) {
-        cacheManager = cacheManagerx;
         parser = parserx;
         log = logx;
         snippetsScoreCounter = 0;
@@ -275,10 +272,10 @@ public class plasmaSnippetCache {
         IResourceInfo resInfo = null;
         try {
             // trying to load the resource from the cache
-            resContent = cacheManager.getResourceContentStream(url);
+            resContent = plasmaHTCache.getResourceContentStream(url);
             if (resContent != null) {
                 // if the content was found
-                resContentLength = cacheManager.getResourceContentLength(url);
+                resContentLength = plasmaHTCache.getResourceContentLength(url);
             } else if (fetchOnline) {
                 // if not found try to download it
                 
@@ -295,8 +292,8 @@ public class plasmaSnippetCache {
                         resContent = new ByteArrayInputStream(resourceArray);
                         resContentLength = resourceArray.length;
                     } else {
-                        resContent = cacheManager.getResourceContentStream(url); 
-                        resContentLength = cacheManager.getResourceContentLength(url);
+                        resContent = plasmaHTCache.getResourceContentStream(url); 
+                        resContentLength = plasmaHTCache.getResourceContentLength(url);
                     }
                 }
                 
@@ -380,10 +377,10 @@ public class plasmaSnippetCache {
         IResourceInfo resInfo = null;
         try {
             // trying to load the resource from the cache
-            resContent = cacheManager.getResourceContentStream(url);
+            resContent = plasmaHTCache.getResourceContentStream(url);
             if (resContent != null) {
                 // if the content was found
-                resContentLength = cacheManager.getResourceContentLength(url);
+                resContentLength = plasmaHTCache.getResourceContentLength(url);
             } else if (fetchOnline) {
                 // if not found try to download it
                 
@@ -400,8 +397,8 @@ public class plasmaSnippetCache {
                         resContent = new ByteArrayInputStream(resourceArray);
                         resContentLength = resourceArray.length;
                     } else {
-                        resContent = cacheManager.getResourceContentStream(url); 
-                        resContentLength = cacheManager.getResourceContentLength(url);
+                        resContent = plasmaHTCache.getResourceContentStream(url); 
+                        resContentLength = plasmaHTCache.getResourceContentLength(url);
                     }
                 }
                 
@@ -749,7 +746,7 @@ public class plasmaSnippetCache {
             if (docInfo == null) {
                 // try to get the header from the htcache directory
                 try {                    
-                    docInfo = cacheManager.loadResourceInfo(url);
+                    docInfo = plasmaHTCache.loadResourceInfo(url);
                 } catch (Exception e) {
                     // ignore this. resource info loading failed
                 }   
@@ -763,7 +760,7 @@ public class plasmaSnippetCache {
                 // getting URL mimeType
                 try {
                     httpHeader header = httpc.whead(url, url.getHost(), 10000, null, null, plasmaSwitchboard.getSwitchboard().remoteProxyConfig);
-                    docInfo = cacheManager.getResourceInfoFactory().buildResourceInfoObj(url, header);
+                    docInfo = plasmaHTCache.getResourceInfoFactory().buildResourceInfoObj(url, header);
                 } catch (Exception e) {
                     // ingore this. http header download failed
                 } 
@@ -771,7 +768,7 @@ public class plasmaSnippetCache {
 
             // STEP 3: if the metadata is still null try to guess the mimeType of the resource
             if (docInfo == null) {
-                String filename = cacheManager.getCachePath(url).getName();
+                String filename = plasmaHTCache.getCachePath(url).getName();
                 int p = filename.lastIndexOf('.');
                 if (    // if no extension is available
                         (p < 0) ||
@@ -820,9 +817,9 @@ public class plasmaSnippetCache {
             long contentLength = -1;
             
             // trying to load the resource body from cache
-            InputStream resource = cacheManager.getResourceContentStream(url);
+            InputStream resource = plasmaHTCache.getResourceContentStream(url);
             if (resource != null) {
-                contentLength = cacheManager.getResourceContentLength(url);
+                contentLength = plasmaHTCache.getResourceContentLength(url);
             } else if (fetchOnline) {
                 // if the content is not available in cache try to download it from web
                 
@@ -834,8 +831,8 @@ public class plasmaSnippetCache {
             
                 // in case that the reosurce was not in ram, read it from disk
                 if (resourceArray == null) {
-                    resource = cacheManager.getResourceContentStream(url);   
-                    contentLength = cacheManager.getResourceContentLength(url); 
+                    resource = plasmaHTCache.getResourceContentStream(url);   
+                    contentLength = plasmaHTCache.getResourceContentLength(url); 
                 } else {
                     resource = new ByteArrayInputStream(resourceArray);
                     contentLength = resourceArray.length;

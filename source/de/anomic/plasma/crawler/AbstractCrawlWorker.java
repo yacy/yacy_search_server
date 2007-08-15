@@ -108,11 +108,6 @@ public abstract class AbstractCrawlWorker extends Thread implements plasmaCrawlW
     protected final plasmaSwitchboard sb;
     
     /**
-     * reference to the cache manager
-     */
-    protected final plasmaHTCache   cacheManager;
-    
-    /**
      * Logging class
      */
     protected final serverLog       log;
@@ -130,14 +125,12 @@ public abstract class AbstractCrawlWorker extends Thread implements plasmaCrawlW
             ThreadGroup theTG,
             plasmaCrawlerPool thePool,
             plasmaSwitchboard theSb,
-            plasmaHTCache theCacheManager,
             serverLog theLog
     ) {
         super(theTG,plasmaCrawlWorker.threadBaseName + "_created");
 
         this.myPool = thePool;
         this.sb = theSb;
-        this.cacheManager = theCacheManager;
         this.log = theLog;
     }
         
@@ -311,7 +304,7 @@ public abstract class AbstractCrawlWorker extends Thread implements plasmaCrawlW
         this.sb.errorURL.stackPushEntry(ee);
         
         // delete the cache file
-        File cacheFile = this.cacheManager.getCachePath(this.url);
+        File cacheFile = plasmaHTCache.getCachePath(this.url);
         if (cacheFile.exists()) cacheFile.delete();
     }    
 }

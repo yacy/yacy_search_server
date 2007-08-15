@@ -61,8 +61,7 @@ import de.anomic.server.logging.serverLog;
 public final class plasmaCrawlLoader extends Thread {
 
     public static plasmaSwitchboard switchboard;
-
-    private final plasmaHTCache   cacheManager;
+    
     private final serverLog       log;   
 
     private HashSet supportedProtocols;
@@ -73,13 +72,10 @@ public final class plasmaCrawlLoader extends Thread {
     private final ThreadGroup theThreadGroup = new ThreadGroup("CrawlerThreads");
     private boolean stopped = false;
 
-    public plasmaCrawlLoader(
-            plasmaHTCache theCacheManager, 
-            serverLog theLog) {
+    public plasmaCrawlLoader(serverLog theLog) {
         
         this.setName("plasmaCrawlLoader");
 
-        this.cacheManager    = theCacheManager;
         this.log             = theLog;
 
         // supported protocols 
@@ -117,7 +113,6 @@ public final class plasmaCrawlLoader extends Thread {
         plasmaCrawlerFactory theFactory = new plasmaCrawlerFactory(
                 this.theThreadGroup,
                 switchboard,
-                this.cacheManager,
                 this.log);
 
         this.crawlwerPool = new plasmaCrawlerPool(theFactory,this.crawlerPoolConfig,this.theThreadGroup);        

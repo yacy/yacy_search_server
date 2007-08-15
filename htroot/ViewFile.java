@@ -162,8 +162,8 @@ public class ViewFile {
         String resMime = null;
         try {
             // trying to load the resource body
-            resource = sb.cacheManager.getResourceContentStream(url);
-            resourceLength = sb.cacheManager.getResourceContentLength(url);
+            resource = plasmaHTCache.getResourceContentStream(url);
+            resourceLength = plasmaHTCache.getResourceContentLength(url);
 
             // if the resource body was not cached we try to load it from web
             if (resource == null) {
@@ -179,8 +179,8 @@ public class ViewFile {
 
                 if (entry != null) {
                     resInfo = entry.getDocumentInfo();
-                    resource = sb.cacheManager.getResourceContentStream(url);
-                    resourceLength = sb.cacheManager.getResourceContentLength(url);
+                    resource = plasmaHTCache.getResourceContentStream(url);
+                    resourceLength = plasmaHTCache.getResourceContentLength(url);
                 }
 
                 if (resource == null) {
@@ -196,7 +196,7 @@ public class ViewFile {
 
                 // try to load the metadata from cache
                 try {
-                    resInfo = sb.cacheManager.loadResourceInfo(url);
+                    resInfo = plasmaHTCache.loadResourceInfo(url);
                 } catch (Exception e) {
                     /* ignore this */
                 }
@@ -218,7 +218,7 @@ public class ViewFile {
                         return prop;
                     }
                     try {
-                        resInfo = sb.cacheManager.getResourceInfoFactory().buildResourceInfoObj(url, responseHeader);
+                        resInfo = plasmaHTCache.getResourceInfoFactory().buildResourceInfoObj(url, responseHeader);
                     } catch (Exception e) {
                         prop.put("error", 4);
                         prop.put("error_errorText", e.getMessage());

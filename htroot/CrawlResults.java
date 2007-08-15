@@ -154,9 +154,6 @@ public class CrawlResults {
             yacySeed initiatorSeed, executorSeed;
             indexURLEntry urle;
 
-            // needed for getCachePath(url)
-            final plasmaHTCache cacheManager = sb.getCacheManager();
-
             int i, cnt = 0;
             for (i = sb.wordIndex.loadedURL.getStackSize(tabletype) - 1; i >= (sb.wordIndex.loadedURL.getStackSize(tabletype) - lines); i--) {
                 initiatorHash = sb.wordIndex.loadedURL.getInitiatorHash(tabletype, i);
@@ -173,7 +170,7 @@ public class CrawlResults {
 
                     urlstr = comp.url().toNormalform(false, true);
                     urltxt = nxTools.shortenURLString(urlstr, 72); // shorten the string text like a URL
-                    cachepath = cacheManager.getCachePath(new URL(urlstr)).toString().replace('\\', '/').substring(cacheManager.cachePath.toString().length() + 1);
+                    cachepath = plasmaHTCache.getCachePath(new URL(urlstr)).toString().replace('\\', '/').substring(plasmaHTCache.cachePath.toString().length() + 1);
 
                     prop.put("table_indexed_" + cnt + "_dark", (dark) ? 1 : 0);
                     if (showControl) {

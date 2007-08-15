@@ -113,7 +113,6 @@ public final class httpdProxyHandler {
     // static variables
     // can only be instantiated upon first instantiation of this class object
     private static plasmaSwitchboard switchboard = null;
-    private static plasmaHTCache  cacheManager = null;
     public  static HashSet yellowList = null;
     private static int timeout = 30000;
     private static boolean yacyTrigger = true;
@@ -185,8 +184,6 @@ public final class httpdProxyHandler {
         
         // creating a logger
         theLogger = new serverLog("PROXY");
-        
-        cacheManager = switchboard.getCacheManager();
             
         isTransparentProxy = Boolean.valueOf(switchboard.getConfig("isTransparentProxy","false")).booleanValue();
             
@@ -392,10 +389,10 @@ public final class httpdProxyHandler {
             }
             
             // decide wether to use a cache entry or connect to the network
-            File cacheFile = cacheManager.getCachePath(url);
+            File cacheFile = plasmaHTCache.getCachePath(url);
             
             httpHeader cachedResponseHeader = null;
-            ResourceInfo cachedResInfo = (ResourceInfo) cacheManager.loadResourceInfo(url);
+            ResourceInfo cachedResInfo = (ResourceInfo) plasmaHTCache.loadResourceInfo(url);
             if (cachedResInfo != null) {
                 // set the new request header (needed by function shallUseCacheForProxy)
                 cachedResInfo.setRequestHeader(requestHeader);
@@ -428,7 +425,7 @@ public final class httpdProxyHandler {
             // in two of these cases we trigger a scheduler to handle newly arrived files:
             // case 1 and case 3
             plasmaHTCache.Entry cacheEntry = (cachedResponseHeader == null) ? null :
-                cacheManager.newEntry(
+                plasmaHTCache.newEntry(
                     requestDate,                     // init date 
                     0,                               // crawling depth
                     url,                             // url
@@ -561,14 +558,14 @@ public final class httpdProxyHandler {
             if ((cacheFile.isFile()) && (cachedResponseHeader != null)) {
                 // delete the cache
                 sizeBeforeDelete = cacheFile.length();
-                cacheManager.deleteFile(url);
+                plasmaHTCache.deleteFile(url);
                 conProp.setProperty(httpHeader.CONNECTION_PROP_PROXY_RESPOND_CODE,"TCP_REFRESH_MISS");
             }            
 
             // reserver cache entry
             Date requestDate = new Date(((Long)conProp.get(httpHeader.CONNECTION_PROP_REQUEST_START)).longValue());
             IResourceInfo resInfo = new ResourceInfo(url,requestHeader,res.responseHeader);
-            plasmaHTCache.Entry cacheEntry = cacheManager.newEntry(
+            plasmaHTCache.Entry cacheEntry = plasmaHTCache.newEntry(
                     requestDate, 
                     0, 
                     url,
@@ -648,7 +645,7 @@ public final class httpdProxyHandler {
                         // totally fresh file
                         //cacheEntry.status = plasmaHTCache.CACHE_FILL; // it's an insert
                         cacheEntry.setCacheArray(cacheArray);
-                        cacheManager.push(cacheEntry);
+                        plasmaHTCache.push(cacheEntry);
                         conProp.setProperty(httpHeader.CONNECTION_PROP_PROXY_RESPOND_CODE,"TCP_MISS");
                     } else if (sizeBeforeDelete == cacheArray.length) {
                         // before we came here we deleted a cache entry
@@ -660,7 +657,7 @@ public final class httpdProxyHandler {
                         // before we came here we deleted a cache entry
                         //cacheEntry.status = plasmaHTCache.CACHE_STALE_RELOAD_GOOD;
                         cacheEntry.setCacheArray(cacheArray);
-                        cacheManager.push(cacheEntry); // necessary update, write response header to cache
+                        plasmaHTCache.push(cacheEntry); // necessary update, write response header to cache
                         conProp.setProperty(httpHeader.CONNECTION_PROP_PROXY_RESPOND_CODE,"TCP_REFRESH_MISS");
                     }
                 } else {
@@ -670,11 +667,11 @@ public final class httpdProxyHandler {
                     res.writeContent(hfos, cacheFile);
                     if (hfos instanceof htmlFilterWriter) ((htmlFilterWriter) hfos).finalize();
                     theLogger.logFine("for write-file of " + url + ": contentLength = " + contentLength + ", sizeBeforeDelete = " + sizeBeforeDelete);
-                    cacheManager.writeFileAnnouncement(cacheFile);
+                    plasmaHTCache.writeFileAnnouncement(cacheFile);
                     if (sizeBeforeDelete == -1) {
                         // totally fresh file
                         //cacheEntry.status = plasmaHTCache.CACHE_FILL; // it's an insert
-                        cacheManager.push(cacheEntry);
+                        plasmaHTCache.push(cacheEntry);
                         conProp.setProperty(httpHeader.CONNECTION_PROP_PROXY_RESPOND_CODE,"TCP_MISS");
                     } else if (sizeBeforeDelete == cacheFile.length()) {
                         // before we came here we deleted a cache entry
@@ -684,7 +681,7 @@ public final class httpdProxyHandler {
                     } else {
                         // before we came here we deleted a cache entry
                         //cacheEntry.status = plasmaHTCache.CACHE_STALE_RELOAD_GOOD;
-                        cacheManager.push(cacheEntry); // necessary update, write response header to cache
+                        plasmaHTCache.push(cacheEntry); // necessary update, write response header to cache
                         conProp.setProperty(httpHeader.CONNECTION_PROP_PROXY_RESPOND_CODE,"TCP_REFRESH_MISS");
                     }
                     // beware! all these writings will not fill the cacheEntry.cacheArray

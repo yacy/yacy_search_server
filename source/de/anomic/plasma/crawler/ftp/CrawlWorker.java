@@ -71,8 +71,8 @@ import de.anomic.server.logging.serverLog;
 
 public class CrawlWorker extends AbstractCrawlWorker implements plasmaCrawlWorker {
 
-    public CrawlWorker(ThreadGroup theTG, plasmaCrawlerPool thePool, plasmaSwitchboard theSb, plasmaHTCache theCacheManager, serverLog theLog) {
-        super(theTG, thePool, theSb, theCacheManager, theLog);
+    public CrawlWorker(ThreadGroup theTG, plasmaCrawlerPool thePool, plasmaSwitchboard theSb, serverLog theLog) {
+        super(theTG, thePool, theSb, theLog);
         
         // this crawler supports ftp
         this.protocol = "ftp";  
@@ -94,7 +94,7 @@ public class CrawlWorker extends AbstractCrawlWorker implements plasmaCrawlWorke
                 fileDate
         );        
         
-        return this.cacheManager.newEntry(
+        return plasmaHTCache.newEntry(
                 new Date(), 
                 this.depth, 
                 this.url, 
@@ -193,7 +193,7 @@ public class CrawlWorker extends AbstractCrawlWorker implements plasmaCrawlWorke
             }
 
             // creating a cache file object
-            File cacheFile = this.cacheManager.getCachePath(this.url);        
+            File cacheFile = plasmaHTCache.getCachePath(this.url);        
 
             // TODO: aborting download if content is to long ...
 
@@ -202,7 +202,7 @@ public class CrawlWorker extends AbstractCrawlWorker implements plasmaCrawlWorke
             // testing if the file already exists
             if (cacheFile.isFile()) {
                 // delete the file if it already exists
-                this.cacheManager.deleteFile(this.url);
+                plasmaHTCache.deleteFile(this.url);
             } else {
                 // create parent directories
                 cacheFile.getParentFile().mkdirs();
@@ -268,11 +268,11 @@ public class CrawlWorker extends AbstractCrawlWorker implements plasmaCrawlWorke
                 if (cacheFile.exists()) cacheFile.delete();            
             } else {
                 // announce the file
-                this.cacheManager.writeFileAnnouncement(cacheFile);
+                plasmaHTCache.writeFileAnnouncement(cacheFile);
 
                 // enQueue new entry with response header
                 if (this.profile != null) {
-                    this.cacheManager.push(htCache);
+                    plasmaHTCache.push(htCache);
                 }                
             }
             
