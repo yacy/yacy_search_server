@@ -314,10 +314,7 @@ public final class CrawlWorker extends AbstractCrawlWorker {
                         }
                         
                         // normalizing URL
-                        redirectionUrlString = new URL(redirectionUrlString).toNormalform(true, true);
-
-                        // generating the new URL object
-                        URL redirectionUrl = new URL(redirectionUrlString);
+                        URL redirectionUrl = URL.newURL(this.url, redirectionUrlString);
 
                         // returning the used httpc
                         httpc.returnInstance(remote);
