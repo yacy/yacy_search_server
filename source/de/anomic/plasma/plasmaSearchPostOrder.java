@@ -101,6 +101,10 @@ public final class plasmaSearchPostOrder {
         return pageAcc.size() > 0;
     }
     
+    public int getTotalCount() {
+        return this.localContributions + this.globalContributions;
+    }
+    
     public indexURLEntry nextElement() {
         Object top = pageAcc.firstKey();
         //System.out.println("postorder-key: " + ((String) top));

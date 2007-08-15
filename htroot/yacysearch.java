@@ -52,8 +52,8 @@ import java.net.MalformedURLException;
 import java.net.URLEncoder;
 import java.util.HashMap;
 import java.util.Iterator;
-import java.util.regex.PatternSyntaxException;
 import java.util.TreeSet;
+import java.util.regex.PatternSyntaxException;
 
 import de.anomic.htmlFilter.htmlFilterImageEntry;
 import de.anomic.http.httpHeader;
@@ -64,20 +64,23 @@ import de.anomic.kelondro.kelondroNaturalOrder;
 import de.anomic.net.URL;
 import de.anomic.plasma.plasmaCondenser;
 import de.anomic.plasma.plasmaParserDocument;
+import de.anomic.plasma.plasmaSearchEvent;
 import de.anomic.plasma.plasmaSearchImages;
+import de.anomic.plasma.plasmaSearchPostOrder;
 import de.anomic.plasma.plasmaSearchPreOrder;
 import de.anomic.plasma.plasmaSearchQuery;
 import de.anomic.plasma.plasmaSearchRankingProfile;
 import de.anomic.plasma.plasmaSearchProcessing;
+import de.anomic.plasma.plasmaSearchResultAccumulator;
 import de.anomic.plasma.plasmaSnippetCache;
 import de.anomic.plasma.plasmaSwitchboard;
 import de.anomic.plasma.plasmaURL;
-import de.anomic.plasma.plasmaSearchResults;
 import de.anomic.server.serverCore;
 import de.anomic.server.serverDomains;
 import de.anomic.server.serverDate;
 import de.anomic.server.serverObjects;
 import de.anomic.server.serverSwitch;
+import de.anomic.server.logging.serverLog;
 import de.anomic.tools.crypt;
 import de.anomic.tools.nxTools;
 import de.anomic.yacy.yacyCore;
@@ -236,7 +239,7 @@ public class yacysearch {
             yacyCore.newsPool.publishMyNews(yacyNewsRecord.newRecord(yacyNewsPool.CATEGORY_SURFTIPP_VOTE_ADD, map));
         }
 
-        // if aplus-button was hit, create new voting message
+        // if a plus-button was hit, create new voting message
         if (post.containsKey("recommendref")) {
             if (!sb.verifyAuthentication(header, true)) {
                 prop.put("AUTHENTICATE", "admin log-in"); // force log-in
@@ -247,7 +250,7 @@ public class yacysearch {
             if (urlentry != null) {
                 indexURLEntry.Components comp = urlentry.comp();
                 plasmaParserDocument document;
-                document = sb.snippetCache.retrieveDocument(comp.url(), true, 5000, true);
+                document = plasmaSnippetCache.retrieveDocument(comp.url(), true, 5000, true);
                 if (document != null) {
                     // create a news message
                     HashMap map = new HashMap();
@@ -288,110 +291,147 @@ public class yacysearch {
         plasmaSearchProcessing localTiming = new plasmaSearchProcessing(4 * thisSearch.maximumTime / 10, thisSearch.wantedResults);
         plasmaSearchProcessing remoteTiming = new plasmaSearchProcessing(6 * thisSearch.maximumTime / 10, thisSearch.wantedResults);
 
-        plasmaSearchResults results = new plasmaSearchResults();
+        //**
+        //searchFromLocal(thisSearch, ranking, localTiming, remoteTiming, true, (String) header.get("CLIENTIP"))
+        String client = (String) header.get("CLIENTIP"); // the search client who initiated the search
+        
+        // tell all threads to do nothing for a specific time
+        sb.intermissionAllThreads(2 * thisSearch.maximumTime);
+        
+        // filter out words that appear in bluelist
+        thisSearch.filterOut(plasmaSwitchboard.blueList);
+            
+        // log
+        serverLog.logInfo("LOCAL_SEARCH", "INIT WORD SEARCH: " + thisSearch.queryString + ":" + thisSearch.queryHashes + " - " + thisSearch.wantedResults + " links, " + (thisSearch.maximumTime / 1000) + " seconds");
+        long timestamp = System.currentTimeMillis();
+
+        // create a new search event
         String wrongregex = null;
+        plasmaSearchEvent theSearch = new plasmaSearchEvent(thisSearch, ranking, localTiming, remoteTiming, true, sb.wordIndex, (sb.isRobinsonMode()) ? sb.clusterhashes : null);
+        plasmaSearchPostOrder acc;
         try{
-            results = sb.searchFromLocal(thisSearch, ranking, localTiming, remoteTiming, true, (String) header.get("CLIENTIP"));
-        }
-        catch(PatternSyntaxException e){
+            acc = theSearch.search();
+        } catch(PatternSyntaxException e){
             wrongregex = e.getPattern();
+            acc = new plasmaSearchPostOrder(thisSearch, ranking);
         }
+            
+        // fetch snippets
+        serverLog.logFine("LOCAL_SEARCH", "SEARCH TIME AFTER ORDERING OF SEARCH RESULTS: " + ((System.currentTimeMillis() - timestamp) / 1000) + " seconds");
+        plasmaSearchResultAccumulator accu = new plasmaSearchResultAccumulator(theSearch, sb.wordIndex, plasmaSwitchboard.blueList);
+        serverLog.logFine("LOCAL_SEARCH", "SEARCH TIME AFTER RESULT PREPARATION: " + ((System.currentTimeMillis() - timestamp) / 1000) + " seconds");
+                
+        // calc some more cross-reference
+        long remainingTime = thisSearch.maximumTime - (System.currentTimeMillis() - timestamp);
+        if (remainingTime < 0) remainingTime = 1000;
+        //Object[] ws = acc.getReferences(16);
+        serverLog.logFine("LOCAL_SEARCH", "SEARCH TIME AFTER XREF PREPARATION: " + ((System.currentTimeMillis() - timestamp) / 1000) + " seconds");
+
+        // log
+        serverLog.logInfo("LOCAL_SEARCH", "EXIT WORD SEARCH: " + thisSearch.queryString + " - " +
+                    acc.getTotalCount() + " links found, " +
+                    acc.filteredResults + " links filtered, " +
+                    acc.sizeOrdered() + " links ordered, " +
+                    ((System.currentTimeMillis() - timestamp) / 1000) + " seconds");
+            
+            
+        // prepare search statistics
+        Long trackerHandle = new Long(System.currentTimeMillis());
+        HashMap searchProfile = theSearch.resultProfile();
+        searchProfile.put("querystring", thisSearch.queryString);
+        searchProfile.put("time", trackerHandle);
+        searchProfile.put("host", client);
+        searchProfile.put("offset", new Integer(0));
+        searchProfile.put("results", accu);
+        sb.localSearches.add(searchProfile);
+        TreeSet handles = (TreeSet) sb.localSearchTracker.get(client);
+        if (handles == null) handles = new TreeSet();
+        handles.add(trackerHandle);
+        sb.localSearchTracker.put(client, handles);
+        //**
 
         //prop=sb.searchFromLocal(thisSearch, ranking, localTiming, remoteTiming, true, (String) header.get("CLIENTIP"));
         prop=new serverObjects();
         //prop.put("references", 0);
         URL wordURL=null;
-        prop.put("num-results_totalcount", results.getTotalcount());
-        prop.put("num-results_filteredcount", results.getFilteredcount());
-        prop.put("num-results_orderedcount", results.getOrderedcount());
-        prop.put("num-results_linkcount", results.getLinkcount());
+        prop.put("num-results_totalcount", acc.getTotalCount());
+        prop.put("num-results_filteredcount", acc.filteredResults);
+        prop.put("num-results_orderedcount", acc.sizeOrdered());
+        prop.put("num-results_globalresults", acc.globalContributions);
+        prop.put("num-results_linkcount", 0);
         prop.put("type_results", 0);
-        if(results.numResults()!=0){
-            //we've got results
-            prop.put("num-results_totalcount", results.getTotalcount());
-            prop.put("num-results_filteredcount", results.getFilteredcount());
-            prop.put("num-results_orderedcount", Integer.toString(results.getOrderedcount())); //why toString?
-            prop.put("num-results_globalresults", results.getGlobalresults());
-            for(int i=0;i<results.numResults();i++){
-                plasmaSearchResults.searchResult result=results.getResult(i);
-                prop.put("type_results_" + i + "_authorized_recommend", (yacyCore.newsPool.getSpecific(yacyNewsPool.OUTGOING_DB, yacyNewsPool.CATEGORY_SURFTIPP_ADD, "url", result.getUrl()) == null) ? 1 : 0);
-                prop.put("type_results_" + i + "_authorized_recommend_deletelink", "/yacysearch.html?search=" + results.getFormerSearch() + "&Enter=Search&count=" + results.getQuery().wantedResults + "&order=" + crypt.simpleEncode(results.getRanking().toExternalString()) + "&resource=local&time=3&deleteref=" + result.getUrlhash() + "&urlmaskfilter=.*");
-                prop.put("type_results_" + i + "_authorized_recommend_recommendlink", "/yacysearch.html?search=" + results.getFormerSearch() + "&Enter=Search&count=" + results.getQuery().wantedResults + "&order=" + crypt.simpleEncode(results.getRanking().toExternalString()) + "&resource=local&time=3&recommendref=" + result.getUrlhash() + "&urlmaskfilter=.*");
-                prop.put("type_results_" + i + "_authorized_urlhash", result.getUrlhash());
-                prop.put("type_results_" + i + "_description", result.getUrlentry().comp().title());
-                prop.put("type_results_" + i + "_url", result.getUrl());
-                try{
-                		URL url=new URL(result.getUrl());
-                		int port=url.getPort();
-                        URL faviconURL = new URL(url.getProtocol() + "://" + url.getHost() + ((port != -1) ? (":" + String.valueOf(port)) : "") + "/favicon.ico");
-                        // TODO: parse <link rel="favicon" /> ...
-                        // aquire license for favicon url loading
-                        prop.put("type_results_" + i + "_faviconCode", sb.licensedURLs.aquireLicense(faviconURL));
-                }catch(MalformedURLException e){}
-                prop.put("type_results_" + i + "_urlhash", result.getUrlhash());
-                prop.put("type_results_" + i + "_urlhexhash", yacySeed.b64Hash2hexHash(result.getUrlhash()));
-                prop.put("type_results_" + i + "_urlname", nxTools.shortenURLString(result.getUrlname(), 120));
-                prop.put("type_results_" + i + "_date", plasmaSwitchboard.dateString(result.getUrlentry().moddate()));
-                prop.put("type_results_" + i + "_ybr", plasmaSearchPreOrder.ybr(result.getUrlentry().hash()));
-                prop.put("type_results_" + i + "_size", Long.toString(result.getUrlentry().size()));
+
+        for (int i = 0; i < accu.resultCount(); i++) {
+            plasmaSearchResultAccumulator.Entry result = accu.resultEntry(i);
+            prop.put("type_results_" + i + "_authorized_recommend", (yacyCore.newsPool.getSpecific(yacyNewsPool.OUTGOING_DB, yacyNewsPool.CATEGORY_SURFTIPP_ADD, "url", result.urlstring()) == null) ? 1 : 0);
+            prop.put("type_results_" + i + "_authorized_recommend_deletelink", "/yacysearch.html?search=" + thisSearch.queryString + "&Enter=Search&count=" + thisSearch.wantedResults + "&order=" + crypt.simpleEncode(ranking.toExternalString()) + "&resource=local&time=3&deleteref=" + result.hash() + "&urlmaskfilter=.*");
+            prop.put("type_results_" + i + "_authorized_recommend_recommendlink", "/yacysearch.html?search=" + thisSearch.queryString + "&Enter=Search&count=" + thisSearch.wantedResults + "&order=" + crypt.simpleEncode(ranking.toExternalString()) + "&resource=local&time=3&recommendref=" + result.hash() + "&urlmaskfilter=.*");
+            prop.put("type_results_" + i + "_authorized_urlhash", result.hash());
+            prop.put("type_results_" + i + "_description", result.title());
+            prop.put("type_results_" + i + "_url", result.urlstring());
+            int port=result.url().getPort();
+            URL faviconURL;
+            try {
+                faviconURL = new URL(result.url().getProtocol() + "://" + result.url().getHost() + ((port != -1) ? (":" + String.valueOf(port)) : "") + "/favicon.ico");
+            } catch (MalformedURLException e1) {
+                continue;
+            }
+            prop.put("type_results_" + i + "_faviconCode", sb.licensedURLs.aquireLicense(faviconURL)); // aquire license for favicon url loading
+            prop.put("type_results_" + i + "_urlhash", result.hash());
+                prop.put("type_results_" + i + "_urlhexhash", yacySeed.b64Hash2hexHash(result.hash()));
+                prop.put("type_results_" + i + "_urlname", nxTools.shortenURLString(result.urlname(), 120));
+                prop.put("type_results_" + i + "_date", plasmaSwitchboard.dateString(result.modified()));
+                prop.put("type_results_" + i + "_ybr", plasmaSearchPreOrder.ybr(result.hash()));
+                prop.put("type_results_" + i + "_size", Long.toString(result.filesize()));
                 try {
                     prop.put("type_results_" + i + "_words", URLEncoder.encode(query[0].toString(),"UTF-8"));
                 } catch (UnsupportedEncodingException e) {}
-                prop.put("type_results_" + i + "_former", results.getFormerSearch());
-                prop.put("type_results_" + i + "_rankingprops", result.getUrlentry().word().toPropertyForm() + ", domLengthEstimated=" + plasmaURL.domLengthEstimation(result.getUrlhash()) +
-                        ((plasmaURL.probablyRootURL(result.getUrlhash())) ? ", probablyRootURL" : "") + 
-                        (((wordURL = plasmaURL.probablyWordURL(result.getUrlhash(), query[0])) != null) ? ", probablyWordURL=" + wordURL.toNormalform(false, true) : ""));
+                prop.put("type_results_" + i + "_former", querystring);
+                prop.put("type_results_" + i + "_rankingprops", result.word().toPropertyForm() + ", domLengthEstimated=" + plasmaURL.domLengthEstimation(result.hash()) +
+                        ((plasmaURL.probablyRootURL(result.hash())) ? ", probablyRootURL" : "") + 
+                        (((wordURL = plasmaURL.probablyWordURL(result.hash(), query[0])) != null) ? ", probablyWordURL=" + wordURL.toNormalform(false, true) : ""));
                 // adding snippet if available
                 if (result.hasSnippet()) {
                     prop.put("type_results_" + i + "_snippet", 1);
-                    prop.putASIS("type_results_" + i + "_snippet_text", result.getSnippet().getLineMarked(results.getQuery().queryHashes));//FIXME: the ASIS should not be needed, if there is no html in .java
+                    prop.putASIS("type_results_" + i + "_snippet_text", result.textSnippet().getLineMarked(theSearch.getQuery().queryHashes));//FIXME: the ASIS should not be needed, if there is no html in .java
                 } else {                	
                 	if (post.containsKey("fetchSnippet")) {
-                		/* fetch the snippet now */
-                        try {
-                        	// snippet fetch timeout
-                        	int textsnippet_timeout = Integer.parseInt(env.getConfig("timeout_media", "10000"));
-                        	
-                        	// boolean line_end_with_punctuation
-                        	boolean pre = post.get("pre", "false").equals("true");
-                        	
-//                        	 if 'remove' is set to true, then RWI references to URLs that do not have the snippet are removed
-                        	boolean remove = post.get("remove", "false").equals("true");
-                        	
-                        	URL resultURL = new URL(result.getUrl());                        	
-                        	plasmaSnippetCache.TextSnippet snippet = sb.snippetCache.retrieveTextSnippet(
-                        			resultURL, 
-                        			queryHashes, 
-                        			true, 
-                        			pre, 
-                        			260, 
-                        			textsnippet_timeout
-                        	);
-                        	                        	
-                            if (snippet.getErrorCode() < 11) {
-                                // no problems occurred
-                                //prop.put("text", (snippet.exists()) ? snippet.getLineMarked(queryHashes) : "unknown");
-                                prop.putASIS("type_results_" + i + "_snippet_text", (snippet.exists()) ? snippet.getLineMarked(queryHashes) : "unknown");
-                            } else {
-                                // problems with snippet fetch
-                               prop.put("type_results_" + i + "_snippet_text", (remove) ? sb.snippetCache.failConsequences(snippet, queryHashes) : snippet.getError());
-                            }          
-                            prop.put("type_results_" + i + "_snippet", 1);
-                        } catch (MalformedURLException e) {
-                    		prop.put("type_results_" + i + "_snippet", 0);
-                    		prop.put("type_results_" + i + "_snippet_text", "");
-                        }
+                		// snippet fetch timeout
+                        int textsnippet_timeout = Integer.parseInt(env.getConfig("timeout_media", "10000"));
+                        
+                        // boolean line_end_with_punctuation
+                        boolean pre = post.get("pre", "false").equals("true");
+                        
+                        // if 'remove' is set to true, then RWI references to URLs that do not have the snippet are removed
+                        boolean remove = post.get("remove", "false").equals("true");
+                        
+                        plasmaSnippetCache.TextSnippet snippet = plasmaSnippetCache.retrieveTextSnippet(
+                        		result.url(), 
+                        		queryHashes, 
+                        		true, 
+                        		pre, 
+                        		260, 
+                        		textsnippet_timeout
+                        );
+                                                	
+                        if (snippet.getErrorCode() < 11) {
+                            // no problems occurred
+                            //prop.put("text", (snippet.exists()) ? snippet.getLineMarked(queryHashes) : "unknown");
+                            prop.putASIS("type_results_" + i + "_snippet_text", (snippet.exists()) ? snippet.getLineMarked(queryHashes) : "unknown");
+                        } else {
+                            // problems with snippet fetch
+                           prop.put("type_results_" + i + "_snippet_text", (remove) ? plasmaSnippetCache.failConsequences(snippet, queryHashes) : snippet.getError());
+                        }          
+                        prop.put("type_results_" + i + "_snippet", 1);
                 	} else {
                 		/* no snippet available (will be fetched later via ajax) */
                 		prop.put("type_results_" + i + "_snippet", 0);
                 		prop.put("type_results_" + i + "_snippet_text", "");
                 	}
                 }
-                prop.put("type_results", results.numResults());
-                prop.put("references", results.getReferences());
-                prop.put("num-results_linkcount", Integer.toString(results.numResults()));
+                prop.put("type_results", accu.resultCount());
+                prop.put("num-results_linkcount", Integer.toString(accu.resultCount()));
             }
-        }
 
         // remember the last search expression
         env.setConfig("last-search", querystring + contentdomString);
@@ -513,7 +553,7 @@ public class yacysearch {
             int columns = post.getInt("columns", 6);
             URL url = null;
             try {url = new URL(post.get("url", ""));} catch (MalformedURLException e) {}
-            plasmaSearchImages si = new plasmaSearchImages(sb.snippetCache, 6000, url, depth);
+            plasmaSearchImages si = new plasmaSearchImages(6000, url, depth);
             Iterator i = si.entries();
             htmlFilterImageEntry ie;
             int line = 0;

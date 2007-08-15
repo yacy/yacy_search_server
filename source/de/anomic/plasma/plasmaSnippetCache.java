@@ -86,9 +86,9 @@ public class plasmaSnippetCache {
     public static final int ERROR_PARSER_NO_LINES = 15;
     public static final int ERROR_NO_MATCH = 16;
     
-    private int                   snippetsScoreCounter;
-    private kelondroMScoreCluster snippetsScore;
-    private HashMap               snippetsCache;
+    private static int                   snippetsScoreCounter;
+    private static kelondroMScoreCluster snippetsScore;
+    private static HashMap               snippetsCache;
     
     /**
      * a cache holding URLs to favicons specified by the page content, e.g. by using the html link-tag. e.g.
@@ -96,29 +96,26 @@ public class plasmaSnippetCache {
      * 	 &lt;link rel="shortcut icon" type="image/x-icon" href="../src/favicon.ico"&gt;
      * </pre>
      */
-    private HashMap				  faviconCache;
-    private plasmaHTCache         cacheManager;
-    private plasmaParser          parser;
-    private serverLog             log;
-    private plasmaSwitchboard     sb;
+    private static HashMap               faviconCache;
+    private static plasmaHTCache         cacheManager;
+    private static plasmaParser          parser;
+    private static serverLog             log;
     
-    public plasmaSnippetCache(
-            plasmaSwitchboard theSb,
-            plasmaHTCache cacheManager, 
-            plasmaParser parser,
-            serverLog log
+    public static void init(
+            plasmaHTCache cacheManagerx, 
+            plasmaParser parserx,
+            serverLog logx
     ) {
-        this.cacheManager = cacheManager;
-        this.parser = parser;
-        this.log = log;
-        this.sb = theSb;
-        this.snippetsScoreCounter = 0;
-        this.snippetsScore = new kelondroMScoreCluster();
-        this.snippetsCache = new HashMap(); 
-        this.faviconCache = new HashMap();
+        cacheManager = cacheManagerx;
+        parser = parserx;
+        log = logx;
+        snippetsScoreCounter = 0;
+        snippetsScore = new kelondroMScoreCluster();
+        snippetsCache = new HashMap(); 
+        faviconCache = new HashMap();
     }
     
-    public class TextSnippet {
+    public static class TextSnippet {
         private URL url;
         private String line;
         private String error;
@@ -235,7 +232,7 @@ public class plasmaSnippetCache {
         }
     }
     
-    public class MediaSnippet {
+    public static class MediaSnippet {
         public String type, href, name, attr;
         public MediaSnippet(String type, String href, String name, String attr) {
             this.type = type;
@@ -247,12 +244,12 @@ public class plasmaSnippetCache {
         }
     }
     
-    public boolean existsInCache(URL url, Set queryhashes) {
+    public static boolean existsInCache(URL url, Set queryhashes) {
         String hashes = yacySearch.set2string(queryhashes);
         return retrieveFromCache(hashes, plasmaURL.urlHash(url)) != null;
     }
     
-    public TextSnippet retrieveTextSnippet(URL url, Set queryhashes, boolean fetchOnline, boolean pre, int snippetMaxLength, int timeout) {
+    public static TextSnippet retrieveTextSnippet(URL url, Set queryhashes, boolean fetchOnline, boolean pre, int snippetMaxLength, int timeout) {
         // heise = "0OQUNU3JSs05"
         if (queryhashes.size() == 0) {
             //System.out.println("found no queryhashes for URL retrieve " + url);
@@ -266,7 +263,7 @@ public class plasmaSnippetCache {
         String line = retrieveFromCache(wordhashes, urlhash);
         if (line != null) {        	
             //System.out.println("found snippet for URL " + url + " in cache: " + line);
-            return new TextSnippet(url, line, source, null, null,(URL)this.faviconCache.get(urlhash));
+            return new TextSnippet(url, line, source, null, null,(URL) faviconCache.get(urlhash));
         }
         
         /* ===========================================================================
@@ -278,10 +275,10 @@ public class plasmaSnippetCache {
         IResourceInfo resInfo = null;
         try {
             // trying to load the resource from the cache
-            resContent = this.cacheManager.getResourceContentStream(url);
+            resContent = cacheManager.getResourceContentStream(url);
             if (resContent != null) {
                 // if the content was found
-                resContentLength = this.cacheManager.getResourceContentLength(url);
+                resContentLength = cacheManager.getResourceContentLength(url);
             } else if (fetchOnline) {
                 // if not found try to download it
                 
@@ -298,8 +295,8 @@ public class plasmaSnippetCache {
                         resContent = new ByteArrayInputStream(resourceArray);
                         resContentLength = resourceArray.length;
                     } else {
-                        resContent = this.cacheManager.getResourceContentStream(url); 
-                        resContentLength = this.cacheManager.getResourceContentLength(url);
+                        resContent = cacheManager.getResourceContentStream(url); 
+                        resContentLength = cacheManager.getResourceContentLength(url);
                     }
                 }
                 
@@ -333,7 +330,7 @@ public class plasmaSnippetCache {
          * COMPUTE SNIPPET
          * =========================================================================== */    
         URL resFavicon = document.getFavicon();
-        if (resFavicon != null) this.faviconCache.put(urlhash,resFavicon);
+        if (resFavicon != null) faviconCache.put(urlhash,resFavicon);
         // we have found a parseable non-empty file: use the lines
 
         // compute snippet from text
@@ -375,7 +372,7 @@ public class plasmaSnippetCache {
      * @param fetchOnline specifies if the resource should be loaded from web if it'as not available in the cache
      * @return the parsed document as {@link plasmaParserDocument}
      */
-    public plasmaParserDocument retrieveDocument(URL url, boolean fetchOnline, int timeout, boolean forText) {
+    public static plasmaParserDocument retrieveDocument(URL url, boolean fetchOnline, int timeout, boolean forText) {
 
         // load resource
         long resContentLength = 0;
@@ -383,10 +380,10 @@ public class plasmaSnippetCache {
         IResourceInfo resInfo = null;
         try {
             // trying to load the resource from the cache
-            resContent = this.cacheManager.getResourceContentStream(url);
+            resContent = cacheManager.getResourceContentStream(url);
             if (resContent != null) {
                 // if the content was found
-                resContentLength = this.cacheManager.getResourceContentLength(url);
+                resContentLength = cacheManager.getResourceContentLength(url);
             } else if (fetchOnline) {
                 // if not found try to download it
                 
@@ -403,8 +400,8 @@ public class plasmaSnippetCache {
                         resContent = new ByteArrayInputStream(resourceArray);
                         resContentLength = resourceArray.length;
                     } else {
-                        resContent = this.cacheManager.getResourceContentStream(url); 
-                        resContentLength = this.cacheManager.getResourceContentLength(url);
+                        resContent = cacheManager.getResourceContentStream(url); 
+                        resContentLength = cacheManager.getResourceContentLength(url);
                     }
                 }
                 
@@ -436,7 +433,7 @@ public class plasmaSnippetCache {
     }
 
     
-    public void storeToCache(String wordhashes, String urlhash, String snippet) {
+    public static void storeToCache(String wordhashes, String urlhash, String snippet) {
         // generate key
         String key = urlhash + wordhashes;
 
@@ -462,13 +459,13 @@ public class plasmaSnippetCache {
         }
     }
     
-    private String retrieveFromCache(String wordhashes, String urlhash) {
+    private static String retrieveFromCache(String wordhashes, String urlhash) {
         // generate key
         String key = urlhash + wordhashes;
         return (String) snippetsCache.get(key);
     }
     
-    private String computeMediaSnippet(Map media, Set queryhashes) {
+    private static String computeMediaSnippet(Map media, Set queryhashes) {
         Iterator i = media.entrySet().iterator();
         Map.Entry entry;
         String url, desc;
@@ -493,7 +490,7 @@ public class plasmaSnippetCache {
         return result.substring(6);
     }
     
-    private Object[] /*{String - the snippet, Set - remaining hashes}*/
+    private static Object[] /*{String - the snippet, Set - remaining hashes}*/
             computeTextSnippet(Iterator sentences, Set queryhashes, int maxLength) {
         try {
             if (sentences == null) return null;
@@ -552,7 +549,7 @@ public class plasmaSnippetCache {
         }
     }
     
-    private Object[] /*{String - the snippet, Set - remaining hashes}*/
+    private static Object[] /*{String - the snippet, Set - remaining hashes}*/
             computeTextSnippet(String sentence, Set queryhashes, int maxLength) {
         try {
             if (sentence == null) return null;
@@ -620,7 +617,7 @@ public class plasmaSnippetCache {
         }
     }
     
-    public ArrayList retrieveMediaSnippets(URL url, Set queryhashes, String mediatype, boolean fetchOnline, int timeout) {
+    public static ArrayList retrieveMediaSnippets(URL url, Set queryhashes, String mediatype, boolean fetchOnline, int timeout) {
         if (queryhashes.size() == 0) {
             serverLog.logFine("snippet fetch", "no query hashes given for url " + url);
             return new ArrayList();
@@ -638,7 +635,7 @@ public class plasmaSnippetCache {
         return a;
     }
     
-    public ArrayList computeMediaSnippets(plasmaParserDocument document, Set queryhashes, String mediatype) {
+    public static ArrayList computeMediaSnippets(plasmaParserDocument document, Set queryhashes, String mediatype) {
         
         if (document == null) return new ArrayList();
         Map media = null;
@@ -671,7 +668,7 @@ public class plasmaSnippetCache {
         return result;
     }
     
-    public ArrayList computeImageSnippets(plasmaParserDocument document, Set queryhashes) {
+    public static ArrayList computeImageSnippets(plasmaParserDocument document, Set queryhashes) {
         
         TreeSet images = document.getImages();
         
@@ -699,7 +696,7 @@ public class plasmaSnippetCache {
         return result;
     }
     
-    private Set removeAppearanceHashes(String sentence, Set queryhashes) {
+    private static Set removeAppearanceHashes(String sentence, Set queryhashes) {
         // remove all hashes that appear in the sentence
         if (sentence == null) return queryhashes;
         HashMap hs = hashSentence(sentence);
@@ -717,7 +714,7 @@ public class plasmaSnippetCache {
         return remaininghashes;
     }
     
-    private HashMap hashSentence(String sentence) {
+    private static HashMap hashSentence(String sentence) {
         // generates a word-wordPos mapping
         HashMap map = new HashMap();
         Enumeration words = plasmaCondenser.wordTokenizer(sentence, "UTF-8", 0);
@@ -731,7 +728,7 @@ public class plasmaSnippetCache {
         return map;
     }
      
-    public plasmaParserDocument parseDocument(URL url, long contentLength, InputStream resourceStream) throws ParserException {
+    public static plasmaParserDocument parseDocument(URL url, long contentLength, InputStream resourceStream) throws ParserException {
         return parseDocument(url, contentLength, resourceStream, null);
     }
     
@@ -744,7 +741,7 @@ public class plasmaSnippetCache {
      * @return the extracted data
      * @throws ParserException
      */
-    public plasmaParserDocument parseDocument(URL url, long contentLength, InputStream resourceStream, IResourceInfo docInfo) throws ParserException {
+    public static plasmaParserDocument parseDocument(URL url, long contentLength, InputStream resourceStream, IResourceInfo docInfo) throws ParserException {
         try {
             if (resourceStream == null) return null;
 
@@ -752,7 +749,7 @@ public class plasmaSnippetCache {
             if (docInfo == null) {
                 // try to get the header from the htcache directory
                 try {                    
-                    docInfo = this.cacheManager.loadResourceInfo(url);
+                    docInfo = cacheManager.loadResourceInfo(url);
                 } catch (Exception e) {
                     // ignore this. resource info loading failed
                 }   
@@ -765,8 +762,8 @@ public class plasmaSnippetCache {
                 
                 // getting URL mimeType
                 try {
-                    httpHeader header = httpc.whead(url, url.getHost(), 10000, null, null, this.sb.remoteProxyConfig);
-                    docInfo = this.cacheManager.getResourceInfoFactory().buildResourceInfoObj(url, header);
+                    httpHeader header = httpc.whead(url, url.getHost(), 10000, null, null, plasmaSwitchboard.getSwitchboard().remoteProxyConfig);
+                    docInfo = cacheManager.getResourceInfoFactory().buildResourceInfoObj(url, header);
                 } catch (Exception e) {
                     // ingore this. http header download failed
                 } 
@@ -774,7 +771,7 @@ public class plasmaSnippetCache {
 
             // STEP 3: if the metadata is still null try to guess the mimeType of the resource
             if (docInfo == null) {
-                String filename = this.cacheManager.getCachePath(url).getName();
+                String filename = cacheManager.getCachePath(url).getName();
                 int p = filename.lastIndexOf('.');
                 if (    // if no extension is available
                         (p < 0) ||
@@ -792,12 +789,12 @@ public class plasmaSnippetCache {
                         supposedMime = plasmaParser.getMimeTypeByFileExt(filename.substring(p + 1));
                     }
 
-                    return this.parser.parseSource(url, supposedMime, null, contentLength, resourceStream);
+                    return parser.parseSource(url, supposedMime, null, contentLength, resourceStream);
                 }
                 return null;
             }            
             if (plasmaParser.supportedMimeTypesContains(docInfo.getMimeType())) {
-                return this.parser.parseSource(url, docInfo.getMimeType(), docInfo.getCharacterEncoding(), contentLength, resourceStream);
+                return parser.parseSource(url, docInfo.getMimeType(), docInfo.getCharacterEncoding(), contentLength, resourceStream);
             }
             return null;
         } catch (InterruptedException e) {
@@ -817,15 +814,15 @@ public class plasmaSnippetCache {
      * <tr><td>[1]</td><td>the content-length as {@link Integer}</td></tr>
      * </table>
      */
-    public Object[] getResource(URL url, boolean fetchOnline, int socketTimeout, boolean forText) {
+    public static Object[] getResource(URL url, boolean fetchOnline, int socketTimeout, boolean forText) {
         // load the url as resource from the web
         try {
             long contentLength = -1;
             
             // trying to load the resource body from cache
-            InputStream resource = this.cacheManager.getResourceContentStream(url);
+            InputStream resource = cacheManager.getResourceContentStream(url);
             if (resource != null) {
-                contentLength = this.cacheManager.getResourceContentLength(url);
+                contentLength = cacheManager.getResourceContentLength(url);
             } else if (fetchOnline) {
                 // if the content is not available in cache try to download it from web
                 
@@ -837,8 +834,8 @@ public class plasmaSnippetCache {
             
                 // in case that the reosurce was not in ram, read it from disk
                 if (resourceArray == null) {
-                    resource = this.cacheManager.getResourceContentStream(url);   
-                    contentLength = this.cacheManager.getResourceContentLength(url); 
+                    resource = cacheManager.getResourceContentStream(url);   
+                    contentLength = cacheManager.getResourceContentLength(url); 
                 } else {
                     resource = new ByteArrayInputStream(resourceArray);
                     contentLength = resourceArray.length;
@@ -852,20 +849,20 @@ public class plasmaSnippetCache {
         }
     }
     
-    public plasmaHTCache.Entry loadResourceFromWeb(
+    public static plasmaHTCache.Entry loadResourceFromWeb(
             URL url, 
             int socketTimeout,
             boolean keepInMemory,
             boolean forText
     ) throws plasmaCrawlerException {
         
-        plasmaHTCache.Entry result = this.sb.cacheLoader.loadSync(
+        plasmaHTCache.Entry result = plasmaSwitchboard.getSwitchboard().cacheLoader.loadSync(
                 url,                         // the url
                 "",                          // name of the url, from anchor tag <a>name</a>
                 null,                        // referer
                 yacyCore.seedDB.mySeed.hash, // initiator
                 0,                           // depth
-                (forText) ? sb.defaultTextSnippetProfile : sb.defaultMediaSnippetProfile, // crawl profile
+                (forText) ? plasmaSwitchboard.getSwitchboard().defaultTextSnippetProfile : plasmaSwitchboard.getSwitchboard().defaultMediaSnippetProfile, // crawl profile
                 socketTimeout,
                 keepInMemory
         );
@@ -873,7 +870,7 @@ public class plasmaSnippetCache {
         return result;
     }
     
-    public String failConsequences(TextSnippet snippet, Set queryhashes) {
+    public static String failConsequences(TextSnippet snippet, Set queryhashes) {
         // problems with snippet fetch
         if (yacyCore.seedDB.mySeed.isVirgin()) return snippet.getError() + " (no consequences, no network connection)"; // no consequences if we do not have a network connection
         String urlHash = plasmaURL.urlHash(snippet.getUrl());
@@ -883,12 +880,12 @@ public class plasmaSnippetCache {
             (snippet.getErrorCode() == ERROR_PARSER_FAILED) ||
             (snippet.getErrorCode() == ERROR_PARSER_NO_LINES)) {
             log.logInfo("error: '" + snippet.getError() + "', remove url = " + snippet.getUrl().toNormalform(false, true) + ", cause: " + snippet.getError());
-            sb.wordIndex.loadedURL.remove(urlHash);
-            sb.wordIndex.removeHashReferences(queryhashes, urlHash);
+            plasmaSwitchboard.getSwitchboard().wordIndex.loadedURL.remove(urlHash);
+            plasmaSwitchboard.getSwitchboard().wordIndex.removeHashReferences(queryhashes, urlHash);
         }
         if (snippet.getErrorCode() == ERROR_NO_MATCH) {
             log.logInfo("error: '" + snippet.getError() + "', remove words '" + querystring + "' for url = " + snippet.getUrl().toNormalform(false, true) + ", cause: " + snippet.getError());
-            sb.wordIndex.removeHashReferences(snippet.remaingHashes, urlHash);
+            plasmaSwitchboard.getSwitchboard().wordIndex.removeHashReferences(snippet.remaingHashes, urlHash);
         }
         return snippet.getError();
     }

@@ -55,7 +55,6 @@ package de.anomic.plasma;
 import java.io.File;
 import java.io.IOException;
 import java.net.MalformedURLException;
-import java.util.Date;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.LinkedList;
@@ -64,7 +63,6 @@ import de.anomic.http.httpc;
 import de.anomic.http.httpc.response;
 import de.anomic.index.indexRWIEntry;
 import de.anomic.index.indexURLEntry;
-import de.anomic.kelondro.kelondroBitfield;
 import de.anomic.kelondro.kelondroCache;
 import de.anomic.kelondro.kelondroCloneableIterator;
 import de.anomic.kelondro.kelondroException;
@@ -206,33 +204,7 @@ public final class plasmaCrawlLURL {
             return null;
         }
     }
-
-    public synchronized indexURLEntry newEntry(
-            URL url,
-            String descr,
-            String author,
-            String tags,
-            String ETag,
-            Date mod,
-            Date load,
-            Date fresh,
-            String referrer,
-            byte[] md5,
-            long size,
-            int wc,
-            char dt,
-            kelondroBitfield flags,
-            String lang,
-            int llocal,
-            int lother,
-            int laudio,
-            int limage,
-            int lvideo,
-            int lapp) {
-        return new indexURLEntry(url, descr, author, tags, ETag, mod, load, fresh, referrer, md5,
-                    size, wc, dt, flags, lang, llocal, lother, laudio, limage, lvideo, lapp);
-    }
-
+    
     public synchronized int getStackSize(int stack) {
         switch (stack) {
             case 1: return externResultStack.size();
@@ -554,8 +526,7 @@ public final class plasmaCrawlLURL {
             }
         }
     }
-
-
+    
     public static void main(String[] args) {
         // test-generation of url hashes for debugging
         // one argument requires, will be treated as url

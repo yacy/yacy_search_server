@@ -57,18 +57,18 @@ public final class plasmaSearchImages {
 
     private TreeSet images;
     
-    public plasmaSearchImages(plasmaSnippetCache sc, long maxTime, URL url, int depth) {
+    public plasmaSearchImages(long maxTime, URL url, int depth) {
         long start = System.currentTimeMillis();
         this.images = new TreeSet();
         if (maxTime > 10) {
-            Object[] resource = sc.getResource(url, true, (int) maxTime, false);
+            Object[] resource = plasmaSnippetCache.getResource(url, true, (int) maxTime, false);
             InputStream res = (InputStream) resource[0];
             Long resLength = (Long) resource[1];
             if (res != null) {
                 plasmaParserDocument document = null;
                 try {
                     // parse the document
-                    document = sc.parseDocument(url, resLength.longValue(), res);
+                    document = plasmaSnippetCache.parseDocument(url, resLength.longValue(), res);
                 } catch (ParserException e) {
                     // parsing failed
                 } finally {
@@ -88,7 +88,7 @@ public final class plasmaSearchImages {
                         String nexturlstring;
                         try {
                             nexturlstring = new URL((String) e.getKey()).toNormalform(true, true);
-                            addAll(new plasmaSearchImages(sc, serverDate.remainingTime(start, maxTime, 10), new URL(nexturlstring), depth - 1));
+                            addAll(new plasmaSearchImages(serverDate.remainingTime(start, maxTime, 10), new URL(nexturlstring), depth - 1));
                         } catch (MalformedURLException e1) {
                             e1.printStackTrace();
                         }
@@ -99,13 +99,13 @@ public final class plasmaSearchImages {
         }
     }
     
-    public plasmaSearchImages(plasmaSnippetCache sc, long maxTime, plasmaSearchPostOrder sres, int depth) {
+    public plasmaSearchImages(long maxTime, plasmaSearchPostOrder sres, int depth) {
         long start = System.currentTimeMillis();
         this.images = new TreeSet();
         indexURLEntry urlentry;
         while (sres.hasMoreElements()) {
             urlentry = sres.nextElement();
-            addAll(new plasmaSearchImages(sc, serverDate.remainingTime(start, maxTime, 10), urlentry.comp().url(), depth));
+            addAll(new plasmaSearchImages(serverDate.remainingTime(start, maxTime, 10), urlentry.comp().url(), depth));
         }
     }
     

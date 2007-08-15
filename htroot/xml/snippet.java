@@ -58,7 +58,7 @@ public class snippet {
         // find snippet
         if (media.equals("text")) {
             // attach text snippet
-            plasmaSnippetCache.TextSnippet snippet = switchboard.snippetCache.retrieveTextSnippet(url, queryHashes, true, pre, 260, textsnippet_timeout);
+            plasmaSnippetCache.TextSnippet snippet = plasmaSnippetCache.retrieveTextSnippet(url, queryHashes, true, pre, 260, textsnippet_timeout);
             prop.put("status",snippet.getErrorCode());
             if (snippet.getErrorCode() < 11) {
                 // no problems occurred
@@ -66,14 +66,14 @@ public class snippet {
                 prop.putASIS("text", (snippet.exists()) ? snippet.getLineMarked(queryHashes) : "unknown"); //FIXME: the ASIS should not be needed, but we have still htmlcode in .java files
             } else {
                 // problems with snippet fetch
-               prop.put("text", (remove) ? switchboard.snippetCache.failConsequences(snippet, queryHashes) : snippet.getError());
+               prop.put("text", (remove) ? plasmaSnippetCache.failConsequences(snippet, queryHashes) : snippet.getError());
             }
             prop.put("link", 0);
             prop.put("links", 0);
             prop.put("favicon",snippet.getFavicon()==null?"":snippet.getFavicon().toString());
         } else {
             // attach media information
-            ArrayList mediaSnippets = switchboard.snippetCache.retrieveMediaSnippets(url, queryHashes, media, true, mediasnippet_timeout);
+            ArrayList mediaSnippets = plasmaSnippetCache.retrieveMediaSnippets(url, queryHashes, media, true, mediasnippet_timeout);
             plasmaSnippetCache.MediaSnippet ms;
             for (int i = 0; i < mediaSnippets.size(); i++) {
                 ms = (plasmaSnippetCache.MediaSnippet) mediaSnippets.get(i);

@@ -49,6 +49,7 @@ import java.net.MalformedURLException;
 
 import de.anomic.http.httpHeader;
 import de.anomic.net.URL;
+import de.anomic.plasma.plasmaSnippetCache;
 import de.anomic.plasma.plasmaSwitchboard;
 import de.anomic.server.serverFileUtils;
 import de.anomic.server.serverObjects;
@@ -91,7 +92,7 @@ public class ViewImage {
         int timeout = post.getInt("timeout", 5000);
         
         // getting the image as stream
-        Object[] resource = sb.snippetCache.getResource(url, true, timeout, false);
+        Object[] resource = plasmaSnippetCache.getResource(url, true, timeout, false);
         byte[] imgb = null;
         if (resource == null) {
             if (urlString.endsWith(".ico")) {

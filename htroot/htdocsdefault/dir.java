@@ -366,7 +366,7 @@ public class dir {
         try {
             final URL url = new URL(urlstring);
             final plasmaCondenser condenser = new plasmaCondenser(new ByteArrayInputStream(("yacyshare. " + phrase + ". " + descr).getBytes()), "UTF-8");
-            final indexURLEntry newEntry = switchboard.wordIndex.loadedURL.newEntry(
+            final indexURLEntry newEntry = new indexURLEntry(
                 url,
                 "YaCyShare: " + descr,
                 yacyCore.seedDB.mySeed.getName(),

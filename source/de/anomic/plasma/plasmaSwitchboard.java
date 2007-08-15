@@ -218,7 +218,6 @@ public final class plasmaSwitchboard extends serverAbstractSwitch implements ser
     public  plasmaCrawlZURL             errorURL, delegatedURL;
     public  plasmaWordIndex             wordIndex;
     public  plasmaHTCache               cacheManager;
-    public  plasmaSnippetCache          snippetCache;
     public  plasmaCrawlLoader           cacheLoader;
     public  plasmaSwitchboardQueue      sbQueue;
     public  plasmaCrawlStacker          sbStackCrawlThread;
@@ -1292,7 +1291,7 @@ public final class plasmaSwitchboard extends serverAbstractSwitch implements ser
         
         // generate snippets cache
         log.logConfig("Initializing Snippet Cache");
-        snippetCache = new plasmaSnippetCache(this,cacheManager, parser,log);
+        plasmaSnippetCache.init(cacheManager, parser,log);
         
         // start yacy core
         log.logConfig("Starting YaCy Protocol Core");
@@ -2504,7 +2503,7 @@ public final class plasmaSwitchboard extends serverAbstractSwitch implements ser
                     
                     // create a new loaded URL db entry
                     long ldate = System.currentTimeMillis();
-                    indexURLEntry newEntry = wordIndex.loadedURL.newEntry(
+                    indexURLEntry newEntry = new indexURLEntry(
                             entry.url(),                               // URL
                             docDescription,                            // document description
                             document.getAuthor(),                      // author
@@ -2892,177 +2891,6 @@ public final class plasmaSwitchboard extends serverAbstractSwitch implements ser
         if (date == null) return ""; else return DateFormatter.format(date);
     }
     
-    public plasmaSearchResults searchFromLocal(plasmaSearchQuery query,
-                                         plasmaSearchRankingProfile ranking,
-                                         plasmaSearchProcessing  localTiming,
-                                         plasmaSearchProcessing  remoteTiming,
-                                         boolean postsort,
-                                         String client) {
-        
-        // tell all threads to do nothing for a specific time
-        intermissionAllThreads(2 * query.maximumTime);
-        
-        plasmaSearchResults results=new plasmaSearchResults();
-        results.setRanking(ranking);
-        results.setQuery(query);
-        results.setFormerSearch("");
-        try {
-            // filter out words that appear in bluelist
-            //log.logInfo("E");
-            query.filterOut(blueList);
-            results.setQuery(query);
-            
-            // log
-            log.logInfo("INIT WORD SEARCH: " + query.queryString + ":" + query.queryHashes + " - " + query.wantedResults + " links, " + (query.maximumTime / 1000) + " seconds");
-            long timestamp = System.currentTimeMillis();
-            
-            // start a presearch, which makes only sense if we idle afterwards.
-            // this is especially the case if we start a global search and idle until search
-            //if (query.domType == plasmaSearchQuery.SEARCHDOM_GLOBALDHT) {
-            //    Thread preselect = new presearch(query.queryHashes, order, query.maximumTime / 10, query.urlMask, 10, 3);
-            //    preselect.start();
-            //}
-            
-            // create a new search event
-            plasmaSearchEvent theSearch = new plasmaSearchEvent(query, ranking, localTiming, remoteTiming, postsort, log, wordIndex, snippetCache, (isRobinsonMode()) ? this.clusterhashes : null);
-            plasmaSearchPostOrder acc = theSearch.search();
-            
-            // fetch snippets
-            //if (query.domType != plasmaSearchQuery.SEARCHDOM_GLOBALDHT) snippetCache.fetch(acc.cloneSmart(), query.queryHashes, query.urlMask, 10, 1000);
-            log.logFine("SEARCH TIME AFTER ORDERING OF SEARCH RESULTS: " + ((System.currentTimeMillis() - timestamp) / 1000) + " seconds");
-            
-            // result is a List of urlEntry elements: prepare answer
-            if (acc == null) {
-                results.setTotalcount(0);
-                results.setFilteredcount(0);
-                results.setOrderedcount(0);
-                results.setLinkcount(0);
-            } else {
-                results.setTotalcount(acc.globalContributions + acc.localContributions);
-                results.setFilteredcount(acc.filteredResults);
-                results.setOrderedcount(acc.sizeOrdered());
-                results.setGlobalresults(acc.globalContributions);
-                results.setRanking(ranking);
-                
-                int i = 0;
-                int p;
-                indexURLEntry urlentry;
-                String urlstring, urlname, filename, urlhash;
-                String host, hash, address;
-                yacySeed seed;
-                boolean includeSnippets = false;
-                results.setFormerSearch(query.queryString());
-                long targetTime = timestamp + query.maximumTime;
-                if (targetTime < System.currentTimeMillis()) targetTime = System.currentTimeMillis() + 1000;
-                while ((acc.hasMoreElements()) && (i < query.wantedResults) && (System.currentTimeMillis() < targetTime)) {
-                    urlentry = acc.nextElement();
-                    indexURLEntry.Components comp = urlentry.comp();
-                    urlhash = urlentry.hash();
-                    assert (urlhash != null);
-                    assert (urlhash.length() == 12) : "urlhash = " + urlhash;
-                    host = comp.url().getHost();
-                    if (host.endsWith(".yacyh")) {
-                        // translate host into current IP
-                        p = host.indexOf(".");
-                        hash = yacySeed.hexHash2b64Hash(host.substring(p + 1, host.length() - 6));
-                        seed = yacyCore.seedDB.getConnected(hash);
-                        filename = comp.url().getFile();
-                        if ((seed == null) || ((address = seed.getPublicAddress()) == null)) {
-                            // seed is not known from here
-                            wordIndex.removeWordReferences(plasmaCondenser.getWords(("yacyshare " + filename.replace('?', ' ') + " " + comp.title()).getBytes(), "UTF-8").keySet(), urlentry.hash());
-                            wordIndex.loadedURL.remove(urlentry.hash()); // clean up
-                            continue; // next result
-                        }
-                        urlstring = "http://" + address + "/" + host.substring(0, p) + filename;
-                        urlname = "http://share." + seed.getName() + ".yacy" + filename;
-                        if ((p = urlname.indexOf("?")) > 0) urlname = urlname.substring(0, p);
-                    } else {
-                        urlstring = comp.url().toNormalform(false, true);
-                        urlname = urlstring;
-                    }
-                    
-                    
-                    // check bluelist again: filter out all links where any bluelisted word
-                    // appear either in url, url's description or search word
-                    // the search word was sorted out earlier
-                        /*
-                        String s = descr.toLowerCase() + url.toString().toLowerCase();
-                        for (int c = 0; c < blueList.length; c++) {
-                            if (s.indexOf(blueList[c]) >= 0) return;
-                        }
-                         */
-                    //addScoreForked(ref, gs, descr.split(" "));
-                    //addScoreForked(ref, gs, urlstring.split("/"));
-                    plasmaSearchResults.searchResult result=results.createSearchResult();
-                    result.setUrl(urlstring);
-                    result.setUrlname(urlname);
-                    result.setUrlentry(urlentry);
-                    if (includeSnippets) {
-						result.setSnippet(snippetCache.retrieveTextSnippet(comp.url(), results.getQuery().queryHashes, false, urlentry.flags().get(plasmaCondenser.flag_cat_indexof), 260, 1000));
-						// snippet = snippetCache.retrieveTextSnippet(comp.url(), query.queryHashes, false, urlentry.flags().get(plasmaCondenser.flag_cat_indexof), 260, 1000);
-					} else {
-						// snippet = null;
-						result.setSnippet(null);
-					}
-					i++;
-					results.appendResult(result);
-				}
-                log.logFine("SEARCH TIME AFTER RESULT PREPARATION: " + ((System.currentTimeMillis() - timestamp) / 1000) + " seconds");
-                
-                // calc some more cross-reference
-                long remainingTime = query.maximumTime - (System.currentTimeMillis() - timestamp);
-                if (remainingTime < 0) remainingTime = 1000;
-                /*
-                while ((acc.hasMoreElements()) && (((time + timestamp) < System.currentTimeMillis()))) {
-                    urlentry = acc.nextElement();
-                    urlstring = htmlFilterContentScraper.urlNormalform(urlentry.url());
-                    descr = urlentry.descr();
-                 
-                    addScoreForked(ref, gs, descr.split(" "));
-                    addScoreForked(ref, gs, urlstring.split("/"));
-                }
-                 **/
-                //Object[] ws = ref.getScores(16, false, 2, Integer.MAX_VALUE);
-                Object[] ws = acc.getReferences(16);
-                results.setReferences(ws);
-                log.logFine("SEARCH TIME AFTER XREF PREPARATION: " + ((System.currentTimeMillis() - timestamp) / 1000) + " seconds");
-                
-                    /*
-                    System.out.print("DEBUG WORD-SCORE: ");
-                    for (int ii = 0; ii < ws.length; ii++) System.out.print(ws[ii] + ", ");
-                    System.out.println(" all words = " + ref.getElementCount() + ", total count = " + ref.getTotalCount());
-                     */
-            }
-            
-            // log
-            log.logInfo("EXIT WORD SEARCH: " + query.queryString + " - " +
-                    results.getTotalcount() + " links found, " +
-                    results.getFilteredcount() + " links filtered, " +
-                    results.getOrderedcount() + " links ordered, " +
-                    results.getLinkcount() + " links selected, " +
-                    ((System.currentTimeMillis() - timestamp) / 1000) + " seconds");
-            
-            
-            // prepare search statistics
-            Long trackerHandle = new Long(System.currentTimeMillis());
-            HashMap searchProfile = theSearch.resultProfile();
-            searchProfile.put("querystring", query.queryString);
-            searchProfile.put("time", trackerHandle);
-            searchProfile.put("host", client);
-            searchProfile.put("offset", new Integer(0));
-            searchProfile.put("results", results);
-            this.localSearches.add(searchProfile);
-            TreeSet handles = (TreeSet) this.localSearchTracker.get(client);
-            if (handles == null) handles = new TreeSet();
-            handles.add(trackerHandle);
-            this.localSearchTracker.put(client, handles);
-            
-            return results;
-        } catch (IOException e) {
-            return null;
-        }
-    }
-    
     public serverObjects action(String actionName, serverObjects actionInput) {
         // perform an action. (not used)    
         return null;
@@ -3092,12 +2920,12 @@ public final class plasmaSwitchboard extends serverAbstractSwitch implements ser
         InputStream resourceContent = null;
         try {
             // get the resource content
-            Object[] resource = snippetCache.getResource(comp.url(), fetchOnline, 10000, true);
+            Object[] resource = plasmaSnippetCache.getResource(comp.url(), fetchOnline, 10000, true);
             resourceContent = (InputStream) resource[0];
             Long resourceContentLength = (Long) resource[1];
             
             // parse the resource
-            plasmaParserDocument document = snippetCache.parseDocument(comp.url(), resourceContentLength.longValue(), resourceContent);
+            plasmaParserDocument document = plasmaSnippetCache.parseDocument(comp.url(), resourceContentLength.longValue(), resourceContent);
             
             // get the word set
             Set words = null;

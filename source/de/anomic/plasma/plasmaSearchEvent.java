@@ -27,7 +27,6 @@
 package de.anomic.plasma;
 
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Map;
 import java.util.TreeMap;
@@ -38,20 +37,14 @@ import de.anomic.server.logging.serverLog;
 import de.anomic.yacy.yacyCore;
 import de.anomic.yacy.yacySearch;
 
-public final class plasmaSearchEvent extends Thread implements Runnable {
+public final class plasmaSearchEvent {
     
     public static plasmaSearchEvent lastEvent = null;
 
-    private static HashSet flushThreads = new HashSet();
-    
-    private serverLog log;
     private plasmaSearchQuery query;
     private plasmaSearchRankingProfile ranking;
     private plasmaWordIndex wordIndex;
-    private plasmaCrawlLURL urlStore;
-    private plasmaSnippetCache snippetCache;
     private indexContainer rcContainers; // cache for results
-    private int rcContainerFlushCount;
     private Map rcAbstracts; // cache for index abstracts; word:TreeMap mapping where the embedded TreeMap is a urlhash:peerlist relation
     private plasmaSearchProcessing profileLocal, profileGlobal;
     private boolean postsort;
@@ -65,18 +58,12 @@ public final class plasmaSearchEvent extends Thread implements Runnable {
                              plasmaSearchProcessing localTiming,
                              plasmaSearchProcessing remoteTiming,
                              boolean postsort,
-                             serverLog log,
                              plasmaWordIndex wordIndex,
-                             plasmaSnippetCache snippetCache,
                              TreeMap preselectedPeerHashes) {
-        this.log = log;
         this.wordIndex = wordIndex;
         this.query = query;
         this.ranking = ranking;
-        this.urlStore = wordIndex.loadedURL;
-        this.snippetCache = snippetCache;
         this.rcContainers = plasmaWordIndex.emptyContainer(null);
-        this.rcContainerFlushCount = 0;
         this.rcAbstracts = (query.queryHashes.size() > 1) ? new TreeMap() : null; // generate abstracts only for combined searches
         this.profileLocal = localTiming;
         this.profileGlobal = remoteTiming;
@@ -118,9 +105,6 @@ public final class plasmaSearchEvent extends Thread implements Runnable {
     public plasmaSearchPostOrder search() {
         // combine all threads
         
-        // we synchronize with flushThreads to allow only one local search at a time,
-        // so all search tasks are queued
-        synchronized (flushThreads) {
             long start = System.currentTimeMillis();
             plasmaSearchPostOrder result;
             if ((query.domType == plasmaSearchQuery.SEARCHDOM_GLOBALDHT) ||
@@ -131,12 +115,24 @@ public final class plasmaSearchEvent extends Thread implements Runnable {
 
                 // do a global search
                 // the result of the fetch is then in the rcGlobal
-                log.logFine("STARTING " + fetchpeers + " THREADS TO CATCH EACH " + profileGlobal.getTargetCount(plasmaSearchProcessing.PROCESS_POSTSORT) + " URLs WITHIN " + (profileGlobal.duetime() / 1000) + " SECONDS");
+                serverLog.logFine("SEARCH_EVENT", "STARTING " + fetchpeers + " THREADS TO CATCH EACH " + profileGlobal.getTargetCount(plasmaSearchProcessing.PROCESS_POSTSORT) + " URLs WITHIN " + (profileGlobal.duetime() / 1000) + " SECONDS");
                 long secondaryTimeout = System.currentTimeMillis() + profileGlobal.duetime() / 3 * 2;
                 long primaryTimeout = System.currentTimeMillis() + profileGlobal.duetime();
-                primarySearchThreads = yacySearch.primaryRemoteSearches(plasmaSearchQuery.hashSet2hashString(query.queryHashes), plasmaSearchQuery.hashSet2hashString(query.excludeHashes), "",
-                        query.prefer, query.urlMask, query.maxDistance, urlStore, wordIndex, rcContainers, rcAbstracts,
-                        fetchpeers, plasmaSwitchboard.urlBlacklist, snippetCache, profileGlobal, ranking, query.constraint,
+                primarySearchThreads = yacySearch.primaryRemoteSearches(
+                        plasmaSearchQuery.hashSet2hashString(query.queryHashes),
+                        plasmaSearchQuery.hashSet2hashString(query.excludeHashes),
+                        "",
+                        query.prefer,
+                        query.urlMask,
+                        query.maxDistance,
+                        wordIndex,
+                        rcContainers, 
+                        rcAbstracts,
+                        fetchpeers,
+                        plasmaSwitchboard.urlBlacklist,
+                        profileGlobal,
+                        ranking,
+                        query.constraint,
                         (query.domType == plasmaSearchQuery.SEARCHDOM_GLOBALDHT) ? null : preselectedPeerHashes);
 
                 // meanwhile do a local search
@@ -198,7 +194,7 @@ public final class plasmaSearchEvent extends Thread implements Runnable {
                 int globalContributions = rcContainers.size();
                 
                 // finished searching
-                log.logFine("SEARCH TIME AFTER GLOBAL-TRIGGER TO " + primarySearchThreads.length + " PEERS: " + ((System.currentTimeMillis() - start) / 1000) + " seconds");
+                serverLog.logFine("SEARCH_EVENT", "SEARCH TIME AFTER GLOBAL-TRIGGER TO " + primarySearchThreads.length + " PEERS: " + ((System.currentTimeMillis() - start) / 1000) + " seconds");
 
                 // combine the result and order
                 indexContainer searchResult = plasmaWordIndex.emptyContainer(null);
@@ -215,9 +211,6 @@ public final class plasmaSearchEvent extends Thread implements Runnable {
                 
                 if (result != null) {
                     result.globalContributions = globalContributions;
-
-                    // flush results in a separate thread
-                    this.start(); // start to flush results
                 }
             } else {
                 Map[] searchContainerMaps = profileLocal.localSearchContainers(query, wordIndex, null);
@@ -242,7 +235,7 @@ public final class plasmaSearchEvent extends Thread implements Runnable {
             }
 
             // log the event
-            log.logFine("SEARCHRESULT: " + profileLocal.reportToString());
+            serverLog.logFine("SEARCH_EVENT", "SEARCHRESULT: " + profileLocal.reportToString());
             
             // prepare values for statistics
             lastEvent = this;
@@ -251,7 +244,6 @@ public final class plasmaSearchEvent extends Thread implements Runnable {
             
             // return search result
             return result;
-        }
     }
 
     private void prepareSecondarySearch() {
@@ -311,7 +303,7 @@ public final class plasmaSearchEvent extends Thread implements Runnable {
                 System.out.println("DEBUG-INDEXABSTRACT ***: peer " + peer + "   has urls: " + urls);
                 System.out.println("DEBUG-INDEXABSTRACT ***: peer " + peer + " from words: " + words);
                 secondarySearchThreads[c++] = yacySearch.secondaryRemoteSearch(
-                        words, "", urls, urlStore, wordIndex, rcContainers, peer, plasmaSwitchboard.urlBlacklist, snippetCache,
+                        words, "", urls, wordIndex, rcContainers, peer, plasmaSwitchboard.urlBlacklist,
                         profileGlobal, ranking, query.constraint, preselectedPeerHashes);
 
             }
@@ -344,66 +336,6 @@ public final class plasmaSearchEvent extends Thread implements Runnable {
             }
         }
         return wordlist;
-    }
-    
-    public void run() {
-        flushThreads.add(this); // this will care that the search event object is referenced from somewhere while it is still alive
-
-        // put all new results into wordIndex
-        // this must be called after search results had been computed
-        // it is wise to call this within a separate thread because
-        // this method waits until all threads are finished
-        serverLog.logFine("PLASMA", "STARTED FLUSHING GLOBAL SEARCH RESULTS FOR SEARCH " + query.queryString);
-        
-        int remaining = 0;
-        if (primarySearchThreads == null) return;
-        long starttime = System.currentTimeMillis();
-        while (true) {
-            flushGlobalResults(); // must be flushed before first check of remaining threads, othervise it is possible that NO results are flushed at all
-            
-            remaining = yacySearch.remainingWaiting(primarySearchThreads);
-            if (secondarySearchThreads != null) remaining += yacySearch.remainingWaiting(secondarySearchThreads);
-            if (remaining == 0) break;
-  
-            // wait a little bit before trying again
-            try {Thread.sleep(1000);} catch (InterruptedException e) {}
-            if (System.currentTimeMillis() - starttime > 90000) {
-                yacySearch.interruptAlive(primarySearchThreads);
-                if (secondarySearchThreads != null) yacySearch.interruptAlive(secondarySearchThreads);
-                log.logFine("SEARCH FLUSH: " + remaining + " PEERS STILL BUSY; ABANDONED; SEARCH WAS " + query.queryString);
-                break;
-            }
-            //log.logFine("FINISHED FLUSH RESULTS PROCESS for query " + query.hashes(","));
-        }
-        
-        serverLog.logFine("PLASMA", "FINISHED FLUSHING " + rcContainerFlushCount + " GLOBAL SEARCH RESULTS FOR SEARCH " + query.queryString);
-            
-        // finally delete the temporary index
-        rcContainers = null;
-        
-        flushThreads.remove(this);
-    }
-    
-    public void flushGlobalResults() {
-        // flush the rcGlobal as much as is there so far
-        // this must be called sometime after search results had been computed
-        int count = 0;
-        if ((rcContainers != null) && (rcContainers.size() > 0)) {
-            synchronized (rcContainers) {
-                String wordHash;
-                Iterator hashi = query.queryHashes.iterator();
-                while (hashi.hasNext()) {
-                    wordHash = (String) hashi.next();
-                    rcContainers.setWordHash(wordHash);
-                    wordIndex.addEntries(rcContainers, System.currentTimeMillis(), true);
-                    log.logFine("FLUSHED " + wordHash + ": " + rcContainers.size() + " url entries");
-                }
-                // the rcGlobal was flushed, empty it
-                count += rcContainers.size();
-                rcContainers.clear();
-            }
-        }
-        rcContainerFlushCount += count;
     }
     
 }

@@ -61,7 +61,6 @@ import de.anomic.kelondro.kelondroBase64Order;
 import de.anomic.kelondro.kelondroBitfield;
 import de.anomic.net.URL;
 import de.anomic.plasma.plasmaCondenser;
-import de.anomic.plasma.plasmaCrawlLURL;
 import de.anomic.plasma.plasmaSearchRankingProfile;
 import de.anomic.plasma.plasmaSearchProcessing;
 import de.anomic.plasma.plasmaSnippetCache;
@@ -344,12 +343,10 @@ public final class yacyClient {
             boolean global, 
             int partitions,
             yacySeed target,
-            plasmaCrawlLURL urlManager, 
             plasmaWordIndex wordIndex,
             indexContainer containerCache,
             Map abstractCache,
-            plasmaURLPattern blacklist, 
-            plasmaSnippetCache snippets, 
+            plasmaURLPattern blacklist,
             plasmaSearchProcessing timingProfile,
             plasmaSearchRankingProfile rankingProfile,
             kelondroBitfield constraint
@@ -460,7 +457,7 @@ public final class yacyClient {
 		String[] urls = new String[results];
 		for (int n = 0; n < results; n++) {
 			// get one single search result
-			urlEntry = urlManager.newEntry((String) result.get("resource" + n));
+			urlEntry = wordIndex.loadedURL.newEntry((String) result.get("resource" + n));
 			if (urlEntry == null) continue;
 			assert (urlEntry.hash().length() == 12) : "urlEntry.hash() = " + urlEntry.hash();
 			if (urlEntry.hash().length() != 12) continue; // bad url hash
@@ -482,8 +479,7 @@ public final class yacyClient {
 				continue; // no word attached
 			}
 
-			// the search-result-url transports all the attributes of word
-			// indexes
+			// the search-result-url transports all the attributes of word indexes
 			entry = urlEntry.word();
 			if (!(entry.urlHash().equals(urlEntry.hash()))) {
 				yacyCore.log.logInfo("remote search (client): url-hash " + urlEntry.hash() + " does not belong to word-attached-hash " + entry.urlHash() + "; url = " + comp.url() + " from peer " + target.getName());
@@ -492,20 +488,19 @@ public final class yacyClient {
 
 			// passed all checks, store url
 			try {
-				urlManager.store(urlEntry);
-				urlManager.stack(urlEntry, yacyCore.seedDB.mySeed.hash, target.hash, 2);
+				wordIndex.loadedURL.store(urlEntry);
+                wordIndex.loadedURL.stack(urlEntry, yacyCore.seedDB.mySeed.hash, target.hash, 2);
 			} catch (IOException e) {
 				yacyCore.log.logSevere("could not store search result", e);
 				continue; // db-error
 			}
 
 			if (urlEntry.snippet() != null) {
-				// we don't store the snippets along the url entry, because they
-				// are search-specific.
+				// we don't store the snippets along the url entry,
+                // because they are search-specific.
 				// instead, they are placed in a snipped-search cache.
-				// System.out.println("--- RECEIVED SNIPPET '" + link.snippet()
-				// + "'");
-				snippets.storeToCache(wordhashes, urlEntry.hash(), urlEntry.snippet());
+				// System.out.println("--- RECEIVED SNIPPET '" + link.snippet() + "'");
+				plasmaSnippetCache.storeToCache(wordhashes, urlEntry.hash(), urlEntry.snippet());
 			}
 			// add the url entry to the word indexes
 			for (int m = 0; m < words; m++) {
@@ -516,10 +511,11 @@ public final class yacyClient {
 		}
 
 		// insert the containers to the index
+        containerCache.addAllUnique(container[0]); // one is enough
 		for (int m = 0; m < words; m++) {
-			containerCache.addAllUnique(container[m]);
+            wordIndex.addEntries(container[m], System.currentTimeMillis(), true);
 		}
-
+        
 		// read index abstract
 		if (abstractCache != null) {
 			Iterator i = result.entrySet().iterator();

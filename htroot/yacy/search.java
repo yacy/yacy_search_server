@@ -1,14 +1,15 @@
 // search.java
-// -----------------------
-// part of the AnomicHTTPD caching proxy
-// (C) by Michael Peter Christen; mc@anomic.de
-// first published on http://www.anomic.de
-// Frankfurt, Germany, 2004
+// (C) 2004 by Michael Peter Christen; mc@yacy.net, Frankfurt a. M., Germany
+// first published on http://yacy.net
+//
+// This is a part of YaCy, a peer-to-peer based web search engine
 //
 // $LastChangedDate$
 // $LastChangedRevision$
 // $LastChangedBy$
 //
+// LICENSE
+// 
 // This program is free software; you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
 // the Free Software Foundation; either version 2 of the License, or
@@ -22,32 +23,11 @@
 // You should have received a copy of the GNU General Public License
 // along with this program; if not, write to the Free Software
 // Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
-//
-// Using this software in any meaning (reading, learning, copying, compiling,
-// running) means that you agree that the Author(s) is (are) not responsible
-// for cost, loss of data or any harm that may be caused directly or indirectly
-// by usage of this softare or this documentation. The usage of this software
-// is on your own risk. The installation and usage (starting/running) of this
-// software may allow other people or application to access your computer and
-// any attached devices and is highly dependent on the configuration of the
-// software which must be done by the user of the software; the author(s) is
-// (are) also not responsible for proper configuration and usage of the
-// software, even if provoked by documentation provided together with
-// the software.
-//
-// Any changes to this file according to the GPL as documented in the file
-// gpl.txt aside this file in the shipment you received can be done to the
-// lines that follows this copyright notice here, but changes must not be
-// done inside the copyright notive above. A re-distribution must contain
-// the intact and unchanged copyright notice.
-// Contributions and changes to the program code must be marked as such.
-
 
 // You must compile this file with
 // javac -classpath .:../../Classes search.java
 // if the shell's current path is htroot/yacy
 
-import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
 import java.util.TreeSet;
@@ -56,11 +36,9 @@ import de.anomic.http.httpHeader;
 import de.anomic.kelondro.kelondroBase64Order;
 import de.anomic.kelondro.kelondroBitfield;
 import de.anomic.index.indexContainer;
-import de.anomic.net.natLib;
 import de.anomic.plasma.plasmaURL;
 import de.anomic.index.indexURLEntry;
 import de.anomic.plasma.plasmaCondenser;
-import de.anomic.plasma.plasmaSearchEvent;
 import de.anomic.plasma.plasmaSearchPreOrder;
 import de.anomic.plasma.plasmaSearchQuery;
 import de.anomic.plasma.plasmaSearchRankingProfile;
@@ -151,7 +129,7 @@ public final class search {
         int joincount = 0;
         plasmaSearchPostOrder acc = null;
         plasmaSearchQuery squery = null;
-        plasmaSearchEvent theSearch = null;
+        //plasmaSearchEvent theSearch = null;
         if ((query.length() == 0) && (abstractSet != null)) {
             // this is _not_ a normal search, only a request for index abstracts
             squery = new plasmaSearchQuery(abstractSet, new TreeSet(kelondroBase64Order.enhancedCoder), maxdist, prefer, plasmaSearchQuery.contentdomParser(contentdom), count, duetime, filter, plasmaSearchQuery.catchall_constraint);
@@ -159,11 +137,11 @@ public final class search {
             yacyCore.log.logInfo("INIT HASH SEARCH (abstracts only): " + plasmaSearchQuery.anonymizedQueryHashes(squery.queryHashes) + " - " + squery.wantedResults + " links");
 
             // prepare a search profile
-            plasmaSearchRankingProfile rankingProfile = (profile.length() == 0) ? new plasmaSearchRankingProfile(contentdom) : new plasmaSearchRankingProfile("", profile);
+            //plasmaSearchRankingProfile rankingProfile = (profile.length() == 0) ? new plasmaSearchRankingProfile(contentdom) : new plasmaSearchRankingProfile("", profile);
             plasmaSearchProcessing localTiming  = new plasmaSearchProcessing(squery.maximumTime, squery.wantedResults);
-            plasmaSearchProcessing remoteTiming = null;
+            //plasmaSearchProcessing remoteTiming = null;
 
-            theSearch = new plasmaSearchEvent(squery, rankingProfile, localTiming, remoteTiming, true, yacyCore.log, sb.wordIndex, sb.snippetCache, null);
+            //theSearch = new plasmaSearchEvent(squery, rankingProfile, localTiming, remoteTiming, true, sb.wordIndex, null);
             Map[] containers = localTiming.localSearchContainers(squery, sb.wordIndex, plasmaSearchQuery.hashes2Set(urls));
             if (containers != null) {
                 Iterator ci = containers[0].entrySet().iterator();
@@ -189,12 +167,9 @@ public final class search {
             // prepare a search profile
             plasmaSearchRankingProfile rankingProfile = (profile.length() == 0) ? new plasmaSearchRankingProfile(contentdom) : new plasmaSearchRankingProfile("", profile);
             plasmaSearchProcessing localProcess  = new plasmaSearchProcessing(squery.maximumTime, squery.wantedResults);
-            plasmaSearchProcessing remoteProcess = null;
+            //plasmaSearchProcessing remoteProcess = null;
 
-            theSearch = new plasmaSearchEvent(squery,
-                    rankingProfile, localProcess, remoteProcess, true,
-                    yacyCore.log, sb.wordIndex,
-                    sb.snippetCache, null);
+            //theSearch = new plasmaSearchEvent(squery, rankingProfile, localProcess, remoteProcess, true, sb.wordIndex, null);
             Map[] containers = localProcess.localSearchContainers(squery, sb.wordIndex, plasmaSearchQuery.hashes2Set(urls));
             // set statistic details of search result and find best result index set
             if (containers == null) {
@@ -283,15 +258,17 @@ public final class search {
         
         // prepare search statistics
         Long trackerHandle = new Long(System.currentTimeMillis());
+        String client = (String) header.get("CLIENTIP");
+        /*
         HashMap searchProfile = theSearch.resultProfile();
         searchProfile.put("resulttime", new Long(System.currentTimeMillis() - timestamp));
         searchProfile.put("resultcount", new Integer(joincount));
-        String client = (String) header.get("CLIENTIP");
         searchProfile.put("host", client);
         yacySeed remotepeer = yacyCore.seedDB.lookupByIP(natLib.getInetAddress(client), true, false, false);
         searchProfile.put("peername", (remotepeer == null) ? "unknown" : remotepeer.getName());
         searchProfile.put("time", trackerHandle);
         sb.remoteSearches.add(searchProfile);
+        */
         TreeSet handles = (TreeSet) sb.remoteSearchTracker.get(client);
         if (handles == null) handles = new TreeSet();
         handles.add(trackerHandle);
@@ -315,7 +292,7 @@ public final class search {
             while ((acc.hasMoreElements()) && (i < squery.wantedResults)) {
                 urlentry = (indexURLEntry) acc.nextElement();
                 if (includesnippet) {
-                    snippet = sb.snippetCache.retrieveTextSnippet(urlentry.comp().url(), squery.queryHashes, false, urlentry.flags().get(plasmaCondenser.flag_cat_indexof), 260, 1000);
+                    snippet = plasmaSnippetCache.retrieveTextSnippet(urlentry.comp().url(), squery.queryHashes, false, urlentry.flags().get(plasmaCondenser.flag_cat_indexof), 260, 1000);
                 } else {
                     snippet = null;
                 }

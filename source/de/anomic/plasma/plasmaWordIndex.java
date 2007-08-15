@@ -135,23 +135,13 @@ public final class plasmaWordIndex implements indexRI {
        this.flushsize = flushsize;
     }
 
-    public void dhtOutFlushControl() {
+    public void dhtFlushControl(indexRAMRI theCache) {
         // check for forced flush
-        synchronized (dhtOutCache) {
-            if ((dhtOutCache.getMaxWordCount() > wCacheMaxChunk ) ||
-                (dhtOutCache.size() > dhtOutCache.getMaxWordCount()) ||
+        synchronized (theCache) {
+            if ((theCache.getMaxWordCount() > wCacheMaxChunk ) ||
+                (theCache.size() > theCache.getMaxWordCount()) ||
                 (serverMemory.available() < collections.minMem())) {
-                flushCache(dhtOutCache, dhtOutCache.size() + flushsize - dhtOutCache.getMaxWordCount());
-            }
-        }
-    }
-    public void dhtInFlushControl() {
-        // check for forced flush
-        synchronized (dhtInCache) {
-            if ((dhtInCache.getMaxWordCount() > wCacheMaxChunk ) ||
-                (dhtInCache.size() > dhtInCache.getMaxWordCount())||
-                (serverMemory.available() < collections.minMem())) {
-                flushCache(dhtInCache, dhtInCache.size() + flushsize - dhtInCache.getMaxWordCount());
+                flushCache(theCache, theCache.size() + flushsize - theCache.getMaxWordCount());
             }
         }
     }
@@ -173,10 +163,10 @@ public final class plasmaWordIndex implements indexRI {
         // add the entry
         if (dhtInCase) {
             dhtInCache.addEntry(wordHash, entry, updateTime, true);
-            dhtInFlushControl();
+            dhtFlushControl(this.dhtInCache);
         } else {
             dhtOutCache.addEntry(wordHash, entry, updateTime, false);
-            dhtOutFlushControl();
+            dhtFlushControl(this.dhtOutCache);
         }
     }
     
@@ -189,10 +179,10 @@ public final class plasmaWordIndex implements indexRI {
         // add the entry
         if (dhtInCase) {
             dhtInCache.addEntries(entries, updateTime, true);
-            dhtInFlushControl();
+            dhtFlushControl(this.dhtInCache);
         } else {
             dhtOutCache.addEntries(entries, updateTime, false);
-            dhtOutFlushControl();
+            dhtFlushControl(this.dhtOutCache);
         }
     }
 
