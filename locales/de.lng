@@ -349,7 +349,7 @@ You can create a personal profile here, which can be seen by other YaCy-members.
 You do not need to provide any personal data here, but if you want to distribute your contact information, you can do that here.==Sie m&uuml;ssen hier keine pers&ouml;nlichen Daten eingeben, aber wenn Sie Kontaktinformationen bereitstellen m&ouml;chten, k&ouml;nnen Sie das hier machen.
 #Name==Name
 #Nick Name==Nick Name
-Homepage \(appears on every <a href="/Supporter.html">Supporter Page</a> as long as your peer is online\)==Homepage (erscheint auf der <a href="/Supporter.html">Supporter Seite, so lange wie Ihr Peer online ist</a>
+Homepage \(appears on every <a href="/Supporter.html">Supporter Page</a> as long as your peer is online\)==Homepage (erscheint auf der <a href="/Supporter.html">Unterst&uuml;tzer Seite, so lange wie Ihr Peer online ist</a>
 #eMail==eMail
 #ICQ==ICQ
 #Jabber==Jabber
@@ -481,6 +481,35 @@ Date</td>==Datum</td>
 Sending Client==Sendender Client
 #Cookie==Cookie
 #-----------------------------
+
+#File: CrawlProfileEditor_p.html
+#---------------------------
+Crawl Profile Editor==Crawl Profil Editor
+Crawl profiles hold information about a specific URL which is internally used to perform the crawl it belongs to.==Crawl Profile enthalten Informationen &uuml;ber eine spezifische URL, welche intern genutzt wird, um nachzuvollziehen, wozu der Crawl geh&ouml;rt.
+The profiles for remote crawls, <a href="/ProxyIndexingMonitor_p.html">indexing via proxy</a> and snippet fetches==Die Profile f&uuml;r Remote Crawl, <a href="/ProxyIndexingMonitor_p.html">Indexierung per Proxy</a> und Snippet Abrufe
+cannot be altered here as they are hard-coded.==k&oumlnnen nicht ver&auml;ndert werden, weil sie "hard-coded" sind.
+Crawl Profile List==Crawl Profil Liste
+Crawl Thread==Crawl Art
+#Start URL==Start URL
+Depth</strong>==Tiefe</strong>
+Filter</strong>==Maske</strong>
+MaxAge</strong>==Max. Alter</strong>
+Auto Filter Depth</strong>==Auto Filter Tiefe</strong>
+Auto Filter Content</strong>==Auto Inhalts Filter</strong>
+Max Page Per Domain</strong>==Max. Seiten pro Domain</strong>
+Accept==Akzeptiere
+Fill Proxy Cache==F&uuml;lle Proxy Cache
+Local Text Indexing==Lokal Text Indexieren
+Local Media Indexing==Lokal Media Indexieren
+Remote Indexing==Remote Indexieren
+no::yes==nein::ja
+"Delete"=="l&oumlschen"
+Select the profile to edit==Profil zur Bearbeitung ausw&auml;hlen 
+"Edit profile"=="Profil bearbeiten"
+An error occured during editing the crawl profile:==Es trat folgender Fehler bei der Bearbeitung des Crawl Profils auf:
+Edit Profile==Bearbeite Profil
+"Submit changes"
+#---------------------------
 
 #File: CrawlResults.html
 #---------------------------
@@ -858,7 +887,7 @@ Depth==Tiefe
 
 #File: IndexCreateWWWGlobalQueue_p.html
 #---------------------------
-Index Creation: WWW Global Crawl Queue==Index Erzeugung: Globaler WWW-Puffer
+Global Crawl Queue==Globaler Crawl-Puffer
 This queue stores the urls that shall be sent to other peers to perform a remote crawl.==Dieser Puffer enth&auml;lt URLs, die an andere Peers gesendet werden sollen, um einen Remote Crawl durchzuf&uuml;hren.
 If there is no peer for remote crawling available, the links are crawled locally.==Wenn kein Peer zum Remote Crawl vorhanden ist, werden die Links lokal gecrawlt.
 The global crawler queue is empty==Der globale Crawler-Puffer ist leer.
@@ -1092,9 +1121,12 @@ attachment &le;==Anhang  &le;
 Your Message==Ihre Nachricht
 Subject:==Betreff:
 Text:==Inhalt:
+"Enter"=="Los"
+"Preview"=="Vorschau"
 You can use==Sie k&ouml;nnen hier
 Wiki Code</a> here.==Wiki Code </a> benutzen.
-"Enter"=="Los"
+Preview message==Nachricht Vorschau
+The message has not been sent yet!==Die Nachricht wurde noch nicht gesendet!
 The peer is alive but cannot respond. Sorry.==Der Peer ist nicht online und kann nicht antworten. Entschuldigung.
 Your message has been sent. The target peer responded:==Ihre Nachricht wurde erfolgreich versandt. Der Ziel-Peer antwortet:
 The target peer is alive but did not receive your message. Sorry.==Der Ziel-Peer ist online, hat aber Ihre Nachricht nicht erhalten. Entschuldigung.
@@ -1178,12 +1210,11 @@ To do this, press this button:==Um dies zu tun, dr&uuml;cken Sie bitte diesen Kn
 #File: News.html
 #---------------------------
 Network Menu==Netzwerkmen&uuml;
-News&nbsp;Overview==News-&Uuml;berblick
+Overview==&Uuml;berblick
 Incoming&nbsp;News==eingehende News
 Processed&nbsp;News==gelesene News
 Outgoing&nbsp;News==ausgehende News
 Published&nbsp;News==ver&ouml;ffentlichte News
-News Overview==News&uuml;berblick
 This is the YaCyNews system \(currently under testing\).==Dies ist das YaCy News-System (zur Zeit noch im Test).
 The news service is controlled by several entry points:==Dieser News Service wird von folgenden Punkten initiiert:
 A crawl start with activated remote indexing will automatically create a news entry.==Wird ein neuer Crawl mit aktivierter Remote-Crawling-Funktion gestartet, dann wird automatisch ein News-Eintrag erstellt.
@@ -1954,6 +1985,23 @@ Then YaCy will restart.==Dann wird YaCy neu gestartet.
 You can now go back to the <a href="Settings_p.html">Settings</a> page if you want to make more changes.==Sie k&ouml;nnen nun zur&uuml;ck auf die <a href="Settings_p.html">Einstellungen</a> Seite gehen, wenn Sie &Auml;nderungen vornehmen wollen.
 #-----------------------------
 
+#File: Supporter.html
+#---------------------------
+Supporter</title>==Unterst&uuml;tzer</title>
+"Please enter a comment to your link recommendation. (Your Vote is also considered without a comment.)"
+Supporter</h2>==Unterst&uuml;tzer</h2>
+Supporter are switched off for users without authorization==Die Unterst&uuml;tzer-Seiten sind ausgeschaltet f&uuml;r Benutzer ohne Erlaubnis 
+"bookmark"=="Lesezeichen"
+"Add to bookmarks"=="Zu den Lesezeichen hinzufügen"
+"positive vote"=="Positive Bewertung"
+"Give positive vote"=="Link positiv bewerten"
+"negative vote"=="Negative Bewertung"
+"Give negative vote"=="Link negativ bewerten"
+provided by YaCy peers with an URL in their profile. This shows only URLs from peers that are currently online.==bereitgestellt durch YaCy Peers mit einer URL in ihem Profil. Es werden nur URLs von Peers angezeigt, die online sind.
+
+provided by YaCy peers using public bookmarks, link votes and crawl start points
+#-----------------------------
+
 #File: Surftips.html
 #-----------------------------
 Surftips</title>==Surftipps</title>
@@ -1986,13 +2034,6 @@ First name==Vorname
 Last name==Nachname
 Address==Adresse
 Rights==Rechte
-#Proxy==Proxy
-#Admin==Admin
-Fileshare-Upload==Dateifreigabe-Upload
-Fileshare-Download==Dateifreigabe-Download
-#Blog==Blog
-#Wiki Admin==Wiki Admin
-Bookmarks==Lesezeichen
 Timelimit==Zeitlimit
 Time used==Verbrauchte Zeit
 Save User==Benutzer speichern
@@ -2063,12 +2104,13 @@ Comment==Kommentar
 #---------------------------
 PPM \(Pages Per Minute\)==PPM (Seiten pro Minute)
 RWI RAM \(Word Cache\)==RWI RAM (W&ouml;rter Zwischenspeicher)
-Error with profile management. Please stop YaCy, delete the file DATA/PLASMADB/crawlProfiles0.db and restart.==Fehler im Profil Management. Bitte stoppen Sie YaCy, l&ouml;schen Sie die Datei DATA/PLASMADB/crawlProfiles0.db und starten Sie YaCy neu. 
+Error with profile management. Please stop YaCy, delete the file DATA/PLASMADB/crawlProfiles0.db==Fehler im Profil Management. Bitte stoppen Sie YaCy, l&ouml;schen Sie die Datei DATA/PLASMADB/crawlProfiles0.db 
+and restart.==und starten Sie YaCy neu.
 Error:==Fehler:
 Application not yet initialized. Sorry. Please wait some seconds and repeat==Anwendung noch nicht initialisiert. Bitte warten Sie noch ein paar Sekunden und versuchen 
-the request.==es dann erneut.
 ERROR: Crawl filter==FEHLER: Crawl Maske
-does not match with crawl root==stimmt nicht &uuml;berein mit dem Crawlstart
+does not match with==stimmt nicht &uuml;berein mit
+crawl root==dem Crawlstart
 Please try again with different==Bitte probieren Sie es erneut mit einer anderen
 filter. ::==Maske. ::
 Crawling of==Crawling von
@@ -2076,23 +2118,9 @@ failed. Reason:==schlug fehl. Grund:
 Error with URL input==Fehler mit URL Eingabe
 Error with file input==Fehler mit Datei Eingabe
 started.==gestartet.
-Please wait some seconds, it may take some seconds until the first result appears there.==Bitte warten Sie einige Sekunden, bis hier die ersten Ergebnisse zu sehen sind. 
+Please wait some seconds,==Bitte warten Sie einige Sekunden, 
+it may take some seconds until the first result appears there.==es kann einige Sekunden dauern, bis hier die ersten Ergebnisse zu sehen sind.
 If you crawl any un-wanted pages, you can delete them <a href="IndexCreateWWWLocalQueue_p.html">here</a>.==Wenn Ihr Crawl Seiten indexiert, die Sie nicht indexiert haben wollen, k&ouml;nnen Sie diese <a href="IndexCreateWWWLocalQueue_p.html">hier</a> l&ouml;schen.
-Crawl Profiles:==Crawl Profile:
-Crawl Thread==Crawl Art
-#Start URL==Start URL
-Depth</strong>==Tiefe</strong>
-Filter</strong>==Maske</strong>
-MaxAge</strong>==Max. Alter</strong>
-Auto Filter Depth</strong>==Auto Filter Tiefe</strong>
-Auto Filter Content</strong>==Auto Inhalts Filter</strong>
-Max Page Per Domain</strong>==Max. Seiten pro Domain</strong>
-Accept \'?\' URLs</strong>==URLs mit "?" akzeptieren</strong>
-Fill Proxy Cache==F&uuml;lle Proxy Cache
-Local Text Indexing==Lokal Text Indexieren
-Local Media Indexing==Lokal Media Indexieren
-Remote Indexing==Remote Indexieren
-\#no::yes\#==#nein::ja#
 Crawl Queue:==Crawler Puffer:
 Queue==Puffer
 Profile</th>==Profil</th>
@@ -2102,8 +2130,8 @@ Depth</th>==Tiefe</th>
 Anchor Name==Linkbezeichnung
 #URL==URL
 Delete==Löschen
-seconds.==Sekunden.
 Next update in==Nächste Aktualisierung in
+/> seconds.==/> Sekunden.
 Queue</th>==Puffer</th>
 Size==Größe
 #Max==Max
@@ -2194,12 +2222,12 @@ word==Wort
 These tags create a definition list.==Diese Tags erstellen eine definierte Liste.
 This tag creates a horizontal line.==Dieser Tag erzeugt eine horizontale Linie.
 pagename==Seitenname
-description==Beschreibung
+description\]\]==Beschreibung]]
 This tag creates links to other pages of the wiki.==Dieser Tag erzeugt einen Link zu einer anderen Seite im Wiki.
 This tag displays an image, it can be aligned left, right or center.==Dieser Tag f&uuml;gt ein Bild ein, es kann links (left), rechts (right) oder mittig (center) ausgerichtet werden.
 These tags create a table, whereas the first marks the beginning of the table, the second starts==Diese Tags erstellen eine Tabelle, wobei der erste den Anfang der Tabelle markiert, der zweite beginnt 
-a new line, the third and fourth each create a new cell in the line. The last displayed tag closes==eine neue Zeile, der dritte und vierte erzeugen eine neue Zelle in der Zeile. Der zuletztt dargestellte Tag schliesst
-the table.==die Tabelle.
+a new line, the third and fourth each create a new cell in the line. The last displayed tag==eine neue Zeile, der dritte und vierte erzeugen eine neue Zelle in der Zeile. Der zuletztt dargestellte Tag
+closes the table.==schliesst die Tabelle.
 The escape tags will cause all tags in the text between the starting and the closing tag to not be treated as wiki-code.==Durch diesen Tag wird der Text, der zwischen den Klammern steht, nicht interpretiert und unformatiert als normaler Text ausgegeben.
 A text between these tags will keep all the spaces and linebreaks in it. Great for ASCII-art and program code.==Ein Text zwischen diesen Tags wird alle Leerzeichen und Zeilenumbr&uuml;che beinhalten. Gut geeignet f&uuml;r ASCII-Kunst und Programm Code.  
 If a line starts with a space, it will be displayed in a non-proportional font.==Wenn eine Zeile mit einem Leerzeichen anf&auml;ngt, wird diese als nicht-proportionale Schriftart dargestellt.
