@@ -73,7 +73,9 @@
     </p>
 
     <p>The message has not been sent yet!</p>
-
+    <!--[if IE]>
+    <div class="gainlayout">
+    <![endif]-->
     <dl class="pairs">
       <dt>Subject:</dt><dd>#[subject]#</dd>
       <dt>Message:</dt>
@@ -81,6 +83,11 @@
         #[previewmessage]#
       </dd>
     </dl>
+    <!--[if IE]>
+    </div>
+    <![endif]-->
+
+    <br style="clear:left;" />
 
     <form action="MessageSend_p.html" method="post" enctype="multipart/form-data" accept-charset="UTF-8">
       <fieldset>

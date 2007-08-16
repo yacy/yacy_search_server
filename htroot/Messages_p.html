@@ -51,6 +51,9 @@
     #(error)#::<p class="error">I/O error reading message table: #[message]#</p>#(/error)#
     ::
     <!-- View -->
+    <!--[if IE]>
+    <div class="gainlayout">
+    <![endif]-->
     <dl class="pairs">
       <dt>From:</dt><dd><a href="ViewProfile.html?hash=#[hash]#&amp;display=1" title="View profile of peer #[from]#">#[from]#</a></dd>
       <dt>To:</dt><dd>#[to]#</dd>
@@ -69,6 +72,9 @@
         <a href="Messages_p.html?action=delete&amp;object=#[key]#">delete</a>
       </dd>
     </dl>
+    <!--[if IE]>
+    </div>
+    <![endif]-->
     #(/mode)#
     
     #%env/templates/footer.template%#
