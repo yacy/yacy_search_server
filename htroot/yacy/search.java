@@ -28,6 +28,7 @@
 // javac -classpath .:../../Classes search.java
 // if the shell's current path is htroot/yacy
 
+import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
 import java.util.TreeSet;
@@ -36,9 +37,11 @@ import de.anomic.http.httpHeader;
 import de.anomic.kelondro.kelondroBase64Order;
 import de.anomic.kelondro.kelondroBitfield;
 import de.anomic.index.indexContainer;
+import de.anomic.net.natLib;
 import de.anomic.plasma.plasmaURL;
 import de.anomic.index.indexURLEntry;
 import de.anomic.plasma.plasmaCondenser;
+import de.anomic.plasma.plasmaSearchEvent;
 import de.anomic.plasma.plasmaSearchPreOrder;
 import de.anomic.plasma.plasmaSearchQuery;
 import de.anomic.plasma.plasmaSearchRankingProfile;
@@ -259,16 +262,13 @@ public final class search {
         // prepare search statistics
         Long trackerHandle = new Long(System.currentTimeMillis());
         String client = (String) header.get("CLIENTIP");
-        /*
-        HashMap searchProfile = theSearch.resultProfile();
-        searchProfile.put("resulttime", new Long(System.currentTimeMillis() - timestamp));
-        searchProfile.put("resultcount", new Integer(joincount));
+        HashMap searchProfile = plasmaSearchEvent.resultProfile(squery, joincount, System.currentTimeMillis() - timestamp);
         searchProfile.put("host", client);
         yacySeed remotepeer = yacyCore.seedDB.lookupByIP(natLib.getInetAddress(client), true, false, false);
         searchProfile.put("peername", (remotepeer == null) ? "unknown" : remotepeer.getName());
         searchProfile.put("time", trackerHandle);
         sb.remoteSearches.add(searchProfile);
-        */
+        
         TreeSet handles = (TreeSet) sb.remoteSearchTracker.get(client);
         if (handles == null) handles = new TreeSet();
         handles.add(trackerHandle);

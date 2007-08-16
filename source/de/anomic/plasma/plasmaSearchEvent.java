@@ -92,16 +92,21 @@ public final class plasmaSearchEvent {
     
     public HashMap resultProfile() {
         // generate statistics about search: query, time, etc
+        return resultProfile(this.query, this.searchcount, this.searchtime);
+    }
+    
+    public static HashMap resultProfile(plasmaSearchQuery query, int searchcount, long searchtime) {
+        // generate statistics about search: query, time, etc
         HashMap r = new HashMap();
         r.put("queryhashes", query.queryHashes);
         r.put("querystring", query.queryString);
         r.put("querycount", new Integer(query.wantedResults));
         r.put("querytime", new Long(query.maximumTime));
-        r.put("resultcount", new Integer(this.searchcount));
-        r.put("resulttime", new Long(this.searchtime));
+        r.put("resultcount", new Integer(searchcount));
+        r.put("resulttime", new Long(searchtime));
         return r;
     }
-    
+
     public plasmaSearchPostOrder search() {
         // combine all threads
         
