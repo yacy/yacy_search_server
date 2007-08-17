@@ -396,7 +396,7 @@ public final class yacyVersion implements Comparator, Comparable {
             serverLog.logInfo("UPDATE", "INITIATED");
             String script =
                 "cd " + sb.getRootPath() + "/DATA/RELEASE/" + serverCore.lfstring +
-                "tar xfz " + release + serverCore.lfstring +
+                "gunzip -c " + release + " | tar xf -" + serverCore.lfstring +
                 "while [ -e ../yacy.running ]; do" + serverCore.lfstring +
                 "sleep 1" + serverCore.lfstring +
                 "done" + serverCore.lfstring +
