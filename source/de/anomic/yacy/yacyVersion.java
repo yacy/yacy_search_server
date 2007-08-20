@@ -371,13 +371,14 @@ public final class yacyVersion implements Comparator, Comparable {
             try {
                 serverLog.logInfo("RESTART", "INITIATED");
                 String script =
+                    "#!/bin/sh" + serverCore.lfstring +
                     "cd " + sb.getRootPath() + "/DATA/RELEASE/" + serverCore.lfstring +
-                    "while [ -e ../yacy.running ]; do" + serverCore.lfstring +
+                    "while [ -f ../yacy.running ]; do" + serverCore.lfstring +
                     "sleep 1" + serverCore.lfstring +
                     "done" + serverCore.lfstring +
                     "cd ../../" + serverCore.lfstring +
                     "nohup ./startYACY.sh > /dev/null" + serverCore.lfstring;
-    			File scriptFile = new File(sb.getRootPath(), "DATA/RELEASE/restart.sh");
+                File scriptFile = new File(sb.getRootPath(), "DATA/RELEASE/restart.sh");
                 serverSystem.deployScript(scriptFile, script);
                 serverLog.logInfo("RESTART", "wrote restart-script to " + scriptFile.getAbsolutePath());
                 serverSystem.execAsynchronous(scriptFile);
@@ -395,9 +396,10 @@ public final class yacyVersion implements Comparator, Comparable {
             plasmaSwitchboard sb = plasmaSwitchboard.getSwitchboard();
             serverLog.logInfo("UPDATE", "INITIATED");
             String script =
+                "#!/bin/sh" + serverCore.lfstring +
                 "cd " + sb.getRootPath() + "/DATA/RELEASE/" + serverCore.lfstring +
                 "gunzip -c " + release + " | tar xf -" + serverCore.lfstring +
-                "while [ -e ../yacy.running ]; do" + serverCore.lfstring +
+                "while [ -f ../yacy.running ]; do" + serverCore.lfstring +
                 "sleep 1" + serverCore.lfstring +
                 "done" + serverCore.lfstring +
                 "cp -Rf yacy/* ../../" + serverCore.lfstring +

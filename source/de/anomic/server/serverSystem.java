@@ -99,7 +99,7 @@ public final class serverSystem {
 
 	isMacArchitecture = ((systemOS == systemMacOSC) || (systemOS == systemMacOSX));
 	isUnixFS = ((systemOS == systemMacOSX) || (systemOS == systemUnix));
-    canExecUnix = ((isUnixFS) || (!((systemOS == systemMacOSC) || (systemOS == systemWindows))));
+        canExecUnix = ((isUnixFS) || (!((systemOS == systemMacOSC) || (systemOS == systemWindows))));
 
 	// set up the MRJ Methods through reflection
 	if (isMacArchitecture) try {
@@ -340,7 +340,7 @@ public final class serverSystem {
         // runs a unix/linux script as separate thread
         File starterFile = new File(scriptFile.getAbsolutePath() + ".starter.sh");
         //deployScript(starterFile, "touch restart.starter.startet1");
-        deployScript(starterFile, scriptFile.getAbsolutePath() + " &" + serverCore.lfstring);
+        deployScript(starterFile, "#!/bin/sh" + serverCore.lfstring + scriptFile.getAbsolutePath() + " &" + serverCore.lfstring);
         try {
             Runtime.getRuntime().exec(starterFile.getAbsolutePath()).waitFor();
         } catch (InterruptedException e) {
