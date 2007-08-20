@@ -176,7 +176,7 @@ public class PerformanceQueues_p {
             // disallow setting of memprereq for indexer to prevent db from throwing OOMs
             prop.put("table_" + c + "_disabled", /*(threadName.endsWith("_indexing")) ? 1 :*/ 0);
             prop.put("table_" + c + "_recommendation", (threadName.endsWith("_indexing")) ? 1 : 0);
-            prop.put("table_" + c + "_recommendation_value", (threadName.endsWith("_indexing")) ? ((switchboard.wordIndex.minMem() + 2 * 1024 * 1024)/1024) : 0);
+            prop.put("table_" + c + "_recommendation_value", (threadName.endsWith("_indexing")) ? (switchboard.wordIndex.minMem() / 1024) : 0);
             c++;
         }
         prop.put("table", c);

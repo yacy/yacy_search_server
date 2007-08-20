@@ -91,7 +91,7 @@ public final class plasmaWordIndex implements indexRI {
     }
 
     public int minMem() {
-        return 2*1024*1024 /* indexing overhead */ + dhtOutCache.minMem() + dhtInCache.minMem() + collections.minMem();
+        return 1024*1024 /* indexing overhead */ + dhtOutCache.minMem() + dhtInCache.minMem() + collections.minMem();
     }
 
     public int maxURLinDHTOutCache() {

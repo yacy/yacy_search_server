@@ -95,7 +95,9 @@ public final class indexRAMRI implements indexRI {
     }
 
     public int minMem() {
-        return 1024*1024;
+        // there is no specific large array that needs to be maintained
+        // this value is just a guess of the possible overhead
+        return 100 * 1024; // 100 kb
     }
     
     public synchronized long getUpdateTime(String wordHash) {
