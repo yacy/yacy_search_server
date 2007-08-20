@@ -51,7 +51,7 @@
 # general network definition
 network.unit.name = freeworld
 network.unit.description = Public YaCy Community
-#network.unit.domain = global
+network.unit.domain = global
 network.unit.dhtredundancy.junior = 1
 network.unit.dhtredundancy.senior = 3
 network.unit.bootstrap.seedlist0 = http://de.geocities.com/d15511z/yacy/angel/seed.txt
