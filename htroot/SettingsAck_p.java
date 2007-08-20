@@ -602,34 +602,7 @@ public class SettingsAck_p {
             prop.put("info_parser",enabledMimesCount);
             prop.put("info", 18);
             return prop;
-            
-//            plasmaSwitchboard sb = (plasmaSwitchboard)env;
-//            
-//            HashMap configList = plasmaParser.getParserConfigList(); 
-//            Iterator parserModeIter = configList.keySet().iterator();
-//            
-//            String[] enabledMimes = null;
-//            if (post.containsKey("allParserEnabled")) {
-//                // enable all available parsers
-//                enabledMimes = plasmaParser.setEnabledParserList(sb.parser.getAvailableParserList().keySet());
-//            } else {
-//                // activate all received parsers       
-//                enabledMimes = plasmaParser.setEnabledParserList(post.keySet());
-//            }
-//            Arrays.sort(enabledMimes);
-//            
-//            StringBuffer enabledMimesTxt = new StringBuffer();
-//            for (int i=0; i < enabledMimes.length; i++) {
-//                enabledMimesTxt.append(enabledMimes[i]).append(",");
-//                prop.put("info_parser_" + i + "_enabledMime",enabledMimes[i]);
-//            }
-//            prop.put("info_parser",enabledMimes.length);
-//            if (enabledMimesTxt.length() > 0) enabledMimesTxt.deleteCharAt(enabledMimesTxt.length()-1);            
-//            
-//            env.setConfig("parseableMimeTypes",enabledMimesTxt.toString());
-//            
-//            prop.put("info", 18);
-//            return prop;
+
         }
         
         // Crawler settings
