@@ -275,15 +275,19 @@ public class htmlFilterContentScraper extends htmlFilterAbstractScraper implemen
         for (int i = 0; i < s.length(); i++)
             if (s.charAt(i) < ' ') s = s.substring(0, i) + " " + s.substring(i + 1);
         */
-        
-        // remove double-spaces
+
         int p;
-        while ((p = s.indexOf("  ")) >= 0) s = s.substring(0, p) + s.substring(p + 1);        
+
+        // CR/LF entfernen, dabei koennen doppelte Leerzeichen enstehen die aber weiter unten entfernt werden - thq
+        while ((p = s.indexOf("\n")) >= 0) s = s.substring(0, p) + ((p + 1 == s.length()) ? "" : " " + s.substring(p + 1));
+       
+        // remove double-spaces
+        while ((p = s.indexOf("  ")) >= 0) s = s.substring(0, p) + s.substring(p + 1);
 
         // we don't accept headlines that are too short
         s = s.trim();
         if (s.length() < 4) s = "";
-        
+
         // return result
         return s;
     }
@@ -360,7 +364,7 @@ public class htmlFilterContentScraper extends htmlFilterAbstractScraper implemen
      * @return the {@link URL} to the favicon that belongs to the document
      */    
     public URL getFavicon() {
-    	return this.favicon;
+        return this.favicon;
     }
 
     public String getDescription() {
