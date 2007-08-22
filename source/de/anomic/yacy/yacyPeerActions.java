@@ -52,6 +52,7 @@ import java.util.Iterator;
 import de.anomic.http.httpHeader;
 import de.anomic.http.httpc;
 import de.anomic.net.URL;
+import de.anomic.plasma.plasmaCrawlNURL;
 import de.anomic.plasma.plasmaSwitchboard;
 import de.anomic.server.serverCore;
 import de.anomic.server.serverDate;
@@ -97,7 +98,7 @@ public class yacyPeerActions {
             seedDB.mySeed.put(yacySeed.PORT, Integer.toString(serverCore.getPortNr(sb.getConfig("port", "8080"))));
         }
         
-        long uptime = (System.currentTimeMillis() - sb.startupTime) / 1000;
+        long uptime = (System.currentTimeMillis() - serverCore.startupTime) / 1000;
 		long uptimediff = uptime - sb.lastseedcheckuptime;
 		long indexedcdiff = sb.indexedPages - sb.lastindexedPages;
         //double requestcdiff = sb.requestedQueries - sb.lastrequestedQueries;
@@ -116,6 +117,7 @@ public class yacyPeerActions {
         seedDB.mySeed.put(yacySeed.UPTIME, Long.toString(uptime/60)); // the number of minutes that the peer is up in minutes/day (moving average MA30)
         seedDB.mySeed.put(yacySeed.LCOUNT, Integer.toString(sb.wordIndex.loadedURL.size())); // the number of links that the peer has stored (LURL's)
         seedDB.mySeed.put(yacySeed.NCOUNT, Integer.toString(sb.noticeURL.size())); // the number of links that the peer has noticed, but not loaded (NURL's)
+        seedDB.mySeed.put(yacySeed.RCOUNT, Integer.toString(sb.noticeURL.stackSize(plasmaCrawlNURL.STACK_TYPE_LIMIT))); // the number of links that the peer provides for remote crawling (ZURL's)
         seedDB.mySeed.put(yacySeed.ICOUNT, Integer.toString(sb.wordIndex.size())); // the minimum number of words that the peer has indexed (as it says)
         seedDB.mySeed.put(yacySeed.SCOUNT, Integer.toString(seedDB.sizeConnected())); // the number of seeds that the peer has stored
         seedDB.mySeed.put(yacySeed.CCOUNT, Double.toString(((int) ((seedDB.sizeConnected() + seedDB.sizeDisconnected() + seedDB.sizePotential()) * 60.0 / (uptime + 1.01)) * 100) / 100.0)); // the number of clients that the peer connects (as connects/hour)

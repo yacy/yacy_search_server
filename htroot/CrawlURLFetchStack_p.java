@@ -275,7 +275,7 @@ public class CrawlURLFetchStack_p {
         plasmaCrawlEntry entry;
         int failed = 0;
         for (int i=0; i<count; i++) try {
-            entry = nurl.pop(fromStackType);
+            entry = nurl.pop(fromStackType, false);
             stack.push(entry.url());
         } catch (IOException e) { failed++; }
         return failed;

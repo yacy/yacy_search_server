@@ -1,6 +1,6 @@
-// AccessStatistics_p.java
-// (C) 2006 by Michael Peter Christen; mc@anomic.de, Frankfurt a. M., Germany
-// first published 14.01.2007 on http://www.anomic.de
+// AccessTracker_p.java
+// (C) 2006 by Michael Peter Christen; mc@yacy.net, Frankfurt a. M., Germany
+// first published 14.01.2007 on http://www.yacy.net
 //
 // This is a part of YaCy, a peer-to-peer based web search engine
 //

@@ -154,6 +154,8 @@ public class yacySeed {
     public static final String LCOUNT    = "LCount";
     /** the number of links that the peer has noticed, but not loaded (NURL's) */
     public static final String NCOUNT    = "NCount";
+    /** the number of links that the peer provides for remote crawls (ZURL's) */
+    public static final String RCOUNT    = "RCount";
     /** the number of words the peer has indexed (as it says) */
     public static final String ICOUNT    = "ICount";
     /** the number of seeds that the peer has stored */
@@ -205,6 +207,7 @@ public class yacySeed {
         this.dna.put(yacySeed.UPTIME, yacySeed.ZERO);
         this.dna.put(yacySeed.LCOUNT, yacySeed.ZERO);
         this.dna.put(yacySeed.NCOUNT, yacySeed.ZERO);
+        this.dna.put(yacySeed.RCOUNT, yacySeed.ZERO);
         this.dna.put(yacySeed.ICOUNT, yacySeed.ZERO);
         this.dna.put(yacySeed.SCOUNT, yacySeed.ZERO);
         this.dna.put(yacySeed.CCOUNT, yacySeed.ZERO);

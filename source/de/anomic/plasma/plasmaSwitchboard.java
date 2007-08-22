@@ -247,7 +247,6 @@ public final class plasmaSwitchboard extends serverAbstractSwitch implements ser
     private plasmaDHTChunk              dhtTransferChunk = null;
     public  ArrayList                   localSearches, remoteSearches; // array of search result properties as HashMaps
     public  HashMap                     localSearchTracker, remoteSearchTracker; // mappings from requesting host to a TreeSet of Long(access time)
-    public  long                        startupTime = 0;
     public  long                        lastseedcheckuptime = -1;
     public  long                        indexedPages = 0;
     public  long                        lastindexedPages = 0;
@@ -2172,7 +2171,7 @@ public final class plasmaSwitchboard extends serverAbstractSwitch implements ser
         while (urlEntry == null && noticeURL.stackSize(plasmaCrawlNURL.STACK_TYPE_CORE) > 0) {
             String stats = "LOCALCRAWL[" + noticeURL.stackSize(plasmaCrawlNURL.STACK_TYPE_CORE) + ", " + noticeURL.stackSize(plasmaCrawlNURL.STACK_TYPE_LIMIT) + ", " + noticeURL.stackSize(plasmaCrawlNURL.STACK_TYPE_OVERHANG) + ", " + noticeURL.stackSize(plasmaCrawlNURL.STACK_TYPE_REMOTE) + "]";
             try {
-                urlEntry = noticeURL.pop(plasmaCrawlNURL.STACK_TYPE_CORE);
+                urlEntry = noticeURL.pop(plasmaCrawlNURL.STACK_TYPE_CORE, true);
                 String profileHandle = urlEntry.profileHandle();
                 // System.out.println("DEBUG plasmaSwitchboard.processCrawling:
                 // profileHandle = " + profileHandle + ", urlEntry.url = " + urlEntry.url());
@@ -2241,7 +2240,7 @@ public final class plasmaSwitchboard extends serverAbstractSwitch implements ser
         String stats = "REMOTECRAWLTRIGGER[" + noticeURL.stackSize(plasmaCrawlNURL.STACK_TYPE_CORE) + ", " + noticeURL.stackSize(plasmaCrawlNURL.STACK_TYPE_LIMIT) + ", " + noticeURL.stackSize(plasmaCrawlNURL.STACK_TYPE_OVERHANG) + ", "
                         + noticeURL.stackSize(plasmaCrawlNURL.STACK_TYPE_REMOTE) + "]";
         try {
-            plasmaCrawlEntry urlEntry = noticeURL.pop(plasmaCrawlNURL.STACK_TYPE_LIMIT);
+            plasmaCrawlEntry urlEntry = noticeURL.pop(plasmaCrawlNURL.STACK_TYPE_LIMIT, true);
             String profileHandle = urlEntry.profileHandle();
             // System.out.println("DEBUG plasmaSwitchboard.processCrawling:
             // profileHandle = " + profileHandle + ", urlEntry.url = " + urlEntry.url());
@@ -2328,7 +2327,7 @@ public final class plasmaSwitchboard extends serverAbstractSwitch implements ser
         String stats = "REMOTETRIGGEREDCRAWL[" + noticeURL.stackSize(plasmaCrawlNURL.STACK_TYPE_CORE) + ", " + noticeURL.stackSize(plasmaCrawlNURL.STACK_TYPE_LIMIT) + ", " + noticeURL.stackSize(plasmaCrawlNURL.STACK_TYPE_OVERHANG) + ", "
                         + noticeURL.stackSize(plasmaCrawlNURL.STACK_TYPE_REMOTE) + "]";
         try {
-            plasmaCrawlEntry urlEntry = noticeURL.pop(plasmaCrawlNURL.STACK_TYPE_REMOTE);
+            plasmaCrawlEntry urlEntry = noticeURL.pop(plasmaCrawlNURL.STACK_TYPE_REMOTE, true);
             String profileHandle = urlEntry.profileHandle();
             // System.out.println("DEBUG plasmaSwitchboard.processCrawling:
             // profileHandle = " + profileHandle + ", urlEntry.url = " +

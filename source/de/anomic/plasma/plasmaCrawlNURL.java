@@ -156,18 +156,18 @@ public class plasmaCrawlNURL {
         }
     }
     
-    public plasmaCrawlEntry pop(int stackType) throws IOException {
+    public plasmaCrawlEntry pop(int stackType, boolean delay) throws IOException {
         switch (stackType) {
-            case STACK_TYPE_CORE:     return pop(coreStack);
-            case STACK_TYPE_LIMIT:    return pop(limitStack);
-            case STACK_TYPE_REMOTE:   return pop(remoteStack);
+            case STACK_TYPE_CORE:     return pop(coreStack, delay);
+            case STACK_TYPE_LIMIT:    return pop(limitStack, delay);
+            case STACK_TYPE_REMOTE:   return pop(remoteStack, delay);
             default: return null;
         }
     }
 
     public void shift(int fromStack, int toStack) {
         try {
-            plasmaCrawlEntry entry = pop(fromStack);
+            plasmaCrawlEntry entry = pop(fromStack, false);
             if (entry != null) push(toStack, entry);
         } catch (IOException e) {
             return;
@@ -183,13 +183,13 @@ public class plasmaCrawlNURL {
             }
     }
     
-    private plasmaCrawlEntry pop(plasmaCrawlBalancer balancer) throws IOException {
+    private plasmaCrawlEntry pop(plasmaCrawlBalancer balancer, boolean delay) throws IOException {
         // this is a filo - pop
         int s;
         plasmaCrawlEntry entry;
         synchronized (balancer) {
         while ((s = balancer.size()) > 0) {
-            entry = balancer.pop(minimumLocalDelta, minimumGlobalDelta, maximumDomAge);
+            entry = balancer.pop((delay) ? minimumLocalDelta : 0, (delay) ? minimumGlobalDelta : 0, maximumDomAge);
             if (entry == null) {
                 if (s > balancer.size()) continue;
                 int aftersize = balancer.size();

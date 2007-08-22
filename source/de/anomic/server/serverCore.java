@@ -94,6 +94,7 @@ public final class serverCore extends serverAbstractThread implements serverThre
     public static final String crlfString = new String(crlf);
     public static final String lfstring = new String(new byte[]{lf});
     public static final Class[] stringType = {"".getClass()}; //  set up some reflection
+    public static final long startupTime = System.currentTimeMillis();
     
     //Class[] exceptionType = {Class.forName("java.lang.Throwable")};
     

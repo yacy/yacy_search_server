@@ -53,7 +53,6 @@ import java.util.Map;
 import de.anomic.http.httpHeader;
 import de.anomic.plasma.plasmaSwitchboard;
 import de.anomic.server.serverCore;
-import de.anomic.server.serverDate;
 import de.anomic.server.serverDomains;
 import de.anomic.server.serverObjects;
 import de.anomic.server.serverSwitch;
@@ -122,6 +121,8 @@ public final class hello {
             prop.putASIS("yourip", reportedip);
             remoteSeed.put(yacySeed.IP, reportedip);
             urls = yacyClient.queryUrlCount(remoteSeed);
+        } else {
+            prop.putASIS("yourip", "unknown");
         }
 
         // if the previous attempt (using the reported ip address) was not successful, try the ip where 
@@ -209,7 +210,6 @@ public final class hello {
             seeds.append("seed0=").append(yacyCore.seedDB.mySeed.genSeedStr(key)).append(serverCore.crlfString);
         }
 
-        prop.putASIS("mytime", serverDate.shortSecondTime());
         prop.putASIS("seedlist", seeds.toString());
         // return rewrite properties
         return prop;

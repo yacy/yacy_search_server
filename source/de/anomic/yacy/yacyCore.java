@@ -81,7 +81,6 @@ public class yacyCore {
 
     // statics
     public static ThreadGroup publishThreadGroup = new ThreadGroup("publishThreadGroup");
-    public static long startupTime = System.currentTimeMillis();
     public static yacySeedDB seedDB = null;
     public static yacyNewsPool newsPool = null;
     public static final HashMap seedUploadMethods = new HashMap();
@@ -115,7 +114,7 @@ public class yacyCore {
 
     public static int yacyTime() {
         // the time since startup of yacy in seconds
-        return (int) ((System.currentTimeMillis() - startupTime) / 1000);
+        return (int) ((System.currentTimeMillis() - serverCore.startupTime) / 1000);
     }
 
     public yacyCore(plasmaSwitchboard sb) {

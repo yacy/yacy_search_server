@@ -106,6 +106,7 @@ import de.anomic.plasma.plasmaSwitchboard;
 import de.anomic.server.serverByteBuffer;
 import de.anomic.server.serverClassLoader;
 import de.anomic.server.serverCore;
+import de.anomic.server.serverDate;
 import de.anomic.server.serverFileUtils;
 import de.anomic.server.serverObjects;
 import de.anomic.server.serverSwitch;
@@ -631,8 +632,9 @@ public final class httpdFileHandler {
                             }
                             // add the application version, the uptime and the client name to every rewrite table
                             tp.put(servletProperties.PEER_STAT_VERSION, switchboard.getConfig("version", ""));
-                            tp.put(servletProperties.PEER_STAT_UPTIME, ((System.currentTimeMillis() - Long.parseLong(switchboard.getConfig("startupTime","0"))) / 1000) / 60); // uptime in minutes
+                            tp.put(servletProperties.PEER_STAT_UPTIME, ((System.currentTimeMillis() -  serverCore.startupTime) / 1000) / 60); // uptime in minutes
                             tp.put(servletProperties.PEER_STAT_CLIENTNAME, switchboard.getConfig("peerName", "anomic"));
+                            tp.put(servletProperties.PEER_STAT_MYTIME, serverDate.shortSecondTime());
                             //System.out.println("respond props: " + ((tp == null) ? "null" : tp.toString())); // debug
                         } catch (InvocationTargetException e) {
                             if (e.getCause() instanceof InterruptedException) {

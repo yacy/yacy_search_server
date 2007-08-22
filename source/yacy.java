@@ -167,8 +167,6 @@ public final class yacy {
     * @param startupFree free memory at startup time, to be used later for statistics
     */
     private static void startup(String homePath, long startupMemFree, long startupMemTotal) {
-        long startup = System.currentTimeMillis();
-
         int oldRev=0;
         int newRev=0;
 
@@ -268,7 +266,6 @@ public final class yacy {
             sb.setConfig("vString", yacyVersion.combined2prettyVersion(Double.toString(version)));
             sb.setConfig("vdate", (vDATE.startsWith("@")) ? serverDate.shortDayTime() : vDATE);
             sb.setConfig("applicationRoot", homePath);
-            sb.startupTime = startup;
             serverLog.logConfig("STARTUP", "YACY Version: " + version + ", Built " + sb.getConfig("vdate", "00000000"));
             yacyVersion.latestRelease = version;
 

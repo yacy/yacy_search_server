@@ -1,0 +1,31 @@
+<?xml version="1.0"?>
+
+<!-- this is not exactly rss format, but similar -->
+<rss>
+
+<!-- YaCy standard response header -->
+<yacy version="#[version]#">
+<iam>#[iam]#</iam>
+<uptime>#[uptime]#</uptime>
+<mytime>#[mytime]#</mytime>
+<response>#[response]#</response>
+</yacy>
+
+<!-- rss standard channel -->
+<channel>
+<title>#[channel_title]#</title>
+<description>#[channel_description]#</description>
+<pubDate>#[channel_pubDate]#</pubDate>
+<!-- urll items -->
+#{item}#
+<item>
+<title>#[title]#</title>
+<link>#[link]#</link>
+<description>#[description]#</description>
+<author>#[author]#</author>
+<pubDate>#[pubDate]#</pubDate>
+<guid>#[guid]#</guid>
+</item>
+#{/item}#
+</channel>
+</rss>

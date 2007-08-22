@@ -49,6 +49,7 @@ package de.anomic.plasma.crawler;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.Date;
 
 import de.anomic.plasma.plasmaURL;
 import de.anomic.net.URL;
@@ -288,7 +289,7 @@ public abstract class AbstractCrawlWorker extends Thread implements plasmaCrawlW
                 this.url,
                 referrerHash, 
                 this.name, 
-                null,
+                new Date(),
                 this.profile.handle(),
                 this.depth, 
                 0, 

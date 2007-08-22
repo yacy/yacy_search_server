@@ -56,7 +56,7 @@ public class plasmaCrawlEntry {
         "String handle-4, " +                                       // extra handle
         "Cardinal loaddate-8 {b256}," +                             // time when the file was loaded
         "Cardinal serverdate-8 {b256}," +                           // time when that the server returned as document date
-        "Cardinal modifiedSince-8 {b256}",                           // time that was given to server as ifModifiedSince
+        "Cardinal modifiedSince-8 {b256}",                          // time that was given to server as ifModifiedSince
         kelondroBase64Order.enhancedCoder,
         0
         );
@@ -105,6 +105,7 @@ public class plasmaCrawlEntry {
                  int forkfactor
     ) {
         // create new entry and store it into database
+        assert appdate != null;
         this.urlhash       = plasmaURL.urlHash(url);
         this.initiator     = initiator;
         this.url           = url;
@@ -214,36 +215,36 @@ public class plasmaCrawlEntry {
 
     public Date appdate() {
         // the date when the url appeared first
-        return new Date(appdate);
+        return new Date(this.appdate);
     }
     
     public Date loaddate() {
         // the date when the url was loaded
-        return new Date(loaddate);
+        return new Date(this.loaddate);
     }
     
     public Date serverdate() {
         // the date that the server returned as document date
-        return new Date(serverdate);
+        return new Date(this.serverdate);
     }
     
     public Date imsdate() {
         // the date that the client (browser) send as ifModifiedSince in proxy mode
-        return new Date(imsdate);
+        return new Date(this.imsdate);
     }
 
     public String name() {
         // return the anchor name (text inside <a> tag)
-        return name;
+        return this.name;
     }
 
     public int depth() {
         // crawl depth where the url appeared
-        return depth;
+        return this.depth;
     }
 
     public String profileHandle() {
         // the handle of the crawl profile
-        return profileHandle;
+        return this.profileHandle;
     }
 }

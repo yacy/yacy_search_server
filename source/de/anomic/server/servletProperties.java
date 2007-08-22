@@ -32,6 +32,7 @@ public class servletProperties extends serverObjects {
     
     public static final String PEER_STAT_VERSION = "version";
     public static final String PEER_STAT_UPTIME = "uptime";
+    public static final String PEER_STAT_MYTIME = "mytime";
     public static final String PEER_STAT_CLIENTNAME = "clientname";
 
     private String prefix="";
