@@ -26,7 +26,6 @@
 
 package de.anomic.plasma;
 
-import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
 import java.util.TreeMap;
@@ -47,17 +46,14 @@ public final class plasmaSearchEvent {
     private indexContainer rcContainers; // cache for results
     private Map rcAbstracts; // cache for index abstracts; word:TreeMap mapping where the embedded TreeMap is a urlhash:peerlist relation
     private plasmaSearchProcessing profileLocal, profileGlobal;
-    private boolean postsort;
     private yacySearch[] primarySearchThreads, secondarySearchThreads;
-    private long searchtime;
-    private int searchcount;
     private TreeMap preselectedPeerHashes;
+    private int localcount, globalcount;
     
     public plasmaSearchEvent(plasmaSearchQuery query,
                              plasmaSearchRankingProfile ranking,
                              plasmaSearchProcessing localTiming,
                              plasmaSearchProcessing remoteTiming,
-                             boolean postsort,
                              plasmaWordIndex wordIndex,
                              TreeMap preselectedPeerHashes) {
         this.wordIndex = wordIndex;
@@ -67,16 +63,19 @@ public final class plasmaSearchEvent {
         this.rcAbstracts = (query.queryHashes.size() > 1) ? new TreeMap() : null; // generate abstracts only for combined searches
         this.profileLocal = localTiming;
         this.profileGlobal = remoteTiming;
-        this.postsort = postsort;
         this.primarySearchThreads = null;
         this.secondarySearchThreads = null;
-        this.searchtime = -1;
-        this.searchcount = -1;
         this.preselectedPeerHashes = preselectedPeerHashes;
+        this.localcount = 0;
+        this.globalcount = 0;
     }
     
     public plasmaSearchQuery getQuery() {
         return query;
+    }
+    
+    public plasmaSearchRankingProfile getRanking() {
+        return ranking;
     }
     
     public plasmaSearchProcessing getLocalTiming() {
@@ -90,28 +89,19 @@ public final class plasmaSearchEvent {
         return secondarySearchThreads;
     }
     
-    public HashMap resultProfile() {
-        // generate statistics about search: query, time, etc
-        return resultProfile(this.query, this.searchcount, this.searchtime);
+    public int getLocalCount() {
+        return this.localcount;
     }
     
-    public static HashMap resultProfile(plasmaSearchQuery query, int searchcount, long searchtime) {
-        // generate statistics about search: query, time, etc
-        HashMap r = new HashMap();
-        r.put("queryhashes", query.queryHashes);
-        r.put("querystring", query.queryString);
-        r.put("querycount", new Integer(query.wantedResults));
-        r.put("querytime", new Long(query.maximumTime));
-        r.put("resultcount", new Integer(searchcount));
-        r.put("resulttime", new Long(searchtime));
-        return r;
+    public int getGlobalCount() {
+        return this.globalcount;
     }
 
-    public plasmaSearchPostOrder search() {
+    public plasmaSearchPreOrder search() {
         // combine all threads
         
             long start = System.currentTimeMillis();
-            plasmaSearchPostOrder result;
+            plasmaSearchPreOrder pre;
             if ((query.domType == plasmaSearchQuery.SEARCHDOM_GLOBALDHT) ||
                 (query.domType == plasmaSearchQuery.SEARCHDOM_CLUSTERALL)) {
                 int fetchpeers = (int) (query.maximumTime / 500L); // number of target peers; means 10 peers in 10 seconds
@@ -195,8 +185,6 @@ public final class plasmaSearchEvent {
                         ((secondarySearchThreads == null) || (yacySearch.remainingWaiting(secondarySearchThreads) == 0))) break; // all threads have finished
                     try {Thread.sleep(100);} catch (InterruptedException e) {}
                 }
-
-                int globalContributions = rcContainers.size();
                 
                 // finished searching
                 serverLog.logFine("SEARCH_EVENT", "SEARCH TIME AFTER GLOBAL-TRIGGER TO " + primarySearchThreads.length + " PEERS: " + ((System.currentTimeMillis() - start) / 1000) + " seconds");
@@ -207,16 +195,9 @@ public final class plasmaSearchEvent {
                 searchResult.addAllUnique(rcContainers);
                 searchResult.sort();
                 searchResult.uniq(1000);
-                plasmaSearchPreOrder pre = profileLocal.preSort(query, ranking, searchResult);
-                result = profileLocal.urlFetch(query, ranking, wordIndex, pre);
-                result.localContributions = (rcLocal == null) ? 0 : rcLocal.size();
-                profileLocal.postSort(postsort, result);
-                profileLocal.applyFilter(result);
-                
-                
-                if (result != null) {
-                    result.globalContributions = globalContributions;
-                }
+                localcount = rcLocal.size();
+                globalcount = rcContainers.size();
+                pre = new plasmaSearchPreOrder(query, profileLocal, ranking, searchResult);
             } else {
                 Map[] searchContainerMaps = profileLocal.localSearchContainers(query, wordIndex, null);
                 
@@ -230,13 +211,8 @@ public final class plasmaSearchEvent {
                                 0 :
                                 profileLocal.getTargetTime(plasmaSearchProcessing.PROCESS_JOIN) * query.queryHashes.size() / (query.queryHashes.size() + query.excludeHashes.size()),
                               query.maxDistance);
-                plasmaSearchPreOrder pre = profileLocal.preSort(query, ranking, rcLocal);
-                result = profileLocal.urlFetch(query, ranking, wordIndex, pre);
-                result.localContributions = (rcLocal == null) ? 0 : rcLocal.size();
-                profileLocal.postSort(postsort, result);
-                profileLocal.applyFilter(result);
-                
-                result.globalContributions = 0;
+                this.localcount = rcLocal.size();
+                pre = new plasmaSearchPreOrder(query, profileLocal, ranking, rcLocal);
             }
 
             // log the event
@@ -244,11 +220,9 @@ public final class plasmaSearchEvent {
             
             // prepare values for statistics
             lastEvent = this;
-            this.searchtime = System.currentTimeMillis() - start;
-            this.searchcount = result.filteredResults;
             
             // return search result
-            return result;
+            return pre;
     }
 
     private void prepareSecondarySearch() {

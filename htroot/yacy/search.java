@@ -39,15 +39,11 @@ import de.anomic.kelondro.kelondroBitfield;
 import de.anomic.index.indexContainer;
 import de.anomic.net.natLib;
 import de.anomic.plasma.plasmaURL;
-import de.anomic.index.indexURLEntry;
-import de.anomic.plasma.plasmaCondenser;
-import de.anomic.plasma.plasmaSearchEvent;
 import de.anomic.plasma.plasmaSearchPreOrder;
 import de.anomic.plasma.plasmaSearchQuery;
 import de.anomic.plasma.plasmaSearchRankingProfile;
-import de.anomic.plasma.plasmaSearchPostOrder;
 import de.anomic.plasma.plasmaSearchProcessing;
-import de.anomic.plasma.plasmaSnippetCache;
+import de.anomic.plasma.plasmaSearchResultAccumulator;
 import de.anomic.plasma.plasmaSwitchboard;
 import de.anomic.plasma.plasmaWordIndex;
 import de.anomic.server.serverCore;
@@ -88,7 +84,7 @@ public final class search {
         final int     partitions = post.getInt("partitions", 30);
         String  profile = post.get("profile", ""); // remote profile hand-over
         if (profile.length() > 0) profile = crypt.simpleDecode(profile, null);
-        final boolean includesnippet = post.get("includesnippet", "false").equals("true");
+        //final boolean includesnippet = post.get("includesnippet", "false").equals("true");
         final kelondroBitfield constraint = new kelondroBitfield(4, post.get("constraint", "______"));
 //      final boolean global = ((String) post.get("resource", "global")).equals("global"); // if true, then result may consist of answers from other peers
 //      Date remoteTime = yacyCore.parseUniversalDate((String) post.get(yacySeed.MYTIME));        // read remote time
@@ -130,9 +126,9 @@ public final class search {
         StringBuffer indexabstract = new StringBuffer();
         int indexabstractContainercount = 0;
         int joincount = 0;
-        plasmaSearchPostOrder acc = null;
         plasmaSearchQuery squery = null;
         //plasmaSearchEvent theSearch = null;
+        plasmaSearchResultAccumulator accu = null;
         if ((query.length() == 0) && (abstractSet != null)) {
             // this is _not_ a normal search, only a request for index abstracts
             squery = new plasmaSearchQuery(abstractSet, new TreeSet(kelondroBase64Order.enhancedCoder), maxdist, prefer, plasmaSearchQuery.contentdomParser(contentdom), count, duetime, filter, plasmaSearchQuery.catchall_constraint);
@@ -223,15 +219,11 @@ public final class search {
                 if (localResults == null) {
                     joincount = 0;
                     prop.put("joincount", 0);
-                    acc = null;
                 } else {
                     joincount = localResults.size();
                     prop.putASIS("joincount", Integer.toString(joincount));
-                    plasmaSearchPreOrder pre = localProcess.preSort(squery, rankingProfile, localResults);
-                    acc = localProcess.urlFetch(squery, rankingProfile, sb.wordIndex, pre);
-                    acc.localContributions = (localResults == null) ? 0 : localResults.size();
-                    localProcess.postSort(true, acc);
-                    localProcess.applyFilter(acc);
+                    plasmaSearchPreOrder pre = new plasmaSearchPreOrder(squery, localProcess, rankingProfile, localResults);
+                    accu = new plasmaSearchResultAccumulator(squery, localProcess, rankingProfile, pre, sb.wordIndex, plasmaSwitchboard.blueList, false);
                 }
                 
                 // generate compressed index for maxcounthash
@@ -262,7 +254,7 @@ public final class search {
         // prepare search statistics
         Long trackerHandle = new Long(System.currentTimeMillis());
         String client = (String) header.get("CLIENTIP");
-        HashMap searchProfile = plasmaSearchEvent.resultProfile(squery, joincount, System.currentTimeMillis() - timestamp);
+        HashMap searchProfile = squery.resultProfile((accu == null) ? 0 : accu.resultCount(), System.currentTimeMillis() - timestamp);
         searchProfile.put("host", client);
         yacySeed remotepeer = yacyCore.seedDB.lookupByIP(natLib.getInetAddress(client), true, false, false);
         searchProfile.put("peername", (remotepeer == null) ? "unknown" : remotepeer.getName());
@@ -275,7 +267,7 @@ public final class search {
         sb.remoteSearchTracker.put(client, handles);
         
         // prepare result
-        if ((joincount == 0) || (acc == null)) {
+        if ((joincount == 0) || (accu == null)) {
             
             // no results
             prop.putASIS("links", "");
@@ -284,33 +276,21 @@ public final class search {
 
         } else {
             // result is a List of urlEntry elements
-            int i = 0;
             StringBuffer links = new StringBuffer();
             String resource = null;
-            indexURLEntry urlentry;
-            plasmaSnippetCache.TextSnippet snippet;
-            while ((acc.hasMoreElements()) && (i < squery.wantedResults)) {
-                urlentry = (indexURLEntry) acc.nextElement();
-                if (includesnippet) {
-                    snippet = plasmaSnippetCache.retrieveTextSnippet(urlentry.comp().url(), squery.queryHashes, false, urlentry.flags().get(plasmaCondenser.flag_cat_indexof), 260, 1000);
-                } else {
-                    snippet = null;
-                }
-                if ((snippet != null) && (snippet.exists())) {
-                    resource = urlentry.toString(snippet.getLineRaw());
-                } else {
-                    resource = urlentry.toString();
-                }
+            plasmaSearchResultAccumulator.Entry entry;
+            for (int i = 0; i < accu.resultCount(); i++) {
+                entry = accu.resultEntry(i);
+                resource = entry.resource();
                 if (resource != null) {
                     links.append("resource").append(i).append('=').append(resource).append(serverCore.crlfString);
-                    i++;
                 }
             }
             prop.putASIS("links", new String(links));
-            prop.putASIS("linkcount", Integer.toString(i));
+            prop.put("linkcount", accu.resultCount());
 
             // prepare reference hints
-            Object[] ws = acc.getReferences(16);
+            Object[] ws = accu.references();
             StringBuffer refstr = new StringBuffer();
             for (int j = 0; j < ws.length; j++)
                 refstr.append(",").append((String) ws[j]);

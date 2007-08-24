@@ -28,15 +28,10 @@ package de.anomic.plasma;
 
 import java.util.Collection;
 import java.util.HashMap;
-import java.util.Iterator;
 import java.util.Map;
 import java.util.Set;
 
 import de.anomic.index.indexContainer;
-import de.anomic.index.indexRWIEntry;
-import de.anomic.index.indexURLEntry;
-import de.anomic.kelondro.kelondroException;
-import de.anomic.server.logging.serverLog;
 
 /**
  *
@@ -331,128 +326,4 @@ public class plasmaSearchProcessing implements Cloneable {
         return rcLocal;
     }
     
-    // presort
-    public plasmaSearchPreOrder preSort(
-            plasmaSearchQuery query,
-            plasmaSearchRankingProfile ranking,
-            indexContainer resultIndex) {
-        // we collect the urlhashes and construct a list with urlEntry objects
-        // attention: if minEntries is too high, this method will not terminate within the maxTime
-
-        assert (resultIndex != null);
-        
-        long preorderTime = getTargetTime(plasmaSearchProcessing.PROCESS_PRESORT);
-        
-        startTimer();
-        long pst = System.currentTimeMillis();
-        resultIndex.sort();
-        resultIndex.uniq(1000);
-        preorderTime = preorderTime - (System.currentTimeMillis() - pst);
-        if (preorderTime < 0) preorderTime = 200;
-        plasmaSearchPreOrder preorder = new plasmaSearchPreOrder(query, ranking, resultIndex, preorderTime);
-        if (resultIndex.size() > query.wantedResults) preorder.remove(true, true);
-        setYieldTime(plasmaSearchProcessing.PROCESS_PRESORT);
-        setYieldCount(plasmaSearchProcessing.PROCESS_PRESORT, resultIndex.size());
-        
-        return preorder;
-    }
-    
-    // urlfetch
-    public plasmaSearchPostOrder urlFetch(
-            plasmaSearchQuery query,
-            plasmaSearchRankingProfile ranking,
-            plasmaWordIndex wordIndex,
-            plasmaSearchPreOrder preorder) {
-
-        // start url-fetch
-        long postorderTime = getTargetTime(plasmaSearchProcessing.PROCESS_POSTSORT);
-        //System.out.println("DEBUG: postorder-final (urlfetch) maxtime = " + postorderTime);
-        long postorderLimitTime = (postorderTime < 0) ? Long.MAX_VALUE : (System.currentTimeMillis() + postorderTime);
-        startTimer();
-        plasmaSearchPostOrder acc = new plasmaSearchPostOrder(query, ranking);
-        
-        indexRWIEntry entry;
-        indexURLEntry page;
-        Long preranking;
-        Object[] preorderEntry;
-        indexURLEntry.Components comp;
-        String pagetitle, pageurl, pageauthor;
-        int minEntries = getTargetCount(plasmaSearchProcessing.PROCESS_POSTSORT);
-        try {
-            ordering: while (preorder.hasNext()) {
-                if ((System.currentTimeMillis() >= postorderLimitTime) || (acc.sizeFetched() >= 5 * minEntries)) break;
-                preorderEntry = preorder.next();
-                entry = (indexRWIEntry) preorderEntry[0];
-                // load only urls if there was not yet a root url of that hash
-                preranking = (Long) preorderEntry[1];
-                // find the url entry
-                page = wordIndex.loadedURL.load(entry.urlHash(), entry);
-                if (page != null) {
-                    comp = page.comp();
-                    pagetitle = comp.title().toLowerCase();
-                    if (comp.url() == null) continue ordering; // rare case where the url is corrupted
-                    pageurl = comp.url().toString().toLowerCase();
-                    pageauthor = comp.author().toLowerCase();
-                    
-                    // check exclusion
-                    if (plasmaSearchQuery.matches(pagetitle, query.excludeHashes)) continue ordering;
-                    if (plasmaSearchQuery.matches(pageurl, query.excludeHashes)) continue ordering;
-                    if (plasmaSearchQuery.matches(pageauthor, query.excludeHashes)) continue ordering;
-                    
-                    // check url mask
-                    if (!(pageurl.matches(query.urlMask))) continue ordering;
-                    
-                    // check constraints
-                    if ((!(query.constraint.equals(plasmaSearchQuery.catchall_constraint))) &&
-                        (query.constraint.get(plasmaCondenser.flag_cat_indexof)) &&
-                        (!(comp.title().startsWith("Index of")))) {
-                        serverLog.logFine("PLASMA", "filtered out " + comp.url().toString());
-                        // filter out bad results
-                        Iterator wi = query.queryHashes.iterator();
-                        while (wi.hasNext()) wordIndex.removeEntry((String) wi.next(), page.hash());
-                    } else if (query.contentdom != plasmaSearchQuery.CONTENTDOM_TEXT) {
-                        if ((query.contentdom == plasmaSearchQuery.CONTENTDOM_AUDIO) && (page.laudio() > 0)) acc.addPage(page, preranking);
-                        else if ((query.contentdom == plasmaSearchQuery.CONTENTDOM_VIDEO) && (page.lvideo() > 0)) acc.addPage(page, preranking);
-                        else if ((query.contentdom == plasmaSearchQuery.CONTENTDOM_IMAGE) && (page.limage() > 0)) acc.addPage(page, preranking);
-                        else if ((query.contentdom == plasmaSearchQuery.CONTENTDOM_APP) && (page.lapp() > 0)) acc.addPage(page, preranking);
-                    } else {
-                        acc.addPage(page, preranking);
-                    }
-                }
-            }
-        } catch (kelondroException ee) {
-            serverLog.logSevere("PLASMA", "Database Failure during plasmaSearch.order: " + ee.getMessage(), ee);
-        }
-        setYieldTime(plasmaSearchProcessing.PROCESS_URLFETCH);
-        setYieldCount(plasmaSearchProcessing.PROCESS_URLFETCH, acc.sizeFetched());
-
-        acc.filteredResults = preorder.filteredCount();
-        
-        return acc;
-    }
-
-    //acc.localContributions = (resultIndex == null) ? 0 : resultIndex.size();
-    
-    // postsort
-    public void postSort(
-            boolean postsort,
-            plasmaSearchPostOrder acc) {
-
-        // start postsorting
-        startTimer();
-        acc.sortPages(postsort);
-        setYieldTime(plasmaSearchProcessing.PROCESS_POSTSORT);
-        setYieldCount(plasmaSearchProcessing.PROCESS_POSTSORT, acc.sizeOrdered());
-    }
-    
-    // filter
-    public void applyFilter(
-            plasmaSearchPostOrder acc) {
-
-        // apply filter
-        startTimer();
-        acc.removeRedundant();
-        setYieldTime(plasmaSearchProcessing.PROCESS_FILTER);
-        setYieldCount(plasmaSearchProcessing.PROCESS_FILTER, acc.sizeOrdered());
-    }
 }

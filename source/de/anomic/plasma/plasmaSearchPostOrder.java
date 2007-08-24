@@ -65,9 +65,6 @@ public final class plasmaSearchPostOrder {
     private ArrayList results;          // this is a buffer for plasmaWordIndexEntry + plasmaCrawlLURL.entry - objects
     private plasmaSearchQuery query;
     private plasmaSearchRankingProfile ranking;
-    public  int globalContributions;
-    public  int localContributions;
-    public  int filteredResults;
     
     public plasmaSearchPostOrder(plasmaSearchQuery query, plasmaSearchRankingProfile ranking) {
         this.pageAcc = new TreeMap();
@@ -75,9 +72,6 @@ public final class plasmaSearchPostOrder {
         this.results = new ArrayList();
         this.query = query;
         this.ranking = ranking;
-        this.globalContributions = 0;
-        this.localContributions = 0;
-        this.filteredResults = 0;
     }
     
     public plasmaSearchPostOrder cloneSmart() {
@@ -99,10 +93,6 @@ public final class plasmaSearchPostOrder {
     
     public boolean hasMoreElements() {
         return pageAcc.size() > 0;
-    }
-    
-    public int getTotalCount() {
-        return this.localContributions + this.globalContributions;
     }
     
     public indexURLEntry nextElement() {

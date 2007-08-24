@@ -30,29 +30,117 @@ package de.anomic.plasma;
 import java.io.UnsupportedEncodingException;
 import java.util.ArrayList;
 import java.util.Date;
+import java.util.Iterator;
 import java.util.TreeSet;
 
 import de.anomic.index.indexRWIEntry;
 import de.anomic.index.indexURLEntry;
 import de.anomic.kelondro.kelondroBitfield;
+import de.anomic.kelondro.kelondroException;
 import de.anomic.net.URL;
+import de.anomic.server.logging.serverLog;
 import de.anomic.yacy.yacyCore;
 import de.anomic.yacy.yacySeed;
 
 public class plasmaSearchResultAccumulator {
 
     private ArrayList hits;
+    private Object[] references;
     
-    public plasmaSearchResultAccumulator(plasmaSearchEvent theSearch, plasmaWordIndex wordIndex, TreeSet blueList) {
+    public plasmaSearchResultAccumulator(
+            plasmaSearchQuery theQuery,
+            plasmaSearchProcessing process,
+            plasmaSearchRankingProfile ranking,
+            plasmaSearchPreOrder pre,
+            plasmaWordIndex wordIndex,
+            TreeSet blueList,
+            boolean overfetch) {
 
         hits = new ArrayList();
-        plasmaSearchPostOrder acc = theSearch.search();
-
-        // fetch urls
+        
+        // start url-fetch
+        long postorderTime = process.getTargetTime(plasmaSearchProcessing.PROCESS_POSTSORT);
+        //System.out.println("DEBUG: postorder-final (urlfetch) maxtime = " + postorderTime);
+        long postorderLimitTime = (postorderTime < 0) ? Long.MAX_VALUE : (System.currentTimeMillis() + postorderTime);
+        process.startTimer();
+        plasmaSearchPostOrder acc = new plasmaSearchPostOrder(theQuery, ranking);
+        
+        indexRWIEntry rwientry;
+        indexURLEntry page;
+        Long preranking;
+        Object[] preorderEntry;
+        indexURLEntry.Components comp;
+        String pagetitle, pageurl, pageauthor;
+        int minEntries = process.getTargetCount(plasmaSearchProcessing.PROCESS_POSTSORT);
+        try {
+            ordering: while (pre.hasNext()) {
+                if ((System.currentTimeMillis() >= postorderLimitTime) || (acc.sizeFetched() >= ((overfetch) ? 4 : 1) * minEntries)) break;
+                preorderEntry = pre.next();
+                rwientry = (indexRWIEntry) preorderEntry[0];
+                // load only urls if there was not yet a root url of that hash
+                preranking = (Long) preorderEntry[1];
+                // find the url entry
+                page = wordIndex.loadedURL.load(rwientry.urlHash(), rwientry);
+                if (page != null) {
+                    comp = page.comp();
+                    pagetitle = comp.title().toLowerCase();
+                    if (comp.url() == null) continue ordering; // rare case where the url is corrupted
+                    pageurl = comp.url().toString().toLowerCase();
+                    pageauthor = comp.author().toLowerCase();
+                    
+                    // check exclusion
+                    if (plasmaSearchQuery.matches(pagetitle, theQuery.excludeHashes)) continue ordering;
+                    if (plasmaSearchQuery.matches(pageurl, theQuery.excludeHashes)) continue ordering;
+                    if (plasmaSearchQuery.matches(pageauthor, theQuery.excludeHashes)) continue ordering;
+                    
+                    // check url mask
+                    if (!(pageurl.matches(theQuery.urlMask))) continue ordering;
+                    
+                    // check constraints
+                    if ((!(theQuery.constraint.equals(plasmaSearchQuery.catchall_constraint))) &&
+                        (theQuery.constraint.get(plasmaCondenser.flag_cat_indexof)) &&
+                        (!(comp.title().startsWith("Index of")))) {
+                        serverLog.logFine("PLASMA", "filtered out " + comp.url().toString());
+                        // filter out bad results
+                        Iterator wi = theQuery.queryHashes.iterator();
+                        while (wi.hasNext()) wordIndex.removeEntry((String) wi.next(), page.hash());
+                    } else if (theQuery.contentdom != plasmaSearchQuery.CONTENTDOM_TEXT) {
+                        if ((theQuery.contentdom == plasmaSearchQuery.CONTENTDOM_AUDIO) && (page.laudio() > 0)) acc.addPage(page, preranking);
+                        else if ((theQuery.contentdom == plasmaSearchQuery.CONTENTDOM_VIDEO) && (page.lvideo() > 0)) acc.addPage(page, preranking);
+                        else if ((theQuery.contentdom == plasmaSearchQuery.CONTENTDOM_IMAGE) && (page.limage() > 0)) acc.addPage(page, preranking);
+                        else if ((theQuery.contentdom == plasmaSearchQuery.CONTENTDOM_APP) && (page.lapp() > 0)) acc.addPage(page, preranking);
+                    } else {
+                        acc.addPage(page, preranking);
+                    }
+                }
+            }
+        } catch (kelondroException ee) {
+            serverLog.logSevere("PLASMA", "Database Failure during plasmaSearch.order: " + ee.getMessage(), ee);
+        }
+        process.setYieldTime(plasmaSearchProcessing.PROCESS_URLFETCH);
+        process.setYieldCount(plasmaSearchProcessing.PROCESS_URLFETCH, acc.sizeFetched());
+        
+        // start postsorting
+        process.startTimer();
+        acc.sortPages(true);
+        process.setYieldTime(plasmaSearchProcessing.PROCESS_POSTSORT);
+        process.setYieldCount(plasmaSearchProcessing.PROCESS_POSTSORT, acc.sizeOrdered());
+        
+        
+        // apply filter
+        process.startTimer();
+        acc.removeRedundant();
+        process.setYieldTime(plasmaSearchProcessing.PROCESS_FILTER);
+        process.setYieldCount(plasmaSearchProcessing.PROCESS_FILTER, acc.sizeOrdered());
+        
+        // generate references
+        references = acc.getReferences(16);
+        
+        // generate Result.Entry objects and optionally fetch snippets
         int i = 0;
         Entry entry;
         boolean includeSnippets = false;
-        while ((acc.hasMoreElements()) && (i < theSearch.getQuery().wantedResults)) {
+        while ((acc.hasMoreElements()) && (i < theQuery.wantedResults)) {
             try {
                 entry = new Entry(acc.nextElement(), wordIndex);
             } catch (RuntimeException e) {
@@ -69,7 +157,7 @@ public class plasmaSearchResultAccumulator {
              */
             if (includeSnippets) {
                 entry.setSnippet(plasmaSnippetCache.retrieveTextSnippet(
-                        entry.url(), theSearch.getQuery().queryHashes, false,
+                        entry.url(), theQuery.queryHashes, false,
                         entry.flags().get(plasmaCondenser.flag_cat_indexof), 260,
                         1000));
                 // snippet =
@@ -96,6 +184,14 @@ public class plasmaSearchResultAccumulator {
          */
 
     }
+    
+
+    // filter
+    public void applyFilter(
+            plasmaSearchPostOrder acc) {
+
+        
+    }
 
     public int resultCount() {
         return hits.size();
@@ -103,6 +199,10 @@ public class plasmaSearchResultAccumulator {
     
     public Entry resultEntry(int i) {
         return (Entry) hits.get(i);
+    }
+    
+    public Object[] references() {
+        return this.references;
     }
     
     public static class Entry {
@@ -185,6 +285,14 @@ public class plasmaSearchResultAccumulator {
         }
         public plasmaSnippetCache.TextSnippet textSnippet() {
             return null;
+        }
+        public String resource() {
+            // generate transport resource
+            if ((snippet != null) && (snippet.exists())) {
+                return urlentry.toString(snippet.getLineRaw());
+            } else {
+                return urlentry.toString();
+            }
         }
     }
     

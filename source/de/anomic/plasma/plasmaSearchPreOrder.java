@@ -76,18 +76,27 @@ public final class plasmaSearchPreOrder {
         this.ranking = null;
     }
     
-    public plasmaSearchPreOrder(plasmaSearchQuery query, plasmaSearchRankingProfile ranking, indexContainer container, long maxTime) {
+    public plasmaSearchPreOrder(plasmaSearchQuery query, plasmaSearchProcessing process, plasmaSearchRankingProfile ranking, indexContainer container) {
+        // we collect the urlhashes and construct a list with urlEntry objects
+        // attention: if minEntries is too high, this method will not terminate within the maxTime
+
         this.query = query;
         this.ranking = ranking;
         
+        assert (container != null);
+        
+        long maxTime = process.getTargetTime(plasmaSearchProcessing.PROCESS_PRESORT);
+        process.startTimer();
+        
+        // set limit time for interruption
         long limitTime = (maxTime < 0) ? Long.MAX_VALUE : System.currentTimeMillis() + maxTime;
-        indexRWIEntry iEntry;
-
+        
         // first pass: find min/max to obtain limits for normalization
         Iterator i = container.entries();
         int count = 0;
         this.entryMin = null;
         this.entryMax = null;
+        indexRWIEntry iEntry;
         while (i.hasNext()) {
             if (System.currentTimeMillis() > limitTime) break;
             iEntry = (indexRWIEntry) i.next();
@@ -101,6 +110,7 @@ public final class plasmaSearchPreOrder {
         this.pageAcc = new TreeMap();
         TreeSet searchWords = plasmaSearchQuery.cleanQuery(query.queryString)[0];
         for (int j = 0; j < count; j++) {
+            if (System.currentTimeMillis() > limitTime) break;
             iEntry = (indexRWIEntry) i.next();
             if (iEntry.urlHash().length() != container.row().width(container.row().primaryKey())) continue;
             if ((!(query.constraint.equals(plasmaSearchQuery.catchall_constraint))) && (!(iEntry.flags().allOf(query.constraint)))) continue; // filter out entries that do not match the search constraint
@@ -113,13 +123,18 @@ public final class plasmaSearchPreOrder {
             pageAcc.put(serverCodings.encodeHex(Long.MAX_VALUE - this.ranking.preRanking(iEntry, this.entryMin, this.entryMax, searchWords), 16) + iEntry.urlHash(), iEntry);
         }
         this.filteredCount = pageAcc.size();
+        
+        if (container.size() > query.wantedResults) remove(true, true);
+
+        process.setYieldTime(plasmaSearchProcessing.PROCESS_PRESORT);
+        process.setYieldCount(plasmaSearchProcessing.PROCESS_PRESORT, container.size());
     }
     
     public int filteredCount() {
         return this.filteredCount;
     }
     
-    public void remove(boolean rootDomExt, boolean doubleDom) {
+    private void remove(boolean rootDomExt, boolean doubleDom) {
         // this removes all refererences to urls that are extended paths of existing 'RootDom'-urls
         if (pageAcc.size() <= query.wantedResults) return;
         HashSet rootDoms = new HashSet();

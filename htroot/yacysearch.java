@@ -53,7 +53,6 @@ import java.net.URLEncoder;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.TreeSet;
-import java.util.regex.PatternSyntaxException;
 
 import de.anomic.htmlFilter.htmlFilterImageEntry;
 import de.anomic.http.httpHeader;
@@ -66,7 +65,6 @@ import de.anomic.plasma.plasmaCondenser;
 import de.anomic.plasma.plasmaParserDocument;
 import de.anomic.plasma.plasmaSearchEvent;
 import de.anomic.plasma.plasmaSearchImages;
-import de.anomic.plasma.plasmaSearchPostOrder;
 import de.anomic.plasma.plasmaSearchPreOrder;
 import de.anomic.plasma.plasmaSearchQuery;
 import de.anomic.plasma.plasmaSearchRankingProfile;
@@ -272,7 +270,7 @@ public class yacysearch {
         
         // do the search
         TreeSet queryHashes = plasmaCondenser.words2hashes(query[0]);
-        plasmaSearchQuery thisSearch = new plasmaSearchQuery(
+        plasmaSearchQuery theQuery = new plasmaSearchQuery(
         			querystring,
         			queryHashes,
         			plasmaCondenser.words2hashes(query[1]),
@@ -288,57 +286,51 @@ public class yacysearch {
                     20,
                     constraint);
         plasmaSearchRankingProfile ranking = (sb.getConfig("rankingProfile", "").length() == 0) ? new plasmaSearchRankingProfile(contentdomString) : new plasmaSearchRankingProfile("", crypt.simpleDecode(sb.getConfig("rankingProfile", ""), null));
-        plasmaSearchProcessing localTiming = new plasmaSearchProcessing(4 * thisSearch.maximumTime / 10, thisSearch.wantedResults);
-        plasmaSearchProcessing remoteTiming = new plasmaSearchProcessing(6 * thisSearch.maximumTime / 10, thisSearch.wantedResults);
+        plasmaSearchProcessing localTiming = new plasmaSearchProcessing(4 * theQuery.maximumTime / 10, theQuery.wantedResults);
+        plasmaSearchProcessing remoteTiming = new plasmaSearchProcessing(6 * theQuery.maximumTime / 10, theQuery.wantedResults);
 
         //**
         //searchFromLocal(thisSearch, ranking, localTiming, remoteTiming, true, (String) header.get("CLIENTIP"))
         String client = (String) header.get("CLIENTIP"); // the search client who initiated the search
         
         // tell all threads to do nothing for a specific time
-        sb.intermissionAllThreads(2 * thisSearch.maximumTime);
+        sb.intermissionAllThreads(2 * theQuery.maximumTime);
         
         // filter out words that appear in bluelist
-        thisSearch.filterOut(plasmaSwitchboard.blueList);
+        theQuery.filterOut(plasmaSwitchboard.blueList);
             
         // log
-        serverLog.logInfo("LOCAL_SEARCH", "INIT WORD SEARCH: " + thisSearch.queryString + ":" + thisSearch.queryHashes + " - " + thisSearch.wantedResults + " links, " + (thisSearch.maximumTime / 1000) + " seconds");
+        serverLog.logInfo("LOCAL_SEARCH", "INIT WORD SEARCH: " + theQuery.queryString + ":" + theQuery.queryHashes + " - " + theQuery.wantedResults + " links, " + (theQuery.maximumTime / 1000) + " seconds");
         long timestamp = System.currentTimeMillis();
 
         // create a new search event
         String wrongregex = null;
-        plasmaSearchEvent theSearch = new plasmaSearchEvent(thisSearch, ranking, localTiming, remoteTiming, true, sb.wordIndex, (sb.isRobinsonMode()) ? sb.clusterhashes : null);
-        plasmaSearchPostOrder acc;
-        try{
-            acc = theSearch.search();
-        } catch(PatternSyntaxException e){
-            wrongregex = e.getPattern();
-            acc = new plasmaSearchPostOrder(thisSearch, ranking);
-        }
+        plasmaSearchEvent theSearch = new plasmaSearchEvent(theQuery, ranking, localTiming, remoteTiming, sb.wordIndex, (sb.isRobinsonMode()) ? sb.clusterhashes : null);
+        plasmaSearchPreOrder preorder = theSearch.search();
             
         // fetch snippets
         serverLog.logFine("LOCAL_SEARCH", "SEARCH TIME AFTER ORDERING OF SEARCH RESULTS: " + ((System.currentTimeMillis() - timestamp) / 1000) + " seconds");
-        plasmaSearchResultAccumulator accu = new plasmaSearchResultAccumulator(theSearch, sb.wordIndex, plasmaSwitchboard.blueList);
+        plasmaSearchResultAccumulator accu = new plasmaSearchResultAccumulator(theQuery, localTiming, ranking, preorder, sb.wordIndex, plasmaSwitchboard.blueList, true);
         serverLog.logFine("LOCAL_SEARCH", "SEARCH TIME AFTER RESULT PREPARATION: " + ((System.currentTimeMillis() - timestamp) / 1000) + " seconds");
                 
         // calc some more cross-reference
-        long remainingTime = thisSearch.maximumTime - (System.currentTimeMillis() - timestamp);
+        long remainingTime = theQuery.maximumTime - (System.currentTimeMillis() - timestamp);
         if (remainingTime < 0) remainingTime = 1000;
         //Object[] ws = acc.getReferences(16);
         serverLog.logFine("LOCAL_SEARCH", "SEARCH TIME AFTER XREF PREPARATION: " + ((System.currentTimeMillis() - timestamp) / 1000) + " seconds");
 
         // log
-        serverLog.logInfo("LOCAL_SEARCH", "EXIT WORD SEARCH: " + thisSearch.queryString + " - " +
-                    acc.getTotalCount() + " links found, " +
-                    acc.filteredResults + " links filtered, " +
-                    acc.sizeOrdered() + " links ordered, " +
+        serverLog.logInfo("LOCAL_SEARCH", "EXIT WORD SEARCH: " + theQuery.queryString + " - " +
+                    (theSearch.getLocalCount() + theSearch.getGlobalCount()) + " links found, " +
+                    preorder.filteredCount() + " links filtered, " +
+                    accu.resultCount() + " links ordered, " +
                     ((System.currentTimeMillis() - timestamp) / 1000) + " seconds");
             
             
         // prepare search statistics
         Long trackerHandle = new Long(System.currentTimeMillis());
-        HashMap searchProfile = theSearch.resultProfile();
-        searchProfile.put("querystring", thisSearch.queryString);
+        HashMap searchProfile = theQuery.resultProfile(accu.resultCount(), System.currentTimeMillis() - timestamp);
+        searchProfile.put("querystring", theQuery.queryString);
         searchProfile.put("time", trackerHandle);
         searchProfile.put("host", client);
         searchProfile.put("offset", new Integer(0));
@@ -354,18 +346,18 @@ public class yacysearch {
         prop=new serverObjects();
         //prop.put("references", 0);
         URL wordURL=null;
-        prop.put("num-results_totalcount", acc.getTotalCount());
-        prop.put("num-results_filteredcount", acc.filteredResults);
-        prop.put("num-results_orderedcount", acc.sizeOrdered());
-        prop.put("num-results_globalresults", acc.globalContributions);
+        prop.put("num-results_totalcount", theSearch.getLocalCount() + theSearch.getGlobalCount());
+        prop.put("num-results_filteredcount", preorder.filteredCount());
+        prop.put("num-results_orderedcount", accu.resultCount());
+        prop.put("num-results_globalresults", theSearch.getGlobalCount());
         prop.put("num-results_linkcount", 0);
         prop.put("type_results", 0);
 
         for (int i = 0; i < accu.resultCount(); i++) {
             plasmaSearchResultAccumulator.Entry result = accu.resultEntry(i);
             prop.put("type_results_" + i + "_authorized_recommend", (yacyCore.newsPool.getSpecific(yacyNewsPool.OUTGOING_DB, yacyNewsPool.CATEGORY_SURFTIPP_ADD, "url", result.urlstring()) == null) ? 1 : 0);
-            prop.put("type_results_" + i + "_authorized_recommend_deletelink", "/yacysearch.html?search=" + thisSearch.queryString + "&Enter=Search&count=" + thisSearch.wantedResults + "&order=" + crypt.simpleEncode(ranking.toExternalString()) + "&resource=local&time=3&deleteref=" + result.hash() + "&urlmaskfilter=.*");
-            prop.put("type_results_" + i + "_authorized_recommend_recommendlink", "/yacysearch.html?search=" + thisSearch.queryString + "&Enter=Search&count=" + thisSearch.wantedResults + "&order=" + crypt.simpleEncode(ranking.toExternalString()) + "&resource=local&time=3&recommendref=" + result.hash() + "&urlmaskfilter=.*");
+            prop.put("type_results_" + i + "_authorized_recommend_deletelink", "/yacysearch.html?search=" + theQuery.queryString + "&Enter=Search&count=" + theQuery.wantedResults + "&order=" + crypt.simpleEncode(ranking.toExternalString()) + "&resource=local&time=3&deleteref=" + result.hash() + "&urlmaskfilter=.*");
+            prop.put("type_results_" + i + "_authorized_recommend_recommendlink", "/yacysearch.html?search=" + theQuery.queryString + "&Enter=Search&count=" + theQuery.wantedResults + "&order=" + crypt.simpleEncode(ranking.toExternalString()) + "&resource=local&time=3&recommendref=" + result.hash() + "&urlmaskfilter=.*");
             prop.put("type_results_" + i + "_authorized_urlhash", result.hash());
             prop.put("type_results_" + i + "_description", result.title());
             prop.put("type_results_" + i + "_url", result.urlstring());
@@ -393,7 +385,7 @@ public class yacysearch {
                 // adding snippet if available
                 if (result.hasSnippet()) {
                     prop.put("type_results_" + i + "_snippet", 1);
-                    prop.putASIS("type_results_" + i + "_snippet_text", result.textSnippet().getLineMarked(theSearch.getQuery().queryHashes));//FIXME: the ASIS should not be needed, if there is no html in .java
+                    prop.putASIS("type_results_" + i + "_snippet_text", result.textSnippet().getLineMarked(theQuery.queryHashes));//FIXME: the ASIS should not be needed, if there is no html in .java
                 } else {                	
                 	if (post.containsKey("fetchSnippet")) {
                 		// snippet fetch timeout
@@ -535,7 +527,7 @@ public class yacysearch {
                 }
             }
 
-            prop.put("type", (thisSearch.contentdom == plasmaSearchQuery.CONTENTDOM_TEXT) ? 0 : ((thisSearch.contentdom == plasmaSearchQuery.CONTENTDOM_IMAGE) ? 2 : 1));
+            prop.put("type", (theQuery.contentdom == plasmaSearchQuery.CONTENTDOM_TEXT) ? 0 : ((theQuery.contentdom == plasmaSearchQuery.CONTENTDOM_IMAGE) ? 2 : 1));
             if (prop.getInt("type", 0) == 1) prop.put("type_mediatype", contentdomString);
             prop.put("input_cat", "href");
             prop.put("input_depth", "0");

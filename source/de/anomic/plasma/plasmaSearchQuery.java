@@ -42,6 +42,7 @@
 
 package de.anomic.plasma;
 
+import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Set;
 import java.util.TreeSet;
@@ -215,4 +216,16 @@ public final class plasmaSearchQuery {
         return new String(sb);
     }
     
+
+    public HashMap resultProfile(int searchcount, long searchtime) {
+        // generate statistics about search: query, time, etc
+        HashMap r = new HashMap();
+        r.put("queryhashes", queryHashes);
+        r.put("querystring", queryString);
+        r.put("querycount", new Integer(wantedResults));
+        r.put("querytime", new Long(maximumTime));
+        r.put("resultcount", new Integer(searchcount));
+        r.put("resulttime", new Long(searchtime));
+        return r;
+    }
 }
