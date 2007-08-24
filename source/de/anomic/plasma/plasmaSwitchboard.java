@@ -2621,7 +2621,7 @@ public final class plasmaSwitchboard extends serverAbstractSwitch implements ser
                                             ioLinks[1].intValue(),
                                             condenser.RESULT_FLAGS
                                         );
-                                indexContainer wordIdxContainer = plasmaWordIndex.emptyContainer(wordHash);
+                                indexContainer wordIdxContainer = plasmaWordIndex.emptyContainer(wordHash, 1);
                                 wordIdxContainer.add(wordIdxEntry);
                                 tmpContainers.add(wordIdxContainer);
                             }

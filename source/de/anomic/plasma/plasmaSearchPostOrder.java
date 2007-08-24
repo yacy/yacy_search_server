@@ -101,7 +101,7 @@ public final class plasmaSearchPostOrder {
         return (indexURLEntry) pageAcc.remove(top);
     }
     
-    protected void addPage(indexURLEntry page, Long preranking) {
+    protected void addPage(indexURLEntry page) {
         
         // take out relevant information for reference computation
         indexURLEntry.Components comp = page.comp();
@@ -110,7 +110,7 @@ public final class plasmaSearchPostOrder {
         String[] descrcomps = comp.title().toLowerCase().split(htmlFilterContentScraper.splitrex); // words in the description
         
         // store everything
-        results.add(new Object[] {page, urlcomps, descrcomps, preranking});
+        results.add(new Object[] {page, urlcomps, descrcomps});
         
         // add references
         addScoreFiltered(urlcomps);
@@ -137,12 +137,12 @@ public final class plasmaSearchPostOrder {
             // calculate ranking
             if (postsort)
                 ranking = this.ranking.postRanking(
-                            ((Long) resultVector[3]).longValue(),
                             query,
                             commonSense,
                             (String[]) resultVector[1],
                             (String[]) resultVector[2],
-                            page
+                            page,
+                            i
                             );
             else
                 ranking = ((Long) resultVector[3]).longValue();

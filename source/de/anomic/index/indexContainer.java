@@ -46,14 +46,14 @@ public class indexContainer extends kelondroRowSet {
         this.wordHash = wordHash;
     }
     
-    public indexContainer(String wordHash, kelondroRow rowdef) {
-        super(rowdef, 0);
+    public indexContainer(String wordHash, kelondroRow rowdef, int objectCount) {
+        super(rowdef, objectCount);
         this.wordHash = wordHash;
         this.lastTimeWrote = 0;
     }
     
     public indexContainer topLevelClone() {
-        indexContainer newContainer = new indexContainer(this.wordHash, this.rowdef);
+        indexContainer newContainer = new indexContainer(this.wordHash, this.rowdef, this.size());
         newContainer.addAllUnique(this);
         return newContainer;
     }
@@ -308,7 +308,7 @@ public class indexContainer extends kelondroRowSet {
         assert small.rowdef.equals(large.rowdef) : "small = " + small.rowdef.toString() + "; large = " + large.rowdef.toString();
         int keylength = small.rowdef.width(0);
         assert (keylength == large.rowdef.width(0));
-        indexContainer conj = new indexContainer(null, small.rowdef); // start with empty search result
+        indexContainer conj = new indexContainer(null, small.rowdef, 0); // start with empty search result
         Iterator se = small.entries();
         indexRWIEntry ie0, ie1;
         long stamp = System.currentTimeMillis();
@@ -331,7 +331,7 @@ public class indexContainer extends kelondroRowSet {
         assert i1.rowdef.equals(i2.rowdef) : "i1 = " + i1.rowdef.toString() + "; i2 = " + i2.rowdef.toString();
         int keylength = i1.rowdef.width(0);
         assert (keylength == i2.rowdef.width(0));
-        indexContainer conj = new indexContainer(null, i1.rowdef); // start with empty search result
+        indexContainer conj = new indexContainer(null, i1.rowdef, 0); // start with empty search result
         if (!((i1.rowdef.getOrdering().signature().equals(i2.rowdef.getOrdering().signature())) &&
               (i1.rowdef.primaryKey() == i2.rowdef.primaryKey()))) return conj; // ordering must be equal
         Iterator e1 = i1.entries();

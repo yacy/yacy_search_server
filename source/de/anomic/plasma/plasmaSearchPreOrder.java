@@ -208,11 +208,11 @@ public final class plasmaSearchPreOrder {
         return theClone;
     }
     
-    public boolean hasNext() {
+    private boolean hasNext() {
         return pageAcc.size() > 0;
     }
     
-    public Object[] /*{indexEntry, Long}*/ next() {
+    private Object[] /*{indexEntry, Long}*/ next() {
         String top = (String) pageAcc.firstKey();
         //System.out.println("preorder-key:  " + top);
         Long preranking;
@@ -223,6 +223,19 @@ public final class plasmaSearchPreOrder {
             preranking = new Long(0);
         }
         return new Object[]{(indexRWIEntry) pageAcc.remove(top), preranking};
+    }
+    
+    public indexContainer strippedContainer(int count) {
+        // return an indexContainer with a limited number of results
+        indexContainer container = plasmaWordIndex.emptyContainer(null, count);
+        Object[] o;
+        indexRWIEntry entry;
+        while ((count-- > 0) && (hasNext())) {
+            o = next();
+            entry = (indexRWIEntry) o[0];
+            container.addUnique(entry.toKelondroEntry());
+        }
+        return container;
     }
     
     public indexRWIEntry[] getNormalizer() {

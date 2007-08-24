@@ -199,6 +199,7 @@ public class serverDomains {
     // checks for local/global IP range and local IP
     public static boolean isLocal(URL url) {
         InetAddress hostAddress = dnsResolve(url.getHost());
+        if (hostAddress == null) /* we are offline */ return false; // it is rare to be offline in intranets
         return hostAddress.isSiteLocalAddress() || hostAddress.isLoopbackAddress();
     }
 

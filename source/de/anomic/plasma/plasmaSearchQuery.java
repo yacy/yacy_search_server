@@ -140,9 +140,9 @@ public final class plasmaSearchQuery {
         return keyhashes;
     }
     
-    public static String hashSet2hashString(Set words) {
-        Iterator i = words.iterator();
-        StringBuffer sb = new StringBuffer(words.size() * yacySeedDB.commonHashLength);
+    public static String hashSet2hashString(Set hashes) {
+        Iterator i = hashes.iterator();
+        StringBuffer sb = new StringBuffer(hashes.size() * yacySeedDB.commonHashLength);
         while (i.hasNext()) sb.append((String) i.next());
         return new String(sb);
     }
@@ -216,7 +216,11 @@ public final class plasmaSearchQuery {
         return new String(sb);
     }
     
-
+    public String id() {
+        // generate a string that identifies a search so results can be re-used in a cache
+        return hashSet2hashString(this.queryHashes) + "-" + hashSet2hashString(this.excludeHashes) + ":" + this.contentdom;
+    }
+    
     public HashMap resultProfile(int searchcount, long searchtime) {
         // generate statistics about search: query, time, etc
         HashMap r = new HashMap();

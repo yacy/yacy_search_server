@@ -33,6 +33,7 @@ import java.util.Date;
 import java.util.Iterator;
 import java.util.TreeSet;
 
+import de.anomic.index.indexContainer;
 import de.anomic.index.indexRWIEntry;
 import de.anomic.index.indexURLEntry;
 import de.anomic.kelondro.kelondroBitfield;
@@ -51,7 +52,7 @@ public class plasmaSearchResultAccumulator {
             plasmaSearchQuery theQuery,
             plasmaSearchProcessing process,
             plasmaSearchRankingProfile ranking,
-            plasmaSearchPreOrder pre,
+            indexContainer pre,
             plasmaWordIndex wordIndex,
             TreeSet blueList,
             boolean overfetch) {
@@ -67,18 +68,14 @@ public class plasmaSearchResultAccumulator {
         
         indexRWIEntry rwientry;
         indexURLEntry page;
-        Long preranking;
-        Object[] preorderEntry;
         indexURLEntry.Components comp;
         String pagetitle, pageurl, pageauthor;
         int minEntries = process.getTargetCount(plasmaSearchProcessing.PROCESS_POSTSORT);
         try {
-            ordering: while (pre.hasNext()) {
+            ordering: for (int i = 0; i < pre.size(); i++) {
                 if ((System.currentTimeMillis() >= postorderLimitTime) || (acc.sizeFetched() >= ((overfetch) ? 4 : 1) * minEntries)) break;
-                preorderEntry = pre.next();
-                rwientry = (indexRWIEntry) preorderEntry[0];
+                rwientry = new indexRWIEntry(pre.get(i));
                 // load only urls if there was not yet a root url of that hash
-                preranking = (Long) preorderEntry[1];
                 // find the url entry
                 page = wordIndex.loadedURL.load(rwientry.urlHash(), rwientry);
                 if (page != null) {
@@ -105,12 +102,12 @@ public class plasmaSearchResultAccumulator {
                         Iterator wi = theQuery.queryHashes.iterator();
                         while (wi.hasNext()) wordIndex.removeEntry((String) wi.next(), page.hash());
                     } else if (theQuery.contentdom != plasmaSearchQuery.CONTENTDOM_TEXT) {
-                        if ((theQuery.contentdom == plasmaSearchQuery.CONTENTDOM_AUDIO) && (page.laudio() > 0)) acc.addPage(page, preranking);
-                        else if ((theQuery.contentdom == plasmaSearchQuery.CONTENTDOM_VIDEO) && (page.lvideo() > 0)) acc.addPage(page, preranking);
-                        else if ((theQuery.contentdom == plasmaSearchQuery.CONTENTDOM_IMAGE) && (page.limage() > 0)) acc.addPage(page, preranking);
-                        else if ((theQuery.contentdom == plasmaSearchQuery.CONTENTDOM_APP) && (page.lapp() > 0)) acc.addPage(page, preranking);
+                        if ((theQuery.contentdom == plasmaSearchQuery.CONTENTDOM_AUDIO) && (page.laudio() > 0)) acc.addPage(page);
+                        else if ((theQuery.contentdom == plasmaSearchQuery.CONTENTDOM_VIDEO) && (page.lvideo() > 0)) acc.addPage(page);
+                        else if ((theQuery.contentdom == plasmaSearchQuery.CONTENTDOM_IMAGE) && (page.limage() > 0)) acc.addPage(page);
+                        else if ((theQuery.contentdom == plasmaSearchQuery.CONTENTDOM_APP) && (page.lapp() > 0)) acc.addPage(page);
                     } else {
-                        acc.addPage(page, preranking);
+                        acc.addPage(page);
                     }
                 }
             }

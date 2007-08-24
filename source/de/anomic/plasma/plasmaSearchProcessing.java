@@ -309,7 +309,7 @@ public class plasmaSearchProcessing implements Cloneable {
         // join a search result and return the joincount (number of pages after join)
 
         // since this is a conjunction we return an empty entity if any word is not known
-        if (includeContainers == null) return plasmaWordIndex.emptyContainer(null);
+        if (includeContainers == null) return plasmaWordIndex.emptyContainer(null, 0);
 
         // join the result
         startTimer();
@@ -319,7 +319,7 @@ public class plasmaSearchProcessing implements Cloneable {
         if ((rcLocal != null) && (remaining > 0)) {
             indexContainer.excludeContainers(rcLocal, excludeContainers, remaining);
         }
-        if (rcLocal == null) rcLocal = plasmaWordIndex.emptyContainer(null);
+        if (rcLocal == null) rcLocal = plasmaWordIndex.emptyContainer(null, 0);
         setYieldTime(plasmaSearchProcessing.PROCESS_JOIN);
         setYieldCount(plasmaSearchProcessing.PROCESS_JOIN, rcLocal.size());
 

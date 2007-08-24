@@ -449,7 +449,7 @@ public final class yacyClient {
 		final int words = wordhashes.length() / yacySeedDB.commonHashLength;
 		indexContainer[] container = new indexContainer[words];
 		for (int i = 0; i < words; i++) {
-			container[i] = plasmaWordIndex.emptyContainer(wordhashes.substring(i * yacySeedDB.commonHashLength, (i + 1) * yacySeedDB.commonHashLength));
+			container[i] = plasmaWordIndex.emptyContainer(wordhashes.substring(i * yacySeedDB.commonHashLength, (i + 1) * yacySeedDB.commonHashLength), timingProfile.getTargetCount(plasmaSearchProcessing.PROCESS_POSTSORT));
 		}
 
 		// insert results to containers

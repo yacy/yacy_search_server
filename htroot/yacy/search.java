@@ -164,7 +164,7 @@ public final class search {
             yacyCore.log.logInfo("INIT HASH SEARCH (query-" + abstracts + "): " + plasmaSearchQuery.anonymizedQueryHashes(squery.queryHashes) + " - " + squery.wantedResults + " links");
 
             // prepare a search profile
-            plasmaSearchRankingProfile rankingProfile = (profile.length() == 0) ? new plasmaSearchRankingProfile(contentdom) : new plasmaSearchRankingProfile("", profile);
+            plasmaSearchRankingProfile rankingProfile = (profile.length() == 0) ? new plasmaSearchRankingProfile(plasmaSearchQuery.contentdomParser(contentdom)) : new plasmaSearchRankingProfile("", profile);
             plasmaSearchProcessing localProcess  = new plasmaSearchProcessing(squery.maximumTime, squery.wantedResults);
             //plasmaSearchProcessing remoteProcess = null;
 
@@ -208,7 +208,7 @@ public final class search {
                 // join and order the result
                 indexContainer localResults =
                     (containers == null) ?
-                      plasmaWordIndex.emptyContainer(null) :
+                      plasmaWordIndex.emptyContainer(null, 0) :
                           localProcess.localSearchJoinExclude(
                               containers[0].values(),
                               containers[1].values(),
@@ -223,7 +223,7 @@ public final class search {
                     joincount = localResults.size();
                     prop.putASIS("joincount", Integer.toString(joincount));
                     plasmaSearchPreOrder pre = new plasmaSearchPreOrder(squery, localProcess, rankingProfile, localResults);
-                    accu = new plasmaSearchResultAccumulator(squery, localProcess, rankingProfile, pre, sb.wordIndex, plasmaSwitchboard.blueList, false);
+                    accu = new plasmaSearchResultAccumulator(squery, localProcess, rankingProfile, pre.strippedContainer(200), sb.wordIndex, plasmaSwitchboard.blueList, false);
                 }
                 
                 // generate compressed index for maxcounthash

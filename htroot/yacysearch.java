@@ -56,6 +56,7 @@ import java.util.TreeSet;
 
 import de.anomic.htmlFilter.htmlFilterImageEntry;
 import de.anomic.http.httpHeader;
+import de.anomic.index.indexContainer;
 import de.anomic.index.indexURLEntry;
 import de.anomic.kelondro.kelondroBitfield;
 import de.anomic.kelondro.kelondroMSetTools;
@@ -151,7 +152,6 @@ public class yacysearch {
             prop.put("type", 0);
             prop.put("type_excluded", 0);
             prop.put("type_combine", 0);
-            prop.put("type_resultbottomline", 0);
             prop.put("type_results", "");
             prop.put("num-results", (searchAllowed) ? 0 : 6);
             
@@ -197,13 +197,7 @@ public class yacysearch {
         if (clustersearch) global = true; // switches search on, but search target is limited to cluster nodes
         
         // find search domain
-        int contentdomCode = plasmaSearchQuery.CONTENTDOM_TEXT;
-        String contentdomString = post.get("contentdom", "text");
-        if (contentdomString.equals("text")) contentdomCode = plasmaSearchQuery.CONTENTDOM_TEXT;
-        if (contentdomString.equals("audio")) contentdomCode = plasmaSearchQuery.CONTENTDOM_AUDIO;
-        if (contentdomString.equals("video")) contentdomCode = plasmaSearchQuery.CONTENTDOM_VIDEO;
-        if (contentdomString.equals("image")) contentdomCode = plasmaSearchQuery.CONTENTDOM_IMAGE;
-        if (contentdomString.equals("app")) contentdomCode = plasmaSearchQuery.CONTENTDOM_APP;
+        int contentdomCode = plasmaSearchQuery.contentdomParser(post.get("contentdom", "text"));
         
         // patch until better search profiles are available
         if ((contentdomCode != plasmaSearchQuery.CONTENTDOM_TEXT) && (count <= 10)) count = 30;
@@ -265,8 +259,7 @@ public class yacysearch {
 
         // prepare search properties
         final boolean yacyonline = ((yacyCore.seedDB != null) && (yacyCore.seedDB.mySeed != null) && (yacyCore.seedDB.mySeed.getPublicAddress() != null));
-        final boolean samesearch = env.getConfig("last-search", "").equals(querystring + contentdomString);
-        final boolean globalsearch = (global) && (yacyonline) && (!samesearch);
+        final boolean globalsearch = (global) && (yacyonline);
         
         // do the search
         TreeSet queryHashes = plasmaCondenser.words2hashes(query[0]);
@@ -285,7 +278,7 @@ public class yacysearch {
                     "",
                     20,
                     constraint);
-        plasmaSearchRankingProfile ranking = (sb.getConfig("rankingProfile", "").length() == 0) ? new plasmaSearchRankingProfile(contentdomString) : new plasmaSearchRankingProfile("", crypt.simpleDecode(sb.getConfig("rankingProfile", ""), null));
+        plasmaSearchRankingProfile ranking = (sb.getConfig("rankingProfile", "").length() == 0) ? new plasmaSearchRankingProfile(contentdomCode) : new plasmaSearchRankingProfile("", crypt.simpleDecode(sb.getConfig("rankingProfile", ""), null));
         plasmaSearchProcessing localTiming = new plasmaSearchProcessing(4 * theQuery.maximumTime / 10, theQuery.wantedResults);
         plasmaSearchProcessing remoteTiming = new plasmaSearchProcessing(6 * theQuery.maximumTime / 10, theQuery.wantedResults);
 
@@ -305,8 +298,8 @@ public class yacysearch {
 
         // create a new search event
         String wrongregex = null;
-        plasmaSearchEvent theSearch = new plasmaSearchEvent(theQuery, ranking, localTiming, remoteTiming, sb.wordIndex, (sb.isRobinsonMode()) ? sb.clusterhashes : null);
-        plasmaSearchPreOrder preorder = theSearch.search();
+        plasmaSearchEvent theSearch = plasmaSearchEvent.getEvent(theQuery, ranking, localTiming, remoteTiming, sb.wordIndex, (sb.isRobinsonMode()) ? sb.clusterhashes : null);
+        indexContainer preorder = theSearch.search();
             
         // fetch snippets
         serverLog.logFine("LOCAL_SEARCH", "SEARCH TIME AFTER ORDERING OF SEARCH RESULTS: " + ((System.currentTimeMillis() - timestamp) / 1000) + " seconds");
@@ -322,7 +315,7 @@ public class yacysearch {
         // log
         serverLog.logInfo("LOCAL_SEARCH", "EXIT WORD SEARCH: " + theQuery.queryString + " - " +
                     (theSearch.getLocalCount() + theSearch.getGlobalCount()) + " links found, " +
-                    preorder.filteredCount() + " links filtered, " +
+                    theSearch.filteredCount() + " links filtered, " +
                     accu.resultCount() + " links ordered, " +
                     ((System.currentTimeMillis() - timestamp) / 1000) + " seconds");
             
@@ -347,9 +340,10 @@ public class yacysearch {
         //prop.put("references", 0);
         URL wordURL=null;
         prop.put("num-results_totalcount", theSearch.getLocalCount() + theSearch.getGlobalCount());
-        prop.put("num-results_filteredcount", preorder.filteredCount());
+        prop.put("num-results_filteredcount", theSearch.filteredCount());
         prop.put("num-results_orderedcount", accu.resultCount());
-        prop.put("num-results_globalresults", theSearch.getGlobalCount());
+        prop.put("num-results_globalresults", (theSearch.getGlobalCount() == 0) ? 0 : 1);
+        prop.put("num-results_globalresults_globalcount", theSearch.getGlobalCount());
         prop.put("num-results_linkcount", 0);
         prop.put("type_results", 0);
 
@@ -425,11 +419,7 @@ public class yacysearch {
                 prop.put("num-results_linkcount", Integer.toString(accu.resultCount()));
             }
 
-        // remember the last search expression
-        env.setConfig("last-search", querystring + contentdomString);
-
         // process result of search
-        prop.put("type_resultbottomline", 0);
         if (filtered.size() > 0) {
             prop.put("excluded", 1);
             prop.put("excluded_stopwords", filtered.toString());
@@ -509,26 +499,8 @@ public class yacysearch {
                 }
             }
 
-            if (wrongregex != null) {
-                    prop.put("type_resultbottomline", 0);
-            }
-            else if (yacyonline) {
-                if (global) {
-                    prop.put("type_resultbottomline", 1);
-                    prop.put("type_resultbottomline_globalresults", prop.get("num-results_globalresults", "0"));
-                } else {
-                    prop.put("type_resultbottomline", 0);
-                }
-            } else {
-                if (global) {
-                    prop.put("type_resultbottomline", 3);
-                } else {
-                    prop.put("type_resultbottomline", 0);
-                }
-            }
-
             prop.put("type", (theQuery.contentdom == plasmaSearchQuery.CONTENTDOM_TEXT) ? 0 : ((theQuery.contentdom == plasmaSearchQuery.CONTENTDOM_IMAGE) ? 2 : 1));
-            if (prop.getInt("type", 0) == 1) prop.put("type_mediatype", contentdomString);
+            if (prop.getInt("type", 0) == 1) prop.put("type_mediatype", post.get("contentdom", "text"));
             prop.put("input_cat", "href");
             prop.put("input_depth", "0");
 
@@ -536,7 +508,6 @@ public class yacysearch {
             String hostName = (String) header.get("Host", "localhost");
             if (hostName.indexOf(":") == -1) hostName += ":" + serverCore.getPortNr(env.getConfig("port", "8080"));
             prop.put("rssYacyImageURL", "http://" + hostName + "/env/grafics/yacy.gif");
-
         }
 
         if (post.get("cat", "href").equals("image")) {
@@ -591,7 +562,7 @@ public class yacysearch {
         prop.put("input_prefermaskfilter", prefermask);
         prop.put("input_indexof", (indexof) ? "on" : "off");
         prop.put("input_constraint", constraint.exportB64());
-        prop.put("input_contentdom", contentdomString);
+        prop.put("input_contentdom", post.get("contentdom", "text"));
         prop.put("input_contentdomCheckText", (contentdomCode == plasmaSearchQuery.CONTENTDOM_TEXT) ? 1 : 0);
         prop.put("input_contentdomCheckAudio", (contentdomCode == plasmaSearchQuery.CONTENTDOM_AUDIO) ? 1 : 0);
         prop.put("input_contentdomCheckVideo", (contentdomCode == plasmaSearchQuery.CONTENTDOM_VIDEO) ? 1 : 0);

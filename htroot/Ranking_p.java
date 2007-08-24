@@ -30,6 +30,7 @@ import java.util.Iterator;
 import java.util.Map;
 
 import de.anomic.http.httpHeader;
+import de.anomic.plasma.plasmaSearchQuery;
 import de.anomic.plasma.plasmaSearchRankingProfile;
 import de.anomic.plasma.plasmaSwitchboard;
 import de.anomic.server.serverObjects;
@@ -132,7 +133,7 @@ public class Ranking_p {
             final serverObjects prop = defaultValues();
             plasmaSearchRankingProfile ranking =
                     (sb.getConfig("rankingProfile", "").length() == 0) ?
-                    new plasmaSearchRankingProfile("text") :
+                    new plasmaSearchRankingProfile(plasmaSearchQuery.CONTENTDOM_TEXT) :
                     new plasmaSearchRankingProfile("", crypt.simpleDecode(sb.getConfig("rankingProfile", ""), null));
             putRanking(prop, ranking, "local");
             return prop;
@@ -149,7 +150,7 @@ public class Ranking_p {
         
         if (post.containsKey("ResetRanking")) {
             sb.setConfig("rankingProfile", "");
-            plasmaSearchRankingProfile ranking = new plasmaSearchRankingProfile("text");
+            plasmaSearchRankingProfile ranking = new plasmaSearchRankingProfile(plasmaSearchQuery.CONTENTDOM_TEXT);
             final serverObjects prop = defaultValues();
             //prop.putAll(ranking.toExternalMap("local"));
             putRanking(prop, ranking, "local");

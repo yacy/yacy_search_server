@@ -116,7 +116,7 @@ document.getElementById("Enter").value = "search again - catch up more links";
 	::
     <p>No Results. &quot;<strong>#[wrong_regex]#</strong>&quot; is no valid regular expression. Please go back to the previous page and make sure to enter a valid regular expressions for URL mask and Prefer mask.</p>
     ::
-	<p><strong id="linkcount">#[linkcount]#</strong> results from <strong>#[orderedcount]#</strong> ordered links from <strong>#[filteredcount]#</strong> filtered links of a total number of <strong>#[totalcount]#</strong> known.</p>
+	<p><strong id="linkcount">#[linkcount]#</strong> results from <strong>#[orderedcount]#</strong> ordered links from <strong>#[filteredcount]#</strong> filtered links of a total number of <strong>#[totalcount]#</strong> known#(globalresults)#.::, <strong>#[globalcount]#</strong> links from other YaCy peers.#(/globalresults)#</p>
 	::
 	<p>Searching the web with this peer is disabled for unauthorized users. Please <a href="Status.html?login=">log in</a> as administrator to use the search function</p>
 #(/num-results)#
@@ -164,21 +164,7 @@ document.getElementById("Enter").value = "search again - catch up more links";
 	</script> 
 	
 	<!-- linklist end -->
-	#(resultbottomline)#
-	::
-	<p>The global search resulted in #[globalresults]# link contributions from other YaCy peers.</p>
-	::
-	<p></p>
-	::
-	<p>
-	  You cannot get global search results because you are not connected to another YaCy peer.
-	</p>
-	::
-	<p>
-	  You can enrich the search results by using the 'global' option; you must also switch to online mode
-	  (by using the proxy) to contribute to the global index.
-	</p>
-	#(/resultbottomline)#
+
 	::<!-- type 1: media search -->
   <!-- non-js variant -->
   <noscript>

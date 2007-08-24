@@ -94,9 +94,8 @@ public class plasmaSearchRankingProfile {
         coeff_catindexof, coeff_cathasimage, coeff_cathasaudio, coeff_cathasvideo, coeff_cathasapp,
         coeff_urlcompintoplist, coeff_descrcompintoplist, coeff_prefer;
     
-    public plasmaSearchRankingProfile(String mediatype) {
+    public plasmaSearchRankingProfile(int mediatype) {
         // set default-values
-        if (mediatype == null) mediatype = "text";
         coeff_domlength          = 8;
         coeff_ybr                = 8;
         coeff_date               = 4;
@@ -121,15 +120,15 @@ public class plasmaSearchRankingProfile {
         coeff_urlcompintoplist   = 3;
         coeff_descrcompintoplist = 2;
         coeff_prefer             = 15;
-        coeff_catindexof         = (mediatype.equals("text")) ? 1 : 10;
-        coeff_cathasimage        = (mediatype.equals("image")) ? 15 : 1;
-        coeff_cathasaudio        = (mediatype.equals("audio")) ? 15 : 1;
-        coeff_cathasvideo        = (mediatype.equals("video")) ? 15 : 1;
-        coeff_cathasapp          = (mediatype.equals("app")) ? 15 : 1;
+        coeff_catindexof         = (mediatype == plasmaSearchQuery.CONTENTDOM_TEXT) ? 1 : 10;
+        coeff_cathasimage        = (mediatype == plasmaSearchQuery.CONTENTDOM_IMAGE) ? 15 : 1;
+        coeff_cathasaudio        = (mediatype == plasmaSearchQuery.CONTENTDOM_AUDIO) ? 15 : 1;
+        coeff_cathasvideo        = (mediatype == plasmaSearchQuery.CONTENTDOM_VIDEO) ? 15 : 1;
+        coeff_cathasapp          = (mediatype == plasmaSearchQuery.CONTENTDOM_APP) ? 15 : 1;
     }
     
     public plasmaSearchRankingProfile(String prefix, String profile) {
-        this("text"); // set defaults
+        this(plasmaSearchQuery.CONTENTDOM_TEXT); // set defaults
         if ((profile != null) && (profile.length() > 0)) {
             //parse external form
             HashMap coeff = new HashMap();
@@ -326,13 +325,15 @@ public class plasmaSearchRankingProfile {
     }
     */
     public long postRanking(
-                    long ranking,
                     plasmaSearchQuery query,
                     Set topwords,
                     String[] urlcomps,
                     String[] descrcomps,
-                    indexURLEntry page) {
+                    indexURLEntry page,
+                    int position) {
 
+        long ranking = (255 - position) << 8;
+        
         // for media search: prefer pages with many links
         if (query.contentdom == plasmaSearchQuery.CONTENTDOM_IMAGE) ranking += page.limage() << coeff_cathasimage;
         if (query.contentdom == plasmaSearchQuery.CONTENTDOM_AUDIO) ranking += page.limage() << coeff_cathasaudio;

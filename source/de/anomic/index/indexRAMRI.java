@@ -383,10 +383,14 @@ public final class indexRAMRI implements indexRI {
         return (((long) intTime) * (long) 1000) + initTime;
     }
     
-    public synchronized boolean hasContainer(String wordHash) {
+    public boolean hasContainer(String wordHash) {
         return cache.containsKey(wordHash);
     }
     
+    public int sizeContainer(String wordHash) {
+        return ((indexContainer) cache.get(wordHash)).size();
+    }
+
     public synchronized indexContainer getContainer(String wordHash, Set urlselection, long maxtime_dummy) {
 
         // retrieve container
@@ -497,7 +501,7 @@ public final class indexRAMRI implements indexRI {
 
     public synchronized void addEntry(String wordHash, indexRWIEntry newEntry, long updateTime, boolean dhtCase) {
         indexContainer container = (indexContainer) cache.get(wordHash);
-        if (container == null) container = new indexContainer(wordHash, this.payloadrow);
+        if (container == null) container = new indexContainer(wordHash, this.payloadrow, 1);
         container.put(newEntry);
         cache.put(wordHash, container);
         hashScore.incScore(wordHash);

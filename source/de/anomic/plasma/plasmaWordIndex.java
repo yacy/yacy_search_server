@@ -152,8 +152,8 @@ public final class plasmaWordIndex implements indexRI {
         return entries.updated();
     }
     
-    public static indexContainer emptyContainer(String wordHash) {
-    	return new indexContainer(wordHash, indexRWIEntry.urlEntryRow);
+    public static indexContainer emptyContainer(String wordHash, int elementCount) {
+    	return new indexContainer(wordHash, indexRWIEntry.urlEntryRow, elementCount);
     }
 
     public void addEntry(String wordHash, indexRWIEntry entry, long updateTime, boolean dhtInCase) {
@@ -392,7 +392,11 @@ public final class plasmaWordIndex implements indexRI {
     }
 
     public indexContainer deleteContainer(String wordHash) {
-        indexContainer c = new indexContainer(wordHash, indexRWIEntry.urlEntryRow);
+        indexContainer c = new indexContainer(
+                wordHash,
+                indexRWIEntry.urlEntryRow,
+                dhtInCache.sizeContainer(wordHash) + dhtOutCache.sizeContainer(wordHash) + collections.indexSize(wordHash)
+                );
         synchronized (dhtInCache) {
         	c.addAllUnique(dhtInCache.deleteContainer(wordHash));
         }
