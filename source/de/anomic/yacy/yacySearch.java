@@ -162,13 +162,15 @@ public class yacySearch extends Thread {
     	//return (yacySeed[]) l.toArray();
     }
     
-    private static yacySeed[] selectDHTPeers(Set wordhashes, int seedcount) {
+    private static yacySeed[] selectSearchTargets(Set wordhashes, int seedcount) {
         // find out a specific number of seeds, that would be relevant for the given word hash(es)
         // the result is ordered by relevance: [0] is most relevant
         // the seedcount is the maximum number of wanted results
         if (yacyCore.seedDB == null) { return null; }
-        if (seedcount > yacyCore.seedDB.sizeConnected()) { seedcount = yacyCore.seedDB.sizeConnected(); }
-
+        if ((seedcount >= yacyCore.seedDB.sizeConnected()) || (yacyCore.seedDB.noDHTActivity())) {
+            seedcount = yacyCore.seedDB.sizeConnected();
+        }
+        
         // put in seeds according to dht
         final kelondroMScoreCluster ranking = new kelondroMScoreCluster();
         final HashMap seeds = new HashMap();
@@ -256,7 +258,7 @@ public class yacySearch extends Thread {
         if (yacyCore.seedDB.mySeed == null || yacyCore.seedDB.mySeed.getPublicAddress() == null) { return null; }
 
         // prepare seed targets and threads
-        final yacySeed[] targetPeers = (clusterselection == null) ? selectDHTPeers(plasmaSearchQuery.hashes2Set(wordhashes), targets) : selectClusterPeers(clusterselection);
+        final yacySeed[] targetPeers = (clusterselection == null) ? selectSearchTargets(plasmaSearchQuery.hashes2Set(wordhashes), targets) : selectClusterPeers(clusterselection);
         if (targetPeers == null) return new yacySearch[0];
         targets = targetPeers.length;
         if (targets == 0) return new yacySearch[0];

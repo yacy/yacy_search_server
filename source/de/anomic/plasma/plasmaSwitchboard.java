@@ -3079,6 +3079,9 @@ public final class plasmaSwitchboard extends serverAbstractSwitch implements ser
         if (yacyCore.seedDB.mySeed.isVirgin()) {
             return "no DHT distribution: status is virgin";
         }
+        if (yacyCore.seedDB.noDHTActivity()) {
+            return "no DHT distribution: network too small";
+        }
         if (getConfig(INDEX_DIST_ALLOW, "false").equalsIgnoreCase("false")) {
             return "no DHT distribution: not enabled";
         }
