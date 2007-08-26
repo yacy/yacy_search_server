@@ -406,7 +406,7 @@ public class yacysearch {
                             prop.putASIS("type_results_" + i + "_snippet_text", (snippet.exists()) ? snippet.getLineMarked(queryHashes) : "unknown");
                         } else {
                             // problems with snippet fetch
-                           prop.put("type_results_" + i + "_snippet_text", (remove) ? plasmaSnippetCache.failConsequences(snippet, queryHashes) : snippet.getError());
+                           prop.put("type_results_" + i + "_snippet_text", (remove) ? plasmaSnippetCache.failConsequences(snippet, theQuery.id()) : snippet.getError());
                         }          
                         prop.put("type_results_" + i + "_snippet", 1);
                 	} else {
@@ -503,6 +503,7 @@ public class yacysearch {
             if (prop.getInt("type", 0) == 1) prop.put("type_mediatype", post.get("contentdom", "text"));
             prop.put("input_cat", "href");
             prop.put("input_depth", "0");
+            prop.put("type_eventID", theQuery.id()); 
 
             // adding some additional properties needed for the rss feed
             String hostName = (String) header.get("Host", "localhost");
@@ -569,7 +570,6 @@ public class yacysearch {
         prop.put("input_contentdomCheckImage", (contentdomCode == plasmaSearchQuery.CONTENTDOM_IMAGE) ? 1 : 0);
         prop.put("input_contentdomCheckApp", (contentdomCode == plasmaSearchQuery.CONTENTDOM_APP) ? 1 : 0);
         prop.put("type_former", post.get("search", "")); //the query-string used to get the snippets
-        
         
         // return rewrite properties
         return prop;

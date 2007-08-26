@@ -46,6 +46,7 @@
 
 import de.anomic.http.httpHeader;
 import de.anomic.plasma.plasmaGrafics;
+import de.anomic.plasma.plasmaSearchEvent;
 import de.anomic.server.serverObjects;
 import de.anomic.server.serverSwitch;
 import de.anomic.ymage.ymageMatrix;
@@ -56,7 +57,9 @@ public class SearchEventPicture {
     
     public static ymageMatrix respond(httpHeader header, serverObjects post, serverSwitch env) {
 
-        ymageMatrix yp = plasmaGrafics.getSearchEventPicture();
+        String eventID = (String) header.get("event", plasmaSearchEvent.lastEventID);
+        if (eventID == null) return null;
+        ymageMatrix yp = plasmaGrafics.getSearchEventPicture(eventID);
         if (yp == null) return new ymageMatrix(1, 1, "000000"); // empty image
         
         return yp;

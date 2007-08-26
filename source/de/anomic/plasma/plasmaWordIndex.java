@@ -423,6 +423,17 @@ public final class plasmaWordIndex implements indexRI {
         return removed;
     }
     
+    public int removeEntryMultiple(Set wordHashes, String urlHash) {
+        // remove the same url hashes for multiple words
+        // this is mainly used when correcting a index after a search
+        Iterator i = wordHashes.iterator();
+        int count = 0;
+        while (i.hasNext()) {
+            if (removeEntry((String) i.next(), urlHash)) count++;
+        }
+        return count;
+    }
+    
     public int removeEntries(String wordHash, Set urlHashes) {
         int removed = 0;
         synchronized (dhtInCache) {
@@ -451,6 +462,15 @@ public final class plasmaWordIndex implements indexRI {
         return removed;
     }
     
+    public void removeEntriesMultiple(Set wordHashes, Set urlHashes) {
+        // remove the same url hashes for multiple words
+        // this is mainly used when correcting a index after a search
+        Iterator i = wordHashes.iterator();
+        while (i.hasNext()) {
+            removeEntries((String) i.next(), urlHashes);
+        }
+    }
+    
     public int removeWordReferences(Set words, String urlhash) {
         // sequentially delete all word references
         // returns number of deletions
@@ -459,18 +479,6 @@ public final class plasmaWordIndex implements indexRI {
         while (iter.hasNext()) {
             // delete the URL reference in this word index
             if (removeEntry(plasmaCondenser.word2hash((String) iter.next()), urlhash)) count++;
-        }
-        return count;
-    }
-    
-    public int removeHashReferences(Set hashes, String urlhash) {
-        // sequentially delete all word references
-        // returns number of deletions
-        Iterator iter = hashes.iterator();
-        int count = 0;
-        while (iter.hasNext()) {
-            // delete the URL reference in this word index
-            if (removeEntry((String) iter.next(), urlhash)) count++;
         }
         return count;
     }

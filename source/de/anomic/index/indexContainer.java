@@ -167,6 +167,13 @@ public class indexContainer extends kelondroRowSet {
         return count;
     }
 
+    public void removeEntriesMultiple(Set wordHashes, Set urlHashes) {
+        Iterator i = wordHashes.iterator();
+        while (i.hasNext()) {
+            removeEntries((String) i.next(), urlHashes);
+        }
+    }
+
     public Iterator entries() {
         // returns an iterator of indexEntry objects
         return new entryIterator();

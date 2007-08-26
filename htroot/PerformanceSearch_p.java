@@ -94,7 +94,8 @@ public class PerformanceSearch_p {
         }
         
         // prepare values
-        plasmaSearchEvent se = plasmaSearchEvent.lastEvent;
+        plasmaSearchEvent se = plasmaSearchEvent.getEvent(plasmaSearchEvent.lastEventID);
+        
         // count complete execution time
         long time = 0;
         long t;

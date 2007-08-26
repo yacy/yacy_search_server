@@ -16,7 +16,7 @@ public class WatchWebStructure_p {
         int width = 768;
         int height = 576;
         int depth = 3;
-        int nodes = 1000; // maximum number of host nodes that are painted
+        int nodes = 500; // maximum number of host nodes that are painted
         int time = -1;
         String host = "auto";
         

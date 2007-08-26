@@ -26,12 +26,15 @@
 
 package de.anomic.plasma;
 
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Map;
 import java.util.TreeMap;
 
 import de.anomic.index.indexContainer;
+import de.anomic.index.indexRWIEntry;
 import de.anomic.kelondro.kelondroMSetTools;
 import de.anomic.server.logging.serverLog;
 import de.anomic.yacy.yacyCore;
@@ -39,7 +42,8 @@ import de.anomic.yacy.yacySearch;
 
 public final class plasmaSearchEvent {
     
-    public static plasmaSearchEvent lastEvent = null;
+    //public static plasmaSearchEvent lastEvent = null;
+    public static String lastEventID = "";
     private static HashMap lastEvents = new HashMap(); // a cache for objects from this class: re-use old search requests
     public static final long eventLifetime = 600000; // the time an event will stay in the cache, 10 Minutes
     
@@ -57,6 +61,7 @@ public final class plasmaSearchEvent {
     private indexContainer sortedResults;
     private int lastglobal;
     private int filteredCount;
+    private ArrayList display; // an array of url hashes of urls that had been displayed as search result after this search
     
     private plasmaSearchEvent(plasmaSearchQuery query,
                              plasmaSearchRankingProfile ranking,
@@ -80,6 +85,7 @@ public final class plasmaSearchEvent {
         this.globalcount = 0;
         this.sortedResults = null;
         this.lastglobal = 0;
+        this.display = new ArrayList();
         
         long start = System.currentTimeMillis();
         if ((query.domType == plasmaSearchQuery.SEARCHDOM_GLOBALDHT) ||
@@ -152,11 +158,22 @@ public final class plasmaSearchEvent {
 
             // sort the local containers and truncate it to a limited count,
             // so following sortings together with the global results will be fast
-            localcount = rcLocal.size();
             plasmaSearchPreOrder firstsort = new plasmaSearchPreOrder(query, profileLocal, ranking, rcLocal);
             rcLocal = firstsort.strippedContainer(200);
-                  
-            // wait some time to retrieve index abstracts from primary search
+            
+            int prefetchIndex = 0;
+            HashSet unknownURLs = new HashSet();
+            String urlhash;
+            
+            // while we wait for the first time-out for index abstracts, we fetch urls form the url-db
+            while ((System.currentTimeMillis() < secondaryTimeout) && (prefetchIndex < rcLocal.size())) {
+                if (yacySearch.remainingWaiting(primarySearchThreads) == 0) break; // all threads have finished
+                urlhash = new String(rcLocal.get(prefetchIndex).getColBytes(0));
+                if (wordIndex.loadedURL.load(urlhash, null) == null) unknownURLs.add(urlhash);
+                prefetchIndex++;
+            }
+            
+            // eventually wait some more time to retrieve index abstracts from primary search
             while (System.currentTimeMillis() < secondaryTimeout) {
                 if (yacySearch.remainingWaiting(primarySearchThreads) == 0) break; // all threads have finished
                 try {Thread.sleep(100);} catch (InterruptedException e) {}
@@ -164,6 +181,19 @@ public final class plasmaSearchEvent {
             
             // evaluate index abstracts and start a secondary search
             if (rcAbstracts != null) prepareSecondarySearch();
+            
+            // while we wait for the second time-out for index abstracts, we fetch more urls form the url-db
+            while ((System.currentTimeMillis() < primaryTimeout) && (prefetchIndex < rcLocal.size())) {
+                if (yacySearch.remainingWaiting(primarySearchThreads) == 0) break; // all threads have finished
+                urlhash = new String(rcLocal.get(prefetchIndex).getColBytes(0));
+                if (wordIndex.loadedURL.load(urlhash, null) == null) unknownURLs.add(urlhash);
+                prefetchIndex++;
+            }
+            
+            // when we have found some non-existing urls in the local collection, we delete them now
+            wordIndex.removeEntriesMultiple(query.queryHashes, unknownURLs);
+            rcLocal.removeEntriesMultiple(query.queryHashes, unknownURLs);
+            localcount = rcLocal.size();
             
             // catch up global results:
             // wait until primary timeout passed
@@ -195,7 +225,7 @@ public final class plasmaSearchEvent {
         serverLog.logFine("SEARCH_EVENT", "SEARCHRESULT: " + profileLocal.reportToString());
         
         // set link for statistic
-        lastEvent = this;
+        //lastEvent = this;
         
         // remove old events in the event cache
         Iterator i = lastEvents.entrySet().iterator();
@@ -205,6 +235,7 @@ public final class plasmaSearchEvent {
         
         // store this search to a cache so it can be re-used
         lastEvents.put(query.id(), this);
+        lastEventID = query.id();
     }
     
     public plasmaSearchQuery getQuery() {
@@ -234,6 +265,10 @@ public final class plasmaSearchEvent {
         return this.globalcount;
     }
 
+    public static plasmaSearchEvent getEvent(String eventID) {
+        return (plasmaSearchEvent) lastEvents.get(eventID);
+    }
+    
     public static plasmaSearchEvent getEvent(plasmaSearchQuery query,
             plasmaSearchRankingProfile ranking,
             plasmaSearchProcessing localTiming,
@@ -370,6 +405,17 @@ public final class plasmaSearchEvent {
             }
         }
         return wordlist;
+    }
+ 
+    public void remove(String urlhash) {
+        // removes the url hash reference from last search result
+        indexRWIEntry e = this.sortedResults.remove(urlhash);
+        assert e != null;
+        rcLocal.remove(urlhash);
+    }
+    
+    public void displayed(String urlhash, int position) {
+        this.display.set(position, urlhash);
     }
     
 }

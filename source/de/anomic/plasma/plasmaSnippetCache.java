@@ -867,7 +867,7 @@ public class plasmaSnippetCache {
         return result;
     }
     
-    public static String failConsequences(TextSnippet snippet, Set queryhashes) {
+    public static String failConsequences(TextSnippet snippet, String eventID) {
         // problems with snippet fetch
         if (yacyCore.seedDB.mySeed.isVirgin()) return snippet.getError() + " (no consequences, no network connection)"; // no consequences if we do not have a network connection
         String urlHash = plasmaURL.urlHash(snippet.getUrl());
@@ -878,11 +878,14 @@ public class plasmaSnippetCache {
             (snippet.getErrorCode() == ERROR_PARSER_NO_LINES)) {
             log.logInfo("error: '" + snippet.getError() + "', remove url = " + snippet.getUrl().toNormalform(false, true) + ", cause: " + snippet.getError());
             plasmaSwitchboard.getSwitchboard().wordIndex.loadedURL.remove(urlHash);
-            plasmaSwitchboard.getSwitchboard().wordIndex.removeHashReferences(queryhashes, urlHash);
+            plasmaSearchEvent event = plasmaSearchEvent.getEvent(eventID);
+            plasmaSwitchboard.getSwitchboard().wordIndex.removeEntryMultiple(event.getQuery().queryHashes, urlHash);
+            event.remove(urlHash);
         }
         if (snippet.getErrorCode() == ERROR_NO_MATCH) {
             log.logInfo("error: '" + snippet.getError() + "', remove words '" + querystring + "' for url = " + snippet.getUrl().toNormalform(false, true) + ", cause: " + snippet.getError());
-            plasmaSwitchboard.getSwitchboard().wordIndex.removeHashReferences(snippet.remaingHashes, urlHash);
+            plasmaSwitchboard.getSwitchboard().wordIndex.removeEntryMultiple(snippet.remaingHashes, urlHash);
+            plasmaSearchEvent.getEvent(eventID).remove(urlHash);
         }
         return snippet.getError();
     }

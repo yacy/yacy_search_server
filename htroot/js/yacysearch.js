@@ -51,12 +51,12 @@ function Progressbar(length, parent) {
   parent.appendChild(this.element);
 }
 
-function AllTextSnippets(query) {
+function AllTextSnippets(query, eventID) {
 	var span = document.getElementsByTagName("span");
 	for(var x=0;x<span.length;x++) {
 		if (span[x].className == 'snippetLoading') {
 				var url = document.getElementById("url" + span[x].id.substring(1));
-				requestTextSnippet(url,query);
+				requestTextSnippet(url, query, eventID);
 		}
 	}
 }
@@ -79,9 +79,9 @@ function AllImageSnippets(urls, query) {
   }
 }
 
-function requestTextSnippet(url, query){
+function requestTextSnippet(url, query, eventID){
 	var request=createRequestObject();
-	request.open('get', '/xml/snippet.xml?url=' + escape(url) + '&remove=true&media=text&search=' + escape(query),true);
+	request.open('get', '/xml/snippet.xml?url=' + escape(url) + '&remove=true&media=text&search=' + escape(query) + '&eventID=' + eventID,true);
 	request.onreadystatechange = function () {handleTextState(request)};
 	request.send(null);
 }

@@ -120,10 +120,11 @@ public class plasmaGrafics {
     private static BufferedImage peerloadPicture = null;
     private static long          peerloadPictureDate = 0;
 
-    public static ymageMatrix getSearchEventPicture() {
-        if (plasmaSearchEvent.lastEvent == null) return null;
-        yacySearch[] primarySearches = plasmaSearchEvent.lastEvent.getPrimarySearchThreads();
-        yacySearch[] secondarySearches = plasmaSearchEvent.lastEvent.getSecondarySearchThreads();
+    public static ymageMatrix getSearchEventPicture(String eventID) {
+        plasmaSearchEvent event = plasmaSearchEvent.getEvent(eventID);
+        if (event == null) return null;
+        yacySearch[] primarySearches = event.getPrimarySearchThreads();
+        yacySearch[] secondarySearches = event.getSecondarySearchThreads();
         if (primarySearches == null) return null; // this was a local search and there are no threads
 
         // get a copy of a recent network picture
@@ -159,7 +160,7 @@ public class plasmaGrafics {
         }
         
         // draw in the search target
-        plasmaSearchQuery query = plasmaSearchEvent.lastEvent.getQuery();
+        plasmaSearchQuery query = event.getQuery();
         Iterator i = query.queryHashes.iterator();
         eventPicture.setMode(ymageMatrix.MODE_SUB);
         eventPicture.setColor(ymageMatrix.SUBTRACTIVE_BLACK);
