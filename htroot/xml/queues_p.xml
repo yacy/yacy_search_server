@@ -1,4 +1,5 @@
 <?xml version="1.0"?>
+<queues>
 <dbsize>
   <urlpublictext>#[urlpublictextSize]#</urlpublictext>
   <rwipublictext>#[rwipublictextSize]#</rwipublictext>
@@ -64,4 +65,4 @@
   </entry>
 #{/list-remote}#
 </remotecrawlerqueue>
-</xml>
+</queues>

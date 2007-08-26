@@ -467,7 +467,9 @@ public class plasmaCrawlBalancer {
         while ((urlRAMStack.size() <= dist) && (urlFileStack.size() > 0)) {
             // flush some entries from disc to ram stack
             try {
-                urlRAMStack.add(new String(urlFileStack.pop().getColBytes(0)));
+                kelondroRow.Entry t = urlFileStack.pop();
+                if (t == null) break;
+                urlRAMStack.add(new String(t.getColBytes(0)));
             } catch (IOException e) {
                 break;
             }

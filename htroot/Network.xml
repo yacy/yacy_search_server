@@ -9,8 +9,9 @@
     <ppm>#[ppm]#</ppm>
 	<qph>#[qph]#</qph>
     <uptime>#[uptime]#</uptime>
-    <links>#[links]#</links>
-    <words>#[words]#</words>
+    <links>#[LCount]#</links>
+    <words>#[ICount]#</words>
+    <rurls>#[RCount]#</rurls>
     <lastseen>#[lastSeen]#</lastseen>
     <sendWords>#[sI]#</sendWords>
     <receivedWords>#[rI]#</receivedWords>
@@ -60,8 +61,9 @@
     <version>#[my-version]#</version>
     <utc>#[my-utc]#</utc>
     <uptime>#[my-uptime]#</uptime>
-    <links>#[my-links]#</links>
-    <words>#[my-words]#</words> 
+    <links>#[my-LCount]#</links>
+    <words>#[my-ICount]#</words> 
+    <words>#[my-RCount]#</words> 
     <acceptcrawl>#[my-acceptcrawl]#</acceptcrawl>
     <acceptindex>#[my-dhtreceive]#</acceptindex>
     <acceptranking>#[my-rankingreceive]#</acceptranking>

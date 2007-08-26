@@ -110,12 +110,14 @@ public class Network {
                 // update seed info
                 yacyCore.peerActions.updateMySeed();
                 
-                long links;
-                long words;
+                long LCount;
+                long ICount;
+                long RCount;
                 try {
-                    links = Long.parseLong(seed.get(yacySeed.LCOUNT, "0"));
-                    words = Long.parseLong(seed.get(yacySeed.ICOUNT, "0"));
-                } catch (Exception e) {links = 0; words = 0;}
+                    LCount = Long.parseLong(seed.get(yacySeed.LCOUNT, "0"));
+                    ICount = Long.parseLong(seed.get(yacySeed.ICOUNT, "0"));
+                    RCount = Long.parseLong(seed.get(yacySeed.RCOUNT, "0"));
+                } catch (Exception e) {LCount = 0; ICount = 0; RCount = 0;}
 
                 // my-info
                 prop.put("table_my-name", seed.get(yacySeed.NAME, "-") );
@@ -124,16 +126,16 @@ public class Network {
                     prop.put("table_my-info", 0);
                 } else if(yacyCore.seedDB.mySeed.isJunior()) {
                     prop.put("table_my-info", 1);
-                    accPotLinks += links;
-                    accPotWords += words;
+                    accPotLinks += LCount;
+                    accPotWords += ICount;
                 } else if(yacyCore.seedDB.mySeed.isSenior()) {
                     prop.put("table_my-info", 2);
-                    accActLinks += links;
-                    accActWords += words;
+                    accActLinks += LCount;
+                    accActWords += ICount;
                 } else if(yacyCore.seedDB.mySeed.isPrincipal()) {
                     prop.put("table_my-info", 3);
-                    accActLinks += links;
-                    accActWords += words;
+                    accActLinks += LCount;
+                    accActWords += ICount;
                 }
                 prop.put("table_my-acceptcrawl", seed.getFlagAcceptRemoteCrawl() ? 1 : 0);
                 prop.put("table_my-dhtreceive", seed.getFlagAcceptRemoteIndex() ? 1 : 0);
@@ -145,8 +147,9 @@ public class Network {
                 prop.put("table_my-version", seed.get(yacySeed.VERSION, "-"));
                 prop.put("table_my-utc", seed.get(yacySeed.UTC, "-"));
                 prop.put("table_my-uptime", serverDate.intervalToString(60000 * Long.parseLong(seed.get(yacySeed.UPTIME, ""))));
-                prop.put("table_my-links", groupDigits(links));
-                prop.put("table_my-words", groupDigits(words));
+                prop.put("table_my-LCount", groupDigits(LCount));
+                prop.put("table_my-ICount", groupDigits(ICount));
+                prop.put("table_my-RCount", groupDigits(RCount));
                 prop.put("table_my-sI", groupDigits(seed.get(yacySeed.INDEX_OUT, "0")));
                 prop.put("table_my-sU", groupDigits(seed.get(yacySeed.URL_OUT, "0")));
                 prop.put("table_my-rI", groupDigits(seed.get(yacySeed.INDEX_IN, "0")));
@@ -470,8 +473,9 @@ public class Network {
                             prop.put(STR_TABLE_LIST + conCount + "_lastSeen", /*seed.getLastSeenString() + " " +*/ lastseen);
                             prop.put(STR_TABLE_LIST + conCount + "_utc", seed.get(yacySeed.UTC, "-"));
                             prop.put(STR_TABLE_LIST + conCount + "_uptime", serverDate.intervalToString(60000 * Long.parseLong(seed.get(yacySeed.UPTIME, "0"))));
-                            prop.put(STR_TABLE_LIST + conCount + "_links", groupDigits(seed.get(yacySeed.LCOUNT, "0")));
-                            prop.put(STR_TABLE_LIST + conCount + "_words", groupDigits(seed.get(yacySeed.ICOUNT, "0")));
+                            prop.put(STR_TABLE_LIST + conCount + "_LCount", groupDigits(seed.get(yacySeed.LCOUNT, "0")));
+                            prop.put(STR_TABLE_LIST + conCount + "_ICount", groupDigits(seed.get(yacySeed.ICOUNT, "0")));
+                            prop.put(STR_TABLE_LIST + conCount + "_RCount", groupDigits(seed.get(yacySeed.RCOUNT, "0")));
                             prop.put(STR_TABLE_LIST + conCount + "_sI", groupDigits(seed.get(yacySeed.INDEX_OUT, "0")));
                             prop.put(STR_TABLE_LIST + conCount + "_sU", groupDigits(seed.get(yacySeed.URL_OUT, "0")));
                             prop.put(STR_TABLE_LIST + conCount + "_rI", groupDigits(seed.get(yacySeed.INDEX_IN, "0")));
