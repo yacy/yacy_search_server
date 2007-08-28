@@ -113,7 +113,8 @@ function handleQueues(){
 		return;
 	}
 	var queuesResponse = queuesRPC.responseXML;
-	xml=getFirstChild(queuesResponse);
+	//xml=getFirstChild(queuesResponse);
+	xml=getFirstChild(queuesResponse, "queues");
 	if(queuesResponse != null){
 		clearTable(document.getElementById("queueTable"), 1);
 	
