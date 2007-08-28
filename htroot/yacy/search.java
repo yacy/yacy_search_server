@@ -28,6 +28,7 @@
 // javac -classpath .:../../Classes search.java
 // if the shell's current path is htroot/yacy
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
@@ -38,19 +39,16 @@ import de.anomic.kelondro.kelondroBase64Order;
 import de.anomic.kelondro.kelondroBitfield;
 import de.anomic.index.indexContainer;
 import de.anomic.net.natLib;
+import de.anomic.plasma.plasmaSearchEvent;
 import de.anomic.plasma.plasmaURL;
-import de.anomic.plasma.plasmaSearchPreOrder;
 import de.anomic.plasma.plasmaSearchQuery;
 import de.anomic.plasma.plasmaSearchRankingProfile;
 import de.anomic.plasma.plasmaSearchProcessing;
-import de.anomic.plasma.plasmaSearchResultAccumulator;
 import de.anomic.plasma.plasmaSwitchboard;
-import de.anomic.plasma.plasmaWordIndex;
 import de.anomic.server.serverCore;
 import de.anomic.server.serverObjects;
 import de.anomic.server.serverSwitch;
 import de.anomic.yacy.yacyCore;
-import de.anomic.yacy.yacyDHTAction;
 import de.anomic.yacy.yacyNetwork;
 import de.anomic.yacy.yacySeed;
 import de.anomic.tools.crypt;
@@ -126,22 +124,19 @@ public final class search {
         StringBuffer indexabstract = new StringBuffer();
         int indexabstractContainercount = 0;
         int joincount = 0;
-        plasmaSearchQuery squery = null;
-        //plasmaSearchEvent theSearch = null;
-        plasmaSearchResultAccumulator accu = null;
+        plasmaSearchQuery theQuery = null;
+        ArrayList accu = null;
         if ((query.length() == 0) && (abstractSet != null)) {
             // this is _not_ a normal search, only a request for index abstracts
-            squery = new plasmaSearchQuery(abstractSet, new TreeSet(kelondroBase64Order.enhancedCoder), maxdist, prefer, plasmaSearchQuery.contentdomParser(contentdom), count, duetime, filter, plasmaSearchQuery.catchall_constraint);
-            squery.domType = plasmaSearchQuery.SEARCHDOM_LOCAL;
-            yacyCore.log.logInfo("INIT HASH SEARCH (abstracts only): " + plasmaSearchQuery.anonymizedQueryHashes(squery.queryHashes) + " - " + squery.wantedResults + " links");
+            theQuery = new plasmaSearchQuery(abstractSet, new TreeSet(kelondroBase64Order.enhancedCoder), maxdist, prefer, plasmaSearchQuery.contentdomParser(contentdom), count, duetime, filter, plasmaSearchQuery.catchall_constraint);
+            theQuery.domType = plasmaSearchQuery.SEARCHDOM_LOCAL;
+            yacyCore.log.logInfo("INIT HASH SEARCH (abstracts only): " + plasmaSearchQuery.anonymizedQueryHashes(theQuery.queryHashes) + " - " + theQuery.wantedResults + " links");
 
             // prepare a search profile
-            //plasmaSearchRankingProfile rankingProfile = (profile.length() == 0) ? new plasmaSearchRankingProfile(contentdom) : new plasmaSearchRankingProfile("", profile);
-            plasmaSearchProcessing localTiming  = new plasmaSearchProcessing(squery.maximumTime, squery.wantedResults);
-            //plasmaSearchProcessing remoteTiming = null;
-
+            plasmaSearchProcessing localTiming  = new plasmaSearchProcessing(theQuery.maximumTime, theQuery.wantedResults);
+            
             //theSearch = new plasmaSearchEvent(squery, rankingProfile, localTiming, remoteTiming, true, sb.wordIndex, null);
-            Map[] containers = localTiming.localSearchContainers(squery, sb.wordIndex, plasmaSearchQuery.hashes2Set(urls));
+            Map[] containers = localTiming.localSearchContainers(theQuery, sb.wordIndex, plasmaSearchQuery.hashes2Set(urls));
             if (containers != null) {
                 Iterator ci = containers[0].entrySet().iterator();
                 Map.Entry entry;
@@ -157,90 +152,68 @@ public final class search {
             
             prop.putASIS("indexcount", "");
             prop.put("joincount", 0);
+            prop.putASIS("references", "");
+            
         } else {
             // retrieve index containers from search request
-            squery = new plasmaSearchQuery(queryhashes, excludehashes, maxdist, prefer, plasmaSearchQuery.contentdomParser(contentdom), count, duetime, filter, constraint);
-            squery.domType = plasmaSearchQuery.SEARCHDOM_LOCAL;
-            yacyCore.log.logInfo("INIT HASH SEARCH (query-" + abstracts + "): " + plasmaSearchQuery.anonymizedQueryHashes(squery.queryHashes) + " - " + squery.wantedResults + " links");
+            theQuery = new plasmaSearchQuery(queryhashes, excludehashes, maxdist, prefer, plasmaSearchQuery.contentdomParser(contentdom), count, duetime, filter, constraint);
+            theQuery.domType = plasmaSearchQuery.SEARCHDOM_LOCAL;
+            yacyCore.log.logInfo("INIT HASH SEARCH (query-" + abstracts + "): " + plasmaSearchQuery.anonymizedQueryHashes(theQuery.queryHashes) + " - " + theQuery.wantedResults + " links");
 
             // prepare a search profile
             plasmaSearchRankingProfile rankingProfile = (profile.length() == 0) ? new plasmaSearchRankingProfile(plasmaSearchQuery.contentdomParser(contentdom)) : new plasmaSearchRankingProfile("", profile);
-            plasmaSearchProcessing localProcess  = new plasmaSearchProcessing(squery.maximumTime, squery.wantedResults);
+            plasmaSearchProcessing localProcess  = new plasmaSearchProcessing(theQuery.maximumTime, theQuery.wantedResults);
             //plasmaSearchProcessing remoteProcess = null;
 
-            //theSearch = new plasmaSearchEvent(squery, rankingProfile, localProcess, remoteProcess, true, sb.wordIndex, null);
-            Map[] containers = localProcess.localSearchContainers(squery, sb.wordIndex, plasmaSearchQuery.hashes2Set(urls));
+            plasmaSearchEvent theSearch = plasmaSearchEvent.getEvent(theQuery, rankingProfile, localProcess, null, sb.wordIndex, null, true, abstractSet);
+            //Map[] containers = localProcess.localSearchContainers(theQuery, sb.wordIndex, plasmaSearchQuery.hashes2Set(urls));
             // set statistic details of search result and find best result index set
-            if (containers == null) {
+            if (theSearch.getLocalCount() == 0) {
                 prop.putASIS("indexcount", "");
                 prop.putASIS("joincount", "0");
             } else {
-                Iterator ci = containers[0].entrySet().iterator();
+                // attach information about index abstracts
                 StringBuffer indexcount = new StringBuffer();
                 Map.Entry entry;
-                int maxcount = -1;
-                double mindhtdistance = 1.1, d;
-                String wordhash;
-                String maxcounthash = null, neardhthash = null;
-                while (ci.hasNext()) {
-                    entry = (Map.Entry) ci.next();
-                    wordhash = (String) entry.getKey();
-                    indexContainer container = (indexContainer) entry.getValue();
-                    if (container.size() > maxcount) {
-                        maxcounthash = wordhash;
-                        maxcount = container.size();
-                    }
-                    d = yacyDHTAction.dhtDistance(yacyCore.seedDB.mySeed.hash, wordhash);
-                    if (d < mindhtdistance) {
-                        // calculate the word hash that is closest to our dht position
-                        mindhtdistance = d;
-                        neardhthash = wordhash;
-                    }
-                    indexcount.append("indexcount.").append(container.getWordHash()).append('=').append(Integer.toString(container.size())).append(serverCore.crlfString);
-                    if ((abstractSet != null) && (abstractSet.contains(wordhash))) {
-                        // if a specific index-abstract is demanded, attach it here
-                        indexabstractContainercount += container.size();
-                        indexabstract.append("indexabstract." + wordhash + "=").append(plasmaURL.compressIndex(container, null,1000).toString()).append(serverCore.crlfString);
+                Iterator i = theSearch.IACount.entrySet().iterator();
+                while (i.hasNext()) {
+                    entry = (Map.Entry) i.next();
+                    indexcount.append("indexcount.").append((String) entry.getKey()).append('=').append(((Integer) entry.getValue()).toString()).append(serverCore.crlfString);
+                }
+                if (abstractSet != null) {
+                    // if a specific index-abstract is demanded, attach it here
+                    i = abstractSet.iterator();
+                    String wordhash;
+                    while (i.hasNext()) {
+                        wordhash = (String) i.next();
+                        indexabstractContainercount += ((Integer) theSearch.IACount.get(wordhash)).intValue();
+                        indexabstract.append("indexabstract." + wordhash + "=").append((String) theSearch.IAResults.get(wordhash)).append(serverCore.crlfString);
                     }
                 }
                 prop.putASIS("indexcount", new String(indexcount));
-
-                // join and order the result
-                indexContainer localResults =
-                    (containers == null) ?
-                      plasmaWordIndex.emptyContainer(null, 0) :
-                          localProcess.localSearchJoinExclude(
-                              containers[0].values(),
-                              containers[1].values(),
-                              (squery.queryHashes.size() == 0) ?
-                                0 :
-                                localProcess.getTargetTime(plasmaSearchProcessing.PROCESS_JOIN) * squery.queryHashes.size() / (squery.queryHashes.size() + squery.excludeHashes.size()),
-                              squery.maxDistance);
-                if (localResults == null) {
+                
+                if (theSearch.getLocalCount() == 0) {
                     joincount = 0;
                     prop.put("joincount", 0);
                 } else {
-                    joincount = localResults.size();
+                    joincount = theSearch.getLocalCount();
                     prop.putASIS("joincount", Integer.toString(joincount));
-                    plasmaSearchPreOrder pre = new plasmaSearchPreOrder(squery, localProcess, rankingProfile, localResults);
-                    accu = new plasmaSearchResultAccumulator(squery, localProcess, rankingProfile, pre.strippedContainer(200), sb.wordIndex, plasmaSwitchboard.blueList, false);
+                    accu = theSearch.computeResults(plasmaSwitchboard.blueList, false);
                 }
                 
                 // generate compressed index for maxcounthash
                 // this is not needed if the search is restricted to specific
                 // urls, because it is a re-search
-                if ((maxcounthash == null) || (urls.length() != 0) || (queryhashes.size() == 1) || (abstracts.length() == 0)) {
+                if ((theSearch.IAmaxcounthash == null) || (urls.length() != 0) || (queryhashes.size() == 1) || (abstracts.length() == 0)) {
                     prop.putASIS("indexabstract", "");
                 } else if (abstracts.equals("auto")) {
                     // automatically attach the index abstract for the index that has the most references. This should be our target dht position
-                    indexContainer container = (indexContainer) containers[0].get(maxcounthash);
-                    indexabstractContainercount += container.size();
-                    indexabstract.append("indexabstract." + maxcounthash + "=").append(plasmaURL.compressIndex(container,localResults, 1000).toString()).append(serverCore.crlfString);
-                    if ((neardhthash != null) && (!(neardhthash.equals(maxcounthash)))) {
+                    indexabstractContainercount += ((Integer) theSearch.IACount.get(theSearch.IAmaxcounthash)).intValue();
+                    indexabstract.append("indexabstract." + theSearch.IAmaxcounthash + "=").append((String) theSearch.IAResults.get(theSearch.IAmaxcounthash)).append(serverCore.crlfString);
+                    if ((theSearch.IAneardhthash != null) && (!(theSearch.IAneardhthash.equals(theSearch.IAmaxcounthash)))) {
                         // in case that the neardhthash is different from the maxcounthash attach also the neardhthash-container
-                        container = (indexContainer) containers[0].get(neardhthash);
-                        indexabstractContainercount += container.size();
-                        indexabstract.append("indexabstract." + neardhthash + "=").append(plasmaURL.compressIndex(container, localResults, 1000).toString()).append(serverCore.crlfString);
+                        indexabstractContainercount += ((Integer) theSearch.IACount.get(theSearch.IAneardhthash)).intValue();
+                        indexabstract.append("indexabstract." + theSearch.IAneardhthash + "=").append((String) theSearch.IAResults.get(theSearch.IAneardhthash)).append(serverCore.crlfString);
                     }
                     //System.out.println("DEBUG-ABSTRACTGENERATION: maxcounthash = " + maxcounthash);
                     //System.out.println("DEBUG-ABSTRACTGENERATION: neardhthash  = "+ neardhthash);
@@ -248,13 +221,20 @@ public final class search {
                 }
             }
             if (partitions > 0) sb.requestedQueries = sb.requestedQueries + 1d / (double) partitions; // increase query counter
+
+            // prepare reference hints
+            Object[] ws = theSearch.references();
+            StringBuffer refstr = new StringBuffer();
+            for (int j = 0; j < ws.length; j++)
+                refstr.append(",").append((String) ws[j]);
+            prop.putASIS("references", (refstr.length() > 0) ? refstr.substring(1) : new String(refstr));
         }
         prop.putASIS("indexabstract", new String(indexabstract));
         
         // prepare search statistics
         Long trackerHandle = new Long(System.currentTimeMillis());
         String client = (String) header.get("CLIENTIP");
-        HashMap searchProfile = squery.resultProfile((accu == null) ? 0 : accu.resultCount(), System.currentTimeMillis() - timestamp);
+        HashMap searchProfile = theQuery.resultProfile((accu == null) ? 0 : accu.size(), System.currentTimeMillis() - timestamp);
         searchProfile.put("host", client);
         yacySeed remotepeer = yacyCore.seedDB.lookupByIP(natLib.getInetAddress(client), true, false, false);
         searchProfile.put("peername", (remotepeer == null) ? "unknown" : remotepeer.getName());
@@ -278,23 +258,16 @@ public final class search {
             // result is a List of urlEntry elements
             StringBuffer links = new StringBuffer();
             String resource = null;
-            plasmaSearchResultAccumulator.Entry entry;
-            for (int i = 0; i < accu.resultCount(); i++) {
-                entry = accu.resultEntry(i);
+            plasmaSearchEvent.Entry entry;
+            for (int i = 0; i < accu.size(); i++) {
+                entry = (plasmaSearchEvent.Entry) accu.get(i);
                 resource = entry.resource();
                 if (resource != null) {
                     links.append("resource").append(i).append('=').append(resource).append(serverCore.crlfString);
                 }
             }
             prop.putASIS("links", new String(links));
-            prop.put("linkcount", accu.resultCount());
-
-            // prepare reference hints
-            Object[] ws = accu.references();
-            StringBuffer refstr = new StringBuffer();
-            for (int j = 0; j < ws.length; j++)
-                refstr.append(",").append((String) ws[j]);
-            prop.putASIS("references", (refstr.length() > 0) ? refstr.substring(1) : new String(refstr));
+            prop.put("linkcount", accu.size());
         }
         
         // add information about forward peers
@@ -304,7 +277,7 @@ public final class search {
         
         // log
         yacyCore.log.logInfo("EXIT HASH SEARCH: " +
-                plasmaSearchQuery.anonymizedQueryHashes(squery.queryHashes) + " - " + joincount + " links found, " +
+                plasmaSearchQuery.anonymizedQueryHashes(theQuery.queryHashes) + " - " + joincount + " links found, " +
                 prop.get("linkcount", "?") + " links selected, " +
                 indexabstractContainercount + " index abstract references attached, " +
                 (System.currentTimeMillis() - timestamp) + " milliseconds");

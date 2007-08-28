@@ -64,11 +64,13 @@ public class URLLicense {
         synchronized (permissions) {
             url = (URL) permissions.remove(license);
         }
+        /*
         if (url == null) {
             System.out.println("DEBUG-URLLICENSE: no URL license present for code=" + license);
         } else {
             System.out.println("DEBUG-URLLICENSE: granted download of " + url.toString());
         }
+        */
         return url;
     }
     

@@ -26,19 +26,28 @@
 
 package de.anomic.plasma;
 
+import java.io.UnsupportedEncodingException;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Map;
 import java.util.TreeMap;
+import java.util.TreeSet;
 
 import de.anomic.index.indexContainer;
 import de.anomic.index.indexRWIEntry;
+import de.anomic.index.indexURLEntry;
+import de.anomic.kelondro.kelondroBitfield;
+import de.anomic.kelondro.kelondroException;
 import de.anomic.kelondro.kelondroMSetTools;
+import de.anomic.net.URL;
 import de.anomic.server.logging.serverLog;
 import de.anomic.yacy.yacyCore;
+import de.anomic.yacy.yacyDHTAction;
 import de.anomic.yacy.yacySearch;
+import de.anomic.yacy.yacySeed;
 
 public final class plasmaSearchEvent {
     
@@ -62,13 +71,18 @@ public final class plasmaSearchEvent {
     private int lastglobal;
     private int filteredCount;
     private ArrayList display; // an array of url hashes of urls that had been displayed as search result after this search
+    private Object[] references;
+    public  TreeMap IAResults, IACount;
+    public  String IAmaxcounthash, IAneardhthash;
     
     private plasmaSearchEvent(plasmaSearchQuery query,
                              plasmaSearchRankingProfile ranking,
                              plasmaSearchProcessing localTiming,
                              plasmaSearchProcessing remoteTiming,
                              plasmaWordIndex wordIndex,
-                             TreeMap preselectedPeerHashes) {
+                             TreeMap preselectedPeerHashes,
+                             boolean generateAbstracts,
+                             TreeSet abstractSet) {
         this.eventTime = System.currentTimeMillis(); // for lifetime check
         this.wordIndex = wordIndex;
         this.query = query;
@@ -86,6 +100,11 @@ public final class plasmaSearchEvent {
         this.sortedResults = null;
         this.lastglobal = 0;
         this.display = new ArrayList();
+        this.references = new String[0];
+        this.IAResults = new TreeMap();
+        this.IACount = new TreeMap();
+        this.IAmaxcounthash = null;
+        this.IAneardhthash = null;
         
         long start = System.currentTimeMillis();
         if ((query.domType == plasmaSearchQuery.SEARCHDOM_GLOBALDHT) ||
@@ -208,6 +227,33 @@ public final class plasmaSearchEvent {
         } else {
             Map[] searchContainerMaps = profileLocal.localSearchContainers(query, wordIndex, null);
             
+            if (generateAbstracts) {
+                // compute index abstracts
+                Iterator ci = searchContainerMaps[0].entrySet().iterator();
+                Map.Entry entry;
+                int maxcount = -1;
+                double mindhtdistance = 1.1, d;
+                String wordhash;
+                while (ci.hasNext()) {
+                    entry = (Map.Entry) ci.next();
+                    wordhash = (String) entry.getKey();
+                    indexContainer container = (indexContainer) entry.getValue();
+                    assert (container.getWordHash().equals(wordhash));
+                    if (container.size() > maxcount) {
+                        IAmaxcounthash = wordhash;
+                        maxcount = container.size();
+                    }
+                    d = yacyDHTAction.dhtDistance(yacyCore.seedDB.mySeed.hash, wordhash);
+                    if (d < mindhtdistance) {
+                        // calculate the word hash that is closest to our dht position
+                        mindhtdistance = d;
+                        IAneardhthash = wordhash;
+                    }
+                    IACount.put(wordhash, new Integer(container.size()));
+                    IAResults.put(wordhash, plasmaURL.compressIndex(container, null, 1000).toString());
+                }
+            }
+            
             rcLocal =
                 (searchContainerMaps == null) ?
                   plasmaWordIndex.emptyContainer(null, 0) :
@@ -274,10 +320,12 @@ public final class plasmaSearchEvent {
             plasmaSearchProcessing localTiming,
             plasmaSearchProcessing remoteTiming,
             plasmaWordIndex wordIndex,
-            TreeMap preselectedPeerHashes) {
+            TreeMap preselectedPeerHashes,
+            boolean generateAbstracts,
+            TreeSet abstractSet) {
         plasmaSearchEvent event = (plasmaSearchEvent) lastEvents.get(query.id());
         if (event == null) {
-            event = new plasmaSearchEvent(query, ranking, localTiming, remoteTiming, wordIndex, preselectedPeerHashes);
+            event = new plasmaSearchEvent(query, ranking, localTiming, remoteTiming, wordIndex, preselectedPeerHashes, generateAbstracts, abstractSet);
         } else {
             //re-new the event time for this event, so it is not deleted next time too early
             event.eventTime = System.currentTimeMillis();
@@ -285,7 +333,7 @@ public final class plasmaSearchEvent {
         return event;
     }
     
-    public indexContainer search() {
+    private indexContainer search() {
         // combine the local and global (if any) result and order
         if ((rcGlobal != null) && (rcGlobal.size() > 0)) {
             globalcount = rcGlobal.size();
@@ -309,6 +357,136 @@ public final class plasmaSearchEvent {
         }
         
         return this.sortedResults;
+    }
+
+    public ArrayList computeResults(
+            TreeSet blueList,
+            boolean overfetch) {
+        
+        indexContainer pre = search();
+        final ArrayList hits = new ArrayList();
+        
+        // start url-fetch
+        final long postorderTime = this.profileLocal.getTargetTime(plasmaSearchProcessing.PROCESS_POSTSORT);
+        //System.out.println("DEBUG: postorder-final (urlfetch) maxtime = " + postorderTime);
+        final long postorderLimitTime = (postorderTime < 0) ? Long.MAX_VALUE : (System.currentTimeMillis() + postorderTime);
+        this.profileLocal.startTimer();
+        final plasmaSearchPostOrder acc = new plasmaSearchPostOrder(query, ranking);
+        
+        indexRWIEntry rwientry;
+        indexURLEntry page;
+        indexURLEntry.Components comp;
+        String pagetitle, pageurl, pageauthor;
+        final int minEntries = this.profileLocal.getTargetCount(plasmaSearchProcessing.PROCESS_POSTSORT);
+        try {
+            ordering: for (int i = 0; i < pre.size(); i++) {
+                if ((System.currentTimeMillis() >= postorderLimitTime) || (acc.sizeFetched() >= ((overfetch) ? 4 : 1) * minEntries)) break;
+                rwientry = new indexRWIEntry(pre.get(i));
+                // load only urls if there was not yet a root url of that hash
+                // find the url entry
+                page = wordIndex.loadedURL.load(rwientry.urlHash(), rwientry);
+                if (page != null) {
+                    comp = page.comp();
+                    pagetitle = comp.title().toLowerCase();
+                    if (comp.url() == null) continue ordering; // rare case where the url is corrupted
+                    pageurl = comp.url().toString().toLowerCase();
+                    pageauthor = comp.author().toLowerCase();
+                    
+                    // check exclusion
+                    if (plasmaSearchQuery.matches(pagetitle, query.excludeHashes)) continue ordering;
+                    if (plasmaSearchQuery.matches(pageurl, query.excludeHashes)) continue ordering;
+                    if (plasmaSearchQuery.matches(pageauthor, query.excludeHashes)) continue ordering;
+                    
+                    // check url mask
+                    if (!(pageurl.matches(query.urlMask))) continue ordering;
+                    
+                    // check constraints
+                    if ((!(query.constraint.equals(plasmaSearchQuery.catchall_constraint))) &&
+                        (query.constraint.get(plasmaCondenser.flag_cat_indexof)) &&
+                        (!(comp.title().startsWith("Index of")))) {
+                        serverLog.logFine("PLASMA", "filtered out " + comp.url().toString());
+                        // filter out bad results
+                        final Iterator wi = query.queryHashes.iterator();
+                        while (wi.hasNext()) wordIndex.removeEntry((String) wi.next(), page.hash());
+                    } else if (query.contentdom != plasmaSearchQuery.CONTENTDOM_TEXT) {
+                        if ((query.contentdom == plasmaSearchQuery.CONTENTDOM_AUDIO) && (page.laudio() > 0)) acc.addPage(page);
+                        else if ((query.contentdom == plasmaSearchQuery.CONTENTDOM_VIDEO) && (page.lvideo() > 0)) acc.addPage(page);
+                        else if ((query.contentdom == plasmaSearchQuery.CONTENTDOM_IMAGE) && (page.limage() > 0)) acc.addPage(page);
+                        else if ((query.contentdom == plasmaSearchQuery.CONTENTDOM_APP) && (page.lapp() > 0)) acc.addPage(page);
+                    } else {
+                        acc.addPage(page);
+                    }
+                }
+            }
+        } catch (final kelondroException ee) {
+            serverLog.logSevere("PLASMA", "Database Failure during plasmaSearch.order: " + ee.getMessage(), ee);
+        }
+        this.profileLocal.setYieldTime(plasmaSearchProcessing.PROCESS_URLFETCH);
+        this.profileLocal.setYieldCount(plasmaSearchProcessing.PROCESS_URLFETCH, acc.sizeFetched());
+        
+        // start postsorting
+        this.profileLocal.startTimer();
+        acc.sortPages(true);
+        this.profileLocal.setYieldTime(plasmaSearchProcessing.PROCESS_POSTSORT);
+        this.profileLocal.setYieldCount(plasmaSearchProcessing.PROCESS_POSTSORT, acc.sizeOrdered());
+        
+        
+        // apply filter
+        this.profileLocal.startTimer();
+        acc.removeRedundant();
+        this.profileLocal.setYieldTime(plasmaSearchProcessing.PROCESS_FILTER);
+        this.profileLocal.setYieldCount(plasmaSearchProcessing.PROCESS_FILTER, acc.sizeOrdered());
+        
+        // generate references
+        this.references = acc.getReferences(16);
+        
+        // generate Result.Entry objects and optionally fetch snippets
+        int i = 0;
+        Entry entry;
+        final boolean includeSnippets = false;
+        while ((acc.hasMoreElements()) && (i < query.wantedResults)) {
+            try {
+                entry = new Entry(acc.nextElement(), wordIndex);
+            } catch (final RuntimeException e) {
+                continue;
+            }
+            // check bluelist again: filter out all links where any
+            // bluelisted word
+            // appear either in url, url's description or search word
+            // the search word was sorted out earlier
+            /*
+             * String s = descr.toLowerCase() + url.toString().toLowerCase();
+             * for (int c = 0; c < blueList.length; c++) { if
+             * (s.indexOf(blueList[c]) >= 0) return; }
+             */
+            if (includeSnippets) {
+                entry.setSnippet(plasmaSnippetCache.retrieveTextSnippet(
+                        entry.url(), query.queryHashes, false,
+                        entry.flags().get(plasmaCondenser.flag_cat_indexof), 260,
+                        1000));
+                // snippet =
+                // snippetCache.retrieveTextSnippet(comp.url(),
+                // query.queryHashes, false,
+                // urlentry.flags().get(plasmaCondenser.flag_cat_indexof),
+                // 260, 1000);
+            } else {
+                // snippet = null;
+                entry.setSnippet(null);
+            }
+            i++;
+            hits.add(entry);
+        }
+
+        /*
+         * while ((acc.hasMoreElements()) && (((time + timestamp) <
+         * System.currentTimeMillis()))) { urlentry = acc.nextElement();
+         * urlstring = htmlFilterContentScraper.urlNormalform(urlentry.url());
+         * descr = urlentry.descr();
+         * 
+         * addScoreForked(ref, gs, descr.split(" ")); addScoreForked(ref, gs,
+         * urlstring.split("/")); }
+         */
+        return hits;
     }
     
     public int filteredCount() {
@@ -418,4 +596,98 @@ public final class plasmaSearchEvent {
         this.display.set(position, urlhash);
     }
     
+    public Object[] references() {
+        return this.references;
+    }
+    
+    public static class Entry {
+        private indexURLEntry urlentry;
+        private indexURLEntry.Components urlcomps; // buffer for components
+        private String alternative_urlstring;
+        private String alternative_urlname;
+        private plasmaSnippetCache.TextSnippet snippet;
+        
+        public Entry(indexURLEntry urlentry, plasmaWordIndex wordIndex) {
+            this.urlentry = urlentry;
+            this.urlcomps = urlentry.comp();
+            this.alternative_urlstring = null;
+            this.alternative_urlname = null;
+            this.snippet = null;
+            String host = urlcomps.url().getHost();
+            if (host.endsWith(".yacyh")) {
+                // translate host into current IP
+                int p = host.indexOf(".");
+                String hash = yacySeed.hexHash2b64Hash(host.substring(p + 1, host.length() - 6));
+                yacySeed seed = yacyCore.seedDB.getConnected(hash);
+                String filename = urlcomps.url().getFile();
+                String address = null;
+                if ((seed == null) || ((address = seed.getPublicAddress()) == null)) {
+                    // seed is not known from here
+                    try {
+                        wordIndex.removeWordReferences(
+                            plasmaCondenser.getWords(
+                                ("yacyshare " +
+                                 filename.replace('?', ' ') +
+                                 " " +
+                                 urlcomps.title()).getBytes(), "UTF-8").keySet(),
+                                 urlentry.hash());
+                        wordIndex.loadedURL.remove(urlentry.hash()); // clean up
+                        throw new RuntimeException("index void");
+                    } catch (UnsupportedEncodingException e) {
+                        throw new RuntimeException("parser failed: " + e.getMessage());
+                    }
+                }
+                alternative_urlstring = "http://" + address + "/" + host.substring(0, p) + filename;
+                alternative_urlname = "http://share." + seed.getName() + ".yacy" + filename;
+                if ((p = alternative_urlname.indexOf("?")) > 0) alternative_urlname = alternative_urlname.substring(0, p);
+            }
+        }
+        public String hash() {
+            return urlentry.hash();
+        }
+        public URL url() {
+            return urlcomps.url();
+        }
+        public kelondroBitfield flags() {
+            return urlentry.flags();
+        }
+        public String urlstring() {
+            return (alternative_urlstring == null) ? urlcomps.url().toNormalform(false, true) : alternative_urlstring;
+        }
+        public String urlname() {
+            return (alternative_urlname == null) ? urlcomps.url().toNormalform(false, true) : alternative_urlname;
+        }
+        public String title() {
+            return urlcomps.title();
+        }
+        public void setSnippet(plasmaSnippetCache.TextSnippet snippet) {
+            this.snippet = snippet;
+        }
+        public plasmaSnippetCache.TextSnippet snippet() {
+            return this.snippet;
+        }
+        public Date modified() {
+            return urlentry.moddate();
+        }
+        public int filesize() {
+            return urlentry.size();
+        }
+        public indexRWIEntry word() {
+            return urlentry.word();
+        }
+        public boolean hasSnippet() {
+            return false;
+        }
+        public plasmaSnippetCache.TextSnippet textSnippet() {
+            return null;
+        }
+        public String resource() {
+            // generate transport resource
+            if ((snippet != null) && (snippet.exists())) {
+                return urlentry.toString(snippet.getLineRaw());
+            } else {
+                return urlentry.toString();
+            }
+        }
+    }
 }

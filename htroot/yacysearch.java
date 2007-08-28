@@ -50,13 +50,13 @@ import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.net.MalformedURLException;
 import java.net.URLEncoder;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.TreeSet;
 
 import de.anomic.htmlFilter.htmlFilterImageEntry;
 import de.anomic.http.httpHeader;
-import de.anomic.index.indexContainer;
 import de.anomic.index.indexURLEntry;
 import de.anomic.kelondro.kelondroBitfield;
 import de.anomic.kelondro.kelondroMSetTools;
@@ -70,7 +70,6 @@ import de.anomic.plasma.plasmaSearchPreOrder;
 import de.anomic.plasma.plasmaSearchQuery;
 import de.anomic.plasma.plasmaSearchRankingProfile;
 import de.anomic.plasma.plasmaSearchProcessing;
-import de.anomic.plasma.plasmaSearchResultAccumulator;
 import de.anomic.plasma.plasmaSnippetCache;
 import de.anomic.plasma.plasmaSwitchboard;
 import de.anomic.plasma.plasmaURL;
@@ -298,12 +297,11 @@ public class yacysearch {
 
         // create a new search event
         String wrongregex = null;
-        plasmaSearchEvent theSearch = plasmaSearchEvent.getEvent(theQuery, ranking, localTiming, remoteTiming, sb.wordIndex, (sb.isRobinsonMode()) ? sb.clusterhashes : null);
-        indexContainer preorder = theSearch.search();
+        plasmaSearchEvent theSearch = plasmaSearchEvent.getEvent(theQuery, ranking, localTiming, remoteTiming, sb.wordIndex, (sb.isRobinsonMode()) ? sb.clusterhashes : null, false, null);
             
-        // fetch snippets
+        // generate result object
         serverLog.logFine("LOCAL_SEARCH", "SEARCH TIME AFTER ORDERING OF SEARCH RESULTS: " + ((System.currentTimeMillis() - timestamp) / 1000) + " seconds");
-        plasmaSearchResultAccumulator accu = new plasmaSearchResultAccumulator(theQuery, localTiming, ranking, preorder, sb.wordIndex, plasmaSwitchboard.blueList, true);
+        ArrayList accu = theSearch.computeResults(plasmaSwitchboard.blueList, true);
         serverLog.logFine("LOCAL_SEARCH", "SEARCH TIME AFTER RESULT PREPARATION: " + ((System.currentTimeMillis() - timestamp) / 1000) + " seconds");
                 
         // calc some more cross-reference
@@ -316,13 +314,12 @@ public class yacysearch {
         serverLog.logInfo("LOCAL_SEARCH", "EXIT WORD SEARCH: " + theQuery.queryString + " - " +
                     (theSearch.getLocalCount() + theSearch.getGlobalCount()) + " links found, " +
                     theSearch.filteredCount() + " links filtered, " +
-                    accu.resultCount() + " links ordered, " +
+                    accu.size() + " links ordered, " +
                     ((System.currentTimeMillis() - timestamp) / 1000) + " seconds");
-            
-            
+
         // prepare search statistics
         Long trackerHandle = new Long(System.currentTimeMillis());
-        HashMap searchProfile = theQuery.resultProfile(accu.resultCount(), System.currentTimeMillis() - timestamp);
+        HashMap searchProfile = theQuery.resultProfile(accu.size(), System.currentTimeMillis() - timestamp);
         searchProfile.put("querystring", theQuery.queryString);
         searchProfile.put("time", trackerHandle);
         searchProfile.put("host", client);
@@ -333,22 +330,30 @@ public class yacysearch {
         if (handles == null) handles = new TreeSet();
         handles.add(trackerHandle);
         sb.localSearchTracker.put(client, handles);
-        //**
-
+        
         //prop=sb.searchFromLocal(thisSearch, ranking, localTiming, remoteTiming, true, (String) header.get("CLIENTIP"));
-        prop=new serverObjects();
+        prop = new serverObjects();
         //prop.put("references", 0);
-        URL wordURL=null;
         prop.put("num-results_totalcount", theSearch.getLocalCount() + theSearch.getGlobalCount());
         prop.put("num-results_filteredcount", theSearch.filteredCount());
-        prop.put("num-results_orderedcount", accu.resultCount());
+        prop.put("num-results_orderedcount", accu.size());
         prop.put("num-results_globalresults", (theSearch.getGlobalCount() == 0) ? 0 : 1);
         prop.put("num-results_globalresults_globalcount", theSearch.getGlobalCount());
         prop.put("num-results_linkcount", 0);
+        
+        /*
+        for (int i = 0; i < theQuery.wantedResults; i++) {
+            prop.put("type_results_" + i + "_item", i);
+            prop.put("type_results_" + i + "_eventID", theQuery.id());
+        }
+        prop.put("type_results", theQuery.wantedResults);
+        */
+        //------------------------
+        
         prop.put("type_results", 0);
-
-        for (int i = 0; i < accu.resultCount(); i++) {
-            plasmaSearchResultAccumulator.Entry result = accu.resultEntry(i);
+        URL wordURL=null;
+        for (int i = 0; i < accu.size(); i++) {
+            plasmaSearchEvent.Entry result = (plasmaSearchEvent.Entry) accu.get(i);
             prop.put("type_results_" + i + "_authorized_recommend", (yacyCore.newsPool.getSpecific(yacyNewsPool.OUTGOING_DB, yacyNewsPool.CATEGORY_SURFTIPP_ADD, "url", result.urlstring()) == null) ? 1 : 0);
             prop.put("type_results_" + i + "_authorized_recommend_deletelink", "/yacysearch.html?search=" + theQuery.queryString + "&Enter=Search&count=" + theQuery.wantedResults + "&order=" + crypt.simpleEncode(ranking.toExternalString()) + "&resource=local&time=3&deleteref=" + result.hash() + "&urlmaskfilter=.*");
             prop.put("type_results_" + i + "_authorized_recommend_recommendlink", "/yacysearch.html?search=" + theQuery.queryString + "&Enter=Search&count=" + theQuery.wantedResults + "&order=" + crypt.simpleEncode(ranking.toExternalString()) + "&resource=local&time=3&recommendref=" + result.hash() + "&urlmaskfilter=.*");
@@ -410,22 +415,24 @@ public class yacysearch {
                         }          
                         prop.put("type_results_" + i + "_snippet", 1);
                 	} else {
-                		/* no snippet available (will be fetched later via ajax) */
+                		// no snippet available (will be fetched later via ajax)
                 		prop.put("type_results_" + i + "_snippet", 0);
                 		prop.put("type_results_" + i + "_snippet_text", "");
                 	}
                 }
-                prop.put("type_results", accu.resultCount());
-                prop.put("num-results_linkcount", Integer.toString(accu.resultCount()));
+                prop.put("type_results", accu.size());
+                prop.put("num-results_linkcount", Integer.toString(accu.size()));
             }
-
-        // process result of search
-        if (filtered.size() > 0) {
-            prop.put("excluded", 1);
-            prop.put("excluded_stopwords", filtered.toString());
-        } else {
-            prop.put("excluded", 0);
-        }
+            
+            //------------------------
+        
+            // process result of search
+            if (filtered.size() > 0) {
+                prop.put("excluded", 1);
+                prop.put("excluded_stopwords", filtered.toString());
+            } else {
+                prop.put("excluded", 0);
+            }
 
             if (prop == null || prop.size() == 0) {
                 if (post.get("search", "").length() < 3) {
@@ -440,7 +447,6 @@ public class yacysearch {
                     prop.put("num-results", 5);
                     int hintcount = references.length;
                     if (hintcount > 0) {
-
                         prop.put("type_combine", 1);
                         // get the topwords
                         final TreeSet topwords = new TreeSet(kelondroNaturalOrder.naturalOrder);
@@ -449,8 +455,6 @@ public class yacysearch {
                             tmp = (String) references[i];
                             if (tmp.matches("[a-z]+")) {
                                 topwords.add(tmp);
-                            // } else {
-                            //    topwords.add("(" + tmp + ")");
                             }
                         }
 
@@ -460,13 +464,13 @@ public class yacysearch {
                             kelondroMSetTools.excludeDestructive(topwords, plasmaSwitchboard.badwords);
                         }
 
-						//avoid stopwords being topwords
+                        // avoid stopwords being topwords
                         if (env.getConfig("filterOutStopwordsFromTopwords", "true").equals("true")) {
-                        if ((plasmaSwitchboard.stopwords != null) && (plasmaSwitchboard.stopwords.size() > 0)) {
-                            kelondroMSetTools.excludeDestructive(topwords, plasmaSwitchboard.stopwords);
-                        	}
+                            if ((plasmaSwitchboard.stopwords != null) && (plasmaSwitchboard.stopwords.size() > 0)) {
+                                kelondroMSetTools.excludeDestructive(topwords, plasmaSwitchboard.stopwords);
+                            }
                         }
-						
+		 				
                         String word;
                         hintcount = 0;
                         final Iterator iter = topwords.iterator();
@@ -489,11 +493,9 @@ public class yacysearch {
                     if (wrongregex != null) {
                         prop.put("num-results_wrong_regex", wrongregex);
                         prop.put("num-results", 4);
-                    }
-                    else if (totalcount == 0) {
+                    } else if (totalcount == 0) {
                         prop.put("num-results", 3); // long
-                    }
-                    else {
+                    } else {
                         prop.put("num-results", 5);
                     }
                 }
@@ -545,9 +547,10 @@ public class yacysearch {
 
         // if user is not authenticated, he may not vote for URLs
         int linkcount = Integer.parseInt(prop.get("num-results_linkcount", "0"));
-        for (int i=0; i<linkcount; i++)
+        for (int i=0; i<linkcount; i++) {
             prop.put("type_results_" + i + "_authorized", (authenticated) ? 1 : 0);
-
+        }
+        
         prop.put("searchagain", (global) ? 1 : 0);
         prop.put("input", input);
         prop.put("display", display);

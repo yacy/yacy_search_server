@@ -230,20 +230,29 @@ document.getElementById("Enter").value = "search again - catch up more links";
 	</tr>
 	#{/results}#
 	</table>
+	
+	<!-- type 4: experimental new text search -->
+	#(combine)#
+		::
+		<p><strong>Refine your search with these topwords</strong>:</p>
+		<p>
+		#{words}#
+		<a href="yacysearch.html?search=#[newsearch]#&amp;Enter=Search&amp;count=#[count]#&amp;resource=#[resource]#&amp;time=#[time]#">#[word]#</a>
+		#{/words}#
+		</p>
+	#(/combine)#
+	<!-- linklist begin -->
+	<div id="hidden_results"></div>
+	#{results}#
+	<!-- link begin -->
+	     <div class="searchresults" name="searchresults">
+	     <!--#include virtual="yacysearchitem.html?item=#[item]#&eventID=#[eventID]#" -->
+	     </div>
+	<!-- link end -->
+	#{/results}#
+	
+	
 #(/type)#
-
-
-#(display)#
-	<p class="info">
-	YaCy is a GPL'ed project with the target of implementing a P2P-based global search engine.<br />
-	Architecture (C) by Michael Peter Christen, <img src="/env/grafics/mcemailh.gif" alt="Mail-Adresse von Michael Peter Christen" />
-	</p>
-	#%env/templates/simplefooter.template%#
-	::
-	#%env/templates/footer.template%#
-	::
-	#%env/templates/embeddedfooter.template%#
-#(/display)#
 
 </body>
 </html>

@@ -191,6 +191,10 @@ public final class plasmaSearchQuery {
     	return this.queryString;
     }
     
+    public TreeSet[] queryWords() {
+        return cleanQuery(this.queryString);
+    }
+    
     public void filterOut(Set blueList) {
         // filter out words that appear in this set
     	// this is applied to the queryHashes
