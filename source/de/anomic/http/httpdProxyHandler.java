@@ -124,7 +124,7 @@ public final class httpdProxyHandler {
 
     private static htmlFilterTransformer transformer = null;
     public static final String proxyUserAgent = "yacy (" + httpc.systemOST +") yacy.net";
-    public static final String crawlerUserAgent = "yacybot (" + httpc.systemOST +") http://yacy.net/yacy/bot.html";
+    public static final String crawlerUserAgent = "yacybot (" + httpc.systemOST +") http://yacy.net/bot.html";
     private static File htRootPath = null;
 
     //private Properties connectionProperties = null;
