@@ -137,7 +137,8 @@ document.getElementById("Enter").value = "search again - catch up more links";
 	<div id="hidden_results"></div>
 	#{results}#
 	<!-- link begin -->
-	     <div class="searchresults" name="searchresults">
+	     <div class="searchresults">
+	       <img src="ViewImage.png?width=16&height=16&code=#[faviconCode]#" id="f#[urlhash]#" class="favicon" width="16" height="16" alt="favicon of #[url]#" />
 	       #(authorized)#::
 	       <div class="urlactions">
 	         <a href="/Bookmarks.html?edit=#[urlhash]#" class="bookmarklink" title="bookmark"><img src="/env/grafics/empty.gif" title="bookmark" alt="bookmark" class="bookmarkIcon" /></a>
@@ -150,10 +151,10 @@ document.getElementById("Enter").value = "search again - catch up more links";
 	         #(/recommend)#
 	       </div>
 	       #(/authorized)#
-	       <h4 class="linktitle"><img src="ViewImage.png?width=16&height=16&code=#[faviconCode]#" id="f#[urlhash]#" class="favicon" width="16" height="16" /><a href="#[url]#" target="_parent">#[description]#</a></h4>
-	       <p class="snippet iconindented"><span class="#(snippet)#snippetLoading::snippetLoaded#(/snippet)#" id="h#[urlhash]#">#(snippet)#loading snippet ...::#[text]##(/snippet)#</span></p>
-	       <p class="url iconindented"><a href="#[url]#" id="url#[urlhash]#" target="_parent">#[urlname]#</a></p>
-	       <p class="urlinfo iconindented">#[date]# | YBR-#[ybr]# | <a href="ViewFile.html?urlHash=#[urlhash]#&amp;words=#[words]#">Info</a> | <a href="yacysearch.html?cat=image&amp;url=#[url]#&amp;search=#[former]#">Pictures</a></p>
+	       <h4 class="linktitle"><a href="#[url]#" target="_parent">#[description]#</a></h4>
+	       <p class="snippet"><span class="#(snippet)#snippetLoading::snippetLoaded#(/snippet)#" id="h#[urlhash]#">#(snippet)#loading snippet ...::#[text]##(/snippet)#</span></p>
+	       <p class="url"><a href="#[url]#" id="url#[urlhash]#" target="_parent">#[urlname]#</a></p>
+	       <p class="urlinfo">#[date]# | YBR-#[ybr]# | <a href="ViewFile.html?urlHash=#[urlhash]#&amp;words=#[words]#">Info</a> | <a href="yacysearch.html?cat=image&amp;url=#[url]#&amp;search=#[former]#">Pictures</a></p>
 	     </div>
 	<!-- link end -->
 	#{/results}#
@@ -245,7 +246,7 @@ document.getElementById("Enter").value = "search again - catch up more links";
 	<div id="hidden_results"></div>
 	#{results}#
 	<!-- link begin -->
-	     <div class="searchresults" name="searchresults">
+	     <div class="searchresults">
 	     <!--#include virtual="yacysearchitem.html?item=#[item]#&eventID=#[eventID]#" -->
 	     </div>
 	<!-- link end -->

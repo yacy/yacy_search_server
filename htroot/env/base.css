@@ -280,6 +280,7 @@ div.yacysearch {
 
 div.urlactions {
   float:left;
+  clear:left;
 }
 
 /*----------
@@ -424,12 +425,9 @@ a:hover.MenuItemLink {
 
 div.urlactions a {
   display:block;
-}
-
-div.urlactions > a {
   width: 11px;
   height: 11px;
-  margin: 1px 1px 1px 7px;
+  margin: 1px 4px;
 }
 
 a.bookmarklink:hover, div.searchresults:hover a.bookmarklink, div.searchresults.hover a.bookmarklink {
@@ -590,6 +588,10 @@ form.search.small fieldset {
     clear:left;
     margin-left:100px;
 }
+
+form.search.small fieldset * {
+  margin-left:0;
+}
 /*----------
 <img>
 */
@@ -700,10 +702,8 @@ ul#menu a.MenuItemLink {
 }
 
 img.favicon{
-	margin-right: 3px;
-	width: 16px;
-	height: 16px;
-}
-p.iconindented{
-	padding-left: 19px;
+  margin: 4px 1px;
+  width: 16px;
+  height: 16px;
+  float: left;
 }
