@@ -16,7 +16,7 @@ You can also use this software to set up your own search portal.
 WHERE IS THE DOCUMENTATION?
 
 The complete documentation can be found at:
-(English)  http://yacy.net/yacy
+(English)  http://yacy.net/
 (Wiki:de)  http://www.yacy-websuche.de/wiki/index.php/De:Start
 (Wiki:en)  http://www.yacy-websearch.net/wiki/index.php/En:Start
 

@@ -58,13 +58,13 @@ network.unit.bootstrap.seedlist0 = http://de.geocities.com/d15511z/yacy/angel/se
 network.unit.bootstrap.seedlist1 = http://home.arcor.de/hermens/yacy/seed.txt
 network.unit.bootstrap.seedlist2 = http://low.audioattack.de/yacy/seed.txt
 network.unit.bootstrap.seedlist3 = http://www.lulabad.de/seed.txt
-network.unit.bootstrap.seedlist4 = http://www.yacy.net/yacy/seed.txt
+network.unit.bootstrap.seedlist4 = http://www.yacy.net/seed.txt
 network.unit.bootstrap.seedlist5 = http://www.marcelhenseler.de/yacy/seed.txt
 network.unit.bootstrap.seedlist6 = http://www.dc-art.de/yacy/seed.txt
 
 # each network may use different yacy distributions.
 # the auto-updater can access network-specific update locations
-network.unit.update.location0 = http://yacy.net/yacy/Download.html
+network.unit.update.location0 = http://yacy.net/Download.html
 network.unit.update.location1 = http://latest.yacy.net
 network.unit.update.location2 = http://www.findenstattsuchen.info/YaCy/latest/index.php
 
