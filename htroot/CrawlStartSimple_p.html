@@ -50,10 +50,13 @@
           </td>
         </tr>
         <tr valign="top" class="TableCellLight">
-          <td><label for="crawlingDepth">Crawling Depth</label>:</td>
-          <td><input name="crawlingDepth" id="crawlingDepth" type="text" size="2" maxlength="2" value="#[crawlingDepth]#" /></td>
+          <td><label for="crawlingDepth">Crawling Range</label>:</td>
           <td>
-            The depth defines how deep the Crawler will follow links of links (...) and so on.
+          <input type="radio" name="range" value="wide" checked="checked" />Wide: depth <input name="crawlingDepth" id="crawlingDepth" type="text" size="2" maxlength="2" value="#[crawlingDepth]#" />&nbsp;&nbsp;|&nbsp;&nbsp;
+          <input type="radio" name="range" value="domain" />Complete Single Domain
+          </td>
+          <td>
+            The range defines if the crawl shall consider a complete domain, or a wide crawl up to a specific depth.
           </td>
         </tr>
         

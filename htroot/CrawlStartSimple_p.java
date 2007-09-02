@@ -45,7 +45,7 @@ public class CrawlStartSimple_p {
         
         // define visible variables
         prop.put("proxyPrefetchDepth", env.getConfig("proxyPrefetchDepth", "0"));
-        prop.put("crawlingDepth", env.getConfig("crawlingDepth", "0"));
+        prop.put("crawlingDepth", Math.min(3, env.getConfigLong("crawlingDepth", 0)));
         prop.put("crawlingFilter", env.getConfig("crawlingFilter", "0"));
         
         int crawlingIfOlder = (int) env.getConfigLong("crawlingIfOlder", -1);

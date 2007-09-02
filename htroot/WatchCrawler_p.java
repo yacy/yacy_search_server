@@ -97,10 +97,16 @@ public class WatchCrawler_p {
                     prop.put("info", 3);
                 } else {
                     // set new properties
+                    boolean fullDomain = post.get("range", "wide").equals("domain"); // special property in simple crawl start
+                    
                     String newcrawlingfilter = post.get("crawlingFilter", ".*");
+                    if (fullDomain) try {
+                        newcrawlingfilter = ".*" + (new URL(post.get("crawlingURL",""))).getHost() + ".*";
+                    } catch (MalformedURLException e) {}
                     env.setConfig("crawlingFilter", newcrawlingfilter);
                     
                     int newcrawlingdepth = Integer.parseInt(post.get("crawlingDepth", "0"));
+                    if (fullDomain) newcrawlingdepth = 99;
                     env.setConfig("crawlingDepth", Integer.toString(newcrawlingdepth));
                     
                     boolean crawlingIfOlderCheck = post.get("crawlingIfOlderCheck", "off").equals("on");
