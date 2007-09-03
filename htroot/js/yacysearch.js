@@ -51,64 +51,6 @@ function Progressbar(length, parent) {
   parent.appendChild(this.element);
 }
 
-function AllTextSnippets(query, eventID) {
-	var span = document.getElementsByTagName("span");
-	for(var x=0;x<span.length;x++) {
-		if (span[x].className == 'snippetLoading') {
-				var url = document.getElementById("url" + span[x].id.substring(1));
-				requestTextSnippet(url, query, eventID);
-		}
-	}
-}
-
-function AllMediaSnippets(urls, query, mediatype) {
-  document.getElementById("linkcount").innerHTML = 0;
-  var container = document.getElementById("results");
-  var progressbar = new Progressbar(urls.length, container);
-  for (url in urls) {
-    requestMediaSnippet(urls[url],query,mediatype,progressbar);
-  }
-}
-
-function AllImageSnippets(urls, query) {
-  document.getElementById("linkcount").innerHTML = 0;
-  var container = document.getElementById("results");
-  var progressbar = new Progressbar(urls.length, container);
-  for(url in urls) {
-    requestImageSnippet(urls[url],query,progressbar);
-  }
-}
-
-function requestTextSnippet(url, query, eventID){
-	var request=createRequestObject();
-	request.open('get', '/xml/snippet.xml?url=' + escape(url) + '&remove=true&media=text&search=' + escape(query) + '&eventID=' + eventID,true);
-	request.onreadystatechange = function () {handleTextState(request)};
-	request.send(null);
-}
-
-function requestMediaSnippet(url, query, mediatype, progressbar){
-	var request=createRequestObject();
-	request.open('get', '/xml/snippet.xml?url=' + escape(url) + '&remove=true&media=' + escape(mediatype) + '&search=' + escape(query),true);
-	request.onreadystatechange = function () {handleMediaState(request, progressbar)};
-	request.send(null);
-}
-
-function requestImageSnippet(url, query, progressbar){
-	var request=createRequestObject();
-	request.open('get', '/xml/snippet.xml?url=' + escape(url) + '&remove=true&media=image&search=' + escape(query),true);
-	request.onreadystatechange = function () {handleImageState(request, progressbar)};
-	request.send(null);
-}
-
-function show_hidden_results(){
-  var results = document.getElementsByTagName("div");
-  for (var i = 0; i < results.length; i++) {
-    var result = results[i];
-    if (result.className == "searchresults hidden")
-      result.className = "searchresults";
-  }
-  document.getElementById("hidden_results").innerHTML = "";
-}
 function handleTextState(req) {
     if(req.readyState != 4){
 		return;
@@ -283,4 +225,11 @@ function addHover() {
       }
     }
   }
+}
+
+function statistics(offset, items, global, total) {
+  document.getElementById("offset").firstChild.nodeValue = offset;
+  document.getElementById("itemscount").firstChild.nodeValue = items;
+  document.getElementById("globalcount").firstChild.nodeValue = global;
+  document.getElementById("totalcount").firstChild.nodeValue = total;
 }

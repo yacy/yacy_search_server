@@ -282,48 +282,11 @@ public class plasmaSearchRankingProfile {
         ranking += (flags.get(plasmaCondenser.flag_cat_hasapp)) ? 256 << coeff_cathasapp : 0;
         
         ranking += (plasmaURL.probablyRootURL(t.urlHash())) ? 16 << coeff_urllength : 0;
-        ranking += (plasmaURL.probablyWordURL(t.urlHash(), searchedWords) != null) ? 256 << coeff_appurl : 0;
+        if (searchedWords != null) ranking += (plasmaURL.probablyWordURL(t.urlHash(), searchedWords) != null) ? 256 << coeff_appurl : 0;
 
         return ranking;
     }
-    /*
-    public long preRanking(indexRWIEntry normalizedEntry, TreeSet searchedWords) {
-        // the normalizedEntry must be a normalized indexEntry
-        long ranking = 0;
-        ranking += (256 - plasmaURL.domLengthNormalized(normalizedEntry.urlHash())) << coeff_domlength;
-        ranking += plasmaSearchPreOrder.ybr_p(normalizedEntry.urlHash()) << coeff_ybr;
-        ranking += normalizedEntry.virtualAge() << coeff_date;
-        ranking += normalizedEntry.wordsintitle() << coeff_wordsintitle;
-        ranking += normalizedEntry.wordsintext() << coeff_wordsintext;
-        ranking += normalizedEntry.phrasesintext() << coeff_phrasesintext;
-        ranking += normalizedEntry.llocal() << coeff_llocal;
-        ranking += normalizedEntry.lother() << coeff_lother;
-        ranking += (normalizedEntry.urllength() == 0) ? 0 : (256 - normalizedEntry.urllength()) << coeff_urllength;
-        ranking += (normalizedEntry.urlcomps() == 0) ? 0 : (256 - normalizedEntry.urlcomps()) << coeff_urlcomps;
-        ranking += (normalizedEntry.hitcount() == 0) ? 0 : normalizedEntry.hitcount() << coeff_hitcount;
-        ranking += (normalizedEntry.posintext() == 0) ? 0 : (256 - normalizedEntry.posintext()) << coeff_posintext;
-        ranking += (normalizedEntry.posofphrase() == 0) ? 0 : (256 - normalizedEntry.posofphrase()) << coeff_posofphrase;
-        ranking += (normalizedEntry.worddistance() == 0) ? 0 : (256 - normalizedEntry.worddistance()) << coeff_worddistance;
-
-        kelondroBitfield flags = normalizedEntry.flags();
-        ranking += (flags.get(indexRWIEntry.flag_app_url)) ? 256 << coeff_appurl : 0;
-        ranking += (flags.get(indexRWIEntry.flag_app_descr)) ? 256 << coeff_appdescr : 0;
-        ranking += (flags.get(indexRWIEntry.flag_app_author)) ? 256 << coeff_appauthor : 0;
-        ranking += (flags.get(indexRWIEntry.flag_app_tags)) ? 256 << coeff_apptags : 0;
-        ranking += (flags.get(indexRWIEntry.flag_app_reference)) ? 256 << coeff_appref : 0;
-        ranking += (flags.get(indexRWIEntry.flag_app_emphasized)) ? 256 << coeff_appemph : 0;
-        ranking += (flags.get(plasmaCondenser.flag_cat_indexof)) ? 256 << coeff_catindexof : 0;
-        ranking += (flags.get(plasmaCondenser.flag_cat_hasimage)) ? 256 << coeff_cathasimage : 0;
-        ranking += (flags.get(plasmaCondenser.flag_cat_hasaudio)) ? 256 << coeff_cathasaudio : 0;
-        ranking += (flags.get(plasmaCondenser.flag_cat_hasvideo)) ? 256 << coeff_cathasvideo : 0;
-        ranking += (flags.get(plasmaCondenser.flag_cat_hasapp)) ? 256 << coeff_cathasapp : 0;
-        
-        ranking += (plasmaURL.probablyRootURL(normalizedEntry.urlHash())) ? 16 << coeff_urllength : 0;
-        ranking += (plasmaURL.probablyWordURL(normalizedEntry.urlHash(), searchedWords) != null) ? 256 << coeff_appurl : 0;
-        
-        return ranking;
-    }
-    */
+    
     public long postRanking(
                     plasmaSearchQuery query,
                     Set topwords,

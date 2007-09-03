@@ -85,11 +85,7 @@ public final class plasmaSearchPreOrder {
         
         assert (container != null);
         
-        long maxTime = process.getTargetTime(plasmaSearchProcessing.PROCESS_PRESORT);
         process.startTimer();
-        
-        // set limit time for interruption
-        long limitTime = (maxTime < 0) ? Long.MAX_VALUE : System.currentTimeMillis() + maxTime;
         
         // first pass: find min/max to obtain limits for normalization
         Iterator i = container.entries();
@@ -98,7 +94,6 @@ public final class plasmaSearchPreOrder {
         this.entryMax = null;
         indexRWIEntry iEntry;
         while (i.hasNext()) {
-            if (System.currentTimeMillis() > limitTime) break;
             iEntry = (indexRWIEntry) i.next();
             if (this.entryMin == null) this.entryMin = (indexRWIEntry) iEntry.clone(); else this.entryMin.min(iEntry);
             if (this.entryMax == null) this.entryMax = (indexRWIEntry) iEntry.clone(); else this.entryMax.max(iEntry);
@@ -110,7 +105,6 @@ public final class plasmaSearchPreOrder {
         this.pageAcc = new TreeMap();
         TreeSet searchWords = plasmaSearchQuery.cleanQuery(query.queryString)[0];
         for (int j = 0; j < count; j++) {
-            if (System.currentTimeMillis() > limitTime) break;
             iEntry = (indexRWIEntry) i.next();
             if (iEntry.urlHash().length() != container.row().width(container.row().primaryKey())) continue;
             if ((!(query.constraint.equals(plasmaSearchQuery.catchall_constraint))) && (!(iEntry.flags().allOf(query.constraint)))) continue; // filter out entries that do not match the search constraint
@@ -124,10 +118,9 @@ public final class plasmaSearchPreOrder {
         }
         this.filteredCount = pageAcc.size();
         
-        if (container.size() > query.wantedResults) remove(true, true);
+        if (container.size() > query.neededResults()) remove(true, true);
 
-        process.setYieldTime(plasmaSearchProcessing.PROCESS_PRESORT);
-        process.setYieldCount(plasmaSearchProcessing.PROCESS_PRESORT, container.size());
+        process.yield(plasmaSearchProcessing.PRESORT, container.size());
     }
     
     public int filteredCount() {
@@ -136,7 +129,7 @@ public final class plasmaSearchPreOrder {
     
     private void remove(boolean rootDomExt, boolean doubleDom) {
         // this removes all refererences to urls that are extended paths of existing 'RootDom'-urls
-        if (pageAcc.size() <= query.wantedResults) return;
+        if (pageAcc.size() <= query.neededResults()) return;
         HashSet rootDoms = new HashSet();
         HashSet doubleDoms = new HashSet();
         Iterator i = pageAcc.entrySet().iterator();
@@ -146,7 +139,7 @@ public final class plasmaSearchPreOrder {
         boolean isWordRootURL;
         TreeSet querywords = plasmaSearchQuery.cleanQuery(query.queryString())[0];
         while (i.hasNext()) {
-            if (pageAcc.size() <= query.wantedResults) break;
+            if (pageAcc.size() <= query.neededResults()) break;
             entry = (Map.Entry) i.next();
             iEntry = (indexRWIEntry) entry.getValue();
             hashpart = iEntry.urlHash().substring(6);

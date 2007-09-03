@@ -99,6 +99,18 @@ update.time.download = 0
 # the deploy time when the last update was done; milliseconds since epoch
 update.time.deploy = 0
 
+# restart-option
+# a peer can be re-started periodically
+# restart.process can be either 'off' (no automatic restart) or 'time' (time- rule-based, see below)
+restart.process = off
+# the restart.cycle is the number of hours that must pass bevore a restart is done
+restart.cycle = 20
+# the restart.hour is a pattern that must match with the hour string (two-digit, 24h)
+# when the restart should be performed
+restart.hour = 03
+# the following values are set automatically
+restart.time = 0
+
 # clusters within a network:
 # every network can have an unlimited number of clusters. Clusters may be also completely
 # sealed and have no connection to other peers. When a cluster does not use the
@@ -635,7 +647,8 @@ javastart_Xms__pro=Xms512m
 # not for first startup of YaCy
 # UNIX: corresponds to the nice-level
 # WIN: -20=realtime;-15=high;-10=above;0=normal;10=below;20=low
-javastart_priority=0
+javastart_priority=10
+javastart_priority__pro=0
 
 # performance properties for the word index cache
 # wordCacheMaxLow/High is the number of word indexes that shall be held in the

@@ -123,7 +123,7 @@ public class IndexControl_p {
             if (delurl || delurlref) {
                 // generate an urlx array
                 indexContainer index = null;
-                index = switchboard.wordIndex.getContainer(keyhash, null, -1);
+                index = switchboard.wordIndex.getContainer(keyhash, null);
                 Iterator en = index.entries();
                 int i = 0;
                 urlx = new String[index.size()];
@@ -250,7 +250,7 @@ public class IndexControl_p {
             indexContainer index;
             String result;
             long starttime = System.currentTimeMillis();
-            index = switchboard.wordIndex.getContainer(keyhash, null, -1);
+            index = switchboard.wordIndex.getContainer(keyhash, null);
             // built urlCache
             Iterator urlIter = index.entries();
             HashMap knownURLs = new HashMap();
@@ -490,7 +490,7 @@ public class IndexControl_p {
         serverObjects prop = new serverObjects();
         indexContainer index = null;
         try {
-            index = switchboard.wordIndex.getContainer(keyhash, null, -1);
+            index = switchboard.wordIndex.getContainer(keyhash, null);
 
             prop.put("genUrlList_keyHash", keyhash);
             

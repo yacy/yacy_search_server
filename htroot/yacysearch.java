@@ -47,10 +47,7 @@
 // if the shell's current path is HTROOT
 
 import java.io.IOException;
-import java.io.UnsupportedEncodingException;
 import java.net.MalformedURLException;
-import java.net.URLEncoder;
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.TreeSet;
@@ -66,13 +63,11 @@ import de.anomic.plasma.plasmaCondenser;
 import de.anomic.plasma.plasmaParserDocument;
 import de.anomic.plasma.plasmaSearchEvent;
 import de.anomic.plasma.plasmaSearchImages;
-import de.anomic.plasma.plasmaSearchPreOrder;
 import de.anomic.plasma.plasmaSearchQuery;
 import de.anomic.plasma.plasmaSearchRankingProfile;
 import de.anomic.plasma.plasmaSearchProcessing;
 import de.anomic.plasma.plasmaSnippetCache;
 import de.anomic.plasma.plasmaSwitchboard;
-import de.anomic.plasma.plasmaURL;
 import de.anomic.server.serverCore;
 import de.anomic.server.serverDomains;
 import de.anomic.server.serverDate;
@@ -80,11 +75,9 @@ import de.anomic.server.serverObjects;
 import de.anomic.server.serverSwitch;
 import de.anomic.server.logging.serverLog;
 import de.anomic.tools.crypt;
-import de.anomic.tools.nxTools;
 import de.anomic.yacy.yacyCore;
 import de.anomic.yacy.yacyNewsPool;
 import de.anomic.yacy.yacyNewsRecord;
-import de.anomic.yacy.yacySeed;
 
 public class yacysearch {
 
@@ -134,6 +127,7 @@ public class yacysearch {
             prop.put("input_former", "");
             prop.put("former", "");
             prop.put("input_count", 10);
+            prop.put("input_offset", 0);
             prop.put("input_resource", "global");
             prop.put("input_time", 6);
             prop.put("input_urlmaskfilter", ".*");
@@ -166,10 +160,11 @@ public class yacysearch {
         }
         if (sb.facilityDB != null) try { sb.facilityDB.update("zeitgeist", querystring, post); } catch (Exception e) {}
 
-        int count = Integer.parseInt(post.get("count", "10"));
+        int count = post.getInt("count", 10);
+        int offset = post.getInt("offset", 0);
         boolean global = (post == null) ? true : post.get("resource", "global").equals("global");
         final boolean indexof = post.get("indexof","").equals("on"); 
-        final long searchtime = 1000 * Long.parseLong(post.get("time", "10"));
+        final long searchtime = 1000 * post.getLong("time", 6);
         String urlmask = "";
         if (post.containsKey("urlmask") && post.get("urlmask").equals("no")) {
             urlmask = ".*";
@@ -269,7 +264,9 @@ public class yacysearch {
                     maxDistance,
                     prefermask,
                     contentdomCode,
+                    true,
                     count,
+                    offset,
                     searchtime,
                     urlmask,
                     (clustersearch && globalsearch) ? plasmaSearchQuery.SEARCHDOM_CLUSTERALL :
@@ -278,11 +275,8 @@ public class yacysearch {
                     20,
                     constraint);
         plasmaSearchRankingProfile ranking = (sb.getConfig("rankingProfile", "").length() == 0) ? new plasmaSearchRankingProfile(contentdomCode) : new plasmaSearchRankingProfile("", crypt.simpleDecode(sb.getConfig("rankingProfile", ""), null));
-        plasmaSearchProcessing localTiming = new plasmaSearchProcessing(4 * theQuery.maximumTime / 10, theQuery.wantedResults);
-        plasmaSearchProcessing remoteTiming = new plasmaSearchProcessing(6 * theQuery.maximumTime / 10, theQuery.wantedResults);
+        plasmaSearchProcessing localTiming = new plasmaSearchProcessing(4 * theQuery.maximumTime / 10, theQuery.displayResults());
 
-        //**
-        //searchFromLocal(thisSearch, ranking, localTiming, remoteTiming, true, (String) header.get("CLIENTIP"))
         String client = (String) header.get("CLIENTIP"); // the search client who initiated the search
         
         // tell all threads to do nothing for a specific time
@@ -292,139 +286,83 @@ public class yacysearch {
         theQuery.filterOut(plasmaSwitchboard.blueList);
             
         // log
-        serverLog.logInfo("LOCAL_SEARCH", "INIT WORD SEARCH: " + theQuery.queryString + ":" + theQuery.queryHashes + " - " + theQuery.wantedResults + " links, " + (theQuery.maximumTime / 1000) + " seconds");
+        serverLog.logInfo("LOCAL_SEARCH", "INIT WORD SEARCH: " + theQuery.queryString + ":" + theQuery.queryHashes + " - " + theQuery.neededResults() + " links to be computed, " + theQuery.displayResults() + " lines to be displayed, " + (theQuery.maximumTime / 1000) + " seconds");
         long timestamp = System.currentTimeMillis();
 
         // create a new search event
         String wrongregex = null;
-        plasmaSearchEvent theSearch = plasmaSearchEvent.getEvent(theQuery, ranking, localTiming, remoteTiming, sb.wordIndex, (sb.isRobinsonMode()) ? sb.clusterhashes : null, false, null);
+        if (plasmaSearchEvent.getEvent(theQuery.id()) == null) {
+            theQuery.setOffset(0); // in case that this is a new search, always start without a offset 
+            offset = 0;
+        }
+        plasmaSearchEvent theSearch = plasmaSearchEvent.getEvent(theQuery, ranking, localTiming, sb.wordIndex, (sb.isRobinsonMode()) ? sb.clusterhashes : null, false, null);
             
         // generate result object
         serverLog.logFine("LOCAL_SEARCH", "SEARCH TIME AFTER ORDERING OF SEARCH RESULTS: " + ((System.currentTimeMillis() - timestamp) / 1000) + " seconds");
-        ArrayList accu = theSearch.computeResults(plasmaSwitchboard.blueList, true);
         serverLog.logFine("LOCAL_SEARCH", "SEARCH TIME AFTER RESULT PREPARATION: " + ((System.currentTimeMillis() - timestamp) / 1000) + " seconds");
                 
         // calc some more cross-reference
         long remainingTime = theQuery.maximumTime - (System.currentTimeMillis() - timestamp);
         if (remainingTime < 0) remainingTime = 1000;
-        //Object[] ws = acc.getReferences(16);
         serverLog.logFine("LOCAL_SEARCH", "SEARCH TIME AFTER XREF PREPARATION: " + ((System.currentTimeMillis() - timestamp) / 1000) + " seconds");
 
         // log
         serverLog.logInfo("LOCAL_SEARCH", "EXIT WORD SEARCH: " + theQuery.queryString + " - " +
                     (theSearch.getLocalCount() + theSearch.getGlobalCount()) + " links found, " +
-                    theSearch.filteredCount() + " links filtered, " +
-                    accu.size() + " links ordered, " +
                     ((System.currentTimeMillis() - timestamp) / 1000) + " seconds");
 
         // prepare search statistics
         Long trackerHandle = new Long(System.currentTimeMillis());
-        HashMap searchProfile = theQuery.resultProfile(accu.size(), System.currentTimeMillis() - timestamp);
+        HashMap searchProfile = theQuery.resultProfile(System.currentTimeMillis() - timestamp);
         searchProfile.put("querystring", theQuery.queryString);
         searchProfile.put("time", trackerHandle);
         searchProfile.put("host", client);
         searchProfile.put("offset", new Integer(0));
-        searchProfile.put("results", accu);
         sb.localSearches.add(searchProfile);
         TreeSet handles = (TreeSet) sb.localSearchTracker.get(client);
         if (handles == null) handles = new TreeSet();
         handles.add(trackerHandle);
         sb.localSearchTracker.put(client, handles);
         
-        //prop=sb.searchFromLocal(thisSearch, ranking, localTiming, remoteTiming, true, (String) header.get("CLIENTIP"));
         prop = new serverObjects();
-        //prop.put("references", 0);
         prop.put("num-results_totalcount", theSearch.getLocalCount() + theSearch.getGlobalCount());
-        prop.put("num-results_filteredcount", theSearch.filteredCount());
-        prop.put("num-results_orderedcount", accu.size());
-        prop.put("num-results_globalresults", (theSearch.getGlobalCount() == 0) ? 0 : 1);
+        prop.put("num-results_globalresults", 1);
         prop.put("num-results_globalresults_globalcount", theSearch.getGlobalCount());
+        prop.put("num-results_offset", 0);
         prop.put("num-results_linkcount", 0);
-        
-        /*
-        for (int i = 0; i < theQuery.wantedResults; i++) {
-            prop.put("type_results_" + i + "_item", i);
-            prop.put("type_results_" + i + "_eventID", theQuery.id());
+
+        // compose page navigation
+        StringBuffer pagenav = new StringBuffer();
+        int thispage = offset / theQuery.displayResults();
+        if (thispage == 0) pagenav.append("&lt;&nbsp;"); else {
+            pagenav.append(navurla(thispage - 1, display, theQuery));
+            pagenav.append("<strong>&lt;</strong></a>&nbsp;");
         }
-        prop.put("type_results", theQuery.wantedResults);
-        */
-        //------------------------
+        int numberofpages = Math.min(10, Math.min(thispage + 2, (theSearch.getGlobalCount() + theSearch.getLocalCount()) / theQuery.displayResults()));
+        for (int i = 0; i < numberofpages; i++) {
+            if (i == thispage) {
+                pagenav.append("<strong>");
+                pagenav.append(i + 1);
+                pagenav.append("</strong>&nbsp;");
+            } else {
+                pagenav.append(navurla(i, display, theQuery));
+                pagenav.append(i + 1);
+                pagenav.append("</a>&nbsp;");
+            }
+        }
+        if (thispage >= numberofpages) pagenav.append("&gt;"); else {
+            pagenav.append(navurla(thispage + 1, display, theQuery));
+            pagenav.append("<strong>&gt;</strong></a>");
+        }
+        prop.putASIS("num-results_pagenav", pagenav.toString());
         
-        prop.put("type_results", 0);
-        URL wordURL=null;
-        for (int i = 0; i < accu.size(); i++) {
-            plasmaSearchEvent.Entry result = (plasmaSearchEvent.Entry) accu.get(i);
-            prop.put("type_results_" + i + "_authorized_recommend", (yacyCore.newsPool.getSpecific(yacyNewsPool.OUTGOING_DB, yacyNewsPool.CATEGORY_SURFTIPP_ADD, "url", result.urlstring()) == null) ? 1 : 0);
-            prop.put("type_results_" + i + "_authorized_recommend_deletelink", "/yacysearch.html?search=" + theQuery.queryString + "&Enter=Search&count=" + theQuery.wantedResults + "&order=" + crypt.simpleEncode(ranking.toExternalString()) + "&resource=local&time=3&deleteref=" + result.hash() + "&urlmaskfilter=.*");
-            prop.put("type_results_" + i + "_authorized_recommend_recommendlink", "/yacysearch.html?search=" + theQuery.queryString + "&Enter=Search&count=" + theQuery.wantedResults + "&order=" + crypt.simpleEncode(ranking.toExternalString()) + "&resource=local&time=3&recommendref=" + result.hash() + "&urlmaskfilter=.*");
-            prop.put("type_results_" + i + "_authorized_urlhash", result.hash());
-            prop.put("type_results_" + i + "_description", result.title());
-            prop.put("type_results_" + i + "_url", result.urlstring());
-            int port=result.url().getPort();
-            URL faviconURL;
-            try {
-                faviconURL = new URL(result.url().getProtocol() + "://" + result.url().getHost() + ((port != -1) ? (":" + String.valueOf(port)) : "") + "/favicon.ico");
-            } catch (MalformedURLException e1) {
-                continue;
-            }
-            prop.put("type_results_" + i + "_faviconCode", sb.licensedURLs.aquireLicense(faviconURL)); // aquire license for favicon url loading
-            prop.put("type_results_" + i + "_urlhash", result.hash());
-                prop.put("type_results_" + i + "_urlhexhash", yacySeed.b64Hash2hexHash(result.hash()));
-                prop.put("type_results_" + i + "_urlname", nxTools.shortenURLString(result.urlname(), 120));
-                prop.put("type_results_" + i + "_date", plasmaSwitchboard.dateString(result.modified()));
-                prop.put("type_results_" + i + "_ybr", plasmaSearchPreOrder.ybr(result.hash()));
-                prop.put("type_results_" + i + "_size", Long.toString(result.filesize()));
-                try {
-                    prop.put("type_results_" + i + "_words", URLEncoder.encode(query[0].toString(),"UTF-8"));
-                } catch (UnsupportedEncodingException e) {}
-                prop.put("type_results_" + i + "_former", querystring);
-                prop.put("type_results_" + i + "_rankingprops", result.word().toPropertyForm() + ", domLengthEstimated=" + plasmaURL.domLengthEstimation(result.hash()) +
-                        ((plasmaURL.probablyRootURL(result.hash())) ? ", probablyRootURL" : "") + 
-                        (((wordURL = plasmaURL.probablyWordURL(result.hash(), query[0])) != null) ? ", probablyWordURL=" + wordURL.toNormalform(false, true) : ""));
-                // adding snippet if available
-                if (result.hasSnippet()) {
-                    prop.put("type_results_" + i + "_snippet", 1);
-                    prop.putASIS("type_results_" + i + "_snippet_text", result.textSnippet().getLineMarked(theQuery.queryHashes));//FIXME: the ASIS should not be needed, if there is no html in .java
-                } else {                	
-                	if (post.containsKey("fetchSnippet")) {
-                		// snippet fetch timeout
-                        int textsnippet_timeout = Integer.parseInt(env.getConfig("timeout_media", "10000"));
-                        
-                        // boolean line_end_with_punctuation
-                        boolean pre = post.get("pre", "false").equals("true");
-                        
-                        // if 'remove' is set to true, then RWI references to URLs that do not have the snippet are removed
-                        boolean remove = post.get("remove", "false").equals("true");
-                        
-                        plasmaSnippetCache.TextSnippet snippet = plasmaSnippetCache.retrieveTextSnippet(
-                        		result.url(), 
-                        		queryHashes, 
-                        		true, 
-                        		pre, 
-                        		260, 
-                        		textsnippet_timeout
-                        );
-                                                	
-                        if (snippet.getErrorCode() < 11) {
-                            // no problems occurred
-                            //prop.put("text", (snippet.exists()) ? snippet.getLineMarked(queryHashes) : "unknown");
-                            prop.putASIS("type_results_" + i + "_snippet_text", (snippet.exists()) ? snippet.getLineMarked(queryHashes) : "unknown");
-                        } else {
-                            // problems with snippet fetch
-                           prop.put("type_results_" + i + "_snippet_text", (remove) ? plasmaSnippetCache.failConsequences(snippet, theQuery.id()) : snippet.getError());
-                        }          
-                        prop.put("type_results_" + i + "_snippet", 1);
-                	} else {
-                		// no snippet available (will be fetched later via ajax)
-                		prop.put("type_results_" + i + "_snippet", 0);
-                		prop.put("type_results_" + i + "_snippet_text", "");
-                	}
-                }
-                prop.put("type_results", accu.size());
-                prop.put("num-results_linkcount", Integer.toString(accu.size()));
-            }
-            
-            //------------------------
+        // generate the search result lines; they will be produced by another servlet
+        for (int i = 0; i < theQuery.displayResults(); i++) {
+            prop.put("type_results_" + i + "_item", offset + i);
+            prop.put("type_results_" + i + "_eventID", theQuery.id());
+            prop.put("type_results_" + i + "_display", display);
+        }
+        prop.put("type_results", theQuery.displayResults());
         
             // process result of search
             if (filtered.size() > 0) {
@@ -480,6 +418,7 @@ public class yacysearch {
                                 prop.put("type_combine_words_" + hintcount + "_word", word);
                                 prop.put("type_combine_words_" + hintcount + "_newsearch", post.get("search", "").replace(' ', '+') + "+" + word);
                                 prop.put("type_combine_words_" + hintcount + "_count", count);
+                                prop.put("type_combine_words_" + hintcount + "_offset", offset);
                                 prop.put("type_combine_words_" + hintcount + "_resource", ((global) ? "global" : "local"));
                                 prop.put("type_combine_words_" + hintcount + "_time", (searchtime / 1000));
                             }
@@ -493,8 +432,6 @@ public class yacysearch {
                     if (wrongregex != null) {
                         prop.put("num-results_wrong_regex", wrongregex);
                         prop.put("num-results", 4);
-                    } else if (totalcount == 0) {
-                        prop.put("num-results", 3); // long
                     } else {
                         prop.put("num-results", 5);
                     }
@@ -557,9 +494,10 @@ public class yacysearch {
         prop.put("input_input", input);
         prop.put("input_display", display);
         prop.putASIS("input_promoteSearchPageGreeting", promoteSearchPageGreeting);
-        prop.put("input_former", post.get("search", ""));
+        prop.put("input_former", querystring);
         prop.put("former", post.get("search", ""));
         prop.put("input_count", count);
+        prop.put("input_offset", offset);
         prop.put("input_resource", (global) ? "global" : "local");
         prop.put("input_time", searchtime / 1000);
         prop.put("input_urlmaskfilter", urlmask);
@@ -578,4 +516,7 @@ public class yacysearch {
         return prop;
     }
 
+    private static String navurla(int page, int display, plasmaSearchQuery theQuery) {
+        return "<a href=\"yacysearch.html?display=" + display + "&amp;search=" + theQuery.queryString() + "&amp;count="+ theQuery.displayResults() + "&amp;offset=" + (page * theQuery.displayResults()) + "&amp;resource=" + theQuery.searchdom() + "&amp;time=" + (theQuery.maximumTime / 1000) + "&amp;urlmaskfilter=" + theQuery.urlMask + "&amp;prefermaskfilter=" + theQuery.prefer + "&amp;cat=href&amp;constraint=" + theQuery.constraint.exportB64() + "&amp;contentdom=" + theQuery.contentdom() + "&amp;former=" + theQuery.queryString() + "\">";
+    }
 }

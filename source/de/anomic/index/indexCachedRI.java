@@ -86,7 +86,7 @@ public class indexCachedRI implements indexRI {
     }
     
     public long getUpdateTime(String wordHash) {
-        indexContainer entries = getContainer(wordHash, null, -1);
+        indexContainer entries = getContainer(wordHash, null);
         if (entries == null) return 0;
         return entries.updated();
     }
@@ -140,25 +140,25 @@ public class indexCachedRI implements indexRI {
         return false;
     }
     
-    public indexContainer getContainer(String wordHash, Set urlselection, long maxTime) {
+    public indexContainer getContainer(String wordHash, Set urlselection) {
         // get from cache
-        indexContainer container = riExtern.getContainer(wordHash, urlselection, maxTime);
+        indexContainer container = riExtern.getContainer(wordHash, urlselection);
         if (container == null) {
-            container = riIntern.getContainer(wordHash, urlselection, maxTime);
+            container = riIntern.getContainer(wordHash, urlselection);
         } else {
-            container.addAllUnique(riIntern.getContainer(wordHash, urlselection, maxTime));
+            container.addAllUnique(riIntern.getContainer(wordHash, urlselection));
         }
 
         // get from collection index
         if (container == null) {
-            container = backend.getContainer(wordHash, urlselection, (maxTime < 0) ? -1 : maxTime);
+            container = backend.getContainer(wordHash, urlselection);
         } else {
-            container.addAllUnique(backend.getContainer(wordHash, urlselection, (maxTime < 0) ? -1 : maxTime));
+            container.addAllUnique(backend.getContainer(wordHash, urlselection));
         }
         return container;
     }
 
-    public Map getContainers(Set wordHashes, Set urlselection, boolean interruptIfEmpty, long maxTime) {
+    public Map getContainers(Set wordHashes, Set urlselection, boolean interruptIfEmpty) {
         // return map of wordhash:indexContainer
         
         // retrieve entities that belong to the hashes
@@ -166,19 +166,12 @@ public class indexCachedRI implements indexRI {
         String singleHash;
         indexContainer singleContainer;
             Iterator i = wordHashes.iterator();
-            long start = System.currentTimeMillis();
-            long remaining;
             while (i.hasNext()) {
-                // check time
-                remaining = maxTime - (System.currentTimeMillis() - start);
-                //if ((maxTime > 0) && (remaining <= 0)) break;
-                if ((maxTime >= 0) && (remaining <= 0)) remaining = 100;
-            
                 // get next word hash:
                 singleHash = (String) i.next();
             
                 // retrieve index
-                singleContainer = getContainer(singleHash, urlselection, (maxTime < 0) ? -1 : remaining / (wordHashes.size() - containers.size()));
+                singleContainer = getContainer(singleHash, urlselection);
             
                 // check result
                 if (((singleContainer == null) || (singleContainer.size() == 0)) && (interruptIfEmpty)) return new HashMap();

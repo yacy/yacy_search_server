@@ -27,7 +27,6 @@
 import java.io.UnsupportedEncodingException;
 import java.net.MalformedURLException;
 import java.net.URLEncoder;
-import java.util.ArrayList;
 import java.util.TreeSet;
 
 import de.anomic.http.httpHeader;
@@ -55,6 +54,7 @@ public class yacysearchitem {
         
         String eventID = post.get("eventID", "");
         int item = post.getInt("item", -1);
+        //int display = post.getInt("display", 0);
         boolean authenticated = sb.adminAuthenticated(header) >= 2;
         
         // find search event
@@ -62,19 +62,25 @@ public class yacysearchitem {
         plasmaSearchQuery theQuery = theSearch.getQuery();
         plasmaSearchRankingProfile ranking = theSearch.getRanking();
 
-        long startprofiling = System.currentTimeMillis();
-        
         // generate result object
-        ArrayList accu = theSearch.computeResults(plasmaSwitchboard.blueList, true);
+        plasmaSearchEvent.ResultEntry result = theSearch.oneResult(item);
+
+        // dynamically update count values
+        prop.put("offset", theQuery.neededResults() - theQuery.displayResults() + 1);
+        prop.put("items", item + 1);
+        prop.put("global", theSearch.getGlobalCount());
+        prop.put("total", theSearch.getGlobalCount() + theSearch.getLocalCount());
         
-        plasmaSearchEvent.Entry result = (plasmaSearchEvent.Entry) accu.get(item);
-        System.out.println("PROFILING_DEBUG: " + (System.currentTimeMillis() - startprofiling) + " millisekunden fuer item " + item);
-        
+        if (result == null) {
+            prop.put("content", 0); // no content
+            return prop;
+        }
+            
         prop.put("content", 1); // switch on content
         prop.put("content_authorized", (authenticated) ? 1 : 0);
         prop.put("content_authorized_recommend", (yacyCore.newsPool.getSpecific(yacyNewsPool.OUTGOING_DB, yacyNewsPool.CATEGORY_SURFTIPP_ADD, "url", result.urlstring()) == null) ? 1 : 0);
-        prop.put("content_authorized_recommend_deletelink", "/yacysearch.html?search=" + theQuery.queryString + "&Enter=Search&count=" + theQuery.wantedResults + "&order=" + crypt.simpleEncode(ranking.toExternalString()) + "&resource=local&time=3&deleteref=" + result.hash() + "&urlmaskfilter=.*");
-        prop.put("content_authorized_recommend_recommendlink", "/yacysearch.html?search=" + theQuery.queryString + "&Enter=Search&count=" + theQuery.wantedResults + "&order=" + crypt.simpleEncode(ranking.toExternalString()) + "&resource=local&time=3&recommendref=" + result.hash() + "&urlmaskfilter=.*");
+        prop.put("content_authorized_recommend_deletelink", "/yacysearch.html?search=" + theQuery.queryString + "&Enter=Search&count=" + theQuery.displayResults() + "&offset=" + (theQuery.neededResults() - theQuery.displayResults()) + "&order=" + crypt.simpleEncode(ranking.toExternalString()) + "&resource=local&time=3&deleteref=" + result.hash() + "&urlmaskfilter=.*");
+        prop.put("content_authorized_recommend_recommendlink", "/yacysearch.html?search=" + theQuery.queryString + "&Enter=Search&count=" + theQuery.displayResults() + "&offset=" + (theQuery.neededResults() - theQuery.displayResults()) + "&order=" + crypt.simpleEncode(ranking.toExternalString()) + "&resource=local&time=3&recommendref=" + result.hash() + "&urlmaskfilter=.*");
         prop.put("content_authorized_urlhash", result.hash());
         prop.put("content_description", result.title());
         prop.put("content_url", result.urlstring());
@@ -105,40 +111,8 @@ public class yacysearchitem {
                         ((plasmaURL.probablyRootURL(result.hash())) ? ", probablyRootURL" : "") + 
                         (((wordURL = plasmaURL.probablyWordURL(result.hash(), query[0])) != null) ? ", probablyWordURL=" + wordURL.toNormalform(false, true) : ""));
  
-        /*
-        // adding snippet if available
-        if (result.hasSnippet()) {
-            prop.put("content_snippet", result.textSnippet().getLineMarked(theQuery.queryHashes));
-        } else {
-            // snippet fetch timeout
-            int textsnippet_timeout = Integer.parseInt(env.getConfig("timeout_media", "10000"));
-                       
-            // boolean line_end_with_punctuation
-            boolean pre = post.get("pre", "false").equals("true");
-                        
-            // if 'remove' is set to true, then RWI references to URLs that do not have the snippet are removed
-            boolean remove = post.get("remove", "false").equals("true");
-                        
-            plasmaSnippetCache.TextSnippet snippet = plasmaSnippetCache.retrieveTextSnippet(
-                                result.url(), 
-                                theQuery.queryHashes, 
-                                true, 
-                                pre, 
-                                260, 
-                                textsnippet_timeout
-                );
-                                                   
-            if (snippet.getErrorCode() < 11) {
-                // no problems occurred
-                //prop.put("text", (snippet.exists()) ? snippet.getLineMarked(queryHashes) : "unknown");
-                prop.putASIS("content_snippet", (snippet.exists()) ? snippet.getLineMarked(theQuery.queryHashes) : "unknown");
-            } else {
-                // problems with snippet fetch
-                prop.put("content_snippet", (remove) ? plasmaSnippetCache.failConsequences(snippet, theQuery.id()) : snippet.getError());
-            }
-        }
-        */
-        prop.put("content_snippet","temporary no snippet computed");
+        prop.putASIS("content_snippet", result.textSnippet().getLineMarked(theQuery.queryHashes));
+        
         return prop;
     }
     

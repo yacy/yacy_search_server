@@ -61,8 +61,8 @@ import de.anomic.kelondro.kelondroBase64Order;
 import de.anomic.kelondro.kelondroBitfield;
 import de.anomic.net.URL;
 import de.anomic.plasma.plasmaCondenser;
+import de.anomic.plasma.plasmaSearchContainer;
 import de.anomic.plasma.plasmaSearchRankingProfile;
-import de.anomic.plasma.plasmaSearchProcessing;
 import de.anomic.plasma.plasmaSnippetCache;
 import de.anomic.plasma.plasmaSwitchboard;
 import de.anomic.plasma.plasmaWordIndex;
@@ -104,7 +104,7 @@ public final class yacyClient {
             salt = yacyNetwork.enrichRequestPost(obj, plasmaSwitchboard.getSwitchboard(), null);
             obj.putASIS("count", "20");
             obj.putASIS("seed", yacyCore.seedDB.mySeed.genSeedStr(salt));
-                
+            yacyCore.log.logFine("yacyClient.publishMySeed thread '" + Thread.currentThread().getName() + "' contacting peer at " + address);
             // send request
             result = nxTools.table(
                     httpc.wput(new URL("http://" + address + "/yacy/hello.html"),
@@ -339,15 +339,15 @@ public final class yacyClient {
             String urlhashes,
             String prefer,
             String filter,
+            int count,
             int maxDistance,
             boolean global, 
             int partitions,
             yacySeed target,
             plasmaWordIndex wordIndex,
-            indexContainer containerCache,
+            plasmaSearchContainer containerCache,
             Map abstractCache,
             plasmaURLPattern blacklist,
-            plasmaSearchProcessing timingProfile,
             plasmaSearchRankingProfile rankingProfile,
             kelondroBitfield constraint
     ) {
@@ -370,9 +370,8 @@ public final class yacyClient {
         // prepare request
         final serverObjects post = new serverObjects();
         final String salt = yacyNetwork.enrichRequestPost(post, plasmaSwitchboard.getSwitchboard(), target.hash);
-        long duetime = timingProfile.duetime();
         post.putASIS("myseed", yacyCore.seedDB.mySeed.genSeedStr(salt));
-        post.put("count", timingProfile.getTargetCount(plasmaSearchProcessing.PROCESS_POSTSORT));
+        post.put("count", Math.max(10, count));
         post.putASIS("resource", ((global) ? "global" : "local"));
         post.put("partitions", partitions);
         post.putASIS("query", wordhashes);
@@ -381,8 +380,6 @@ public final class yacyClient {
         post.putASIS("prefer", prefer);
         post.putASIS("filter", filter);
         post.putASIS("ttl", "0");
-        post.put("duetime", Long.toString(duetime));
-        post.putASIS("timing", crypt.simpleEncode(timingProfile.targetToString())); // new duetimes splitted by specific search tasks
         post.put("maxdist", maxDistance);
         post.putASIS("profile", crypt.simpleEncode(rankingProfile.toExternalString()));
         post.putASIS("constraint", constraint.exportB64());
@@ -424,8 +421,6 @@ public final class yacyClient {
 
 		// compute all computation times
 		final long totalrequesttime = System.currentTimeMillis() - timestamp;
-		String returnProfile = (String) result.get("profile");
-		if (returnProfile != null) timingProfile.putYield(returnProfile);
 		
 		// OUTPUT:
 		// version : application version of responder
@@ -449,7 +444,7 @@ public final class yacyClient {
 		final int words = wordhashes.length() / yacySeedDB.commonHashLength;
 		indexContainer[] container = new indexContainer[words];
 		for (int i = 0; i < words; i++) {
-			container[i] = plasmaWordIndex.emptyContainer(wordhashes.substring(i * yacySeedDB.commonHashLength, (i + 1) * yacySeedDB.commonHashLength), timingProfile.getTargetCount(plasmaSearchProcessing.PROCESS_POSTSORT));
+			container[i] = plasmaWordIndex.emptyContainer(wordhashes.substring(i * yacySeedDB.commonHashLength, (i + 1) * yacySeedDB.commonHashLength), count);
 		}
 
 		// insert results to containers
@@ -502,17 +497,28 @@ public final class yacyClient {
 				// System.out.println("--- RECEIVED SNIPPET '" + link.snippet() + "'");
 				plasmaSnippetCache.storeToCache(wordhashes, urlEntry.hash(), urlEntry.snippet());
 			}
+            
 			// add the url entry to the word indexes
 			for (int m = 0; m < words; m++) {
 				container[m].add(entry, System.currentTimeMillis());
 			}
+            
 			// store url hash for statistics
 			urls[n] = urlEntry.hash();
 		}
 
+        // store remote result to local result container
+        synchronized (containerCache) {
+            // insert one container into the search result buffer
+            containerCache.insert(container[0], false, false); // one is enough
+            
+            // integrate remote topwords
+            String references = (String) result.get("references");
+            if (references != null) containerCache.addReferences(references.split(","));
+        }
+        
 		// insert the containers to the index
-        containerCache.addAllUnique(container[0]); // one is enough
-		for (int m = 0; m < words; m++) {
+        for (int m = 0; m < words; m++) {
             wordIndex.addEntries(container[m], System.currentTimeMillis(), true);
 		}
         
@@ -557,8 +563,8 @@ public final class yacyClient {
 				+ ", DHTdist="
 				+ ((wordhashes.length() < 12) ? "void" : Double
 						.toString(yacyDHTAction.dhtDistance(target.hash,
-								wordhashes.substring(0, 12)))) + ", duetime="
-				+ duetime + ", searchtime=" + searchtime + ", netdelay="
+								wordhashes.substring(0, 12))))
+				+ ", searchtime=" + searchtime + ", netdelay="
 				+ (totalrequesttime - searchtime) + ", references="
 				+ result.get("references"));
 		return urls;

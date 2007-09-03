@@ -101,7 +101,7 @@ public final class indexRAMRI implements indexRI {
     }
     
     public synchronized long getUpdateTime(String wordHash) {
-        indexContainer entries = getContainer(wordHash, null, -1);
+        indexContainer entries = getContainer(wordHash, null);
         if (entries == null) return 0;
         return entries.updated();
     }
@@ -391,7 +391,7 @@ public final class indexRAMRI implements indexRI {
         return ((indexContainer) cache.get(wordHash)).size();
     }
 
-    public synchronized indexContainer getContainer(String wordHash, Set urlselection, long maxtime_dummy) {
+    public synchronized indexContainer getContainer(String wordHash, Set urlselection) {
 
         // retrieve container
         indexContainer container = (indexContainer) cache.get(wordHash);
@@ -418,7 +418,7 @@ public final class indexRAMRI implements indexRI {
 
     public synchronized boolean removeEntry(String wordHash, String urlHash) {
         indexContainer c = (indexContainer) cache.get(wordHash);
-        if ((c != null) && (c.removeEntry(wordHash, urlHash))) {
+        if ((c != null) && (c.remove(urlHash) != null)) {
             // removal successful
             if (c.size() == 0) {
                 deleteContainer(wordHash);
@@ -436,7 +436,7 @@ public final class indexRAMRI implements indexRI {
         if (urlHashes.size() == 0) return 0;
         indexContainer c = (indexContainer) cache.get(wordHash);
         int count;
-        if ((c != null) && ((count = c.removeEntries(wordHash, urlHashes)) > 0)) {
+        if ((c != null) && ((count = c.removeEntries(urlHashes)) > 0)) {
             // removal successful
             if (c.size() == 0) {
                 deleteContainer(wordHash);

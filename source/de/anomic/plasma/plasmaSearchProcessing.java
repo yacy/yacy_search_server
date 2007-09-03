@@ -26,8 +26,10 @@
 
 package de.anomic.plasma;
 
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.Map;
 import java.util.Set;
 
@@ -66,211 +68,70 @@ public class plasmaSearchProcessing implements Cloneable {
     // time = time to fetch snippets for selected URLs
     // count = maximum number of snipptes to be fetched
     
-    public static final char PROCESS_COLLECTION   = 'c';
-    public static final char PROCESS_JOIN         = 'j';
-    public static final char PROCESS_PRESORT      = 'r';
-    public static final char PROCESS_URLFETCH     = 'u';
-    public static final char PROCESS_POSTSORT     = 'o';
-    public static final char PROCESS_FILTER       = 'f';
-    public static final char PROCESS_SNIPPETFETCH = 's';
+    public static final String COLLECTION   = "collection";
+    public static final String JOIN         = "join";
+    public static final String PRESORT      = "presort";
+    public static final String URLFETCH     = "urlfetch";
     
     private static final long minimumTargetTime = 100;
-    
-    public static char[] sequence = new char[]{
-        PROCESS_COLLECTION,
-        PROCESS_JOIN,
-        PROCESS_PRESORT,
-        PROCESS_URLFETCH,
-        PROCESS_POSTSORT,
-        PROCESS_FILTER,
-        PROCESS_SNIPPETFETCH
-    };
 
-    private HashMap targetTime;
-    private HashMap targetCount;
-    private HashMap yieldTime;
-    private HashMap yieldCount;
+    private long targetTime;
+    private int  targetCount;
+    private ArrayList yield;
     private long timer;
     
     private plasmaSearchProcessing() {
-        targetTime = new HashMap();
-        targetCount = new HashMap();
-        yieldTime = new HashMap();
-        yieldCount = new HashMap();
+        targetTime = minimumTargetTime;
+        targetCount = 10;
+        yield = new ArrayList();
         timer = 0;
     }
     
     public plasmaSearchProcessing(long time, int count) {
-        this(
-          3 * time / 12, 10 * count, 
-          1 * time / 12, 10 * count, 
-          1 * time / 12, 10 * count, 
-          2 * time / 12,  5 * count, 
-          3 * time / 12, count,
-          1 * time / 12, count, 
-          1 * time / 12, 1
-        );
-    }
-    
-    public plasmaSearchProcessing(
-            long time_collection,   int count_collection,
-            long time_join,         int count_join,
-            long time_presort,      int count_presort,
-            long time_urlfetch,     int count_urlfetch,
-            long time_postsort,     int count_postsort,
-            long time_filter,       int count_filter,
-            long time_snippetfetch, int count_snippetfetch) {
         this();
-        
-        targetTime.put(new Character(PROCESS_COLLECTION), new Long(time_collection));
-        targetTime.put(new Character(PROCESS_JOIN), new Long(time_join));
-        targetTime.put(new Character(PROCESS_PRESORT), new Long(time_presort));
-        targetTime.put(new Character(PROCESS_URLFETCH), new Long(time_urlfetch));
-        targetTime.put(new Character(PROCESS_POSTSORT), new Long(time_postsort));
-        targetTime.put(new Character(PROCESS_FILTER), new Long(time_filter));
-        targetTime.put(new Character(PROCESS_SNIPPETFETCH), new Long(time_snippetfetch));
-        targetCount.put(new Character(PROCESS_COLLECTION), new Integer(count_collection));
-        targetCount.put(new Character(PROCESS_JOIN), new Integer(count_join));
-        targetCount.put(new Character(PROCESS_PRESORT), new Integer(count_presort));
-        targetCount.put(new Character(PROCESS_URLFETCH), new Integer(count_urlfetch));
-        targetCount.put(new Character(PROCESS_POSTSORT), new Integer(count_postsort));
-        targetCount.put(new Character(PROCESS_FILTER), new Integer(count_filter));
-        targetCount.put(new Character(PROCESS_SNIPPETFETCH), new Integer(count_snippetfetch));
-        
+        this.targetTime = time;
+        this.targetCount = count;
+    }
+    
+    public static class Entry {
+        public String process;
+        public int count;
+        public long time;
+        public Entry(String process, int count, long time) {
+            this.process = process;
+            this.count = count;
+            this.time = time;
+        }
     }
 
-    public Object clone() {
-        plasmaSearchProcessing p = new plasmaSearchProcessing();
-        p.targetTime = (HashMap) this.targetTime.clone();
-        p.targetCount = (HashMap) this.targetCount.clone();
-        p.yieldTime = (HashMap) this.yieldTime.clone();
-        p.yieldCount = (HashMap) this.yieldCount.clone();
-        return p;
+    public int getTargetCount() {
+        return this.targetCount;
     }
     
-    public plasmaSearchProcessing(String s) {
-        targetTime = new HashMap();
-        targetCount = new HashMap();
-        yieldTime = new HashMap();
-        yieldCount = new HashMap();
-        
-        intoMap(s, targetTime, targetCount);
-    }
-    
-    public long duetime() {
-        // returns the old duetime value as sum of all waiting times
-        long d = 0;
-        for (int i = 0; i < sequence.length; i++) {
-            d += ((Long) targetTime.get(new Character(sequence[i]))).longValue();
-        }
-        return d;
-    }
-    
-    public void putYield(String s) {
-        intoMap(s, yieldTime, yieldCount);
+    public long getTargetTime() {
+        return this.targetTime;
     }
 
-    public String yieldToString() {
-        return toString(yieldTime, yieldCount);
-    }
-    
-    public String targetToString() {
-        return toString(targetTime, targetCount);
-    }
-    
-    public long getTargetTime(char type) {
-        // sum up all time that was demanded and subtract all that had been wasted
-        long sum = 0;
-        Long t;
-        Character element;
-        for (int i = 0; i < sequence.length; i++) {
-            element = new Character(sequence[i]);
-            t = (Long) targetTime.get(element);
-            if (t != null) sum += t.longValue();
-            if (type == sequence[i]) return (sum < 0) ? minimumTargetTime : sum;
-            t = (Long) yieldTime.get(element);
-            if (t != null) sum -= t.longValue();
-        }
-        return minimumTargetTime;
-    }
-    
-    public int getTargetCount(char type) {
-        Integer i = (Integer) targetCount.get(new Character(type));
-        if (i == null) return -1; else return i.intValue();
-    }
-    
-    public long getYieldTime(char type) {
-        Long l = (Long) yieldTime.get(new Character(type));
-        if (l == null) return -1; else return l.longValue();
-    }
-    
-    public int getYieldCount(char type) {
-        Integer i = (Integer) yieldCount.get(new Character(type));
-        if (i == null) return -1; else return i.intValue();
-    }
-    
     public void startTimer() {
         this.timer = System.currentTimeMillis();
     }
-    
-    public void setYieldTime(char type) {
-        // sets a time that is computed using the timer
-        long t = System.currentTimeMillis() - this.timer;
-        yieldTime.put(new Character(type), new Long(t));
-    }
-    
-    public void setYieldCount(char type, int count) {
-        yieldCount.put(new Character(type), new Integer(count));
-    }
-    
-    public String reportToString() {
-        return "target=" + toString(targetTime, targetCount) + "; yield=" + toString(yieldTime, yieldCount);
-    }
-    
-    public static String toString(HashMap time, HashMap count) {
-        // put this into a format in such a way that it can be send in a http header or post argument
-        // that means that no '=' or spaces are allowed
-        StringBuffer sb = new StringBuffer(sequence.length * 10);
-        Character element;
-        Integer xi;
-        Long xl;
-        for (int i = 0; i < sequence.length; i++) {
-            element = new Character(sequence[i]);
-            sb.append("t");
-            sb.append(element);
-            xl = (Long) time.get(element);
-            sb.append((xl == null) ? "0" : xl.toString());
-            sb.append("|");
-            sb.append("c");
-            sb.append(element);
-            xi = (Integer) count.get(element);
-            sb.append((xi == null) ? "0" : xi.toString());
-            sb.append("|");
-        }
-        return sb.toString();
-    }
-    
-    public static void intoMap(String s, HashMap time, HashMap count) {
-        // this is the reverse method to toString
-        int p = 0;
-        char ct;
-        String elt;
-        String v;
-        int p1;
-        while ((p < s.length()) && ((p1 = s.indexOf('|', p)) > 0)) {
-            ct = s.charAt(p);
-            elt = s.substring(p + 1, p + 2);
-            v = s.substring(p + 2, p1);
-            if (ct == 't') {
-                time.put(elt, new Long(Long.parseLong(v)));
-            } else {
-                count.put(elt, new Integer(Integer.parseInt(v)));
-            }
-        }
-    }
-    
-    // the processes
 
+    public void yield(String s, int count) {
+        long t = System.currentTimeMillis() - this.timer;
+        Entry e = new Entry(s, count, t);
+        yield.add(e);
+    }
+    
+    public Iterator events() {
+        // iteratese Entry-type Objects
+        return yield.iterator();
+    }
+
+    public int size() {
+        // returns number of events / Entry-Objects in yield array
+        return yield.size();
+    }
+    
     // collection
     public Map[] localSearchContainers(
             plasmaSearchQuery query,
@@ -280,23 +141,18 @@ public class plasmaSearchProcessing implements Cloneable {
 
         // retrieve entities that belong to the hashes
         startTimer();
-        long start = System.currentTimeMillis();
         Map inclusionContainers = (query.queryHashes.size() == 0) ? new HashMap() : wordIndex.getContainers(
                         query.queryHashes,
                         urlselection,
                         true,
-                        true,
-                        getTargetTime(plasmaSearchProcessing.PROCESS_COLLECTION) * query.queryHashes.size() / (query.queryHashes.size() + query.excludeHashes.size()));
+                        true);
         if ((inclusionContainers.size() != 0) && (inclusionContainers.size() < query.queryHashes.size())) inclusionContainers = new HashMap(); // prevent that only a subset is returned
-        long remaintime =  getTargetTime(plasmaSearchProcessing.PROCESS_COLLECTION) - System.currentTimeMillis() + start;
-        Map exclusionContainers = ((inclusionContainers == null) || (inclusionContainers.size() == 0) || (remaintime <= 0)) ? new HashMap() : wordIndex.getContainers(
+        Map exclusionContainers = ((inclusionContainers == null) || (inclusionContainers.size() == 0)) ? new HashMap() : wordIndex.getContainers(
                 query.excludeHashes,
                 urlselection,
                 true,
-                true,
-                remaintime);
-        setYieldTime(plasmaSearchProcessing.PROCESS_COLLECTION);
-        setYieldCount(plasmaSearchProcessing.PROCESS_COLLECTION, inclusionContainers.size());
+                true);
+        yield(plasmaSearchProcessing.COLLECTION, inclusionContainers.size());
 
         return new Map[]{inclusionContainers, exclusionContainers};
     }
@@ -305,7 +161,7 @@ public class plasmaSearchProcessing implements Cloneable {
     public indexContainer localSearchJoinExclude(
             Collection includeContainers,
             Collection excludeContainers,
-            long time, int maxDistance) {
+            int maxDistance) {
         // join a search result and return the joincount (number of pages after join)
 
         // since this is a conjunction we return an empty entity if any word is not known
@@ -313,15 +169,12 @@ public class plasmaSearchProcessing implements Cloneable {
 
         // join the result
         startTimer();
-        long start = System.currentTimeMillis();
-        indexContainer rcLocal = indexContainer.joinContainers(includeContainers, time, maxDistance);
-        long remaining = getTargetTime(plasmaSearchProcessing.PROCESS_JOIN) - System.currentTimeMillis() + start;
-        if ((rcLocal != null) && (remaining > 0)) {
-            indexContainer.excludeContainers(rcLocal, excludeContainers, remaining);
+        indexContainer rcLocal = indexContainer.joinContainers(includeContainers, maxDistance);
+        if (rcLocal != null) {
+            indexContainer.excludeContainers(rcLocal, excludeContainers);
         }
         if (rcLocal == null) rcLocal = plasmaWordIndex.emptyContainer(null, 0);
-        setYieldTime(plasmaSearchProcessing.PROCESS_JOIN);
-        setYieldCount(plasmaSearchProcessing.PROCESS_JOIN, rcLocal.size());
+        yield(plasmaSearchProcessing.JOIN, rcLocal.size());
 
         return rcLocal;
     }

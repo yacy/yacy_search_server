@@ -295,9 +295,11 @@ public class yacyDHTAction implements yacyPeerAction {
         assert yacyCore.seedDB != null;
         assert yacyCore.seedDB.mySeed != null;
         assert yacyCore.seedDB.mySeed.hash != null;
+        /*
         assert
             !(kelondroBase64Order.enhancedCoder.cardinal(firstKey.getBytes()) < kelondroBase64Order.enhancedCoder.cardinal(yacyCore.seedDB.mySeed.hash.getBytes()) &&
               kelondroBase64Order.enhancedCoder.cardinal(lastKey.getBytes()) > kelondroBase64Order.enhancedCoder.cardinal(yacyCore.seedDB.mySeed.hash.getBytes()));
+        */
         ArrayList seeds = new ArrayList();
         yacySeed seed;
         //double ownDistance = Math.min(yacyDHTAction.dhtDistance(yacyCore.seedDB.mySeed.hash, firstKey), yacyDHTAction.dhtDistance(yacyCore.seedDB.mySeed.hash, lastKey));

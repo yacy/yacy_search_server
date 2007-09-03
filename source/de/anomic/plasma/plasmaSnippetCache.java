@@ -230,8 +230,9 @@ public class plasmaSnippetCache {
     }
     
     public static class MediaSnippet {
-        public String type, href, name, attr;
-        public MediaSnippet(String type, String href, String name, String attr) {
+        public int type;
+        public String href, name, attr;
+        public MediaSnippet(int type, String href, String name, String attr) {
             this.type = type;
             this.href = href;
             this.name = name;
@@ -614,31 +615,30 @@ public class plasmaSnippetCache {
         }
     }
     
-    public static ArrayList retrieveMediaSnippets(URL url, Set queryhashes, String mediatype, boolean fetchOnline, int timeout) {
+    public static ArrayList retrieveMediaSnippets(URL url, Set queryhashes, int mediatype, boolean fetchOnline, int timeout) {
         if (queryhashes.size() == 0) {
             serverLog.logFine("snippet fetch", "no query hashes given for url " + url);
             return new ArrayList();
         }
-        if (mediatype == null) mediatype = "";
         
         plasmaParserDocument document = retrieveDocument(url, fetchOnline, timeout, false);
         ArrayList a = new ArrayList();
         if (document != null) {
-            if ((mediatype.length() == 0) || (mediatype.equals("audio"))) a.addAll(computeMediaSnippets(document, queryhashes, "audio"));
-            if ((mediatype.length() == 0) || (mediatype.equals("video"))) a.addAll(computeMediaSnippets(document, queryhashes, "video"));
-            if ((mediatype.length() == 0) || (mediatype.equals("app"  ))) a.addAll(computeMediaSnippets(document, queryhashes, "app"));
-            if ((mediatype.length() == 0) || (mediatype.equals("image"))) a.addAll(computeImageSnippets(document, queryhashes));
+            if ((mediatype == plasmaSearchQuery.CONTENTDOM_ALL) || (mediatype == plasmaSearchQuery.CONTENTDOM_AUDIO)) a.addAll(computeMediaSnippets(document, queryhashes, plasmaSearchQuery.CONTENTDOM_AUDIO));
+            if ((mediatype == plasmaSearchQuery.CONTENTDOM_ALL) || (mediatype == plasmaSearchQuery.CONTENTDOM_VIDEO)) a.addAll(computeMediaSnippets(document, queryhashes, plasmaSearchQuery.CONTENTDOM_VIDEO));
+            if ((mediatype == plasmaSearchQuery.CONTENTDOM_ALL) || (mediatype == plasmaSearchQuery.CONTENTDOM_APP)) a.addAll(computeMediaSnippets(document, queryhashes, plasmaSearchQuery.CONTENTDOM_APP));
+            if ((mediatype == plasmaSearchQuery.CONTENTDOM_ALL) || (mediatype == plasmaSearchQuery.CONTENTDOM_IMAGE)) a.addAll(computeImageSnippets(document, queryhashes));
         }
         return a;
     }
     
-    public static ArrayList computeMediaSnippets(plasmaParserDocument document, Set queryhashes, String mediatype) {
+    public static ArrayList computeMediaSnippets(plasmaParserDocument document, Set queryhashes, int mediatype) {
         
         if (document == null) return new ArrayList();
         Map media = null;
-        if (mediatype.equals("audio")) media = document.getAudiolinks();
-        else if (mediatype.equals("video")) media = document.getVideolinks();
-        else if (mediatype.equals("app")) media = document.getApplinks();
+        if (mediatype == plasmaSearchQuery.CONTENTDOM_AUDIO) media = document.getAudiolinks();
+        else if (mediatype == plasmaSearchQuery.CONTENTDOM_VIDEO) media = document.getVideolinks();
+        else if (mediatype == plasmaSearchQuery.CONTENTDOM_APP) media = document.getApplinks();
         if (media == null) return null;
         
         Iterator i = media.entrySet().iterator();
@@ -650,7 +650,6 @@ public class plasmaSnippetCache {
             entry = (Map.Entry) i.next();
             url = (String) entry.getKey();
             desc = (String) entry.getValue();
-            //result.add(new MediaSnippet(mediatype, url, (desc.length() == 0) ? url : desc, null));
             s = removeAppearanceHashes(url, queryhashes);
             if (s.size() == 0) {
                 result.add(new MediaSnippet(mediatype, url, desc, null));
@@ -678,15 +677,14 @@ public class plasmaSnippetCache {
             ientry = (htmlFilterImageEntry) i.next();
             url = (String) ientry.url().toNormalform(true, true);
             desc = (String) ientry.alt();
-            //result.add(new MediaSnippet("image", url, (desc.length() == 0) ? url : desc, ientry.width() + " x " + ientry.height()));
             s = removeAppearanceHashes(url, queryhashes);
             if (s.size() == 0) {
-                result.add(new MediaSnippet("image", url, desc, ientry.width() + " x " + ientry.height()));
+                result.add(new MediaSnippet(plasmaSearchQuery.CONTENTDOM_IMAGE, url, desc, ientry.width() + " x " + ientry.height()));
                 continue;
             }
             s = removeAppearanceHashes(desc, s);
             if (s.size() == 0) {
-                result.add(new MediaSnippet("image", url, desc, ientry.width() + " x " + ientry.height()));
+                result.add(new MediaSnippet(plasmaSearchQuery.CONTENTDOM_IMAGE, url, desc, ientry.width() + " x " + ientry.height()));
                 continue;
             }
         }

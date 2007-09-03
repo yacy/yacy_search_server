@@ -283,7 +283,7 @@ public final class httpdFileHandler {
             String method = conProp.getProperty(httpHeader.CONNECTION_PROP_METHOD);
             path = conProp.getProperty(httpHeader.CONNECTION_PROP_PATH);
             String argsString = conProp.getProperty(httpHeader.CONNECTION_PROP_ARGS); // is null if no args were given
-            String httpVersion= conProp.getProperty(httpHeader.CONNECTION_PROP_HTTP_VER);
+            String httpVersion = conProp.getProperty(httpHeader.CONNECTION_PROP_HTTP_VER);
             
             // check hack attacks in path
             if (path.indexOf("..") >= 0) {
@@ -710,7 +710,7 @@ public final class httpdFileHandler {
                         httpd.sendRespondHeader(conProp, out, httpVersion, 200, null, mimeType, -1, targetDate, null, tp.getOutgoingHeader(), null, "chunked", nocache);
                         // send the content in chunked parts, see RFC 2616 section 3.6.1
                         httpChunkedOutputStream chos = new httpChunkedOutputStream(out);
-                        httpSSI.writeSSI(o, chos);
+                        httpSSI.writeSSI(o, chos, authorization);
                         //chos.write(result);
                         chos.finish();
                     } else {
@@ -724,14 +724,14 @@ public final class httpdFileHandler {
                         
                         if (zipContent) {
                             GZIPOutputStream zippedOut = new GZIPOutputStream(o);
-                            httpSSI.writeSSI(o1, zippedOut);
+                            httpSSI.writeSSI(o1, zippedOut, authorization);
                             //httpTemplate.writeTemplate(fis, zippedOut, tp, "-UNRESOLVED_PATTERN-".getBytes("UTF-8"));
                             zippedOut.finish();
                             zippedOut.flush();
                             zippedOut.close();
                             zippedOut = null;
                         } else {
-                            httpSSI.writeSSI(o1, o);
+                            httpSSI.writeSSI(o1, o, authorization);
                             //httpTemplate.writeTemplate(fis, o, tp, "-UNRESOLVED_PATTERN-".getBytes("UTF-8"));
                         }
                         if (method.equals(httpHeader.METHOD_HEAD)) {

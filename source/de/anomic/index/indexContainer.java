@@ -1,6 +1,6 @@
 // indexContainer.java
-// (C) 2006 by Michael Peter Christen; mc@anomic.de, Frankfurt a. M., Germany
-// first published 04.07.2006 on http://www.anomic.de
+// (C) 2006 by Michael Peter Christen; mc@yacy.net, Frankfurt a. M., Germany
+// first published 04.07.2006 on http://yacy.net
 //
 // This is a part of YaCy, a peer-to-peer based web search engine
 //
@@ -154,28 +154,15 @@ public class indexContainer extends kelondroRowSet {
         return new indexRWIEntry(entry);
     }
 
-    public boolean removeEntry(String wordHash, String urlHash) {
-        if (!wordHash.equals(this.wordHash)) return false;
-        return remove(urlHash) != null;
-    }
-
-    public int removeEntries(String wordHash, Set urlHashes) {
-        if (!wordHash.equals(this.wordHash)) return 0;
+    public int removeEntries(Set urlHashes) {
         int count = 0;
         Iterator i = urlHashes.iterator();
         while (i.hasNext()) count += (remove((String) i.next()) == null) ? 0 : 1;
         return count;
     }
 
-    public void removeEntriesMultiple(Set wordHashes, Set urlHashes) {
-        Iterator i = wordHashes.iterator();
-        while (i.hasNext()) {
-            removeEntries((String) i.next(), urlHashes);
-        }
-    }
-
     public Iterator entries() {
-        // returns an iterator of indexEntry objects
+        // returns an iterator of indexRWIEntry objects
         return new entryIterator();
     }
 
@@ -220,9 +207,7 @@ public class indexContainer extends kelondroRowSet {
         }
     }
 
-    public static indexContainer joinContainers(Collection containers, long time, int maxDistance) {
-        
-        long stamp = System.currentTimeMillis();
+    public static indexContainer joinContainers(Collection containers, int maxDistance) {
         
         // order entities by their size
         TreeMap map = new TreeMap();
@@ -251,10 +236,9 @@ public class indexContainer extends kelondroRowSet {
         while ((map.size() > 0) && (searchResult.size() > 0)) {
             // take the first element of map which is a result and combine it with result
             k = (Long) map.firstKey(); // the next smallest...
-            time -= (System.currentTimeMillis() - stamp); stamp = System.currentTimeMillis();
             searchA = searchResult;
             searchB = (indexContainer) map.remove(k);
-            searchResult = indexContainer.joinConstructive(searchA, searchB, 2 * time / (map.size() + 1), maxDistance);
+            searchResult = indexContainer.joinConstructive(searchA, searchB, maxDistance);
             // free resources
             searchA = null;
             searchB = null;
@@ -265,17 +249,14 @@ public class indexContainer extends kelondroRowSet {
         return searchResult;
     }
     
-    public static indexContainer excludeContainers(indexContainer pivot, Collection containers, long time) {
-        
-        long stamp = System.currentTimeMillis();
+    public static indexContainer excludeContainers(indexContainer pivot, Collection containers) {
         
         // check if there is any result
         if ((containers == null) || (containers.size() == 0)) return pivot; // no result, nothing found
         
         Iterator i = containers.iterator();
         while (i.hasNext()) {
-        	time -= (System.currentTimeMillis() - stamp); stamp = System.currentTimeMillis();
-        	pivot = excludeDestructive(pivot, (indexContainer) i.next(), time);
+        	pivot = excludeDestructive(pivot, (indexContainer) i.next());
         	if ((pivot == null) || (pivot.size() == 0)) return null;
         }
         
@@ -289,7 +270,7 @@ public class indexContainer extends kelondroRowSet {
         return l;
     }
     
-    public static indexContainer joinConstructive(indexContainer i1, indexContainer i2, long time, int maxDistance) {
+    public static indexContainer joinConstructive(indexContainer i1, indexContainer i2, int maxDistance) {
         if ((i1 == null) || (i2 == null)) return null;
         if ((i1.size() == 0) || (i2.size() == 0)) return null;
         
@@ -302,15 +283,15 @@ public class indexContainer extends kelondroRowSet {
         // start most efficient method
         if (stepsEnum > stepsTest) {
             if (i1.size() < i2.size())
-                return joinConstructiveByTest(i1, i2, time, maxDistance);
+                return joinConstructiveByTest(i1, i2, maxDistance);
             else
-                return joinConstructiveByTest(i2, i1, time, maxDistance);
+                return joinConstructiveByTest(i2, i1, maxDistance);
         } else {
-            return joinConstructiveByEnumeration(i1, i2, time, maxDistance);
+            return joinConstructiveByEnumeration(i1, i2, maxDistance);
         }
     }
     
-    private static indexContainer joinConstructiveByTest(indexContainer small, indexContainer large, long time, int maxDistance) {
+    private static indexContainer joinConstructiveByTest(indexContainer small, indexContainer large, int maxDistance) {
         System.out.println("DEBUG: JOIN METHOD BY TEST");
         assert small.rowdef.equals(large.rowdef) : "small = " + small.rowdef.toString() + "; large = " + large.rowdef.toString();
         int keylength = small.rowdef.width(0);
@@ -318,8 +299,7 @@ public class indexContainer extends kelondroRowSet {
         indexContainer conj = new indexContainer(null, small.rowdef, 0); // start with empty search result
         Iterator se = small.entries();
         indexRWIEntry ie0, ie1;
-        long stamp = System.currentTimeMillis();
-            while ((se.hasNext()) && ((System.currentTimeMillis() - stamp) < time)) {
+            while (se.hasNext()) {
                 ie0 = (indexRWIEntry) se.next();
                 ie1 = large.get(ie0.urlHash());
                 if ((ie0 != null) && (ie1 != null)) {
@@ -333,7 +313,7 @@ public class indexContainer extends kelondroRowSet {
         return conj;
     }
     
-    private static indexContainer joinConstructiveByEnumeration(indexContainer i1, indexContainer i2, long time, int maxDistance) {
+    private static indexContainer joinConstructiveByEnumeration(indexContainer i1, indexContainer i2, int maxDistance) {
         System.out.println("DEBUG: JOIN METHOD BY ENUMERATION");
         assert i1.rowdef.equals(i2.rowdef) : "i1 = " + i1.rowdef.toString() + "; i2 = " + i2.rowdef.toString();
         int keylength = i1.rowdef.width(0);
@@ -350,8 +330,7 @@ public class indexContainer extends kelondroRowSet {
             ie1 = (indexRWIEntry) e1.next();
             ie2 = (indexRWIEntry) e2.next();
 
-            long stamp = System.currentTimeMillis();
-            while ((System.currentTimeMillis() - stamp) < time) {
+            while (true) {
                 assert (ie1.urlHash().length() == keylength) : "ie1.urlHash() = " + ie1.urlHash();
                 assert (ie2.urlHash().length() == keylength) : "ie2.urlHash() = " + ie2.urlHash();
                 c = i1.rowdef.getOrdering().compare(ie1.urlHash(), ie2.urlHash());
@@ -372,7 +351,7 @@ public class indexContainer extends kelondroRowSet {
         return conj;
     }
     
-    public static indexContainer excludeDestructive(indexContainer pivot, indexContainer excl, long time) {
+    public static indexContainer excludeDestructive(indexContainer pivot, indexContainer excl) {
         if (pivot == null) return null;
         if (excl == null) return pivot;
         if (pivot.size() == 0) return null;
@@ -386,21 +365,20 @@ public class indexContainer extends kelondroRowSet {
         
         // start most efficient method
         if (stepsEnum > stepsTest) {
-            return excludeDestructiveByTest(pivot, excl, time);
+            return excludeDestructiveByTest(pivot, excl);
         } else {
-            return excludeDestructiveByEnumeration(pivot, excl, time);
+            return excludeDestructiveByEnumeration(pivot, excl);
         }
     }
     
-    private static indexContainer excludeDestructiveByTest(indexContainer pivot, indexContainer excl, long time) {
+    private static indexContainer excludeDestructiveByTest(indexContainer pivot, indexContainer excl) {
         assert pivot.rowdef.equals(excl.rowdef) : "small = " + pivot.rowdef.toString() + "; large = " + excl.rowdef.toString();
         int keylength = pivot.rowdef.width(0);
         assert (keylength == excl.rowdef.width(0));
         boolean iterate_pivot = pivot.size() < excl.size();
         Iterator se = (iterate_pivot) ? pivot.entries() : excl.entries();
         indexRWIEntry ie0, ie1;
-        long stamp = System.currentTimeMillis();
-            while ((se.hasNext()) && ((System.currentTimeMillis() - stamp) < time)) {
+            while (se.hasNext()) {
                 ie0 = (indexRWIEntry) se.next();
                 ie1 = excl.get(ie0.urlHash());
                 if ((ie0 != null) && (ie1 != null)) {
@@ -412,7 +390,7 @@ public class indexContainer extends kelondroRowSet {
         return pivot;
     }
     
-    private static indexContainer excludeDestructiveByEnumeration(indexContainer pivot, indexContainer excl, long time) {
+    private static indexContainer excludeDestructiveByEnumeration(indexContainer pivot, indexContainer excl) {
         assert pivot.rowdef.equals(excl.rowdef) : "i1 = " + pivot.rowdef.toString() + "; i2 = " + excl.rowdef.toString();
         int keylength = pivot.rowdef.width(0);
         assert (keylength == excl.rowdef.width(0));
@@ -427,8 +405,7 @@ public class indexContainer extends kelondroRowSet {
             ie1 = (indexRWIEntry) e1.next();
             ie2 = (indexRWIEntry) e2.next();
 
-            long stamp = System.currentTimeMillis();
-            while ((System.currentTimeMillis() - stamp) < time) {
+            while (true) {
                 assert (ie1.urlHash().length() == keylength) : "ie1.urlHash() = " + ie1.urlHash();
                 assert (ie2.urlHash().length() == keylength) : "ie2.urlHash() = " + ie2.urlHash();
                 c = pivot.rowdef.getOrdering().compare(ie1.urlHash(), ie2.urlHash());

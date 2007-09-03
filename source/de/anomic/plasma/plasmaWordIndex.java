@@ -147,7 +147,7 @@ public final class plasmaWordIndex implements indexRI {
     }
     
     public long getUpdateTime(String wordHash) {
-        indexContainer entries = getContainer(wordHash, null, -1);
+        indexContainer entries = getContainer(wordHash, null);
         if (entries == null) return 0;
         return entries.updated();
     }
@@ -203,7 +203,7 @@ public final class plasmaWordIndex implements indexRI {
             indexContainer c;
             while (collectMax) {
                 wordHash = ram.maxScoreWordHash();
-                c = ram.getContainer(wordHash, null, -1);
+                c = ram.getContainer(wordHash, null);
                 if ((c != null) && (c.size() > wCacheMaxChunk)) {
                     containerList.add(ram.deleteContainer(wordHash));
                     if (serverMemory.available() < collections.minMem()) break; // protect memory during flush
@@ -310,7 +310,7 @@ public final class plasmaWordIndex implements indexRI {
         return false;
     }
     
-    public indexContainer getContainer(String wordHash, Set urlselection, long maxTime) {
+    public indexContainer getContainer(String wordHash, Set urlselection) {
         if ((wordHash == null) || (wordHash.length() != yacySeedDB.commonHashLength)) {
             // wrong input
             return null;
@@ -319,28 +319,28 @@ public final class plasmaWordIndex implements indexRI {
         // get from cache
         indexContainer container;
         synchronized (dhtOutCache) {
-        	container = dhtOutCache.getContainer(wordHash, urlselection, -1);
+        	container = dhtOutCache.getContainer(wordHash, urlselection);
         }
         synchronized (dhtInCache) {
         	if (container == null) {
-        		container = dhtInCache.getContainer(wordHash, urlselection, -1);
+        		container = dhtInCache.getContainer(wordHash, urlselection);
         	} else {
-        		container.addAllUnique(dhtInCache.getContainer(wordHash, urlselection, -1));
+        		container.addAllUnique(dhtInCache.getContainer(wordHash, urlselection));
         	}
         }
         
         // get from collection index
         synchronized (this) {
             if (container == null) {
-                container = collections.getContainer(wordHash, urlselection, (maxTime < 0) ? -1 : maxTime);
+                container = collections.getContainer(wordHash, urlselection);
             } else {
-                container.addAllUnique(collections.getContainer(wordHash, urlselection, (maxTime < 0) ? -1 : maxTime));
+                container.addAllUnique(collections.getContainer(wordHash, urlselection));
             }
         }
         return container;
     }
 
-    public Map getContainers(Set wordHashes, Set urlselection, boolean deleteIfEmpty, boolean interruptIfEmpty, long maxTime) {
+    public Map getContainers(Set wordHashes, Set urlselection, boolean deleteIfEmpty, boolean interruptIfEmpty) {
         // return map of wordhash:indexContainer
         
         // retrieve entities that belong to the hashes
@@ -348,19 +348,13 @@ public final class plasmaWordIndex implements indexRI {
         String singleHash;
         indexContainer singleContainer;
             Iterator i = wordHashes.iterator();
-            long start = System.currentTimeMillis();
-            long remaining;
             while (i.hasNext()) {
-                // check time
-                remaining = maxTime - (System.currentTimeMillis() - start);
-                //if ((maxTime > 0) && (remaining <= 0)) break;
-                if ((maxTime >= 0) && (remaining <= 0)) remaining = 100;
             
                 // get next word hash:
                 singleHash = (String) i.next();
             
                 // retrieve index
-                singleContainer = getContainer(singleHash, urlselection, (maxTime < 0) ? -1 : remaining / (wordHashes.size() - containers.size()));
+                singleContainer = getContainer(singleHash, urlselection);
             
                 // check result
                 if (((singleContainer == null) || (singleContainer.size() == 0)) && (interruptIfEmpty)) return new HashMap();

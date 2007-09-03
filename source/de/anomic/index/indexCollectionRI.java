@@ -62,7 +62,7 @@ public class indexCollectionRI implements indexRI {
     }
     
     public long getUpdateTime(String wordHash) {
-        indexContainer entries = getContainer(wordHash, null, -1);
+        indexContainer entries = getContainer(wordHash, null);
         if (entries == null) return 0;
         return entries.updated();
     }
@@ -130,7 +130,7 @@ public class indexCollectionRI implements indexRI {
         }
     }
     
-    public synchronized indexContainer getContainer(String wordHash, Set urlselection, long maxtime) {
+    public synchronized indexContainer getContainer(String wordHash, Set urlselection) {
         try {
             kelondroRowSet collection = collectionIndex.get(wordHash.getBytes());
             if (collection != null) collection.select(urlselection);

@@ -62,7 +62,8 @@ public class kelondroObjects {
         assert (key != null);
         assert (key.length() > 0);
         assert (newMap != null);
-    
+        if (cacheScore == null) return; // may appear during shutdown
+
         // write entry
         kelondroRA kra = dyn.getRA(key);
         newMap.write(kra);
@@ -95,8 +96,8 @@ public class kelondroObjects {
 
     protected synchronized kelondroObjectsEntry get(final String key, final boolean storeCache) throws IOException {
         // load map from cache
-        assert cache != null;
         assert key != null;
+        if (cache == null) return null; // case may appear during shutdown
         kelondroObjectsEntry map = (kelondroObjectsEntry) cache.get(key);
         if (map != null) return map;
 
@@ -122,6 +123,7 @@ public class kelondroObjects {
     
     private synchronized void checkCacheSpace() {
         // check for space in cache
+        if (cache == null) return; // may appear during shutdown
         if (cache.size() >= cachesize) {
             // delete one entry
             final String delkey = (String) cacheScore.getMinObject();

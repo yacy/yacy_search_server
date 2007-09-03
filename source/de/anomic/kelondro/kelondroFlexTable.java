@@ -209,6 +209,7 @@ public class kelondroFlexTable extends kelondroFlexWidthArray implements kelondr
     }
     
     public synchronized kelondroRow.Entry get(byte[] key) throws IOException {
+        if (index == null) return null; // case may happen during shutdown
 		int pos = index.geti(key);
 		assert this.size() == index.size() : "content.size() = " + this.size() + ", index.size() = " + index.size() + ", analysis: " + index.consistencyAnalysis();
 		if (pos < 0) return null;
@@ -259,6 +260,7 @@ public class kelondroFlexTable extends kelondroFlexWidthArray implements kelondr
         assert (!(serverLog.allZero(row.getColBytes(0))));
         assert row.objectsize() <= this.rowdef.objectsize;
         byte[] key = row.getColBytes(0);
+        if (index == null) return null; // case may appear during shutdown
         int pos = index.geti(key);
         if (pos < 0) {
         	pos = super.add(row);

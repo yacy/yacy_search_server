@@ -7,105 +7,24 @@
   <body id="PerformanceSearch">
     #%env/templates/header.template%#
     #%env/templates/submenuConfig.template%#
-    <h2>Timing Settings of Search Sequence</h2>
-    
-    <p>
-      <strong>Settings for local search profile:</strong>
-    </p>
-    <form action="PerformanceSearch_p.html" method="post" enctype="multipart/form-data">
-      <table border="0" cellpadding="2" cellspacing="1">
-        <tr class="TableHeader" valign="bottom">
-          <td>Entity</td>
-          <td>Collection</td>
-          <td>Join</td>
-          <td>Pre-Sort</td>
-          <td>URL Fetch</td>
-          <td>Post-Sort</td>
-          <td>Filter</td>
-          <td>Snippet-Fetch</td>
-        </tr>
-        <tr class="TableCellDark">
-          <td align="left">execution Time (percentage; sum of this must be 100)</td>
-          <td align="right"><input name="searchProcessLocalTime_c" type="text" size="8" maxlength="8" value="#[searchProcessLocalTime_c]#" /></td>
-          <td align="right"><input name="searchProcessLocalTime_j" type="text" size="8" maxlength="8" value="#[searchProcessLocalTime_j]#" /></td>
-          <td align="right"><input name="searchProcessLocalTime_r" type="text" size="8" maxlength="8" value="#[searchProcessLocalTime_r]#" /></td>
-          <td align="right"><input name="searchProcessLocalTime_u" type="text" size="8" maxlength="8" value="#[searchProcessLocalTime_u]#" /></td>
-          <td align="right"><input name="searchProcessLocalTime_o" type="text" size="8" maxlength="8" value="#[searchProcessLocalTime_o]#" /></td>
-          <td align="right"><input name="searchProcessLocalTime_f" type="text" size="8" maxlength="8" value="#[searchProcessLocalTime_f]#" /></td>
-          <td align="right"><input name="searchProcessLocalTime_s" type="text" size="8" maxlength="8" value="#[searchProcessLocalTime_s]#" /></td>
-        </tr>
-        <tr class="TableCellDark">
-          <td align="left">result count (percentage of requested amount)</td>
-          <td align="right"><input name="searchProcessLocalCount_c" type="text" size="8" maxlength="8" value="#[searchProcessLocalCount_c]#" /></td>
-          <td align="right"><input name="searchProcessLocalCount_j" type="text" size="8" maxlength="8" value="#[searchProcessLocalCount_j]#" /></td>
-          <td align="right"><input name="searchProcessLocalCount_r" type="text" size="8" maxlength="8" value="#[searchProcessLocalCount_r]#" /></td>
-          <td align="right"><input name="searchProcessLocalCount_u" type="text" size="8" maxlength="8" value="#[searchProcessLocalCount_u]#" /></td>
-          <td align="right"><input name="searchProcessLocalCount_o" type="text" size="8" maxlength="8" value="#[searchProcessLocalCount_o]#" /></td>
-          <td align="right"><input name="searchProcessLocalCount_f" type="text" size="8" maxlength="8" value="#[searchProcessLocalCount_f]#" /></td>
-          <td align="right"><input name="searchProcessLocalCount_s" type="text" size="8" maxlength="8" value="#[searchProcessLocalCount_s]#" /></td>
-        </tr>
-        <tr class="TableCellLight">
-          <td align="left" colspan="8">
-          <input type="submit" name="submitlocalprofilecustom" value="Submit New Profile Values" />&nbsp;&nbsp;&nbsp;
-          <input type="submit" name="submitlocalprofiledefault" value="Reset To Default Values" />&nbsp;&nbsp;&nbsp;
-          </td>
-        </tr>
-      </table>
-    </form>
-    
-    #(submitlocalrespond)#
-    ::
-    <p>Your settings are valid and will be used for next search.</p>
-    ::
-    <p>Reset to default settings done.</p>
-    ::
-    <p>Your settings cannot be accepted: sum of execution time percentage is not 100</p>
-    #(/submitlocalrespond)#
+    <h2>Search Sequence Timing</h2>
     
     <p>
       <strong>Timing results of latest search request:</strong>
     </p>
     <table border="0" cellpadding="2" cellspacing="1">
       <tr class="TableHeader" valign="bottom">
-        <td>Entity</td>
-        <td>Collection</td>
-        <td>Join</td>
-        <td>Pre-Sort</td>
-        <td>URL Fetch</td>
-        <td>Post-Sort</td>
-        <td>Filter</td>
-        <td>Snippet-Fetch</td>
+        <td>Event</td>
+        <td>Time (milliseconds)</td>
+        <td>Result-Count</td>
       </tr>
-      <tr class="TableCellDark">
-        <td align="left">execution Time (absolute milliseconds)</td>
-        <td align="right">#[latestLocalTimeAbs_c]#</td>
-        <td align="right">#[latestLocalTimeAbs_j]#</td>
-        <td align="right">#[latestLocalTimeAbs_r]#</td>
-        <td align="right">#[latestLocalTimeAbs_u]#</td>
-        <td align="right">#[latestLocalTimeAbs_o]#</td>
-        <td align="right">#[latestLocalTimeAbs_f]#</td>
-        <td align="right">#[latestLocalTimeAbs_s]#</td>
+    #{table}#
+      <tr class="TableCellDark" valign="bottom">
+        <td>#[event]#</td>
+        <td>#[time]#</td>
+        <td>#[count]#</td>
       </tr>
-      <tr class="TableCellDark">
-        <td align="left">execution Time (relative)</td>
-        <td align="right">#[latestLocalTimeRel_c]#</td>
-        <td align="right">#[latestLocalTimeRel_j]#</td>
-        <td align="right">#[latestLocalTimeRel_r]#</td>
-        <td align="right">#[latestLocalTimeRel_u]#</td>
-        <td align="right">#[latestLocalTimeRel_o]#</td>
-        <td align="right">#[latestLocalTimeRel_f]#</td>
-        <td align="right">#[latestLocalTimeRel_s]#</td>
-      </tr>
-      <tr class="TableCellDark">
-        <td align="left">result count (absolute amount)</td>
-        <td align="right">#[latestLocalCountAbs_c]#</td>
-        <td align="right">#[latestLocalCountAbs_j]#</td>
-        <td align="right">#[latestLocalCountAbs_r]#</td>
-        <td align="right">#[latestLocalCountAbs_u]#</td>
-        <td align="right">#[latestLocalCountAbs_o]#</td>
-        <td align="right">#[latestLocalCountAbs_f]#</td>
-        <td align="right">#[latestLocalCountAbs_s]#</td>
-      </tr>
+    #{/table}#
     </table>
     
     <p>

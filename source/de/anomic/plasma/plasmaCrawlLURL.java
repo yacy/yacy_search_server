@@ -297,6 +297,7 @@ public final class plasmaCrawlLURL {
     }
 
     public synchronized boolean exists(String urlHash) {
+        if (urlIndexFile == null) return false; // case may happen during shutdown
         try {
             return urlIndexFile.has(urlHash.getBytes());
         } catch (IOException e) {

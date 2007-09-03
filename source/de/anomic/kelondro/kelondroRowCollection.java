@@ -281,6 +281,7 @@ public class kelondroRowCollection {
         assert (index >= 0) : "get: access with index " + index + " is below zero";
         assert (index < chunkcount) : "get: access with index " + index + " is above chunkcount " + chunkcount + "; sortBound = " + sortBound;
         assert (index * rowdef.objectsize < chunkcache.length);
+        if ((chunkcache == null) || (rowdef == null)) return null; // case may appear during shutdown
         if (index >= chunkcount) return null;
         if (index * rowdef.objectsize() >= chunkcache.length) return null;
         this.lastTimeRead = System.currentTimeMillis();
@@ -288,13 +289,26 @@ public class kelondroRowCollection {
     }
     
     public synchronized final void set(int index, kelondroRow.Entry a) {
-        assert (index >= 0) : "get: access with index " + index + " is below zero";
-        assert (index < chunkcount) : "get: access with index " + index + " is above chunkcount " + chunkcount;
-        //assert (!(bugappearance(a, astart, alength))) : "a = " + serverLog.arrayList(a, astart, alength);
-        //if (bugappearance(a, astart, alength)) return; // TODO: this is temporary; remote peers may still submit bad entries
+        assert (index >= 0) : "set: access with index " + index + " is below zero";
+        ensureSize(index + 1);
         a.writeToArray(chunkcache, index * rowdef.objectsize());
+        if (index >= chunkcount) chunkcount = index + 1;
         this.lastTimeWrote = System.currentTimeMillis();
     }
+    
+    public final void insertUnique(int index, kelondroRow.Entry a) {
+        assert (a != null);
+
+        if (index < chunkcount) {
+            // make room
+            ensureSize(chunkcount + 1);
+            System.arraycopy(chunkcache, rowdef.objectsize() * index, chunkcache, rowdef.objectsize() * (index + 1), (chunkcount - index) * rowdef.objectsize());
+            chunkcount++;
+        }
+        // insert entry into gap
+        set(index, a);
+    }
+    
     
     public synchronized void addUnique(kelondroRow.Entry row) {
         byte[] r = row.bytes();

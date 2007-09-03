@@ -42,7 +42,7 @@ public interface indexRI {
     public long getUpdateTime(String wordHash);
     public int indexSize(String wordHash);
     public boolean hasContainer(String wordHash); // should only be used if in case that true is returned the getContainer is NOT called
-    public indexContainer getContainer(String wordHash, Set urlselection, long maxtime);
+    public indexContainer getContainer(String wordHash, Set urlselection);
     public indexContainer deleteContainer(String wordHash);
     
     public boolean removeEntry(String wordHash, String urlHash);

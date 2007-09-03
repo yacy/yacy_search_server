@@ -63,6 +63,7 @@ public final class plasmaSearchQuery {
     public static final int SEARCHDOM_GLOBALDHT = 3;
     public static final int SEARCHDOM_GLOBALALL = 4;
     
+    public static final int CONTENTDOM_ALL   = -1;
     public static final int CONTENTDOM_TEXT  = 0;
     public static final int CONTENTDOM_IMAGE = 1;
     public static final int CONTENTDOM_AUDIO = 2;
@@ -74,7 +75,7 @@ public final class plasmaSearchQuery {
     
     public String queryString;
     public TreeSet queryHashes, excludeHashes;
-    public int wantedResults;
+    private int linesPerPage, offset;
     public String prefer;
     public int contentdom;
     public long maximumTime;
@@ -84,9 +85,11 @@ public final class plasmaSearchQuery {
     public int domMaxTargets;
     public int maxDistance;
     public kelondroBitfield constraint;
+    public boolean onlineSnippetFetch;
 
     public plasmaSearchQuery(String queryString, TreeSet queryHashes, TreeSet excludeHashes, int maxDistance, String prefer, int contentdom,
-                             int wantedResults, long maximumTime, String urlMask,
+                             boolean onlineSnippetFetch,
+                             int lines, int offset, long maximumTime, String urlMask,
                              int domType, String domGroupName, int domMaxTargets,
                              kelondroBitfield constraint) {
         this.queryString = queryString;
@@ -95,31 +98,29 @@ public final class plasmaSearchQuery {
         this.maxDistance = maxDistance;
         this.prefer = prefer;
         this.contentdom = contentdom;
-        this.wantedResults = wantedResults;
+        this.linesPerPage = lines;
+        this.offset = offset;
         this.maximumTime = maximumTime;
         this.urlMask = urlMask;
         this.domType = domType;
         this.domGroupName = domGroupName;
         this.domMaxTargets = domMaxTargets;
         this.constraint = constraint;
+        this.onlineSnippetFetch = onlineSnippetFetch;
     }
     
-    public plasmaSearchQuery(TreeSet queryHashes, TreeSet excludeHashes, int maxDistance, String prefer, int contentdom,
-                             int wantedResults, long maximumTime, String urlMask,
-                             kelondroBitfield constraint) {
-        this.queryString = null;
-        this.excludeHashes =  excludeHashes;
-        this.maxDistance = maxDistance;
-        this.prefer = prefer;
-        this.contentdom = contentdom;
-        this.queryHashes = queryHashes;
-        this.wantedResults = wantedResults;
-        this.maximumTime = maximumTime;
-        this.urlMask = urlMask;
-        this.domType = -1;
-        this.domGroupName = null;
-        this.domMaxTargets = -1;
-        this.constraint = constraint;
+    public int neededResults() {
+        // the number of result lines that must be computed
+        return this.offset + this.linesPerPage;
+    }
+    
+    public int displayResults() {
+        // the number if result lines that are displayed at once (size of result page)
+        return this.linesPerPage;
+    }
+    
+    public void setOffset(int newOffset) {
+        this.offset = newOffset;
     }
     
     public static int contentdomParser(String dom) {
@@ -129,6 +130,19 @@ public final class plasmaSearchQuery {
         else if (dom.equals("video")) return CONTENTDOM_VIDEO;
         else if (dom.equals("app")) return CONTENTDOM_APP;
         return CONTENTDOM_TEXT;
+    }
+    
+    public String contentdom() {
+        if (this.contentdom == CONTENTDOM_TEXT) return "text";
+        else if (this.contentdom == CONTENTDOM_IMAGE) return "image";
+        else if (this.contentdom == CONTENTDOM_AUDIO) return "audio";
+        else if (this.contentdom == CONTENTDOM_VIDEO) return "video";
+        else if (this.contentdom == CONTENTDOM_APP) return "app";
+        return "text";
+    }
+    
+    public String searchdom() {
+        return (this.domType == SEARCHDOM_LOCAL) ? "local" : "global";
     }
     
     public static TreeSet hashes2Set(String query) {
@@ -225,14 +239,14 @@ public final class plasmaSearchQuery {
         return hashSet2hashString(this.queryHashes) + "-" + hashSet2hashString(this.excludeHashes) + ":" + this.contentdom;
     }
     
-    public HashMap resultProfile(int searchcount, long searchtime) {
+    public HashMap resultProfile(long searchtime) {
         // generate statistics about search: query, time, etc
         HashMap r = new HashMap();
         r.put("queryhashes", queryHashes);
         r.put("querystring", queryString);
-        r.put("querycount", new Integer(wantedResults));
+        r.put("querycount", new Integer(linesPerPage));
         r.put("querytime", new Long(maximumTime));
-        r.put("resultcount", new Integer(searchcount));
+        //r.put("resultcount", new Integer(searchcount));
         r.put("resulttime", new Long(searchtime));
         return r;
     }
