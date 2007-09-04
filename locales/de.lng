@@ -2266,27 +2266,26 @@ Please repeat your search to see if there are late-responses from remote peers==
 If you think the information you searched should exist in the global index,==Wenn Sie glauben, die Information, nach der Sie suchen, sollte im globalen Index stehen,
 then please run your own peer and start a crawl of your wanted information to make it==dann starten Sie von Ihrem eigenen Peer einen Crawl nach der gesuchten Information, um sie
 available for everyone. Then stay online to support crawls from other peers. Thank you!==allen anderen Peers auch zur Verf&uuml;gung zu stellen. Bleiben Sie bitte online um Crawls von anderen Peers zu erlauben. Danke!
-results from==Resultate aus
-ordered links from==angeforderten Links aus
-filtered links of a total number of==gefilterten Links von insgesamt
-known.==bekannten Links.
+results from a total number of==Treffer aus insgesamt
+known==bekannten Links
+links from other YaCy peers==Links von anderen YaCy Peers
 Refine your search with these topwords==Verfeinere die Suche mit diesen Topw&ouml;rtern
 You can enrich the search results by using the 'global' option; you must also switch to online mode==Sie k&ouml;nnen die Anzahl Ihrer Treffer erh&ouml;hen, wenn Sie die 'global' Option benutzen; Sie m&uuml;ssen aber erst in den Onlinemodus wechseln
 \(by using the proxy\) to contribute to the global index.==(indem Sie den Proxy benutzen), um etwas zum globalen Index beizutragen.
 You cannot get global search results because you are not connected to another YaCy peer.==Sie k&ouml;nnen keine globalen Treffer erhalten, da sie nicht mit einem anderen YaCy Peer verbunden sind.
-"bookmark"=="Lesezeichen"
-"recommend"=="empfehlen"
-"delete"=="l&ouml;schen"
 loading snippet ...==Auszug wird geladen ...
 loading snippet from==Auszug wird geladen von
 Sorry, but in order to use the image search, you need JavaScript. But here are the urls, YaCy would have looked for the images you want. Perhaps you can find them there. Sorry for the inconvenience. If you want a non-JavaScript image search, beg the developers for it.==Entschuldigung, aber um die Bildersuche benutzen zu k&ouml;nnen, brauchen Sie JavaScript. Aber hier sind die URLs, die YaCy benutzt hat, um nach Ihren gesuchten Bildern zu suchen. Vielleicht finden Sie diese dort. Entschuldigen Sie die Unanehmlichkeiten. Wenn Sie eine Bildersuche ohne JavaScript wollen, bitten Sie die Entwickler darum.
-Pictures==Bilder
-The global search resulted in \#\[globalresults\]\# link contributions from other YaCy peers.==Die globale Suche enth&auml;lt #[globalresults]# Ergebnisse, die von anderen Peers geliefert wurden.
-YaCy is a GPL'ed project==YaCy ist ein GPL Projekt
-with the target of implementing a P2P-based global search engine.==mit dem Ziel eine globale P2P-basierte Suchmaschine zu realisieren.
-Architecture \(C\) by Michael Peter Christen==Architektur (C) von Michael Peter Christen
+Search Result Pages==Suchergebnis Seiten
 #-----------------------------
 
+#File: yacysearch.html
+#---------------------------
+"bookmark"=="Lesezeichen"
+"recommend"=="empfehlen"
+"delete"=="l&ouml;schen"
+Pictures==Bilder
+#-----------------------------
 
 #File: env/templates/simpleheader.template
 #---------------------------
