@@ -231,21 +231,6 @@ public final class search {
         }
         prop.putASIS("indexabstract", new String(indexabstract));
         
-        // prepare search statistics
-        Long trackerHandle = new Long(System.currentTimeMillis());
-        String client = (String) header.get("CLIENTIP");
-        HashMap searchProfile = theQuery.resultProfile(System.currentTimeMillis() - timestamp);
-        searchProfile.put("host", client);
-        yacySeed remotepeer = yacyCore.seedDB.lookupByIP(natLib.getInetAddress(client), true, false, false);
-        searchProfile.put("peername", (remotepeer == null) ? "unknown" : remotepeer.getName());
-        searchProfile.put("time", trackerHandle);
-        sb.remoteSearches.add(searchProfile);
-        
-        TreeSet handles = (TreeSet) sb.remoteSearchTracker.get(client);
-        if (handles == null) handles = new TreeSet();
-        handles.add(trackerHandle);
-        sb.remoteSearchTracker.put(client, handles);
-        
         // prepare result
         if ((joincount == 0) || (accu == null)) {
             
@@ -274,6 +259,20 @@ public final class search {
         prop.putASIS("fwhop", ""); // hops (depth) of forwards that had been performed to construct this result
         prop.putASIS("fwsrc", ""); // peers that helped to construct this result
         prop.putASIS("fwrec", ""); // peers that would have helped to construct this result (recommendations)
+
+        // prepare search statistics
+        Long trackerHandle = new Long(System.currentTimeMillis());
+        HashMap searchProfile = theQuery.resultProfile(joincount, System.currentTimeMillis() - timestamp);
+        String client = (String) header.get("CLIENTIP");
+        searchProfile.put("host", client);
+        yacySeed remotepeer = yacyCore.seedDB.lookupByIP(natLib.getInetAddress(client), true, false, false);
+        searchProfile.put("peername", (remotepeer == null) ? "unknown" : remotepeer.getName());
+        searchProfile.put("time", trackerHandle);
+        sb.remoteSearches.add(searchProfile);
+        TreeSet handles = (TreeSet) sb.remoteSearchTracker.get(client);
+        if (handles == null) handles = new TreeSet();
+        handles.add(trackerHandle);
+        sb.remoteSearchTracker.put(client, handles);
         
         // log
         yacyCore.log.logInfo("EXIT HASH SEARCH: " +
