@@ -51,7 +51,6 @@ import java.util.Iterator;
 
 import de.anomic.http.httpHeader;
 import de.anomic.http.httpc;
-import de.anomic.net.URL;
 import de.anomic.plasma.plasmaCrawlNURL;
 import de.anomic.plasma.plasmaSwitchboard;
 import de.anomic.server.serverCore;
@@ -145,7 +144,7 @@ public class yacyPeerActions {
         
         yacySeed     ys;
         String       seedListFileURL;
-        URL          url;
+        yacyURL      url;
         ArrayList    seedList;
         Iterator     enu;
         int          lc;
@@ -171,7 +170,7 @@ public class yacyPeerActions {
                     reqHeader.put(httpHeader.PRAGMA,"no-cache");
                     reqHeader.put(httpHeader.CACHE_CONTROL,"no-cache");
                     
-                    url = new URL(seedListFileURL);
+                    url = new yacyURL(seedListFileURL, null);
                     long start = System.currentTimeMillis();
                     header = httpc.whead(url, url.getHost(), this.bootstrapLoadTimeout, null, null, this.sb.remoteProxyConfig,reqHeader);
                     long loadtime = System.currentTimeMillis() - start;

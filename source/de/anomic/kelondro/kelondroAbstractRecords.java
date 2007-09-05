@@ -307,7 +307,7 @@ public abstract class kelondroAbstractRecords implements kelondroRecords {
         }
         
         private synchronized void checkConsistency() {
-            if (debugmode) try { // in debug mode
+            if ((debugmode) && (entryFile != null)) try { // in debug mode
                 long efl = entryFile.length();
                 assert ((efl - POS_NODES) % ((long) recordsize)) == 0 : "rest = " + ((entryFile.length()  - POS_NODES) % ((long) recordsize)) + ", USEDC = " + this.USEDC + ", FREEC = " + this.FREEC  + ", recordsize = " + recordsize + ", file = " + filename;
                 long calculated_used = (efl - POS_NODES) / ((long) recordsize);

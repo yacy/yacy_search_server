@@ -142,13 +142,13 @@ public class plasmaCrawlNURLImporter extends AbstractImporter implements dbImpor
                             
                             this.urlCount++;
                             nextEntry = this.importNurlDB.pop(stackTypes[stackType], false);
-                            nextHash = nextEntry.urlhash();
+                            nextHash = nextEntry.url().hash();
                         } else {
                             if (!entryIter.hasNext()) break;
                             
                             this.urlCount++;
                             nextEntry = (plasmaCrawlEntry) entryIter.next();
-                            nextHash = nextEntry.urlhash();
+                            nextHash = nextEntry.url().hash();
                         }
                     } catch (IOException e) {
                         this.log.logWarning("Unable to import entry: " + e.toString());

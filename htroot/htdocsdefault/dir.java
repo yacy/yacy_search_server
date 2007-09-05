@@ -60,12 +60,11 @@ import de.anomic.data.userDB;
 import de.anomic.http.httpHeader;
 import de.anomic.http.httpc;
 import de.anomic.http.httpd;
-import de.anomic.plasma.plasmaURL;
 import de.anomic.index.indexURLEntry;
 import de.anomic.kelondro.kelondroBase64Order;
 import de.anomic.kelondro.kelondroBitfield;
-import de.anomic.net.URL;
 import de.anomic.plasma.plasmaCondenser;
+import de.anomic.plasma.plasmaHTCache;
 import de.anomic.plasma.plasmaSwitchboard;
 import de.anomic.server.serverCodings;
 import de.anomic.server.serverCore;
@@ -79,6 +78,7 @@ import de.anomic.tools.dirlistComparator;
 import de.anomic.tools.md5DirFileFilter;
 import de.anomic.yacy.yacyCore;
 import de.anomic.yacy.yacySeed;
+import de.anomic.yacy.yacyURL;
 
 public class dir {
 
@@ -364,7 +364,7 @@ public class dir {
 
     public static void indexPhrase(plasmaSwitchboard switchboard, String urlstring, String phrase, String descr, byte[] md5) {
         try {
-            final URL url = new URL(urlstring);
+            final yacyURL url = new yacyURL(urlstring, null);
             final plasmaCondenser condenser = new plasmaCondenser(new ByteArrayInputStream(("yacyshare. " + phrase + ". " + descr).getBytes()), "UTF-8");
             final indexURLEntry newEntry = new indexURLEntry(
                 url,
@@ -379,7 +379,7 @@ public class dir {
                 md5, // md5
                 (long) phrase.length(), // size
                 condenser.RESULT_NUMB_WORDS, // word count
-                plasmaURL.DT_SHARE, // doctype
+                plasmaHTCache.DT_SHARE, // doctype
                 new kelondroBitfield(4),
                 "**", // language
                 0,0,0,0,0,0
@@ -392,14 +392,13 @@ public class dir {
                     5 /*process case*/
                 );
             
-            final String urlHash = newEntry.hash();
-            /*final int words =*/ switchboard.wordIndex.addPageIndex(url, urlHash, new Date(), phrase.length() + descr.length() + 13, null, condenser, "**", plasmaURL.DT_SHARE, 0, 0);
+            /*final int words =*/ switchboard.wordIndex.addPageIndex(url, new Date(), phrase.length() + descr.length() + 13, null, condenser, "**", plasmaHTCache.DT_SHARE, 0, 0);
         } catch (IOException e) {}
     }
 
     public static void deletePhrase(plasmaSwitchboard switchboard, String urlstring, String phrase, String descr) {
         try {
-            final String urlhash = plasmaURL.urlHash(new URL(urlstring));
+            final String urlhash = (new yacyURL(urlstring, null)).hash();
             final Iterator words = plasmaCondenser.getWords(("yacyshare " + phrase + " " + descr).getBytes("UTF-8"), "UTF-8").keySet().iterator();
             String word;
             while (words.hasNext()) {

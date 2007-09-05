@@ -44,13 +44,13 @@
 
 package de.anomic.plasma.parser;
 
-import de.anomic.net.URL;
 import de.anomic.plasma.plasmaCrawlEURL;
+import de.anomic.yacy.yacyURL;
 
 public class ParserException extends Exception
 {
     private String errorCode = null;
-    private URL url = null;
+    private yacyURL url = null;
     
 	private static final long serialVersionUID = 1L;
 
@@ -58,21 +58,21 @@ public class ParserException extends Exception
         super();
     }
 
-    public ParserException(String message, URL url) {
+    public ParserException(String message, yacyURL url) {
         this(message,url,plasmaCrawlEURL.DENIED_PARSER_ERROR);
     }    
     
-    public ParserException(String message, URL url, String errorCode) {
+    public ParserException(String message, yacyURL url, String errorCode) {
         super(message);
         this.errorCode = errorCode;
         this.url = url;
     }
 
-    public ParserException(String message, URL url, Throwable cause) {
+    public ParserException(String message, yacyURL url, Throwable cause) {
         this(message,url,cause,plasmaCrawlEURL.DENIED_PARSER_ERROR);
     }
     
-    public ParserException(String message, URL url, Throwable cause, String errorCode) {
+    public ParserException(String message, yacyURL url, Throwable cause, String errorCode) {
         super(message, cause);
         this.errorCode = errorCode;
         this.url = url;
@@ -82,7 +82,7 @@ public class ParserException extends Exception
         return this.errorCode;
     }
     
-    public URL getURL() {
+    public yacyURL getURL() {
         return this.url;
     }
 }

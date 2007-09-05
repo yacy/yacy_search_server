@@ -48,13 +48,13 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
 
-import de.anomic.net.URL;
 import de.anomic.plasma.plasmaParser;
 import de.anomic.plasma.plasmaParserDocument;
 import de.anomic.plasma.parser.AbstractParser;
 import de.anomic.plasma.parser.ParserException;
 import de.anomic.server.serverCachedFileOutputStream;
 import de.anomic.server.logging.serverLog;
+import de.anomic.yacy.yacyURL;
 
 import SevenZip.ArchiveExtractCallback;
 import SevenZip.Archive.IInArchive;
@@ -117,7 +117,7 @@ public class SZParserExtractCallback extends ArchiveExtractCallback {
                 plasmaParserDocument theDoc;
                 // workaround for relative links in file, normally '#' shall be used behind the location, see
                 // below for reversion of the effects
-                URL url = URL.newURL(doc.getLocation(), this.prefix + "/" + super.filePath);
+                yacyURL url = yacyURL.newURL(doc.getLocation(), this.prefix + "/" + super.filePath);
                 String mime = plasmaParser.getMimeTypeByFileExt(super.filePath.substring(super.filePath.lastIndexOf('.') + 1));
                 if (this.cfos.isFallback()) {
                     theDoc = this.parser.parseSource(url, mime, null, this.cfos.getContentFile());

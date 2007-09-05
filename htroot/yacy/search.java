@@ -40,7 +40,6 @@ import de.anomic.kelondro.kelondroBitfield;
 import de.anomic.index.indexContainer;
 import de.anomic.net.natLib;
 import de.anomic.plasma.plasmaSearchEvent;
-import de.anomic.plasma.plasmaURL;
 import de.anomic.plasma.plasmaSearchQuery;
 import de.anomic.plasma.plasmaSearchRankingProfile;
 import de.anomic.plasma.plasmaSearchProcessing;
@@ -125,6 +124,7 @@ public final class search {
         int indexabstractContainercount = 0;
         int joincount = 0;
         plasmaSearchQuery theQuery = null;
+        plasmaSearchProcessing localProcess = null;
         ArrayList accu = null;
         if ((query.length() == 0) && (abstractSet != null)) {
             // this is _not_ a normal search, only a request for index abstracts
@@ -133,10 +133,10 @@ public final class search {
             yacyCore.log.logInfo("INIT HASH SEARCH (abstracts only): " + plasmaSearchQuery.anonymizedQueryHashes(theQuery.queryHashes) + " - " + theQuery.displayResults() + " links");
 
             // prepare a search profile
-            plasmaSearchProcessing localTiming  = new plasmaSearchProcessing(theQuery.maximumTime, theQuery.displayResults());
+            localProcess  = new plasmaSearchProcessing(theQuery.maximumTime, theQuery.displayResults());
             
             //theSearch = new plasmaSearchEvent(squery, rankingProfile, localTiming, remoteTiming, true, sb.wordIndex, null);
-            Map[] containers = localTiming.localSearchContainers(theQuery, sb.wordIndex, plasmaSearchQuery.hashes2Set(urls));
+            Map[] containers = localProcess.localSearchContainers(theQuery, sb.wordIndex, plasmaSearchQuery.hashes2Set(urls));
             if (containers != null) {
                 Iterator ci = containers[0].entrySet().iterator();
                 Map.Entry entry;
@@ -146,7 +146,7 @@ public final class search {
                     wordhash = (String) entry.getKey();
                     indexContainer container = (indexContainer) entry.getValue();
                     indexabstractContainercount += container.size();
-                    indexabstract.append("indexabstract." + wordhash + "=").append(plasmaURL.compressIndex(container, null, 1000).toString()).append(serverCore.crlfString);                
+                    indexabstract.append("indexabstract." + wordhash + "=").append(plasmaSearchProcessing.compressIndex(container, null, 1000).toString()).append(serverCore.crlfString);                
                 }
             }
             
@@ -155,18 +155,17 @@ public final class search {
             prop.putASIS("references", "");
             
         } else {
+            
             // retrieve index containers from search request
             theQuery = new plasmaSearchQuery(null, queryhashes, excludehashes, maxdist, prefer, plasmaSearchQuery.contentdomParser(contentdom), false, count, 0, duetime, filter, plasmaSearchQuery.SEARCHDOM_LOCAL, null, -1, constraint);
             theQuery.domType = plasmaSearchQuery.SEARCHDOM_LOCAL;
             yacyCore.log.logInfo("INIT HASH SEARCH (query-" + abstracts + "): " + plasmaSearchQuery.anonymizedQueryHashes(theQuery.queryHashes) + " - " + theQuery.displayResults() + " links");
-
+            
             // prepare a search profile
             plasmaSearchRankingProfile rankingProfile = (profile.length() == 0) ? new plasmaSearchRankingProfile(plasmaSearchQuery.contentdomParser(contentdom)) : new plasmaSearchRankingProfile("", profile);
-            plasmaSearchProcessing localProcess  = new plasmaSearchProcessing(theQuery.maximumTime, theQuery.displayResults());
-            //plasmaSearchProcessing remoteProcess = null;
-
+            localProcess  = new plasmaSearchProcessing(theQuery.maximumTime, theQuery.displayResults());
             plasmaSearchEvent theSearch = plasmaSearchEvent.getEvent(theQuery, rankingProfile, localProcess, sb.wordIndex, null, true, abstractSet);
-            //Map[] containers = localProcess.localSearchContainers(theQuery, sb.wordIndex, plasmaSearchQuery.hashes2Set(urls));
+            
             // set statistic details of search result and find best result index set
             if (theSearch.getLocalCount() == 0) {
                 prop.putASIS("indexcount", "");
@@ -204,7 +203,7 @@ public final class search {
                 // generate compressed index for maxcounthash
                 // this is not needed if the search is restricted to specific
                 // urls, because it is a re-search
-                if ((theSearch.IAmaxcounthash == null) || (urls.length() != 0) || (queryhashes.size() == 1) || (abstracts.length() == 0)) {
+                if ((theSearch.IAmaxcounthash == null) || (urls.length() != 0) || (queryhashes.size() <= 1) || (abstracts.length() == 0)) {
                     prop.putASIS("indexabstract", "");
                 } else if (abstracts.equals("auto")) {
                     // automatically attach the index abstract for the index that has the most references. This should be our target dht position
@@ -221,13 +220,15 @@ public final class search {
                 }
             }
             if (partitions > 0) sb.requestedQueries = sb.requestedQueries + 1d / (double) partitions; // increase query counter
-
+            
             // prepare reference hints
+            localProcess.startTimer();
             Object[] ws = theSearch.references();
             StringBuffer refstr = new StringBuffer();
             for (int j = 0; j < ws.length; j++)
                 refstr.append(",").append((String) ws[j]);
             prop.putASIS("references", (refstr.length() > 0) ? refstr.substring(1) : new String(refstr));
+            localProcess.yield("reference collection", ws.length);
         }
         prop.putASIS("indexabstract", new String(indexabstract));
         
@@ -241,6 +242,7 @@ public final class search {
 
         } else {
             // result is a List of urlEntry elements
+            localProcess.startTimer();
             StringBuffer links = new StringBuffer();
             String resource = null;
             plasmaSearchEvent.ResultEntry entry;
@@ -253,6 +255,7 @@ public final class search {
             }
             prop.putASIS("links", new String(links));
             prop.put("linkcount", accu.size());
+            localProcess.yield("result list preparation", accu.size());
         }
         
         // add information about forward peers
@@ -278,7 +281,7 @@ public final class search {
         yacyCore.log.logInfo("EXIT HASH SEARCH: " +
                 plasmaSearchQuery.anonymizedQueryHashes(theQuery.queryHashes) + " - " + joincount + " links found, " +
                 prop.get("linkcount", "?") + " links selected, " +
-                indexabstractContainercount + " index abstract references attached, " +
+                indexabstractContainercount + " index abstracts, " +
                 (System.currentTimeMillis() - timestamp) + " milliseconds");
  
         prop.putASIS("searchtime", Long.toString(System.currentTimeMillis() - timestamp));

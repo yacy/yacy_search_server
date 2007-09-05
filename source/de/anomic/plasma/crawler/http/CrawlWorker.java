@@ -60,8 +60,6 @@ import de.anomic.http.httpc;
 import de.anomic.http.httpdBoundedSizeOutputStream;
 import de.anomic.http.httpdLimitExceededException;
 import de.anomic.http.httpdProxyHandler;
-import de.anomic.plasma.plasmaURL;
-import de.anomic.net.URL;
 import de.anomic.plasma.plasmaCrawlEURL;
 import de.anomic.plasma.plasmaCrawlLoader;
 import de.anomic.plasma.plasmaHTCache;
@@ -74,6 +72,7 @@ import de.anomic.plasma.crawler.plasmaCrawlerPool;
 import de.anomic.plasma.urlPattern.plasmaURLPattern;
 import de.anomic.server.serverSystem;
 import de.anomic.server.logging.serverLog;
+import de.anomic.yacy.yacyURL;
 
 public final class CrawlWorker extends AbstractCrawlWorker {
 
@@ -140,7 +139,7 @@ public final class CrawlWorker extends AbstractCrawlWorker {
         return load(DEFAULT_CRAWLING_RETRY_COUNT);
     }    
 
-    protected plasmaHTCache.Entry createCacheEntry(URL requestUrl, Date requestDate, httpHeader requestHeader, httpc.response response) {
+    protected plasmaHTCache.Entry createCacheEntry(yacyURL requestUrl, Date requestDate, httpHeader requestHeader, httpc.response response) {
         IResourceInfo resourceInfo = new ResourceInfo(requestUrl,requestHeader,response.responseHeader);
         return plasmaHTCache.newEntry(
                 requestDate, 
@@ -314,7 +313,7 @@ public final class CrawlWorker extends AbstractCrawlWorker {
                         }
                         
                         // normalizing URL
-                        URL redirectionUrl = URL.newURL(this.url, redirectionUrlString);
+                        yacyURL redirectionUrl = yacyURL.newURL(this.url, redirectionUrlString);
 
                         // returning the used httpc
                         httpc.returnInstance(remote);
@@ -332,7 +331,7 @@ public final class CrawlWorker extends AbstractCrawlWorker {
                         }
 
                         // generating url hash
-                        String urlhash = plasmaURL.urlHash(redirectionUrl);
+                        String urlhash = redirectionUrl.hash();
                         
                         // removing url from loader queue
                         plasmaCrawlLoader.switchboard.noticeURL.remove(urlhash);

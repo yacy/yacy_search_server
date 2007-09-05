@@ -31,11 +31,11 @@ import java.util.Iterator;
 import java.util.TreeSet;
 
 import de.anomic.http.httpHeader;
-import de.anomic.net.URL;
 import de.anomic.plasma.plasmaSwitchboard;
 import de.anomic.server.serverObjects;
 import de.anomic.server.serverSwitch;
 import de.anomic.server.serverSystem;
+import de.anomic.yacy.yacyURL;
 import de.anomic.yacy.yacyVersion;
 
 public class ConfigUpdate_p {
@@ -54,7 +54,7 @@ public class ConfigUpdate_p {
                 String release = post.get("releasedownload", "");
                 if (release.length() > 0) {
                     try {
-                        yacyVersion.downloadRelease(new yacyVersion(new URL(release)));
+                        yacyVersion.downloadRelease(new yacyVersion(new yacyURL(release, null)));
                     } catch (IOException e) {
                         // TODO Auto-generated catch block
                         e.printStackTrace();

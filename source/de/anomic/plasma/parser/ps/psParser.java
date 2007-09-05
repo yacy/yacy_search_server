@@ -52,12 +52,12 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.util.Hashtable;
 
-import de.anomic.net.URL;
 import de.anomic.plasma.plasmaParserDocument;
 import de.anomic.plasma.parser.AbstractParser;
 import de.anomic.plasma.parser.Parser;
 import de.anomic.plasma.parser.ParserException;
 import de.anomic.server.serverFileUtils;
+import de.anomic.yacy.yacyURL;
 
 public class psParser extends AbstractParser implements Parser {
 
@@ -114,7 +114,7 @@ public class psParser extends AbstractParser implements Parser {
     }
     
     
-    public plasmaParserDocument parse(URL location, String mimeType, String charset, File sourceFile) throws ParserException, InterruptedException {
+    public plasmaParserDocument parse(yacyURL location, String mimeType, String charset, File sourceFile) throws ParserException, InterruptedException {
         
     	File outputFile = null;
         try { 
@@ -281,7 +281,7 @@ public class psParser extends AbstractParser implements Parser {
     	super.reset();
     }
 
-    public plasmaParserDocument parse(URL location, String mimeType, String charset, InputStream source) throws ParserException, InterruptedException {
+    public plasmaParserDocument parse(yacyURL location, String mimeType, String charset, InputStream source) throws ParserException, InterruptedException {
         
         File tempFile = null;
         try {

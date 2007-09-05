@@ -48,9 +48,9 @@ import java.io.File;
 import java.io.InputStream;
 import java.util.Hashtable;
 
-import de.anomic.net.URL;
 import de.anomic.plasma.plasmaParserDocument;
 import de.anomic.server.logging.serverLog;
+import de.anomic.yacy.yacyURL;
 
 /**
  * This interface defines a list of methods that needs to be implemented
@@ -74,7 +74,7 @@ public interface Parser {
      *  
      * @throws ParserException if the content could not be parsed properly 
      */
-    public plasmaParserDocument parse(URL location, String mimeType, String charset, byte[] source)
+    public plasmaParserDocument parse(yacyURL location, String mimeType, String charset, byte[] source)
     throws ParserException, InterruptedException;
     
     /**
@@ -88,7 +88,7 @@ public interface Parser {
      *  
      * @throws ParserException if the content could not be parsed properly 
      */    
-    public plasmaParserDocument parse(URL location, String mimeType, String charset, File sourceFile)
+    public plasmaParserDocument parse(yacyURL location, String mimeType, String charset, File sourceFile)
     throws ParserException, InterruptedException;
     
     /**
@@ -102,7 +102,7 @@ public interface Parser {
      *  
      * @throws ParserException if the content could not be parsed properly 
      */    
-    public plasmaParserDocument parse(URL location, String mimeType, String charset, InputStream source) 
+    public plasmaParserDocument parse(yacyURL location, String mimeType, String charset, InputStream source) 
     throws ParserException, InterruptedException;
             
     /**

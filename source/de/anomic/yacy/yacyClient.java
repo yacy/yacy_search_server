@@ -55,13 +55,12 @@ import de.anomic.http.httpRemoteProxyConfig;
 import de.anomic.http.httpc;
 import de.anomic.index.indexContainer;
 import de.anomic.index.indexRWIEntry;
-import de.anomic.plasma.plasmaURL;
 import de.anomic.index.indexURLEntry;
 import de.anomic.kelondro.kelondroBase64Order;
 import de.anomic.kelondro.kelondroBitfield;
-import de.anomic.net.URL;
 import de.anomic.plasma.plasmaCondenser;
 import de.anomic.plasma.plasmaSearchContainer;
+import de.anomic.plasma.plasmaSearchProcessing;
 import de.anomic.plasma.plasmaSearchRankingProfile;
 import de.anomic.plasma.plasmaSnippetCache;
 import de.anomic.plasma.plasmaSwitchboard;
@@ -107,7 +106,7 @@ public final class yacyClient {
             yacyCore.log.logFine("yacyClient.publishMySeed thread '" + Thread.currentThread().getName() + "' contacting peer at " + address);
             // send request
             result = nxTools.table(
-                    httpc.wput(new URL("http://" + address + "/yacy/hello.html"),
+                    httpc.wput(new yacyURL("http://" + address + "/yacy/hello.html", null),
                                yacySeed.b64Hash2hexHash(otherHash) + ".yacyh",
                                12000, 
                                null, 
@@ -243,7 +242,7 @@ public final class yacyClient {
         // send request
         try {
             final HashMap result = nxTools.table(
-                    httpc.wput(new URL("http://" + target.getClusterAddress() + "/yacy/query.html"),
+                    httpc.wput(new yacyURL("http://" + target.getClusterAddress() + "/yacy/query.html", null),
                     		   target.getHexHash() + ".yacyh",
                                8000, 
                                null, 
@@ -274,7 +273,7 @@ public final class yacyClient {
         // send request
         try {
             final HashMap result = nxTools.table(
-                    httpc.wput(new URL("http://" + target.getClusterAddress() + "/yacy/query.html"),
+                    httpc.wput(new yacyURL("http://" + target.getClusterAddress() + "/yacy/query.html", null),
                     		   target.getHexHash() + ".yacyh",
                                8000, 
                                null, 
@@ -307,7 +306,7 @@ public final class yacyClient {
         // send request
         try {
         	final HashMap result = nxTools.table(
-                httpc.wput(new URL("http://" + target.getClusterAddress() + "/yacy/query.html"),
+                httpc.wput(new yacyURL("http://" + target.getClusterAddress() + "/yacy/query.html", null),
                 		   target.getHexHash() + ".yacyh",
                            6000, 
                            null, 
@@ -390,7 +389,7 @@ public final class yacyClient {
         HashMap result = null;
         try {
           	result = nxTools.table(
-                httpc.wput(new URL("http://" + target.getClusterAddress() + "/yacy/search.html"),
+                httpc.wput(new yacyURL("http://" + target.getClusterAddress() + "/yacy/search.html", null),
                         target.getHexHash() + ".yacyh",
                         60000, 
                         null, 
@@ -538,7 +537,7 @@ public final class yacyClient {
 						if (singleAbstract == null) singleAbstract = new TreeMap();
 						ci = new serverByteBuffer(((String) entry.getValue()).getBytes());
 						//System.out.println("DEBUG-ABSTRACTFETCH: for word hash " + wordhash + " received " + ci.toString());
-						plasmaURL.decompressIndex(singleAbstract, ci, target.hash);
+						plasmaSearchProcessing.decompressIndex(singleAbstract, ci, target.hash);
 						abstractCache.put(wordhash, singleAbstract);
 					}
 				}
@@ -583,7 +582,7 @@ public final class yacyClient {
         // send request
         try {
             final HashMap result = nxTools.table(
-                httpc.wput(new URL("http://" + targetAddress(targetHash) + "/yacy/message.html"),
+                httpc.wput(new yacyURL("http://" + targetAddress(targetHash) + "/yacy/message.html", null),
                            yacySeed.b64Hash2hexHash(targetHash)+ ".yacyh",
                            8000, 
                            null, 
@@ -619,7 +618,7 @@ public final class yacyClient {
         // send request
         try {
             final HashMap result = nxTools.table(
-                httpc.wput(new URL("http://" + targetAddress(targetHash) + "/yacy/message.html"),
+                httpc.wput(new yacyURL("http://" + targetAddress(targetHash) + "/yacy/message.html", null),
                            yacySeed.b64Hash2hexHash(targetHash)+ ".yacyh",
                            20000, 
                            null, 
@@ -663,7 +662,7 @@ public final class yacyClient {
         
         // send request
         try {
-            final URL url = new URL("http://" + targetAddress + "/yacy/transfer.html");
+            final yacyURL url = new yacyURL("http://" + targetAddress + "/yacy/transfer.html", null);
             final HashMap result = nxTools.table(
                 httpc.wput(url,
                            url.getHost(),
@@ -699,7 +698,7 @@ public final class yacyClient {
         
         // send request
         try {
-            final URL url = new URL("http://" + targetAddress + "/yacy/transfer.html");
+            final yacyURL url = new yacyURL("http://" + targetAddress + "/yacy/transfer.html", null);
             final HashMap result = nxTools.table(
                 httpc.wput(url,
                            url.getHost(),
@@ -743,11 +742,11 @@ public final class yacyClient {
         return "wrong protocol: " + protocol;
     }
     
-    public static HashMap crawlOrder(yacySeed targetSeed, URL url, URL referrer, int timeout) {
-        return crawlOrder(targetSeed, new URL[]{url}, new URL[]{referrer}, timeout); 
+    public static HashMap crawlOrder(yacySeed targetSeed, yacyURL url, yacyURL referrer, int timeout) {
+        return crawlOrder(targetSeed, new yacyURL[]{url}, new yacyURL[]{referrer}, timeout); 
     }
     
-    public static HashMap crawlOrder(yacySeed target, URL[] url, URL[] referrer, int timeout) {
+    public static HashMap crawlOrder(yacySeed target, yacyURL[] url, yacyURL[] referrer, int timeout) {
         assert (target != null);
         assert (yacyCore.seedDB.mySeed != null);
         assert (yacyCore.seedDB.mySeed != target);
@@ -775,7 +774,7 @@ public final class yacyClient {
         // send request
         try {
             final HashMap result = nxTools.table(
-                    httpc.wput(new URL("http://" + address + "/yacy/crawlOrder.html"),
+                    httpc.wput(new yacyURL("http://" + address + "/yacy/crawlOrder.html", null),
                                target.getHexHash() + ".yacyh",
                                timeout, 
                                null, 
@@ -842,7 +841,7 @@ public final class yacyClient {
         // send request
         try {
             return nxTools.table(
-                    httpc.wput(new URL("http://" + address + "/yacy/crawlReceipt.html"),
+                    httpc.wput(new yacyURL("http://" + address + "/yacy/crawlReceipt.html", null),
                                target.getHexHash() + ".yacyh",
                                60000, 
                                null, 
@@ -991,7 +990,7 @@ public final class yacyClient {
         try {
             final ArrayList v = nxTools.strings(
                 httpc.wput(
-                    new URL("http://" + address + "/yacy/transferRWI.html"), 
+                    new yacyURL("http://" + address + "/yacy/transferRWI.html", null), 
                     targetSeed.getHexHash() + ".yacyh",
                     timeout, 
                     null, 
@@ -1046,7 +1045,7 @@ public final class yacyClient {
         try {
             final ArrayList v = nxTools.strings(
                 httpc.wput(
-                    new URL("http://" + address + "/yacy/transferURL.html"),
+                    new yacyURL("http://" + address + "/yacy/transferURL.html", null),
                     targetSeed.getHexHash() + ".yacyh",
                     timeout, 
                     null, 
@@ -1081,7 +1080,7 @@ public final class yacyClient {
         try {
             return nxTools.table(
                 httpc.wput(
-                    new URL("http://" + address + "/yacy/profile.html"), 
+                    new yacyURL("http://" + address + "/yacy/profile.html", null), 
                     targetSeed.getHexHash() + ".yacyh",
                     10000, 
                     null, 
@@ -1118,14 +1117,14 @@ public final class yacyClient {
             
             final HashMap result = nxTools.table(
                     httpc.wget(
-                            new URL("http://" + target.getPublicAddress() + "/yacy/search.html" +
+                            new yacyURL("http://" + target.getPublicAddress() + "/yacy/search.html" +
                                     "?myseed=" + yacyCore.seedDB.mySeed.genSeedStr(null) +
                                     "&youare=" + target.hash + "&key=" +
                                     "&myseed=" + yacyCore.seedDB.mySeed.genSeedStr(null) +
                                     "&count=10" +
                                     "&resource=global" +
                                     "&query=" + wordhashe +
-                                    "&network.unit.name=" + plasmaSwitchboard.getSwitchboard().getConfig("network.unit.name", yacySeed.DFLT_NETWORK_UNIT)),
+                                    "&network.unit.name=" + plasmaSwitchboard.getSwitchboard().getConfig("network.unit.name", yacySeed.DFLT_NETWORK_UNIT), null),
                                     target.getHexHash() + ".yacyh",
                                     5000, 
                                     null, 

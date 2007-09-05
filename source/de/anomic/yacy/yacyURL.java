@@ -1,6 +1,6 @@
-// URL.java
-// (C) 2006 by Michael Peter Christen; mc@anomic.de, Frankfurt a. M., Germany
-// first published 13.07.2006 on http://www.anomic.de
+// yacyURL.java
+// (C) 2006 by Michael Peter Christen; mc@yacy.net, Frankfurt a. M., Germany
+// first published 13.07.2006 on http://yacy.net
 //
 // $LastChangedDate: 2006-04-02 22:40:07 +0200 (So, 02 Apr 2006) $
 // $LastChangedRevision: 1986 $
@@ -22,27 +22,384 @@
 // along with this program; if not, write to the Free Software
 // Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 
-package de.anomic.net;
+package de.anomic.yacy;
 
 // this class exsist to provide a system-wide normal form representation of urls,
 // and to prevent that java.net.URL usage causes DNS queries which are used in java.net.
 
 import java.io.File;
+import java.net.InetAddress;
 import java.net.MalformedURLException;
+import java.util.HashMap;
+import java.util.Iterator;
+import java.util.TreeSet;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-public class URL {
+import de.anomic.kelondro.kelondroBase64Order;
+import de.anomic.server.serverCodings;
+import de.anomic.server.serverDomains;
 
-    private String protocol, host, userInfo, path, quest, ref;
-    private int port;
+public class yacyURL {
+
+
+    // TLD separation in political and cultural parts
+    // https://www.cia.gov/cia/publications/factbook/index.html
+    // http://en.wikipedia.org/wiki/List_of_countries_by_continent
     
-    public URL(String url) throws MalformedURLException {
-        if (url == null) throw new MalformedURLException("url string is null");
-        parseURLString(url);
+    private static final String[] TLD_NorthAmericaOceania={
+        // primary english-speaking countries
+        // english-speaking countries from central america are also included
+        // includes also dutch and french colonies in the caribbean sea
+        // and US/English/Australian military bases in asia
+         "EDU=US Educational",
+         "GOV=US Government",
+         "MIL=US Military",
+         "NET=Network",
+         "ORG=Non-Profit Organization",
+         "AN=Netherlands Antilles",
+         "AS=American Samoa",
+         "AG=Antigua and Barbuda",
+         "AI=Anguilla",
+         "AU=Australia",
+         "BB=Barbados",
+         "BZ=Belize",
+         "BM=Bermuda",
+         "BS=Bahamas",
+         "CA=Canada",
+         "CC=Cocos (Keeling) Islands",
+         "CK=Cook Islands",
+         "CX=Christmas Island", // located in the Indian Ocean, but belongs to Australia
+         "DM=Dominica",
+         "FM=Micronesia",
+         "FJ=Fiji",
+         "GD=Grenada",
+         "GP=Guadeloupe",
+         "GS=South Georgia and the South Sandwich Islands", // south of south america, but administrated by british, has only a scientific base
+         "GU=Guam", // strategical US basis close to Japan
+         "HM=Heard and McDonald Islands", // uninhabited, sub-Antarctic island, owned by Australia
+         "HT=Haiti",
+         "IO=British Indian Ocean Territory", // UK-US naval support facility in the Indian Ocean
+         "KI=Kiribati", // 33 coral atolls in the pacific, formerly owned by UK
+         "KN=Saint Kitts and Nevis", // islands in the carribean see
+         "KY=Cayman Islands",
+         "LC=Saint Lucia",
+         "MH=Marshall Islands", // formerly US atomic bomb test site, now a key installation in the US missile defense network
+         "MP=Northern Mariana Islands", // US strategic location in the western Pacific Ocean
+         "NC=New Caledonia",
+         "NF=Norfolk Island",
+         "NR=Nauru", // independent UN island
+         "NU=Niue", // one of world's largest coral islands
+         "NZ=New Zealand (Aotearoa)",
+         "PG=Papua New Guinea",
+         "PN=Pitcairn", // overseas territory of the UK
+         "PR=Puerto Rico", // territory of the US with commonwealth status
+         "PW=Palau", // was once governed by Micronesia
+         "Sb=Solomon Islands",
+         "TC=Turks and Caicos Islands", // overseas territory of the UK
+         "TK=Tokelau", // group of three atolls in the South Pacific Ocean, british protectorat
+         "TO=Tonga",
+         "TT=Trinidad and Tobago",
+         "TV=Tuvalu", //  nine coral atolls in the South Pacific Ocean; in 2000, Tuvalu leased its TLD ".tv" for $50 million over a 12-year period
+         "UM=US Minor Outlying Islands", // nine insular United States possessions in the Pacific Ocean and the Caribbean Sea
+         "US=United States",
+         "VC=Saint Vincent and the Grenadines",
+         "VG=Virgin Islands (British)",
+         "VI=Virgin Islands (U.S.)",
+         "VU=Vanuatu",
+         "WF=Wallis and Futuna Islands",
+         "WS=Samoa"
+     };
+     private static final String[] TLD_MiddleSouthAmerica = {
+         // primary spanish and portugese-speaking
+         "AR=Argentina",
+         "AW=Aruba",
+         "BR=Brazil",
+         "BO=Bolivia",
+         "CL=Chile",
+         "CO=Colombia",
+         "CR=Costa Rica",
+         "CU=Cuba",
+         "DO=Dominican Republic",
+         "EC=Ecuador",
+         "FK=Falkland Islands (Malvinas)",
+         "GF=French Guiana",
+         "GT=Guatemala",
+         "GY=Guyana",
+         "HN=Honduras",
+         "JM=Jamaica",
+         "MX=Mexico",
+         "NI=Nicaragua",
+         "PA=Panama",
+         "PE=Peru",
+         "PY=Paraguay",
+         "SR=Suriname",
+         "SV=El Salvador",
+         "UY=Uruguay",
+         "VE=Venezuela"
+     };
+     private static final String[] TLD_EuropaRussia = {
+        // includes also countries that are mainly french- dutch- speaking
+        // and culturally close to europe
+         "AD=Andorra",
+         "AL=Albania",
+         "AQ=Antarctica",
+         "AT=Austria",
+         "BA=Bosnia and Herzegovina",
+         "BE=Belgium",
+         "BG=Bulgaria",
+         "BV=Bouvet Island", // this island is uninhabited and covered by ice, south of africa but governed by Norway
+         "BY=Belarus",
+         "CH=Switzerland",
+         "CS=Czechoslovakia (former)",
+         "CZ=Czech Republic",
+         "CY=Cyprus",
+         "DE=Germany",
+         "DK=Denmark",
+         "ES=Spain",
+         "EE=Estonia",
+         "FI=Finland",
+         "FO=Faroe Islands", // Viking Settlers
+         "FR=France",
+         "FX=France, Metropolitan",
+         "GB=Great Britain (UK)",
+         "GI=Gibraltar",
+         "GL=Greenland",
+         "GR=Greece",
+         "HR=Croatia (Hrvatska)",
+         "HU=Hungary",
+         "IE=Ireland",
+         "IS=Iceland",
+         "IT=Italy",
+         "LI=Liechtenstein",
+         "LT=Lithuania",
+         "LU=Luxembourg",
+         "LV=Latvia",
+         "MD=Moldova",
+         "MC=Monaco",
+         "MK=Macedonia",
+         "MN=Mongolia",
+         "MS=Montserrat", // British island in the Caribbean Sea, almost not populated because of strong vulcanic activity
+         "MT=Malta",
+         "MQ=Martinique", // island in the eastern Caribbean Sea, overseas department of France
+         "NATO=Nato field",
+         "NL=Netherlands",
+         "NO=Norway",
+         "PF=French Polynesia", // French annexed Polynesian island in the South Pacific, French atomic bomb test site
+         "PL=Poland",
+         "PM=St. Pierre and Miquelon", // french-administrated colony close to canada, belongs to France
+         "PT=Portugal",
+         "RO=Romania",
+         "RU=Russia",
+         "SE=Sweden",
+         "SI=Slovenia",
+         "SJ=Svalbard and Jan Mayen Islands", // part of Norway
+         "SM=San Marino",
+         "SK=Slovak Republic",
+         "SU=USSR (former)",
+         "TF=French Southern Territories", // islands in the arctic see, no inhabitants
+         "UK=United Kingdom",
+         "UA=Ukraine",
+         "VA=Vatican City State (Holy See)",
+         "YU=Yugoslavia"
+     };
+     
+     private static final String[] TLD_MiddleEastWestAsia = {
+         // states that are influenced by islamic culture and arabic language
+         // includes also eurasia states and those that had been part of the former USSR and close to southwest asia
+         "AE=United Arab Emirates",
+         "AF=Afghanistan",
+         "AM=Armenia",
+         "AZ=Azerbaijan",
+         "BH=Bahrain",
+         "GE=Georgia",
+         "IL=Israel",
+         "IQ=Iraq",
+         "IR=Iran",
+         "JO=Jordan",
+         "KG=Kyrgyzstan",
+         "KZ=Kazakhstan",
+         "KW=Kuwait",
+         "LB=Lebanon",
+         "OM=Oman",
+         "QA=Qatar",
+         "SA=Saudi Arabia",
+         "SY=Syria",
+         "TJ=Tajikistan",
+         "TM=Turkmenistan",
+         "PK=Pakistan",
+         "TR=Turkey",
+         "UZ=Uzbekistan",
+         "YE=Yemen"
+     };
+     private static final String[] TLD_SouthEastAsia = {
+         "BD=Bangladesh",
+         "BN=Brunei Darussalam",
+         "BT=Bhutan",
+         "CN=China",
+         "HK=Hong Kong",
+         "ID=Indonesia",
+         "IN=India",
+         "LA=Laos",
+         "NP=Nepal",
+         "JP=Japan",
+         "KH=Cambodia",
+         "KP=Korea (North)",
+         "KR=Korea (South)",
+         "LK=Sri Lanka",
+         "MY=Malaysia",
+         "MM=Myanmar", // formerly known as Burma
+         "MO=Macau", // Portuguese settlement, part of China, but has some autonomy
+         "MV=Maldives", // group of atolls in the Indian Ocean
+         "PH=Philippines",
+         "SG=Singapore",
+         "TP=East Timor",
+         "TH=Thailand",
+         "TW=Taiwan",
+         "VN=Viet Nam"
+     };
+     private static final String[] TLD_Africa = {
+         "AO=Angola",
+         "BF=Burkina Faso",
+         "BI=Burundi",
+         "BJ=Benin",
+         "BW=Botswana",
+         "CF=Central African Republic",
+         "CG=Congo",
+         "CI=Cote D'Ivoire (Ivory Coast)",
+         "CM=Cameroon",
+         "CV=Cape Verde",
+         "DJ=Djibouti",
+         "DZ=Algeria",
+         "EG=Egypt",
+         "EH=Western Sahara",
+         "ER=Eritrea",
+         "ET=Ethiopia",
+         "GA=Gabon",
+         "GH=Ghana",
+         "GM=Gambia",
+         "GN=Guinea",
+         "GQ=Equatorial Guinea",
+         "GW=Guinea-Bissau",
+         "KE=Kenya",
+         "KM=Comoros",
+         "LR=Liberia",
+         "LS=Lesotho",
+         "LY=Libya",
+         "MA=Morocco",
+         "MG=Madagascar",
+         "ML=Mali",
+         "MR=Mauritania",
+         "MU=Mauritius",
+         "MW=Malawi",
+         "MZ=Mozambique",
+         "NA=Namibia",
+         "NE=Niger",
+         "NG=Nigeria",
+         "RE=Reunion",
+         "RW=Rwanda",
+         "SC=Seychelles",
+         "SD=Sudan",
+         "SH=St. Helena",
+         "SL=Sierra Leone",
+         "SN=Senegal",
+         "SO=Somalia",
+         "ST=Sao Tome and Principe",
+         "SZ=Swaziland",
+         "TD=Chad",
+         "TG=Togo",
+         "TN=Tunisia",
+         "TZ=Tanzania",
+         "UG=Uganda",
+         "ZA=South Africa",
+         "ZM=Zambia",
+         "ZR=Zaire",
+         "ZW=Zimbabwe",
+         "YT=Mayotte"
+     };
+     private static final String[] TLD_Generic = {
+         "COM=US Commercial",
+         "AERO=",
+         "BIZ=",
+         "COOP=",
+         "INFO=",
+         "MUSEUM=",
+         "NAME=",
+         "PRO=",
+         "ARPA=",
+         "INT=International",
+         "ARPA=Arpanet",
+         "NT=Neutral Zone"
+     };
+
+
+    /*
+     * TLDs: aero, biz, com, coop, edu, gov, info, int, mil, museum, name, net,
+     * org, pro, arpa AC, AD, AE, AERO, AF, AG, AI, AL, AM, AN, AO, AQ, AR,
+     * ARPA, AS, AT, AU, AW, AZ, BA, BB, BD, BE, BF, BG, BH, BI, BIZ, BJ, BM,
+     * BN, BO, BR, BS, BT, BV, BW, BY, BZ, CA, CC, CD, CF, CG, CH, CI, CK, CL,
+     * CM, CN, CO, COM, COOP, CR, CU, CV, CX, CY, CZ, DE, DJ, DK, DM, DO, DZ,
+     * EC, EDU, EE, EG, ER, ES, ET, EU, FI, FJ, FK, FM, FO, FR, GA, GB, GD, GE,
+     * GF, GG, GH, GI, GL, GM, GN, GOV, GP, GQ, GR, GS, GT, GU, GW, GY, HK, HM,
+     * HN, HR, HT, HU, ID, IE, IL, IM, IN, INFO, INT, IO, IQ, IR, IS, IT, JE,
+     * JM, JO, JOBS, JP, KE, KG, KH, KI, KM, KN, KR, KW, KY, KZ, LA, LB, LC, LI,
+     * LK, LR, LS, LT, LU, LV, LY, MA, MC, MD, MG, MH, MIL, MK, ML, MM, MN, MO,
+     * MOBI, MP, MQ, MR, MS, MT, MU, MUSEUM, MV, MW, MX, MY, MZ, NA, NAME, NC,
+     * NE, NET, NF, NG, NI, NL, NO, NP, NR, NU, NZ, OM, ORG, PA, PE, PF, PG, PH,
+     * PK, PL, PM, PN, PR, PRO, PS, PT, PW, PY, QA, RE, RO, RU, RW, SA, SB, SC,
+     * SD, SE, SG, SH, SI, SJ, SK, SL, SM, SN, SO, SR, ST, SU, SV, SY, SZ, TC,
+     * TD, TF, TG, TH, TJ, TK, TL, TM, TN, TO, TP, TR, TRAVEL, TT, TV, TW, TZ,
+     * UA, UG, UK, UM, US, UY, UZ, VA, VC, VE, VG, VI, VN, VU, WF, WS, YE, YT,
+     * YU, ZA, ZM, ZW
+     */
+
+    public static String dummyHash;
+
+    private static HashMap TLDID = new HashMap();
+    private static HashMap TLDName = new HashMap();
+
+    private static void insertTLDProps(String[] TLDList, int id) {
+        int p;
+        String tld, name;
+        Integer ID = new Integer(id);
+        for (int i = 0; i < TLDList.length; i++) {
+            p = TLDList[i].indexOf('=');
+            if (p > 0) {
+                tld = TLDList[i].substring(0, p).toLowerCase();
+                name = TLDList[i].substring(p + 1);
+                TLDID.put(tld, ID);
+                TLDName.put(tld, name);
+            }
+        }
+    }
+
+    static {
+        // create a dummy hash
+        dummyHash = "";
+        for (int i = 0; i < yacySeedDB.commonHashLength; i++) dummyHash += "-";
+
+        // assign TLD-ids and names
+        insertTLDProps(TLD_EuropaRussia, 0);
+        insertTLDProps(TLD_MiddleSouthAmerica, 1);
+        insertTLDProps(TLD_SouthEastAsia, 2);
+        insertTLDProps(TLD_MiddleEastWestAsia, 3);
+        insertTLDProps(TLD_NorthAmericaOceania, 4);
+        insertTLDProps(TLD_Africa, 5);
+        insertTLDProps(TLD_Generic, 6);
+        // the id=7 is used to flag local addresses
     }
     
-    public void parseURLString(String url) throws MalformedURLException {
+    // class variables
+    private String protocol, host, userInfo, path, quest, ref, hash;
+    private int port;
+    
+    public yacyURL(String url, String hash) throws MalformedURLException {
+        if (url == null) throw new MalformedURLException("url string is null");
+        parseURLString(url);
+        this.hash = hash;
+    }
+    
+    private void parseURLString(String url) throws MalformedURLException {
         // identify protocol
         assert (url != null);
         url = url.trim();
@@ -100,40 +457,41 @@ public class URL {
         }
     }
 
-    public URL(File file) throws MalformedURLException {
+    public yacyURL(File file) throws MalformedURLException {
         this("file", "", -1, file.getAbsolutePath());
     }
 
-    public static URL newURL(String baseURL, String relPath) throws MalformedURLException {
+    public static yacyURL newURL(String baseURL, String relPath) throws MalformedURLException {
         if ((baseURL == null) ||
             (relPath.startsWith("http://")) ||
             (relPath.startsWith("https://")) ||
             (relPath.startsWith("ftp://")) ||
             (relPath.startsWith("file://")) ||
             (relPath.startsWith("smb://"))) {
-            return new URL(relPath);
+            return new yacyURL(relPath, null);
         } else {
-            return new URL(new URL(baseURL), relPath);
+            return new yacyURL(new yacyURL(baseURL, null), relPath);
         }
     }
     
-    public static URL newURL(URL baseURL, String relPath) throws MalformedURLException {
+    public static yacyURL newURL(yacyURL baseURL, String relPath) throws MalformedURLException {
         if ((baseURL == null) ||
             (relPath.startsWith("http://")) ||
             (relPath.startsWith("https://")) ||
             (relPath.startsWith("ftp://")) ||
             (relPath.startsWith("file://")) ||
             (relPath.startsWith("smb://"))) {
-            return new URL(relPath);
+            return new yacyURL(relPath, null);
         } else {
-            return new URL(baseURL, relPath);
+            return new yacyURL(baseURL, relPath);
         }
     }
     
-    private URL(URL baseURL, String relPath) throws MalformedURLException {
+    private yacyURL(yacyURL baseURL, String relPath) throws MalformedURLException {
         if (baseURL == null) throw new MalformedURLException("base URL is null");
         if (relPath == null) throw new MalformedURLException("relPath is null");
 
+        this.hash = null;
         this.protocol = baseURL.protocol;
         this.host = baseURL.host;
         this.port = baseURL.port;
@@ -176,12 +534,13 @@ public class URL {
         escape();
     }
     
-    public URL(String protocol, String host, int port, String path) throws MalformedURLException {
+    public yacyURL(String protocol, String host, int port, String path) throws MalformedURLException {
         if (protocol == null) throw new MalformedURLException("protocol is null");
         this.protocol = protocol;
         this.host = host;
         this.port = port;
         this.path = path;
+        this.hash = null;
         identRef();
         identQuest();
         escape();
@@ -400,11 +759,11 @@ public class URL {
         int r = this.host.indexOf(':');
         if (r < 0) {
             this.port = dflt;
-        } else {        	
+        } else {            
             try {
-            	String portStr = this.host.substring(r + 1);
+                String portStr = this.host.substring(r + 1);
                 if (portStr.trim().length() > 0) this.port = Integer.parseInt(portStr);
-                else this.port =  -1;             	
+                else this.port =  -1;               
                 this.host = this.host.substring(0, r);
             } catch (NumberFormatException e) {
                 throw new MalformedURLException("wrong port in host fragment '" + this.host + "' of input url '" + inputURL + "'");
@@ -522,7 +881,7 @@ public class URL {
                this.getHost().toLowerCase() + ((defaultPort) ? ("") : (":" + this.port)) + path;
     }
     
-    public boolean equals(URL other) {
+    public boolean equals(yacyURL other) {
         return (((this.protocol == other.protocol) || (this.protocol.equals(other.protocol))) &&
                 ((this.host     == other.host    ) || (this.host.equals(other.host))) &&
                 ((this.userInfo == other.userInfo) || (this.userInfo.equals(other.userInfo))) &&
@@ -537,9 +896,177 @@ public class URL {
     }
     
     public int compareTo(Object h) {
-        assert (h instanceof URL);
-        return this.toString().compareTo(((URL) h).toString());
+        assert (h instanceof yacyURL);
+        return this.toString().compareTo(((yacyURL) h).toString());
     }
+    
+    // static methods from plasmaURL
+
+    public static final int flagTypeID(String hash) {
+        return (kelondroBase64Order.enhancedCoder.decodeByte(hash.charAt(11)) & 32) >> 5;
+    }
+
+    public static final int flagTLDID(String hash) {
+        return (kelondroBase64Order.enhancedCoder.decodeByte(hash.charAt(11)) & 28) >> 2;
+    }
+
+    public static final int flagLengthID(String hash) {
+        return (kelondroBase64Order.enhancedCoder.decodeByte(hash.charAt(11)) & 3);
+    }
+
+    public final String hash() {
+        // in case that the object was initialized without a known url hash, compute it now
+        if (this.hash == null) this.hash = urlHashComputation();
+        return this.hash;
+    }
+
+    private final String urlHashComputation() {
+        // the url hash computation needs a DNS lookup to check if the addresses domain is local
+        // that causes that this method may be very slow
+        
+        assert this.hash == null; // should only be called if the hash was not computed bevore
+
+        int p = this.host.lastIndexOf('.');
+        String tld = "", dom = tld;
+        if (p > 0) {
+            tld = host.substring(p + 1);
+            dom = host.substring(0, p);
+        }
+        Integer ID = (serverDomains.isLocal(tld)) ? null : (Integer) TLDID.get(tld); // identify local addresses
+        int id = (ID == null) ? 7 : ID.intValue(); // local addresses are flagged with id=7
+        boolean isHTTP = this.protocol.equals("http");
+        p = dom.lastIndexOf('.'); // locate subdomain
+        String subdom = "";
+        if (p > 0) {
+            subdom = dom.substring(0, p);
+            dom = dom.substring(p + 1);
+        }
+        
+        // find rootpath
+        String pathx = new String(this.path);
+        if (pathx.startsWith("/"))
+            pathx = pathx.substring(1);
+        if (pathx.endsWith("/"))
+            pathx = pathx.substring(0, pathx.length() - 1);
+        p = pathx.indexOf('/');
+        String rootpath = "";
+        if (p > 0) {
+            rootpath = pathx.substring(0, p);
+        }
+
+        // we collected enough information to compute the fragments that are
+        // basis for hashes
+        int l = dom.length();
+        int domlengthKey = (l <= 8) ? 0 : (l <= 12) ? 1 : (l <= 16) ? 2 : 3;
+        byte flagbyte = (byte) (((isHTTP) ? 0 : 32) | (id << 2) | domlengthKey);
+
+        // combine the attributes
+        StringBuffer hash = new StringBuffer(12);
+        // form the 'local' part of the hash
+        hash.append(kelondroBase64Order.enhancedCoder.encode(serverCodings.encodeMD5Raw(toNormalform(true, true))).substring(0, 5)); // 5 chars
+        hash.append(subdomPortPath(subdom, port, rootpath)); // 1 char
+        // form the 'global' part of the hash
+        hash.append(protocolHostPort(this.protocol, host, port)); // 5 chars
+        hash.append(kelondroBase64Order.enhancedCoder.encodeByte(flagbyte)); // 1 char
+
+        // return result hash
+        return new String(hash);
+    }
+
+    private static char subdomPortPath(String subdom, int port, String rootpath) {
+        return kelondroBase64Order.enhancedCoder.encode(serverCodings.encodeMD5Raw(subdom + ":" + port + ":" + rootpath)).charAt(0);
+    }
+
+    private static final char rootURLFlag = subdomPortPath("www", 80, "");
+
+    public static final boolean probablyRootURL(String urlHash) {
+        return (urlHash.charAt(5) == rootURLFlag);
+    }
+
+    private static String protocolHostPort(String protocol, String host, int port) {
+        return kelondroBase64Order.enhancedCoder.encode(serverCodings.encodeMD5Raw(protocol + ":" + host + ":" + port)).substring(0, 5);
+    }
+
+    private static String[] testTLDs = new String[] { "com", "net", "org", "uk", "fr", "de", "es", "it" };
+
+    public static final yacyURL probablyWordURL(String urlHash, TreeSet words) {
+        Iterator wi = words.iterator();
+        String word;
+        while (wi.hasNext()) {
+            word = (String) wi.next();
+            if ((word == null) || (word.length() == 0)) continue;
+            String pattern = urlHash.substring(6, 11);
+            for (int i = 0; i < testTLDs.length; i++) {
+                if (pattern.equals(protocolHostPort("http", "www." + word.toLowerCase() + "." + testTLDs[i], 80)))
+                    try {
+                        return new yacyURL("http://www." + word.toLowerCase() + "." + testTLDs[i], null);
+                    } catch (MalformedURLException e) {
+                        return null;
+                    }
+            }
+        }
+        return null;
+    }
+
+    public static final boolean isWordRootURL(String givenURLHash, TreeSet words) {
+        if (!(probablyRootURL(givenURLHash))) return false;
+        yacyURL wordURL = probablyWordURL(givenURLHash, words);
+        if (wordURL == null) return false;
+        if (wordURL.hash().equals(givenURLHash)) return true;
+        return false;
+    }
+
+    public static final int domLengthEstimation(String urlHash) {
+        // generates an estimation of the original domain length
+        assert (urlHash != null);
+        assert (urlHash.length() == 12) : "urlhash = " + urlHash;
+        int flagbyte = kelondroBase64Order.enhancedCoder.decodeByte(urlHash.charAt(11));
+        int domLengthKey = flagbyte & 3;
+        switch (domLengthKey) {
+        case 0:
+            return 4;
+        case 1:
+            return 10;
+        case 2:
+            return 14;
+        case 3:
+            return 20;
+        }
+        return 20;
+    }
+
+    public static int domLengthNormalized(String urlHash) {
+        return 255 * domLengthEstimation(urlHash) / 30;
+    }
+
+    public static final int domDomain(String urlHash) {
+        // returns the ID of the domain of the domain
+        assert (urlHash != null);
+        assert (urlHash.length() == 12) : "urlhash = " + urlHash;
+        int flagbyte = kelondroBase64Order.enhancedCoder.decodeByte(urlHash.charAt(11));
+        return (flagbyte & 12) >> 2;
+    }
+
+    public static boolean isGlobalDomain(String urlhash) {
+        return domDomain(urlhash) != 7;
+    }
+
+    // checks for local/global IP range and local IP
+    public boolean isLocal() {
+        InetAddress hostAddress = serverDomains.dnsResolve(this.host); // TODO: use a check with the hash first
+        if (hostAddress == null) /* we are offline */ return false; // it is rare to be offline in intranets
+        return hostAddress.isSiteLocalAddress() || hostAddress.isLoopbackAddress();
+    }
+    
+    // language calculation
+    public static String language(yacyURL url) {
+        String language = "uk";
+        String host = url.getHost();
+        int pos = host.lastIndexOf(".");
+        if ((pos > 0) && (host.length() - pos == 3)) language = host.substring(pos + 1).toLowerCase();
+        return language;
+    }
+    
     
     public static void main(String[] args) {
         String[][] test = new String[][]{
@@ -570,12 +1097,12 @@ public class URL {
           new String[]{null, "http://diskusjion.no/index.php?s=5bad5f431a106d9a8355429b81bb0ca5&amp;showuser=23585"}
           };
         String environment, url;
-        de.anomic.net.URL aURL, aURL1;
+        yacyURL aURL, aURL1;
         java.net.URL jURL;
         for (int i = 0; i < test.length; i++) {
             environment = test[i][0];
             url = test[i][1];
-            try {aURL = de.anomic.net.URL.newURL(environment, url);} catch (MalformedURLException e) {aURL = null;}
+            try {aURL = yacyURL.newURL(environment, url);} catch (MalformedURLException e) {aURL = null;}
             if (environment == null) {
                 try {jURL = new java.net.URL(url);} catch (MalformedURLException e) {jURL = null;}
             } else {
@@ -593,7 +1120,7 @@ public class URL {
             
             // check stability: the normalform of the normalform must be equal to the normalform
             if (aURL != null) try {
-                aURL1 = new de.anomic.net.URL(aURL.toNormalform(false, true));
+                aURL1 = new yacyURL(aURL.toNormalform(false, true), null);
                 if (!(aURL1.toNormalform(false, true).equals(aURL.toNormalform(false, true)))) {
                     System.out.println("no stability for url:");
                     System.out.println("aURL0=" + aURL.toString());

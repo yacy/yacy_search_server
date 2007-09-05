@@ -58,11 +58,11 @@ import de.anomic.data.listManager;
 import de.anomic.data.translator;
 import de.anomic.http.httpHeader;
 import de.anomic.http.httpc;
-import de.anomic.net.URL;
 import de.anomic.plasma.plasmaSwitchboard;
 import de.anomic.server.serverObjects;
 import de.anomic.server.serverSwitch;
 import de.anomic.tools.nxTools;
+import de.anomic.yacy.yacyURL;
 
 
 public class ConfigLanguage_p {
@@ -97,7 +97,7 @@ public class ConfigLanguage_p {
 			String url = (String)post.get("url");
 			ArrayList langVector;
 			try{
-                URL u = new URL(url);
+                yacyURL u = new yacyURL(url, null);
 				langVector = nxTools.strings(httpc.wget(u, u.getHost(), 6000, null, null, switchboard.remoteProxyConfig, null, null), "UTF-8");
 			}catch(IOException e){
 				prop.put("status", 1);//unable to get url

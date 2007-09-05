@@ -56,17 +56,15 @@ import net.sf.jmimemagic.MagicMatchNotFoundException;
 import org.apache.log4j.Level;
 import org.apache.log4j.Logger;
 
-import de.anomic.net.URL;
 import de.anomic.plasma.plasmaParser;
 import de.anomic.plasma.plasmaParserDocument;
 import de.anomic.plasma.parser.AbstractParser;
 import de.anomic.plasma.parser.Parser;
 import de.anomic.plasma.parser.ParserException;
 import de.anomic.server.serverFileUtils;
+import de.anomic.yacy.yacyURL;
 
-public class mimeTypeParser
-extends AbstractParser
-implements Parser {
+public class mimeTypeParser extends AbstractParser implements Parser {
     
     /**
      * a list of mime types that are supported by this parser class
@@ -127,7 +125,7 @@ implements Parser {
         return null;        
     }
     
-    public plasmaParserDocument parse(URL location, String mimeType, String charset, File sourceFile) throws ParserException, InterruptedException {
+    public plasmaParserDocument parse(yacyURL location, String mimeType, String charset, File sourceFile) throws ParserException, InterruptedException {
         
         String orgMimeType = mimeType;
         
@@ -188,7 +186,7 @@ implements Parser {
         }
     }
     
-    public plasmaParserDocument parse(URL location, String mimeType,String charset, InputStream source) throws ParserException, InterruptedException {
+    public plasmaParserDocument parse(yacyURL location, String mimeType,String charset, InputStream source) throws ParserException, InterruptedException {
         File dstFile = null;
         try {
             dstFile = File.createTempFile("mimeTypeParser",".tmp");

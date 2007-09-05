@@ -44,7 +44,6 @@
 package de.anomic.plasma.parser.swf;
 
 import java.io.InputStream;
-import de.anomic.net.URL;
 import java.util.Hashtable;
 import java.util.HashMap;
 
@@ -54,6 +53,7 @@ import de.anomic.plasma.plasmaParserDocument;
 import de.anomic.plasma.parser.AbstractParser;
 import de.anomic.plasma.parser.Parser;
 import de.anomic.plasma.parser.ParserException;
+import de.anomic.yacy.yacyURL;
 
 public class swfParser extends AbstractParser implements Parser {
 
@@ -90,7 +90,7 @@ public class swfParser extends AbstractParser implements Parser {
      * parses the source documents and returns a plasmaParserDocument containing
      * all extracted information about the parsed document
      */
-    public plasmaParserDocument parse(URL location, String mimeType, String charset, InputStream source) throws ParserException, InterruptedException {
+    public plasmaParserDocument parse(yacyURL location, String mimeType, String charset, InputStream source) throws ParserException, InterruptedException {
 
         try {
             SWF2HTML swf2html = new SWF2HTML();

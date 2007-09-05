@@ -56,11 +56,11 @@ import org.apache.poi.hssf.record.Record;
 import org.apache.poi.hssf.record.SSTRecord;
 import org.apache.poi.poifs.filesystem.POIFSFileSystem;
 
-import de.anomic.net.URL;
 import de.anomic.plasma.plasmaParserDocument;
 import de.anomic.plasma.parser.AbstractParser;
 import de.anomic.plasma.parser.Parser;
 import de.anomic.plasma.parser.ParserException;
+import de.anomic.yacy.yacyURL;
 
 public class xlsParser extends AbstractParser implements Parser, HSSFListener {
 
@@ -102,7 +102,7 @@ public class xlsParser extends AbstractParser implements Parser, HSSFListener {
      * parses the source documents and returns a plasmaParserDocument containing
      * all extracted information about the parsed document
      */ 
-    public plasmaParserDocument parse(URL location, String mimeType,
+    public plasmaParserDocument parse(yacyURL location, String mimeType,
             String charset, InputStream source) throws ParserException,
             InterruptedException {
         try {

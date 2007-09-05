@@ -51,7 +51,6 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.io.PrintStream;
 import java.io.UnsupportedEncodingException;
-import java.lang.reflect.Constructor;
 import java.net.InetAddress;
 import java.net.MalformedURLException;
 import java.net.URLDecoder;
@@ -67,7 +66,6 @@ import java.util.StringTokenizer;
 import de.anomic.data.htmlTools;
 import de.anomic.data.userDB;
 import de.anomic.kelondro.kelondroBase64Order;
-import de.anomic.net.URL;
 import de.anomic.plasma.plasmaSwitchboard;
 import de.anomic.server.serverByteBuffer;
 import de.anomic.server.serverCodings;
@@ -78,9 +76,9 @@ import de.anomic.server.serverHandler;
 import de.anomic.server.serverObjects;
 import de.anomic.server.serverSwitch;
 import de.anomic.server.logging.serverLog;
-import de.anomic.soap.httpdSoapHandler;
 import de.anomic.yacy.yacyCore;
 import de.anomic.yacy.yacySeed;
+import de.anomic.yacy.yacyURL;
 
 
 /**
@@ -119,7 +117,6 @@ public final class httpd implements serverHandler {
     public static final String hline = "-------------------------------------------------------------------------------";
     
     public static HashMap reverseMappingCache = new HashMap();
-    private httpdSoapHandler soapHandler = null;
     private static plasmaSwitchboard switchboard = null;
     private static String virtualHost = null;
     
@@ -488,36 +485,8 @@ public final class httpd implements serverHandler {
             if (this.prop.getProperty(httpHeader.CONNECTION_PROP_HOST).equals(virtualHost)) {
                 // pass to server
                 if (this.allowServer) {
-                    
-                    /*
-                     * Handling SOAP Requests here ...
-                     */
-                    if (this.prop.containsKey(httpHeader.CONNECTION_PROP_PATH) && this.prop.getProperty(httpHeader.CONNECTION_PROP_PATH).startsWith("/soap/")) {
-                        if (this.soapHandler == null) {
-                            try {
-                                Class soapHandlerClass = Class.forName("de.anomic.soap.httpdSoapHandler");
-                                Constructor classConstructor = soapHandlerClass.getConstructor( new Class[] { serverSwitch.class } );
-                                this.soapHandler  = (httpdSoapHandler) classConstructor.newInstance(new Object[] { switchboard });
-                            } catch (Exception e) {
-                                sendRespondError(this.prop,this.session.out,4,501,null,"Error while initializing SOAP Excension",e);
-                                return serverCore.TERMINATE_CONNECTION;
-                            } catch (NoClassDefFoundError e) {
-                                sendRespondError(this.prop,this.session.out,4,503,null,"SOAP Extension not installed",e);
-                                return serverCore.TERMINATE_CONNECTION;
-                            } catch (Error e) {
-                                sendRespondError(this.prop,this.session.out,4,503,null,"SOAP Extension not installed",e);
-                                return serverCore.TERMINATE_CONNECTION;                                
-                            }
-                        }
-                        this.soapHandler.doGet(this.prop, header, this.session.out);
-                        
-                        /*
-                         * Handling HTTP requests here ...
-                         */
-                    } else {              
-                        if (this.handleServerAuthentication(header)) {
-                            httpdFileHandler.doGet(this.prop, header, this.session.out);
-                        }
+                    if (this.handleServerAuthentication(header)) {
+                        httpdFileHandler.doGet(this.prop, header, this.session.out);
                     }
                 } else {
                     // not authorized through firewall blocking (ip does not match filter)
@@ -637,40 +606,8 @@ public final class httpd implements serverHandler {
             if (prop.getProperty(httpHeader.CONNECTION_PROP_HOST).equals(virtualHost)) {
                 // pass to server
                 if (allowServer) {
-                    
-                    /*
-                     * Handling SOAP Requests here ...
-                     */
-                    if (this.prop.containsKey(httpHeader.CONNECTION_PROP_PATH) && this.prop.getProperty(httpHeader.CONNECTION_PROP_PATH).startsWith("/soap/")) {
-                        if (this.soapHandler == null) {
-                            try {
-                                // creating the soap handler class by name
-                                Class soapHandlerClass = Class.forName("de.anomic.soap.httpdSoapHandler");
-                                
-                                // Look for the proper constructor  
-                                Constructor soapHandlerConstructor = soapHandlerClass.getConstructor( new Class[] { serverSwitch.class } );
-                                
-                                // creating the new object
-                                this.soapHandler = (httpdSoapHandler)soapHandlerConstructor.newInstance( new Object[] { switchboard } );   
-                            } catch (Exception e) {
-                            	sendRespondError(this.prop,this.session.out,4,501,null,"Error while initializing SOAP Excension",e);
-                                return serverCore.TERMINATE_CONNECTION;
-                            } catch (NoClassDefFoundError e) {
-                                sendRespondError(this.prop,this.session.out,4,503,null,"SOAP Extension not installed",e);
-                                return serverCore.TERMINATE_CONNECTION;                                
-                            } catch (Error e) {
-                                sendRespondError(this.prop,this.session.out,4,503,null,"SOAP Extension not installed",e);
-                                return serverCore.TERMINATE_CONNECTION;                                
-                            }
-                        }
-                        this.soapHandler.doPost(this.prop, header, this.session.out, this.session.in);                
-                        /*
-                         * Handling normal HTTP requests here ...
-                         */
-                    } else {       
-                        if (handleServerAuthentication(header)) {
-                            httpdFileHandler.doPost(prop, header, this.session.out, this.session.in);
-                        }
+                    if (handleServerAuthentication(header)) {
+                        httpdFileHandler.doPost(prop, header, this.session.out, this.session.in);
                     }
                 } else {
                     // not authorized through firewall blocking (ip does not match filter)
@@ -1199,7 +1136,7 @@ public final class httpd implements serverHandler {
             
             String urlString;
             try {
-                urlString = (new URL((method.equals(httpHeader.METHOD_CONNECT)?"https":"http"), host, port, (args == null) ? path : path + "?" + args)).toString();
+                urlString = (new yacyURL((method.equals(httpHeader.METHOD_CONNECT)?"https":"http"), host, port, (args == null) ? path : path + "?" + args)).toString();
             } catch (MalformedURLException e) {
                 urlString = "invalid URL"; 
             }            

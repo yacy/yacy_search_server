@@ -56,11 +56,11 @@ import java.util.Date;
 
 import de.anomic.http.httpHeader;
 import de.anomic.http.httpc;
-import de.anomic.net.URL;
 import de.anomic.plasma.plasmaCrawlRobotsTxt;
 import de.anomic.plasma.plasmaSwitchboard;
 import de.anomic.server.serverByteBuffer;
 import de.anomic.server.logging.serverLog;
+import de.anomic.yacy.yacyURL;
 
 /*
  * A class for Parsing robots.txt files.
@@ -227,7 +227,7 @@ public final class robotsParser{
         return new Object[]{denyList,sitemap,crawlDelay};
     }        
     
-    private static final int getPort(URL theURL) {
+    private static final int getPort(yacyURL theURL) {
         int port = theURL.getPort();
         if (port == -1) {
             if (theURL.getProtocol().equalsIgnoreCase("http")) {
@@ -240,7 +240,7 @@ public final class robotsParser{
         return port;
     }
     
-    private static final String getHostPort(URL theURL) {
+    private static final String getHostPort(yacyURL theURL) {
         String urlHostPort = null;
         int port = getPort(theURL);
         urlHostPort = theURL.getHost() + ":" + port;
@@ -249,9 +249,9 @@ public final class robotsParser{
         return urlHostPort;
     }
     
-    public static URL getSitemapURL(URL theURL) {
+    public static yacyURL getSitemapURL(yacyURL theURL) {
     	if (theURL == null) throw new IllegalArgumentException(); 
-    	URL sitemapURL = null;
+    	yacyURL sitemapURL = null;
     	
         // generating the hostname:poart string needed to do a DB lookup
         String urlHostPort = getHostPort(theURL);    	
@@ -265,13 +265,13 @@ public final class robotsParser{
                        
         try {
         	String sitemapUrlStr = robotsTxt4Host.getSitemap();
-        	if (sitemapUrlStr != null) sitemapURL = new URL(sitemapUrlStr);
+        	if (sitemapUrlStr != null) sitemapURL = new yacyURL(sitemapUrlStr, null);
         } catch (MalformedURLException e) {/* ignore this */}
         
         return sitemapURL;
     }
     
-    public static Integer getCrawlDelay(URL theURL) {
+    public static Integer getCrawlDelay(yacyURL theURL) {
     	if (theURL == null) throw new IllegalArgumentException(); 
     	Integer crawlDelay = null;
     	
@@ -292,7 +292,7 @@ public final class robotsParser{
         return crawlDelay;    	
     }
     
-    public static boolean isDisallowed(URL nexturl) {
+    public static boolean isDisallowed(yacyURL nexturl) {
         if (nexturl == null) throw new IllegalArgumentException();               
         
         // generating the hostname:poart string needed to do a DB lookup
@@ -309,10 +309,10 @@ public final class robotsParser{
                     (robotsTxt4Host.getLoadedDate() == null) ||
                     (System.currentTimeMillis() - robotsTxt4Host.getLoadedDate().getTime() > 7*24*60*60*1000)
             ) {
-                URL robotsURL = null;
+                yacyURL robotsURL = null;
                 // generating the proper url to download the robots txt
                 try {                 
-                    robotsURL = new URL(nexturl.getProtocol(),nexturl.getHost(),getPort(nexturl),"/robots.txt");
+                    robotsURL = new yacyURL(nexturl.getProtocol(),nexturl.getHost(),getPort(nexturl),"/robots.txt");
                 } catch (MalformedURLException e) {
                     serverLog.logSevere("ROBOTS","Unable to generate robots.txt URL for URL '" + nexturl.toString() + "'.");
                     return false;
@@ -371,7 +371,7 @@ public final class robotsParser{
         return false;
     }
     
-    static Object[] downloadRobotsTxt(URL robotsURL, int redirectionCount, plasmaCrawlRobotsTxt.Entry entry) throws Exception {
+    static Object[] downloadRobotsTxt(yacyURL robotsURL, int redirectionCount, plasmaCrawlRobotsTxt.Entry entry) throws Exception {
         
         if (redirectionCount < 0) return new Object[]{Boolean.FALSE,null,null};
         redirectionCount--;
@@ -392,7 +392,7 @@ public final class robotsParser{
             httpHeader reqHeaders = new httpHeader();
             
             // adding referer
-            reqHeaders.put(httpHeader.REFERER, (URL.newURL(robotsURL,"/")).toNormalform(true, true));
+            reqHeaders.put(httpHeader.REFERER, (yacyURL.newURL(robotsURL,"/")).toNormalform(true, true));
             
             if (entry != null) {
                 oldEtag = entry.getETag();
@@ -447,7 +447,7 @@ public final class robotsParser{
                 redirectionUrlString = redirectionUrlString.trim();
                 
                 // generating the new URL object
-                URL redirectionUrl = URL.newURL(robotsURL, redirectionUrlString);
+                yacyURL redirectionUrl = yacyURL.newURL(robotsURL, redirectionUrlString);
                 
                 // returning the used httpc
                 httpc.returnInstance(con); 

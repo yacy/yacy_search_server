@@ -49,15 +49,13 @@ import java.util.Hashtable;
 import javax.swing.text.DefaultStyledDocument;
 import javax.swing.text.rtf.RTFEditorKit;
 
-import de.anomic.net.URL;
 import de.anomic.plasma.plasmaParserDocument;
 import de.anomic.plasma.parser.AbstractParser;
 import de.anomic.plasma.parser.Parser;
 import de.anomic.plasma.parser.ParserException;
+import de.anomic.yacy.yacyURL;
 
-public class rtfParser
-extends AbstractParser
-implements Parser {
+public class rtfParser extends AbstractParser implements Parser {
 
     /**
      * a list of mime types that are supported by this parser class
@@ -80,7 +78,7 @@ implements Parser {
         this.parserName = "Rich Text Format Parser";  
 	}
 
-	public plasmaParserDocument parse(URL location, String mimeType, String charset, InputStream source) throws ParserException, InterruptedException {
+	public plasmaParserDocument parse(yacyURL location, String mimeType, String charset, InputStream source) throws ParserException, InterruptedException {
 
         
 		try {	

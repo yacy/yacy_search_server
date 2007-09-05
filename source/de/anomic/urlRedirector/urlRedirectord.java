@@ -10,8 +10,6 @@ import java.util.Date;
 import de.anomic.data.userDB;
 import de.anomic.http.httpHeader;
 import de.anomic.http.httpc;
-import de.anomic.plasma.plasmaURL;
-import de.anomic.net.URL;
 import de.anomic.plasma.plasmaCrawlProfile;
 import de.anomic.plasma.plasmaParser;
 import de.anomic.plasma.plasmaSwitchboard;
@@ -20,6 +18,7 @@ import de.anomic.server.serverHandler;
 import de.anomic.server.logging.serverLog;
 import de.anomic.server.serverCore.Session;
 import de.anomic.yacy.yacyCore;
+import de.anomic.yacy.yacyURL;
 
 public class urlRedirectord implements serverHandler {
     
@@ -180,7 +179,7 @@ public class urlRedirectord implements serverHandler {
                     String reasonString = null;
                     try {
                         // generating URL Object
-                        URL reqURL = new URL(this.nextURL);
+                        yacyURL reqURL = new yacyURL(this.nextURL, null);
                         
                         // getting URL mimeType
                         httpHeader header = httpc.whead(reqURL, reqURL.getHost(), 10000, null, null, switchboard.remoteProxyConfig);                        
@@ -191,7 +190,7 @@ public class urlRedirectord implements serverHandler {
                                 header.mime())
                         ) {
                             // first delete old entry, if exists
-                            String urlhash = plasmaURL.urlHash(this.nextURL);
+                            String urlhash = reqURL.hash();
                             switchboard.wordIndex.loadedURL.remove(urlhash);
                             switchboard.noticeURL.remove(urlhash);
                             switchboard.errorURL.remove(urlhash);                            

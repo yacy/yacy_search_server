@@ -51,8 +51,8 @@ import de.anomic.kelondro.kelondroBase64Order;
 import de.anomic.kelondro.kelondroException;
 import de.anomic.kelondro.kelondroRow;
 import de.anomic.kelondro.kelondroStack;
-import de.anomic.net.URL;
 import de.anomic.server.logging.serverLog;
+import de.anomic.yacy.yacyURL;
 
 public class URLFetcherStack {
     
@@ -84,7 +84,7 @@ public class URLFetcherStack {
         this.db.close();
     }
     
-    public boolean push(URL url) {
+    public boolean push(yacyURL url) {
         try {
             this.db.push(this.db.row().newEntry(
                     new byte[][] { url.toNormalform(true, true).getBytes() }
@@ -97,14 +97,14 @@ public class URLFetcherStack {
         }
     }
     
-    public URL pop() {
+    public yacyURL pop() {
         try {
             kelondroRow.Entry r = this.db.pop();
             if (r == null) return null;
             final String url = r.getColString(0, null);
             try {
                 this.popped++;
-                return new URL(url);
+                return new yacyURL(url, null);
             } catch (MalformedURLException e) {
                 this.log.logSevere("found invalid URL-entry: " + url);
                 return null;

@@ -93,7 +93,6 @@ import java.util.zip.GZIPOutputStream;
 import de.anomic.htmlFilter.htmlFilterContentTransformer;
 import de.anomic.htmlFilter.htmlFilterTransformer;
 import de.anomic.htmlFilter.htmlFilterWriter;
-import de.anomic.net.URL;
 import de.anomic.plasma.plasmaHTCache;
 import de.anomic.plasma.plasmaParser;
 import de.anomic.plasma.plasmaSwitchboard;
@@ -107,6 +106,7 @@ import de.anomic.server.serverObjects;
 import de.anomic.server.logging.serverLog;
 import de.anomic.server.logging.serverMiniLogFormatter;
 import de.anomic.yacy.yacyCore;
+import de.anomic.yacy.yacyURL;
 
 public final class httpdProxyHandler {
     
@@ -319,7 +319,7 @@ public final class httpdProxyHandler {
             int pos=0;
             int port=0;
 
-            URL url = null;
+            yacyURL url = null;
             try {
                 url = httpHeader.getRequestURL(conProp);
 
@@ -329,11 +329,11 @@ public final class httpdProxyHandler {
                         redirectorWriter.println(url.toNormalform(false, true));
                         redirectorWriter.flush();
                     }
-                    String newUrl=redirectorReader.readLine();
-                    if(!newUrl.equals("")){
-                        try{
-                            url=new URL(newUrl);
-                        }catch(MalformedURLException e){}//just keep the old one
+                    String newUrl = redirectorReader.readLine();
+                    if (!newUrl.equals("")) {
+                        try {
+                            url = new yacyURL(newUrl, null);
+                        } catch(MalformedURLException e){}//just keep the old one
                     }
                     conProp.setProperty(httpHeader.CONNECTION_PROP_HOST, url.getHost()+":"+url.getPort());
                     conProp.setProperty(httpHeader.CONNECTION_PROP_PATH, url.getPath());
@@ -474,7 +474,7 @@ public final class httpdProxyHandler {
         }
     }
     
-    private static void fulfillRequestFromWeb(Properties conProp, URL url,String ext, httpHeader requestHeader, httpHeader cachedResponseHeader, File cacheFile, OutputStream respond) {
+    private static void fulfillRequestFromWeb(Properties conProp, yacyURL url,String ext, httpHeader requestHeader, httpHeader cachedResponseHeader, File cacheFile, OutputStream respond) {
         
         GZIPOutputStream gzippedOut = null; 
         httpChunkedOutputStream chunkedOut = null;
@@ -727,7 +727,7 @@ public final class httpdProxyHandler {
 
     private static void fulfillRequestFromCache(
             Properties conProp, 
-            URL url,
+            yacyURL url,
             String ext,
             httpHeader requestHeader, 
             httpHeader cachedResponseHeader,
@@ -865,7 +865,7 @@ public final class httpdProxyHandler {
         
         httpc remote = null;
         httpc.response res = null;
-        URL url = null;
+        yacyURL url = null;
         try {
             // remembering the starting time of the request
             Date requestDate = new Date(); // remember the time...
@@ -892,7 +892,7 @@ public final class httpdProxyHandler {
             }
             
             try {
-                url = new URL("http", host, port, (args == null) ? path : path + "?" + args);
+                url = new yacyURL("http", host, port, (args == null) ? path : path + "?" + args);
             } catch (MalformedURLException e) {
                 String errorMsg = "ERROR: internal error with url generation: host=" +
                                   host + ", port=" + port + ", path=" + path + ", args=" + args;
@@ -968,7 +968,7 @@ public final class httpdProxyHandler {
     public static void doPost(Properties conProp, httpHeader requestHeader, OutputStream respond, PushbackInputStream body) throws IOException {
         
         httpc remote = null;
-        URL url = null;
+        yacyURL url = null;
         try {
             // remembering the starting time of the request
             Date requestDate = new Date(); // remember the time...
@@ -993,7 +993,7 @@ public final class httpdProxyHandler {
             }
             
             try {
-                url = new URL("http", host, port, (args == null) ? path : path + "?" + args);
+                url = new yacyURL("http", host, port, (args == null) ? path : path + "?" + args);
             } catch (MalformedURLException e) {
                 String errorMsg = "ERROR: internal error with url generation: host=" +
                                   host + ", port=" + port + ", path=" + path + ", args=" + args;
@@ -1308,7 +1308,7 @@ public final class httpdProxyHandler {
         out.flush();
     }
     */
-    private static void handleProxyException(Exception e, httpc remote, Properties conProp, OutputStream respond, URL url) {
+    private static void handleProxyException(Exception e, httpc remote, Properties conProp, OutputStream respond, yacyURL url) {
         // this may happen if 
         // - the targeted host does not exist 
         // - anything with the remote server was wrong.

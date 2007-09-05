@@ -32,12 +32,11 @@ import java.util.Map;
 
 import de.anomic.http.httpHeader;
 import de.anomic.kelondro.kelondroBase64Order;
-import de.anomic.net.URL;
 import de.anomic.plasma.plasmaSwitchboard;
-import de.anomic.plasma.plasmaURL;
 import de.anomic.plasma.plasmaWebStructure;
 import de.anomic.server.serverObjects;
 import de.anomic.server.serverSwitch;
+import de.anomic.yacy.yacyURL;
 import de.anomic.ymage.ymageGraph;
 import de.anomic.ymage.ymageMatrix;
 import de.anomic.ymage.ymageToolPrint;
@@ -92,7 +91,7 @@ public class WebStructurePicture_p {
             // find start hash
             String hash = null;
             try {
-                hash = plasmaURL.urlHash(new URL("http://" + host)).substring(6);
+                hash = (new yacyURL("http://" + host, null)).hash().substring(6);
             } catch (MalformedURLException e) {e.printStackTrace();}
             assert (sb.webStructure.references(hash) != null);
             

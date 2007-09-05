@@ -55,7 +55,6 @@ import de.anomic.data.URLFetcherStack;
 import de.anomic.htmlFilter.htmlFilterContentScraper;
 import de.anomic.htmlFilter.htmlFilterWriter;
 import de.anomic.http.httpHeader;
-import de.anomic.net.URL;
 import de.anomic.plasma.plasmaCrawlEntry;
 import de.anomic.plasma.plasmaCrawlNURL;
 import de.anomic.plasma.plasmaSwitchboard;
@@ -64,6 +63,7 @@ import de.anomic.server.serverFileUtils;
 import de.anomic.server.serverObjects;
 import de.anomic.server.serverSwitch;
 import de.anomic.server.logging.serverLog;
+import de.anomic.yacy.yacyURL;
 
 public class CrawlURLFetchStack_p {
     
@@ -200,16 +200,16 @@ public class CrawlURLFetchStack_p {
                         prop.put("upload", 1);
                     } else if (type.equals("html")) {
                         try {
-                            final htmlFilterContentScraper scraper = new htmlFilterContentScraper(new URL(file));
+                            final htmlFilterContentScraper scraper = new htmlFilterContentScraper(new yacyURL(file));
                             final Writer writer = new htmlFilterWriter(null, null, scraper, null, false);
                             serverFileUtils.write(content, writer);
                             writer.close();
                             
                             final Iterator it = ((HashMap)scraper.getAnchors()).keySet().iterator();
                             int added = 0, failed = 0;
-                            URL url;
+                            yacyURL url;
                             while (it.hasNext()) try {
-                                url = new URL((String)it.next());
+                                url = new yacyURL((String) it.next(), null);
                                 if (blCheck && plasmaSwitchboard.urlBlacklist.isListed(plasmaURLPattern.BLACKLIST_CRAWLER, url)) {
                                     failed++;
                                     continue;
@@ -264,7 +264,7 @@ public class CrawlURLFetchStack_p {
     private static boolean addURL(String url, boolean blCheck, URLFetcherStack stack) {
         try {
             if (url == null || url.length() == 0) return false;
-            URL u = new URL(url);
+            yacyURL u = new yacyURL(url, null);
             if (blCheck && plasmaSwitchboard.urlBlacklist.isListed(plasmaURLPattern.BLACKLIST_CRAWLER, u)) return false;
             stack.push(u);
             return true;
@@ -288,7 +288,7 @@ public class CrawlURLFetchStack_p {
             url = post.get("url" + i, null);
             if (url == null || url.length() == 0) continue;
             try {
-                stack.push(new URL(url));
+                stack.push(new yacyURL(url, null));
                 count++;
             } catch (MalformedURLException e) {
                 serverLog.logInfo("URLFETCHER", "retrieved invalid url for adding to the stack: " + url);

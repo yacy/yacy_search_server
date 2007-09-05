@@ -57,7 +57,6 @@ import java.util.TreeSet;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
 
-import de.anomic.net.URL;
 import de.anomic.plasma.plasmaParser;
 import de.anomic.plasma.plasmaParserDocument;
 import de.anomic.plasma.parser.AbstractParser;
@@ -65,6 +64,7 @@ import de.anomic.plasma.parser.Parser;
 import de.anomic.plasma.parser.ParserException;
 import de.anomic.server.serverByteBuffer;
 import de.anomic.server.serverFileUtils;
+import de.anomic.yacy.yacyURL;
 
 public class zipParser extends AbstractParser implements Parser {
 
@@ -95,7 +95,7 @@ public class zipParser extends AbstractParser implements Parser {
         return SUPPORTED_MIME_TYPES;
     }
     
-    public plasmaParserDocument parse(URL location, String mimeType, String charset, InputStream source) throws ParserException, InterruptedException {
+    public plasmaParserDocument parse(yacyURL location, String mimeType, String charset, InputStream source) throws ParserException, InterruptedException {
         
         long docTextLength = 0;
         OutputStream docText = null;
@@ -149,7 +149,7 @@ public class zipParser extends AbstractParser implements Parser {
                     serverFileUtils.copy(zippedContent,subDocTempFile,entry.getSize());                    
                     
                     // parsing the zip file entry
-                    subDoc = theParser.parseSource(URL.newURL(location,"#" + entryName),entryMime,null, subDocTempFile);
+                    subDoc = theParser.parseSource(yacyURL.newURL(location,"#" + entryName),entryMime,null, subDocTempFile);
                 } catch (ParserException e) {
                     this.theLogger.logInfo("Unable to parse zip file entry '" + entryName + "'. " + e.getMessage());
                 } finally {

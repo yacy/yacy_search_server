@@ -48,11 +48,10 @@ import java.util.Iterator;
 import java.util.Map;
 
 import de.anomic.http.httpHeader;
-import de.anomic.net.URL;
 import de.anomic.plasma.plasmaSwitchboard;
-import de.anomic.server.serverDomains;
 import de.anomic.server.serverObjects;
 import de.anomic.server.serverSwitch;
+import de.anomic.yacy.yacyURL;
 
 public class Statistics {
     
@@ -75,13 +74,13 @@ public class Statistics {
                     boolean dark = true;
                     Map map;
                     String urlString;
-                    URL url;
+                    yacyURL url;
                     while ((it.hasNext()) && (count < maxCount)) {
                         map = (Map) it.next();
                         if (count >= maxCount) break;
                         urlString = (String) map.get("key");
-                        try { url = new URL(urlString); } catch (MalformedURLException e) { url = null; }
-                        if ((url != null) && (!serverDomains.isLocal(url))) {
+                        try { url = new yacyURL(urlString, null); } catch (MalformedURLException e) { url = null; }
+                        if ((url != null) && (!url.isLocal())) {
                             prop.put("page_backlinks_list_" + count + "_dark", ((dark) ? 1 : 0)); dark =! dark;
                             prop.put("page_backlinks_list_" + count + "_url", urlString);
                             prop.put("page_backlinks_list_" + count + "_date", map.get("date"));

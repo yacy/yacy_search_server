@@ -57,11 +57,11 @@ import org.apache.commons.codec.net.QuotedPrintableCodec;
 
 import de.anomic.http.httpc;
 import de.anomic.kelondro.kelondroBase64Order;
-import de.anomic.net.URL;
 import de.anomic.plasma.plasmaParserDocument;
 import de.anomic.plasma.parser.AbstractParser;
 import de.anomic.plasma.parser.Parser;
 import de.anomic.plasma.parser.ParserException;
+import de.anomic.yacy.yacyURL;
 
 /**
  * Vcard specification: http://www.imc.org/pdi/vcard-21.txt
@@ -97,7 +97,7 @@ public class vcfParser extends AbstractParser implements Parser {
         return SUPPORTED_MIME_TYPES;
     }
     
-    public plasmaParserDocument parse(URL location, String mimeType, String charset, InputStream source) throws ParserException, InterruptedException {
+    public plasmaParserDocument parse(yacyURL location, String mimeType, String charset, InputStream source) throws ParserException, InterruptedException {
         
         try {
             StringBuffer parsedTitle = new StringBuffer();
@@ -212,7 +212,7 @@ public class vcfParser extends AbstractParser implements Parser {
                         parsedData.clear();
                     } else if (key.toUpperCase().startsWith("URL")) {
                         try {
-                            URL newURL = new URL(value);
+                            yacyURL newURL = new yacyURL(value, null);
                             anchors.put(newURL.toString(),newURL.toString());   
                             //parsedData.put(key,value);
                         } catch (MalformedURLException ex) {/* ignore this */}                                                
@@ -268,7 +268,7 @@ public class vcfParser extends AbstractParser implements Parser {
     
     public static void main(String[] args) {
         try {
-            URL contentUrl = new URL(args[0]);
+            yacyURL contentUrl = new yacyURL(args[0], null);
             
             vcfParser testParser = new vcfParser();
             byte[] content = httpc.singleGET(contentUrl, contentUrl.getHost(), 10000, null, null, null, null);

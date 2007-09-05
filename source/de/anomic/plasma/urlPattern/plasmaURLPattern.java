@@ -2,7 +2,7 @@ package de.anomic.plasma.urlPattern;
 
 import java.io.File;
 
-import de.anomic.net.URL;
+import de.anomic.yacy.yacyURL;
 
 public interface plasmaURLPattern {
 
@@ -46,10 +46,8 @@ public interface plasmaURLPattern {
 
 
     public boolean hashInBlacklistedCache(String blacklistType, String urlHash);
-
-    public boolean isListed(String blacklistType, String urlHash, URL url);
     
-    public boolean isListed(String blacklistType, URL url);
+    public boolean isListed(String blacklistType, yacyURL url);
     
     public boolean isListed(String blacklistType, String hostlow, String path);    
     

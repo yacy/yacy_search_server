@@ -32,8 +32,6 @@ import java.util.HashMap;
 import java.util.Iterator;
 
 import de.anomic.http.httpHeader;
-import de.anomic.net.URL;
-import de.anomic.plasma.plasmaURL;
 import de.anomic.kelondro.kelondroMScoreCluster;
 import de.anomic.kelondro.kelondroRow;
 import de.anomic.kelondro.kelondroNaturalOrder;
@@ -48,6 +46,7 @@ import de.anomic.yacy.yacyCore;
 import de.anomic.yacy.yacyNewsPool;
 import de.anomic.yacy.yacyNewsRecord;
 import de.anomic.yacy.yacySeed;
+import de.anomic.yacy.yacyURL;
 
 public class Surftips {
 
@@ -134,7 +133,7 @@ public class Surftips {
                 
                 url = row.getColString(0, null);
                 try{
-                	if(plasmaSwitchboard.urlBlacklist.isListed(plasmaURLPattern.BLACKLIST_SURFTIPS ,new URL(url)))
+                	if(plasmaSwitchboard.urlBlacklist.isListed(plasmaURLPattern.BLACKLIST_SURFTIPS ,new yacyURL(url, null)))
                 		continue;
                 }catch(MalformedURLException e){continue;};
                 title = row.getColString(1,"UTF-8");
@@ -302,10 +301,18 @@ public class Surftips {
 
             // add/subtract votes and write record
             if (entry != null) {
-                urlhash = plasmaURL.urlHash(url);
+                try {
+                    urlhash = (new yacyURL(url, null)).hash();
+                } catch (MalformedURLException e) {
+                    urlhash = null;
+                }
                 if (urlhash == null)
-                		urlhash=plasmaURL.urlHash("http://"+url);
-                		if(urlhash==null){
+                    try {
+                        urlhash = (new yacyURL("http://"+url, null)).hash();
+                    } catch (MalformedURLException e) {
+                        urlhash = null;
+                    }
+                		if (urlhash == null) {
                 			System.out.println("Surftips: bad url '" + url + "' from news record " + record.toString());
                 			continue;
                 		}

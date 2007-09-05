@@ -45,13 +45,12 @@
 // You must compile this file with
 // javac -classpath .:../classes crawlOrder.java
 
+import java.net.MalformedURLException;
 import java.util.ArrayList;
 import java.util.Date;
 
 import de.anomic.http.httpHeader;
-import de.anomic.plasma.plasmaURL;
 import de.anomic.index.indexURLEntry;
-import de.anomic.net.URL;
 import de.anomic.plasma.plasmaSwitchboard;
 import de.anomic.server.serverObjects;
 import de.anomic.server.serverSwitch;
@@ -59,6 +58,7 @@ import de.anomic.tools.crypt;
 import de.anomic.yacy.yacyCore;
 import de.anomic.yacy.yacyNetwork;
 import de.anomic.yacy.yacySeed;
+import de.anomic.yacy.yacyURL;
 
 public final class crawlOrder {
 
@@ -182,16 +182,16 @@ public final class crawlOrder {
                     // old method: only one url
 
                     // normalizing URL
-                    String newURL = new URL((String) urlv.get(0)).toNormalform(true, true);
+                    String newURL = new yacyURL((String) urlv.get(0), null).toNormalform(true, true);
                     if (!newURL.equals(urlv.get(0))) {
                         env.getLog().logWarning("crawlOrder: Received not normalized URL " + urlv.get(0));    
                     }
-                    String refURL = (refv.get(0) == null) ? null : new URL((String) refv.get(0)).toNormalform(true, true);
+                    String refURL = (refv.get(0) == null) ? null : new yacyURL((String) refv.get(0), null).toNormalform(true, true);
                     if ((refURL != null) && (!refURL.equals(refv.get(0)))) {
                         env.getLog().logWarning("crawlOrder: Received not normalized Referer URL " + refv.get(0) + " of URL " + urlv.get(0));    
                     }
                     
-                    if (!switchboard.acceptURL(new URL(newURL))) {
+                    if (!switchboard.acceptURL(new yacyURL(newURL, null))) {
                         env.getLog().logWarning("crawlOrder: Received URL outside of our domain: " + newURL);
                         return null;
                     }
@@ -263,7 +263,12 @@ public final class crawlOrder {
             // case where we have already the url loaded;
             reason = reasonString;
             // send lurl-Entry as response
-            indexURLEntry entry = switchboard.wordIndex.loadedURL.load(plasmaURL.urlHash(url), null);
+            indexURLEntry entry;
+            try {
+                entry = switchboard.wordIndex.loadedURL.load((new yacyURL(url, null)).hash(), null);
+            } catch (MalformedURLException e) {
+                entry = null;
+            }
             if (entry == null) {
                 response = "rejected";
                 lurl = "";

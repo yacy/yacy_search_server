@@ -30,13 +30,11 @@ import java.net.URLEncoder;
 import java.util.TreeSet;
 
 import de.anomic.http.httpHeader;
-import de.anomic.net.URL;
 import de.anomic.plasma.plasmaSearchEvent;
 import de.anomic.plasma.plasmaSearchPreOrder;
 import de.anomic.plasma.plasmaSearchQuery;
 import de.anomic.plasma.plasmaSearchRankingProfile;
 import de.anomic.plasma.plasmaSwitchboard;
-import de.anomic.plasma.plasmaURL;
 import de.anomic.server.serverObjects;
 import de.anomic.server.serverSwitch;
 import de.anomic.tools.crypt;
@@ -44,6 +42,7 @@ import de.anomic.tools.nxTools;
 import de.anomic.yacy.yacyCore;
 import de.anomic.yacy.yacyNewsPool;
 import de.anomic.yacy.yacySeed;
+import de.anomic.yacy.yacyURL;
 
 
 public class yacysearchitem {
@@ -86,9 +85,9 @@ public class yacysearchitem {
         prop.put("content_url", result.urlstring());
         
         int port=result.url().getPort();
-        URL faviconURL;
+        yacyURL faviconURL;
         try {
-            faviconURL = new URL(result.url().getProtocol() + "://" + result.url().getHost() + ((port != -1) ? (":" + String.valueOf(port)) : "") + "/favicon.ico");
+            faviconURL = new yacyURL(result.url().getProtocol() + "://" + result.url().getHost() + ((port != -1) ? (":" + String.valueOf(port)) : "") + "/favicon.ico", null);
         } catch (MalformedURLException e1) {
             faviconURL = null;
         }
@@ -102,14 +101,14 @@ public class yacysearchitem {
         prop.put("content_size", Long.toString(result.filesize()));
         
         TreeSet[] query = theQuery.queryWords();
-        URL wordURL = null;
+        yacyURL wordURL = null;
         try {
             prop.put("content_words", URLEncoder.encode(query[0].toString(),"UTF-8"));
         } catch (UnsupportedEncodingException e) {}
         prop.put("content_former", theQuery.queryString);
-        prop.put("content_rankingprops", result.word().toPropertyForm() + ", domLengthEstimated=" + plasmaURL.domLengthEstimation(result.hash()) +
-                        ((plasmaURL.probablyRootURL(result.hash())) ? ", probablyRootURL" : "") + 
-                        (((wordURL = plasmaURL.probablyWordURL(result.hash(), query[0])) != null) ? ", probablyWordURL=" + wordURL.toNormalform(false, true) : ""));
+        prop.put("content_rankingprops", result.word().toPropertyForm() + ", domLengthEstimated=" + yacyURL.domLengthEstimation(result.hash()) +
+                        ((yacyURL.probablyRootURL(result.hash())) ? ", probablyRootURL" : "") + 
+                        (((wordURL = yacyURL.probablyWordURL(result.hash(), query[0])) != null) ? ", probablyWordURL=" + wordURL.toNormalform(false, true) : ""));
  
         prop.putASIS("content_snippet", result.textSnippet().getLineMarked(theQuery.queryHashes));
         

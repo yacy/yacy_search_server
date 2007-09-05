@@ -54,7 +54,6 @@ import de.anomic.http.httpHeader;
 import de.anomic.http.httpd;
 import de.anomic.http.httpdByteCountInputStream;
 import de.anomic.http.httpdByteCountOutputStream;
-import de.anomic.net.URL;
 import de.anomic.plasma.plasmaSwitchboard;
 import de.anomic.server.serverCore;
 import de.anomic.server.serverDomains;
@@ -64,6 +63,7 @@ import de.anomic.server.serverObjects;
 import de.anomic.server.serverSwitch;
 import de.anomic.yacy.yacyCore;
 import de.anomic.yacy.yacySeed;
+import de.anomic.yacy.yacyURL;
 import de.anomic.yacy.yacyVersion;
 
 public class Status {
@@ -120,7 +120,7 @@ public class Status {
                 String release = post.get("releasedownload", "");
                 if (release.length() > 0) {
                     try {
-                        yacyVersion.downloadRelease(new yacyVersion(new URL(release)));
+                        yacyVersion.downloadRelease(new yacyVersion(new yacyURL(release, null)));
                     } catch (IOException e) {
                         // TODO Auto-generated catch block
                         e.printStackTrace();

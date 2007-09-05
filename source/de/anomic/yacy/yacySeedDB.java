@@ -68,7 +68,6 @@ import de.anomic.kelondro.kelondroException;
 import de.anomic.kelondro.kelondroMScoreCluster;
 import de.anomic.kelondro.kelondroMapObjects;
 import de.anomic.kelondro.kelondroBase64Order;
-import de.anomic.net.URL;
 import de.anomic.plasma.plasmaHTCache;
 import de.anomic.plasma.plasmaSwitchboard;
 import de.anomic.server.serverCore;
@@ -730,7 +729,7 @@ public final class yacySeedDB {
 //          String  seedFTPAccount,
 //          String  seedFTPPassword,
 //          File    seedFTPPath,
-            URL     seedURL) throws Exception {
+            yacyURL seedURL) throws Exception {
         
         // upload a seed file, if possible
         if (seedURL == null) throw new NullPointerException("UPLOAD - Error: URL not given");
@@ -766,7 +765,7 @@ public final class yacySeedDB {
         return log;
     }
     
-    private ArrayList downloadSeedFile(URL seedURL) throws IOException {
+    private ArrayList downloadSeedFile(yacyURL seedURL) throws IOException {
     	httpc remote = null;
         try {
             // init httpc

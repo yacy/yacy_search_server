@@ -54,10 +54,10 @@ import java.util.Hashtable;
 import java.util.Iterator;
 import java.util.Set;
 
-import de.anomic.net.URL;
 import de.anomic.plasma.parser.Parser;
 import de.anomic.plasma.parser.ParserInfo;
 import de.anomic.server.logging.serverLog;
+import de.anomic.yacy.yacyURL;
 
 public class plasmaParserConfig {
     /**
@@ -85,7 +85,7 @@ public class plasmaParserConfig {
         this.parserMode = theParserMode;            
     }
     
-    public boolean supportedContent(URL url, String mimeType) {
+    public boolean supportedContent(yacyURL url, String mimeType) {
         // TODO: we need some exceptions here to index URLs like this
         //       http://www.musicabona.com/respighi/12668/cd/index.html.fr
         mimeType = plasmaParser.getRealMimeType(mimeType);
@@ -112,7 +112,7 @@ public class plasmaParserConfig {
     }        
     
     
-    public boolean supportedFileExt(URL url) {
+    public boolean supportedFileExt(yacyURL url) {
         if (url == null) throw new NullPointerException();
         
         // getting the file path

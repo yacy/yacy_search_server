@@ -58,7 +58,6 @@ import org.apache.commons.pool.impl.GenericObjectPool;
 
 import de.anomic.data.robotsParser;
 import de.anomic.http.httpc;
-import de.anomic.plasma.plasmaURL;
 import de.anomic.index.indexURLEntry;
 import de.anomic.kelondro.kelondroCache;
 import de.anomic.kelondro.kelondroException;
@@ -68,12 +67,12 @@ import de.anomic.kelondro.kelondroIndex;
 import de.anomic.kelondro.kelondroRow;
 import de.anomic.kelondro.kelondroRowSet;
 import de.anomic.kelondro.kelondroTree;
-import de.anomic.net.URL;
 import de.anomic.plasma.urlPattern.plasmaURLPattern;
 import de.anomic.server.serverDomains;
 import de.anomic.server.serverSemaphore;
 import de.anomic.server.logging.serverLog;
 import de.anomic.yacy.yacyCore;
+import de.anomic.yacy.yacyURL;
 
 public final class plasmaCrawlStacker {
     
@@ -190,7 +189,7 @@ public final class plasmaCrawlStacker {
     }
     
     public void enqueue(
-            URL nexturl, 
+            yacyURL nexturl, 
             String referrerhash, 
             String initiatorHash, 
             String name, 
@@ -247,7 +246,7 @@ public final class plasmaCrawlStacker {
         String reason = null; // failure reason
 
         // getting the initiator peer hash
-        if ((initiatorHash == null) || (initiatorHash.length() == 0)) initiatorHash = plasmaURL.dummyHash;        
+        if ((initiatorHash == null) || (initiatorHash.length() == 0)) initiatorHash = yacyURL.dummyHash;        
         
         // strange errors
         if (nexturlString == null) {
@@ -257,21 +256,20 @@ public final class plasmaCrawlStacker {
         }
         
         // getting the referer url and url hash
-        URL referrerURL = null;
+        yacyURL referrerURL = null;
         if (referrerString != null) {
             try {
-                referrerURL = new URL(referrerString);
+                referrerURL = new yacyURL(referrerString, null);
             } catch (MalformedURLException e) {
                 referrerURL = null;
                 referrerString = null;
             }
         }
-        String referrerHash = (referrerString==null)?null:plasmaURL.urlHash(referrerString);
 
         // check for malformed urls
-        URL nexturl = null;
+        yacyURL nexturl = null;
         try {
-            nexturl = new URL(nexturlString);
+            nexturl = new yacyURL(nexturlString, null);
         } catch (MalformedURLException e) {
             reason = plasmaCrawlEURL.DENIED_MALFORMED_URL;
             this.log.logSevere("Wrong URL in stackCrawl: " + nexturlString + 
@@ -367,10 +365,9 @@ public final class plasmaCrawlStacker {
 
         // check if the url is double registered
         checkInterruption();
-        String nexturlhash = plasmaURL.urlHash(nexturl);
-        String dbocc = this.sb.urlExists(nexturlhash);
+        String dbocc = this.sb.urlExists(nexturl.hash());
         indexURLEntry oldEntry = null;
-        oldEntry = this.sb.wordIndex.loadedURL.load(nexturlhash, null);
+        oldEntry = this.sb.wordIndex.loadedURL.load(nexturl.hash(), null);
         boolean recrawl = (oldEntry != null) && ((System.currentTimeMillis() - oldEntry.loaddate().getTime()) > profile.recrawlIfOlder());
         // apply recrawl rule
         if ((dbocc != null) && (!(recrawl))) {
@@ -396,7 +393,7 @@ public final class plasmaCrawlStacker {
         }
         
         // store information
-        boolean local = ((initiatorHash.equals(plasmaURL.dummyHash)) || (initiatorHash.equals(yacyCore.seedDB.mySeed.hash)));
+        boolean local = ((initiatorHash.equals(yacyURL.dummyHash)) || (initiatorHash.equals(yacyCore.seedDB.mySeed.hash)));
         boolean global = 
             (profile != null) &&
             (profile.remoteIndexing()) /* granted */ &&
@@ -415,7 +412,7 @@ public final class plasmaCrawlStacker {
         checkInterruption();
         plasmaCrawlEntry ne = new plasmaCrawlEntry(initiatorHash, /* initiator, needed for p2p-feedback */
                 nexturl, /* url clear text string */
-                referrerHash, /* last url in crawling queue */
+                (referrerURL == null) ? null : referrerURL.hash(), /* last url in crawling queue */
                 name, /* load date */
                 loadDate, /* the anchor name */
                 (profile == null) ? null : profile.handle(),  // profile must not be null!
@@ -551,7 +548,7 @@ public final class plasmaCrawlStacker {
                 synchronized(this.urlEntryHashCache) {                    
                     kelondroRow.Entry oldValue = this.urlEntryCache.put(newMessage.toRow());                        
                     if (oldValue == null) {
-                        insertionDoneSuccessfully = this.urlEntryHashCache.add(newMessage.urlhash());
+                        insertionDoneSuccessfully = this.urlEntryHashCache.add(newMessage.url().hash());
                     }
                 }
                 

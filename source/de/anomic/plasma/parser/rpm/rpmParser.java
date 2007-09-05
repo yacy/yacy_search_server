@@ -53,12 +53,12 @@ import com.jguild.jrpm.io.RPMFile;
 import com.jguild.jrpm.io.datatype.DataTypeIf;
 
 import de.anomic.http.httpc;
-import de.anomic.net.URL;
 import de.anomic.plasma.plasmaParserDocument;
 import de.anomic.plasma.parser.AbstractParser;
 import de.anomic.plasma.parser.Parser;
 import de.anomic.plasma.parser.ParserException;
 import de.anomic.server.serverFileUtils;
+import de.anomic.yacy.yacyURL;
 
 /**
  * @author theli
@@ -92,7 +92,7 @@ public class rpmParser extends AbstractParser implements Parser {
         return SUPPORTED_MIME_TYPES;
     }
     
-    public plasmaParserDocument parse(URL location, String mimeType, String charset,
+    public plasmaParserDocument parse(yacyURL location, String mimeType, String charset,
             InputStream source) throws ParserException {
         File dstFile = null;
         try {
@@ -106,7 +106,7 @@ public class rpmParser extends AbstractParser implements Parser {
         }        
     }    
     
-    public plasmaParserDocument parse(URL location, String mimeType, String charset, File sourceFile) throws ParserException, InterruptedException {
+    public plasmaParserDocument parse(yacyURL location, String mimeType, String charset, File sourceFile) throws ParserException, InterruptedException {
         RPMFile rpmFile = null;        
         try {
             String summary = null, description = null, packager = null, name = sourceFile.getName();
@@ -177,7 +177,7 @@ public class rpmParser extends AbstractParser implements Parser {
     
     public static void main(String[] args) {
         try {
-            URL contentUrl = new URL(args[0]);
+            yacyURL contentUrl = new yacyURL(args[0], null);
             
             rpmParser testParser = new rpmParser();
             byte[] content = httpc.singleGET(contentUrl, contentUrl.getHost(), 10000, null, null, null, null);

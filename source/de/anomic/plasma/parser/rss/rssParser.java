@@ -56,7 +56,6 @@ import de.anomic.htmlFilter.htmlFilterAbstractScraper;
 import de.anomic.htmlFilter.htmlFilterContentScraper;
 import de.anomic.htmlFilter.htmlFilterImageEntry;
 import de.anomic.htmlFilter.htmlFilterWriter;
-import de.anomic.net.URL;
 import de.anomic.plasma.plasmaParserDocument;
 import de.anomic.plasma.parser.AbstractParser;
 import de.anomic.plasma.parser.Parser;
@@ -66,6 +65,7 @@ import de.anomic.server.serverCharBuffer;
 import de.anomic.server.serverFileUtils;
 import de.anomic.xml.rssReader;
 import de.anomic.xml.rssReader.Item;
+import de.anomic.yacy.yacyURL;
 
 public class rssParser extends AbstractParser implements Parser {
 
@@ -92,7 +92,7 @@ public class rssParser extends AbstractParser implements Parser {
         this.parserName = "Rich Site Summary/Atom Feed Parser"; 
 	}
 
-	public plasmaParserDocument parse(URL location, String mimeType, String charset, InputStream source) throws ParserException, InterruptedException {
+	public plasmaParserDocument parse(yacyURL location, String mimeType, String charset, InputStream source) throws ParserException, InterruptedException {
 
         try {
             LinkedList feedSections = new LinkedList();
@@ -114,7 +114,7 @@ public class rssParser extends AbstractParser implements Parser {
             String feedDescription = reader.getChannel().getDescription();
             
             if (reader.getImage() != null) {
-                images.add(new htmlFilterImageEntry(new URL(reader.getImage()), feedTitle, -1, -1));
+                images.add(new htmlFilterImageEntry(new yacyURL(reader.getImage(), null), feedTitle, -1, -1));
             }            
             
             // loop through the feed items
@@ -126,7 +126,7 @@ public class rssParser extends AbstractParser implements Parser {
 					Item item = reader.getItem(i);	
                     
         			String itemTitle = item.getTitle();
-        			URL    itemURL   = new URL(item.getLink());
+                    yacyURL    itemURL   = new yacyURL(item.getLink(), null);
         			String itemDescr = item.getDescription();
         			String itemCreator = item.getCreator();
         			if (itemCreator != null && itemCreator.length() > 0) authors.append(",").append(itemCreator);

@@ -48,12 +48,12 @@ import java.io.InputStream;
 import java.net.MalformedURLException;
 
 import de.anomic.http.httpHeader;
-import de.anomic.net.URL;
 import de.anomic.plasma.plasmaSnippetCache;
 import de.anomic.plasma.plasmaSwitchboard;
 import de.anomic.server.serverFileUtils;
 import de.anomic.server.serverObjects;
 import de.anomic.server.serverSwitch;
+import de.anomic.yacy.yacyURL;
 import de.anomic.ymage.ymageImageParser;
 
 public class ViewImage {
@@ -70,9 +70,9 @@ public class ViewImage {
         String urlLicense = post.get("code", "");
         boolean auth = ((String) header.get("CLIENTIP", "")).equals("localhost") || sb.verifyAuthentication(header, true); // handle access rights
         
-        URL url = null;
+        yacyURL url = null;
         if ((urlString.length() > 0) && (auth)) try {
-            url = new URL(urlString);
+            url = new yacyURL(urlString, null);
         } catch (MalformedURLException e1) {
             url = null;
         }

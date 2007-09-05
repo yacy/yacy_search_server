@@ -55,13 +55,12 @@ import java.util.Date;
 
 import de.anomic.data.htmlTools;
 import de.anomic.http.httpHeader;
-import de.anomic.plasma.plasmaURL;
-import de.anomic.net.URL;
 import de.anomic.plasma.plasmaCrawlProfile;
 import de.anomic.plasma.plasmaSwitchboard;
 import de.anomic.server.serverObjects;
 import de.anomic.server.serverSwitch;
 import de.anomic.yacy.yacyCore;
+import de.anomic.yacy.yacyURL;
 
 public class QuickCrawlLink_p {
     
@@ -128,19 +127,19 @@ public class QuickCrawlLink_p {
         
         if (crawlingStart != null) {
             crawlingStart = crawlingStart.trim();
-            try {crawlingStart = new URL(crawlingStart).toNormalform(true, true);} catch (MalformedURLException e1) {}
+            try {crawlingStart = new yacyURL(crawlingStart, null).toNormalform(true, true);} catch (MalformedURLException e1) {}
             
             // check if url is proper
-            URL crawlingStartURL = null;
+            yacyURL crawlingStartURL = null;
             try {
-                crawlingStartURL = new URL(crawlingStart);
+                crawlingStartURL = new yacyURL(crawlingStart, null);
             } catch (MalformedURLException e) {
                 prop.put("mode_status", 1);
                 prop.put("mode_code", "1");
                 return prop;
             }
                     
-            String urlhash = plasmaURL.urlHash(crawlingStart);
+            String urlhash = crawlingStartURL.hash();
             switchboard.wordIndex.loadedURL.remove(urlhash);
             switchboard.noticeURL.remove(urlhash);
             switchboard.errorURL.remove(urlhash);

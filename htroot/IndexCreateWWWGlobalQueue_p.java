@@ -126,7 +126,7 @@ public class IndexCreateWWWGlobalQueue_p {
                     prop.put("crawler-queue_list_"+showNum+"_modified", daydate(urle.loaddate()) );
                     prop.put("crawler-queue_list_"+showNum+"_anchor", htmlTools.encodeUnicode2html(urle.name(), true));
                     prop.put("crawler-queue_list_"+showNum+"_url", htmlTools.encodeUnicode2html(urle.url().toNormalform(false, true), false));
-                    prop.put("crawler-queue_list_"+showNum+"_hash", urle.urlhash());
+                    prop.put("crawler-queue_list_"+showNum+"_hash", urle.url().hash());
                     dark = !dark;
                     showNum++;
                 } else {

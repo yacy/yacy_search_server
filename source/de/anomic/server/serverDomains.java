@@ -37,7 +37,6 @@ import java.util.Map;
 import java.util.Set;
 
 import de.anomic.kelondro.kelondroMScoreCluster;
-import de.anomic.net.URL;
 import de.anomic.plasma.plasmaSwitchboard;
 
 public class serverDomains {
@@ -196,13 +195,6 @@ public class serverDomains {
         
     }
 
-    // checks for local/global IP range and local IP
-    public static boolean isLocal(URL url) {
-        InetAddress hostAddress = dnsResolve(url.getHost());
-        if (hostAddress == null) /* we are offline */ return false; // it is rare to be offline in intranets
-        return hostAddress.isSiteLocalAddress() || hostAddress.isLoopbackAddress();
-    }
-
     private static InetAddress[] localAddresses = null;
     static {
         try {
@@ -214,6 +206,9 @@ public class serverDomains {
     
     public static boolean isLocal(String address) {
 
+        // attention! because this method does a dns resolve to look up an IP address,
+        // the result may be very slow. Consider 100 milliseconds per access
+        
         assert (address != null);
 
         // check local ip addresses

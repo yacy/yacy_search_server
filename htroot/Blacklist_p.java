@@ -60,7 +60,6 @@ import java.util.TreeMap;
 
 import de.anomic.data.listManager;
 import de.anomic.http.httpHeader;
-import de.anomic.net.URL;
 import de.anomic.plasma.plasmaSwitchboard;
 import de.anomic.plasma.urlPattern.abstractURLPattern;
 import de.anomic.plasma.urlPattern.plasmaURLPattern;
@@ -68,6 +67,7 @@ import de.anomic.server.serverObjects;
 import de.anomic.server.serverSwitch;
 import de.anomic.yacy.yacyCore;
 import de.anomic.yacy.yacySeed;
+import de.anomic.yacy.yacyURL;
 
 public class Blacklist_p {
 	private final static String DISABLED         = "disabled_";
@@ -95,9 +95,9 @@ public class Blacklist_p {
             	prop.put("testlist",1);
             	String urlstring = post.get("testurl", "");
             	if(!urlstring.startsWith("http://")) urlstring = "http://"+urlstring;
-            	URL testurl = null;
+                yacyURL testurl = null;
 				try {
-					testurl = new URL(urlstring);
+					testurl = new yacyURL(urlstring, null);
 				} catch (MalformedURLException e) { }
 				if(testurl != null) {
 					prop.put("testlist_url",testurl.toString());

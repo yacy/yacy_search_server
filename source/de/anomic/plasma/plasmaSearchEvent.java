@@ -41,12 +41,12 @@ import de.anomic.index.indexURLEntry;
 import de.anomic.kelondro.kelondroBitfield;
 import de.anomic.kelondro.kelondroMSetTools;
 import de.anomic.kelondro.kelondroRow;
-import de.anomic.net.URL;
 import de.anomic.server.logging.serverLog;
 import de.anomic.yacy.yacyCore;
 import de.anomic.yacy.yacyDHTAction;
 import de.anomic.yacy.yacySearch;
 import de.anomic.yacy.yacySeed;
+import de.anomic.yacy.yacyURL;
 
 public final class plasmaSearchEvent {
     
@@ -213,7 +213,7 @@ public final class plasmaSearchEvent {
                         IAneardhthash = wordhash;
                     }
                     IACount.put(wordhash, new Integer(container.size()));
-                    IAResults.put(wordhash, plasmaURL.compressIndex(container, null, 1000).toString());
+                    IAResults.put(wordhash, plasmaSearchProcessing.compressIndex(container, null, 1000).toString());
                 }
                 process.yield("abstract generation", searchContainerMaps[0].size());
             }
@@ -234,7 +234,7 @@ public final class plasmaSearchEvent {
             
             this.rankedCache = new plasmaSearchContainer(query, ranking, plasmaSearchQuery.cleanQuery(query.queryString)[0], rcLocal);
         }
-
+        
         if (query.onlineSnippetFetch) {
             // start worker threads to fetch urls and snippets
             this.workerThreads = new resultWorker[workerThreadCount];
@@ -245,6 +245,7 @@ public final class plasmaSearchEvent {
         } else {
             // prepare result vector directly without worker threads
             int rankedIndex = 0;
+            process.startTimer();
             while ((rankedIndex < rankedCache.container().size()) && (resultList.size() < (query.neededResults()))) {
                 // fetch next entry to work on
                 indexContainer c = rankedCache.container();
@@ -263,6 +264,7 @@ public final class plasmaSearchEvent {
                     rankedCache.addReferences(resultEntry);
                 }
             }
+            process.yield("offline snippet fetch", resultList.size());
         }
         
         // remove old events in the event cache
@@ -285,6 +287,7 @@ public final class plasmaSearchEvent {
         
         // load only urls if there was not yet a root url of that hash
         // find the url entry
+        
         indexURLEntry page = wordIndex.loadedURL.load(entry.urlHash(), entry);
         
         if (page == null) {
@@ -773,7 +776,7 @@ public final class plasmaSearchEvent {
         public String hash() {
             return urlentry.hash();
         }
-        public URL url() {
+        public yacyURL url() {
             return urlcomps.url();
         }
         public kelondroBitfield flags() {

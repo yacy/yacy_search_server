@@ -62,7 +62,6 @@ import de.anomic.htmlFilter.htmlFilterContentScraper;
 import de.anomic.htmlFilter.htmlFilterImageEntry;
 import de.anomic.htmlFilter.htmlFilterWriter;
 import de.anomic.http.httpHeader;
-import de.anomic.net.URL;
 import de.anomic.plasma.plasmaHTCache;
 import de.anomic.plasma.plasmaParserDocument;
 import de.anomic.plasma.plasmaSwitchboard;
@@ -71,6 +70,7 @@ import de.anomic.plasma.cache.UnsupportedProtocolException;
 import de.anomic.server.serverFileUtils;
 import de.anomic.server.serverObjects;
 import de.anomic.server.serverSwitch;
+import de.anomic.yacy.yacyURL;
 
 public class CacheAdmin_p {
 	
@@ -118,7 +118,7 @@ public class CacheAdmin_p {
         final StringBuffer tree = new StringBuffer();
         final StringBuffer info = new StringBuffer();
 
-        final URL  url  = plasmaHTCache.getURL(file);
+        final yacyURL  url  = plasmaHTCache.getURL(file);
         
         String urlstr = "";
         

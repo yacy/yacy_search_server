@@ -60,14 +60,13 @@ import org.xml.sax.helpers.DefaultHandler;
 import de.anomic.http.httpc;
 import de.anomic.http.httpdByteCountInputStream;
 import de.anomic.index.indexURLEntry;
-import de.anomic.net.URL;
 import de.anomic.plasma.plasmaCrawlProfile;
 import de.anomic.plasma.plasmaCrawlZURL;
 import de.anomic.plasma.plasmaSwitchboard;
-import de.anomic.plasma.plasmaURL;
 import de.anomic.server.serverDate;
 import de.anomic.server.logging.serverLog;
 import de.anomic.yacy.yacyCore;
+import de.anomic.yacy.yacyURL;
 
 /**
  * Class to parse a sitemap file.<br>
@@ -140,7 +139,7 @@ public class SitemapParser extends DefaultHandler {
 	/**
 	 * The location of the sitemap file
 	 */
-	private URL siteMapURL = null;
+	private yacyURL siteMapURL = null;
 	
 	/**
 	 * The next URL to enqueue
@@ -153,7 +152,7 @@ public class SitemapParser extends DefaultHandler {
 	private Date lastMod = null;
 	
 	
-	public SitemapParser(plasmaSwitchboard sb, URL sitemap, plasmaCrawlProfile.entry theCrawlingProfile) {
+	public SitemapParser(plasmaSwitchboard sb, yacyURL sitemap, plasmaCrawlProfile.entry theCrawlingProfile) {
 		if (sb == null) throw new NullPointerException("The switchboard must not be null");
 		if (sitemap == null) throw new NullPointerException("The sitemap URL must not be null");
 		this.switchboard = sb;
@@ -276,7 +275,12 @@ public class SitemapParser extends DefaultHandler {
 			if (this.nextURL == null) return;
 			
 			// get the url hash
-			String nexturlhash = plasmaURL.urlHash(this.nextURL);
+			String nexturlhash;
+            try {
+                nexturlhash = (new yacyURL(this.nextURL, null)).hash();
+            } catch (MalformedURLException e1) {
+                nexturlhash = null;
+            }
 			
 			// check if the url is known and needs to be recrawled
 			if (this.lastMod != null) {
@@ -314,7 +318,7 @@ public class SitemapParser extends DefaultHandler {
 					this.logger.logInfo("The URL '" + this.nextURL + "' can not be crawled. Reason: " + error);
 					
 					// insert URL into the error DB
-					plasmaCrawlZURL.Entry ee = this.switchboard.errorURL.newEntry(new URL(this.nextURL), error);
+					plasmaCrawlZURL.Entry ee = this.switchboard.errorURL.newEntry(new yacyURL(this.nextURL, null), error);
                     ee.store();
                     this.switchboard.errorURL.stackPushEntry(ee);					
 				} catch (MalformedURLException e) {/* ignore this */ }

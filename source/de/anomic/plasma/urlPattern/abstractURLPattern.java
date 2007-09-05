@@ -55,7 +55,7 @@ import java.util.Iterator;
 import java.util.Set;
 
 import de.anomic.kelondro.kelondroMSetTools;
-import de.anomic.net.URL;
+import de.anomic.yacy.yacyURL;
 
 public abstract class abstractURLPattern implements plasmaURLPattern {
 
@@ -193,22 +193,17 @@ public abstract class abstractURLPattern implements plasmaURLPattern {
         return urlHashCache.contains(urlHash);
     }
 
-    public boolean isListed(String blacklistType, String urlHash, URL url) {
+    public boolean isListed(String blacklistType, yacyURL url) {
 
         Set urlHashCache = getCacheUrlHashsSet(blacklistType);        
-        if (!urlHashCache.contains(urlHash)) {
+        if (!urlHashCache.contains(url.hash())) {
             boolean temp = isListed(blacklistType, url.getHost().toLowerCase(), url.getFile());
             if (temp) {
-                urlHashCache.add(urlHash);
+                urlHashCache.add(url.hash());
             }
             return temp;   
         }        
         return true;  
-    }
-
-    public final boolean isListed(String blacklistType, URL url) {
-        if (url == null) { return true; }
-        return isListed(blacklistType, url.getHost().toLowerCase(), url.getFile());
     }
 
 }

@@ -36,8 +36,7 @@ import java.io.Writer;
 import java.util.Properties;
 
 import de.anomic.http.httpHeader;
-import de.anomic.net.URL;
-
+import de.anomic.yacy.yacyURL;
 
 public class htmlFilterInputStream extends InputStream implements htmlFilterEventListener {
     
@@ -59,7 +58,7 @@ public class htmlFilterInputStream extends InputStream implements htmlFilterEven
     public htmlFilterInputStream(
             InputStream inStream,
             String inputStreamCharset,
-            URL rooturl,
+            yacyURL rooturl,
             htmlFilterTransformer transformer,
             boolean passbyIfBinarySuspect
     ) throws UnsupportedEncodingException {

@@ -141,7 +141,6 @@ import de.anomic.http.httpd;
 import de.anomic.http.httpdRobotsTxtConfig;
 import de.anomic.index.indexContainer;
 import de.anomic.index.indexRWIEntry;
-import de.anomic.plasma.plasmaURL;
 import de.anomic.index.indexURLEntry;
 import de.anomic.kelondro.kelondroBitfield;
 import de.anomic.kelondro.kelondroCache;
@@ -150,7 +149,6 @@ import de.anomic.kelondro.kelondroException;
 import de.anomic.kelondro.kelondroMSetTools;
 import de.anomic.kelondro.kelondroMapTable;
 import de.anomic.kelondro.kelondroNaturalOrder;
-import de.anomic.net.URL;
 import de.anomic.plasma.dbImport.dbImportManager;
 import de.anomic.plasma.parser.ParserException;
 import de.anomic.plasma.urlPattern.defaultURLPattern;
@@ -165,6 +163,7 @@ import de.anomic.server.serverSwitch;
 import de.anomic.server.serverThread;
 import de.anomic.server.logging.serverLog;
 import de.anomic.tools.crypt;
+import de.anomic.yacy.yacyURL;
 import de.anomic.yacy.yacyVersion;
 import de.anomic.yacy.yacyClient;
 import de.anomic.yacy.yacyCore;
@@ -911,7 +910,7 @@ public final class plasmaSwitchboard extends serverAbstractSwitch implements ser
         Map initProps;
         if (networkUnitDefinition.startsWith("http://")) {
             try {
-                this.setConfig(httpc.loadHashMap(new URL(networkUnitDefinition), remoteProxyConfig));
+                this.setConfig(httpc.loadHashMap(new yacyURL(networkUnitDefinition, null), remoteProxyConfig));
             } catch (MalformedURLException e) {
             }
         } else {
@@ -923,7 +922,7 @@ public final class plasmaSwitchboard extends serverAbstractSwitch implements ser
         }
         if (networkGroupDefinition.startsWith("http://")) {
             try {
-                this.setConfig(httpc.loadHashMap(new URL(networkGroupDefinition), remoteProxyConfig));
+                this.setConfig(httpc.loadHashMap(new yacyURL(networkGroupDefinition, null), remoteProxyConfig));
             } catch (MalformedURLException e) {
             }
         } else {
@@ -941,7 +940,7 @@ public final class plasmaSwitchboard extends serverAbstractSwitch implements ser
             location = getConfig("network.unit.update.location" + i, "");
             if (location.length() == 0) break;
             try {
-                yacyVersion.latestReleaseLocations.add(new URL(location));
+                yacyVersion.latestReleaseLocations.add(new yacyURL(location, null));
             } catch (MalformedURLException e) {
                 break;
             }
@@ -1476,7 +1475,7 @@ public final class plasmaSwitchboard extends serverAbstractSwitch implements ser
     	}
     }
    
-    public boolean acceptURL(URL url) {
+    public boolean acceptURL(yacyURL url) {
         // returns true if the url can be accepted accoring to network.unit.domain
         if (url == null) return false;
         String host = url.getHost();
@@ -1510,8 +1509,8 @@ public final class plasmaSwitchboard extends serverAbstractSwitch implements ser
         errorURL.remove(hash);
     }
     
-    public URL getURL(String urlhash) throws IOException {
-        if (urlhash.equals(plasmaURL.dummyHash)) return null;
+    public yacyURL getURL(String urlhash) throws IOException {
+        if (urlhash.equals(yacyURL.dummyHash)) return null;
         plasmaCrawlEntry ne = noticeURL.get(urlhash);
         if (ne != null) return ne.url();
         indexURLEntry le = wordIndex.loadedURL.load(urlhash, null);
@@ -1739,7 +1738,7 @@ public final class plasmaSwitchboard extends serverAbstractSwitch implements ser
             // enqueue for further crawling
             enQueue(this.sbQueue.newEntry(
                     entry.url(), 
-                    plasmaURL.urlHash(entry.referrerURL()),
+                    (entry.referrerURL() == null) ? null : entry.referrerURL().hash(),
                     entry.ifModifiedSince(), 
                     entry.requestWithCookie(),
                     entry.initiator(), 
@@ -2363,7 +2362,7 @@ public final class plasmaSwitchboard extends serverAbstractSwitch implements ser
         return parseResource(entry.url(), mimeType, charset, entry.cacheFile());
     }
     
-    public plasmaParserDocument parseResource(URL location, String mimeType, String documentCharset, File sourceFile) throws InterruptedException, ParserException {
+    public plasmaParserDocument parseResource(yacyURL location, String mimeType, String documentCharset, File sourceFile) throws InterruptedException, ParserException {
         plasmaParserDocument doc = parser.parseSource(location, mimeType, documentCharset, sourceFile);
         assert(doc != null) : "Unexpected error. Parser returned null.";
         return doc;
@@ -2387,8 +2386,8 @@ public final class plasmaSwitchboard extends serverAbstractSwitch implements ser
             // 6) local fetching for global crawling (other known or unknwon initiator)
             int processCase = PROCESSCASE_0_UNKNOWN;
             yacySeed initiatorPeer = null;
-            String initiatorPeerHash = (entry.proxy()) ? plasmaURL.dummyHash : entry.initiator();
-            if (initiatorPeerHash.equals(plasmaURL.dummyHash)) {
+            String initiatorPeerHash = (entry.proxy()) ? yacyURL.dummyHash : entry.initiator();
+            if (initiatorPeerHash.equals(yacyURL.dummyHash)) {
                 // proxy-load
                 processCase = PROCESSCASE_4_PROXY_LOAD;
             } else if (initiatorPeerHash.equals(yacyCore.seedDB.mySeed.hash)) {
@@ -2442,7 +2441,7 @@ public final class plasmaSwitchboard extends serverAbstractSwitch implements ser
                 Map hl = document.getHyperlinks();
                 Iterator i = hl.entrySet().iterator();
                 String nextUrlString;
-                URL nextUrl;
+                yacyURL nextUrl;
                 Map.Entry nextEntry;
                 while (i.hasNext()) {
                     // check for interruption
@@ -2452,7 +2451,7 @@ public final class plasmaSwitchboard extends serverAbstractSwitch implements ser
                     nextEntry = (Map.Entry) i.next();
                     nextUrlString = (String) nextEntry.getKey();
                     try {                        
-                        nextUrl = new URL(nextUrlString);
+                        nextUrl = new yacyURL(nextUrlString, null);
                         
                         // enqueue the hyperlink into the pre-notice-url db
                         sbStackCrawlThread.enqueue(nextUrl, entry.urlHash(), initiatorPeerHash, (String) nextEntry.getValue(), docDate, entry.depth() + 1, entry.profile());                        
@@ -2467,9 +2466,7 @@ public final class plasmaSwitchboard extends serverAbstractSwitch implements ser
              * CREATE INDEX
              * ========================================================================= */  
             String docDescription = document.getTitle();
-            URL referrerURL = entry.referrerURL();
-            String referrerUrlHash = plasmaURL.urlHash(referrerURL);
-            if (referrerUrlHash == null) referrerUrlHash = plasmaURL.dummyHash;
+            yacyURL referrerURL = entry.referrerURL();
 
             String noIndexReason = plasmaCrawlEURL.DENIED_UNSPECIFIED_INDEXING_ERROR;
             if (processCase == PROCESSCASE_4_PROXY_LOAD) {
@@ -2506,13 +2503,13 @@ public final class plasmaSwitchboard extends serverAbstractSwitch implements ser
                             docDate,                                   // modification date
                             new Date(),                                // loaded date
                             new Date(ldate + Math.max(0, ldate - docDate.getTime()) / 2), // freshdate, computed with Proxy-TTL formula 
-                            referrerUrlHash,                           // referer hash
+                            (referrerURL == null) ? null : referrerURL.hash(),                        // referer hash
                             new byte[0],                               // md5
                             (int) entry.size(),                        // size
                             condenser.RESULT_NUMB_WORDS,               // word count
-                            plasmaURL.docType(document.getMimeType()), // doctype
+                            plasmaHTCache.docType(document.getMimeType()), // doctype
                             condenser.RESULT_FLAGS,                    // flags
-                            plasmaURL.language(entry.url()),           // language
+                            yacyURL.language(entry.url()),             // language
                             ioLinks[0].intValue(),                     // llocal
                             ioLinks[1].intValue(),                     // lother
                             document.getAudiolinks().size(),           // laudio
@@ -2567,13 +2564,12 @@ public final class plasmaSwitchboard extends serverAbstractSwitch implements ser
                              * ======================================================================== */
                             words = wordIndex.addPageIndex(
                                     entry.url(),                                  // document url
-                                    urlHash,                                      // document url hash
                                     docDate,                                      // document mod date
                                     (int) entry.size(),                           // document size
                                     document,                                     // document content
                                     condenser,                                    // document condenser
-                                    plasmaURL.language(entry.url()),              // document language
-                                    plasmaURL.docType(document.getMimeType()),    // document type
+                                    yacyURL.language(entry.url()),                // document language
+                                    plasmaHTCache.docType(document.getMimeType()),// document type
                                     ioLinks[0].intValue(),                        // outlinkSame
                                     ioLinks[1].intValue()                         // outlinkOthers
                             );
@@ -2586,8 +2582,8 @@ public final class plasmaSwitchboard extends serverAbstractSwitch implements ser
                             
                             ArrayList tmpContainers = new ArrayList(condenser.words().size());
                             
-                            String language = plasmaURL.language(entry.url());                            
-                            char doctype = plasmaURL.docType(document.getMimeType());
+                            String language = yacyURL.language(entry.url());                            
+                            char doctype = plasmaHTCache.docType(document.getMimeType());
                             indexURLEntry.Components comp = newEntry.comp();
                             int urlLength = comp.url().toNormalform(true, true).length();
                             int urlComps = htmlFilterContentScraper.urlComps(comp.url().toNormalform(true, true)).length;
@@ -2645,14 +2641,13 @@ public final class plasmaSwitchboard extends serverAbstractSwitch implements ser
                             String error = (String) resultObj.get("result");
                             if (error != null) {
                                 words = wordIndex.addPageIndex(
-                                        entry.url(), 
-                                        urlHash, 
+                                        entry.url(),
                                         docDate, 
                                         (int) entry.size(),
                                         document, 
                                         condenser,
-                                        plasmaURL.language(entry.url()),
-                                        plasmaURL.docType(document.getMimeType()),
+                                        yacyURL.language(entry.url()),
+                                        plasmaHTCache.docType(document.getMimeType()),
                                         ioLinks[0].intValue(), 
                                         ioLinks[1].intValue()
                                 );
@@ -2692,7 +2687,7 @@ public final class plasmaSwitchboard extends serverAbstractSwitch implements ser
                         }
                     } else {
                         log.logFine("Not Indexed Resource '" + entry.url().toNormalform(false, true) + "': process case=" + processCase);
-                        addURLtoErrorDB(entry.url(), referrerUrlHash, initiatorPeerHash, docDescription, plasmaCrawlEURL.DENIED_UNKNOWN_INDEXING_PROCESS_CASE, new kelondroBitfield());
+                        addURLtoErrorDB(entry.url(), referrerURL.hash(), initiatorPeerHash, docDescription, plasmaCrawlEURL.DENIED_UNKNOWN_INDEXING_PROCESS_CASE, new kelondroBitfield());
                     }
                 } catch (Exception ee) {
                     if (ee instanceof InterruptedException) throw (InterruptedException)ee;
@@ -2705,7 +2700,7 @@ public final class plasmaSwitchboard extends serverAbstractSwitch implements ser
                         if (clusterhashes != null) initiatorPeer.setAlternativeAddress((String) clusterhashes.get(initiatorPeer.hash));
                         yacyClient.crawlReceipt(initiatorPeer, "crawl", "exception", ee.getMessage(), null, "");
                     }
-                    addURLtoErrorDB(entry.url(), referrerUrlHash, initiatorPeerHash, docDescription, plasmaCrawlEURL.DENIED_UNSPECIFIED_INDEXING_ERROR, new kelondroBitfield());
+                    addURLtoErrorDB(entry.url(), (referrerURL == null) ? null : referrerURL.hash(), initiatorPeerHash, docDescription, plasmaCrawlEURL.DENIED_UNSPECIFIED_INDEXING_ERROR, new kelondroBitfield());
                 }
                 
             } else {
@@ -2713,7 +2708,7 @@ public final class plasmaSwitchboard extends serverAbstractSwitch implements ser
                 checkInterruption();
                 
                 log.logInfo("Not indexed any word in URL " + entry.url() + "; cause: " + noIndexReason);
-                addURLtoErrorDB(entry.url(), referrerUrlHash, initiatorPeerHash, docDescription, noIndexReason, new kelondroBitfield());
+                addURLtoErrorDB(entry.url(), (referrerURL == null) ? null : referrerURL.hash(), initiatorPeerHash, docDescription, noIndexReason, new kelondroBitfield());
                 if ((processCase == PROCESSCASE_6_GLOBAL_CRAWLING) && (initiatorPeer != null)) {
                     if (clusterhashes != null) initiatorPeer.setAlternativeAddress((String) clusterhashes.get(initiatorPeer.hash));
                     yacyClient.crawlReceipt(initiatorPeer, "crawl", "rejected", noIndexReason, null, "");
@@ -2764,15 +2759,15 @@ public final class plasmaSwitchboard extends serverAbstractSwitch implements ser
         }
         
         // convert the referrer hash into the corresponding URL
-        URL refererURL = null;
+        yacyURL refererURL = null;
         String refererHash = urlEntry.referrerhash();
-        if ((refererHash != null) && (!refererHash.equals(plasmaURL.dummyHash))) try {
+        if ((refererHash != null) && (!refererHash.equals(yacyURL.dummyHash))) try {
             refererURL = this.getURL(refererHash);
         } catch (IOException e) {
             refererURL = null;
         }
         cacheLoader.loadAsync(urlEntry.url(), urlEntry.name(), (refererURL!=null)?refererURL.toString():null, urlEntry.initiator(), urlEntry.depth(), profile, -1, false);
-        log.logInfo(stats + ": enqueued for load " + urlEntry.url() + " [" + urlEntry.urlhash() + "]");
+        log.logInfo(stats + ": enqueued for load " + urlEntry.url() + " [" + urlEntry.url().hash() + "]");
         return;
     }
     
@@ -2800,8 +2795,8 @@ public final class plasmaSwitchboard extends serverAbstractSwitch implements ser
         
         // check if peer for remote crawl is available
         yacySeed remoteSeed = ((this.isPublicRobinson()) && (getConfig("cluster.mode", "").equals("publiccluster"))) ?
-        	yacyCore.dhtAgent.getPublicClusterCrawlSeed(urlEntry.urlhash(), this.clusterhashes) :	
-        	yacyCore.dhtAgent.getGlobalCrawlSeed(urlEntry.urlhash());
+        	yacyCore.dhtAgent.getPublicClusterCrawlSeed(urlEntry.url().hash(), this.clusterhashes) :	
+        	yacyCore.dhtAgent.getGlobalCrawlSeed(urlEntry.url().hash());
         if (remoteSeed == null) {
             log.logFine("plasmaSwitchboard.processRemoteCrawlTrigger: no remote crawl seed available");
             return false;
@@ -2897,8 +2892,8 @@ public final class plasmaSwitchboard extends serverAbstractSwitch implements ser
     }
     
     // method for index deletion
-    public int removeAllUrlReferences(URL url, boolean fetchOnline) {
-        return removeAllUrlReferences(plasmaURL.urlHash(url), fetchOnline);
+    public int removeAllUrlReferences(yacyURL url, boolean fetchOnline) {
+        return removeAllUrlReferences(url.hash(), fetchOnline);
     }
     
     public int removeAllUrlReferences(String urlhash, boolean fetchOnline) {
@@ -3231,7 +3226,7 @@ public final class plasmaSwitchboard extends serverAbstractSwitch implements ser
     }
     
     private void addURLtoErrorDB(
-            URL url, 
+            yacyURL url, 
             String referrerHash, 
             String initiator, 
             String name, 

@@ -38,11 +38,9 @@ import java.util.regex.PatternSyntaxException;
 import de.anomic.htmlFilter.htmlFilterContentScraper;
 import de.anomic.htmlFilter.htmlFilterWriter;
 import de.anomic.http.httpHeader;
-import de.anomic.net.URL;
 import de.anomic.plasma.plasmaCrawlProfile;
 import de.anomic.plasma.plasmaCrawlZURL;
 import de.anomic.plasma.plasmaSwitchboard;
-import de.anomic.plasma.plasmaURL;
 import de.anomic.plasma.dbImport.dbImporter;
 import de.anomic.server.serverFileUtils;
 import de.anomic.server.serverObjects;
@@ -50,6 +48,7 @@ import de.anomic.server.serverSwitch;
 import de.anomic.yacy.yacyCore;
 import de.anomic.yacy.yacyNewsPool;
 import de.anomic.yacy.yacyNewsRecord;
+import de.anomic.yacy.yacyURL;
 
 public class WatchCrawler_p {
 	public static final String CRAWLING_MODE_URL = "url";
@@ -101,12 +100,12 @@ public class WatchCrawler_p {
                     
                     String newcrawlingfilter = post.get("crawlingFilter", ".*");
                     if (fullDomain) try {
-                        newcrawlingfilter = ".*" + (new URL(post.get("crawlingURL",""))).getHost() + ".*";
+                        newcrawlingfilter = ".*" + (new yacyURL(post.get("crawlingURL",""), null)).getHost() + ".*";
                     } catch (MalformedURLException e) {}
                     env.setConfig("crawlingFilter", newcrawlingfilter);
                     
-                    int newcrawlingdepth = Integer.parseInt(post.get("crawlingDepth", "0"));
-                    if (fullDomain) newcrawlingdepth = 99;
+                    int newcrawlingdepth = Integer.parseInt(post.get("crawlingDepth", "8"));
+                    if (fullDomain) newcrawlingdepth = 8;
                     env.setConfig("crawlingDepth", Integer.toString(newcrawlingdepth));
                     
                     boolean crawlingIfOlderCheck = post.get("crawlingIfOlderCheck", "off").equals("on");
@@ -158,12 +157,12 @@ public class WatchCrawler_p {
                         if (pos == -1) crawlingStart = "http://" + crawlingStart;
 
                         // normalizing URL
-                        try {crawlingStart = new URL(crawlingStart).toNormalform(true, true);} catch (MalformedURLException e1) {}
+                        try {crawlingStart = new yacyURL(crawlingStart, null).toNormalform(true, true);} catch (MalformedURLException e1) {}
                         
                         // check if url is proper
-                        URL crawlingStartURL = null;
+                        yacyURL crawlingStartURL = null;
                         try {
-                            crawlingStartURL = new URL(crawlingStart);
+                            crawlingStartURL = new yacyURL(crawlingStart, null);
                         } catch (MalformedURLException e) {
                             crawlingStartURL = null;
                         }
@@ -181,7 +180,7 @@ public class WatchCrawler_p {
                             
                             // stack request
                             // first delete old entry, if exists
-                            String urlhash = plasmaURL.urlHash(crawlingStart);
+                            String urlhash = (new yacyURL(crawlingStart, null)).hash();
                             switchboard.wordIndex.loadedURL.remove(urlhash);
                             switchboard.noticeURL.remove(urlhash);
                             switchboard.errorURL.remove(urlhash);
@@ -258,7 +257,7 @@ public class WatchCrawler_p {
                                 String fileString = new String(fileContent,"UTF-8");
                                 
                                 // parsing the bookmark file and fetching the headline and contained links
-                                htmlFilterContentScraper scraper = new htmlFilterContentScraper(new URL(file));
+                                htmlFilterContentScraper scraper = new htmlFilterContentScraper(new yacyURL(file));
                                 //OutputStream os = new htmlFilterOutputStream(null, scraper, null, false);
                                 Writer writer = new htmlFilterWriter(null,null,scraper,null,false);
                                 serverFileUtils.write(fileString,writer);
@@ -282,12 +281,12 @@ public class WatchCrawler_p {
                                     nexturlstring = nexturlstring.trim();
                                     
                                     // normalizing URL
-                                    nexturlstring = new URL(nexturlstring).toNormalform(true, true);                                    
+                                    nexturlstring = new yacyURL(nexturlstring, null).toNormalform(true, true);                                    
                                     
                                     // generating an url object
-                                    URL nexturlURL = null;
+                                    yacyURL nexturlURL = null;
                                     try {
-                                        nexturlURL = new URL(nexturlstring);
+                                        nexturlURL = new yacyURL(nexturlstring, null);
                                     } catch (MalformedURLException ex) {
                                         nexturlURL = null;
                                         c++;

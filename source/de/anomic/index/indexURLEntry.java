@@ -38,15 +38,14 @@ import de.anomic.kelondro.kelondroBitfield;
 import de.anomic.kelondro.kelondroException;
 import de.anomic.kelondro.kelondroNaturalOrder;
 import de.anomic.kelondro.kelondroRow;
-import de.anomic.net.URL;
 import de.anomic.plasma.plasmaCrawlEntry;
 import de.anomic.plasma.plasmaSearchQuery;
-import de.anomic.plasma.plasmaURL;
 import de.anomic.server.serverCharBuffer;
 import de.anomic.server.serverCodings;
 import de.anomic.server.serverDate;
 import de.anomic.tools.crypt;
 import de.anomic.tools.nxTools;
+import de.anomic.yacy.yacyURL;
 import de.anomic.index.indexRWIEntry;
 
 public class indexURLEntry {
@@ -120,7 +119,7 @@ public class indexURLEntry {
     private indexRWIEntry word; // this is only used if the url is transported via remote search requests
 
     public indexURLEntry(
-            URL url,
+            yacyURL url,
             String descr,
             String author,
             String tags,
@@ -143,12 +142,12 @@ public class indexURLEntry {
             int lapp) {
         // create new entry and store it into database
         this.entry = rowdef.newEntry();
-        this.entry.setCol(col_hash, plasmaURL.urlHash(url), null);
+        this.entry.setCol(col_hash, url.hash(), null);
         this.entry.setCol(col_comp, encodeComp(url, descr, author, tags, ETag));
         this.entry.setCol(col_mod, encodeDate(mod));
         this.entry.setCol(col_load, encodeDate(load));
         this.entry.setCol(col_fresh, encodeDate(fresh));
-        this.entry.setCol(col_referrer, referrer.getBytes());
+        this.entry.setCol(col_referrer, (referrer == null) ? null : referrer.getBytes());
         this.entry.setCol(col_md5, md5);
         this.entry.setCol(col_size, size);
         this.entry.setCol(col_wc, wc);
@@ -170,7 +169,7 @@ public class indexURLEntry {
         return kelondroNaturalOrder.encodeLong(d.getTime() / 86400000, 4);
     }
     
-    public static byte[] encodeComp(URL url, String descr, String author, String tags, String ETag) {
+    public static byte[] encodeComp(yacyURL url, String descr, String author, String tags, String ETag) {
         serverCharBuffer s = new serverCharBuffer(200);
         s.append(url.toNormalform(false, true)).append(10);
         s.append(descr).append(10);
@@ -190,9 +189,9 @@ public class indexURLEntry {
         // generates an plasmaLURLEntry using the properties from the argument
         // the property names must correspond to the one from toString
         //System.out.println("DEBUG-ENTRY: prop=" + prop.toString());
-        URL url;
+        yacyURL url;
         try {
-            url = new URL(crypt.simpleDecode(prop.getProperty("url", ""), null));
+            url = new yacyURL(crypt.simpleDecode(prop.getProperty("url", ""), null), prop.getProperty("hash"));
         } catch (MalformedURLException e) {
             url = null;
         }
@@ -202,7 +201,7 @@ public class indexURLEntry {
         String ETag = crypt.simpleDecode(prop.getProperty("ETag", ""), null); if (ETag == null) ETag = "";
         
         this.entry = rowdef.newEntry();
-        this.entry.setCol(col_hash, plasmaURL.urlHash(url), null);
+        this.entry.setCol(col_hash, url.hash(), null);
         this.entry.setCol(col_comp, encodeComp(url, descr, author, tags, ETag));
         try {
             this.entry.setCol(col_mod, encodeDate(serverDate.shortDayFormatter.parse(prop.getProperty("mod", "20000101"))));
@@ -219,7 +218,7 @@ public class indexURLEntry {
         } catch (ParseException e) {
             this.entry.setCol(col_fresh, encodeDate(new Date()));
         }
-        this.entry.setCol(col_referrer, prop.getProperty("referrer", plasmaURL.dummyHash).getBytes());
+        this.entry.setCol(col_referrer, prop.getProperty("referrer", yacyURL.dummyHash).getBytes());
         this.entry.setCol(col_md5, serverCodings.decodeHex(prop.getProperty("md5", "")));
         this.entry.setCol(col_size, Integer.parseInt(prop.getProperty("size", "0")));
         this.entry.setCol(col_wc, Integer.parseInt(prop.getProperty("wc", "0")));
@@ -301,6 +300,7 @@ public class indexURLEntry {
         ArrayList cl = nxTools.strings(this.entry.getCol("comp", null), "UTF-8");
         return new indexURLEntry.Components(
                 (cl.size() > 0) ? ((String) cl.get(0)).trim() : "",
+                hash(),
                 (cl.size() > 1) ? ((String) cl.get(1)).trim() : "",
                 (cl.size() > 2) ? ((String) cl.get(2)).trim() : "",
                 (cl.size() > 3) ? ((String) cl.get(3)).trim() : "",
@@ -442,12 +442,12 @@ public class indexURLEntry {
     }
 
     public class Components {
-        private URL url;
+        private yacyURL url;
         private String title, author, tags, ETag;
         
-        public Components(String url, String title, String author, String tags, String ETag) {
+        public Components(String url, String urlhash, String title, String author, String tags, String ETag) {
             try {
-                this.url = new URL(url);
+                this.url = new yacyURL(url, urlhash);
             } catch (MalformedURLException e) {
                 this.url = null;
             }
@@ -456,18 +456,18 @@ public class indexURLEntry {
             this.tags = tags;
             this.ETag = ETag;
         }
-        public Components(URL url, String descr, String author, String tags, String ETag) {
+        public Components(yacyURL url, String descr, String author, String tags, String ETag) {
             this.url = url;
             this.title = descr;
             this.author = author;
             this.tags = tags;
             this.ETag = ETag;
         }
-        public URL    url()    { return this.url; }
-        public String title()  { return this.title; }
-        public String author() { return this.author; }
-        public String tags()   { return this.tags; }
-        public String ETag()   { return this.ETag; }
+        public yacyURL url()    { return this.url; }
+        public String  title()  { return this.title; }
+        public String  author() { return this.author; }
+        public String  tags()   { return this.tags; }
+        public String  ETag()   { return this.ETag; }
     }
     
 }

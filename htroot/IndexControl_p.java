@@ -62,11 +62,9 @@ import de.anomic.data.listManager;
 import de.anomic.http.httpHeader;
 import de.anomic.index.indexContainer;
 import de.anomic.index.indexRWIEntry;
-import de.anomic.plasma.plasmaURL;
 import de.anomic.index.indexURLEntry;
 import de.anomic.kelondro.kelondroBase64Order;
 import de.anomic.kelondro.kelondroRotateIterator;
-import de.anomic.net.URL;
 import de.anomic.plasma.plasmaCondenser;
 import de.anomic.plasma.plasmaSwitchboard;
 import de.anomic.plasma.urlPattern.abstractURLPattern;
@@ -76,6 +74,7 @@ import de.anomic.server.serverSwitch;
 import de.anomic.yacy.yacyClient;
 import de.anomic.yacy.yacyCore;
 import de.anomic.yacy.yacySeed;
+import de.anomic.yacy.yacyURL;
 
 public class IndexControl_p {
 	
@@ -196,7 +195,11 @@ public class IndexControl_p {
         }
 
         if (post.containsKey("urldelete")) {
-            urlhash = plasmaURL.urlHash(urlstring);
+            try {
+                urlhash = (new yacyURL(urlstring, null)).hash();
+            } catch (MalformedURLException e) {
+                urlhash = null;
+            }
             if ((urlhash == null) || (urlstring == null)) {
                 prop.put("result", "No input given; nothing deleted.");
             } else {
@@ -307,8 +310,8 @@ public class IndexControl_p {
 
         if (post.containsKey("urlstringsearch")) {
             try {
-                URL url = new URL(urlstring);
-                urlhash = plasmaURL.urlHash(url);
+                yacyURL url = new yacyURL(urlstring, null);
+                urlhash = url.hash();
                 prop.put("urlhash", urlhash);
                 indexURLEntry entry = switchboard.wordIndex.loadedURL.load(urlhash, null);
                 if (entry == null) {
@@ -369,7 +372,7 @@ public class IndexControl_p {
                 try {
                     String[] supportedBlacklistTypes = env.getConfig("BlackLists.types", "").split(",");
                     pw = new PrintWriter(new FileWriter(new File(listManager.listsPath, blacklist), true));
-                    URL url;
+                    yacyURL url;
                     for (int i=0; i<urlx.length; i++) {
                         urlHashes.add(urlx[i]);
                         indexURLEntry e = switchboard.wordIndex.loadedURL.load(urlx[i], null);
@@ -397,7 +400,7 @@ public class IndexControl_p {
                 try {
                     String[] supportedBlacklistTypes = abstractURLPattern.BLACKLIST_TYPES_STRING.split(",");
                     pw = new PrintWriter(new FileWriter(new File(listManager.listsPath, blacklist), true));
-                    URL url;
+                    yacyURL url;
                     for (int i=0; i<urlx.length; i++) {
                         urlHashes.add(urlx[i]);
                         indexURLEntry e = switchboard.wordIndex.loadedURL.load(urlx[i], null);
@@ -460,7 +463,7 @@ public class IndexControl_p {
         }
         indexURLEntry.Components comp = entry.comp();
         String referrer = null;
-        indexURLEntry le = switchboard.wordIndex.loadedURL.load(entry.referrerHash(), null);
+        indexURLEntry le = (entry.referrerHash() == null) ? null : switchboard.wordIndex.loadedURL.load(entry.referrerHash(), null);
         if (le == null) {
             referrer = "<unknown>";
         } else {
@@ -519,7 +522,7 @@ public class IndexControl_p {
                     }
                 }
 
-                URL url;
+                yacyURL url;
                 final Iterator iter = tm.keySet().iterator();
                 while (iter.hasNext()) {
                     us = iter.next().toString();
@@ -536,7 +539,7 @@ public class IndexControl_p {
                         prop.put("genUrlList_urlList_"+i+"_urlExists_keyHash", keyhash);
                         prop.put("genUrlList_urlList_"+i+"_urlExists_urlString", us);
                         prop.put("genUrlList_urlList_"+i+"_urlExists_pos", uh[1]);
-                        url = new URL(us);
+                        url = new yacyURL(us, null);
                         if (plasmaSwitchboard.urlBlacklist.isListed(plasmaURLPattern.BLACKLIST_DHT, url)) {
                             prop.put("genUrlList_urlList_"+i+"_urlExists_urlhxChecked", 1);
                         }

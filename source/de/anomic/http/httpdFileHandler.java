@@ -962,7 +962,6 @@ public final class httpdFileHandler {
                 }          
             }
             
-            //System.out.println("**DEBUG** loading class file " + classFile);
             Class c = provider.loadClass(classFile);
             Class[] params = new Class[] {
                     httpHeader.class,

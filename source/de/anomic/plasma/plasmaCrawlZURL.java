@@ -37,9 +37,9 @@ import de.anomic.kelondro.kelondroFlexTable;
 import de.anomic.kelondro.kelondroIndex;
 import de.anomic.kelondro.kelondroRow;
 import de.anomic.kelondro.kelondroRowSet;
-import de.anomic.net.URL;
 import de.anomic.yacy.yacyCore;
 import de.anomic.yacy.yacySeedDB;
+import de.anomic.yacy.yacyURL;
 
 public class plasmaCrawlZURL {
     
@@ -83,12 +83,12 @@ public class plasmaCrawlZURL {
     public synchronized Entry newEntry(
             plasmaCrawlEntry bentry, String executor, Date workdate,
             int workcount, String anycause) {
-        if ((executor == null) || (executor.length() < yacySeedDB.commonHashLength)) executor = plasmaURL.dummyHash;
+        if ((executor == null) || (executor.length() < yacySeedDB.commonHashLength)) executor = yacyURL.dummyHash;
         if (anycause == null) anycause = "unknown";
         return new Entry(bentry, executor, workdate, workcount, anycause);
     }
 
-    public synchronized Entry newEntry(URL url, String anycause) {
+    public synchronized Entry newEntry(yacyURL url, String anycause) {
         return new Entry(url, anycause);
     }
 
@@ -139,13 +139,13 @@ public class plasmaCrawlZURL {
     public class Entry {
 
         plasmaCrawlEntry bentry;    // the balancer entry
-        private String           executor;  // the crawling initiator
-        private Date             workdate;  // the time when the url was last time tried to load
-        private int              workcount; // number of tryings
-        private String           anycause;  // string describing reason for load fail
-        private boolean          stored;
+        private String   executor;  // the crawling initiator
+        private Date     workdate;  // the time when the url was last time tried to load
+        private int      workcount; // number of tryings
+        private String   anycause;  // string describing reason for load fail
+        private boolean  stored;
 
-        public Entry(URL url, String reason) {
+        public Entry(yacyURL url, String reason) {
             this(new plasmaCrawlEntry(url), null, new Date(), 0, reason);
         }
         
@@ -181,7 +181,7 @@ public class plasmaCrawlZURL {
             this.workcount = (int) entry.getColLong(3);
             this.anycause = entry.getColString(4, "UTF-8");
             this.bentry = new plasmaCrawlEntry(plasmaCrawlEntry.rowdef.newEntry(entry.getColBytes(5)));
-            assert ((new String(entry.getColBytes(0))).equals(bentry.urlhash()));
+            assert ((new String(entry.getColBytes(0))).equals(bentry.url().hash()));
             return;
         }
         
@@ -190,7 +190,7 @@ public class plasmaCrawlZURL {
             if (this.stored) return;
             if (this.bentry == null) return;
             kelondroRow.Entry newrow = rowdef.newEntry();
-            newrow.setCol(0, this.bentry.urlhash().getBytes());
+            newrow.setCol(0, this.bentry.url().hash().getBytes());
             newrow.setCol(1, this.executor.getBytes());
             newrow.setCol(2, this.workdate.getTime());
             newrow.setCol(3, this.workcount);
@@ -204,7 +204,7 @@ public class plasmaCrawlZURL {
             }
         }
 
-        public URL url() {
+        public yacyURL url() {
             return this.bentry.url();
         }
         
@@ -217,7 +217,7 @@ public class plasmaCrawlZURL {
             // the result is a String of 12 bytes within a 72-bit space
             // (each byte has an 6-bit range)
             // that should be enough for all web pages on the world
-            return this.bentry.urlhash();
+            return this.bentry.url().hash();
         }
 
         public Date workdate() {

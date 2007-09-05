@@ -48,15 +48,15 @@ import java.util.Map;
 import java.util.TreeSet;
 
 import de.anomic.htmlFilter.htmlFilterImageEntry;
-import de.anomic.net.URL;
 import de.anomic.plasma.parser.ParserException;
 import de.anomic.server.serverDate;
+import de.anomic.yacy.yacyURL;
 
 public final class plasmaSearchImages {
 
     private TreeSet images;
     
-    public plasmaSearchImages(long maxTime, URL url, int depth) {
+    public plasmaSearchImages(long maxTime, yacyURL url, int depth) {
         long start = System.currentTimeMillis();
         this.images = new TreeSet();
         if (maxTime > 10) {
@@ -86,8 +86,8 @@ public final class plasmaSearchImages {
                         Map.Entry e = (Map.Entry) i.next();
                         String nexturlstring;
                         try {
-                            nexturlstring = new URL((String) e.getKey()).toNormalform(true, true);
-                            addAll(new plasmaSearchImages(serverDate.remainingTime(start, maxTime, 10), new URL(nexturlstring), depth - 1));
+                            nexturlstring = new yacyURL((String) e.getKey(), null).toNormalform(true, true);
+                            addAll(new plasmaSearchImages(serverDate.remainingTime(start, maxTime, 10), new yacyURL(nexturlstring, null), depth - 1));
                         } catch (MalformedURLException e1) {
                             e1.printStackTrace();
                         }

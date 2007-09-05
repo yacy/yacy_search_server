@@ -50,7 +50,6 @@ import java.util.Iterator;
 
 import de.anomic.data.htmlTools;
 import de.anomic.http.httpHeader;
-import de.anomic.net.URL;
 import de.anomic.plasma.plasmaCrawlZURL;
 import de.anomic.plasma.plasmaHTCache;
 import de.anomic.plasma.plasmaSwitchboard;
@@ -59,6 +58,7 @@ import de.anomic.server.serverObjects;
 import de.anomic.server.serverSwitch;
 import de.anomic.yacy.yacyCore;
 import de.anomic.yacy.yacySeed;
+import de.anomic.yacy.yacyURL;
 
 public class IndexCreateIndexingQueue_p {
     
@@ -173,7 +173,7 @@ public class IndexCreateIndexingQueue_p {
                 prop.put("rejected_only-latest", 0);
             }
             dark = true;
-            URL url; 
+            yacyURL url; 
             String initiatorHash, executorHash;
             plasmaCrawlZURL.Entry entry;
             yacySeed initiatorSeed, executorSeed;

@@ -73,9 +73,9 @@ import java.util.TimeZone;
 import java.util.TreeMap;
 import java.util.Vector;
 
-import de.anomic.net.URL;
 import de.anomic.server.serverCore;
 import de.anomic.server.logging.serverLog;
+import de.anomic.yacy.yacyURL;
 
 
 public final class httpHeader extends TreeMap implements Map {
@@ -675,7 +675,7 @@ public final class httpHeader extends TreeMap implements Map {
     }    
     
     public static boolean supportChunkedEncoding(Properties conProp) {
-    	// getting the http version of the soap client
+    	// getting the http version of the client
     	String httpVer = conProp.getProperty(httpHeader.CONNECTION_PROP_HTTP_VER); 
     	
     	// only clients with http version 1.1 supports chunk
@@ -793,7 +793,7 @@ public final class httpHeader extends TreeMap implements Map {
         theHeader.append("\r\n");                
     }    
     
-    public static URL getRequestURL(Properties conProp) throws MalformedURLException {
+    public static yacyURL getRequestURL(Properties conProp) throws MalformedURLException {
         String host =    conProp.getProperty(httpHeader.CONNECTION_PROP_HOST);
         String path =    conProp.getProperty(httpHeader.CONNECTION_PROP_PATH);     // always starts with leading '/'
         String args =    conProp.getProperty(httpHeader.CONNECTION_PROP_ARGS);     // may be null if no args were given
@@ -807,7 +807,7 @@ public final class httpHeader extends TreeMap implements Map {
             host = host.substring(0, pos);
         }
         
-        URL url = new URL("http", host, port, (args == null) ? path : path + "?" + args);
+        yacyURL url = new yacyURL("http", host, port, (args == null) ? path : path + "?" + args);
         return url;
     }
 

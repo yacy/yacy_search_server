@@ -32,8 +32,6 @@ import java.util.HashMap;
 import java.util.Iterator;
 
 import de.anomic.http.httpHeader;
-import de.anomic.net.URL;
-import de.anomic.plasma.plasmaURL;
 import de.anomic.kelondro.kelondroMScoreCluster;
 import de.anomic.kelondro.kelondroRow;
 import de.anomic.kelondro.kelondroNaturalOrder;
@@ -48,6 +46,7 @@ import de.anomic.yacy.yacyCore;
 import de.anomic.yacy.yacyNewsPool;
 import de.anomic.yacy.yacyNewsRecord;
 import de.anomic.yacy.yacySeed;
+import de.anomic.yacy.yacyURL;
 
 public class Supporter {
 
@@ -125,10 +124,9 @@ public class Supporter {
                 if (row == null) continue;
                 
                 url = row.getColString(0, null);
-                try{
-                    if(plasmaSwitchboard.urlBlacklist.isListed(plasmaURLPattern.BLACKLIST_SURFTIPS ,new URL(url)))
-                        continue;
-                }catch(MalformedURLException e){continue;};
+                try {
+                    if (plasmaSwitchboard.urlBlacklist.isListed(plasmaURLPattern.BLACKLIST_SURFTIPS ,new yacyURL(url, urlhash))) continue;
+                } catch(MalformedURLException e) {continue;}
                 title = row.getColString(1,"UTF-8");
                 description = row.getColString(2,"UTF-8");
                 if ((url == null) || (title == null) || (description == null)) continue;
@@ -241,10 +239,18 @@ public class Supporter {
 
             // add/subtract votes and write record
             if (entry != null) {
-                urlhash = plasmaURL.urlHash(url);
+                try {
+                    urlhash = (new yacyURL(url, null)).hash();
+                } catch (MalformedURLException e) {
+                    urlhash = null;
+                }
                 if (urlhash == null)
-                        urlhash=plasmaURL.urlHash("http://"+url);
-                        if(urlhash==null){
+                    try {
+                        urlhash = (new yacyURL("http://" + url, null)).hash();
+                    } catch (MalformedURLException e) {
+                        urlhash = null;
+                    }
+                        if (urlhash==null) {
                             System.out.println("Supporter: bad url '" + url + "' from news record " + record.toString());
                             continue;
                         }

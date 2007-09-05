@@ -53,12 +53,11 @@ import java.util.HashSet;
 import java.util.Iterator;
 import java.util.TreeSet;
 
-import de.anomic.plasma.plasmaURL;
 import de.anomic.kelondro.kelondroAttrSeq;
 import de.anomic.kelondro.kelondroBase64Order;
-import de.anomic.net.URL;
 import de.anomic.server.serverCodings;
 import de.anomic.server.serverFileUtils;
+import de.anomic.yacy.yacyURL;
 
 public class plasmaRankingRCIEvaluation {
     
@@ -177,8 +176,8 @@ public class plasmaRankingRCIEvaluation {
             dom = (String) i.next();
             if (dom.startsWith("www.")) dom = dom.substring(4);
             try {
-                dommap.put(plasmaURL.urlHash(new URL("http://" + dom)).substring(6), dom);
-                dommap.put(plasmaURL.urlHash(new URL("http://www." + dom)).substring(6), "www." + dom);
+                dommap.put((new yacyURL("http://" + dom, null)).hash().substring(6), dom);
+                dommap.put((new yacyURL("http://www." + dom, null)).hash().substring(6), "www." + dom);
             } catch (MalformedURLException e) {}
         }
         return dommap;

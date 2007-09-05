@@ -50,13 +50,13 @@ import java.util.HashSet;
 import org.apache.commons.pool.impl.GenericKeyedObjectPool;
 import org.apache.commons.pool.impl.GenericObjectPool;
 
-import de.anomic.net.URL;
 import de.anomic.plasma.crawler.plasmaCrawlWorker;
 import de.anomic.plasma.crawler.plasmaCrawlerException;
 import de.anomic.plasma.crawler.plasmaCrawlerFactory;
 import de.anomic.plasma.crawler.plasmaCrawlerMsgQueue;
 import de.anomic.plasma.crawler.plasmaCrawlerPool;
 import de.anomic.server.logging.serverLog;
+import de.anomic.yacy.yacyURL;
 
 public final class plasmaCrawlLoader extends Thread {
 
@@ -215,7 +215,7 @@ public final class plasmaCrawlLoader extends Thread {
     }
     
     public plasmaHTCache.Entry loadSync(
-            URL url, 
+            yacyURL url, 
             String urlName,
             String referer, 
             String initiator, 
@@ -267,7 +267,7 @@ public final class plasmaCrawlLoader extends Thread {
     }
 
     public void loadAsync(
-            URL url, 
+            yacyURL url, 
             String urlName,
             String referer, 
             String initiator, 

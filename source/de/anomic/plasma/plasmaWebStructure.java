@@ -29,6 +29,7 @@ package de.anomic.plasma;
 
 import java.io.File;
 import java.io.IOException;
+import java.net.MalformedURLException;
 import java.util.ConcurrentModificationException;
 import java.util.Date;
 import java.util.Iterator;
@@ -39,10 +40,10 @@ import java.util.SortedMap;
 import java.util.TreeSet;
 
 import de.anomic.kelondro.kelondroBase64Order;
-import de.anomic.net.URL;
 import de.anomic.server.serverDate;
 import de.anomic.server.serverFileUtils;
 import de.anomic.server.logging.serverLog;
+import de.anomic.yacy.yacyURL;
 
 public class plasmaWebStructure {
 
@@ -92,8 +93,8 @@ public class plasmaWebStructure {
         }
     }
     
-    public Integer[] /*(outlinksSame, outlinksOther)*/ generateCitationReference(URL url, String baseurlhash, Date docDate, plasmaParserDocument document, plasmaCondenser condenser) {
-        assert plasmaURL.urlHash(url).equals(baseurlhash);
+    public Integer[] /*(outlinksSame, outlinksOther)*/ generateCitationReference(yacyURL url, String baseurlhash, Date docDate, plasmaParserDocument document, plasmaCondenser condenser) {
+        assert url.hash().equals(baseurlhash);
         
         // generate citation reference
         Map hl = document.getHyperlinks();
@@ -105,18 +106,20 @@ public class plasmaWebStructure {
         int GCount = 0;
         int LCount = 0;
         while (it.hasNext()) {
-            nexturlhash = plasmaURL.urlHash((String) ((Map.Entry) it.next()).getKey());
-            if (nexturlhash != null) {
-                if (nexturlhash.substring(6).equals(lhp)) {
-                    // this is a inbound link
-                    cpl.append(nexturlhash.substring(0, 6)); // store only local part
-                    LCount++;
-                } else {
-                    // this is a outbound link
-                    cpg.append(nexturlhash); // store complete hash
-                    GCount++;
+            try {
+                nexturlhash = (new yacyURL((String) ((Map.Entry) it.next()).getKey(), null)).hash();
+                if (nexturlhash != null) {
+                    if (nexturlhash.substring(6).equals(lhp)) {
+                        // this is a inbound link
+                        cpl.append(nexturlhash.substring(0, 6)); // store only local part
+                        LCount++;
+                    } else {
+                        // this is a outbound link
+                        cpg.append(nexturlhash); // store complete hash
+                        GCount++;
+                    }
                 }
-            }
+            } catch (MalformedURLException e) {}
         }
         
         // append this reference to buffer
@@ -270,8 +273,8 @@ public class plasmaWebStructure {
         }
     }
     
-    private void learn(URL url, StringBuffer reference /*string of b64(12digits)-hashes*/) {
-        String domhash = plasmaURL.urlHash(url).substring(6);
+    private void learn(yacyURL url, StringBuffer reference /*string of b64(12digits)-hashes*/) {
+        String domhash = url.hash().substring(6);
 
         // parse the new reference string and join it with the stored references
         Map refs = references(domhash);

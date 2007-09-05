@@ -144,7 +144,7 @@ public class IndexCreateWWWLocalQueue_p {
                                 if (value != null) {
                                     Matcher matcher = compiledPattern.matcher(value);
                                     if (matcher.find()) {
-                                        switchboard.noticeURL.remove(entry.urlhash());
+                                        switchboard.noticeURL.remove(entry.url().hash());
                                     }                                    
                                 }
                             }
@@ -190,7 +190,7 @@ public class IndexCreateWWWLocalQueue_p {
                     prop.put("crawler-queue_list_"+showNum+"_modified", daydate(urle.loaddate()) );
                     prop.put("crawler-queue_list_"+showNum+"_anchor", htmlTools.encodeUnicode2html(urle.name(), true));
                     prop.put("crawler-queue_list_"+showNum+"_url", htmlTools.encodeUnicode2html(urle.url().toNormalform(false, true), false));
-                    prop.put("crawler-queue_list_"+showNum+"_hash", urle.urlhash());
+                    prop.put("crawler-queue_list_"+showNum+"_hash", urle.url().hash());
                     dark = !dark;
                     showNum++;
                 } else {

@@ -52,10 +52,10 @@ import java.util.TreeSet;
 
 import de.anomic.index.indexContainer;
 import de.anomic.index.indexRWIEntry;
-import de.anomic.plasma.plasmaURL;
 import de.anomic.kelondro.kelondroBinSearch;
 import de.anomic.server.serverCodings;
 import de.anomic.server.serverFileUtils;
+import de.anomic.yacy.yacyURL;
 
 public final class plasmaSearchPreOrder {
     
@@ -143,7 +143,7 @@ public final class plasmaSearchPreOrder {
             entry = (Map.Entry) i.next();
             iEntry = (indexRWIEntry) entry.getValue();
             hashpart = iEntry.urlHash().substring(6);
-            isWordRootURL = plasmaURL.isWordRootURL(iEntry.urlHash(), querywords);
+            isWordRootURL = yacyURL.isWordRootURL(iEntry.urlHash(), querywords);
             if (isWordRootURL) {
                 rootDoms.add(hashpart);
             } else {

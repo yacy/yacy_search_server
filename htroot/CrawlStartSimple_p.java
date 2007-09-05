@@ -28,7 +28,6 @@ import java.util.Enumeration;
 import java.util.Iterator;
 
 import de.anomic.http.httpHeader;
-import de.anomic.plasma.plasmaURL;
 import de.anomic.plasma.plasmaSwitchboard;
 import de.anomic.server.serverObjects;
 import de.anomic.server.serverSwitch;
@@ -36,6 +35,7 @@ import de.anomic.yacy.yacyCore;
 import de.anomic.yacy.yacyNewsPool;
 import de.anomic.yacy.yacyNewsRecord;
 import de.anomic.yacy.yacySeed;
+import de.anomic.yacy.yacyURL;
 
 public class CrawlStartSimple_p {
     
@@ -152,8 +152,8 @@ public class CrawlStartSimple_p {
         if ((yacyCore.seedDB == null) || (yacyCore.seedDB.mySeed.isVirgin()) || (yacyCore.seedDB.mySeed.isJunior())) {
             prop.put("remoteCrawlPeers", 0);
         } else {
-            Enumeration crawlavail = yacyCore.dhtAgent.getAcceptRemoteCrawlSeeds(plasmaURL.dummyHash, true);
-            Enumeration crawlpendi = yacyCore.dhtAgent.getAcceptRemoteCrawlSeeds(plasmaURL.dummyHash, false);
+            Enumeration crawlavail = yacyCore.dhtAgent.getAcceptRemoteCrawlSeeds(yacyURL.dummyHash, true);
+            Enumeration crawlpendi = yacyCore.dhtAgent.getAcceptRemoteCrawlSeeds(yacyURL.dummyHash, false);
             if ((!(crawlavail.hasMoreElements())) && (!(crawlpendi.hasMoreElements()))) {
                 prop.put("remoteCrawlPeers", 0); //no peers availible
             } else {

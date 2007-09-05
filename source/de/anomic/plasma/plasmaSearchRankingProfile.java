@@ -48,7 +48,7 @@ import java.util.Set;
 import java.util.TreeSet;
 
 import de.anomic.index.indexRWIEntry;
-import de.anomic.plasma.plasmaURL;
+import de.anomic.yacy.yacyURL;
 import de.anomic.index.indexURLEntry;
 import de.anomic.kelondro.kelondroBitfield;
 
@@ -252,7 +252,7 @@ public class plasmaSearchRankingProfile {
     public long preRanking(indexRWIEntry t, indexRWIEntry min, indexRWIEntry max, TreeSet searchedWords) {
         // the normalizedEntry must be a normalized indexEntry
         long ranking = 0;
-        ranking += (256 - plasmaURL.domLengthNormalized(t.urlHash())) << coeff_domlength;
+        ranking += (256 - yacyURL.domLengthNormalized(t.urlHash())) << coeff_domlength;
         ranking += plasmaSearchPreOrder.ybr_p(t.urlHash()) << coeff_ybr;
         ranking += (255 - (255 * (t.virtualAge()   - min.virtualAge()   ) / (1 + max.virtualAge()   - min.virtualAge()))  ) << coeff_date;
         ranking +=        (255 * (t.wordsintitle() - min.wordsintitle() ) / (1 + max.wordsintitle() - min.wordsintitle()))  << coeff_wordsintitle;
@@ -281,8 +281,8 @@ public class plasmaSearchRankingProfile {
         ranking += (flags.get(plasmaCondenser.flag_cat_hasvideo)) ? 256 << coeff_cathasvideo : 0;
         ranking += (flags.get(plasmaCondenser.flag_cat_hasapp)) ? 256 << coeff_cathasapp : 0;
         
-        ranking += (plasmaURL.probablyRootURL(t.urlHash())) ? 16 << coeff_urllength : 0;
-        if (searchedWords != null) ranking += (plasmaURL.probablyWordURL(t.urlHash(), searchedWords) != null) ? 256 << coeff_appurl : 0;
+        ranking += (yacyURL.probablyRootURL(t.urlHash())) ? 16 << coeff_urllength : 0;
+        if (searchedWords != null) ranking += (yacyURL.probablyWordURL(t.urlHash(), searchedWords) != null) ? 256 << coeff_appurl : 0;
 
         return ranking;
     }

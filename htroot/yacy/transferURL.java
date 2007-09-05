@@ -137,7 +137,7 @@ public final class transferURL {
                 }
                 
                 // check if the entry is blacklisted
-                if ((blockBlacklist) && (plasmaSwitchboard.urlBlacklist.isListed(plasmaURLPattern.BLACKLIST_DHT, lEntry.hash(), comp.url()))) {
+                if ((blockBlacklist) && (plasmaSwitchboard.urlBlacklist.isListed(plasmaURLPattern.BLACKLIST_DHT, comp.url()))) {
                     int deleted = sb.wordIndex.tryRemoveURLs(lEntry.hash());
                     yacyCore.log.logFine("transferURL: blocked blacklisted URL '" + comp.url().toNormalform(false, true) + "' from peer " + otherPeerName + "; deleted " + deleted + " URL entries from RWIs");
                     lEntry = null;

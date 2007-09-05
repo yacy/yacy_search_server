@@ -52,11 +52,11 @@ import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
 
-import de.anomic.net.URL;
 import de.anomic.plasma.plasmaParser;
 import de.anomic.plasma.plasmaParserDocument;
 import de.anomic.server.serverThread;
 import de.anomic.server.logging.serverLog;
+import de.anomic.yacy.yacyURL;
 
 /**
  * New classes implementing the {@link de.anomic.plasma.parser.Parser} interface
@@ -139,7 +139,7 @@ public abstract class AbstractParser implements Parser{
         return tempFile;
     }
     
-    public int parseDir(URL location, String prefix, File dir, plasmaParserDocument doc)
+    public int parseDir(yacyURL location, String prefix, File dir, plasmaParserDocument doc)
             throws ParserException, InterruptedException, IOException {
         if (!dir.isDirectory())
             throw new ParserException("tried to parse ordinary file " + dir + " as directory", location);
@@ -153,7 +153,7 @@ public abstract class AbstractParser implements Parser{
             if (file.isDirectory()) {
                 result += parseDir(location, prefix, file, doc);
             } else try {
-                URL url = URL.newURL(location, "/" + prefix + "/"
+                yacyURL url = yacyURL.newURL(location, "/" + prefix + "/"
                         // XXX: workaround for relative paths within document
                         + file.getPath().substring(file.getPath().indexOf(File.separatorChar) + 1)
                         + "/" + file.getName());
@@ -185,7 +185,7 @@ public abstract class AbstractParser implements Parser{
 	 * @see de.anomic.plasma.parser.Parser#parse(de.anomic.net.URL, java.lang.String, byte[])
 	 */
 	public plasmaParserDocument parse(
-            URL location, 
+            yacyURL location, 
             String mimeType,
             String charset,
             byte[] source
@@ -220,7 +220,7 @@ public abstract class AbstractParser implements Parser{
 	 * @see de.anomic.plasma.parser.Parser#parse(de.anomic.net.URL, java.lang.String, java.io.File)
 	 */
 	public plasmaParserDocument parse(
-            URL location, 
+            yacyURL location, 
             String mimeType,
             String charset,
 			File sourceFile
@@ -254,7 +254,7 @@ public abstract class AbstractParser implements Parser{
      * 
      * @see de.anomic.plasma.parser.Parser#parse(de.anomic.net.URL, java.lang.String, java.io.InputStream)
      */
-    public abstract plasmaParserDocument parse(URL location, String mimeType, String charset, InputStream source) throws ParserException, InterruptedException;
+    public abstract plasmaParserDocument parse(yacyURL location, String mimeType, String charset, InputStream source) throws ParserException, InterruptedException;
 
     /**
      * @return Returns a list of library names that are needed by this parser

@@ -41,7 +41,6 @@ import java.util.regex.Pattern;
 
 import de.anomic.htmlFilter.htmlFilterContentScraper;
 import de.anomic.http.httpc;
-import de.anomic.net.URL;
 import de.anomic.plasma.plasmaSwitchboard;
 import de.anomic.server.serverCore;
 import de.anomic.server.serverSystem;
@@ -73,10 +72,10 @@ public final class yacyVersion implements Comparator, Comparable {
     public String dateStamp;
     public int svn;
     public boolean proRelease, mainRelease;
-    public URL url;
+    public yacyURL url;
     public String name;
     
-    public yacyVersion(URL url) {
+    public yacyVersion(yacyURL url) {
         this(url.getFileName());
         this.url = url;
     }
@@ -256,7 +255,7 @@ public final class yacyVersion implements Comparator, Comparable {
         // {promainreleases, prodevreleases, stdmainreleases, stddevreleases}
         Object[] a = new Object[latestReleaseLocations.size()];
         for (int j = 0; j < latestReleaseLocations.size(); j++) {
-            a[j] = getReleases((URL) latestReleaseLocations.get(j), force);
+            a[j] = getReleases((yacyURL) latestReleaseLocations.get(j), force);
         }
         TreeSet[] r = new TreeSet[4];
         TreeSet s;
@@ -270,7 +269,7 @@ public final class yacyVersion implements Comparator, Comparable {
         return r;
     }
     
-    private static TreeSet[] getReleases(URL location, boolean force) {
+    private static TreeSet[] getReleases(yacyURL location, boolean force) {
         // get release info from a internet resource
         // {promainreleases, prodevreleases, stdmainreleases, stddevreleases} 
         TreeSet[] latestRelease = (TreeSet[]) latestReleases.get(location);
@@ -286,7 +285,7 @@ public final class yacyVersion implements Comparator, Comparable {
         return latestRelease;
     }
     
-    private static TreeSet[] allReleaseFrom(URL url) {
+    private static TreeSet[] allReleaseFrom(yacyURL url) {
         // retrieves the latest info about releases
         // this is done by contacting a release location,
         // parsing the content and filtering+parsing links
@@ -308,7 +307,7 @@ public final class yacyVersion implements Comparator, Comparable {
         yacyVersion release;
         while (i.hasNext()) {
             try {
-                url = new URL((String) i.next());
+                url = new yacyURL((String) i.next(), null);
             } catch (MalformedURLException e1) {
                 continue; // just ignore invalid urls
             }

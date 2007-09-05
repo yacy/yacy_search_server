@@ -63,8 +63,8 @@ import java.net.MalformedURLException;
 import java.util.Enumeration;
 import java.util.Properties;
 
-import de.anomic.net.URL;
 import de.anomic.server.serverCharBuffer;
+import de.anomic.yacy.yacyURL;
 
 public final class htmlFilterWriter extends Writer {
 
@@ -508,7 +508,7 @@ public final class htmlFilterWriter extends Writer {
         if (args.length != 1) return;
         char[] buffer = new char[512];
         try {
-            htmlFilterContentScraper scraper = new htmlFilterContentScraper(new URL("http://localhost:8080"));
+            htmlFilterContentScraper scraper = new htmlFilterContentScraper(new yacyURL("http://localhost:8080", null));
             htmlFilterTransformer transformer = new htmlFilterContentTransformer();            
             // TODO: this does not work at the moment
             System.exit(0);

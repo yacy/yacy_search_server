@@ -52,16 +52,14 @@ import java.util.Date;
 import java.util.Map;
 
 import de.anomic.http.httpHeader;
-import de.anomic.plasma.plasmaURL;
-import de.anomic.net.URL;
 import de.anomic.plasma.plasmaHTCache;
 import de.anomic.plasma.cache.IResourceInfo;
 import de.anomic.plasma.cache.ResourceInfoFactory;
 import de.anomic.server.serverDate;
+import de.anomic.yacy.yacyURL;
 
 public class ResourceInfo implements IResourceInfo {
-    private URL url;
-    private String urlHash;
+    private yacyURL url;
     private httpHeader responseHeader;
     private httpHeader requestHeader;
     
@@ -70,25 +68,23 @@ public class ResourceInfo implements IResourceInfo {
      * @param objectURL
      * @param objectInfo
      */
-    public ResourceInfo(URL objectURL, Map objectInfo) {
+    public ResourceInfo(yacyURL objectURL, Map objectInfo) {
         if (objectURL == null) throw new NullPointerException();
         if (objectInfo == null) throw new NullPointerException();
         
         // generating the url hash
         this.url = objectURL;
-        this.urlHash = plasmaURL.urlHash(this.url.toNormalform(true, true));
         
         // create the http header object
         this.responseHeader =  new httpHeader(null, objectInfo);
     }
 
-    public ResourceInfo(URL objectURL, httpHeader requestHeaders, httpHeader responseHeaders) {
+    public ResourceInfo(yacyURL objectURL, httpHeader requestHeaders, httpHeader responseHeaders) {
         if (objectURL == null) throw new NullPointerException();
         if (responseHeaders == null) throw new NullPointerException();  
         
         // generating the url hash
         this.url = objectURL;
-        this.urlHash = plasmaURL.urlHash(this.url.toNormalform(true, true));
         
         this.requestHeader = requestHeaders;
         this.responseHeader = responseHeaders;
@@ -131,10 +127,10 @@ public class ResourceInfo implements IResourceInfo {
         return docDate;
     }
     
-    public URL getRefererUrl() {
+    public yacyURL getRefererUrl() {
         if (this.requestHeader == null) return null;
         try {
-            return new URL((String) this.requestHeader.get(httpHeader.REFERER, ""));
+            return new yacyURL((String) this.requestHeader.get(httpHeader.REFERER, ""), null);
         } catch (Exception e) {
             return null;
         }        
@@ -143,7 +139,7 @@ public class ResourceInfo implements IResourceInfo {
     /**
      * @see de.anomic.plasma.cache.IResourceInfo#getUrl()
      */
-    public URL getUrl() {
+    public yacyURL getUrl() {
         return this.url;
     }
     
@@ -151,7 +147,7 @@ public class ResourceInfo implements IResourceInfo {
      * @see de.anomic.plasma.cache.IResourceInfo#getUrlHash()
      */    
     public String getUrlHash() {
-        return this.urlHash;
+        return this.url.hash();
     }
     
     public void setRequestHeader(httpHeader reqestHeader) {

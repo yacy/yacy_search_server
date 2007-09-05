@@ -221,7 +221,7 @@
 
   <!-- compiling the main sources -->   
   <javac srcdir="${src}/" destdir="${build}"
-         excludes="de/anomic/plasma/parser/*/*,de/anomic/yacy/seedUpload/**,de/anomic/soap/**,yacy.java,de/anomic/server/portForwarding/*/*,de/anomic/data/rssReader.java"
+         excludes="de/anomic/plasma/parser/*/*,de/anomic/yacy/seedUpload/**,yacy.java,de/anomic/server/portForwarding/*/*,de/anomic/data/rssReader.java"
          debug="true" debuglevel="lines,vars,source" 
          source="${javacSource}" target="${javacTarget}">
     <classpath refid="project.class.path"/>
@@ -241,7 +241,6 @@
   <javac srcdir="${htroot}/" 
          classpathref="project.class.path"
          debug="true" debuglevel="lines,vars,source" 
-  		 excludes="soap/*"
          source="${javacSource}" target="${javacTarget}"/>
 </target>
 	
@@ -297,33 +296,6 @@
     <fileset dir="${src}/" includes="de/anomic/yacy/seedUpload/yacySeedUpload*.xml"/>
   </subant>
 </target>   
- 
-<!-- compiling optional soap API and building install packages -->   
-<target name="compileSoap" depends="compileMain" description="Compiling and zipping additional yacy SOAP API">
-  <subant target="${extensionTarget}">
-    <property name="src" location="${src}"/>
-    <property name="build" location="${build}"/>
-    <property name="libx" location="${libx}"/>
-    <property name="htroot" value="${htroot}"/>    
-    <property name="release" location="${release_ext}"/>
-    <property name="javacSource" value="${javacSource}"/>
-    <property name="javacTarget" value="${javacTarget}"/>
-    <fileset dir="${src}/" includes="de/anomic/soap/build.xml"/>
-  </subant>
-</target>       
-	
-<target name="distSoapClientStubJar" depends="init" description="Generates a jar file with all client stub classes for the YaCy SOAP API">
-  <subant target="buildClientStubJar">
-    <property name="src" location="${src}"/>
-    <property name="build" location="${build}"/>
-    <property name="libx" location="${libx}"/>
-    <property name="htroot" value="${htroot}"/>    
-    <property name="release" location="${release_ext}"/>
-    <property name="javacSource" value="${javacSource}"/>
-    <property name="javacTarget" value="${javacTarget}"/>
-    <fileset dir="${src}/" includes="de/anomic/soap/build.xml"/>
-  </subant>
-</target>	
    
 <target name="compilePortForwarding" depends="compileMain" description="Compiling and zipping additional port forwarder"> 
     <javac srcdir="${src}/de/anomic/server/portForwarding" destdir="${build}" source="${javacSource}" target="${javacTarget}" debug="true" debuglevel="lines,vars,source">
@@ -359,7 +331,7 @@
 </target>   
     
 <!-- compile optional classs that were not compiled elsewhere -->
-<target name="compileExtensions" depends="compileMain,compileParsers,compileSeedUploaders,compileSoap,compilePortForwarding">
+<target name="compileExtensions" depends="compileMain,compileParsers,compileSeedUploaders,compilePortForwarding">
 	
 	<!-- compile rss Reader -->
 	  <javac srcdir="${src}" destdir="${build}"
@@ -423,9 +395,7 @@
 		    <!-- excluding all additional content parsers --> 
 		    <exclude name="de/anomic/plasma/parser/*/*"/>
 		    <!-- excluding all additional seed uploaders --> 
-		    <exclude name="de/anomic/yacy/seedUpload/**"/> 
-		    <!-- excluding the soap handler --> 
-		    <exclude name="de/anomic/soap/**"/>
+		    <exclude name="de/anomic/yacy/seedUpload/**"/>
 		    <!-- excluding the port forwarder --> 
 		    <exclude name="de/anomic/server/portForwarding/*/*"/> 
 			<!-- ecluding rss Reader class -->
@@ -527,8 +497,6 @@
 	    <exclude name="de/anomic/plasma/parser/*/*"/>
 	  	<!-- excluding sources for additional seed uploaders -->
 	    <exclude name="de/anomic/yacy/seedUpload/yacySeedUpload**"/>
-	  	<!-- excluding soap -->
-	    <exclude name="de/anomic/soap/**"/> 
 	    <!-- excluding the port forwarder --> 
 	    <exclude name="de/anomic/server/portForwarding/*/*"/> 
 		<!-- ecluding rss Reader class -->
@@ -545,7 +513,6 @@
 	  <fileset dir="${htroot}">
 	    <include name="**/*"/>
 	    <exclude name="yacy/seedUpload/**"/>
-	  	<exclude name="soap/**"/>
 	  </fileset>
 	  <fileset dir="${htroot}">
 	      <include name="yacy/seedUpload/yacySeedUploadFile.html"/>

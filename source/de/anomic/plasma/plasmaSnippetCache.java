@@ -60,16 +60,15 @@ import java.util.TreeSet;
 import de.anomic.htmlFilter.htmlFilterImageEntry;
 import de.anomic.http.httpHeader;
 import de.anomic.http.httpc;
-import de.anomic.plasma.plasmaURL;
 import de.anomic.kelondro.kelondroMScoreCluster;
 import de.anomic.kelondro.kelondroMSetTools;
-import de.anomic.net.URL;
 import de.anomic.plasma.cache.IResourceInfo;
 import de.anomic.plasma.crawler.plasmaCrawlerException;
 import de.anomic.plasma.parser.ParserException;
 import de.anomic.server.logging.serverLog;
 import de.anomic.yacy.yacySearch;
 import de.anomic.yacy.yacyCore;
+import de.anomic.yacy.yacyURL;
 
 public class plasmaSnippetCache {
 
@@ -113,18 +112,18 @@ public class plasmaSnippetCache {
     }
     
     public static class TextSnippet {
-        private URL url;
+        private yacyURL url;
         private String line;
         private String error;
         private int errorCode;
         private Set remaingHashes;
-        private URL favicon;
+        private yacyURL favicon;
         
-        public TextSnippet(URL url, String line, int errorCode, Set remaingHashes, String errortext) {
+        public TextSnippet(yacyURL url, String line, int errorCode, Set remaingHashes, String errortext) {
         	this(url,line,errorCode,remaingHashes,errortext,null);
         }
         
-        public TextSnippet(URL url, String line, int errorCode, Set remaingHashes, String errortext, URL favicon) {
+        public TextSnippet(yacyURL url, String line, int errorCode, Set remaingHashes, String errortext, yacyURL favicon) {
             this.url = url;
             this.line = line;
             this.errorCode = errorCode;
@@ -132,7 +131,7 @@ public class plasmaSnippetCache {
             this.remaingHashes = remaingHashes;
             this.favicon = favicon;
         }
-        public URL getUrl() {
+        public yacyURL getUrl() {
             return this.url;
         }
         public boolean exists() {
@@ -224,7 +223,7 @@ public class plasmaSnippetCache {
             return l.toString().trim();
         }
         
-        public URL getFavicon() {
+        public yacyURL getFavicon() {
         	return this.favicon;
         }
     }
@@ -242,26 +241,26 @@ public class plasmaSnippetCache {
         }
     }
     
-    public static boolean existsInCache(URL url, Set queryhashes) {
+    public static boolean existsInCache(yacyURL url, Set queryhashes) {
         String hashes = yacySearch.set2string(queryhashes);
-        return retrieveFromCache(hashes, plasmaURL.urlHash(url)) != null;
+        return retrieveFromCache(hashes, url.hash()) != null;
     }
     
-    public static TextSnippet retrieveTextSnippet(URL url, Set queryhashes, boolean fetchOnline, boolean pre, int snippetMaxLength, int timeout) {
+    public static TextSnippet retrieveTextSnippet(yacyURL url, Set queryhashes, boolean fetchOnline, boolean pre, int snippetMaxLength, int timeout) {
         // heise = "0OQUNU3JSs05"
+        
         if (queryhashes.size() == 0) {
             //System.out.println("found no queryhashes for URL retrieve " + url);
             return new TextSnippet(url, null, ERROR_NO_HASH_GIVEN, queryhashes, "no query hashes given");
         }
-        String urlhash = plasmaURL.urlHash(url);
         
         // try to get snippet from snippetCache
         int source = SOURCE_CACHE;
         String wordhashes = yacySearch.set2string(queryhashes);
-        String line = retrieveFromCache(wordhashes, urlhash);
+        String line = retrieveFromCache(wordhashes, url.hash());
         if (line != null) {        	
             //System.out.println("found snippet for URL " + url + " in cache: " + line);
-            return new TextSnippet(url, line, source, null, null,(URL) faviconCache.get(urlhash));
+            return new TextSnippet(url, line, source, null, null,(yacyURL) faviconCache.get(url.hash()));
         }
         
         /* ===========================================================================
@@ -277,7 +276,7 @@ public class plasmaSnippetCache {
             if (resContent != null) {
                 // if the content was found
                 resContentLength = plasmaHTCache.getResourceContentLength(url);
-            } else if (fetchOnline) {
+                } else if (fetchOnline) {
                 // if not found try to download it
                 
                 // download resource using the crawler and keep resource in memory if possible
@@ -286,7 +285,7 @@ public class plasmaSnippetCache {
                 // getting resource metadata (e.g. the http headers for http resources)
                 if (entry != null) {
                     resInfo = entry.getDocumentInfo();
-
+                    
                     // read resource body (if it is there)
                     byte []resourceArray = entry.cacheArray();
                     if (resourceArray != null) {
@@ -309,7 +308,7 @@ public class plasmaSnippetCache {
             if (!(e instanceof plasmaCrawlerException)) e.printStackTrace();
             return new TextSnippet(url, null, ERROR_SOURCE_LOADING, queryhashes, "error loading resource: " + e.getMessage());
         } 
-
+        
         /* ===========================================================================
          * PARSING RESOURCE
          * =========================================================================== */
@@ -327,8 +326,8 @@ public class plasmaSnippetCache {
         /* ===========================================================================
          * COMPUTE SNIPPET
          * =========================================================================== */    
-        URL resFavicon = document.getFavicon();
-        if (resFavicon != null) faviconCache.put(urlhash,resFavicon);
+        yacyURL resFavicon = document.getFavicon();
+        if (resFavicon != null) faviconCache.put(url.hash(), resFavicon);
         // we have found a parseable non-empty file: use the lines
 
         // compute snippet from text
@@ -356,7 +355,8 @@ public class plasmaSnippetCache {
         if (line.length() > snippetMaxLength) line = line.substring(0, snippetMaxLength);
 
         // finally store this snippet in our own cache
-        storeToCache(wordhashes, urlhash, line);
+        storeToCache(wordhashes, url.hash(), line);
+        
         document.close();
         return new TextSnippet(url, line, source, null, null, resFavicon);
     }
@@ -370,7 +370,7 @@ public class plasmaSnippetCache {
      * @param fetchOnline specifies if the resource should be loaded from web if it'as not available in the cache
      * @return the parsed document as {@link plasmaParserDocument}
      */
-    public static plasmaParserDocument retrieveDocument(URL url, boolean fetchOnline, int timeout, boolean forText) {
+    public static plasmaParserDocument retrieveDocument(yacyURL url, boolean fetchOnline, int timeout, boolean forText) {
 
         // load resource
         long resContentLength = 0;
@@ -615,7 +615,7 @@ public class plasmaSnippetCache {
         }
     }
     
-    public static ArrayList retrieveMediaSnippets(URL url, Set queryhashes, int mediatype, boolean fetchOnline, int timeout) {
+    public static ArrayList retrieveMediaSnippets(yacyURL url, Set queryhashes, int mediatype, boolean fetchOnline, int timeout) {
         if (queryhashes.size() == 0) {
             serverLog.logFine("snippet fetch", "no query hashes given for url " + url);
             return new ArrayList();
@@ -723,7 +723,7 @@ public class plasmaSnippetCache {
         return map;
     }
      
-    public static plasmaParserDocument parseDocument(URL url, long contentLength, InputStream resourceStream) throws ParserException {
+    public static plasmaParserDocument parseDocument(yacyURL url, long contentLength, InputStream resourceStream) throws ParserException {
         return parseDocument(url, contentLength, resourceStream, null);
     }
     
@@ -736,7 +736,7 @@ public class plasmaSnippetCache {
      * @return the extracted data
      * @throws ParserException
      */
-    public static plasmaParserDocument parseDocument(URL url, long contentLength, InputStream resourceStream, IResourceInfo docInfo) throws ParserException {
+    public static plasmaParserDocument parseDocument(yacyURL url, long contentLength, InputStream resourceStream, IResourceInfo docInfo) throws ParserException {
         try {
             if (resourceStream == null) return null;
 
@@ -809,7 +809,7 @@ public class plasmaSnippetCache {
      * <tr><td>[1]</td><td>the content-length as {@link Integer}</td></tr>
      * </table>
      */
-    public static Object[] getResource(URL url, boolean fetchOnline, int socketTimeout, boolean forText) {
+    public static Object[] getResource(yacyURL url, boolean fetchOnline, int socketTimeout, boolean forText) {
         // load the url as resource from the web
         try {
             long contentLength = -1;
@@ -845,7 +845,7 @@ public class plasmaSnippetCache {
     }
     
     public static plasmaHTCache.Entry loadResourceFromWeb(
-            URL url, 
+            yacyURL url, 
             int socketTimeout,
             boolean keepInMemory,
             boolean forText
@@ -868,7 +868,7 @@ public class plasmaSnippetCache {
     public static String failConsequences(TextSnippet snippet, String eventID) {
         // problems with snippet fetch
         if (yacyCore.seedDB.mySeed.isVirgin()) return snippet.getError() + " (no consequences, no network connection)"; // no consequences if we do not have a network connection
-        String urlHash = plasmaURL.urlHash(snippet.getUrl());
+        String urlHash = snippet.getUrl().hash();
         String querystring = kelondroMSetTools.setToString(snippet.getRemainingHashes(), ' ');
         if ((snippet.getErrorCode() == ERROR_SOURCE_LOADING) ||
             (snippet.getErrorCode() == ERROR_RESOURCE_LOADING) ||

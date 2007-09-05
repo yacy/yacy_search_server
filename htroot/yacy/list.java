@@ -56,7 +56,6 @@ import de.anomic.data.URLFetcherStack;
 import de.anomic.data.htmlTools;
 import de.anomic.data.listManager;
 import de.anomic.http.httpHeader;
-import de.anomic.net.URL;
 import de.anomic.plasma.plasmaSwitchboard;
 import de.anomic.server.serverCore;
 import de.anomic.server.serverObjects;
@@ -65,6 +64,7 @@ import de.anomic.server.logging.serverLog;
 import de.anomic.yacy.yacyCore;
 import de.anomic.yacy.yacyNetwork;
 import de.anomic.yacy.yacySeed;
+import de.anomic.yacy.yacyURL;
 
 public final class list {
 
@@ -121,7 +121,7 @@ public final class list {
                 if (count > 0 && db.size() > 0) {
                     final StringBuffer b = new StringBuffer();
                     
-                    URL url;
+                    yacyURL url;
                     int cnt = 0;
                     for (int i=0; i<count; i++) {
                         if ((url = db.pop()) == null) continue;

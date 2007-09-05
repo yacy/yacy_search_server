@@ -24,11 +24,11 @@
 import java.net.MalformedURLException;
 
 import de.anomic.http.httpHeader;
-import de.anomic.net.URL;
 import de.anomic.server.serverObjects;
 import de.anomic.server.serverSwitch;
 import de.anomic.server.servletProperties;
 import de.anomic.xml.rssReader;
+import de.anomic.yacy.yacyURL;
 
 // test url:
 // http://localhost:8080/FeedReader_p.html?url=http://www.tagesthemen.de/xml/rss2
@@ -40,9 +40,9 @@ public class FeedReader_p {
         
         prop.put("page", 0);
         if (post != null) {
-            URL url;
+            yacyURL url;
             try {
-                url = new URL((String) post.get("url"));
+                url = new yacyURL((String) post.get("url"), null);
             } catch (MalformedURLException e) {
                 prop.put("page", 2);
                 return prop;

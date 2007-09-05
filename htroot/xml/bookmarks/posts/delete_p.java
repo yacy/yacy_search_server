@@ -42,11 +42,13 @@
 // Contributions and changes to the program code must be marked as such.
 
 package xml.bookmarks.posts;
+import java.net.MalformedURLException;
+
 import de.anomic.http.httpHeader;
-import de.anomic.plasma.plasmaURL;
 import de.anomic.plasma.plasmaSwitchboard;
 import de.anomic.server.serverObjects;
 import de.anomic.server.serverSwitch;
+import de.anomic.yacy.yacyURL;
 
 public class delete_p {
     public static serverObjects respond(httpHeader header, serverObjects post, serverSwitch env) {
@@ -54,13 +56,17 @@ public class delete_p {
         plasmaSwitchboard switchboard = (plasmaSwitchboard) env;
         serverObjects prop = new serverObjects();
         if(post!= null){
-        	if( post.containsKey("url") && switchboard.bookmarksDB.removeBookmark(plasmaURL.urlHash(post.get("url", "nourl"))) ){
-        		prop.put("result", 1);
-        	}else if(post.containsKey("urlhash") && switchboard.bookmarksDB.removeBookmark(post.get("urlhash", "nohash"))){
-        		prop.put("result", 1);
-        	}else{
-        		prop.put("result",0);
-        	}
+        	try {
+                if( post.containsKey("url") && switchboard.bookmarksDB.removeBookmark((new yacyURL(post.get("url", "nourl"), null)).hash())) {
+                	prop.put("result", 1);
+                }else if(post.containsKey("urlhash") && switchboard.bookmarksDB.removeBookmark(post.get("urlhash", "nohash"))){
+                	prop.put("result", 1);
+                }else{
+                	prop.put("result",0);
+                }
+            } catch (MalformedURLException e) {
+                prop.put("result",0);
+            }
         }else{
         	prop.put("result",0);
         }

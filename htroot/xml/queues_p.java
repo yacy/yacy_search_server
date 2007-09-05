@@ -200,7 +200,7 @@ public class queues_p {
                 prop.put(tableName + "_" + showNum + "_modified", daydate(urle.loaddate()));
                 prop.put(tableName + "_" + showNum + "_anchor", urle.name());
                 prop.put(tableName + "_" + showNum + "_url", urle.url().toNormalform(false, true));
-                prop.put(tableName + "_" + showNum + "_hash", urle.urlhash());
+                prop.put(tableName + "_" + showNum + "_hash", urle.url().hash());
                 showNum++;
             }
         }

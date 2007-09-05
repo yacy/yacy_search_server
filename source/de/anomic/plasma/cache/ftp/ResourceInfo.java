@@ -51,10 +51,9 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
 
-import de.anomic.plasma.plasmaURL;
-import de.anomic.net.URL;
 import de.anomic.plasma.cache.IResourceInfo;
 import de.anomic.plasma.cache.ResourceInfoFactory;
+import de.anomic.yacy.yacyURL;
 
 public class ResourceInfo implements IResourceInfo {
 
@@ -62,8 +61,7 @@ public class ResourceInfo implements IResourceInfo {
     public static final String MODIFICATION_DATE = "modificationDate";
     public static final String REFERER = "referer";
     
-    private URL url;
-    private String urlHash;    
+    private yacyURL url;
     private HashMap propertyMap; 
     
     /**
@@ -71,24 +69,22 @@ public class ResourceInfo implements IResourceInfo {
      * @param objectURL
      * @param objectInfo
      */
-    public ResourceInfo(URL objectURL, Map objectInfo) {
+    public ResourceInfo(yacyURL objectURL, Map objectInfo) {
         if (objectURL == null) throw new NullPointerException();
         if (objectInfo == null) throw new NullPointerException();
         
         // generating the url hash
         this.url = objectURL;
-        this.urlHash = plasmaURL.urlHash(this.url.toNormalform(true, true));
         
         // create the http header object
         this.propertyMap =  new HashMap(objectInfo);
     }    
     
-    public ResourceInfo(URL objectURL, String refererUrl, String mimeType, Date fileDate) {
+    public ResourceInfo(yacyURL objectURL, String refererUrl, String mimeType, Date fileDate) {
         if (objectURL == null) throw new NullPointerException();
         
         // generating the url hash
         this.url = objectURL;
-        this.urlHash = plasmaURL.urlHash(this.url.toNormalform(true, true));
         
         // create the http header object
         this.propertyMap =  new HashMap();
@@ -113,22 +109,18 @@ public class ResourceInfo implements IResourceInfo {
         return new Date(Long.valueOf((String) this.propertyMap.get(MODIFICATION_DATE)).longValue());
     }
 
-    public URL getRefererUrl() {
+    public yacyURL getRefererUrl() {
         try {
-            return (this.propertyMap == null) ? null : new URL((String)this.propertyMap.get(REFERER));
+            return (this.propertyMap == null) ? null : new yacyURL((String)this.propertyMap.get(REFERER), null);
         } catch (MalformedURLException e) {
             return null;
         }
     }
 
-    public URL getUrl() {
+    public yacyURL getUrl() {
         return this.url;
     }
-
-    public String getUrlHash() {
-        return this.urlHash;
-    }
-
+    
     public Date ifModifiedSince() {
         return null;
     }

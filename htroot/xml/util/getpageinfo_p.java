@@ -55,11 +55,11 @@ import de.anomic.htmlFilter.htmlFilterContentScraper;
 import de.anomic.htmlFilter.htmlFilterWriter;
 import de.anomic.http.httpHeader;
 import de.anomic.http.httpc;
-import de.anomic.net.URL;
 import de.anomic.plasma.plasmaSwitchboard;
 import de.anomic.server.serverFileUtils;
 import de.anomic.server.serverObjects;
 import de.anomic.server.serverSwitch;
+import de.anomic.yacy.yacyURL;
 
 public class getpageinfo_p {
     public static serverObjects respond(httpHeader header, serverObjects post, serverSwitch env) {
@@ -82,7 +82,7 @@ public class getpageinfo_p {
             }
             if (actions.indexOf("title")>=0) {
                 try {
-                    URL u = new URL(url);
+                    yacyURL u = new yacyURL(url, null);
                     String contentString=new String(httpc.wget(u, u.getHost(), 6000, null, null, ((plasmaSwitchboard) env).remoteProxyConfig, null, null))	;
                     
                     htmlFilterContentScraper scraper = new htmlFilterContentScraper(u);
@@ -110,13 +110,13 @@ public class getpageinfo_p {
             }
             if(actions.indexOf("robots")>=0){
                 try {
-                	URL theURL = new URL(url);
+                    yacyURL theURL = new yacyURL(url, null);
                 	
                 	// determine if crawling of the current URL is allowed
                 	prop.put("robots-allowed", robotsParser.isDisallowed(theURL) ? 0:1);
                     
                     // get the sitemap URL of the domain
-                    URL sitemapURL = robotsParser.getSitemapURL(theURL);
+                    yacyURL sitemapURL = robotsParser.getSitemapURL(theURL);
                     prop.put("sitemap", (sitemapURL==null)?"":sitemapURL.toString());
                 } catch (MalformedURLException e) {}
             }

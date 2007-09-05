@@ -125,7 +125,7 @@ public class IndexCreateWWWRemoteQueue_p {
                     prop.put("crawler-queue_list_" + showNum + "_modified", daydate(urle.loaddate()) );
                     prop.put("crawler-queue_list_" + showNum + "_anchor", urle.name());
                     prop.put("crawler-queue_list_" + showNum + "_url", urle.url().toString());
-                    prop.put("crawler-queue_list_" + showNum + "_hash", urle.urlhash());
+                    prop.put("crawler-queue_list_" + showNum + "_hash", urle.url().hash());
                     dark = !dark;
                     showNum++;
                 } else {

@@ -62,10 +62,10 @@ import java.util.TreeSet;
 import javax.swing.event.EventListenerList;
 
 import de.anomic.http.httpc;
-import de.anomic.net.URL;
 import de.anomic.plasma.plasmaSwitchboard;
 import de.anomic.server.serverCharBuffer;
 import de.anomic.server.serverFileUtils;
+import de.anomic.yacy.yacyURL;
 
 public class htmlFilterContentScraper extends htmlFilterAbstractScraper implements htmlFilterScraper {
 
@@ -112,14 +112,14 @@ public class htmlFilterContentScraper extends htmlFilterAbstractScraper implemen
     /**
      * {@link URL} to the favicon that belongs to the document
      */
-    private URL favicon;
+    private yacyURL favicon;
     
     /**
      * The document root {@link URL} 
      */
-    private URL root;
+    private yacyURL root;
 
-    public htmlFilterContentScraper(URL root) {
+    public htmlFilterContentScraper(yacyURL root) {
         // the root value here will not be used to load the resource.
         // it is only the reference for relative links
         super(linkTags0, linkTags1);
@@ -161,7 +161,7 @@ public class htmlFilterContentScraper extends htmlFilterAbstractScraper implemen
     
     private String absolutePath(String relativePath) {
         try {
-            return URL.newURL(root, relativePath).toNormalform(false, true);
+            return yacyURL.newURL(root, relativePath).toNormalform(false, true);
         } catch (Exception e) {
             return "";
         }
@@ -175,13 +175,13 @@ public class htmlFilterContentScraper extends htmlFilterAbstractScraper implemen
                 height = Integer.parseInt(tagopts.getProperty("height", "-1"));
             } catch (NumberFormatException e) {}
             try {
-                URL url = new URL(absolutePath(tagopts.getProperty("src", "")));
+                yacyURL url = new yacyURL(absolutePath(tagopts.getProperty("src", "")), null);
                 htmlFilterImageEntry ie = new htmlFilterImageEntry(url, tagopts.getProperty("alt",""), width, height);
                 images.add(ie);
             } catch (MalformedURLException e) {}
         }
         if (tagname.equalsIgnoreCase("base")) try {
-            root = new URL(tagopts.getProperty("href", ""));
+            root = new yacyURL(tagopts.getProperty("href", ""), null);
         } catch (MalformedURLException e) {}
         if (tagname.equalsIgnoreCase("frame")) {
             anchors.put(absolutePath(tagopts.getProperty("src", "")), tagopts.getProperty("name",""));
@@ -204,9 +204,9 @@ public class htmlFilterContentScraper extends htmlFilterAbstractScraper implemen
             if (href.length() > 0) anchors.put(absolutePath(href), areatitle);
         }
         if (tagname.equalsIgnoreCase("link")) {
-            URL newLink = null;
+            yacyURL newLink = null;
             try {
-                newLink = new URL(absolutePath(tagopts.getProperty("href", "")));
+                newLink = new yacyURL(absolutePath(tagopts.getProperty("href", "")), null);
             } catch (MalformedURLException e) {}
 
             if (newLink != null) {
@@ -363,7 +363,7 @@ public class htmlFilterContentScraper extends htmlFilterAbstractScraper implemen
     /**
      * @return the {@link URL} to the favicon that belongs to the document
      */    
-    public URL getFavicon() {
+    public yacyURL getFavicon() {
         return this.favicon;
     }
 
@@ -478,7 +478,7 @@ public class htmlFilterContentScraper extends htmlFilterAbstractScraper implemen
         }
     }
     
-    public static htmlFilterContentScraper parseResource(URL location) throws IOException {
+    public static htmlFilterContentScraper parseResource(yacyURL location) throws IOException {
         // load page
         byte[] page = httpc.wget(
                 location,

@@ -76,7 +76,6 @@ import javax.net.ssl.X509TrustManager;
 import org.apache.commons.pool.impl.GenericObjectPool;
 
 import de.anomic.kelondro.kelondroBase64Order;
-import de.anomic.net.URL;
 import de.anomic.server.serverByteBuffer;
 import de.anomic.server.serverCore;
 import de.anomic.server.serverDomains;
@@ -84,6 +83,7 @@ import de.anomic.server.serverFileUtils;
 import de.anomic.server.serverObjects;
 import de.anomic.server.logging.serverLog;
 import de.anomic.tools.nxTools;
+import de.anomic.yacy.yacyURL;
 
 /**
 * This class implements an http client. While http access is built-in in java
@@ -959,7 +959,7 @@ public final class httpc {
     }
 
     public static byte[] singleGET(
-            URL u,
+            yacyURL u,
             String vhost,
             int timeout,
             String user, 
@@ -1017,7 +1017,7 @@ public final class httpc {
     }
 
     public static byte[] singlePOST(
-            URL u, 
+            yacyURL u, 
             String vhost,
             int timeout,
             String user, 
@@ -1049,7 +1049,7 @@ public final class httpc {
     }
     
     public static byte[] wget(
-            URL url,
+            yacyURL url,
             String vhost,
             int timeout, 
             String user, 
@@ -1090,7 +1090,7 @@ public final class httpc {
         return a;
     }
     
-    public static Map loadHashMap(URL url, httpRemoteProxyConfig proxy) {
+    public static Map loadHashMap(yacyURL url, httpRemoteProxyConfig proxy) {
         try {
             // should we use the proxy?
             boolean useProxy = (proxy != null) &&  
@@ -1119,7 +1119,7 @@ public final class httpc {
     }
 
     public static httpHeader whead(
-            URL url,
+            yacyURL url,
             String vhost,
             int timeout, 
             String user, 
@@ -1130,7 +1130,7 @@ public final class httpc {
     }
     
     public static httpHeader whead(
-            URL url,
+            yacyURL url,
             String vhost,
             int timeout, 
             String user, 
@@ -1172,7 +1172,7 @@ public final class httpc {
     }
 
     public static byte[] wput(
-            URL url,
+            yacyURL url,
             String vhost,
             int timeout, 
             String user, 
@@ -1217,7 +1217,7 @@ public final class httpc {
             
             httpRemoteProxyConfig theRemoteProxyConfig = httpRemoteProxyConfig.init(proxyHost,proxyPort);
             try {
-                URL u = new URL(url);
+                yacyURL u = new yacyURL(url, null);
                 text = nxTools.strings(wget(u, u.getHost(), timeout, null, null, theRemoteProxyConfig, null, null));
             } catch (MalformedURLException e) {
                 System.out.println("The url '" + url + "' is wrong.");

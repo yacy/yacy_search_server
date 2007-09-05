@@ -49,7 +49,6 @@ import java.util.Iterator;
 import java.util.Random;
 import java.util.TreeMap;
 
-import de.anomic.net.URL;
 import de.anomic.plasma.plasmaCrawlProfile;
 import de.anomic.plasma.plasmaCrawlZURL;
 import de.anomic.plasma.plasmaSwitchboard;
@@ -62,6 +61,7 @@ import de.anomic.server.serverObjects;
 import de.anomic.server.logging.serverLog;
 import de.anomic.yacy.yacyCore;
 import de.anomic.yacy.yacySeed;
+import de.anomic.yacy.yacyURL;
 import de.anomic.yacy.yacyVersion;
 
 public class CrawlURLFetch_p {
@@ -139,10 +139,10 @@ public class CrawlURLFetch_p {
                                 count,
                                 frequency);
                     } else {
-                        URL url = null;
+                        yacyURL url = null;
                         if (post.get("source", "").equals("url")) {
                             try {
-                                url = new URL(post.get("host", null));
+                                url = new yacyURL(post.get("host", null), null);
                                 if (!savedURLs.contains(url.toNormalform(true, true)))
                                     savedURLs.add(url.toNormalform(true, true));
                                 prop.put("host", post.get("host", url.toString()));
@@ -152,7 +152,7 @@ public class CrawlURLFetch_p {
                             }
                         } else if (post.get("source", "").equals("savedURL")) {
                             try {
-                                url = new URL(post.get("saved", ""));
+                                url = new yacyURL(post.get("saved", ""), null);
                             } catch (MalformedURLException e) {
                                 /* should never appear, except for invalid input, see above */
                             }
@@ -355,7 +355,7 @@ public class CrawlURLFetch_p {
         public String     lastServerResponse = null;
         public int        lastFailed = 0;
         
-        public final URL url;
+        public final yacyURL url;
         public final int count;
         public long delay;
         public final plasmaSwitchboard sb;
@@ -363,7 +363,7 @@ public class CrawlURLFetch_p {
         
         public boolean paused = false;
         
-        public static URL getListServletURL(String host, int mode, int count, String peerHash) {
+        public static yacyURL getListServletURL(String host, int mode, int count, String peerHash) {
             String r = "http://" + host + "/yacy/list.html?list=queueUrls&display=";
             
             switch (mode) {
@@ -380,7 +380,7 @@ public class CrawlURLFetch_p {
             }
             
             try {
-                return new URL(r);
+                return new yacyURL(r, null);
             } catch (MalformedURLException e) {
                 return null;
             }
@@ -389,7 +389,7 @@ public class CrawlURLFetch_p {
         public URLFetcher(
                 serverSwitch env,
                 plasmaCrawlProfile.entry profile,
-                URL url,
+                yacyURL url,
                 int count,
                 long delayMs) {
             if (env == null || profile == null || url == null)
@@ -420,7 +420,7 @@ public class CrawlURLFetch_p {
         public void run() {
             this.paused = false;
             long start;
-            URL url;
+            yacyURL url;
             while (!isInterrupted()) {
                 try {
                     start = System.currentTimeMillis();
@@ -449,7 +449,7 @@ public class CrawlURLFetch_p {
             }
         }
         
-        private URL getDLURL() {
+        private yacyURL getDLURL() {
             if (this.url != null) return this.url; 
             
             // choose random seed
@@ -493,7 +493,7 @@ public class CrawlURLFetch_p {
                     this.failed.put(urls[i], reason);
                     try {
                         plasmaCrawlZURL.Entry ee = this.sb.errorURL.newEntry(
-                                new URL(urls[i]),
+                                new yacyURL(urls[i], null),
                                 reason);
                         ee.store();
                         this.sb.errorURL.stackPushEntry(ee);
@@ -503,7 +503,7 @@ public class CrawlURLFetch_p {
             return this.lastFetchedURLs;
         }
         
-        private String[] getURLs(URL url) {
+        private String[] getURLs(yacyURL url) {
             if (url == null) return null;
             String[] r = null;
             try {

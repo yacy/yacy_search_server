@@ -51,13 +51,13 @@ import SevenZip.IInStream;
 import SevenZip.MyRandomAccessFile;
 import SevenZip.Archive.SevenZip.Handler;
 
-import de.anomic.net.URL;
 import de.anomic.plasma.plasmaParserDocument;
 import de.anomic.plasma.parser.AbstractParser;
 import de.anomic.plasma.parser.Parser;
 import de.anomic.plasma.parser.ParserException;
 import de.anomic.server.serverCachedFileOutputStream;
 import de.anomic.server.serverFileUtils;
+import de.anomic.yacy.yacyURL;
 
 public class sevenzipParser extends AbstractParser implements Parser {
     
@@ -81,7 +81,7 @@ public class sevenzipParser extends AbstractParser implements Parser {
         super.parserName = "7zip Archive Parser";
     }
     
-    public plasmaParserDocument parse(URL location, String mimeType, String charset,
+    public plasmaParserDocument parse(yacyURL location, String mimeType, String charset,
             IInStream source, long maxRamSize) throws ParserException, InterruptedException {
         plasmaParserDocument doc = new plasmaParserDocument(location, mimeType, charset);
         Handler archive;
@@ -111,12 +111,12 @@ public class sevenzipParser extends AbstractParser implements Parser {
         }
     }
     
-    public plasmaParserDocument parse(URL location, String mimeType, String charset,
+    public plasmaParserDocument parse(yacyURL location, String mimeType, String charset,
             byte[] source) throws ParserException, InterruptedException {
         return parse(location, mimeType, charset, new ByteArrayIInStream(source), Parser.MAX_KEEP_IN_MEMORY_SIZE - source.length);
     }
     
-    public plasmaParserDocument parse(URL location, String mimeType, String charset,
+    public plasmaParserDocument parse(yacyURL location, String mimeType, String charset,
             File sourceFile) throws ParserException, InterruptedException {
         try {
             return parse(location, mimeType, charset, new MyRandomAccessFile(sourceFile, "r"), Parser.MAX_KEEP_IN_MEMORY_SIZE);
@@ -125,7 +125,7 @@ public class sevenzipParser extends AbstractParser implements Parser {
         }
     }
     
-    public plasmaParserDocument parse(URL location, String mimeType, String charset,
+    public plasmaParserDocument parse(yacyURL location, String mimeType, String charset,
             InputStream source) throws ParserException, InterruptedException {
         try {
             serverCachedFileOutputStream cfos = new serverCachedFileOutputStream(Parser.MAX_KEEP_IN_MEMORY_SIZE);

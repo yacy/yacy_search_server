@@ -50,11 +50,11 @@ import java.util.Hashtable;
 
 import org.apache.poi.hslf.extractor.PowerPointExtractor;
 
-import de.anomic.net.URL;
 import de.anomic.plasma.plasmaParserDocument;
 import de.anomic.plasma.parser.AbstractParser;
 import de.anomic.plasma.parser.Parser;
 import de.anomic.plasma.parser.ParserException;
+import de.anomic.yacy.yacyURL;
 
 public class pptParser extends AbstractParser implements Parser {
 
@@ -88,7 +88,7 @@ public class pptParser extends AbstractParser implements Parser {
      * parses the source documents and returns a plasmaParserDocument containing
      * all extracted information about the parsed document
      */ 
-    public plasmaParserDocument parse(URL location, String mimeType,
+    public plasmaParserDocument parse(yacyURL location, String mimeType,
             String charset, InputStream source) throws ParserException,
             InterruptedException {
         try {

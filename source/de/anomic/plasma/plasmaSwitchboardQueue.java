@@ -55,10 +55,10 @@ import de.anomic.kelondro.kelondroBase64Order;
 import de.anomic.kelondro.kelondroNaturalOrder;
 import de.anomic.kelondro.kelondroRow;
 import de.anomic.kelondro.kelondroStack;
-import de.anomic.net.URL;
 import de.anomic.plasma.cache.IResourceInfo;
 import de.anomic.server.logging.serverLog;
 import de.anomic.yacy.yacySeedDB;
+import de.anomic.yacy.yacyURL;
 
 public class plasmaSwitchboardQueue {
 
@@ -105,12 +105,12 @@ public class plasmaSwitchboardQueue {
     public synchronized void push(Entry entry) throws IOException {
         sbQueueStack.push(sbQueueStack.row().newEntry(new byte[][]{
             entry.url.toString().getBytes(),
-            (entry.referrerHash == null) ? plasmaURL.dummyHash.getBytes() : entry.referrerHash.getBytes(),
+            (entry.referrerHash == null) ? yacyURL.dummyHash.getBytes() : entry.referrerHash.getBytes(),
             kelondroBase64Order.enhancedCoder.encodeLong((entry.ifModifiedSince == null) ? 0 : entry.ifModifiedSince.getTime(), 11).getBytes(),
             new byte[]{entry.flags},
-            (entry.initiator == null) ? plasmaURL.dummyHash.getBytes() : entry.initiator.getBytes(),
+            (entry.initiator == null) ? yacyURL.dummyHash.getBytes() : entry.initiator.getBytes(),
             kelondroBase64Order.enhancedCoder.encodeLong((long) entry.depth, rowdef.width(5)).getBytes(),
-            (entry.profileHandle == null) ? plasmaURL.dummyHash.getBytes() : entry.profileHandle.getBytes(),
+            (entry.profileHandle == null) ? yacyURL.dummyHash.getBytes() : entry.profileHandle.getBytes(),
             (entry.anchorName == null) ? "-".getBytes("UTF-8") : entry.anchorName.getBytes("UTF-8")
         }));
     }
@@ -184,13 +184,13 @@ public class plasmaSwitchboardQueue {
         }
     }
     
-    public Entry newEntry(URL url, String referrer, Date ifModifiedSince, boolean requestWithCookie,
+    public Entry newEntry(yacyURL url, String referrer, Date ifModifiedSince, boolean requestWithCookie,
                      String initiator, int depth, String profilehandle, String anchorName) {
         return new Entry(url, referrer, ifModifiedSince, requestWithCookie, initiator, depth, profilehandle, anchorName);
     }
 
     public class Entry {
-        private URL url;              // plasmaURL.urlStringLength
+        private yacyURL url;              // plasmaURL.urlStringLength
         private String referrerHash;  // plasmaURL.urlHashLength
         private Date ifModifiedSince; // 6
         private byte flags;           // 1
@@ -202,9 +202,9 @@ public class plasmaSwitchboardQueue {
         // computed values
         private plasmaCrawlProfile.entry profileEntry;
         private IResourceInfo contentInfo;
-        private URL referrerURL;
+        private yacyURL referrerURL;
 
-        public Entry(URL url, String referrer, Date ifModifiedSince, boolean requestWithCookie,
+        public Entry(yacyURL url, String referrer, Date ifModifiedSince, boolean requestWithCookie,
                      String initiator, int depth, String profileHandle, String anchorName) {
             this.url = url;
             this.referrerHash = referrer;
@@ -224,7 +224,7 @@ public class plasmaSwitchboardQueue {
             long ims = row.getColLong(2);
             byte flags = row.getColByte(3);
             try {
-                this.url = new URL(row.getColString(0, "UTF-8"));
+                this.url = new yacyURL(row.getColString(0, "UTF-8"), null);
             } catch (MalformedURLException e) {
                 this.url = null;
             }
@@ -245,7 +245,7 @@ public class plasmaSwitchboardQueue {
             long ims = (row[2] == null) ? 0 : kelondroBase64Order.enhancedCoder.decodeLong(new String(row[2], "UTF-8"));
             byte flags = (row[3] == null) ? 0 : row[3][0];
             try {
-                this.url = new URL(new String(row[0], "UTF-8"));
+                this.url = new yacyURL(new String(row[0], "UTF-8"), null);
             } catch (MalformedURLException e) {
                 this.url = null;
             }
@@ -262,12 +262,12 @@ public class plasmaSwitchboardQueue {
             this.referrerURL = null;
         }
         
-        public URL url() {
+        public yacyURL url() {
             return url;
         }
 
         public String urlHash() {
-            return plasmaURL.urlHash(url);
+            return url.hash();
         }
 
         public boolean requestedWithCookie() {
@@ -279,7 +279,7 @@ public class plasmaSwitchboardQueue {
         }
 
         public boolean proxy() {
-            return (initiator == null) || (initiator.equals(plasmaURL.dummyHash));
+            return (initiator == null) || (initiator.equals(yacyURL.dummyHash));
         }
 
         public String initiator() {
@@ -324,9 +324,9 @@ public class plasmaSwitchboardQueue {
             return (info == null) ? new Date() : info.getModificationDate();            
         }
         
-        public URL referrerURL() {
+        public yacyURL referrerURL() {
             if (referrerURL == null) {
-                if ((referrerHash == null) || (referrerHash.equals(plasmaURL.dummyHash))) return null;
+                if ((referrerHash == null) || (referrerHash.equals(yacyURL.dummyHash))) return null;
                 indexURLEntry entry = lurls.load(referrerHash, null);
                 if (entry == null) referrerURL = null; else referrerURL = entry.comp().url();
             }

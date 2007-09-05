@@ -51,7 +51,7 @@ package de.anomic.plasma.cache;
 import java.util.Date;
 import java.util.Map;
 
-import de.anomic.net.URL;
+import de.anomic.yacy.yacyURL;
 
 /**
  * A class containing metadata about a downloaded resource
@@ -66,13 +66,13 @@ public interface IResourceInfo {
     /**
      * @return the URL of this content
      */
-    public URL getUrl();
+    public yacyURL getUrl();
     
     /**
      * Returns the referer URL of this URL
      * @return referer URL
      */
-    public URL getRefererUrl();
+    public yacyURL getRefererUrl();
     
     /**
      * Returns the mimetype of the cached object
@@ -91,11 +91,6 @@ public interface IResourceInfo {
      * @return the modifiaction date
      */
     public Date getModificationDate();
-    
-    /**
-     * @return the url hash of the content URL
-     */
-    public String getUrlHash();
     
     /**
      * Specifies if the resource was requested with a

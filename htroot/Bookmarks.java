@@ -59,7 +59,6 @@ import de.anomic.data.bookmarksDB.Tag;
 import de.anomic.http.httpHeader;
 import de.anomic.http.httpc;
 import de.anomic.index.indexURLEntry;
-import de.anomic.net.URL;
 import de.anomic.plasma.plasmaParserDocument;
 import de.anomic.plasma.plasmaSnippetCache;
 import de.anomic.plasma.plasmaSwitchboard;
@@ -69,6 +68,7 @@ import de.anomic.server.serverSwitch;
 import de.anomic.yacy.yacyCore;
 import de.anomic.yacy.yacyNewsPool;
 import de.anomic.yacy.yacyNewsRecord;
+import de.anomic.yacy.yacyURL;
 
 public class Bookmarks {
     public static serverObjects respond(httpHeader header, serverObjects post, serverSwitch env) {
@@ -214,7 +214,7 @@ public class Bookmarks {
             }
             try {
                 File file=new File((String)post.get("bookmarksfile"));
-                switchboard.bookmarksDB.importFromBookmarks(new URL(file) , new String((byte[])post.get("bookmarksfile$file")), tags, isPublic);
+                switchboard.bookmarksDB.importFromBookmarks(new yacyURL(file) , new String((byte[])post.get("bookmarksfile$file")), tags, isPublic);
             } catch (MalformedURLException e) {}
             
         }else if(post.containsKey("xmlfile")){

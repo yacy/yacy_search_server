@@ -60,7 +60,6 @@ import java.util.Properties;
 import de.anomic.http.httpChunkedInputStream;
 import de.anomic.http.httpHeader;
 import de.anomic.http.httpc;
-import de.anomic.net.URL;
 import de.anomic.plasma.plasmaHTCache;
 import de.anomic.plasma.plasmaParser;
 import de.anomic.plasma.plasmaSwitchboard;
@@ -71,6 +70,7 @@ import de.anomic.server.serverFileUtils;
 import de.anomic.server.serverHandler;
 import de.anomic.server.logging.serverLog;
 import de.anomic.server.serverCore.Session;
+import de.anomic.yacy.yacyURL;
 
 /**
  * @author theli
@@ -346,7 +346,7 @@ public class icapd implements serverHandler {
             httpHeader.handleTransparentProxySupport(httpReqHeader,httpReqProps,virtualHost,true);
             
             // getting the request URL
-            URL httpRequestURL = httpHeader.getRequestURL(httpReqProps);            
+            yacyURL httpRequestURL = httpHeader.getRequestURL(httpReqProps);            
             
             /* =========================================================================
              * Parsing response data

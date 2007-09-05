@@ -59,7 +59,6 @@ import com.catcode.odf.OpenDocumentMetadata;
 import com.catcode.odf.OpenDocumentTextInputStream;
 
 import de.anomic.http.httpc;
-import de.anomic.net.URL;
 import de.anomic.plasma.plasmaParserDocument;
 import de.anomic.plasma.parser.AbstractParser;
 import de.anomic.plasma.parser.Parser;
@@ -67,6 +66,7 @@ import de.anomic.plasma.parser.ParserException;
 import de.anomic.server.serverCharBuffer;
 import de.anomic.server.serverFileUtils;
 import de.anomic.server.logging.serverLog;
+import de.anomic.yacy.yacyURL;
 
 public class odtParser extends AbstractParser implements Parser {
 
@@ -95,7 +95,7 @@ public class odtParser extends AbstractParser implements Parser {
         return SUPPORTED_MIME_TYPES;
     }
     
-    public plasmaParserDocument parse(URL location, String mimeType, String charset, File dest) throws ParserException, InterruptedException {
+    public plasmaParserDocument parse(yacyURL location, String mimeType, String charset, File dest) throws ParserException, InterruptedException {
         
         Writer writer = null;
         File writerFile = null;
@@ -209,7 +209,7 @@ public class odtParser extends AbstractParser implements Parser {
         }
     }
     
-    public plasmaParserDocument parse(URL location, String mimeType, String charset, InputStream source) throws ParserException, InterruptedException {
+    public plasmaParserDocument parse(yacyURL location, String mimeType, String charset, InputStream source) throws ParserException, InterruptedException {
         File dest = null;
         try {
             // creating a tempfile
@@ -241,7 +241,7 @@ public class odtParser extends AbstractParser implements Parser {
             if (args.length != 1) return;
             
             // getting the content URL
-            URL contentUrl = new URL(args[0]);
+            yacyURL contentUrl = new yacyURL(args[0], null);
             
             // creating a new parser
             odtParser testParser = new odtParser();

@@ -48,15 +48,13 @@ import java.util.Hashtable;
 
 import org.textmining.text.extraction.WordExtractor;
 
-import de.anomic.net.URL;
 import de.anomic.plasma.plasmaParserDocument;
 import de.anomic.plasma.parser.AbstractParser;
 import de.anomic.plasma.parser.Parser;
 import de.anomic.plasma.parser.ParserException;
+import de.anomic.yacy.yacyURL;
 
-public class docParser
-extends AbstractParser
-implements Parser {
+public class docParser extends AbstractParser implements Parser {
 
     /**
      * a list of mime types that are supported by this parser class
@@ -78,7 +76,7 @@ implements Parser {
         this.parserName = "Word Document Parser";
 	}
 
-	public plasmaParserDocument parse(URL location, String mimeType, String charset,
+	public plasmaParserDocument parse(yacyURL location, String mimeType, String charset,
 			InputStream source) throws ParserException, InterruptedException {
 
         

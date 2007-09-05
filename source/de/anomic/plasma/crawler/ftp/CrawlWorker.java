@@ -55,7 +55,6 @@ import java.io.PrintStream;
 import java.io.PrintWriter;
 import java.util.Date;
 
-import de.anomic.net.URL;
 import de.anomic.net.ftpc;
 import de.anomic.plasma.plasmaCrawlEURL;
 import de.anomic.plasma.plasmaHTCache;
@@ -68,6 +67,7 @@ import de.anomic.plasma.crawler.plasmaCrawlWorker;
 import de.anomic.plasma.crawler.plasmaCrawlerPool;
 import de.anomic.plasma.plasmaHTCache.Entry;
 import de.anomic.server.logging.serverLog;
+import de.anomic.yacy.yacyURL;
 
 public class CrawlWorker extends AbstractCrawlWorker implements plasmaCrawlWorker {
 
@@ -188,7 +188,7 @@ public class CrawlWorker extends AbstractCrawlWorker implements plasmaCrawlWorke
                 if (isFolder) {
                     fullPath = fullPath + "/";
                     file = "";
-                    this.url = URL.newURL(this.url,fullPath);
+                    this.url = yacyURL.newURL(this.url,fullPath);
                 }
             }
 

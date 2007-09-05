@@ -74,7 +74,6 @@ import de.anomic.kelondro.kelondroBase64Order;
 import de.anomic.kelondro.kelondroDyn;
 import de.anomic.kelondro.kelondroMScoreCluster;
 import de.anomic.kelondro.kelondroMapObjects;
-import de.anomic.net.URL;
 import de.anomic.plasma.plasmaCondenser;
 import de.anomic.plasma.plasmaCrawlEntry;
 import de.anomic.plasma.plasmaCrawlLURL;
@@ -92,6 +91,7 @@ import de.anomic.server.logging.serverLog;
 import de.anomic.tools.enumerateFiles;
 import de.anomic.yacy.yacyClient;
 import de.anomic.yacy.yacySeedDB;
+import de.anomic.yacy.yacyURL;
 import de.anomic.yacy.yacyVersion;
 
 /**
@@ -412,7 +412,7 @@ public final class yacy {
                     server.terminate(false);
                     server.interrupt();
                     if (server.isAlive()) try {
-                        URL u = new URL((server.withSSL()?"https":"http")+"://localhost:" + serverCore.getPortNr(port));
+                        yacyURL u = new yacyURL((server.withSSL()?"https":"http")+"://localhost:" + serverCore.getPortNr(port), null);
                         httpc.wget(u, u.getHost(), 1000, null, null, null, null, null); // kick server
                         serverLog.logConfig("SHUTDOWN", "sent termination signal to server socket");
                     } catch (IOException ee) {

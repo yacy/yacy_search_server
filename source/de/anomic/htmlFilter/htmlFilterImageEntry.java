@@ -40,22 +40,22 @@
 
 package de.anomic.htmlFilter;
 
-import de.anomic.net.URL;
+import de.anomic.yacy.yacyURL;
 
 public class htmlFilterImageEntry implements Comparable {
 
-    private URL url;
+    private yacyURL url;
     private String alt;
     private int width, height;
 
-    public htmlFilterImageEntry(URL url, String alt, int width, int height) {
+    public htmlFilterImageEntry(yacyURL url, String alt, int width, int height) {
         this.url = url;
         this.alt = alt;
         this.width = width;
         this.height = height;
     }
 
-    public URL url() {
+    public yacyURL url() {
         return this.url;
     }
     

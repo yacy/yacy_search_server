@@ -61,7 +61,6 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.lang.StringBuffer;
 import java.net.InetAddress;
-import java.net.MalformedURLException;
 import java.util.Collections;
 import java.util.Date;
 import java.util.HashSet;
@@ -73,12 +72,10 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import de.anomic.http.httpHeader;
-import de.anomic.plasma.plasmaURL;
 import de.anomic.kelondro.kelondroBase64Order;
 import de.anomic.kelondro.kelondroDyn;
 import de.anomic.kelondro.kelondroMScoreCluster;
 import de.anomic.kelondro.kelondroMapObjects;
-import de.anomic.net.URL;
 import de.anomic.plasma.cache.IResourceInfo;
 import de.anomic.plasma.cache.ResourceInfoFactory;
 import de.anomic.plasma.cache.UnsupportedProtocolException;
@@ -92,6 +89,7 @@ import de.anomic.server.logging.serverLog;
 import de.anomic.tools.enumerateFiles;
 import de.anomic.yacy.yacySeed;
 import de.anomic.yacy.yacySeedDB;
+import de.anomic.yacy.yacyURL;
 
 public final class plasmaHTCache {
     
@@ -114,6 +112,122 @@ public final class plasmaHTCache {
     private static ResourceInfoFactory objFactory = new ResourceInfoFactory();
     private static serverThread cacheScanThread;
 
+    // doctypes:
+    public static final char DT_PDFPS   = 'p';
+    public static final char DT_TEXT    = 't';
+    public static final char DT_HTML    = 'h';
+    public static final char DT_DOC     = 'd';
+    public static final char DT_IMAGE   = 'i';
+    public static final char DT_MOVIE   = 'm';
+    public static final char DT_FLASH   = 'f';
+    public static final char DT_SHARE   = 's';
+    public static final char DT_AUDIO   = 'a';
+    public static final char DT_BINARY  = 'b';
+    public static final char DT_UNKNOWN = 'u';
+
+    // appearance locations: (used for flags)
+    public static final int AP_TITLE     =  0; // title tag from html header
+    public static final int AP_H1        =  1; // headline - top level
+    public static final int AP_H2        =  2; // headline, second level
+    public static final int AP_H3        =  3; // headline, 3rd level
+    public static final int AP_H4        =  4; // headline, 4th level
+    public static final int AP_H5        =  5; // headline, 5th level
+    public static final int AP_H6        =  6; // headline, 6th level
+    public static final int AP_TEXT      =  7; // word appears in text (used to check validation of other appearances against spam)
+    public static final int AP_DOM       =  8; // word inside an url: in Domain
+    public static final int AP_PATH      =  9; // word inside an url: in path
+    public static final int AP_IMG       = 10; // tag inside image references
+    public static final int AP_ANCHOR    = 11; // anchor description
+    public static final int AP_ENV       = 12; // word appears in environment (similar to anchor appearance)
+    public static final int AP_BOLD      = 13; // may be interpreted as emphasized
+    public static final int AP_ITALICS   = 14; // may be interpreted as emphasized
+    public static final int AP_WEAK      = 15; // for Text that is small or bareley visible
+    public static final int AP_INVISIBLE = 16; // good for spam detection
+    public static final int AP_TAG       = 17; // for tagged indexeing (i.e. using mp3 tags)
+    public static final int AP_AUTHOR    = 18; // word appears in author name
+    public static final int AP_OPUS      = 19; // word appears in name of opus, which may be an album name (in mp3 tags)
+    public static final int AP_TRACK     = 20; // word appears in track name (i.e. in mp3 tags)
+    
+    // URL attributes
+    public static final int UA_LOCAL    =  0; // URL was crawled locally
+    public static final int UA_TILDE    =  1; // tilde appears in URL
+    public static final int UA_REDIRECT =  2; // The URL is a redirection
+    
+    // local flag attributes
+    public static final char LT_LOCAL   = 'L';
+    public static final char LT_GLOBAL  = 'G';
+
+    // doctype calculation
+    public static char docType(yacyURL url) {
+        String path = url.getPath().toLowerCase();
+        // serverLog.logFinest("PLASMA", "docType URL=" + path);
+        char doctype = DT_UNKNOWN;
+        if (path.endsWith(".gif"))       { doctype = DT_IMAGE; }
+        else if (path.endsWith(".ico"))  { doctype = DT_IMAGE; }
+        else if (path.endsWith(".bmp"))  { doctype = DT_IMAGE; }
+        else if (path.endsWith(".jpg"))  { doctype = DT_IMAGE; }
+        else if (path.endsWith(".jpeg")) { doctype = DT_IMAGE; }
+        else if (path.endsWith(".png"))  { doctype = DT_IMAGE; }
+        else if (path.endsWith(".html")) { doctype = DT_HTML;  }
+        else if (path.endsWith(".txt"))  { doctype = DT_TEXT;  }
+        else if (path.endsWith(".doc"))  { doctype = DT_DOC;   }
+        else if (path.endsWith(".rtf"))  { doctype = DT_DOC;   }
+        else if (path.endsWith(".pdf"))  { doctype = DT_PDFPS; }
+        else if (path.endsWith(".ps"))   { doctype = DT_PDFPS; }
+        else if (path.endsWith(".avi"))  { doctype = DT_MOVIE; }
+        else if (path.endsWith(".mov"))  { doctype = DT_MOVIE; }
+        else if (path.endsWith(".qt"))   { doctype = DT_MOVIE; }
+        else if (path.endsWith(".mpg"))  { doctype = DT_MOVIE; }
+        else if (path.endsWith(".md5"))  { doctype = DT_SHARE; }
+        else if (path.endsWith(".mpeg")) { doctype = DT_MOVIE; }
+        else if (path.endsWith(".asf"))  { doctype = DT_FLASH; }
+        return doctype;
+    }
+
+    public static char docType(String mime) {
+        // serverLog.logFinest("PLASMA", "docType mime=" + mime);
+        char doctype = DT_UNKNOWN;
+        if (mime == null) doctype = DT_UNKNOWN;
+        else if (mime.startsWith("image/")) doctype = DT_IMAGE;
+        else if (mime.endsWith("/gif")) doctype = DT_IMAGE;
+        else if (mime.endsWith("/jpeg")) doctype = DT_IMAGE;
+        else if (mime.endsWith("/png")) doctype = DT_IMAGE;
+        else if (mime.endsWith("/html")) doctype = DT_HTML;
+        else if (mime.endsWith("/rtf")) doctype = DT_DOC;
+        else if (mime.endsWith("/pdf")) doctype = DT_PDFPS;
+        else if (mime.endsWith("/octet-stream")) doctype = DT_BINARY;
+        else if (mime.endsWith("/x-shockwave-flash")) doctype = DT_FLASH;
+        else if (mime.endsWith("/msword")) doctype = DT_DOC;
+        else if (mime.endsWith("/mspowerpoint")) doctype = DT_DOC;
+        else if (mime.endsWith("/postscript")) doctype = DT_PDFPS;
+        else if (mime.startsWith("text/")) doctype = DT_TEXT;
+        else if (mime.startsWith("image/")) doctype = DT_IMAGE;
+        else if (mime.startsWith("audio/")) doctype = DT_AUDIO;
+        else if (mime.startsWith("video/")) doctype = DT_MOVIE;
+        //bz2     = application/x-bzip2
+        //dvi     = application/x-dvi
+        //gz      = application/gzip
+        //hqx     = application/mac-binhex40
+        //lha     = application/x-lzh
+        //lzh     = application/x-lzh
+        //pac     = application/x-ns-proxy-autoconfig
+        //php     = application/x-httpd-php
+        //phtml   = application/x-httpd-php
+        //rss     = application/xml
+        //tar     = application/tar
+        //tex     = application/x-tex
+        //tgz     = application/tar
+        //torrent = application/x-bittorrent
+        //xhtml   = application/xhtml+xml
+        //xla     = application/msexcel
+        //xls     = application/msexcel
+        //xsl     = application/xml
+        //xml     = application/xml
+        //Z       = application/x-compress
+        //zip     = application/zip
+        return doctype;
+    }
+    
     public static void init(File htCachePath, long CacheSizeMax, long preloadTime, String layout, boolean migration) {
         
         cachePath = htCachePath;
@@ -252,7 +366,7 @@ public final class plasmaHTCache {
         return (curCacheSize >= maxCacheSize) ? 0 : maxCacheSize - curCacheSize;
     }
 
-    public static boolean writeResourceContent(URL url, byte[] array) {
+    public static boolean writeResourceContent(yacyURL url, byte[] array) {
         if (array == null) return false;
         File file = getCachePath(url);
         try {
@@ -288,16 +402,16 @@ public final class plasmaHTCache {
         }
     }
 
-    public static boolean deleteFile(URL url) {
+    public static boolean deleteFile(yacyURL url) {
         return deleteURLfromCache("", url, "FROM");
     }
 
-    private static boolean deleteURLfromCache(String key, URL url, String msg) {
+    private static boolean deleteURLfromCache(String key, yacyURL url, String msg) {
         if (deleteFileandDirs(key, getCachePath(url), msg)) {
             try {
                 // As the file is gone, the entry in responseHeader.db is not needed anymore
                 log.logFinest("Trying to remove responseHeader from URL: " + url.toNormalform(false, true));
-                responseHeaderDB.remove(plasmaURL.urlHash(url));
+                responseHeaderDB.remove(url.hash());
             } catch (IOException e) {
                 resetResponseHeaderDB();
                 log.logInfo("IOExeption removing response header from DB: " + e.getMessage(), e);
@@ -356,10 +470,10 @@ public final class plasmaHTCache {
                                 log.logFinest("Trying to remove responseHeader for URLhash: " + urlHash);
                                 responseHeaderDB.remove(urlHash);
                             } else {
-                                URL url = getURL(file);
+                                yacyURL url = getURL(file);
                                 if (url != null) {
                                     log.logFinest("Trying to remove responseHeader for URL: " + url.toNormalform(false, true));
-                                    responseHeaderDB.remove(plasmaURL.urlHash(url));
+                                    responseHeaderDB.remove(url.hash());
                                 }
                             }
                         } catch (IOException e) {
@@ -497,13 +611,10 @@ public final class plasmaHTCache {
      * @throws <b>UnsupportedProtocolException</b> if the protocol is not supported and therefore the
      * info object couldn't be created
      */
-    public static IResourceInfo loadResourceInfo(URL url) throws UnsupportedProtocolException, IllegalAccessException {    
-        
-        // getting the URL hash
-        String urlHash = plasmaURL.urlHash(url.toNormalform(true, true));
+    public static IResourceInfo loadResourceInfo(yacyURL url) throws UnsupportedProtocolException, IllegalAccessException {    
         
         // loading data from database
-        Map hdb = responseHeaderDB.getMap(urlHash);
+        Map hdb = responseHeaderDB.getMap(url.hash());
         if (hdb == null) return null;
         
         // generate the cached object
@@ -601,7 +712,7 @@ public final class plasmaHTCache {
      * that path will be generated
      * @return new File
      */
-    public static File getCachePath(final URL url) {
+    public static File getCachePath(final yacyURL url) {
 //      this.log.logFinest("plasmaHTCache: getCachePath:  IN=" + url.toString());
 
         // peer.yacy || www.peer.yacy  = http/yacy/peer
@@ -662,18 +773,18 @@ public final class plasmaHTCache {
         if (cacheLayout.equals("tree")) {
             File FileTree = treeFile(fileName, "tree", path);
             if (cacheMigration) {
-                moveCachedObject(hashFile(fileName, "hash", extention, url), FileTree);
-                moveCachedObject(hashFile(fileName, null, extention, url), FileTree); // temporary migration
+                moveCachedObject(hashFile(fileName, "hash", extention, url.hash()), FileTree);
+                moveCachedObject(hashFile(fileName, null, extention, url.hash()), FileTree); // temporary migration
                 moveCachedObject(treeFile(fileName, null, path), FileTree);           // temporary migration
             }
             return FileTree;
         }
         if (cacheLayout.equals("hash")) {
-            File FileFlat = hashFile(fileName, "hash", extention, url);
+            File FileFlat = hashFile(fileName, "hash", extention, url.hash());
             if (cacheMigration) {
                 moveCachedObject(treeFile(fileName, "tree", path), FileFlat);
                 moveCachedObject(treeFile(fileName, null, path), FileFlat);           // temporary migration
-                moveCachedObject(hashFile(fileName, null, extention, url), FileFlat); // temporary migration
+                moveCachedObject(hashFile(fileName, null, extention, url.hash()), FileFlat); // temporary migration
             }
             return FileFlat;
         }
@@ -688,8 +799,8 @@ public final class plasmaHTCache {
         return new File(cachePath, f.toString());
     }
     
-    private static File hashFile(StringBuffer fileName, String prefix, String extention, URL url) {
-        String hexHash = yacySeed.b64Hash2hexHash(plasmaURL.urlHash(url));
+    private static File hashFile(StringBuffer fileName, String prefix, String extention, String urlhash) {
+        String hexHash = yacySeed.b64Hash2hexHash(urlhash);
         StringBuffer f = new StringBuffer(fileName.length() + 30);
         f.append(fileName);
         if (prefix != null) f.append('/').append(prefix);
@@ -720,11 +831,11 @@ public final class plasmaHTCache {
      * this is the reverse function to getCachePath: it constructs the url as string
      * from a given storage path
      */
-    public static URL getURL(final File f) {
+    public static yacyURL getURL(final File f) {
 //      this.log.logFinest("plasmaHTCache: getURL:  IN: Path=[" + cachePath + "] File=[" + f + "]");
         final String urlHash = getHash(f);
         if (urlHash != null) {
-            URL url = null;
+            yacyURL url = null;
             // try the urlPool
             try {
                 url = plasmaSwitchboard.getSwitchboard().getURL(urlHash);
@@ -744,7 +855,7 @@ public final class plasmaHTCache {
                         String s = ((String)origRequestLine).substring(i).trim();
                         i = s.indexOf(" ");
                         try {
-                            url = new URL((i<0) ? s : s.substring(0,i));
+                            url = new yacyURL((i<0) ? s : s.substring(0,i), urlHash);
                         } catch (final Exception e) {
                             url = null;
                         }
@@ -831,7 +942,7 @@ public final class plasmaHTCache {
 
 //          this.log.logFinest("plasmaHTCache: getURL: OUT=" + s);
             try {
-                return new URL(protocol + host + path);
+                return new yacyURL(protocol + host + path, null);
             } catch (final Exception e) {
                 return null;
             }
@@ -846,7 +957,7 @@ public final class plasmaHTCache {
      * is available or the cached file is not readable, <code>null</code>
      * is returned.
      */
-    public static InputStream getResourceContentStream(URL url) {
+    public static InputStream getResourceContentStream(yacyURL url) {
         // load the url as resource from the cache
         File f = getCachePath(url);
         if (f.exists() && f.canRead()) try {
@@ -858,7 +969,7 @@ public final class plasmaHTCache {
         return null;        
     }
     
-    public static long getResourceContentLength(URL url) {
+    public static long getResourceContentLength(yacyURL url) {
         // load the url as resource from the cache
         File f = getCachePath(url);
         if (f.exists() && f.canRead()) {
@@ -886,7 +997,7 @@ public final class plasmaHTCache {
     public static Entry newEntry(
             Date initDate, 
             int depth, 
-            URL url, 
+            yacyURL url,
             String name,
             //httpHeader requestHeader,
             String responseStatus, 
@@ -898,7 +1009,7 @@ public final class plasmaHTCache {
         return new Entry(
                 initDate, 
                 depth, 
-                url, 
+                url,
                 name, 
                 //requestHeader, 
                 responseStatus, 
@@ -919,10 +1030,8 @@ public final class plasmaHTCache {
     private String                   responseStatus;    
     private File                     cacheFile;      // the cache file
     private byte[]                   cacheArray;     // or the cache as byte-array
-    private URL                      url;
+    private yacyURL                  url;
     private String                   name;           // the name of the link, read as anchor from an <a>-tag
-    private String                   nomalizedURLHash;
-    private String                   nomalizedURLString;
     //private int                      status;         // cache load/hit/stale etc status
     private Date                     lastModified;
     private char                     doctype;
@@ -933,7 +1042,7 @@ public final class plasmaHTCache {
     /**
      * protocolspecific information about the resource 
      */
-    private IResourceInfo              resInfo;
+    private IResourceInfo            resInfo;
 
     protected Object clone() throws CloneNotSupportedException {
         return new Entry(
@@ -952,7 +1061,7 @@ public final class plasmaHTCache {
 
     public Entry(Date initDate, 
             int depth, 
-            URL url, 
+            yacyURL url,
             String name,
             //httpHeader requestHeader,
             String responseStatus,
@@ -966,22 +1075,11 @@ public final class plasmaHTCache {
             System.exit(0);            
         }
         this.resInfo = resourceInfo;
-        
-        
-        // normalize url
-        this.nomalizedURLString = url.toNormalform(true, true);
-
-        try {
-            this.url            = new URL(this.nomalizedURLString);
-        } catch (MalformedURLException e) {
-            System.out.println("internal error at httpdProxyCache.Entry: " + e);
-            System.exit(-1);
-        }
+        this.url              = url;
         this.name             = name;
         this.cacheFile        = getCachePath(this.url);
-        this.nomalizedURLHash = plasmaURL.urlHash(this.nomalizedURLString);
-
-       // assigned:
+        
+        // assigned:
         this.initDate       = initDate;
         this.depth          = depth;
         //this.requestHeader  = requestHeader;
@@ -994,9 +1092,9 @@ public final class plasmaHTCache {
         this.lastModified = resourceInfo.getModificationDate();
         
         // getting the doctype
-        this.doctype = plasmaURL.docType(resourceInfo.getMimeType());
-        if (this.doctype == plasmaURL.DT_UNKNOWN) this.doctype = plasmaURL.docType(url);
-        this.language = plasmaURL.language(url);
+        this.doctype = docType(resourceInfo.getMimeType());
+        if (this.doctype == DT_UNKNOWN) this.doctype = docType(url);
+        this.language = yacyURL.language(url);
 
         // to be defined later:
         this.cacheArray     = null;
@@ -1006,12 +1104,12 @@ public final class plasmaHTCache {
         return this.name;
     }
     
-    public URL url() {
+    public yacyURL url() {
         return this.url;
     }
     
     public String urlHash() {
-        return this.nomalizedURLHash;
+        return this.url.hash();
     }
     
     public Date lastModified() {
@@ -1041,8 +1139,8 @@ public final class plasmaHTCache {
         return this.depth;
     }
     
-    public URL referrerURL() {
-        return (this.resInfo==null)?null:this.resInfo.getRefererUrl();
+    public yacyURL referrerURL() {
+        return (this.resInfo == null) ? null : this.resInfo.getRefererUrl();
     }
 
     public File cacheFile() {
@@ -1070,10 +1168,9 @@ public final class plasmaHTCache {
     }
     
     public boolean writeResourceInfo() {
-        assert(this.nomalizedURLHash != null) : "URL Hash is null";
         if (this.resInfo == null) return false;
         try {
-            responseHeaderDB.set(this.nomalizedURLHash, this.resInfo.getMap());
+            responseHeaderDB.set(this.url.hash(), this.resInfo.getMap());
         } catch (Exception e) {
             resetResponseHeaderDB();
             return false;
@@ -1134,8 +1231,8 @@ public final class plasmaHTCache {
 
         // -CGI access in request
         // CGI access makes the page very individual, and therefore not usable in caches
-        if (isPOST(this.nomalizedURLString) && !this.profile.crawlingQ()) { return "dynamic_post"; }
-        if (isCGI(this.nomalizedURLString)) { return "dynamic_cgi"; }
+        if (isPOST(this.url.toNormalform(true, true)) && !this.profile.crawlingQ()) { return "dynamic_post"; }
+        if (isCGI(this.url.toNormalform(true, true))) { return "dynamic_cgi"; }
 
         if (this.resInfo != null) {
             return this.resInfo.shallStoreCacheForProxy();
@@ -1153,8 +1250,8 @@ public final class plasmaHTCache {
 
         // -CGI access in request
         // CGI access makes the page very individual, and therefore not usable in caches
-        if (isPOST(this.nomalizedURLString)) { return false; }
-        if (isCGI(this.nomalizedURLString)) { return false; }
+        if (isPOST(this.url.toNormalform(true, true))) { return false; }
+        if (isCGI(this.url.toNormalform(true, true))) { return false; }
         
         if (this.resInfo != null) {
             return this.resInfo.shallUseCacheForProxy();

@@ -49,12 +49,12 @@ import de.anomic.kelondro.kelondroCloneableIterator;
 import de.anomic.kelondro.kelondroMergeIterator;
 import de.anomic.kelondro.kelondroOrder;
 import de.anomic.kelondro.kelondroRotateIterator;
-import de.anomic.net.URL;
 import de.anomic.plasma.urlPattern.plasmaURLPattern;
 import de.anomic.server.logging.serverLog;
 import de.anomic.server.serverMemory;
 import de.anomic.yacy.yacyDHTAction;
 import de.anomic.yacy.yacySeedDB;
+import de.anomic.yacy.yacyURL;
 
 public final class plasmaWordIndex implements indexRI {
 
@@ -261,7 +261,7 @@ public final class plasmaWordIndex implements indexRI {
         return ((long) microDateDays) * ((long) day);
     }
     
-    public int addPageIndex(URL url, String urlHash, Date urlModified, int size, plasmaParserDocument document, plasmaCondenser condenser, String language, char doctype, int outlinksSame, int outlinksOther) {
+    public int addPageIndex(yacyURL url, Date urlModified, int size, plasmaParserDocument document, plasmaCondenser condenser, String language, char doctype, int outlinksSame, int outlinksOther) {
         // this is called by the switchboard to put in a new page into the index
         // use all the words in one condenser object to simultanous create index entries
         
@@ -280,7 +280,7 @@ public final class plasmaWordIndex implements indexRI {
             word = (String) wentry.getKey();
             wprop = (plasmaCondenser.wordStatProp) wentry.getValue();
             assert (wprop.flags != null);
-            ientry = new indexRWIEntry(urlHash,
+            ientry = new indexRWIEntry(url.hash(),
                         urlLength, urlComps, (document == null) ? urlLength : document.getTitle().length(),
                         wprop.count,
                         condenser.words().size(),
@@ -560,7 +560,7 @@ public final class plasmaWordIndex implements indexRI {
             serverLog.logInfo("INDEXCLEANER", "IndexCleaner-Thread started");
             indexContainer container = null;
             indexRWIEntry entry = null;
-            URL url = null;
+            yacyURL url = null;
             HashSet urlHashs = new HashSet();
             Iterator indexContainerIterator = indexContainerSet(startHash, false, false, 100).iterator();
             while (indexContainerIterator.hasNext() && run) {

@@ -29,7 +29,7 @@ package de.anomic.data;
 import java.util.HashMap;
 import java.util.Random;
 
-import de.anomic.net.URL;
+import de.anomic.yacy.yacyURL;
 
 public class URLLicense {
 
@@ -46,7 +46,7 @@ public class URLLicense {
         this.keylen = keylen;
     }
     
-    public String aquireLicense(URL url) {
+    public String aquireLicense(yacyURL url) {
         // generate license key
         String license = "";
         while (license.length() < keylen) license += Integer.toHexString(random.nextInt());
@@ -59,10 +59,10 @@ public class URLLicense {
         return license;
     }
     
-    public URL releaseLicense(String license) {
-        URL url = null;
+    public yacyURL releaseLicense(String license) {
+        yacyURL url = null;
         synchronized (permissions) {
-            url = (URL) permissions.remove(license);
+            url = (yacyURL) permissions.remove(license);
         }
         /*
         if (url == null) {

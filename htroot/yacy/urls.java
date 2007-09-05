@@ -72,7 +72,7 @@ public class urls {
                 prop.put("item_" + c + "_description", entry.name());
                 prop.put("item_" + c + "_author", "");
                 prop.put("item_" + c + "_pubDate", serverDate.shortSecondTime(entry.appdate()));
-                prop.put("item_" + c + "_guid", entry.urlhash());
+                prop.put("item_" + c + "_guid", entry.url().hash());
                 c++;
                 count--;
             }

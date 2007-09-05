@@ -69,11 +69,11 @@ import de.anomic.kelondro.kelondroException;
 import de.anomic.kelondro.kelondroFlexSplitTable;
 import de.anomic.kelondro.kelondroIndex;
 import de.anomic.kelondro.kelondroRow;
-import de.anomic.net.URL;
 import de.anomic.plasma.urlPattern.plasmaURLPattern;
 import de.anomic.server.serverCodings;
 import de.anomic.server.logging.serverLog;
 import de.anomic.yacy.yacySeedDB;
+import de.anomic.yacy.yacyURL;
 
 public final class plasmaCrawlLURL {
 
@@ -118,8 +118,8 @@ public final class plasmaCrawlLURL {
     public synchronized void stack(indexURLEntry e, String initiatorHash, String executorHash, int stackType) {
         if (e == null) { return; }
         try {
-            if (initiatorHash == null) { initiatorHash = plasmaURL.dummyHash; }
-            if (executorHash == null) { executorHash = plasmaURL.dummyHash; }
+            if (initiatorHash == null) { initiatorHash = yacyURL.dummyHash; }
+            if (executorHash == null) { executorHash = yacyURL.dummyHash; }
             switch (stackType) {
                 case 0: break;
                 case 1: externResultStack.add(e.hash() + initiatorHash + executorHash); break;
@@ -161,6 +161,7 @@ public final class plasmaCrawlLURL {
         // - look into the hash cache
         // - look into the filed properties
         // if the url cannot be found, this returns null
+        if (urlHash == null) return null;
         try {
             kelondroRow.Entry entry = urlIndexFile.get(urlHash.getBytes());
             if (entry == null) return null;
@@ -394,7 +395,7 @@ public final class plasmaCrawlLURL {
                     if ((pos = oldUrlStr.indexOf("://")) != -1) {
                         // trying to correct the url
                         String newUrlStr = "http://" + oldUrlStr.substring(pos + 3);
-                        URL newUrl = new URL(newUrlStr);
+                        yacyURL newUrl = new yacyURL(newUrlStr, null);
 
                         // doing a http head request to test if the url is correct
                         theHttpc = httpc.getInstance(newUrl.getHost(), newUrl.getHost(), newUrl.getPort(), 30000, false, plasmaSwitchboard.getSwitchboard().remoteProxyConfig);
@@ -534,7 +535,7 @@ public final class plasmaCrawlLURL {
         // returns url-hash
         if (args[0].equals("-h")) try {
             // arg 1 is url
-            System.out.println("HASH: " + plasmaURL.urlHash(new URL(args[1])));
+            System.out.println("HASH: " + (new yacyURL(args[1], null)).hash());
         } catch (MalformedURLException e) {}
         if (args[0].equals("-l")) try {
             // arg 1 is path to URLCache

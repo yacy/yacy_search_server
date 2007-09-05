@@ -58,7 +58,6 @@ import de.anomic.htmlFilter.htmlFilterImageEntry;
 import de.anomic.http.httpHeader;
 import de.anomic.http.httpc;
 import de.anomic.index.indexURLEntry;
-import de.anomic.net.URL;
 import de.anomic.plasma.plasmaCondenser;
 import de.anomic.plasma.plasmaHTCache;
 import de.anomic.plasma.plasmaParserDocument;
@@ -70,6 +69,7 @@ import de.anomic.plasma.parser.ParserException;
 import de.anomic.server.serverFileUtils;
 import de.anomic.server.serverObjects;
 import de.anomic.server.serverSwitch;
+import de.anomic.yacy.yacyURL;
 
 public class ViewFile {
 
@@ -99,7 +99,7 @@ public class ViewFile {
         String viewMode = post.get("viewMode","sentences");
         prop.put("error_vMode-" + viewMode, 1);
         
-        URL url = null;
+        yacyURL url = null;
         String descr = "";
         int wordCount = 0;
         int size = 0;
@@ -144,7 +144,7 @@ public class ViewFile {
             }
 
             // define an url by post parameter
-            url = new URL(urlString);
+            url = new yacyURL(urlString, null);
             pre = post.get("pre", "false").equals("true");
         } catch (MalformedURLException e) {}
         

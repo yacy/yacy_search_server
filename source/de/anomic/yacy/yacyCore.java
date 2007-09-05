@@ -70,7 +70,6 @@ import java.util.List;
 import java.util.Map;
 
 import de.anomic.http.httpc;
-import de.anomic.net.URL;
 import de.anomic.plasma.plasmaSwitchboard;
 import de.anomic.server.serverCore;
 import de.anomic.server.serverSemaphore;
@@ -755,7 +754,7 @@ public class yacyCore {
             }
 
             // ensure that the seed file url is configured properly
-            URL seedURL;
+            yacyURL seedURL;
             try{
                 final String seedURLStr = sb.getConfig("seedURL", "");
                 if (seedURLStr.length() == 0) { throw new MalformedURLException("The seed-file url must not be empty."); }
@@ -765,7 +764,7 @@ public class yacyCore {
                 )){ 
                     throw new MalformedURLException("Unsupported protocol."); 
                 }
-                seedURL = new URL(seedURLStr);
+                seedURL = new yacyURL(seedURLStr, null);
             } catch(MalformedURLException e) {
                 final String errorMsg = "Malformed seed file URL '" + sb.getConfig("seedURL", "") + "'. " + e.getMessage();
                 log.logWarning("SaveSeedList: " + errorMsg);
@@ -783,7 +782,7 @@ public class yacyCore {
                             "\n\tPrevious peerType is '" + seedDB.mySeed.get(yacySeed.PEERTYPE, yacySeed.PEERTYPE_JUNIOR) + "'.");
 
 //              logt = seedDB.uploadCache(seedFTPServer, seedFTPAccount, seedFTPPassword, seedFTPPath, seedURL);
-                logt = seedDB.uploadCache(uploader,sb, seedDB, seedURL);
+                logt = seedDB.uploadCache(uploader, sb, seedDB, seedURL);
                 if (logt != null) {
                     if (logt.indexOf("Error") >= 0) {
                         seedDB.mySeed.put(yacySeed.PEERTYPE, prevStatus);

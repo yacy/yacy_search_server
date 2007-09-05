@@ -42,13 +42,13 @@
 
 package de.anomic.plasma;
 
-import de.anomic.net.URL;
 import de.anomic.server.serverSemaphore;
+import de.anomic.yacy.yacyURL;
 
 public final class plasmaCrawlLoaderMessage {
     public final int crawlingPriority;
     
-    public final URL url;
+    public final yacyURL url;
     public final String name;
     public final String referer;
     public final String initiator;
@@ -64,7 +64,7 @@ public final class plasmaCrawlLoaderMessage {
     
     // loadParallel(URL url, String referer, String initiator, int depth, plasmaCrawlProfile.entry profile) {
     public plasmaCrawlLoaderMessage(
-            URL url,
+            yacyURL url,
             String name,                       // the name of the url, from anchor tag <a>name</a>
             String referer, 
             String initiator, 

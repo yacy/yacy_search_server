@@ -52,6 +52,7 @@ import java.net.MalformedURLException;
 
 import de.anomic.server.serverCachedFileOutputStream;
 import de.anomic.server.serverFileUtils;
+import de.anomic.yacy.yacyURL;
 
 import java.util.Arrays;
 import java.util.HashMap;
@@ -62,12 +63,11 @@ import java.util.Map;
 import java.util.TreeSet;
 
 import de.anomic.htmlFilter.htmlFilterImageEntry;
-import de.anomic.net.URL;
 import de.anomic.plasma.parser.Parser;
 
 public class plasmaParserDocument {
     
-    private URL location;       // the source url
+    private yacyURL location;       // the source url
     private String mimeType;    // mimeType as taken from http header
     private String charset;     // the charset of the document
     private List keywords;  // most resources provide a keyword field
@@ -83,11 +83,11 @@ public class plasmaParserDocument {
     // text in image tags.
     private Map hyperlinks, audiolinks, videolinks, applinks;
     private Map emaillinks;
-    private URL favicon;
+    private yacyURL favicon;
     private boolean resorted;
     private InputStream textStream;
     
-    protected plasmaParserDocument(URL location, String mimeType, String charset,
+    protected plasmaParserDocument(yacyURL location, String mimeType, String charset,
                     String[] keywords, String title, String author,
                     String[] sections, String abstrct,
                     Object text, Map anchors, TreeSet images) {
@@ -118,32 +118,32 @@ public class plasmaParserDocument {
         }
     }
     
-    public plasmaParserDocument(URL location, String mimeType, String charset) {
+    public plasmaParserDocument(yacyURL location, String mimeType, String charset) {
         this(location, mimeType, charset, null, null, null, null, null, (Object)null, null, null);
     }
     
-    public plasmaParserDocument(URL location, String mimeType, String charset,
+    public plasmaParserDocument(yacyURL location, String mimeType, String charset,
                     String[] keywords, String title, String author,
                     String[] sections, String abstrct,
                     byte[] text, Map anchors, TreeSet images) {
         this(location, mimeType, charset, keywords, title, author, sections, abstrct, (Object)text, anchors, images);
     }
     
-    public plasmaParserDocument(URL location, String mimeType, String charset,
+    public plasmaParserDocument(yacyURL location, String mimeType, String charset,
             String[] keywords, String title, String author,
             String[] sections, String abstrct,
             File text, Map anchors, TreeSet images) {
         this(location, mimeType, charset, keywords, title, author, sections, abstrct, (Object)text, anchors, images);
     }
     
-    public plasmaParserDocument(URL location, String mimeType, String charset,
+    public plasmaParserDocument(yacyURL location, String mimeType, String charset,
             String[] keywords, String title, String author,
             String[] sections, String abstrct,
             serverCachedFileOutputStream text, Map anchors, TreeSet images) {
         this(location, mimeType, charset, keywords, title, author, sections, abstrct, (Object)text, anchors, images);
     }
 
-    public URL getLocation() {
+    public yacyURL getLocation() {
         return this.location;
     }
     
@@ -304,7 +304,7 @@ public class plasmaParserDocument {
         
         // extract hyperlinks, medialinks and emaillinks from anchorlinks
         Iterator i;
-        URL url;
+        yacyURL url;
         String u;
         int extpos, qpos;
         String ext = null;
@@ -330,7 +330,7 @@ public class plasmaParserDocument {
                         ext = u.substring(extpos + 1).toLowerCase();
                     }
                     try {
-                        url = new URL(u);
+                        url = new yacyURL(u, null);
                         u = url.toNormalform(true, true);
                         if (plasmaParser.mediaExtContains(ext)) {
                             // this is not a normal anchor, its a media link
@@ -399,14 +399,14 @@ public class plasmaParserDocument {
     /**
      * @return the {@link URL} to the favicon that belongs to the document
      */
-    public URL getFavicon() {
+    public yacyURL getFavicon() {
     	return this.favicon;
     }
     
     /**
      * @param faviconURL the {@link URL} to the favicon that belongs to the document
      */
-    public void setFavicon(URL faviconURL) {
+    public void setFavicon(yacyURL faviconURL) {
     	this.favicon = faviconURL;
     }
     

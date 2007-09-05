@@ -30,7 +30,6 @@ import java.util.Locale;
 
 import de.anomic.http.httpHeader;
 import de.anomic.index.indexURLEntry;
-import de.anomic.net.URL;
 import de.anomic.plasma.plasmaHTCache;
 import de.anomic.plasma.plasmaSwitchboard;
 import de.anomic.server.serverObjects;
@@ -39,6 +38,7 @@ import de.anomic.server.logging.serverLog;
 import de.anomic.tools.nxTools;
 import de.anomic.yacy.yacyCore;
 import de.anomic.yacy.yacySeed;
+import de.anomic.yacy.yacyURL;
 
 public class CrawlResults {
 
@@ -170,7 +170,7 @@ public class CrawlResults {
 
                     urlstr = comp.url().toNormalform(false, true);
                     urltxt = nxTools.shortenURLString(urlstr, 72); // shorten the string text like a URL
-                    cachepath = plasmaHTCache.getCachePath(new URL(urlstr)).toString().replace('\\', '/').substring(plasmaHTCache.cachePath.toString().length() + 1);
+                    cachepath = plasmaHTCache.getCachePath(new yacyURL(urlstr, null)).toString().replace('\\', '/').substring(plasmaHTCache.cachePath.toString().length() + 1);
 
                     prop.put("table_indexed_" + cnt + "_dark", (dark) ? 1 : 0);
                     if (showControl) {

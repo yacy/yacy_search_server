@@ -75,12 +75,12 @@ import de.anomic.htmlFilter.htmlFilterImageEntry;
 import de.anomic.htmlFilter.htmlFilterInputStream;
 import de.anomic.htmlFilter.htmlFilterWriter;
 import de.anomic.http.httpc;
-import de.anomic.net.URL;
 import de.anomic.plasma.parser.Parser;
 import de.anomic.plasma.parser.ParserException;
 import de.anomic.plasma.parser.ParserInfo;
 import de.anomic.server.serverFileUtils;
 import de.anomic.server.logging.serverLog;
+import de.anomic.yacy.yacyURL;
 
 public final class plasmaParser {
     public static final String PARSER_MODE_PROXY   = "PROXY";
@@ -322,11 +322,11 @@ public final class plasmaParser {
         }
     }
     
-    public static boolean supportedRealTimeContent(URL url, String mimeType) {
+    public static boolean supportedRealTimeContent(yacyURL url, String mimeType) {
         return realtimeParsableMimeTypesContains(mimeType) && supportedRealtimeFileExtContains(url);
     }    
     
-    public static boolean supportedRealtimeFileExtContains(URL url) {
+    public static boolean supportedRealtimeFileExtContains(yacyURL url) {
         String fileExt = getFileExt(url);
         synchronized (supportedRealtimeFileExt) {
             return supportedRealtimeFileExt.contains(fileExt);
@@ -334,7 +334,7 @@ public final class plasmaParser {
     }
 
     
-    public static String getFileExt(URL url) {
+    public static String getFileExt(yacyURL url) {
         // getting the file path
         String name = url.getPath();
         
@@ -566,7 +566,7 @@ public final class plasmaParser {
         } catch (Exception e) {/* ignore this */}
     }    
     
-    public plasmaParserDocument parseSource(URL location, String mimeType, String charset, byte[] sourceArray) 
+    public plasmaParserDocument parseSource(yacyURL location, String mimeType, String charset, byte[] sourceArray) 
     throws InterruptedException, ParserException {
         ByteArrayInputStream byteIn = null;
         try {
@@ -600,7 +600,7 @@ public final class plasmaParser {
         
     }
 
-    public plasmaParserDocument parseSource(URL location, String theMimeType, String theDocumentCharset, File sourceFile) throws InterruptedException, ParserException {
+    public plasmaParserDocument parseSource(yacyURL location, String theMimeType, String theDocumentCharset, File sourceFile) throws InterruptedException, ParserException {
         
         BufferedInputStream sourceStream = null;
         try {
@@ -644,7 +644,7 @@ public final class plasmaParser {
      * @throws InterruptedException
      * @throws ParserException
      */
-    public plasmaParserDocument parseSource(URL location, String theMimeType, String theDocumentCharset, long contentLength, InputStream sourceStream) throws InterruptedException, ParserException {        
+    public plasmaParserDocument parseSource(yacyURL location, String theMimeType, String theDocumentCharset, long contentLength, InputStream sourceStream) throws InterruptedException, ParserException {        
         Parser theParser = null;
         String mimeType = null;
         try {
@@ -719,7 +719,7 @@ public final class plasmaParser {
         }        
     }
     
-    private plasmaParserDocument parseHtml(URL location, String mimeType, String documentCharset, InputStream sourceStream) throws IOException, ParserException {
+    private plasmaParserDocument parseHtml(yacyURL location, String mimeType, String documentCharset, InputStream sourceStream) throws IOException, ParserException {
         
         // make a scraper and transformer
         htmlFilterInputStream htmlFilter = new htmlFilterInputStream(sourceStream,documentCharset,location,null,false);
@@ -750,13 +750,13 @@ public final class plasmaParser {
         return transformScraper(location, mimeType, documentCharset, scraper);
     }
     
-    public plasmaParserDocument transformScraper(URL location, String mimeType, String charSet, htmlFilterContentScraper scraper) {
+    public plasmaParserDocument transformScraper(yacyURL location, String mimeType, String charSet, htmlFilterContentScraper scraper) {
         try {
             String[] sections = new String[scraper.getHeadlines(1).length + scraper.getHeadlines(2).length + scraper.getHeadlines(3).length + scraper.getHeadlines(4).length];
             int p = 0;
             for (int i = 1; i <= 4; i++) for (int j = 0; j < scraper.getHeadlines(i).length; j++) sections[p++] = scraper.getHeadlines(i)[j];
             plasmaParserDocument ppd =  new plasmaParserDocument(
-                    new URL(location.toNormalform(true, true)),
+                    new yacyURL(location.toNormalform(true, true), null),
                     mimeType,
                     charSet,
                     scraper.getKeywords(),
@@ -897,7 +897,7 @@ public final class plasmaParser {
     	httpc remote = null;
         try {
             Object content = null;
-            URL contentURL = null;
+            yacyURL contentURL = null;
             long contentLength = -1;
             String contentMimeType = "application/octet-stream";
             String charSet = "UTF-8";
@@ -909,9 +909,9 @@ public final class plasmaParser {
             String mode = args[0];
             if (mode.equalsIgnoreCase("-f")) {
                 content = new File(args[1]);
-                contentURL = new URL((File)content);
+                contentURL = new yacyURL((File)content);
             } else if (mode.equalsIgnoreCase("-u")) {
-                contentURL = new URL(args[1]);
+                contentURL = new yacyURL(args[1], null);
                 
                 // downloading the document content
                 remote = httpc.getInstance(
@@ -1003,7 +1003,7 @@ public final class plasmaParser {
         config.enableAllParsers();        
     }
     
-    public static boolean supportedContent(URL url, String mimeType) {
+    public static boolean supportedContent(yacyURL url, String mimeType) {
         if (url == null) throw new NullPointerException();
         
         Iterator configs = parserConfigList.values().iterator();
@@ -1017,7 +1017,7 @@ public final class plasmaParser {
         return false;
     }    
 
-    public static boolean supportedContent(String parserMode, URL url, String mimeType) {
+    public static boolean supportedContent(String parserMode, yacyURL url, String mimeType) {
         if (!PARSER_MODE.contains(parserMode)) throw new IllegalArgumentException();
         if (url == null) throw new NullPointerException();
         

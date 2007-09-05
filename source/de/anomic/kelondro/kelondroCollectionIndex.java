@@ -41,11 +41,11 @@ import java.util.TimeZone;
 import java.util.TreeMap;
 
 import de.anomic.index.indexContainer;
-import de.anomic.plasma.plasmaURL;
 import de.anomic.server.serverCodings;
 import de.anomic.server.serverFileUtils;
 import de.anomic.server.serverMemory;
 import de.anomic.server.logging.serverLog;
+import de.anomic.yacy.yacyURL;
 
 public class kelondroCollectionIndex {
 
@@ -762,7 +762,7 @@ public class kelondroCollectionIndex {
         while (i.hasNext()) {
             entry = (kelondroRow.Entry) i.next();
             ref = entry.getColBytes(0);
-            if ((ref.length == 12) && (plasmaURL.probablyRootURL(new String(ref)))) {
+            if ((ref.length == 12) && (yacyURL.probablyRootURL(new String(ref)))) {
                 survival.addUnique(entry);
                 i.remove();
             }

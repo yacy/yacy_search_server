@@ -314,12 +314,11 @@ public final class userDB {
         public static final String BLOG_RIGHT = "blogRight";
         public static final String WIKIADMIN_RIGHT = "wikiAdminRight";
         public static final String BOOKMARK_RIGHT = "bookmarkRight";
-        public static final String SOAP_RIGHT = "soapRight";
         
         //to create new rights, you just need to edit this strings
         public static final String RIGHT_TYPES=
         	ADMIN_RIGHT+","+DOWNLOAD_RIGHT+","+UPLOAD_RIGHT+","+PROXY_RIGHT+","+
-        	BLOG_RIGHT+","+BOOKMARK_RIGHT+","+WIKIADMIN_RIGHT+","+SOAP_RIGHT;
+        	BLOG_RIGHT+","+BOOKMARK_RIGHT+","+WIKIADMIN_RIGHT;
         public static final String RIGHT_NAMES="Admin,Download,Upload,Proxy usage,Blog,Bookmark,Wiki Admin,SOAP";
         
         public static final int PROXY_ALLOK = 0; //can Surf

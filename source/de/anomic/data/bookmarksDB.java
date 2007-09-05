@@ -48,6 +48,7 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.UnsupportedEncodingException;
 import java.io.Writer;
+import java.net.MalformedURLException;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -72,7 +73,6 @@ import org.xml.sax.SAXException;
 import de.anomic.htmlFilter.htmlFilterContentScraper;
 import de.anomic.htmlFilter.htmlFilterWriter;
 import de.anomic.plasma.plasmaCondenser;
-import de.anomic.plasma.plasmaURL;
 import de.anomic.kelondro.kelondroCloneableIterator;
 import de.anomic.kelondro.kelondroDyn;
 import de.anomic.kelondro.kelondroException;
@@ -80,10 +80,10 @@ import de.anomic.kelondro.kelondroMapObjects;
 import de.anomic.kelondro.kelondroNaturalOrder;
 import de.anomic.kelondro.kelondroObjects;
 import de.anomic.kelondro.kelondroObjectsMapEntry;
-import de.anomic.net.URL;
 import de.anomic.server.serverDate;
 import de.anomic.server.serverFileUtils;
 import de.anomic.server.logging.serverLog;
+import de.anomic.yacy.yacyURL;
 
 public class bookmarksDB {
     kelondroMapObjects tagsTable;
@@ -390,7 +390,7 @@ public class bookmarksDB {
         
     }
     
-    public int importFromBookmarks(URL baseURL, String input, String tag, boolean importPublic){
+    public int importFromBookmarks(yacyURL baseURL, String input, String tag, boolean importPublic){
 		try {
 			// convert string to inputstream
 			ByteArrayInputStream byteIn = new ByteArrayInputStream(input.getBytes("UTF-8"));
@@ -402,7 +402,7 @@ public class bookmarksDB {
 			return 0;
 		}        	
     }
-    public int importFromBookmarks(URL baseURL, InputStreamReader input, String tag, boolean importPublic){
+    public int importFromBookmarks(yacyURL baseURL, InputStreamReader input, String tag, boolean importPublic){
     	int importCount = 0;
     	
     	HashMap links=new HashMap();
@@ -712,7 +712,11 @@ public class bookmarksDB {
             if(!url.toLowerCase().startsWith("http://") && !url.toLowerCase().startsWith("https://")){
                 url="http://"+url;
             }
-            this.urlHash=plasmaURL.urlHash(url);
+            try {
+                this.urlHash=(new yacyURL(url, null)).hash();
+            } catch (MalformedURLException e) {
+                this.urlHash = null;
+            }
             entry.put(BOOKMARK_URL, url);
             this.timestamp=System.currentTimeMillis();
             tags=new HashSet();
@@ -728,7 +732,7 @@ public class bookmarksDB {
             
             removeBookmark(this.urlHash); //prevent empty tags
         }
-        public Bookmark(String urlHash, URL url){
+        public Bookmark(String urlHash, yacyURL url){
             super();
             this.urlHash=urlHash;
             entry.put(BOOKMARK_URL, url.toNormalform(false, true));
@@ -742,9 +746,9 @@ public class bookmarksDB {
             tags=new HashSet();
             timestamp=System.currentTimeMillis();
         }
-        
-        public Bookmark(kelondroObjectsMapEntry map) {
-            this(plasmaURL.urlHash((String)map.map().get(BOOKMARK_URL)), map.map());
+
+        public Bookmark(kelondroObjectsMapEntry map) throws MalformedURLException {
+            this((new yacyURL((String)map.map().get(BOOKMARK_URL), null)).hash(), map.map());
         }
         
         private Map toMap(){

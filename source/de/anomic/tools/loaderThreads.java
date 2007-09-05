@@ -46,7 +46,7 @@ import java.util.Hashtable;
 
 import de.anomic.http.httpRemoteProxyConfig;
 import de.anomic.http.httpc;
-import de.anomic.net.URL;
+import de.anomic.yacy.yacyURL;
 
 public class loaderThreads {
     
@@ -83,11 +83,11 @@ public class loaderThreads {
         this.failed = 0;
     }
     
-    public void newPropLoaderThread(String name, URL url) {
+    public void newPropLoaderThread(String name, yacyURL url) {
         newThread(name, url, new propLoader());
     }
     
-    public void newThread(String name, URL url, loaderProcess process) {
+    public void newThread(String name, yacyURL url, loaderProcess process) {
         Thread t = new loaderThread(url, process);
         threads.put(name, t);
         t.start();
@@ -130,13 +130,13 @@ public class loaderThreads {
     }
 
     protected class loaderThread extends Thread {
-        private URL url;
+        private yacyURL url;
         private Exception error;
         private loaderProcess process;
         private byte[] page;
         private boolean loaded;
         
-        public loaderThread(URL url, loaderProcess process) {
+        public loaderThread(yacyURL url, loaderProcess process) {
             this.url = url;
             this.process = process;
             this.error = null;
@@ -232,7 +232,7 @@ public class loaderThreads {
         httpRemoteProxyConfig proxyConfig = httpRemoteProxyConfig.init("192.168.1.122", 3128);
         loaderThreads loader = new loaderThreads(proxyConfig);
         try {
-            loader.newPropLoaderThread("load1", new URL("http://www.anomic.de/superseed.txt"));
+            loader.newPropLoaderThread("load1", new yacyURL("http://www.anomic.de/superseed.txt", null));
         } catch (MalformedURLException e) {
             
         }

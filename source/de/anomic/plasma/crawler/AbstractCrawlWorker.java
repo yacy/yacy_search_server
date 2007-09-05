@@ -49,10 +49,9 @@ package de.anomic.plasma.crawler;
 
 import java.io.File;
 import java.io.IOException;
+import java.net.MalformedURLException;
 import java.util.Date;
 
-import de.anomic.plasma.plasmaURL;
-import de.anomic.net.URL;
 import de.anomic.plasma.plasmaCrawlEntry;
 import de.anomic.plasma.plasmaCrawlLoaderMessage;
 import de.anomic.plasma.plasmaCrawlProfile;
@@ -61,6 +60,7 @@ import de.anomic.plasma.plasmaHTCache;
 import de.anomic.plasma.plasmaSwitchboard;
 import de.anomic.server.logging.serverLog;
 import de.anomic.yacy.yacyCore;
+import de.anomic.yacy.yacyURL;
 
 public abstract class AbstractCrawlWorker extends Thread implements plasmaCrawlWorker {
     
@@ -86,7 +86,7 @@ public abstract class AbstractCrawlWorker extends Thread implements plasmaCrawlW
      * Crawl job specific variables
      * ============================================================ */    
     public plasmaCrawlLoaderMessage theMsg;
-    protected URL url;
+    protected yacyURL url;
     protected String name;
     protected String refererURLString;
     protected String initiator;
@@ -281,7 +281,12 @@ public abstract class AbstractCrawlWorker extends Thread implements plasmaCrawlW
         this.errorMessage = failreason;
         
         // convert the referrer URL into a hash value
-        String referrerHash = (this.refererURLString==null)?null:plasmaURL.urlHash(this.refererURLString);
+        String referrerHash;
+        try {
+            referrerHash = (this.refererURLString == null) ? null : (new yacyURL(this.refererURLString, null)).hash();
+        } catch (MalformedURLException e) {
+            referrerHash = null;
+        }
         
         // create a new errorURL DB entry
         plasmaCrawlEntry bentry = new plasmaCrawlEntry(

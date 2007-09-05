@@ -58,7 +58,6 @@ import java.util.HashSet;
 import de.anomic.data.listManager;
 import de.anomic.http.httpHeader;
 import de.anomic.http.httpc;
-import de.anomic.net.URL;
 import de.anomic.plasma.plasmaSwitchboard;
 import de.anomic.plasma.urlPattern.abstractURLPattern;
 import de.anomic.server.serverObjects;
@@ -66,6 +65,7 @@ import de.anomic.server.serverSwitch;
 import de.anomic.tools.nxTools;
 import de.anomic.yacy.yacyCore;
 import de.anomic.yacy.yacySeed;
+import de.anomic.yacy.yacyURL;
 
 public class sharedBlacklist_p {
 
@@ -131,7 +131,7 @@ public class sharedBlacklist_p {
                         reqHeader.put(httpHeader.CACHE_CONTROL,"no-cache");
 
                         // get List
-                        URL u = new URL(downloadURL);
+                        yacyURL u = new yacyURL(downloadURL, null);
                         otherBlacklist = nxTools.strings(httpc.wget(u, u.getHost(), 12000, null, null, switchboard.remoteProxyConfig,reqHeader, null), "UTF-8"); 
                     } catch (Exception e) {
                         prop.put("status", STATUS_PEER_UNKNOWN);
@@ -147,7 +147,7 @@ public class sharedBlacklist_p {
                 prop.put("page_source", downloadURL);
 
                 try {
-                    URL u = new URL(downloadURL);
+                    yacyURL u = new yacyURL(downloadURL, null);
                     otherBlacklist = nxTools.strings(httpc.wget(u, u.getHost(), 6000, null, null, switchboard.remoteProxyConfig, null, null), "UTF-8"); //get List
                 } catch (Exception e) {
                     prop.put("status", STATUS_URL_PROBLEM);

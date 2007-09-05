@@ -51,11 +51,12 @@ package de.anomic.plasma.cache;
 import java.lang.reflect.Constructor;
 import java.util.Map;
 
-import de.anomic.net.URL;
+import de.anomic.yacy.yacyURL;
+
 
 public class ResourceInfoFactory {
     public IResourceInfo buildResourceInfoObj(
-            URL resourceURL,
+            yacyURL resourceURL,
             Map resourceMetadata
     ) throws UnsupportedProtocolException, IllegalAccessException {
         
@@ -73,7 +74,7 @@ public class ResourceInfoFactory {
             
             // getting the constructor
             final Constructor classConstructor = moduleClass.getConstructor( new Class[] { 
-                    URL.class,
+                    yacyURL.class,
                     Map.class
             } );
             

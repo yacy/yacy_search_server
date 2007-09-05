@@ -58,7 +58,6 @@ import de.anomic.index.indexURLEntry;
 import de.anomic.kelondro.kelondroBitfield;
 import de.anomic.kelondro.kelondroMSetTools;
 import de.anomic.kelondro.kelondroNaturalOrder;
-import de.anomic.net.URL;
 import de.anomic.plasma.plasmaCondenser;
 import de.anomic.plasma.plasmaParserDocument;
 import de.anomic.plasma.plasmaSearchEvent;
@@ -69,7 +68,6 @@ import de.anomic.plasma.plasmaSearchProcessing;
 import de.anomic.plasma.plasmaSnippetCache;
 import de.anomic.plasma.plasmaSwitchboard;
 import de.anomic.server.serverCore;
-import de.anomic.server.serverDomains;
 import de.anomic.server.serverDate;
 import de.anomic.server.serverObjects;
 import de.anomic.server.serverSwitch;
@@ -78,6 +76,7 @@ import de.anomic.tools.crypt;
 import de.anomic.yacy.yacyCore;
 import de.anomic.yacy.yacyNewsPool;
 import de.anomic.yacy.yacyNewsRecord;
+import de.anomic.yacy.yacyURL;
 
 public class yacysearch {
 
@@ -104,9 +103,9 @@ public class yacysearch {
             // save referrer
             // System.out.println("HEADER=" + header.toString());
             if (referer != null) {
-                URL url;
-                try { url = new URL(referer); } catch (MalformedURLException e) { url = null; }
-                if ((url != null) && (!serverDomains.isLocal(url))) {
+                yacyURL url;
+                try { url = new yacyURL(referer, null); } catch (MalformedURLException e) { url = null; }
+                if ((url != null) && (!url.isLocal())) {
                     final HashMap referrerprop = new HashMap();
                     referrerprop.put("count", "1");
                     referrerprop.put("clientip", header.get("CLIENTIP"));
@@ -454,8 +453,8 @@ public class yacysearch {
 
             int depth = post.getInt("depth", 0);
             int columns = post.getInt("columns", 6);
-            URL url = null;
-            try {url = new URL(post.get("url", ""));} catch (MalformedURLException e) {}
+            yacyURL url = null;
+            try {url = new yacyURL(post.get("url", ""), null);} catch (MalformedURLException e) {}
             plasmaSearchImages si = new plasmaSearchImages(6000, url, depth);
             Iterator i = si.entries();
             htmlFilterImageEntry ie;

@@ -33,15 +33,14 @@ import java.net.MalformedURLException;
 import java.util.HashMap;
 
 import de.anomic.http.httpHeader;
-import de.anomic.net.URL;
 import de.anomic.plasma.plasmaSearchQuery;
 import de.anomic.plasma.plasmaSwitchboard;
-import de.anomic.server.serverDomains;
 import de.anomic.server.serverDate;
 import de.anomic.server.serverObjects;
 import de.anomic.server.serverSwitch;
 import de.anomic.yacy.yacyCore;
 import de.anomic.yacy.yacySeed;
+import de.anomic.yacy.yacyURL;
 
 public class index {
 
@@ -80,13 +79,13 @@ public class index {
 
         final String referer = (String) header.get(httpHeader.REFERER);
         if (referer != null) {
-            URL url;
+            yacyURL url;
             try {
-                url = new URL(referer);
+                url = new yacyURL(referer, null);
             } catch (MalformedURLException e) {
                 url = null;
             }
-            if ((url != null) && (!serverDomains.isLocal(url))) {
+            if ((url != null) && (!url.isLocal())) {
                 final HashMap referrerprop = new HashMap();
                 referrerprop.put("count", "1");
                 referrerprop.put("clientip", header.get(httpHeader.CONNECTION_PROP_CLIENTIP));
