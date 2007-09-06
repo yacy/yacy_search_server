@@ -1647,14 +1647,14 @@ public final class plasmaSwitchboard extends serverAbstractSwitch implements ser
         }
         return hasDoneSomething;
     }
-    
+    /*
     synchronized public void htEntryStoreEnqueued(plasmaHTCache.Entry entry) {
         if (plasmaHTCache.full())
             htEntryStoreProcess(entry);
         else
             plasmaHTCache.push(entry);
     }
-    
+    */
     synchronized public boolean htEntryStoreProcess(plasmaHTCache.Entry entry) {
         
         if (entry == null) return false;

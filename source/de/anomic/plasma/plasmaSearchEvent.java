@@ -421,7 +421,9 @@ public final class plasmaSearchEvent {
     }
 
     public static plasmaSearchEvent getEvent(String eventID) {
-        return (plasmaSearchEvent) lastEvents.get(eventID);
+        synchronized (lastEvents) {
+            return (plasmaSearchEvent) lastEvents.get(eventID);
+        }
     }
     
     public static plasmaSearchEvent getEvent(plasmaSearchQuery query,
@@ -431,31 +433,34 @@ public final class plasmaSearchEvent {
             TreeMap preselectedPeerHashes,
             boolean generateAbstracts,
             TreeSet abstractSet) {
-        plasmaSearchEvent event = (plasmaSearchEvent) lastEvents.get(query.id());
-        if (event == null) {
-            event = new plasmaSearchEvent(query, ranking, localTiming, wordIndex, preselectedPeerHashes, generateAbstracts, abstractSet);
-        } else {
-            //re-new the event time for this event, so it is not deleted next time too early
-            event.eventTime = System.currentTimeMillis();
-            // replace the query, because this contains the current result offset
-            event.query = query;
-        }
-        
-        // if worker threads had been alive, but did not succeed, start them again to fetch missing links
-        if ((query.onlineSnippetFetch) &&
-            (!event.anyWorkerAlive()) &&
-            (event.resultList.size() < query.neededResults()) &&
-            ((event.getLocalCount() + event.getGlobalCount()) > event.resultList.size())) {
-            // set new timeout
-            event.eventTime = System.currentTimeMillis();
-            // start worker threads to fetch urls and snippets
-            event.workerThreads = new resultWorker[workerThreadCount];
-            for (int i = 0; i < workerThreadCount; i++) {
-                event.workerThreads[i] = event.deployWorker(i, 3 * event.process.getTargetTime());
+        synchronized (lastEvents) {
+            plasmaSearchEvent event = (plasmaSearchEvent) lastEvents.get(query.id());
+            if (event == null) {
+                event = new plasmaSearchEvent(query, ranking, localTiming, wordIndex, preselectedPeerHashes, generateAbstracts, abstractSet);
+            } else {
+                //re-new the event time for this event, so it is not deleted next time too early
+                event.eventTime = System.currentTimeMillis();
+                // replace the query, because this contains the current result offset
+                event.query = query;
             }
+        
+            // if worker threads had been alive, but did not succeed, start them again to fetch missing links
+            if ((query.onlineSnippetFetch) &&
+                (!event.anyWorkerAlive()) &&
+                (event.resultList.size() < query.neededResults()) &&
+                ((event.getLocalCount() + event.getGlobalCount()) > event.resultList.size())) {
+                // set new timeout
+                event.eventTime = System.currentTimeMillis();
+                // start worker threads to fetch urls and snippets
+                event.workerThreads = new resultWorker[workerThreadCount];
+                for (int i = 0; i < workerThreadCount; i++) {
+                    event.workerThreads[i] = event.deployWorker(i, 3 * event.process.getTargetTime());
+                }
+            }
+        
+            return event;
         }
         
-        return event;
     }
     
     private resultWorker deployWorker(int id, long lifetime) {

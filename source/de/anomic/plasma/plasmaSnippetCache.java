@@ -590,8 +590,11 @@ public class plasmaSnippetCache {
             if (maxpos > maxLength) {
                 // the string is too long, even if we cut it at the end
                 // so cut it here at both ends at once
-                int newlen = maxpos - minpos + 10;
+                assert maxpos >= minpos;
+                int newlen = Math.max(10, maxpos - minpos + 10);
                 int around = (maxLength - newlen) / 2;
+                assert minpos - around < sentence.length() : "maxpos = " + maxpos + ", minpos = " + minpos + ", around = " + around + ", sentence.length() = " + sentence.length();
+                assert ((maxpos + around) <= sentence.length()) && ((maxpos + around) <= sentence.length()) : "maxpos = " + maxpos + ", minpos = " + minpos + ", around = " + around + ", sentence.length() = " + sentence.length();
                 sentence = "[..] " + sentence.substring(minpos - around, ((maxpos + around) > sentence.length()) ? sentence.length() : (maxpos + around)).trim() + " [..]";
                 minpos = around;
                 maxpos = sentence.length() - around - 5;
@@ -715,9 +718,11 @@ public class plasmaSnippetCache {
         Enumeration words = plasmaCondenser.wordTokenizer(sentence, "UTF-8", 0);
         int pos = 0;
         StringBuffer word;
+        String hash;
         while (words.hasMoreElements()) {
             word = (StringBuffer) words.nextElement();
-            map.put(plasmaCondenser.word2hash(new String(word)), new Integer(pos));
+            hash = plasmaCondenser.word2hash(new String(word));
+            if (!map.containsKey(hash)) map.put(hash, new Integer(pos)); // dont overwrite old values, that leads to too far word distances
             pos += word.length() + 1;
         }
         return map;

@@ -46,6 +46,7 @@ import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.MalformedURLException;
+import java.util.HashMap;
 
 import de.anomic.http.httpHeader;
 import de.anomic.plasma.plasmaSnippetCache;
@@ -58,6 +59,9 @@ import de.anomic.ymage.ymageImageParser;
 
 public class ViewImage {
 
+    private static HashMap iconcache = new HashMap();
+    private static String defaulticon = "htroot/env/grafics/dfltfvcn.ico";
+    
     public static Image respond(httpHeader header, serverObjects post, serverSwitch env) {
         
         plasmaSwitchboard sb = (plasmaSwitchboard)env;     
@@ -92,79 +96,92 @@ public class ViewImage {
         int timeout = post.getInt("timeout", 5000);
         
         // getting the image as stream
-        Object[] resource = plasmaSnippetCache.getResource(url, true, timeout, false);
-        byte[] imgb = null;
-        if (resource == null) {
-            if (urlString.endsWith(".ico")) {
-                // load default favicon dfltfvcn.ico
-                try {
-                    imgb = serverFileUtils.read(new File(sb.getRootPath(), "htroot/env/grafics/dfltfvcn.ico"));
-                } catch (IOException e) {
+        Image scaled = (Image) iconcache.get(urlString);
+        if (scaled == null) {
+            Object[] resource = plasmaSnippetCache.getResource(url, true, timeout, false);
+            byte[] imgb = null;
+            if (resource == null) {
+                if (urlString.endsWith(".ico")) {
+                    // load default favicon dfltfvcn.ico
+                    try {
+                        imgb = serverFileUtils.read(new File(sb.getRootPath(), defaulticon));
+                    } catch (IOException e) {
+                        return null;
+                    }
+                } else {
                     return null;
                 }
             } else {
-                return null;
-            }
-        } else {
-            InputStream imgStream = (InputStream) resource[0];
-            if (imgStream == null) return null;
-        
-            // read image data
-            try {
-                imgb = serverFileUtils.read(imgStream);
-            } catch (IOException e) {
-                return null;
-            } finally {
-                try { imgStream.close(); } catch (Exception e) {/* ignore this */}
-            }
-        }
-        
-        // read image
-        Image image = ymageImageParser.parse(urlString.toString(), imgb);
-        
-        if ((auth) && ((width == 0) || (height == 0)) && (maxwidth == 0) && (maxheight == 0)) return image;
+                InputStream imgStream = (InputStream) resource[0];
+                if (imgStream == null) return null;
 
-        // find original size
-        int h = image.getHeight(null);
-        int w = image.getWidth(null);
-        
-        //System.out.println("DEBUG: get access to image " + url.toNormalform() + " is " + ((auth) ? "authorized" : "NOT authorized"));
-        
-        // in case of not-authorized access shrink the image to prevent copyright problems
-        // so that images are not larger than thumbnails
-        if (!auth) {
-            maxwidth = (int) Math.min(64.0, w * 0.6);
-            maxheight = (int) Math.min(64.0, h * 0.6);
-        }
-        
-        // calculate width & height from maxwidth & maxheight
-        if ((maxwidth != 0) || (maxheight != 0)) {
-            double hs = (w <= maxwidth) ? 1.0 : ((double) maxwidth) / ((double) w);
-            double vs = (h <= maxheight) ? 1.0 : ((double) maxheight) / ((double) h);
-            double scale = Math.min(hs, vs);
-            if (!auth) scale = Math.min(scale, 0.6); // this is for copyright purpose
-            if (scale < 1.0) {
-                width = (int) (((double) w) * scale);
-                height = (int) (((double) h) * scale);
+                // read image data
+                try {
+                    imgb = serverFileUtils.read(imgStream);
+                } catch (IOException e) {
+                    return null;
+                } finally {
+                    try {
+                        imgStream.close();
+                    } catch (Exception e) {/* ignore this */}
+                }
+            }
+
+            // read image
+            Image image = ymageImageParser.parse(urlString.toString(), imgb);
+
+            if ((auth) && ((width == 0) || (height == 0)) && (maxwidth == 0) && (maxheight == 0)) return image;
+
+            // find original size
+            int h = image.getHeight(null);
+            int w = image.getWidth(null);
+
+            // System.out.println("DEBUG: get access to image " +
+            // url.toNormalform() + " is " + ((auth) ? "authorized" : "NOT
+            // authorized"));
+
+            // in case of not-authorized access shrink the image to prevent
+            // copyright problems
+            // so that images are not larger than thumbnails
+            if ((!auth) && ((w > 16) || (h > 16))) {
+                maxwidth = (int) Math.min(64.0, w * 0.6);
+                maxheight = (int) Math.min(64.0, h * 0.6);
+            }
+
+            // calculate width & height from maxwidth & maxheight
+            if ((maxwidth != 0) || (maxheight != 0)) {
+                double hs = (w <= maxwidth) ? 1.0 : ((double) maxwidth) / ((double) w);
+                double vs = (h <= maxheight) ? 1.0 : ((double) maxheight) / ((double) h);
+                double scale = Math.min(hs, vs);
+                if (!auth) scale = Math.min(scale, 0.6); // this is for copyright purpose
+                if (scale < 1.0) {
+                    width = (int) (((double) w) * scale);
+                    height = (int) (((double) h) * scale);
+                } else {
+                    width = w;
+                    height = h;
+                }
             } else {
                 width = w;
                 height = h;
             }
-        } else {
-            width = w;
-            height = h;
+
+            // check for minimum values
+            width = Math.max(width, 1);
+            height = Math.max(height, 1);
+
+            // scale image
+            scaled = ((w == width) && (h == height)) ? image : image.getScaledInstance(width, height, Image.SCALE_AREA_AVERAGING);
+            MediaTracker mediaTracker = new MediaTracker(new Container());
+            mediaTracker.addImage(scaled, 0);
+            try {mediaTracker.waitForID(0);} catch (InterruptedException e) {}
+
+            if ((height == 16) && (width == 16) && (resource != null)) {
+                // this might be a favicon, store image to cache for faster re-load later on
+                iconcache.put(urlString, scaled);
+            }
         }
         
-        // check for minimum values
-        width = Math.max(width, 1);
-        height = Math.max(height, 1);
-        
-        // scale image 
-        Image scaled = image.getScaledInstance(width, height, Image.SCALE_AREA_AVERAGING); 
-        MediaTracker mediaTracker = new MediaTracker(new Container()); 
-        mediaTracker.addImage(scaled, 0); 
-        try {mediaTracker.waitForID(0);} catch (InterruptedException e) {} 
-
         return scaled;
     }
     
