@@ -103,100 +103,27 @@ document.getElementById("Enter").value = "search again - catch up more links";
 	::
     <p>No Results. &quot;<strong>#[wrong_regex]#</strong>&quot; is no valid regular expression. Please go back to the previous page and make sure to enter a valid regular expressions for URL mask and Prefer mask.</p>
     ::
-	<p><strong id="offset">#[offset]#</strong>-<strong id="itemscount">#[linkcount]#</strong> results from a total number of <strong id="totalcount">#[totalcount]#</strong> known#(globalresults)#.::, <strong id="globalcount">#[globalcount]#</strong> links from other YaCy peers.#(/globalresults)#</p>
+	<p><strong id="offset">#[offset]#</strong>-<strong id="itemscount">#[linkcount]#</strong> results from a total number of <strong id="totalcount">#[totalcount]#</strong> known#(globalresults)#.::, <strong id="globalcount">#[globalcount]#</strong> links from other YaCy peers.#(/globalresults)#<div id="results"></div></p>
 	<p>Search Result Pages: <span id="pagenav">#[pagenav]#</span></p>
 	::
 	<p>Searching the web with this peer is disabled for unauthorized users. Please <a href="Status.html?login=">log in</a> as administrator to use the search function</p>
 #(/num-results)#
 
-<!-- view the result list -->
-#(type)#
-	<!-- type 0: text search -->
-	#(combine)#
-		::
-		<p><strong>Refine with</strong>:</p>
-		<p>
-		#{words}#
-		<a href="yacysearch.html?search=#[newsearch]#&amp;Enter=Search&amp;count=#[count]#&amp;offset=#[offset]#&amp;resource=#[resource]#&amp;time=#[time]#">#[word]#</a>
-		#{/words}#
-		</p>
-	#(/combine)#
-	<!-- linklist begin -->
-	<div id="hidden_results"></div>
-	#{results}#
-	<!--#include virtual="yacysearchitem.html?item=#[item]#&eventID=#[eventID]#&display=#[display]#" -->
-	#{/results}#
-	
-	<!-- linklist end -->
+<!-- the search results -->
+#(combine)#::
+<p><strong>Refine with</strong>:</p>
+<p>#{words}#<a href="yacysearch.html?search=#[newsearch]#&amp;Enter=Search&amp;count=#[count]#&amp;offset=#[offset]#&amp;resource=#[resource]#&amp;time=#[time]#">#[word]#</a>#{/words}#</p>
+#(/combine)#
+<script type="text/javascript">
+var progressbar = new Progressbar(#[results]#, document.getElementById("results"));
+</script>
 
-	::<!-- type 1: media search -->
-  <!-- non-js variant -->
-  <noscript>
-    <p>
-      Sorry, at the moment you need JavaScript in order to use this search. But here are the urls where YaCy would have looked for your searchresults. Perhaps you can find them there. Sorry for the inconvenience. If you want a non-JavaScript search, beg the developers for it.
-    </p>
-    <!-- linklist begin -->
-    <ul>
-	    #{results}#
-      <!-- link begin -->
-      <li><a href="#[url]#">#[urlname]#</a></li>
-	    <!-- link end -->
-	    #{/results}#
-    </ul>
-	  <!-- linklist end -->
-  </noscript>
-  <!-- linklist start-->
-  <div id="results">
-  </div>
-  <!-- linklist end-->
-	<script type="text/javascript">
-    var urls = "#{results}##[urlname]# #{/results}#".split(" ");
-    // the last element is always empty because the split gets a space at the end of the string
-    urls.length--;
-    if(urls.length > 0) {
-	    AllMediaSnippets(urls, "#[former]#", "#[mediatype]#");
-    }
-	</script> 
-	
-	::<!-- type 2: image search: presents image thumbnails -->
-  <noscript>
-    <p>
-      Sorry, but in order to use the image search, you need JavaScript. But here are the urls where YaCy would have looked for the images you want. Perhaps you can find them there. Sorry for the inconvenience. If you want a non-JavaScript image search, beg the developers for it.
-    </p>
-    <ul>
-    #{results}#
-      <li><a href="#[url]#">#[urlname]#</a></li>
-    #{/results}#
-    </ul>
-  </noscript>
-  <!-- linklist start -->
-  <div id="results">
-  </div>
-	<!-- linklist end -->
-	<script type="text/javascript">
-    var urls = "#{results}##[urlname]# #{/results}#".split(" ");
-    // the last element is always empty because the split gets a space at the end of the string
-    urls.length--;
-    if(urls.length > 0) {
-      AllImageSnippets(urls, "#[former]#");
-    }
-	</script>
-	<br style="clear:left;" />
-	
-	::<!-- type 3: image thumbnail list for one single url -->
-	<table border="0" cellspacing="16" cellpadding="0">
-	#{results}#
-	<tr valign="bottom">
-	#{line}#
-	<td>
-	<a href="#[url]#"><img src="/ViewImage.png?maxwidth=96&amp;maxheight=96&amp;url=#[url]#" /></a><br /><a href="#[url]#">#[name]#</a>
-	</td>
-	#{/line}#
-	</tr>
-	#{/results}#
-	</table>
-	
-#(/type)#
+<!-- linklist begin -->
+<div id="hidden_results"></div>
+#{results}#
+<!--#include virtual="yacysearchitem.html?item=#[item]#&eventID=#[eventID]#" -->
+#{/results}#
+<!-- linklist end -->
 
 </body>
 </html>

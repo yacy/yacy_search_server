@@ -52,7 +52,6 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.TreeSet;
 
-import de.anomic.htmlFilter.htmlFilterImageEntry;
 import de.anomic.http.httpHeader;
 import de.anomic.index.indexURLEntry;
 import de.anomic.kelondro.kelondroBitfield;
@@ -61,7 +60,6 @@ import de.anomic.kelondro.kelondroNaturalOrder;
 import de.anomic.plasma.plasmaCondenser;
 import de.anomic.plasma.plasmaParserDocument;
 import de.anomic.plasma.plasmaSearchEvent;
-import de.anomic.plasma.plasmaSearchImages;
 import de.anomic.plasma.plasmaSearchQuery;
 import de.anomic.plasma.plasmaSearchRankingProfile;
 import de.anomic.plasma.plasmaSearchProcessing;
@@ -141,10 +139,9 @@ public class yacysearch {
             prop.put("input_contentdomCheckVideo", 0);
             prop.put("input_contentdomCheckImage", 0);
             prop.put("input_contentdomCheckApp", 0);
-            prop.put("type", 0);
-            prop.put("type_excluded", 0);
-            prop.put("type_combine", 0);
-            prop.put("type_results", "");
+            prop.put("excluded", 0);
+            prop.put("combine", 0);
+            prop.put("results", "");
             prop.put("num-results", (searchAllowed) ? 0 : 6);
             
             return prop;
@@ -193,70 +190,70 @@ public class yacysearch {
         int contentdomCode = plasmaSearchQuery.contentdomParser(post.get("contentdom", "text"));
         
         // patch until better search profiles are available
-        if ((contentdomCode != plasmaSearchQuery.CONTENTDOM_TEXT) && (count <= 10)) count = 30;
+        if ((contentdomCode != plasmaSearchQuery.CONTENTDOM_TEXT) && (count <= 30)) count = 30;
         
         serverObjects prop = new serverObjects();
         if (post.get("cat", "href").equals("href")) {
 
-        final TreeSet[] query = plasmaSearchQuery.cleanQuery(querystring); // converts also umlaute
-        // filter out stopwords
-        final TreeSet filtered = kelondroMSetTools.joinConstructive(query[0], plasmaSwitchboard.stopwords);
-        if (filtered.size() > 0) {
-            kelondroMSetTools.excludeDestructive(query[0], plasmaSwitchboard.stopwords);
-        }
-
-        // if a minus-button was hit, remove a special reference first
-        if (post.containsKey("deleteref")) {
-            if (!sb.verifyAuthentication(header, true)) {
-                prop.put("AUTHENTICATE", "admin log-in"); // force log-in
-                return prop;
+            final TreeSet[] query = plasmaSearchQuery.cleanQuery(querystring); // converts also umlaute
+            // filter out stopwords
+            final TreeSet filtered = kelondroMSetTools.joinConstructive(query[0], plasmaSwitchboard.stopwords);
+            if (filtered.size() > 0) {
+                kelondroMSetTools.excludeDestructive(query[0], plasmaSwitchboard.stopwords);
             }
+
+            // if a minus-button was hit, remove a special reference first
+            if (post.containsKey("deleteref")) {
+                if (!sb.verifyAuthentication(header, true)) {
+                    prop.put("AUTHENTICATE", "admin log-in"); // force log-in
+                    return prop;
+                }
                 
-            // delete the index entry locally
-            final String delHash = post.get("deleteref", ""); // urlhash
-            sb.wordIndex.removeWordReferences(query[0], delHash);
+                // delete the index entry locally
+                final String delHash = post.get("deleteref", ""); // urlhash
+                sb.wordIndex.removeWordReferences(query[0], delHash);
 
-            // make new news message with negative voting
-            HashMap map = new HashMap();
-            map.put("urlhash", delHash);
-            map.put("vote", "negative");
-            map.put("refid", "");
-            yacyCore.newsPool.publishMyNews(yacyNewsRecord.newRecord(yacyNewsPool.CATEGORY_SURFTIPP_VOTE_ADD, map));
-        }
-
-        // if a plus-button was hit, create new voting message
-        if (post.containsKey("recommendref")) {
-            if (!sb.verifyAuthentication(header, true)) {
-                prop.put("AUTHENTICATE", "admin log-in"); // force log-in
-                return prop;
+                // make new news message with negative voting
+                HashMap map = new HashMap();
+                map.put("urlhash", delHash);
+                map.put("vote", "negative");
+                map.put("refid", "");
+                yacyCore.newsPool.publishMyNews(yacyNewsRecord.newRecord(yacyNewsPool.CATEGORY_SURFTIPP_VOTE_ADD, map));
             }
-            final String recommendHash = post.get("recommendref", ""); // urlhash
-            indexURLEntry urlentry = sb.wordIndex.loadedURL.load(recommendHash, null);
-            if (urlentry != null) {
-                indexURLEntry.Components comp = urlentry.comp();
-                plasmaParserDocument document;
-                document = plasmaSnippetCache.retrieveDocument(comp.url(), true, 5000, true);
-                if (document != null) {
-                    // create a news message
-                    HashMap map = new HashMap();
-                    map.put("url", comp.url().toNormalform(false, true).replace(',', '|'));
-                    map.put("title", comp.title().replace(',', ' '));
-                    map.put("description", ((document == null) ? comp.title() : document.getTitle()).replace(',', ' '));
-                    map.put("author", ((document == null) ? "" : document.getAuthor()));
-                    map.put("tags", ((document == null) ? "" : document.getKeywords(' ')));
-                    yacyCore.newsPool.publishMyNews(yacyNewsRecord.newRecord(yacyNewsPool.CATEGORY_SURFTIPP_ADD, map));
-                    document.close();
+
+            // if a plus-button was hit, create new voting message
+            if (post.containsKey("recommendref")) {
+                if (!sb.verifyAuthentication(header, true)) {
+                    prop.put("AUTHENTICATE", "admin log-in"); // force log-in
+                    return prop;
+                }
+                final String recommendHash = post.get("recommendref", ""); // urlhash
+                indexURLEntry urlentry = sb.wordIndex.loadedURL.load(recommendHash, null);
+                if (urlentry != null) {
+                    indexURLEntry.Components comp = urlentry.comp();
+                    plasmaParserDocument document;
+                    document = plasmaSnippetCache.retrieveDocument(comp.url(), true, 5000, true);
+                    if (document != null) {
+                        // create a news message
+                        HashMap map = new HashMap();
+                        map.put("url", comp.url().toNormalform(false, true).replace(',', '|'));
+                        map.put("title", comp.title().replace(',', ' '));
+                        map.put("description", ((document == null) ? comp.title() : document.getTitle()).replace(',', ' '));
+                        map.put("author", ((document == null) ? "" : document.getAuthor()));
+                        map.put("tags", ((document == null) ? "" : document.getKeywords(' ')));
+                        yacyCore.newsPool.publishMyNews(yacyNewsRecord.newRecord(yacyNewsPool.CATEGORY_SURFTIPP_ADD, map));
+                        document.close();
+                    }
                 }
             }
-        }
 
-        // prepare search properties
-        final boolean yacyonline = ((yacyCore.seedDB != null) && (yacyCore.seedDB.mySeed != null) && (yacyCore.seedDB.mySeed.getPublicAddress() != null));
-        final boolean globalsearch = (global) && (yacyonline);
+            // prepare search properties
+            final boolean yacyonline = ((yacyCore.seedDB != null) && (yacyCore.seedDB.mySeed != null) && (yacyCore.seedDB.mySeed.getPublicAddress() != null));
+            final boolean globalsearch = (global) && (yacyonline);
         
-        // do the search
-        TreeSet queryHashes = plasmaCondenser.words2hashes(query[0]);
-        plasmaSearchQuery theQuery = new plasmaSearchQuery(
+            // do the search
+            TreeSet queryHashes = plasmaCondenser.words2hashes(query[0]);
+            plasmaSearchQuery theQuery = new plasmaSearchQuery(
         			querystring,
         			queryHashes,
         			plasmaCondenser.words2hashes(query[1]),
@@ -273,95 +270,94 @@ public class yacysearch {
                     "",
                     20,
                     constraint);
-        plasmaSearchRankingProfile ranking = (sb.getConfig("rankingProfile", "").length() == 0) ? new plasmaSearchRankingProfile(contentdomCode) : new plasmaSearchRankingProfile("", crypt.simpleDecode(sb.getConfig("rankingProfile", ""), null));
-        plasmaSearchProcessing localTiming = new plasmaSearchProcessing(4 * theQuery.maximumTime / 10, theQuery.displayResults());
+            plasmaSearchRankingProfile ranking = (sb.getConfig("rankingProfile", "").length() == 0) ? new plasmaSearchRankingProfile(contentdomCode) : new plasmaSearchRankingProfile("", crypt.simpleDecode(sb.getConfig("rankingProfile", ""), null));
+            plasmaSearchProcessing localTiming = new plasmaSearchProcessing(4 * theQuery.maximumTime / 10, theQuery.displayResults());
 
-        String client = (String) header.get("CLIENTIP"); // the search client who initiated the search
+            String client = (String) header.get("CLIENTIP"); // the search client who initiated the search
         
-        // tell all threads to do nothing for a specific time
-        sb.intermissionAllThreads(2 * theQuery.maximumTime);
+            // tell all threads to do nothing for a specific time
+            sb.intermissionAllThreads(2 * theQuery.maximumTime);
         
-        // filter out words that appear in bluelist
-        theQuery.filterOut(plasmaSwitchboard.blueList);
+            // filter out words that appear in bluelist
+            theQuery.filterOut(plasmaSwitchboard.blueList);
             
-        // log
-        serverLog.logInfo("LOCAL_SEARCH", "INIT WORD SEARCH: " + theQuery.queryString + ":" + theQuery.queryHashes + " - " + theQuery.neededResults() + " links to be computed, " + theQuery.displayResults() + " lines to be displayed, " + (theQuery.maximumTime / 1000) + " seconds");
-        long timestamp = System.currentTimeMillis();
+            // log
+            serverLog.logInfo("LOCAL_SEARCH", "INIT WORD SEARCH: " + theQuery.queryString + ":" + theQuery.queryHashes + " - " + theQuery.neededResults() + " links to be computed, " + theQuery.displayResults() + " lines to be displayed, " + (theQuery.maximumTime / 1000) + " seconds");
+            long timestamp = System.currentTimeMillis();
 
-        // create a new search event
-        String wrongregex = null;
-        if (plasmaSearchEvent.getEvent(theQuery.id()) == null) {
-            theQuery.setOffset(0); // in case that this is a new search, always start without a offset 
-            offset = 0;
-        }
-        plasmaSearchEvent theSearch = plasmaSearchEvent.getEvent(theQuery, ranking, localTiming, sb.wordIndex, (sb.isRobinsonMode()) ? sb.clusterhashes : null, false, null);
+            // create a new search event
+            String wrongregex = null;
+            if (plasmaSearchEvent.getEvent(theQuery.id()) == null) {
+                theQuery.setOffset(0); // in case that this is a new search, always start without a offset 
+                offset = 0;
+            }
+            plasmaSearchEvent theSearch = plasmaSearchEvent.getEvent(theQuery, ranking, localTiming, sb.wordIndex, (sb.isRobinsonMode()) ? sb.clusterhashes : null, false, null);
             
-        // generate result object
-        serverLog.logFine("LOCAL_SEARCH", "SEARCH TIME AFTER ORDERING OF SEARCH RESULTS: " + ((System.currentTimeMillis() - timestamp) / 1000) + " seconds");
-        serverLog.logFine("LOCAL_SEARCH", "SEARCH TIME AFTER RESULT PREPARATION: " + ((System.currentTimeMillis() - timestamp) / 1000) + " seconds");
+            // generate result object
+            serverLog.logFine("LOCAL_SEARCH", "SEARCH TIME AFTER ORDERING OF SEARCH RESULTS: " + ((System.currentTimeMillis() - timestamp) / 1000) + " seconds");
+            serverLog.logFine("LOCAL_SEARCH", "SEARCH TIME AFTER RESULT PREPARATION: " + ((System.currentTimeMillis() - timestamp) / 1000) + " seconds");
                 
-        // calc some more cross-reference
-        long remainingTime = theQuery.maximumTime - (System.currentTimeMillis() - timestamp);
-        if (remainingTime < 0) remainingTime = 1000;
-        serverLog.logFine("LOCAL_SEARCH", "SEARCH TIME AFTER XREF PREPARATION: " + ((System.currentTimeMillis() - timestamp) / 1000) + " seconds");
+            // calc some more cross-reference
+            long remainingTime = theQuery.maximumTime - (System.currentTimeMillis() - timestamp);
+            if (remainingTime < 0) remainingTime = 1000;
+            serverLog.logFine("LOCAL_SEARCH", "SEARCH TIME AFTER XREF PREPARATION: " + ((System.currentTimeMillis() - timestamp) / 1000) + " seconds");
 
-        // log
-        serverLog.logInfo("LOCAL_SEARCH", "EXIT WORD SEARCH: " + theQuery.queryString + " - " +
+            // log
+            serverLog.logInfo("LOCAL_SEARCH", "EXIT WORD SEARCH: " + theQuery.queryString + " - " +
                     (theSearch.getLocalCount() + theSearch.getGlobalCount()) + " links found, " +
                     ((System.currentTimeMillis() - timestamp) / 1000) + " seconds");
 
-        // prepare search statistics
-        Long trackerHandle = new Long(System.currentTimeMillis());
-        HashMap searchProfile = theQuery.resultProfile(theSearch.getLocalCount() + theSearch.getGlobalCount(), System.currentTimeMillis() - timestamp);
-        searchProfile.put("querystring", theQuery.queryString);
-        searchProfile.put("time", trackerHandle);
-        searchProfile.put("host", client);
-        searchProfile.put("offset", new Integer(0));
-        sb.localSearches.add(searchProfile);
-        TreeSet handles = (TreeSet) sb.localSearchTracker.get(client);
-        if (handles == null) handles = new TreeSet();
-        handles.add(trackerHandle);
-        sb.localSearchTracker.put(client, handles);
+            // prepare search statistics
+            Long trackerHandle = new Long(System.currentTimeMillis());
+            HashMap searchProfile = theQuery.resultProfile(theSearch.getLocalCount() + theSearch.getGlobalCount(), System.currentTimeMillis() - timestamp);
+            searchProfile.put("querystring", theQuery.queryString);
+            searchProfile.put("time", trackerHandle);
+            searchProfile.put("host", client);
+            searchProfile.put("offset", new Integer(0));
+            sb.localSearches.add(searchProfile);
+            TreeSet handles = (TreeSet) sb.localSearchTracker.get(client);
+            if (handles == null) handles = new TreeSet();
+            handles.add(trackerHandle);
+            sb.localSearchTracker.put(client, handles);
         
-        prop = new serverObjects();
-        prop.put("num-results_totalcount", theSearch.getLocalCount() + theSearch.getGlobalCount());
-        prop.put("num-results_globalresults", 1);
-        prop.put("num-results_globalresults_globalcount", theSearch.getGlobalCount());
-        prop.put("num-results_offset", 0);
-        prop.put("num-results_linkcount", 0);
+            prop = new serverObjects();
+            prop.put("num-results_totalcount", theSearch.getLocalCount() + theSearch.getGlobalCount());
+            prop.put("num-results_globalresults", 1);
+            prop.put("num-results_globalresults_globalcount", theSearch.getGlobalCount());
+            prop.put("num-results_offset", 0);
+            prop.put("num-results_linkcount", 0);
 
-        // compose page navigation
-        StringBuffer pagenav = new StringBuffer();
-        int thispage = offset / theQuery.displayResults();
-        if (thispage == 0) pagenav.append("&lt;&nbsp;"); else {
-            pagenav.append(navurla(thispage - 1, display, theQuery));
-            pagenav.append("<strong>&lt;</strong></a>&nbsp;");
-        }
-        int numberofpages = Math.min(10, Math.min(thispage + 2, (theSearch.getGlobalCount() + theSearch.getLocalCount()) / theQuery.displayResults()));
-        for (int i = 0; i < numberofpages; i++) {
-            if (i == thispage) {
-                pagenav.append("<strong>");
-                pagenav.append(i + 1);
-                pagenav.append("</strong>&nbsp;");
-            } else {
-                pagenav.append(navurla(i, display, theQuery));
-                pagenav.append(i + 1);
-                pagenav.append("</a>&nbsp;");
+            // compose page navigation
+            StringBuffer pagenav = new StringBuffer();
+            int thispage = offset / theQuery.displayResults();
+            if (thispage == 0) pagenav.append("&lt;&nbsp;"); else {
+                pagenav.append(navurla(thispage - 1, display, theQuery));
+                pagenav.append("<strong>&lt;</strong></a>&nbsp;");
             }
-        }
-        if (thispage >= numberofpages) pagenav.append("&gt;"); else {
-            pagenav.append(navurla(thispage + 1, display, theQuery));
-            pagenav.append("<strong>&gt;</strong></a>");
-        }
-        prop.putASIS("num-results_pagenav", pagenav.toString());
+            int numberofpages = Math.min(10, Math.min(thispage + 2, (theSearch.getGlobalCount() + theSearch.getLocalCount()) / theQuery.displayResults()));
+            for (int i = 0; i < numberofpages; i++) {
+                if (i == thispage) {
+                    pagenav.append("<strong>");
+                    pagenav.append(i + 1);
+                    pagenav.append("</strong>&nbsp;");
+                } else {
+                    pagenav.append(navurla(i, display, theQuery));
+                    pagenav.append(i + 1);
+                    pagenav.append("</a>&nbsp;");
+                }
+            }
+            if (thispage >= numberofpages) pagenav.append("&gt;"); else {
+                pagenav.append(navurla(thispage + 1, display, theQuery));
+                pagenav.append("<strong>&gt;</strong></a>");
+            }
+            prop.putASIS("num-results_pagenav", pagenav.toString());
         
-        // generate the search result lines; they will be produced by another servlet
-        for (int i = 0; i < theQuery.displayResults(); i++) {
-            prop.put("type_results_" + i + "_item", offset + i);
-            prop.put("type_results_" + i + "_eventID", theQuery.id());
-            prop.put("type_results_" + i + "_display", display);
-        }
-        prop.put("type_results", theQuery.displayResults());
+            // generate the search result lines; they will be produced by another servlet
+            for (int i = 0; i < theQuery.displayResults(); i++) {
+                prop.put("results_" + i + "_item", offset + i);
+                prop.put("results_" + i + "_eventID", theQuery.id());
+            }
+            prop.put("results", theQuery.displayResults());
         
             // process result of search
             if (filtered.size() > 0) {
@@ -384,7 +380,7 @@ public class yacysearch {
                     prop.put("num-results", 5);
                     int hintcount = references.length;
                     if (hintcount > 0) {
-                        prop.put("type_combine", 1);
+                        prop.put("combine", 1);
                         // get the topwords
                         final TreeSet topwords = new TreeSet(kelondroNaturalOrder.naturalOrder);
                         String tmp = "";
@@ -414,14 +410,14 @@ public class yacysearch {
                         while (iter.hasNext()) {
                             word = (String) iter.next();
                             if (word != null) {
-                                prop.put("type_combine_words_" + hintcount + "_word", word);
-                                prop.put("type_combine_words_" + hintcount + "_newsearch", post.get("search", "").replace(' ', '+') + "+" + word);
-                                prop.put("type_combine_words_" + hintcount + "_count", count);
-                                prop.put("type_combine_words_" + hintcount + "_offset", offset);
-                                prop.put("type_combine_words_" + hintcount + "_resource", ((global) ? "global" : "local"));
-                                prop.put("type_combine_words_" + hintcount + "_time", (searchtime / 1000));
+                                prop.put("combine_words_" + hintcount + "_word", word);
+                                prop.put("combine_words_" + hintcount + "_newsearch", post.get("search", "").replace(' ', '+') + "+" + word);
+                                prop.put("combine_words_" + hintcount + "_count", count);
+                                prop.put("combine_words_" + hintcount + "_offset", offset);
+                                prop.put("combine_words_" + hintcount + "_resource", ((global) ? "global" : "local"));
+                                prop.put("combine_words_" + hintcount + "_time", (searchtime / 1000));
                             }
-                            prop.put("type_combine_words", hintcount);
+                            prop.put("combine_words", hintcount);
                             if (hintcount++ > MAX_TOPWORDS) {
                                 break;
                             }
@@ -437,54 +433,13 @@ public class yacysearch {
                 }
             }
 
-            prop.put("type", (theQuery.contentdom == plasmaSearchQuery.CONTENTDOM_TEXT) ? 0 : ((theQuery.contentdom == plasmaSearchQuery.CONTENTDOM_IMAGE) ? 2 : 1));
-            if (prop.getInt("type", 0) == 1) prop.put("type_mediatype", post.get("contentdom", "text"));
             prop.put("input_cat", "href");
             prop.put("input_depth", "0");
-            prop.put("type_eventID", theQuery.id()); 
 
             // adding some additional properties needed for the rss feed
             String hostName = (String) header.get("Host", "localhost");
             if (hostName.indexOf(":") == -1) hostName += ":" + serverCore.getPortNr(env.getConfig("port", "8080"));
             prop.put("rssYacyImageURL", "http://" + hostName + "/env/grafics/yacy.gif");
-        }
-
-        if (post.get("cat", "href").equals("image")) {
-
-            int depth = post.getInt("depth", 0);
-            int columns = post.getInt("columns", 6);
-            yacyURL url = null;
-            try {url = new yacyURL(post.get("url", ""), null);} catch (MalformedURLException e) {}
-            plasmaSearchImages si = new plasmaSearchImages(6000, url, depth);
-            Iterator i = si.entries();
-            htmlFilterImageEntry ie;
-            int line = 0;
-            while (i.hasNext()) {
-                int col = 0;
-                for (col = 0; col < columns; col++) {
-                    if (!i.hasNext()) break;
-                    ie = (htmlFilterImageEntry) i.next();
-                    String urls = ie.url().toString();
-                    String name = "";
-                    int p = urls.lastIndexOf('/');
-                    if (p > 0) name = urls.substring(p + 1);
-                    prop.put("type_results_" + line + "_line_" + col + "_url", urls);
-                    prop.put("type_results_" + line + "_line_" + col + "_name", name);
-                }
-                prop.put("type_results_" + line + "_line", col);
-                line++;
-            }
-            prop.put("type_results", line);
-
-            prop.put("type", 3); // set type of result: image list
-            prop.put("input_cat", "href");
-            prop.put("input_depth", depth);
-        }
-
-        // if user is not authenticated, he may not vote for URLs
-        int linkcount = Integer.parseInt(prop.get("num-results_linkcount", "0"));
-        for (int i=0; i<linkcount; i++) {
-            prop.put("type_results_" + i + "_authorized", (authenticated) ? 1 : 0);
         }
         
         prop.put("searchagain", (global) ? 1 : 0);
@@ -509,7 +464,6 @@ public class yacysearch {
         prop.put("input_contentdomCheckVideo", (contentdomCode == plasmaSearchQuery.CONTENTDOM_VIDEO) ? 1 : 0);
         prop.put("input_contentdomCheckImage", (contentdomCode == plasmaSearchQuery.CONTENTDOM_IMAGE) ? 1 : 0);
         prop.put("input_contentdomCheckApp", (contentdomCode == plasmaSearchQuery.CONTENTDOM_APP) ? 1 : 0);
-        prop.put("type_former", post.get("search", "")); //the query-string used to get the snippets
         
         // return rewrite properties
         return prop;

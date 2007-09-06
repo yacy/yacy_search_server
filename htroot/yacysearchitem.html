@@ -15,12 +15,19 @@
     #(/recommend)#
     </div>
   #(/authorized)#
-  
   <p class="snippet"><span class="snippetLoaded" id="h#[urlhash]#">#[snippet]#</span></p>
   <p class="url"><a href="#[url]#" id="url#[urlhash]#" target="_parent">#[urlname]#</a></p>
   <p class="urlinfo">#[date]# | YBR-#[ybr]# | <a href="ViewFile.html?urlHash=#[urlhash]#&amp;words=#[words]#">Info</a> | <a href="yacysearch.html?cat=image&amp;url=#[url]#&amp;search=#[former]#">Pictures</a></p>
   </div>
+  ::
+  #{images}#
+  <div class="thumbcontainer">
+  <a href="#[href]#" class="thumblink"><img src="/ViewImage.png?maxwidth=96&maxheight=96&code=#[code]#" alt="#[name]#"></a>
+  <div class="TableCellDark"><a href="#[href]#">#[name]#</a></div>
+  </div>
+  #{/images}#
 #(/content)#
 <script type="text/javascript">
 statistics("#[offset]#", "#[items]#", "#[global]#", "#[total]#");
+progressbar.step(1);
 </script>
