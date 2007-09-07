@@ -43,8 +43,8 @@ Date</td>==Datum</td>
 Offset==Versatz
 Expected Results==Erwartete Ergebnisse
 Returned Results==Gefundene Ergebnisse
-Expected Time==Erwartete Zeit
-Used Time==Gebrauchte Zeit
+Expected Time \(in ms\)==Erwartete Zeit (in ms)
+Used Time \(in ms\)==Gebrauchte Zeit (in ms)
 Query==Such Wort
 Search Word Hashes==Such Wort Hash
 Count</td>==Anzahl</td>
