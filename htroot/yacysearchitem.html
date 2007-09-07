@@ -20,13 +20,30 @@
   <p class="urlinfo">#[date]# | YBR-#[ybr]# | <a href="ViewFile.html?urlHash=#[urlhash]#&amp;words=#[words]#">Info</a> | <a href="yacysearch.html?cat=image&amp;url=#[url]#&amp;search=#[former]#">Pictures</a></p>
   </div>
   ::
-  #{images}#
+  #{items}#
   <div class="thumbcontainer">
   <a href="#[href]#" class="thumblink"><img src="/ViewImage.png?maxwidth=96&maxheight=96&code=#[code]#" alt="#[name]#"></a>
   <div class="TableCellDark"><a href="#[href]#">#[name]#</a></div>
   </div>
-  #{/images}#
+  #{/items}#
+  ::
+  #{items}#
+  <tr class="#(col)#TableCellLight::TableCellDark#(/col)#"><td>#[name]#</td><td><a href="#[href]#">#[hrefshort]#</a></tr>
+  #{/items}#
+  ::
+  #{items}#
+  <tr class="#(col)#TableCellLight::TableCellDark#(/col)#"><td>#[name]#</td><td><a href="#[href]#">#[hrefshort]#</a></tr>
+  #{/items}#
+  ::
+  #{items}#
+  <tr class="#(col)#TableCellLight::TableCellDark#(/col)#"><td>#[name]#</td><td><a href="#[href]#">#[hrefshort]#</a></tr>
+  #{/items}#
 #(/content)#
+#(references)#::
+<p><strong>Topwords</strong>:
+#{words}#&nbsp;<a href="yacysearch.html?search=#[newsearch]#&amp;Enter=Search&amp;count=#[count]#&amp;offset=#[offset]#&amp;resource=#[resource]#&amp;time=#[time]#">#[word]#</a>#{/words}#
+</p>
+#(/references)#
 <script type="text/javascript">
 statistics("#[offset]#", "#[items]#", "#[global]#", "#[total]#");
 progressbar.step(1);

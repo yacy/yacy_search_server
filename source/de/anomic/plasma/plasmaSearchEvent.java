@@ -32,6 +32,7 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
+import java.util.Set;
 import java.util.TreeMap;
 import java.util.TreeSet;
 
@@ -64,7 +65,7 @@ public final class plasmaSearchEvent {
     private plasmaSearchProcessing process;
     private yacySearch[] primarySearchThreads, secondarySearchThreads;
     private TreeMap preselectedPeerHashes;
-    private Object[] references;
+    //private Object[] references;
     public  TreeMap IAResults, IACount;
     public  String IAmaxcounthash, IAneardhthash;
     private int localcount;
@@ -89,7 +90,6 @@ public final class plasmaSearchEvent {
         this.primarySearchThreads = null;
         this.secondarySearchThreads = null;
         this.preselectedPeerHashes = preselectedPeerHashes;
-        this.references = new String[0];
         this.IAResults = new TreeMap();
         this.IACount = new TreeMap();
         this.IAmaxcounthash = null;
@@ -250,8 +250,14 @@ public final class plasmaSearchEvent {
                 // fetch next entry to work on
                 indexContainer c = rankedCache.container();
                 indexRWIEntry entry = new indexRWIEntry(c.get(rankedIndex++));
-
-                ResultEntry resultEntry = obtainResultEntry(entry, false);
+                indexURLEntry page = wordIndex.loadedURL.load(entry.urlHash(), entry);
+                
+                if (page == null) {
+                    registerFailure(entry.urlHash(), "url does not exist in lurl-db");
+                    continue;
+                }
+                
+                ResultEntry resultEntry = obtainResultEntry(page, false);
                 if (resultEntry == null) continue; // the entry had some problems, cannot be used
                 
                 // place the result to the result vector
@@ -267,18 +273,34 @@ public final class plasmaSearchEvent {
             process.yield("offline snippet fetch", resultList.size());
         }
         
-        // remove old events in the event cache
-        Iterator i = lastEvents.entrySet().iterator();
-        while (i.hasNext()) {
-            if (((plasmaSearchEvent) ((Map.Entry) i.next()).getValue()).eventTime + eventLifetime < System.currentTimeMillis()) i.remove();
-        }
+        // clean up events
+        cleanupEvents();
         
         // store this search to a cache so it can be re-used
         lastEvents.put(query.id(), this);
         lastEventID = query.id();
     }
 
-    private ResultEntry obtainResultEntry(indexRWIEntry entry, boolean fetchSnippetOnline) {
+    private static void cleanupEvents() {
+        // remove old events in the event cache
+        Iterator i = lastEvents.entrySet().iterator();
+        plasmaSearchEvent cleanEvent;
+        while (i.hasNext()) {
+            cleanEvent = (plasmaSearchEvent) ((Map.Entry) i.next()).getValue();
+            if (cleanEvent.eventTime + eventLifetime < System.currentTimeMillis()) {
+                // execute deletion of failed words
+                Set removeWords = cleanEvent.query.queryHashes;
+                removeWords.addAll(cleanEvent.query.excludeHashes);
+                cleanEvent.wordIndex.removeEntriesMultiple(removeWords, cleanEvent.failedURLs.keySet());
+                serverLog.logInfo("SearchEvents", "cleaning up event " + cleanEvent.query.id() + ", removed " + cleanEvent.failedURLs.size() + " URL references on " + removeWords.size() + " words");
+                
+                // remove the event
+                i.remove();
+            }
+        }
+    }
+    
+    private ResultEntry obtainResultEntry(indexURLEntry page, boolean fetchSnippetOnline) {
 
         // a search result entry needs some work to produce a result Entry:
         // - check if url entry exists in LURL-db
@@ -288,39 +310,24 @@ public final class plasmaSearchEvent {
         // load only urls if there was not yet a root url of that hash
         // find the url entry
         
-        indexURLEntry page = wordIndex.loadedURL.load(entry.urlHash(), entry);
-        
-        if (page == null) {
-            registerFailure(entry.urlHash(), "url does not exist in lurl-db");
-            return null;
-        }
-        
         indexURLEntry.Components comp = page.comp();
         String pagetitle = comp.title().toLowerCase();
         if (comp.url() == null) {
-            registerFailure(entry.urlHash(), "url corrupted (null)");
+            registerFailure(page.hash(), "url corrupted (null)");
             return null; // rare case where the url is corrupted
         }
         String pageurl = comp.url().toString().toLowerCase();
         String pageauthor = comp.author().toLowerCase();
             
         // check exclusion
-        if (plasmaSearchQuery.matches(pagetitle, query.excludeHashes)) {
-            registerFailure(entry.urlHash(), "query-exclusion matches title: " + pagetitle);
-            return null;
-        }
-        if (plasmaSearchQuery.matches(pageurl, query.excludeHashes)) {
-            registerFailure(entry.urlHash(), "query-exclusion matches title: " + pagetitle);
-            return null;
-        }
-        if (plasmaSearchQuery.matches(pageauthor, query.excludeHashes)) {
-            registerFailure(entry.urlHash(), "query-exclusion matches title: " + pagetitle);
+        if ((plasmaSearchQuery.matches(pagetitle, query.excludeHashes)) ||
+            (plasmaSearchQuery.matches(pageurl, query.excludeHashes)) ||
+            (plasmaSearchQuery.matches(pageauthor, query.excludeHashes))) {
             return null;
         }
             
         // check url mask
         if (!(pageurl.matches(query.urlMask))) {
-            registerFailure(entry.urlHash(), "url-exclusion matches urlMask: " + pageurl);
             return null;
         }
             
@@ -330,24 +337,24 @@ public final class plasmaSearchEvent {
             (!(comp.title().startsWith("Index of")))) {
             final Iterator wi = query.queryHashes.iterator();
             while (wi.hasNext()) wordIndex.removeEntry((String) wi.next(), page.hash());
-            registerFailure(entry.urlHash(), "index-of constrained not fullfilled");
+            registerFailure(page.hash(), "index-of constrained not fullfilled");
             return null;
         }
         
         if ((query.contentdom == plasmaSearchQuery.CONTENTDOM_AUDIO) && (page.laudio() == 0)) {
-            registerFailure(entry.urlHash(), "contentdom-audio constrained not fullfilled");
+            registerFailure(page.hash(), "contentdom-audio constrained not fullfilled");
             return null;
         }
         if ((query.contentdom == plasmaSearchQuery.CONTENTDOM_VIDEO) && (page.lvideo() == 0)) {
-            registerFailure(entry.urlHash(), "contentdom-video constrained not fullfilled");
+            registerFailure(page.hash(), "contentdom-video constrained not fullfilled");
             return null;
         }
         if ((query.contentdom == plasmaSearchQuery.CONTENTDOM_IMAGE) && (page.limage() == 0)) {
-            registerFailure(entry.urlHash(), "contentdom-image constrained not fullfilled");
+            registerFailure(page.hash(), "contentdom-image constrained not fullfilled");
             return null;
         }
         if ((query.contentdom == plasmaSearchQuery.CONTENTDOM_APP) && (page.lapp() == 0)) {
-            registerFailure(entry.urlHash(), "contentdom-app constrained not fullfilled");
+            registerFailure(page.hash(), "contentdom-app constrained not fullfilled");
             return null;
         }
             
@@ -364,7 +371,7 @@ public final class plasmaSearchEvent {
                 return new ResultEntry(page, wordIndex, null, null); // result without snippet
             } else {
                 // problems with snippet fetch
-                registerFailure(entry.urlHash(), "no text snippet for URL " + comp.url());
+                registerFailure(page.hash(), "no text snippet for URL " + comp.url());
                 plasmaSnippetCache.failConsequences(snippet, query.id());
                 return null;
             }
@@ -378,7 +385,7 @@ public final class plasmaSearchEvent {
                 return new ResultEntry(page, wordIndex, null, null);
             } else {
                 // problems with snippet fetch
-                registerFailure(entry.urlHash(), "no media snippet for URL " + comp.url());
+                registerFailure(page.hash(), "no media snippet for URL " + comp.url());
                 return null;
             }
         }
@@ -492,18 +499,24 @@ public final class plasmaSearchEvent {
             while ((resultList.size() < query.neededResults() + query.displayResults()) && (System.currentTimeMillis() < this.timeout)) {
                 
                 // try secondary search
-                prepareSecondarySearch();
+                prepareSecondarySearch(); // will be executed only once
                 
                 // fetch next entry to work on
                 this.entry = null;
                 entry = nextOrder();
                 if (entry == null) {
                     // wait and try again
-                    try {Thread.sleep(200);} catch (InterruptedException e) {}
+                    try {Thread.sleep(100);} catch (InterruptedException e) {}
                     continue;
                 }
-
-                ResultEntry resultEntry = obtainResultEntry(entry, true);
+                
+                indexURLEntry page = wordIndex.loadedURL.load(entry.urlHash(), entry);
+                if (page == null) {
+                    registerFailure(entry.urlHash(), "url does not exist in lurl-db");
+                    continue;
+                }
+                
+                ResultEntry resultEntry = obtainResultEntry(page, true);
                 if (resultEntry == null) continue; // the entry had some problems, cannot be used
                 
                 // place the result to the result vector
@@ -730,8 +743,8 @@ public final class plasmaSearchEvent {
         //assert e != null;
     }
     
-    public Object[] references() {
-        return this.references;
+    public Object[] references(int count) {
+        return this.rankedCache.getReferences(count);
     }
     
     public static class ResultEntry {

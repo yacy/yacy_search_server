@@ -99,10 +99,6 @@ document.getElementById("Enter").value = "search again - catch up more links";
 	::
 	<p>No Results. (length of search words must be at least 3 characters)</p>
 	::
-	<p>No Results. Please repeat your search to see if there are late-responses from remote peers.</p>
-	::
-    <p>No Results. &quot;<strong>#[wrong_regex]#</strong>&quot; is no valid regular expression. Please go back to the previous page and make sure to enter a valid regular expressions for URL mask and Prefer mask.</p>
-    ::
 	<p><strong id="offset">#[offset]#</strong>-<strong id="itemscount">#[linkcount]#</strong> results from a total number of <strong id="totalcount">#[totalcount]#</strong> known#(globalresults)#.::, <strong id="globalcount">#[globalcount]#</strong> links from other YaCy peers.#(/globalresults)#<div id="results"></div></p>
 	<p>Search Result Pages: <span id="pagenav">#[pagenav]#</span></p>
 	::
@@ -111,19 +107,23 @@ document.getElementById("Enter").value = "search again - catch up more links";
 
 <!-- the search results -->
 #(combine)#::
-<p><strong>Refine with</strong>:</p>
-<p>#{words}#<a href="yacysearch.html?search=#[newsearch]#&amp;Enter=Search&amp;count=#[count]#&amp;offset=#[offset]#&amp;resource=#[resource]#&amp;time=#[time]#">#[word]#</a>#{/words}#</p>
+<p><strong>Topwords</strong>:
+#{words}#&nbsp;<a href="yacysearch.html?search=#[newsearch]#&amp;Enter=Search&amp;count=#[count]#&amp;offset=#[offset]#&amp;resource=#[resource]#&amp;time=#[time]#">#[word]#</a>#{/words}#
+</p>
 #(/combine)#
 <script type="text/javascript">
 var progressbar = new Progressbar(#[results]#, document.getElementById("results"));
 </script>
 
 <!-- linklist begin -->
-<div id="hidden_results"></div>
+#(resultTable)#::<table width="100%"><tr class="TableHeader"><td width="30%">Media</td><td width="70%">URL</tr>#(/resultTable)#
 #{results}#
 <!--#include virtual="yacysearchitem.html?item=#[item]#&eventID=#[eventID]#" -->
 #{/results}#
+#(resultTable)#::</table>#(/resultTable)#
 <!-- linklist end -->
 
+<!-- attach the bottomline -->
+<!--#include virtual="yacysearchitem.html?bottomline=true&eventID=#[eventID]#" -->
 </body>
 </html>

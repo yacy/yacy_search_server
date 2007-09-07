@@ -49,14 +49,12 @@
 import java.io.IOException;
 import java.net.MalformedURLException;
 import java.util.HashMap;
-import java.util.Iterator;
 import java.util.TreeSet;
 
 import de.anomic.http.httpHeader;
 import de.anomic.index.indexURLEntry;
 import de.anomic.kelondro.kelondroBitfield;
 import de.anomic.kelondro.kelondroMSetTools;
-import de.anomic.kelondro.kelondroNaturalOrder;
 import de.anomic.plasma.plasmaCondenser;
 import de.anomic.plasma.plasmaParserDocument;
 import de.anomic.plasma.plasmaSearchEvent;
@@ -77,8 +75,6 @@ import de.anomic.yacy.yacyNewsRecord;
 import de.anomic.yacy.yacyURL;
 
 public class yacysearch {
-
-    public static final int MAX_TOPWORDS = 24;
 
     public static serverObjects respond(httpHeader header, serverObjects post, serverSwitch env) {
         final plasmaSwitchboard sb = (plasmaSwitchboard) env;
@@ -142,7 +138,8 @@ public class yacysearch {
             prop.put("excluded", 0);
             prop.put("combine", 0);
             prop.put("results", "");
-            prop.put("num-results", (searchAllowed) ? 0 : 6);
+            prop.put("resultTable", 0);
+            prop.put("num-results", (searchAllowed) ? 0 : 4);
             
             return prop;
         }
@@ -286,7 +283,6 @@ public class yacysearch {
             long timestamp = System.currentTimeMillis();
 
             // create a new search event
-            String wrongregex = null;
             if (plasmaSearchEvent.getEvent(theQuery.id()) == null) {
                 theQuery.setOffset(0); // in case that this is a new search, always start without a offset 
                 offset = 0;
@@ -358,7 +354,9 @@ public class yacysearch {
                 prop.put("results_" + i + "_eventID", theQuery.id());
             }
             prop.put("results", theQuery.displayResults());
-        
+            prop.put("resultTable", (contentdomCode <= 1) ? 0 : 1);
+            prop.put("eventID", theQuery.id()); // for bottomline
+            
             // process result of search
             if (filtered.size() > 0) {
                 prop.put("excluded", 1);
@@ -374,63 +372,7 @@ public class yacysearch {
                     prop.put("num-results", 1); // no results
                 }
             } else {
-                final int totalcount = prop.getInt("num-results_totalcount", 0);
-                if (totalcount >= 10) {
-                    final Object[] references = (Object[]) prop.get( "references", new String[0]);
-                    prop.put("num-results", 5);
-                    int hintcount = references.length;
-                    if (hintcount > 0) {
-                        prop.put("combine", 1);
-                        // get the topwords
-                        final TreeSet topwords = new TreeSet(kelondroNaturalOrder.naturalOrder);
-                        String tmp = "";
-                        for (int i = 0; i < hintcount; i++) {
-                            tmp = (String) references[i];
-                            if (tmp.matches("[a-z]+")) {
-                                topwords.add(tmp);
-                            }
-                        }
-
-                        // filter out the badwords
-                        final TreeSet filteredtopwords = kelondroMSetTools.joinConstructive(topwords, plasmaSwitchboard.badwords);
-                        if (filteredtopwords.size() > 0) {
-                            kelondroMSetTools.excludeDestructive(topwords, plasmaSwitchboard.badwords);
-                        }
-
-                        // avoid stopwords being topwords
-                        if (env.getConfig("filterOutStopwordsFromTopwords", "true").equals("true")) {
-                            if ((plasmaSwitchboard.stopwords != null) && (plasmaSwitchboard.stopwords.size() > 0)) {
-                                kelondroMSetTools.excludeDestructive(topwords, plasmaSwitchboard.stopwords);
-                            }
-                        }
-		 				
-                        String word;
-                        hintcount = 0;
-                        final Iterator iter = topwords.iterator();
-                        while (iter.hasNext()) {
-                            word = (String) iter.next();
-                            if (word != null) {
-                                prop.put("combine_words_" + hintcount + "_word", word);
-                                prop.put("combine_words_" + hintcount + "_newsearch", post.get("search", "").replace(' ', '+') + "+" + word);
-                                prop.put("combine_words_" + hintcount + "_count", count);
-                                prop.put("combine_words_" + hintcount + "_offset", offset);
-                                prop.put("combine_words_" + hintcount + "_resource", ((global) ? "global" : "local"));
-                                prop.put("combine_words_" + hintcount + "_time", (searchtime / 1000));
-                            }
-                            prop.put("combine_words", hintcount);
-                            if (hintcount++ > MAX_TOPWORDS) {
-                                break;
-                            }
-                        }
-                    }
-                } else {
-                    if (wrongregex != null) {
-                        prop.put("num-results_wrong_regex", wrongregex);
-                        prop.put("num-results", 4);
-                    } else {
-                        prop.put("num-results", 5);
-                    }
-                }
+                prop.put("num-results", 3);
             }
 
             prop.put("input_cat", "href");

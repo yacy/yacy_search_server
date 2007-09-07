@@ -28,9 +28,12 @@ import java.io.UnsupportedEncodingException;
 import java.net.MalformedURLException;
 import java.net.URLEncoder;
 import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.TreeSet;
 
 import de.anomic.http.httpHeader;
+import de.anomic.kelondro.kelondroMSetTools;
+import de.anomic.kelondro.kelondroNaturalOrder;
 import de.anomic.plasma.plasmaSearchEvent;
 import de.anomic.plasma.plasmaSearchPreOrder;
 import de.anomic.plasma.plasmaSearchQuery;
@@ -49,12 +52,17 @@ import de.anomic.yacy.yacyURL;
 
 public class yacysearchitem {
 
+    private static boolean col = true;
+    private static final int namelength = 60;
+    private static final int urllength = 120;
+    private static final int MAX_TOPWORDS = 24;
+    
     public static serverObjects respond(httpHeader header, serverObjects post, serverSwitch env) {
         final plasmaSwitchboard sb = (plasmaSwitchboard) env;
         final serverObjects prop = new serverObjects();
         
         String eventID = post.get("eventID", "");
-        int item = post.getInt("item", -1);
+        boolean bottomline = post.get("bottomline", "false").equals("true");
         boolean authenticated = sb.adminAuthenticated(header) >= 2;
         
         // find search event
@@ -62,14 +70,73 @@ public class yacysearchitem {
         plasmaSearchQuery theQuery = theSearch.getQuery();
         plasmaSearchRankingProfile ranking = theSearch.getRanking();
 
-        // generate result object
-        plasmaSearchEvent.ResultEntry result = theSearch.oneResult(item);
-
         // dynamically update count values
         prop.put("offset", theQuery.neededResults() - theQuery.displayResults() + 1);
-        prop.put("items", item + 1);
         prop.put("global", theSearch.getGlobalCount());
         prop.put("total", theSearch.getGlobalCount() + theSearch.getLocalCount());
+        prop.put("items", theQuery.displayResults());
+        
+        if (bottomline) {
+            // attach the bottom line with search references (topwords)
+            final Object[] references = theSearch.references(20);
+            int hintcount = references.length;
+            if (hintcount > 0) {
+                prop.put("references", 1);
+                // get the topwords
+                final TreeSet topwords = new TreeSet(kelondroNaturalOrder.naturalOrder);
+                String tmp = "";
+                for (int i = 0; i < hintcount; i++) {
+                    tmp = (String) references[i];
+                    if (tmp.matches("[a-z]+")) {
+                        topwords.add(tmp);
+                    }
+                }
+
+                // filter out the badwords
+                final TreeSet filteredtopwords = kelondroMSetTools.joinConstructive(topwords, plasmaSwitchboard.badwords);
+                if (filteredtopwords.size() > 0) {
+                    kelondroMSetTools.excludeDestructive(topwords, plasmaSwitchboard.badwords);
+                }
+
+                // avoid stopwords being topwords
+                if (env.getConfig("filterOutStopwordsFromTopwords", "true").equals("true")) {
+                    if ((plasmaSwitchboard.stopwords != null) && (plasmaSwitchboard.stopwords.size() > 0)) {
+                        kelondroMSetTools.excludeDestructive(topwords, plasmaSwitchboard.stopwords);
+                    }
+                }
+                
+                String word;
+                hintcount = 0;
+                final Iterator iter = topwords.iterator();
+                while (iter.hasNext()) {
+                    word = (String) iter.next();
+                    if (word != null) {
+                        prop.put("references_words_" + hintcount + "_word", word);
+                        prop.put("references_words_" + hintcount + "_newsearch", theQuery.queryString.replace(' ', '+') + "+" + word);
+                        prop.put("references_words_" + hintcount + "_count", theQuery.displayResults());
+                        prop.put("references_words_" + hintcount + "_offset", 0);
+                        prop.put("references_words_" + hintcount + "_resource", theQuery.searchdom());
+                        prop.put("references_words_" + hintcount + "_time", (theQuery.maximumTime / 1000));
+                    }
+                    prop.put("references_words", hintcount);
+                    if (hintcount++ > MAX_TOPWORDS) {
+                        break;
+                    }
+                }
+            } else {
+                prop.put("references", 0);
+            }
+            
+            return prop;
+        }
+        
+        // no bottomline
+        prop.put("references", 0);
+        
+        // generate result object
+        int item = post.getInt("item", -1);
+        prop.put("items", (item < 0) ? theQuery.displayResults() : item + 1);
+        plasmaSearchEvent.ResultEntry result = theSearch.oneResult(item);
         
         if (result == null) {
             prop.put("content", 0); // no content
@@ -99,7 +166,7 @@ public class yacysearchitem {
             prop.put("content_faviconCode", sb.licensedURLs.aquireLicense(faviconURL)); // aquire license for favicon url loading
             prop.put("content_urlhash", result.hash());
             prop.put("content_urlhexhash", yacySeed.b64Hash2hexHash(result.hash()));
-            prop.put("content_urlname", nxTools.shortenURLString(result.urlname(), 120));
+            prop.put("content_urlname", nxTools.shortenURLString(result.urlname(), urllength));
             prop.put("content_date", plasmaSwitchboard.dateString(result.modified()));
             prop.put("content_ybr", plasmaSearchPreOrder.ybr(result.hash()));
             prop.put("content_size", Long.toString(result.filesize()));
@@ -128,19 +195,49 @@ public class yacysearchitem {
                 for (int i = 0; i < images.size(); i++) {
                     ms = (plasmaSnippetCache.MediaSnippet) images.get(i);
                     try {url = new yacyURL(ms.href, null);} catch (MalformedURLException e) {continue;}
-                    prop.put("content_images_" + i + "_href", ms.href);
-                    prop.put("content_images_" + i + "_code", sb.licensedURLs.aquireLicense(url));
-                    prop.put("content_images_" + i + "_name", ms.name);
-                    prop.put("content_images_" + i + "_attr", ms.attr); // attributes, here: original size of image
+                    prop.put("content_items_" + i + "_href", ms.href);
+                    prop.put("content_items_" + i + "_code", sb.licensedURLs.aquireLicense(url));
+                    prop.put("content_items_" + i + "_name", shorten(ms.name, namelength));
+                    prop.put("content_items_" + i + "_attr", ms.attr); // attributes, here: original size of image
                     c++;
                 }
-                prop.put("content_images", c);
+                prop.put("content_items", c);
             } else {
-                prop.put("content_images", 0);
+                prop.put("content_items", 0);
+            }
+        }
+        
+        if ((theQuery.contentdom == plasmaSearchQuery.CONTENTDOM_AUDIO) ||
+            (theQuery.contentdom == plasmaSearchQuery.CONTENTDOM_VIDEO) ||
+            (theQuery.contentdom == plasmaSearchQuery.CONTENTDOM_APP)) {
+            // any other media content
+            ArrayList /* of plasmaSnippetCache.MediaSnippet */ media = result.mediaSnippets();
+            if (item == 0) col = true;
+            if (media != null) {
+                plasmaSnippetCache.MediaSnippet ms;
+                int c = 0;
+                for (int i = 0; i < media.size(); i++) {
+                    ms = (plasmaSnippetCache.MediaSnippet) media.get(i);
+                    prop.put("content_items_" + i + "_href", ms.href);
+                    prop.put("content_items_" + i + "_hrefshort", nxTools.shortenURLString(ms.href, urllength));
+                    prop.put("content_items_" + i + "_name", shorten(ms.name, namelength));
+                    prop.put("content_items_" + i + "_col", (col) ? 0 : 1);
+                    c++;
+                    col = !col;
+                }
+                prop.put("content_items", c);
+            } else {
+                prop.put("content_items", 0);
             }
         }
         
         return prop;
     }
     
+    private static String shorten(String s, int length) {
+        if (s.length() <= length) return s;
+        int p = s.lastIndexOf('.');
+        if (p < 0) return s.substring(0, length - 3) + "...";
+        return s.substring(0, length - (s.length() - p) - 3) + "..." + s.substring(p);
+    }
 }
