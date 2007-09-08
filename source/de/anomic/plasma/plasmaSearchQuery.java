@@ -115,7 +115,7 @@ public final class plasmaSearchQuery {
     }
     
     public int displayResults() {
-        // the number if result lines that are displayed at once (size of result page)
+        // the number of result lines that are displayed at once (size of result page)
         return this.linesPerPage;
     }
     

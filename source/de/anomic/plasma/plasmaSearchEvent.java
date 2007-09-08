@@ -51,7 +51,7 @@ import de.anomic.yacy.yacyURL;
 
 public final class plasmaSearchEvent {
     
-    public static int workerThreadCount = 5;
+    public static int workerThreadCount = 10;
     public static String lastEventID = "";
     private static HashMap lastEvents = new HashMap(); // a cache for objects from this class: re-use old search requests
     public static final long eventLifetime = 600000; // the time an event will stay in the cache, 10 Minutes
@@ -71,6 +71,7 @@ public final class plasmaSearchEvent {
     private int localcount;
     private resultWorker[] workerThreads;
     private ArrayList resultList; // list of this.Entry objects
+    //private int resultListLock; // a pointer that shows that all elements below this pointer are fixed and may not be changed again
     private HashMap failedURLs; // a mapping from a urlhash to a fail reason string
     TreeSet snippetFetchWordHashes; // a set of word hashes that are used to match with the snippets
     
@@ -97,6 +98,7 @@ public final class plasmaSearchEvent {
         this.localcount = 0;
         this.workerThreads = null;
         this.resultList = new ArrayList(10); // this is the result set which is filled up with search results, enriched with snippets
+        //this.resultListLock = 0; // no locked elements until now
         this.failedURLs = new HashMap(); // a map of urls to reason strings where a worker thread tried to work on, but failed.
         
         // snippets do not need to match with the complete query hashes,
@@ -120,7 +122,7 @@ public final class plasmaSearchEvent {
             // the result of the fetch is then in the rcGlobal
             process.startTimer();
             serverLog.logFine("SEARCH_EVENT", "STARTING " + fetchpeers + " THREADS TO CATCH EACH " + query.displayResults() + " URLs");
-            primarySearchThreads = yacySearch.primaryRemoteSearches(
+            this.primarySearchThreads = yacySearch.primaryRemoteSearches(
                     plasmaSearchQuery.hashSet2hashString(query.queryHashes),
                     plasmaSearchQuery.hashSet2hashString(query.excludeHashes),
                     "",
@@ -136,7 +138,7 @@ public final class plasmaSearchEvent {
                     ranking,
                     query.constraint,
                     (query.domType == plasmaSearchQuery.SEARCHDOM_GLOBALDHT) ? null : preselectedPeerHashes);
-            process.yield("remote search thread start", primarySearchThreads.length);
+            process.yield("remote search thread start", this.primarySearchThreads.length);
             
             // meanwhile do a local search
             Map[] searchContainerMaps = process.localSearchContainers(query, wordIndex, null);
@@ -400,6 +402,22 @@ public final class plasmaSearchEvent {
         return false;
     }
     
+    private boolean anyRemoteSearchAlive() {
+        // check primary search threads
+        if ((this.primarySearchThreads != null) && (this.primarySearchThreads.length != 0)) {
+            for (int i = 0; i < this.primarySearchThreads.length; i++) {
+                if ((this.primarySearchThreads[i] != null) && (this.primarySearchThreads[i].isAlive())) return true;
+            }
+        }
+        // maybe a secondary search thread is alivem check this
+        if ((this.secondarySearchThreads != null) && (this.secondarySearchThreads.length != 0)) {
+            for (int i = 0; i < this.primarySearchThreads.length; i++) {
+                if ((this.secondarySearchThreads[i] != null) && (this.secondarySearchThreads[i].isAlive())) return true;
+            }
+        }
+        return false;
+    }
+    
     public plasmaSearchQuery getQuery() {
         return query;
     }
@@ -454,7 +472,7 @@ public final class plasmaSearchEvent {
             // if worker threads had been alive, but did not succeed, start them again to fetch missing links
             if ((query.onlineSnippetFetch) &&
                 (!event.anyWorkerAlive()) &&
-                (event.resultList.size() < query.neededResults()) &&
+                (event.resultList.size() < query.neededResults() + 10) &&
                 ((event.getLocalCount() + event.getGlobalCount()) > event.resultList.size())) {
                 // set new timeout
                 event.eventTime = System.currentTimeMillis();
@@ -493,10 +511,14 @@ public final class plasmaSearchEvent {
         public void run() {
 
             // sleep first to give remote loading threads a chance to fetch entries
-            try {Thread.sleep(this.sleeptime);} catch (InterruptedException e1) {}
+            if (anyRemoteSearchAlive()) try {Thread.sleep(this.sleeptime);} catch (InterruptedException e1) {}
             
             // start fetching urls and snippets
-            while ((resultList.size() < query.neededResults() + query.displayResults()) && (System.currentTimeMillis() < this.timeout)) {
+            while (true) {
+                
+                if (resultList.size() > query.neededResults() + query.displayResults()) break; // computed enough
+
+                if (System.currentTimeMillis() > this.timeout) break; // time is over
                 
                 // try secondary search
                 prepareSecondarySearch(); // will be executed only once
@@ -505,9 +527,14 @@ public final class plasmaSearchEvent {
                 this.entry = null;
                 entry = nextOrder();
                 if (entry == null) {
-                    // wait and try again
-                    try {Thread.sleep(100);} catch (InterruptedException e) {}
-                    continue;
+                    if (anyRemoteSearchAlive()) {
+                        // wait and try again
+                        try {Thread.sleep(100);} catch (InterruptedException e) {}
+                        continue;
+                    } else {
+                        // we will not see that there core more results in
+                        break;
+                    }
                 }
                 
                 indexURLEntry page = wordIndex.loadedURL.load(entry.urlHash(), entry);
@@ -531,7 +558,7 @@ public final class plasmaSearchEvent {
                 
                 System.out.println("DEBUG SNIPPET_LOADING: thread " + id + " got " + resultEntry.url());
             }
-            System.out.println("DEBUG: resultWorker thread " + id + " terminated");
+            serverLog.logInfo("SEARCH", "resultWorker thread " + id + " terminated");
         }
         
         private indexRWIEntry nextOrder() {
@@ -574,28 +601,105 @@ public final class plasmaSearchEvent {
         serverLog.logInfo("search", "sorted out hash " + urlhash + " during search: " + reason);
     }
     
-    
     public ResultEntry oneResult(int item) {
         // first sleep a while to give accumulation threads a chance to work
         long sleeptime = this.eventTime + (this.query.maximumTime / this.query.displayResults() * ((item % this.query.displayResults()) + 1)) - System.currentTimeMillis();
-        if ((query.domType == plasmaSearchQuery.SEARCHDOM_GLOBALDHT) &&
-            (anyWorkerAlive()) &&
-            (sleeptime > 0)) try {Thread.sleep(sleeptime);} catch (InterruptedException e) {}
+        if ((anyWorkerAlive()) && (sleeptime > 0)) {
+            try {Thread.sleep(sleeptime);} catch (InterruptedException e) {}
+        }
         
-        // then sleep until a result is available
+        // if there are less than 10 more results available, sleep some extra time to get a chance that the "common sense" ranking algorithm can work
+        if ((this.resultList.size() <= item + 10) && (anyWorkerAlive())) {
+            try {Thread.sleep(300);} catch (InterruptedException e) {}
+        }
+        // then sleep until any result is available (that should not happen)
         while ((this.resultList.size() <= item) && (anyWorkerAlive())) {
             try {Thread.sleep(100);} catch (InterruptedException e) {}
         }
         
         // finally, if there is something, return the result
         synchronized (this.resultList) {
+            // check if we have enough entries
             if (this.resultList.size() <= item) return null;
             
-            // todo: fetch best result (switch) from item position to end of resultList
+            // fetch the best entry from the resultList, not the entry from item position
+            // whenever a specific entry was switched in its position and was returned here
+            // a moving pointer is set to assign that item position as not changeable
+            int bestpick = postRankingFavourite(item);
+            if (bestpick != item) {
+                // switch the elements
+                ResultEntry buf = (ResultEntry) this.resultList.get(bestpick);
+                serverLog.logInfo("SEARCH_POSTRANKING", "prefering [" + bestpick + "] " + buf.urlstring() + " over [" + item + "] " + ((ResultEntry) this.resultList.get(item)).urlstring());
+                this.resultList.set(bestpick, (ResultEntry) this.resultList.get(item));
+                this.resultList.set(item, buf);
+            }
             
+            //this.resultListLock = item; // lock the element; be prepared to return it
             return (ResultEntry) this.resultList.get(item);
         }
     }
+    
+    private int postRankingFavourite(int item) {
+        // do a post-ranking on resultList, which should be locked upon time of this call
+        long rank, bestrank = 0;
+        int bestitem = item;
+        ResultEntry entry;
+        for (int i = item; i < this.resultList.size(); i++) {
+            entry = (ResultEntry) this.resultList.get(i);
+            rank = this.ranking.postRanking(this.query, this.references(10), entry, item);
+            if (rank > bestrank) {
+                bestrank = rank;
+                bestitem = i;
+            }
+        }
+        return bestitem;
+    }
+    
+    /*
+    public void removeRedundant() {
+        // remove all urls from the pageAcc structure that occur double by specific redundancy rules
+        // a link is redundant, if a sub-path of the url is cited before. redundant urls are removed
+        // we find redundant urls by iteration over all elements in pageAcc
+        Iterator i = pageAcc.entrySet().iterator();
+        HashMap paths = new HashMap(); // a url-subpath to pageAcc-key relation
+        Map.Entry entry;
+
+        // first scan all entries and find all urls that are referenced
+        while (i.hasNext()) {
+            entry = (Map.Entry) i.next();
+            paths.put(((indexURLEntry) entry.getValue()).comp().url().toNormalform(true, true), entry.getKey());
+            //if (path != null) path = shortenPath(path);
+            //if (path != null) paths.put(path, entry.getKey());
+        }
+
+        // now scan the pageAcc again and remove all redundant urls
+        i = pageAcc.entrySet().iterator();
+        String shorten;
+        while (i.hasNext()) {
+            entry = (Map.Entry) i.next();
+            shorten = shortenPath(((indexURLEntry) entry.getValue()).comp().url().toNormalform(true, true));
+            // scan all subpaths of the url
+            while (shorten != null) {
+                if (pageAcc.size() <= query.wantedResults) break;
+                if (paths.containsKey(shorten)) {
+                    //System.out.println("deleting path from search result: " + path + " is redundant to " + shorten);
+                    try {
+                        i.remove();
+                    } catch (IllegalStateException e) {
+
+                    }
+                }
+                shorten = shortenPath(shorten);
+            }
+        }
+    }
+
+    private static String shortenPath(String path) {
+        int pos = path.lastIndexOf('/');
+        if (pos < 0) return null;
+        return path.substring(0, pos);
+    }
+    */
     
     public ArrayList completeResults(long waitingtime) {
         long timeout = System.currentTimeMillis() + waitingtime;
@@ -743,7 +847,8 @@ public final class plasmaSearchEvent {
         //assert e != null;
     }
     
-    public Object[] references(int count) {
+    public Set references(int count) {
+        // returns a set of words that are computed as toplist
         return this.rankedCache.getReferences(count);
     }
     
@@ -791,6 +896,7 @@ public final class plasmaSearchEvent {
                 if ((p = alternative_urlname.indexOf("?")) > 0) alternative_urlname = alternative_urlname.substring(0, p);
             }
         }
+        
         public String hash() {
             return urlentry.hash();
         }
@@ -820,6 +926,18 @@ public final class plasmaSearchEvent {
         }
         public int filesize() {
             return urlentry.size();
+        }
+        public int limage() {
+            return urlentry.limage();
+        }
+        public int laudio() {
+            return urlentry.laudio();
+        }
+        public int lvideo() {
+            return urlentry.lvideo();
+        }
+        public int lapp() {
+            return urlentry.lapp();
         }
         public indexRWIEntry word() {
             return urlentry.word();

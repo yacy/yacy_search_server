@@ -145,10 +145,15 @@ public class plasmaSearchContainer {
         return this.globalcount;
     }
     
-    public Object[] getReferences(int count) {
+    public Set getReferences(int count) {
         // create a list of words that had been computed by statistics over all
         // words that appeared in the url or the description of all urls
-        return ref.getScores(count, false, 2, Integer.MAX_VALUE);
+        Object[] refs = ref.getScores(count, false, 2, Integer.MAX_VALUE);
+        TreeSet s = new TreeSet(String.CASE_INSENSITIVE_ORDER);
+        for (int i = 0; i < refs.length; i++) {
+            s.add((String) refs[i]);
+        }
+        return s;
     }
     
     public void addReferences(String[] words) {

@@ -29,6 +29,7 @@ import java.net.MalformedURLException;
 import java.net.URLEncoder;
 import java.util.ArrayList;
 import java.util.Iterator;
+import java.util.Set;
 import java.util.TreeSet;
 
 import de.anomic.http.httpHeader;
@@ -64,6 +65,7 @@ public class yacysearchitem {
         String eventID = post.get("eventID", "");
         boolean bottomline = post.get("bottomline", "false").equals("true");
         boolean authenticated = sb.adminAuthenticated(header) >= 2;
+        int item = post.getInt("item", -1);
         
         // find search event
         plasmaSearchEvent theSearch = plasmaSearchEvent.getEvent(eventID);
@@ -74,19 +76,19 @@ public class yacysearchitem {
         prop.put("offset", theQuery.neededResults() - theQuery.displayResults() + 1);
         prop.put("global", theSearch.getGlobalCount());
         prop.put("total", theSearch.getGlobalCount() + theSearch.getLocalCount());
-        prop.put("items", theQuery.displayResults());
+        prop.put("items", (item < 0) ? theQuery.neededResults() : item + 1);
         
         if (bottomline) {
             // attach the bottom line with search references (topwords)
-            final Object[] references = theSearch.references(20);
-            int hintcount = references.length;
-            if (hintcount > 0) {
+            final Set references = theSearch.references(20);
+            if (references.size() > 0) {
                 prop.put("references", 1);
                 // get the topwords
                 final TreeSet topwords = new TreeSet(kelondroNaturalOrder.naturalOrder);
                 String tmp = "";
-                for (int i = 0; i < hintcount; i++) {
-                    tmp = (String) references[i];
+                Iterator i = references.iterator();
+                while (i.hasNext()) {
+                    tmp = (String) i.next();
                     if (tmp.matches("[a-z]+")) {
                         topwords.add(tmp);
                     }
@@ -106,7 +108,7 @@ public class yacysearchitem {
                 }
                 
                 String word;
-                hintcount = 0;
+                int hintcount = 0;
                 final Iterator iter = topwords.iterator();
                 while (iter.hasNext()) {
                     word = (String) iter.next();
@@ -134,8 +136,6 @@ public class yacysearchitem {
         prop.put("references", 0);
         
         // generate result object
-        int item = post.getInt("item", -1);
-        prop.put("items", (item < 0) ? theQuery.displayResults() : item + 1);
         plasmaSearchEvent.ResultEntry result = theSearch.oneResult(item);
         
         if (result == null) {

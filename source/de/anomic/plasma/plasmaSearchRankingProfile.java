@@ -47,9 +47,9 @@ import java.util.Map;
 import java.util.Set;
 import java.util.TreeSet;
 
+import de.anomic.htmlFilter.htmlFilterContentScraper;
 import de.anomic.index.indexRWIEntry;
 import de.anomic.yacy.yacyURL;
-import de.anomic.index.indexURLEntry;
 import de.anomic.kelondro.kelondroBitfield;
 
 public class plasmaSearchRankingProfile {
@@ -290,30 +290,30 @@ public class plasmaSearchRankingProfile {
     public long postRanking(
                     plasmaSearchQuery query,
                     Set topwords,
-                    String[] urlcomps,
-                    String[] descrcomps,
-                    indexURLEntry page,
+                    plasmaSearchEvent.ResultEntry rentry,
                     int position) {
 
         long ranking = (255 - position) << 8;
         
         // for media search: prefer pages with many links
-        if (query.contentdom == plasmaSearchQuery.CONTENTDOM_IMAGE) ranking += page.limage() << coeff_cathasimage;
-        if (query.contentdom == plasmaSearchQuery.CONTENTDOM_AUDIO) ranking += page.limage() << coeff_cathasaudio;
-        if (query.contentdom == plasmaSearchQuery.CONTENTDOM_VIDEO) ranking += page.limage() << coeff_cathasvideo;
-        if (query.contentdom == plasmaSearchQuery.CONTENTDOM_APP  ) ranking += page.limage() << coeff_cathasapp;
+        if (query.contentdom == plasmaSearchQuery.CONTENTDOM_IMAGE) ranking += rentry.limage() << coeff_cathasimage;
+        if (query.contentdom == plasmaSearchQuery.CONTENTDOM_AUDIO) ranking += rentry.laudio() << coeff_cathasaudio;
+        if (query.contentdom == plasmaSearchQuery.CONTENTDOM_VIDEO) ranking += rentry.lvideo() << coeff_cathasvideo;
+        if (query.contentdom == plasmaSearchQuery.CONTENTDOM_APP  ) ranking += rentry.lapp()   << coeff_cathasapp;
         
         // prefer hit with 'prefer' pattern
-        indexURLEntry.Components comp = page.comp();
-        if (comp.url().toNormalform(true, true).matches(query.prefer)) ranking += 256 << coeff_prefer;
-        if (comp.title().matches(query.prefer)) ranking += 256 << coeff_prefer;
+        if (rentry.url().toNormalform(true, true).matches(query.prefer)) ranking += 256 << coeff_prefer;
+        if (rentry.title().matches(query.prefer)) ranking += 256 << coeff_prefer;
         
         // apply 'common-sense' heuristic using references
+        String urlstring = rentry.url().toNormalform(true, true);
+        String[] urlcomps = htmlFilterContentScraper.urlComps(urlstring);
+        String[] descrcomps = rentry.title().toLowerCase().split(htmlFilterContentScraper.splitrex);
         for (int j = 0; j < urlcomps.length; j++) {
-            if (topwords.contains(urlcomps[j])) ranking += 256 << coeff_urlcompintoplist;
+            if (topwords.contains(urlcomps[j])) ranking += Math.max(1, 256 - urlstring.length()) << coeff_urlcompintoplist;
         }
         for (int j = 0; j < descrcomps.length; j++) {
-            if (topwords.contains(descrcomps[j])) ranking += 256 << coeff_descrcompintoplist;
+            if (topwords.contains(descrcomps[j])) ranking += Math.max(1, 256 - rentry.title().length()) << coeff_descrcompintoplist;
         }
 
         // apply query-in-result matching

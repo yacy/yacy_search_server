@@ -32,6 +32,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
+import java.util.Set;
 import java.util.TreeSet;
 
 import de.anomic.http.httpHeader;
@@ -226,12 +227,14 @@ public final class search {
             
             // prepare reference hints
             localProcess.startTimer();
-            Object[] ws = theSearch.references(10);
+            Set ws = theSearch.references(10);
             StringBuffer refstr = new StringBuffer();
-            for (int j = 0; j < ws.length; j++)
-                refstr.append(",").append((String) ws[j]);
+            Iterator j = ws.iterator();
+            while (j.hasNext()) {
+                refstr.append(",").append((String) j.next());
+            }
             prop.putASIS("references", (refstr.length() > 0) ? refstr.substring(1) : new String(refstr));
-            localProcess.yield("reference collection", ws.length);
+            localProcess.yield("reference collection", ws.size());
         }
         prop.putASIS("indexabstract", new String(indexabstract));
         
