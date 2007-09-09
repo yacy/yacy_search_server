@@ -459,11 +459,12 @@ public class plasmaCrawlBalancer {
     public synchronized plasmaCrawlEntry top(int dist) throws IOException {
         // if we need to flush anything, then flush the domain stack first,
         // to avoid that new urls get hidden by old entries from the file stack
+        if (urlRAMStack == null) return null;
         while ((domainStacksNotEmpty()) && (urlRAMStack.size() <= dist)) {
             // flush only that much as we need to display
             flushOnceDomStacks(0, true); 
         }
-        while ((urlRAMStack.size() <= dist) && (urlFileStack.size() > 0)) {
+        while ((urlFileStack != null) && (urlRAMStack.size() <= dist) && (urlFileStack.size() > 0)) {
             // flush some entries from disc to ram stack
             try {
                 kelondroRow.Entry t = urlFileStack.pop();
