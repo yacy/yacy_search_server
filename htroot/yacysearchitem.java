@@ -64,25 +64,39 @@ public class yacysearchitem {
         
         String eventID = post.get("eventID", "");
         boolean bottomline = post.get("bottomline", "false").equals("true");
+        boolean rss = post.get("rss", "false").equals("true");
         boolean authenticated = sb.adminAuthenticated(header) >= 2;
         int item = post.getInt("item", -1);
         
+        // default settings for blank item
+        prop.put("content", 0);
+        prop.put("rss", 0);
+        prop.put("references", 0);
+        prop.put("rssreferences", 0);
+        prop.put("dynamic", 0);
+        
         // find search event
         plasmaSearchEvent theSearch = plasmaSearchEvent.getEvent(eventID);
+        if (theSearch == null) {
+            // the event does not exist, show empty page
+            return prop;
+        }
         plasmaSearchQuery theQuery = theSearch.getQuery();
         plasmaSearchRankingProfile ranking = theSearch.getRanking();
 
         // dynamically update count values
-        prop.put("offset", theQuery.neededResults() - theQuery.displayResults() + 1);
-        prop.put("global", theSearch.getGlobalCount());
-        prop.put("total", theSearch.getGlobalCount() + theSearch.getLocalCount());
-        prop.put("items", (item < 0) ? theQuery.neededResults() : item + 1);
+        if (!rss) {
+            prop.put("dynamic_offset", theQuery.neededResults() - theQuery.displayResults() + 1);
+            prop.put("dynamic_global", theSearch.getGlobalCount());
+            prop.put("dynamic_total", theSearch.getGlobalCount() + theSearch.getLocalCount());
+            prop.put("dynamic_items", (item < 0) ? theQuery.neededResults() : item + 1);
+            prop.put("dynamic", 1);
+        }
         
         if (bottomline) {
             // attach the bottom line with search references (topwords)
             final Set references = theSearch.references(20);
             if (references.size() > 0) {
-                prop.put("references", 1);
                 // get the topwords
                 final TreeSet topwords = new TreeSet(kelondroNaturalOrder.naturalOrder);
                 String tmp = "";
@@ -107,46 +121,71 @@ public class yacysearchitem {
                     }
                 }
                 
-                String word;
-                int hintcount = 0;
-                final Iterator iter = topwords.iterator();
-                while (iter.hasNext()) {
-                    word = (String) iter.next();
-                    if (word != null) {
-                        prop.put("references_words_" + hintcount + "_word", word);
-                        prop.put("references_words_" + hintcount + "_newsearch", theQuery.queryString.replace(' ', '+') + "+" + word);
-                        prop.put("references_words_" + hintcount + "_count", theQuery.displayResults());
-                        prop.put("references_words_" + hintcount + "_offset", 0);
-                        prop.put("references_words_" + hintcount + "_resource", theQuery.searchdom());
-                        prop.put("references_words_" + hintcount + "_time", (theQuery.maximumTime / 1000));
+                if (rss) {
+                    String word;
+                    int hintcount = 0;
+                    final Iterator iter = topwords.iterator();
+                    while (iter.hasNext()) {
+                        word = (String) iter.next();
+                        if (word != null) {
+                            prop.put("rssreferences_words_" + hintcount + "_word", word);
+                        }
+                        prop.put("rssreferences_words", hintcount);
+                        if (hintcount++ > MAX_TOPWORDS) {
+                            break;
+                        }
                     }
-                    prop.put("references_words", hintcount);
-                    if (hintcount++ > MAX_TOPWORDS) {
-                        break;
+                    prop.put("rssreferences", 1);
+                } else {
+                    String word;
+                    int hintcount = 0;
+                    final Iterator iter = topwords.iterator();
+                    while (iter.hasNext()) {
+                        word = (String) iter.next();
+                        if (word != null) {
+                            prop.put("references_words_" + hintcount + "_word", word);
+                            prop.put("references_words_" + hintcount + "_newsearch", theQuery.queryString.replace(' ', '+') + "+" + word);
+                            prop.put("references_words_" + hintcount + "_count", theQuery.displayResults());
+                            prop.put("references_words_" + hintcount + "_offset", 0);
+                            prop.put("references_words_" + hintcount + "_resource", theQuery.searchdom());
+                            prop.put("references_words_" + hintcount + "_time", (theQuery.maximumTime / 1000));
+                        }
+                        prop.put("references_words", hintcount);
+                        if (hintcount++ > MAX_TOPWORDS) {
+                            break;
+                        }
                     }
+                    prop.put("references", 1);
                 }
-            } else {
-                prop.put("references", 0);
             }
             
             return prop;
         }
         
-        // no bottomline
-        prop.put("references", 0);
-        
         // generate result object
         plasmaSearchEvent.ResultEntry result = theSearch.oneResult(item);
         
         if (result == null) {
-            prop.put("content", 0); // no content
+            // no content
             return prop;
         }
             
-        prop.put("content", theQuery.contentdom + 1); // switch on specific content
+        if (rss) {
+            // text search for rss output
+            prop.put("rss", 1); // switch on specific content
+            prop.put("rss_title", result.title());
+            prop.put("rss_description", result.textSnippet().getLineRaw());
+            prop.put("rss_link", result.urlstring());
+            prop.put("rss_urlhash", result.hash());
+            prop.put("rss_date", plasmaSwitchboard.dateString(result.modified()));
+            return prop;
+        }
+        
+        prop.put("rss", 0);
         
         if (theQuery.contentdom == plasmaSearchQuery.CONTENTDOM_TEXT) {
             // text search
+            prop.put("content", theQuery.contentdom + 1); // switch on specific content
             prop.put("content_authorized", (authenticated) ? 1 : 0);
             prop.put("content_authorized_recommend", (yacyCore.newsPool.getSpecific(yacyNewsPool.OUTGOING_DB, yacyNewsPool.CATEGORY_SURFTIPP_ADD, "url", result.urlstring()) == null) ? 1 : 0);
             prop.put("content_authorized_recommend_deletelink", "/yacysearch.html?search=" + theQuery.queryString + "&Enter=Search&count=" + theQuery.displayResults() + "&offset=" + (theQuery.neededResults() - theQuery.displayResults()) + "&order=" + crypt.simpleEncode(ranking.toExternalString()) + "&resource=local&time=3&deleteref=" + result.hash() + "&urlmaskfilter=.*");
@@ -182,11 +221,13 @@ public class yacysearchitem {
                         (((wordURL = yacyURL.probablyWordURL(result.hash(), query[0])) != null) ? ", probablyWordURL=" + wordURL.toNormalform(false, true) : ""));
  
             prop.putASIS("content_snippet", result.textSnippet().getLineMarked(theQuery.queryHashes));
+            return prop;
         }
         
         if (theQuery.contentdom == plasmaSearchQuery.CONTENTDOM_IMAGE) {
             // image search; shows thumbnails
             // iterate over all images in the result
+            prop.put("content", theQuery.contentdom + 1); // switch on specific content
             ArrayList /* of plasmaSnippetCache.MediaSnippet */ images = result.mediaSnippets();
             if (images != null) {
                 plasmaSnippetCache.MediaSnippet ms;
@@ -205,12 +246,14 @@ public class yacysearchitem {
             } else {
                 prop.put("content_items", 0);
             }
+            return prop;
         }
         
         if ((theQuery.contentdom == plasmaSearchQuery.CONTENTDOM_AUDIO) ||
             (theQuery.contentdom == plasmaSearchQuery.CONTENTDOM_VIDEO) ||
             (theQuery.contentdom == plasmaSearchQuery.CONTENTDOM_APP)) {
             // any other media content
+            prop.put("content", theQuery.contentdom + 1); // switch on specific content
             ArrayList /* of plasmaSnippetCache.MediaSnippet */ media = result.mediaSnippets();
             if (item == 0) col = true;
             if (media != null) {
@@ -229,6 +272,7 @@ public class yacysearchitem {
             } else {
                 prop.put("content_items", 0);
             }
+            return prop;
         }
         
         return prop;

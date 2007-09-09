@@ -136,7 +136,6 @@ public class yacysearch {
             prop.put("input_contentdomCheckImage", 0);
             prop.put("input_contentdomCheckApp", 0);
             prop.put("excluded", 0);
-            prop.put("combine", 0);
             prop.put("results", "");
             prop.put("resultTable", 0);
             prop.put("num-results", (searchAllowed) ? 0 : 4);

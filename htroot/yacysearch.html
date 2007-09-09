@@ -106,11 +106,6 @@ document.getElementById("Enter").value = "search again - catch up more links";
 #(/num-results)#
 
 <!-- the search results -->
-#(combine)#::
-<p><strong>Topwords</strong>:
-#{words}#&nbsp;<a href="yacysearch.html?search=#[newsearch]#&amp;Enter=Search&amp;count=#[count]#&amp;offset=#[offset]#&amp;resource=#[resource]#&amp;time=#[time]#">#[word]#</a>#{/words}#
-</p>
-#(/combine)#
 <script type="text/javascript">
 var progressbar = new Progressbar(#[results]#, document.getElementById("results"));
 </script>
@@ -118,7 +113,7 @@ var progressbar = new Progressbar(#[results]#, document.getElementById("results"
 <!-- linklist begin -->
 #(resultTable)#::<table width="100%"><tr class="TableHeader"><td width="30%">Media</td><td width="70%">URL</tr>#(/resultTable)#
 #{results}#
-<!--#include virtual="yacysearchitem.html?item=#[item]#&eventID=#[eventID]#" -->
+<!--#include virtual="yacysearchitem.html?rss=false&item=#[item]#&eventID=#[eventID]#" -->
 #{/results}#
 #(resultTable)#::</table>#(/resultTable)#
 <!-- linklist end -->

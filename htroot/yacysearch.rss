@@ -3,10 +3,7 @@
 <rss version="2.0"
 	xmlns:yacyTopwords="http://www.yacy.net/yacy/topwords"
 	xmlns:opensearch="http://a9.com/-/spec/opensearch/1.1/">
-	<!--
-		YACY P2P WEB SEARCH - Results
-		Hint: append the query-parameter "fetchSnippet=" to embed snippets
-	-->
+	<!-- YaCy P2P Web Search - Results; http://yacy.net -->
 	<channel>
 		<title>YaCy P2P-Search for #[former]#</title>
 		<description>Search for #[former]#</description>
@@ -20,26 +17,10 @@
 		<opensearch:link rel="search" href="opensearchdescription.xml" type="application/opensearchdescription+xml"/>
 		<opensearch:Query role="request" searchTerms="#[former]#" />
 		
-		#(type)#
-		#{results}#<item>
-			<title><![CDATA[#[description]#]]></title>
-			<link>#[url]#</link>
-			#(snippet)#::<description><![CDATA[#[text]#]]></description>#(/snippet)#
-			<pubDate>#[date]#</pubDate>
-			<guid>#[urlhash]#</guid>
-		</item>
+		#{results}#
+<!--#include virtual="yacysearchitem.html?rss=true&item=#[item]#&eventID=#[eventID]#" -->
+		#{/results}#
 		
-		#{/results}#<yacyTopwords:topwords>
-            #(combine)#
-            ::
-            #{words}#
-            <yacyTopwords:item>
-                <yacyTopwords:word>#[word]#</yacyTopwords:word>
-            </yacyTopwords:item>
-            #{/words}#
-            #(/combine)#
-		</yacyTopwords:topwords>
-        ::
-		#(/type)#
+<!--#include virtual="yacysearchitem.html?rss=true&bottomline=true&eventID=#[eventID]#" -->
 	</channel>
 </rss>

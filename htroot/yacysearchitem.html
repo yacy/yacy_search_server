@@ -39,12 +39,31 @@
   <tr class="#(col)#TableCellLight::TableCellDark#(/col)#"><td>#[name]#</td><td><a href="#[href]#">#[hrefshort]#</a></tr>
   #{/items}#
 #(/content)#
+#(rss)#::
+<item>
+<title><![CDATA[#[title]#]]></title>
+<link>#[link]#</link>
+<description><![CDATA[#[description]#]]></description>
+<pubDate>#[date]#</pubDate>
+<guid>#[urlhash]#</guid>
+</item>
+#(/rss)#
 #(references)#::
 <p><strong>Topwords</strong>:
 #{words}#&nbsp;<a href="yacysearch.html?search=#[newsearch]#&amp;Enter=Search&amp;count=#[count]#&amp;offset=#[offset]#&amp;resource=#[resource]#&amp;time=#[time]#">#[word]#</a>#{/words}#
 </p>
 #(/references)#
+#(rssreferences)#::
+<yacyTopwords:topwords>
+#{words}#
+<yacyTopwords:item><yacyTopwords:word>#[word]#</yacyTopwords:word></yacyTopwords:item>
+#{/words}#
+</yacyTopwords:topwords>
+#(/rssreferences)#
+#(dynamic)#::
 <script type="text/javascript">
 statistics("#[offset]#", "#[items]#", "#[global]#", "#[total]#");
 progressbar.step(1);
 </script>
+#(/dynamic)#
+
