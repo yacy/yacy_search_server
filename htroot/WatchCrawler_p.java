@@ -102,6 +102,7 @@ public class WatchCrawler_p {
                     if (fullDomain) try {
                         newcrawlingfilter = ".*" + (new yacyURL(post.get("crawlingURL",""), null)).getHost() + ".*";
                     } catch (MalformedURLException e) {}
+                    if (newcrawlingfilter.length() < 2) newcrawlingfilter = ".*"; // avoid that all urls are filtered out if bad value was submitted
                     env.setConfig("crawlingFilter", newcrawlingfilter);
                     
                     int newcrawlingdepth = Integer.parseInt(post.get("crawlingDepth", "8"));
