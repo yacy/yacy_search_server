@@ -8,7 +8,7 @@
 //
 // $LastChangedDate$
 // $LastChangedRevision$
-// $LastChangedBy$
+// $LastChangedBy: $
 //
 // This program is free software; you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -248,7 +248,7 @@ public class plasmaDHTChunk {
                             continue;
                         }
                         lurl = wordIndex.loadedURL.load(iEntry.urlHash(), iEntry);
-                        if ((lurl == null) || (lurl.comp().url() == null)) {
+                        if ((lurl == null) || (lurl.comp() == null) || (lurl.comp().url() == null)) {
                             //yacyCore.log.logFine("DEBUG selectTransferContainersResource: not-bound url hash '" + iEntry.urlHash() + "' for word hash " + container.getWordHash());
                             notBoundCounter++;
                             urlIter.remove();
