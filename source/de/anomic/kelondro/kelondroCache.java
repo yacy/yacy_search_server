@@ -61,7 +61,7 @@ public class kelondroCache implements kelondroIndex {
     private kelondroIndex  index;
     private kelondroRow    keyrow;
     private int            readHit, readMiss, writeUnique, writeDouble, cacheDelete, cacheFlush;
-    private int            hasnotHit, hasnotMiss, hasnotUnique, hasnotDouble, hasnotDelete, hasnotFlush;
+    private int            hasnotHit, hasnotMiss, hasnotUnique, hasnotDouble, hasnotDelete;
     private boolean 	   read, write;
     
     public kelondroCache(kelondroIndex backupIndex, boolean read, boolean write) {
@@ -90,7 +90,6 @@ public class kelondroCache implements kelondroIndex {
         this.hasnotUnique = 0;
         this.hasnotDouble = 0;
         this.hasnotDelete = 0;
-        this.hasnotFlush = 0;
     }
     
     public final int cacheObjectChunkSize() {
@@ -154,7 +153,7 @@ public class kelondroCache implements kelondroIndex {
         map.put("objectMissCacheWriteUnique", Integer.toString(hasnotUnique));
         map.put("objectMissCacheWriteDouble", Integer.toString(hasnotDouble));
         map.put("objectMissCacheDeletes", Integer.toString(hasnotDelete));
-        map.put("objectMissCacheFlushes", Integer.toString(hasnotFlush));
+        map.put("objectMissCacheFlushes", "0"); // a miss cache flush can only happen if we have a deletion cache (which we dont have)
         
         // future feature .. map.put("objectElderTimeRead", index.profile().)
         return map;
@@ -456,32 +455,6 @@ public class kelondroCache implements kelondroIndex {
         // The write buffer does not work here, because it does not store dates.
         
         throw new UnsupportedOperationException("put with date is inefficient in kelondroCache");
-        /*
-        if (entryDate == null) return put(row);
-        
-        assert (row != null);
-        assert (row.columns() == row().columns());
-        //assert (!(serverLog.allZero(row.getColBytes(index.primarykey()))));
-        assert (writeBufferUnique == null);
-        assert (writeBufferDoubles == null);
-        
-        byte[] key = row.getColBytes(index.row().primaryKey);
-        checkHitSpace();
-        
-        // remove entry from miss- and hit-cache
-        if (readMissCache != null) {
-            this.readMissCache.remove(key);
-            this.hasnotDelete++;
-        }
-
-        // the worst case: we must write to the backend directly
-        Entry entry = index.put(row);
-        if (readHitCache != null) {
-            kelondroRow.Entry dummy = readHitCache.put(row); // learn that entry
-            if (dummy == null) this.writeUnique++; else this.writeDouble++;
-        }
-        return entry;
-        */
     }
 
     public synchronized void addUnique(Entry row) throws IOException {

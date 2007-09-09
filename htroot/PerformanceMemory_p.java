@@ -194,7 +194,7 @@ public class PerformanceMemory_p {
             prop.put("ObjectList_" + c + "_objectMissCacheWriteUnique", map.get("objectMissCacheWriteUnique"));
             prop.put("ObjectList_" + c + "_objectMissCacheWriteDouble", map.get("objectMissCacheWriteDouble"));
             prop.put("ObjectList_" + c + "_objectMissCacheDeletes", map.get("objectMissCacheDeletes"));
-            prop.put("ObjectList_" + c + "_objectMissCacheFlushes", map.get("objectMissCacheFlushes"));
+            //prop.put("ObjectList_" + c + "_objectMissCacheFlushes", map.get("objectMissCacheFlushes"));
             
             c++;
         }
@@ -205,9 +205,9 @@ public class PerformanceMemory_p {
         prop.put("objectMissCacheTotalMem", totalmissmem / (1024 * 1024));
 
         // parse initialization memory settings
-        String Xmx = env.getConfig("javastart_Xmx", "Xmx64m").substring(3);
+        String Xmx = env.getConfig("javastart_Xmx", "Xmx96m").substring(3);
         prop.put("Xmx", Xmx.substring(0, Xmx.length() - 1));
-        String Xms = env.getConfig("javastart_Xms", "Xms10m").substring(3);
+        String Xms = env.getConfig("javastart_Xms", "Xms96m").substring(3);
         prop.put("Xms", Xms.substring(0, Xms.length() - 1));
         
         // other caching structures
