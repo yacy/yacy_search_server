@@ -211,7 +211,7 @@ public class sharedBlacklist_p {
                                 String[] supportedBlacklistTypes = supportedBlacklistTypesStr.split(",");  
 
                                 for (int blTypes=0; blTypes < supportedBlacklistTypes.length; blTypes++) {
-                                    if (listManager.ListInListslist(supportedBlacklistTypes[blTypes] + ".BlackLists",selectedBlacklistName)) {
+                                    if (listManager.listSetContains(supportedBlacklistTypes[blTypes] + ".BlackLists",selectedBlacklistName)) {
                                         plasmaSwitchboard.urlBlacklist.add(supportedBlacklistTypes[blTypes],newItem.substring(0, pos), newItem.substring(pos + 1));
                                     }                
                                 }                         

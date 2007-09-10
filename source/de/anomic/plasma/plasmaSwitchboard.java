@@ -993,14 +993,14 @@ public final class plasmaSwitchboard extends serverAbstractSwitch implements ser
         }
         
         // load the black-list / inspired by [AS]
-        File ulrBlackListFile = new File(getRootPath(), getConfig(LISTS_PATH, LISTS_PATH_DEFAULT));
+        File blacklistsPath = new File(getRootPath(), getConfig(LISTS_PATH, LISTS_PATH_DEFAULT));
         String blacklistClassName = getConfig(BLACKLIST_CLASS, BLACKLIST_CLASS_DEFAULT);
         
         this.log.logConfig("Starting blacklist engine ...");
         try {
             Class blacklistClass = Class.forName(blacklistClassName);
             Constructor blacklistClassConstr = blacklistClass.getConstructor( new Class[] { File.class } );
-            urlBlacklist = (plasmaURLPattern) blacklistClassConstr.newInstance(new Object[] { ulrBlackListFile });
+            urlBlacklist = (plasmaURLPattern) blacklistClassConstr.newInstance(new Object[] { blacklistsPath });
             this.log.logFine("Used blacklist engine class: " + blacklistClassName);
             this.log.logConfig("Using blacklist engine: " + urlBlacklist.getEngineInfo());
         } catch (Exception e) {
@@ -1013,7 +1013,7 @@ public final class plasmaSwitchboard extends serverAbstractSwitch implements ser
       
         this.log.logConfig("Loading backlist data ...");
         listManager.switchboard = this;
-        listManager.listsPath = ulrBlackListFile;        
+        listManager.listsPath = blacklistsPath;        
         listManager.reloadBlacklists();
 
         // load badwords (to filter the topwords)

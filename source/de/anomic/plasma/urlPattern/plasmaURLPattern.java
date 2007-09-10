@@ -1,6 +1,8 @@
 package de.anomic.plasma.urlPattern;
 
 import java.io.File;
+import java.util.Arrays;
+import java.util.HashSet;
 
 import de.anomic.yacy.yacyURL;
 
@@ -24,6 +26,20 @@ public interface plasmaURLPattern {
         }
         
         public String getFileName() { return this.filename; }
+        
+        
+        /**
+         * Construct a unified array of file names from comma seperated file name
+         * list.
+         * 
+         * @return unified String array of file names
+         */
+        public String[] getFileNamesUnified() {
+            HashSet hs = new HashSet(Arrays.asList(this.filename.split(",")));
+            
+            return (String[]) hs.toArray(new String[hs.size()]);
+        }
+        
         public String getType() { return this.type; }
     }
 

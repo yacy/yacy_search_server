@@ -4,6 +4,7 @@
 // (C) by Michael Peter Christen; mc@anomic.de
 // first published on http://www.anomic.de
 // Frankfurt, Germany, 2005
+// (C) 2007 by Bjoern Krombholz
 // last major change: 12. August 2006 (theli) ?
 //
 // $LastChangedDate$
@@ -46,14 +47,15 @@
 package de.anomic.plasma.urlPattern;
 
 import java.io.File;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
+import java.util.Map;
 import java.util.Set;
-
 import de.anomic.kelondro.kelondroMSetTools;
 import de.anomic.yacy.yacyURL;
 
@@ -141,15 +143,46 @@ public abstract class abstractURLPattern implements plasmaURLPattern {
         }
     }
     
-    public void loadList(String blacklistType, String filenames, String sep) {
-        HashMap blacklistMap = getBlacklistMap(blacklistType);
-        String[] filenamesarray = filenames.split(",");
+    public void loadList(blacklistFile blFile, String sep) {
+        HashMap blacklistMap = getBlacklistMap(blFile.getType());
+        Set loadedBlacklist;
+        Map.Entry loadedEntry;
+        ArrayList paths, loadedPaths;
 
-        if (filenamesarray.length > 0) {
-            for (int i = 0; i < filenamesarray.length; i++) {
-                blacklistMap.putAll(kelondroMSetTools.loadMapMultiValsPerKey(new File(this.blacklistRootPath, filenamesarray[i]).toString(), sep));
+        String[] fileNames = blFile.getFileNamesUnified();
+        if (fileNames.length > 0) {
+            for (int i = 0; i < fileNames.length; i++) {
+                // make sure all requested blacklist files exist
+                File file = new File(this.blacklistRootPath, fileNames[i]);
+                try {
+                    file.createNewFile();
+                } catch (IOException e) { /* */ }
+                
+                // join all blacklists from files into one internal blacklist map
+                loadedBlacklist = kelondroMSetTools.loadMapMultiValsPerKey(file.toString(), sep).entrySet();
+                for (Iterator mi = loadedBlacklist.iterator(); mi.hasNext(); ) {
+                    loadedEntry = (Map.Entry) mi.next();
+                    loadedPaths = (ArrayList) loadedEntry.getValue();
+                    
+                    // create new entry if host mask unknown, otherwise merge
+                    // existing one with path patterns from blacklist file 
+                    paths = (ArrayList) blacklistMap.get(loadedEntry.getKey());
+                    if (paths == null) {
+                        blacklistMap.put(loadedEntry.getKey(), loadedPaths);
+                    } else {
+                        // TODO check for duplicates? (refactor List -> Set)
+                        paths.addAll(loadedPaths);
+                    }
+                }
             }
         }
+    }
+    
+    public void loadList(String blacklistType, String fileNames, String sep) {
+        // method for not breaking older plasmaURLPattern interface
+        blacklistFile blFile = new blacklistFile(fileNames, blacklistType);
+        
+        loadList(blFile, sep);
     }
     
     public void removeAll(String blacklistType, String host) {

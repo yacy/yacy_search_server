@@ -109,7 +109,7 @@ public class BlacklistCleaner_p {
         
         if (post.containsKey("listNames")) {
             blacklistToUse = (String)post.get("listNames"); 
-            if (blacklistToUse.length() == 0 || !listManager.ListInListslist("listManager.listsPath", blacklistToUse))
+            if (blacklistToUse.length() == 0 || !listManager.listSetContains("listManager.listsPath", blacklistToUse))
                 prop.put("results", 2);
         }
         
@@ -283,7 +283,7 @@ public class BlacklistCleaner_p {
             
             // remove the entry from the running blacklist engine
             for (int blTypes=0; blTypes < supportedBlacklistTypes.length; blTypes++) {
-                if (listManager.ListInListslist(supportedBlacklistTypes[blTypes] + ".BlackLists", blacklistToUse)) {
+                if (listManager.listSetContains(supportedBlacklistTypes[blTypes] + ".BlackLists", blacklistToUse)) {
                     String host = (s.indexOf("/") == -1) ? s : s.substring(0, s.indexOf("/"));
                     String path = (s.indexOf("/") == -1) ? ".*" : s.substring(s.indexOf("/") + 1);
                     try {
@@ -318,7 +318,7 @@ public class BlacklistCleaner_p {
                 }
                 pw.println(host + "/" + path);
                 for (int blTypes=0; blTypes < supportedBlacklistTypes.length; blTypes++) {
-                    if (listManager.ListInListslist(supportedBlacklistTypes[blTypes] + ".BlackLists",blacklistToUse)) {
+                    if (listManager.listSetContains(supportedBlacklistTypes[blTypes] + ".BlackLists",blacklistToUse)) {
                         plasmaSwitchboard.urlBlacklist.add(
                                 supportedBlacklistTypes[blTypes],
                                 host,

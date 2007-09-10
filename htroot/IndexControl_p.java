@@ -381,7 +381,7 @@ public class IndexControl_p {
                             url = e.comp().url();
                             pw.println(url.getHost() + "/" + url.getFile());
                             for (int blTypes=0; blTypes < supportedBlacklistTypes.length; blTypes++) {
-                                if (listManager.ListInListslist(supportedBlacklistTypes[blTypes] + ".BlackLists", blacklist)) {
+                                if (listManager.listSetContains(supportedBlacklistTypes[blTypes] + ".BlackLists", blacklist)) {
                                     plasmaSwitchboard.urlBlacklist.add(
                                             supportedBlacklistTypes[blTypes],
                                             url.getHost(),
@@ -409,7 +409,7 @@ public class IndexControl_p {
                             url = e.comp().url();
                             pw.println(url.getHost() + "/.*");
                             for (int blTypes=0; blTypes < supportedBlacklistTypes.length; blTypes++) {
-                                if (listManager.ListInListslist(supportedBlacklistTypes[blTypes] + ".BlackLists", blacklist)) {
+                                if (listManager.listSetContains(supportedBlacklistTypes[blTypes] + ".BlackLists", blacklist)) {
                                     plasmaSwitchboard.urlBlacklist.add(
                                             supportedBlacklistTypes[blTypes],
                                             url.getHost(),

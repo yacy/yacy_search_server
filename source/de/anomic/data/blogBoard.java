@@ -132,8 +132,8 @@ public class blogBoard {
 	    record.put("ip", ip);
         if (page == null) record.put("page", "");
         else record.put("page", kelondroBase64Order.enhancedCoder.encode(page));
-        if (comments == null) record.put("comments", listManager.arraylist2string(new ArrayList()));
-        else record.put("comments", listManager.arraylist2string(comments));
+        if (comments == null) record.put("comments", listManager.collection2string(new ArrayList()));
+        else record.put("comments", listManager.collection2string(comments));
         if (commentMode == null) record.put("commentMode", "1");
         else record.put("commentMode", commentMode);
 	    
@@ -144,7 +144,7 @@ public class blogBoard {
 	private entry(String key, Map record) {
 	    this.key = key;
 	    this.record = record;
-        if (this.record.get("comments")==null) this.record.put("comments", listManager.arraylist2string(new ArrayList()));
+        if (this.record.get("comments")==null) this.record.put("comments", listManager.collection2string(new ArrayList()));
         if (this.record.get("commentMode")==null || this.record.get("commentMode").equals("")) this.record.put("commentMode", "1");
 	}
 	
@@ -221,13 +221,13 @@ public class blogBoard {
     public void addComment(String commentID) {
         ArrayList comments = listManager.string2arraylist((String) record.get("comments"));
         comments.add(commentID);
-        record.put("comments", listManager.arraylist2string(comments));
+        record.put("comments", listManager.collection2string(comments));
     }
     
     public boolean removeComment(String commentID) {
         ArrayList comments = listManager.string2arraylist((String) record.get("comments"));
         boolean success = comments.remove(commentID);
-        record.put("comments", listManager.arraylist2string(comments));
+        record.put("comments", listManager.collection2string(comments));
         return success;
     }
     

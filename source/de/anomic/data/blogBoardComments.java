@@ -150,7 +150,7 @@ public class blogBoardComments {
 	private CommentEntry(String key, Map record) {
 	    this.key = key;
 	    this.record = record;
-        if (this.record.get("comments")==null) this.record.put("comments", listManager.arraylist2string(new ArrayList()));
+        if (this.record.get("comments")==null) this.record.put("comments", listManager.collection2string(new ArrayList()));
 	}
 	
 	public String key() {

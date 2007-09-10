@@ -138,11 +138,11 @@ public class Blacklist_p {
                     newFile.createNewFile();
                     
                     // share the newly created blacklist
-                    listManager.addListToListslist(BLACKLIST_SHARED, blacklistToUse);
+                    listManager.updateListSet(BLACKLIST_SHARED, blacklistToUse);
                     
                     // activate it for all known blacklist types
                     for (int blTypes=0; blTypes < supportedBlacklistTypes.length; blTypes++) {
-                        listManager.addListToListslist(supportedBlacklistTypes[blTypes] + ".BlackLists",blacklistToUse);
+                        listManager.updateListSet(supportedBlacklistTypes[blTypes] + ".BlackLists",blacklistToUse);
                     }                                 
                 } catch (IOException e) {/* */}
                 
@@ -161,11 +161,11 @@ public class Blacklist_p {
                 BlackListFile.delete();
 
                 for (int blTypes=0; blTypes < supportedBlacklistTypes.length; blTypes++) {
-                    listManager.removeListFromListslist(supportedBlacklistTypes[blTypes] + ".BlackLists",blacklistToUse);
+                    listManager.removeFromListSet(supportedBlacklistTypes[blTypes] + ".BlackLists",blacklistToUse);
                 }                
                 
                 // remove it from the shared list
-                listManager.removeListFromListslist(BLACKLIST_SHARED, blacklistToUse);
+                listManager.removeFromListSet(BLACKLIST_SHARED, blacklistToUse);
                 blacklistToUse = null;
                 
                 // reload Blacklists
@@ -185,9 +185,9 @@ public class Blacklist_p {
                 
                 for (int blTypes=0; blTypes < supportedBlacklistTypes.length; blTypes++) {                    
                     if (post.containsKey("activateList4" + supportedBlacklistTypes[blTypes])) {
-                        listManager.addListToListslist(supportedBlacklistTypes[blTypes] + ".BlackLists",blacklistToUse);                        
+                        listManager.updateListSet(supportedBlacklistTypes[blTypes] + ".BlackLists",blacklistToUse);                        
                     } else {
-                        listManager.removeListFromListslist(supportedBlacklistTypes[blTypes] + ".BlackLists",blacklistToUse);                        
+                        listManager.removeFromListSet(supportedBlacklistTypes[blTypes] + ".BlackLists",blacklistToUse);                        
                     }                    
                 }                     
 
@@ -205,11 +205,11 @@ public class Blacklist_p {
                     return prop;
                 }                   
                 
-                if (listManager.ListInListslist(BLACKLIST_SHARED, blacklistToUse)) { 
+                if (listManager.listSetContains(BLACKLIST_SHARED, blacklistToUse)) { 
                     // Remove from shared BlackLists
-                    listManager.removeListFromListslist(BLACKLIST_SHARED, blacklistToUse);
+                    listManager.removeFromListSet(BLACKLIST_SHARED, blacklistToUse);
                 } else { // inactive list -> enable
-                    listManager.addListToListslist(BLACKLIST_SHARED, blacklistToUse);
+                    listManager.updateListSet(BLACKLIST_SHARED, blacklistToUse);
                 }                                
             } else if (post.containsKey("deleteBlacklistEntry")) {
                 
@@ -253,7 +253,7 @@ public class Blacklist_p {
                     oldEntry = oldEntry + "/.*";
                 }                
                 for (int blTypes=0; blTypes < supportedBlacklistTypes.length; blTypes++) {
-                    if (listManager.ListInListslist(supportedBlacklistTypes[blTypes] + ".BlackLists",blacklistToUse)) {
+                    if (listManager.listSetContains(supportedBlacklistTypes[blTypes] + ".BlackLists",blacklistToUse)) {
                         plasmaSwitchboard.urlBlacklist.remove(supportedBlacklistTypes[blTypes],oldEntry.substring(0, pos), oldEntry.substring(pos + 1));
                     }                
                 }                    
@@ -303,7 +303,7 @@ public class Blacklist_p {
 
                 // add to blacklist
                 for (int blTypes=0; blTypes < supportedBlacklistTypes.length; blTypes++) {
-                    if (listManager.ListInListslist(supportedBlacklistTypes[blTypes] + ".BlackLists",blacklistToUse)) {
+                    if (listManager.listSetContains(supportedBlacklistTypes[blTypes] + ".BlackLists",blacklistToUse)) {
                         plasmaSwitchboard.urlBlacklist.add(supportedBlacklistTypes[blTypes],newEntry.substring(0, pos), newEntry.substring(pos + 1));
                     }
                 }
@@ -352,7 +352,7 @@ public class Blacklist_p {
 
                 // add to blacklist
                 for (int blTypes=0; blTypes < supportedBlacklistTypes.length; blTypes++) {
-                    if (listManager.ListInListslist(supportedBlacklistTypes[blTypes] + ".BlackLists",blacklistToUse)) {
+                    if (listManager.listSetContains(supportedBlacklistTypes[blTypes] + ".BlackLists",blacklistToUse)) {
                         plasmaSwitchboard.urlBlacklist.add(supportedBlacklistTypes[blTypes],entry.substring(0, pos), entry.substring(pos + 1));
                     }
                 }
@@ -390,7 +390,7 @@ public class Blacklist_p {
                     entry = entry + "/.*";
                 }
                 for (int blTypes=0; blTypes < supportedBlacklistTypes.length; blTypes++) {
-                    if (listManager.ListInListslist(supportedBlacklistTypes[blTypes] + ".BlackLists",blacklistToUse)) {
+                    if (listManager.listSetContains(supportedBlacklistTypes[blTypes] + ".BlackLists",blacklistToUse)) {
                         plasmaSwitchboard.urlBlacklist.remove(supportedBlacklistTypes[blTypes],entry.substring(0, pos), entry.substring(pos + 1));
                     }
                 }
@@ -469,13 +469,13 @@ public class Blacklist_p {
                     for (int blTypes=0; blTypes < supportedBlacklistTypes.length; blTypes++) {
                         prop.put(DISABLED + "currentActiveFor_" + blTypes + "_blTypeName",supportedBlacklistTypes[blTypes]);
                         prop.put(DISABLED + "currentActiveFor_" + blTypes + "_checked",
-                                listManager.ListInListslist(supportedBlacklistTypes[blTypes] + ".BlackLists",dirlist[i])?0:1);
+                                listManager.listSetContains(supportedBlacklistTypes[blTypes] + ".BlackLists",dirlist[i])?0:1);
                     }
                     prop.put(DISABLED + "currentActiveFor",supportedBlacklistTypes.length);
 
                 }
                 
-                if (listManager.ListInListslist(BLACKLIST_SHARED, dirlist[i])) {
+                if (listManager.listSetContains(BLACKLIST_SHARED, dirlist[i])) {
                     prop.put(DISABLED + BLACKLIST + blacklistCount + "_shared", 1);
                 } else {
                     prop.put(DISABLED + BLACKLIST + blacklistCount + "_shared", 0);
@@ -483,7 +483,7 @@ public class Blacklist_p {
 
                 int activeCount = 0;
                 for (int blTypes=0; blTypes < supportedBlacklistTypes.length; blTypes++) {
-                    if (listManager.ListInListslist(supportedBlacklistTypes[blTypes] + ".BlackLists",dirlist[i])) {
+                    if (listManager.listSetContains(supportedBlacklistTypes[blTypes] + ".BlackLists",dirlist[i])) {
                         prop.put(DISABLED + BLACKLIST + blacklistCount + "_active_" + activeCount + "_blTypeName",supportedBlacklistTypes[blTypes]);
                         activeCount++;
                     }                

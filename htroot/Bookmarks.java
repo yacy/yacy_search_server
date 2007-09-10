@@ -49,8 +49,8 @@ import java.io.File;
 import java.net.MalformedURLException;
 import java.util.Date;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.Iterator;
+import java.util.Set;
 
 import de.anomic.data.bookmarksDB;
 import de.anomic.data.listManager;
@@ -127,7 +127,7 @@ public class Bookmarks {
             if(tagsString.equals("")){
                 tagsString="unsorted"; //defaulttag
             }
-            HashSet tags=listManager.string2hashset(tagsString);
+            Set tags=listManager.string2set(tagsString);
         
             bookmarksDB.Bookmark bookmark = switchboard.bookmarksDB.createBookmark(url, username);
             if(bookmark != null){
@@ -264,7 +264,7 @@ public class Bookmarks {
         count++;
     }
     count=0;
-    HashSet tags;
+    Set tags;
     Iterator tagsIt;
     int tagCount;
     while(count<max_count && it.hasNext()){

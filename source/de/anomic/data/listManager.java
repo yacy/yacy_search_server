@@ -3,6 +3,7 @@
 // part of YACY
 // 
 // (C) 2005, 2006 by Alexander Schier
+// (C) 2007 by Bjoern 'Fuchs' Krombholz; fox.box@gmail.com
 // 
 // last change: $LastChangedDate$ by $LastChangedBy$
 // $LastChangedRevision$
@@ -51,8 +52,11 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.PrintWriter;
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collection;
 import java.util.HashSet;
 import java.util.Iterator;
+import java.util.Set;
 import java.util.Vector;
 
 import de.anomic.plasma.plasmaSwitchboard;
@@ -66,59 +70,75 @@ public class listManager {
     public static plasmaSwitchboard switchboard;
     public static File listsPath;
 
-//===============Listslists=====================
-        // get an array of all Lists from a Config Property
-        public static String[] getListslistArray(String Listname) {
-            return switchboard.getConfig(Listname, "").split(",");
+    /**
+     * Get ListSet from configuration file and return it as a unified Set.
+     * 
+     * <b>Meaning of ListSet</b>: There are various "lists" in YaCy which are
+     * actually disjunct (pairwise unequal) sets which themselves can be seperated
+     * into different subsets. E.g., there can be more than one blacklist of a type.
+     * A ListSet is the set of all those "lists" (subsets) of an equal type.   
+     *  
+     * @param setName name of the ListSet
+     * @return a ListSet from configuration file
+     */
+    public static Set getListSet(String setName) {
+        return string2set(switchboard.getConfig(setName, ""));
+    }
+
+    /**
+     * Removes an element from a ListSet and updates the configuration file
+     * accordingly. If the element doesn't exist, then nothing will be changed.
+     * 
+     * @param setName name of the ListSet.
+     * @param listName name of the element to remove from the ListSet.
+     */
+    public static void removeFromListSet(String setName, String listName) {
+        Set listSet = getListSet(setName);
+        
+        if (listSet.size() > 0) {
+            listSet.remove(listName);
+            switchboard.setConfig(setName, collection2string(listSet));
         }
+    }
 
-        // removes a List from a Lists-List
-        public static void removeListFromListslist(String ListName, String BlackList) {
-            String[] Lists = getListslistArray(ListName);
-            String temp = "";
+    /**
+     * Adds an element to an existing ListSet. If the ListSet doesn't exist yet,
+     * a new one will be added. If the ListSet already contains an identical element,
+     * then nothing happens.
+     * 
+     * The new list will be written to the configuartion file.
+     *  
+     * @param setName
+     * @param newListName
+     */
+    public static void updateListSet(String setName, String newListName) {
+        Set listSet = getListSet(setName);
+        listSet.add(newListName);
 
-            for (int i=0; i <= Lists.length -1; i++) {
-                if (!Lists[i].equals(BlackList) && !Lists[i].equals("")) {
-                    temp += Lists[i] + ",";
-                }
-            }
-            if (temp.endsWith(",")) { //remove "," at end...
-                temp = temp.substring(0, temp.length() -1);
-            }
-            if (temp.startsWith(",") ) { //remove "," at end...
-                temp = temp.substring(1, temp.length());
-            }
+        switchboard.setConfig(setName, collection2string(listSet));
+    }
 
-            switchboard.setConfig(ListName, temp);
-        }
+    /**
+     * @param setName ListSet in which to search for an element.
+     * @param listName the element to search for. 
+     * @return <code>true</code> if the ListSet "setName" contains an element
+     *         "listName", <code>false</code> otherwise.
+     */
+    public static boolean listSetContains(String setName, String listName) {
+        Set Lists =  getListSet(setName);
 
-        // add a new List to a List-List
-        public static void addListToListslist(String ListName, String newList) {
-            String[] Lists = getListslistArray(ListName);
-            String temp = "";
+        return Lists.contains(listName);
+    }
 
-            for (int i = 0; i <= (Lists.length -1); i++) {
-                temp += Lists[i] + ",";
-            }
-            temp += newList;
-            switchboard.setConfig(ListName, temp);
-        }
 
-        // returns true, if the Lists-List contains the Listname
-        public static boolean ListInListslist(String Listname, String BlackList) {
-            String[] Lists =  getListslistArray(Listname);
+//================general Lists==================
 
-            for (int u=0; u <= Lists.length -1; u++) {
-                if (BlackList.equals(Lists[u])) {
-                    return true;
-                }
-            }
-            return false;
-        }
-
-//================generel Lists==================
-
-    // Gets a Array of all lines(Items) of a (list)file
+    /**
+     * Read lines of a file into an ArrayList.
+     * 
+     * @param listFile the file
+     * @return the resulting array as an ArrayList
+     */
     public static ArrayList getListArray(File listFile){
         String line;
         ArrayList list = new ArrayList();
@@ -140,7 +160,13 @@ public class listManager {
         return list;
     }
 
-    // Writes the Liststring to a file
+    /**
+     * Write a String to a file (used for string representation of lists).
+     * 
+     * @param listFile the file to write to
+     * @param out the String to write
+     * @return returns <code>true</code> if successful, <code>false</code> otherwise
+     */
     public static boolean writeList(File listFile, String out) {
         BufferedWriter bw = null;
         try {
@@ -155,7 +181,13 @@ public class listManager {
         }
     }
 
-    // overloaded function to write an array
+    /**
+     * Write elements of an Array of Strings to a file (one element per line).
+     *  
+     * @param listFile the file to write to
+     * @param list the Array to write
+     * @return returns <code>true</code> if successful, <code>false</code> otherwise
+     */
     public static boolean writeList(File listFile, String[] list){
         StringBuffer out = new StringBuffer();
         for(int i=0;i < list.length; i++){
@@ -166,11 +198,19 @@ public class listManager {
         return writeList(listFile, new String(out)); //(File, String)
     }
 
+    // same as below
     public static String getListString(String filename, boolean withcomments) {        
         File listFile = new File(listsPath ,filename);
         return getListString(listFile, withcomments);
     }
-    
+
+    /**
+     * Read lines of a text file into a String, optionally ignoring comments.
+     * 
+     * @param listFile the File to read from.
+     * @param withcomments If <code>false</code> ignore lines starting with '#'.
+     * @return String representation of the file content.
+     */
     public static String getListString(File listFile, boolean withcomments){
         StringBuffer temp = new StringBuffer();
         
@@ -203,6 +243,13 @@ public class listManager {
         return getDirListing(dir);
     }
     
+    /**
+     * Read content of a directory into a String array of file names.
+     * 
+     * @param dir The directory to get the file listing from. If it doesn't exist yet,
+     * it will be created.
+     * @return array of file names
+     */
     public static String[] getDirListing(File dir){
         String[] fileListString;
         File[] fileList;
@@ -221,9 +268,11 @@ public class listManager {
         return null;
     }    
 
+    // same as below
     public static ArrayList getDirsRecursive(File dir, String notdir){
         return getDirsRecursive(dir, notdir, true);
     }
+    
     /**
      * Returns a List of all dirs and subdirs as File Objects
      *
@@ -246,92 +295,89 @@ public class listManager {
         }
         return resultList;
     }
-    public static String arraylist2string(ArrayList list){
-        Iterator it=list.iterator();
-        String ret="";
-        if(it.hasNext()){
-            ret=(String) it.next();
-            while(it.hasNext()){
-                ret+=","+(String)it.next();
+
+    
+//================Helper functions for collection conversion==================
+    
+    /**
+     * Simple conversion of a Collection of Strings to a comma separated String.
+     * If the implementing Collection subclass guaranties an order of its elements,
+     * the substrings of the result will have the same order.
+     * 
+     * @param col a Collection of Strings.
+     * @return String with elements from set separated by comma.
+     */
+    public static String collection2string(Collection col){
+        StringBuffer str = new StringBuffer();
+        
+        if (col != null && (col.size() > 0)) {
+            Iterator it = col.iterator();
+            str.append((String) it.next());
+            while(it.hasNext()) {
+                str.append(",").append((String) it.next());
             }
         }
-        return ret;
+        
+        return str.toString();
     }
+
+    /**
+     * @see listManager#string2vector(String)
+     */
     public static ArrayList string2arraylist(String string){
-        ArrayList ret=new ArrayList();
-        String[] hashes=string.split(",");
-        if(string.indexOf(",") > -1){
-            for(int i=0;i<hashes.length;i++){
-                ret.add(hashes[i]);
-            }
-        }else{
-            ret = new ArrayList();
-            if(!string.equals("")){
-                ret.add(string);
-            }
+        ArrayList l;
+
+        if (string != null) {
+            l = new ArrayList(Arrays.asList(string.split(",")));
+        } else {
+            l = new ArrayList();
         }
-        return ret;
-    }
-    public static String vector2string(Vector vector){
-        Iterator it=vector.iterator();
-        String ret="";
-        if(it.hasNext()){
-            ret=(String) it.next();
-            while(it.hasNext()){
-                ret+=","+(String)it.next();
-            }
-        }
-        return ret;
+
+        return l;
     }
 
+    /**
+     * Simple conversion of a comma separated list to a unified Set.
+     *   
+     * @param string list of comma separated Strings
+     * @return resulting Set or empty Set if string is <code>null</code>
+     */
+    public static Set string2set(String string){
+        HashSet set;
+        
+        if (string != null) {
+            set = new HashSet(Arrays.asList(string.split(",")));
+        } else {
+            set = new HashSet();
+        }
+
+        return set;
+    }
+
+    /**
+     * Simple conversion of a comma separated list to a Vector containing
+     * the order of the substrings.
+     * 
+     * @param string list of comma separated Strings
+     * @return resulting Vector or empty Vector if string is <code>null</code>
+     */
     public static Vector string2vector(String string){
-        Vector ret=new Vector();
-        String[] hashes=string.split(",");
-        if(string.indexOf(",") > -1){
-            for(int i=0;i<hashes.length;i++){
-                ret.add(hashes[i]);
-            }
-        }else{
-            ret = new Vector();
-            if(!string.equals("")){
-            	ret.add(string);
-            }
-        }
-        return ret;
-    }
-    public static String hashset2string(HashSet hashset){
-        StringBuffer ret=new StringBuffer();
-        if(hashset!=null){
-            Iterator it=hashset.iterator();
-            if(it.hasNext()){
-                ret.append((String)it.next());
-                while(it.hasNext()){
-                    ret.append(",").append((String)it.next());
-                }
-            }
-        }
-        return new String(ret);
-    }
-    public static HashSet string2hashset(String string){
-        HashSet ret=new HashSet();
-        String[] hashes=string.split(",");
-        if(string.indexOf(",") > -1){
-            for(int i=0;i<hashes.length;i++){
-                ret.add(hashes[i]);
-            }
-        }else{
-            ret = new HashSet();
-            if(!string.equals("")){
-                ret.add(string);
-            }
-        }
-        return ret;
-    }
+        Vector v;
 
+        if (string != null) {
+            v = new Vector(Arrays.asList(string.split(",")));
+        } else {
+            v = new Vector();
+        }
+
+        return v;
+    }
 
 //=============Blacklist specific================
 
-    // load all active Blacklists in the Proxy
+    /**
+     * Load or reload all active Blacklists
+     */
     public static void reloadBlacklists(){
         String supportedBlacklistTypesStr = abstractURLPattern.BLACKLIST_TYPES_STRING;
         String[] supportedBlacklistTypes = supportedBlacklistTypesStr.split(",");
