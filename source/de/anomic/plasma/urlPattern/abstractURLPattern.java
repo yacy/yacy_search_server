@@ -118,10 +118,14 @@ public abstract class abstractURLPattern implements plasmaURLPattern {
     }
     
     public void clear() {
-        Iterator iter = this.hostpaths.keySet().iterator();
+        Iterator iter = this.hostpaths.values().iterator();
+        Iterator cIter = this.cachedUrlHashs.values().iterator();
         while (iter.hasNext()) {
-            HashMap blacklistMap = (HashMap) this.hostpaths.get(iter.next());
-            blacklistMap.clear();
+            ((HashMap) iter.next()).clear();
+        }
+        while (cIter.hasNext()) {
+            // clear caches as well to avoid wrong/outdated matches after changing lists
+            ((Set) cIter.next()).clear();
         }
     }
 
