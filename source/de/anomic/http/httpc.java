@@ -666,7 +666,7 @@ public final class httpc {
                 if (pos >= 0) {
                     // remove the gzip encoding
                     //System.out.println("!!! removing gzip encoding");
-                    header.put(httpHeader.ACCEPT_ENCODING, encoding.substring(0, pos) + encoding.substring(pos + 4));
+                    header.put(httpHeader.ACCEPT_ENCODING, encoding.substring(0, pos) + encoding.substring(pos + 5));
                 }
             }
         } else {
@@ -675,10 +675,11 @@ public final class httpc {
 
         //header = new httpHeader(); header.put("Host", this.host); // debug
 
+        StringBuffer sb = new StringBuffer();
         // send request
         if ((this.remoteProxyUse) && (!(method.equals(httpHeader.METHOD_CONNECT))))
             path = ((this.adressed_port == 443) ? "https://" : "http://") + this.adressed_host + ":" + this.adressed_port + path;
-        serverCore.send(this.clientOutput, method + " " + path + " HTTP/1.0"); // if set to HTTP/1.1, servers give time-outs?
+        sb.append(method + " " + path + " HTTP/1.0" + serverCore.crlfString); // TODO if set to HTTP/1.1, servers give time-outs?
 
         // send header
         //System.out.println("***HEADER for path " + path + ": PROXY TO SERVER = " + header.toString()); // DEBUG
@@ -692,14 +693,15 @@ public final class httpc {
             if ((tag != '*') && (tag != '#')) {
                 count = header.keyCount(key);
                 for (int j = 0; j < count; j++) {
-                    serverCore.send(this.clientOutput, key + ": " + ((String) header.getSingle(key, j)).trim());
+                    sb.append(key + ": " + ((String) header.getSingle(key, j)).trim() + serverCore.crlfString);
                 }
                 //System.out.println("#" + key + ": " + value);
             }
         }
 
-        // send terminating line
-        serverCore.send(this.clientOutput, "");
+        // add terminating line
+        sb.append(serverCore.crlfString);
+        serverCore.send(this.clientOutput, sb.toString());
         this.clientOutput.flush();
 
         // this is the place where www.stern.de refuses to answer ..???

@@ -859,7 +859,7 @@ public final class serverCore extends serverAbstractThread implements serverThre
     	}
     
     	public void writeLine(String messg) throws IOException {
-    	    send(this.out, messg);
+    	    send(this.out, messg + crlfString);
     	    log(true, messg);
     	}
     
@@ -1205,7 +1205,8 @@ public final class serverCore extends serverAbstractThread implements serverThre
 
     public static void send(OutputStream os, String buf) throws IOException {
     	os.write(buf.getBytes());
-    	os.write(crlf);
+    	// TODO make sure there was no reason to add this additional newline
+    	//os.write(crlf);
     	os.flush();
     }
     
