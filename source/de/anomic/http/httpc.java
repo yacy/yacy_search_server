@@ -666,7 +666,10 @@ public final class httpc {
                 if (pos >= 0) {
                     // remove the gzip encoding
                     //System.out.println("!!! removing gzip encoding");
-                    header.put(httpHeader.ACCEPT_ENCODING, encoding.substring(0, pos) + encoding.substring(pos + 5));
+                	// ex: "gzip,deflate" => pos == 0, but we need to remove the "," as well => substring(pos+5),
+                	// ex: "gzip" => pos == 0, but substring(pos+5) would exceed boundaries
+                	String enc = encoding.substring(0, pos) + (encoding.length() > (pos+5) ? encoding.substring(pos + 5) : "");
+                	header.put(httpHeader.ACCEPT_ENCODING, enc);
                 }
             }
         } else {
