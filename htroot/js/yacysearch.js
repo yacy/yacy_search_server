@@ -69,7 +69,7 @@ function addHover() {
 }
 
 function statistics(offset, items, global, total) {
-  document.getElementById("offset").firstChild.nodeValue = offset;
+  document.getElementById("resultsOffset").firstChild.nodeValue = offset;
   document.getElementById("itemscount").firstChild.nodeValue = items;
   document.getElementById("globalcount").firstChild.nodeValue = global;
   document.getElementById("totalcount").firstChild.nodeValue = total;
