@@ -322,6 +322,9 @@ public class yacyCore {
                     // success! we have published our peer to a senior peer
                     // update latest news from the other peer
                     log.logInfo("publish: handshaked " + this.seed.get(yacySeed.PEERTYPE, yacySeed.PEERTYPE_SENIOR) + " peer '" + this.seed.getName() + "' at " + this.seed.getPublicAddress());
+                    // update last seed date
+                    this.seed.setLastSeenUTC();
+                    peerActions.peerArrival(this.seed, true);
                 }
             } catch (Exception e) {
                 log.logSevere("publishThread: error with target seed " + seed.toString() + ": " + e.getMessage(), e);
