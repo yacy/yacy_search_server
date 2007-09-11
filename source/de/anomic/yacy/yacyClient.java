@@ -96,13 +96,11 @@ public final class yacyClient {
         // this works of course only if we know the other peer's hash.
         
         HashMap result = null;
-        String salt;
+        final serverObjects post = yacyNetwork.basicRequestPost(plasmaSwitchboard.getSwitchboard(), null);
         try {
             // generate request
-            final serverObjects obj = new serverObjects();
-            salt = yacyNetwork.enrichRequestPost(obj, plasmaSwitchboard.getSwitchboard(), null);
-            obj.putASIS("count", "20");
-            obj.putASIS("seed", yacyCore.seedDB.mySeed.genSeedStr(salt));
+            post.putASIS("count", "20");
+            post.putASIS("seed", yacyCore.seedDB.mySeed.genSeedStr(post.get("key", "")));
             yacyCore.log.logFine("yacyClient.publishMySeed thread '" + Thread.currentThread().getName() + "' contacting peer at " + address);
             // send request
             result = nxTools.table(
@@ -112,7 +110,7 @@ public final class yacyClient {
                                null, 
                                null,
                                proxyConfig(),
-                               obj,
+                               post,
                                null
                     ), "UTF-8"
             );
@@ -140,7 +138,7 @@ public final class yacyClient {
         	if (seed.length() > yacySeed.maxsize) {
             	yacyCore.log.logInfo("hello/client 0: rejected contacting seed; too large (" + seed.length() + " > " + yacySeed.maxsize + ")");
             } else {
-            	otherPeer = yacySeed.genRemoteSeed(seed, salt, true);
+            	otherPeer = yacySeed.genRemoteSeed(seed, post.get("key", ""), true);
             	if (otherPeer == null || !otherPeer.hash.equals(otherHash)) {
             		yacyCore.log.logFine("yacyClient.publishMySeed: consistency error: other peer '" + ((otherPeer==null)?"unknown":otherPeer.getName()) + "' wrong");
             		return -1; // no success
@@ -168,7 +166,7 @@ public final class yacyClient {
          */
         if (!serverCore.portForwardingEnabled || otherPeerVersion >= yacyVersion.YACY_SUPPORTS_PORT_FORWARDING) {
             String mytype = (String) result.get(yacySeed.YOURTYPE);
-            if (mytype == null) { mytype = yacySeed.PEERTYPE_JUNIOR; }        
+            if (mytype == null) { mytype = ""; }        
             yacyAccessible accessible = new yacyAccessible();
             if (mytype.equals(yacySeed.PEERTYPE_SENIOR)||mytype.equals(yacySeed.PEERTYPE_PRINCIPAL)) {
                 accessible.IWasAccessed = true;
@@ -200,8 +198,13 @@ public final class yacyClient {
                         }
                     }
                 }
+            } else if ((mytype.equalsIgnoreCase(yacySeed.PEERTYPE_SENIOR)) ||
+                       (mytype.equalsIgnoreCase(yacySeed.PEERTYPE_PRINCIPAL))) {
+                yacyCore.log.logFine("yacyClient.publishMySeed: Peer '" + ((otherPeer==null)?"unknown":otherPeer.getName()) + "' reported us as " + mytype + ", accepted other peer.");
             } else {
-                yacyCore.log.logFine("yacyClient.publishMySeed: Peer '" + ((otherPeer==null)?"unknown":otherPeer.getName()) + "' reported us as " + mytype + ".");
+                // wrong type report
+                yacyCore.log.logFine("yacyClient.publishMySeed: Peer '" + ((otherPeer==null)?"unknown":otherPeer.getName()) + "' reported us as " + mytype + ", rejecting other peer.");
+                return -1;
             }
             if (yacyCore.seedDB.mySeed.orVirgin().equals(yacySeed.PEERTYPE_VIRGIN))
                 yacyCore.seedDB.mySeed.put(yacySeed.PEERTYPE, mytype);
@@ -226,7 +229,7 @@ public final class yacyClient {
         	if (seedStr.length() > yacySeed.maxsize) {
             	yacyCore.log.logInfo("hello/client: rejected contacting seed; too large (" + seedStr.length() + " > " + yacySeed.maxsize + ")");
             } else {
-            	if (yacyCore.peerActions.peerArrival(yacySeed.genRemoteSeed(seedStr, salt, true), (i == 1))) count++;
+            	if (yacyCore.peerActions.peerArrival(yacySeed.genRemoteSeed(seedStr, post.get("key", ""), true), (i == 1))) count++;
             }
         }
         return count;
@@ -234,8 +237,7 @@ public final class yacyClient {
 
     public static yacySeed querySeed(yacySeed target, String seedHash) {
         // prepare request
-        final serverObjects post = new serverObjects();
-        String salt = yacyNetwork.enrichRequestPost(post, plasmaSwitchboard.getSwitchboard(), target.hash);
+        final serverObjects post = yacyNetwork.basicRequestPost(plasmaSwitchboard.getSwitchboard(), target.hash);
         post.putASIS("object", "seed");
         post.putASIS("env", seedHash);
             
@@ -255,7 +257,7 @@ public final class yacyClient {
             
             if (result == null || result.size() == 0) { return null; }
             //final Date remoteTime = yacyCore.parseUniversalDate((String) result.get(yacySeed.MYTIME)); // read remote time
-            return yacySeed.genRemoteSeed((String) result.get("response"), salt, true);
+            return yacySeed.genRemoteSeed((String) result.get("response"), post.get("key", ""), true);
         } catch (Exception e) {
             yacyCore.log.logSevere("yacyClient.querySeed error:" + e.getMessage());
             return null;
@@ -264,8 +266,7 @@ public final class yacyClient {
 
     public static int queryRWICount(yacySeed target, String wordHash) {
         // prepare request
-        final serverObjects post = new serverObjects();
-        yacyNetwork.enrichRequestPost(post, plasmaSwitchboard.getSwitchboard(), target.hash);
+        final serverObjects post = yacyNetwork.basicRequestPost(plasmaSwitchboard.getSwitchboard(), target.hash);
         post.putASIS("object", "rwicount");
         post.putASIS("ttl", "0");
         post.putASIS("env", wordHash);
@@ -297,8 +298,7 @@ public final class yacyClient {
         if (yacyCore.seedDB.mySeed == null) return -1;
         
         // prepare request
-        final serverObjects post = new serverObjects();
-        yacyNetwork.enrichRequestPost(post, plasmaSwitchboard.getSwitchboard(), target.hash);
+        final serverObjects post = yacyNetwork.basicRequestPost(plasmaSwitchboard.getSwitchboard(), target.hash);
         post.putASIS("object", "lurlcount");
         post.putASIS("ttl", "0");
         post.putASIS("env", "");
@@ -367,9 +367,8 @@ public final class yacyClient {
         // duetime    : maximum time that a peer should spent to create a result
 
         // prepare request
-        final serverObjects post = new serverObjects();
-        final String salt = yacyNetwork.enrichRequestPost(post, plasmaSwitchboard.getSwitchboard(), target.hash);
-        post.putASIS("myseed", yacyCore.seedDB.mySeed.genSeedStr(salt));
+        final serverObjects post = yacyNetwork.basicRequestPost(plasmaSwitchboard.getSwitchboard(), target.hash);
+        post.putASIS("myseed", yacyCore.seedDB.mySeed.genSeedStr(post.get("key", "")));
         post.put("count", Math.max(10, count));
         post.putASIS("resource", ((global) ? "global" : "local"));
         post.put("partitions", partitions);
@@ -580,8 +579,7 @@ public final class yacyClient {
         if (yacyCore.seedDB == null || yacyCore.seedDB.mySeed == null) { return null; }
 
         // prepare request
-        final serverObjects post = new serverObjects();
-        yacyNetwork.enrichRequestPost(post, plasmaSwitchboard.getSwitchboard(), targetHash);
+        final serverObjects post = yacyNetwork.basicRequestPost(plasmaSwitchboard.getSwitchboard(), targetHash);
         post.putASIS("process", "permission");
         
         // send request
@@ -609,10 +607,9 @@ public final class yacyClient {
         // this post a message to the remote message board
 
         // prepare request
-        final serverObjects post = new serverObjects();
-        final String salt = yacyNetwork.enrichRequestPost(post, plasmaSwitchboard.getSwitchboard(), targetHash);
+        final serverObjects post = yacyNetwork.basicRequestPost(plasmaSwitchboard.getSwitchboard(), targetHash);
         post.putASIS("process", "post");
-        post.putASIS("myseed", yacyCore.seedDB.mySeed.genSeedStr(salt));
+        post.putASIS("myseed", yacyCore.seedDB.mySeed.genSeedStr(post.get("key", "")));
         post.putASIS("subject", subject);
         try {
             post.putASIS("message", new String(message, "UTF-8"));
@@ -657,8 +654,7 @@ public final class yacyClient {
     public static HashMap transferPermission(String targetAddress, long filesize, String filename) {
 
         // prepare request
-        final serverObjects post = new serverObjects();
-        yacyNetwork.enrichRequestPost(post, plasmaSwitchboard.getSwitchboard(), null);
+        final serverObjects post = yacyNetwork.basicRequestPost(plasmaSwitchboard.getSwitchboard(), null);
         post.putASIS("process", "permission");
         post.putASIS("purpose", "crcon");
         post.putASIS("filename", filename);
@@ -690,8 +686,7 @@ public final class yacyClient {
     public static HashMap transferStore(String targetAddress, String access, String filename, byte[] file) {
         
         // prepare request
-        final serverObjects post = new serverObjects();
-        yacyNetwork.enrichRequestPost(post, plasmaSwitchboard.getSwitchboard(), null);
+        final serverObjects post = yacyNetwork.basicRequestPost(plasmaSwitchboard.getSwitchboard(), null);
         post.putASIS("process", "store");
         post.putASIS("purpose", "crcon");
         post.putASIS("filename", filename);
@@ -757,8 +752,7 @@ public final class yacyClient {
         assert (yacyCore.seedDB.mySeed != target);
         
         // prepare request
-        final serverObjects post = new serverObjects();
-        yacyNetwork.enrichRequestPost(post, plasmaSwitchboard.getSwitchboard(), target.hash);
+        final serverObjects post = yacyNetwork.basicRequestPost(plasmaSwitchboard.getSwitchboard(), target.hash);
         post.putASIS("process", "crawl");
         if (url.length == 1) {
             post.putASIS("url", crypt.simpleEncode(url[0].toNormalform(true, true)));
@@ -830,14 +824,13 @@ public final class yacyClient {
          */
         
         // prepare request
-        final serverObjects post = new serverObjects();
-        String salt = yacyNetwork.enrichRequestPost(post, plasmaSwitchboard.getSwitchboard(), target.hash);
+        final serverObjects post = yacyNetwork.basicRequestPost(plasmaSwitchboard.getSwitchboard(), target.hash);
         post.putASIS("process", process);
         post.putASIS("urlhash", ((entry == null) ? "" : entry.hash()));
         post.putASIS("result", result);
         post.putASIS("reason", reason);
         post.putASIS("wordh", wordhashes);
-        post.putASIS("lurlEntry", ((entry == null) ? "" : crypt.simpleEncode(entry.toString(), salt)));
+        post.putASIS("lurlEntry", ((entry == null) ? "" : crypt.simpleEncode(entry.toString(), post.get("key", ""))));
         
         // determining target address
         final String address = target.getClusterAddress();
@@ -958,8 +951,7 @@ public final class yacyClient {
         if (address == null) { return null; }
 
         // prepare post values
-        final serverObjects post = new serverObjects();
-        yacyNetwork.enrichRequestPost(post, plasmaSwitchboard.getSwitchboard(), targetSeed.hash);
+        final serverObjects post = yacyNetwork.basicRequestPost(plasmaSwitchboard.getSwitchboard(), targetSeed.hash);
         
         // enabling gzip compression for post request body
         if ((gzipBody) && (targetSeed.getVersion() >= yacyVersion.YACY_SUPPORTS_GZIP_POST_REQUESTS)) {
@@ -1025,8 +1017,7 @@ public final class yacyClient {
         if (address == null) { return null; }
 
         // prepare post values
-        final serverObjects post = new serverObjects(5+urls.length);
-        yacyNetwork.enrichRequestPost(post, plasmaSwitchboard.getSwitchboard(), targetSeed.hash);
+        final serverObjects post = yacyNetwork.basicRequestPost(plasmaSwitchboard.getSwitchboard(), targetSeed.hash);
         
         // enabling gzip compression for post request body
         if ((gzipBody) && (targetSeed.getVersion() >= yacyVersion.YACY_SUPPORTS_GZIP_POST_REQUESTS)) {
@@ -1077,8 +1068,7 @@ public final class yacyClient {
     public static HashMap getProfile(yacySeed targetSeed) {
 
         // this post a message to the remote message board
-        final serverObjects post = new serverObjects(2);
-        yacyNetwork.enrichRequestPost(post, plasmaSwitchboard.getSwitchboard(), targetSeed.hash);
+        final serverObjects post = yacyNetwork.basicRequestPost(plasmaSwitchboard.getSwitchboard(), targetSeed.hash);
          
         String address = targetSeed.getClusterAddress();
         if (address == null) { address = "localhost:8080"; }

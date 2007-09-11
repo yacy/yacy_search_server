@@ -71,10 +71,10 @@ public final class crawlReceipt {
         // return variable that accumulates replacements
         plasmaSwitchboard switchboard = (plasmaSwitchboard) env;
         serverObjects prop = new serverObjects();
-        serverLog log = switchboard.getLog();
-        
         if ((post == null) || (env == null)) return prop;
         if (!yacyNetwork.authentifyRequest(post, env)) return prop;
+        
+        serverLog log = switchboard.getLog();
 
         //int proxyPrefetchDepth = Integer.parseInt(env.getConfig("proxyPrefetchDepth", "0"));
         //int crawlingDepth = Integer.parseInt(env.getConfig("crawlingDepth", "0"));

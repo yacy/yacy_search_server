@@ -78,8 +78,6 @@ public final class crawlOrder {
         String process    = post.get("process", "");   // process type
         String key        = post.get("key", "");       // transmission key
         int    orderDepth = post.getInt("depth", 0);   // crawl depth
-        String unitName   = post.get("network.unit.name", yacySeed.DFLT_NETWORK_UNIT); // the network unit        
-        if (!unitName.equals(env.getConfig("network.unit.name", yacySeed.DFLT_NETWORK_UNIT))) return null;
         
         // response values
         /*

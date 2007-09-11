@@ -65,13 +65,17 @@ import de.anomic.yacy.yacyVersion;
 public final class hello {
 
     public static serverObjects respond(httpHeader header, serverObjects post, serverSwitch env) throws InterruptedException {
-        if (post == null || env == null || yacyCore.seedDB == null || yacyCore.seedDB.mySeed == null) { return null; }
-
         plasmaSwitchboard sb = (plasmaSwitchboard) env;
-        // return variable that accumulates replacements
-        final serverObjects prop = new serverObjects();
-        if ((post == null) || (env == null)) return prop;
-        if (!yacyNetwork.authentifyRequest(post, env)) return prop;
+        serverObjects prop = new serverObjects();
+        prop.put("message", "none");
+        if ((post == null) || (env == null)) {
+            prop.put("message", "no post or no enviroment");
+            return prop;
+        }
+        if (!yacyNetwork.authentifyRequest(post, env)) {
+            prop.put("message", "not in my network");
+            return prop;
+        }
         
 //      final String iam      = (String) post.get("iam", "");      // complete seed of the requesting peer
 //      final String mytime   = (String) post.get(MYTIME, ""); //
@@ -83,12 +87,16 @@ public final class hello {
 //      final Date remoteTime = yacyCore.parseUniversalDate((String) post.get(MYTIME)); // read remote time
         if (seed.length() > yacySeed.maxsize) {
         	yacyCore.log.logInfo("hello/server: rejected contacting seed; too large (" + seed.length() + " > " + yacySeed.maxsize + ")");
-        	return null;
+            prop.put("message", "your seed is too long (" + seed.length() + ")");
+            return prop;
         }
         final yacySeed remoteSeed = yacySeed.genRemoteSeed(seed, key, false);
 
 //      System.out.println("YACYHELLO: REMOTESEED=" + ((remoteSeed == null) ? "NULL" : remoteSeed.toString()));
-        if ((remoteSeed == null) || (remoteSeed.hash == null)) { return null; }
+        if ((remoteSeed == null) || (remoteSeed.hash == null)) {
+            prop.put("message", "cannot parse your seed");
+            return prop;
+        }
         
 //      final String properTest = remoteSeed.isProper();
         // The remote peer might not know its IP yet, so don't abort if the IP check fails
@@ -97,7 +105,10 @@ public final class hello {
         // we easily know the caller's IP:
         final String clientip = (String) header.get("CLIENTIP", "<unknown>"); // read an artificial header addendum
         InetAddress ias = serverDomains.dnsResolve(clientip);
-        if (ias == null) return null;
+        if (ias == null) {
+            prop.put("message", "cannot resolve your IP from your reported location " + clientip);
+            return prop;
+        }
         final String userAgent = (String) header.get(httpHeader.USER_AGENT, "<unknown>");
         final String reportedip = remoteSeed.get(yacySeed.IP, "");
         final String reportedPeerType = remoteSeed.get(yacySeed.PEERTYPE, yacySeed.PEERTYPE_JUNIOR);
@@ -105,7 +116,8 @@ public final class hello {
 
         if ((sb.isRobinsonMode()) && (!sb.isPublicRobinson())) {
         	// if we are a robinson cluster, answer only if this client is known by our network definition
-        	return prop;
+            prop.put("message", "I am robinson, I do not answer");
+            return prop;
         }
         
         int urls = -1;
@@ -212,6 +224,7 @@ public final class hello {
 
         prop.putASIS("seedlist", seeds.toString());
         // return rewrite properties
+        prop.put("message", "ok " + seed.length());
         return prop;
     }
 

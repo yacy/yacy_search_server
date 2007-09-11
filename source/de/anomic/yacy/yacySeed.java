@@ -86,7 +86,7 @@ import de.anomic.tools.crypt;
 
 public class yacySeed {
 
-	public static final int maxsize = 2048;
+	public static final int maxsize = 4096;
     /**
      * <b>substance</b> "sI" (send index/words)
      */

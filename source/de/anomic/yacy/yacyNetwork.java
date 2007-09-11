@@ -67,9 +67,10 @@ public class yacyNetwork {
 		return false;
 	}
 	
-	public static final String enrichRequestPost(serverObjects post, serverSwitch env, String targetHash) {
+	public static final serverObjects basicRequestPost(serverSwitch env, String targetHash) {
         // put in all the essentials for routing and network authentification
 		// generate a session key
+        serverObjects post = new serverObjects();
         final String salt = crypt.randomSalt();
         post.put("key", salt);
         
@@ -96,7 +97,7 @@ public class yacyNetwork {
             }
         }        
         
-		return salt;
+		return post;
 	}
 	
 }
