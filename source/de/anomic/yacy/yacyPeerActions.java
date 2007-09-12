@@ -351,9 +351,9 @@ public class yacyPeerActions {
         }
     }
 
-    private final void disconnectPeer(yacySeed seed) {
+    private final void disconnectPeer(yacySeed seed, String cause) {
         // we do this if we did not get contact with the other peer
-	    yacyCore.log.logFine("connect: no contact to a " + seed.get(yacySeed.PEERTYPE, yacySeed.PEERTYPE_VIRGIN) + " peer '" + seed.getName() + "' at " + seed.getPublicAddress());
+	    yacyCore.log.logFine("connect: no contact to a " + seed.get(yacySeed.PEERTYPE, yacySeed.PEERTYPE_VIRGIN) + " peer '" + seed.getName() + "' at " + seed.getPublicAddress() + ". Cause: " + cause);
         synchronized (seedDB) {
 	        if (!seedDB.hasDisconnected(seed.hash)) { disconnects++; }
             seed.put("dct", Long.toString(System.currentTimeMillis()));
@@ -372,10 +372,9 @@ public class yacyPeerActions {
         return res;
     }
     
-    public void peerDeparture(yacySeed peer) {
+    public void peerDeparture(yacySeed peer, String cause) {
         if (peer == null) return;
-        //System.out.println("PEER DEPARTURE:" + peer.toString());
-        disconnectPeer(peer);
+        disconnectPeer(peer, cause);
         // perform all actions
         Iterator i = actions.iterator();
         while (i.hasNext()) ((yacyPeerAction) i.next()).processPeerDeparture(peer);

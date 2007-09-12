@@ -106,7 +106,7 @@ public class MessageSend_p {
                 prop.put("mode_permission",0);
 
 	        if (targetPeer != null) {
-	            yacyCore.peerActions.peerDeparture(targetPeer);
+	            yacyCore.peerActions.peerDeparture(targetPeer, "peer responded upon message send request: " + response);
 	        }
 	    } else {
             prop.put("mode_permission",1);

@@ -2814,7 +2814,7 @@ public final class plasmaSwitchboard extends serverAbstractSwitch implements ser
         // check if we got contact to peer and the peer respondet
         if ((page == null) || (page.get("delay") == null)) {
             log.logInfo("CRAWL: REMOTE CRAWL TO PEER " + remoteSeed.getName() + " FAILED. CAUSE: unknown (URL=" + urlEntry.url().toString() + "). Removed peer.");
-            yacyCore.peerActions.peerDeparture(remoteSeed);
+            yacyCore.peerActions.peerDeparture(remoteSeed, "remote crawl to peer failed; peer answered unappropriate");
             return false; // no response from peer, we will crawl this ourself
         }
         

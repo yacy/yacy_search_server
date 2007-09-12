@@ -205,7 +205,7 @@ public class plasmaDHTTransfer extends Thread {
                 this.transferStatusMessage = "Transfer to peer " + this.seed.getName() + ":" + this.seed.hash + " failed:'" + error + "', Trying to reconnect ...";
                 
                 // force disconnection of peer
-                yacyCore.peerActions.peerDeparture(this.seed);
+                yacyCore.peerActions.peerDeparture(this.seed, "DHT Transfer: " + this.transferStatusMessage);
                 this.log.logWarning(this.transferStatusMessage);
                 
                 // calculate pause time

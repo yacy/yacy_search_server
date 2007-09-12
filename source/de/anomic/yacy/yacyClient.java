@@ -97,7 +97,7 @@ public final class yacyClient {
         
         HashMap result = null;
         final serverObjects post = yacyNetwork.basicRequestPost(plasmaSwitchboard.getSwitchboard(), null);
-        try {
+        for (int retry = 0; retry < 3; retry++) try {
             // generate request
             post.putASIS("count", "20");
             post.putASIS("seed", yacyCore.seedDB.mySeed.genSeedStr(post.get("key", "")));
@@ -114,14 +114,18 @@ public final class yacyClient {
                                null
                     ), "UTF-8"
             );
+            break;
         } catch (Exception e) {
             if (Thread.currentThread().isInterrupted()) {
                 yacyCore.log.logFine("yacyClient.publishMySeed thread '" + Thread.currentThread().getName() + "' interrupted.");
+                return -1;
             } else {
-                yacyCore.log.logFine("yacyClient.publishMySeed exception:" + e.getMessage());
+                yacyCore.log.logFine("yacyClient.publishMySeed thread '" + Thread.currentThread().getName() + "' exception: " + e.getMessage() + "; retry = " + retry); // here VERY OFTEN a 'Connection reset' appears. What is the cause?
+                // try again (go into loop)
             }
-            return -1;
+            result = null;
         }
+        
         if (result == null || result.size() < 3) {
             yacyCore.log.logFine("yacyClient.publishMySeed result error: " +
             ((result == null) ? "result null" : ("result=" + result.toString())));
@@ -400,7 +404,7 @@ public final class yacyClient {
             	);
         } catch (IOException e) {
             yacyCore.log.logFine("SEARCH failed FROM " + target.hash + ":" + target.getName() + " (" + e.getMessage() + "), score=" + target.selectscore + ", DHTdist=" + yacyDHTAction.dhtDistance(target.hash, wordhashes.substring(0, 12)));
-            yacyCore.peerActions.peerDeparture(target);
+            yacyCore.peerActions.peerDeparture(target, "search request to peer created io exception: " + e.getMessage());
             return null;
         }
 

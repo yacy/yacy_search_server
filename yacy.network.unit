@@ -60,13 +60,11 @@ network.unit.bootstrap.seedlist2 = http://low.audioattack.de/yacy/seed.txt
 network.unit.bootstrap.seedlist3 = http://www.lulabad.de/seed.txt
 network.unit.bootstrap.seedlist4 = http://www.yacy.net/seed.txt
 network.unit.bootstrap.seedlist5 = http://www.marcelhenseler.de/yacy/seed.txt
-network.unit.bootstrap.seedlist6 = http://www.dc-art.de/yacy/seed.txt
 
 # each network may use different yacy distributions.
 # the auto-updater can access network-specific update locations
 network.unit.update.location0 = http://yacy.net/Download.html
-network.unit.update.location1 = http://latest.yacy.net
-network.unit.update.location2 = http://www.findenstattsuchen.info/YaCy/latest/index.php
+network.unit.update.location1 = http://latest.yacy.de
 
 # properties for in-protocol response authentification:
 network.unit.protocol.control = uncontrolled
