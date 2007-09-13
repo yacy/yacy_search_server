@@ -496,6 +496,8 @@ public class Network {
                         int percent=(int)((float)(myValue-prevValue)/(float)(nextValue-prevValue)*100);
                         long indexdiff=nextValue-myValue;
                         long ppmdiff=myPPM-nextPPM;
+                        if (percent < 0) percent = -1;
+                        if (percent > 100) percent = 101;
                         prop.put("table_progressbar", 1); //display the bar
                         prop.put("table_progressbar_percent", percent);
                         prop.put("table_progressbar_percent2", 100-percent);
