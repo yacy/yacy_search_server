@@ -45,8 +45,8 @@ Expected Results==Erwartete Ergebnisse
 Returned Results==Gefundene Ergebnisse
 Expected Time \(in ms\)==Erwartete Zeit (in ms)
 Used Time \(in ms\)==Gebrauchte Zeit (in ms)
-Query==Such Wort
-Search Word Hashes==Such Wort Hash
+Query==Suchwort
+Search Word Hashes==Suchwort Hash
 Count</td>==Anzahl</td>
 Queries Per Last Hour==Suchanfragen pro letzter Stunde
 Access Dates==Zugriffsdaten
@@ -142,7 +142,7 @@ Yacy-Wiki Code==YaCy-Wiki Befehle
 here.==benutzen.
 Comments:==Kommentare:
 deactivated==deaktiviert
-activated==aktiviert
+>activated==>aktiviert
 moderated==moderiert
 "Submit"=="Absenden"
 "Preview"=="Vorschau"
@@ -232,9 +232,9 @@ For explanation please look into yacy.init==F&uuml;r eine Erkl&auml;rung sehen S
 
 #File: ConfigBasic.html
 #---------------------------
-Select a language for the interface==W&auml;hlen Sie eine Sprache f&uuml;r das Interface
-Basic Configuration==Grundeinstellungen
+Access Configuration==Zugangseinstellungen
 Your YaCy Peer needs some basic information to operate properly==Ihr YaCy-Peer ben&ouml;tigt einige Grundinformationen um korrekt zu funktionieren
+Select a language for the interface==W&auml;hlen Sie eine Sprache f&uuml;r das Interface
 Your peer name has not been customized==Ihr Peername wurde noch nicht angepasst
 please set your own peer name==bitte setzen Sie einen eigenen Peernamen ein
 You have a nice peer name==Sie haben einen sch&ouml;nen Peernamen
@@ -261,7 +261,6 @@ start your own crawl</a> and contribute to the global index, or create your own 
 set a personal peer profile</a> \(optional settings\)==ein eigenes Peer-Profil angeben</a> (freiwillige Angabe)
 monitor at the network page</a> what the other peers are doing==auf der Netzwerkseite beobachten</a>, was andere Peers gerade machen
 Your Peer name is a default name; please set an individual peer name.==Ihr Peer-Name ist ein Standardname; bitte stellen Sie einen individuellen Namen ein.
-Please try to choose another one.==Bitte versuchen Sie einen anderen.
 You did not set a user name and/or a password.==Sie haben keinen Nutzernamen und/oder kein Passwort gesetzt.
 Some pages are protected by passwords.==Einige Seiten sind passwortgesch&uuml;tzt.
 You should set a password here to secure your YaCy peer.==Sie sollten hier ein Passwort einstellen um Ihren YaCy-Peer zu sichern.
@@ -491,7 +490,7 @@ cannot be altered here as they are hard-coded.==k&oumlnnen nicht ver&auml;ndert 
 Crawl Profile List==Crawl Profil Liste
 Crawl Thread==Crawl Art
 #Start URL==Start URL
-Depth</strong>==Tiefe</strong>
+>Depth</strong>==>Tiefe</strong>
 Filter</strong>==Maske</strong>
 MaxAge</strong>==Max. Alter</strong>
 Auto Filter Depth</strong>==Auto Filter Tiefe</strong>
@@ -599,32 +598,32 @@ This is an emacs-like regular expression that must match with the URLs which are
 Use this i.e. to crawl a single domain. If you set this filter it makes sense to increase==Benutzen Sie dies z.B., um nur eine einzelne Domain zu crawlen. Wenn Sie diese Maske aktivieren, macht es Sinn
 the crawling depth.==die Crawling Tiefe zu erh&ouml;hen.
 #Re-Crawl Option:==Re-Crawl Option:
-Use==Benutzen
-Interval:==Intervall:
+Use</label>:==Benutzen</label>:
+Interval==Intervall
 Year\(s\)==Jahr(e)
 Month\(s\)==Monat(e)
 Day\(s\)==Tag(e)
 Hour\(s\)==Stunde(n)
 Minute\(s\)==Minute(n)
-If you use this option, web pages that are already existent in your database are crawled and indexed again.==Ist diese Option aktiviert, werden bereits in Ihrer Datenbank existierende Internetseite erneut gecrawlet und indexiert.
+If you use this option, web pages that are already existent in your database are crawled and indexed again.==Ist diese Option aktiviert, werden bereits in Ihrer Datenbank existierende Internetseite erneut gecrawlt und indexiert.
 It depends on the age of the last crawl if this is done or not: if the last crawl is older than the given==Es h&auml;ngt vom Alter des letzten Crawls ab, ob dies getan oder nicht getan wird: wenn der letzte Crawl &auml;lter als das angegebene
 date, the page is crawled again, otherwise it is treated as 'double' and not loaded or indexed again.==Datum ist, wird die Seite erneut gecrawlet, sonst wird sie als 'double' markiert und weder geladen noch indexiert.
 Auto-Dom-Filter:==Auto-Dom-Filter:
-Depth:==Tiefe:
 This option will automatically create a domain-filter which limits the crawl on domains the crawler==Diese Option erzeugt automatisch einen Domain-Filter der den Crawl auf die Domains beschr&auml;nkt ,
 will find on the given depth. You can use this option i.e. to crawl a page with bookmarks while==die auf der angegebenen Tiefe gefunden werden. Diese Option kann man beispielsweise benutzen, um eine Seite mit Bookmarks zu crawlen
 restricting the crawl on only those domains that appear on the bookmark-page. The adequate depth==und dann den folgenden Crawl automatisch auf die Domains zu beschr&auml;nken, die in der Bookmarkliste vorkamen. Die einzustellende Tiefe f&uuml;r
 for this example would be 1.==dieses Beispiel w&auml;re 1.
 The default value 0 gives no restrictions.==Der Vorgabewert 0 bedeutet, dass nichts eingeschr&auml;nkt wird.
 Maximum Pages per Domain:==Maximale Seiten pro Domain:
-Page-Count:==Seitenanzahl:
+Page-Count==Seitenanzahl
 You can limit the maxmimum number of pages that are fetched and indexed from a single domain with this option.==Sie k&ouml;nnen die maximale Anzahl an Seiten, die von einer einzelnen Domain gefunden und indexiert werden, mit dieser Option begrenzen.
 You can combine this limitation with the 'Auto-Dom-Filter', so that the limit is applied to all the domains within==Sie k&ouml;nnen diese Option auch mit dem 'Auto-Dom-Filter' kombinieren, so dass das Limit f&uuml;r alle Domains mit der
 the given depth. Domains outside the given depth are then sorted-out anyway.==angegebenen Tiefe gilt. Domains ausserhalb der angegebenen Tiefe werden einfach aussortiert.
-Accept URLs with \'?\' / dynamic URLs:==Akzeptiere URLs mit '?' / dynamische URLs:
+Accept URLs with==Akzeptiere URLs mit
+dynamic URLs==dynamische URLs
 A questionmark is usually a hint for a dynamic page. URLs pointing to dynamic content should usually not be crawled. However, there are sometimes web pages with static content that==Ein Fragezeichen ist normalerweise ein Hinweis auf eine dynamische Seite. URLs mit dynamischem Inhalt sollten normalerweise nicht gecrawlt werden. Wie auch immer, manchmal gibt es Seiten mit festem Inhalt, die
 is accessed with URLs containing question marks. If you are unsure, do not check this to avoid crawl loops.==nur von URLs zu erreichen sind, die ein Fragezeichen enthalten. Wenn Sie unsicher sind, aktivieren Sie diese Funktion nicht, um Crawl Schleifen zu vermeiden.
-Store to Proxy Cache:==Speichern im Proxy-Cache:
+Store to Web Cache==Speichern im Web-Cache
 This option is used by default for proxy prefetch, but is not needed for explicit crawling.==Diese Option ist standardm&auml;ssig beim Proxy aktiviert, wird aber zum reinen Crawlen nicht gebraucht.
 We recommend to leave this switched off unless you want to control the crawl results with the==Wir raten Ihnen, sie nicht zu aktivieren, ausser Sie wollen die Crawl Resulate mit
 Cache Monitor==Cache Monitor kontrollieren.
@@ -649,7 +648,6 @@ Other already visited URLs are sorted out as \"double\".==Andere bereits besucht
 A complete re-crawl will be available soon.==Ein kompletter Re-Crawl wird bald m&ouml;glich sein.
 "Start New Crawl"=="Neuen Crawl starten"
 Depth</label>:==Tiefe</label>:
-Accept \'?\' URLs</strong>==URLs mit "?" akzeptieren</strong>
 #-----------------------------
 
 #File: CrawlStartSimple_p.html
@@ -666,8 +664,10 @@ Value==Wert
 Description</strong>==Beschreibung</strong>
 Starting Point:==Startpunkt:
 Enter here the start url of the web crawl.==Geben Sie hier den Startpunkt f&uuml;r Ihren Web Crawl ein.
-Crawling Depth==Crawling-Tiefe
-The depth defines how deep the Crawler will follow links of links \(...\) and so on.==Die Tiefe definiert, wie tief der Crawler den Links der Links (...) folgen wird und so weiter.
+Crawling Range==Crawling Bereich
+Wide: depth==Umfang: Tiefe
+Complete Domain==Komplette Domain
+The range defines if the crawl shall consider a complete domain, or a wide crawl up to a specific depth.==Der Bereich definiert, ob der Crawl eine komplette Domain oder einen Bereich bis zu einer bestimmten Tiefe crawlen soll.  
 "Start New Distributed Crawl \(will be visible at other peers\)"=="Starte einen neuen verteilten Crawl (sichtbar f&uuml;r alle anderen Peers)" 
 Recently started remote crawls in progress:==Gerade gestartetes Indexieren auf anderen Peers in Bearbeitung:
 Start Time==Startzeit
@@ -697,7 +697,7 @@ YaCy homepage==YaCy-Homepage
 Local and Global Search: Options and Functions==Lokale und globale Suche: Optionen und Funktionen
 The proxy provides a search interface that accesses your local index, created from web pages that passed the proxy.==Der Proxy bringt eine Suchmaschine mit, die einen lokalen Index bildet, der sich aus den Webseiten zusammensetzt, die Sie mit dem Proxy besuchen.
 The search can also be applied globally, by searching other peers. You can use the following options to enhance your search results==Die Suche kann aber auch global ausgeweitet werden. Dazu werden die anderen Peers herangezogen und von ihnen Informationen abgefragt. Sie k&ouml;nnen aber auch folgende Optionen benutzen, um mehr Suchergebnisse zu erhalten
-Search Word List==Such Wort Liste
+Search Word List==Suchwort Liste
 You can search for several words simultanous. Words must be separated by a single space.==Sie k&ouml;nnen eine Suche mit mehreren W&ouml;rtern gleichzeitig starten. Die W&ouml;rter m&uuml;ssen durch ein Leerzeichen getrennt sein.
 The words are treated conjunctive, that means every must occur in the result, not any.==
 If you do a global search \(see below\) you may get different results each time you do a search.==Wenn Sie eine globale Suche (siehe unten) durchf&uuml;hren, kann es sein, dass Sie bei wiederholten Suchanfragen jedesmal andere Ergebnisse erhalten.
@@ -826,33 +826,40 @@ The local index currently consists of \(at least\) \#\[wcount\]\# reverse word i
 "Show Details for URL"=="Details f&uuml;r URL zeigen"
 #URL-Hash:==URL-Hash:
 "Show Details for URL-Hash"=="Details f&uuml;r URL-Hash zeigen"
-DHT Transmission control:==DHT-Verteilungs Kontrolle:
-The transmission is necessary for the functionality of global search on other peers.==Die Verteilung ist notwendig, damit auf anderen Peers die globale Suche funktioniert.
-If you switch off distribution or receipt of RWIs you will be banned from global search.==Wenn Sie die Verteilung oder den Erhalt von RWIs nicht erlauben, werden Sie von der globalen Suche ausgeschlossen.
-Index&nbsp;Distribution:==Index Verteilung:
-This enables automated, DHT-ruled Index Transmission to other peers.==Dies erlaubt die automatische DHT-basierte Index Verteilung zu anderen Peers.
-If checked, DHT-Transmission is enabled even during crawling.==Wenn aktiviert, ist die DHT-Verteilung w&auml;hrend des Crawlens erlaubt.
-Index Receive:==Index Empfang:
-Accept remote Index Transmissions. This works only if you are a senior peer.==Akzeptiere remote Index Empfang. Dies funktioniert nur, wenn Sie Senior-Peer sind.
-The DHT-rules do not work without this function.==Die DHT-Regeln funktionieren nicht ohne Aktivierung dieser Funktion.
-If checked, your peer silently ignores transmitted URLs that match your blacklist==Wenn aktiviert, ignoriert Ihr Peer stillschweigend eingehende URLs, die auf Ihrer Blacklist stehen.
-#Peer Tags:==Peer Tags:
-If your peer runs in \'Robinson Mode\' \(Distribution and Receive off\), you probably run YaCy as a search engine==Falls Ihr Peer im "Robinson Modus" (Verteilung und Empfang deaktiviert) l&auml;uft, betreiben Sie Ihren Peer vielleicht als Suchmaschine
-for your own search portal. Please describe your search portal with some keywords \(comma-separated\).==f&uuml;r Ihr eigenes Suchportal. Bitte beschreiben Sie Ihr Suchportal mit ein paar Stichw&ouml;rtern (durch Kommas getrennt).
-This will help to use your peer as search target even if you do not distribute your web index by==Dies wird helfen Ihren Peer als Such Ziel zu benutzen, auch wenn Sie Ihren Web Index nicht 
-DHT distribution.==per DHT Verteilung verschicken.
-"set"=="Speichern"
-Changes will take effect immediately==&Auml;nderungen sind sofort aktiv
-#Let this translation here to avoid errors.
 Word:</td>==Wort:</td>
 Word-Hash:</td>==Wort-Hash:</td>
+URL entries related to this word hash==URL Eintr&auml;ge zugeh&ouml;rig zu diesem Wort Hash
+Reference Deletion==Refernzen L&ouml;schung
+delete also the referenced URL itself \(reasonable and recommended, may produce unresolved references==l&ouml;sche ebenso die verwiesene URL selber (akzeptabel und empfohlen, produziert eventuell ungel&ouml;ste Referenzen
+at other word indexes but they do not harm\)==an anderen Wort Indizes, aber es verursacht keinen Schaden
+for every resolvable and deleted URL reference, delete the same reference at every other word where==f&uuml;r jede l&ouml;sbare und gel&ouml;schte URL Referenz, l&ouml;sche die selbe Referenz bei jedem anderen Wort, wo
+"Delete reference to selected URLs"=="Referenz und markierte URLs l&ouml;schen"
+"Delete reference to ALL URLs"=="Referenz und ALLE URLs l&ouml;schen"
+delete Word\)==Wort l&ouml;schen)
+Blacklist Extension==Blacklist Erweiterung
+"Add selected URLs to blacklist"=="Markierte URLs zu Blacklist hinzuf&uuml;gen"
+"Add selected domains to blacklist"=="Markierte Domains zu Blacklist hinzuf&uuml;gen"
+No entry found for URL-hash==Kein Eintrag gefunden zu URL-Hash
+URL String</td>==URL Adresse</td>
+Hash</td>==Hash</td>
+Description</td>==Beschreibung</td>
+Modified-Date</td>==&Auml;nderungsdatum</td>
+Loaded-Date</td>==Ladedatum</td>
+#Referrer</td>==Referrer</td>
+Doctype</td>==Dokumententyp</td>
+Language</td>==Sprache</td>
+Size</td>==Gr&ouml;sse</td>
+Words</td>==W&ouml;rter</td>
+"Delete URL"=="URL l&ouml;schen"
+this may produce unresolved references at other word indexes but they do not harm==dies mag ungel&ouml;ste Referenzen an anderen Wort Indizes erzeugen, aber es richtet keinen Schaden an
+"Delete URL and remove all references from words"=="URL l&ouml;schen und alle Referenzen zu W&ouml;rtern entfernen"
+delete the reference to this url at every other word where the reference exists \(very extensive, but prevents unresolved references\)==l&ouml;scht die Referenz zu dieser URL und jedem anderen Wort, wo die Referenz existiert (sehr umfassend, aber bewahrt vor ungel&ouml;sten Referenzen)
 #-----------------------------
 
 
 #File: IndexCreateIndexingQueue_p.html
 #---------------------------
-Index Creation/Indexing Queue==Index Erzeugung/Indexier-Puffer
-Index Creation: Indexing Queue==Index Erzeugung: Indexier-Puffer
+Indexing Queue==Indexier-Puffer
 The indexing queue is empty==Der Indexier-Puffer ist leer.
 "clear indexing queue"=="Puffer l&ouml;schen"
 There are <strong>\#\[num\]\#</strong> entries in the indexing queue. Showing <strong>\#\[show\]\#</strong> entries with a total size of <strong>\#\[totalSize\]\#</strong>.==Es befinden sich <strong>#[num]#</strong> Eintr&auml;ge in dem Indexier-Puffer. <strong>#[show]#</strong> Eintr&auml;ge mit einer Gr&ouml;sse von <strong>#[totalSize]#</strong> werden angezeigt.
@@ -905,8 +912,7 @@ Anchor Name==Anker Name
 
 #File: IndexCreateWWWLocalQueue_p.html
 #---------------------------
-YaCy '\#\[clientname\]\#': Index Creation / WWW Local Crawl Queue==YaCy '#[clientname]#': Index Erzeugung / Lokaler WWW-Puffer
-Index Creation: WWW Local Crawl Queue==Index Erzeugung: Lokaler WWW-Puffer
+Local Crawl Queue==Lokaler Crawl-Puffer
 This queue stores the urls that shall be crawled localy by this peer.==Dieser Puffer enth&auml;lt URLs, die von diesem Peer lokal gecrawlt werden sollen.
 It may also contain urls that are computed by the proxy-prefetch.==Sie enth&auml;lt auch URLs, die vom Proxy durch tieferes Indexieren bereitgestellt werden.
 The local crawler queue is empty==Der lokale Crawler-Puffer ist leer.
@@ -1090,8 +1096,8 @@ Malformed URL Exception==Missgeformte URL
 #---------------------------
 >Messages==>Nachrichten
 >Date==>Datum
->From==>Von
->To==>An
+From</td>==Von</td>
+To</td>==An</td>
 >Subject==>Betreff
 Action==Aktion
 From:==Von:
@@ -1163,6 +1169,7 @@ Offset==Versatz
 Uptime==Uptime
 Links==Links
 RWIs==RWIs
+URLs for<br />Remote<br />Crawl==URLs f&uuml;r<br />Remote<br />Crawl
 Sent<br />Words==Gesendete<br />W&ouml;rter
 Sent<br />URLs==Gesendete<br />URLs
 Received<br />Words==Empfangene<br />W&ouml;rter
@@ -1209,7 +1216,6 @@ To do this, press this button:==Um dies zu tun, dr&uuml;cken Sie bitte diesen Kn
 
 #File: News.html
 #---------------------------
-Network Menu==Netzwerkmen&uuml;
 Overview==&Uuml;berblick
 Incoming&nbsp;News==eingehende News
 Processed&nbsp;News==gelesene News
@@ -1314,7 +1320,6 @@ before GC==vor GC
 after GC==nach GC
 >Now==>Jetzt
 before <==vor <
-Next<br />Startup==N&auml;chster<br />Start
 Description==Beschreibung
 maximum memory that the JVM will attempt to use==maximaler Speicher den die JVM nutzen wird
 >Available<==>Verf&uuml;gbar<
@@ -1325,101 +1330,52 @@ total memory taken from the OS==gesamter vom Betriebssystem zugewiesener Speiche
 free memory in the JVM within total amount==freier Speicher in der JVM innerhalb des Gesamten Speichers
 >Used<==>Belegt<
 used memory in the JVM within total amount==genutzter Speicher in der JVM innerhalb des Gesamten Speichers
-Re-Configuration of Startup Paramenters:==Neukonfiguration der Startparameter:
-Changes take effect after <strong>re-start</strong> of YaCy==&Auml;nderungen werden erst nach <strong>Neustart</strong> von YaCy wirksam
-RAM Cache for Database Files:==RAM-Cache f&uuml;r Datenbank-Dateien:
-Chunk Size==Chunk Gr&ouml;&szlig;e
-#Slots==
-Memory Occupation==Speicherbeanspruchung
-Needed<br />==Ben&ouml;tigt<br />
-&nbsp;DB&nbsp;Size==&nbsp;DB&nbsp;Gr&ouml;&szlig;e
->Empty==>Frei
-High Prio==hohe Prio
-Medium Prio==mittlere Prio
-Low Prio==niedr. Prio
-Used Now==jetzt Belegt
-Assigned Max==zugewiesenes Max.
-Default Max==standard Max.
-Good Max==gutes Max.
-Best Max==bestes Max.
-The Assortment Cluster stores most of the page indexes.==Der Assortment Cluster speichert die meisten Seitenindexe.
-Flushing speed of the temporary RWI cache depends on the size of this file cache. Increasing the space of this==Die Entleerungsgeschwindigkeit des tempor&auml;ren RWI Caches h&auml;ngt von der Gr&ouml;&szlig;e dieses Datei-Caches ab. Ein Vergr&ouml;&szlig;ern des Speichers dieses
-cache will speed up crawls with a depth > 3.==Caches wird Crawls mit einer Tiefe >3 beschleunigen.
-#HTTP Response Header==
-The Response Header database stores the HTTP heades that other servers send when YaCy retrieves web pages==Die Response-Header Datenbank speichert die HTTP-Heads, die andere Server schicken, wenn YaCy
-during proxy mode, when performing crawls or if it fetches pages for snippet generation.==durch den Proxymodus, beim Durchf&uuml;hren von Crawls oder zur Snippeterstellung Webseiten empf&auml;ngt.
-Increasing this cache will be most important for a fast proxy mode.==Erh&ouml;hen dieses Caches ist f&uuml;r einen schnellen Proxybetrieb am wichtigsten.
-'loaded' URLs=='geladene' URLs
-This is the database that holds the hash/url - relation and properties regarding the url like load date and server date.==Dies ist die Datenbank, die die Hash/URL-Beziehung und Eigenschaften der URL, wie Ladedatum und Serverdatum, speichert.
-This cache is very important for a fast search process.==Dieser Cache ist sehr wichtig f&uuml;r einen schnellen Suchprozess.
-Increasing the cache size will result in more search results and less IO during DHT transfer.==Vergr&ouml;&szlig;ern dieses Caches wird mehr Suchergebnisse und weniger IO-Last w&auml;hrend eines DHT-Transfers hervorbringen.
-'noticed' URLs=='bekannte' URLs
-A noticed URL is one that was discovered during crawling but was not loaded yet.==Eine bekannte URL wurde beim Crawlen entdeckt, aber noch nicht geladen.
-Increasing the cache size will result in faster double-check during URL recognition when doing crawls.==Erh&ouml;hen der Cachegr&ouml;&szlig;e resultiert in schnellerer R&uuml;ck&uuml;berpr&uuml;fung beim Durchf&uuml;hren von Crawls.
-'error' URLs=='fehlerhafte' URLs
-URLs that cannot be loaded are stored in this database. It is also used for double-checked during crawling.==URLs die nicht geladen werden k&ouml;nnen werden in dieser Datenbank gespeichert.
-Increasing the cache size will most probably speed up crawling slightly, but not significantly.==Erh&ouml;hen der Cachegr&ouml;&szlig;e wird h&ouml;chstwahrscheinlich das Crawlen etwas, aber nicht sehr, beschleunigen.
-DHT Control==DHT Kontrolle
-This is simply the cache for the seed-dbs==Dies ist der Cache f&uuml;r die Seed-dbs
-active, passive, potential==Aktiv, Passiv, Potenziell
-This cache is divided into three equal parts.==Dieser Cache ist in 3 gleich gro&szlig;e Teile zerlegt.
-Increasing this cache may speed up many functions, but we need to test this to see the effects.==Vergr&ouml;&szlig;ern dieses Caches k&ouml;nnte viele Funktionen beschleunigen, aber wir m&uuml;ssen es testen um die Effekte zu sehen.
->Messages==>Nachrichten
-The Message cache for peer-to-peer messages. Less important.==Der Nachrichtencache f&uuml;r Peer-to-Peer Nachrichten. Unwichtig.
-The YaCy-Wiki uses a database to store its pages.==Das YaCy-Wiki nutzt eine Datenbank um ihre Seiten zu sichern.
-This cache is divided in two parts, one for the wiki database and one for its backup.==Dieser Cache ist in 2 Teile getrennt, einer f&uuml;r die Wiki-Datenbank und einer f&uuml;r ihr Backup.
-Increasing this cache may speed up access to the wiki pages.==Vergr&ouml;&szlig;ern dieses Caches kann den Zugriff auf die Wikiseiten beschleunigen.
-The News-DB stores property-lists for news that are included in seeds.==Die News-DB speichert Eigenschaftslisten f&uuml;r News die in Seeds enthalten sind.
-Increasing this cache may speed up the peer-ping.==Erh&ouml;hen dieses Caches kann den Peer-Ping beschleunigen.
-The robots.txt DB stores downloaded records from robots.txt files.==Die robots.txt-DB speichert heruntergeladene Eintr&auml;ge aus robots.txt-Dateien.
-Increasing this cache may speed up validation if crawling of the URL is allowed.==Vergr&ouml;&szlig;ern dieses Caches kann die &Uuml;berpr&uuml;fung ob eine URL gecrawled werden darf beschleunigen.
-Crawl Profiles==Crawl Profile
-The profile database stores properties for each crawl that is started on the local peer.==Die Profil-Datenbank speichert Eigenschaften f&uuml;r jeden Crawl der auf dem lokalen Peer gestartet wurde.
-Increasing this cache may speed up crawling, but not much space is needed, so the effect may be low.==Vergr&ouml;&szlig;ern dieses Caches kann das Crawlen beschleunigen, aber es wird nicht viel Platz gebraucht, der Effekt k&ouml;nnte also gering sein.
->Totals==>Gesamt
-Sum of memory amounts==Summe der Speichermengen
-Re-Configuration:==Neukonfiguration:
+Memory Settings==Speicher Einstellungen
+Memory reserved for JVM==F&uuml;r JVM reservierter Speicher
 "Set"=="Setzen"
-these<br />custom<br />values==dieser<br />nutzerdef.<br />Werte
-all<br />default<br />values==aller<br />Standard-<br />werte
-all<br />recom-<br />mended values==aller<br />empfohlenen<br />Werte
-all<br />optimum<br />values==aller<br />Optimal-<br />werte
-#Write Cache Object Allocation:==
-#now alive in write cache==
-#currently held in write buffer heap==
+Accepted change. This will take effect after <strong>restart</strong> of YaCy==&Auml;nderung akzeptiert. Diese werden erst nach einem <strong>Neustart</strong> von YaCy wirksam
+FlexTable RAM Index:==FlexTabelle RAM Index:
+Table</td>==Tabelle</td>
+Chunk Size==Chunk Gr&ouml;&szlig;e
+Count</td>==Anzahl</td>
+Used Memory==Benutzer Speicher
+Node Caches:==Knoten Cache:
+
+#TODO
+#Read Hit</td>
+#Read Miss</td>
+#Write Unique</td>
+#Write Double</td>
+#Deletes</td>
+#Flushes</td>
+#Total Mem = #[nodeCacheTotalMem]# MB; Stop Grow when less than #[nodeCacheStopGrow]# MB available left; Start Shrink when less than #[nodeCacheStartShrink]# MB availabe left
+#Object Read Caches:
+#Read Hit Cache</td>
+#Read Miss Cache</td>
+#Total Mem: #[objectHitCacheTotalMem]# MB (hit), #[objectMissCacheTotalMem]# MB (miss); Stop Grow when less than #[objectCacheStopGrow]# MB available left; Start Shrink when less than #[objectCacheStartShrink]# MB availabe left</td>
+
+Other Caching Structures:==Andere Zwischenspeicher Strukturen:
+Type</td>==Typ</td>
+Amount</td>==Umfang</td>
+#DNSCache</td>==DNSCache</td>#DNSNoCache</td>==DNSNoCache</td>
+#HashBlacklistedCache==HashBlacklistedCache
 #-----------------------------
 
 #File: PerformanceSearch_p.html
 #---------------------------
 Performance Settings of Search Sequence==Performanceeinstellungen des Suchablaufs
-Timing Settings of Search Sequence==Timing-Einstellungen des Suchablaufs
-Settings for local search profile:==Einstellungen des lokalen Suchprofils:
-#Entity==
-#Collection==
-#Join==
-#Pre-Sort==
-#URL Fetch==
-#Post-Sort==
-#Filter==
-#Snippet-Fetch==
-execution Time==Ausf&uuml;hrungszeit
-percentage; sum of this must be 100==prozentual; Summe muss 100 sein
-#result count==
-#percentage of requested amount==
-Submit New Profile Values==neue Profilwerte &uuml;bertragen
-Reset To Default Values==Auf Standardwerte zur&uuml;cksetzen
-Your settings are valid and will be used for next search.==Ihre Einstellungen sind g&uuml;ltig und werden f&uuml;r die n&auml;chste Suche genutzt.
-Reset to default settings done.==Standardwerte wurden wiederhergestellt.
-Your settings cannot be accepted: sum of execution time percentage is not 100==Ihre Einstellungen k&ouml;nnen nicht &uuml;bernommen werden: Summe der prozentualen Ausf&uuml;hrungszeit ist nicht 100.
+Search Sequence Timing==Timing des Suchablaufs
 Timing results of latest search request:==Timing-Ergebnisse der letzten Suchanfrage:
-absolute milliseconds==absolut, Millisekunden
-absolute amount==absoluter Wert
+Event</td>==Ereignis</td>
+Time \(milliseconds\)==Zeit (Millisekunden)
+Result-Count==Anzahl Ergebnisse
 The network picture below shows how the latest search query was solved by asking corresponding peers in the DHT:==Das Netzwerkbild zeigt wie die letzte Suche durch Anfragen bei zust&auml;ndigen Peers im DHT gel&ouml;st wurde.
+"Search event picture"=="Such Ereignis Bild"
 #-----------------------------
 
 #File: ProxyIndexingMonitor_p.html
 #---------------------------
-Index Monitor for Proxy Indexing==Index Profil f&uuml;r den Proxy Index
+Indexing with Proxy==Indexierung per Proxy
 This is the control page for web pages that your peer has indexed during the current application run-time==Dies ist die Kontrollseite f&uuml;r Internetseiten, die Ihr Peer w&auml;hrend der aktuellen Sitzung
 as result of proxy fetch/prefetch.==durch Besuchen einer Seite indexiert.
 No personal or protected page is indexed==Pers&ouml;nliche Seiten und gesch&uuml;tze Seiten werden nicht indexiert
@@ -1782,7 +1738,7 @@ No information has been submitted==Es wurden keine Informationen &uuml;bertragen
 Error with submitted information.==Es gab einen Fehler bei der &Uuml;bertragung der Informationen.
 Nothing changed.</p>==Nichts wurde ver&auml;ndert.</p>
 The user name must be given.==Der User Name muss angegeben werden
-Your request cannot be processed.<br />Nothing changed.==Ihre Anfrage konnte nicht bearbeitet werden.<br />Nichts wurde ver&auml;ndert.
+Your request cannot be processed.==Ihre Anfrage konnte nicht bearbeitet werden.
 The password redundancy check failed. You have probably misstyped your password.==Die Passwort&uuml;berpr&uuml;fung schlug fehl. Sie haben sich wahrscheinlich vertippt.
 Shutting down.</strong><br />Application will terminate after working off all crawling tasks.==Runterfahren</strong><br />Die Anwendung wird geschlossen, nachdem alle Crawls abgearbeitet wurden.
 Your administration account setting has been made.==Ihre Administrator Account Einstellungen wurden gespeichert.
@@ -1840,7 +1796,6 @@ Only Proxy-cache ist available in this mode.==Nur der Proxy Cache ist in diesem 
 After a short while you should see the effect on the==Nach kurzer Zeit k&ouml;nnen Sie die &Auml;nderungen auf der
 You can now go back to the==Sie k&ouml;nnen nun zur&uuml;ck zu den
 Settings</a> page if you want to make more changes.==Einstellungen</a> gehen, um weitere &Auml;nderungen vorzunehmen.
-Port rebinding will be done in a few seconds==Der neue Port wird in ein paar Sekunden übernommen.
 You can reach your YaCy server under the new location==Dieser YaCy-Peer kann nun unter seiner neuen Adresse erreicht werden: 
 #-----------------------------
 
@@ -1934,7 +1889,7 @@ password-protected==Passwort-gesch&uuml;tzt
 not used==nicht benutzt
 broken==unterbrochen
 connected==verbunden
-Remote proxy==Remote Proxy
+#Remote Proxy==Remote Proxy
 not used==nicht benutzt
 Used for YaCy -> YaCy communication:==Benutzt zur YaCy -> YaCy Kommunikation:
 Yes==Ja
@@ -1963,7 +1918,7 @@ Remote triggered Crawl==eingehende Remote-Crawls
 Global Crawl Trigger==ausgehende Remote-Crawls
 Pre-Queueing==Vor-Pufferung
 Seed server==Seed Server
-Configure\]==Konfigurieren]
+Configure==Konfigurieren
 Enabled: Updating to server==Aktiviert: Aktualisiere auf Server
 Last upload: #\[lastUpload\]# ago.==Letztesmal Hochladen #[lastUpload]# her
 Enabled: Updating to file==Aktiviert: Aktualisiere die Datei
@@ -1971,18 +1926,20 @@ Enabled: Updating to file==Aktiviert: Aktualisiere die Datei
 
 #File: Steering.html
 #---------------------------
-Steering==Steuerung
-Steering Receipt:==Steuerung:
-No information has been submitted==Es wurden keine Informationen &uuml;bermittelt
-Nothing changed==Nichts wurde ver&auml;ndert
+Steering</title>==Steuerung</title>
+Steering Receipt:==Steuerung Eingang:
 Your system is not protected by a password==Ihr System wird nicht von einem Passwort gesch&uuml;tzt
 Please go to the <a href="/Settings_p.html">Settings</a> page and set an administration password==Bitte gehen Sie auf die <a href="/Settings_p.html">Einstellungen</a> Seite und geben ein Administrator Passwort ein
 You don't have the correct access right to perform this task.==Sie haben nicht die Erlaubnis diese Anwendung auszuf&uuml;hren.
 Please log in.==Bitte melden Sie sich an.
-Shutting down.==Runterfahren
-Application will terminate after working off all scheduled tasks.==Der YaCy Proxy f&auml;hrt sich runter, nachdem alle ausstehenden Aufgaben abgearbeitet wurden.
 Then YaCy will restart.==Dann wird YaCy neu gestartet.
 You can now go back to the <a href="Settings_p.html">Settings</a> page if you want to make more changes.==Sie k&ouml;nnen nun zur&uuml;ck auf die <a href="Settings_p.html">Einstellungen</a> Seite gehen, wenn Sie &Auml;nderungen vornehmen wollen.
+Shutting down.==YaCy wird nun heruntergefahren
+Application will terminate after working off all scheduled tasks.==Der YaCy Proxy f&auml;hrt sich runter, nachdem alle ausstehenden Aufgaben abgearbeitet wurden.
+Restart YaCy.==YaCy wird nun neu gestartet.
+If you can't reach YaCy's interface after 5 minutes restart failed.==Wenn Sie nach 5 Minuten nicht auf das YaCy Interface zurgreifen k&ouml;nnen, dann ist der Neustart fehlgeschlagen.
+Installing release==Installiere Release
+YaCy will be restarted after installation==YaCy wird nach der Installation neugestartet
 #-----------------------------
 
 #File: Supporter.html
@@ -2027,8 +1984,8 @@ New user==Neuer Benutzer
 Edit User==Benutzer bearbeiten
 Delete User==Benutzer l&ouml;schen
 Edit current user:==Aktuellen Benutzer bearbeiten:
-Username==Benutzername
-Password==Passwort
+Username</label>==Benutzername</label>
+Password</label>==Passwort</label>
 Repeat password==Passwort wiederholen
 First name==Vorname
 Last name==Nachname
@@ -2041,7 +1998,7 @@ User created:==Benutzer erstellt:
 User changed:==Benutzer ge&auml;ndert:
 Generic error.==Genereller Fehler.
 Passwords do not match.==Passw&ouml;rter stimmen nicht &uuml;berein.
-Username too short. Username must be \>\= 4 Characters.==Benutzername zu kurz. Benutzername muss länger als 3 Buchstaben sein.
+Username too short. Username must be \>\= 4 Characters.==Benutzername zu kurz. Benutzername muss länger als 4 Buchstaben sein.
 #-----------------------------
 
 #File: ViewFile.html
@@ -2122,12 +2079,12 @@ Please wait some seconds,==Bitte warten Sie einige Sekunden,
 it may take some seconds until the first result appears there.==es kann einige Sekunden dauern, bis hier die ersten Ergebnisse zu sehen sind.
 If you crawl any un-wanted pages, you can delete them <a href="IndexCreateWWWLocalQueue_p.html">here</a>.==Wenn Ihr Crawl Seiten indexiert, die Sie nicht indexiert haben wollen, k&ouml;nnen Sie diese <a href="IndexCreateWWWLocalQueue_p.html">hier</a> l&ouml;schen.
 Crawl Queue:==Crawler Puffer:
-Queue==Puffer
+Queue</th>==Puffer</th>
 Profile</th>==Profil</th>
 Initiator==Auftraggeber
 Depth</th>==Tiefe</th>
-#Modified Date==zuletzt bearbeitet-Datum
-Anchor Name==Linkbezeichnung
+Modified Date==&Auml;nderungsdatum
+Anchor Name==Linktitel
 #URL==URL
 Delete==Löschen
 Next update in==Nächste Aktualisierung in
@@ -2140,6 +2097,10 @@ Loader==Lader
 Local Crawler==Lokaler Crawler
 unlimited==uneingeschr&auml;nkt
 #Remote Crawler==Remote Crawler
+Speed==Geschwindigkeit
+"minimum"=="Minimum"
+"custom"=="benutzerdefiniert"
+"maximum"=="Maximum"
 Database==Datenbank
 Entries==Eintr&auml;ge
 Pages \(URLs\)==Seiten (URLs)
@@ -2231,17 +2192,16 @@ closes the table.==schliesst die Tabelle.
 The escape tags will cause all tags in the text between the starting and the closing tag to not be treated as wiki-code.==Durch diesen Tag wird der Text, der zwischen den Klammern steht, nicht interpretiert und unformatiert als normaler Text ausgegeben.
 A text between these tags will keep all the spaces and linebreaks in it. Great for ASCII-art and program code.==Ein Text zwischen diesen Tags wird alle Leerzeichen und Zeilenumbr&uuml;che beinhalten. Gut geeignet f&uuml;r ASCII-Kunst und Programm Code.  
 If a line starts with a space, it will be displayed in a non-proportional font.==Wenn eine Zeile mit einem Leerzeichen anf&auml;ngt, wird diese als nicht-proportionale Schriftart dargestellt.
-url==URL
+url description==URL Beschreibung
 This tag creates links to external websites.==Dieser Tag erstellt einen Link zu einer externen Internetseite.
-Image==Bild
-alt==Beschreibung
-align==Ausrichtung
+alt text==alt Beschreibung
 #-----------------------------
 
 #File: yacysearch.html
 #---------------------------
 Search Page==Suchseite
 "Search"=="Suchen"
+'Search'=='Suchen'
 "search again - catch up more links"=="Erneut suchen - mehr Links sammeln" 
 more options==Mehr Optionen
 #Text==Text
@@ -2252,39 +2212,19 @@ Applications==Anwendungen
 The following words are stop-words and had been excluded from the search:==Folgende W&ouml;rter sind Stopwords und wurden von der Suche ausgeschlossen:
 No Results.==Keine Ergebnisse.
 length of search words must be at least 3 characters==Die L&auml;nge der Suchbegriffe muss mindestens 3 Zeichen betragen
-If you think this is unsatisfactory then you may consider to support the global index by running your own proxy/peer.==Wenn Sie das f&uuml;r unzureichend halten, sollten Sie &uuml;berlegen, den globalen Index durch das Betreiben eines eigenen Proxies/Peers zu unterst&uuml;tzen.
-If everybody contributes, the results will get better.==Wenn jeder etwas beitr&auml;gt, werden die Ergebnisse besser.
-Other possible reasons for no result:==Andere m&ouml;gliche Gr&uuml;nde daf&uuml;r, dass Sie keine Ergebnisse erhalten haben:
-The search time was too short. Search again with same query to catch up 'late peers'==Die Zeit zum suchen war zu kurz. Suchen Sie erneut mit erh&ouml;hter max. Suchdauer nach dem gleichen Begriff, um so auch Ergebnisse von langsameren Peers zu erhalten.
-There is currently no support for german umlaute. Please use ae/oe/ue instead==Zur Zeit gibt es keine Unterst&uuml;tzung der deutschen Umlaute. Bitte benutzen Sie stattdessen ae/oe/ue.
-Words of length &lt; 3 are not indexed. Please omit such words==W&ouml;rter mit weniger als 3 Buchstaben werden nicht indexiert. Bitte vermeiden Sie eine Suche nach solchen W&ouml;rtern.
-YaCy tries to index singular instead of plural words. Please use the singular form==YaCy indexiert nur den Singular eines Wortes. Bitte suchen Sie daher auch nur nach dem Singular.
-Only complete words are indexed, not parts of words==Nur komplette W&ouml;rter sind indexiert, keine Teile eines Wortes.
-Don't use stopwords as search words==Benutzen Sie bitte keine Stopwords in der Suche.
-During this test phase the reaction time of remote peers is unknown.==W&auml;hrend dieser Testphase ist die Reaktionszeit von anderen Peers unbekannt.
-Please repeat your search to see if there are late-responses from remote peers==Bitte wiederholen Sie Ihre Suche, um zu sehen ob es Antworten von sp&auml;t reagierenden Peers gibt
-If you think the information you searched should exist in the global index,==Wenn Sie glauben, die Information, nach der Sie suchen, sollte im globalen Index stehen,
-then please run your own peer and start a crawl of your wanted information to make it==dann starten Sie von Ihrem eigenen Peer einen Crawl nach der gesuchten Information, um sie
-available for everyone. Then stay online to support crawls from other peers. Thank you!==allen anderen Peers auch zur Verf&uuml;gung zu stellen. Bleiben Sie bitte online um Crawls von anderen Peers zu erlauben. Danke!
 results from a total number of==Treffer aus insgesamt
 known==bekannten Links
 links from other YaCy peers==Links von anderen YaCy Peers
-Refine your search with these topwords==Verfeinere die Suche mit diesen Topw&ouml;rtern
-You can enrich the search results by using the 'global' option; you must also switch to online mode==Sie k&ouml;nnen die Anzahl Ihrer Treffer erh&ouml;hen, wenn Sie die 'global' Option benutzen; Sie m&uuml;ssen aber erst in den Onlinemodus wechseln
-\(by using the proxy\) to contribute to the global index.==(indem Sie den Proxy benutzen), um etwas zum globalen Index beizutragen.
-You cannot get global search results because you are not connected to another YaCy peer.==Sie k&ouml;nnen keine globalen Treffer erhalten, da sie nicht mit einem anderen YaCy Peer verbunden sind.
-loading snippet ...==Auszug wird geladen ...
-loading snippet from==Auszug wird geladen von
-Sorry, but in order to use the image search, you need JavaScript. But here are the urls, YaCy would have looked for the images you want. Perhaps you can find them there. Sorry for the inconvenience. If you want a non-JavaScript image search, beg the developers for it.==Entschuldigung, aber um die Bildersuche benutzen zu k&ouml;nnen, brauchen Sie JavaScript. Aber hier sind die URLs, die YaCy benutzt hat, um nach Ihren gesuchten Bildern zu suchen. Vielleicht finden Sie diese dort. Entschuldigen Sie die Unanehmlichkeiten. Wenn Sie eine Bildersuche ohne JavaScript wollen, bitten Sie die Entwickler darum.
 Search Result Pages==Suchergebnis Seiten
 #-----------------------------
 
-#File: yacysearch.html
+#File: yacysearchitem.html
 #---------------------------
 "bookmark"=="Lesezeichen"
 "recommend"=="empfehlen"
 "delete"=="l&ouml;schen"
 Pictures==Bilder
+Topwords</strong>:==Topw&ouml;rter</strong>:
 #-----------------------------
 
 #File: env/templates/simpleheader.template
