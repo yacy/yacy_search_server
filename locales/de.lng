@@ -102,7 +102,6 @@ Activate this list for==Diese Liste ist g&uuml;ltig f&uuml;r
 
 #File: BlacklistCleaner_p.html
 #---------------------------
-Blacklist Manager==Blacklist Verwaltung
 Blacklist Cleaner==Blacklist aufr&auml;men
 Here you can remove or edit illegal or double blacklist-entries.==Hier k&ouml;nnen Sie ung&uuml;ltige oder doppelte Eintr&auml;ge auf der Blacklist entfernen oder bearbeiten. 
 Check list==Liste testen
@@ -214,8 +213,7 @@ Bookmarks per page.==Lesezeichen pro Seite.
 
 #File: CacheAdmin_p.html
 #---------------------------
-Local Cache Management==Lokale Cache Verwaltung
->Local Cache==>Lokaler Cache
+Web Cache==Internet Cache
 The current cache size is==Die aktuelle Gr&ouml;&szlig;e des Caches betr&auml;gt
 The maximum cache size is==Die maximale Gr&ouml;&szlig;e betr&auml;gt
 #-----------------------------
@@ -407,7 +405,6 @@ Error saving the skin.==Es trat ein Fehler beim Speichern des Skins auf.
 
 #File: ConfigUpdate_p.html
 #---------------------------
-
 Manual System Update==Manuelle Systemaktualisierung
 Available Releases==Verf&uuml;gbare Versionen
 "Download Release"=="Version Herunterladen"
@@ -416,7 +413,7 @@ Downloaded Releases==Heruntergeladene Versionen
 "Install Release"=="Version Installieren"
 Automatic Update==Automatische Aktualisierung
 check for new releases, download if available and restart with downloaded release==suche nach neuer Version, lade sie herunter und starte neu mit dieser Version
-"Check + Download + Install Release Now"=="Suchen + Herunterladen + Version nun installieren"
+"Check \+ Download \+ Install Release Now"=="Suchen + Herunterladen + Version nun installieren"
 Download of release #[downloadedRelease]# finished. Restart Initiated.
 No more recent release found.
 Omiting update because this is a development environment.
@@ -439,7 +436,6 @@ Last System Lookup==Letzter System Check
 never==niemals
 Last Release Download==Letzter Download
 Last Deploy==Letzte Anwendung
-#noch ungünstig
 #-----------------------------
 
 #File: Connections_p.html
@@ -486,7 +482,7 @@ Sending Client==Sendender Client
 Crawl Profile Editor==Crawl Profil Editor
 Crawl profiles hold information about a specific URL which is internally used to perform the crawl it belongs to.==Crawl Profile enthalten Informationen &uuml;ber eine spezifische URL, welche intern genutzt wird, um nachzuvollziehen, wozu der Crawl geh&ouml;rt.
 The profiles for remote crawls, <a href="/ProxyIndexingMonitor_p.html">indexing via proxy</a> and snippet fetches==Die Profile f&uuml;r Remote Crawl, <a href="/ProxyIndexingMonitor_p.html">Indexierung per Proxy</a> und Snippet Abrufe
-cannot be altered here as they are hard-coded.==k&oumlnnen nicht ver&auml;ndert werden, weil sie "hard-coded" sind.
+cannot be altered here as they are hard-coded.==k&ouml;nnen nicht ver&auml;ndert werden, weil sie "hard-coded" sind.
 Crawl Profile List==Crawl Profil Liste
 Crawl Thread==Crawl Art
 #Start URL==Start URL
@@ -502,12 +498,12 @@ Local Text Indexing==Lokal Text Indexieren
 Local Media Indexing==Lokal Media Indexieren
 Remote Indexing==Remote Indexieren
 no::yes==nein::ja
-"Delete"=="l&oumlschen"
+"Delete"=="l&ouml;schen"
 Select the profile to edit==Profil zur Bearbeitung ausw&auml;hlen 
 "Edit profile"=="Profil bearbeiten"
 An error occured during editing the crawl profile:==Es trat folgender Fehler bei der Bearbeitung des Crawl Profils auf:
 Edit Profile==Bearbeite Profil
-"Submit changes"
+"Submit changes"=="&Auml;nderungen speichern"
 #---------------------------
 
 #File: CrawlResults.html
@@ -640,7 +636,7 @@ If you need your crawling results locally, you should switch this off.==Wenn Sie
 Only senior and principal peers can initiate or receive remote crawls.==Nur Senior und Principal Peers k&ouml;nnen einen remote Crawl initiieren oder erhalten.
 A YaCyNews message will be created to inform all peers about a global crawl==Eine Nachricht wird im YaCy News Bereich angezeigt, um alle Peers von diesem globalen Crawl zu informieren 
 so they can omit starting a crawl with the same start point.==damit sie es vermeiden k&ouml;nnen, einen Crawl vom selben Startpunkt zu starten.
-Exclude <em>static</em> Stop-Words==<em>Statische</em> Stop-Words ausschlie&szlig;en:
+Exclude <em>static</em> Stop-Words==<em>Statische</em> Stop-Words ausschlie&szlig;en
 This can be useful to circumvent that extremely common words are added to the database, i.e. \"the\", \"he\", \"she\", \"it\"... To exclude all words given in the file <tt>yacy.stopwords</tt> from indexing,==Dies ist sinnvoll, um zu verhindern, dass extrem h&auml;ufig vorkommende W&ouml;rter wie z.B. "der", "die", "das", "und", "er", "sie" etc in die Datenbank aufgenommen werden. Um alle W&ouml;rter von der Indexierung auszuschliessen, die in der Datei <tt>yacy.stopwords</tt> enthalten sind,
 check this box.==aktivieren Sie diese Box.
 Existing start URLs are re-crawled.==Die existierende Start URL wird wieder gecrawlt.
@@ -675,7 +671,7 @@ Peer Name==Peer Name
 Start URL==Start URL
 Intention/Description==Absicht/Beschreibung
 Depth</strong>==Tiefe</strong>
-Accept \'?\' URLs==Akzeptiere '?' URLs
+Accept==Akzeptiere
 \#no::yes\#==#nein::ja#
 Recently started remote crawls, finished:==Gerade gestartete Remote-Crawls anderer Peers, beendete:
 Recently started remote crawls, finished:</strong></p>
@@ -883,8 +879,7 @@ Fail-Reason==Fehler Grund
 
 #File: IndexCreateLoaderQueue_p.html
 #---------------------------
-Index Creation / Loader Queue==Index Erzeugung / Lade-Puffer
-Index Creation: Loader Queue==Index Erzeugung: Lade-Puffer
+Loader Queue==Lade-Puffer
 The loader set is empty==Der Lade-Puffer ist leer.
 There are \#\[num\]\# entries in the loader set:==Es befinden sich #[num]# Eintr&auml;ge in dem Lade-Puffer:
 Initiator==Initiator
@@ -1095,7 +1090,7 @@ Malformed URL Exception==Missgeformte URL
 #File: Messages_p.html
 #---------------------------
 >Messages==>Nachrichten
->Date==>Datum
+Date</td>==Datum</td>
 From</td>==Von</td>
 To</td>==An</td>
 >Subject==>Betreff
@@ -1212,6 +1207,8 @@ here</a>==hier</a>
 for an installation guide\) or you can go online by activating the permanent online mode.==f&uuml;r eine Installationsanleitung) stellen. Sie k&ouml;nnen aber auch online gehen, indem Sie den \"Permanent Online\" Modus aktivieren.
 To do this, press this button:==Um dies zu tun, dr&uuml;cken Sie bitte diesen Knopf:
 "go online"=="online gehen"
+Progress towards the next peer:==Forschritt bis zum n&auml;chsten Peer:
+At current PPM you will reach him \#\(timemessage\)\#in an unknown time::in \#\[time\]\#::never, because he is faster than you==Mit den aktuellen PPM erreichen Sie ihn #(timemessage)#in einer unbekannten Zeit::in #[time]#::niemals, weil er schneller als Sie ist
 #-----------------------------
 
 #File: News.html
@@ -1258,7 +1255,7 @@ Queue Size==Warteschl.-<br />l&auml;nge
 #Sleep Time==
 #Exec Time==
 >Cycles==>Durchl.
->Idle==>unt&auml;t.
+<td>Idle==<td>unt&auml;t.
 >Busy==>besch&auml;ft.
 Short Mem<br />Cycles==Durchl.<br />ohne ausr. Speicher
 >per Cycle==>pro Durchlauf
@@ -1273,24 +1270,32 @@ Submit New Delay Values==Neue Verz&ouml;gerungswerte speichern
 Reset To Default Values==Standardwerte wiederherstellen
 Changes take effect immediately==&Auml;nderungen werden sofort wirksam
 Cache Settings:==Cache Einstellungen:
-Words in RAM Cache:==W&ouml;rter im RAM-Cache
-This is the current size of the word cache.==Dies ist die momentane Gr&ouml;&szlig;e des Wort-Caches.
-The smaller this number, the faster the shut-down procedure will be.==Je kleiner diese Zahl ist, desto schneller wird das Herunterfahren von YaCy gehen.
-The maximum of this cache can be set below.==Die Maximalgr&ouml;&szlig;e dieses Cache kann nachfolgend eingestellt werden.
+Cache Type==Cache Typ
+DHT-Out==DHT-Ausgehend
+DHT-In==DHT-Eingehend
+<td>Description==<td>Beschreibung
+URLs in RAM buffer:==URLs im RAM Puffer:
+This is the size of the URL write buffer. Its purpose is to buffer incoming URLs==Dies ist die Gr&ouml;sse des URLs write Puffer. Seine Aufgabe ist es die eingehenden URLs zu puffern
+in case of search result transmission and during DHT transfer.==im Falle von Suchergebnis&uuml;bertragung und w&auml;hrend des DHT Transfers.
+Words in RAM cache:==W&ouml;rter im RAM-Cache
+This is the current size of the word caches.==Dies ist die momentane Gr&ouml;&szlig;e des Wort-Caches.
+The indexing cache speeds up the indexing process, the DHT cache holds indexes temporary for approval.==Der Indexing Cache beschleunigt den Indexier Prozess, der DHT Cache enth&auml;lt tempor&auml;re Indizes zum Best&auml;tigen.
+The maximum of this caches can be set below.==Das Maximum dieses Cache kann unten festgesetzt werden.
 Maximum URLs currently assigned<br />to one cached word:==h&ouml;chste Anzahl URLs die derzeit einem Wort im Zwischenspeicher zugewiesen wurde:
 This is the maximum size of URLs assigned to a single word cache entry.==Dies ist die maximale Menge an URLs, die einem einzelnen Wort-Cache Eintrag zugewiesen wurden.
 If this is a big number, it shows that the caching works efficiently.==Wenn diese Zahl hoch ist, hei&szlig;t das, dass der Wort-Cache effizient arbeitet.
-Maximum Age of Word in cache:==h&ouml;chstes Alter eines Wortes im Cache:
-This is the maximum age of a word index that is in the RAM cache in minutes.==Dies ist das maximale Alter eines Wortes im RAM-Cache (in Minuten)
-Minimum Age of Word in cache:==geringstes Alter eines Wortes im Cache:
-This is the minimum age of a word index that is in the RAM cache in minutes.==Dies ist das minimale Alter eines Wortes im RAM-Cache (in Minuten)
-Maximum number of Word Caches, low limit:==Maximale Wortzahl im Cache, niedrige Grenze
-Maximum number of Word Caches, high limit:==Maximale Wortzahl im Cache, hohe Grenze
+Maximum age of a word:==Maximales Alter eines Wortes:
+This is the maximum age of a word in an index in minutes.==Dies ist das maximale Alter eines Wortes in einem Index in Minuten.
+Minimum age of a word:==Minimales Alter eines Wortes:
+This is the minimum age of a word in an index in minutes.==Dies ist das minimale Alter eines Wortes in einem Index in Minuten.
+Maximum number of words in cache:==Maximale Wortzahl im Cache:
 This is is the number of word indexes that shall be held in the==Dies ist die Anzahl der Wort-indexe die w&auml;hrend des Indexierens im
 ram cache during indexing. When YaCy is shut down, this cache must be==RAM-Cache gehalten werden sollen. Sobald YaCy herunterf&auml;hrt muss dieser Cache
 flushed to disc; this may last some minutes.==auf die Festplatte gesichert werden; dies kann einige Minuten dauern.
-The low limit is valid for crawling tasks, the high limit is valid==Die niedrige Grenze gilt f&uuml;r Crawling-Aufgaben, die hohe Grenze gilt f&uuml;r
-for search and DHT transmission tasks.==Such- und DHT-&Uuml;bertragungsaufgaben.
+Initial space of words in cache:==Anfangs Freiraum im Word Cache:
+This is is the init size of space for words in cache.==Dies ist die Anfangsgr&ouml;sse von W&ouml;rtern im Cache.
+word flush size:==Wort Flush Gr&ouml;sse:
+The word flush size is applied when an indexing loop is executed, and the cache size is exceeded.==Die Wort Flush Gr&ouml;sse wird eingesetzt, wenn ein Indexier Loop ausgef&uuml;hrt wird und die Cache Gr&ouml;sse &uumlberschritten wurde. 
 Enter New Cache Size==Neue Cachegr&ouml;&szlig;e eintragen
 Thread pool settings:==Threadpool Einstellungen:
 maximum Active==max. aktiv
@@ -1299,7 +1304,14 @@ minimum Idle==min. inaktiv
 current Active==derzeit aktiv
 current Idle==derzeit inaktiv
 Enter new Threadpool Configuration==neue Threadpoolkonfiguration eintragen
-Proxy Performance Settings:==Proxy Performance Einstellungen
+YaCy Priority Settings==YaCy Priorit&auml;t Einstellungen
+YaCy Process Priority==YaCy Prozess Priorit&auml;t
+#Normal==Normal
+Below normal==unter Normal
+Idle</option>==unt&auml;tig</option>
+"Set new Priority"=="Neue Priorit&auml;t speichern"
+Changes take effect after <strong>restart</strong> of YaCy==&Auml;nderungen werden erst nach einem <strong>Neustart</strong> von YaCy wirksam.
+Proxy Performance Settings==Proxy Performance Einstellungen
 #Online Caution Delay==
 This is the time that the crawler idles when the proxy is accessed.==Dies ist die Zeit die der Crawler pausiert wenn auf den Proxy zugegriffen wird.
 The delay is extended by this time==Die normale Verz&ouml;gerung wird um diese Zeit verl&auml;ngert,
