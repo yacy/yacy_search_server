@@ -241,7 +241,35 @@ div.ProgressBar {
 }
 div.ProgressBarFill {
 	margin:0px;
+	padding:0px;
 	height:100%; /*not valid value for Netscape 8*/
+}
+
+#resCounter {
+	/* left part of the progress bar */
+	position: absolute;
+	left: 1em;
+}
+
+#resProgBar {
+	height: 1.5em;
+	margin: 1em auto;
+	position: relative; /* for "relative" absolute pos of children */
+	text-align: left;
+	width: 100%;
+	float: none;
+}
+
+#resNav {
+	/* right part of the progress bar */
+	position: absolute;
+	right: 1em;
+}
+
+#resProgFill {
+	position: absolute;
+	left: 0px;
+	top: 0px;
 }
 
 div.bookmarkList, div.Tags {

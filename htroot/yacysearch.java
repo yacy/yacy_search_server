@@ -323,29 +323,29 @@ public class yacysearch {
             prop.put("num-results_linkcount", 0);
 
             // compose page navigation
-            StringBuffer pagenav = new StringBuffer();
+            StringBuffer resnav = new StringBuffer();
             int thispage = offset / theQuery.displayResults();
-            if (thispage == 0) pagenav.append("&lt;&nbsp;"); else {
-                pagenav.append(navurla(thispage - 1, display, theQuery));
-                pagenav.append("<strong>&lt;</strong></a>&nbsp;");
+            if (thispage == 0) resnav.append("&lt;&nbsp;"); else {
+                resnav.append(navurla(thispage - 1, display, theQuery));
+                resnav.append("<strong>&lt;</strong></a>&nbsp;");
             }
             int numberofpages = Math.min(10, Math.min(thispage + 2, (theSearch.getGlobalCount() + theSearch.getLocalCount()) / theQuery.displayResults()));
             for (int i = 0; i < numberofpages; i++) {
                 if (i == thispage) {
-                    pagenav.append("<strong>");
-                    pagenav.append(i + 1);
-                    pagenav.append("</strong>&nbsp;");
+                    resnav.append("<strong>");
+                    resnav.append(i + 1);
+                    resnav.append("</strong>&nbsp;");
                 } else {
-                    pagenav.append(navurla(i, display, theQuery));
-                    pagenav.append(i + 1);
-                    pagenav.append("</a>&nbsp;");
+                    resnav.append(navurla(i, display, theQuery));
+                    resnav.append(i + 1);
+                    resnav.append("</a>&nbsp;");
                 }
             }
-            if (thispage >= numberofpages) pagenav.append("&gt;"); else {
-                pagenav.append(navurla(thispage + 1, display, theQuery));
-                pagenav.append("<strong>&gt;</strong></a>");
+            if (thispage >= numberofpages) resnav.append("&gt;"); else {
+                resnav.append(navurla(thispage + 1, display, theQuery));
+                resnav.append("<strong>&gt;</strong></a>");
             }
-            prop.putASIS("num-results_pagenav", pagenav.toString());
+            prop.putASIS("num-results_resnav", resnav.toString());
         
             // generate the search result lines; they will be produced by another servlet
             for (int i = 0; i < theQuery.displayResults(); i++) {
