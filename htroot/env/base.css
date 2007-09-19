@@ -315,7 +315,16 @@ div.yacysearch {
 div.urlactions {
   float:left;
   clear:left;
-  margin: 0px 4px;
+  margin: 0px 6px 0px 2px;
+}
+
+img.favicon{
+  margin: 0px 4px 0px 0px;
+  width: 16px;
+  height: 16px;
+  float: left;
+  position: absolute;
+  left: 0px;
 }
 
 /*----------
@@ -336,10 +345,16 @@ div.bookmark p {
   margin:1px;
 }
 
+div.searchresults h4{
+  margin:2px 2px 2px 2px;
+  padding-left: 20px;
+}
+
 div.searchresults p{
   margin:2px 2px 2px 2px;
   padding-left: 20px;
 }
+
 
 form.search.small p.yacylogo { /* The logo in yacysearch.html */
   display:block;
@@ -737,9 +752,3 @@ ul#menu a.MenuItemLink {
   padding:1px 5% 1px 15%;
 }
 
-img.favicon{
-  margin: 0px 4px 0px 0px;
-  width: 16px;
-  height: 16px;
-  float: left;
-}
