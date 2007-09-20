@@ -129,7 +129,6 @@ tt, *.tt {
 .snippetLoaded {
   font-style:italic;
   color: #666;
-  margin-left: 2px;
 }
 
 .snippetLoaded b {
@@ -318,13 +317,16 @@ div.urlactions {
   margin: 0px 6px 0px 2px;
 }
 
+h4.linktitle {
+  margin:2px;
+  padding-left: 20px;
+}
+
 img.favicon{
-  margin: 0px 4px 0px 0px;
+  margin: 0px 4px 0px -20px;
   width: 16px;
   height: 16px;
   float: left;
-  position: absolute;
-  left: 0px;
 }
 
 /*----------
@@ -343,11 +345,6 @@ p.info {
 
 div.bookmark p {
   margin:1px;
-}
-
-div.searchresults h4{
-  margin:2px 2px 2px 2px;
-  padding-left: 20px;
 }
 
 div.searchresults p{
@@ -427,9 +424,6 @@ div.SubMenu h3 {
   margin:0;
   margin-bottom:1px;
   padding:1px 10px;
-}
-div.searchresults h4 {
-  margin: 2px;
 }
 
 h4.bookmarkTitle {
