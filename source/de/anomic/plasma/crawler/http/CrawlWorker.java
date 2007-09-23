@@ -193,7 +193,7 @@ public final class CrawlWorker extends AbstractCrawlWorker {
                 requestHeader.put(httpHeader.ACCEPT_ENCODING, this.acceptEncoding);
 
             // open the connection
-            remote = httpc.getInstance(host, host, port, this.socketTimeout, ssl, this.remoteProxyConfig,"CRAWLER",null);
+            remote = new httpc(host, host, port, this.socketTimeout, ssl, this.remoteProxyConfig, "CRAWLER", null);
 
             // specifying if content encoding is allowed
             remote.setAllowContentEncoding((this.acceptEncoding != null && this.acceptEncoding.length() > 0));
@@ -314,10 +314,6 @@ public final class CrawlWorker extends AbstractCrawlWorker {
                         
                         // normalizing URL
                         yacyURL redirectionUrl = yacyURL.newURL(this.url, redirectionUrlString);
-
-                        // returning the used httpc
-                        httpc.returnInstance(remote);
-                        remote = null;
 
                         // restart crawling with new url
                         this.log.logInfo("CRAWLER Redirection detected ('" + res.status + "') for URL " + this.url.toString());
@@ -452,10 +448,6 @@ public final class CrawlWorker extends AbstractCrawlWorker {
                     return null;
                 }
 
-                // returning the used httpc
-                if (remote != null) httpc.returnInstance(remote);
-                remote = null;
-
                 // setting the retry counter to 1
                 if (crawlingRetryCount > 2) crawlingRetryCount = 2;
 
@@ -467,8 +459,6 @@ public final class CrawlWorker extends AbstractCrawlWorker {
                 addURLtoErrorDB(failreason);
             }
             return null;
-        } finally {
-            if (remote != null) httpc.returnInstance(remote);
         }
     }
     

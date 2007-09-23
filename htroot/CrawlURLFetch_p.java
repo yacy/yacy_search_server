@@ -507,13 +507,13 @@ public class CrawlURLFetch_p {
             if (url == null) return null;
             String[] r = null;
             try {
-                httpc con = httpc.getInstance(
+                httpc con = new httpc(
                         url.getHost(),
                         url.getHost(),
                         url.getPort(),
                         15000,
                         url.getProtocol().equals("https"),
-                        plasmaSwitchboard.getSwitchboard().remoteProxyConfig);
+                        plasmaSwitchboard.getSwitchboard().remoteProxyConfig, null, null);
                 
                 httpHeader header = new httpHeader();
                 header.put(httpHeader.ACCEPT_ENCODING, "US-ASCII");
@@ -531,7 +531,6 @@ public class CrawlURLFetch_p {
                     if (encoding == null) encoding = "US-ASCII";
                     r = parseText(new String(sbb.getBytes(), encoding));
                 }
-                httpc.returnInstance(con);
             } catch (IOException e) {  }
             return r;
         }

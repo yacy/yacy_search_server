@@ -398,7 +398,7 @@ public final class plasmaCrawlLURL {
                         yacyURL newUrl = new yacyURL(newUrlStr, null);
 
                         // doing a http head request to test if the url is correct
-                        theHttpc = httpc.getInstance(newUrl.getHost(), newUrl.getHost(), newUrl.getPort(), 30000, false, plasmaSwitchboard.getSwitchboard().remoteProxyConfig);
+                        theHttpc = new httpc(newUrl.getHost(), newUrl.getHost(), newUrl.getPort(), 30000, false, plasmaSwitchboard.getSwitchboard().remoteProxyConfig, null, null);
                         response res = theHttpc.HEAD(newUrl.getPath(), null);
 
                         if (res.statusCode == 200) {
@@ -416,7 +416,6 @@ public final class plasmaCrawlLURL {
                 } finally {
                     if (theHttpc != null) try {
                         theHttpc.close();
-                        httpc.returnInstance(theHttpc);
                     } catch (Exception e) { }
                 }
             }

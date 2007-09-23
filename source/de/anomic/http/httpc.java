@@ -74,8 +74,6 @@ import javax.net.ssl.SSLSocketFactory;
 import javax.net.ssl.TrustManager;
 import javax.net.ssl.X509TrustManager;
 
-import org.apache.commons.pool.impl.GenericObjectPool;
-
 import de.anomic.kelondro.kelondroBase64Order;
 import de.anomic.server.serverByteBuffer;
 import de.anomic.server.serverCore;
@@ -91,8 +89,8 @@ import de.anomic.yacy.yacyURL;
 * libraries, it is still necessary to implement the network interface since
 * otherwise there is no access to the HTTP/1.0 / HTTP/1.1 header information
 * that comes along each connection.
-* FIXME: Add some information about the usage of the threadpool.
 */
+
 public final class httpc {
 
     // some constants
@@ -103,87 +101,30 @@ public final class httpc {
      */
     public static final String GZIP_POST_BODY = "GZIP_POST_BODY";
     
-    // statics
+    // final statics
     private static final String vDATE = "20040602";
-    public static String userAgent;
     private static final int terminalMaxLength = 30000;
     private static final TimeZone GMTTimeZone = TimeZone.getTimeZone("GMT");
-    
-    /**
-    * This string is initialized on loading of this class and contains
-    * information about the current OS.
-    */
-    public static String systemOST;
-
-    // --- The GMT standard date format used in the HTTP protocol
     private static final SimpleDateFormat HTTPGMTFormatter = new SimpleDateFormat("EEE, dd MMM yyyy HH:mm:ss zzz", Locale.US);
-    static {
-         HTTPGMTFormatter.setTimeZone(GMTTimeZone);
-    }
+    private static final HashMap reverseMappingCache = new HashMap();
+    private static final HashMap openSocketLookupTable = new HashMap();
     
-    /**
-     * A Object Pool containing all pooled httpc-objects.
-     * @see httpcPool
-     */
-    private static final httpcPool theHttpcPool;
-
-    // class variables
-    private Socket socket = null; // client socket for commands
-    private Thread socketOwner = null;
-    private String adressed_host = null;
-    private int    adressed_port = 80;
-    private String target_virtual_host = null;
+    // defined during set-up of switchboard
+    public static boolean yacyDebugMode = false;
     
-    // output and input streams for client control connection
-    PushbackInputStream clientInput = null;
-    private OutputStream clientOutput = null;
-    
-    private httpdByteCountInputStream clientInputByteCount = null;
-    private httpdByteCountOutputStream clientOutputByteCount = null;
-
-    private boolean remoteProxyUse = false;
-    private httpRemoteProxyConfig remoteProxyConfig = null;
-    
-    String  requestPath = null;
-    private boolean allowContentEncoding = true;
-	public static boolean yacyDebugMode = false;
-
-    static final HashMap reverseMappingCache = new HashMap();
-    
-    /**
-     * Indicates if the current object was removed from pool because the maximum limit
-     * was exceeded.
-     */
-    boolean removedFromPool = false;
-
-    static SSLSocketFactory theSSLSockFactory = null;
+    // statics to be defined in static section below
+    private static SSLSocketFactory theSSLSockFactory = null;
+    public static String systemOST;
+    public static String userAgent;
     
     static {
+        // set the time zone
+        HTTPGMTFormatter.setTimeZone(GMTTimeZone); // The GMT standard date format used in the HTTP protocol
+        
         // set time-out of InetAddress.getByName cache ttl
         java.security.Security.setProperty("networkaddress.cache.ttl" , "60");
         java.security.Security.setProperty("networkaddress.cache.negative.ttl" , "0");
 
-        
-        // Configuring the httpc object pool
-        
-        // implementation of session thread pool
-        GenericObjectPool.Config config = new GenericObjectPool.Config();
-
-        // The maximum number of active connections that can be allocated from pool at the same time,
-        // 0 for no limit
-        config.maxActive = 150;
-
-        // The maximum number of idle connections connections in the pool
-        // 0 = no limit.
-        config.maxIdle = 75;
-        config.minIdle = 10;
-
-        config.whenExhaustedAction = GenericObjectPool.WHEN_EXHAUSTED_BLOCK;
-        config.minEvictableIdleTimeMillis = 30000;
-
-        theHttpcPool = new httpcPool(new httpcFactory(),config);
-        
-        
         // initializing a dummy trustManager to enable https connections
         
         // Create a trust manager that does not validate certificate chains
@@ -218,8 +159,7 @@ public final class httpc {
             HttpsURLConnection.setDefaultHostnameVerifier(hv);
         } catch (Exception e) {
         }        
- 
-        
+
         // provide system information for client identification
         String loc = System.getProperty("user.timezone", "nowhere");
         int p = loc.indexOf("/");
@@ -233,13 +173,27 @@ public final class httpc {
         userAgent = "yacy (www.yacy.net; v" + vDATE + "; " + systemOST + ")";
     }
     
-    /**
-     * A reusable readline buffer
-     * @see serverByteBuffer
-     */
-    final serverByteBuffer readLineBuffer = new serverByteBuffer(100);
+    
+    // class variables
+    private Socket socket = null; // client socket for commands
+    private Thread socketOwner = null;
+    private String adressed_host = null;
+    private int    adressed_port = 80;
+    private String target_virtual_host = null;
+    
+    // output and input streams for client control connection
+    private PushbackInputStream clientInput = null;
+    private OutputStream clientOutput = null;
+    
+    private httpdByteCountInputStream clientInputByteCount = null;
+    private httpdByteCountOutputStream clientOutputByteCount = null;
 
-    private static final HashMap openSocketLookupTable = new HashMap();
+    private boolean remoteProxyUse = false;
+    private httpRemoteProxyConfig remoteProxyConfig = null;
+    
+    private String  requestPath = null;
+    private boolean allowContentEncoding = true;
+	
 
     /**
     * Convert the status of this class into an String object to output it.
@@ -247,83 +201,6 @@ public final class httpc {
     public String toString() {
         return (this.adressed_host == null) ? "Disconnected" : "Connected to " + this.adressed_host +
                 ((this.remoteProxyUse) ? " via " + adressed_host : "");
-    }
-
-    /**
-    * This method gets a new httpc instance from the object pool and
-    * initializes it with the given parameters. Use this method if you have to
-    * use a proxy to access the pages.
-    *
-    * @param server
-    * @param port
-    * @param timeout
-    * @param ssl
-    * @param remoteProxyHost
-    * @param remoteProxyPort
-    * @throws IOException
-    * @see httpc#init
-    */
-    public static httpc getInstance(
-            String server,
-            String vhost,
-            int port,
-            int timeout,
-            boolean ssl,
-            httpRemoteProxyConfig remoteProxyConfig,
-            String incomingByteCountAccounting,
-            String outgoingByteCountAccounting
-            ) throws IOException {
-
-        httpc newHttpc;
-        try {
-            // fetching a new httpc from the object pool
-            newHttpc = (httpc) httpc.theHttpcPool.borrowObject();
-        } catch (Exception e) {
-            throw new IOException("Unable to initialize a new httpc. " + e.getMessage());
-        }
-
-        // initialize it
-        try {
-            newHttpc.init(
-                    server,
-                    vhost,
-                    port,
-                    timeout,
-                    ssl,
-                    remoteProxyConfig,
-                    incomingByteCountAccounting,
-                    outgoingByteCountAccounting
-            );
-        } catch (IOException e) {
-            try{ httpc.theHttpcPool.returnObject(newHttpc); } catch (Exception e1) {}
-            throw e;
-        }
-        return newHttpc;
-    }
-    
-    public static httpc getInstance(
-            String server,
-            String vhost,
-            int port,
-            int timeout,
-            boolean ssl,
-            httpRemoteProxyConfig remoteProxyConfig
-            ) throws IOException {
-    	return getInstance(server,vhost,port,timeout,ssl,remoteProxyConfig,null,null);
-    }
-
-    /**
-    * Put back a used instance into the instance pool of httpc.
-    *
-    * @param theHttpc The instance of httpc which should be returned to the pool
-    */
-    public static void returnInstance(httpc theHttpc) {
-        try {
-            theHttpc.reset();
-            httpc.theHttpcPool.returnObject(theHttpc);
-        } catch (Exception e) {
-            // we could ignore this error
-        }
     }
 
     /**
@@ -377,15 +254,13 @@ public final class httpc {
     }
 
     /**
-    * Initialize the httpc-instance with the given data. This method is used,
-    * if you have to use a proxy to access the pages. This just calls init
-    * without proxy information and adds the proxy information.
+    * Initialize the httpc-instance with the given data.
     *
     * @param remoteProxyHost
     * @param remoteProxyPort
     * @throws IOException
     */
-    private void init(
+    public httpc(
             String server, 
             String vhost,
             int port, 
@@ -506,9 +381,6 @@ public final class httpc {
                                 this.socket.getInputStream()); 
             this.clientOutput = this.socket.getOutputStream();
             
-
-                                  
-
             // if we reached this point, we should have a connection
         } catch (UnknownHostException e) {
             if (this.socket != null) {
@@ -528,69 +400,7 @@ public final class httpc {
         return (this.clientOutputByteCount == null)?0:this.clientOutputByteCount.getCount();
     }
 
-    /**
-    * This method resets an httpc-instance, so that it can be used for the next
-    * connection. This is called before the instance is put back to the pool.
-    * All streams and sockets are closed and set to null.
-    */
-    void reset() {
-        if (this.clientInput != null) {
-            try {this.clientInput.close();} catch (Exception e) {}
-            this.clientInput = null;
-        }
-        if (this.clientOutput != null) {
-            try {this.clientOutput.close();} catch (Exception e) {}
-            this.clientOutput = null;
-        }
-        if (this.socket != null) {
-            try {this.socket.close();} catch (Exception e) {}
-            httpc.unregisterOpenSocket(this.socket,this.socketOwner);
-            this.socket = null;
-            this.socketOwner = null;
-        }
-        
-        if (this.clientInputByteCount != null) {
-            this.clientInputByteCount.finish();
-            this.clientInputByteCount = null;
-        }
-        if (this.clientOutputByteCount != null) {
-            this.clientOutputByteCount.finish();
-            this.clientOutputByteCount = null;
-        }
-
-        this.adressed_host = null;
-        this.target_virtual_host = null;
-        //this.timeout = 0;
-
-        this.remoteProxyUse = false;
-        this.remoteProxyConfig = null;
-        this.requestPath = null;
-
-        this.allowContentEncoding = true;
-
-        // shrink readlinebuffer if it is to large
-        this.readLineBuffer.reset(80);
-    }
-
-    /**
-    * Just calls reset to close all connections.
-    */
     public void close() {
-        reset();
-    }
-
-    /**
-    * If this instance is garbage-collected we check if the object was returned
-    * to the pool. if not, we invalidate the object from the pool.
-    *
-    * @see httpcPool#invalidateObject
-    */
-    protected void finalize() throws Throwable {
-        if (!(this.removedFromPool)) {
-            System.err.println("Httpc object was not returned to object pool.");
-            httpc.theHttpcPool.invalidateObject(this);
-        }
-        this.reset();
     }
 
     /**
@@ -939,29 +749,22 @@ public final class httpc {
         }
 
         httpc con = null;
-        try {
-            con = httpc.getInstance(realhost, virtualhost, port, timeout, ssl, theRemoteProxyConfig);
+        con = new httpc(realhost, virtualhost, port, timeout, ssl, theRemoteProxyConfig, null, null);
 
-            httpc.response res = con.GET(path, requestHeader);
-            if (res.status.startsWith("2")) {
-            	if (download == null) {
-            		// stream to byte[]
-            		serverByteBuffer sbb = new serverByteBuffer();
-            		res.writeContent(sbb, null);
-            		return sbb.getBytes();
-            	} else {
-            		// stream to file and return null
-            		res.writeContent(null, download);
-            		return null;
-            	}
+        httpc.response res = con.GET(path, requestHeader);
+        if (res.status.startsWith("2")) {
+            if (download == null) {
+                // stream to byte[]
+                serverByteBuffer sbb = new serverByteBuffer();
+                res.writeContent(sbb, null);
+                return sbb.getBytes();
+            } else {
+                // stream to file and return null
+                res.writeContent(null, download);
+                return null;
             }
-            return res.status.getBytes();
-        } catch (Exception e) {
-            throw new IOException(e.getMessage());
-        } finally {
-            if (con != null) httpc.returnInstance(con);
         }
-
+        return res.status.getBytes();
     }
 
     public static byte[] singleGET(
@@ -1002,24 +805,16 @@ public final class httpc {
             requestHeader.put(httpHeader.AUTHORIZATION, kelondroBase64Order.standardCoder.encodeString(user + ":" + password));
         }
 
-        httpc con = null;
-        try {
-            con = httpc.getInstance(realhost, virtualhost, port, timeout, ssl, theRemoteProxyConfig);
-            httpc.response res = con.POST(path, requestHeader, props, files);
+        httpc con = new httpc(realhost, virtualhost, port, timeout, ssl, theRemoteProxyConfig, null, null);
+        httpc.response res = con.POST(path, requestHeader, props, files);
 
-            //System.out.println("response=" + res.toString());
-            if (res.status.startsWith("2")) {
-            	serverByteBuffer sbb = new serverByteBuffer();
-            	res.writeContent(sbb, null);
-                return sbb.getBytes();
-            }
-            return res.status.getBytes();
-        } catch (Exception e) {
-            throw new IOException(e.getMessage());
-        } finally {
-            if (con != null) httpc.returnInstance(con);
-        }
-
+        //System.out.println("response=" + res.toString());
+        if (!(res.status.startsWith("2"))) return res.status.getBytes();
+            
+        // read connection body and return body
+        serverByteBuffer sbb = new serverByteBuffer();
+        res.writeContent(sbb, null);
+        return sbb.getBytes();
     }
 
     public static byte[] singlePOST(
@@ -1161,20 +956,14 @@ public final class httpc {
 
         // start connection
         httpc con = null;
-        try {
-            con = httpc.getInstance(realhost, vhost, port, timeout, ssl, theRemoteProxyConfig);
-            httpc.response res = con.HEAD(path, requestHeader);
-            if (res.status.startsWith("2")) {
-                // success
-                return res.responseHeader;
-            }
-            // fail
+        con = new httpc(realhost, vhost, port, timeout, ssl, theRemoteProxyConfig, null, null);
+        httpc.response res = con.HEAD(path, requestHeader);
+        if (res.status.startsWith("2")) {
+            // success
             return res.responseHeader;
-        } catch (Exception e) {
-            throw new IOException(e.getMessage());
-        } finally {
-            if (con != null) httpc.returnInstance(con);
         }
+        // fail
+        return res.responseHeader;
     }
 
     public static byte[] wput(
@@ -1456,7 +1245,7 @@ public final class httpc {
             }
 
             // reads in the http header, right now, right here
-            byte[] b = serverCore.receive(httpc.this.clientInput, httpc.this.readLineBuffer, terminalMaxLength, false);
+            byte[] b = serverCore.receive(httpc.this.clientInput, terminalMaxLength, false);
             if (b == null) {
                 // the server has meanwhile disconnected
                 this.statusCode = 503;
@@ -1475,7 +1264,7 @@ public final class httpc {
             
             if ((this.statusCode==500)&&(this.statusText.equals("status line parse error"))) {
                 // flush in anything that comes without parsing
-                while ((b != null) && (b.length != 0)) b = serverCore.receive(httpc.this.clientInput, httpc.this.readLineBuffer, terminalMaxLength, false);
+                while ((b != null) && (b.length != 0)) b = serverCore.receive(httpc.this.clientInput, terminalMaxLength, false);
                 return; // in bad mood                
             }
                         
@@ -1483,13 +1272,13 @@ public final class httpc {
             if (this.statusCode == 400) {
                 // bad request
                 // flush in anything that comes without parsing
-                while ((b = serverCore.receive(httpc.this.clientInput, httpc.this.readLineBuffer, terminalMaxLength, false)).length != 0) {}
+                while ((b = serverCore.receive(httpc.this.clientInput, terminalMaxLength, false)).length != 0) {}
                 return; // in bad mood
             }
 
             // at this point we should have a valid response. read in the header properties
             String key = "";
-            while ((b = serverCore.receive(httpc.this.clientInput, httpc.this.readLineBuffer, terminalMaxLength, false)) != null) {
+            while ((b = serverCore.receive(httpc.this.clientInput, terminalMaxLength, false)) != null) {
                 if (b.length == 0) break;
                 buffer = new String(b);
                 buffer=buffer.trim();
@@ -1786,86 +1575,3 @@ public class SSLSocketClientWithClientAuth {
     }
 }
  */
-
-final class httpcFactory implements org.apache.commons.pool.PoolableObjectFactory {
-
-    public httpcFactory() {
-        super();
-    }
-
-    /**
-     * @see org.apache.commons.pool.PoolableObjectFactory#makeObject()
-     */
-    public Object makeObject() throws Exception {
-        return new httpc();
-    }
-
-    /**
-     * @see org.apache.commons.pool.PoolableObjectFactory#destroyObject(java.lang.Object)
-     */
-    public void destroyObject(Object obj) {
-        assert(obj instanceof httpc): "Invalid object type added to pool.";
-        if (obj instanceof httpc) {
-            httpc theHttpc = (httpc) obj;
-
-            theHttpc.removedFromPool = true;
-        }
-    }
-
-    /**
-     * @see org.apache.commons.pool.PoolableObjectFactory#validateObject(java.lang.Object)
-     */
-    public boolean validateObject(Object obj) {
-        assert(obj instanceof httpc): "Invalid object type in pool.";
-        return true;
-    }
-
-    /**
-     * @param obj
-     *
-     */
-    public void activateObject(Object obj)  {
-        //log.debug(" activateObject...");
-    }
-
-    /**
-     * @param obj
-     *
-     */
-    public void passivateObject(Object obj) {
-        assert(obj instanceof httpc): "Invalid object type returned to pool.";
-    }
-}
-
-final class httpcPool extends GenericObjectPool {
-    /**
-     * First constructor.
-     * @param objFactory
-     */
-    public httpcPool(httpcFactory objFactory) {
-        super(objFactory);
-        this.setMaxIdle(75); // Maximum idle threads.
-        this.setMaxActive(150); // Maximum active threads.
-        this.setMinEvictableIdleTimeMillis(30000); //Evictor runs every 30 secs.
-        //this.setMaxWait(1000); // Wait 1 second till a thread is available
-    }
-
-    public httpcPool(httpcFactory objFactory,
-            GenericObjectPool.Config config) {
-        super(objFactory, config);
-    }
-
-    /**
-     * @see org.apache.commons.pool.impl.GenericObjectPool#borrowObject()
-     */
-    public Object borrowObject() throws Exception  {
-        return super.borrowObject();
-    }
-
-    /**
-     * @see org.apache.commons.pool.impl.GenericObjectPool#returnObject(java.lang.Object)
-     */
-    public void returnObject(Object obj) throws Exception  {
-        super.returnObject(obj);
-    }
-}

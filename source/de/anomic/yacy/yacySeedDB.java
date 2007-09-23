@@ -769,13 +769,14 @@ public final class yacySeedDB {
     	httpc remote = null;
         try {
             // init httpc
-        	remote = httpc.getInstance(
+        	remote = new httpc(
                 		seedURL.getHost(),
                 		seedURL.getHost(),
                 		seedURL.getPort(),
                 		10000,
                 		seedURL.getProtocol().equalsIgnoreCase("https"),
-                		sb.remoteProxyConfig);
+                		sb.remoteProxyConfig,
+                        null, null);
             
             // Configure http headers
             httpHeader reqHeader = new httpHeader();
@@ -801,9 +802,7 @@ public final class yacySeedDB {
             return nxTools.strings(content,"UTF-8");
         } catch (Exception e) {
         	throw new IOException("Unable to download seed file '" + seedURL + "'. " + e.getMessage());
-        } finally {
-        	if (remote != null) try { httpc.returnInstance(remote); } catch (Exception e) {}
-        } 	
+        }
     }
 
     private String checkCache(ArrayList uv, ArrayList check) {                

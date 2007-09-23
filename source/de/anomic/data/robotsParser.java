@@ -386,7 +386,7 @@ public final class robotsParser{
             downloadStart = System.currentTimeMillis();
             plasmaSwitchboard sb = plasmaSwitchboard.getSwitchboard();
             //TODO: adding Traffic statistic for robots download?
-            con = httpc.getInstance(robotsURL.getHost(), robotsURL.getHost(), robotsURL.getPort(), 10000, robotsURL.getProtocol().equalsIgnoreCase("https"), sb.remoteProxyConfig);
+            con = new httpc(robotsURL.getHost(), robotsURL.getHost(), robotsURL.getPort(), 10000, robotsURL.getProtocol().equalsIgnoreCase("https"), sb.remoteProxyConfig, null, null);
             
             // if we previously have downloaded this robots.txt then we can set the if-modified-since header
             httpHeader reqHeaders = new httpHeader();
@@ -447,11 +447,7 @@ public final class robotsParser{
                 redirectionUrlString = redirectionUrlString.trim();
                 
                 // generating the new URL object
-                yacyURL redirectionUrl = yacyURL.newURL(robotsURL, redirectionUrlString);
-                
-                // returning the used httpc
-                httpc.returnInstance(con); 
-                con = null;            
+                yacyURL redirectionUrl = yacyURL.newURL(robotsURL, redirectionUrlString);      
                 
                 // following the redirection
                 serverLog.logFinest("ROBOTS","Redirection detected for robots.txt with URL '" + robotsURL + "'." + 
@@ -467,9 +463,7 @@ public final class robotsParser{
             }        
         } catch (Exception e) {
             throw e;
-        } finally {
-            if (con != null) httpc.returnInstance(con);            
-        }            
+        }
         return new Object[]{new Boolean(accessCompletelyRestricted),robotsTxt,eTag,lastMod};
     }
 }

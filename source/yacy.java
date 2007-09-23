@@ -509,7 +509,7 @@ public final class yacy {
         httpHeader requestHeader = new httpHeader();
         requestHeader.put("Authorization", "realm=" + encodedPassword); // for http-authentify
         try {
-            httpc con = httpc.getInstance("localhost", "localhost", port, 10000, false, null);
+            httpc con = new httpc("localhost", "localhost", port, 10000, false, null, null, null);
             httpc.response res = con.GET("Steering.html?shutdown=", requestHeader);
 
             // read response

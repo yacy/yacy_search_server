@@ -719,9 +719,7 @@ public final class httpdProxyHandler {
             // deleting cached content
             if (cacheFile.exists()) cacheFile.delete();                            
             handleProxyException(e,remote,conProp,respond,url);
-        } finally {
-            if (remote != null) httpc.returnInstance(remote);
-        } 
+        }
     }
 
 
@@ -958,8 +956,6 @@ public final class httpdProxyHandler {
             httpd.sendRespondHeader(conProp,respond,httpVer,res.statusCode,res.statusText,res.responseHeader);
         } catch (Exception e) {
             handleProxyException(e,remote,conProp,respond,url); 
-        } finally {
-            if (remote != null) httpc.returnInstance(remote);
         }
         
         respond.flush();
@@ -1085,8 +1081,6 @@ public final class httpdProxyHandler {
         } catch (Exception e) {
             handleProxyException(e,remote,conProp,respond,url);                 
         } finally {
-            if (remote != null) httpc.returnInstance(remote);
-            
             respond.flush();
             if (respond instanceof httpdByteCountOutputStream) ((httpdByteCountOutputStream)respond).finish();           
             
@@ -1134,13 +1128,14 @@ public final class httpdProxyHandler {
         ) {
             httpc remoteProxy = null;
             try {
-                remoteProxy = httpc.getInstance(
+                remoteProxy = new httpc(
                         host,
                         host,
                         port,
                         timeout,
                         false,
-                        switchboard.remoteProxyConfig
+                        switchboard.remoteProxyConfig,
+                        null, null
                 );
 
                 httpc.response response = remoteProxy.CONNECT(host, port, requestHeader);
@@ -1159,8 +1154,6 @@ public final class httpdProxyHandler {
                 }
             } catch (Exception e) {
                 throw new IOException(e.getMessage());
-            } finally {
-                if (remoteProxy != null) httpc.returnInstance(remoteProxy);
             }
         }
 
@@ -1271,13 +1264,14 @@ public final class httpdProxyHandler {
         }
         
         // branch to server/proxy
-        return httpc.getInstance(
+        return new httpc(
                     server, 
                     server,
                     port, 
                     timeout, 
                     false, 
-                    remProxyConfig
+                    remProxyConfig,
+                    null, null
             );
     }
     

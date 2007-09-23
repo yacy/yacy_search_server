@@ -117,7 +117,6 @@ public final class serverCore extends serverAbstractThread implements serverThre
     private ServerSocket socket;           // listener
     serverLog log;                         // log object
     private int timeout;                   // connection time-out of the socket
-    
     private int thresholdSleep = 30000;    // after that time a thread is considered as beeing sleeping (30 seconds)
     serverHandler handlerPrototype;        // the command class (a serverHandler) 
 
@@ -762,9 +761,6 @@ public final class serverCore extends serverAbstractThread implements serverThre
     	public  OutputStream out;          // on control output stream, autoflush
         public  int socketTimeout;
 
-        private final serverByteBuffer readLineBuffer = new serverByteBuffer(256);
-        
-    	
     	public Session(ThreadGroup theThreadGroup) {
             super(theThreadGroup,"Session_created");
     	}
@@ -864,7 +860,7 @@ public final class serverCore extends serverAbstractThread implements serverThre
     	}
     
     	public byte[] readLine() {
-    	    return receive(this.in, this.readLineBuffer, serverCore.this.commandMaxLength, false);
+    	    return receive(this.in, serverCore.this.commandMaxLength, false);
     	}
     
         /**
@@ -890,7 +886,6 @@ public final class serverCore extends serverAbstractThread implements serverThre
         public void reset()  {
             this.done = true;
             this.syncObject = null;
-            this.readLineBuffer.reset();
             if (this.commandObj !=null) this.commandObj.reset();
             this.userAddress = null;
             this.userPort = 0;
@@ -1174,10 +1169,10 @@ public final class serverCore extends serverAbstractThread implements serverThre
         
     }
 
-    public static byte[] receive(PushbackInputStream pbis, serverByteBuffer readLineBuffer, int maxSize, boolean logerr) {
+    public static byte[] receive(PushbackInputStream pbis, int maxSize, boolean logerr) {
 
         // reuse an existing linebuffer
-        readLineBuffer.reset();
+        serverByteBuffer readLineBuffer = new serverByteBuffer(80);
         
         int bufferSize = 0, b = 0;    	
     	try {

@@ -113,14 +113,18 @@ public final class serverFileUtils {
     
     public static void writeX(InputStream source, OutputStream procOS, OutputStream bufferOS) {
         byte[] buffer = new byte[2048];
-        int l;
-
+        int l, c = 0;
+        
         while (true) try {
             l = source.read(buffer, 0, buffer.length);
             if (l <= 0) break;
+            c += l;
             if (procOS != null) procOS.write(buffer, 0, l);
             if (bufferOS != null) bufferOS.write(buffer, 0, l);
-        } catch (IOException e) {break;}
+        } catch (IOException e) {
+            System.out.println("** DEBUG: writeX/IOStream terminated with IOException, processed " + c + " bytes.");
+            break;
+        }
         
         // flush the streams
         if (procOS != null) try { procOS.flush(); } catch (IOException e) {}
@@ -130,14 +134,18 @@ public final class serverFileUtils {
     
     public static void writeX(Reader source, Writer procOS, Writer bufferOS) {
         char[] buffer = new char[2048];
-        int l;
+        int l, c= 0;
 
         while (true) try{
             l = source.read(buffer, 0, buffer.length);
             if (l <= 0) break;
+            c += l;
             if (procOS != null) procOS.write(buffer, 0, l);
             if (bufferOS != null) bufferOS.write(buffer, 0, l);
-        } catch (IOException e) {break;}
+        } catch (IOException e) {
+            System.out.println("** DEBUG: writeX/ReaderWriter terminated with IOException, processed " + c + " bytes.");
+            break;
+        }
         
         // flush the streams
         if (procOS != null) try { procOS.flush(); } catch (IOException e) {}

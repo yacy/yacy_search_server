@@ -914,13 +914,14 @@ public final class plasmaParser {
                 contentURL = new yacyURL(args[1], null);
                 
                 // downloading the document content
-                remote = httpc.getInstance(
+                remote = new httpc(
                 		contentURL.getHost(),
                 		contentURL.getHost(),
                 		contentURL.getPort(),
                 		5000,
                 		contentURL.getProtocol().equalsIgnoreCase("https"),
-                        null);
+                        null,
+                        null, null);
                 
                 httpc.response res = remote.GET(contentURL.getFile(), null);
                 if (res.statusCode != 200) {
@@ -987,8 +988,6 @@ public final class plasmaParser {
             }
         } catch (Exception e) {
             e.printStackTrace();
-        } finally {
-        	if (remote != null) try { httpc.returnInstance(remote); } catch (Exception e) {}
         }
     }
     

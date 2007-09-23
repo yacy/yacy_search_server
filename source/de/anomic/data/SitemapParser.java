@@ -174,13 +174,13 @@ public class SitemapParser extends DefaultHandler {
 		// download document
 		httpc remote = null;
 		try {
-			remote = httpc.getInstance(
+			remote = new httpc(
 					this.siteMapURL.getHost(),
 					this.siteMapURL.getHost(),
 					this.siteMapURL.getPort(),
 					5000,
 					this.siteMapURL.getProtocol().equalsIgnoreCase("https"),
-                    switchboard.remoteProxyConfig);
+                    switchboard.remoteProxyConfig, null, null);
 			
 			httpc.response res = remote.GET(this.siteMapURL.getFile(), null);
 			if (res.statusCode != 200) {
@@ -211,8 +211,6 @@ public class SitemapParser extends DefaultHandler {
 			saxParser.parse(this.counterStream, this);
 		} catch (Exception e) {
 			this.logger.logWarning("Unable to parse sitemap file " + this.siteMapURL,e);
-		} finally {
-			if (remote != null) try { httpc.returnInstance(remote); } catch (Exception e) {/* ignore this */}
 		}
 	}
 	
