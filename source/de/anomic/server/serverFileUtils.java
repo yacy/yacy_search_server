@@ -111,40 +111,46 @@ public final class serverFileUtils {
         return total;
     }
     
-    public static void writeX(InputStream source, OutputStream procOS, OutputStream bufferOS) throws IOException {
+    public static void writeX(InputStream source, OutputStream procOS, OutputStream bufferOS) {
         byte[] buffer = new byte[2048];
         int l;
 
-        while ((l = source.read(buffer, 0, buffer.length)) >= 0) {
+        while (true) try {
+            l = source.read(buffer, 0, buffer.length);
+            if (l <= 0) break;
             if (procOS != null) procOS.write(buffer, 0, l);
             if (bufferOS != null) bufferOS.write(buffer, 0, l);
-        }
+        } catch (IOException e) {break;}
         
         // flush the streams
-        if (procOS != null) procOS.flush();
-        if (bufferOS != null) bufferOS.flush();
+        if (procOS != null) try { procOS.flush(); } catch (IOException e) {}
+        if (bufferOS != null) try { bufferOS.flush(); } catch (IOException e) {}
         buffer = null;
     }
     
-    public static void writeX(Reader source, Writer procOS, Writer bufferOS) throws IOException {
+    public static void writeX(Reader source, Writer procOS, Writer bufferOS) {
         char[] buffer = new char[2048];
         int l;
 
-        while ((l = source.read(buffer, 0, buffer.length)) >= 0) {
+        while (true) try{
+            l = source.read(buffer, 0, buffer.length);
+            if (l <= 0) break;
             if (procOS != null) procOS.write(buffer, 0, l);
             if (bufferOS != null) bufferOS.write(buffer, 0, l);
-        }
+        } catch (IOException e) {break;}
         
         // flush the streams
-        if (procOS != null) procOS.flush();
-        if (bufferOS != null) bufferOS.flush();
+        if (procOS != null) try { procOS.flush(); } catch (IOException e) {}
+        if (bufferOS != null) try { bufferOS.flush(); } catch (IOException e) {}
         buffer = null;
     }      
     
-    public static void writeX(InputStream source, String inputCharset, Writer procOS, OutputStream bufferOS, String outputCharset) throws IOException {
-        InputStreamReader sourceReader = new InputStreamReader(source,inputCharset);
-        OutputStreamWriter bufferOSWriter = (bufferOS==null)?null:new OutputStreamWriter(bufferOS,outputCharset);
-        writeX(sourceReader,procOS,bufferOSWriter);
+    public static void writeX(InputStream source, String inputCharset, Writer procOS, OutputStream bufferOS, String outputCharset) {
+        try {
+            InputStreamReader sourceReader = new InputStreamReader(source, inputCharset);
+            OutputStreamWriter bufferOSWriter = (bufferOS == null) ? null : new OutputStreamWriter(bufferOS,outputCharset);
+            writeX(sourceReader, procOS, bufferOSWriter);
+        } catch (IOException e) {}
     }    
 
     

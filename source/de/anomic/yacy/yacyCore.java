@@ -298,7 +298,6 @@ public class yacyCore {
     protected class publishThread extends Thread {
         private int added;
         private yacySeed seed;
-        private Exception error;
         private final serverSemaphore sync;
         private final List syncList;
 
@@ -312,7 +311,6 @@ public class yacyCore {
 
             this.seed = seed;
             this.added = 0;
-            this.error = null;
         }
 
         public final void run() {
@@ -333,7 +331,6 @@ public class yacyCore {
                 }
             } catch (Exception e) {
                 log.logSevere("publishThread: error with target seed " + seed.toString() + ": " + e.getMessage(), e);
-                this.error = e;
             } finally {
                 this.syncList.add(this);
                 this.sync.V();

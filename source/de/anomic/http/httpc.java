@@ -41,6 +41,7 @@
 package de.anomic.http;
 
 import java.io.File;
+import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
@@ -1638,35 +1639,43 @@ public final class httpc {
         /**
         * This method writes the input stream to either another output stream
         * or a file or both.
+        * In case that an exception occurrs, the stream reading is just teminated
+        * and content received so far is returned
         *
         * @param procOS
         * @param file
-        * @throws IOException
         */
-        public void writeContent(Object procOS, File file) throws IOException {
+        public void writeContent(Object procOS, File file) {
             // this writes the input stream to either another output stream or
             // a file or both.
             FileOutputStream bufferOS = null;
+            if (file != null) try {
+                bufferOS = new FileOutputStream(file);
+            } catch (FileNotFoundException e) {
+                file = null;
+            }
             try {
-                if (file != null) bufferOS = new FileOutputStream(file);
+                InputStream is = this.getContentInputStream();
                 if (procOS == null) {
-                	serverFileUtils.writeX(this.getContentInputStream(), null, bufferOS);
+                    serverFileUtils.writeX(is, null, bufferOS);
                 } else if (procOS instanceof OutputStream) {
-                    serverFileUtils.writeX(this.getContentInputStream(), (OutputStream) procOS, bufferOS);
+                    serverFileUtils.writeX(is, (OutputStream) procOS, bufferOS);
                     //writeContentX(httpc.this.clientInput, this.gzip, this.responseHeader.contentLength(), procOS, bufferOS);
                 } else if (procOS instanceof Writer) {
                     String charSet = this.responseHeader.getCharacterEncoding();
                     if (charSet == null) charSet = httpHeader.DEFAULT_CHARSET;
-                    serverFileUtils.writeX(this.getContentInputStream(), charSet, (Writer)procOS, bufferOS, charSet);                
+                    serverFileUtils.writeX(is, charSet, (Writer) procOS, bufferOS, charSet);                
                 } else {
                     throw new IllegalArgumentException("Invalid procOS object type '" + procOS.getClass().getName() + "'");
                 }
-            } finally {
-                if (bufferOS != null) {
-                	bufferOS.flush();
+            } catch (IOException e) {}
+            
+            if (bufferOS != null) {
+                try {
+                    bufferOS.flush();
                     bufferOS.close();
-                    if (file.length() == 0) file.delete();
-                }
+                } catch (IOException e) {}
+                if (file.length() == 0) file.delete();
             }
         }
         
