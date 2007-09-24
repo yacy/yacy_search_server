@@ -365,7 +365,7 @@ public final class httpc {
             // setting socket timeout and keep alive behaviour
             this.socket.setSoTimeout(timeout); // waiting time for read
             //socket.setSoLinger(true, timeout);
-            this.socket.setKeepAlive(true); //
+            this.socket.setKeepAlive(false); //
 
             if (incomingByteCountAccounting != null) {
                 this.clientInputByteCount = new httpdByteCountInputStream(this.socket.getInputStream(),incomingByteCountAccounting);
@@ -373,7 +373,6 @@ public final class httpc {
             if (outgoingByteCountAccounting != null) {
                 this.clientOutputByteCount = new httpdByteCountOutputStream(this.socket.getOutputStream(),outgoingByteCountAccounting);
             }
-            
             
             // getting input and output streams
             this.clientInput  = new PushbackInputStream((this.clientInputByteCount!=null)?
@@ -400,19 +399,58 @@ public final class httpc {
         return (this.clientOutputByteCount == null)?0:this.clientOutputByteCount.getCount();
     }
 
+    public void finalize() {
+        this.close();
+    }
+    
     public void close() {
+        if (this.clientInput != null) {
+            try {this.clientInput.close();} catch (Exception e) {}
+            this.clientInput = null;
+        }
+        
+        if (this.clientOutput != null) {
+            try {this.clientOutput.close();} catch (Exception e) {}
+            this.clientOutput = null;
+        }
+        
+        if (this.socket != null) {
+            try {this.socket.close();} catch (Exception e) {}
+            httpc.unregisterOpenSocket(this.socket, this.socketOwner);
+            this.socket = null;
+        }
+        this.socketOwner = null;
+        
+        if (this.clientInputByteCount != null) {
+            this.clientInputByteCount.finish();
+            this.clientInputByteCount = null;
+        }
+        
+        if (this.clientOutputByteCount != null) {
+            this.clientOutputByteCount.finish();
+            this.clientOutputByteCount = null;
+        }
+
+        this.adressed_host = null;
+        this.target_virtual_host = null;
+
+        this.remoteProxyConfig = null;
+        this.requestPath = null;
     }
 
     /**
-    * This method invokes a call to the given server.
-    *
-    * @param method Which method should be called? GET, POST, HEAD or CONNECT
-    * @param path String with the path on the server to be get.
-    * @param header The prefilled header (if available) from the calling
-    * browser.
-    * @param zipped Is encoded content (gzip) allowed or not?
-    * @throws IOException
-    */
+     * This method invokes a call to the given server.
+     * 
+     * @param method
+     *            Which method should be called? GET, POST, HEAD or CONNECT
+     * @param path
+     *            String with the path on the server to be get.
+     * @param header
+     *            The prefilled header (if available) from the calling browser.
+     * @param zipped
+     *            Is encoded content (gzip) allowed or not?
+     * @throws IOException
+     */
     private void send(String method, String path, httpHeader header, boolean zipped) throws IOException {
         // scheduled request through request-response objects/threads
 
