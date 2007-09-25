@@ -57,7 +57,6 @@ import java.util.LinkedList;
 import org.apache.commons.pool.impl.GenericObjectPool;
 
 import de.anomic.data.robotsParser;
-import de.anomic.http.httpc;
 import de.anomic.index.indexURLEntry;
 import de.anomic.kelondro.kelondroCache;
 import de.anomic.kelondro.kelondroException;
@@ -783,11 +782,7 @@ public final class plasmaCrawlStacker {
             public void close() {
                 if (this.isAlive()) {
                     try {
-                        // trying to close all still open httpc-Sockets first                    
-                        int closedSockets = httpc.closeOpenSockets(this);
-                        if (closedSockets > 0) {
-                            log.logInfo(closedSockets + " HTTP-client sockets of thread '" + this.getName() + "' closed.");
-                        }                    
+                        // TODO: this object should care of all open clien connections within this class and close them here             
                     } catch (Exception e) {}
                 }            
             }

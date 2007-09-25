@@ -439,7 +439,7 @@ public final class CrawlWorker extends AbstractCrawlWorker {
                 this.log.logSevere("CRAWLER No trusted certificate found for URL '" + this.url.toString() + "'. ");  
                 failreason = plasmaCrawlEURL.DENIED_SSL_UNTRUSTED_CERT;
             } else {
-                this.log.logSevere("CRAWLER Unexpected Error with URL '" + this.url.toString() + "': " + e.toString(),e);
+                this.log.logSevere("CRAWLER Unexpected Error with URL '" + this.url.toString() + "': " + e.toString(), e);
                 failreason = plasmaCrawlEURL.DENIED_CONNECTION_ERROR;
             }
 
@@ -467,11 +467,7 @@ public final class CrawlWorker extends AbstractCrawlWorker {
     public void close() {
         if (this.isAlive()) {
             try {
-                // trying to close all still open httpc-Sockets first                    
-                int closedSockets = httpc.closeOpenSockets(this);
-                if (closedSockets > 0) {
-                    this.log.logInfo(closedSockets + " HTTP-client sockets of thread '" + this.getName() + "' closed.");
-                }
+                // TODO: this object should care of all open clien connections within this class and close them here
             } catch (Exception e) {/* ignore this. shutdown in progress */}
         }
     }    

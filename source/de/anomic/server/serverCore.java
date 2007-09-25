@@ -76,7 +76,6 @@ import javax.net.ssl.SSLSocketFactory;
 import org.apache.commons.pool.impl.GenericObjectPool;
 import org.apache.commons.pool.impl.GenericObjectPool.Config;
 
-import de.anomic.http.httpc;
 import de.anomic.icap.icapd;
 import de.anomic.server.logging.serverLog;
 import de.anomic.server.portForwarding.serverPortForwarding;
@@ -796,12 +795,6 @@ public final class serverCore extends serverAbstractThread implements serverThre
         public void close() {
             if (this.isAlive()) {
                 try {
-                    // trying to close all still open httpc-Sockets first                    
-                    int closedSockets = httpc.closeOpenSockets(this);
-                    if (closedSockets > 0) {
-                        serverCore.this.log.logInfo(closedSockets + " HTTP-client sockets of thread '" + this.getName() + "' closed.");
-                    }                    
-                    
                     // closing the socket to the client
                     if ((this.controlSocket != null)&&(this.controlSocket.isConnected())) {
                         this.controlSocket.close();

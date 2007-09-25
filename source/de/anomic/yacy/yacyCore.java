@@ -69,7 +69,6 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 
-import de.anomic.http.httpc;
 import de.anomic.plasma.plasmaSwitchboard;
 import de.anomic.server.serverCore;
 import de.anomic.server.serverSemaphore;
@@ -609,8 +608,7 @@ public class yacyCore {
                     Thread currentThread = threadList[currentThreadIdx];
 
                     if (currentThread.isAlive()) {
-                        log.logFine("publish: Closing socket of publishing thread '" + currentThread.getName() + "' [" + currentThreadIdx + "].");
-                        httpc.closeOpenSockets(currentThread);
+                        // TODO: this object should care of all open clien connections within this class and close them here
                     }
                 }
 

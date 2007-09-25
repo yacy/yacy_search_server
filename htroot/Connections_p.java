@@ -49,7 +49,6 @@
 import java.io.UnsupportedEncodingException;
 import java.net.InetAddress;
 import java.net.URLEncoder;
-import java.util.Iterator;
 import java.util.Properties;
 
 import org.apache.commons.pool.impl.GenericObjectPool;
@@ -172,7 +171,6 @@ public final class Connections_p {
                 if (cmdObj instanceof httpd) {
                     prot = isSSL ? "https":"http";
                     
-                    
                     // getting the http command object
                     httpd currentHttpd =  (httpd)cmdObj;
                     
@@ -240,18 +238,19 @@ public final class Connections_p {
         prop.put("numActiveRunning",Integer.toString(numActiveRunning));
         prop.put("numActivePending",Integer.toString(numActivePending));
         
-        
         // client sessions
-        Iterator i = httpc.activeConnections.iterator();
+        httpc[] a = httpc.allConnections();
         int c = 0;
-        while (i.hasNext()) {
-        	httpc clientConnection = (httpc) i.next();
-        	prop.put("clientList_" + c + "_clientProtocol", (clientConnection.ssl) ? "HTTPS" : "HTTP");
-        	prop.put("clientList_" + c + "_clientLifetime", System.currentTimeMillis() - clientConnection.initTime);
-        	prop.put("clientList_" + c + "_clientTargetHost", clientConnection.adressed_host + ":" + clientConnection.adressed_port);
-        	prop.put("clientList_" + c + "_clientCommand", (clientConnection.command == null) ? "-" : clientConnection.command);
-        	prop.put("clientList_" + c + "_clientID", clientConnection.hashCode());
-        	c++;
+        for (int i = 0; i < a.length; i++) {
+        	httpc clientConnection = (httpc) a[i];
+            if (clientConnection != null) {
+                prop.put("clientList_" + c + "_clientProtocol", (clientConnection.ssl) ? "HTTPS" : "HTTP");
+                prop.put("clientList_" + c + "_clientLifetime", System.currentTimeMillis() - clientConnection.initTime);
+                prop.put("clientList_" + c + "_clientTargetHost", clientConnection.adressed_host + ":" + clientConnection.adressed_port);
+                prop.put("clientList_" + c + "_clientCommand", (clientConnection.command == null) ? "-" : clientConnection.command);
+                prop.put("clientList_" + c + "_clientID", clientConnection.hashCode());
+                c++;
+            }
         }
         prop.put("clientList", c);
         prop.put("clientActive", c);
