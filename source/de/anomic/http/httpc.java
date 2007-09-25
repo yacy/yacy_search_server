@@ -200,6 +200,7 @@ public final class httpc {
     public boolean ssl;
     public long initTime;
     public String command;
+    public int timeout;
     
     private int hashIndex;
 
@@ -222,6 +223,10 @@ public final class httpc {
             String outgoingByteCountAccounting            
     ) throws IOException {
         
+    	// remove old connections
+    	checkIdleConnections();
+    	
+    	// register new connection
     	this.hashIndex = objCounter;
     	objCounter++;
     	synchronized (activeConnections) {activeConnections.add(this);}
@@ -230,6 +235,7 @@ public final class httpc {
     	this.ssl = ssl;
     	this.initTime = System.currentTimeMillis();
     	this.command = null;
+    	this.timeout = timeout;
     	
         if ((theRemoteProxyConfig == null) ||
             (!theRemoteProxyConfig.useProxy())) {
@@ -380,7 +386,7 @@ public final class httpc {
             }            
 
             // trying to establish a connection to the address
-            this.socket.connect(address,timeout);
+            this.socket.connect(address, timeout);
             
             // registering the socket
             this.socketOwner = this.registerOpenSocket(this.socket);
@@ -422,6 +428,32 @@ public final class httpc {
         return (this.clientOutputByteCount == null)?0:this.clientOutputByteCount.getCount();
     }
 
+    public static int checkIdleConnections() {
+    	// try to find and close all connections that did not find a target server and are idle waiting for a server socket
+    	Iterator i = httpc.activeConnections.iterator();
+    	int c = 0;
+    	while (i.hasNext()) {
+    		httpc clientConnection = (httpc) i.next();
+    		if ((clientConnection.command == null) && (clientConnection.initTime + clientConnection.timeout > System.currentTimeMillis())) {
+    			// the time-out limit is reached. close the connection
+    			clientConnection.close();
+    			c++;
+    		}
+    	}
+    	return c;
+    }
+    
+    public static int closeAllConnections() {
+    	Iterator i = httpc.activeConnections.iterator();
+    	int c = 0;
+    	while (i.hasNext()) {
+    		httpc clientConnection = (httpc) i.next();
+    		clientConnection.close();
+    		c++;
+    	}
+        return c;
+    }
+    
     public void finalize() {
         this.close();
     }

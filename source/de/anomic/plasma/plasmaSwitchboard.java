@@ -1785,6 +1785,7 @@ public final class plasmaSwitchboard extends serverAbstractSwitch implements ser
         parser.close();
         plasmaHTCache.close();
         sbQueue.close();
+        httpc.closeAllConnections();
         webStructure.flushCitationReference("crg");
         webStructure.close();
         log.logConfig("SWITCHBOARD SHUTDOWN STEP 3: sending termination signal to database manager (stand by...)");
