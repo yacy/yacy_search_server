@@ -409,6 +409,7 @@ public final class plasmaCrawlLURL {
                             remove(urlHash);
                             log.logInfo("UrlDB-Entry with urlHash '" + urlHash + "' removed\n\tURL: " + oldUrlStr + "\n\tConnection Status: " + res.status);
                         }
+                        theHttpc.close();
                     }
                 } catch (Exception e) {
                     remove(urlHash);

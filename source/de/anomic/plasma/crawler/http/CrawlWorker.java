@@ -271,10 +271,12 @@ public final class CrawlWorker extends AbstractCrawlWorker {
                             // we write the new cache entry to file system directly
                             byte[] cacheArray = null;
                             cacheArray = res.writeContent(fos,this.keepInMemory);
+                            remote.close();
                             htCache.setCacheArray(cacheArray);
                             plasmaHTCache.writeFileAnnouncement(cacheFile);
                         } finally {
                             if (fos!=null)try{fos.close();}catch(Exception e){/* ignore this */}
+                            remote.close();
                         }
                         
                         // enQueue new entry with response header

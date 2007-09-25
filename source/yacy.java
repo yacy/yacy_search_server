@@ -521,6 +521,7 @@ public final class yacy {
                 con.close();
             } else {
                 serverLog.logSevere("REMOTE-SHUTDOWN", "error response from YACY socket: " + res.status);
+                con.close();
                 System.exit(-1);
             }
         } catch (IOException e) {

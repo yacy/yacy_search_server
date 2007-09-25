@@ -8,6 +8,7 @@
   <body id="Connections">
     #%env/templates/header.template%#
     #%env/templates/submenuAccessTracker.template%#
+    
     <h2>Server Connection Tracking</h2>
     <h3>Incoming Connections</h3>
     <p>Showing #[numActiveRunning]# active, #[numActivePending]# pending connections from a max. of #[numMax]# allowed incoming connections.</p>
@@ -34,7 +35,27 @@
       #{/list}#
     </table>
 
+	<h3>Outgoing Connections</h3>
+    <p>Showing #[clientActive]# active outgoing connections:</p>
+    <table border="0" cellpadding="2" cellspacing="1">
+      <tr class="TableHeader" valign="bottom">
+        <td>Protocol</td>
+        <td>Duration</td>
+        <td>Dest. IP[:Port]</td>
+        <td>Command</td>
+        <td>ID</td>
+      </tr>
+      #{clientList}#
+      <tr class="TableCell#(dark)#Light::Dark#(/dark)#">
+        <td>#[clientProtocol]#</td>
+        <td>#[clientLifetime]#</td>
+        <td>#[clientTargetHost]#</td>
+        <td>#[clientCommand]#</td>
+        <td>#[clientID]#</td>
+      </tr>
+      #{/clientList}#
+    </table>
+    
     #%env/templates/footer.template%#
-
   </body>
 </html>

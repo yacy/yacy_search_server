@@ -209,6 +209,7 @@ public class SitemapParser extends DefaultHandler {
 					+ "\n\tLength:   " + this.contentLength);
 			SAXParser saxParser = SAXParserFactory.newInstance().newSAXParser();
 			saxParser.parse(this.counterStream, this);
+			remote.close();
 		} catch (Exception e) {
 			this.logger.logWarning("Unable to parse sitemap file " + this.siteMapURL,e);
 		}

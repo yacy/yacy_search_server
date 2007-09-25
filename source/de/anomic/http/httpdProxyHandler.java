@@ -708,6 +708,8 @@ public final class httpdProxyHandler {
                 conProp.setProperty(httpHeader.CONNECTION_PROP_PROXY_RESPOND_CODE,"TCP_MISS");
             }
 
+            remote.close();
+            
             if (gzippedOut != null) {
                 gzippedOut.finish();
             }
@@ -954,11 +956,11 @@ public final class httpdProxyHandler {
             
             // sending the server respond back to the client
             httpd.sendRespondHeader(conProp,respond,httpVer,res.statusCode,res.statusText,res.responseHeader);
+            respond.flush();
+            remote.close();
         } catch (Exception e) {
             handleProxyException(e,remote,conProp,respond,url); 
         }
-        
-        respond.flush();
     }
     
     public static void doPost(Properties conProp, httpHeader requestHeader, OutputStream respond, PushbackInputStream body) throws IOException {
@@ -1144,12 +1146,14 @@ public final class httpdProxyHandler {
                     // replace connection details
                     host = switchboard.remoteProxyConfig.getProxyHost();
                     port = switchboard.remoteProxyConfig.getProxyPort();
+                    remoteProxy.close();
                     // go on (see below)
                 } else {
                     // pass error response back to client
                     httpd.sendRespondHeader(conProp,clientOut,httpVersion,response.statusCode,response.statusText,response.responseHeader);
                     //respondHeader(clientOut, response.status, response.responseHeader);
                     forceConnectionClose(conProp);
+                    remoteProxy.close();
                     return;
                 }
             } catch (Exception e) {

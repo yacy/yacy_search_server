@@ -60,6 +60,7 @@ import java.util.Date;
 import java.util.Enumeration;
 import java.util.GregorianCalendar;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Locale;
 import java.util.Map;
@@ -108,6 +109,8 @@ public final class httpc {
     private static final SimpleDateFormat HTTPGMTFormatter = new SimpleDateFormat("EEE, dd MMM yyyy HH:mm:ss zzz", Locale.US);
     private static final HashMap reverseMappingCache = new HashMap();
     private static final HashMap openSocketLookupTable = new HashMap();
+    public static final HashSet activeConnections = new HashSet(); // all connections are stored here and deleted when they are finished
+    public static int objCounter = 0; // will be increased with each object and is use to return a hash code
     
     // defined during set-up of switchboard
     public static boolean yacyDebugMode = false;
@@ -177,8 +180,8 @@ public final class httpc {
     // class variables
     private Socket socket = null; // client socket for commands
     private Thread socketOwner = null;
-    private String adressed_host = null;
-    private int    adressed_port = 80;
+    public  String adressed_host = null;
+    public  int    adressed_port = 80;
     private String target_virtual_host = null;
     
     // output and input streams for client control connection
@@ -194,6 +197,76 @@ public final class httpc {
     private String  requestPath = null;
     private boolean allowContentEncoding = true;
 	
+    public boolean ssl;
+    public long initTime;
+    public String command;
+    
+    private int hashIndex;
+
+
+    /**
+    * Initialize the httpc-instance with the given data.
+    *
+    * @param remoteProxyHost
+    * @param remoteProxyPort
+    * @throws IOException
+    */
+    public httpc(
+            String server, 
+            String vhost,
+            int port, 
+            int timeout, 
+            boolean ssl,
+            httpRemoteProxyConfig theRemoteProxyConfig,
+            String incomingByteCountAccounting,
+            String outgoingByteCountAccounting            
+    ) throws IOException {
+        
+    	this.hashIndex = objCounter;
+    	objCounter++;
+    	synchronized (activeConnections) {activeConnections.add(this);}
+    	//System.out.println("*** DEBUG init httpc: " + activeConnections.size() + " connections online");
+    	
+    	this.ssl = ssl;
+    	this.initTime = System.currentTimeMillis();
+    	this.command = null;
+    	
+        if ((theRemoteProxyConfig == null) ||
+            (!theRemoteProxyConfig.useProxy())) {
+            initN(
+                    server, 
+                    vhost,
+                    port, 
+                    timeout, 
+                    ssl,
+                    incomingByteCountAccounting,
+                    outgoingByteCountAccounting            
+            );
+            return;
+        }
+        
+        if (port == -1) {
+            port = (ssl)? 443 : 80;
+        }
+        
+        String remoteProxyHost = theRemoteProxyConfig.getProxyHost();
+        int    remoteProxyPort = theRemoteProxyConfig.getProxyPort();
+        
+        this.initN(
+                remoteProxyHost,
+                vhost,
+                remoteProxyPort,
+                timeout,
+                ssl,
+                incomingByteCountAccounting,
+                outgoingByteCountAccounting);
+        
+        this.remoteProxyUse = true;
+        this.adressed_host = server;
+        this.adressed_port = port;
+        this.target_virtual_host = vhost;
+        this.remoteProxyConfig = theRemoteProxyConfig;
+    }
 
     /**
     * Convert the status of this class into an String object to output it.
@@ -252,62 +325,12 @@ public final class httpc {
     public static Date nowDate() {
         return new GregorianCalendar(GMTTimeZone).getTime();
     }
-
-    /**
-    * Initialize the httpc-instance with the given data.
-    *
-    * @param remoteProxyHost
-    * @param remoteProxyPort
-    * @throws IOException
-    */
-    public httpc(
-            String server, 
-            String vhost,
-            int port, 
-            int timeout, 
-            boolean ssl,
-            httpRemoteProxyConfig theRemoteProxyConfig,
-            String incomingByteCountAccounting,
-            String outgoingByteCountAccounting            
-    ) throws IOException {
-        
-        if ((theRemoteProxyConfig == null) ||
-            (!theRemoteProxyConfig.useProxy())) {
-            initN(
-                    server, 
-                    vhost,
-                    port, 
-                    timeout, 
-                    ssl,
-                    incomingByteCountAccounting,
-                    outgoingByteCountAccounting            
-            );
-            return;
-        }
-        
-        if (port == -1) {
-            port = (ssl)? 443 : 80;
-        }
-        
-        String remoteProxyHost = theRemoteProxyConfig.getProxyHost();
-        int    remoteProxyPort = theRemoteProxyConfig.getProxyPort();
-        
-        this.initN(
-                remoteProxyHost,
-                vhost,
-                remoteProxyPort,
-                timeout,
-                ssl,
-                incomingByteCountAccounting,
-                outgoingByteCountAccounting);
-        
-        this.remoteProxyUse = true;
-        this.adressed_host = server;
-        this.adressed_port = port;
-        this.target_virtual_host = vhost;
-        this.remoteProxyConfig = theRemoteProxyConfig;
+    
+    public int hashCode() {
+    	// return a hash code so it is possible to store objects of httpc objects in a HashSet
+    	return this.hashIndex;
     }
-
+    
     /**
     * Initialize the https-instance with the given data. Opens the sockets to
     * the remote server and creats input and output streams.
@@ -404,6 +427,9 @@ public final class httpc {
     }
     
     public void close() {
+    	synchronized (activeConnections) {activeConnections.remove(this);}
+    	//System.out.println("*** DEBUG close httpc: " + activeConnections.size() + " connections online");
+    	
         if (this.clientInput != null) {
             try {this.clientInput.close();} catch (Exception e) {}
             this.clientInput = null;
@@ -569,7 +595,8 @@ public final class httpc {
     */
     public response GET(String path, httpHeader requestHeader) throws IOException {
         //serverLog.logDebug("HTTPC", handle + " requested GET '" + path + "', time = " + (System.currentTimeMillis() - handle));
-        try {
+    	this.command = "GET " + path;
+    	try {
             boolean zipped = (!this.allowContentEncoding) ? false : httpd.shallTransportZipped(path);
             send(httpHeader.METHOD_GET, path, requestHeader, zipped);
             response r = new response(zipped);
@@ -592,6 +619,7 @@ public final class httpc {
     * @throws IOException
     */
     public response HEAD(String path, httpHeader requestHeader) throws IOException {
+    	this.command = "HEAD " + path;
         try {
             send(httpHeader.METHOD_HEAD, path, requestHeader, false);
             return new response(false);
@@ -612,6 +640,7 @@ public final class httpc {
     * @throws IOException
     */
     public response POST(String path, httpHeader requestHeader, InputStream ins) throws IOException {
+    	this.command = "POST " + path;
         try {
             send(httpHeader.METHOD_POST, path, requestHeader, false);
             // if there is a body to the call, we would have a CONTENT-LENGTH tag in the requestHeader
@@ -653,6 +682,7 @@ public final class httpc {
     */
     
     public response CONNECT(String remotehost, int remoteport, httpHeader requestHeader) throws IOException {
+    	this.command = "CONNECT " + remotehost + ":" + remoteport;
         try {
             send(httpHeader.METHOD_CONNECT, remotehost + ":" + remoteport, requestHeader, false);
             return new response(false);
@@ -786,8 +816,7 @@ public final class httpc {
             requestHeader.put(httpHeader.AUTHORIZATION, kelondroBase64Order.standardCoder.encodeString(user + ":" + password));
         }
 
-        httpc con = null;
-        con = new httpc(realhost, virtualhost, port, timeout, ssl, theRemoteProxyConfig, null, null);
+        httpc con = new httpc(realhost, virtualhost, port, timeout, ssl, theRemoteProxyConfig, null, null);
 
         httpc.response res = con.GET(path, requestHeader);
         if (res.status.startsWith("2")) {
@@ -795,10 +824,12 @@ public final class httpc {
                 // stream to byte[]
                 serverByteBuffer sbb = new serverByteBuffer();
                 res.writeContent(sbb, null);
+                con.close();
                 return sbb.getBytes();
             } else {
                 // stream to file and return null
                 res.writeContent(null, download);
+                con.close();
                 return null;
             }
         }
@@ -847,11 +878,16 @@ public final class httpc {
         httpc.response res = con.POST(path, requestHeader, props, files);
 
         //System.out.println("response=" + res.toString());
-        if (!(res.status.startsWith("2"))) return res.status.getBytes();
+        if (!(res.status.startsWith("2"))) {
+        	byte[] status = res.status.getBytes();
+            con.close();
+            return status;
+        }
             
         // read connection body and return body
         serverByteBuffer sbb = new serverByteBuffer();
         res.writeContent(sbb, null);
+        con.close();
         return sbb.getBytes();
     }
 
@@ -993,15 +1029,11 @@ public final class httpc {
         String realhost = url.getHost();
 
         // start connection
-        httpc con = null;
-        con = new httpc(realhost, vhost, port, timeout, ssl, theRemoteProxyConfig, null, null);
+        httpc con = new httpc(realhost, vhost, port, timeout, ssl, theRemoteProxyConfig, null, null);
         httpc.response res = con.HEAD(path, requestHeader);
-        if (res.status.startsWith("2")) {
-            // success
-            return res.responseHeader;
-        }
-        // fail
-        return res.responseHeader;
+        httpHeader h = res.responseHeader;
+        con.close();
+        return h;
     }
 
     public static byte[] wput(

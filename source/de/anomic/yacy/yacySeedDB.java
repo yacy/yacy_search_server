@@ -791,9 +791,9 @@ public final class yacySeedDB {
             	throw new IOException("Server returned status: " + res.status);
             }
             
-            
             // read byte array
             byte[] content = serverFileUtils.read(res.getContentInputStream());
+            remote.close();
             
             // uncompress it if it is gzipped
             content = serverFileUtils.uncompressGZipArray(content);

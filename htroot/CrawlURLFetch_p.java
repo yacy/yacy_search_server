@@ -531,6 +531,7 @@ public class CrawlURLFetch_p {
                     if (encoding == null) encoding = "US-ASCII";
                     r = parseText(new String(sbb.getBytes(), encoding));
                 }
+                con.close();
             } catch (IOException e) {  }
             return r;
         }

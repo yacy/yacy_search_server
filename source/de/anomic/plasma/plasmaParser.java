@@ -932,6 +932,7 @@ public final class plasmaParser {
                 contentMimeType = res.responseHeader.mime();
                 charSet = res.responseHeader.getCharacterEncoding();
                 contentLength = res.responseHeader.contentLength();
+                remote.close();
             }
             
             if ((args.length >= 4)&&(args[2].equalsIgnoreCase("-m"))) {

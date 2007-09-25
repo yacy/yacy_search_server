@@ -413,6 +413,7 @@ public final class robotsParser{
                 if (!res.responseHeader.mime().startsWith("text/plain")) {
                     robotsTxt = null;
                     serverLog.logFinest("ROBOTS","Robots.txt from URL '" + robotsURL + "' has wrong mimetype '" + res.responseHeader.mime() + "'.");                    
+                    con.close();
                 } else {
 
                     // getting some metadata
@@ -435,10 +436,12 @@ public final class robotsParser{
                     serverLog.logFinest("ROBOTS","Robots.txt successfully loaded from URL '" + robotsURL + "' in " + (downloadEnd-downloadStart) + " ms.");
                 }
             } else if (res.status.startsWith("304")) {
+            	con.close();
                 return null;
             } else if (res.status.startsWith("3")) {
                 // getting redirection URL
                 String redirectionUrlString = (String) res.responseHeader.get(httpHeader.LOCATION);
+                con.close();
                 if (redirectionUrlString==null) {
                     serverLog.logFinest("ROBOTS","robots.txt could not be downloaded from URL '" + robotsURL + "' because of missing redirecton header. [" + res.status + "].");
                     robotsTxt = null;                    
@@ -455,10 +458,12 @@ public final class robotsParser{
                 return downloadRobotsTxt(redirectionUrl,redirectionCount,entry);
                 
             } else if (res.status.startsWith("401") || res.status.startsWith("403")) {
+            	con.close();
                 accessCompletelyRestricted = true;
                 serverLog.logFinest("ROBOTS","Access to Robots.txt not allowed on URL '" + robotsURL + "'.");
             } else {
                 serverLog.logFinest("ROBOTS","robots.txt could not be downloaded from URL '" + robotsURL + "'. [" + res.status + "].");
+                con.close();
                 robotsTxt = null;
             }        
         } catch (Exception e) {
