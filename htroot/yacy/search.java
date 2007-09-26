@@ -130,6 +130,7 @@ public final class search {
         plasmaSearchQuery theQuery = null;
         plasmaSearchProcessing localProcess = null;
         ArrayList accu = null;
+        long urlRetrievalAllTime = 0, snippetComputationAllTime = 0;
         if ((query.length() == 0) && (abstractSet != null)) {
             // this is _not_ a normal search, only a request for index abstracts
             theQuery = new plasmaSearchQuery(null, abstractSet, new TreeSet(kelondroBase64Order.enhancedCoder), maxdist, prefer, plasmaSearchQuery.contentdomParser(contentdom), false, count, 0, duetime, filter, plasmaSearchQuery.SEARCHDOM_LOCAL, null, -1, plasmaSearchQuery.catchall_constraint);
@@ -169,6 +170,8 @@ public final class search {
             plasmaSearchRankingProfile rankingProfile = (profile.length() == 0) ? new plasmaSearchRankingProfile(plasmaSearchQuery.contentdomParser(contentdom)) : new plasmaSearchRankingProfile("", profile);
             localProcess  = new plasmaSearchProcessing(theQuery.maximumTime, theQuery.displayResults());
             plasmaSearchEvent theSearch = plasmaSearchEvent.getEvent(theQuery, rankingProfile, localProcess, sb.wordIndex, null, true, abstractSet);
+            urlRetrievalAllTime = theSearch.getURLRetrievalTime();
+            snippetComputationAllTime = theSearch.getSnippetComputationTime();
             
             // set statistic details of search result and find best result index set
             if (theSearch.getLocalCount() == 0) {
@@ -271,7 +274,7 @@ public final class search {
 
         // prepare search statistics
         Long trackerHandle = new Long(System.currentTimeMillis());
-        HashMap searchProfile = theQuery.resultProfile(joincount, System.currentTimeMillis() - timestamp);
+        HashMap searchProfile = theQuery.resultProfile(joincount, System.currentTimeMillis() - timestamp, urlRetrievalAllTime, snippetComputationAllTime);
         String client = (String) header.get("CLIENTIP");
         searchProfile.put("host", client);
         yacySeed remotepeer = yacyCore.seedDB.lookupByIP(natLib.getInetAddress(client), true, false, false);

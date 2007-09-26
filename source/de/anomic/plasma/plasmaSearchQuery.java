@@ -239,7 +239,7 @@ public final class plasmaSearchQuery {
         return hashSet2hashString(this.queryHashes) + "-" + hashSet2hashString(this.excludeHashes) + ":" + this.contentdom;
     }
     
-    public HashMap resultProfile(int searchcount, long searchtime) {
+    public HashMap resultProfile(int searchcount, long searchtime, long urlretrieval, long snippetcomputation) {
         // generate statistics about search: query, time, etc
         HashMap r = new HashMap();
         r.put("queryhashes", queryHashes);
@@ -248,6 +248,8 @@ public final class plasmaSearchQuery {
         r.put("querytime", new Long(maximumTime));
         r.put("resultcount", new Integer(searchcount));
         r.put("resulttime", new Long(searchtime));
+        r.put("resulturltime", new Long(urlretrieval));
+        r.put("resultsnippettime", new Long(snippetcomputation));
         return r;
     }
 }

@@ -28,6 +28,8 @@
         <resultcount>#[resultcount]#</resultcount>
         <querytime>#[querytime]#</querytime>
         <resulttime>#[resulttime]#</resulttime>
+        <urltime>#[urltime]#</urltime>
+        <snippettime>#[snippettime]#</snippettime>
         <querystring>#[querystring]#</querystring>	 
 	  </entry>
 	  #{/list}#</localSearchLog>
@@ -54,6 +56,8 @@
         <resultcount>#[resultcount]#</resultcount>
         <querytime>#[querytime]#</querytime>
         <resulttime>#[resulttime]#</resulttime>
+        <urltime>#[urltime]#</urltime>
+        <snippettime>#[snippettime]#</snippettime>
         <queryhashes>#[queryhashes]#</queryhashes>
 	  </entry>
 	  #{/list}#</remoteSearchLog>

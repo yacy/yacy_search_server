@@ -74,6 +74,8 @@ public final class plasmaSearchEvent {
     //private int resultListLock; // a pointer that shows that all elements below this pointer are fixed and may not be changed again
     private HashMap failedURLs; // a mapping from a urlhash to a fail reason string
     TreeSet snippetFetchWordHashes; // a set of word hashes that are used to match with the snippets
+    private long urlRetrievalAllTime;
+    private long snippetComputationAllTime;
     
     private plasmaSearchEvent(plasmaSearchQuery query,
                              plasmaSearchRankingProfile ranking,
@@ -96,6 +98,8 @@ public final class plasmaSearchEvent {
         this.IAmaxcounthash = null;
         this.IAneardhthash = null;
         this.localcount = 0;
+        this.urlRetrievalAllTime = 0;
+        this.snippetComputationAllTime = 0;
         this.workerThreads = null;
         this.resultList = new ArrayList(10); // this is the result set which is filled up with search results, enriched with snippets
         //this.resultListLock = 0; // no locked elements until now
@@ -248,6 +252,7 @@ public final class plasmaSearchEvent {
             // prepare result vector directly without worker threads
             int rankedIndex = 0;
             process.startTimer();
+            
             while ((rankedIndex < rankedCache.container().size()) && (resultList.size() < (query.neededResults()))) {
                 // fetch next entry to work on
                 indexContainer c = rankedCache.container();
@@ -261,6 +266,8 @@ public final class plasmaSearchEvent {
                 
                 ResultEntry resultEntry = obtainResultEntry(page, false);
                 if (resultEntry == null) continue; // the entry had some problems, cannot be used
+                urlRetrievalAllTime += resultEntry.dbRetrievalTime;
+                snippetComputationAllTime += resultEntry.snippetComputationTime;
                 
                 // place the result to the result vector
                 synchronized (resultList) {
@@ -312,6 +319,7 @@ public final class plasmaSearchEvent {
         // load only urls if there was not yet a root url of that hash
         // find the url entry
         
+        long startTime = System.currentTimeMillis();
         indexURLEntry.Components comp = page.comp();
         String pagetitle = comp.title().toLowerCase();
         if (comp.url() == null) {
@@ -320,7 +328,8 @@ public final class plasmaSearchEvent {
         }
         String pageurl = comp.url().toString().toLowerCase();
         String pageauthor = comp.author().toLowerCase();
-            
+        long dbRetrievalTime = System.currentTimeMillis() - startTime;
+        
         // check exclusion
         if ((plasmaSearchQuery.matches(pagetitle, query.excludeHashes)) ||
             (plasmaSearchQuery.matches(pageurl, query.excludeHashes)) ||
@@ -363,14 +372,17 @@ public final class plasmaSearchEvent {
         // load snippet
         if (query.contentdom == plasmaSearchQuery.CONTENTDOM_TEXT) {
             // attach text snippet
-            plasmaSnippetCache.TextSnippet snippet = plasmaSnippetCache.retrieveTextSnippet(comp.url(), snippetFetchWordHashes, fetchSnippetOnline, query.constraint.get(plasmaCondenser.flag_cat_indexof), 260, 6000);
+            startTime = System.currentTimeMillis();
+            plasmaSnippetCache.TextSnippet snippet = plasmaSnippetCache.retrieveTextSnippet(comp.url(), snippetFetchWordHashes, fetchSnippetOnline, query.constraint.get(plasmaCondenser.flag_cat_indexof), 180, 3000, (fetchSnippetOnline) ? Integer.MAX_VALUE : 100000);
+            long snippetComputationTime = System.currentTimeMillis() - startTime;
+            
             if (snippet.getErrorCode() < 11) {
                 // we loaded the file and found the snippet
-                return new ResultEntry(page, wordIndex, snippet, null); // result with snippet attached
+                return new ResultEntry(page, wordIndex, snippet, null, dbRetrievalTime, snippetComputationTime); // result with snippet attached
             } else if (!fetchSnippetOnline) {
                 // we did not demand online loading, therefore a failure does not mean that the missing snippet causes a rejection of this result
                 // this may happen during a remote search, because snippet loading is omitted to retrieve results faster
-                return new ResultEntry(page, wordIndex, null, null); // result without snippet
+                return new ResultEntry(page, wordIndex, null, null, dbRetrievalTime, snippetComputationTime); // result without snippet
             } else {
                 // problems with snippet fetch
                 registerFailure(page.hash(), "no text snippet for URL " + comp.url());
@@ -379,12 +391,15 @@ public final class plasmaSearchEvent {
             }
         } else {
             // attach media information
+            startTime = System.currentTimeMillis();
             ArrayList mediaSnippets = plasmaSnippetCache.retrieveMediaSnippets(comp.url(), snippetFetchWordHashes, query.contentdom, fetchSnippetOnline, 6000);
+            long snippetComputationTime = System.currentTimeMillis() - startTime;
+            
             if ((mediaSnippets != null) && (mediaSnippets.size() > 0)) {
                 // found media snippets, return entry
-                return new ResultEntry(page, wordIndex, null, mediaSnippets);
+                return new ResultEntry(page, wordIndex, null, mediaSnippets, dbRetrievalTime, snippetComputationTime);
             } else if (!fetchSnippetOnline) {
-                return new ResultEntry(page, wordIndex, null, null);
+                return new ResultEntry(page, wordIndex, null, null, dbRetrievalTime, snippetComputationTime);
             } else {
                 // problems with snippet fetch
                 registerFailure(page.hash(), "no media snippet for URL " + comp.url());
@@ -443,6 +458,14 @@ public final class plasmaSearchEvent {
     
     public int getGlobalCount() {
         return this.rankedCache.getGlobalCount();
+    }
+    
+    public long getURLRetrievalTime() {
+        return this.urlRetrievalAllTime;
+    }
+    
+    public long getSnippetComputationTime() {
+        return this.snippetComputationAllTime;
     }
 
     public static plasmaSearchEvent getEvent(String eventID) {
@@ -545,6 +568,8 @@ public final class plasmaSearchEvent {
                 
                 ResultEntry resultEntry = obtainResultEntry(page, true);
                 if (resultEntry == null) continue; // the entry had some problems, cannot be used
+                urlRetrievalAllTime += resultEntry.dbRetrievalTime;
+                snippetComputationAllTime += resultEntry.snippetComputationTime;
                 
                 // place the result to the result vector
                 synchronized (resultList) {
@@ -853,6 +878,7 @@ public final class plasmaSearchEvent {
     }
     
     public static class ResultEntry {
+        // payload objects
         private indexURLEntry urlentry;
         private indexURLEntry.Components urlcomps; // buffer for components
         private String alternative_urlstring;
@@ -860,13 +886,19 @@ public final class plasmaSearchEvent {
         private plasmaSnippetCache.TextSnippet textSnippet;
         private ArrayList /* of plasmaSnippetCache.MediaSnippet */ mediaSnippets;
         
-        public ResultEntry(indexURLEntry urlentry, plasmaWordIndex wordIndex, plasmaSnippetCache.TextSnippet textSnippet, ArrayList mediaSnippets) {
+        // statistic objects
+        public long dbRetrievalTime, snippetComputationTime;
+        
+        public ResultEntry(indexURLEntry urlentry, plasmaWordIndex wordIndex, plasmaSnippetCache.TextSnippet textSnippet, ArrayList mediaSnippets,
+                           long dbRetrievalTime, long snippetComputationTime) {
             this.urlentry = urlentry;
             this.urlcomps = urlentry.comp();
             this.alternative_urlstring = null;
             this.alternative_urlname = null;
             this.textSnippet = textSnippet;
             this.mediaSnippets = mediaSnippets;
+            this.dbRetrievalTime = dbRetrievalTime;
+            this.snippetComputationTime = snippetComputationTime;
             String host = urlcomps.url().getHost();
             if (host.endsWith(".yacyh")) {
                 // translate host into current IP

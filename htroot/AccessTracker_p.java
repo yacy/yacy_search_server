@@ -150,6 +150,8 @@ public class AccessTracker_p {
                 prop.put("page_list_" + entCount + "_querycount", ((Integer) searchProfile.get("querycount")).toString());
                 prop.put("page_list_" + entCount + "_querytime", ((Long) searchProfile.get("querytime")).toString());
                 prop.put("page_list_" + entCount + "_resultcount", ((Integer) searchProfile.get("resultcount")).toString());
+                prop.put("page_list_" + entCount + "_urltime", ((Long) searchProfile.get("resulturltime")).toString());
+                prop.put("page_list_" + entCount + "_snippettime", ((Long) searchProfile.get("resultsnippettime")).toString());
                 prop.put("page_list_" + entCount + "_resulttime", ((Long) searchProfile.get("resulttime")).toString());
             }
             prop.put("page_list", m);

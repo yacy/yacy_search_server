@@ -246,7 +246,7 @@ public class plasmaSnippetCache {
         return retrieveFromCache(hashes, url.hash()) != null;
     }
     
-    public static TextSnippet retrieveTextSnippet(yacyURL url, Set queryhashes, boolean fetchOnline, boolean pre, int snippetMaxLength, int timeout) {
+    public static TextSnippet retrieveTextSnippet(yacyURL url, Set queryhashes, boolean fetchOnline, boolean pre, int snippetMaxLength, int timeout, int maxDocLen) {
         // heise = "0OQUNU3JSs05"
         
         if (queryhashes.size() == 0) {
@@ -276,7 +276,11 @@ public class plasmaSnippetCache {
             if (resContent != null) {
                 // if the content was found
                 resContentLength = plasmaHTCache.getResourceContentLength(url);
-                } else if (fetchOnline) {
+                if ((resContentLength > maxDocLen) && (!fetchOnline)) {
+                    // content may be too large to be parsed here. To be fast, we omit calculation of snippet here
+                    return new TextSnippet(url, null, ERROR_SOURCE_LOADING, queryhashes, "resource available, but too large: " + resContentLength + " bytes");
+                }
+            } else if (fetchOnline) {
                 // if not found try to download it
                 
                 // download resource using the crawler and keep resource in memory if possible

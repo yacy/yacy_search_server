@@ -304,7 +304,7 @@ public class yacysearch {
 
             // prepare search statistics
             Long trackerHandle = new Long(System.currentTimeMillis());
-            HashMap searchProfile = theQuery.resultProfile(theSearch.getLocalCount() + theSearch.getGlobalCount(), System.currentTimeMillis() - timestamp);
+            HashMap searchProfile = theQuery.resultProfile(theSearch.getLocalCount() + theSearch.getGlobalCount(), System.currentTimeMillis() - timestamp, theSearch.getURLRetrievalTime(), theSearch.getSnippetComputationTime());
             searchProfile.put("querystring", theQuery.queryString);
             searchProfile.put("time", trackerHandle);
             searchProfile.put("host", client);
