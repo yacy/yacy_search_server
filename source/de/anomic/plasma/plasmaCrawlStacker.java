@@ -490,10 +490,10 @@ public final class plasmaCrawlStacker {
                 // do nothing..
             } 
             if (this.dbtype == QUEUE_DB_TYPE_FLEX) {
-                kelondroFlexWidthArray.delete(cacheStacksPath, "urlNoticeStacker7.db");
+                kelondroFlexWidthArray.delete(cacheStacksPath, "urlNoticeStacker8.db");
             } 
             if (this.dbtype == QUEUE_DB_TYPE_TREE) {
-                File cacheFile = new File(cacheStacksPath, "urlNoticeStacker.db");
+                File cacheFile = new File(cacheStacksPath, "urlNoticeStacker8.db");
                 cacheFile.delete();
             }
         }
@@ -505,7 +505,7 @@ public final class plasmaCrawlStacker {
                 this.urlEntryCache = new kelondroRowSet(plasmaCrawlEntry.rowdef, 0);
             } 
             if (this.dbtype == QUEUE_DB_TYPE_FLEX) {
-                String newCacheName = "urlNoticeStacker7.db";
+                String newCacheName = "urlNoticeStacker8.db";
                 cacheStacksPath.mkdirs();
                 try {
                     this.urlEntryCache = new kelondroCache(new kelondroFlexTable(cacheStacksPath, newCacheName, preloadTime, plasmaCrawlEntry.rowdef, true), true, false);
@@ -522,7 +522,7 @@ public final class plasmaCrawlStacker {
                 }
             } 
             if (this.dbtype == QUEUE_DB_TYPE_TREE) {
-                File cacheFile = new File(cacheStacksPath, "urlNoticeStacker.db");
+                File cacheFile = new File(cacheStacksPath, "urlNoticeStacker8.db");
                 cacheFile.getParentFile().mkdirs();
                 this.urlEntryCache = new kelondroCache(kelondroTree.open(cacheFile, true, preloadTime, plasmaCrawlEntry.rowdef), true, true);
             }
