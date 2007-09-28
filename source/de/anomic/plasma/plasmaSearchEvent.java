@@ -64,6 +64,7 @@ public final class plasmaSearchEvent {
     private Map rcAbstracts; // cache for index abstracts; word:TreeMap mapping where the embedded TreeMap is a urlhash:peerlist relation
     private plasmaSearchProcessing process;
     private yacySearch[] primarySearchThreads, secondarySearchThreads;
+    private Thread localSearchThread;
     private TreeMap preselectedPeerHashes;
     //private Object[] references;
     public  TreeMap IAResults, IACount;
@@ -145,50 +146,8 @@ public final class plasmaSearchEvent {
             process.yield("remote search thread start", this.primarySearchThreads.length);
             
             // meanwhile do a local search
-            Map[] searchContainerMaps = process.localSearchContainers(query, wordIndex, null);
-            
-            // use the search containers to fill up rcAbstracts locally
-            /*
-            if ((rcAbstracts != null) && (searchContainerMap != null)) {
-                Iterator i, ci = searchContainerMap.entrySet().iterator();
-                Map.Entry entry;
-                String wordhash;
-                indexContainer container;
-                TreeMap singleAbstract;
-                String mypeerhash = yacyCore.seedDB.mySeed.hash;
-                while (ci.hasNext()) {
-                    entry = (Map.Entry) ci.next();
-                    wordhash = (String) entry.getKey();
-                    container = (indexContainer) entry.getValue();
-                    // collect all urlhashes from the container
-                    synchronized (rcAbstracts) {
-                        singleAbstract = (TreeMap) rcAbstracts.get(wordhash); // a mapping from url-hashes to a string of peer-hashes
-                        if (singleAbstract == null) singleAbstract = new TreeMap();
-                        i = container.entries();
-                        while (i.hasNext()) singleAbstract.put(((indexEntry) i.next()).urlHash(), mypeerhash);
-                        rcAbstracts.put(wordhash, singleAbstract);
-                    }
-                }
-            }
-            */
-
-            // join and exlcude the local result
-            indexContainer rcLocal =
-                (searchContainerMaps == null) ?
-                  plasmaWordIndex.emptyContainer(null, 0) :
-                      process.localSearchJoinExclude(
-                          searchContainerMaps[0].values(),
-                          searchContainerMaps[1].values(),
-                          query.maxDistance);
-            this.localcount = rcLocal.size();
-            
-            // sort the local containers and truncate it to a limited count,
-            // so following sortings together with the global results will be fast
-            plasmaSearchPreOrder firstsort = new plasmaSearchPreOrder(query, process, ranking, rcLocal);
-            rcLocal = firstsort.strippedContainer(200);
-            synchronized (rankedCache) {
-                this.rankedCache.insert(rcLocal, true, true);
-            }
+            localSearchThread = new localSearchProcess();
+            localSearchThread.start();
            
             // finished searching
             serverLog.logFine("SEARCH_EVENT", "SEARCH TIME AFTER GLOBAL-TRIGGER TO " + primarySearchThreads.length + " PEERS: " + ((System.currentTimeMillis() - start) / 1000) + " seconds");
@@ -288,6 +247,61 @@ public final class plasmaSearchEvent {
         // store this search to a cache so it can be re-used
         lastEvents.put(query.id(), this);
         lastEventID = query.id();
+    }
+    
+
+    private class localSearchProcess extends Thread {
+        
+        public localSearchProcess() {
+        }
+        
+        public void run() {
+            // do a local search
+            Map[] searchContainerMaps = process.localSearchContainers(query, wordIndex, null);
+            
+            // use the search containers to fill up rcAbstracts locally
+            /*
+            if ((rcAbstracts != null) && (searchContainerMap != null)) {
+                Iterator i, ci = searchContainerMap.entrySet().iterator();
+                Map.Entry entry;
+                String wordhash;
+                indexContainer container;
+                TreeMap singleAbstract;
+                String mypeerhash = yacyCore.seedDB.mySeed.hash;
+                while (ci.hasNext()) {
+                    entry = (Map.Entry) ci.next();
+                    wordhash = (String) entry.getKey();
+                    container = (indexContainer) entry.getValue();
+                    // collect all urlhashes from the container
+                    synchronized (rcAbstracts) {
+                        singleAbstract = (TreeMap) rcAbstracts.get(wordhash); // a mapping from url-hashes to a string of peer-hashes
+                        if (singleAbstract == null) singleAbstract = new TreeMap();
+                        i = container.entries();
+                        while (i.hasNext()) singleAbstract.put(((indexEntry) i.next()).urlHash(), mypeerhash);
+                        rcAbstracts.put(wordhash, singleAbstract);
+                    }
+                }
+            }
+            */
+            
+            // join and exlcude the local result
+            indexContainer rcLocal =
+                (searchContainerMaps == null) ?
+                  plasmaWordIndex.emptyContainer(null, 0) :
+                      process.localSearchJoinExclude(
+                          searchContainerMaps[0].values(),
+                          searchContainerMaps[1].values(),
+                          query.maxDistance);
+            localcount = rcLocal.size();
+            
+            // sort the local containers and truncate it to a limited count,
+            // so following sortings together with the global results will be fast
+            plasmaSearchPreOrder firstsort = new plasmaSearchPreOrder(query, process, ranking, rcLocal);
+            rcLocal = firstsort.strippedContainer(200);
+            synchronized (rankedCache) {
+                rankedCache.insert(rcLocal, true, true);
+            }
+        }
     }
 
     private static void cleanupEvents() {
