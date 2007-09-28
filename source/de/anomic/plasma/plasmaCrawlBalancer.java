@@ -63,8 +63,8 @@ import de.anomic.yacy.yacySeedDB;
 
 public class plasmaCrawlBalancer {
     
-    private static final String stackSuffix = "7.stack";
-    private static final String indexSuffix = "7.db";
+    private static final String stackSuffix = "8.stack";
+    private static final String indexSuffix = "8.db";
 
     // a shared domainAccess map for all balancers
     private static final Map domainAccess = Collections.synchronizedMap(new HashMap());
@@ -85,10 +85,10 @@ public class plasmaCrawlBalancer {
         this.cacheStacksPath = cachePath;
         this.stackname = stackname;
         File stackFile = new File(cachePath, stackname + stackSuffix);
-        urlFileStack    = kelondroStack.open(stackFile, stackrow);
-        domainStacks = new HashMap();
-        urlRAMStack     = new ArrayList();
-        top = true;
+        this.urlFileStack   = kelondroStack.open(stackFile, stackrow);
+        this.domainStacks   = new HashMap();
+        this.urlRAMStack    = new ArrayList();
+        this.top            = true;
         
         // create a stack for newly entered entries
         if (!(cachePath.exists())) cachePath.mkdir(); // make the path
@@ -140,6 +140,30 @@ public class plasmaCrawlBalancer {
        kelondroRow.Entry entry = urlFileIndex.get(urlhash.getBytes());
        if (entry == null) return null;
        return new plasmaCrawlEntry(entry);
+    }
+    
+    public synchronized int removeAllByProfileHandle(String profileHandle) throws IOException {
+        // removes all entries with a specific profile hash.
+        // this may last some time
+        // returns number of deletions
+        
+        // first find a list of url hashes that shall be deleted
+        Iterator i = urlFileIndex.rows(true, null);
+        ArrayList urlHashes = new ArrayList();
+        kelondroRow.Entry rowEntry;
+        plasmaCrawlEntry crawlEntry;
+        while (i.hasNext()) {
+            rowEntry = (kelondroRow.Entry) i.next();
+            crawlEntry = new plasmaCrawlEntry(rowEntry);
+            if (crawlEntry.profileHandle().equals(profileHandle)) {
+                urlHashes.add(crawlEntry.url().hash());
+            }
+        }
+        
+        // then delete all these urls from the queues and the file index
+        i = urlHashes.iterator();
+        while (i.hasNext()) this.remove((String) i.next());
+        return urlHashes.size();
     }
     
     public synchronized plasmaCrawlEntry remove(String urlhash) throws IOException {

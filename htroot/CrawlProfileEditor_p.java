@@ -1,11 +1,15 @@
 // CrawlProfileEditor_p.java
-// -------------------------------
-// part of the AnomicHTTPD caching proxy
-// (C) by Michael Peter Christen; mc@anomic.de
-// first published on http://www.anomic.de
-// Frankfurt, Germany, 2004, 2005
-// last major change: 04.07.2005
+// (C) 2005, by Michael Peter Christen; mc@yacy.net, Frankfurt a. M., Germany
+// first published 04.07.2005 on http://yacy.net
 //
+// This is a part of YaCy, a peer-to-peer based web search engine
+//
+// $LastChangedDate: 2006-04-02 22:40:07 +0200 (So, 02 Apr 2006) $
+// $LastChangedRevision: 1986 $
+// $LastChangedBy: orbiter $
+//
+// LICENSE
+// 
 // This program is free software; you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
 // the Free Software Foundation; either version 2 of the License, or
@@ -19,29 +23,6 @@
 // You should have received a copy of the GNU General Public License
 // along with this program; if not, write to the Free Software
 // Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
-//
-// Using this software in any meaning (reading, learning, copying, compiling,
-// running) means that you agree that the Author(s) is (are) not responsible
-// for cost, loss of data or any harm that may be caused directly or indirectly
-// by usage of this softare or this documentation. The usage of this software
-// is on your own risk. The installation and usage (starting/running) of this
-// software may allow other people or application to access your computer and
-// any attached devices and is highly dependent on the configuration of the
-// software which must be done by the user of the software; the author(s) is
-// (are) also not responsible for proper configuration and usage of the
-// software, even if provoked by documentation provided together with
-// the software.
-//
-// Any changes to this file according to the GPL as documented in the file
-// gpl.txt aside this file in the shipment you received can be done to the
-// lines that follows this copyright notice here, but changes must not be
-// done inside the copyright notive above. A re-distribution must contain
-// the intact and unchanged copyright notice.
-// Contributions and changes to the program code must be marked as such.
-
-// You must compile this file with
-// javac -classpath .:../classes CrawlProfileEditor_p.java
-// if the shell's current path is HTROOT
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -103,14 +84,23 @@ public class CrawlProfileEditor_p {
         
         // read post for handle
         String handle = (post == null) ? "" : post.get("handle", "");
-        if ((post != null) &&  (post.containsKey("deleteprofile"))) {
-            // deletion of a crawl
-            sb.profiles.removeEntry(handle);
+        if (post != null) {
+            if (post.containsKey("terminate")) {
+                // termination of a crawl: shift the crawl from active to passive
+                sb.profilesPassiveCrawls.newEntry(sb.profilesActiveCrawls.getEntry(handle).map());
+                sb.profilesActiveCrawls.removeEntry(handle);
+                // delete all entries from the crawl queue that are deleted here
+                sb.noticeURL.removeByProfileHandle(handle);
+            }
+            if (post.containsKey("delete")) {
+                // deletion of a terminated crawl profile
+                sb.profilesPassiveCrawls.removeEntry(handle);
+            }
         }
         
         // generate handle list
         int count = 0;
-        Iterator it = sb.profiles.profiles(true);
+        Iterator it = sb.profilesActiveCrawls.profiles(true);
         entry selentry;
         while (it.hasNext()) {
             selentry = (entry)it.next();
@@ -126,7 +116,7 @@ public class CrawlProfileEditor_p {
             count++;
         }
         prop.put("profiles", count);
-        selentry = sb.profiles.getEntry(handle);
+        selentry = sb.profilesActiveCrawls.getEntry(handle);
         
         // read post for change submit
         if ((post != null) && (selentry != null)) {
@@ -138,7 +128,7 @@ public class CrawlProfileEditor_p {
 						tee = (eentry) it.next();
 						String cval = (String) selentry.map().get(tee.name);
 						String val = (tee.type == eentry.BOOLEAN) ? Boolean.toString(post.containsKey(tee.name)) : post.get(tee.name, cval);
-						if (!cval.equals(val)) sb.profiles.changeEntry(selentry, tee.name, val);
+						if (!cval.equals(val)) sb.profilesActiveCrawls.changeEntry(selentry, tee.name, val);
 					}
 				} catch (IOException ex) {
 					prop.put("error", 1);
@@ -149,47 +139,22 @@ public class CrawlProfileEditor_p {
         
         // generate crawl profile table
         count = 0;
-        int domlistlength = (post == null) ? 160 : post.getInt("domlistlength", 160);
-        it = sb.profiles.profiles(true);
-        plasmaCrawlProfile.entry profile;
         boolean dark = true;
+        int domlistlength = (post == null) ? 160 : post.getInt("domlistlength", 160);
+        plasmaCrawlProfile.entry profile;
+        // put active crawls into list
+        it = sb.profilesActiveCrawls.profiles(true);
         while (it.hasNext()) {
             profile = (plasmaCrawlProfile.entry) it.next();
-            prop.put("crawlProfiles_"+count+"_dark", ((dark) ? 1 : 0));
-            prop.put("crawlProfiles_"+count+"_name", profile.name());
-            prop.put("crawlProfiles_"+count+"_startURL", profile.startURL());
-            prop.put("crawlProfiles_"+count+"_handle", profile.handle());
-            prop.put("crawlProfiles_"+count+"_depth", profile.generalDepth());
-            prop.put("crawlProfiles_"+count+"_filter", profile.generalFilter());
-            prop.put("crawlProfiles_"+count+"_crawlingIfOlder", (profile.recrawlIfOlder() == Long.MAX_VALUE) ? "no re-crawl" : ""+profile.recrawlIfOlder());
-            prop.put("crawlProfiles_"+count+"_crawlingDomFilterDepth", (profile.domFilterDepth() == Integer.MAX_VALUE) ? "inactive" : Integer.toString(profile.domFilterDepth()));
-
-            //start contrib [MN]
-            int i = 0;
-            String item;
-            while((i <= domlistlength) && !((item = profile.domName(true, i)).equals(""))){
-                if(i == domlistlength){
-                    item = item + " ...";
-                }
-                prop.put("crawlProfiles_"+count+"_crawlingDomFilterContent_"+i+"_item", item);
-                i++;
-            }
-
-            prop.put("crawlProfiles_"+count+"_crawlingDomFilterContent", i);
-            //end contrib [MN]
-
-            prop.put("crawlProfiles_"+count+"_crawlingDomMaxPages", (profile.domMaxPages() == Integer.MAX_VALUE) ? "unlimited" : ""+profile.domMaxPages());
-            prop.put("crawlProfiles_"+count+"_withQuery", ((profile.crawlingQ()) ? 1 : 0));
-            prop.put("crawlProfiles_"+count+"_storeCache", ((profile.storeHTCache()) ? 1 : 0));
-            prop.put("crawlProfiles_"+count+"_indexText", ((profile.indexText()) ? 1 : 0));
-            prop.put("crawlProfiles_"+count+"_indexMedia", ((profile.indexMedia()) ? 1 : 0));
-            prop.put("crawlProfiles_"+count+"_remoteIndexing", ((profile.remoteIndexing()) ? 1 : 0));
-            prop.put("crawlProfiles_"+count+"_deleteButton", (((profile.name().equals("remote")) ||
-                                                               (profile.name().equals("proxy")) ||
-                                                               (profile.name().equals("snippetText")) ||
-                                                               (profile.name().equals("snippetMedia")) ? 0 : 1)));
-            prop.put("crawlProfiles_"+count+"_deleteButton_handle", profile.handle());
-            
+            putProfileEntry(prop, profile, true, dark, count, domlistlength);
+            dark = !dark;
+            count++;
+        }
+        // put passive crawls into list
+        it = sb.profilesPassiveCrawls.profiles(true);
+        while (it.hasNext()) {
+            profile = (plasmaCrawlProfile.entry) it.next();
+            putProfileEntry(prop, profile, false, dark, count, domlistlength);
             dark = !dark;
             count++;
         }
@@ -222,5 +187,45 @@ public class CrawlProfileEditor_p {
 		}
         
         return prop;
+    }
+    
+    private static void putProfileEntry(servletProperties prop, plasmaCrawlProfile.entry profile, boolean active, boolean dark, int count, int domlistlength) {
+        prop.put("crawlProfiles_" + count + "_dark", ((dark) ? 1 : 0));
+        prop.put("crawlProfiles_" + count + "_status", ((active) ? 1 : 0));
+        prop.put("crawlProfiles_" + count + "_name", profile.name());
+        prop.put("crawlProfiles_" + count + "_startURL", profile.startURL());
+        prop.put("crawlProfiles_" + count + "_handle", profile.handle());
+        prop.put("crawlProfiles_" + count + "_depth", profile.generalDepth());
+        prop.put("crawlProfiles_" + count + "_filter", profile.generalFilter());
+        prop.put("crawlProfiles_" + count + "_crawlingIfOlder", (profile.recrawlIfOlder() == Long.MAX_VALUE) ? "no re-crawl" : ""+profile.recrawlIfOlder());
+        prop.put("crawlProfiles_" + count + "_crawlingDomFilterDepth", (profile.domFilterDepth() == Integer.MAX_VALUE) ? "inactive" : Integer.toString(profile.domFilterDepth()));
+
+        // start contrib [MN]
+        int i = 0;
+        String item;
+        while ((i <= domlistlength) && !((item = profile.domName(true, i)).equals(""))){
+            if(i == domlistlength){
+                item = item + " ...";
+            }
+            prop.put("crawlProfiles_"+count+"_crawlingDomFilterContent_"+i+"_item", item);
+            i++;
+        }
+
+        prop.put("crawlProfiles_"+count+"_crawlingDomFilterContent", i);
+        // end contrib [MN]
+
+        prop.put("crawlProfiles_" + count + "_crawlingDomMaxPages", (profile.domMaxPages() == Integer.MAX_VALUE) ? "unlimited" : ""+profile.domMaxPages());
+        prop.put("crawlProfiles_" + count + "_withQuery", (profile.crawlingQ()) ? 1 : 0);
+        prop.put("crawlProfiles_" + count + "_storeCache", (profile.storeHTCache()) ? 1 : 0);
+        prop.put("crawlProfiles_" + count + "_indexText", (profile.indexText()) ? 1 : 0);
+        prop.put("crawlProfiles_" + count + "_indexMedia", (profile.indexMedia()) ? 1 : 0);
+        prop.put("crawlProfiles_" + count + "_remoteIndexing", (profile.remoteIndexing()) ? 1 : 0);
+        prop.put("crawlProfiles_" + count + "_terminateButton", ((!active) || (profile.name().equals("remote")) ||
+                                                           (profile.name().equals("proxy")) ||
+                                                           (profile.name().equals("snippetText")) ||
+                                                           (profile.name().equals("snippetMedia"))) ? 0 : 1);
+        prop.put("crawlProfiles_" + count + "_terminateButton_handle", profile.handle());
+        prop.put("crawlProfiles_" + count + "_deleteButton", (active) ? 0 : 1);
+        prop.put("crawlProfiles_" + count + "_deleteButton_handle", profile.handle());
     }
 }

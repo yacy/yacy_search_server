@@ -16,7 +16,8 @@
   <li class="menugroup" id="menugroupCrawlerControl">
     <h3>Web&nbsp;Indexing</h3>
     <ul class="menu">
-      <li><a href="/CrawlStartSimple_p.html" class="MenuItemLink lock">Start a Web Crawl</a></li>
+      <li><a href="/WatchCrawler_p.html?autoforward=" class="MenuItemLink lock">Crawl Start &amp; Monitoring</a></li>
+      <li><a href="/CrawlResults.html?process=5&autoforward=" class="MenuItemLink">Crawl Results</a></li>
       <li><a href="/IndexControl_p.html" class="MenuItemLink lock">Index Administration</a></li>
       <li><a href="/Blacklist_p.html" class="MenuItemLink lock">Filter &amp; Blacklists</a></li>
       <li><a href="/ProxyIndexingMonitor_p.html" class="MenuItemLink lock">Indexing with Proxy</a></li>
@@ -26,11 +27,9 @@
     <h3>Monitoring</h3>
     <ul class="menu">
       <li><a href="/Network.html" accesskey="w" class="MenuItemLink">YaCy Network</a></li>
-      <li><a href="/WatchWebStructure_p.html?host=auto&amp;depth=2&amp;time=1000" class="MenuItemLink lock">Crawl Activity</a></li>
-      <li><a href="/CrawlResults.html" class="MenuItemLink">Crawl Results</a></li>
+      <li><a href="/WatchWebStructure_p.html?host=auto&amp;depth=2&amp;time=1000" class="MenuItemLink lock">Web Visualization</a></li>
       <li><a href="/AccessTracker_p.html" class="MenuItemLink lock">Access Tracker</a></li>
       <li><a href="/ViewLog_p.html" class="MenuItemLink lock">Server Log</a></li>
-      <li><a href="/CacheAdmin_p.html" class="MenuItemLink lock">Web Cache</a></li>
       <li><a href="/News.html" accesskey="n" class="MenuItemLink">News Monitor</a></li>
       <li><a href="/CookieMonitorIncoming_p.html" class="MenuItemLink lock">Cookies in Proxy</a></li>
     </ul>

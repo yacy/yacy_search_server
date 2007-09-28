@@ -575,7 +575,7 @@ public final class plasmaParser {
             
             // testing if the resource is not empty
             if (sourceArray == null || sourceArray.length == 0) {
-                String errorMsg = "No resource content available.";
+                String errorMsg = "No resource content available (1).";
                 this.theLogger.logInfo("Unable to parse '" + location + "'. " + errorMsg);
                 throw new ParserException(errorMsg,location,plasmaCrawlEURL.DENIED_NOT_PARSEABLE_NO_CONTENT);
             }              
@@ -609,7 +609,7 @@ public final class plasmaParser {
             
             // testing if the resource is not empty
             if (!(sourceFile.exists() && sourceFile.canRead() && sourceFile.length() > 0)) {
-                String errorMsg = sourceFile.exists() ? "Empty resource file." : "No resource content available.";
+                String errorMsg = sourceFile.exists() ? "Empty resource file." : "No resource content available (2).";
                 this.theLogger.logInfo("Unable to parse '" + location + "'. " + errorMsg);
                 throw new ParserException(errorMsg,location,plasmaCrawlEURL.DENIED_NOT_PARSEABLE_NO_CONTENT);
             }        

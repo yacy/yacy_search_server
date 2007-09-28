@@ -117,11 +117,11 @@ public class ProxyIndexingMonitor_p {
                     prop.put("info", 1); //delete DATA/PLASMADB/crawlProfiles0.db
                 } else {
                     try {
-                        sb.profiles.changeEntry(sb.defaultProxyProfile, "generalDepth", Integer.toString(newProxyPrefetchDepth));
-                        sb.profiles.changeEntry(sb.defaultProxyProfile, "storeHTCache", (proxyStoreHTCache) ? "true": "false");
-                        sb.profiles.changeEntry(sb.defaultProxyProfile, "remoteIndexing",proxyIndexingRemote ? "true":"false");
-                        sb.profiles.changeEntry(sb.defaultProxyProfile, "indexText",proxyIndexingLocalText ? "true":"false");
-                        sb.profiles.changeEntry(sb.defaultProxyProfile, "indexMedia",proxyIndexingLocalMedia ? "true":"false");
+                        sb.profilesActiveCrawls.changeEntry(sb.defaultProxyProfile, "generalDepth", Integer.toString(newProxyPrefetchDepth));
+                        sb.profilesActiveCrawls.changeEntry(sb.defaultProxyProfile, "storeHTCache", (proxyStoreHTCache) ? "true": "false");
+                        sb.profilesActiveCrawls.changeEntry(sb.defaultProxyProfile, "remoteIndexing",proxyIndexingRemote ? "true":"false");
+                        sb.profilesActiveCrawls.changeEntry(sb.defaultProxyProfile, "indexText",proxyIndexingLocalText ? "true":"false");
+                        sb.profilesActiveCrawls.changeEntry(sb.defaultProxyProfile, "indexMedia",proxyIndexingLocalMedia ? "true":"false");
                         
                         prop.put("info", 2);//new proxyPrefetchdepth
                         prop.put("info_message", newProxyPrefetchDepth);

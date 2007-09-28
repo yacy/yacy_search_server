@@ -48,7 +48,7 @@ public class plasmaCrawlEntry {
         "String refhash-" + yacySeedDB.commonHashLength + ", " +    // the url's referrer hash
         "String urlname-80, " +                                     // the name of the url, from anchor tag <a>name</a>
         "Cardinal appdate-8 {b256}, " +                             // the time when the url was first time appeared
-        "String profile-4, " +                                      // the name of the prefetch profile handle
+        "String profile-" + yacySeedDB.commonHashLength + ", " +    // the name of the prefetch profile handle
         "Cardinal depth-2 {b256}, " +                               // the prefetch depth so far, starts at 0
         "Cardinal parentbr-3 {b256}, " +                            // number of anchors of the parent
         "Cardinal forkfactor-4 {b256}, " +                          // sum of anchors of all ancestors

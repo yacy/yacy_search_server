@@ -92,6 +92,7 @@ public class IndexCreateIndexingQueue_p {
                                 plasmaHTCache.deleteFile(entry.url());
                             }                            
                         }
+                        switchboard.sbQueue.clear(); // reset file to clean up content completely
                     } 
                 } catch (Exception e) {}
             } else if (post.containsKey("deleteEntry")) {

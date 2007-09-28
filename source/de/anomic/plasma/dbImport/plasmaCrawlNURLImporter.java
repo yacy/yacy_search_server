@@ -64,7 +64,7 @@ public class plasmaCrawlNURLImporter extends AbstractImporter implements dbImpor
         this.preloadTime = Long.valueOf((String)initParams.get("preloadTime")).longValue();        
         
         File noticeUrlDbFile = new File(plasmaPath,"urlNotice1.db");
-        File profileDbFile = new File(plasmaPath, "crawlProfiles0.db");
+        File profileDbFile = new File(plasmaPath, plasmaSwitchboard.DBFILE_ACTIVE_CRAWL_PROFILES);
         
         String errorMsg = null;
         if (!plasmaPath.exists()) 
@@ -169,7 +169,7 @@ public class plasmaCrawlNURLImporter extends AbstractImporter implements dbImpor
                         if (!this.importProfileHandleCache.contains(profileHandle)) {
                             
                             // testing if the profile is already known
-                            plasmaCrawlProfile.entry profileEntry = this.sb.profiles.getEntry(profileHandle);
+                            plasmaCrawlProfile.entry profileEntry = this.sb.profilesActiveCrawls.getEntry(profileHandle);
                             
                             // if not we need to import it
                             if (profileEntry == null) {
@@ -178,7 +178,7 @@ public class plasmaCrawlNURLImporter extends AbstractImporter implements dbImpor
                                 if (sourceEntry != null) {
                                     this.profileCount++;
                                     this.importProfileHandleCache.add(profileHandle);
-                                    this.sb.profiles.newEntry((TreeMap)((TreeMap)sourceEntry.map()).clone());
+                                    this.sb.profilesActiveCrawls.newEntry((TreeMap)((TreeMap)sourceEntry.map()).clone());
                                 } else {
                                     this.log.logWarning("Profile '" + profileHandle + "' of url entry '" + nextHash + "' unknown.");
                                     continue;
@@ -193,7 +193,7 @@ public class plasmaCrawlNURLImporter extends AbstractImporter implements dbImpor
                         
                         // removing hash from the import db
                     } finally {
-                        this.importNurlDB.remove(nextHash);
+                        this.importNurlDB.removeByURLHash(nextHash);
                     }
                     
                     if (this.urlCount % 100 == 0) {

@@ -94,7 +94,7 @@ public class IndexCreateWWWGlobalQueue_p {
                 prop.put("info_numEntries", c);
             } else if (post.containsKey("deleteEntry")) {
                 String urlHash = (String) post.get("deleteEntry");
-                switchboard.noticeURL.remove(urlHash);
+                switchboard.noticeURL.removeByURLHash(urlHash);
                 prop.put("LOCATION","");
                 return prop;
             }
@@ -118,7 +118,7 @@ public class IndexCreateWWWGlobalQueue_p {
                 if ((urle != null)&&(urle.url()!=null)) {
                     initiator = yacyCore.seedDB.getConnected(urle.initiator());
                     profileHandle = urle.profileHandle();
-                    profileEntry = (profileHandle == null) ? null : switchboard.profiles.getEntry(profileHandle);
+                    profileEntry = (profileHandle == null) ? null : switchboard.profilesActiveCrawls.getEntry(profileHandle);
                     prop.put("crawler-queue_list_"+showNum+"_dark", ((dark) ? 1 : 0) );
                     prop.put("crawler-queue_list_"+showNum+"_initiator", ((initiator == null) ? "proxy" : htmlTools.encodeUnicode2html(initiator.getName(), true)) );
                     prop.put("crawler-queue_list_"+showNum+"_profile", ((profileEntry == null) ? "unknown" : htmlTools.encodeUnicode2html(profileEntry.name(), true)));

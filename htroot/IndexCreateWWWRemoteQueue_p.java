@@ -93,7 +93,7 @@ public class IndexCreateWWWRemoteQueue_p {
                 prop.put("info_numEntries", c);
             } else if (post.containsKey("deleteEntry")) {
                 String urlHash = (String) post.get("deleteEntry");
-                sb.noticeURL.remove(urlHash);
+                sb.noticeURL.removeByURLHash(urlHash);
                 prop.put("LOCATION","");
                 return prop;
             }
@@ -117,7 +117,7 @@ public class IndexCreateWWWRemoteQueue_p {
                 if (urle != null && urle.url() != null) {
                     initiator = yacyCore.seedDB.getConnected(urle.initiator());
                     profileHandle = urle.profileHandle();
-                    profileEntry = (profileHandle == null) ? null : sb.profiles.getEntry(profileHandle);
+                    profileEntry = (profileHandle == null) ? null : sb.profilesActiveCrawls.getEntry(profileHandle);
                     prop.put("crawler-queue_list_" + showNum + "_dark", ((dark) ? 1 : 0) );
                     prop.put("crawler-queue_list_" + showNum + "_initiator", ((initiator == null) ? "proxy" : initiator.getName()));
                     prop.put("crawler-queue_list_" + showNum + "_profile", ((profileEntry == null) ? "unknown" : profileEntry.name()));

@@ -63,12 +63,17 @@ public class WatchCrawler_p {
         // return variable that accumulates replacements
         plasmaSwitchboard switchboard = (plasmaSwitchboard) env;
         serverObjects prop = new serverObjects();
+        prop.put("forwardToCrawlStart", 0);
         
         if (post == null) {
             // not a crawl start, only monitoring
             prop.put("info", 0);
         } else {
             prop.put("info", 0);
+            
+            if ((post.containsKey("autoforward")) && (switchboard.coreCrawlJobSize() == 0)) {
+                prop.put("forwardToCrawlStart", 1);
+            }
             
             if (post.containsKey("continue")) {
                 // continue queue
@@ -158,18 +163,12 @@ public class WatchCrawler_p {
                         if (pos == -1) crawlingStart = "http://" + crawlingStart;
 
                         // normalizing URL
-                        try {crawlingStart = new yacyURL(crawlingStart, null).toNormalform(true, true);} catch (MalformedURLException e1) {}
-                        
-                        // check if url is proper
                         yacyURL crawlingStartURL = null;
-                        try {
-                            crawlingStartURL = new yacyURL(crawlingStart, null);
-                        } catch (MalformedURLException e) {
-                            crawlingStartURL = null;
-                        }
+                        try {crawlingStartURL = new yacyURL(crawlingStart, null);} catch (MalformedURLException e1) {}
+                        crawlingStart = (crawlingStartURL == null) ? null : crawlingStartURL.toNormalform(true, true);
                         
                         // check if pattern matches
-                        if ((crawlingStartURL == null) /* || (!(crawlingStart.matches(newcrawlingfilter))) */) {
+                        if ((crawlingStart == null) /* || (!(crawlingStart.matches(newcrawlingfilter))) */) {
                             // print error message
                             prop.put("info", 4); //crawlfilter does not match url
                             prop.put("info_newcrawlingfilter", newcrawlingfilter);
@@ -183,12 +182,13 @@ public class WatchCrawler_p {
                             // first delete old entry, if exists
                             String urlhash = (new yacyURL(crawlingStart, null)).hash();
                             switchboard.wordIndex.loadedURL.remove(urlhash);
-                            switchboard.noticeURL.remove(urlhash);
+                            switchboard.noticeURL.removeByURLHash(urlhash);
                             switchboard.errorURL.remove(urlhash);
                             
                             // stack url
-                            plasmaCrawlProfile.entry pe = switchboard.profiles.newEntry(
-                                    crawlingStartURL.getHost(), crawlingStart, newcrawlingfilter, newcrawlingfilter,
+                            switchboard.profilesPassiveCrawls.removeEntry(crawlingStartURL.hash()); // if there is an old entry, delete it
+                            plasmaCrawlProfile.entry pe = switchboard.profilesActiveCrawls.newEntry(
+                                    crawlingStartURL.getHost(), crawlingStartURL, newcrawlingfilter, newcrawlingfilter,
                                     newcrawlingdepth, newcrawlingdepth,
                                     crawlingIfOlder, crawlingDomFilterDepth, crawlingDomMaxPages,
                                     crawlingQ,
@@ -268,7 +268,8 @@ public class WatchCrawler_p {
                                 HashMap hyperlinks = (HashMap) scraper.getAnchors();
                                 
                                 // creating a crawler profile
-                                plasmaCrawlProfile.entry profile = switchboard.profiles.newEntry(fileName, "file://" + file.toString(), newcrawlingfilter, newcrawlingfilter, newcrawlingdepth, newcrawlingdepth, crawlingIfOlder, crawlingDomFilterDepth, crawlingDomMaxPages, crawlingQ, indexText, indexMedia, storeHTCache, true, crawlOrder, xsstopw, xdstopw, xpstopw);
+                                yacyURL crawlURL = new yacyURL("file://" + file.toString(), null);
+                                plasmaCrawlProfile.entry profile = switchboard.profilesActiveCrawls.newEntry(fileName, crawlURL, newcrawlingfilter, newcrawlingfilter, newcrawlingdepth, newcrawlingdepth, crawlingIfOlder, crawlingDomFilterDepth, crawlingDomMaxPages, crawlingQ, indexText, indexMedia, storeHTCache, true, crawlOrder, xsstopw, xdstopw, xpstopw);
                                 
                                 // loop through the contained links
                                 Iterator interator = hyperlinks.entrySet().iterator();
@@ -325,10 +326,11 @@ public class WatchCrawler_p {
                     	try {
                     		// getting the sitemap URL
                     		sitemapURLStr = post.get("sitemapURL","");
-                    		
+                    		yacyURL sitemapURL = new yacyURL(sitemapURLStr, null);
+                            
                     		// create a new profile
-                    		plasmaCrawlProfile.entry pe = switchboard.profiles.newEntry(
-                    				sitemapURLStr, sitemapURLStr, newcrawlingfilter, newcrawlingfilter,
+                    		plasmaCrawlProfile.entry pe = switchboard.profilesActiveCrawls.newEntry(
+                    				sitemapURLStr, sitemapURL, newcrawlingfilter, newcrawlingfilter,
                     				newcrawlingdepth, newcrawlingdepth,
                     				crawlingIfOlder, crawlingDomFilterDepth, crawlingDomMaxPages,
                     				crawlingQ,

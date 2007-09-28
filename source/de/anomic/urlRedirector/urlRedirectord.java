@@ -34,11 +34,11 @@ public class urlRedirectord implements serverHandler {
         }
         
         if (profile == null) {
-                profile = switchboard.profiles.newEntry(
+                profile = switchboard.profilesActiveCrawls.newEntry(
                             // name
                             "URL Redirector",
                             // start URL
-                            "", 
+                            null, 
                             // crawling filter
                             ".*", 
                             ".*", 
@@ -151,7 +151,7 @@ public class urlRedirectord implements serverHandler {
                     if (pos != -1) {
                         String newDepth = line.substring(pos).trim();
                         this.theLogger.logFine("Changing crawling depth to '" + newDepth + "'.");
-                        switchboard.profiles.changeEntry(profile, "generalDepth",newDepth);
+                        switchboard.profilesActiveCrawls.changeEntry(profile, "generalDepth",newDepth);
                     }
                     outputWriter.print("\r\n");
                     outputWriter.flush();
@@ -160,7 +160,7 @@ public class urlRedirectord implements serverHandler {
                     if (pos != -1) {
                         String newValue = line.substring(pos).trim();
                         this.theLogger.logFine("Changing crawl dynamic setting to '" + newValue + "'");
-                        switchboard.profiles.changeEntry(profile, "crawlingQ",newValue);
+                        switchboard.profilesActiveCrawls.changeEntry(profile, "crawlingQ",newValue);
                     }
                     outputWriter.print("\r\n");
                     outputWriter.flush();                    
@@ -192,7 +192,7 @@ public class urlRedirectord implements serverHandler {
                             // first delete old entry, if exists
                             String urlhash = reqURL.hash();
                             switchboard.wordIndex.loadedURL.remove(urlhash);
-                            switchboard.noticeURL.remove(urlhash);
+                            switchboard.noticeURL.removeByURLHash(urlhash);
                             switchboard.errorURL.remove(urlhash);                            
                             
                             // enqueuing URL for crawling

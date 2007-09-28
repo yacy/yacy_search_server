@@ -141,15 +141,15 @@ public class QuickCrawlLink_p {
                     
             String urlhash = crawlingStartURL.hash();
             switchboard.wordIndex.loadedURL.remove(urlhash);
-            switchboard.noticeURL.remove(urlhash);
+            switchboard.noticeURL.removeByURLHash(urlhash);
             switchboard.errorURL.remove(urlhash);
             
             // create crawling profile
             plasmaCrawlProfile.entry pe = null;
             try {
-                pe = switchboard.profiles.newEntry(
+                pe = switchboard.profilesActiveCrawls.newEntry(
                         crawlingStartURL.getHost(), 
-                        crawlingStart, 
+                        crawlingStartURL, 
                         crawlingFilter, 
                         crawlingFilter, 
                         CrawlingDepth, 

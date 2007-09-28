@@ -29,6 +29,7 @@
   </colgroup>
   <tr class="TableHeader"> 
     <td><strong>Crawl Thread</strong></td>
+    <td><strong>Status</strong></td>
     <td><strong>Start URL</strong></td>
     <td><strong>Depth</strong></td>
     <td><strong>Filter</strong></td>
@@ -46,6 +47,7 @@
   #{crawlProfiles}# 
   <tr class="TableCell#(dark)#Light::Dark#(/dark)#"> 
     <td>#[name]#</td>
+    <td>#(status)#terminated::active#(/status)#</td>
     <td><a  href="#[startURL]#">#[startURL]#</a></td>
     <td>#[depth]#</td>
     <td>#[filter]#</td>
@@ -58,12 +60,18 @@
     <td>#(indexText)#no::yes#(/indexText)#</td>
     <td>#(indexMedia)#no::yes#(/indexMedia)#</td>
     <td>#(remoteIndexing)#no::yes#(/remoteIndexing)#</td>
-    <td>#(deleteButton)#::
-    <form action="CrawlProfileEditor_p.html" method="get" enctype="multipart/form-data">
-        <pre><input type="hidden" name="handle" value="#[handle]#" /></pre>
-        <pre><input type="submit" name="deleteprofile" value="Delete" /></pre>
-      #(/deleteButton)#
-    </form>
+    <td>#(terminateButton)#::
+        <form action="CrawlProfileEditor_p.html" method="get" enctype="multipart/form-data">
+        <input type="hidden" name="handle" value="#[handle]#" />
+        <input type="submit" name="terminate" value="Terminate" />
+        </form>
+        #(/terminateButton)#
+	    #(deleteButton)#::
+        <form action="CrawlProfileEditor_p.html" method="get" enctype="multipart/form-data">
+        <input type="hidden" name="handle" value="#[handle]#" />
+        <input type="submit" name="delete" value="Delete" />
+        </form>
+        #(/deleteButton)#
 	</td>
   </tr>
   #{/crawlProfiles}# 

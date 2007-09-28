@@ -83,9 +83,9 @@ public class CrawlURLFetch_p {
     
     public static plasmaCrawlProfile.entry getCrawlProfile(serverSwitch env) {
         if (profile == null) {
-            profile = ((plasmaSwitchboard)env).profiles.newEntry(
+            profile = ((plasmaSwitchboard)env).profilesActiveCrawls.newEntry(
                     "URLFetcher",           // Name
-                    "",                     // URL
+                    null,                   // URL
                     ".*", ".*",             // General / specific filter
                     0, 0,                   // General / specific depth
                     -1, -1, -1,             // Recrawl / Dom-filter depth / Dom-max-pages

@@ -61,7 +61,7 @@ public final class plasmaWordIndex implements indexRI {
     // environment constants
     public  static final long wCacheMaxAge   = 1000 * 60 * 30; // milliseconds; 30 minutes
     public  static final int  wCacheMaxChunk = 1000;           // number of references for each urlhash
-    public  static final int  lowcachedivisor = 200;
+    public  static final int  lowcachedivisor = 320;
     public  static final int  maxCollectionPartition = 7; // should be 7
     
     private final kelondroOrder      indexOrder = kelondroBase64Order.enhancedCoder;

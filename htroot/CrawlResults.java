@@ -69,6 +69,11 @@ public class CrawlResults {
             tabletype = 0;
         }
 
+        if ((post != null) && (post.containsKey("autoforward")) && (tabletype == 5) && (sb.wordIndex.loadedURL.getStackSize(5) == 0)) {
+            // the main menu does a request to the local crawler page, but in case this table is empty, the overview page is shown
+            tabletype = 0;
+        }
+        
         // check if authorization is needed and/or given
         if (((tabletype > 0) && (tabletype < 6)) ||
             (post.containsKey("clearlist")) ||

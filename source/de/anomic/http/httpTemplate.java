@@ -464,9 +464,9 @@ public final class httpTemplate {
                             while( (line = br.readLine()) != null ){
                                 include.append(line.getBytes("UTF-8")).append(de.anomic.server.serverCore.crlfString.getBytes("UTF-8"));
                             }
-                        }catch(IOException e){
+                        } catch (IOException e) {
                             //file not found?                    
-                            serverLog.logSevere("FILEHANDLER","Include Error with file: " + new String(filename, "UTF-8"));
+                            serverLog.logSevere("FILEHANDLER","Include Error with file " + new String(filename, "UTF-8") + ": " + e.getMessage());
                         } finally {
                             if (br != null) try { br.close(); br=null; } catch (Exception e) {}
                         }

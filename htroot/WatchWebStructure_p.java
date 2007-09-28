@@ -31,7 +31,7 @@ public class WatchWebStructure_p {
         
         if (host.equals("auto")) {
         	// try to find the host from the crawl profiles
-        	Iterator it = sb.profiles.profiles(true);
+        	Iterator it = sb.profilesActiveCrawls.profiles(true);
             entry e;
             while (it.hasNext()) {
                 e = (entry)it.next();

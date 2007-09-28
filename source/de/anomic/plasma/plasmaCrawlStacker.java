@@ -214,7 +214,7 @@ public final class plasmaCrawlStacker {
     
     public String dequeue(plasmaCrawlEntry theMsg) throws InterruptedException {
         
-        plasmaCrawlProfile.entry profile = this.sb.profiles.getEntry(theMsg.profileHandle());
+        plasmaCrawlProfile.entry profile = this.sb.profilesActiveCrawls.getEntry(theMsg.profileHandle());
         if (profile == null) {
             String errorMsg = "LOST PROFILE HANDLE '" + theMsg.profileHandle() + "' for URL " + theMsg.url();
             this.log.logSevere(errorMsg);

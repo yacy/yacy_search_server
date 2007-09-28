@@ -139,12 +139,20 @@ public class plasmaCrawlNURL {
         return null;
     }
     
-    public plasmaCrawlEntry remove(String urlhash) {
+    public plasmaCrawlEntry removeByURLHash(String urlhash) {
         plasmaCrawlEntry entry = null;
         try {if ((entry = coreStack.remove(urlhash)) != null) return entry;} catch (IOException e) {}
         try {if ((entry = limitStack.remove(urlhash)) != null) return entry;} catch (IOException e) {}
         try {if ((entry = remoteStack.remove(urlhash)) != null) return entry;} catch (IOException e) {}
         return null;
+    }
+    
+    public int removeByProfileHandle(String handle) {
+        int removed = 0;
+        try {removed += coreStack.removeAllByProfileHandle(handle);} catch (IOException e) {}
+        try {removed += limitStack.removeAllByProfileHandle(handle);} catch (IOException e) {}
+        try {removed += remoteStack.removeAllByProfileHandle(handle);} catch (IOException e) {}
+        return removed;
     }
     
     public plasmaCrawlEntry[] top(int stackType, int count) {

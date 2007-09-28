@@ -82,7 +82,7 @@ public class plasmaSwitchboardQueue {
             "byte[] flags-1, " +                                       // flags
             "String initiator-" + yacySeedDB.commonHashLength + ", " + // the crawling initiator
             "Cardinal depth-2 {b64e}, " +                              // the prefetch depth so far, starts at 0
-            "String profile-" + plasmaCrawlProfile.crawlProfileHandleLength + ", " + // the name of the prefetch profile handle
+            "String profile-" + yacySeedDB.commonHashLength + ", " +   // the name of the prefetch profile handle
             "String urldescr-80",
             kelondroNaturalOrder.naturalOrder,
             0);

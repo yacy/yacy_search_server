@@ -160,7 +160,7 @@ public class SitemapParser extends DefaultHandler {
 		
 		if (theCrawlingProfile == null) {
 			// create a new profile
-			this.crawlingProfile = createProfile(this.siteMapURL.getHost(),this.siteMapURL.toString());
+			this.crawlingProfile = createProfile(this.siteMapURL.getHost(), this.siteMapURL);
 		} else {
 			// use an existing profile
 			this.crawlingProfile = theCrawlingProfile;
@@ -348,8 +348,8 @@ public class SitemapParser extends DefaultHandler {
 		}
 	}
 	
-	private plasmaCrawlProfile.entry createProfile(String domainName, String sitemapURL) {
-        return this.switchboard.profiles.newEntry(
+	private plasmaCrawlProfile.entry createProfile(String domainName, yacyURL sitemapURL) {
+        return this.switchboard.profilesActiveCrawls.newEntry(
         		domainName, 
         		sitemapURL,
         		// crawlingFilter

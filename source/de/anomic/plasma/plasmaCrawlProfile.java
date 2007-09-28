@@ -55,6 +55,8 @@ import de.anomic.kelondro.kelondroException;
 import de.anomic.kelondro.kelondroMapObjects;
 import de.anomic.kelondro.kelondroNaturalOrder;
 import de.anomic.server.serverCodings;
+import de.anomic.yacy.yacySeedDB;
+import de.anomic.yacy.yacyURL;
 
 public class plasmaCrawlProfile {
     
@@ -64,13 +66,11 @@ public class plasmaCrawlProfile {
     private File profileTableFile;
     private long preloadTime;
     
-    public static final int crawlProfileHandleLength = 4;  // name of the prefetch profile
-    
     public plasmaCrawlProfile(File file, long preloadTime) {
         this.profileTableFile = file;
         this.preloadTime = preloadTime;
         profileTableFile.getParentFile().mkdirs();
-        kelondroDyn dyn = new kelondroDyn(profileTableFile, true, true, preloadTime, crawlProfileHandleLength, 2000, '#', kelondroNaturalOrder.naturalOrder, true, false, true);
+        kelondroDyn dyn = new kelondroDyn(profileTableFile, true, true, preloadTime, yacySeedDB.commonHashLength, 2000, '#', kelondroNaturalOrder.naturalOrder, true, false, true);
         profileTable = new kelondroMapObjects(dyn, 500);
     }
     
@@ -79,7 +79,7 @@ public class plasmaCrawlProfile {
         if (profileTable != null) profileTable.close();
         if (!(profileTableFile.delete())) throw new RuntimeException("cannot delete crawl profile database");
         profileTableFile.getParentFile().mkdirs();
-        kelondroDyn dyn = new kelondroDyn(profileTableFile, true, true, preloadTime, crawlProfileHandleLength, 2000, '#', kelondroNaturalOrder.naturalOrder, true, false, true);
+        kelondroDyn dyn = new kelondroDyn(profileTableFile, true, true, preloadTime, yacySeedDB.commonHashLength, 2000, '#', kelondroNaturalOrder.naturalOrder, true, false, true);
         profileTable = new kelondroMapObjects(dyn, 500);
     }
     
@@ -164,7 +164,7 @@ public class plasmaCrawlProfile {
         return ne;        
     }
     
-    public entry newEntry(String name, String startURL, String generalFilter, String specificFilter,
+    public entry newEntry(String name, yacyURL startURL, String generalFilter, String specificFilter,
                            int generalDepth, int specificDepth,
                            int recrawlIfOlder /*minutes*/, int domFilterDepth,  int domMaxPages,
                            boolean crawlingQ,
@@ -257,7 +257,7 @@ public class plasmaCrawlProfile {
         private Map mem;
         private Map doms;
         
-        public entry(String name, String startURL, String generalFilter, String specificFilter,
+        public entry(String name, yacyURL startURL, String generalFilter, String specificFilter,
                      int generalDepth, int specificDepth,
                      int recrawlIfOlder /*minutes*/, int domFilterDepth, int domMaxPages,
                      boolean crawlingQ,
@@ -266,11 +266,11 @@ public class plasmaCrawlProfile {
                      boolean remoteIndexing,
                      boolean xsstopw, boolean xdstopw, boolean xpstopw) {
             if (name == null || name.length() == 0) throw new NullPointerException("name must not be null");
-            String handle = kelondroBase64Order.enhancedCoder.encode(serverCodings.encodeMD5Raw(Long.toString(System.currentTimeMillis()))).substring(0, crawlProfileHandleLength);
+            String handle = (startURL == null) ? kelondroBase64Order.enhancedCoder.encode(serverCodings.encodeMD5Raw(Long.toString(System.currentTimeMillis()))).substring(0, yacySeedDB.commonHashLength) : startURL.hash();
             mem = new HashMap();
             mem.put(HANDLE,           handle);
             mem.put(NAME,             name);
-            mem.put(START_URL,        (startURL == null) ? "" : startURL);
+            mem.put(START_URL,        (startURL == null) ? "" : startURL.toNormalform(true, false));
             mem.put(GENERAL_FILTER,   (generalFilter == null) ? ".*" : generalFilter);
             mem.put(SPECIFIC_FILTER,  (specificFilter == null) ? ".*" : specificFilter);
             mem.put(GENERAL_DEPTH,    Integer.toString(generalDepth));

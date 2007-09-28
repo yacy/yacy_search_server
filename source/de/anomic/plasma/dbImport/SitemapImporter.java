@@ -113,7 +113,7 @@ public class SitemapImporter extends AbstractImporter implements dbImporter {
         	this.sitemapURL = new yacyURL((String)initParams.get("sitemapURL"), null);
         	
         	// getting the crawling profile to use
-        	plasmaCrawlProfile.entry profileEntry = this.sb.profiles.getEntry((String)initParams.get("crawlingProfile"));
+        	plasmaCrawlProfile.entry profileEntry = this.sb.profilesActiveCrawls.getEntry((String)initParams.get("crawlingProfile"));
         	
         	// creating the sitemap parser
         	this.parser = new SitemapParser(this.sb,this.sitemapURL,profileEntry);
