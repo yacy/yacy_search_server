@@ -639,6 +639,10 @@ public final class yacySeedDB {
                     seed = (yacySeed) e.nextElement();
                     if (seed != null) {
                         addressStr = seed.getPublicAddress();
+                        if (addressStr == null) {
+                                serverLog.logWarning("YACY","lookupByIP: address of seed " + seed.getName() + " is null.");
+                                continue;
+                        }
                         if ((pos = addressStr.indexOf(":"))!= -1) {
                             addressStr = addressStr.substring(0,pos);
                         }
@@ -672,6 +676,7 @@ public final class yacySeedDB {
         try {
             // check local seed
             addressStr = mySeed.getPublicAddress();
+            if (addressStr == null) return null;
             if ((pos = addressStr.indexOf(":"))!= -1) {
                 addressStr = addressStr.substring(0,pos);
             }
