@@ -961,6 +961,6 @@ wikiParser.class = de.anomic.data.wikiCode
 # settings for automatic deletion of old entries in passive and potential seed-db
 # time means max time (in days) a peer may not have been seen before it is deleted
 routing.deleteOldSeeds.permission = true
-routing.deleteOldSeeds.permission__pro = false
+routing.deleteOldSeeds.permission__pro = true
 routing.deleteOldSeeds.time = 7
 routing.deleteOldSeeds.time__pro = 30

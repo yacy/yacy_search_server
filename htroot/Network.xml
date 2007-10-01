@@ -63,7 +63,7 @@
     <uptime>#[my-uptime]#</uptime>
     <links>#[my-LCount]#</links>
     <words>#[my-ICount]#</words> 
-    <words>#[my-RCount]#</words> 
+    <rurls>#[my-RCount]#</rurls> 
     <acceptcrawl>#[my-acceptcrawl]#</acceptcrawl>
     <acceptindex>#[my-dhtreceive]#</acceptindex>
     <acceptranking>#[my-rankingreceive]#</acceptranking>
