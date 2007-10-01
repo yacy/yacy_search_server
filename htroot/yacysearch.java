@@ -175,7 +175,7 @@ public class yacysearch {
         // SEARCH
         final boolean indexDistributeGranted = sb.getConfig(plasmaSwitchboard.INDEX_DIST_ALLOW, "true").equals("true");
         final boolean indexReceiveGranted = sb.getConfig("allowReceiveIndex", "true").equals("true");
-        final boolean offline = yacyCore.seedDB.mySeed.isVirgin();
+        final boolean offline = yacyCore.seedDB.mySeed().isVirgin();
         final boolean clustersearch = sb.isRobinsonMode() &&
     									(sb.getConfig("cluster.mode", "").equals("privatecluster") ||
     									 sb.getConfig("cluster.mode", "").equals("publiccluster"));
@@ -244,7 +244,7 @@ public class yacysearch {
             }
 
             // prepare search properties
-            final boolean yacyonline = ((yacyCore.seedDB != null) && (yacyCore.seedDB.mySeed != null) && (yacyCore.seedDB.mySeed.getPublicAddress() != null));
+            final boolean yacyonline = ((yacyCore.seedDB != null) && (yacyCore.seedDB.mySeed() != null) && (yacyCore.seedDB.mySeed().getPublicAddress() != null));
             final boolean globalsearch = (global) && (yacyonline);
         
             // do the search

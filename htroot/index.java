@@ -106,7 +106,7 @@ public class index {
         
         //long mylinks = 0;
         try {
-            prop.put("links", groupDigits(/*mylinks = */Long.parseLong(yacyCore.seedDB.mySeed.get(yacySeed.LCOUNT, "0"))));
+            prop.put("links", groupDigits(/*mylinks = */Long.parseLong(yacyCore.seedDB.mySeed().get(yacySeed.LCOUNT, "0"))));
         } catch (NumberFormatException e) { prop.put("links", "0"); }
         //prop.put("total-links", groupDigits(mylinks + yacyCore.seedDB.countActiveURL())); // extremely time-intensive!
         

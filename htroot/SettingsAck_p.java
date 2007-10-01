@@ -294,7 +294,7 @@ public class SettingsAck_p {
             } else {
                 serverCore.useStaticIP = true;
             }
-            yacyCore.seedDB.mySeed.put(yacySeed.IP, staticIP);
+            yacyCore.seedDB.mySeed().put(yacySeed.IP, staticIP);
             env.setConfig("staticIP", staticIP);
 
             // server access data

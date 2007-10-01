@@ -78,7 +78,7 @@ public class plasmaCrawlEntry {
     private int      handle;
 
     public plasmaCrawlEntry(yacyURL url) {
-        this(yacyCore.seedDB.mySeed.hash, url, null, null, new Date(), null, 0, 0, 0);
+        this(yacyCore.seedDB.mySeed().hash, url, null, null, new Date(), null, 0, 0, 0);
     }
     
     /**

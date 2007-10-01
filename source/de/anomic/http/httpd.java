@@ -359,7 +359,7 @@ public final class httpd implements serverHandler {
         // user = addressed peer name
         // pw = addressed peer hash (b64-hash)
         String auth = (String) header.get(httpHeader.PROXY_AUTHORIZATION,"xxxxxx");
-        String test = kelondroBase64Order.standardCoder.encodeString(yacyCore.seedDB.mySeed.getName() + ":" + yacyCore.seedDB.mySeed.hash);
+        String test = kelondroBase64Order.standardCoder.encodeString(yacyCore.seedDB.mySeed().getName() + ":" + yacyCore.seedDB.mySeed().hash);
         if (!test.equals(auth.trim().substring(6))) return false;
         
         // the accessing client must use a yacy user-agent
@@ -1164,7 +1164,7 @@ public final class httpd implements serverHandler {
                         : Integer.toString(serverCore.getPortNr(switchboard.getConfig("port", "8080"))));
             }                   
 
-            tp.put("peerName", yacyCore.seedDB.mySeed.getName());
+            tp.put("peerName", yacyCore.seedDB.mySeed().getName());
             tp.put("errorMessageType", errorcase);            
             tp.put("httpStatus",       Integer.toString(httpStatusCode) + " " + httpStatusText);
             tp.put("requestMethod",    conProp.getProperty(httpHeader.CONNECTION_PROP_METHOD));
@@ -1485,7 +1485,7 @@ public final class httpd implements serverHandler {
         if ((hostName == null) || (hostName.length() == 0)) return false;
         
         // getting ip address and port of this seed
-        yacySeed thisSeed =  yacyCore.seedDB.mySeed;
+        yacySeed thisSeed =  yacyCore.seedDB.mySeed();
         String thisSeedIP   = thisSeed.get(yacySeed.IP,null);
         String thisSeedPort = thisSeed.get(yacySeed.PORT,null);
         
@@ -1548,7 +1548,7 @@ public final class httpd implements serverHandler {
             final Integer dstPort = (idx != -1) ? Integer.valueOf(hostName.substring(idx+1).trim()) : new Integer(80);
             
             // if the hostname endswith thisPeerName.yacy ...
-            if (dstHost.endsWith(yacyCore.seedDB.mySeed.getName() + ".yacy")) {
+            if (dstHost.endsWith(yacyCore.seedDB.mySeed().getName() + ".yacy")) {
                 return true;
             /* 
              * If the port number is equal to the yacy port and the IP address is an address of this host ...

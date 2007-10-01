@@ -199,7 +199,7 @@ public class urlRedirectord implements serverHandler {
                             reasonString = switchboard.sbStackCrawlThread.stackCrawl(
                                     this.nextURL, 
                                     null, 
-                                    yacyCore.seedDB.mySeed.hash, 
+                                    yacyCore.seedDB.mySeed().hash, 
                                     "URL Redirector", 
                                     new Date(), 
                                     0, 

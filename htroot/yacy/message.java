@@ -92,7 +92,7 @@ public final class message {
 
         String youare = post.get("youare", ""); // seed hash of the target peer, needed for network stability
         // check if we are the right target and requester has correct information about this peer
-        if ((yacyCore.seedDB.mySeed == null) || (!(yacyCore.seedDB.mySeed.hash.equals(youare)))) {
+        if ((yacyCore.seedDB.mySeed() == null) || (!(yacyCore.seedDB.mySeed().hash.equals(youare)))) {
             // this request has a wrong target
             prop.putASIS("response", "-1"); // request rejected
             return prop;
@@ -152,7 +152,7 @@ public final class message {
             sb.messageDB.write(msgEntry = sb.messageDB.newEntry(
                     "remote",
                     otherSeed.get(yacySeed.NAME, "anonymous"), otherSeed.hash,
-                    yacyCore.seedDB.mySeed.getName(), yacyCore.seedDB.mySeed.hash,
+                    yacyCore.seedDB.mySeed().getName(), yacyCore.seedDB.mySeed().hash,
                     subject, mb));
 
             messageForwardingViaEmail(env, msgEntry);
@@ -198,7 +198,7 @@ public final class message {
             .append(sendMailTo)
             .append("\nFrom: ")
             .append("yacy@")
-            .append(yacyCore.seedDB.mySeed.getName())
+            .append(yacyCore.seedDB.mySeed().getName())
             .append("\nSubject: [YaCy] ")
             .append(msgEntry.subject().replace('\n', ' '))
             .append("\nDate: ")

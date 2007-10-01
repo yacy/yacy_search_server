@@ -288,7 +288,7 @@ public final class serverCore extends serverAbstractThread implements serverThre
         
         // updating the port information
         //yacyCore.seedDB.mySeed.put(yacySeed.PORT,Integer.toString(bindAddress.getPort()));    
-        yacyCore.seedDB.mySeed.put(yacySeed.PORT, seedPort);    
+        yacyCore.seedDB.mySeed().put(yacySeed.PORT, seedPort);    
     }
     
     public static int getPortNr(String extendedPortString) {
@@ -377,8 +377,8 @@ public final class serverCore extends serverAbstractThread implements serverThre
                 serverCore.portForwarding.connect();
                 
                 serverCore.portForwardingEnabled = true;
-                yacyCore.seedDB.mySeed.put(yacySeed.IP, serverDomains.myPublicIP());
-                yacyCore.seedDB.mySeed.put(yacySeed.PORT,Integer.toString(serverCore.portForwarding.getPort()));                               
+                yacyCore.seedDB.mySeed().put(yacySeed.IP, serverDomains.myPublicIP());
+                yacyCore.seedDB.mySeed().put(yacySeed.PORT,Integer.toString(serverCore.portForwarding.getPort()));                               
             } catch (Exception e) {
                 serverCore.portForwardingEnabled = false;
                 this.switchboard.setConfig("portForwarding.Enabled", "false");
@@ -392,8 +392,8 @@ public final class serverCore extends serverAbstractThread implements serverThre
         } else {
             serverCore.portForwardingEnabled = false;
             serverCore.portForwarding = null;
-            yacyCore.seedDB.mySeed.put(yacySeed.IP, serverDomains.myPublicIP());
-            yacyCore.seedDB.mySeed.put(yacySeed.PORT,Integer.toString(serverCore.getPortNr(this.switchboard.getConfig("port", "8080"))));             
+            yacyCore.seedDB.mySeed().put(yacySeed.IP, serverDomains.myPublicIP());
+            yacyCore.seedDB.mySeed().put(yacySeed.PORT,Integer.toString(serverCore.getPortNr(this.switchboard.getConfig("port", "8080"))));             
         }
         if(! this.switchboard.getConfig("staticIP", "").equals(""))
             serverCore.useStaticIP=true;

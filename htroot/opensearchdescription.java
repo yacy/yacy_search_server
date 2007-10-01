@@ -44,7 +44,7 @@ public class opensearchdescription {
         final serverObjects prop = new serverObjects();
         prop.put("thisaddress", thisaddress);
         prop.put("SearchPageGreeting", promoteSearchPageGreeting);
-        prop.put("clientname", yacyCore.seedDB.mySeed.getName());
+        prop.put("clientname", yacyCore.seedDB.mySeed().getName());
         
         // return rewrite properties
         return prop;

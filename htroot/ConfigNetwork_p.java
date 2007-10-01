@@ -97,10 +97,10 @@ public class ConfigNetwork_p {
 
             if (indexReceive) {
                 sb.setConfig("allowReceiveIndex", "true");
-                yacyCore.seedDB.mySeed.setFlagAcceptRemoteIndex(true);
+                yacyCore.seedDB.mySeed().setFlagAcceptRemoteIndex(true);
             } else {
                 sb.setConfig("allowReceiveIndex", "false");
-                yacyCore.seedDB.mySeed.setFlagAcceptRemoteIndex(false);
+                yacyCore.seedDB.mySeed().setFlagAcceptRemoteIndex(false);
             }
 
             if (post.get("indexReceiveBlockBlacklist", "").equals("on")) {
@@ -110,7 +110,7 @@ public class ConfigNetwork_p {
             }
                 
             if (post.containsKey("peertags")) {
-                yacyCore.seedDB.mySeed.setPeerTags(serverCodings.string2set(normalizedList((String) post.get("peertags")), ","));
+                yacyCore.seedDB.mySeed().setPeerTags(serverCodings.string2set(normalizedList((String) post.get("peertags")), ","));
             }
             
             sb.setConfig("cluster.mode", post.get("cluster.mode", "publicpeer"));
@@ -150,11 +150,11 @@ public class ConfigNetwork_p {
         prop.put("indexReceiveChecked", (indexReceive) ? 1 : 0);
         prop.put("indexReceiveBlockBlacklistChecked.on", (sb.getConfig("indexReceiveBlockBlacklist", "true").equals("true")) ? 1 : 0);
         prop.put("indexReceiveBlockBlacklistChecked.off", (sb.getConfig("indexReceiveBlockBlacklist", "true").equals("true")) ? 0 : 1);
-        prop.put("peertags", serverCodings.set2string(yacyCore.seedDB.mySeed.getPeerTags(), ",", false));
+        prop.put("peertags", serverCodings.set2string(yacyCore.seedDB.mySeed().getPeerTags(), ",", false));
 
         // set seed information directly
-        yacyCore.seedDB.mySeed.setFlagAcceptRemoteCrawl(sb.getConfigBool("crawlResponse", false));
-        yacyCore.seedDB.mySeed.setFlagAcceptRemoteIndex(indexReceive);
+        yacyCore.seedDB.mySeed().setFlagAcceptRemoteCrawl(sb.getConfigBool("crawlResponse", false));
+        yacyCore.seedDB.mySeed().setFlagAcceptRemoteIndex(indexReceive);
         
         // set p2p/robinson mode flags and values
         prop.put("p2p.checked", (indexDistribute || indexReceive) ? 1 : 0);

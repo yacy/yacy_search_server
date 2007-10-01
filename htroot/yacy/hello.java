@@ -201,7 +201,7 @@ public final class hello {
             final Map ySeeds = yacyCore.seedDB.seedsByAge(true, count); // peerhash/yacySeed relation
             
             // attach also my own seed
-            seeds.append("seed0=").append(yacyCore.seedDB.mySeed.genSeedStr(key)).append(serverCore.crlfString);
+            seeds.append("seed0=").append(yacyCore.seedDB.mySeed().genSeedStr(key)).append(serverCore.crlfString);
             count = 1;            
             
             // attach other seeds
@@ -219,7 +219,7 @@ public final class hello {
             }
         } else {
             // attach also my own seed
-            seeds.append("seed0=").append(yacyCore.seedDB.mySeed.genSeedStr(key)).append(serverCore.crlfString);
+            seeds.append("seed0=").append(yacyCore.seedDB.mySeed().genSeedStr(key)).append(serverCore.crlfString);
         }
 
         prop.putASIS("seedlist", seeds.toString());

@@ -75,7 +75,7 @@ public class yacyNetwork {
         post.put("key", salt);
         
         // just standard identification essentials
-		post.put("iam", yacyCore.seedDB.mySeed.hash);
+		post.put("iam", yacyCore.seedDB.mySeed().hash);
 		if (targetHash != null) post.put("youare", targetHash);
         
         // time information for synchronization
@@ -92,7 +92,7 @@ public class yacyNetwork {
             if (authentificationMethod.equals("salted-magic-sim")) {
                 // generate an authentification essential using the salt, the iam-hash and the network magic
                 String magic = env.getConfig("network.unit.protocol.request.authentification.essentials", "");
-                String md5 = serverCodings.encodeMD5Hex(salt + yacyCore.seedDB.mySeed.hash + magic);
+                String md5 = serverCodings.encodeMD5Hex(salt + yacyCore.seedDB.mySeed().hash + magic);
                 post.put("magicmd5", md5);
             }
         }        

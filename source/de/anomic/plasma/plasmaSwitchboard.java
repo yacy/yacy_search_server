@@ -114,7 +114,6 @@ import java.net.MalformedURLException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
-import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.Hashtable;
 import java.util.Iterator;
@@ -955,6 +954,12 @@ public final class plasmaSwitchboard extends serverAbstractSwitch implements ser
         this.acceptGlobalURLs = "global.any".indexOf(getConfig("network.unit.domain", "global")) >= 0;
         this.acceptLocalURLs = "local.any".indexOf(getConfig("network.unit.domain", "global")) >= 0;
         
+        // start yacy core
+        log.logConfig("Starting YaCy Protocol Core");
+        this.yc = new yacyCore(this);
+        serverInstantThread.oneTimeJob(yacyCore.peerActions, "loadSeedLists", yacyCore.log, 0);
+        long startedSeedListAquisition = System.currentTimeMillis();
+        
         // load values from configs
         this.plasmaPath   = new File(rootPath, getConfig(DBPATH, DBPATH_DEFAULT));
         this.log.logConfig("Plasma DB Path: " + this.plasmaPath.toString());
@@ -1296,14 +1301,6 @@ public final class plasmaSwitchboard extends serverAbstractSwitch implements ser
         log.logConfig("Initializing Snippet Cache");
         plasmaSnippetCache.init(parser, log);
         
-        // start yacy core
-        log.logConfig("Starting YaCy Protocol Core");
-        //try{Thread.currentThread().sleep(5000);} catch (InterruptedException e) {} // for profiler
-        this.yc = new yacyCore(this);
-        //log.logSystem("Started YaCy Protocol Core");
-        //      System.gc(); try{Thread.currentThread().sleep(5000);} catch (InterruptedException e) {} // for profiler
-        serverInstantThread.oneTimeJob(yc, "loadSeeds", yacyCore.log, 3000);
-        
         String wikiParserClassName = getConfig(WIKIPARSER_CLASS, WIKIPARSER_CLASS_DEFAULT);
         this.log.logConfig("Loading wiki parser " + wikiParserClassName + " ...");
         try {
@@ -1324,6 +1321,9 @@ public final class plasmaSwitchboard extends serverAbstractSwitch implements ser
         this.dhtTransferIndexCount = (int) getConfigLong(INDEX_DIST_CHUNK_SIZE_START, 50);
         
         // init robinson cluster
+        // before we do that, we wait some time until the seed list is loaded.
+        while (((System.currentTimeMillis() - startedSeedListAquisition) < 8000) && (yacyCore.seedDB.sizeConnected() == 0)) try {Thread.sleep(1000);} catch (InterruptedException e) {}
+        try {Thread.sleep(1000);} catch (InterruptedException e) {}
         this.clusterhashes = yacyCore.seedDB.clusterHashes(getConfig("cluster.peers.yacydomain", ""));
         
         // deploy threads
@@ -2010,13 +2010,13 @@ public final class plasmaSwitchboard extends serverAbstractSwitch implements ser
             // clean up seed-dbs
             if(getConfigBool("routing.deleteOldSeeds.permission",true)) {
             	final long deleteOldSeedsTime = getConfigLong("routing.deleteOldSeeds.time",7)*24*3600000;
-                Enumeration e = yacyCore.seedDB.seedsSortedDisconnected(true,yacySeed.LASTSEEN);
+                Iterator e = yacyCore.seedDB.seedsSortedDisconnected(true,yacySeed.LASTSEEN);
                 yacySeed seed = null;
                 ArrayList deleteQueue = new ArrayList();
                 checkInterruption();
                 //clean passive seeds
-                while(e.hasMoreElements()) {
-                	seed = (yacySeed)e.nextElement();
+                while(e.hasNext()) {
+                	seed = (yacySeed)e.next();
                 	if(seed != null) {
                 		//list is sorted -> break when peers are too young to delete
                 		if(seed.getLastSeenUTC() > (System.currentTimeMillis()-deleteOldSeedsTime))
@@ -2029,8 +2029,8 @@ public final class plasmaSwitchboard extends serverAbstractSwitch implements ser
                 e = yacyCore.seedDB.seedsSortedPotential(true,yacySeed.LASTSEEN);
                 checkInterruption();
                 //clean potential seeds
-                while(e.hasMoreElements()) {
-                	seed = (yacySeed)e.nextElement();
+                while(e.hasNext()) {
+                	seed = (yacySeed)e.next();
                 	if(seed != null) {
                 		//list is sorted -> break when peers are too young to delete
                 		if(seed.getLastSeenUTC() > (System.currentTimeMillis()-deleteOldSeedsTime))
@@ -2199,7 +2199,7 @@ public final class plasmaSwitchboard extends serverAbstractSwitch implements ser
                     return true;
                 }
                 log.logFine("LOCALCRAWL: URL=" + urlEntry.url() + ", initiator=" + urlEntry.initiator() + ", crawlOrder=" + ((profile.remoteIndexing()) ? "true" : "false") + ", depth=" + urlEntry.depth() + ", crawlDepth=" + profile.generalDepth() + ", filter=" + profile.generalFilter()
-                        + ", permission=" + ((yacyCore.seedDB == null) ? "undefined" : (((yacyCore.seedDB.mySeed.isSenior()) || (yacyCore.seedDB.mySeed.isPrincipal())) ? "true" : "false")));
+                        + ", permission=" + ((yacyCore.seedDB == null) ? "undefined" : (((yacyCore.seedDB.mySeed().isSenior()) || (yacyCore.seedDB.mySeed().isPrincipal())) ? "true" : "false")));
                 
                 processLocalCrawling(urlEntry, profile, stats);
                 return true;
@@ -2264,13 +2264,13 @@ public final class plasmaSwitchboard extends serverAbstractSwitch implements ser
                 return true;
             }
             log.logFine("plasmaSwitchboard.limitCrawlTriggerJob: url=" + urlEntry.url() + ", initiator=" + urlEntry.initiator() + ", crawlOrder=" + ((profile.remoteIndexing()) ? "true" : "false") + ", depth=" + urlEntry.depth() + ", crawlDepth=" + profile.generalDepth() + ", filter="
-                            + profile.generalFilter() + ", permission=" + ((yacyCore.seedDB == null) ? "undefined" : (((yacyCore.seedDB.mySeed.isSenior()) || (yacyCore.seedDB.mySeed.isPrincipal())) ? "true" : "false")));
+                            + profile.generalFilter() + ", permission=" + ((yacyCore.seedDB == null) ? "undefined" : (((yacyCore.seedDB.mySeed().isSenior()) || (yacyCore.seedDB.mySeed().isPrincipal())) ? "true" : "false")));
 
             boolean tryRemote = ((noticeURL.stackSize(plasmaCrawlNURL.STACK_TYPE_CORE) != 0) || (sbQueue.size() != 0)) &&
                                  (profile.remoteIndexing()) &&
                                  (urlEntry.initiator() != null) &&
                                 // (!(urlEntry.initiator().equals(indexURL.dummyHash))) &&
-                                 ((yacyCore.seedDB.mySeed.isSenior()) || (yacyCore.seedDB.mySeed.isPrincipal()));
+                                 ((yacyCore.seedDB.mySeed().isSenior()) || (yacyCore.seedDB.mySeed().isPrincipal()));
             if (tryRemote) {
                 boolean success = processRemoteCrawlTrigger(urlEntry);
                 if (success) return true;
@@ -2353,7 +2353,7 @@ public final class plasmaSwitchboard extends serverAbstractSwitch implements ser
                 return false;
             }
             log.logFine("plasmaSwitchboard.remoteTriggeredCrawlJob: url=" + urlEntry.url() + ", initiator=" + urlEntry.initiator() + ", crawlOrder=" + ((profile.remoteIndexing()) ? "true" : "false") + ", depth=" + urlEntry.depth() + ", crawlDepth=" + profile.generalDepth() + ", filter="
-                        + profile.generalFilter() + ", permission=" + ((yacyCore.seedDB == null) ? "undefined" : (((yacyCore.seedDB.mySeed.isSenior()) || (yacyCore.seedDB.mySeed.isPrincipal())) ? "true" : "false")));
+                        + profile.generalFilter() + ", permission=" + ((yacyCore.seedDB == null) ? "undefined" : (((yacyCore.seedDB.mySeed().isSenior()) || (yacyCore.seedDB.mySeed().isPrincipal())) ? "true" : "false")));
 
             processLocalCrawling(urlEntry, profile, stats);
             return true;
@@ -2405,7 +2405,7 @@ public final class plasmaSwitchboard extends serverAbstractSwitch implements ser
             if (initiatorPeerHash.equals(yacyURL.dummyHash)) {
                 // proxy-load
                 processCase = PROCESSCASE_4_PROXY_LOAD;
-            } else if (initiatorPeerHash.equals(yacyCore.seedDB.mySeed.hash)) {
+            } else if (initiatorPeerHash.equals(yacyCore.seedDB.mySeed().hash)) {
                 // normal crawling
                 processCase = PROCESSCASE_5_LOCAL_CRAWLING;
             } else {
@@ -2539,7 +2539,7 @@ public final class plasmaSwitchboard extends serverAbstractSwitch implements ser
                     wordIndex.loadedURL.stack(
                             newEntry,                       // loaded url db entry
                             initiatorPeerHash,              // initiator peer hash
-                            yacyCore.seedDB.mySeed.hash,    // executor peer hash
+                            yacyCore.seedDB.mySeed().hash,    // executor peer hash
                             processCase                     // process case
                     );                    
                     
@@ -2803,7 +2803,7 @@ public final class plasmaSwitchboard extends serverAbstractSwitch implements ser
         }
         
         // are we qualified for a remote crawl?
-        if ((yacyCore.seedDB.mySeed == null) || (yacyCore.seedDB.mySeed.isJunior())) {
+        if ((yacyCore.seedDB.mySeed() == null) || (yacyCore.seedDB.mySeed().isJunior())) {
             log.logFine("plasmaSwitchboard.processRemoteCrawlTrigger: no permission");
             return false; // no, we must crawl this page ourselves
         }
@@ -2860,7 +2860,7 @@ public final class plasmaSwitchboard extends serverAbstractSwitch implements ser
                 indexURLEntry entry = wordIndex.loadedURL.newEntry(propStr);
                 try {
                     wordIndex.loadedURL.store(entry);
-                    wordIndex.loadedURL.stack(entry, yacyCore.seedDB.mySeed.hash, remoteSeed.hash, 1); // *** ueberfluessig/doppelt?
+                    wordIndex.loadedURL.stack(entry, yacyCore.seedDB.mySeed().hash, remoteSeed.hash, 1); // *** ueberfluessig/doppelt?
                     // noticeURL.remove(entry.hash());
                 } catch (IOException e) {
                     // TODO Auto-generated catch block
@@ -3083,10 +3083,10 @@ public final class plasmaSwitchboard extends serverAbstractSwitch implements ser
         if (yacyCore.seedDB == null) {
             return "no DHT distribution: seedDB == null";
         }
-        if (yacyCore.seedDB.mySeed == null) {
+        if (yacyCore.seedDB.mySeed() == null) {
             return "no DHT distribution: mySeed == null";
         }
-        if (yacyCore.seedDB.mySeed.isVirgin()) {
+        if (yacyCore.seedDB.mySeed().isVirgin()) {
             return "no DHT distribution: status is virgin";
         }
         if (yacyCore.seedDB.noDHTActivity()) {
@@ -3126,7 +3126,7 @@ public final class plasmaSwitchboard extends serverAbstractSwitch implements ser
         }
         
         // do the transfer
-        int peerCount = Math.max(1, (yacyCore.seedDB.mySeed.isJunior()) ?
+        int peerCount = Math.max(1, (yacyCore.seedDB.mySeed().isJunior()) ?
                            (int) getConfigLong("network.unit.dhtredundancy.junior", 1) :
                            (int) getConfigLong("network.unit.dhtredundancy.senior", 1)); // set redundancy factor
         long starttime = System.currentTimeMillis();

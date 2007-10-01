@@ -46,7 +46,6 @@
 // javac -classpath .:../classes Network.java
 // if the shell's current path is HTROOT
 
-import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
@@ -83,7 +82,7 @@ public class Network {
         prop.put("page_networkName", sb.getConfig("network.unit.name", "unspecified"));
         final boolean overview = (post == null) || (post.get("page", "0").equals("0"));
 
-        final String mySeedType = yacyCore.seedDB.mySeed.get(yacySeed.PEERTYPE, yacySeed.PEERTYPE_VIRGIN);
+        final String mySeedType = yacyCore.seedDB.mySeed().get(yacySeed.PEERTYPE, yacySeed.PEERTYPE_VIRGIN);
         final boolean iAmActive = (mySeedType.equals(yacySeed.PEERTYPE_SENIOR) || mySeedType.equals(yacySeed.PEERTYPE_PRINCIPAL));
 
         if (overview) {
@@ -105,8 +104,8 @@ public class Network {
             double myqph = 0d;
 
             // create own peer info
-            yacySeed seed = yacyCore.seedDB.mySeed;
-            if (yacyCore.seedDB.mySeed != null){ //our Peer
+            yacySeed seed = yacyCore.seedDB.mySeed();
+            if (yacyCore.seedDB.mySeed() != null){ //our Peer
                 // update seed info
                 yacyCore.peerActions.updateMySeed();
                 
@@ -122,17 +121,17 @@ public class Network {
                 // my-info
                 prop.put("table_my-name", seed.get(yacySeed.NAME, "-") );
                 prop.put("table_my-hash", seed.hash );
-                if (yacyCore.seedDB.mySeed.isVirgin()) {
+                if (yacyCore.seedDB.mySeed().isVirgin()) {
                     prop.put("table_my-info", 0);
-                } else if(yacyCore.seedDB.mySeed.isJunior()) {
+                } else if(yacyCore.seedDB.mySeed().isJunior()) {
                     prop.put("table_my-info", 1);
                     accPotLinks += LCount;
                     accPotWords += ICount;
-                } else if(yacyCore.seedDB.mySeed.isSenior()) {
+                } else if(yacyCore.seedDB.mySeed().isSenior()) {
                     prop.put("table_my-info", 2);
                     accActLinks += LCount;
                     accActWords += ICount;
-                } else if(yacyCore.seedDB.mySeed.isPrincipal()) {
+                } else if(yacyCore.seedDB.mySeed().isPrincipal()) {
                     prop.put("table_my-info", 3);
                     accActLinks += LCount;
                     accActWords += ICount;
@@ -264,7 +263,7 @@ public class Network {
                     // add temporary the own seed to the database
                     if (iAmActive) {
                         yacyCore.peerActions.updateMySeed();
-                        yacyCore.seedDB.addConnected(yacyCore.seedDB.mySeed);
+                        yacyCore.seedDB.addConnected(yacyCore.seedDB.mySeed());
                     }
 
                     // find updated Information using YaCyNews
@@ -292,7 +291,7 @@ public class Network {
                     boolean dark = true;
                     yacySeed seed;
                     final boolean complete = post.containsKey("ip");
-                    Enumeration e = null;
+                    Iterator e = null;
                     switch (page) {
                         case 1 : e = yacyCore.seedDB.seedsSortedConnected(post.get("order", "down").equals("up"), post.get("sort", yacySeed.LCOUNT)); break;
                         case 2 : e = yacyCore.seedDB.seedsSortedDisconnected(post.get("order", "down").equals("up"), post.get("sort", yacySeed.LASTSEEN)); break;
@@ -321,8 +320,8 @@ public class Network {
                             prop.put("regexerror_wrongregex", wrongregex);
                         }
                     }
-                    while (e.hasMoreElements() && conCount < maxCount) {
-                        seed = (yacySeed) e.nextElement();
+                    while (e.hasNext() && conCount < maxCount) {
+                        seed = (yacySeed) e.next();
                         if (seed != null) {
                             if((post.containsKey("search"))  && (wrongregex == null)) {
                                 boolean abort = true;
@@ -341,7 +340,7 @@ public class Network {
                             prop.put(STR_TABLE_LIST + conCount + "_updatedBlog", 0);
                             prop.put(STR_TABLE_LIST + conCount + "_isCrawling", 0);
                             if (conCount >= maxCount) { break; }
-                            if (seed.hash.equals(yacyCore.seedDB.mySeed.hash)) {
+                            if (seed.hash.equals(yacyCore.seedDB.mySeed().hash)) {
                                 prop.put(STR_TABLE_LIST + conCount + "_dark", 2);
                                 myValue=Long.parseLong(seed.get(yacySeed.LCOUNT, "0"));
                                 try{
@@ -397,7 +396,7 @@ public class Network {
                             prop.put(STR_TABLE_LIST + conCount + "_shortname", shortname);
                             prop.put(STR_TABLE_LIST + conCount + "_fullname", seed.get(yacySeed.NAME, "deadlink"));
                             userAgent = null;
-                            if (seed.hash.equals(yacyCore.seedDB.mySeed.hash)) {
+                            if (seed.hash.equals(yacyCore.seedDB.mySeed().hash)) {
                                userAgent = httpc.userAgent;
                             } else {
                                userAgent = yacyCore.peerActions.getUserAgent(seed.getIP());

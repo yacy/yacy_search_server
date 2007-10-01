@@ -235,7 +235,7 @@ public class serverPortForwardingSch implements serverPortForwarding{
     public synchronized boolean isConnected() {
         if (session == null) return false;
         if (!session.isConnected()) return false;        
-        int urls = yacyClient.queryUrlCount(yacyCore.seedDB.mySeed);
+        int urls = yacyClient.queryUrlCount(yacyCore.seedDB.mySeed());
         return !(urls < 0); 
     }
 

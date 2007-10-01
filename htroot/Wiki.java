@@ -93,8 +93,8 @@ public class Wiki {
         if (author.equals("anonymous")) {
             author = wikiBoard.guessAuthor(ip);
             if (author == null) {
-                if (de.anomic.yacy.yacyCore.seedDB.mySeed == null) author = "anonymous";
-                else author = de.anomic.yacy.yacyCore.seedDB.mySeed.get("Name", "anonymous");
+                if (de.anomic.yacy.yacyCore.seedDB.mySeed() == null) author = "anonymous";
+                else author = de.anomic.yacy.yacyCore.seedDB.mySeed().get("Name", "anonymous");
             }
         }
         

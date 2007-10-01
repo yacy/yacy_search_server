@@ -89,7 +89,7 @@ public class Bookmarks {
     prop.put("user",username);
     
     // set peer address
-    final String address = yacyCore.seedDB.mySeed.getPublicAddress();
+    final String address = yacyCore.seedDB.mySeed().getPublicAddress();
     prop.put("address", address);
     
     //defaultvalues

@@ -171,7 +171,7 @@ public final class plasmaSearchEvent {
                         IAmaxcounthash = wordhash;
                         maxcount = container.size();
                     }
-                    d = yacyDHTAction.dhtDistance(yacyCore.seedDB.mySeed.hash, wordhash);
+                    d = yacyDHTAction.dhtDistance(yacyCore.seedDB.mySeed().hash, wordhash);
                     if (d < mindhtdistance) {
                         // calculate the word hash that is closest to our dht position
                         mindhtdistance = d;
@@ -811,7 +811,7 @@ public final class plasmaSearchEvent {
             Iterator i1 = abstractJoin.entrySet().iterator();
             Map.Entry entry1;
             String url, urls, peer, peers;
-            String mypeerhash = yacyCore.seedDB.mySeed.hash;
+            String mypeerhash = yacyCore.seedDB.mySeed().hash;
             boolean mypeerinvolved = false;
             int mypeercount;
             while (i1.hasNext()) {

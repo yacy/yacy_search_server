@@ -154,7 +154,7 @@ public class plasmaCrawlZURL {
                 int workcount, String anycause) {
             // create new entry
             this.bentry = bentry;
-            this.executor = (executor == null) ? yacyCore.seedDB.mySeed.hash : executor;
+            this.executor = (executor == null) ? yacyCore.seedDB.mySeed().hash : executor;
             this.workdate = (workdate == null) ? new Date() : workdate;
             this.workcount = workcount;
             this.anycause = (anycause == null) ? "" : anycause;

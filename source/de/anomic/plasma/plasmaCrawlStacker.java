@@ -392,15 +392,15 @@ public final class plasmaCrawlStacker {
         }
         
         // store information
-        boolean local = ((initiatorHash.equals(yacyURL.dummyHash)) || (initiatorHash.equals(yacyCore.seedDB.mySeed.hash)));
+        boolean local = ((initiatorHash.equals(yacyURL.dummyHash)) || (initiatorHash.equals(yacyCore.seedDB.mySeed().hash)));
         boolean global = 
             (profile != null) &&
             (profile.remoteIndexing()) /* granted */ &&
             (currentdepth == profile.generalDepth()) /* leaf node */ && 
             //(initiatorHash.equals(yacyCore.seedDB.mySeed.hash)) /* not proxy */ &&
             (
-                    (yacyCore.seedDB.mySeed.isSenior()) ||
-                    (yacyCore.seedDB.mySeed.isPrincipal())
+                    (yacyCore.seedDB.mySeed().isSenior()) ||
+                    (yacyCore.seedDB.mySeed().isPrincipal())
             ) /* qualified */;
         
         if ((!local)&&(!global)&&(!profile.handle().equals(this.sb.defaultRemoteProfile.handle()))) {
@@ -853,7 +853,7 @@ public final class plasmaCrawlStacker {
                     // if the url was rejected we store it into the error URL db
                     if (rejectReason != null) {
                         plasmaCrawlZURL.Entry ee = sb.errorURL.newEntry(
-                                this.theMsg, yacyCore.seedDB.mySeed.hash, null,
+                                this.theMsg, yacyCore.seedDB.mySeed().hash, null,
                                 0, rejectReason);
                         ee.store();
                         sb.errorURL.stackPushEntry(ee);

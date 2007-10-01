@@ -89,8 +89,8 @@ public class MessageSend_p {
 	    //System.out.println("DEBUG: permission request result = " + result.toString());
 	    String peerName;
 	    yacySeed targetPeer = null;
-	    if (hash.equals(yacyCore.seedDB.mySeed.hash)) {
-	        peerName = yacyCore.seedDB.mySeed.get(yacySeed.NAME,"nameless");
+	    if (hash.equals(yacyCore.seedDB.mySeed().hash)) {
+	        peerName = yacyCore.seedDB.mySeed().get(yacySeed.NAME,"nameless");
 	    } else {
 	        targetPeer = yacyCore.seedDB.getConnected(hash);
 	        if (targetPeer == null)

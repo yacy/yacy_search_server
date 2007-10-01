@@ -50,7 +50,6 @@ import java.awt.Graphics2D;
 import java.awt.RenderingHints;
 import java.awt.image.BufferedImage;
 import java.util.Date;
-import java.util.Enumeration;
 import java.util.Iterator;
 
 import de.anomic.yacy.yacyCore;
@@ -144,7 +143,7 @@ public class plasmaGrafics {
         for (int j = 0; j < primarySearches.length; j++) {
             eventPicture.setColor((primarySearches[j].isAlive()) ? ymageMatrix.SUBTRACTIVE_RED : ymageMatrix.SUBTRACTIVE_GREEN);
             hash = primarySearches[j].target().hash;
-            angle = (int) ((long) 360 * (yacySeed.dhtPosition(hash) / (yacySeed.maxDHTDistance / (long) 10000)) / (long) 10000);
+            angle = (int) (360 * yacySeed.dhtPosition(hash));
             eventPicture.arcLine(cx, cy, cr - 20, cr, angle);
         }
 
@@ -153,7 +152,7 @@ public class plasmaGrafics {
             for (int j = 0; j < secondarySearches.length; j++) {
                 eventPicture.setColor((secondarySearches[j].isAlive()) ? ymageMatrix.SUBTRACTIVE_RED : ymageMatrix.SUBTRACTIVE_GREEN);
                 hash = secondarySearches[j].target().hash;
-                angle = (int) ((long) 360 * (yacySeed.dhtPosition(hash) / (yacySeed.maxDHTDistance / (long) 10000)) / (long) 10000);
+                angle = (int) (360 * yacySeed.dhtPosition(hash));
                 eventPicture.arcLine(cx, cy, cr - 10, cr, angle - 1);
                 eventPicture.arcLine(cx, cy, cr - 10, cr, angle + 1);
             }
@@ -166,7 +165,7 @@ public class plasmaGrafics {
         eventPicture.setColor(ymageMatrix.SUBTRACTIVE_BLACK);
         while (i.hasNext()) {
             hash = (String) i.next();
-            angle = (int) ((long) 360 * (yacySeed.dhtPosition(hash) / (yacySeed.maxDHTDistance / (long) 10000)) / (long) 10000);
+            angle = (int) (360 * yacySeed.dhtPosition(hash));
             eventPicture.arcLine(cx, cy, cr - 20, cr, angle);
         }
 
@@ -208,10 +207,10 @@ public class plasmaGrafics {
         // draw connected senior and principals
         int count = 0;
         int totalCount = 0;
-        Enumeration e = yacyCore.seedDB.seedsConnected(true, false, null, (float) 0.0);
+        Iterator e = yacyCore.seedDB.seedsConnected(true, false, null, (float) 0.0);
         
-        while (e.hasMoreElements() && count < maxCount) {
-            seed = (yacySeed) e.nextElement();
+        while (e.hasNext() && count < maxCount) {
+            seed = (yacySeed) e.next();
             if (seed != null) {
                 drawNetworkPicturePeer(networkPicture, width / 2, height / 2 + 20, innerradius, outerradius, seed, COL_ACTIVE_DOT, COL_ACTIVE_LINE, COL_ACTIVE_TEXT, corona);
                 count++;
@@ -222,8 +221,8 @@ public class plasmaGrafics {
         // draw disconnected senior and principals that have been seen lately
         count = 0;
         e = yacyCore.seedDB.seedsSortedDisconnected(false, yacySeed.LASTSEEN);
-        while (e.hasMoreElements() && count < maxCount) {
-            seed = (yacySeed) e.nextElement();
+        while (e.hasNext() && count < maxCount) {
+            seed = (yacySeed) e.next();
             if (seed != null) {
                 lastseen = Math.abs((System.currentTimeMillis() - seed.getLastSeenUTC()) / 1000 / 60);
                 if (lastseen > passiveLimit) break; // we have enough, this list is sorted so we don't miss anything
@@ -236,8 +235,8 @@ public class plasmaGrafics {
         // draw juniors that have been seen lately
         count = 0;
         e = yacyCore.seedDB.seedsSortedPotential(false, yacySeed.LASTSEEN);
-        while (e.hasMoreElements() && count < maxCount) {
-            seed = (yacySeed) e.nextElement();
+        while (e.hasNext() && count < maxCount) {
+            seed = (yacySeed) e.next();
             if (seed != null) {
                 lastseen = Math.abs((System.currentTimeMillis() - seed.getLastSeenUTC()) / 1000 / 60);
                 if (lastseen > potentialLimit) break; // we have enough, this list is sorted so we don't miss anything
@@ -248,7 +247,7 @@ public class plasmaGrafics {
         totalCount += count;
 
         // draw my own peer
-        drawNetworkPicturePeer(networkPicture, width / 2, height / 2 + 20, innerradius, outerradius, yacyCore.seedDB.mySeed, COL_WE_DOT, COL_WE_LINE, COL_WE_TEXT, corona);
+        drawNetworkPicturePeer(networkPicture, width / 2, height / 2 + 20, innerradius, outerradius, yacyCore.seedDB.mySeed(), COL_WE_DOT, COL_WE_LINE, COL_WE_TEXT, corona);
 
         // draw description
         networkPicture.setColor(COL_HEADLINE);
@@ -263,10 +262,10 @@ public class plasmaGrafics {
     }
 
     private static void drawNetworkPicturePeer(ymageMatrix img, int x, int y, int innerradius, int outerradius, yacySeed seed, String colorDot, String colorLine, String colorText, boolean corona) {
-        String name = seed.getName().toUpperCase();
+        String name = seed.getName().toUpperCase() + ":" + seed.hash /*+ ":" + (((double) ((int) (100 * (((double) yacySeed.dhtPosition(seed.hash)) / ((double) yacySeed.maxDHTDistance))))) / 100.0)*/;
         if (name.length() < shortestName) shortestName = name.length();
         if (name.length() > longestName) longestName = name.length();
-        int angle = (int) ((long) 360 * (seed.dhtPosition() / (yacySeed.maxDHTDistance / (long) 10000)) / (long) 10000);
+        int angle = (int) (360 * seed.dhtPosition());
         //System.out.println("Seed " + seed.hash + " has distance " + seed.dhtDistance() + ", angle = " + angle);
         int linelength = 20 + outerradius * (20 * (name.length() - shortestName) / (longestName - shortestName) + (Math.abs(seed.hash.hashCode()) % 20)) / 60;
         if (linelength > outerradius) linelength = outerradius;

@@ -110,10 +110,10 @@ public class BlogComments {
 			StrAuthor = switchboard.blogDB.guessAuthor(ip);
 			
 	    	if (StrAuthor == null || StrAuthor.length() == 0) {
-	    		if (de.anomic.yacy.yacyCore.seedDB.mySeed == null)
+	    		if (de.anomic.yacy.yacyCore.seedDB.mySeed() == null)
 	    			StrAuthor = "anonymous";
 	        	else {
-	        		StrAuthor = de.anomic.yacy.yacyCore.seedDB.mySeed.get("Name", "anonymous");
+	        		StrAuthor = de.anomic.yacy.yacyCore.seedDB.mySeed().get("Name", "anonymous");
 	        	}
 	        }
 	    }
@@ -160,15 +160,15 @@ public class BlogComments {
                     switchboard.messageDB.write(msgEntry = switchboard.messageDB.newEntry(
                             "blogComment",
                             StrAuthor,
-                            yacyCore.seedDB.mySeed.hash,
-                            yacyCore.seedDB.mySeed.getName(), yacyCore.seedDB.mySeed.hash,
+                            yacyCore.seedDB.mySeed().hash,
+                            yacyCore.seedDB.mySeed().getName(), yacyCore.seedDB.mySeed().hash,
                             "new blog comment: " + new String(blogEntry.subject(),"UTF-8"), content));
                 } catch (UnsupportedEncodingException e1) {
                     switchboard.messageDB.write(msgEntry = switchboard.messageDB.newEntry(
                             "blogComment",
                             StrAuthor,
-                            yacyCore.seedDB.mySeed.hash,
-                            yacyCore.seedDB.mySeed.getName(), yacyCore.seedDB.mySeed.hash,
+                            yacyCore.seedDB.mySeed().hash,
+                            yacyCore.seedDB.mySeed().getName(), yacyCore.seedDB.mySeed().hash,
                             "new blog comment: " + new String(blogEntry.subject()), content));
                 }
 
@@ -331,7 +331,7 @@ public class BlogComments {
             .append(sendMailTo)
             .append("\nFrom: ")
             .append("yacy@")
-            .append(yacyCore.seedDB.mySeed.getName())
+            .append(yacyCore.seedDB.mySeed().getName())
             .append("\nSubject: [YaCy] ")
             .append(msgEntry.subject().replace('\n', ' '))
             .append("\nDate: ")

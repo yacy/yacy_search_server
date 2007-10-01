@@ -296,8 +296,8 @@ public final class search {
         prop.putASIS("searchtime", Long.toString(System.currentTimeMillis() - timestamp));
 
         final int links = Integer.parseInt(prop.get("linkcount","0"));
-        yacyCore.seedDB.mySeed.incSI(links);
-        yacyCore.seedDB.mySeed.incSU(links);
+        yacyCore.seedDB.mySeed().incSI(links);
+        yacyCore.seedDB.mySeed().incSU(links);
         return prop;
     }
 

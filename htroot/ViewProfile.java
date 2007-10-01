@@ -101,9 +101,9 @@ public class ViewProfile {
             profile.putAll(p);
             prop.put("success", "3"); // everything ok
             prop.put("localremotepeer", 0);
-            prop.put("success_peername", yacyCore.seedDB.mySeed.getName());
-            prop.put("success_peerhash", yacyCore.seedDB.mySeed.hash);
-            address = yacyCore.seedDB.mySeed.getPublicAddress();
+            prop.put("success_peername", yacyCore.seedDB.mySeed().getName());
+            prop.put("success_peerhash", yacyCore.seedDB.mySeed().hash);
+            address = yacyCore.seedDB.mySeed().getPublicAddress();
         } else {
             // read the profile from remote peer
             yacySeed seed = yacyCore.seedDB.getConnected(hash);

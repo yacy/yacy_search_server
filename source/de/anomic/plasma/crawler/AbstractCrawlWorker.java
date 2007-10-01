@@ -300,7 +300,7 @@ public abstract class AbstractCrawlWorker extends Thread implements plasmaCrawlW
                 0, 
                 0);
         plasmaCrawlZURL.Entry ee = this.sb.errorURL.newEntry(
-                bentry, yacyCore.seedDB.mySeed.hash, null,
+                bentry, yacyCore.seedDB.mySeed().hash, null,
                 0, (failreason==null)?"Unknown reason":failreason);
         
         // store the entry

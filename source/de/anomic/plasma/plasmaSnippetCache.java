@@ -864,7 +864,7 @@ public class plasmaSnippetCache {
                 url,                         // the url
                 "",                          // name of the url, from anchor tag <a>name</a>
                 null,                        // referer
-                yacyCore.seedDB.mySeed.hash, // initiator
+                yacyCore.seedDB.mySeed().hash, // initiator
                 0,                           // depth
                 (forText) ? plasmaSwitchboard.getSwitchboard().defaultTextSnippetProfile : plasmaSwitchboard.getSwitchboard().defaultMediaSnippetProfile, // crawl profile
                 socketTimeout,
@@ -876,7 +876,7 @@ public class plasmaSnippetCache {
     
     public static String failConsequences(TextSnippet snippet, String eventID) {
         // problems with snippet fetch
-        if (yacyCore.seedDB.mySeed.isVirgin()) return snippet.getError() + " (no consequences, no network connection)"; // no consequences if we do not have a network connection
+        if (yacyCore.seedDB.mySeed().isVirgin()) return snippet.getError() + " (no consequences, no network connection)"; // no consequences if we do not have a network connection
         String urlHash = snippet.getUrl().hash();
         String querystring = kelondroMSetTools.setToString(snippet.getRemainingHashes(), ' ');
         if ((snippet.getErrorCode() == ERROR_SOURCE_LOADING) ||

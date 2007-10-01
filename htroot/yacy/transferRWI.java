@@ -92,8 +92,8 @@ public final class transferRWI {
         StringBuffer unknownURLs = new StringBuffer();
         int          pause       = 10000;
         
-        if ((youare == null) || (!youare.equals(yacyCore.seedDB.mySeed.hash))) {
-        	sb.getLog().logInfo("Rejecting RWIs from peer " + otherPeerName + ". Wrong target. Wanted peer=" + youare + ", iam=" + yacyCore.seedDB.mySeed.hash);
+        if ((youare == null) || (!youare.equals(yacyCore.seedDB.mySeed().hash))) {
+        	sb.getLog().logInfo("Rejecting RWIs from peer " + otherPeerName + ". Wrong target. Wanted peer=" + youare + ", iam=" + yacyCore.seedDB.mySeed().hash);
             result = "wrong_target";
             pause = 0;
         } else if ((!granted) || (sb.isRobinsonMode())) {
@@ -183,7 +183,7 @@ public final class transferRWI {
                 }
                 received++;
             }
-            yacyCore.seedDB.mySeed.incRI(received);
+            yacyCore.seedDB.mySeed().incRI(received);
 
             // finally compose the unknownURL hash list
             final Iterator it = unknownURL.iterator();  
@@ -195,7 +195,7 @@ public final class transferRWI {
             if ((wordhashes.length == 0) || (received == 0)) {
                 sb.getLog().logInfo("Received 0 RWIs from " + otherPeerName + ", processed in " + (System.currentTimeMillis() - startProcess) + " milliseconds, requesting " + unknownURL.size() + " URLs, blocked " + blocked + " RWIs");
             } else {
-                final double avdist = (yacyDHTAction.dhtDistance(yacyCore.seedDB.mySeed.hash, wordhashes[0]) + yacyDHTAction.dhtDistance(yacyCore.seedDB.mySeed.hash, wordhashes[received - 1])) / 2.0;
+                final double avdist = (yacyDHTAction.dhtDistance(yacyCore.seedDB.mySeed().hash, wordhashes[0]) + yacyDHTAction.dhtDistance(yacyCore.seedDB.mySeed().hash, wordhashes[received - 1])) / 2.0;
                 sb.getLog().logInfo("Received " + received + " Entries " + wordc + " Words [" + wordhashes[0] + " .. " + wordhashes[received - 1] + "]/" + avdist + " from " + otherPeerName + ", processed in " + (System.currentTimeMillis() - startProcess) + " milliseconds, requesting " + unknownURL.size() + "/" + receivedURL + " URLs, blocked " + blocked + " RWIs");
             }
             result = "ok";

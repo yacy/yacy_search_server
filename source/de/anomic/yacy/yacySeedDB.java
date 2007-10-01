@@ -53,7 +53,6 @@ import java.lang.reflect.Method;
 import java.net.InetAddress;
 import java.net.UnknownHostException;
 import java.util.ArrayList;
-import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.Hashtable;
 import java.util.Iterator;
@@ -102,9 +101,9 @@ public final class yacySeedDB {
     protected kelondroMapObjects seedActiveDB, seedPassiveDB, seedPotentialDB;
     private long preloadTime;
     
-    public  final plasmaSwitchboard sb;
-    public  yacySeed mySeed; // my own seed
-    public  final File myOwnSeedFile;
+    private final plasmaSwitchboard sb;
+    private yacySeed mySeed; // my own seed
+    
     private final Hashtable nameLookupCache;
     private final Hashtable ipLookupCache;
     
@@ -126,8 +125,21 @@ public final class yacySeedDB {
         seedPassiveDB = openSeedTable(seedPassiveDBFile);
         seedPotentialDB = openSeedTable(seedPotentialDBFile);
         
+        // start our virtual DNS service for yacy peers with empty cache
+        nameLookupCache = new Hashtable();
+        
+        // cache for reverse name lookup
+        ipLookupCache = new Hashtable();
+        
+        // check if we are in the seedCaches: this can happen if someone else published our seed
+        removeMySeed();
+    }
+    
+    private synchronized void initMySeed() {
+        if (this.mySeed != null) return;
+        
         // create or init own seed
-        myOwnSeedFile = sb.getOwnSeedFile();
+        File myOwnSeedFile = sb.getOwnSeedFile();
         if (myOwnSeedFile.length() > 0) try {
             // load existing identity
             mySeed = yacySeed.load(myOwnSeedFile);
@@ -160,17 +172,23 @@ public final class yacySeedDB {
         }
         mySeed.put(yacySeed.PEERTYPE, yacySeed.PEERTYPE_VIRGIN); // markup startup condition
         
-        // start our virtual DNS service for yacy peers with empty cache
-        nameLookupCache = new Hashtable();
-        
-        // cache for reverse name lookup
-        ipLookupCache = new Hashtable();
-        
-        // check if we are in the seedCaches: this can happen if someone else published our seed
-        removeMySeed();
+    }
+
+    public boolean mySeedIsDefined() {
+        return this.mySeed != null;
+    }
+    
+    public yacySeed mySeed() {
+        if (this.mySeed == null) {
+            if (this.sizeConnected() == 0) try {Thread.sleep(5000);} catch (InterruptedException e) {} // wait for init
+            initMySeed();
+        }
+        return this.mySeed;
     }
     
     public synchronized void removeMySeed() {
+        if ((seedActiveDB.size() == 0) && (seedPassiveDB.size() == 0) && (seedPotentialDB.size() == 0)) return; // avoid that the own seed is initialized too early
+        if (this.mySeed == null) initMySeed();
         try {
             seedActiveDB.remove(mySeed.hash);
             seedPassiveDB.remove(mySeed.hash);
@@ -238,17 +256,17 @@ public final class yacySeedDB {
         
     }
     
-    public Enumeration seedsSortedConnected(boolean up, String field) {
+    public Iterator seedsSortedConnected(boolean up, String field) {
         // enumerates seed-type objects: all seeds sequentially ordered by field
         return new seedEnum(up, field, seedActiveDB);
     }
     
-    public Enumeration seedsSortedDisconnected(boolean up, String field) {
+    public Iterator seedsSortedDisconnected(boolean up, String field) {
         // enumerates seed-type objects: all seeds sequentially ordered by field
         return new seedEnum(up, field, seedPassiveDB);
     }
     
-    public Enumeration seedsSortedPotential(boolean up, String field) {
+    public Iterator seedsSortedPotential(boolean up, String field) {
         // enumerates seed-type objects: all seeds sequentially ordered by field
         return new seedEnum(up, field, seedPotentialDB);
     }
@@ -300,25 +318,25 @@ public final class yacySeedDB {
     	return clustermap;
     }
     
-    public Enumeration seedsConnected(boolean up, boolean rot, String firstHash, float minVersion) {
+    public Iterator seedsConnected(boolean up, boolean rot, String firstHash, float minVersion) {
         // enumerates seed-type objects: all seeds sequentially without order
         return new seedEnum(up, rot, (firstHash == null) ? null : firstHash.getBytes(), null, seedActiveDB, minVersion);
     }
     
-    public Enumeration seedsDisconnected(boolean up, boolean rot, String firstHash, float minVersion) {
+    public Iterator seedsDisconnected(boolean up, boolean rot, String firstHash, float minVersion) {
         // enumerates seed-type objects: all seeds sequentially without order
         return new seedEnum(up, rot, (firstHash == null) ? null : firstHash.getBytes(), null, seedPassiveDB, minVersion);
     }
     
-    public Enumeration seedsPotential(boolean up, boolean rot, String firstHash, float minVersion) {
+    public Iterator seedsPotential(boolean up, boolean rot, String firstHash, float minVersion) {
         // enumerates seed-type objects: all seeds sequentially without order
         return new seedEnum(up, rot, (firstHash == null) ? null : firstHash.getBytes(), null, seedPotentialDB, minVersion);
     }
     
     public yacySeed anySeedVersion(float minVersion) {
         // return just any seed that has a specific minimum version number
-        Enumeration e = seedsConnected(true, true, yacySeed.randomHash(), minVersion);
-        return (yacySeed) e.nextElement();
+        Iterator e = seedsConnected(true, true, yacySeed.randomHash(), minVersion);
+        return (yacySeed) e.next();
     }
 
     public HashMap seedsByAge(boolean up, int count) {
@@ -331,12 +349,12 @@ public final class yacySeedDB {
         kelondroMScoreCluster seedScore = new kelondroMScoreCluster();
         yacySeed ys;
         long absage;
-        Enumeration s = seedsConnected(true, false, null, (float) 0.0);
+        Iterator s = seedsConnected(true, false, null, (float) 0.0);
         int searchcount = 1000;
         if (searchcount > sizeConnected()) searchcount = sizeConnected();
         try {
-            while ((s.hasMoreElements()) && (searchcount-- > 0)) {
-                ys = (yacySeed) s.nextElement();
+            while ((s.hasNext()) && (searchcount-- > 0)) {
+                ys = (yacySeed) s.next();
                 if ((ys != null) && (ys.get(yacySeed.LASTSEEN, "").length() > 10)) try {
                     absage = Math.abs(System.currentTimeMillis() + serverDate.dayMillis - ys.getLastSeenUTC());
                     seedScore.addScore(ys.hash, (int) absage); // the higher absage, the older is the peer
@@ -510,7 +528,7 @@ public final class yacySeedDB {
         
     private yacySeed get(String hash, kelondroMapObjects database) {
         if (hash == null) return null;
-        if ((mySeed != null) && (hash.equals(mySeed.hash))) return mySeed;
+        if ((this.mySeed != null) && (hash.equals(mySeed.hash))) return mySeed;
         Map entry = database.getMap(hash);
         if (entry == null) return null;
         return new yacySeed(hash, entry);
@@ -536,7 +554,8 @@ public final class yacySeedDB {
     }
     
     public void update(String hash, yacySeed seed) {
-        if ((mySeed != null) && (hash.equals(mySeed.hash))) {
+        if (this.mySeed == null) initMySeed();
+        if (hash.equals(mySeed.hash)) {
             mySeed = seed;
             return;
         }
@@ -555,7 +574,10 @@ public final class yacySeedDB {
         // reads a seed by searching by name
 
         // local peer?
-        if (peerName.equals("localpeer")) return mySeed;
+        if (peerName.equals("localpeer")) {
+            if (this.mySeed == null) initMySeed();
+            return mySeed;
+        }
         
         // then try to use the cache
         yacySeed seed = (yacySeed) nameLookupCache.get(peerName);
@@ -564,9 +586,9 @@ public final class yacySeedDB {
         // enumerate the cache and simultanous insert values
         String name;
     	for (int table = 0; table < 2; table++) {
-        	Enumeration e = (table == 0) ? seedsConnected(true, false, null, (float) 0.0) : seedsDisconnected(true, false, null, (float) 0.0);
-        	while (e.hasMoreElements()) {
-        		seed = (yacySeed) e.nextElement();
+            Iterator e = (table == 0) ? seedsConnected(true, false, null, (float) 0.0) : seedsDisconnected(true, false, null, (float) 0.0);
+        	while (e.hasNext()) {
+        		seed = (yacySeed) e.next();
         		if (seed != null) {
         			name = seed.getName().toLowerCase();
         			if (seed.isProper() == null) nameLookupCache.put(name, seed);
@@ -575,6 +597,7 @@ public final class yacySeedDB {
         	}
         }
         // check local seed
+        if (this.mySeed == null) initMySeed();
         name = mySeed.getName().toLowerCase();
         if (mySeed.isProper() == null) nameLookupCache.put(name, mySeed);
         if (name.equals(peerName)) return mySeed;
@@ -593,7 +616,10 @@ public final class yacySeedDB {
         yacySeed seed = null;        
         
         // local peer?
-        if (httpd.isThisHostIP(peerIP)) return mySeed;
+        if (httpd.isThisHostIP(peerIP)) {
+            if (this.mySeed == null) initMySeed();
+            return mySeed;
+        }
         
         // then try to use the cache
         SoftReference ref = (SoftReference) ipLookupCache.get(peerIP);
@@ -608,11 +634,11 @@ public final class yacySeedDB {
         
         if (lookupConnected) {
             // enumerate the cache and simultanous insert values
-            Enumeration e = seedsConnected(true, false, null, (float) 0.0);
+            Iterator e = seedsConnected(true, false, null, (float) 0.0);
 
-            while (e.hasMoreElements()) {
+            while (e.hasNext()) {
                 try {
-                    seed = (yacySeed) e.nextElement();
+                    seed = (yacySeed) e.next();
                     if (seed != null) {
                         addressStr = seed.getPublicAddress();
                         if (addressStr == null) {
@@ -632,11 +658,11 @@ public final class yacySeedDB {
         
         if (lookupDisconnected) {
             // enumerate the cache and simultanous insert values
-            Enumeration e = seedsDisconnected(true, false, null, (float) 0.0);
+            Iterator e = seedsDisconnected(true, false, null, (float) 0.0);
 
-            while (e.hasMoreElements()) {
+            while (e.hasNext()) {
                 try {
-                    seed = (yacySeed) e.nextElement();
+                    seed = (yacySeed) e.next();
                     if (seed != null) {
                         addressStr = seed.getPublicAddress();
                         if (addressStr == null) {
@@ -656,11 +682,11 @@ public final class yacySeedDB {
         
         if (lookupPotential) {
             // enumerate the cache and simultanous insert values
-            Enumeration e = seedsPotential(true, false, null, (float) 0.0);
+            Iterator e = seedsPotential(true, false, null, (float) 0.0);
 
-            while (e.hasMoreElements()) {
+            while (e.hasNext()) {
                 try {
-                    seed = (yacySeed) e.nextElement();
+                    seed = (yacySeed) e.next();
                     if ((seed != null) && ((addressStr = seed.getPublicAddress()) != null)) {
                         if ((pos = addressStr.indexOf(":"))!= -1) {
                             addressStr = addressStr.substring(0,pos);
@@ -675,6 +701,7 @@ public final class yacySeedDB {
         
         try {
             // check local seed
+            if (this.mySeed == null) return null;
             addressStr = mySeed.getPublicAddress();
             if (addressStr == null) return null;
             if ((pos = addressStr.indexOf(":"))!= -1) {
@@ -703,7 +730,8 @@ public final class yacySeedDB {
             
             // store own seed
             String line;
-            if ((addMySeed) && (mySeed != null)) {
+            if (this.mySeed == null) initMySeed();
+            if (addMySeed) {
                 line = mySeed.genSeedStr(null);
                 v.add(line);
                 pw.print(line + serverCore.crlfString);
@@ -711,9 +739,9 @@ public final class yacySeedDB {
             
             // store other seeds
             yacySeed ys;
-            Enumeration se = seedsConnected(true, false, null, (float) 0.0);
-            while (se.hasMoreElements()) {
-                ys = (yacySeed) se.nextElement();
+            Iterator se = seedsConnected(true, false, null, (float) 0.0);
+            while (se.hasNext()) {
+                ys = (yacySeed) se.next();
                 if (ys != null) {
                     line = ys.genSeedStr(null);
                     v.add(line);
@@ -851,6 +879,7 @@ public final class yacySeedDB {
             seed = getConnected(hash); // checks only remote, not local
             // check local seed
             if (seed == null) {
+                if (this.mySeed == null) initMySeed();
                 if (hash.equals(mySeed.hash))
                     seed = mySeed;
                 else return null;
@@ -867,6 +896,7 @@ public final class yacySeedDB {
             String domain = host.substring(0, host.length() - 5).toLowerCase();
             seed = lookupByName(domain);
             if (seed == null) return null;
+            if (this.mySeed == null) initMySeed();
             if ((seed == mySeed) && (!(seed.isOnline()))) {
                 // take local ip instead of external
                 return serverDomains.myPublicIP() + ":" + serverCore.getPortNr(sb.getConfig("port", "8080")) + ((subdom == null) ? "" : ("/" + subdom));
@@ -877,7 +907,7 @@ public final class yacySeedDB {
         }
     }
 
-    class seedEnum implements Enumeration {
+    class seedEnum implements Iterator {
         
         kelondroMapObjects.mapIterator it;
         yacySeed nextSeed;
@@ -924,7 +954,7 @@ public final class yacySeedDB {
             }
         }
         
-        public boolean hasMoreElements() {
+        public boolean hasNext() {
             return (nextSeed != null);
         }
         
@@ -937,7 +967,7 @@ public final class yacySeedDB {
             return new yacySeed(hash, dna);
         }
         
-        public Object nextElement() {
+        public Object next() {
             yacySeed seed = nextSeed;
             try {while (true) {
                 nextSeed = internalNext();
@@ -958,6 +988,10 @@ public final class yacySeedDB {
 				}
             }
             return seed;
+        }
+
+        public void remove() {
+            throw new UnsupportedOperationException();
         }
         
     }

@@ -51,7 +51,6 @@ import java.io.FileWriter;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.net.MalformedURLException;
-import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
@@ -439,9 +438,9 @@ public class IndexControl_p {
         yacySeed seed;
         int hc = 0;
         if (yacyCore.seedDB != null && yacyCore.seedDB.sizeConnected() > 0) {
-            Enumeration e = yacyCore.dhtAgent.getAcceptRemoteIndexSeeds(startHash);
-            while (e.hasMoreElements()) {
-                seed = (yacySeed) e.nextElement();
+            Iterator e = yacyCore.dhtAgent.getAcceptRemoteIndexSeeds(startHash);
+            while (e.hasNext()) {
+                seed = (yacySeed) e.next();
                 if (seed != null) {
                     prop.put("hosts_" + hc + "_hosthash", seed.hash);
                     prop.put("hosts_" + hc + "_hostname", seed.hash + " " + seed.get(yacySeed.NAME, "nameless"));

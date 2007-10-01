@@ -44,7 +44,7 @@ public class urls {
         serverObjects prop = new serverObjects();
         
         // insert default values
-        prop.putASIS("iam", yacyCore.seedDB.mySeed.hash);
+        prop.putASIS("iam", yacyCore.seedDB.mySeed().hash);
         prop.putASIS("response", "rejected - insufficient call parameters");
         prop.putASIS("channel_title", "");
         prop.putASIS("channel_description", "");

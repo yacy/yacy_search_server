@@ -96,7 +96,7 @@ public class ConfigBasic {
         // starting a peer ping
         
         //boolean doPeerPing = false;
-        if ((yacyCore.seedDB.mySeed.isVirgin()) || (yacyCore.seedDB.mySeed.isJunior())) {
+        if ((yacyCore.seedDB.mySeed().isVirgin()) || (yacyCore.seedDB.mySeed().isJunior())) {
             serverInstantThread.oneTimeJob(sb.yc, "peerPing", null, 0);
             //doPeerPing = true;
         }
@@ -202,7 +202,7 @@ public class ConfigBasic {
         // check if values are proper
         boolean properPW = (env.getConfig("adminAccount", "").length() == 0) && (env.getConfig(httpd.ADMIN_ACCOUNT_B64MD5, "").length() > 0);
         boolean properName = (env.getConfig("peerName","").length() >= 3) && (!(yacySeed.isDefaultPeerName(env.getConfig("peerName",""))));
-        boolean properPort = (yacyCore.seedDB.mySeed.isSenior()) || (yacyCore.seedDB.mySeed.isPrincipal());
+        boolean properPort = (yacyCore.seedDB.mySeed().isSenior()) || (yacyCore.seedDB.mySeed().isPrincipal());
         
         if ((properPW) && (env.getConfig("defaultFiles", "").startsWith("ConfigBasic.html,"))) {
         	    env.setConfig("defaultFiles", env.getConfig("defaultFiles", "").substring(17));

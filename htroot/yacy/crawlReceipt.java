@@ -114,7 +114,7 @@ public final class crawlReceipt {
         final yacySeed otherPeer = yacyCore.seedDB.get(iam);
         final String otherPeerName = iam + ":" + ((otherPeer == null) ? "NULL" : (otherPeer.getName() + "/" + otherPeer.getVersion()));        
 
-        if ((yacyCore.seedDB.mySeed == null) || (!(yacyCore.seedDB.mySeed.hash.equals(youare)))) {
+        if ((yacyCore.seedDB.mySeed() == null) || (!(yacyCore.seedDB.mySeed().hash.equals(youare)))) {
             // no yacy connection / unknown peers
             prop.putASIS("delay", "3600");
             return prop;

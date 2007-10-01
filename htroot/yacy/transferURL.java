@@ -89,8 +89,8 @@ public final class transferURL {
         final yacySeed otherPeer = yacyCore.seedDB.get(iam);
         final String otherPeerName = iam + ":" + ((otherPeer == null) ? "NULL" : (otherPeer.getName() + "/" + otherPeer.getVersion()));
 
-        if ((youare == null) || (!youare.equals(yacyCore.seedDB.mySeed.hash))) {
-        	sb.getLog().logInfo("Rejecting URLs from peer " + otherPeerName + ". Wrong target. Wanted peer=" + youare + ", iam=" + yacyCore.seedDB.mySeed.hash);
+        if ((youare == null) || (!youare.equals(yacyCore.seedDB.mySeed().hash))) {
+        	sb.getLog().logInfo("Rejecting URLs from peer " + otherPeerName + ". Wrong target. Wanted peer=" + youare + ", iam=" + yacyCore.seedDB.mySeed().hash);
             result = "wrong_target";
         } else if ((!granted) || (sb.isRobinsonMode())) {
         	sb.getLog().logInfo("Rejecting URLs from peer " + otherPeerName + ". Not granted.");
@@ -164,7 +164,7 @@ public final class transferURL {
                 }
             }
 
-            yacyCore.seedDB.mySeed.incRU(received);
+            yacyCore.seedDB.mySeed().incRU(received);
 
             // return rewrite properties
             final int more = sb.wordIndex.loadedURL.size() - sizeBefore;

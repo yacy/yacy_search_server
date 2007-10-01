@@ -88,7 +88,7 @@ public class Blog {
         
         boolean hasRights = switchboard.verifyAuthentication(header, true);
         final boolean xml = ((String)header.get(httpHeader.CONNECTION_PROP_PATH)).endsWith(".xml");
-        final String address = yacyCore.seedDB.mySeed.getPublicAddress();
+        final String address = yacyCore.seedDB.mySeed().getPublicAddress();
 
         if(hasRights) {
             prop.put("mode_admin",1);
@@ -97,7 +97,7 @@ public class Blog {
         }
         
         if (post == null) {
-            prop.put("peername", yacyCore.seedDB.mySeed.getName());
+            prop.put("peername", yacyCore.seedDB.mySeed().getName());
             prop.put("address", address);
             return putBlogDefault(prop, switchboard, address, 0, 20, hasRights, xml);
         }
@@ -124,10 +124,10 @@ public class Blog {
 			StrAuthor = switchboard.blogDB.guessAuthor(ip);
 			
 	    	if (StrAuthor == null || StrAuthor.length() == 0) {
-	    		if (de.anomic.yacy.yacyCore.seedDB.mySeed == null)
+	    		if (de.anomic.yacy.yacyCore.seedDB.mySeed() == null)
 	    			StrAuthor = "anonymous";
 	        	else {
-	        		StrAuthor = de.anomic.yacy.yacyCore.seedDB.mySeed.get("Name", "anonymous");
+	        		StrAuthor = de.anomic.yacy.yacyCore.seedDB.mySeed().get("Name", "anonymous");
 	        	}
 	        }
 	    }
@@ -263,7 +263,7 @@ public class Blog {
 	        if(pagename.equals(DEFAULT_PAGE)) {
 	            // XXX: where are "peername" and "address" used in the template?
                 // XXX: "clientname" is already set to the peername, no need for a new setting
-                prop.put("peername", yacyCore.seedDB.mySeed.getName());
+                prop.put("peername", yacyCore.seedDB.mySeed().getName());
                 prop.put("address", address);
 	        	//index all entries
                 putBlogDefault(prop, switchboard, address, start, num, hasRights, xml);

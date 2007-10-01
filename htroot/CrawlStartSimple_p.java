@@ -24,7 +24,6 @@
 // along with this program; if not, write to the Free Software
 // Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 
-import java.util.Enumeration;
 import java.util.Iterator;
 
 import de.anomic.http.httpHeader;
@@ -149,28 +148,28 @@ public class CrawlStartSimple_p {
 
         
         // remote crawl peers
-        if ((yacyCore.seedDB == null) || (yacyCore.seedDB.mySeed.isVirgin()) || (yacyCore.seedDB.mySeed.isJunior())) {
+        if ((yacyCore.seedDB == null) || (yacyCore.seedDB.mySeed().isVirgin()) || (yacyCore.seedDB.mySeed().isJunior())) {
             prop.put("remoteCrawlPeers", 0);
         } else {
-            Enumeration crawlavail = yacyCore.dhtAgent.getAcceptRemoteCrawlSeeds(yacyURL.dummyHash, true);
-            Enumeration crawlpendi = yacyCore.dhtAgent.getAcceptRemoteCrawlSeeds(yacyURL.dummyHash, false);
-            if ((!(crawlavail.hasMoreElements())) && (!(crawlpendi.hasMoreElements()))) {
+            Iterator crawlavail = yacyCore.dhtAgent.getAcceptRemoteCrawlSeeds(yacyURL.dummyHash, true);
+            Iterator crawlpendi = yacyCore.dhtAgent.getAcceptRemoteCrawlSeeds(yacyURL.dummyHash, false);
+            if ((!(crawlavail.hasNext())) && (!(crawlpendi.hasNext()))) {
                 prop.put("remoteCrawlPeers", 0); //no peers availible
             } else {
                 prop.put("remoteCrawlPeers", 1);
                 int maxcount = 100;
                 int availcount = 0;
                 yacySeed seed;
-                while ((availcount < maxcount) && (crawlavail.hasMoreElements())) {
-                    seed = (yacySeed) crawlavail.nextElement();
+                while ((availcount < maxcount) && (crawlavail.hasNext())) {
+                    seed = (yacySeed) crawlavail.next();
                     prop.put("remoteCrawlPeers_available_" + availcount + "_name", seed.getName());
                     prop.put("remoteCrawlPeers_available_" + availcount + "_due", (yacyCore.yacyTime() - seed.available));
                     availcount++;
                 }
                 prop.put("remoteCrawlPeers_available", availcount);
                 int pendicount = 0;
-                while ((pendicount < maxcount) && (crawlpendi.hasMoreElements())) {
-                    seed = (yacySeed) crawlpendi.nextElement();
+                while ((pendicount < maxcount) && (crawlpendi.hasNext())) {
+                    seed = (yacySeed) crawlpendi.next();
                     prop.put("remoteCrawlPeers_busy_" + pendicount + "_name", seed.getName());
                     prop.put("remoteCrawlPeers_busy_" + pendicount + "_due", (yacyCore.yacyTime() - seed.available));
                     pendicount++;

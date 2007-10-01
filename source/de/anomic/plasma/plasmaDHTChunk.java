@@ -131,7 +131,7 @@ public class plasmaDHTChunk {
             this.log = log;
             this.wordIndex = wordIndex;
             this.startPointHash = selectTransferStart();
-            log.logFine("Selected hash " + this.startPointHash + " as start point for index distribution, distance = " + yacyDHTAction.dhtDistance(yacyCore.seedDB.mySeed.hash, this.startPointHash));
+            log.logFine("Selected hash " + this.startPointHash + " as start point for index distribution, distance = " + yacyDHTAction.dhtDistance(yacyCore.seedDB.mySeed().hash, this.startPointHash));
             selectTransferContainers(this.startPointHash, minCount, maxCount, maxtime);
 
             // count the indexes, can be smaller as expected
@@ -149,7 +149,7 @@ public class plasmaDHTChunk {
         try {
             this.log = log;
             this.wordIndex = wordIndex;
-            log.logFine("Demanded hash " + startHash + " as start point for index distribution, distance = " + yacyDHTAction.dhtDistance(yacyCore.seedDB.mySeed.hash, this.startPointHash));
+            log.logFine("Demanded hash " + startHash + " as start point for index distribution, distance = " + yacyDHTAction.dhtDistance(yacyCore.seedDB.mySeed().hash, this.startPointHash));
             selectTransferContainers(startHash, minCount, maxCount, maxtime);
 
             // count the indexes, can be smaller as expected
@@ -171,7 +171,7 @@ public class plasmaDHTChunk {
         String bestHash = null;
         for (int i = yacyCore.seedDB.sizeConnected() / 8; i > 0; i--) {
             startPointHash = kelondroBase64Order.enhancedCoder.encode(serverCodings.encodeMD5Raw(Long.toString(i + System.currentTimeMillis()))).substring(2, 2 + yacySeedDB.commonHashLength);
-            d = yacyDHTAction.dhtDistance(yacyCore.seedDB.mySeed.hash, startPointHash);
+            d = yacyDHTAction.dhtDistance(yacyCore.seedDB.mySeed().hash, startPointHash);
             if (d > (minimumDistance + ((double) i / (double) 10))) {
                 return startPointHash;
             }
@@ -182,7 +182,7 @@ public class plasmaDHTChunk {
         }
         // if that fails, take simply the best start point
         if (bestHash == null) {
-            return yacyCore.seedDB.mySeed.hash.substring(0, 11) + "z";
+            return yacyCore.seedDB.mySeed().hash.substring(0, 11) + "z";
         } else {
             return bestHash;
         }

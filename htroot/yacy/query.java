@@ -88,7 +88,7 @@ public final class query {
         prop.putASIS("mytime", serverDate.shortSecondTime());
 
         // check if we are the right target and requester has correct information about this peer
-        if (yacyCore.seedDB.mySeed == null || !yacyCore.seedDB.mySeed.hash.equals(youare)) {
+        if (yacyCore.seedDB.mySeed() == null || !yacyCore.seedDB.mySeed().hash.equals(youare)) {
             // this request has a wrong target
             prop.putASIS("response", "-1"); // request rejected
             return prop;

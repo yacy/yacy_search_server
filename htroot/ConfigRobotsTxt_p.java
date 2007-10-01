@@ -62,7 +62,7 @@ public class ConfigRobotsTxt_p {
         final servletProperties prop = new servletProperties();
         
         httpdRobotsTxtConfig rbc = ((plasmaSwitchboard)env).robotstxtConfig;
-        prop.put("clientname", yacyCore.seedDB.mySeed.getPublicAddress());
+        prop.put("clientname", yacyCore.seedDB.mySeed().getPublicAddress());
         
         if (post != null) {
             if (post.containsKey("save")) {

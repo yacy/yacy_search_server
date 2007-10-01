@@ -1526,7 +1526,7 @@ public final class httpdProxyHandler {
         // appending info about this peer
         viaValue
         .append(httpVer).append(" ")
-        .append(yacyCore.seedDB.mySeed.getName()).append(".yacy ")
+        .append(yacyCore.seedDB.mySeed().getName()).append(".yacy ")
         .append("(YaCy ").append(switchboard.getConfig("vString", "0.0")).append(")");
         
         // storing header back

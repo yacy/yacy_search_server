@@ -29,7 +29,7 @@ public abstract class abstractWikiParser implements wikiParser {
             return transform(
                     new BufferedReader(new StringReader(content)),
                     content.length(),
-                    yacyCore.seedDB.mySeed.getPublicAddress(),
+                    yacyCore.seedDB.mySeed().getPublicAddress(),
                     sb);
         } catch (IOException e) {
             return "internal error: " + e.getMessage();
@@ -75,7 +75,7 @@ public abstract class abstractWikiParser implements wikiParser {
             return transform(
                     new BufferedReader(new InputStreamReader(bais, encoding)),
                     content.length,
-                    yacyCore.seedDB.mySeed.getPublicAddress(),
+                    yacyCore.seedDB.mySeed().getPublicAddress(),
                     switchboard);
         } catch (IOException e) {
             return "internal error: " + e.getMessage();

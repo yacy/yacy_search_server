@@ -106,7 +106,7 @@ public final class transfer {
                 String access = kelondroBase64Order.enhancedCoder.encode(serverCodings.encodeMD5Raw(otherpeer + ":" + filename)) + ":" + kelondroBase64Order.enhancedCoder.encode(serverCodings.encodeMD5Raw("" + System.currentTimeMillis()));
                 prop.putASIS("response", "ok");
                 prop.putASIS("process_access", access);
-                prop.putASIS("process_address", yacyCore.seedDB.mySeed.getPublicAddress());
+                prop.putASIS("process_address", yacyCore.seedDB.mySeed().getPublicAddress());
                 prop.putASIS("process_protocol", "http");
                 prop.putASIS("process_path", "");  // currently empty; the store process will find a path
                 prop.putASIS("process_maxsize", "-1"); // if response is too big we return the size of the file

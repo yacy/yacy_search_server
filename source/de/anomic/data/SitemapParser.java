@@ -302,7 +302,7 @@ public class SitemapParser extends DefaultHandler {
 				error = this.switchboard.sbStackCrawlThread.stackCrawl(
 						this.nextURL,
 						null, // this.siteMapURL.toString(),
-						yacyCore.seedDB.mySeed.hash,
+						yacyCore.seedDB.mySeed().hash,
 						this.nextURL, 
 						new Date(),
 						0,

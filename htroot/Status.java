@@ -208,35 +208,35 @@ public class Status {
         // peer information
         String thisHash = "";
         final String thisName = sb.getConfig("peerName", "<nameless>");
-        if (yacyCore.seedDB.mySeed == null)  {
+        if (yacyCore.seedDB.mySeed() == null)  {
             thisHash = "not assigned";
             prop.put("peerAddress", 0);    // not assigned
             prop.put("peerStatistics", 0); // unknown
         } else {
-            final long uptime = 60000 * Long.parseLong(yacyCore.seedDB.mySeed.get(yacySeed.UPTIME, "0"));
+            final long uptime = 60000 * Long.parseLong(yacyCore.seedDB.mySeed().get(yacySeed.UPTIME, "0"));
             prop.put("peerStatistics", 1);
             prop.put("peerStatistics_uptime", serverDate.intervalToString(uptime));
-            prop.put("peerStatistics_pagesperminute", yacyCore.seedDB.mySeed.get(yacySeed.ISPEED, "unknown"));
-            prop.put("peerStatistics_queriesperhour", Double.toString(Math.round(6000d * yacyCore.seedDB.mySeed.getQPM()) / 100d));
-            prop.put("peerStatistics_links", groupDigits(yacyCore.seedDB.mySeed.get(yacySeed.LCOUNT, "0")));
-            prop.put("peerStatistics_words", groupDigits(yacyCore.seedDB.mySeed.get(yacySeed.ICOUNT, "0")));
+            prop.put("peerStatistics_pagesperminute", yacyCore.seedDB.mySeed().get(yacySeed.ISPEED, "unknown"));
+            prop.put("peerStatistics_queriesperhour", Double.toString(Math.round(6000d * yacyCore.seedDB.mySeed().getQPM()) / 100d));
+            prop.put("peerStatistics_links", groupDigits(yacyCore.seedDB.mySeed().get(yacySeed.LCOUNT, "0")));
+            prop.put("peerStatistics_words", groupDigits(yacyCore.seedDB.mySeed().get(yacySeed.ICOUNT, "0")));
             prop.put("peerStatistics_juniorConnects", yacyCore.peerActions.juniorConnects);
             prop.put("peerStatistics_seniorConnects", yacyCore.peerActions.seniorConnects);
             prop.put("peerStatistics_principalConnects", yacyCore.peerActions.principalConnects);
             prop.put("peerStatistics_disconnects", yacyCore.peerActions.disconnects);
-            prop.put("peerStatistics_connects", yacyCore.seedDB.mySeed.get(yacySeed.CCOUNT, "0"));
-            if (yacyCore.seedDB.mySeed.getPublicAddress() == null) {
-                thisHash = yacyCore.seedDB.mySeed.hash;
+            prop.put("peerStatistics_connects", yacyCore.seedDB.mySeed().get(yacySeed.CCOUNT, "0"));
+            if (yacyCore.seedDB.mySeed().getPublicAddress() == null) {
+                thisHash = yacyCore.seedDB.mySeed().hash;
                 prop.put("peerAddress", 0); // not assigned + instructions
                 prop.put("warningGoOnline", 1);
             } else {
-                thisHash = yacyCore.seedDB.mySeed.hash;
+                thisHash = yacyCore.seedDB.mySeed().hash;
                 prop.put("peerAddress", 1); // Address
-                prop.put("peerAddress_address", yacyCore.seedDB.mySeed.getPublicAddress());
+                prop.put("peerAddress_address", yacyCore.seedDB.mySeed().getPublicAddress());
                 prop.put("peerAddress_peername", sb.getConfig("peerName", "<nameless>").toLowerCase());
             }
         }
-        final String peerStatus = ((yacyCore.seedDB.mySeed == null) ? yacySeed.PEERTYPE_VIRGIN : yacyCore.seedDB.mySeed.get(yacySeed.PEERTYPE, yacySeed.PEERTYPE_VIRGIN));
+        final String peerStatus = ((yacyCore.seedDB.mySeed() == null) ? yacySeed.PEERTYPE_VIRGIN : yacyCore.seedDB.mySeed().get(yacySeed.PEERTYPE, yacySeed.PEERTYPE_VIRGIN));
         if (peerStatus.equals(yacySeed.PEERTYPE_VIRGIN)) {
             prop.put(PEERSTATUS, 0);
             prop.put("urgentStatusVirgin", 1);
@@ -249,7 +249,7 @@ public class Status {
         } else if (peerStatus.equals(yacySeed.PEERTYPE_PRINCIPAL)) {
             prop.put(PEERSTATUS, 3);
             prop.put("hintStatusPrincipal", 1);
-            prop.put("hintStatusPrincipal_seedURL", yacyCore.seedDB.mySeed.get("seedURL", "?"));
+            prop.put("hintStatusPrincipal_seedURL", yacyCore.seedDB.mySeed().get("seedURL", "?"));
         }
         prop.put("peerName", thisName);
         prop.put("hash", thisHash);

@@ -55,7 +55,7 @@ import java.io.PrintWriter;
 import java.net.MalformedURLException;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Enumeration;
+import java.util.Iterator;
 import java.util.TreeMap;
 
 import de.anomic.data.listManager;
@@ -437,9 +437,9 @@ public class Blacklist_p {
 	            int peerCount = 0;
 	            try {
 	                TreeMap hostList = new TreeMap();
-	                final Enumeration e = yacyCore.seedDB.seedsConnected(true, false, null, (float) 0.0);
-	                while (e.hasMoreElements()) {
-	                    yacySeed seed = (yacySeed) e.nextElement();
+	                final Iterator e = yacyCore.seedDB.seedsConnected(true, false, null, (float) 0.0);
+	                while (e.hasNext()) {
+	                    yacySeed seed = (yacySeed) e.next();
 	                    if (seed != null) hostList.put(seed.get(yacySeed.NAME, "nameless"),seed.hash);
 	                }
 	

@@ -58,8 +58,8 @@ public class status_p {
         serverObjects prop = new serverObjects();
         prop.put("rejected", 0);
         yacyCore.peerActions.updateMySeed();
-        prop.put("ppm", yacyCore.seedDB.mySeed.get(yacySeed.ISPEED, "unknown"));
-        prop.put("qpm", yacyCore.seedDB.mySeed.get(yacySeed.RSPEED, "unknown"));
+        prop.put("ppm", yacyCore.seedDB.mySeed().get(yacySeed.ISPEED, "unknown"));
+        prop.put("qpm", yacyCore.seedDB.mySeed().get(yacySeed.RSPEED, "unknown"));
         prop.put("wordCacheSize", switchboard.wordIndex.dhtOutCacheSize() + switchboard.wordIndex.dhtInCacheSize());
         prop.put("wordCacheWSize", switchboard.wordIndex.dhtOutCacheSize());
         prop.put("wordCacheKSize", switchboard.wordIndex.dhtInCacheSize());

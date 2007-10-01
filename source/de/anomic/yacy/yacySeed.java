@@ -69,7 +69,7 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
-import java.util.Properties;
+import java.util.Random;
 import java.util.Set;
 
 import de.anomic.kelondro.kelondroBase64Order;
@@ -173,6 +173,8 @@ public class yacySeed {
     
     public static final String DFLT_NETWORK_UNIT = "freeworld";
     public static final String DFLT_NETWORK_GROUP = "";
+
+    private static final Random random = new Random(System.currentTimeMillis());
     
     // class variables
     /** the peer-hash */
@@ -657,68 +659,98 @@ public class yacySeed {
     public static final long minDHTNumber   = kelondroBase64Order.enhancedCoder.cardinal("AAAAAAAAAAAA".getBytes());
     public static final long maxDHTDistance = Long.MAX_VALUE;
 
-    public final long dhtDistance(String wordhash) {
-        // computes a virtual distance, the result must be set in relation to maxDHTDistace
-        // if the distance is small, this peer is more responsible for that word hash
-        // if the distance is big, this peer is less responsible for that word hash
-        final long myPos = dhtPosition(this.hash);
-        final long wordPos = dhtPosition(wordhash);
-        return (myPos > wordPos) ? (myPos - wordPos) : (yacySeed.maxDHTDistance - wordPos + myPos);
-    }
-
-    public final long dhtPosition() {
-        // returns an absolute value
+    public double dhtPosition() {
+        // normalized to 1.0
         return dhtPosition(this.hash);
     }
 
-    public static long dhtPosition(String ahash) {
-        // returns an absolute value
-        return kelondroBase64Order.enhancedCoder.cardinal(ahash.getBytes());
+    public static double dhtPosition(String ahash) {
+        // normalized to 1.0
+        return ((double) kelondroBase64Order.enhancedCoder.cardinal(ahash.getBytes())) / ((double) maxDHTDistance);
     }
 
+    public final static double dhtDistance(String from, String to) {
+        // computes a virtual distance, the result must be set in relation to maxDHTDistace
+        // if the distance is small, this peer is more responsible for that word hash
+        // if the distance is big, this peer is less responsible for that word hash
+        if (from == null) return dhtPosition(to);
+        final double fromPos = dhtPosition(from);
+        final double toPos = dhtPosition(to);
+        return (fromPos < toPos) ? (toPos - fromPos) : (1.0 - fromPos + toPos);
+    }
+    
+    private static String bestNewHash(yacySeedDB seedDB) {
+        int con = seedDB.sizeConnected();
+        if (con == 0) return positionToHash(0.0);
+        if (con == 1) return positionToHash(0.5);
+        if (con == 2) return positionToHash(0.25);
+        if (con == 3) return positionToHash(0.75);
+        if (con == 4) return positionToHash(0.125);
+        if (con == 5) return positionToHash(0.625);
+        if (con == 6) return positionToHash(0.375);
+        if (con == 7) return positionToHash(0.875);
+        
+        int tries = Math.max(1, Math.min(32, seedDB.sizeConnected() / 2));
+        String hash;
+        String bestHash = null;
+        double c, bestC = Double.MAX_VALUE;
+        double segmentSize = Math.min(0.9, 4.0 / seedDB.sizeConnected());
+        Iterator i;
+        double d;
+        yacySeed s;
+        for (int t = 0; t < tries; t++) {
+            hash = randomHash();
+            i = seedDB.seedsConnected(true, true, hash, (float) 0.0);
+            c = 0.0;
+            while (i.hasNext()) {
+                s = (yacySeed) i.next();
+                d = dhtDistance(hash, s.hash);
+                if (d > segmentSize) break;
+                c = c + 1.0/d;
+            }
+            System.out.println("BESTHASH  " + hash + " = " + c);
+            if (c < bestC) {
+                bestC = c;
+                bestHash = hash;
+                System.out.println("BESTHASH  " + hash + " is best now");
+            }
+        }
+        if (bestHash == null) return randomHash();
+        
+        // at this point we know only the position of a peer sequence
+        double bestPosition = dhtPosition(bestHash) + (segmentSize / 2);
+        if (bestPosition > 1.0) bestPosition = bestPosition - 1.0;
+        bestHash = positionToHash(bestPosition);
+        System.out.println("BESTHASH  finally is " + bestHash);
+        return bestHash;
+    }
+    
+    private static String positionToHash(double t) {
+        // transform the position of a peer position into a close peer hash
+        assert t >= 0.0 : "t = " + t;
+        assert t < 1.0 : "t = " + t;
+        
+        // now calculate a hash that is closest to the best position
+        double d, bestD = Double.MAX_VALUE;
+        int tries = 128;
+        String hash, bestHash = null;
+        for (int v = 0; v < tries; v++) {
+            hash = randomHash();
+            d = dhtPosition(hash);
+            if (Math.abs(d - t) < bestD) {
+                bestD = Math.abs(d - t);
+                bestHash = hash;
+            }
+        }
+        return bestHash;
+    }
+    
     public static yacySeed genLocalSeed(plasmaSwitchboard sb) {
         // genera a seed for the local peer
         // this is the birthplace of a seed, that then will start to travel to other peers
 
-        // at first we need a good peer hash
-        // that hash should be as static as possible, so that it depends mainly on system
-        // variables and can even then be reconstructed if the local seed has disappeared
-        final Properties sp = System.getProperties();
-        final String slow =
-            sp.getProperty("file.encoding", "") +
-            sp.getProperty("file.separator", "") +
-            sp.getProperty("java.class.path", "") +
-            sp.getProperty("java.vendor", "") +
-            sp.getProperty("os.arch", "") +
-            sp.getProperty("os.name", "") +
-            sp.getProperty("path.separator", "") +
-            sp.getProperty("user.dir", "") +
-            sp.getProperty("user.home", "") +
-            sp.getProperty("user.language", "") +
-            sp.getProperty("user.name", "") +
-            sp.getProperty("user.timezone", "");
-        final String medium =
-            sp.getProperty("java.class.version", "") +
-            sp.getProperty("java.version", "") +
-            sp.getProperty("os.version", "") +
-            sb.getConfig("peerName", "noname");
-        final String fast = Long.toString(System.currentTimeMillis());
-        // the resultinh hash does not have any information than can be used to reconstruct the
-        // original system information that has been collected here to create the hash
-        // We simply distinuguish three parts of the hash: slow, medium and fast changing character of system idenfification
-        // the Hash is constructed in such a way, that the slow part influences the main aerea of the distributed hash location
-        // more than the fast part. The effect is, that if the peer looses it's seed information and is reconstructed, it
-        // still hosts most information of the distributed hash the an appropriate 'position'
-        final String hash =
-            kelondroBase64Order.enhancedCoder.encode(serverCodings.encodeMD5Raw(slow)).substring(0, 4) +
-            kelondroBase64Order.enhancedCoder.encode(serverCodings.encodeMD5Raw(medium)).substring(0, 4) +
-            kelondroBase64Order.enhancedCoder.encode(serverCodings.encodeMD5Raw(fast)).substring(0, 4);
+        final String hash = bestNewHash(yacyCore.seedDB);
         yacyCore.log.logInfo("init: OWN SEED = " + hash);
-
-        if (hash.length() != yacySeedDB.commonHashLength) {
-            yacyCore.log.logSevere("YACY Internal error: distributed hash conceptual error");
-            System.exit(-1);
-        }
 
         final yacySeed newSeed = new yacySeed(hash);
 
@@ -741,8 +773,8 @@ public class yacySeed {
 
     public static String randomHash() {
         final String hash =
-            kelondroBase64Order.enhancedCoder.encode(serverCodings.encodeMD5Raw(System.currentTimeMillis() + "a")).substring(0, 6) +
-            kelondroBase64Order.enhancedCoder.encode(serverCodings.encodeMD5Raw(System.currentTimeMillis() + "b")).substring(0, 6);
+            kelondroBase64Order.enhancedCoder.encode(serverCodings.encodeMD5Raw(Long.toString(random.nextLong()))).substring(0, 6) +
+            kelondroBase64Order.enhancedCoder.encode(serverCodings.encodeMD5Raw(Long.toString(random.nextLong()))).substring(0, 6);
         return hash;
     }
 

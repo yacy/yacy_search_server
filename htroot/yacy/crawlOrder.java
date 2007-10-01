@@ -102,13 +102,13 @@ public final class crawlOrder {
         String  lurl        = "";
         boolean granted     = switchboard.getConfigBool("crawlResponse", false);
         int     acceptDepth = Integer.parseInt(switchboard.getConfig("crawlResponseDepth", "0"));
-        int     ppm         = yacyCore.seedDB.mySeed.getPPM();
-        int     acceptDelay = (ppm == 0) ? 10 : (2 + 60 / yacyCore.seedDB.mySeed.getPPM());
+        int     ppm         = yacyCore.seedDB.mySeed().getPPM();
+        int     acceptDelay = (ppm == 0) ? 10 : (2 + 60 / yacyCore.seedDB.mySeed().getPPM());
 
         if (orderDepth > acceptDepth) orderDepth = acceptDepth;
 
         // check if requester is authorized
-        if ((yacyCore.seedDB.mySeed == null) || (!(yacyCore.seedDB.mySeed.hash.equals(youare)))) {
+        if ((yacyCore.seedDB.mySeed() == null) || (!(yacyCore.seedDB.mySeed().hash.equals(youare)))) {
             // this request has a wrong target
             response = "denied";
             reason = "authentify-problem";

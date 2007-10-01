@@ -49,7 +49,7 @@
 //if the shell's current path is HTROOT
 
 import java.util.Date;
-import java.util.Enumeration;
+import java.util.Iterator;
 import java.util.NoSuchElementException;
 import java.util.TreeMap;
 
@@ -131,10 +131,10 @@ public final class IndexTransfer_p {
         yacySeed seed;
         int hc = 0;
         if ((yacyCore.seedDB != null) && (yacyCore.seedDB.sizeConnected() > 0)) {
-            Enumeration e = yacyCore.dhtAgent.getAcceptRemoteIndexSeeds("------------");
+            Iterator e = yacyCore.dhtAgent.getAcceptRemoteIndexSeeds("------------");
             TreeMap hostList = new TreeMap();
-            while (e.hasMoreElements()) {
-                seed = (yacySeed) e.nextElement();
+            while (e.hasNext()) {
+                seed = (yacySeed) e.next();
                 if (seed != null) hostList.put(seed.get(yacySeed.NAME, "nameless"),seed.hash);
             }
             

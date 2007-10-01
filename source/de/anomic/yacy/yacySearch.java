@@ -44,7 +44,6 @@
 package de.anomic.yacy;
 
 import java.util.ArrayList;
-import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
@@ -113,8 +112,8 @@ public class yacySearch extends Thread {
             StringBuffer urllist = new StringBuffer(this.urls.length * 13);
             for (int i = 0; i < this.urls.length; i++) urllist.append(this.urls[i]).append(' ');
             yacyCore.log.logInfo("REMOTE SEARCH - remote peer " + targetPeer.hash + ":" + targetPeer.getName() + " contributed " + urls.length + " links for word hash " + wordhashes + ": " + new String(urllist));
-            yacyCore.seedDB.mySeed.incRI(urls.length);
-            yacyCore.seedDB.mySeed.incRU(urls.length);
+            yacyCore.seedDB.mySeed().incRI(urls.length);
+            yacyCore.seedDB.mySeed().incRU(urls.length);
         } else {
             yacyCore.log.logInfo("REMOTE SEARCH - no answer from remote peer " + targetPeer.hash + ":" + targetPeer.getName());
         }
@@ -173,7 +172,7 @@ public class yacySearch extends Thread {
         final kelondroMScoreCluster ranking = new kelondroMScoreCluster();
         final HashMap seeds = new HashMap();
         yacySeed seed;
-        Enumeration dhtEnum;         
+        Iterator dhtEnum;         
         int c;
         String wordhash;
         double distance;
@@ -182,8 +181,8 @@ public class yacySearch extends Thread {
             wordhash = (String) iter.next();
             dhtEnum = yacyCore.dhtAgent.getDHTSeeds(true, wordhash, (float) 0.0);
             c = seedcount;
-            while (dhtEnum.hasMoreElements() && c > 0) {
-                seed = (yacySeed) dhtEnum.nextElement();
+            while (dhtEnum.hasNext() && c > 0) {
+                seed = (yacySeed) dhtEnum.next();
                 if (seed == null) continue;
                 distance = yacyDHTAction.dhtDistance(seed.hash, wordhash);
                 if (distance > 0.2) continue; // catch bug in peer selection
@@ -199,8 +198,8 @@ public class yacySearch extends Thread {
         c = seedcount;
         int score;
         if (c > yacyCore.seedDB.sizeConnected()) { c = yacyCore.seedDB.sizeConnected(); }
-        while (dhtEnum.hasMoreElements() && c > 0) {
-            seed = (yacySeed) dhtEnum.nextElement();
+        while (dhtEnum.hasNext() && c > 0) {
+            seed = (yacySeed) dhtEnum.next();
             if (seed == null) continue;
             if (!seed.getFlagAcceptRemoteIndex()) continue; // probably a robinson peer
             score = (int) Math.round(Math.random() * ((c / 3) + 3));
@@ -213,8 +212,8 @@ public class yacySearch extends Thread {
         // put in seeds that are public robinson peers and where the peer tags match with query
         // or seeds that are newbies to ensure that public demonstrations always work
         dhtEnum = yacyCore.seedDB.seedsConnected(true, false, null, (float) 0.50);
-        while (dhtEnum.hasMoreElements()) {
-        	seed = (yacySeed) dhtEnum.nextElement();
+        while (dhtEnum.hasNext()) {
+        	seed = (yacySeed) dhtEnum.next();
             if (seed == null) continue;
             if (seed.matchPeerTags(wordhashes)) { // access robinson peers with matching tag
             	serverLog.logInfo("PLASMA", "selectPeers/PeerTags: " + seed.hash + ":" + seed.getName() + ", is specialized peer for " + seed.getPeerTags().toString());
@@ -253,7 +252,7 @@ public class yacySearch extends Thread {
             plasmaSearchRankingProfile rankingProfile,
             kelondroBitfield constraint, TreeMap clusterselection) {
         // check own peer status
-        if (yacyCore.seedDB.mySeed == null || yacyCore.seedDB.mySeed.getPublicAddress() == null) { return null; }
+        if (yacyCore.seedDB.mySeed() == null || yacyCore.seedDB.mySeed().getPublicAddress() == null) { return null; }
 
         // prepare seed targets and threads
         final yacySeed[] targetPeers = (clusterselection == null) ? selectSearchTargets(plasmaSearchQuery.hashes2Set(wordhashes), targets) : selectClusterPeers(clusterselection);
@@ -277,7 +276,7 @@ public class yacySearch extends Thread {
             plasmaSearchRankingProfile rankingProfile,
             kelondroBitfield constraint, TreeMap clusterselection) {
         // check own peer status
-        if (yacyCore.seedDB.mySeed == null || yacyCore.seedDB.mySeed.getPublicAddress() == null) { return null; }
+        if (yacyCore.seedDB.mySeed() == null || yacyCore.seedDB.mySeed().getPublicAddress() == null) { return null; }
 
         // prepare seed targets and threads
         final yacySeed targetPeer = yacyCore.seedDB.getConnected(targethash);

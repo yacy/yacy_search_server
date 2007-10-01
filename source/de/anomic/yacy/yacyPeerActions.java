@@ -90,11 +90,11 @@ public class yacyPeerActions {
             // generate new peer name
             sb.setConfig("peerName", yacySeed.makeDefaultPeerName());
         }
-        seedDB.mySeed.put(yacySeed.NAME, sb.getConfig("peerName", "nameless"));
+        seedDB.mySeed().put(yacySeed.NAME, sb.getConfig("peerName", "nameless"));
         if ((serverCore.portForwardingEnabled) && (serverCore.portForwarding != null)) {
-            seedDB.mySeed.put(yacySeed.PORT, Integer.toString(serverCore.portForwarding.getPort()));
+            seedDB.mySeed().put(yacySeed.PORT, Integer.toString(serverCore.portForwarding.getPort()));
         } else {
-            seedDB.mySeed.put(yacySeed.PORT, Integer.toString(serverCore.getPortNr(sb.getConfig("port", "8080"))));
+            seedDB.mySeed().put(yacySeed.PORT, Integer.toString(serverCore.getPortNr(sb.getConfig("port", "8080"))));
         }
         
         long uptime = (System.currentTimeMillis() - serverCore.startupTime) / 1000;
@@ -109,33 +109,33 @@ public class yacyPeerActions {
         
         //the speed of indexing (pages/minute) of the peer
         sb.totalPPM = (int) (sb.indexedPages * 60 / Math.max(uptime, 1));
-        seedDB.mySeed.put(yacySeed.ISPEED, Long.toString(Math.round(Math.max((float) indexedcdiff, 0f) * 60f / Math.max((float) uptimediff, 1f))));
+        seedDB.mySeed().put(yacySeed.ISPEED, Long.toString(Math.round(Math.max((float) indexedcdiff, 0f) * 60f / Math.max((float) uptimediff, 1f))));
         sb.totalQPM = sb.requestedQueries * 60d / Math.max((double) uptime, 1d);
-        seedDB.mySeed.put(yacySeed.RSPEED, Double.toString(sb.totalQPM /*Math.max((float) requestcdiff, 0f) * 60f / Math.max((float) uptimediff, 1f)*/ ));
+        seedDB.mySeed().put(yacySeed.RSPEED, Double.toString(sb.totalQPM /*Math.max((float) requestcdiff, 0f) * 60f / Math.max((float) uptimediff, 1f)*/ ));
         
-        seedDB.mySeed.put(yacySeed.UPTIME, Long.toString(uptime/60)); // the number of minutes that the peer is up in minutes/day (moving average MA30)
-        seedDB.mySeed.put(yacySeed.LCOUNT, Integer.toString(sb.wordIndex.loadedURL.size())); // the number of links that the peer has stored (LURL's)
-        seedDB.mySeed.put(yacySeed.NCOUNT, Integer.toString(sb.noticeURL.size())); // the number of links that the peer has noticed, but not loaded (NURL's)
-        seedDB.mySeed.put(yacySeed.RCOUNT, Integer.toString(sb.noticeURL.stackSize(plasmaCrawlNURL.STACK_TYPE_LIMIT))); // the number of links that the peer provides for remote crawling (ZURL's)
-        seedDB.mySeed.put(yacySeed.ICOUNT, Integer.toString(sb.wordIndex.size())); // the minimum number of words that the peer has indexed (as it says)
-        seedDB.mySeed.put(yacySeed.SCOUNT, Integer.toString(seedDB.sizeConnected())); // the number of seeds that the peer has stored
-        seedDB.mySeed.put(yacySeed.CCOUNT, Double.toString(((int) ((seedDB.sizeConnected() + seedDB.sizeDisconnected() + seedDB.sizePotential()) * 60.0 / (uptime + 1.01)) * 100) / 100.0)); // the number of clients that the peer connects (as connects/hour)
-        seedDB.mySeed.put(yacySeed.VERSION, sb.getConfig("version", ""));
-        if (seedDB.mySeed.get(yacySeed.PEERTYPE,"").equals(yacySeed.PEERTYPE_PRINCIPAL)) {
+        seedDB.mySeed().put(yacySeed.UPTIME, Long.toString(uptime/60)); // the number of minutes that the peer is up in minutes/day (moving average MA30)
+        seedDB.mySeed().put(yacySeed.LCOUNT, Integer.toString(sb.wordIndex.loadedURL.size())); // the number of links that the peer has stored (LURL's)
+        seedDB.mySeed().put(yacySeed.NCOUNT, Integer.toString(sb.noticeURL.size())); // the number of links that the peer has noticed, but not loaded (NURL's)
+        seedDB.mySeed().put(yacySeed.RCOUNT, Integer.toString(sb.noticeURL.stackSize(plasmaCrawlNURL.STACK_TYPE_LIMIT))); // the number of links that the peer provides for remote crawling (ZURL's)
+        seedDB.mySeed().put(yacySeed.ICOUNT, Integer.toString(sb.wordIndex.size())); // the minimum number of words that the peer has indexed (as it says)
+        seedDB.mySeed().put(yacySeed.SCOUNT, Integer.toString(seedDB.sizeConnected())); // the number of seeds that the peer has stored
+        seedDB.mySeed().put(yacySeed.CCOUNT, Double.toString(((int) ((seedDB.sizeConnected() + seedDB.sizeDisconnected() + seedDB.sizePotential()) * 60.0 / (uptime + 1.01)) * 100) / 100.0)); // the number of clients that the peer connects (as connects/hour)
+        seedDB.mySeed().put(yacySeed.VERSION, sb.getConfig("version", ""));
+        if (seedDB.mySeed().get(yacySeed.PEERTYPE,"").equals(yacySeed.PEERTYPE_PRINCIPAL)) {
             // attach information about seed location
-            seedDB.mySeed.put("seedURL", sb.getConfig("seedURL", ""));
+            seedDB.mySeed().put("seedURL", sb.getConfig("seedURL", ""));
         }
-        seedDB.mySeed.setFlagDirectConnect(true);
-        seedDB.mySeed.setLastSeenUTC();
-        seedDB.mySeed.put(yacySeed.UTC, serverDate.UTCDiffString());
-        seedDB.mySeed.setFlagAcceptRemoteCrawl(sb.getConfig("crawlResponse", "").equals("true"));
-        seedDB.mySeed.setFlagAcceptRemoteIndex(sb.getConfig("allowReceiveIndex", "").equals("true"));
+        seedDB.mySeed().setFlagDirectConnect(true);
+        seedDB.mySeed().setLastSeenUTC();
+        seedDB.mySeed().put(yacySeed.UTC, serverDate.UTCDiffString());
+        seedDB.mySeed().setFlagAcceptRemoteCrawl(sb.getConfig("crawlResponse", "").equals("true"));
+        seedDB.mySeed().setFlagAcceptRemoteIndex(sb.getConfig("allowReceiveIndex", "").equals("true"));
         //mySeed.setFlagAcceptRemoteIndex(true);
     }
             
     public void saveMySeed() {
         try {
-          seedDB.mySeed.save(seedDB.myOwnSeedFile);
+          seedDB.mySeed().save(sb.getOwnSeedFile());
         } catch (IOException e) {}
     }
 
@@ -192,7 +192,7 @@ public class yacyPeerActions {
                         while (enu.hasNext()) {
                             ys = yacySeed.genRemoteSeed((String) enu.next(), null, true);
                             if ((ys != null) && (ys.isProper() == null) &&
-                                    ((seedDB.mySeed == null) || (seedDB.mySeed.hash != ys.hash))) {
+                                    ((!seedDB.mySeedIsDefined()) || (seedDB.mySeed().hash != ys.hash))) {
                                 if (connectPeer(ys, false)) lc++;
                                 //seedDB.writeMap(ys.hash, ys.getMap(), "init");
                                 //System.out.println("BOOTSTRAP: received peer " + ys.get(yacySeed.NAME, "anonymous") + "/" + ys.getAddress());
@@ -204,10 +204,10 @@ public class yacyPeerActions {
                     
                 } catch (IOException e) {
                     // this is when wget fails, commonly because of timeout
-                    yacyCore.log.logWarning("BOOTSTRAP: failed to load seeds from seed-list URL " + seedListFileURL + ": " + e.getMessage());
+                    yacyCore.log.logWarning("BOOTSTRAP: failed (1) to load seeds from seed-list URL " + seedListFileURL + ": " + e.getMessage(), e);
                 } catch (Exception e) {
                     // this is when wget fails; may be because of missing internet connection
-                    yacyCore.log.logSevere("BOOTSTRAP: failed to load seeds from seed-list URL " + seedListFileURL + ": " + e.getMessage());
+                    yacyCore.log.logSevere("BOOTSTRAP: failed (2) to load seeds from seed-list URL " + seedListFileURL + ": " + e.getMessage(), e);
                 }
             }
         }
@@ -226,7 +226,7 @@ public class yacyPeerActions {
             yacyCore.log.logSevere("connect: WRONG seed (" + seed.getName() + "/" + seed.hash + "): " + error);
             return false;
         }
-        if ((this.seedDB.mySeed != null) && (seed.hash.equals(this.seedDB.mySeed.hash))) {
+        if ((this.seedDB.mySeedIsDefined()) && (seed.hash.equals(this.seedDB.mySeed().hash))) {
             yacyCore.log.logInfo("connect: SELF reference " + seed.getPublicAddress());
             return false;
         }
@@ -333,7 +333,7 @@ public class yacyPeerActions {
                 return true;
             } else {
                 // the seed is new
-                if (seed.get(yacySeed.IP, "127.0.0.1").equals(this.seedDB.mySeed.get(yacySeed.IP, "127.0.0.1"))) {
+                if ((seedDB.mySeedIsDefined()) && (seed.get(yacySeed.IP, "127.0.0.1").equals(this.seedDB.mySeed().get(yacySeed.IP, "127.0.0.1")))) {
                     // seed from the same IP as the calling client: can be
                     // the case if there runs another one over a NAT
                     yacyCore.log.logFine("connect: saved NEW seed (myself IP) " + seed.getPublicAddress());

@@ -187,14 +187,14 @@ public final class Connections_p {
                     commandLine = urlRedir.getURL();
                 }                
                 
-                if ((dest != null) && (dest.equals(virtualHost))) dest = yacyCore.seedDB.mySeed.getName() + ".yacy";
+                if ((dest != null) && (dest.equals(virtualHost))) dest = yacyCore.seedDB.mySeed().getName() + ".yacy";
                 
                 // determining if the source is a yacy host
                 yacySeed seed = null;
                 if (doNameLookup) {
                     seed = yacyCore.seedDB.lookupByIP(userAddress,true,false,false);
                     if (seed != null) {
-                        if ((seed.hash.equals(yacyCore.seedDB.mySeed.hash)) && 
+                        if ((seed.hash.equals(yacyCore.seedDB.mySeed().hash)) && 
                                 (!seed.get(yacySeed.PORT,"").equals(Integer.toString(userPort)))) {
                             seed = null;
                         }

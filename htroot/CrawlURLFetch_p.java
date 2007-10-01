@@ -43,7 +43,6 @@ import java.io.IOException;
 import java.net.MalformedURLException;
 import java.util.ArrayList;
 import java.util.Date;
-import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Random;
@@ -164,7 +163,7 @@ public class CrawlURLFetch_p {
                                         ys.getPublicAddress(),
                                         URLFetcher.MODE_LIST,
                                         count,
-                                        yacyCore.seedDB.mySeed.hash)) == null) {
+                                        yacyCore.seedDB.mySeed().hash)) == null) {
                                     prop.put("peerError", ERR_PEER_GENERAL_CONN);
                                     prop.put("peerError_hash", post.get("peerhash", ""));
                                     prop.put("peerError_name", ys.getName());
@@ -269,11 +268,11 @@ public class CrawlURLFetch_p {
         TreeMap hostList = new TreeMap();
         String peername;
         if (yacyCore.seedDB != null && yacyCore.seedDB.sizeConnected() > 0) {
-            final Enumeration e = yacyCore.seedDB.seedsConnected(true, false, null, yacyVersion.YACY_PROVIDES_CRAWLS_VIA_LIST_HTML);
+            final Iterator e = yacyCore.seedDB.seedsConnected(true, false, null, yacyVersion.YACY_PROVIDES_CRAWLS_VIA_LIST_HTML);
             int dbsize;
-            while (e.hasMoreElements()) {
-                yacySeed seed = (yacySeed) e.nextElement();
-                if (seed != null && !seed.hash.equals(yacyCore.seedDB.mySeed.hash)) {
+            while (e.hasNext()) {
+                yacySeed seed = (yacySeed) e.next();
+                if (seed != null && !seed.hash.equals(yacyCore.seedDB.mySeed().hash)) {
                     peername = seed.get(yacySeed.NAME, "nameless");
                     if (checkURLCount && (dbsize = getURLs2Fetch(seed, theRemoteProxyConfig)) > 0) {
                         hostList.put(peername + " (" + dbsize + ")", seed.hash);
@@ -376,7 +375,7 @@ public class CrawlURLFetch_p {
             if (peerHash != null && peerHash.length() > 0) {
                 r += "&iam=" + peerHash;
             } else if (mode == MODE_LIST) {
-                r += "&iam=" + yacyCore.seedDB.mySeed.hash;
+                r += "&iam=" + yacyCore.seedDB.mySeed().hash;
             }
             
             try {
@@ -454,16 +453,16 @@ public class CrawlURLFetch_p {
             
             // choose random seed
             yacySeed ys = null;
-            Enumeration e = yacyCore.seedDB.seedsConnected(true, false, null, yacyVersion.YACY_PROVIDES_CRAWLS_VIA_LIST_HTML);
+            Iterator e = yacyCore.seedDB.seedsConnected(true, false, null, yacyVersion.YACY_PROVIDES_CRAWLS_VIA_LIST_HTML);
             int num = new Random().nextInt(yacyCore.seedDB.sizeConnected()) + 1;
             Object o;
-            for (int i=0; i<num && e.hasMoreElements(); i++) {
-                o = e.nextElement();
+            for (int i=0; i<num && e.hasNext(); i++) {
+                o = e.next();
                 if (o != null) ys = (yacySeed)o;
             }
             if (ys == null) return null;
             
-            return getListServletURL(ys.getPublicAddress(), MODE_LIST, this.count, yacyCore.seedDB.mySeed.hash);
+            return getListServletURL(ys.getPublicAddress(), MODE_LIST, this.count, yacyCore.seedDB.mySeed().hash);
         }
         
         private int stackURLs(String[] urls) throws InterruptedException {
@@ -478,7 +477,7 @@ public class CrawlURLFetch_p {
                 reason = this.sb.sbStackCrawlThread.stackCrawl(
                         urls[i],
                         null,
-                        yacyCore.seedDB.mySeed.hash,
+                        yacyCore.seedDB.mySeed().hash,
                         null,
                         new Date(),
                         this.profile.generalDepth(),

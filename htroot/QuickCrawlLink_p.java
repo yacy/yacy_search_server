@@ -181,7 +181,7 @@ public class QuickCrawlLink_p {
                 reasonString = switchboard.sbStackCrawlThread.stackCrawl(
                         crawlingStart, 
                         null, 
-                        yacyCore.seedDB.mySeed.hash, 
+                        yacyCore.seedDB.mySeed().hash, 
                         (title==null)?"CRAWLING-ROOT":title, 
                                 new Date(), 
                                 0, 

@@ -48,7 +48,6 @@ import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
-import java.util.Enumeration;
 import java.util.Iterator;
 import java.util.TreeMap;
 
@@ -76,8 +75,8 @@ public class Messages_p {
         serverObjects prop = new serverObjects();
 
         // set peer address / name
-        final String peerAddress = yacyCore.seedDB.mySeed.getPublicAddress();
-        final String peerName = yacyCore.seedDB.mySeed.getName();
+        final String peerAddress = yacyCore.seedDB.mySeed().getPublicAddress();
+        final String peerName = yacyCore.seedDB.mySeed().getName();
         prop.put("peerAddress", peerAddress);
         prop.put("peerName", peerName);
 
@@ -87,9 +86,9 @@ public class Messages_p {
             int peerCount = 0;
             try {
                 TreeMap hostList = new TreeMap();
-                final Enumeration e = yacyCore.seedDB.seedsConnected(true, false, null, (float) 0.0);
-                while (e.hasMoreElements()) {
-                    yacySeed seed = (yacySeed) e.nextElement();
+                final Iterator e = yacyCore.seedDB.seedsConnected(true, false, null, (float) 0.0);
+                while (e.hasNext()) {
+                    yacySeed seed = (yacySeed) e.next();
                     if (seed != null) hostList.put(seed.get(yacySeed.NAME, "nameless"),seed.hash);
                 }
 

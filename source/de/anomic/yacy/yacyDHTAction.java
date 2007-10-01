@@ -44,7 +44,7 @@
 package de.anomic.yacy;
 
 import java.util.ArrayList;
-import java.util.Enumeration;
+import java.util.Iterator;
 import java.util.TreeMap;
 import java.util.TreeSet;
 
@@ -66,24 +66,24 @@ public class yacyDHTAction implements yacyPeerAction {
         this.seedCrawlReady = new kelondroMScoreCluster();
         // init crawl-ready table
         try {
-            Enumeration en = seedDB.seedsConnected(true, false, null, (float) 0.0);
+            Iterator en = seedDB.seedsConnected(true, false, null, (float) 0.0);
             yacySeed ys;
-            while (en.hasMoreElements()) {
-                ys = (yacySeed) en.nextElement();
+            while (en.hasNext()) {
+                ys = (yacySeed) en.next();
                 if ((ys != null) && (ys.getVersion() >= ((float) 0.3))) seedCrawlReady.setScore(ys.hash, yacyCore.yacyTime());
             }
         } catch (IllegalArgumentException e) {
         }
     }
    
-    public Enumeration getDHTSeeds(boolean up, String firstHash, float minVersion) {
+    public Iterator getDHTSeeds(boolean up, String firstHash, float minVersion) {
         // enumerates seed-type objects: all seeds with starting point in the middle, rotating at the end/beginning
         return new seedDHTEnum(up, firstHash, minVersion);
     }
 
-    class seedDHTEnum implements Enumeration {
+    class seedDHTEnum implements Iterator {
 
-        Enumeration e1, e2;
+        Iterator e1, e2;
         boolean up;
         int steps;
         float minVersion;
@@ -96,16 +96,16 @@ public class yacyDHTAction implements yacyPeerAction {
             this.e2 = null;
         }
         
-        public boolean hasMoreElements() {
-            return (steps > 0) && ((e2 == null) || (e2.hasMoreElements()));
+        public boolean hasNext() {
+            return (steps > 0) && ((e2 == null) || (e2.hasNext()));
         }
 
-        public Object nextElement() {
+        public Object next() {
             if (steps == 0) return null;
             steps--;
-            if ((e1 != null) && (e1.hasMoreElements())) {
-                Object n = e1.nextElement();
-                if (!(e1.hasMoreElements())) {
+            if ((e1 != null) && (e1.hasNext())) {
+                Object n = e1.next();
+                if (!(e1.hasNext())) {
                     e1 = null;
                     e2 = seedDB.seedsConnected(up, false, null, minVersion);
                 }
@@ -115,21 +115,25 @@ public class yacyDHTAction implements yacyPeerAction {
                     e1 = null;
                     e2 = seedDB.seedsConnected(up, false, null, minVersion);
                 }
-                return e2.nextElement();
+                return e2.next();
             }
+        }
+
+        public void remove() {
+            throw new UnsupportedOperationException();
         }
     }
     
-    public Enumeration getAcceptRemoteIndexSeeds(String starthash) {
+    public Iterator getAcceptRemoteIndexSeeds(String starthash) {
         // returns an enumeration of yacySeed-Objects
         // that have the AcceptRemoteIndex-Flag set
         // the seeds are enumerated in the right order according DHT
         return new acceptRemoteIndexSeedEnum(starthash);
     }
     
-    class acceptRemoteIndexSeedEnum implements Enumeration {
+    class acceptRemoteIndexSeedEnum implements Iterator {
 
-        Enumeration se;
+        Iterator se;
         yacySeed nextSeed;
         
         public acceptRemoteIndexSeedEnum(String starthash) {
@@ -137,15 +141,15 @@ public class yacyDHTAction implements yacyPeerAction {
             nextSeed = nextInternal();
         }
         
-        public boolean hasMoreElements() {
+        public boolean hasNext() {
             return nextSeed != null;
         }
 
         private yacySeed nextInternal() {
             yacySeed s;
             try {
-                while (se.hasMoreElements()) {
-                    s = (yacySeed) se.nextElement();
+                while (se.hasNext()) {
+                    s = (yacySeed) se.next();
                     if (s == null) return null;
                     if (s.getFlagAcceptRemoteIndex()) return s;
                 }
@@ -158,21 +162,25 @@ public class yacyDHTAction implements yacyPeerAction {
             return null;
         }
         
-        public Object nextElement() {
+        public Object next() {
             yacySeed next = nextSeed;
             nextSeed = nextInternal();
             return next;
         }
 
+        public void remove() {
+            throw new UnsupportedOperationException();
+        }
+
     }
     
-    public Enumeration getAcceptRemoteCrawlSeeds(String starthash, boolean available) {
+    public Iterator getAcceptRemoteCrawlSeeds(String starthash, boolean available) {
         return new acceptRemoteCrawlSeedEnum(starthash, available);
     }
     
-    class acceptRemoteCrawlSeedEnum implements Enumeration {
+    class acceptRemoteCrawlSeedEnum implements Iterator {
 
-        Enumeration se;
+        Iterator se;
         yacySeed nextSeed;
         boolean available;
         
@@ -182,14 +190,14 @@ public class yacyDHTAction implements yacyPeerAction {
             nextSeed = nextInternal();
         }
         
-        public boolean hasMoreElements() {
+        public boolean hasNext() {
             return nextSeed != null;
         }
 
         private yacySeed nextInternal() {
             yacySeed s;
-            while (se.hasMoreElements()) {
-                s = (yacySeed) se.nextElement();
+            while (se.hasNext()) {
+                s = (yacySeed) se.next();
                 if (s == null) return null;
                 s.available = seedCrawlReady.getScore(s.hash);
                 if (available) {
@@ -201,18 +209,22 @@ public class yacyDHTAction implements yacyPeerAction {
             return null;
         }
         
-        public Object nextElement() {
+        public Object next() {
             yacySeed next = nextSeed;
             nextSeed = nextInternal();
             return next;
         }
 
+        public void remove() {
+            throw new UnsupportedOperationException();
+        }
+
     }
     
     public synchronized yacySeed getGlobalCrawlSeed(String urlHash) {
-        Enumeration e = getAcceptRemoteCrawlSeeds(urlHash, true);
+        Iterator e = getAcceptRemoteCrawlSeeds(urlHash, true);
         yacySeed seed;
-        if (e.hasMoreElements()) seed = (yacySeed) e.nextElement(); else seed = null;
+        if (e.hasNext()) seed = (yacySeed) e.next(); else seed = null;
         e = null;
         return seed;
     }
@@ -258,8 +270,8 @@ public class yacyDHTAction implements yacyPeerAction {
     
     public static boolean shallBeOwnWord(String wordhash) {
         if (yacyCore.seedDB == null) return false;
-        if (yacyCore.seedDB.mySeed.isPotential()) return false;
-        final double distance = dhtDistance(yacyCore.seedDB.mySeed.hash, wordhash);
+        if (yacyCore.seedDB.mySeed().isPotential()) return false;
+        final double distance = dhtDistance(yacyCore.seedDB.mySeed().hash, wordhash);
         final double max = 1.2 / yacyCore.seedDB.sizeConnected();
         //System.out.println("Distance for " + wordhash + ": " + distance + "; max is " + max);
         return (distance > 0) && (distance <= max);
@@ -293,8 +305,8 @@ public class yacyDHTAction implements yacyPeerAction {
         assert firstKey != null;
         assert lastKey != null;
         assert yacyCore.seedDB != null;
-        assert yacyCore.seedDB.mySeed != null;
-        assert yacyCore.seedDB.mySeed.hash != null;
+        assert yacyCore.seedDB.mySeed() != null;
+        assert yacyCore.seedDB.mySeed().hash != null;
         /*
         assert
             !(kelondroBase64Order.enhancedCoder.cardinal(firstKey.getBytes()) < kelondroBase64Order.enhancedCoder.cardinal(yacyCore.seedDB.mySeed.hash.getBytes()) &&
@@ -306,12 +318,12 @@ public class yacyDHTAction implements yacyPeerAction {
         //double maxDistance = Math.min(ownDistance, maxDist);
 
         double firstdist, lastdist;
-        Enumeration e = this.getAcceptRemoteIndexSeeds(lastKey);
+        Iterator e = this.getAcceptRemoteIndexSeeds(lastKey);
         TreeSet doublecheck = new TreeSet(kelondroBase64Order.enhancedCoder);
         int maxloop = Math.min(100, yacyCore.seedDB.sizeConnected()); // to ensure termination
         if (log != null) log.logInfo("Collecting DHT target peers for first_hash = " + firstKey + ", last_hash = " + lastKey);
-        while ((e.hasMoreElements()) && (seeds.size() < (primaryPeerCount + reservePeerCount)) && (maxloop-- > 0)) {
-            seed = (yacySeed) e.nextElement();
+        while ((e.hasNext()) && (seeds.size() < (primaryPeerCount + reservePeerCount)) && (maxloop-- > 0)) {
+            seed = (yacySeed) e.next();
             if (seeds != null) {
             	firstdist = yacyDHTAction.dhtDistance(seed.hash, firstKey);
             	lastdist = yacyDHTAction.dhtDistance(seed.hash, lastKey);

@@ -108,11 +108,11 @@ public final class plasmaRankingDistribution {
             log.logFine("no ranking distribution: seedDB == null");
             return false;
         }
-        if (yacyCore.seedDB.mySeed == null) {
+        if (yacyCore.seedDB.mySeed() == null) {
             log.logFine("no ranking distribution: mySeed == null");
             return false;
         }
-        if (yacyCore.seedDB.mySeed.isVirgin()) {
+        if (yacyCore.seedDB.mySeed().isVirgin()) {
             log.logFine("no ranking distribution: status is virgin");
             return false;
         }

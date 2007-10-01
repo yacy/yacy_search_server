@@ -205,7 +205,7 @@ public class News {
         }
         
         // adding the peer address
-        prop.put("address",yacyCore.seedDB.mySeed.getPublicAddress());
+        prop.put("address",yacyCore.seedDB.mySeed().getPublicAddress());
         
         // return rewrite properties
         return prop;

@@ -87,13 +87,13 @@ public class ScreenSaver {
                 if (line.equals("")) {
                     continue;
                 } else if (line.startsWith("PPM")) {                    
-                    String currentPPM = yacyCore.seedDB.mySeed.get(yacySeed.ISPEED, "-1");
+                    String currentPPM = yacyCore.seedDB.mySeed().get(yacySeed.ISPEED, "-1");
                     outputWriter.println(currentPPM);
                 } else if (line.startsWith("LINKS")) {
-                    String currentLinks = yacyCore.seedDB.mySeed.get(yacySeed.LCOUNT, "-1");
+                    String currentLinks = yacyCore.seedDB.mySeed().get(yacySeed.LCOUNT, "-1");
                     outputWriter.println(currentLinks);
                 } else if (line.startsWith("WORDS")) {
-                    String currentWords = yacyCore.seedDB.mySeed.get(yacySeed.ICOUNT, "-1");
+                    String currentWords = yacyCore.seedDB.mySeed().get(yacySeed.ICOUNT, "-1");
                     outputWriter.println(currentWords);
                 } else if (line.equals("CURRENTURL")) {
                     String currentURL = "";

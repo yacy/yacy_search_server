@@ -127,7 +127,7 @@ public class yacyNewsRecord {
         this.created = new Date();
         this.category = category;
         this.distributed = 0;
-        this.originator = yacyCore.seedDB.mySeed.hash;
+        this.originator = yacyCore.seedDB.mySeed().hash;
         removeStandards();
     }
 
