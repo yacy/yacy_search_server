@@ -43,8 +43,10 @@ Date</td>==Datum</td>
 Offset==Versatz
 Expected Results==Erwartete Ergebnisse
 Returned Results==Gefundene Ergebnisse
-Expected Time \(in ms\)==Erwartete Zeit (in ms)
-Used Time \(in ms\)==Gebrauchte Zeit (in ms)
+Expected Time \(ms\)==Erwartete Zeit (in ms)
+Used Time \(ms\)==Gebrauchte Zeit (in ms)
+URL fetch \(ms\)==URL Abruf (in ms)
+Snippet comp \(ms\)==Vorschau Erzeugung (in ms)
 Query==Suchwort
 Search Word Hashes==Suchwort Hash
 Count</td>==Anzahl</td>
@@ -442,15 +444,19 @@ Last Deploy==Letzte Anwendung
 #---------------------------
 Connection Tracking==Verbindungsstatus
 Incoming Connections==Eingehende Verbindungen
-Showing \#\[numActiveRunning\]\# active, \#\[numActivePending\]\# pending connections from a max. of \#\[numMax\]\# allowed incoming connections.==Es werden #[numActiveRunning]# aktive und #[numActivePending]# wartende Verbindungen von max. #[numMax]# erlaubten eingehenden Verbindungen angezeigt..
-Protocol==Protokoll
+Showing \#\[numActiveRunning\]\# active, \#\[numActivePending\]\# pending connections from a max. of \#\[numMax\]\# allowed incoming connections.==Es werden #[numActiveRunning]# aktive und #[numActivePending]# wartende Verbindungen von max. #[numMax]# erlaubten eingehenden Verbindungen angezeigt.
+Protocol</td>==Protokoll</td>
 Duration==Dauer
 Source IP\[:Port\]==Quell-IP[:Port]
 Dest. IP\[:Port\]==Ziel-IP[:Port]
-Command==Kommando
+Command</td>==Kommando</td>
 Used==Benutzt
 Close==Schlie&szlig;en
 Waiting for new request nr.==Warte auf neue Anfrage Nr.
+Outgoing Connections==Ausgehende Verbindungen
+Showing \#\[clientActive\]\# active outgoing connections:==Es werden #[clientActive]# aktive ausgehende Verbindungen gezeigt:
+Duration==Dauer
+#ID==ID
 #-----------------------------
 
 #File: CookieMonitorIncoming_p.html
@@ -1194,7 +1200,7 @@ Network legend:==Netzwerklegende:
 dark font==schwarze Schrift
 senior/principal peers==Senior/Principal Peers
 lightred font==hellrote Schrift
-passiv peers \( &lt; 5 hour passiv time\)==Passive Peers ( &lt; 5 Stunden passiv)
+passiv peers \( &lt; 5 hour passive time\)==Passive Peers ( &lt; 5 Stunden passiv)
 turquoise font==t&uuml;rkise Schrift
 junior peers==Junior Peers
 red point==roter Punkt
@@ -2227,7 +2233,6 @@ length of search words must be at least 3 characters==Die L&auml;nge der Suchbeg
 results from a total number of==Treffer aus insgesamt
 known==bekannten Links
 links from other YaCy peers==Links von anderen YaCy Peers
-Search Result Pages==Suchergebnis Seiten
 #-----------------------------
 
 #File: yacysearchitem.html
@@ -2260,17 +2265,16 @@ Publication==Ver&ouml;ffentlichung
 >Bookmarks==>Lesezeichen
 >Help==>Hilfe
 Web&nbsp;Indexing==Web Indexierung
-Start a Web Crawl==Starte einen Web Crawl
+Crawl Start &amp; Monitoring==Crawl Start &amp; Kontrolle
+Crawl Results==Crawl Ergebnisse
 Index Administration==Indexverwaltung
 #Filter &amp; Blacklists==Filter &amp; Blacklists
 Indexing with Proxy==Indexierung per Proxy
 Monitoring==Kontrolle
 YaCy Network==YaCy Netzwerk
-Crawl Activity==Crawler Aktivit&auml;t
-Crawl Results==Crawl Ergebnisse
+Web Visualization==Internet Visualisierung
 Access Tracker==Zugriffs Tracker
 #Server Log==Server Log
-#Web Cache==Web Cache
 News Monitor==News Anzeige
 Cookies in Proxy==Cookies per Proxy
 Peer Control==Peer Kontrolle
@@ -2337,25 +2341,6 @@ Incoming&nbsp;Cookies==Eingehende Cookies
 Outgoing&nbsp;Cookies==Ausgehende Cookies
 #-----------------------------
 
-#File: env/templates/submenuCrawler.template
-#---------------------------
-Crawler Activity==Crawler Aktivit&auml;t
-Activity Visualization==Visualisierung der Aktivit&auml;t 
-Web Structure==Netz Struktur
-Crawler Queues==Crawler Puffer
-Control Queues==Kontolle des Puffers
-Indexing<==Indexierung<
-Loader<==Lader<
-WWW Crawl Queues==WWW Crawl-Puffer
-Local<==Lokal<
-#Global<==Global<
-#Remote<==Remote<
-Overhang<==&Uuml;berhang<
-Media Crawl Queues==Medien Crawl-Puffer
->Images==>Bilder
->Movies==>Filme
->Music==>Musik
-#-----------------------------
 
 #File: env/templates/submenuIndexControl.template
 #---------------------------
@@ -2372,7 +2357,19 @@ Start a Web Crawl==Starte einen Web Crawl
 Crawl Start \(easy\)==Crawl starten (Anf&auml;nger)
 Crawl Start \(expert\)==Crawl starten (Experte)
 Crawl Profile Editor==Crawl Profil Editor
-
+Crawler Queues==Crawler Puffer
+Control Queues==Kontolle des Puffers
+Indexing<==Indexierung<
+Loader<==Lader<
+WWW Crawl Queues==WWW Crawl-Puffer
+Local<==Lokal<
+#Global<==Global<
+#Remote<==Remote<
+Overhang<==&Uuml;berhang<
+Media Crawl Queues==Medien Crawl-Puffer
+>Images==>Bilder
+>Movies==>Filme
+>Music==>Musik
 
 #File: env/templates/submenuPerformance.template
 #---------------------------
@@ -2395,6 +2392,14 @@ File Hosting==Datei Freigabe
 #Server Log==Server Log
 Log Statistics==Log Statistik
 #-----------------------------
+
+#File: env/templates/submenuWebStructure.template
+#---------------------------
+Web Visualization==Internet Visualisierung
+Web Structure==Internet Struktur
+Web Cache==Internet Zwischenspeicher
+#-----------------------------
+
 
 #File: htdocsdefault/dir.html
 #---------------------------
@@ -2453,7 +2458,7 @@ Password</label>==Passwort</label>
 
 #File: proxymsg/error.html
 #-----------------------------
-YaCy: Proxy Message==YaCy: Proxy Nachricht
+YaCy: Error Message==YaCy: Fehler Nachricht
 YaCy - Distributed Web Indexing - Administration==YaCy - Verteiltes Internet-Indexieren - Administration 
 Problems with request:==Probleme mit Anfrage:
 unspecified error==unspezifizierter Fehler
