@@ -11,9 +11,9 @@
 			<url>#[rssYacyImageURL]#</url>
 			<title>Search for #[former]#</title>
 		</image>
-		<opensearch:totalResults>#[type_results]#</opensearch:totalResults>
+		<opensearch:totalResults>#[results]#</opensearch:totalResults>
 		<opensearch:startIndex>1</opensearch:startIndex>
-		<opensearch:itemsPerPage>#[type_results]#</opensearch:itemsPerPage>
+		<opensearch:itemsPerPage>#[results]#</opensearch:itemsPerPage>
 		<opensearch:link rel="search" href="opensearchdescription.xml" type="application/opensearchdescription+xml"/>
 		<opensearch:Query role="request" searchTerms="#[former]#" />
 		

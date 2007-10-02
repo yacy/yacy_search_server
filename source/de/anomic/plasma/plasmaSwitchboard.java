@@ -117,6 +117,7 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.Hashtable;
 import java.util.Iterator;
+import java.util.Locale;
 import java.util.Map;
 import java.util.Properties;
 import java.util.Set;
@@ -2894,6 +2895,13 @@ public final class plasmaSwitchboard extends serverAbstractSwitch implements ser
     public static String dateString(Date date) {
         if (date == null) return ""; else return DateFormatter.format(date);
     }
+    
+    // we need locale independent RFC-822 dates at some places
+    private static SimpleDateFormat DateFormatter822 = new SimpleDateFormat("EEE, dd MMM yyyy", Locale.US);
+    public static String dateString822(Date date) {
+        if (date == null) return ""; else return DateFormatter822.format(date);
+    }
+    
     
     public serverObjects action(String actionName, serverObjects actionInput) {
         // perform an action. (not used)    

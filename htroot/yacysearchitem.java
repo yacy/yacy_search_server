@@ -178,7 +178,7 @@ public class yacysearchitem {
             prop.put("rss_description", result.textSnippet().getLineRaw());
             prop.put("rss_link", result.urlstring());
             prop.put("rss_urlhash", result.hash());
-            prop.put("rss_date", plasmaSwitchboard.dateString(result.modified()));
+            prop.put("rss_date", plasmaSwitchboard.dateString822(result.modified()));
             return prop;
         }
         
