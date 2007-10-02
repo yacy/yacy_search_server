@@ -331,9 +331,14 @@ public final class CrawlWorker extends AbstractCrawlWorker {
                         // generating url hash
                         String urlhash = redirectionUrl.hash();
                         
-                        // removing url from loader queue
-                        plasmaCrawlLoader.switchboard.noticeURL.removeByURLHash(urlhash);
-
+                        // check if the url was already indexed
+                        String dbname = plasmaCrawlLoader.switchboard.urlExists(urlhash);
+                        if (dbname != null) {
+                            this.log.logWarning("CRAWLER Redirection of URL=" + this.url.toString() + " ignored. The url appears already in db " + dbname);
+                            addURLtoErrorDB(plasmaCrawlEURL.DENIED_REDIRECTION_TO_DOUBLE_CONTENT);
+                            return null;
+                        }
+                        
                         // retry crawling with new url
                         this.url = redirectionUrl;
                         plasmaHTCache.Entry redirectedEntry = load(crawlingRetryCount-1);

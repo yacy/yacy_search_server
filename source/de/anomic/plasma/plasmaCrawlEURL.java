@@ -55,6 +55,7 @@ public class plasmaCrawlEURL {
     public static final String DENIED_UNSUPPORTED_CHARSET = "denied_(unsupported_charset)";
     public static final String DENIED_REDIRECTION_HEADER_EMPTY = "denied_(redirection_header_empty)";
     public static final String DENIED_REDIRECTION_COUNTER_EXCEEDED = "denied_(redirection_counter_exceeded)";
+    public static final String DENIED_REDIRECTION_TO_DOUBLE_CONTENT = "denied_(redirection_to_double_content)";
     public static final String DENIED_WRONG_HTTP_STATUSCODE = "denied_(wrong_http_status_code_";
     public static final String DENIED_CONTENT_DECODING_ERROR = "denied_(content_decoding_error)";
     public static final String DENIED_FILESIZE_LIMIT_EXCEEDED = "denied_(filesize_limit_exceeded)";
