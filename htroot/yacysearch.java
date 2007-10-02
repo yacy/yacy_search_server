@@ -152,7 +152,7 @@ public class yacysearch {
         }
         if (sb.facilityDB != null) try { sb.facilityDB.update("zeitgeist", querystring, post); } catch (Exception e) {}
 
-        int count = post.getInt("count", 10);
+        int itemsPerPage = post.getInt("count", 10);
         int offset = post.getInt("offset", 0);
         boolean global = (post == null) ? true : post.get("resource", "global").equals("global");
         final boolean indexof = post.get("indexof","").equals("on"); 
@@ -186,7 +186,7 @@ public class yacysearch {
         int contentdomCode = plasmaSearchQuery.contentdomParser(post.get("contentdom", "text"));
         
         // patch until better search profiles are available
-        if ((contentdomCode != plasmaSearchQuery.CONTENTDOM_TEXT) && (count <= 30)) count = 30;
+        if ((contentdomCode != plasmaSearchQuery.CONTENTDOM_TEXT) && (itemsPerPage <= 30)) itemsPerPage = 30;
         
         serverObjects prop = new serverObjects();
         if (post.get("cat", "href").equals("href")) {
@@ -257,7 +257,7 @@ public class yacysearch {
                     prefermask,
                     contentdomCode,
                     true,
-                    count,
+                    itemsPerPage,
                     offset,
                     searchtime,
                     urlmask,
@@ -319,8 +319,9 @@ public class yacysearch {
             prop.put("num-results_totalcount", theSearch.getLocalCount() + theSearch.getGlobalCount());
             prop.put("num-results_globalresults", 1);
             prop.put("num-results_globalresults_globalcount", theSearch.getGlobalCount());
-            prop.put("num-results_offset", 0);
+            prop.put("num-results_offset", offset);
             prop.put("num-results_linkcount", 0);
+            prop.put("num-results_itemsPerPage", itemsPerPage);
 
             // compose page navigation
             StringBuffer resnav = new StringBuffer();
@@ -391,7 +392,7 @@ public class yacysearch {
         prop.putASIS("input_promoteSearchPageGreeting", promoteSearchPageGreeting);
         prop.put("input_former", querystring);
         prop.put("former", post.get("search", ""));
-        prop.put("input_count", count);
+        prop.put("input_count", itemsPerPage);
         prop.put("input_offset", offset);
         prop.put("input_resource", (global) ? "global" : "local");
         prop.put("input_time", searchtime / 1000);

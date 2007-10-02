@@ -73,12 +73,12 @@
           <td><label for="crawlingFilter">Crawling Filter</label>:</td>
           <td>
 			<input name="crawlingFilter" id="crawlingFilter" type="text" size="20" maxlength="100" value="#[crawlingFilter]#" />
-			<input type="button" value="only one domain" onclick='var domain=prompt("please enter domain without \"www.\" (i.e. \"yacy.net\").");if(domain!=null){document.getElementById("crawlingFilter").value="(^|.*\\.)"+domain.replace("\.", "\\.")+"/.*"}' />
+			<input type="radio" name="range" value="wide" checked="checked" />Use filter&nbsp;&nbsp;|&nbsp;&nbsp;
+			<input type="radio" name="range" value="domain" />Restrict to start domain
 		  </td>
           <td>
-            This is an emacs-like regular expression that must match with the URLs which are used to be crawled.
-            Use this i.e. to crawl a single domain. If you set this filter it makes sense to increase
-            the crawling depth.
+            The filter is an emacs-like regular expression that must match with the URLs which are used to be crawled; default is 'catch all'.
+            You can also use an automatic domain-restriction to fully crawl a single domain.
           </td>
         </tr>
         <tr valign="top" class="TableCellLight">

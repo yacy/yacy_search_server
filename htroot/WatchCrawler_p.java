@@ -104,15 +104,15 @@ public class WatchCrawler_p {
                     boolean fullDomain = post.get("range", "wide").equals("domain"); // special property in simple crawl start
                     
                     String newcrawlingfilter = post.get("crawlingFilter", ".*");
+                    if (newcrawlingfilter.length() < 2) newcrawlingfilter = ".*"; // avoid that all urls are filtered out if bad value was submitted
+                    env.setConfig("crawlingFilter", newcrawlingfilter);
                     if (fullDomain) try {
                         newcrawlingfilter = ".*" + (new yacyURL(post.get("crawlingURL",""), null)).getHost() + ".*";
                     } catch (MalformedURLException e) {}
-                    if (newcrawlingfilter.length() < 2) newcrawlingfilter = ".*"; // avoid that all urls are filtered out if bad value was submitted
-                    env.setConfig("crawlingFilter", newcrawlingfilter);
                     
                     int newcrawlingdepth = Integer.parseInt(post.get("crawlingDepth", "8"));
-                    if (fullDomain) newcrawlingdepth = 8;
                     env.setConfig("crawlingDepth", Integer.toString(newcrawlingdepth));
+                    if ((fullDomain) && (newcrawlingdepth < 8)) newcrawlingdepth = 8;
                     
                     boolean crawlingIfOlderCheck = post.get("crawlingIfOlderCheck", "off").equals("on");
                     int crawlingIfOlderNumber = Integer.parseInt(post.get("crawlingIfOlderNumber", "-1"));

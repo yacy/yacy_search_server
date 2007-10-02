@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<OpenSearchDescription xmlns="http://www.opensearch.org/Specifications/OpenSearch/1.1">
+<OpenSearchDescription xmlns="http://a9.com/-/spec/opensearch/1.1/">
   <ShortName>YaCy/#[clientname]#</ShortName>
   <LongName>YaCy.net - #[SearchPageGreeting]#</LongName>
   <Image type="image/gif">http://#[thisaddress]#/env/grafics/yacy.gif</Image>
