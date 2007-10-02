@@ -305,16 +305,14 @@ public class Network {
                     String userAgent, location;
                     int PPM;
                     double QPM;
-                    long myValue=0, nextValue=0, prevValue=0, nextPPM=0, myPPM=0;
                     Pattern peerSearchPattern = null;
                     String wrongregex = null;
                     prop.put("regexerror", 0);
                     prop.put("regexerror_wrongregex", (String)null);
                     if(post.containsKey("search")) {
-                        try{
+                        try {
                             peerSearchPattern = Pattern.compile(post.get("match", ""), Pattern.CASE_INSENSITIVE);
-                        }
-                        catch (PatternSyntaxException pse){
+                        } catch (PatternSyntaxException pse){
                             wrongregex = pse.getPattern();
                             prop.put("regexerror", 1);
                             prop.put("regexerror_wrongregex", wrongregex);
@@ -342,26 +340,8 @@ public class Network {
                             if (conCount >= maxCount) { break; }
                             if (seed.hash.equals(yacyCore.seedDB.mySeed().hash)) {
                                 prop.put(STR_TABLE_LIST + conCount + "_dark", 2);
-                                myValue=Long.parseLong(seed.get(yacySeed.LCOUNT, "0"));
-                                try{
-                                    myPPM=Long.parseLong(seed.get(yacySeed.ISPEED, "0"));
-                                }catch(NumberFormatException exception){
-                                    myPPM=0;
-                                }
                             } else {
                                 prop.put(STR_TABLE_LIST + conCount + "_dark", ((dark) ? 1 : 0) ); dark=!dark;
-                                if(myValue==0){
-                                    //before myself: better
-                                    nextValue=Long.parseLong(seed.get(yacySeed.LCOUNT, "0"));
-                                    try{
-                                        nextPPM=Long.parseLong(seed.get(yacySeed.ISPEED, "0"));
-                                    }catch(NumberFormatException exception){
-                                        nextPPM=0;
-                                    }
-                                }else if(nextValue==0){
-                                    //after myself: worse
-                                    prevValue=Long.parseLong(seed.get(yacySeed.LCOUNT, "0"));
-                                }    
                             }
                             if (updatedProfile.contains(seed.hash)) {
                                 prop.put(STR_TABLE_LIST + conCount + "_updatedProfile", 1);
@@ -384,7 +364,7 @@ public class Network {
                             }
                             PPM = seed.getPPM();
                             QPM = seed.getQPM();
-                            if (((startURL = (String) isCrawling.get(seed.hash)) != null) && (PPM >= 10)) {
+                            if (((startURL = (String) isCrawling.get(seed.hash)) != null) && (PPM >= 4)) {
                                 prop.put(STR_TABLE_LIST + conCount + "_isCrawling", 1);
                                 prop.put(STR_TABLE_LIST + conCount + "_isCrawling_page", startURL);
                             }
@@ -489,31 +469,7 @@ public class Network {
                     prop.put("table", 1);
                     prop.put("table_num", conCount);
                     prop.put("table_total", ((page == 1) && (iAmActive)) ? (size + 1) : size );
-                    prop.put("table_complete", ((complete)? 1 : 0) );
-                    
-                    if( (!post.containsKey("order") && !post.containsKey("sort") && !post.containsKey("search")) && page==1){
-                        int percent=(int)((float)(myValue-prevValue)/(float)(nextValue-prevValue)*100);
-                        long indexdiff=nextValue-myValue;
-                        long ppmdiff=myPPM-nextPPM;
-                        if (percent < 0) percent = -1;
-                        if (percent > 100) percent = 101;
-                        prop.put("table_progressbar", 1); //display the bar
-                        prop.put("table_progressbar_percent", percent);
-                        prop.put("table_progressbar_percent2", 100-percent);
-                        if(indexdiff!=0 && ppmdiff!=0)
-                            if(ppmdiff<0){
-                                prop.put("table_progressbar_timemessage", 2);
-                            }else{
-                                prop.put("table_progressbar_timemessage", 1);
-                                // indexdiff / (ppmdiff * 60 * 1000) to get it in milli-seconds
-                                prop.put("table_progressbar_timemessage_time", serverDate.intervalToString( (int)((float)indexdiff/(float)ppmdiff)*60000 ));
-                            }
-                        else
-                            prop.put("table_progressbar_timemessage", 0);
-                    }else{
-                        prop.put("table_progressbar", 0); //no display
-                    }
-                    
+                    prop.put("table_complete", ((complete)? 1 : 0) );                    
                 }
             }
             prop.put("page", page);
