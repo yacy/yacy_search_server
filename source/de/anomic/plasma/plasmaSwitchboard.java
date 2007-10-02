@@ -2469,7 +2469,7 @@ public final class plasmaSwitchboard extends serverAbstractSwitch implements ser
                         nextUrl = new yacyURL(nextUrlString, null);
                         
                         // enqueue the hyperlink into the pre-notice-url db
-                        sbStackCrawlThread.enqueue(nextUrl, entry.urlHash(), initiatorPeerHash, (String) nextEntry.getValue(), docDate, entry.depth() + 1, entry.profile());                        
+                        sbStackCrawlThread.enqueue(nextUrl, entry.urlHash(), initiatorPeerHash, (String) nextEntry.getValue(), docDate, entry.depth() + 1, entry.profile(), entry.depth() <= 1);
                     } catch (MalformedURLException e1) {}                    
                 }
                 log.logInfo("CRAWL: ADDED " + hl.size() + " LINKS FROM " + entry.url().toNormalform(false, true) +

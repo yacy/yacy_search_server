@@ -194,7 +194,8 @@ public final class plasmaCrawlStacker {
             String name, 
             Date loadDate, 
             int currentdepth, 
-            plasmaCrawlProfile.entry profile) {
+            plasmaCrawlProfile.entry profile,
+            boolean first) {
         if (profile != null) try {            
             this.queue.addMessage(new plasmaCrawlEntry(
                     initiatorHash,
@@ -206,7 +207,8 @@ public final class plasmaCrawlStacker {
                     currentdepth,
                     0,
                     0
-                    ));
+                    ),
+                    first);
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -534,23 +536,27 @@ public final class plasmaCrawlStacker {
             this.urlEntryHashCache.clear();            
         }
 
-        public void addMessage(plasmaCrawlEntry newMessage) 
-        throws InterruptedException, IOException {
+        public void addMessage(plasmaCrawlEntry newMessage, boolean first) throws InterruptedException, IOException {
             if (newMessage == null) throw new NullPointerException();
             
             this.writeSync.P();
             try {
                 
-                boolean insertionDoneSuccessfully = false;
+                boolean insertionDone = false;
                 synchronized(this.urlEntryHashCache) {                    
                     kelondroRow.Entry oldValue = this.urlEntryCache.put(newMessage.toRow());                        
                     if (oldValue == null) {
-                        insertionDoneSuccessfully = this.urlEntryHashCache.add(newMessage.url().hash());
+                        if (first) {
+                            this.urlEntryHashCache.addFirst(newMessage.url().hash());
+                        } else {
+                            this.urlEntryHashCache.addLast(newMessage.url().hash());
+                        }
+                        insertionDone = true;
                     }
                 }
                 
-                if (insertionDoneSuccessfully)  {
-                    this.readSync.V();              
+                if (insertionDone)  {
+                    this.readSync.V();
                 }
             } finally {
                 this.writeSync.V();
@@ -560,7 +566,7 @@ public final class plasmaCrawlStacker {
         public int size() {
             synchronized(this.urlEntryHashCache) {
                 return this.urlEntryHashCache.size();
-            }         
+            }
         }
         
         public int getDBType() {

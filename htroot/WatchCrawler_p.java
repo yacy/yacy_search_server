@@ -276,7 +276,6 @@ public class WatchCrawler_p {
                                 
                                 // loop through the contained links
                                 Iterator linkiterator = hyperlinks.entrySet().iterator();
-                                int c = 0;
                                 while (linkiterator.hasNext()) {
                                     Map.Entry e = (Map.Entry) linkiterator.next();
                                     String nexturlstring = (String) e.getKey();
@@ -294,21 +293,19 @@ public class WatchCrawler_p {
                                         nexturlURL = new yacyURL(nexturlstring, null);
                                     } catch (MalformedURLException ex) {
                                         nexturlURL = null;
-                                        c++;
                                         continue;
                                     }                                    
                                     
                                     // enqueuing the url for crawling
-                                    String rejectReason = switchboard.sbStackCrawlThread.stackCrawl(nexturlstring, null, yacyCore.seedDB.mySeed().hash, (String)e.getValue(), new Date(), 0, profile);                                    
-                                    
-                                    // if something failed add the url into the errorURL list
-                                    if (rejectReason == null) {
-                                        c++;
-                                    } else {
-                                        plasmaCrawlZURL.Entry ee = switchboard.errorURL.newEntry(nexturlURL, rejectReason);
-                                        ee.store();
-                                        switchboard.errorURL.stackPushEntry(ee);
-                                    }
+                                    switchboard.sbStackCrawlThread.enqueue(
+                                            nexturlURL, 
+                                            null, 
+                                            yacyCore.seedDB.mySeed().hash, 
+                                            (String) e.getValue(), 
+                                            new Date(), 
+                                            0, 
+                                            profile,
+                                            true);
                                 }                             
                                
                             } catch (PatternSyntaxException e) {
