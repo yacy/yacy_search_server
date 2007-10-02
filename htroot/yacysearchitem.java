@@ -147,6 +147,7 @@ public class yacysearchitem {
                             prop.put("references_words_" + hintcount + "_newsearch", theQuery.queryString.replace(' ', '+') + "+" + word);
                             prop.put("references_words_" + hintcount + "_count", theQuery.displayResults());
                             prop.put("references_words_" + hintcount + "_offset", 0);
+                            prop.put("references_words_" + hintcount + "_contentdom", theQuery.contentdom());
                             prop.put("references_words_" + hintcount + "_resource", theQuery.searchdom());
                             prop.put("references_words_" + hintcount + "_time", (theQuery.maximumTime / 1000));
                         }
