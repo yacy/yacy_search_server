@@ -271,11 +271,14 @@ public class WatchCrawler_p {
                                 yacyURL crawlURL = new yacyURL("file://" + file.toString(), null);
                                 plasmaCrawlProfile.entry profile = switchboard.profilesActiveCrawls.newEntry(fileName, crawlURL, newcrawlingfilter, newcrawlingfilter, newcrawlingdepth, newcrawlingdepth, crawlingIfOlder, crawlingDomFilterDepth, crawlingDomMaxPages, crawlingQ, indexText, indexMedia, storeHTCache, true, crawlOrder, xsstopw, xdstopw, xpstopw);
                                 
+                                // pause local crawl here
+                                switchboard.pauseCrawlJob(plasmaSwitchboard.CRAWLJOB_LOCAL_CRAWL);
+                                
                                 // loop through the contained links
-                                Iterator interator = hyperlinks.entrySet().iterator();
+                                Iterator linkiterator = hyperlinks.entrySet().iterator();
                                 int c = 0;
-                                while (interator.hasNext()) {
-                                    Map.Entry e = (Map.Entry) interator.next();
+                                while (linkiterator.hasNext()) {
+                                    Map.Entry e = (Map.Entry) linkiterator.next();
                                     String nexturlstring = (String) e.getKey();
                                     
                                     if (nexturlstring == null) continue;
@@ -296,7 +299,7 @@ public class WatchCrawler_p {
                                     }                                    
                                     
                                     // enqueuing the url for crawling
-                                    String rejectReason = switchboard.sbStackCrawlThread.stackCrawl(nexturlstring, null, yacyCore.seedDB.mySeed().hash, (String)e.getValue(), new Date(), 1, profile);                                    
+                                    String rejectReason = switchboard.sbStackCrawlThread.stackCrawl(nexturlstring, null, yacyCore.seedDB.mySeed().hash, (String)e.getValue(), new Date(), 0, profile);                                    
                                     
                                     // if something failed add the url into the errorURL list
                                     if (rejectReason == null) {
@@ -320,7 +323,8 @@ public class WatchCrawler_p {
                                 prop.put("info_error", e.getMessage());
                                 e.printStackTrace();                                
                             }
-                        }                        
+                            switchboard.continueCrawlJob(plasmaSwitchboard.CRAWLJOB_LOCAL_CRAWL);
+                        }
                     } else if (crawlingMode.equals(CRAWLING_MODE_SITEMAP)) { 
                     	String sitemapURLStr = null;
                     	try {

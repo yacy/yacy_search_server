@@ -288,9 +288,7 @@ public final class plasmaCrawlStacker {
         // check if ip is local ip address
         checkInterruption(); // TODO: this is protocol specific
         InetAddress hostAddress = serverDomains.dnsResolve(nexturl.getHost());
-		if(this.sb.getConfig("yacyDebugMode", "true").equals("true")){
-			//just ignore the check in debugmode (useful for tor(.eff.org)
-        }else if (hostAddress == null) {
+		if (hostAddress == null) {
             // if a http proxy is configured name resolution may not work
             if (this.sb.remoteProxyConfig == null || !this.sb.remoteProxyConfig.useProxy()) {
                 reason = plasmaCrawlEURL.DENIED_UNKNOWN_HOST;
