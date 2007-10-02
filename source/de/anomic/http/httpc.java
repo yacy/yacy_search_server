@@ -56,6 +56,7 @@ import java.net.SocketException;
 import java.net.UnknownHostException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.Date;
 import java.util.Enumeration;
 import java.util.GregorianCalendar;
@@ -109,6 +110,9 @@ public final class httpc {
     private static final SimpleDateFormat HTTPGMTFormatter = new SimpleDateFormat("EEE, dd MMM yyyy HH:mm:ss zzz", Locale.US);
     private static final HashMap reverseMappingCache = new HashMap();
     private static final HashSet activeConnections = new HashSet(); // all connections are stored here and deleted when they are finished
+    private static final long minimumTime_before_activeConnections_cleanup = 600000;
+    public  static final connectionTimeComparator connectionTimeComparatorInstance = new connectionTimeComparator();
+    
     private static int objCounter = 0; // will be increased with each object and is use to return a hash code
     
     // defined during set-up of switchboard
@@ -432,7 +436,7 @@ public final class httpc {
             httpc clientConnection = a[i];
             if ((clientConnection != null) &&
                 (clientConnection.initTime != Long.MAX_VALUE) &&
-                (clientConnection.initTime + Math.max(60000, clientConnection.timeout) < System.currentTimeMillis())) {
+                (clientConnection.initTime + Math.max(minimumTime_before_activeConnections_cleanup, clientConnection.timeout) < System.currentTimeMillis())) {
                 // the time-out limit is reached. close the connection
                 clientConnection.close();
                 c++;
@@ -466,7 +470,24 @@ public final class httpc {
         }
         return a;
     }
-            
+    
+    public static class connectionTimeComparator implements Comparator {
+
+        public connectionTimeComparator() {
+            super();
+        }
+        
+        public int compare(Object o1, Object o2) {
+            httpc c1 = (httpc) o1;
+            httpc c2 = (httpc) o2;
+            long l1 = System.currentTimeMillis() - c1.initTime;
+            long l2 = System.currentTimeMillis() - c2.initTime;
+            if (l1 < l2) return 1;
+            if (l1 > l2) return -1;
+            return 0;
+        }    
+    }
+    
     public void finalize() {
         this.close();
     }
@@ -1319,33 +1340,6 @@ public final class httpc {
         }
         
         /**
-        * This method just outputs the found content into an byte-array and
-        * returns it.
-        *
-        * @return the found content
-        * @throws IOException 
-        */ /*
-        public byte[] writeContent() throws IOException {
-//            int contentLength = (int) this.responseHeader.contentLength();
-//            serverByteBuffer sbb = new serverByteBuffer((contentLength==-1)?8192:contentLength);
-//            writeContentX(httpc.this.clientInput, this.gzip, this.responseHeader.contentLength(), null, sbb);
-//            return sbb.getBytes();
-            return serverFileUtils.read(this.getContentInputStream());
-        }
-        public void writeContent(File file) throws IOException {
-            // this writes the input stream to a file
-            FileOutputStream bufferOS = null;
-            try {
-                if (file != null) bufferOS = new FileOutputStream(file);
-                serverFileUtils.writeX(this.getContentInputStream(), null, bufferOS);
-            } finally {
-                if (bufferOS != null) {
-                    bufferOS.close();
-                    if (file.length() == 0) file.delete();
-                }
-            }
-        }*/
-        /**
         * This method outputs the found content into an byte-array and
         * additionally outputs it to procOS.
         *
@@ -1362,12 +1356,11 @@ public final class httpc {
             }
             
             if (procOS instanceof OutputStream) {
-                //writeContentX(httpc.this.clientInput, this.gzip, this.responseHeader.contentLength(), procOS, sbb);
-                serverFileUtils.writeX(this.getContentInputStream(), (OutputStream)procOS, sbb);
+                serverFileUtils.writeX(this.getContentInputStream(), (OutputStream) procOS, sbb);
             } else if (procOS instanceof Writer) {
                 String charSet = this.responseHeader.getCharacterEncoding();
                 if (charSet == null) charSet = httpHeader.DEFAULT_CHARSET;
-                serverFileUtils.writeX(this.getContentInputStream(), charSet, (Writer)procOS, sbb, charSet);                
+                serverFileUtils.writeX(this.getContentInputStream(), charSet, (Writer) procOS, sbb, charSet);                
             } else {
                 throw new IllegalArgumentException("Invalid procOS object type '" + procOS.getClass().getName() + "'");
             }

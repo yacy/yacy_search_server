@@ -49,6 +49,7 @@
 import java.io.UnsupportedEncodingException;
 import java.net.InetAddress;
 import java.net.URLEncoder;
+import java.util.Arrays;
 import java.util.Properties;
 
 import org.apache.commons.pool.impl.GenericObjectPool;
@@ -240,6 +241,7 @@ public final class Connections_p {
         
         // client sessions
         httpc[] a = httpc.allConnections();
+        Arrays.sort(a, httpc.connectionTimeComparatorInstance);
         int c = 0;
         for (int i = 0; i < a.length; i++) {
         	httpc clientConnection = (httpc) a[i];
@@ -258,4 +260,5 @@ public final class Connections_p {
         // return rewrite values for templates
         return prop;
     }
+
 }
