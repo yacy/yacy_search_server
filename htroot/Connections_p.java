@@ -248,6 +248,7 @@ public final class Connections_p {
             if (clientConnection != null) {
                 prop.put("clientList_" + c + "_clientProtocol", (clientConnection.ssl) ? "HTTPS" : "HTTP");
                 prop.put("clientList_" + c + "_clientLifetime", System.currentTimeMillis() - clientConnection.initTime);
+                prop.put("clientList_" + c + "_clientIdletime", System.currentTimeMillis() - clientConnection.lastIO);
                 prop.put("clientList_" + c + "_clientTargetHost", clientConnection.adressed_host + ":" + clientConnection.adressed_port);
                 prop.put("clientList_" + c + "_clientCommand", (clientConnection.command == null) ? "-" : clientConnection.command);
                 prop.put("clientList_" + c + "_clientID", clientConnection.hashCode());
