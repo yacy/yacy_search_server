@@ -392,7 +392,8 @@ public final class indexRAMRI implements indexRI {
     }
 
     public synchronized indexContainer getContainer(String wordHash, Set urlselection) {
-
+        if (wordHash == null) return null;
+        
         // retrieve container
         indexContainer container = (indexContainer) cache.get(wordHash);
         
