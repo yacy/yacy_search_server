@@ -271,9 +271,9 @@ public class Bookmarks {
         bookmark=switchboard.bookmarksDB.getBookmark((String)it.next());
         if(bookmark!=null){
         	if(bookmark.getFeed() && isAdmin)
-        		prop.put("bookmarks_"+count+"_link", "/FeedReader_p.html?url="+de.anomic.data.htmlTools.encodeUnicode2html(bookmark.getUrl(), false));
+        		prop.put("bookmarks_"+count+"_link", "/FeedReader_p.html?url="+bookmark.getUrl());
         	else
-        		prop.put("bookmarks_"+count+"_link", de.anomic.data.htmlTools.encodeUnicode2html(bookmark.getUrl(), false));
+        		prop.put("bookmarks_"+count+"_link",bookmark.getUrl());
             prop.put("bookmarks_"+count+"_title", bookmark.getTitle());
             prop.put("bookmarks_"+count+"_description", bookmark.getDescription());
             prop.put("bookmarks_"+count+"_date", serverDate.dateToiso8601(new Date(bookmark.getTimeStamp())));
