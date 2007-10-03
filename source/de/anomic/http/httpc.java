@@ -227,10 +227,14 @@ public final class httpc {
             String outgoingByteCountAccounting            
     ) throws IOException {
         
-        // TODO method can be removed completely when no more CLOSE_WAIT connections appear.
-    	// remove old connections
-    	//checkIdleConnections();
+        // remove old connections
+        // do NOT remove this check; in case that everything works fine this call does nothing
+        // but if in any arror case connections stay open, this will ensure that the peer keeps running and the host server is not blocked from working
+    	checkIdleConnections();
     	
+        // register new connection
+        this.hashIndex = objCounter;
+        
     	// register new connection
     	this.hashIndex = objCounter;
     	objCounter++;
@@ -387,13 +391,15 @@ public final class httpc {
                 address = new InetSocketAddress(hostip, port);
             } else {
                 address = new InetSocketAddress(server,port);
-            }            
-
+            }
+            
             // trying to establish a connection to the address
             this.initTime = System.currentTimeMillis();
-            this.socket.setKeepAlive(false); //
+            this.socket.setKeepAlive(false);
             this.socket.connect(address, timeout);
-
+            // setting socket timeout and keep alive behaviour
+            this.socket.setSoTimeout(timeout); // waiting time for read
+            
             if (incomingByteCountAccounting != null) {
                 this.clientInputByteCount = new httpdByteCountInputStream(this.socket.getInputStream(),incomingByteCountAccounting);
             }
@@ -434,7 +440,6 @@ public final class httpc {
         return (this.clientOutputByteCount == null)?0:this.clientOutputByteCount.getCount();
     }
 
-    // TODO remove when it's sure that the CLOSE_WAIT problem was solved.
     public static int checkIdleConnections() {
         // try to find and close all connections that did not find a target server and are idle waiting for a server socket
         
@@ -514,7 +519,7 @@ public final class httpc {
     
     public void close() {
     	synchronized (activeConnections) {activeConnections.remove(this);}
-    	System.out.println("*** DEBUG close httpc: " + activeConnections.size() + " connections online");
+    	//System.out.println("*** DEBUG close httpc: " + activeConnections.size() + " connections online");
     	
         if (this.clientInput != null) {
             try {this.clientInput.close();} catch (Exception e) {}

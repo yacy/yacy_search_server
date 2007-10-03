@@ -362,24 +362,24 @@ public final class plasmaSearchEvent {
             (!(comp.title().startsWith("Index of")))) {
             final Iterator wi = query.queryHashes.iterator();
             while (wi.hasNext()) wordIndex.removeEntry((String) wi.next(), page.hash());
-            registerFailure(page.hash(), "index-of constrained not fullfilled");
+            registerFailure(page.hash(), "index-of constraint not fullfilled");
             return null;
         }
         
         if ((query.contentdom == plasmaSearchQuery.CONTENTDOM_AUDIO) && (page.laudio() == 0)) {
-            registerFailure(page.hash(), "contentdom-audio constrained not fullfilled");
+            registerFailure(page.hash(), "contentdom-audio constraint not fullfilled");
             return null;
         }
         if ((query.contentdom == plasmaSearchQuery.CONTENTDOM_VIDEO) && (page.lvideo() == 0)) {
-            registerFailure(page.hash(), "contentdom-video constrained not fullfilled");
+            registerFailure(page.hash(), "contentdom-video constraint not fullfilled");
             return null;
         }
         if ((query.contentdom == plasmaSearchQuery.CONTENTDOM_IMAGE) && (page.limage() == 0)) {
-            registerFailure(page.hash(), "contentdom-image constrained not fullfilled");
+            registerFailure(page.hash(), "contentdom-image constraint not fullfilled");
             return null;
         }
         if ((query.contentdom == plasmaSearchQuery.CONTENTDOM_APP) && (page.lapp() == 0)) {
-            registerFailure(page.hash(), "contentdom-app constrained not fullfilled");
+            registerFailure(page.hash(), "contentdom-app constraint not fullfilled");
             return null;
         }
             
@@ -389,6 +389,7 @@ public final class plasmaSearchEvent {
             startTime = System.currentTimeMillis();
             plasmaSnippetCache.TextSnippet snippet = plasmaSnippetCache.retrieveTextSnippet(comp.url(), snippetFetchWordHashes, fetchSnippetOnline, query.constraint.get(plasmaCondenser.flag_cat_indexof), 180, 3000, (fetchSnippetOnline) ? Integer.MAX_VALUE : 100000);
             long snippetComputationTime = System.currentTimeMillis() - startTime;
+            serverLog.logInfo("SEARCH_EVENT", "text snippet load time for " + comp.url() + ": " + snippetComputationTime);
             
             if (snippet.getErrorCode() < 11) {
                 // we loaded the file and found the snippet
@@ -408,6 +409,7 @@ public final class plasmaSearchEvent {
             startTime = System.currentTimeMillis();
             ArrayList mediaSnippets = plasmaSnippetCache.retrieveMediaSnippets(comp.url(), snippetFetchWordHashes, query.contentdom, fetchSnippetOnline, 6000);
             long snippetComputationTime = System.currentTimeMillis() - startTime;
+            serverLog.logInfo("SEARCH_EVENT", "media snippet load time for " + comp.url() + ": " + snippetComputationTime);
             
             if ((mediaSnippets != null) && (mediaSnippets.size() > 0)) {
                 // found media snippets, return entry

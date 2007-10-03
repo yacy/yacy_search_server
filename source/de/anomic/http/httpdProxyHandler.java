@@ -861,7 +861,7 @@ public final class httpdProxyHandler {
         }
     }
     
-    public static void doHead(Properties conProp, httpHeader requestHeader, OutputStream respond) throws IOException {
+    public static void doHead(Properties conProp, httpHeader requestHeader, OutputStream respond) {
         
         httpc remote = null;
         httpc.response res = null;
