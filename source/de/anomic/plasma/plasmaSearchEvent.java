@@ -223,7 +223,7 @@ public final class plasmaSearchEvent {
                     continue;
                 }
                 
-                ResultEntry resultEntry = obtainResultEntry(page, false);
+                ResultEntry resultEntry = obtainResultEntry(page, (snippetComputationAllTime < 300) ? 1 : 0);
                 if (resultEntry == null) continue; // the entry had some problems, cannot be used
                 urlRetrievalAllTime += resultEntry.dbRetrievalTime;
                 snippetComputationAllTime += resultEntry.snippetComputationTime;
@@ -323,12 +323,17 @@ public final class plasmaSearchEvent {
         }
     }
     
-    private ResultEntry obtainResultEntry(indexURLEntry page, boolean fetchSnippetOnline) {
+    private ResultEntry obtainResultEntry(indexURLEntry page, int snippetFetchMode) {
 
         // a search result entry needs some work to produce a result Entry:
         // - check if url entry exists in LURL-db
         // - check exclusions, constraints, masks, media-domains
         // - load snippet (see if page exists) and check if snippet contains searched word
+
+        // Snippet Fetching can has 3 modes:
+        // 0 - do not fetch snippets
+        // 1 - fetch snippets offline only
+        // 2 - online snippet fetch
         
         // load only urls if there was not yet a root url of that hash
         // find the url entry
@@ -382,19 +387,23 @@ public final class plasmaSearchEvent {
             registerFailure(page.hash(), "contentdom-app constraint not fullfilled");
             return null;
         }
-            
+
+        if (snippetFetchMode == 0) {
+            return new ResultEntry(page, wordIndex, null, null, dbRetrievalTime, 0); // result without snippet
+        }
+        
         // load snippet
         if (query.contentdom == plasmaSearchQuery.CONTENTDOM_TEXT) {
             // attach text snippet
             startTime = System.currentTimeMillis();
-            plasmaSnippetCache.TextSnippet snippet = plasmaSnippetCache.retrieveTextSnippet(comp.url(), snippetFetchWordHashes, fetchSnippetOnline, query.constraint.get(plasmaCondenser.flag_cat_indexof), 180, 3000, (fetchSnippetOnline) ? Integer.MAX_VALUE : 100000);
+            plasmaSnippetCache.TextSnippet snippet = plasmaSnippetCache.retrieveTextSnippet(comp.url(), snippetFetchWordHashes, (snippetFetchMode == 2), query.constraint.get(plasmaCondenser.flag_cat_indexof), 180, 3000, (snippetFetchMode == 2) ? Integer.MAX_VALUE : 100000);
             long snippetComputationTime = System.currentTimeMillis() - startTime;
             serverLog.logInfo("SEARCH_EVENT", "text snippet load time for " + comp.url() + ": " + snippetComputationTime + ", " + ((snippet.getErrorCode() < 11) ? "snippet found" : ("no snippet found (" + snippet.getError() + ")")));
             
             if (snippet.getErrorCode() < 11) {
                 // we loaded the file and found the snippet
                 return new ResultEntry(page, wordIndex, snippet, null, dbRetrievalTime, snippetComputationTime); // result with snippet attached
-            } else if (!fetchSnippetOnline) {
+            } else if (snippetFetchMode == 1) {
                 // we did not demand online loading, therefore a failure does not mean that the missing snippet causes a rejection of this result
                 // this may happen during a remote search, because snippet loading is omitted to retrieve results faster
                 return new ResultEntry(page, wordIndex, null, null, dbRetrievalTime, snippetComputationTime); // result without snippet
@@ -407,14 +416,14 @@ public final class plasmaSearchEvent {
         } else {
             // attach media information
             startTime = System.currentTimeMillis();
-            ArrayList mediaSnippets = plasmaSnippetCache.retrieveMediaSnippets(comp.url(), snippetFetchWordHashes, query.contentdom, fetchSnippetOnline, 6000);
+            ArrayList mediaSnippets = plasmaSnippetCache.retrieveMediaSnippets(comp.url(), snippetFetchWordHashes, query.contentdom, (snippetFetchMode == 2), 6000);
             long snippetComputationTime = System.currentTimeMillis() - startTime;
             serverLog.logInfo("SEARCH_EVENT", "media snippet load time for " + comp.url() + ": " + snippetComputationTime);
             
             if ((mediaSnippets != null) && (mediaSnippets.size() > 0)) {
                 // found media snippets, return entry
                 return new ResultEntry(page, wordIndex, null, mediaSnippets, dbRetrievalTime, snippetComputationTime);
-            } else if (!fetchSnippetOnline) {
+            } else if (snippetFetchMode == 1) {
                 return new ResultEntry(page, wordIndex, null, null, dbRetrievalTime, snippetComputationTime);
             } else {
                 // problems with snippet fetch
@@ -582,7 +591,7 @@ public final class plasmaSearchEvent {
                     continue;
                 }
                 
-                ResultEntry resultEntry = obtainResultEntry(page, true);
+                ResultEntry resultEntry = obtainResultEntry(page, 2);
                 if (resultEntry == null) continue; // the entry had some problems, cannot be used
                 urlRetrievalAllTime += resultEntry.dbRetrievalTime;
                 snippetComputationAllTime += resultEntry.snippetComputationTime;
@@ -749,41 +758,6 @@ public final class plasmaSearchEvent {
         }
         return this.resultList;
     }
-    
-    /*
-        // generate Result.Entry objects and optionally fetch snippets
-        int i = 0;
-        Entry entry;
-        final boolean includeSnippets = false;
-        while ((acc.hasMoreElements()) && (i < query.wantedResults)) {
-            try {
-                entry = new Entry(acc.nextElement(), wordIndex);
-            } catch (final RuntimeException e) {
-                continue;
-            }
-            // check bluelist again: filter out all links where any
-            // bluelisted word
-            // appear either in url, url's description or search word
-            // the search word was sorted out earlier
-            
-            if (includeSnippets) {
-                entry.setSnippet(plasmaSnippetCache.retrieveTextSnippet(
-                        entry.url(), query.queryHashes, false,
-                        entry.flags().get(plasmaCondenser.flag_cat_indexof), 260,
-                        1000));
-                // snippet =
-                // snippetCache.retrieveTextSnippet(comp.url(),
-                // query.queryHashes, false,
-                // urlentry.flags().get(plasmaCondenser.flag_cat_indexof),
-                // 260, 1000);
-            } else {
-                // snippet = null;
-                entry.setSnippet(null);
-            }
-            i++;
-            hits.add(entry);
-        }
-    */
     
     boolean secondarySearchStartet = false;
     
