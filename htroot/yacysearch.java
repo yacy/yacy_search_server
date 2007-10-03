@@ -381,6 +381,7 @@ public class yacysearch {
             // adding some additional properties needed for the rss feed
             String hostName = (String) header.get("Host", "localhost");
             if (hostName.indexOf(":") == -1) hostName += ":" + serverCore.getPortNr(env.getConfig("port", "8080"));
+            prop.put("searchBaseURL", "http://" + hostName + "/yacysearch.html");
             prop.put("rssYacyImageURL", "http://" + hostName + "/env/grafics/yacy.gif");
         }
         

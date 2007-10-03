@@ -2897,7 +2897,7 @@ public final class plasmaSwitchboard extends serverAbstractSwitch implements ser
     }
     
     // we need locale independent RFC-822 dates at some places
-    private static SimpleDateFormat DateFormatter822 = new SimpleDateFormat("EEE, dd MMM yyyy", Locale.US);
+    private static SimpleDateFormat DateFormatter822 = new SimpleDateFormat("EEE, dd MMM yyyy HH:mm:ss Z", Locale.US);
     public static String dateString822(Date date) {
         if (date == null) return ""; else return DateFormatter822.format(date);
     }
