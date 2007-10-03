@@ -389,7 +389,7 @@ public final class plasmaSearchEvent {
             startTime = System.currentTimeMillis();
             plasmaSnippetCache.TextSnippet snippet = plasmaSnippetCache.retrieveTextSnippet(comp.url(), snippetFetchWordHashes, fetchSnippetOnline, query.constraint.get(plasmaCondenser.flag_cat_indexof), 180, 3000, (fetchSnippetOnline) ? Integer.MAX_VALUE : 100000);
             long snippetComputationTime = System.currentTimeMillis() - startTime;
-            serverLog.logInfo("SEARCH_EVENT", "text snippet load time for " + comp.url() + ": " + snippetComputationTime);
+            serverLog.logInfo("SEARCH_EVENT", "text snippet load time for " + comp.url() + ": " + snippetComputationTime + ", " + ((snippet.getErrorCode() < 11) ? "snippet found" : ("no snippet found (" + snippet.getError() + ")")));
             
             if (snippet.getErrorCode() < 11) {
                 // we loaded the file and found the snippet

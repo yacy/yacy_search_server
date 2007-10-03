@@ -436,7 +436,14 @@ public final class yacyClient {
 		// now create a plasmaIndex out of this result
 		// System.out.println("yacyClient: " + ((urlhashes.length() == 0) ? "primary" : "secondary")+ " search result = " + result.toString()); // debug
 		
-		final int results = Integer.parseInt((String) result.get("count"));
+		int results = 0;
+        try {
+            results = Integer.parseInt((String) result.get("count"));
+        } catch (NumberFormatException e) {
+            yacyCore.log.logFine("SEARCH failed FROM " + target.hash + ":" + target.getName() + ", wrong output format");
+            yacyCore.peerActions.peerDeparture(target, "search request to peer created number format exception");
+            return null;
+        }
 		// System.out.println("***result count " + results);
 
 		// create containers
