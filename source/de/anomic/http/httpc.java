@@ -56,6 +56,7 @@ import java.net.SocketException;
 import java.net.UnknownHostException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Comparator;
 import java.util.Date;
 import java.util.Enumeration;
@@ -111,6 +112,7 @@ public final class httpc {
     private static final HashMap reverseMappingCache = new HashMap();
     private static final HashSet activeConnections = new HashSet(); // all connections are stored here and deleted when they are finished
     private static final long minimumTime_before_activeConnections_cleanup = 600000;
+    private static final int activeConnections_maximum = 64;
     public  static final connectionTimeComparator connectionTimeComparatorInstance = new connectionTimeComparator();
     
     private static int objCounter = 0; // will be increased with each object and is use to return a hash code
@@ -431,8 +433,20 @@ public final class httpc {
         // try to find and close all connections that did not find a target server and are idle waiting for a server socket
         
         httpc[] a = allConnections(); // put set into array to avoid ConcurrentModificationExceptions
+        int tbd = 0;
         int c = 0;
-        for (int i = 0; i < a.length; i++) {
+        if (a.length > activeConnections_maximum) {
+            // delete some connections; choose the oldest
+            Arrays.sort(a, httpc.connectionTimeComparatorInstance);
+            tbd = a.length - activeConnections_maximum;
+            for (int i = 0; i < tbd; i++) {
+                if (a[i] != null) {
+                    a[i].close();
+                    c++;
+                }
+            }
+        }
+        for (int i = tbd; i < a.length; i++) {
             httpc clientConnection = a[i];
             if ((clientConnection != null) &&
                 (clientConnection.initTime != Long.MAX_VALUE) &&
