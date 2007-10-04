@@ -54,7 +54,7 @@ public class htmlTools {
                 continue search;
             }
             // not found match
-            sb.append(text.charAt(spos));
+            sb.append(text.charAt(textpos));
             textpos++;
         }
 
