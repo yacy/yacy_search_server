@@ -43,18 +43,19 @@ public class htmlTools {
      */
     public static String encode(String text, final String[] map, int spos, int epos) {
         StringBuffer sb = new StringBuffer(text.length());
-        search: while (spos < text.length()) {
+        int textpos = 0;
+        search: while (textpos < text.length()) {
             // find a (forward) mapping
             loop: for (int i = spos; i < epos; i += 2) {
-                if (text.charAt(spos) != map[i].charAt(0)) continue loop;
+                if (text.charAt(textpos) != map[i].charAt(0)) continue loop;
                 // found match
                 sb.append(map[i + 1]);
-                spos++;
+                textpos++;
                 continue search;
             }
             // not found match
             sb.append(text.charAt(spos));
-            spos++;
+            textpos++;
         }
 
         return sb.toString();
