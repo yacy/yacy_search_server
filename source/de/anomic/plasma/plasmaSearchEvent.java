@@ -451,7 +451,7 @@ public final class plasmaSearchEvent {
         }
         // maybe a secondary search thread is alivem check this
         if ((this.secondarySearchThreads != null) && (this.secondarySearchThreads.length != 0)) {
-            for (int i = 0; i < this.primarySearchThreads.length; i++) {
+            for (int i = 0; i < this.secondarySearchThreads.length; i++) {
                 if ((this.secondarySearchThreads[i] != null) && (this.secondarySearchThreads[i].isAlive())) return true;
             }
         }
