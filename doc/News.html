@@ -85,6 +85,60 @@ globalheader();
 </ul>
 -->
 
+
+<br><p><a name="4145">v0.55_20071004_4145</a>
+<ul>
+<li>Enhanced Search Interface and Search Behaviour</li>
+  <ul>
+  <li>Search result pages are displayed directly after search request without any waiting time. Search results are displayed one-by-one using SSI includes when they had been verified by the snippet-fetcher.</li>
+  <li>Redesigned search process: search results are checked internally for snippet matching and results are presented using SSIs.</li>
+  <li>All search interface pages now use the progress bar that had been introduced first for image search.</li>
+  <li>Added search history cache that keeps search results for 10 minutes. Repeated searches for the same topic use the cache for results.</li>
+  <li>Introduced multiple search result pages.</li>
+  <li>Enhanced ranking normalization time during search result computation.</li>
+  <li>Removed Ajax methods from search interface.</li>
+  <li>Enhanced display of favicons beside search results (less verticall space, better floating of text around, correct position beside result text)</li>
+  <li>Added profiling information to search result computation: URL fetch time and snippet computation time. These values can be seen in the access tracker.</li>
+  <li>Added security layer for ViewImage, images are only retrieved if another process has created a view-license before.</li>
+  <li>The opensearch rss search result (/yacysearch.rss) has always result snippets</li>
+  </ul>
+<li>Enhanced Web Crawls</li>
+  <ul>
+  <li>Redesigned appearance of crawl start and monitoring pages in menu. Introduced some intelligent forwarding rules that automatically shows monitoring pages of interest accoriding to crawler/indexing situation.</li>
+  <li>Extended crawl profile menu; crawls that are finished are not deleted any more but stored in a new table which can also be seen on the profile servlet page.</li>
+  <li>The size of the remote crawl stack is added to seed information, so other peers can see how much links are provided for remote crawl.</li>
+  <li>Added option to simple crawl start: complete domain. This is also added to complex crawl start menu and replaces the 'only one domain' button.</li>
+  <li>Added cache to favicon display.</li>
+  <li>Fixed bad synchronization in Crawl Balancer that caused inconsistencies.</li>
+  <li>Added a yacy interface servlet that can be used to download links from the remote crawl stack. This interface is not yet used on client-side.</li>
+  <li>Enhanced crawl start with link file: URLs are placed in the preNURL table instead of NURL table. This enables crawl starts with a huge number of links in crawl start files.</li>
+  <li>Fixed problem during crawling with redirection: these urls had not been double-checked.</li>
+  </ul>
+<li>Speed-up Enhancements</li>
+  <ul>
+  <li>Enhanced memory allocation methods in kelondro, less overall memory copying (about 50%).</li>
+  <li>Adopted memory calculation functions for thread control to reduced memory consumption of collection objects.</li>
+  <li>Removed object pool from httpc and introduced client connection supervision. Long-running idle connections are closed automaticaly.</li>
+  <li>Redesigned URL hash computation, this used a is-local method which itself nedded a DNS lookup, and that needed time. Now the URL hash computation is prevented in many cases where the URL can be read from a YaCy database which had been accessed with the URL hash. The result is a overall speed up and less network operation in all parts of YaCy.</li>
+  </ul>
+<li>Other new Features</li>
+  <ul>
+  <li>Enhanced SSIs, refences may now also be servlets, not only files. SSIs work now also for non-chunked-encoding clients.</li>
+  <li>In pro-releases all parsers are activated by default.</li>
+  <li>Added client connection table to Connections servlet.</li>
+  <li>New peers compute their peer hash according to present DHT situation, a optimal position is calculated and used as new peer hash.</li>
+  </ul>
+<li>Bugfixes</li>
+  <ul>
+  <li>Auto-Update functionality now works on Solaris/OpenSolaris.</li>
+  <li>Various fixes and cleanups for blacklist handling.</li>
+  <li>Fix problems with some web servers which couldn't handle the way yacy was sending requests.</li>
+  <li>Fixed round-robin method of peer-ping order (the successfully pinged peer was not updated to current last-seed date).</li>
+  <li>Fixed connection problem on http client side implementation: disconnections are not treated as error any more since sudden disconnections are allowed as EOF signal if no file length is given in http header. Because the YaCy protocol uses exactly this method, many peers had been not reacheable after the delay at the end of a server session was removed. After this fix there was much better availability between peers.</li>
+  <li>Many more minor bug fixes.</li>
+  </ul>
+</ul>
+
 <br><p><a name="4021">v0.54_20070802_4021</a>
 <ul>
 <li>Option to define separated YaCy networks</li>
@@ -126,7 +180,7 @@ globalheader();
 
 <br><p><a name="3914">v0.53_20070618_3914</a>
 <ul>
-<li>Enhance Search Interface</li>
+<li>Enhanced Search Interface</li>
   <ul>
   <li>Speed-up of web interface (more responsive)</li>
   <li>Search results without snippets are blinded out</li>
