@@ -2237,10 +2237,24 @@ public final class plasmaSwitchboard extends serverAbstractSwitch implements ser
             if (robinsonPrivateCase) return false;
         }
         
-        // if the server is busy, we do crawling more slowly
-        //if (!(cacheManager.idle())) try {Thread.currentThread().sleep(2000);} catch (InterruptedException e) {}
+        // check local indexing queues
+        // in case the placing of remote crawl fails, there must be space in the local queue to work off the remote crawl
+        if (sbQueue.size() >= indexingSlots * 2) {
+            log.logFine("LimitCrawl: too many processes in indexing queue, dismissed (" +
+            "sbQueueSize=" + sbQueue.size() + ")");
+            return false;
+        }
+        if (cacheLoader.size() >= crawlSlots) {
+            log.logFine("LimitCrawl: too many processes in loader queue, dismissed (" +
+            "cacheLoader=" + cacheLoader.size() + ")");
+            return false;
+        }
+        if (onlineCaution()) {
+            log.logFine("LimitCrawl: online caution, omitting processing");
+            return false;
+        }
         
-        // if crawling was paused we have to wait until we wer notified to continue
+        // if crawling was paused we have to wait until we were notified to continue
         Object[] status = (Object[])this.crawlJobsStatus.get(CRAWLJOB_GLOBAL_CRAWL_TRIGGER);
         synchronized(status[CRAWLJOB_SYNC]) {
             if (((Boolean)status[CRAWLJOB_STATUS]).booleanValue()) {
@@ -2277,20 +2291,7 @@ public final class plasmaSwitchboard extends serverAbstractSwitch implements ser
                 if (success) return true;
             }
 
-            processLocalCrawling(urlEntry, profile, stats); // emergency case
-            
-            if (sbQueue.size() >= indexingSlots) {
-                log.logFine("LimitCrawl: too many processes in indexing queue, delayed to protect emergency case (" +
-                "sbQueueSize=" + sbQueue.size() + ")");
-                return false;
-            }
-            
-            if (cacheLoader.size() >= crawlSlots) {
-                log.logFine("LimitCrawl: too many processes in loader queue, delayed to protect emergency case (" +
-                "cacheLoader=" + cacheLoader.size() + ")");
-                return false;
-            }
-            
+            processLocalCrawling(urlEntry, profile, stats); // emergency case, work off the crawl locally            
             return true;
         } catch (IOException e) {
             log.logSevere(stats + ": CANNOT FETCH ENTRY: " + e.getMessage(), e);
