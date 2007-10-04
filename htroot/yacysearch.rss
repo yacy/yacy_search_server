@@ -1,4 +1,4 @@
-<?xml version="1.0"?>
+<?xml version="1.0" encoding="UTF-8"?>
 <?xml-stylesheet type='text/xsl' href='/yacysearch.xsl' version='1.0'?>
 <rss version="2.0"
 	xmlns:yacyTopwords="http://www.yacy.net/yacy/topwords"
@@ -6,19 +6,19 @@
 	xmlns:atom="http://www.w3.org/2005/Atom">
 	<!-- YaCy P2P Web Search - Results; http://yacy.net -->
 	<channel>
-		<title>YaCy P2P-Search for #[former]#</title>
-		<description>Search for #[former]#</description>
-		<link>#[searchBaseURL]#?search=#[former]#&amp;resource=#[input_resource]#&amp;contentdom=#[input_contentdom]#</link>
+		<title>YaCy P2P-Search for #[rss_query]#</title>
+		<description>Search for #[rss_query]#</description>
+		<link>#[searchBaseURL]#?search=#[rss_queryenc]#&amp;resource=#[input_resource]#&amp;contentdom=#[input_contentdom]#</link>
 		<image>
 			<url>#[rssYacyImageURL]#</url>
-			<title>Search for #[former]#</title>
-			<link>#[searchBaseURL]#?search=#[former]#&amp;resource=#[input_resource]#&amp;contentdom=#[input_contentdom]#</link>
+			<title>Search for #[rss_query]#</title>
+			<link>#[searchBaseURL]#?search=#[rss_queryenc]#&amp;resource=#[input_resource]#&amp;contentdom=#[input_contentdom]#</link>
 		</image>
 		<opensearch:totalResults>#[num-results_totalcount]#</opensearch:totalResults>
 		<opensearch:startIndex>#[num-results_offset]#</opensearch:startIndex>
 		<opensearch:itemsPerPage>#[num-results_itemsPerPage]#</opensearch:itemsPerPage>
 		<atom:link rel="related" href="opensearchdescription.xml" type="application/opensearchdescription+xml"/>
-		<opensearch:Query role="request" searchTerms="#[former]#" />
+		<opensearch:Query role="request" searchTerms="#[rss_queryenc]#" />
 		
 		#{results}#
 <!--#include virtual="yacysearchitem.html?rss=true&item=#[item]#&eventID=#[eventID]#" -->

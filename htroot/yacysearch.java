@@ -51,6 +51,7 @@ import java.net.MalformedURLException;
 import java.util.HashMap;
 import java.util.TreeSet;
 
+import de.anomic.data.htmlTools;
 import de.anomic.http.httpHeader;
 import de.anomic.index.indexURLEntry;
 import de.anomic.kelondro.kelondroBitfield;
@@ -381,8 +382,8 @@ public class yacysearch {
             // adding some additional properties needed for the rss feed
             String hostName = (String) header.get("Host", "localhost");
             if (hostName.indexOf(":") == -1) hostName += ":" + serverCore.getPortNr(env.getConfig("port", "8080"));
-            prop.put("searchBaseURL", "http://" + hostName + "/yacysearch.html");
-            prop.put("rssYacyImageURL", "http://" + hostName + "/env/grafics/yacy.gif");
+            prop.putASIS("searchBaseURL", "http://" + hostName + "/yacysearch.html");
+            prop.putASIS("rssYacyImageURL", "http://" + hostName + "/env/grafics/yacy.gif");
         }
         
         prop.put("searchagain", (global) ? 1 : 0);
@@ -407,6 +408,11 @@ public class yacysearch {
         prop.put("input_contentdomCheckVideo", (contentdomCode == plasmaSearchQuery.CONTENTDOM_VIDEO) ? 1 : 0);
         prop.put("input_contentdomCheckImage", (contentdomCode == plasmaSearchQuery.CONTENTDOM_IMAGE) ? 1 : 0);
         prop.put("input_contentdomCheckApp", (contentdomCode == plasmaSearchQuery.CONTENTDOM_APP) ? 1 : 0);
+        
+        // for RSS: don't HTML encode some elements
+        String q = htmlTools.encodeUnicode2xml(post.get("search", ""));
+        prop.put("rss_query", q);
+        prop.put("rss_queryenc", yacyURL.escape(q));
         
         // return rewrite properties
         return prop;

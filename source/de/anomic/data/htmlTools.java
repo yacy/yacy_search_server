@@ -2,30 +2,62 @@ package de.anomic.data;
 
 public class htmlTools {
 
-    /** Replaces characters in a string with other characters defined in an array.
+    /** Replaces characters in a string with other entities according to HTML standards.
       * @param text a string that possibly contains special characters
-      * @param entities array that contains characters to be replaced and characters it will be replaced by
+      * @param includingAmpersand if <code>false</code> ampersands are not encoded
       * @return the string with all characters replaced by the corresponding character from array
       */
       //[FB], changes by [MN], re-implemented by [MC]
     public static String encodeUnicode2html(String text, boolean includingAmpersand) {
         if (text == null) return null;
-        int pos = 0;
+        int spos = (includingAmpersand ? 0 : 2);
+        int epos = mapping.length;
+
+        return encode(text, mapping, spos, epos);
+    }
+
+    /**
+     * Replaces special entities ampersand, quotation marks, and less than/graiter than
+     * by the escaping entities allowed in XML documents.
+     * 
+     * @param text the original String
+     * @return the encoded String
+     */
+    public static String encodeUnicode2xml(String text) {
+        if (text == null) return null;
+        int spos = 0;
+        int epos = 8;
+
+        return encode(text, mapping, spos, epos);
+    }
+
+    /**
+     * Generic method that replaces occurences of special character entities defined in map 
+     * array with their corresponding mapping.
+     * @param text The String too process.
+     * @param map  An array defining the entity mapping.
+     * @param spos It is possible to use a subset of the map only. This parameter defines the
+     *             starting point in the map array. 
+     * @param epos The ending point, see above.
+     * @return A copy of the original String with all entities defined in map replaced.
+     */
+    public static String encode(String text, final String[] map, int spos, int epos) {
         StringBuffer sb = new StringBuffer(text.length());
-        search: while (pos < text.length()) {
+        search: while (spos < text.length()) {
             // find a (forward) mapping
-            loop: for (int i = (includingAmpersand) ? 0 : 2; i < mapping.length; i += 2) {
-                if (text.charAt(pos) != mapping[i].charAt(0)) continue loop;
+            loop: for (int i = spos; i < epos; i += 2) {
+                if (text.charAt(spos) != map[i].charAt(0)) continue loop;
                 // found match
-                sb.append(mapping[i + 1]);
-                pos++;
+                sb.append(map[i + 1]);
+                spos++;
                 continue search;
             }
             // not found match
-            sb.append(text.charAt(pos));
-            pos++;
+            sb.append(text.charAt(spos));
+            spos++;
         }
-        return new String(sb);
+
+        return sb.toString();
     }
     
     public static String decodeHtml2Unicode(String text) {

@@ -32,6 +32,7 @@ import java.util.Iterator;
 import java.util.Set;
 import java.util.TreeSet;
 
+import de.anomic.data.htmlTools;
 import de.anomic.http.httpHeader;
 import de.anomic.kelondro.kelondroMSetTools;
 import de.anomic.kelondro.kelondroNaturalOrder;
@@ -174,8 +175,8 @@ public class yacysearchitem {
         if (rss) {
             // text search for rss output
             prop.put("rss", 1); // switch on specific content
-            prop.put("rss_title", result.title());
-            prop.put("rss_description", result.textSnippet().getLineRaw());
+            prop.putASIS("rss_title", htmlTools.encodeUnicode2xml(result.title()));
+            prop.putASIS("rss_description", htmlTools.encodeUnicode2xml(result.textSnippet().getLineRaw()));
             prop.put("rss_link", result.urlstring());
             prop.put("rss_urlhash", result.hash());
             prop.put("rss_date", plasmaSwitchboard.dateString822(result.modified()));
