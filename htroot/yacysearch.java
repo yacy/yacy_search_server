@@ -412,7 +412,7 @@ public class yacysearch {
         // for RSS: don't HTML encode some elements
         String q = htmlTools.encodeUnicode2xml(post.get("search", ""));
         prop.putASIS("rss_query", q);
-        prop.putASIS("rss_queryenc", yacyURL.escape(q));
+        prop.putASIS("rss_queryenc", yacyURL.escape(q.replace(' ', '+')));
         
         // return rewrite properties
         return prop;
