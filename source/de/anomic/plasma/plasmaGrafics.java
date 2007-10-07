@@ -6,6 +6,8 @@
 // Frankfurt, Germany, 2005
 // Created 08.10.2005
 //
+// Contributions by Marc Nause [MN]
+//
 // $LastChangedDate$
 // $LastChangedRevision$
 // $LastChangedBy$
@@ -118,6 +120,9 @@ public class plasmaGrafics {
     
     private static BufferedImage peerloadPicture = null;
     private static long          peerloadPictureDate = 0;
+
+    private static ymageMatrix   bannerPicture = null;      // [MN]
+    //private static long          bannerPictureDate = 0;   // [MN]
 
     public static ymageMatrix getSearchEventPicture(String eventID) {
         plasmaSearchEvent event = plasmaSearchEvent.getEvent(eventID);
@@ -353,6 +358,46 @@ public class plasmaGrafics {
     	
     	g.setColor(COL_NORMAL_TEXT);
     	g.drawChars(caption.toCharArray(), 0, caption.length(), x+LEGEND_BOX_SIZE+5,y);
+    }
+
+    //[MN]
+    public static ymageMatrix getBannerPicture(int width, int height, String bgcolor, String textcolor, String bordercolor, String name, String links, String words, String type, String ppm, String network, String nlinks, String nwords, String nqph, String nppm) {
+        //if ((bannerPicture == null) || ((System.currentTimeMillis() - bannerDate) > maxAge)) {
+            drawBannerPicture(width, height, bgcolor, textcolor, bordercolor, name, links, words, type, ppm, network, nlinks, nwords, nqph, nppm);
+        //}
+        return bannerPicture;
+    }
+
+    //[MN]
+    private static void drawBannerPicture(int width, int height, String bgcolor, String textcolor, String bordercolor, String name, String links, String words, String type, String ppm, String network, String nlinks, String nwords, String nqph, String nppm) {
+
+        bannerPicture = new ymageMatrix(width, height, bgcolor);
+        bannerPicture.setMode(ymageMatrix.MODE_SUB);
+
+        // draw description
+        bannerPicture.setColor(textcolor);
+        ymageToolPrint.print(bannerPicture, 100, 12, 0, "PEER:  " +name , -1);
+        ymageToolPrint.print(bannerPicture, 100, 22, 0, "LINKS: " + links , -1);
+        ymageToolPrint.print(bannerPicture, 100, 32, 0, "WORDS: " + words , -1);
+        ymageToolPrint.print(bannerPicture, 100, 42, 0, "TYPE:  " + type , -1);
+        ymageToolPrint.print(bannerPicture, 100, 52, 0, "SPEED: " + ppm  , -1);
+
+        ymageToolPrint.print(bannerPicture, 285, 12, 0, "NETWORK: " +network , -1);
+        ymageToolPrint.print(bannerPicture, 285, 22, 0, "LINKS:   " + nlinks , -1);
+        ymageToolPrint.print(bannerPicture, 285, 32, 0, "WORDS:   " + nwords , -1);
+        //ymageToolPrint.print(bannerPicture, 285, 42, 0, "QUERIES: " + nqph , -1);
+        ymageToolPrint.print(bannerPicture, 285, 52, 0, "SPEED:   " + nppm , -1);
+
+        if (!bordercolor.equals("")) {
+            bannerPicture.setColor(bordercolor);
+            bannerPicture.line(0,0,0,height-1);
+            bannerPicture.line(0,0,width-1,0);
+            bannerPicture.line(width-1,0,width-1,height-1);
+            bannerPicture.line(0,height-1,width-1,height-1);
+        }
+
+        // set timestamp
+//         bannerPictureDate = System.currentTimeMillis();
     }
 
 }
