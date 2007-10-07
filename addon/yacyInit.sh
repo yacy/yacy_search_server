@@ -9,7 +9,12 @@ DAEMON_DIR=/opt/yacy #installation directory
 USER=yacy #set to the user whose rights the proxy will gain
 
 
-CLASSPATH=$DAEMON_DIR/classes
+# generating the proper classpath
+CLASSPATH=""
+for N in $DAEMON_DIR/lib/*.jar; do CLASSPATH="$CLASSPATH$N:"; done
+for N in $DAEMON_DIR/libx/*.jar; do CLASSPATH="$CLASSPATH$N:"; done
+CLASSPATH="classes:.:htroot:$CLASSPATH"
+#CLASSPATH=$DAEMON_DIR/classes
 DAEMON=$DAEMON_DIR/startYACY.sh
 NAME="yacy"
 DESC="YaCy HTTP Proxy"
