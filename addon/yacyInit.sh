@@ -4,18 +4,23 @@
 #
 # Provided by Matthias Kempka, 26.12.2004
 
-PATH=/sbin:/bin:/usr/sbin:/usr/local/bin:/usr/bin #ensure java is in the path
-DAEMON_DIR=/opt/yacy #installation directory
-USER=yacy #set to the user whose rights the proxy will gain
+# ensure java is in the path
+PATH=/sbin:/bin:/usr/sbin:/usr/local/bin:/usr/bin
+# installation directory
+DAEMON_DIR=/opt/yacy
+# set to the user whose rights the proxy will gain
+USER=yacy
+# Set this to the maximum number of seconds the script should try to shutdown
+# yacy. You might want to increase this on slower peers or for bigger
+# databases.
+SHUTDOWN_TIMEOUT=20
 
 
 # generating the proper classpath
 CLASSPATH=""
-for N in $DAEMON_DIR/lib/*.jar; do CLASSPATH="$CLASSPATH$N:"; done
-for N in $DAEMON_DIR/libx/*.jar; do CLASSPATH="$CLASSPATH$N:"; done
+for N in lib/*.jar; do CLASSPATH="$CLASSPATH$N:"; done
+for N in libx/*.jar; do CLASSPATH="$CLASSPATH$N:"; done
 CLASSPATH="classes:.:htroot:$CLASSPATH"
-#CLASSPATH=$DAEMON_DIR/classes
-DAEMON=$DAEMON_DIR/startYACY.sh
 NAME="yacy"
 DESC="YaCy HTTP Proxy"
 PID_FILE=/var/run/$NAME.pid
@@ -38,7 +43,7 @@ case "$1" in
 	fi
 	echo -n "Starting $DESC: "
 	start-stop-daemon --start --background --make-pidfile --chuid $USER\
-		--pidfile $PID_FILE --startas $JAVA\
+		--pidfile $PID_FILE --chdir $DAEMON_DIR --startas $JAVA\
 		-- -classpath $CLASSPATH yacy $DAEMON_DIR
 	echo "$NAME."
 	;;
@@ -48,7 +53,7 @@ case "$1" in
 		echo -n "Stopping $DESC: "
 		cd $DAEMON_DIR
 		./stopYACY.sh
-		timeout=20
+		timeout=$SHUTDOWN_TIMEOUT
 		while [ -n "$pidno" ]
 		  do
 		  let timeout=$timeout-1
