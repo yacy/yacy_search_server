@@ -1630,7 +1630,8 @@ public final class plasmaSwitchboard extends serverAbstractSwitch implements ser
      */
     public boolean cleanProfiles() throws InterruptedException {
         if ((sbQueue.size() > 0) || (cacheLoader.size() > 0) ||
-                (sbStackCrawlThread.size() > 0) || (noticeURL.notEmpty())) 
+                (sbStackCrawlThread != null && sbStackCrawlThread.size() > 0) ||
+                (noticeURL.notEmpty())) 
             return false;
         final Iterator iter = profilesActiveCrawls.profiles(true);
         plasmaCrawlProfile.entry entry;
