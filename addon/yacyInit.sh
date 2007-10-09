@@ -15,8 +15,11 @@ USER=yacy
 # databases.
 SHUTDOWN_TIMEOUT=20
 
+# Don't run if not installed
+test -f $DAEMON_DIR/startYACY.sh || exit 0
 
 # generating the proper classpath
+cd $DAEMON_DIR
 CLASSPATH=""
 for N in lib/*.jar; do CLASSPATH="$CLASSPATH$N:"; done
 for N in libx/*.jar; do CLASSPATH="$CLASSPATH$N:"; done
@@ -24,9 +27,6 @@ CLASSPATH="classes:.:htroot:$CLASSPATH"
 NAME="yacy"
 DESC="YaCy HTTP Proxy"
 PID_FILE=/var/run/$NAME.pid
-
-# Don't run if not installed
-test -f $DAEMON || exit 0
 
 JAVA=$(which java)
 
@@ -44,7 +44,7 @@ case "$1" in
 	echo -n "Starting $DESC: "
 	start-stop-daemon --start --background --make-pidfile --chuid $USER\
 		--pidfile $PID_FILE --chdir $DAEMON_DIR --startas $JAVA\
-		-- -classpath $CLASSPATH yacy $DAEMON_DIR
+		-- -classpath $CLASSPATH yacy $DAEMON_DIR > yacy.log
 	echo "$NAME."
 	;;
 	
@@ -54,16 +54,15 @@ case "$1" in
 		cd $DAEMON_DIR
 		./stopYACY.sh
 		timeout=$SHUTDOWN_TIMEOUT
-		while [ -n "$pidno" ]
-		  do
-		  let timeout=$timeout-1
-		  if [ $timeout -eq 0 ]; then
-		      start-stop-daemon --stop --pidfile $PID_FILE --oknodo
-		      break
-		  fi
-		  echo -n  "."
-		  sleep 1
-		  pidno=$( ps ax | grep $pid | awk '{ print $1 }' | grep $pid )
+		while [ -n "$pidno" ]; do
+			let timeout=$timeout-1
+			if [ $timeout -eq 0 ]; then
+				start-stop-daemon --stop --pidfile $PID_FILE --oknodo --verbose
+				break
+			fi
+			echo -n  "."
+			sleep 1
+			pidno=$( ps ax | grep $pid | awk '{ print $1 }' | grep $pid )
 		done
 		echo "$NAME."
 		cd -
