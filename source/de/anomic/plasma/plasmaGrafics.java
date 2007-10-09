@@ -122,7 +122,7 @@ public class plasmaGrafics {
     private static long          peerloadPictureDate = 0;
 
     private static ymageMatrix   bannerPicture = null;      // [MN]
-    //private static long          bannerPictureDate = 0;   // [MN]
+    private static long          bannerPictureDate = 0;     // [MN]
 
     public static ymageMatrix getSearchEventPicture(String eventID) {
         plasmaSearchEvent event = plasmaSearchEvent.getEvent(eventID);
@@ -361,32 +361,34 @@ public class plasmaGrafics {
     }
 
     //[MN]
-    public static ymageMatrix getBannerPicture(int width, int height, String bgcolor, String textcolor, String bordercolor, String name, String links, String words, String type, String ppm, String network, String nlinks, String nwords, String nqph, String nppm) {
-        //if ((bannerPicture == null) || ((System.currentTimeMillis() - bannerDate) > maxAge)) {
+    public static ymageMatrix getBannerPicture(long maxAge, int width, int height, String bgcolor, String textcolor, String bordercolor, String name, long links, long words, String type, int ppm, String network, long nlinks, long nwords, double nqph, long nppm) {
+        if ((bannerPicture == null) || ((System.currentTimeMillis() - bannerPictureDate) > maxAge)) {
             drawBannerPicture(width, height, bgcolor, textcolor, bordercolor, name, links, words, type, ppm, network, nlinks, nwords, nqph, nppm);
-        //}
+        }
         return bannerPicture;
     }
 
     //[MN]
-    private static void drawBannerPicture(int width, int height, String bgcolor, String textcolor, String bordercolor, String name, String links, String words, String type, String ppm, String network, String nlinks, String nwords, String nqph, String nppm) {
+    private static void drawBannerPicture(int width, int height, String bgcolor, String textcolor, String bordercolor, String name, long links, long words, String type, int ppm, String network, long nlinks, long nwords, double nqph, long nppm) {
+
+        int exprlength = 19;
 
         bannerPicture = new ymageMatrix(width, height, bgcolor);
         bannerPicture.setMode(ymageMatrix.MODE_SUB);
 
         // draw description
         bannerPicture.setColor(textcolor);
-        ymageToolPrint.print(bannerPicture, 100, 12, 0, "PEER:  " +name , -1);
-        ymageToolPrint.print(bannerPicture, 100, 22, 0, "LINKS: " + links , -1);
-        ymageToolPrint.print(bannerPicture, 100, 32, 0, "WORDS: " + words , -1);
-        ymageToolPrint.print(bannerPicture, 100, 42, 0, "TYPE:  " + type , -1);
-        ymageToolPrint.print(bannerPicture, 100, 52, 0, "SPEED: " + ppm  , -1);
+        ymageToolPrint.print(bannerPicture, 100, 12, 0, "PEER:  " + addTrailingBlanks(name, exprlength), -1);
+        ymageToolPrint.print(bannerPicture, 100, 22, 0, "LINKS: " + addBlanksAndDots(links, exprlength), -1);
+        ymageToolPrint.print(bannerPicture, 100, 32, 0, "WORDS: " + addBlanksAndDots(words, exprlength), -1);
+        ymageToolPrint.print(bannerPicture, 100, 42, 0, "TYPE:  " + addTrailingBlanks(type, exprlength), -1);
+        ymageToolPrint.print(bannerPicture, 100, 52, 0, "SPEED: " + addTrailingBlanks(ppm + " PAGES/MINUTE", exprlength), -1);
 
-        ymageToolPrint.print(bannerPicture, 285, 12, 0, "NETWORK: " +network , -1);
-        ymageToolPrint.print(bannerPicture, 285, 22, 0, "LINKS:   " + nlinks , -1);
-        ymageToolPrint.print(bannerPicture, 285, 32, 0, "WORDS:   " + nwords , -1);
-        //ymageToolPrint.print(bannerPicture, 285, 42, 0, "QUERIES: " + nqph , -1);
-        ymageToolPrint.print(bannerPicture, 285, 52, 0, "SPEED:   " + nppm , -1);
+        ymageToolPrint.print(bannerPicture, 285, 12, 0, "NETWORK: " + addTrailingBlanks(network, exprlength), -1);
+        ymageToolPrint.print(bannerPicture, 285, 22, 0, "LINKS:   " + addBlanksAndDots(nlinks, exprlength), -1);
+        ymageToolPrint.print(bannerPicture, 285, 32, 0, "WORDS:   " + addBlanksAndDots(nwords, exprlength), -1);
+        ymageToolPrint.print(bannerPicture, 285, 42, 0, "QUERIES: " + addTrailingBlanks(nqph + " QUERIES/HOUR", exprlength), -1);
+        ymageToolPrint.print(bannerPicture, 285, 52, 0, "SPEED:   " + addTrailingBlanks(nppm + " PAGES/MINUTE", exprlength), -1);
 
         if (!bordercolor.equals("")) {
             bannerPicture.setColor(bordercolor);
@@ -397,7 +399,55 @@ public class plasmaGrafics {
         }
 
         // set timestamp
-//         bannerPictureDate = System.currentTimeMillis();
+         bannerPictureDate = System.currentTimeMillis();
+    }
+
+    //[MN]
+    private static String addBlanksAndDots(int input, int length) {
+        return addBlanksAndDots(input + "", length);
+    }
+
+    //[MN]
+    private static String addBlanksAndDots(long input, int length) {
+        return addBlanksAndDots(input + "", length);
+    }
+
+    //[MN]
+    private static String addBlanksAndDots(String input, int length) {
+        input = addDots(input);
+        input = addTrailingBlanks(input,length);
+        return input;
+    }
+
+    //[MN]
+    private static String addDots(String word) {
+        String tmp = "";
+        int len = word.length();
+        while(len > 3) {
+            if(tmp.equals("")) {
+                tmp = word.substring(len-3,len);
+            } else {
+                tmp = word.substring(len-3,len) + "." + tmp;
+            }
+            word = word.substring(0,len-3);
+            len = word.length();
+        }
+        word = word + "." + tmp;
+        return word;
+    }
+
+    //[MN]
+    private static String addTrailingBlanks(String word, int length) {
+        if (length > word.length()) {
+            String blanks = "";
+            length = length - word.length();
+            int i = 0;
+            while(i++ < length) {
+                blanks += " ";
+            }
+            word = blanks + word;
+        }
+        return word;
     }
 
 }

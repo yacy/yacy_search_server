@@ -7,8 +7,8 @@
 //
 // This File is contributed by Marc Nause
 //
-// $LastChangedDate: 2007-10-07 $
-// $LastChangedRevision: $
+// $LastChangedDate: 2007-10-09 23:07:00 +0200 (Mi, 09 Okt 2007) $
+// $LastChangedRevision: 4154 $
 // $LastChangedBy: low012 $
 //
 // This program is free software; you can redistribute it and/or modify
@@ -69,73 +69,54 @@ public class Banner {
             bordercolor = post.get("bordercolor", bordercolor);
         }
 
-        yacySeed seed = yacyCore.seedDB.mySeed();
-        String name = seed.get(yacySeed.NAME, "-");
-        name = addTrailingBlanks(name,19).toUpperCase();
-        String links = seed.get(yacySeed.LCOUNT, "0");
-        links = addDots(links);
-        links = addTrailingBlanks(links,19);
-        String words = seed.get(yacySeed.ICOUNT, "0");
-        words = addDots(words);
-        words = addTrailingBlanks(words,19);
-
+        String name = "";
+        long links = 0;
+        long words = 0;
+        int myppm = 0;
+        double myqph = 0;
         String type = "";
-        if (yacyCore.seedDB.mySeed().isVirgin()) {
-            type = "VIRGIN";
-        } else if(yacyCore.seedDB.mySeed().isJunior()) {
-            type = "JUNIOR";
-        } else if(yacyCore.seedDB.mySeed().isSenior()) {
-            type = "SENIOR";
-        } else if(yacyCore.seedDB.mySeed().isPrincipal()) {
-            type = "PRINCIPAL";
-        }
-        type = addTrailingBlanks(type,19);
-        String ppm = seed.getPPM() + " PAGES/MINUTE";
-        ppm = addTrailingBlanks(ppm,19);
+        String network = "";
+        long nlinks = 0;
+        long nwords = 0;
+        double nqpm = 0;
+        double nqph = 0;
+        long nppm = 0;
 
-        String network = env.getConfig("network.unit.name", "unspecified").toUpperCase();
-        network = addTrailingBlanks(network,19);
-        String nlinks = yacyCore.seedDB.countActiveURL()+"";
-        nlinks = addDots(nlinks);
-        nlinks = addTrailingBlanks(nlinks,19);
-        String nwords = yacyCore.seedDB.countActiveRWI()+"";
-        nwords = addDots(nwords);
-        nwords = addTrailingBlanks(nwords,19);
-        String nqph = yacyCore.seedDB.countActiveQPM() + " QUERIES/MINUTE";
-        nqph = addTrailingBlanks(nqph,19);
-        String nppm = yacyCore.seedDB.countActivePPM() + " PAGES/MINUTE";
-        nppm = addTrailingBlanks(nppm,19);
+        yacySeed seed = yacyCore.seedDB.mySeed();
+        if (seed != null){
+            name = seed.get(yacySeed.NAME, "-").toUpperCase();
+            links = Long.parseLong(seed.get(yacySeed.LCOUNT, "0"));
+            words = Long.parseLong(seed.get(yacySeed.ICOUNT, "0"));
+            myppm = seed.getPPM();
+            myqph = 60d * seed.getQPM();
+            network = env.getConfig("network.unit.name", "unspecified").toUpperCase();
+            nlinks = yacyCore.seedDB.countActiveURL();
+            nwords = yacyCore.seedDB.countActiveRWI();
+            nqpm = yacyCore.seedDB.countActiveQPM();
+            nppm = yacyCore.seedDB.countActivePPM();
 
-        return plasmaGrafics.getBannerPicture(width, height, bgcolor, textcolor, bordercolor, name, links, words, type, ppm, network, nlinks, nwords, nqph, nppm);
-    }
-
-    private static String addDots(String word) {
-        String tmp = "";
-        int len = word.length();
-        while(len > 3) {
-            if(tmp.equals("")) {
-                tmp = word.substring(len-3,len);
-            } else {
-                tmp = word.substring(len-3,len) + "." + tmp;
+            if (yacyCore.seedDB.mySeed().isVirgin()) {
+                type = "VIRGIN";
+                nqph = Math.round(6000d * nqpm) / 100d;
+            } else if(yacyCore.seedDB.mySeed().isJunior()) {
+                type = "JUNIOR";
+                nqph = Math.round(6000d * nqpm) / 100d;
+            } else if(yacyCore.seedDB.mySeed().isSenior()) {
+                type = "SENIOR";
+                nlinks = nlinks + links;
+                nwords = nwords + words;
+                nqph = Math.round(6000d * nqpm + 100d * myqph) / 100d;
+                nppm = nppm + myppm;
+            } else if(yacyCore.seedDB.mySeed().isPrincipal()) {
+                type = "PRINCIPAL";
+                nlinks = nlinks + links;
+                nwords = nwords + words;
+                nqph = Math.round(6000d * nqpm + 100d * myqph) / 100d;
+                nppm = nppm + myppm;
             }
-            word = word.substring(0,len-3);
-            len = word.length();
         }
-        word = word + "." + tmp;
-        return word;
-    }
 
-    private static String addTrailingBlanks(String word, int length) {
-        if (length > word.length()) {
-            String blanks = "";
-            length = length - word.length();
-            int i = 0;
-            while(i++ < length) {
-                blanks += " ";
-            }
-            word = blanks + word;
-        }
-        return word;
+        return plasmaGrafics.getBannerPicture(1000, width, height, bgcolor, textcolor, bordercolor, name, links, words, type, myppm, network, nlinks, nwords, nqph, nppm);
     }
 
 }
