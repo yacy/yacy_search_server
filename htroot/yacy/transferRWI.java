@@ -83,7 +83,7 @@ public final class transferRWI {
         boolean granted       = sb.getConfig("allowReceiveIndex", "false").equals("true");
         boolean blockBlacklist = sb.getConfig("indexReceiveBlockBlacklist", "false").equals("true");
         boolean checkLimit    = sb.getConfigBool("indexDistribution.transferRWIReceiptLimitEnabled", true);
-        final long cachelimit = sb.getConfigLong("indexDistribution.dhtReceiptLimit", 1000);
+        final long cachelimit = sb.getConfigLong("indexDistribution.dhtReceiptLimit", 10000);
         final yacySeed otherPeer = yacyCore.seedDB.get(iam);
         final String otherPeerName = iam + ":" + ((otherPeer == null) ? "NULL" : (otherPeer.getName() + "/" + otherPeer.getVersion()));                
         
