@@ -7,11 +7,10 @@
 # ensure java is in the path
 PATH=/sbin:/bin:/usr/sbin:/usr/local/bin:/usr/bin
 # installation directory
-#DAEMON_DIR=/opt/yacy
-DAEMON_DIR=/home/fox/daten/dev/eclipse/yacy
+DAEMON_DIR=/opt/yacy
 # set to the user whose rights the proxy will gain
-#USER=yacy
-USER=fox
+USER=yacy
+
 # Set this to the maximum number of seconds the script should try to shutdown
 # yacy. You might want to increase this on slower peers or for bigger
 # databases.
