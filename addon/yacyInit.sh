@@ -1,4 +1,4 @@
-#! /bin/sh
+#!/bin/sh
 #
 # init script for the HTTP Proxy: YaCy
 #
@@ -7,9 +7,11 @@
 # ensure java is in the path
 PATH=/sbin:/bin:/usr/sbin:/usr/local/bin:/usr/bin
 # installation directory
-DAEMON_DIR=/opt/yacy
+#DAEMON_DIR=/opt/yacy
+DAEMON_DIR=/home/fox/daten/dev/eclipse/yacy
 # set to the user whose rights the proxy will gain
-USER=yacy
+#USER=yacy
+USER=fox
 # Set this to the maximum number of seconds the script should try to shutdown
 # yacy. You might want to increase this on slower peers or for bigger
 # databases.
@@ -18,8 +20,31 @@ SHUTDOWN_TIMEOUT=20
 # Don't run if not installed
 test -f $DAEMON_DIR/startYACY.sh || exit 0
 
-# generating the proper classpath
 cd $DAEMON_DIR
+
+# Default niceness if not set in config file
+NICE_VAL=0
+
+JAVA_ARGS="-Djava.awt.headless=true"
+#get javastart args
+if [ -f DATA/SETTINGS/httpProxy.conf ]
+then
+	# startup memory
+	for i in Xmx Xms; do
+		j="`grep javastart_$i DATA/SETTINGS/httpProxy.conf | sed 's/^[^=]*=//'`";
+		if [ -n $j ]; then JAVA_ARGS="-$j $JAVA_ARGS"; fi;
+	done
+	
+	# Priority
+	j="`grep javastart_priority DATA/SETTINGS/httpProxy.conf | sed 's/^[^=]*=//'`";
+
+	if [ ! -z "$j" ];then
+		if [ -n $j ]; then NICE_VAL=$j; fi;
+	fi
+	
+fi
+
+# generating the proper classpath
 CLASSPATH=""
 for N in lib/*.jar; do CLASSPATH="$CLASSPATH$N:"; done
 for N in libx/*.jar; do CLASSPATH="$CLASSPATH$N:"; done
@@ -44,7 +69,8 @@ case "$1" in
 	echo -n "Starting $DESC: "
 	start-stop-daemon --start --background --make-pidfile --chuid $USER\
 		--pidfile $PID_FILE --chdir $DAEMON_DIR --startas $JAVA\
-		-- -classpath $CLASSPATH yacy $DAEMON_DIR > yacy.log
+		--nicelevel $NICE_VAL\
+		-- $JAVA_ARGS -classpath $CLASSPATH yacy $DAEMON_DIR
 	echo "$NAME."
 	;;
 	
