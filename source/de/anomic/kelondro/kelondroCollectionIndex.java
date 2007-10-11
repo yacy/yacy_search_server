@@ -599,7 +599,6 @@ public class kelondroCollectionIndex {
                 int newPartitionNumber;
                 while ((newPartitionNumber = arrayIndex(oldcollection.size())) > maxPartitions) {
                     kelondroRowSet newcollection = shrinkCollection(key, oldcollection, arrayCapacity(maxPartitions));
-                    saveCommons(key, oldcollection);
                     oldcollection = newcollection;
                 }
                 
@@ -714,7 +713,6 @@ public class kelondroCollectionIndex {
             int newPartitionNumber;
             while ((newPartitionNumber = arrayIndex(oldcollection.size())) > maxPartitions) {
                 kelondroRowSet newcollection = shrinkCollection(key, oldcollection, arrayCapacity(maxPartitions));
-                saveCommons(key, oldcollection);
                 oldcollection = newcollection;
             }
             
@@ -747,6 +745,7 @@ public class kelondroCollectionIndex {
     }
     
     private kelondroRowSet shrinkCollection(byte[] key, kelondroRowSet collection, int targetSize) {
+        //TODO Remove timing before release
         // removes entries from collection
         // the removed entries are stored in a 'commons' dump file
 
@@ -754,23 +753,32 @@ public class kelondroCollectionIndex {
         int oldsize = collection.size();
         kelondroRowSet survival = new kelondroRowSet(collection.rowdef, 0);
         if (oldsize <= targetSize) return survival;
+        long sadd1 = 0, srem1 = 0, sadd2 = 0, srem2 = 0, tot1 = 0, tot2 = 0;
+        long t1 = 0, t2 = 0;
         
         // delete some entries, which are bad rated
         Iterator i = collection.rows();
         kelondroRow.Entry entry;
         byte[] ref;
+        t1 = System.currentTimeMillis();
         while (i.hasNext()) {
             entry = (kelondroRow.Entry) i.next();
             ref = entry.getColBytes(0);
             if ((ref.length == 12) && (yacyURL.probablyRootURL(new String(ref)))) {
+                t2 = System.currentTimeMillis();
                 survival.addUnique(entry);
+                sadd1 += System.currentTimeMillis() - t2;
+                t2 = System.currentTimeMillis();
                 i.remove();
+                srem1 += System.currentTimeMillis() - t2;
             }
         }
         int firstSurvival = survival.size();
+        tot1 = System.currentTimeMillis() - t1;
         
         // check if we shrinked enough
         Random rand = new Random(System.currentTimeMillis());
+        t1 = System.currentTimeMillis();
         while (survival.size() > targetSize) {
             // now delete randomly more entries from the survival collection
             i = survival.rows();
@@ -778,13 +786,22 @@ public class kelondroCollectionIndex {
                 entry = (kelondroRow.Entry) i.next();
                 ref = entry.getColBytes(0);
                 if (rand.nextInt() % 4 != 0) {
+                    t2 = System.currentTimeMillis();
                     collection.addUnique(entry);
+                    sadd2 += System.currentTimeMillis() - t2;
+                    t2 = System.currentTimeMillis();
                     i.remove();
+                    srem2 += System.currentTimeMillis() - t2;
                 }
             }
         }
+        tot2 = System.currentTimeMillis() - t1;
         
+        serverLog.logFine("kelondroCollectionIndex", "tot= "+tot1+'/'+tot2+" # add/rem(1)= "+sadd1+'/'+srem1+" # add/rem(2)= "+sadd2+'/'+srem2);
         serverLog.logInfo("kelondroCollectionIndex", "shrinked common word " + new String(key) + "; old size = " + oldsize + ", new size = " + collection.size() + ", maximum size = " + targetSize + ", survival size = " + survival.size() + ", first survival = " + firstSurvival);
+        
+        //finally dump the removed entries to a file
+        saveCommons(key, collection);
         return survival;
     }
     

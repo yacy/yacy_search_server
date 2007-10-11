@@ -124,7 +124,7 @@ public class kelondroRowSet extends kelondroRowCollection implements kelondroInd
         if (index < 0) return null;
         //System.out.println("remove: chunk found at index position (before remove) " + index + ", inset=" + serverLog.arrayList(super.chunkcache, super.rowdef.objectsize() * index, length + 10) + ", searchkey=" + serverLog.arrayList(a, start, length));
         kelondroRow.Entry entry = super.get(index);
-        super.removeRow(index);
+        super.removeRow(index, false);
         //System.out.println("remove: chunk found at index position (after  remove) " + index + ", inset=" + serverLog.arrayList(super.chunkcache, super.rowdef.objectsize() * index, length) + ", searchkey=" + serverLog.arrayList(a, start, length));
         int findagainindex = find(a, start, length);
         //System.out.println("kelondroRowSet.remove");

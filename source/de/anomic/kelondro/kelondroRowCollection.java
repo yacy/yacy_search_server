@@ -363,26 +363,39 @@ public class kelondroRowCollection {
         chunkcount += c.size();
     }
     
-    protected synchronized final void removeRow(int p) {
+    /**
+     * This method removes the entry at position p ensuring the order of the remaining
+     * entries if specified by keepOrder.
+     * Note: Keeping the order is expensive. If you want to remove more than one element in
+     * a batch with this method, it'd be better to do the removes without order keeping and doing
+     * the sort after all the removes are done.
+     * 
+     * @param p element at this position will be removed
+     * @param keepOrder keep the order of remaining entries
+     */
+    protected synchronized final void removeRow(int p, boolean keepOrder) {
         assert p >= 0 : "p = " + p;
         assert p < chunkcount : "p = " + p + ", chunkcount = " + chunkcount;
         assert chunkcount > 0 : "chunkcount = " + chunkcount;
         assert sortBound <= chunkcount : "sortBound = " + sortBound + ", chunkcount = " + chunkcount;
-        if (p < sortBound) {
-        	// remove by shift
-        	System.arraycopy(
-        			chunkcache, (p + 1) * this.rowdef.objectsize(),
+        if (keepOrder && (p < sortBound)) {
+            // remove by shift (quite expensive for big collections)
+            System.arraycopy(
+                    chunkcache, (p + 1) * this.rowdef.objectsize(),
                     chunkcache, p * this.rowdef.objectsize(),
                     (chunkcount - p - 1) * this.rowdef.objectsize());
             sortBound--;
         } else {
-        	// remove by copying the top-element to the remove position
-        	if (p != chunkcount - 1) {
-        		System.arraycopy(
-        			chunkcache, (chunkcount - 1) * this.rowdef.objectsize(),
-        			chunkcache, p * this.rowdef.objectsize(),
-        			this.rowdef.objectsize());
-        	}
+            // remove by copying the top-element to the remove position
+            if (p != chunkcount - 1) {
+                System.arraycopy(
+                        chunkcache, (chunkcount - 1) * this.rowdef.objectsize(),
+                        chunkcache, p * this.rowdef.objectsize(),
+                        this.rowdef.objectsize());
+            }
+            // we moved the last element to the remove position: (p+1)st element
+            // only the first p elements keep their order
+            if (sortBound > p) sortBound = p;
         }
         chunkcount--;
         this.lastTimeWrote = System.currentTimeMillis();
@@ -414,6 +427,12 @@ public class kelondroRowCollection {
         return new rowIterator();
     }
     
+    /**
+     * Iterator for kelondroRowCollection.
+     * It supports remove() though it doesn't contain the order of the underlying
+     * collection during removes.
+     *
+     */
     public class rowIterator implements Iterator {
 
         private int p;
@@ -432,7 +451,7 @@ public class kelondroRowCollection {
         
         public void remove() {
             p--;
-            removeRow(p);
+            removeRow(p, false);
         }
     }
     
@@ -562,7 +581,7 @@ public class kelondroRowCollection {
         	//System.out.println("ENTRY0: " + serverLog.arrayList(chunkcache, rowdef.objectsize*i, rowdef.objectsize));
         	//System.out.println("ENTRY1: " + serverLog.arrayList(chunkcache, rowdef.objectsize*(i+1), rowdef.objectsize));
             if (compare(i, i + 1) == 0) {
-                removeRow(i); // this decreases the chunkcount
+                removeRow(i, true); // this decreases the chunkcount
             } else {
                 i++;
             }
