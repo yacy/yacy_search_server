@@ -117,7 +117,10 @@ public class ConfigNetwork_p {
         	
             // read remote crawl request settings
             sb.setConfig("crawlResponse", (crawlResponse) ? "true" : "false");
-            int newppm = Math.max(1, Integer.parseInt(post.get("acceptCrawlLimit", "1")));
+            int newppm = 1;
+            try {
+                newppm = Math.max(1, Integer.parseInt(post.get("acceptCrawlLimit", "1")));
+            } catch (NumberFormatException e) {}
             long newBusySleep = Math.max(100, 60000 / newppm);
             serverThread rct = sb.getThread(plasmaSwitchboard.CRAWLJOB_REMOTE_TRIGGERED_CRAWL);
             rct.setBusySleep(newBusySleep);
@@ -136,7 +139,10 @@ public class ConfigNetwork_p {
         
         // write remote crawl request settings
         prop.put("crawlResponse", sb.getConfigBool("crawlResponse", false) ? 1 : 0);
-        long RTCbusySleep = Integer.parseInt(env.getConfig(plasmaSwitchboard.CRAWLJOB_REMOTE_TRIGGERED_CRAWL_BUSYSLEEP, "100"));
+        long RTCbusySleep = 100;
+        try {
+            RTCbusySleep = Integer.parseInt(env.getConfig(plasmaSwitchboard.CRAWLJOB_REMOTE_TRIGGERED_CRAWL_BUSYSLEEP, "100"));
+        } catch (NumberFormatException e) {}
         int RTCppm = (int) (60000L / RTCbusySleep);
         prop.put("acceptCrawlLimit", RTCppm);
         

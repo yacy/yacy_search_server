@@ -223,10 +223,22 @@ public class PerformanceQueues_p {
              */
             serverThread httpd = switchboard.getThread("10_httpd");
             GenericObjectPool.Config httpdPoolConfig = ((serverCore)httpd).getPoolConfig();
-            maxActive = Integer.parseInt(post.get("httpd Session Pool_maxActive","8"));
-            maxIdle = Integer.parseInt(post.get("httpd Session Pool_maxIdle","4"));
-            minIdle = Integer.parseInt(post.get("httpd Session Pool_minIdle","0"));
-            
+            try {
+                maxActive = Integer.parseInt(post.get("httpd Session Pool_maxActive","8"));
+            } catch (NumberFormatException e) {
+                maxActive = 8;
+            }
+            try {
+                maxIdle = Integer.parseInt(post.get("httpd Session Pool_maxIdle","4"));
+            } catch (NumberFormatException e) {
+                maxIdle = 4;
+            }
+            try {
+                minIdle = Integer.parseInt(post.get("httpd Session Pool_minIdle","0"));
+            } catch (NumberFormatException e) {
+                minIdle = 0;
+            }
+
             httpdPoolConfig.minIdle = (minIdle > maxIdle) ? maxIdle/2 : minIdle;
             httpdPoolConfig.maxIdle = (maxIdle > maxActive) ? maxActive/2 : maxIdle;
             httpdPoolConfig.maxActive = maxActive;    
@@ -237,15 +249,27 @@ public class PerformanceQueues_p {
             switchboard.setConfig("httpdMaxActiveSessions",maxActive);
             switchboard.setConfig("httpdMaxIdleSessions",maxIdle);
             switchboard.setConfig("httpdMinIdleSessions",minIdle);
-            
+
             /*
              * Configuring the crawlStacker pool
              */
             GenericObjectPool.Config stackerPoolConfig = switchboard.sbStackCrawlThread.getPoolConfig();
-            maxActive = Integer.parseInt(post.get("CrawlStacker Session Pool_maxActive","10"));
-            maxIdle = Integer.parseInt(post.get("CrawlStacker Session Pool_maxIdle","10"));
-            minIdle = Integer.parseInt(post.get("CrawlStacker Session Pool_minIdle","5"));
-            
+            try {
+                maxActive = Integer.parseInt(post.get("CrawlStacker Session Pool_maxActive","10"));
+            } catch (NumberFormatException e) {
+                maxActive = 10;
+            }
+            try {
+                maxIdle = Integer.parseInt(post.get("CrawlStacker Session Pool_maxIdle","10"));
+            } catch (NumberFormatException e) {
+                maxIdle = 10;
+            }
+            try {
+                minIdle = Integer.parseInt(post.get("CrawlStacker Session Pool_minIdle","5"));
+            } catch (NumberFormatException e) {
+                minIdle = 5;
+            }
+
             stackerPoolConfig.minIdle = (minIdle > maxIdle) ? maxIdle/2 : minIdle;
             stackerPoolConfig.maxIdle = (maxIdle > maxActive) ? maxActive/2 : maxIdle;
             stackerPoolConfig.maxActive = maxActive;   
