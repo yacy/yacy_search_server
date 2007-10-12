@@ -48,7 +48,6 @@ import java.text.DecimalFormat;
 import java.util.ArrayList;
 import java.util.Iterator;
 
-import de.anomic.data.htmlTools;
 import de.anomic.http.httpHeader;
 import de.anomic.plasma.plasmaCrawlZURL;
 import de.anomic.plasma.plasmaHTCache;
@@ -142,11 +141,11 @@ public class IndexCreateIndexingQueue_p {
                     totalSize += entrySize;
                     initiator = yacyCore.seedDB.getConnected(pcentry.initiator());
                     prop.put("indexing-queue_list_"+entryCount+"_dark", (inProcess)? 2: ((dark) ? 1 : 0));
-                    prop.put("indexing-queue_list_"+entryCount+"_initiator", ((initiator == null) ? "proxy" : htmlTools.encodeUnicode2html(initiator.getName(), true)));
+                    prop.put("indexing-queue_list_"+entryCount+"_initiator", ((initiator == null) ? "proxy" : initiator.getName()));
                     prop.put("indexing-queue_list_"+entryCount+"_depth", pcentry.depth());
                     prop.put("indexing-queue_list_"+entryCount+"_modified", pcentry.getModificationDate());
-                    prop.put("indexing-queue_list_"+entryCount+"_anchor", (pcentry.anchorName()==null)?"":htmlTools.encodeUnicode2html(pcentry.anchorName(), true));
-                    prop.put("indexing-queue_list_"+entryCount+"_url", htmlTools.encodeUnicode2html(pcentry.url().toNormalform(false, true), false));
+                    prop.put("indexing-queue_list_"+entryCount+"_anchor", (pcentry.anchorName()==null)?"":pcentry.anchorName());
+                    prop.put("indexing-queue_list_"+entryCount+"_url", pcentry.url().toNormalform(false, true));
                     prop.put("indexing-queue_list_"+entryCount+"_size", bytesToString(entrySize));
                     prop.put("indexing-queue_list_"+entryCount+"_inProcess", (inProcess)?1:0);
                     prop.put("indexing-queue_list_"+entryCount+"_inProcess_hash", pcentry.urlHash());
@@ -189,9 +188,9 @@ public class IndexCreateIndexingQueue_p {
                     executorHash = entry.executor();
                     initiatorSeed = yacyCore.seedDB.getConnected(initiatorHash);
                     executorSeed = yacyCore.seedDB.getConnected(executorHash);
-                    prop.put("rejected_list_"+j+"_initiator", ((initiatorSeed == null) ? "proxy" : htmlTools.encodeUnicode2html(initiatorSeed.getName(), true)));
-                    prop.put("rejected_list_"+j+"_executor", ((executorSeed == null) ? "proxy" : htmlTools.encodeUnicode2html(executorSeed.getName(), true)));
-                    prop.put("rejected_list_"+j+"_url", htmlTools.encodeUnicode2html(url.toNormalform(false, true), false));
+                    prop.put("rejected_list_"+j+"_initiator", ((initiatorSeed == null) ? "proxy" : initiatorSeed.getName()));
+                    prop.put("rejected_list_"+j+"_executor", ((executorSeed == null) ? "proxy" : executorSeed.getName()));
+                    prop.put("rejected_list_"+j+"_url", url.toNormalform(false, true));
                     prop.put("rejected_list_"+j+"_failreason", entry.anycause());
                     prop.put("rejected_list_"+j+"_dark", ((dark) ? 1 : 0));
                     dark = !dark;
