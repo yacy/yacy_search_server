@@ -53,6 +53,7 @@ import java.util.Hashtable;
 import org.pdfbox.pdfparser.PDFParser;
 import org.pdfbox.pdmodel.PDDocument;
 import org.pdfbox.pdmodel.PDDocumentInformation;
+import org.pdfbox.pdmodel.encryption.StandardDecryptionMaterial;
 import org.pdfbox.util.PDFTextStripper;
 
 import de.anomic.plasma.plasmaCrawlEURL;
@@ -77,7 +78,7 @@ public class pdfParser extends AbstractParser implements Parser {
      * @see Parser#getLibxDependences()
      */
     private static final String[] LIBX_DEPENDENCIES = new String[] {
-        "PDFBox-0.7.2.jar"
+        "PDFBox-0.7.3.jar"
     };        
     
     public pdfParser() {        
@@ -119,7 +120,9 @@ public class pdfParser extends AbstractParser implements Parser {
             theDocument = parser.getPDDocument();
             
             if (theDocument.isEncrypted()) {
-                throw new ParserException("Document is encrypted",location,plasmaCrawlEURL.DENIED_DOCUMENT_ENCRYPTED);
+                theDocument.openProtection(new StandardDecryptionMaterial(""));
+                if (!theDocument.getCurrentAccessPermission().canExtractContent())
+                    throw new ParserException("Document is encrypted",location,plasmaCrawlEURL.DENIED_DOCUMENT_ENCRYPTED);
             }
             
             // extracting some metadata
