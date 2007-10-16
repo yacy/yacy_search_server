@@ -61,6 +61,7 @@ import de.anomic.server.serverCodings;
 import de.anomic.server.serverDate;
 import de.anomic.server.serverObjects;
 import de.anomic.server.serverSwitch;
+import de.anomic.tools.yFormatter;
 import de.anomic.yacy.yacyClient;
 import de.anomic.yacy.yacyCore;
 import de.anomic.yacy.yacyNewsPool;
@@ -73,8 +74,12 @@ public class Network {
     private static final String STR_TABLE_LIST = "table_list_";
 
     public static serverObjects respond(httpHeader header, serverObjects post, serverSwitch switchboard) {
+        boolean isXML = ((String)header.get("PATH")).endsWith(".xml");
         plasmaSwitchboard sb = (plasmaSwitchboard) switchboard;
         final long start = System.currentTimeMillis();
+        if (isXML) {
+            yFormatter.setLocale("none");
+        }
         
         // return variable that accumulates replacements
         final serverObjects prop = new serverObjects();
@@ -146,19 +151,19 @@ public class Network {
                 prop.put("table_my-version", seed.get(yacySeed.VERSION, "-"));
                 prop.put("table_my-utc", seed.get(yacySeed.UTC, "-"));
                 prop.put("table_my-uptime", serverDate.intervalToString(60000 * Long.parseLong(seed.get(yacySeed.UPTIME, ""))));
-                prop.put("table_my-LCount", groupDigits(LCount));
-                prop.put("table_my-ICount", groupDigits(ICount));
-                prop.put("table_my-RCount", groupDigits(RCount));
-                prop.put("table_my-sI", groupDigits(seed.get(yacySeed.INDEX_OUT, "0")));
-                prop.put("table_my-sU", groupDigits(seed.get(yacySeed.URL_OUT, "0")));
-                prop.put("table_my-rI", groupDigits(seed.get(yacySeed.INDEX_IN, "0")));
-                prop.put("table_my-rU", groupDigits(seed.get(yacySeed.URL_IN, "0")));
+                prop.put("table_my-LCount", yFormatter.number(LCount));
+                prop.put("table_my-ICount", yFormatter.number(ICount));
+                prop.put("table_my-RCount", yFormatter.number(RCount));
+                prop.put("table_my-sI", yFormatter.number(seed.get(yacySeed.INDEX_OUT, "0")));
+                prop.put("table_my-sU", yFormatter.number(seed.get(yacySeed.URL_OUT, "0")));
+                prop.put("table_my-rI", yFormatter.number(seed.get(yacySeed.INDEX_IN, "0")));
+                prop.put("table_my-rU", yFormatter.number(seed.get(yacySeed.URL_IN, "0")));
                 prop.put("table_my-ppm", myppm);
-                prop.put("table_my-qph", Double.toString(Math.round(100d * myqph) / 100d));
-                prop.put("table_my-totalppm", sb.totalPPM);
-                prop.put("table_my-totalqph", Double.toString(Math.round(6000d * sb.totalQPM) / 100d));
-                prop.put("table_my-seeds", seed.get(yacySeed.SCOUNT, "-"));
-                prop.put("table_my-connects", groupDigits(seed.get(yacySeed.CCOUNT, "0")));
+                prop.put("table_my-qph", yFormatter.number(Math.round(100d * myqph) / 100d));
+                prop.put("table_my-totalppm", yFormatter.number(sb.totalPPM));
+                prop.put("table_my-totalqph", yFormatter.number(Math.round(6000d * sb.totalQPM) / 100d));
+                prop.put("table_my-seeds", yFormatter.number(seed.get(yacySeed.SCOUNT, "-")));
+                prop.put("table_my-connects", yFormatter.number(seed.get(yacySeed.CCOUNT, "0")));
                 prop.put("table_my-url", seed.get("seedURL", ""));
                 
                 // generating the location string
@@ -171,20 +176,20 @@ public class Network {
             // overall results: Network statistics
             if (iAmActive) conCount++; else if (mySeedType.equals(yacySeed.PEERTYPE_JUNIOR)) potCount++;
             prop.put("table_active-count", conCount);
-            prop.put("table_active-links", groupDigits(accActLinks));
-            prop.put("table_active-words", groupDigits(accActWords));
+            prop.put("table_active-links", yFormatter.number(accActLinks));
+            prop.put("table_active-words", yFormatter.number(accActWords));
             prop.put("table_passive-count", disconCount);
-            prop.put("table_passive-links", groupDigits(accPassLinks));
-            prop.put("table_passive-words", groupDigits(accPassWords));
+            prop.put("table_passive-links", yFormatter.number(accPassLinks));
+            prop.put("table_passive-words", yFormatter.number(accPassWords));
             prop.put("table_potential-count", potCount);
-            prop.put("table_potential-links", groupDigits(accPotLinks));
-            prop.put("table_potential-words", groupDigits(accPotWords));
+            prop.put("table_potential-links", yFormatter.number(accPotLinks));
+            prop.put("table_potential-words", yFormatter.number(accPotWords));
             prop.put("table_all-count", (conCount + disconCount + potCount));
-            prop.put("table_all-links", groupDigits(accActLinks + accPassLinks + accPotLinks));
-            prop.put("table_all-words", groupDigits(accActWords + accPassWords + accPotWords));
+            prop.put("table_all-links", yFormatter.number(accActLinks + accPassLinks + accPotLinks));
+            prop.put("table_all-words", yFormatter.number(accActWords + accPassWords + accPotWords));
 
             prop.put("table_gppm", otherppm + ((iAmActive) ? myppm : 0));
-            prop.put("table_gqph", Double.toString(Math.round(6000d * otherqpm + 100d * ((iAmActive) ? myqph : 0d)) / 100d));
+            prop.put("table_gqph", yFormatter.number(Math.round(6000d * otherqpm + 100d * ((iAmActive) ? myqph : 0d)) / 100d));
 
 //          String comment = "";
             prop.put("table_comment", 0);
@@ -393,7 +398,7 @@ public class Network {
                                 prop.put(STR_TABLE_LIST + conCount + "_complete_CRWCnt", seed.get(yacySeed.CRWCNT, "0"));
                                 prop.put(STR_TABLE_LIST + conCount + "_complete_CRTCnt", seed.get(yacySeed.CRTCNT, "0"));
                                 prop.put(STR_TABLE_LIST + conCount + "_complete_seeds", seed.get(yacySeed.SCOUNT, "-"));
-                                prop.put(STR_TABLE_LIST + conCount + "_complete_connects", groupDigits(seed.get(yacySeed.CCOUNT, "0")));
+                                prop.put(STR_TABLE_LIST + conCount + "_complete_connects", yFormatter.number(seed.get(yacySeed.CCOUNT, "0")));
                                 prop.put(STR_TABLE_LIST + conCount + "_complete_userAgent", userAgent);
                             } else {
                                 prop.put(STR_TABLE_LIST + conCount + "_complete", 0);
@@ -452,15 +457,15 @@ public class Network {
                             prop.put(STR_TABLE_LIST + conCount + "_lastSeen", /*seed.getLastSeenString() + " " +*/ lastseen);
                             prop.put(STR_TABLE_LIST + conCount + "_utc", seed.get(yacySeed.UTC, "-"));
                             prop.put(STR_TABLE_LIST + conCount + "_uptime", serverDate.intervalToString(60000 * Long.parseLong(seed.get(yacySeed.UPTIME, "0"))));
-                            prop.put(STR_TABLE_LIST + conCount + "_LCount", groupDigits(seed.get(yacySeed.LCOUNT, "0")));
-                            prop.put(STR_TABLE_LIST + conCount + "_ICount", groupDigits(seed.get(yacySeed.ICOUNT, "0")));
-                            prop.put(STR_TABLE_LIST + conCount + "_RCount", groupDigits(seed.get(yacySeed.RCOUNT, "0")));
-                            prop.put(STR_TABLE_LIST + conCount + "_sI", groupDigits(seed.get(yacySeed.INDEX_OUT, "0")));
-                            prop.put(STR_TABLE_LIST + conCount + "_sU", groupDigits(seed.get(yacySeed.URL_OUT, "0")));
-                            prop.put(STR_TABLE_LIST + conCount + "_rI", groupDigits(seed.get(yacySeed.INDEX_IN, "0")));
-                            prop.put(STR_TABLE_LIST + conCount + "_rU", groupDigits(seed.get(yacySeed.URL_IN, "0")));
+                            prop.put(STR_TABLE_LIST + conCount + "_LCount", yFormatter.number(seed.get(yacySeed.LCOUNT, "0")));
+                            prop.put(STR_TABLE_LIST + conCount + "_ICount", yFormatter.number(seed.get(yacySeed.ICOUNT, "0")));
+                            prop.put(STR_TABLE_LIST + conCount + "_RCount", yFormatter.number(seed.get(yacySeed.RCOUNT, "0")));
+                            prop.put(STR_TABLE_LIST + conCount + "_sI", yFormatter.number(seed.get(yacySeed.INDEX_OUT, "0")));
+                            prop.put(STR_TABLE_LIST + conCount + "_sU", yFormatter.number(seed.get(yacySeed.URL_OUT, "0")));
+                            prop.put(STR_TABLE_LIST + conCount + "_rI", yFormatter.number(seed.get(yacySeed.INDEX_IN, "0")));
+                            prop.put(STR_TABLE_LIST + conCount + "_rU", yFormatter.number(seed.get(yacySeed.URL_IN, "0")));
                             prop.put(STR_TABLE_LIST + conCount + "_ppm", PPM);
-                            prop.put(STR_TABLE_LIST + conCount + "_qph", Double.toString(Math.round(6000d * QPM) / 100d));
+                            prop.put(STR_TABLE_LIST + conCount + "_qph", yFormatter.number(Math.round(6000d * QPM) / 100d));
                             conCount++;
                         } // seed != null
                     } // while
@@ -482,26 +487,13 @@ public class Network {
                 default: break;
             }
         }
+        
         prop.put("table_rt", System.currentTimeMillis() - start);
+        if (isXML) {
+            // restore locale for formatter
+            yFormatter.setLocale(sb.getConfig("locale.lang", "default"));
+        }
         // return rewrite properties
         return prop;
     }
-
-    private static String groupDigits(String sValue) {
-        long lValue;
-        try {
-            if (sValue.endsWith(".0")) { sValue = sValue.substring(0, sValue.length() - 2); } // for Connects per hour, why float ?
-            lValue = Long.parseLong(sValue);
-        } catch (Exception e) {lValue = 0;}
-        if (lValue == 0) { return "-"; }
-        return groupDigits(lValue);
-    }
-
-    private static String groupDigits(long Number) {
-        final String s = Long.toString(Number);
-        String t = "";
-        for (int i = 0; i < s.length(); i++) t = s.charAt(s.length() - i - 1) + (((i % 3) == 0) ? "." : "") + t;
-        return t.substring(0, t.length() - 1);
-    }
-
 }

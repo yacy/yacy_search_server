@@ -47,7 +47,6 @@
 // if the shell's current path is HTROOT
 
 import java.io.IOException;
-import java.text.DecimalFormat;
 import java.util.Date;
 
 import de.anomic.http.httpHeader;
@@ -61,6 +60,7 @@ import de.anomic.server.serverDate;
 import de.anomic.server.serverMemory;
 import de.anomic.server.serverObjects;
 import de.anomic.server.serverSwitch;
+import de.anomic.tools.yFormatter;
 import de.anomic.yacy.yacyCore;
 import de.anomic.yacy.yacySeed;
 import de.anomic.yacy.yacyURL;
@@ -217,14 +217,14 @@ public class Status {
             prop.put("peerStatistics", 1);
             prop.put("peerStatistics_uptime", serverDate.intervalToString(uptime));
             prop.put("peerStatistics_pagesperminute", yacyCore.seedDB.mySeed().get(yacySeed.ISPEED, "unknown"));
-            prop.put("peerStatistics_queriesperhour", Double.toString(Math.round(6000d * yacyCore.seedDB.mySeed().getQPM()) / 100d));
-            prop.put("peerStatistics_links", groupDigits(yacyCore.seedDB.mySeed().get(yacySeed.LCOUNT, "0")));
-            prop.put("peerStatistics_words", groupDigits(yacyCore.seedDB.mySeed().get(yacySeed.ICOUNT, "0")));
+            prop.put("peerStatistics_queriesperhour", yFormatter.number(Math.round(6000d * yacyCore.seedDB.mySeed().getQPM()) / 100d));
+            prop.put("peerStatistics_links", yFormatter.number(yacyCore.seedDB.mySeed().get(yacySeed.LCOUNT, "0")));
+            prop.put("peerStatistics_words", yFormatter.number(yacyCore.seedDB.mySeed().get(yacySeed.ICOUNT, "0")));
             prop.put("peerStatistics_juniorConnects", yacyCore.peerActions.juniorConnects);
             prop.put("peerStatistics_seniorConnects", yacyCore.peerActions.seniorConnects);
             prop.put("peerStatistics_principalConnects", yacyCore.peerActions.principalConnects);
             prop.put("peerStatistics_disconnects", yacyCore.peerActions.disconnects);
-            prop.put("peerStatistics_connects", yacyCore.seedDB.mySeed().get(yacySeed.CCOUNT, "0"));
+            prop.put("peerStatistics_connects", yFormatter.number(yacyCore.seedDB.mySeed().get(yacySeed.CCOUNT, "0")));
             if (yacyCore.seedDB.mySeed().getPublicAddress() == null) {
                 thisHash = yacyCore.seedDB.mySeed().hash;
                 prop.put("peerAddress", 0); // not assigned + instructions
@@ -285,7 +285,7 @@ public class Status {
         
         if (yacyCore.seedDB != null && yacyCore.seedDB.sizeConnected() > 0){
             prop.put("otherPeers", 1);
-            prop.put("otherPeers_num", yacyCore.seedDB.sizeConnected());
+            prop.put("otherPeers_num", yFormatter.number(yacyCore.seedDB.sizeConnected()));
         }else{
             prop.put("otherPeers", 0); // not online
         }
@@ -361,18 +361,17 @@ public class Status {
         try {
             final StringBuffer byteString = new StringBuffer();
 
-            final DecimalFormat df = new DecimalFormat( "0.00" );
             if (byteCount > 1073741824) {
-                byteString.append(df.format((double)byteCount / (double)1073741824 ))
+                byteString.append(yFormatter.number(byteCount / 1073741824.0 ))
                           .append(" GB");
             } else if (byteCount > 1048576) {
-                byteString.append(df.format((double)byteCount / (double)1048576))
+                byteString.append(yFormatter.number(byteCount / 1048576.0))
                           .append(" MB");
             } else if (byteCount > 1024) {
-                byteString.append(df.format((double)byteCount / (double)1024))
+                byteString.append(yFormatter.number(byteCount / 1024.0))
                           .append(" KB");
             } else {
-                byteString.append(Long.toString(byteCount))
+                byteString.append(yFormatter.number(byteCount))
                 .append(" Bytes");
             }
 
@@ -386,21 +385,4 @@ public class Status {
     
     //TODO: groupDigits-functions (Status.java & Network.java) should
     //      be referenced in a single class (now double-implemented)
-    private static String groupDigits(String sValue) {
-        long lValue;
-        try {
-            if (sValue.endsWith(".0")) { sValue = sValue.substring(0, sValue.length() - 2); } // for Connects per hour, why float ?
-            lValue = Long.parseLong(sValue);
-        } catch (Exception e) {lValue = 0;}
-        if (lValue == 0) { return "-"; }
-        return groupDigits(lValue);
-    }
-    
-    private static String groupDigits(long Number) {
-        final String s = Long.toString(Number);
-        String t = "";
-        for (int i = 0; i < s.length(); i++) t = s.charAt(s.length() - i - 1) + (((i % 3) == 0) ? "." : "") + t;
-        return t.substring(0, t.length() - 1);
-    }
-
 }

@@ -89,6 +89,7 @@ import de.anomic.server.serverSemaphore;
 import de.anomic.server.serverSystem;
 import de.anomic.server.logging.serverLog;
 import de.anomic.tools.enumerateFiles;
+import de.anomic.tools.yFormatter;
 import de.anomic.yacy.yacyClient;
 import de.anomic.yacy.yacySeedDB;
 import de.anomic.yacy.yacyURL;
@@ -383,7 +384,9 @@ public final class yacy {
                             }
                         } catch (IOException e) {}
                     }
-
+                    // initialize number formatter with this locale
+                    yFormatter.setLocale(lang);
+                    
                     // registering shutdown hook
                     serverLog.logConfig("STARTUP", "Registering Shutdown Hook");
                     final Runtime run = Runtime.getRuntime();
