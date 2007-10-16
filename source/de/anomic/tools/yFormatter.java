@@ -70,12 +70,9 @@ public final class yFormatter {
     public static void setLocale(String lang) {
         String l = (lang.equalsIgnoreCase("default") ? "en" : lang.toLowerCase());
         if (l.equals("none")) {
-            // TODO fix the following without breaking yacystats and similar.
-            // special format for backwards compatibility in .xml files
-            // #.###.## (dots for grouping + decimal separator)
             DecimalFormatSymbols dfs = new DecimalFormatSymbols(Locale.ENGLISH);
-            dfs.setGroupingSeparator('.');
-            numForm = new DecimalFormat("#,###.##", dfs);
+            dfs.setGroupingSeparator('.'); // not used
+            numForm = new DecimalFormat("####.##", dfs);
         } else {
             setLocale(new Locale(l));
             initDefaults();

@@ -175,16 +175,16 @@ public class Network {
 
             // overall results: Network statistics
             if (iAmActive) conCount++; else if (mySeedType.equals(yacySeed.PEERTYPE_JUNIOR)) potCount++;
-            prop.put("table_active-count", conCount);
+            prop.put("table_active-count", yFormatter.number(conCount));
             prop.put("table_active-links", yFormatter.number(accActLinks));
             prop.put("table_active-words", yFormatter.number(accActWords));
-            prop.put("table_passive-count", disconCount);
+            prop.put("table_passive-count", yFormatter.number(disconCount));
             prop.put("table_passive-links", yFormatter.number(accPassLinks));
             prop.put("table_passive-words", yFormatter.number(accPassWords));
-            prop.put("table_potential-count", potCount);
+            prop.put("table_potential-count", yFormatter.number(potCount));
             prop.put("table_potential-links", yFormatter.number(accPotLinks));
             prop.put("table_potential-words", yFormatter.number(accPotWords));
-            prop.put("table_all-count", (conCount + disconCount + potCount));
+            prop.put("table_all-count", yFormatter.number(conCount + disconCount + potCount));
             prop.put("table_all-links", yFormatter.number(accActLinks + accPassLinks + accPotLinks));
             prop.put("table_all-words", yFormatter.number(accActWords + accPassWords + accPotWords));
 

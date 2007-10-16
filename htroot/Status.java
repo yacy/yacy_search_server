@@ -341,16 +341,16 @@ public class Status {
         prop.put("loaderQueueMax", Integer.toString(loaderMaxCount));        
         prop.put("loaderQueuePercent", (loaderPercent>100)?"100":Integer.toString(loaderPercent));
         
-        prop.put("localCrawlQueueSize", Integer.toString(sb.getThread(plasmaSwitchboard.CRAWLJOB_LOCAL_CRAWL).getJobCount()));
+        prop.put("localCrawlQueueSize", yFormatter.number(sb.getThread(plasmaSwitchboard.CRAWLJOB_LOCAL_CRAWL).getJobCount()));
         prop.put("localCrawlPaused",sb.crawlJobIsPaused(plasmaSwitchboard.CRAWLJOB_LOCAL_CRAWL)?1:0);
 
-        prop.put("remoteTriggeredCrawlQueueSize", Integer.toString(sb.getThread(plasmaSwitchboard.CRAWLJOB_REMOTE_TRIGGERED_CRAWL).getJobCount()));
+        prop.put("remoteTriggeredCrawlQueueSize", yFormatter.number(sb.getThread(plasmaSwitchboard.CRAWLJOB_REMOTE_TRIGGERED_CRAWL).getJobCount()));
         prop.put("remoteTriggeredCrawlPaused",sb.crawlJobIsPaused(plasmaSwitchboard.CRAWLJOB_REMOTE_TRIGGERED_CRAWL)?1:0);        
 
-        prop.put("globalCrawlTriggerQueueSize", Integer.toString(sb.getThread(plasmaSwitchboard.CRAWLJOB_GLOBAL_CRAWL_TRIGGER).getJobCount()));
+        prop.put("globalCrawlTriggerQueueSize", yFormatter.number(sb.getThread(plasmaSwitchboard.CRAWLJOB_GLOBAL_CRAWL_TRIGGER).getJobCount()));
         prop.put("globalCrawlTriggerPaused",sb.crawlJobIsPaused(plasmaSwitchboard.CRAWLJOB_GLOBAL_CRAWL_TRIGGER)?1:0);                
         
-        prop.put("stackCrawlQueueSize", Integer.toString(sb.sbStackCrawlThread.size()));       
+        prop.put("stackCrawlQueueSize", yFormatter.number(sb.sbStackCrawlThread.size()));       
 
         // return rewrite properties
         prop.put("date",(new Date()).toString());
