@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <classpath>
 	<classpathentry kind="src" path="source"/>
-	<classpathentry excluding="htdocsdefault/|locale/|proxymsg/|yacy/|env/|env/" kind="src" output="htroot" path="htroot"/>
+	<classpathentry excluding="env/|htdocsdefault/|proxymsg/|yacy/|env/" kind="src" output="htroot" path="htroot"/>
 	<classpathentry kind="src" path="htroot/htdocsdefault"/>
 	<classpathentry kind="src" path="htroot/yacy"/>
 	<classpathentry kind="src" path="htroot/env"/>
@@ -23,7 +23,6 @@
 	<classpathentry kind="lib" path="libx/jsch-0.1.21.jar"/>
 	<classpathentry kind="lib" path="libx/log4j-1.2.9.jar"/>
 	<classpathentry kind="lib" path="libx/odf_utils_05_11_29.jar"/>
-	<classpathentry kind="lib" path="libx/PDFBox-0.7.2.jar"/>
 	<classpathentry kind="lib" path="libx/saaj.jar"/>
 	<classpathentry kind="lib" path="libx/sbbi-upnplib-1.0.3.jar"/>
 	<classpathentry kind="lib" path="libx/tm-extractors-0.4.jar"/>
@@ -37,5 +36,7 @@
 	<classpathentry kind="lib" path="libx/webcat-0.1-swf.jar"/>
 	<classpathentry kind="lib" path="libx/J7Zip-modified.jar"/>
 	<classpathentry kind="lib" path="libx/commons-logging.jar"/>
+	<classpathentry kind="lib" path="libx/PDFBox-0.7.3.jar"/>
+	<classpathentry kind="lib" path="libx/FontBox-0.1.0-dev.jar"/>
 	<classpathentry kind="output" path="gen"/>
 </classpath>

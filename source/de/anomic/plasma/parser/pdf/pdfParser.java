@@ -78,7 +78,7 @@ public class pdfParser extends AbstractParser implements Parser {
      * @see Parser#getLibxDependences()
      */
     private static final String[] LIBX_DEPENDENCIES = new String[] {
-        "PDFBox-0.7.3.jar"
+        "PDFBox-0.7.3.jar", "FontBox-0.1.0-dev.jar"
     };        
     
     public pdfParser() {        

@@ -1,57 +1,49 @@
 <?xml version="1.0"?>
 <project name="YACY - pdfParser" default="dist">
-    <description>
+	<description>
             A class to parse pdf documents (application/pdf)
     </description>
 
-    <property name="parserShortName" value="pdf"/>
-	<property name="parserVersion" value="0.1"/>
+	<property name="parserShortName" value="pdf" />
+	<property name="parserVersion" value="0.1" />
 
-    <property name="parserLongName" value="yacyContentParser_${parserShortName}"/>    	
-   	<property name="parserArchive" location="${release}/${parserLongName}_${parserVersion}.tgz"/>	    	
-    	
-    <target name="compile">
-  	  <javac srcdir="${src}/de/anomic/plasma/parser/${parserShortName}" destdir="${build}" source="${javacSource}" target="${javacTarget}" debug="true" debuglevel="lines,vars,source">
-  	  	<classpath>
-  	  	  <pathelement location="${build}" />	
-  	  	
-		  <!-- main lib needed to parse pdf files -->  	  	
-  		  <pathelement location="${libx}/PDFBox-0.7.3.jar" />        	
-  	  	</classpath>
-  	  </javac>    	
-    </target>
-	
+	<property name="parserLongName" value="yacyContentParser_${parserShortName}" />
+	<property name="parserArchive" location="${release}/${parserLongName}_${parserVersion}.tgz" />
 
-    <target name="zip" depends="compile">
-  	  <tar destfile="${parserArchive}" compression="gzip">
-  	  	<tarfileset dir="${libx}" 
-  	  				includes="PDFBox-0.7.3.*" 
-  	  				prefix="${releaseFileParentDir}/libx/"
-			  	  	dirmode="755" mode="644"/>
-  	  	<tarfileset dir="${src}/de/anomic/plasma/parser/${parserShortName}" 
-  	  				prefix="${releaseFileParentDir}/source/de/anomic/plasma/parser/${parserShortName}"
-			  	  	dirmode="755" mode="644"/>
-  	  	<tarfileset dir="${build}/de/anomic/plasma/parser/${parserShortName}" 
-  	  				prefix="${releaseFileParentDir}/classes/de/anomic/plasma/parser/${parserShortName}"
-			  	  	dirmode="755" mode="644"/>	  	
-  	  </tar>    	
-    </target>	
+	<target name="compile">
+		<javac srcdir="${src}/de/anomic/plasma/parser/${parserShortName}" destdir="${build}" source="${javacSource}" target="${javacTarget}" debug="true" debuglevel="lines,vars,source">
+			<classpath>
+				<pathelement location="${build}" />
+				<!-- main lib needed to parse pdf files -->
+				<pathelement location="${libx}/PDFBox-0.7.3.jar" />
+				<!-- additional fontparsing lib, part of PDFBox -->
+				<pathelement location="${libx}/FontBox-0.1.0-dev.jar" />
+			</classpath>
+		</javac>
+	</target>
 
-    <target name="copy" depends="compile">
-        <copy todir="${release}/libx/">
-             <fileset dir="${libx}" includes="PDFBox-0.7.3.*"/> 
-        </copy>
-        <copy todir="${release}/source/de/anomic/plasma/parser/${parserShortName}">
-             <fileset dir="${src}/de/anomic/plasma/parser/${parserShortName}" includes="**/*"/> 
-        </copy>        
-        <copy todir="${release}/classes/de/anomic/plasma/parser/${parserShortName}">
-             <fileset dir="${build}/de/anomic/plasma/parser/${parserShortName}" includes="**/*"/> 
-        </copy>         
-    </target>  
- 
-    
-    <target name="dist" depends="compile,zip" description="Compile and zip the parser"/>        
-	
-	
+	<target name="zip" depends="compile">
+		<tar destfile="${parserArchive}" compression="gzip">
+			<tarfileset dir="${libx}" includes="PDFBox-0.7.3.*" prefix="${releaseFileParentDir}/libx/" dirmode="755" mode="644" />
+			<tarfileset dir="${libx}" includes="FontBox*" prefix="${releaseFileParentDir}/libx/" dirmode="755" mode="644" />
+			<tarfileset dir="${src}/de/anomic/plasma/parser/${parserShortName}" prefix="${releaseFileParentDir}/source/de/anomic/plasma/parser/${parserShortName}" dirmode="755" mode="644" />
+			<tarfileset dir="${build}/de/anomic/plasma/parser/${parserShortName}" prefix="${releaseFileParentDir}/classes/de/anomic/plasma/parser/${parserShortName}" dirmode="755" mode="644" />
+		</tar>
+	</target>
+
+	<target name="copy" depends="compile">
+		<copy todir="${release}/libx/">
+			<fileset dir="${libx}" includes="PDFBox-0.7.3.*,FontBox*" />
+		</copy>
+		<copy todir="${release}/source/de/anomic/plasma/parser/${parserShortName}">
+			<fileset dir="${src}/de/anomic/plasma/parser/${parserShortName}" includes="**/*" />
+		</copy>
+		<copy todir="${release}/classes/de/anomic/plasma/parser/${parserShortName}">
+			<fileset dir="${build}/de/anomic/plasma/parser/${parserShortName}" includes="**/*" />
+		</copy>
+	</target>
+
+
+	<target name="dist" depends="compile,zip" description="Compile and zip the parser" />
 </project>
 
