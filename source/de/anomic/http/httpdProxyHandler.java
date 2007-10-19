@@ -793,9 +793,9 @@ public final class httpdProxyHandler {
                 if (charSet == null) charSet = httpHeader.DEFAULT_CHARSET;
                 
                 // make a transformer
-                if ((!(transformer.isIdentityTransformer())) &&
-                        ((ext == null) || (!(plasmaParser.supportedRealtimeFileExtContains(url)))) &&
-                        ((cachedResponseHeader == null) || (plasmaParser.realtimeParsableMimeTypesContains(cachedResponseHeader.mime())))) {
+                if (( !transformer.isIdentityTransformer()) &&
+                        (ext == null || !plasmaParser.supportedRealtimeFileExtContains(url)) &&
+                        (plasmaParser.realtimeParsableMimeTypesContains(cachedResponseHeader.mime()))) {
                     hfos = new htmlFilterWriter((chunkedOut != null) ? chunkedOut : respond, charSet, null, transformer, (ext.length() == 0));
                 } else {
                     hfos = (gzippedOut != null) ? gzippedOut : ((chunkedOut != null)? chunkedOut : respond);

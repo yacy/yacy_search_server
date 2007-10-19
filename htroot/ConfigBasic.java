@@ -145,7 +145,7 @@ public class ConfigBasic {
         // port settings
         String port = env.getConfig("port", "8080"); //this allows a low port, but it will only get one, if the user edits the config himself.
 		if(post!=null && Integer.parseInt((String)post.get("port"))>1023){
-			port = (String)post.get("port", "8080");
+			port = post.get("port", "8080");
 		}
         
         // admin password

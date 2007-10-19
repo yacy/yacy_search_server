@@ -97,10 +97,10 @@ public class IndexControl_p {
         }
         
         // default values
-        String keystring = ((String) post.get("keystring", "")).trim();
-        String keyhash = ((String) post.get("keyhash", "")).trim();
-        String urlstring = ((String) post.get("urlstring", "")).trim();
-        String urlhash = ((String) post.get("urlhash", "")).trim();
+        String keystring = post.get("keystring", "").trim();
+        String keyhash = post.get("keyhash", "").trim();
+        String urlstring = post.get("urlstring", "").trim();
+        String urlhash = post.get("urlhash", "").trim();
 
         if (!urlstring.startsWith("http://") &&
             !urlstring.startsWith("https://")) { urlstring = "http://" + urlstring; }

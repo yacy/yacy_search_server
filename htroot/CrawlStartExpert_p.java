@@ -60,7 +60,7 @@ public class CrawlStartExpert_p {
             prop.put("crawlingIfOlderNumber", Math.round((float)crawlingIfOlder / (float)(60*24)));
             prop.put("crawlingIfOlderUnitDayCheck", 1);
         } else if (crawlingIfOlder >= 60) {
-            prop.put("crawlingIfOlderNumber", Math.round((float)crawlingIfOlder / 60f));
+            prop.put("crawlingIfOlderNumber", Math.round(crawlingIfOlder / 60f));
             prop.put("crawlingIfOlderUnitHourCheck", 1);
         } else {
             prop.put("crawlingIfOlderNumber", crawlingIfOlder);

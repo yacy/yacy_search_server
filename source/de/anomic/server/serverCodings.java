@@ -72,8 +72,8 @@ public final class serverCodings {
         if (in == null) return "";
         StringBuffer result = new StringBuffer(in.length * 8 / 3);
         for (int i = 0; i < in.length; i++) {
-            if ((0Xff & (int) in[i]) < 8) result.append('0');
-            result.append(Integer.toOctalString(0Xff & (int) in[i]));
+            if ((0Xff & in[i]) < 8) result.append('0');
+            result.append(Integer.toOctalString(0Xff & in[i]));
         }
         return new String(result);
     }
@@ -82,8 +82,8 @@ public final class serverCodings {
         if (in == null) return "";
         StringBuffer result = new StringBuffer(in.length * 2);
         for (int i = 0; i < in.length; i++) {
-            if ((0Xff & (int) in[i]) < 16) result.append('0');
-            result.append(Integer.toHexString(0Xff & (int) in[i]));
+            if ((0Xff & in[i]) < 16) result.append('0');
+            result.append(Integer.toHexString(0Xff & in[i]));
         }
         return new String(result);
     }

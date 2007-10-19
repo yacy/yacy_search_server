@@ -63,21 +63,21 @@ public class ymageCaptcha extends ymageMatrix {
         int x;
         int y;
         int ub = 0;
-        int widthPerChar = (int)(width/chars);
+        int widthPerChar = width/chars;
         int pixels = width * height;
 
 
         //printing code
         for(int i=0;i<chars;i++){
-            y = random.nextInt((int)(height/2)) + (int)(height/4);
+            y = random.nextInt(height/2) + (height/4);
             setColor(((random.nextInt(128)+64)<<16) + ((random.nextInt(128)+64)<<8) + random.nextInt(128)+64);
-            ymageToolPrint.print(this, widthPerChar*i+random.nextInt((int)(widthPerChar/2)) , y , 0, code.substring(i,i+1), -1);
+            ymageToolPrint.print(this, widthPerChar*i+random.nextInt(widthPerChar/2) , y , 0, code.substring(i,i+1), -1);
         }
 
         //adding some noise
 
         //random pixels
-        ub = (int)(pixels/100);
+        ub = pixels/100;
         for(int i=0;i<ub;i++){
             setColor(((random.nextInt(128)+64)<<16) + ((random.nextInt(128)+64)<<8) + random.nextInt(128)+64);
             x = random.nextInt(width);
@@ -86,7 +86,7 @@ public class ymageCaptcha extends ymageMatrix {
         }
 
         //random lines
-        ub = (int)(pixels/1000);
+        ub = pixels/1000;
         for(int i=0;i<ub;i++){
             setColor(((random.nextInt(128)+64)<<16) + ((random.nextInt(128)+64)<<8) + random.nextInt(128)+64);
             x = random.nextInt(width);

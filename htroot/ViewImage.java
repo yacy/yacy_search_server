@@ -155,8 +155,8 @@ public class ViewImage {
                 double scale = Math.min(hs, vs);
                 if (!auth) scale = Math.min(scale, 0.6); // this is for copyright purpose
                 if (scale < 1.0) {
-                    width = (int) (((double) w) * scale);
-                    height = (int) (((double) h) * scale);
+                    width = (int) (w * scale);
+                    height = (int) (h * scale);
                 } else {
                     width = w;
                     height = h;

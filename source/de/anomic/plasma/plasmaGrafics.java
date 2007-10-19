@@ -96,8 +96,8 @@ public class plasmaGrafics {
             this.color = color;
         }
         
-        public int getAngle() { return (int)Math.round(360f*this.fraction); }
-        public int getFractionPercent() { return (int)Math.round(100f*this.fraction); }
+        public int getAngle() { return Math.round(360f*this.fraction); }
+        public int getFractionPercent() { return Math.round(100f*this.fraction); }
         public Color getColor() { return this.color; }
         public long getExecTime() { return this.execTime; }
         public String getPieceName() { return this.pieceName; }
@@ -133,7 +133,7 @@ public class plasmaGrafics {
 
         // get a copy of a recent network picture
         ymageMatrix eventPicture = getNetworkPicture(120000, plasmaSwitchboard.getSwitchboard().getConfig("network.unit.name", "unspecified"), plasmaSwitchboard.getSwitchboard().getConfig("network.unit.description", "unspecified"), COL_BACKGROUND);
-        if (eventPicture instanceof ymageMatrix) eventPicture = (ymageMatrix) eventPicture; //new ymageMatrix((ymageMatrix) eventPicture);
+        //if (eventPicture instanceof ymageMatrix) eventPicture = (ymageMatrix) eventPicture; //new ymageMatrix((ymageMatrix) eventPicture);
         // TODO: fix cloning of ymageMatrix pictures
         
         // get dimensions

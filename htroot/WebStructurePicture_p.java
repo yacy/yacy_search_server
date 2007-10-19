@@ -43,7 +43,7 @@ import de.anomic.ymage.ymageToolPrint;
 
 public class WebStructurePicture_p {
     
-    private static final double maxlongd = (double) Long.MAX_VALUE;
+    private static final double maxlongd = Long.MAX_VALUE;
     
     public static ymageMatrix respond(httpHeader header, serverObjects post, serverSwitch env) {
         plasmaSwitchboard sb = (plasmaSwitchboard) env;
@@ -125,7 +125,7 @@ public class WebStructurePicture_p {
         }
         if (nextlayer == maxlayer) return mynodes;
         nextlayer++;
-        double radius = 1.0 / ((double) (1 << nextlayer));
+        double radius = 1.0 / (1 << nextlayer);
         Map next = structure.references(centerhash);
         Map.Entry entry;
         String targethash, targethost;
@@ -147,7 +147,7 @@ public class WebStructurePicture_p {
             targets.add(new String[] {targethash, targethost});
             if (graph.getPoint(targethost) != null) continue;
             // set a new point. It is placed on a circle around the host point
-            double angle = ((double) kelondroBase64Order.enhancedCoder.cardinal((targethash + "____").getBytes())) / maxlongd * 2 * Math.PI;
+            double angle = kelondroBase64Order.enhancedCoder.cardinal((targethash + "____").getBytes()) / maxlongd * 2 * Math.PI;
             //System.out.println("ANGLE = " + angle);
             rr = radius * 0.25 * (1 - targetrefs / maxtargetrefs);
             re = radius * 0.5 * (thisrefs / maxthisrefs);

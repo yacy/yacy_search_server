@@ -229,7 +229,7 @@ public class Network {
                     peer = yacyCore.seedDB.getConnected(peer.hash);
                     if (peer == null) {
                         prop.put("table_comment",1);
-                        prop.put("table_comment_status","publish: disconnected peer '" + peer.getName() + "/" + post.get("peerHash") + "' from " + peer.getPublicAddress());                     
+                        prop.put("table_comment_status","publish: disconnected peer 'UNKNOWN/" + post.get("peerHash") + "' from UNKNOWN");
                     } else {
                         prop.put("table_comment",2);
                         prop.put("table_comment_status","publish: handshaked " + peer.get(yacySeed.PEERTYPE, yacySeed.PEERTYPE_SENIOR) + " peer '" + peer.getName() + "' at " + peer.getPublicAddress());

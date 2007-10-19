@@ -225,8 +225,8 @@ public final class serverLog {
         if (b.length == 0) return "[]";
         length = Math.min(length, b.length - start);
         StringBuffer sb = new StringBuffer(b.length * 4);
-        sb.append('[').append(Integer.toString((int) b[start])).append(',');
-        for (int i = 1; i < length; i++) sb.append(' ').append(Integer.toString((int) b[start + i])).append(',');
+        sb.append('[').append(Integer.toString(b[start])).append(',');
+        for (int i = 1; i < length; i++) sb.append(' ').append(Integer.toString(b[start + i])).append(',');
         sb.append(']');
         return sb.toString();
     }
@@ -240,7 +240,7 @@ public final class serverLog {
                 sb.append('\n').append("# ").append(Integer.toHexString(i)).append(": ");
             else
                 sb.append(',');
-            sb.append(' ').append(Integer.toString(0xff & (int) b[i]));
+            sb.append(' ').append(Integer.toString(0xff & b[i]));
             if (i >= 65535) break;
         }
         sb.append('\n');

@@ -76,20 +76,20 @@ public class ymageBMPParser {
 
     public static final int DWORD(byte[] b, int offset) {
         if (offset + 3 >= b.length) return 0;
-        int ret = ((int) b[offset + 3] & 0xff);
-        ret = (ret << 8) | ((int) b[offset + 2] & 0xff);
-        ret = (ret << 8) | ((int) b[offset + 1] & 0xff);
-        ret = (ret << 8) | ((int) b[offset] & 0xff);
+        int ret = (b[offset + 3] & 0xff);
+        ret = (ret << 8) | (b[offset + 2] & 0xff);
+        ret = (ret << 8) | (b[offset + 1] & 0xff);
+        ret = (ret << 8) | (b[offset] & 0xff);
         return ret;
     }
 
     public static final int WORD(byte[] b, int offset) {
-        int ret = (((int) b[offset + 1] & 0xff) << 8) | ((int) b[offset] & 0xff);
+        int ret = ((b[offset + 1] & 0xff) << 8) | (b[offset] & 0xff);
         return ret;
     }
     
     public static final int BYTE(byte[] b, int offset) {
-        int ret = ((int) b[offset] & 0xff);
+        int ret = (b[offset] & 0xff);
         return ret;
     }
     
@@ -172,7 +172,7 @@ public class ymageBMPParser {
             int b;
             for (int rows = 0; rows < height; rows++) {
                 for (int columns = 0; columns < width; columns = columns + 8) {
-                    b = ((int) s[offset + n] & 0xff);
+                    b = (s[offset + n] & 0xff);
                     n++;
                     image.setRGB(columns,     (height - rows - 1), colortable.colorindex[(b & 0x80) >> 7]);
                     image.setRGB(columns + 1, (height - rows - 1), colortable.colorindex[(b & 0x40) >> 6]);
@@ -192,7 +192,7 @@ public class ymageBMPParser {
             int b;
             for (int rows = 0; rows < height; rows++) {
                 for (int columns = 0; columns < width; columns = columns + 2) {
-                    b = ((int) s[offset + n] & 0xff);
+                    b = (s[offset + n] & 0xff);
                     n++;
                     image.setRGB(columns,     (height - rows - 1), colortable.colorindex[(b & 0xf0) >> 4]);
                     image.setRGB(columns + 1, (height - rows - 1), colortable.colorindex[b & 0xf]);
@@ -205,7 +205,7 @@ public class ymageBMPParser {
             int n = 0;
             for (int rows = 0; rows < height; rows++) {
                 for (int columns = 0; columns < width; columns++) {
-                    image.setRGB(columns, (height - rows - 1), colortable.colorindex[((int) s[offset + n] & 0xff)]);
+                    image.setRGB(columns, (height - rows - 1), colortable.colorindex[(s[offset + n] & 0xff)]);
                     n++;
                 }
                 n += fill4(n);

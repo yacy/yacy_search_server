@@ -54,29 +54,35 @@ import java.util.Locale;
  * to the locale set for YaCy.
  */
 public final class yFormatter {
+    // default formatter
     private static NumberFormat numForm = NumberFormat.getInstance(new Locale("en"));
+    
+    // generic formatter that can be used when no localized formatting is allowed
+    private static final NumberFormat cleanNumForm = 
+        new DecimalFormat("####.##", new DecimalFormatSymbols(Locale.ENGLISH));
+
     static {
+        // just initialize defaults on class load
         initDefaults();
     }
 
 
     /**
-     * @param locale the locale to set
+     * @param locale the {@link Locale} to set or <code>null</code> to set the special
+     * empty locale to create unformatted numbers
      */
     public static void setLocale(Locale locale) {
-        numForm = NumberFormat.getInstance(locale);
+        numForm = (locale == null ? cleanNumForm : NumberFormat.getInstance(locale));
+        initDefaults();
     }
-    
+
+    /**
+     * @param lang an ISO 639 language code which is used to generate a {@link Locale}
+     */
     public static void setLocale(String lang) {
         String l = (lang.equalsIgnoreCase("default") ? "en" : lang.toLowerCase());
-        if (l.equals("none")) {
-            DecimalFormatSymbols dfs = new DecimalFormatSymbols(Locale.ENGLISH);
-            dfs.setGroupingSeparator('.'); // not used
-            numForm = new DecimalFormat("####.##", dfs);
-        } else {
-            setLocale(new Locale(l));
-            initDefaults();
-        }
+        
+        setLocale(l.equals("none") ? null : new Locale(l));
     }
 
     private static void initDefaults() {
@@ -85,10 +91,16 @@ public final class yFormatter {
         numForm.setMaximumFractionDigits(2);    // 2 decimal digits for float/double
     }
 
+    public static String number(double d, boolean localized) {
+        return (localized ? number(d) : cleanNumForm.format(d));
+    }
     public static String number(double d) {
         return numForm.format(d);
     }
 
+    public static String number(long l, boolean localized) {
+        return (localized ? number(l) : cleanNumForm.format(l));
+    }
     public static String number(long l) {
         return numForm.format(l);
     }

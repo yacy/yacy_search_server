@@ -682,8 +682,8 @@ public class plasmaSnippetCache {
         ArrayList result = new ArrayList();
         while (i.hasNext()) {
             ientry = (htmlFilterImageEntry) i.next();
-            url = (String) ientry.url().toNormalform(true, true);
-            desc = (String) ientry.alt();
+            url = ientry.url().toNormalform(true, true);
+            desc = ientry.alt();
             s = removeAppearanceHashes(url, queryhashes);
             if (s.size() == 0) {
                 result.add(new MediaSnippet(plasmaSearchQuery.CONTENTDOM_IMAGE, url, desc, ientry.width() + " x " + ientry.height()));

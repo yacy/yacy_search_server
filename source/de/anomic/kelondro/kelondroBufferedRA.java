@@ -76,7 +76,7 @@ public class kelondroBufferedRA extends kelondroAbstractRA implements kelondroRA
     }
 
     public int read() throws IOException {
-        return (int) 0xff & sbb.byteAt((int) pos++);
+        return 0xff & sbb.byteAt((int) pos++);
     }
 
     public int read(byte[] b, int off, int len) throws IOException {

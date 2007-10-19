@@ -123,7 +123,7 @@ public class PerformanceMemory_p {
         long mem, totalmem = 0;
         while (i.hasNext()) {
             filename = (String) i.next();
-            map = (Map) kelondroFlexTable.memoryStats(filename);
+            map = kelondroFlexTable.memoryStats(filename);
             mem = Long.parseLong((String) map.get("tableIndexMem"));
             totalmem += mem;
             prop.put("TableList_" + c + "_tableIndexPath", ((p = filename.indexOf("DATA")) < 0) ? filename : filename.substring(p));
@@ -141,7 +141,7 @@ public class PerformanceMemory_p {
         totalmem = 0;
         while (i.hasNext()) {
             filename = (String) i.next();
-            map = (Map) kelondroCachedRecords.memoryStats(filename);
+            map = kelondroCachedRecords.memoryStats(filename);
             mem = Long.parseLong((String) map.get("nodeCacheMem"));
             totalmem += mem;
             prop.put("NodeList_" + c + "_nodeCachePath", ((p = filename.indexOf("DATA")) < 0) ? filename : filename.substring(p));
@@ -167,7 +167,7 @@ public class PerformanceMemory_p {
         long hitmem, missmem, totalhitmem = 0, totalmissmem = 0;
         while (i.hasNext()) {
             filename = (String) i.next();
-            map = (Map) kelondroCache.memoryStats(filename);
+            map = kelondroCache.memoryStats(filename);
             prop.put("ObjectList_" + c + "_objectCachePath", ((p = filename.indexOf("DATA")) < 0) ? filename : filename.substring(p));
             
             // hit cache

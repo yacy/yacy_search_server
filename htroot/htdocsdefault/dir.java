@@ -377,7 +377,7 @@ public class dir {
                 new Date(), // freshtime
                 "AAAAAAAAAAAA", // referrer
                 md5, // md5
-                (long) phrase.length(), // size
+                phrase.length(), // size
                 condenser.RESULT_NUMB_WORDS, // word count
                 plasmaHTCache.DT_SHARE, // doctype
                 new kelondroBitfield(4),

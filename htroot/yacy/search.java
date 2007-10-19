@@ -226,7 +226,7 @@ public final class search {
                     //yacyCore.log.logFine("DEBUG HASH SEARCH: " + indexabstract);
                 }
             }
-            if (partitions > 0) sb.requestedQueries = sb.requestedQueries + 1d / (double) partitions; // increase query counter
+            if (partitions > 0) sb.requestedQueries = sb.requestedQueries + 1d / partitions; // increase query counter
             
             // prepare reference hints
             localProcess.startTimer();

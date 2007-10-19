@@ -349,8 +349,8 @@ public class ViewFile {
                     prop.put("viewMode_links_" + i + "_dark", ((dark) ? 1 : 0));
                     prop.put("viewMode_links_" + i + "_type", "image");
                     prop.putASIS("viewMode_links_" + i + "_text", markup(wordArray, entry.alt()));
-                    prop.put("viewMode_links_" + i + "_url", (String) entry.url().toNormalform(false, true));
-                    prop.putASIS("viewMode_links_" + i + "_link", markup(wordArray, (String) entry.url().toNormalform(false, true)));
+                    prop.put("viewMode_links_" + i + "_url", entry.url().toNormalform(false, true));
+                    prop.putASIS("viewMode_links_" + i + "_link", markup(wordArray, entry.url().toNormalform(false, true)));
                     if (entry.width() > 0 && entry.height() > 0)
                         prop.putASIS("viewMode_links_" + i + "_attr", entry.width() + "x" + entry.height() + " Pixel");
                     else

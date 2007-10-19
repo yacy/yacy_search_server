@@ -149,7 +149,7 @@ public class htmlFilterContentScraper extends htmlFilterAbstractScraper implemen
             if ((b.length() != 0) && (!(punctuation(b.charAt(b.length() - 1))))) b.append((int) '.');
             //System.out.println("*** Appended dot: " + b.toString());
         }
-        if (b.length() != 0) content.append(b).append((int) 32);
+        if (b.length() != 0) content.append(b).append(32);
     }
 
     public static final String splitrex = " |/|\\(|\\)|-|\\:|_|\\.|,|\\?|!|'|" + '"';

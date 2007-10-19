@@ -130,7 +130,7 @@ public class ConfigUpdate_p {
         TreeSet downloadedreleases = new TreeSet();
         for (int j = 0; j < downloaded.length; j++) {
             try {
-                release = (yacyVersion) new yacyVersion(downloaded[j]);
+                release = new yacyVersion(downloaded[j]);
                 downloadedreleases.add(release);
             } catch (RuntimeException e) {
                 // not a valid release

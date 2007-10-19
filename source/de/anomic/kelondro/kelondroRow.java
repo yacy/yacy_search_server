@@ -538,7 +538,7 @@ public class kelondroRow {
                     bb.append((new kelondroBitfield(getColBytes(i))).exportB64());
                 } else if ((decimalCardinal) && (row[i].celltype() == kelondroColumn.celltype_binary)) {
                     assert row[i].cellwidth() == 1;
-                    bb.append(Integer.toString((int) (0xff & getColByte(i))));
+                    bb.append(Integer.toString((0xff & getColByte(i))));
                 } else {
                     bb.append(rowinstance, offset + colstart[i], row[i].cellwidth());
                 }

@@ -69,6 +69,7 @@ import java.util.Map;
 
 import de.anomic.data.htmlTools;
 import de.anomic.plasma.plasmaSwitchboard;
+import de.anomic.tools.yFormatter;
 
 public class serverObjects extends Hashtable implements Cloneable {
 
@@ -99,49 +100,106 @@ public class serverObjects extends Hashtable implements Cloneable {
         }
     }
 
-    // byte[] variant
+    /**
+     * Add byte array to the map, value is kept as it is.
+     * @param key   key name as String.
+     * @param value mapped value as a byte array.
+     * @return      the added value.
+     */
     public byte[] put(String key, byte[] value) {
         return (byte[]) this.put((Object) key, (Object) value); //TODO: use wikiCode.replaceXMLEntities?!
     }
 
-    // string variant
+    
+    /**
+     * Add a String to the map. The content of the String is escaped to be usable in HTML output.
+     * @param key   key name as String.
+     * @param value a String that will be reencoded for HTML output.
+     * @return      the modified String that was added to the map.
+     * @see htmlTools#encodeUnicode2html(String, boolean)
+     */
     public String put(String key, String value) {
         return (String) put((Object) key, (Object) htmlTools.encodeUnicode2html(value, true));
     }
+
+    /**
+     * Add an unformatted String representation of a double/float value
+     * to the map.
+     * @param key   key name as String.
+     * @param value value as double/float.
+     * @return value as it was added to the map or <code>NaN</code> if an error occured.
+     */
+    public double put(String key, double value) {
+        String ret = this.put(key, Double.toString(value));
+        if (ret == null) {
+            return Double.NaN;
+        } else try {
+            return Double.parseDouble(ret);
+        } catch (NumberFormatException e) {
+            return Double.NaN;
+        }
+    }
+
+    /**
+     * same as {@link #put(String, double)} but for integer types
+     * @return Returns 0 for the error case.
+     */
+    public long put(String key, long value) {
+        String result = this.put(key, Long.toString(value));
+        if (result == null) {
+            return 0;
+        } else try {
+            return Long.parseLong(result);
+        } catch (NumberFormatException e) {
+            return 0;
+        }
+    }
+
+    /**
+     * Add a byte/long/integer to the map. The number will be encoded into a String using
+     * a localized format specified by {@link yFormatter}.
+     * @param key   key name as String.
+     * @param value integer type value to be added to the map in its formatted String 
+     *              representation.
+     * @return the String value added to the map.
+     */
+    public String putNum(String key, long value) {
+        return (String) this.put((Object) key, (Object) yFormatter.number(value));
+    }
+    /**
+     * Variant for double/float types.
+     * @see #putNum(String, long)
+     */
+    public String putNum(String key, double value) {
+        return (String) this.put((Object) key, (Object) yFormatter.number(value));
+    }
+
+    // ASIS methods don't reencode the values before adding them to the map
     public byte[] putASIS(String key, byte[] value) {
         return (byte[]) this.put((Object) key, (Object) value);
     }
-    public String putASIS(Object key, String value) {
-        return (String) this.put(key, (Object) value);
+    public String putASIS(String key, String value) {
+        return (String) this.put((Object) key, (Object) value);
     }
-    public String putWiki(Object key, String wikiCode){
+
+    public String putWiki(String key, String wikiCode){
         return this.putASIS(key, plasmaSwitchboard.wikiParser.transform(wikiCode));
     }
-    public String putWiki(Object key, byte[] wikiCode) {
+    public String putWiki(String key, byte[] wikiCode) {
         try {
             return this.putASIS(key, plasmaSwitchboard.wikiParser.transform(wikiCode));
         } catch (UnsupportedEncodingException e) {
             return this.putASIS(key, "Internal error pasting wiki-code: " + e.getMessage());
         }
     }
-    public String putWiki(Object key, String wikiCode, String publicAddress) {
+    public String putWiki(String key, String wikiCode, String publicAddress) {
         return this.putASIS(key, plasmaSwitchboard.wikiParser.transform(wikiCode, publicAddress));
     }
-    public String putWiki(Object key, byte[] wikiCode, String publicAddress) {
+    public String putWiki(String key, byte[] wikiCode, String publicAddress) {
         try {
             return this.putASIS(key, plasmaSwitchboard.wikiParser.transform(wikiCode, "UTF-8", publicAddress));
         } catch (UnsupportedEncodingException e) {
             return this.putASIS(key, "Internal error pasting wiki-code: " + e.getMessage());
-        }
-    }
-
-    // long variant
-    public long put(String key, long value) {
-        String result = this.put(key, Long.toString(value));
-        if (result == null) return 0; else try {
-            return Long.parseLong(result);
-        } catch (NumberFormatException e) {
-            return 0;
         }
     }
 

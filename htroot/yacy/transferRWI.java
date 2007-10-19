@@ -75,7 +75,7 @@ public final class transferRWI {
 
         // request values
         final String iam      = post.get("iam", "");                      // seed hash of requester
-        final String youare   = (String) post.get("youare", "");          // seed hash of the target peer, needed for network stability
+        final String youare   = post.get("youare", "");                   // seed hash of the target peer, needed for network stability
 //      final String key      = (String) post.get("key", "");             // transmission key
         final int wordc       = Integer.parseInt(post.get("wordc", ""));  // number of different words
         final int entryc      = Integer.parseInt(post.get("entryc", "")); // number of entries in indexes

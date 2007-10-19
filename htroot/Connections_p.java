@@ -244,7 +244,7 @@ public final class Connections_p {
         Arrays.sort(a, httpc.connectionTimeComparatorInstance);
         int c = 0;
         for (int i = 0; i < a.length; i++) {
-        	httpc clientConnection = (httpc) a[i];
+            httpc clientConnection = a[i];
             if (clientConnection != null) {
                 prop.put("clientList_" + c + "_clientProtocol", (clientConnection.ssl) ? "HTTPS" : "HTTP");
                 prop.put("clientList_" + c + "_clientLifetime", System.currentTimeMillis() - clientConnection.initTime);
