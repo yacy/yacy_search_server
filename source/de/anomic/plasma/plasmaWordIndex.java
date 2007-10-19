@@ -131,11 +131,13 @@ public final class plasmaWordIndex implements indexRI {
         long cacheBytes = 0;
         long entryBytes = indexRWIEntry.urlEntryRow.objectsize();
         indexRAMRI cache = (in ? dhtInCache : dhtOutCache);
-        Iterator it = cache.wordContainers(null, false);
-        indexContainer ic;
-        while ( it.hasNext() ) {
-            ic = (indexContainer)it.next();
-            cacheBytes += ic.size() * entryBytes;
+        synchronized (cache) {
+            Iterator it = cache.wordContainers(null, false);
+            indexContainer ic;
+            while ( it.hasNext() ) {
+                ic = (indexContainer)it.next();
+                cacheBytes += ic.size() * entryBytes;
+            }
         }
         
         return cacheBytes;
