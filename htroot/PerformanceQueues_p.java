@@ -295,6 +295,8 @@ public class PerformanceQueues_p {
         prop.put("urlCacheSize", switchboard.wordIndex.loadedURL.writeCacheSize());  
         prop.put("wordCacheWSize", switchboard.wordIndex.dhtOutCacheSize());
         prop.put("wordCacheKSize", switchboard.wordIndex.dhtInCacheSize());
+        prop.putNum("wordCacheWSizeKBytes", switchboard.wordIndex.dhtCacheSizeBytes(false)/1024);
+        prop.putNum("wordCacheKSizeKBytes", switchboard.wordIndex.dhtCacheSizeBytes(true)/1024);
         prop.put("maxURLinWCache", "" + switchboard.wordIndex.maxURLinDHTOutCache());
         prop.put("maxURLinKCache", "" + switchboard.wordIndex.maxURLinDHTInCache());
         prop.put("maxAgeOfWCache", "" + (switchboard.wordIndex.maxAgeOfDHTOutCache() / 1000 / 60)); // minutes
