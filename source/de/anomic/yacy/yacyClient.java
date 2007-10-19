@@ -219,7 +219,7 @@ public final class yacyClient {
         }
 
         //final Date remoteTime = yacyCore.parseUniversalDate((String) result.get(yacySeed.MYTIME)); // read remote time
-        
+
         // read the seeds that the peer returned and integrate them into own database
         int i = 0;
         int count = 0;
@@ -384,7 +384,7 @@ public final class yacyClient {
         post.putASIS("constraint", constraint.exportB64());
         if (abstractCache != null) post.putASIS("abstracts", "auto");
         final long timestamp = System.currentTimeMillis();
-            
+
         // send request
         HashMap result = null;
         try {
@@ -555,7 +555,7 @@ public final class yacyClient {
 				}
 			}
 		}
-        
+
 		// generate statistics
 		long searchtime;
 		try {
