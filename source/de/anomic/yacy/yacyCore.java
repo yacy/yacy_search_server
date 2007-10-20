@@ -385,24 +385,12 @@ public class yacyCore {
                 seeds = seedDB.seedsByAge(false, attempts); // best for seed list maintenance/cleaning
             }
 
-            if (seeds == null) { return 0; }
+            if ((seeds == null) || seeds.size() == 0) { return 0; }
+            if (seeds.size() < attempts) { attempts = seeds.size(); }
 
             // This will try to get Peers that are not currently in amIAccessibleDB
-            LinkedList seedList = new LinkedList();
-            LinkedList tmpSeedList = new LinkedList();
             Iterator si = seeds.values().iterator();
             yacySeed seed;
-            while (si.hasNext()) {
-            	seed = (yacySeed) si.next();
-                if (seed == null) continue;
-                if (amIAccessibleDB.containsKey(seed.hash)) {
-                    tmpSeedList.add(seed);
-                } else {
-                    seedList.add(seed);
-                }
-            }
-            while (!tmpSeedList.isEmpty()) { seedList.add(tmpSeedList.remove(0)); }
-            if (seedList.size() < attempts) { attempts = seedList.size(); }
 
             // include a YaCyNews record to my seed
             try {
@@ -428,9 +416,11 @@ public class yacyCore {
             final serverSemaphore sync = new serverSemaphore(attempts);
 
             // going through the peer list and starting a new publisher thread for each peer
-            for (int i = 0; i < attempts; i++) {
-                seed = (yacySeed) seedList.remove(0);
+            int i = 0;
+            while (si. hasNext()) {
+                seed = (yacySeed) si.next();
                 if (seed == null) { continue; }
+                i++;
 
                 final String address = seed.getClusterAddress();
                 log.logFine("HELLO #" + i + " to peer '" + seed.get(yacySeed.NAME, "") + "' at " + address); // debug
@@ -468,34 +458,6 @@ public class yacyCore {
                         newSeeds =  t.added;
                     } else {
                         newSeeds += t.added;
-                    }
-                }
-            }
-
-            // Nobody contacted yet, try again until peerPingInitial attempts are through
-            while ((newSeeds < 0) && (contactedSeedCount < PING_INITIAL) && (!seedList.isEmpty())) {
-                seed = (yacySeed) seedList.remove(0);
-                if (seed != null) {
-                    String address = seed.getPublicAddress();
-                    log.logFine("HELLO x" + contactedSeedCount + " to peer '" + seed.get(yacySeed.NAME, "") + "' at " + address); // debug
-                    String seederror = seed.isProper();
-                    if ((address == null) || (seederror != null)) {
-                        peerActions.peerDeparture(seed, "initial peer ping to peer resulted in address = " + address + "; seederror = " + seederror);
-                    } else {
-                    	if (seed.alternativeIP != null) address = seed.alternativeIP + ":" + seed.getPort();
-                        contactedSeedCount++;
-                        //new publishThread(yacyCore.publishThreadGroup,seeds[i],sync,syncList)).start();
-                        try {
-                            newSeeds = yacyClient.publishMySeed(address, seed.hash);
-                            if (newSeeds < 0) {
-                                log.logInfo("publish: disconnected " + seed.get(yacySeed.PEERTYPE, yacySeed.PEERTYPE_SENIOR) + " peer '" + seed.getName() + "' from " + seed.getPublicAddress());
-                                peerActions.peerDeparture(seed, "initial peer ping to peer resulted in seed response < 0");
-                            } else {
-                                log.logInfo("publish: handshaked " + seed.get(yacySeed.PEERTYPE, yacySeed.PEERTYPE_SENIOR) + " peer '" + seed.getName() + "' at " + seed.getPublicAddress());
-                            }
-                        } catch (Exception e) {
-                            log.logSevere("publishMySeed: error with target seed " + seed.toString() + ": " + e.getMessage(), e);
-                        }
                     }
                 }
             }
