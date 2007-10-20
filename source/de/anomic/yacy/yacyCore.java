@@ -419,7 +419,10 @@ public class yacyCore {
             int i = 0;
             while (si. hasNext()) {
                 seed = (yacySeed) si.next();
-                if (seed == null) { continue; }
+                if (seed == null) {
+                    sync.P();
+                    continue;
+                }
                 i++;
 
                 final String address = seed.getClusterAddress();
