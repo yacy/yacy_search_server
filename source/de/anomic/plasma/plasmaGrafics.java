@@ -403,10 +403,12 @@ public class plasmaGrafics {
     }
 
     //[MN]
+    /* quoted method because it is not used anywhere (and creates a warning in eclipse)
     private static String addBlanksAndDots(int input, int length) {
         return addBlanksAndDots(input + "", length);
     }
-
+    */
+    
     //[MN]
     private static String addBlanksAndDots(long input, int length) {
         return addBlanksAndDots(input + "", length);

@@ -394,8 +394,8 @@ public class kelondroRowCollection {
                         this.rowdef.objectsize());
             }
             // we moved the last element to the remove position: (p+1)st element
-            // only the first p elements keep their order
-            if (sortBound > p) sortBound = p;
+            // only the first p elements keep their order (element p is already outside the order)
+            if (sortBound >= p) sortBound = p;
         }
         chunkcount--;
         this.lastTimeWrote = System.currentTimeMillis();

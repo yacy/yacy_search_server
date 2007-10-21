@@ -598,8 +598,7 @@ public class kelondroCollectionIndex {
                 // to avoid that this grows too big
                 int newPartitionNumber;
                 while ((newPartitionNumber = arrayIndex(oldcollection.size())) > maxPartitions) {
-                    kelondroRowSet newcollection = shrinkCollection(key, oldcollection, arrayCapacity(maxPartitions));
-                    oldcollection = newcollection;
+                    shrinkCollection(key, oldcollection, arrayCapacity(maxPartitions));
                 }
                 
                 // work on with oldcollection
@@ -712,8 +711,7 @@ public class kelondroCollectionIndex {
             // to avoid that this grows too big
             int newPartitionNumber;
             while ((newPartitionNumber = arrayIndex(oldcollection.size())) > maxPartitions) {
-                kelondroRowSet newcollection = shrinkCollection(key, oldcollection, arrayCapacity(maxPartitions));
-                oldcollection = newcollection;
+                shrinkCollection(key, oldcollection, arrayCapacity(maxPartitions));
             }
             
             // work on with oldcollection
@@ -744,15 +742,16 @@ public class kelondroCollectionIndex {
         }
     }
     
-    private kelondroRowSet shrinkCollection(byte[] key, kelondroRowSet collection, int targetSize) {
+    private void shrinkCollection(byte[] key, kelondroRowSet collection, int targetSize) {
         //TODO Remove timing before release
         // removes entries from collection
         // the removed entries are stored in a 'commons' dump file
 
+        if (key.length != 12) return;
         // check if the collection is already small enough
         int oldsize = collection.size();
-        kelondroRowSet survival = new kelondroRowSet(collection.rowdef, 0);
-        if (oldsize <= targetSize) return survival;
+        if (oldsize <= targetSize) return;
+        kelondroRowSet newcommon = new kelondroRowSet(collection.rowdef, 0);
         long sadd1 = 0, srem1 = 0, sadd2 = 0, srem2 = 0, tot1 = 0, tot2 = 0;
         long t1 = 0, t2 = 0;
         
@@ -764,30 +763,30 @@ public class kelondroCollectionIndex {
         while (i.hasNext()) {
             entry = (kelondroRow.Entry) i.next();
             ref = entry.getColBytes(0);
-            if ((ref.length == 12) && (yacyURL.probablyRootURL(new String(ref)))) {
+            if ((ref.length != 12) || (!yacyURL.probablyRootURL(new String(ref)))) {
                 t2 = System.currentTimeMillis();
-                survival.addUnique(entry);
+                newcommon.addUnique(entry);
                 sadd1 += System.currentTimeMillis() - t2;
                 t2 = System.currentTimeMillis();
                 i.remove();
                 srem1 += System.currentTimeMillis() - t2;
             }
         }
-        int firstSurvival = survival.size();
+        int firstnewcommon = newcommon.size();
         tot1 = System.currentTimeMillis() - t1;
         
         // check if we shrinked enough
         Random rand = new Random(System.currentTimeMillis());
         t1 = System.currentTimeMillis();
-        while (survival.size() > targetSize) {
+        while (collection.size() > targetSize) {
             // now delete randomly more entries from the survival collection
-            i = survival.rows();
+            i = collection.rows();
             while (i.hasNext()) {
                 entry = (kelondroRow.Entry) i.next();
                 ref = entry.getColBytes(0);
                 if (rand.nextInt() % 4 != 0) {
                     t2 = System.currentTimeMillis();
-                    collection.addUnique(entry);
+                    newcommon.addUnique(entry);
                     sadd2 += System.currentTimeMillis() - t2;
                     t2 = System.currentTimeMillis();
                     i.remove();
@@ -798,16 +797,10 @@ public class kelondroCollectionIndex {
         tot2 = System.currentTimeMillis() - t1;
         
         serverLog.logFine("kelondroCollectionIndex", "tot= "+tot1+'/'+tot2+" # add/rem(1)= "+sadd1+'/'+srem1+" # add/rem(2)= "+sadd2+'/'+srem2);
-        serverLog.logInfo("kelondroCollectionIndex", "shrinked common word " + new String(key) + "; old size = " + oldsize + ", new size = " + collection.size() + ", maximum size = " + targetSize + ", survival size = " + survival.size() + ", first survival = " + firstSurvival);
+        serverLog.logInfo("kelondroCollectionIndex", "shrinked common word " + new String(key) + "; old size = " + oldsize + ", new size = " + collection.size() + ", maximum size = " + targetSize + ", newcommon size = " + newcommon.size() + ", first newcommon = " + firstnewcommon);
         
-        //finally dump the removed entries to a file
-        saveCommons(key, collection);
-        return survival;
-    }
-    
-    private void saveCommons(byte[] key, kelondroRowSet collection) {
-        if (key.length != 12) return;
-        collection.sort();
+        // finally dump the removed entries to a file
+        newcommon.sort();
         TimeZone GMTTimeZone = TimeZone.getTimeZone("GMT");
         Calendar gregorian = new GregorianCalendar(GMTTimeZone);
         SimpleDateFormat formatter = new SimpleDateFormat("yyyyMMddHHmmss");
@@ -816,11 +809,11 @@ public class kelondroCollectionIndex {
         storagePath.mkdirs();
         File file = new File(storagePath, filename);
         try {
-            collection.saveCollection(file);
-            serverLog.logInfo("kelondroCollectionIndex", "dumped common word " + new String(key) + " to " + file.toString() + "; size = " + collection.size());
+            newcommon.saveCollection(file);
+            serverLog.logInfo("kelondroCollectionIndex", "dumped common word " + new String(key) + " to " + file.toString() + "; size = " + newcommon.size());
         } catch (IOException e) {
             e.printStackTrace();
-            serverLog.logWarning("kelondroCollectionIndex", "failed to dump common word " + new String(key) + " to " + file.toString() + "; size = " + collection.size());
+            serverLog.logWarning("kelondroCollectionIndex", "failed to dump common word " + new String(key) + " to " + file.toString() + "; size = " + newcommon.size());
         }
         
     }
