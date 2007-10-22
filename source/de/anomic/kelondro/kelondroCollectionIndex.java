@@ -585,25 +585,20 @@ public class kelondroCollectionIndex {
                 int oldSerialNumber = 0;
 
                 // load the old collection and join it
-                kelondroRowSet oldcollection = getwithparams(indexrow, oldchunksize, oldchunkcount, oldPartitionNumber, oldrownumber, oldSerialNumber, false);
-                    
-                // join with new collection
-                oldcollection.addAllUnique(collection);
-                oldcollection.sort();
-                oldcollection.uniq(-1); // FIXME: not clear if it would be better to insert the collection with put to avoid double-entries
-                oldcollection.trim(false);
+                collection.addAllUnique(getwithparams(indexrow, oldchunksize, oldchunkcount, oldPartitionNumber, oldrownumber, oldSerialNumber, false));
+                collection.sort();
+                collection.uniq(-1); // FIXME: not clear if it would be better to insert the collection with put to avoid double-entries
+                collection.trim(false);
                 
                 // check for size of collection:
                 // if necessary shrink the collection and dump a part of that collection
                 // to avoid that this grows too big
-                int newPartitionNumber;
-                while ((newPartitionNumber = arrayIndex(oldcollection.size())) > maxPartitions) {
-                    shrinkCollection(key, oldcollection, arrayCapacity(maxPartitions));
+                if (arrayIndex(collection.size()) > maxPartitions) {
+                    shrinkCollection(key, collection, arrayCapacity(maxPartitions));
                 }
                 
-                // work on with oldcollection
-                collection = oldcollection;
-                newPartitionNumber = arrayIndex(collection.size());
+                // determine new partition position
+                int newPartitionNumber = arrayIndex(collection.size());
 
                 // see if we need new space or if we can overwrite the old space
                 if (oldPartitionNumber == newPartitionNumber) {
@@ -697,26 +692,20 @@ public class kelondroCollectionIndex {
             int oldSerialNumber = 0;
 
             // load the old collection and join it
-            kelondroRowSet oldcollection = getwithparams(indexrow, oldchunksize, oldchunkcount, oldPartitionNumber, oldrownumber, oldSerialNumber, false);
-
-            // join with new collection
-            oldcollection.addAllUnique(collection);
-            oldcollection.sort();
-            oldcollection.uniq(-1); // FIXME: not clear if it would be better to insert the collection with put to avoid double-entries
-            oldcollection.trim(false);
-            collection = oldcollection;
+            collection.addAllUnique(getwithparams(indexrow, oldchunksize, oldchunkcount, oldPartitionNumber, oldrownumber, oldSerialNumber, false));
+            collection.sort();
+            collection.uniq(-1); // FIXME: not clear if it would be better to insert the collection with put to avoid double-entries
+            collection.trim(false);
             
             // check for size of collection:
             // if necessary shrink the collection and dump a part of that collection
             // to avoid that this grows too big
-            int newPartitionNumber;
-            while ((newPartitionNumber = arrayIndex(oldcollection.size())) > maxPartitions) {
-                shrinkCollection(key, oldcollection, arrayCapacity(maxPartitions));
+            if (arrayIndex(collection.size()) > maxPartitions) {
+                shrinkCollection(key, collection, arrayCapacity(maxPartitions));
             }
             
-            // work on with oldcollection
-            collection = oldcollection;
-            newPartitionNumber = arrayIndex(collection.size());
+            // determine new partition location
+            int newPartitionNumber = arrayIndex(collection.size());
 
             // see if we need new space or if we can overwrite the old space
             if (oldPartitionNumber == newPartitionNumber) {
@@ -742,7 +731,7 @@ public class kelondroCollectionIndex {
         }
     }
     
-    private void shrinkCollection(byte[] key, kelondroRowSet collection, int targetSize) {
+    private void shrinkCollection(byte[] key, kelondroRowCollection collection, int targetSize) {
         //TODO Remove timing before release
         // removes entries from collection
         // the removed entries are stored in a 'commons' dump file
@@ -795,6 +784,7 @@ public class kelondroCollectionIndex {
             }
         }
         tot2 = System.currentTimeMillis() - t1;
+        collection.trim(false);
         
         serverLog.logFine("kelondroCollectionIndex", "tot= "+tot1+'/'+tot2+" # add/rem(1)= "+sadd1+'/'+srem1+" # add/rem(2)= "+sadd2+'/'+srem2);
         serverLog.logInfo("kelondroCollectionIndex", "shrinked common word " + new String(key) + "; old size = " + oldsize + ", new size = " + collection.size() + ", maximum size = " + targetSize + ", newcommon size = " + newcommon.size() + ", first newcommon = " + firstnewcommon);
