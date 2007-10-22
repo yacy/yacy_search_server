@@ -250,6 +250,8 @@ parseableExt=html,htm,txt,php,shtml,asp,aspx,jsp
 # Set these Strings to cusomize your peer and give any message to
 # other peer users
 promoteSearchPageGreeting =
+# if the following property is set to true, the network name is used as greeting
+promoteSearchPageGreeting.useNetworkName = false
 
 # the path to the PLASMA database of the web spider
 dbPath=DATA/PLASMADB

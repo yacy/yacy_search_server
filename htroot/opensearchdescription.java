@@ -36,6 +36,7 @@ public class opensearchdescription {
 
         // generate message content for open search description
         String promoteSearchPageGreeting = env.getConfig("promoteSearchPageGreeting", "");
+        if (env.getConfigBool("promoteSearchPageGreeting.useNetworkName", false)) promoteSearchPageGreeting = env.getConfig("network.unit.description", "");
         if (promoteSearchPageGreeting.length() == 0) promoteSearchPageGreeting = "P2P WEB SEARCH";
 
         String thisaddress = (String) header.get("Host", "localhost");

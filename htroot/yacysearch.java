@@ -87,6 +87,7 @@ public class yacysearch {
         if ((display == 1) && (!authenticated)) display = 0;
         int input = (post == null) ? 2 : post.getInt("input", 2);
         String promoteSearchPageGreeting = env.getConfig("promoteSearchPageGreeting", "");
+        if (env.getConfigBool("promoteSearchPageGreeting.useNetworkName", false)) promoteSearchPageGreeting = env.getConfig("network.unit.description", "");
         if (promoteSearchPageGreeting.length() == 0) promoteSearchPageGreeting = "P2P WEB SEARCH";
 
         // case if no values are requested
