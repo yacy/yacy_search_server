@@ -621,7 +621,6 @@ public class kelondroTree extends kelondroCachedRecords implements kelondroIndex
     public kelondroRow.Entry remove(byte[] key, boolean keepOrder) throws IOException {
         // keepOrder cannot have any effect: the order inside the database file cannot be maintained, but iteration over objects will always maintain the object order
         // therefore keepOrder should be true, because the effect is always given, while the data structure does not maintain order
-        assert keepOrder == true;
         // delete from database
         synchronized(writeSearchObj) {
             writeSearchObj.process(key);
