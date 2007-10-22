@@ -130,7 +130,7 @@ public class kelondroIntBytesMap {
                 index0.uniq(10000);
                 index1 = new kelondroRowSet(rowdef, 0); 
             }
-            kelondroRow.Entry indexentry = index0.remove(key);
+            kelondroRow.Entry indexentry = index0.remove(key, true);
             if (indexentry != null) {
                 return indexentry.getColBytes(1);
             }
@@ -139,7 +139,7 @@ public class kelondroIntBytesMap {
         // at this point index1 cannot be null
         assert (index1 != null);
         if (index1.size() == 0) return null;
-        kelondroRow.Entry indexentry = index1.remove(key);
+        kelondroRow.Entry indexentry = index1.remove(key, true);
         if (indexentry == null) return null;
         return indexentry.getColBytes(1);
     }

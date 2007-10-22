@@ -150,8 +150,8 @@ public class kelondroSplittedTree implements kelondroIndex {
         return ktfs[partition(row.getColBytes(0))].put(row);
     }
 
-    public kelondroRow.Entry remove(byte[] key) throws IOException {
-        return ktfs[partition(key)].remove(key);
+    public kelondroRow.Entry remove(byte[] key, boolean keepOrder) throws IOException {
+        return ktfs[partition(key)].remove(key, keepOrder);
     }
     
     public kelondroRow.Entry removeOne() throws IOException {

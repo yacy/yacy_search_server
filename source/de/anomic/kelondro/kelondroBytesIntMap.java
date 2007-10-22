@@ -145,9 +145,9 @@ public class kelondroBytesIntMap {
                 //System.out.println("finished initialization phase at size = " + index0.size() + " in removei");
             }
             // if the new entry is within the initialization part, just overwrite it
-            kelondroRow.Entry indexentry = index0.remove(key);
+            kelondroRow.Entry indexentry = index0.remove(key, true);
             if (indexentry != null) {
-                assert index0.remove(key) == null; // check if remove worked
+                assert index0.remove(key, true) == null; // check if remove worked
                 //assert consistencyAnalysis0() : "consistency problem: " + consistencyAnalysis();
                 return (int) indexentry.getColLong(1);
             }
@@ -156,9 +156,9 @@ public class kelondroBytesIntMap {
         // at this point index1 cannot be null
         assert (index1 != null);
         if (index1.size() == 0) return -1;
-        kelondroRow.Entry indexentry = index1.remove(key);
+        kelondroRow.Entry indexentry = index1.remove(key, true);
         if (indexentry == null) return -1;
-        assert index1.remove(key) == null; // check if remove worked
+        assert index1.remove(key, true) == null; // check if remove worked
         //assert consistencyAnalysis0() : "consistency problem: " + consistencyAnalysis();
         return (int) indexentry.getColLong(1);
     }

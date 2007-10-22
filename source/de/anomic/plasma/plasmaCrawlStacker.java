@@ -584,7 +584,7 @@ public final class plasmaCrawlStacker {
                 synchronized(this.urlEntryHashCache) {               
                     urlHash = (String) this.urlEntryHashCache.removeFirst();
                     if (urlHash == null) throw new IOException("urlHash is null");
-                    entry = this.urlEntryCache.remove(urlHash.getBytes());                 
+                    entry = this.urlEntryCache.remove(urlHash.getBytes(), false);                 
                 }
             } finally {
                 this.writeSync.V();

@@ -311,7 +311,8 @@ public class kelondroFlexTable extends kelondroFlexWidthArray implements kelondr
 		
     }
     
-    public synchronized kelondroRow.Entry remove(byte[] key) throws IOException {
+    public synchronized kelondroRow.Entry remove(byte[] key, boolean keepOrder) throws IOException {
+        assert keepOrder == false; // the underlying data structure is a file, where the order cannot be maintained. Gaps are filled with new values.
         int i = index.removei(key);
         assert (index.geti(key) < 0); // must be deleted
         if (i < 0) {

@@ -140,7 +140,7 @@ public class dbtest {
             final STEntry entry = new STEntry(this.getSource());
             System.out.println("remove: " + serverLog.arrayList(entry.getKey(), 0, entry.getKey().length));
             try {
-                getTable().remove(entry.getKey());
+                getTable().remove(entry.getKey(), false);
             } catch (IOException e) {
                 System.err.println(e);
                 e.printStackTrace();
@@ -338,7 +338,7 @@ public class dbtest {
                     start = System.currentTimeMillis();
                     for (int i = 0; i < count; i++) {
                         key = randomHash(random);
-                        table.remove(key);
+                        table.remove(key, false);
                     }
                     remove = System.currentTimeMillis() - start;
                     

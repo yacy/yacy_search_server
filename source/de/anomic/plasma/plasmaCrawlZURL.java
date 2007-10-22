@@ -95,7 +95,7 @@ public class plasmaCrawlZURL {
     public boolean remove(String hash) {
         if (hash == null) return false;
         try {
-            urlIndexFile.remove(hash.getBytes());
+            urlIndexFile.remove(hash.getBytes(), false);
             return true;
         } catch (IOException e) {
             return false;

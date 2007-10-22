@@ -281,7 +281,7 @@ public final class plasmaCrawlLURL {
     public synchronized boolean remove(String urlHash) {
         if (urlHash == null) return false;
         try {
-            kelondroRow.Entry r = urlIndexFile.remove(urlHash.getBytes());
+            kelondroRow.Entry r = urlIndexFile.remove(urlHash.getBytes(), false);
             if (r == null) return false;
             for (int stack = 1; stack <= 6; stack++) {
                 for (int i = getStackSize(stack) - 1; i >= 0; i--) {

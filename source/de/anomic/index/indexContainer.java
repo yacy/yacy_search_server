@@ -149,7 +149,7 @@ public class indexContainer extends kelondroRowSet {
     }
 
     public indexRWIEntry remove(String urlHash) {
-        kelondroRow.Entry entry = this.remove(urlHash.getBytes());
+        kelondroRow.Entry entry = remove(urlHash.getBytes(), true);
         if (entry == null) return null;
         return new indexRWIEntry(entry);
     }
@@ -384,7 +384,7 @@ public class indexContainer extends kelondroRowSet {
                 if ((ie0 != null) && (ie1 != null)) {
                     assert (ie0.urlHash().length() == keylength) : "ie0.urlHash() = " + ie0.urlHash();
                     assert (ie1.urlHash().length() == keylength) : "ie1.urlHash() = " + ie1.urlHash();
-                    if (iterate_pivot) se.remove(); pivot.remove(ie0.urlHash().getBytes());
+                    if (iterate_pivot) se.remove(); pivot.remove(ie0.urlHash().getBytes(), true);
                 }
             }
         return pivot;

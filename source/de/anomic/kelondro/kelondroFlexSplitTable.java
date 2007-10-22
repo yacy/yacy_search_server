@@ -260,13 +260,13 @@ public class kelondroFlexSplitTable implements kelondroIndex {
         while (i.hasNext()) addUnique((kelondroRow.Entry) i.next(), entryDate);
     }
     
-    public synchronized kelondroRow.Entry remove(byte[] key) throws IOException {
+    public synchronized kelondroRow.Entry remove(byte[] key, boolean keepOrder) throws IOException {
         Iterator i = tables.values().iterator();
         kelondroIndex table;
         kelondroRow.Entry entry;
         while (i.hasNext()) {
             table = (kelondroIndex) i.next();
-            entry = table.remove(key);
+            entry = table.remove(key, keepOrder);
             if (entry != null) return entry;
         }
         return null;

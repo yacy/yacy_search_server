@@ -156,7 +156,7 @@ public class kelondroMapTable {
         if (table != null) {table.remove(key); mTables.put(tablename, table); return;}
       
         kelondroIndex Tree = (kelondroIndex) tTables.get(tablename);
-        if (Tree != null) {Tree.remove(key.getBytes()); tTables.put(tablename, Tree); return;}
+        if (Tree != null) {Tree.remove(key.getBytes(), false); tTables.put(tablename, Tree); return;}
         
         throw new RuntimeException("kelondroTables.delete: table '" + tablename + "' does not exist.");
     }

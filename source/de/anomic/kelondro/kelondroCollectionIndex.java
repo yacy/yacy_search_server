@@ -835,8 +835,8 @@ public class kelondroCollectionIndex {
         Object k;
         while (i.hasNext()) {
             k = i.next();
-            if ((k instanceof byte[]) && (oldcollection.remove((byte[]) k) != null)) removed++;
-            if ((k instanceof String) && (oldcollection.remove(((String) k).getBytes()) != null)) removed++;
+            if ((k instanceof byte[]) && (oldcollection.remove((byte[]) k, false) != null)) removed++;
+            if ((k instanceof String) && (oldcollection.remove(((String) k).getBytes(), false) != null)) removed++;
         }
         oldcollection.sort();
         oldcollection.trim(false);
@@ -893,7 +893,7 @@ public class kelondroCollectionIndex {
     
     public synchronized kelondroRowSet delete(byte[] key) throws IOException {
         // find an entry, if one exists
-        kelondroRow.Entry indexrow = index.remove(key);
+        kelondroRow.Entry indexrow = index.remove(key, false);
         if (indexrow == null) return null;
         kelondroRowSet removedCollection = getdelete(indexrow, true);
         assert (removedCollection != null);
@@ -925,7 +925,7 @@ public class kelondroCollectionIndex {
         byte[] arraykey = arrayrow.getColBytes(0);
         if (!(index.row().objectOrder.wellformed(arraykey))) {
             // cleanup for a bad bug that corrupted the database
-            index.remove(indexkey);  // the RowCollection must be considered lost
+            index.remove(indexkey, false); // the RowCollection must be considered lost
             array.remove(rownumber); // loose the RowCollection (we don't know how much is lost)
             serverLog.logSevere("kelondroCollectionIndex." + array.filename, "lost a RowCollection because of a bad arraykey");
             return new kelondroRowSet(this.payloadrow, 0);
@@ -933,7 +933,7 @@ public class kelondroCollectionIndex {
         kelondroRowSet collection = new kelondroRowSet(this.payloadrow, arrayrow, 1); // FIXME: this does not yet work with different rowdef in case of several rowdef.objectsize()
         if ((!(index.row().objectOrder.wellformed(indexkey))) || (index.row().objectOrder.compare(arraykey, indexkey) != 0)) {
             // check if we got the right row; this row is wrong. Fix it:
-            index.remove(indexkey); // the wrong row cannot be fixed
+            index.remove(indexkey, true); // the wrong row cannot be fixed
             // store the row number in the index; this may be a double-entry, but better than nothing
             kelondroRow.Entry indexEntry = index.row().newEntry();
             indexEntry.setCol(idx_col_key, arrayrow.getColBytes(0));

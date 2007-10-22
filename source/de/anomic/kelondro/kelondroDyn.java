@@ -332,7 +332,7 @@ public class kelondroDyn {
         int recpos = 0;
         byte[] k;
         while (index.get(k = dynKey(key, recpos)) != null) {
-            index.remove(k);
+            index.remove(k, true);
             buffer.remove(k);
             recpos++;
         }

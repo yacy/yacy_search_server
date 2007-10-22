@@ -171,7 +171,7 @@ public class plasmaCrawlBalancer {
         // and it was implemented in the previous architecture
         // however, usage is not recommendet
     	int s = urlFileIndex.size();
-       kelondroRow.Entry entry = urlFileIndex.remove(urlhash.getBytes());
+       kelondroRow.Entry entry = urlFileIndex.remove(urlhash.getBytes(), false);
        if (entry == null) return null;
        assert urlFileIndex.size() + 1 == s : "urlFileIndex.size() = " + urlFileIndex.size() + ", s = " + s;
        
@@ -446,7 +446,7 @@ public class plasmaCrawlBalancer {
         long delta = lastAccessDelta(result);
         assert delta >= 0: "delta = " + delta;
         int s = urlFileIndex.size();
-        kelondroRow.Entry rowEntry = urlFileIndex.remove(result.getBytes());
+        kelondroRow.Entry rowEntry = urlFileIndex.remove(result.getBytes(), false);
         assert urlFileIndex.size() + 1 == s : "urlFileIndex.size() = " + urlFileIndex.size() + ", s = " + s + ", result = " + result;
         if (rowEntry == null) {
             serverLog.logSevere("PLASMA BALANCER", "get() found a valid urlhash, but failed to fetch the corresponding url entry - total size = " + size() + ", fileStack.size() = " + urlFileStack.size() + ", ramStack.size() = " + urlRAMStack.size() + ", domainStacks.size() = " + domainStacks.size());
