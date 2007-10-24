@@ -72,16 +72,16 @@ public class get {
                     tag==null || bookmark.getTags().contains(tag) &&
                     isAdmin || bookmark.getPublic()){
                 prop.put("posts_"+count+"_url", bookmark.getUrl());
-                prop.put("posts_"+count+"_title", bookmark.getTitle());
-                prop.put("posts_"+count+"_description", bookmark.getDescription());
-                prop.putASIS("posts_"+count+"_md5", serverCodings.encodeMD5Hex(bookmark.getUrl()));
+                prop.putHTML("posts_"+count+"_title", bookmark.getTitle());
+                prop.putHTML("posts_"+count+"_description", bookmark.getDescription());
+                prop.put("posts_"+count+"_md5", serverCodings.encodeMD5Hex(bookmark.getUrl()));
                 prop.put("posts_"+count+"_time", date);
-                prop.put("posts_"+count+"_tags", bookmark.getTagsString().replaceAll(","," "));
+                prop.putHTML("posts_"+count+"_tags", bookmark.getTagsString().replaceAll(","," "));
                 
                 // additional XML tags
-                prop.put("posts_"+count+"_isExtended",extendedXML ? 1:0);
+                prop.put("posts_"+count+"_isExtended",extendedXML ? "1" : "0");
                 if (extendedXML) {
-                	prop.putASIS("posts_"+count+"_isExtended_private", Boolean.toString(!bookmark.getPublic()));
+                	prop.put("posts_"+count+"_isExtended_private", Boolean.toString(!bookmark.getPublic()));
                 }
                 count++;
             }

@@ -45,8 +45,8 @@ public class ConfigUpdate_p {
         final serverObjects prop = new serverObjects();
         final plasmaSwitchboard sb = (plasmaSwitchboard) env;
 
-        prop.put("candeploy_configCommit", 0);
-        prop.put("candeploy_autoUpdate", 0);
+        prop.put("candeploy_configCommit", "0");
+        prop.put("candeploy_autoUpdate", "0");
         
         if (post != null) {
             if (post.containsKey("downloadRelease")) {
@@ -69,7 +69,7 @@ public class ConfigUpdate_p {
             if (post.containsKey("autoUpdate")) {
                 yacyVersion updateVersion = yacyVersion.rulebasedUpdateInfo(true);
                 if (updateVersion == null) {
-                    prop.put("candeploy_autoUpdate", 2); // no more recent release found
+                    prop.put("candeploy_autoUpdate", "2"); // no more recent release found
                 } else try {
                     // there is a version that is more recent. Load it and re-start with it
                     sb.getLog().logInfo("AUTO-UPDATE: downloading more recent release " + updateVersion.url);
@@ -79,15 +79,15 @@ public class ConfigUpdate_p {
                     boolean devenvironment = yacyVersion.combined2prettyVersion(sb.getConfig("version","0.1")).startsWith("dev");
                     if (devenvironment) {
                         sb.getLog().logInfo("AUTO-UPDATE: omiting update because this is a development environment");
-                        prop.put("candeploy_autoUpdate", 3);
+                        prop.put("candeploy_autoUpdate", "3");
                     } else if ((!releaseFile.exists()) || (releaseFile.length() == 0)) {
                         sb.getLog().logInfo("AUTO-UPDATE: omiting update because download failed (file cannot be found or is too small)");
-                        prop.put("candeploy_autoUpdate", 4);
+                        prop.put("candeploy_autoUpdate", "4");
                     } else {
                         yacyVersion.deployRelease(updateVersion.name);
                         sb.terminate(5000);
                         sb.getLog().logInfo("AUTO-UPDATE: deploy and restart initiated");
-                        prop.put("candeploy_autoUpdate", 1);
+                        prop.put("candeploy_autoUpdate", "1");
                     }
                 } catch (IOException e) {
                     sb.getLog().logSevere("AUTO-UPDATE: could not download and install release " + updateVersion.url + ": " + e.getMessage());
@@ -95,7 +95,7 @@ public class ConfigUpdate_p {
             }
          
             if (post.containsKey("configSubmit")) {
-                prop.put("candeploy_configCommit", 1);
+                prop.put("candeploy_configCommit", "1");
                 sb.setConfig("update.process", (post.get("updateMode", "manual").equals("manual")) ? "manual" : "auto");
                 sb.setConfig("update.cycle", Math.max(12, post.getLong("cycle", 168)));
                 sb.setConfig("update.blacklist", post.get("blacklist", ""));
@@ -107,9 +107,9 @@ public class ConfigUpdate_p {
         if (serverSystem.canExecUnix) {
             // we can deploy a new system with (i.e.)
             // cd DATA/RELEASE;tar xfz $1;cp -Rf yacy/* ../../;rm -Rf yacy
-            prop.put("candeploy", 1);
+            prop.put("candeploy", "1");
         } else {
-            prop.put("candeploy", 0);
+            prop.put("candeploy", "0");
         }
         
         // version information
@@ -125,7 +125,7 @@ public class ConfigUpdate_p {
         yacyVersion release, dflt;
         String[] downloaded = sb.releasePath.list();
             
-        prop.put("candeploy_deployenabled", (downloaded.length == 0) ? 0 : ((devenvironment) ? 1 : 2)); // prevent that a developer-version is over-deployed
+        prop.put("candeploy_deployenabled", (downloaded.length == 0) ? "0" : ((devenvironment) ? "1" : "2")); // prevent that a developer-version is over-deployed
           
         TreeSet downloadedreleases = new TreeSet();
         for (int j = 0; j < downloaded.length; j++) {
@@ -144,7 +144,7 @@ public class ConfigUpdate_p {
             release = (yacyVersion) i.next();
             prop.put("candeploy_downloadedreleases_" + relcount + "_name", (release.proRelease ? "pro" : "standard") + "/" + ((release.mainRelease) ? "main" : "dev") + " " + release.releaseNr + "/" + release.svn);
             prop.put("candeploy_downloadedreleases_" + relcount + "_file", release.name);
-            prop.put("candeploy_downloadedreleases_" + relcount + "_selected", (release == dflt) ? 1 : 0);
+            prop.put("candeploy_downloadedreleases_" + relcount + "_selected", (release == dflt) ? "1" : "0");
             relcount++;
         }
         prop.put("candeploy_downloadedreleases", relcount);
@@ -160,7 +160,7 @@ public class ConfigUpdate_p {
             release = (yacyVersion) i.next();
             prop.put("candeploy_availreleases_" + relcount + "_name", (release.proRelease ? "pro" : "standard") + "/" + ((release.mainRelease) ? "main" : "dev") + " " + release.releaseNr + "/" + release.svn);
             prop.put("candeploy_availreleases_" + relcount + "_url", release.url.toString());
-            prop.put("candeploy_availreleases_" + relcount + "_selected", 0);
+            prop.put("candeploy_availreleases_" + relcount + "_selected", "0");
             relcount++;
         }
         // dev
@@ -172,23 +172,23 @@ public class ConfigUpdate_p {
             release = (yacyVersion) i.next();
             prop.put("candeploy_availreleases_" + relcount + "_name", (release.proRelease ? "pro" : "standard") + "/" + ((release.mainRelease) ? "main" : "dev") + " " + release.releaseNr + "/" + release.svn);
             prop.put("candeploy_availreleases_" + relcount + "_url", release.url.toString());
-            prop.put("candeploy_availreleases_" + relcount + "_selected", (release == dflt) ? 1 : 0);
+            prop.put("candeploy_availreleases_" + relcount + "_selected", (release == dflt) ? "1" : "0");
             relcount++;
         }
         prop.put("candeploy_availreleases", relcount);
 
         // properties for automated system update
-        prop.put("candeploy_manualUpdateChecked", (sb.getConfig("update.process", "manual").equals("manual")) ? 1 : 0);
-        prop.put("candeploy_autoUpdateChecked", (sb.getConfig("update.process", "manual").equals("auto")) ? 1 : 0);
+        prop.put("candeploy_manualUpdateChecked", (sb.getConfig("update.process", "manual").equals("manual")) ? "1" : "0");
+        prop.put("candeploy_autoUpdateChecked", (sb.getConfig("update.process", "manual").equals("auto")) ? "1" : "0");
         prop.put("candeploy_cycle", sb.getConfigLong("update.cycle", 168));
         prop.put("candeploy_blacklist", sb.getConfig("update.blacklist", ""));
-        prop.put("candeploy_releaseTypeMainChecked", (sb.getConfig("update.concept", "any").equals("any")) ? 0 : 1);
-        prop.put("candeploy_releaseTypeAnyChecked", (sb.getConfig("update.concept", "any").equals("any")) ? 1 : 0);
-        prop.put("candeploy_lastlookup", (sb.getConfigLong("update.time.lookup", 0) == 0) ? 0 : 1);
+        prop.put("candeploy_releaseTypeMainChecked", (sb.getConfig("update.concept", "any").equals("any")) ? "0" : "1");
+        prop.put("candeploy_releaseTypeAnyChecked", (sb.getConfig("update.concept", "any").equals("any")) ? "1" : "0");
+        prop.put("candeploy_lastlookup", (sb.getConfigLong("update.time.lookup", 0) == 0) ? "0" : "1");
         prop.put("candeploy_lastlookup_time", new Date(sb.getConfigLong("update.time.lookup", 0)).toString());
-        prop.put("candeploy_lastdownload", (sb.getConfigLong("update.time.download", 0) == 0) ? 0 : 1);
+        prop.put("candeploy_lastdownload", (sb.getConfigLong("update.time.download", 0) == 0) ? "0" : "1");
         prop.put("candeploy_lastdownload_time", new Date(sb.getConfigLong("update.time.download", 0)).toString());
-        prop.put("candeploy_lastdeploy", (sb.getConfigLong("update.time.deploy", 0) == 0) ? 0 : 1);
+        prop.put("candeploy_lastdeploy", (sb.getConfigLong("update.time.deploy", 0) == 0) ? "0" : "1");
         prop.put("candeploy_lastdeploy_time", new Date(sb.getConfigLong("update.time.deploy", 0)).toString());
         
         /*

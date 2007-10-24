@@ -41,59 +41,55 @@ public class CrawlStartExpert_p {
         prop.put("crawlingFilter", env.getConfig("crawlingFilter", "0"));
         
         int crawlingIfOlder = (int) env.getConfigLong("crawlingIfOlder", -1);
-        prop.put("crawlingIfOlderCheck", (crawlingIfOlder == -1) ? 0 : 1);
-        prop.put("crawlingIfOlderUnitYearCheck", 0);
-        prop.put("crawlingIfOlderUnitMonthCheck", 0);
-        prop.put("crawlingIfOlderUnitDayCheck", 0);
-        prop.put("crawlingIfOlderUnitHourCheck", 0);
-        prop.put("crawlingIfOlderUnitMinuteCheck", 0);
+        prop.put("crawlingIfOlderCheck", (crawlingIfOlder == -1) ? "0" : "1");
+        prop.put("crawlingIfOlderUnitYearCheck", "0");
+        prop.put("crawlingIfOlderUnitMonthCheck", "0");
+        prop.put("crawlingIfOlderUnitDayCheck", "0");
+        prop.put("crawlingIfOlderUnitHourCheck", "0");
+        prop.put("crawlingIfOlderUnitMinuteCheck", "0");
         if ((crawlingIfOlder == -1) || (crawlingIfOlder == Integer.MAX_VALUE)) {
-            prop.put("crawlingIfOlderNumber", 1);
-            prop.put("crawlingIfOlderUnitYearCheck", 1);
+            prop.put("crawlingIfOlderNumber", "1");
+            prop.put("crawlingIfOlderUnitYearCheck", "1");
         } else if (crawlingIfOlder >= 60*24*365) {
             prop.put("crawlingIfOlderNumber", Math.round((float)crawlingIfOlder / (float)(60*24*365)));
-            prop.put("crawlingIfOlderUnitYearCheck", 1);
+            prop.put("crawlingIfOlderUnitYearCheck", "1");
         } else if (crawlingIfOlder >= 60*24*30) {
             prop.put("crawlingIfOlderNumber", Math.round((float)crawlingIfOlder / (float)(60*24*30)));
-            prop.put("crawlingIfOlderUnitMonthCheck", 1);
+            prop.put("crawlingIfOlderUnitMonthCheck", "1");
         } else if (crawlingIfOlder >= 60*24) {
             prop.put("crawlingIfOlderNumber", Math.round((float)crawlingIfOlder / (float)(60*24)));
-            prop.put("crawlingIfOlderUnitDayCheck", 1);
+            prop.put("crawlingIfOlderUnitDayCheck", "1");
         } else if (crawlingIfOlder >= 60) {
             prop.put("crawlingIfOlderNumber", Math.round(crawlingIfOlder / 60f));
-            prop.put("crawlingIfOlderUnitHourCheck", 1);
+            prop.put("crawlingIfOlderUnitHourCheck", "1");
         } else {
             prop.put("crawlingIfOlderNumber", crawlingIfOlder);
-            prop.put("crawlingIfOlderUnitMinuteCheck", 1);
+            prop.put("crawlingIfOlderUnitMinuteCheck", "1");
         }
         int crawlingDomFilterDepth = (int) env.getConfigLong("crawlingDomFilterDepth", -1);
-        prop.put("crawlingDomFilterCheck", (crawlingDomFilterDepth == -1) ? 0 : 1);
+        prop.put("crawlingDomFilterCheck", (crawlingDomFilterDepth == -1) ? "0" : "1");
         prop.put("crawlingDomFilterDepth", (crawlingDomFilterDepth == -1) ? 1 : crawlingDomFilterDepth);
         int crawlingDomMaxPages = (int) env.getConfigLong("crawlingDomMaxPages", -1);
-        prop.put("crawlingDomMaxCheck", (crawlingDomMaxPages == -1) ? 0 : 1);
+        prop.put("crawlingDomMaxCheck", (crawlingDomMaxPages == -1) ? "0" : "1");
         prop.put("crawlingDomMaxPages", (crawlingDomMaxPages == -1) ? 10000 : crawlingDomMaxPages);
-        prop.put("crawlingQChecked", env.getConfig("crawlingQ", "").equals("true") ? 1 : 0);
-        prop.put("storeHTCacheChecked", env.getConfig("storeHTCache", "").equals("true") ? 1 : 0);
-        prop.put("indexingTextChecked", env.getConfig("indexText", "").equals("true") ? 1 : 0);
-        prop.put("indexingMediaChecked", env.getConfig("indexMedia", "").equals("true") ? 1 : 0);
-        prop.put("crawlOrderChecked", env.getConfig("crawlOrder", "").equals("true") ? 1 : 0);
+        prop.put("crawlingQChecked", env.getConfig("crawlingQ", "").equals("true") ? "1" : "0");
+        prop.put("storeHTCacheChecked", env.getConfig("storeHTCache", "").equals("true") ? "1" : "0");
+        prop.put("indexingTextChecked", env.getConfig("indexText", "").equals("true") ? "1" : "0");
+        prop.put("indexingMediaChecked", env.getConfig("indexMedia", "").equals("true") ? "1" : "0");
+        prop.put("crawlOrderChecked", env.getConfig("crawlOrder", "").equals("true") ? "1" : "0");
         
         long LCbusySleep = Integer.parseInt(env.getConfig(plasmaSwitchboard.CRAWLJOB_LOCAL_CRAWL_BUSYSLEEP, "100"));
         int LCppm = (LCbusySleep == 0) ? 1000 : (int) (60000L / LCbusySleep);
-        prop.put("crawlingSpeedMaxChecked", (LCppm >= 1000) ? 1 : 0);
-        prop.put("crawlingSpeedCustChecked", ((LCppm > 10) && (LCppm < 1000)) ? 1 : 0);
-        prop.put("crawlingSpeedMinChecked", (LCppm <= 10) ? 1 : 0);
+        prop.put("crawlingSpeedMaxChecked", (LCppm >= 1000) ? "1" : "0");
+        prop.put("crawlingSpeedCustChecked", ((LCppm > 10) && (LCppm < 1000)) ? "1" : "0");
+        prop.put("crawlingSpeedMinChecked", (LCppm <= 10) ? "1" : "0");
         prop.put("customPPMdefault", ((LCppm > 10) && (LCppm < 1000)) ? Integer.toString(LCppm) : "");
         
-        prop.put("xsstopwChecked", env.getConfig("xsstopw", "").equals("true") ? 1 : 0);
-        prop.put("xdstopwChecked", env.getConfig("xdstopw", "").equals("true") ? 1 : 0);
-        prop.put("xpstopwChecked", env.getConfig("xpstopw", "").equals("true") ? 1 : 0);
+        prop.put("xsstopwChecked", env.getConfig("xsstopw", "").equals("true") ? "1" : "0");
+        prop.put("xdstopwChecked", env.getConfig("xdstopw", "").equals("true") ? "1" : "0");
+        prop.put("xpstopwChecked", env.getConfig("xpstopw", "").equals("true") ? "1" : "0");
         
         // return rewrite properties
         return prop;
     }
-	
 }
-
-
-

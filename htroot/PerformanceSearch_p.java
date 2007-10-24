@@ -41,7 +41,7 @@ public class PerformanceSearch_p {
         plasmaSearchEvent se = plasmaSearchEvent.getEvent(plasmaSearchEvent.lastEventID);
         
         if (se == null) {
-            prop.put("table", 0);
+            prop.put("table", "0");
             return prop;
         }
         
@@ -51,8 +51,8 @@ public class PerformanceSearch_p {
         while (events.hasNext()) {
             event = (plasmaSearchProcessing.Entry) events.next();
             prop.put("table_" + c + "_event", event.process);
-            prop.put("table_" + c + "_count", event.count);
-            prop.put("table_" + c + "_time", event.time);
+            prop.putNum("table_" + c + "_count", event.count);
+            prop.putNum("table_" + c + "_time", event.time);
             c++;
         }
         prop.put("table", c);

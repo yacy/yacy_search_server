@@ -59,15 +59,18 @@ public class Statistics {
         // return variable that accumulates replacements
         plasmaSwitchboard switchboard = (plasmaSwitchboard) sb;
         serverObjects prop = new serverObjects();
-        int page = (post == null) ? 0 : Integer.parseInt(post.get("page", "0"));
+        if (null == switchboard.facilityDB) 
+            return prop;
+
+        int page = (post == null) ? 0 : post.getInt("page", 0);
         
         prop.put("page", page);
         switch (page) {
             case 0:
                 if (switchboard.facilityDB.size("backlinks") == 0) {
-                    prop.put("page_backlinks", 0);
+                    prop.put("page_backlinks", "0");
                 } else {
-                    prop.put("page_backlinks", 1);
+                    prop.put("page_backlinks", "1");
                     Iterator it = switchboard.facilityDB.maps("backlinks", false, "date");
                     int count = 0;
                     int maxCount = 100;
@@ -81,7 +84,8 @@ public class Statistics {
                         urlString = (String) map.get("key");
                         try { url = new yacyURL(urlString, null); } catch (MalformedURLException e) { url = null; }
                         if ((url != null) && (!url.isLocal())) {
-                            prop.put("page_backlinks_list_" + count + "_dark", ((dark) ? 1 : 0)); dark =! dark;
+                            prop.put("page_backlinks_list_" + count + "_dark", dark ? "1" : "0");
+                            dark =! dark;
                             prop.put("page_backlinks_list_" + count + "_url", urlString);
                             prop.put("page_backlinks_list_" + count + "_date", map.get("date"));
                             prop.put("page_backlinks_list_" + count + "_clientip", map.get("clientip"));
@@ -89,14 +93,13 @@ public class Statistics {
                             count++;
                         }
                     }//while
-                    prop.put("page_backlinks_list", count);
-                    prop.put("page_backlinks_num", count);
-                    prop.put("page_backlinks_total", switchboard.facilityDB.size("backlinks"));
+                    prop.putNum("page_backlinks_list", count);
+                    prop.putNum("page_backlinks_num", count);
+                    prop.putNum("page_backlinks_total", switchboard.facilityDB.size("backlinks"));
                 }
                 break;
         }
         // return rewrite properties
         return prop;
     }
-    
 }

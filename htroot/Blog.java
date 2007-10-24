@@ -91,13 +91,13 @@ public class Blog {
         final String address = yacyCore.seedDB.mySeed().getPublicAddress();
 
         if(hasRights) {
-            prop.put("mode_admin",1);
+            prop.put("mode_admin", "1");
         } else {
-            prop.put("mode_admin",0);
+            prop.put("mode_admin", "0");
         }
         
         if (post == null) {
-            prop.put("peername", yacyCore.seedDB.mySeed().getName());
+            prop.putHTML("peername", yacyCore.seedDB.mySeed().getName());
             prop.put("address", address);
             return putBlogDefault(prop, switchboard, address, 0, 20, hasRights, xml);
         }
@@ -197,80 +197,80 @@ public class Blog {
 		    //edit an entry
 			if(hasRights) {
 				try {
-                    prop.put("mode", 1); //edit
+                    prop.put("mode", "1"); //edit
                     prop.put("mode_commentMode", page.getCommentMode());
-			        prop.put("mode_author", new String(page.author(),"UTF-8"));
+			        prop.putHTML("mode_author", new String(page.author(),"UTF-8"), xml);
 			        prop.put("mode_pageid", page.key());
-			        prop.put("mode_subject", new String(page.subject(), "UTF-8"));
+			        prop.putHTML("mode_subject", new String(page.subject(), "UTF-8"), xml);
 			        prop.put("mode_page-code", new String(page.page(), "UTF-8"));
 			    } catch (UnsupportedEncodingException e) {}
 			}
 			else {
-				prop.put("mode",3); //access denied (no rights)
+				prop.put("mode", "3"); //access denied (no rights)
 			}
 		}
 		else if(post.containsKey("preview")) {
 			//preview the page
 			if(hasRights) {
-	            prop.put("mode", 2);//preview
-                prop.put("mode_commentMode", Integer.parseInt(post.get("commentMode", "1")));
-	            prop.put("mode_pageid", pagename);
+	            prop.put("mode", "2");//preview
+                prop.put("mode_commentMode", post.getInt("commentMode", 1));
+	            prop.putHTML("mode_pageid", pagename, xml);
 	            try {
-					prop.put("mode_author", new String(author, "UTF-8"));
+					prop.putHTML("mode_author", new String(author, "UTF-8"), xml);
 				} catch (UnsupportedEncodingException e) {
-					prop.put("mode_author", new String(author));
+					prop.putHTML("mode_author", new String(author), xml);
 				}
-	            prop.put("mode_subject", post.get("subject",""));
+	            prop.putHTML("mode_subject", post.get("subject",""), xml);
 	            prop.put("mode_date", dateString(new Date()));
 	            prop.putWiki("mode_page", post.get("content", ""));
-	            prop.put("mode_page-code", post.get("content", ""));
+	            prop.putHTML("mode_page-code", post.get("content", ""), xml);
 			}
-			else prop.put("mode",3); //access denied (no rights)
+			else prop.put("mode", "3"); //access denied (no rights)
 		}
 		else if(post.get("delete", "").equals("try")) {
 			if(hasRights) {
-				prop.put("mode",4);
-				prop.put("mode_pageid",pagename);
+				prop.put("mode", "4");
+				prop.put("mode_pageid", pagename);
 				try {
-					prop.put("mode_author",new String(page.author(), "UTF-8"));
+					prop.putHTML("mode_author",new String(page.author(), "UTF-8"), xml);
 				} catch (UnsupportedEncodingException e) {
-					prop.put("mode_author",new String(page.author()));
+					prop.putHTML("mode_author",new String(page.author()), xml);
 				}
 				try {
-					prop.put("mode_subject",new String(page.subject(),"UTF-8"));
+					prop.putHTML("mode_subject",new String(page.subject(),"UTF-8"), xml);
 				} catch (UnsupportedEncodingException e) {
-					prop.put("mode_subject",new String(page.subject()));
+					prop.putHTML("mode_subject",new String(page.subject()), xml);
 				}
 			}
-			else prop.put("mode",3); //access denied (no rights)
+			else prop.put("mode", "3"); //access denied (no rights)
 		}
 		else if(post.containsKey("import")) {
-			prop.put("mode",5);
-			prop.put("mode_state",0);
+			prop.put("mode", "5");
+			prop.put("mode_state", "0");
 		}
 		else if(post.containsKey("xmlfile")) {
-			prop.put("mode",5);
+			prop.put("mode", "5");
 			if(switchboard.blogDB.importXML(new String((byte[])post.get("xmlfile$file")))) {
-				prop.put("mode_state",1);
+				prop.put("mode_state", "1");
 			}
 			else {
-				prop.put("mode_state",2);
+				prop.put("mode_state", "2");
 			}
 		}
 		else {
 		    // show blog-entry/entries
-	        prop.put("mode", 0); //viewing
+	        prop.put("mode", "0"); //viewing
 	        if(pagename.equals(DEFAULT_PAGE)) {
 	            // XXX: where are "peername" and "address" used in the template?
                 // XXX: "clientname" is already set to the peername, no need for a new setting
-                prop.put("peername", yacyCore.seedDB.mySeed().getName());
+                prop.putHTML("peername", yacyCore.seedDB.mySeed().getName(), xml);
                 prop.put("address", address);
 	        	//index all entries
                 putBlogDefault(prop, switchboard, address, start, num, hasRights, xml);
 	        }
 	        else {
 	        	//only show 1 entry
-	        	prop.put("mode_entries",1);
+	        	prop.put("mode_entries", "1");
                 putBlogEntry(prop, page, address, 0, hasRights, xml);
 	        }
 		}
@@ -304,14 +304,14 @@ public class Blog {
                         hasRights,
                         xml);
             }
-            prop.put("mode_entries",count);
+            prop.put("mode_entries", count);
             
             if(i.hasNext()) {
-                prop.put("mode_moreentries",1); //more entries are availible
-                prop.put("mode_moreentries_start",nextstart);
-                prop.put("mode_moreentries_num",num);
+                prop.put("mode_moreentries", "1"); //more entries are availible
+                prop.put("mode_moreentries_start", nextstart);
+                prop.put("mode_moreentries_num", num);
             } else {
-                prop.put("moreentries",0);
+                prop.put("moreentries", "0");
             }
         } catch (IOException e) { serverLog.logSevere("BLOG", "Error reading blog-DB", e); }
         return prop;
@@ -327,23 +327,23 @@ public class Blog {
         
         // subject
         try {
-            prop.put("mode_entries_" + number + "_subject", new String(entry.subject(),"UTF-8"));
+            prop.putHTML("mode_entries_" + number + "_subject", new String(entry.subject(),"UTF-8"), xml);
         } catch (UnsupportedEncodingException e) {
-            prop.put("mode_entries_" + number + "_subject", new String(entry.subject()));
+            prop.putHTML("mode_entries_" + number + "_subject", new String(entry.subject()), xml);
         }
         
         // author
         try {
-            prop.put("mode_entries_" + number + "_author", new String(entry.author(),"UTF-8"));
+            prop.putHTML("mode_entries_" + number + "_author", new String(entry.author(),"UTF-8"), xml);
         } catch (UnsupportedEncodingException e) {
-            prop.put("mode_entries_" + number + "_author", new String(entry.author()));
+            prop.putHTML("mode_entries_" + number + "_author", new String(entry.author()), xml);
         }
         
         // comments
         if(entry.getCommentMode() == 0) {
-            prop.put("mode_entries_" + number + "_commentsactive", 0);
+            prop.put("mode_entries_" + number + "_commentsactive", "0");
         } else {
-            prop.put("mode_entries_" + number + "_commentsactive", 1);
+            prop.put("mode_entries_" + number + "_commentsactive", "1");
             prop.put("mode_entries_" + number + "_commentsactive_pageid", entry.key());
             prop.put("mode_entries_" + number + "_commentsactive_address", address);
             try {
@@ -360,17 +360,17 @@ public class Blog {
         prop.put("mode_entries_" + number + "_ip", entry.ip());
         
         if(xml) {
-            prop.putASIS("mode_entries_" + number + "_page", entry.page());
+            prop.put("mode_entries_" + number + "_page", entry.page());
             prop.put("mode_entries_" + number + "_timestamp", entry.timestamp());
         } else {
             prop.putWiki("mode_entries_" + number + "_page", entry.page());
         }
         
         if(hasRights) {
-            prop.put("mode_entries_" + number + "_admin", 1);
+            prop.put("mode_entries_" + number + "_admin", "1");
             prop.put("mode_entries_" + number + "_admin_pageid",entry.key());
         } else {
-            prop.put("mode_entries_" + number + "_admin", 0);
+            prop.put("mode_entries_" + number + "_admin", "0");
         }
         
         return prop;

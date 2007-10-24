@@ -45,13 +45,13 @@ function refresh(){
 
 function requestStatus(){
 	statusRPC=createRequestObject();
-	statusRPC.open('get', '/xml/status_p.xml');
+	statusRPC.open('get', '/xml/status_p.xml?html=');
 	statusRPC.onreadystatechange = handleStatus;
 	statusRPC.send(null);
 }
 function requestQueues(){
 	queuesRPC=createRequestObject();
-	queuesRPC.open('get', '/xml/queues_p.xml');
+	queuesRPC.open('get', '/xml/queues_p.xml?html=');
 	queuesRPC.onreadystatechange = handleQueues;
 	queuesRPC.send(null);
 
@@ -85,12 +85,14 @@ function handleStatus(){
     removeAllChildren(trafCrawlerSpan);
 	trafCrawlerSpan.appendChild(document.createTextNode(Math.round((trafficCrawler) / 1024 / 10.24) / 100));
     
-	var wordCache=getValue(getFirstChild(statusTag, "wordCacheWSize"));
+	var wordCache=getValue(getFirstChild(statusTag, "wordCacheWCount"));
+	var wordCacheSize=getValue(getFirstChild(statusTag, "wordCacheWSize"));
 	var wordCacheMax=getValue(getFirstChild(statusTag, "wordCacheMaxCount"));
+	var wordCacheMaxSize=getValue(getFirstChild(statusTag, "wordCacheMaxSize"));
 
 	wordCacheNum=document.getElementById("wordcacheNum");
 	removeAllChildren(wordCacheNum);
-	wordCacheNum.appendChild(document.createTextNode(wordCache+"/"+wordCacheMax));
+	wordCacheNum.appendChild(document.createTextNode(wordCacheSize+"/"+wordCacheMaxSize));
 	
 	wordCacheSpan=document.getElementById("wordcacheSpan");
 	removeAllChildren(wordCacheSpan);

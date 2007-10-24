@@ -103,17 +103,17 @@ public final class Settings_p {
 
         prop.put("port", env.getConfig("port", "8080"));               
         
-        prop.put("peerName", env.getConfig("peerName", "nameless"));
+        prop.putHTML("peerName", env.getConfig("peerName", "nameless"));
         prop.put("staticIP", env.getConfig("staticIP", ""));
         String peerLang = env.getConfig("locale.language", "default");
         if (peerLang.equals("default")) peerLang = "en";
         prop.put("peerLang", peerLang);
         
         // http networking settings
-        prop.put("isTransparentProxy", env.getConfig("isTransparentProxy", "false").equals("true") ? 1 : 0); 
-        prop.put("connectionKeepAliveSupport", env.getConfig("connectionKeepAliveSupport", "false").equals("true") ? 1 : 0);
-        prop.put("proxy.sendViaHeader", env.getConfig("proxy.sendViaHeader", "false").equals("true") ? 1 : 0);
-        prop.put("proxy.sendXForwardedForHeader", env.getConfig("proxy.sendXForwardedForHeader", "true").equals("true") ? 1 : 0);
+        prop.put("isTransparentProxy", env.getConfig("isTransparentProxy", "false").equals("true") ? "1" : "0"); 
+        prop.put("connectionKeepAliveSupport", env.getConfig("connectionKeepAliveSupport", "false").equals("true") ? "1" : "0");
+        prop.put("proxy.sendViaHeader", env.getConfig("proxy.sendViaHeader", "false").equals("true") ? "1" : "0");
+        prop.put("proxy.sendXForwardedForHeader", env.getConfig("proxy.sendXForwardedForHeader", "true").equals("true") ? "1" : "0");
         
         // remote port forwarding settings
         String[] forwardingMethods = new String[]{"sch","upnp"};
@@ -130,15 +130,15 @@ public final class Settings_p {
             } catch (Exception e) {
             } catch (Error e) {}
         }
-        prop.put("forwardingMethods",methodCount);
+        prop.put("forwardingMethods", methodCount);
         
         if (methodCount > 0) portForwardingAvailable = true;
         
         prop.put("portForwarding.Type",currentForwarder);
-        prop.put("portForwarding.Available",portForwardingAvailable? 1:0);
-        prop.put("portForwarding.Enabled",env.getConfig("portForwarding.Enabled","false").equals("true")? 1 : 0);
+        prop.put("portForwarding.Available",portForwardingAvailable? "1" : "0");
+        prop.put("portForwarding.Enabled",env.getConfig("portForwarding.Enabled","false").equals("true")? "1" : "0");
         
-        prop.put("portForwarding.sch.UseProxy",env.getConfig("portForwarding.sch.UseProxy", "false").equals("true")? 1 : 0);
+        prop.put("portForwarding.sch.UseProxy",env.getConfig("portForwarding.sch.UseProxy", "false").equals("true") ? "1" : "0");
         prop.put("portForwarding.sch.Port",env.getConfig("portForwarding.sch.Port", ""));        
         prop.put("portForwarding.sch.Host",env.getConfig("portForwarding.sch.Host", ""));
         prop.put("portForwarding.sch.HostPort",env.getConfig("portForwarding.sch.HostPort", ""));
@@ -177,14 +177,14 @@ public final class Settings_p {
         prop.put("remoteProxyNoProxy", env.getConfig("remoteProxyNoProxy", ""));
         
         // proxy access filter
-        prop.put("proxyfilter", env.getConfig("proxyClient", "*"));
+        prop.putHTML("proxyfilter", env.getConfig("proxyClient", "*"));
         
         // proxy password
         if ( env.getConfig("use_proxyAccounts", "false").equals("false") ) {
             // no password has been specified
-            prop.put("use_proxyAccounts", 0); //unchecked
+            prop.put("use_proxyAccounts", "0"); //unchecked
         } else {
-            prop.put("use_proxyAccounts", 1); //checked
+            prop.put("use_proxyAccounts", "1"); //checked
             /*s = env.getConfig("proxyAccount", "proxy:void");
             pos = s.indexOf(":");
             if (pos < 0) {
@@ -195,7 +195,7 @@ public final class Settings_p {
         }
         
         // server access filter
-        prop.put("serverfilter", env.getConfig("serverClient", "*"));
+        prop.putHTML("serverfilter", env.getConfig("serverClient", "*"));
         
         // server password
         if (env.getConfig("serverAccountBase64", "").length() == 0) {
@@ -212,7 +212,7 @@ public final class Settings_p {
         }
         
         // clientIP
-        prop.put("clientIP", (String) header.get("CLIENTIP", "<unknown>")); // read an artificial header addendum
+        prop.putHTML("clientIP", (String) header.get("CLIENTIP", "<unknown>"), true); // read an artificial header addendum
         
         /* 
          * seed upload settings
@@ -232,7 +232,7 @@ public final class Settings_p {
         HashMap uploaders = yacyCore.getSeedUploadMethods();
         prop.put("seedUploadMethods", uploaders.size() + 1);
         prop.put("seedUploadMethods_0_name", "none");
-        prop.put("seedUploadMethods_0_selected", enabledUploader.equals("none")?1:0);
+        prop.put("seedUploadMethods_0_selected", enabledUploader.equals("none") ? "1" : "0");
         prop.put("seedUploadMethods_0_file", "");
         
         int count = 0;
@@ -241,7 +241,7 @@ public final class Settings_p {
             count++;
             String uploaderName = (String) uploaderKeys.next();
             prop.put("seedUploadMethods_" +count+ "_name", uploaderName);
-            prop.put("seedUploadMethods_" +count+ "_selected", uploaderName.equals(enabledUploader)?1:0);            
+            prop.put("seedUploadMethods_" +count+ "_selected", uploaderName.equals(enabledUploader) ? "1" : "0");            
             prop.put("seedUploadMethods_" +count+ "_file", "Settings_Seed_Upload" + uploaderName + ".inc");
             
             yacySeedUploader theUploader = yacyCore.getSeedUploader(uploaderName);
@@ -260,7 +260,7 @@ public final class Settings_p {
         /*
          * Message forwarding configuration
          */
-        prop.put("msgForwardingEnabled",env.getConfig("msgForwardingEnabled","false").equals("true")? 1 : 0);
+        prop.put("msgForwardingEnabled",env.getConfig("msgForwardingEnabled","false").equals("true") ? "1" : "0");
         prop.put("msgForwardingCmd",env.getConfig("msgForwardingCmd", ""));
         prop.put("msgForwardingTo",env.getConfig("msgForwardingTo", ""));
         
@@ -290,9 +290,9 @@ public final class Settings_p {
         while (availableParserIter.hasNext()) {
             ParserInfo parserInfo = (ParserInfo) availableParserIter.next();
             prop.put("parser_" + parserIdx + "_name", parserInfo.parserName);
-            prop.put("parser_" + parserIdx + "_version", parserInfo.parserVersionNr);
-            prop.put("parser_" + parserIdx + "_usage", Integer.toString(parserInfo.usageCount));
-            prop.put("parser_" + parserIdx + "_colspan",Integer.toString(configArray.length));
+            prop.putHTML("parser_" + parserIdx + "_version", parserInfo.parserVersionNr, true);
+            prop.put("parser_" + parserIdx + "_usage", parserInfo.usageCount);
+            prop.put("parser_" + parserIdx + "_colspan", configArray.length);
             
             int mimeIdx = 0;
             Enumeration mimeTypeIter = parserInfo.supportedMimeTypes.keys();
@@ -305,10 +305,10 @@ public final class Settings_p {
                 for (int i=0; i<configArray.length; i++) {
                     HashSet enabledParsers =  configArray[i].getEnabledParserList();
                     prop.put("parser_" + parserIdx + "_mime_" + mimeIdx + "_parserMode_" + i + "_optionName", configArray[i].parserMode + "." + mimeType);
-                    prop.put("parser_" + parserIdx + "_mime_" + mimeIdx + "_parserMode_" + i + "_status", enabledParsers.contains(mimeType) ? 1:0);
+                    prop.put("parser_" + parserIdx + "_mime_" + mimeIdx + "_parserMode_" + i + "_status", enabledParsers.contains(mimeType) ? "1" : "0");
                     allParsersEnabled[i] &= enabledParsers.contains(mimeType);
                 }
-                prop.put("parser_" + parserIdx + "_mime_" + mimeIdx + "_parserMode",configArray.length);
+                prop.put("parser_" + parserIdx + "_mime_" + mimeIdx + "_parserMode", configArray.length);
                 mimeIdx++;
             }
             prop.put("parser_" + parserIdx + "_mime", mimeIdx);
@@ -318,11 +318,11 @@ public final class Settings_p {
         
         for (int i=0; i<configArray.length; i++) {
             prop.put("parserMode_" + i + "_name",configArray[i].parserMode);
-            prop.put("parserMode_" + i + "_allParserEnabled",allParsersEnabled[i] ? 1:0);
+            prop.put("parserMode_" + i + "_allParserEnabled",allParsersEnabled[i] ? "1" : "0");
         }
         prop.put("parserMode",configArray.length);
         prop.put("parser", parserIdx);
-        prop.put("parser.colspan", Integer.toString(configArray.length+2));
+        prop.put("parser.colspan", configArray.length+2);
         
         // Crawler settings
         prop.put("crawler.clientTimeout",sb.getConfig("crawler.clientTimeout", "10000"));

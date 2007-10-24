@@ -109,15 +109,15 @@ public class News {
         // generate properties for output
         if (overview) {
             // show overview
-            prop.put("table", 0);
-            prop.put("page", 0);
-            prop.put("table_insize", yacyCore.newsPool.size(yacyNewsPool.INCOMING_DB));
-            prop.put("table_prsize", yacyCore.newsPool.size(yacyNewsPool.PROCESSED_DB));
-            prop.put("table_ousize", yacyCore.newsPool.size(yacyNewsPool.OUTGOING_DB));
-            prop.put("table_pusize", yacyCore.newsPool.size(yacyNewsPool.PUBLISHED_DB));
+            prop.put("table", "0");
+            prop.put("page", "0");
+            prop.putNum("table_insize", yacyCore.newsPool.size(yacyNewsPool.INCOMING_DB));
+            prop.putNum("table_prsize", yacyCore.newsPool.size(yacyNewsPool.PROCESSED_DB));
+            prop.putNum("table_ousize", yacyCore.newsPool.size(yacyNewsPool.OUTGOING_DB));
+            prop.putNum("table_pusize", yacyCore.newsPool.size(yacyNewsPool.PUBLISHED_DB));
         } else {
             // generate table
-            prop.put("table", 1);
+            prop.put("table", "1");
             prop.put("page", tableID + 1);
             prop.put("table_page", tableID + 1);
             
@@ -137,7 +137,7 @@ public class News {
                     if (seed == null) seed = yacyCore.seedDB.getDisconnected(record.originator());
                     String category = record.category();
                     prop.put("table_list_" + i + "_id", record.id());
-                    prop.put("table_list_" + i + "_ori", (seed == null) ? record.originator() : seed.getName());
+                    prop.putHTML("table_list_" + i + "_ori", (seed == null) ? record.originator() : seed.getName());
                     prop.put("table_list_" + i + "_cre", serverDate.shortSecondTime(record.created()));
                     prop.put("table_list_" + i + "_crerfcdate", httpc.dateString(record.created()));
                     prop.put("table_list_" + i + "_cat", category);
@@ -145,7 +145,7 @@ public class News {
                     prop.put("table_list_" + i + "_dis", record.distributed());
                     
                     Map attributeMap = record.attributes();
-                    prop.put("table_list_" + i + "_att", attributeMap.toString() );                    
+                    prop.putHTML("table_list_" + i + "_att", attributeMap.toString());
                     int j = 0;
                     if (attributeMap.size() > 0) {
 	                    Iterator attributeKeys = attributeMap.keySet().iterator();
@@ -153,11 +153,11 @@ public class News {
 	                    	String key = (String) attributeKeys.next();
 	                    	String value = (String) attributeMap.get(key);
 	                    	prop.put("table_list_" + i + "_attributes_" + j + "_name",key);
-	                    	prop.put("table_list_" + i + "_attributes_" + j + "_value",value);
+	                    	prop.putHTML("table_list_" + i + "_attributes_" + j + "_value",value);
 	                    	j++;
 	                    }
                     }
-                    prop.put("table_list_" + i + "_attributes",j);       
+                    prop.put("table_list_" + i + "_attributes", j);
                                         
                     // generating link / title / description (taken over from Surftips.java)
                     String link, title, description;
@@ -195,8 +195,8 @@ public class News {
                     	description = "";
                     }
                     prop.put("table_list_" + i + "_link", link);
-                    prop.put("table_list_" + i + "_title", title);
-                    prop.put("table_list_" + i + "_description", description);
+                    prop.putHTML("table_list_" + i + "_title", title);
+                    prop.putHTML("table_list_" + i + "_description", description);
                     
                     i++;
                 }
@@ -210,5 +210,4 @@ public class News {
         // return rewrite properties
         return prop;
     }
-
 }

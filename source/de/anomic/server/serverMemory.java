@@ -26,9 +26,8 @@
 
 package de.anomic.server;
 
-import java.text.DecimalFormat;
-
 import de.anomic.server.logging.serverLog;
+import de.anomic.tools.yFormatter;
 
 public class serverMemory {
 
@@ -150,15 +149,14 @@ public class serverMemory {
         try {
             final StringBuffer byteString = new StringBuffer();
 
-            final DecimalFormat df = new DecimalFormat( "0.00" );
             if (byteCount > 1073741824) {
-                byteString.append(df.format((double)byteCount / (double)1073741824 ))
+                byteString.append(yFormatter.number((double)byteCount / (double)1073741824 ))
                           .append(" GB");
             } else if (byteCount > 1048576) {
-                byteString.append(df.format((double)byteCount / (double)1048576))
+                byteString.append(yFormatter.number((double)byteCount / (double)1048576))
                           .append(" MB");
             } else if (byteCount > 1024) {
-                byteString.append(df.format((double)byteCount / (double)1024))
+                byteString.append(yFormatter.number((double)byteCount / (double)1024))
                           .append(" KB");
             } else {
                 byteString.append(Long.toString(byteCount))

@@ -78,54 +78,54 @@ public class User_p {
         for(i=0;i<rights.length;i++){
         		prop.put("rights_"+i+"_name", rights[i]);
         		prop.put("rights_"+i+"_friendlyName", rightNames[i]);
-        		prop.put("rights_"+i+"_set", 0);
+        		prop.put("rights_"+i+"_set", "0");
         }
         prop.put("rights", i);
         
-        prop.put("users", 0);
+        prop.put("users", "0");
 
         if(sb.userDB == null)
             return prop;
         
         if(post == null){
-			//do nothing
-            
-        //user != current_user
-        //user=from userlist
-        //current_user = edited user
-		} else if(post.containsKey("user") && !((String)post.get("user")).equals("newuser")){
-			if(post.containsKey("change_user")){
-	            //defaults for newuser are set above                
-		        entry=sb.userDB.getEntry((String)post.get("user"));
-		        // program crashes if a submit with emty username was made on previous mask and the user clicked on the 
-		        // link: "If you want to manage more Users, return to the user page." (parameter "user" is empty)
+            //do nothing
+
+            //user != current_user
+            //user=from userlist
+            //current_user = edited user
+        } else if(post.containsKey("user") && !((String)post.get("user")).equals("newuser")){
+            if(post.containsKey("change_user")){
+                //defaults for newuser are set above                
+                entry=sb.userDB.getEntry((String)post.get("user"));
+                // program crashes if a submit with emty username was made on previous mask and the user clicked on the 
+                // link: "If you want to manage more Users, return to the user page." (parameter "user" is empty)
                 if (entry != null) {
-    			    //TODO: set username read-only in html
+                    //TODO: set username read-only in html
                     prop.put("current_user", post.get("user"));
-    	                prop.put("username", post.get("user"));
-    	                prop.put("firstname", entry.getFirstName());
-    	                prop.put("lastname", entry.getLastName());
-    	                prop.put("address", entry.getAddress());
-    	                prop.put("timelimit", entry.getTimeLimit());
-    	                prop.put("timeused", entry.getTimeUsed());
-    	                for(i=0;i<rights.length;i++){
-    	                		prop.put("rights_"+i+"_set", (entry.hasRight(rights[i])?1:0));
-    	                }
-    	                prop.put("rights", i);
+                    prop.put("username", post.get("user"));
+                    prop.putHTML("firstname", entry.getFirstName());
+                    prop.putHTML("lastname", entry.getLastName());
+                    prop.putHTML("address", entry.getAddress());
+                    prop.put("timelimit", entry.getTimeLimit());
+                    prop.put("timeused", entry.getTimeUsed());
+                    for(i=0;i<rights.length;i++){
+                        prop.put("rights_"+i+"_set", entry.hasRight(rights[i]) ? "1" : "0");
+                    }
+                    prop.put("rights", i);
                 }
-			}else if( post.containsKey("delete_user") && !((String)post.get("user")).equals("newuser") ){
-				sb.userDB.removeEntry((String)post.get("user"));
-			}
+            }else if( post.containsKey("delete_user") && !((String)post.get("user")).equals("newuser") ){
+                sb.userDB.removeEntry((String)post.get("user"));
+            }
         } else if(post.containsKey("change")) { //New User / edit User
-            prop.put("text", 0);
-            prop.put("error", 0);
+            prop.put("text", "0");
+            prop.put("error", "0");
 
             
             String username=(String)post.get("username");
             String pw=(String)post.get("password");
             String pw2=(String)post.get("password2");
             if(! pw.equals(pw2)){
-                prop.put("error", 2); //PW does not match
+                prop.put("error", "2"); //PW does not match
                 return prop;
             }
             String firstName=(String)post.get("firstname");
@@ -154,10 +154,10 @@ public class User_p {
                 try{
                     entry=sb.userDB.createEntry(username, mem);
                     sb.userDB.addEntry(entry);
-                    prop.put("text_username", username);
-                    prop.put("text", 1);
+                    prop.putHTML("text_username", username);
+                    prop.put("text", "1");
                 }catch(IllegalArgumentException e){
-                    prop.put("error", 3);
+                    prop.put("error", "3");
                 }
                 
                 
@@ -179,12 +179,12 @@ public class User_p {
 		            }catch (IOException e){
 					}
                 }else{
-					prop.put("error", 1);
+					prop.put("error", "1");
 				}
-				prop.put("text_username", username);
-				prop.put("text", 2);
+				prop.putHTML("text_username", username);
+				prop.put("text", "2");
             }//edit user
-			prop.put("username", username);
+			prop.putHTML("username", username);
         }
 		
 		//Generate Userlist
@@ -192,7 +192,7 @@ public class User_p {
         int numUsers=0;
         while(it.hasNext()){
             entry = (userDB.Entry)it.next();
-            prop.put("users_"+numUsers+"_user", entry.getUserName());
+            prop.putHTML("users_"+numUsers+"_user", entry.getUserName());
             numUsers++;
         }
         prop.put("users", numUsers);

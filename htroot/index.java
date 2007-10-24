@@ -39,7 +39,6 @@ import de.anomic.server.serverDate;
 import de.anomic.server.serverObjects;
 import de.anomic.server.serverSwitch;
 import de.anomic.yacy.yacyCore;
-import de.anomic.yacy.yacySeed;
 import de.anomic.yacy.yacyURL;
 
 public class index {
@@ -106,40 +105,41 @@ public class index {
         
         //long mylinks = 0;
         try {
-            prop.put("links", groupDigits(/*mylinks = */Long.parseLong(yacyCore.seedDB.mySeed().get(yacySeed.LCOUNT, "0"))));
-        } catch (NumberFormatException e) { prop.put("links", "0"); }
+            prop.putNum("links", yacyCore.seedDB.mySeed().getLinkCount());
+        } catch (NumberFormatException e) { prop.putHTML("links", "0"); }
         //prop.put("total-links", groupDigits(mylinks + yacyCore.seedDB.countActiveURL())); // extremely time-intensive!
         
         // we create empty entries for template strings
         String promoteSearchPageGreeting = env.getConfig("promoteSearchPageGreeting", "");
         if (env.getConfigBool("promoteSearchPageGreeting.useNetworkName", false)) promoteSearchPageGreeting = env.getConfig("network.unit.description", "");
         if (promoteSearchPageGreeting.length() == 0) promoteSearchPageGreeting = "P2P WEB SEARCH";
-        prop.putASIS("promoteSearchPageGreeting", promoteSearchPageGreeting);
-        prop.put("former", former);
-        prop.put("num-results", 0);
-        prop.put("excluded", 0);
-        prop.put("combine", 0);
-        prop.put("resultbottomline", 0);
+        prop.putHTML("promoteSearchPageGreeting", promoteSearchPageGreeting);
+        prop.putHTML("former", former);
+        prop.put("num-results", "0");
+        prop.put("excluded", "0");
+        prop.put("combine", "0");
+        prop.put("resultbottomline", "0");
         prop.put("searchoptions", searchoptions);
-        prop.put("searchoptions_count-10", (count == 10) ? 1 : 0);
-        prop.put("searchoptions_count-50", (count == 50) ? 1 : 0);
-        prop.put("searchoptions_count-100", (count == 100) ? 1 : 0);
-        prop.put("searchoptions_resource-global", ((global) ? 1 : 0));
-        prop.put("searchoptions_resource-global-disabled", (indexReceiveGranted && indexDistributeGranted) ? 0 : 1);
-        prop.put("searchoptions_resource-global-disabled_reason", (indexReceiveGranted) ? 0 : (indexDistributeGranted) ? 1 : 2);
-        prop.put("searchoptions_resource-local", ((global) ? 0 : 1));
-        prop.put("searchoptions_time-1", (time == 1) ? 1 : 0);
-        prop.put("searchoptions_time-2", (time == 2) ? 1 : 0);
-        prop.put("searchoptions_time-4", (time == 4) ? 1 : 0);
-        prop.put("searchoptions_time-6", (time == 6) ? 1 : 0);
-        prop.put("searchoptions_time-8", (time == 8) ? 1 : 0);
-        prop.put("searchoptions_time-10", (time == 10) ? 1 : 0);
-        prop.put("searchoptions_urlmaskoptions", 0);
-        prop.put("searchoptions_urlmaskoptions_urlmaskfilter", urlmaskfilter);
-        prop.put("searchoptions_prefermaskoptions", 0);
-        prop.put("searchoptions_prefermaskoptions_prefermaskfilter", prefermaskfilter);
+        prop.put("searchoptions_count-10", (count == 10) ? "1" : "0");
+        prop.put("searchoptions_count-50", (count == 50) ? "1" : "0");
+        prop.put("searchoptions_count-100", (count == 100) ? "1" : "0");
+        prop.put("searchoptions_resource-global", global ? "1" : "0");
+        prop.put("searchoptions_resource-global-disabled", (indexReceiveGranted && indexDistributeGranted) ? "0" : "1");
+        prop.put("searchoptions_resource-global-disabled_reason", 
+                (indexReceiveGranted) ? "0" : (indexDistributeGranted ? "1" : "2"));
+        prop.put("searchoptions_resource-local", global ? "0" : "1");
+        prop.put("searchoptions_time-1", (time == 1) ? "1" : "0");
+        prop.put("searchoptions_time-2", (time == 2) ? "1" : "0");
+        prop.put("searchoptions_time-4", (time == 4) ? "1" : "0");
+        prop.put("searchoptions_time-6", (time == 6) ? "1" : "0");
+        prop.put("searchoptions_time-8", (time == 8) ? "1" : "0");
+        prop.put("searchoptions_time-10", (time == 10) ? "1" : "0");
+        prop.put("searchoptions_urlmaskoptions", "0");
+        prop.putHTML("searchoptions_urlmaskoptions_urlmaskfilter", urlmaskfilter);
+        prop.put("searchoptions_prefermaskoptions", "0");
+        prop.putHTML("searchoptions_prefermaskoptions_prefermaskfilter", prefermaskfilter);
         prop.put("searchoptions_indexofChecked", "");
-        prop.put("searchoptions_publicSearchpage", (publicPage == true) ? 0 : 1);
+        prop.put("searchoptions_publicSearchpage", (publicPage == true) ? "0" : "1");
         prop.put("results", "");
         prop.put("cat", cat);
         prop.put("type", type);
@@ -147,19 +147,12 @@ public class index {
         prop.put("display", display);
         prop.put("constraint", constraint);
         prop.put("searchoptions_display", display);
-        prop.put("contentdomCheckText", (contentdom == plasmaSearchQuery.CONTENTDOM_TEXT) ? 1 : 0);
-        prop.put("contentdomCheckAudio", (contentdom == plasmaSearchQuery.CONTENTDOM_AUDIO) ? 1 : 0);
-        prop.put("contentdomCheckVideo", (contentdom == plasmaSearchQuery.CONTENTDOM_VIDEO) ? 1 : 0);
-        prop.put("contentdomCheckImage", (contentdom == plasmaSearchQuery.CONTENTDOM_IMAGE) ? 1 : 0);
-        prop.put("contentdomCheckApp", (contentdom == plasmaSearchQuery.CONTENTDOM_APP) ? 1 : 0);
+        prop.put("contentdomCheckText", (contentdom == plasmaSearchQuery.CONTENTDOM_TEXT) ? "1" : "0");
+        prop.put("contentdomCheckAudio", (contentdom == plasmaSearchQuery.CONTENTDOM_AUDIO) ? "1" : "0");
+        prop.put("contentdomCheckVideo", (contentdom == plasmaSearchQuery.CONTENTDOM_VIDEO) ? "1" : "0");
+        prop.put("contentdomCheckImage", (contentdom == plasmaSearchQuery.CONTENTDOM_IMAGE) ? "1" : "0");
+        prop.put("contentdomCheckApp", (contentdom == plasmaSearchQuery.CONTENTDOM_APP) ? "1" : "0");
 
         return prop;
-    }
-    
-    private static String groupDigits(long Number) {
-        final String s = Long.toString(Number);
-        String t = "";
-        for (int i = 0; i < s.length(); i++) t = s.charAt(s.length() - i - 1) + (((i % 3) == 0) ? "." : "") + t;
-        return t.substring(0, t.length() - 1);
     }
 }

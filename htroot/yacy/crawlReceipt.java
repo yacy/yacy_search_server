@@ -116,40 +116,40 @@ public final class crawlReceipt {
 
         if ((yacyCore.seedDB.mySeed() == null) || (!(yacyCore.seedDB.mySeed().hash.equals(youare)))) {
             // no yacy connection / unknown peers
-            prop.putASIS("delay", "3600");
+            prop.put("delay", "3600");
             return prop;
         }
         
         if (propStr == null) {
             // error with url / wrong key
-            prop.putASIS("delay", "3600");
+            prop.put("delay", "3600");
             return prop;
         }
         
         if ((switchboard.isRobinsonMode()) && (!switchboard.isInMyCluster(otherPeer))) {
         	// we reject urls that are from outside our cluster
-        	prop.putASIS("delay", "9999");
+        	prop.put("delay", "9999");
     	}
         
         // generating a new loaded URL entry
         indexURLEntry entry = switchboard.wordIndex.loadedURL.newEntry(propStr);
         if (entry == null) {
             log.logWarning("crawlReceipt: RECEIVED wrong RECEIPT (entry null) from peer " + iam + "\n\tURL properties: "+ propStr);
-            prop.putASIS("delay", "3600");
+            prop.put("delay", "3600");
             return prop;
         }
         
         indexURLEntry.Components comp = entry.comp();
         if (comp.url() == null) {
             log.logWarning("crawlReceipt: RECEIVED wrong RECEIPT (url null) for hash " + entry.hash() + " from peer " + iam + "\n\tURL properties: "+ propStr);
-            prop.putASIS("delay", "3600");
+            prop.put("delay", "3600");
             return prop;
         }
         
         // check if the entry is in our network domain
         if (!switchboard.acceptURL(comp.url())) {
             log.logWarning("crawlReceipt: RECEIVED wrong RECEIPT (url outside of our domain) for hash " + entry.hash() + " from peer " + iam + "\n\tURL properties: "+ propStr);
-            prop.putASIS("delay", "9999");
+            prop.put("delay", "9999");
             return prop;
         }
         
@@ -161,11 +161,11 @@ public final class crawlReceipt {
             log.logInfo("crawlReceipt: RECEIVED RECEIPT from " + otherPeerName + " for URL " + entry.hash() + ":" + comp.url().toNormalform(false, true));
 
             // ready for more
-            prop.putASIS("delay", "10");
+            prop.put("delay", "10");
             return prop;
         } catch (IOException e) {
             e.printStackTrace();
-            prop.putASIS("delay", "3600");
+            prop.put("delay", "3600");
             return prop;
         }
 
@@ -174,7 +174,7 @@ public final class crawlReceipt {
         ee.store();
         switchboard.errorURL.stackPushEntry(ee);
         //switchboard.noticeURL.remove(receivedUrlhash);
-        prop.putASIS("delay", "3600");
+        prop.put("delay", "3600");
         return prop;
 	
          // return rewrite properties

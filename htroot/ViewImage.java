@@ -64,7 +64,7 @@ public class ViewImage {
     
     public static Image respond(httpHeader header, serverObjects post, serverSwitch env) {
         
-        plasmaSwitchboard sb = (plasmaSwitchboard)env;     
+        plasmaSwitchboard sb = (plasmaSwitchboard)env;
         
         // the url to the image can be either submitted with an url in clear text, or using a license key
         // if the url is given as clear text, the user must be authorized as admin

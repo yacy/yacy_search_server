@@ -53,7 +53,6 @@ import java.util.Date;
 import java.util.Iterator;
 import java.util.Locale;
 
-import de.anomic.data.htmlTools;
 import de.anomic.http.httpHeader;
 import de.anomic.plasma.plasmaCrawlEntry;
 import de.anomic.plasma.plasmaCrawlLoaderMessage;
@@ -82,18 +81,20 @@ public class queues_p {
         plasmaSwitchboard switchboard = (plasmaSwitchboard) env;
         //wikiCode wikiTransformer = new wikiCode(switchboard);
         serverObjects prop = new serverObjects();
-        prop.put("rejected", 0);
+        if (post == null || !post.containsKey("html"))
+            prop.setLocalized(false);
+        prop.put("rejected", "0");
         //int showRejectedCount = 10;
         
         yacySeed initiator;
         
         //indexing queue
-        prop.put("indexingSize", switchboard.getThread(plasmaSwitchboard.INDEXER).getJobCount()+switchboard.indexingTasksInProcess.size());
-        prop.put("indexingMax", plasmaSwitchboard.indexingSlots);
-        prop.put("urlpublictextSize", switchboard.wordIndex.loadedURL.size());
-        prop.put("rwipublictextSize", switchboard.wordIndex.size());
+        prop.putNum("indexingSize", switchboard.getThread(plasmaSwitchboard.INDEXER).getJobCount()+switchboard.indexingTasksInProcess.size());
+        prop.putNum("indexingMax", plasmaSwitchboard.indexingSlots);
+        prop.putNum("urlpublictextSize", switchboard.wordIndex.loadedURL.size());
+        prop.putNum("rwipublictextSize", switchboard.wordIndex.size());
         if ((switchboard.sbQueue.size() == 0) && (switchboard.indexingTasksInProcess.size() == 0)) {
-            prop.put("list", 0); //is empty
+            prop.put("list", "0"); //is empty
         } else {
             plasmaSwitchboardQueue.Entry pcentry;
             int inProcessCount = 0;
@@ -125,13 +126,13 @@ public class queues_p {
                     totalSize += entrySize;
                     initiator = yacyCore.seedDB.getConnected(pcentry.initiator());
                     prop.put("list-indexing_"+i+"_profile", (pcentry.profile() != null) ? pcentry.profile().name() : "deleted");
-                    prop.put("list-indexing_"+i+"_initiator", ((initiator == null) ? "proxy" : htmlTools.encodeUnicode2html(initiator.getName(), true)));
+                    prop.put("list-indexing_"+i+"_initiator", ((initiator == null) ? "proxy" : initiator.getName()));
                     prop.put("list-indexing_"+i+"_depth", pcentry.depth());
                     prop.put("list-indexing_"+i+"_modified", pcentry.getModificationDate());
-                    prop.put("list-indexing_"+i+"_anchor", (pcentry.anchorName()==null)?"":htmlTools.encodeUnicode2html(pcentry.anchorName(), true));
+                    prop.putHTML("list-indexing_"+i+"_anchor", (pcentry.anchorName()==null) ? "" : pcentry.anchorName(), true);
                     prop.put("list-indexing_"+i+"_url", pcentry.url().toNormalform(false, true));
-                    prop.put("list-indexing_"+i+"_size", entrySize);
-                    prop.put("list-indexing_"+i+"_inProcess", (inProcess)?1:0);
+                    prop.putNum("list-indexing_"+i+"_size", entrySize);
+                    prop.put("list-indexing_"+i+"_inProcess", (inProcess) ? "1" : "0");
                     prop.put("list-indexing_"+i+"_hash", pcentry.urlHash());
                     ok++;
                 }
@@ -140,12 +141,12 @@ public class queues_p {
         }
         
         //loader queue
-        prop.put("loaderSize", Integer.toString(switchboard.cacheLoader.size()));        
-        prop.put("loaderMax", Integer.toString(plasmaSwitchboard.crawlSlots));
+        prop.put("loaderSize", switchboard.cacheLoader.size());
+        prop.put("loaderMax", plasmaSwitchboard.crawlSlots);
         if (switchboard.cacheLoader.size() == 0) {
-            prop.put("list-loader", 0);
+            prop.put("list-loader", "0");
         } else {
-            ThreadGroup loaderThreads = switchboard.cacheLoader.threadStatus();            
+            ThreadGroup loaderThreads = switchboard.cacheLoader.threadStatus();
             Thread[] threadList = new Thread[loaderThreads.activeCount()*2];
             int size = loaderThreads.enumerate(threadList);
             
@@ -165,17 +166,17 @@ public class queues_p {
         }
         
         //local crawl queue
-        prop.put("localCrawlSize", Integer.toString(switchboard.getThread(plasmaSwitchboard.CRAWLJOB_LOCAL_CRAWL).getJobCount()));
+        prop.putNum("localCrawlSize", switchboard.getThread(plasmaSwitchboard.CRAWLJOB_LOCAL_CRAWL).getJobCount());
         prop.put("localCrawlState", switchboard.crawlJobIsPaused(plasmaSwitchboard.CRAWLJOB_LOCAL_CRAWL) ? STATE_PAUSED : STATE_RUNNING);
         int stackSize = switchboard.noticeURL.stackSize(plasmaCrawlNURL.STACK_TYPE_CORE);
         addNTable(prop, "list-local", switchboard.noticeURL.top(plasmaCrawlNURL.STACK_TYPE_CORE, Math.min(10, stackSize)));
         
         //global crawl queue
-        prop.put("remoteCrawlSize", Integer.toString(switchboard.getThread(plasmaSwitchboard.CRAWLJOB_GLOBAL_CRAWL_TRIGGER).getJobCount()));
+        prop.putNum("remoteCrawlSize", switchboard.getThread(plasmaSwitchboard.CRAWLJOB_GLOBAL_CRAWL_TRIGGER).getJobCount());
         prop.put("remoteCrawlState", switchboard.crawlJobIsPaused(plasmaSwitchboard.CRAWLJOB_GLOBAL_CRAWL_TRIGGER) ? STATE_PAUSED : STATE_RUNNING);
         stackSize = switchboard.noticeURL.stackSize(plasmaCrawlNURL.STACK_TYPE_LIMIT);
         if (stackSize == 0) {
-            prop.put("list-remote", 0);
+            prop.put("list-remote", "0");
         } else {
             addNTable(prop, "list-remote", switchboard.noticeURL.top(plasmaCrawlNURL.STACK_TYPE_LIMIT, Math.min(10, stackSize)));
         }
@@ -198,8 +199,8 @@ public class queues_p {
                 prop.put(tableName + "_" + showNum + "_initiator", ((initiator == null) ? "proxy" : initiator.getName()));
                 prop.put(tableName + "_" + showNum + "_depth", urle.depth());
                 prop.put(tableName + "_" + showNum + "_modified", daydate(urle.loaddate()));
-                prop.put(tableName + "_" + showNum + "_anchor", urle.name());
-                prop.put(tableName + "_" + showNum + "_url", urle.url().toNormalform(false, true));
+                prop.putHTML(tableName + "_" + showNum + "_anchor", urle.name(), true);
+                prop.putHTML(tableName + "_" + showNum + "_url", urle.url().toNormalform(false, true), true);
                 prop.put(tableName + "_" + showNum + "_hash", urle.url().hash());
                 showNum++;
             }
@@ -208,6 +209,3 @@ public class queues_p {
 
     }
 }
-
-
-

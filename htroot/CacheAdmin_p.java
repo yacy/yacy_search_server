@@ -161,13 +161,13 @@ public class CacheAdmin_p {
                         
                         final plasmaParserDocument document = switchboard.parser.transformScraper(url, mimeType, sourceCharset, scraper);
                         
-                        prop.put("info_type_title", scraper.getTitle());
+                        prop.putHTML("info_type_title", scraper.getTitle());
                         
                         int i;
                         String[] t = document.getSectionTitles();
                         prop.put("info_type_headlines", t.length);
                         for (i = 0; i < t.length; i++)
-                        	prop.put("info_type_headlines_" + i + "_headline",
+                        	prop.putHTML("info_type_headlines_" + i + "_headline",
                         			t[i].replaceAll("\n", "").trim());
                         
                         formatAnchor(prop, document.getHyperlinks(), "links");
@@ -177,13 +177,13 @@ public class CacheAdmin_p {
                         formatAnchor(prop, document.getApplinks(), "apps");
                         formatAnchor(prop, document.getEmaillinks(), "email");
                         
-                        prop.put("info_type_text", new String(scraper.getText()));
+                        prop.putHTML("info_type_text", new String(scraper.getText()));
                         
                         i = 0;
                         final Iterator sentences = document.getSentences(false);
                         if (sentences != null)
                         	while (sentences.hasNext()) {
-                        		prop.put("info_type_lines_" + i + "_line",
+                        		prop.putHTML("info_type_lines_" + i + "_line",
                         				new String((StringBuffer) sentences.next()).replaceAll("\n", "").trim());
     	                        i++;
     	                    }
@@ -214,9 +214,9 @@ public class CacheAdmin_p {
             tree.ensureCapacity((list == null) ? 70 : (list.length + 1) * 256);
             linkPathString(prop, ((pathString.length() == 0) ? ("/") : (pathString)), true); 
             if (list == null) {
-                prop.put("info_empty", 1);
+                prop.put("info_empty", "1");
             } else {
-            	prop.put("info_empty", 0);
+            	prop.put("info_empty", "0");
                 final TreeSet dList = new TreeSet();
                 final TreeSet fList = new TreeSet();
                 int size = list.length - 1, i = size;
@@ -247,10 +247,10 @@ public class CacheAdmin_p {
             }
         }
         
-        prop.put("cachesize", Long.toString(plasmaHTCache.curCacheSize/1024));
-        prop.put("cachemax", Long.toString(plasmaHTCache.maxCacheSize/1024));
+        prop.putNum("cachesize", plasmaHTCache.curCacheSize/1024);
+        prop.putNum("cachemax", plasmaHTCache.maxCacheSize/1024);
         prop.put("path", path.toString());
-        prop.put("info_info", info.toString());
+        prop.putHTML("info_info", info.toString());
 
         /* prop.put("info_tree", tree.toString()); */
         // return rewrite properties
@@ -259,9 +259,9 @@ public class CacheAdmin_p {
     
     private static void formatHeader(serverObjects prop, Map header) {
         if (header == null) {
-            prop.put("info_header", 0);
+            prop.put("info_header", "0");
         } else {
-        	prop.put("info_header", 1);
+        	prop.put("info_header", "1");
         	int i = 0;
             final Iterator iter = header.entrySet().iterator();
             Map.Entry entry;
@@ -301,12 +301,12 @@ public class CacheAdmin_p {
         int i = 0;
         while (iter.hasNext()) {
             ie = (htmlFilterImageEntry) iter.next();
-            prop.put("info_type_use.images_images_" + i + "_name", ie.alt().replaceAll("\n", "").trim());
-            prop.put("info_type_use.images_images_" + i + "_link",
+            prop.putHTML("info_type_use.images_images_" + i + "_name", ie.alt().replaceAll("\n", "").trim());
+            prop.putHTML("info_type_use.images_images_" + i + "_link",
             		de.anomic.data.htmlTools.encodeUnicode2html(ie.url().toNormalform(false, true), false));
             i++;
         }
-        prop.put("info_type_use.images", (i == 0) ? 0 : 1);
+        prop.put("info_type_use.images", (i == 0) ? "0" : "1");
     }
 
     private static void linkPathString(serverObjects prop, String path, boolean dir) {
@@ -316,13 +316,12 @@ public class CacheAdmin_p {
         if (dir) { e = elements.length; } else { e = elements.length - 1; }
         for(i = 0; i < e; i++) {
             if (elements[i].length() == 0) continue;
-        	prop.put("paths_" + count + "_path", dirs);
-        	prop.put("paths_" + count + "_name", elements[i]);
+        	prop.putHTML("paths_" + count + "_path", dirs);
+        	prop.putHTML("paths_" + count + "_name", elements[i]);
         	dirs += "/" + elements[i];
             count++;
         }
         prop.put("paths", count);
         return;
     }
-
 }

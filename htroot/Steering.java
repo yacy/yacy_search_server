@@ -61,7 +61,7 @@ public class Steering {
 
         final plasmaSwitchboard sb = (plasmaSwitchboard) ss;
         final serverObjects prop = new serverObjects();
-        prop.put("info", 0); //no information submitted
+        prop.put("info", "0"); //no information submitted
         if (prop == null) { return null; }
 
         // handle access rights
@@ -72,13 +72,13 @@ public class Steering {
 
         if (post.containsKey("shutdown")) {
             sb.terminate(5000);
-            prop.put("info", 3);
+            prop.put("info", "3");
             return prop;
         }
 
         if (post.containsKey("restart")) {
             yacyVersion.restart();
-            prop.put("info", 4);
+            prop.put("info", "4");
 
             return prop;
         }
@@ -90,7 +90,7 @@ public class Steering {
             if ((!devenvironment) && (releaseFile.length() > 0) && (releaseFile.exists())) {
                 yacyVersion.deployRelease(releaseFileName);
             }
-            prop.put("info", 5);
+            prop.put("info", "5");
             prop.put("info_release", releaseFileName);
 
             return prop;

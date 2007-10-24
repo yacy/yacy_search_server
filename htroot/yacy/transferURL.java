@@ -174,8 +174,8 @@ public final class transferURL {
             result = "ok";
         }
 
-        prop.putASIS("double", doublevalues);
-        prop.putASIS("result", result);
+        prop.put("double", doublevalues);
+        prop.put("result", result);
         return prop;
     }
 }

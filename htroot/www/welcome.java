@@ -67,9 +67,9 @@ public class welcome {
         // update seed info
         yacyCore.peerActions.updateMySeed();
 
-        prop.put("peername", env.getConfig("peerName", "<nameless>"));
-        prop.put("peerdomain", env.getConfig("peerName", "<nameless>").toLowerCase());
-        prop.put("peeraddress", yacyCore.seedDB.mySeed().getPublicAddress());
+        prop.putHTML("peername", env.getConfig("peerName", "<nameless>"));
+        prop.putHTML("peerdomain", env.getConfig("peerName", "<nameless>").toLowerCase());
+        prop.putHTML("peeraddress", yacyCore.seedDB.mySeed().getPublicAddress());
         prop.put("hostname", serverDomains.myPublicIP());
         try{
             prop.put("hostip", InetAddress.getByName(serverDomains.myPublicIP()).getHostAddress());
@@ -82,8 +82,8 @@ public class welcome {
         final String peertype = (yacyCore.seedDB.mySeed() == null) ? yacySeed.PEERTYPE_JUNIOR : yacyCore.seedDB.mySeed().get(yacySeed.PEERTYPE, yacySeed.PEERTYPE_VIRGIN);
         final boolean senior = (peertype.equals(yacySeed.PEERTYPE_SENIOR)) || (peertype.equals(yacySeed.PEERTYPE_PRINCIPAL));
         if (senior) { prop.put("couldcan", "can"); } else { prop.put("couldcan", "could"); }
-        if (senior) { prop.put("seniorinfo", "This peer runs in senior mode which means that your peer can be accessed using the addresses shown above."); } else { prop.put("seniorinfo", "<b>Nobody can access your peer from the outside of your intranet. You must open your firewall and/or set a 'virtual server' in the settings of your router to enable access to the addresses as shown below.</b>"); }
-        prop.put("wwwpath", "<application_root_path>/" + env.getConfig("htDocsPath", "DATA/HTDOCS"));
+        if (senior) { prop.put("seniorinfo", "This peer runs in senior mode which means that your peer can be accessed using the addresses shown above."); } else { prop.putHTML("seniorinfo", "<b>Nobody can access your peer from the outside of your intranet. You must open your firewall and/or set a 'virtual server' in the settings of your router to enable access to the addresses as shown below.</b>"); }
+        prop.putHTML("wwwpath", "<application_root_path>/" + env.getConfig("htDocsPath", "DATA/HTDOCS"));
 
         // return rewrite properties
         return prop;

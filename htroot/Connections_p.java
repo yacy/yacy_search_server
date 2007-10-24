@@ -202,42 +202,43 @@ public final class Connections_p {
                     }
                 }
                 
-                prop.put("list_" + idx + "_dark", ((dark) ? 1 : 0) ); dark=!dark;
+                prop.put("list_" + idx + "_dark", dark ? "1" : "0");
+                dark=!dark;
                 try {
                     prop.put("list_" + idx + "_sessionID",URLEncoder.encode(currentSession.getName(),"UTF8"));
                 } catch (UnsupportedEncodingException e) {
                     // TODO Auto-generated catch block
                     e.printStackTrace();
                 }
-                prop.put("list_" + idx + "_sessionName",currentSession.getName());
-                prop.put("list_" + idx + "_proto",prot);             
+                prop.put("list_" + idx + "_sessionName", currentSession.getName());
+                prop.put("list_" + idx + "_proto", prot);
                 if (sessionTime > 1000*60) {
-                    prop.put("list_" + idx + "_ms",0);
+                    prop.put("list_" + idx + "_ms", "0");
                     prop.put("list_" + idx + "_ms_duration",serverDate.intervalToString(sessionTime));
                 } else {
-                    prop.put("list_" + idx + "_ms",1);
-                    prop.put("list_" + idx + "_ms_duration",Long.toString(sessionTime));
+                    prop.put("list_" + idx + "_ms", "1");
+                    prop.putNum("list_" + idx + "_ms_duration", sessionTime);
                 }
                 prop.put("list_" + idx + "_source",(seed!=null)?seed.getName()+".yacy":userAddress.getHostAddress()+":"+userPort);
                 prop.put("list_" + idx + "_dest",(dest==null)?"-":dest);
                 if (blockingRequest) {
-                    prop.put("list_" + idx + "_running",0);
-                    prop.put("list_" + idx + "_running_reqNr",Integer.toString(commandCount+1));
+                    prop.put("list_" + idx + "_running", "0");
+                    prop.putNum("list_" + idx + "_running_reqNr", commandCount+1);
                     numActivePending++;
                 } else {
-                    prop.put("list_" + idx + "_running",1);
-                    prop.put("list_" + idx + "_running_command",(commandLine==null)?"":commandLine);
+                    prop.put("list_" + idx + "_running", "1");
+                    prop.put("list_" + idx + "_running_command", commandLine==null ? "" :commandLine);
                     numActiveRunning++;
                 }
-                prop.put("list_" + idx + "_used",Integer.toString(commandCount));                
+                prop.putNum("list_" + idx + "_used", commandCount);
                 idx++;                
             }
         }     
-        prop.put("list",idx);
+        prop.put("list", idx);
         
-        prop.put("numMax",Integer.toString(numMax));
-        prop.put("numActiveRunning",Integer.toString(numActiveRunning));
-        prop.put("numActivePending",Integer.toString(numActivePending));
+        prop.putNum("numMax", numMax);
+        prop.putNum("numActiveRunning", numActiveRunning);
+        prop.putNum("numActivePending", numActivePending);
         
         // client sessions
         httpc[] a = httpc.allConnections();
@@ -247,10 +248,10 @@ public final class Connections_p {
             httpc clientConnection = a[i];
             if (clientConnection != null) {
                 prop.put("clientList_" + c + "_clientProtocol", (clientConnection.ssl) ? "HTTPS" : "HTTP");
-                prop.put("clientList_" + c + "_clientLifetime", System.currentTimeMillis() - clientConnection.initTime);
-                prop.put("clientList_" + c + "_clientIdletime", System.currentTimeMillis() - clientConnection.lastIO);
+                prop.putNum("clientList_" + c + "_clientLifetime", System.currentTimeMillis() - clientConnection.initTime);
+                prop.putNum("clientList_" + c + "_clientIdletime", System.currentTimeMillis() - clientConnection.lastIO);
                 prop.put("clientList_" + c + "_clientTargetHost", clientConnection.adressed_host + ":" + clientConnection.adressed_port);
-                prop.put("clientList_" + c + "_clientCommand", (clientConnection.command == null) ? "-" : clientConnection.command);
+                prop.putHTML("clientList_" + c + "_clientCommand", (clientConnection.command == null) ? "-" : clientConnection.command);
                 prop.put("clientList_" + c + "_clientID", clientConnection.hashCode());
                 c++;
             }
@@ -261,5 +262,4 @@ public final class Connections_p {
         // return rewrite values for templates
         return prop;
     }
-
 }

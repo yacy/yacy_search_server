@@ -67,15 +67,15 @@ public class getpageinfo_p {
         prop.put("sitemap", "");
         prop.put("title", "");
         prop.put("favicon","");
-        prop.put("robots-allowed", 3); //unknown
+        prop.put("robots-allowed", "3"); //unknown
         String actions="title";
         if(post!=null && post.containsKey("url")){
             if(post.containsKey("actions"))
                 actions=(String)post.get("actions");
             String url=(String) post.get("url");
 			if(url.toLowerCase().startsWith("ftp://")){
-				prop.put("robots-allowed", 1);
-				prop.put("title", "FTP: "+url);
+				prop.put("robots-allowed", "1");
+				prop.putHTML("title", "FTP: "+url);
                 return prop;
 			} else if (!(url.toLowerCase().startsWith("http://") || url.toLowerCase().startsWith("https://"))) {
                 url = "http://" + url;
@@ -92,15 +92,15 @@ public class getpageinfo_p {
                     writer.close();
                     
                     // put the document title 
-                    prop.put("title", scraper.getTitle());
+                    prop.putHTML("title", scraper.getTitle());
                     
                     // put the favicon that belongs to the document
-                    prop.put("favicon", (scraper.getFavicon()==null)?"":scraper.getFavicon().toString());
+                    prop.put("favicon", (scraper.getFavicon()==null) ? "" : scraper.getFavicon().toString());
                     
                     // put keywords
                     String list[]=scraper.getKeywords();
                     for(int i=0;i<list.length;i++){
-                    	prop.put("tags_"+i+"_tag", list[i]);
+                    	prop.putHTML("tags_"+i+"_tag", list[i]);
                     }
                     prop.put("tags", list.length);
 
@@ -113,11 +113,11 @@ public class getpageinfo_p {
                     yacyURL theURL = new yacyURL(url, null);
                 	
                 	// determine if crawling of the current URL is allowed
-                	prop.put("robots-allowed", robotsParser.isDisallowed(theURL) ? 0:1);
+                	prop.put("robots-allowed", robotsParser.isDisallowed(theURL) ? "0" : "1");
                     
                     // get the sitemap URL of the domain
                     yacyURL sitemapURL = robotsParser.getSitemapURL(theURL);
-                    prop.put("sitemap", (sitemapURL==null)?"":sitemapURL.toString());
+                    prop.putHTML("sitemap", (sitemapURL==null)?"":sitemapURL.toString());
                 } catch (MalformedURLException e) {}
             }
             
@@ -127,6 +127,3 @@ public class getpageinfo_p {
     }
     
 }
-
-
-

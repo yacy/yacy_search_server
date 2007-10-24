@@ -73,7 +73,7 @@ public class ProxyIndexingMonitor_p {
         String oldProxyCachePath, newProxyCachePath;
         String oldProxyCacheSize, newProxyCacheSize;
 
-        prop.put("info", 0);
+        prop.put("info", "0");
         prop.put("info_message", "");
 
         if (post != null) {
@@ -114,7 +114,7 @@ public class ProxyIndexingMonitor_p {
 
                 // implant these settings also into the crawling profile for the proxy
                 if (sb.defaultProxyProfile == null) {
-                    prop.put("info", 1); //delete DATA/PLASMADB/crawlProfiles0.db
+                    prop.put("info", "1"); //delete DATA/PLASMADB/crawlProfiles0.db
                 } else {
                     try {
                         sb.profilesActiveCrawls.changeEntry(sb.defaultProxyProfile, "generalDepth", Integer.toString(newProxyPrefetchDepth));
@@ -123,53 +123,52 @@ public class ProxyIndexingMonitor_p {
                         sb.profilesActiveCrawls.changeEntry(sb.defaultProxyProfile, "indexText",proxyIndexingLocalText ? "true":"false");
                         sb.profilesActiveCrawls.changeEntry(sb.defaultProxyProfile, "indexMedia",proxyIndexingLocalMedia ? "true":"false");
                         
-                        prop.put("info", 2);//new proxyPrefetchdepth
+                        prop.put("info", "2");//new proxyPrefetchdepth
                         prop.put("info_message", newProxyPrefetchDepth);
-                        prop.put("info_caching", (proxyStoreHTCache) ? 1 : 0);
-                        prop.put("info_indexingLocalText", (proxyIndexingLocalText) ? 1 : 0);
-                        prop.put("info_indexingLocalMedia", (proxyIndexingLocalMedia) ? 1 : 0);
-                        prop.put("info_indexingRemote", (proxyIndexingRemote) ? 1 : 0);
+                        prop.put("info_caching", proxyStoreHTCache ? "1" : "0");
+                        prop.put("info_indexingLocalText", proxyIndexingLocalText ? "1" : "0");
+                        prop.put("info_indexingLocalMedia", proxyIndexingLocalMedia ? "1" : "0");
+                        prop.put("info_indexingRemote", proxyIndexingRemote ? "1" : "0");
 
                         // proxyCache - only display on change
                         if (oldProxyCachePath.equals(newProxyCachePath)) {
-                            prop.put("info_path", 0);
+                            prop.put("info_path", "0");
                             prop.put("info_path_return", oldProxyCachePath);
                         } else {
-                            prop.put("info_path", 1);
+                            prop.put("info_path", "1");
                             prop.put("info_path_return", newProxyCachePath);
                         }
                         // proxyCacheSize - only display on change
                         if (oldProxyCacheSize.equals(newProxyCacheSize)) {
-                            prop.put("info_size", 0);
+                            prop.put("info_size", "0");
                             prop.put("info_size_return", oldProxyCacheSize);
                         } else {
-                            prop.put("info_size", 1);
+                            prop.put("info_size", "1");
                             prop.put("info_size_return", newProxyCacheSize);
                         }
                         // proxyCache, proxyCacheSize we need a restart
-                        prop.put("info_restart", 0);
-                        prop.put("info_restart_return", 0);
-                        if (!oldProxyCachePath.equals(newProxyCachePath)) prop.put("info_restart", 1);
-//                      if (!oldProxyCacheSize.equals(newProxyCacheSize)) prop.put("info_restart", 1);
+                        prop.put("info_restart", "0");
+                        prop.put("info_restart_return", "0");
+                        if (!oldProxyCachePath.equals(newProxyCachePath)) prop.put("info_restart", "1");
 
                     } catch (IOException e) {
-                        prop.put("info", 3); //Error: errmsg
-                        prop.put("info_error", e.getMessage());
+                        prop.put("info", "3"); //Error: errmsg
+                        prop.putHTML("info_error", e.getMessage());
                     }
                 }
 
             } catch (Exception e) {
-                prop.put("info", 2); //Error: errmsg
-                prop.put("info_error", e.getMessage());
+                prop.put("info", "2"); //Error: errmsg
+                prop.putHTML("info_error", e.getMessage());
                 serverLog.logSevere("SERVLET", "ProxyIndexingMonitor.case3", e);
             }
         }
 
         prop.put("proxyPrefetchDepth", env.getConfig("proxyPrefetchDepth", "0"));
-        prop.put("proxyStoreHTCacheChecked", env.getConfig("proxyStoreHTCache", "").equals("true") ? 1 : 0);
-        prop.put("proxyIndexingRemote", env.getConfig("proxyIndexingRemote", "").equals("true") ? 1 : 0);
-        prop.put("proxyIndexingLocalText", env.getConfig("proxyIndexingLocalText", "").equals("true") ? 1 : 0);
-        prop.put("proxyIndexingLocalMedia", env.getConfig("proxyIndexingLocalMedia", "").equals("true") ? 1 : 0);
+        prop.put("proxyStoreHTCacheChecked", env.getConfig("proxyStoreHTCache", "").equals("true") ? "1" : "0");
+        prop.put("proxyIndexingRemote", env.getConfig("proxyIndexingRemote", "").equals("true") ? "1" : "0");
+        prop.put("proxyIndexingLocalText", env.getConfig("proxyIndexingLocalText", "").equals("true") ? "1" : "0");
+        prop.put("proxyIndexingLocalMedia", env.getConfig("proxyIndexingLocalMedia", "").equals("true") ? "1" : "0");
         prop.put("proxyCache", env.getConfig("proxyCache", "DATA/HTCACHE"));
         prop.put("proxyCacheSize", env.getConfig("proxyCacheSize", "64"));
         // return rewrite properties

@@ -53,7 +53,6 @@ import java.net.MalformedURLException;
 import java.net.URLDecoder;
 import java.util.Date;
 
-import de.anomic.data.htmlTools;
 import de.anomic.http.httpHeader;
 import de.anomic.plasma.plasmaCrawlProfile;
 import de.anomic.plasma.plasmaSwitchboard;
@@ -79,24 +78,24 @@ public class QuickCrawlLink_p {
         
         if (post == null) {
             // send back usage example
-            prop.put("mode",0);
+            prop.put("mode", "0");
             
             // getting the http host header
             String hostSocket = (String) header.get(httpHeader.CONNECTION_PROP_HOST);
             
             //String host = hostSocket;
-            int port = 80, pos = hostSocket.indexOf(":");        
+            int port = 80, pos = hostSocket.indexOf(":");
             if (pos != -1) {
                 port = Integer.parseInt(hostSocket.substring(pos + 1));
                 //host = hostSocket.substring(0, pos);
             }    
             
             prop.put("mode_host", "localhost");
-            prop.put("mode_port", Integer.toString(port));            
+            prop.put("mode_port", port);
             
             return prop;
         }
-        prop.put("mode",1);
+        prop.put("mode", "1");
         
         // getting the URL
         String crawlingStart = post.get("url",null);
@@ -122,8 +121,8 @@ public class QuickCrawlLink_p {
         boolean xdstopw        = post.get("xdstopw", "").equals("on");
         boolean xpstopw        = post.get("xpstopw", "").equals("on");
 
-        prop.put("mode_url", (crawlingStart == null) ? "unknown" : htmlTools.encodeUnicode2html(crawlingStart, false));
-        prop.put("mode_title", (title == null) ? "unknown" : htmlTools.encodeUnicode2html(title, true));
+        prop.put("mode_url", (crawlingStart == null) ? "unknown" : crawlingStart);
+        prop.putHTML("mode_title", (title == null) ? "unknown" : title);
         
         if (crawlingStart != null) {
             crawlingStart = crawlingStart.trim();
@@ -134,7 +133,7 @@ public class QuickCrawlLink_p {
             try {
                 crawlingStartURL = new yacyURL(crawlingStart, null);
             } catch (MalformedURLException e) {
-                prop.put("mode_status", 1);
+                prop.put("mode_status", "1");
                 prop.put("mode_code", "1");
                 return prop;
             }
@@ -169,9 +168,9 @@ public class QuickCrawlLink_p {
                 );
             } catch (Exception e) {
                 // mist
-                prop.put("mode_status", 2);//Error with url
-                prop.put("mode_code","2");
-                prop.put("mode_status_error", e.getMessage());
+                prop.put("mode_status", "2");//Error with url
+                prop.put("mode_code", "2");
+                prop.putHTML("mode_status_error", e.getMessage());
                 return prop;
             }
             
@@ -193,17 +192,15 @@ public class QuickCrawlLink_p {
             
             // validate rejection reason
             if (reasonString == null) {
-                prop.put("mode_status", 0);//start msg
-                prop.put("mode_code","0");
+                prop.put("mode_status", "0");//start msg
+                prop.put("mode_code", "0");
             } else {
-                prop.put("mode_status", 3);//start msg
+                prop.put("mode_status", "3");//start msg
                 prop.put("mode_code","3");
-                prop.put("mode_status_error", reasonString);
+                prop.putHTML("mode_status_error", reasonString);
             }
-            
         }
         
         return prop;
     }
-    
 }

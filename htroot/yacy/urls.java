@@ -44,12 +44,12 @@ public class urls {
         serverObjects prop = new serverObjects();
         
         // insert default values
-        prop.putASIS("iam", yacyCore.seedDB.mySeed().hash);
-        prop.putASIS("response", "rejected - insufficient call parameters");
-        prop.putASIS("channel_title", "");
-        prop.putASIS("channel_description", "");
-        prop.putASIS("channel_pubDate", "");
-        prop.put("item", 0);
+        prop.put("iam", yacyCore.seedDB.mySeed().hash);
+        prop.put("response", "rejected - insufficient call parameters");
+        prop.put("channel_title", "");
+        prop.put("channel_description", "");
+        prop.put("channel_pubDate", "");
+        prop.put("item", "0");
         
         if (post == null) return prop;
         
@@ -68,8 +68,8 @@ public class urls {
                 }
                 if (entry == null) break;
                 prop.put("item_" + c + "_title", "");
-                prop.put("item_" + c + "_link", entry.url().toNormalform(true, false));
-                prop.put("item_" + c + "_description", entry.name());
+                prop.putHTML("item_" + c + "_link", entry.url().toNormalform(true, false));
+                prop.putHTML("item_" + c + "_description", entry.name());
                 prop.put("item_" + c + "_author", "");
                 prop.put("item_" + c + "_pubDate", serverDate.shortSecondTime(entry.appdate()));
                 prop.put("item_" + c + "_guid", entry.url().hash());
@@ -77,7 +77,7 @@ public class urls {
                 count--;
             }
             prop.put("item", c);
-            prop.put("response", "ok");
+            prop.putHTML("response", "ok");
         }
 
         // return rewrite properties

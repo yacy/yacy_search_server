@@ -87,14 +87,14 @@ public final class message {
         int messagesize = 10240;
         int attachmentsize = 0;
 
-        prop.putASIS("messagesize", "0");
-        prop.putASIS("attachmentsize", "0");
+        prop.put("messagesize", "0");
+        prop.put("attachmentsize", "0");
 
         String youare = post.get("youare", ""); // seed hash of the target peer, needed for network stability
         // check if we are the right target and requester has correct information about this peer
         if ((yacyCore.seedDB.mySeed() == null) || (!(yacyCore.seedDB.mySeed().hash.equals(youare)))) {
             // this request has a wrong target
-            prop.putASIS("response", "-1"); // request rejected
+            prop.put("response", "-1"); // request rejected
             return prop;
         }
 
@@ -102,17 +102,17 @@ public final class message {
         	 (!((sb.isPublicRobinson()) ||
         	    (sb.isInMyCluster((String)header.get(httpHeader.CONNECTION_PROP_CLIENTIP)))))) {
             // if we are a robinson cluster, answer only if this client is known by our network definition
-        	prop.putASIS("response", "-1"); // request rejected
+        	prop.put("response", "-1"); // request rejected
             return prop;
         }
         
-        prop.putASIS("messagesize", Integer.toString(messagesize));
-        prop.putASIS("attachmentsize", Integer.toString(attachmentsize));
+        prop.put("messagesize", Integer.toString(messagesize));
+        prop.put("attachmentsize", Integer.toString(attachmentsize));
 
         if (process.equals("permission")) {
             // permission: respond with acceptable message and attachment size
 //          String iam = (String) post.get("iam", "");    // seed hash of requester
-            prop.putASIS("response", "Welcome to my peer!");
+            prop.put("response", "Welcome to my peer!");
             // that's it!
         }
 
@@ -120,7 +120,7 @@ public final class message {
             // post: post message to message board
             String otherSeedString = post.get("myseed", "");
             if (otherSeedString.length() == 0) {
-                prop.putASIS("response", "-1"); // request rejected
+                prop.put("response", "-1"); // request rejected
                 return prop;
             }
             //Date remoteTime = yacyCore.parseUniversalDate((String) post.get(yacySeed.MYTIME)); // read remote time
@@ -129,17 +129,17 @@ public final class message {
             String subject = crypt.simpleDecode(post.get("subject", ""), key); // message's subject
             String message = crypt.simpleDecode(post.get("message", ""), key); // message body
             if (subject == null || message == null) {
-                prop.putASIS("response", "-1"); // don't accept empty messages
+                prop.put("response", "-1"); // don't accept empty messages
                 return prop;
             }
             message = message.trim();
             subject = subject.trim();
             if (subject.length() == 0 || message.length() == 0) {
-                prop.putASIS("response", "-1"); // don't accept empty messages
+                prop.put("response", "-1"); // don't accept empty messages
                 return prop;
             }
             
-            prop.putASIS("response", "Thank you!");
+            prop.put("response", "Thank you!");
 
             // save message
             messageBoard.entry msgEntry = null;

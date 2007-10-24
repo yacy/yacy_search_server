@@ -154,8 +154,8 @@ public class IndexCreateWWWLocalQueue_p {
                     }
                 }
                 
-                prop.put("info", 3);//crawling queue cleared
-                prop.put("info_numEntries", c);
+                prop.put("info", "3");//crawling queue cleared
+                prop.putNum("info_numEntries", c);
             } else if (post.containsKey("deleteEntry")) {
                 String urlHash = (String) post.get("deleteEntry");
                 switchboard.noticeURL.removeByURLHash(urlHash);
@@ -166,9 +166,9 @@ public class IndexCreateWWWLocalQueue_p {
 
         int showNum = 0, stackSize = switchboard.noticeURL.stackSize(plasmaCrawlNURL.STACK_TYPE_CORE);
         if (stackSize == 0) {
-            prop.put("crawler-queue", 0);
+            prop.put("crawler-queue", "0");
         } else {
-            prop.put("crawler-queue", 1);
+            prop.put("crawler-queue", "1");
             plasmaCrawlEntry[] crawlerList = switchboard.noticeURL.top(plasmaCrawlNURL.STACK_TYPE_CORE, (int) (showLimit * 1.20));
 
             plasmaCrawlEntry urle;
@@ -183,12 +183,12 @@ public class IndexCreateWWWLocalQueue_p {
                     initiator = yacyCore.seedDB.getConnected(urle.initiator());
                     profileHandle = urle.profileHandle();
                     profileEntry = (profileHandle == null) ? null : switchboard.profilesActiveCrawls.getEntry(profileHandle);
-                    prop.put("crawler-queue_list_"+showNum+"_dark", ((dark) ? 1 : 0) );
+                    prop.put("crawler-queue_list_"+showNum+"_dark", dark ? "1" : "0");
                     prop.put("crawler-queue_list_"+showNum+"_initiator", ((initiator == null) ? "proxy" : initiator.getName()) );
                     prop.put("crawler-queue_list_"+showNum+"_profile", ((profileEntry == null) ? "unknown" : profileEntry.name()));
                     prop.put("crawler-queue_list_"+showNum+"_depth", urle.depth());
                     prop.put("crawler-queue_list_"+showNum+"_modified", daydate(urle.loaddate()) );
-                    prop.put("crawler-queue_list_"+showNum+"_anchor", urle.name());
+                    prop.putHTML("crawler-queue_list_"+showNum+"_anchor", urle.name());
                     prop.put("crawler-queue_list_"+showNum+"_url", urle.url().toNormalform(false, true));
                     prop.put("crawler-queue_list_"+showNum+"_hash", urle.url().hash());
                     dark = !dark;
@@ -197,17 +197,13 @@ public class IndexCreateWWWLocalQueue_p {
                     stackSize--;
                 }
             }
-            prop.put("crawler-queue_list", showNum);
-            prop.put("crawler-queue_num", stackSize);//num Entries
-            prop.put("crawler-queue_show-num", showNum); //showin sjow-num most recent
+            prop.putNum("crawler-queue_list", showNum);
+            prop.putNum("crawler-queue_num", stackSize);//num Entries
+            prop.putNum("crawler-queue_show-num", showNum); //showin sjow-num most recent
 
         }
 
         // return rewrite properties
         return prop;
     }
-    
 }
-
-
-

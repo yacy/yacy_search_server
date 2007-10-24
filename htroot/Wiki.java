@@ -109,8 +109,8 @@ public class Wiki {
             access = post.get("access", "admin");
             switchboard.setConfig("WikiAccess", access);
         }
-        if (access.equals("admin")) prop.put("mode_access", 0);
-        if (access.equals("all"))   prop.put("mode_access", 1);
+        if (access.equals("admin")) prop.put("mode_access", "0");
+        if (access.equals("all"))   prop.put("mode_access", "1");
 
         wikiBoard.entry page = switchboard.wikiDB.read(pagename);
         
@@ -150,28 +150,28 @@ public class Wiki {
             
             // edit the page
             try {
-                prop.put("mode", 1); //edit
-                prop.put("mode_author", author);
-                prop.put("mode_page-code", new String(page.page(), "UTF-8"));
-                prop.put("mode_pagename", pagename);
+                prop.put("mode", "1"); //edit
+                prop.putHTML("mode_author", author);
+                prop.putHTML("mode_page-code", new String(page.page(), "UTF-8"));
+                prop.putHTML("mode_pagename", pagename);
             } catch (UnsupportedEncodingException e) {}
         }
 
         //contributed by [MN]
         else if (post.containsKey("preview")) {
             // preview the page
-            prop.put("mode", 2);//preview
-            prop.put("mode_pagename", pagename);
-            prop.put("mode_author", author);
+            prop.put("mode", "2");//preview
+            prop.putHTML("mode_pagename", pagename);
+            prop.putHTML("mode_author", author);
             prop.put("mode_date", dateString(new Date()));
             prop.putWiki("mode_page", post.get("content", ""));
-            prop.put("mode_page-code", post.get("content", ""));
+            prop.putHTML("mode_page-code", post.get("content", ""));
         }
         //end contrib of [MN]
 
         else if (post.containsKey("index")) {
             // view an index
-            prop.put("mode", 3); //Index
+            prop.put("mode", "3"); //Index
             String subject;
             try {
                 Iterator i = switchboard.wikiDB.keys(true);
@@ -180,25 +180,25 @@ public class Wiki {
                 while (i.hasNext()) {
                     subject = (String) i.next();
                     entry = switchboard.wikiDB.read(subject);
-                    prop.put("mode_pages_"+count+"_name",wikiBoard.webalize(subject));
-                    prop.put("mode_pages_"+count+"_subject", subject);
+                    prop.putHTML("mode_pages_"+count+"_name",wikiBoard.webalize(subject));
+                    prop.putHTML("mode_pages_"+count+"_subject", subject);
                     prop.put("mode_pages_"+count+"_date", dateString(entry.date()));
-                    prop.put("mode_pages_"+count+"_author", entry.author());
+                    prop.putHTML("mode_pages_"+count+"_author", entry.author());
                     count++;
                 }
                 prop.put("mode_pages", count);
             } catch (IOException e) {
-                prop.put("mode_error", 1); //IO Error reading Wiki
-                prop.put("mode_error_message", e.getMessage());
+                prop.put("mode_error", "1"); //IO Error reading Wiki
+                prop.putHTML("mode_error_message", e.getMessage());
             }
-            prop.put("mode_pagename", pagename);
+            prop.putHTML("mode_pagename", pagename);
         }
         
         else if (post.containsKey("diff")) {
             // Diff
-            prop.put("mode", 4);
-            prop.put("mode_page", pagename);
-            prop.put("mode_error_page", pagename);
+            prop.put("mode", "4");
+            prop.putHTML("mode_page", pagename);
+            prop.putHTML("mode_error_page", pagename);
             
             try {
                 Iterator it = switchboard.wikiDB.keysBkp(true);
@@ -212,11 +212,11 @@ public class Wiki {
                     prop.put("mode_error_versions_" + count + "_date", wikiBoard.dateString(entry.date()));
                     prop.put("mode_error_versions_" + count + "_fdate", dateString(entry.date()));
                     if (wikiBoard.dateString(entry.date()).equals(post.get("old", null))) {
-                        prop.put("mode_error_versions_" + count + "_oldselected", 1);
+                        prop.put("mode_error_versions_" + count + "_oldselected", "1");
                         oentry = entry;
                         oldselected = true;
                     } else if (wikiBoard.dateString(entry.date()).equals(post.get("new", null))) {
-                        prop.put("mode_error_versions_" + count + "_newselected", 1);
+                        prop.put("mode_error_versions_" + count + "_newselected", "1");
                         nentry = entry;
                         newselected = true;
                     }
@@ -225,12 +225,12 @@ public class Wiki {
                 count--;    // don't show current version
                 
                 if (!oldselected)   // select latest old entry
-                    prop.put("mode_error_versions_" + (count - 1) + "_oldselected", 1);
+                    prop.put("mode_error_versions_" + (count - 1) + "_oldselected", "1");
                 if (!newselected)   // select latest new entry (== current)
-                    prop.put("mode_error_curselected", 1);
+                    prop.put("mode_error_curselected", "1");
                 
                 if (count == 0) {
-                    prop.put("mode_error", 2); // no entries found
+                    prop.put("mode_error", "2"); // no entries found
                 } else {
                     prop.put("mode_error_versions", count);
                 }
@@ -247,37 +247,35 @@ public class Wiki {
                     diff diff = new diff(
                             new String(oentry.page(), "UTF-8"),
                             new String(nentry.page(), "UTF-8"), 3);
-                    prop.putASIS("mode_versioning_diff", de.anomic.data.diff.toHTML(new diff[] { diff }));
-                    prop.put("mode_versioning", 1);
+                    prop.put("mode_versioning_diff", de.anomic.data.diff.toHTML(new diff[] { diff }));
+                    prop.put("mode_versioning", "1");
                 } else if (post.containsKey("viewold") && oentry != null) {
-                    prop.put("mode_versioning", 2);
-                    prop.put("mode_versioning_pagename", pagename);
-                    prop.put("mode_versioning_author", oentry.author());
+                    prop.put("mode_versioning", "2");
+                    prop.putHTML("mode_versioning_pagename", pagename);
+                    prop.putHTML("mode_versioning_author", oentry.author());
                     prop.put("mode_versioning_date", dateString(oentry.date()));
                     prop.putWiki("mode_versioning_page", oentry.page());
-                    prop.put("mode_versioning_page-code", new String(oentry.page(), "UTF-8"));
+                    prop.putHTML("mode_versioning_page-code", new String(oentry.page(), "UTF-8"));
                 }
             } catch (IOException e) {
-                prop.put("mode_error", 1); //IO Error reading Wiki
-                prop.put("mode_error_message", e.getMessage());
+                prop.put("mode_error", "1"); //IO Error reading Wiki
+                prop.putHTML("mode_error_message", e.getMessage());
             }
         }
 
         else {
             // show page
-            prop.put("mode", 0); //viewing
-            prop.put("mode_pagename", pagename);
-            prop.put("mode_author", page.author());
+            prop.put("mode", "0"); //viewing
+            prop.putHTML("mode_pagename", pagename);
+            prop.putHTML("mode_author", page.author());
             prop.put("mode_date", dateString(page.date()));
             prop.putWiki("mode_page", page.page());
 
-            prop.put("controls", 0);
-            prop.put("controls_pagename", pagename);
+            prop.put("controls", "0");
+            prop.putHTML("controls_pagename", pagename);
         }
 
         // return rewrite properties
         return prop;
     }
-
-
 }

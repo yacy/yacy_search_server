@@ -100,9 +100,9 @@ public final class search {
              	 (!((sb.isPublicRobinson()) ||
              	    (sb.isInMyCluster((String)header.get(httpHeader.CONNECTION_PROP_CLIENTIP)))))) {
                  // if we are a robinson cluster, answer only if this client is known by our network definition
-        	prop.putASIS("links", "");
-            prop.putASIS("linkcount", "0");
-            prop.putASIS("references", "");
+        	prop.put("links", "");
+            prop.put("linkcount", "0");
+            prop.put("references", "");
         	return prop;
         }
         
@@ -155,9 +155,9 @@ public final class search {
                 }
             }
             
-            prop.putASIS("indexcount", "");
-            prop.put("joincount", 0);
-            prop.putASIS("references", "");
+            prop.put("indexcount", "");
+            prop.put("joincount", "0");
+            prop.put("references", "");
             
         } else {
             
@@ -175,8 +175,8 @@ public final class search {
             
             // set statistic details of search result and find best result index set
             if (theSearch.getLocalCount() == 0) {
-                prop.putASIS("indexcount", "");
-                prop.putASIS("joincount", "0");
+                prop.put("indexcount", "");
+                prop.put("joincount", "0");
             } else {
                 // attach information about index abstracts
                 StringBuffer indexcount = new StringBuffer();
@@ -196,14 +196,14 @@ public final class search {
                         indexabstract.append("indexabstract." + wordhash + "=").append((String) theSearch.IAResults.get(wordhash)).append(serverCore.crlfString);
                     }
                 }
-                prop.putASIS("indexcount", new String(indexcount));
+                prop.put("indexcount", indexcount.toString());
                 
                 if (theSearch.getLocalCount() == 0) {
                     joincount = 0;
-                    prop.put("joincount", 0);
+                    prop.put("joincount", "0");
                 } else {
                     joincount = theSearch.getLocalCount();
-                    prop.putASIS("joincount", Integer.toString(joincount));
+                    prop.put("joincount", Integer.toString(joincount));
                     accu = theSearch.completeResults(duetime);
                 }
                 
@@ -211,7 +211,7 @@ public final class search {
                 // this is not needed if the search is restricted to specific
                 // urls, because it is a re-search
                 if ((theSearch.IAmaxcounthash == null) || (urls.length() != 0) || (queryhashes.size() <= 1) || (abstracts.length() == 0)) {
-                    prop.putASIS("indexabstract", "");
+                    prop.put("indexabstract", "");
                 } else if (abstracts.equals("auto")) {
                     // automatically attach the index abstract for the index that has the most references. This should be our target dht position
                     indexabstractContainercount += ((Integer) theSearch.IACount.get(theSearch.IAmaxcounthash)).intValue();
@@ -236,18 +236,18 @@ public final class search {
             while (j.hasNext()) {
                 refstr.append(",").append((String) j.next());
             }
-            prop.putASIS("references", (refstr.length() > 0) ? refstr.substring(1) : new String(refstr));
+            prop.put("references", (refstr.length() > 0) ? refstr.substring(1) : refstr.toString());
             localProcess.yield("reference collection", ws.size());
         }
-        prop.putASIS("indexabstract", new String(indexabstract));
+        prop.put("indexabstract", indexabstract.toString());
         
         // prepare result
         if ((joincount == 0) || (accu == null)) {
             
             // no results
-            prop.putASIS("links", "");
-            prop.putASIS("linkcount", "0");
-            prop.putASIS("references", "");
+            prop.put("links", "");
+            prop.put("linkcount", "0");
+            prop.put("references", "");
 
         } else {
             // result is a List of urlEntry elements
@@ -262,15 +262,15 @@ public final class search {
                     links.append("resource").append(i).append('=').append(resource).append(serverCore.crlfString);
                 }
             }
-            prop.putASIS("links", new String(links));
+            prop.put("links", links.toString());
             prop.put("linkcount", accu.size());
             localProcess.yield("result list preparation", accu.size());
         }
         
         // add information about forward peers
-        prop.putASIS("fwhop", ""); // hops (depth) of forwards that had been performed to construct this result
-        prop.putASIS("fwsrc", ""); // peers that helped to construct this result
-        prop.putASIS("fwrec", ""); // peers that would have helped to construct this result (recommendations)
+        prop.put("fwhop", ""); // hops (depth) of forwards that had been performed to construct this result
+        prop.put("fwsrc", ""); // peers that helped to construct this result
+        prop.put("fwrec", ""); // peers that would have helped to construct this result (recommendations)
 
         // prepare search statistics
         Long trackerHandle = new Long(System.currentTimeMillis());
@@ -293,7 +293,7 @@ public final class search {
                 indexabstractContainercount + " index abstracts, " +
                 (System.currentTimeMillis() - timestamp) + " milliseconds");
  
-        prop.putASIS("searchtime", Long.toString(System.currentTimeMillis() - timestamp));
+        prop.put("searchtime", System.currentTimeMillis() - timestamp);
 
         final int links = Integer.parseInt(prop.get("linkcount","0"));
         yacyCore.seedDB.mySeed().incSI(links);

@@ -74,7 +74,7 @@ public final class profile {
            	(!sb.isPublicRobinson()) &&
            	(!sb.isInMyCluster((String)header.get(httpHeader.CONNECTION_PROP_CLIENTIP)))) {
                // if we are a robinson cluster, answer only if this client is known by our network definition
-        	prop.put("list", 0);
+        	prop.put("list", "0");
             return prop;
         }
         
@@ -97,8 +97,8 @@ public final class profile {
             key=(String)it.next();
             value=profile.getProperty(key, "").replaceAll("\r","").replaceAll("\n","\\\\n");
             if( !(key.equals("")) && !(value.equals("")) ){
-                prop.putASIS("list_"+count+"_key", key);
-                prop.putASIS("list_"+count+"_value", value);
+                prop.put("list_"+count+"_key", key);
+                prop.put("list_"+count+"_value", value);
                 count++;
             }
         }

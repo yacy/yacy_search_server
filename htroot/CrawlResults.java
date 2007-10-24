@@ -126,32 +126,32 @@ public class CrawlResults {
 
         // create table
         if (tabletype == 0) {
-            prop.put("table", 2);
+            prop.put("table", "2");
         } else if (sb.wordIndex.loadedURL.getStackSize(tabletype) == 0) {
-            prop.put("table", 0);
+            prop.put("table", "0");
         } else {
-            prop.put("table", 1);
+            prop.put("table", "1");
             if (lines > sb.wordIndex.loadedURL.getStackSize(tabletype)) lines = sb.wordIndex.loadedURL.getStackSize(tabletype);
             if (lines == sb.wordIndex.loadedURL.getStackSize(tabletype)) {
-                prop.put("table_size", 0);
+                prop.put("table_size", "0");
             } else {
-                prop.put("table_size", 1);
+                prop.put("table_size", "1");
                 prop.put("table_size_count", lines);
             }
             prop.put("table_size_all", sb.wordIndex.loadedURL.getStackSize(tabletype));
             
             if (showControl) {
-                prop.put("table_showControl", 1);
-                prop.put("table_showControl_feedbackpage", "CrawlResults.html");
+                prop.put("table_showControl", "1");
+                prop.putHTML("table_showControl_feedbackpage", "CrawlResults.html");
                 prop.put("table_showControl_tabletype", tabletype);
             } else
-                prop.put("table_showControl", 0);
-            prop.put("table_showInit", (showInit) ? 1 : 0);
-            prop.put("table_showExec", (showExec) ? 1 : 0);
-            prop.put("table_showDate", (showDate) ? 1 : 0);
-            prop.put("table_showWords", (showWords) ? 1 : 0);
-            prop.put("table_showTitle", (showTitle) ? 1 : 0);
-            prop.put("table_showURL", (showURL) ? 1 : 0);
+                prop.put("table_showControl", "0");
+            prop.put("table_showInit", (showInit) ? "1" : "0");
+            prop.put("table_showExec", (showExec) ? "1" : "0");
+            prop.put("table_showDate", (showDate) ? "1" : "0");
+            prop.put("table_showWords", (showWords) ? "1" : "0");
+            prop.put("table_showTitle", (showTitle) ? "1" : "0");
+            prop.put("table_showURL", (showURL) ? "1" : "0");
 
             boolean dark = true;
             String urlHash, initiatorHash, executorHash;
@@ -177,71 +177,71 @@ public class CrawlResults {
                     urltxt = nxTools.shortenURLString(urlstr, 72); // shorten the string text like a URL
                     cachepath = plasmaHTCache.getCachePath(new yacyURL(urlstr, null)).toString().replace('\\', '/').substring(plasmaHTCache.cachePath.toString().length() + 1);
 
-                    prop.put("table_indexed_" + cnt + "_dark", (dark) ? 1 : 0);
+                    prop.put("table_indexed_" + cnt + "_dark", (dark) ? "1" : "0");
                     if (showControl) {
-                        prop.put("table_indexed_" + cnt + "_showControl", 1);
+                        prop.put("table_indexed_" + cnt + "_showControl", "1");
                         prop.put("table_indexed_" + cnt + "_showControl_feedbackpage", "CrawlResults.html");
                         prop.put("table_indexed_" + cnt + "_showControl_tabletype", tabletype);
                         prop.put("table_indexed_" + cnt + "_showControl_urlhash", urlHash);
                     } else
-                        prop.put("table_indexed_" + cnt + "_showControl", 0);
+                        prop.put("table_indexed_" + cnt + "_showControl", "0");
 
                     if (showInit) {
-                        prop.put("table_indexed_" + cnt + "_showInit", 1);
+                        prop.put("table_indexed_" + cnt + "_showInit", "1");
                         prop.put("table_indexed_" + cnt + "_showInit_initiatorSeed", (initiatorSeed == null) ? "unknown" : initiatorSeed.getName());
                     } else
-                        prop.put("table_indexed_" + cnt + "_showInit", 0);
+                        prop.put("table_indexed_" + cnt + "_showInit", "0");
 
                     if (showExec) {
-                        prop.put("table_indexed_" + cnt + "_showExec", 1);
+                        prop.put("table_indexed_" + cnt + "_showExec", "1");
                         prop.put("table_indexed_" + cnt + "_showExec_executorSeed", (executorSeed == null) ? "unknown" : executorSeed.getName());
                     } else
-                        prop.put("table_indexed_" + cnt + "_showExec", 0);
+                        prop.put("table_indexed_" + cnt + "_showExec", "0");
 
                     if (showDate) {
-                        prop.put("table_indexed_" + cnt + "_showDate", 1);
+                        prop.put("table_indexed_" + cnt + "_showDate", "1");
                         prop.put("table_indexed_" + cnt + "_showDate_modified", daydate(urle.moddate()));
                     } else
-                        prop.put("table_indexed_" + cnt + "_showDate", 0);
+                        prop.put("table_indexed_" + cnt + "_showDate", "0");
 
                     if (showWords) {
-                        prop.put("table_indexed_" + cnt + "_showWords", 1);
+                        prop.put("table_indexed_" + cnt + "_showWords", "1");
                         prop.put("table_indexed_" + cnt + "_showWords_count", urle.wordCount());
                     } else
-                        prop.put("table_indexed_" + cnt + "_showWords", 0);
+                        prop.put("table_indexed_" + cnt + "_showWords", "0");
 
                     if (showTitle) {
-                        prop.put("table_indexed_" + cnt + "_showTitle", (showTitle) ? 1 : 0);
+                        prop.put("table_indexed_" + cnt + "_showTitle", (showTitle) ? "1" : "0");
                         if (cachepath == null) {
-                            prop.put("table_indexed_" + cnt + "_showTitle_available", 0);
+                            prop.put("table_indexed_" + cnt + "_showTitle_available", "0");
                         } else {
-                            prop.put("table_indexed_" + cnt + "_showTitle_available", 1);
+                            prop.put("table_indexed_" + cnt + "_showTitle_available", "1");
 
                             if (comp.title() == null || comp.title().trim().length() == 0)
-                                prop.put("table_indexed_" + cnt + "_showTitle_available_nodescr", 0);
+                                prop.put("table_indexed_" + cnt + "_showTitle_available_nodescr", "0");
                             else
-                                prop.put("table_indexed_" + cnt + "_showTitle_available_nodescr", 1);
-                            prop.put("table_indexed_" + cnt + "_showTitle_available_nodescr_urldescr", comp.title());
+                                prop.put("table_indexed_" + cnt + "_showTitle_available_nodescr", "1");
+                            prop.putHTML("table_indexed_" + cnt + "_showTitle_available_nodescr_urldescr", comp.title());
 
                             prop.put("table_indexed_" + cnt + "_showTitle_available_cachepath", cachepath);
-                            prop.put("table_indexed_" + cnt + "_showTitle_available_urltitle", urlstr);
+                            prop.putHTML("table_indexed_" + cnt + "_showTitle_available_urltitle", urlstr);
                         }
                     } else
-                        prop.put("table_indexed_" + cnt + "_showTitle", 0);
+                        prop.put("table_indexed_" + cnt + "_showTitle", "0");
 
                     if (showURL) {
-                        prop.put("table_indexed_" + cnt + "_showURL", 1);
+                        prop.put("table_indexed_" + cnt + "_showURL", "1");
                         if (cachepath == null) {
-                            prop.put("table_indexed_" + cnt + "_showURL_available", 0);
+                            prop.put("table_indexed_" + cnt + "_showURL_available", "0");
                         } else {
-                            prop.put("table_indexed_" + cnt + "_showURL_available", 1);
+                            prop.put("table_indexed_" + cnt + "_showURL_available", "1");
 
                             prop.put("table_indexed_" + cnt + "_showURL_available_cachepath", cachepath);
-                            prop.put("table_indexed_" + cnt + "_showURL_available_urltitle", urlstr);
+                            prop.putHTML("table_indexed_" + cnt + "_showURL_available_urltitle", urlstr);
                             prop.put("table_indexed_" + cnt + "_showURL_available_url", urltxt);
                         }
                     } else
-                        prop.put("table_indexed_" + cnt + "_showURL", 0);
+                        prop.put("table_indexed_" + cnt + "_showURL", "0");
 
                     dark = !dark;
                     cnt++;

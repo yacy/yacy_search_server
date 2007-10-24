@@ -42,7 +42,7 @@ public class TestApplet {
     for(int i=0;i<lines.length;i++){
         pair=lines[i].split("=");
         if(pair.length==2){
-            args.put(pair[0], pair[1]);
+            args.putHTML(pair[0], pair[1]);
         }
     }
     

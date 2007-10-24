@@ -99,8 +99,8 @@ public final class yacyClient {
         final serverObjects post = yacyNetwork.basicRequestPost(plasmaSwitchboard.getSwitchboard(), null);
         for (int retry = 0; retry < 3; retry++) try {
             // generate request
-            post.putASIS("count", "20");
-            post.putASIS("seed", yacyCore.seedDB.mySeed().genSeedStr(post.get("key", "")));
+            post.put("count", "20");
+            post.put("seed", yacyCore.seedDB.mySeed().genSeedStr(post.get("key", "")));
             yacyCore.log.logFine("yacyClient.publishMySeed thread '" + Thread.currentThread().getName() + "' contacting peer at " + address);
             // send request
             result = nxTools.table(
@@ -239,8 +239,8 @@ public final class yacyClient {
     public static yacySeed querySeed(yacySeed target, String seedHash) {
         // prepare request
         final serverObjects post = yacyNetwork.basicRequestPost(plasmaSwitchboard.getSwitchboard(), target.hash);
-        post.putASIS("object", "seed");
-        post.putASIS("env", seedHash);
+        post.put("object", "seed");
+        post.put("env", seedHash);
             
         // send request
         try {
@@ -268,9 +268,9 @@ public final class yacyClient {
     public static int queryRWICount(yacySeed target, String wordHash) {
         // prepare request
         final serverObjects post = yacyNetwork.basicRequestPost(plasmaSwitchboard.getSwitchboard(), target.hash);
-        post.putASIS("object", "rwicount");
-        post.putASIS("ttl", "0");
-        post.putASIS("env", wordHash);
+        post.put("object", "rwicount");
+        post.put("ttl", "0");
+        post.put("env", wordHash);
             
         // send request
         try {
@@ -300,9 +300,9 @@ public final class yacyClient {
         
         // prepare request
         final serverObjects post = yacyNetwork.basicRequestPost(plasmaSwitchboard.getSwitchboard(), target.hash);
-        post.putASIS("object", "lurlcount");
-        post.putASIS("ttl", "0");
-        post.putASIS("env", "");
+        post.put("object", "lurlcount");
+        post.put("ttl", "0");
+        post.put("env", "");
         
         // send request
         try {
@@ -369,20 +369,20 @@ public final class yacyClient {
 
         // prepare request
         final serverObjects post = yacyNetwork.basicRequestPost(plasmaSwitchboard.getSwitchboard(), target.hash);
-        post.putASIS("myseed", yacyCore.seedDB.mySeed().genSeedStr(post.get("key", "")));
+        post.put("myseed", yacyCore.seedDB.mySeed().genSeedStr(post.get("key", "")));
         post.put("count", Math.max(10, count));
-        post.putASIS("resource", ((global) ? "global" : "local"));
+        post.put("resource", ((global) ? "global" : "local"));
         post.put("partitions", partitions);
-        post.putASIS("query", wordhashes);
-        post.putASIS("exclude", excludehashes);
-        post.putASIS("urls", urlhashes);
-        post.putASIS("prefer", prefer);
-        post.putASIS("filter", filter);
-        post.putASIS("ttl", "0");
+        post.put("query", wordhashes);
+        post.put("exclude", excludehashes);
+        post.put("urls", urlhashes);
+        post.put("prefer", prefer);
+        post.put("filter", filter);
+        post.put("ttl", "0");
         post.put("maxdist", maxDistance);
-        post.putASIS("profile", crypt.simpleEncode(rankingProfile.toExternalString()));
-        post.putASIS("constraint", constraint.exportB64());
-        if (abstractCache != null) post.putASIS("abstracts", "auto");
+        post.put("profile", crypt.simpleEncode(rankingProfile.toExternalString()));
+        post.put("constraint", constraint.exportB64());
+        if (abstractCache != null) post.put("abstracts", "auto");
         final long timestamp = System.currentTimeMillis();
 
         // send request
@@ -588,7 +588,7 @@ public final class yacyClient {
 
         // prepare request
         final serverObjects post = yacyNetwork.basicRequestPost(plasmaSwitchboard.getSwitchboard(), targetHash);
-        post.putASIS("process", "permission");
+        post.put("process", "permission");
         
         // send request
         try {
@@ -616,13 +616,13 @@ public final class yacyClient {
 
         // prepare request
         final serverObjects post = yacyNetwork.basicRequestPost(plasmaSwitchboard.getSwitchboard(), targetHash);
-        post.putASIS("process", "post");
-        post.putASIS("myseed", yacyCore.seedDB.mySeed().genSeedStr(post.get("key", "")));
-        post.putASIS("subject", subject);
+        post.put("process", "post");
+        post.put("myseed", yacyCore.seedDB.mySeed().genSeedStr(post.get("key", "")));
+        post.put("subject", subject);
         try {
-            post.putASIS("message", new String(message, "UTF-8"));
+            post.put("message", new String(message, "UTF-8"));
         } catch (UnsupportedEncodingException e) {
-            post.putASIS("message", new String(message));
+            post.put("message", new String(message));
         }
 
         // send request
@@ -663,11 +663,11 @@ public final class yacyClient {
 
         // prepare request
         final serverObjects post = yacyNetwork.basicRequestPost(plasmaSwitchboard.getSwitchboard(), null);
-        post.putASIS("process", "permission");
-        post.putASIS("purpose", "crcon");
-        post.putASIS("filename", filename);
-        post.putASIS("filesize", Long.toString(filesize));
-        post.putASIS("can-send-protocol", "http");
+        post.put("process", "permission");
+        post.put("purpose", "crcon");
+        post.put("filename", filename);
+        post.put("filesize", Long.toString(filesize));
+        post.put("can-send-protocol", "http");
         
         // send request
         try {
@@ -695,12 +695,12 @@ public final class yacyClient {
         
         // prepare request
         final serverObjects post = yacyNetwork.basicRequestPost(plasmaSwitchboard.getSwitchboard(), null);
-        post.putASIS("process", "store");
-        post.putASIS("purpose", "crcon");
-        post.putASIS("filename", filename);
+        post.put("process", "store");
+        post.put("purpose", "crcon");
+        post.put("filename", filename);
         post.put("filesize", Long.toString(file.length));
-        post.putASIS("md5", serverCodings.encodeMD5Hex(file));
-        post.putASIS("access", access);
+        post.put("md5", serverCodings.encodeMD5Hex(file));
+        post.put("access", access);
         HashMap files = new HashMap();
         files.put("filename", file);
         
@@ -761,18 +761,18 @@ public final class yacyClient {
         
         // prepare request
         final serverObjects post = yacyNetwork.basicRequestPost(plasmaSwitchboard.getSwitchboard(), target.hash);
-        post.putASIS("process", "crawl");
+        post.put("process", "crawl");
         if (url.length == 1) {
-            post.putASIS("url", crypt.simpleEncode(url[0].toNormalform(true, true)));
-            post.putASIS("referrer", crypt.simpleEncode((referrer[0] == null) ? "" : referrer[0].toNormalform(true, true)));
+            post.put("url", crypt.simpleEncode(url[0].toNormalform(true, true)));
+            post.put("referrer", crypt.simpleEncode((referrer[0] == null) ? "" : referrer[0].toNormalform(true, true)));
         } else {
             for (int i=0; i< url.length; i++) {
-                post.putASIS("url" + i, crypt.simpleEncode(url[i].toNormalform(true, true)));
-                post.putASIS("ref" + i, crypt.simpleEncode((referrer[i] == null) ? "" : referrer[i].toNormalform(true, true)));
+                post.put("url" + i, crypt.simpleEncode(url[i].toNormalform(true, true)));
+                post.put("ref" + i, crypt.simpleEncode((referrer[i] == null) ? "" : referrer[i].toNormalform(true, true)));
             }
         }
-        post.putASIS("depth", "0");
-        post.putASIS("ttl", "0");
+        post.put("depth", "0");
+        post.put("ttl", "0");
         
         // determining target address
         final String address = target.getClusterAddress();
@@ -833,12 +833,12 @@ public final class yacyClient {
         
         // prepare request
         final serverObjects post = yacyNetwork.basicRequestPost(plasmaSwitchboard.getSwitchboard(), target.hash);
-        post.putASIS("process", process);
-        post.putASIS("urlhash", ((entry == null) ? "" : entry.hash()));
-        post.putASIS("result", result);
-        post.putASIS("reason", reason);
-        post.putASIS("wordh", wordhashes);
-        post.putASIS("lurlEntry", ((entry == null) ? "" : crypt.simpleEncode(entry.toString(), post.get("key", ""))));
+        post.put("process", process);
+        post.put("urlhash", ((entry == null) ? "" : entry.hash()));
+        post.put("result", result);
+        post.put("reason", reason);
+        post.put("wordh", wordhashes);
+        post.put("lurlEntry", ((entry == null) ? "" : crypt.simpleEncode(entry.toString(), post.get("key", ""))));
         
         // determining target address
         final String address = target.getClusterAddress();
@@ -963,7 +963,7 @@ public final class yacyClient {
         
         // enabling gzip compression for post request body
         if ((gzipBody) && (targetSeed.getVersion() >= yacyVersion.YACY_SUPPORTS_GZIP_POST_REQUESTS)) {
-            post.putASIS(httpc.GZIP_POST_BODY,"true");
+            post.put(httpc.GZIP_POST_BODY,"true");
         }
         post.put("wordc", Integer.toString(indexes.length));
         
@@ -991,7 +991,7 @@ public final class yacyClient {
         }
 
         post.put("entryc", indexcount);
-        post.putASIS("indexes", entrypost.toString());
+        post.put("indexes", entrypost.toString());
         try {
             final ArrayList v = nxTools.strings(
                 httpc.wput(
@@ -1029,7 +1029,7 @@ public final class yacyClient {
         
         // enabling gzip compression for post request body
         if ((gzipBody) && (targetSeed.getVersion() >= yacyVersion.YACY_SUPPORTS_GZIP_POST_REQUESTS)) {
-            post.putASIS(httpc.GZIP_POST_BODY,"true");
+            post.put(httpc.GZIP_POST_BODY,"true");
         }        
         
         String resource = "";
@@ -1039,7 +1039,7 @@ public final class yacyClient {
             if (urls[i] != null) {
                 resource = urls[i].toString();                
                 if (resource != null) {
-                    post.putASIS("url" + urlc, resource);
+                    post.put("url" + urlc, resource);
                     urlPayloadSize += resource.length();
                     urlc++;
                 }

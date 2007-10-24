@@ -86,24 +86,24 @@ public class Bookmarks {
     //redirect to userpage
     /*if(username!="" &&(post == null || !post.containsKey("user") && !post.containsKey("mode")))
         prop.put("LOCATION", "/Bookmarks.html?user="+username);*/
-    prop.put("user",username);
+    prop.put("user", username);
     
     // set peer address
     final String address = yacyCore.seedDB.mySeed().getPublicAddress();
     prop.put("address", address);
     
     //defaultvalues
-    prop.put("mode", 0);
+    prop.put("mode", "0");
     if(isAdmin){
-        prop.put("mode", 1);
+        prop.put("mode", "1");
     }
-    prop.put("mode_edit", 0);
+    prop.put("mode_edit", "0");
     prop.put("mode_title", "");
     prop.put("mode_description", "");
     prop.put("mode_url", "");
     prop.put("mode_tags", "");
-    prop.put("mode_public", 1); //1=is public
-    prop.put("mode_feed", 0); //no newsfeed
+    prop.put("mode_public", "1"); //1=is public
+    prop.put("mode_feed", "0"); //no newsfeed
     if(post != null){
         
         if(!isAdmin){
@@ -113,11 +113,11 @@ public class Bookmarks {
         }else if(post.containsKey("mode")){
             String mode=(String) post.get("mode");
             if(mode.equals("add")){
-            	prop.put("mode", 2);
+            	prop.put("mode", "2");
             }else if(mode.equals("importxml")){
-            	prop.put("mode", 3);
+            	prop.put("mode", "3");
             }else if(mode.equals("importbookmarks")){
-                prop.put("mode", 4);
+                prop.put("mode", "4");
             }
         }else if(post.containsKey("add")){ //add an Entry
             String url=(String) post.get("url");
@@ -156,15 +156,15 @@ public class Bookmarks {
             }
         }else if(post.containsKey("edit")){
             String urlHash=(String) post.get("edit");
-            prop.put("mode", 2);
+            prop.put("mode", "2");
             if (urlHash.length() == 0) {
-                prop.put("mode_edit", 0); // create mode
-                prop.put("mode_title", (String) post.get("title"));
-                prop.put("mode_description", (String) post.get("description"));
+                prop.put("mode_edit", "0"); // create mode
+                prop.putHTML("mode_title", (String) post.get("title"));
+                prop.putHTML("mode_description", (String) post.get("description"));
                 prop.put("mode_url", (String) post.get("url"));
-                prop.put("mode_tags", (String) post.get("tags"));
-                prop.put("mode_public", 0);
-                prop.put("mode_feed", 0);
+                prop.putHTML("mode_tags", (String) post.get("tags"));
+                prop.put("mode_public", "0");
+                prop.put("mode_feed", "0");
             } else {
                     bookmarksDB.Bookmark bookmark = switchboard.bookmarksDB.getBookmark(urlHash);
                     if (bookmark == null) {
@@ -174,32 +174,32 @@ public class Bookmarks {
                         if (urlentry != null) {
                             indexURLEntry.Components comp = urlentry.comp();
                             document = plasmaSnippetCache.retrieveDocument(comp.url(), true, 5000, true);
-                            prop.put("mode_edit", 0); // create mode
+                            prop.put("mode_edit", "0"); // create mode
                             prop.put("mode_url", comp.url().toNormalform(false, true));
-                            prop.put("mode_title", comp.title());
-                            prop.put("mode_description", (document == null) ? comp.title(): document.getTitle());
-                            prop.put("mode_author", comp.author());
-                            prop.put("mode_tags", (document == null) ? comp.tags() : document.getKeywords(','));
-                            prop.put("mode_public", 0);
-                            prop.put("mode_feed", 0); //TODO: check if it IS a feed
+                            prop.putHTML("mode_title", comp.title());
+                            prop.putHTML("mode_description", (document == null) ? comp.title(): document.getTitle());
+                            prop.putHTML("mode_author", comp.author());
+                            prop.putHTML("mode_tags", (document == null) ? comp.tags() : document.getKeywords(','));
+                            prop.put("mode_public", "0");
+                            prop.put("mode_feed", "0"); //TODO: check if it IS a feed
                         }
                         if (document != null) document.close();
                     } else {
                         // get from the bookmark database
-                        prop.put("mode_edit", 1); // edit mode
-                        prop.put("mode_title", bookmark.getTitle());
-                        prop.put("mode_description", bookmark.getDescription());
+                        prop.put("mode_edit", "1"); // edit mode
+                        prop.putHTML("mode_title", bookmark.getTitle());
+                        prop.putHTML("mode_description", bookmark.getDescription());
                         prop.put("mode_url", bookmark.getUrl());
-                        prop.put("mode_tags", bookmark.getTagsString());
+                        prop.putHTML("mode_tags", bookmark.getTagsString());
                         if (bookmark.getPublic()) {
-                            prop.put("mode_public", 1);
+                            prop.put("mode_public", "1");
                         } else {
-                            prop.put("mode_public", 0);
+                            prop.put("mode_public", "0");
                         }
                         if (bookmark.getFeed()) {
-                            prop.put("mode_feed", 1);
+                            prop.put("mode_feed", "1");
                         } else {
-                            prop.put("mode_feed", 0);
+                            prop.put("mode_feed", "0");
                         }
                     }
                 }
@@ -244,8 +244,8 @@ public class Bookmarks {
     prop.put("num-bookmarks", switchboard.bookmarksDB.bookmarksSize());
     while(it.hasNext()){
         tag=(Tag) it.next();
-        prop.put("taglist_"+count+"_name", tag.getFriendlyName());
-        prop.put("taglist_"+count+"_tag", tag.getTagName());
+        prop.putHTML("taglist_"+count+"_name", tag.getFriendlyName());
+        prop.putHTML("taglist_"+count+"_tag", tag.getTagName());
         prop.put("taglist_"+count+"_num", tag.size());
         count++;
     }
@@ -274,11 +274,11 @@ public class Bookmarks {
         		prop.put("bookmarks_"+count+"_link", "/FeedReader_p.html?url="+bookmark.getUrl());
         	else
         		prop.put("bookmarks_"+count+"_link",bookmark.getUrl());
-            prop.put("bookmarks_"+count+"_title", bookmark.getTitle());
-            prop.put("bookmarks_"+count+"_description", bookmark.getDescription());
+            prop.putHTML("bookmarks_"+count+"_title", bookmark.getTitle());
+            prop.putHTML("bookmarks_"+count+"_description", bookmark.getDescription());
             prop.put("bookmarks_"+count+"_date", serverDate.dateToiso8601(new Date(bookmark.getTimeStamp())));
             prop.put("bookmarks_"+count+"_rfc822date", httpc.dateString(new Date(bookmark.getTimeStamp())));
-            prop.put("bookmarks_"+count+"_public", (bookmark.getPublic()? 1:0));
+            prop.put("bookmarks_"+count+"_public", (bookmark.getPublic() ? "1" : "0"));
             
             //List Tags.
             tags=bookmark.getTags();
@@ -294,12 +294,12 @@ public class Bookmarks {
             count++;
         }
     }
-    prop.put("tag", tagName);
+    prop.putHTML("tag", tagName);
     prop.put("start", start);
     if(it.hasNext()){
-        prop.put("next-page", 1);
+        prop.put("next-page", "1");
         prop.put("next-page_start", start+max_count);
-        prop.put("next-page_tag", tagName);
+        prop.putHTML("next-page_tag", tagName);
         prop.put("next-page_num", max_count);
     }
     if(start >= max_count){
@@ -307,9 +307,9 @@ public class Bookmarks {
     	if(start <0){
     		start=0;
     	}
-    	prop.put("prev-page", 1);
+    	prop.put("prev-page", "1");
     	prop.put("prev-page_start", start);
-    	prop.put("prev-page_tag", tagName);
+    	prop.putHTML("prev-page_tag", tagName);
     	prop.put("prev-page_num", max_count);
     }
     prop.put("bookmarks", count);

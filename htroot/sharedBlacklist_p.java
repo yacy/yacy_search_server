@@ -111,16 +111,16 @@ public class sharedBlacklist_p {
                         String IP = seed.get(yacySeed.IP, "127.0.0.1"); 
                         String Port = seed.get(yacySeed.PORT, "8080");
                         String peerName = seed.get(yacySeed.NAME, "<" + IP + ":" + Port + ">");
-                        prop.put("page_source", peerName);
+                        prop.putHTML("page_source", peerName);
 
                         downloadURL = "http://" + IP + ":" + Port + "/yacy/list.html?col=black";
                     } else {
                         prop.put("status", STATUS_PEER_UNKNOWN);//YaCy-Peer not found
-                        prop.put("page", 1);   
+                        prop.put("page", "1");
                     }
                 } else {
                     prop.put("status", STATUS_PEER_UNKNOWN);//YaCy-Peer not found
-                    prop.put("page", 1);   
+                    prop.put("page", "1");
                 }
                 
                 if (downloadURL != null) {
@@ -135,46 +135,46 @@ public class sharedBlacklist_p {
                         otherBlacklist = nxTools.strings(httpc.wget(u, u.getHost(), 12000, null, null, switchboard.remoteProxyConfig,reqHeader, null), "UTF-8"); 
                     } catch (Exception e) {
                         prop.put("status", STATUS_PEER_UNKNOWN);
-                        prop.put("page", 1);                      
-                    }        
+                        prop.put("page", "1");
+                    }
                 }
             } else if (post.containsKey("url")) {
                 /* ======================================================
                  * Download the blacklist from URL
-                 * ====================================================== */                
+                 * ====================================================== */
                 
-                String downloadURL = (String)post.get("url");                
-                prop.put("page_source", downloadURL);
+                String downloadURL = (String)post.get("url");
+                prop.putHTML("page_source", downloadURL);
 
                 try {
                     yacyURL u = new yacyURL(downloadURL, null);
                     otherBlacklist = nxTools.strings(httpc.wget(u, u.getHost(), 6000, null, null, switchboard.remoteProxyConfig, null, null), "UTF-8"); //get List
                 } catch (Exception e) {
                     prop.put("status", STATUS_URL_PROBLEM);
-                    prop.put("status_address",downloadURL);
-                    prop.put("page", 1);                    
+                    prop.putHTML("status_address",downloadURL);
+                    prop.put("page", "1");
                 }
             } else if (post.containsKey("file")) {
                 /* ======================================================
                  * Import the blacklist from file
-                 * ====================================================== */      
+                 * ====================================================== */
                 String sourceFileName = (String)post.get("file");
                 prop.put("page_source", sourceFileName);
                 
                 File sourceFile = new File(listManager.listsPath, sourceFileName);
                 if (!sourceFile.exists() || !sourceFile.canRead() || !sourceFile.isFile()) {
                     prop.put("status", STATUS_FILE_ERROR);
-                    prop.put("page", 1);                       
-                } else {                
+                    prop.put("page", "1");
+                } else {
                     otherBlacklist = listManager.getListArray(sourceFile);
                 }
                 
             } else if (post.containsKey("add")) {
                 /* ======================================================
                  * Add loaded items into blacklist file
-                 * ====================================================== */                  
+                 * ====================================================== */
                 
-                prop.put("page", 1); //result page                
+                prop.put("page", "1"); //result page
                 prop.put("status", STATUS_ENTRIES_ADDED); //list of added Entries
                 
                 int count = 0;//couter of added entries
@@ -213,20 +213,20 @@ public class sharedBlacklist_p {
                                 for (int blTypes=0; blTypes < supportedBlacklistTypes.length; blTypes++) {
                                     if (listManager.listSetContains(supportedBlacklistTypes[blTypes] + ".BlackLists",selectedBlacklistName)) {
                                         plasmaSwitchboard.urlBlacklist.add(supportedBlacklistTypes[blTypes],newItem.substring(0, pos), newItem.substring(pos + 1));
-                                    }                
-                                }                         
+                                    }
+                                }
                             }
                         }
                     }
                 } catch (Exception e) {
-                    prop.put("status",1);
-                    prop.put("status_error", e.getLocalizedMessage());
+                    prop.put("status", "1");
+                    prop.putHTML("status_error", e.getLocalizedMessage());
                 } finally {
                     if (pw != null) try { pw.close(); } catch (Exception e){ /* */}
                 }
                 
                 prop.put("LOCATION","Blacklist_p.html?selectedListName=" + selectedBlacklistName + "&selectList=");
-                return prop;                                              
+                return prop;
             }
             
             // generate the html list
@@ -236,30 +236,29 @@ public class sharedBlacklist_p {
                 
                 // sort the loaded blacklist
                 String[] sortedlist = (String[])otherBlacklist.toArray(new String[otherBlacklist.size()]);
-                Arrays.sort(sortedlist);                             
+                Arrays.sort(sortedlist);
                 
                 int count = 0;
                 for(int i = 0; i < sortedlist.length; i++){
                     String tmp = sortedlist[i];
                     if( !Blacklist.contains(tmp) && (!tmp.equals("")) ){
                         //newBlacklist.add(tmp);
-                        prop.put("page_urllist_" + count + "_dark", count % 2 == 0 ? 0:1);
+                        prop.put("page_urllist_" + count + "_dark", count % 2 == 0 ? "0" : "1");
                         prop.put("page_urllist_" + count + "_url", tmp);
                         prop.put("page_urllist_" + count + "_count", count);
                         count++;
                     }
                 }
-                prop.put("page_urllist", (count));       
-                prop.put("num", String.valueOf(count));
-                prop.put("page", 0);
+                prop.put("page_urllist", (count));
+                prop.put("num", count);
+                prop.put("page", "0");
             }
                 
                 
         } else {
-            prop.put("page", 1);
-            prop.put("status", 5);//Wrong Invokation
+            prop.put("page", "1");
+            prop.put("status", "5");//Wrong Invokation
         }
         return prop;
     }
-
 }

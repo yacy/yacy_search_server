@@ -81,6 +81,18 @@
         <td>#[querystring]#</td>
       </tr>
       #{/list}#
+      <tr class="TableHeader">
+        <td></td>
+        <td></td>
+        <td></td>
+        <td>&#216; #[querycount_avg]#</td>
+        <td>&#216; #[resultcount_avg]#</td>
+        <td>&#216; #[querytime_avg]#</td>
+        <td>&#216; #[resulttime_avg]#</td>
+        <td>&#216; #[urltime_avg]#</td>
+        <td>&#216; #[snippettime_avg]#</td>
+        <td></td>
+      </tr>
     </table>
     ::
     <h2>Local Search Host Tracker</h2>
@@ -101,6 +113,12 @@
         <td>#{dates}##[date]# #{/dates}#</td>
       </tr>
       #{/list}#
+      <tr class="TableHeader">
+        <td></td>
+        <td>&#931; #[total]#</td>
+        <td>&#931; #[qph_sum]#</td>
+        <td></td>
+      </tr>
     </table>
     ::
     <h2>Remote Search Log</h2>
@@ -133,6 +151,18 @@
         <td>#[queryhashes]#</td>
       </tr>
       #{/list}#
+      <tr class="TableHeader">
+        <td></td>
+        <td></td>
+        <td></td>
+        <td>&#216; #[querycount_avg]#</td>
+        <td>&#216; #[resultcount_avg]#</td>
+        <td>&#216; #[querytime_avg]#</td>
+        <td>&#216; #[resulttime_avg]#</td>
+        <td>&#216; #[urltime_avg]#</td>
+        <td>&#216; #[snippettime_avg]#</td>
+        <td></td>
+      </tr>
     </table>
     ::
     <h2>Remote Search Host Tracker</h2>
@@ -155,6 +185,13 @@
         <td>#{dates}##[date]# #{/dates}#</td>
       </tr>
       #{/list}#
+      <tr class="TableHeader">
+        <td></td>
+        <td></td>
+        <td>&#931; #[total]#</td>
+        <td>&#931; #[qph_sum]#</td>
+        <td></td>
+      </tr>
     </table>
     #(/page)#
     #%env/templates/footer.template%#

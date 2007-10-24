@@ -3,7 +3,9 @@
   <ppm>#[ppm]#</ppm>
   <wordCacheSize>#[wordCacheSize]#</wordCacheSize>
   <wordCacheWSize>#[wordCacheWSize]#</wordCacheWSize>
+  <wordCacheWCount>#[wordCacheWCount]#</wordCacheWCount>
   <wordCacheKSize>#[wordCacheKSize]#</wordCacheKSize>
+  <wordCacheMaxSize>#[wordCacheMaxSize]#</wordCacheMaxSize>
   <wordCacheMaxCount>#[wordCacheMaxCount]#</wordCacheMaxCount>
 
   <memory>

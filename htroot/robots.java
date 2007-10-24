@@ -19,16 +19,16 @@ public class robots {
         if (rbc.isAllDisallowed()) {
             prop.put(httpdRobotsTxtConfig.ALL, 1);
         } else {
-            if (rbc.isBlogDisallowed()) prop.put(httpdRobotsTxtConfig.ALL + "_" + httpdRobotsTxtConfig.BLOG, 1);
-            if (rbc.isBookmarksDisallowed()) prop.put(httpdRobotsTxtConfig.ALL + "_" + httpdRobotsTxtConfig.BOOKMARKS, 1);
-            if (rbc.isFileshareDisallowed()) prop.put(httpdRobotsTxtConfig.ALL + "_" + httpdRobotsTxtConfig.FILESHARE, 1);
-            if (rbc.isHomepageDisallowed()) prop.put(httpdRobotsTxtConfig.ALL + "_" + httpdRobotsTxtConfig.HOMEPAGE, 1);
-            if (rbc.isNetworkDisallowed()) prop.put(httpdRobotsTxtConfig.ALL + "_" + httpdRobotsTxtConfig.NETWORK, 1);
-            if (rbc.isNewsDisallowed()) prop.put(httpdRobotsTxtConfig.ALL + "_" + httpdRobotsTxtConfig.NEWS, 1);
-            if (rbc.isStatusDisallowed()) prop.put(httpdRobotsTxtConfig.ALL + "_" + httpdRobotsTxtConfig.STATUS, 1);
-            if (rbc.isSurftipsDisallowed()) prop.put(httpdRobotsTxtConfig.ALL + "_" + httpdRobotsTxtConfig.SURFTIPS, 1);
-            if (rbc.isWikiDisallowed()) prop.put(httpdRobotsTxtConfig.ALL + "_" + httpdRobotsTxtConfig.WIKI, 1);
-            if (rbc.isProfileDisallowed()) prop.put(httpdRobotsTxtConfig.ALL + "_" + httpdRobotsTxtConfig.PROFILE, 1);
+            if (rbc.isBlogDisallowed()) prop.put(httpdRobotsTxtConfig.ALL + "_" + httpdRobotsTxtConfig.BLOG, "1");
+            if (rbc.isBookmarksDisallowed()) prop.put(httpdRobotsTxtConfig.ALL + "_" + httpdRobotsTxtConfig.BOOKMARKS, "1");
+            if (rbc.isFileshareDisallowed()) prop.put(httpdRobotsTxtConfig.ALL + "_" + httpdRobotsTxtConfig.FILESHARE, "1");
+            if (rbc.isHomepageDisallowed()) prop.put(httpdRobotsTxtConfig.ALL + "_" + httpdRobotsTxtConfig.HOMEPAGE, "1");
+            if (rbc.isNetworkDisallowed()) prop.put(httpdRobotsTxtConfig.ALL + "_" + httpdRobotsTxtConfig.NETWORK, "1");
+            if (rbc.isNewsDisallowed()) prop.put(httpdRobotsTxtConfig.ALL + "_" + httpdRobotsTxtConfig.NEWS, "1");
+            if (rbc.isStatusDisallowed()) prop.put(httpdRobotsTxtConfig.ALL + "_" + httpdRobotsTxtConfig.STATUS, "1");
+            if (rbc.isSurftipsDisallowed()) prop.put(httpdRobotsTxtConfig.ALL + "_" + httpdRobotsTxtConfig.SURFTIPS, "1");
+            if (rbc.isWikiDisallowed()) prop.put(httpdRobotsTxtConfig.ALL + "_" + httpdRobotsTxtConfig.WIKI, "1");
+            if (rbc.isProfileDisallowed()) prop.put(httpdRobotsTxtConfig.ALL + "_" + httpdRobotsTxtConfig.PROFILE, "1");
             
             if (rbc.isLockedDisallowed() || rbc.isDirsDisallowed()) {
                 final ArrayList[] p = getFiles(env.getConfig(plasmaSwitchboard.HTROOT_PATH, plasmaSwitchboard.HTROOT_PATH_DEFAULT));

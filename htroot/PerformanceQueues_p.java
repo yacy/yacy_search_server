@@ -57,6 +57,7 @@ import de.anomic.server.serverFileUtils;
 import de.anomic.server.serverObjects;
 import de.anomic.server.serverSwitch;
 import de.anomic.server.serverThread;
+import de.anomic.tools.yFormatter;
 
 public class PerformanceQueues_p {
     
@@ -66,10 +67,12 @@ public class PerformanceQueues_p {
         serverObjects prop = new serverObjects();
         File defaultSettingsFile = new File(switchboard.getRootPath(), "yacy.init");
         Map defaultSettings = ((post == null) || (!(post.containsKey("submitdefault")))) ? null : serverFileUtils.loadHashMap(defaultSettingsFile);
-        
         Iterator threads = switchboard.threadNames();
         String threadName;
         serverThread thread;
+        
+        boolean xml = ((String)header.get("PATH")).endsWith(".xml");
+        prop.setLocalized(!xml);
         
         // calculate totals
         long blocktime_total = 0, sleeptime_total = 0, exectime_total = 0;
@@ -98,16 +101,16 @@ public class PerformanceQueues_p {
             // set values to templates
             prop.put("table_" + c + "_threadname", threadName);
 
-			prop.put("table_" + c + "_hasurl_shortdescr", thread.getShortDescription());
+			prop.putHTML("table_" + c + "_hasurl_shortdescr", thread.getShortDescription(), xml);
 			if(thread.getMonitorURL() == null) {
-				prop.put("table_"+c+"_hasurl", 0);
+				prop.put("table_"+c+"_hasurl", "0");
 			}else{
-				prop.put("table_"+c+"_hasurl", 1);
+				prop.put("table_"+c+"_hasurl", "1");
 				prop.put("table_" + c + "_hasurl_url", thread.getMonitorURL());
 			}
-            prop.put("table_" + c + "_longdescr", thread.getLongDescription());
+            prop.putHTML("table_" + c + "_longdescr", thread.getLongDescription(), xml);
             queuesize = thread.getJobCount();
-            prop.put("table_" + c + "_queuesize", (queuesize == Integer.MAX_VALUE) ? "unlimited" : Integer.toString(queuesize));
+            prop.put("table_" + c + "_queuesize", (queuesize == Integer.MAX_VALUE) ? "unknown" : yFormatter.number(queuesize, !xml));
             
             blocktime = thread.getBlockTime();
             sleeptime = thread.getSleepTime();
@@ -116,19 +119,19 @@ public class PerformanceQueues_p {
             idleCycles = thread.getIdleCycles();
             busyCycles = thread.getBusyCycles();
             memshortageCycles = thread.getOutOfMemoryCycles();
-            prop.put("table_" + c + "_blocktime", blocktime / 1000);
-            prop.put("table_" + c + "_blockpercent", Long.toString(100 * blocktime / blocktime_total));
-            prop.put("table_" + c + "_sleeptime", sleeptime / 1000);
-            prop.put("table_" + c + "_sleeppercent", Long.toString(100 * sleeptime / sleeptime_total));
-            prop.put("table_" + c + "_exectime", exectime / 1000);
-            prop.put("table_" + c + "_execpercent", Long.toString(100 * exectime / exectime_total));
-            prop.put("table_" + c + "_totalcycles", Long.toString(idleCycles + busyCycles + memshortageCycles));
-            prop.put("table_" + c + "_idlecycles", Long.toString(idleCycles));
-            prop.put("table_" + c + "_busycycles", Long.toString(busyCycles));
-            prop.put("table_" + c + "_memscycles", Long.toString(memshortageCycles));
-            prop.put("table_" + c + "_sleeppercycle", ((idleCycles + busyCycles) == 0) ? "-" : Long.toString(sleeptime / (idleCycles + busyCycles)));
-            prop.put("table_" + c + "_execpercycle", (busyCycles == 0) ? "-" : Long.toString(exectime / busyCycles));
-            prop.put("table_" + c + "_memusepercycle", (busyCycles == 0) ? "-" : Long.toString(memuse / busyCycles / 1024));
+            prop.putNum("table_" + c + "_blocktime", blocktime / 1000);
+            prop.putNum("table_" + c + "_blockpercent", 100 * blocktime / blocktime_total);
+            prop.putNum("table_" + c + "_sleeptime", sleeptime / 1000);
+            prop.putNum("table_" + c + "_sleeppercent", 100 * sleeptime / sleeptime_total);
+            prop.putNum("table_" + c + "_exectime", exectime / 1000);
+            prop.putNum("table_" + c + "_execpercent", 100 * exectime / exectime_total);
+            prop.putNum("table_" + c + "_totalcycles", idleCycles + busyCycles + memshortageCycles);
+            prop.putNum("table_" + c + "_idlecycles", idleCycles);
+            prop.putNum("table_" + c + "_busycycles", busyCycles);
+            prop.putNum("table_" + c + "_memscycles", memshortageCycles);
+            prop.putNum("table_" + c + "_sleeppercycle", ((idleCycles + busyCycles) == 0) ? -1 : sleeptime / (idleCycles + busyCycles));
+            prop.putNum("table_" + c + "_execpercycle", (busyCycles == 0) ? -1 : exectime / busyCycles);
+            prop.putNum("table_" + c + "_memusepercycle", (busyCycles == 0) ? -1 : memuse / busyCycles / 1024);
             
             if ((post != null) && (post.containsKey("submitdelay"))) {
                 // load with new values
@@ -174,9 +177,9 @@ public class PerformanceQueues_p {
             prop.put("table_" + c + "_busysleep", busysleep);
             prop.put("table_" + c + "_memprereq", memprereq / 1024);
             // disallow setting of memprereq for indexer to prevent db from throwing OOMs
-            prop.put("table_" + c + "_disabled", /*(threadName.endsWith("_indexing")) ? 1 :*/ 0);
-            prop.put("table_" + c + "_recommendation", (threadName.endsWith("_indexing")) ? 1 : 0);
-            prop.put("table_" + c + "_recommendation_value", (threadName.endsWith("_indexing")) ? (switchboard.wordIndex.minMem() / 1024) : 0);
+            prop.put("table_" + c + "_disabled", /*(threadName.endsWith("_indexing")) ? 1 :*/ "0");
+            prop.put("table_" + c + "_recommendation", threadName.endsWith("_indexing") ? "1" : "0");
+            prop.putNum("table_" + c + "_recommendation_value", threadName.endsWith("_indexing") ? (switchboard.wordIndex.minMem() / 1024) : 0);
             c++;
         }
         prop.put("table", c);
@@ -292,58 +295,58 @@ public class PerformanceQueues_p {
         }
         
         // table cache settings
-        prop.put("urlCacheSize", switchboard.wordIndex.loadedURL.writeCacheSize());  
-        prop.put("wordCacheWSize", switchboard.wordIndex.dhtOutCacheSize());
-        prop.put("wordCacheKSize", switchboard.wordIndex.dhtInCacheSize());
+        prop.putNum("urlCacheSize", switchboard.wordIndex.loadedURL.writeCacheSize());  
+        prop.putNum("wordCacheWSize", switchboard.wordIndex.dhtOutCacheSize());
+        prop.putNum("wordCacheKSize", switchboard.wordIndex.dhtInCacheSize());
         prop.putNum("wordCacheWSizeKBytes", switchboard.wordIndex.dhtCacheSizeBytes(false)/1024);
         prop.putNum("wordCacheKSizeKBytes", switchboard.wordIndex.dhtCacheSizeBytes(true)/1024);
-        prop.put("maxURLinWCache", "" + switchboard.wordIndex.maxURLinDHTOutCache());
-        prop.put("maxURLinKCache", "" + switchboard.wordIndex.maxURLinDHTInCache());
-        prop.put("maxAgeOfWCache", "" + (switchboard.wordIndex.maxAgeOfDHTOutCache() / 1000 / 60)); // minutes
-        prop.put("maxAgeOfKCache", "" + (switchboard.wordIndex.maxAgeOfDHTInCache() / 1000 / 60)); // minutes
-        prop.put("minAgeOfWCache", "" + (switchboard.wordIndex.minAgeOfDHTOutCache() / 1000 / 60)); // minutes
-        prop.put("minAgeOfKCache", "" + (switchboard.wordIndex.minAgeOfDHTInCache() / 1000 / 60)); // minutes
-        prop.put("maxWaitingWordFlush", switchboard.getConfig("maxWaitingWordFlush", "180"));
+        prop.putNum("maxURLinWCache", switchboard.wordIndex.maxURLinDHTOutCache());
+        prop.putNum("maxURLinKCache", switchboard.wordIndex.maxURLinDHTInCache());
+        prop.putNum("maxAgeOfWCache", switchboard.wordIndex.maxAgeOfDHTOutCache() / 1000 / 60); // minutes
+        prop.putNum("maxAgeOfKCache", switchboard.wordIndex.maxAgeOfDHTInCache() / 1000 / 60); // minutes
+        prop.putNum("minAgeOfWCache", switchboard.wordIndex.minAgeOfDHTOutCache() / 1000 / 60); // minutes
+        prop.putNum("minAgeOfKCache", switchboard.wordIndex.minAgeOfDHTInCache() / 1000 / 60); // minutes
+        prop.putNum("maxWaitingWordFlush", switchboard.getConfigLong("maxWaitingWordFlush", 180));
         prop.put("wordCacheMaxCount", switchboard.getConfigLong(plasmaSwitchboard.WORDCACHE_MAX_COUNT, 20000));
         prop.put("wordCacheInitCount", switchboard.getConfigLong(plasmaSwitchboard.WORDCACHE_INIT_COUNT, 30000));
         prop.put("wordFlushSize", switchboard.getConfigLong("wordFlushSize", 2000));
-        prop.put("onlineCautionDelay", switchboard.getConfig("onlineCautionDelay", "30000"));
-        prop.put("onlineCautionDelayCurrent", System.currentTimeMillis() - switchboard.proxyLastAccess);
+        prop.put("onlineCautionDelay", switchboard.getConfigLong("onlineCautionDelay", 30000));
+        prop.putNum("onlineCautionDelayCurrent", System.currentTimeMillis() - switchboard.proxyLastAccess);
         
         // table thread pool settings
         GenericKeyedObjectPool.Config crawlerPoolConfig = switchboard.cacheLoader.getPoolConfig();
-        prop.put("pool_0_name","Crawler Pool");
-        prop.put("pool_0_maxActive",crawlerPoolConfig.maxActive);
-        prop.put("pool_0_maxIdle",crawlerPoolConfig.maxIdle);
-        prop.put("pool_0_minIdleConfigurable",0);
-        prop.put("pool_0_minIdle","0");        
-        prop.put("pool_0_numActive",switchboard.cacheLoader.getNumActiveWorker());
-        prop.put("pool_0_numIdle",switchboard.cacheLoader.getNumIdleWorker());
+        prop.put("pool_0_name", "Crawler Pool");
+        prop.put("pool_0_maxActive", crawlerPoolConfig.maxActive);
+        prop.put("pool_0_maxIdle", crawlerPoolConfig.maxIdle);
+        prop.put("pool_0_minIdleConfigurable", "0");
+        prop.put("pool_0_minIdle", "0");        
+        prop.put("pool_0_numActive", switchboard.cacheLoader.getNumActiveWorker());
+        prop.put("pool_0_numIdle", switchboard.cacheLoader.getNumIdleWorker());
         
         serverThread httpd = switchboard.getThread("10_httpd");
         GenericObjectPool.Config httpdPoolConfig = ((serverCore)httpd).getPoolConfig();
-        prop.put("pool_1_name","httpd Session Pool");
-        prop.put("pool_1_maxActive",httpdPoolConfig.maxActive);
-        prop.put("pool_1_maxIdle",httpdPoolConfig.maxIdle);
-        prop.put("pool_1_minIdleConfigurable",1);
-        prop.put("pool_1_minIdle",httpdPoolConfig.minIdle);  
-        prop.put("pool_1_numActive",((serverCore)httpd).getActiveSessionCount());
-        prop.put("pool_1_numIdle",((serverCore)httpd).getIdleSessionCount());
+        prop.put("pool_1_name", "httpd Session Pool");
+        prop.put("pool_1_maxActive", httpdPoolConfig.maxActive);
+        prop.put("pool_1_maxIdle", httpdPoolConfig.maxIdle);
+        prop.put("pool_1_minIdleConfigurable", "1");
+        prop.put("pool_1_minIdle", httpdPoolConfig.minIdle);  
+        prop.put("pool_1_numActive", ((serverCore)httpd).getActiveSessionCount());
+        prop.put("pool_1_numIdle", ((serverCore)httpd).getIdleSessionCount());
         
         GenericObjectPool.Config stackerPoolConfig = switchboard.sbStackCrawlThread.getPoolConfig();
-        prop.put("pool_2_name","CrawlStacker Session Pool");
-        prop.put("pool_2_maxActive",stackerPoolConfig.maxActive);
-        prop.put("pool_2_maxIdle",stackerPoolConfig.maxIdle);
-        prop.put("pool_2_minIdleConfigurable",1);
-        prop.put("pool_2_minIdle",stackerPoolConfig.minIdle);  
-        prop.put("pool_2_numActive",switchboard.sbStackCrawlThread.getNumActiveWorker());
-        prop.put("pool_2_numIdle",switchboard.sbStackCrawlThread.getNumIdleWorker());
-        prop.put("pool",3);
+        prop.putHTML("pool_2_name", "CrawlStacker Session Pool");
+        prop.put("pool_2_maxActive", stackerPoolConfig.maxActive);
+        prop.put("pool_2_maxIdle", stackerPoolConfig.maxIdle);
+        prop.put("pool_2_minIdleConfigurable", "1");
+        prop.put("pool_2_minIdle", stackerPoolConfig.minIdle);  
+        prop.put("pool_2_numActive", switchboard.sbStackCrawlThread.getNumActiveWorker());
+        prop.put("pool_2_numIdle", switchboard.sbStackCrawlThread.getNumIdleWorker());
+        prop.put("pool", "3");
         
         long curr_prio = switchboard.getConfigLong("javastart_priority",0);
-        prop.put("priority_normal",(curr_prio==0)?1:0);
-        prop.put("priority_below",(curr_prio==10)?1:0);
-        prop.put("priority_low",(curr_prio==20)?1:0);
+        prop.put("priority_normal",(curr_prio==0) ? "1" : "0");
+        prop.put("priority_below",(curr_prio==10) ? "1" : "0");
+        prop.put("priority_low",(curr_prio==20) ? "1" : "0");
         
         // return rewrite values for templates
         return prop;

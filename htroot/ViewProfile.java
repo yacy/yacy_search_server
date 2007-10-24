@@ -68,8 +68,8 @@ import de.anomic.yacy.yacySeed;
 
 public class ViewProfile {
 
-	public static serverObjects respond(httpHeader header, serverObjects post, serverSwitch env) {
-	    // listManager.switchboard = (plasmaSwitchboard) env;
+    public static serverObjects respond(httpHeader header, serverObjects post, serverSwitch env) {
+        // listManager.switchboard = (plasmaSwitchboard) env;
         serverObjects prop = new serverObjects();
         plasmaSwitchboard switchboard = (plasmaSwitchboard) env;
         boolean authenticated = switchboard.adminAuthenticated(header) >= 2;
@@ -79,10 +79,10 @@ public class ViewProfile {
         
         if ((hash == null) || (yacyCore.seedDB == null)) {
             // wrong access
-            prop.put("success","0");
+            prop.put("success", "0");
             return prop;
         }
-        prop.put("hash",hash);
+        prop.put("hash", hash);
         
         // get the profile
         HashMap profile = null;
@@ -100,8 +100,8 @@ public class ViewProfile {
             profile = new HashMap();
             profile.putAll(p);
             prop.put("success", "3"); // everything ok
-            prop.put("localremotepeer", 0);
-            prop.put("success_peername", yacyCore.seedDB.mySeed().getName());
+            prop.put("localremotepeer", "0");
+            prop.putHTML("success_peername", yacyCore.seedDB.mySeed().getName());
             prop.put("success_peerhash", yacyCore.seedDB.mySeed().hash);
             address = yacyCore.seedDB.mySeed().getPublicAddress();
         } else {
@@ -128,11 +128,11 @@ public class ViewProfile {
                     yacyCore.log.logInfo("fetched profile:" + profile);
                     prop.put("success", "3"); // everything ok
                 }
-                prop.put("success_peername", seed.getName());
+                prop.putHTML("success_peername", seed.getName());
                 prop.put("success_peerhash", seed.hash);
                 address = seed.getPublicAddress();
             }
-            prop.put("localremotepeer", 1);
+            prop.put("localremotepeer", "1");
         }
         Iterator i;
         if (profile != null) {
@@ -157,7 +157,7 @@ public class ViewProfile {
         //empty values
         Iterator it = knownKeys.iterator();
         while (it.hasNext()) {
-            prop.put("success_" + (String) it.next(), 0);
+            prop.put("success_" + (String) it.next(), "0");
         }
         
         //number of not explicitly recognized but displayed items
@@ -168,38 +168,38 @@ public class ViewProfile {
             String value = new String();
 
             // this prevents broken links ending in <br>
-			value=((String) entry.getValue()).replaceAll("\r", "").replaceAll("\\\\n", "\n");
+            value=((String) entry.getValue()).replaceAll("\r", "").replaceAll("\\\\n", "\n");
 
             //all known Keys which should be set as they are
             if (knownKeys.contains(key)) {
-            	if (value.length() > 0) {
-            		prop.put("success_" + key, 1);
-					// only comments get "wikified"
-					if(key.equals("comment")){
-						prop.putWiki(
-							"success_" + key + "_value",
-							((String) entry.getValue()).replaceAll("\r", "").replaceAll("\\\\n", "\n"),
-                            address
-						);
-						prop.putASIS("success_" + key + "_b64value",kelondroBase64Order.standardCoder.encodeString((String) entry.getValue()));
-					}else{
-	            		prop.put("success_" + key + "_value", value); //put replaces HTML Chars by entities.
-					}
-            	}
-            	//special handling, hide flower if no icq uin is set
+                if (value.length() > 0) {
+                    prop.put("success_" + key, "1");
+                    // only comments get "wikified"
+                    if(key.equals("comment")){
+                        prop.putWiki(
+                                "success_" + key + "_value",
+                                ((String) entry.getValue()).replaceAll("\r", "").replaceAll("\\\\n", "\n"),
+                                address
+                        );
+                        prop.put("success_" + key + "_b64value",kelondroBase64Order.standardCoder.encodeString((String) entry.getValue()));
+                    }else{
+                        prop.putHTML("success_" + key + "_value", value); //put replaces HTML Chars by entities.
+                    }
+                }
+                //special handling, hide flower if no icq uin is set
             } else if (key.equals("homepage")) {
-            	if (value.length() > 0) {
-            		if (!(value.startsWith("http"))) {
-            			value = "http://" + value;
-            		}
-            		prop.put("success_" + key, 1);
-            		prop.put("success_" + key + "_value", value);
-            	}
+                if (value.length() > 0) {
+                    if (!(value.startsWith("http"))) {
+                        value = "http://" + value;
+                    }
+                    prop.put("success_" + key, "1");
+                    prop.putHTML("success_" + key + "_value", value);
+                }
                 //This will display unknown items(of newer versions) as plaintext
             } else {
                 //unknown
                 prop.put("success_other_" + numUnknown + "_key", key);
-                prop.put("success_other_" + numUnknown + "_value", value);
+                prop.putHTML("success_other_" + numUnknown + "_value", value);
                 numUnknown++;
             }
         }
@@ -207,5 +207,4 @@ public class ViewProfile {
 
         return prop;
     }
-
 }

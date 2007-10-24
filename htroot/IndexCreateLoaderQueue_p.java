@@ -61,9 +61,9 @@ public class IndexCreateLoaderQueue_p {
         
 
         if (switchboard.cacheLoader.size() == 0) {
-            prop.put("loader-set", 0);
+            prop.put("loader-set", "0");
         } else {
-            prop.put("loader-set", 1);
+            prop.put("loader-set", "1");
             boolean dark = true;
             
             ThreadGroup loaderThreads = switchboard.cacheLoader.threadStatus();            
@@ -78,7 +78,7 @@ public class IndexCreateLoaderQueue_p {
                 if (theMsg == null) continue;
                 
                 initiator = yacyCore.seedDB.getConnected(theMsg.initiator);
-                prop.put("loader-set_list_"+count+"_dark", ((dark) ? 1 : 0) );
+                prop.put("loader-set_list_"+count+"_dark", dark ? "1" : "0");
                 prop.put("loader-set_list_"+count+"_initiator", ((initiator == null) ? "proxy" : initiator.getName()));
                 prop.put("loader-set_list_"+count+"_depth", theMsg.depth );
                 prop.put("loader-set_list_"+count+"_url", theMsg.url.toNormalform(false, true)); // null pointer exception here !!! maybe url = null; check reason.
@@ -92,8 +92,4 @@ public class IndexCreateLoaderQueue_p {
         // return rewrite properties
         return prop;
     }
-    
 }
-
-
-

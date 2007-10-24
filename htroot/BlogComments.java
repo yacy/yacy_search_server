@@ -82,8 +82,8 @@ public class BlogComments {
 		blogBoard.entry page = null;
 		boolean hasRights = switchboard.verifyAuthentication(header, true);
 
-        if(hasRights) prop.put("mode_admin",1);
-        else prop.put("mode_admin",0);
+        if (hasRights) prop.put("mode_admin", "1");
+        else prop.put("mode_admin", "0");
 
         if (post == null) {
             post = new serverObjects();
@@ -130,7 +130,7 @@ public class BlogComments {
 			byte[] content;
             if(!post.get("content", "").equals(""))
             {
-                if(post.get("subject", "").equals("")) post.put("subject", "no title");
+                if(post.get("subject", "").equals("")) post.putHTML("subject", "no title");
                 try {
                     content = post.get("content", "").getBytes("UTF-8");
                 } catch (UnsupportedEncodingException e) {
@@ -201,21 +201,21 @@ public class BlogComments {
         
         if(post.containsKey("preview")) {
 			//preview the page
-            prop.put("mode", 1);//preview
+            prop.put("mode", "1");//preview
             prop.put("mode_pageid", pagename);
             try {
-                prop.put("mode_author", new String(author, "UTF-8"));
+                prop.putHTML("mode_author", new String(author, "UTF-8"));
             } catch (UnsupportedEncodingException e) {
-                prop.put("mode_author", new String(author));
+                prop.putHTML("mode_author", new String(author));
             }
-            prop.put("mode_subject", post.get("subject",""));
+            prop.putHTML("mode_subject", post.get("subject",""));
             prop.put("mode_date", dateString(new Date()));
             prop.putWiki("mode_page", post.get("content", ""));
             prop.put("mode_page-code", post.get("content", ""));
 		}
 		else {
 		    // show blog-entry/entries
-	        prop.put("mode", 0); //viewing
+	        prop.put("mode", "0"); //viewing
 	        if(pagename.equals("blog_default")) {
                 prop.put("LOCATION","Blog.html");
 	        }
@@ -223,14 +223,14 @@ public class BlogComments {
 	        	//show 1 blog entry
 	        	prop.put("mode_pageid", page.key());
 	        	try {
-					prop.put("mode_subject", new String(page.subject(),"UTF-8"));
+					prop.putHTML("mode_subject", new String(page.subject(),"UTF-8"));
 				} catch (UnsupportedEncodingException e) {
-					prop.put("mode_subject", new String(page.subject()));
+					prop.putHTML("mode_subject", new String(page.subject()));
 				}
 	        	try {
-					prop.put("mode_author", new String(page.author(),"UTF-8"));
+					prop.putHTML("mode_author", new String(page.author(),"UTF-8"));
 				} catch (UnsupportedEncodingException e) {
-					prop.put("mode_author", new String(page.author()));
+					prop.putHTML("mode_author", new String(page.author()));
 				}
                 try {
                     prop.put("mode_comments", new String(page.commentsSize(),"UTF-8"));
@@ -240,8 +240,8 @@ public class BlogComments {
 	        	prop.put("mode_date", dateString(page.date()));
 	        	prop.putWiki("mode_page", page.page());
 	        	if(hasRights) {
-    				prop.put("mode_admin", 1);
-    				prop.put("mode_admin_pageid",page.key());
+    				prop.put("mode_admin", "1");
+    				prop.put("mode_admin_pageid", page.key());
     			}
                 //show all commments
                 try {
@@ -268,42 +268,42 @@ public class BlogComments {
                         if (commentMode == 2 && !hasRights && !entry.isAllowed())
                             continue;
                         
-                        prop.put("mode", 0);
-                        prop.put("mode_entries_"+count+"_pageid",entry.key());
+                        prop.put("mode", "0");
+                        prop.put("mode_entries_"+count+"_pageid", entry.key());
                         if(!xml) {
-                            prop.put("mode_entries_"+count+"_subject", new String(entry.subject(),"UTF-8"));
-                            prop.put("mode_entries_"+count+"_author", new String(entry.author(),"UTF-8"));
+                            prop.putHTML("mode_entries_"+count+"_subject", new String(entry.subject(),"UTF-8"));
+                            prop.putHTML("mode_entries_"+count+"_author", new String(entry.author(),"UTF-8"));
                             prop.putWiki("mode_entries_"+count+"_page", entry.page());
                         }
                         else {
-                            prop.put("mode_entries_"+count+"_subject", new String(entry.subject(),"UTF-8"));
-                            prop.put("mode_entries_"+count+"_author", new String(entry.author(),"UTF-8"));
-                            prop.putASIS("mode_entries_"+count+"_page", entry.page());
+                            prop.putHTML("mode_entries_"+count+"_subject", new String(entry.subject(),"UTF-8"));
+                            prop.putHTML("mode_entries_"+count+"_author", new String(entry.author(),"UTF-8"));
+                            prop.put("mode_entries_"+count+"_page", entry.page());
                             prop.put("mode_entries_"+count+"_timestamp", entry.timestamp());
                         }
                         prop.put("mode_entries_"+count+"_date", dateString(entry.date()));
                         prop.put("mode_entries_"+count+"_ip", entry.ip());
                         if(hasRights) {
-                            prop.put("mode_entries_"+count+"_admin", 1);
-                            prop.put("mode_entries_"+count+"_admin_pageid",page.key());
-                            prop.put("mode_entries_"+count+"_admin_commentid",pageid);
+                            prop.put("mode_entries_"+count+"_admin", "1");
+                            prop.put("mode_entries_"+count+"_admin_pageid", page.key());
+                            prop.put("mode_entries_"+count+"_admin_commentid", pageid);
                             if(!entry.isAllowed()) {
-                                prop.put("mode_entries_"+count+"_admin_moderate", 1);
-                                prop.put("mode_entries_"+count+"_admin_moderate_pageid",page.key());
-                                prop.put("mode_entries_"+count+"_admin_moderate_commentid",pageid);
+                                prop.put("mode_entries_"+count+"_admin_moderate", "1");
+                                prop.put("mode_entries_"+count+"_admin_moderate_pageid", page.key());
+                                prop.put("mode_entries_"+count+"_admin_moderate_commentid", pageid);
 
                             }
                         }
                         else prop.put("mode_entries_"+count+"_admin", 0);
                         ++count;
                     }
-                    prop.put("mode_entries",count);
+                    prop.put("mode_entries", count);
                     if(i.hasNext()) {
-                        prop.put("mode_moreentries",1); //more entries are availible
-                        prop.put("mode_moreentries_start",nextstart);
-                        prop.put("mode_moreentries_num",num);
+                        prop.put("mode_moreentries", "1"); //more entries are availible
+                        prop.put("mode_moreentries_start", nextstart);
+                        prop.put("mode_moreentries_num", num);
                     }
-                    else prop.put("moreentries",0);
+                    else prop.put("moreentries", "0");
                 } catch (IOException e) {
 
                 }

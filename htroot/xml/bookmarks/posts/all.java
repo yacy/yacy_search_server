@@ -79,15 +79,15 @@ public class all {
         while(it.hasNext()){
             bookmark=switchboard.bookmarksDB.getBookmark((String) it.next());
             prop.put("posts_"+count+"_url", bookmark.getUrl());
-            prop.put("posts_"+count+"_title", bookmark.getTitle());
-            prop.put("posts_"+count+"_description", bookmark.getDescription());
+            prop.putHTML("posts_"+count+"_title", bookmark.getTitle());
+            prop.putHTML("posts_"+count+"_description", bookmark.getDescription());
             prop.put("posts_"+count+"_md5", serverCodings.encodeMD5Hex(bookmark.getUrl()));
             date=new Date(bookmark.getTimeStamp());
             prop.put("posts_"+count+"_time", serverDate.dateToiso8601(date));
-            prop.put("posts_"+count+"_tags", bookmark.getTagsString().replaceAll(","," "));
+            prop.putHTML("posts_"+count+"_tags", bookmark.getTagsString().replaceAll(","," "));
             
             // additional XML tags
-            prop.put("posts_"+count+"_isExtended",extendedXML ? 1:0);
+            prop.put("posts_"+count+"_isExtended",extendedXML ? "1" : "0");
             if (extendedXML) {
             	prop.put("posts_"+count+"_isExtended_private", Boolean.toString(!bookmark.getPublic()));
             }
@@ -100,6 +100,3 @@ public class all {
     }
     
 }
-
-
-

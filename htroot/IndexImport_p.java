@@ -112,15 +112,15 @@ public final class IndexImport_p {
                     PrintStream errorOut = new PrintStream(errorMsg);
                     e.printStackTrace(errorOut);
                     
-                    prop.put("error",3);
-                    prop.put("error_error_msg",e.toString());
-                    prop.put("error_error_stackTrace",errorMsg.toString().replaceAll("\n","<br>"));
+                    prop.put("error", "3");
+                    prop.putHTML("error_error_msg",e.toString());
+                    prop.putHTML("error_error_stackTrace",errorMsg.toString().replaceAll("\n","<br>"));
                     
                     errorOut.close();
                 }
             } else if (post.containsKey("clearFinishedJobList")) {
                 switchboard.dbImportManager.finishedJobs.clear();
-                prop.put("LOCATION","");
+                prop.put("LOCATION", "");
                 return prop;
             } else if (
                     (post.containsKey("stopIndexDbImport")) ||
@@ -149,8 +149,8 @@ public final class IndexImport_p {
             }
         }
         
-        prop.put("wcount", Integer.toString(switchboard.wordIndex.size()));
-        prop.put("ucount", Integer.toString(switchboard.wordIndex.loadedURL.size()));
+        prop.putNum("wcount", switchboard.wordIndex.size());
+        prop.putNum("ucount", switchboard.wordIndex.loadedURL.size());
         
         /*
          * Loop over all currently running jobs
@@ -162,7 +162,7 @@ public final class IndexImport_p {
             dbImporter currThread = importThreads[i];
 
             // get import type
-            prop.put("running.jobs_" + i + "_type",            currThread.getJobType());
+            prop.put("running.jobs_" + i + "_type", currThread.getJobType());
             
             // root path of the source db
             String fullName = currThread.getJobName().toString();
@@ -171,24 +171,24 @@ public final class IndexImport_p {
             prop.put("running.jobs_" + i + "_shortName",shortName);
             
             // specifies if the importer is still running
-            prop.put("running.jobs_" + i + "_stopped",         currThread.isStopped() ? 0:1);
+            prop.put("running.jobs_" + i + "_stopped", currThread.isStopped() ? "0" : "1");
             
             // specifies if the importer was paused
-            prop.put("running.jobs_" + i + "_paused",          currThread.isPaused() ? 1:0);
+            prop.put("running.jobs_" + i + "_paused", currThread.isPaused() ? "1" : "0");
             
             // setting the status
-            prop.put("running.jobs_" + i + "_runningStatus",          currThread.isPaused() ? 2 : currThread.isStopped() ? 0 : 1);
+            prop.put("running.jobs_" + i + "_runningStatus", currThread.isPaused() ? "2" : currThread.isStopped() ? "0" : "1");
             
             // other information
-            prop.put("running.jobs_" + i + "_percent",         Integer.toString(currThread.getProcessingStatusPercent()));
-            prop.put("running.jobs_" + i + "_elapsed",         serverDate.intervalToString(currThread.getElapsedTime()));
-            prop.put("running.jobs_" + i + "_estimated",       serverDate.intervalToString(currThread.getEstimatedTime()));
-            prop.put("running.jobs_" + i + "_status",          currThread.getStatus().replaceAll("\n", "<br>"));
+            prop.putNum("running.jobs_" + i + "_percent", currThread.getProcessingStatusPercent());
+            prop.put("running.jobs_" + i + "_elapsed", serverDate.intervalToString(currThread.getElapsedTime()));
+            prop.put("running.jobs_" + i + "_estimated", serverDate.intervalToString(currThread.getEstimatedTime()));
+            prop.putHTML("running.jobs_" + i + "_status", currThread.getStatus().replaceAll("\n", "<br>"));
             
             // job number of the importer thread
-            prop.put("running.jobs_" + i + "_job_nr", Integer.toString(currThread.getJobID()));
+            prop.put("running.jobs_" + i + "_job_nr", currThread.getJobID());
         }
-        prop.put("running.jobs",activeCount);
+        prop.put("running.jobs", activeCount);
         
         /*
          * Loop over all finished jobs 
@@ -203,20 +203,18 @@ public final class IndexImport_p {
             prop.put("finished.jobs_" + i + "_fullName", fullName);
             prop.put("finished.jobs_" + i + "_shortName", shortName);
             if (error != null) { 
-                prop.put("finished.jobs_" + i + "_runningStatus", 1);
-                prop.put("finished.jobs_" + i + "_runningStatus_errorMsg", error.replaceAll("\n", "<br>"));
+                prop.put("finished.jobs_" + i + "_runningStatus", "1");
+                prop.putHTML("finished.jobs_" + i + "_runningStatus_errorMsg", error.replaceAll("\n", "<br>"));
             } else {
-                prop.put("finished.jobs_" + i + "_runningStatus", 0);
+                prop.put("finished.jobs_" + i + "_runningStatus", "0");
             }
-            prop.put("finished.jobs_" + i + "_percent", Integer.toString(currThread.getProcessingStatusPercent()));
-            prop.put("finished.jobs_" + i + "_elapsed", serverDate.intervalToString(currThread.getElapsedTime()));         
-            prop.put("finished.jobs_" + i + "_status", currThread.getStatus().replaceAll("\n", "<br>"));
+            prop.putNum("finished.jobs_" + i + "_percent", currThread.getProcessingStatusPercent());
+            prop.put("finished.jobs_" + i + "_elapsed", serverDate.intervalToString(currThread.getElapsedTime()));
+            prop.putHTML("finished.jobs_" + i + "_status", currThread.getStatus().replaceAll("\n", "<br>"));
         }
         prop.put("finished.jobs",finishedJobs.length);
         
         prop.put("date",(new Date()).toString());
         return prop;
     }
-    
-    
 }

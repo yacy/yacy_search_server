@@ -45,7 +45,6 @@ import de.anomic.server.serverObjects;
 import de.anomic.server.serverSwitch;
 import de.anomic.server.serverMemory;
 import de.anomic.yacy.yacyCore;
-import de.anomic.yacy.yacySeed;
 import de.anomic.http.httpdByteCountInputStream;
 import de.anomic.http.httpdByteCountOutputStream;
 
@@ -56,22 +55,28 @@ public class status_p {
         // return variable that accumulates replacements
         plasmaSwitchboard switchboard = (plasmaSwitchboard) env;
         serverObjects prop = new serverObjects();
-        prop.put("rejected", 0);
+        if (post == null || !post.containsKey("html"))
+            prop.setLocalized(false);
+        prop.put("rejected", "0");
         yacyCore.peerActions.updateMySeed();
-        prop.put("ppm", yacyCore.seedDB.mySeed().get(yacySeed.ISPEED, "unknown"));
-        prop.put("qpm", yacyCore.seedDB.mySeed().get(yacySeed.RSPEED, "unknown"));
-        prop.put("wordCacheSize", switchboard.wordIndex.dhtOutCacheSize() + switchboard.wordIndex.dhtInCacheSize());
-        prop.put("wordCacheWSize", switchboard.wordIndex.dhtOutCacheSize());
-        prop.put("wordCacheKSize", switchboard.wordIndex.dhtInCacheSize());
-        prop.put("wordCacheMaxCount", switchboard.getConfig(plasmaSwitchboard.WORDCACHE_MAX_COUNT, "10000"));
+        final int  cacheOutSize = switchboard.wordIndex.dhtOutCacheSize();
+        final long cacheMaxSize = switchboard.getConfigLong(plasmaSwitchboard.WORDCACHE_MAX_COUNT, 10000);
+        prop.putNum("ppm", yacyCore.seedDB.mySeed().getPPM());
+        prop.putNum("qpm", yacyCore.seedDB.mySeed().getQPM());
+        prop.putNum("wordCacheSize", switchboard.wordIndex.dhtOutCacheSize() + switchboard.wordIndex.dhtInCacheSize());
+        prop.putNum("wordCacheWSize", cacheOutSize);
+        prop.putNum("wordCacheKSize", switchboard.wordIndex.dhtInCacheSize());
+        prop.putNum("wordCacheMaxSize", cacheMaxSize);
+        prop.put("wordCacheWCount", cacheOutSize);
+        prop.put("wordCacheMaxCount", cacheMaxSize);
 
 		//
 		// memory usage and system attributes
 		final Runtime rt = Runtime.getRuntime();
-        prop.put("freeMemory", rt.freeMemory());
-        prop.put("totalMemory", rt.totalMemory());
-        prop.put("maxMemory", serverMemory.max);
-        prop.put("processors", rt.availableProcessors());
+        prop.putNum("freeMemory", rt.freeMemory());
+        prop.putNum("totalMemory", rt.totalMemory());
+        prop.putNum("maxMemory", serverMemory.max);
+        prop.putNum("processors", rt.availableProcessors());
 
 		// proxy traffic
 		prop.put("trafficIn", httpdByteCountInputStream.getGlobalCount());
@@ -83,6 +88,3 @@ public class status_p {
     }
     
 }
-
-
-

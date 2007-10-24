@@ -73,13 +73,13 @@ public final class transfer {
         String filename  = post.get("filename", ""); // a name of a file without path
         //long   filesize  = Long.parseLong((String) post.get("filesize", "")); // the size of the file
 
-        prop.put("process", 0);
-        prop.putASIS("response", "denied"); // reject is default and is overwritten if ok
-        prop.putASIS("process_access", "");
-        prop.putASIS("process_address", "");
-        prop.putASIS("process_protocol", "");
-        prop.putASIS("process_path", "");
-        prop.putASIS("process_maxsize", "0");
+        prop.put("process", "0");
+        prop.put("response", "denied"); // reject is default and is overwritten if ok
+        prop.put("process_access", "");
+        prop.put("process_address", "");
+        prop.put("process_protocol", "");
+        prop.put("process_path", "");
+        prop.put("process_maxsize", "0");
 
         if (sb.isRobinsonMode() || !sb.rankingOn) {
         	// in a robinson environment, do not answer. We do not do any transfer in a robinson cluster.
@@ -98,18 +98,18 @@ public final class transfer {
         String otherpeerName = otherseed.hash + ":" + otherseed.getName();
         
         if (process.equals("permission")) {
-            prop.put("process", 0);
+            prop.put("process", "0");
             if (((purpose.equals("crcon")) && (filename.startsWith("CRG")) && (filename.endsWith(".cr.gz"))) || ((filename.startsWith("domlist")) && (filename.endsWith(".txt.gz") || filename.endsWith(".zip")))) {
                 // consolidation of cr files
                 //System.out.println("yacy/transfer:post=" + post.toString());
                 //String cansendprotocol = (String) post.get("can-send-protocol", "http");
                 String access = kelondroBase64Order.enhancedCoder.encode(serverCodings.encodeMD5Raw(otherpeer + ":" + filename)) + ":" + kelondroBase64Order.enhancedCoder.encode(serverCodings.encodeMD5Raw("" + System.currentTimeMillis()));
-                prop.putASIS("response", "ok");
-                prop.putASIS("process_access", access);
-                prop.putASIS("process_address", yacyCore.seedDB.mySeed().getPublicAddress());
-                prop.putASIS("process_protocol", "http");
-                prop.putASIS("process_path", "");  // currently empty; the store process will find a path
-                prop.putASIS("process_maxsize", "-1"); // if response is too big we return the size of the file
+                prop.put("response", "ok");
+                prop.put("process_access", access);
+                prop.put("process_address", yacyCore.seedDB.mySeed().getPublicAddress());
+                prop.put("process_protocol", "http");
+                prop.put("process_path", "");  // currently empty; the store process will find a path
+                prop.put("process_maxsize", "-1"); // if response is too big we return the size of the file
                 sb.rankingPermissions.put(serverCodings.encodeMD5Hex(kelondroBase64Order.standardCoder.encodeString(access)), filename);
                 sb.getLog().logFine("RankingTransmission: granted peer " + otherpeerName + " to send CR file " + filename);
             }
@@ -117,7 +117,7 @@ public final class transfer {
         }
 
         if (process.equals("store")) {
-            prop.put("process", 1);
+            prop.put("process", "1");
             if (purpose.equals("crcon")) {
                 byte[] filebytes = (byte[]) post.get("filename$file");
                 String accesscode = post.get("access", "");   // one-time authentication
@@ -125,10 +125,10 @@ public final class transfer {
                 //java.util.HashMap perm = sb.rankingPermissions;
                 //System.out.println("PERMISSIONDEBUG: accesscode=" + accesscode + ", permissions=" + perm.toString());
                 String grantedFile = (String) sb.rankingPermissions.get(accesscode);
-                prop.putASIS("process_tt", "");
+                prop.put("process_tt", "");
                 if ((grantedFile == null) || (!(grantedFile.equals(filename)))) {
                     // fraud-access of this interface
-                    prop.putASIS("response", "denied");
+                    prop.put("response", "denied");
                     sb.getLog().logFine("RankingTransmission: denied " + otherpeerName + " to send CR file " + filename + ": wrong access code");
                 } else {
                     sb.rankingPermissions.remove(accesscode); // not needed any more
@@ -140,19 +140,19 @@ public final class transfer {
                             serverFileUtils.write(filebytes, file);
                             String md5t = serverCodings.encodeMD5Hex(file);
                             if (md5t.equals(md5)) {
-                                prop.putASIS("response", "ok");
+                                prop.put("response", "ok");
                                 sb.getLog().logFine("RankingTransmission: received from peer " + otherpeerName + " CR file " + filename);
                             } else {
-                                prop.putASIS("response", "transfer failure");
+                                prop.put("response", "transfer failure");
                                 sb.getLog().logFine("RankingTransmission: transfer failure from peer " + otherpeerName + " for CR file " + filename);
                             }
                         }else{
                             //exploit?
-                            prop.putASIS("response", "io error");
+                            prop.put("response", "io error");
                             return prop;
                         }
                     } catch (IOException e) {
-                        prop.putASIS("response", "io error");
+                        prop.put("response", "io error");
                     }
                 }
             }

@@ -73,7 +73,7 @@ public final class query {
         	// or we are a private cluster and the requester is in our cluster.
           	// if we don't answer, the remote peer will recognize us as junior peer,
           	// what would mean that our peer ping does not work
-        	prop.putASIS("response", "-1"); // request rejected
+        	prop.put("response", "-1"); // request rejected
             return prop;
         }
                   
@@ -85,12 +85,12 @@ public final class query {
         final String obj    = post.get("object", ""); // keyword for query subject
         final String env    = post.get("env", "");    // argument to query
 
-        prop.putASIS("mytime", serverDate.shortSecondTime());
+        prop.put("mytime", serverDate.shortSecondTime());
 
         // check if we are the right target and requester has correct information about this peer
         if (yacyCore.seedDB.mySeed() == null || !yacyCore.seedDB.mySeed().hash.equals(youare)) {
             // this request has a wrong target
-            prop.putASIS("response", "-1"); // request rejected
+            prop.put("response", "-1"); // request rejected
             return prop;
         }
 
@@ -117,30 +117,30 @@ public final class query {
         // requests about requirements
 
         if (obj.equals("wantedlurls")) {
-            prop.putASIS("response", "0"); // dummy response
+            prop.put("response", "0"); // dummy response
             return prop;
         }
 
         if (obj.equals("wantedpurls")) {
-            prop.putASIS("response", "0"); // dummy response
+            prop.put("response", "0"); // dummy response
             return prop;
         }
 
         if (obj.equals("wantedword")) {
             // response returns a list of wanted word hashes
-            prop.putASIS("response", "0"); // dummy response
+            prop.put("response", "0"); // dummy response
             return prop;
         }
 
         if (obj.equals("wantedrwi")) {
             // <env> shall contain a word hash, the number of wanted lurls for this hash is returned
-            prop.putASIS("response", "0"); // dummy response
+            prop.put("response", "0"); // dummy response
             return prop;
         }
 
         if (obj.equals("wantedseeds")) {
             // return a number of wanted seed
-            prop.putASIS("response", "0"); // dummy response
+            prop.put("response", "0"); // dummy response
             return prop;
         }
 

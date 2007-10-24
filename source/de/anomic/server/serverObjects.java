@@ -3,8 +3,12 @@
 //(C) by Michael Peter Christen; mc@anomic.de
 //first published on http://www.anomic.de
 //Frankfurt, Germany, 2004
-//last major change: 05.06.2004
-
+//(C) changes by Bjoern 'fuchs' Krombholz
+//
+// $LastChangedDate:  $
+// $LastChangedRevision:  $
+// $LastChangedBy:  $
+//
 //This program is free software; you can redistribute it and/or modify
 //it under the terms of the GNU General Public License as published by
 //the Free Software Foundation; either version 2 of the License, or
@@ -74,6 +78,7 @@ import de.anomic.tools.yFormatter;
 public class serverObjects extends Hashtable implements Cloneable {
 
     private static final long serialVersionUID = 1L;
+    private boolean localized = true; 
 
     public serverObjects() {
         super();
@@ -87,7 +92,15 @@ public class serverObjects extends Hashtable implements Cloneable {
         super(input);
     }
 
-    // new put takes also null values
+    /**
+     * Add a key-value pair of Objects to the map.
+     * @param key   This method will do nothing if the key is <code>null</code>.
+     * @param value The value that should be mapped to the key.
+     *              If value is <code>null</code>, then the element at <code>key</code>
+     *              is removed from the map.
+     * @return The value that was added to the map. 
+     * @see java.util.Hashtable#put(K, V)
+     */
     public Object put(Object key, Object value) {
         if (key == null) {
             // this does nothing
@@ -101,25 +114,20 @@ public class serverObjects extends Hashtable implements Cloneable {
     }
 
     /**
+     * This method just calls {@link #put(Object, Object)}.
+     */
+    public String put(String key, String value) {
+        return (String) this.put((Object) key, value);
+    }
+
+    /**
      * Add byte array to the map, value is kept as it is.
      * @param key   key name as String.
      * @param value mapped value as a byte array.
      * @return      the added value.
      */
     public byte[] put(String key, byte[] value) {
-        return (byte[]) this.put((Object) key, (Object) value); //TODO: use wikiCode.replaceXMLEntities?!
-    }
-
-    
-    /**
-     * Add a String to the map. The content of the String is escaped to be usable in HTML output.
-     * @param key   key name as String.
-     * @param value a String that will be reencoded for HTML output.
-     * @return      the modified String that was added to the map.
-     * @see htmlTools#encodeUnicode2html(String, boolean)
-     */
-    public String put(String key, String value) {
-        return (String) put((Object) key, (Object) htmlTools.encodeUnicode2html(value, true));
+        return (byte[]) this.put((Object) key, (Object) value); //TODO: do we need an encoding method for byte[]?
     }
 
     /**
@@ -130,13 +138,10 @@ public class serverObjects extends Hashtable implements Cloneable {
      * @return value as it was added to the map or <code>NaN</code> if an error occured.
      */
     public double put(String key, double value) {
-        String ret = this.put(key, Double.toString(value));
-        if (ret == null) {
+        if (null == this.put(key, Double.toString(value))) {
             return Double.NaN;
-        } else try {
-            return Double.parseDouble(ret);
-        } catch (NumberFormatException e) {
-            return Double.NaN;
+        } else {
+            return value;
         }
     }
 
@@ -145,61 +150,81 @@ public class serverObjects extends Hashtable implements Cloneable {
      * @return Returns 0 for the error case.
      */
     public long put(String key, long value) {
-        String result = this.put(key, Long.toString(value));
-        if (result == null) {
+        if (null == this.put(key, Long.toString(value))) {
             return 0;
-        } else try {
-            return Long.parseLong(result);
-        } catch (NumberFormatException e) {
-            return 0;
+        } else {
+            return value;
         }
     }
 
     /**
+     * Add a String to the map. The content of the String is escaped to be usable in HTML output.
+     * @param key   key name as String.
+     * @param value a String that will be reencoded for HTML output.
+     * @return      the modified String that was added to the map.
+     * @see htmlTools#encodeUnicode2html(String, boolean)
+     */
+    public String putHTML(String key, String value) {
+        return putHTML(key, value, false);
+    }
+
+    /**
+     * Like {@link #putHTML(String, String)} but takes an extra argument defining, if the returned
+     * String should be used in normal HTML: <code>false</code>.
+     * If forXML is <code>true</code>, then only the characters <b>&amp; &quot; &lt; &gt;</b> will be
+     * replaced in the returned String.
+     */
+    public String putHTML(String key, String value, boolean forXML) {
+        return (String) put((Object) key, htmlTools.encodeUnicode2html(value, true, forXML));
+    }
+
+    /**
      * Add a byte/long/integer to the map. The number will be encoded into a String using
-     * a localized format specified by {@link yFormatter}.
+     * a localized format specified by {@link yFormatter} and {@link #setLocalized(boolean)}.
      * @param key   key name as String.
      * @param value integer type value to be added to the map in its formatted String 
      *              representation.
      * @return the String value added to the map.
      */
     public String putNum(String key, long value) {
-        return (String) this.put((Object) key, (Object) yFormatter.number(value));
+        return (String) this.put((Object) key, yFormatter.number(value, this.localized));
     }
+
     /**
      * Variant for double/float types.
      * @see #putNum(String, long)
      */
     public String putNum(String key, double value) {
-        return (String) this.put((Object) key, (Object) yFormatter.number(value));
+        return (String) this.put((Object) key, yFormatter.number(value, this.localized));
     }
 
-    // ASIS methods don't reencode the values before adding them to the map
-    public byte[] putASIS(String key, byte[] value) {
-        return (byte[]) this.put((Object) key, (Object) value);
-    }
-    public String putASIS(String key, String value) {
-        return (String) this.put((Object) key, (Object) value);
+    /**
+     * Variant for string encoded numbers.
+     * @see #putNum(String, long)
+     */
+    public String putNum(String key, String value) {
+        return (String) this.put((Object) key, yFormatter.number(value));
     }
 
+    
     public String putWiki(String key, String wikiCode){
-        return this.putASIS(key, plasmaSwitchboard.wikiParser.transform(wikiCode));
+        return this.put(key, plasmaSwitchboard.wikiParser.transform(wikiCode));
     }
     public String putWiki(String key, byte[] wikiCode) {
         try {
-            return this.putASIS(key, plasmaSwitchboard.wikiParser.transform(wikiCode));
+            return this.put(key, plasmaSwitchboard.wikiParser.transform(wikiCode));
         } catch (UnsupportedEncodingException e) {
-            return this.putASIS(key, "Internal error pasting wiki-code: " + e.getMessage());
+            return this.put(key, "Internal error pasting wiki-code: " + e.getMessage());
         }
     }
     public String putWiki(String key, String wikiCode, String publicAddress) {
-        return this.putASIS(key, plasmaSwitchboard.wikiParser.transform(wikiCode, publicAddress));
+        return this.put(key, plasmaSwitchboard.wikiParser.transform(wikiCode, publicAddress));
     }
     public String putWiki(String key, byte[] wikiCode, String publicAddress) {
         try {
-            return this.putASIS(key, plasmaSwitchboard.wikiParser.transform(wikiCode, "UTF-8", publicAddress));
+            return this.put(key, plasmaSwitchboard.wikiParser.transform(wikiCode, "UTF-8", publicAddress));
         } catch (UnsupportedEncodingException e) {
-            return this.putASIS(key, "Internal error pasting wiki-code: " + e.getMessage());
+            return this.put(key, "Internal error pasting wiki-code: " + e.getMessage());
         }
     }
 
@@ -290,6 +315,17 @@ public class serverObjects extends Hashtable implements Cloneable {
                 } catch (Exception e){}
             }
         }
+    }
+
+    /**
+     * Defines the localization state of this object.
+     * Currently it is used for numbers added with the putNum() methods only.
+     * @param loc if <code>true</code> store numbers in a localized format, otherwise
+     *            use a default english locale without grouping.
+     * @see yFormatter#setLocale(String) 
+     */
+    public void setLocalized(boolean loc) {
+        this.localized = loc;
     }
 
     public Object clone() {

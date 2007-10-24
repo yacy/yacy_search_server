@@ -66,32 +66,32 @@ public class User{
         userDB.Entry entry=null;
 
         //default values
-        prop.put("logged_in", 0);
-        prop.put("logged-in_limit", 0);
-        prop.put("status", 0);
+        prop.put("logged_in", "0");
+        prop.put("logged-in_limit", "0");
+        prop.put("status", "0");
         //identified via HTTPPassword
         entry=sb.userDB.proxyAuth(((String) header.get(httpHeader.AUTHORIZATION, "xxxxxx")));
         if(entry != null){
-        	prop.put("logged-in_identified-by", 1);
+        	prop.put("logged-in_identified-by", "1");
         //try via cookie
         }else{
             entry=sb.userDB.cookieAuth(header.getHeaderCookies());
-            prop.put("logged-in_identified-by", 2);
+            prop.put("logged-in_identified-by", "2");
             //try via ip
             if(entry == null){
                 entry=sb.userDB.ipAuth(((String)header.get("CLIENTIP", "xxxxxx")));
                 if(entry != null){
-                    prop.put("logged-in_identified-by", 0);
+                    prop.put("logged-in_identified-by", "0");
                 }
             }
         }
         
         //identified via userDB
         if(entry != null){
-            prop.put("logged-in", 1);
+            prop.put("logged-in", "1");
             prop.put("logged-in_username", entry.getUserName());
             if(entry.getTimeLimit() > 0){
-                prop.put("logged-in_limit", 1);
+                prop.put("logged-in_limit", "1");
                 long limit=entry.getTimeLimit();
                 long used=entry.getTimeUsed();
                 prop.put("logged-in_limit_timelimit", limit);
@@ -104,7 +104,7 @@ public class User{
             }
         //logged in via static Password
         }else if(sb.verifyAuthentication(header, true)){
-            prop.put("logged-in", 2);
+            prop.put("logged-in", "2");
         //identified via form-login
         //TODO: this does not work for a static admin, yet.
         }else if(post != null && post.containsKey("username") && post.containsKey("password")){
@@ -130,8 +130,8 @@ public class User{
                 outgoingHeader.setCookie("login", cookie);
                 prop.setOutgoingHeader(outgoingHeader);
                 
-                prop.put("logged-in", 1);
-                prop.put("logged-in_identified-by", 1);
+                prop.put("logged-in", "1");
+                prop.put("logged-in_identified-by", "1");
                 prop.put("logged-in_username", username);
                 if(post.containsKey("returnto")){
                     prop.put("LOCATION", (String)post.get("returnto"));
@@ -141,27 +141,27 @@ public class User{
         
         if(post!= null && entry != null){
         		if(post.containsKey("changepass")){
-        			prop.put("status", 1); //password
+        			prop.put("status", "1"); //password
         			if(entry.getMD5EncodedUserPwd().equals(serverCodings.encodeMD5Hex(entry.getUserName()+":"+post.get("oldpass", "")))){
         			if(post.get("newpass").equals(post.get("newpass2"))){
         			if(!post.get("newpass", "").equals("")){
         				try {
 							entry.setProperty(userDB.Entry.MD5ENCODED_USERPWD_STRING, serverCodings.encodeMD5Hex(entry.getUserName()+":"+post.get("newpass", "")));
-							prop.put("status_password", 0); //changes
+							prop.put("status_password", "0"); //changes
 						} catch (IOException e) {}
         			}else{
-        				prop.put("status_password", 3); //empty
+        				prop.put("status_password", "3"); //empty
         			}
         			}else{
-        				prop.put("status_password", 2); //pws do not match
+        				prop.put("status_password", "2"); //pws do not match
         			}
         			}else{
-        				prop.put("status_password", 1); //old pw wrong
+        				prop.put("status_password", "1"); //old pw wrong
         			}
         		}
         }
         if(post!=null && post.containsKey("logout")){
-            prop.put("logged-in",0);
+            prop.put("logged-in", "0");
             if(entry != null){
                 entry.logout(((String)header.get("CLIENTIP", "xxxxxx")), userDB.getLoginToken(header.getHeaderCookies())); //todo: logout cookie
             }else{

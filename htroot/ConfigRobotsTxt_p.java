@@ -83,19 +83,19 @@ public class ConfigRobotsTxt_p {
             }
         }
         
-        prop.put(httpdRobotsTxtConfig.ALL + ".checked", (rbc.isAllDisallowed()) ? 1 : 0);
-        prop.put(httpdRobotsTxtConfig.BLOG + ".checked", (rbc.isBlogDisallowed()) ? 1 : 0);
-        prop.put(httpdRobotsTxtConfig.BOOKMARKS + ".checked", (rbc.isBookmarksDisallowed()) ? 1 : 0);
-        prop.put(httpdRobotsTxtConfig.DIRS + ".checked", (rbc.isDirsDisallowed()) ? 1 : 0);
-        prop.put(httpdRobotsTxtConfig.FILESHARE + ".checked", (rbc.isFileshareDisallowed()) ? 1 : 0);
-        prop.put(httpdRobotsTxtConfig.HOMEPAGE + ".checked", (rbc.isHomepageDisallowed()) ? 1 : 0);
-        prop.put(httpdRobotsTxtConfig.LOCKED + ".checked", (rbc.isLockedDisallowed()) ? 1 : 0);
-        prop.put(httpdRobotsTxtConfig.NETWORK + ".checked", (rbc.isNetworkDisallowed()) ? 1 : 0);
-        prop.put(httpdRobotsTxtConfig.NEWS + ".checked", (rbc.isNewsDisallowed()) ? 1 : 0);
-        prop.put(httpdRobotsTxtConfig.STATUS + ".checked", (rbc.isStatusDisallowed()) ? 1 : 0);
-        prop.put(httpdRobotsTxtConfig.SURFTIPS + ".checked", (rbc.isSurftipsDisallowed()) ? 1 : 0);
-        prop.put(httpdRobotsTxtConfig.WIKI + ".checked", (rbc.isWikiDisallowed()) ? 1 : 0);
-        prop.put(httpdRobotsTxtConfig.PROFILE + ".checked", (rbc.isProfileDisallowed()) ? 1 : 0);
+        prop.put(httpdRobotsTxtConfig.ALL + ".checked", (rbc.isAllDisallowed()) ? "1" : "0");
+        prop.put(httpdRobotsTxtConfig.BLOG + ".checked", (rbc.isBlogDisallowed()) ? "1" : "0");
+        prop.put(httpdRobotsTxtConfig.BOOKMARKS + ".checked", (rbc.isBookmarksDisallowed()) ? "1" : "0");
+        prop.put(httpdRobotsTxtConfig.DIRS + ".checked", (rbc.isDirsDisallowed()) ? "1" : "0");
+        prop.put(httpdRobotsTxtConfig.FILESHARE + ".checked", (rbc.isFileshareDisallowed()) ? "1" : "0");
+        prop.put(httpdRobotsTxtConfig.HOMEPAGE + ".checked", (rbc.isHomepageDisallowed()) ? "1" : "0");
+        prop.put(httpdRobotsTxtConfig.LOCKED + ".checked", (rbc.isLockedDisallowed()) ? "1" : "0");
+        prop.put(httpdRobotsTxtConfig.NETWORK + ".checked", (rbc.isNetworkDisallowed()) ? "1" : "0");
+        prop.put(httpdRobotsTxtConfig.NEWS + ".checked", (rbc.isNewsDisallowed()) ? "1" : "0");
+        prop.put(httpdRobotsTxtConfig.STATUS + ".checked", (rbc.isStatusDisallowed()) ? "1" : "0");
+        prop.put(httpdRobotsTxtConfig.SURFTIPS + ".checked", (rbc.isSurftipsDisallowed()) ? "1" : "0");
+        prop.put(httpdRobotsTxtConfig.WIKI + ".checked", (rbc.isWikiDisallowed()) ? "1" : "0");
+        prop.put(httpdRobotsTxtConfig.PROFILE + ".checked", (rbc.isProfileDisallowed()) ? "1" : "0");
         return prop;
     }
 }

@@ -130,11 +130,11 @@ public final class hello {
             serverCore.checkInterruption();
             
             // try first the reportedip, since this may be a connect from a port-forwarding host
-            prop.putASIS("yourip", reportedip);
+            prop.put("yourip", reportedip);
             remoteSeed.put(yacySeed.IP, reportedip);
             urls = yacyClient.queryUrlCount(remoteSeed);
         } else {
-            prop.putASIS("yourip", "unknown");
+            prop.put("yourip", "unknown");
         }
 
         // if the previous attempt (using the reported ip address) was not successful, try the ip where 
@@ -149,7 +149,7 @@ public final class hello {
         	if (isNotLocal) {
         		serverCore.checkInterruption();
                 
-                prop.putASIS("yourip", clientip);
+                prop.put("yourip", clientip);
                 remoteSeed.put(yacySeed.IP, clientip);
                 urls = yacyClient.queryUrlCount(remoteSeed);
         	}
@@ -162,18 +162,18 @@ public final class hello {
         // assign status
         if (urls >= 0) {
             if (remoteSeed.get(yacySeed.PEERTYPE, yacySeed.PEERTYPE_SENIOR) == null) {
-                prop.putASIS(yacySeed.YOURTYPE, yacySeed.PEERTYPE_SENIOR);
+                prop.put(yacySeed.YOURTYPE, yacySeed.PEERTYPE_SENIOR);
                 remoteSeed.put(yacySeed.PEERTYPE, yacySeed.PEERTYPE_SENIOR);
             } else if (remoteSeed.get(yacySeed.PEERTYPE, yacySeed.PEERTYPE_PRINCIPAL).equals(yacySeed.PEERTYPE_PRINCIPAL)) {
-                prop.putASIS(yacySeed.YOURTYPE, yacySeed.PEERTYPE_PRINCIPAL);
+                prop.put(yacySeed.YOURTYPE, yacySeed.PEERTYPE_PRINCIPAL);
             } else {
-                prop.putASIS(yacySeed.YOURTYPE, yacySeed.PEERTYPE_SENIOR);
+                prop.put(yacySeed.YOURTYPE, yacySeed.PEERTYPE_SENIOR);
                 remoteSeed.put(yacySeed.PEERTYPE, yacySeed.PEERTYPE_SENIOR);
             }
             // connect the seed
             yacyCore.peerActions.peerArrival(remoteSeed, true);
         } else {
-            prop.putASIS(yacySeed.YOURTYPE, yacySeed.PEERTYPE_JUNIOR);
+            prop.put(yacySeed.YOURTYPE, yacySeed.PEERTYPE_JUNIOR);
             yacyCore.peerActions.juniorConnects++; // update statistics
             remoteSeed.put(yacySeed.PEERTYPE, yacySeed.PEERTYPE_JUNIOR);
             yacyCore.log.logInfo("hello: responded remote junior peer '" + remoteSeed.getName() + "' from " + reportedip);
@@ -222,7 +222,7 @@ public final class hello {
             seeds.append("seed0=").append(yacyCore.seedDB.mySeed().genSeedStr(key)).append(serverCore.crlfString);
         }
 
-        prop.putASIS("seedlist", seeds.toString());
+        prop.put("seedlist", seeds.toString());
         // return rewrite properties
         prop.put("message", "ok " + seed.length());
         return prop;

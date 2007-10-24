@@ -51,7 +51,6 @@ import java.net.MalformedURLException;
 import java.util.HashMap;
 import java.util.TreeSet;
 
-import de.anomic.data.htmlTools;
 import de.anomic.http.httpHeader;
 import de.anomic.index.indexURLEntry;
 import de.anomic.kelondro.kelondroBitfield;
@@ -70,6 +69,7 @@ import de.anomic.server.serverObjects;
 import de.anomic.server.serverSwitch;
 import de.anomic.server.logging.serverLog;
 import de.anomic.tools.crypt;
+import de.anomic.tools.yFormatter;
 import de.anomic.yacy.yacyCore;
 import de.anomic.yacy.yacyNewsPool;
 import de.anomic.yacy.yacyNewsRecord;
@@ -93,6 +93,7 @@ public class yacysearch {
         // case if no values are requested
         final String referer = (String) header.get("Referer");
         String querystring = (post == null) ? "" : post.get("search", "").trim();
+        boolean rss = post.get("rss", "false").equals("true");
         
         if ((post == null) || (env == null) || (querystring.length() == 0) || (!searchAllowed)) {
 
@@ -113,18 +114,18 @@ public class yacysearch {
 
             // we create empty entries for template strings
             final serverObjects prop = new serverObjects();
-            prop.put("searchagain", 0);
+            prop.put("searchagain", "0");
             prop.put("input", input);
             prop.put("display", display);
             prop.put("input_input", input);
             prop.put("input_display", display);
-            prop.putASIS("input_promoteSearchPageGreeting", promoteSearchPageGreeting);
+            prop.put("input_promoteSearchPageGreeting", promoteSearchPageGreeting);
             prop.put("input_former", "");
             prop.put("former", "");
-            prop.put("input_count", 10);
-            prop.put("input_offset", 0);
+            prop.put("input_count", "10");
+            prop.put("input_offset", "0");
             prop.put("input_resource", "global");
-            prop.put("input_time", 6);
+            prop.put("input_time", "6");
             prop.put("input_urlmaskfilter", ".*");
             prop.put("input_prefermaskfilter", "");
             prop.put("input_indexof", "off");
@@ -132,15 +133,15 @@ public class yacysearch {
             prop.put("input_cat", "href");
             prop.put("input_depth", "0");
             prop.put("input_contentdom", "text");
-            prop.put("input_contentdomCheckText", 1);
-            prop.put("input_contentdomCheckAudio", 0);
-            prop.put("input_contentdomCheckVideo", 0);
-            prop.put("input_contentdomCheckImage", 0);
-            prop.put("input_contentdomCheckApp", 0);
-            prop.put("excluded", 0);
+            prop.put("input_contentdomCheckText", "1");
+            prop.put("input_contentdomCheckAudio", "0");
+            prop.put("input_contentdomCheckVideo", "0");
+            prop.put("input_contentdomCheckImage", "0");
+            prop.put("input_contentdomCheckApp", "0");
+            prop.put("excluded", "0");
             prop.put("results", "");
-            prop.put("resultTable", 0);
-            prop.put("num-results", (searchAllowed) ? 0 : 4);
+            prop.put("resultTable", "0");
+            prop.put("num-results", searchAllowed ? "0" : "4");
             
             return prop;
         }
@@ -318,11 +319,11 @@ public class yacysearch {
             sb.localSearchTracker.put(client, handles);
         
             prop = new serverObjects();
-            prop.put("num-results_totalcount", theSearch.getLocalCount() + theSearch.getGlobalCount());
-            prop.put("num-results_globalresults", 1);
-            prop.put("num-results_globalresults_globalcount", theSearch.getGlobalCount());
+            prop.put("num-results_totalcount", yFormatter.number(theSearch.getLocalCount() + theSearch.getGlobalCount(), !rss));
+            prop.put("num-results_globalresults", "1");
+            prop.put("num-results_globalresults_globalcount", yFormatter.number(theSearch.getGlobalCount(), !rss));
             prop.put("num-results_offset", offset);
-            prop.put("num-results_linkcount", 0);
+            prop.put("num-results_linkcount", "0");
             prop.put("num-results_itemsPerPage", itemsPerPage);
 
             // compose page navigation
@@ -348,7 +349,7 @@ public class yacysearch {
                 resnav.append(navurla(thispage + 1, display, theQuery));
                 resnav.append("<strong>&gt;</strong></a>");
             }
-            prop.putASIS("num-results_resnav", resnav.toString());
+            prop.put("num-results_resnav", resnav.toString());
         
             // generate the search result lines; they will be produced by another servlet
             for (int i = 0; i < theQuery.displayResults(); i++) {
@@ -356,25 +357,25 @@ public class yacysearch {
                 prop.put("results_" + i + "_eventID", theQuery.id());
             }
             prop.put("results", theQuery.displayResults());
-            prop.put("resultTable", (contentdomCode <= 1) ? 0 : 1);
+            prop.put("resultTable", (contentdomCode <= 1) ? "0" : "1");
             prop.put("eventID", theQuery.id()); // for bottomline
             
             // process result of search
             if (filtered.size() > 0) {
-                prop.put("excluded", 1);
-                prop.put("excluded_stopwords", filtered.toString());
+                prop.put("excluded", "1");
+                prop.putHTML("excluded_stopwords", filtered.toString());
             } else {
-                prop.put("excluded", 0);
+                prop.put("excluded", "0");
             }
 
             if (prop == null || prop.size() == 0) {
                 if (post.get("search", "").length() < 3) {
-                    prop.put("num-results", 2); // no results - at least 3 chars
+                    prop.put("num-results", "2"); // no results - at least 3 chars
                 } else {
-                    prop.put("num-results", 1); // no results
+                    prop.put("num-results", "1"); // no results
                 }
             } else {
-                prop.put("num-results", 3);
+                prop.put("num-results", "3");
             }
 
             prop.put("input_cat", "href");
@@ -383,37 +384,36 @@ public class yacysearch {
             // adding some additional properties needed for the rss feed
             String hostName = (String) header.get("Host", "localhost");
             if (hostName.indexOf(":") == -1) hostName += ":" + serverCore.getPortNr(env.getConfig("port", "8080"));
-            prop.putASIS("searchBaseURL", "http://" + hostName + "/yacysearch.html");
-            prop.putASIS("rssYacyImageURL", "http://" + hostName + "/env/grafics/yacy.gif");
+            prop.put("searchBaseURL", "http://" + hostName + "/yacysearch.html");
+            prop.put("rssYacyImageURL", "http://" + hostName + "/env/grafics/yacy.gif");
         }
         
-        prop.put("searchagain", (global) ? 1 : 0);
+        prop.put("searchagain", global ? "1" : "0");
         prop.put("input", input);
         prop.put("display", display);
         prop.put("input_input", input);
         prop.put("input_display", display);
-        prop.putASIS("input_promoteSearchPageGreeting", promoteSearchPageGreeting);
-        prop.put("input_former", querystring);
-        prop.put("former", post.get("search", ""));
+        prop.put("input_promoteSearchPageGreeting", promoteSearchPageGreeting);
+        prop.putHTML("input_former", querystring);
+        //prop.put("former", post.get("search", ""));
         prop.put("input_count", itemsPerPage);
         prop.put("input_offset", offset);
-        prop.put("input_resource", (global) ? "global" : "local");
+        prop.put("input_resource", global ? "global" : "local");
         prop.put("input_time", searchtime / 1000);
-        prop.put("input_urlmaskfilter", urlmask);
-        prop.put("input_prefermaskfilter", prefermask);
+        prop.putHTML("input_urlmaskfilter", urlmask);
+        prop.putHTML("input_prefermaskfilter", prefermask);
         prop.put("input_indexof", (indexof) ? "on" : "off");
         prop.put("input_constraint", constraint.exportB64());
         prop.put("input_contentdom", post.get("contentdom", "text"));
-        prop.put("input_contentdomCheckText", (contentdomCode == plasmaSearchQuery.CONTENTDOM_TEXT) ? 1 : 0);
-        prop.put("input_contentdomCheckAudio", (contentdomCode == plasmaSearchQuery.CONTENTDOM_AUDIO) ? 1 : 0);
-        prop.put("input_contentdomCheckVideo", (contentdomCode == plasmaSearchQuery.CONTENTDOM_VIDEO) ? 1 : 0);
-        prop.put("input_contentdomCheckImage", (contentdomCode == plasmaSearchQuery.CONTENTDOM_IMAGE) ? 1 : 0);
-        prop.put("input_contentdomCheckApp", (contentdomCode == plasmaSearchQuery.CONTENTDOM_APP) ? 1 : 0);
+        prop.put("input_contentdomCheckText", (contentdomCode == plasmaSearchQuery.CONTENTDOM_TEXT) ? "1" : "0");
+        prop.put("input_contentdomCheckAudio", (contentdomCode == plasmaSearchQuery.CONTENTDOM_AUDIO) ? "1" : "0");
+        prop.put("input_contentdomCheckVideo", (contentdomCode == plasmaSearchQuery.CONTENTDOM_VIDEO) ? "1" : "0");
+        prop.put("input_contentdomCheckImage", (contentdomCode == plasmaSearchQuery.CONTENTDOM_IMAGE) ? "1" : "0");
+        prop.put("input_contentdomCheckApp", (contentdomCode == plasmaSearchQuery.CONTENTDOM_APP) ? "1" : "0");
         
         // for RSS: don't HTML encode some elements
-        String q = htmlTools.encodeUnicode2xml(post.get("search", ""));
-        prop.putASIS("rss_query", q);
-        prop.putASIS("rss_queryenc", yacyURL.escape(q.replace(' ', '+')));
+        prop.putHTML("rss_query", querystring, true);
+        prop.put("rss_queryenc", yacyURL.escape(querystring.replace(' ', '+')));
         
         // return rewrite properties
         return prop;

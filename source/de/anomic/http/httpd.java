@@ -757,7 +757,7 @@ public final class httpd implements serverHandler {
             sep = argsString.indexOf("&");
             if ((eqp <= 0) || (sep <= 0)) break;
             // resulting equations are inserted into the property args with leading '&'
-            args.putASIS(parseArg(argsString.substring(0, eqp)), parseArg(argsString.substring(eqp + 1, sep)));
+            args.put(parseArg(argsString.substring(0, eqp)), parseArg(argsString.substring(eqp + 1, sep)));
             argsString = argsString.substring(sep + 1);
             argc++;
         }
@@ -965,12 +965,12 @@ public final class httpd implements serverHandler {
             java.lang.System.arraycopy(buffer, pos, line, 0, q - pos);
             // in the 'line' variable we have now either a normal value or an uploadef file
             if (filename == null) {
-                args.putASIS(new String(name, "UTF-8"), new String(line, "UTF-8"));
+                args.put(new String(name, "UTF-8"), new String(line, "UTF-8"));
             } else {
                 // we store the file in a hashtable.
                 // we use the same key to address the file in the hashtable as we
                 // use to address the filename in the properties, but without leading '&'
-                args.putASIS(new String(name, "UTF-8"), new String(filename, "UTF-8"));
+                args.put(new String(name, "UTF-8"), new String(filename, "UTF-8"));
                 files.put(new String(name, "UTF-8"), line);
             }
             argc++;
@@ -1172,7 +1172,7 @@ public final class httpd implements serverHandler {
             
             switch (errorcase) {
                 case ERRORCASE_MESSAGE:
-                    tp.putASIS("errorMessageType_detailedErrorMsg", (detailedErrorMsgText == null) ? "" : detailedErrorMsgText.replaceAll("\n", "<br />"));
+                    tp.put("errorMessageType_detailedErrorMsg", (detailedErrorMsgText == null) ? "" : detailedErrorMsgText.replaceAll("\n", "<br />"));
                     break;
                 case ERRORCASE_FILE:
                     tp.put("errorMessageType_file", (detailedErrorMsgFile == null) ? "" : detailedErrorMsgFile);

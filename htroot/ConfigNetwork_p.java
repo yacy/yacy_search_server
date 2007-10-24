@@ -54,26 +54,26 @@ public class ConfigNetwork_p {
             	indexDistribute = false;
             	indexReceive = false;
             	if ((clustermode.equals("privatepeer")) || (clustermode.equals("publicpeer"))) {
-            		prop.put("commitRobinsonWithoutRemoteIndexing", 1);
+            		prop.put("commitRobinsonWithoutRemoteIndexing", "1");
             		crawlResponse = false;
             	}
             	if ((clustermode.equals("privatecluster")) || (clustermode.equals("publiccluster"))) {
-            		prop.put("commitRobinsonWithRemoteIndexing", 1);
+            		prop.put("commitRobinsonWithRemoteIndexing", "1");
             		crawlResponse = true;
             	}
             	commit = 1;
             } else {
             	if (!indexDistribute && !indexReceive) {
-            		prop.put("commitDHTIsRobinson", 1);
+            		prop.put("commitDHTIsRobinson", "1");
             		commit = 2;
             	} else if (indexDistribute && indexReceive) {
             		commit = 1;
             	} else {
-            		prop.put("commitDHTNoGlobalSearch", 1);
+            		prop.put("commitDHTNoGlobalSearch", "1");
             		commit = 1;
             	}
             	if (!crawlResponse) {
-            		prop.put("commitCrawlPlea", 1);
+            		prop.put("commitCrawlPlea", "1");
             	}
             }
             
@@ -138,7 +138,7 @@ public class ConfigNetwork_p {
         prop.put("commit", commit);
         
         // write remote crawl request settings
-        prop.put("crawlResponse", sb.getConfigBool("crawlResponse", false) ? 1 : 0);
+        prop.put("crawlResponse", sb.getConfigBool("crawlResponse", false) ? "1" : "0");
         long RTCbusySleep = 100;
         try {
             RTCbusySleep = Integer.parseInt(env.getConfig(plasmaSwitchboard.CRAWLJOB_REMOTE_TRIGGERED_CRAWL_BUSYSLEEP, "100"));
@@ -148,31 +148,31 @@ public class ConfigNetwork_p {
         
         boolean indexDistribute = sb.getConfig(plasmaSwitchboard.INDEX_DIST_ALLOW, "true").equals("true");
         boolean indexReceive = sb.getConfig("allowReceiveIndex", "true").equals("true");
-        prop.put("indexDistributeChecked", (indexDistribute) ? 1 : 0);
-        prop.put("indexDistributeWhileCrawling.on", (sb.getConfig(plasmaSwitchboard.INDEX_DIST_ALLOW_WHILE_CRAWLING, "true").equals("true")) ? 1 : 0);
-        prop.put("indexDistributeWhileCrawling.off", (sb.getConfig(plasmaSwitchboard.INDEX_DIST_ALLOW_WHILE_CRAWLING, "true").equals("true")) ? 0 : 1);
-        prop.put("indexDistributeWhileIndexing.on", (sb.getConfig(plasmaSwitchboard.INDEX_DIST_ALLOW_WHILE_INDEXING, "true").equals("true")) ? 1 : 0);
-        prop.put("indexDistributeWhileIndexing.off", (sb.getConfig(plasmaSwitchboard.INDEX_DIST_ALLOW_WHILE_INDEXING, "true").equals("true")) ? 0 : 1);
-        prop.put("indexReceiveChecked", (indexReceive) ? 1 : 0);
-        prop.put("indexReceiveBlockBlacklistChecked.on", (sb.getConfig("indexReceiveBlockBlacklist", "true").equals("true")) ? 1 : 0);
-        prop.put("indexReceiveBlockBlacklistChecked.off", (sb.getConfig("indexReceiveBlockBlacklist", "true").equals("true")) ? 0 : 1);
-        prop.put("peertags", serverCodings.set2string(yacyCore.seedDB.mySeed().getPeerTags(), ",", false));
+        prop.put("indexDistributeChecked", (indexDistribute) ? "1" : "0");
+        prop.put("indexDistributeWhileCrawling.on", (sb.getConfig(plasmaSwitchboard.INDEX_DIST_ALLOW_WHILE_CRAWLING, "true").equals("true")) ? "1" : "0");
+        prop.put("indexDistributeWhileCrawling.off", (sb.getConfig(plasmaSwitchboard.INDEX_DIST_ALLOW_WHILE_CRAWLING, "true").equals("true")) ? "0" : "1");
+        prop.put("indexDistributeWhileIndexing.on", (sb.getConfig(plasmaSwitchboard.INDEX_DIST_ALLOW_WHILE_INDEXING, "true").equals("true")) ? "1" : "0");
+        prop.put("indexDistributeWhileIndexing.off", (sb.getConfig(plasmaSwitchboard.INDEX_DIST_ALLOW_WHILE_INDEXING, "true").equals("true")) ? "0" : "1");
+        prop.put("indexReceiveChecked", (indexReceive) ? "1" : "0");
+        prop.put("indexReceiveBlockBlacklistChecked.on", (sb.getConfig("indexReceiveBlockBlacklist", "true").equals("true")) ? "1" : "0");
+        prop.put("indexReceiveBlockBlacklistChecked.off", (sb.getConfig("indexReceiveBlockBlacklist", "true").equals("true")) ? "0" : "1");
+        prop.putHTML("peertags", serverCodings.set2string(yacyCore.seedDB.mySeed().getPeerTags(), ",", false));
 
         // set seed information directly
         yacyCore.seedDB.mySeed().setFlagAcceptRemoteCrawl(sb.getConfigBool("crawlResponse", false));
         yacyCore.seedDB.mySeed().setFlagAcceptRemoteIndex(indexReceive);
         
         // set p2p/robinson mode flags and values
-        prop.put("p2p.checked", (indexDistribute || indexReceive) ? 1 : 0);
-        prop.put("robinson.checked", (indexDistribute || indexReceive) ? 0 : 1);
+        prop.put("p2p.checked", (indexDistribute || indexReceive) ? "1" : "0");
+        prop.put("robinson.checked", (indexDistribute || indexReceive) ? "0" : "1");
         prop.put("cluster.peers.ipport", sb.getConfig("cluster.peers.ipport", ""));
         prop.put("cluster.peers.yacydomain", sb.getConfig("cluster.peers.yacydomain", ""));
         prop.put("cluster.peers.yacydomain.hashes", (sb.clusterhashes.size() == 0) ? "" : sb.clusterhashes.toString());
         // set p2p mode flags
-        prop.put("privatepeerChecked", (sb.getConfig("cluster.mode", "").equals("privatepeer")) ? 1 : 0);
-        prop.put("privateclusterChecked", (sb.getConfig("cluster.mode", "").equals("privatecluster")) ? 1 : 0);
-        prop.put("publicclusterChecked", (sb.getConfig("cluster.mode", "").equals("publiccluster")) ? 1 : 0);
-        prop.put("publicpeerChecked", (sb.getConfig("cluster.mode", "").equals("publicpeer")) ? 1 : 0);
+        prop.put("privatepeerChecked", (sb.getConfig("cluster.mode", "").equals("privatepeer")) ? "1" : "0");
+        prop.put("privateclusterChecked", (sb.getConfig("cluster.mode", "").equals("privatecluster")) ? "1" : "0");
+        prop.put("publicclusterChecked", (sb.getConfig("cluster.mode", "").equals("publiccluster")) ? "1" : "0");
+        prop.put("publicpeerChecked", (sb.getConfig("cluster.mode", "").equals("publicpeer")) ? "1" : "0");
         
         return prop;
 	}

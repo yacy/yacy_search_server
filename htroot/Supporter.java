@@ -133,31 +133,31 @@ public class Supporter {
                 refid = row.getColString(3, null);
                 voted = (yacyCore.newsPool.getSpecific(yacyNewsPool.OUTGOING_DB, yacyNewsPool.CATEGORY_SURFTIPP_VOTE_ADD, "refid", refid) != null) || 
                         (yacyCore.newsPool.getSpecific(yacyNewsPool.PUBLISHED_DB, yacyNewsPool.CATEGORY_SURFTIPP_VOTE_ADD, "refid", refid) != null);
-                prop.put("supporter_results_" + i + "_authorized", (authenticated) ? 1 : 0);
-                prop.put("supporter_results_" + i + "_authorized_recommend", (voted) ? 0 : 1);
+                prop.put("supporter_results_" + i + "_authorized", authenticated ? "1" : "0");
+                prop.put("supporter_results_" + i + "_authorized_recommend", voted ? "0" : "1");
 
                 prop.put("supporter_results_" + i + "_authorized_recommend_urlhash", urlhash);
                 prop.put("supporter_results_" + i + "_authorized_recommend_refid", refid);
-                prop.putASIS("supporter_results_" + i + "_authorized_recommend_url", crypt.simpleEncode(url, null, 'b'));
-                prop.putASIS("supporter_results_" + i + "_authorized_recommend_title", crypt.simpleEncode(title, null, 'b'));
-                prop.putASIS("supporter_results_" + i + "_authorized_recommend_description", crypt.simpleEncode(description, null, 'b'));
+                prop.put("supporter_results_" + i + "_authorized_recommend_url", crypt.simpleEncode(url, null, 'b'));
+                prop.putHTML("supporter_results_" + i + "_authorized_recommend_title", crypt.simpleEncode(title, null, 'b'));
+                prop.putHTML("supporter_results_" + i + "_authorized_recommend_description", crypt.simpleEncode(description, null, 'b'));
                 prop.put("supporter_results_" + i + "_authorized_recommend_display", display);
-                prop.put("supporter_results_" + i + "_authorized_recommend_showScore", (showScore ? 1 : 0));
+                prop.put("supporter_results_" + i + "_authorized_recommend_showScore", showScore ? "1" : "0");
 
                 prop.put("supporter_results_" + i + "_authorized_urlhash", urlhash);
-                prop.put("supporter_results_" + i + "_url", de.anomic.data.htmlTools.encodeUnicode2html(url, false));
+                prop.put("supporter_results_" + i + "_url", url);
                 prop.put("supporter_results_" + i + "_urlname", nxTools.shortenURLString(url, 60));
                 prop.put("supporter_results_" + i + "_urlhash", urlhash);
-                prop.put("supporter_results_" + i + "_title", (showScore) ? ("(" + ranking.getScore(urlhash) + ") " + title) : title);
-                prop.put("supporter_results_" + i + "_description", description);
+                prop.putHTML("supporter_results_" + i + "_title", (showScore) ? ("(" + ranking.getScore(urlhash) + ") " + title) : title);
+                prop.putHTML("supporter_results_" + i + "_description", description);
                 i++;
                 
                 if (i >= 50) break;
             }
             prop.put("supporter_results", i);
-            prop.put("supporter", 1);
+            prop.put("supporter", "1");
         } else {
-            prop.put("supporter", 0);
+            prop.put("supporter", "0");
         }
         
         return prop;
@@ -268,10 +268,6 @@ public class Supporter {
                     Supporter.put(urlhash, entry);
                 }
             }
-            
         }
-        
     }
-    
-    
 }

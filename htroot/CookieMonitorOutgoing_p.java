@@ -81,12 +81,13 @@ public class CookieMonitorOutgoing_p {
             cookies = (Object[]) oa[2];
 
             // put values in template
-            prop.put("list_" + entCount + "_dark", ((dark) ? 1 : 0) ); dark =! dark;
+            prop.put("list_" + entCount + "_dark", dark ? "1" : "0" ); 
+            dark =! dark;
             prop.put("list_" + entCount + "_host", host);
             prop.put("list_" + entCount + "_date", httpc.dateString(date));
             prop.put("list_" + entCount + "_client", client);
             while (tmpCount < cookies.length){
-                prop.put("list_" + entCount + "_cookies_" + tmpCount + "_item", ((String) cookies[tmpCount]));
+                prop.putHTML("list_" + entCount + "_cookies_" + tmpCount + "_item", ((String) cookies[tmpCount]));
                 tmpCount++;
             }
             prop.put("list_" + entCount + "_cookies", tmpCount);

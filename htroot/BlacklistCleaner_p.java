@@ -102,7 +102,7 @@ public class BlacklistCleaner_p {
         String[] supportedBlacklistTypes = supportedBlacklistTypesStr.split(","); 
         
         if (post == null) {
-            prop.put("results", 0);
+            prop.put("results", "0");
             putBlacklists(prop, listManager.getDirListing(listManager.listsPath), blacklistToUse);
             return prop;
         }
@@ -110,27 +110,27 @@ public class BlacklistCleaner_p {
         if (post.containsKey("listNames")) {
             blacklistToUse = (String)post.get("listNames"); 
             if (blacklistToUse.length() == 0 || !listManager.listSetContains("listManager.listsPath", blacklistToUse))
-                prop.put("results", 2);
+                prop.put("results", "2");
         }
         
         putBlacklists(prop, listManager.getDirListing(listManager.listsPath), blacklistToUse);
         
         if (blacklistToUse != null) {
-            prop.put("results", 1);
+            prop.put("results", "1");
             
             if (post.containsKey("delete")) {
-                prop.put(RESULTS + "modified", 1);
+                prop.put(RESULTS + "modified", "1");
                 prop.put(RESULTS + "modified_delCount", removeEntries(blacklistToUse, supportedBlacklistTypes, getByPrefix(post, "select", true, true)));
             } else if (post.containsKey("alter")) {
-                prop.put(RESULTS + "modified", 2);
+                prop.put(RESULTS + "modified", "2");
                 prop.put(RESULTS + "modified_alterCount", alterEntries(blacklistToUse, supportedBlacklistTypes, getByPrefix(post, "select", true, false), getByPrefix(post, "entry", false, false)));
             }
             
             // list illegal entries
             HashMap ies = getIllegalEntries(blacklistToUse, supportedBlacklistTypes, plasmaSwitchboard.urlBlacklist);
             prop.put(RESULTS + "entries", ies.size());
-            prop.put(RESULTS + "blEngine", plasmaSwitchboard.urlBlacklist.getEngineInfo());
-            prop.put(RESULTS + "disabled", (ies.size() == 0) ? 1 : 0);
+            prop.putHTML(RESULTS + "blEngine", plasmaSwitchboard.urlBlacklist.getEngineInfo());
+            prop.put(RESULTS + "disabled", (ies.size() == 0) ? "1" : "0");
             if (ies.size() > 0) {
                 prop.put(RESULTS + DISABLED + "entries", ies.size());
                 Iterator it = ies.keySet().iterator();
@@ -139,7 +139,7 @@ public class BlacklistCleaner_p {
                 while (it.hasNext()) {
                     s = (String)it.next();
                     prop.put(RESULTS + DISABLED + ENTRIES + i + "_error", ((Integer)ies.get(s)).longValue());
-                    prop.put(RESULTS + DISABLED + ENTRIES + i + "_entry", s);
+                    prop.putHTML(RESULTS + DISABLED + ENTRIES + i + "_entry", s);
                     i++;
                 }
             }
@@ -155,19 +155,19 @@ public class BlacklistCleaner_p {
         
         if (supported) {
             if (lists.length > 0) {
-                prop.put("disabled", 0);
+                prop.put("disabled", "0");
                 prop.put(DISABLED + "blacklists", lists.length);
                 for (int i=0; i<lists.length; i++) {
-                    prop.put(DISABLED + BLACKLISTS + i + "_name", lists[i]);
-                    prop.put(DISABLED + BLACKLISTS + i + "_selected", (lists[i].equals(selected)) ? 1 : 0);
+                    prop.putHTML(DISABLED + BLACKLISTS + i + "_name", lists[i]);
+                    prop.put(DISABLED + BLACKLISTS + i + "_selected", (lists[i].equals(selected)) ? "1" : "0");
                 }
             } else {
-                prop.put("disabled", 2);
+                prop.put("disabled", "2");
             }
         } else {
-            prop.put("disabled", 1);
+            prop.put("disabled", "1");
             for (int i=0; i<supportedBLEngines.length; i++)
-                prop.put(DISABLED + "engines_" + i + "_name", supportedBLEngines[i].getName());
+                prop.putHTML(DISABLED + "engines_" + i + "_name", supportedBLEngines[i].getName());
             prop.put(DISABLED + "engines", supportedBLEngines.length);
         }
     }
@@ -323,7 +323,7 @@ public class BlacklistCleaner_p {
                                 supportedBlacklistTypes[blTypes],
                                 host,
                                 path);
-                    }                
+                    }
                 }
             }
             pw.close();

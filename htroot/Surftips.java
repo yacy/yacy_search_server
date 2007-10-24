@@ -142,31 +142,31 @@ public class Surftips {
                 refid = row.getColString(3, null);
                 voted = (yacyCore.newsPool.getSpecific(yacyNewsPool.OUTGOING_DB, yacyNewsPool.CATEGORY_SURFTIPP_VOTE_ADD, "refid", refid) != null) || 
                 		(yacyCore.newsPool.getSpecific(yacyNewsPool.PUBLISHED_DB, yacyNewsPool.CATEGORY_SURFTIPP_VOTE_ADD, "refid", refid) != null);
-                prop.put("surftips_results_" + i + "_authorized", (authenticated) ? 1 : 0);
-                prop.put("surftips_results_" + i + "_authorized_recommend", (voted) ? 0 : 1);
+                prop.put("surftips_results_" + i + "_authorized", (authenticated) ? "1" : "0");
+                prop.put("surftips_results_" + i + "_authorized_recommend", (voted) ? "0" : "1");
 
 				prop.put("surftips_results_" + i + "_authorized_recommend_urlhash", urlhash);
 				prop.put("surftips_results_" + i + "_authorized_recommend_refid", refid);
-				prop.putASIS("surftips_results_" + i + "_authorized_recommend_url", crypt.simpleEncode(url, null, 'b'));
-				prop.putASIS("surftips_results_" + i + "_authorized_recommend_title", crypt.simpleEncode(title, null, 'b'));
-				prop.putASIS("surftips_results_" + i + "_authorized_recommend_description", crypt.simpleEncode(description, null, 'b'));
+				prop.put("surftips_results_" + i + "_authorized_recommend_url", crypt.simpleEncode(url, null, 'b'));
+				prop.put("surftips_results_" + i + "_authorized_recommend_title", crypt.simpleEncode(title, null, 'b'));
+				prop.put("surftips_results_" + i + "_authorized_recommend_description", crypt.simpleEncode(description, null, 'b'));
 				prop.put("surftips_results_" + i + "_authorized_recommend_display", display);
-				prop.put("surftips_results_" + i + "_authorized_recommend_showScore", (showScore ? 1 : 0));
+				prop.put("surftips_results_" + i + "_authorized_recommend_showScore", (showScore ? "1" : "0"));
 
                 prop.put("surftips_results_" + i + "_authorized_urlhash", urlhash);
-                prop.put("surftips_results_" + i + "_url", de.anomic.data.htmlTools.encodeUnicode2html(url, false));
+                prop.put("surftips_results_" + i + "_url", url);
                 prop.put("surftips_results_" + i + "_urlname", nxTools.shortenURLString(url, 60));
                 prop.put("surftips_results_" + i + "_urlhash", urlhash);
-                prop.put("surftips_results_" + i + "_title", (showScore) ? ("(" + ranking.getScore(urlhash) + ") " + title) : title);
-                prop.put("surftips_results_" + i + "_description", description);
+                prop.putHTML("surftips_results_" + i + "_title", (showScore) ? ("(" + ranking.getScore(urlhash) + ") " + title) : title);
+                prop.putHTML("surftips_results_" + i + "_description", description);
                 i++;
                 
                 if (i >= 50) break;
             }
             prop.put("surftips_results", i);
-            prop.put("surftips", 1);
+            prop.put("surftips", "1");
         } else {
-            prop.put("surftips", 0);
+            prop.put("surftips", "0");
         }
         
         return prop;
@@ -330,10 +330,6 @@ public class Surftips {
                     surftips.put(urlhash, entry);
                 }
             }
-            
         }
-        
     }
-    
-    
 }

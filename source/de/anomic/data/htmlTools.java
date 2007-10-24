@@ -1,3 +1,46 @@
+// htmlTools.java
+// -----------------------
+// (C) by Michael Peter Christen; mc@anomic.de, 
+// (C) by Jan Sandbrink (NN), Franz Brausse (FB, karlchenofhell),
+// (C) by Bjoern 'fuchs' Krombholz (fuchsi)
+// first published on http://www.yacy.net
+//
+// $LastChangedDate: $
+// $LastChangedRevision: $
+// $LastChangedBy: $
+//
+// This program is free software; you can redistribute it and/or modify
+// it under the terms of the GNU General Public License as published by
+// the Free Software Foundation; either version 2 of the License, or
+// (at your option) any later version.
+//
+// This program is distributed in the hope that it will be useful,
+// but WITHOUT ANY WARRANTY; without even the implied warranty of
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+// GNU General Public License for more details.
+//
+// You should have received a copy of the GNU General Public License
+// along with this program; if not, write to the Free Software
+// Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
+//
+// Using this software in any meaning (reading, learning, copying, compiling,
+// running) means that you agree that the Author(s) is (are) not responsible
+// for cost, loss of data or any harm that may be caused directly or indirectly
+// by usage of this softare or this documentation. The usage of this software
+// is on your own risk. The installation and usage (starting/running) of this
+// software may allow other people or application to access your computer and
+// any attached devices and is highly dependent on the configuration of the
+// software which must be done by the user of the software; the author(s) is
+// (are) also not responsible for proper configuration and usage of the
+// software, even if provoked by documentation provided together with
+// the software.
+//
+// Any changes to this file according to the GPL as documented in the file
+// gpl.txt aside this file in the shipment you received can be done to the
+// lines that follows this copyright notice here, but changes must not be
+// done inside the copyright notive above. A re-distribution must contain
+// the intact and unchanged copyright notice.
+// Contributions and changes to the program code must be marked as such.
 package de.anomic.data;
 
 public class htmlTools {
@@ -5,30 +48,42 @@ public class htmlTools {
     /** Replaces characters in a string with other entities according to HTML standards.
       * @param text a string that possibly contains special characters
       * @param includingAmpersand if <code>false</code> ampersands are not encoded
+      * @param forXML if <code>true</code> then only &amp;, &quot;, &lt; and &gt; will
+      *               be transcoded. 
       * @return the string with all characters replaced by the corresponding character from array
       */
-      //[FB], changes by [MN], re-implemented by [MC]
-    public static String encodeUnicode2html(String text, boolean includingAmpersand) {
-        if (text == null) return null;
+    public static String encodeUnicode2html(String text, boolean includingAmpersand, boolean forXML) {
+        if (text == null) 
+            return null;
+        
         int spos = (includingAmpersand ? 0 : 2);
-        int epos = mapping.length;
+        // if (forXML), then only encode ampersand, quotation mark, less than and 
+        // greather than which are the first 4 pairs in default mapping table
+        int epos = (forXML ? 8 : mapping.length);
 
         return encode(text, mapping, spos, epos);
     }
+    
+    /**
+     * Like {@link #encodeUnicode2html(String, boolean, boolean)} with <code>forXML = false</code>
+     */
+    public static String encodeUnicode2html(String text, boolean includingAmpersand) {
+        return encodeUnicode2html(text, includingAmpersand, false);
+    }
+
 
     /**
      * Replaces special entities ampersand, quotation marks, and less than/graiter than
      * by the escaping entities allowed in XML documents.
      * 
+     * Like {@link #encodeUnicode2html(String, boolean, boolean)} with
+     * <code>includingAmpersand = true</code> and <code>foxXML = true</code>.
+     * 
      * @param text the original String
      * @return the encoded String
      */
     public static String encodeUnicode2xml(String text) {
-        if (text == null) return null;
-        int spos = 0;
-        int epos = 8;
-
-        return encode(text, mapping, spos, epos);
+        return encodeUnicode2html(text, true, true);
     }
 
     /**

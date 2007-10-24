@@ -95,9 +95,9 @@ public final class IndexTransfer_p {
         }
         
         // insert constants
-        prop.put("wcount", Integer.toString(switchboard.wordIndex.size()));
-        prop.put("ucount", Integer.toString(switchboard.wordIndex.loadedURL.size()));
-        prop.put("running",(switchboard.transferIdxThread==null)?0:1);
+        prop.putNum("wcount", switchboard.wordIndex.size());
+        prop.putNum("ucount", switchboard.wordIndex.loadedURL.size());
+        prop.put("running",(switchboard.transferIdxThread==null) ? "0" : "1");
         if (switchboard.transferIdxThread != null) {
             String[] status = switchboard.transferIdxThread.getStatus();
             String[] range  = switchboard.transferIdxThread.getRange();
@@ -105,22 +105,22 @@ public final class IndexTransfer_p {
             
             prop.put("running_selection.status",status[0]);
             prop.put("running_selection.twrange", range[0]);
-            prop.put("running_selection.twchunk", Integer.toString(chunk[0]));
+            prop.put("running_selection.twchunk", chunk[0]);
             
             prop.put("running_transfer.status",status[1]);
             prop.put("running_transfer.twrange", range[1]);
-            prop.put("running_transfer.twchunk", Integer.toString(chunk[1]));
+            prop.put("running_transfer.twchunk", chunk[1]);
 
             
-            prop.put("running_twEntityCount",switchboard.transferIdxThread.getTransferedContainerCount());
-            prop.put("running_twEntryCount",switchboard.transferIdxThread.getTransferedEntryCount());
-            prop.put("running_twPayloadSize",serverMemory.bytesToString(switchboard.transferIdxThread.getTransferedBytes()));
-            prop.put("running_twEntityPercent",Float.toString(switchboard.transferIdxThread.getTransferedContainerPercent()));
-            prop.put("running_twEntrySpeed",Integer.toString(switchboard.transferIdxThread.getTransferedEntrySpeed()));
+            prop.putNum("running_twEntityCount", switchboard.transferIdxThread.getTransferedContainerCount());
+            prop.putNum("running_twEntryCount", switchboard.transferIdxThread.getTransferedEntryCount());
+            prop.put("running_twPayloadSize", serverMemory.bytesToString(switchboard.transferIdxThread.getTransferedBytes()));
+            prop.putNum("running_twEntityPercent", switchboard.transferIdxThread.getTransferedContainerPercent());
+            prop.putNum("running_twEntrySpeed", switchboard.transferIdxThread.getTransferedEntrySpeed());
             
-            prop.put("running_deleteIndex", switchboard.transferIdxThread.deleteIndex()?1:0);
+            prop.put("running_deleteIndex", switchboard.transferIdxThread.deleteIndex() ? "1" : "0");
             prop.put("running_peerName",switchboard.transferIdxThread.getSeed().getName());
-            prop.put("running_stopped",(switchboard.transferIdxThread.isFinished()) || (!switchboard.transferIdxThread.isAlive())?1:0);
+            prop.put("running_stopped",(switchboard.transferIdxThread.isFinished()) || (!switchboard.transferIdxThread.isAlive()) ? "1" : "0");
         } else {
             if (!prop.containsKey("running_status")) prop.put("running_status","Not running");
         }
@@ -147,7 +147,7 @@ public final class IndexTransfer_p {
                     hostList.remove(hostName);
                 }
             } catch (NoSuchElementException ex) {}
-            prop.put("running_hosts", Integer.toString(hc));
+            prop.put("running_hosts", hc);
         } else {
             prop.put("running_hosts", "0");
         }
@@ -155,6 +155,4 @@ public final class IndexTransfer_p {
         prop.put("date",(new Date()).toString());
         return prop;
     }
-    
-    
 }

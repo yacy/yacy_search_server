@@ -44,7 +44,6 @@
 // if the shell's current path is HTROOT
 
 import java.io.IOException;
-import java.text.DecimalFormat;
 import java.util.ArrayList;
 import java.util.Iterator;
 
@@ -53,6 +52,7 @@ import de.anomic.plasma.plasmaCrawlZURL;
 import de.anomic.plasma.plasmaHTCache;
 import de.anomic.plasma.plasmaSwitchboard;
 import de.anomic.plasma.plasmaSwitchboardQueue;
+import de.anomic.server.serverMemory;
 import de.anomic.server.serverObjects;
 import de.anomic.server.serverSwitch;
 import de.anomic.yacy.yacyCore;
@@ -65,7 +65,7 @@ public class IndexCreateIndexingQueue_p {
         // return variable that accumulates replacements
         plasmaSwitchboard switchboard = (plasmaSwitchboard) env;
         serverObjects prop = new serverObjects();
-        prop.put("rejected", 0);
+        prop.put("rejected", "0");
         int showRejectedCount = 100;
         
         int showLimit = 100;
@@ -108,9 +108,9 @@ public class IndexCreateIndexingQueue_p {
         boolean dark;
         
         if ((switchboard.sbQueue.size() == 0) && (switchboard.indexingTasksInProcess.size() == 0)) {
-            prop.put("indexing-queue", 0); //is empty
+            prop.put("indexing-queue", "0"); //is empty
         } else {
-            prop.put("indexing-queue", 1); // there are entries in the queue or in process
+            prop.put("indexing-queue", "1"); // there are entries in the queue or in process
             
             dark = true;
             plasmaSwitchboardQueue.Entry pcentry;
@@ -140,37 +140,37 @@ public class IndexCreateIndexingQueue_p {
                     long entrySize = pcentry.size();
                     totalSize += entrySize;
                     initiator = yacyCore.seedDB.getConnected(pcentry.initiator());
-                    prop.put("indexing-queue_list_"+entryCount+"_dark", (inProcess)? 2: ((dark) ? 1 : 0));
+                    prop.put("indexing-queue_list_"+entryCount+"_dark", inProcess ? "2" : (dark ? "1" : "0"));
                     prop.put("indexing-queue_list_"+entryCount+"_initiator", ((initiator == null) ? "proxy" : initiator.getName()));
                     prop.put("indexing-queue_list_"+entryCount+"_depth", pcentry.depth());
                     prop.put("indexing-queue_list_"+entryCount+"_modified", pcentry.getModificationDate());
-                    prop.put("indexing-queue_list_"+entryCount+"_anchor", (pcentry.anchorName()==null)?"":pcentry.anchorName());
+                    prop.putHTML("indexing-queue_list_"+entryCount+"_anchor", (pcentry.anchorName()==null)?"":pcentry.anchorName());
                     prop.put("indexing-queue_list_"+entryCount+"_url", pcentry.url().toNormalform(false, true));
-                    prop.put("indexing-queue_list_"+entryCount+"_size", bytesToString(entrySize));
-                    prop.put("indexing-queue_list_"+entryCount+"_inProcess", (inProcess)?1:0);
+                    prop.put("indexing-queue_list_"+entryCount+"_size", serverMemory.bytesToString(entrySize));
+                    prop.put("indexing-queue_list_"+entryCount+"_inProcess", inProcess ? "1" :"0");
                     prop.put("indexing-queue_list_"+entryCount+"_inProcess_hash", pcentry.urlHash());
                     dark = !dark;
                     entryCount++;
                 }
             }
             
-            prop.put("indexing-queue_show", entryCount);//show shown entries
-            prop.put("indexing-queue_num", totalCount);//num entries in queue 
-            prop.put("indexing-queue_totalSize", bytesToString(totalSize));//num entries in queue 
-            prop.put("indexing-queue_list", entryCount);
+            prop.putNum("indexing-queue_show", entryCount);//show shown entries
+            prop.putNum("indexing-queue_num", totalCount); //num entries in queue 
+            prop.put("indexing-queue_totalSize", serverMemory.bytesToString(totalSize));//num entries in queue 
+            prop.putNum("indexing-queue_list", entryCount);
         }
         
         // failure cases
         if (switchboard.errorURL.stackSize() != 0) {
             if (showRejectedCount > switchboard.errorURL.stackSize()) showRejectedCount = switchboard.errorURL.stackSize();
-            prop.put("rejected", 1);
-            prop.put("rejected_num", switchboard.errorURL.stackSize());
+            prop.put("rejected", "1");
+            prop.putNum("rejected_num", switchboard.errorURL.stackSize());
             if (showRejectedCount != switchboard.errorURL.stackSize()) {
-                prop.put("rejected_only-latest", 1);
-                prop.put("rejected_only-latest_num", showRejectedCount);
-                prop.put("rejected_only-latest_newnum", ((int) (showRejectedCount * 1.5)));
+                prop.put("rejected_only-latest", "1");
+                prop.putNum("rejected_only-latest_num", showRejectedCount);
+                prop.putNum("rejected_only-latest_newnum", ((int) (showRejectedCount * 1.5)));
             }else{
-                prop.put("rejected_only-latest", 0);
+                prop.put("rejected_only-latest", "0");
             }
             dark = true;
             yacyURL url; 
@@ -191,8 +191,8 @@ public class IndexCreateIndexingQueue_p {
                     prop.put("rejected_list_"+j+"_initiator", ((initiatorSeed == null) ? "proxy" : initiatorSeed.getName()));
                     prop.put("rejected_list_"+j+"_executor", ((executorSeed == null) ? "proxy" : executorSeed.getName()));
                     prop.put("rejected_list_"+j+"_url", url.toNormalform(false, true));
-                    prop.put("rejected_list_"+j+"_failreason", entry.anycause());
-                    prop.put("rejected_list_"+j+"_dark", ((dark) ? 1 : 0));
+                    prop.putHTML("rejected_list_"+j+"_failreason", entry.anycause());
+                    prop.put("rejected_list_"+j+"_dark", dark ? "1" : "0");
                     dark = !dark;
                     j++;
                 } catch (IOException e) {
@@ -205,34 +205,4 @@ public class IndexCreateIndexingQueue_p {
         // return rewrite properties
         return prop;
     }
-    
-    public static String bytesToString(long byteCount) {  
-        try {
-            StringBuffer byteString = new StringBuffer();
-            
-            DecimalFormat df = new DecimalFormat( "0.00" );
-            if (byteCount > 1073741824) {                
-                byteString.append(df.format((double)byteCount / (double)1073741824 ))
-                          .append(" GB");
-            } else if (byteCount > 1048576) {
-                byteString.append(df.format((double)byteCount / (double)1048576))
-                          .append(" MB");              
-            } else if (byteCount > 1024) {
-                byteString.append(df.format((double)byteCount /(double)1024))
-                          .append(" KB");             
-            } else {
-                byteString.append(Long.toString(byteCount))
-                .append(" Bytes");                
-            }
-            
-            return byteString.toString();       
-        } catch (Exception e) {
-            return "unknown";
-        }        
-        
-    }    
-    
 }
-
-
-

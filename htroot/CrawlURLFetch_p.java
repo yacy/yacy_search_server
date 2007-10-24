@@ -226,18 +226,18 @@ public class CrawlURLFetch_p {
         }
         
         if (fetcher != null) {
-            prop.put("runs", 1);
+            prop.put("runs", "1");
             prop.put("runs_status",
                     ((fetcher.paused && fetcher.isAlive()) ? STAT_THREAD_PAUSED :
                     (fetcher.isAlive()) ? STAT_THREAD_ALIVE : STAT_THREAD_STOPPED));
-            prop.put("runs_totalRuns",          URLFetcher.totalRuns);
-            prop.put("runs_totalFetchedURLs",   URLFetcher.totalFetchedURLs);
-            prop.put("runs_totalFailedURLs",    URLFetcher.totalFailed);
-            prop.put("runs_lastRun",            fetcher.lastRun);
-            prop.put("runs_lastFetchedURLs",    fetcher.lastFetchedURLs);
+            prop.putNum("runs_totalRuns",          URLFetcher.totalRuns);
+            prop.putNum("runs_totalFetchedURLs",   URLFetcher.totalFetchedURLs);
+            prop.putNum("runs_totalFailedURLs",    URLFetcher.totalFailed);
+            prop.putNum("runs_lastRun",            fetcher.lastRun);
+            prop.putNum("runs_lastFetchedURLs",    fetcher.lastFetchedURLs);
             prop.put("runs_lastServerResponse", (fetcher.lastServerResponse == null)
                     ? "" : fetcher.lastServerResponse);
-            prop.put("runs_curDelay", (int)(fetcher.delay / 60000));
+            prop.putNum("runs_curDelay", (int)(fetcher.delay / 60000));
             
             Iterator it = fetcher.failed.keySet().iterator();
             int i = 0;
@@ -248,7 +248,7 @@ public class CrawlURLFetch_p {
                 prop.put("runs_error_" + i + "_url", (String)key);
                 i++;
             }
-            prop.put("runs_error", i);    
+            prop.put("runs_error", i);
         }
         
         return prop;
@@ -256,10 +256,10 @@ public class CrawlURLFetch_p {
     
     private static int listURLs(serverObjects prop) {
         if (savedURLs.size() == 0) return 0;
-        prop.put("saved", 1);
+        prop.put("saved", "1");
         for (int i=0; i<savedURLs.size(); i++)
             prop.put("saved_urls_" + i + "_url", savedURLs.get(i));
-        prop.put("saved_urls", savedURLs.size());
+        prop.putNum("saved_urls", savedURLs.size());
         return savedURLs.size();
     }
     
@@ -292,9 +292,9 @@ public class CrawlURLFetch_p {
                 peerCount++;
             }
             prop.put("peersKnown_peers", peerCount);
-            prop.put("peersKnown", 1);
+            prop.put("peersKnown", "1");
         } else {
-            prop.put("peersKnown", 0);
+            prop.put("peersKnown", "0");
         }
         return peerCount;
     }

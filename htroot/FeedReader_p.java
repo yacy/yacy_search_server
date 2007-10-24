@@ -38,13 +38,13 @@ public class FeedReader_p {
     public static servletProperties respond(httpHeader header, serverObjects post, serverSwitch env) {
         servletProperties prop = new servletProperties();
         
-        prop.put("page", 0);
+        prop.put("page", "0");
         if (post != null) {
             yacyURL url;
             try {
                 url = new yacyURL((String) post.get("url"), null);
             } catch (MalformedURLException e) {
-                prop.put("page", 2);
+                prop.put("page", "2");
                 return prop;
             }
             
@@ -52,25 +52,25 @@ public class FeedReader_p {
             // int offset=Integer.parseInt(post.get("offset", "0")); //offset to the first displayed item
             rssReader parser = new rssReader(url.toString());
 
-            prop.put("page_title", parser.getChannel().getTitle());
+            prop.putHTML("page_title", parser.getChannel().getTitle());
             if (parser.getChannel().getAuthor() == null) {
-                prop.put("page_hasAuthor", 0);
+                prop.put("page_hasAuthor", "0");
             } else {
-                prop.put("page_hasAuthor", 1);
-                prop.put("page_hasAuthor_author", parser.getChannel().getAuthor());
+                prop.put("page_hasAuthor", "1");
+                prop.putHTML("page_hasAuthor_author", parser.getChannel().getAuthor());
             }
-            prop.put("page_description", parser.getChannel().getDescription());
+            prop.putHTML("page_description", parser.getChannel().getDescription());
 
             for (int i = 0; i < parser.items(); i++) {
                 rssReader.Item item = parser.getItem(i);
-                prop.put("page_items_" + i + "_author", item.getAuthor());
-                prop.put("page_items_" + i + "_title", item.getTitle());
+                prop.putHTML("page_items_" + i + "_author", item.getAuthor());
+                prop.putHTML("page_items_" + i + "_title", item.getTitle());
                 prop.put("page_items_" + i + "_link", item.getLink());
-                prop.putASIS("page_items_" + i + "_description", item.getDescription());
+                prop.put("page_items_" + i + "_description", item.getDescription());
                 prop.put("page_items_" + i + "_date", item.getPubDate());
             }
             prop.put("page_items", parser.items());
-            prop.put("page", 1);
+            prop.put("page", "1");
         }
     
         // return rewrite properties

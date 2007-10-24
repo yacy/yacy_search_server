@@ -104,9 +104,9 @@ public class dir {
         final File dir = new File(htroot, path);
 
         // general settings
-        prop.put("peername", env.getConfig("peerName", "<nameless>"));
-        prop.put("peerdomain", env.getConfig("peerName", "<nameless>").toLowerCase());
-        prop.put("peeraddress", yacyCore.seedDB.mySeed().getPublicAddress());
+        prop.putHTML("peername", env.getConfig("peerName", "<nameless>"));
+        prop.putHTML("peerdomain", env.getConfig("peerName", "<nameless>").toLowerCase());
+        prop.putHTML("peeraddress", yacyCore.seedDB.mySeed().getPublicAddress());
         prop.put("hostname", serverDomains.myPublicIP());
         try{
             prop.put("hostip", InetAddress.getByName(serverDomains.myPublicIP()));
@@ -239,7 +239,7 @@ public class dir {
             // tree += "<span class=\"tt\">path&nbsp;=&nbsp;" + path + "</span><br><br>";
             if (list != null) {
                 int filecount = 0, fileIdx = 0;
-                prop.put("path", path);
+                prop.putHTML("path", path);
                 
                 boolean dark = false;
                 for (int i = 0; i < list.length; i++) {
@@ -249,7 +249,7 @@ public class dir {
                     String fileName = f.getName();
 
                     // changing table row color
-                    prop.put("dirlist_" + fileIdx + "_dark" , dark?1:0);
+                    prop.put("dirlist_" + fileIdx + "_dark" , dark ? "1" : "0");
                     dark = !dark;                        
 
 
@@ -284,74 +284,74 @@ public class dir {
                     prop.put("dirlist_" + fileIdx + "_dir_rfc822date" , httpc.dateString(new Date(f.lastModified())));
                     prop.put("dirlist_" + fileIdx + "_dir_timestamp" , Long.toString(f.lastModified()));
                     // the entry name
-                    prop.put("dirlist_" + fileIdx + "_dir_name" , fileName);                     
+                    prop.putHTML("dirlist_" + fileIdx + "_dir_name" , fileName);                     
 
                     if (f.isDirectory()) {
                         // the entry is a directory
-                        prop.put("dirlist_" + fileIdx + "_dir" , 1);
-                        prop.put("dirlist_" + fileIdx + "_dir_URL","http://" + yacyCore.seedDB.mySeed().getPublicAddress() + path + fileName + "/");
+                        prop.put("dirlist_" + fileIdx + "_dir" , "1");
+                        prop.putHTML("dirlist_" + fileIdx + "_dir_URL","http://" + yacyCore.seedDB.mySeed().getPublicAddress() + path + fileName + "/");
                     } else {
                         // determine if we should display the description string or a preview image
                         boolean showImage = /* (description.length() == 0) && */ (fileName.endsWith(".jpg") || fileName.endsWith(".gif") || fileName.endsWith(".png") || fileName.endsWith(".ico") || fileName.endsWith(".bmp"));
 
                         // the entry is a file
-                        prop.put("dirlist_" + fileIdx + "_dir" , 0);
+                        prop.put("dirlist_" + fileIdx + "_dir" , "0");
                         // the file size
                         prop.put("dirlist_" + fileIdx + "_dir_size" , serverMemory.bytesToString(f.length()));
-                        prop.put("dirlist_" + fileIdx + "_dir_sizeBytes" , Long.toString(f.length()));
+                        prop.put("dirlist_" + fileIdx + "_dir_sizeBytes" , f.length());
                         // the unique url
-                        prop.put("dirlist_" + fileIdx + "_dir_yacyhURL",yacyhURL(yacyCore.seedDB.mySeed(), fileName, md5s));  
-                        prop.put("dirlist_" + fileIdx + "_dir_URL","http://" + yacyCore.seedDB.mySeed().getPublicAddress() + path + fileName);
+                        prop.putHTML("dirlist_" + fileIdx + "_dir_yacyhURL",yacyhURL(yacyCore.seedDB.mySeed(), fileName, md5s));  
+                        prop.putHTML("dirlist_" + fileIdx + "_dir_URL","http://" + yacyCore.seedDB.mySeed().getPublicAddress() + path + fileName);
                         // the md5 sum of the file
                         prop.put("dirlist_" + fileIdx + "_dir_md5s",md5s);
                         // description mode: 0...image preview, 1...description text 
                         prop.put("dirlist_" + fileIdx + "_dir_descriptionMode",showImage?0:1);
                         if (showImage) {
-                            prop.put("dirlist_" + fileIdx + "_dir_descriptionMode_image",fileName);
+                            prop.putHTML("dirlist_" + fileIdx + "_dir_descriptionMode_image",fileName);
                         }
                         // always set the description tag (needed by rss and xml)
-                        prop.put("dirlist_" + fileIdx + "_dir_descriptionMode_text",description);                                                   
+                        prop.putHTML("dirlist_" + fileIdx + "_dir_descriptionMode_text",description);                                                   
                     }
 
-                    prop.put("dirlist_" + fileIdx + "_adminAuthorization",adminAuthorization?1:0);
-                    prop.put("dirlist_" + fileIdx + "_adminAuthorization_name",fileName);
+                    prop.put("dirlist_" + fileIdx + "_adminAuthorization",adminAuthorization ? "1" : "0");
+                    prop.putHTML("dirlist_" + fileIdx + "_adminAuthorization_name",fileName);
 
                     fileIdx++;
                 }
 
                 prop.put("dirlist",filecount);
-                prop.put("emptydir", filecount == 0 ? 1:0);
+                prop.put("emptydir", filecount == 0 ? "1" : "0");
             }
-            prop.put("authenticated",1);
+            prop.put("authenticated", "1");
         } else {
-            prop.put("authenticated",0);
+            prop.put("authenticated", "0");
         }
         
         if (adminAuthorization) {
-            prop.put("ident", 0);
-            prop.put("logout", 0);
-            prop.put("account", 0);
-            prop.put("service",0);
-            prop.put("info", 0);
+            prop.put("ident", "0");
+            prop.put("logout", "0");
+            prop.put("account", "0");
+            prop.put("service", "0");
+            prop.put("info", "0");
         } else if (uploadAuthorization) {
-            prop.put("ident", 1);
-            prop.put("logout", 1);
-            prop.put("account", 1);
-            prop.put("service",0);
-            prop.put("info", 1);
+            prop.put("ident", "1");
+            prop.put("logout", "1");
+            prop.put("account", "1");
+            prop.put("service", "0");
+            prop.put("info", "1");
         } else if (downloadAuthorization) {
-            prop.put("ident", 2); 
-            prop.put("logout", 2);
-            prop.put("account", 2);
-            prop.put("service",1);
-            prop.put("info", 2);
+            prop.put("ident", "2"); 
+            prop.put("logout", "2");
+            prop.put("account", "2");
+            prop.put("service", "1");
+            prop.put("info", "2");
 
         } else {
-            prop.put("ident", 3);
-            prop.put("logout", 3);
-            prop.put("account",3);
-            prop.put("service", 2);
-            prop.put("info", 3);
+            prop.put("ident", "3");
+            prop.put("logout", "3");
+            prop.put("account", "3");
+            prop.put("service", "2");
+            prop.put("info", "3");
         }
         
         // return rewrite properties

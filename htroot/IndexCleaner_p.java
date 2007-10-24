@@ -59,7 +59,7 @@ public class IndexCleaner_p {
         plasmaSwitchboard sb = (plasmaSwitchboard) env;
         prop.put("title", "DbCleanup_p");
         if (post!=null) {
-            prop.put("bla", "post!=null");
+            //prop.putHTML("bla", "post!=null");
             if (post.get("action").equals("ustart")) {
                 if (urldbCleanerThread==null || !urldbCleanerThread.isAlive()) {
                     urldbCleanerThread = sb.wordIndex.loadedURL.makeCleaner();
@@ -93,30 +93,30 @@ public class IndexCleaner_p {
             prop.put("LOCATION","");
             return prop;
         }
-        prop.put("bla", "post==null");
+        //prop.put("bla", "post==null");
         if (urldbCleanerThread!=null) {
-            prop.put("urldb", 1);
-            prop.put("urldb_percentUrls", ((double)urldbCleanerThread.totalSearchedUrls/sb.wordIndex.loadedURL.size())*100 + "");
-            prop.put("urldb_blacklisted", urldbCleanerThread.blacklistedUrls);
-            prop.put("urldb_total", urldbCleanerThread.totalSearchedUrls);
-            prop.put("urldb_lastBlacklistedUrl", urldbCleanerThread.lastBlacklistedUrl);
+            prop.put("urldb", "1");
+            prop.putNum("urldb_percentUrls", ((double)urldbCleanerThread.totalSearchedUrls/sb.wordIndex.loadedURL.size())*100);
+            prop.putNum("urldb_blacklisted", urldbCleanerThread.blacklistedUrls);
+            prop.putNum("urldb_total", urldbCleanerThread.totalSearchedUrls);
+            prop.putHTML("urldb_lastBlacklistedUrl", urldbCleanerThread.lastBlacklistedUrl);
             prop.put("urldb_lastBlacklistedHash", urldbCleanerThread.lastBlacklistedHash);
-            prop.put("urldb_lastUrl", urldbCleanerThread.lastUrl);
+            prop.putHTML("urldb_lastUrl", urldbCleanerThread.lastUrl);
             prop.put("urldb_lastHash", urldbCleanerThread.lastHash);
             prop.put("urldb_threadAlive", urldbCleanerThread.isAlive() + "");
             prop.put("urldb_threadToString", urldbCleanerThread.toString());
             double percent = ((double)urldbCleanerThread.blacklistedUrls/urldbCleanerThread.totalSearchedUrls)*100;
-            prop.put("urldb_percent", percent + "");
+            prop.putNum("urldb_percent", percent);
         }
         if (indexCleanerThread!=null) {
-            prop.put("rwidb", 1);
+            prop.put("rwidb", "1");
             prop.put("rwidb_threadAlive", indexCleanerThread.isAlive() + "");
             prop.put("rwidb_threadToString", indexCleanerThread.toString());
-            prop.put("rwidb_RWIcountstart", indexCleanerThread.rwiCountAtStart);
-            prop.put("rwidb_RWIcountnow", sb.wordIndex.size());
+            prop.putNum("rwidb_RWIcountstart", indexCleanerThread.rwiCountAtStart);
+            prop.putNum("rwidb_RWIcountnow", sb.wordIndex.size());
             prop.put("rwidb_wordHashNow", indexCleanerThread.wordHashNow);
             prop.put("rwidb_lastWordHash", indexCleanerThread.lastWordHash);
-            prop.put("rwidb_lastDeletionCounter", indexCleanerThread.lastDeletionCounter);
+            prop.putNum("rwidb_lastDeletionCounter", indexCleanerThread.lastDeletionCounter);
 
         }
         return prop;

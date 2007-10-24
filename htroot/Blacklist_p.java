@@ -86,13 +86,13 @@ public class Blacklist_p {
         
         String blacklistToUse = null;
         serverObjects prop = new serverObjects();
-        prop.put("blacklistEngine", plasmaSwitchboard.urlBlacklist.getEngineInfo());
+        prop.putHTML("blacklistEngine", plasmaSwitchboard.urlBlacklist.getEngineInfo());
         
         // do all post operations
         if (post != null) {
             
             if(post.containsKey("testList")) {
-            	prop.put("testlist",1);
+            	prop.put("testlist", "1");
             	String urlstring = post.get("testurl", "");
             	if(!urlstring.startsWith("http://")) urlstring = "http://"+urlstring;
                 yacyURL testurl = null;
@@ -100,19 +100,19 @@ public class Blacklist_p {
 					testurl = new yacyURL(urlstring, null);
 				} catch (MalformedURLException e) { }
 				if(testurl != null) {
-					prop.put("testlist_url",testurl.toString());
+					prop.putHTML("testlist_url",testurl.toString());
 					if(plasmaSwitchboard.urlBlacklist.isListed(plasmaURLPattern.BLACKLIST_CRAWLER, testurl))
-						prop.put("testlist_listedincrawler",1);
+						prop.put("testlist_listedincrawler", "1");
 					if(plasmaSwitchboard.urlBlacklist.isListed(plasmaURLPattern.BLACKLIST_DHT, testurl))
-						prop.put("testlist_listedindht",1);
+						prop.put("testlist_listedindht", "1");
 					if(plasmaSwitchboard.urlBlacklist.isListed(plasmaURLPattern.BLACKLIST_NEWS, testurl))
-						prop.put("testlist_listedinnews",1);
+						prop.put("testlist_listedinnews", "1");
 					if(plasmaSwitchboard.urlBlacklist.isListed(plasmaURLPattern.BLACKLIST_PROXY, testurl))
-						prop.put("testlist_listedinproxy",1);
+						prop.put("testlist_listedinproxy", "1");
 					if(plasmaSwitchboard.urlBlacklist.isListed(plasmaURLPattern.BLACKLIST_SEARCH, testurl))
-						prop.put("testlist_listedinsearch",1);
+						prop.put("testlist_listedinsearch", "1");
 					if(plasmaSwitchboard.urlBlacklist.isListed(plasmaURLPattern.BLACKLIST_SURFTIPS, testurl))
-						prop.put("testlist_listedinsurftips",1);
+						prop.put("testlist_listedinsurftips", "1");
 				}
 				else prop.put("testlist_url","not valid");
             }
@@ -179,7 +179,7 @@ public class Blacklist_p {
                 
                 blacklistToUse = (String)post.get("selectedListName");
                 if (blacklistToUse == null || blacklistToUse.trim().length() == 0) {
-                    prop.put("LOCATION","");
+                    prop.put("LOCATION", "");
                     return prop;
                 }                   
                 
@@ -201,7 +201,7 @@ public class Blacklist_p {
                 
                 blacklistToUse = (String)post.get("selectedListName");
                 if (blacklistToUse == null || blacklistToUse.trim().length() == 0) {
-                    prop.put("LOCATION","");
+                    prop.put("LOCATION", "");
                     return prop;
                 }                   
                 
@@ -210,26 +210,26 @@ public class Blacklist_p {
                     listManager.removeFromListSet(BLACKLIST_SHARED, blacklistToUse);
                 } else { // inactive list -> enable
                     listManager.updateListSet(BLACKLIST_SHARED, blacklistToUse);
-                }                                
+                }
             } else if (post.containsKey("deleteBlacklistEntry")) {
                 
                 /* ===========================================================
                  * Delete a blacklist entry
-                 * =========================================================== */                     
+                 * =========================================================== */
                 
                 // get the current selected blacklist name
                 blacklistToUse = (String)post.get("currentBlacklist");
                 if (blacklistToUse == null || blacklistToUse.trim().length() == 0) {
-                    prop.put("LOCATION","");
+                    prop.put("LOCATION", "");
                     return prop;
-                }                 
+                }
                 
                 // get the entry that should be deleted
                 String oldEntry = (String)post.get("selectedEntry");
                 if (oldEntry == null || oldEntry.trim().length() == 0) {
-                    prop.put("LOCATION",header.get("PATH") + "?selectList=&selectedListName=" + blacklistToUse);
+                    prop.put("LOCATION", header.get("PATH") + "?selectList=&selectedListName=" + blacklistToUse);
                     return prop;
-                }                
+                }
                 
                 // load blacklist data from file
                 ArrayList list = listManager.getListArray(new File(listManager.listsPath, blacklistToUse));
@@ -251,28 +251,28 @@ public class Blacklist_p {
                     // add default empty path pattern
                     pos = oldEntry.length();
                     oldEntry = oldEntry + "/.*";
-                }                
+                }
                 for (int blTypes=0; blTypes < supportedBlacklistTypes.length; blTypes++) {
                     if (listManager.listSetContains(supportedBlacklistTypes[blTypes] + ".BlackLists",blacklistToUse)) {
                         plasmaSwitchboard.urlBlacklist.remove(supportedBlacklistTypes[blTypes],oldEntry.substring(0, pos), oldEntry.substring(pos + 1));
-                    }                
-                }                    
+                    }
+                }
                 
             } else if (post.containsKey("addBlacklistEntry")) {
                 
                 /* ===========================================================
                  * Add a new blacklist entry
-                 * =========================================================== */                     
+                 * =========================================================== */
                 
                 blacklistToUse = (String)post.get("currentBlacklist");   
                 if (blacklistToUse == null || blacklistToUse.trim().length() == 0) {
-                    prop.put("LOCATION","");
+                    prop.put("LOCATION", "");
                     return prop;
-                }                  
+                }
                 
                 String newEntry = (String)post.get("newEntry");
                 if (newEntry.trim().length() == 0) {
-                    prop.put("LOCATION",header.get("PATH") + "?selectList=&selectedListName=" + blacklistToUse);
+                    prop.put("LOCATION", header.get("PATH") + "?selectList=&selectedListName=" + blacklistToUse);
                     return prop;
                 }
                 
@@ -315,7 +315,7 @@ public class Blacklist_p {
 
                 blacklistToUse = (String)post.get("targetBlacklist");
                 if (blacklistToUse == null || blacklistToUse.trim().length() == 0) {
-                    prop.put("LOCATION","");
+                    prop.put("LOCATION", "");
                     return prop;
                 }
 
@@ -364,7 +364,7 @@ public class Blacklist_p {
                 // get the current selected blacklist name
                 blacklistToUse = (String)post.get("currentBlacklist");
                 if (blacklistToUse == null || blacklistToUse.trim().length() == 0) {
-                    prop.put("LOCATION","");
+                    prop.put("LOCATION", "");
                     return prop;
                 }
 
@@ -429,7 +429,7 @@ public class Blacklist_p {
                 prop.put(DISABLED + "Itemlist_" + entryCount + "_item", nextEntry);
                 entryCount++;
             }
-        	prop.put(DISABLED + "Itemlist", entryCount);            
+        	prop.put(DISABLED + "Itemlist", entryCount);
 
 
 	        // List known hosts for BlackList retrieval
@@ -447,7 +447,7 @@ public class Blacklist_p {
 	                while ((peername = (String) hostList.firstKey()) != null) {
 	                    final String Hash = (String) hostList.get(peername);
 	                    prop.put(DISABLED + "otherHosts_" + peerCount + "_hash", Hash);
-	                    prop.put(DISABLED + "otherHosts_" + peerCount + "_name", peername);
+	                    prop.putHTML(DISABLED + "otherHosts_" + peerCount + "_name", peername, true);
 	                    hostList.remove(peername);
 	                    peerCount++;
 	                }
@@ -460,42 +460,42 @@ public class Blacklist_p {
         int blacklistCount = 0;
         if (dirlist != null) {
             for (int i = 0; i <= dirlist.length - 1; i++) {
-                prop.put(DISABLED + BLACKLIST + blacklistCount + "_name", dirlist[i]);
-                prop.put(DISABLED + BLACKLIST + blacklistCount + "_selected", 0);
+                prop.putHTML(DISABLED + BLACKLIST + blacklistCount + "_name", dirlist[i], true);
+                prop.put(DISABLED + BLACKLIST + blacklistCount + "_selected", "0");
 
                 if (dirlist[i].equals(blacklistToUse)) { //current List
-                    prop.put(DISABLED + BLACKLIST + blacklistCount + "_selected", 1);
+                    prop.put(DISABLED + BLACKLIST + blacklistCount + "_selected", "1");
 
                     for (int blTypes=0; blTypes < supportedBlacklistTypes.length; blTypes++) {
-                        prop.put(DISABLED + "currentActiveFor_" + blTypes + "_blTypeName",supportedBlacklistTypes[blTypes]);
+                        prop.putHTML(DISABLED + "currentActiveFor_" + blTypes + "_blTypeName",supportedBlacklistTypes[blTypes], true);
                         prop.put(DISABLED + "currentActiveFor_" + blTypes + "_checked",
-                                listManager.listSetContains(supportedBlacklistTypes[blTypes] + ".BlackLists",dirlist[i])?0:1);
+                                listManager.listSetContains(supportedBlacklistTypes[blTypes] + ".BlackLists",dirlist[i]) ? "0" : "1");
                     }
-                    prop.put(DISABLED + "currentActiveFor",supportedBlacklistTypes.length);
+                    prop.put(DISABLED + "currentActiveFor", supportedBlacklistTypes.length);
 
                 }
                 
                 if (listManager.listSetContains(BLACKLIST_SHARED, dirlist[i])) {
-                    prop.put(DISABLED + BLACKLIST + blacklistCount + "_shared", 1);
+                    prop.put(DISABLED + BLACKLIST + blacklistCount + "_shared", "1");
                 } else {
-                    prop.put(DISABLED + BLACKLIST + blacklistCount + "_shared", 0);
+                    prop.put(DISABLED + BLACKLIST + blacklistCount + "_shared", "0");
                 }
 
                 int activeCount = 0;
                 for (int blTypes=0; blTypes < supportedBlacklistTypes.length; blTypes++) {
                     if (listManager.listSetContains(supportedBlacklistTypes[blTypes] + ".BlackLists",dirlist[i])) {
-                        prop.put(DISABLED + BLACKLIST + blacklistCount + "_active_" + activeCount + "_blTypeName",supportedBlacklistTypes[blTypes]);
+                        prop.putHTML(DISABLED + BLACKLIST + blacklistCount + "_active_" + activeCount + "_blTypeName", supportedBlacklistTypes[blTypes]);
                         activeCount++;
                     }                
                 }          
-                prop.put(DISABLED + BLACKLIST + blacklistCount + "_active",activeCount);
+                prop.put(DISABLED + BLACKLIST + blacklistCount + "_active", activeCount);
                 blacklistCount++;
             }
         }
         prop.put(DISABLED + "blackLists", blacklistCount);
         
-        prop.put(DISABLED + "currentBlacklist", (blacklistToUse==null)?"":blacklistToUse);
-        prop.put("disabled", (blacklistToUse == null) ? 1 : 0);
+        prop.putHTML(DISABLED + "currentBlacklist", (blacklistToUse==null) ? "" : blacklistToUse, true);
+        prop.put("disabled", (blacklistToUse == null) ? "1" : "0");
         return prop;
     }
 

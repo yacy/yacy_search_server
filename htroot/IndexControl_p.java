@@ -105,9 +105,9 @@ public class IndexControl_p {
         if (!urlstring.startsWith("http://") &&
             !urlstring.startsWith("https://")) { urlstring = "http://" + urlstring; }
 
-        prop.put("keystring", keystring);
+        prop.putHTML("keystring", keystring);
         prop.put("keyhash", keyhash);
-        prop.put("urlstring", urlstring);
+        prop.putHTML("urlstring", urlstring);
         prop.put("urlhash", urlhash);
         prop.put("result", " ");
 
@@ -189,7 +189,7 @@ public class IndexControl_p {
                 urlstring = entry.comp().url().toNormalform(false, true);
                 prop.put("urlstring", "");
                 switchboard.urlRemove(urlhash);
-                prop.put("result", "Removed URL " + urlstring);
+                prop.putHTML("result", "Removed URL " + urlstring);
             }
         }
 
@@ -203,7 +203,7 @@ public class IndexControl_p {
                 prop.put("result", "No input given; nothing deleted.");
             } else {
                 switchboard.urlRemove(urlhash);
-                prop.put("result", "Removed URL " + urlstring);
+                prop.putHTML("result", "Removed URL " + urlstring);
             }
         }
 
@@ -217,7 +217,7 @@ public class IndexControl_p {
 
         if (post.containsKey("keyhashsearch")) {
             if (keystring.length() == 0 || !plasmaCondenser.word2hash(keystring).equals(keyhash)) {
-                prop.put("keystring", "<not possible to compute word from hash>");
+                prop.put("keystring", "&lt;not possible to compute word from hash&gt;");
             }
             prop.put("urlstring", "");
             prop.put("urlhash", "");
@@ -227,7 +227,7 @@ public class IndexControl_p {
         // transfer to other peer
         if (post.containsKey("keyhashtransfer")) {
             if (keystring.length() == 0 || !plasmaCondenser.word2hash(keystring).equals(keyhash)) {
-                prop.put("keystring", "<not possible to compute word from hash>");
+                prop.put("keystring", "&lt;not possible to compute word from hash&gt;");
             }
             
             // find host & peer
@@ -290,7 +290,7 @@ public class IndexControl_p {
                 indexContainer container;
                 int i = 0;
                 int rows = 0, cols = 0;
-                prop.put("keyhashsimilar", 1);
+                prop.put("keyhashsimilar", "1");
                 while (containerIt.hasNext() && i < 256) {
                     container = (indexContainer) containerIt.next();
                     prop.put("keyhashsimilar_rows_"+rows+"_cols_"+cols+"_wordHash", container.getWordHash());
@@ -314,13 +314,13 @@ public class IndexControl_p {
                 prop.put("urlhash", urlhash);
                 indexURLEntry entry = switchboard.wordIndex.loadedURL.load(urlhash, null);
                 if (entry == null) {
-                    prop.put("urlstring", "unknown url: " + urlstring);
+                    prop.putHTML("urlstring", "unknown url: " + urlstring);
                     prop.put("urlhash", "");
                 } else {
                     prop.putAll(genUrlProfile(switchboard, entry, urlhash));
                 }
             } catch (MalformedURLException e) {
-                prop.put("urlstring", "bad url: " + urlstring);
+                prop.putHTML("urlstring", "bad url: " + urlstring);
                 prop.put("urlhash", "");
             }
         }
@@ -330,7 +330,7 @@ public class IndexControl_p {
             if (entry == null) {
                 prop.put("result", "No Entry for URL hash " + urlhash);
             } else {
-                prop.put("urlstring", entry.comp().url().toNormalform(false, true));
+                prop.putHTML("urlstring", entry.comp().url().toNormalform(false, true));
                 prop.putAll(genUrlProfile(switchboard, entry, urlhash));
             }
         }
@@ -343,7 +343,7 @@ public class IndexControl_p {
                 indexURLEntry entry;
                 int i = 0;
                 int rows = 0, cols = 0;
-                prop.put("urlhashsimilar", 1);
+                prop.put("urlhashsimilar", "1");
                 while (entryIt.hasNext() && i < 256) {
                     entry = (indexURLEntry) entryIt.next();
                     if (entry == null) break;
@@ -427,8 +427,8 @@ public class IndexControl_p {
         listHosts(prop, keyhash);
 
         // insert constants
-        prop.put("wcount", Integer.toString(switchboard.wordIndex.size()));
-        prop.put("ucount", Integer.toString(switchboard.wordIndex.loadedURL.size()));
+        prop.putNum("wcount", switchboard.wordIndex.size());
+        prop.putNum("ucount", switchboard.wordIndex.loadedURL.size());
         // return rewrite properties
         return prop;
     }
@@ -443,11 +443,11 @@ public class IndexControl_p {
                 seed = (yacySeed) e.next();
                 if (seed != null) {
                     prop.put("hosts_" + hc + "_hosthash", seed.hash);
-                    prop.put("hosts_" + hc + "_hostname", seed.hash + " " + seed.get(yacySeed.NAME, "nameless"));
+                    prop.putHTML("hosts_" + hc + "_hostname", seed.hash + " " + seed.get(yacySeed.NAME, "nameless"));
                     hc++;
                 }
             }
-            prop.put("hosts", Integer.toString(hc));
+            prop.put("hosts", hc);
         } else {
             prop.put("hosts", "0");
         }
@@ -456,7 +456,7 @@ public class IndexControl_p {
     public static serverObjects genUrlProfile(plasmaSwitchboard switchboard, indexURLEntry entry, String urlhash) {
         serverObjects prop = new serverObjects();
         if (entry == null) {
-            prop.put("genUrlProfile", 1);
+            prop.put("genUrlProfile", "1");
             prop.put("genUrlProfile_urlhash", urlhash);
             return prop;
         }
@@ -469,17 +469,17 @@ public class IndexControl_p {
             referrer = le.comp().url().toNormalform(false, true);
         }
         if (comp.url() == null) {
-            prop.put("genUrlProfile", 1);
+            prop.put("genUrlProfile", "1");
             prop.put("genUrlProfile_urlhash", urlhash);
             return prop;
         }
-        prop.put("genUrlProfile", 2);
-        prop.put("genUrlProfile_urlNormalform", comp.url().toNormalform(false, true));
+        prop.put("genUrlProfile", "2");
+        prop.putHTML("genUrlProfile_urlNormalform", comp.url().toNormalform(false, true));
         prop.put("genUrlProfile_urlhash", urlhash);
         prop.put("genUrlProfile_urlDescr", comp.title());
         prop.put("genUrlProfile_moddate", entry.moddate());
         prop.put("genUrlProfile_loaddate", entry.loaddate());
-        prop.put("genUrlProfile_referrer", referrer);
+        prop.putHTML("genUrlProfile_referrer", referrer);
         prop.put("genUrlProfile_doctype", ""+entry.doctype());
         prop.put("genUrlProfile_language", entry.language());
         prop.put("genUrlProfile_size", entry.size());
@@ -497,11 +497,11 @@ public class IndexControl_p {
             prop.put("genUrlList_keyHash", keyhash);
             
             if ((index == null) || (index.size() == 0)) {
-                prop.put("genUrlList", 1);
-                prop.put("genUrlList_count", 0);
+                prop.put("genUrlList", "1");
+                prop.put("genUrlList_count", "0");
             } else {
                 final Iterator en = index.entries();
-                prop.put("genUrlList", 2);
+                prop.put("genUrlList", "2");
                 String us;
                 String uh[] = new String[2];
                 int i = 0;
@@ -527,26 +527,26 @@ public class IndexControl_p {
                     us = iter.next().toString();
                     uh = (String[]) tm.get(us);
                     if (us.equals(uh[0])) {
-                        prop.put("genUrlList_urlList_"+i+"_urlExists", 0);
+                        prop.put("genUrlList_urlList_"+i+"_urlExists", "0");
                         prop.put("genUrlList_urlList_"+i+"_urlExists_urlhxCount", i);
-                        prop.put("genUrlList_urlList_"+i+"_urlExists_urlhxValue", uh[0]);
+                        prop.putHTML("genUrlList_urlList_"+i+"_urlExists_urlhxValue", uh[0]);
                     } else {
-                        prop.put("genUrlList_urlList_"+i+"_urlExists", 1);
+                        prop.put("genUrlList_urlList_"+i+"_urlExists", "1");
                         prop.put("genUrlList_urlList_"+i+"_urlExists_urlhxCount", i);
-                        prop.put("genUrlList_urlList_"+i+"_urlExists_urlhxValue", uh[0]);
-                        prop.put("genUrlList_urlList_"+i+"_urlExists_keyString", keystring);
+                        prop.putHTML("genUrlList_urlList_"+i+"_urlExists_urlhxValue", uh[0]);
+                        prop.putHTML("genUrlList_urlList_"+i+"_urlExists_keyString", keystring);
                         prop.put("genUrlList_urlList_"+i+"_urlExists_keyHash", keyhash);
-                        prop.put("genUrlList_urlList_"+i+"_urlExists_urlString", us);
+                        prop.putHTML("genUrlList_urlList_"+i+"_urlExists_urlString", us);
                         prop.put("genUrlList_urlList_"+i+"_urlExists_pos", uh[1]);
                         url = new yacyURL(us, null);
                         if (plasmaSwitchboard.urlBlacklist.isListed(plasmaURLPattern.BLACKLIST_DHT, url)) {
-                            prop.put("genUrlList_urlList_"+i+"_urlExists_urlhxChecked", 1);
+                            prop.put("genUrlList_urlList_"+i+"_urlExists_urlhxChecked", "1");
                         }
                     }
                     i++;
                 }
                 prop.put("genUrlList_urlList", i);
-                prop.put("genUrlList_keyString", keystring);
+                prop.putHTML("genUrlList_keyString", keystring);
                 prop.put("genUrlList_count", i);
                 putBlacklists(prop, listManager.getDirListing(listManager.listsPath));
             }

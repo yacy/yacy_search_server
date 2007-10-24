@@ -32,7 +32,6 @@ import java.util.Iterator;
 import java.util.Set;
 import java.util.TreeSet;
 
-import de.anomic.data.htmlTools;
 import de.anomic.http.httpHeader;
 import de.anomic.kelondro.kelondroMSetTools;
 import de.anomic.kelondro.kelondroNaturalOrder;
@@ -70,11 +69,11 @@ public class yacysearchitem {
         int item = post.getInt("item", -1);
         
         // default settings for blank item
-        prop.put("content", 0);
-        prop.put("rss", 0);
-        prop.put("references", 0);
-        prop.put("rssreferences", 0);
-        prop.put("dynamic", 0);
+        prop.put("content", "0");
+        prop.put("rss", "0");
+        prop.put("references", "0");
+        prop.put("rssreferences", "0");
+        prop.put("dynamic", "0");
         
         // find search event
         plasmaSearchEvent theSearch = plasmaSearchEvent.getEvent(eventID);
@@ -91,7 +90,7 @@ public class yacysearchitem {
             prop.put("dynamic_global", theSearch.getGlobalCount());
             prop.put("dynamic_total", theSearch.getGlobalCount() + theSearch.getLocalCount());
             prop.put("dynamic_items", (item < 0) ? theQuery.neededResults() : item + 1);
-            prop.put("dynamic", 1);
+            prop.put("dynamic", "1");
         }
         
         if (bottomline) {
@@ -129,14 +128,14 @@ public class yacysearchitem {
                     while (iter.hasNext()) {
                         word = (String) iter.next();
                         if (word != null) {
-                            prop.put("rssreferences_words_" + hintcount + "_word", word);
+                            prop.putHTML("rssreferences_words_" + hintcount + "_word", word);
                         }
                         prop.put("rssreferences_words", hintcount);
                         if (hintcount++ > MAX_TOPWORDS) {
                             break;
                         }
                     }
-                    prop.put("rssreferences", 1);
+                    prop.put("rssreferences", "1");
                 } else {
                     String word;
                     int hintcount = 0;
@@ -144,10 +143,10 @@ public class yacysearchitem {
                     while (iter.hasNext()) {
                         word = (String) iter.next();
                         if (word != null) {
-                            prop.put("references_words_" + hintcount + "_word", word);
-                            prop.put("references_words_" + hintcount + "_newsearch", theQuery.queryString.replace(' ', '+') + "+" + word);
+                            prop.putHTML("references_words_" + hintcount + "_word", word);
+                            prop.putHTML("references_words_" + hintcount + "_newsearch", theQuery.queryString.replace(' ', '+') + "+" + word);
                             prop.put("references_words_" + hintcount + "_count", theQuery.displayResults());
-                            prop.put("references_words_" + hintcount + "_offset", 0);
+                            prop.put("references_words_" + hintcount + "_offset", "0");
                             prop.put("references_words_" + hintcount + "_contentdom", theQuery.contentdom());
                             prop.put("references_words_" + hintcount + "_resource", theQuery.searchdom());
                             prop.put("references_words_" + hintcount + "_time", (theQuery.maximumTime / 1000));
@@ -157,7 +156,7 @@ public class yacysearchitem {
                             break;
                         }
                     }
-                    prop.put("references", 1);
+                    prop.put("references", "1");
                 }
             }
             
@@ -174,26 +173,26 @@ public class yacysearchitem {
             
         if (rss) {
             // text search for rss output
-            prop.put("rss", 1); // switch on specific content
-            prop.putASIS("rss_title", htmlTools.encodeUnicode2xml(result.title()));
-            prop.putASIS("rss_description", htmlTools.encodeUnicode2xml(result.textSnippet().getLineRaw()));
-            prop.put("rss_link", result.urlstring());
+            prop.put("rss", "1"); // switch on specific content
+            prop.putHTML("rss_title", result.title(), true);
+            prop.putHTML("rss_description", result.textSnippet().getLineRaw(), true);
+            prop.putHTML("rss_link", result.urlstring(), true);
             prop.put("rss_urlhash", result.hash());
             prop.put("rss_date", plasmaSwitchboard.dateString822(result.modified()));
             return prop;
         }
         
-        prop.put("rss", 0);
+        prop.put("rss", "0");
         
         if (theQuery.contentdom == plasmaSearchQuery.CONTENTDOM_TEXT) {
             // text search
             prop.put("content", theQuery.contentdom + 1); // switch on specific content
-            prop.put("content_authorized", (authenticated) ? 1 : 0);
-            prop.put("content_authorized_recommend", (yacyCore.newsPool.getSpecific(yacyNewsPool.OUTGOING_DB, yacyNewsPool.CATEGORY_SURFTIPP_ADD, "url", result.urlstring()) == null) ? 1 : 0);
+            prop.put("content_authorized", authenticated ? "1" : "0");
+            prop.put("content_authorized_recommend", (yacyCore.newsPool.getSpecific(yacyNewsPool.OUTGOING_DB, yacyNewsPool.CATEGORY_SURFTIPP_ADD, "url", result.urlstring()) == null) ? "1" : "0");
             prop.put("content_authorized_recommend_deletelink", "/yacysearch.html?search=" + theQuery.queryString + "&Enter=Search&count=" + theQuery.displayResults() + "&offset=" + (theQuery.neededResults() - theQuery.displayResults()) + "&order=" + crypt.simpleEncode(ranking.toExternalString()) + "&resource=local&time=3&deleteref=" + result.hash() + "&urlmaskfilter=.*");
             prop.put("content_authorized_recommend_recommendlink", "/yacysearch.html?search=" + theQuery.queryString + "&Enter=Search&count=" + theQuery.displayResults() + "&offset=" + (theQuery.neededResults() - theQuery.displayResults()) + "&order=" + crypt.simpleEncode(ranking.toExternalString()) + "&resource=local&time=3&recommendref=" + result.hash() + "&urlmaskfilter=.*");
             prop.put("content_authorized_urlhash", result.hash());
-            prop.put("content_description", result.title());
+            prop.putHTML("content_description", result.title());
             prop.put("content_url", result.urlstring());
         
             int port=result.url().getPort();
@@ -204,25 +203,25 @@ public class yacysearchitem {
                 faviconURL = null;
             }
         
-            prop.put("content_faviconCode", sb.licensedURLs.aquireLicense(faviconURL)); // aquire license for favicon url loading
+            prop.putHTML("content_faviconCode", sb.licensedURLs.aquireLicense(faviconURL)); // aquire license for favicon url loading
             prop.put("content_urlhash", result.hash());
             prop.put("content_urlhexhash", yacySeed.b64Hash2hexHash(result.hash()));
-            prop.put("content_urlname", nxTools.shortenURLString(result.urlname(), urllength));
+            prop.putHTML("content_urlname", nxTools.shortenURLString(result.urlname(), urllength));
             prop.put("content_date", plasmaSwitchboard.dateString(result.modified()));
             prop.put("content_ybr", plasmaSearchPreOrder.ybr(result.hash()));
-            prop.put("content_size", Long.toString(result.filesize()));
+            prop.putNum("content_size", result.filesize());
         
             TreeSet[] query = theQuery.queryWords();
             yacyURL wordURL = null;
             try {
-                prop.put("content_words", URLEncoder.encode(query[0].toString(),"UTF-8"));
+                prop.putHTML("content_words", URLEncoder.encode(query[0].toString(),"UTF-8"));
             } catch (UnsupportedEncodingException e) {}
-            prop.put("content_former", theQuery.queryString);
+            prop.putHTML("content_former", theQuery.queryString);
             prop.put("content_rankingprops", result.word().toPropertyForm() + ", domLengthEstimated=" + yacyURL.domLengthEstimation(result.hash()) +
-                        ((yacyURL.probablyRootURL(result.hash())) ? ", probablyRootURL" : "") + 
-                        (((wordURL = yacyURL.probablyWordURL(result.hash(), query[0])) != null) ? ", probablyWordURL=" + wordURL.toNormalform(false, true) : ""));
+                    ((yacyURL.probablyRootURL(result.hash())) ? ", probablyRootURL" : "") + 
+                    (((wordURL = yacyURL.probablyWordURL(result.hash(), query[0])) != null) ? ", probablyWordURL=" + wordURL.toNormalform(false, true) : ""));
  
-            prop.putASIS("content_snippet", result.textSnippet().getLineMarked(theQuery.queryHashes));
+            prop.put("content_snippet", result.textSnippet().getLineMarked(theQuery.queryHashes));
             return prop;
         }
         
@@ -238,15 +237,15 @@ public class yacysearchitem {
                 for (int i = 0; i < images.size(); i++) {
                     ms = (plasmaSnippetCache.MediaSnippet) images.get(i);
                     try {url = new yacyURL(ms.href, null);} catch (MalformedURLException e) {continue;}
-                    prop.put("content_items_" + i + "_href", ms.href);
+                    prop.putHTML("content_items_" + i + "_href", ms.href);
                     prop.put("content_items_" + i + "_code", sb.licensedURLs.aquireLicense(url));
-                    prop.put("content_items_" + i + "_name", shorten(ms.name, namelength));
+                    prop.putHTML("content_items_" + i + "_name", shorten(ms.name, namelength));
                     prop.put("content_items_" + i + "_attr", ms.attr); // attributes, here: original size of image
                     c++;
                 }
                 prop.put("content_items", c);
             } else {
-                prop.put("content_items", 0);
+                prop.put("content_items", "0");
             }
             return prop;
         }
@@ -263,16 +262,16 @@ public class yacysearchitem {
                 int c = 0;
                 for (int i = 0; i < media.size(); i++) {
                     ms = (plasmaSnippetCache.MediaSnippet) media.get(i);
-                    prop.put("content_items_" + i + "_href", ms.href);
-                    prop.put("content_items_" + i + "_hrefshort", nxTools.shortenURLString(ms.href, urllength));
-                    prop.put("content_items_" + i + "_name", shorten(ms.name, namelength));
-                    prop.put("content_items_" + i + "_col", (col) ? 0 : 1);
+                    prop.putHTML("content_items_" + i + "_href", ms.href);
+                    prop.putHTML("content_items_" + i + "_hrefshort", nxTools.shortenURLString(ms.href, urllength));
+                    prop.putHTML("content_items_" + i + "_name", shorten(ms.name, namelength));
+                    prop.put("content_items_" + i + "_col", (col) ? "0" : "1");
                     c++;
                     col = !col;
                 }
                 prop.put("content_items", c);
             } else {
-                prop.put("content_items", 0);
+                prop.put("content_items", "0");
             }
             return prop;
         }

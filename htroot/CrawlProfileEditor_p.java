@@ -112,7 +112,7 @@ public class CrawlProfileEditor_p {
             prop.put("profiles_" + count + "_name", selentry.name());
             prop.put("profiles_" + count + "_handle", selentry.handle());
             if (handle.equals(selentry.handle()))
-                prop.put("profiles_" + count + "_selected", 1);
+                prop.put("profiles_" + count + "_selected", "1");
             count++;
         }
         prop.put("profiles", count);
@@ -131,8 +131,8 @@ public class CrawlProfileEditor_p {
 						if (!cval.equals(val)) sb.profilesActiveCrawls.changeEntry(selentry, tee.name, val);
 					}
 				} catch (IOException ex) {
-					prop.put("error", 1);
-					prop.put("error_message", ex.getMessage());
+					prop.put("error", "1");
+					prop.putHTML("error_message", ex.getMessage());
 				}
 			}
 		}
@@ -162,9 +162,9 @@ public class CrawlProfileEditor_p {
         
         // generate edit field
         if (selentry == null) {
-        	prop.put("edit", 0);
+        	prop.put("edit", "0");
         } else {
-        	prop.put("edit", 1);
+        	prop.put("edit", "1");
 			prop.put("edit_name", selentry.name());
 			prop.put("edit_handle", selentry.handle());
 			it = labels.iterator();
@@ -172,12 +172,12 @@ public class CrawlProfileEditor_p {
 			while (it.hasNext()) {
 				eentry ee = (eentry) it.next();
 				Object val = selentry.map().get(ee.name);
-				prop.put("edit_entries_" + count + "_readonly", ee.readonly ? 1 : 0);
+				prop.put("edit_entries_" + count + "_readonly", ee.readonly ? "1" : "0");
 				prop.put("edit_entries_" + count + "_readonly_name", ee.name);
 				prop.put("edit_entries_" + count + "_readonly_label", ee.label);
 				prop.put("edit_entries_" + count + "_readonly_type", ee.type);
 				if (ee.type == eentry.BOOLEAN) {
-					prop.put("edit_entries_" + count + "_readonly_type_checked", Boolean.valueOf((String) val).booleanValue() ? 1 : 0);
+					prop.put("edit_entries_" + count + "_readonly_type_checked", Boolean.valueOf((String) val).booleanValue() ? "1" : "0");
 				} else {
 					prop.put("edit_entries_" + count + "_readonly_type_value", val);
 				}
@@ -190,8 +190,8 @@ public class CrawlProfileEditor_p {
     }
     
     private static void putProfileEntry(servletProperties prop, plasmaCrawlProfile.entry profile, boolean active, boolean dark, int count, int domlistlength) {
-        prop.put("crawlProfiles_" + count + "_dark", ((dark) ? 1 : 0));
-        prop.put("crawlProfiles_" + count + "_status", ((active) ? 1 : 0));
+        prop.put("crawlProfiles_" + count + "_dark", dark ? "1" : "0");
+        prop.put("crawlProfiles_" + count + "_status", active ? "1" : "0");
         prop.put("crawlProfiles_" + count + "_name", profile.name());
         prop.put("crawlProfiles_" + count + "_startURL", profile.startURL());
         prop.put("crawlProfiles_" + count + "_handle", profile.handle());
@@ -207,7 +207,7 @@ public class CrawlProfileEditor_p {
             if(i == domlistlength){
                 item = item + " ...";
             }
-            prop.put("crawlProfiles_"+count+"_crawlingDomFilterContent_"+i+"_item", item);
+            prop.putHTML("crawlProfiles_"+count+"_crawlingDomFilterContent_"+i+"_item", item);
             i++;
         }
 
@@ -215,17 +215,17 @@ public class CrawlProfileEditor_p {
         // end contrib [MN]
 
         prop.put("crawlProfiles_" + count + "_crawlingDomMaxPages", (profile.domMaxPages() == Integer.MAX_VALUE) ? "unlimited" : ""+profile.domMaxPages());
-        prop.put("crawlProfiles_" + count + "_withQuery", (profile.crawlingQ()) ? 1 : 0);
-        prop.put("crawlProfiles_" + count + "_storeCache", (profile.storeHTCache()) ? 1 : 0);
-        prop.put("crawlProfiles_" + count + "_indexText", (profile.indexText()) ? 1 : 0);
-        prop.put("crawlProfiles_" + count + "_indexMedia", (profile.indexMedia()) ? 1 : 0);
-        prop.put("crawlProfiles_" + count + "_remoteIndexing", (profile.remoteIndexing()) ? 1 : 0);
+        prop.put("crawlProfiles_" + count + "_withQuery", (profile.crawlingQ()) ? "1" : "0");
+        prop.put("crawlProfiles_" + count + "_storeCache", (profile.storeHTCache()) ? "1" : "0");
+        prop.put("crawlProfiles_" + count + "_indexText", (profile.indexText()) ? "1" : "0");
+        prop.put("crawlProfiles_" + count + "_indexMedia", (profile.indexMedia()) ? "1" : "0");
+        prop.put("crawlProfiles_" + count + "_remoteIndexing", (profile.remoteIndexing()) ? "1" : "0");
         prop.put("crawlProfiles_" + count + "_terminateButton", ((!active) || (profile.name().equals("remote")) ||
                                                            (profile.name().equals("proxy")) ||
                                                            (profile.name().equals("snippetText")) ||
-                                                           (profile.name().equals("snippetMedia"))) ? 0 : 1);
+                                                           (profile.name().equals("snippetMedia"))) ? "0" : "1");
         prop.put("crawlProfiles_" + count + "_terminateButton_handle", profile.handle());
-        prop.put("crawlProfiles_" + count + "_deleteButton", (active) ? 0 : 1);
+        prop.put("crawlProfiles_" + count + "_deleteButton", (active) ? "0" : "1");
         prop.put("crawlProfiles_" + count + "_deleteButton_handle", profile.handle());
     }
 }

@@ -71,8 +71,8 @@ public class YaCySearchPluginFF {
         }    
         
         prop.put("host", host);
-        prop.put("port", Integer.toString(port));
-        prop.put("name", yacyCore.seedDB.mySeed().getName());
+        prop.put("port", port);
+        prop.putHTML("name", yacyCore.seedDB.mySeed().getName());
         
         return prop;
     }

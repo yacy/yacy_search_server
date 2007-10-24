@@ -139,19 +139,19 @@ public class Status {
 
         boolean adminaccess = sb.adminAuthenticated(header) >= 2;
         if (adminaccess) {
-            prop.put("showPrivateTable",1);
+            prop.put("showPrivateTable", "1");
             prop.put("privateStatusTable", "Status_p.inc");
         } else { 
-            prop.put("showPrivateTable",0);
+            prop.put("showPrivateTable", "0");
             prop.put("privateStatusTable", "");
         }
 
         // password protection
         if (sb.getConfig(httpd.ADMIN_ACCOUNT_B64MD5, "").length() == 0) {
-            prop.put("protection", 0); // not protected
-            prop.put("urgentSetPassword", 1);
+            prop.put("protection", "0"); // not protected
+            prop.put("urgentSetPassword", "1");
         } else {
-            prop.put("protection", 1); // protected
+            prop.put("protection", "1"); // protected
         }
         
         // version information
@@ -164,11 +164,11 @@ public class Status {
 
         // place some more hints
         if ((adminaccess) && (sb.getThread(plasmaSwitchboard.CRAWLJOB_LOCAL_CRAWL).getJobCount() == 0) && (sb.getThread(plasmaSwitchboard.INDEXER).getJobCount() == 0)) {
-            prop.put("hintCrawlStart", 1);
+            prop.put("hintCrawlStart", "1");
         }
         
         if ((adminaccess) && (sb.getThread(plasmaSwitchboard.CRAWLJOB_LOCAL_CRAWL).getJobCount() > 500)) {
-            prop.put("hintCrawlMonitor", 1);
+            prop.put("hintCrawlMonitor", "1");
         }
         
         // hostname and port
@@ -176,33 +176,33 @@ public class Status {
         int pos = extendedPortString.indexOf(":"); 
         prop.put("port",serverCore.getPortNr(extendedPortString));
         if (pos!=-1) {
-            prop.put("extPortFormat",1);
+            prop.put("extPortFormat", "1");
             prop.put("extPortFormat_extPort",extendedPortString);
         } else {
-            prop.put("extPortFormat",0);
+            prop.put("extPortFormat", "0");
         }
         prop.put("host", serverDomains.myPublicLocalIP().getHostAddress());
         
         // ssl support
-        prop.put("sslSupport",sb.getConfig("keyStore", "").length() == 0 ? 0:1);
+        prop.put("sslSupport",sb.getConfig("keyStore", "").length() == 0 ? "0" : "1");
 
         // port forwarding: hostname and port
         if ((serverCore.portForwardingEnabled) && (serverCore.portForwarding != null)) {
-            prop.put("portForwarding", 1);
+            prop.put("portForwarding", "1");
             prop.put("portForwarding_host", serverCore.portForwarding.getHost());
             prop.put("portForwarding_port", Integer.toString(serverCore.portForwarding.getPort()));
-            prop.put("portForwarding_status", serverCore.portForwarding.isConnected() ? 1:0);
+            prop.put("portForwarding_status", serverCore.portForwarding.isConnected() ? "1" : "0");
         } else {
-            prop.put("portForwarding", 0);
+            prop.put("portForwarding", "0");
         }
 
         if (sb.getConfig("remoteProxyUse", "false").equals("true")) {
-            prop.put("remoteProxy", 1);
-            prop.put("remoteProxy_host", sb.getConfig("remoteProxyHost", "<unknown>"));
-            prop.put("remoteProxy_port", sb.getConfig("remoteProxyPort", "<unknown>"));
-            prop.put("remoteProxy_4Yacy", sb.getConfig("remoteProxyUse4Yacy", "true").equalsIgnoreCase("true")?0:1);
+            prop.put("remoteProxy", "1");
+            prop.putHTML("remoteProxy_host", sb.getConfig("remoteProxyHost", "<unknown>"), true);
+            prop.putHTML("remoteProxy_port", sb.getConfig("remoteProxyPort", "<unknown>"), true);
+            prop.put("remoteProxy_4Yacy", sb.getConfig("remoteProxyUse4Yacy", "true").equalsIgnoreCase("true") ? "0" : "1");
         } else {
-            prop.put("remoteProxy", 0); // not used
+            prop.put("remoteProxy", "0"); // not used
         }
 
         // peer information
@@ -210,48 +210,48 @@ public class Status {
         final String thisName = sb.getConfig("peerName", "<nameless>");
         if (yacyCore.seedDB.mySeed() == null)  {
             thisHash = "not assigned";
-            prop.put("peerAddress", 0);    // not assigned
-            prop.put("peerStatistics", 0); // unknown
+            prop.put("peerAddress", "0");    // not assigned
+            prop.put("peerStatistics", "0"); // unknown
         } else {
             final long uptime = 60000 * Long.parseLong(yacyCore.seedDB.mySeed().get(yacySeed.UPTIME, "0"));
-            prop.put("peerStatistics", 1);
+            prop.put("peerStatistics", "1");
             prop.put("peerStatistics_uptime", serverDate.intervalToString(uptime));
-            prop.put("peerStatistics_pagesperminute", yacyCore.seedDB.mySeed().get(yacySeed.ISPEED, "unknown"));
-            prop.put("peerStatistics_queriesperhour", yFormatter.number(Math.round(6000d * yacyCore.seedDB.mySeed().getQPM()) / 100d));
-            prop.put("peerStatistics_links", yFormatter.number(yacyCore.seedDB.mySeed().get(yacySeed.LCOUNT, "0")));
+            prop.putNum("peerStatistics_pagesperminute", yacyCore.seedDB.mySeed().getPPM());
+            prop.putNum("peerStatistics_queriesperhour", Math.round(6000d * yacyCore.seedDB.mySeed().getQPM()) / 100d);
+            prop.putNum("peerStatistics_links", yacyCore.seedDB.mySeed().getLinkCount());
             prop.put("peerStatistics_words", yFormatter.number(yacyCore.seedDB.mySeed().get(yacySeed.ICOUNT, "0")));
-            prop.put("peerStatistics_juniorConnects", yacyCore.peerActions.juniorConnects);
-            prop.put("peerStatistics_seniorConnects", yacyCore.peerActions.seniorConnects);
-            prop.put("peerStatistics_principalConnects", yacyCore.peerActions.principalConnects);
-            prop.put("peerStatistics_disconnects", yacyCore.peerActions.disconnects);
+            prop.putNum("peerStatistics_juniorConnects", yacyCore.peerActions.juniorConnects);
+            prop.putNum("peerStatistics_seniorConnects", yacyCore.peerActions.seniorConnects);
+            prop.putNum("peerStatistics_principalConnects", yacyCore.peerActions.principalConnects);
+            prop.putNum("peerStatistics_disconnects", yacyCore.peerActions.disconnects);
             prop.put("peerStatistics_connects", yFormatter.number(yacyCore.seedDB.mySeed().get(yacySeed.CCOUNT, "0")));
             if (yacyCore.seedDB.mySeed().getPublicAddress() == null) {
                 thisHash = yacyCore.seedDB.mySeed().hash;
-                prop.put("peerAddress", 0); // not assigned + instructions
-                prop.put("warningGoOnline", 1);
+                prop.put("peerAddress", "0"); // not assigned + instructions
+                prop.put("warningGoOnline", "1");
             } else {
                 thisHash = yacyCore.seedDB.mySeed().hash;
-                prop.put("peerAddress", 1); // Address
+                prop.put("peerAddress", "1"); // Address
                 prop.put("peerAddress_address", yacyCore.seedDB.mySeed().getPublicAddress());
-                prop.put("peerAddress_peername", sb.getConfig("peerName", "<nameless>").toLowerCase());
+                prop.putHTML("peerAddress_peername", sb.getConfig("peerName", "<nameless>").toLowerCase(), true);
             }
         }
         final String peerStatus = ((yacyCore.seedDB.mySeed() == null) ? yacySeed.PEERTYPE_VIRGIN : yacyCore.seedDB.mySeed().get(yacySeed.PEERTYPE, yacySeed.PEERTYPE_VIRGIN));
         if (peerStatus.equals(yacySeed.PEERTYPE_VIRGIN)) {
-            prop.put(PEERSTATUS, 0);
-            prop.put("urgentStatusVirgin", 1);
+            prop.put(PEERSTATUS, "0");
+            prop.put("urgentStatusVirgin", "1");
         } else if (peerStatus.equals(yacySeed.PEERTYPE_JUNIOR)) {
-            prop.put(PEERSTATUS, 1);
-            prop.put("warningStatusJunior", 1);
+            prop.put(PEERSTATUS, "1");
+            prop.put("warningStatusJunior", "1");
         } else if (peerStatus.equals(yacySeed.PEERTYPE_SENIOR)) {
-            prop.put(PEERSTATUS, 2);
-            prop.put("hintStatusSenior", 1);
+            prop.put(PEERSTATUS, "2");
+            prop.put("hintStatusSenior", "1");
         } else if (peerStatus.equals(yacySeed.PEERTYPE_PRINCIPAL)) {
-            prop.put(PEERSTATUS, 3);
-            prop.put("hintStatusPrincipal", 1);
+            prop.put(PEERSTATUS, "3");
+            prop.put("hintStatusPrincipal", "1");
             prop.put("hintStatusPrincipal_seedURL", yacyCore.seedDB.mySeed().get("seedURL", "?"));
         }
-        prop.put("peerName", thisName);
+        prop.putHTML("peerName", thisName);
         prop.put("hash", thisHash);
         
         final String seedUploadMethod = sb.getConfig("seedUploadMethod", "");
@@ -268,121 +268,92 @@ public class Status {
             }
 
             if (seedUploadMethod.equalsIgnoreCase("ftp")) {
-                prop.put(SEEDSERVER, 1); // enabled
+                prop.put(SEEDSERVER, "1"); // enabled
                 prop.put("seedServer_seedServer", sb.getConfig("seedFTPServer", ""));
             } else if (seedUploadMethod.equalsIgnoreCase("scp")) {
-                prop.put(SEEDSERVER, 1); // enabled
+                prop.put(SEEDSERVER, "1"); // enabled
                 prop.put("seedServer_seedServer", sb.getConfig("seedScpServer", ""));
             } else if (seedUploadMethod.equalsIgnoreCase("file")) {
-                prop.put(SEEDSERVER, 2); // enabled
+                prop.put(SEEDSERVER, "2"); // enabled
                 prop.put("seedServer_seedFile", sb.getConfig("seedFilePath", ""));
             }
             prop.put("seedServer_lastUpload",
                     serverDate.intervalToString(System.currentTimeMillis() - sb.yc.lastSeedUpload_timeStamp));
         } else {
-            prop.put(SEEDSERVER, 0); // disabled
+            prop.put(SEEDSERVER, "0"); // disabled
         }
         
         if (yacyCore.seedDB != null && yacyCore.seedDB.sizeConnected() > 0){
-            prop.put("otherPeers", 1);
-            prop.put("otherPeers_num", yFormatter.number(yacyCore.seedDB.sizeConnected()));
+            prop.put("otherPeers", "1");
+            prop.putNum("otherPeers_num", yacyCore.seedDB.sizeConnected());
         }else{
-            prop.put("otherPeers", 0); // not online
+            prop.put("otherPeers", "0"); // not online
         }
 
         if (sb.getConfig("browserPopUpTrigger", "false").equals("false")) {
-            prop.put("popup", 0);
+            prop.put("popup", "0");
         } else {
-            prop.put("popup", 1);
+            prop.put("popup", "1");
         }
 
         if (sb.getConfig("onlineMode", "1").equals("0")) {
-            prop.put("omode", 0);
+            prop.put("omode", "0");
         } else if (sb.getConfig("onlineMode", "1").equals("1")) {
-                prop.put("omode", 1);
+                prop.put("omode", "1");
             } else {
-            prop.put("omode", 2);
+            prop.put("omode", "2");
         }
 
         final Runtime rt = Runtime.getRuntime();
 
         // memory usage and system attributes
-        prop.put("freeMemory", bytesToString(rt.freeMemory()));
-        prop.put("totalMemory", bytesToString(rt.totalMemory()));
-        prop.put("maxMemory", bytesToString(serverMemory.max));
+        prop.put("freeMemory", serverMemory.bytesToString(rt.freeMemory()));
+        prop.put("totalMemory", serverMemory.bytesToString(rt.totalMemory()));
+        prop.put("maxMemory", serverMemory.bytesToString(serverMemory.max));
         prop.put("processors", rt.availableProcessors());
 
         // proxy traffic
         //prop.put("trafficIn",bytesToString(httpdByteCountInputStream.getGlobalCount()));
-        prop.put("trafficProxy",bytesToString(httpdByteCountOutputStream.getAccountCount("PROXY")));
-        prop.put("trafficCrawler",bytesToString(httpdByteCountInputStream.getAccountCount("CRAWLER")));
+        prop.put("trafficProxy", serverMemory.bytesToString(httpdByteCountOutputStream.getAccountCount("PROXY")));
+        prop.put("trafficCrawler", serverMemory.bytesToString(httpdByteCountInputStream.getAccountCount("CRAWLER")));
 
         // connection information
         serverCore httpd = (serverCore) sb.getThread("10_httpd");
         int activeSessionCount = httpd.getActiveSessionCount();
         int idleSessionCount = httpd.getIdleSessionCount();
         int maxSessionCount = httpd.getMaxSessionCount();
-        prop.put("connectionsActive",Integer.toString(activeSessionCount));
-        prop.put("connectionsMax",Integer.toString(maxSessionCount));
-        prop.put("connectionsIdle",Integer.toString(idleSessionCount));
+        prop.putNum("connectionsActive", activeSessionCount);
+        prop.putNum("connectionsMax", maxSessionCount);
+        prop.putNum("connectionsIdle", idleSessionCount);
         
         // Queue information
         int indexingJobCount = sb.getThread("80_indexing").getJobCount()+sb.indexingTasksInProcess.size();
         int indexingMaxCount = plasmaSwitchboard.indexingSlots;
         int indexingPercent = (indexingMaxCount==0)?0:indexingJobCount*100/indexingMaxCount;
-        prop.put("indexingQueueSize", Integer.toString(indexingJobCount));
-        prop.put("indexingQueueMax", Integer.toString(indexingMaxCount));
-        prop.put("indexingQueuePercent",(indexingPercent>100)?"100":Integer.toString(indexingPercent));
+        prop.putNum("indexingQueueSize", indexingJobCount);
+        prop.putNum("indexingQueueMax", indexingMaxCount);
+        prop.put("indexingQueuePercent",(indexingPercent>100) ? 100 : indexingPercent);
         
         int loaderJobCount = sb.cacheLoader.size();
         int loaderMaxCount = plasmaSwitchboard.crawlSlots;
         int loaderPercent = (loaderMaxCount==0)?0:loaderJobCount*100/loaderMaxCount;
-        prop.put("loaderQueueSize", Integer.toString(loaderJobCount));        
-        prop.put("loaderQueueMax", Integer.toString(loaderMaxCount));        
-        prop.put("loaderQueuePercent", (loaderPercent>100)?"100":Integer.toString(loaderPercent));
+        prop.putNum("loaderQueueSize", loaderJobCount);
+        prop.putNum("loaderQueueMax", loaderMaxCount);        
+        prop.put("loaderQueuePercent", (loaderPercent>100) ? 100 : loaderPercent);
         
-        prop.put("localCrawlQueueSize", yFormatter.number(sb.getThread(plasmaSwitchboard.CRAWLJOB_LOCAL_CRAWL).getJobCount()));
-        prop.put("localCrawlPaused",sb.crawlJobIsPaused(plasmaSwitchboard.CRAWLJOB_LOCAL_CRAWL)?1:0);
+        prop.putNum("localCrawlQueueSize", sb.getThread(plasmaSwitchboard.CRAWLJOB_LOCAL_CRAWL).getJobCount());
+        prop.put("localCrawlPaused",sb.crawlJobIsPaused(plasmaSwitchboard.CRAWLJOB_LOCAL_CRAWL) ? "1" : "0");
 
-        prop.put("remoteTriggeredCrawlQueueSize", yFormatter.number(sb.getThread(plasmaSwitchboard.CRAWLJOB_REMOTE_TRIGGERED_CRAWL).getJobCount()));
-        prop.put("remoteTriggeredCrawlPaused",sb.crawlJobIsPaused(plasmaSwitchboard.CRAWLJOB_REMOTE_TRIGGERED_CRAWL)?1:0);        
+        prop.putNum("remoteTriggeredCrawlQueueSize", sb.getThread(plasmaSwitchboard.CRAWLJOB_REMOTE_TRIGGERED_CRAWL).getJobCount());
+        prop.put("remoteTriggeredCrawlPaused",sb.crawlJobIsPaused(plasmaSwitchboard.CRAWLJOB_REMOTE_TRIGGERED_CRAWL) ? "1" : "0");
 
-        prop.put("globalCrawlTriggerQueueSize", yFormatter.number(sb.getThread(plasmaSwitchboard.CRAWLJOB_GLOBAL_CRAWL_TRIGGER).getJobCount()));
-        prop.put("globalCrawlTriggerPaused",sb.crawlJobIsPaused(plasmaSwitchboard.CRAWLJOB_GLOBAL_CRAWL_TRIGGER)?1:0);                
+        prop.putNum("globalCrawlTriggerQueueSize", sb.getThread(plasmaSwitchboard.CRAWLJOB_GLOBAL_CRAWL_TRIGGER).getJobCount());
+        prop.put("globalCrawlTriggerPaused",sb.crawlJobIsPaused(plasmaSwitchboard.CRAWLJOB_GLOBAL_CRAWL_TRIGGER) ? "1" : "0");
         
-        prop.put("stackCrawlQueueSize", yFormatter.number(sb.sbStackCrawlThread.size()));       
+        prop.putNum("stackCrawlQueueSize", sb.sbStackCrawlThread.size());
 
         // return rewrite properties
         prop.put("date",(new Date()).toString());
         return prop;
     }
-
-    public static String bytesToString(long byteCount) {
-        try {
-            final StringBuffer byteString = new StringBuffer();
-
-            if (byteCount > 1073741824) {
-                byteString.append(yFormatter.number(byteCount / 1073741824.0 ))
-                          .append(" GB");
-            } else if (byteCount > 1048576) {
-                byteString.append(yFormatter.number(byteCount / 1048576.0))
-                          .append(" MB");
-            } else if (byteCount > 1024) {
-                byteString.append(yFormatter.number(byteCount / 1024.0))
-                          .append(" KB");
-            } else {
-                byteString.append(yFormatter.number(byteCount))
-                .append(" Bytes");
-            }
-
-            return byteString.toString();
-        } catch (Exception e) {
-            return "unknown";
-        }
-
-    }
-    
-    
-    //TODO: groupDigits-functions (Status.java & Network.java) should
-    //      be referenced in a single class (now double-implemented)
 }

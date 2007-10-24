@@ -42,12 +42,12 @@ public class blacklists_p {
         int count;
         if (dirlist != null) {
             for (int i = 0; i <= dirlist.length - 1; i++) {
-                prop.put("lists_" + blacklistCount + "_name", dirlist[i]);
+                prop.putHTML("lists_" + blacklistCount + "_name", dirlist[i]);
          
                 if (listManager.listSetContains("BlackLists.Shared", dirlist[i])) {
-                    prop.put("lists_" + blacklistCount + "_shared", 1);
+                    prop.put("lists_" + blacklistCount + "_shared", "1");
                 } else {
-                    prop.put("lists_" + blacklistCount + "_shared", 0);
+                    prop.put("lists_" + blacklistCount + "_shared", "0");
                 }
                 
                 String[] types = abstractURLPattern.BLACKLIST_TYPES_STRING.split(",");
@@ -67,7 +67,7 @@ public class blacklists_p {
                     if (nextEntry.length() == 0) continue;
                     if (nextEntry.startsWith("#")) continue;
         
-                    prop.put("lists_" + blacklistCount + "_items_" + count + "_item", nextEntry);
+                    prop.putHTML("lists_" + blacklistCount + "_items_" + count + "_item", nextEntry);
                     count++;
                 }
                 prop.put("lists_" + blacklistCount + "_items", count);
@@ -82,6 +82,3 @@ public class blacklists_p {
     }
     
 }
-
-
-

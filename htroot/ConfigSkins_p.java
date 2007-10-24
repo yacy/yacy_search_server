@@ -97,7 +97,7 @@ public class ConfigSkins_p {
 
 	//Fallback
 	prop.put("currentskin", "");
-	prop.put("status", 0);//nothing
+	prop.put("status", "0"); //nothing
 	
 	String[] skinFiles = listManager.getDirListing(skinPath);
 	if(skinFiles == null){
@@ -129,7 +129,7 @@ public class ConfigSkins_p {
                 yacyURL u = new yacyURL(url, null);
 				skinVector = nxTools.strings(httpc.wget(u, u.getHost(), 6000, null, null, switchboard.remoteProxyConfig, null, null), "UTF-8");
 			}catch(IOException e){
-				prop.put("status", 1);//unable to get URL
+				prop.put("status", "1");//unable to get URL
 				prop.put("status_url", url);
 				return prop;
 			}
@@ -143,7 +143,7 @@ public class ConfigSkins_p {
 				}
 				bw.close();
 			}catch(IOException e){
-				prop.put("status", 2);//error saving the skin
+				prop.put("status", "2");//error saving the skin
 				return prop;
 			}
 			if(post.containsKey("use_skin") && ((String)post.get("use_skin")).equals("on")){
@@ -167,5 +167,4 @@ public class ConfigSkins_p {
 	prop.put("currentskin", env.getConfig("currentSkin", "default"));
 	return prop;
     }
-
 }

@@ -93,8 +93,8 @@ public class ViewLog_p {
             }
         }
         
-        prop.put("submenu", (displaySubmenu) ? 1 : 0);
-        prop.put("reverseChecked", reversed ? 1 : 0);
+        prop.put("submenu", displaySubmenu ? "1" : "0");
+        prop.put("reverseChecked", reversed ? "1" : "0");
         prop.put("lines", lines);
         prop.put("maxlines",maxlines);
         prop.put("filter", filter);
@@ -125,14 +125,13 @@ public class ViewLog_p {
             else if (nextLogLine.startsWith("I ")) level = 1;
             else if (nextLogLine.startsWith("D ")) level = 0;
             
-            prop.put("log_" + lc + "_level",level);
-            prop.put("log_" + lc + "_line", nextLogLine); 
+            prop.put("log_" + lc + "_level", level);
+            prop.putHTML("log_" + lc + "_line", nextLogLine); 
             lc++;
         }
-        prop.put("log",lc);
+        prop.put("log", lc);
         
         // return rewrite properties
         return prop;
     }
-    
 }

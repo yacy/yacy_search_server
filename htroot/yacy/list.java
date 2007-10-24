@@ -108,7 +108,7 @@ public final class list {
                 }
             } // if filenamesarray.length > 0
 
-            prop.put("list",out);
+            prop.put("list",out.toString());
         }
         // start contrib by [FB]
         else if (col.length() == 0 && post.get("list", "").equals("queueUrls")) {
@@ -128,7 +128,7 @@ public final class list {
                         b.append(htmlTools.decodeHtml2Unicode(url.toNormalform(false, true))).append("\n");
                         cnt++;
                     }
-                    prop.put("list", b);
+                    prop.put("list", b.toString());
                     CrawlURLFetchStack_p.fetchMap.put(
                             otherPeerName,
                             new Integer(((CrawlURLFetchStack_p.fetchMap.get(otherPeerName) == null)
@@ -144,7 +144,7 @@ public final class list {
             }
         // end contrib by [FB]
         } else {
-            prop.putASIS("list","");
+            prop.put("list","");
         }
         
         return prop;

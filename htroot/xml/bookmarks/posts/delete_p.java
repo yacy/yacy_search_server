@@ -58,17 +58,17 @@ public class delete_p {
         if(post!= null){
         	try {
                 if( post.containsKey("url") && switchboard.bookmarksDB.removeBookmark((new yacyURL(post.get("url", "nourl"), null)).hash())) {
-                	prop.put("result", 1);
+                	prop.put("result", "1");
                 }else if(post.containsKey("urlhash") && switchboard.bookmarksDB.removeBookmark(post.get("urlhash", "nohash"))){
-                	prop.put("result", 1);
+                	prop.put("result", "1");
                 }else{
-                	prop.put("result",0);
+                	prop.put("result", "0");
                 }
             } catch (MalformedURLException e) {
-                prop.put("result",0);
+                prop.put("result", "0");
             }
         }else{
-        	prop.put("result",0);
+        	prop.put("result", "0");
         }
         // return rewrite properties
         return prop;

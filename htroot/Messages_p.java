@@ -78,11 +78,11 @@ public class Messages_p {
         final String peerAddress = yacyCore.seedDB.mySeed().getPublicAddress();
         final String peerName = yacyCore.seedDB.mySeed().getName();
         prop.put("peerAddress", peerAddress);
-        prop.put("peerName", peerName);
+        prop.putHTML("peerName", peerName, true);
 
         // List known hosts for message sending (from Blacklist_p.java)
         if (yacyCore.seedDB != null && yacyCore.seedDB.sizeConnected() > 0) {
-            prop.put("peersKnown", 1);
+            prop.put("peersKnown", "1");
             int peerCount = 0;
             try {
                 TreeMap hostList = new TreeMap();
@@ -96,18 +96,18 @@ public class Messages_p {
                 while ((peername = (String) hostList.firstKey()) != null) {
                     final String Hash = (String) hostList.get(peername);
                     prop.put(PEERSKNOWN + "peers_" + peerCount + "_hash", Hash);
-                    prop.put(PEERSKNOWN + "peers_" + peerCount + "_name", peername);
+                    prop.putHTML(PEERSKNOWN + "peers_" + peerCount + "_name", peername, true);
                     hostList.remove(peername);
                     peerCount++;
                 }
             } catch (Exception e) {/* */}
             prop.put(PEERSKNOWN + "peers", peerCount);
         } else {
-            prop.put("peersKnown", 0);
+            prop.put("peersKnown", "0");
         }
 
-        prop.put("mode", 0);
-        prop.put("mode_error", 0);
+        prop.put("mode", "0");
+        prop.put("mode_error", "0");
 
         String action = ((post == null) ? "list" : post.get("action", "list"));
         messageBoard.entry message;
@@ -127,7 +127,7 @@ public class Messages_p {
         }
 
         if (action.equals("list")) {
-            prop.put("mode", 0); //list
+            prop.put("mode", "0"); //list
             try {
                 Iterator i = switchboard.messageDB.keys(null, true);
                 String key;
@@ -137,13 +137,13 @@ public class Messages_p {
                 while (i.hasNext()) {
                     key = (String) i.next();
                     message = switchboard.messageDB.read(key);
-                    prop.put("mode_messages_"+count+"_dark", ((dark) ? 1 : 0) );
+                    prop.put("mode_messages_"+count+"_dark", ((dark) ? "1" : "0") );
                     prop.put("mode_messages_"+count+"_date", dateString(message.date()));
-                    prop.put("mode_messages_"+count+"_from", message.author());
-                    prop.put("mode_messages_"+count+"_to", message.recipient());
-                    prop.put("mode_messages_"+count+"_subject", message.subject());
-                    prop.put("mode_messages_"+count+"_category", message.category());
-                    prop.put("mode_messages_"+count+"_key", key);
+                    prop.putHTML("mode_messages_"+count+"_from", message.author(), true);
+                    prop.putHTML("mode_messages_"+count+"_to", message.recipient(), true);
+                    prop.putHTML("mode_messages_"+count+"_subject", message.subject(), true);
+                    prop.putHTML("mode_messages_"+count+"_category", message.category(), true);
+                    prop.putHTML("mode_messages_"+count+"_key", key, true);
                     prop.put("mode_messages_"+count+"_hash", message.authorHash());
 
                     if (((String)header.get(httpHeader.CONNECTION_PROP_PATH)).endsWith(".rss")) {
@@ -155,7 +155,7 @@ public class Messages_p {
 
                     	// also write out the message body (needed for the RSS feed)
                         try {
-                        	prop.put("mode_messages_"+count+"_body",new String(message.message(), "UTF-8"));
+                        	prop.putHTML("mode_messages_"+count+"_body",new String(message.message(), "UTF-8"), true);
                         } catch (UnsupportedEncodingException e) {
                             // can not happen, because UTF-8 must be supported by every JVM
                         }
@@ -166,21 +166,21 @@ public class Messages_p {
                 }
                 prop.put("mode_messages", count);
             } catch (IOException e) {
-                prop.put("mode_error", 1);//I/O error reading message table
-                prop.put("mode_error_message", e.getMessage());
+                prop.put("mode_error", "1");//I/O error reading message table
+                prop.putHTML("mode_error_message", e.getMessage());
             }
         }
 
         if (action.equals("view")) {
-            prop.put("mode", 1); //view
+            prop.put("mode", "1"); //view
             String key = post.get("object", "");
             message = switchboard.messageDB.read(key);
             if (message == null) throw new NullPointerException("Message with ID " + key + " does not exist");
 
-            prop.put("mode_from", message.author());
-            prop.put("mode_to", message.recipient());
+            prop.putHTML("mode_from", message.author(), true);
+            prop.putHTML("mode_to", message.recipient(), true);
             prop.put("mode_date", dateString(message.date()));
-            prop.put("mode_subject", message.subject());
+            prop.putHTML("mode_subject", message.subject(), true);
             String theMessage = null;
             try {
                 theMessage = new String(message.message(), "UTF-8");
@@ -189,7 +189,7 @@ public class Messages_p {
             }
             prop.putWiki("mode_message", theMessage);
             prop.put("mode_hash", message.authorHash());
-            prop.put("mode_key", key);
+            prop.putHTML("mode_key", key, true);
         }
 
         // return rewrite properties

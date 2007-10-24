@@ -185,18 +185,18 @@ public class ConfigBasic {
                 host = serverDomains.myPublicLocalIP().getHostAddress();
             }
             
-            prop.put("reconnect", 1);
+            prop.put("reconnect", "1");
             prop.put("reconnect_host", host);
             prop.put("nextStep_host", host);
             prop.put("reconnect_port", port);
-            prop.put("nextStep_port", port);            
-            prop.put("reconnect_sslSupport", theServerCore.withSSL() ? 1:0);
-            prop.put("nextStep_sslSupport", theServerCore.withSSL() ? 1:0);
+            prop.put("nextStep_port", port);
+            prop.put("reconnect_sslSupport", theServerCore.withSSL() ? "1" : "0");
+            prop.put("nextStep_sslSupport", theServerCore.withSSL() ? "1" : "0");
             
             // force reconnection in 7 seconds
             theServerCore.reconnect(7000);
         } else {
-            prop.put("reconnect", 0);
+            prop.put("reconnect", "0");
         }
         
         // check if values are proper
@@ -209,9 +209,9 @@ public class ConfigBasic {
             httpdFileHandler.initDefaultPath();
         }
         
-        prop.put("statusName", (properName) ? 1 : 0);
-        prop.put("statusPassword", (properPW) ? 1 : 0);
-        prop.put("statusPort", (properPort) ? 1 : 0);
+        prop.put("statusName", properName ? "1" : "0");
+        prop.put("statusPassword", properPW ? "1" : "0");
+        prop.put("statusPort", properPort ? "1" : "0");
         if (reconnect) {
             prop.put("nextStep", NEXTSTEP_RECONNECT);
         } else if (!properPW) {
@@ -230,33 +230,33 @@ public class ConfigBasic {
         prop.put("defaultPort", env.getConfig("port", "8080"));
         lang = env.getConfig("locale.language", "default"); // re-assign lang, may have changed
         if (lang.equals("default")) {
-            prop.put("langDeutsch", 0);
-            prop.put("langEnglish", 1);
+            prop.put("langDeutsch", "0");
+            prop.put("langEnglish", "1");
         } else if (lang.equals("de")) {
-            prop.put("langDeutsch", 1);
-            prop.put("langEnglish", 0);
+            prop.put("langDeutsch", "1");
+            prop.put("langEnglish", "0");
         } else {
-            prop.put("langDeutsch", 0);
-            prop.put("langEnglish", 0);
+            prop.put("langDeutsch", "0");
+            prop.put("langEnglish", "0");
         }
         return prop;
     }
     /*
     private boolean findUPnPRouter(int timeout) {
         
-        // determine if the upnp port forwarding class is available and load it dynamically        
+        // determine if the upnp port forwarding class is available and load it dynamically
         Object[] UpnpForwarder = this.getUpnpForwarderClasses();
         serverPortForwarding upnp = (serverPortForwarding) UpnpForwarder[0];
-        Method scanForRouter = (Method) UpnpForwarder[1];                
+        Method scanForRouter = (Method) UpnpForwarder[1];
         if ((upnp == null) || (scanForRouter == null)) return false; 
         
         // trying to find a upnp router
         try {
             Object result = scanForRouter.invoke(upnp, new Object[]{new Integer(timeout)});
             if ((result != null)&&(result instanceof Boolean)) {
-                return ((Boolean)result).booleanValue();                        
+                return ((Boolean)result).booleanValue();
             }
-        } catch (Exception e) {  // ignore this error            
+        } catch (Exception e) {  // ignore this error
         } catch (Error e)     {} // ignore this error
         return false;
     }
@@ -274,22 +274,22 @@ public class ConfigBasic {
             // trying to get the proper method for router scanning
             scanForRouter = upnp.getClass().getMethod("routerAvailable", new Class[] {int.class});
             
-        } catch (Exception e) {  // ignore this error            
-        } catch (Error e)     {} // ignore this error    
+        } catch (Exception e) {  // ignore this error
+        } catch (Error e)     {} // ignore this error
 
         return new Object[]{upnp,scanForRouter};
     }
     */
     private void reinitPortForwarding(serverObjects post, serverSwitch env) {
         if ((post != null)) {
-            try {                
+            try {
                 boolean reinitPortForwarding = false;
                 
                 if (post.containsKey("enableUpnp")) {
                     // upnp should be enabled
                     env.setConfig("portForwarding.Enabled","true");
                     env.setConfig("portForwarding.Type", "upnp");
-                    reinitPortForwarding = true;                      
+                    reinitPortForwarding = true;
                 } else {
                     String currentForwarder = env.getConfig("portForwarding.Type", "none");
                     boolean otherForwarderEnabled = serverCore.portForwardingEnabled && serverCore.portForwarding != null && !currentForwarder.equalsIgnoreCase("upnp");
@@ -301,21 +301,20 @@ public class ConfigBasic {
                         env.setConfig("portForwarding.Type", "none");
                         reinitPortForwarding = true;
                     }
-                }           
+                }
                 
                 if (reinitPortForwarding) {
                     if ((serverCore.portForwardingEnabled) && (serverCore.portForwarding != null)) {
                         // trying to shutdown the current port forwarding channel
-                        serverCore.portForwarding.disconnect();                
-                    }              
+                        serverCore.portForwarding.disconnect();
+                    }
                     
                     // trying to reinitialize the port forwarding
                     serverCore httpd = (serverCore) env.getThread("10_httpd");
-                    httpd.initPortForwarding();                      
+                    httpd.initPortForwarding();
                 }
                 
             } catch (Exception e) { /* */ }
-        }          
+        }
     }
-    
 }

@@ -91,8 +91,8 @@ public class ConfigProfile_p {
             profile.setProperty("comment", (String)post.get("comment"));
 
 
-            prop.put("name", profile.getProperty("name", ""));
-            prop.put("nickname", profile.getProperty("nickname", ""));
+            prop.putHTML("name", profile.getProperty("name", ""));
+            prop.putHTML("nickname", profile.getProperty("nickname", ""));
             prop.put("homepage", profile.getProperty("homepage", ""));
             prop.put("email", profile.getProperty("email", ""));
 
@@ -102,7 +102,7 @@ public class ConfigProfile_p {
             prop.put("msn", profile.getProperty("msn", ""));
             prop.put("skype", profile.getProperty("skype", ""));
 
-            prop.put("comment", profile.getProperty("comment", ""));
+            prop.putHTML("comment", profile.getProperty("comment", ""));
 
             // write new values
             FileOutputStream fileOut = null;
@@ -122,8 +122,8 @@ public class ConfigProfile_p {
         }
 
         else{
-            prop.put("name", profile.getProperty("name", ""));
-            prop.put("nickname", profile.getProperty("nickname", ""));
+            prop.putHTML("name", profile.getProperty("name", ""));
+            prop.putHTML("nickname", profile.getProperty("nickname", ""));
             prop.put("homepage", profile.getProperty("homepage", ""));
             prop.put("email", profile.getProperty("email", ""));
 
@@ -133,7 +133,7 @@ public class ConfigProfile_p {
             prop.put("msn", profile.getProperty("msn", ""));
             prop.put("skype", profile.getProperty("skype", ""));
 
-            prop.put("comment", profile.getProperty("comment", ""));
+            prop.putHTML("comment", profile.getProperty("comment", ""));
         }
 
         return prop;

@@ -89,15 +89,15 @@ public class ViewFile {
         plasmaSwitchboard sb = (plasmaSwitchboard)env;     
 
         if (post != null && post.containsKey("words"))
-            prop.put("error_words", (String)post.get("words"));
+            prop.putHTML("error_words", (String)post.get("words"));
         else {
-            prop.put("error", 1);
-            prop.put("viewmode", 0);    
+            prop.put("error", "1");
+            prop.put("viewmode", "0");    
             return prop;
         }
 
         String viewMode = post.get("viewMode","sentences");
-        prop.put("error_vMode-" + viewMode, 1);
+        prop.put("error_vMode-" + viewMode, "1");
         
         yacyURL url = null;
         String descr = "";
@@ -106,13 +106,13 @@ public class ViewFile {
         boolean pre = false;
         
         // getting the url hash from which the content should be loaded
-        String urlHash = post.get("urlHash","");       
+        String urlHash = post.get("urlHash","");
         if (urlHash.length() > 0) {
             // getting the urlEntry that belongs to the url hash
             indexURLEntry urlEntry = null;
             urlEntry = sb.wordIndex.loadedURL.load(urlHash, null);
             if (urlEntry == null) {
-                prop.put("error",2);
+                prop.put("error", "2");
                 prop.put("viewMode",VIEW_MODE_NO_TEXT);
                 return prop;
             }            
@@ -120,7 +120,7 @@ public class ViewFile {
                 // gettin the url that belongs to the entry
             indexURLEntry.Components comp = urlEntry.comp();
             if ((comp == null) || (comp.url() == null)) {
-                prop.put("error", 3);
+                prop.put("error", "3");
                 prop.put("viewMode", VIEW_MODE_NO_TEXT);
                 return prop;
             }
@@ -150,7 +150,7 @@ public class ViewFile {
         
         
         if (url == null) {
-            prop.put("error", 1);
+            prop.put("error", "1");
             prop.put("viewMode", VIEW_MODE_NO_TEXT);
             return prop;
         }
@@ -171,8 +171,8 @@ public class ViewFile {
                 try {
                     entry = plasmaSnippetCache.loadResourceFromWeb(url, 5000, false, true);
                 } catch (plasmaCrawlerException e) {
-                    prop.put("error", 4);
-                    prop.put("error_errorText", e.getMessage());
+                    prop.put("error", "4");
+                    prop.putHTML("error_errorText", e.getMessage());
                     prop.put("viewMode", VIEW_MODE_NO_TEXT);
                     return prop;
                 }
@@ -184,7 +184,7 @@ public class ViewFile {
                 }
 
                 if (resource == null) {
-                    prop.put("error", 4);
+                    prop.put("error", "4");
                     prop.put("error_errorText", "No resource available");
                     prop.put("viewMode", VIEW_MODE_NO_TEXT);
                     return prop;
@@ -205,14 +205,14 @@ public class ViewFile {
                 if (resInfo == null) {
                     String protocol = url.getProtocol();
                     if (!((protocol.equals("http") || protocol.equals("https")))) {
-                        prop.put("error", 6);
+                        prop.put("error", "6");
                         prop.put("viewMode", VIEW_MODE_NO_TEXT);
                         return prop;
                     }
 
                     httpHeader responseHeader = httpc.whead(url, url.getHost(), 5000, null, null, sb.remoteProxyConfig);
                     if (responseHeader == null) {
-                        prop.put("error", 4);
+                        prop.put("error", "4");
                         prop.put("error_errorText", "Unable to load resource metadata.");
                         prop.put("viewMode", VIEW_MODE_NO_TEXT);
                         return prop;
@@ -220,8 +220,8 @@ public class ViewFile {
                     try {
                         resInfo = plasmaHTCache.getResourceInfoFactory().buildResourceInfoObj(url, responseHeader);
                     } catch (Exception e) {
-                        prop.put("error", 4);
-                        prop.put("error_errorText", e.getMessage());
+                        prop.put("error", "4");
+                        prop.putHTML("error_errorText", e.getMessage());
                         prop.put("viewMode", VIEW_MODE_NO_TEXT);
                         return prop;
                     }
@@ -237,8 +237,8 @@ public class ViewFile {
                 } catch (Exception ex) {
                     /* ignore this */
                 }
-            prop.put("error", 4);
-            prop.put("error_errorText", e.getMessage());
+            prop.put("error", "4");
+            prop.putHTML("error_errorText", e.getMessage());
             prop.put("viewMode", VIEW_MODE_NO_TEXT);
             return prop;
         }
@@ -250,8 +250,8 @@ public class ViewFile {
             try {
                 content = new String(serverFileUtils.read(resource), "UTF-8");
             } catch (Exception e) {
-                prop.put("error", 4);
-                prop.put("error_errorText", e.getMessage());
+                prop.put("error", "4");
+                prop.putHTML("error_errorText", e.getMessage());
                 prop.put("viewMode", VIEW_MODE_NO_TEXT);
                 return prop;
             } finally {
@@ -265,9 +265,9 @@ public class ViewFile {
 
             content = content.replaceAll("\n", "<br />").replaceAll("\t", "&nbsp;&nbsp;&nbsp;&nbsp;");
 
-            prop.put("error", 0);
+            prop.put("error", "0");
             prop.put("viewMode", VIEW_MODE_AS_PLAIN_TEXT);
-            prop.put("viewMode_plainText", content);
+            prop.putHTML("viewMode_plainText", content);
             
         } else if (viewMode.equals("iframe")) {
             prop.put("viewMode", VIEW_MODE_AS_IFRAME);
@@ -279,14 +279,14 @@ public class ViewFile {
             try {
                 document = plasmaSnippetCache.parseDocument(url, resourceLength, resource, resInfo);
                 if (document == null) {
-                    prop.put("error", 5);
+                    prop.put("error", "5");
                     prop.put("error_errorText", "Unknown error");
                     prop.put("viewMode", VIEW_MODE_NO_TEXT);
                     return prop;
                 }
             } catch (ParserException e) {
-                prop.put("error", 5);
-                prop.put("error_errorText", e.getMessage());
+                prop.put("error", "5");
+                prop.putHTML("error_errorText", e.getMessage());
                 prop.put("viewMode", VIEW_MODE_NO_TEXT);
                 return prop;
             } finally {
@@ -307,7 +307,7 @@ public class ViewFile {
                 content = content.replaceAll("\n", "<br />").replaceAll("\t", "&nbsp;&nbsp;&nbsp;&nbsp;");
 
                 prop.put("viewMode", VIEW_MODE_AS_PARSED_TEXT);
-                prop.putASIS("viewMode_parsedText", markup(wordArray, content));
+                prop.put("viewMode_parsedText", markup(wordArray, content));
                 
             } else if (viewMode.equals("sentences")) {
                 prop.put("viewMode", VIEW_MODE_AS_PARSED_SENTENCES);
@@ -322,9 +322,9 @@ public class ViewFile {
                     while (sentences.hasNext()) {
                         sentence = ((StringBuffer) sentences.next()).toString();
                         if (sentence.trim().length() > 0) {
-                            prop.put("viewMode_sentences_" + i + "_nr", Integer.toString(i + 1));
-                            prop.putASIS("viewMode_sentences_" + i + "_text", markup(wordArray, sentence));
-                            prop.put("viewMode_sentences_" + i + "_dark", ((dark) ? 1 : 0));
+                            prop.put("viewMode_sentences_" + i + "_nr", i + 1);
+                            prop.put("viewMode_sentences_" + i + "_text", markup(wordArray, sentence));
+                            prop.put("viewMode_sentences_" + i + "_dark", dark ? "1" : "0");
                             dark = !dark;
                             i++;
                         }
@@ -346,13 +346,13 @@ public class ViewFile {
                 while (tsi.hasNext()) {
                     entry = (htmlFilterImageEntry) tsi.next();
                     prop.put("viewMode_links_" + i + "_nr", i);
-                    prop.put("viewMode_links_" + i + "_dark", ((dark) ? 1 : 0));
+                    prop.put("viewMode_links_" + i + "_dark", dark ? "1" : "0");
                     prop.put("viewMode_links_" + i + "_type", "image");
-                    prop.putASIS("viewMode_links_" + i + "_text", markup(wordArray, entry.alt()));
+                    prop.put("viewMode_links_" + i + "_text", markup(wordArray, entry.alt()));
                     prop.put("viewMode_links_" + i + "_url", entry.url().toNormalform(false, true));
-                    prop.putASIS("viewMode_links_" + i + "_link", markup(wordArray, entry.url().toNormalform(false, true)));
+                    prop.put("viewMode_links_" + i + "_link", markup(wordArray, entry.url().toNormalform(false, true)));
                     if (entry.width() > 0 && entry.height() > 0)
-                        prop.putASIS("viewMode_links_" + i + "_attr", entry.width() + "x" + entry.height() + " Pixel");
+                        prop.put("viewMode_links_" + i + "_attr", entry.width() + "x" + entry.height() + " Pixel");
                     else
                         prop.put("viewMode_links_" + i + "_attr", "unknown");
                     dark = !dark;
@@ -365,13 +365,13 @@ public class ViewFile {
             }
             if (document != null) document.close();
         }
-        prop.put("error", 0);
+        prop.put("error", "0");
         prop.put("error_url", url.toNormalform(false, true));
         prop.put("error_hash", urlHash);
-        prop.put("error_wordCount", Integer.toString(wordCount));
-        prop.put("error_desc", descr);
-        prop.put("error_size", size);
-        prop.put("error_mimeTypeAvailable", (resMime == null) ? 0 : 1);
+        prop.put("error_wordCount", wordCount);
+        prop.putHTML("error_desc", descr);
+        prop.putNum("error_size", size);
+        prop.put("error_mimeTypeAvailable", (resMime == null) ? "0" : "1");
         prop.put("error_mimeTypeAvailable_mimeType", resMime);
         return prop;
     }
@@ -408,11 +408,11 @@ public class ViewFile {
             entry = (Map.Entry) mi.next();
             prop.put("viewMode_links_" + c + "_nr", c);
             prop.put("viewMode_links_" + c + "_dark", ((dark) ? 1 : 0));
-            prop.put("viewMode_links_" + c + "_type", name);
-            prop.putASIS("viewMode_links_" + c + "_text", markup(wordArray, (String) entry.getValue()));
-            prop.putASIS("viewMode_links_" + c + "_link", markup(wordArray, (String) entry.getKey()));
+            prop.putHTML("viewMode_links_" + c + "_type", name);
+            prop.put("viewMode_links_" + c + "_text", markup(wordArray, (String) entry.getValue()));
+            prop.put("viewMode_links_" + c + "_link", markup(wordArray, (String) entry.getKey()));
             prop.put("viewMode_links_" + c + "_url", entry.getKey());
-            prop.put("viewMode_links_" + c + "_attr", "");
+            prop.putHTML("viewMode_links_" + c + "_attr", "");
             dark = !dark;
             c++;
             i++;

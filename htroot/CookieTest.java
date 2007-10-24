@@ -90,7 +90,7 @@ public class CookieTest {
         	}
         	
          prop.setOutgoingHeader(outgoingHeader);
-         prop.put("coockiesout",0);
+         prop.put("coockiesout", "0");
          //header.
          
         }
@@ -102,18 +102,15 @@ public class CookieTest {
         
         outgoingHeader.setCookie(cookieName,cookieValue);
         prop.setOutgoingHeader(outgoingHeader);
-        prop.put("cookiesin",1);
-        prop.put("cookiesin_0_name",cookieName);
-        prop.put("cookiesin_0_value",cookieValue);
+        prop.put("cookiesin", "1");
+        prop.put("cookiesin_0_name", cookieName);
+        prop.putHTML("cookiesin_0_value", cookieValue);
         //header.
         
        }
 
-        prop.put("cookiesout",1);
-        prop.put("cookiesout_0_string", header.getHeaderCookies().replaceAll(";",";<br />"));
+        prop.put("cookiesout", "1");
+        prop.putHTML("cookiesout_0_string", header.getHeaderCookies().replaceAll(";",";<br />"));
         return prop;
     }
-
-
-
 }

@@ -27,7 +27,6 @@ import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
 
-import de.anomic.data.htmlTools;
 import de.anomic.http.httpHeader;
 import de.anomic.server.serverObjects;
 import de.anomic.server.serverSwitch;
@@ -62,8 +61,8 @@ public class config_p {
         int count=0;
         while(keys.hasNext()){
             key = (String) keys.next();
-            prop.put("options_"+count+"_key", htmlTools.encodeUnicode2html(key, true));
-            prop.put("options_"+count+"_value", htmlTools.encodeUnicode2html(env.getConfig(key, "ERROR"), true));
+            prop.putHTML("options_"+count+"_key", key);
+            prop.putHTML("options_"+count+"_value", env.getConfig(key, "ERROR"));
             count++;        
         }
         prop.put("options", count);

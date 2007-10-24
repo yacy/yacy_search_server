@@ -72,7 +72,7 @@ public class autoconfig {
         }    
         
         prop.put("host", host);
-        prop.put("port", Integer.toString(port));
+        prop.put("port", port);
         
         return prop;
     }

@@ -63,16 +63,16 @@ public class WatchCrawler_p {
         // return variable that accumulates replacements
         plasmaSwitchboard switchboard = (plasmaSwitchboard) env;
         serverObjects prop = new serverObjects();
-        prop.put("forwardToCrawlStart", 0);
+        prop.put("forwardToCrawlStart", "0");
         
         if (post == null) {
             // not a crawl start, only monitoring
-            prop.put("info", 0);
+            prop.put("info", "0");
         } else {
-            prop.put("info", 0);
+            prop.put("info", "0");
             
             if ((post.containsKey("autoforward")) && (switchboard.coreCrawlJobSize() == 0)) {
-                prop.put("forwardToCrawlStart", 1);
+                prop.put("forwardToCrawlStart", "1");
             }
             
             if (post.containsKey("continue")) {
@@ -98,7 +98,7 @@ public class WatchCrawler_p {
             if (post.containsKey("crawlingstart")) {
                 // init crawl
                 if (yacyCore.seedDB == null) {
-                    prop.put("info", 3);
+                    prop.put("info", "3");
                 } else {
                     // set new properties
                     boolean fullDomain = post.get("range", "wide").equals("domain"); // special property in simple crawl start
@@ -170,9 +170,9 @@ public class WatchCrawler_p {
                         // check if pattern matches
                         if ((crawlingStart == null) /* || (!(crawlingStart.matches(newcrawlingfilter))) */) {
                             // print error message
-                            prop.put("info", 4); //crawlfilter does not match url
-                            prop.put("info_newcrawlingfilter", newcrawlingfilter);
-                            prop.put("info_crawlingStart", crawlingStart);
+                            prop.put("info", "4"); //crawlfilter does not match url
+                            prop.putHTML("info_newcrawlingfilter", newcrawlingfilter);
+                            prop.putHTML("info_crawlingStart", crawlingStart);
                         } else try {
                             
                             // check if the crawl filter works correctly
@@ -198,8 +198,8 @@ public class WatchCrawler_p {
                             
                             if (reasonString == null) {
                                 // liftoff!
-                                prop.put("info", 8);//start msg
-                                prop.put("info_crawlingURL", ((String) post.get("crawlingURL")));
+                                prop.put("info", "8");//start msg
+                                prop.putHTML("info_crawlingURL", ((String) post.get("crawlingURL")));
                                 
                                 // generate a YaCyNews if the global flag was set
                                 if (crawlOrder) {
@@ -220,33 +220,33 @@ public class WatchCrawler_p {
                                 }
                                 
                             } else {
-                                prop.put("info", 5); //Crawling failed
-                                prop.put("info_crawlingURL", ((String) post.get("crawlingURL")));
-                                prop.put("info_reasonString", reasonString);
+                                prop.put("info", "5"); //Crawling failed
+                                prop.putHTML("info_crawlingURL", ((String) post.get("crawlingURL")));
+                                prop.putHTML("info_reasonString", reasonString);
                                 
                                 plasmaCrawlZURL.Entry ee = switchboard.errorURL.newEntry(crawlingStartURL, reasonString);
                                 ee.store();
                                 switchboard.errorURL.stackPushEntry(ee);
                             }
                         } catch (PatternSyntaxException e) {
-                            prop.put("info", 4); //crawlfilter does not match url
-                            prop.put("info_newcrawlingfilter", newcrawlingfilter);
-                            prop.put("info_error", e.getMessage());                                 
+                            prop.put("info", "4"); //crawlfilter does not match url
+                            prop.putHTML("info_newcrawlingfilter", newcrawlingfilter);
+                            prop.putHTML("info_error", e.getMessage());
                         } catch (Exception e) {
                             // mist
-                            prop.put("info", 6);//Error with url
-                            prop.put("info_crawlingStart", crawlingStart);
-                            prop.put("info_error", e.getMessage());
+                            prop.put("info", "6");//Error with url
+                            prop.putHTML("info_crawlingStart", crawlingStart);
+                            prop.putHTML("info_error", e.getMessage());
                             e.printStackTrace();
-                        }                        
+                        }
                         
-                    } else if (crawlingMode.equals(CRAWLING_MODE_FILE)) {                        
+                    } else if (crawlingMode.equals(CRAWLING_MODE_FILE)) {
                         if (post.containsKey("crawlingFile")) {
                             // getting the name of the uploaded file
                             String fileName = (String) post.get("crawlingFile");  
-                            try {                     
+                            try {
                                 // check if the crawl filter works correctly
-                                Pattern.compile(newcrawlingfilter);                              
+                                Pattern.compile(newcrawlingfilter);
                                 
                                 // loading the file content
                                 File file = new File(fileName);
@@ -285,7 +285,7 @@ public class WatchCrawler_p {
                                     nexturlstring = nexturlstring.trim();
                                     
                                     // normalizing URL
-                                    nexturlstring = new yacyURL(nexturlstring, null).toNormalform(true, true);                                    
+                                    nexturlstring = new yacyURL(nexturlstring, null).toNormalform(true, true);
                                     
                                     // generating an url object
                                     yacyURL nexturlURL = null;
@@ -294,7 +294,7 @@ public class WatchCrawler_p {
                                     } catch (MalformedURLException ex) {
                                         nexturlURL = null;
                                         continue;
-                                    }                                    
+                                    }
                                     
                                     // enqueuing the url for crawling
                                     switchboard.sbStackCrawlThread.enqueue(
@@ -306,19 +306,19 @@ public class WatchCrawler_p {
                                             0, 
                                             profile,
                                             true);
-                                }                             
+                                }
                                
                             } catch (PatternSyntaxException e) {
                                 // print error message
-                                prop.put("info", 4); //crawlfilter does not match url
-                                prop.put("info_newcrawlingfilter", newcrawlingfilter);
-                                prop.put("info_error", e.getMessage());                            
+                                prop.put("info", "4"); //crawlfilter does not match url
+                                prop.putHTML("info_newcrawlingfilter", newcrawlingfilter);
+                                prop.putHTML("info_error", e.getMessage());
                             } catch (Exception e) {
                                 // mist
-                                prop.put("info", 7);//Error with file
-                                prop.put("info_crawlingStart", fileName);
-                                prop.put("info_error", e.getMessage());
-                                e.printStackTrace();                                
+                                prop.put("info", "7");//Error with file
+                                prop.putHTML("info_crawlingStart", fileName);
+                                prop.putHTML("info_error", e.getMessage());
+                                e.printStackTrace();
                             }
                             switchboard.continueCrawlJob(plasmaSwitchboard.CRAWLJOB_LOCAL_CRAWL);
                         }
@@ -338,7 +338,7 @@ public class WatchCrawler_p {
                     				indexText, indexMedia,
                     				storeHTCache, true, crawlOrder, xsstopw, xdstopw, xpstopw);
                     		
-                    		// create a new sitemap importer             
+                    		// create a new sitemap importer
                     		dbImporter importerThread = switchboard.dbImportManager.getNewImporter("sitemap");
                     		if (importerThread != null) {
                     			HashMap initParams = new HashMap();
@@ -346,14 +346,14 @@ public class WatchCrawler_p {
                     			initParams.put("crawlingProfile",pe.handle());
                     			
                     			importerThread.init(initParams);
-                    			importerThread.startIt();                            
-                    		}              
+                    			importerThread.startIt();
+                    		}
                     	} catch (Exception e) {
                     		// mist
-                    		prop.put("info", 6);//Error with url
-                    		prop.put("info_crawlingStart", sitemapURLStr);
-                    		prop.put("info_error", e.getMessage());
-                    		e.printStackTrace();                    		
+                    		prop.put("info", "6");//Error with url
+                    		prop.putHTML("info_crawlingStart", sitemapURLStr);
+                    		prop.putHTML("info_error", e.getMessage());
+                    		e.printStackTrace();
                     	}
                     }
                 }
@@ -367,9 +367,9 @@ public class WatchCrawler_p {
         // performance settings
         long LCbusySleep = Integer.parseInt(env.getConfig(plasmaSwitchboard.CRAWLJOB_LOCAL_CRAWL_BUSYSLEEP, "100"));
         int LCppm = (int) (60000L / Math.max(1,LCbusySleep));
-        prop.put("crawlingSpeedMaxChecked", (LCppm >= 1000) ? 1 : 0);
-        prop.put("crawlingSpeedCustChecked", ((LCppm > 10) && (LCppm < 1000)) ? 1 : 0);
-        prop.put("crawlingSpeedMinChecked", (LCppm <= 10) ? 1 : 0);
+        prop.put("crawlingSpeedMaxChecked", (LCppm >= 1000) ? "1" : "0");
+        prop.put("crawlingSpeedCustChecked", ((LCppm > 10) && (LCppm < 1000)) ? "1" : "0");
+        prop.put("crawlingSpeedMinChecked", (LCppm <= 10) ? "1" : "0");
         prop.put("customPPMdefault", ((LCppm > 10) && (LCppm < 1000)) ? Integer.toString(LCppm) : "");
         
         // return rewrite properties

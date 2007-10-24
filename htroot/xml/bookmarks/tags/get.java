@@ -67,7 +67,7 @@ public class get {
         bookmarksDB.Tag tag;
         while(it.hasNext()){
             tag=(bookmarksDB.Tag)it.next();
-            prop.put("tags_"+count+"_name", tag.getTagName());
+            prop.putHTML("tags_"+count+"_name", tag.getTagName());
             prop.put("tags_"+count+"_count", tag.size());
             count++;
         }
@@ -78,6 +78,3 @@ public class get {
     }
     
 }
-
-
-

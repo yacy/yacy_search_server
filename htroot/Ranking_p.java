@@ -76,20 +76,20 @@ public class Ranking_p {
     private static serverObjects defaultValues() {
         final serverObjects prop = new serverObjects();
         prop.put("search", "");
-        prop.put("num-results", 0);
-        prop.put("excluded", 0);
-        prop.put("combine", 0);
-        prop.put("resultbottomline", 0);
-        prop.put("localCount", 10);
-        prop.put("localWDist", 999);
+        prop.put("num-results", "0");
+        prop.put("excluded", "0");
+        prop.put("combine", "0");
+        prop.put("resultbottomline", "0");
+        prop.put("localCount", "10");
+        prop.put("localWDist", "999");
         //prop.put("globalChecked", "checked");
-        prop.put("globalChecked", 0);
-        prop.put("postsortChecked", 1);
-        prop.put("localTime", 6);
+        prop.put("globalChecked", "0");
+        prop.put("postsortChecked", "1");
+        prop.put("localTime", "6");
         prop.put("results", "");
-        prop.put("urlmaskoptions", 0);
-        prop.put("urlmaskoptions_urlmaskfilter", ".*");
-        prop.put("jumpToCursor", 1);
+        prop.put("urlmaskoptions", "0");
+        prop.putHTML("urlmaskoptions_urlmaskfilter", ".*");
+        prop.put("jumpToCursor", "1");
         return prop;
     }
     
@@ -113,9 +113,9 @@ public class Ranking_p {
     			prop.put("attr" + attrExtension + "_" + j + "_select_" + i + "_value", i);
     			try {
 					prop.put("attr" + attrExtension + "_" + j + "_select_" + i + "_checked",
-							(i == Integer.valueOf((String)map.get(key)).intValue()) ? 1 : 0);
+							(i == Integer.valueOf((String)map.get(key)).intValue()) ? "1" : "0");
 				} catch (NumberFormatException e) {
-					prop.put("attr" + attrExtension + "_" + j + "_select_" + i + "_checked", 0);
+					prop.put("attr" + attrExtension + "_" + j + "_select_" + i + "_checked", "0");
 				}
     		}
     		prop.put("attr" + attrExtension + "_" + j + "_value",

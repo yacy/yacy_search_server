@@ -79,13 +79,13 @@ public class LogStatistics_p {
             }
         }
         
-        prop.put("submenu", (displaySubmenu) ? 1 : 0);
+        prop.put("submenu", displaySubmenu ? "1" : "0");
         
         if (r == null) {
-            prop.put("results", 0);
+            prop.put("results", "0");
             return prop;
         }
-        prop.put("results", 1);
+        prop.put("results", "1");
         String[] t;
         float l;
         prop.put(RESULTS + LogParserPLASMA.DHT_DISTANCE_AVERAGE, r.get(LogParserPLASMA.DHT_DISTANCE_AVERAGE));
@@ -148,9 +148,9 @@ public class LogStatistics_p {
         prop.put(RESULTS + LogParserPLASMA.TOTAL_PARSER_TIME + "Unit", t[1]);
         prop.put(RESULTS + LogParserPLASMA.TOTAL_PARSER_RUNS, r.get(LogParserPLASMA.TOTAL_PARSER_RUNS));
         if ((l /= 1000) == 0) {
-            prop.put(RESULTS + "avgExists", 0);
+            prop.put(RESULTS + "avgExists", "0");
         } else {
-            prop.put(RESULTS + "avgExists", 1);
+            prop.put(RESULTS + "avgExists", "1");
             prop.put(RESULTS + "avgExists_avgParserRunsPerMinute", (int) (((Integer) r.get(LogParserPLASMA.TOTAL_PARSER_RUNS)).floatValue() / l)); 
         }
         
@@ -162,7 +162,7 @@ public class LogStatistics_p {
             prop.put(RESULTS + "useDHTRejectPeers_DHTRejectPeers_" + i + "_hash", hashes[i]);
         }
         prop.put(RESULTS + "DHTRejectPeers", i);
-        prop.put(RESULTS + "useDHTRejectPeers", (i > 0) ? 1 : 0);
+        prop.put(RESULTS + "useDHTRejectPeers", (i > 0) ? "1" : "0");
         prop.put(RESULTS + "useDHTRejectPeers_DHTRejectPeers", i);
         
         names = ((HashSet)r.get(LogParserPLASMA.DHT_SENT_PEERS_NAME)).toArray();
@@ -173,7 +173,7 @@ public class LogStatistics_p {
             prop.put(RESULTS + "useDHTPeers_DHTPeers_" + i + "_hash", hashes[i]);
         }
         prop.put(RESULTS + "DHTPeers", i);
-        prop.put(RESULTS + "useDHTPeers", (i > 0) ? 1 : 0);
+        prop.put(RESULTS + "useDHTPeers", (i > 0) ? "1" : "0");
         prop.put(RESULTS + "useDHTPeers_DHTPeers", i);
         
         return prop;

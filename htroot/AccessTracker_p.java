@@ -59,6 +59,7 @@ public class AccessTracker_p {
      
         // return variable that accumulates replacements
         serverObjects prop = new serverObjects();
+        prop.setLocalized(!((String)header.get("PATH")).endsWith(".xml"));
         int page = 0;
         if (post != null) page = post.getInt("page", 0);
         prop.put("page", page);
@@ -74,11 +75,11 @@ public class AccessTracker_p {
             while ((entCount < maxCount) && (i.hasNext())) {
                 host = (String) i.next();
                 access = switchboard.accessTrack(host);
-                prop.put("page_list_" + entCount + "_host", host);
-                prop.put("page_list_" + entCount + "_countSecond", access.tailMap(new Long(System.currentTimeMillis() - 1000)).size());
-                prop.put("page_list_" + entCount + "_countMinute", access.tailMap(new Long(System.currentTimeMillis() - 1000 * 60)).size());
-                prop.put("page_list_" + entCount + "_count10Minutes", access.tailMap(new Long(System.currentTimeMillis() - 1000 * 60 * 10)).size());
-                prop.put("page_list_" + entCount + "_countHour", access.tailMap(new Long(System.currentTimeMillis() - 1000 * 60 * 60)).size());
+                prop.putHTML("page_list_" + entCount + "_host", host);
+                prop.putNum("page_list_" + entCount + "_countSecond", access.tailMap(Long.valueOf(System.currentTimeMillis() - 1000)).size());
+                prop.putNum("page_list_" + entCount + "_countMinute", access.tailMap(Long.valueOf(System.currentTimeMillis() - 1000 * 60)).size());
+                prop.putNum("page_list_" + entCount + "_count10Minutes", access.tailMap(Long.valueOf(System.currentTimeMillis() - 1000 * 60 * 10)).size());
+                prop.putNum("page_list_" + entCount + "_countHour", access.tailMap(Long.valueOf(System.currentTimeMillis() - 1000 * 60 * 60)).size());
                 entCount++;
             }
             } catch (ConcurrentModificationException e) {} // we dont want to synchronize this
@@ -97,9 +98,9 @@ public class AccessTracker_p {
 						Iterator ii = treemapclone(access).entrySet().iterator();
 						while (ii.hasNext()) {
 							entry = (Map.Entry) ii.next();
-							prop.put("page_list_" + entCount + "_host", host);
-							prop.put("page_list_" + entCount + "_date", serverDate.shortSecondTime(new Date(((Long) entry.getKey()).longValue())));
-							prop.put("page_list_" + entCount + "_path", (String) entry.getValue());
+							prop.putHTML("page_list_" + entCount + "_host", host);
+							prop.putHTML("page_list_" + entCount + "_date", serverDate.shortSecondTime(new Date(((Long) entry.getKey()).longValue())));
+							prop.putHTML("page_list_" + entCount + "_path", (String) entry.getValue());
 							entCount++;
 						}
 					} catch (ConcurrentModificationException e) {} // we dont want to synchronize this
@@ -113,9 +114,9 @@ public class AccessTracker_p {
 						Iterator ii = treemapclone(access).entrySet().iterator();
 						while (ii.hasNext()) {
 							entry = (Map.Entry) ii.next();
-							prop.put("page_list_" + entCount + "_host", host);
+							prop.putHTML("page_list_" + entCount + "_host", host);
 							prop.put("page_list_" + entCount + "_date", serverDate.shortSecondTime(new Date(((Long) entry.getKey()).longValue())));
-							prop.put("page_list_" + entCount + "_path", (String) entry.getValue());
+							prop.putHTML("page_list_" + entCount + "_path", (String) entry.getValue());
 							entCount++;
 						}
 					}
@@ -129,40 +130,64 @@ public class AccessTracker_p {
             Long trackerHandle;
             HashMap searchProfile;
             int m = Math.min(maxCount, array.size());
+            long qcountSum = 0;
+            long qtimeSum = 0;
+            long rcountSum = 0;
+            long utimeSum = 0;
+            long stimeSum = 0;
+            long rtimeSum = 0;
+            
             for (int entCount = 0; entCount < m; entCount++) {
                 searchProfile = (HashMap) array.get(array.size() - entCount - 1);
                 trackerHandle = (Long) searchProfile.get("time");
             
                 // put values in template
-                prop.put("page_list_" + entCount + "_dark", ((dark) ? 1 : 0) ); dark =! dark;
-                prop.put("page_list_" + entCount + "_host", (String) searchProfile.get("host"));
+                prop.put("page_list_" + entCount + "_dark", ((dark) ? 1 : 0) );
+                dark =! dark;
+                prop.putHTML("page_list_" + entCount + "_host", (String) searchProfile.get("host"));
                 prop.put("page_list_" + entCount + "_date", serverDate.shortSecondTime(new Date(trackerHandle.longValue())));
-                prop.put("page_list_" + entCount + "_timestamp", Long.toString(trackerHandle.longValue()));
+                prop.put("page_list_" + entCount + "_timestamp", trackerHandle.longValue());
                 if (page == 2) {
                     // local search
-                    prop.put("page_list_" + entCount + "_offset", ((Integer) searchProfile.get("offset")).toString());
+                    prop.putNum("page_list_" + entCount + "_offset", ((Integer) searchProfile.get("offset")).longValue());
                     prop.put("page_list_" + entCount + "_querystring", searchProfile.get("querystring"));
                 } else {
                     // remote search
-                    prop.put("page_list_" + entCount + "_peername", (String) searchProfile.get("peername"));
+                    prop.putHTML("page_list_" + entCount + "_peername", (String) searchProfile.get("peername"));
                     prop.put("page_list_" + entCount + "_queryhashes", plasmaSearchQuery.anonymizedQueryHashes((Set) searchProfile.get("queryhashes")));
                 }
-                prop.put("page_list_" + entCount + "_querycount", ((Integer) searchProfile.get("querycount")).toString());
-                prop.put("page_list_" + entCount + "_querytime", ((Long) searchProfile.get("querytime")).toString());
-                prop.put("page_list_" + entCount + "_resultcount", ((Integer) searchProfile.get("resultcount")).toString());
-                prop.put("page_list_" + entCount + "_urltime", ((Long) searchProfile.get("resulturltime")).toString());
-                prop.put("page_list_" + entCount + "_snippettime", ((Long) searchProfile.get("resultsnippettime")).toString());
-                prop.put("page_list_" + entCount + "_resulttime", ((Long) searchProfile.get("resulttime")).toString());
+                prop.putNum("page_list_" + entCount + "_querycount", ((Integer) searchProfile.get("querycount")).longValue());
+                prop.putNum("page_list_" + entCount + "_querytime", ((Long) searchProfile.get("querytime")).longValue());
+                prop.putNum("page_list_" + entCount + "_resultcount", ((Integer) searchProfile.get("resultcount")).longValue());
+                prop.putNum("page_list_" + entCount + "_urltime", ((Long) searchProfile.get("resulturltime")).longValue());
+                prop.putNum("page_list_" + entCount + "_snippettime", ((Long) searchProfile.get("resultsnippettime")).longValue());
+                prop.putNum("page_list_" + entCount + "_resulttime", ((Long) searchProfile.get("resulttime")).longValue());
+                qcountSum += ((Integer) searchProfile.get("querycount")).intValue();
+                qtimeSum += ((Long) searchProfile.get("querytime")).longValue();
+                rcountSum += ((Integer) searchProfile.get("resultcount")).intValue();
+                utimeSum += ((Long) searchProfile.get("resulturltime")).longValue();
+                stimeSum += ((Long) searchProfile.get("resultsnippettime")).longValue();
+                rtimeSum += ((Long) searchProfile.get("resulttime")).longValue();
             }
             prop.put("page_list", m);
             prop.put("page_num", m);
-            prop.put("page_total", (page == 2) ? switchboard.localSearches.size() : switchboard.remoteSearches.size());
+            
+            // Put -1 instead of NaN as result for empty search list
+            if (m == 0) m = -1;
+            prop.putNum("page_querycount_avg", (double)qcountSum/m);
+            prop.putNum("page_querytime_avg", (double)qtimeSum/m);
+            prop.putNum("page_resultcount_avg", (double)rcountSum/m);
+            prop.putNum("page_urltime_avg", (double)utimeSum/m);
+            prop.putNum("page_snippettime_avg", (double)stimeSum/m);
+            prop.putNum("page_resulttime_avg", (double)rtimeSum/m);
+            prop.putNum("page_total", (page == 2) ? switchboard.localSearches.size() : switchboard.remoteSearches.size());
         }
         if ((page == 3) || (page == 5)) {
             Iterator i = (page == 3) ? switchboard.localSearchTracker.entrySet().iterator() : switchboard.remoteSearchTracker.entrySet().iterator();
             String host;
             TreeSet handles;
             int entCount = 0;
+            int qphSum = 0;
             Map.Entry entry;
             try {
             while ((entCount < maxCount) && (i.hasNext())) {
@@ -180,23 +205,25 @@ public class AccessTracker_p {
                 }
                 prop.put("page_list_" + entCount + "_dates", dateCount);
                 int qph = handles.tailSet(new Long(System.currentTimeMillis() - 1000 * 60 * 60)).size();
+                qphSum += qph;
                 prop.put("page_list_" + entCount + "_qph", qph);
                 
                 prop.put("page_list_" + entCount + "_dark", ((dark) ? 1 : 0) ); dark =! dark;
-                prop.put("page_list_" + entCount + "_host", host);
+                prop.putHTML("page_list_" + entCount + "_host", host);
                 if (page == 5) {
                     yacySeed remotepeer = yacyCore.seedDB.lookupByIP(natLib.getInetAddress(host), true, true, true);
-                    prop.put("page_list_" + entCount + "_peername", (remotepeer == null) ? "UNKNOWN" : remotepeer.getName());
+                    prop.putHTML("page_list_" + entCount + "_peername", (remotepeer == null) ? "UNKNOWN" : remotepeer.getName());
                 }
-                prop.put("page_list_" + entCount + "_count", new Integer(handles.size()).toString());
+                prop.putHTML("page_list_" + entCount + "_count", new Integer(handles.size()).toString());
 
                 // next
                 entCount++;
             }
             } catch (ConcurrentModificationException e) {} // we dont want to synchronize this
             prop.put("page_list", entCount);
-            prop.put("page_num", entCount);
-            prop.put("page_total", (page == 3) ? switchboard.localSearches.size() : switchboard.remoteSearches.size());
+            prop.putNum("page_num", entCount);
+            prop.putNum("page_total", (page == 3) ? switchboard.localSearches.size() : switchboard.remoteSearches.size());
+            prop.putNum("page_qph_sum", qphSum);
         }
         // return rewrite properties
         return prop;

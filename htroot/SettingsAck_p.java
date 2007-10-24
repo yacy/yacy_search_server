@@ -87,7 +87,7 @@ public class SettingsAck_p {
         //if (post == null) System.out.println("POST: NULL"); else System.out.println("POST: " + post.toString());
         
         if (post == null) {
-            prop.put("info", 1);//no information submitted
+            prop.put("info", "1");//no information submitted
             return prop;
         }
         
@@ -99,22 +99,22 @@ public class SettingsAck_p {
             String pw2    = (String) post.get("adminpw2");
             // do checks
             if ((user == null) || (pw1 == null) || (pw2 == null)) {
-                prop.put("info", 1);//error with submitted information
+                prop.put("info", "1");//error with submitted information
                 return prop;
             }
             if (user.length() == 0) {
-                prop.put("info", 2);//username must be given
+                prop.put("info", "2");//username must be given
                 return prop;
             }
             if (!(pw1.equals(pw2))) {
-                prop.put("info", 3);//pw check failed
+                prop.put("info", "3");//pw check failed
                 return prop;
             }
             // check passed. set account:
             env.setConfig(httpd.ADMIN_ACCOUNT_B64MD5, serverCodings.encodeMD5Hex(kelondroBase64Order.standardCoder.encodeString(user + ":" + pw1)));
             env.setConfig("adminAccount", "");
-            prop.put("info", 5);//admin account changed
-            prop.put("info_user", user);
+            prop.put("info", "5");//admin account changed
+            prop.putHTML("info_user", user);
             return prop;
         }
         
@@ -125,26 +125,26 @@ public class SettingsAck_p {
              * set new port
              */
             String port = (String) post.get("port");
-            prop.put("info_port", port);
+            prop.putHTML("info_port", port);
             if (!env.getConfig("port", port).equals(port)) {
                 // validation port
                 serverCore theServerCore = (serverCore) env.getThread("10_httpd");
                 try {
                     InetSocketAddress theNewAddress = theServerCore.generateSocketAddress(port);
                     String hostName = theNewAddress.getHostName();
-                    prop.put("info_restart",1);
-                    prop.put("info_restart_ip",(hostName.equals("0.0.0.0"))?"localhost":hostName);
-                    prop.put("info_restart_port",Integer.toString(theNewAddress.getPort()));
+                    prop.put("info_restart", "1");
+                    prop.put("info_restart_ip",(hostName.equals("0.0.0.0"))? "localhost" : hostName);
+                    prop.put("info_restart_port", theNewAddress.getPort());
                     
                     env.setConfig("port", port);
                     
                     theServerCore.reconnect();                    
                 } catch (SocketException e) {
-                    prop.put("info",26);
+                    prop.put("info", "26");
                     return prop;
                 }
             } else {
-                prop.put("info_restart",0);
+                prop.put("info_restart", "0");
             }
             
             // read and process data
@@ -158,7 +158,7 @@ public class SettingsAck_p {
 			}
             // do checks
             if ((filter == null) || (use_proxyAccounts == null)) { 
-                prop.put("info", 1);//error with submitted information
+                prop.put("info", "1");//error with submitted information
                 return prop;
             }
             /*if (user.length() == 0) {
@@ -183,11 +183,11 @@ public class SettingsAck_p {
                         Pattern.compile(patternStr);
                     }
                 } catch (PatternSyntaxException e) {
-                    prop.put("info", 27);
-                    prop.put("info_filter", filter);
-                    prop.put("info_nr", Integer.toString(patternCount));
-                    prop.put("info_error", e.getMessage());
-                    prop.put("info_pattern", patternStr);
+                    prop.put("info", "27");
+                    prop.putHTML("info_filter", filter);
+                    prop.put("info_nr", patternCount);
+                    prop.putHTML("info_error", e.getMessage());
+                    prop.putHTML("info_pattern", patternStr);
                     return prop;
                 }
             }
@@ -196,12 +196,12 @@ public class SettingsAck_p {
             env.setConfig("proxyClient", filter);
             env.setConfig("use_proxyAccounts", use_proxyAccounts);//"true" or "false"
 			if (use_proxyAccounts.equals("false")){
-                prop.put("info", 6);//proxy account has changed(no pw)
-                prop.put("info_filter", filter);
+                prop.put("info", "6");//proxy account has changed(no pw)
+                prop.putHTML("info_filter", filter);
 			} else {
-                prop.put("info", 7);//proxy account has changed
+                prop.put("info", "7");//proxy account has changed
                 //prop.put("info_user", user);
-                prop.put("info_filter", filter);
+                prop.putHTML("info_filter", filter);
 			}
             return prop;
         }
@@ -212,7 +212,7 @@ public class SettingsAck_p {
             // set transparent proxy flag
             httpdProxyHandler.isTransparentProxy = post.containsKey("isTransparentProxy");
             env.setConfig("isTransparentProxy", httpdProxyHandler.isTransparentProxy ? "true" : "false");
-            prop.put("info_isTransparentProxy", httpdProxyHandler.isTransparentProxy ? "on" : "off");            
+            prop.put("info_isTransparentProxy", httpdProxyHandler.isTransparentProxy ? "on" : "off");
             
             // setting the keep alive property
             httpd.keepAliveSupport = post.containsKey("connectionKeepAliveSupport");
@@ -227,7 +227,7 @@ public class SettingsAck_p {
             env.setConfig("proxy.sendXForwardedForHeader", post.containsKey("proxy.sendXForwardedForHeader")?"true":"false");
             prop.put("info_proxy.sendXForwardedForHeader", post.containsKey("proxy.sendXForwardedForHeader")? "on" : "off");            
             
-            prop.put("info", 20);             
+            prop.put("info", "20");
             return prop;
         }
         
@@ -257,12 +257,12 @@ public class SettingsAck_p {
                 serverThread peerPing = env.getThread("30_peerping");
                 peerPing.notifyThread();
             } catch (Exception e) {
-                prop.put("info", 23); 
-                prop.put("info_errormsg",(e.getMessage() == null) ? "unknown" : e.getMessage().replaceAll("\n","<br>"));
+                prop.put("info", "23"); 
+                prop.putHTML("info_errormsg",(e.getMessage() == null) ? "unknown" : e.getMessage().replaceAll("\n","<br>"));
                 return prop;
             }
             
-            prop.put("info", 22); 
+            prop.put("info", "22"); 
             prop.put("info_portForwarding.Enabled", post.containsKey("portForwarding.Enabled")?"on":"off");
             prop.put("info_portForwarding.Type", (String)post.get("portForwarding.Type"));
             
@@ -305,7 +305,7 @@ public class SettingsAck_p {
             // do checks
             if (filter == null) {
                 //if ((filter == null) || (user == null) || (pw1 == null) || (pw2 == null)) {
-                prop.put("info", 1);//error with submitted information
+                prop.put("info", "1");//error with submitted information
                 return prop;
             }
            /* if (user.length() == 0) {
@@ -322,18 +322,18 @@ public class SettingsAck_p {
                 int patternCount = 0;
                 String patternStr = null;
                 try {
-                    StringTokenizer st = new StringTokenizer(filter,",");                
+                    StringTokenizer st = new StringTokenizer(filter,",");
                     while (st.hasMoreTokens()) {
                         patternCount++;
                         patternStr = st.nextToken();
                         Pattern.compile(patternStr);
                     }
                 } catch (PatternSyntaxException e) {
-                    prop.put("info", 27);
-                    prop.put("info_filter", filter);
-                    prop.put("info_nr", Integer.toString(patternCount));
-                    prop.put("info_error", e.getMessage());
-                    prop.put("info_pattern", patternStr);
+                    prop.put("info", "27");
+                    prop.putHTML("info_filter", filter);
+                    prop.put("info_nr", patternCount);
+                    prop.putHTML("info_error", e.getMessage());
+                    prop.putHTML("info_pattern", patternStr);
                     return prop;
                 }
             }            
@@ -343,15 +343,15 @@ public class SettingsAck_p {
             //env.setConfig("serverAccountBase64MD5", serverCodings.encodeMD5Hex(kelondroBase64Order.standardCoder.encodeString(user + ":" + pw1)));
             env.setConfig("serverAccount", "");
             
-            prop.put("info", 8);//server access filter updated
+            prop.put("info", "8");//server access filter updated
             //prop.put("info_user", user);
-            prop.put("info_filter", filter);
+            prop.putHTML("info_filter", filter);
             return prop;
         }
 
         if (post.containsKey("pmode")) {
             env.setConfig("onlineMode", "2");
-            prop.put("info", 11);//permanent online mode
+            prop.put("info", "11");//permanent online mode
             yacyCore.setOnlineMode(2);
             yacyCore.triggerOnlineAction();
             return prop;
@@ -359,14 +359,14 @@ public class SettingsAck_p {
         
         if (post.containsKey("emode")) {
             env.setConfig("onlineMode", "1");
-            prop.put("info", 24);//event-based online mode
+            prop.put("info", "24");//event-based online mode
             yacyCore.setOnlineMode(1);
             return prop;
         }
         
         if (post.containsKey("cmode")) {
             env.setConfig("onlineMode", "0");
-            prop.put("info", 25);//cache mode
+            prop.put("info", "25");//cache mode
             yacyCore.setOnlineMode(0);
             return prop;
         }
@@ -428,7 +428,7 @@ public class SettingsAck_p {
 //            env.setConfig("remoteProxyUse", (httpdProxyHandler.remoteProxyUse) ? "true" : "false");
             
             
-            prop.put("info", 15); // The remote-proxy setting has been changed
+            prop.put("info", "15"); // The remote-proxy setting has been changed
             return prop;
         }
         
@@ -436,12 +436,12 @@ public class SettingsAck_p {
             String error;
             if ((error = ((plasmaSwitchboard)env).yc.saveSeedList(env)) == null) {
                 // trying to upload the seed-list file    
-                prop.put("info", 13);
-                prop.put("info_success",1);
+                prop.put("info", "13");
+                prop.put("info_success", "1");
             } else {
-                prop.put("info",14);
-                prop.put("info_errormsg",error.replaceAll("\n","<br>"));                
-                env.setConfig("seedUploadMethod","none");                 
+                prop.put("info", "14");
+                prop.putHTML("info_errormsg",error.replaceAll("\n","<br>"));
+                env.setConfig("seedUploadMethod","none");
             }
             return prop;
         }
@@ -467,13 +467,13 @@ public class SettingsAck_p {
                 String error;
                 if ((error = ((plasmaSwitchboard)env).yc.saveSeedList(env)) == null) {
                     // we have successfully uploaded the seed-list file
-                    prop.put("info_seedUploadMethod",newSeedUploadMethod);
-                    prop.put("info_seedURL",newSeedURLStr);
-                    prop.put("info_success",(newSeedUploadMethod.equalsIgnoreCase("none")?0:1));
-                    prop.put("info", 19);
+                    prop.put("info_seedUploadMethod", newSeedUploadMethod);
+                    prop.putHTML("info_seedURL",newSeedURLStr);
+                    prop.put("info_success", newSeedUploadMethod.equalsIgnoreCase("none") ? "0" : "1");
+                    prop.put("info", "19");
                 } else {
-                    prop.put("info",14);
-                    prop.put("info_errormsg",error.replaceAll("\n","<br>"));                
+                    prop.put("info", "14");
+                    prop.putHTML("info_errormsg", error.replaceAll("\n","<br>"));
                     env.setConfig("seedUploadMethod","none");
                 }
                 return prop;
@@ -514,21 +514,21 @@ public class SettingsAck_p {
                         if ((error = ((plasmaSwitchboard)env).yc.saveSeedList(env)) == null) {
                             
                             // we have successfully uploaded the seed file
-                            prop.put("info", 13);
-                            prop.put("info_success",1);
+                            prop.put("info", "13");
+                            prop.put("info_success", "1");
                         } else {
                             // if uploading failed we print out an error message
-                            prop.put("info", 14);
-                            prop.put("info_errormsg",error.replaceAll("\n","<br>"));
+                            prop.put("info", "14");
+                            prop.putHTML("info_errormsg",error.replaceAll("\n","<br>"));
                             env.setConfig("seedUploadMethod","none");                            
                         }                       
                     } else {
-                        prop.put("info", 13);
-                        prop.put("info_success",0);
+                        prop.put("info", "13");
+                        prop.put("info_success", "0");
                     }
                 } else {
-                    prop.put("info", 13);
-                    prop.put("info_success",0);
+                    prop.put("info", "13");
+                    prop.put("info_success", "0");
                 }
                 return prop;
             }            
@@ -542,10 +542,10 @@ public class SettingsAck_p {
             env.setConfig("msgForwardingCmd",(String) post.get("msgForwardingCmd"));
             env.setConfig("msgForwardingTo",(String) post.get("msgForwardingTo"));
             
-            prop.put("info", 21);
+            prop.put("info", "21");
             prop.put("info_msgForwardingEnabled", post.containsKey("msgForwardingEnabled") ? "on" : "off");
             prop.put("info_msgForwardingCmd", (String) post.get("msgForwardingCmd"));
-            prop.put("info_msgForwardingTo", (String) post.get("msgForwardingTo"));
+            prop.putHTML("info_msgForwardingTo", (String) post.get("msgForwardingTo"));
             
             return prop;
         }
@@ -600,7 +600,7 @@ public class SettingsAck_p {
                 env.setConfig("parseableMimeTypes." + currParserMode,currEnabledMimesTxt.toString());
             }
             prop.put("info_parser",enabledMimesCount);
-            prop.put("info", 18);
+            prop.put("info", "18");
             return prop;
 
         }
@@ -618,7 +618,7 @@ public class SettingsAck_p {
                 if (crawlerTimeout < 0) crawlerTimeout = 0;
                 env.setConfig("crawler.clientTimeout", Integer.toString(crawlerTimeout));
             } catch (NumberFormatException e) {
-                prop.put("info", 29);
+                prop.put("info", "29");
                 prop.put("info_crawler.clientTimeout",post.get("crawler.clientTimeout"));
                 return prop;
             }
@@ -632,7 +632,7 @@ public class SettingsAck_p {
                 maxHttpSize = Integer.valueOf(maxSizeStr).intValue();
                 env.setConfig("crawler.http.maxFileSize", Long.toString(maxHttpSize));
             } catch (NumberFormatException e) {
-                prop.put("info", 30);
+                prop.put("info", "30");
                 prop.put("info_crawler.http.maxFileSize",post.get("crawler.http.maxFileSize"));
                 return prop;
             }
@@ -646,22 +646,22 @@ public class SettingsAck_p {
                 maxFtpSize = Integer.valueOf(maxSizeStr).intValue();
                 env.setConfig("crawler.ftp.maxFileSize", Long.toString(maxFtpSize));
             } catch (NumberFormatException e) {
-                prop.put("info", 31);
+                prop.put("info", "31");
                 prop.put("info_crawler.ftp.maxFileSize",post.get("crawler.ftp.maxFileSize"));
                 return prop;
             }                        
             
             // everything is ok
-            prop.put("info_crawler.clientTimeout",(crawlerTimeout==0) ?"0" :serverDate.intervalToString(crawlerTimeout));
-            prop.put("info_crawler.http.maxFileSize",(maxHttpSize==-1)?"-1":serverMemory.bytesToString(maxHttpSize));
-            prop.put("info_crawler.ftp.maxFileSize", (maxFtpSize==-1) ?"-1":serverMemory.bytesToString(maxFtpSize));
-            prop.put("info", 28);
+            prop.put("info_crawler.clientTimeout",(crawlerTimeout==0) ? "0" :serverDate.intervalToString(crawlerTimeout));
+            prop.put("info_crawler.http.maxFileSize",(maxHttpSize==-1)? "-1":serverMemory.bytesToString(maxHttpSize));
+            prop.put("info_crawler.ftp.maxFileSize", (maxFtpSize==-1) ? "-1":serverMemory.bytesToString(maxFtpSize));
+            prop.put("info", "28");
             return prop;
         }
         
         
         // nothing made
-        prop.put("info", 1);//no information submitted
+        prop.put("info", "1");//no information submitted
         return prop;
     }
     
