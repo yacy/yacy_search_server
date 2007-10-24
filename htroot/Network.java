@@ -394,7 +394,7 @@ public class Network {
                                 prop.putNum(STR_TABLE_LIST + conCount + "_complete_CRWCnt", Long.parseLong(seed.get(yacySeed.CRWCNT, "0")));
                                 prop.putNum(STR_TABLE_LIST + conCount + "_complete_CRTCnt", Long.parseLong(seed.get(yacySeed.CRTCNT, "0")));
                                 prop.putNum(STR_TABLE_LIST + conCount + "_complete_seeds", Long.parseLong(seed.get(yacySeed.SCOUNT, "0")));
-                                prop.putNum(STR_TABLE_LIST + conCount + "_complete_connects", Long.parseLong(seed.get(yacySeed.CCOUNT, "0")));
+                                prop.putNum(STR_TABLE_LIST + conCount + "_complete_connects", Double.parseDouble(seed.get(yacySeed.CCOUNT, "0")));
                                 prop.putHTML(STR_TABLE_LIST + conCount + "_complete_userAgent", userAgent);
                             } else {
                                 prop.put(STR_TABLE_LIST + conCount + "_complete", 0);

@@ -160,7 +160,7 @@ public class yacySeed {
     public static final String ICOUNT    = "ICount";
     /** the number of seeds that the peer has stored */
     public static final String SCOUNT    = "SCount";
-    /** the number of clients that the peer connects (connects/hour) */
+    /** the number of clients that the peer connects (connects/hour as double) */
     public static final String CCOUNT    = "CCount";
     /** Citation Rank (Own) - Count */
     public static final String CRWCNT    = "CRWCnt";
