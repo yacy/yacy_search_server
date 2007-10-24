@@ -76,10 +76,10 @@ public class AccessTracker_p {
                 host = (String) i.next();
                 access = switchboard.accessTrack(host);
                 prop.putHTML("page_list_" + entCount + "_host", host);
-                prop.putNum("page_list_" + entCount + "_countSecond", access.tailMap(Long.valueOf(System.currentTimeMillis() - 1000)).size());
-                prop.putNum("page_list_" + entCount + "_countMinute", access.tailMap(Long.valueOf(System.currentTimeMillis() - 1000 * 60)).size());
-                prop.putNum("page_list_" + entCount + "_count10Minutes", access.tailMap(Long.valueOf(System.currentTimeMillis() - 1000 * 60 * 10)).size());
-                prop.putNum("page_list_" + entCount + "_countHour", access.tailMap(Long.valueOf(System.currentTimeMillis() - 1000 * 60 * 60)).size());
+                prop.putNum("page_list_" + entCount + "_countSecond", access.tailMap(new Long(System.currentTimeMillis() - 1000)).size());
+                prop.putNum("page_list_" + entCount + "_countMinute", access.tailMap(new Long(System.currentTimeMillis() - 1000 * 60)).size());
+                prop.putNum("page_list_" + entCount + "_count10Minutes", access.tailMap(new Long(System.currentTimeMillis() - 1000 * 60 * 10)).size());
+                prop.putNum("page_list_" + entCount + "_countHour", access.tailMap(new Long(System.currentTimeMillis() - 1000 * 60 * 60)).size());
                 entCount++;
             }
             } catch (ConcurrentModificationException e) {} // we dont want to synchronize this
