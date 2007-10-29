@@ -65,11 +65,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Properties;
 import java.util.Set;
-
-import org.apache.commons.pool.KeyedPoolableObjectFactory;
-import org.apache.commons.pool.impl.GenericKeyedObjectPool;
-import org.apache.commons.pool.impl.GenericObjectPool;
-
 import de.anomic.htmlFilter.htmlFilterContentScraper;
 import de.anomic.htmlFilter.htmlFilterImageEntry;
 import de.anomic.htmlFilter.htmlFilterInputStream;
@@ -125,13 +120,6 @@ public final class plasmaParser {
             if (bufferedIn != null) try{bufferedIn.close();}catch(Exception e){}
         }    
     }
-    
-    /**
-     * A pool of parsers.
-     * @see plasmaParserPool
-     * @see plasmaParserFactory
-     */
-    static plasmaParserPool theParserPool;
 
     /**
      * A list of media extensions that should <b>not</b> be handled by the plasmaParser
@@ -188,25 +176,6 @@ public final class plasmaParser {
         initAudioExt(extString2extList(audio));  // audio formats
         initVideoExt(extString2extList(video));  // video formats
         initAppsExt(extString2extList(apps));    // application formats
-                
-        
-        /* ===================================================
-         * initializing the parser object pool
-         * =================================================== */
-        GenericKeyedObjectPool.Config config = new GenericKeyedObjectPool.Config();
-        
-        // The maximum number of active connections that can be allocated from pool at the same time,
-        // 0 for no limit
-        config.maxActive = 0;
-        
-        // The maximum number of idle connections connections in the pool
-        // 0 = no limit.        
-        config.maxIdle = 5;    
-        
-        config.whenExhaustedAction = GenericObjectPool.WHEN_EXHAUSTED_BLOCK; 
-        config.minEvictableIdleTimeMillis = 30000; 
-        
-        plasmaParser.theParserPool = new plasmaParserPool(new plasmaParserFactory(),config);    
         
         /* ===================================================
          * loading a list of available parsers
@@ -559,11 +528,6 @@ public final class plasmaParser {
                 currentConfig.enabledParserList.clear();
             }
         }
-        
-        // closing the parser object pool
-        try {
-            theParserPool.close();
-        } catch (Exception e) {/* ignore this */}
     }    
     
     public plasmaParserDocument parseSource(yacyURL location, String mimeType, String charset, byte[] sourceArray) 
@@ -714,7 +678,7 @@ public final class plasmaParser {
             
         } finally {
             if (theParser != null) {
-                try { plasmaParser.theParserPool.returnObject(mimeType, theParser); } catch (Exception e) { /* ignore this */}
+                theParser = null; // delete object
             }
         }        
     }
@@ -801,7 +765,7 @@ public final class plasmaParser {
 			}
             
             // fetching a new parser object from pool  
-			Parser theParser = (Parser) theParserPool.borrowObject(parserClassName);
+			Parser theParser = makeParser(parserClassName);
             
             // checking if the created parser really supports the given mimetype 
             Hashtable supportedMimeTypes = theParser.getSupportedMimeTypes();
@@ -809,7 +773,6 @@ public final class plasmaParser {
                 parserInfo.incUsageCounter();
 				return theParser;
             }
-            theParserPool.returnObject(parserClassName,theParser);
             
         } catch (Exception e) {
             System.err.println("ERROR: Unable to load the correct parser for type " + mimeType);
@@ -1070,94 +1033,25 @@ public final class plasmaParser {
         
         return false;
     }    
-    
-}
 
-final class plasmaParserFactory implements KeyedPoolableObjectFactory {
-    
-    public plasmaParserFactory() {
-        super();  
-    }
-    
-    /**
-     * @see org.apache.commons.pool.PoolableObjectFactory#makeObject()
-     */
-    public Object makeObject(Object key) throws Exception {
+    public static Parser makeParser(Object name) throws Exception {
         
-        if (!(key instanceof String))
+        if (!(name instanceof String))
             throw new IllegalArgumentException("The object key must be of type string.");
         
         // loading class by name
-        Class moduleClass = Class.forName((String)key);
+        Class moduleClass = Class.forName((String)name);
         
         // instantiating class
         Parser theParser = (Parser) moduleClass.newInstance();
         
         // setting logger that should by used
-        String parserShortName = ((String)key).substring("de.anomic.plasma.parser.".length(),((String)key).lastIndexOf("."));
+        String parserShortName = ((String)name).substring("de.anomic.plasma.parser.".length(),((String)name).lastIndexOf("."));
         
         serverLog theLogger = new serverLog("PARSER." + parserShortName.toUpperCase());
         theParser.setLogger(theLogger);
         
         return theParser;
     }          
-    
-     /**
-     * @see org.apache.commons.pool.PoolableObjectFactory#destroyObject(java.lang.Object)
-     */
-    public void destroyObject(Object key, Object obj) {
-    	/*
-        if (obj instanceof Parser) {
-            Parser theParser = (Parser) obj;
-        }
-    */
-    }
-    
-    /**
-     * @see org.apache.commons.pool.PoolableObjectFactory#validateObject(java.lang.Object)
-     */
-    public boolean validateObject(Object key, Object obj) {
-        if (obj instanceof Parser) {
-            //Parser theParser = (Parser) obj;
-            return true;
-        }
-        return true;
-    }
-    
-    /**
-     * @param obj 
-     * 
-     */
-    public void activateObject(Object key, Object obj)  {
-        //log.debug(" activateObject...");
-    }
-
-    /**
-     * @param obj 
-     * 
-     */
-    public void passivateObject(Object key, Object obj) { 
-        //log.debug(" passivateObject..." + obj);
-        if (obj instanceof Parser)  {
-            Parser theParser = (Parser) obj;
-            theParser.reset();
-        }
-    }
-    
-}    
-
-final class plasmaParserPool extends GenericKeyedObjectPool {
-
-    public plasmaParserPool(plasmaParserFactory objFactory, GenericKeyedObjectPool.Config config) {
-        super(objFactory, config);
-    }
-    
-
-    public Object borrowObject(Object key) throws Exception  {
-       return super.borrowObject(key);
-    }
-
-    public void returnObject(Object key, Object borrowed) throws Exception  {
-        super.returnObject(key,borrowed);
-    }        
-}   
+   
+}

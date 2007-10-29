@@ -829,11 +829,12 @@ public class plasmaSnippetCache {
                 
                 // try to download the resource using a crawler
                 plasmaHTCache.Entry entry = plasmaSwitchboard.getSwitchboard().crawlQueues.loadResourceFromWeb(url, (socketTimeout < 0) ? -1 : socketTimeout, true, forText);
+                if (entry == null) return null; // not found in web
                 
                 // read resource body (if it is there)
                 byte[] resourceArray = entry.cacheArray();
             
-                // in case that the reosurce was not in ram, read it from disk
+                // in case that the resource was not in ram, read it from disk
                 if (resourceArray == null) {
                     resource = plasmaHTCache.getResourceContentStream(url);   
                     contentLength = plasmaHTCache.getResourceContentLength(url); 

@@ -163,7 +163,7 @@ public class plasmaParserConfig {
                     Parser theParser = null;
                     try {
                         // getting the parser
-                        theParser = (Parser) plasmaParser.theParserPool.borrowObject(((ParserInfo)plasmaParser.availableParserList.get(mimeType)).parserClassName);
+                        theParser = plasmaParser.makeParser(((ParserInfo)plasmaParser.availableParserList.get(mimeType)).parserClassName);
                         
                         // getting a list of mimeTypes that the parser supports
                         Hashtable parserSupportsMimeTypes = theParser.getSupportedMimeTypes();
@@ -182,7 +182,7 @@ public class plasmaParserConfig {
                         serverLog.logSevere("PARSER", "error in setEnabledParserList", e);
                     } finally {
                         if (theParser != null)
-                            try { plasmaParser.theParserPool.returnObject(mimeType,theParser); } catch (Exception e) {}
+                            theParser = null; // destroy object
                     }
                 }
             }
