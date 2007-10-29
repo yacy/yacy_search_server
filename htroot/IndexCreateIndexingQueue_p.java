@@ -77,7 +77,7 @@ public class IndexCreateIndexingQueue_p {
             }    
             
             if (post.containsKey("clearRejected")) {
-                switchboard.errorURL.clearStack();
+                switchboard.crawlQueues.errorURL.clearStack();
             } 
             if (post.containsKey("moreRejected")) {
                 showRejectedCount = Integer.parseInt(post.get("showRejected", "10"));
@@ -88,7 +88,7 @@ public class IndexCreateIndexingQueue_p {
                         plasmaSwitchboardQueue.Entry entry = null;
                         while ((entry = switchboard.sbQueue.pop()) != null) {
                             if ((entry != null) && (entry.profile() != null) && (!(entry.profile().storeHTCache()))) {
-                                plasmaHTCache.deleteFile(entry.url());
+                                plasmaHTCache.deleteURLfromCache(entry.url());
                             }                            
                         }
                         switchboard.sbQueue.clear(); // reset file to clean up content completely
@@ -161,11 +161,11 @@ public class IndexCreateIndexingQueue_p {
         }
         
         // failure cases
-        if (switchboard.errorURL.stackSize() != 0) {
-            if (showRejectedCount > switchboard.errorURL.stackSize()) showRejectedCount = switchboard.errorURL.stackSize();
+        if (switchboard.crawlQueues.errorURL.stackSize() != 0) {
+            if (showRejectedCount > switchboard.crawlQueues.errorURL.stackSize()) showRejectedCount = switchboard.crawlQueues.errorURL.stackSize();
             prop.put("rejected", "1");
-            prop.putNum("rejected_num", switchboard.errorURL.stackSize());
-            if (showRejectedCount != switchboard.errorURL.stackSize()) {
+            prop.putNum("rejected_num", switchboard.crawlQueues.errorURL.stackSize());
+            if (showRejectedCount != switchboard.crawlQueues.errorURL.stackSize()) {
                 prop.put("rejected_only-latest", "1");
                 prop.putNum("rejected_only-latest_num", showRejectedCount);
                 prop.putNum("rejected_only-latest_newnum", ((int) (showRejectedCount * 1.5)));
@@ -178,9 +178,9 @@ public class IndexCreateIndexingQueue_p {
             plasmaCrawlZURL.Entry entry;
             yacySeed initiatorSeed, executorSeed;
             int j=0;
-            for (int i = switchboard.errorURL.stackSize() - 1; i >= (switchboard.errorURL.stackSize() - showRejectedCount); i--) {
+            for (int i = switchboard.crawlQueues.errorURL.stackSize() - 1; i >= (switchboard.crawlQueues.errorURL.stackSize() - showRejectedCount); i--) {
                 try {
-                    entry = switchboard.errorURL.stackPopEntry(i);
+                    entry = switchboard.crawlQueues.errorURL.top(i);
                     url = entry.url();
                     if (url == null) continue;
                     

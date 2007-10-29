@@ -28,7 +28,6 @@ package de.anomic.yacy;
 // and to prevent that java.net.URL usage causes DNS queries which are used in java.net.
 
 import java.io.File;
-import java.net.InetAddress;
 import java.net.MalformedURLException;
 import java.util.HashMap;
 import java.util.Iterator;
@@ -900,6 +899,23 @@ public class yacyURL {
         return this.toString().compareTo(((yacyURL) h).toString());
     }
     
+
+    public boolean isPOST() {
+        return (path.indexOf("?") >= 0 ||
+                path.indexOf("&") >= 0);
+    }
+
+    public boolean isCGI() {
+        String ls = path.toLowerCase();
+        return ((ls.indexOf(".cgi") >= 0) ||
+                (ls.indexOf(".exe") >= 0) ||
+                (ls.indexOf(";jsessionid=") >= 0) ||
+                (ls.indexOf("sessionid/") >= 0) ||
+                (ls.indexOf("phpsessid=") >= 0) ||
+                (ls.indexOf("search.php?sid=") >= 0) ||
+                (ls.indexOf("memberlist.php?sid=") >= 0));
+    }
+    
     // static methods from plasmaURL
 
     public static final int flagTypeID(String hash) {
@@ -1053,9 +1069,7 @@ public class yacyURL {
 
     // checks for local/global IP range and local IP
     public boolean isLocal() {
-        InetAddress hostAddress = serverDomains.dnsResolve(this.host); // TODO: use a check with the hash first
-        if (hostAddress == null) /* we are offline */ return false; // it is rare to be offline in intranets
-        return hostAddress.isSiteLocalAddress() || hostAddress.isLoopbackAddress();
+        return serverDomains.isLocal(this.host);
     }
     
     // language calculation

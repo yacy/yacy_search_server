@@ -558,7 +558,7 @@ public final class httpdProxyHandler {
             if ((cacheFile.isFile()) && (cachedResponseHeader != null)) {
                 // delete the cache
                 sizeBeforeDelete = cacheFile.length();
-                plasmaHTCache.deleteFile(url);
+                plasmaHTCache.deleteURLfromCache(url);
                 conProp.setProperty(httpHeader.CONNECTION_PROP_PROXY_RESPOND_CODE,"TCP_REFRESH_MISS");
             }            
 

@@ -334,7 +334,7 @@ public class Status {
         prop.putNum("indexingQueueMax", indexingMaxCount);
         prop.put("indexingQueuePercent",(indexingPercent>100) ? 100 : indexingPercent);
         
-        int loaderJobCount = sb.cacheLoader.size();
+        int loaderJobCount = sb.crawlQueues.size();
         int loaderMaxCount = plasmaSwitchboard.crawlSlots;
         int loaderPercent = (loaderMaxCount==0)?0:loaderJobCount*100/loaderMaxCount;
         prop.putNum("loaderQueueSize", loaderJobCount);
@@ -350,7 +350,7 @@ public class Status {
         prop.putNum("globalCrawlTriggerQueueSize", sb.getThread(plasmaSwitchboard.CRAWLJOB_GLOBAL_CRAWL_TRIGGER).getJobCount());
         prop.put("globalCrawlTriggerPaused",sb.crawlJobIsPaused(plasmaSwitchboard.CRAWLJOB_GLOBAL_CRAWL_TRIGGER) ? "1" : "0");
         
-        prop.putNum("stackCrawlQueueSize", sb.sbStackCrawlThread.size());
+        prop.putNum("stackCrawlQueueSize", sb.crawlStacker.size());
 
         // return rewrite properties
         prop.put("date",(new Date()).toString());

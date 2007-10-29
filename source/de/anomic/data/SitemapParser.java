@@ -274,12 +274,12 @@ public class SitemapParser extends DefaultHandler {
 			if (this.nextURL == null) return;
 			
 			// get the url hash
-			String nexturlhash;
+			String nexturlhash = null;
+            yacyURL url = null;
             try {
-                nexturlhash = (new yacyURL(this.nextURL, null)).hash();
-            } catch (MalformedURLException e1) {
-                nexturlhash = null;
-            }
+                url = new yacyURL(this.nextURL, null);
+                nexturlhash = url.hash();
+            } catch (MalformedURLException e1) {}
 			
 			// check if the url is known and needs to be recrawled
 			if (this.lastMod != null) {
@@ -299,8 +299,8 @@ public class SitemapParser extends DefaultHandler {
 			// URL needs to crawled
 			String error = null;
 			try {
-				error = this.switchboard.sbStackCrawlThread.stackCrawl(
-						this.nextURL,
+				error = this.switchboard.crawlStacker.stackCrawl(
+						url,
 						null, // this.siteMapURL.toString(),
 						yacyCore.seedDB.mySeed().hash,
 						this.nextURL, 
@@ -317,9 +317,9 @@ public class SitemapParser extends DefaultHandler {
 					this.logger.logInfo("The URL '" + this.nextURL + "' can not be crawled. Reason: " + error);
 					
 					// insert URL into the error DB
-					plasmaCrawlZURL.Entry ee = this.switchboard.errorURL.newEntry(new yacyURL(this.nextURL, null), error);
+					plasmaCrawlZURL.Entry ee = this.switchboard.crawlQueues.errorURL.newEntry(new yacyURL(this.nextURL, null), error);
                     ee.store();
-                    this.switchboard.errorURL.stackPushEntry(ee);					
+                    this.switchboard.crawlQueues.errorURL.push(ee);					
 				} catch (MalformedURLException e) {/* ignore this */ }
 			} else {
 				this.logger.logInfo("New URL '" + this.nextURL + "' added for crawling.");

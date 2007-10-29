@@ -47,7 +47,6 @@ import java.io.File;
 import java.util.Iterator;
 import java.util.Map;
 
-import org.apache.commons.pool.impl.GenericKeyedObjectPool;
 import org.apache.commons.pool.impl.GenericObjectPool;
 
 import de.anomic.http.httpHeader;
@@ -203,22 +202,13 @@ public class PerformanceQueues_p {
              * configuring the crawler pool 
              */
             // getting the current crawler pool configuration
-            GenericKeyedObjectPool.Config crawlerPoolConfig = switchboard.cacheLoader.getPoolConfig();
             int maxActive = Integer.parseInt(post.get("Crawler Pool_maxActive","8"));
-            int maxIdle = Integer.parseInt(post.get("Crawler Pool_maxIdle","4"));
-            int minIdle = 0; // Integer.parseInt(post.get("Crawler Pool_minIdle","0"));
-            
-            //crawlerPoolConfig.minIdle = (minIdle > maxIdle) ? maxIdle/2 : minIdle;
-            crawlerPoolConfig.maxIdle = (maxIdle > maxActive) ? maxActive/2 : maxIdle;
-            crawlerPoolConfig.maxActive = maxActive;    
             
             // accept new crawler pool settings
             plasmaSwitchboard.crawlSlots = maxActive;
-            switchboard.cacheLoader.setPoolConfig(crawlerPoolConfig);
             
             // storing the new values into configfile
             switchboard.setConfig("crawler.MaxActiveThreads",maxActive);
-            switchboard.setConfig("crawler.MaxIdleThreads",maxIdle);
             //switchboard.setConfig("crawler.MinIdleThreads",minIdle);
             
             /* 
@@ -231,6 +221,8 @@ public class PerformanceQueues_p {
             } catch (NumberFormatException e) {
                 maxActive = 8;
             }
+            int maxIdle = 0;
+            int minIdle = 0;
             try {
                 maxIdle = Integer.parseInt(post.get("httpd Session Pool_maxIdle","4"));
             } catch (NumberFormatException e) {
@@ -253,36 +245,6 @@ public class PerformanceQueues_p {
             switchboard.setConfig("httpdMaxIdleSessions",maxIdle);
             switchboard.setConfig("httpdMinIdleSessions",minIdle);
 
-            /*
-             * Configuring the crawlStacker pool
-             */
-            GenericObjectPool.Config stackerPoolConfig = switchboard.sbStackCrawlThread.getPoolConfig();
-            try {
-                maxActive = Integer.parseInt(post.get("CrawlStacker Session Pool_maxActive","10"));
-            } catch (NumberFormatException e) {
-                maxActive = 10;
-            }
-            try {
-                maxIdle = Integer.parseInt(post.get("CrawlStacker Session Pool_maxIdle","10"));
-            } catch (NumberFormatException e) {
-                maxIdle = 10;
-            }
-            try {
-                minIdle = Integer.parseInt(post.get("CrawlStacker Session Pool_minIdle","5"));
-            } catch (NumberFormatException e) {
-                minIdle = 5;
-            }
-
-            stackerPoolConfig.minIdle = (minIdle > maxIdle) ? maxIdle/2 : minIdle;
-            stackerPoolConfig.maxIdle = (maxIdle > maxActive) ? maxActive/2 : maxIdle;
-            stackerPoolConfig.maxActive = maxActive;   
-            
-            switchboard.sbStackCrawlThread.setPoolConfig(stackerPoolConfig);     
-            
-            // storing the new values into configfile
-            switchboard.setConfig("stacker.MaxActiveThreads",maxActive);
-            switchboard.setConfig("stacker.MaxIdleThreads",maxIdle);
-            switchboard.setConfig("stacker.MinIdleThreads",minIdle);
         }        
         
         if ((post != null) && (post.containsKey("PrioritySubmit"))) {
@@ -314,14 +276,13 @@ public class PerformanceQueues_p {
         prop.putNum("onlineCautionDelayCurrent", System.currentTimeMillis() - switchboard.proxyLastAccess);
         
         // table thread pool settings
-        GenericKeyedObjectPool.Config crawlerPoolConfig = switchboard.cacheLoader.getPoolConfig();
-        prop.put("pool_0_name", "Crawler Pool");
-        prop.put("pool_0_maxActive", crawlerPoolConfig.maxActive);
-        prop.put("pool_0_maxIdle", crawlerPoolConfig.maxIdle);
-        prop.put("pool_0_minIdleConfigurable", "0");
-        prop.put("pool_0_minIdle", "0");        
-        prop.put("pool_0_numActive", switchboard.cacheLoader.getNumActiveWorker());
-        prop.put("pool_0_numIdle", switchboard.cacheLoader.getNumIdleWorker());
+        prop.put("pool_0_name","Crawler Pool");
+        prop.put("pool_0_maxActive", switchboard.getConfigLong("crawler.MaxActiveThreads", 0));
+        prop.put("pool_0_maxIdle", 0);
+        prop.put("pool_0_minIdleConfigurable",0);
+        prop.put("pool_0_minIdle", 0);
+        prop.put("pool_0_numActive",switchboard.crawlQueues.size());
+        prop.put("pool_0_numIdle", 0);
         
         serverThread httpd = switchboard.getThread("10_httpd");
         GenericObjectPool.Config httpdPoolConfig = ((serverCore)httpd).getPoolConfig();
@@ -333,15 +294,7 @@ public class PerformanceQueues_p {
         prop.put("pool_1_numActive", ((serverCore)httpd).getActiveSessionCount());
         prop.put("pool_1_numIdle", ((serverCore)httpd).getIdleSessionCount());
         
-        GenericObjectPool.Config stackerPoolConfig = switchboard.sbStackCrawlThread.getPoolConfig();
-        prop.putHTML("pool_2_name", "CrawlStacker Session Pool");
-        prop.put("pool_2_maxActive", stackerPoolConfig.maxActive);
-        prop.put("pool_2_maxIdle", stackerPoolConfig.maxIdle);
-        prop.put("pool_2_minIdleConfigurable", "1");
-        prop.put("pool_2_minIdle", stackerPoolConfig.minIdle);  
-        prop.put("pool_2_numActive", switchboard.sbStackCrawlThread.getNumActiveWorker());
-        prop.put("pool_2_numIdle", switchboard.sbStackCrawlThread.getNumIdleWorker());
-        prop.put("pool", "3");
+        prop.put("pool", "2");
         
         long curr_prio = switchboard.getConfigLong("javastart_priority",0);
         prop.put("priority_normal",(curr_prio==0) ? "1" : "0");

@@ -140,8 +140,8 @@ public class QuickCrawlLink_p {
                     
             String urlhash = crawlingStartURL.hash();
             switchboard.wordIndex.loadedURL.remove(urlhash);
-            switchboard.noticeURL.removeByURLHash(urlhash);
-            switchboard.errorURL.remove(urlhash);
+            switchboard.crawlQueues.noticeURL.removeByURLHash(urlhash);
+            switchboard.crawlQueues.errorURL.remove(urlhash);
             
             // create crawling profile
             plasmaCrawlProfile.entry pe = null;
@@ -177,8 +177,8 @@ public class QuickCrawlLink_p {
             // stack URL
             String reasonString = null;
             try {
-                reasonString = switchboard.sbStackCrawlThread.stackCrawl(
-                        crawlingStart, 
+                reasonString = switchboard.crawlStacker.stackCrawl(
+                        crawlingStartURL, 
                         null, 
                         yacyCore.seedDB.mySeed().hash, 
                         (title==null)?"CRAWLING-ROOT":title, 

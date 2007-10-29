@@ -129,7 +129,7 @@ public final class crawlOrder {
             delay = "3600"; // may request one hour later again
         } else try {
             yacySeed requester = yacyCore.seedDB.getConnected(iam);
-            int queuesize = switchboard.coreCrawlJobSize() + switchboard.limitCrawlTriggerJobSize() + switchboard.remoteTriggeredCrawlJobSize() + switchboard.queueSize();
+            int queuesize = switchboard.crawlQueues.coreCrawlJobSize() + switchboard.crawlQueues.limitCrawlTriggerJobSize() + switchboard.crawlQueues.remoteTriggeredCrawlJobSize() + switchboard.queueSize();
             if (requester == null) {
                 response = "denied";
                 reason = "unknown-client";
@@ -180,7 +180,8 @@ public final class crawlOrder {
                     // old method: only one url
 
                     // normalizing URL
-                    String newURL = new yacyURL((String) urlv.get(0), null).toNormalform(true, true);
+                    yacyURL url = new yacyURL((String) urlv.get(0), null);
+                    String newURL = url.toNormalform(true, true);
                     if (!newURL.equals(urlv.get(0))) {
                         env.getLog().logWarning("crawlOrder: Received not normalized URL " + urlv.get(0));    
                     }
@@ -197,7 +198,7 @@ public final class crawlOrder {
                     // adding URL to noticeURL Queue
                     env.getLog().logFinest("crawlOrder: a: url='" + newURL + "'");
                     
-                    stackresult = stack(switchboard, newURL, refURL, iam, youare);
+                    stackresult = stack(switchboard, url, refURL, iam, youare);
                     response = (String) stackresult[0];
                     reason = (String) stackresult[1];
                     lurl = (String) stackresult[2];
@@ -209,12 +210,13 @@ public final class crawlOrder {
                     //int rejectedCount = 0;
                     for (int i = 0; i < count; i++) {
                         env.getLog().logFinest("crawlOrder: b: url='" + (String) urlv.get(i) + "'");
-                        
-                        stackresult = stack(switchboard, (String) urlv.get(i), (String) refv.get(i), iam, youare);
-                        response = (String) stackresult[0];
-                        prop.put("list_" + i + "_job", (String) stackresult[0] + "," + (String) stackresult[1]);
-                        prop.put("list_" + i + "_lurl", (String) stackresult[2]);
-                        prop.put("list_" + i + "_count", i);
+                        try {
+                        stackresult = stack(switchboard, new yacyURL((String) urlv.get(i), null), (String) refv.get(i), iam, youare);
+                            response = (String) stackresult[0];
+                            prop.put("list_" + i + "_job", (String) stackresult[0] + "," + (String) stackresult[1]);
+                            prop.put("list_" + i + "_lurl", (String) stackresult[2]);
+                            prop.put("list_" + i + "_count", i);
+                        } catch (MalformedURLException e) {}
                     }
                     prop.put("list", count);
                     response = "enqueued";
@@ -242,13 +244,13 @@ public final class crawlOrder {
         return prop;
     }
 
-    private static Object[] stack(plasmaSwitchboard switchboard, String url, String referrer, String iam, String youare) {
+    private static Object[] stack(plasmaSwitchboard switchboard, yacyURL url, String referrer, String iam, String youare) {
         String response, reason, lurl;
         // stack url
         switchboard.getLog().logFinest("crawlOrder: stack: url='" + url + "'");
         String reasonString = null;
         try {
-            reasonString = switchboard.sbStackCrawlThread.stackCrawl(url, referrer, iam, "REMOTE-CRAWLING", new Date(), 0, switchboard.defaultRemoteProfile);
+            reasonString = switchboard.crawlStacker.stackCrawl(url, referrer, iam, "REMOTE-CRAWLING", new Date(), 0, switchboard.defaultRemoteProfile);
         } catch (InterruptedException e) {
             reasonString = "Shutdown in progress";
         }
@@ -262,11 +264,7 @@ public final class crawlOrder {
             reason = reasonString;
             // send lurl-Entry as response
             indexURLEntry entry;
-            try {
-                entry = switchboard.wordIndex.loadedURL.load((new yacyURL(url, null)).hash(), null);
-            } catch (MalformedURLException e) {
-                entry = null;
-            }
+            entry = switchboard.wordIndex.loadedURL.load(url.hash(), null);
             if (entry == null) {
                 response = "rejected";
                 lurl = "";

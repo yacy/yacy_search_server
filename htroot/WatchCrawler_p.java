@@ -71,7 +71,7 @@ public class WatchCrawler_p {
         } else {
             prop.put("info", "0");
             
-            if ((post.containsKey("autoforward")) && (switchboard.coreCrawlJobSize() == 0)) {
+            if ((post.containsKey("autoforward")) && (switchboard.crawlQueues.coreCrawlJobSize() == 0)) {
                 prop.put("forwardToCrawlStart", "1");
             }
             
@@ -180,10 +180,11 @@ public class WatchCrawler_p {
                             
                             // stack request
                             // first delete old entry, if exists
-                            String urlhash = (new yacyURL(crawlingStart, null)).hash();
+                            yacyURL url = new yacyURL(crawlingStart, null);
+                            String urlhash = url.hash();
                             switchboard.wordIndex.loadedURL.remove(urlhash);
-                            switchboard.noticeURL.removeByURLHash(urlhash);
-                            switchboard.errorURL.remove(urlhash);
+                            switchboard.crawlQueues.noticeURL.removeByURLHash(urlhash);
+                            switchboard.crawlQueues.errorURL.remove(urlhash);
                             
                             // stack url
                             switchboard.profilesPassiveCrawls.removeEntry(crawlingStartURL.hash()); // if there is an old entry, delete it
@@ -194,7 +195,7 @@ public class WatchCrawler_p {
                                     crawlingQ,
                                     indexText, indexMedia,
                                     storeHTCache, true, crawlOrder, xsstopw, xdstopw, xpstopw);
-                            String reasonString = switchboard.sbStackCrawlThread.stackCrawl(crawlingStart, null, yacyCore.seedDB.mySeed().hash, "CRAWLING-ROOT", new Date(), 0, pe);
+                            String reasonString = switchboard.crawlStacker.stackCrawl(url, null, yacyCore.seedDB.mySeed().hash, "CRAWLING-ROOT", new Date(), 0, pe);
                             
                             if (reasonString == null) {
                                 // liftoff!
@@ -224,9 +225,9 @@ public class WatchCrawler_p {
                                 prop.putHTML("info_crawlingURL", ((String) post.get("crawlingURL")));
                                 prop.putHTML("info_reasonString", reasonString);
                                 
-                                plasmaCrawlZURL.Entry ee = switchboard.errorURL.newEntry(crawlingStartURL, reasonString);
+                                plasmaCrawlZURL.Entry ee = switchboard.crawlQueues.errorURL.newEntry(crawlingStartURL, reasonString);
                                 ee.store();
-                                switchboard.errorURL.stackPushEntry(ee);
+                                switchboard.crawlQueues.errorURL.push(ee);
                             }
                         } catch (PatternSyntaxException e) {
                             prop.put("info", "4"); //crawlfilter does not match url
@@ -297,7 +298,7 @@ public class WatchCrawler_p {
                                     }
                                     
                                     // enqueuing the url for crawling
-                                    switchboard.sbStackCrawlThread.enqueue(
+                                    switchboard.crawlStacker.enqueueEntry(
                                             nexturlURL, 
                                             null, 
                                             yacyCore.seedDB.mySeed().hash, 

@@ -64,7 +64,6 @@ import de.anomic.plasma.plasmaParserDocument;
 import de.anomic.plasma.plasmaSnippetCache;
 import de.anomic.plasma.plasmaSwitchboard;
 import de.anomic.plasma.cache.IResourceInfo;
-import de.anomic.plasma.crawler.plasmaCrawlerException;
 import de.anomic.plasma.parser.ParserException;
 import de.anomic.server.serverFileUtils;
 import de.anomic.server.serverObjects;
@@ -169,8 +168,8 @@ public class ViewFile {
             if (resource == null) {
                 plasmaHTCache.Entry entry = null;
                 try {
-                    entry = plasmaSnippetCache.loadResourceFromWeb(url, 5000, false, true);
-                } catch (plasmaCrawlerException e) {
+                    entry = sb.crawlQueues.loadResourceFromWeb(url, 5000, false, true);
+                } catch (Exception e) {
                     prop.put("error", "4");
                     prop.putHTML("error_errorText", e.getMessage());
                     prop.put("viewMode", VIEW_MODE_NO_TEXT);

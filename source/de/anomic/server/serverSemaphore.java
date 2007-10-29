@@ -47,11 +47,7 @@ package de.anomic.server;
 public final class serverSemaphore  {
     private long currentValue = 0;    
     private long maximumValue = Long.MAX_VALUE;
-     
-    public serverSemaphore()  {
-        this(0,Long.MAX_VALUE);
-    }
-    
+
     public serverSemaphore(long initialValue)  {
         this(initialValue,Long.MAX_VALUE);
     }    

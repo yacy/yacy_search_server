@@ -570,8 +570,7 @@ filterOutStopwordsFromTopwords=true
 80_indexing_busysleep__pro=10
 80_indexing_memprereq=6291456
 82_crawlstack_idlesleep=5000
-82_crawlstack_busysleep=50
-82_crawlstack_busysleep__pro=10
+82_crawlstack_busysleep=0
 82_crawlstack_memprereq=1048576
 90_cleanup_idlesleep=300000
 90_cleanup_busysleep=300000
@@ -730,12 +729,6 @@ crawler.ftp.maxFileSize__pro=1048576
 
 # maximum number of crawler threads
 crawler.MaxActiveThreads = 30
-crawler.MaxIdleThreads = 5
-
-# maximum number of crawl-stacker threads
-stacker.MaxActiveThreads = 50
-stacker.MaxIdleThreads = 10
-stacker.MinIdleThreads = 5
 
 # maximum size of indexing queue
 indexer.slots = 40

@@ -79,7 +79,7 @@ public class IndexCreateWWWLocalQueue_p {
     
     public static serverObjects respond(httpHeader header, serverObjects post, serverSwitch env) {
         // return variable that accumulates replacements
-        plasmaSwitchboard switchboard = (plasmaSwitchboard) env;
+        plasmaSwitchboard sb = (plasmaSwitchboard) env;
         serverObjects prop = new serverObjects();
  
         int showLimit = 100;
@@ -96,9 +96,9 @@ public class IndexCreateWWWLocalQueue_p {
                 String pattern = post.get("pattern", ".*").trim();
                 final int option  = post.getInt("option", INVALID);
                 if (pattern.equals(".*")) {
-                    c = switchboard.noticeURL.stackSize(plasmaCrawlNURL.STACK_TYPE_CORE);
-                    switchboard.noticeURL.clear(plasmaCrawlNURL.STACK_TYPE_CORE);
-                    try { switchboard.cleanProfiles(); } catch (InterruptedException e) {/* ignore this */}
+                    c = sb.crawlQueues.noticeURL.stackSize(plasmaCrawlNURL.STACK_TYPE_CORE);
+                    sb.crawlQueues.noticeURL.clear(plasmaCrawlNURL.STACK_TYPE_CORE);
+                    try { sb.cleanProfiles(); } catch (InterruptedException e) {/* ignore this */}
                 } else if (option > INVALID) {
                     Pattern compiledPattern = null;
                     try {
@@ -108,7 +108,7 @@ public class IndexCreateWWWLocalQueue_p {
                         if (option == PROFILE) {
                             // search and delete the crawl profile (_much_ faster, independant of queue size)
                             // XXX: what to do about the annoying LOST PROFILE messages in the log?
-                            Iterator it = switchboard.profilesActiveCrawls.profiles(true);
+                            Iterator it = sb.profilesActiveCrawls.profiles(true);
                             plasmaCrawlProfile.entry entry;
                             while (it.hasNext()) {
                                 entry = (plasmaCrawlProfile.entry)it.next();
@@ -119,12 +119,12 @@ public class IndexCreateWWWLocalQueue_p {
                                         name.equals(plasmaSwitchboard.CRAWL_PROFILE_SNIPPET_MEDIA))
                                     continue;
                                 if (compiledPattern.matcher(name).find()) {
-                                    switchboard.profilesActiveCrawls.removeEntry(entry.handle());
+                                    sb.profilesActiveCrawls.removeEntry(entry.handle());
                                 }
                             }
                         } else {
                             // iterating through the list of URLs
-                            Iterator iter = switchboard.noticeURL.iterator(plasmaCrawlNURL.STACK_TYPE_CORE);
+                            Iterator iter = sb.crawlQueues.noticeURL.iterator(plasmaCrawlNURL.STACK_TYPE_CORE);
                             plasmaCrawlEntry entry;
                             while (iter.hasNext()) {
                                 if ((entry = (plasmaCrawlEntry) iter.next()) == null) continue;
@@ -144,7 +144,7 @@ public class IndexCreateWWWLocalQueue_p {
                                 if (value != null) {
                                     Matcher matcher = compiledPattern.matcher(value);
                                     if (matcher.find()) {
-                                        switchboard.noticeURL.removeByURLHash(entry.url().hash());
+                                        sb.crawlQueues.noticeURL.removeByURLHash(entry.url().hash());
                                     }                                    
                                 }
                             }
@@ -158,18 +158,18 @@ public class IndexCreateWWWLocalQueue_p {
                 prop.putNum("info_numEntries", c);
             } else if (post.containsKey("deleteEntry")) {
                 String urlHash = (String) post.get("deleteEntry");
-                switchboard.noticeURL.removeByURLHash(urlHash);
+                sb.crawlQueues.noticeURL.removeByURLHash(urlHash);
                 prop.put("LOCATION","");
                 return prop;
             }
         }
 
-        int showNum = 0, stackSize = switchboard.noticeURL.stackSize(plasmaCrawlNURL.STACK_TYPE_CORE);
+        int showNum = 0, stackSize = sb.crawlQueues.noticeURL.stackSize(plasmaCrawlNURL.STACK_TYPE_CORE);
         if (stackSize == 0) {
             prop.put("crawler-queue", "0");
         } else {
             prop.put("crawler-queue", "1");
-            plasmaCrawlEntry[] crawlerList = switchboard.noticeURL.top(plasmaCrawlNURL.STACK_TYPE_CORE, (int) (showLimit * 1.20));
+            plasmaCrawlEntry[] crawlerList = sb.crawlQueues.noticeURL.top(plasmaCrawlNURL.STACK_TYPE_CORE, (int) (showLimit * 1.20));
 
             plasmaCrawlEntry urle;
             boolean dark = true;
@@ -182,7 +182,7 @@ public class IndexCreateWWWLocalQueue_p {
                 if ((urle != null)&&(urle.url()!=null)) {
                     initiator = yacyCore.seedDB.getConnected(urle.initiator());
                     profileHandle = urle.profileHandle();
-                    profileEntry = (profileHandle == null) ? null : switchboard.profilesActiveCrawls.getEntry(profileHandle);
+                    profileEntry = (profileHandle == null) ? null : sb.profilesActiveCrawls.getEntry(profileHandle);
                     prop.put("crawler-queue_list_"+showNum+"_dark", dark ? "1" : "0");
                     prop.put("crawler-queue_list_"+showNum+"_initiator", ((initiator == null) ? "proxy" : initiator.getName()) );
                     prop.put("crawler-queue_list_"+showNum+"_profile", ((profileEntry == null) ? "unknown" : profileEntry.name()));

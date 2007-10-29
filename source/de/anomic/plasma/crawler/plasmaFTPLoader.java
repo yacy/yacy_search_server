@@ -45,68 +45,53 @@
 // Contributions and changes to the program code must be marked as such.
 
 
-package de.anomic.plasma.crawler.ftp;
+package de.anomic.plasma.crawler;
 
 import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileOutputStream;
-import java.io.IOException;
 import java.io.PrintStream;
 import java.io.PrintWriter;
 import java.util.Date;
 
 import de.anomic.net.ftpc;
 import de.anomic.plasma.plasmaCrawlEURL;
+import de.anomic.plasma.plasmaCrawlEntry;
 import de.anomic.plasma.plasmaHTCache;
 import de.anomic.plasma.plasmaParser;
 import de.anomic.plasma.plasmaSwitchboard;
-import de.anomic.plasma.cache.IResourceInfo;
 import de.anomic.plasma.cache.ftp.ResourceInfo;
-import de.anomic.plasma.crawler.AbstractCrawlWorker;
-import de.anomic.plasma.crawler.plasmaCrawlWorker;
-import de.anomic.plasma.crawler.plasmaCrawlerPool;
-import de.anomic.plasma.plasmaHTCache.Entry;
 import de.anomic.server.logging.serverLog;
-import de.anomic.yacy.yacyURL;
 
-public class CrawlWorker extends AbstractCrawlWorker implements plasmaCrawlWorker {
+public class plasmaFTPLoader {
 
-    public CrawlWorker(ThreadGroup theTG, plasmaCrawlerPool thePool, plasmaSwitchboard theSb, serverLog theLog) {
-        super(theTG, thePool, theSb, theLog);
-        
-        // this crawler supports ftp
-        this.protocol = "ftp";  
+    private plasmaSwitchboard sb;
+    private serverLog log;
+    
+    public plasmaFTPLoader(plasmaSwitchboard sb, serverLog log) {
+        this.sb = sb;
+        this.log = log;
     }
 
-    public void close() {
-        // TODO: abort a currently established connection
-    }
-
-    public void init() {
-        // nothing todo here
-    }
-
-    protected plasmaHTCache.Entry createCacheEntry(String mimeType, Date fileDate) {
-        IResourceInfo resourceInfo = new ResourceInfo(
-                this.url,
-                this.refererURLString,
-                mimeType,
-                fileDate
-        );        
-        
+    protected plasmaHTCache.Entry createCacheEntry(plasmaCrawlEntry entry, String mimeType, Date fileDate) {
         return plasmaHTCache.newEntry(
                 new Date(), 
-                this.depth, 
-                this.url, 
-                this.name,  
+                entry.depth(), 
+                entry.url(), 
+                entry.name(),  
                 "OK",
-                resourceInfo, 
-                this.initiator, 
-                this.profile
+                new ResourceInfo(
+                        entry.url(),
+                        sb.getURL(entry.referrerhash()),
+                        mimeType,
+                        fileDate
+                ), 
+                entry.initiator(), 
+                sb.profilesActiveCrawls.getEntry(entry.profileHandle())
         );
-    }        
-    
-    public Entry load() throws IOException {
+    }
+
+    public plasmaHTCache.Entry load(plasmaCrawlEntry entry) {
                        
         ByteArrayOutputStream bout = new ByteArrayOutputStream();
         PrintStream out = new PrintStream(bout);
@@ -118,7 +103,7 @@ public class CrawlWorker extends AbstractCrawlWorker implements plasmaCrawlWorke
         ftpc ftpClient = new ftpc(System.in, out, err);
         
         // get username and password
-        String userInfo = this.url.getUserInfo();
+        String userInfo = entry.url().getUserInfo();
         String userName = "anonymous", userPwd = "anonymous";
         if (userInfo != null) {
             int pos = userInfo.indexOf(":");
@@ -129,9 +114,9 @@ public class CrawlWorker extends AbstractCrawlWorker implements plasmaCrawlWorke
         } 
         
         // get server name, port and file path
-        String host = this.url.getHost();
-        String fullPath = this.url.getPath();
-        int port = this.url.getPort();
+        String host = entry.url().getHost();
+        String fullPath = entry.url().getPath();
+        int port = entry.url().getPort();
         
         plasmaHTCache.Entry htCache = null;
         try {
@@ -141,27 +126,12 @@ public class CrawlWorker extends AbstractCrawlWorker implements plasmaCrawlWorke
             } else {
                 ftpClient.exec("open " + host + " " + port, false);
             }
-            if (berr.size() > 0) {
-                this.log.logWarning("Unable to connect to ftp server " + this.url.getHost() + " hosting URL " + this.url.toString() + "\nErrorlog: " + berr.toString());
-                addURLtoErrorDB(plasmaCrawlEURL.DENIED_CONNECTION_ERROR);
-                return null;
-            }
 
             // login to the server
-            ftpClient.exec("user " + userName + " " + userPwd, false);  
-            if (berr.size() > 0) {
-                this.log.logWarning("Unable to login to ftp server " + this.url.getHost() + " hosting URL " + this.url.toString() + "\nErrorlog: " + berr.toString());
-                addURLtoErrorDB(plasmaCrawlEURL.DENIED_SERVER_LOGIN_FAILED);      
-                return null;
-            }        
+            ftpClient.exec("user " + userName + " " + userPwd, false);   
 
             // change transfer mode to binary
             ftpClient.exec("binary", false);
-            if (berr.size() > 0) {
-                this.log.logWarning("Unable to set the file transfer mode to binary for URL " + this.url.toString() + "\nErrorlog: " + berr.toString());
-                addURLtoErrorDB(plasmaCrawlEURL.DENIED_SERVER_TRASFER_MODE_PROBLEM);
-                return null;
-            }         
 
             // determine filename and path
             String file, path;              
@@ -188,12 +158,11 @@ public class CrawlWorker extends AbstractCrawlWorker implements plasmaCrawlWorke
                 if (isFolder) {
                     fullPath = fullPath + "/";
                     file = "";
-                    this.url = yacyURL.newURL(this.url,fullPath);
                 }
             }
 
             // creating a cache file object
-            File cacheFile = plasmaHTCache.getCachePath(this.url);        
+            File cacheFile = plasmaHTCache.getCachePath(entry.url());        
 
             // TODO: aborting download if content is to long ...
 
@@ -202,7 +171,7 @@ public class CrawlWorker extends AbstractCrawlWorker implements plasmaCrawlWorke
             // testing if the file already exists
             if (cacheFile.isFile()) {
                 // delete the file if it already exists
-                plasmaHTCache.deleteFile(this.url);
+                plasmaHTCache.deleteURLfromCache(entry.url());
             } else {
                 // create parent directories
                 cacheFile.getParentFile().mkdirs();
@@ -216,7 +185,7 @@ public class CrawlWorker extends AbstractCrawlWorker implements plasmaCrawlWorke
                 fileDate = new Date();
 
                 // create a htcache entry
-                htCache = createCacheEntry(mimeType,fileDate);
+                htCache = createCacheEntry(entry, mimeType, fileDate);
 
                 // generate the dirlist
                 StringBuffer dirList = ftpClient.dirhtml(fullPath);            
@@ -228,22 +197,22 @@ public class CrawlWorker extends AbstractCrawlWorker implements plasmaCrawlWorke
                     writer.flush();
                     writer.close();
                 } catch (Exception e) {
-                    this.log.logInfo("Unable to write dirlist for URL " + this.url.toString());
+                    this.log.logInfo("Unable to write dirlist for URL " + entry.url().toString());
                     htCache = null;
                 }
             } else {
                 // determine the mimetype of the resource
-                String extension = plasmaParser.getFileExt(this.url);
+                String extension = plasmaParser.getFileExt(entry.url());
                 mimeType = plasmaParser.getMimeTypeByFileExt(extension);
 
                 // if the mimetype and file extension is supported we start to download the file
-                if ((this.acceptAllContent) || (plasmaParser.supportedContent(plasmaParser.PARSER_MODE_CRAWLER,this.url,mimeType))) {
+                if (plasmaParser.supportedContent(plasmaParser.PARSER_MODE_CRAWLER, entry.url(), mimeType)) {
 
                     // TODO: determine the real file date
                     fileDate = new Date();
 
                     // create a htcache entry
-                    htCache = createCacheEntry(mimeType,fileDate);
+                    htCache = createCacheEntry(entry, mimeType, fileDate);
 
                     // change into working directory
                     ftpClient.exec("cd \"" + fullPath + "\"", false);
@@ -252,8 +221,8 @@ public class CrawlWorker extends AbstractCrawlWorker implements plasmaCrawlWorke
                     ftpClient.exec("get \"" + file + "\" \"" + cacheFile.getAbsolutePath() + "\"", false);
                 } else {
                     // if the response has not the right file type then reject file
-                    this.log.logInfo("REJECTED WRONG MIME/EXT TYPE " + mimeType + " for URL " + this.url.toString());
-                    addURLtoErrorDB(plasmaCrawlEURL.DENIED_WRONG_MIMETYPE_OR_EXT);
+                    this.log.logInfo("REJECTED WRONG MIME/EXT TYPE " + mimeType + " for URL " + entry.url().toString());
+                    sb.crawlQueues.errorURL.newEntry(entry, null, new Date(), 1, plasmaCrawlEURL.DENIED_WRONG_MIMETYPE_OR_EXT);
                     return null;
                 }
             }
@@ -261,19 +230,14 @@ public class CrawlWorker extends AbstractCrawlWorker implements plasmaCrawlWorke
             // pass the downloaded resource to the cache manager
             if (berr.size() > 0 || htCache == null) {
                 // if the response has not the right file type then reject file
-                this.log.logWarning("Unable to download URL " + this.url.toString() + "\nErrorlog: " + berr.toString());
-                addURLtoErrorDB(plasmaCrawlEURL.DENIED_SERVER_DOWNLOAD_ERROR);
+                this.log.logWarning("Unable to download URL " + entry.url().toString() + "\nErrorlog: " + berr.toString());
+                sb.crawlQueues.errorURL.newEntry(entry, null, new Date(), 1, plasmaCrawlEURL.DENIED_SERVER_DOWNLOAD_ERROR);
 
                 // an error has occured. cleanup
                 if (cacheFile.exists()) cacheFile.delete();            
             } else {
                 // announce the file
-                plasmaHTCache.writeFileAnnouncement(cacheFile);
-
-                // enQueue new entry with response header
-                if (this.profile != null) {
-                    plasmaHTCache.push(htCache);
-                }                
+                plasmaHTCache.writeFileAnnouncement(cacheFile);        
             }
             
             return htCache;

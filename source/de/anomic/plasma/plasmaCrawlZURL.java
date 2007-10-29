@@ -54,29 +54,29 @@ public class plasmaCrawlZURL {
             0);
 
     // the class object
-    private kelondroIndex urlIndexFile = null;
-    private LinkedList rejectedStack = new LinkedList(); // strings: url
+    private kelondroIndex urlIndex = null;
+    private LinkedList stack = new LinkedList(); // strings: url
     
     public plasmaCrawlZURL(File cachePath, String tablename, boolean startWithEmptyFile) {
     	// creates a new ZURL in a file
         cachePath.mkdirs();
         if (startWithEmptyFile) kelondroFlexTable.delete(cachePath, tablename);
-        urlIndexFile = new kelondroFlexTable(cachePath, tablename, -1, rowdef, true);
+        urlIndex = new kelondroFlexTable(cachePath, tablename, -1, rowdef, true);
     }
     
     public plasmaCrawlZURL() {
     	// creates a new ZUR in RAM
-        urlIndexFile = new kelondroRowSet(rowdef, 0);
+        urlIndex = new kelondroRowSet(rowdef, 0);
     }
     
     public int size() {
-        return urlIndexFile.size() ;
+        return urlIndex.size() ;
     }
     
     public void close() {
-        if (urlIndexFile != null) {
-            urlIndexFile.close();
-            urlIndexFile = null;
+        if (urlIndex != null) {
+            urlIndex.close();
+            urlIndex = null;
         }
     }
 
@@ -95,45 +95,52 @@ public class plasmaCrawlZURL {
     public boolean remove(String hash) {
         if (hash == null) return false;
         try {
-            urlIndexFile.remove(hash.getBytes(), false);
+            urlIndex.remove(hash.getBytes(), false);
             return true;
         } catch (IOException e) {
             return false;
         }
     }
     
-    public synchronized void stackPushEntry(Entry e) {
-        rejectedStack.add(e.hash());
+    public synchronized void push(Entry e) {
+        stack.add(e.hash());
     }
     
-    public Entry stackPopEntry(int pos) throws IOException {
-        String urlhash = (String) rejectedStack.get(pos);
+    public Entry top(int pos) throws IOException {
+        String urlhash = (String) stack.get(pos);
         if (urlhash == null) return null;
-        return new Entry(urlhash);
+        return getEntry(urlhash);
     }
    
-    public synchronized Entry getEntry(String hash) throws IOException {
-        return new Entry(hash);
+    public synchronized Entry getEntry(String urlhash) {
+        try {
+            kelondroRow.Entry entry = urlIndex.get(urlhash.getBytes());
+            if (entry == null) return null;
+            return new Entry(entry);
+        } catch (IOException e) {
+            e.printStackTrace();
+            return null;
+        }
     }
     
     public boolean getUseNewDB() {
-        return (urlIndexFile instanceof kelondroFlexTable);
+        return (urlIndex instanceof kelondroFlexTable);
     }
 
     public boolean exists(String urlHash) {
         try {
-            return urlIndexFile.has(urlHash.getBytes());
+            return urlIndex.has(urlHash.getBytes());
         } catch (IOException e) {
             return false;
         }
     }
     
     public void clearStack() {
-        rejectedStack.clear();
+        stack.clear();
     }
     
     public int stackSize() {
-        return rejectedStack.size();
+        return stack.size();
     }
     
     public class Entry {
@@ -153,6 +160,7 @@ public class plasmaCrawlZURL {
                 plasmaCrawlEntry bentry, String executor, Date workdate,
                 int workcount, String anycause) {
             // create new entry
+            assert bentry != null;
             this.bentry = bentry;
             this.executor = (executor == null) ? yacyCore.seedDB.mySeed().hash : executor;
             this.workdate = (workdate == null) ? new Date() : workdate;
@@ -161,17 +169,9 @@ public class plasmaCrawlZURL {
             stored = false;
         }
 
-        public Entry(String hash) throws IOException {
-            kelondroRow.Entry entry = urlIndexFile.get(hash.getBytes());
-            if (entry != null) {
-                insertEntry(entry);
-            }
-            this.stored = true;
-        }
-
         public Entry(kelondroRow.Entry entry) throws IOException {
             insertEntry(entry);
-            this.stored = false;
+            this.stored = true;
         }
         
         private void insertEntry(kelondroRow.Entry entry) throws IOException {
@@ -197,7 +197,7 @@ public class plasmaCrawlZURL {
             newrow.setCol(4, this.anycause.getBytes());
             newrow.setCol(5, this.bentry.toRow().bytes());
             try {
-                urlIndexFile.put(newrow);
+                urlIndex.put(newrow);
                 this.stored = true;
             } catch (IOException e) {
                 System.out.println("INTERNAL ERROR AT plasmaEURL:url2hash:" + e.toString());
@@ -241,7 +241,7 @@ public class plasmaCrawlZURL {
         boolean error = false;
         
         public kiter(boolean up, String firstHash) throws IOException {
-            i = urlIndexFile.rows(up, (firstHash == null) ? null : firstHash.getBytes());
+            i = urlIndex.rows(up, (firstHash == null) ? null : firstHash.getBytes());
             error = false;
         }
 

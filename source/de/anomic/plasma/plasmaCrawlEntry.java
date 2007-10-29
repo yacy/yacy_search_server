@@ -76,7 +76,9 @@ public class plasmaCrawlEntry {
     private int      forkfactor;    // sum of anchors of all ancestors
     private kelondroBitfield flags;
     private int      handle;
-
+    private String   status;
+    private int      initialHash;   // to provide a object hash that does not change even if the url changes because of redirection
+    
     public plasmaCrawlEntry(yacyURL url) {
         this(yacyCore.seedDB.mySeed().hash, url, null, null, new Date(), null, 0, 0, 0);
     }
@@ -105,6 +107,8 @@ public class plasmaCrawlEntry {
     ) {
         // create new entry and store it into database
         assert appdate != null;
+        assert url != null;
+        if ((initiator == null) || (initiator.length() == 0)) initiator = yacyURL.dummyHash;
         this.initiator     = initiator;
         this.url           = url;
         this.referrer      = (referrer == null) ? yacyURL.dummyHash : referrer;
@@ -119,6 +123,8 @@ public class plasmaCrawlEntry {
         this.loaddate      = 0;
         this.serverdate    = 0;
         this.imsdate       = 0;
+        this.status        = "loaded(args)";
+        this.initialHash   = url.hashCode();
     }
     
     public plasmaCrawlEntry(kelondroRow.Entry entry) throws IOException {
@@ -143,7 +149,22 @@ public class plasmaCrawlEntry {
         this.loaddate = entry.getColLong(12);
         this.serverdate = entry.getColLong(13);
         this.imsdate = entry.getColLong(14);
+        this.status        = "loaded(kelondroRow.Entry)";
+        this.initialHash   = url.hashCode();
         return;
+    }
+    
+    public int hashCode() {
+        // overloads Object.hashCode()
+        return this.initialHash;
+    }
+    
+    public void setStatus(String s) {
+        this.status = s;
+    }
+    
+    public String getStatus() {
+        return this.status;
     }
     
     private static String normalizeHandle(int h) {
@@ -186,6 +207,11 @@ public class plasmaCrawlEntry {
     public yacyURL url() {
         // the url
         return url;
+    }
+    
+    public void redirectURL(yacyURL redirectedURL) {
+        // replace old URL by new one. This should only be used in case of url redirection
+        this.url = redirectedURL;
     }
 
     public String referrerhash() {

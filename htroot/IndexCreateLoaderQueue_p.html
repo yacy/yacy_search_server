@@ -23,12 +23,14 @@
       <tr class="TableHeader">
         <th>Initiator</th>
         <th>Depth</th>
+        <th>Status</th>
         <th>URL</th>
       </tr>
       #{list}#
       <tr class="TableCell#(dark)#Light::Dark#(/dark)#">
         <td>#[initiator]#</td>
         <td>#[depth]#</td>
+        <td>#[status]#</td>
         <td><a href="#[url]#">#[url]#</a></td>
       </tr>
       #{/list}#

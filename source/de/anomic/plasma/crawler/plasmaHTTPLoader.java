@@ -42,7 +42,7 @@
 //the intact and unchanged copyright notice.
 //Contributions and changes to the program code must be marked as such.
 
-package de.anomic.plasma.crawler.http;
+package de.anomic.plasma.crawler;
 
 import java.io.File;
 import java.io.FileOutputStream;
@@ -61,20 +61,18 @@ import de.anomic.http.httpdBoundedSizeOutputStream;
 import de.anomic.http.httpdLimitExceededException;
 import de.anomic.http.httpdProxyHandler;
 import de.anomic.plasma.plasmaCrawlEURL;
-import de.anomic.plasma.plasmaCrawlLoader;
+import de.anomic.plasma.plasmaCrawlEntry;
 import de.anomic.plasma.plasmaHTCache;
 import de.anomic.plasma.plasmaParser;
 import de.anomic.plasma.plasmaSwitchboard;
 import de.anomic.plasma.cache.IResourceInfo;
 import de.anomic.plasma.cache.http.ResourceInfo;
-import de.anomic.plasma.crawler.AbstractCrawlWorker;
-import de.anomic.plasma.crawler.plasmaCrawlerPool;
 import de.anomic.plasma.urlPattern.plasmaURLPattern;
 import de.anomic.server.serverSystem;
 import de.anomic.server.logging.serverLog;
 import de.anomic.yacy.yacyURL;
 
-public final class CrawlWorker extends AbstractCrawlWorker {
+public final class plasmaHTTPLoader {
 
     public static final int DEFAULT_CRAWLING_RETRY_COUNT = 5;
     
@@ -96,86 +94,69 @@ public final class CrawlWorker extends AbstractCrawlWorker {
     private String acceptEncoding;
     private String acceptLanguage;
     private String acceptCharset;
+    private plasmaSwitchboard sb;
+    private serverLog log;
     
-    /**
-     * Constructor of this class
-     * @param theTG
-     * @param thePool
-     * @param theSb
-     * @param theLog
-     */
-    public CrawlWorker(
-            ThreadGroup theTG,
-            plasmaCrawlerPool thePool,
-            plasmaSwitchboard theSb,
-            serverLog theLog) {
-        super(theTG,thePool,theSb,theLog);
-
-        // this crawler supports http
-        this.protocol = "http";        
-    }
-
-    public void init() {
+    public plasmaHTTPLoader(plasmaSwitchboard sb, serverLog theLog) {
+        this.sb = sb;
+        this.log = theLog;
+        
         // refreshing timeout value
-        if (this.theMsg.timeout < 0) {
-            this.socketTimeout = (int) this.sb.getConfigLong("crawler.clientTimeout", 10000);
-        } else {
-            this.socketTimeout = this.theMsg.timeout;
-        }
+        this.socketTimeout = (int) sb.getConfigLong("crawler.clientTimeout", 10000);
         
         // maximum allowed file size
-        this.maxFileSize = this.sb.getConfigLong("crawler.http.maxFileSize", -1);
+        this.maxFileSize = sb.getConfigLong("crawler.http.maxFileSize", -1);
         
         // some http header values
-        this.acceptEncoding = this.sb.getConfig("crawler.http.acceptEncoding", "gzip,deflate");
-        this.acceptLanguage = this.sb.getConfig("crawler.http.acceptLanguage","en-us,en;q=0.5");
-        this.acceptCharset  = this.sb.getConfig("crawler.http.acceptCharset","ISO-8859-1,utf-8;q=0.7,*;q=0.7");
+        this.acceptEncoding = sb.getConfig("crawler.http.acceptEncoding", "gzip,deflate");
+        this.acceptLanguage = sb.getConfig("crawler.http.acceptLanguage","en-us,en;q=0.5");
+        this.acceptCharset  = sb.getConfig("crawler.http.acceptCharset","ISO-8859-1,utf-8;q=0.7,*;q=0.7");
         
         // getting the http proxy config
-        this.remoteProxyConfig = this.sb.remoteProxyConfig;        
+        this.remoteProxyConfig = sb.remoteProxyConfig;        
     }
-    
-    public plasmaHTCache.Entry load() throws IOException {
-        return load(DEFAULT_CRAWLING_RETRY_COUNT);
-    }    
 
-    protected plasmaHTCache.Entry createCacheEntry(yacyURL requestUrl, Date requestDate, httpHeader requestHeader, httpc.response response) {
-        IResourceInfo resourceInfo = new ResourceInfo(requestUrl,requestHeader,response.responseHeader);
+    protected plasmaHTCache.Entry createCacheEntry(plasmaCrawlEntry entry, Date requestDate, httpHeader requestHeader, httpc.response response) {
+        IResourceInfo resourceInfo = new ResourceInfo(entry.url(), requestHeader, response.responseHeader);
         return plasmaHTCache.newEntry(
                 requestDate, 
-                this.depth, 
-                this.url, 
-                this.name,  
+                entry.depth(),
+                entry.url(),
+                entry.name(),
                 response.status,
                 resourceInfo, 
-                this.initiator, 
-                this.profile
+                entry.initiator(),
+                sb.profilesActiveCrawls.getEntry(entry.profileHandle())
         );
     }    
+   
+    public plasmaHTCache.Entry load(plasmaCrawlEntry entry) {
+        return load(entry, DEFAULT_CRAWLING_RETRY_COUNT);
+    }
     
-    private plasmaHTCache.Entry load(int crawlingRetryCount) throws IOException {
+    private plasmaHTCache.Entry load(plasmaCrawlEntry entry, int retryCount) {
 
-        // if the recrawling limit was exceeded we stop crawling now
-        if (crawlingRetryCount <= 0) return null;
-
+        if (retryCount < 0) {
+            this.log.logInfo("Redirection counter exceeded for URL " + entry.url().toString() + ". Processing aborted.");
+            sb.crawlQueues.errorURL.newEntry(entry, null, new Date(), 1, plasmaCrawlEURL.DENIED_REDIRECTION_COUNTER_EXCEEDED).store();
+            return null;
+        }
+        
         Date requestDate = new Date(); // remember the time...
-        String host = this.url.getHost();
-        String path = this.url.getFile();
-        int port = this.url.getPort();
-        boolean ssl = this.url.getProtocol().equals("https");
+        String host = entry.url().getHost();
+        String path = entry.url().getFile();
+        int port = entry.url().getPort();
+        boolean ssl = entry.url().getProtocol().equals("https");
         if (port < 0) port = (ssl) ? 443 : 80;
         
         // check if url is in blacklist
         String hostlow = host.toLowerCase();
         if (plasmaSwitchboard.urlBlacklist.isListed(plasmaURLPattern.BLACKLIST_CRAWLER, hostlow, path)) {
-            this.log.logInfo("CRAWLER Rejecting URL '" + this.url.toString() + "'. URL is in blacklist.");
-            addURLtoErrorDB(plasmaCrawlEURL.DENIED_URL_IN_BLACKLIST);
+            this.log.logInfo("CRAWLER Rejecting URL '" + entry.url().toString() + "'. URL is in blacklist.");
+            sb.crawlQueues.errorURL.newEntry(entry, null, new Date(), 1, plasmaCrawlEURL.DENIED_URL_IN_BLACKLIST).store();
             return null;
         }
-
-        // TODO: resolve yacy and yacyh domains
-        //String yAddress = yacyCore.seedDB.resolveYacyAddress(host);
-
+        
         // take a file from the net
         httpc remote = null;
         plasmaHTCache.Entry htCache = null;
@@ -183,8 +164,10 @@ public final class CrawlWorker extends AbstractCrawlWorker {
             // create a request header
             httpHeader requestHeader = new httpHeader();
             requestHeader.put(httpHeader.USER_AGENT, httpdProxyHandler.crawlerUserAgent);
-            if (this.refererURLString != null && this.refererURLString.length() > 0)
-                requestHeader.put(httpHeader.REFERER, this.refererURLString);
+            yacyURL refererURL = null;
+            if (entry.referrerhash() != null) refererURL = sb.getURL(entry.referrerhash());
+            if (refererURL != null)
+                requestHeader.put(httpHeader.REFERER, refererURL.toNormalform(true, true));
             if (this.acceptLanguage != null && this.acceptLanguage.length() > 0)
                 requestHeader.put(httpHeader.ACCEPT_LANGUAGE, this.acceptLanguage);
             if (this.acceptCharset != null && this.acceptCharset.length() > 0)
@@ -205,13 +188,13 @@ public final class CrawlWorker extends AbstractCrawlWorker {
                 // the transfer is ok
                 
                 // create a new cache entry
-                htCache = createCacheEntry(this.url,requestDate, requestHeader, res); 
+                htCache = createCacheEntry(entry, requestDate, requestHeader, res); 
                 
                 // aborting download if content is to long ...
                 if (htCache.cacheFile().getAbsolutePath().length() > serverSystem.maxPathLength) {
                     remote.close();
-                    this.log.logInfo("REJECTED URL " + this.url.toString() + " because path too long '" + plasmaHTCache.cachePath.getAbsolutePath() + "'");
-                    addURLtoErrorDB(plasmaCrawlEURL.DENIED_CACHEFILE_PATH_TOO_LONG);                    
+                    this.log.logInfo("REJECTED URL " + entry.url().toString() + " because path too long '" + plasmaHTCache.cachePath.getAbsolutePath() + "'");
+                    sb.crawlQueues.errorURL.newEntry(entry, null, new Date(), 1, plasmaCrawlEURL.DENIED_CACHEFILE_PATH_TOO_LONG);                    
                     return (htCache = null);
                 }
 
@@ -219,20 +202,20 @@ public final class CrawlWorker extends AbstractCrawlWorker {
                 if (!htCache.cacheFile().getCanonicalPath().startsWith(plasmaHTCache.cachePath.getCanonicalPath())) {
                     // if the response has not the right file type then reject file
                     remote.close();
-                    this.log.logInfo("REJECTED URL " + this.url.toString() + " because of an invalid file path ('" +
+                    this.log.logInfo("REJECTED URL " + entry.url().toString() + " because of an invalid file path ('" +
                                 htCache.cacheFile().getCanonicalPath() + "' does not start with '" +
                                 plasmaHTCache.cachePath.getAbsolutePath() + "').");
-                    addURLtoErrorDB(plasmaCrawlEURL.DENIED_INVALID_CACHEFILE_PATH);
+                    sb.crawlQueues.errorURL.newEntry(entry, null, new Date(), 1, plasmaCrawlEURL.DENIED_INVALID_CACHEFILE_PATH);
                     return (htCache = null);
                 }
 
                 // request has been placed and result has been returned. work off response
-                File cacheFile = plasmaHTCache.getCachePath(this.url);
+                File cacheFile = plasmaHTCache.getCachePath(entry.url());
                 try {
-                    if ((this.acceptAllContent) || (plasmaParser.supportedContent(plasmaParser.PARSER_MODE_CRAWLER,this.url,res.responseHeader.mime()))) {
+                    if (plasmaParser.supportedContent(plasmaParser.PARSER_MODE_CRAWLER,entry.url(),res.responseHeader.mime())) {
                         // delete old content
                         if (cacheFile.isFile()) {
-                            plasmaHTCache.deleteFile(this.url);
+                            plasmaHTCache.deleteURLfromCache(entry.url());
                         }
                         
                         // create parent directories
@@ -246,31 +229,21 @@ public final class CrawlWorker extends AbstractCrawlWorker {
                             // getting content length
                             long contentLength = (res.isGzipped()) ? res.getGzippedLength() : res.responseHeader.contentLength();
                             
-                            // check if the file is too large to keep it in memory
-                            if (this.keepInMemory) {
-                                // if the content length is unknown or larger than 5MB we
-                                // do not keep resource in memory
-                                // TODO: make MAX_KEEP_IN_MEMORY_SIZE configureble
-                                if ((contentLength == -1) || (contentLength > 5 * 1024 * 1024)) {
-                                    this.keepInMemory = false;
-                                }
-                            }
-                            
                             // check the maximum allowed file size                            
                             if (this.maxFileSize > -1) {                                
                                 if (contentLength == -1) {
                                     fos = new httpdBoundedSizeOutputStream(fos,this.maxFileSize);                     
                                 } else if (contentLength > this.maxFileSize) {
                                     remote.close();
-                                    this.log.logInfo("REJECTED URL " + this.url + " because file size '" + contentLength + "' exceeds max filesize limit of " + this.maxFileSize + " bytes.");
-                                    addURLtoErrorDB(plasmaCrawlEURL.DENIED_FILESIZE_LIMIT_EXCEEDED);                    
+                                    this.log.logInfo("REJECTED URL " + entry.url() + " because file size '" + contentLength + "' exceeds max filesize limit of " + this.maxFileSize + " bytes.");
+                                    sb.crawlQueues.errorURL.newEntry(entry, null, new Date(), 1, plasmaCrawlEURL.DENIED_FILESIZE_LIMIT_EXCEEDED);                    
                                     return null;
                                 }
                             }
 
                             // we write the new cache entry to file system directly
                             byte[] cacheArray = null;
-                            cacheArray = res.writeContent(fos,this.keepInMemory);
+                            cacheArray = res.writeContent(fos, false);
                             remote.close();
                             htCache.setCacheArray(cacheArray);
                             plasmaHTCache.writeFileAnnouncement(cacheFile);
@@ -279,16 +252,13 @@ public final class CrawlWorker extends AbstractCrawlWorker {
                             remote.close();
                         }
                         
-                        // enQueue new entry with response header
-                        if (this.profile != null) {
-                            plasmaHTCache.push(htCache);
-                        }
+                        return htCache;
                     } else {
                         // if the response has not the right file type then reject file
                         remote.close();
-                        this.log.logInfo("REJECTED WRONG MIME/EXT TYPE " + res.responseHeader.mime() + " for URL " + this.url.toString());
-                        addURLtoErrorDB(plasmaCrawlEURL.DENIED_WRONG_MIMETYPE_OR_EXT);
-                        htCache = null;
+                        this.log.logInfo("REJECTED WRONG MIME/EXT TYPE " + res.responseHeader.mime() + " for URL " + entry.url().toString());
+                        sb.crawlQueues.errorURL.newEntry(entry, null, new Date(), 1, plasmaCrawlEURL.DENIED_WRONG_MIMETYPE_OR_EXT);
+                        return null;
                     }
                 } catch (SocketException e) {
                     // this may happen if the client suddenly closes its connection
@@ -297,34 +267,33 @@ public final class CrawlWorker extends AbstractCrawlWorker {
                     // but we clean the cache also, since it may be only partial
                     // and most possible corrupted
                     if (cacheFile.exists()) cacheFile.delete();
-                    this.log.logSevere("CRAWLER LOADER ERROR1: with URL=" + this.url.toString() + ": " + e.toString());
-                    addURLtoErrorDB(plasmaCrawlEURL.DENIED_CONNECTION_ERROR);
+                    this.log.logSevere("CRAWLER LOADER ERROR1: with URL=" + entry.url().toString() + ": " + e.toString());
+                    sb.crawlQueues.errorURL.newEntry(entry, null, new Date(), 1, plasmaCrawlEURL.DENIED_CONNECTION_ERROR);
                     htCache = null;
                 }
             } else if (res.status.startsWith("30")) {
-                if (crawlingRetryCount > 0) {
                     if (res.responseHeader.containsKey(httpHeader.LOCATION)) {
                         // getting redirection URL
                         String redirectionUrlString = (String) res.responseHeader.get(httpHeader.LOCATION);
                         redirectionUrlString = redirectionUrlString.trim();
 
                         if (redirectionUrlString.length() == 0) {
-                            this.log.logWarning("CRAWLER Redirection of URL=" + this.url.toString() + " aborted. Location header is empty.");
-                            addURLtoErrorDB(plasmaCrawlEURL.DENIED_REDIRECTION_HEADER_EMPTY);
+                            this.log.logWarning("CRAWLER Redirection of URL=" + entry.url().toString() + " aborted. Location header is empty.");
+                            sb.crawlQueues.errorURL.newEntry(entry, null, new Date(), 1, plasmaCrawlEURL.DENIED_REDIRECTION_HEADER_EMPTY);
                             return null;
                         }
                         
                         // normalizing URL
-                        yacyURL redirectionUrl = yacyURL.newURL(this.url, redirectionUrlString);
+                        yacyURL redirectionUrl = yacyURL.newURL(entry.url(), redirectionUrlString);
 
                         // restart crawling with new url
-                        this.log.logInfo("CRAWLER Redirection detected ('" + res.status + "') for URL " + this.url.toString());
+                        this.log.logInfo("CRAWLER Redirection detected ('" + res.status + "') for URL " + entry.url().toString());
                         this.log.logInfo("CRAWLER ..Redirecting request to: " + redirectionUrl);
 
                         // if we are already doing a shutdown we don't need to retry crawling
                         if (Thread.currentThread().isInterrupted()) {
-                            this.log.logSevere("CRAWLER Retry of URL=" + this.url.toString() + " aborted because of server shutdown.");
-                            addURLtoErrorDB(plasmaCrawlEURL.DENIED_SERVER_SHUTDOWN);
+                            this.log.logSevere("CRAWLER Retry of URL=" + entry.url().toString() + " aborted because of server shutdown.");
+                            sb.crawlQueues.errorURL.newEntry(entry, null, new Date(), 1, plasmaCrawlEURL.DENIED_SERVER_SHUTDOWN);
                             return null;
                         }
 
@@ -332,48 +301,29 @@ public final class CrawlWorker extends AbstractCrawlWorker {
                         String urlhash = redirectionUrl.hash();
                         
                         // check if the url was already indexed
-                        String dbname = plasmaCrawlLoader.switchboard.urlExists(urlhash);
+                        String dbname = sb.urlExists(urlhash);
                         if (dbname != null) {
-                            this.log.logWarning("CRAWLER Redirection of URL=" + this.url.toString() + " ignored. The url appears already in db " + dbname);
-                            addURLtoErrorDB(plasmaCrawlEURL.DENIED_REDIRECTION_TO_DOUBLE_CONTENT);
+                            this.log.logWarning("CRAWLER Redirection of URL=" + entry.url().toString() + " ignored. The url appears already in db " + dbname);
+                            sb.crawlQueues.errorURL.newEntry(entry, null, new Date(), 1, plasmaCrawlEURL.DENIED_REDIRECTION_TO_DOUBLE_CONTENT);
                             return null;
                         }
                         
                         // retry crawling with new url
-                        this.url = redirectionUrl;
-                        plasmaHTCache.Entry redirectedEntry = load(crawlingRetryCount-1);
+                        entry.redirectURL(redirectionUrl);
+                        return load(entry, retryCount - 1);
                         
-                        if (redirectedEntry != null) {
-//                            TODO: Here we can store the content of the redirection
-//                            as content of the original URL if some criterias are met
-//                            
-//                            plasmaHTCache.Entry newEntry = (plasmaHTCache.Entry) redirectedEntry.clone();
-//                            newEntry.url = url;
-//                            TODO: which http header should we store here?
-//                                                      
-//                            // enQueue new entry with response header
-//                            if (profile != null) {
-//                                cacheManager.push(newEntry);
-//                            }
-//                            htCache = newEntry;
-                        }
                     }
-                } else {
-                    this.log.logInfo("Redirection counter exceeded for URL " + this.url.toString() + ". Processing aborted.");
-                    addURLtoErrorDB(plasmaCrawlEURL.DENIED_REDIRECTION_COUNTER_EXCEEDED);
-                }
-            }else {
+            } else {
                 // if the response has not the right response type then reject file
-                this.log.logInfo("REJECTED WRONG STATUS TYPE '" + res.status + "' for URL " + this.url.toString());
+                this.log.logInfo("REJECTED WRONG STATUS TYPE '" + res.status + "' for URL " + entry.url().toString());
                 
                 // not processed any further
-                addURLtoErrorDB(plasmaCrawlEURL.DENIED_WRONG_HTTP_STATUSCODE + res.statusCode +  ")");
+                sb.crawlQueues.errorURL.newEntry(entry, null, new Date(), 1, plasmaCrawlEURL.DENIED_WRONG_HTTP_STATUSCODE + res.statusCode +  ")");
             }
             
             if (remote != null) remote.close();
             return htCache;
         } catch (Exception e) {
-            boolean retryCrawling = false;
             String errorMsg = e.getMessage();
             String failreason = null;
 
@@ -385,95 +335,70 @@ public final class CrawlWorker extends AbstractCrawlWorker {
                 this.log.logInfo("CRAWLER Interruption detected because of server shutdown.");
                 failreason = plasmaCrawlEURL.DENIED_SERVER_SHUTDOWN;
             } else if (e instanceof httpdLimitExceededException) {
-                this.log.logWarning("CRAWLER Max file size limit '" + this.maxFileSize + "' exceeded while downloading URL " + this.url);
+                this.log.logWarning("CRAWLER Max file size limit '" + this.maxFileSize + "' exceeded while downloading URL " + entry.url());
                 failreason = plasmaCrawlEURL.DENIED_FILESIZE_LIMIT_EXCEEDED;                    
             } else if (e instanceof MalformedURLException) {
-                this.log.logWarning("CRAWLER Malformed URL '" + this.url.toString() + "' detected. ");
+                this.log.logWarning("CRAWLER Malformed URL '" + entry.url().toString() + "' detected. ");
                 failreason = plasmaCrawlEURL.DENIED_MALFORMED_URL;
             } else if (e instanceof NoRouteToHostException) {
-                this.log.logWarning("CRAWLER No route to host found while trying to crawl URL  '" + this.url.toString() + "'.");
+                this.log.logWarning("CRAWLER No route to host found while trying to crawl URL  '" + entry.url().toString() + "'.");
                 failreason = plasmaCrawlEURL.DENIED_NO_ROUTE_TO_HOST;
             } else if ((e instanceof UnknownHostException) ||
                        ((errorMsg != null) && (errorMsg.indexOf("unknown host") >= 0))) {
-                this.log.logWarning("CRAWLER Unknown host in URL '" + this.url.toString() + "'. " +
-                        "Referer URL: " + ((this.refererURLString == null) ?"Unknown":this.refererURLString));
+                this.log.logWarning("CRAWLER Unknown host in URL '" + entry.url().toString() + "'. " +
+                        "Referer URL: " + ((entry.referrerhash() == null) ? "Unknown" : sb.getURL(entry.referrerhash()).toNormalform(true, true)));
                 failreason = plasmaCrawlEURL.DENIED_UNKNOWN_HOST;
             } else if (e instanceof java.net.BindException) {
-                this.log.logWarning("CRAWLER BindException detected while trying to download content from '" + this.url.toString() +
+                this.log.logWarning("CRAWLER BindException detected while trying to download content from '" + entry.url().toString() +
                 "'. Retrying request.");
-                failreason = plasmaCrawlEURL.DENIED_CONNECTION_BIND_EXCEPTION;                
-                retryCrawling = true;
+                failreason = plasmaCrawlEURL.DENIED_CONNECTION_BIND_EXCEPTION;
             } else if ((errorMsg != null) && (
             		(errorMsg.indexOf("Corrupt GZIP trailer") >= 0) ||
             		(errorMsg.indexOf("Not in GZIP format") >= 0) ||
             		(errorMsg.indexOf("Unexpected end of ZLIB") >= 0)
             )) {
-                this.log.logWarning("CRAWLER Problems detected while receiving gzip encoded content from '" + this.url.toString() +
+                this.log.logWarning("CRAWLER Problems detected while receiving gzip encoded content from '" + entry.url().toString() +
                 "'. Retrying request without using gzip content encoding.");
                 failreason = plasmaCrawlEURL.DENIED_CONTENT_DECODING_ERROR;
                 this.acceptEncoding = null;
-                retryCrawling = true;
             } else if ((errorMsg != null) && (errorMsg.indexOf("Read timed out") >= 0)) {
-                this.log.logWarning("CRAWLER Read timeout while receiving content from '" + this.url.toString() +
+                this.log.logWarning("CRAWLER Read timeout while receiving content from '" + entry.url().toString() +
                 "'. Retrying request.");
                 failreason = plasmaCrawlEURL.DENIED_CONNECTION_TIMEOUT;
-                retryCrawling = true;
             } else if ((errorMsg != null) && (errorMsg.indexOf("connect timed out") >= 0)) {
-                this.log.logWarning("CRAWLER Timeout while trying to connect to '" + this.url.toString() +
+                this.log.logWarning("CRAWLER Timeout while trying to connect to '" + entry.url().toString() +
                 "'. Retrying request.");
                 failreason = plasmaCrawlEURL.DENIED_CONNECTION_TIMEOUT;
-                retryCrawling = true;
             } else if ((errorMsg != null) && (errorMsg.indexOf("Connection timed out") >= 0)) {
-                this.log.logWarning("CRAWLER Connection timeout while receiving content from '" + this.url.toString() +
+                this.log.logWarning("CRAWLER Connection timeout while receiving content from '" + entry.url().toString() +
                 "'. Retrying request.");
                 failreason = plasmaCrawlEURL.DENIED_CONNECTION_TIMEOUT;
-                retryCrawling = true;
             } else if ((errorMsg != null) && (errorMsg.indexOf("Connection refused") >= 0)) {
-                this.log.logWarning("CRAWLER Connection refused while trying to connect to '" + this.url.toString() + "'.");
+                this.log.logWarning("CRAWLER Connection refused while trying to connect to '" + entry.url().toString() + "'.");
                 failreason = plasmaCrawlEURL.DENIED_CONNECTION_REFUSED;
             } else if ((errorMsg != null) && (errorMsg.indexOf("There is not enough space on the disk") >= 0)) {
-                this.log.logSevere("CRAWLER Not enough space on the disk detected while crawling '" + this.url.toString() + "'. " +
+                this.log.logSevere("CRAWLER Not enough space on the disk detected while crawling '" + entry.url().toString() + "'. " +
                 "Pausing crawlers. ");
-                plasmaCrawlLoader.switchboard.pauseCrawlJob(plasmaSwitchboard.CRAWLJOB_LOCAL_CRAWL);
-                plasmaCrawlLoader.switchboard.pauseCrawlJob(plasmaSwitchboard.CRAWLJOB_REMOTE_TRIGGERED_CRAWL);
+                sb.pauseCrawlJob(plasmaSwitchboard.CRAWLJOB_LOCAL_CRAWL);
+                sb.pauseCrawlJob(plasmaSwitchboard.CRAWLJOB_REMOTE_TRIGGERED_CRAWL);
                 failreason = plasmaCrawlEURL.DENIED_OUT_OF_DISK_SPACE;
             } else if ((errorMsg != null) && (errorMsg.indexOf("Network is unreachable") >=0)) {
-                this.log.logSevere("CRAWLER Network is unreachable while trying to crawl URL '" + this.url.toString() + "'. ");
+                this.log.logSevere("CRAWLER Network is unreachable while trying to crawl URL '" + entry.url().toString() + "'. ");
                 failreason = plasmaCrawlEURL.DENIED_NETWORK_IS_UNREACHABLE;
             } else if ((errorMsg != null) && (errorMsg.indexOf("No trusted certificate found")>= 0)) {
-                this.log.logSevere("CRAWLER No trusted certificate found for URL '" + this.url.toString() + "'. ");  
+                this.log.logSevere("CRAWLER No trusted certificate found for URL '" + entry.url().toString() + "'. ");  
                 failreason = plasmaCrawlEURL.DENIED_SSL_UNTRUSTED_CERT;
             } else {
-                this.log.logSevere("CRAWLER Unexpected Error with URL '" + this.url.toString() + "': " + e.toString(), e);
+                this.log.logSevere("CRAWLER Unexpected Error with URL '" + entry.url().toString() + "': " + e.toString(), e);
                 failreason = plasmaCrawlEURL.DENIED_CONNECTION_ERROR;
             }
 
-            if (retryCrawling) {
-                // if we are already doing a shutdown we don't need to retry crawling
-                if (Thread.currentThread().isInterrupted()) {
-                    this.log.logSevere("CRAWLER Retry of URL=" + this.url.toString() + " aborted because of server shutdown.");
-                    return null;
-                }
-
-                // setting the retry counter to 1
-                if (crawlingRetryCount > 2) crawlingRetryCount = 2;
-
-                // retry crawling
-                return load(crawlingRetryCount - 1);
-            }
             if (failreason != null) {
                 // add url into error db
-                addURLtoErrorDB(failreason);
+                sb.crawlQueues.errorURL.newEntry(entry, null, new Date(), 1, failreason);
             }
             return null;
         }
     }
     
-    public void close() {
-        if (this.isAlive()) {
-            try {
-                // TODO: this object should care of all open clien connections within this class and close them here
-            } catch (Exception e) {/* ignore this. shutdown in progress */}
-        }
-    }    
 }

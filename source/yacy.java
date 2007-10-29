@@ -806,7 +806,7 @@ public final class yacy {
                 }
             }
             if (source.equals("eurl")) {
-                Iterator eiter = sb.errorURL.entries(true, null);
+                Iterator eiter = sb.crawlQueues.errorURL.entries(true, null);
                 plasmaCrawlZURL.Entry entry;
                 while (eiter.hasNext()) {
                     try {
@@ -825,7 +825,7 @@ public final class yacy {
                 }
             }
             if (source.equals("nurl")) {
-                Iterator eiter = sb.noticeURL.iterator(plasmaCrawlNURL.STACK_TYPE_CORE);
+                Iterator eiter = sb.crawlQueues.noticeURL.iterator(plasmaCrawlNURL.STACK_TYPE_CORE);
                 plasmaCrawlEntry entry;
                 while (eiter.hasNext()) {
                     try {
@@ -915,7 +915,7 @@ public final class yacy {
                 }
             }
             if (source.equals("eurl")) {
-                Iterator eiter = sb.errorURL.entries(true, null);
+                Iterator eiter = sb.crawlQueues.errorURL.entries(true, null);
                 plasmaCrawlZURL.Entry entry;
                 while (eiter.hasNext()) {
                     entry = (plasmaCrawlZURL.Entry) eiter.next();
@@ -931,7 +931,7 @@ public final class yacy {
                 }
             }
             if (source.equals("nurl")) {
-                Iterator eiter = sb.noticeURL.iterator(plasmaCrawlNURL.STACK_TYPE_CORE);
+                Iterator eiter = sb.crawlQueues.noticeURL.iterator(plasmaCrawlNURL.STACK_TYPE_CORE);
                 plasmaCrawlEntry entry;
                 while (eiter.hasNext()) {
                     entry = (plasmaCrawlEntry) eiter.next();

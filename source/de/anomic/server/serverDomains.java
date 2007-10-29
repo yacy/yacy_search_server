@@ -70,6 +70,18 @@ public class serverDomains {
     * @param host Hostname of the host in demand.
     * @return String with the ip. null, if the host could not be resolved.
     */
+    public static InetAddress dnsResolveFromCache(String host) throws UnknownHostException {
+        if ((host == null) || (host.length() == 0)) return null;
+        host = host.toLowerCase().trim();        
+        
+        // trying to resolve host by doing a name cache lookup
+        InetAddress ip = (InetAddress) nameCacheHit.get(host);
+        if (ip != null) return ip;
+        
+        if (nameCacheMiss.contains(host)) return null;
+        throw new UnknownHostException("host not in cache");
+    }
+    
     public static InetAddress dnsResolve(String host) {
         if ((host == null) || (host.length() == 0)) return null;
         host = host.toLowerCase().trim();        
@@ -79,6 +91,7 @@ public class serverDomains {
         if (ip != null) return ip;
         
         if (nameCacheMiss.contains(host)) return null;
+        //System.out.println("***DEBUG dnsResolve(" + host + ")");
         try {
             boolean doCaching = true;
             ip = InetAddress.getByName(host);

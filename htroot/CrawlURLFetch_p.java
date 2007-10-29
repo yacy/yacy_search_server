@@ -465,17 +465,18 @@ public class CrawlURLFetch_p {
             return getListServletURL(ys.getPublicAddress(), MODE_LIST, this.count, yacyCore.seedDB.mySeed().hash);
         }
         
-        private int stackURLs(String[] urls) throws InterruptedException {
+        private int stackURLs(ArrayList /*of yacyURL*/ urls) throws InterruptedException {
             this.lastFailed = 0;
             this.lastFetchedURLs = 0;
             this.failed.clear();
             
             if (urls == null) return 0;
             String reason;
-            for (int i=0; i<urls.length && !isInterrupted(); i++) {
-                if (urls[i].trim().length() == 0) continue;
-                reason = this.sb.sbStackCrawlThread.stackCrawl(
-                        urls[i],
+            yacyURL url;
+            for (int i = 0; i < urls.size() && !isInterrupted(); i++) {
+                url = (yacyURL) urls.get(i);
+                reason = this.sb.crawlStacker.stackCrawl(
+                        url,
                         null,
                         yacyCore.seedDB.mySeed().hash,
                         null,
@@ -483,28 +484,26 @@ public class CrawlURLFetch_p {
                         this.profile.generalDepth(),
                         this.profile);
                 if (reason == null) {
-                    serverLog.logFine(this.getName(), "stacked " + urls[i]);
+                    serverLog.logFine(this.getName(), "stacked " + url);
                     this.lastFetchedURLs++;
                 } else {
-                    serverLog.logFine(this.getName(), "error on stacking " + urls[i] + ": " + reason);
+                    serverLog.logFine(this.getName(), "error on stacking " + url + ": " + reason);
                     this.lastFailed++;
                     totalFailed++;
-                    this.failed.put(urls[i], reason);
-                    try {
-                        plasmaCrawlZURL.Entry ee = this.sb.errorURL.newEntry(
-                                new yacyURL(urls[i], null),
+                    this.failed.put(url, reason);
+                    plasmaCrawlZURL.Entry ee = this.sb.crawlQueues.errorURL.newEntry(
+                                url,
                                 reason);
-                        ee.store();
-                        this.sb.errorURL.stackPushEntry(ee);
-                    } catch (MalformedURLException e) {  }
+                    ee.store();
+                    this.sb.crawlQueues.errorURL.push(ee);
                 }
             }
             return this.lastFetchedURLs;
         }
         
-        private String[] getURLs(yacyURL url) {
+        private ArrayList /*of yacyURL */ getURLs(yacyURL url) {
             if (url == null) return null;
-            String[] r = null;
+            ArrayList a = new ArrayList();
             try {
                 httpc con = new httpc(
                         url.getHost(),
@@ -528,15 +527,17 @@ public class CrawlURLFetch_p {
                     String encoding = res.responseHeader.getCharacterEncoding();
                     
                     if (encoding == null) encoding = "US-ASCII";
-                    r = parseText(new String(sbb.getBytes(), encoding));
+                    String[] s = (new String(sbb.getBytes(), encoding)).split("\n");
+                    for (int i = 0; i < s.length; i++) {
+                        try {
+                            a.add(new yacyURL(s[i], null));
+                        } catch (MalformedURLException e) {}
+                    }
                 }
                 con.close();
             } catch (IOException e) {  }
-            return r;
+            return a;
         }
         
-        private static String[] parseText(String text) {
-            return text.split("\n");
-        }
     }
 }

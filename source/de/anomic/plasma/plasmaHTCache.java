@@ -401,13 +401,9 @@ public final class plasmaHTCache {
             }
         }
     }
-
-    public static boolean deleteFile(yacyURL url) {
-        return deleteURLfromCache("", url, "FROM");
-    }
-
-    private static boolean deleteURLfromCache(String key, yacyURL url, String msg) {
-        if (deleteFileandDirs(key, getCachePath(url), msg)) {
+    
+    public static boolean deleteURLfromCache(yacyURL url) {
+        if (deleteFileandDirs(getCachePath(url), "FROM")) {
             try {
                 // As the file is gone, the entry in responseHeader.db is not needed anymore
                 log.logFinest("Trying to remove responseHeader from URL: " + url.toNormalform(false, true));
@@ -432,9 +428,9 @@ public final class plasmaHTCache {
        return false;
     }
 
-    private static boolean deleteFileandDirs(String key, File obj, String msg) {
+    private static boolean deleteFileandDirs(File obj, String msg) {
         if (deleteFile(obj)) {
-            log.logInfo("DELETED " + msg + " CACHE [" + key + "]: " + obj.toString());
+            log.logInfo("DELETED " + msg + " CACHE: " + obj.toString());
             obj = obj.getParentFile();
             // If the has been emptied, remove it
             // Loop as long as we produce empty driectoriers, but stop at HTCACHE
@@ -462,7 +458,7 @@ public final class plasmaHTCache {
                 if (file != null) {
                     if (filesInUse.contains(file)) continue;
                     log.logFinest("Trying to delete [" + key + "] = old file: " + file.toString());
-                    if (deleteFileandDirs(key, file, "OLD")) {
+                    if (deleteFileandDirs(file, "OLD")) {
                         try {
                             // As the file is gone, the entry in responseHeader.db is not needed anymore
                             String urlHash = getHash(file);
@@ -647,9 +643,9 @@ public final class plasmaHTCache {
         return plasmaParser.supportedMimeTypesContains(mimeType);
     }
 
-    public static boolean noIndexingURL(String urlString) {
-        if (urlString == null) return false;
-        urlString = urlString.toLowerCase();
+    public static boolean noIndexingURL(yacyURL url) {
+        if (url == null) return false;
+        String urlString = url.toString().toLowerCase();
         
         //http://www.yacy.net/getimage.php?image.png
         
@@ -978,30 +974,12 @@ public final class plasmaHTCache {
         return 0;           
     }
 
-    public static boolean isPOST(String urlString) {
-        return (urlString.indexOf("?") >= 0 ||
-                urlString.indexOf("&") >= 0);
-    }
-
-    public static boolean isCGI(String urlString) {
-        String ls = urlString.toLowerCase();
-        return ((ls.indexOf(".cgi") >= 0) ||
-                (ls.indexOf(".exe") >= 0) ||
-                (ls.indexOf(";jsessionid=") >= 0) ||
-                (ls.indexOf("sessionid/") >= 0) ||
-                (ls.indexOf("phpsessid=") >= 0) ||
-                (ls.indexOf("search.php?sid=") >= 0) ||
-                (ls.indexOf("memberlist.php?sid=") >= 0));
-    }
-
     public static Entry newEntry(
             Date initDate, 
             int depth, 
             yacyURL url,
             String name,
-            //httpHeader requestHeader,
-            String responseStatus, 
-            //httpHeader responseHeader,
+            String responseStatus,
             IResourceInfo docInfo,            
             String initiator,
             plasmaCrawlProfile.entry profile
@@ -1010,10 +988,8 @@ public final class plasmaHTCache {
                 initDate, 
                 depth, 
                 url,
-                name, 
-                //requestHeader, 
-                responseStatus, 
-                //responseHeader,
+                name,
+                responseStatus,
                 docInfo,
                 initiator, 
                 profile
@@ -1025,14 +1001,11 @@ public final class plasmaHTCache {
     // the class objects
     private Date                     initDate;       // the date when the request happened; will be used as a key
     private int                      depth;          // the depth of prefetching
-//    private httpHeader               requestHeader;  // we carry also the header to prevent too many file system access
-//    private httpHeader               responseHeader; // we carry also the header to prevent too many file system access
     private String                   responseStatus;    
     private File                     cacheFile;      // the cache file
     private byte[]                   cacheArray;     // or the cache as byte-array
     private yacyURL                  url;
     private String                   name;           // the name of the link, read as anchor from an <a>-tag
-    //private int                      status;         // cache load/hit/stale etc status
     private Date                     lastModified;
     private char                     doctype;
     private String                   language;
@@ -1050,9 +1023,7 @@ public final class plasmaHTCache {
                 this.depth,
                 this.url,
                 this.name,
-                //this.requestHeader,
                 this.responseStatus,
-                //this.responseHeader,
                 this.resInfo,
                 this.initiator,
                 this.profile
@@ -1063,9 +1034,7 @@ public final class plasmaHTCache {
             int depth, 
             yacyURL url,
             String name,
-            //httpHeader requestHeader,
             String responseStatus,
-            //httpHeader responseHeader,
             IResourceInfo resourceInfo,            
             String initiator,
             plasmaCrawlProfile.entry profile
@@ -1082,9 +1051,7 @@ public final class plasmaHTCache {
         // assigned:
         this.initDate       = initDate;
         this.depth          = depth;
-        //this.requestHeader  = requestHeader;
         this.responseStatus = responseStatus;
-        //this.responseHeader = responseHeader;
         this.profile        = profile;
         this.initiator      = (initiator == null) ? null : ((initiator.length() == 0) ? null : initiator);
 
@@ -1101,6 +1068,7 @@ public final class plasmaHTCache {
     }
 
     public String name() {
+        // the anchor name; can be either the text inside the anchor tag or the page description after loading of the page
         return this.name;
     }
     
@@ -1154,14 +1122,6 @@ public final class plasmaHTCache {
     public byte[] cacheArray() {
         return this.cacheArray;
     }
-    
-//    public httpHeader requestHeader() {
-//        return this.requestHeader;
-//    }
-    
-//    public httpHeader responseHeader() {
-//        return this.responseHeader;        
-//    }
     
     public IResourceInfo getDocumentInfo() {
         return this.resInfo;
@@ -1217,10 +1177,8 @@ public final class plasmaHTCache {
         // check status code
         if ((this.resInfo != null) && (!this.resInfo.validResponseStatus(this.responseStatus))) {
             return "bad_status_" + this.responseStatus.substring(0,3);
-        }        
-//        if (!(this.responseStatus.startsWith("200") ||
-//              this.responseStatus.startsWith("203"))) { return "bad_status_" + this.responseStatus.substring(0,3); }
-
+        }
+        
         // check storage location
         // sometimes a file name is equal to a path name in the same directory;
         // or sometimes a file name is equal a directory name created earlier;
@@ -1231,8 +1189,8 @@ public final class plasmaHTCache {
 
         // -CGI access in request
         // CGI access makes the page very individual, and therefore not usable in caches
-        if (isPOST(this.url.toNormalform(true, true)) && !this.profile.crawlingQ()) { return "dynamic_post"; }
-        if (isCGI(this.url.toNormalform(true, true))) { return "dynamic_cgi"; }
+        if (this.url.isPOST() && !this.profile.crawlingQ()) { return "dynamic_post"; }
+        if (this.url.isCGI()) { return "dynamic_cgi"; }
 
         if (this.resInfo != null) {
             return this.resInfo.shallStoreCacheForProxy();
@@ -1246,12 +1204,11 @@ public final class plasmaHTCache {
      * @return whether the file should be taken from the cache
      */
     public boolean shallUseCacheForProxy() {
-//      System.out.println("SHALL READ CACHE: requestHeader = " + requestHeader.toString() + ", responseHeader = " + responseHeader.toString());
 
         // -CGI access in request
         // CGI access makes the page very individual, and therefore not usable in caches
-        if (isPOST(this.url.toNormalform(true, true))) { return false; }
-        if (isCGI(this.url.toNormalform(true, true))) { return false; }
+        if (this.url.isPOST()) { return false; }
+        if (this.url.isCGI()) { return false; }
         
         if (this.resInfo != null) {
             return this.resInfo.shallUseCacheForProxy();

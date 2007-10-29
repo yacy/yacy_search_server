@@ -44,9 +44,8 @@
 // if the shell's current path is HTROOT
 
 import de.anomic.http.httpHeader;
-import de.anomic.plasma.plasmaCrawlLoaderMessage;
+import de.anomic.plasma.plasmaCrawlEntry;
 import de.anomic.plasma.plasmaSwitchboard;
-import de.anomic.plasma.crawler.plasmaCrawlWorker;
 import de.anomic.server.serverObjects;
 import de.anomic.server.serverSwitch;
 import de.anomic.yacy.yacyCore;
@@ -60,32 +59,27 @@ public class IndexCreateLoaderQueue_p {
         serverObjects prop = new serverObjects();
         
 
-        if (switchboard.cacheLoader.size() == 0) {
+        if (switchboard.crawlQueues.size() == 0) {
             prop.put("loader-set", "0");
         } else {
             prop.put("loader-set", "1");
             boolean dark = true;
-            
-            ThreadGroup loaderThreads = switchboard.cacheLoader.threadStatus();            
-            int threadCount  = loaderThreads.activeCount();
-            Thread[] threadList = new Thread[threadCount*2];
-            threadCount = loaderThreads.enumerate(threadList);
+            plasmaCrawlEntry[] w = switchboard.crawlQueues.activeWorker();
             yacySeed initiator;
-            int i, count = 0;
-            for (i = 0; i < threadCount; i++)  {
-                plasmaCrawlWorker theWorker = (plasmaCrawlWorker)threadList[i];
-                plasmaCrawlLoaderMessage theMsg = theWorker.getMessage();
-                if (theMsg == null) continue;
+            int count = 0;
+            for (int i = 0; i < w.length; i++)  {
+                if (w[i] == null) continue;
                 
-                initiator = yacyCore.seedDB.getConnected(theMsg.initiator);
+                initiator = yacyCore.seedDB.getConnected(w[i].initiator());
                 prop.put("loader-set_list_"+count+"_dark", dark ? "1" : "0");
                 prop.put("loader-set_list_"+count+"_initiator", ((initiator == null) ? "proxy" : initiator.getName()));
-                prop.put("loader-set_list_"+count+"_depth", theMsg.depth );
-                prop.put("loader-set_list_"+count+"_url", theMsg.url.toNormalform(false, true)); // null pointer exception here !!! maybe url = null; check reason.
+                prop.put("loader-set_list_"+count+"_depth", w[i].depth());
+                prop.put("loader-set_list_"+count+"_status", w[i].getStatus());
+                prop.put("loader-set_list_"+count+"_url", w[i].url().toNormalform(true, false));
                 dark = !dark;
                 count++;
             }
-            prop.put("loader-set_list", count );
+            prop.put("loader-set_list", count);
             prop.put("loader-set_num", count);
         }
                 

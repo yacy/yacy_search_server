@@ -46,7 +46,6 @@
 
 package de.anomic.plasma.cache.ftp;
 
-import java.net.MalformedURLException;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
@@ -80,7 +79,7 @@ public class ResourceInfo implements IResourceInfo {
         this.propertyMap =  new HashMap(objectInfo);
     }    
     
-    public ResourceInfo(yacyURL objectURL, String refererUrl, String mimeType, Date fileDate) {
+    public ResourceInfo(yacyURL objectURL, yacyURL refererUrl, String mimeType, Date fileDate) {
         if (objectURL == null) throw new NullPointerException();
         
         // generating the url hash
@@ -110,11 +109,7 @@ public class ResourceInfo implements IResourceInfo {
     }
 
     public yacyURL getRefererUrl() {
-        try {
-            return (this.propertyMap == null) ? null : new yacyURL((String)this.propertyMap.get(REFERER), null);
-        } catch (MalformedURLException e) {
-            return null;
-        }
+        return (this.propertyMap == null) ? null : ((yacyURL) this.propertyMap.get(REFERER));
     }
 
     public yacyURL getUrl() {

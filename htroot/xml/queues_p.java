@@ -55,11 +55,9 @@ import java.util.Locale;
 
 import de.anomic.http.httpHeader;
 import de.anomic.plasma.plasmaCrawlEntry;
-import de.anomic.plasma.plasmaCrawlLoaderMessage;
 import de.anomic.plasma.plasmaCrawlNURL;
 import de.anomic.plasma.plasmaSwitchboard;
 import de.anomic.plasma.plasmaSwitchboardQueue;
-import de.anomic.plasma.crawler.http.CrawlWorker;
 import de.anomic.server.serverObjects;
 import de.anomic.server.serverSwitch;
 import de.anomic.yacy.yacyCore;
@@ -78,7 +76,7 @@ public class queues_p {
     
     public static serverObjects respond(httpHeader header, serverObjects post, serverSwitch env) {
         // return variable that accumulates replacements
-        plasmaSwitchboard switchboard = (plasmaSwitchboard) env;
+        plasmaSwitchboard sb = (plasmaSwitchboard) env;
         //wikiCode wikiTransformer = new wikiCode(switchboard);
         serverObjects prop = new serverObjects();
         if (post == null || !post.containsKey("html"))
@@ -89,11 +87,11 @@ public class queues_p {
         yacySeed initiator;
         
         //indexing queue
-        prop.putNum("indexingSize", switchboard.getThread(plasmaSwitchboard.INDEXER).getJobCount()+switchboard.indexingTasksInProcess.size());
+        prop.putNum("indexingSize", sb.getThread(plasmaSwitchboard.INDEXER).getJobCount()+sb.indexingTasksInProcess.size());
         prop.putNum("indexingMax", plasmaSwitchboard.indexingSlots);
-        prop.putNum("urlpublictextSize", switchboard.wordIndex.loadedURL.size());
-        prop.putNum("rwipublictextSize", switchboard.wordIndex.size());
-        if ((switchboard.sbQueue.size() == 0) && (switchboard.indexingTasksInProcess.size() == 0)) {
+        prop.putNum("urlpublictextSize", sb.wordIndex.loadedURL.size());
+        prop.putNum("rwipublictextSize", sb.wordIndex.size());
+        if ((sb.sbQueue.size() == 0) && (sb.indexingTasksInProcess.size() == 0)) {
             prop.put("list", "0"); //is empty
         } else {
             plasmaSwitchboardQueue.Entry pcentry;
@@ -103,14 +101,14 @@ public class queues_p {
             ArrayList entryList = new ArrayList();
             
             // getting all entries that are currently in process
-            synchronized (switchboard.indexingTasksInProcess) {
-                inProcessCount = switchboard.indexingTasksInProcess.size();
-                entryList.addAll(switchboard.indexingTasksInProcess.values());
+            synchronized (sb.indexingTasksInProcess) {
+                inProcessCount = sb.indexingTasksInProcess.size();
+                entryList.addAll(sb.indexingTasksInProcess.values());
             }
             
             // getting all enqueued entries
-            if ((switchboard.sbQueue.size() > 0)) {
-                Iterator i1 = switchboard.sbQueue.entryIterator(false);
+            if ((sb.sbQueue.size() > 0)) {
+                Iterator i1 = sb.sbQueue.entryIterator(false);
                 while (i1.hasNext()) entryList.add((plasmaSwitchboardQueue.Entry) i1.next());
             }
             
@@ -130,7 +128,7 @@ public class queues_p {
                     prop.put("list-indexing_"+i+"_depth", pcentry.depth());
                     prop.put("list-indexing_"+i+"_modified", pcentry.getModificationDate());
                     prop.putHTML("list-indexing_"+i+"_anchor", (pcentry.anchorName()==null) ? "" : pcentry.anchorName(), true);
-                    prop.put("list-indexing_"+i+"_url", pcentry.url().toNormalform(false, true));
+                    prop.putHTML("list-indexing_"+i+"_url", pcentry.url().toNormalform(false, true), true);
                     prop.putNum("list-indexing_"+i+"_size", entrySize);
                     prop.put("list-indexing_"+i+"_inProcess", (inProcess) ? "1" : "0");
                     prop.put("list-indexing_"+i+"_hash", pcentry.urlHash());
@@ -141,44 +139,41 @@ public class queues_p {
         }
         
         //loader queue
-        prop.put("loaderSize", switchboard.cacheLoader.size());
-        prop.put("loaderMax", plasmaSwitchboard.crawlSlots);
-        if (switchboard.cacheLoader.size() == 0) {
+        prop.put("loaderSize", Integer.toString(sb.crawlQueues.size()));        
+        prop.put("loaderMax", Integer.toString(plasmaSwitchboard.crawlSlots));
+        if (sb.crawlQueues.size() == 0) {
             prop.put("list-loader", "0");
         } else {
-            ThreadGroup loaderThreads = switchboard.cacheLoader.threadStatus();
-            Thread[] threadList = new Thread[loaderThreads.activeCount()*2];
-            int size = loaderThreads.enumerate(threadList);
-            
-            int i, count = 0;
-            for (i = 0; i < size; i++)  {
-                CrawlWorker theWorker = (CrawlWorker)threadList[i];
-                plasmaCrawlLoaderMessage theMsg = theWorker.theMsg;
-                if (theMsg == null) continue;
-                prop.put("list-loader_"+count+"_profile", theMsg.profile.name());
-                initiator = yacyCore.seedDB.getConnected(theMsg.initiator);
+            plasmaCrawlEntry[] w = sb.crawlQueues.activeWorker();
+            int count = 0;
+            for (int i = 0; i < w.length; i++)  {
+                if (w[i] == null) continue;
+                prop.put("list-loader_"+count+"_profile", w[i].profileHandle());
+                initiator = yacyCore.seedDB.getConnected(w[i].initiator());
                 prop.put("list-loader_"+count+"_initiator", ((initiator == null) ? "proxy" : initiator.getName()));
-                prop.put("list-loader_"+count+"_depth", theMsg.depth );
-                prop.put("list-loader_"+count+"_url", theMsg.url.toString()); // null pointer exception here !!! maybe url = null; check reason.
+                prop.put("list-loader_"+count+"_depth", w[i].depth());
+                prop.putHTML("list-loader_"+count+"_url", w[i].url().toString(), true);
                 count++;
             }
-            prop.put("list-loader", count );
+            prop.put("list-loader", count);
         }
         
         //local crawl queue
-        prop.putNum("localCrawlSize", switchboard.getThread(plasmaSwitchboard.CRAWLJOB_LOCAL_CRAWL).getJobCount());
-        prop.put("localCrawlState", switchboard.crawlJobIsPaused(plasmaSwitchboard.CRAWLJOB_LOCAL_CRAWL) ? STATE_PAUSED : STATE_RUNNING);
-        int stackSize = switchboard.noticeURL.stackSize(plasmaCrawlNURL.STACK_TYPE_CORE);
-        addNTable(prop, "list-local", switchboard.noticeURL.top(plasmaCrawlNURL.STACK_TYPE_CORE, Math.min(10, stackSize)));
+        prop.putNum("localCrawlSize", Integer.toString(sb.getThread(plasmaSwitchboard.CRAWLJOB_LOCAL_CRAWL).getJobCount()));
+        prop.put("localCrawlState", sb.crawlJobIsPaused(plasmaSwitchboard.CRAWLJOB_LOCAL_CRAWL) ? STATE_PAUSED : STATE_RUNNING);
+        int stackSize = sb.crawlQueues.noticeURL.stackSize(plasmaCrawlNURL.STACK_TYPE_CORE);
+        addNTable(prop, "list-local", sb.crawlQueues.noticeURL.top(plasmaCrawlNURL.STACK_TYPE_CORE, Math.min(10, stackSize)));
+
         
         //global crawl queue
-        prop.putNum("remoteCrawlSize", switchboard.getThread(plasmaSwitchboard.CRAWLJOB_GLOBAL_CRAWL_TRIGGER).getJobCount());
-        prop.put("remoteCrawlState", switchboard.crawlJobIsPaused(plasmaSwitchboard.CRAWLJOB_GLOBAL_CRAWL_TRIGGER) ? STATE_PAUSED : STATE_RUNNING);
-        stackSize = switchboard.noticeURL.stackSize(plasmaCrawlNURL.STACK_TYPE_LIMIT);
+        prop.putNum("remoteCrawlSize", Integer.toString(sb.getThread(plasmaSwitchboard.CRAWLJOB_GLOBAL_CRAWL_TRIGGER).getJobCount()));
+        prop.put("remoteCrawlState", sb.crawlJobIsPaused(plasmaSwitchboard.CRAWLJOB_GLOBAL_CRAWL_TRIGGER) ? STATE_PAUSED : STATE_RUNNING);
+        stackSize = sb.crawlQueues.noticeURL.stackSize(plasmaCrawlNURL.STACK_TYPE_LIMIT);
+
         if (stackSize == 0) {
             prop.put("list-remote", "0");
         } else {
-            addNTable(prop, "list-remote", switchboard.noticeURL.top(plasmaCrawlNURL.STACK_TYPE_LIMIT, Math.min(10, stackSize)));
+            addNTable(prop, "list-remote", sb.crawlQueues.noticeURL.top(plasmaCrawlNURL.STACK_TYPE_LIMIT, Math.min(10, stackSize)));
         }
 
         // return rewrite properties

@@ -45,7 +45,6 @@
 package de.anomic.plasma;
 
 import java.io.ByteArrayInputStream;
-import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.Enumeration;
@@ -63,7 +62,6 @@ import de.anomic.http.httpc;
 import de.anomic.kelondro.kelondroMScoreCluster;
 import de.anomic.kelondro.kelondroMSetTools;
 import de.anomic.plasma.cache.IResourceInfo;
-import de.anomic.plasma.crawler.plasmaCrawlerException;
 import de.anomic.plasma.parser.ParserException;
 import de.anomic.server.logging.serverLog;
 import de.anomic.yacy.yacySearch;
@@ -284,7 +282,7 @@ public class plasmaSnippetCache {
                 // if not found try to download it
                 
                 // download resource using the crawler and keep resource in memory if possible
-                plasmaHTCache.Entry entry = loadResourceFromWeb(url, timeout, true, true);
+                plasmaHTCache.Entry entry = plasmaSwitchboard.getSwitchboard().crawlQueues.loadResourceFromWeb(url, timeout, true, true);
                 
                 // getting resource metadata (e.g. the http headers for http resources)
                 if (entry != null) {
@@ -309,7 +307,7 @@ public class plasmaSnippetCache {
                 return new TextSnippet(url, null, ERROR_SOURCE_LOADING, queryhashes, "no resource available");
             }
         } catch (Exception e) {
-            if (!(e instanceof plasmaCrawlerException)) e.printStackTrace();
+            e.printStackTrace();
             return new TextSnippet(url, null, ERROR_SOURCE_LOADING, queryhashes, "error loading resource: " + e.getMessage());
         } 
         
@@ -390,7 +388,7 @@ public class plasmaSnippetCache {
                 // if not found try to download it
                 
                 // download resource using the crawler and keep resource in memory if possible
-                plasmaHTCache.Entry entry = loadResourceFromWeb(url, timeout, true, forText);
+                plasmaHTCache.Entry entry = plasmaSwitchboard.getSwitchboard().crawlQueues.loadResourceFromWeb(url, timeout, true, forText);
                 
                 // getting resource metadata (e.g. the http headers for http resources)
                 if (entry != null) {
@@ -820,7 +818,6 @@ public class plasmaSnippetCache {
      */
     public static Object[] getResource(yacyURL url, boolean fetchOnline, int socketTimeout, boolean forText) {
         // load the url as resource from the web
-        try {
             long contentLength = -1;
             
             // trying to load the resource body from cache
@@ -831,7 +828,7 @@ public class plasmaSnippetCache {
                 // if the content is not available in cache try to download it from web
                 
                 // try to download the resource using a crawler
-                plasmaHTCache.Entry entry = loadResourceFromWeb(url, (socketTimeout < 0) ? -1 : socketTimeout, true, forText);
+                plasmaHTCache.Entry entry = plasmaSwitchboard.getSwitchboard().crawlQueues.loadResourceFromWeb(url, (socketTimeout < 0) ? -1 : socketTimeout, true, forText);
                 
                 // read resource body (if it is there)
                 byte[] resourceArray = entry.cacheArray();
@@ -848,30 +845,6 @@ public class plasmaSnippetCache {
                 return null;
             }
             return new Object[]{resource,new Long(contentLength)};
-        } catch (IOException e) {
-            return null;
-        }
-    }
-    
-    public static plasmaHTCache.Entry loadResourceFromWeb(
-            yacyURL url, 
-            int socketTimeout,
-            boolean keepInMemory,
-            boolean forText
-    ) throws plasmaCrawlerException {
-        
-        plasmaHTCache.Entry result = plasmaSwitchboard.getSwitchboard().cacheLoader.loadSync(
-                url,                         // the url
-                "",                          // name of the url, from anchor tag <a>name</a>
-                null,                        // referer
-                yacyCore.seedDB.mySeed().hash, // initiator
-                0,                           // depth
-                (forText) ? plasmaSwitchboard.getSwitchboard().defaultTextSnippetProfile : plasmaSwitchboard.getSwitchboard().defaultMediaSnippetProfile, // crawl profile
-                socketTimeout,
-                keepInMemory
-        );
-        
-        return result;
     }
     
     public static String failConsequences(TextSnippet snippet, String eventID) {

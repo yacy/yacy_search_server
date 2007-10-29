@@ -60,9 +60,9 @@ public class urls {
             int count = Math.min(100, post.getInt("count", 0));
             int c = 0;
             plasmaCrawlEntry entry;
-            while ((count > 0) && (sb.noticeURL.stackSize(stackType) > 0)) {
+            while ((count > 0) && (sb.crawlQueues.noticeURL.stackSize(stackType) > 0)) {
                 try {
-                    entry = sb.noticeURL.pop(stackType, false);
+                    entry = sb.crawlQueues.noticeURL.pop(stackType, false);
                 } catch (IOException e) {
                     break;
                 }

@@ -192,12 +192,12 @@ public class urlRedirectord implements serverHandler {
                             // first delete old entry, if exists
                             String urlhash = reqURL.hash();
                             switchboard.wordIndex.loadedURL.remove(urlhash);
-                            switchboard.noticeURL.removeByURLHash(urlhash);
-                            switchboard.errorURL.remove(urlhash);                            
+                            switchboard.crawlQueues.noticeURL.removeByURLHash(urlhash);
+                            switchboard.crawlQueues.errorURL.remove(urlhash);                            
                             
                             // enqueuing URL for crawling
-                            reasonString = switchboard.sbStackCrawlThread.stackCrawl(
-                                    this.nextURL, 
+                            reasonString = switchboard.crawlStacker.stackCrawl(
+                                    reqURL, 
                                     null, 
                                     yacyCore.seedDB.mySeed().hash, 
                                     "URL Redirector", 

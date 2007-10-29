@@ -103,6 +103,7 @@ public class plasmaSwitchboardQueue {
     }
 
     public synchronized void push(Entry entry) throws IOException {
+        if (entry == null) return;
         sbQueueStack.push(sbQueueStack.row().newEntry(new byte[][]{
             entry.url.toString().getBytes(),
             (entry.referrerHash == null) ? yacyURL.dummyHash.getBytes() : entry.referrerHash.getBytes(),
@@ -190,7 +191,7 @@ public class plasmaSwitchboardQueue {
     }
 
     public class Entry {
-        private yacyURL url;              // plasmaURL.urlStringLength
+        private yacyURL url;          // plasmaURL.urlStringLength
         private String referrerHash;  // plasmaURL.urlHashLength
         private Date ifModifiedSince; // 6
         private byte flags;           // 1
@@ -359,14 +360,13 @@ public class plasmaSwitchboardQueue {
                 return "Indexing_Not_Allowed";
             }
 
-            String nURL = url.toNormalform(true, true);
             // -CGI access in request
             // CGI access makes the page very individual, and therefore not usable in caches
             if (!profile().crawlingQ()) {
-                if (plasmaHTCache.isPOST(nURL)) {
+                if (url.isPOST()) {
                     return "Dynamic_(POST)";
                 }
-                if (plasmaHTCache.isCGI(nURL)) {
+                if (url.isCGI()) {
                     return "Dynamic_(CGI)";
                 }
             }
@@ -378,7 +378,7 @@ public class plasmaSwitchboardQueue {
             // we checked that in shallStoreCache
 
             // a picture cannot be indexed
-            if (plasmaHTCache.noIndexingURL(nURL)) {
+            if (plasmaHTCache.noIndexingURL(url)) {
                 return "Media_Content_(forbidden)";
             }
 
@@ -414,12 +414,11 @@ public class plasmaSwitchboardQueue {
                 return "Indexing_Not_Allowed";
             }
 
-            final String nURL = url().toNormalform(true, true);
             // -CGI access in request
             // CGI access makes the page very individual, and therefore not usable in caches
             if (!profile().crawlingQ()) {
-                if (plasmaHTCache.isPOST(nURL)) { return "Dynamic_(POST)"; }
-                if (plasmaHTCache.isCGI(nURL)) { return "Dynamic_(CGI)"; }
+                if (url().isPOST()) { return "Dynamic_(POST)"; }
+                if (url().isCGI()) { return "Dynamic_(CGI)"; }
             }
 
             // -authorization cases in request
@@ -433,7 +432,7 @@ public class plasmaSwitchboardQueue {
                 String status = this.getCachedObjectInfo().shallIndexCacheForCrawler();
                 if (status != null) return status;
             }
-            if (plasmaHTCache.noIndexingURL(nURL)) { return "Media_Content_(forbidden)"; }
+            if (plasmaHTCache.noIndexingURL(url())) { return "Media_Content_(forbidden)"; }
 
             // -if-modified-since in request
             // if the page is fresh at the very moment we can index it

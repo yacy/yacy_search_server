@@ -79,8 +79,8 @@ public class IndexCreateWWWGlobalQueue_p {
             }            
             
             if (post.containsKey("clearcrawlqueue")) {
-                int c = switchboard.noticeURL.stackSize(plasmaCrawlNURL.STACK_TYPE_LIMIT);
-                switchboard.noticeURL.clear(plasmaCrawlNURL.STACK_TYPE_LIMIT);
+                int c = switchboard.crawlQueues.noticeURL.stackSize(plasmaCrawlNURL.STACK_TYPE_LIMIT);
+                switchboard.crawlQueues.noticeURL.clear(plasmaCrawlNURL.STACK_TYPE_LIMIT);
                 try { switchboard.cleanProfiles(); } catch (InterruptedException e) { /* Ignore this */}
                 /*
                 int c = 0;
@@ -93,18 +93,18 @@ public class IndexCreateWWWGlobalQueue_p {
                 prop.putNum("info_numEntries", c);
             } else if (post.containsKey("deleteEntry")) {
                 String urlHash = (String) post.get("deleteEntry");
-                switchboard.noticeURL.removeByURLHash(urlHash);
+                switchboard.crawlQueues.noticeURL.removeByURLHash(urlHash);
                 prop.put("LOCATION","");
                 return prop;
             }
         }
 
-        int stackSize = switchboard.noticeURL.stackSize(plasmaCrawlNURL.STACK_TYPE_LIMIT);
+        int stackSize = switchboard.crawlQueues.noticeURL.stackSize(plasmaCrawlNURL.STACK_TYPE_LIMIT);
         if (stackSize == 0) {
             prop.put("crawler-queue", "0");
         } else {
             prop.put("crawler-queue", "1");
-            plasmaCrawlEntry[] crawlerList = switchboard.noticeURL.top(plasmaCrawlNURL.STACK_TYPE_LIMIT, showLimit);
+            plasmaCrawlEntry[] crawlerList = switchboard.crawlQueues.noticeURL.top(plasmaCrawlNURL.STACK_TYPE_LIMIT, showLimit);
             
             plasmaCrawlEntry urle;
             boolean dark = true;

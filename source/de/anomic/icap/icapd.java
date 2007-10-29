@@ -402,7 +402,7 @@ public class icapd implements serverHandler {
             
             // if the file already exits we delete it
             if (cacheFile.isFile()) {
-                plasmaHTCache.deleteFile(httpRequestURL);
+                plasmaHTCache.deleteURLfromCache(httpRequestURL);
             }                        
             // we write the new cache entry to file system directly
             cacheFile.getParentFile().mkdirs();            

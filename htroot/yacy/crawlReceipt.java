@@ -157,7 +157,7 @@ public final class crawlReceipt {
             // put new entry into database
             switchboard.wordIndex.loadedURL.store(entry);
             switchboard.wordIndex.loadedURL.stack(entry, youare, iam, 1);
-            switchboard.delegatedURL.remove(entry.hash()); // the delegated work has been done
+            switchboard.crawlQueues.delegatedURL.remove(entry.hash()); // the delegated work has been done
             log.logInfo("crawlReceipt: RECEIVED RECEIPT from " + otherPeerName + " for URL " + entry.hash() + ":" + comp.url().toNormalform(false, true));
 
             // ready for more
@@ -169,10 +169,10 @@ public final class crawlReceipt {
             return prop;
         }
 
-        switchboard.delegatedURL.remove(entry.hash()); // the delegated work is transformed into an error case
-        plasmaCrawlZURL.Entry ee = switchboard.errorURL.newEntry(entry.toBalancerEntry(), youare, null, 0, result + ":" + reason);
+        switchboard.crawlQueues.delegatedURL.remove(entry.hash()); // the delegated work is transformed into an error case
+        plasmaCrawlZURL.Entry ee = switchboard.crawlQueues.errorURL.newEntry(entry.toBalancerEntry(), youare, null, 0, result + ":" + reason);
         ee.store();
-        switchboard.errorURL.stackPushEntry(ee);
+        switchboard.crawlQueues.errorURL.push(ee);
         //switchboard.noticeURL.remove(receivedUrlhash);
         prop.put("delay", "3600");
         return prop;

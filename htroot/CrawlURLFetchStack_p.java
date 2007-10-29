@@ -172,15 +172,15 @@ public class CrawlURLFetchStack_p {
                 }
             }
             else if (post.containsKey("shiftlcq")) {
-                final int count = Math.min(post.getInt("shiftloc", 0), sb.noticeURL.stackSize(plasmaCrawlNURL.STACK_TYPE_CORE));
-                final int failed = shiftFromNotice(sb.noticeURL, plasmaCrawlNURL.STACK_TYPE_CORE, getURLFetcherStack(env), count);
+                final int count = Math.min(post.getInt("shiftloc", 0), sb.crawlQueues.noticeURL.stackSize(plasmaCrawlNURL.STACK_TYPE_CORE));
+                final int failed = shiftFromNotice(sb.crawlQueues.noticeURL, plasmaCrawlNURL.STACK_TYPE_CORE, getURLFetcherStack(env), count);
                 prop.put("shiftloc", "1");
                 prop.put("shiftloc_value", count - failed);
                 prop.put("shiftloc_failed", failed);
             }
             else if (post.containsKey("shiftrcq")) {
                 final int count = post.getInt("shiftrem", 0);
-                final int failed = shiftFromNotice(sb.noticeURL, plasmaCrawlNURL.STACK_TYPE_LIMIT, getURLFetcherStack(env), count);
+                final int failed = shiftFromNotice(sb.crawlQueues.noticeURL, plasmaCrawlNURL.STACK_TYPE_LIMIT, getURLFetcherStack(env), count);
                 prop.put("shiftrem", "1");
                 prop.put("shiftrem_value", count - failed);
                 prop.put("shiftrem_failed", failed);
@@ -235,10 +235,10 @@ public class CrawlURLFetchStack_p {
         prop.put("totalFetched", getURLFetcherStack(env).getPopped());
         prop.put("totalAdded", getURLFetcherStack(env).getPushed());
         prop.put("maxSize", maxURLsPerFetch);
-        prop.put("locurls", sb.noticeURL.stackSize(plasmaCrawlNURL.STACK_TYPE_CORE));
-        prop.put("remurls", sb.noticeURL.stackSize(plasmaCrawlNURL.STACK_TYPE_LIMIT));
-        prop.put("locurlsVal", Math.min(sb.noticeURL.stackSize(plasmaCrawlNURL.STACK_TYPE_CORE), 500));
-        prop.put("remurlsVal", Math.min(sb.noticeURL.stackSize(plasmaCrawlNURL.STACK_TYPE_LIMIT), 500));
+        prop.put("locurls", sb.crawlQueues.noticeURL.stackSize(plasmaCrawlNURL.STACK_TYPE_CORE));
+        prop.put("remurls", sb.crawlQueues.noticeURL.stackSize(plasmaCrawlNURL.STACK_TYPE_LIMIT));
+        prop.put("locurlsVal", Math.min(sb.crawlQueues.noticeURL.stackSize(plasmaCrawlNURL.STACK_TYPE_CORE), 500));
+        prop.put("remurlsVal", Math.min(sb.crawlQueues.noticeURL.stackSize(plasmaCrawlNURL.STACK_TYPE_LIMIT), 500));
         return prop;
     }
     
