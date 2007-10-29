@@ -58,7 +58,6 @@
 <property name="yacyroot" location="."/>	
 <property name="addon" location="addon"/>
 <property name="src" location="source"/>
-<property name="doc" location="doc"/>
 <property name="data" location="DATA"/>
 <property name="lib" location="lib"/>
 <property name="libx" location="libx"/>
@@ -169,9 +168,7 @@
   <mkdir dir="${build}/de/anomic/tools"/>
   <mkdir dir="${build}/de/anomic/ymage"/>
   <mkdir dir="${build}/de/anomic/yacy"/>
-  <mkdir dir="${build}/de/anomic/yacy/seedUpload"/>   
-
-  <!--<mkdir dir="${doc}"/>-->
+  <mkdir dir="${build}/de/anomic/yacy/seedUpload"/>
   <mkdir dir="${data}"/>
   <mkdir dir="${release}"/>
 
@@ -193,8 +190,7 @@
   <!-- deleting old file -->
   <delete file="${build}/yacy.java" failonerror="false"/>
   <copy file="${src}/yacy.java" tofile="${build}/yacy.java" overwrite="true" filtering="true" />
-  <!--<copy file="${doc}/Download.html" tofile="${doc}/Download.html.up" filtering="true" />-->
-	  
+  
 </target>
   	
 <target name="compileMain" depends="init" description="Compiling the yacy sources ...">
@@ -481,13 +477,6 @@
 		    <include name="ChangeLog"/>
 	  	</fileset>	
   	</copy>
-	<!--
-	<copy todir="${release_main}/doc">
-	  	<fileset dir="${doc}">
-	    	<include name="**/*"/>
-	  	</fileset>
-	</copy>
-	-->
 	
 	<!-- copy source code -->
 	<copy todir="${release_main}/source">
@@ -565,9 +554,6 @@
 	
   <!-- deleting unneeded files -->
   <delete dir="${release_main}"/>
-
-  <!-- writing the current release version into a file -->   
-  <!--<echo message="${releaseVersion}" file="${doc}/release.txt"/>-->
 </target>
 	
 <target name="distPro" depends="compileExtensions,copyMain4Dist,copyExt4Dist">
