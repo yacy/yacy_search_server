@@ -204,6 +204,9 @@ public final class serverDate {
     }
 
     public static long UTCDiff() {
+        // DST_OFFSET is dependent on the time of the Calendar, so it has to be updated
+        // to get the correct current offset
+        thisCalendar.setTimeInMillis(System.currentTimeMillis());
         long zoneOffsetHours = thisCalendar.get(Calendar.ZONE_OFFSET);
         long DSTOffsetHours = thisCalendar.get(Calendar.DST_OFFSET);
         return zoneOffsetHours + DSTOffsetHours;
