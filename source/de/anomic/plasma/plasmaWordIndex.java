@@ -155,10 +155,11 @@ public final class plasmaWordIndex implements indexRI {
     public void dhtFlushControl(indexRAMRI theCache) {
         // check for forced flush
         synchronized (theCache) {
-            if ((theCache.getMaxWordCount() > wCacheMaxChunk ) ||
+            if ((theCache.maxURLinCache() > wCacheMaxChunk ) ||
                 (theCache.size() > theCache.getMaxWordCount()) ||
                 (serverMemory.available() < collections.minMem())) {
-                flushCache(theCache, theCache.size() + flushsize - theCache.getMaxWordCount());
+                int count = theCache.size() + flushsize - theCache.getMaxWordCount();
+                flushCache(theCache, (count > 0) ? count : 1);
             }
         }
     }
