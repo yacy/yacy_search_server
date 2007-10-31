@@ -63,6 +63,7 @@ import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.URI;
 import java.util.Collections;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.LinkedList;
@@ -71,6 +72,7 @@ import java.util.Map;
 
 import de.anomic.plasma.plasmaSwitchboard;
 import de.anomic.server.serverCore;
+import de.anomic.server.serverDate;
 import de.anomic.server.serverSemaphore;
 import de.anomic.server.serverSwitch;
 import de.anomic.server.logging.serverLog;
@@ -315,9 +317,29 @@ public class yacyCore {
                     // success! we have published our peer to a senior peer
                     // update latest news from the other peer
                     log.logInfo("publish: handshaked " + this.seed.get(yacySeed.PEERTYPE, yacySeed.PEERTYPE_SENIOR) + " peer '" + this.seed.getName() + "' at " + this.seed.getPublicAddress());
-                    // update last seed date
-                    this.seed.setLastSeenUTC();
-                    peerActions.peerArrival(this.seed, true);
+                    // check if seed's lastSeen has been updated
+                    yacySeed newSeed = seedDB.getConnected(this.seed.hash);
+                    if (newSeed != null) {
+                        if (newSeed.getLastSeenUTC() < (System.currentTimeMillis() - 10000)) {
+                            // update last seed date
+                            if (newSeed.getLastSeenUTC() >= this.seed.getLastSeenUTC()) {
+                                log.logFine("publish: recently handshaked " + this.seed.get(yacySeed.PEERTYPE, yacySeed.PEERTYPE_SENIOR) +
+                                    " peer '" + this.seed.getName() + "' at " + this.seed.getPublicAddress() + "with old LastSeen: '" +
+                                    serverDate.shortSecondTime(new Date(newSeed.getLastSeenUTC())) + "'");
+                                newSeed.setLastSeenUTC();
+                                peerActions.peerArrival(newSeed, true);
+                            } else {
+                                log.logFine("publish: recently handshaked " + this.seed.get(yacySeed.PEERTYPE, yacySeed.PEERTYPE_SENIOR) +
+                                    " peer '" + this.seed.getName() + "' at " + this.seed.getPublicAddress() + "with old LastSeen: '" +
+                                    serverDate.shortSecondTime(new Date(newSeed.getLastSeenUTC())) + "', this is more recent: '" +
+                                    serverDate.shortSecondTime(new Date(this.seed.getLastSeenUTC())) + "'");
+                                this.seed.setLastSeenUTC();
+                                peerActions.peerArrival(this.seed, true);
+                            }
+                        }
+                    } else {
+                        log.logFine("publish: recently handshaked " + this.seed.get(yacySeed.PEERTYPE, yacySeed.PEERTYPE_SENIOR) + " peer '" + this.seed.getName() + "' at " + this.seed.getPublicAddress() + " not in connectedDB");
+                    }
                 }
             } catch (Exception e) {
                 log.logSevere("publishThread: error with target seed " + seed.toString() + ": " + e.getMessage(), e);
