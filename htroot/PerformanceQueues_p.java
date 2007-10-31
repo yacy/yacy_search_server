@@ -204,11 +204,8 @@ public class PerformanceQueues_p {
             // getting the current crawler pool configuration
             int maxActive = Integer.parseInt(post.get("Crawler Pool_maxActive","8"));
             
-            // accept new crawler pool settings
-            plasmaSwitchboard.crawlSlots = maxActive;
-            
             // storing the new values into configfile
-            switchboard.setConfig("crawler.MaxActiveThreads",maxActive);
+            switchboard.setConfig(plasmaSwitchboard.CRAWLER_THREADS_ACTIVE_MAX,maxActive);
             //switchboard.setConfig("crawler.MinIdleThreads",minIdle);
             
             /* 

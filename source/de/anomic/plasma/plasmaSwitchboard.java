@@ -175,9 +175,7 @@ import de.anomic.yacy.yacySeed;
 public final class plasmaSwitchboard extends serverAbstractSwitch implements serverSwitch {
     
     // load slots
-    public static int crawlSlots            = 10;
-    public static int indexingSlots         = 30;
-    public static int stackCrawlSlots       = 2000;
+    public static int xstackCrawlSlots       = 2000;
     
     private int       dhtTransferIndexCount = 100;    
     
@@ -410,6 +408,7 @@ public final class plasmaSwitchboard extends serverAbstractSwitch implements ser
     public static final String CRAWLSTACK_METHOD_FREEMEM    = null;
     public static final String CRAWLSTACK_IDLESLEEP         = "82_crawlstack_idlesleep";
     public static final String CRAWLSTACK_BUSYSLEEP         = "82_crawlstack_busysleep";
+    public static final String CRAWLSTACK_SLOTS             = "stacker.slots";
     
     // 90_cleanup
     /**
@@ -1170,9 +1169,6 @@ public final class plasmaSwitchboard extends serverAbstractSwitch implements ser
         // create queue
         this.sbQueue = new plasmaSwitchboardQueue(this.wordIndex.loadedURL, new File(this.plasmaPath, "switchboardQueue2.stack"), this.profilesActiveCrawls);
         
-        // setting the indexing queue slots
-        indexingSlots = (int) getConfigLong(INDEXER_SLOTS, 30);
-        
         // create in process list
         this.indexingTasksInProcess = new HashMap();
         
@@ -1204,7 +1200,6 @@ public final class plasmaSwitchboard extends serverAbstractSwitch implements ser
         
         // start a loader
         log.logConfig("Starting Crawl Loader");
-        crawlSlots = Integer.parseInt(getConfig(CRAWLER_THREADS_ACTIVE_MAX, "10"));
         this.crawlQueues = new plasmaCrawlQueues(this, plasmaPath);
                 
         /*
@@ -1307,7 +1302,7 @@ public final class plasmaSwitchboard extends serverAbstractSwitch implements ser
         }
         
         // initializing the stackCrawlThread
-        this.crawlStacker = new plasmaCrawlStacker(this, this.plasmaPath, ramPreNURL_time, (int) getConfigLong("tableTypeForPreNURL", 0));
+        this.crawlStacker = new plasmaCrawlStacker(this, this.plasmaPath, ramPreNURL_time, (int) getConfigLong("tableTypeForPreNURL", 0), (((int) getConfigLong("tableTypeForPreNURL", 0) == 0) && (getConfigLong(CRAWLSTACK_BUSYSLEEP, 0) <= 100)));
         //this.sbStackCrawlThread = new plasmaStackCrawlThread(this,this.plasmaPath,ramPreNURL);
         //this.sbStackCrawlThread.start();
         
@@ -1850,7 +1845,7 @@ public final class plasmaSwitchboard extends serverAbstractSwitch implements ser
                     return doneSomething; // nothing to do
                 }
 
-                if (crawlStacker.size() >= stackCrawlSlots) {
+                if (crawlStacker.size() >= getConfigLong(CRAWLSTACK_SLOTS, 2000)) {
                     log.logFine("deQueue: too many processes in stack crawl thread queue (" + "stackCrawlQueue=" + crawlStacker.size() + ")");
                     return doneSomething;
                 }

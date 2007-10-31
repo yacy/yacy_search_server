@@ -85,12 +85,14 @@ public final class plasmaCrawlStacker extends Thread {
     private File cacheStacksPath;
     private long preloadTime;
     private int dbtype;
-
+    private boolean prequeue;
+    
     // objects for the prefetch task
     private ArrayList dnsfetchHosts = new ArrayList();    
     
-    public plasmaCrawlStacker(plasmaSwitchboard sb, File dbPath, long preloadTime, int dbtype) {
+    public plasmaCrawlStacker(plasmaSwitchboard sb, File dbPath, long preloadTime, int dbtype, boolean prequeue) {
         this.sb = sb;
+        this.prequeue = prequeue;
         
         // init the message list
         this.urlEntryHashCache = new LinkedList();
@@ -168,13 +170,11 @@ public final class plasmaCrawlStacker extends Thread {
     }
     
     public void close() {
-        try {
+        if (this.dbtype == QUEUE_DB_TYPE_RAM) {
             this.log.logFine("Shutdown. Flushing remaining " + size() + " crawl stacker job entries. please wait.");
             while (size() > 0) {
                 if (!job()) break;
             }
-        } catch (Exception e1) {
-            this.log.logSevere("Unable to shutdown all remaining stackCrawl threads", e1);
         }
         terminateDNSPrefetcher();
         
@@ -240,7 +240,7 @@ public final class plasmaCrawlStacker extends Thread {
                 
         synchronized(this.urlEntryHashCache) {                    
             kelondroRow.Entry oldValue;
-            prefetchHost(nexturl.getHost());
+            if (prequeue) prefetchHost(nexturl.getHost());
             try {
                 oldValue = this.urlEntryCache.put(newEntry.toRow());
             } catch (IOException e) {

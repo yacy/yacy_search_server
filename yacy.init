@@ -734,6 +734,9 @@ crawler.MaxActiveThreads = 30
 indexer.slots = 40
 indexer.slots__pro = 80
 
+# maximum size of stacker queue
+stacker.slots = 2000
+
 # specifies if yacy should set it's own referer if no referer URL
 # was set by the client.
 useYacyReferer = true
@@ -888,6 +891,7 @@ currentSkin=
 # temporary flag for new database structure. set only true for testing
 # ALL DATA THAT IS CREATED WITH THIS FLAG ON WILL BE VOID IN A FINAL VERSION
 # table-types: RAM = 0, TREE = 1, FLEX = 2;
+# if you set this to a non-RAM value, you should increase the stacker.slots value
 tableTypeForPreNURL=0
 
 # flag to show if pages shall be usable for non-admin users

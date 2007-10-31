@@ -328,14 +328,14 @@ public class Status {
         
         // Queue information
         int indexingJobCount = sb.getThread("80_indexing").getJobCount()+sb.indexingTasksInProcess.size();
-        int indexingMaxCount = plasmaSwitchboard.indexingSlots;
+        int indexingMaxCount = (int) sb.getConfigLong(plasmaSwitchboard.INDEXER_SLOTS, 30);
         int indexingPercent = (indexingMaxCount==0)?0:indexingJobCount*100/indexingMaxCount;
         prop.putNum("indexingQueueSize", indexingJobCount);
         prop.putNum("indexingQueueMax", indexingMaxCount);
         prop.put("indexingQueuePercent",(indexingPercent>100) ? 100 : indexingPercent);
         
         int loaderJobCount = sb.crawlQueues.size();
-        int loaderMaxCount = plasmaSwitchboard.crawlSlots;
+        int loaderMaxCount = Integer.parseInt(sb.getConfig(plasmaSwitchboard.CRAWLER_THREADS_ACTIVE_MAX, "10"));
         int loaderPercent = (loaderMaxCount==0)?0:loaderJobCount*100/loaderMaxCount;
         prop.putNum("loaderQueueSize", loaderJobCount);
         prop.putNum("loaderQueueMax", loaderMaxCount);        

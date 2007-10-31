@@ -134,12 +134,12 @@ public class plasmaCrawlQueues {
             //log.logDebug("CoreCrawl: queue is empty");
             return false;
         }
-        if (sb.sbQueue.size() >= plasmaSwitchboard.indexingSlots) {
+        if (sb.sbQueue.size() >= (int) sb.getConfigLong(plasmaSwitchboard.INDEXER_SLOTS, 30)) {
             log.logFine("CoreCrawl: too many processes in indexing queue, dismissed (" +
             "sbQueueSize=" + sb.sbQueue.size() + ")");
             return false;
         }
-        if (this.size() >= plasmaSwitchboard.crawlSlots) {
+        if (this.size() >= sb.getConfigLong(plasmaSwitchboard.CRAWLER_THREADS_ACTIVE_MAX, 10)) {
             log.logFine("CoreCrawl: too many processes in loader queue, dismissed (" +
             "cacheLoader=" + this.size() + ")");
             return false;
@@ -230,12 +230,12 @@ public class plasmaCrawlQueues {
         
         // check local indexing queues
         // in case the placing of remote crawl fails, there must be space in the local queue to work off the remote crawl
-        if (sb.sbQueue.size() >= plasmaSwitchboard.indexingSlots * 2) {
+        if (sb.sbQueue.size() >= (int) sb.getConfigLong(plasmaSwitchboard.INDEXER_SLOTS, 30) * 2) {
             log.logFine("LimitCrawl: too many processes in indexing queue, dismissed (" +
             "sbQueueSize=" + sb.sbQueue.size() + ")");
             return false;
         }
-        if (this.size() >= plasmaSwitchboard.crawlSlots) {
+        if (this.size() >= sb.getConfigLong(plasmaSwitchboard.CRAWLER_THREADS_ACTIVE_MAX, 10)) {
             log.logFine("LimitCrawl: too many processes in loader queue, dismissed (" +
             "cacheLoader=" + this.size() + ")");
             return false;
@@ -318,12 +318,12 @@ public class plasmaCrawlQueues {
             //log.logDebug("GlobalCrawl: queue is empty");
             return false;
         }
-        if (sb.sbQueue.size() >= plasmaSwitchboard.indexingSlots) {
+        if (sb.sbQueue.size() >= (int) sb.getConfigLong(plasmaSwitchboard.INDEXER_SLOTS, 30)) {
             log.logFine("GlobalCrawl: too many processes in indexing queue, dismissed (" +
             "sbQueueSize=" + sb.sbQueue.size() + ")");
             return false;
         }
-        if (this.size() >= plasmaSwitchboard.crawlSlots) {
+        if (this.size() >= sb.getConfigLong(plasmaSwitchboard.CRAWLER_THREADS_ACTIVE_MAX, 10)) {
             log.logFine("GlobalCrawl: too many processes in loader queue, dismissed (" +
             "cacheLoader=" + this.size() + ")");
             return false;

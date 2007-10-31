@@ -88,7 +88,7 @@ public class queues_p {
         
         //indexing queue
         prop.putNum("indexingSize", sb.getThread(plasmaSwitchboard.INDEXER).getJobCount()+sb.indexingTasksInProcess.size());
-        prop.putNum("indexingMax", plasmaSwitchboard.indexingSlots);
+        prop.putNum("indexingMax", (int) sb.getConfigLong(plasmaSwitchboard.INDEXER_SLOTS, 30));
         prop.putNum("urlpublictextSize", sb.wordIndex.loadedURL.size());
         prop.putNum("rwipublictextSize", sb.wordIndex.size());
         if ((sb.sbQueue.size() == 0) && (sb.indexingTasksInProcess.size() == 0)) {
@@ -140,7 +140,7 @@ public class queues_p {
         
         //loader queue
         prop.put("loaderSize", Integer.toString(sb.crawlQueues.size()));        
-        prop.put("loaderMax", Integer.toString(plasmaSwitchboard.crawlSlots));
+        prop.put("loaderMax", sb.getConfig(plasmaSwitchboard.CRAWLER_THREADS_ACTIVE_MAX, "10"));
         if (sb.crawlQueues.size() == 0) {
             prop.put("list-loader", "0");
         } else {
