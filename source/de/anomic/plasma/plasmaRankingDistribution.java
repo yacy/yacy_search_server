@@ -128,7 +128,7 @@ public final class plasmaRankingDistribution {
             return false;
         }
         
-        if (outfiles.length > count) count = outfiles.length;
+        if (outfiles.length < count) count = outfiles.length;
         File crfile = null;
         
         for (int i = 0; i < count; i++) {
