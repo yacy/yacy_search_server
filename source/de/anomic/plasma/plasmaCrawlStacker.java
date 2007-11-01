@@ -86,6 +86,9 @@ public final class plasmaCrawlStacker extends Thread {
     private long preloadTime;
     private int dbtype;
     private boolean prequeue;
+    private long dnsHit, dnsMiss;
+    private int alternateCount;
+    
     
     // objects for the prefetch task
     private ArrayList dnsfetchHosts = new ArrayList();    
@@ -93,6 +96,9 @@ public final class plasmaCrawlStacker extends Thread {
     public plasmaCrawlStacker(plasmaSwitchboard sb, File dbPath, long preloadTime, int dbtype, boolean prequeue) {
         this.sb = sb;
         this.prequeue = prequeue;
+        this.dnsHit = 0;
+        this.dnsMiss = 0;
+        this.alternateCount = 0;
         
         // init the message list
         this.urlEntryHashCache = new LinkedList();
@@ -152,14 +158,18 @@ public final class plasmaCrawlStacker extends Thread {
         } catch (InterruptedException e) {}
     }       
 
-    public void prefetchHost(String host) {
+    public boolean prefetchHost(String host) {
+        // returns true when the host was known in the dns cache.
+        // If not, the host is stacked on the fetch stack and false is returned
         try {
             serverDomains.dnsResolveFromCache(host);
+            return true;
         } catch (UnknownHostException e) {
             synchronized (this) {
                 dnsfetchHosts.add(host);
                 notifyAll();
             }
+            return false;
         }
     }
     
@@ -221,8 +231,7 @@ public final class plasmaCrawlStacker extends Thread {
             String name, 
             Date loadDate, 
             int currentdepth, 
-            plasmaCrawlProfile.entry profile,
-            boolean first) {
+            plasmaCrawlProfile.entry profile) {
         if (profile == null) return;
         plasmaCrawlEntry newEntry = new plasmaCrawlEntry(
                     initiatorHash,
@@ -240,17 +249,28 @@ public final class plasmaCrawlStacker extends Thread {
                 
         synchronized(this.urlEntryHashCache) {                    
             kelondroRow.Entry oldValue;
-            if (prequeue) prefetchHost(nexturl.getHost());
+            boolean hostknown = true;
+            if (prequeue) hostknown = prefetchHost(nexturl.getHost());
             try {
                 oldValue = this.urlEntryCache.put(newEntry.toRow());
             } catch (IOException e) {
                 oldValue = null;
             }                        
             if (oldValue == null) {
-                if (first) {
+                //System.out.println("*** debug crawlStacker dnsHit=" + this.dnsHit + ", dnsMiss=" + this.dnsMiss + ", alternateCount=" + this.alternateCount + ((this.dnsMiss > 0) ? (", Q=" + (this.dnsHit / this.dnsMiss)) : ""));
+                if (hostknown) {
+                    this.alternateCount++;
                     this.urlEntryHashCache.addFirst(newEntry.url().hash());
+                    this.dnsHit++;
                 } else {
-                    this.urlEntryHashCache.addLast(newEntry.url().hash());
+                    if ((this.dnsMiss > 0) && (this.alternateCount > 2 * this.dnsHit / this.dnsMiss)) {
+                        this.urlEntryHashCache.addFirst(newEntry.url().hash());
+                        this.alternateCount = 0;
+                        //System.out.println("*** debug crawlStacker alternate switch, dnsHit=" + this.dnsHit + ", dnsMiss=" + this.dnsMiss + ", alternateCount=" + this.alternateCount + ", Q=" + (this.dnsHit / this.dnsMiss));
+                    } else {
+                        this.urlEntryHashCache.addLast(newEntry.url().hash());
+                    }
+                    this.dnsMiss++; 
                 }
             }
         }

@@ -305,8 +305,7 @@ public class WatchCrawler_p {
                                             (String) e.getValue(), 
                                             new Date(), 
                                             0, 
-                                            profile,
-                                            true);
+                                            profile);
                                 }
                                
                             } catch (PatternSyntaxException e) {
