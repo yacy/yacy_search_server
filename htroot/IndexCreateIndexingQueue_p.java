@@ -80,7 +80,7 @@ public class IndexCreateIndexingQueue_p {
                 switchboard.crawlQueues.errorURL.clearStack();
             } 
             if (post.containsKey("moreRejected")) {
-                showRejectedCount = Integer.parseInt(post.get("showRejected", "10"));
+                showRejectedCount = post.getInt("showRejected", 10);
             }
             if (post.containsKey("clearIndexingQueue")) {
                 try {
@@ -168,7 +168,7 @@ public class IndexCreateIndexingQueue_p {
             if (showRejectedCount != switchboard.crawlQueues.errorURL.stackSize()) {
                 prop.put("rejected_only-latest", "1");
                 prop.putNum("rejected_only-latest_num", showRejectedCount);
-                prop.putNum("rejected_only-latest_newnum", ((int) (showRejectedCount * 1.5)));
+                prop.put("rejected_only-latest_newnum", ((int) (showRejectedCount * 1.5)));
             }else{
                 prop.put("rejected_only-latest", "0");
             }
