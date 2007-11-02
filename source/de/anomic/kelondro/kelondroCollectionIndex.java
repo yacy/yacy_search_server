@@ -24,6 +24,10 @@ package de.anomic.kelondro;
 // the collection arrays may be migration to another size during run-time, which means that not only the
 // partitions as mentioned above are maintained, but also a set of "shadow-partitions", that represent old
 // partitions and where data is read only and slowly migrated to the default partitions.
+//
+// $LastChangedDate$
+// $LastChangedRevision$
+// $LastChangedBy$
 
 import java.io.File;
 import java.io.IOException;
@@ -558,7 +562,7 @@ public class kelondroCollectionIndex {
         TreeMap array_add_map = new TreeMap();
         ArrayList actionList;
         TreeMap actionMap;
-        boolean madegc = false;
+        //boolean madegc = false;
         //System.out.println("DEBUG existingContainer: " + existingContainer.toString());
         while (existingContainer.size() > 0) {
             oldPartitionNumber1 = ((Integer) existingContainer.lastKey()).intValue();
@@ -637,12 +641,12 @@ public class kelondroCollectionIndex {
                     array_replace_map = new TreeMap(); // delete references
                     indexrows_existing.addAll(array_add_multiple(array_add_map, 0, this.payloadrow.objectsize()));
                     array_add_map = new TreeMap(); // delete references
-                    if (!madegc) {
-                        // prevent that this flush is made again even when there is enough memory
-                        System.gc();
-                        // prevent that this gc happens more than one time
-                        madegc = true;
-                    }
+                    //if (!madegc) {
+                    //    prevent that this flush is made again even when there is enough memory
+                    serverMemory.gc(10000, "kelendroCollectionIndex.mergeMultiple(...)"); // thq
+                    //    prevent that this gc happens more than one time
+                    //    madegc = true;
+                    //}
                 }
             }
         }

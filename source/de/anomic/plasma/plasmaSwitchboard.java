@@ -121,6 +121,8 @@ import java.util.Locale;
 import java.util.Map;
 import java.util.Properties;
 import java.util.Set;
+import java.util.Timer;
+import java.util.TimerTask;
 import java.util.TreeMap;
 import java.util.TreeSet;
 
@@ -159,6 +161,7 @@ import de.anomic.server.serverAbstractSwitch;
 import de.anomic.server.serverDomains;
 import de.anomic.server.serverFileUtils;
 import de.anomic.server.serverInstantThread;
+import de.anomic.server.serverMemory;
 import de.anomic.server.serverObjects;
 import de.anomic.server.serverSemaphore;
 import de.anomic.server.serverSwitch;
@@ -253,7 +256,8 @@ public final class plasmaSwitchboard extends serverAbstractSwitch implements ser
     public  TreeMap                     clusterhashes; // map of peerhash(String)/alternative-local-address as ip:port or only ip (String) or null if address in seed should be used
     public  boolean                     acceptLocalURLs, acceptGlobalURLs;
     public  URLLicense                  licensedURLs;
-    
+    public  Timer                       moreMemory;
+
     /*
      * Remote Proxy configuration
      */
@@ -1153,11 +1157,11 @@ public final class plasmaSwitchboard extends serverAbstractSwitch implements ser
         wordIndex.setWordFlushSize((int) getConfigLong("wordFlushSize", 10000));
         
         // set a maximum amount of memory for the caches
-        long memprereq = Math.max(getConfigLong(INDEXER_MEMPREREQ, 0), wordIndex.minMem());
+        // long memprereq = Math.max(getConfigLong(INDEXER_MEMPREREQ, 0), wordIndex.minMem());
         // setConfig(INDEXER_MEMPREREQ, memprereq);
-        //setThreadPerformance(INDEXER, getConfigLong(INDEXER_IDLESLEEP, 0), getConfigLong(INDEXER_BUSYSLEEP, 0), memprereq);
-        kelondroCachedRecords.setCacheGrowStati(memprereq + 4 * 1024 * 1024, memprereq + 2 * 1024 * 1024);
-        kelondroCache.setCacheGrowStati(memprereq + 4 * 1024 * 1024, memprereq + 2 * 1024 * 1024);
+        // setThreadPerformance(INDEXER, getConfigLong(INDEXER_IDLESLEEP, 0), getConfigLong(INDEXER_BUSYSLEEP, 0), memprereq);
+        kelondroCachedRecords.setCacheGrowStati(40 * 1024 * 1024, 20 * 1024 * 1024);
+        kelondroCache.setCacheGrowStati(40 * 1024 * 1024, 20 * 1024 * 1024);
         
         // make parser
         log.logConfig("Starting Parser");
@@ -1318,7 +1322,11 @@ public final class plasmaSwitchboard extends serverAbstractSwitch implements ser
         
         // deploy threads
         log.logConfig("Starting Threads");
-        // System.gc(); // help for profiler
+        serverMemory.gc(1000, "plasmaSwitchboard, help for profiler"); // help for profiler - thq
+
+        moreMemory = new Timer(); // init GC Thread - thq
+        moreMemory.schedule(new MoreMemory(), 300000, 600000);
+
         int indexing_cluster = Integer.parseInt(getConfig(INDEXER_CLUSTER, "1"));
         if (indexing_cluster < 1) indexing_cluster = 1;
         deployThread(CLEANUP, "Cleanup", "simple cleaning process for monitoring information", null,
@@ -1743,6 +1751,7 @@ public final class plasmaSwitchboard extends serverAbstractSwitch implements ser
     
     public void close() {
         log.logConfig("SWITCHBOARD SHUTDOWN STEP 1: sending termination signal to managed threads:");
+        moreMemory.cancel();
         terminateAllThreads(true);
         if (transferIdxThread != null) stopTransferWholeIndex(false);
         log.logConfig("SWITCHBOARD SHUTDOWN STEP 2: sending termination signal to threaded indexing");
@@ -1792,9 +1801,9 @@ public final class plasmaSwitchboard extends serverAbstractSwitch implements ser
         // flush some entries from the RAM cache
         wordIndex.flushCacheSome();
         // adopt maximum cache size to current size to prevent that further OutOfMemoryErrors occur
-        int newMaxCount = Math.max(1200, Math.min((int) getConfigLong(WORDCACHE_MAX_COUNT, 1200), wordIndex.dhtOutCacheSize()));
+/*      int newMaxCount = Math.max(1200, Math.min((int) getConfigLong(WORDCACHE_MAX_COUNT, 1200), wordIndex.dhtOutCacheSize()));
         setConfig(WORDCACHE_MAX_COUNT, Integer.toString(newMaxCount));
-        wordIndex.setMaxWordCount(newMaxCount); 
+        wordIndex.setMaxWordCount(newMaxCount); */
     }
     
     public boolean deQueue() {
@@ -2040,14 +2049,14 @@ public final class plasmaSwitchboard extends serverAbstractSwitch implements ser
                     yacyCore.newsPool.publishMyNews(yacyNewsRecord.newRecord(yacyNewsPool.CATEGORY_PROFILE_BROADCAST, news));
                 }
             }
-
+/*
             // set a maximum amount of memory for the caches
-            long memprereq = Math.max(getConfigLong(INDEXER_MEMPREREQ, 0), wordIndex.minMem());
+            // long memprereq = Math.max(getConfigLong(INDEXER_MEMPREREQ, 0), wordIndex.minMem());
             // setConfig(INDEXER_MEMPREREQ, memprereq);
-            //setThreadPerformance(INDEXER, getConfigLong(INDEXER_IDLESLEEP, 0), getConfigLong(INDEXER_BUSYSLEEP, 0), memprereq);
-            kelondroCachedRecords.setCacheGrowStati(memprereq + 4 * 1024 * 1024, memprereq + 2 * 1024 * 1024);
-            kelondroCache.setCacheGrowStati(memprereq + 4 * 1024 * 1024, memprereq + 2 * 1024 * 1024);
-            
+            // setThreadPerformance(INDEXER, getConfigLong(INDEXER_IDLESLEEP, 0), getConfigLong(INDEXER_BUSYSLEEP, 0), memprereq);
+            kelondroCachedRecords.setCacheGrowStati(40 * 1024 * 1024, 20 * 1024 * 1024);
+            kelondroCache.setCacheGrowStati(40 * 1024 * 1024, 20 * 1024 * 1024);
+*/
             // update the cluster set
             this.clusterhashes = yacyCore.seedDB.clusterHashes(getConfig("cluster.peers.yacydomain", ""));
             
@@ -2887,7 +2896,7 @@ public final class plasmaSwitchboard extends serverAbstractSwitch implements ser
         if ((curThread instanceof serverThread) && ((serverThread)curThread).shutdownInProgress()) throw new InterruptedException("Shutdown in progress ...");
         else if (this.terminate || curThread.isInterrupted()) throw new InterruptedException("Shutdown in progress ...");
     }
-    
+
     public void terminate(long delay) {
         if (delay <= 0) throw new IllegalArgumentException("The shutdown delay must be greater than 0.");
         (new delayedShutdown(this,delay)).start();
@@ -2905,6 +2914,12 @@ public final class plasmaSwitchboard extends serverAbstractSwitch implements ser
     public boolean waitForShutdown() throws InterruptedException {
         this.shutdownSync.P();
         return this.terminate;
+    }
+}
+
+class MoreMemory extends TimerTask {
+    public final void run() {
+        serverMemory.gc(10000, "MoreMemory()");
     }
 }
 

@@ -4,9 +4,9 @@
 //
 // This is a part of YaCy, a peer-to-peer based web search engine
 //
-// $LastChangedDate: 2006-04-02 22:40:07 +0200 (So, 02 Apr 2006) $
-// $LastChangedRevision: 1986 $
-// $LastChangedBy: orbiter $
+// $LastChangedDate$
+// $LastChangedRevision$
+// $LastChangedBy$
 //
 // LICENSE
 // 
@@ -45,6 +45,7 @@ import de.anomic.kelondro.kelondroNaturalOrder;
 import de.anomic.kelondro.kelondroRow;
 import de.anomic.server.serverByteBuffer;
 import de.anomic.server.serverFileUtils;
+import de.anomic.server.serverMemory;
 import de.anomic.server.logging.serverLog;
 import de.anomic.yacy.yacySeedDB;
 
@@ -160,7 +161,7 @@ public final class indexRAMRI implements indexRI {
 
                 // write a log
                 if (System.currentTimeMillis() > messageTime) {
-                    // System.gc(); // for better statistic
+                    serverMemory.gc(1000, "indexRAMRI, for better statistic-1"); // for better statistic - thq
                     wordsPerSecond = wordcount * 1000
                             / (1 + System.currentTimeMillis() - startTime);
                     log.logInfo("dump status: " + wordcount
@@ -222,7 +223,7 @@ public final class indexRAMRI implements indexRI {
                     //while (rt.freeMemory() < 1000000) {flushFromMem(); java.lang.System.gc();}
                     // write a log
                     if (System.currentTimeMillis() > messageTime) {
-                        System.gc(); // for better statistic
+                        serverMemory.gc(1000, "indexRAMRI, for better statistic-2"); // for better statistic - thq
                         urlsPerSecond = 1 + urlCount * 1000 / (1 + System.currentTimeMillis() - startTime);
                         log.logInfo("restoring status: " + urlCount + " urls done, " + ((dumpArray.size() - urlCount) / urlsPerSecond) + " seconds remaining, free mem = " + (Runtime.getRuntime().freeMemory() / 1024 / 1024) + "MB");
                         messageTime = System.currentTimeMillis() + 5000;

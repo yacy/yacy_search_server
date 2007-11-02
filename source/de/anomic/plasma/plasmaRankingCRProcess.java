@@ -6,9 +6,9 @@
 // Frankfurt, Germany, 2005
 // Created 15.11.2005
 //
-// $LastChangedDate: 2005-10-22 15:28:04 +0200 (Sat, 22 Oct 2005) $
-// $LastChangedRevision: 968 $
-// $LastChangedBy: theli $
+// $LastChangedDate$
+// $LastChangedRevision$
+// $LastChangedBy$
 //
 // This program is free software; you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -386,7 +386,7 @@ public class plasmaRankingCRProcess {
         // finished. write to file
         cr = null;
         cr_in = null;
-        System.gc();
+        serverMemory.gc(1000, "plasmaRankingCRProcess.genrci(...)"); // thq
         rci.toFile(rci_out);
         return count;
     }

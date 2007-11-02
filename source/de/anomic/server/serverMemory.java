@@ -3,9 +3,9 @@
 // (C) 2005 by Michael Peter Christen; mc@yacy.net, Frankfurt a. M., Germany
 // first published 22.09.2005 on http://yacy.net
 //
-// $LastChangedDate: 2005-09-21 16:21:45 +0200 (Wed, 21 Sep 2005) $
-// $LastChangedRevision: 763 $
-// $LastChangedBy: orbiter $
+// $LastChangedDate$
+// $LastChangedRevision$
+// $LastChangedBy$
 //
 // LICENSE
 // 
@@ -23,7 +23,6 @@
 // along with this program; if not, write to the Free Software
 // Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 
-
 package de.anomic.server;
 
 import de.anomic.server.logging.serverLog;
@@ -38,11 +37,25 @@ public class serverMemory {
     
     private static final long[] gcs = new long[5];
     private static int gcs_pos = 0;
-    
+
+    private static long lastGC;
+
+    public final synchronized static void gc(int last, String info) { // thq
+        long elapsed = System.currentTimeMillis() - lastGC;
+        if (elapsed > last) {
+            long free = free();
+            System.gc();
+            lastGC = System.currentTimeMillis();
+            log.logInfo("[gc] before: " + bytesToString(free) + ", after: " + bytesToString(free()) + ", call: " + info);
+        } else if (log.isFine()) {
+            log.logFine("[gc] no execute, last run: " + (elapsed / 1000) + " seconds ago, call: " + info);
+        }
+    }
+
     /** @return the amount of freed bytes by a forced GC this method performes */
     private static long runGC(final boolean count) {
         final long memnow = available();
-        System.gc();
+        gc(1000, "serverMemory.runGC(...)");
         final long freed = available() - memnow;
         if (count) {
             gcs[gcs_pos] = freed;
@@ -89,7 +102,7 @@ public class serverMemory {
     public static boolean available(long memory, boolean gciffail) {
         if (available() >= memory) return true;
         if (!gciffail) return false;
-        System.gc();
+        gc(4000, "serverMemory.available(...)");
         return (available() >= memory);
     }
     

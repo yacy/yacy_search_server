@@ -6,7 +6,7 @@
 //
 // $LastChangedDate$
 // $LastChangedRevision$
-// $LastChangedBy: $
+// $LastChangedBy$
 //
 // ThreadPool
 //
@@ -414,7 +414,7 @@ public final class serverCore extends serverAbstractThread implements serverThre
     
     public void freemem() {
         // FIXME: can we something here to flush memory? Idea: Reduce the size of some of our various caches.
-    	System.gc();
+        serverMemory.gc(2000, "serverCore.freemem()"); // thq
     }
     
     // class body

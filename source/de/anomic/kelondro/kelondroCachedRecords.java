@@ -4,9 +4,9 @@
 //
 // This is a part of YaCy, a peer-to-peer based web search engine
 //
-// $LastChangedDate: 2006-04-02 22:40:07 +0200 (So, 02 Apr 2006) $
-// $LastChangedRevision: 1986 $
-// $LastChangedBy: orbiter $
+// $LastChangedDate$
+// $LastChangedRevision$
+// $LastChangedBy$
 //
 // LICENSE
 // 
@@ -122,7 +122,11 @@ public class kelondroCachedRecords extends kelondroAbstractRecords implements ke
         // 1: cache is allowed to grow, but need not to shrink
         // 2: cache is allowed to grow and must not shrink
         if (available > stopGrow) return 2;
-        if (available > startShrink) return 1;
+        if (available > startShrink) {
+            serverMemory.gc(30000, "kelendroCacheRecords.cacheGrowStatus(...) 1"); // thq
+            return 1;
+        }
+        serverMemory.gc(3000, "kelendroCacheRecords.cacheGrowStatus(...) 0"); // thq
         return 0;
     }
     
