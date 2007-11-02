@@ -46,9 +46,9 @@ public class serverMemory {
             long free = free();
             System.gc();
             lastGC = System.currentTimeMillis();
-            log.logInfo("[gc] before: " + bytesToString(free) + ", after: " + bytesToString(free()) + ", call: " + info);
+            if (log.isFine()) log.logInfo("[gc] before: " + bytesToString(free) + ", after: " + bytesToString(free()) + ", call: " + info);
         } else if (log.isFine()) {
-            log.logFine("[gc] no execute, last run: " + (elapsed / 1000) + " seconds ago, call: " + info);
+            log.logFinest("[gc] no execute, last run: " + (elapsed / 1000) + " seconds ago, call: " + info);
         }
     }
 
