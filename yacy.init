@@ -265,6 +265,9 @@ indexSecondaryPath=
 # the path to the LISTS files. Most lists are used to filter web content
 listsPath=DATA/LISTS
 
+# path to additional databases, like messages, blog data and bookmarks
+workPath=DATA/WORK
+
 # the path to the SKINS files.
 skinPath=DATA/SKINS
 

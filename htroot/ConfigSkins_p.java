@@ -78,7 +78,7 @@ public class ConfigSkins_p {
 	}
 
 	private static boolean changeSkin(plasmaSwitchboard sb, String skinPath, String skin){
-        File htdocsDir  = new File(sb.getRootPath(), sb.getConfig("htDocsPath", "DATA/HTDOCS")+"/env");
+        File htdocsDir  = new File(sb.getConfigPath("htDocsPath", "DATA/HTDOCS"), "env");
 		File styleFile = new File(htdocsDir, "style.css");
 		File skinFile  = new File(skinPath, skin);
 
@@ -93,7 +93,7 @@ public class ConfigSkins_p {
 	public static serverObjects respond(httpHeader header, serverObjects post, serverSwitch env) {
 	serverObjects prop = new serverObjects();
 	plasmaSwitchboard switchboard = (plasmaSwitchboard) env;
-	String skinPath = new File(env.getRootPath(), env.getConfig("skinsPath", "DATA/SKINS")).toString();
+	String skinPath = new File(env.getRootPath(), env.getConfig("skinPath", "DATA/SKINS")).toString();
 
 	//Fallback
 	prop.put("currentskin", "");

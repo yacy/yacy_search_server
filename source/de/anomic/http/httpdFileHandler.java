@@ -182,21 +182,21 @@ public final class httpdFileHandler {
             
             // create a htDocsPath: user defined pages
             if (htDocsPath == null) {
-                htDocsPath = new File(switchboard.getRootPath(), switchboard.getConfig("htDocsPath", "htdocs"));
+                htDocsPath = switchboard.getConfigPath(plasmaSwitchboard.HTDOCS_PATH, plasmaSwitchboard.HTDOCS_PATH_DEFAULT);
                 if (!(htDocsPath.exists())) htDocsPath.mkdir();
             }
             
             // create a htTemplatePath
             if (htTemplatePath == null) {
-                htTemplatePath = new File(switchboard.getRootPath(), switchboard.getConfig("htTemplatePath","htroot/env/templates"));
+                htTemplatePath = switchboard.getConfigPath("htTemplatePath","htroot/env/templates");
                 if (!(htTemplatePath.exists())) htTemplatePath.mkdir();
             }
             //This is now handles by #%env/templates/foo%#
             //if (templates.size() == 0) templates.putAll(httpTemplate.loadTemplates(htTemplatePath));
             
             // create htLocaleDefault, htLocalePath
-            if (htDefaultPath == null) htDefaultPath = new File(switchboard.getRootPath(), switchboard.getConfig("htDefaultPath","htroot"));
-            if (htLocalePath == null) htLocalePath = new File(switchboard.getConfig("locale.translated_html","DATA/LOCALE/htroot"));
+            if (htDefaultPath == null) htDefaultPath = switchboard.getConfigPath("htDefaultPath", "htroot");
+            if (htLocalePath == null) htLocalePath = switchboard.getConfigPath("locale.translated_html", "DATA/LOCALE/htroot");
         }
         
     }
@@ -217,8 +217,8 @@ public final class httpdFileHandler {
 	 * @param path relative from htroot
 	 * @param localeSelection language of localized file; locale.language from switchboard is used if localeSelection.equals("") */
 	public static File getLocalizedFile(String path, String localeSelection){
-        if (htDefaultPath == null) htDefaultPath = new File(switchboard.getRootPath(), switchboard.getConfig("htDefaultPath","htroot"));
-        if (htLocalePath == null) htLocalePath = new File(switchboard.getRootPath(), switchboard.getConfig("locale.translated_html","DATA/LOCALE/htroot"));
+        if (htDefaultPath == null) htDefaultPath = switchboard.getConfigPath("htDefaultPath","htroot");
+        if (htLocalePath == null) htLocalePath = switchboard.getConfigPath("locale.translated_html","DATA/LOCALE/htroot");
 
         if (!(localeSelection.equals("default"))) {
             File localePath = new File(htLocalePath, localeSelection + "/" + path);

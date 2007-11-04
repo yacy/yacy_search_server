@@ -964,20 +964,20 @@ public final class plasmaSwitchboard extends serverAbstractSwitch implements ser
         long startedSeedListAquisition = System.currentTimeMillis();
         
         // load values from configs
-        this.plasmaPath   = new File(rootPath, getConfig(DBPATH, DBPATH_DEFAULT));
+        this.plasmaPath   = getConfigPath(DBPATH, DBPATH_DEFAULT);
         this.log.logConfig("Plasma DB Path: " + this.plasmaPath.toString());
-        this.indexPrimaryPath = new File(rootPath, getConfig(INDEX_PRIMARY_PATH, INDEX_PATH_DEFAULT));
+        this.indexPrimaryPath = getConfigPath(INDEX_PRIMARY_PATH, INDEX_PATH_DEFAULT);
         this.log.logConfig("Index Primary Path: " + this.indexPrimaryPath.toString());
         this.indexSecondaryPath = (getConfig(INDEX_SECONDARY_PATH, "").length() == 0) ? indexPrimaryPath : new File(getConfig(INDEX_SECONDARY_PATH, ""));
         this.log.logConfig("Index Secondary Path: " + this.indexSecondaryPath.toString());
-        this.listsPath      = new File(rootPath, getConfig(LISTS_PATH, LISTS_PATH_DEFAULT));
+        this.listsPath      = getConfigPath(LISTS_PATH, LISTS_PATH_DEFAULT);
         this.log.logConfig("Lists Path:     " + this.listsPath.toString());
-        this.htDocsPath   = new File(rootPath, getConfig(HTDOCS_PATH, HTDOCS_PATH_DEFAULT));
+        this.htDocsPath   = getConfigPath(HTDOCS_PATH, HTDOCS_PATH_DEFAULT);
         this.log.logConfig("HTDOCS Path:    " + this.htDocsPath.toString());
-        this.rankingPath   = new File(rootPath, getConfig(RANKING_PATH, RANKING_PATH_DEFAULT));
+        this.rankingPath   = getConfigPath(RANKING_PATH, RANKING_PATH_DEFAULT);
         this.log.logConfig("Ranking Path:    " + this.rankingPath.toString());
         this.rankingPermissions = new HashMap(); // mapping of permission - to filename.
-        this.workPath   = new File(rootPath, getConfig(WORK_PATH, WORK_PATH_DEFAULT));
+        this.workPath   = getConfigPath(WORK_PATH, WORK_PATH_DEFAULT);
         this.log.logConfig("Work Path:    " + this.workPath.toString());
         
         // set up local robots.txt
@@ -1002,7 +1002,7 @@ public final class plasmaSwitchboard extends serverAbstractSwitch implements ser
         }
         
         // load the black-list / inspired by [AS]
-        File blacklistsPath = new File(getRootPath(), getConfig(LISTS_PATH, LISTS_PATH_DEFAULT));
+        File blacklistsPath = getConfigPath(LISTS_PATH, LISTS_PATH_DEFAULT);
         String blacklistClassName = getConfig(BLACKLIST_CLASS, BLACKLIST_CLASS_DEFAULT);
         
         this.log.logConfig("Starting blacklist engine ...");
@@ -1099,14 +1099,7 @@ public final class plasmaSwitchboard extends serverAbstractSwitch implements ser
         log.logConfig("Starting HT Cache Manager");
         
         // create the cache directory
-        String cache = getConfig(HTCACHE_PATH, HTCACHE_PATH_DEFAULT);
-        cache = cache.replace('\\', '/');
-        if (cache.endsWith("/")) { cache = cache.substring(0, cache.length() - 1); }
-        if (new File(cache).isAbsolute()) {
-            htCachePath = new File(cache); // don't use rootPath
-        } else {
-            htCachePath = new File(rootPath, cache);
-        }
+        htCachePath = getConfigPath(HTCACHE_PATH, HTCACHE_PATH_DEFAULT);
         this.log.logInfo("HTCACHE Path = " + htCachePath.getAbsolutePath());
         long maxCacheSize = 1024 * 1024 * Long.parseLong(getConfig(PROXY_CACHE_SIZE, "2")); // this is megabyte
         String cacheLayout = getConfig(PROXY_CACHE_LAYOUT, PROXY_CACHE_LAYOUT_TREE);
@@ -1114,14 +1107,7 @@ public final class plasmaSwitchboard extends serverAbstractSwitch implements ser
         plasmaHTCache.init(htCachePath, maxCacheSize, ramHTTP_time, cacheLayout, cacheMigration);
         
         // create the release download directory
-        String release = getConfig(RELEASE_PATH, RELEASE_PATH_DEFAULT);
-        release = release.replace('\\', '/');
-        if (release.endsWith("/")) { release = release.substring(0, release.length() - 1); }
-        if (new File(release).isAbsolute()) {
-            releasePath = new File(release); // don't use rootPath
-        } else {
-            releasePath = new File(rootPath, release);
-        }
+        releasePath = getConfigPath(RELEASE_PATH, RELEASE_PATH_DEFAULT);
         releasePath.mkdirs();
         this.log.logInfo("RELEASE Path = " + releasePath.getAbsolutePath());
        
@@ -1235,7 +1221,7 @@ public final class plasmaSwitchboard extends serverAbstractSwitch implements ser
         
         // init messages: clean up message symbol
         File notifierSource = new File(getRootPath(), getConfig(HTROOT_PATH, HTROOT_PATH_DEFAULT) + "/env/grafics/empty.gif");
-        File notifierDest = new File(getConfig(HTDOCS_PATH, HTDOCS_PATH_DEFAULT), "notifier.gif");
+        File notifierDest = new File(getConfigPath(HTDOCS_PATH, HTDOCS_PATH_DEFAULT), "notifier.gif");
         try {
             serverFileUtils.copy(notifierSource, notifierDest);
         } catch (IOException e) {
@@ -2072,7 +2058,7 @@ public final class plasmaSwitchboard extends serverAbstractSwitch implements ser
      * @return a new File instance
      */
     public File getOwnSeedFile() {
-        return new File(getRootPath(), getConfig(OWN_SEED_FILE, DBFILE_OWN_SEED));
+        return getConfigPath(OWN_SEED_FILE, DBFILE_OWN_SEED);
     }
     
     /**

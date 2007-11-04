@@ -159,7 +159,7 @@ public final class message {
 
             // finally write notification
             File notifierSource = new File(sb.getRootPath(), sb.getConfig("htRootPath","htroot") + "/env/grafics/message.gif");
-            File notifierDest   = new File(sb.getConfig("htDocsPath", "DATA/HTDOCS"), "notifier.gif");
+            File notifierDest   = new File(sb.getConfigPath("htDocsPath", "DATA/HTDOCS"), "notifier.gif");
             try {
                 serverFileUtils.copy(notifierSource, notifierDest);
             } catch (IOException e) {

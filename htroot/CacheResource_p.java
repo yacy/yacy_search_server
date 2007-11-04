@@ -62,7 +62,7 @@ public class CacheResource_p {
         String path = ((post == null) ? "" : post.get("path", ""));
 
         // we dont need check the path, because we have do that in plasmaSwitchboard.java - Borg-0300
-        File cache = new File(switchboard.getConfig("proxyCache", "DATA/HTCACHE").toString());    
+        File cache = switchboard.getConfigPath(plasmaSwitchboard.HTCACHE_PATH, plasmaSwitchboard.HTCACHE_PATH_DEFAULT);
 
         File f = new File(cache, path);
         byte[] resource;

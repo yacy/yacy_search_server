@@ -49,6 +49,7 @@
 
 package de.anomic.server;
 
+import java.io.File;
 import java.net.InetAddress;
 import java.util.Iterator;
 import java.util.Map;
@@ -102,6 +103,7 @@ public interface serverSwitch {
     public String getConfig(String key, String dflt);
     public long getConfigLong(String key, long dflt);
     public boolean getConfigBool(String key, boolean dflt);
+    public File getConfigPath(String key, String dflt);
     public Iterator configKeys();
     public Map getRemoved();
         

@@ -97,7 +97,7 @@ public class dir {
 
         // variables for this path
 //      File   htroot = new File(switchboard.getRootPath(), switchboard.getConfig("htRootPath", "htroot"));
-        final File   htroot = new File(switchboard.getRootPath(), switchboard.getConfig("htDocsPath", "DATA/HTDOCS"));
+        final File   htroot = switchboard.getConfigPath("htDocsPath", "DATA/HTDOCS");
         String path   = (String) header.get("PATH", "/");
         int pos = path.lastIndexOf("/");
         if (pos >= 0) { path = path.substring(0, pos + 1); }

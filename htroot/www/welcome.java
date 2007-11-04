@@ -47,6 +47,7 @@ package www;
 // javac -classpath .:../classes index.java
 // if the shell's current path is HTROOT
 
+import java.io.File;
 import java.net.InetAddress;
 import java.net.UnknownHostException;
 
@@ -83,10 +84,10 @@ public class welcome {
         final boolean senior = (peertype.equals(yacySeed.PEERTYPE_SENIOR)) || (peertype.equals(yacySeed.PEERTYPE_PRINCIPAL));
         if (senior) { prop.put("couldcan", "can"); } else { prop.put("couldcan", "could"); }
         if (senior) { prop.put("seniorinfo", "This peer runs in senior mode which means that your peer can be accessed using the addresses shown above."); } else { prop.putHTML("seniorinfo", "<b>Nobody can access your peer from the outside of your intranet. You must open your firewall and/or set a 'virtual server' in the settings of your router to enable access to the addresses as shown below.</b>"); }
-        prop.putHTML("wwwpath", "<application_root_path>/" + env.getConfig("htDocsPath", "DATA/HTDOCS"));
+        File wwwpath = env.getConfigPath("htDocsPath", "DATA/HTDOCS");
+        prop.putHTML("wwwpath", wwwpath.isAbsolute() ? wwwpath.getAbsolutePath() : "<application_root_path>/" + env.getConfig("htDocsPath", "DATA/HTDOCS"));
 
         // return rewrite properties
         return prop;
     }
-
 }

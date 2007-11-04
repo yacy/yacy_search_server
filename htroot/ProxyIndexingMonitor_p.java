@@ -95,15 +95,15 @@ public class ProxyIndexingMonitor_p {
                 
                 // added proxyCache, proxyCacheSize - Borg-0300
                 // proxyCache - check and create the directory
-                oldProxyCachePath = env.getConfig("proxyCache", "DATA/HTCACHE");
-                newProxyCachePath = post.get("proxyCache", "DATA/HTCACHE");
+                oldProxyCachePath = env.getConfig(plasmaSwitchboard.HTCACHE_PATH, plasmaSwitchboard.HTCACHE_PATH_DEFAULT);
+                newProxyCachePath = post.get("proxyCache", plasmaSwitchboard.HTCACHE_PATH_DEFAULT);
                 newProxyCachePath = newProxyCachePath.replace('\\', '/');
                 if (newProxyCachePath.endsWith("/")) {
                     newProxyCachePath = newProxyCachePath.substring(0, newProxyCachePath.length() - 1);
                 }
-                final File cache = new File(newProxyCachePath);
+                env.setConfig(plasmaSwitchboard.HTCACHE_PATH, newProxyCachePath);
+                final File cache = env.getConfigPath(plasmaSwitchboard.HTCACHE_PATH, oldProxyCachePath);
                 if (!cache.isDirectory() && !cache.isFile()) cache.mkdirs();
-                env.setConfig("proxyCache", newProxyCachePath);
 
                 // proxyCacheSize 
                 oldProxyCacheSize = getStringLong(env.getConfig("proxyCacheSize", "64"));
@@ -169,7 +169,7 @@ public class ProxyIndexingMonitor_p {
         prop.put("proxyIndexingRemote", env.getConfig("proxyIndexingRemote", "").equals("true") ? "1" : "0");
         prop.put("proxyIndexingLocalText", env.getConfig("proxyIndexingLocalText", "").equals("true") ? "1" : "0");
         prop.put("proxyIndexingLocalMedia", env.getConfig("proxyIndexingLocalMedia", "").equals("true") ? "1" : "0");
-        prop.put("proxyCache", env.getConfig("proxyCache", "DATA/HTCACHE"));
+        prop.put("proxyCache", env.getConfig(plasmaSwitchboard.HTCACHE_PATH, plasmaSwitchboard.HTCACHE_PATH_DEFAULT));
         prop.put("proxyCacheSize", env.getConfig("proxyCacheSize", "64"));
         // return rewrite properties
         return prop;

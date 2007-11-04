@@ -95,7 +95,7 @@ public class migration {
             file.delete();
     }
     public static void installSkins(plasmaSwitchboard sb){
-        final File skinsPath = new File(sb.getRootPath(), sb.getConfig("skinsPath", "DATA/SKINS"));
+        final File skinsPath = sb.getConfigPath("skinPath", "DATA/SKINS");
         final File defaultSkinsPath = new File(sb.getRootPath(), "skins");
         if(defaultSkinsPath.exists()){
             final String[] skinFiles = listManager.getDirListing(defaultSkinsPath.getAbsolutePath());
@@ -112,9 +112,9 @@ public class migration {
         if(skin.equals("")){
             skin="default";
         }
-        File skinsDir=new File(sb.getRootPath(), sb.getConfig("skinsPath", "DATA/SKINS"));
+        File skinsDir=sb.getConfigPath("skinPath", "DATA/SKINS");
         File skinFile=new File(skinsDir, skin+".css");
-        File htdocsPath=new File(sb.getRootPath(), sb.getConfig("htdocsPath", "DATA/HTDOCS")+"/env");
+        File htdocsPath=new File(sb.getConfigPath(plasmaSwitchboard.HTDOCS_PATH, plasmaSwitchboard.HTROOT_PATH_DEFAULT), "env");
         File styleFile=new File(htdocsPath, "style.css");
         if(!skinFile.exists()){
             if(styleFile.exists()){

@@ -10,7 +10,7 @@
 //
 // $LastChangedDate$
 // $LastChangedRevision$
-// $LastChangedBy: $
+// $LastChangedBy$
 //
 // This program is free software; you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -257,7 +257,7 @@ public class translator {
         }
         String htRootPath = env.getConfig("htRootPath", "htroot");
         File sourceDir = new File(env.getRootPath(), htRootPath);
-        File destDir = new File(env.getConfig("locale.translated_html","DATA/LOCALE/htroot"), lang.substring(0, lang.length() - 4));// cut
+        File destDir = new File(env.getConfigPath("locale.translated_html","DATA/LOCALE/htroot"), lang.substring(0, lang.length() - 4));// cut
         // .lng
         //File destDir = new File(env.getRootPath(), htRootPath + "/locale/" + lang.substring(0, lang.length() - 4));// cut
         // .lng

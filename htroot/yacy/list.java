@@ -79,7 +79,7 @@ public final class list {
         if (!yacyNetwork.authentifyRequest(post, env)) return prop;
         
         final String col = post.get("col", "");
-        final File listsPath = new File(env.getRootPath(),env.getConfig("listsPath", "DATA/LISTS"));
+        final File listsPath = env.getConfigPath(plasmaSwitchboard.LISTS_PATH, plasmaSwitchboard.LISTS_PATH_DEFAULT);
         
         String otherPeerName = null;
         if (post.containsKey("iam")) {

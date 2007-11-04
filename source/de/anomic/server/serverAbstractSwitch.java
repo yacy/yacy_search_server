@@ -318,6 +318,28 @@ public abstract class serverAbstractSwitch implements serverSwitch {
     public boolean getConfigBool(String key, boolean dflt) {
         return Boolean.valueOf(getConfig(key, Boolean.toString(dflt))).booleanValue();
     }
+    
+    /**
+     * Create a File instance for a configuration setting specifying a path.
+     * @param key   config key
+     * @param dflt  default path value, that is used when there is no value
+     *              <code>key</code> in the configuration.
+     * @return if the value of the setting is an absolute path String, then the
+     * returned File is derived from this setting only. Otherwise the path's file
+     * is constructed from the applications root path + the relative path setting.
+     */
+    public File getConfigPath(String key, String dflt) {
+        File ret;
+        String path = getConfig(key, dflt).replace('\\', '/');
+        File f = new File(path);
+        if (f == null) {
+            ret = null;
+        } else {
+            ret = (f.isAbsolute() ? f : new File(this.rootPath, path));
+        }
+        
+        return ret;
+    }
 
     public Iterator configKeys() {
 	return configProps.keySet().iterator();

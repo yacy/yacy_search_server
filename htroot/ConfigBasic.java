@@ -47,7 +47,6 @@
 // javac -classpath .:../classes ConfigBasic_p.java
 // if the shell's current path is HTROOT
 
-import java.io.File;
 import java.lang.Integer;
 import java.util.regex.Pattern;
 
@@ -80,7 +79,7 @@ public class ConfigBasic {
         ConfigBasic config = new ConfigBasic();
         plasmaSwitchboard sb = (plasmaSwitchboard) env;
         serverObjects prop = new serverObjects();
-        String langPath = new File(env.getRootPath(), env.getConfig("locale.work", "DATA/LOCALE/locales")).toString();
+        String langPath = env.getConfigPath("locale.work", "DATA/LOCALE/locales").getAbsolutePath();
         String lang = env.getConfig("locale.language", "default");
         
         int authentication = sb.adminAuthenticated(header);

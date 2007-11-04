@@ -99,7 +99,7 @@ public class AccessTracker_p {
 						while (ii.hasNext()) {
 							entry = (Map.Entry) ii.next();
 							prop.putHTML("page_list_" + entCount + "_host", host);
-							prop.putHTML("page_list_" + entCount + "_date", serverDate.shortSecondTime(new Date(((Long) entry.getKey()).longValue())));
+							prop.put("page_list_" + entCount + "_date", serverDate.shortSecondTime(new Date(((Long) entry.getKey()).longValue())));
 							prop.putHTML("page_list_" + entCount + "_path", (String) entry.getValue());
 							entCount++;
 						}
@@ -214,7 +214,7 @@ public class AccessTracker_p {
                     yacySeed remotepeer = yacyCore.seedDB.lookupByIP(natLib.getInetAddress(host), true, true, true);
                     prop.putHTML("page_list_" + entCount + "_peername", (remotepeer == null) ? "UNKNOWN" : remotepeer.getName());
                 }
-                prop.putHTML("page_list_" + entCount + "_count", new Integer(handles.size()).toString());
+                prop.putNum("page_list_" + entCount + "_count", handles.size());
 
                 // next
                 entCount++;

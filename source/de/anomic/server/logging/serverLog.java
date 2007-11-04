@@ -197,8 +197,12 @@ public final class serverLog {
             logManager.readConfiguration(fileIn);
 
             // creating the logging directory
-            File log = new File(homePath,"./DATA/LOG/");
-            if(!log.canRead()) log.mkdir();
+            String logPattern = logManager.getProperty("java.util.logging.FileHandler.pattern");
+            int stripPos = logPattern.lastIndexOf('/');
+            if (stripPos < 0) stripPos = logPattern.lastIndexOf(File.pathSeparatorChar);
+            File log = new File(logPattern.substring(0, stripPos));
+            if (!log.isAbsolute()) log = new File(homePath, log.getPath());
+            if (!log.canRead()) log.mkdir();
 
             // TODO: changing the pattern settings for the file handlers
             

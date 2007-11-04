@@ -71,7 +71,7 @@ public class ConfigLanguage_p {
         //listManager.switchboard = (plasmaSwitchboard) env;
         serverObjects prop = new serverObjects();
         plasmaSwitchboard switchboard = (plasmaSwitchboard) env;
-        String langPath = new File(env.getRootPath(), env.getConfig("locale.work", "DATA/LOCALE/locales")).toString();
+        String langPath = env.getConfigPath("locale.work", "DATA/LOCALE/locales").getAbsolutePath();
 
         //Fallback
         //prop.put("currentlang", ""); //is done by Translationtemplate

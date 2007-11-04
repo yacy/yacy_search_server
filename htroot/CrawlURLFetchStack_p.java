@@ -73,7 +73,7 @@ public class CrawlURLFetchStack_p {
     
     public static URLFetcherStack getURLFetcherStack(serverSwitch env) {
         if (stack == null) try {
-            stack = new URLFetcherStack(env.getConfig(plasmaSwitchboard.DBPATH, plasmaSwitchboard.DBPATH_DEFAULT));
+            stack = new URLFetcherStack(env.getConfigPath(plasmaSwitchboard.DBPATH, plasmaSwitchboard.DBPATH_DEFAULT));
         } catch (IOException e) {
             serverLog.logSevere("URLFETCHER", "Couldn't initialize URL stack: " + e.getMessage());
         }

@@ -275,7 +275,7 @@ public final class yacy {
 
             // create some directories
             final File htRootPath = new File(homePath, sb.getConfig("htRootPath", "htroot"));
-            final File htDocsPath = new File(homePath, sb.getConfig("htDocsPath", "DATA/HTDOCS"));
+            final File htDocsPath = sb.getConfigPath(plasmaSwitchboard.HTDOCS_PATH, plasmaSwitchboard.HTDOCS_PATH_DEFAULT);
             if (!(htDocsPath.exists())) htDocsPath.mkdir();
             //final File htTemplatePath = new File(homePath, sb.getConfig("htTemplatePath","htdocs"));
 
@@ -343,8 +343,8 @@ public final class yacy {
                     }
 
                     // Copy the shipped locales into DATA, existing files are overwritten
-                    final File locale_work   = new File(homePath, sb.getConfig("locale.work", "DATA/LOCALE/locales"));
-                    final File locale_source = new File(homePath, sb.getConfig("locale.source", "locales"));
+                    final File locale_work   = sb.getConfigPath("locale.work", "DATA/LOCALE/locales");
+                    final File locale_source = sb.getConfigPath("locale.source", "locales");
                     try{
                         final File[] locale_source_files = locale_source.listFiles();
                         locale_work.mkdirs();
@@ -366,7 +366,7 @@ public final class yacy {
                     if (!lang.equals("") && !lang.equals("default")) { //locale is used
                         String currentRev = "";
                         try{
-                            final BufferedReader br = new BufferedReader(new InputStreamReader(new FileInputStream(new File(sb.getConfig("locale.translated_html", "DATA/LOCALE/htroot"), lang+"/version" ))));
+                            final BufferedReader br = new BufferedReader(new InputStreamReader(new FileInputStream(new File(sb.getConfigPath("locale.translated_html", "DATA/LOCALE/htroot"), lang+"/version" ))));
                             currentRev = br.readLine();
                             br.close();
                         }catch(IOException e){
@@ -375,7 +375,7 @@ public final class yacy {
 
                         if (!currentRev.equals(sb.getConfig("svnRevision", ""))) try { //is this another version?!
                             final File sourceDir = new File(sb.getConfig("htRootPath", "htroot"));
-                            final File destDir = new File(sb.getConfig("locale.translated_html", "DATA/LOCALE/htroot"), lang);
+                            final File destDir = new File(sb.getConfigPath("locale.translated_html", "DATA/LOCALE/htroot"), lang);
                             if (translator.translateFilesRecursive(sourceDir, destDir, new File(locale_work, lang + ".lng"), "html,template,inc", "locale")){ //translate it
                                 //write the new Versionnumber
                                 final BufferedWriter bw = new BufferedWriter(new PrintWriter(new FileWriter(new File(destDir, "version"))));

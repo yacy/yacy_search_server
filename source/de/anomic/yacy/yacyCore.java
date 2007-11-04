@@ -127,7 +127,7 @@ public class yacyCore {
         log = new serverLog("YACY");
 
         // create a yacy db
-        yacyDBPath = new File(sb.getRootPath(), sb.getConfig("yacyDB", "DATA/YACYDB"));
+        yacyDBPath = sb.getConfigPath("yacyDB", "DATA/YACYDB");
         if (!yacyDBPath.exists()) { yacyDBPath.mkdir(); }
 
         // create or init seed cache

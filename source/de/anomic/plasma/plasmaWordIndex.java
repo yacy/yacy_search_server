@@ -210,12 +210,13 @@ public final class plasmaWordIndex implements indexRI {
     }
     
     private void flushCache(indexRAMRI ram, int count) {
+        if (count <= 0) return;
+        
         busyCacheFlush = true;
         String wordHash;
         ArrayList containerList = new ArrayList();
         synchronized (ram) {
             count = Math.min(5000, Math.min(count, ram.size()));
-            if (count <= 0) return;
             boolean collectMax = true;
             indexContainer c;
             while (collectMax) {

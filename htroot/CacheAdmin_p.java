@@ -210,7 +210,7 @@ public class CacheAdmin_p {
             }
 
             // generate sorted dir/file listing
-            final String[] list = dir.list(new Filter(new File(switchboard.getConfig(plasmaSwitchboard.HTCACHE_PATH, plasmaSwitchboard.HTCACHE_PATH_DEFAULT))));
+            final String[] list = dir.list(new Filter(switchboard.getConfigPath(plasmaSwitchboard.HTCACHE_PATH, plasmaSwitchboard.HTCACHE_PATH_DEFAULT)));
             tree.ensureCapacity((list == null) ? 70 : (list.length + 1) * 256);
             linkPathString(prop, ((pathString.length() == 0) ? ("/") : (pathString)), true); 
             if (list == null) {

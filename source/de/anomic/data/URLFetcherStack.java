@@ -69,10 +69,8 @@ public class URLFetcherStack {
     private int popped = 0;
     private int pushed = 0;
     
-    public URLFetcherStack(String path) throws IOException {
-        this.db = new kelondroStack(
-                new File(path + File.separator + DBFILE),
-                rowdef);
+    public URLFetcherStack(File path) throws IOException {
+        this.db = new kelondroStack(new File(path, DBFILE), rowdef);
         this.log = new serverLog("URLFETCHERSTACK");
     }
     

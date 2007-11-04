@@ -176,7 +176,7 @@ public class BlogComments {
                 
                 // finally write notification
                 File notifierSource = new File(switchboard.getRootPath(), switchboard.getConfig("htRootPath","htroot") + "/env/grafics/message.gif");
-                File notifierDest   = new File(switchboard.getConfig("htDocsPath", "DATA/HTDOCS"), "notifier.gif");
+                File notifierDest   = new File(switchboard.getConfigPath("htDocsPath", "DATA/HTDOCS"), "notifier.gif");
                 try {
                     serverFileUtils.copy(notifierSource, notifierDest);
                 } catch (IOException e) {
