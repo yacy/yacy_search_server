@@ -74,7 +74,7 @@ public class kelondroCache implements kelondroIndex {
     }
     
     private void init() {
-        this.keyrow = new kelondroRow(new kelondroColumn[]{index.row().column(index.row().primaryKey)}, index.row().objectOrder, index.row().primaryKey);
+        this.keyrow = new kelondroRow(new kelondroColumn[]{index.row().column(index.row().primaryKeyIndex)}, index.row().objectOrder, 0);
         this.readHitCache = (read) ? new kelondroRowSet(index.row(), 0) : null;
         this.readMissCache = (read) ? new kelondroRowSet(this.keyrow, 0) : null;
         this.writeBufferUnique = (write) ? new kelondroRowSet(index.row(), 0) : null;
@@ -93,7 +93,7 @@ public class kelondroCache implements kelondroIndex {
     }
     
     public final int cacheObjectChunkSize() {
-        return index.row().objectsize();
+        return index.row().objectsize;
     }
     
     public int writeBufferSize() {
@@ -184,7 +184,7 @@ public class kelondroCache implements kelondroIndex {
             kelondroRow.Entry row;
             while ((i.hasNext()) && (maxcount-- > 0)) {
                 row = (kelondroRow.Entry) i.next();
-                delete.add(row.getColBytes(index.row().primaryKey));
+                delete.add(row.getPrimaryKeyBytes());
                 this.index.addUnique(row);
                 this.cacheFlush++;
             }
@@ -218,7 +218,7 @@ public class kelondroCache implements kelondroIndex {
             kelondroRow.Entry row;
             while ((i.hasNext()) && (maxcount-- > 0)) {
                 row = (kelondroRow.Entry) i.next();
-                delete.add(row.getColBytes(index.row().primaryKey));
+                delete.add(row.getPrimaryKeyBytes());
                 this.index.addUnique(row);
                 this.cacheFlush++;
             }
@@ -364,7 +364,7 @@ public class kelondroCache implements kelondroIndex {
         assert (row.columns() == row().columns());
         //assert (!(serverLog.allZero(row.getColBytes(index.primarykey()))));
         
-        byte[] key = row.getColBytes(index.row().primaryKey);
+        byte[] key = row.getPrimaryKeyBytes();
         checkHitSpace();
         
         // remove entry from miss- and hit-cache
@@ -462,7 +462,7 @@ public class kelondroCache implements kelondroIndex {
         assert (row.columns() == row().columns());
         //assert (!(serverLog.allZero(row.getColBytes(index.primarykey()))));
         
-        byte[] key = row.getColBytes(index.row().primaryKey);
+        byte[] key = row.getPrimaryKeyBytes();
         checkHitSpace();
         
         // remove entry from miss- and hit-cache
@@ -514,7 +514,7 @@ public class kelondroCache implements kelondroIndex {
         assert (writeBufferUnique == null);
         assert (writeBufferDoubles == null);
         
-        byte[] key = row.getColBytes(index.row().primaryKey);
+        byte[] key = row.getPrimaryKeyBytes();
         checkHitSpace();
         
         // remove entry from miss- and hit-cache
@@ -585,7 +585,7 @@ public class kelondroCache implements kelondroIndex {
         if ((writeBufferUnique != null) && (writeBufferUnique.size() > 0)) {
             Entry entry = writeBufferUnique.removeOne();
             if (readMissCache != null) {
-                kelondroRow.Entry dummy = readMissCache.put(readMissCache.row().newEntry(entry.getColBytes(index.row().primaryKey)));
+                kelondroRow.Entry dummy = readMissCache.put(readMissCache.row().newEntry(entry.getPrimaryKeyBytes()));
                 if (dummy == null) this.hasnotUnique++; else this.hasnotDouble++;
             }
             return entry;
@@ -593,7 +593,7 @@ public class kelondroCache implements kelondroIndex {
 
         if ((writeBufferDoubles != null) && (writeBufferDoubles.size() > 0)) {
             Entry entry = writeBufferDoubles.removeOne();
-            byte[] key = entry.getColBytes(index.row().primaryKey);
+            byte[] key = entry.getPrimaryKeyBytes();
             if (readMissCache != null) {
                 kelondroRow.Entry dummy = readMissCache.put(readMissCache.row().newEntry(key));
                 if (dummy == null) this.hasnotUnique++; else this.hasnotDouble++;
@@ -604,7 +604,7 @@ public class kelondroCache implements kelondroIndex {
         
         Entry entry = index.removeOne();
         if (entry == null) return null;
-        byte[] key = entry.getColBytes(index.row().primaryKey);
+        byte[] key = entry.getPrimaryKeyBytes();
         if (readMissCache != null) {
             kelondroRow.Entry dummy = readMissCache.put(readMissCache.row().newEntry(key));
             if (dummy == null) this.hasnotUnique++; else this.hasnotDouble++;

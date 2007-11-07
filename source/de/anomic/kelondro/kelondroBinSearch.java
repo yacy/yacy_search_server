@@ -50,7 +50,6 @@ public class kelondroBinSearch {
     
     private byte[] chunks;
     private int    chunksize;
-    private byte[] buffer;
     private int    count;
     private kelondroOrder objectOrder = new kelondroNaturalOrder(true);
     
@@ -58,7 +57,6 @@ public class kelondroBinSearch {
         this.chunks = chunks;
         this.chunksize = chunksize;
         this.count = chunks.length / chunksize;
-        this.buffer = new byte[chunksize];
     }
     
     public boolean contains(byte[] t) {
@@ -68,11 +66,11 @@ public class kelondroBinSearch {
     private synchronized boolean contains(byte[] t, int beginPos, int endPos) {
         // the endPos is exclusive, beginPos is inclusive
         // this method is synchronized to make the use of the buffer possible
+        assert t.length == this.chunksize;
         if (beginPos >= endPos) return false;
         int pivot = (beginPos + endPos) / 2;
         if ((pivot < 0) || (pivot >= this.count)) return false;
-        selectBuffer(pivot);
-        int c = objectOrder.compare(buffer, t);
+        int c = objectOrder.compare(this.chunks, pivot * this.chunksize, this.chunksize, t, 0, t.length);
         if (c == 0) return true;
         if (c < 0) /* buffer < t */ return contains(t, pivot + 1, endPos);
         if (c > 0) /* buffer > t */ return contains(t, beginPos, pivot);
@@ -87,10 +85,6 @@ public class kelondroBinSearch {
         byte[] a = new byte[chunksize];
         System.arraycopy(this.chunks, element * this.chunksize, a, 0, chunksize);
         return a;
-    }
-
-    private void selectBuffer(int element) {
-        System.arraycopy(this.chunks, element * this.chunksize, this.buffer, 0, chunksize);
     }
     
     public static void main(String[] args) {

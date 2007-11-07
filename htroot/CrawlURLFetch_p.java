@@ -465,7 +465,7 @@ public class CrawlURLFetch_p {
             return getListServletURL(ys.getPublicAddress(), MODE_LIST, this.count, yacyCore.seedDB.mySeed().hash);
         }
         
-        private int stackURLs(ArrayList /*of yacyURL*/ urls) throws InterruptedException {
+        private int stackURLs(ArrayList /*of yacyURL*/ urls) {
             this.lastFailed = 0;
             this.lastFetchedURLs = 0;
             this.failed.clear();

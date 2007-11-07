@@ -210,13 +210,13 @@ public abstract class kelondroAbstractRecords implements kelondroRecords {
             if (chunk == null) {
                 chunk = spaceChunk;
             }
-            assert (chunk.length == ROW.objectsize()) : "chunk.length = " + chunk.length + ", ROW.objectsize() = " + ROW.objectsize();
+            assert (chunk.length == ROW.objectsize) : "chunk.length = " + chunk.length + ", ROW.objectsize() = " + ROW.objectsize;
             //synchronized (USAGE) {
                 synchronized (entryFile) {
                     if (USAGE.FREEC == 0) {
                         // generate new entry
                         int index = USAGE.allCount();
-                        entryFile.write(seekpos(index) + overhead, chunk, 0, ROW.objectsize()); // occupy space, othervise the USAGE computaton does not work
+                        entryFile.write(seekpos(index) + overhead, chunk, 0, ROW.objectsize); // occupy space, othervise the USAGE computaton does not work
                         USAGE.USEDC++;
                         writeused(false);
                         return index;
@@ -251,7 +251,7 @@ public abstract class kelondroAbstractRecords implements kelondroRecords {
                         }
                         USAGE.writeused(false);
                         USAGE.writefree();
-                        entryFile.write(seekpos(index) + overhead, chunk, 0, ROW.objectsize()); // overwrite space
+                        entryFile.write(seekpos(index) + overhead, chunk, 0, ROW.objectsize); // overwrite space
                         return index;
                     }
                 }
@@ -418,7 +418,7 @@ public abstract class kelondroAbstractRecords implements kelondroRecords {
         
         // store dynamic run-time data
         this.overhead = this.OHBYTEC + 4 * this.OHHANDLEC;
-        this.recordsize = this.overhead + ROW.objectsize();
+        this.recordsize = this.overhead + ROW.objectsize;
         this.headchunksize = overhead + ROW.width(0);
         this.tailchunksize = this.recordsize - this.headchunksize;
         this.spaceChunk = fillSpaceChunk(recordsize);
@@ -564,7 +564,7 @@ public abstract class kelondroAbstractRecords implements kelondroRecords {
         
         // assign remaining values that are only present at run-time
         this.overhead = OHBYTEC + 4 * OHHANDLEC;
-        this.recordsize = this.overhead + ROW.objectsize();
+        this.recordsize = this.overhead + ROW.objectsize;
         this.headchunksize = this.overhead + this.ROW.width(0);
         this.tailchunksize = this.recordsize - this.headchunksize;
         this.spaceChunk = fillSpaceChunk(recordsize);

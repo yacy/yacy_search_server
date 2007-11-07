@@ -298,8 +298,7 @@ public class SitemapParser extends DefaultHandler {
 			
 			// URL needs to crawled
 			String error = null;
-			try {
-				error = this.switchboard.crawlStacker.stackCrawl(
+			error = this.switchboard.crawlStacker.stackCrawl(
 						url,
 						null, // this.siteMapURL.toString(),
 						yacyCore.seedDB.mySeed().hash,
@@ -308,9 +307,6 @@ public class SitemapParser extends DefaultHandler {
 						0,
 						this.crawlingProfile
 				);
-			} catch (InterruptedException e) {
-				throw new SAXException ("Parsing interrupted", e);
-			}
 			
 			if (error != null) {
 				try {

@@ -274,8 +274,8 @@ public class kelondroAttrSeq {
             String pivot = structure.substring(0, p);
             structure = structure.substring(p + 5);
             kelondroColumn a = new kelondroColumn(pivot);
-            pivot_name = a.nickname();
-            pivot_len = a.cellwidth();
+            pivot_name = a.nickname;
+            pivot_len = a.cellwidth;
             
             // parse property part definition:
             p = structure.indexOf(",'|'");
@@ -295,8 +295,8 @@ public class kelondroAttrSeq {
             p = 0;
             for (int i = 0; i < l.size(); i++) {
                 a = (kelondroColumn) l.get(i);
-                prop_names[i] = a.nickname();
-                prop_len[i] = a.cellwidth();
+                prop_names[i] = a.nickname;
+                prop_len[i] = a.cellwidth;
                 prop_pos[i] = p;
                 p += prop_len[i];
             }
@@ -316,8 +316,8 @@ public class kelondroAttrSeq {
             p = 0;
             for (int i = 0; i < l.size(); i++) {
                 a = (kelondroColumn) l.get(i);
-                seq_names[i] = a.nickname();
-                seq_len[i] = a.cellwidth();
+                seq_names[i] = a.nickname;
+                seq_len[i] = a.cellwidth;
                 seq_pos[i] = p;
                 p += seq_len[i];
             }

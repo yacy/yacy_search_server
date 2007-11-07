@@ -342,7 +342,7 @@ public class kelondroTree extends kelondroCachedRecords implements kelondroIndex
     public kelondroRow.Entry put(kelondroRow.Entry newrow) throws IOException {
         assert (newrow != null);
         assert (newrow.columns() == row().columns());
-        assert (!(serverLog.allZero(newrow.getColBytes(super.row().primaryKey))));
+        assert (!(serverLog.allZero(newrow.getPrimaryKeyBytes())));
         assert newrow.objectsize() <= super.row().objectsize;
         // Associates the specified value with the specified key in this map
         kelondroRow.Entry result = null;

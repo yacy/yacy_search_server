@@ -208,7 +208,7 @@ public class plasmaRankingCRProcess {
                 acc_entry = acc.row().newEntry();
                 acc_entry.setCol("Referee", key, null);
                 for (int i = 1; i < acc.row().columns(); i++) {
-                    acc_entry.setCol(i, new_entry.getAttr(acc.row().column(i).nickname(), 0));
+                    acc_entry.setCol(i, new_entry.getAttr(acc.row().column(i).nickname, 0));
                 }
                 seq.put(key.getBytes(), new_entry.getSeqCollection());
                 FUDate = plasmaWordIndex.microDateHoursInt(System.currentTimeMillis()); // first update date

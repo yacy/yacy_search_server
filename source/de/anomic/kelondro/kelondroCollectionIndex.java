@@ -206,7 +206,7 @@ public class kelondroCollectionIndex {
         //kelondroIndex theindex = new kelondroFlexTable(path, filenameStub + ".index", preloadTime, indexRow(keylength, indexOrder), true);
 
         // save/check property file for this array
-        File propfile = propertyFile(path, filenameStub, loadfactor, rowdef.objectsize());
+        File propfile = propertyFile(path, filenameStub, loadfactor, rowdef.objectsize);
         Map props = new HashMap();
         if (propfile.exists()) {
             props = serverFileUtils.loadHashMap(propfile);
@@ -224,11 +224,11 @@ public class kelondroCollectionIndex {
     }
     
     private kelondroFixedWidthArray openArrayFile(int partitionNumber, int serialNumber, boolean create) throws IOException {
-        File f = arrayFile(path, filenameStub, loadfactor, payloadrow.objectsize(), partitionNumber, serialNumber);
+        File f = arrayFile(path, filenameStub, loadfactor, payloadrow.objectsize, partitionNumber, serialNumber);
         int load = arrayCapacity(partitionNumber);
         kelondroRow rowdef = new kelondroRow(
                 "byte[] key-" + keylength + "," +
-                "byte[] collection-" + (kelondroRowCollection.exportOverheadSize + load * this.payloadrow.objectsize()),
+                "byte[] collection-" + (kelondroRowCollection.exportOverheadSize + load * this.payloadrow.objectsize),
                 index.row().objectOrder,
                 0
                 );
@@ -299,7 +299,7 @@ public class kelondroCollectionIndex {
         // the collection is new
         int partitionNumber = arrayIndex(collection.size());
         kelondroRow.Entry indexrow = index.row().newEntry();
-        kelondroFixedWidthArray array = getArray(partitionNumber, serialNumber, this.payloadrow.objectsize());
+        kelondroFixedWidthArray array = getArray(partitionNumber, serialNumber, this.payloadrow.objectsize);
 
         // define row
         kelondroRow.Entry arrayEntry = array.row().newEntry();
@@ -311,7 +311,7 @@ public class kelondroCollectionIndex {
 
         // store the new row number in the index
         indexrow.setCol(idx_col_key, key);
-        indexrow.setCol(idx_col_chunksize, this.payloadrow.objectsize());
+        indexrow.setCol(idx_col_chunksize, this.payloadrow.objectsize);
         indexrow.setCol(idx_col_chunkcount, collection.size());
         indexrow.setCol(idx_col_clusteridx, (byte) partitionNumber);
         indexrow.setCol(idx_col_flags, (byte) 0);
@@ -497,15 +497,15 @@ public class kelondroCollectionIndex {
         if (oldPartitionNumber == newPartitionNumber) {
             array_replace(
                     key, collection, indexrow,
-                    oldPartitionNumber, serialNumber, this.payloadrow.objectsize(),
+                    oldPartitionNumber, serialNumber, this.payloadrow.objectsize,
                     oldrownumber); // modifies indexrow
         } else {
             array_remove(
-                    oldPartitionNumber, serialNumber, this.payloadrow.objectsize(),
+                    oldPartitionNumber, serialNumber, this.payloadrow.objectsize,
                     oldrownumber);
             array_add(
                     key, collection, indexrow,
-                    newPartitionNumber, serialNumber, this.payloadrow.objectsize()); // modifies indexrow
+                    newPartitionNumber, serialNumber, this.payloadrow.objectsize); // modifies indexrow
         }
         
         if ((int) indexrow.getColLong(idx_col_chunkcount) != collection.size())
@@ -619,7 +619,7 @@ public class kelondroCollectionIndex {
                      */
                 } else {
                     array_remove(
-                            oldPartitionNumber, oldSerialNumber, this.payloadrow.objectsize(),
+                            oldPartitionNumber, oldSerialNumber, this.payloadrow.objectsize,
                             oldrownumber);
                 
                     actionList = (ArrayList) array_add_map.get(new Integer(newPartitionNumber));
@@ -637,9 +637,9 @@ public class kelondroCollectionIndex {
                 // memory protection: flush collected collections
                 if (serverMemory.available() < minMem()) {
                     // emergency flush
-                    indexrows_existing.addAll(array_replace_multiple(array_replace_map, 0, this.payloadrow.objectsize()));
+                    indexrows_existing.addAll(array_replace_multiple(array_replace_map, 0, this.payloadrow.objectsize));
                     array_replace_map = new TreeMap(); // delete references
-                    indexrows_existing.addAll(array_add_multiple(array_add_map, 0, this.payloadrow.objectsize()));
+                    indexrows_existing.addAll(array_add_multiple(array_add_map, 0, this.payloadrow.objectsize));
                     array_add_map = new TreeMap(); // delete references
                     //if (!madegc) {
                     //    prevent that this flush is made again even when there is enough memory
@@ -652,9 +652,9 @@ public class kelondroCollectionIndex {
         }
         
         // finallly flush the collected collections
-        indexrows_existing.addAll(array_replace_multiple(array_replace_map, 0, this.payloadrow.objectsize()));
+        indexrows_existing.addAll(array_replace_multiple(array_replace_map, 0, this.payloadrow.objectsize));
         array_replace_map = new TreeMap(); // delete references
-        indexrows_existing.addAll(array_add_multiple(array_add_map, 0, this.payloadrow.objectsize()));
+        indexrows_existing.addAll(array_add_multiple(array_add_map, 0, this.payloadrow.objectsize));
         array_add_map = new TreeMap(); // delete references
         
         // write new containers
@@ -715,15 +715,15 @@ public class kelondroCollectionIndex {
             if (oldPartitionNumber == newPartitionNumber) {
                 array_replace(
                         key, collection, indexrow,
-                        oldPartitionNumber, oldSerialNumber, this.payloadrow.objectsize(),
+                        oldPartitionNumber, oldSerialNumber, this.payloadrow.objectsize,
                         oldrownumber); // modifies indexrow
             } else {
                 array_remove(
-                        oldPartitionNumber, oldSerialNumber, this.payloadrow.objectsize(),
+                        oldPartitionNumber, oldSerialNumber, this.payloadrow.objectsize,
                         oldrownumber);
                 array_add(
                         key, collection, indexrow,
-                        newPartitionNumber, oldSerialNumber, this.payloadrow.objectsize()); // modifies indexrow
+                        newPartitionNumber, oldSerialNumber, this.payloadrow.objectsize); // modifies indexrow
             }
             
             final int collectionsize = collection.size(); // extra variable for easier debugging
@@ -862,15 +862,15 @@ public class kelondroCollectionIndex {
         if (oldPartitionNumber == newPartitionNumber) {
             array_replace(
                     key, oldcollection, indexrow,
-                    oldPartitionNumber, serialNumber, this.payloadrow.objectsize(),
+                    oldPartitionNumber, serialNumber, this.payloadrow.objectsize,
                     oldrownumber); // modifies indexrow
         } else {
             array_remove(
-                    oldPartitionNumber, serialNumber, this.payloadrow.objectsize(),
+                    oldPartitionNumber, serialNumber, this.payloadrow.objectsize,
                     oldrownumber);
             array_add(
                     key, oldcollection, indexrow,
-                    newPartitionNumber, serialNumber, this.payloadrow.objectsize()); // modifies indexrow
+                    newPartitionNumber, serialNumber, this.payloadrow.objectsize); // modifies indexrow
         }
         index.put(indexrow); // write modified indexrow
         return removed;
@@ -941,7 +941,7 @@ public class kelondroCollectionIndex {
             // store the row number in the index; this may be a double-entry, but better than nothing
             kelondroRow.Entry indexEntry = index.row().newEntry();
             indexEntry.setCol(idx_col_key, arrayrow.getColBytes(0));
-            indexEntry.setCol(idx_col_chunksize, this.payloadrow.objectsize());
+            indexEntry.setCol(idx_col_chunksize, this.payloadrow.objectsize);
             indexEntry.setCol(idx_col_chunkcount, collection.size());
             indexEntry.setCol(idx_col_clusteridx, (byte) clusteridx);
             indexEntry.setCol(idx_col_flags, (byte) 0);

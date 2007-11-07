@@ -143,6 +143,7 @@ import de.anomic.http.httpd;
 import de.anomic.http.httpdRobotsTxtConfig;
 import de.anomic.index.indexContainer;
 import de.anomic.index.indexRWIEntry;
+import de.anomic.index.indexRWIRowEntry;
 import de.anomic.index.indexURLEntry;
 import de.anomic.kelondro.kelondroBitfield;
 import de.anomic.kelondro.kelondroCache;
@@ -167,6 +168,7 @@ import de.anomic.server.serverSemaphore;
 import de.anomic.server.serverSwitch;
 import de.anomic.server.serverThread;
 import de.anomic.server.logging.serverLog;
+import de.anomic.tools.crypt;
 import de.anomic.yacy.yacyURL;
 import de.anomic.yacy.yacyVersion;
 import de.anomic.yacy.yacyClient;
@@ -1046,7 +1048,7 @@ public final class plasmaSwitchboard extends serverAbstractSwitch implements ser
         // load ranking tables
         File YBRPath = new File(rootPath, "ranking/YBR");
         if (YBRPath.exists()) {
-            plasmaSearchPreOrder.loadYBR(YBRPath, 15);
+            plasmaSearchRankingProcess.loadYBR(YBRPath, 15);
         }
 
         // read memory amount
@@ -1501,6 +1503,14 @@ public final class plasmaSwitchboard extends serverAbstractSwitch implements ser
         if (le != null) return le.comp().url();
         return null;
     }
+    
+    public plasmaSearchRankingProfile getRanking() {
+        return (getConfig("rankingProfile", "").length() == 0) ?
+                  new plasmaSearchRankingProfile(plasmaSearchQuery.CONTENTDOM_TEXT) :
+                  new plasmaSearchRankingProfile("", crypt.simpleDecode(sb.getConfig("rankingProfile", ""), null));
+    }
+    
+    
     
     /**
      * This method changes the HTCache size.<br>
@@ -2344,7 +2354,7 @@ public final class plasmaSwitchboard extends serverAbstractSwitch implements ser
                                 String word = (String) wentry.getKey();
                                 wordStat = (plasmaCondenser.wordStatProp) wentry.getValue();
                                 String wordHash = plasmaCondenser.word2hash(word);
-                                indexRWIEntry wordIdxEntry = new indexRWIEntry(
+                                indexRWIEntry wordIdxEntry = new indexRWIRowEntry(
                                             urlHash,
                                             urlLength, urlComps,
                                             wordStat.count,

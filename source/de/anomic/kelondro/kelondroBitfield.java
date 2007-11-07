@@ -63,7 +63,7 @@ public class kelondroBitfield implements Cloneable {
     
     public void set(int pos, boolean value) {
         assert (pos >= 0);
-        int slot = pos / 8;
+        int slot = pos >> 3; // /8
         if (slot >= bb.length) {
             // extend capacity
             byte[] nb = new byte[slot + 1];
@@ -81,13 +81,13 @@ public class kelondroBitfield implements Cloneable {
     
     public boolean get(int pos) {
         assert (pos >= 0);
-        int slot = pos / 8;
+        int slot = pos >> 3; // /8
         if (slot > bb.length) return false;
         return (bb[slot] & (1 << (pos % 8))) > 0;
     }
 
     public int length() {
-        return bb.length * 8;
+        return bb.length << 3;
     }
     
     public String exportB64() {

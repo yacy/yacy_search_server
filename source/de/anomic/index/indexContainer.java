@@ -72,18 +72,17 @@ public class indexContainer extends kelondroRowSet {
     
     public void add(indexRWIEntry entry) {
         // add without double-occurrence test
-        assert entry.toKelondroEntry().objectsize() == super.rowdef.objectsize();
+        assert entry.toKelondroEntry().objectsize() == super.rowdef.objectsize;
         this.addUnique(entry.toKelondroEntry());
     }
     
     public void add(indexRWIEntry entry, long updateTime) {
         // add without double-occurrence test
-        assert entry.toKelondroEntry().objectsize() == super.rowdef.objectsize();
+        assert entry.toKelondroEntry().objectsize() == super.rowdef.objectsize;
         this.add(entry);
         this.lastTimeWrote = updateTime;
     }
     
-
     public static final indexContainer mergeUnique(indexContainer a, boolean aIsClone, indexContainer b, boolean bIsClone) {
         if ((aIsClone) && (bIsClone)) {
             if (a.size() > b.size()) return (indexContainer) mergeUnique(a, b); else return (indexContainer) mergeUnique(b, a);
@@ -100,20 +99,20 @@ public class indexContainer extends kelondroRowSet {
     }
     
     public indexRWIEntry put(indexRWIEntry entry) {
-        assert entry.toKelondroEntry().objectsize() == super.rowdef.objectsize();
+        assert entry.toKelondroEntry().objectsize() == super.rowdef.objectsize;
         kelondroRow.Entry r = super.put(entry.toKelondroEntry());
         if (r == null) return null;
-        return new indexRWIEntry(r);
+        return new indexRWIRowEntry(r);
     }
     
     public boolean putRecent(indexRWIEntry entry) {
-        assert entry.toKelondroEntry().objectsize() == super.rowdef.objectsize();
+        assert entry.toKelondroEntry().objectsize() == super.rowdef.objectsize;
         // returns true if the new entry was added, false if it already existed
         kelondroRow.Entry oldEntryRow = this.put(entry.toKelondroEntry());
         if (oldEntryRow == null) {
             return true;
         } else {
-            indexRWIEntry oldEntry = new indexRWIEntry(oldEntryRow);
+            indexRWIEntry oldEntry = new indexRWIRowEntry(oldEntryRow);
             if (entry.isOlder(oldEntry)) { // A more recent Entry is already in this container
                 this.put(oldEntry.toKelondroEntry()); // put it back
                 return false;
@@ -145,13 +144,13 @@ public class indexContainer extends kelondroRowSet {
     public indexRWIEntry get(String urlHash) {
         kelondroRow.Entry entry = this.get(urlHash.getBytes());
         if (entry == null) return null;
-        return new indexRWIEntry(entry);
+        return new indexRWIRowEntry(entry);
     }
 
     public indexRWIEntry remove(String urlHash) {
         kelondroRow.Entry entry = remove(urlHash.getBytes(), true);
         if (entry == null) return null;
-        return new indexRWIEntry(entry);
+        return new indexRWIRowEntry(entry);
     }
 
     public int removeEntries(Set urlHashes) {
@@ -181,7 +180,7 @@ public class indexContainer extends kelondroRowSet {
         public Object next() {
             kelondroRow.Entry rentry = (kelondroRow.Entry) rowEntryIterator.next();
             if (rentry == null) return null;
-            return new indexRWIEntry(rentry);
+            return new indexRWIRowEntry(rentry);
         }
 
         public void remove() {
@@ -320,7 +319,7 @@ public class indexContainer extends kelondroRowSet {
         assert (keylength == i2.rowdef.width(0));
         indexContainer conj = new indexContainer(null, i1.rowdef, 0); // start with empty search result
         if (!((i1.rowdef.getOrdering().signature().equals(i2.rowdef.getOrdering().signature())) &&
-              (i1.rowdef.primaryKey() == i2.rowdef.primaryKey()))) return conj; // ordering must be equal
+              (i1.rowdef.primaryKeyIndex == i2.rowdef.primaryKeyIndex))) return conj; // ordering must be equal
         Iterator e1 = i1.entries();
         Iterator e2 = i2.entries();
         int c;
@@ -395,7 +394,7 @@ public class indexContainer extends kelondroRowSet {
         int keylength = pivot.rowdef.width(0);
         assert (keylength == excl.rowdef.width(0));
         if (!((pivot.rowdef.getOrdering().signature().equals(excl.rowdef.getOrdering().signature())) &&
-              (pivot.rowdef.primaryKey() == excl.rowdef.primaryKey()))) return pivot; // ordering must be equal
+              (pivot.rowdef.primaryKeyIndex == excl.rowdef.primaryKeyIndex))) return pivot; // ordering must be equal
         Iterator e1 = pivot.entries();
         Iterator e2 = excl.entries();
         int c;

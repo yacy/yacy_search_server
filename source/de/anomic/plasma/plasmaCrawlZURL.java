@@ -49,7 +49,7 @@ public class plasmaCrawlZURL {
             "Cardinal workdate-8 {b256}, " +                           // the time when the url was last time tried to load
             "Cardinal workcount-4 {b256}, " +                          // number of load retries
             "String anycause-80, " +                                   // string describing load failure
-            "byte[] entry-" + plasmaCrawlEntry.rowdef.objectsize(),                                          // extra space
+            "byte[] entry-" + plasmaCrawlEntry.rowdef.objectsize,                                          // extra space
             kelondroBase64Order.enhancedCoder,
             0);
 
@@ -106,7 +106,7 @@ public class plasmaCrawlZURL {
         stack.add(e.hash());
     }
     
-    public Entry top(int pos) throws IOException {
+    public Entry top(int pos) {
         String urlhash = (String) stack.get(pos);
         if (urlhash == null) return null;
         return getEntry(urlhash);

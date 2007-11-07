@@ -84,7 +84,7 @@ public final class indexRAMRI implements indexRI {
                 "byte[] wordhash-" + yacySeedDB.commonHashLength + ", " +
                 "Cardinal occ-4 {b256}, " +
                 "Cardinal time-8 {b256}, " +
-                "byte[] urlprops-" + payloadrow.objectsize(),
+                "byte[] urlprops-" + payloadrow.objectsize,
                 kelondroBase64Order.enhancedCoder, 0);
         
         // read in dump of last session
@@ -215,7 +215,7 @@ public final class indexRAMRI implements indexRI {
                     if ((row == null) || (row.empty(0)) || (row.empty(3))) continue;
                     wordHash = row.getColString(0, "UTF-8");
                     //creationTime = kelondroRecords.bytes2long(row[2]);
-                    wordEntry = new indexRWIEntry(row.getColBytes(3));
+                    wordEntry = new indexRWIRowEntry(row.getColBytes(3));
                     // store to cache
                     addEntry(wordHash, wordEntry, startTime, false);
                     urlCount++;

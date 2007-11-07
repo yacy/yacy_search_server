@@ -60,7 +60,7 @@ public class kelondroFlexTable extends kelondroFlexWidthArray implements kelondr
         }
         
         try {
-    	long neededRAM = (long) ((super.row().column(0).cellwidth() + 4) * super.size() * kelondroRowCollection.growfactor);
+    	long neededRAM = (long) ((super.row().column(0).cellwidth + 4) * super.size() * kelondroRowCollection.growfactor);
     	
     	File newpath = new File(path, tablename);
         File indexfile = new File(newpath, "col.000.index");
@@ -103,7 +103,7 @@ public class kelondroFlexTable extends kelondroFlexWidthArray implements kelondr
                 // generate new index file
                 System.out.println("*** Generating File index for " + size() + " entries from " + indexfile);
                 System.out.println("*** Cause: too less RAM (" + serverMemory.available() + " Bytes) configured. Assign at least " + (neededRAM / 1024 / 1024) + " MB more RAM to enable a RAM index.");
-                ki = initializeTreeIndex(indexfile, preloadTime, rowdef.objectOrder, rowdef.primaryKey);
+                ki = initializeTreeIndex(indexfile, preloadTime, rowdef.objectOrder);
 
                 System.out.println(" -done-");
                 System.out.println(ki.size() + " entries indexed from " + super.col[0].size() + " keys.");
@@ -119,7 +119,7 @@ public class kelondroFlexTable extends kelondroFlexWidthArray implements kelondr
     	} catch (IOException e) {
     		if (resetOnFail) {
     			RAMIndex = true;
-    	        index = new kelondroBytesIntMap(super.row().column(0).cellwidth(), super.rowdef.objectOrder, 0);
+    	        index = new kelondroBytesIntMap(super.row().column(0).cellwidth, super.rowdef.objectOrder, 0);
     		} else {
     			throw new kelondroException(e.getMessage());
     		}
@@ -129,7 +129,7 @@ public class kelondroFlexTable extends kelondroFlexWidthArray implements kelondr
     public void reset() throws IOException {
     	super.reset();
     	RAMIndex = true;
-        index = new kelondroBytesIntMap(super.row().column(0).cellwidth(), super.rowdef.objectOrder, 0);
+        index = new kelondroBytesIntMap(super.row().column(0).cellwidth, super.rowdef.objectOrder, 0);
     }
     
     public static int staticSize(File path, String tablename) {
@@ -137,7 +137,7 @@ public class kelondroFlexTable extends kelondroFlexWidthArray implements kelondr
     }
     
     public static int staticRAMIndexNeed(File path, String tablename, kelondroRow rowdef) {
-        return (int) ((rowdef.column(0).cellwidth() + 4) * staticSize(path, tablename) * kelondroRowSet.growfactor);
+        return (int) ((rowdef.column(0).cellwidth + 4) * staticSize(path, tablename) * kelondroRowSet.growfactor);
     }
     
     public boolean hasRAMIndex() {
@@ -155,7 +155,7 @@ public class kelondroFlexTable extends kelondroFlexWidthArray implements kelondr
     private kelondroBytesIntMap initializeRamIndex() {
     	int space = super.col[0].size() + 1;
     	if (space < 0) throw new kelondroException("wrong space: " + space);
-        kelondroBytesIntMap ri = new kelondroBytesIntMap(super.row().column(0).cellwidth(), super.rowdef.objectOrder, space);
+        kelondroBytesIntMap ri = new kelondroBytesIntMap(super.row().column(0).cellwidth, super.rowdef.objectOrder, space);
         Iterator content = super.col[0].contentNodes(-1);
         kelondroNode node;
         int i;
@@ -179,8 +179,8 @@ public class kelondroFlexTable extends kelondroFlexWidthArray implements kelondr
         return ri;
     }
     
-    private kelondroIndex initializeTreeIndex(File indexfile, long preloadTime, kelondroOrder objectOrder, int primaryKey) throws IOException {
-        kelondroIndex treeindex = new kelondroCache(new kelondroTree(indexfile, true, preloadTime, treeIndexRow(rowdef.width(0), objectOrder), 2, 80), true, false);
+    private kelondroIndex initializeTreeIndex(File indexfile, long preloadTime, kelondroOrder objectOrder) throws IOException {
+        kelondroIndex treeindex = new kelondroCache(new kelondroTree(indexfile, true, preloadTime, treeIndexRow(rowdef.primaryKeyLength, objectOrder), 2, 80), true, false);
         Iterator content = super.col[0].contentNodes(-1);
         kelondroNode node;
         kelondroRow.Entry indexentry;
@@ -218,7 +218,7 @@ public class kelondroFlexTable extends kelondroFlexWidthArray implements kelondr
 		// so the size may be smaller than an index to a row entry
 		kelondroRow.Entry result = super.get(pos);
 		assert result != null;
-		assert rowdef.objectOrder.compare(result.getColBytes(rowdef.primaryKey), key) == 0 : "key and row does not match; key = " + serverLog.arrayList(key, 0, key.length) + " row.key = " + serverLog.arrayList(result.getColBytes(rowdef.primaryKey), 0, rowdef.width(rowdef.primaryKey));
+		assert rowdef.objectOrder.compare(result.getPrimaryKeyBytes(), key) == 0 : "key and row does not match; key = " + serverLog.arrayList(key, 0, key.length) + " row.key = " + serverLog.arrayList(result.getPrimaryKeyBytes(), 0, rowdef.primaryKeyLength);
         return result;
 	}
     
@@ -283,7 +283,7 @@ public class kelondroFlexTable extends kelondroFlexWidthArray implements kelondr
             return null;
         }
         assert oldentry != null : "overwrite of empty position " + pos + ", index management must have failed before";
-        assert rowdef.objectOrder.compare(oldentry.getColBytes(rowdef.primaryKey), key) == 0 : "key and row does not match; key = " + serverLog.arrayList(key, 0, key.length) + " row.key = " + serverLog.arrayList(oldentry.getColBytes(rowdef.primaryKey), 0, rowdef.width(rowdef.primaryKey));
+        assert rowdef.objectOrder.compare(oldentry.getPrimaryKeyBytes(), key) == 0 : "key and row does not match; key = " + serverLog.arrayList(key, 0, key.length) + " row.key = " + serverLog.arrayList(oldentry.getPrimaryKeyBytes(), 0, rowdef.primaryKeyLength);
         super.set(pos, row);
         assert this.size() == index.size() : "content.size() = " + this.size() + ", index.size() = " + index.size();
         return oldentry;
@@ -327,7 +327,7 @@ public class kelondroFlexTable extends kelondroFlexWidthArray implements kelondr
     		return null;
         }
         assert r != null : "r == null"; // should be avoided with path above
-        assert rowdef.objectOrder.compare(r.getColBytes(rowdef.primaryKey), key) == 0 : "key and row does not match; key = " + serverLog.arrayList(key, 0, key.length) + " row.key = " + serverLog.arrayList(r.getColBytes(rowdef.primaryKey), 0, rowdef.width(rowdef.primaryKey));
+        assert rowdef.objectOrder.compare(r.getPrimaryKeyBytes(), key) == 0 : "key and row does not match; key = " + serverLog.arrayList(key, 0, key.length) + " row.key = " + serverLog.arrayList(r.getPrimaryKeyBytes(), 0, rowdef.primaryKeyLength);
         super.remove(i);
         assert super.get(i) == null : "i = " + i + ", get(i) = " + serverLog.arrayList(super.get(i).bytes(), 0, 12);
         assert this.size() == index.size() : "content.size() = " + this.size() + ", index.size() = " + index.size();

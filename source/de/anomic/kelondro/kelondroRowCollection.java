@@ -63,7 +63,7 @@ public class kelondroRowCollection {
     
     public kelondroRowCollection(kelondroRow rowdef, int objectCount) {
         this.rowdef = rowdef;
-        this.chunkcache = new byte[objectCount * rowdef.objectsize()];
+        this.chunkcache = new byte[objectCount * rowdef.objectsize];
         this.chunkcount = 0;
         this.sortBound = 0;
         this.lastTimeRead = System.currentTimeMillis();
@@ -100,8 +100,8 @@ public class kelondroRowCollection {
             if (oldOrder == null) oldOrder = kelondroBase64Order.bySignature(sortOrderKey);
         }
         if ((rowdef.objectOrder != null) && (oldOrder != null) && (!(rowdef.objectOrder.signature().equals(oldOrder.signature()))))
-            throw new kelondroException("old collection order does not match with new order");
-        if (rowdef.primaryKey != (int) exportedCollection.getColLong(exp_order_col))
+            throw new kelondroException("old collection order does not match with new order; objectOrder.signature = " + rowdef.objectOrder.signature() + ", oldOrder.signature = " + oldOrder.signature());
+        if (rowdef.primaryKeyIndex != (int) exportedCollection.getColLong(exp_order_col))
             throw new kelondroException("old collection primary key does not match with new primary key");
         this.sortBound = (int) exportedCollection.getColLong(exp_order_bound);
         //assert (sortBound <= chunkcount) : "sortBound = " + sortBound + ", chunkcount = " + chunkcount;
@@ -159,7 +159,7 @@ public class kelondroRowCollection {
         entry.setCol(exp_last_read, daysSince2000(this.lastTimeRead));
         entry.setCol(exp_last_wrote, daysSince2000(this.lastTimeWrote));
         entry.setCol(exp_order_type, (this.rowdef.objectOrder == null) ? "__".getBytes() :this.rowdef.objectOrder.signature().getBytes());
-        entry.setCol(exp_order_col, this.rowdef.primaryKey);
+        entry.setCol(exp_order_col, this.rowdef.primaryKeyIndex);
         entry.setCol(exp_order_bound, this.sortBound);
         entry.setCol(exp_collection, this.chunkcache);
         return entry.bytes();
@@ -174,7 +174,7 @@ public class kelondroRowCollection {
     }
     
     private final void ensureSize(int elements) {
-        int needed = elements * rowdef.objectsize();
+        int needed = elements * rowdef.objectsize;
         if (chunkcache.length >= needed) return;
         byte[] newChunkcache = new byte[(int) (needed * growfactor)]; // increase space
         System.arraycopy(chunkcache, 0, newChunkcache, 0, chunkcache.length);
@@ -182,77 +182,14 @@ public class kelondroRowCollection {
         newChunkcache = null;
     }
     
-    /*
-    private static final Object[] arraydepot = new Object[]{new byte[0]};
-    
-    private final void ensureSize(int elements) {
-        int needed = elements * rowdef.objectsize();
-        if (chunkcache.length >= needed) return;
-        long neededRAM = (long) (needed * growfactor);
-        long availableRAM = serverMemory.available();
-        //if ((safemode) && (neededRAM > availableRAM)) throw new kelondroMemoryProtectionException("rowCollection temporary chunkcache", neededRAM, availableRAM);
-
-        if (neededRAM > availableRAM) {
-        	// go into safe mode: use the arraydepot
-        	synchronized (arraydepot) {
-        		if (((byte[]) arraydepot[0]).length >= neededRAM) {
-        			System.out.println("ensureSize case 1");
-        			// use the depot to increase the chunkcache
-        			byte[] newChunkcache = (byte[]) arraydepot[0];
-                	System.arraycopy(chunkcache, 0, newChunkcache, 0, chunkcache.length);
-                	// safe the chunkcache for later use in arraydepot
-                	arraydepot[0] = chunkcache;
-                	chunkcache = newChunkcache;
-                	newChunkcache = null;
-        		} else {
-        			System.out.println("ensureSize case 2");
-        			// this is the critical part: we need more RAM.
-        			// do a buffering using the arraydepot
-        			byte[] buffer0 = (byte[]) arraydepot[0];
-        			byte[] buffer1 = new byte[chunkcache.length - buffer0.length];
-                	// first copy the previous chunkcache to the two buffers
-        			System.arraycopy(chunkcache, 0, buffer0, 0, buffer0.length);
-        			System.arraycopy(chunkcache, buffer0.length, buffer1, 0, buffer1.length);
-        			// then free the previous chunkcache and replace it with a new array at target size
-        			chunkcache = null; // hand this over to GC
-        			chunkcache = new byte[(int) neededRAM];
-        			System.arraycopy(buffer0, 0, chunkcache, 0, buffer0.length);
-        			System.arraycopy(buffer1, 0, chunkcache, buffer0.length, buffer1.length);
-        			// then move the bigger buffer into the arraydepot
-        			if (buffer0.length > buffer1.length) {
-        				arraydepot[0] = buffer0;
-        			} else {
-        				arraydepot[1] = buffer1;
-        			}
-        			buffer0 = null;
-    				buffer1 = null;
-        		}
-        	}
-        } else {
-        	// there is enough memory available
-        	byte[] newChunkcache = new byte[(int) neededRAM]; // increase space
-        	System.arraycopy(chunkcache, 0, newChunkcache, 0, chunkcache.length);
-        	// safe the chunkcache for later use in arraydepot
-        	synchronized (arraydepot) {
-        		if (((byte[]) arraydepot[0]).length < chunkcache.length) {
-        			System.out.println("ensureSize case 0");
-        			arraydepot[0] = chunkcache;
-        		}
-        	}
-        	chunkcache = newChunkcache;
-        	newChunkcache = null;
-        }
-    }
-    */
-    
     public final long memoryNeededForGrow() {
-        return (long) ((((long) (chunkcount + 1)) * ((long) rowdef.objectsize())) * growfactor);
+        return (long) ((((long) (chunkcount + 1)) * ((long) rowdef.objectsize)) * growfactor);
     }
     
     public synchronized void trim(boolean plusGrowFactor) {
         if (chunkcache.length == 0)
             return;
-        int needed = chunkcount * rowdef.objectsize();
+        int needed = chunkcount * rowdef.objectsize;
         if (plusGrowFactor)
             needed = (int) (needed * growfactor);
         if (needed >= chunkcache.length)
@@ -283,15 +220,15 @@ public class kelondroRowCollection {
         assert (index * rowdef.objectsize < chunkcache.length);
         if ((chunkcache == null) || (rowdef == null)) return null; // case may appear during shutdown
         if (index >= chunkcount) return null;
-        if (index * rowdef.objectsize() >= chunkcache.length) return null;
+        if (index * rowdef.objectsize >= chunkcache.length) return null;
         this.lastTimeRead = System.currentTimeMillis();
-        return rowdef.newEntry(chunkcache, index * rowdef.objectsize(), true);
+        return rowdef.newEntry(chunkcache, index * rowdef.objectsize, true);
     }
     
     public synchronized final void set(int index, kelondroRow.Entry a) {
         assert (index >= 0) : "set: access with index " + index + " is below zero";
         ensureSize(index + 1);
-        a.writeToArray(chunkcache, index * rowdef.objectsize());
+        a.writeToArray(chunkcache, index * rowdef.objectsize);
         if (index >= chunkcount) chunkcount = index + 1;
         this.lastTimeWrote = System.currentTimeMillis();
     }
@@ -302,7 +239,7 @@ public class kelondroRowCollection {
         if (index < chunkcount) {
             // make room
             ensureSize(chunkcount + 1);
-            System.arraycopy(chunkcache, rowdef.objectsize() * index, chunkcache, rowdef.objectsize() * (index + 1), (chunkcount - index) * rowdef.objectsize());
+            System.arraycopy(chunkcache, rowdef.objectsize * index, chunkcache, rowdef.objectsize * (index + 1), (chunkcount - index) * rowdef.objectsize);
             chunkcount++;
         }
         // insert entry into gap
@@ -336,9 +273,9 @@ public class kelondroRowCollection {
             return; // TODO: this is temporary; remote peers may still submit bad entries
         }
         assert (!(bugappearance(a, astart, alength))) : "a = " + serverLog.arrayList(a, astart, alength);
-        int l = Math.min(rowdef.objectsize(), Math.min(alength, a.length - astart));
+        int l = Math.min(rowdef.objectsize, Math.min(alength, a.length - astart));
         ensureSize(chunkcount + 1);
-        System.arraycopy(a, astart, chunkcache, rowdef.objectsize() * chunkcount, l);
+        System.arraycopy(a, astart, chunkcache, rowdef.objectsize * chunkcount, l);
         chunkcount++;
         this.lastTimeWrote = System.currentTimeMillis();
     }
@@ -357,9 +294,9 @@ public class kelondroRowCollection {
 
     public synchronized final void addAllUnique(kelondroRowCollection c) {
         if (c == null) return;
-        assert(rowdef.objectsize() == c.rowdef.objectsize());
+        assert(rowdef.objectsize == c.rowdef.objectsize);
         ensureSize(chunkcount + c.size());
-        System.arraycopy(c.chunkcache, 0, chunkcache, rowdef.objectsize() * chunkcount, rowdef.objectsize() * c.size());
+        System.arraycopy(c.chunkcache, 0, chunkcache, rowdef.objectsize * chunkcount, rowdef.objectsize * c.size());
         chunkcount += c.size();
     }
     
@@ -381,17 +318,17 @@ public class kelondroRowCollection {
         if (keepOrder && (p < sortBound)) {
             // remove by shift (quite expensive for big collections)
             System.arraycopy(
-                    chunkcache, (p + 1) * this.rowdef.objectsize(),
-                    chunkcache, p * this.rowdef.objectsize(),
-                    (chunkcount - p - 1) * this.rowdef.objectsize());
+                    chunkcache, (p + 1) * this.rowdef.objectsize,
+                    chunkcache, p * this.rowdef.objectsize,
+                    (chunkcount - p - 1) * this.rowdef.objectsize);
             sortBound--;
         } else {
             // remove by copying the top-element to the remove position
             if (p != chunkcount - 1) {
                 System.arraycopy(
-                        chunkcache, (chunkcount - 1) * this.rowdef.objectsize(),
-                        chunkcache, p * this.rowdef.objectsize(),
-                        this.rowdef.objectsize());
+                        chunkcache, (chunkcount - 1) * this.rowdef.objectsize,
+                        chunkcache, p * this.rowdef.objectsize,
+                        this.rowdef.objectsize);
             }
             // we moved the last element to the remove position: (p+1)st element
             // only the first p elements keep their order (element p is already outside the order)
@@ -551,17 +488,17 @@ public class kelondroRowCollection {
 
     private final int swap(int i, int j, int p) {
         if (i == j) return p;
-        if ((this.chunkcount + 1) * this.rowdef.objectsize() < this.chunkcache.length) {
+        if ((this.chunkcount + 1) * this.rowdef.objectsize < this.chunkcache.length) {
             // there is space in the chunkcache that we can use as buffer
-            System.arraycopy(chunkcache, this.rowdef.objectsize() * i, chunkcache, chunkcache.length - this.rowdef.objectsize(), this.rowdef.objectsize());
-            System.arraycopy(chunkcache, this.rowdef.objectsize() * j, chunkcache, this.rowdef.objectsize() * i, this.rowdef.objectsize());
-            System.arraycopy(chunkcache, chunkcache.length - this.rowdef.objectsize(), chunkcache, this.rowdef.objectsize() * j, this.rowdef.objectsize());
+            System.arraycopy(chunkcache, this.rowdef.objectsize * i, chunkcache, chunkcache.length - this.rowdef.objectsize, this.rowdef.objectsize);
+            System.arraycopy(chunkcache, this.rowdef.objectsize * j, chunkcache, this.rowdef.objectsize * i, this.rowdef.objectsize);
+            System.arraycopy(chunkcache, chunkcache.length - this.rowdef.objectsize, chunkcache, this.rowdef.objectsize * j, this.rowdef.objectsize);
         } else {
             // allocate a chunk to use as buffer
-            byte[] a = new byte[this.rowdef.objectsize()];
-            System.arraycopy(chunkcache, this.rowdef.objectsize() * i, a, 0, this.rowdef.objectsize());
-            System.arraycopy(chunkcache, this.rowdef.objectsize() * j, chunkcache, this.rowdef.objectsize() * i, this.rowdef.objectsize());
-            System.arraycopy(a, 0, chunkcache, this.rowdef.objectsize() * j, this.rowdef.objectsize());
+            byte[] a = new byte[this.rowdef.objectsize];
+            System.arraycopy(chunkcache, this.rowdef.objectsize * i, a, 0, this.rowdef.objectsize);
+            System.arraycopy(chunkcache, this.rowdef.objectsize * j, chunkcache, this.rowdef.objectsize * i, this.rowdef.objectsize);
+            System.arraycopy(a, 0, chunkcache, this.rowdef.objectsize * j, this.rowdef.objectsize);
         }
         if (i == p) return j; else if (j == p) return i; else return p;
     }
@@ -598,39 +535,38 @@ public class kelondroRowCollection {
     }
 
     private final int compare(int i, int j) {
-        assert (chunkcount * this.rowdef.objectsize() <= chunkcache.length) : "chunkcount = " + chunkcount + ", objsize = " + this.rowdef.objectsize() + ", chunkcache.length = " + chunkcache.length;
+        assert (chunkcount * this.rowdef.objectsize <= chunkcache.length) : "chunkcount = " + chunkcount + ", objsize = " + this.rowdef.objectsize + ", chunkcache.length = " + chunkcache.length;
         assert (i >= 0) && (i < chunkcount) : "i = " + i + ", chunkcount = " + chunkcount;
         assert (j >= 0) && (j < chunkcount) : "j = " + j + ", chunkcount = " + chunkcount;
         assert (this.rowdef.objectOrder != null);
         if (i == j) return 0;
-        assert (this.rowdef.primaryKey == 0) : "this.sortColumn = " + this.rowdef.primaryKey;
-        int keylength = this.rowdef.width(this.rowdef.primaryKey);
-        int colstart  = this.rowdef.colstart[this.rowdef.primaryKey];
-        if (bugappearance(chunkcache, i * this.rowdef.objectsize() + colstart, keylength)) throw new kelondroException("bugappearance i");
-        if (bugappearance(chunkcache, j * this.rowdef.objectsize() + colstart, keylength)) throw new kelondroException("bugappearance j");
+        assert (this.rowdef.primaryKeyIndex == 0) : "this.sortColumn = " + this.rowdef.primaryKeyIndex;
+        int colstart = (this.rowdef.primaryKeyIndex < 0) ? 0 : this.rowdef.colstart[this.rowdef.primaryKeyIndex];
+        assert (!bugappearance(chunkcache, i * this.rowdef.objectsize + colstart, this.rowdef.primaryKeyLength));
+        assert (!bugappearance(chunkcache, j * this.rowdef.objectsize + colstart, this.rowdef.primaryKeyLength));
         int c = this.rowdef.objectOrder.compare(
                 chunkcache,
-                i * this.rowdef.objectsize() + colstart,
-                keylength,
+                i * this.rowdef.objectsize + colstart,
+                this.rowdef.primaryKeyLength,
                 chunkcache,
-                j * this.rowdef.objectsize() + colstart,
-                keylength);
+                j * this.rowdef.objectsize + colstart,
+                this.rowdef.primaryKeyLength);
         return c;
     }
 
     protected synchronized int compare(byte[] a, int astart, int alength, int chunknumber) {
         assert (chunknumber < chunkcount);
-        int l = Math.min(this.rowdef.width(rowdef.primaryKey), Math.min(a.length - astart, alength));
-        return rowdef.objectOrder.compare(a, astart, l, chunkcache, chunknumber * this.rowdef.objectsize() + this.rowdef.colstart[rowdef.primaryKey], this.rowdef.width(rowdef.primaryKey));
+        int l = Math.min(this.rowdef.primaryKeyLength, Math.min(a.length - astart, alength));
+        return rowdef.objectOrder.compare(a, astart, l, chunkcache, chunknumber * this.rowdef.objectsize + ((rowdef.primaryKeyIndex < 0) ? 0 : this.rowdef.colstart[rowdef.primaryKeyIndex]), this.rowdef.primaryKeyLength);
     }
     
     protected synchronized boolean match(byte[] a, int astart, int alength, int chunknumber) {
         if (chunknumber >= chunkcount) return false;
         int i = 0;
-        int p = chunknumber * this.rowdef.objectsize() + this.rowdef.colstart[rowdef.primaryKey];
-        final int len = Math.min(this.rowdef.width(rowdef.primaryKey), Math.min(alength, a.length - astart));
+        int p = chunknumber * this.rowdef.objectsize + ((rowdef.primaryKeyIndex < 0) ? 0 : this.rowdef.colstart[rowdef.primaryKeyIndex]);
+        final int len = Math.min(this.rowdef.primaryKeyLength, Math.min(alength, a.length - astart));
         while (i < len) if (a[astart + i++] != chunkcache[p++]) return false;
-        return ((len == this.rowdef.width(rowdef.primaryKey)) || (chunkcache[len] == 0)) ;
+        return ((len == this.rowdef.primaryKeyLength) || (chunkcache[len] == 0)) ;
     }
     
     public synchronized void close() {

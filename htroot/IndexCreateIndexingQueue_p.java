@@ -43,7 +43,6 @@
 // javac -classpath .:../classes IndexCreate_p.java
 // if the shell's current path is HTROOT
 
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Iterator;
 
@@ -179,7 +178,6 @@ public class IndexCreateIndexingQueue_p {
             yacySeed initiatorSeed, executorSeed;
             int j=0;
             for (int i = switchboard.crawlQueues.errorURL.stackSize() - 1; i >= (switchboard.crawlQueues.errorURL.stackSize() - showRejectedCount); i--) {
-                try {
                     entry = switchboard.crawlQueues.errorURL.top(i);
                     url = entry.url();
                     if (url == null) continue;
@@ -195,9 +193,6 @@ public class IndexCreateIndexingQueue_p {
                     prop.put("rejected_list_"+j+"_dark", dark ? "1" : "0");
                     dark = !dark;
                     j++;
-                } catch (IOException e) {
-                    e.printStackTrace();
-                }
             }
             prop.put("rejected_list", j);
         }

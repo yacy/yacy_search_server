@@ -91,7 +91,7 @@ public class kelondroEcoRecords extends kelondroAbstractRecords {
             
             // create chunks
             this.ohChunk = new byte[overhead];
-            this.bodyChunk = new byte[ROW.objectsize()];
+            this.bodyChunk = new byte[ROW.objectsize];
             for (int i = this.ohChunk.length - 1; i >= 0; i--) this.ohChunk[i] = (byte) 0xff;
             if (rowinstance == null) {
                 for (int i = this.bodyChunk.length - 1; i >= 0; i--) this.bodyChunk[i] = (byte) 0xff;
@@ -130,12 +130,12 @@ public class kelondroEcoRecords extends kelondroAbstractRecords {
             } else { */
                 // create empty chunks
                 this.ohChunk = new byte[overhead];
-                this.bodyChunk = new byte[ROW.objectsize()];
+                this.bodyChunk = new byte[ROW.objectsize];
                 
                 // write content to chunks
                 if (bulkchunk != null) {
                     if (overhead > 0) System.arraycopy(bulkchunk, offset, this.ohChunk, 0, overhead);
-                    System.arraycopy(bulkchunk, offset + overhead, this.bodyChunk, 0, ROW.objectsize());
+                    System.arraycopy(bulkchunk, offset + overhead, this.bodyChunk, 0, ROW.objectsize);
                 }
             //}
             
@@ -161,7 +161,7 @@ public class kelondroEcoRecords extends kelondroAbstractRecords {
 
             // read record
             this.ohChunk = new byte[overhead];
-            this.bodyChunk = new byte[ROW.objectsize()];
+            this.bodyChunk = new byte[ROW.objectsize];
             if (overhead > 0) entryFile.readFully(seekpos(this.handle), this.ohChunk, 0, overhead);
             entryFile.readFully(seekpos(this.handle) + overhead, this.bodyChunk, 0, this.bodyChunk.length);
             
@@ -210,7 +210,7 @@ public class kelondroEcoRecords extends kelondroAbstractRecords {
 
         public synchronized void setValueRow(byte[] row) throws IOException {
             // if the index is defined, then write values directly to the file, else only to the object
-            if ((row != null) && (row.length != ROW.objectsize())) throw new IOException("setValueRow with wrong (" + row.length + ") row length instead correct: " + ROW.objectsize());
+            if ((row != null) && (row.length != ROW.objectsize)) throw new IOException("setValueRow with wrong (" + row.length + ") row length instead correct: " + ROW.objectsize);
             
             // set values
             if (this.handle.index != kelondroHandle.NUL) {
@@ -234,7 +234,7 @@ public class kelondroEcoRecords extends kelondroAbstractRecords {
             
             if (this.bodyChunk == null) {
                 // load all values from the database file
-                this.bodyChunk = new byte[ROW.objectsize()];
+                this.bodyChunk = new byte[ROW.objectsize];
                 // read values
                 entryFile.readFully(seekpos(this.handle) + (long) overhead, this.bodyChunk, 0, this.bodyChunk.length);
             }
@@ -261,8 +261,8 @@ public class kelondroEcoRecords extends kelondroAbstractRecords {
             // save tail
             if ((this.bodyChunk != null) && (this.bodyChanged)) {
                 //System.out.println("WRITET(" + filename + ", " + (seekpos(this.handle) + headchunksize) + ", " + this.tailChunk.length + ")");
-                assert (this.bodyChunk == null) || (this.bodyChunk.length == ROW.objectsize());
-                entryFile.write(seekpos(this.handle) + overhead, (this.bodyChunk == null) ? new byte[ROW.objectsize()] : this.bodyChunk);
+                assert (this.bodyChunk == null) || (this.bodyChunk.length == ROW.objectsize);
+                entryFile.write(seekpos(this.handle) + overhead, (this.bodyChunk == null) ? new byte[ROW.objectsize] : this.bodyChunk);
                 this.bodyChanged = false;
             }
             

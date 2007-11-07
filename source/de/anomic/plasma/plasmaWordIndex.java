@@ -43,6 +43,7 @@ import de.anomic.index.indexContainerOrder;
 import de.anomic.index.indexRAMRI;
 import de.anomic.index.indexRI;
 import de.anomic.index.indexRWIEntry;
+import de.anomic.index.indexRWIRowEntry;
 import de.anomic.index.indexURLEntry;
 import de.anomic.kelondro.kelondroBase64Order;
 import de.anomic.kelondro.kelondroCloneableIterator;
@@ -74,13 +75,13 @@ public final class plasmaWordIndex implements indexRI {
     public plasmaWordIndex(File indexPrimaryRoot, File indexSecondaryRoot, long preloadTime, serverLog log) {
         File textindexcache = new File(indexPrimaryRoot, "PUBLIC/TEXT/RICACHE");
         if (!(textindexcache.exists())) textindexcache.mkdirs();
-        this.dhtOutCache = new indexRAMRI(textindexcache, indexRWIEntry.urlEntryRow, wCacheMaxChunk, wCacheMaxAge, "dump1.array", log);
-        this.dhtInCache  = new indexRAMRI(textindexcache, indexRWIEntry.urlEntryRow, wCacheMaxChunk, wCacheMaxAge, "dump2.array", log);
+        this.dhtOutCache = new indexRAMRI(textindexcache, indexRWIRowEntry.urlEntryRow, wCacheMaxChunk, wCacheMaxAge, "dump1.array", log);
+        this.dhtInCache  = new indexRAMRI(textindexcache, indexRWIRowEntry.urlEntryRow, wCacheMaxChunk, wCacheMaxAge, "dump2.array", log);
         
         // create collections storage path
         File textindexcollections = new File(indexPrimaryRoot, "PUBLIC/TEXT/RICOLLECTION");
         if (!(textindexcollections.exists())) textindexcollections.mkdirs();
-        this.collections = new indexCollectionRI(textindexcollections, "collection", preloadTime, maxCollectionPartition, indexRWIEntry.urlEntryRow);
+        this.collections = new indexCollectionRI(textindexcollections, "collection", preloadTime, maxCollectionPartition, indexRWIRowEntry.urlEntryRow);
 
         // create LURL-db
         loadedURL = new plasmaCrawlLURL(indexSecondaryRoot, preloadTime);
@@ -129,7 +130,7 @@ public final class plasmaWordIndex implements indexRI {
     public long dhtCacheSizeBytes(boolean in) {
         // calculate the real size in bytes of DHT-In/Out-Cache
         long cacheBytes = 0;
-        long entryBytes = indexRWIEntry.urlEntryRow.objectsize();
+        long entryBytes = indexRWIRowEntry.urlEntryRow.objectsize;
         indexRAMRI cache = (in ? dhtInCache : dhtOutCache);
         synchronized (cache) {
             Iterator it = cache.wordContainers(null, false);
@@ -171,7 +172,7 @@ public final class plasmaWordIndex implements indexRI {
     }
     
     public static indexContainer emptyContainer(String wordHash, int elementCount) {
-    	return new indexContainer(wordHash, indexRWIEntry.urlEntryRow, elementCount);
+    	return new indexContainer(wordHash, indexRWIRowEntry.urlEntryRow, elementCount);
     }
 
     public void addEntry(String wordHash, indexRWIEntry entry, long updateTime, boolean dhtInCase) {
@@ -189,7 +190,7 @@ public final class plasmaWordIndex implements indexRI {
     }
     
     public void addEntries(indexContainer entries, long updateTime, boolean dhtInCase) {
-        assert (entries.row().objectsize() == indexRWIEntry.urlEntryRow.objectsize());
+        assert (entries.row().objectsize == indexRWIRowEntry.urlEntryRow.objectsize);
         
         // set dhtInCase depending on wordHash
         if ((!dhtInCase) && (yacyDHTAction.shallBeOwnWord(entries.getWordHash()))) dhtInCase = true;
@@ -298,7 +299,7 @@ public final class plasmaWordIndex implements indexRI {
             word = (String) wentry.getKey();
             wprop = (plasmaCondenser.wordStatProp) wentry.getValue();
             assert (wprop.flags != null);
-            ientry = new indexRWIEntry(url.hash(),
+            ientry = new indexRWIRowEntry(url.hash(),
                         urlLength, urlComps, (document == null) ? urlLength : document.getTitle().length(),
                         wprop.count,
                         condenser.words().size(),
@@ -406,7 +407,7 @@ public final class plasmaWordIndex implements indexRI {
     public indexContainer deleteContainer(String wordHash) {
         indexContainer c = new indexContainer(
                 wordHash,
-                indexRWIEntry.urlEntryRow,
+                indexRWIRowEntry.urlEntryRow,
                 dhtInCache.sizeContainer(wordHash) + dhtOutCache.sizeContainer(wordHash) + collections.indexSize(wordHash)
                 );
         synchronized (dhtInCache) {

@@ -47,7 +47,7 @@ package de.anomic.kelondro;
 
 import java.util.Comparator;
 
-public class kelondroNaturalOrder extends kelondroAbstractOrder implements kelondroOrder, Comparator, Cloneable {
+public final class kelondroNaturalOrder extends kelondroAbstractOrder implements kelondroOrder, Comparator, Cloneable {
     
     public static final kelondroOrder naturalOrder = new kelondroNaturalOrder(true);
     
@@ -55,6 +55,7 @@ public class kelondroNaturalOrder extends kelondroAbstractOrder implements kelon
         this.asc = ascending;
         this.zero = null;
     }
+    
     public boolean wellformed(byte[] a) {
         return true;
     }
@@ -127,7 +128,7 @@ public class kelondroNaturalOrder extends kelondroAbstractOrder implements kelon
     public final static long decodeLong(byte[] s, int offset, int length) {
         if (s == null) return 0;
         long c = 0;
-        int m = Math.min(s.length, offset + length);
+        final int m = Math.min(s.length, offset + length);
         while (offset < m) c = (c << 8) | ((long) s[offset++] & 0xFF);
         return c;
     }
@@ -152,8 +153,8 @@ public class kelondroNaturalOrder extends kelondroAbstractOrder implements kelon
     public final int compare0(byte[] a, int aoffset, int alength, byte[] b, int boffset, int blength) {
         if (zero == null) return compares(a, aoffset, alength, b, boffset, blength);
         // we have an artificial start point. check all combinations
-        int az = compares(a, aoffset, alength, zero, 0, zero.length); // -1 if a < z; 0 if a == z; 1 if a > z
-        int bz = compares(b, boffset, blength, zero, 0, zero.length); // -1 if b < z; 0 if b == z; 1 if b > z
+        final int az = compares(a, aoffset, alength, zero, 0, zero.length); // -1 if a < z; 0 if a == z; 1 if a > z
+        final int bz = compares(b, boffset, blength, zero, 0, zero.length); // -1 if b < z; 0 if b == z; 1 if b > z
         if (az == bz) return compares(a, aoffset, alength, b, boffset, blength);
         return sig(az - bz);
     }
@@ -184,28 +185,6 @@ public class kelondroNaturalOrder extends kelondroAbstractOrder implements kelon
         return 0;
     }
 
-    /*
-    public static final int compares(byte[] a, byte[] b) {
-        int i = 0;
-        final int al = a.length;
-        final int bl = b.length;
-        final int len = (al > bl) ? bl : al;
-        while (i < len) {
-            if (a[i] > b[i]) return 1;
-            if (a[i] < b[i]) return -1;
-            // else the bytes are equal and it may go on yet undecided
-            i++;
-        }
-        // check if we have a zero-terminated equality
-        if ((i == al) && (i < bl) && (b[i] == 0)) return 0;
-        if ((i == bl) && (i < al) && (a[i] == 0)) return 0;
-        // no, decide by length
-        if (al > bl) return 1;
-        if (al < bl) return -1;
-        // no, they are equal
-        return 0;
-    }
-    */
     public static void main(String[] args) {
         byte[] t = new byte[12];
         for (int i = 0; i < 12; i++) t[i] = (byte) 255;

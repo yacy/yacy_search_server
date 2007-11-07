@@ -41,7 +41,6 @@ import de.anomic.index.indexRWIEntry;
 import de.anomic.index.indexURLEntry;
 import de.anomic.kelondro.kelondroBitfield;
 import de.anomic.kelondro.kelondroMSetTools;
-import de.anomic.kelondro.kelondroRow;
 import de.anomic.server.logging.serverLog;
 import de.anomic.yacy.yacyCore;
 import de.anomic.yacy.yacyDHTAction;
@@ -55,12 +54,13 @@ public final class plasmaSearchEvent {
     public static String lastEventID = "";
     private static HashMap lastEvents = new HashMap(); // a cache for objects from this class: re-use old search requests
     public static final long eventLifetime = 600000; // the time an event will stay in the cache, 10 Minutes
+    private static final int max_results_preparation = 200;
     
     private long eventTime;
     private plasmaSearchQuery query;
     private plasmaSearchRankingProfile ranking;
     private plasmaWordIndex wordIndex;
-    private plasmaSearchContainer rankedCache; // ordered search results, grows dynamically as all the query threads enrich this container
+    private plasmaSearchRankingProcess rankedCache; // ordered search results, grows dynamically as all the query threads enrich this container
     private Map rcAbstracts; // cache for index abstracts; word:TreeMap mapping where the embedded TreeMap is a urlhash:peerlist relation
     private plasmaSearchProcessing process;
     private yacySearch[] primarySearchThreads, secondarySearchThreads;
@@ -117,7 +117,7 @@ public final class plasmaSearchEvent {
         long start = System.currentTimeMillis();
         if ((query.domType == plasmaSearchQuery.SEARCHDOM_GLOBALDHT) ||
             (query.domType == plasmaSearchQuery.SEARCHDOM_CLUSTERALL)) {
-            this.rankedCache = new plasmaSearchContainer(query, ranking, plasmaSearchQuery.cleanQuery(query.queryString)[0]);
+            this.rankedCache = new plasmaSearchRankingProcess(query, process, ranking, max_results_preparation);
             
             int fetchpeers = (int) (query.maximumTime / 500L); // number of target peers; means 10 peers in 10 seconds
             if (fetchpeers > 50) fetchpeers = 50;
@@ -191,13 +191,8 @@ public final class plasmaSearchEvent {
                           searchContainerMaps[1].values(),
                           query.maxDistance);
             this.localcount = rcLocal.size();
-            plasmaSearchPreOrder sort = new plasmaSearchPreOrder(query, process, ranking, rcLocal);
-            
-            process.startTimer();
-            rcLocal = sort.strippedContainer(200);
-            process.yield("result strip", rcLocal.size());
-            
-            this.rankedCache = new plasmaSearchContainer(query, ranking, plasmaSearchQuery.cleanQuery(query.queryString)[0], rcLocal);
+            this.rankedCache = new plasmaSearchRankingProcess(query, process, ranking, max_results_preparation);
+            this.rankedCache.insert(rcLocal, true);
         }
         
         if (query.onlineSnippetFetch) {
@@ -209,33 +204,36 @@ public final class plasmaSearchEvent {
             }
         } else {
             // prepare result vector directly without worker threads
-            int rankedIndex = 0;
             process.startTimer();
-            
-            while ((rankedIndex < rankedCache.container().size()) && (resultList.size() < (query.neededResults()))) {
-                // fetch next entry to work on
-                indexContainer c = rankedCache.container();
-                indexRWIEntry entry = new indexRWIEntry(c.get(rankedIndex++));
-                indexURLEntry page = wordIndex.loadedURL.load(entry.urlHash(), entry);
+            indexRWIEntry entry;
+            indexURLEntry page;
+            ResultEntry resultEntry;
+            synchronized (rankedCache) {
+                Iterator indexRWIEntryIterator = rankedCache.entries();
+                while ((indexRWIEntryIterator.hasNext()) && (resultList.size() < (query.neededResults()))) {
+                    // fetch next entry
+                    entry = (indexRWIEntry) indexRWIEntryIterator.next();
+                    page = wordIndex.loadedURL.load(entry.urlHash(), entry);
                 
-                if (page == null) {
-                    registerFailure(entry.urlHash(), "url does not exist in lurl-db");
-                    continue;
-                }
+                    if (page == null) {
+                        registerFailure(entry.urlHash(), "url does not exist in lurl-db");
+                        continue;
+                    }
                 
-                ResultEntry resultEntry = obtainResultEntry(page, (snippetComputationAllTime < 300) ? 1 : 0);
-                if (resultEntry == null) continue; // the entry had some problems, cannot be used
-                urlRetrievalAllTime += resultEntry.dbRetrievalTime;
-                snippetComputationAllTime += resultEntry.snippetComputationTime;
+                    resultEntry = obtainResultEntry(page, (snippetComputationAllTime < 300) ? 1 : 0);
+                    if (resultEntry == null) continue; // the entry had some problems, cannot be used
+                    urlRetrievalAllTime += resultEntry.dbRetrievalTime;
+                    snippetComputationAllTime += resultEntry.snippetComputationTime;
                 
-                // place the result to the result vector
-                synchronized (resultList) {
-                    resultList.add(resultEntry);
-                }
+                    // place the result to the result vector
+                    synchronized (resultList) {
+                        resultList.add(resultEntry);
+                    }
 
-                // add references
-                synchronized (rankedCache) {
-                    rankedCache.addReferences(resultEntry);
+                    // add references
+                    synchronized (rankedCache) {
+                        rankedCache.addReferences(resultEntry);
+                    }
                 }
             }
             process.yield("offline snippet fetch", resultList.size());
@@ -248,7 +246,6 @@ public final class plasmaSearchEvent {
         lastEvents.put(query.id(), this);
         lastEventID = query.id();
     }
-    
 
     private class localSearchProcess extends Thread {
         
@@ -296,10 +293,8 @@ public final class plasmaSearchEvent {
             
             // sort the local containers and truncate it to a limited count,
             // so following sortings together with the global results will be fast
-            plasmaSearchPreOrder firstsort = new plasmaSearchPreOrder(query, process, ranking, rcLocal);
-            rcLocal = firstsort.strippedContainer(200);
             synchronized (rankedCache) {
-                rankedCache.insert(rcLocal, true, true);
+                rankedCache.insert(rcLocal, true);
             }
         }
     }
@@ -473,6 +468,7 @@ public final class plasmaSearchEvent {
     public yacySearch[] getPrimarySearchThreads() {
         return primarySearchThreads;
     }
+    
     public yacySearch[] getSecondarySearchThreads() {
         return secondarySearchThreads;
     }
@@ -580,7 +576,7 @@ public final class plasmaSearchEvent {
                         try {Thread.sleep(100);} catch (InterruptedException e) {}
                         continue;
                     } else {
-                        // we will not see that there core more results in
+                        // we will not see that there come more results in
                         break;
                     }
                 }
@@ -613,14 +609,14 @@ public final class plasmaSearchEvent {
         
         private indexRWIEntry nextOrder() {
             synchronized (rankedCache) {
-                indexContainer c = rankedCache.container();
-                kelondroRow.Entry entry;
+                Iterator i = rankedCache.entries();
+                indexRWIEntry entry;
                 String urlhash;
-                for (int i = 0; i < c.size(); i++) {
-                    entry = c.get(i);
-                    urlhash = new String(entry.getColBytes(0));
+                while (i.hasNext()) {
+                    entry = (indexRWIEntry) i.next();
+                    urlhash = entry.urlHash();
                     if ((anyFailureWith(urlhash)) || (anyWorkerWith(urlhash)) || (anyResultWith(urlhash))) continue;
-                    return new indexRWIEntry(entry);
+                    return entry;
                 }
             }
             return null; // no more entries available

@@ -227,7 +227,7 @@ public class plasmaRankingRCIEvaluation {
                 File root_path = new File(args[1]);
                 
                 // load a partition table
-                plasmaSearchPreOrder.loadYBR(new File(root_path, "ranking/YBR"), 16);
+                plasmaSearchRankingProcess.loadYBR(new File(root_path, "ranking/YBR"), 16);
                 
                 // load domain list and generate hash index for domains
                 HashMap dommap = genReverseDomHash(new File(root_path, "domlist.txt"));
@@ -236,8 +236,8 @@ public class plasmaRankingRCIEvaluation {
                 String hash, dom;
                 for (int i = 0; i < 9; i++) {
                     System.out.print("YBR-" + i + ": ");
-                    for (int j = 0; j < plasmaSearchPreOrder.ybrTables[i].size(); j++) {
-                        hash = new String(plasmaSearchPreOrder.ybrTables[i].get(j));
+                    for (int j = 0; j < plasmaSearchRankingProcess.ybrTables[i].size(); j++) {
+                        hash = new String(plasmaSearchRankingProcess.ybrTables[i].get(j));
                         dom = (String) dommap.get(hash);
                         if (dom == null) System.out.print("[" + hash + "], "); else System.out.print(dom + ", ");
                     }

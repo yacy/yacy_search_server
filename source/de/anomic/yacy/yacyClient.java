@@ -59,7 +59,7 @@ import de.anomic.index.indexURLEntry;
 import de.anomic.kelondro.kelondroBase64Order;
 import de.anomic.kelondro.kelondroBitfield;
 import de.anomic.plasma.plasmaCondenser;
-import de.anomic.plasma.plasmaSearchContainer;
+import de.anomic.plasma.plasmaSearchRankingProcess;
 import de.anomic.plasma.plasmaSearchProcessing;
 import de.anomic.plasma.plasmaSearchRankingProfile;
 import de.anomic.plasma.plasmaSnippetCache;
@@ -345,7 +345,7 @@ public final class yacyClient {
             int partitions,
             yacySeed target,
             plasmaWordIndex wordIndex,
-            plasmaSearchContainer containerCache,
+            plasmaSearchRankingProcess containerCache,
             Map abstractCache,
             plasmaURLPattern blacklist,
             plasmaSearchRankingProfile rankingProfile,
@@ -516,7 +516,7 @@ public final class yacyClient {
         // store remote result to local result container
         synchronized (containerCache) {
             // insert one container into the search result buffer
-            containerCache.insert(container[0], false, false); // one is enough
+            containerCache.insert(container[0], false); // one is enough
             
             // integrate remote topwords
             String references = (String) result.get("references");

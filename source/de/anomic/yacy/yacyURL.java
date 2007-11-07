@@ -1052,7 +1052,7 @@ public class yacyURL {
     }
 
     public static int domLengthNormalized(String urlHash) {
-        return 255 * domLengthEstimation(urlHash) / 30;
+        return domLengthEstimation(urlHash) << 8 / 20;
     }
 
     public static final int domDomain(String urlHash) {

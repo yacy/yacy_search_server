@@ -36,7 +36,7 @@ import de.anomic.http.httpHeader;
 import de.anomic.kelondro.kelondroMSetTools;
 import de.anomic.kelondro.kelondroNaturalOrder;
 import de.anomic.plasma.plasmaSearchEvent;
-import de.anomic.plasma.plasmaSearchPreOrder;
+import de.anomic.plasma.plasmaSearchRankingProcess;
 import de.anomic.plasma.plasmaSearchQuery;
 import de.anomic.plasma.plasmaSearchRankingProfile;
 import de.anomic.plasma.plasmaSnippetCache;
@@ -208,7 +208,7 @@ public class yacysearchitem {
             prop.put("content_urlhexhash", yacySeed.b64Hash2hexHash(result.hash()));
             prop.putHTML("content_urlname", nxTools.shortenURLString(result.urlname(), urllength));
             prop.put("content_date", plasmaSwitchboard.dateString(result.modified()));
-            prop.put("content_ybr", plasmaSearchPreOrder.ybr(result.hash()));
+            prop.put("content_ybr", plasmaSearchRankingProcess.ybr(result.hash()));
             prop.putNum("content_size", result.filesize());
         
             TreeSet[] query = theQuery.queryWords();

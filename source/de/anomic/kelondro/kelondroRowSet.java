@@ -64,8 +64,8 @@ public class kelondroRowSet extends kelondroRowCollection implements kelondroInd
     public void setOrdering(kelondroOrder newOrder, int newColumn) {
         assert newOrder != null;
         if ((rowdef.objectOrder == null) ||
-                (!(rowdef.objectOrder.signature().equals(newOrder.signature()))) ||
-                (newColumn != rowdef.primaryKey)) {
+            (!(rowdef.objectOrder.signature().equals(newOrder.signature()))) ||
+            (newColumn != rowdef.primaryKeyIndex)) {
             rowdef.setOrdering(newOrder, newColumn);
             this.sortBound = 0;
         }
@@ -103,12 +103,12 @@ public class kelondroRowSet extends kelondroRowCollection implements kelondroInd
     
     public synchronized kelondroRow.Entry put(kelondroRow.Entry entry) {
         assert (entry != null);
-        assert (entry.getColBytes(rowdef.primaryKey) != null);
+        assert (entry.getPrimaryKeyBytes() != null);
         //assert (!(serverLog.allZero(entry.getColBytes(super.sortColumn))));
         long handle = profile.startWrite();
         int index = -1;
         kelondroRow.Entry oldentry = null;
-        index = find(entry.bytes(), super.rowdef.colstart[rowdef.primaryKey], super.rowdef.width(rowdef.primaryKey));
+        index = find(entry.bytes(), (rowdef.primaryKeyIndex < 0) ? 0 :super.rowdef.colstart[rowdef.primaryKeyIndex], super.rowdef.primaryKeyLength);
         if (index < 0) {
             super.addUnique(entry);
         } else {
@@ -128,7 +128,7 @@ public class kelondroRowSet extends kelondroRowCollection implements kelondroInd
         //System.out.println("remove: chunk found at index position (after  remove) " + index + ", inset=" + serverLog.arrayList(super.chunkcache, super.rowdef.objectsize() * index, length) + ", searchkey=" + serverLog.arrayList(a, start, length));
         int findagainindex = find(a, start, length);
         //System.out.println("kelondroRowSet.remove");
-        assert findagainindex < 0 : "remove: chunk found again at index position (after  remove) " + findagainindex + ", index(before) = " + index + ", inset=" + serverLog.arrayList(super.chunkcache, super.rowdef.objectsize() * findagainindex, length) + ", searchkey=" + serverLog.arrayList(a, start, length); // check if the remove worked
+        assert findagainindex < 0 : "remove: chunk found again at index position (after  remove) " + findagainindex + ", index(before) = " + index + ", inset=" + serverLog.arrayList(super.chunkcache, super.rowdef.objectsize * findagainindex, length) + ", searchkey=" + serverLog.arrayList(a, start, length); // check if the remove worked
         return entry;
     }
 

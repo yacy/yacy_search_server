@@ -135,7 +135,6 @@ public class plasmaSearchProcessing implements Cloneable {
         return yield.size();
     }
     
-    // collection
     public Map[] localSearchContainers(
             plasmaSearchQuery query,
             plasmaWordIndex wordIndex,
@@ -160,7 +159,6 @@ public class plasmaSearchProcessing implements Cloneable {
         return new Map[]{inclusionContainers, exclusionContainers};
     }
     
-    // join
     public indexContainer localSearchJoinExclude(
             Collection includeContainers,
             Collection excludeContainers,

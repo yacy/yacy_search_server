@@ -500,7 +500,7 @@ public class kelondroCachedRecords extends kelondroAbstractRecords implements ke
 
         public synchronized void setValueRow(byte[] row) throws IOException {
             // if the index is defined, then write values directly to the file, else only to the object
-            if ((row != null) && (row.length != ROW.objectsize())) throw new IOException("setValueRow with wrong (" + row.length + ") row length instead correct: " + ROW.objectsize());
+            if ((row != null) && (row.length != ROW.objectsize)) throw new IOException("setValueRow with wrong (" + row.length + ") row length instead correct: " + ROW.objectsize);
             
             // set values
             if (this.handle.index != kelondroHandle.NUL) {
@@ -532,7 +532,7 @@ public class kelondroCachedRecords extends kelondroAbstractRecords implements ke
             }
 
             // create return value
-            byte[] row = new byte[ROW.objectsize()];
+            byte[] row = new byte[ROW.objectsize];
 
             // read key
             System.arraycopy(headChunk, overhead, row, 0, ROW.width(0));

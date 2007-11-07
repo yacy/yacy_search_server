@@ -45,12 +45,8 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
 import java.util.Set;
-import java.util.TreeSet;
 
 import de.anomic.htmlFilter.htmlFilterContentScraper;
-import de.anomic.index.indexRWIEntry;
-import de.anomic.yacy.yacyURL;
-import de.anomic.kelondro.kelondroBitfield;
 
 public class plasmaSearchRankingProfile {
 
@@ -86,7 +82,7 @@ public class plasmaSearchRankingProfile {
     public static final String DESCRCOMPINTOPLIST = "descrcompintoplist";
     public static final String PREFER = "prefer";
 
-    private int
+    public int
         coeff_domlength, coeff_ybr, coeff_date, coeff_wordsintitle, coeff_wordsintext, coeff_phrasesintext,
         coeff_llocal, coeff_lother, coeff_urllength, coeff_urlcomps, coeff_hitcount, 
         coeff_posintext, coeff_posofphrase, coeff_posinphrase, coeff_worddistance,
@@ -247,44 +243,6 @@ public class plasmaSearchRankingProfile {
             ext.append(entry.getValue());
         }
         return new String(ext);
-    }
-    
-    public long preRanking(indexRWIEntry t, indexRWIEntry min, indexRWIEntry max, TreeSet searchedWords) {
-        // the normalizedEntry must be a normalized indexEntry
-        long ranking = 0;
-        ranking += (256 - yacyURL.domLengthNormalized(t.urlHash())) << coeff_domlength;
-        ranking += plasmaSearchPreOrder.ybr_p(t.urlHash()) << coeff_ybr;
-        ranking += (255 - (255 * (t.virtualAge()   - min.virtualAge()   ) / (1 + max.virtualAge()   - min.virtualAge()))  ) << coeff_date;
-        ranking +=        (255 * (t.wordsintitle() - min.wordsintitle() ) / (1 + max.wordsintitle() - min.wordsintitle()))  << coeff_wordsintitle;
-        ranking +=        (255 * (t.wordsintext()  - min.wordsintext()  ) / (1 + max.wordsintext()  - min.wordsintext()))   << coeff_wordsintext;
-        ranking +=        (255 * (t.phrasesintext()- min.phrasesintext()) / (1 + max.phrasesintext()- min.phrasesintext())) << coeff_phrasesintext;
-        ranking += t.llocal() << coeff_llocal;
-        ranking += t.lother() << coeff_lother;
-        ranking += (255 - (255 * (t.urllength()    - min.urllength()    ) / (1 + max.urllength()    - min.urllength()))   ) << coeff_urllength;
-        ranking += (255 - (255 * (t.urlcomps()     - min.urlcomps()     ) / (1 + max.urlcomps()     - min.urlcomps()))    ) << coeff_urlcomps;
-        ranking +=        (255 * (t.hitcount()     - min.hitcount()     ) / (1 + max.hitcount()     - min.hitcount()))      << coeff_hitcount;
-        ranking += (255 - (255 * (t.posintext()    - min.posintext()    ) / (1 + max.posintext()    - min.posintext()))   ) << coeff_posintext;
-        ranking += (255 - (255 * (t.posofphrase()  - min.posofphrase()  ) / (1 + max.posofphrase()  - min.posofphrase())) ) << coeff_posofphrase;
-        ranking += (255 - (255 * (t.posinphrase()  - min.posinphrase()  ) / (1 + max.posinphrase()  - min.posinphrase())) ) << coeff_posinphrase;
-        ranking += (255 - (255 * (t.worddistance() - min.worddistance() ) / (1 + max.worddistance() - min.worddistance()))) << coeff_worddistance;
-
-        kelondroBitfield flags = t.flags();
-        ranking += (flags.get(indexRWIEntry.flag_app_url)) ? 256 << coeff_appurl : 0;
-        ranking += (flags.get(indexRWIEntry.flag_app_descr)) ? 256 << coeff_appdescr : 0;
-        ranking += (flags.get(indexRWIEntry.flag_app_author)) ? 256 << coeff_appauthor : 0;
-        ranking += (flags.get(indexRWIEntry.flag_app_tags)) ? 256 << coeff_apptags : 0;
-        ranking += (flags.get(indexRWIEntry.flag_app_reference)) ? 256 << coeff_appref : 0;
-        ranking += (flags.get(indexRWIEntry.flag_app_emphasized)) ? 256 << coeff_appemph : 0;
-        ranking += (flags.get(plasmaCondenser.flag_cat_indexof)) ? 256 << coeff_catindexof : 0;
-        ranking += (flags.get(plasmaCondenser.flag_cat_hasimage)) ? 256 << coeff_cathasimage : 0;
-        ranking += (flags.get(plasmaCondenser.flag_cat_hasaudio)) ? 256 << coeff_cathasaudio : 0;
-        ranking += (flags.get(plasmaCondenser.flag_cat_hasvideo)) ? 256 << coeff_cathasvideo : 0;
-        ranking += (flags.get(plasmaCondenser.flag_cat_hasapp)) ? 256 << coeff_cathasapp : 0;
-        
-        ranking += (yacyURL.probablyRootURL(t.urlHash())) ? 16 << coeff_urllength : 0;
-        if (searchedWords != null) ranking += (yacyURL.probablyWordURL(t.urlHash(), searchedWords) != null) ? 256 << coeff_appurl : 0;
-
-        return ranking;
     }
     
     public long postRanking(

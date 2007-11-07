@@ -41,8 +41,8 @@ public class kelondroColumn {
     public static final int encoder_b256   = 2;
     public static final int encoder_bytes  = 3;
     
-    private int celltype, cellwidth, encoder;
-    private String nickname, description;
+    public int celltype, cellwidth, encoder;
+    public String nickname, description;
 
     public kelondroColumn(String nickname, int celltype, int encoder, int cellwidth, String description) {
         this.celltype = celltype;
@@ -190,26 +190,6 @@ public class kelondroColumn {
         this.celltype = celltype;
         this.encoder = encoder;
         this.nickname = nickname;
-    }
-
-    public int celltype() {
-        return this.celltype;
-    }
-    
-    public int cellwidth() {
-        return this.cellwidth;
-    }
-    
-    public int encoder() {
-        return this.encoder;
-    }
-    
-    public String nickname() {
-        return this.nickname;
-    }
-    
-    public String description() {
-        return this.description;
     }
     
     public String toString() {

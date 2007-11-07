@@ -176,8 +176,7 @@ public class QuickCrawlLink_p {
             
             // stack URL
             String reasonString = null;
-            try {
-                reasonString = switchboard.crawlStacker.stackCrawl(
+            reasonString = switchboard.crawlStacker.stackCrawl(
                         crawlingStartURL, 
                         null, 
                         yacyCore.seedDB.mySeed().hash, 
@@ -186,9 +185,6 @@ public class QuickCrawlLink_p {
                                 0, 
                                 pe
                 );
-            } catch (InterruptedException e) {
-                reasonString = "Server shutdown in progess";
-            }
             
             // validate rejection reason
             if (reasonString == null) {

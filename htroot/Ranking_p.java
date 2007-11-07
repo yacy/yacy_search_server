@@ -131,10 +131,7 @@ public class Ranking_p {
         if ((post == null) || (env == null)) {
             // we create empty entries for template strings
             final serverObjects prop = defaultValues();
-            plasmaSearchRankingProfile ranking =
-                    (sb.getConfig("rankingProfile", "").length() == 0) ?
-                    new plasmaSearchRankingProfile(plasmaSearchQuery.CONTENTDOM_TEXT) :
-                    new plasmaSearchRankingProfile("", crypt.simpleDecode(sb.getConfig("rankingProfile", ""), null));
+            plasmaSearchRankingProfile ranking = sb.getRanking();
             putRanking(prop, ranking, "local");
             return prop;
         }

@@ -236,7 +236,7 @@ public class indexURLEntry {
         this.word = null;
         if (prop.containsKey("word")) throw new kelondroException("old database structure is not supported");
         if (prop.containsKey("wi")) {
-            this.word = new indexRWIEntry(kelondroBase64Order.enhancedCoder.decodeString(prop.getProperty("wi", "")));
+            this.word = new indexRWIRowEntry(kelondroBase64Order.enhancedCoder.decodeString(prop.getProperty("wi", "")));
         }
     }
 

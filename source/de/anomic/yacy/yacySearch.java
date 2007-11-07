@@ -52,7 +52,7 @@ import java.util.TreeMap;
 
 import de.anomic.kelondro.kelondroBitfield;
 import de.anomic.kelondro.kelondroMScoreCluster;
-import de.anomic.plasma.plasmaSearchContainer;
+import de.anomic.plasma.plasmaSearchRankingProcess;
 import de.anomic.plasma.plasmaSearchQuery;
 import de.anomic.plasma.plasmaSearchRankingProfile;
 import de.anomic.plasma.plasmaWordIndex;
@@ -65,7 +65,7 @@ public class yacySearch extends Thread {
     final private boolean global;
     final private int partitions;
     final private plasmaWordIndex wordIndex;
-    final private plasmaSearchContainer containerCache;
+    final private plasmaSearchRankingProcess containerCache;
     final private Map abstractCache;
     final private plasmaURLPattern blacklist;
     final private yacySeed targetPeer;
@@ -77,7 +77,7 @@ public class yacySearch extends Thread {
     
     public yacySearch(String wordhashes, String excludehashes, String urlhashes, String prefer, String filter, int count, int maxDistance, 
                       boolean global, int partitions, yacySeed targetPeer, plasmaWordIndex wordIndex,
-                      plasmaSearchContainer containerCache, Map abstractCache,
+                      plasmaSearchRankingProcess containerCache, Map abstractCache,
                       plasmaURLPattern blacklist,
                       plasmaSearchRankingProfile rankingProfile,
                       kelondroBitfield constraint) {
@@ -247,7 +247,7 @@ public class yacySearch extends Thread {
             String wordhashes, String excludehashes, String urlhashes,
             String prefer, String filter, int count, int maxDist,
             plasmaWordIndex wordIndex,
-            plasmaSearchContainer containerCache, Map abstractCache,
+            plasmaSearchRankingProcess containerCache, Map abstractCache,
             int targets, plasmaURLPattern blacklist,
             plasmaSearchRankingProfile rankingProfile,
             kelondroBitfield constraint, TreeMap clusterselection) {
@@ -271,7 +271,7 @@ public class yacySearch extends Thread {
     
     public static yacySearch secondaryRemoteSearch(String wordhashes, String excludehashes, String urlhashes,
             plasmaWordIndex wordIndex,
-            plasmaSearchContainer containerCache,
+            plasmaSearchRankingProcess containerCache,
             String targethash, plasmaURLPattern blacklist,
             plasmaSearchRankingProfile rankingProfile,
             kelondroBitfield constraint, TreeMap clusterselection) {

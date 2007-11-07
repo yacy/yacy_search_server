@@ -343,7 +343,7 @@ public final class plasmaCrawlStacker extends Thread {
         return new plasmaCrawlEntry(entry);
     }
     
-    public String stackCrawl(yacyURL url, String referrerhash, String initiatorHash, String name, Date loadDate, int currentdepth, plasmaCrawlProfile.entry profile) throws InterruptedException {
+    public String stackCrawl(yacyURL url, String referrerhash, String initiatorHash, String name, Date loadDate, int currentdepth, plasmaCrawlProfile.entry profile) {
         // stacks a crawl item. The position can also be remote
         // returns null if successful, a reason string if not successful
         //this.log.logFinest("stackCrawl: nexturlString='" + nexturlString + "'");
@@ -363,7 +363,7 @@ public final class plasmaCrawlStacker extends Thread {
         return stackCrawl(entry);
     }
     
-    public String stackCrawl(plasmaCrawlEntry entry) throws InterruptedException {
+    public String stackCrawl(plasmaCrawlEntry entry) {
         // stacks a crawl item. The position can also be remote
         // returns null if successful, a reason string if not successful
         //this.log.logFinest("stackCrawl: nexturlString='" + nexturlString + "'");

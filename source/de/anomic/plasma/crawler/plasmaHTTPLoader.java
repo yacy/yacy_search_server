@@ -345,8 +345,9 @@ public final class plasmaHTTPLoader {
                 failreason = plasmaCrawlEURL.DENIED_NO_ROUTE_TO_HOST;
             } else if ((e instanceof UnknownHostException) ||
                        ((errorMsg != null) && (errorMsg.indexOf("unknown host") >= 0))) {
-                this.log.logWarning("CRAWLER Unknown host in URL '" + entry.url().toString() + "'. " +
-                        "Referer URL: " + ((entry.referrerhash() == null) ? "Unknown" : sb.getURL(entry.referrerhash()).toNormalform(true, true)));
+                yacyURL u = (entry.referrerhash() == null) ? null : sb.getURL(entry.referrerhash());
+                this.log.logWarning("CRAWLER Unknown host in URL '" + entry.url() + "'. " +
+                        "Referer URL: " + ((u == null) ? "Unknown" : u.toNormalform(true, true)));
                 failreason = plasmaCrawlEURL.DENIED_UNKNOWN_HOST;
             } else if (e instanceof java.net.BindException) {
                 this.log.logWarning("CRAWLER BindException detected while trying to download content from '" + entry.url().toString() +
