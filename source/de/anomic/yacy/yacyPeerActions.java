@@ -273,7 +273,7 @@ public class yacyPeerActions {
         if (disconnectedSeed == null) {
             dtimeUTC0 = 0; // never disconnected: virtually disconnected maximum time ago
         } else {
-            dtimeUTC0 = Long.parseLong(disconnectedSeed.get("dct", "0"));
+            dtimeUTC0 = disconnectedSeed.getLong("dct", 0);
         }
 
         if (direct) {

@@ -329,6 +329,16 @@ public class yacySeed {
         if (o == null) { return dflt; }
         return (String) o;
     }
+    
+    public final long getLong(String key, long dflt) {
+        final Object o = this.dna.get(key);
+        if (o == null) { return dflt; }
+        try {
+        	return Long.parseLong((String) o);
+        } catch (NumberFormatException e) {
+        	return dflt;
+        }
+    }
 
     public final void setIP()                    { dna.put(yacySeed.IP, ""); }
     public final void setIP(final String ip)     { dna.put(yacySeed.IP, ip); }
@@ -592,7 +602,7 @@ public class yacySeed {
 
     public final long getLinkCount() {
         try {
-            return Long.parseLong(get(yacySeed.LCOUNT, yacySeed.ZERO));
+            return getLong(yacySeed.LCOUNT, 0);
         } catch (NumberFormatException e) {
             return 0;
         }
