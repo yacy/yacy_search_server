@@ -341,6 +341,37 @@ public class kelondroBase64Order extends kelondroAbstractOrder implements kelond
         // they are equal
         return 0;
     }
+    
+    public final int comparePivot(byte[] compiledPivot, byte[] b, int boffset, int blength) {
+    	assert zero == null;
+    	assert asc;
+        assert (boffset + blength <= b.length) : "b.length = " + b.length + ", boffset = " + boffset + ", blength = " + blength;
+        int i = 0;
+        final int bl = Math.min(blength, b.length - boffset);
+        byte acc, bcc;
+        while ((i < compiledPivot.length) && (i < bl)) {
+            acc = compiledPivot[i];
+            bcc = ahpla[b[boffset + i]];
+            if (acc > bcc) return 1;
+            if (acc < bcc) return -1;
+            // else the bytes are equal and it may go on yet undecided
+            i++;
+        }
+        // compare length
+        if (compiledPivot.length > bl) return 1;
+        if (compiledPivot.length < bl) return -1;
+        // they are equal
+        return 0;
+    }
+    
+    public final byte[] compilePivot(byte[] a, int aoffset, int alength) {
+        assert (aoffset + alength <= a.length) : "a.length = " + a.length + ", aoffset = " + aoffset + ", alength = " + alength;
+        byte[] cp = new byte[Math.min(alength, a.length - aoffset)];
+        for (int i = cp.length - 1; i >= 0; i--) {
+            cp[i] = ahpla[a[aoffset + i]];
+        }
+        return cp;
+    }
 
     public static void main(String[] s) {
         kelondroBase64Order b64 = new kelondroBase64Order(true, true);

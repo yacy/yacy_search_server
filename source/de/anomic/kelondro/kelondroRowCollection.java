@@ -28,11 +28,13 @@ import java.io.File;
 import java.io.IOException;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Random;
 import java.util.Set;
 
 import de.anomic.server.serverFileUtils;
 import de.anomic.server.serverMemory;
 import de.anomic.server.logging.serverLog;
+import de.anomic.yacy.yacySeedDB;
 
 public class kelondroRowCollection {
 
@@ -51,6 +53,8 @@ public class kelondroRowCollection {
     private static final int exp_order_col   = 4;
     private static final int exp_order_bound = 5;
     private static final int exp_collection  = 6;
+    
+    private static int processors = Runtime.getRuntime().availableProcessors();
     
     public kelondroRowCollection(kelondroRowCollection rc) {
         this.rowdef = rc.rowdef;
@@ -187,11 +191,9 @@ public class kelondroRowCollection {
     }
     
     public synchronized void trim(boolean plusGrowFactor) {
-        if (chunkcache.length == 0)
-            return;
+        if (chunkcache.length == 0) return;
         int needed = chunkcount * rowdef.objectsize;
-        if (plusGrowFactor)
-            needed = (int) (needed * growfactor);
+        if (plusGrowFactor) needed = (int) (needed * growfactor);
         if (needed >= chunkcache.length)
             return; // in case that the growfactor causes that the cache would
                     // grow instead of shrink, simply ignore the growfactor
@@ -406,104 +408,103 @@ public class kelondroRowCollection {
     public synchronized final void sort() {
         assert (this.rowdef.objectOrder != null);
         if (this.sortBound == this.chunkcount) return; // this is already sorted
-        //System.out.println("SORT(chunkcount=" + this.chunkcount + ", sortBound=" + this.sortBound + ")");
-        if (this.sortBound > 1) {
-            qsort(0, this.sortBound, this.chunkcount);
-        } else {
-            qsort(0, this.chunkcount);
-        }
+
+        int p = partition(0, this.chunkcount, new byte[this.rowdef.objectsize]);
+        if (p >= 0) {
+        	if ((processors > 1) && (this.chunkcount > 10000)) {
+        		// sort this using multi-threading; use one second thread
+        		qsortthread qs = new qsortthread(0, p);
+            	qs.start();
+        		qsort(p, this.chunkcount, new byte[this.rowdef.objectsize]);
+        		try {qs.join();} catch (InterruptedException e) {e.printStackTrace();}
+        	} else {
+        		byte[] swapspace = new byte[this.rowdef.objectsize];
+        		qsort(0, p, swapspace);
+        		qsort(p, this.chunkcount, swapspace);
+        	}
+    	}
         this.sortBound = this.chunkcount;
     }
 
-    private final void qsort(int L, int S, int R) {
-        //System.out.println("QSORT: chunkcache.length=" + chunkcache.length + ", chunksize=" + chunksize + ", L=" + L + ", S=" + S + ", R=" + R);
-        assert (S <= R) : "S > R: S = " + S + ", R = " + R;
-        if (L >= R - 1) return;
-        if (S >= R) return;
-
-        if (R - L < 20) {
-            isort(L, R);
-            return;
-         }
-        
-        int p = L + ((S - L) / 2);
-        int ps = p;
-        int q = S;
-        int qs = q;
-        int pivot = p;
-        while (q < R) {
-            if (compare(pivot, q) < 1) {
-                q++;
-            } else {
-                pivot = swap(p, q, pivot);
-                p++;
-                q++;
-            }
-        }
-        if ((ps - L) <= ((p - L) / 2)) qsort(L, p); else qsort(L, ps, p);
-        if ((qs - p) <= ((R - p) / 2)) qsort(p, R); else qsort(p, qs, R);
+    private class qsortthread extends Thread {
+    	private int sl, sr;
+    	byte[] swapspace;
+    	public qsortthread(int L, int R) {
+    		this.sl = L;
+    		this.sr = R;
+    		this.swapspace = new byte[rowdef.objectsize];
+    	}
+    	public void run() {
+    		qsort(sl, sr, swapspace);
+    	}
+    	
     }
-
-    private final void qsort(int L, int R) {
-        //System.out.println("QSORT: chunkcache.length=" + chunkcache.length + ", L=" + L + "/" + new String(this.chunkcache, L * this.rowdef.objectsize(), this.rowdef.width(0)) + ", R=" + R + "/" + new String(this.chunkcache, (R - 1) * this.rowdef.objectsize(), this.rowdef.width(0)));
-        /*
-        if ((L == 190) && (R == 258)) {
-            for (int i = L; i < R; i++) {
-                System.out.print(new String(this.chunkcache, L * this.chunksize, this.chunksize) + ", ");
-            }
-            System.out.println();
-        }
-        */
-        if (L >= R - 1) return;
+    
+    private final void qsort(int L, int R, byte[] swapspace) {
+		int p = partition(L, R, swapspace);
+		if (p >= 0) {
+			qsort(L, p, swapspace);
+			qsort(p, R, swapspace);
+		}
+	}
+    
+	private final int partition(int L, int R, byte[] swapspace) {
+        if (L >= R - 1) return -1;
         
         if (R - L < 20) {
-            isort(L, R);
-            return;
+            isort(L, R, swapspace);
+            return -1;
          }
         
-        int i = L;
-        int j = R - 1;
-        int pivot = (i + j) / 2;
-        //System.out.println("Pivot=" + pivot + "/" + new String(this.chunkcache, pivot * this.rowdef.objectsize(), this.rowdef.width(0)));
-        while (i <= j) {
-            while (compare(pivot, i) ==  1) i++; // chunkAt[i] < keybuffer
-            while (compare(pivot, j) == -1) j--; // chunkAt[j] > keybuffer
-            //if (L == 6693) System.out.println(i + ", " + j);
-            if (i <= j) {
-                pivot = swap(i, j, pivot);
-                i++;
-                j--;
-            }
+        int p = L;
+        int q = R - 1;
+        int pivot = (p + q) / 2;
+        int oldpivot = -1;
+        byte[] compiledPivot = null;
+        if (this.rowdef.objectOrder instanceof kelondroBase64Order) {
+        	while (p <= q) {
+        		if (oldpivot != pivot) {
+        			compiledPivot = compilePivot(pivot);
+        			oldpivot = pivot;
+        		}
+        		while (comparePivot(compiledPivot, p) ==  1) p++; // chunkAt[p] < pivot
+        		while (comparePivot(compiledPivot, q) == -1) q--; // chunkAt[q] > pivot
+        		if (p <= q) {
+        			oldpivot = pivot;
+        			pivot = swap(p, q, pivot, swapspace);
+        			p++;
+        			q--;
+        		}
+        	}
+        } else {
+        	while (p <= q) {
+        		while (compare(pivot, p) ==  1) p++; // chunkAt[p] < pivot
+        		while (compare(pivot, q) == -1) q--; // chunkAt[q] > pivot
+        		if (p <= q) {
+        			pivot = swap(p, q, pivot, swapspace);
+        			p++;
+        			q--;
+        		}
+        	}
         }
-        //if (L == 6693) System.out.println(i);
-        qsort(L, i);
-        qsort(i, R);
+        return p;
     }
-
-    private final void isort(int L, int R) {
+	
+    private final void isort(int L, int R, byte[] swapspace) {
         for (int i = L + 1; i < R; i++)
             for (int j = i; j > L && compare(j - 1, j) > 0; j--)
-                swap(j, j - 1, 0);
+                swap(j, j - 1, 0, swapspace);
     }
 
-    private final int swap(int i, int j, int p) {
+    private final int swap(int i, int j, int p, byte[] swapspace) {
         if (i == j) return p;
-        if ((this.chunkcount + 1) * this.rowdef.objectsize < this.chunkcache.length) {
-            // there is space in the chunkcache that we can use as buffer
-            System.arraycopy(chunkcache, this.rowdef.objectsize * i, chunkcache, chunkcache.length - this.rowdef.objectsize, this.rowdef.objectsize);
-            System.arraycopy(chunkcache, this.rowdef.objectsize * j, chunkcache, this.rowdef.objectsize * i, this.rowdef.objectsize);
-            System.arraycopy(chunkcache, chunkcache.length - this.rowdef.objectsize, chunkcache, this.rowdef.objectsize * j, this.rowdef.objectsize);
-        } else {
-            // allocate a chunk to use as buffer
-            byte[] a = new byte[this.rowdef.objectsize];
-            System.arraycopy(chunkcache, this.rowdef.objectsize * i, a, 0, this.rowdef.objectsize);
-            System.arraycopy(chunkcache, this.rowdef.objectsize * j, chunkcache, this.rowdef.objectsize * i, this.rowdef.objectsize);
-            System.arraycopy(a, 0, chunkcache, this.rowdef.objectsize * j, this.rowdef.objectsize);
-        }
+        System.arraycopy(chunkcache, this.rowdef.objectsize * i, swapspace, 0, this.rowdef.objectsize);
+        System.arraycopy(chunkcache, this.rowdef.objectsize * j, chunkcache, this.rowdef.objectsize * i, this.rowdef.objectsize);
+        System.arraycopy(swapspace, 0, chunkcache, this.rowdef.objectsize * j, this.rowdef.objectsize);
         if (i == p) return j; else if (j == p) return i; else return p;
     }
 
-    public synchronized void uniq(long maxtime) {
+    public synchronized void uniq() {
         assert (this.rowdef.objectOrder != null);
         // removes double-occurrences of chunks
         // this works only if the collection was ordered with sort before
@@ -511,19 +512,28 @@ public class kelondroRowCollection {
         // then this method may run a long time with 100% CPU load which is caused
         // by the large number of memory movements. Therefore it is possible
         // to assign a runtime limitation
-        long start = System.currentTimeMillis();
         if (chunkcount <= 1) return;
         int i = 0;
         while (i < chunkcount - 1) {
-        	//System.out.println("ENTRY0: " + serverLog.arrayList(chunkcache, rowdef.objectsize*i, rowdef.objectsize));
-        	//System.out.println("ENTRY1: " + serverLog.arrayList(chunkcache, rowdef.objectsize*(i+1), rowdef.objectsize));
-            if (compare(i, i + 1) == 0) {
+        	if (compare(i, i + 1) == 0) {
                 removeRow(i, true); // this decreases the chunkcount
             } else {
                 i++;
             }
-            if ((maxtime > 0) && (start + maxtime < System.currentTimeMillis())) break;
         }
+    }
+    
+    public synchronized boolean isSorted() {
+        assert (this.rowdef.objectOrder != null);
+        if (chunkcount <= 1) return true;
+        for (int i = 0; i < chunkcount - 1; i++) {
+        	//System.out.println("*" + new String(get(i).getColBytes(0)));
+        	if (compare(i, i + 1) > 0) {
+        		//System.out.println("?" + new String(get(i+1).getColBytes(0)));
+        		return false;
+        	}
+        }
+        return true;
     }
     
     public synchronized String toString() {
@@ -553,6 +563,33 @@ public class kelondroRowCollection {
                 this.rowdef.primaryKeyLength);
         return c;
     }
+    
+    private final byte[] compilePivot(int i) {
+        assert (chunkcount * this.rowdef.objectsize <= chunkcache.length) : "chunkcount = " + chunkcount + ", objsize = " + this.rowdef.objectsize + ", chunkcache.length = " + chunkcache.length;
+        assert (i >= 0) && (i < chunkcount) : "i = " + i + ", chunkcount = " + chunkcount;
+        assert (this.rowdef.objectOrder != null);
+        assert (this.rowdef.objectOrder instanceof kelondroBase64Order);
+        assert (this.rowdef.primaryKeyIndex == 0) : "this.sortColumn = " + this.rowdef.primaryKeyIndex;
+        int colstart = (this.rowdef.primaryKeyIndex < 0) ? 0 : this.rowdef.colstart[this.rowdef.primaryKeyIndex];
+        assert (!bugappearance(chunkcache, i * this.rowdef.objectsize + colstart, this.rowdef.primaryKeyLength));
+        return ((kelondroBase64Order) this.rowdef.objectOrder).compilePivot(chunkcache, i * this.rowdef.objectsize + colstart, this.rowdef.primaryKeyLength);
+    }
+    
+    private final int comparePivot(byte[] compiledPivot, int j) {
+        assert (chunkcount * this.rowdef.objectsize <= chunkcache.length) : "chunkcount = " + chunkcount + ", objsize = " + this.rowdef.objectsize + ", chunkcache.length = " + chunkcache.length;
+        assert (j >= 0) && (j < chunkcount) : "j = " + j + ", chunkcount = " + chunkcount;
+        assert (this.rowdef.objectOrder != null);
+        assert (this.rowdef.objectOrder instanceof kelondroBase64Order);
+        assert (this.rowdef.primaryKeyIndex == 0) : "this.sortColumn = " + this.rowdef.primaryKeyIndex;
+        int colstart = (this.rowdef.primaryKeyIndex < 0) ? 0 : this.rowdef.colstart[this.rowdef.primaryKeyIndex];
+        assert (!bugappearance(chunkcache, j * this.rowdef.objectsize + colstart, this.rowdef.primaryKeyLength));
+        int c = ((kelondroBase64Order) this.rowdef.objectOrder).comparePivot(
+        		compiledPivot,
+                chunkcache,
+                j * this.rowdef.objectsize + colstart,
+                this.rowdef.primaryKeyLength);
+        return c;
+    }
 
     protected synchronized int compare(byte[] a, int astart, int alength, int chunknumber) {
         assert (chunknumber < chunkcount);
@@ -573,9 +610,59 @@ public class kelondroRowCollection {
         chunkcache = null;
     }
     
+    public static void test(int testsize) {
+    	kelondroRow r = new kelondroRow(new kelondroColumn[]{
+    			new kelondroColumn("hash", kelondroColumn.celltype_string, kelondroColumn.encoder_bytes, yacySeedDB.commonHashLength, "hash")},
+    			kelondroBase64Order.enhancedCoder, 0);
+    	kelondroRowCollection c = new kelondroRowCollection(r, testsize);
+    	System.out.println("kelondroRowCollection test with size = " + testsize);
+    	Random a = new Random(0);
+    	long t0 = System.currentTimeMillis();
+    	for (int i = 0; i < testsize; i++) {
+    		String s = kelondroBase64Order.enhancedCoder.encodeLong(a.nextLong(), 6) + kelondroBase64Order.enhancedCoder.encodeLong(a.nextLong(), 6);
+    		c.add(s.getBytes());
+    	}
+    	long t1 = System.currentTimeMillis();
+    	System.out.println("create c   : " + (t1 - t0) + " milliseconds, " + (testsize / (t1 - t0)) + " entries/millisecond");
+    	kelondroRowCollection d = new kelondroRowCollection(r, testsize+1);
+    	for (int i = 0; i < testsize; i++) {
+    		d.add(c.get(i).getColBytes(0));
+    	}
+    	long t2 = System.currentTimeMillis();
+    	System.out.println("copy c -> d: " + (t2 - t1) + " milliseconds, " + (testsize / (t2 - t1)) + " entries/millisecond");
+    	processors = 1;
+    	c.sort();
+    	long t3 = System.currentTimeMillis();
+    	System.out.println("sort c (1) : " + (t3 - t2) + " milliseconds, " + (testsize / (t3 - t2)) + " entries/millisecond");
+    	processors = 2;
+    	d.sort();
+    	long t4 = System.currentTimeMillis();
+    	System.out.println("sort d (2) : " + (t4 - t3) + " milliseconds, " + (testsize / (t4 - t3)) + " entries/millisecond");
+    	c.uniq();
+    	long t5 = System.currentTimeMillis();
+    	System.out.println("uniq c     : " + (t5 - t4) + " milliseconds, " + (testsize / (t5 - t4)) + " entries/millisecond");
+    	d.uniq();
+    	long t6 = System.currentTimeMillis();
+    	System.out.println("uniq d     : " + (t6 - t5) + " milliseconds, " + (testsize / (t6 - t5)) + " entries/millisecond");
+    	boolean cis = c.isSorted();
+    	long t7 = System.currentTimeMillis();
+    	System.out.println("c isSorted = " + ((cis) ? "true" : "false") + ": " + (t7 - t6) + " milliseconds");
+    	boolean dis = d.isSorted();
+    	long t8 = System.currentTimeMillis();
+    	System.out.println("d isSorted = " + ((dis) ? "true" : "false") + ": " + (t8 - t7) + " milliseconds");
+    	System.out.println("Result size: c = " + c.size() + ", d = " + d.size());
+    	System.out.println();
+    }
+    
     public static void main(String[] args) {
+    	test(10000);
+    	test(100000);
+    	test(1000000);
+    	
+    	/*   	
         System.out.println(new java.util.Date(10957 * day));
         System.out.println(new java.util.Date(0));
         System.out.println(daysSince2000(System.currentTimeMillis()));
+        */
     }
 }

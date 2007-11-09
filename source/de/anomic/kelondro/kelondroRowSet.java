@@ -308,7 +308,7 @@ public class kelondroRowSet extends kelondroRowCollection implements kelondroInd
         System.out.println("INPUT-TOSTRING: " + d.toString());
         d.sort();
         System.out.println("SORTED        : " + d.toString());
-        d.uniq(10000);
+        d.uniq();
         System.out.println("UNIQ          : " + d.toString());
         d.trim(false);
         System.out.println("TRIM          : " + d.toString());

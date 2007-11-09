@@ -65,7 +65,7 @@ public class kelondroIntBytesMap {
             if (index1 == null) {
                 // finish initialization phase
                 index0.sort();
-                index0.uniq(10000);
+                index0.uniq();
                 index1 = new kelondroRowSet(rowdef, 0); 
             }
             kelondroRow.Entry indexentry = index0.get(key);
@@ -85,7 +85,7 @@ public class kelondroIntBytesMap {
             if (index1 == null) {
                 // finish initialization phase
                 index0.sort();
-                index0.uniq(10000);
+                index0.uniq();
                 index1 = new kelondroRowSet(rowdef, 0); 
             }
             kelondroRow.Entry indexentry = index0.get(key);
@@ -127,7 +127,7 @@ public class kelondroIntBytesMap {
             if (index1 == null) {
                 // finish initialization phase
                 index0.sort();
-                index0.uniq(10000);
+                index0.uniq();
                 index1 = new kelondroRowSet(rowdef, 0); 
             }
             kelondroRow.Entry indexentry = index0.remove(key, true);
@@ -181,7 +181,7 @@ public class kelondroIntBytesMap {
             if (index1 == null) {
                 // finish initialization phase
                 index0.sort();
-                index0.uniq(10000);
+                index0.uniq();
                 index1 = new kelondroRowSet(rowdef, 0); 
             }
             return index0.rows(true, null);

@@ -58,7 +58,7 @@ public class kelondroBytesIntMap {
                 // finish initialization phase
                 if (index0 instanceof kelondroRowSet) {
                     ((kelondroRowSet) index0).sort();
-                    ((kelondroRowSet) index0).uniq(10000);
+                    ((kelondroRowSet) index0).uniq();
                 }
                 index1 = new kelondroRowSet(rowdef, 0);
                 //System.out.println("finished initialization phase at size = " + index0.size() + " in geti");
@@ -83,7 +83,7 @@ public class kelondroBytesIntMap {
                 // finish initialization phase
                 if (index0 instanceof kelondroRowSet) {
                     ((kelondroRowSet) index0).sort();
-                    ((kelondroRowSet) index0).uniq(10000);
+                    ((kelondroRowSet) index0).uniq();
                 }
                 index1 = new kelondroRowSet(rowdef, 0);
                 //System.out.println("finished initialization phase at size = " + index0.size() + " in puti");
@@ -139,7 +139,7 @@ public class kelondroBytesIntMap {
                 // finish initialization phase
                 if (index0 instanceof kelondroRowSet) {
                     ((kelondroRowSet) index0).sort();
-                    ((kelondroRowSet) index0).uniq(10000);
+                    ((kelondroRowSet) index0).uniq();
                 }
                 index1 = new kelondroRowSet(rowdef, 0);
                 //System.out.println("finished initialization phase at size = " + index0.size() + " in removei");
@@ -204,7 +204,7 @@ public class kelondroBytesIntMap {
             // finish initialization phase
             if (index0 instanceof kelondroRowSet) {
                 ((kelondroRowSet) index0).sort();
-                ((kelondroRowSet) index0).uniq(10000);
+                ((kelondroRowSet) index0).uniq();
             }
             index1 = new kelondroRowSet(rowdef, 0);
             //System.out.println("finished initialization phase at size = " + index0.size() + " in rows");
@@ -279,13 +279,13 @@ public class kelondroBytesIntMap {
     private String singleConsistency(kelondroRowSet rs) {
         int s = rs.size();
         rs.sort();
-        rs.uniq(10000);
+        rs.uniq();
         if (rs.size() == s) return "set is sound"; else return "set has " + (rs.size() - s) + " double-entries";
     }
     private boolean singleConsistency0(kelondroRowSet rs) {
         int s = rs.size();
         rs.sort();
-        rs.uniq(10000);
+        rs.uniq();
         return rs.size() == s;
     }
 }

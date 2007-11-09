@@ -63,7 +63,7 @@ public class kelondroCollectionIndex {
     private int           loadfactor;
     private Map           arrays; // Map of (partitionNumber"-"chunksize)/kelondroFixedWidthArray - Objects
     private kelondroRow   payloadrow; // definition of the payload (chunks inside the collections)
-    private int           maxPartitions;  // this is the maxmimum number of array files; yet not used
+    private int           maxPartitions;  // this is the maxmimum number of array files
     
     private static final int idx_col_key        = 0;  // the index
     private static final int idx_col_chunksize  = 1;  // chunksize (number of bytes in a single chunk, needed for migration option)
@@ -591,7 +591,7 @@ public class kelondroCollectionIndex {
                 // load the old collection and join it
                 collection.addAllUnique(getwithparams(indexrow, oldchunksize, oldchunkcount, oldPartitionNumber, oldrownumber, oldSerialNumber, false));
                 collection.sort();
-                collection.uniq(-1); // FIXME: not clear if it would be better to insert the collection with put to avoid double-entries
+                collection.uniq(); // FIXME: not clear if it would be better to insert the collection with put to avoid double-entries
                 collection.trim(false);
                 
                 // check for size of collection:
@@ -698,7 +698,7 @@ public class kelondroCollectionIndex {
             // load the old collection and join it
             collection.addAllUnique(getwithparams(indexrow, oldchunksize, oldchunkcount, oldPartitionNumber, oldrownumber, oldSerialNumber, false));
             collection.sort();
-            collection.uniq(-1); // FIXME: not clear if it would be better to insert the collection with put to avoid double-entries
+            collection.uniq(); // FIXME: not clear if it would be better to insert the collection with put to avoid double-entries
             collection.trim(false);
             
             // check for size of collection:
