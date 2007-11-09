@@ -34,8 +34,8 @@ import de.anomic.server.logging.serverLog;
 
 public class kelondroRowSet extends kelondroRowCollection implements kelondroIndex {
 
-    private static final int collectionReSortLimit = 90;
-
+    private static final int collectionReSortLimit = 300;
+    
     private kelondroProfile profile;
 
     public kelondroRowSet(kelondroRowSet rs) {

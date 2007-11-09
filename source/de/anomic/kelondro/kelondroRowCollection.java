@@ -38,7 +38,9 @@ import de.anomic.yacy.yacySeedDB;
 
 public class kelondroRowCollection {
 
-    public static final double growfactor = 1.4;
+    public  static final double growfactor = 1.4;
+    private static final int isortlimit = 20;
+    
     
     protected byte[]        chunkcache;
     protected int           chunkcount;
@@ -408,66 +410,75 @@ public class kelondroRowCollection {
     public synchronized final void sort() {
         assert (this.rowdef.objectOrder != null);
         if (this.sortBound == this.chunkcount) return; // this is already sorted
-
-        int p = partition(0, this.chunkcount, new byte[this.rowdef.objectsize]);
-        if (p >= 0) {
-        	if ((processors > 1) && (this.chunkcount > 10000)) {
-        		// sort this using multi-threading; use one second thread
-        		qsortthread qs = new qsortthread(0, p);
-            	qs.start();
-        		qsort(p, this.chunkcount, new byte[this.rowdef.objectsize]);
-        		try {qs.join();} catch (InterruptedException e) {e.printStackTrace();}
-        	} else {
-        		byte[] swapspace = new byte[this.rowdef.objectsize];
-        		qsort(0, p, swapspace);
-        		qsort(p, this.chunkcount, swapspace);
-        	}
-    	}
+        if (this.chunkcount < isortlimit) {
+            isort(0, this.chunkcount, new byte[this.rowdef.objectsize]);
+            return;
+        }
+        byte[] swapspace = new byte[this.rowdef.objectsize];
+        int p = partition(0, this.chunkcount, this.sortBound, swapspace);
+        if ((processors > 1) && (this.chunkcount >= 10000)) {
+        	// sort this using multi-threading; use one second thread
+        	qsortthread qs = new qsortthread(0, p, 0);
+            qs.start();
+        	qsort(p, this.chunkcount, 0, swapspace);
+        	try {qs.join();} catch (InterruptedException e) {e.printStackTrace();}
+        } else {
+        	qsort(0, p, 0, swapspace);
+        	qsort(p, this.chunkcount, 0, swapspace);
+        }
         this.sortBound = this.chunkcount;
+        assert this.isSorted();
     }
 
     private class qsortthread extends Thread {
-    	private int sl, sr;
-    	byte[] swapspace;
-    	public qsortthread(int L, int R) {
+    	private int sl, sr, sb;
+    	public qsortthread(int L, int R, int S) {
     		this.sl = L;
     		this.sr = R;
-    		this.swapspace = new byte[rowdef.objectsize];
+    		this.sb = S;
     	}
     	public void run() {
-    		qsort(sl, sr, swapspace);
+    		qsort(sl, sr, sb, new byte[rowdef.objectsize]);
     	}
-    	
     }
     
-    private final void qsort(int L, int R, byte[] swapspace) {
-		int p = partition(L, R, swapspace);
-		if (p >= 0) {
-			qsort(L, p, swapspace);
-			qsort(p, R, swapspace);
-		}
-	}
-    
-	private final int partition(int L, int R, byte[] swapspace) {
-        if (L >= R - 1) return -1;
-        
-        if (R - L < 20) {
+    private final void qsort(int L, int R, int S, byte[] swapspace) {
+    	if (R - L < isortlimit) {
             isort(L, R, swapspace);
-            return -1;
-         }
+            return;
+        }
+		int p = partition(L, R, S, swapspace);
+		qsort(L, p, 0, swapspace);
+		qsort(p, R, 0, swapspace);
+	}
+
+	private final int partition(int L, int R, int S, byte[] swapspace) {
+		// returns {partition-point, new-S}
+        assert (L < R - 1);
+        assert (R - L >= isortlimit);
         
         int p = L;
         int q = R - 1;
-        int pivot = (p + q) / 2;
+        int pivot = (L + R - 1) / 2;
         int oldpivot = -1;
         byte[] compiledPivot = null;
         if (this.rowdef.objectOrder instanceof kelondroBase64Order) {
         	while (p <= q) {
+        		// wenn pivot < S: pivot befindet sich in sortierter Sequenz von L bis S - 1
+        		// d.h. alle Werte von L bis pivot sind kleiner als das pivot
+        		// zu finden ist ein minimales p <= q so dass chunk[p] >= pivot        		
         		if (oldpivot != pivot) {
         			compiledPivot = compilePivot(pivot);
         			oldpivot = pivot;
         		}
-        		while (comparePivot(compiledPivot, p) ==  1) p++; // chunkAt[p] < pivot
+        		if ((pivot < S) && (p < pivot)) {
+        			//System.out.println("+++ saved " + (pivot - p) + " comparisments");
+        			p = pivot;
+        			S = 0;
+        		} else {
+        			while (comparePivot(compiledPivot, p) ==  1) p++; // chunkAt[p] < pivot
+        		}
+        		// nun gilt chunkAt[p] >= pivot
         		while (comparePivot(compiledPivot, q) == -1) q--; // chunkAt[q] > pivot
         		if (p <= q) {
         			oldpivot = pivot;
@@ -478,7 +489,12 @@ public class kelondroRowCollection {
         	}
         } else {
         	while (p <= q) {
-        		while (compare(pivot, p) ==  1) p++; // chunkAt[p] < pivot
+        		if ((pivot < S) && (p < pivot)) {
+        			p = pivot;
+        			S = 0;
+        		} else {
+        			while (compare(pivot, p) ==  1) p++; // chunkAt[p] < pivot
+        		}
         		while (compare(pivot, q) == -1) q--; // chunkAt[q] > pivot
         		if (p <= q) {
         			pivot = swap(p, q, pivot, swapspace);
@@ -529,7 +545,7 @@ public class kelondroRowCollection {
         for (int i = 0; i < chunkcount - 1; i++) {
         	//System.out.println("*" + new String(get(i).getColBytes(0)));
         	if (compare(i, i + 1) > 0) {
-        		//System.out.println("?" + new String(get(i+1).getColBytes(0)));
+        		System.out.println("?" + new String(get(i+1).getColBytes(0)));
         		return false;
         	}
         }
@@ -618,13 +634,15 @@ public class kelondroRowCollection {
     	System.out.println("kelondroRowCollection test with size = " + testsize);
     	Random a = new Random(0);
     	long t0 = System.currentTimeMillis();
+    	String s;
     	for (int i = 0; i < testsize; i++) {
-    		String s = kelondroBase64Order.enhancedCoder.encodeLong(a.nextLong(), 6) + kelondroBase64Order.enhancedCoder.encodeLong(a.nextLong(), 6);
+    		s = kelondroBase64Order.enhancedCoder.encodeLong(a.nextLong(), 6) + kelondroBase64Order.enhancedCoder.encodeLong(a.nextLong(), 6);
+    		//assert
     		c.add(s.getBytes());
     	}
     	long t1 = System.currentTimeMillis();
     	System.out.println("create c   : " + (t1 - t0) + " milliseconds, " + (testsize / (t1 - t0)) + " entries/millisecond");
-    	kelondroRowCollection d = new kelondroRowCollection(r, testsize+1);
+    	kelondroRowCollection d = new kelondroRowCollection(r, testsize);
     	for (int i = 0; i < testsize; i++) {
     		d.add(c.get(i).getColBytes(0));
     	}
@@ -644,20 +662,39 @@ public class kelondroRowCollection {
     	d.uniq();
     	long t6 = System.currentTimeMillis();
     	System.out.println("uniq d     : " + (t6 - t5) + " milliseconds, " + (testsize / (t6 - t5)) + " entries/millisecond");
-    	boolean cis = c.isSorted();
+    	a = new Random(0);
+    	kelondroRowSet e = new kelondroRowSet(r, testsize);
+    	for (int i = 0; i < testsize; i++) {
+    		s = kelondroBase64Order.enhancedCoder.encodeLong(a.nextLong(), 6) + kelondroBase64Order.enhancedCoder.encodeLong(a.nextLong(), 6);
+    		e.put(r.newEntry(s.getBytes()));
+    	}
     	long t7 = System.currentTimeMillis();
-    	System.out.println("c isSorted = " + ((cis) ? "true" : "false") + ": " + (t7 - t6) + " milliseconds");
-    	boolean dis = d.isSorted();
+    	System.out.println("create e   : " + (t7 - t6) + " milliseconds, " + (testsize / (t7 - t6)) + " entries/millisecond");
+    	e.sort();
     	long t8 = System.currentTimeMillis();
-    	System.out.println("d isSorted = " + ((dis) ? "true" : "false") + ": " + (t8 - t7) + " milliseconds");
-    	System.out.println("Result size: c = " + c.size() + ", d = " + d.size());
+    	System.out.println("sort e (2) : " + (t8 - t7) + " milliseconds, " + (testsize / (t8 - t7)) + " entries/millisecond");
+    	e.uniq();
+    	long t9 = System.currentTimeMillis();
+    	System.out.println("uniq e     : " + (t9 - t8) + " milliseconds, " + (testsize / (t9 - t8)) + " entries/millisecond");
+    	boolean cis = c.isSorted();
+    	long t10 = System.currentTimeMillis();
+    	System.out.println("c isSorted = " + ((cis) ? "true" : "false") + ": " + (t10 - t9) + " milliseconds");
+    	boolean dis = d.isSorted();
+    	long t11 = System.currentTimeMillis();
+    	System.out.println("d isSorted = " + ((dis) ? "true" : "false") + ": " + (t11 - t10) + " milliseconds");
+    	boolean eis = e.isSorted();
+    	long t12 = System.currentTimeMillis();
+    	System.out.println("e isSorted = " + ((eis) ? "true" : "false") + ": " + (t12 - t11) + " milliseconds");
+    	System.out.println("Result size: c = " + c.size() + ", d = " + d.size() + ", e = " + e.size());
     	System.out.println();
     }
     
     public static void main(String[] args) {
     	test(10000);
     	test(100000);
-    	test(1000000);
+    	//test(1000000);
+
+        // 368, 12029
     	
     	/*   	
         System.out.println(new java.util.Date(10957 * day));
@@ -666,3 +703,36 @@ public class kelondroRowCollection {
         */
     }
 }
+
+/*
+kelondroRowCollection test with size = 10000
+create c   : 74 milliseconds, 135 entries/millisecond
+copy c -> d: 21 milliseconds, 476 entries/millisecond
+sort c (1) : 24 milliseconds, 416 entries/millisecond
+sort d (2) : 17 milliseconds, 588 entries/millisecond
+uniq c     : 2 milliseconds, 5000 entries/millisecond
+uniq d     : 1 milliseconds, 10000 entries/millisecond
+create e   : 367 milliseconds, 27 entries/millisecond
+sort e (2) : 10 milliseconds, 1000 entries/millisecond
+uniq e     : 1 milliseconds, 10000 entries/millisecond
+c isSorted = true: 2 milliseconds
+d isSorted = true: 2 milliseconds
+e isSorted = true: 1 milliseconds
+Result size: c = 10000, d = 10000, e = 10000
+
+kelondroRowCollection test with size = 100000
+create c   : 291 milliseconds, 343 entries/millisecond
+copy c -> d: 65 milliseconds, 1538 entries/millisecond
+sort c (1) : 170 milliseconds, 588 entries/millisecond
+sort d (2) : 104 milliseconds, 961 entries/millisecond
+uniq c     : 10 milliseconds, 10000 entries/millisecond
+uniq d     : 9 milliseconds, 11111 entries/millisecond
+create e   : 18882 milliseconds, 5 entries/millisecond
+sort e (2) : 116 milliseconds, 862 entries/millisecond
+uniq e     : 10 milliseconds, 10000 entries/millisecond
+c isSorted = true: 9 milliseconds
+d isSorted = true: 9 milliseconds
+e isSorted = true: 9 milliseconds
+Result size: c = 100000, d = 100000, e = 100000
+
+*/
