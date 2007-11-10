@@ -626,6 +626,10 @@ public class kelondroRowCollection {
         chunkcache = null;
     }
     
+    private static long d(long a, long b) {
+    	if (b == 0) return a; else return a / b;
+    }
+    
     public static void test(int testsize) {
     	kelondroRow r = new kelondroRow(new kelondroColumn[]{
     			new kelondroColumn("hash", kelondroColumn.celltype_string, kelondroColumn.encoder_bytes, yacySeedDB.commonHashLength, "hash")},
@@ -641,27 +645,27 @@ public class kelondroRowCollection {
     		c.add(s.getBytes());
     	}
     	long t1 = System.currentTimeMillis();
-    	System.out.println("create c   : " + (t1 - t0) + " milliseconds, " + (testsize / (t1 - t0)) + " entries/millisecond");
+    	System.out.println("create c   : " + (t1 - t0) + " milliseconds, " + d(testsize, (t1 - t0)) + " entries/millisecond");
     	kelondroRowCollection d = new kelondroRowCollection(r, testsize);
     	for (int i = 0; i < testsize; i++) {
     		d.add(c.get(i).getColBytes(0));
     	}
     	long t2 = System.currentTimeMillis();
-    	System.out.println("copy c -> d: " + (t2 - t1) + " milliseconds, " + (testsize / (t2 - t1)) + " entries/millisecond");
+    	System.out.println("copy c -> d: " + (t2 - t1) + " milliseconds, " + d(testsize, (t2 - t1)) + " entries/millisecond");
     	processors = 1;
     	c.sort();
     	long t3 = System.currentTimeMillis();
-    	System.out.println("sort c (1) : " + (t3 - t2) + " milliseconds, " + (testsize / (t3 - t2)) + " entries/millisecond");
+    	System.out.println("sort c (1) : " + (t3 - t2) + " milliseconds, " + d(testsize, (t3 - t2)) + " entries/millisecond");
     	processors = 2;
     	d.sort();
     	long t4 = System.currentTimeMillis();
-    	System.out.println("sort d (2) : " + (t4 - t3) + " milliseconds, " + (testsize / (t4 - t3)) + " entries/millisecond");
+    	System.out.println("sort d (2) : " + (t4 - t3) + " milliseconds, " + d(testsize, (t4 - t3)) + " entries/millisecond");
     	c.uniq();
     	long t5 = System.currentTimeMillis();
-    	System.out.println("uniq c     : " + (t5 - t4) + " milliseconds, " + (testsize / (t5 - t4)) + " entries/millisecond");
+    	System.out.println("uniq c     : " + (t5 - t4) + " milliseconds, " + d(testsize, (t5 - t4)) + " entries/millisecond");
     	d.uniq();
     	long t6 = System.currentTimeMillis();
-    	System.out.println("uniq d     : " + (t6 - t5) + " milliseconds, " + (testsize / (t6 - t5)) + " entries/millisecond");
+    	System.out.println("uniq d     : " + (t6 - t5) + " milliseconds, " + d(testsize, (t6 - t5)) + " entries/millisecond");
     	a = new Random(0);
     	kelondroRowSet e = new kelondroRowSet(r, testsize);
     	for (int i = 0; i < testsize; i++) {
@@ -669,13 +673,13 @@ public class kelondroRowCollection {
     		e.put(r.newEntry(s.getBytes()));
     	}
     	long t7 = System.currentTimeMillis();
-    	System.out.println("create e   : " + (t7 - t6) + " milliseconds, " + (testsize / (t7 - t6)) + " entries/millisecond");
+    	System.out.println("create e   : " + (t7 - t6) + " milliseconds, " + d(testsize, (t7 - t6)) + " entries/millisecond");
     	e.sort();
     	long t8 = System.currentTimeMillis();
-    	System.out.println("sort e (2) : " + (t8 - t7) + " milliseconds, " + (testsize / (t8 - t7)) + " entries/millisecond");
+    	System.out.println("sort e (2) : " + (t8 - t7) + " milliseconds, " + d(testsize, (t8 - t7)) + " entries/millisecond");
     	e.uniq();
     	long t9 = System.currentTimeMillis();
-    	System.out.println("uniq e     : " + (t9 - t8) + " milliseconds, " + (testsize / (t9 - t8)) + " entries/millisecond");
+    	System.out.println("uniq e     : " + (t9 - t8) + " milliseconds, " + d(testsize, (t9 - t8)) + " entries/millisecond");
     	boolean cis = c.isSorted();
     	long t10 = System.currentTimeMillis();
     	System.out.println("c isSorted = " + ((cis) ? "true" : "false") + ": " + (t10 - t9) + " milliseconds");
@@ -690,6 +694,7 @@ public class kelondroRowCollection {
     }
     
     public static void main(String[] args) {
+    	test(1000);
     	test(10000);
     	test(100000);
     	//test(1000000);
