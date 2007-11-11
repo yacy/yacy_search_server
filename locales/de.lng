@@ -51,7 +51,7 @@ Query==Suchwort
 Search Word Hashes==Suchwort Hash
 Count</td>==Anzahl</td>
 Queries Per Last Hour==Suchanfragen pro letzter Stunde
-Access Dates==Zugriffsdaten
+Access Dates==Zugriffszeiten
 This is a list of searches that had been requested from remote peer search interface==Dies ist eine Liste aller Suchanfragen, die von einem anderen Peer gestellt wurden. 
 
 #---------------------------
@@ -505,6 +505,7 @@ Local Media Indexing==Lokal Media Indexieren
 Remote Indexing==Remote Indexieren
 no::yes==nein::ja
 "Delete"=="l&ouml;schen"
+"Terminate"=="Beenden"
 Select the profile to edit==Profil zur Bearbeitung ausw&auml;hlen 
 "Edit profile"=="Profil bearbeiten"
 An error occured during editing the crawl profile:==Es trat folgender Fehler bei der Bearbeitung des Crawl Profils auf:
@@ -595,10 +596,10 @@ to the index, but no linked content is indexed. 2-4 is good for normal indexing.
 Be careful with the depth. Consider a branching factor of average 20;==Seien Sie vorsichtig mit der Crawl-Tiefe. Erw&auml;gen Sie einen durschnittlichen Verzweigungsfaktor von 20;
 A prefetch-depth of 8 would index 25.600.000.000 pages, maybe this is the whole WWW.==eine Crawl-Tiefe 8 wird 25.600.000.000 Seiten indexieren, vielleicht sogar das ganze WWW.
 Crawling Filter==Crawling Filter
-"only one domain"=="Nur eine Domain"
-This is an emacs-like regular expression that must match with the URLs which are used to be crawled.==Dies ist ein emacs-&auml;hnlicher regul&auml;rer Ausdruck, der mit der gecrawlten URL &uuml;bereinstimmen muss.
-Use this i.e. to crawl a single domain. If you set this filter it makes sense to increase==Benutzen Sie dies z.B., um nur eine einzelne Domain zu crawlen. Wenn Sie diese Maske aktivieren, macht es Sinn
-the crawling depth.==die Crawling Tiefe zu erh&ouml;hen.
+Use filter==Filter nutzen
+Restrict to start domain==Auf Startdomain beschr&auml;nken
+The filter is an emacs-like regular expression that must match with the URLs which are used to be crawled; default is 'catch all'.==Dieser Filter ist ein emacs-&auml;hnlicher regul&auml;rer Ausdruck, der mit den zu crawlenden URLs &uuml;bereinstimmen muss; standard ist 'sammel alle'.
+You can also use an automatic domain-restriction to fully crawl a single domain.==Sie k&ouml;nnen aber auch eine automatische Domain-Beschr&auml;nkung benutzen, um eine einzelne Domain komplett zu crawlen.
 #Re-Crawl Option:==Re-Crawl Option:
 Use</label>:==Benutzen</label>:
 Interval==Intervall
@@ -670,7 +671,7 @@ Crawling Range==Crawling Bereich
 Wide: depth==Umfang: Tiefe
 Complete Domain==Komplette Domain
 The range defines if the crawl shall consider a complete domain, or a wide crawl up to a specific depth.==Der Bereich definiert, ob der Crawl eine komplette Domain oder einen Bereich bis zu einer bestimmten Tiefe crawlen soll.  
-"Start New Distributed Crawl \(will be visible at other peers\)"=="Starte einen neuen verteilten Crawl (sichtbar f&uuml;r alle anderen Peers)" 
+"Start New Distributed Crawl \(will be visible at other peers\)"=="Einen neuen verteilten Crawl (sichtbar f&uuml;r alle anderen Peers) starten" 
 Recently started remote crawls in progress:==Gerade gestartetes Indexieren auf anderen Peers in Bearbeitung:
 Start Time==Startzeit
 Peer Name==Peer Name
@@ -691,14 +692,14 @@ Busy Peers==Besch&auml;tigte Peers
 
 #File: Help.html
 #---------------------------
-YaCy: Help==YaCy: Hilfeseiten
+YaCy: Help==YaCy: Hilfe
 >Help==>Hilfe
-This is a distributed web crawler and also a caching HTTP proxy. You are using the <em>online-interface</em> of the application. You can use this interface to configure your personal settings, proxy settings, access control and crawling properties. You can also use this interface to start crawls, send messages to other peers and monitor your index, cache status and crawling processes. Most important, you can use the search page to search either your own or the <em>global</em> index.==YaCy ist eine Suchmaschine,  die &auml;hnlich dem Prinzip des verteilten Rechnens (distributed computing wie z.B. SETI@home) funktioniert. Das ganze heisst hier eher "verteiltes Durchsuchen und Indexieren" des Internets. Ausserdem bringt sie einen HTTP Proxy Server mit. Sie benutzen gerade das <em>Online-Interface</em> von YaCy. Sie k&ouml;nnen dieses Interface auch zum Konfigurieren Ihrer pers&ouml;nlichen Einstellungen, Proxy-Einstellungen, der Zugriffs-Kontrolle und den Crawl-Einstellungen benutzen. Sie k&ouml;nnen das Interface auch zum Starten von Crawls, Nachrichtenversand an andere YaCy-Nutzer und zur &Uuml;berwachung Ihres Index, Cache-Status und des Crawl-Prozesses benutzen. Besonders wichtig ist, dass man die Suchseite benutzen kann, um entweder den eigenen oder den <em>globalen</em> Index zu durchsuchen.
+This is a distributed web crawler and also a caching HTTP proxy. You are using the <em>online-interface</em> of the application. You can use this interface to configure your personal settings, proxy settings, access control and crawling properties. You can also use this interface to start crawls, send messages to other peers and monitor your index, cache status and crawling processes. Most important, you can use the search page to search either your own or the <em>global</em> index.==YaCy ist eine Suchmaschine,  die &auml;hnlich dem Prinzip des verteilten Rechnens (distributed computing wie z.B. SETI@home) funktioniert. Das ganze heisst hier eher "verteiltes Durchsuchen und Indexieren" des Internets. Ausserdem bringt sie einen HTTP Proxy Server mit. Sie benutzen gerade das <em>Online-Interface</em> von YaCy. Sie k&ouml;nnen dieses Interface auch zum Konfigurieren Ihrer pers&ouml;nlichen Einstellungen, Proxy-Einstellungen, der Zugriffs-Kontrolle und den Crawl-Einstellungen benutzen. Sie k&ouml;nnen das Interface auch zum Starten von Crawls, Nachrichtenversand an andere YaCy-Nutzer und zur &Uuml;berwachung Ihres Index, Cache-Status und des Crawl-Prozesses benutzen. Besonders wichtig ist, dass Sie die Suchseite benutzen k&ouml;nnen, um entweder den eigenen oder den <em>globalen</em> Index zu durchsuchen.
 For more detailed information, visit the==F&uuml;r weitergehende Informationen besuchen Sie bitte die
 YaCy homepage==YaCy-Homepage
 Local and Global Search: Options and Functions==Lokale und globale Suche: Optionen und Funktionen
-The proxy provides a search interface that accesses your local index, created from web pages that passed the proxy.==Der Proxy bringt eine Suchmaschine mit, die einen lokalen Index bildet, der sich aus den Webseiten zusammensetzt, die Sie mit dem Proxy besuchen.
-The search can also be applied globally, by searching other peers. You can use the following options to enhance your search results==Die Suche kann aber auch global ausgeweitet werden. Dazu werden die anderen Peers herangezogen und von ihnen Informationen abgefragt. Sie k&ouml;nnen aber auch folgende Optionen benutzen, um mehr Suchergebnisse zu erhalten
+The proxy provides a search interface that accesses your local index, created from web pages that passed the proxy.==Der Proxy bringt eine Suchmaschine mit, die auf Ihren lokalen Index zugreift. Dieser setzt sich aus den Webseiten zusammen, die Sie mit dem Proxy besuchen.
+The search can also be applied globally, by searching other peers. You can use the following options to enhance your search results==Die Suche kann aber auch global ausgeweitet werden. Dazu werden die anderen Peers herangezogen und von ihnen Informationen abgefragt. Sie k&ouml;nnen allerdings auch folgende Optionen benutzen, um mehr Suchergebnisse zu erhalten
 Search Word List==Suchwort Liste
 You can search for several words simultanous. Words must be separated by a single space.==Sie k&ouml;nnen eine Suche mit mehreren W&ouml;rtern gleichzeitig starten. Die W&ouml;rter m&uuml;ssen durch ein Leerzeichen getrennt sein.
 The words are treated conjunctive, that means every must occur in the result, not any.==
@@ -774,7 +775,7 @@ Images==Bilder
 #Video==Video
 Applications==Anwendungen
 more options...==mehr Optionen...
-Max. number of results==Max. Anzahl Ergebnisse
+Max. number of results==Max. Anzahl der Ergebnisse
 Resource==Quelle
 global==global
 local==lokal
@@ -789,8 +790,8 @@ Constraints==Einschr&auml;nkungen
 only index pages==Nur Index Seiten
 This peer holds \#\[links\]\# URLs==Dieser Peer speichert #[links]# URLs.
 "authentication required"=="Autorisierung erforderlich"
-Disable search function for users without authorization==Deaktiviere Suchfunktion f&uuml;r Benutzer ohne Autorisierung
-Enable web search to everyone==Aktiviere Suchfunktion f&uuml;r alle Nutzer
+Disable search function for users without authorization==Suchfunktion f&uuml;r Benutzer ohne Autorisierung sperren
+Enable web search to everyone==Suchfunktion f&uuml;r alle Nutzer erlauben
 #-----------------------------
 
 #File: IndexCleaner_p.html
@@ -1213,8 +1214,6 @@ here</a>==hier</a>
 for an installation guide\) or you can go online by activating the permanent online mode.==f&uuml;r eine Installationsanleitung) stellen. Sie k&ouml;nnen aber auch online gehen, indem Sie den \"Permanent Online\" Modus aktivieren.
 To do this, press this button:==Um dies zu tun, dr&uuml;cken Sie bitte diesen Knopf:
 "go online"=="online gehen"
-Progress towards the next peer:==Forschritt bis zum n&auml;chsten Peer:
-At current PPM you will reach him \#\(timemessage\)\#in an unknown time::in \#\[time\]\#::never, because he is faster than you==Mit den aktuellen PPM erreichen Sie ihn #(timemessage)#in einer unbekannten Zeit::in #[time]#::niemals, weil er schneller als Sie ist
 #-----------------------------
 
 #File: News.html
@@ -1493,8 +1492,8 @@ Post-Ranking==Nach-Ranking
 #"URL Component Appears In Toplist"=="URL Komponente kommt in Topliste vor"
 #"Description Comp. Appears In Toplist"=="Beschreibung kommt in Topliste vor"
 #"Application Of Prefer Pattern"=="Anwendung der bervorzugten Form"
-"Set as Default Ranking"=="Speicher als Standard Ranking"
-"Re-Set to Built-In Ranking"=="Stelle auf urspr&uuml;ngliche Werte zur&uuml;ck"
+"Set as Default Ranking"=="Als Standard Ranking speichern"
+"Re-Set to Built-In Ranking"=="Auf urspr&uuml;ngliche Werte zur&uuml;cksetzen"
 #"delete"=="l&ouml;schen"
 #Info==Info
 
@@ -2077,6 +2076,7 @@ Comment==Kommentar
 
 #File: WatchCrawler_p.html
 #---------------------------
+Crawler Queues==Crawler Puffer
 PPM \(Pages Per Minute\)==PPM (Seiten pro Minute)
 RWI RAM \(Word Cache\)==RWI RAM (W&ouml;rter Zwischenspeicher)
 Error with profile management. Please stop YaCy, delete the file DATA/PLASMADB/crawlProfiles0.db==Fehler im Profil Management. Bitte stoppen Sie YaCy, l&ouml;schen Sie die Datei DATA/PLASMADB/crawlProfiles0.db 
@@ -2289,7 +2289,6 @@ The Project==Das Projekt
 Project Home==Projektseite
 English Forum==Englisches Forum
 #Deutsches Forum==Deutsches Forum
-Download YaCy==YaCy herunterladen
 YaCy Project Wiki==YaCy Projekt Wiki
 YaCy Statistics==YaCy Statistiken
 #-----------------------------
