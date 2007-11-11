@@ -425,16 +425,18 @@ public class plasmaGrafics {
     private static String addDots(String word) {
         String tmp = "";
         int len = word.length();
-        while(len > 3) {
-            if(tmp.equals("")) {
-                tmp = word.substring(len-3,len);
-            } else {
-                tmp = word.substring(len-3,len) + "." + tmp;
+        if (len > 3) {
+            while(len > 3) {
+                if(tmp.equals("")) {
+                    tmp = word.substring(len-3,len);
+                } else {
+                    tmp = word.substring(len-3,len) + "." + tmp;
+                }
+                word = word.substring(0,len-3);
+                len = word.length();
             }
-            word = word.substring(0,len-3);
-            len = word.length();
+            word = word + "." + tmp;
         }
-        word = word + "." + tmp;
         return word;
     }
 
