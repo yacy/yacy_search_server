@@ -149,7 +149,7 @@ public final class kelondroRow {
     public final Entry newEntry(byte[] rowinstance) {
         if (rowinstance == null) return null;
         //assert (rowinstance[0] != 0);
-        assert (this.objectOrder.wellformed(rowinstance, 0, row[0].cellwidth)) : "rowinstance[0] = " + serverLog.arrayList(rowinstance, 0, row[0].cellwidth);
+        assert (this.objectOrder.wellformed(rowinstance, 0, row[0].cellwidth)) : "rowinstance[0] = " + new String(rowinstance, 0, row[0].cellwidth) + " / " + serverLog.arrayList(rowinstance, 0, row[0].cellwidth);
         if (!(this.objectOrder.wellformed(rowinstance, 0, row[0].cellwidth))) return null;
         return new Entry(rowinstance, false);
     }

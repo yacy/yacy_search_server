@@ -899,10 +899,8 @@ public class yacyURL {
         return this.toString().compareTo(((yacyURL) h).toString());
     }
     
-
     public boolean isPOST() {
-        return (path.indexOf("?") >= 0 ||
-                path.indexOf("&") >= 0);
+    	return (this.quest != null) && (this.quest.length() > 0);
     }
 
     public boolean isCGI() {
