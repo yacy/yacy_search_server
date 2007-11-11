@@ -56,7 +56,7 @@ public class kelondroRowCollection {
     private static final int exp_order_bound = 5;
     private static final int exp_collection  = 6;
     
-    private static int processors = Runtime.getRuntime().availableProcessors();
+    private static int processors = 1; //Runtime.getRuntime().availableProcessors();
     
     public kelondroRowCollection(kelondroRowCollection rc) {
         this.rowdef = rc.rowdef;
@@ -630,19 +630,24 @@ public class kelondroRowCollection {
     	if (b == 0) return a; else return a / b;
     }
     
+    private static Random random;
+    private static String randomHash() {
+    	return
+    		kelondroBase64Order.enhancedCoder.encodeLong(random.nextLong(), 4) +
+    		kelondroBase64Order.enhancedCoder.encodeLong(random.nextLong(), 4) +
+    		kelondroBase64Order.enhancedCoder.encodeLong(random.nextLong(), 4);
+    }
+    
     public static void test(int testsize) {
     	kelondroRow r = new kelondroRow(new kelondroColumn[]{
     			new kelondroColumn("hash", kelondroColumn.celltype_string, kelondroColumn.encoder_bytes, yacySeedDB.commonHashLength, "hash")},
     			kelondroBase64Order.enhancedCoder, 0);
     	kelondroRowCollection c = new kelondroRowCollection(r, testsize);
     	System.out.println("kelondroRowCollection test with size = " + testsize);
-    	Random a = new Random(0);
+    	random = new Random(0);
     	long t0 = System.currentTimeMillis();
-    	String s;
     	for (int i = 0; i < testsize; i++) {
-    		s = kelondroBase64Order.enhancedCoder.encodeLong(a.nextLong(), 6) + kelondroBase64Order.enhancedCoder.encodeLong(a.nextLong(), 6);
-    		//assert
-    		c.add(s.getBytes());
+    		c.add(randomHash().getBytes());
     	}
     	long t1 = System.currentTimeMillis();
     	System.out.println("create c   : " + (t1 - t0) + " milliseconds, " + d(testsize, (t1 - t0)) + " entries/millisecond");
@@ -666,11 +671,10 @@ public class kelondroRowCollection {
     	d.uniq();
     	long t6 = System.currentTimeMillis();
     	System.out.println("uniq d     : " + (t6 - t5) + " milliseconds, " + d(testsize, (t6 - t5)) + " entries/millisecond");
-    	a = new Random(0);
+    	random = new Random(0);
     	kelondroRowSet e = new kelondroRowSet(r, testsize);
     	for (int i = 0; i < testsize; i++) {
-    		s = kelondroBase64Order.enhancedCoder.encodeLong(a.nextLong(), 6) + kelondroBase64Order.enhancedCoder.encodeLong(a.nextLong(), 6);
-    		e.put(r.newEntry(s.getBytes()));
+    		e.put(r.newEntry(randomHash().getBytes()));
     	}
     	long t7 = System.currentTimeMillis();
     	System.out.println("create e   : " + (t7 - t6) + " milliseconds, " + d(testsize, (t7 - t6)) + " entries/millisecond");
@@ -694,7 +698,7 @@ public class kelondroRowCollection {
     }
     
     public static void main(String[] args) {
-    	test(1000);
+    	//test(1000);
     	test(10000);
     	test(100000);
     	//test(1000000);
@@ -708,36 +712,3 @@ public class kelondroRowCollection {
         */
     }
 }
-
-/*
-kelondroRowCollection test with size = 10000
-create c   : 74 milliseconds, 135 entries/millisecond
-copy c -> d: 21 milliseconds, 476 entries/millisecond
-sort c (1) : 24 milliseconds, 416 entries/millisecond
-sort d (2) : 17 milliseconds, 588 entries/millisecond
-uniq c     : 2 milliseconds, 5000 entries/millisecond
-uniq d     : 1 milliseconds, 10000 entries/millisecond
-create e   : 367 milliseconds, 27 entries/millisecond
-sort e (2) : 10 milliseconds, 1000 entries/millisecond
-uniq e     : 1 milliseconds, 10000 entries/millisecond
-c isSorted = true: 2 milliseconds
-d isSorted = true: 2 milliseconds
-e isSorted = true: 1 milliseconds
-Result size: c = 10000, d = 10000, e = 10000
-
-kelondroRowCollection test with size = 100000
-create c   : 291 milliseconds, 343 entries/millisecond
-copy c -> d: 65 milliseconds, 1538 entries/millisecond
-sort c (1) : 170 milliseconds, 588 entries/millisecond
-sort d (2) : 104 milliseconds, 961 entries/millisecond
-uniq c     : 10 milliseconds, 10000 entries/millisecond
-uniq d     : 9 milliseconds, 11111 entries/millisecond
-create e   : 18882 milliseconds, 5 entries/millisecond
-sort e (2) : 116 milliseconds, 862 entries/millisecond
-uniq e     : 10 milliseconds, 10000 entries/millisecond
-c isSorted = true: 9 milliseconds
-d isSorted = true: 9 milliseconds
-e isSorted = true: 9 milliseconds
-Result size: c = 100000, d = 100000, e = 100000
-
-*/
