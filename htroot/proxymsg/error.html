@@ -1,8 +1,9 @@
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml">
   <head>
+    <base href="http://#[host]#:#[port]#" />
     <title>YaCy: Error Message</title>
-  	#%env/templates/metas.template%#
+    #%env/templates/metas.template%#
   </head>
   <body id="error">
     <div class="head">
@@ -20,14 +21,14 @@
       ::<!-- 5 -->
       #%[file]%#
       #(/errorMessageType)#
-      	
+
       #(printStackTrace)#::
       <hr />
       <p class="tt error"><em>Exception occured</em>: <strong>#[exception]#</strong></p>
       <pre class="tt error"><em>TRACE</em>:
-#[stacktrace]#</pre>
+      #[stacktrace]#</pre>
       #(/printStackTrace)#
-      
+
       <hr />
       <p>Generated #[date]# by #[peerName]#.yacy</p>
     </div>
