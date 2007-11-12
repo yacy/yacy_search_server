@@ -333,11 +333,15 @@ public class yacySeed {
     public final long getLong(String key, long dflt) {
         final Object o = this.dna.get(key);
         if (o == null) { return dflt; }
-        try {
+        if (o instanceof String) try {
         	return Long.parseLong((String) o);
         } catch (NumberFormatException e) {
         	return dflt;
-        }
+        } else if (o instanceof Long) {
+            return ((Long) o).longValue();
+        } else if (o instanceof Integer) {
+            return (long) ((Integer) o).intValue();
+        } else return dflt;
     }
 
     public final void setIP()                    { dna.put(yacySeed.IP, ""); }

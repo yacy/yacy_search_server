@@ -526,15 +526,28 @@ public class kelondroRowCollection {
         // this works only if the collection was ordered with sort before
         // if the collection is large and the number of deletions is also large,
         // then this method may run a long time with 100% CPU load which is caused
-        // by the large number of memory movements. Therefore it is possible
-        // to assign a runtime limitation
+        // by the large number of memory movements.
         if (chunkcount < 2) return;
         int i = chunkcount - 2;
-        while (i >= 0) {
-        	if (compare(i, i + 1) == 0) {
-                removeRow(i, true);
+        long t = System.currentTimeMillis(); // for time-out
+        int d = 0;
+        boolean u = true;
+        try {
+            while (i >= 0) {
+                if (compare(i, i + 1) == 0) {
+                    removeRow(i, false);
+                    d++;
+                    if (i < chunkcount - 2) u = false;
+                }
+                i--;
+                if (System.currentTimeMillis() - t > 10000) {
+                    throw new RuntimeException("uniq() time-out at " + i + " (backwards) from " + chunkcount + " elements after " + (System.currentTimeMillis() - t) + " milliseconds; " + d + " deletions so far");
+                }
             }
-            i--;
+        } catch (RuntimeException e) {
+            serverLog.logWarning("kelondroRowCollection", e.getMessage(), e);
+        } finally {
+            if (!u) this.sort();
         }
     }
     
