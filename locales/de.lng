@@ -432,7 +432,7 @@ Release type==Release Typ
 only main releases==nur offizielle Versionen
 any release including developer releases==jede Version, auch Entwickler Versionen
 "Submit"=="Speichern"
-Accepted Changes.==A&uml;nderungen akzeptiert.
+Accepted Changes.==&Auml;nderungen akzeptiert.
 System Update Statistics==System Aktualisierungs Statistiken
 Last System Lookup==Letzter System Check
 never==niemals
@@ -1374,7 +1374,8 @@ Node Caches:==Knoten Cache:
 Other Caching Structures:==Andere Zwischenspeicher Strukturen:
 Type</td>==Typ</td>
 Amount</td>==Umfang</td>
-#DNSCache</td>==DNSCache</td>#DNSNoCache</td>==DNSNoCache</td>
+#DNSCache</td>==DNSCache</td>
+#DNSNoCache</td>==DNSNoCache</td>
 #HashBlacklistedCache==HashBlacklistedCache
 #-----------------------------
 
