@@ -185,7 +185,7 @@ public final class crawlOrder {
                     if (!newURL.equals(urlv.get(0))) {
                         env.getLog().logWarning("crawlOrder: Received not normalized URL " + urlv.get(0));    
                     }
-                    String refURL = (refv.get(0) == null) ? null : new yacyURL((String) refv.get(0), null).toNormalform(true, true);
+                    yacyURL refURL = (refv.get(0) == null) ? null : new yacyURL((String) refv.get(0), null);
                     if ((refURL != null) && (!refURL.equals(refv.get(0)))) {
                         env.getLog().logWarning("crawlOrder: Received not normalized Referer URL " + refv.get(0) + " of URL " + urlv.get(0));    
                     }
@@ -211,7 +211,7 @@ public final class crawlOrder {
                     for (int i = 0; i < count; i++) {
                         env.getLog().logFinest("crawlOrder: b: url='" + (String) urlv.get(i) + "'");
                         try {
-                        stackresult = stack(switchboard, new yacyURL((String) urlv.get(i), null), (String) refv.get(i), iam, youare);
+                        stackresult = stack(switchboard, new yacyURL((String) urlv.get(i), null), ((refv.get(i) == null) || (((String) refv.get(i)).length() == 0)) ? null : new yacyURL((String) refv.get(i), null), iam, youare);
                             response = (String) stackresult[0];
                             prop.put("list_" + i + "_job", (String) stackresult[0] + "," + (String) stackresult[1]);
                             prop.put("list_" + i + "_lurl", (String) stackresult[2]);
@@ -244,7 +244,7 @@ public final class crawlOrder {
         return prop;
     }
 
-    private static Object[] stack(plasmaSwitchboard switchboard, yacyURL url, String referrer, String iam, String youare) {
+    private static Object[] stack(plasmaSwitchboard switchboard, yacyURL url, yacyURL referrer, String iam, String youare) {
         String response, reason, lurl;
         // stack url
         switchboard.getLog().logFinest("crawlOrder: stack: url='" + url + "'");

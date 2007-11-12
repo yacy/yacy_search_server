@@ -343,7 +343,7 @@ public final class plasmaCrawlStacker extends Thread {
         return new plasmaCrawlEntry(entry);
     }
     
-    public String stackCrawl(yacyURL url, String referrerhash, String initiatorHash, String name, Date loadDate, int currentdepth, plasmaCrawlProfile.entry profile) {
+    public String stackCrawl(yacyURL url, yacyURL referrer, String initiatorHash, String name, Date loadDate, int currentdepth, plasmaCrawlProfile.entry profile) {
         // stacks a crawl item. The position can also be remote
         // returns null if successful, a reason string if not successful
         //this.log.logFinest("stackCrawl: nexturlString='" + nexturlString + "'");
@@ -352,7 +352,7 @@ public final class plasmaCrawlStacker extends Thread {
         plasmaCrawlEntry entry = new plasmaCrawlEntry(
                 initiatorHash,                               // initiator, needed for p2p-feedback
                 url,                                         // url clear text string
-                referrerhash,                                // last url in crawling queue
+                (referrer == null) ? null : referrer.hash(), // last url in crawling queue
                 name,                                        // load date
                 loadDate,                                    // the anchor name
                 (profile == null) ? null : profile.handle(), // profile must not be null!
