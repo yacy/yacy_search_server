@@ -141,34 +141,52 @@ public class kelondroRowSet extends kelondroRowCollection implements kelondroInd
         
         if (rowdef.objectOrder == null) return iterativeSearch(a, astart, alength, 0, this.chunkcount);
         
-        // check if a re-sorting make sense
+        // check if a re-sorting makes sense
         if ((this.chunkcount - this.sortBound) > collectionReSortLimit) {
         	sort();
         }
+        if ((this.rowdef.objectOrder != null) && (this.rowdef.objectOrder instanceof kelondroBase64Order) && (this.sortBound > 4000)) {
+            // first try to find in sorted area
+            final byte[] compiledPivot = compilePivot(a, astart, alength);
+            int p = binarySearchCompiledPivot(compiledPivot);
+            if (p >= 0) return p;
+            
+            // then find in unsorted area
+            return iterativeSearchCompiledPivot(compiledPivot, this.sortBound, this.chunkcount);
+        } else {
+            // first try to find in sorted area
+            int p = binarySearch(a, astart, alength);
+            if (p >= 0) return p;
         
-        // first try to find in sorted area
-        int p = binarySearch(a, astart, alength);
-        if (p >= 0) return p;
-        
-        // then find in unsorted area
-        return iterativeSearch(a, astart, alength, this.sortBound, this.chunkcount);
-        
+            // then find in unsorted area
+            return iterativeSearch(a, astart, alength, this.sortBound, this.chunkcount);
+        }        
     }
     
     private int iterativeSearch(byte[] key, int astart, int alength, int leftBorder, int rightBound) {
-        // returns the chunknumber
-        
+        // returns the chunknumber        
         if (rowdef.objectOrder == null) {
             for (int i = leftBorder; i < rightBound; i++) {
                 if (match(key, astart, alength, i)) return i;
             }
             return -1;
         } else {
+            // we dont do a special handling of kelondroBase64Order here, because tests showed that this produces too much overhead
             for (int i = leftBorder; i < rightBound; i++) {
                 if (compare(key, astart, alength, i) == 0) return i;
             }
             return -1;
         }
+    }
+    
+    private int iterativeSearchCompiledPivot(byte[] compiledPivot, int leftBorder, int rightBound) {
+        // returns the chunknumber
+        assert (rowdef.objectOrder != null);
+        assert (rowdef.objectOrder instanceof kelondroBase64Order);
+        for (int i = leftBorder; i < rightBound; i++) {
+            if (comparePivot(compiledPivot, i) == 0) return i;
+        }
+        return -1;
     }
     
     private int binarySearch(byte[] key, int astart, int alength) {
@@ -183,8 +201,25 @@ public class kelondroRowSet extends kelondroRowCollection implements kelondroInd
             p = l + ((rbound - l) >> 1);
             d = compare(key, astart, alength, p);
             if (d == 0) return p;
-            else if (d < 0) rbound = p;
-            else l = p + 1;
+            if (d < 0) rbound = p; else l = p + 1;
+        }
+        return -1;
+    }
+    
+    private int binarySearchCompiledPivot(byte[] compiledPivot) {
+        // returns the exact position of the key if the key exists,
+        // or -1 if the key does not exist
+        assert (rowdef.objectOrder != null);
+        assert (rowdef.objectOrder instanceof kelondroBase64Order);
+        int l = 0;
+        int rbound = this.sortBound;
+        int p = 0;
+        int d;
+        while (l < rbound) {
+            p = l + ((rbound - l) >> 1);
+            d = comparePivot(compiledPivot, p);
+            if (d == 0) return p;
+            if (d < 0) rbound = p; else l = p + 1;
         }
         return -1;
     }
@@ -202,8 +237,7 @@ public class kelondroRowSet extends kelondroRowCollection implements kelondroInd
             p = l + ((rbound - l) >> 1);
             d = compare(key, astart, alength, p);
             if (d == 0) return p;
-            else if (d < 0) rbound = p;
-            else l = p + 1;
+            if (d < 0) rbound = p; else l = p + 1;
         }
         return l;
     }

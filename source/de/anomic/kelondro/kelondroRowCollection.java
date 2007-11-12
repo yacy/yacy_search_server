@@ -56,7 +56,7 @@ public class kelondroRowCollection {
     private static final int exp_order_bound = 5;
     private static final int exp_collection  = 6;
     
-    private static int processors = 1; //Runtime.getRuntime().availableProcessors();
+    private static int processors = Runtime.getRuntime().availableProcessors();
     
     public kelondroRowCollection(kelondroRowCollection rc) {
         this.rowdef = rc.rowdef;
@@ -427,7 +427,7 @@ public class kelondroRowCollection {
         	qsort(p, this.chunkcount, 0, swapspace);
         }
         this.sortBound = this.chunkcount;
-        assert this.isSorted();
+        //assert this.isSorted();
     }
 
     private class qsortthread extends Thread {
@@ -528,14 +528,13 @@ public class kelondroRowCollection {
         // then this method may run a long time with 100% CPU load which is caused
         // by the large number of memory movements. Therefore it is possible
         // to assign a runtime limitation
-        if (chunkcount <= 1) return;
-        int i = 0;
-        while (i < chunkcount - 1) {
+        if (chunkcount < 2) return;
+        int i = chunkcount - 2;
+        while (i >= 0) {
         	if (compare(i, i + 1) == 0) {
-                removeRow(i, true); // this decreases the chunkcount
-            } else {
-                i++;
+                removeRow(i, true);
             }
+            i--;
         }
     }
     
@@ -580,8 +579,7 @@ public class kelondroRowCollection {
         return c;
     }
     
-    private final byte[] compilePivot(int i) {
-        assert (chunkcount * this.rowdef.objectsize <= chunkcache.length) : "chunkcount = " + chunkcount + ", objsize = " + this.rowdef.objectsize + ", chunkcache.length = " + chunkcache.length;
+    protected final byte[] compilePivot(int i) {
         assert (i >= 0) && (i < chunkcount) : "i = " + i + ", chunkcount = " + chunkcount;
         assert (this.rowdef.objectOrder != null);
         assert (this.rowdef.objectOrder instanceof kelondroBase64Order);
@@ -591,7 +589,14 @@ public class kelondroRowCollection {
         return ((kelondroBase64Order) this.rowdef.objectOrder).compilePivot(chunkcache, i * this.rowdef.objectsize + colstart, this.rowdef.primaryKeyLength);
     }
     
-    private final int comparePivot(byte[] compiledPivot, int j) {
+    protected final byte[] compilePivot(byte[] a, int astart, int alength) {
+        assert (this.rowdef.objectOrder != null);
+        assert (this.rowdef.objectOrder instanceof kelondroBase64Order);
+        assert (this.rowdef.primaryKeyIndex == 0) : "this.sortColumn = " + this.rowdef.primaryKeyIndex;
+        return ((kelondroBase64Order) this.rowdef.objectOrder).compilePivot(a, astart, alength);
+    }
+    
+    protected final int comparePivot(byte[] compiledPivot, int j) {
         assert (chunkcount * this.rowdef.objectsize <= chunkcache.length) : "chunkcount = " + chunkcount + ", objsize = " + this.rowdef.objectsize + ", chunkcache.length = " + chunkcache.length;
         assert (j >= 0) && (j < chunkcount) : "j = " + j + ", chunkcount = " + chunkcount;
         assert (this.rowdef.objectOrder != null);
@@ -693,7 +698,26 @@ public class kelondroRowCollection {
     	boolean eis = e.isSorted();
     	long t12 = System.currentTimeMillis();
     	System.out.println("e isSorted = " + ((eis) ? "true" : "false") + ": " + (t12 - t11) + " milliseconds");
-    	System.out.println("Result size: c = " + c.size() + ", d = " + d.size() + ", e = " + e.size());
+    	random = new Random(0);
+    	boolean allfound = true;
+        for (int i = 0; i < testsize; i++) {
+            if (e.get(randomHash().getBytes()) == null) {
+                allfound = false;
+                break;
+            }
+        }
+        long t13 = System.currentTimeMillis();
+        System.out.println("e allfound = " + ((allfound) ? "true" : "false") + ": " + (t13 - t12) + " milliseconds");
+        boolean noghosts = true;
+        for (int i = 0; i < testsize; i++) {
+            if (e.get(randomHash().getBytes()) != null) {
+                noghosts = false;
+                break;
+            }
+        }
+        long t14 = System.currentTimeMillis();
+        System.out.println("e noghosts = " + ((noghosts) ? "true" : "false") + ": " + (t14 - t13) + " milliseconds");
+        System.out.println("Result size: c = " + c.size() + ", d = " + d.size() + ", e = " + e.size());
     	System.out.println();
     }
     
@@ -702,8 +726,6 @@ public class kelondroRowCollection {
     	test(10000);
     	test(100000);
     	//test(1000000);
-
-        // 368, 12029
     	
     	/*   	
         System.out.println(new java.util.Date(10957 * day));
@@ -711,4 +733,40 @@ public class kelondroRowCollection {
         System.out.println(daysSince2000(System.currentTimeMillis()));
         */
     }
+    
+    /*
+kelondroRowCollection test with size = 10000
+create c   : 134 milliseconds, 74 entries/millisecond
+copy c -> d: 47 milliseconds, 212 entries/millisecond
+sort c (1) : 66 milliseconds, 151 entries/millisecond
+sort d (2) : 23 milliseconds, 434 entries/millisecond
+uniq c     : 3 milliseconds, 3333 entries/millisecond
+uniq d     : 2 milliseconds, 5000 entries/millisecond
+create e   : 528 milliseconds, 18 entries/millisecond
+sort e (2) : 13 milliseconds, 769 entries/millisecond
+uniq e     : 2 milliseconds, 5000 entries/millisecond
+c isSorted = true: 2 milliseconds
+d isSorted = true: 3 milliseconds
+e isSorted = true: 2 milliseconds
+e allfound = true: 85 milliseconds
+e noghosts = true: 75 milliseconds
+Result size: c = 10000, d = 10000, e = 10000
+
+kelondroRowCollection test with size = 100000
+create c   : 589 milliseconds, 169 entries/millisecond
+copy c -> d: 141 milliseconds, 709 entries/millisecond
+sort c (1) : 268 milliseconds, 373 entries/millisecond
+sort d (2) : 187 milliseconds, 534 entries/millisecond
+uniq c     : 13 milliseconds, 7692 entries/millisecond
+uniq d     : 14 milliseconds, 7142 entries/millisecond
+create e   : 22068 milliseconds, 4 entries/millisecond
+sort e (2) : 167 milliseconds, 598 entries/millisecond
+uniq e     : 14 milliseconds, 7142 entries/millisecond
+c isSorted = true: 13 milliseconds
+d isSorted = true: 14 milliseconds
+e isSorted = true: 13 milliseconds
+e allfound = true: 815 milliseconds
+e noghosts = true: 787 milliseconds
+Result size: c = 100000, d = 100000, e = 100000
+     */
 }

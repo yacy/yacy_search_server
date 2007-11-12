@@ -288,7 +288,7 @@ public final class indexRAMRI implements indexRI {
     public class wordContainerIterator implements kelondroCloneableIterator {
 
         // this class exists, because the wCache cannot be iterated with rotation
-        // and because every indeContainer Object that is iterated must be returned as top-level-clone
+        // and because every indexContainer Object that is iterated must be returned as top-level-clone
         // so this class simulates wCache.tailMap(startWordHash).values().iterator()
         // plus the mentioned features
         

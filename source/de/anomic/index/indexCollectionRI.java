@@ -71,7 +71,7 @@ public class indexCollectionRI implements indexRI {
         return collectionIndex.size();
     }
     
-    public synchronized int indexSize(String wordHash) {
+    public int indexSize(String wordHash) {
         try {
             return collectionIndex.indexSize(wordHash.getBytes());
         } catch (IOException e) {
@@ -122,7 +122,7 @@ public class indexCollectionRI implements indexRI {
 
     }
 
-    public synchronized boolean hasContainer(String wordHash) {
+    public boolean hasContainer(String wordHash) {
         try {
             return collectionIndex.has(wordHash.getBytes());
         } catch (IOException e) {
@@ -130,7 +130,7 @@ public class indexCollectionRI implements indexRI {
         }
     }
     
-    public synchronized indexContainer getContainer(String wordHash, Set urlselection) {
+    public indexContainer getContainer(String wordHash, Set urlselection) {
         try {
             kelondroRowSet collection = collectionIndex.get(wordHash.getBytes());
             if (collection != null) collection.select(urlselection);
@@ -141,7 +141,7 @@ public class indexCollectionRI implements indexRI {
         }
     }
 
-    public synchronized indexContainer deleteContainer(String wordHash) {
+    public indexContainer deleteContainer(String wordHash) {
         try {
             kelondroRowSet collection = collectionIndex.delete(wordHash.getBytes());
             if (collection == null) return null;
@@ -151,13 +151,13 @@ public class indexCollectionRI implements indexRI {
         }
     }
 
-    public synchronized boolean removeEntry(String wordHash, String urlHash) {
+    public boolean removeEntry(String wordHash, String urlHash) {
         HashSet hs = new HashSet();
         hs.add(urlHash.getBytes());
         return removeEntries(wordHash, hs) == 1;
     }
     
-    public synchronized int removeEntries(String wordHash, Set urlHashes) {
+    public int removeEntries(String wordHash, Set urlHashes) {
         try {
             return collectionIndex.remove(wordHash.getBytes(), urlHashes);
         } catch (kelondroOutOfLimitsException e) {
@@ -169,7 +169,7 @@ public class indexCollectionRI implements indexRI {
         }
     }
 
-    public synchronized void addEntries(indexContainer newEntries, long creationTime, boolean dhtCase) {
+    public void addEntries(indexContainer newEntries, long creationTime, boolean dhtCase) {
         try {
             collectionIndex.merge(newEntries);
         } catch (kelondroOutOfLimitsException e) {
@@ -179,10 +179,10 @@ public class indexCollectionRI implements indexRI {
         }
     }
 
-    public synchronized void addMultipleEntries(List /*of indexContainer*/ containerList) {
+    public void addMultipleEntries(List /*of indexContainer*/ containerList) {
         try {
         	//for (int i = 0; i < containerList.size(); i++) collectionIndex.merge((indexContainer) containerList.get(i));
-            synchronized (containerList) {collectionIndex.mergeMultiple(containerList);}
+            collectionIndex.mergeMultiple(containerList);
         } catch (kelondroOutOfLimitsException e) {
             e.printStackTrace();
         } catch (IOException e) {
@@ -190,7 +190,7 @@ public class indexCollectionRI implements indexRI {
         }
     }
 
-    public synchronized void close() {
+    public void close() {
         collectionIndex.close();
     }
     
