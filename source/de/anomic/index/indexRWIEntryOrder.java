@@ -64,7 +64,7 @@ public class indexRWIEntryOrder extends kelondroAbstractOrder implements kelondr
             if (this.max == null) this.max = mmf0.entryMax; else indexRWIVarEntry.max(this.max, mmf0.entryMax);
             //long s1= System.currentTimeMillis(), sc = Math.max(1, s1 - s0);
             //System.out.println("***DEBUG*** indexRWIEntry.Order (2-THREADED): " + sc + " milliseconds for " + container.size() + " entries, " + (container.size() / sc) + " entries/millisecond");
-        } else {
+        } else if (container.size() > 0) {
             // run minmax in one thread
             minmaxfinder mmf = new minmaxfinder(container, 0, container.size());
             mmf.run(); // execute without multi-threading

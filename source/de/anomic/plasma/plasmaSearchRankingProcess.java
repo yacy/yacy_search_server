@@ -81,6 +81,7 @@ public final class plasmaSearchRankingProcess {
         // attention: if minEntries is too high, this method will not terminate within the maxTime
 
         assert (container != null);
+        if (container.size() == 0) return;
         
         process.startTimer();
         if (this.order == null) {
