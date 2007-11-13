@@ -412,6 +412,7 @@ public class kelondroRowCollection {
         if (this.sortBound == this.chunkcount) return; // this is already sorted
         if (this.chunkcount < isortlimit) {
             isort(0, this.chunkcount, new byte[this.rowdef.objectsize]);
+            this.sortBound = this.chunkcount;
             return;
         }
         byte[] swapspace = new byte[this.rowdef.objectsize];

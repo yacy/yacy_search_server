@@ -144,9 +144,9 @@ public class indexURLEntry {
         this.entry = rowdef.newEntry();
         this.entry.setCol(col_hash, url.hash(), null);
         this.entry.setCol(col_comp, encodeComp(url, descr, author, tags, ETag));
-        this.entry.setCol(col_mod, encodeDate(mod));
-        this.entry.setCol(col_load, encodeDate(load));
-        this.entry.setCol(col_fresh, encodeDate(fresh));
+        encodeDate(col_mod, mod);
+        encodeDate(col_load, load);
+        encodeDate(col_fresh, fresh);
         this.entry.setCol(col_referrer, (referrer == null) ? null : referrer.getBytes());
         this.entry.setCol(col_md5, md5);
         this.entry.setCol(col_size, size);
@@ -160,13 +160,18 @@ public class indexURLEntry {
         this.entry.setCol(col_laudio, laudio);
         this.entry.setCol(col_lvideo, lvideo);
         this.entry.setCol(col_lapp, lapp);
+        System.out.println("===DEBUG=== " + load.toString() + ", " + decodeDate(col_load).toString());
         this.snippet = null;
         this.word = null;
     }
 
-    public static byte[] encodeDate(Date d) {
+    private void encodeDate(int col, Date d) {
         // calculates the number of days since 1.1.1970 and returns this as 4-byte array
-        return kelondroNaturalOrder.encodeLong(d.getTime() / 86400000, 4);
+        this.entry.setCol(col, kelondroNaturalOrder.encodeLong(d.getTime() / 86400000, 4));
+    }
+
+    private Date decodeDate(int col) {
+        return new Date(86400000 * this.entry.getColLong(col));
     }
     
     public static byte[] encodeComp(yacyURL url, String descr, String author, String tags, String ETag) {
@@ -204,19 +209,19 @@ public class indexURLEntry {
         this.entry.setCol(col_hash, url.hash(), null);
         this.entry.setCol(col_comp, encodeComp(url, descr, author, tags, ETag));
         try {
-            this.entry.setCol(col_mod, encodeDate(serverDate.shortDayFormatter.parse(prop.getProperty("mod", "20000101"))));
+            encodeDate(col_mod, serverDate.shortDayFormatter.parse(prop.getProperty("mod", "20000101")));
         } catch (ParseException e) {
-            this.entry.setCol(col_mod, encodeDate(new Date()));
+            encodeDate(col_mod, new Date());
         }
         try {
-            this.entry.setCol(col_load, encodeDate(serverDate.shortDayFormatter.parse(prop.getProperty("load", "20000101"))));
+            encodeDate(col_load, serverDate.shortDayFormatter.parse(prop.getProperty("load", "20000101")));
         } catch (ParseException e) {
-            this.entry.setCol(col_load, encodeDate(new Date()));
+            encodeDate(col_load, new Date());
         }
         try {
-            this.entry.setCol(col_fresh, encodeDate(serverDate.shortDayFormatter.parse(prop.getProperty("fresh", "20000101"))));
+            encodeDate(col_fresh, serverDate.shortDayFormatter.parse(prop.getProperty("fresh", "20000101")));
         } catch (ParseException e) {
-            this.entry.setCol(col_fresh, encodeDate(new Date()));
+            encodeDate(col_fresh, new Date());
         }
         this.entry.setCol(col_referrer, prop.getProperty("referrer", yacyURL.dummyHash).getBytes());
         this.entry.setCol(col_md5, serverCodings.decodeHex(prop.getProperty("md5", "")));
@@ -308,15 +313,15 @@ public class indexURLEntry {
     }
     
     public Date moddate() {
-        return new Date(86400000 * entry.getColLong(col_mod));
+        return decodeDate(col_mod);
     }
 
     public Date loaddate() {
-        return new Date(86400000 * entry.getColLong(col_load));
+        return decodeDate(col_load);
     }
 
     public Date freshdate() {
-        return new Date(86400000 * entry.getColLong(col_fresh));
+        return decodeDate(col_fresh);
     }
 
     public String referrerHash() {
