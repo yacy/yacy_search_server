@@ -69,8 +69,7 @@ Active list:==Aktivierte Liste:
 No blacklist selected==Keine Blacklist gew&auml;hlt
 Test list:==Teste Liste:
 "Test"=="Testen"
-The tested URL was==Die geteste URL war
-It is blocked for the following cases:==Sie wird in den folgenden F&auml;llen geblockt:
+The tested URL was==Die getestete URL warIt is blocked for the following cases:==Sie wird in den folgenden F&auml;llen geblockt:
 #Crawling==Crawling
 #DHT==DHT
 #News==News
@@ -1208,11 +1207,7 @@ red point==roter Punkt
 this peer==Ihr Peer
 You are in online mode, but probably no internet resource is available.==Sie befinden sich im Online-Modus, aber zur Zeit besteht keine Internetverbindung.You are in online mode, but probably no internet resource is available.
 Please check your internet connection.==Bitte &uuml;berpr&uuml;fen Sie Ihre Internetverbindung.
-You are either not in online mode or you do not use the proxy option.==Sie sind entweder nicht im Online-Modus oder Sie benutzen nicht die Proxy-Option.
-'on-demand - mode', see=='on-demand - Modus', siehe
-here</a>==hier</a>
-for an installation guide\) or you can go online by activating the permanent online mode.==f&uuml;r eine Installationsanleitung) stellen. Sie k&ouml;nnen aber auch online gehen, indem Sie den \"Permanent Online\" Modus aktivieren.
-To do this, press this button:==Um dies zu tun, dr&uuml;cken Sie bitte diesen Knopf:
+You are not in online mode. To get online, press this button:==Sie sind nicht im Online-Modus. Um Online zu gehen, dr&uml;cken Sie diesen Knopf:
 "go online"=="online gehen"
 #-----------------------------
 
@@ -1846,9 +1841,6 @@ and set an administration password.==und geben Sie ein Administrator Passwort ei
 You have not published your peer seed yet. This happens automatically, just wait.==Ihr Peer ist dem Netzwerk noch nicht bekannt. Warten Sie noch ein wenig, dies geschieht automatisch.
 While you have this status you are not allowed to search other peers.==W&auml;hrend Sie diesen Status haben, ist es Ihnen nicht erlaubt andere Peers zu durchsuchen.
 The peer must go online to get a peer address.==Ihr Peer muss online gehen, um eine Adresse zu bekommen.
-If you don't know how to configure your system,==Wenn Sie nicht wissen, wie Sie Ihr System konfigurieren,
-see the <a==lesen Sie die <a
-installation instructions</a>.==Installationsanleitung</a>.
 You cannot be reached from outside.==Ihr Peer kann nicht von au&szlig;en erreicht werden.
 A possible reason is that you are behind a firewall, NAT or Router.==Ein m&ouml;glicher Grund ist, dass Sie sich hinter einer Firewall, NAT oder einem Router befinden.
 But you can <a href="index.html">search the internet</a> using the other peers'==Trotzdem k&ouml;nnen Sie <a href="index.html">das Internet durchsuchen</a>, indem Sie den globalen Index
