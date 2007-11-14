@@ -1138,22 +1138,22 @@ public final class httpd implements serverHandler {
             try {
                 urlString = (new yacyURL((method.equals(httpHeader.METHOD_CONNECT)?"https":"http"), host, port, (args == null) ? path : path + "?" + args)).toString();
             } catch (MalformedURLException e) {
-                urlString = "invalid URL"; 
-            }            
-            
+                urlString = "invalid URL";
+            }
+
             // set rewrite values
             serverObjects tp = new serverObjects();
-            
+
 //            tp.put("host", serverCore.publicIP().getHostAddress());
 //            tp.put("port", switchboard.getConfig("port", "8080"));
-            
+
             String clientIP = conProp.getProperty(httpHeader.CONNECTION_PROP_CLIENTIP,"127.0.0.1");
-            
+
             // check if ip is local ip address
             InetAddress hostAddress = serverDomains.dnsResolve(clientIP);
             if (hostAddress == null) {
                 tp.put("host", serverDomains.myPublicLocalIP().getHostAddress());
-                tp.put("port", serverCore.getPortNr(switchboard.getConfig("port", "8080")));                    
+                tp.put("port", serverCore.getPortNr(switchboard.getConfig("port", "8080")));
             } else if (hostAddress.isSiteLocalAddress() || hostAddress.isLoopbackAddress()) {
                 tp.put("host", serverDomains.myPublicLocalIP().getHostAddress());
                 tp.put("port", serverCore.getPortNr(switchboard.getConfig("port", "8080")));
@@ -1162,14 +1162,23 @@ public final class httpd implements serverHandler {
                 tp.put("port", (serverCore.portForwardingEnabled && (serverCore.portForwarding != null)) 
                         ? Integer.toString(serverCore.portForwarding.getPort()) 
                         : Integer.toString(serverCore.getPortNr(switchboard.getConfig("port", "8080"))));
-            }                   
+            }
+
+            // if peer has public address it will be used
+            if (yacyCore.seedDB.mySeed().getPublicAddress() != null) {
+                tp.put("extAddress", yacyCore.seedDB.mySeed().getPublicAddress());
+            }
+            // otherwise the local ip address will be used
+            else {
+                tp.put("extAddress", tp.get("host", "127.0.0.1") + ":" + tp.get("port", "8080"));
+            }
 
             tp.put("peerName", yacyCore.seedDB.mySeed().getName());
-            tp.put("errorMessageType", errorcase);            
+            tp.put("errorMessageType", errorcase);
             tp.put("httpStatus",       Integer.toString(httpStatusCode) + " " + httpStatusText);
             tp.put("requestMethod",    conProp.getProperty(httpHeader.CONNECTION_PROP_METHOD));
             tp.put("requestURL",       urlString);
-            
+
             switch (errorcase) {
                 case ERRORCASE_MESSAGE:
                     tp.put("errorMessageType_detailedErrorMsg", (detailedErrorMsgText == null) ? "" : detailedErrorMsgText.replaceAll("\n", "<br />"));
