@@ -80,11 +80,36 @@
     ::
     <p>#[count]# URL entries related to this word hash <span class="tt">#[keyHash]#</span></p>
     <form action="IndexControl_p.html" method="post" enctype="multipart/form-data">
-      <p>#{urlList}# #(urlExists)#
-        <input type="checkbox" id="urlhx.#[urlhxCount]#" name="urlhx.#[urlhxCount]#" checked value="#[urlhxValue]#" align="top" /><label for="urlhx.#[urlhxCount]#" class="tt">#[urlhxValue]#&nbsp;&lt;unresolved URL Hash&gt;</span><br />
-        ::<input type="checkbox" id="urlhx.#[urlhxCount]#" name="urlhx.#[urlhxCount]#" #(urlhxChecked)#::checked="checked" #(/urlhxChecked)#value="#[urlhxValue]#" align="top" />
-        <a href="/IndexControl_p.html?keystring=#[keyString]#&amp;keyhash=#[keyHash]#&amp;urlhash=#[urlhxValue]#&amp;urlstringsearch=&amp;urlstring=#[urlString]#" class="tt">#[urlhxValue]#</a><label for="urlhx.#[urlhxCount]#" class="tt">&nbsp;#[urlString]#, pos=#[pos]#</label><br />
-      #(/urlExists)# #{/urlList}#</p>
+      <p>
+      <table border="0" cellpadding="2" cellspacing="1">
+      <tr class="TableHeader"><td>&nbsp;</td><td>hash</td><td>url</td><td>pos</td><td>phrase</td><td>urlcomps</td><td>urllength</td><td width="60%">props</td></tr>
+      #{urlList}#
+      <tr class="TableCellLight">
+      #(urlExists)#
+        <td><input type="checkbox" id="urlhx.#[urlhxCount]#" name="urlhx.#[urlhxCount]#" checked value="#[urlhxValue]#" align="top" />
+            <label for="urlhx.#[urlhxCount]#" class="tt">#[urlhxValue]#</label></td>
+        <td>&lt;unresolved URL Hash&gt;</td>
+        <td></td>
+        <td></td>
+        <td></td>
+        <td></td>
+        <td></td>
+        <td></td>
+        </span>
+        ::
+        <td><input type="checkbox" id="urlhx.#[urlhxCount]#" name="urlhx.#[urlhxCount]#" #(urlhxChecked)#::checked="checked" #(/urlhxChecked)#value="#[urlhxValue]#" align="top" />
+            <label for="urlhx.#[urlhxCount]#" class="tt"></label></td>
+        <td><a href="/IndexControl_p.html?keystring=#[keyString]#&amp;keyhash=#[keyHash]#&amp;urlhash=#[urlhxValue]#&amp;urlstringsearch=&amp;urlstring=#[urlString]#" class="tt">#[urlhxValue]#</a></td>
+        <td><a href="#[urlString]#">#[urlStringShort]#</a></td>
+        <td>#[pos]#</td>
+        <td>#[phrase]#</td>
+        <td>#[urlcomps]#</td>
+        <td>#[urllength]#</td>
+        <td>#[props]#</td>
+      #(/urlExists)#
+      </tr>
+      #{/urlList}#
+      </table>
       <input type="hidden" name="keystring" value="#[keyString]#" />
       <input type="hidden" name="keyhash" value="#[keyHash]#" />
       <input type="hidden" name="urlstring" value="" />

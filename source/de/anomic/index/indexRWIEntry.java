@@ -33,11 +33,11 @@ public interface indexRWIEntry {
 
     // appearance flags, used in RWI entry
     // the flags 0..23 are identical to the category flags in plasmaCondenser
-    public  static final int flag_app_url           = 24; // word appears in url
+    public  static final int flag_app_reference     = 24; // word appears in anchor description text (the reference to an url), or any alternative text field of a link
     public  static final int flag_app_descr         = 25; // word appears in headline (or any description part)
     public  static final int flag_app_author        = 26; // word appears in author
     public  static final int flag_app_tags          = 27; // word appears in header tags
-    public  static final int flag_app_reference     = 28; // word appears in anchor description text (the reference to an url), or any alternative text field of a link
+    public  static final int flag_app_url           = 28; // word appears in url
     public  static final int flag_app_emphasized    = 29; // word is emphasized in text (i.e. bold, italics, special size)
 
     public String toPropertyForm();

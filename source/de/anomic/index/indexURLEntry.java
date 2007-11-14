@@ -160,7 +160,7 @@ public class indexURLEntry {
         this.entry.setCol(col_laudio, laudio);
         this.entry.setCol(col_lvideo, lvideo);
         this.entry.setCol(col_lapp, lapp);
-        System.out.println("===DEBUG=== " + load.toString() + ", " + decodeDate(col_load).toString());
+        //System.out.println("===DEBUG=== " + load.toString() + ", " + decodeDate(col_load).toString());
         this.snippet = null;
         this.word = null;
     }

@@ -126,20 +126,19 @@ public final class plasmaCondenser {
         this.wordcut = 2;
         this.words = new TreeMap();
         this.sentences = new HashMap();
+        this.RESULT_FLAGS = new kelondroBitfield(4);
         
         //System.out.println("DEBUG: condensing " + document.getMainLongTitle() + ", indexText=" + Boolean.toString(indexText) + ", indexMedia=" + Boolean.toString(indexMedia));
+
+        // construct flag set for document
+        if (document.getImages().size() > 0) RESULT_FLAGS.set(flag_cat_hasimage, true);
+        if (document.getAudiolinks().size() > 0) RESULT_FLAGS.set(flag_cat_hasaudio, true);
+        if (document.getVideolinks().size() > 0) RESULT_FLAGS.set(flag_cat_hasvideo, true);
+        if (document.getApplinks().size()   > 0) RESULT_FLAGS.set(flag_cat_hasapp,   true);
         
         Map.Entry entry;
         if (indexText) {
-            createCondensement(document.getText(), document.getCharset());
-
-            kelondroBitfield wflags = (kelondroBitfield) RESULT_FLAGS.clone(); // the template for the word flags, only from position 0..19
-            // construct flag set for document
-            if (document.getImages().size() > 0) RESULT_FLAGS.set(flag_cat_hasimage, true);
-            if (document.getAudiolinks().size() > 0) RESULT_FLAGS.set(flag_cat_hasaudio, true);
-            if (document.getVideolinks().size() > 0) RESULT_FLAGS.set(flag_cat_hasvideo, true);
-            if (document.getApplinks().size()   > 0) RESULT_FLAGS.set(flag_cat_hasapp,   true);
-        
+            createCondensement(document.getText(), document.getCharset());        
             // the phrase counter:
             // phrase   0 are words taken from the URL
             // phrase   1 is the MainTitle
@@ -152,22 +151,22 @@ public final class plasmaCondenser {
             // phrase  99 is taken from the media Link url and anchor description
             // phrase 100 and above are lines from the text
       
-            insertTextToWords(document.getTitle(),    1, indexRWIEntry.flag_app_descr, wflags);
-            //insertTextToWords(document.getTitle(),    2, indexRWIEntryNew.flag_app_descr, wflags);
-            insertTextToWords(document.getAbstract(), 3, indexRWIEntry.flag_app_descr, wflags);
-            insertTextToWords(document.getAuthor(),   4, indexRWIEntry.flag_app_descr, wflags);
+            insertTextToWords(document.getLocation().toNormalform(false, true), 0, indexRWIEntry.flag_app_url, RESULT_FLAGS);
+            insertTextToWords(document.getTitle(),    1, indexRWIEntry.flag_app_descr, RESULT_FLAGS);
+            insertTextToWords(document.getAbstract(), 3, indexRWIEntry.flag_app_descr, RESULT_FLAGS);
+            insertTextToWords(document.getAuthor(),   4, indexRWIEntry.flag_app_descr, RESULT_FLAGS);
             // missing: tags!
             String[] titles = document.getSectionTitles();
             for (int i = 0; i < titles.length; i++) {
-                insertTextToWords(titles[i], i + 10, indexRWIEntry.flag_app_emphasized, wflags);
+                insertTextToWords(titles[i], i + 10, indexRWIEntry.flag_app_emphasized, RESULT_FLAGS);
             }
-        
+            
             // anchors
             Iterator i = document.getAnchors().entrySet().iterator();
             while (i.hasNext()) {
                 entry = (Map.Entry) i.next();
-                insertTextToWords((String) entry.getKey(), 98, indexRWIEntry.flag_app_url, wflags);
-                insertTextToWords((String) entry.getValue(), 98, indexRWIEntry.flag_app_url, wflags);
+                insertTextToWords((String) entry.getKey(), 98, indexRWIEntry.flag_app_reference, RESULT_FLAGS);
+                insertTextToWords((String) entry.getValue(), 98, indexRWIEntry.flag_app_reference, RESULT_FLAGS);
             }
         } else {
             this.RESULT_NUMB_WORDS = 0;
@@ -177,30 +176,28 @@ public final class plasmaCondenser {
         }
         
         if (indexMedia) {
-            kelondroBitfield wflags = (kelondroBitfield) RESULT_FLAGS.clone(); // the template for the word flags, only from position 0..19
-            
             // audio
             Iterator i = document.getAudiolinks().entrySet().iterator();
             while (i.hasNext()) {
                 entry = (Map.Entry) i.next();
-                insertTextToWords((String) entry.getKey(), 99, flag_cat_hasaudio, wflags);
-                insertTextToWords((String) entry.getValue(), 99, flag_cat_hasaudio, wflags);
+                insertTextToWords((String) entry.getKey(), 99, flag_cat_hasaudio, RESULT_FLAGS);
+                insertTextToWords((String) entry.getValue(), 99, flag_cat_hasaudio, RESULT_FLAGS);
             }
 
             // video
             i = document.getVideolinks().entrySet().iterator();
             while (i.hasNext()) {
                 entry = (Map.Entry) i.next();
-                insertTextToWords((String) entry.getKey(), 99, flag_cat_hasvideo, wflags);
-                insertTextToWords((String) entry.getValue(), 99, flag_cat_hasvideo, wflags);
+                insertTextToWords((String) entry.getKey(), 99, flag_cat_hasvideo, RESULT_FLAGS);
+                insertTextToWords((String) entry.getValue(), 99, flag_cat_hasvideo, RESULT_FLAGS);
             }
 
             // applications
             i = document.getApplinks().entrySet().iterator();
             while (i.hasNext()) {
                 entry = (Map.Entry) i.next();
-                insertTextToWords((String) entry.getKey(), 99, flag_cat_hasapp, wflags);
-                insertTextToWords((String) entry.getValue(), 99, flag_cat_hasapp, wflags);
+                insertTextToWords((String) entry.getKey(), 99, flag_cat_hasapp, RESULT_FLAGS);
+                insertTextToWords((String) entry.getValue(), 99, flag_cat_hasapp, RESULT_FLAGS);
             }
 
             // images
@@ -208,8 +205,8 @@ public final class plasmaCondenser {
             htmlFilterImageEntry ientry;
             while (i.hasNext()) {
                 ientry = (htmlFilterImageEntry) i.next();
-                insertTextToWords(ientry.url().toNormalform(false, true), 99, flag_cat_hasimage, wflags);
-                insertTextToWords(ientry.alt(), 99, flag_cat_hasimage, wflags);
+                insertTextToWords(ientry.url().toNormalform(false, true), 99, flag_cat_hasimage, RESULT_FLAGS);
+                insertTextToWords(ientry.alt(), 99, flag_cat_hasimage, RESULT_FLAGS);
             }
         
             // finally check all words for missing flag entry
@@ -219,7 +216,7 @@ public final class plasmaCondenser {
                 entry = (Map.Entry) i.next();
                 wprop = (wordStatProp) entry.getValue();
                 if (wprop.flags == null) {
-                    wprop.flags = (kelondroBitfield) wflags.clone();
+                    wprop.flags = (kelondroBitfield) RESULT_FLAGS.clone();
                     words.put(entry.getKey(), wprop);
                 }
             }
@@ -241,8 +238,6 @@ public final class plasmaCondenser {
             wprop = (wordStatProp) words.get(word);
             if (wprop == null) wprop = new wordStatProp(0, pip, phrase);
             if (wprop.flags == null) wprop.flags = (kelondroBitfield) flagstemplate.clone();
-            wprop.numOfPhrase = 1;
-            wprop.posInPhrase = pip;
             wprop.flags.set(flagpos, true);
             words.put(word, wprop);
             pip++;

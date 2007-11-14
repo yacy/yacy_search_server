@@ -54,6 +54,7 @@ import java.net.MalformedURLException;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
+import java.util.Map;
 import java.util.Set;
 import java.util.TreeMap;
 
@@ -502,42 +503,63 @@ public class IndexControl_p {
             } else {
                 final Iterator en = index.entries();
                 prop.put("genUrlList", "2");
-                String us;
-                String uh[] = new String[2];
                 int i = 0;
-
+                // first generate a new map where the urls are sorted (not by hash but by the url text)
                 final TreeMap tm = new TreeMap();
                 indexRWIEntry xi;
+                indexURLEntry le;
+                Object[] wu;
                 while (en.hasNext()) {
                     xi = (indexRWIEntry) en.next();
-                    uh = new String[]{xi.urlHash(), Integer.toString(xi.posintext())};
-                    indexURLEntry le = switchboard.wordIndex.loadedURL.load(uh[0], null);
+                    le = switchboard.wordIndex.loadedURL.load(xi.urlHash(), null);
+                    wu = new Object[]{xi, le};
                     if (le == null) {
-                        tm.put(uh[0], uh);
+                        tm.put(xi.urlHash(), wu);
                     } else {
-                        us = le.comp().url().toNormalform(false, true);
-                        tm.put(us, uh);
-
+                        tm.put(le.comp().url().toNormalform(false, true), wu);
                     }
                 }
 
                 yacyURL url;
-                final Iterator iter = tm.keySet().iterator();
+                final Iterator iter = tm.entrySet().iterator();
+                Map.Entry entry;
+                String us;
                 while (iter.hasNext()) {
-                    us = iter.next().toString();
-                    uh = (String[]) tm.get(us);
-                    if (us.equals(uh[0])) {
+                    entry = (Map.Entry) iter.next();
+                    us = (String) entry.getKey();
+                    wu = (Object[]) entry.getValue();
+                    xi = (indexRWIEntry) wu[0];
+                    le = (indexURLEntry) wu[1];
+                    if (us.equals(xi.urlHash())) {
                         prop.put("genUrlList_urlList_"+i+"_urlExists", "0");
                         prop.put("genUrlList_urlList_"+i+"_urlExists_urlhxCount", i);
-                        prop.putHTML("genUrlList_urlList_"+i+"_urlExists_urlhxValue", uh[0]);
+                        prop.putHTML("genUrlList_urlList_"+i+"_urlExists_urlhxValue", xi.urlHash());
                     } else {
                         prop.put("genUrlList_urlList_"+i+"_urlExists", "1");
                         prop.put("genUrlList_urlList_"+i+"_urlExists_urlhxCount", i);
-                        prop.putHTML("genUrlList_urlList_"+i+"_urlExists_urlhxValue", uh[0]);
+                        prop.putHTML("genUrlList_urlList_"+i+"_urlExists_urlhxValue", xi.urlHash());
                         prop.putHTML("genUrlList_urlList_"+i+"_urlExists_keyString", keystring);
                         prop.put("genUrlList_urlList_"+i+"_urlExists_keyHash", keyhash);
                         prop.putHTML("genUrlList_urlList_"+i+"_urlExists_urlString", us);
-                        prop.put("genUrlList_urlList_"+i+"_urlExists_pos", uh[1]);
+                        prop.putHTML("genUrlList_urlList_"+i+"_urlExists_urlStringShort", (us.length() > 60) ? (us.substring(0, 60) + "...") : us);
+                        prop.put("genUrlList_urlList_"+i+"_urlExists_pos", xi.posintext());
+                        prop.put("genUrlList_urlList_"+i+"_urlExists_phrase", xi.posofphrase());
+                        prop.put("genUrlList_urlList_"+i+"_urlExists_urlcomps", xi.urlcomps());
+                        prop.put("genUrlList_urlList_"+i+"_urlExists_urllength", xi.urllength());
+                        prop.put("genUrlList_urlList_"+i+"_urlExists_props",
+                                ((xi.flags().get(plasmaCondenser.flag_cat_hasimage)) ? "contains images, " : "") +
+                                ((xi.flags().get(plasmaCondenser.flag_cat_hasaudio)) ? "contains audio, " : "") +
+                                ((xi.flags().get(plasmaCondenser.flag_cat_hasvideo)) ? "contains video, " : "") +
+                                ((xi.flags().get(plasmaCondenser.flag_cat_hasapp)) ? "contains applications, " : "") +
+                                ((xi.flags().get(indexRWIEntry.flag_app_url)) ? "appears in url, " : "") +
+                                ((xi.flags().get(indexRWIEntry.flag_app_descr)) ? "appears in description, " : "") +
+                                ((xi.flags().get(indexRWIEntry.flag_app_author)) ? "appears in author, " : "") +
+                                ((xi.flags().get(indexRWIEntry.flag_app_tags)) ? "appears in tags, " : "") +
+                                ((xi.flags().get(indexRWIEntry.flag_app_reference)) ? "appears in reference, " : "") +
+                                ((xi.flags().get(indexRWIEntry.flag_app_emphasized)) ? "appears emphasized" : "")
+                        );
+                        prop.put("genUrlList_urlList_"+i+"_urlExists_phrase", xi.posofphrase());
+                        prop.put("genUrlList_urlList_"+i+"_urlExists_phrase", xi.posofphrase());
                         url = new yacyURL(us, null);
                         if (plasmaSwitchboard.urlBlacklist.isListed(plasmaURLPattern.BLACKLIST_DHT, url)) {
                             prop.put("genUrlList_urlList_"+i+"_urlExists_urlhxChecked", "1");
