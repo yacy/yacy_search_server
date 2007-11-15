@@ -121,7 +121,7 @@ public final class plasmaCondenser {
     
     public plasmaCondenser(plasmaParserDocument document, boolean indexText, boolean indexMedia) throws UnsupportedEncodingException {
         // if addMedia == true, then all the media links are also parsed and added to the words
-        // added media words are flagged with the approriate media flag
+        // added media words are flagged with the appropriate media flag
         this.wordminsize = 3;
         this.wordcut = 2;
         this.words = new TreeMap();
@@ -130,11 +130,7 @@ public final class plasmaCondenser {
         
         //System.out.println("DEBUG: condensing " + document.getMainLongTitle() + ", indexText=" + Boolean.toString(indexText) + ", indexMedia=" + Boolean.toString(indexMedia));
 
-        // construct flag set for document
-        if (document.getImages().size() > 0) RESULT_FLAGS.set(flag_cat_hasimage, true);
-        if (document.getAudiolinks().size() > 0) RESULT_FLAGS.set(flag_cat_hasaudio, true);
-        if (document.getVideolinks().size() > 0) RESULT_FLAGS.set(flag_cat_hasvideo, true);
-        if (document.getApplinks().size()   > 0) RESULT_FLAGS.set(flag_cat_hasapp,   true);
+        insertTextToWords(document.getLocation().toNormalform(false, true), 0, indexRWIEntry.flag_app_url, RESULT_FLAGS);
         
         Map.Entry entry;
         if (indexText) {
@@ -151,7 +147,6 @@ public final class plasmaCondenser {
             // phrase  99 is taken from the media Link url and anchor description
             // phrase 100 and above are lines from the text
       
-            insertTextToWords(document.getLocation().toNormalform(false, true), 0, indexRWIEntry.flag_app_url, RESULT_FLAGS);
             insertTextToWords(document.getTitle(),    1, indexRWIEntry.flag_app_descr, RESULT_FLAGS);
             insertTextToWords(document.getAbstract(), 3, indexRWIEntry.flag_app_descr, RESULT_FLAGS);
             insertTextToWords(document.getAuthor(),   4, indexRWIEntry.flag_app_descr, RESULT_FLAGS);
@@ -221,6 +216,12 @@ public final class plasmaCondenser {
                 }
             }
         }
+        
+        // construct flag set for document
+        if (document.getImages().size() > 0) RESULT_FLAGS.set(flag_cat_hasimage, true);
+        if (document.getAudiolinks().size() > 0) RESULT_FLAGS.set(flag_cat_hasaudio, true);
+        if (document.getVideolinks().size() > 0) RESULT_FLAGS.set(flag_cat_hasvideo, true);
+        if (document.getApplinks().size()   > 0) RESULT_FLAGS.set(flag_cat_hasapp,   true);
     }
     
     private void insertTextToWords(String text, int phrase, int flagpos, kelondroBitfield flagstemplate) {
@@ -360,9 +361,6 @@ public final class plasmaCondenser {
     }
 
     private void createCondensement(InputStream is, String charset) throws UnsupportedEncodingException {
-
-        words = new TreeMap(/*kelondroNaturalOrder.naturalOrder*/);
-        sentences = new HashMap();
         HashSet currsentwords = new HashSet();
         StringBuffer sentence = new StringBuffer(100);
         String word = "";

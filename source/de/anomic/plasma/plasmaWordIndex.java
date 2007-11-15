@@ -34,6 +34,7 @@ import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Map;
 import java.util.Set;
+import java.util.TreeMap;
 import java.util.TreeSet;
 
 import de.anomic.htmlFilter.htmlFilterContentScraper;
@@ -46,6 +47,7 @@ import de.anomic.index.indexRWIEntry;
 import de.anomic.index.indexRWIRowEntry;
 import de.anomic.index.indexURLEntry;
 import de.anomic.kelondro.kelondroBase64Order;
+import de.anomic.kelondro.kelondroBitfield;
 import de.anomic.kelondro.kelondroCloneableIterator;
 import de.anomic.kelondro.kelondroMergeIterator;
 import de.anomic.kelondro.kelondroOrder;
@@ -387,6 +389,120 @@ public final class plasmaWordIndex implements indexRI {
         return containers;
     }
 
+    public Finding retrieveURLs(String keyhash, kelondroBitfield filter, boolean all, int maxcount, boolean loadurl, int sortorder) {
+        // search for a word hash and generate a list of url links
+        // sortorder: 0 = hash, 1 = url, 2 = ranking
+        indexContainer index = getContainer(keyhash, null);
+        final TreeMap tm = new TreeMap();
+        final TreeSet mi = new TreeSet();
+        final ArrayList indexes = new ArrayList();
+        final int[] c = new int[32];
+        for (int i = 0; i < 32; i++) {c[i] = 0;}
+        
+        if ((index != null) && (index.size() != 0)) {
+            final Iterator en = index.entries();
+            // generate a new map where the urls are sorted (not by hash but by the url text)
+            
+            indexRWIEntry ientry;
+            indexURLEntry uentry;
+            loop: while (en.hasNext()) {
+                ientry = (indexRWIEntry) en.next();
+
+                // test if ientry matches with filter
+                if (filter != null) {
+                    // if all = true: let only entries pass that has all matching bits
+                    // if all = false: let all entries pass that has at least one matching bit
+                    if (all) {
+                        for (int i = 0; i < 32; i++) {
+                            if ((filter.get(i)) && (!ientry.flags().get(i))) continue loop;
+                        }
+                    } else {
+                        boolean nok = true;
+                        flagtest: for (int i = 0; i < 32; i++) {
+                            if ((filter.get(i)) && (ientry.flags().get(i))) {nok = false; break flagtest;}
+                        }
+                        if (nok) continue loop;
+                    }
+                }
+                
+                // increase flag counts
+                for (int i = 0; i < 32; i++) {
+                    if (ientry.flags().get(i)) {c[i]++;}
+                }
+                
+                // load url
+                if (loadurl) {
+                    uentry = loadedURL.load(ientry.urlHash(), null);
+                    if (uentry == null) {
+                        mi.add(ientry.urlHash());
+                    } else {
+                        if (sortorder == 0) {
+                            tm.put(uentry.comp().url().toNormalform(false, true), new Item(ientry, uentry));
+                        }
+                        if (sortorder == 1) {
+                            tm.put(ientry.urlHash(), new Item(ientry, uentry));
+                        }
+                    }
+                } else {
+                    indexes.add(new Item(ientry, null));
+                }
+                if ((maxcount > 0) && (mi.size() + tm.size() > maxcount)) break loop;
+            }
+        }
+        if (loadurl) {
+            return new Finding(tm.values().iterator(), mi, tm.size(), c);
+        } else {
+            return new Finding(indexes.iterator(), mi, indexes.size(), c);
+        }
+    }
+    
+    public class Finding {
+        private Iterator items; // an iterator if Items objects
+        private Set misses; // a set of hashes where we did not found items
+        private int findcount;
+        private int[] flagcount;
+        public Finding(Iterator items, Set misses, int findcount, int[] flagcount) {
+            this.findcount = findcount;
+            this.items = items;
+            this.misses = misses;
+            this.flagcount = flagcount;
+        }
+        public int size() {
+            return this.findcount;
+        }
+        public Iterator hit() {
+            return this.items;
+        }
+        public Set miss() {
+            return this.misses;
+        }
+        public int[] flagcount() {
+            return this.flagcount;
+        }
+    }
+    
+    public class Item {
+        private indexRWIEntry ientry;
+        private indexURLEntry uentry;
+        public Item() {
+            ientry = null;
+            uentry = null;
+        }
+        public Item(indexRWIEntry ientry, indexURLEntry uentry) {
+            this.ientry = ientry;
+            this.uentry = uentry;
+        }
+        public boolean found() {
+            return (ientry != null) && (uentry != null);
+        }
+        public indexRWIEntry index() {
+            return this.ientry;
+        }
+        public indexURLEntry url() {
+            return this.uentry;
+        }
+    }
+    
     public int size() {
         return java.lang.Math.max(collections.size(), java.lang.Math.max(dhtInCache.size(), dhtOutCache.size()));
     }

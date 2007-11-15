@@ -1,0 +1,64 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <title>YaCy '#[clientname]#': Index Control</title>
+    #%env/templates/metas.template%#
+  </head>
+  <body id="IndexControl">
+    #%env/templates/header.template%#
+    #%env/templates/submenuIndexControl.template%#
+    <h2>Index Administration</h2>
+    <p>The local index currently contains #[ucount]# URL references</p>
+    <form action="IndexControlURLs_p.html" method="post" enctype="multipart/form-data">
+    <fieldset><legend>URL Retrieval</legend>
+      <dl>
+        <dt class="TableCellDark">Retrieve by URL:</dt>
+        <dd><input type="text" name="urlstring" value="#[urlstring]#" size="40" maxlength="250" />
+            <input type="submit" name="urlstringsearch" value="Show Details for URL" />
+        </dd>
+        
+        <dt class="TableCellDark">Rertieve by URL-Hash:</dt>
+        <dd><input type="text" name="urlhash" value="#[urlhash]#" size="40" maxlength="12" />
+            <input type="submit" name="urlhashsearch" value="Show Details for URL-Hash" />
+            <input type="submit" name="urlhashsimilar" value="Generate List" />
+        </dd>
+      </dl>
+    </fieldset>
+    </form>
+    
+	#(urlhashsimilar)#::Sequential List of URL-Hashes:<br />
+    #{rows}# 
+    #{cols}#<a href="/IndexControlURLs_p.html?urlhash=#[urlHash]#&amp;urlhashsearch=1" class="tt">#[urlHash]#</a> #{/cols}#<br />
+    #{/rows}# 
+    #(/urlhashsimilar)#
+    
+    #(genUrlProfile)#
+    ::No entry found for URL-hash #[urlhash]#
+    ::<table>
+		<tr><td class="small">URL String</td><td class="tt">#[urlNormalform]#</td></tr>
+		<tr><td class="small">Hash</td><td class="tt">#[urlhash]#</td></tr>
+		<tr><td class="small">Description</td><td class="tt">#[urlDescr]#</td></tr>
+		<tr><td class="small">Modified-Date</td><td class="tt">#[moddate]#</td></tr>
+		<tr><td class="small">Loaded-Date</td><td class="tt">#[loaddate]#</td></tr>
+		<tr><td class="small">Referrer</td><td class="tt">#[referrer]#</td></tr>
+		<tr><td class="small">Doctype</td><td class="tt">#[doctype]#</td></tr>
+		<tr><td class="small">Language</td><td class="tt">#[language]#</td></tr>
+		<tr><td class="small">Size</td><td class="tt">#[size]#</td></tr>
+		<tr><td class="small">Words</td><td class="tt">#[wordCount]#</td></tr>
+	</table><br />
+	<form action="IndexControlURLs_p.html" method="post" enctype="multipart/form-data">
+		<input type="hidden" name="keystring" value="" />
+		<input type="hidden" name="keyhash" value="" />
+		<input type="hidden" name="urlstring" value="" />
+		<input type="hidden" name="urlhash" value="#[urlhash]#" />
+		<input type="submit" value="Delete URL" name="urlhashdelete" /><br />
+		<span class="small">&nbsp;this may produce unresolved references at other word indexes but they do not harm</span><br /><br />
+		<input type="submit" value="Delete URL and remove all references from words" name="urlhashdeleteall" /><br />
+		<span class="small">&nbsp;delete the reference to this url at every other word where the reference exists (very extensive, but prevents unresolved references)</span><br />
+	</form>
+    #(/genUrlProfile)#
+    #[result]#
+    
+    #%env/templates/footer.template%#
+  </body>
+</html>
