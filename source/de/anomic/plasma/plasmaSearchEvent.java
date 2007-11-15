@@ -240,7 +240,7 @@ public final class plasmaSearchEvent {
         }
         
         // clean up events
-        cleanupEvents();
+        cleanupEvents(false);
         
         // store this search to a cache so it can be re-used
         lastEvents.put(query.id(), this);
@@ -299,13 +299,13 @@ public final class plasmaSearchEvent {
         }
     }
 
-    private static void cleanupEvents() {
+    public static void cleanupEvents(boolean all) {
         // remove old events in the event cache
         Iterator i = lastEvents.entrySet().iterator();
         plasmaSearchEvent cleanEvent;
         while (i.hasNext()) {
             cleanEvent = (plasmaSearchEvent) ((Map.Entry) i.next()).getValue();
-            if (cleanEvent.eventTime + eventLifetime < System.currentTimeMillis()) {
+            if ((all) || (cleanEvent.eventTime + eventLifetime < System.currentTimeMillis())) {
                 // execute deletion of failed words
                 Set removeWords = cleanEvent.query.queryHashes;
                 removeWords.addAll(cleanEvent.query.excludeHashes);

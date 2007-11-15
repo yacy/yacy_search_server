@@ -42,6 +42,7 @@ import de.anomic.index.indexRWIEntry;
 import de.anomic.index.indexURLEntry;
 import de.anomic.kelondro.kelondroBitfield;
 import de.anomic.plasma.plasmaCondenser;
+import de.anomic.plasma.plasmaSearchEvent;
 import de.anomic.plasma.plasmaSwitchboard;
 import de.anomic.plasma.plasmaWordIndex;
 import de.anomic.plasma.urlPattern.abstractURLPattern;
@@ -68,6 +69,9 @@ public class IndexControlRWIs_p {
         prop.put("searchresult", 0);
         prop.put("keyhashsimilar", 0);
         prop.put("genUrlList", 0);
+        
+        // clean up all search events
+        plasmaSearchEvent.cleanupEvents(true);
         
         if (post != null) {
             // default values
