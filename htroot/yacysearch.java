@@ -169,7 +169,7 @@ public class yacysearch {
 
         kelondroBitfield constraint = post.containsKey("constraint") ? new kelondroBitfield(4, post.get("constraint", "______")) : plasmaSearchQuery.catchall_constraint;
         if (indexof) {
-            constraint = new kelondroBitfield();
+            constraint = new kelondroBitfield(4);
             constraint.set(plasmaCondenser.flag_cat_indexof, true);
         }
         
@@ -225,7 +225,7 @@ public class yacysearch {
                     return prop;
                 }
                 final String recommendHash = post.get("recommendref", ""); // urlhash
-                indexURLEntry urlentry = sb.wordIndex.loadedURL.load(recommendHash, null);
+                indexURLEntry urlentry = sb.wordIndex.loadedURL.load(recommendHash, null, 0);
                 if (urlentry != null) {
                     indexURLEntry.Components comp = urlentry.comp();
                     plasmaParserDocument document;
@@ -266,7 +266,8 @@ public class yacysearch {
                     ((globalsearch) ? plasmaSearchQuery.SEARCHDOM_GLOBALDHT : plasmaSearchQuery.SEARCHDOM_LOCAL),
                     "",
                     20,
-                    constraint);
+                    constraint,
+                    false);
             plasmaSearchProcessing localTiming = new plasmaSearchProcessing(4 * theQuery.maximumTime / 10, theQuery.displayResults());
 
             String client = (String) header.get("CLIENTIP"); // the search client who initiated the search

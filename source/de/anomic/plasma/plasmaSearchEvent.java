@@ -205,22 +205,15 @@ public final class plasmaSearchEvent {
         } else {
             // prepare result vector directly without worker threads
             process.startTimer();
-            indexRWIEntry entry;
-            indexURLEntry page;
+            indexURLEntry uentry;
             ResultEntry resultEntry;
             synchronized (rankedCache) {
-                Iterator indexRWIEntryIterator = rankedCache.entries();
-                while ((indexRWIEntryIterator.hasNext()) && (resultList.size() < (query.neededResults()))) {
+                Iterator urlIterator = rankedCache.entries(wordIndex, true);
+                while ((urlIterator.hasNext()) && (resultList.size() < (query.neededResults()))) {
                     // fetch next entry
-                    entry = (indexRWIEntry) indexRWIEntryIterator.next();
-                    page = wordIndex.loadedURL.load(entry.urlHash(), entry);
+                    uentry = (indexURLEntry) urlIterator.next();
                 
-                    if (page == null) {
-                        registerFailure(entry.urlHash(), "url does not exist in lurl-db");
-                        continue;
-                    }
-                
-                    resultEntry = obtainResultEntry(page, (snippetComputationAllTime < 300) ? 1 : 0);
+                    resultEntry = obtainResultEntry(uentry, (snippetComputationAllTime < 300) ? 1 : 0);
                     if (resultEntry == null) continue; // the entry had some problems, cannot be used
                     urlRetrievalAllTime += resultEntry.dbRetrievalTime;
                     snippetComputationAllTime += resultEntry.snippetComputationTime;
@@ -581,7 +574,7 @@ public final class plasmaSearchEvent {
                     }
                 }
                 
-                indexURLEntry page = wordIndex.loadedURL.load(entry.urlHash(), entry);
+                indexURLEntry page = wordIndex.loadedURL.load(entry.urlHash(), entry, 0);
                 if (page == null) {
                     registerFailure(entry.urlHash(), "url does not exist in lurl-db");
                     continue;
@@ -609,7 +602,7 @@ public final class plasmaSearchEvent {
         
         private indexRWIEntry nextOrder() {
             synchronized (rankedCache) {
-                Iterator i = rankedCache.entries();
+                Iterator i = rankedCache.entries(null, false);
                 indexRWIEntry entry;
                 String urlhash;
                 while (i.hasNext()) {

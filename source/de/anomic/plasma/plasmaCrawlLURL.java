@@ -153,7 +153,7 @@ public final class plasmaCrawlLURL {
         return 0;
     }
 
-    public synchronized indexURLEntry load(String urlHash, indexRWIEntry searchedWord) {
+    public synchronized indexURLEntry load(String urlHash, indexRWIEntry searchedWord, long ranking) {
         // generates an plasmaLURLEntry using the url hash
         // to speed up the access, the url-hashes are buffered
         // in the hash cache.
@@ -165,7 +165,7 @@ public final class plasmaCrawlLURL {
         try {
             kelondroRow.Entry entry = urlIndexFile.get(urlHash.getBytes());
             if (entry == null) return null;
-            return new indexURLEntry(entry, searchedWord);
+            return new indexURLEntry(entry, searchedWord, ranking);
         } catch (IOException e) {
             return null;
         }
@@ -176,7 +176,7 @@ public final class plasmaCrawlLURL {
         indexURLEntry oldEntry;
         try {
             if (exists(entry.hash())) {
-                oldEntry = load(entry.hash(), null);
+                oldEntry = load(entry.hash(), null, 0);
             } else {
                 oldEntry = null;
             }
@@ -342,7 +342,7 @@ public final class plasmaCrawlLURL {
             if (this.iter == null) { return null; }
             if (this.iter.hasNext()) { e = (kelondroRow.Entry) this.iter.next(); }
             if (e == null) { return null; }
-            return new indexURLEntry(e, null);
+            return new indexURLEntry(e, null, 0);
         }
 
         public final void remove() {

@@ -167,7 +167,7 @@ public class CrawlResults {
                 urlHash = sb.wordIndex.loadedURL.getUrlHash(tabletype, i);
 //              serverLog.logFinest("PLASMA", "plasmaCrawlLURL/genTableProps urlHash=" + urlHash);
                 try {
-                    urle = sb.wordIndex.loadedURL.load(urlHash, null);
+                    urle = sb.wordIndex.loadedURL.load(urlHash, null, 0);
                     indexURLEntry.Components comp = urle.comp();
 //                  serverLog.logFinest("PLASMA", "plasmaCrawlLURL/genTableProps urle=" + urle.toString());
                     initiatorSeed = yacyCore.seedDB.getConnected(initiatorHash);

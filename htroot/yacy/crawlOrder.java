@@ -261,7 +261,7 @@ public final class crawlOrder {
             reason = reasonString;
             // send lurl-Entry as response
             indexURLEntry entry;
-            entry = switchboard.wordIndex.loadedURL.load(url.hash(), null);
+            entry = switchboard.wordIndex.loadedURL.load(url.hash(), null, 0);
             if (entry == null) {
                 response = "rejected";
                 lurl = "";

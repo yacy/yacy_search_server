@@ -328,7 +328,7 @@ public class plasmaSwitchboardQueue {
         public yacyURL referrerURL() {
             if (referrerURL == null) {
                 if ((referrerHash == null) || (referrerHash.equals(yacyURL.dummyHash))) return null;
-                indexURLEntry entry = lurls.load(referrerHash, null);
+                indexURLEntry entry = lurls.load(referrerHash, null, 0);
                 if (entry == null) referrerURL = null; else referrerURL = entry.comp().url();
             }
             return referrerURL;

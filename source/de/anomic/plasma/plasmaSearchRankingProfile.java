@@ -64,6 +64,7 @@ public class plasmaSearchRankingProfile {
     public static final String HITCOUNT      = "hitcount";
     public static final String POSINTEXT     = "posintext";
     public static final String POSOFPHRASE   = "posofphrase";
+    public static final String POSINPHRASE   = "posinphrase";
     public static final String WORDDISTANCE  = "worddistance";
     public static final String APPURL        = "appurl";
     public static final String APPDESCR      = "appdescr";
@@ -154,6 +155,7 @@ public class plasmaSearchRankingProfile {
             coeff_hitcount           = parseMap(coeff, HITCOUNT, coeff_hitcount);
             coeff_posintext          = parseMap(coeff, POSINTEXT, coeff_posintext);
             coeff_posofphrase        = parseMap(coeff, POSOFPHRASE, coeff_posofphrase);
+            coeff_posinphrase        = parseMap(coeff, POSINPHRASE, coeff_posinphrase);
             coeff_worddistance       = parseMap(coeff, WORDDISTANCE, coeff_worddistance);
             coeff_appurl             = parseMap(coeff, APPURL, coeff_appurl);
             coeff_appdescr           = parseMap(coeff, APPDESCR, coeff_appdescr);
@@ -207,6 +209,7 @@ public class plasmaSearchRankingProfile {
         ext.put(prefix + HITCOUNT, Integer.toString(coeff_hitcount));
         ext.put(prefix + POSINTEXT, Integer.toString(coeff_posintext));
         ext.put(prefix + POSOFPHRASE, Integer.toString(coeff_posofphrase));
+        ext.put(prefix + POSINPHRASE, Integer.toString(coeff_posinphrase));
         ext.put(prefix + WORDDISTANCE, Integer.toString(coeff_worddistance));
         ext.put(prefix + APPURL, Integer.toString(coeff_appurl));
         ext.put(prefix + APPDESCR, Integer.toString(coeff_appdescr));

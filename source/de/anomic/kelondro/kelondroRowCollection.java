@@ -413,6 +413,7 @@ public class kelondroRowCollection {
         if (this.chunkcount < isortlimit) {
             isort(0, this.chunkcount, new byte[this.rowdef.objectsize]);
             this.sortBound = this.chunkcount;
+            assert this.isSorted();
             return;
         }
         byte[] swapspace = new byte[this.rowdef.objectsize];
@@ -555,6 +556,7 @@ public class kelondroRowCollection {
     public synchronized boolean isSorted() {
         assert (this.rowdef.objectOrder != null);
         if (chunkcount <= 1) return true;
+        if (chunkcount != this.sortBound) return false;
         for (int i = 0; i < chunkcount - 1; i++) {
         	//System.out.println("*" + new String(get(i).getColBytes(0)));
         	if (compare(i, i + 1) > 0) {

@@ -85,28 +85,57 @@ public final class plasmaSearchQuery {
     public int domMaxTargets;
     public int maxDistance;
     public kelondroBitfield constraint;
+    public boolean allofconstraint;
     public boolean onlineSnippetFetch;
 
-    public plasmaSearchQuery(String queryString, TreeSet queryHashes, TreeSet excludeHashes, int maxDistance, String prefer, int contentdom,
-                             boolean onlineSnippetFetch,
-                             int lines, int offset, long maximumTime, String urlMask,
-                             int domType, String domGroupName, int domMaxTargets,
-                             kelondroBitfield constraint) {
-        this.queryString = queryString;
-        this.queryHashes = queryHashes;
-        this.excludeHashes = excludeHashes;
-        this.maxDistance = maxDistance;
-        this.prefer = prefer;
-        this.contentdom = contentdom;
+    public plasmaSearchQuery(String queryString, int lines, kelondroBitfield constraint) {
+    	if ((queryString.length() == 12) && (kelondroBase64Order.enhancedCoder.wellformed(queryString.getBytes()))) {
+    		this.queryString = null;
+            this.queryHashes = new TreeSet();
+            this.excludeHashes = new TreeSet();
+            this.queryHashes.add(queryString);
+    	} else {
+    		this.queryString = queryString;
+    		TreeSet[] cq = cleanQuery(queryString);
+    		this.queryHashes = plasmaCondenser.words2hashes(cq[0]);
+    		this.excludeHashes = plasmaCondenser.words2hashes(cq[1]);
+    	}
+        this.maxDistance = Integer.MAX_VALUE;
+        this.prefer = "";
+        this.contentdom = CONTENTDOM_ALL;
         this.linesPerPage = lines;
-        this.offset = offset;
-        this.maximumTime = maximumTime;
-        this.urlMask = urlMask;
-        this.domType = domType;
-        this.domGroupName = domGroupName;
-        this.domMaxTargets = domMaxTargets;
+        this.offset = 0;
+        this.maximumTime = 10000;
+        this.urlMask = ".*";
+        this.domType = SEARCHDOM_LOCAL;
+        this.domGroupName = "";
+        this.domMaxTargets = 0;
         this.constraint = constraint;
-        this.onlineSnippetFetch = onlineSnippetFetch;
+        this.allofconstraint = false;
+        this.onlineSnippetFetch = false;
+    }
+    
+public plasmaSearchQuery(String queryString, TreeSet queryHashes, TreeSet excludeHashes, int maxDistance, String prefer, int contentdom,
+        boolean onlineSnippetFetch,
+        int lines, int offset, long maximumTime, String urlMask,
+        int domType, String domGroupName, int domMaxTargets,
+        kelondroBitfield constraint, boolean allofconstraint) {
+		this.queryString = queryString;
+		this.queryHashes = queryHashes;
+		this.excludeHashes = excludeHashes;
+		this.maxDistance = maxDistance;
+		this.prefer = prefer;
+		this.contentdom = contentdom;
+		this.linesPerPage = lines;
+		this.offset = offset;
+		this.maximumTime = maximumTime;
+		this.urlMask = urlMask;
+		this.domType = domType;
+		this.domGroupName = domGroupName;
+		this.domMaxTargets = domMaxTargets;
+		this.constraint = constraint;
+		this.allofconstraint = allofconstraint;
+		this.onlineSnippetFetch = onlineSnippetFetch;
     }
     
     public int neededResults() {

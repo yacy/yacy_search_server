@@ -30,6 +30,7 @@ import java.util.Iterator;
 import java.util.Map;
 
 import de.anomic.http.httpHeader;
+import de.anomic.plasma.plasmaSearchEvent;
 import de.anomic.plasma.plasmaSearchQuery;
 import de.anomic.plasma.plasmaSearchRankingProfile;
 import de.anomic.plasma.plasmaSwitchboard;
@@ -63,6 +64,7 @@ public class Ranking_p {
 		rankingParameters.put(plasmaSearchRankingProfile.PHRASESINTEXT, "Phrases In Text");
 		rankingParameters.put(plasmaSearchRankingProfile.POSINTEXT, "Position In Text");
 		rankingParameters.put(plasmaSearchRankingProfile.POSOFPHRASE, "Position Of Phrase");
+		rankingParameters.put(plasmaSearchRankingProfile.POSINPHRASE, "Position In Phrase");
 		rankingParameters.put(plasmaSearchRankingProfile.PREFER, "Application Of Prefer Pattern");
 		rankingParameters.put(plasmaSearchRankingProfile.URLCOMPINTOPLIST, "URL Component Appears In Toplist");
 		rankingParameters.put(plasmaSearchRankingProfile.URLCOMPS, "URL Components");
@@ -127,6 +129,9 @@ public class Ranking_p {
     public static serverObjects respond(httpHeader header, serverObjects post, serverSwitch env) {
         final plasmaSwitchboard sb = (plasmaSwitchboard) env;
 
+        // clean up all search events
+        plasmaSearchEvent.cleanupEvents(true);
+        
         // case if no values are requested
         if ((post == null) || (env == null)) {
             // we create empty entries for template strings

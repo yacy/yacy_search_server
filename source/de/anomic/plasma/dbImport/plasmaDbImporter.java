@@ -193,7 +193,7 @@ public class plasmaDbImporter extends AbstractImporter implements dbImporter {
                             // we need to import the url
 
                             // getting the url entry
-                            indexURLEntry urlEntry = this.importWordIndex.loadedURL.load(urlHash, null);
+                            indexURLEntry urlEntry = this.importWordIndex.loadedURL.load(urlHash, null, 0);
                             if (urlEntry != null) {
 
                                 /* write it into the home url db */

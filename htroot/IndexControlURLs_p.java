@@ -76,7 +76,7 @@ public class IndexControlURLs_p {
         }
 
         if (post.containsKey("urlhashdelete")) {
-            indexURLEntry entry = sb.wordIndex.loadedURL.load(urlhash, null);
+            indexURLEntry entry = sb.wordIndex.loadedURL.load(urlhash, null, 0);
             if (entry == null) {
                 prop.put("result", "No Entry for URL hash " + urlhash + "; nothing deleted.");
             } else {
@@ -106,7 +106,7 @@ public class IndexControlURLs_p {
                 yacyURL url = new yacyURL(urlstring, null);
                 urlhash = url.hash();
                 prop.put("urlhash", urlhash);
-                indexURLEntry entry = sb.wordIndex.loadedURL.load(urlhash, null);
+                indexURLEntry entry = sb.wordIndex.loadedURL.load(urlhash, null, 0);
                 if (entry == null) {
                     prop.putHTML("urlstring", "unknown url: " + urlstring);
                     prop.put("urlhash", "");
@@ -120,7 +120,7 @@ public class IndexControlURLs_p {
         }
 
         if (post.containsKey("urlhashsearch")) {
-            indexURLEntry entry = sb.wordIndex.loadedURL.load(urlhash, null);
+            indexURLEntry entry = sb.wordIndex.loadedURL.load(urlhash, null, 0);
             if (entry == null) {
                 prop.put("result", "No Entry for URL hash " + urlhash);
             } else {
@@ -172,7 +172,7 @@ public class IndexControlURLs_p {
         }
         indexURLEntry.Components comp = entry.comp();
         String referrer = null;
-        indexURLEntry le = (entry.referrerHash() == null) ? null : switchboard.wordIndex.loadedURL.load(entry.referrerHash(), null);
+        indexURLEntry le = (entry.referrerHash() == null) ? null : switchboard.wordIndex.loadedURL.load(entry.referrerHash(), null, 0);
         if (le == null) {
             referrer = "<unknown>";
         } else {

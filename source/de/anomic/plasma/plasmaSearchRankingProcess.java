@@ -61,6 +61,7 @@ public final class plasmaSearchRankingProcess {
     private int globalcount;
     private HashMap urlhashes; // map for double-check; String/Long relation, addresses ranking number (backreference for deletion)
     private kelondroMScoreCluster ref;  // reference score computation for the commonSense heuristic
+    private int[] c; // flag counter
     
     public plasmaSearchRankingProcess(plasmaSearchQuery query, plasmaSearchProcessing process, plasmaSearchRankingProfile ranking, int maxentries) {
         // we collect the urlhashes and construct a list with urlEntry objects
@@ -74,6 +75,8 @@ public final class plasmaSearchRankingProcess {
         this.globalcount = 0;
         this.urlhashes = new HashMap();
         this.ref = new kelondroMScoreCluster();
+        c = new int[32];
+        for (int i = 0; i < 32; i++) {c[i] = 0;}
     }
     
     public void insert(indexContainer container, boolean local) {
@@ -83,12 +86,12 @@ public final class plasmaSearchRankingProcess {
         assert (container != null);
         if (container.size() == 0) return;
         
-        process.startTimer();
+        if (process != null) process.startTimer();
         if (this.order == null) {
             this.order = new indexRWIEntryOrder(ranking);
         }
         this.order.extend(container);
-        process.yield("normalizing", container.size());
+        if (process != null) process.yield("normalizing", container.size());
         
         /*
         container.setOrdering(o, 0);
@@ -96,7 +99,7 @@ public final class plasmaSearchRankingProcess {
         */
         
         // normalize entries and get ranking
-        process.startTimer();
+        if (process != null) process.startTimer();
         Iterator i = container.entries();
         this.pageAcc = new TreeMap();
         indexRWIEntry iEntry, l;
@@ -106,9 +109,15 @@ public final class plasmaSearchRankingProcess {
         while (i.hasNext()) {
             iEntry = (indexRWIEntry) i.next();
             if (iEntry.urlHash().length() != container.row().primaryKeyLength) continue;
+
+            // increase flag counts
+            for (int j = 0; j < 32; j++) {
+                if (iEntry.flags().get(j)) {c[j]++;}
+            }
             
+            // kick out entries that are too bad acording to current findings
             r = new Long(order.cardinal(iEntry));
-            if ((pageAcc.size() >= maxentries) && (r.longValue() > biggestEntry)) continue;
+            if ((maxentries >= 0) && (pageAcc.size() >= maxentries) && (r.longValue() > biggestEntry)) continue;
                         
             // check constraints
             if ((!(query.constraint.equals(plasmaSearchQuery.catchall_constraint))) && (!(iEntry.flags().allOf(query.constraint)))) continue; // filter out entries that do not match the search constraint
@@ -118,7 +127,7 @@ public final class plasmaSearchRankingProcess {
                 if ((query.contentdom == plasmaSearchQuery.CONTENTDOM_IMAGE) && (!(iEntry.flags().get(plasmaCondenser.flag_cat_hasimage)))) continue;
                 if ((query.contentdom == plasmaSearchQuery.CONTENTDOM_APP  ) && (!(iEntry.flags().get(plasmaCondenser.flag_cat_hasapp  )))) continue;
             }
-            if (pageAcc.size() < maxentries) {
+            if ((maxentries < 0) || (pageAcc.size() < maxentries)) {
                 if (urlhashes.containsKey(iEntry.urlHash())) continue;
                 while (pageAcc.containsKey(r)) r = new Long(r.longValue() + 1);
                 pageAcc.put(r, iEntry);
@@ -145,12 +154,47 @@ public final class plasmaSearchRankingProcess {
         
         if (container.size() > query.neededResults()) remove(true, true);
 
-        process.yield(plasmaSearchProcessing.PRESORT, container.size());
+        if (process != null) process.yield(plasmaSearchProcessing.PRESORT, container.size());
+    }
+    
+    public class rIterator implements Iterator {
+
+    	boolean urls;
+    	Iterator r;
+    	plasmaWordIndex wi;
+    	public rIterator(plasmaWordIndex wi, boolean fetchURLs) {
+    		// if fetchURLs == true, this iterates indexURLEntry objects, otherwise it iterates indexRWIEntry objects
+    		this.urls = fetchURLs;
+    		this.r = pageAcc.entrySet().iterator();
+    		this.wi = wi;
+    	}
+    	
+		public boolean hasNext() {
+			return r.hasNext();
+		}
+
+		public Object next() {
+			Map.Entry entry = (Map.Entry) r.next();
+			indexRWIEntry ientry = (indexRWIEntry) entry.getValue();
+			if (urls) {
+				return wi.loadedURL.load(ientry.urlHash(), ientry, ((Long) entry.getKey()).longValue());
+			} else {
+				return ientry;
+			}
+		}
+
+		public void remove() {
+			throw new UnsupportedOperationException();
+		}
     }
     
     public int size() {
         assert pageAcc.size() == urlhashes.size();
         return pageAcc.size();
+    }
+    
+    public int[] flagCount() {
+    	return c;
     }
     
     public int filteredCount() {
@@ -170,9 +214,9 @@ public final class plasmaSearchRankingProcess {
         return iEntry;
     }
 
-    public Iterator entries() {
-        // returns an iterator of indexRWIEntry objects in the ranked order, best entry first
-        return this.pageAcc.values().iterator();
+    public Iterator entries(plasmaWordIndex wi, boolean fetchURLs) {
+    	// if fetchURLs == true, this iterates indexURLEntry objects, otherwise it iterates indexRWIEntry objects
+        return new rIterator(wi, fetchURLs);
     }
     
     public Set getReferences(int count) {

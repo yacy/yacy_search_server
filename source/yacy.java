@@ -630,7 +630,7 @@ public final class yacy {
                         iEntry = (indexRWIEntry) wordIdxEntries.next();
                         String urlHash = iEntry.urlHash();                    
                         if ((currentUrlDB.exists(urlHash)) && (!minimizedUrlDB.exists(urlHash))) try {
-                            indexURLEntry urlEntry = currentUrlDB.load(urlHash, null);                       
+                            indexURLEntry urlEntry = currentUrlDB.load(urlHash, null, 0);                       
                             urlCounter++;
                             minimizedUrlDB.store(urlEntry);
                             if (urlCounter % 500 == 0) {

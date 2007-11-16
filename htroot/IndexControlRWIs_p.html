@@ -92,9 +92,9 @@
             <input type="radio" name="lines" value="1000" />1000&nbsp;&nbsp;
         </dd>
         <dt class="TableCellDark">Ordering of list:</dt>
-        <dd><input type="radio" name="ordering" value="0" checked="checked" />by URL&nbsp;&nbsp;
+        <dd><input type="radio" name="ordering" value="2" checked="checked"  />by Ranking&nbsp;&nbsp;
+            <input type="radio" name="ordering" value="0"/>by URL&nbsp;&nbsp;
             <input type="radio" name="ordering" value="1" />by URL Hash&nbsp;&nbsp;
-            <!-- <input type="radio" name="ordering" value="2" />by Ranking&nbsp;&nbsp;-->
         </dd>
         <dt class="TableCellLight"></dt>
         <dd><input type="submit" name="urllist" value="List Selected URLs" />
@@ -134,30 +134,61 @@
     <form action="IndexControlRWIs_p.html" method="post" enctype="multipart/form-data">
       <p>
       <table border="0" cellpadding="2" cellspacing="1">
-      <tr class="TableHeader"><td>&nbsp;</td><td>hash</td><td>url</td><td>pos</td><td>phrase</td><td>urlcomps</td><td>urllength</td><td width="60%">props</td></tr>
+      <tr class="TableHeader">
+        <td colspan="3">Resource</td>
+        <td colspan="8">Negative Ranking Factors</td>
+        <td colspan="7">Positive Ranking Factors</td>
+        <td rowspan="2">Reverse Normalized Weighted Ranking Sum</td>
+      </tr>
+      <tr class="TableHeader">
+        <td>&nbsp;</td>
+        <td>hash</td>
+        <td>url</td>
+        <td>dom length</td>
+        <td>ybr</td>
+        <td>url comps</td>
+        <td>url length</td>
+        <td>pos in text</td>
+        <td>pos of phrase</td>
+        <td>pos in phrase</td>
+        <td>word distance</td>
+        <td>date</td>
+        <td>words in title</td>
+        <td>words in text</td>
+        <td>local links</td>
+        <td>remote links</td>
+        <td>hitcount</td>
+        <td>props</td>
+        <td></td>
+      </tr>
       #{urlList}#
       <tr class="TableCellLight">
       #(urlExists)#
-        <td><input type="checkbox" id="urlhx.#[urlhxCount]#" name="urlhx.#[urlhxCount]#" checked value="#[urlhxValue]#" align="top" />
+        <td class="TableCellDark"><input type="checkbox" id="urlhx.#[urlhxCount]#" name="urlhx.#[urlhxCount]#" checked value="#[urlhxValue]#" align="top" />
             <label for="urlhx.#[urlhxCount]#" class="tt">#[urlhxValue]#</label></td>
         <td>&lt;unresolved URL Hash&gt;</td>
-        <td></td>
-        <td></td>
-        <td></td>
-        <td></td>
-        <td></td>
-        <td></td>
-        </span>
+        <td colspan="15"></td>
         ::
         <td><input type="checkbox" id="urlhx.#[urlhxCount]#" name="urlhx.#[urlhxCount]#" #(urlhxChecked)#::checked="checked" #(/urlhxChecked)#value="#[urlhxValue]#" align="top" />
             <label for="urlhx.#[urlhxCount]#" class="tt"></label></td>
         <td><a href="/IndexControlURLs_p.html?keystring=#[keyString]#&amp;keyhash=#[keyHash]#&amp;urlhash=#[urlhxValue]#&amp;urlstringsearch=&amp;urlstring=#[urlString]#" class="tt">#[urlhxValue]#</a></td>
         <td><a href="#[urlString]#">#[urlStringShort]#</a></td>
-        <td>#[pos]#</td>
-        <td>#[phrase]#</td>
-        <td>#[urlcomps]#</td>
-        <td>#[urllength]#</td>
+        <td class="TableCellDark">#[domlength]#</td>
+        <td class="TableCellDark">#[ybr]#</td>
+        <td class="TableCellDark">#[urlcomps]#</td>
+        <td class="TableCellDark">#[urllength]#</td>
+        <td class="TableCellDark">#[pos]#</td>
+        <td class="TableCellDark">#[phrase]#</td>
+        <td class="TableCellDark">#[posinphrase]#</td>
+        <td class="TableCellDark">#[worddistance]#</td>
+        <td>#[date]#</td>
+        <td>#[wordsintitle]#</td>
+        <td>#[wordsintext]#</td>
+        <td>#[llocal]#</td>
+        <td>#[lother]#</td>
+        <td>#[hitcount]#</td>
         <td>#[props]#</td>
+        <td align="right" class="TableCellDark">#[ranking]#</td>
       #(/urlExists)#
       </tr>
       #{/urlList}#

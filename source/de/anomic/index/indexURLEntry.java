@@ -117,7 +117,8 @@ public class indexURLEntry {
     private kelondroRow.Entry entry;
     private String snippet;
     private indexRWIEntry word; // this is only used if the url is transported via remote search requests
-
+    private long ranking; // during generation of a search result this value is set
+    
     public indexURLEntry(
             yacyURL url,
             String descr,
@@ -163,6 +164,7 @@ public class indexURLEntry {
         //System.out.println("===DEBUG=== " + load.toString() + ", " + decodeDate(col_load).toString());
         this.snippet = null;
         this.word = null;
+        this.ranking = 0;
     }
 
     private void encodeDate(int col, Date d) {
@@ -184,10 +186,11 @@ public class indexURLEntry {
         return s.toString().getBytes();
     }
     
-    public indexURLEntry(kelondroRow.Entry entry, indexRWIEntry searchedWord) {
+    public indexURLEntry(kelondroRow.Entry entry, indexRWIEntry searchedWord, long ranking) {
         this.entry = entry;
         this.snippet = null;
         this.word = searchedWord;
+        this.ranking = ranking;
     }
 
     public indexURLEntry(Properties prop){
@@ -243,6 +246,7 @@ public class indexURLEntry {
         if (prop.containsKey("wi")) {
             this.word = new indexRWIRowEntry(kelondroBase64Order.enhancedCoder.decodeString(prop.getProperty("wi", "")));
         }
+        this.ranking = 0;
     }
 
     private StringBuffer corePropList() {
@@ -301,6 +305,10 @@ public class indexURLEntry {
         return this.entry.getColString(col_hash, null);
     }
 
+    public long ranking() {
+    	return this.ranking;
+    }
+    
     public indexURLEntry.Components comp() {
         ArrayList cl = nxTools.strings(this.entry.getCol("comp", null), "UTF-8");
         return new indexURLEntry.Components(

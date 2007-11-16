@@ -286,7 +286,7 @@ public class SitemapParser extends DefaultHandler {
 				String dbocc = this.switchboard.urlExists(nexturlhash);
 				if ((dbocc != null) && (dbocc.equalsIgnoreCase("loaded"))) {
 					// the url was already loaded. we need to check the date
-					indexURLEntry oldEntry = this.switchboard.wordIndex.loadedURL.load(nexturlhash, null);
+					indexURLEntry oldEntry = this.switchboard.wordIndex.loadedURL.load(nexturlhash, null, 0);
 					if (oldEntry != null) {
 						Date modDate = oldEntry.moddate();
 						// check if modDate is null

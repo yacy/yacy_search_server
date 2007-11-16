@@ -1499,7 +1499,7 @@ public final class plasmaSwitchboard extends serverAbstractSwitch implements ser
         if (urlhash.equals(yacyURL.dummyHash)) return null;
         yacyURL ne = crawlQueues.getURL(urlhash);
         if (ne != null) return ne;
-        indexURLEntry le = wordIndex.loadedURL.load(urlhash, null);
+        indexURLEntry le = wordIndex.loadedURL.load(urlhash, null, 0);
         if (le != null) return le.comp().url();
         return null;
     }
@@ -2541,7 +2541,7 @@ public final class plasmaSwitchboard extends serverAbstractSwitch implements ser
         // finally, delete the url entry
         
         // determine the url string
-        indexURLEntry entry = wordIndex.loadedURL.load(urlhash, null);
+        indexURLEntry entry = wordIndex.loadedURL.load(urlhash, null, 0);
         if (entry == null) return 0;
         indexURLEntry.Components comp = entry.comp();
         if (comp.url() == null) return 0;

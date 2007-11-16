@@ -991,10 +991,11 @@ public class yacyURL {
         return kelondroBase64Order.enhancedCoder.encode(serverCodings.encodeMD5Raw(subdom + ":" + port + ":" + rootpath)).charAt(0);
     }
 
-    private static final char rootURLFlag = subdomPortPath("www", 80, "");
+    private static final char rootURLFlag0 = subdomPortPath("", 80, "");
+    private static final char rootURLFlag1 = subdomPortPath("www", 80, "");
 
     public static final boolean probablyRootURL(String urlHash) {
-        return (urlHash.charAt(5) == rootURLFlag);
+        return (urlHash.charAt(5) == rootURLFlag0) || (urlHash.charAt(5) == rootURLFlag1);
     }
 
     private static String protocolHostPort(String protocol, String host, int port) {

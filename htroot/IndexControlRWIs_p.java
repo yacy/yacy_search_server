@@ -30,6 +30,7 @@ import java.io.FileWriter;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.net.MalformedURLException;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
@@ -43,10 +44,13 @@ import de.anomic.index.indexURLEntry;
 import de.anomic.kelondro.kelondroBitfield;
 import de.anomic.plasma.plasmaCondenser;
 import de.anomic.plasma.plasmaSearchEvent;
+import de.anomic.plasma.plasmaSearchQuery;
+import de.anomic.plasma.plasmaSearchRankingProcess;
 import de.anomic.plasma.plasmaSwitchboard;
 import de.anomic.plasma.plasmaWordIndex;
 import de.anomic.plasma.urlPattern.abstractURLPattern;
 import de.anomic.plasma.urlPattern.plasmaURLPattern;
+import de.anomic.server.serverDate;
 import de.anomic.server.serverObjects;
 import de.anomic.server.serverSwitch;
 import de.anomic.yacy.yacyClient;
@@ -198,7 +202,7 @@ public class IndexControlRWIs_p {
                 indexURLEntry lurl;
                 while (urlIter.hasNext()) {
                     iEntry = (indexRWIEntry) urlIter.next();
-                    lurl = sb.wordIndex.loadedURL.load(iEntry.urlHash(), null);
+                    lurl = sb.wordIndex.loadedURL.load(iEntry.urlHash(), null, 0);
                     if (lurl == null) {
                         unknownURLEntries.add(iEntry.urlHash());
                         urlIter.remove();
@@ -255,7 +259,7 @@ public class IndexControlRWIs_p {
                         yacyURL url;
                         for (int i=0; i<urlx.length; i++) {
                             urlHashes.add(urlx[i]);
-                            indexURLEntry e = sb.wordIndex.loadedURL.load(urlx[i], null);
+                            indexURLEntry e = sb.wordIndex.loadedURL.load(urlx[i], null, 0);
                             sb.wordIndex.loadedURL.remove(urlx[i]);
                             if (e != null) {
                                 url = e.comp().url();
@@ -283,7 +287,7 @@ public class IndexControlRWIs_p {
                         yacyURL url;
                         for (int i=0; i<urlx.length; i++) {
                             urlHashes.add(urlx[i]);
-                            indexURLEntry e = sb.wordIndex.loadedURL.load(urlx[i], null);
+                            indexURLEntry e = sb.wordIndex.loadedURL.load(urlx[i], null, 0);
                             sb.wordIndex.loadedURL.remove(urlx[i]);
                             if (e != null) {
                                 url = e.comp().url();
@@ -357,7 +361,7 @@ public class IndexControlRWIs_p {
     }
 
     private static plasmaWordIndex.Finding genSearchresult(serverObjects prop, plasmaSwitchboard sb, String keyhash, kelondroBitfield filter, boolean urlfetch, int sortorder) {
-        final plasmaWordIndex.Finding finding = sb.wordIndex.retrieveURLs(keyhash, filter, false, -1, urlfetch, sortorder);
+        final plasmaWordIndex.Finding finding = sb.wordIndex.retrieveURLs(new plasmaSearchQuery(keyhash, -1, filter), urlfetch, sortorder, sb.getRanking());
         if (finding.size() == 0) {
             prop.put("searchresult", 2);
             prop.put("searchresult_wordhash", keyhash);
@@ -395,37 +399,53 @@ public class IndexControlRWIs_p {
             prop.put("genUrlList_ordering", ordering);
             int i = 0;
             yacyURL url;
-            Iterator iter = finding.hit();
-            plasmaWordIndex.Item entry;
+            Iterator iter = finding.urls();
+            indexURLEntry entry;
             String us;
+            long rn = -1;
             while (iter.hasNext()) {
-                entry = (plasmaWordIndex.Item) iter.next();
-                us = entry.url().comp().url().toNormalform(false, false);
+                entry = (indexURLEntry) iter.next();
+                us = entry.comp().url().toNormalform(false, false);
+                if (rn == -1) rn = entry.ranking();
                 prop.put("genUrlList_urlList_"+i+"_urlExists", "1");
                 prop.put("genUrlList_urlList_"+i+"_urlExists_urlhxCount", i);
-                prop.putHTML("genUrlList_urlList_"+i+"_urlExists_urlhxValue", entry.index().urlHash());
+                prop.putHTML("genUrlList_urlList_"+i+"_urlExists_urlhxValue", entry.word().urlHash());
                 prop.putHTML("genUrlList_urlList_"+i+"_urlExists_keyString", keystring);
                 prop.put("genUrlList_urlList_"+i+"_urlExists_keyHash", keyhash);
                 prop.putHTML("genUrlList_urlList_"+i+"_urlExists_urlString", us);
-                prop.putHTML("genUrlList_urlList_"+i+"_urlExists_urlStringShort", (us.length() > 60) ? (us.substring(0, 60) + "...") : us);
-                prop.put("genUrlList_urlList_"+i+"_urlExists_pos", entry.index().posintext());
-                prop.put("genUrlList_urlList_"+i+"_urlExists_phrase", entry.index().posofphrase());
-                prop.put("genUrlList_urlList_"+i+"_urlExists_urlcomps", entry.index().urlcomps());
-                prop.put("genUrlList_urlList_"+i+"_urlExists_urllength", entry.index().urllength());
+                prop.put("genUrlList_urlList_"+i+"_urlExists_urlStringShort", (us.length() > 40) ? (us.substring(0, 20) + "<br>" + us.substring(20,  40) + "...") : ((us.length() > 30) ? (us.substring(0, 20) + "<br>" + us.substring(20)) : us));
+                prop.putNum("genUrlList_urlList_"+i+"_urlExists_ranking", (entry.ranking() - rn));
+                prop.put("genUrlList_urlList_"+i+"_urlExists_domlength", yacyURL.domLengthEstimation(entry.hash()));
+                prop.put("genUrlList_urlList_"+i+"_urlExists_ybr", plasmaSearchRankingProcess.ybr(entry.hash()));
+                prop.put("genUrlList_urlList_"+i+"_urlExists_date", serverDate.shortDayTime(new Date(entry.word().lastModified())));
+                prop.put("genUrlList_urlList_"+i+"_urlExists_wordsintitle", entry.word().wordsintitle());
+                prop.put("genUrlList_urlList_"+i+"_urlExists_wordsintext", entry.word().wordsintext());
+                prop.put("genUrlList_urlList_"+i+"_urlExists_phrasesintext", entry.word().phrasesintext());
+                prop.put("genUrlList_urlList_"+i+"_urlExists_llocal", entry.word().llocal());
+                prop.put("genUrlList_urlList_"+i+"_urlExists_lother", entry.word().lother());
+                prop.put("genUrlList_urlList_"+i+"_urlExists_hitcount", entry.word().hitcount());
+                prop.put("genUrlList_urlList_"+i+"_urlExists_worddistance", entry.word().worddistance());
+                prop.put("genUrlList_urlList_"+i+"_urlExists_pos", entry.word().posintext());
+                prop.put("genUrlList_urlList_"+i+"_urlExists_phrase", entry.word().posofphrase());
+                prop.put("genUrlList_urlList_"+i+"_urlExists_posinphrase", entry.word().posinphrase());
+                prop.put("genUrlList_urlList_"+i+"_urlExists_urlcomps", entry.word().urlcomps());
+                prop.put("genUrlList_urlList_"+i+"_urlExists_urllength", entry.word().urllength());
                 prop.put("genUrlList_urlList_"+i+"_urlExists_props",
-                        ((entry.index().flags().get(plasmaCondenser.flag_cat_hasimage)) ? "contains images, " : "") +
-                        ((entry.index().flags().get(plasmaCondenser.flag_cat_hasaudio)) ? "contains audio, " : "") +
-                        ((entry.index().flags().get(plasmaCondenser.flag_cat_hasvideo)) ? "contains video, " : "") +
-                        ((entry.index().flags().get(plasmaCondenser.flag_cat_hasapp)) ? "contains applications, " : "") +
-                        ((entry.index().flags().get(indexRWIEntry.flag_app_url)) ? "appears in url, " : "") +
-                        ((entry.index().flags().get(indexRWIEntry.flag_app_descr)) ? "appears in description, " : "") +
-                        ((entry.index().flags().get(indexRWIEntry.flag_app_author)) ? "appears in author, " : "") +
-                        ((entry.index().flags().get(indexRWIEntry.flag_app_tags)) ? "appears in tags, " : "") +
-                        ((entry.index().flags().get(indexRWIEntry.flag_app_reference)) ? "appears in reference, " : "") +
-                        ((entry.index().flags().get(indexRWIEntry.flag_app_emphasized)) ? "appears emphasized" : "")
+                		((entry.word().flags().get(plasmaCondenser.flag_cat_indexof)) ? "appears on index page, " : "") +
+                        ((entry.word().flags().get(plasmaCondenser.flag_cat_hasimage)) ? "contains images, " : "") +
+                        ((entry.word().flags().get(plasmaCondenser.flag_cat_hasaudio)) ? "contains audio, " : "") +
+                        ((entry.word().flags().get(plasmaCondenser.flag_cat_hasvideo)) ? "contains video, " : "") +
+                        ((entry.word().flags().get(plasmaCondenser.flag_cat_hasapp)) ? "contains applications, " : "") +
+                        ((entry.word().flags().get(indexRWIEntry.flag_app_url)) ? "appears in url, " : "") +
+                        ((entry.word().flags().get(indexRWIEntry.flag_app_descr)) ? "appears in description, " : "") +
+                        ((entry.word().flags().get(indexRWIEntry.flag_app_author)) ? "appears in author, " : "") +
+                        ((entry.word().flags().get(indexRWIEntry.flag_app_tags)) ? "appears in tags, " : "") +
+                        ((entry.word().flags().get(indexRWIEntry.flag_app_reference)) ? "appears in reference, " : "") +
+                        ((entry.word().flags().get(indexRWIEntry.flag_app_emphasized)) ? "appears emphasized, " : "") +
+                        ((yacyURL.probablyRootURL(entry.word().urlHash())) ? "probably root url" : "")
                 );
-                prop.put("genUrlList_urlList_"+i+"_urlExists_phrase", entry.index().posofphrase());
-                prop.put("genUrlList_urlList_"+i+"_urlExists_phrase", entry.index().posofphrase());
+                prop.put("genUrlList_urlList_"+i+"_urlExists_phrase", entry.word().posofphrase());
+                prop.put("genUrlList_urlList_"+i+"_urlExists_phrase", entry.word().posofphrase());
                 try {
                     url = new yacyURL(us, null);
                 } catch (MalformedURLException e) {

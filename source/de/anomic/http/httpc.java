@@ -234,6 +234,7 @@ public final class httpc {
         // do NOT remove this check; in case that everything works fine this call does nothing
         // but if in any arror case connections stay open, this will ensure that the peer keeps running and the host server is not blocked from working
     	checkIdleConnections();
+    	assert timeout != 0;
     	
         // register new connection
         this.hashIndex = objCounter;
@@ -401,9 +402,10 @@ public final class httpc {
             this.initTime = System.currentTimeMillis();
             this.lastIO = System.currentTimeMillis();
             this.socket.setKeepAlive(false);
-            this.socket.connect(address, timeout);
             // setting socket timeout and keep alive behaviour
             this.socket.setSoTimeout(timeout); // waiting time for read
+            // get the connection
+            this.socket.connect(address, timeout);
             
             if (incomingByteCountAccounting != null) {
                 this.clientInputByteCount = new httpdByteCountInputStream(this.socket.getInputStream(),incomingByteCountAccounting);
