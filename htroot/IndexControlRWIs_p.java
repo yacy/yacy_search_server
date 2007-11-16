@@ -29,7 +29,6 @@ import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.io.PrintWriter;
-import java.net.MalformedURLException;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -405,7 +404,10 @@ public class IndexControlRWIs_p {
             long rn = -1;
             while (iter.hasNext()) {
                 entry = (indexURLEntry) iter.next();
-                us = entry.comp().url().toNormalform(false, false);
+                if ((entry == null) || (entry.comp() == null)) continue;
+                url = entry.comp().url();
+                if (url == null) continue;
+                us = url.toNormalform(false, false);
                 if (rn == -1) rn = entry.ranking();
                 prop.put("genUrlList_urlList_"+i+"_urlExists", "1");
                 prop.put("genUrlList_urlList_"+i+"_urlExists_urlhxCount", i);
@@ -415,21 +417,21 @@ public class IndexControlRWIs_p {
                 prop.putHTML("genUrlList_urlList_"+i+"_urlExists_urlString", us);
                 prop.put("genUrlList_urlList_"+i+"_urlExists_urlStringShort", (us.length() > 40) ? (us.substring(0, 20) + "<br>" + us.substring(20,  40) + "...") : ((us.length() > 30) ? (us.substring(0, 20) + "<br>" + us.substring(20)) : us));
                 prop.putNum("genUrlList_urlList_"+i+"_urlExists_ranking", (entry.ranking() - rn));
-                prop.put("genUrlList_urlList_"+i+"_urlExists_domlength", yacyURL.domLengthEstimation(entry.hash()));
-                prop.put("genUrlList_urlList_"+i+"_urlExists_ybr", plasmaSearchRankingProcess.ybr(entry.hash()));
+                prop.putNum("genUrlList_urlList_"+i+"_urlExists_domlength", yacyURL.domLengthEstimation(entry.hash()));
+                prop.putNum("genUrlList_urlList_"+i+"_urlExists_ybr", plasmaSearchRankingProcess.ybr(entry.hash()));
                 prop.put("genUrlList_urlList_"+i+"_urlExists_date", serverDate.shortDayTime(new Date(entry.word().lastModified())));
-                prop.put("genUrlList_urlList_"+i+"_urlExists_wordsintitle", entry.word().wordsintitle());
-                prop.put("genUrlList_urlList_"+i+"_urlExists_wordsintext", entry.word().wordsintext());
-                prop.put("genUrlList_urlList_"+i+"_urlExists_phrasesintext", entry.word().phrasesintext());
-                prop.put("genUrlList_urlList_"+i+"_urlExists_llocal", entry.word().llocal());
-                prop.put("genUrlList_urlList_"+i+"_urlExists_lother", entry.word().lother());
-                prop.put("genUrlList_urlList_"+i+"_urlExists_hitcount", entry.word().hitcount());
-                prop.put("genUrlList_urlList_"+i+"_urlExists_worddistance", entry.word().worddistance());
-                prop.put("genUrlList_urlList_"+i+"_urlExists_pos", entry.word().posintext());
-                prop.put("genUrlList_urlList_"+i+"_urlExists_phrase", entry.word().posofphrase());
-                prop.put("genUrlList_urlList_"+i+"_urlExists_posinphrase", entry.word().posinphrase());
-                prop.put("genUrlList_urlList_"+i+"_urlExists_urlcomps", entry.word().urlcomps());
-                prop.put("genUrlList_urlList_"+i+"_urlExists_urllength", entry.word().urllength());
+                prop.putNum("genUrlList_urlList_"+i+"_urlExists_wordsintitle", entry.word().wordsintitle());
+                prop.putNum("genUrlList_urlList_"+i+"_urlExists_wordsintext", entry.word().wordsintext());
+                prop.putNum("genUrlList_urlList_"+i+"_urlExists_phrasesintext", entry.word().phrasesintext());
+                prop.putNum("genUrlList_urlList_"+i+"_urlExists_llocal", entry.word().llocal());
+                prop.putNum("genUrlList_urlList_"+i+"_urlExists_lother", entry.word().lother());
+                prop.putNum("genUrlList_urlList_"+i+"_urlExists_hitcount", entry.word().hitcount());
+                prop.putNum("genUrlList_urlList_"+i+"_urlExists_worddistance", entry.word().worddistance());
+                prop.putNum("genUrlList_urlList_"+i+"_urlExists_pos", entry.word().posintext());
+                prop.putNum("genUrlList_urlList_"+i+"_urlExists_phrase", entry.word().posofphrase());
+                prop.putNum("genUrlList_urlList_"+i+"_urlExists_posinphrase", entry.word().posinphrase());
+                prop.putNum("genUrlList_urlList_"+i+"_urlExists_urlcomps", entry.word().urlcomps());
+                prop.putNum("genUrlList_urlList_"+i+"_urlExists_urllength", entry.word().urllength());
                 prop.put("genUrlList_urlList_"+i+"_urlExists_props",
                 		((entry.word().flags().get(plasmaCondenser.flag_cat_indexof)) ? "appears on index page, " : "") +
                         ((entry.word().flags().get(plasmaCondenser.flag_cat_hasimage)) ? "contains images, " : "") +
@@ -444,13 +446,6 @@ public class IndexControlRWIs_p {
                         ((entry.word().flags().get(indexRWIEntry.flag_app_emphasized)) ? "appears emphasized, " : "") +
                         ((yacyURL.probablyRootURL(entry.word().urlHash())) ? "probably root url" : "")
                 );
-                prop.put("genUrlList_urlList_"+i+"_urlExists_phrase", entry.word().posofphrase());
-                prop.put("genUrlList_urlList_"+i+"_urlExists_phrase", entry.word().posofphrase());
-                try {
-                    url = new yacyURL(us, null);
-                } catch (MalformedURLException e) {
-                    url = null;
-                }
                 if (plasmaSwitchboard.urlBlacklist.isListed(plasmaURLPattern.BLACKLIST_DHT, url)) {
                     prop.put("genUrlList_urlList_"+i+"_urlExists_urlhxChecked", "1");
                 }
