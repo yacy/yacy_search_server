@@ -35,12 +35,16 @@
     #(genUrlProfile)#
     ::No entry found for URL-hash #[urlhash]#
     ::<table>
-		<tr><td class="small">URL String</td><td class="tt">#[urlNormalform]#</td></tr>
+		<tr><td class="small">URL String</td><td class="tt"><a href="#[urlNormalform]#">#[urlNormalform]#</a></td></tr>
 		<tr><td class="small">Hash</td><td class="tt">#[urlhash]#</td></tr>
 		<tr><td class="small">Description</td><td class="tt">#[urlDescr]#</td></tr>
 		<tr><td class="small">Modified-Date</td><td class="tt">#[moddate]#</td></tr>
 		<tr><td class="small">Loaded-Date</td><td class="tt">#[loaddate]#</td></tr>
-		<tr><td class="small">Referrer</td><td class="tt">#[referrer]#</td></tr>
+		#(referrer)#
+		<tr><td class="small">Referrer</td><td class="tt">unknown</td></tr>
+		::
+		<tr><td class="small">Referrer</td><td class="tt"><a href="IndexControlURLs_p.html?urlhashsearch=&urlhash=#[hash]#">#[url]#</a></td></tr>
+		#(/referrer)#
 		<tr><td class="small">Doctype</td><td class="tt">#[doctype]#</td></tr>
 		<tr><td class="small">Language</td><td class="tt">#[language]#</td></tr>
 		<tr><td class="small">Size</td><td class="tt">#[size]#</td></tr>

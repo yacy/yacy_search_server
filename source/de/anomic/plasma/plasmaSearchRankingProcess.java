@@ -44,6 +44,7 @@ import de.anomic.kelondro.kelondroBinSearch;
 import de.anomic.kelondro.kelondroMScoreCluster;
 import de.anomic.server.serverCodings;
 import de.anomic.server.serverFileUtils;
+import de.anomic.server.serverProfiling;
 import de.anomic.yacy.yacyURL;
 
 public final class plasmaSearchRankingProcess {
@@ -56,14 +57,14 @@ public final class plasmaSearchRankingProcess {
     private plasmaSearchRankingProfile ranking;
     private int filteredCount;
     private indexRWIEntryOrder order;
-    private plasmaSearchProcessing process;
+    private serverProfiling process;
     private int maxentries;
     private int globalcount;
     private HashMap urlhashes; // map for double-check; String/Long relation, addresses ranking number (backreference for deletion)
     private kelondroMScoreCluster ref;  // reference score computation for the commonSense heuristic
     private int[] c; // flag counter
     
-    public plasmaSearchRankingProcess(plasmaSearchQuery query, plasmaSearchProcessing process, plasmaSearchRankingProfile ranking, int maxentries) {
+    public plasmaSearchRankingProcess(plasmaSearchQuery query, serverProfiling process, plasmaSearchRankingProfile ranking, int maxentries) {
         // we collect the urlhashes and construct a list with urlEntry objects
         // attention: if minEntries is too high, this method will not terminate within the maxTime
         this.pageAcc = new TreeMap();
@@ -91,7 +92,7 @@ public final class plasmaSearchRankingProcess {
             this.order = new indexRWIEntryOrder(ranking);
         }
         this.order.extend(container);
-        if (process != null) process.yield("normalizing", container.size());
+        if (process != null) process.yield(plasmaSearchEvent.NORMALIZING, container.size());
         
         /*
         container.setOrdering(o, 0);
@@ -115,7 +116,7 @@ public final class plasmaSearchRankingProcess {
                 if (iEntry.flags().get(j)) {c[j]++;}
             }
             
-            // kick out entries that are too bad acording to current findings
+            // kick out entries that are too bad according to current findings
             r = new Long(order.cardinal(iEntry));
             if ((maxentries >= 0) && (pageAcc.size() >= maxentries) && (r.longValue() > biggestEntry)) continue;
                         
@@ -154,7 +155,7 @@ public final class plasmaSearchRankingProcess {
         
         if (container.size() > query.neededResults()) remove(true, true);
 
-        if (process != null) process.yield(plasmaSearchProcessing.PRESORT, container.size());
+        if (process != null) process.yield(plasmaSearchEvent.PRESORT, container.size());
     }
     
     public class rIterator implements Iterator {

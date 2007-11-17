@@ -24,13 +24,12 @@
 // along with this program; if not, write to the Free Software
 // Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 
-
 import java.util.Iterator;
 
 import de.anomic.http.httpHeader;
 import de.anomic.plasma.plasmaSearchEvent;
-import de.anomic.plasma.plasmaSearchProcessing;
 import de.anomic.server.serverObjects;
+import de.anomic.server.serverProfiling;
 import de.anomic.server.serverSwitch;
 
 public class PerformanceSearch_p {
@@ -47,9 +46,9 @@ public class PerformanceSearch_p {
         
         Iterator events = se.getProcess().events();
         int c = 0;
-        plasmaSearchProcessing.Entry event;
+        serverProfiling.Entry event;
         while (events.hasNext()) {
-            event = (plasmaSearchProcessing.Entry) events.next();
+            event = (serverProfiling.Entry) events.next();
             prop.put("table_" + c + "_event", event.process);
             prop.putNum("table_" + c + "_count", event.count);
             prop.putNum("table_" + c + "_time", event.time);

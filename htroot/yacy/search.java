@@ -43,10 +43,10 @@ import de.anomic.net.natLib;
 import de.anomic.plasma.plasmaSearchEvent;
 import de.anomic.plasma.plasmaSearchQuery;
 import de.anomic.plasma.plasmaSearchRankingProfile;
-import de.anomic.plasma.plasmaSearchProcessing;
 import de.anomic.plasma.plasmaSwitchboard;
 import de.anomic.server.serverCore;
 import de.anomic.server.serverObjects;
+import de.anomic.server.serverProfiling;
 import de.anomic.server.serverSwitch;
 import de.anomic.yacy.yacyCore;
 import de.anomic.yacy.yacyNetwork;
@@ -128,7 +128,7 @@ public final class search {
         int indexabstractContainercount = 0;
         int joincount = 0;
         plasmaSearchQuery theQuery = null;
-        plasmaSearchProcessing localProcess = null;
+        serverProfiling localProcess = null;
         ArrayList accu = null;
         long urlRetrievalAllTime = 0, snippetComputationAllTime = 0;
         if ((query.length() == 0) && (abstractSet != null)) {
@@ -138,10 +138,12 @@ public final class search {
             yacyCore.log.logInfo("INIT HASH SEARCH (abstracts only): " + plasmaSearchQuery.anonymizedQueryHashes(theQuery.queryHashes) + " - " + theQuery.displayResults() + " links");
 
             // prepare a search profile
-            localProcess  = new plasmaSearchProcessing(theQuery.maximumTime, theQuery.displayResults());
+            localProcess  = new serverProfiling(theQuery.maximumTime, theQuery.displayResults());
             
             //theSearch = new plasmaSearchEvent(squery, rankingProfile, localTiming, remoteTiming, true, sb.wordIndex, null);
-            Map[] containers = localProcess.localSearchContainers(theQuery, sb.wordIndex, plasmaSearchQuery.hashes2Set(urls));
+            localProcess.startTimer();
+            Map[] containers = sb.wordIndex.localSearchContainers(theQuery, plasmaSearchQuery.hashes2Set(urls));
+            localProcess.yield(plasmaSearchEvent.COLLECTION, containers[0].size());
             if (containers != null) {
                 Iterator ci = containers[0].entrySet().iterator();
                 Map.Entry entry;
@@ -151,7 +153,7 @@ public final class search {
                     wordhash = (String) entry.getKey();
                     indexContainer container = (indexContainer) entry.getValue();
                     indexabstractContainercount += container.size();
-                    indexabstract.append("indexabstract." + wordhash + "=").append(plasmaSearchProcessing.compressIndex(container, null, 1000).toString()).append(serverCore.crlfString);                
+                    indexabstract.append("indexabstract." + wordhash + "=").append(indexContainer.compressIndex(container, null, 1000).toString()).append(serverCore.crlfString);                
                 }
             }
             
@@ -168,7 +170,7 @@ public final class search {
             
             // prepare a search profile
             plasmaSearchRankingProfile rankingProfile = (profile.length() == 0) ? new plasmaSearchRankingProfile(plasmaSearchQuery.contentdomParser(contentdom)) : new plasmaSearchRankingProfile("", profile);
-            localProcess  = new plasmaSearchProcessing(theQuery.maximumTime, theQuery.displayResults());
+            localProcess  = new serverProfiling(theQuery.maximumTime, theQuery.displayResults());
             plasmaSearchEvent theSearch = plasmaSearchEvent.getEvent(theQuery, rankingProfile, localProcess, sb.wordIndex, null, true, abstractSet);
             urlRetrievalAllTime = theSearch.getURLRetrievalTime();
             snippetComputationAllTime = theSearch.getSnippetComputationTime();

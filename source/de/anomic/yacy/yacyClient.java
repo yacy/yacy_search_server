@@ -60,7 +60,6 @@ import de.anomic.kelondro.kelondroBase64Order;
 import de.anomic.kelondro.kelondroBitfield;
 import de.anomic.plasma.plasmaCondenser;
 import de.anomic.plasma.plasmaSearchRankingProcess;
-import de.anomic.plasma.plasmaSearchProcessing;
 import de.anomic.plasma.plasmaSearchRankingProfile;
 import de.anomic.plasma.plasmaSnippetCache;
 import de.anomic.plasma.plasmaSwitchboard;
@@ -549,7 +548,7 @@ public final class yacyClient {
 						if (singleAbstract == null) singleAbstract = new TreeMap();
 						ci = new serverByteBuffer(((String) entry.getValue()).getBytes());
 						//System.out.println("DEBUG-ABSTRACTFETCH: for word hash " + wordhash + " received " + ci.toString());
-						plasmaSearchProcessing.decompressIndex(singleAbstract, ci, target.hash);
+						indexContainer.decompressIndex(singleAbstract, ci, target.hash);
 						abstractCache.put(wordhash, singleAbstract);
 					}
 				}

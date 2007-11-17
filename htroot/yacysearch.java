@@ -59,12 +59,12 @@ import de.anomic.plasma.plasmaCondenser;
 import de.anomic.plasma.plasmaParserDocument;
 import de.anomic.plasma.plasmaSearchEvent;
 import de.anomic.plasma.plasmaSearchQuery;
-import de.anomic.plasma.plasmaSearchProcessing;
 import de.anomic.plasma.plasmaSnippetCache;
 import de.anomic.plasma.plasmaSwitchboard;
 import de.anomic.server.serverCore;
 import de.anomic.server.serverDate;
 import de.anomic.server.serverObjects;
+import de.anomic.server.serverProfiling;
 import de.anomic.server.serverSwitch;
 import de.anomic.server.logging.serverLog;
 import de.anomic.tools.yFormatter;
@@ -268,7 +268,7 @@ public class yacysearch {
                     20,
                     constraint,
                     false);
-            plasmaSearchProcessing localTiming = new plasmaSearchProcessing(4 * theQuery.maximumTime / 10, theQuery.displayResults());
+            serverProfiling localTiming = new serverProfiling(4 * theQuery.maximumTime / 10, theQuery.displayResults());
 
             String client = (String) header.get("CLIENTIP"); // the search client who initiated the search
         

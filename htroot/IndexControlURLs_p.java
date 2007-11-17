@@ -171,13 +171,7 @@ public class IndexControlURLs_p {
             return prop;
         }
         indexURLEntry.Components comp = entry.comp();
-        String referrer = null;
         indexURLEntry le = (entry.referrerHash() == null) ? null : switchboard.wordIndex.loadedURL.load(entry.referrerHash(), null, 0);
-        if (le == null) {
-            referrer = "<unknown>";
-        } else {
-            referrer = le.comp().url().toNormalform(false, true);
-        }
         if (comp.url() == null) {
             prop.put("genUrlProfile", "1");
             prop.put("genUrlProfile_urlhash", urlhash);
@@ -189,7 +183,9 @@ public class IndexControlURLs_p {
         prop.put("genUrlProfile_urlDescr", comp.title());
         prop.put("genUrlProfile_moddate", entry.moddate());
         prop.put("genUrlProfile_loaddate", entry.loaddate());
-        prop.putHTML("genUrlProfile_referrer", referrer);
+        prop.put("genUrlProfile_referrer", (le == null) ? 0 : 1);
+        prop.putHTML("genUrlProfile_referrer_url", (le == null) ? "<unknown>" : le.comp().url().toNormalform(false, true));
+        prop.put("genUrlProfile_referrer_hash", (le == null) ? "" : le.hash());
         prop.put("genUrlProfile_doctype", ""+entry.doctype());
         prop.put("genUrlProfile_language", entry.language());
         prop.put("genUrlProfile_size", entry.size());

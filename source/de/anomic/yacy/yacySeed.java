@@ -670,7 +670,7 @@ public class yacySeed {
         return type.equals(yacySeed.PEERTYPE_SENIOR) || type.equals(yacySeed.PEERTYPE_PRINCIPAL);
     }
     
-    public static final long minDHTNumber   = kelondroBase64Order.enhancedCoder.cardinal("AAAAAAAAAAAA".getBytes());
+    public static final long minDHTNumber   = kelondroBase64Order.enhancedCoder.cardinal(kelondroBase64Order.zero(12));
     public static final long maxDHTDistance = Long.MAX_VALUE;
 
     public double dhtPosition() {

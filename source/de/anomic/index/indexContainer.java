@@ -30,12 +30,15 @@ import java.lang.reflect.Method;
 import java.util.Collection;
 import java.util.ConcurrentModificationException;
 import java.util.Iterator;
+import java.util.Map;
 import java.util.Set;
 import java.util.TreeMap;
 
 import de.anomic.kelondro.kelondroBase64Order;
 import de.anomic.kelondro.kelondroRow;
 import de.anomic.kelondro.kelondroRowSet;
+import de.anomic.plasma.plasmaWordIndex;
+import de.anomic.server.serverByteBuffer;
 
 public class indexContainer extends kelondroRowSet {
 
@@ -206,6 +209,23 @@ public class indexContainer extends kelondroRowSet {
         }
     }
 
+    public static indexContainer joinExcludeContainers(
+            Collection includeContainers,
+            Collection excludeContainers,
+            int maxDistance) {
+        // join a search result and return the joincount (number of pages after join)
+
+        // since this is a conjunction we return an empty entity if any word is not known
+        if (includeContainers == null) return plasmaWordIndex.emptyContainer(null, 0);
+
+        // join the result
+        indexContainer rcLocal = indexContainer.joinContainers(includeContainers, maxDistance);
+        if (rcLocal == null) return plasmaWordIndex.emptyContainer(null, 0);
+        excludeContainers(rcLocal, excludeContainers);
+        
+        return rcLocal;
+    }
+    
     public static indexContainer joinContainers(Collection containers, int maxDistance) {
         
         // order entities by their size
@@ -433,4 +453,71 @@ public class indexContainer extends kelondroRowSet {
         return (int) kelondroBase64Order.enhancedCoder.decodeLong(this.wordHash.substring(0, 4));
     }
     
+
+    public static final serverByteBuffer compressIndex(indexContainer inputContainer, indexContainer excludeContainer, long maxtime) {
+        // collect references according to domains
+        long timeout = (maxtime < 0) ? Long.MAX_VALUE : System.currentTimeMillis() + maxtime;
+        TreeMap doms = new TreeMap();
+        synchronized (inputContainer) {
+            Iterator i = inputContainer.entries();
+            indexRWIEntry iEntry;
+            String dom, paths;
+            while (i.hasNext()) {
+                iEntry = (indexRWIEntry) i.next();
+                if ((excludeContainer != null) && (excludeContainer.get(iEntry.urlHash()) != null)) continue; // do not include urls that are in excludeContainer
+                dom = iEntry.urlHash().substring(6);
+                if ((paths = (String) doms.get(dom)) == null) {
+                    doms.put(dom, iEntry.urlHash().substring(0, 6));
+                } else {
+                    doms.put(dom, paths + iEntry.urlHash().substring(0, 6));
+                }
+                if (System.currentTimeMillis() > timeout)
+                    break;
+            }
+        }
+        // construct a result string
+        serverByteBuffer bb = new serverByteBuffer(inputContainer.size() * 6);
+        bb.append('{');
+        Iterator i = doms.entrySet().iterator();
+        Map.Entry entry;
+        while (i.hasNext()) {
+            entry = (Map.Entry) i.next();
+            bb.append((String) entry.getKey());
+            bb.append(':');
+            bb.append((String) entry.getValue());
+            if (System.currentTimeMillis() > timeout)
+                break;
+            if (i.hasNext())
+                bb.append(',');
+        }
+        bb.append('}');
+        return bb;
+    }
+
+    public static final void decompressIndex(TreeMap target, serverByteBuffer ci, String peerhash) {
+        // target is a mapping from url-hashes to a string of peer-hashes
+        if ((ci.byteAt(0) == '{') && (ci.byteAt(ci.length() - 1) == '}')) {
+            //System.out.println("DEBUG-DECOMPRESS: input is " + ci.toString());
+            ci = ci.trim(1, ci.length() - 2);
+            String dom, url, peers;
+            while ((ci.length() >= 13) && (ci.byteAt(6) == ':')) {
+                assert ci.length() >= 6 : "ci.length() = " + ci.length();
+                dom = ci.toString(0, 6);
+                ci.trim(7);
+                while ((ci.length() > 0) && (ci.byteAt(0) != ',')) {
+                    assert ci.length() >= 6 : "ci.length() = " + ci.length();
+                    url = ci.toString(0, 6) + dom;
+                    ci.trim(6);
+                    peers = (String) target.get(url);
+                    if (peers == null) {
+                        target.put(url, peerhash);
+                    } else {
+                        target.put(url, peers + peerhash);
+                    }
+                    //System.out.println("DEBUG-DECOMPRESS: " + url + ":" + target.get(url));
+                }
+                if (ci.byteAt(0) == ',') ci.trim(1);
+            }
+        }
+    }
 }

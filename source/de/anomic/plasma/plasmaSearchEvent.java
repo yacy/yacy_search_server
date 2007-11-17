@@ -41,6 +41,7 @@ import de.anomic.index.indexRWIEntry;
 import de.anomic.index.indexURLEntry;
 import de.anomic.kelondro.kelondroBitfield;
 import de.anomic.kelondro.kelondroMSetTools;
+import de.anomic.server.serverProfiling;
 import de.anomic.server.logging.serverLog;
 import de.anomic.yacy.yacyCore;
 import de.anomic.yacy.yacyDHTAction;
@@ -50,7 +51,13 @@ import de.anomic.yacy.yacyURL;
 
 public final class plasmaSearchEvent {
     
-    public static int workerThreadCount = 10;
+    public static final String COLLECTION = "collection";
+    public static final String JOIN = "join";
+    public static final String PRESORT = "presort";
+    public static final String URLFETCH = "urlfetch";
+    public static final String NORMALIZING = "normalizing";
+    
+    public static int workerThreadCount = 3;
     public static String lastEventID = "";
     private static HashMap lastEvents = new HashMap(); // a cache for objects from this class: re-use old search requests
     public static final long eventLifetime = 600000; // the time an event will stay in the cache, 10 Minutes
@@ -62,7 +69,7 @@ public final class plasmaSearchEvent {
     private plasmaWordIndex wordIndex;
     private plasmaSearchRankingProcess rankedCache; // ordered search results, grows dynamically as all the query threads enrich this container
     private Map rcAbstracts; // cache for index abstracts; word:TreeMap mapping where the embedded TreeMap is a urlhash:peerlist relation
-    private plasmaSearchProcessing process;
+    private serverProfiling process;
     private yacySearch[] primarySearchThreads, secondarySearchThreads;
     private Thread localSearchThread;
     private TreeMap preselectedPeerHashes;
@@ -80,7 +87,7 @@ public final class plasmaSearchEvent {
     
     private plasmaSearchEvent(plasmaSearchQuery query,
                              plasmaSearchRankingProfile ranking,
-                             plasmaSearchProcessing localTiming,
+                             serverProfiling localTiming,
                              plasmaWordIndex wordIndex,
                              TreeMap preselectedPeerHashes,
                              boolean generateAbstracts,
@@ -117,13 +124,13 @@ public final class plasmaSearchEvent {
         long start = System.currentTimeMillis();
         if ((query.domType == plasmaSearchQuery.SEARCHDOM_GLOBALDHT) ||
             (query.domType == plasmaSearchQuery.SEARCHDOM_CLUSTERALL)) {
+            // do a global search
             this.rankedCache = new plasmaSearchRankingProcess(query, process, ranking, max_results_preparation);
             
             int fetchpeers = (int) (query.maximumTime / 500L); // number of target peers; means 10 peers in 10 seconds
             if (fetchpeers > 50) fetchpeers = 50;
             if (fetchpeers < 30) fetchpeers = 30;
 
-            // do a global search
             // the result of the fetch is then in the rcGlobal
             process.startTimer();
             serverLog.logFine("SEARCH_EVENT", "STARTING " + fetchpeers + " THREADS TO CATCH EACH " + query.displayResults() + " URLs");
@@ -152,7 +159,10 @@ public final class plasmaSearchEvent {
             // finished searching
             serverLog.logFine("SEARCH_EVENT", "SEARCH TIME AFTER GLOBAL-TRIGGER TO " + primarySearchThreads.length + " PEERS: " + ((System.currentTimeMillis() - start) / 1000) + " seconds");
         } else {
-            Map[] searchContainerMaps = process.localSearchContainers(query, wordIndex, null);
+            // do a local search
+            process.startTimer();
+            Map[] searchContainerMaps = wordIndex.localSearchContainers(query, null);
+            process.yield(COLLECTION, searchContainerMaps[0].size());
             
             if (generateAbstracts) {
                 // compute index abstracts
@@ -178,18 +188,21 @@ public final class plasmaSearchEvent {
                         IAneardhthash = wordhash;
                     }
                     IACount.put(wordhash, new Integer(container.size()));
-                    IAResults.put(wordhash, plasmaSearchProcessing.compressIndex(container, null, 1000).toString());
+                    IAResults.put(wordhash, indexContainer.compressIndex(container, null, 1000).toString());
                 }
                 process.yield("abstract generation", searchContainerMaps[0].size());
             }
             
+            process.startTimer();
             indexContainer rcLocal =
                 (searchContainerMaps == null) ?
                   plasmaWordIndex.emptyContainer(null, 0) :
-                      process.localSearchJoinExclude(
+                      indexContainer.joinExcludeContainers(
                           searchContainerMaps[0].values(),
                           searchContainerMaps[1].values(),
                           query.maxDistance);
+            process.yield(JOIN, rcLocal.size());
+            
             this.localcount = rcLocal.size();
             this.rankedCache = new plasmaSearchRankingProcess(query, process, ranking, max_results_preparation);
             this.rankedCache.insert(rcLocal, true);
@@ -247,7 +260,9 @@ public final class plasmaSearchEvent {
         
         public void run() {
             // do a local search
-            Map[] searchContainerMaps = process.localSearchContainers(query, wordIndex, null);
+            process.startTimer();
+            Map[] searchContainerMaps = wordIndex.localSearchContainers(query, null);
+            process.yield(COLLECTION, searchContainerMaps[0].size());
             
             // use the search containers to fill up rcAbstracts locally
             /*
@@ -275,13 +290,15 @@ public final class plasmaSearchEvent {
             */
             
             // join and exlcude the local result
+            process.startTimer();
             indexContainer rcLocal =
                 (searchContainerMaps == null) ?
                   plasmaWordIndex.emptyContainer(null, 0) :
-                      process.localSearchJoinExclude(
+                      indexContainer.joinExcludeContainers(
                           searchContainerMaps[0].values(),
                           searchContainerMaps[1].values(),
                           query.maxDistance);
+            process.yield(JOIN, rcLocal.size());
             localcount = rcLocal.size();
             
             // sort the local containers and truncate it to a limited count,
@@ -454,7 +471,7 @@ public final class plasmaSearchEvent {
         return ranking;
     }
     
-    public plasmaSearchProcessing getProcess() {
+    public serverProfiling getProcess() {
         return process;
     }
     
@@ -490,7 +507,7 @@ public final class plasmaSearchEvent {
     
     public static plasmaSearchEvent getEvent(plasmaSearchQuery query,
             plasmaSearchRankingProfile ranking,
-            plasmaSearchProcessing localTiming,
+            serverProfiling localTiming,
             plasmaWordIndex wordIndex,
             TreeMap preselectedPeerHashes,
             boolean generateAbstracts,

@@ -389,6 +389,24 @@ public final class plasmaWordIndex implements indexRI {
         return containers;
     }
 
+    public Map[] localSearchContainers(plasmaSearchQuery query, Set urlselection) {
+        // search for the set of hashes and return a map of of wordhash:indexContainer containing the seach result
+
+        // retrieve entities that belong to the hashes
+        Map inclusionContainers = (query.queryHashes.size() == 0) ? new HashMap() : getContainers(
+                        query.queryHashes,
+                        urlselection,
+                        true,
+                        true);
+        if ((inclusionContainers.size() != 0) && (inclusionContainers.size() < query.queryHashes.size())) inclusionContainers = new HashMap(); // prevent that only a subset is returned
+        Map exclusionContainers = (inclusionContainers.size() == 0) ? new HashMap() : getContainers(
+                query.excludeHashes,
+                urlselection,
+                true,
+                true);
+        return new Map[]{inclusionContainers, exclusionContainers};
+    }
+    
     public Finding retrieveURLs(plasmaSearchQuery query, boolean loadurl, int sortorder, plasmaSearchRankingProfile ranking) {
         // search for a word hash and generate a list of url links
         // sortorder: 0 = hash, 1 = url, 2 = ranking

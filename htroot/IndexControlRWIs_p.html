@@ -30,16 +30,16 @@
     <p>No entry for word '#[word]#'</p>::
     <p>No entry for word hash #[wordhash]#</p>::
 	<p>Search result:
-	<form action="IndexControlRWIs_p.html" method="post" enctype="multipart/form-data">
+	<form name="selection" action="IndexControlRWIs_p.html" method="post" enctype="multipart/form-data">
     <table border="0" cellpadding="2" cellspacing="1">
 	  <tr class="TableHeader">
-	  	<td>&nbsp;</td>
+	  	<td style="background-color:#FFFFFF">&nbsp;</td>
 	    <td rowspan="2">total URLs</td>
 	    <td colspan="6">appearance in</td>
 	    <td colspan="4">in link type</td>
 	    <td colspan="1">document type</td>
       <tr class="TableCellDark">
-        <td>&nbsp;</td>
+        <td style="background-color:#FFFFFF">&nbsp;</td>
         <td>reference</td>
         <td>description</td>
         <td>author</td>
@@ -53,7 +53,7 @@
         <td>index of</td>
       </tr>
       <tr class="TableCellDark">
-        <td>&nbsp;</td>
+        <td style="background-color:#FFFFFF">&nbsp;</td>
         <td>#[allurl]#</td>
         <td>#[reference]#</td>
         <td>#[description]#</td>
@@ -69,18 +69,18 @@
       </tr>
       <tr class="TableCellLight">
         <td class="TableCellDark">Selection</td>
-        <td><input type="checkbox" name="allurl" checked="checked" /></td>
-        <td><input type="checkbox" name="reference" /></td>
-        <td><input type="checkbox" name="description" /></td>
-        <td><input type="checkbox" name="author" /></td>
-        <td><input type="checkbox" name="tag" /></td>
-        <td><input type="checkbox" name="url" /></td>
-        <td><input type="checkbox" name="emphasized" /></td>
-        <td><input type="checkbox" name="image" /></td>
-        <td><input type="checkbox" name="audio" /></td>
-        <td><input type="checkbox" name="video" /></td>
-        <td><input type="checkbox" name="app" /></td>
-        <td><input type="checkbox" name="indexof" /></td>
+        <td><input type="checkbox" name="allurl" id="allurl" checked="checked" /></td>
+        <td><input type="checkbox" name="reference" onclick="document.selection.allurl.checked=false" /></td>
+        <td><input type="checkbox" name="description" onclick="document.selection.allurl.checked=false" /></td>
+        <td><input type="checkbox" name="author" onclick="document.selection.allurl.checked=false" /></td>
+        <td><input type="checkbox" name="tag" onclick="document.selection.allurl.checked=false" /></td>
+        <td><input type="checkbox" name="url" onclick="document.selection.allurl.checked=false" /></td>
+        <td><input type="checkbox" name="emphasized" onclick="document.selection.allurl.checked=false" /></td>
+        <td><input type="checkbox" name="image" onclick="document.selection.allurl.checked=false" /></td>
+        <td><input type="checkbox" name="audio" onclick="document.selection.allurl.checked=false" /></td>
+        <td><input type="checkbox" name="video" onclick="document.selection.allurl.checked=false" /></td>
+        <td><input type="checkbox" name="app" onclick="document.selection.allurl.checked=false" /></td>
+        <td><input type="checkbox" name="indexof" onclick="document.selection.allurl.checked=false" /></td>
       </tr>
     </table>
     </p>
