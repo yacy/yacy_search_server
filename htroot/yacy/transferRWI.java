@@ -73,13 +73,15 @@ public final class transferRWI {
         final serverObjects prop = new serverObjects();
         if ((post == null) || (env == null)) return prop;
         if (!yacyNetwork.authentifyRequest(post, env)) return prop;
-
+        if (!post.containsKey("wordc")) return prop;
+        if (!post.containsKey("entryc")) return prop;
+        
         // request values
         final String iam      = post.get("iam", "");                      // seed hash of requester
         final String youare   = post.get("youare", "");                   // seed hash of the target peer, needed for network stability
 //      final String key      = (String) post.get("key", "");             // transmission key
-        final int wordc       = Integer.parseInt(post.get("wordc", ""));  // number of different words
-        final int entryc      = Integer.parseInt(post.get("entryc", "")); // number of entries in indexes
+        final int wordc       = post.getInt("wordc", 0);                  // number of different words
+        final int entryc      = post.getInt("entryc", 0);                 // number of entries in indexes
         byte[] indexes        = post.get("indexes", "").getBytes();       // the indexes, as list of word entries
         boolean granted       = sb.getConfig("allowReceiveIndex", "false").equals("true");
         boolean blockBlacklist = sb.getConfig("indexReceiveBlockBlacklist", "false").equals("true");
