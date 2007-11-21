@@ -220,8 +220,8 @@ public class yacysearchitem {
             prop.put("content_rankingprops", result.word().toPropertyForm() + ", domLengthEstimated=" + yacyURL.domLengthEstimation(result.hash()) +
                     ((yacyURL.probablyRootURL(result.hash())) ? ", probablyRootURL" : "") + 
                     (((wordURL = yacyURL.probablyWordURL(result.hash(), query[0])) != null) ? ", probablyWordURL=" + wordURL.toNormalform(false, true) : ""));
- 
-            prop.put("content_snippet", result.textSnippet().getLineMarked(theQuery.queryHashes));
+            plasmaSnippetCache.TextSnippet snippet = result.textSnippet();
+            prop.put("content_snippet", (snippet == null) ? "(snippet not found)" : snippet.getLineMarked(theQuery.queryHashes));
             return prop;
         }
         

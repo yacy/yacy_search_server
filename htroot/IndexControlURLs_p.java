@@ -36,6 +36,7 @@ import de.anomic.kelondro.kelondroRotateIterator;
 import de.anomic.plasma.plasmaSwitchboard;
 import de.anomic.server.serverObjects;
 import de.anomic.server.serverSwitch;
+import de.anomic.yacy.yacySeedDB;
 import de.anomic.yacy.yacyURL;
 
 public class IndexControlURLs_p {
@@ -171,7 +172,7 @@ public class IndexControlURLs_p {
             return prop;
         }
         indexURLEntry.Components comp = entry.comp();
-        indexURLEntry le = (entry.referrerHash() == null) ? null : switchboard.wordIndex.loadedURL.load(entry.referrerHash(), null, 0);
+        indexURLEntry le = ((entry.referrerHash() == null) || (entry.referrerHash().length() != yacySeedDB.commonHashLength)) ? null : switchboard.wordIndex.loadedURL.load(entry.referrerHash(), null, 0);
         if (comp.url() == null) {
             prop.put("genUrlProfile", "1");
             prop.put("genUrlProfile_urlhash", urlhash);

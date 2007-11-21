@@ -83,7 +83,7 @@ public final class search {
         String  profile = post.get("profile", ""); // remote profile hand-over
         if (profile.length() > 0) profile = crypt.simpleDecode(profile, null);
         //final boolean includesnippet = post.get("includesnippet", "false").equals("true");
-        final kelondroBitfield constraint = new kelondroBitfield(4, post.get("constraint", "______"));
+        final kelondroBitfield constraint = ((post.containsKey("constraint")) && (post.get("constraint", "").length() > 0)) ? new kelondroBitfield(4, post.get("constraint", "______")) : null;
 //      final boolean global = ((String) post.get("resource", "global")).equals("global"); // if true, then result may consist of answers from other peers
 //      Date remoteTime = yacyCore.parseUniversalDate((String) post.get(yacySeed.MYTIME));        // read remote time
 
@@ -133,7 +133,7 @@ public final class search {
         long urlRetrievalAllTime = 0, snippetComputationAllTime = 0;
         if ((query.length() == 0) && (abstractSet != null)) {
             // this is _not_ a normal search, only a request for index abstracts
-            theQuery = new plasmaSearchQuery(null, abstractSet, new TreeSet(kelondroBase64Order.enhancedCoder), maxdist, prefer, plasmaSearchQuery.contentdomParser(contentdom), false, count, 0, duetime, filter, plasmaSearchQuery.SEARCHDOM_LOCAL, null, -1, plasmaSearchQuery.catchall_constraint, false);
+            theQuery = new plasmaSearchQuery(null, abstractSet, new TreeSet(kelondroBase64Order.enhancedCoder), maxdist, prefer, plasmaSearchQuery.contentdomParser(contentdom), false, count, 0, duetime, filter, plasmaSearchQuery.SEARCHDOM_LOCAL, null, -1, null, false);
             theQuery.domType = plasmaSearchQuery.SEARCHDOM_LOCAL;
             yacyCore.log.logInfo("INIT HASH SEARCH (abstracts only): " + plasmaSearchQuery.anonymizedQueryHashes(theQuery.queryHashes) + " - " + theQuery.displayResults() + " links");
 

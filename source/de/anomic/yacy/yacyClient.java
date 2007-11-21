@@ -380,7 +380,7 @@ public final class yacyClient {
         post.put("ttl", "0");
         post.put("maxdist", maxDistance);
         post.put("profile", crypt.simpleEncode(rankingProfile.toExternalString()));
-        post.put("constraint", constraint.exportB64());
+        post.put("constraint", (constraint == null) ? "" : constraint.exportB64());
         if (abstractCache != null) post.put("abstracts", "auto");
         final long timestamp = System.currentTimeMillis();
 

@@ -42,7 +42,7 @@
     <td><strong>Local Text Indexing</strong></td>
     <td><strong>Local Media Indexing</strong></td>
     <td><strong>Remote Indexing</strong></td>
-    <td></td>
+    <td><strong>Status / Action</strong></td>
   </tr>
   #{crawlProfiles}# 
   <tr class="TableCell#(dark)#Light::Dark#(/dark)#"> 
@@ -61,12 +61,14 @@
     <td>#(indexMedia)#no::yes#(/indexMedia)#</td>
     <td>#(remoteIndexing)#no::yes#(/remoteIndexing)#</td>
     <td>#(terminateButton)#::
+        <div style="text-decoration:blink">Running</div>
         <form action="CrawlProfileEditor_p.html" method="get" enctype="multipart/form-data">
         <input type="hidden" name="handle" value="#[handle]#" />
         <input type="submit" name="terminate" value="Terminate" />
         </form>
         #(/terminateButton)#
 	    #(deleteButton)#::
+	    Finished
         <form action="CrawlProfileEditor_p.html" method="get" enctype="multipart/form-data">
         <input type="hidden" name="handle" value="#[handle]#" />
         <input type="submit" name="delete" value="Delete" />

@@ -127,7 +127,7 @@ public class yacysearch {
             prop.put("input_urlmaskfilter", ".*");
             prop.put("input_prefermaskfilter", "");
             prop.put("input_indexof", "off");
-            prop.put("input_constraint", plasmaSearchQuery.catchall_constraint.exportB64());
+            prop.put("input_constraint", "");
             prop.put("input_cat", "href");
             prop.put("input_depth", "0");
             prop.put("input_contentdom", "text");
@@ -167,7 +167,7 @@ public class yacysearch {
         String prefermask = post.get("prefermaskfilter", "");
         if ((prefermask.length() > 0) && (prefermask.indexOf(".*") < 0)) prefermask = ".*" + prefermask + ".*";
 
-        kelondroBitfield constraint = post.containsKey("constraint") ? new kelondroBitfield(4, post.get("constraint", "______")) : plasmaSearchQuery.catchall_constraint;
+        kelondroBitfield constraint = ((post.containsKey("constraint")) && (post.get("constraint", "").length() > 0)) ? new kelondroBitfield(4, post.get("constraint", "______")) : null;
         if (indexof) {
             constraint = new kelondroBitfield(4);
             constraint.set(plasmaCondenser.flag_cat_indexof, true);
@@ -401,7 +401,7 @@ public class yacysearch {
         prop.putHTML("input_urlmaskfilter", urlmask);
         prop.putHTML("input_prefermaskfilter", prefermask);
         prop.put("input_indexof", (indexof) ? "on" : "off");
-        prop.put("input_constraint", constraint.exportB64());
+        prop.put("input_constraint", (constraint == null) ? "" : constraint.exportB64());
         prop.put("input_contentdom", post.get("contentdom", "text"));
         prop.put("input_contentdomCheckText", (contentdomCode == plasmaSearchQuery.CONTENTDOM_TEXT) ? "1" : "0");
         prop.put("input_contentdomCheckAudio", (contentdomCode == plasmaSearchQuery.CONTENTDOM_AUDIO) ? "1" : "0");
@@ -418,6 +418,17 @@ public class yacysearch {
     }
 
     private static String navurla(int page, int display, plasmaSearchQuery theQuery) {
-        return "<a href=\"yacysearch.html?display=" + display + "&amp;search=" + theQuery.queryString() + "&amp;count="+ theQuery.displayResults() + "&amp;offset=" + (page * theQuery.displayResults()) + "&amp;resource=" + theQuery.searchdom() + "&amp;time=" + (theQuery.maximumTime / 1000) + "&amp;urlmaskfilter=" + theQuery.urlMask + "&amp;prefermaskfilter=" + theQuery.prefer + "&amp;cat=href&amp;constraint=" + theQuery.constraint.exportB64() + "&amp;contentdom=" + theQuery.contentdom() + "&amp;former=" + theQuery.queryString() + "\">";
+        return
+        "<a href=\"yacysearch.html?display=" + display +
+        "&amp;search=" + theQuery.queryString() +
+        "&amp;count="+ theQuery.displayResults() +
+        "&amp;offset=" + (page * theQuery.displayResults()) +
+        "&amp;resource=" + theQuery.searchdom() +
+        "&amp;time=" + (theQuery.maximumTime / 1000) +
+        "&amp;urlmaskfilter=" + theQuery.urlMask +
+        "&amp;prefermaskfilter=" + theQuery.prefer +
+        "&amp;cat=href&amp;constraint=" + ((theQuery.constraint == null) ? "" : theQuery.constraint.exportB64()) +
+        "&amp;contentdom=" + theQuery.contentdom() +
+        "&amp;former=" + theQuery.queryString() + "\">";
     }
 }

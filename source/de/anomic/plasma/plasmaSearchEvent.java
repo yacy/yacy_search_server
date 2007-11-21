@@ -125,7 +125,7 @@ public final class plasmaSearchEvent {
         if ((query.domType == plasmaSearchQuery.SEARCHDOM_GLOBALDHT) ||
             (query.domType == plasmaSearchQuery.SEARCHDOM_CLUSTERALL)) {
             // do a global search
-            this.rankedCache = new plasmaSearchRankingProcess(query, process, ranking, max_results_preparation);
+            this.rankedCache = new plasmaSearchRankingProcess(wordIndex, query, process, ranking, 2, max_results_preparation);
             
             int fetchpeers = (int) (query.maximumTime / 500L); // number of target peers; means 10 peers in 10 seconds
             if (fetchpeers > 50) fetchpeers = 50;
@@ -160,14 +160,15 @@ public final class plasmaSearchEvent {
             serverLog.logFine("SEARCH_EVENT", "SEARCH TIME AFTER GLOBAL-TRIGGER TO " + primarySearchThreads.length + " PEERS: " + ((System.currentTimeMillis() - start) / 1000) + " seconds");
         } else {
             // do a local search
-            process.startTimer();
-            Map[] searchContainerMaps = wordIndex.localSearchContainers(query, null);
-            process.yield(COLLECTION, searchContainerMaps[0].size());
+            this.rankedCache = new plasmaSearchRankingProcess(wordIndex, query, process, ranking, 2, max_results_preparation);
+            this.rankedCache.execQuery(true);
+            this.localcount = this.rankedCache.filteredCount();
+            //plasmaWordIndex.Finding finding = wordIndex.retrieveURLs(query, false, 2, ranking, process);
             
             if (generateAbstracts) {
                 // compute index abstracts
                 process.startTimer();
-                Iterator ci = searchContainerMaps[0].entrySet().iterator();
+                Iterator ci = this.rankedCache.searchContainerMaps()[0].entrySet().iterator();
                 Map.Entry entry;
                 int maxcount = -1;
                 double mindhtdistance = 1.1, d;
@@ -190,22 +191,9 @@ public final class plasmaSearchEvent {
                     IACount.put(wordhash, new Integer(container.size()));
                     IAResults.put(wordhash, indexContainer.compressIndex(container, null, 1000).toString());
                 }
-                process.yield("abstract generation", searchContainerMaps[0].size());
+                process.yield("abstract generation", this.rankedCache.searchContainerMaps()[0].size());
             }
             
-            process.startTimer();
-            indexContainer rcLocal =
-                (searchContainerMaps == null) ?
-                  plasmaWordIndex.emptyContainer(null, 0) :
-                      indexContainer.joinExcludeContainers(
-                          searchContainerMaps[0].values(),
-                          searchContainerMaps[1].values(),
-                          query.maxDistance);
-            process.yield(JOIN, rcLocal.size());
-            
-            this.localcount = rcLocal.size();
-            this.rankedCache = new plasmaSearchRankingProcess(query, process, ranking, max_results_preparation);
-            this.rankedCache.insert(rcLocal, true);
         }
         
         if (query.onlineSnippetFetch) {
@@ -221,10 +209,8 @@ public final class plasmaSearchEvent {
             indexURLEntry uentry;
             ResultEntry resultEntry;
             synchronized (rankedCache) {
-                Iterator urlIterator = rankedCache.entries(wordIndex, true);
-                while ((urlIterator.hasNext()) && (resultList.size() < (query.neededResults()))) {
-                    // fetch next entry
-                    uentry = (indexURLEntry) urlIterator.next();
+                while ((rankedCache.size() > 0) && ((uentry = rankedCache.bestURL(true)) != null) && (resultList.size() < (query.neededResults()))) {
+                    System.out.println("***DEBUG*** SEARCH RESULT URL=" + uentry.comp().url().toNormalform(false, false));
                 
                     resultEntry = obtainResultEntry(uentry, (snippetComputationAllTime < 300) ? 1 : 0);
                     if (resultEntry == null) continue; // the entry had some problems, cannot be used
@@ -260,51 +246,12 @@ public final class plasmaSearchEvent {
         
         public void run() {
             // do a local search
-            process.startTimer();
-            Map[] searchContainerMaps = wordIndex.localSearchContainers(query, null);
-            process.yield(COLLECTION, searchContainerMaps[0].size());
-            
-            // use the search containers to fill up rcAbstracts locally
-            /*
-            if ((rcAbstracts != null) && (searchContainerMap != null)) {
-                Iterator i, ci = searchContainerMap.entrySet().iterator();
-                Map.Entry entry;
-                String wordhash;
-                indexContainer container;
-                TreeMap singleAbstract;
-                String mypeerhash = yacyCore.seedDB.mySeed.hash;
-                while (ci.hasNext()) {
-                    entry = (Map.Entry) ci.next();
-                    wordhash = (String) entry.getKey();
-                    container = (indexContainer) entry.getValue();
-                    // collect all urlhashes from the container
-                    synchronized (rcAbstracts) {
-                        singleAbstract = (TreeMap) rcAbstracts.get(wordhash); // a mapping from url-hashes to a string of peer-hashes
-                        if (singleAbstract == null) singleAbstract = new TreeMap();
-                        i = container.entries();
-                        while (i.hasNext()) singleAbstract.put(((indexEntry) i.next()).urlHash(), mypeerhash);
-                        rcAbstracts.put(wordhash, singleAbstract);
-                    }
-                }
-            }
-            */
-            
-            // join and exlcude the local result
-            process.startTimer();
-            indexContainer rcLocal =
-                (searchContainerMaps == null) ?
-                  plasmaWordIndex.emptyContainer(null, 0) :
-                      indexContainer.joinExcludeContainers(
-                          searchContainerMaps[0].values(),
-                          searchContainerMaps[1].values(),
-                          query.maxDistance);
-            process.yield(JOIN, rcLocal.size());
-            localcount = rcLocal.size();
             
             // sort the local containers and truncate it to a limited count,
             // so following sortings together with the global results will be fast
             synchronized (rankedCache) {
-                rankedCache.insert(rcLocal, true);
+                rankedCache.execQuery(true);
+                localcount = rankedCache.filteredCount();
             }
         }
     }
@@ -367,7 +314,7 @@ public final class plasmaSearchEvent {
         }
             
         // check constraints
-        if ((!(query.constraint.equals(plasmaSearchQuery.catchall_constraint))) &&
+        if ((query.constraint != null) &&
             (query.constraint.get(plasmaCondenser.flag_cat_indexof)) &&
             (!(comp.title().startsWith("Index of")))) {
             final Iterator wi = query.queryHashes.iterator();
@@ -401,7 +348,7 @@ public final class plasmaSearchEvent {
         if (query.contentdom == plasmaSearchQuery.CONTENTDOM_TEXT) {
             // attach text snippet
             startTime = System.currentTimeMillis();
-            plasmaSnippetCache.TextSnippet snippet = plasmaSnippetCache.retrieveTextSnippet(comp.url(), snippetFetchWordHashes, (snippetFetchMode == 2), query.constraint.get(plasmaCondenser.flag_cat_indexof), 180, 3000, (snippetFetchMode == 2) ? Integer.MAX_VALUE : 100000);
+            plasmaSnippetCache.TextSnippet snippet = plasmaSnippetCache.retrieveTextSnippet(comp.url(), snippetFetchWordHashes, (snippetFetchMode == 2), ((query.constraint != null) && (query.constraint.get(plasmaCondenser.flag_cat_indexof))), 180, 3000, (snippetFetchMode == 2) ? Integer.MAX_VALUE : 100000);
             long snippetComputationTime = System.currentTimeMillis() - startTime;
             serverLog.logInfo("SEARCH_EVENT", "text snippet load time for " + comp.url() + ": " + snippetComputationTime + ", " + ((snippet.getErrorCode() < 11) ? "snippet found" : ("no snippet found (" + snippet.getError() + ")")));
             
@@ -550,7 +497,6 @@ public final class plasmaSearchEvent {
 
     private class resultWorker extends Thread {
         
-        private indexRWIEntry entry;   // entry this thread is working on
         private long timeout; // the date until this thread should try to work
         private long sleeptime; // the sleeptime of this thread at the beginning of its life
         private int id;
@@ -559,7 +505,6 @@ public final class plasmaSearchEvent {
             this.id = id;
             this.timeout = System.currentTimeMillis() + lifetime;
             this.sleeptime = lifetime / 10 * id;
-            this.entry = null;
         }
 
         public void run() {
@@ -568,34 +513,15 @@ public final class plasmaSearchEvent {
             if (anyRemoteSearchAlive()) try {Thread.sleep(this.sleeptime);} catch (InterruptedException e1) {}
             
             // start fetching urls and snippets
-            while (true) {
-                
-                if (resultList.size() > query.neededResults() + query.displayResults()) break; // computed enough
-
-                if (System.currentTimeMillis() > this.timeout) break; // time is over
+            indexURLEntry page;
+            while ((resultList.size() < query.neededResults() + query.displayResults()) &&
+                   (System.currentTimeMillis() < this.timeout) &&
+                   ((page = rankedCache.bestURL(true)) != null)) {
+                if (anyResultWith(page.hash())) continue;
+                if (anyFailureWith(page.hash())) continue;
                 
                 // try secondary search
                 prepareSecondarySearch(); // will be executed only once
-                
-                // fetch next entry to work on
-                this.entry = null;
-                entry = nextOrder();
-                if (entry == null) {
-                    if (anyRemoteSearchAlive()) {
-                        // wait and try again
-                        try {Thread.sleep(100);} catch (InterruptedException e) {}
-                        continue;
-                    } else {
-                        // we will not see that there come more results in
-                        break;
-                    }
-                }
-                
-                indexURLEntry page = wordIndex.loadedURL.load(entry.urlHash(), entry, 0);
-                if (page == null) {
-                    registerFailure(entry.urlHash(), "url does not exist in lurl-db");
-                    continue;
-                }
                 
                 ResultEntry resultEntry = obtainResultEntry(page, 2);
                 if (resultEntry == null) continue; // the entry had some problems, cannot be used
@@ -615,29 +541,6 @@ public final class plasmaSearchEvent {
                 System.out.println("DEBUG SNIPPET_LOADING: thread " + id + " got " + resultEntry.url());
             }
             serverLog.logInfo("SEARCH", "resultWorker thread " + id + " terminated");
-        }
-        
-        private indexRWIEntry nextOrder() {
-            synchronized (rankedCache) {
-                Iterator i = rankedCache.entries(null, false);
-                indexRWIEntry entry;
-                String urlhash;
-                while (i.hasNext()) {
-                    entry = (indexRWIEntry) i.next();
-                    urlhash = entry.urlHash();
-                    if ((anyFailureWith(urlhash)) || (anyWorkerWith(urlhash)) || (anyResultWith(urlhash))) continue;
-                    return entry;
-                }
-            }
-            return null; // no more entries available
-        }
-        
-        private boolean anyWorkerWith(String urlhash) {
-            for (int i = 0; i < workerThreadCount; i++) {
-                if ((workerThreads[i] == null) || (workerThreads[i] == this)) continue;
-                if ((workerThreads[i].entry != null) && (workerThreads[i].entry.urlHash().equals(urlhash))) return true;
-            }
-            return false;
         }
         
         private boolean anyResultWith(String urlhash) {
@@ -681,7 +584,7 @@ public final class plasmaSearchEvent {
             // fetch the best entry from the resultList, not the entry from item position
             // whenever a specific entry was switched in its position and was returned here
             // a moving pointer is set to assign that item position as not changeable
-            int bestpick = postRankingFavourite(item);
+            int bestpick = item; //postRankingFavourite(item);
             if (bestpick != item) {
                 // switch the elements
                 ResultEntry buf = (ResultEntry) this.resultList.get(bestpick);
@@ -694,68 +597,6 @@ public final class plasmaSearchEvent {
             return (ResultEntry) this.resultList.get(item);
         }
     }
-    
-    private int postRankingFavourite(int item) {
-        // do a post-ranking on resultList, which should be locked upon time of this call
-        long rank, bestrank = 0;
-        int bestitem = item;
-        ResultEntry entry;
-        for (int i = item; i < this.resultList.size(); i++) {
-            entry = (ResultEntry) this.resultList.get(i);
-            rank = this.ranking.postRanking(this.query, this.references(10), entry, item);
-            if (rank > bestrank) {
-                bestrank = rank;
-                bestitem = i;
-            }
-        }
-        return bestitem;
-    }
-    
-    /*
-    public void removeRedundant() {
-        // remove all urls from the pageAcc structure that occur double by specific redundancy rules
-        // a link is redundant, if a sub-path of the url is cited before. redundant urls are removed
-        // we find redundant urls by iteration over all elements in pageAcc
-        Iterator i = pageAcc.entrySet().iterator();
-        HashMap paths = new HashMap(); // a url-subpath to pageAcc-key relation
-        Map.Entry entry;
-
-        // first scan all entries and find all urls that are referenced
-        while (i.hasNext()) {
-            entry = (Map.Entry) i.next();
-            paths.put(((indexURLEntry) entry.getValue()).comp().url().toNormalform(true, true), entry.getKey());
-            //if (path != null) path = shortenPath(path);
-            //if (path != null) paths.put(path, entry.getKey());
-        }
-
-        // now scan the pageAcc again and remove all redundant urls
-        i = pageAcc.entrySet().iterator();
-        String shorten;
-        while (i.hasNext()) {
-            entry = (Map.Entry) i.next();
-            shorten = shortenPath(((indexURLEntry) entry.getValue()).comp().url().toNormalform(true, true));
-            // scan all subpaths of the url
-            while (shorten != null) {
-                if (pageAcc.size() <= query.wantedResults) break;
-                if (paths.containsKey(shorten)) {
-                    //System.out.println("deleting path from search result: " + path + " is redundant to " + shorten);
-                    try {
-                        i.remove();
-                    } catch (IllegalStateException e) {
-
-                    }
-                }
-                shorten = shortenPath(shorten);
-            }
-        }
-    }
-
-    private static String shortenPath(String path) {
-        int pos = path.lastIndexOf('/');
-        if (pos < 0) return null;
-        return path.substring(0, pos);
-    }
-    */
     
     public ArrayList completeResults(long waitingtime) {
         long timeout = System.currentTimeMillis() + waitingtime;

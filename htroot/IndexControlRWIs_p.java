@@ -46,7 +46,6 @@ import de.anomic.plasma.plasmaSearchEvent;
 import de.anomic.plasma.plasmaSearchQuery;
 import de.anomic.plasma.plasmaSearchRankingProcess;
 import de.anomic.plasma.plasmaSwitchboard;
-import de.anomic.plasma.plasmaWordIndex;
 import de.anomic.plasma.urlPattern.abstractURLPattern;
 import de.anomic.plasma.urlPattern.plasmaURLPattern;
 import de.anomic.server.serverDate;
@@ -92,8 +91,8 @@ public class IndexControlRWIs_p {
             if (post.containsKey("keystringsearch")) {
                 keyhash = plasmaCondenser.word2hash(keystring);
                 prop.put("keyhash", keyhash);
-                final plasmaWordIndex.Finding finding = genSearchresult(prop, sb, keyhash, null, false, sortorder);
-                if (finding.size() == 0) {
+                final plasmaSearchRankingProcess ranking = genSearchresult(prop, sb, keyhash, null, sortorder, false);
+                if (ranking.filteredCount() == 0) {
                     prop.put("searchresult", 1);
                     prop.put("searchresult_word", keystring);
                 }
@@ -103,8 +102,8 @@ public class IndexControlRWIs_p {
                 if (keystring.length() == 0 || !plasmaCondenser.word2hash(keystring).equals(keyhash)) {
                     prop.put("keystring", "&lt;not possible to compute word from hash&gt;");
                 }
-                final plasmaWordIndex.Finding finding = genSearchresult(prop, sb, keyhash, null, false, sortorder);
-                if (finding.size() == 0) {
+                final plasmaSearchRankingProcess ranking = genSearchresult(prop, sb, keyhash, null, sortorder, false);
+                if (ranking.filteredCount() == 0) {
                     prop.put("searchresult", 2);
                     prop.put("searchresult_wordhash", keyhash);
                 }
@@ -162,8 +161,8 @@ public class IndexControlRWIs_p {
                 }
                 kelondroBitfield flags = compileFlags(post);
                 int count = (post.get("lines", "all").equals("all")) ? -1 : post.getInt("lines", -1);
-                final plasmaWordIndex.Finding finding = genSearchresult(prop, sb, keyhash, flags, true, sortorder);
-                genURLList(prop, keyhash, keystring, finding, flags, count, sortorder);
+                final plasmaSearchRankingProcess ranking = genSearchresult(prop, sb, keyhash, flags, sortorder, true);
+                genURLList(prop, keyhash, keystring, ranking, flags, count, sortorder);
             }
 
             // transfer to other peer
@@ -319,11 +318,11 @@ public class IndexControlRWIs_p {
     
     private static kelondroBitfield compileFlags(serverObjects post) {
         kelondroBitfield b = new kelondroBitfield(4);
-        if (post.get("allurl", "").equals("on")) {
-            for (int i = 0; i < 32; i++) {b.set(i, true);}
-            return b;
+        if (post.get("allurl", "").equals("on")) return null;
+        if (post.get("flags") != null) {
+            if (post.get("flags","").length() == 0) return null;
+            return new kelondroBitfield(4, (String) post.get("flags"));
         }
-        if (post.get("flags") != null) return new kelondroBitfield(4, (String) post.get("flags"));
         if (post.get("reference", "").equals("on")) b.set(indexRWIEntry.flag_app_reference, true);
         if (post.get("description", "").equals("on")) b.set(indexRWIEntry.flag_app_descr, true);
         if (post.get("author", "").equals("on")) b.set(indexRWIEntry.flag_app_author, true);
@@ -359,51 +358,52 @@ public class IndexControlRWIs_p {
         }
     }
 
-    private static plasmaWordIndex.Finding genSearchresult(serverObjects prop, plasmaSwitchboard sb, String keyhash, kelondroBitfield filter, boolean urlfetch, int sortorder) {
-        final plasmaWordIndex.Finding finding = sb.wordIndex.retrieveURLs(new plasmaSearchQuery(keyhash, -1, filter), urlfetch, sortorder, sb.getRanking());
-        if (finding.size() == 0) {
+    private static plasmaSearchRankingProcess genSearchresult(serverObjects prop, plasmaSwitchboard sb, String keyhash, kelondroBitfield filter, int sortorder, boolean fetchURLs) {
+        plasmaSearchQuery query = new plasmaSearchQuery(keyhash, -1, filter);
+        plasmaSearchRankingProcess ranked = new plasmaSearchRankingProcess(sb.wordIndex, query, null, sb.getRanking(), sortorder, Integer.MAX_VALUE);
+        ranked.execQuery(fetchURLs);
+        
+        if (ranked.filteredCount() == 0) {
             prop.put("searchresult", 2);
             prop.put("searchresult_wordhash", keyhash);
         } else {
             prop.put("searchresult", 3);
-            prop.put("searchresult_allurl", finding.size());
-            prop.put("searchresult_reference", finding.flagcount()[indexRWIEntry.flag_app_reference]);
-            prop.put("searchresult_description", finding.flagcount()[indexRWIEntry.flag_app_descr]);
-            prop.put("searchresult_author", finding.flagcount()[indexRWIEntry.flag_app_author]);
-            prop.put("searchresult_tag", finding.flagcount()[indexRWIEntry.flag_app_tags]);
-            prop.put("searchresult_url", finding.flagcount()[indexRWIEntry.flag_app_url]);
-            prop.put("searchresult_emphasized", finding.flagcount()[indexRWIEntry.flag_app_emphasized]);
-            prop.put("searchresult_image", finding.flagcount()[plasmaCondenser.flag_cat_hasimage]);
-            prop.put("searchresult_audio", finding.flagcount()[plasmaCondenser.flag_cat_hasaudio]);
-            prop.put("searchresult_video", finding.flagcount()[plasmaCondenser.flag_cat_hasvideo]);
-            prop.put("searchresult_app", finding.flagcount()[plasmaCondenser.flag_cat_hasapp]);
-            prop.put("searchresult_indexof", finding.flagcount()[plasmaCondenser.flag_cat_indexof]);
+            prop.put("searchresult_allurl", ranked.filteredCount());
+            prop.put("searchresult_reference", ranked.flagCount()[indexRWIEntry.flag_app_reference]);
+            prop.put("searchresult_description", ranked.flagCount()[indexRWIEntry.flag_app_descr]);
+            prop.put("searchresult_author", ranked.flagCount()[indexRWIEntry.flag_app_author]);
+            prop.put("searchresult_tag", ranked.flagCount()[indexRWIEntry.flag_app_tags]);
+            prop.put("searchresult_url", ranked.flagCount()[indexRWIEntry.flag_app_url]);
+            prop.put("searchresult_emphasized", ranked.flagCount()[indexRWIEntry.flag_app_emphasized]);
+            prop.put("searchresult_image", ranked.flagCount()[plasmaCondenser.flag_cat_hasimage]);
+            prop.put("searchresult_audio", ranked.flagCount()[plasmaCondenser.flag_cat_hasaudio]);
+            prop.put("searchresult_video", ranked.flagCount()[plasmaCondenser.flag_cat_hasvideo]);
+            prop.put("searchresult_app", ranked.flagCount()[plasmaCondenser.flag_cat_hasapp]);
+            prop.put("searchresult_indexof", ranked.flagCount()[plasmaCondenser.flag_cat_indexof]);
         }
-        return finding;
+        return ranked;
     }
     
-    private static void genURLList(serverObjects prop, String keyhash, String keystring, plasmaWordIndex.Finding finding, kelondroBitfield flags, int maxlines, int ordering) {
+    private static void genURLList(serverObjects prop, String keyhash, String keystring, plasmaSearchRankingProcess ranked, kelondroBitfield flags, int maxlines, int ordering) {
         // search for a word hash and generate a list of url links
         prop.put("genUrlList_keyHash", keyhash);
         
-        if (finding.size() == 0) {
+        if (ranked.filteredCount() == 0) {
             prop.put("genUrlList", 1);
             prop.put("genUrlList_count", 0);
             prop.put("searchresult", 2);
         } else {
             prop.put("genUrlList", 2);
             prop.put("searchresult", 3);
-            prop.put("genUrlList_flags", flags.exportB64());
+            prop.put("genUrlList_flags", (flags == null) ? "" : flags.exportB64());
             prop.put("genUrlList_lines", maxlines);
             prop.put("genUrlList_ordering", ordering);
             int i = 0;
             yacyURL url;
-            Iterator iter = finding.urls();
             indexURLEntry entry;
             String us;
             long rn = -1;
-            while (iter.hasNext()) {
-                entry = (indexURLEntry) iter.next();
+            while ((ranked.size() > 0) && ((entry = ranked.bestURL(false)) != null)) {
                 if ((entry == null) || (entry.comp() == null)) continue;
                 url = entry.comp().url();
                 if (url == null) continue;
@@ -452,7 +452,7 @@ public class IndexControlRWIs_p {
                 i++;
                 if ((maxlines >= 0) && (i >= maxlines)) break;
             }
-            iter = finding.miss().iterator();
+            Iterator iter = ranked.miss(); // iterates url hash strings
             while (iter.hasNext()) {
                 us = (String) iter.next();
                 prop.put("genUrlList_urlList_"+i+"_urlExists", "0");

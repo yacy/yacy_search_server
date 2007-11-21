@@ -34,7 +34,6 @@ import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Map;
 import java.util.Set;
-import java.util.TreeMap;
 import java.util.TreeSet;
 
 import de.anomic.htmlFilter.htmlFilterContentScraper;
@@ -47,7 +46,6 @@ import de.anomic.index.indexRWIEntry;
 import de.anomic.index.indexRWIRowEntry;
 import de.anomic.index.indexURLEntry;
 import de.anomic.kelondro.kelondroBase64Order;
-import de.anomic.kelondro.kelondroBitfield;
 import de.anomic.kelondro.kelondroCloneableIterator;
 import de.anomic.kelondro.kelondroMergeIterator;
 import de.anomic.kelondro.kelondroOrder;
@@ -65,7 +63,7 @@ public final class plasmaWordIndex implements indexRI {
     public  static final long wCacheMaxAge   = 1000 * 60 * 30; // milliseconds; 30 minutes
     public  static final int  wCacheMaxChunk =  400;           // maximum number of references for each urlhash
     public  static final int  lowcachedivisor = 320;
-    public  static final int  maxCollectionPartition = 8; // should be 7
+    public  static final int  maxCollectionPartition = 7; // should be 7
     
     private final kelondroOrder      indexOrder = kelondroBase64Order.enhancedCoder;
     private final indexRAMRI         dhtOutCache, dhtInCache;
@@ -405,115 +403,6 @@ public final class plasmaWordIndex implements indexRI {
                 true,
                 true);
         return new Map[]{inclusionContainers, exclusionContainers};
-    }
-    
-    public Finding retrieveURLs(plasmaSearchQuery query, boolean loadurl, int sortorder, plasmaSearchRankingProfile ranking) {
-        // search for a word hash and generate a list of url links
-        // sortorder: 0 = hash, 1 = url, 2 = ranking
-    	assert query.queryHashes.size() == 1;
-    	final TreeSet mi = new TreeSet();
-        String keyhash = (String) query.queryHashes.first();
-    	kelondroBitfield filter = query.constraint;
-        indexContainer index = getContainer(keyhash, null);
-        indexRWIEntry ientry;
-        indexURLEntry uentry;
-        final int[] c = new int[32];
-    	for (int i = 0; i < 32; i++) {c[i] = 0;}
-    	
-        if ((index == null) || (index.size() == 0)) {
-        	return new Finding(mi.iterator(), mi.iterator(), mi, 0, c);
-        }
-        
-    	if (sortorder == 2) {
-        	plasmaSearchRankingProcess process = new plasmaSearchRankingProcess(query, null, ranking, query.neededResults());
-        	process.insert(index, true);
-        	return new Finding(process.entries(this, true), null, mi, process.filteredCount(), process.flagCount());
-        } else {
-    		final TreeMap tm = new TreeMap();
-        	final ArrayList indexes = new ArrayList();
-	        
-	        final Iterator en = index.entries();
-	        // generate a new map where the urls are sorted (not by hash but by the url text)
-	        
-	        loop: while (en.hasNext()) {
-	            ientry = (indexRWIEntry) en.next();
-	
-	            // test if ientry matches with filter
-	            if (filter != null) {
-	                // if all = true: let only entries pass that has all matching bits
-	                // if all = false: let all entries pass that has at least one matching bit
-	                if (query.allofconstraint) {
-	                    for (int i = 0; i < 32; i++) {
-	                        if ((filter.get(i)) && (!ientry.flags().get(i))) continue loop;
-	                    }
-	                } else {
-	                    boolean nok = true;
-	                    flagtest: for (int i = 0; i < 32; i++) {
-	                        if ((filter.get(i)) && (ientry.flags().get(i))) {nok = false; break flagtest;}
-	                    }
-	                    if (nok) continue loop;
-	                }
-	            }
-	            
-	            // increase flag counts
-	            for (int i = 0; i < 32; i++) {
-	                if (ientry.flags().get(i)) {c[i]++;}
-	            }
-	            
-	            // load url
-	            if (loadurl) {
-	                uentry = loadedURL.load(ientry.urlHash(), ientry, 0);
-	                if (uentry == null) {
-	                    mi.add(ientry.urlHash());
-	                } else {
-	                    if (sortorder == 0) {
-	                        tm.put(uentry.comp().url().toNormalform(false, true), uentry);
-	                    }
-	                    if (sortorder == 1) {
-	                        tm.put(ientry.urlHash(), uentry);
-	                    }
-	                }
-	            } else {
-	                indexes.add(ientry);
-	            }
-	            if ((query.neededResults() > 0) && (mi.size() + tm.size() > query.neededResults())) break loop;
-	        } // end loop
-	        if (loadurl) {
-	            return new Finding(tm.values().iterator(), null, mi, tm.size(), c);
-	        } else {
-	            return new Finding(null, indexes.iterator(), mi, indexes.size(), c);
-	        }
-        }
-    }
-    
-    public static class Finding {
-        private Iterator urls; // an iterator if indexURLEntry objects
-        private Iterator rwientries; // an iterator of indexRWIEntry objects
-        private Set misses; // a set of hashes where we did not found items
-        private int findcount;
-        private int[] flagcount;
-        public Finding(Iterator urls, Iterator rwientries, Set misses, int findcount, int[] flagcount) {
-            this.findcount = findcount;
-            this.urls = urls;
-            this.rwientries = rwientries;
-            this.misses = misses;
-            this.flagcount = flagcount;
-        }
-        public int size() {
-            return this.findcount;
-        }
-        public Iterator urls() {
-            return this.urls;
-        }
-        public Iterator rwientries() {
-            return this.rwientries;
-        }
-        public Set miss() {
-            return this.misses;
-        }
-        public int[] flagcount() {
-            return this.flagcount;
-        }
     }
     
     public int size() {

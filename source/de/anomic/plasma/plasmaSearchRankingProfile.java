@@ -44,9 +44,6 @@ package de.anomic.plasma;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
-import java.util.Set;
-
-import de.anomic.htmlFilter.htmlFilterContentScraper;
 
 public class plasmaSearchRankingProfile {
 
@@ -113,7 +110,7 @@ public class plasmaSearchRankingProfile {
         coeff_appauthor          = 13;
         coeff_apptags            = 8;
         coeff_appref             = 9;
-        coeff_appemph            = 11;
+        coeff_appemph            = 13;
         coeff_urlcompintoplist   = 3;
         coeff_descrcompintoplist = 2;
         coeff_prefer             = 15;
@@ -246,49 +243,6 @@ public class plasmaSearchRankingProfile {
             ext.append(entry.getValue());
         }
         return new String(ext);
-    }
-    
-    public long postRanking(
-                    plasmaSearchQuery query,
-                    Set topwords,
-                    plasmaSearchEvent.ResultEntry rentry,
-                    int position) {
-
-        long ranking = (255 - position) << 8;
-        
-        // for media search: prefer pages with many links
-        if (query.contentdom == plasmaSearchQuery.CONTENTDOM_IMAGE) ranking += rentry.limage() << coeff_cathasimage;
-        if (query.contentdom == plasmaSearchQuery.CONTENTDOM_AUDIO) ranking += rentry.laudio() << coeff_cathasaudio;
-        if (query.contentdom == plasmaSearchQuery.CONTENTDOM_VIDEO) ranking += rentry.lvideo() << coeff_cathasvideo;
-        if (query.contentdom == plasmaSearchQuery.CONTENTDOM_APP  ) ranking += rentry.lapp()   << coeff_cathasapp;
-        
-        // prefer hit with 'prefer' pattern
-        if (rentry.url().toNormalform(true, true).matches(query.prefer)) ranking += 256 << coeff_prefer;
-        if (rentry.title().matches(query.prefer)) ranking += 256 << coeff_prefer;
-        
-        // apply 'common-sense' heuristic using references
-        String urlstring = rentry.url().toNormalform(true, true);
-        String[] urlcomps = htmlFilterContentScraper.urlComps(urlstring);
-        String[] descrcomps = rentry.title().toLowerCase().split(htmlFilterContentScraper.splitrex);
-        for (int j = 0; j < urlcomps.length; j++) {
-            if (topwords.contains(urlcomps[j])) ranking += Math.max(1, 256 - urlstring.length()) << coeff_urlcompintoplist;
-        }
-        for (int j = 0; j < descrcomps.length; j++) {
-            if (topwords.contains(descrcomps[j])) ranking += Math.max(1, 256 - rentry.title().length()) << coeff_descrcompintoplist;
-        }
-
-        // apply query-in-result matching
-        Set urlcomph = plasmaCondenser.words2hashSet(urlcomps);
-        Set descrcomph = plasmaCondenser.words2hashSet(descrcomps);
-        Iterator shi = query.queryHashes.iterator();
-        String queryhash;
-        while (shi.hasNext()) {
-            queryhash = (String) shi.next();
-            if (urlcomph.contains(queryhash)) ranking += 256 << coeff_appurl;
-            if (descrcomph.contains(queryhash)) ranking += 256 << coeff_appdescr;
-        }
-
-        return ranking;
     }
     
 }
