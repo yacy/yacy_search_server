@@ -334,7 +334,8 @@ public final class plasmaSearchRankingProcess {
             long ranking = (bestEntry instanceof Long) ? ((Long) bestEntry).longValue() : 0;
             indexURLEntry u = wordIndex.loadedURL.load(ientry.urlHash(), ientry, ranking);
             if (u != null) {
-                this.handover.put(u.hash(), u.comp().url().toNormalform(true, false)); // remember that we handed over this url
+            	indexURLEntry.Components comp = u.comp();
+            	if (comp.url() != null) this.handover.put(u.hash(), comp.url().toNormalform(true, false)); // remember that we handed over this url
                 return u;
             }
             misses.add(ientry.urlHash());
