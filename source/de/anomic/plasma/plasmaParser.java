@@ -1,12 +1,16 @@
 // plasmaParser.java 
-// ------------------------
-// part of YaCy
-// (C) by Michael Peter Christen; mc@anomic.de
-// first published on http://www.anomic.de
-// Frankfurt, Germany, 2005
+// (C) 2005 by Michael Peter Christen; mc@yacy.net, Frankfurt a. M., Germany
+// first published in january 2005 on http://yacy.net
+// with contributions 02.05.2005 by Martin Thelian
 //
-// last major change: 02.05.2005 by Martin Thelian
+// This is a part of YaCy, a peer-to-peer based web search engine
 //
+// $LastChangedDate: 2006-04-02 22:40:07 +0200 (So, 02 Apr 2006) $
+// $LastChangedRevision: 1986 $
+// $LastChangedBy: orbiter $
+//
+// LICENSE
+// 
 // This program is free software; you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
 // the Free Software Foundation; either version 2 of the License, or
@@ -20,27 +24,6 @@
 // You should have received a copy of the GNU General Public License
 // along with this program; if not, write to the Free Software
 // Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
-//
-// Using this software in any meaning (reading, learning, copying, compiling,
-// running) means that you agree that the Author(s) is (are) not responsible
-// for cost, loss of data or any harm that may be caused directly or indirectly
-// by usage of this softare or this documentation. The usage of this software
-// is on your own risk. The installation and usage (starting/running) of this
-// software may allow other people or application to access your computer and
-// any attached devices and is highly dependent on the configuration of the
-// software which must be done by the user of the software; the author(s) is
-// (are) also not responsible for proper configuration and usage of the
-// software, even if provoked by documentation provided together with
-// the software.
-//
-// Any changes to this file according to the GPL as documented in the file
-// gpl.txt aside this file in the shipment you received can be done to the
-// lines that follows this copyright notice here, but changes must not be
-// done inside the copyright notive above. A re-distribution must contain
-// the intact and unchanged copyright notice.
-// Contributions and changes to the program code must be marked as such.
-
-// compile: javac -classpath lib/commons-collections.jar:lib/commons-pool.jar -sourcepath source source/de/anomic/plasma/plasmaParser.java
 
 package de.anomic.plasma;
 
@@ -78,15 +61,17 @@ import de.anomic.server.logging.serverLog;
 import de.anomic.yacy.yacyURL;
 
 public final class plasmaParser {
-    public static final String PARSER_MODE_PROXY   = "PROXY";
-    public static final String PARSER_MODE_CRAWLER = "CRAWLER";
+    public static final String PARSER_MODE_PROXY         = "PROXY";
+    public static final String PARSER_MODE_CRAWLER       = "CRAWLER";
     public static final String PARSER_MODE_URLREDIRECTOR = "URLREDIRECTOR";
-    public static final String PARSER_MODE_ICAP = "ICAP";
+    public static final String PARSER_MODE_ICAP          = "ICAP";
+    public static final String PARSER_MODE_IMAGE         = "IMAGE";
     public static final HashSet PARSER_MODE = new HashSet(Arrays.asList(new String[]{
             PARSER_MODE_PROXY,
             PARSER_MODE_CRAWLER,
             PARSER_MODE_ICAP,
-            PARSER_MODE_URLREDIRECTOR
+            PARSER_MODE_URLREDIRECTOR,
+            PARSER_MODE_IMAGE
     }));
     
     private static final HashMap parserConfigList = new HashMap();
@@ -98,15 +83,10 @@ public final class plasmaParser {
     public static final Properties availableParserList = new Properties();
     
     /**
-     * A list of file extensions that are supported by the html-parser and can
-     * be parsed in realtime.
+     * A list of file extensions and mime types that are supported by the html-parser
      */
-    public static final HashSet supportedRealtimeFileExt = new HashSet();
-    
-    /**
-     * A list of mimeTypes that can be parsed in Realtime (on the fly)
-     */
-    public static final HashSet realtimeParsableMimeTypes = new HashSet();    
+    public static final HashSet supportedHTMLFileExt = new HashSet();
+    public static final HashSet supportedHTMLMimeTypes = new HashSet();    
     
     private static final Properties mimeTypeLookupByFileExt = new Properties();
     static {
@@ -194,34 +174,24 @@ public final class plasmaParser {
     }
     
     /**
-     * This function is used to initialize the realtimeParsableMimeTypes List.
+     * This function is used to initialize the HTMLParsableMimeTypes List.
      * This list contains a list of mimeTypes that can be parsed in realtime by
      * the yacy html-Parser
-     * @param realtimeParsableMimeTypes a list of mimetypes that can be parsed by the 
+     * @param htmlParsableMimeTypes a list of mimetypes that can be parsed by the 
      * yacy html parser
      */
-    public static void initRealtimeParsableMimeTypes(String realtimeParsableMimeTypes) {
+    public static void initHTMLParsableMimeTypes(String htmlParsableMimeTypes) {
         LinkedList mimeTypes = new LinkedList();
-        if ((realtimeParsableMimeTypes == null) || (realtimeParsableMimeTypes.length() == 0)) {
-            // Nothing todo here
-        } else {            
-            String[] realtimeParsableMimeTypeList = realtimeParsableMimeTypes.split(",");        
-            for (int i = 0; i < realtimeParsableMimeTypeList.length; i++) mimeTypes.add(realtimeParsableMimeTypeList[i].toLowerCase().trim());
+        if ((htmlParsableMimeTypes == null) || (htmlParsableMimeTypes.length() == 0)) {
+            return;
         }
-        initRealtimeParsableMimeTypes(mimeTypes);
-    }
-    
-    /**
-     * This function is used to initialize the realtimeParsableMimeTypes List.
-     * This list contains a list of mimeTypes that can be parsed in realtime by
-     * the yacy html-Parser
-     * @param realtimeParsableMimeTypes a list of mimetypes that can be parsed by the 
-     * yacy html parser
-     */    
-    public static void initRealtimeParsableMimeTypes(List mimeTypesList) {
-        synchronized (realtimeParsableMimeTypes) {
-            realtimeParsableMimeTypes.clear();
-            realtimeParsableMimeTypes.addAll(mimeTypesList);
+        String[] realtimeParsableMimeTypeList = htmlParsableMimeTypes.split(",");        
+        for (int i = 0; i < realtimeParsableMimeTypeList.length; i++) {
+            mimeTypes.add(realtimeParsableMimeTypeList[i].toLowerCase().trim());
+        }
+        synchronized (supportedHTMLMimeTypes) {
+            supportedHTMLMimeTypes.clear();
+            supportedHTMLMimeTypes.addAll(mimeTypes);
         }        
     }
     
@@ -277,32 +247,31 @@ public final class plasmaParser {
         }        
     }
     
-    public static void initSupportedRealtimeFileExt(List supportedRealtimeFileExtList) {
-        synchronized (supportedRealtimeFileExt) {
-            supportedRealtimeFileExt.clear();
-            supportedRealtimeFileExt.addAll(supportedRealtimeFileExtList);
+    public static void initSupportedHTMLFileExt(List supportedRealtimeFileExtList) {
+        synchronized (supportedHTMLFileExt) {
+            supportedHTMLFileExt.clear();
+            supportedHTMLFileExt.addAll(supportedRealtimeFileExtList);
         }
     }
         
-    public static boolean realtimeParsableMimeTypesContains(String mimeType) {
-        mimeType = getRealMimeType(mimeType);
-        synchronized (realtimeParsableMimeTypes) {
-            return realtimeParsableMimeTypes.contains(mimeType);
+    public static boolean HTMLParsableMimeTypesContains(String mimeType) {
+        mimeType = normalizeMimeType(mimeType);
+        synchronized (supportedHTMLMimeTypes) {
+            return supportedHTMLMimeTypes.contains(mimeType);
         }
     }
     
-    public static boolean supportedRealTimeContent(yacyURL url, String mimeType) {
-        return realtimeParsableMimeTypesContains(mimeType) && supportedRealtimeFileExtContains(url);
+    public static boolean supportedHTMLContent(yacyURL url, String mimeType) {
+        return HTMLParsableMimeTypesContains(mimeType) && supportedHTMLFileExtContains(url);
     }    
     
-    public static boolean supportedRealtimeFileExtContains(yacyURL url) {
+    public static boolean supportedHTMLFileExtContains(yacyURL url) {
         String fileExt = getFileExt(url);
-        synchronized (supportedRealtimeFileExt) {
-            return supportedRealtimeFileExt.contains(fileExt);
+        synchronized (supportedHTMLFileExt) {
+            return supportedHTMLFileExt.contains(fileExt);
         }   
     }
 
-    
     public static String getFileExt(yacyURL url) {
         // getting the file path
         String name = url.getPath();
@@ -319,13 +288,12 @@ public final class plasmaParser {
         return name.substring(p + 1);        
     }
 
-    
     public static boolean mediaExtContains(String mediaExt) {
         if (mediaExt == null) return false;
         mediaExt = mediaExt.trim().toLowerCase();
         
-        synchronized (supportedRealtimeFileExt) {
-            if (supportedRealtimeFileExt.contains(mediaExt)) return false;
+        synchronized (supportedHTMLFileExt) {
+            if (supportedHTMLFileExt.contains(mediaExt)) return false;
         }        
         
         if (supportedFileExtContains(mediaExt)) return false;
@@ -407,7 +375,7 @@ public final class plasmaParser {
     	return encoding;
     }
     
-    public static String getRealMimeType(String mimeType) {
+    public static String normalizeMimeType(String mimeType) {
         //if (mimeType == null) doMimeTypeAnalysis
         if (mimeType == null) mimeType = "application/octet-stream";
         mimeType = mimeType.trim().toLowerCase();
@@ -616,7 +584,7 @@ public final class plasmaParser {
                 this.theLogger.logFine("Parsing '" + location + "' from stream");            
             
             // getting the mimetype of the document
-            mimeType = getRealMimeType(theMimeType);
+            mimeType = normalizeMimeType(theMimeType);
             
             // getting the file extension of the document
             String fileExt = getFileExt(location);
@@ -646,7 +614,7 @@ public final class plasmaParser {
                 theParser.setContentLength(contentLength);
                 // parse the resource
                 doc = theParser.parse(location, mimeType,documentCharset,sourceStream);
-            } else if (realtimeParsableMimeTypesContains(mimeType)) {
+            } else if (HTMLParsableMimeTypesContains(mimeType)) {
                 doc = parseHtml(location, mimeType, documentCharset, sourceStream);
             } else {
                 String errorMsg = "No parser available to parse mimetype '" + mimeType + "'";
@@ -749,7 +717,7 @@ public final class plasmaParser {
      */
     private Parser getParser(String mimeType) {
 
-        mimeType = getRealMimeType(mimeType);        
+        mimeType = normalizeMimeType(mimeType);        
         try {
             
             // determining the proper parser class name for the mimeType
@@ -781,17 +749,6 @@ public final class plasmaParser {
         return null;
         
     }
-    
-    /*
-    public static String urlNormalform(URL url) {
-        if (url == null) return null;
-        return urlNormalform(url.toString());
-    }
-    
-    public static String urlNormalform(String us) {
-        return htmlFilterContentScraper.urlNormalform(us);
-    }   
-    */
     
     static Map allReflinks(Set links) {
         // links is either a Set of Strings (with urls) or htmlFilterImageEntries
@@ -909,11 +866,8 @@ public final class plasmaParser {
             // creating a plasma parser
             plasmaParser theParser = new plasmaParser();
             
-            // configuring the realtime parsable mimeTypes
-            plasmaParser.initRealtimeParsableMimeTypes("application/xhtml+xml,text/html,text/plain,text/sgml");
-            
-            // configure all other supported mimeTypes
-            plasmaParser.enableAllParsers(PARSER_MODE_PROXY);
+            // configuring the html parsable mimeTypes
+            plasmaParser.initHTMLParsableMimeTypes("application/xhtml+xml,text/html,text/plain,text/sgml");
 
             // parsing the content
             plasmaParserDocument document = null;
@@ -955,17 +909,6 @@ public final class plasmaParser {
         }
     }
     
-    private static void enableAllParsers(String parserMode) {
-        if (!PARSER_MODE.contains(parserMode)) throw new IllegalArgumentException();
-        
-        plasmaParserConfig config = (plasmaParserConfig) parserConfigList.get(parserMode);
-        if (config == null) {
-            config = new plasmaParserConfig(parserMode);
-            parserConfigList.put(parserMode, config);
-        }
-        config.enableAllParsers();        
-    }
-    
     public static boolean supportedContent(yacyURL url, String mimeType) {
         if (url == null) throw new NullPointerException();
         
@@ -984,6 +927,7 @@ public final class plasmaParser {
         if (!PARSER_MODE.contains(parserMode)) throw new IllegalArgumentException();
         if (url == null) throw new NullPointerException();
         
+        if (parserMode.equals(PARSER_MODE_IMAGE)) return true;
         plasmaParserConfig config = (plasmaParserConfig) parserConfigList.get(parserMode);
         return (config == null)?false:config.supportedContent(url, mimeType);
     }

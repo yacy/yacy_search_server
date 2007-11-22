@@ -39,6 +39,7 @@ import de.anomic.plasma.plasmaCrawlNURL;
 import de.anomic.plasma.plasmaCrawlProfile;
 import de.anomic.plasma.plasmaCrawlZURL;
 import de.anomic.plasma.plasmaHTCache;
+import de.anomic.plasma.plasmaParser;
 import de.anomic.plasma.plasmaSwitchboard;
 import de.anomic.server.logging.serverLog;
 import de.anomic.tools.crypt;
@@ -518,7 +519,7 @@ public class plasmaCrawlQueues {
                 0, 
                 0);
         
-        return loader.load(centry);
+        return loader.load(centry, (forText) ? plasmaParser.PARSER_MODE_CRAWLER : plasmaParser.PARSER_MODE_IMAGE);
     }
     
     public int size() {
@@ -547,7 +548,7 @@ public class plasmaCrawlQueues {
                 } else {
                     // starting a load from the internet
                     this.entry.setStatus("worker-loading");
-                    String result = loader.process(this.entry);
+                    String result = loader.process(this.entry, plasmaParser.PARSER_MODE_CRAWLER);
                     if (result != null) {
                         plasmaCrawlZURL.Entry eentry = errorURL.newEntry(this.entry.url(), "cannot load: " + result);
                         eentry.store();

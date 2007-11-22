@@ -61,23 +61,23 @@ public final class plasmaProtocolLoader {
         return (HashSet) this.supportedProtocols.clone();
     }
     
-    public plasmaHTCache.Entry load(plasmaCrawlEntry entry) {
+    public plasmaHTCache.Entry load(plasmaCrawlEntry entry, String parserMode) {
         // getting the protocol of the next URL                
         String protocol = entry.url().getProtocol();
         
-        if ((protocol.equals("http") || (protocol.equals("https")))) return httpLoader.load(entry);
+        if ((protocol.equals("http") || (protocol.equals("https")))) return httpLoader.load(entry, parserMode);
         if (protocol.equals("ftp")) return ftpLoader.load(entry);
         
         this.log.logWarning("Unsupported protocol '" + protocol + "' in url " + entry.url());
         return null;
     }
     
-    public String process(plasmaCrawlEntry entry) {
+    public String process(plasmaCrawlEntry entry, String parserMode) {
         // load a resource, store it to htcache and push queue entry to switchboard queue
         // returns null if everything went fine, a fail reason string if a problem occurred
         plasmaHTCache.Entry h;
         try {
-            h = load(entry);
+            h = load(entry, parserMode);
             entry.setStatus("loaded");
             if (h == null) return "load failed";
             boolean stored = sb.htEntryStoreProcess(h);

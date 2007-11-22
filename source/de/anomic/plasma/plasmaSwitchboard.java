@@ -563,11 +563,12 @@ public final class plasmaSwitchboard extends serverAbstractSwitch implements ser
     // Parser settings
     //////////////////////////////////////////////////////////////////////////////////////////////
     
-    public static final String PARSER_MIMETYPES_REALTIME        = "parseableRealtimeMimeTypes";
+    public static final String PARSER_MIMETYPES_HTML            = "parseableMimeTypes.HTML";
     public static final String PARSER_MIMETYPES_PROXY           = "parseableMimeTypes.PROXY";
     public static final String PARSER_MIMETYPES_CRAWLER         = "parseableMimeTypes.CRAWLER";
     public static final String PARSER_MIMETYPES_ICAP            = "parseableMimeTypes.ICAP";
     public static final String PARSER_MIMETYPES_URLREDIRECTOR   = "parseableMimeTypes.URLREDIRECTOR";
+    public static final String PARSER_MIMETYPES_IMAGE           = "parseableMimeTypes.IMAGE";
     public static final String PARSER_MEDIA_EXT                 = "mediaExt";
     public static final String PARSER_MEDIA_EXT_PARSEABLE       = "parseableExt";
     
@@ -1180,15 +1181,16 @@ public final class plasmaSwitchboard extends serverAbstractSwitch implements ser
         // define an extension-blacklist
         log.logConfig("Parser: Initializing Extension Mappings for Media/Parser");
         plasmaParser.initMediaExt(plasmaParser.extString2extList(getConfig(PARSER_MEDIA_EXT,"")));
-        plasmaParser.initSupportedRealtimeFileExt(plasmaParser.extString2extList(getConfig(PARSER_MEDIA_EXT_PARSEABLE,"")));
+        plasmaParser.initSupportedHTMLFileExt(plasmaParser.extString2extList(getConfig(PARSER_MEDIA_EXT_PARSEABLE,"")));
         
         // define a realtime parsable mimetype list
         log.logConfig("Parser: Initializing Mime Types");
-        plasmaParser.initRealtimeParsableMimeTypes(getConfig(PARSER_MIMETYPES_REALTIME,"application/xhtml+xml,text/html,text/plain"));
-        plasmaParser.initParseableMimeTypes(plasmaParser.PARSER_MODE_PROXY,getConfig(PARSER_MIMETYPES_PROXY,null));
-        plasmaParser.initParseableMimeTypes(plasmaParser.PARSER_MODE_CRAWLER,getConfig(PARSER_MIMETYPES_CRAWLER,null));
-        plasmaParser.initParseableMimeTypes(plasmaParser.PARSER_MODE_ICAP,getConfig(PARSER_MIMETYPES_ICAP,null));
-        plasmaParser.initParseableMimeTypes(plasmaParser.PARSER_MODE_URLREDIRECTOR,getConfig(PARSER_MIMETYPES_URLREDIRECTOR,null));
+        plasmaParser.initHTMLParsableMimeTypes(getConfig(PARSER_MIMETYPES_HTML, "application/xhtml+xml,text/html,text/plain"));
+        plasmaParser.initParseableMimeTypes(plasmaParser.PARSER_MODE_PROXY, getConfig(PARSER_MIMETYPES_PROXY, null));
+        plasmaParser.initParseableMimeTypes(plasmaParser.PARSER_MODE_CRAWLER, getConfig(PARSER_MIMETYPES_CRAWLER, null));
+        plasmaParser.initParseableMimeTypes(plasmaParser.PARSER_MODE_ICAP, getConfig(PARSER_MIMETYPES_ICAP, null));
+        plasmaParser.initParseableMimeTypes(plasmaParser.PARSER_MODE_URLREDIRECTOR, getConfig(PARSER_MIMETYPES_URLREDIRECTOR, null));
+        plasmaParser.initParseableMimeTypes(plasmaParser.PARSER_MODE_IMAGE, getConfig(PARSER_MIMETYPES_IMAGE, null));
         
         // start a loader
         log.logConfig("Starting Crawl Loader");

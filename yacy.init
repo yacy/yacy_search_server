@@ -224,9 +224,9 @@ proxyCacheMigration = true
 
 # the following mime-types are the whitelist for indexing
 #
-# parseableRealtimeMimeTypes: specifies mime-types that can be indexed on the fly
+# parseableMimeTypes.HTML: specifies mime-types that can be indexed with built-in html parser
 # parseableMime: specifies mime-types that can be indexed but not on the fly
-parseableRealtimeMimeTypes=application/xhtml+xml,text/html,text/plain,text/sgml
+parseableMimeTypes.HTML=application/xhtml+xml,text/html,text/plain,text/sgml
 parseableMimeTypes=
 parseableMimeTypes__pro=application/atom+xml,application/bzip2,application/excel,application/gzip,application/java-archive,application/msexcel,application/mspowerpoint,application/msword,application/octet-stream,application/pdf,application/postscript,application/powerpoint,application/rdf+xml,application/rss+xml,application/rtf,application/tar,application/vcard,application/vnd.ms-excel,application/vnd.ms-powerpoint,application/vnd.oasis.opendocument.text,application/x-7z-compressed,application/x-bz2,application/x-bzip2,application/x-compress,application/x-compressed,application/x-excel,application/x-gzip,application/x-msexcel,application/x-redhat packet manager,application/x-redhat-package-manager,application/x-rpm,application/x-shockwave-flash,application/x-shockwave-flash2-preview,application/x-tar,application/x-vnd.oasis.opendocument.text,application/x-xml,application/x-zip,application/x-zip-compressed,application/xml,application/zip,text/postscript,text/rss,text/rtf,text/x-vcard,text/xml
 parseableMimeTypes.CRAWLER=
@@ -237,6 +237,7 @@ parseableMimeTypes.ICAP=
 parseableMimeTypes.ICAP__pro=application/atom+xml,application/bzip2,application/excel,application/gzip,application/java-archive,application/msexcel,application/mspowerpoint,application/msword,application/octet-stream,application/pdf,application/postscript,application/powerpoint,application/rdf+xml,application/rss+xml,application/rtf,application/tar,application/vcard,application/vnd.ms-excel,application/vnd.ms-powerpoint,application/vnd.oasis.opendocument.text,application/x-7z-compressed,application/x-bz2,application/x-bzip2,application/x-compress,application/x-compressed,application/x-excel,application/x-gzip,application/x-msexcel,application/x-redhat packet manager,application/x-redhat-package-manager,application/x-rpm,application/x-shockwave-flash,application/x-shockwave-flash2-preview,application/x-tar,application/x-vnd.oasis.opendocument.text,application/x-xml,application/x-zip,application/x-zip-compressed,application/xml,application/zip,text/postscript,text/rss,text/rtf,text/x-vcard,text/xml
 parseableMimeTypes.URLREDIRECTOR=
 parseableMimeTypes.URLREDIRECTOR__pro=application/atom+xml,application/bzip2,application/excel,application/gzip,application/java-archive,application/msexcel,application/mspowerpoint,application/msword,application/octet-stream,application/pdf,application/postscript,application/powerpoint,application/rdf+xml,application/rss+xml,application/rtf,application/tar,application/vcard,application/vnd.ms-excel,application/vnd.ms-powerpoint,application/vnd.oasis.opendocument.text,application/x-7z-compressed,application/x-bz2,application/x-bzip2,application/x-compress,application/x-compressed,application/x-excel,application/x-gzip,application/x-msexcel,application/x-redhat packet manager,application/x-redhat-package-manager,application/x-rpm,application/x-shockwave-flash,application/x-shockwave-flash2-preview,application/x-tar,application/x-vnd.oasis.opendocument.text,application/x-xml,application/x-zip,application/x-zip-compressed,application/xml,application/zip,text/postscript,text/rss,text/rtf,text/x-vcard,text/xml
+parseableMimeTypes.IMAGE=image/gif,image/jpeg,image/png,image/tiff,image/vnd.wap.wbmp,image/x-icon,image/bmp
 
 # media extension string
 # a comma-separated list of extensions that denote media file formats

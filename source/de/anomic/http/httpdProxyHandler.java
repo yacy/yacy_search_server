@@ -581,7 +581,7 @@ public final class httpdProxyHandler {
             // handle file types and make (possibly transforming) output stream
             if (
                     (!transformer.isIdentityTransformer()) &&
-                    (plasmaParser.supportedRealTimeContent(url,res.responseHeader.mime()))
+                    (plasmaParser.supportedHTMLContent(url,res.responseHeader.mime()))
                 ) {
                 // make a transformer
                 theLogger.logFine("create transformer for URL " + url);
@@ -794,8 +794,8 @@ public final class httpdProxyHandler {
                 
                 // make a transformer
                 if (( !transformer.isIdentityTransformer()) &&
-                        (ext == null || !plasmaParser.supportedRealtimeFileExtContains(url)) &&
-                        (plasmaParser.realtimeParsableMimeTypesContains(cachedResponseHeader.mime()))) {
+                        (ext == null || !plasmaParser.supportedHTMLFileExtContains(url)) &&
+                        (plasmaParser.HTMLParsableMimeTypesContains(cachedResponseHeader.mime()))) {
                     hfos = new htmlFilterWriter((chunkedOut != null) ? chunkedOut : respond, charSet, null, transformer, (ext.length() == 0));
                 } else {
                     hfos = (gzippedOut != null) ? gzippedOut : ((chunkedOut != null)? chunkedOut : respond);

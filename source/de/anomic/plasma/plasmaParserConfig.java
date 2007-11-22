@@ -88,7 +88,7 @@ public class plasmaParserConfig {
     public boolean supportedContent(yacyURL url, String mimeType) {
         // TODO: we need some exceptions here to index URLs like this
         //       http://www.musicabona.com/respighi/12668/cd/index.html.fr
-        mimeType = plasmaParser.getRealMimeType(mimeType);
+        mimeType = plasmaParser.normalizeMimeType(mimeType);
         if (
                 mimeType.equals("text/html") ||
                 mimeType.equals("application/xhtml+xml") ||
@@ -100,10 +100,10 @@ public class plasmaParserConfig {
     }        
     
     public boolean supportedMimeTypesContains(String mimeType) {
-        mimeType = plasmaParser.getRealMimeType(mimeType);
+        mimeType = plasmaParser.normalizeMimeType(mimeType);
         
-        synchronized (plasmaParser.realtimeParsableMimeTypes) {
-            if (plasmaParser.realtimeParsableMimeTypes.contains(mimeType)) return true;
+        synchronized (plasmaParser.supportedHTMLMimeTypes) {
+            if (plasmaParser.supportedHTMLMimeTypes.contains(mimeType)) return true;
         }        
 
         synchronized (this.enabledParserList) { 
@@ -124,8 +124,8 @@ public class plasmaParserConfig {
         if (fileExt == null) return false;        
         fileExt = fileExt.trim().toLowerCase();
 
-        synchronized (plasmaParser.supportedRealtimeFileExt) {
-            if (plasmaParser.supportedRealtimeFileExt.contains(fileExt)) return true;
+        synchronized (plasmaParser.supportedHTMLFileExt) {
+            if (plasmaParser.supportedHTMLFileExt.contains(fileExt)) return true;
         }        
 
         synchronized(this.supportedFileExt) {

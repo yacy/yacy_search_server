@@ -130,11 +130,11 @@ public final class plasmaHTTPLoader {
         );
     }    
    
-    public plasmaHTCache.Entry load(plasmaCrawlEntry entry) {
-        return load(entry, DEFAULT_CRAWLING_RETRY_COUNT);
+    public plasmaHTCache.Entry load(plasmaCrawlEntry entry, String parserMode) {
+        return load(entry, parserMode, DEFAULT_CRAWLING_RETRY_COUNT);
     }
     
-    private plasmaHTCache.Entry load(plasmaCrawlEntry entry, int retryCount) {
+    private plasmaHTCache.Entry load(plasmaCrawlEntry entry, String parserMode, int retryCount) {
 
         if (retryCount < 0) {
             this.log.logInfo("Redirection counter exceeded for URL " + entry.url().toString() + ". Processing aborted.");
@@ -212,7 +212,7 @@ public final class plasmaHTTPLoader {
                 // request has been placed and result has been returned. work off response
                 File cacheFile = plasmaHTCache.getCachePath(entry.url());
                 try {
-                    if (plasmaParser.supportedContent(plasmaParser.PARSER_MODE_CRAWLER,entry.url(),res.responseHeader.mime())) {
+                    if (plasmaParser.supportedContent(parserMode, entry.url(), res.responseHeader.mime())) {
                         // delete old content
                         if (cacheFile.isFile()) {
                             plasmaHTCache.deleteURLfromCache(entry.url());
@@ -310,7 +310,7 @@ public final class plasmaHTTPLoader {
                         
                         // retry crawling with new url
                         entry.redirectURL(redirectionUrl);
-                        return load(entry, retryCount - 1);
+                        return load(entry, plasmaParser.PARSER_MODE_URLREDIRECTOR, retryCount - 1);
                         
                     }
             } else {

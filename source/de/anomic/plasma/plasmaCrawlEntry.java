@@ -1,6 +1,6 @@
-// plasmaCrawlBalancerEntry.java
-// (C) 2007 by Michael Peter Christen; mc@anomic.de, Frankfurt a. M., Germany
-// first published 14.03.2007 on http://www.anomic.de
+// plasmaCrawlEntry.java
+// (C) 2007 by Michael Peter Christen; mc@yacy.net, Frankfurt a. M., Germany
+// first published 14.03.2007 on http://yacy.net
 //
 // This is a part of YaCy, a peer-to-peer based web search engine
 //
