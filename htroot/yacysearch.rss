@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <?xml-stylesheet type='text/xsl' href='/yacysearch.xsl' version='1.0'?>
-<rss version="2.0"
+<rss version="2.0">
 	xmlns:yacyTopwords="http://www.yacy.net/yacy/topwords"
 	xmlns:opensearch="http://a9.com/-/spec/opensearch/1.1/"
 	xmlns:atom="http://www.w3.org/2005/Atom">

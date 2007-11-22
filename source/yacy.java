@@ -890,69 +890,6 @@ public final class yacy {
         }
     }
     
-    private static void urllist(String homePath, String source, boolean html, String targetName) {
-        File root = new File(homePath);
-        try {
-            final plasmaSwitchboard sb = new plasmaSwitchboard(homePath, "yacy.init", "DATA/SETTINGS/httpProxy.conf", false);
-            File file = new File(root, targetName);
-            BufferedOutputStream bos = new BufferedOutputStream(new FileOutputStream(file));
-            
-            if (source.equals("lurl")) {
-                Iterator eiter = sb.wordIndex.loadedURL.entries(true, null);
-                indexURLEntry entry;
-                while (eiter.hasNext()) {
-                    entry = (indexURLEntry) eiter.next();
-                    indexURLEntry.Components comp = entry.comp();
-                    if ((entry != null) && (comp.url() != null)) {
-                        if (html) {
-                            bos.write(("<a href=\"" + comp.url().toNormalform(false, true) + "\">" + comp.title() + "</a><br>").getBytes("UTF-8"));
-                            bos.write(serverCore.crlf);
-                        } else {
-                            bos.write(comp.url().toNormalform(false, true).getBytes());
-                            bos.write(serverCore.crlf);
-                        }
-                    }
-                }
-            }
-            if (source.equals("eurl")) {
-                Iterator eiter = sb.crawlQueues.errorURL.entries(true, null);
-                plasmaCrawlZURL.Entry entry;
-                while (eiter.hasNext()) {
-                    entry = (plasmaCrawlZURL.Entry) eiter.next();
-                    if ((entry != null) && (entry.url() != null)) {
-                        if (html) {
-                            bos.write(("<a href=\"" + entry.url() + "\">" + entry.url() + "</a> " + entry.anycause() + "<br>").getBytes("UTF-8"));
-                            bos.write(serverCore.crlf);
-                        } else {
-                            bos.write(entry.url().toString().getBytes());
-                            bos.write(serverCore.crlf);
-                        }
-                    }
-                }
-            }
-            if (source.equals("nurl")) {
-                Iterator eiter = sb.crawlQueues.noticeURL.iterator(plasmaCrawlNURL.STACK_TYPE_CORE);
-                plasmaCrawlEntry entry;
-                while (eiter.hasNext()) {
-                    entry = (plasmaCrawlEntry) eiter.next();
-                    if ((entry != null) && (entry.url() != null)) {
-                        if (html) {
-                            bos.write(("<a href=\"" + entry.url() + "\">" + entry.url() + "</a> " + "profile=" + entry.profileHandle() + ", depth=" + entry.depth() + "<br>").getBytes("UTF-8"));
-                            bos.write(serverCore.crlf);
-                        } else {
-                            bos.write(entry.url().toString().getBytes());
-                            bos.write(serverCore.crlf);
-                        }
-                    }
-                }
-            }
-            bos.close();
-            sb.close();
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-    }
-    
     private static String[] shift(String[] args, int pos, int count) {
         String[] newargs = new String[args.length - count];
         System.arraycopy(args, 0, newargs, 0, pos);
@@ -1166,24 +1103,6 @@ public final class yacy {
             if (args.length == 2) applicationRoot= args[1];
             String outfile = "domlist_" + source + "_" + System.currentTimeMillis();
             domlist(applicationRoot, source, format, outfile);
-        } else if ((args.length >= 1) && (args[0].toLowerCase().equals("-urllist"))) {
-            // generate a url list and save it in a file
-            String source = "lurl";
-            if (args.length >= 3 && args[1].toLowerCase().equals("-source")) {
-                if ((args[2].equals("nurl")) ||
-                    (args[2].equals("lurl")) ||
-                    (args[2].equals("eurl")))
-                    source = args[2];
-                args = shift(args, 1, 2);
-            }
-            boolean html = false;
-            if (args.length >= 3 && args[1].toLowerCase().equals("-format")) {
-                if (args[2].equals("html")) html = true;
-                args = shift(args, 1, 2);
-            }
-            if (args.length == 2) applicationRoot= args[1];
-            String outfile = "urllist_" + source + "_" + System.currentTimeMillis() + ((html) ? ".html" : ".txt");
-            urllist(applicationRoot, source, html, outfile);
         } else if ((args.length >= 1) && (args[0].toLowerCase().equals("-urldbcleanup"))) {
             // generate a url list and save it in a file
             if (args.length == 2) applicationRoot= args[1];

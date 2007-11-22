@@ -32,6 +32,37 @@
     #{/rows}# 
     #(/urlhashsimilar)#
     
+    #(lurlexportfinished)#::
+    <div class="commit">Finished export of #[urlcount]# URLs to file #[exportfile]#</div>::
+    #(/lurlexportfinished)#
+    
+    #(lurlexporterror)#::
+    <div class="error">Export to file #[exportfile]# failed: #[exportfailmsg]#</div>::
+    #(/lurlexporterror)#
+    
+    #(lurlexport)#::
+    <form action="IndexControlURLs_p.html" method="post" enctype="multipart/form-data">
+    <fieldset><legend>Loaded URL Export</legend>
+      <dl>
+        <dt class="TableCellDark">Export File</dt>
+        <dd><input type="text" name="exportfile" value="#[exportfile]#" size="80" maxlength="250" />
+        </dd>
+        <dt class="TableCellDark">URL Filter</dt>
+        <dd><input type="text" name="exportfilter" value=".*.*" size="20" maxlength="250" />
+        </dd>
+        <dt class="TableCellDark">Export Format</dt>
+        <dd><input type="radio" name="format" value="rss" checked />XML (RSS)&nbsp;&nbsp;
+            <input type="radio" name="format" value="text" />Plain Text List (URLs only)
+        </dd>
+        <dt class="TableCellLight"></dt>
+        <dd><input type="submit" name="lurlexport" value="Export URLs" />
+        </dd>
+      </dl>
+    </fieldset>
+    </form>::
+    <div class="commit" style="text-decoration:blink">Export to file #[exportfile]# is running ..  #[urlcount]# URLs so far</div>::
+    #(/lurlexport)#
+    
     #(genUrlProfile)#
     ::No entry found for URL-hash #[urlhash]#
     ::<table>

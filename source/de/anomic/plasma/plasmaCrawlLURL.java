@@ -52,8 +52,11 @@
 
 package de.anomic.plasma;
 
+import java.io.BufferedOutputStream;
 import java.io.File;
+import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.PrintWriter;
 import java.net.MalformedURLException;
 import java.util.HashSet;
 import java.util.Iterator;
@@ -527,6 +530,115 @@ public final class plasmaCrawlLURL {
                 }
             }
         }
+    }
+
+    private exportc exportthread = null;
+    
+    public boolean export(File f, String filter, boolean rss) {
+    	if ((exportthread != null) && (exportthread.isAlive())) {
+    		serverLog.logWarning("LURL-EXPORT", "cannot start another export thread, already one running");
+    		return false;
+    	}
+    	this.exportthread = new exportc(f, filter, rss);
+    	this.exportthread.start();
+    	return (this.exportthread.isAlive());
+    }
+	
+	public String export_failed() {
+		if (exportthread == null) return null;
+		return exportthread.failure;
+	}
+	
+	public int export_count() {
+		if (exportthread == null) return 0;
+		return exportthread.count();
+	}
+	
+	public boolean export_running() {
+		if (exportthread == null) return false;
+		return exportthread.isAlive();
+	}
+	
+	public File export_file() {
+		if (exportthread == null) return null;
+		return exportthread.file();
+	}
+	
+    public class exportc extends Thread {
+    	File f;
+    	String filter;
+    	int count;
+    	String failure;
+    	boolean rss;
+    	
+    	public exportc(File f, String filter, boolean rss) {
+    		this.f = f;
+    		this.filter = filter;
+    		this.count = 0;
+    		this.failure = null;
+    		this.rss = rss;
+    	}
+    	
+    	public void run() {
+    		try {
+    			f.getParentFile().mkdirs();
+    			PrintWriter pw = new PrintWriter(new BufferedOutputStream(new FileOutputStream(f)));
+    			if (rss) {
+    				pw.println("<?xml version=\"1.0\" encoding=\"UTF-8\"?>");
+    				pw.println("<?xml-stylesheet type='text/xsl' href='/yacysearch.xsl' version='1.0'?>");
+    				pw.println("<rss version=\"2.0\">");
+    				pw.println("<channel>");
+    				pw.println("<title>YaCy Peer-to-Peer - Web-Search LURL Export</title>");
+    				pw.println("<description></description>");
+    				pw.println("<link>http://yacy.net</link>");
+    			}
+    			
+    			Iterator i = entries(true, null); // iterates indexURLEntry objects
+        		indexURLEntry entry;
+        		indexURLEntry.Components comp;
+        		String url;
+        		while (i.hasNext()) {
+        			entry = (indexURLEntry) i.next();
+        			comp = entry.comp();
+        			url = comp.url().toNormalform(true, false);
+        			if (!url.matches(filter)) continue;
+        			if (rss) {
+        				pw.println("<item>");
+        				pw.println("<title>" + yacyURL.escape(comp.title()) + "</title>");
+        				pw.println("<link>" + url + "</link>");
+        				if (comp.author().length() > 0) pw.println("<author>" + comp.author() + "</author>");
+        				if (comp.tags().length() > 0) pw.println("<description>" + comp.tags() + "</description>");
+        				pw.println("<pubDate>" + entry.moddate().toString() + "</pubDate>");
+        				pw.println("<guid isPermaLink=\"false\">" + entry.hash() + "</guid>");
+        				pw.println("</item>");
+        			} else {
+        				pw.println(url);
+        			}
+        			count++;
+        		}
+        		if (rss) {
+    				pw.println("</channel>");
+    				pw.println("</rss>");
+    			}
+        		pw.close();
+    		} catch (IOException e) {
+    			e.printStackTrace();
+    			this.failure = e.getMessage();
+    		}
+    		// terminate process
+    	}
+    	
+    	public File file() {
+    		return this.f;
+    	}
+    	
+    	public String failed() {
+    		return this.failure;
+    	}
+    	
+    	public int count() {
+    		return this.count;
+    	}
     }
     
     public static void main(String[] args) {

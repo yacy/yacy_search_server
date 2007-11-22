@@ -25,6 +25,7 @@
 // along with this program; if not, write to the Free Software
 // Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 
+import java.io.File;
 import java.io.IOException;
 import java.net.MalformedURLException;
 import java.util.Iterator;
@@ -34,6 +35,7 @@ import de.anomic.index.indexURLEntry;
 import de.anomic.kelondro.kelondroBase64Order;
 import de.anomic.kelondro.kelondroRotateIterator;
 import de.anomic.plasma.plasmaSwitchboard;
+import de.anomic.server.serverDate;
 import de.anomic.server.serverObjects;
 import de.anomic.server.serverSwitch;
 import de.anomic.yacy.yacySeedDB;
@@ -46,14 +48,42 @@ public class IndexControlURLs_p {
         plasmaSwitchboard sb = (plasmaSwitchboard) env;
         
         serverObjects prop = new serverObjects();
+        prop.put("urlstring", "");
+        prop.put("urlhash", "");
+        prop.put("result", "");
+        prop.put("ucount", Integer.toString(sb.wordIndex.loadedURL.size()));
+        prop.put("otherHosts", "");
         
+        if (sb.wordIndex.loadedURL.export_running()) {
+        	// there is currently a running export
+        	prop.put("lurlexportfinished", 0);
+    		prop.put("lurlexporterror", 0);
+    		prop.put("lurlexport", 2);
+            prop.put("lurlexport_exportfile", sb.wordIndex.loadedURL.export_file().toString());
+            prop.put("lurlexport_urlcount", sb.wordIndex.loadedURL.export_count());
+        } else {
+        	prop.put("lurlexport", 1);
+    		prop.put("lurlexport_exportfile", sb.getRootPath() + "/DATA/EXPORT/" + serverDate.shortSecondTime());
+
+    		prop.put("lurlexportfinished", 0);
+    		prop.put("lurlexporterror", 0);
+    		if (sb.wordIndex.loadedURL.export_failed() == null) {
+        		// the export is finished, or there has not been a export
+        		if (sb.wordIndex.loadedURL.export_count() > 0) {
+        			// an export is finished
+        			prop.put("lurlexportfinished", 1);
+            		prop.put("lurlexportfinished_exportfile", sb.wordIndex.loadedURL.export_file().toString());
+            		prop.put("lurlexportfinished_urlcount", sb.wordIndex.loadedURL.export_count());
+        		}               
+        	} else {
+        		// the export had errors
+        		prop.put("lurlexporterror", 1);
+        		prop.put("lurlexporterror_exportfile", sb.wordIndex.loadedURL.export_file().toString());
+        		prop.put("lurlexporterror_exportfailmsg", sb.wordIndex.loadedURL.export_failed());
+        	}
+        }        
         if (post == null || env == null) {
-            prop.put("urlstring", "");
-            prop.put("urlhash", "");
-            prop.put("result", "");
-            prop.put("ucount", Integer.toString(sb.wordIndex.loadedURL.size()));
-            prop.put("otherHosts", "");
-            return prop; // be save
+            return prop; // nothing to do
         }
         
         // default values
@@ -68,12 +98,9 @@ public class IndexControlURLs_p {
         prop.put("result", " ");
 
         if (post.containsKey("urlhashdeleteall")) {
-            //try {
-                int i = sb.removeAllUrlReferences(urlhash, true);
-                prop.put("result", "Deleted URL and " + i + " references from " + i + " word indexes.");
-            //} catch (IOException e) {
-            //    prop.put("result", "Deleted nothing because the url-hash could not be resolved");
-            //}
+            int i = sb.removeAllUrlReferences(urlhash, true);
+            prop.put("result", "Deleted URL and " + i + " references from " + i + " word indexes.");
+            prop.put("lurlexport", 0);
         }
 
         if (post.containsKey("urlhashdelete")) {
@@ -86,6 +113,7 @@ public class IndexControlURLs_p {
                 sb.urlRemove(urlhash);
                 prop.putHTML("result", "Removed URL " + urlstring);
             }
+            prop.put("lurlexport", 0);
         }
 
         if (post.containsKey("urldelete")) {
@@ -100,6 +128,7 @@ public class IndexControlURLs_p {
                 sb.urlRemove(urlhash);
                 prop.putHTML("result", "Removed URL " + urlstring);
             }
+            prop.put("lurlexport", 0);
         }
 
         if (post.containsKey("urlstringsearch")) {
@@ -118,6 +147,7 @@ public class IndexControlURLs_p {
                 prop.putHTML("urlstring", "bad url: " + urlstring);
                 prop.put("urlhash", "");
             }
+            prop.put("lurlexport", 0);
         }
 
         if (post.containsKey("urlhashsearch")) {
@@ -128,6 +158,7 @@ public class IndexControlURLs_p {
                 prop.putHTML("urlstring", entry.comp().url().toNormalform(false, true));
                 prop.putAll(genUrlProfile(sb, entry, urlhash));
             }
+            prop.put("lurlexport", 0);
         }
 
         // generate list
@@ -156,6 +187,25 @@ public class IndexControlURLs_p {
             } catch (IOException e) {
                 prop.put("result", "No Entries for URL hash " + urlhash);
             }
+            prop.put("lurlexport", 0);
+        }
+        
+        if (post.containsKey("lurlexport")) {
+        	boolean rss = post.get("format", "text").equals("rss");
+			String s = post.get("exportfile", "");
+			if (s.indexOf('.') < 0) {
+				if (rss) s = s + ".xml"; else s = s + ".txt";
+			}
+        	File f = new File(s);
+			f.getParentFile().mkdirs();
+			String filter = post.get("exportfilter", ".*");
+			boolean running = sb.wordIndex.loadedURL.export(f, filter, rss);
+
+			prop.put("lurlexport_exportfile", s);
+			prop.put("lurlexport_urlcount", sb.wordIndex.loadedURL.export_count());
+			if ((running) && (sb.wordIndex.loadedURL.export_failed() == null)) {
+				prop.put("lurlexport", 2);			    
+			}
         }
         
         // insert constants
