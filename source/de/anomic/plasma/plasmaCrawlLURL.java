@@ -66,12 +66,14 @@ import de.anomic.http.httpc;
 import de.anomic.http.httpc.response;
 import de.anomic.index.indexRWIEntry;
 import de.anomic.index.indexURLEntry;
+import de.anomic.kelondro.kelondroBase64Order;
 import de.anomic.kelondro.kelondroCache;
 import de.anomic.kelondro.kelondroCloneableIterator;
 import de.anomic.kelondro.kelondroException;
 import de.anomic.kelondro.kelondroFlexSplitTable;
 import de.anomic.kelondro.kelondroIndex;
 import de.anomic.kelondro.kelondroRow;
+import de.anomic.kelondro.kelondroRowSet;
 import de.anomic.plasma.urlPattern.plasmaURLPattern;
 import de.anomic.server.serverCodings;
 import de.anomic.server.logging.serverLog;
@@ -534,12 +536,12 @@ public final class plasmaCrawlLURL {
 
     private exportc exportthread = null;
     
-    public boolean export(File f, String filter, boolean rss) {
+    public boolean export(File f, String filter, int format, boolean dom) {
     	if ((exportthread != null) && (exportthread.isAlive())) {
     		serverLog.logWarning("LURL-EXPORT", "cannot start another export thread, already one running");
     		return false;
     	}
-    	this.exportthread = new exportc(f, filter, rss);
+    	this.exportthread = new exportc(f, filter, format, dom);
     	this.exportthread.start();
     	return (this.exportthread.isAlive());
     }
@@ -569,21 +571,30 @@ public final class plasmaCrawlLURL {
     	String filter;
     	int count;
     	String failure;
-    	boolean rss;
+    	int format;
+    	boolean dom;
+    	kelondroRowSet doms;
     	
-    	public exportc(File f, String filter, boolean rss) {
+    	public exportc(File f, String filter, int format, boolean dom) {
+    	    // format: 0=text, 1=html, 2=rss/xml
     		this.f = f;
     		this.filter = filter;
     		this.count = 0;
     		this.failure = null;
-    		this.rss = rss;
+    		this.format = format;
+    		this.dom = dom;
+    		if ((dom) && (format == 2)) dom = false;
+    		this.doms = new kelondroRowSet(new kelondroRow("String hash-6", kelondroBase64Order.enhancedCoder, 0), 0);
     	}
     	
     	public void run() {
     		try {
     			f.getParentFile().mkdirs();
     			PrintWriter pw = new PrintWriter(new BufferedOutputStream(new FileOutputStream(f)));
-    			if (rss) {
+    			if (format == 1) {
+    			    pw.println("<html><head></head><body>");
+    			}
+    			if (format == 2) {
     				pw.println("<?xml version=\"1.0\" encoding=\"UTF-8\"?>");
     				pw.println("<?xml-stylesheet type='text/xsl' href='/yacysearch.xsl' version='1.0'?>");
     				pw.println("<rss version=\"2.0\">");
@@ -597,26 +608,45 @@ public final class plasmaCrawlLURL {
         		indexURLEntry entry;
         		indexURLEntry.Components comp;
         		String url;
-        		while (i.hasNext()) {
+        		loop: while (i.hasNext()) {
         			entry = (indexURLEntry) i.next();
         			comp = entry.comp();
         			url = comp.url().toNormalform(true, false);
         			if (!url.matches(filter)) continue;
-        			if (rss) {
-        				pw.println("<item>");
-        				pw.println("<title>" + yacyURL.escape(comp.title()) + "</title>");
-        				pw.println("<link>" + url + "</link>");
-        				if (comp.author().length() > 0) pw.println("<author>" + comp.author() + "</author>");
-        				if (comp.tags().length() > 0) pw.println("<description>" + comp.tags() + "</description>");
-        				pw.println("<pubDate>" + entry.moddate().toString() + "</pubDate>");
-        				pw.println("<guid isPermaLink=\"false\">" + entry.hash() + "</guid>");
-        				pw.println("</item>");
+        			if (dom) {
+        			    if (doms.has(entry.hash().substring(6).getBytes())) continue loop;
+        			    doms.add(entry.hash().substring(6).getBytes());
+        			    url = comp.url().getHost();
+        			    if (format == 0) {
+                            pw.println(url);
+                        }
+                        if (format == 1) {
+                            pw.println("<a href=\"http://" + url + "\">" + url + "</a><br>");
+                        }
         			} else {
-        				pw.println(url);
+        			    if (format == 0) {
+        			        pw.println(url);
+        			    }
+        			    if (format == 1) {
+        			        pw.println("<a href=\"" + url + "\">" + comp.title() + "</a><br>");
+        			    }
+        			    if (format == 2) {
+        			        pw.println("<item>");
+        			        pw.println("<title>" + comp.title() + "</title>");
+        			        pw.println("<link>" + yacyURL.escape(url) + "</link>");
+        			        if (comp.author().length() > 0) pw.println("<author>" + comp.author() + "</author>");
+        			        if (comp.tags().length() > 0) pw.println("<description>" + comp.tags() + "</description>");
+        			        pw.println("<pubDate>" + entry.moddate().toString() + "</pubDate>");
+        			        pw.println("<guid isPermaLink=\"false\">" + entry.hash() + "</guid>");
+        			        pw.println("</item>");
+        			    }
         			}
-        			count++;
+                    count++;
         		}
-        		if (rss) {
+        		if (format == 1) {
+                    pw.println("</body></html>");
+                }
+        		if (format == 2) {
     				pw.println("</channel>");
     				pw.println("</rss>");
     			}

@@ -75,10 +75,7 @@ import de.anomic.kelondro.kelondroDyn;
 import de.anomic.kelondro.kelondroMScoreCluster;
 import de.anomic.kelondro.kelondroMapObjects;
 import de.anomic.plasma.plasmaCondenser;
-import de.anomic.plasma.plasmaCrawlEntry;
 import de.anomic.plasma.plasmaCrawlLURL;
-import de.anomic.plasma.plasmaCrawlNURL;
-import de.anomic.plasma.plasmaCrawlZURL;
 import de.anomic.plasma.plasmaSwitchboard;
 import de.anomic.plasma.plasmaWordIndex;
 import de.anomic.server.serverCore;
@@ -766,129 +763,6 @@ public final class yacy {
             serverLog.logInfo("TRANSFER-CR", "could not read file " + crfile);
         }
     }
-    /**
-    * Generates a text file containing all domains in this peer's DB.
-    * This may be useful to calculate the YaCy-Blockrank.
-    *
-    * @param format String which determines the format of the file. Possible values: "html", "zip", "gzip" or "plain"
-    * @see urllist
-    */
-    private static void domlist(String homePath, String source, String format, String targetName) {
-    	
-    	File root = new File(homePath);
-        try {
-            final plasmaSwitchboard sb = new plasmaSwitchboard(homePath, "yacy.init", "DATA/SETTINGS/httpProxy.conf", false);
-            HashMap doms = new HashMap();
-            System.out.println("Started domain list extraction from " + sb.wordIndex.loadedURL.size() + " url entries.");
-            System.out.println("a dump will be written after double-check of all extracted domains.");
-            System.out.println("This process may fail in case of too less memory. To increase memory, start with");
-            System.out.println("java -Xmx<megabytes>m -classpath classes yacy -domlist [ -source { nurl | lurl | eurl } ] [ -format { text  | zip | gzip | html } ] [ <path to DATA folder> ]");
-            int c = 0;
-            long start = System.currentTimeMillis();
-            if (source.equals("lurl")) {
-                Iterator eiter = sb.wordIndex.loadedURL.entries(true, null);
-                indexURLEntry entry;
-                while (eiter.hasNext()) {
-                    try {
-                        entry = (indexURLEntry) eiter.next();
-                        indexURLEntry.Components comp = entry.comp();
-                        if ((entry != null) && (comp.url() != null)) doms.put(comp.url().getHost(), null);
-                    } catch (Exception e) {
-                        // here a MalformedURLException may occur
-                        // just ignore
-                    }
-                    c++;
-                    if (c % 10000 == 0) System.out.println(
-                            c + " urls checked, " +
-                            doms.size() + " domains collected, " +
-                            ((Runtime.getRuntime().maxMemory() - Runtime.getRuntime().totalMemory() + Runtime.getRuntime().freeMemory()) / 1024 / 1024) + " MB available, " + 
-                            ((System.currentTimeMillis() - start) * (sb.wordIndex.loadedURL.size() - c) / c / 60000) + " minutes remaining.");
-                }
-            }
-            if (source.equals("eurl")) {
-                Iterator eiter = sb.crawlQueues.errorURL.entries(true, null);
-                plasmaCrawlZURL.Entry entry;
-                while (eiter.hasNext()) {
-                    try {
-                        entry = (plasmaCrawlZURL.Entry) eiter.next();
-                        if ((entry != null) && (entry.url() != null)) doms.put(entry.url().getHost(), entry.anycause());
-                    } catch (Exception e) {
-                        // here a MalformedURLException may occur
-                        // just ignore
-                    }
-                    c++;
-                    if (c % 10000 == 0) System.out.println(
-                            c + " urls checked, " +
-                            doms.size() + " domains collected, " +
-                            ((Runtime.getRuntime().maxMemory() - Runtime.getRuntime().totalMemory() + Runtime.getRuntime().freeMemory()) / 1024 / 1024) + " MB available, " + 
-                            ((System.currentTimeMillis() - start) * (sb.wordIndex.loadedURL.size() - c) / c / 60000) + " minutes remaining.");
-                }
-            }
-            if (source.equals("nurl")) {
-                Iterator eiter = sb.crawlQueues.noticeURL.iterator(plasmaCrawlNURL.STACK_TYPE_CORE);
-                plasmaCrawlEntry entry;
-                while (eiter.hasNext()) {
-                    try {
-                        entry = (plasmaCrawlEntry) eiter.next();
-                        if ((entry != null) && (entry.url() != null)) doms.put(entry.url().getHost(), "profile=" + entry.profileHandle() + ", depth=" + entry.depth());
-                    } catch (Exception e) {
-                        // here a MalformedURLException may occur
-                        // just ignore
-                    }
-                    c++;
-                    if (c % 10000 == 0) System.out.println(
-                            c + " urls checked, " +
-                            doms.size() + " domains collected, " +
-                            ((Runtime.getRuntime().maxMemory() - Runtime.getRuntime().totalMemory() + Runtime.getRuntime().freeMemory()) / 1024 / 1024) + " MB available, " + 
-                            ((System.currentTimeMillis() - start) * (sb.wordIndex.loadedURL.size() - c) / c / 60000) + " minutes remaining.");
-                }
-            }
-            
-            if (format.equals("html")) {
-                // output file in HTML format
-                File file = new File(root, targetName + ".html");
-                BufferedOutputStream bos = new BufferedOutputStream(new FileOutputStream(file));
-                System.out.println("Started domain list dump to file " + file);
-                Iterator i = doms.entrySet().iterator();
-                Map.Entry entry;
-                String key;
-                bos.write(("<!DOCTYPE HTML PUBLIC \"-//W3C//DTD HTML 4.01 Transitional//EN\" \"http://www.w3.org/TR/html4/loose.dtd\">").getBytes());
-                bos.write(serverCore.crlf);
-                bos.write(("<html><head><title>YaCy " + source + " domainlist</title></head><body>").getBytes());
-                bos.write(serverCore.crlf);
-                while (i.hasNext()) {
-                    entry = (Map.Entry) i.next();
-                    key = (String) entry.getKey();
-                    bos.write(("<a href=\"http://" + key + "\">" + key + "</a>" +
-                              ((entry.getValue() == null) ? "" : (" " + ((String) entry.getValue()))) + "<br>"
-                             ).getBytes());
-                    bos.write(serverCore.crlf);
-                }
-                bos.write(("</body></html>").getBytes());
-                bos.close();
-            
-            } else if (format.equals("zip")) {
-                // output file in plain text but compressed with ZIP
-                File file = new File(root, targetName + ".zip");
-                System.out.println("Started domain list dump to file " + file);
-                serverFileUtils.saveSet(file, "zip", doms.keySet(), new String(serverCore.crlf));
-            
-            } else if (format.equals("gzip")) {
-                // output file in plain text but compressed with GZIP
-                File file = new File(root, targetName + ".txt.gz");
-                System.out.println("Started domain list dump to file " + file);
-                serverFileUtils.saveSet(file, "gzip", doms.keySet(), new String(serverCore.crlf));
-            } else {
-                // plain text list
-                File file = new File(root, targetName + ".txt");
-                System.out.println("Started domain list dump to file " + file);
-                serverFileUtils.saveSet(file, "plain", doms.keySet(), new String(serverCore.crlf));
-            }
-            sb.close();
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-    }
     
     private static String[] shift(String[] args, int pos, int count) {
         String[] newargs = new String[args.length - count];
@@ -1082,27 +956,6 @@ public final class yacy {
             String targetaddress = args[1];
             String crfile = args[2];
             transferCR(targetaddress, crfile);
-        } else if ((args.length >= 1) && (args[0].toLowerCase().equals("-domlist"))) {
-            // generate a url list and save it in a file
-            String source = "lurl";
-            if (args.length >= 3 && args[1].toLowerCase().equals("-source")) {
-                if ((args[2].equals("nurl")) ||
-                    (args[2].equals("lurl")) ||
-                    (args[2].equals("eurl")))
-                    source = args[2];
-                args = shift(args, 1, 2);
-            }
-            String format = "txt";
-            if (args.length >= 3 && args[1].toLowerCase().equals("-format")) {
-                if ((args[2].equals("html")) ||
-                    (args[2].equals("zip")) ||
-                    (args[2].equals("gzip")))
-                    format = args[2];
-                args = shift(args, 1, 2);
-            }
-            if (args.length == 2) applicationRoot= args[1];
-            String outfile = "domlist_" + source + "_" + System.currentTimeMillis();
-            domlist(applicationRoot, source, format, outfile);
         } else if ((args.length >= 1) && (args[0].toLowerCase().equals("-urldbcleanup"))) {
             // generate a url list and save it in a file
             if (args.length == 2) applicationRoot= args[1];

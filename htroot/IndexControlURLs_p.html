@@ -17,7 +17,7 @@
             <input type="submit" name="urlstringsearch" value="Show Details for URL" />
         </dd>
         
-        <dt class="TableCellDark">Rertieve by URL-Hash:</dt>
+        <dt class="TableCellDark">Retrieve by URL-Hash:</dt>
         <dd><input type="text" name="urlhash" value="#[urlhash]#" size="40" maxlength="12" />
             <input type="submit" name="urlhashsearch" value="Show Details for URL-Hash" />
             <input type="submit" name="urlhashsimilar" value="Generate List" />
@@ -51,8 +51,14 @@
         <dd><input type="text" name="exportfilter" value=".*.*" size="20" maxlength="250" />
         </dd>
         <dt class="TableCellDark">Export Format</dt>
-        <dd><input type="radio" name="format" value="rss" checked />XML (RSS)&nbsp;&nbsp;
-            <input type="radio" name="format" value="text" />Plain Text List (URLs only)
+        <dd>Only Domain:
+            <input type="radio" name="format" value="dom-text" />Plain Text List (domains only)&nbsp;&nbsp;
+            <input type="radio" name="format" value="dom-html" />HTML (domains as URLs, no title)<br>
+            Full URL List:
+            <input type="radio" name="format" value="url-text" />Plain Text List (URLs only)&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+            <input type="radio" name="format" value="url-html" />HTML (URLs with title)&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+            <input type="radio" name="format" value="url-rss" checked />XML (RSS)
+            </br>
         </dd>
         <dt class="TableCellLight"></dt>
         <dd><input type="submit" name="lurlexport" value="Export URLs" />

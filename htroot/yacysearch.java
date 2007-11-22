@@ -267,7 +267,7 @@ public class yacysearch {
                     "",
                     20,
                     constraint,
-                    false);
+                    true);
             serverProfiling localTiming = new serverProfiling(4 * theQuery.maximumTime / 10, theQuery.displayResults());
 
             String client = (String) header.get("CLIENTIP"); // the search client who initiated the search

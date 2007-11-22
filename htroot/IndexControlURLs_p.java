@@ -191,15 +191,25 @@ public class IndexControlURLs_p {
         }
         
         if (post.containsKey("lurlexport")) {
-        	boolean rss = post.get("format", "text").equals("rss");
+            // parse format
+            int format = 0;
+            String fname = post.get("format", "url-text");
+            boolean dom = fname.startsWith("dom"); // if dom== false complete urls are exported, othervise only the domain
+            if (fname.endsWith("text")) format = 0;
+            if (fname.endsWith("html")) format = 1;
+            if (fname.endsWith("rss")) format = 2;
+            
+            // extend export file name
 			String s = post.get("exportfile", "");
 			if (s.indexOf('.') < 0) {
-				if (rss) s = s + ".xml"; else s = s + ".txt";
+				if (format == 0) s = s + ".txt";
+				if (format == 1) s = s + ".html";
+				if (format == 2) s = s + ".xml";
 			}
         	File f = new File(s);
 			f.getParentFile().mkdirs();
 			String filter = post.get("exportfilter", ".*");
-			boolean running = sb.wordIndex.loadedURL.export(f, filter, rss);
+			boolean running = sb.wordIndex.loadedURL.export(f, filter, format, dom);
 
 			prop.put("lurlexport_exportfile", s);
 			prop.put("lurlexport_urlcount", sb.wordIndex.loadedURL.export_count());
