@@ -128,7 +128,7 @@ public final class search {
         int indexabstractContainercount = 0;
         int joincount = 0;
         plasmaSearchQuery theQuery = null;
-        serverProfiling localProcess = null;
+        serverProfiling localProfiling = null;
         ArrayList accu = null;
         long urlRetrievalAllTime = 0, snippetComputationAllTime = 0;
         if ((query.length() == 0) && (abstractSet != null)) {
@@ -138,12 +138,12 @@ public final class search {
             yacyCore.log.logInfo("INIT HASH SEARCH (abstracts only): " + plasmaSearchQuery.anonymizedQueryHashes(theQuery.queryHashes) + " - " + theQuery.displayResults() + " links");
 
             // prepare a search profile
-            localProcess  = new serverProfiling(theQuery.maximumTime, theQuery.displayResults());
+            localProfiling  = new serverProfiling();
             
             //theSearch = new plasmaSearchEvent(squery, rankingProfile, localTiming, remoteTiming, true, sb.wordIndex, null);
-            localProcess.startTimer();
+            localProfiling.startTimer();
             Map[] containers = sb.wordIndex.localSearchContainers(theQuery, plasmaSearchQuery.hashes2Set(urls));
-            localProcess.yield(plasmaSearchEvent.COLLECTION, containers[0].size());
+            localProfiling.yield(plasmaSearchEvent.COLLECTION, containers[0].size());
             if (containers != null) {
                 Iterator ci = containers[0].entrySet().iterator();
                 Map.Entry entry;
@@ -170,8 +170,8 @@ public final class search {
             
             // prepare a search profile
             plasmaSearchRankingProfile rankingProfile = (profile.length() == 0) ? new plasmaSearchRankingProfile(plasmaSearchQuery.contentdomParser(contentdom)) : new plasmaSearchRankingProfile("", profile);
-            localProcess  = new serverProfiling(theQuery.maximumTime, theQuery.displayResults());
-            plasmaSearchEvent theSearch = plasmaSearchEvent.getEvent(theQuery, rankingProfile, localProcess, sb.wordIndex, null, true, abstractSet);
+            localProfiling  = new serverProfiling();
+            plasmaSearchEvent theSearch = plasmaSearchEvent.getEvent(theQuery, rankingProfile, localProfiling, sb.wordIndex, null, true, abstractSet);
             urlRetrievalAllTime = theSearch.getURLRetrievalTime();
             snippetComputationAllTime = theSearch.getSnippetComputationTime();
             
@@ -231,7 +231,7 @@ public final class search {
             if (partitions > 0) sb.requestedQueries = sb.requestedQueries + 1d / partitions; // increase query counter
             
             // prepare reference hints
-            localProcess.startTimer();
+            localProfiling.startTimer();
             Set ws = theSearch.references(10);
             StringBuffer refstr = new StringBuffer();
             Iterator j = ws.iterator();
@@ -239,7 +239,7 @@ public final class search {
                 refstr.append(",").append((String) j.next());
             }
             prop.put("references", (refstr.length() > 0) ? refstr.substring(1) : refstr.toString());
-            localProcess.yield("reference collection", ws.size());
+            localProfiling.yield("reference collection", ws.size());
         }
         prop.put("indexabstract", indexabstract.toString());
         
@@ -253,7 +253,7 @@ public final class search {
 
         } else {
             // result is a List of urlEntry elements
-            localProcess.startTimer();
+            localProfiling.startTimer();
             StringBuffer links = new StringBuffer();
             String resource = null;
             plasmaSearchEvent.ResultEntry entry;
@@ -266,7 +266,7 @@ public final class search {
             }
             prop.put("links", links.toString());
             prop.put("linkcount", accu.size());
-            localProcess.yield("result list preparation", accu.size());
+            localProfiling.yield("result list preparation", accu.size());
         }
         
         // add information about forward peers

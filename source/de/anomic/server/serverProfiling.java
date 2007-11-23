@@ -31,23 +31,12 @@ import java.util.Iterator;
 
 public class serverProfiling implements Cloneable {
 
-    private static final long minimumTargetTime = 100;
-    private long targetTime;
-    private int targetCount;
     private ArrayList yield;
     private long timer;
 
-    private serverProfiling() {
-        targetTime = minimumTargetTime;
-        targetCount = 10;
+    public serverProfiling() {
         yield = new ArrayList();
         timer = 0;
-    }
-
-    public serverProfiling(long time, int count) {
-        this();
-        this.targetTime = time;
-        this.targetCount = count;
     }
 
     public static class Entry {
@@ -60,14 +49,6 @@ public class serverProfiling implements Cloneable {
             this.count = count;
             this.time = time;
         }
-    }
-
-    public int getTargetCount() {
-        return this.targetCount;
-    }
-
-    public long getTargetTime() {
-        return this.targetTime;
     }
 
     public void startTimer() {

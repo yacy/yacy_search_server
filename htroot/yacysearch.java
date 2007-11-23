@@ -268,7 +268,7 @@ public class yacysearch {
                     20,
                     constraint,
                     true);
-            serverProfiling localTiming = new serverProfiling(4 * theQuery.maximumTime / 10, theQuery.displayResults());
+            serverProfiling localProfiling = new serverProfiling();
 
             String client = (String) header.get("CLIENTIP"); // the search client who initiated the search
         
@@ -287,7 +287,7 @@ public class yacysearch {
                 theQuery.setOffset(0); // in case that this is a new search, always start without a offset 
                 offset = 0;
             }
-            plasmaSearchEvent theSearch = plasmaSearchEvent.getEvent(theQuery, sb.getRanking(), localTiming, sb.wordIndex, (sb.isRobinsonMode()) ? sb.clusterhashes : null, false, null);
+            plasmaSearchEvent theSearch = plasmaSearchEvent.getEvent(theQuery, sb.getRanking(), localProfiling, sb.wordIndex, (sb.isRobinsonMode()) ? sb.clusterhashes : null, false, null);
             
             // generate result object
             serverLog.logFine("LOCAL_SEARCH", "SEARCH TIME AFTER ORDERING OF SEARCH RESULTS: " + ((System.currentTimeMillis() - timestamp) / 1000) + " seconds");

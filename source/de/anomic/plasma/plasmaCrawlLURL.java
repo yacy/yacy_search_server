@@ -62,6 +62,7 @@ import java.util.HashSet;
 import java.util.Iterator;
 import java.util.LinkedList;
 
+import de.anomic.data.htmlTools;
 import de.anomic.http.httpc;
 import de.anomic.http.httpc.response;
 import de.anomic.index.indexRWIEntry;
@@ -628,14 +629,14 @@ public final class plasmaCrawlLURL {
         			        pw.println(url);
         			    }
         			    if (format == 1) {
-        			        pw.println("<a href=\"" + url + "\">" + comp.title() + "</a><br>");
+        			        pw.println("<a href=\"" + url + "\">" + htmlTools.encodeUnicode2html(comp.title(), true, true) + "</a><br>");
         			    }
         			    if (format == 2) {
         			        pw.println("<item>");
-        			        pw.println("<title>" + comp.title() + "</title>");
+        			        pw.println("<title>" + htmlTools.encodeUnicode2html(comp.title(), true, true) + "</title>");
         			        pw.println("<link>" + yacyURL.escape(url) + "</link>");
-        			        if (comp.author().length() > 0) pw.println("<author>" + comp.author() + "</author>");
-        			        if (comp.tags().length() > 0) pw.println("<description>" + comp.tags() + "</description>");
+        			        if (comp.author().length() > 0) pw.println("<author>" + htmlTools.encodeUnicode2html(comp.author(), true, true) + "</author>");
+        			        if (comp.tags().length() > 0) pw.println("<description>" + htmlTools.encodeUnicode2html(comp.tags(), true, true) + "</description>");
         			        pw.println("<pubDate>" + entry.moddate().toString() + "</pubDate>");
         			        pw.println("<guid isPermaLink=\"false\">" + entry.hash() + "</guid>");
         			        pw.println("</item>");
