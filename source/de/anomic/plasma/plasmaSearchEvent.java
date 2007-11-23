@@ -208,9 +208,12 @@ public final class plasmaSearchEvent {
             process.startTimer();
             indexURLEntry uentry;
             ResultEntry resultEntry;
+            yacyURL url;
             synchronized (rankedCache) {
                 while ((rankedCache.size() > 0) && ((uentry = rankedCache.bestURL(true)) != null) && (resultList.size() < (query.neededResults()))) {
-                    System.out.println("***DEBUG*** SEARCH RESULT URL=" + uentry.comp().url().toNormalform(false, false));
+                    url = uentry.comp().url();
+                    if (url == null) continue;
+                    System.out.println("***DEBUG*** SEARCH RESULT URL=" + url.toNormalform(false, false));
                 
                     resultEntry = obtainResultEntry(uentry, (snippetComputationAllTime < 300) ? 1 : 0);
                     if (resultEntry == null) continue; // the entry had some problems, cannot be used
