@@ -18,6 +18,7 @@
 				<pathelement location="${libx}/PDFBox-0.7.3.jar" />
 				<!-- additional fontparsing lib, part of PDFBox -->
 				<pathelement location="${libx}/FontBox-0.1.0-dev.jar" />
+				<pathelement location="${libx}/bcprov-jdk14-132.jar" />
 			</classpath>
 		</javac>
 	</target>
@@ -26,6 +27,7 @@
 		<tar destfile="${parserArchive}" compression="gzip">
 			<tarfileset dir="${libx}" includes="PDFBox-0.7.3.*" prefix="${releaseFileParentDir}/libx/" dirmode="755" mode="644" />
 			<tarfileset dir="${libx}" includes="FontBox*" prefix="${releaseFileParentDir}/libx/" dirmode="755" mode="644" />
+			<tarfileset dir="${libx}" includes="bcprov*" prefix="${releaseFileParentDir}/libx/" dirmode="755" mode="644" />
 			<tarfileset dir="${src}/de/anomic/plasma/parser/${parserShortName}" prefix="${releaseFileParentDir}/source/de/anomic/plasma/parser/${parserShortName}" dirmode="755" mode="644" />
 			<tarfileset dir="${build}/de/anomic/plasma/parser/${parserShortName}" prefix="${releaseFileParentDir}/classes/de/anomic/plasma/parser/${parserShortName}" dirmode="755" mode="644" />
 		</tar>
@@ -33,7 +35,7 @@
 
 	<target name="copy" depends="compile">
 		<copy todir="${release}/libx/">
-			<fileset dir="${libx}" includes="PDFBox-0.7.3.*,FontBox*" />
+			<fileset dir="${libx}" includes="PDFBox-0.7.3.*,FontBox*,bcprov*" />
 		</copy>
 		<copy todir="${release}/source/de/anomic/plasma/parser/${parserShortName}">
 			<fileset dir="${src}/de/anomic/plasma/parser/${parserShortName}" includes="**/*" />
