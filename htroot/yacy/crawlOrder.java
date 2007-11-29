@@ -129,7 +129,7 @@ public final class crawlOrder {
             delay = "3600"; // may request one hour later again
         } else try {
             yacySeed requester = yacyCore.seedDB.getConnected(iam);
-            int queuesize = switchboard.crawlQueues.coreCrawlJobSize() + switchboard.crawlQueues.limitCrawlTriggerJobSize() + switchboard.crawlQueues.remoteTriggeredCrawlJobSize() + switchboard.queueSize();
+            int queuesize = switchboard.crawlQueues.coreCrawlJobSize() + switchboard.crawlQueues.limitCrawlJobSize() + switchboard.crawlQueues.remoteTriggeredCrawlJobSize() + switchboard.queueSize();
             if (requester == null) {
                 response = "denied";
                 reason = "unknown-client";
@@ -190,7 +190,7 @@ public final class crawlOrder {
                         env.getLog().logWarning("crawlOrder: Received not normalized Referer URL " + refv.get(0) + " of URL " + urlv.get(0));    
                     }
                     
-                    if (!switchboard.acceptURL(new yacyURL(newURL, null))) {
+                    if (!switchboard.acceptURL(url)) {
                         env.getLog().logWarning("crawlOrder: Received URL outside of our domain: " + newURL);
                         return null;
                     }

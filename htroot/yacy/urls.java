@@ -34,16 +34,15 @@ import de.anomic.server.serverDate;
 import de.anomic.server.serverObjects;
 import de.anomic.server.serverSwitch;
 import de.anomic.yacy.yacyCore;
+import de.anomic.yacy.yacyNetwork;
 
 public class urls {
     
     public static serverObjects respond(httpHeader header, serverObjects post, serverSwitch env) {
         plasmaSwitchboard sb = (plasmaSwitchboard) env;
-     
-        // return variable that accumulates replacements
-        serverObjects prop = new serverObjects();
         
         // insert default values
+        serverObjects prop = new serverObjects();
         prop.put("iam", yacyCore.seedDB.mySeed().hash);
         prop.put("response", "rejected - insufficient call parameters");
         prop.put("channel_title", "");
@@ -51,7 +50,8 @@ public class urls {
         prop.put("channel_pubDate", "");
         prop.put("item", "0");
         
-        if (post == null) return prop;
+        if ((post == null) || (env == null)) return prop;
+        if (!yacyNetwork.authentifyRequest(post, env)) return prop;
         
         if (post.get("call", "").equals("remotecrawl")) {
             // perform a remote crawl url handover
@@ -67,6 +67,9 @@ public class urls {
                     break;
                 }
                 if (entry == null) break;
+                // place url to notice-url db
+                sb.crawlQueues.delegatedURL.push(sb.crawlQueues.delegatedURL.newEntry(entry.url(), "client=____________"));
+                // create RSS entry
                 prop.put("item_" + c + "_title", "");
                 prop.putHTML("item_" + c + "_link", entry.url().toNormalform(true, false));
                 prop.putHTML("item_" + c + "_description", entry.name());
@@ -85,3 +88,106 @@ public class urls {
     }
     
 }
+/*
+from http://88.64.186.183:9999/yacy/urls.xml?count=10&call=remotecrawl
+
+<?xml version="1.0"?>
+
+<!-- this is not exactly rss format, but similar -->
+<rss>
+
+<!-- YaCy standard response header -->
+<yacy version="0.5540423">
+<iam>c_32kgI-4HTE</iam>
+<uptime>3226</uptime>
+<mytime>20071128030353</mytime>
+<response>ok</response>
+</yacy>
+
+<!-- rss standard channel -->
+<channel>
+<title></title>
+<description></description>
+<pubDate></pubDate>
+<!-- urll items -->
+<item>
+<title></title>
+<link>http://publish.vx.roo.com/australian/ithomepagemini/</link>
+<description>sub</description>
+<author></author>
+<pubDate>20071126173629</pubDate>
+<guid>mlD2rBhnfuoY</guid>
+
+</item>
+<item>
+<title></title>
+<link>http://www.news.com.au/story/0%2C23599%2C22835669-2%2C00.html</link>
+<description></description>
+<author></author>
+<pubDate>20071128014306</pubDate>
+<guid>qT1GjNRe_5SQ</guid>
+</item>
+<item>
+<title></title>
+<link>http://www.news.com.au/perthnow/story/0%2C21598%2C22835663-2761%2C00.html</link>
+<description>Driver injured: Willagee crash witnesses sought</description>
+
+<author></author>
+<pubDate>20071128014306</pubDate>
+<guid>yGMa4uRe_5SQ</guid>
+</item>
+<item>
+<title></title>
+<link>http://www.news.com.au/travel/story/0%2C26058%2C22835185-5014090%2C00.html</link>
+<description></description>
+<author></author>
+<pubDate>20071128014306</pubDate>
+<guid>qfob36Re_5SQ</guid>
+</item>
+
+<item>
+<title></title>
+<link>http://www.news.com.au/story/0%2C23599%2C22835311-421%2C00.html</link>
+<description></description>
+<author></author>
+<pubDate>20071128014306</pubDate>
+<guid>YBLVBNRe_5SQ</guid>
+</item>
+<item>
+<title></title>
+<link>http://www.thirdwayblog.com/wp-content/uploads/</link>
+<description>sub</description>
+
+<author></author>
+<pubDate>20071128010343</pubDate>
+<guid>9rnz2MUqGq6Z</guid>
+</item>
+<item>
+<title></title>
+<link>http://www.parliament.gr/kouselas/koino_dra/koino_docs/</link>
+<description>sub</description>
+<author></author>
+<pubDate>20071128010343</pubDate>
+<guid>hSTvg-u6LxcB</guid>
+
+</item>
+<item>
+<title></title>
+<link>http://upload.wikimedia.org/wikipedia/el/f/f1/</link>
+<description>sub</description>
+<author></author>
+<pubDate>20071128010343</pubDate>
+<guid>F-3WVJBs-F4R</guid>
+</item>
+<item>
+<title></title>
+<link>http://www.logiprint.nl/nl/Briefpapier_drukken_Eindhoven.html</link>
+<description>Briefpapier drukken Eindhoven</description>
+<author></author>
+<pubDate>20071011104246</pubDate>
+
+<guid>bmBv8j07Ta7B</guid>
+</item>
+</channel>
+</rss>
+*/

@@ -77,12 +77,6 @@
           <td>#(remoteTriggeredCrawlPaused)#&nbsp;::(paused)#(/remoteTriggeredCrawlPaused)#</td>
         </tr>
         <tr>
-          <td><a href="IndexCreateWWWGlobalQueue_p.html">Global Crawl Trigger</a></td>
-          <td>#[globalCrawlTriggerQueueSize]#</td>
-          <td><a href="Status.html?#(globalCrawlTriggerPaused)#pauseCrawlJob::continueCrawlJob#(/globalCrawlTriggerPaused)#=&amp;jobType=globalCrawlTrigger" title="#(globalCrawlTriggerPaused)#pause global crawl trigger::continue global crawl trigger#(/globalCrawlTriggerPaused)#"><img src="env/grafics/#(globalCrawlTriggerPaused)#stop.gif::start.gif#(/globalCrawlTriggerPaused)#" alt="#(globalCrawlTriggerPaused)#pause global crawl trigger::continue global crawl trigger#(/globalCrawlTriggerPaused)#" style="width:12px;height:12px;" /></a></td>
-          <td>#(globalCrawlTriggerPaused)#&nbsp;::(paused)#(/globalCrawlTriggerPaused)#</td>
-        </tr>    
-        <tr>
           <td>Pre-Queueing</td>
           <td>#[stackCrawlQueueSize]#</td>
           <td></td>

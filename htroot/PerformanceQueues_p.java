@@ -109,7 +109,7 @@ public class PerformanceQueues_p {
 			}
             prop.putHTML("table_" + c + "_longdescr", thread.getLongDescription(), xml);
             queuesize = thread.getJobCount();
-            prop.put("table_" + c + "_queuesize", (queuesize == Integer.MAX_VALUE) ? "unknown" : yFormatter.number(queuesize, !xml));
+            prop.put("table_" + c + "_queuesize", (queuesize == Integer.MAX_VALUE) ? "unlimited" : yFormatter.number(queuesize, !xml));
             
             blocktime = thread.getBlockTime();
             sleeptime = thread.getSleepTime();

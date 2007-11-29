@@ -28,12 +28,14 @@ package de.anomic.plasma.crawler;
 
 import java.io.File;
 import java.io.IOException;
+import java.net.MalformedURLException;
+import java.text.ParseException;
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Iterator;
 
 import de.anomic.data.robotsParser;
-import de.anomic.index.indexURLEntry;
 import de.anomic.plasma.plasmaCrawlEntry;
 import de.anomic.plasma.plasmaCrawlNURL;
 import de.anomic.plasma.plasmaCrawlProfile;
@@ -41,8 +43,9 @@ import de.anomic.plasma.plasmaCrawlZURL;
 import de.anomic.plasma.plasmaHTCache;
 import de.anomic.plasma.plasmaParser;
 import de.anomic.plasma.plasmaSwitchboard;
+import de.anomic.server.serverDate;
 import de.anomic.server.logging.serverLog;
-import de.anomic.tools.crypt;
+import de.anomic.xml.rssReader;
 import de.anomic.yacy.yacyClient;
 import de.anomic.yacy.yacyCore;
 import de.anomic.yacy.yacySeed;
@@ -54,6 +57,7 @@ public class plasmaCrawlQueues {
     private serverLog log;
     private HashMap workers; // mapping from url hash to Worker thread object
     private plasmaProtocolLoader loader;
+    private ArrayList remoteCrawlProviderHashes;
 
     public  plasmaCrawlNURL             noticeURL;
     public  plasmaCrawlZURL             errorURL, delegatedURL;
@@ -63,6 +67,7 @@ public class plasmaCrawlQueues {
         this.log = new serverLog("CRAWLER");
         this.workers = new HashMap();
         this.loader = new plasmaProtocolLoader(sb, log);
+        this.remoteCrawlProviderHashes = new ArrayList();
         
         // start crawling management
         log.logConfig("Starting Crawling Management");
@@ -108,6 +113,9 @@ public class plasmaCrawlQueues {
         Iterator i = workers.values().iterator();
         while (i.hasNext()) ((Thread) i.next()).interrupt();
         // TODO: wait some more time until all threads are finished
+        noticeURL.close();
+        errorURL.close();
+        delegatedURL.close();
     }
     
     public plasmaCrawlEntry[] activeWorker() {
@@ -131,18 +139,32 @@ public class plasmaCrawlQueues {
     }
     
     public boolean coreCrawlJob() {
+        
+        boolean robinsonPrivateCase = ((sb.isRobinsonMode()) && 
+                (!sb.getConfig(plasmaSwitchboard.CLUSTER_MODE, "").equals(plasmaSwitchboard.CLUSTER_MODE_PUBLIC_CLUSTER)) &&
+                (!sb.getConfig(plasmaSwitchboard.CLUSTER_MODE, "").equals(plasmaSwitchboard.CLUSTER_MODE_PRIVATE_CLUSTER)));
+        
+        if ((robinsonPrivateCase) || ((coreCrawlJobSize() <= 20) && (limitCrawlJobSize() > 0))) {
+            // move some tasks to the core crawl job so we have something to do
+            int toshift = Math.min(10, limitCrawlJobSize()); // this cannot be a big number because the balancer makes a forced waiting if it cannot balance
+            for (int i = 0; i < toshift; i++) {
+                noticeURL.shift(plasmaCrawlNURL.STACK_TYPE_LIMIT, plasmaCrawlNURL.STACK_TYPE_CORE);
+            }
+            log.logInfo("shifted " + toshift + " jobs from global crawl to local crawl (coreCrawlJobSize()=" + coreCrawlJobSize() +
+                    ", limitCrawlJobSize()=" + limitCrawlJobSize() + ", cluster.mode=" + sb.getConfig(plasmaSwitchboard.CLUSTER_MODE, "") +
+                    ", robinsonMode=" + ((sb.isRobinsonMode()) ? "on" : "off"));
+        }
+        
         if (noticeURL.stackSize(plasmaCrawlNURL.STACK_TYPE_CORE) == 0) {
             //log.logDebug("CoreCrawl: queue is empty");
             return false;
         }
         if (sb.sbQueue.size() >= (int) sb.getConfigLong(plasmaSwitchboard.INDEXER_SLOTS, 30)) {
-            log.logFine("CoreCrawl: too many processes in indexing queue, dismissed (" +
-            "sbQueueSize=" + sb.sbQueue.size() + ")");
+            log.logFine("CoreCrawl: too many processes in indexing queue, dismissed (" + "sbQueueSize=" + sb.sbQueue.size() + ")");
             return false;
         }
         if (this.size() >= sb.getConfigLong(plasmaSwitchboard.CRAWLER_THREADS_ACTIVE_MAX, 10)) {
-            log.logFine("CoreCrawl: too many processes in loader queue, dismissed (" +
-            "cacheLoader=" + this.size() + ")");
+            log.logFine("CoreCrawl: too many processes in loader queue, dismissed (" + "cacheLoader=" + this.size() + ")");
             return false;
         }
         if (sb.onlineCaution()) {
@@ -203,107 +225,84 @@ public class plasmaCrawlQueues {
         return true;
     }
     
+    public boolean remoteCrawlLoaderJob() {
+        // check if we are allowed to crawl urls provided by other peers
+        if (!yacyCore.seedDB.mySeed().getFlagAcceptRemoteCrawl()) return false;
+        
+        // check if we are a senior peer
+        if (!yacyCore.seedDB.mySeed().isActive()) return false;
+        
+        // check if we have an entry in the provider list, othervise fill the list
+        yacySeed seed;
+        if ((remoteCrawlProviderHashes.size() == 0) && (remoteTriggeredCrawlJobSize() == 0)) {
+            if (yacyCore.seedDB != null && yacyCore.seedDB.sizeConnected() > 0) {
+                Iterator e = yacyCore.dhtAgent.getProvidesRemoteCrawlURLs();
+                while (e.hasNext()) {
+                    seed = (yacySeed) e.next();
+                    if (seed != null) {
+                        remoteCrawlProviderHashes.add(seed.hash);
+                        
+                    }
+                }
+            }
+        }
+        if (remoteCrawlProviderHashes.size() == 0) return false;
+        
+        // take one entry from the provider list and load the entries from the remote peer
+        seed = null;
+        String hash = null;
+        while ((seed == null) && (remoteCrawlProviderHashes.size() > 0)) {
+            hash = (String) remoteCrawlProviderHashes.remove(remoteCrawlProviderHashes.size() - 1);
+            seed = yacyCore.seedDB.get(hash);
+        }
+        if (seed == null) return false;
+        
+        // we know a peer which should provide remote crawl entries. load them now.
+        rssReader reader = (seed == null) ? null : yacyClient.queryRemoteCrawlURLs(seed, 10);
+        if (reader == null) return true;
+        // parse the rss
+        rssReader.Item item;
+        for (int i = 0; i < reader.items(); i++) {
+            item = reader.getItem(i);
+            //System.out.println("URL=" + item.getLink() + ", desc=" + item.getDescription() + ", pubDate=" + item.getPubDate());
+            
+            // put url on remote crawl stack
+            yacyURL url;
+            try {
+                url = new yacyURL(item.getLink(), null);
+            } catch (MalformedURLException e) {
+                url = null;
+            }
+            Date loaddate;
+            try {
+                loaddate = serverDate.parseShortSecondTime(item.getPubDate());
+            } catch (ParseException e) {
+                loaddate = new Date();
+            }
+            yacyURL referrer = null; // referrer needed!
+            if (sb.acceptURL(url)) {
+                // stack url
+                sb.getLog().logFinest("crawlOrder: stack: url='" + url + "'");
+                String reasonString = sb.crawlStacker.stackCrawl(url, referrer, hash, "REMOTE-CRAWLING", loaddate, 0, sb.defaultRemoteProfile);
 
-    public int limitCrawlTriggerJobSize() {
-        return noticeURL.stackSize(plasmaCrawlNURL.STACK_TYPE_LIMIT);
+                if (reasonString == null) {
+                    // done
+                    log.logInfo("crawlOrder: added remote crawl url: " + url.toNormalform(true, false));
+                } else if (reasonString.startsWith("double")) {
+                    // case where we have already the url loaded;
+                    log.logInfo("crawlOrder: ignored double remote crawl url: " + url.toNormalform(true, false));
+                } else {
+                    log.logInfo("crawlOrder: ignored [" + reasonString + "] remote crawl url: " + url.toNormalform(true, false));
+                }
+            } else {
+                log.logWarning("crawlOrder: Received URL outside of our domain: " + url.toNormalform(true, false));
+            }
+        }
+        return true;
     }
     
-    public boolean limitCrawlTriggerJob() {
-        if (noticeURL.stackSize(plasmaCrawlNURL.STACK_TYPE_LIMIT) == 0) {
-            //log.logDebug("LimitCrawl: queue is empty");
-            return false;
-        }
-        boolean robinsonPrivateCase = ((sb.isRobinsonMode()) && 
-                (!sb.getConfig(plasmaSwitchboard.CLUSTER_MODE, "").equals(plasmaSwitchboard.CLUSTER_MODE_PUBLIC_CLUSTER)) &&
-                (!sb.getConfig(plasmaSwitchboard.CLUSTER_MODE, "").equals(plasmaSwitchboard.CLUSTER_MODE_PRIVATE_CLUSTER)));
-        
-        if ((robinsonPrivateCase) || ((coreCrawlJobSize() <= 20) && (limitCrawlTriggerJobSize() > 10))) {
-            // it is not efficient if the core crawl job is empty and we have too much to do
-            // move some tasks to the core crawl job
-            int toshift = 10; // this cannot be a big number because the balancer makes a forced waiting if it cannot balance
-            if (toshift > limitCrawlTriggerJobSize()) toshift = limitCrawlTriggerJobSize();
-            for (int i = 0; i < toshift; i++) {
-                noticeURL.shift(plasmaCrawlNURL.STACK_TYPE_LIMIT, plasmaCrawlNURL.STACK_TYPE_CORE);
-            }
-            log.logInfo("shifted " + toshift + " jobs from global crawl to local crawl (coreCrawlJobSize()=" + coreCrawlJobSize() + ", limitCrawlTriggerJobSize()=" + limitCrawlTriggerJobSize() + ", cluster.mode=" + sb.getConfig(plasmaSwitchboard.CLUSTER_MODE, "") + ", robinsonMode=" + ((sb.isRobinsonMode()) ? "on" : "off"));
-            if (robinsonPrivateCase) return false;
-        }
-        
-        // check local indexing queues
-        // in case the placing of remote crawl fails, there must be space in the local queue to work off the remote crawl
-        if (sb.sbQueue.size() >= (int) sb.getConfigLong(plasmaSwitchboard.INDEXER_SLOTS, 30) * 2) {
-            log.logFine("LimitCrawl: too many processes in indexing queue, dismissed (" +
-            "sbQueueSize=" + sb.sbQueue.size() + ")");
-            return false;
-        }
-        if (this.size() >= sb.getConfigLong(plasmaSwitchboard.CRAWLER_THREADS_ACTIVE_MAX, 10)) {
-            log.logFine("LimitCrawl: too many processes in loader queue, dismissed (" +
-            "cacheLoader=" + this.size() + ")");
-            return false;
-        }
-        if (sb.onlineCaution()) {
-            log.logFine("LimitCrawl: online caution, omitting processing");
-            return false;
-        }
-        
-        // if crawling was paused we have to wait until we were notified to continue
-        Object[] status = (Object[]) sb.crawlJobsStatus.get(plasmaSwitchboard.CRAWLJOB_GLOBAL_CRAWL_TRIGGER);
-        synchronized(status[plasmaSwitchboard.CRAWLJOB_SYNC]) {
-            if (((Boolean)status[plasmaSwitchboard.CRAWLJOB_STATUS]).booleanValue()) {
-                try {
-                    status[plasmaSwitchboard.CRAWLJOB_SYNC].wait();
-                }
-                catch (InterruptedException e){ return false;}
-            }
-        }
-        
-        // start a global crawl, if possible
-        String stats = "REMOTECRAWLTRIGGER[" + noticeURL.stackSize(plasmaCrawlNURL.STACK_TYPE_CORE) + ", " + noticeURL.stackSize(plasmaCrawlNURL.STACK_TYPE_LIMIT) + ", " + noticeURL.stackSize(plasmaCrawlNURL.STACK_TYPE_OVERHANG) + ", "
-                        + noticeURL.stackSize(plasmaCrawlNURL.STACK_TYPE_REMOTE) + "]";
-        try {
-            plasmaCrawlEntry urlEntry = noticeURL.pop(plasmaCrawlNURL.STACK_TYPE_LIMIT, true);
-            String profileHandle = urlEntry.profileHandle();
-            // System.out.println("DEBUG plasmaSwitchboard.processCrawling:
-            // profileHandle = " + profileHandle + ", urlEntry.url = " + urlEntry.url());
-            plasmaCrawlProfile.entry profile = sb.profilesActiveCrawls.getEntry(profileHandle);
-            if (profile == null) {
-                log.logWarning(stats + ": LOST PROFILE HANDLE '" + urlEntry.profileHandle() + "' for URL " + urlEntry.url());
-                return true;
-            }
-            
-            // check if the protocol is supported
-            yacyURL url = urlEntry.url();
-            String urlProtocol = url.getProtocol();
-            if (!this.sb.crawlQueues.isSupportedProtocol(urlProtocol)) {
-                this.log.logSevere("Unsupported protocol in URL '" + url.toString());
-                return true;            
-            }
-            
-            log.logFine("plasmaSwitchboard.limitCrawlTriggerJob: url=" + urlEntry.url() + ", initiator=" + urlEntry.initiator() + ", crawlOrder=" + ((profile.remoteIndexing()) ? "true" : "false") + ", depth=" + urlEntry.depth() + ", crawlDepth=" + profile.generalDepth() + ", filter="
-                            + profile.generalFilter() + ", permission=" + ((yacyCore.seedDB == null) ? "undefined" : (((yacyCore.seedDB.mySeed().isSenior()) || (yacyCore.seedDB.mySeed().isPrincipal())) ? "true" : "false")));
-
-            boolean tryRemote = ((noticeURL.stackSize(plasmaCrawlNURL.STACK_TYPE_CORE) != 0) || (sb.sbQueue.size() != 0)) &&
-                                 (profile.remoteIndexing()) &&
-                                 (urlEntry.initiator() != null) &&
-                                // (!(urlEntry.initiator().equals(indexURL.dummyHash))) &&
-                                 ((yacyCore.seedDB.mySeed().isSenior()) || (yacyCore.seedDB.mySeed().isPrincipal()));
-            if (tryRemote) {
-                // checking robots.txt for http(s) resources
-                if ((urlProtocol.equals("http") || urlProtocol.equals("https")) && robotsParser.isDisallowed(url)) {
-                    this.log.logFine("Crawling of URL '" + url.toString() + "' disallowed by robots.txt.");
-                    return true;            
-                }
-                boolean success = processRemoteCrawlTrigger(urlEntry);
-                if (success) return true;
-            }
-
-            processLocalCrawling(urlEntry, stats); // emergency case, work off the crawl locally            
-            return true;
-        } catch (IOException e) {
-            log.logSevere(stats + ": CANNOT FETCH ENTRY: " + e.getMessage(), e);
-            if (e.getMessage().indexOf("hash is null") > 0) noticeURL.clear(plasmaCrawlNURL.STACK_TYPE_LIMIT);
-            return true; // if we return a false here we will block everything
-        }
+    public int limitCrawlJobSize() {
+        return noticeURL.stackSize(plasmaCrawlNURL.STACK_TYPE_LIMIT);
     }
     
     public int remoteTriggeredCrawlJobSize() {
@@ -397,108 +396,6 @@ public class plasmaCrawlQueues {
         
         log.logInfo(stats + ": enqueued for load " + entry.url() + " [" + entry.url().hash() + "]");
         return;
-    }
-    
-    private boolean processRemoteCrawlTrigger(plasmaCrawlEntry urlEntry) {
-        // if this returns true, then the urlEntry is considered as stored somewhere and the case is finished
-        // if this returns false, the urlEntry will be enqueued to the local crawl again
-        
-        // wrong access
-        if (urlEntry == null) {
-            log.logInfo("REMOTECRAWLTRIGGER[" + noticeURL.stackSize(plasmaCrawlNURL.STACK_TYPE_CORE) + ", " + noticeURL.stackSize(plasmaCrawlNURL.STACK_TYPE_REMOTE) + "]: urlEntry=null");
-            return true; // superfluous request; true correct in this context because the urlEntry shall not be tracked any more
-        }
-        
-        // check url
-        if (urlEntry.url() == null) {
-            log.logFine("ERROR: plasmaSwitchboard.processRemoteCrawlTrigger - url is null. name=" + urlEntry.name());
-            return true; // same case as above: no more consideration
-        }
-        
-        // are we qualified for a remote crawl?
-        if ((yacyCore.seedDB.mySeed() == null) || (yacyCore.seedDB.mySeed().isJunior())) {
-            log.logFine("plasmaSwitchboard.processRemoteCrawlTrigger: no permission");
-            return false; // no, we must crawl this page ourselves
-        }
-        
-        // check if peer for remote crawl is available
-        yacySeed remoteSeed = ((sb.isPublicRobinson()) && (sb.getConfig("cluster.mode", "").equals("publiccluster"))) ?
-            yacyCore.dhtAgent.getPublicClusterCrawlSeed(urlEntry.url().hash(), sb.clusterhashes) :    
-            yacyCore.dhtAgent.getGlobalCrawlSeed(urlEntry.url().hash());
-        if (remoteSeed == null) {
-            log.logFine("plasmaSwitchboard.processRemoteCrawlTrigger: no remote crawl seed available");
-            return false;
-        }
-        
-        // do the request
-        HashMap page = yacyClient.crawlOrder(remoteSeed, urlEntry.url(), sb.getURL(urlEntry.referrerhash()), 6000);
-        if (page == null) {
-            log.logSevere(plasmaSwitchboard.STR_REMOTECRAWLTRIGGER + remoteSeed.getName() + " FAILED. URL CANNOT BE RETRIEVED from referrer hash: " + urlEntry.referrerhash());
-            return false;
-        }
-        
-        // check if we got contact to peer and the peer respondet
-        if ((page == null) || (page.get("delay") == null)) {
-            log.logInfo("CRAWL: REMOTE CRAWL TO PEER " + remoteSeed.getName() + " FAILED. CAUSE: unknown (URL=" + urlEntry.url().toString() + "). Removed peer.");
-            yacyCore.peerActions.peerDeparture(remoteSeed, "remote crawl to peer failed; peer answered unappropriate");
-            return false; // no response from peer, we will crawl this ourself
-        }
-        
-        String response = (String) page.get("response");
-        log.logFine("plasmaSwitchboard.processRemoteCrawlTrigger: remoteSeed="
-                + remoteSeed.getName() + ", url=" + urlEntry.url().toString()
-                + ", response=" + page.toString()); // DEBUG
-
-        // we received an answer and we are told to wait a specific time until we shall ask again for another crawl
-        int newdelay = Integer.parseInt((String) page.get("delay"));
-        yacyCore.dhtAgent.setCrawlDelay(remoteSeed.hash, newdelay);
-        if (response.equals("stacked")) {
-            // success, the remote peer accepted the crawl
-            log.logInfo(plasmaSwitchboard.STR_REMOTECRAWLTRIGGER + remoteSeed.getName()
-                    + " PLACED URL=" + urlEntry.url().toString()
-                    + "; NEW DELAY=" + newdelay);
-            // track this remote crawl
-            delegatedURL.newEntry(urlEntry, remoteSeed.hash, new Date(), 0, response).store();
-            return true;
-        }
-        
-        // check other cases: the remote peer may respond that it already knows that url
-        if (response.equals("double")) {
-            // in case the peer answers double, it transmits the complete lurl data
-            String lurl = (String) page.get("lurl");
-            if ((lurl != null) && (lurl.length() != 0)) {
-                String propStr = crypt.simpleDecode(lurl, (String) page.get("key"));
-                indexURLEntry entry = sb.wordIndex.loadedURL.newEntry(propStr);
-                try {
-                    sb.wordIndex.loadedURL.store(entry);
-                    sb.wordIndex.loadedURL.stack(entry, yacyCore.seedDB.mySeed().hash, remoteSeed.hash, 1); // *** ueberfluessig/doppelt?
-                    // noticeURL.remove(entry.hash());
-                } catch (IOException e) {
-                    // TODO Auto-generated catch block
-                    e.printStackTrace();
-                }
-                
-                log.logInfo(plasmaSwitchboard.STR_REMOTECRAWLTRIGGER + remoteSeed.getName()
-                        + " SUPERFLUOUS. CAUSE: " + page.get("reason")
-                        + " (URL=" + urlEntry.url().toString()
-                        + "). URL IS CONSIDERED AS 'LOADED!'");
-                return true;
-            } else {
-                log.logInfo(plasmaSwitchboard.STR_REMOTECRAWLTRIGGER + remoteSeed.getName()
-                        + " REJECTED. CAUSE: bad lurl response / " + page.get("reason") + " (URL="
-                        + urlEntry.url().toString() + ")");
-                remoteSeed.setFlagAcceptRemoteCrawl(false);
-                yacyCore.seedDB.update(remoteSeed.hash, remoteSeed);
-                return false;
-            }
-        }
-
-        log.logInfo(plasmaSwitchboard.STR_REMOTECRAWLTRIGGER + remoteSeed.getName()
-                + " DENIED. RESPONSE=" + response + ", CAUSE="
-                + page.get("reason") + ", URL=" + urlEntry.url().toString());
-        remoteSeed.setFlagAcceptRemoteCrawl(false);
-        yacyCore.seedDB.update(remoteSeed.hash, remoteSeed);
-        return false;
     }
     
     public plasmaHTCache.Entry loadResourceFromWeb(

@@ -26,6 +26,8 @@
 
 package de.anomic.xml;
 
+import java.io.ByteArrayInputStream;
+import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -37,6 +39,9 @@ import javax.xml.parsers.SAXParserFactory;
 import org.xml.sax.Attributes;
 import org.xml.sax.SAXException;
 import org.xml.sax.helpers.DefaultHandler;
+
+import de.anomic.server.serverByteBuffer;
+import de.anomic.server.logging.serverLog;
 
 public class rssReader extends DefaultHandler {
     
@@ -72,17 +77,7 @@ public class rssReader extends DefaultHandler {
     private HashMap items; // a guid:Item map
     
     
-    public rssReader(String path) {
-        init();
-        parse(path);
-    }
-    
-    public rssReader(InputStream stream) {
-        init();
-        parse(stream);
-    }
-    
-    private void init() {
+    public rssReader() {
         itemsGUID = new ArrayList();
         items = new HashMap();
         buffer = new StringBuffer();
@@ -93,7 +88,8 @@ public class rssReader extends DefaultHandler {
         parsingItem = false;
     }
     
-    private void parse(String path) {
+    public rssReader(String path) {
+        this();
         try {
             SAXParserFactory factory = SAXParserFactory.newInstance();
             SAXParser saxParser = factory.newSAXParser();
@@ -103,7 +99,8 @@ public class rssReader extends DefaultHandler {
         }
     }
     
-    private void parse(InputStream stream) {
+    public rssReader(InputStream stream) {
+        this();
         try {
             SAXParserFactory factory = SAXParserFactory.newInstance();
             SAXParser saxParser = factory.newSAXParser();
@@ -111,6 +108,42 @@ public class rssReader extends DefaultHandler {
         } catch (Exception e) {
             e.printStackTrace();
         }
+    }
+    
+    public static rssReader parse(byte[] a) {
+
+        // check integrity of array
+        if ((a == null) || (a.length == 0)) {
+            serverLog.logWarning("rssReader", "response=null");
+            return null;
+        }
+        if (a.length < 100) {
+            serverLog.logWarning("rssReader", "response=" + new String(a));
+            return null;
+        }
+        if (!serverByteBuffer.equals(a, "<?xml".getBytes())) {
+            serverLog.logWarning("rssReader", "response does not contain valid xml");
+            return null;
+        }
+        String end = new String(a, a.length - 10, 10);
+        if (end.indexOf("rss") < 0) {
+            serverLog.logWarning("rssReader", "response incomplete");
+            return null;
+        }
+        
+        // make input stream
+        ByteArrayInputStream bais = new ByteArrayInputStream(a);
+        
+        // parse stream
+        rssReader reader = null;
+        try {
+            reader = new rssReader(bais);
+        } catch (Exception e) {
+            serverLog.logWarning("rssReader", "parse exception: " + e);
+            return null;
+        }
+        try { bais.close(); } catch (IOException e) {}
+        return reader;
     }
 
     public void startElement(String uri, String name, String tag, Attributes atts) throws SAXException {

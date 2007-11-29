@@ -24,7 +24,7 @@
 <description>#[description]#</description>
 <author>#[author]#</author>
 <pubDate>#[pubDate]#</pubDate>
-<guid>#[guid]#</guid>
+<guid isPermaLink="false">#[guid]#</guid>
 </item>
 #{/item}#
 </channel>

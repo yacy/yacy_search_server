@@ -71,7 +71,7 @@ public class WatchCrawler_p {
         } else {
             prop.put("info", "0");
             
-            if ((post.containsKey("autoforward")) && (switchboard.crawlQueues.coreCrawlJobSize() == 0)) {
+            if ((post.containsKey("autoforward")) && (switchboard.crawlQueues.coreCrawlJobSize() == 0) && (switchboard.crawlQueues.remoteTriggeredCrawlJobSize() == 0)) {
                 prop.put("forwardToCrawlStart", "1");
             }
             
@@ -81,7 +81,7 @@ public class WatchCrawler_p {
                 if (queue.equals("localcrawler")) {
                     switchboard.continueCrawlJob(plasmaSwitchboard.CRAWLJOB_LOCAL_CRAWL);
                 } else if (queue.equals("remotecrawler")) {
-                    switchboard.continueCrawlJob(plasmaSwitchboard.CRAWLJOB_GLOBAL_CRAWL_TRIGGER);
+                    switchboard.continueCrawlJob(plasmaSwitchboard.CRAWLJOB_REMOTE_TRIGGERED_CRAWL);
                 }
             }
 
@@ -91,7 +91,7 @@ public class WatchCrawler_p {
                 if (queue.equals("localcrawler")) {
                     switchboard.pauseCrawlJob(plasmaSwitchboard.CRAWLJOB_LOCAL_CRAWL);
                 } else if (queue.equals("remotecrawler")) {
-                    switchboard.pauseCrawlJob(plasmaSwitchboard.CRAWLJOB_GLOBAL_CRAWL_TRIGGER);
+                    switchboard.pauseCrawlJob(plasmaSwitchboard.CRAWLJOB_REMOTE_TRIGGERED_CRAWL);
                 }
             }
             

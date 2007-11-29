@@ -118,9 +118,9 @@ public class ScreenSaver {
                         remoteTriggeredCrawlStarted = true;
                         sb.continueCrawlJob(plasmaSwitchboard.CRAWLJOB_REMOTE_TRIGGERED_CRAWL);
                     }
-                    if (sb.crawlJobIsPaused(plasmaSwitchboard.CRAWLJOB_GLOBAL_CRAWL_TRIGGER)) {
+                    if (sb.crawlJobIsPaused(plasmaSwitchboard.CRAWLJOB_REMOTE_CRAWL_LOADER)) {
                         globalCrawlTriggerStarted = true;
-                        sb.continueCrawlJob(plasmaSwitchboard.CRAWLJOB_GLOBAL_CRAWL_TRIGGER);
+                        sb.continueCrawlJob(plasmaSwitchboard.CRAWLJOB_REMOTE_CRAWL_LOADER);
                     }                                     
                 } else if (line.equals("EXIT")) {
                     outputWriter.println("OK");
@@ -143,7 +143,7 @@ public class ScreenSaver {
                 sb.pauseCrawlJob(plasmaSwitchboard.CRAWLJOB_REMOTE_TRIGGERED_CRAWL);
             }
             if (globalCrawlTriggerStarted) {
-                sb.pauseCrawlJob(plasmaSwitchboard.CRAWLJOB_GLOBAL_CRAWL_TRIGGER);
+                sb.pauseCrawlJob(plasmaSwitchboard.CRAWLJOB_REMOTE_CRAWL_LOADER);
             }            
         }
     }

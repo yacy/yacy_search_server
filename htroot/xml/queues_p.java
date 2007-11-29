@@ -164,10 +164,14 @@ public class queues_p {
         int stackSize = sb.crawlQueues.noticeURL.stackSize(plasmaCrawlNURL.STACK_TYPE_CORE);
         addNTable(prop, "list-local", sb.crawlQueues.noticeURL.top(plasmaCrawlNURL.STACK_TYPE_CORE, Math.min(10, stackSize)));
 
-        
         //global crawl queue
-        prop.putNum("remoteCrawlSize", Integer.toString(sb.getThread(plasmaSwitchboard.CRAWLJOB_GLOBAL_CRAWL_TRIGGER).getJobCount()));
-        prop.put("remoteCrawlState", sb.crawlJobIsPaused(plasmaSwitchboard.CRAWLJOB_GLOBAL_CRAWL_TRIGGER) ? STATE_PAUSED : STATE_RUNNING);
+        prop.putNum("limitCrawlSize", Integer.toString(sb.crawlQueues.limitCrawlJobSize()));
+        prop.put("limitCrawlState", STATE_RUNNING);
+        stackSize = sb.crawlQueues.noticeURL.stackSize(plasmaCrawlNURL.STACK_TYPE_LIMIT);
+
+        //global crawl queue
+        prop.putNum("remoteCrawlSize", Integer.toString(sb.getThread(plasmaSwitchboard.CRAWLJOB_REMOTE_TRIGGERED_CRAWL).getJobCount()));
+        prop.put("remoteCrawlState", sb.crawlJobIsPaused(plasmaSwitchboard.CRAWLJOB_REMOTE_TRIGGERED_CRAWL) ? STATE_PAUSED : STATE_RUNNING);
         stackSize = sb.crawlQueues.noticeURL.stackSize(plasmaCrawlNURL.STACK_TYPE_LIMIT);
 
         if (stackSize == 0) {

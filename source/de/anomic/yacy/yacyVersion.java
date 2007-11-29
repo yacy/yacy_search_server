@@ -53,7 +53,7 @@ public final class yacyVersion implements Comparator, Comparable {
     public static final float YACY_SUPPORTS_GZIP_POST_REQUESTS = (float) 0.40300772;
     public static final float YACY_ACCEPTS_RANKING_TRANSMISSION = (float) 0.414;
     public static final float YACY_HANDLES_COLLECTION_INDEX = (float) 0.486;
-    public static final float YACY_PROVIDES_CRAWLS_VIA_LIST_HTML = (float) 0.50403367;
+    public static final float YACY_POVIDES_REMOTECRAWL_LISTS = (float) 0.550;
 
     // information about latest release, retrieved by other peers release version
     public static double latestRelease = 0.1; // this value is overwritten when a peer with later version appears

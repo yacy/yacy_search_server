@@ -150,9 +150,16 @@ function handleQueues(){
 		
 		updateTable(localcrawlerqueue, "local crawler");
 		
+		limitcrawlerqueue=getFirstChild(xml, "limitcrawlerqueue");
+		updateTable(limitcrawlerqueue, "limitCrawlerTable");
+		limitcrawlerqueue_size=getValue(getFirstChild(limitcrawlerqueue, "size"));
+		limitcrawlerqueue_state=getValue(getFirstChild(limitcrawlerqueue, "state"));
+		document.getElementById("limitcrawlerqueuesize").firstChild.nodeValue=limitcrawlerqueue_size;
+		putQueueState("limitcrawler", limitcrawlerqueue_state);
+		updateTable(limitcrawlerqueue, "limit crawler");
+		
 		remotecrawlerqueue=getFirstChild(xml, "remotecrawlerqueue");
 		updateTable(remotecrawlerqueue, "remoteCrawlerTable");
-		
 		remotecrawlerqueue_size=getValue(getFirstChild(remotecrawlerqueue, "size"));
 		remotecrawlerqueue_state=getValue(getFirstChild(remotecrawlerqueue, "state"));
 		document.getElementById("remotecrawlerqueuesize").firstChild.nodeValue=remotecrawlerqueue_size;

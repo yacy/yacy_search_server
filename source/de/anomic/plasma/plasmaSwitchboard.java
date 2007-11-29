@@ -348,18 +348,17 @@ public final class plasmaSwitchboard extends serverAbstractSwitch implements ser
     
     // 61_globalcawltrigger
     /**
-     * <p><code>public static final String <strong>CRAWLJOB_GLOBAL_CRAWL_TRIGGER</strong> = "61_globalcrawltrigger"</code></p>
-     * <p>Name of the global crawl trigger thread, popping one entry off it's queue and sending it to a non-busy peer to
-     * crawl it</p>
+     * <p><code>public static final String <strong>CRAWLJOB_REMOTE_CRAWL_LOADER</strong> = "60_remotecrawlloader"</code></p>
+     * <p>Name of the remote crawl list loading thread</p>
      * 
-     * @see plasmaSwitchboard#CRAWLJOB_REMOTE_TRIGGERED_CRAWL
+     * @see plasmaSwitchboard#CRAWLJOB_REMOTE_CRAWL_LOADER
      */
-    public static final String CRAWLJOB_GLOBAL_CRAWL_TRIGGER                    = "61_globalcrawltrigger";
-    public static final String CRAWLJOB_GLOBAL_CRAWL_TRIGGER_METHOD_START       = "limitCrawlTriggerJob";
-    public static final String CRAWLJOB_GLOBAL_CRAWL_TRIGGER_METHOD_JOBCOUNT    = "limitCrawlTriggerJobSize";
-    public static final String CRAWLJOB_GLOBAL_CRAWL_TRIGGER_METHOD_FREEMEM     = null;
-    public static final String CRAWLJOB_GLOBAL_CRAWL_TRIGGER_IDLESLEEP          = "61_globalcrawltrigger_idlesleep";
-    public static final String CRAWLJOB_GLOBAL_CRAWL_TRIGGER_BUSYSLEEP          = "61_globalcrawltrigger_busysleep";
+    public static final String CRAWLJOB_REMOTE_CRAWL_LOADER                    = "60_remotecrawlloader";
+    public static final String CRAWLJOB_REMOTE_CRAWL_LOADER_METHOD_START       = "remoteCrawlLoaderJob";
+    public static final String CRAWLJOB_REMOTE_CRAWL_LOADER_METHOD_JOBCOUNT    = null;
+    public static final String CRAWLJOB_REMOTE_CRAWL_LOADER_METHOD_FREEMEM     = null;
+    public static final String CRAWLJOB_REMOTE_CRAWL_LOADER_IDLESLEEP          = "60_remotecrawlloader_idlesleep";
+    public static final String CRAWLJOB_REMOTE_CRAWL_LOADER_BUSYSLEEP          = "60_remotecrawlloader_busysleep";
     
     // 62_remotetriggeredcrawl
     /**
@@ -1208,9 +1207,9 @@ public final class plasmaSwitchboard extends serverAbstractSwitch implements ser
         this.crawlJobsStatus.put(CRAWLJOB_REMOTE_TRIGGERED_CRAWL, new Object[]{
                 new Object(),
                 Boolean.valueOf(getConfig(CRAWLJOB_REMOTE_TRIGGERED_CRAWL + "_isPaused", "false"))});
-        this.crawlJobsStatus.put(CRAWLJOB_GLOBAL_CRAWL_TRIGGER, new Object[]{
+        this.crawlJobsStatus.put(CRAWLJOB_REMOTE_CRAWL_LOADER, new Object[]{
                 new Object(),
-                Boolean.valueOf(getConfig(CRAWLJOB_GLOBAL_CRAWL_TRIGGER + "_isPaused", "false"))});
+                Boolean.valueOf(getConfig(CRAWLJOB_REMOTE_CRAWL_LOADER + "_isPaused", "false"))});
         
         // init cookie-Monitor
         this.log.logConfig("Starting Cookie Monitor");
@@ -1340,8 +1339,8 @@ public final class plasmaSwitchboard extends serverAbstractSwitch implements ser
         new serverInstantThread(this, PROXY_CACHE_ENQUEUE_METHOD_START, PROXY_CACHE_ENQUEUE_METHOD_JOBCOUNT, PROXY_CACHE_ENQUEUE_METHOD_FREEMEM), 10000);
         deployThread(CRAWLJOB_REMOTE_TRIGGERED_CRAWL, "Remote Crawl Job", "thread that performes a single crawl/indexing step triggered by a remote peer", null,
         new serverInstantThread(crawlQueues, CRAWLJOB_REMOTE_TRIGGERED_CRAWL_METHOD_START, CRAWLJOB_REMOTE_TRIGGERED_CRAWL_METHOD_JOBCOUNT, CRAWLJOB_REMOTE_TRIGGERED_CRAWL_METHOD_FREEMEM), 30000);
-        deployThread(CRAWLJOB_GLOBAL_CRAWL_TRIGGER, "Global Crawl Trigger", "thread that triggeres remote peers for crawling", "/IndexCreateWWWGlobalQueue_p.html",
-        new serverInstantThread(crawlQueues, CRAWLJOB_GLOBAL_CRAWL_TRIGGER_METHOD_START, CRAWLJOB_GLOBAL_CRAWL_TRIGGER_METHOD_JOBCOUNT, CRAWLJOB_GLOBAL_CRAWL_TRIGGER_METHOD_FREEMEM), 30000); // error here?
+        deployThread(CRAWLJOB_REMOTE_CRAWL_LOADER, "Remote Crawl URL Loader", "thread that loads remote crawl lists from other peers", "",
+        new serverInstantThread(crawlQueues, CRAWLJOB_REMOTE_CRAWL_LOADER_METHOD_START, CRAWLJOB_REMOTE_CRAWL_LOADER_METHOD_JOBCOUNT, CRAWLJOB_REMOTE_CRAWL_LOADER_METHOD_FREEMEM), 30000); // error here?
         deployThread(CRAWLJOB_LOCAL_CRAWL, "Local Crawl", "thread that performes a single crawl step from the local crawl queue", "/IndexCreateWWWLocalQueue_p.html",
         new serverInstantThread(crawlQueues, CRAWLJOB_LOCAL_CRAWL_METHOD_START, CRAWLJOB_LOCAL_CRAWL_METHOD_JOBCOUNT, CRAWLJOB_LOCAL_CRAWL_METHOD_FREEMEM), 10000);
         deployThread(SEED_UPLOAD, "Seed-List Upload", "task that a principal peer performes to generate and upload a seed-list to a ftp account", null,
@@ -2639,18 +2638,6 @@ public final class plasmaSwitchboard extends serverAbstractSwitch implements ser
         	thread.setIdleSleep(1000);
         }
         
-        thread = getThread(CRAWLJOB_GLOBAL_CRAWL_TRIGGER);
-        if (thread != null) {
-            setConfig(CRAWLJOB_GLOBAL_CRAWL_TRIGGER_BUSYSLEEP , thread.setBusySleep(Math.max(1000, newBusySleep * 3)));
-            thread.setIdleSleep(10000);
-        }
-        /*
-        thread = getThread(CRAWLJOB_REMOTE_TRIGGERED_CRAWL);
-        if (thread != null) {
-            setConfig(CRAWLJOB_REMOTE_TRIGGERED_CRAWL_BUSYSLEEP , thread.setBusySleep(newBusySleep * 10));
-            thread.setIdleSleep(10000);
-        }
-        */
         thread = getThread(PROXY_CACHE_ENQUEUE);
         if (thread != null) {
             setConfig(PROXY_CACHE_ENQUEUE_BUSYSLEEP , thread.setBusySleep(0));

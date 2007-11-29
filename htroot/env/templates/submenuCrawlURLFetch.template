@@ -1,7 +1,0 @@
-<div class="SubMenu">
-  <h3>URL Fetcher Menu</h3>
-  <ul class="SubMenu">
-    <li><a href="/CrawlURLFetch_p.html" class="MenuItemLink lock">URL Fetcher</a></li>
-    <li><a href="/CrawlURLFetchStack_p.html" class="MenuItemLink lock">URL Stack</a></li>
-  </ul>
-</div>

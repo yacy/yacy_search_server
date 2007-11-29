@@ -124,6 +124,53 @@ public class yacyDHTAction implements yacyPeerAction {
         }
     }
     
+    public Iterator getProvidesRemoteCrawlURLs() {
+        return new providesRemoteCrawlURLsEnum();
+    }
+    
+    class providesRemoteCrawlURLsEnum implements Iterator {
+
+        Iterator se;
+        yacySeed nextSeed;
+        
+        public providesRemoteCrawlURLsEnum() {
+            se = getDHTSeeds(true, null, yacyVersion.YACY_POVIDES_REMOTECRAWL_LISTS);
+            nextSeed = nextInternal();
+        }
+        
+        public boolean hasNext() {
+            return nextSeed != null;
+        }
+
+        private yacySeed nextInternal() {
+            yacySeed s;
+            try {
+                while (se.hasNext()) {
+                    s = (yacySeed) se.next();
+                    if (s == null) return null;
+                    if (s.getLong(yacySeed.RCOUNT, 0) > 0) return s;
+                }
+            } catch (kelondroException e) {
+                System.out.println("DEBUG providesRemoteCrawlURLsEnum:" + e.getMessage());
+                yacyCore.log.logSevere("database inconsistency (" + e.getMessage() + "), re-set of db.");
+                seedDB.resetActiveTable();
+                return null;
+            }
+            return null;
+        }
+        
+        public Object next() {
+            yacySeed next = nextSeed;
+            nextSeed = nextInternal();
+            return next;
+        }
+
+        public void remove() {
+            throw new UnsupportedOperationException();
+        }
+
+    }
+    
     public Iterator getAcceptRemoteIndexSeeds(String starthash) {
         // returns an enumeration of yacySeed-Objects
         // that have the AcceptRemoteIndex-Flag set

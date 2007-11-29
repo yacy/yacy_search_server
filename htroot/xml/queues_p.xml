@@ -49,6 +49,22 @@
   </entry>
 #{/list-local}#
 </localcrawlerqueue>
+<limitcrawlerqueue>
+  <size>#[limitCrawlSize]#</size>
+  <state>#[limitCrawlState]#</state>
+#{list-limit}#
+  <entry>
+    <profile>#[profile]#</profile>
+	<initiator>#[initiator]#</initiator>
+    <depth>#[depth]#</depth>
+    <modified>#[modified]#</modified>
+    <anchor>#[anchor]#</anchor>
+    <url>#[url]#</url>
+    <hash>#[hash]#</hash>
+    <inProcess>#(inProcess)#false::true#(/inProcess)#</inProcess>
+  </entry>
+#{/list-limit}#
+</limitcrawlerqueue>
 <remotecrawlerqueue>
   <size>#[remoteCrawlSize]#</size>
   <state>#[remoteCrawlState]#</state>

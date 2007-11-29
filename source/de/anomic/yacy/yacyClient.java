@@ -72,6 +72,7 @@ import de.anomic.server.serverDomains;
 import de.anomic.server.serverObjects;
 import de.anomic.tools.crypt;
 import de.anomic.tools.nxTools;
+import de.anomic.xml.rssReader;
 
 public final class yacyClient {
 
@@ -329,6 +330,46 @@ public final class yacyClient {
         } catch (IOException e) {
             yacyCore.log.logSevere("yacyClient.queryUrlCount error asking peer '" + target.getName() + "':" + e.toString());
             return -1;
+        }
+    }
+
+    public static rssReader queryRemoteCrawlURLs(yacySeed target, int count) {
+        // returns a list of 
+        if (target == null) { return null; }
+        if (yacyCore.seedDB.mySeed() == null) return null;
+        
+        // prepare request
+        final serverObjects post = yacyNetwork.basicRequestPost(plasmaSwitchboard.getSwitchboard(), target.hash);
+        post.put("call", "remotecrawl");
+        post.put("count", count);
+        
+        // send request
+        try {
+            final byte[] result = 
+                httpc.wput(new yacyURL("http://" + target.getClusterAddress() + "/yacy/urls.xml", null),
+                           target.getHexHash() + ".yacyh",
+                           60000, /* a long time-out is needed */
+                           null, 
+                           null,
+                           proxyConfig(),
+                           post,
+                           null
+                );
+            
+            rssReader reader = rssReader.parse(result);
+            if (reader == null) {
+                // case where the rss reader does not understand the content
+                yacyCore.log.logWarning("yacyClient.queryRemoteCrawlURLs failed asking peer '" + target.getName() + "': probably bad response from remote peer");
+                System.out.println("***DEBUG*** rss input = " + new String(result));
+                target.put(yacySeed.RCOUNT, "0");
+                yacyCore.seedDB.update(target.hash, target); // overwrite number of remote-available number to avoid that this peer is called again (until update is done by peer ping)
+                //e.printStackTrace();
+                return null;
+            }
+            return reader;
+        } catch (IOException e) {
+            yacyCore.log.logSevere("yacyClient.queryRemoteCrawlURLs error asking peer '" + target.getName() + "':" + e.toString());
+            return null;
         }
     }
 
@@ -748,62 +789,6 @@ public final class yacyClient {
         }
         return "wrong protocol: " + protocol;
     }
-    
-    public static HashMap crawlOrder(yacySeed targetSeed, yacyURL url, yacyURL referrer, int timeout) {
-        return crawlOrder(targetSeed, new yacyURL[]{url}, new yacyURL[]{referrer}, timeout); 
-    }
-    
-    public static HashMap crawlOrder(yacySeed target, yacyURL[] url, yacyURL[] referrer, int timeout) {
-        assert (target != null);
-        assert (yacyCore.seedDB.mySeed() != null);
-        assert (yacyCore.seedDB.mySeed() != target);
-        
-        // prepare request
-        final serverObjects post = yacyNetwork.basicRequestPost(plasmaSwitchboard.getSwitchboard(), target.hash);
-        post.put("process", "crawl");
-        if (url.length == 1) {
-            post.put("url", crypt.simpleEncode(url[0].toNormalform(true, true)));
-            post.put("referrer", crypt.simpleEncode((referrer[0] == null) ? "" : referrer[0].toNormalform(true, true)));
-        } else {
-            for (int i=0; i< url.length; i++) {
-                post.put("url" + i, crypt.simpleEncode(url[i].toNormalform(true, true)));
-                post.put("ref" + i, crypt.simpleEncode((referrer[i] == null) ? "" : referrer[i].toNormalform(true, true)));
-            }
-        }
-        post.put("depth", "0");
-        post.put("ttl", "0");
-        
-        // determining target address
-        final String address = target.getClusterAddress();
-        if (address == null) { return null; }
-            
-        // send request
-        try {
-            final HashMap result = nxTools.table(
-                    httpc.wput(new yacyURL("http://" + address + "/yacy/crawlOrder.html", null),
-                               target.getHexHash() + ".yacyh",
-                               timeout, 
-                               null, 
-                               null,
-                               proxyConfig(),
-                               post,
-                               null
-                    ), "UTF-8"
-            );
-            return result;
-        } catch (Exception e) {
-            // most probably a network time-out exception
-            yacyCore.log.logSevere("yacyClient.crawlOrder error: peer=" + target.getName() + ", error=" + e.getMessage());
-            return null;
-        }
-    }
-
-    /*
-        Test:
-        http://217.234.95.114:5777/yacy/crawlOrder.html?key=abc&iam=S-cjM67KhtcJ&youare=EK31N7RgRqTn&process=crawl&referrer=&depth=0&url=p|http://www.heise.de/newsticker/meldung/53245
-        version=0.297 uptime=225 accepted=true reason=ok delay=30 depth=0
-        -er crawlt, Ergebnis erscheint aber unter falschem initiator
-     */
 
     public static HashMap crawlReceipt(yacySeed target, String process, String result, String reason, indexURLEntry entry, String wordhashes) {
         assert (target != null);
