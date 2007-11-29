@@ -53,6 +53,7 @@ public class rssReader extends DefaultHandler {
         "category",    //
         "title",       //
         "link",        //
+        "referrer",    //
         "language",    //
         "description", //
         "creator",     //
@@ -243,6 +244,10 @@ public class rssReader extends DefaultHandler {
         
         public String getLink() {
             return (String) map.get("link");
+        }
+        
+        public String getReferrer() {
+            return (String) map.get("referrer");
         }
         
         public String getLanguage() {

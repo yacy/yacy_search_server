@@ -238,6 +238,21 @@ public class plasmaCrawlQueues {
             return false;
         }
         
+        if (sb.sbQueue.size() >= (int) sb.getConfigLong(plasmaSwitchboard.INDEXER_SLOTS, 30)) {
+            log.logFine("remoteCrawlLoaderJob: too many processes in indexing queue, dismissed (" + "sbQueueSize=" + sb.sbQueue.size() + ")");
+            return false;
+        }
+        
+        if (this.size() >= sb.getConfigLong(plasmaSwitchboard.CRAWLER_THREADS_ACTIVE_MAX, 10)) {
+            log.logFine("remoteCrawlLoaderJob: too many processes in loader queue, dismissed (" + "cacheLoader=" + this.size() + ")");
+            return false;
+        }
+        
+        if (sb.onlineCaution()) {
+            log.logFine("remoteCrawlLoaderJob: online caution, omitting processing");
+            return false;
+        }
+        
         // check if we have an entry in the provider list, otherwise fill the list
         yacySeed seed;
         if ((remoteCrawlProviderHashes.size() == 0) &&
@@ -271,28 +286,32 @@ public class plasmaCrawlQueues {
         if (reader == null) return true;
         // parse the rss
         rssReader.Item item;
+        yacyURL url, referrer;
+        Date loaddate;
         for (int i = 0; i < reader.items(); i++) {
             item = reader.getItem(i);
             //System.out.println("URL=" + item.getLink() + ", desc=" + item.getDescription() + ", pubDate=" + item.getPubDate());
             
             // put url on remote crawl stack
-            yacyURL url;
             try {
                 url = new yacyURL(item.getLink(), null);
             } catch (MalformedURLException e) {
                 url = null;
             }
-            Date loaddate;
+            try {
+                referrer = new yacyURL(item.getReferrer(), null);
+            } catch (MalformedURLException e) {
+                referrer = null;
+            }
             try {
                 loaddate = serverDate.parseShortSecondTime(item.getPubDate());
             } catch (ParseException e) {
                 loaddate = new Date();
             }
-            yacyURL referrer = null; // referrer needed!
             if (sb.acceptURL(url)) {
                 // stack url
                 sb.getLog().logFinest("crawlOrder: stack: url='" + url + "'");
-                String reasonString = sb.crawlStacker.stackCrawl(url, referrer, hash, "REMOTE-CRAWLING", loaddate, 0, sb.defaultRemoteProfile);
+                String reasonString = sb.crawlStacker.stackCrawl(url, referrer, hash, item.getDescription(), loaddate, 0, sb.defaultRemoteProfile);
 
                 if (reasonString == null) {
                     // done
@@ -328,20 +347,18 @@ public class plasmaCrawlQueues {
             return false;
         }
         if (sb.sbQueue.size() >= (int) sb.getConfigLong(plasmaSwitchboard.INDEXER_SLOTS, 30)) {
-            log.logFine("GlobalCrawl: too many processes in indexing queue, dismissed (" +
-            "sbQueueSize=" + sb.sbQueue.size() + ")");
+            log.logFine("GlobalCrawl: too many processes in indexing queue, dismissed (" + "sbQueueSize=" + sb.sbQueue.size() + ")");
             return false;
         }
         if (this.size() >= sb.getConfigLong(plasmaSwitchboard.CRAWLER_THREADS_ACTIVE_MAX, 10)) {
-            log.logFine("GlobalCrawl: too many processes in loader queue, dismissed (" +
-            "cacheLoader=" + this.size() + ")");
+            log.logFine("GlobalCrawl: too many processes in loader queue, dismissed (" + "cacheLoader=" + this.size() + ")");
             return false;
         }        
         if (sb.onlineCaution()) {
             log.logFine("GlobalCrawl: online caution, omitting processing");
             return false;
         }
-        
+
         // if crawling was paused we have to wait until we wer notified to continue
         Object[] status = (Object[]) sb.crawlJobsStatus.get(plasmaSwitchboard.CRAWLJOB_REMOTE_TRIGGERED_CRAWL);
         synchronized(status[plasmaSwitchboard.CRAWLJOB_SYNC]) {

@@ -35,6 +35,7 @@ import de.anomic.server.serverObjects;
 import de.anomic.server.serverSwitch;
 import de.anomic.yacy.yacyCore;
 import de.anomic.yacy.yacyNetwork;
+import de.anomic.yacy.yacyURL;
 
 public class urls {
     
@@ -60,6 +61,7 @@ public class urls {
             int count = Math.min(100, post.getInt("count", 0));
             int c = 0;
             plasmaCrawlEntry entry;
+            yacyURL referrer;
             while ((count > 0) && (sb.crawlQueues.noticeURL.stackSize(stackType) > 0)) {
                 try {
                     entry = sb.crawlQueues.noticeURL.pop(stackType, false);
@@ -67,11 +69,14 @@ public class urls {
                     break;
                 }
                 if (entry == null) break;
+                // find referrer, if there is one
+                referrer = sb.getURL(entry.referrerhash());
                 // place url to notice-url db
                 sb.crawlQueues.delegatedURL.push(sb.crawlQueues.delegatedURL.newEntry(entry.url(), "client=____________"));
                 // create RSS entry
                 prop.put("item_" + c + "_title", "");
                 prop.putHTML("item_" + c + "_link", entry.url().toNormalform(true, false));
+                prop.putHTML("item_" + c + "_referrer", (referrer == null) ? "" : referrer.toNormalform(true, false));
                 prop.putHTML("item_" + c + "_description", entry.name());
                 prop.put("item_" + c + "_author", "");
                 prop.put("item_" + c + "_pubDate", serverDate.shortSecondTime(entry.appdate()));

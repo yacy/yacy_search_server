@@ -1454,10 +1454,16 @@ public final class httpc {
         public void writeX(InputStream source, OutputStream procOS, OutputStream bufferOS) {
             byte[] buffer = new byte[2048];
             int l, c = 0;
+            lastIO = System.currentTimeMillis();
             
-            while (true) try {
+            io: while (true) try {
                 l = source.read(buffer, 0, buffer.length);
-                if (l <= 0) break;
+                if (l < 0) break;
+                if (l == 0) try {
+                    if (System.currentTimeMillis() - lastIO > 30000) break;
+                    this.wait(300);
+                    continue io;
+                } catch (InterruptedException e) {} // may happen without EOF
                 lastIO = System.currentTimeMillis();
                 c += l;
                 if (procOS != null) procOS.write(buffer, 0, l);
@@ -1479,10 +1485,16 @@ public final class httpc {
                 OutputStreamWriter bufferOSWriter = (bufferOS == null) ? null : new OutputStreamWriter(bufferOS,outputCharset);
                 char[] buffer = new char[2048];
                 int l, c= 0;
-
-                while (true) try{
+                lastIO = System.currentTimeMillis();
+                
+                io: while (true) try{
                     l = sourceReader.read(buffer, 0, buffer.length);
-                    if (l <= 0) break;
+                    if (l < 0) break;
+                    if (l == 0) try {
+                        if (System.currentTimeMillis() - lastIO > 30000) break;
+                        this.wait(300);
+                        continue io;
+                    } catch (InterruptedException e) {} // may happen without EOF
                     lastIO = System.currentTimeMillis();
                     c += l;
                     if (procOS != null) procOS.write(buffer, 0, l);

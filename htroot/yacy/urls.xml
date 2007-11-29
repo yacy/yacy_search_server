@@ -21,6 +21,7 @@
 <item>
 <title>#[title]#</title>
 <link>#[link]#</link>
+<referrer>#[referrer]#</referrer>
 <description>#[description]#</description>
 <author>#[author]#</author>
 <pubDate>#[pubDate]#</pubDate>

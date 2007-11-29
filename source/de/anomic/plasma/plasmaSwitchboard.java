@@ -1497,6 +1497,7 @@ public final class plasmaSwitchboard extends serverAbstractSwitch implements ser
     }
     
     public yacyURL getURL(String urlhash) {
+        if (urlhash == null) return null;
         if (urlhash.equals(yacyURL.dummyHash)) return null;
         yacyURL ne = crawlQueues.getURL(urlhash);
         if (ne != null) return ne;
