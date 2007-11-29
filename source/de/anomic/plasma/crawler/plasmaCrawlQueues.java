@@ -227,14 +227,23 @@ public class plasmaCrawlQueues {
     
     public boolean remoteCrawlLoaderJob() {
         // check if we are allowed to crawl urls provided by other peers
-        if (!yacyCore.seedDB.mySeed().getFlagAcceptRemoteCrawl()) return false;
+        if (!yacyCore.seedDB.mySeed().getFlagAcceptRemoteCrawl()) {
+            //this.log.logInfo("remoteCrawlLoaderJob: not done, we are not allowed to do that");
+            return false;
+        }
         
         // check if we are a senior peer
-        if (!yacyCore.seedDB.mySeed().isActive()) return false;
+        if (!yacyCore.seedDB.mySeed().isActive()) {
+            //this.log.logInfo("remoteCrawlLoaderJob: not done, this should be a senior or principal peer");
+            return false;
+        }
         
-        // check if we have an entry in the provider list, othervise fill the list
+        // check if we have an entry in the provider list, otherwise fill the list
         yacySeed seed;
-        if ((remoteCrawlProviderHashes.size() == 0) && (remoteTriggeredCrawlJobSize() == 0)) {
+        if ((remoteCrawlProviderHashes.size() == 0) &&
+            (coreCrawlJobSize() == 0) &&
+            (remoteTriggeredCrawlJobSize() == 0) &&
+            (sb.queueSize() < 10)) {
             if (yacyCore.seedDB != null && yacyCore.seedDB.sizeConnected() > 0) {
                 Iterator e = yacyCore.dhtAgent.getProvidesRemoteCrawlURLs();
                 while (e.hasNext()) {
