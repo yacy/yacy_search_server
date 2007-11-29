@@ -1166,20 +1166,29 @@ public final class serverCore extends serverAbstractThread implements serverThre
 
         // reuse an existing linebuffer
         serverByteBuffer readLineBuffer = new serverByteBuffer(80);
-        
+        serverByteBuffer temp = new serverByteBuffer(80);
+
         int bufferSize = 0, b = 0;    	
-    	try {
-    	    while ((b = pbis.read()) > 31) {
-                readLineBuffer.write(b);
+        try {
+            while ((b = pbis.read()) != cr) {
+                temp.write(b);
                 if (bufferSize++ > maxSize) break;
             }
-            
-    	    // we have catched a possible line end
-    	    if (b == cr) {
-        		// maybe a lf follows, read it:
-        		if ((b = pbis.read()) != lf) if (b >= 0) pbis.unread(b); // we push back the byte
-    	    }
-    	    
+
+            // we have catched a possible line end
+            if (b == cr) {
+                // maybe a lf follows, read it:
+                if ((b = pbis.read()) != lf) if (b >= 0) pbis.unread(b); // we push back the byte
+            }
+
+            byte tempByte;
+            for(int i=0; i<temp.length(); i++){
+                tempByte = temp.byteAt(i);
+                // filter illegal bytes send by buggy HTTP servers
+                if( tempByte == 9 || (tempByte > 31 && tempByte != 127))
+                    readLineBuffer.append(tempByte);
+            }
+
             if ((readLineBuffer.length()==0)&&(b == -1)) return null;
             return readLineBuffer.toByteArray();
         } catch (ClosedByInterruptException e) {
