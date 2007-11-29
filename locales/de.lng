@@ -815,33 +815,115 @@ Pause==Anhalten
 RWIDbCleaner - Clean up the database by deletion of words with reference to blacklisted urls:==RWIDBCleaner - R&auml;umen Sie Ihre Datenbank auf, indem Sie W&ouml;rter die mit Ihrer Blacklist verbunden sind l&ouml;schen:
 #-----------------------------
 
-#File: IndexControl_p.html
+#File: IndexControlRWIs_p.html
 #---------------------------
 Index Control==Index Kontrolle
 Index Administration==Index Administration
-The local index currently consists of \(at least\) \#\[wcount\]\# reverse word indexes and \#\[ucount\]\# URL references==Der lokale Index besteht im Moment aus #[wcount]# W&ouml;rtern und #[ucount]# URL-Links.
+The local index currently contains \#\[wcount\]\# reverse word indexes==Der lokale Index enth&auml;lt im Moment #[wcount]# inverse Wort Indexe
+RWI Retrieval==RWI Abfrage
+Retrieve by Word:<==Abfrage nach Wort:<
 "Show URL Entries for Word"=="URL Eintr&auml;ge f&uuml;r Wort zeigen"
-"Generate List"=="Liste erstellen"
+Retrieve by Word-Hash==Abfrage nach Wort-Hash
 "Show URL Entries for Word-Hash"=="URL Eintr&auml;ge f&uuml;r Wort-Hash zeigen"
+"Generate List"=="Liste erstellen"
+No entry for word \'\#\[word\]\#\'==Keinen Eintrag zu Wort '#[word]#'
+No entry for word hash==Keinen Eintrag zu Wort-Hash
+Search result==Suchergebniss
+total URLs</td>==insgesamte URLs</td>
+appearance in</td>==kommt vor in</td>
+in link type</td>==im Link-Typ</td>
+document type</td>==Dokumenten-Typ</td>
+<td>reference</td>==<td>Verweis</td>
+<td>description</td>==<td>Beschreibung</td>
+<td>author</td>==<td>Autor</td>
+<td>tags</td>==<td>Tags</td>
+<td>url</td>==<td>URL</td>
+<td>emphasized</td>==<td>betont</td>
+<td>image</td>==<td>Bilder</td>
+<td>audio</td>==<td>Audio</td>
+<td>video</td>==<td>Video</td>
+<td>app</td>==<td>Anwendung</td>
+index of</td>==Index of</td>
+>Selection</td>==>Auswahl</td>
+Display URL List==Anzeige der URL-Liste
+Number of lines==Zeilenanzahl
+all lines==alle Zeilen
+Ordering of list==Sortierung der Liste nach
+by Ranking==Ranking
+by URL==URL
+by URL Hash==URL-Hash
+"List Selected URLs"=="Ausgew&auml;hlte URLs anzeigen"
+Transfer RWI to other Peer==RWI Transfer an anderen Peer
+Transfer by Word-Hash==Transfer per Wort-Hash
 "Transfer to other peer"=="An anderen Peer senden"
-#URL:==URL:
-"Show Details for URL"=="Details f&uuml;r URL zeigen"
-#URL-Hash:==URL-Hash:
-"Show Details for URL-Hash"=="Details f&uuml;r URL-Hash zeigen"
-Word:</td>==Wort:</td>
-Word-Hash:</td>==Wort-Hash:</td>
-URL entries related to this word hash==URL Eintr&auml;ge zugeh&ouml;rig zu diesem Wort Hash
-Reference Deletion==Refernzen L&ouml;schung
+to Peer==an Peer
+<dd>select==<dd>ausw&auml;hlen
+or enter a hash==oder Hash eingeben
+Sequential List of Word-Hashes==aufeinanderfolgende Liste der URL-Hashes
+No URL entries related to this word hash==Keine URL Eintr&auml;ge zugeh&ouml;rig zu diesem Wort Hash
+\#\[count\]\# URL entries related to this word hash==#[count]# URL Eintr&auml;ge zugeh&ouml;rig zu diesem Wort Hash
+Resource</td>==Ressource</td>
+Negative Ranking Factors==Negative Ranking Faktoren
+Positive Ranking Factors==Positive Ranking Faktoren
+Reverse Normalized Weighted Ranking Sum==Inverse normalisierte gewichtete Ranking Summe
+hash</td>==Hash</td>
+dom length</td>==Domain L&auml;nge</td>
+ybr</td>==YBR</td>
+#url comps</td>
+url length</td>==URL L&auml;nge</td>
+pos in text</td>==Pos. im Text</td>
+pos of phrase</td>==Pos. des Satzes</td>
+pos in phrase</td>==Pos. im Satz</td>
+word distance</td>==Wort Distanz</td>
+<td>date</td>==<td>Datum</td>
+words in title</td>==W&ouml;rter im Titel</td>
+words in text</td>==W&ouml;rter im Text</td>
+local links</td>==lokale Links</td>
+remote links</td>==remote Links</td>
+hitcount</td>==Trefferzahl</td>
+#props</td>==</td>
+unresolved URL Hash==ungel&ouml;ster URL-Hash
+Reference Deletion==Referenzen L&ouml;schung
 delete also the referenced URL itself \(reasonable and recommended, may produce unresolved references==l&ouml;sche ebenso die verwiesene URL selber (akzeptabel und empfohlen, produziert eventuell ungel&ouml;ste Referenzen
 at other word indexes but they do not harm\)==an anderen Wort Indizes, aber es verursacht keinen Schaden
 for every resolvable and deleted URL reference, delete the same reference at every other word where==f&uuml;r jede l&ouml;sbare und gel&ouml;schte URL Referenz, l&ouml;sche die selbe Referenz bei jedem anderen Wort, wo
+the reference exists \(very extensive, but prevents further unresolved references\)==die Referenz existiert (sehr umfassend, aber bewahrt vor weiteren ungel&ouml;sten Referenzen)
 "Delete reference to selected URLs"=="Referenz und markierte URLs l&ouml;schen"
 "Delete reference to ALL URLs"=="Referenz und ALLE URLs l&ouml;schen"
 delete Word\)==Wort l&ouml;schen)
 Blacklist Extension==Blacklist Erweiterung
 "Add selected URLs to blacklist"=="Markierte URLs zu Blacklist hinzuf&uuml;gen"
 "Add selected domains to blacklist"=="Markierte Domains zu Blacklist hinzuf&uuml;gen"
-No entry found for URL-hash==Kein Eintrag gefunden zu URL-Hash
+#-----------------------------
+
+#File: IndexControlURLs_p.html
+#---------------------------
+Index Control==Index Kontrolle
+Index Administration==Index Administration
+The local index currently contains \#\[ucount\]\# URL references==Der lokale Index enth&auml;lt im Moment #[ucount]# URL-Referenzen
+URL Retrieval==URL Abfrage
+Retrieve by URL:<==Abfrage nach URL:<
+"Show Details for URL"=="Details f&uuml;r URL zeigen"
+Retrieve by URL-Hash==Abfrage nach URL-Hash
+"Show Details for URL-Hash"=="Details f&uuml;r URL-Hash zeigen"
+"Generate List"=="Liste erstellen"
+Sequential List of URL-Hashes==aufeinanderfolgende Liste der URL-Hashes
+Finished export of \#\[urlcount\]\# URLs to file \#\[exportfile\]\#==Export von #[urlcount]# nach Datei #[exportfile]# wurde beendet
+Export to file \#\[exportfile\]\# failed==Export nach Date #[exportfile]# fehlgeschlagen
+Loaded URL Export==Export geladener URLs
+Export File==Export-Datei
+#URL Filter==URL Filter
+#Export Format==Export Format
+Only Domain==Nur Domains
+Plain Text List \(domains only\)==Einfache Text Liste (nur Domains)
+HTML \(domains as URLs, no title\)==HTML (Domains als URLs, kein Titel)
+Full URL List==Vollst&auml;ndige URL Liste
+Plain Text List \(URLs only\)==Einfache Text Liste (nur URLs)
+HTML \(URLs with title\)==HTML (URLs mit Titel)
+#XML (RSS)==XML (RSS)
+"Export URLs"=="URLs exportieren"
+Export to file \#\[exportfile\]\# is running ..  \#\[urlcount\]\# URLs so far==Export nach Datei #[exportfile]# l&auml;ft ..  #[urlcount]# URLs bisher
+No entry found for URL-hash==Keinen Eintrag gefunden f&uuml;r URL-Hash
 URL String</td>==URL Adresse</td>
 Hash</td>==Hash</td>
 Description</td>==Beschreibung</td>
@@ -857,7 +939,6 @@ this may produce unresolved references at other word indexes but they do not har
 "Delete URL and remove all references from words"=="URL l&ouml;schen und alle Referenzen zu W&ouml;rtern entfernen"
 delete the reference to this url at every other word where the reference exists \(very extensive, but prevents unresolved references\)==l&ouml;scht die Referenz zu dieser URL und jedem anderen Wort, wo die Referenz existiert (sehr umfassend, aber bewahrt vor ungel&ouml;sten Referenzen)
 #-----------------------------
-
 
 #File: IndexCreateIndexingQueue_p.html
 #---------------------------
@@ -1925,7 +2006,6 @@ paused==angehalten
 Crawler Queues==Crawler Puffer
 Local Crawl==Lokales Crawlen
 Remote triggered Crawl==eingehende Remote-Crawls
-Global Crawl Trigger==ausgehende Remote-Crawls
 Pre-Queueing==Vor-Pufferung
 Seed server==Seed Server
 Configure==Konfigurieren
@@ -2337,7 +2417,8 @@ Outgoing&nbsp;Cookies==Ausgehende Cookies
 #File: env/templates/submenuIndexControl.template
 #---------------------------
 #Index Administration==Index Administration
-Index Monitoring/Deletion==Index Verwalten/L&ouml;schen
+#RWI Admin==RWI Admin
+URL Reference Admin==URL Referenzen Admin
 #Index Import==Index Import
 #Index Transfer==Index Transfer
 Index Cleaner==Index Aufr&auml;umer
