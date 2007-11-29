@@ -27,6 +27,7 @@
 import java.io.IOException;
 
 import de.anomic.http.httpHeader;
+import de.anomic.index.indexURLEntry;
 import de.anomic.plasma.plasmaCrawlEntry;
 import de.anomic.plasma.plasmaCrawlNURL;
 import de.anomic.plasma.plasmaSwitchboard;
@@ -57,7 +58,6 @@ public class urls {
         if (post.get("call", "").equals("remotecrawl")) {
             // perform a remote crawl url handover
             int stackType = plasmaCrawlNURL.STACK_TYPE_LIMIT;
-            //int stackType = plasmaCrawlNURL.STACK_TYPE_CORE;
             int count = Math.min(100, post.getInt("count", 0));
             int c = 0;
             plasmaCrawlEntry entry;
@@ -83,6 +83,35 @@ public class urls {
                 prop.put("item_" + c + "_guid", entry.url().hash());
                 c++;
                 count--;
+            }
+            prop.put("item", c);
+            prop.putHTML("response", "ok");
+        }
+        
+        if (post.get("call", "").equals("urlhashlist")) {
+            // retrieve a list of urls from the LURL-db by a given list of url hashes
+            String urlhashes = post.get("hashes", "");
+            if (urlhashes.length() % 12 != 0) return prop;
+            int count = urlhashes.length() / 12;
+        	int c = 0;
+        	indexURLEntry entry;
+        	indexURLEntry.Components comp;
+            yacyURL referrer;
+            for (int i = 0; i < count; i++) {
+                entry = sb.wordIndex.loadedURL.load(urlhashes.substring(12 * i, 12 * (i + 1)), null, 0);
+                if (entry == null) continue;
+                // find referrer, if there is one
+                referrer = sb.getURL(entry.referrerHash());
+                // create RSS entry
+                comp = entry.comp();
+                prop.put("item_" + c + "_title", comp.title());
+                prop.putHTML("item_" + c + "_link", comp.url().toNormalform(true, false));
+                prop.putHTML("item_" + c + "_referrer", (referrer == null) ? "" : referrer.toNormalform(true, false));
+                prop.putHTML("item_" + c + "_description", comp.title());
+                prop.put("item_" + c + "_author", comp.author());
+                prop.put("item_" + c + "_pubDate", serverDate.shortSecondTime(entry.moddate()));
+                prop.put("item_" + c + "_guid", entry.hash());
+                c++;
             }
             prop.put("item", c);
             prop.putHTML("response", "ok");
