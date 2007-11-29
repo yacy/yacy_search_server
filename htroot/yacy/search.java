@@ -83,7 +83,15 @@ public final class search {
         String  profile = post.get("profile", ""); // remote profile hand-over
         if (profile.length() > 0) profile = crypt.simpleDecode(profile, null);
         //final boolean includesnippet = post.get("includesnippet", "false").equals("true");
-        final kelondroBitfield constraint = ((post.containsKey("constraint")) && (post.get("constraint", "").length() > 0)) ? new kelondroBitfield(4, post.get("constraint", "______")) : null;
+        kelondroBitfield constraint = ((post.containsKey("constraint")) && (post.get("constraint", "").length() > 0)) ? new kelondroBitfield(4, post.get("constraint", "______")) : null;
+        if (constraint != null) {
+        	// check bad handover parameter from older versions
+            boolean allon = true;
+            for (int i = 0; i < 32; i++) {
+            	if (!constraint.get(i)) {allon = false; break;}
+            }
+            if (allon) constraint = null;
+        }
 //      final boolean global = ((String) post.get("resource", "global")).equals("global"); // if true, then result may consist of answers from other peers
 //      Date remoteTime = yacyCore.parseUniversalDate((String) post.get(yacySeed.MYTIME));        // read remote time
 
