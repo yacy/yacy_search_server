@@ -112,7 +112,7 @@ public class WatchCrawler_p {
                     
                     int newcrawlingdepth = Integer.parseInt(post.get("crawlingDepth", "8"));
                     env.setConfig("crawlingDepth", Integer.toString(newcrawlingdepth));
-                    if ((fullDomain) && (newcrawlingdepth < 8)) newcrawlingdepth = 8;
+                    if ((fullDomain) && (newcrawlingdepth > 8)) newcrawlingdepth = 8;
                     
                     boolean crawlingIfOlderCheck = post.get("crawlingIfOlderCheck", "off").equals("on");
                     int crawlingIfOlderNumber = Integer.parseInt(post.get("crawlingIfOlderNumber", "-1"));
