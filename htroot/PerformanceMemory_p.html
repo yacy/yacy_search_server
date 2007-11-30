@@ -5,6 +5,12 @@
     #%env/templates/metas.template%#
   </head>
   <body id="PerformanceMemory">
+    <script type="text/javascript"><!--
+	function reloadGraph() {
+	  document.images["graph"].src="PerformanceGraph.png?time="+(new Date()).getTime() ;
+	}
+	window.setInterval("reloadGraph()", 1000);
+	//--></script>
     #%env/templates/header.template%#
     #%env/templates/submenuConfig.template%#
     <h2>Performance Settings for Memory</h2>
@@ -71,7 +77,7 @@
       </fieldset>
     </form>
     
-    <p><img src="PerformanceGraph.png"></p>
+    <p><img src="PerformanceGraph.png" name="graph" /></p>
     
     <p><strong>FlexTable RAM Index:</strong></p>
     <table border="0" cellpadding="2" cellspacing="1">
