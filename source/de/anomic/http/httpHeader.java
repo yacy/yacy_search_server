@@ -61,20 +61,16 @@ import java.io.FileReader;
 import java.io.IOException;
 import java.net.MalformedURLException;
 import java.text.Collator;
-import java.text.ParseException;
-import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Properties;
-import java.util.TimeZone;
 import java.util.TreeMap;
 import java.util.Vector;
 
 import de.anomic.server.serverCore;
-import de.anomic.server.logging.serverLog;
 import de.anomic.yacy.yacyURL;
 
 
@@ -388,48 +384,9 @@ public final class httpHeader extends TreeMap implements Map {
 	  Server=Apache/1.3.26
 	*/
     
-    //private static SimpleDateFormat HTTPGMTFormatter = new SimpleDateFormat("EEE, dd MMM yyyy HH:mm:ss 'GMT'");
-    private static SimpleDateFormat EMLFormatter     = new SimpleDateFormat("dd MMM yyyy HH:mm:ss", Locale.US);
-    
-    public static Date parseHTTPDate(String s) {
-        try {
-            return parseHTTPDate(s,true);
-        } catch (ParseException e) {
-            //System.out.println("ERROR long version parse: " + e.getMessage() +  " at position " +  e.getErrorOffset());
-            serverLog.logSevere("HTTPC-header", "DATE ERROR (Parse): " + s);
-            return null;
-        } catch (java.lang.NumberFormatException e) {
-            //System.out.println("ERROR long version parse: " + e.getMessage() +  " at position " +  e.getErrorOffset());
-            serverLog.logSevere("HTTPC-header", "DATE ERROR (NumberFormat): " + s);
-            return null;
-        }
-    }
-    
-    public static Date parseHTTPDate(String s,boolean ignoreTimezone) throws ParseException, NumberFormatException {
-        
-        SimpleDateFormat formatter = EMLFormatter;
-        if ((s == null) || (s.length() < 9)) return null;
-        s = s.trim();
-        if (s.charAt(3) == ',') s = s.substring(5).trim(); // we skip the name of the day
-        if (s.charAt(9) == ' ') s = s.substring(0, 7) + "20" + s.substring(7); // short year version
-        if (s.charAt(2) == ',') s = s.substring(0, 2) + s.substring(3); // ommit comma after day of week
-        if ((s.charAt(0) > '9') && (s.length() > 20) && (s.charAt(2) == ' ')) s = s.substring(3);
-        if (s.length() > 20) {
-            if (!ignoreTimezone) {
-                formatter = (SimpleDateFormat) formatter.clone();
-                formatter.setTimeZone(TimeZone.getTimeZone(s.substring(20)));
-            }
-            s = s.substring(0, 20).trim(); // truncate remaining, since that must be wrong
-        }
-        if (s.indexOf("Mrz") > 0) s = s.replaceAll("Mrz", "March");
-        
-        // parsing the date string
-        return formatter.parse(s);
-    }
-
     private Date headerDate(String kind) {
         if (containsKey(kind)) {
-            Date parsedDate = parseHTTPDate((String) get(kind));
+            Date parsedDate = httpDate.parseHTTPDate((String) get(kind));
             if (parsedDate == null) parsedDate = new Date();
             return new Date(parsedDate.getTime());
         }
@@ -483,7 +440,7 @@ public final class httpHeader extends TreeMap implements Map {
     public Object ifRange() {
         if (containsKey(httpHeader.IF_RANGE)) {
             try {
-                Date rangeDate = parseHTTPDate((String) get(httpHeader.IF_RANGE),false);
+                Date rangeDate = httpDate.parseHTTPDate((String) get(httpHeader.IF_RANGE),false);
                 if (rangeDate != null) return new Date(rangeDate.getTime());
             } catch (Exception e) {}
             return get(httpHeader.IF_RANGE);
