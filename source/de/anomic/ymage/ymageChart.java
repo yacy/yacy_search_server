@@ -41,6 +41,12 @@
 
 package de.anomic.ymage;
 
+import java.io.File;
+import java.io.FileOutputStream;
+import java.io.IOException;
+
+import javax.imageio.ImageIO;
+
 public class ymageChart extends ymageMatrix {
     
     public static final int DIMENSION_RIGHT  = 0;
@@ -54,6 +60,7 @@ public class ymageChart extends ymageMatrix {
     int bottomborder;
     int[] scales = new int[]{0,0,0,0};
     int[] pixels = new int[]{0,0,0,0};
+    int[] offsets = new int[]{0,0,0,0};
     String[] colnames = new String[]{"FFFFFF","FFFFFF","FFFFFF","FFFFFF"};
     String[] colscale = new String[]{null,null,null,null};
     String[] tablenames = new String[]{"","","",""};
@@ -67,43 +74,45 @@ public class ymageChart extends ymageMatrix {
         this.topborder = topborder;
         this.bottomborder = bottomborder;
         if (name != null) {
+            this.setColor("000000");
             ymageToolPrint.print(this, width / 2 - name.length() * 3, 6, 0, name, -1);
         }
     }
     
-    public void declareDimension(int dimensionType, int scale, int pixelperscale, String colorNaming, String colorScale, String name) {
+    public void declareDimension(int dimensionType, int scale, int pixelperscale, int offset, String colorNaming, String colorScale, String name) {
         if ((dimensionType == DIMENSION_LEFT) || (dimensionType == DIMENSION_RIGHT)) {
-            drawVerticalScale((dimensionType == DIMENSION_LEFT), scale, pixelperscale, colorNaming, colorScale, name);
+            drawVerticalScale((dimensionType == DIMENSION_LEFT), scale, pixelperscale, offset, colorNaming, colorScale, name);
         }
         if ((dimensionType == DIMENSION_TOP) || (dimensionType == DIMENSION_BOTTOM)) {
-            drawHorizontalScale((dimensionType == DIMENSION_TOP), scale, pixelperscale, colorNaming, colorScale, name);
+            drawHorizontalScale((dimensionType == DIMENSION_TOP), scale, pixelperscale, offset, colorNaming, colorScale, name);
         }
         scales[dimensionType] = scale;
         pixels[dimensionType] = pixelperscale;
+        offsets[dimensionType] = offset;
         colnames[dimensionType] = colorNaming;
         colscale[dimensionType] = colorScale;
         tablenames[dimensionType] = name;
     }
     
     public void chartDot(int dimension_x, int dimension_y, int coord_x, int coord_y, int dotsize) {
-        int x = coord_x * pixels[dimension_x] / scales[dimension_x];
-        int y = coord_y * pixels[dimension_y] / scales[dimension_y];
+        int x = (coord_x - offsets[dimension_x]) * pixels[dimension_x] / scales[dimension_x];
+        int y = (coord_y - offsets[dimension_y]) * pixels[dimension_y] / scales[dimension_y];
         if (dotsize == 1) plot(leftborder + x, height - bottomborder - y);
                       else dot(leftborder + x, height - bottomborder - y, dotsize, true);
     }
     
     public void chartLine(int dimension_x, int dimension_y, int coord_x1, int coord_y1, int coord_x2, int coord_y2) {
-        int x1 = coord_x1 * pixels[dimension_x] / scales[dimension_x];
-        int y1 = coord_y1 * pixels[dimension_y] / scales[dimension_y];
-        int x2 = coord_x2 * pixels[dimension_x] / scales[dimension_x];
-        int y2 = coord_y2 * pixels[dimension_y] / scales[dimension_y];
+        int x1 = (coord_x1 - offsets[dimension_x]) * pixels[dimension_x] / scales[dimension_x];
+        int y1 = (coord_y1 - offsets[dimension_y]) * pixels[dimension_y] / scales[dimension_y];
+        int x2 = (coord_x2 - offsets[dimension_x]) * pixels[dimension_x] / scales[dimension_x];
+        int y2 = (coord_y2 - offsets[dimension_y]) * pixels[dimension_y] / scales[dimension_y];
         line(leftborder + x1, height - bottomborder - y1, leftborder + x2, height - bottomborder - y2);
     }
     
-    private void drawHorizontalScale(boolean top, int scale, int pixelperscale, String colorNaming, String colorScale, String name) {
+    private void drawHorizontalScale(boolean top, int scale, int pixelperscale, int offset, String colorNaming, String colorScale, String name) {
         int y = (top) ? topborder : height - bottomborder;
         int x = leftborder;
-        int s = 0;
+        int s = offset;
         while (x < width - rightborder) {
             if ((colorScale != null) && (x > leftborder) && (x < (width - rightborder))) {
                 setColor(colorScale);
@@ -120,10 +129,10 @@ public class ymageChart extends ymageMatrix {
         line(leftborder - 4, y, width - rightborder + 4, y);
     }
     
-    private void drawVerticalScale(boolean left, int scale, int pixelperscale, String colorNaming, String colorScale, String name) {
+    private void drawVerticalScale(boolean left, int scale, int pixelperscale, int offset, String colorNaming, String colorScale, String name) {
         int x = (left) ? leftborder : width - rightborder;
         int y = height - bottomborder;
-        int s = 0;
+        int s = offset;
         String s1;
         int s1max = 0;
         while (y > topborder) {
@@ -146,23 +155,28 @@ public class ymageChart extends ymageMatrix {
    
     public static void main(String[] args) {
         System.setProperty("java.awt.headless", "true");
-        ymageChart ip = new ymageChart(640, 480, "000010", 40, 40, 20, 20, "TESTCHART");
-        ip.declareDimension(DIMENSION_BOTTOM, 10, 30, "FFFFFF", "555555", "time");
-        ip.declareDimension(DIMENSION_TOP, 10, 40, "FFFFFF", null, "count");
-        ip.declareDimension(DIMENSION_LEFT, 100, 30, "FFFFFF", "555555", "money");
-        ip.declareDimension(DIMENSION_RIGHT, 100, 50, "FFFFFF", null, "stock");
-        ip.setColor("FF0000");
-        ip.chartDot(DIMENSION_BOTTOM, DIMENSION_LEFT, 20, 100, 5);
-        ip.chartLine(DIMENSION_BOTTOM, DIMENSION_LEFT, 20, 100, 50, 200);
+        ymageChart ip = new ymageChart(660, 240, "000010", 30, 30, 20, 20, "PEER PERFORMANCE GRAPH: PAGES/MINUTE and USED MEMORY");
+        ip.declareDimension(DIMENSION_BOTTOM, 60, 60, -600, "000000", "CCCCCC", "TIME/SECONDS");
+        //ip.declareDimension(DIMENSION_TOP, 10, 40, "000000", null, "count");
+        ip.declareDimension(DIMENSION_LEFT, 50, 40, 0, "008800", null , "PPM [PAGES/MINUTE]");
+        ip.declareDimension(DIMENSION_RIGHT, 100, 20, 0, "0000FF", "CCCCCC", "MEMORY/MEGABYTE");
+        ip.setColor("008800");
+        ip.chartDot(DIMENSION_BOTTOM, DIMENSION_LEFT, -160, 100, 5);
+        ip.chartLine(DIMENSION_BOTTOM, DIMENSION_LEFT, -160, 100, -130, 200);
+        ip.setColor("0000FF");
+        ip.chartDot(DIMENSION_BOTTOM, DIMENSION_RIGHT, -50, 300, 2);
+        ip.chartLine(DIMENSION_BOTTOM, DIMENSION_RIGHT, -80, 100, -50, 300);
         //ip.print(100, 100, 0, "TEXT", true);
         //ip.print(100, 100, 0, "1234", false);
         //ip.print(100, 100, 90, "TEXT", true);
         //ip.print(100, 100, 90, "1234", false);
-        /*
+        
         try {
-            ip.toPNG(true, new File("/Users/admin/dev/yacy/trunk/testimage.png"));
+            FileOutputStream fos = new FileOutputStream(new File("/Users/admin/Desktop/testimage.png"));
+            ImageIO.write(ip.getImage(), "png", fos);
+            fos.close();
         } catch (IOException e) {}
-         */
+        
     }
     
 }

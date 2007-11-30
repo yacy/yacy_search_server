@@ -1,14 +1,15 @@
 // plasmaSwitchboard.java
-// -----------------------
-// part of YaCy
-// (C) by Michael Peter Christen; mc@anomic.de
-// first published on http://www.anomic.de
-// Frankfurt, Germany, 2004, 2005
+// (C) 2004-2007 by Michael Peter Christen; mc@yacy.net, Frankfurt a. M., Germany
+// first published 2004 on http://yacy.net
+//
+// This is a part of YaCy, a peer-to-peer based web search engine
 //
 // $LastChangedDate$
 // $LastChangedRevision$
 // $LastChangedBy$
 //
+// LICENSE
+// 
 // This program is free software; you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
 // the Free Software Foundation; either version 2 of the License, or
@@ -22,25 +23,6 @@
 // You should have received a copy of the GNU General Public License
 // along with this program; if not, write to the Free Software
 // Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
-//
-// Using this software in any meaning (reading, learning, copying, compiling,
-// running) means that you agree that the Author(s) is (are) not responsible
-// for cost, loss of data or any harm that may be caused directly or indirectly
-// by usage of this softare or this documentation. The usage of this software
-// is on your own risk. The installation and usage (starting/running) of this
-// software may allow other people or application to access your computer and
-// any attached devices and is highly dependent on the configuration of the
-// software which must be done by the user of the software; the author(s) is
-// (are) also not responsible for proper configuration and usage of the
-// software, even if provoked by documentation provided together with
-// the software.
-//
-// Any changes to this file according to the GPL as documented in the file
-// gpl.txt aside this file in the shipment you received can be done to the
-// lines that follows this copyright notice here, but changes must not be
-// done inside the copyright notive above. A re-distribution must contain
-// the intact and unchanged copyright notice.
-// Contributions and changes to the program code must be marked as such.
 
 /*
    This class holds the run-time environment of the plasma
@@ -259,6 +241,8 @@ public final class plasmaSwitchboard extends serverAbstractSwitch implements ser
     public  boolean                     acceptLocalURLs, acceptGlobalURLs;
     public  URLLicense                  licensedURLs;
     public  Timer                       moreMemory;
+    public  TreeMap                     ppmHistory, usedMemoryHistory;
+    public  long                        lastPPMUpdate;
 
     /*
      * Remote Proxy configuration
@@ -890,10 +874,16 @@ public final class plasmaSwitchboard extends serverAbstractSwitch implements ser
     public Hashtable crawlJobsStatus = new Hashtable(); 
     
     private static plasmaSwitchboard sb;
-
+    
     public plasmaSwitchboard(String rootPath, String initPath, String configPath, boolean applyPro) {
         super(rootPath, initPath, configPath, applyPro);
         sb=this;
+        
+        // initialize memory profiling
+        ppmHistory = new TreeMap();
+        usedMemoryHistory = new TreeMap();
+        lastPPMUpdate = System.currentTimeMillis();
+        updateProfiling();
         
         // set loglevel and log
         setLog(new serverLog("PLASMA"));
@@ -1416,6 +1406,29 @@ public final class plasmaSwitchboard extends serverAbstractSwitch implements ser
         return sb;
     }
 
+    public void updateProfiling() {
+        Long time = new Long(System.currentTimeMillis());
+        usedMemoryHistory.put(time, new Long(serverMemory.used()));
+        if (time.longValue() - lastPPMUpdate > 30000) {
+            // we don't want to do this too often
+            yacyCore.peerActions.updateMySeed();
+            ppmHistory.put(time, new Long(yacyCore.seedDB.mySeed().getPPM()));
+            lastPPMUpdate = time.longValue();
+        }
+        
+        // clean up too old entries
+        while (usedMemoryHistory.size() > 0) {
+            time = (Long) usedMemoryHistory.firstKey();
+            if (System.currentTimeMillis() - time.longValue() < 600000) break;
+            usedMemoryHistory.remove(time);
+        }
+        while (ppmHistory.size() > 0) {
+            time = (Long) ppmHistory.firstKey();
+            if (System.currentTimeMillis() - time.longValue() < 600000) break;
+            ppmHistory.remove(time);
+        }
+    }
+
     public boolean isRobinsonMode() {
     	// we are in robinson mode, if we do not exchange index by dht distribution
     	// we need to take care that search requests and remote indexing requests go only
@@ -1805,6 +1818,7 @@ public final class plasmaSwitchboard extends serverAbstractSwitch implements ser
     }
     
     public boolean deQueue() {
+        updateProfiling();
         try {
             // work off fresh entries from the proxy or from the crawler
             if (onlineCaution()) {
@@ -1898,6 +1912,7 @@ public final class plasmaSwitchboard extends serverAbstractSwitch implements ser
             }
 
             // ready & finished
+            updateProfiling();
             return true;
         } catch (InterruptedException e) {
             log.logInfo("DEQUEUE: Shutdown detected.");

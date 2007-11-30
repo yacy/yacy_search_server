@@ -32,7 +32,7 @@ import java.util.Iterator;
 import java.util.Map;
 
 /* this class is a container for graph coordinates and it can draw such coordinates into a graph
- * all coordinates are given in a artificial corrdinate system, in the range from
+ * all coordinates are given in a artificial coordinate system, in the range from
  * -1 to +1. The lower left point of the graph has the coordinate -1, -1 and the upper
  * right is 1,1
  * 0,0 is the center of the graph
