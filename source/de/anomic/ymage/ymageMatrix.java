@@ -265,6 +265,27 @@ public class ymageMatrix /*implements Cloneable*/ {
         arc(x, y, innerRadius, outerRadius, fromArc, toArc);
     }
     
+    /**
+     *  inserts an image into the ymageMatrix
+     *  @param bitmap the bitmap to be inserted
+     *  @param x the x value of the upper left coordinate in the ymageMatrix where the bitmap will be placed
+     *  @param y the y value of the upper left coordinate in the ymageMatrix where the bitmap will be placed
+     *
+     *  @author Marc Nause
+     */
+    public void insertBitmap(BufferedImage bitmap, int x, int y) {
+        int heightSrc = bitmap.getHeight();
+        int widthSrc  = bitmap.getWidth();
+        int heightTgt = image.getHeight();
+        int widthTgt  = image.getWidth();
+
+        for (int i = y; i < heightSrc && i < heightTgt - y; i++) {
+            for (int j = x; j < widthSrc && j < widthTgt - x; j++) {
+                image.setRGB(j, i, bitmap.getRGB(j, i));
+            }
+        }
+    }
+    
     public static void demoPaint(ymageMatrix m) {
         m.setMode(MODE_SUB);
         m.setColor(SUBTRACTIVE_CYAN);

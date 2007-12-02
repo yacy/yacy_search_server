@@ -46,17 +46,29 @@
 
 import de.anomic.http.httpHeader;
 import de.anomic.plasma.plasmaGrafics;
+import de.anomic.plasma.plasmaSwitchboard;
+import de.anomic.server.serverCore;
+import de.anomic.server.serverDomains;
 import de.anomic.server.serverObjects;
 import de.anomic.server.serverSwitch;
 import de.anomic.ymage.ymageMatrix;
 import de.anomic.yacy.yacyCore;
 import de.anomic.yacy.yacySeed;
 
+import java.awt.Image;
+import java.awt.image.BufferedImage;
+import java.awt.Toolkit;
+import java.io.File;
+import java.io.IOException;
+import java.net.URL;
+import javax.imageio.ImageIO;
+
 /** draw a banner with information about the peer */
 public class Banner {
 
-    public static ymageMatrix respond(httpHeader header, serverObjects post, serverSwitch env) {
+    public static ymageMatrix respond(httpHeader header, serverObjects post, serverSwitch env) throws IOException {
 
+        final String IMAGE = "env/grafics/yacy.gif";
         int width = 468;
         int height = 60;
         String bgcolor = plasmaGrafics.COL_BACKGROUND;
@@ -84,16 +96,16 @@ public class Banner {
 
         yacySeed seed = yacyCore.seedDB.mySeed();
         if (seed != null){
-            name = seed.get(yacySeed.NAME, "-").toUpperCase();
-            links = Long.parseLong(seed.get(yacySeed.LCOUNT, "0"));
-            words = Long.parseLong(seed.get(yacySeed.ICOUNT, "0"));
-            myppm = seed.getPPM();
-            myqph = 60d * seed.getQPM();
+            name    = seed.get(yacySeed.NAME, "-").toUpperCase();
+            links   = Long.parseLong(seed.get(yacySeed.LCOUNT, "0"));
+            words   = Long.parseLong(seed.get(yacySeed.ICOUNT, "0"));
+            myppm   = seed.getPPM();
+            myqph   = 60d * seed.getQPM();
             network = env.getConfig("network.unit.name", "unspecified").toUpperCase();
-            nlinks = yacyCore.seedDB.countActiveURL();
-            nwords = yacyCore.seedDB.countActiveRWI();
-            nqpm = yacyCore.seedDB.countActiveQPM();
-            nppm = yacyCore.seedDB.countActivePPM();
+            nlinks  = yacyCore.seedDB.countActiveURL();
+            nwords  = yacyCore.seedDB.countActiveRWI();
+            nqpm    = yacyCore.seedDB.countActiveQPM();
+            nppm    = yacyCore.seedDB.countActivePPM();
 
             if (yacyCore.seedDB.mySeed().isVirgin()) {
                 type = "VIRGIN";
@@ -116,6 +128,15 @@ public class Banner {
             }
         }
 
+        if (!plasmaGrafics.logoIsLoaded()) {
+            plasmaSwitchboard switchboard = (plasmaSwitchboard)env;
+            int port = serverCore.getPortNr(switchboard.getConfig("port", "8080"));
+            String host = serverDomains.myPublicLocalIP().getHostAddress();
+            BufferedImage logo = ImageIO.read(new URL("http://"+host+":"+port+"/"+IMAGE));
+            //BufferedImage logo = ImageIO.read(new File(IMAGE));
+            return plasmaGrafics.getBannerPicture(1000, width, height, bgcolor, textcolor, bordercolor, name, links, words, type, myppm, network, nlinks, nwords, nqph, nppm, logo);
+        }
+        
         return plasmaGrafics.getBannerPicture(1000, width, height, bgcolor, textcolor, bordercolor, name, links, words, type, myppm, network, nlinks, nwords, nqph, nppm);
     }
 

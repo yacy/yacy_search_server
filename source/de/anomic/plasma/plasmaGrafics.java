@@ -49,6 +49,7 @@ package de.anomic.plasma;
 
 import java.awt.Color;
 import java.awt.Graphics2D;
+import java.awt.Image;
 import java.awt.RenderingHints;
 import java.awt.image.BufferedImage;
 import java.util.Date;
@@ -122,6 +123,7 @@ public class plasmaGrafics {
     private static long          peerloadPictureDate = 0;
 
     private static ymageMatrix   bannerPicture = null;      // [MN]
+    private static BufferedImage logo = null;               // [MN]
     private static long          bannerPictureDate = 0;     // [MN]
 
     public static ymageMatrix getSearchEventPicture(String eventID) {
@@ -363,16 +365,26 @@ public class plasmaGrafics {
     //[MN]
     public static ymageMatrix getBannerPicture(long maxAge, int width, int height, String bgcolor, String textcolor, String bordercolor, String name, long links, long words, String type, int ppm, String network, long nlinks, long nwords, double nqph, long nppm) {
         if ((bannerPicture == null) || ((System.currentTimeMillis() - bannerPictureDate) > maxAge)) {
-            drawBannerPicture(width, height, bgcolor, textcolor, bordercolor, name, links, words, type, ppm, network, nlinks, nwords, nqph, nppm);
+            drawBannerPicture(width, height, bgcolor, textcolor, bordercolor, name, links, words, type, ppm, network, nlinks, nwords, nqph, nppm, logo);
+        }
+        return bannerPicture;
+    }    
+    
+    //[MN]
+    public static ymageMatrix getBannerPicture(long maxAge, int width, int height, String bgcolor, String textcolor, String bordercolor, String name, long links, long words, String type, int ppm, String network, long nlinks, long nwords, double nqph, long nppm, BufferedImage newLogo) {
+        if ((bannerPicture == null) || ((System.currentTimeMillis() - bannerPictureDate) > maxAge)) {
+            drawBannerPicture(width, height, bgcolor, textcolor, bordercolor, name, links, words, type, ppm, network, nlinks, nwords, nqph, nppm, newLogo);
         }
         return bannerPicture;
     }
 
     //[MN]
-    private static void drawBannerPicture(int width, int height, String bgcolor, String textcolor, String bordercolor, String name, long links, long words, String type, int ppm, String network, long nlinks, long nwords, double nqph, long nppm) {
+    private static void drawBannerPicture(int width, int height, String bgcolor, String textcolor, String bordercolor, String name, long links, long words, String type, int ppm, String network, long nlinks, long nwords, double nqph, long nppm, BufferedImage newLogo) {
 
         int exprlength = 19;
 
+        logo = newLogo;
+        
         bannerPicture = new ymageMatrix(width, height, bgcolor);
         bannerPicture.setMode(ymageMatrix.MODE_SUB);
 
@@ -390,6 +402,10 @@ public class plasmaGrafics {
         ymageToolPrint.print(bannerPicture, 285, 42, 0, "QUERIES: " + addTrailingBlanks(nqph + " QUERIES/HOUR", exprlength), -1);
         ymageToolPrint.print(bannerPicture, 285, 52, 0, "SPEED:   " + addTrailingBlanks(nppm + " PAGES/MINUTE", exprlength), -1);
 
+        if (logo != null) {
+            bannerPicture.insertBitmap(logo, 2, 2);
+        }
+
         if (!bordercolor.equals("")) {
             bannerPicture.setColor(bordercolor);
             bannerPicture.line(0,0,0,height-1);
@@ -397,9 +413,16 @@ public class plasmaGrafics {
             bannerPicture.line(width-1,0,width-1,height-1);
             bannerPicture.line(0,height-1,width-1,height-1);
         }
-
+        
         // set timestamp
          bannerPictureDate = System.currentTimeMillis();
+    }
+    
+    public static boolean logoIsLoaded() {
+        if (logo == null) {
+            return false;
+        }
+        return true;
     }
 
     //[MN]
