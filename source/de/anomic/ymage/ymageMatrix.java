@@ -279,9 +279,12 @@ public class ymageMatrix /*implements Cloneable*/ {
         int heightTgt = image.getHeight();
         int widthTgt  = image.getWidth();
 
-        for (int i = y; i < heightSrc && i < heightTgt - y; i++) {
-            for (int j = x; j < widthSrc && j < widthTgt - x; j++) {
-                image.setRGB(j, i, bitmap.getRGB(j, i));
+        for (int i = 0; i < heightSrc; i++) {
+            for (int j = 0; j < widthSrc; j++) {
+                // pixel in legal area?
+                if (j+x >= 0 && i+y >= 0 && i+y < heightTgt && j+x < widthTgt) {
+                    image.setRGB(j+x, i+y, bitmap.getRGB(j, i));
+                }
             }
         }
     }

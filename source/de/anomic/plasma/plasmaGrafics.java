@@ -403,7 +403,9 @@ public class plasmaGrafics {
         ymageToolPrint.print(bannerPicture, 285, 52, 0, "SPEED:   " + addTrailingBlanks(nppm + " PAGES/MINUTE", exprlength), -1);
 
         if (logo != null) {
-            bannerPicture.insertBitmap(logo, 2, 2);
+            int x = (int)(100/2 - logo.getWidth()/2);
+            int y = (int)(height/2 - logo.getHeight()/2);
+            bannerPicture.insertBitmap(logo, x, y);
         }
 
         if (!bordercolor.equals("")) {
@@ -425,13 +427,6 @@ public class plasmaGrafics {
         return true;
     }
 
-    //[MN]
-    /* quoted method because it is not used anywhere (and creates a warning in eclipse)
-    private static String addBlanksAndDots(int input, int length) {
-        return addBlanksAndDots(input + "", length);
-    }
-    */
-    
     //[MN]
     private static String addBlanksAndDots(long input, int length) {
         return addBlanksAndDots(input + "", length);
