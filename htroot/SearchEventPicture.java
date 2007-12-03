@@ -60,7 +60,7 @@ public class SearchEventPicture {
         String eventID = (String) header.get("event", plasmaSearchEvent.lastEventID);
         if (eventID == null) return null;
         ymageMatrix yp = plasmaGrafics.getSearchEventPicture(eventID);
-        if (yp == null) return new ymageMatrix(1, 1, "000000"); // empty image
+        if (yp == null) return new ymageMatrix(1, 1, ymageMatrix.MODE_SUB, "000000"); // empty image
         
         return yp;
     }

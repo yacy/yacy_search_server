@@ -84,9 +84,7 @@ public class imagetest {
         for (int i = 20; i < 100; i++) r.setPixel(i, 34, new int[]{0, 0, 255});
         return bi;
         */
-        ymageMatrix img = new ymageMatrix(800, 600, "000000");
-        
-        img.setMode(ymageMatrix.MODE_SUB);
+        ymageMatrix img = new ymageMatrix(800, 600, ymageMatrix.MODE_SUB, "000000");
         img.setColor(ymageMatrix.SUBTRACTIVE_BLACK);
         for (int y = 0; y < 600; y = y + 50) ymageToolPrint.print(img, 0, 6 + y, 0, "" + y, -1);
         for (int x = 0; x < 800; x = x + 50) ymageToolPrint.print(img, x, 6    , 0, "" + x, -1);

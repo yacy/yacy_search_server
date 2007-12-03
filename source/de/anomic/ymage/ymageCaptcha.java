@@ -47,8 +47,8 @@ import javax.imageio.ImageIO;
 
 public class ymageCaptcha extends ymageMatrix {
 
-    public ymageCaptcha(int width, int height, String code) {
-        super(width, height, SUBTRACTIVE_WHITE);
+    public ymageCaptcha(int width, int height, byte displayMode, String code) {
+        super(width, height, displayMode, SUBTRACTIVE_WHITE);
         this.create(code);
     }
 
@@ -100,7 +100,7 @@ public class ymageCaptcha extends ymageMatrix {
         // go into headless awt mode
         System.setProperty("java.awt.headless", "true");
 
-        ymageCaptcha m = new ymageCaptcha(200, 70, args[1]);
+        ymageCaptcha m = new ymageCaptcha(200, 70, ymageMatrix.MODE_REPLACE, args[1]);
         try {
             ImageIO.write(m.getImage(), "png", new java.io.File(args[0]));
         } catch (java.io.IOException e) {

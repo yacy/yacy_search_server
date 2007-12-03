@@ -64,31 +64,16 @@ public class ymageMatrix /*implements Cloneable*/ {
     private   int[]          defaultCol;
     private   byte           defaultMode;
 
-    /*
-    public ymageMatrix(ymageMatrix matrix) throws RuntimeException {
-        if (!(serverMemory.available(1024 * 1024 + 3 * width * height, true))) throw new RuntimeException("ymage: not enough memory (" + serverMemory.available() + ") available");
-        // clones the matrix
-        this.width = matrix.width;
-        this.height = matrix.height;
-        this.defaultColR = matrix.defaultColR;
-        this.defaultColG = matrix.defaultColG;
-        this.defaultColB = matrix.defaultColB;
-        this.defaultMode = matrix.defaultMode;
-        this.grid = (WritableRaster) matrix.grid.
-        System.arraycopy(matrix.grid, 0, this.grid, 0, matrix.grid.length);
-    }
-    */
-    
-    public ymageMatrix(int width, int height, String backgroundColor) {
-        this(width, height, colNum(backgroundColor));
+    public ymageMatrix(int width, int height, byte drawMode, String backgroundColor) {
+        this(width, height, drawMode, colNum(backgroundColor));
     }
     
-    public ymageMatrix(int width, int height, long backgroundColor) {
+    public ymageMatrix(int width, int height, byte drawMode, long backgroundColor) {
         if (!(serverMemory.request(1024 * 1024 + 3 * width * height, false))) throw new RuntimeException("ymage: not enough memory (" + serverMemory.available() + ") available");
         this.width = width;
         this.height = height;
         this.defaultCol = new int[]{0xFF, 0xFF, 0xFF};
-        this.defaultMode = MODE_REPLACE;
+        this.defaultMode = drawMode;
         
         image = new BufferedImage(width, height, BufferedImage.TYPE_INT_RGB);
         Graphics2D gr = image.createGraphics();
@@ -96,18 +81,23 @@ public class ymageMatrix /*implements Cloneable*/ {
         //gr.clearRect(0, 0, width, height);
         
         grid = image.getRaster();
-        //if (backgroundColor != SUBTRACTIVE_WHITE) {
-            // fill grid with background color
-            byte bgR = (byte) (0xFF - (backgroundColor >> 16));
-            byte bgG = (byte) (0xFF - ((backgroundColor >> 8) & 0xff));
-            byte bgB = (byte) (0xFF - (backgroundColor & 0xff));
-            int[] c = new int[]{bgR, bgG, bgB};
-            for (int i = 0; i < width; i++) {
-                for (int j = 0; j < height; j++) {
-                    grid.setPixel(i, j, c);
-                }
+        // fill grid with background color
+        byte bgR, bgG, bgB;
+        if (drawMode == MODE_SUB) {
+            bgR = (byte) (0xFF - (backgroundColor >> 16));
+            bgG = (byte) (0xFF - ((backgroundColor >> 8) & 0xff));
+            bgB = (byte) (0xFF - (backgroundColor & 0xff));
+        } else {
+            bgR = (byte) (backgroundColor >> 16);
+            bgG = (byte) ((backgroundColor >> 8) & 0xff);
+            bgB = (byte) (backgroundColor & 0xff);
+        }
+        int[] c = new int[]{bgR, bgG, bgB};
+        for (int i = 0; i < width; i++) {
+            for (int j = 0; j < height; j++) {
+                grid.setPixel(i, j, c);
             }
-        //}
+        }
     }
     
     public BufferedImage getImage() {
@@ -141,11 +131,11 @@ public class ymageMatrix /*implements Cloneable*/ {
     public void setColor(String s) {
         setColor(colNum(s));
     }
-    
+    /*
     public void setMode(byte m) {
         this.defaultMode = m;
     }
-    
+    */
     public void plot(int x, int y) {
         if ((x < 0) || (x >= width)) return;
         if ((y < 0) || (y >= height)) return;
@@ -290,7 +280,6 @@ public class ymageMatrix /*implements Cloneable*/ {
     }
     
     public static void demoPaint(ymageMatrix m) {
-        m.setMode(MODE_SUB);
         m.setColor(SUBTRACTIVE_CYAN);
         m.line(0,  10, 100,  10); ymageToolPrint.print(m, 0,   5, 0, "Cyan", -1);
         m.line(50, 0,   50, 300);
@@ -318,7 +307,7 @@ public class ymageMatrix /*implements Cloneable*/ {
         // go into headless awt mode
         System.setProperty("java.awt.headless", "true");
         
-        ymageMatrix m = new ymageMatrix(200, 300, SUBTRACTIVE_WHITE);
+        ymageMatrix m = new ymageMatrix(200, 300, MODE_SUB, SUBTRACTIVE_WHITE);
         demoPaint(m);
         try {
             ImageIO.write(m.getImage(), "png", new java.io.File(args[0]));

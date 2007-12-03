@@ -49,7 +49,6 @@ package de.anomic.plasma;
 
 import java.awt.Color;
 import java.awt.Graphics2D;
-import java.awt.Image;
 import java.awt.RenderingHints;
 import java.awt.image.BufferedImage;
 import java.util.Date;
@@ -168,7 +167,6 @@ public class plasmaGrafics {
         // draw in the search target
         plasmaSearchQuery query = event.getQuery();
         Iterator i = query.queryHashes.iterator();
-        eventPicture.setMode(ymageMatrix.MODE_SUB);
         eventPicture.setColor(ymageMatrix.SUBTRACTIVE_BLACK);
         while (i.hasNext()) {
             hash = (String) i.next();
@@ -198,8 +196,7 @@ public class plasmaGrafics {
 
         if (yacyCore.seedDB == null) return; // no other peers known
 
-        networkPicture = new ymageMatrix(width, height, bgcolor);
-        networkPicture.setMode(ymageMatrix.MODE_SUB);
+        networkPicture = new ymageMatrix(width, height, ymageMatrix.MODE_SUB, bgcolor);
 
         // draw network circle
         networkPicture.setColor(COL_DHTCIRCLE);
@@ -258,7 +255,6 @@ public class plasmaGrafics {
 
         // draw description
         networkPicture.setColor(COL_HEADLINE);
-        networkPicture.setMode(ymageMatrix.MODE_SUB);
         ymageToolPrint.print(networkPicture, 2, 8, 0, "YACY NETWORK '" + networkName.toUpperCase() + "'", -1);
         ymageToolPrint.print(networkPicture, 2, 16, 0, networkTitle.toUpperCase(), -1);
         ymageToolPrint.print(networkPicture, width - 2, 8, 0, "SNAPSHOT FROM " + new Date().toString().toUpperCase(), 1);
@@ -278,7 +274,6 @@ public class plasmaGrafics {
         if (linelength > outerradius) linelength = outerradius;
         int dotsize = 6 + 2 * (int) (seed.getLinkCount() / 500000L);
         if (dotsize > 18) dotsize = 18;
-        img.setMode(ymageMatrix.MODE_SUB);
         // draw dot
         img.setColor(colorDot);
         img.arcDot(x, y, innerradius, angle, dotsize);
@@ -295,7 +290,6 @@ public class plasmaGrafics {
             if (ppm10 > 3) ppm10 = 3;
             // draw a wave around crawling peers
             long strength;
-            img.setMode(ymageMatrix.MODE_SUB);
             img.setColor("303030");
             img.arcArc(x, y, innerradius, angle, dotsize + 1, dotsize + 1, 0, 360);
             int waveradius = innerradius / 2;
@@ -382,11 +376,8 @@ public class plasmaGrafics {
     private static void drawBannerPicture(int width, int height, String bgcolor, String textcolor, String bordercolor, String name, long links, long words, String type, int ppm, String network, long nlinks, long nwords, double nqph, long nppm, BufferedImage newLogo) {
 
         int exprlength = 19;
-
         logo = newLogo;
-        
-        bannerPicture = new ymageMatrix(width, height, bgcolor);
-        bannerPicture.setMode(ymageMatrix.MODE_SUB);
+        bannerPicture = new ymageMatrix(width, height, ymageMatrix.MODE_SUB, bgcolor);
 
         // draw description
         bannerPicture.setColor(textcolor);

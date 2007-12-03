@@ -47,7 +47,7 @@ public class ymageDemoApplet extends Applet implements Runnable {
 
     public void update(Graphics g) {
         Dimension d = getSize();
-        offGraphics = new ymageMatrix(d.width, d.height, ymageMatrix.SUBTRACTIVE_WHITE);
+        offGraphics = new ymageMatrix(d.width, d.height, ymageMatrix.MODE_REPLACE, ymageMatrix.SUBTRACTIVE_WHITE);
         paintFrame(offGraphics);
         g.drawImage(offGraphics.getImage(), 0, 0, null);
     }

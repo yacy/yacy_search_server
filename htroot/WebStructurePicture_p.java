@@ -83,8 +83,7 @@ public class WebStructurePicture_p {
         ymageMatrix graphPicture;
         if (host == null) {
             // probably no information available
-            graphPicture = new ymageMatrix(width, height, ymageGraph.color_back);
-            graphPicture.setMode(ymageMatrix.MODE_SUB);
+            graphPicture = new ymageMatrix(width, height, ymageMatrix.MODE_SUB, ymageGraph.color_back);
             ymageToolPrint.print(graphPicture, width / 2, height / 2, 0, "NO WEB STRUCTURE DATA AVAILABLE.", 0);
             ymageToolPrint.print(graphPicture, width / 2, height / 2 + 16, 0, "START A WEB CRAWL TO OBTAIN STRUCTURE DATA.", 0);
         } else {
@@ -104,7 +103,6 @@ public class WebStructurePicture_p {
         }
         // print headline
         graphPicture.setColor(ymageGraph.color_text);
-        graphPicture.setMode(ymageMatrix.MODE_SUB);
         ymageToolPrint.print(graphPicture, 2, 8, 0, "YACY WEB-STRUCTURE ANALYSIS", -1);
         if (host != null) ymageToolPrint.print(graphPicture, 2, 16, 0, "LINK ENVIRONMENT OF DOMAIN " + host.toUpperCase(), -1);
         ymageToolPrint.print(graphPicture, width - 2, 8, 0, "SNAPSHOT FROM " + new Date().toString().toUpperCase(), 1);

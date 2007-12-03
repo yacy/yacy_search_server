@@ -131,10 +131,9 @@ public class ymageGraph {
     private static final long color_lineend = 0x555555;
     
     public ymageMatrix draw(int width, int height, int leftborder, int rightborder, int topborder, int bottomborder) {
-        ymageMatrix image = new ymageMatrix(width, height, color_back);
+        ymageMatrix image = new ymageMatrix(width, height, ymageMatrix.MODE_SUB, color_back);
         double xfactor = ((rightmost - leftmost) == 0.0) ? 0.0 : (width - leftborder - rightborder) / (rightmost - leftmost);
         double yfactor = ((topmost - bottommost) == 0.0) ? 0.0 : (height - topborder - bottomborder) / (topmost - bottommost);
-        image.setMode(ymageMatrix.MODE_SUB);
         
         // draw dots and names
         Iterator i = points.entrySet().iterator();

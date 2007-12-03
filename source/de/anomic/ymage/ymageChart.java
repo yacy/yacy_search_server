@@ -65,16 +65,16 @@ public class ymageChart extends ymageMatrix {
     String[] colscale = new String[]{null,null,null,null};
     String[] tablenames = new String[]{"","","",""};
     
-    public ymageChart(int width, int height, String backgroundColor,
+    public ymageChart(int width, int height, String backgroundColor, String foregroundColor,
                       int leftborder, int rightborder, int topborder, int bottomborder,
                       String name) {
-        super(width, height, backgroundColor);
+        super(width, height, ymageMatrix.MODE_REPLACE, backgroundColor);
         this.leftborder = leftborder;
         this.rightborder = rightborder;
         this.topborder = topborder;
         this.bottomborder = bottomborder;
         if (name != null) {
-            this.setColor("000000");
+            this.setColor(foregroundColor);
             ymageToolPrint.print(this, width / 2 - name.length() * 3, 6, 0, name, -1);
         }
     }
@@ -155,7 +155,7 @@ public class ymageChart extends ymageMatrix {
    
     public static void main(String[] args) {
         System.setProperty("java.awt.headless", "true");
-        ymageChart ip = new ymageChart(660, 240, "000010", 30, 30, 20, 20, "PEER PERFORMANCE GRAPH: PAGES/MINUTE and USED MEMORY");
+        ymageChart ip = new ymageChart(660, 240, "FFFFFF", "000000", 30, 30, 20, 20, "PEER PERFORMANCE GRAPH: PAGES/MINUTE and USED MEMORY");
         ip.declareDimension(DIMENSION_BOTTOM, 60, 60, -600, "000000", "CCCCCC", "TIME/SECONDS");
         //ip.declareDimension(DIMENSION_TOP, 10, 40, "000000", null, "count");
         ip.declareDimension(DIMENSION_LEFT, 50, 40, 0, "008800", null , "PPM [PAGES/MINUTE]");
