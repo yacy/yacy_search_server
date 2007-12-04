@@ -46,9 +46,6 @@
 
 import de.anomic.http.httpHeader;
 import de.anomic.plasma.plasmaGrafics;
-import de.anomic.plasma.plasmaSwitchboard;
-import de.anomic.server.serverCore;
-import de.anomic.server.serverDomains;
 import de.anomic.server.serverObjects;
 import de.anomic.server.serverSwitch;
 import de.anomic.ymage.ymageMatrix;
@@ -56,8 +53,8 @@ import de.anomic.yacy.yacyCore;
 import de.anomic.yacy.yacySeed;
 
 import java.awt.image.BufferedImage;
+import java.io.File;
 import java.io.IOException;
-import java.net.URL;
 import javax.imageio.ImageIO;
 
 /** draw a banner with information about the peer */
@@ -65,7 +62,7 @@ public class Banner {
 
     public static ymageMatrix respond(httpHeader header, serverObjects post, serverSwitch env) throws IOException {
 
-        final String IMAGE = "env/grafics/yacy.gif";
+        final String IMAGE = "htroot/env/grafics/yacy.gif";
         int width = 468;
         int height = 60;
         String bgcolor = plasmaGrafics.COL_BACKGROUND;
@@ -126,11 +123,7 @@ public class Banner {
         }
 
         if (!plasmaGrafics.logoIsLoaded()) {
-            plasmaSwitchboard switchboard = (plasmaSwitchboard)env;
-            int port = serverCore.getPortNr(switchboard.getConfig("port", "8080"));
-            String host = serverDomains.myPublicLocalIP().getHostAddress();
-            BufferedImage logo = ImageIO.read(new URL("http://"+host+":"+port+"/"+IMAGE));
-            //BufferedImage logo = ImageIO.read(new File(IMAGE));
+            BufferedImage logo = ImageIO.read(new File(IMAGE));
             return plasmaGrafics.getBannerPicture(1000, width, height, bgcolor, textcolor, bordercolor, name, links, words, type, myppm, network, nlinks, nwords, nqph, nppm, logo);
         }
         

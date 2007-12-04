@@ -264,20 +264,51 @@ public class ymageMatrix /*implements Cloneable*/ {
      *  @author Marc Nause
      */
     public void insertBitmap(BufferedImage bitmap, int x, int y) {
+        insertBitmap(bitmap, x, y, -1);
+    }
+    
+    /**
+     *  inserts an image into the ymageMatrix where all pixels that have the same RGB value as the
+     *  pixel at (xx, yy) are transparent
+     *  @param bitmap the bitmap to be inserted
+     *  @param x the x value of the upper left coordinate in the ymageMatrix where the bitmap will be placed
+     *  @param y the y value of the upper left coordinate in the ymageMatrix where the bitmap will be placed
+     *  @param xx the x value of the pixel that determines which color is transparent
+     *  @param yy the y value of the pixel that determines which color is transparent
+     *  @author Marc Nause
+     */
+    public void insertBitmap(BufferedImage bitmap, int x, int y, int xx, int yy) {
+        insertBitmap(bitmap, x, y, bitmap.getRGB(xx, yy));
+    }    
+
+    /**
+     *  inserts an image into the ymageMatrix where all pixels that have a special RGB value
+     *  pixel at (xx, yy) are transparent
+     *  @param bitmap the bitmap to be inserted
+     *  @param x the x value of the upper left coordinate in the ymageMatrix where the bitmap will be placed
+     *  @param y the y value of the upper left coordinate in the ymageMatrix where the bitmap will be placed
+     *  @param rgb the RGB value that will be transparent
+     *  @author Marc Nause
+     */      
+    public void insertBitmap(BufferedImage bitmap, int x, int y, int transRGB) {
         int heightSrc = bitmap.getHeight();
         int widthSrc  = bitmap.getWidth();
         int heightTgt = image.getHeight();
         int widthTgt  = image.getWidth();
 
+        int rgb;
         for (int i = 0; i < heightSrc; i++) {
             for (int j = 0; j < widthSrc; j++) {
                 // pixel in legal area?
                 if (j+x >= 0 && i+y >= 0 && i+y < heightTgt && j+x < widthTgt) {
-                    image.setRGB(j+x, i+y, bitmap.getRGB(j, i));
+                    rgb = bitmap.getRGB(j, i);
+                    if (rgb != transRGB) {
+                        image.setRGB(j+x, i+y, rgb);
+                    }
                 }
             }
         }
-    }
+    }      
     
     public static void demoPaint(ymageMatrix m) {
         m.setColor(SUBTRACTIVE_CYAN);
