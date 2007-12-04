@@ -40,6 +40,7 @@ import de.anomic.kelondro.kelondroBase64Order;
 import de.anomic.kelondro.kelondroBitfield;
 import de.anomic.index.indexContainer;
 import de.anomic.net.natLib;
+import de.anomic.plasma.plasmaProfiling;
 import de.anomic.plasma.plasmaSearchEvent;
 import de.anomic.plasma.plasmaSearchQuery;
 import de.anomic.plasma.plasmaSearchRankingProfile;
@@ -136,7 +137,6 @@ public final class search {
         int indexabstractContainercount = 0;
         int joincount = 0;
         plasmaSearchQuery theQuery = null;
-        serverProfiling localProfiling = null;
         ArrayList accu = null;
         long urlRetrievalAllTime = 0, snippetComputationAllTime = 0;
         if ((query.length() == 0) && (abstractSet != null)) {
@@ -145,13 +145,9 @@ public final class search {
             theQuery.domType = plasmaSearchQuery.SEARCHDOM_LOCAL;
             yacyCore.log.logInfo("INIT HASH SEARCH (abstracts only): " + plasmaSearchQuery.anonymizedQueryHashes(theQuery.queryHashes) + " - " + theQuery.displayResults() + " links");
 
-            // prepare a search profile
-            localProfiling  = new serverProfiling();
-            
-            //theSearch = new plasmaSearchEvent(squery, rankingProfile, localTiming, remoteTiming, true, sb.wordIndex, null);
-            localProfiling.startTimer();
+            long timer = System.currentTimeMillis();
             Map[] containers = sb.wordIndex.localSearchContainers(theQuery, plasmaSearchQuery.hashes2Set(urls));
-            localProfiling.yield(plasmaSearchEvent.COLLECTION, containers[0].size());
+            serverProfiling.update("SEARCH", new plasmaProfiling.searchEvent(theQuery.id(), plasmaSearchEvent.COLLECTION, containers[0].size(), System.currentTimeMillis() - timer));
             if (containers != null) {
                 Iterator ci = containers[0].entrySet().iterator();
                 Map.Entry entry;
@@ -178,8 +174,7 @@ public final class search {
             
             // prepare a search profile
             plasmaSearchRankingProfile rankingProfile = (profile.length() == 0) ? new plasmaSearchRankingProfile(plasmaSearchQuery.contentdomParser(contentdom)) : new plasmaSearchRankingProfile("", profile);
-            localProfiling  = new serverProfiling();
-            plasmaSearchEvent theSearch = plasmaSearchEvent.getEvent(theQuery, rankingProfile, localProfiling, sb.wordIndex, null, true, abstractSet);
+            plasmaSearchEvent theSearch = plasmaSearchEvent.getEvent(theQuery, rankingProfile, sb.wordIndex, null, true, abstractSet);
             urlRetrievalAllTime = theSearch.getURLRetrievalTime();
             snippetComputationAllTime = theSearch.getSnippetComputationTime();
             
@@ -239,7 +234,7 @@ public final class search {
             if (partitions > 0) sb.requestedQueries = sb.requestedQueries + 1d / partitions; // increase query counter
             
             // prepare reference hints
-            localProfiling.startTimer();
+            long timer = System.currentTimeMillis();
             Set ws = theSearch.references(10);
             StringBuffer refstr = new StringBuffer();
             Iterator j = ws.iterator();
@@ -247,7 +242,7 @@ public final class search {
                 refstr.append(",").append((String) j.next());
             }
             prop.put("references", (refstr.length() > 0) ? refstr.substring(1) : refstr.toString());
-            localProfiling.yield("reference collection", ws.size());
+            serverProfiling.update("SEARCH", new plasmaProfiling.searchEvent(theQuery.id(), "reference collection", ws.size(), System.currentTimeMillis() - timer));
         }
         prop.put("indexabstract", indexabstract.toString());
         
@@ -261,7 +256,7 @@ public final class search {
 
         } else {
             // result is a List of urlEntry elements
-            localProfiling.startTimer();
+            long timer = System.currentTimeMillis();
             StringBuffer links = new StringBuffer();
             String resource = null;
             plasmaSearchEvent.ResultEntry entry;
@@ -274,7 +269,7 @@ public final class search {
             }
             prop.put("links", links.toString());
             prop.put("linkcount", accu.size());
-            localProfiling.yield("result list preparation", accu.size());
+            serverProfiling.update("SEARCH", new plasmaProfiling.searchEvent(theQuery.id(), "result list preparation", accu.size(), System.currentTimeMillis() - timer));
         }
         
         // add information about forward peers

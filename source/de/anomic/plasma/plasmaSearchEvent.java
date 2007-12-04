@@ -69,7 +69,6 @@ public final class plasmaSearchEvent {
     private plasmaWordIndex wordIndex;
     private plasmaSearchRankingProcess rankedCache; // ordered search results, grows dynamically as all the query threads enrich this container
     private Map rcAbstracts; // cache for index abstracts; word:TreeMap mapping where the embedded TreeMap is a urlhash:peerlist relation
-    private serverProfiling process;
     private yacySearch[] primarySearchThreads, secondarySearchThreads;
     private Thread localSearchThread;
     private TreeMap preselectedPeerHashes;
@@ -87,7 +86,6 @@ public final class plasmaSearchEvent {
     
     private plasmaSearchEvent(plasmaSearchQuery query,
                              plasmaSearchRankingProfile ranking,
-                             serverProfiling localTiming,
                              plasmaWordIndex wordIndex,
                              TreeMap preselectedPeerHashes,
                              boolean generateAbstracts,
@@ -97,7 +95,6 @@ public final class plasmaSearchEvent {
         this.query = query;
         this.ranking = ranking;
         this.rcAbstracts = (query.queryHashes.size() > 1) ? new TreeMap() : null; // generate abstracts only for combined searches
-        this.process = localTiming;
         this.primarySearchThreads = null;
         this.secondarySearchThreads = null;
         this.preselectedPeerHashes = preselectedPeerHashes;
@@ -125,14 +122,14 @@ public final class plasmaSearchEvent {
         if ((query.domType == plasmaSearchQuery.SEARCHDOM_GLOBALDHT) ||
             (query.domType == plasmaSearchQuery.SEARCHDOM_CLUSTERALL)) {
             // do a global search
-            this.rankedCache = new plasmaSearchRankingProcess(wordIndex, query, process, ranking, 2, max_results_preparation);
+            this.rankedCache = new plasmaSearchRankingProcess(wordIndex, query, ranking, 2, max_results_preparation);
             
             int fetchpeers = (int) (query.maximumTime / 500L); // number of target peers; means 10 peers in 10 seconds
             if (fetchpeers > 50) fetchpeers = 50;
             if (fetchpeers < 30) fetchpeers = 30;
 
             // the result of the fetch is then in the rcGlobal
-            process.startTimer();
+            long timer = System.currentTimeMillis();
             serverLog.logFine("SEARCH_EVENT", "STARTING " + fetchpeers + " THREADS TO CATCH EACH " + query.displayResults() + " URLs");
             this.primarySearchThreads = yacySearch.primaryRemoteSearches(
                     plasmaSearchQuery.hashSet2hashString(query.queryHashes),
@@ -150,7 +147,7 @@ public final class plasmaSearchEvent {
                     ranking,
                     query.constraint,
                     (query.domType == plasmaSearchQuery.SEARCHDOM_GLOBALDHT) ? null : preselectedPeerHashes);
-            process.yield("remote search thread start", this.primarySearchThreads.length);
+            serverProfiling.update("SEARCH", new plasmaProfiling.searchEvent(query.id(), "remote search thread start", this.primarySearchThreads.length, System.currentTimeMillis() - timer));
             
             // meanwhile do a local search
             localSearchThread = new localSearchProcess();
@@ -160,14 +157,14 @@ public final class plasmaSearchEvent {
             serverLog.logFine("SEARCH_EVENT", "SEARCH TIME AFTER GLOBAL-TRIGGER TO " + primarySearchThreads.length + " PEERS: " + ((System.currentTimeMillis() - start) / 1000) + " seconds");
         } else {
             // do a local search
-            this.rankedCache = new plasmaSearchRankingProcess(wordIndex, query, process, ranking, 2, max_results_preparation);
+            this.rankedCache = new plasmaSearchRankingProcess(wordIndex, query, ranking, 2, max_results_preparation);
             this.rankedCache.execQuery(true);
             this.localcount = this.rankedCache.filteredCount();
             //plasmaWordIndex.Finding finding = wordIndex.retrieveURLs(query, false, 2, ranking, process);
             
             if (generateAbstracts) {
                 // compute index abstracts
-                process.startTimer();
+                long timer = System.currentTimeMillis();
                 Iterator ci = this.rankedCache.searchContainerMaps()[0].entrySet().iterator();
                 Map.Entry entry;
                 int maxcount = -1;
@@ -191,7 +188,7 @@ public final class plasmaSearchEvent {
                     IACount.put(wordhash, new Integer(container.size()));
                     IAResults.put(wordhash, indexContainer.compressIndex(container, null, 1000).toString());
                 }
-                process.yield("abstract generation", this.rankedCache.searchContainerMaps()[0].size());
+                serverProfiling.update("SEARCH", new plasmaProfiling.searchEvent(query.id(), "abstract generation", this.rankedCache.searchContainerMaps()[0].size(), System.currentTimeMillis() - timer));
             }
             
         }
@@ -205,7 +202,7 @@ public final class plasmaSearchEvent {
             }
         } else {
             // prepare result vector directly without worker threads
-            process.startTimer();
+            long timer = System.currentTimeMillis();
             indexURLEntry uentry;
             ResultEntry resultEntry;
             yacyURL url;
@@ -231,7 +228,7 @@ public final class plasmaSearchEvent {
                     }
                 }
             }
-            process.yield("offline snippet fetch", resultList.size());
+            serverProfiling.update("SEARCH", new plasmaProfiling.searchEvent(query.id(), "offline snippet fetch", resultList.size(), System.currentTimeMillis() - timer));
         }
         
         // clean up events
@@ -421,10 +418,6 @@ public final class plasmaSearchEvent {
         return ranking;
     }
     
-    public serverProfiling getProcess() {
-        return process;
-    }
-    
     public yacySearch[] getPrimarySearchThreads() {
         return primarySearchThreads;
     }
@@ -457,7 +450,6 @@ public final class plasmaSearchEvent {
     
     public static plasmaSearchEvent getEvent(plasmaSearchQuery query,
             plasmaSearchRankingProfile ranking,
-            serverProfiling localTiming,
             plasmaWordIndex wordIndex,
             TreeMap preselectedPeerHashes,
             boolean generateAbstracts,
@@ -465,7 +457,7 @@ public final class plasmaSearchEvent {
         synchronized (lastEvents) {
             plasmaSearchEvent event = (plasmaSearchEvent) lastEvents.get(query.id());
             if (event == null) {
-                event = new plasmaSearchEvent(query, ranking, localTiming, wordIndex, preselectedPeerHashes, generateAbstracts, abstractSet);
+                event = new plasmaSearchEvent(query, ranking, wordIndex, preselectedPeerHashes, generateAbstracts, abstractSet);
             } else {
                 //re-new the event time for this event, so it is not deleted next time too early
                 event.eventTime = System.currentTimeMillis();

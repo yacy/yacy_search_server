@@ -146,6 +146,7 @@ import de.anomic.server.serverFileUtils;
 import de.anomic.server.serverInstantThread;
 import de.anomic.server.serverMemory;
 import de.anomic.server.serverObjects;
+import de.anomic.server.serverProfiling;
 import de.anomic.server.serverSemaphore;
 import de.anomic.server.serverSwitch;
 import de.anomic.server.serverThread;
@@ -241,8 +242,6 @@ public final class plasmaSwitchboard extends serverAbstractSwitch implements ser
     public  boolean                     acceptLocalURLs, acceptGlobalURLs;
     public  URLLicense                  licensedURLs;
     public  Timer                       moreMemory;
-    public  TreeMap                     ppmHistory, usedMemoryHistory;
-    public  long                        lastPPMUpdate;
 
     /*
      * Remote Proxy configuration
@@ -877,13 +876,8 @@ public final class plasmaSwitchboard extends serverAbstractSwitch implements ser
     
     public plasmaSwitchboard(String rootPath, String initPath, String configPath, boolean applyPro) {
         super(rootPath, initPath, configPath, applyPro);
+        serverProfiling.startSystemProfiling();
         sb=this;
-        
-        // initialize memory profiling
-        ppmHistory = new TreeMap();
-        usedMemoryHistory = new TreeMap();
-        lastPPMUpdate = System.currentTimeMillis();
-        updateProfiling();
         
         // set loglevel and log
         setLog(new serverLog("PLASMA"));
@@ -1406,29 +1400,6 @@ public final class plasmaSwitchboard extends serverAbstractSwitch implements ser
         return sb;
     }
 
-    public void updateProfiling() {
-        Long time = new Long(System.currentTimeMillis());
-        usedMemoryHistory.put(time, new Long(serverMemory.used()));
-        if (time.longValue() - lastPPMUpdate > 30000) {
-            // we don't want to do this too often
-            yacyCore.peerActions.updateMySeed();
-            ppmHistory.put(time, new Long(yacyCore.seedDB.mySeed().getPPM()));
-            lastPPMUpdate = time.longValue();
-        }
-        
-        // clean up too old entries
-        while (usedMemoryHistory.size() > 0) {
-            time = (Long) usedMemoryHistory.firstKey();
-            if (System.currentTimeMillis() - time.longValue() < 600000) break;
-            usedMemoryHistory.remove(time);
-        }
-        while (ppmHistory.size() > 0) {
-            time = (Long) ppmHistory.firstKey();
-            if (System.currentTimeMillis() - time.longValue() < 600000) break;
-            ppmHistory.remove(time);
-        }
-    }
-
     public boolean isRobinsonMode() {
     	// we are in robinson mode, if we do not exchange index by dht distribution
     	// we need to take care that search requests and remote indexing requests go only
@@ -1762,6 +1733,7 @@ public final class plasmaSwitchboard extends serverAbstractSwitch implements ser
     
     public void close() {
         log.logConfig("SWITCHBOARD SHUTDOWN STEP 1: sending termination signal to managed threads:");
+        serverProfiling.stopSystemProfiling();
         moreMemory.cancel();
         terminateAllThreads(true);
         if (transferIdxThread != null) stopTransferWholeIndex(false);
@@ -1818,7 +1790,6 @@ public final class plasmaSwitchboard extends serverAbstractSwitch implements ser
     }
     
     public boolean deQueue() {
-        updateProfiling();
         try {
             // work off fresh entries from the proxy or from the crawler
             if (onlineCaution()) {
@@ -1910,9 +1881,6 @@ public final class plasmaSwitchboard extends serverAbstractSwitch implements ser
                 // parse and index the resource
                 processResourceStack(nextentry);
             }
-
-            // ready & finished
-            updateProfiling();
             return true;
         } catch (InterruptedException e) {
             log.logInfo("DEQUEUE: Shutdown detected.");
@@ -2449,6 +2417,9 @@ public final class plasmaSwitchboard extends serverAbstractSwitch implements ser
                                     "IndexingTime: " + (indexingEndTime-indexingStartTime) + " ms | " +
                                     "StorageTime: " + (storageEndTime-storageStartTime) + " ms");
                         }
+
+                        // update profiling info
+                        plasmaProfiling.updateIndexedPage(entry);
                         
                         // check for interruption
                         checkInterruption();

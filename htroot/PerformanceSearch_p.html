@@ -14,14 +14,18 @@
     </p>
     <table border="0" cellpadding="2" cellspacing="1">
       <tr class="TableHeader" valign="bottom">
+        <td>Query</td>
         <td>Event</td>
-        <td>Time (milliseconds)</td>
+        <td>Time</td>
+        <td>Duration (milliseconds)</td>
         <td>Result-Count</td>
       </tr>
     #{table}#
       <tr class="TableCellDark" valign="bottom">
+        <td>#[query]#</td>
         <td>#[event]#</td>
         <td>#[time]#</td>
+        <td>#[duration]#</td>
         <td>#[count]#</td>
       </tr>
     #{/table}#

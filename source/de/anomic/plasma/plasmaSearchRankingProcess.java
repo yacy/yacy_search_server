@@ -61,7 +61,6 @@ public final class plasmaSearchRankingProcess {
     private int maxentries;
     private int globalcount;
     private indexRWIEntryOrder order;
-    private serverProfiling process;
     private HashMap urlhashes; // map for double-check; String/Long relation, addresses ranking number (backreference for deletion)
     private kelondroMScoreCluster ref;  // reference score computation for the commonSense heuristic
     private int[] flagcount; // flag counter
@@ -69,7 +68,7 @@ public final class plasmaSearchRankingProcess {
     private plasmaWordIndex wordIndex;
     private Map[] localSearchContainerMaps;
     
-    public plasmaSearchRankingProcess(plasmaWordIndex wordIndex, plasmaSearchQuery query, serverProfiling process, plasmaSearchRankingProfile ranking, int sortorder, int maxentries) {
+    public plasmaSearchRankingProcess(plasmaWordIndex wordIndex, plasmaSearchQuery query, plasmaSearchRankingProfile ranking, int sortorder, int maxentries) {
         // we collect the urlhashes and construct a list with urlEntry objects
         // attention: if minEntries is too high, this method will not terminate within the maxTime
         // sortorder: 0 = hash, 1 = url, 2 = ranking
@@ -78,7 +77,6 @@ public final class plasmaSearchRankingProcess {
         this.doubleDomCache = new HashMap();
         this.handover = new HashMap();
         this.filteredCount = 0;
-        this.process = process;
         this.order = null;
         this.query = query;
         this.ranking = ranking;
@@ -95,12 +93,12 @@ public final class plasmaSearchRankingProcess {
     
     public void execQuery(boolean fetchURLs) {
         
-        if (process != null) process.startTimer();
+        long timer = System.currentTimeMillis();
         this.localSearchContainerMaps = wordIndex.localSearchContainers(query, null);
-        if (process != null) process.yield(plasmaSearchEvent.COLLECTION, this.localSearchContainerMaps[0].size());
-
+        serverProfiling.update("SEARCH", new plasmaProfiling.searchEvent(query.id(), plasmaSearchEvent.COLLECTION, this.localSearchContainerMaps[0].size(), System.currentTimeMillis() - timer));
+        
         // join and exlcude the local result
-        if (process != null) process.startTimer();
+        timer = System.currentTimeMillis();
         indexContainer index =
             (this.localSearchContainerMaps == null) ?
               plasmaWordIndex.emptyContainer(null, 0) :
@@ -108,7 +106,7 @@ public final class plasmaSearchRankingProcess {
                       this.localSearchContainerMaps[0].values(),
                       this.localSearchContainerMaps[1].values(),
                       query.maxDistance);
-        if (process != null) process.yield(plasmaSearchEvent.JOIN, index.size());
+        serverProfiling.update("SEARCH", new plasmaProfiling.searchEvent(query.id(), plasmaSearchEvent.JOIN, index.size(), System.currentTimeMillis() - timer));
         int joincount = index.size();
         
         if ((index == null) || (joincount == 0)) {
@@ -169,12 +167,12 @@ public final class plasmaSearchRankingProcess {
         assert (container != null);
         if (container.size() == 0) return;
         
-        if (process != null) process.startTimer();
+        long timer = System.currentTimeMillis();
         if (this.order == null) {
             this.order = new indexRWIEntryOrder(ranking);
         }
         this.order.extend(container);
-        if (process != null) process.yield(plasmaSearchEvent.NORMALIZING, container.size());
+        serverProfiling.update("SEARCH", new plasmaProfiling.searchEvent(query.id(), plasmaSearchEvent.NORMALIZING, container.size(), System.currentTimeMillis() - timer));
         
         /*
         container.setOrdering(o, 0);
@@ -182,7 +180,7 @@ public final class plasmaSearchRankingProcess {
         */
         
         // normalize entries and get ranking
-        if (process != null) process.startTimer();
+        timer = System.currentTimeMillis();
         Iterator i = container.entries();
         indexRWIEntry iEntry, l;
         long biggestEntry = 0;
@@ -235,8 +233,7 @@ public final class plasmaSearchRankingProcess {
         //System.out.println("###DEBUG### time to sort " + container.size() + " entries to " + this.filteredCount + ": " + sc + " milliseconds, " + (container.size() / sc) + " entries/millisecond, ranking = " + tc);
         
         //if ((query.neededResults() > 0) && (container.size() > query.neededResults())) remove(true, true);
-
-        if (process != null) process.yield(plasmaSearchEvent.PRESORT, container.size());
+        serverProfiling.update("SEARCH", new plasmaProfiling.searchEvent(query.id(), plasmaSearchEvent.PRESORT, container.size(), System.currentTimeMillis() - timer));
     }
 
     private boolean testFlags(indexRWIEntry ientry) {

@@ -26,49 +26,119 @@
 
 package de.anomic.server;
 
-import java.util.ArrayList;
+import java.util.Collections;
+import java.util.HashMap;
 import java.util.Iterator;
+import java.util.Map;
+import java.util.TreeMap;
 
-public class serverProfiling implements Cloneable {
-
-    private ArrayList yield;
-    private long timer;
-
-    public serverProfiling() {
-        yield = new ArrayList();
-        timer = 0;
+public class serverProfiling extends Thread {
+    
+    private static Map historyMaps; // key=name of history, value=TreeMap of Long/Event
+    private static Map eventCounter; // key=name of history, value=Integer of event counter
+    private static long lastCompleteCleanup;
+    private static serverProfiling systemProfiler;
+    
+    static {
+        // initialize profiling
+        historyMaps = Collections.synchronizedMap(new HashMap());
+        eventCounter = Collections.synchronizedMap(new HashMap());
+        lastCompleteCleanup = System.currentTimeMillis();
+        systemProfiler = null;
+    }
+    
+    public static void startSystemProfiling() {
+    	systemProfiler = new serverProfiling(1000);
+    	systemProfiler.start();
+    }
+    
+    public static void stopSystemProfiling() {
+    	systemProfiler.running = false;
     }
 
-    public static class Entry {
-        public String process;
+    private long delaytime;
+    private boolean running;
+    
+    public serverProfiling(long time) {
+    	this.delaytime = time;
+    	running = true;
+    }
+    
+    public void run() {
+    	while (running) {
+    		update("memory", new Long(serverMemory.used()));
+    		try {
+				Thread.sleep(this.delaytime);
+			} catch (InterruptedException e) {
+				this.running = false;
+			}
+    	}
+    }
+    
+    public static void update(String eventName, Object eventPayload) {
+    	// get event history container
+    	int counter = eventCounter.containsKey(eventName) ? ((Integer) eventCounter.get(eventName)).intValue() : 0;
+    	TreeMap history = historyMaps.containsKey(eventName) ? ((TreeMap) historyMaps.get(eventName)) : new TreeMap();
+
+    	// update entry
+        Long time = new Long(System.currentTimeMillis());
+        history.put(time, new Event(counter, eventPayload));
+        counter++;
+        eventCounter.put(eventName, new Integer(counter));
+        
+        // clean up too old entries
+        cleanup(history);
+        cleanup();
+        
+        // store map
+        historyMaps.put(eventName, history);
+    }
+    
+    private static void cleanup() {
+    	if (System.currentTimeMillis() - lastCompleteCleanup < 600000) return;
+    	Object[] historyNames = historyMaps.keySet().toArray();
+    	for (int i = 0; i < historyNames.length; i++) {
+    		cleanup((String) historyNames[i]);
+    	}
+    	lastCompleteCleanup = System.currentTimeMillis();
+    }
+    
+    private static void cleanup(String eventName) {
+    	if (historyMaps.containsKey(eventName)) {
+    		TreeMap history = (TreeMap) historyMaps.get(eventName);
+    		cleanup(history);
+    		if (history.size() > 0) {
+    			historyMaps.put(eventName, history);
+    		} else {
+    			historyMaps.remove(eventName);
+    		}
+    	}
+    }
+    
+    private static void cleanup(TreeMap history) {
+    	// clean up too old entries
+        while (history.size() > 0) {
+        	Long time = (Long) history.firstKey();
+            if (System.currentTimeMillis() - time.longValue() < 600000) break;
+            history.remove(time);
+        }
+        
+    }
+    
+    public static Iterator history(String eventName) {
+    	return (historyMaps.containsKey(eventName) ? ((TreeMap) historyMaps.get(eventName)) : new TreeMap()).values().iterator();
+    }
+
+    public static class Event {
         public int count;
+        public Object payload;
         public long time;
 
-        public Entry(String process, int count, long time) {
-            this.process = process;
+        public Event(int count, Object payload) {
             this.count = count;
-            this.time = time;
+            this.payload = payload;
+            this.time = System.currentTimeMillis();
         }
-    }
-
-    public void startTimer() {
-        this.timer = System.currentTimeMillis();
-    }
-
-    public void yield(String s, int count) {
-        long t = System.currentTimeMillis() - this.timer;
-        Entry e = new Entry(s, count, t);
-        yield.add(e);
-    }
-
-    public Iterator events() {
-        // iteratese Entry-type Objects
-        return yield.iterator();
-    }
-
-    public int size() {
-        // returns number of events / Entry-Objects in yield array
-        return yield.size();
     }
 
 }

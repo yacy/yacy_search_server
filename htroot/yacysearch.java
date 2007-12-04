@@ -64,7 +64,6 @@ import de.anomic.plasma.plasmaSwitchboard;
 import de.anomic.server.serverCore;
 import de.anomic.server.serverDate;
 import de.anomic.server.serverObjects;
-import de.anomic.server.serverProfiling;
 import de.anomic.server.serverSwitch;
 import de.anomic.server.logging.serverLog;
 import de.anomic.tools.yFormatter;
@@ -268,7 +267,6 @@ public class yacysearch {
                     20,
                     constraint,
                     true);
-            serverProfiling localProfiling = new serverProfiling();
 
             String client = (String) header.get("CLIENTIP"); // the search client who initiated the search
         
@@ -287,7 +285,7 @@ public class yacysearch {
                 theQuery.setOffset(0); // in case that this is a new search, always start without a offset 
                 offset = 0;
             }
-            plasmaSearchEvent theSearch = plasmaSearchEvent.getEvent(theQuery, sb.getRanking(), localProfiling, sb.wordIndex, (sb.isRobinsonMode()) ? sb.clusterhashes : null, false, null);
+            plasmaSearchEvent theSearch = plasmaSearchEvent.getEvent(theQuery, sb.getRanking(), sb.wordIndex, (sb.isRobinsonMode()) ? sb.clusterhashes : null, false, null);
             
             // generate result object
             serverLog.logFine("LOCAL_SEARCH", "SEARCH TIME AFTER ORDERING OF SEARCH RESULTS: " + ((System.currentTimeMillis() - timestamp) / 1000) + " seconds");

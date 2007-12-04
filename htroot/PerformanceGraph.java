@@ -24,90 +24,23 @@
 // along with this program; if not, write to the Free Software
 // Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 
-import java.util.Iterator;
-import java.util.Map;
-
 import de.anomic.http.httpHeader;
-import de.anomic.plasma.plasmaSwitchboard;
+import de.anomic.plasma.plasmaProfiling;
 import de.anomic.server.serverObjects;
 import de.anomic.server.serverSwitch;
-import de.anomic.ymage.ymageChart;
 import de.anomic.ymage.ymageMatrix;
-
 
 public class PerformanceGraph {
     
     public static ymageMatrix respond(httpHeader header, serverObjects post, serverSwitch env) {
-        plasmaSwitchboard sb = (plasmaSwitchboard) env;
+        //plasmaSwitchboard sb = (plasmaSwitchboard) env;
         
         if (post == null) post = new serverObjects();
         
-        // find maximum values for automatic graph dimension adoption
-        Iterator i = sb.ppmHistory.entrySet().iterator();
-        Map.Entry entry;
-        int ppm, maxppm = 50;
-        while (i.hasNext()) {
-            entry = (Map.Entry) i.next();
-            ppm = (int) ((Long) entry.getValue()).longValue();
-            if (ppm > maxppm) maxppm = ppm;
-        }
-        i = sb.usedMemoryHistory.entrySet().iterator();
-        long bytes, maxbytes = 100 * 1024 * 1024;
-        while (i.hasNext()) {
-            entry = (Map.Entry) i.next();
-            bytes = ((Long) entry.getValue()).longValue();
-            if (bytes > maxbytes) maxbytes = bytes;
-        }
+        int width = post.getInt("width", 660);
+        int height = post.getInt("height", 240);
         
-        // declare graph and set dimensions
-        int height = 240;
-        int width = 660;
-        int leftborder = 30;
-        int rightborder = 30;
-        int topborder = 20;
-        int bottomborder = 20;
-        int vspace = height - topborder - bottomborder;
-        int hspace = width - leftborder - rightborder;
-        int maxtime = 600;
-        ymageChart ip = new ymageChart(width, height, "FFFFFF", "000000", leftborder, rightborder, topborder, bottomborder, "PEER PERFORMANCE GRAPH: PAGES/MINUTE and USED MEMORY");
-        ip.declareDimension(ymageChart.DIMENSION_BOTTOM, 60, hspace / (maxtime / 60), -maxtime, "000000", "CCCCCC", "TIME/SECONDS");
-        ip.declareDimension(ymageChart.DIMENSION_LEFT, 20, /*40*/ vspace * 20 / maxppm, 0, "008800", null , "PPM [PAGES/MINUTE]");
-        ip.declareDimension(ymageChart.DIMENSION_RIGHT, 100, /*20*/ vspace * 100 / (int)(maxbytes / 1024 / 1024), 0, "0000FF", "CCCCCC", "MEMORY/MEGABYTE");
-        
-        // draw ppm
-        ip.setColor("008800");
-        i = sb.ppmHistory.entrySet().iterator();
-        long time, now = System.currentTimeMillis();
-        int x0 = 1, x1, y0 = 0, y1;
-        while (i.hasNext()) {
-            entry = (Map.Entry) i.next();
-            time = ((Long) entry.getKey()).longValue() - now;
-            ppm = (int) ((Long) entry.getValue()).longValue();
-            //System.out.println("PPM: time = " + time + ", ppm = " + ppm);
-            x1 = (int) (time/1000);
-            y1 = ppm;
-            ip.chartDot(ymageChart.DIMENSION_BOTTOM, ymageChart.DIMENSION_LEFT, x1, y1, 1);
-            if (x0 < 0) ip.chartLine(ymageChart.DIMENSION_BOTTOM, ymageChart.DIMENSION_LEFT, x0, y0, x1, y1);
-            x0 = x1; y0 = y1;
-        }
-        
-        // draw memory
-        ip.setColor("0000FF");
-        i = sb.usedMemoryHistory.entrySet().iterator();
-        x0 = 1;
-        while (i.hasNext()) {
-            entry = (Map.Entry) i.next();
-            time = ((Long) entry.getKey()).longValue() - now;
-            bytes = ((Long) entry.getValue()).longValue();
-            //System.out.println("Memory: time = " + time + ", bytes = " + bytes);
-            x1 = (int) (time/1000);
-            y1 = (int) (bytes / 1024 / 1024);
-            ip.chartDot(ymageChart.DIMENSION_BOTTOM, ymageChart.DIMENSION_RIGHT, x1, y1, 1);
-            if (x0 < 0) ip.chartLine(ymageChart.DIMENSION_BOTTOM, ymageChart.DIMENSION_RIGHT, x0, y0, x1, y1);
-            x0 = x1; y0 = y1;
-        }
-        
-        return ip;
+        return plasmaProfiling.performanceGraph(width, height);
     }
     
 }

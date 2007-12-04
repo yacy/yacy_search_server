@@ -24,10 +24,11 @@
 // along with this program; if not, write to the Free Software
 // Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 
+import java.util.Date;
 import java.util.Iterator;
 
 import de.anomic.http.httpHeader;
-import de.anomic.plasma.plasmaSearchEvent;
+import de.anomic.plasma.plasmaProfiling;
 import de.anomic.server.serverObjects;
 import de.anomic.server.serverProfiling;
 import de.anomic.server.serverSwitch;
@@ -37,21 +38,19 @@ public class PerformanceSearch_p {
     public static serverObjects respond(httpHeader header, serverObjects post, serverSwitch sb) {
         // return variable that accumulates replacements
         serverObjects prop = new serverObjects();
-        plasmaSearchEvent se = plasmaSearchEvent.getEvent(plasmaSearchEvent.lastEventID);
         
-        if (se == null) {
-            prop.put("table", "0");
-            return prop;
-        }
-        
-        Iterator events = se.getProcess().events();
+        Iterator events = serverProfiling.history("SEARCH");
         int c = 0;
-        serverProfiling.Entry event;
+        serverProfiling.Event event;
+        plasmaProfiling.searchEvent search;
         while (events.hasNext()) {
-            event = (serverProfiling.Entry) events.next();
-            prop.put("table_" + c + "_event", event.process);
-            prop.putNum("table_" + c + "_count", event.count);
-            prop.putNum("table_" + c + "_time", event.time);
+            event = (serverProfiling.Event) events.next();
+            search = (plasmaProfiling.searchEvent) event.payload;
+            prop.put("table_" + c + "_query", search.queryID);
+            prop.put("table_" + c + "_event", search.processName);
+            prop.putNum("table_" + c + "_count", search.resultCount);
+            prop.put("table_" + c + "_time", (new Date(event.time)).toString());
+            prop.putNum("table_" + c + "_duration", search.duration);
             c++;
         }
         prop.put("table", c);

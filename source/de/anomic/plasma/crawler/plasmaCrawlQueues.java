@@ -144,7 +144,7 @@ public class plasmaCrawlQueues {
                 (!sb.getConfig(plasmaSwitchboard.CLUSTER_MODE, "").equals(plasmaSwitchboard.CLUSTER_MODE_PUBLIC_CLUSTER)) &&
                 (!sb.getConfig(plasmaSwitchboard.CLUSTER_MODE, "").equals(plasmaSwitchboard.CLUSTER_MODE_PRIVATE_CLUSTER)));
         
-        if ((robinsonPrivateCase) || ((coreCrawlJobSize() <= 20) && (limitCrawlJobSize() > 0))) {
+        if (((robinsonPrivateCase) || (coreCrawlJobSize() <= 20)) && (limitCrawlJobSize() > 0)) {
             // move some tasks to the core crawl job so we have something to do
             int toshift = Math.min(10, limitCrawlJobSize()); // this cannot be a big number because the balancer makes a forced waiting if it cannot balance
             for (int i = 0; i < toshift; i++) {
@@ -181,7 +181,7 @@ public class plasmaCrawlQueues {
                 try {
                     status[plasmaSwitchboard.CRAWLJOB_SYNC].wait();
                 }
-                catch (InterruptedException e){ return false;}
+                catch (InterruptedException e) {return false;}
             }
         }
         
