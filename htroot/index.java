@@ -147,7 +147,10 @@ public class index {
         prop.put("contentdomCheckVideo", (contentdom == plasmaSearchQuery.CONTENTDOM_VIDEO) ? "1" : "0");
         prop.put("contentdomCheckImage", (contentdom == plasmaSearchQuery.CONTENTDOM_IMAGE) ? "1" : "0");
         prop.put("contentdomCheckApp", (contentdom == plasmaSearchQuery.CONTENTDOM_APP) ? "1" : "0");
-
+        
+        // online caution timing
+        sb.localSearchLastAccess = System.currentTimeMillis();
+        
         return prop;
     }
 }

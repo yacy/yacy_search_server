@@ -714,8 +714,10 @@ msgForwardingEnabled=false
 msgForwardingCmd=/usr/sbin/sendmail
 msgForwardingTo=root@localhost
 
-#onlineCautionDelay: delay time after proxy usage before crawling is resumed
-onlineCautionDelay=10000
+#crawlPause: delay time after specific functions before crawling is resumed
+crawlPause.proxy=15000
+crawlPause.localsearch=9000
+crawlPause.remotesearch=3000
 
 # Some configuration values for the crawler
 crawler.clientTimeout=9000

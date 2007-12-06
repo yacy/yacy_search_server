@@ -73,7 +73,8 @@ public class yacysearch {
 
     public static serverObjects respond(httpHeader header, serverObjects post, serverSwitch env) {
         final plasmaSwitchboard sb = (plasmaSwitchboard) env;
-
+        sb.localSearchLastAccess = System.currentTimeMillis();
+        
         boolean searchAllowed = sb.getConfigBool("publicSearchpage", true) || sb.verifyAuthentication(header, false);
         
         boolean authenticated = sb.adminAuthenticated(header) >= 2;
@@ -406,6 +407,8 @@ public class yacysearch {
         // for RSS: don't HTML encode some elements
         prop.putHTML("rss_query", querystring, true);
         prop.put("rss_queryenc", yacyURL.escape(querystring.replace(' ', '+')));
+
+        sb.localSearchLastAccess = System.currentTimeMillis();
         
         // return rewrite properties
         return prop;

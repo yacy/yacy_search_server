@@ -220,7 +220,7 @@ public final class plasmaSwitchboard extends serverAbstractSwitch implements ser
     public  HashMap                     outgoingCookies, incomingCookies;
     public  kelondroMapTable            facilityDB;
     public  plasmaParser                parser;
-    public  long                        proxyLastAccess;
+    public  long                        proxyLastAccess, localSearchLastAccess, remoteSearchLastAccess;
     public  yacyCore                    yc;
     public  HashMap                     indexingTasksInProcess;
     public  userDB                      userDB;
@@ -562,7 +562,9 @@ public final class plasmaSwitchboard extends serverAbstractSwitch implements ser
      * <p><code>public static final String <strong>PROXY_ONLINE_CAUTION_DELAY</strong> = "onlineCautionDelay"</code></p>
      * <p>Name of the setting how long indexing should pause after the last time the proxy was used in milliseconds</p> 
      */
-    public static final String PROXY_ONLINE_CAUTION_DELAY       = "onlineCautionDelay";
+    public static final String PROXY_ONLINE_CAUTION_DELAY        = "crawlPause.proxy";
+    public static final String LOCALSEACH_ONLINE_CAUTION_DELAY   = "crawlPause.localsearch";
+    public static final String REMOTESEARCH_ONLINE_CAUTION_DELAY = "crawlPause.remotesearch";
     /**
      * <p><code>public static final String <strong>PROXY_PREFETCH_DEPTH</strong> = "proxyPrefetchDepth"</code></p>
      * <p>Name of the setting how deep URLs fetched by proxy usage shall be followed</p>
@@ -971,6 +973,8 @@ public final class plasmaSwitchboard extends serverAbstractSwitch implements ser
         
         // setting timestamp of last proxy access
         this.proxyLastAccess = System.currentTimeMillis() - 60000;
+        this.localSearchLastAccess = System.currentTimeMillis() - 60000;
+        this.remoteSearchLastAccess = System.currentTimeMillis() - 60000;
         this.webStructure = new plasmaWebStructure(log, rankingPath, "LOCAL/010_cr/", getConfig("CRDist0Path", plasmaRankingDistribution.CR_OWN), new File(plasmaPath, "webStructure.map"));
         
         // configuring list path
@@ -1507,11 +1511,10 @@ public final class plasmaSwitchboard extends serverAbstractSwitch implements ser
     }
     
     public boolean onlineCaution() {
-        try {
-            return System.currentTimeMillis() - proxyLastAccess < Integer.parseInt(getConfig(PROXY_ONLINE_CAUTION_DELAY, "30000"));
-        } catch (NumberFormatException e) {
-            return false;
-        }
+        return
+           (System.currentTimeMillis() - this.proxyLastAccess < Integer.parseInt(getConfig(PROXY_ONLINE_CAUTION_DELAY, "30000"))) ||
+           (System.currentTimeMillis() - this.localSearchLastAccess < Integer.parseInt(getConfig(LOCALSEACH_ONLINE_CAUTION_DELAY, "30000"))) ||
+           (System.currentTimeMillis() - this.remoteSearchLastAccess < Integer.parseInt(getConfig(REMOTESEARCH_ONLINE_CAUTION_DELAY, "30000")));
     }
     
     private static String ppRamString(long bytes) {
