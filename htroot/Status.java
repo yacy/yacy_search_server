@@ -46,7 +46,6 @@
 // javac -classpath .:../Classes Status.java
 // if the shell's current path is HTROOT
 
-import java.io.IOException;
 import java.util.Date;
 
 import de.anomic.http.httpHeader;
@@ -63,7 +62,6 @@ import de.anomic.server.serverSwitch;
 import de.anomic.tools.yFormatter;
 import de.anomic.yacy.yacyCore;
 import de.anomic.yacy.yacySeed;
-import de.anomic.yacy.yacyURL;
 import de.anomic.yacy.yacyVersion;
 
 public class Status {
@@ -111,18 +109,7 @@ public class Status {
                     sb.setConfig("browserPopUpTrigger", "true");
                 }
                 redirect = true;
-        	} else if (post.containsKey("downloadRelease")) {
-                // download a release
-                String release = post.get("releasedownload", "");
-                if (release.length() > 0) {
-                    try {
-                        yacyVersion.downloadRelease(new yacyVersion(new yacyURL(release, null)));
-                    } catch (IOException e) {
-                        // TODO Auto-generated catch block
-                        e.printStackTrace();
-                    }
-                }
-            }
+        	}
         	
         	if (redirect) {
         		prop.put("LOCATION","");

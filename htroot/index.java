@@ -1,5 +1,5 @@
 // index.java
-// (C) 2004, 2005, 2006 by Michael Peter Christen; mc@anomic.de, Frankfurt a. M., Germany
+// (C) 2004-2007 by Michael Peter Christen; mc@anomic.de, Frankfurt a. M., Germany
 // first published 2004 on http://www.anomic.de
 //
 // This is a part of YaCy, a peer-to-peer based web search engine
@@ -28,18 +28,13 @@
 // javac -classpath .:../classes index.java
 // if the shell's current path is HTROOT
 
-import java.io.IOException;
-import java.net.MalformedURLException;
-import java.util.HashMap;
 
 import de.anomic.http.httpHeader;
 import de.anomic.plasma.plasmaSearchQuery;
 import de.anomic.plasma.plasmaSwitchboard;
-import de.anomic.server.serverDate;
 import de.anomic.server.serverObjects;
 import de.anomic.server.serverSwitch;
 import de.anomic.yacy.yacyCore;
-import de.anomic.yacy.yacyURL;
 
 public class index {
 
@@ -68,14 +63,14 @@ public class index {
         final int time = Math.min(60, (post == null) ? 6 : post.getInt("time", 6));
         final String urlmaskfilter = (post == null) ? ".*" : post.get("urlmaskfilter", ".*");
         final String prefermaskfilter = (post == null) ? "" : post.get("prefermaskfilter", "");
-        final String constraint = (post == null) ? plasmaSearchQuery.catchall_constraint.exportB64() : post.get("constraint", "______");
+        final String constraint = (post == null) ? null : post.get("constraint", null);
         final String cat = (post == null) ? "href" : post.get("cat", "href");
         final int type = (post == null) ? 0 : post.getInt("type", 0);
         
         final boolean indexDistributeGranted = sb.getConfigBool(plasmaSwitchboard.INDEX_DIST_ALLOW, true);
         final boolean indexReceiveGranted = sb.getConfigBool(plasmaSwitchboard.INDEX_RECEIVE_ALLOW, true);
         global = global && indexDistributeGranted && indexReceiveGranted;
-
+/*
         final String referer = (String) header.get(httpHeader.REFERER);
         if (referer != null) {
             yacyURL url;
@@ -93,7 +88,7 @@ public class index {
                 if (sb.facilityDB != null) try {sb.facilityDB.update("backlinks", referer, referrerprop);} catch (IOException e) {}
             }
         }
-
+*/
         // search domain
         int contentdom = plasmaSearchQuery.CONTENTDOM_TEXT;
         String cds = (post == null) ? "text" : post.get("contentdom", "text");

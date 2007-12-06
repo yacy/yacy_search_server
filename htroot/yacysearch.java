@@ -46,8 +46,6 @@
 // javac -classpath .:../classes yacysearch.java
 // if the shell's current path is HTROOT
 
-import java.io.IOException;
-import java.net.MalformedURLException;
 import java.util.HashMap;
 import java.util.TreeSet;
 
@@ -62,7 +60,6 @@ import de.anomic.plasma.plasmaSearchQuery;
 import de.anomic.plasma.plasmaSnippetCache;
 import de.anomic.plasma.plasmaSwitchboard;
 import de.anomic.server.serverCore;
-import de.anomic.server.serverDate;
 import de.anomic.server.serverObjects;
 import de.anomic.server.serverSwitch;
 import de.anomic.server.logging.serverLog;
@@ -88,15 +85,14 @@ public class yacysearch {
         if (promoteSearchPageGreeting.length() == 0) promoteSearchPageGreeting = "P2P WEB SEARCH";
 
         // case if no values are requested
-        final String referer = (String) header.get("Referer");
         String querystring = (post == null) ? "" : post.get("search", "").trim();
         boolean rss = post.get("rss", "false").equals("true");
         
         if ((post == null) || (env == null) || (querystring.length() == 0) || (!searchAllowed)) {
-
+        	/*
             // save referrer
-            // System.out.println("HEADER=" + header.toString());
-            if (referer != null) {
+            final String referer = (String) header.get("Referer");
+        	if (referer != null) {
                 yacyURL url;
                 try { url = new yacyURL(referer, null); } catch (MalformedURLException e) { url = null; }
                 if ((url != null) && (!url.isLocal())) {
@@ -108,7 +104,7 @@ public class yacysearch {
                     if (sb.facilityDB != null) try { sb.facilityDB.update("backlinks", referer, referrerprop); } catch (IOException e) {}
                 }
             }
-
+        	 */
             // we create empty entries for template strings
             final serverObjects prop = new serverObjects();
             prop.put("searchagain", "0");
