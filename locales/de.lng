@@ -2503,7 +2503,7 @@ No service available.==Kein Service verf&uuml;gbar.
 "Log-In as user 'upload'"=="Als Upload einloggen"
 "Log-In as user 'download'"=="Als Download einloggen"
 #Info==Info
-Admin and download accounts are necessary to grant their services to clients;==Amdin und download Accounts sind notwendig, um den Service zu garantieren;
+Admin and download accounts are necessary to grant their services to clients;==Admin und download Accounts sind notwendig, um den Service zu garantieren;
 no password is required for the download-account unless you set one.==f&uuml;r den download-Account ist kein Passwort notwendig, ausser Sie setzen eins. 
 Files uploaded and indexed here have a special index entry \'yacyshare\';==Dateien die hochgeladen und indexiert wurden, haben einen speziellen Indexeintrag "yacyshare";
 if you want to find files that are indexed in any share zone, add the word \'yacyshare\' to the search words.==wenn Sie Dateien finden wollen, die so indexiert wurden, geben Sie zus&auml;tzlich das Wort "yacyshare" zu Ihrem Suchwort ein.
