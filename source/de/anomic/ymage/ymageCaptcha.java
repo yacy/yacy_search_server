@@ -48,7 +48,7 @@ import javax.imageio.ImageIO;
 public class ymageCaptcha extends ymageMatrix {
 
     public ymageCaptcha(int width, int height, byte displayMode, String code) {
-        super(width, height, displayMode, SUBTRACTIVE_WHITE);
+        super(width, height, displayMode, "FFFFFF");
         this.create(code);
     }
 

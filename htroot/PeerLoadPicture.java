@@ -73,9 +73,9 @@ public class PeerLoadPicture {
         
         // too small values lead to an error, too big to huge CPU/memory consumption,
         // resulting in possible DOS.
-        if (width < 400) width = 400;
+        if (width < 40) width = 40;
         if (width > 1920) width = 1920;
-        if (height < 300) height = 300;
+        if (height < 30) height = 30;
         if (height > 1440) height = 1440;
         return plasmaGrafics.getPeerLoadPicture(
                 5000,

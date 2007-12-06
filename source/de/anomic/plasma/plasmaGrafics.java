@@ -65,21 +65,21 @@ public class plasmaGrafics {
     private static int shortestName = 10;
     private static int longestName = 12;
 
-    public  static final String COL_BACKGROUND = "080808"; /*"FFFFE0"*/
-    private static final String COL_DHTCIRCLE = "400030"; /*"008020"*/
-    private static final long   COL_HEADLINE   = ymageMatrix.SUBTRACTIVE_BLACK;
-    private static final String COL_ACTIVE_DOT     = "181808";
-    private static final String COL_ACTIVE_LINE    = "604040";
-    private static final String COL_ACTIVE_TEXT    = "b080b0";
-    private static final String COL_PASSIVE_DOT    = "101010";
-    private static final String COL_PASSIVE_LINE   = "404040";
-    private static final String COL_PASSIVE_TEXT   = "a0a0a0";
-    private static final String COL_POTENTIAL_DOT  = "041010";
-    private static final String COL_POTENTIAL_LINE = "104040";
-    private static final String COL_POTENTIAL_TEXT = "80b0b0";
-    private static final String COL_WE_DOT         = "206060";
-    private static final String COL_WE_LINE        = "b0f0f0";
-    private static final String COL_WE_TEXT        = "f0f0f0";
+    public  static final String COL_BACKGROUND     = "FFFFFF";
+    private static final String COL_DHTCIRCLE      = "006020";
+    private static final String COL_HEADLINE       = "FFFFFF";
+    private static final String COL_ACTIVE_DOT     = "000044";
+    private static final String COL_ACTIVE_LINE    = "335544";
+    private static final String COL_ACTIVE_TEXT    = "66AA88";
+    private static final String COL_PASSIVE_DOT    = "221111";
+    private static final String COL_PASSIVE_LINE   = "443333";
+    private static final String COL_PASSIVE_TEXT   = "663333";
+    private static final String COL_POTENTIAL_DOT  = "002200";
+    private static final String COL_POTENTIAL_LINE = "224422";
+    private static final String COL_POTENTIAL_TEXT = "336633";
+    private static final String COL_WE_DOT         = "FF0000";
+    private static final String COL_WE_LINE        = "FFAAAA";
+    private static final String COL_WE_TEXT        = "FFCCCC";
     
     private static final Color  COL_BORDER      = new Color(  0,   0,   0);
     private static final Color  COL_NORMAL_TEXT = new Color(  0,   0,   0);
@@ -147,7 +147,7 @@ public class plasmaGrafics {
 
         // draw in the primary search peers
         for (int j = 0; j < primarySearches.length; j++) {
-            eventPicture.setColor((primarySearches[j].isAlive()) ? ymageMatrix.SUBTRACTIVE_RED : ymageMatrix.SUBTRACTIVE_GREEN);
+            eventPicture.setColor((primarySearches[j].isAlive()) ? ymageMatrix.RED : ymageMatrix.GREEN);
             hash = primarySearches[j].target().hash;
             angle = (int) (360 * yacySeed.dhtPosition(hash));
             eventPicture.arcLine(cx, cy, cr - 20, cr, angle);
@@ -156,7 +156,7 @@ public class plasmaGrafics {
         // draw in the secondary search peers
         if (secondarySearches != null) {
             for (int j = 0; j < secondarySearches.length; j++) {
-                eventPicture.setColor((secondarySearches[j].isAlive()) ? ymageMatrix.SUBTRACTIVE_RED : ymageMatrix.SUBTRACTIVE_GREEN);
+                eventPicture.setColor((secondarySearches[j].isAlive()) ? ymageMatrix.RED : ymageMatrix.GREEN);
                 hash = secondarySearches[j].target().hash;
                 angle = (int) (360 * yacySeed.dhtPosition(hash));
                 eventPicture.arcLine(cx, cy, cr - 10, cr, angle - 1);
@@ -167,7 +167,7 @@ public class plasmaGrafics {
         // draw in the search target
         plasmaSearchQuery query = event.getQuery();
         Iterator i = query.queryHashes.iterator();
-        eventPicture.setColor(ymageMatrix.SUBTRACTIVE_BLACK);
+        eventPicture.setColor(ymageMatrix.GREY);
         while (i.hasNext()) {
             hash = (String) i.next();
             angle = (int) (360 * yacySeed.dhtPosition(hash));

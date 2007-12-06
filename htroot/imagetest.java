@@ -51,7 +51,6 @@ import de.anomic.ymage.ymageToolPrint;
 
 public class imagetest {
     
-
     public static ymageMatrix respond(httpHeader header, serverObjects post, serverSwitch env) {
         /*
         BufferedImage bi = new BufferedImage(640, 400, BufferedImage.TYPE_INT_RGB); 
@@ -84,24 +83,24 @@ public class imagetest {
         for (int i = 20; i < 100; i++) r.setPixel(i, 34, new int[]{0, 0, 255});
         return bi;
         */
-        ymageMatrix img = new ymageMatrix(800, 600, ymageMatrix.MODE_SUB, "000000");
-        img.setColor(ymageMatrix.SUBTRACTIVE_BLACK);
+        ymageMatrix img = new ymageMatrix(800, 600, ymageMatrix.MODE_SUB, "FFFFFF");
+        img.setColor(ymageMatrix.GREY);
         for (int y = 0; y < 600; y = y + 50) ymageToolPrint.print(img, 0, 6 + y, 0, "" + y, -1);
         for (int x = 0; x < 800; x = x + 50) ymageToolPrint.print(img, x, 6    , 0, "" + x, -1);
-        img.setColor(ymageMatrix.SUBTRACTIVE_RED);
+        img.setColor(ymageMatrix.RED);
         img.dot(550, 110, 90, true);
-        img.setColor(ymageMatrix.SUBTRACTIVE_GREEN);
+        img.setColor(ymageMatrix.GREEN);
         img.dot(480, 200, 90, true);
-        img.setColor(ymageMatrix.SUBTRACTIVE_BLUE);
+        img.setColor(ymageMatrix.BLUE);
         img.dot(620, 200, 90, true);
-        img.setColor(ymageMatrix.SUBTRACTIVE_RED);
+        img.setColor(ymageMatrix.RED);
         img.arc(300, 270, 30, 70, 0, 360);
         img.setColor("330000");
         img.arc(220, 110, 50, 90, 30, 110);
         img.arc(210, 120, 50, 90, 30, 110);
-        img.setColor(ymageMatrix.SUBTRACTIVE_BLACK);
-        ymageToolPrint.print(img, 50, 110, 0, "BROADCAST MESSAGE #772: NODE %882 BLACK abcefghijklmnopqrstuvwxyz", -1);
-        img.setColor(ymageMatrix.SUBTRACTIVE_GREEN);
+        img.setColor(ymageMatrix.GREY);
+        ymageToolPrint.print(img, 50, 110, 0, "BROADCAST MESSAGE #772: NODE %882 GREY abcefghijklmnopqrstuvwxyz", -1);
+        img.setColor(ymageMatrix.GREEN);
         ymageToolPrint.print(img, 50, 120, 0, "BROADCAST MESSAGE #772: NODE %882 GREEN abcefghijklmnopqrstuvwxyz", -1);
         for (long i = 0; i < 256; i++) {
             img.setColor(i);
@@ -124,7 +123,7 @@ public class imagetest {
         for (int i = 0; i <= 360; i++) {
             img.arc(550, 400, 40, 41 + i/9, 0, i);
         }
-        img.setColor(ymageMatrix.SUBTRACTIVE_BLACK);
+        img.setColor(ymageMatrix.GREY);
         int angle;
         for (byte c = (byte) 'A'; c <= 'Z'; c++) {
             angle = (c - (byte) 'A') * 360 / ((byte) 'Z' - (byte) 'A');

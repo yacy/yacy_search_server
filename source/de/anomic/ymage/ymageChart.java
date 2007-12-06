@@ -155,24 +155,30 @@ public class ymageChart extends ymageMatrix {
    
     public static void main(String[] args) {
         System.setProperty("java.awt.headless", "true");
-        ymageChart ip = new ymageChart(660, 240, "FFFFFF", "000000", 30, 30, 20, 20, "PEER PERFORMANCE GRAPH: PAGES/MINUTE and USED MEMORY");
-        ip.declareDimension(DIMENSION_BOTTOM, 60, 60, -600, "000000", "CCCCCC", "TIME/SECONDS");
+        boolean invers = false;
+        String bg = (invers) ? "000000" : "FFFFFF";
+        String fg = (invers) ? "FFFFFF" : "000000";
+        String scale = (invers) ? "333333" : "CCCCCC";
+        String green = (invers) ? "008800" : "008800";
+        String blue = (invers) ? "0000FF" : "0000FF";
+        ymageChart ip = new ymageChart(660, 240, bg, fg, 30, 30, 20, 20, "PEER PERFORMANCE GRAPH: PAGES/MINUTE and USED MEMORY");
+        ip.declareDimension(DIMENSION_BOTTOM, 60, 60, -600, fg, scale, "TIME/SECONDS");
         //ip.declareDimension(DIMENSION_TOP, 10, 40, "000000", null, "count");
-        ip.declareDimension(DIMENSION_LEFT, 50, 40, 0, "008800", null , "PPM [PAGES/MINUTE]");
-        ip.declareDimension(DIMENSION_RIGHT, 100, 20, 0, "0000FF", "CCCCCC", "MEMORY/MEGABYTE");
-        ip.setColor("008800");
+        ip.declareDimension(DIMENSION_LEFT, 50, 40, 0, green, scale , "PPM [PAGES/MINUTE]");
+        ip.declareDimension(DIMENSION_RIGHT, 100, 20, 0, blue, scale, "MEMORY/MEGABYTE");
+        ip.setColor(green);
         ip.chartDot(DIMENSION_BOTTOM, DIMENSION_LEFT, -160, 100, 5);
         ip.chartLine(DIMENSION_BOTTOM, DIMENSION_LEFT, -160, 100, -130, 200);
-        ip.setColor("0000FF");
+        ip.setColor(blue);
         ip.chartDot(DIMENSION_BOTTOM, DIMENSION_RIGHT, -50, 300, 2);
         ip.chartLine(DIMENSION_BOTTOM, DIMENSION_RIGHT, -80, 100, -50, 300);
         //ip.print(100, 100, 0, "TEXT", true);
         //ip.print(100, 100, 0, "1234", false);
         //ip.print(100, 100, 90, "TEXT", true);
         //ip.print(100, 100, 90, "1234", false);
-        
+        File file = new File("/Users/admin/Desktop/testimage.png");
         try {
-            FileOutputStream fos = new FileOutputStream(new File("/Users/admin/Desktop/testimage.png"));
+            FileOutputStream fos = new FileOutputStream(file);
             ImageIO.write(ip.getImage(), "png", fos);
             fos.close();
         } catch (IOException e) {}
