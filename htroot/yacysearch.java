@@ -87,7 +87,7 @@ public class yacysearch {
 
         // case if no values are requested
         String querystring = (post == null) ? "" : post.get("search", "").trim();
-        boolean rss = post.get("rss", "false").equals("true");
+        boolean rss = (post == null) ? false : post.get("rss", "false").equals("true");
         
         if ((post == null) || (env == null) || (querystring.length() == 0) || (!searchAllowed)) {
         	/*
@@ -119,7 +119,7 @@ public class yacysearch {
             prop.put("input_count", "10");
             prop.put("input_offset", "0");
             prop.put("input_resource", "global");
-            prop.put("input_time", "6");
+            prop.put("input_time", sb.getConfigLong("network.unit.search.time", 3));
             prop.put("input_urlmaskfilter", ".*");
             prop.put("input_prefermaskfilter", "");
             prop.put("input_indexof", "off");
@@ -153,7 +153,7 @@ public class yacysearch {
         int offset = post.getInt("offset", 0);
         boolean global = (post == null) ? true : post.get("resource", "global").equals("global");
         final boolean indexof = post.get("indexof","").equals("on"); 
-        final long searchtime = 1000 * post.getLong("time", 6);
+        final long searchtime = 1000 * post.getLong("time", (int) sb.getConfigLong("network.unit.search.time", 3));
         String urlmask = "";
         if (post.containsKey("urlmask") && post.get("urlmask").equals("no")) {
             urlmask = ".*";
