@@ -64,6 +64,8 @@ public class ymageChart extends ymageMatrix {
     String[] colnames = new String[]{"FFFFFF","FFFFFF","FFFFFF","FFFFFF"};
     String[] colscale = new String[]{null,null,null,null};
     String[] tablenames = new String[]{"","","",""};
+    String name;
+    String backgroundColor, foregroundColor;
     
     public ymageChart(int width, int height, String backgroundColor, String foregroundColor,
                       int leftborder, int rightborder, int topborder, int bottomborder,
@@ -73,6 +75,9 @@ public class ymageChart extends ymageMatrix {
         this.rightborder = rightborder;
         this.topborder = topborder;
         this.bottomborder = bottomborder;
+        this.name = name;
+        this.backgroundColor = backgroundColor;
+        this.foregroundColor = foregroundColor;
         if (name != null) {
             this.setColor(foregroundColor);
             ymageToolPrint.print(this, width / 2 - name.length() * 3, 6, 0, name, -1);

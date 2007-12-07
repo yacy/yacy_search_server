@@ -127,9 +127,9 @@ public final class serverByteBuffer extends OutputStream {
     }
 
     public void clear() {
-        this.buffer = new byte[0];
-        length = 0;
-        offset = 0;
+    	// we keep the byte[] and just set the pointer to write positions to zero
+        this.length = 0;
+        this.offset = 0;
     }
     
     public int length() {
@@ -293,7 +293,7 @@ public final class serverByteBuffer extends OutputStream {
     }
 
     public byte[] getBytes(int start) {
-        return getBytes(start, length);
+        return getBytes(start, this.length);
     }
     
     public byte[] getBytes(int start, int len) {
@@ -305,7 +305,7 @@ public final class serverByteBuffer extends OutputStream {
         System.arraycopy(buffer, offset + start, tmp, 0, len);
         return tmp;
     }
-
+    
     public serverByteBuffer trim(int start) {
         trim(start, this.length - start);
         return this;
@@ -507,10 +507,9 @@ public final class serverByteBuffer extends OutputStream {
         this.buffer = v;          
     }
     
-    public byte toByteArray()[] {
-        byte[] newbuf = new byte[this.length];
-        System.arraycopy(this.buffer, 0, newbuf, 0, this.length);
-        return newbuf;
-    }    
+    public void writeTo(OutputStream dest) throws IOException {
+    	dest.write(this.buffer, this.offset, this.length);
+        dest.flush();
+    }
         
 }

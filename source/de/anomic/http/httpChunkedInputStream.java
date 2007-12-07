@@ -157,7 +157,7 @@ public final class httpChunkedInputStream extends InputStream {
                 if (bout.length() <= 2) break;
             } while(true);
             
-            ByteArrayInputStream bin = new ByteArrayInputStream(bout.toByteArray());
+            ByteArrayInputStream bin = new ByteArrayInputStream(bout.getBytes());
             reader = new BufferedReader(new InputStreamReader(bin));
             this.httpTrailer = httpHeader.readHttpHeader(reader);
         } finally {

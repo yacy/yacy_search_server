@@ -875,7 +875,7 @@ public final class httpc {
         }
         // create body array
         out.close();
-        byte[] body = buf.toByteArray();
+        byte[] body = buf.getBytes();
         buf = null; out = null;
         
         //System.out.println("DEBUG: PUT BODY=" + new String(body));

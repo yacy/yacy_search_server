@@ -1190,7 +1190,7 @@ public final class serverCore extends serverAbstractThread implements serverThre
             }
 
             if ((readLineBuffer.length()==0)&&(b == -1)) return null;
-            return readLineBuffer.toByteArray();
+            return readLineBuffer.getBytes();
         } catch (ClosedByInterruptException e) {
             if (logerr) serverLog.logSevere("SERVER", "receive interrupted - timeout");
             return null;            

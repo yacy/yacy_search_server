@@ -195,7 +195,7 @@ public class zipParser extends AbstractParser implements Parser {
                     "", // TODO: AUTHOR
                     (String[])docSections.toArray(new String[docSections.size()]),
                     docAbstrct.toString(),
-                    ((serverByteBuffer)docText).toByteArray(),
+                    ((serverByteBuffer)docText).getBytes(),
                     docAnchors,
                     docImages);
             } else {

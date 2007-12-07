@@ -35,12 +35,7 @@ import de.anomic.ymage.ymageMatrix;
 
 public class plasmaProfiling {
 
-    public static long lastPPMUpdate;
-
-    static {
-        // initialize memory profiling
-        lastPPMUpdate = System.currentTimeMillis()- 30000;
-    }    
+    public static long lastPPMUpdate = System.currentTimeMillis()- 30000;
 
     public static void updateIndexedPage(plasmaSwitchboardQueue.Entry entry) {
         if (System.currentTimeMillis() - lastPPMUpdate > 30000) {
@@ -80,10 +75,10 @@ public class plasmaProfiling {
         int vspace = height - topborder - bottomborder;
         int hspace = width - leftborder - rightborder;
         int maxtime = 600;
-        ymageChart ip = new ymageChart(width, height, "FFFFFF", "000000", leftborder, rightborder, topborder, bottomborder, "PEER PERFORMANCE GRAPH: PAGES/MINUTE and USED MEMORY");
-        ip.declareDimension(ymageChart.DIMENSION_BOTTOM, bottomscale, hspace / (maxtime / bottomscale), -maxtime, "000000", "CCCCCC", "TIME/SECONDS");
-        ip.declareDimension(ymageChart.DIMENSION_LEFT, leftscale, vspace * leftscale / maxppm, 0, "008800", null , "PPM [PAGES/MINUTE]");
-        ip.declareDimension(ymageChart.DIMENSION_RIGHT, rightscale, vspace * rightscale / (int)(maxbytes / 1024 / 1024), 0, "0000FF", "CCCCCC", "MEMORY/MEGABYTE");
+        ymageChart chart = new ymageChart(width, height, "FFFFFF", "000000", leftborder, rightborder, topborder, bottomborder, "PEER PERFORMANCE GRAPH: PAGES/MINUTE and USED MEMORY");
+        chart.declareDimension(ymageChart.DIMENSION_BOTTOM, bottomscale, hspace / (maxtime / bottomscale), -maxtime, "000000", "CCCCCC", "TIME/SECONDS");
+        chart.declareDimension(ymageChart.DIMENSION_LEFT, leftscale, vspace * leftscale / maxppm, 0, "008800", null , "PPM [PAGES/MINUTE]");
+        chart.declareDimension(ymageChart.DIMENSION_RIGHT, rightscale, vspace * rightscale / (int)(maxbytes / 1024 / 1024), 0, "0000FF", "CCCCCC", "MEMORY/MEGABYTE");
         
         // draw ppm
         Iterator i = serverProfiling.history("ppm");
@@ -96,10 +91,10 @@ public class plasmaProfiling {
             ppm = (int) ((Long) event.payload).longValue();
             x1 = (int) (time/1000);
             y1 = ppm;
-            ip.setColor("228822");
-            ip.chartDot(ymageChart.DIMENSION_BOTTOM, ymageChart.DIMENSION_LEFT, x1, y1, 2);
-            ip.setColor("008800");
-            if (x0 < 0) ip.chartLine(ymageChart.DIMENSION_BOTTOM, ymageChart.DIMENSION_LEFT, x0, y0, x1, y1);
+            chart.setColor("228822");
+            chart.chartDot(ymageChart.DIMENSION_BOTTOM, ymageChart.DIMENSION_LEFT, x1, y1, 2);
+            chart.setColor("008800");
+            if (x0 < 0) chart.chartLine(ymageChart.DIMENSION_BOTTOM, ymageChart.DIMENSION_LEFT, x0, y0, x1, y1);
             x0 = x1; y0 = y1;
         }
         
@@ -112,14 +107,14 @@ public class plasmaProfiling {
             bytes = ((Long) event.payload).longValue();
             x1 = (int) (time/1000);
             y1 = (int) (bytes / 1024 / 1024);
-            ip.setColor("AAAAFF");
-            ip.chartDot(ymageChart.DIMENSION_BOTTOM, ymageChart.DIMENSION_RIGHT, x1, y1, 2);
-            ip.setColor("0000FF");
-            if (x0 < 0) ip.chartLine(ymageChart.DIMENSION_BOTTOM, ymageChart.DIMENSION_RIGHT, x0, y0, x1, y1);
+            chart.setColor("AAAAFF");
+            chart.chartDot(ymageChart.DIMENSION_BOTTOM, ymageChart.DIMENSION_RIGHT, x1, y1, 2);
+            chart.setColor("0000FF");
+            if (x0 < 0) chart.chartLine(ymageChart.DIMENSION_BOTTOM, ymageChart.DIMENSION_RIGHT, x0, y0, x1, y1);
             x0 = x1; y0 = y1;
         }
         
-        return ip;
+        return chart;
     }
     
     public static class searchEvent {

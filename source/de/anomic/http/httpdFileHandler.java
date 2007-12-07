@@ -99,8 +99,6 @@ import java.util.logging.Level;
 import java.util.zip.GZIPInputStream;
 import java.util.zip.GZIPOutputStream;
 
-import javax.imageio.ImageIO;
-
 import de.anomic.plasma.plasmaParser;
 import de.anomic.plasma.plasmaSwitchboard;
 import de.anomic.server.serverByteBuffer;
@@ -501,23 +499,12 @@ public final class httpdFileHandler {
                         targetDate = new Date(System.currentTimeMillis());
                         nocache = true;
                         String mimeType = mimeTable.getProperty(targetExt, "text/html");
-
-                        // generate an byte array from the generated image
-                        serverByteBuffer baos = new serverByteBuffer();
-                        // ymagePNGEncoderJDE jde = new
-                        // ymagePNGEncoderJDE((ymageMatrixPainter) yp,
-                        // ymagePNGEncoderJDE.FILTER_NONE, 0);
-                        // byte[] result = jde.pngEncode();
-                        ImageIO.write(yp.getImage(), targetExt, baos);
-                        byte[] result = baos.toByteArray();
-                        baos.close();
-                        baos = null;
+                        serverByteBuffer result = ymageMatrix.exportImage(yp.getImage(), targetExt);
 
                         // write the array to the client
-                        httpd.sendRespondHeader(conProp, out, httpVersion, 200, null, mimeType, result.length, targetDate, null, null, null, null, nocache);
+                        httpd.sendRespondHeader(conProp, out, httpVersion, 200, null, mimeType, result.length(), targetDate, null, null, null, null, nocache);
                         if (!method.equals(httpHeader.METHOD_HEAD)) {
-                            //Thread.sleep(200); // see below
-                            serverFileUtils.write(result, out);
+                        	result.writeTo(out);
                         }
                     }
                     if (img instanceof Image) {
@@ -532,18 +519,12 @@ public final class httpdFileHandler {
                         int height = i.getHeight(null); if (height < 0) height = 96; // bad hack
                         BufferedImage bi = new BufferedImage(width, height, BufferedImage.TYPE_INT_RGB);
                         bi.createGraphics().drawImage(i, 0, 0, width, height, null); 
-                        serverByteBuffer baos = new serverByteBuffer();
-                        ImageIO.write(bi, targetExt, baos);
-
-                        byte[] result = baos.toByteArray();
-                        baos.close();
-                        baos = null;
+                        serverByteBuffer result = ymageMatrix.exportImage(bi, targetExt);
 
                         // write the array to the client
-                        httpd.sendRespondHeader(conProp, out, httpVersion, 200, null, mimeType, result.length, targetDate, null, null, null, null, nocache);
+                        httpd.sendRespondHeader(conProp, out, httpVersion, 200, null, mimeType, result.length(), targetDate, null, null, null, null, nocache);
                         if (!method.equals(httpHeader.METHOD_HEAD)) {
-                            //Thread.sleep(200); // see below
-                            serverFileUtils.write(result, out);
+                        	result.writeTo(out);
                         }
                     }
                 }
@@ -740,7 +721,7 @@ public final class httpdFileHandler {
                                     targetDate, null, tp.getOutgoingHeader(),
                                     contentEncoding, null, nocache);
                         } else {
-                            byte[] result = o.toByteArray(); // this interrupts streaming (bad idea!)
+                            byte[] result = o.getBytes(); // this interrupts streaming (bad idea!)
                             httpd.sendRespondHeader(conProp, out,
                                     httpVersion, 200, null, mimeType, result.length,
                                     targetDate, null, tp.getOutgoingHeader(),

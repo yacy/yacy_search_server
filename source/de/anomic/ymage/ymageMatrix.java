@@ -40,9 +40,11 @@ import java.awt.image.WritableRaster;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.util.ArrayList;
 
 import javax.imageio.ImageIO;
 
+import de.anomic.server.serverByteBuffer;
 import de.anomic.server.serverMemory;
 
 public class ymageMatrix {
@@ -56,14 +58,14 @@ public class ymageMatrix {
     public static final byte MODE_REPLACE = 0;
     public static final byte MODE_ADD = 1;
     public static final byte MODE_SUB = 2;
-
     
     protected int            width, height;
     private   BufferedImage  image;
     private   WritableRaster grid;
     private   int[]          defaultCol;
+    private   long           backgroundCol;
     private   byte           defaultMode;
-
+    
     public ymageMatrix(int width, int height, byte drawMode, String backgroundColor) {
         this(width, height, drawMode, Long.parseLong(backgroundColor, 16));
     }
@@ -72,21 +74,27 @@ public class ymageMatrix {
         if (!(serverMemory.request(1024 * 1024 + 3 * width * height, false))) throw new RuntimeException("ymage: not enough memory (" + serverMemory.available() + ") available");
         this.width = width;
         this.height = height;
+        this.backgroundCol = backgroundColor;
         this.defaultCol = new int[]{0xFF, 0xFF, 0xFF};
         this.defaultMode = drawMode;
         
-        image = new BufferedImage(width, height, BufferedImage.TYPE_INT_RGB);
-        grid = image.getRaster();
-        // fill grid with background color
+        this.image = new BufferedImage(width, height, BufferedImage.TYPE_INT_RGB);
+        //this.image = imageFromPool(width, height, 1000);
+        this.clear();
+        this.grid = image.getRaster();
+    }
+    
+    public void clear() {
+    	// fill grid with background color
         int bgR, bgG, bgB;
         /*if (drawMode == MODE_SUB) {
-            bgR = (int) (0xFF - (backgroundColor >> 16));
-            bgG = (int) (0xFF - ((backgroundColor >> 8) & 0xff));
-            bgB = (int) (0xFF - (backgroundColor & 0xff));
+            bgR = (int) (0xFF - (this.backgroundCol >> 16));
+            bgG = (int) (0xFF - ((this.backgroundCol >> 8) & 0xff));
+            bgB = (int) (0xFF - (this.backgroundCol & 0xff));
         } else {*/
-            bgR = (int) (backgroundColor >> 16);
-            bgG = (int) ((backgroundColor >> 8) & 0xff);
-            bgB = (int) (backgroundColor & 0xff);
+            bgR = (int) (this.backgroundCol >> 16);
+            bgG = (int) ((this.backgroundCol >> 8) & 0xff);
+            bgB = (int) (this.backgroundCol & 0xff);
         //}
         Graphics2D gr = image.createGraphics();
         gr.setBackground(new Color(bgR, bgG, bgB));
@@ -327,6 +335,94 @@ public class ymageMatrix {
         m.setColor(BLUE);
         m.line(0, 130, 100, 130); ymageToolPrint.print(m, 0, 125, 0, "Blue", -1);
         m.line(80, 0,   80, 300);
+    }
+/*
+    private static class imageBuffer {
+    	protected BufferedImage  image;
+    	protected long           access;
+    	public imageBuffer(BufferedImage image) {
+    		this.image = image;
+    		this.access = System.currentTimeMillis();
+    	}
+    	public boolean sameSize(int width, int height) {
+    		return (this.image.getWidth() == width) && (this.image.getHeight() == height);
+    	}
+    	public boolean olderThan(long timeout) {
+    		return System.currentTimeMillis() - this.access > timeout;
+    	}
+    }
+    private static final ArrayList imagePool = new ArrayList();
+    private static BufferedImage imageFromPool(int width, int height, long timeout) {
+    	// returns an Image object from the image pool
+    	// if the pooled Image was created recently (before timeout), it is not used
+    	synchronized (imagePool) {
+    		imageBuffer buffer;
+    		for (int i = 0; i < imagePool.size(); i++) {
+    			buffer = (imageBuffer) imagePool.get(i);
+    			if ((buffer.sameSize(width, height)) && (buffer.olderThan(timeout))) {
+    				// use this buffer
+    				System.out.println("### using imageBuffer from pool " + i);
+    				buffer.access = System.currentTimeMillis();
+    				return buffer.image;
+    			}
+    		}
+    		// no buffered image found, create a new one
+    		buffer = new imageBuffer(new BufferedImage(width, height, BufferedImage.TYPE_INT_RGB));
+    		imagePool.add(buffer);
+    		return buffer.image;
+    	}
+    }
+*/  
+    private static class sbbBuffer {
+    	protected serverByteBuffer buffer;
+    	protected int              pixel;
+    	protected long             access;
+    	public sbbBuffer(int width, int height) {
+    		this.buffer = new serverByteBuffer();
+    		this.access = System.currentTimeMillis();
+    		this.pixel = width * height;
+    	}
+    	public boolean enoughSize(int width, int height) {
+    		return this.pixel >= width * height;
+    	}
+    	public boolean olderThan(long timeout) {
+    		return System.currentTimeMillis() - this.access > timeout;
+    	}
+    }
+    private static final ArrayList sbbPool = new ArrayList();
+    private static serverByteBuffer sbbFromPool(int width, int height, long timeout) {
+    	// returns an Image object from the image pool
+    	// if the pooled Image was created recently (before timeout), it is not used
+    	synchronized (sbbPool) {
+    		sbbBuffer b;
+    		for (int i = 0; i < sbbPool.size(); i++) {
+    			b = (sbbBuffer) sbbPool.get(i);
+    			if ((b.enoughSize(width, height)) && (b.olderThan(timeout))) {
+    				// use this buffer
+    				b.access = System.currentTimeMillis();
+    				b.buffer.clear(); // this makes only sense if the byteBuffer keeps its buffer
+    				return b.buffer;
+    			}
+    		}
+    		// no buffered image found, create a new one
+    		b = new sbbBuffer(width, height);
+    		sbbPool.add(b);
+    		return b.buffer;
+    	}
+    }
+    
+    public static serverByteBuffer exportImage(BufferedImage image, String targetExt) {
+    	// generate an byte array from the given image
+    	//serverByteBuffer baos = new serverByteBuffer();
+    	serverByteBuffer baos = sbbFromPool(image.getWidth(), image.getHeight(), 1000);
+    	try {
+    		ImageIO.write(image, targetExt, baos);
+    		return baos;
+    	} catch (IOException e) {
+    		// should not happen
+    		e.printStackTrace();
+    		return null;
+    	}
     }
     
     public static void main(String[] args) {

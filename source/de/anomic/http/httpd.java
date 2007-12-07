@@ -872,7 +872,7 @@ public final class httpd implements serverHandler {
         } else {
             serverByteBuffer bout = new serverByteBuffer();
             serverFileUtils.copy(in,bout);
-            buffer = bout.toByteArray();
+            buffer = bout.getBytes();
             bout.close(); bout = null;
         }
         
