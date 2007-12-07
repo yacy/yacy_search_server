@@ -65,14 +65,16 @@ public class Banner {
         final String IMAGE = "htroot/env/grafics/yacy.gif";
         int width = 468;
         int height = 60;
-        String bgcolor = plasmaGrafics.COL_BACKGROUND;
-        String textcolor = "ffffff";
-        String bordercolor = "";
+        String bgcolor     = "ddeeee";
+        String textcolor   = "000000";
+        String bordercolor = "aaaaaa";
 
         if (post != null) {
             bgcolor = post.get("bgcolor", bgcolor);
             textcolor = post.get("textcolor", textcolor);
             bordercolor = post.get("bordercolor", bordercolor);
+            width = post.getInt("width", width);
+            height = post.getInt("heigth", height);
         }
 
         String name = "";

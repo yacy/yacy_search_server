@@ -377,7 +377,7 @@ public class plasmaGrafics {
 
         int exprlength = 19;
         logo = newLogo;
-        bannerPicture = new ymageMatrix(width, height, ymageMatrix.MODE_SUB, bgcolor);
+        bannerPicture = new ymageMatrix(width, height, ymageMatrix.MODE_REPLACE, bgcolor);
 
         // draw description
         bannerPicture.setColor(textcolor);
