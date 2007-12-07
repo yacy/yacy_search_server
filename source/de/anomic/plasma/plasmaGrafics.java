@@ -396,7 +396,7 @@ public class plasmaGrafics {
         if (logo != null) {
             int x = (int)(100/2 - logo.getWidth()/2);
             int y = (int)(height/2 - logo.getHeight()/2);
-            bannerPicture.insertBitmap(logo, x, y, 0, 0);
+            bannerPicture.insertBitmap(logo, x, y, 0, 0, ymageMatrix.FILTER_ANTIALIASING);
         }
 
         if (!bordercolor.equals("")) {

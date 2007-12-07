@@ -59,6 +59,9 @@ public class ymageMatrix {
     public static final byte MODE_ADD = 1;
     public static final byte MODE_SUB = 2;
     
+    public static final byte FILTER_ANTIALIASING = 0;
+    public static final byte FILTER_BLUR = 1;
+    
     protected int            width, height;
     private   BufferedImage  image;
     private   WritableRaster grid;
@@ -268,16 +271,27 @@ public class ymageMatrix {
     }
     
     /**
-     *  inserts an image into the ymageMatrix
-     *  @param bitmap the bitmap to be inserted
-     *  @param x the x value of the upper left coordinate in the ymageMatrix where the bitmap will be placed
-     *  @param y the y value of the upper left coordinate in the ymageMatrix where the bitmap will be placed
-     *
-     *  @author Marc Nause
+     * inserts an image into the ymageMatrix
+     * @param bitmap the bitmap to be inserted
+     * @param x the x value of the upper left coordinate in the ymageMatrix where the bitmap will be placed
+     * @param y the y value of the upper left coordinate in the ymageMatrix where the bitmap will be placed
+     * @author Marc Nause
      */
     public void insertBitmap(BufferedImage bitmap, int x, int y) {
         insertBitmap(bitmap, x, y, -1);
     }
+
+    /**
+     * inserts an image into the ymageMatrix
+     * @param bitmap the bitmap to be inserted
+     * @param x the x value of the upper left coordinate in the ymageMatrix where the bitmap will be placed
+     * @param y the y value of the upper left coordinate in the ymageMatrix where the bitmap will be placed
+     * @param filter chooses filter 
+     * @author Marc Nause
+     */
+    public void insertBitmap(BufferedImage bitmap, int x, int y, byte filter) {
+        insertBitmap(bitmap, x, y, -1, filter);
+    }    
     
     /**
      *  inserts an image into the ymageMatrix where all pixels that have the same RGB value as the
@@ -294,19 +308,34 @@ public class ymageMatrix {
     }    
 
     /**
-     *  inserts an image into the ymageMatrix where all pixels that have a special RGB value
-     *  pixel at (xx, yy) are transparent
-     *  @param bitmap the bitmap to be inserted
-     *  @param x the x value of the upper left coordinate in the ymageMatrix where the bitmap will be placed
-     *  @param y the y value of the upper left coordinate in the ymageMatrix where the bitmap will be placed
-     *  @param rgb the RGB value that will be transparent
-     *  @author Marc Nause
+     * inserts an image into the ymageMatrix where all pixels that have the same RGB value as the
+     * pixel at (xx, yy) are transparent
+     * @param bitmap the bitmap to be inserted
+     * @param x the x value of the upper left coordinate in the ymageMatrix where the bitmap will be placed
+     * @param y the y value of the upper left coordinate in the ymageMatrix where the bitmap will be placed
+     * @param xx the x value of the pixel that determines which color is transparent
+     * @param yy the y value of the pixel that determines which color is transparent
+     * @param filter chooses filter 
+     * @author Marc Nause
+     */
+    public void insertBitmap(BufferedImage bitmap, int x, int y, int xx, int yy, byte filter) {
+        insertBitmap(bitmap, x, y, bitmap.getRGB(xx, yy), filter);
+    }        
+    
+    /**
+     * inserts an image into the ymageMatrix where all pixels that have a special RGB value
+     * pixel at (xx, yy) are transparent
+     * @param bitmap the bitmap to be inserted
+     * @param x the x value of the upper left coordinate in the ymageMatrix where the bitmap will be placed
+     * @param y the y value of the upper left coordinate in the ymageMatrix where the bitmap will be placed
+     * @param rgb the RGB value that will be transparent
+     * @author Marc Nause
      */      
     public void insertBitmap(BufferedImage bitmap, int x, int y, int transRGB) {
         int heightSrc = bitmap.getHeight();
         int widthSrc  = bitmap.getWidth();
-        int heightTgt = image.getHeight();
-        int widthTgt  = image.getWidth();
+        int heightTgt = height;
+        int widthTgt  = width;
 
         int rgb;
         for (int i = 0; i < heightSrc; i++) {
@@ -320,7 +349,163 @@ public class ymageMatrix {
                 }
             }
         }
-    }      
+    }
+    
+    /**
+     * inserts an image into the ymageMatrix where all pixels that have a special RGB value
+     * pixel at (xx, yy) are transparent
+     * @param bitmap the bitmap to be inserted
+     * @param x the x value of the upper left coordinate in the ymageMatrix where the bitmap will be placed
+     * @param y the y value of the upper left coordinate in the ymageMatrix where the bitmap will be placed
+     * @param rgb the RGB value that will be transparent
+     * @param filter chooses filter 
+     * @author Marc Nause
+     */
+    public void insertBitmap(BufferedImage bitmap, int x, int y, int transRGB, byte filter) {
+        insertBitmap(bitmap, x, y, transRGB);
+        filter(x-1, y-1, x + bitmap.getWidth(), y + bitmap.getHeight(), filter);
+    }
+    
+    /**
+     * antialiasing filter for a square part of the ymageMatrix
+     * @param lox x value for left upper coordinate
+     * @param loy y value for left upper coordinate
+     * @param rux x value for right lower coordinate
+     * @param ruy y value for right lower coordinate
+     * @author Marc Nause
+     */
+    public void antialiasing(int lox, int loy, int rux, int ruy) {
+        filter(lox, loy, rux, ruy, FILTER_ANTIALIASING);
+    }
+
+    /**
+     * blur filter for a square part of the ymageMatrix
+     * @param lox x value for left upper coordinate
+     * @param loy y value for left upper coordinate
+     * @param rux x value for right lower coordinate
+     * @param ruy y value for right lower coordinate
+     * @author Marc Nause
+     */
+    public void blur(int lox, int loy, int rux, int ruy) {
+        filter(lox, loy, rux, ruy, FILTER_BLUR);
+    }
+    
+    /**
+     * filter for a square part of the ymageMatrix
+     * @param lox x value for left upper coordinate
+     * @param loy y value for left upper coordinate
+     * @param rux x value for right lower coordinate
+     * @param ruy y value for right lower coordinate
+     * @param filter chooses filter 
+     * @author Marc Nause
+     */
+    private void filter(int lox, int loy, int rux, int ruy, byte filter) {
+
+        // taking care that all values are legal
+        if (lox < 0) { lox = 0; }
+        if (loy < 0) { loy = 0; }
+        if (rux < 0) { rux = 0; }
+        if (ruy < 0) { ruy = 0; }
+        if (lox > width) { lox = width - 1; }
+        if (loy > height){ loy = height - 1; }
+        if (rux > width) { rux = width - 1; }
+        if (ruy > height){ ruy = width - 1; }        
+        if (lox > rux) {
+            int tmp = lox;
+            lox = rux;
+            rux = tmp;
+        }
+        if (loy > ruy) {
+            int tmp = loy;
+            loy = ruy;
+            ruy = tmp;
+        }
+  
+        int numberOfNeighbours = 0;
+        int rgbR = 0;
+        int rgbG = 0;
+        int rgbB = 0;
+        int rgb = 0;
+        int width2 = rux - lox + 1;
+        int height2 = ruy - loy + 1;
+        BufferedImage image2 = new BufferedImage(width2, height2, BufferedImage.TYPE_INT_RGB);
+
+        for (int i = lox; i < rux + 1; i++) {
+            for (int j = loy; j < ruy + 1; j++) {
+
+                numberOfNeighbours = 0;
+                rgbR = 0;
+                rgbG = 0;
+                rgbB = 0;  
+                
+                // taking samples from neighbours of pixel
+                if (i > lox) { 
+                    rgb = image.getRGB(i-1, j);
+                    rgbR += rgb >> 16 & 0xff;
+                    rgbG += rgb >> 8& 0xff;
+                    rgbB += rgb & 0xff;  
+                    numberOfNeighbours++;
+                }
+                if (j > loy) { 
+                    rgb = image.getRGB(i, j-1); 
+                    rgbR += rgb >> 16 & 0xff;
+                    rgbG += rgb >> 8& 0xff;
+                    rgbB += rgb & 0xff;                   
+                    numberOfNeighbours++;
+                }
+                if (i < width- 1) {
+                    rgb = image.getRGB(i+1, j); 
+                    rgbR += rgb >> 16 & 0xff;
+                    rgbG += rgb >> 8& 0xff;
+                    rgbB += rgb & 0xff;              
+                    numberOfNeighbours++;
+                }
+                if (i < height - 1) { 
+                    rgb = image.getRGB(i, j+1); 
+                    rgbR += rgb >> 16 & 0xff;
+                    rgbG += rgb >> 8& 0xff;
+                    rgbB += rgb & 0xff;                 
+                    numberOfNeighbours++;
+                }
+                
+                rgb = image.getRGB(i, j);
+                
+                // put more weight on pixle than on neighbours
+                if (filter == FILTER_ANTIALIASING) {
+                    if (numberOfNeighbours == 0) {
+                        numberOfNeighbours = 1;
+                    }
+                    rgbR += (rgb >> 16 & 0xff) * numberOfNeighbours;
+                    rgbG += (rgb >> 8 & 0xff) * numberOfNeighbours;
+                    rgbB += (rgb & 0xff) * numberOfNeighbours;
+                    if (numberOfNeighbours > 1) {
+                        numberOfNeighbours += numberOfNeighbours;
+                    }
+                }
+
+                // put same weight in neighbours as on pixel
+                if (filter == FILTER_BLUR) {
+                    rgbR += (rgb >> 16 & 0xff);
+                    rgbG += (rgb >> 8 & 0xff);
+                    rgbB += (rgb & 0xff);
+                    numberOfNeighbours++;
+                }
+
+                // calculatinc the average
+                rgbR = (int) (rgbR / numberOfNeighbours);
+                rgbG = (int) (rgbG / numberOfNeighbours);
+                rgbB = (int) (rgbB / numberOfNeighbours);
+                
+                rgb = (rgbR << 16) | (rgbG << 8) | rgbB;
+                
+                image2.setRGB(i-lox, j-loy, rgb);
+            }
+        }
+        
+        // insert new version of area into image
+        insertBitmap(image2, lox, loy);
+        
+    }
     
     public static void demoPaint(ymageMatrix m) {
         m.setColor(GREY);
