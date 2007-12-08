@@ -84,7 +84,7 @@ public class Banner {
         double myqph   = 0;
         String type    = "";
         String network = env.getConfig("network.unit.name", "unspecified").toUpperCase();
-        int    peers   = yacyCore.seedDB.sizeConnected();
+        int    peers   = yacyCore.seedDB.sizeConnected() + 1; // the '+ 1': the own peer is not included in sizeConnected()
         long   nlinks  = yacyCore.seedDB.countActiveURL();
         long   nwords  = yacyCore.seedDB.countActiveRWI();
         double nqpm    = yacyCore.seedDB.countActiveQPM();
