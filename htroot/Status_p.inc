@@ -1,8 +1,17 @@
 <div class="sidebar">
 <fieldset>
-  <legend>Private System Properties</legend>
+  <legend>System Status</legend>
   <dl>
 
+    <dt>Process</dt>
+    <dd>#[versionpp]#
+    #(peerStatistics)#
+      Unknown
+      ::
+      <div>Uptime: #[uptime]#</div>
+      #(/peerStatistics)#
+      </dd>
+    
     <dt>System Resources</dt>
     <dd>Processors: #[processors]#</dd>
     
@@ -13,8 +22,14 @@
       password-protected
       #(/protection)#</dd>
     
-    <dt>Peer Host</dt>
-    <dd>#[host]#:#[port]# #(extPortFormat)#::| (Binding to interface: #[extPort]#)#(/extPortFormat)# #(sslSupport)#::| SSL: enabled#(/sslSupport)#</dd>
+    <dt>Address</dt>
+    <dd>Host: #[host]#:#[port]# #(extPortFormat)#::| (Binding to interface: #[extPort]#)#(/extPortFormat)# #(sslSupport)#::| SSL: enabled#(/sslSupport)#<br>
+    #(peerAddress)#
+      peer address not assigned
+      ::
+      Public Address: http://#[address]#<br/>
+      YaCy Address: http://#[peername]#.yacy
+      #(/peerAddress)#</dd>
     
     #(portForwarding)#::
     <dt>Port Forwarding Host</dt>
@@ -45,43 +60,40 @@
     <dt><a href="Connections_p.html">Incoming Connections</a></dt>
     <dd>Active: #[connectionsActive]# | Idle: #[connectionsIdle]# | Max: #[connectionsMax]#</dd>
     
-    <dt><a href="IndexCreateIndexingQueue_p.html">Indexing Queue</a></dt>
-    <dd><table>
+    <dt>Queues</dt>
+    <dd>
+    <a href="IndexCreateIndexingQueue_p.html">Indexing Queue</a>:
+    <table>
       <tr>
       <td><div class="ProgressBar"><div class="ProgressBarFill" style="width:#[indexingQueuePercent]#%;" ></div></div></td>
       <td><div class="ProgressBarCaption">#[indexingQueueSize]#&nbsp;|&nbsp;#[indexingQueueMax]#</div></td>
       </tr>
-    </table></dd>
+    </table><br>
     
-    <dt><a href="IndexCreateLoaderQueue_p.html">Loader Queue</a></dt>
-    <dd><table>
+    <a href="IndexCreateLoaderQueue_p.html">Loader Queue</a>:
+    <table>
       <tr>
-      <td><div class="ProgressBar"><div class="ProgressBarFill" style="width:#[loaderQueuePercent]#%;" ></div></div></td>
-      <td><div class="ProgressBarCaption">#[loaderQueueSize]#&nbsp;|&nbsp;#[loaderQueueMax]#</div></td>
+        <td><div class="ProgressBar"><div class="ProgressBarFill" style="width:#[loaderQueuePercent]#%;" ></div></div></td>
+        <td><div class="ProgressBarCaption">#[loaderQueueSize]#&nbsp;|&nbsp;#[loaderQueueMax]#</div></td>
       </tr>
-    </table></dd>
-    
-    <dt>Crawler Queues</dt>
-    <dd>
-      <table>
-        <tr>
-          <td><a href="IndexCreateWWWLocalQueue_p.html">Local Crawl</a></td>
-          <td>#[localCrawlQueueSize]#</td>
-          <td><a href="Status.html?#(localCrawlPaused)#pauseCrawlJob::continueCrawlJob#(/localCrawlPaused)#=&amp;jobType=localCrawl" title="#(localCrawlPaused)#pause local crawl::continue local crawl#(/localCrawlPaused)#"><img src="env/grafics/#(localCrawlPaused)#stop.gif::start.gif#(/localCrawlPaused)#" alt="#(localCrawlPaused)#pause local crawl::continue local crawl#(/localCrawlPaused)#" style="width:12px;height:12px;" /></a></td>
-          <td>#(localCrawlPaused)#&nbsp;::(paused)#(/localCrawlPaused)#</td>
-        </tr>
-        <tr>
-          <td><a href="IndexCreateWWWRemoteQueue_p.html">Remote triggered Crawl</a></td>
-          <td>#[remoteTriggeredCrawlQueueSize]#</td>
-          <td><a href="Status.html?#(remoteTriggeredCrawlPaused)#pauseCrawlJob::continueCrawlJob#(/remoteTriggeredCrawlPaused)#=&amp;jobType=remoteTriggeredCrawl" title="#(remoteTriggeredCrawlPaused)#pause remote triggered crawl::continue remote triggered crawl#(/remoteTriggeredCrawlPaused)#"><img src="env/grafics/#(remoteTriggeredCrawlPaused)#stop.gif::start.gif#(/remoteTriggeredCrawlPaused)#" alt="#(remoteTriggeredCrawlPaused)#pause remote triggered crawl::continue remote triggered crawl#(/remoteTriggeredCrawlPaused)#" style="width:12px;height:12px;" /></a></td>
-          <td>#(remoteTriggeredCrawlPaused)#&nbsp;::(paused)#(/remoteTriggeredCrawlPaused)#</td>
-        </tr>
-        <tr>
-          <td>Pre-Queueing</td>
-          <td>#[stackCrawlQueueSize]#</td>
-          <td></td>
-          <td></td>
-        </tr>  
+      <tr>
+        <td><a href="IndexCreateWWWLocalQueue_p.html">Local Crawl</a></td>
+        <td>#[localCrawlQueueSize]#</td>
+        <td><a href="Status.html?#(localCrawlPaused)#pauseCrawlJob::continueCrawlJob#(/localCrawlPaused)#=&amp;jobType=localCrawl" title="#(localCrawlPaused)#pause local crawl::continue local crawl#(/localCrawlPaused)#"><img src="env/grafics/#(localCrawlPaused)#stop.gif::start.gif#(/localCrawlPaused)#" alt="#(localCrawlPaused)#pause local crawl::continue local crawl#(/localCrawlPaused)#" style="width:12px;height:12px;" /></a></td>
+        <td>#(localCrawlPaused)#&nbsp;::(paused)#(/localCrawlPaused)#</td>
+      </tr>
+      <tr>
+        <td><a href="IndexCreateWWWRemoteQueue_p.html">Remote triggered Crawl</a></td>
+        <td>#[remoteTriggeredCrawlQueueSize]#</td>
+        <td><a href="Status.html?#(remoteTriggeredCrawlPaused)#pauseCrawlJob::continueCrawlJob#(/remoteTriggeredCrawlPaused)#=&amp;jobType=remoteTriggeredCrawl" title="#(remoteTriggeredCrawlPaused)#pause remote triggered crawl::continue remote triggered crawl#(/remoteTriggeredCrawlPaused)#"><img src="env/grafics/#(remoteTriggeredCrawlPaused)#stop.gif::start.gif#(/remoteTriggeredCrawlPaused)#" alt="#(remoteTriggeredCrawlPaused)#pause remote triggered crawl::continue remote triggered crawl#(/remoteTriggeredCrawlPaused)#" style="width:12px;height:12px;" /></a></td>
+        <td>#(remoteTriggeredCrawlPaused)#&nbsp;::(paused)#(/remoteTriggeredCrawlPaused)#</td>
+      </tr>
+      <tr>
+        <td>Pre-Queueing</td>
+        <td>#[stackCrawlQueueSize]#</td>
+        <td></td>
+        <td></td>
+      </tr>  
       </table>
     </dd>
     

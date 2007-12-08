@@ -77,18 +77,19 @@ public class Banner {
             height = post.getInt("heigth", height);
         }
 
-        String name = "";
-        long links = 0;
-        long words = 0;
-        int myppm = 0;
-        double myqph = 0;
-        String type = "";
-        String network = "";
-        long nlinks = 0;
-        long nwords = 0;
-        double nqpm = 0;
-        double nqph = 0;
-        long nppm = 0;
+        String name    = "";
+        long   links   = 0;
+        long   words   = 0;
+        int    myppm   = 0;
+        double myqph   = 0;
+        String type    = "";
+        String network = env.getConfig("network.unit.name", "unspecified").toUpperCase();
+        int    peers   = yacyCore.seedDB.sizeConnected();
+        long   nlinks  = yacyCore.seedDB.countActiveURL();
+        long   nwords  = yacyCore.seedDB.countActiveRWI();
+        double nqpm    = yacyCore.seedDB.countActiveQPM();
+        long   nppm    = yacyCore.seedDB.countActivePPM();
+        double nqph    = 0;
 
         yacySeed seed = yacyCore.seedDB.mySeed();
         if (seed != null){
@@ -97,11 +98,6 @@ public class Banner {
             words   = Long.parseLong(seed.get(yacySeed.ICOUNT, "0"));
             myppm   = seed.getPPM();
             myqph   = 60d * seed.getQPM();
-            network = env.getConfig("network.unit.name", "unspecified").toUpperCase();
-            nlinks  = yacyCore.seedDB.countActiveURL();
-            nwords  = yacyCore.seedDB.countActiveRWI();
-            nqpm    = yacyCore.seedDB.countActiveQPM();
-            nppm    = yacyCore.seedDB.countActivePPM();
 
             if (yacyCore.seedDB.mySeed().isVirgin()) {
                 type = "VIRGIN";
@@ -126,10 +122,10 @@ public class Banner {
 
         if (!plasmaGrafics.logoIsLoaded()) {
             BufferedImage logo = ImageIO.read(new File(IMAGE));
-            return plasmaGrafics.getBannerPicture(1000, width, height, bgcolor, textcolor, bordercolor, name, links, words, type, myppm, network, nlinks, nwords, nqph, nppm, logo);
+            return plasmaGrafics.getBannerPicture(1000, width, height, bgcolor, textcolor, bordercolor, name, links, words, type, myppm, network, peers, nlinks, nwords, nqph, nppm, logo);
         }
         
-        return plasmaGrafics.getBannerPicture(1000, width, height, bgcolor, textcolor, bordercolor, name, links, words, type, myppm, network, nlinks, nwords, nqph, nppm);
+        return plasmaGrafics.getBannerPicture(1000, width, height, bgcolor, textcolor, bordercolor, name, links, words, type, myppm, network, peers, nlinks, nwords, nqph, nppm);
     }
 
 }

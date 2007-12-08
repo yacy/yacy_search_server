@@ -357,23 +357,23 @@ public class plasmaGrafics {
     }
 
     //[MN]
-    public static ymageMatrix getBannerPicture(long maxAge, int width, int height, String bgcolor, String textcolor, String bordercolor, String name, long links, long words, String type, int ppm, String network, long nlinks, long nwords, double nqph, long nppm) {
+    public static ymageMatrix getBannerPicture(long maxAge, int width, int height, String bgcolor, String textcolor, String bordercolor, String name, long links, long words, String type, int ppm, String network, int peers, long nlinks, long nwords, double nqph, long nppm) {
         if ((bannerPicture == null) || ((System.currentTimeMillis() - bannerPictureDate) > maxAge)) {
-            drawBannerPicture(width, height, bgcolor, textcolor, bordercolor, name, links, words, type, ppm, network, nlinks, nwords, nqph, nppm, logo);
+            drawBannerPicture(width, height, bgcolor, textcolor, bordercolor, name, links, words, type, ppm, network, peers, nlinks, nwords, nqph, nppm, logo);
         }
         return bannerPicture;
     }    
     
     //[MN]
-    public static ymageMatrix getBannerPicture(long maxAge, int width, int height, String bgcolor, String textcolor, String bordercolor, String name, long links, long words, String type, int ppm, String network, long nlinks, long nwords, double nqph, long nppm, BufferedImage newLogo) {
+    public static ymageMatrix getBannerPicture(long maxAge, int width, int height, String bgcolor, String textcolor, String bordercolor, String name, long links, long words, String type, int ppm, String network, int peers, long nlinks, long nwords, double nqph, long nppm, BufferedImage newLogo) {
         if ((bannerPicture == null) || ((System.currentTimeMillis() - bannerPictureDate) > maxAge)) {
-            drawBannerPicture(width, height, bgcolor, textcolor, bordercolor, name, links, words, type, ppm, network, nlinks, nwords, nqph, nppm, newLogo);
+            drawBannerPicture(width, height, bgcolor, textcolor, bordercolor, name, links, words, type, ppm, network, peers, nlinks, nwords, nqph, nppm, newLogo);
         }
         return bannerPicture;
     }
 
     //[MN]
-    private static void drawBannerPicture(int width, int height, String bgcolor, String textcolor, String bordercolor, String name, long links, long words, String type, int ppm, String network, long nlinks, long nwords, double nqph, long nppm, BufferedImage newLogo) {
+    private static void drawBannerPicture(int width, int height, String bgcolor, String textcolor, String bordercolor, String name, long links, long words, String type, int ppm, String network, int peers, long nlinks, long nwords, double nqph, long nppm, BufferedImage newLogo) {
 
         int exprlength = 19;
         logo = newLogo;
@@ -387,7 +387,7 @@ public class plasmaGrafics {
         ymageToolPrint.print(bannerPicture, 100, 42, 0, "TYPE:  " + addTrailingBlanks(type, exprlength), -1);
         ymageToolPrint.print(bannerPicture, 100, 52, 0, "SPEED: " + addTrailingBlanks(ppm + " PAGES/MINUTE", exprlength), -1);
 
-        ymageToolPrint.print(bannerPicture, 285, 12, 0, "NETWORK: " + addTrailingBlanks(network, exprlength), -1);
+        ymageToolPrint.print(bannerPicture, 285, 12, 0, "NETWORK: " + addTrailingBlanks(network + " [" + peers + "]", exprlength), -1);
         ymageToolPrint.print(bannerPicture, 285, 22, 0, "LINKS:   " + addBlanksAndDots(nlinks, exprlength), -1);
         ymageToolPrint.print(bannerPicture, 285, 32, 0, "WORDS:   " + addBlanksAndDots(nwords, exprlength), -1);
         ymageToolPrint.print(bannerPicture, 285, 42, 0, "QUERIES: " + addTrailingBlanks(nqph + " QUERIES/HOUR", exprlength), -1);

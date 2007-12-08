@@ -8,6 +8,16 @@
   <body style="margin:0px;">
     #%env/templates/header.template%#
     #%env/templates/submenuConfig.template%#
+    
+    #(showPrivateTable)#
+    <div class="SubMenu">
+      <ul class="SubMenu">
+      <li><a href="Status.html?login=" class="MenuItemLink lock">Log-in as administrator to see full status</a></li>
+      </ul>
+    </div>
+    ::
+    #(/showPrivateTable)#
+    
     <!--[if IE]>
     <div style="clear:left;" class="gainlayout">
     <![endif]-->
@@ -132,63 +142,8 @@
     
     </div>
     
-    <div class="sidebar">
-    
-    <fieldset>
-    <legend>Public System Properties</legend>
-    <dl>
-    <dt>System Version</dt>
-    <dd>#[versionpp]#</dd>
-    
-    <dt>This&nbsp;peer's&nbsp;address</dt>
-    <dd>#(peerAddress)#
-      Not assigned
-      ::
-      http://#[address]#<br/>
-      http://#[peername]#.yacy
-      #(/peerAddress)#</dd>
-    
-    <dt>This peer's name</dt>
-    <dd>#[peerName]#/#[hash]#</dd>
-    
-    <dt>This peer's statistics</dt>
-    <dd>#(peerStatistics)#
-      Unknown
-      ::
-      <div>Uptime: #[uptime]#</div>
-      <div>Links/RWI: #[links]# / #[words]#</div>
-      <div>PPM/QPH: #[pagesperminute]# / #[queriesperhour]#</div>
-      <div>Connects: 
-        <span title="connected Juniors">#[juniorConnects]#</span> | <span title="connected Seniors">#[seniorConnects]#</span> | <span title="connected Principals">#[principalConnects]#</span> | <span title="disconnected peers">#[disconnects]#</span> (#[connects]# peers/hour)
-      #(/peerStatistics)#
-      </div></dd>
-    
-    <dt>This peer's status</dt>
-    <dd>#(peerStatus)#
-      Virgin
-      ::
-      Junior
-      ::
-      Senior
-      ::
-      Principal
-      #(/peerStatus)#</dd>
-    
-    <dt>Other peers</dt>
-    <dd>#(otherPeers)#not online::#[num]# other peers online.#(/otherPeers)#</dd>
-    
-    #(showPrivateTable)#
-    <dt>Log-In</dt>
-    <dd>Click here to <a href="Status.html?login=">log in</a> as administrator and see full status.</dd>
-    ::
-    #(/showPrivateTable)#
-    
-    </dl>
-    </fieldset>
-    
-    </div>
-    
     #%[privateStatusTable]%#
+    
     <!--[if IE]> 
     </div>
     <![endif]-->  
