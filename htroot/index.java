@@ -63,7 +63,7 @@ public class index {
         final int time = Math.min(60, (post == null) ? (int) sb.getConfigLong("network.unit.search.time", 3) : post.getInt("time", (int) sb.getConfigLong("network.unit.search.time", 3)));
         final String urlmaskfilter = (post == null) ? ".*" : post.get("urlmaskfilter", ".*");
         final String prefermaskfilter = (post == null) ? "" : post.get("prefermaskfilter", "");
-        final String constraint = (post == null) ? null : post.get("constraint", null);
+        final String constraint = (post == null) ? "" : post.get("constraint", "");
         final String cat = (post == null) ? "href" : post.get("cat", "href");
         final int type = (post == null) ? 0 : post.getInt("type", 0);
         

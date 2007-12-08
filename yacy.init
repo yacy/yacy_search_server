@@ -644,8 +644,8 @@ ramCacheProfiles_time=      500
 # othervise the YaCy-internal memory supervision does not work
 javastart_Xmx=Xmx96m
 javastart_Xms=Xms96m
-javastart_Xmx__pro=Xmx512m
-javastart_Xms__pro=Xms512m
+javastart_Xmx__pro=Xmx120m
+javastart_Xms__pro=Xms120m
 
 # priority of the yacy-process
 # is valid in unix/shell and windows environments but
