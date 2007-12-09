@@ -363,7 +363,7 @@ public class ymageMatrix {
      */
     public void insertBitmap(BufferedImage bitmap, int x, int y, int transRGB, byte filter) {
         insertBitmap(bitmap, x, y, transRGB);
-        filter(x-1, y-1, x + bitmap.getWidth(), y + bitmap.getHeight(), filter);
+        filter(x-1, y-1, x + bitmap.getWidth(), y + bitmap.getHeight(), filter, image.getRGB(x, y));
     }
     
     /**
@@ -372,10 +372,11 @@ public class ymageMatrix {
      * @param loy y value for left upper coordinate
      * @param rux x value for right lower coordinate
      * @param ruy y value for right lower coordinate
+     * @param rgb color of background
      * @author Marc Nause
      */
-    public void antialiasing(int lox, int loy, int rux, int ruy) {
-        filter(lox, loy, rux, ruy, FILTER_ANTIALIASING);
+    public void antialiasing(int lox, int loy, int rux, int ruy, int bgcolor) {
+        filter(lox, loy, rux, ruy, FILTER_ANTIALIASING, bgcolor);
     }
 
     /**
@@ -387,7 +388,7 @@ public class ymageMatrix {
      * @author Marc Nause
      */
     public void blur(int lox, int loy, int rux, int ruy) {
-        filter(lox, loy, rux, ruy, FILTER_BLUR);
+        filter(lox, loy, rux, ruy, FILTER_BLUR, -1);
     }
     
     /**
@@ -399,7 +400,7 @@ public class ymageMatrix {
      * @param filter chooses filter 
      * @author Marc Nause
      */
-    private void filter(int lox, int loy, int rux, int ruy, byte filter) {
+    private void filter(int lox, int loy, int rux, int ruy, byte filter, int bgcolor) {
 
         // taking care that all values are legal
         if (lox < 0) { lox = 0; }
@@ -428,6 +429,7 @@ public class ymageMatrix {
         int rgb = 0;
         int width2 = rux - lox + 1;
         int height2 = ruy - loy + 1;
+        boolean border = false;
         BufferedImage image2 = new BufferedImage(width2, height2, BufferedImage.TYPE_INT_RGB);
 
         for (int i = lox; i < rux + 1; i++) {
@@ -441,6 +443,9 @@ public class ymageMatrix {
                 // taking samples from neighbours of pixel
                 if (i > lox) { 
                     rgb = image.getRGB(i-1, j);
+                    if (rgb == bgcolor) {
+                        border = true;
+                    }
                     rgbR += rgb >> 16 & 0xff;
                     rgbG += rgb >> 8& 0xff;
                     rgbB += rgb & 0xff;  
@@ -448,6 +453,9 @@ public class ymageMatrix {
                 }
                 if (j > loy) { 
                     rgb = image.getRGB(i, j-1); 
+                    if (rgb == bgcolor) {
+                        border = true;
+                    }                    
                     rgbR += rgb >> 16 & 0xff;
                     rgbG += rgb >> 8& 0xff;
                     rgbB += rgb & 0xff;                   
@@ -455,13 +463,19 @@ public class ymageMatrix {
                 }
                 if (i < width- 1) {
                     rgb = image.getRGB(i+1, j); 
+                    if (rgb == bgcolor) {
+                        border = true;
+                    }  
                     rgbR += rgb >> 16 & 0xff;
                     rgbG += rgb >> 8& 0xff;
                     rgbB += rgb & 0xff;              
                     numberOfNeighbours++;
                 }
                 if (i < height - 1) { 
-                    rgb = image.getRGB(i, j+1); 
+                    rgb = image.getRGB(i, j+1);
+                    if (rgb == bgcolor) {
+                        border = true;
+                    }  
                     rgbR += rgb >> 16 & 0xff;
                     rgbG += rgb >> 8& 0xff;
                     rgbB += rgb & 0xff;                 
@@ -471,20 +485,25 @@ public class ymageMatrix {
                 rgb = image.getRGB(i, j);
                 
                 // put more weight on pixle than on neighbours
-                if (filter == FILTER_ANTIALIASING) {
-                    if (numberOfNeighbours == 0) {
-                        numberOfNeighbours = 1;
-                    }
-                    rgbR += (rgb >> 16 & 0xff) * numberOfNeighbours;
-                    rgbG += (rgb >> 8 & 0xff) * numberOfNeighbours;
-                    rgbB += (rgb & 0xff) * numberOfNeighbours;
-                    if (numberOfNeighbours > 1) {
-                        numberOfNeighbours += numberOfNeighbours;
-                    }
+                if (filter == FILTER_ANTIALIASING && border) {
+//                    rgbR += (rgb >> 16 & 0xff) * numberOfNeighbours;
+//                    rgbG += (rgb >> 8 & 0xff) * numberOfNeighbours;
+//                    rgbB += (rgb & 0xff) * numberOfNeighbours;
+//                    numberOfNeighbours += numberOfNeighbours;
+                    rgbR += (rgb >> 16 & 0xff);
+                    rgbG += (rgb >> 8 & 0xff);
+                    rgbB += (rgb & 0xff);
+                    numberOfNeighbours++;                    
+                    border = false;
+                } 
+                else if (filter == FILTER_ANTIALIASING) {
+                    rgbR = (rgb >> 16 & 0xff);
+                    rgbG = (rgb >> 8 & 0xff);
+                    rgbB = (rgb & 0xff);
+                    numberOfNeighbours = 1;
                 }
-
                 // put same weight in neighbours as on pixel
-                if (filter == FILTER_BLUR) {
+                else if (filter == FILTER_BLUR) {
                     rgbR += (rgb >> 16 & 0xff);
                     rgbG += (rgb >> 8 & 0xff);
                     rgbB += (rgb & 0xff);
