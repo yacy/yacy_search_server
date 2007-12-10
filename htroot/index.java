@@ -99,10 +99,7 @@ public class index {
         if (cds.equals("app")) contentdom = plasmaSearchQuery.CONTENTDOM_APP;
         
         //long mylinks = 0;
-        try {
-            prop.putNum("links", yacyCore.seedDB.mySeed().getLinkCount());
-        } catch (NumberFormatException e) { prop.putHTML("links", "0"); }
-        //prop.put("total-links", groupDigits(mylinks + yacyCore.seedDB.countActiveURL())); // extremely time-intensive!
+        prop.putNum("links", yacyCore.seedDB.mySeed().getLinkCount());
         
         // we create empty entries for template strings
         String promoteSearchPageGreeting = env.getConfig("promoteSearchPageGreeting", "");
@@ -120,8 +117,7 @@ public class index {
         prop.put("searchoptions_count-100", (count == 100) ? "1" : "0");
         prop.put("searchoptions_resource-global", global ? "1" : "0");
         prop.put("searchoptions_resource-global-disabled", (indexReceiveGranted && indexDistributeGranted) ? "0" : "1");
-        prop.put("searchoptions_resource-global-disabled_reason", 
-                (indexReceiveGranted) ? "0" : (indexDistributeGranted ? "1" : "2"));
+        prop.put("searchoptions_resource-global-disabled_reason", (indexReceiveGranted) ? "0" : (indexDistributeGranted ? "1" : "2"));
         prop.put("searchoptions_resource-local", global ? "0" : "1");
         prop.put("searchoptions_searchtime", time);
         prop.put("searchoptions_time-1", (time == 1) ? "1" : "0");

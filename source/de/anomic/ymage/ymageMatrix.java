@@ -145,25 +145,53 @@ public class ymageMatrix {
     }
 
     public void plot(int x, int y) {
+    	plot (x, y, 100);
+    }
+    
+    private int[] cc = new int[3];
+    
+    public void plot(int x, int y, int intensity) {
         if ((x < 0) || (x >= width)) return;
         if ((y < 0) || (y >= height)) return;
-        //int n = 3 * (x + y * width);
-        if (this.defaultMode == MODE_REPLACE) {
-            grid.setPixel(x, y, defaultCol);
-        } else if (this.defaultMode == MODE_ADD) {
-            int[] c = new int[3];
-            c = grid.getPixel(x, y, c);
-            int r = (0xff & c[0]) + defaultCol[0]; if (r > 255) r = 255;
-            int g = (0xff & c[1]) + defaultCol[1]; if (g > 255) g = 255;
-            int b = (0xff & c[2]) + defaultCol[2]; if (b > 255) b = 255;
-            grid.setPixel(x, y, new int[]{r, g, b});
-        } else if (this.defaultMode == MODE_SUB) {
-            int[] c = new int[3];
-            c = grid.getPixel(x, y, c);
-            int r = (0xff & c[0]) - defaultCol[0]; if (r < 0) r = 0;
-            int g = (0xff & c[1]) - defaultCol[1]; if (g < 0) g = 0;
-            int b = (0xff & c[2]) - defaultCol[2]; if (b < 0) b = 0;
-            grid.setPixel(x, y, new int[]{r, g, b});
+        synchronized (cc) {
+        	if (this.defaultMode == MODE_REPLACE) {
+        		if (intensity == 100) {
+        			cc[0] = defaultCol[0];
+            		cc[1] = defaultCol[1];
+            		cc[2] = defaultCol[2];
+        		} else {
+        			int[] c = new int[3];
+            		c = grid.getPixel(x, y, c);
+        			cc[0] = (intensity * defaultCol[0] + (100 - intensity) * c[0]) / 100;
+        			cc[1] = (intensity * defaultCol[1] + (100 - intensity) * c[1]) / 100;
+        			cc[2] = (intensity * defaultCol[2] + (100 - intensity) * c[2]) / 100;
+        		}
+        	} else if (this.defaultMode == MODE_ADD) {
+        		int[] c = new int[3];
+        		c = grid.getPixel(x, y, c);
+        		if (intensity == 100) {
+        			cc[0] = (0xff & c[0]) + defaultCol[0]; if (cc[0] > 255) cc[0] = 255;
+        			cc[1] = (0xff & c[1]) + defaultCol[1]; if (cc[1] > 255) cc[1] = 255;
+        			cc[2] = (0xff & c[2]) + defaultCol[2]; if (cc[2] > 255) cc[2] = 255;
+        		} else {
+        			cc[0] = (0xff & c[0]) + (intensity * defaultCol[0] / 100); if (cc[0] > 255) cc[0] = 255;
+        			cc[1] = (0xff & c[1]) + (intensity * defaultCol[1] / 100); if (cc[1] > 255) cc[1] = 255;
+        			cc[2] = (0xff & c[2]) + (intensity * defaultCol[2] / 100); if (cc[2] > 255) cc[2] = 255;
+        		}
+        	} else if (this.defaultMode == MODE_SUB) {
+        		int[] c = new int[3];
+        		c = grid.getPixel(x, y, c);
+        		if (intensity == 100) {
+        			cc[0] = (0xff & c[0]) - defaultCol[0]; if (cc[0] < 0) cc[0] = 0;
+        			cc[1] = (0xff & c[1]) - defaultCol[1]; if (cc[1] < 0) cc[1] = 0;
+        			cc[2] = (0xff & c[2]) - defaultCol[2]; if (cc[2] < 0) cc[2] = 0;
+        		} else {
+        			cc[0] = (0xff & c[0]) - (intensity * defaultCol[0] / 100); if (cc[0] < 0) cc[0] = 0;
+        			cc[1] = (0xff & c[1]) - (intensity * defaultCol[1] / 100); if (cc[1] < 0) cc[1] = 0;
+        			cc[2] = (0xff & c[2]) - (intensity * defaultCol[2] / 100); if (cc[2] < 0) cc[2] = 0;
+        		}
+        	}
+        	grid.setPixel(x, y, cc);
         }
     }
     

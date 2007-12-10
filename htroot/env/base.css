@@ -390,13 +390,13 @@ div.welcome { /* The heading in Status.html */
   margin:10px 0;
   padding-top:130px;
   text-align:left;
-  width:55%;
+  width:65%;
   background:url(/env/grafics/kaskelix.png) top center no-repeat;
 }
 
 div.sidebar { /* sidebars on the right side */
   float:left;
-  width:45%;
+  width:35%;
   margin:10px 0;
   padding-top:10px;
   text-align:left;
