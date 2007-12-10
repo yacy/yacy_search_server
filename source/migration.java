@@ -219,7 +219,7 @@ public class migration {
         
         // migration for additional parser settings
         String value = "";
-        if ((value = sb.getConfig("parseableMimeTypes","")).length() > 0) {
+        if (((value = sb.getConfig("parseableMimeTypes","")).length() > 0) && (sb.getConfig("parseableMimeTypes.CRAWLER", "").length() == 0)) {
             sb.setConfig("parseableMimeTypes.CRAWLER", value);
             sb.setConfig("parseableMimeTypes.PROXY", value);
             sb.setConfig("parseableMimeTypes.URLREDIRECTOR", value);
