@@ -130,12 +130,13 @@ public class kelondroCollectionIndex {
         
         // open array files
         this.arrays = new HashMap(); // all entries will be dynamically created with getArray()
-        if (((fileIndexGeneration) || (ramIndexGeneration))) {
+        if ((fileIndexGeneration) || (ramIndexGeneration)) {
             serverLog.logFine("STARTUP", "STARTED INITIALIZATION OF NEW COLLECTION INDEX. THIS WILL TAKE SOME TIME");
-            openAllArrayFiles(((fileIndexGeneration) || (ramIndexGeneration)), indexOrder);
+        } else {
+            if (index == null) index = openIndexFile(path, filenameStub, indexOrder, preloadTime, loadfactor, rowdef);
+            serverLog.logFine("STARTUP", "OPENING COLLECTION INDEX");
         }
-        
-        // open/create index table
+        openAllArrayFiles(((fileIndexGeneration) || (ramIndexGeneration)), indexOrder);
         if (index == null) index = openIndexFile(path, filenameStub, indexOrder, preloadTime, loadfactor, rowdef);
     }
     
