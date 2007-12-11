@@ -61,7 +61,7 @@ public class plasmaCrawlZURL {
     	// creates a new ZURL in a file
         cachePath.mkdirs();
         if (startWithEmptyFile) kelondroFlexTable.delete(cachePath, tablename);
-        urlIndex = new kelondroFlexTable(cachePath, tablename, -1, rowdef, true);
+        urlIndex = new kelondroFlexTable(cachePath, tablename, -1, rowdef, 0, true);
     }
     
     public plasmaCrawlZURL() {

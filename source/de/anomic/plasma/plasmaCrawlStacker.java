@@ -299,13 +299,13 @@ public final class plasmaCrawlStacker extends Thread {
             String newCacheName = "urlNoticeStacker8.db";
             cacheStacksPath.mkdirs();
             try {
-                this.urlEntryCache = new kelondroCache(new kelondroFlexTable(cacheStacksPath, newCacheName, preloadTime, plasmaCrawlEntry.rowdef, true), true, false);
+                this.urlEntryCache = new kelondroCache(new kelondroFlexTable(cacheStacksPath, newCacheName, preloadTime, plasmaCrawlEntry.rowdef, 0, true), true, false);
             } catch (Exception e) {
                 e.printStackTrace();
                 // kill DB and try again
                 kelondroFlexTable.delete(cacheStacksPath, newCacheName);
                 try {
-                    this.urlEntryCache = new kelondroCache(new kelondroFlexTable(cacheStacksPath, newCacheName, preloadTime, plasmaCrawlEntry.rowdef, true), true, false);
+                    this.urlEntryCache = new kelondroCache(new kelondroFlexTable(cacheStacksPath, newCacheName, preloadTime, plasmaCrawlEntry.rowdef, 0, true), true, false);
                 } catch (Exception ee) {
                     ee.printStackTrace();
                     System.exit(-1);

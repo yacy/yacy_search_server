@@ -46,8 +46,9 @@ public class kelondroFlexTable extends kelondroFlexWidthArray implements kelondr
     protected kelondroBytesIntMap index;
     private boolean RAMIndex;
     
-    public kelondroFlexTable(File path, String tablename, long preloadTime, kelondroRow rowdef, boolean resetOnFail) {
+    public kelondroFlexTable(File path, String tablename, long preloadTime, kelondroRow rowdef, int minimumSpace, boolean resetOnFail) {
     	// the buffersize applies to a possible load of the ram-index
+        // the minimumSpace is a initial allocation space for the index; names the number of index slots
     	// if the ram is not sufficient, a tree file is generated
     	// if, and only if a tree file exists, the preload time is applied
     	super(path, tablename, rowdef, resetOnFail);
@@ -59,7 +60,7 @@ public class kelondroFlexTable extends kelondroFlexWidthArray implements kelondr
         }
         
         try {
-    	long neededRAM = (long) ((super.row().column(0).cellwidth + 4) * super.size() * kelondroRowCollection.growfactor);
+    	long neededRAM = (long) ((super.row().column(0).cellwidth + 4) * Math.max(super.size(), minimumSpace) * kelondroRowCollection.growfactor);
     	
     	File newpath = new File(path, tablename);
         File indexfile = new File(newpath, "col.000.index");
@@ -82,7 +83,7 @@ public class kelondroFlexTable extends kelondroFlexWidthArray implements kelondr
         	
         	// fill the index
             System.out.print("*** Loading RAM index for " + size() + " entries from "+ newpath);
-            index = initializeRamIndex();
+            index = initializeRamIndex(minimumSpace);
             
             System.out.println(" -done-");
             System.out.println(index.size()
@@ -151,8 +152,8 @@ public class kelondroFlexTable extends kelondroFlexWidthArray implements kelondr
         return index.geti(key) >= 0;
     }
     
-    private kelondroBytesIntMap initializeRamIndex() {
-    	int space = super.col[0].size() + 1;
+    private kelondroBytesIntMap initializeRamIndex(int initialSpace) {
+    	int space = Math.max(super.col[0].size(), initialSpace) + 1;
     	if (space < 0) throw new kelondroException("wrong space: " + space);
         kelondroBytesIntMap ri = new kelondroBytesIntMap(super.row().column(0).cellwidth, super.rowdef.objectOrder, space);
         Iterator content = super.col[0].contentNodes(-1);
@@ -449,7 +450,7 @@ public class kelondroFlexTable extends kelondroFlexWidthArray implements kelondr
         String name = args[1];
         kelondroRow row = new kelondroRow("Cardinal key-4 {b256}, byte[] x-64", kelondroNaturalOrder.naturalOrder, 0);
         try {
-            kelondroFlexTable t = new kelondroFlexTable(f, name, 0, row, true);
+            kelondroFlexTable t = new kelondroFlexTable(f, name, 0, row, 0, true);
             kelondroRow.Entry entry = row.newEntry();
             entry.setCol(0, System.currentTimeMillis());
             entry.setCol(1, "dummy".getBytes());
