@@ -50,6 +50,7 @@ public class Ranking_p {
 		rankingParameters.put(plasmaSearchRankingProfile.APPREF, "Appearance In Reference");
 		rankingParameters.put(plasmaSearchRankingProfile.APPTAGS, "Appearance In Tags");
 		rankingParameters.put(plasmaSearchRankingProfile.APPURL, "Appearance In URL");
+		rankingParameters.put(plasmaSearchRankingProfile.AUTHORITY, "Authority of Domain");
 		rankingParameters.put(plasmaSearchRankingProfile.CATHASAPP, "Category App, Appearance");
 		rankingParameters.put(plasmaSearchRankingProfile.CATHASAUDIO, "Category Audio Appearance");
 		rankingParameters.put(plasmaSearchRankingProfile.CATHASIMAGE, "Category Image Appearance");

@@ -419,6 +419,7 @@ public class IndexControlRWIs_p {
                 prop.putNum("genUrlList_urlList_"+i+"_urlExists_ranking", (entry.ranking() - rn));
                 prop.putNum("genUrlList_urlList_"+i+"_urlExists_domlength", yacyURL.domLengthEstimation(entry.hash()));
                 prop.putNum("genUrlList_urlList_"+i+"_urlExists_ybr", plasmaSearchRankingProcess.ybr(entry.hash()));
+                prop.putNum("genUrlList_urlList_"+i+"_urlExists_authority", ranked.getOrder().authority(entry.hash()));
                 prop.put("genUrlList_urlList_"+i+"_urlExists_date", serverDate.shortDayTime(new Date(entry.word().lastModified())));
                 prop.putNum("genUrlList_urlList_"+i+"_urlExists_wordsintitle", entry.word().wordsintitle());
                 prop.putNum("genUrlList_urlList_"+i+"_urlExists_wordsintext", entry.word().wordsintext());

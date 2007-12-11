@@ -26,8 +26,13 @@
 
 package de.anomic.index;
 
+import java.util.HashMap;
+import java.util.Iterator;
+import java.util.Map;
+
 import de.anomic.kelondro.kelondroAbstractOrder;
 import de.anomic.kelondro.kelondroBitfield;
+import de.anomic.kelondro.kelondroMScoreCluster;
 import de.anomic.kelondro.kelondroOrder;
 import de.anomic.plasma.plasmaCondenser;
 import de.anomic.plasma.plasmaSearchRankingProcess;
@@ -37,6 +42,8 @@ import de.anomic.yacy.yacyURL;
 public class indexRWIEntryOrder extends kelondroAbstractOrder implements kelondroOrder {
     private indexRWIVarEntry min, max;
     private plasmaSearchRankingProfile ranking;
+    private kelondroMScoreCluster doms;
+    private int maxdomcount;
     
     private static final int processors = Runtime.getRuntime().availableProcessors(); // for multiprocessor support, used during normalization
     
@@ -44,6 +51,8 @@ public class indexRWIEntryOrder extends kelondroAbstractOrder implements kelondr
         this.min = null;
         this.max = null;
         this.ranking = profile;
+        this.doms = new kelondroMScoreCluster();
+        this.maxdomcount = 0;
     }
     
     public void extend(indexContainer container) {
@@ -59,9 +68,20 @@ public class indexRWIEntryOrder extends kelondroAbstractOrder implements kelondr
             mmf1.run(); // execute other fork in this thread
             if (this.min == null) this.min = mmf1.entryMin; else indexRWIVarEntry.min(this.min, mmf1.entryMin);
             if (this.max == null) this.max = mmf1.entryMax; else indexRWIVarEntry.max(this.max, mmf1.entryMax);
+            Map.Entry entry;
+            Iterator di = mmf1.domcount().entrySet().iterator();
+            while (di.hasNext()) {
+            	entry = (Map.Entry) di.next();
+            	this.doms.addScore(entry.getKey(), ((Integer) entry.getValue()).intValue());
+            }
             try {mmf0.join();} catch (InterruptedException e) {} // wait for fork thread to finish
             if (this.min == null) this.min = mmf0.entryMin; else indexRWIVarEntry.min(this.min, mmf0.entryMin);
             if (this.max == null) this.max = mmf0.entryMax; else indexRWIVarEntry.max(this.max, mmf0.entryMax);
+            di = mmf0.domcount().entrySet().iterator();
+            while (di.hasNext()) {
+            	entry = (Map.Entry) di.next();
+            	this.doms.addScore(entry.getKey(), ((Integer) entry.getValue()).intValue());
+            }
             //long s1= System.currentTimeMillis(), sc = Math.max(1, s1 - s0);
             //System.out.println("***DEBUG*** indexRWIEntry.Order (2-THREADED): " + sc + " milliseconds for " + container.size() + " entries, " + (container.size() / sc) + " entries/millisecond");
         } else if (container.size() > 0) {
@@ -70,13 +90,24 @@ public class indexRWIEntryOrder extends kelondroAbstractOrder implements kelondr
             mmf.run(); // execute without multi-threading
             if (this.min == null) this.min = mmf.entryMin; else indexRWIVarEntry.min(this.min, mmf.entryMin);
             if (this.max == null) this.max = mmf.entryMax; else indexRWIVarEntry.max(this.max, mmf.entryMax);
+            Map.Entry entry;
+            Iterator di = mmf.domcount().entrySet().iterator();
+            while (di.hasNext()) {
+            	entry = (Map.Entry) di.next();
+            	this.doms.addScore(entry.getKey(), ((Integer) entry.getValue()).intValue());
+            }
             //long s1= System.currentTimeMillis(), sc = Math.max(1, s1 - s0);
             //System.out.println("***DEBUG*** indexRWIEntry.Order (ONETHREAD): " + sc + " milliseconds for " + container.size() + " entries, " + (container.size() / sc) + " entries/millisecond");
         }
+        if (this.doms.size() > 0) this.maxdomcount = this.doms.getMaxScore();
     }
     
     public Object clone() {
         return null;
+    }
+    
+    public int authority(String urlHash) {
+    	return (doms.getScore(urlHash.substring(6)) << 8) / (1 + this.maxdomcount);
     }
     
     public long cardinal(byte[] key) {
@@ -95,14 +126,15 @@ public class indexRWIEntryOrder extends kelondroAbstractOrder implements kelondr
            + ((t.posintext() == 0) ? 0 : ((256 - (((t.posintext()    - min.posintext()    ) << 8) / (1 + max.posintext()    - min.posintext())    )) << ranking.coeff_posintext))
            + ((t.posofphrase() == 0) ? 0 : ((256 - (((t.posofphrase()  - min.posofphrase()  ) << 8) / (1 + max.posofphrase()  - min.posofphrase())  )) << ranking.coeff_posofphrase))
            + ((t.posinphrase() == 0) ? 0 : ((256 - (((t.posinphrase()  - min.posinphrase()  ) << 8) / (1 + max.posinphrase()  - min.posinphrase())  )) << ranking.coeff_posinphrase))
-           + ((256 - (((t.worddistance() - min.worddistance() ) << 8) / (1 + max.worddistance() - min.worddistance()) )) << ranking.coeff_worddistance)
-           + (       (((t.virtualAge()   - min.virtualAge()   ) << 8) / (1 + max.virtualAge()   - min.virtualAge())    ) << ranking.coeff_date)
-           + (       (((t.wordsintitle() - min.wordsintitle() ) << 8) / (1 + max.wordsintitle() - min.wordsintitle())  ) << ranking.coeff_wordsintitle)
-           + (       (((t.wordsintext()  - min.wordsintext()  ) << 8) / (1 + max.wordsintext()  - min.wordsintext())   ) << ranking.coeff_wordsintext)
-           + (       (((t.phrasesintext()- min.phrasesintext()) << 8) / (1 + max.phrasesintext()- min.phrasesintext()) ) << ranking.coeff_phrasesintext)
-           + (       (((t.llocal()       - min.llocal()       ) << 8) / (1 + max.llocal()       - min.llocal())        ) << ranking.coeff_llocal)
-           + (       (((t.lother()       - min.lother()       ) << 8) / (1 + max.lother()       - min.lother())        ) << ranking.coeff_lother)
-           + (       (((t.hitcount()     - min.hitcount()     ) << 8) / (1 + max.hitcount()     - min.hitcount())      ) << ranking.coeff_hitcount)
+           + ((256 - (((t.worddistance() - min.worddistance()  ) << 8) / (1 + max.worddistance() - min.worddistance()) )) << ranking.coeff_worddistance)
+           + (       (((t.virtualAge()   - min.virtualAge()    ) << 8) / (1 + max.virtualAge()   - min.virtualAge())    ) << ranking.coeff_date)
+           + (       (((t.wordsintitle() - min.wordsintitle()  ) << 8) / (1 + max.wordsintitle() - min.wordsintitle())  ) << ranking.coeff_wordsintitle)
+           + (       (((t.wordsintext()  - min.wordsintext()   ) << 8) / (1 + max.wordsintext()  - min.wordsintext())   ) << ranking.coeff_wordsintext)
+           + (       (((t.phrasesintext()- min.phrasesintext() ) << 8) / (1 + max.phrasesintext()- min.phrasesintext()) ) << ranking.coeff_phrasesintext)
+           + (       (((t.llocal()       - min.llocal()        ) << 8) / (1 + max.llocal()       - min.llocal())        ) << ranking.coeff_llocal)
+           + (       (((t.lother()       - min.lother()        ) << 8) / (1 + max.lother()       - min.lother())        ) << ranking.coeff_lother)
+           + (       (((t.hitcount()     - min.hitcount()      ) << 8) / (1 + max.hitcount()     - min.hitcount())      ) << ranking.coeff_hitcount)
+           + (       authority(t.urlHash()) << ranking.coeff_authority)
            + (((flags.get(indexRWIEntry.flag_app_url))        ? 255 << ranking.coeff_appurl      : 0))
            + (((flags.get(indexRWIEntry.flag_app_descr))      ? 255 << ranking.coeff_appdescr    : 0))
            + (((flags.get(indexRWIEntry.flag_app_author))     ? 255 << ranking.coeff_appauthor   : 0))
@@ -157,11 +189,15 @@ public class indexRWIEntryOrder extends kelondroAbstractOrder implements kelondr
         private indexRWIVarEntry entryMin, entryMax;
         private indexContainer container;
         private int start, end;
+        private HashMap doms;
+        private Integer int1;
         
         public minmaxfinder(indexContainer container, int start /*including*/, int end /*excluding*/) {
             this.container = container;
             this.start = start;
             this.end = end;
+            this.doms = new HashMap();
+            this.int1 = new Integer(1);
         }
         
         public void run() {
@@ -170,11 +206,26 @@ public class indexRWIEntryOrder extends kelondroAbstractOrder implements kelondr
             this.entryMax = null;
             indexRWIRowEntry iEntry;
             int p = this.start;
+            String dom;
+            Integer count;
             while (p < this.end) {
                 iEntry = new indexRWIRowEntry(container.get(p++));
+                // find min/max
                 if (this.entryMin == null) this.entryMin = new indexRWIVarEntry(iEntry); else indexRWIVarEntry.min(this.entryMin, iEntry);
                 if (this.entryMax == null) this.entryMax = new indexRWIVarEntry(iEntry); else indexRWIVarEntry.max(this.entryMax, iEntry);
+                // update domcount
+                dom = iEntry.urlHash().substring(6);
+                count = (Integer) doms.get(dom);
+                if (count == null) {
+                	doms.put(dom, int1);
+                } else {
+                	doms.put(dom, new Integer(count.intValue() + 1));
+                }
             }
+        }
+        
+        public HashMap domcount() {
+        	return this.doms;
         }
     }
     

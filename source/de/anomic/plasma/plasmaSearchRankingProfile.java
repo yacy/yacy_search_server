@@ -62,6 +62,7 @@ public class plasmaSearchRankingProfile {
     public static final String POSINTEXT     = "posintext";
     public static final String POSOFPHRASE   = "posofphrase";
     public static final String POSINPHRASE   = "posinphrase";
+    public static final String AUTHORITY     = "authority";
     public static final String WORDDISTANCE  = "worddistance";
     public static final String APPURL        = "appurl";
     public static final String APPDESCR      = "appdescr";
@@ -83,7 +84,7 @@ public class plasmaSearchRankingProfile {
     public int
         coeff_domlength, coeff_ybr, coeff_date, coeff_wordsintitle, coeff_wordsintext, coeff_phrasesintext,
         coeff_llocal, coeff_lother, coeff_urllength, coeff_urlcomps, coeff_hitcount, 
-        coeff_posintext, coeff_posofphrase, coeff_posinphrase, coeff_worddistance,
+        coeff_posintext, coeff_posofphrase, coeff_posinphrase, coeff_authority, coeff_worddistance,
         coeff_appurl, coeff_appdescr, coeff_appauthor, coeff_apptags, coeff_appref, coeff_appemph,
         coeff_catindexof, coeff_cathasimage, coeff_cathasaudio, coeff_cathasvideo, coeff_cathasapp,
         coeff_urlcompintoplist, coeff_descrcompintoplist, coeff_prefer;
@@ -91,34 +92,35 @@ public class plasmaSearchRankingProfile {
     public plasmaSearchRankingProfile(int mediatype) {
         // set default-values
         coeff_domlength          = 8;
-        coeff_ybr                = 8;
+        coeff_ybr                = 9;
         coeff_date               = 4;
         coeff_wordsintitle       = 4;
-        coeff_wordsintext        = 1;
-        coeff_phrasesintext      = 1;
+        coeff_wordsintext        = 2;
+        coeff_phrasesintext      = 3;
         coeff_llocal             = 2;
         coeff_lother             = 3;
-        coeff_urllength          = 14;
-        coeff_urlcomps           = 14;
-        coeff_hitcount           = 5;
-        coeff_posintext          = 7;
-        coeff_posofphrase        = 6;
+        coeff_urllength          = 15;
+        coeff_urlcomps           = 15;
+        coeff_hitcount           = 4;
+        coeff_posintext          = 11;
+        coeff_posofphrase        = 9;
         coeff_posinphrase        = 1;
+        coeff_authority          = 13;
         coeff_worddistance       = 15;
         coeff_appurl             = 14;
-        coeff_appdescr           = 13;
+        coeff_appdescr           = 12;
         coeff_appauthor          = 13;
         coeff_apptags            = 8;
-        coeff_appref             = 9;
-        coeff_appemph            = 13;
+        coeff_appref             = 8;
+        coeff_appemph            = 12;
         coeff_urlcompintoplist   = 3;
         coeff_descrcompintoplist = 2;
         coeff_prefer             = 15;
-        coeff_catindexof         = (mediatype == plasmaSearchQuery.CONTENTDOM_TEXT) ? 1 : 10;
-        coeff_cathasimage        = (mediatype == plasmaSearchQuery.CONTENTDOM_IMAGE) ? 15 : 1;
-        coeff_cathasaudio        = (mediatype == plasmaSearchQuery.CONTENTDOM_AUDIO) ? 15 : 1;
-        coeff_cathasvideo        = (mediatype == plasmaSearchQuery.CONTENTDOM_VIDEO) ? 15 : 1;
-        coeff_cathasapp          = (mediatype == plasmaSearchQuery.CONTENTDOM_APP) ? 15 : 1;
+        coeff_catindexof         = (mediatype == plasmaSearchQuery.CONTENTDOM_TEXT) ? 0 : 15;
+        coeff_cathasimage        = (mediatype == plasmaSearchQuery.CONTENTDOM_IMAGE) ? 15 : 0;
+        coeff_cathasaudio        = (mediatype == plasmaSearchQuery.CONTENTDOM_AUDIO) ? 15 : 0;
+        coeff_cathasvideo        = (mediatype == plasmaSearchQuery.CONTENTDOM_VIDEO) ? 15 : 0;
+        coeff_cathasapp          = (mediatype == plasmaSearchQuery.CONTENTDOM_APP) ? 15 : 0;
     }
     
     public plasmaSearchRankingProfile(String prefix, String profile) {
@@ -153,6 +155,7 @@ public class plasmaSearchRankingProfile {
             coeff_posintext          = parseMap(coeff, POSINTEXT, coeff_posintext);
             coeff_posofphrase        = parseMap(coeff, POSOFPHRASE, coeff_posofphrase);
             coeff_posinphrase        = parseMap(coeff, POSINPHRASE, coeff_posinphrase);
+            coeff_authority          = parseMap(coeff, AUTHORITY, coeff_authority);
             coeff_worddistance       = parseMap(coeff, WORDDISTANCE, coeff_worddistance);
             coeff_appurl             = parseMap(coeff, APPURL, coeff_appurl);
             coeff_appdescr           = parseMap(coeff, APPDESCR, coeff_appdescr);
@@ -207,6 +210,7 @@ public class plasmaSearchRankingProfile {
         ext.put(prefix + POSINTEXT, Integer.toString(coeff_posintext));
         ext.put(prefix + POSOFPHRASE, Integer.toString(coeff_posofphrase));
         ext.put(prefix + POSINPHRASE, Integer.toString(coeff_posinphrase));
+        ext.put(prefix + AUTHORITY, Integer.toString(coeff_authority));
         ext.put(prefix + WORDDISTANCE, Integer.toString(coeff_worddistance));
         ext.put(prefix + APPURL, Integer.toString(coeff_appurl));
         ext.put(prefix + APPDESCR, Integer.toString(coeff_appdescr));
