@@ -71,7 +71,10 @@ public class WatchCrawler_p {
         } else {
             prop.put("info", "0");
             
-            if ((post.containsKey("autoforward")) && (switchboard.crawlQueues.coreCrawlJobSize() == 0) && (switchboard.crawlQueues.remoteTriggeredCrawlJobSize() == 0)) {
+            if ((post.containsKey("autoforward")) &&
+                (switchboard.crawlQueues.coreCrawlJobSize() == 0) &&
+                (switchboard.crawlQueues.remoteTriggeredCrawlJobSize() == 0) &&
+                (switchboard.queueSize() < 30)) {
                 prop.put("forwardToCrawlStart", "1");
             }
             
