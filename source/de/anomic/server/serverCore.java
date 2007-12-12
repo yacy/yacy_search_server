@@ -1162,34 +1162,56 @@ public final class serverCore extends serverAbstractThread implements serverThre
         
     }
 
+    /**
+     * Read a line from a protocol stream (HTTP/ICAP) and do some
+     * pre-processing (check validity, strip line endings).
+     * <br>
+     * Illegal control characters will be stripped from the result.
+     * Besides the valid line ending CRLF a single LF is treated as a
+     * line ending as well to avoid errors with buggy server.
+     * 
+     * @param pbis    The stream to read from.
+     * @param maxSize maximum number of bytes to read in one run.
+     * @param logerr  log error messages if true, be silent otherwise.
+     * 
+     * @return A byte array representing one line of the input or 
+     *         <code>null</null> if EOS reached.
+     */
     public static byte[] receive(PushbackInputStream pbis, int maxSize, boolean logerr) {
 
         // reuse an existing linebuffer
         serverByteBuffer readLineBuffer = new serverByteBuffer(80);
-        serverByteBuffer temp = new serverByteBuffer(80);
 
-        int bufferSize = 0, b = 0;    	
+        int bufferSize = 0, b = 0;
         try {
-            while ((b = pbis.read()) != cr) {
-                temp.write(b);
-                if (bufferSize++ > maxSize) break;
+            // catch bytes until line end or illegal character reached or buffer full
+            // resulting readLineBuffer doesn't include CRLF or illegal control chars
+            while (bufferSize < maxSize) {
+                b = pbis.read();
+            
+                if ((b > 31 && b != 127) || b == 9) {
+                    // add legal chars to the result
+                    readLineBuffer.append(b);
+                    bufferSize++;
+                } else if (b == cr) {
+                    // possible beginning of CRLF, check following byte
+                    b = pbis.read();
+                    if (b == lf) {
+                        // line end catched: break the loop
+                        break;
+                    } else if (b >= 0) {
+                        // no line end: push back the byte, ignore the CR
+                        pbis.unread(b);
+                    }
+                } else if (b == lf || b < 0) {
+                    // LF without precedent CR: treat as line end of broken servers
+                    // b < 0: EOS
+                    break;
+                }
             }
 
-            // we have catched a possible line end
-            if (b == cr) {
-                // maybe a lf follows, read it:
-                if ((b = pbis.read()) != lf) if (b >= 0) pbis.unread(b); // we push back the byte
-            }
-
-            byte tempByte;
-            for(int i=0; i<temp.length(); i++){
-                tempByte = temp.byteAt(i);
-                // filter illegal bytes send by buggy HTTP servers
-                if( tempByte == 9 || (tempByte > 31 && tempByte != 127))
-                    readLineBuffer.append(tempByte);
-            }
-
-            if ((readLineBuffer.length()==0)&&(b == -1)) return null;
+            // EOS
+            if (bufferSize == 0 && b == -1) return null;
             return readLineBuffer.getBytes();
         } catch (ClosedByInterruptException e) {
             if (logerr) serverLog.logSevere("SERVER", "receive interrupted - timeout");
