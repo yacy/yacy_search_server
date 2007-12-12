@@ -278,7 +278,7 @@ public class yacysearch {
             long timestamp = System.currentTimeMillis();
 
             // create a new search event
-            if (plasmaSearchEvent.getEvent(theQuery.id()) == null) {
+            if (plasmaSearchEvent.getEvent(theQuery.id(false)) == null) {
                 theQuery.setOffset(0); // in case that this is a new search, always start without a offset 
                 offset = 0;
             }
@@ -347,11 +347,11 @@ public class yacysearch {
             // generate the search result lines; they will be produced by another servlet
             for (int i = 0; i < theQuery.displayResults(); i++) {
                 prop.put("results_" + i + "_item", offset + i);
-                prop.put("results_" + i + "_eventID", theQuery.id());
+                prop.put("results_" + i + "_eventID", theQuery.id(false));
             }
             prop.put("results", theQuery.displayResults());
             prop.put("resultTable", (contentdomCode <= 1) ? "0" : "1");
-            prop.put("eventID", theQuery.id()); // for bottomline
+            prop.put("eventID", theQuery.id(false)); // for bottomline
             
             // process result of search
             if (filtered.size() > 0) {

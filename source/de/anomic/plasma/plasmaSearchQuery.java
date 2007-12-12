@@ -189,6 +189,24 @@ public plasmaSearchQuery(String queryString, TreeSet queryHashes, TreeSet exclud
         while (i.hasNext()) sb.append((String) i.next());
         return new String(sb);
     }
+
+    public static String anonymizedQueryHashes(Set hashes) {
+        // create a more anonymized representation of euqery hashes for logging
+        Iterator i = hashes.iterator();
+        StringBuffer sb = new StringBuffer(hashes.size() * (yacySeedDB.commonHashLength + 2) + 2);
+        sb.append("[");
+        String hash;
+        if (i.hasNext()) {
+            hash = (String) i.next();
+            sb.append(hash.substring(0, 3)).append(".........");
+        }
+        while (i.hasNext()) {
+            hash = (String) i.next();
+            sb.append(", ").append(hash.substring(0, 3)).append(".........");
+        }
+        sb.append("]");
+        return new String(sb);
+    }
     
     public static final boolean matches(String text, TreeSet keyhashes) {
     	// returns true if any of the word hashes in keyhashes appear in the String text
@@ -245,27 +263,13 @@ public plasmaSearchQuery(String queryString, TreeSet queryHashes, TreeSet exclud
     	kelondroMSetTools.excludeDestructive(queryHashes, blues);
     }
 
-    public static String anonymizedQueryHashes(Set hashes) {
-        // create a more anonymized representation of euqery hashes for logging
-        StringBuffer sb = new StringBuffer(hashes.size() * 14 + 2);
-        Iterator i = hashes.iterator();
-        sb.append("[");
-        String hash;
-        if (i.hasNext()) {
-            hash = (String) i.next();
-            sb.append(hash.substring(0, 3)).append(".........");
-        }
-        while (i.hasNext()) {
-            hash = (String) i.next();
-            sb.append(", ").append(hash.substring(0, 3)).append(".........");
-        }
-        sb.append("]");
-        return new String(sb);
-    }
-    
-    public String id() {
+    public String id(boolean anonymized) {
         // generate a string that identifies a search so results can be re-used in a cache
-        return hashSet2hashString(this.queryHashes) + "-" + hashSet2hashString(this.excludeHashes) + ":" + this.contentdom;
+        if (anonymized) {
+            return anonymizedQueryHashes(this.queryHashes) + "-" + anonymizedQueryHashes(this.excludeHashes) + ":" + this.contentdom;
+        } else {
+            return hashSet2hashString(this.queryHashes) + "-" + hashSet2hashString(this.excludeHashes) + ":" + this.contentdom;
+        }
     }
     
     public HashMap resultProfile(int searchcount, long searchtime, long urlretrieval, long snippetcomputation) {

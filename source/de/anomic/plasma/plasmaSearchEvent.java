@@ -147,7 +147,7 @@ public final class plasmaSearchEvent {
                     ranking,
                     query.constraint,
                     (query.domType == plasmaSearchQuery.SEARCHDOM_GLOBALDHT) ? null : preselectedPeerHashes);
-            serverProfiling.update("SEARCH", new plasmaProfiling.searchEvent(query.id(), "remote search thread start", this.primarySearchThreads.length, System.currentTimeMillis() - timer));
+            serverProfiling.update("SEARCH", new plasmaProfiling.searchEvent(query.id(true), "remote search thread start", this.primarySearchThreads.length, System.currentTimeMillis() - timer));
             
             // meanwhile do a local search
             localSearchThread = new localSearchProcess();
@@ -188,7 +188,7 @@ public final class plasmaSearchEvent {
                     IACount.put(wordhash, new Integer(container.size()));
                     IAResults.put(wordhash, indexContainer.compressIndex(container, null, 1000).toString());
                 }
-                serverProfiling.update("SEARCH", new plasmaProfiling.searchEvent(query.id(), "abstract generation", this.rankedCache.searchContainerMaps()[0].size(), System.currentTimeMillis() - timer));
+                serverProfiling.update("SEARCH", new plasmaProfiling.searchEvent(query.id(true), "abstract generation", this.rankedCache.searchContainerMaps()[0].size(), System.currentTimeMillis() - timer));
             }
             
         }
@@ -228,15 +228,15 @@ public final class plasmaSearchEvent {
                     }
                 }
             }
-            serverProfiling.update("SEARCH", new plasmaProfiling.searchEvent(query.id(), "offline snippet fetch", resultList.size(), System.currentTimeMillis() - timer));
+            serverProfiling.update("SEARCH", new plasmaProfiling.searchEvent(query.id(true), "offline snippet fetch", resultList.size(), System.currentTimeMillis() - timer));
         }
         
         // clean up events
         cleanupEvents(false);
         
         // store this search to a cache so it can be re-used
-        lastEvents.put(query.id(), this);
-        lastEventID = query.id();
+        lastEvents.put(query.id(false), this);
+        lastEventID = query.id(false);
     }
 
     private class localSearchProcess extends Thread {
@@ -267,7 +267,7 @@ public final class plasmaSearchEvent {
                 Set removeWords = cleanEvent.query.queryHashes;
                 removeWords.addAll(cleanEvent.query.excludeHashes);
                 cleanEvent.wordIndex.removeEntriesMultiple(removeWords, cleanEvent.failedURLs.keySet());
-                serverLog.logInfo("SearchEvents", "cleaning up event " + cleanEvent.query.id() + ", removed " + cleanEvent.failedURLs.size() + " URL references on " + removeWords.size() + " words");
+                serverLog.logInfo("SearchEvents", "cleaning up event " + cleanEvent.query.id(true) + ", removed " + cleanEvent.failedURLs.size() + " URL references on " + removeWords.size() + " words");
                 
                 // remove the event
                 i.remove();
@@ -362,7 +362,7 @@ public final class plasmaSearchEvent {
             } else {
                 // problems with snippet fetch
                 registerFailure(page.hash(), "no text snippet for URL " + comp.url());
-                plasmaSnippetCache.failConsequences(snippet, query.id());
+                plasmaSnippetCache.failConsequences(snippet, query.id(false));
                 return null;
             }
         } else {
@@ -457,7 +457,7 @@ public final class plasmaSearchEvent {
             boolean generateAbstracts,
             TreeSet abstractSet) {
         synchronized (lastEvents) {
-            plasmaSearchEvent event = (plasmaSearchEvent) lastEvents.get(query.id());
+            plasmaSearchEvent event = (plasmaSearchEvent) lastEvents.get(query.id(false));
             if (event == null) {
                 event = new plasmaSearchEvent(query, ranking, wordIndex, preselectedPeerHashes, generateAbstracts, abstractSet);
             } else {

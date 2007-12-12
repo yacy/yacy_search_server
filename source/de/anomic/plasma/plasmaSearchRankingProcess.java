@@ -95,7 +95,7 @@ public final class plasmaSearchRankingProcess {
         
         long timer = System.currentTimeMillis();
         this.localSearchContainerMaps = wordIndex.localSearchContainers(query, null);
-        serverProfiling.update("SEARCH", new plasmaProfiling.searchEvent(query.id(), plasmaSearchEvent.COLLECTION, this.localSearchContainerMaps[0].size(), System.currentTimeMillis() - timer));
+        serverProfiling.update("SEARCH", new plasmaProfiling.searchEvent(query.id(true), plasmaSearchEvent.COLLECTION, this.localSearchContainerMaps[0].size(), System.currentTimeMillis() - timer));
         
         // join and exlcude the local result
         timer = System.currentTimeMillis();
@@ -106,7 +106,7 @@ public final class plasmaSearchRankingProcess {
                       this.localSearchContainerMaps[0].values(),
                       this.localSearchContainerMaps[1].values(),
                       query.maxDistance);
-        serverProfiling.update("SEARCH", new plasmaProfiling.searchEvent(query.id(), plasmaSearchEvent.JOIN, index.size(), System.currentTimeMillis() - timer));
+        serverProfiling.update("SEARCH", new plasmaProfiling.searchEvent(query.id(true), plasmaSearchEvent.JOIN, index.size(), System.currentTimeMillis() - timer));
         int joincount = index.size();
         
         if ((index == null) || (joincount == 0)) {
@@ -172,7 +172,7 @@ public final class plasmaSearchRankingProcess {
             this.order = new indexRWIEntryOrder(ranking);
         }
         this.order.extend(container);
-        serverProfiling.update("SEARCH", new plasmaProfiling.searchEvent(query.id(), plasmaSearchEvent.NORMALIZING, container.size(), System.currentTimeMillis() - timer));
+        serverProfiling.update("SEARCH", new plasmaProfiling.searchEvent(query.id(true), plasmaSearchEvent.NORMALIZING, container.size(), System.currentTimeMillis() - timer));
         
         /*
         container.setOrdering(o, 0);
@@ -233,7 +233,7 @@ public final class plasmaSearchRankingProcess {
         //System.out.println("###DEBUG### time to sort " + container.size() + " entries to " + this.filteredCount + ": " + sc + " milliseconds, " + (container.size() / sc) + " entries/millisecond, ranking = " + tc);
         
         //if ((query.neededResults() > 0) && (container.size() > query.neededResults())) remove(true, true);
-        serverProfiling.update("SEARCH", new plasmaProfiling.searchEvent(query.id(), plasmaSearchEvent.PRESORT, container.size(), System.currentTimeMillis() - timer));
+        serverProfiling.update("SEARCH", new plasmaProfiling.searchEvent(query.id(true), plasmaSearchEvent.PRESORT, container.size(), System.currentTimeMillis() - timer));
     }
 
     private boolean testFlags(indexRWIEntry ientry) {

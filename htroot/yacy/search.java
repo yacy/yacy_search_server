@@ -149,7 +149,7 @@ public final class search {
 
             long timer = System.currentTimeMillis();
             Map[] containers = sb.wordIndex.localSearchContainers(theQuery, plasmaSearchQuery.hashes2Set(urls));
-            serverProfiling.update("SEARCH", new plasmaProfiling.searchEvent(theQuery.id(), plasmaSearchEvent.COLLECTION, containers[0].size(), System.currentTimeMillis() - timer));
+            serverProfiling.update("SEARCH", new plasmaProfiling.searchEvent(theQuery.id(true), plasmaSearchEvent.COLLECTION, containers[0].size(), System.currentTimeMillis() - timer));
             if (containers != null) {
                 Iterator ci = containers[0].entrySet().iterator();
                 Map.Entry entry;
@@ -244,7 +244,7 @@ public final class search {
                 refstr.append(",").append((String) j.next());
             }
             prop.put("references", (refstr.length() > 0) ? refstr.substring(1) : refstr.toString());
-            serverProfiling.update("SEARCH", new plasmaProfiling.searchEvent(theQuery.id(), "reference collection", ws.size(), System.currentTimeMillis() - timer));
+            serverProfiling.update("SEARCH", new plasmaProfiling.searchEvent(theQuery.id(true), "reference collection", ws.size(), System.currentTimeMillis() - timer));
         }
         prop.put("indexabstract", indexabstract.toString());
         
@@ -271,7 +271,7 @@ public final class search {
             }
             prop.put("links", links.toString());
             prop.put("linkcount", accu.size());
-            serverProfiling.update("SEARCH", new plasmaProfiling.searchEvent(theQuery.id(), "result list preparation", accu.size(), System.currentTimeMillis() - timer));
+            serverProfiling.update("SEARCH", new plasmaProfiling.searchEvent(theQuery.id(true), "result list preparation", accu.size(), System.currentTimeMillis() - timer));
         }
         
         // add information about forward peers
