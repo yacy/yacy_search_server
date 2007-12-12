@@ -389,7 +389,8 @@ public final class indexRAMRI implements indexRI {
     }
     
     public int sizeContainer(String wordHash) {
-        return ((indexContainer) cache.get(wordHash)).size();
+        indexContainer c = (indexContainer) cache.get(wordHash);
+        return (c == null) ? 0 : c.size();
     }
 
     public synchronized indexContainer getContainer(String wordHash, Set urlselection) {

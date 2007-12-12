@@ -354,7 +354,7 @@ public class plasmaCrawlProfile {
                 long l = Long.parseLong(r) * 60000L;
                 return (l < 0) ? Long.MAX_VALUE : l;
             } catch (NumberFormatException e) {
-                return 0;
+                return Long.MAX_VALUE;
             }
         }
         public int domFilterDepth() {

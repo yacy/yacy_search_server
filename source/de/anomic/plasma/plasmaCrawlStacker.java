@@ -457,10 +457,15 @@ public final class plasmaCrawlStacker extends Thread {
         String dbocc = sb.crawlQueues.urlExists(entry.url().hash());
         indexURLEntry oldEntry = this.sb.wordIndex.loadedURL.load(entry.url().hash(), null, 0);
         boolean recrawl = (oldEntry != null) && ((System.currentTimeMillis() - oldEntry.loaddate().getTime()) > profile.recrawlIfOlder());
-        // apply recrawl rule
-        if ((dbocc != null) && (!(recrawl))) {
+        // do double-check
+        if ((dbocc != null) && (!recrawl)) {
             reason = plasmaCrawlEURL.DOUBLE_REGISTERED + dbocc + ")";
             this.log.logFine("URL '" + entry.url().toString() + "' is double registered in '" + dbocc + "'. " + "Stack processing time: " + (System.currentTimeMillis()-startTime) + "ms");
+            return reason;
+        }
+        if ((oldEntry != null) && (!recrawl)) {
+            reason = plasmaCrawlEURL.DOUBLE_REGISTERED + "LURL)";
+            this.log.logFine("URL '" + entry.url().toString() + "' is double registered in 'LURL'. " + "Stack processing time: " + (System.currentTimeMillis()-startTime) + "ms");
             return reason;
         }
 
