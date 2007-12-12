@@ -353,7 +353,7 @@ YaCy \'\#\[clientname\]\#\': Search Page==YaCy '#[clientname]#': Page de recherc
 Text==Texte
 Images==Images
 #Audio==Audio
-Video==Vidéo
+>Video==>Vidéo
 Applications==Applications
 more options...==plus d'options...
 Max. number of results:==Nombre maximal de résultats:

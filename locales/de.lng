@@ -875,6 +875,7 @@ pos in text</td>==Pos. im Text</td>
 pos of phrase</td>==Pos. des Satzes</td>
 pos in phrase</td>==Pos. im Satz</td>
 word distance</td>==Wort Distanz</td>
+<td>authority</td>==<td>Autorit&auml;t</td>
 <td>date</td>==<td>Datum</td>
 words in title</td>==W&ouml;rter im Titel</td>
 words in text</td>==W&ouml;rter im Text</td>
@@ -1460,8 +1461,10 @@ Amount</td>==Umfang</td>
 Performance Settings of Search Sequence==Performanceeinstellungen des Suchablaufs
 Search Sequence Timing==Timing des Suchablaufs
 Timing results of latest search request:==Timing-Ergebnisse der letzten Suchanfrage:
+Query==Abfrage
 Event</td>==Ereignis</td>
-Time \(milliseconds\)==Zeit (Millisekunden)
+Time==Zeit
+Duration \(milliseconds\)==Dauer (Millisekunden)
 Result-Count==Anzahl Ergebnisse
 The network picture below shows how the latest search query was solved by asking corresponding peers in the DHT:==Das Netzwerkbild zeigt wie die letzte Suche durch Anfragen bei zust&auml;ndigen Peers im DHT gel&ouml;st wurde.
 "Search event picture"=="Such Ereignis Bild"
@@ -1939,42 +1942,23 @@ You have a principal peer because you publish your seed-list to a public accessi
 where it can be retrieved using the URL==von wo aus sie unter folgender Adresse erreichbar ist:
 Your Web Page Indexer is idle. You can start your own web crawl <a href="CrawlStartSimple_p.html">here</a>==Ihr Webseiten Indexierer ist unt&auml;tig. Sie k&ouml;nnen <a href="CrawlStartSimple_p.html">hier</a> einen Web Crawl starten 
 Your Web Page Indexer is busy. You can <a href="WatchCrawler_p.html">monitor your web crawl</a> here.==Ihr Webseiten Indexierer ist besch&auml;ftigt. Sie k&ouml;nnen Ihren Web Crawl <a href="WatchCrawler_p.html">hier</a> kontrollieren
-Public System Properties==Allgemeine Systemangaben
-System Version==Systemversion
-This&nbsp;peer's&nbsp;address==Adresse dieses Peers
-Not assigned==nicht zugewiesen
-This peer's name==Name dieses Peers
-This peer's statistics==Statistik dieses Peers
-Unknown==unbekannt
-Uptime==Online seit
-Connects:==Verbindungen:
-"connected Juniors"=="verbundene Juniors"
-"connected Seniors"=="verbundene Seniors"
-"connected Principals"=="verbundene Principals"
-"disconnected peers"=="nichtverbundene Peers"
-peers/hour==Peers/Stunde
-This peer's status==Status dieses Peers
-#Virgin==Virgin
-#Junior==Junior
-#Senior==Senior
-#Principal==Principal
-Other peers==Andere Peers
-not online==nicht online
-other peers online.==andere Peers online.
-Log-In==Einloggen
-Click here to <==Klicken Sie <
-log in<==hier,<
-as administrator and see full status.==um sich als Administrator einzuloggen und den vollst&auml;ndigen Status zu sehen.
 #-----------------------------
 
 #File: Status_p.inc
 #---------------------------
-Private System Properties==Private Systemeigenschaften
+#System Status==System Status
+Process</dt>==Prozess</dt>
+Unknown==unbekannt
+Uptime==Online seit
 System Resources==Systemressourcen
 Processors:==Prozessoren:
 Protection==Sicherheit
 Password is missing==Kein Passwort
 password-protected==Passwort-gesch&uuml;tzt
+Address</dt>==Adresse</dt>
+peer address not assigned==Peer Adresse nicht zugewiesen
+Public Address:==&Ouml;ffentliche Adresse:
+YaCy Address:==YaCy Adresse:
 #Peer Host==Peer Host
 #Port Forwarding Host==Port Forwarding Host
 not used==nicht benutzt
@@ -2003,7 +1987,7 @@ Idle:==Wartend:
 Indexing Queue==Indexier Puffer
 Loader Queue==Lade Puffer
 paused==angehalten
-Crawler Queues==Crawler Puffer
+Queues==Puffer
 Local Crawl==Lokales Crawlen
 Remote triggered Crawl==eingehende Remote-Crawls
 Pre-Queueing==Vor-Pufferung
