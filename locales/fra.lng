@@ -7,7 +7,7 @@
 # Frankfurt, Germany, 2005
 #
 # This file is maintained by gDupont
-# This file is written by gDupont, Marsupoil
+# This file is written by gDupont, Marsupoil, Mikayé
 
 # If you find any mistakes or untranslated strings in this file please don't hesitate to email them to the maintainer.
 
@@ -17,14 +17,14 @@
 # Contributors are in chronological ordern, not how much they did absolutely.
 # Thank you for your help!
 <!-- lang -->default\(english\)==french
-<!-- author -->==gDupont, Marsupoil
+<!-- author -->==gDupont, Marsupoil, Mikayé
 <!-- maintainer -->==gDupont
 #-----------------------------
 
 #File: Blacklist_p.html
 #---------------------------
 Blacklist Manager==Gestionnaire des listes noires
-#Blacklist==Liste noire
+Blacklist==Liste noire
 Used Blacklist engine:==Moteur de liste noire utilisé:
 This function provides an URL filter to the proxy; any blacklisted URL is blocked from being loaded.==Cette fonction fournis un filtre d'URL sur le serveur Proxy. Tout URL sur la liste noire ne pourra être chargé.
 You can define several blacklists and activate them separately.==Vous pouvez définir de nombreuses listes noires et les activer séparément.
@@ -68,7 +68,7 @@ export as XML==exporter en XML
 Blog-Home==Accueil du blog
 Author:==Auteur:
 Subject:==Titre:
-#Text:==Texte:
+Text:==Texte:
 You can use==Vous pouvez utiliser
 Yacy-Wiki Code==le code YaCy-Wiki 
 here.==ici.
@@ -209,10 +209,10 @@ Error saving the language file.==Erreur en sauvegardant le fichier de langue.
 Your Personal Profile==Votre profil personnel
 You can create a personal profile here. Other YaCy users can view these information using a link on the network page.==Vous pouvez créer un profil personnel ici. Les autres utilisateurs de YaCy peuvent consulter ce profil depuis la page de réseau.
 You do not need to provide any personal data here, but if you want to distribute your contact information, you can do that here.==Vous n'êtes pas obligés de fournir des informations personnelles, mais si vous voulez diffuser vos informations de contact ici, vous pouvez le faire ici.
-#Name==Name
-#Nick Name==Nick Name
-#Homepage==Homepage
-#eMail==eMail
+Name==Nom
+Nick Name==Pseudo
+Homepage==Page d'accueil
+eMail==courriel
 #ICQ==ICQ
 #Jabber==Jabber
 #Yahoo!==Yahoo!
@@ -243,7 +243,7 @@ Error saving the skin.==Erreur en sauvegardant la skin.
 Connection Tracking==Etat de connexion
 Incoming Connections==Connexions entrantes
 Showing \#\[numActiveRunning\]\# active, \#\[numActivePending\]\# pending connections from a max. of \#\[numMax\]\# allowed incoming connections.==Montrer #[numActiveRunning]# connexions actives et #[numActivePending]# connexions en attente d'un max. de #[numMax]# connexions entrantes autorisées.
-Protocol==Protocol
+Protocol==Protocole
 Duration==Durée
 Source IP\[:Port\]==Source-IP[:Port]
 Dest. IP\[:Port\]==Dest.-IP[:Port]
@@ -350,10 +350,10 @@ There is ".html" at the end, which is not included with the Regular Expression.=
 #---------------------------
 YaCy \'\#\[clientname\]\#\': Search Page==YaCy '#[clientname]#': Page de recherche
 "Search"=="Chercher"
-#Text==Text
+Text==Texte
 Images==Images
 #Audio==Audio
-V#ideo==Video
+Video==Vidéo
 Applications==Applications
 more options...==plus d'options...
 Max. number of results:==Nombre maximal de résultats:
@@ -363,7 +363,7 @@ YBR-Quality-Date==YBR-Qualité-Date
 Date-YBR-Quality==Date-YBR-Qualité
 Quality-YBR-Date==Qualité-YBR-Date
 Date-Quality-YBR==Date-Qualité-YBR
-Quality-Date-YBR==Qualité-Datum-YBR
+Quality-Date-YBR==Qualité-Date-YBR
 Resource:==Source:
 global==global
 local==local
@@ -380,7 +380,7 @@ only index pages==Pages d'index seulement
 
 #File: IndexCleaner_p.html
 #---------------------------
-Index Cleaner==Index Cleaner
+Index Cleaner==Nettoyeur d'index
 #ThreadAlive:
 #ThreadToString:
 Total URLs searched:==URLs totales recherchées:
@@ -760,7 +760,7 @@ The stack is empty.==La liste est vide.
 Showing all \#\[all\]\# entries in this stack.==Voir les #[all]# entrées de cette pile.
 Showing latest \#\[count\]\# lines from a stack of \#\[all\]\# entries.==Voir les #[count]# dernières lignes d'une pile de #[all]# entrées.
 "clear list"=="Vider la liste"
-#Initiator==Initiateur
+Initiator==Initiateur
 Executor==Executeur
 Modified Date==Date de modification
 Words==Mots
@@ -861,7 +861,7 @@ send <strong>M</strong>essage/<br />show <strong>P</strong>rofile/<br />edit <st
 Envoyer un message (<strong>m</strong>)/<br />Montrer le profil (<strong>p</strong>)/<br />Modifier Wiki (<strong>w</strong>)
 Name==Nom
 Address==Adresse
-Hash==Hâchage
+Hash==Hashage
 Type==Type
 Release/<br />SVN==Version YaCy/<br />SVN
 Contact==Contact
@@ -956,9 +956,9 @@ Performance Settings of Queues and Processes==Paramètres de performance des fil
 Scheduled tasks overview and waiting time settings:==Aperçu des tâches programmées et paramètres d'attente:
 Queue Size==Taille de file
 >Total==>Totale
-#Block Time==
-#Sleep Time==
-#Exec Time==
+Block Time==Temps de blocage
+Sleep Time==Temps de veille
+Exec Time==Temps d'execution
 >Cycles==>Cycles
 >Idle==>Inactif
 >Busy==>Actif
@@ -1054,7 +1054,7 @@ Best Max==Meilleur max.
 The Assortment Cluster stores most of the page indexes.==Le cluster d'assortiments stocke la plupart des index de pages.
 Flushing speed of the temporary RWI cache depends on the size of this file cache. Increasing the space of this==La vitesse de transfert du cache RWI temporaire dépends de la taille de ce fichier cache. Augmenter l'espace de ce
 cache will speed up crawls with a depth > 3.==le cache accélère les crawls avec une profondeur supérieure à 3.
-#HTTP Response Header==
+HTTP Response Header==Réponse HTTP
 The Response Header database stores the HTTP heades that other servers send when YaCy retrieves web pages==La base d'entêtes de réponses stocke les entêtes HTTP que les autres serveurs envoient lorsque YaCy retrouve les pages Web
 during proxy mode, when performing crawls or if it fetches pages for snippet generation.==durant le mode proxy en exécutant des crawl ou en parcourant les pages pour la génération d'extraits.
 Increasing this cache will be most important for a fast proxy mode.==Augmenter ce cache est important pour avoir un mode proxy rapide.	
@@ -1094,9 +1094,9 @@ these<br />custom<br />values==ces valeurs <br />utilisateur<br />
 all<br />default<br />values==toutes les valeurs <br />standard<br />
 all<br />recom-<br />mended values==toutes les valeurs <br />recommandées<br />
 all<br />optimum<br />values==toutes les valeurs <br />optimal<br />
-#Write Cache Object Allocation:==
-#now alive in write cache==
-#currently held in write buffer heap==
+Write Cache Object Allocation:==Ecrire le cache d'allocatin d'objet
+now alive in write cache==Maintenant active dans la mémoire du cache d'écriture
+#currently held in write buffer heap==Actuellement entrain d'écrire le tampon
 #-----------------------------
 
 #File: PerformanceSearch_p.html
@@ -1104,19 +1104,19 @@ all<br />optimum<br />values==toutes les valeurs <br />optimal<br />
 Performance Settings of Search Sequence==Paramètres de performances des séquences de recherche
 Timing Settings of Search Sequence==Paramètres de timing des séquences de recherche
 Settings for local search profile:==Paramètres des prfils de recherche locaux:
-#Entity==
+Entity==Entitée
 #Collection==
-#Join==
-#Pre-Sort==
+Join==Joindre
+Pre-Sort==Trier
 #URL Fetch==
-#Post-Sort==
-#Filter==
+Post-Sort==Trier les résultats
+Filter==Filtre
 #Snippet-Fetch==
 execution Time==Temps d'exécution
 percentage; sum of this must be 100==pourcentage; la somme doit faire 100
-#result count==
-#percentage of requested amount==
-Submit New Profile Values==Soumettre de nouvelles valeurs de profile
+result count==Comteur de résultats
+percentage of requested amount==Pourcentage des requêttes en amont
+Submit New Profile Values==Soumettre de nouvelles valeurs de profil
 Reset To Default Values==Eéinitialiser aux valeurs par défaut
 Your settings are valid and will be used for next search.==Vos paramètres sont valides et seront utilisés pour la prochaine recherche.
 Reset to default settings done.==Réinitialisation aux valeurs par défaut effectuée.
@@ -1168,6 +1168,389 @@ An error has occurred:==Une erreur est arrivée:
 You can see a snapshot of recently indexed pages==Vous pouvez voir un cliché des pages récement indexées
 on the==sur la
 Page.==page.
+#-----------------------------
+
+#File: QuickCrawlLink_p.html
+#---------------------------
+YaCy \'\#\[clientname\]\#\': Quick Crawl Link==YaCy '#[clientname]#''#[clientname]#': Schnell-Crawl-Link
+Quick Crawl Link==Lien d'exploration rapide
+Quickly adding Bookmarks:==Ajouter rapidement aux favoris:
+Simply drag and drop the link shown below to your Browsers Toolbar/Link-Bar.==Il suffit de glisser le lien ci-dessous vers votre barre d'outils/barre de liens.
+If you click on it while browsing, the currently viewed website will be inserted into the YaCy crawling queue for indexing.==Si vous cliquez dessus en cours de navigation, le site Web actuellement affichée sera inséré dans la file d'exploration en attente pour l'indexation.
+Crawl with YaCy==Crawler avec YaCy
+Title:==Titre:
+Link:==lien:
+Status:==Status:
+URL successfully added to Crawler Queue==URL ajouté à la file d'attente avec succès.
+Malformed URL==URL malformée
+Unable to create new crawling profile for URL:==Impossible de créer le nouveau profil pour l'exploration Web:
+Unable to add URL to crawler queue:==Impossible d'ajouter des URL dans la file d'exploration:
+#-----------------------------
+
+#File: Settings_p.html
+#---------------------------
+YaCy \'\#\[clientname\]\#\': Settings==YaCy '#[clientname]#': Paramètres
+<h2>Settings</h2>==<h2>Paramètres</h2>
+If you want to restore all settings to the default values,==Si vous souhaitez rétablir les valeurs par défaut des paramètres,
+but <strong>forgot your administration password</strong>, you must stop the proxy,==Mais que vous avez <strong> oublié votre mot de passe d'administration </ strong>, vous devez arrêter le proxy,
+delete the file 'DATA/SETTINGS/httpProxy.conf' in the YaCy application root folder and start YaCy again.==Supprimer le fichier 'DATA/SETTINGS/httpProxy.conf'dans le dossier racine de yacy et démarrer YaCy à nouveau.
+Administration Account Settings==Paramètres du compte administrateur
+Server Access Settings==Paramètres d'accès au serveur
+Proxy Access Settings==Paramètres Proxy
+Content Parser Settings==Paramètres de l'analyseur de contenu 
+Crawler Settings==Paramètres du Crawler
+HTTP Networking==Réseau HTTP
+Remote Proxy \(optional\)==Proxy à distance (optionel)
+Port Forwarding \(optional\)==Redirection de ports (optionel)
+System Behaviour Settings==Paramètres du système
+Seed Upload Settings==Paramètres d'envoi de Seed
+Message Forwarding \(optional\)==Redirection de messages (optionel)
+
+#-----------------------------
+
+
+#File: Settings_ProxyAccess.inc
+#---------------------------
+Proxy Access Settings==Proxyzugangs Einstellungen
+These settings configure the access method to your own http proxy and server.==Diese Einstellungen beeinflussen den Zugriff auf Ihren HTTP-Proxy und -Server.
+All traffic is routed throug one single port, for both proxy and server.==Alle Verbindungen werden durch einen einzigen Port hergestellt, für beides (Proxy und Server).
+
+Server/Proxy Port Configuration==Server/Proxy Port Konfiguration
+The socket addresses where YaCy should listen for incoming connections from other YaCy peers or http clients.==Die Socket-Adressen auf denen YaCy auf eingehende Verbindungen von anderen YaCy-Noeuds oder HTTP-Clients warten soll.
+You have four possibilities to specify the address:==Sie haben vier Möglichkeiten die Adresse anzugeben:
+defining a port only==nur einen Port angeben
+<em>e.g. 8080</em>==<em>z.B. 8080</em>
+defining IP address and port==eine IP-Adresse und Port angeben
+<em>e.g. 192.168.0.1:8080</em>==<em>z.B. 192.168.0.1:8080</em>
+defining host name and port==einen Hostnamen und Port angeben
+<em>e.g. home:8080</em>==<em>z.B. home:8080</em>
+defining interface name and port==einen Interface-namen und Port angeben
+<em>e.g. #eth0:8080</em>==<em>z.B. #eth0:8080</em>
+Hint: Dont forget to change your firewall configuration after you have changed the port.==Hinweis: Denken Sie daran Ihre Firewalleinstellungen zu ändern nachdem Sie den Port geändert haben.
+Proxy and http-Server Administration Port:==Proxy und HTTP-Server Administrations Port:
+Changes will take effect in 5-10 seconds==Die Änderungen werden in 5-10 Sekunden wirksam
+Server Access Restrictions==Server Zugangsbeschränkungen
+You can restrict the access to this proxy/server using a two-stage security barrier:==Sie können den Zugang zu diesem Proxy/Server mit einer 2-stufigen Sicherheitsbarriere einschränken:
+define an <em>access domain</em> with a list of granted client IP-numbers or with wildcards==geben Sie einen <em>Netzwerkadressraum</em> mithilfe einer Liste zugelassener Client-IP-Adressen oder mit Platzhaltern an
+define an <em>user account</em> with an user:password - pair==geben Sie einen <em>Nutzeraccount</em> mit einem nutzer:passwort-Paar an
+This is the account that restricts access to the proxy function.==Dies sind die Nutzer denen der Zugriff auf die Proxyfunktion gewährt wird.
+You probably don't want to share the proxy to the internet, so you should set the IP-Number Access Domain to a pattern that corresponds to you local intranet.==Sie wollen den Proxy vermutlich nicht im Internet zur Verfügung stellen, deshalb sollten Sie den IP-Adressraum so einstellen, dass er auf Ihr lokales Intranet zutrifft.
+The default setting should be right in most cases.==Die Standardwerte sollten in den meisten Fällen richtig sein.
+If you want, you can also set a proxy account so that every proxy user must authenticate first, but this is rather unusual.==Wenn Sie wollen können Sie auch Proxyaccounts erstellen, sodass sich jeder Proxynutzer zuerst anmelden muss, aber das ist eher unüblich.
+IP-Number filter==IP-Adressen Filter
+Use <a==Nutze <a
+#-----------------------------
+
+#File: Settings_Http.inc
+#---------------------------
+HTTP Networking==HTTP Netzwerk
+Transparent Proxy:==Transparenter Proxy:
+With this you can specify if YaCy can be used as transparent proxy.==Hiermit können Sie festlegen ob YaCy als transparenter Proxy genutzt werden kann.
+Hint: On linux you can configure your firewall to transparently redirect all http traffic through yacy using this iptables rule:==Hinweis: Unter Linux können Sie Ihre Firewall darauf einstellen alle HTTP-Verbindungen transparent an YaCy weiterzuleiten indem Sie diese iptables-Regel verwenden:
+With this you can specify if YaCy should support the HTTP connection keep-alive feature.==Hiermit können Sie festlegen ob YaCy die HTTP connection keep-alive Funktionalität unterstützen soll.
+Changes will take effect immediately.==Änderungen sind sofort wirksam.
+Hint: On linux you can configure your firewall to transparently redirect all http traffic through yacy using this iptables rule==Tipp: Unter Linux können Sie Ihre Firewall so konfigurieren, dass der gesamte HTTP-Traffic mithilfe dieser iptables-Regen über YaCy geleitet wird.
+Specifies if the proxy should send the X-Forwarded-For http header.==Gibt an, ob der Proxy den X-forwarded-For HTTP-Header setzen soll.
+Specifies if the proxy should send the <a href="http://www.w3.org/Protocols/rfc2616/rfc2616-sec14.html#sec14.45">Via</a>==Gibt an, ob der Proxy den <a href="http://www.w3.org/Protocols/rfc2616/rfc2616-sec14.html#sec14.45">Via-HTTP-Header</a>
+http header according to RFC 2616 Sect 14.45.==gemäß RFC 2616 Sect 14.45 senden soll.
+Submit==Speichern
+#-----------------------------
+
+#File: Settings_Proxy.inc
+#---------------------------
+YaCy can use another proxy to connect to the internet. You can enter the address for the remote proxy here:==YaCy kann einen anderen Proxy nutzen um sich zum Internet zu verbinden. Sie können die Adresse für den Remote Proxy hier eingeben.
+Use remote proxy:==Nutze Remote Proxy:
+Enables the usage of the remote proxy by yacy==Aktiviert die Nutzung des Remote Proxies durch YaCy
+Use remote proxy for yacy <-> yacy communication==Nutze Remote Proxy für YaCy <-> YaCy Kommunikation
+Specifies if the remote proxy should be used for the communication of this peer to other yacy peers.==Gibt an, ob der Remote Proxy für Kommunikation zwischen diesem und anderen YaCy-Noeuds genutzt werden soll.
+<em>Hint:</em> Enabling this option could cause this peer to remain in junior status.==<em>Hinweis:</em> Dies könnte dazu führen, dass dieser Noeud im Junior-Status verbleibt.
+Use remote proxy for https==Nutze Remote Proxy für HTTPS
+Specifies if YaCy should forward ssl connections to the remote proxy.==Gibt an, ob YaCy SSL-Verbindungen zum Remote Proxy weiterleiten soll.
+The ip address or domain name of the remote proxy==Die IP-Adresse oder der Domainname des Remote Proxy
+the port of the remote proxy==Der Port des Remote Proxy
+no-proxy adresses:==proxylose Adressen:
+IP addresses for which the remote proxy should not be used==IP-Adressen für die der Remote Proxy nicht genutzt werden soll
+Changes will take effect immediately.==Änderungen sind sofort wirksam.
+#-----------------------------
+
+#File: Settings_PortForwarding.inc
+#---------------------------
+# check for logical mistakes, unsure about some translations
+Port Forwarding==Port Weiterleitung
+You can use a remote server running a ssh demon to forward your server/proxy port.==Sie können einen Remote Server mit einem ssh demon nutzen, um Ihrem Server/Proxy Port weiterzuleiten.
+This is useful if you want to tunnel throug a NAT/router.==Dies ist nützlich, wenn Sie durch einen NAT/Router tunneln wollen.
+Alternatively, you can simply set a virtual server port on your NAT/Server to enable connections from outside.==Alternativ können Sie einfach einen virtuellen Server in Ihrem NAT/Router einstellen, um Verbindungen von Außerhalb zu ermöglichen.
+Enable port forwarding:==Aktiviere Port Weiterleitung:
+Enabling disabling port forwarding via secure channel.==Aktivieren/Deaktivieren von Port Weiterleitung über sicheren Kanal.
+Forwarding via proxy:==Weiterleitung über Proxy:
+Function not available at the moment.==Funktion im Moment nicht verfügbar.
+You need to install libx to use this feature==Sie müssen die libx installieren, um diese Funktionen benutzen zu können
+Forwarding port:==Weiterleitender Port
+The port on the remote server that should be forwarded via the secure channel to the local host.==Der Port des Remote Servers der mittels sicherem Kanal auf den lokalen Host weitergeleitet werden soll.
+Forwarding host:==Weiterleitender Host
+Forwarding host port:==Weiterleitender Host Port
+Forwarding host user:==Weiterleitender Host Nutzer
+Forwarding host password:==Weiterleitender Host mot de passe
+Changes will take effect immediately.==Änderungen sind sofort wirksam.
+#-----------------------------
+
+#File: Settings_ServerAccess.inc
+#---------------------------
+Server Access Settings==Serverzugangs Einstellungen 
+IP-Number filter:==IP-Addressfilter:
+Here you can restrict access to the server.==Hier können Sie den Zugang zum Server beschränken.
+By default, the access is not limited,==Standardmäßig ist der Zugang unbeschränkt,
+because this function is needed to spawn the p2p index-sharing function.==da dies notwendig ist um den P2P-Indextausch zu ermöglichen.
+If you block access to your server \(setting anything else than \'\*\'\), then you will also be blocked==Wenn Sie den Zugang zu Ihrem Server blockieren (Einstellen von irgendetwas anderem als '*') dann werden Sie auch davon ausgeschlossen
+from using other peers' indexes for search service.==den Index anderer Noeuds zur
+ Suche zu verwenden.
+However, blocking access may be correct in enterprise environments where you only want to index your==Wie auch immer, in Unternehmensumgebungen kann ein Blockieren richtig sein,
+company's own web pages.==wenn Sie nur die Unternehmenseigenen Websites indexieren wollen.
+staticIP \(optional\):==statische IP (optional):
+<strong>The staticIP can help that your peer can be reached by other peers in case that your==<strong>Die statische IP kann helfen Ihren Noeud für andere Noeuds erreichbar zu machen, falls Sie
+peer is behind a firewall or proxy.</strong> You can create a tunnel through the firewall/proxy==hinter einer Firewall oder einem Proxy sind.</strong> Sie können einen Tunnel durch die Firewall/Proxy créer
+\(look out for 'tunneling through https proxy with connect command'\) and create==(sehen Sie nach "Tunnelung durch einen https Proxy mit verbinden-Befehl") und créer Sie
+an access point for incoming connections.==einen Zugriffspunkt für eingehende Verbindungen.
+This access address can be set here \(either as IP number or domain name\).==Diese Zugrifssadresse kann hier angegeben werden (oder als IP Nummer oder Domain-Name).
+If the address of outgoing connections is equal to the address of incoming connections,==Wenn die Zugriffsadresse der ausgehenden Verbindungen dieselbe ist wie die der eingehenden Verbindungen, 
+you don't need to set anything here, please leave it blank.==brauchen Sie hier nichts angeben. Bitte lassen Sie das Feld leer.
+ATTENTION: Your current IP is recognized as "#\[clientIP\]#".==ACHTUNG: Ihre aktuelle IP wird als "#[clientIP]#" erkannt.
+If the value you enter here does not match with this IP,==Wenn der Wert, den Sie hier eingegeben haben, nicht mit dieser IP übereinstimmt,
+you will not be able to access the server pages anymore.==wird es nicht möglich sein auf die Serverseiten zuzugreifen.
+
+value="submit"==value="speichern"
+
+#-----------------------------
+
+#File: Settings_Seed.inc
+#---------------------------
+Seed Upload Settings==Seed Upload Einstellungen
+With these settings you can configure if you have an account on a public accessible==Mit diesen Einstellungen können Sie bestimmen ob Sie einen Account auf einem öffentlich zugänglichen
+server where you can host a seed-list file.==Server haben, wo Sie eine Seed-Liste bereitstellen können.
+General Settings:==Allgemeine Einstellungen:
+If you enable one of the available uploading methods, you will become a principal peer.==Wenn Sie eine der verfügbaren Uploadmethoden aktivieren, werden Sie ein Principal-Noeud.
+Your peer will then upload the seed-bootstrap information periodically,==Ihr Noeud wird dann die Seed-Bootstrap Informationen periodisch hochladen,
+but only if there have been changes to the seed-list.==jedoch nur wenn Änderungen an der Seed-Liste vorgenommen wurden.
+Upload Method:==Uploadmethode:
+Retry Uploading==Upload versuchen
+Here you can specify which upload method should be used.==Hier können Sie auswählen welche Uploadmethode verwendet werden soll.
+Select 'none' to deactivate uploading.==Verwenden Sie 'none' um den Upload zu deaktivieren.
+The URL that can be used to retrieve the uploaded seed file, like==Die URL die genutzt werden kann um die hochgeladene Seed-Liste zu erhalten, wie
+#-----------------------------
+#File: yacy/seedUpload/yacySeedUploadFtp.html
+#---------------------------
+Uploading via FTP:==Upload per FTP:
+This is the account for a FTP server where you can host a seed-list file.==Dies ist der Account für einen FTP-Server, auf dem Sie eine Seed-Liste bereitstellen können.
+If you set this, you will become a principal peer.==Wenn Sie das tun, werden Sie zum Principal-Noeud.
+Your peer will then upload the seed-bootstrap information periodically,==Ihr Noeud wird dann die Seed-Bootstrap Informationen periodisch hochladen,
+but only if there had been changes to the seed-list.==jedoch nur wenn Änderungen an der Seed-Liste existieren.
+The host where you have a FTP account, like==Der Host zu Ihrem FTP-Account, wie
+Path:==Pfad:
+The remote path on the FTP server, like==Der Remote-Pfad auf dem FTP-Server, wie
+Missing sub-directories are NOT created automatically.==Fehlende Unterverzeichnisse werden NICHT automatisch erstellt.
+Your log-in at the FTP server==Ihr Log-in auf dem FTP-Server
+Password:==mot de passe:
+The password==Das mot de passe
+#-----------------------------
+
+#File: yacy/seedUpload/yacySeedUploadFile.html
+#---------------------------
+Store into filesystem:==Ablegen im Fichiersystem:
+You must configure this if you want to store the seed-list file onto the file system.==Sie müssen diese Einstellungen vornehmen, wenn Sie die Seed-Liste im Fichiersystem ablegen wollen.
+File Location:==Speicherort:
+Here you can specify the path within the filesystem where the seed-list file should be stored.==Hier können Sie den Pfad im Fichiersystem festlegen, in dem die Seed-Liste abgelegt werden soll.
+#-----------------------------
+
+#File: Settings_MessageForwarding.inc
+#---------------------------
+Message Forwarding==Nachrichten Weiterleitung
+With this settings you can activate or deactivate forwarding of yacy-messages via email.==Mit diesen Einstellungen können Sie die Weiterleitung von YaCy-Nachrichten per E-Mail aktivieren oder deaktivieren.
+Enable message forwarding:==Aktiviere Nachrichten Weiterleitung:
+Enabling/Disabling message forwarding via email.==Aktivieren/Deaktivieren der Nachrichten Weiterleitung per E-Mail.
+Forwarding Command:==Weiterleitungskommando:
+The command-line program that should be used to forward the message.<br />e.g.:==Das Kommandozeilenprogramm, das verwendet werden soll um die Nachricht weiterzuleiten.<br />z.B.:
+Forwarding To:==Weiterleiten An:
+The recipient email-address.<br /> e.g.:==Die E-Mail Adresse des Empfängers.<br />z.B.:
+Changes will take effect immediately.==Änderungen sind sofort wirksam.
+#-----------------------------
+
+#File: Settings_Parser.inc
+#---------------------------
+Content Parser Settings==Inhalt Parser Einstellungen
+With this settings you can activate or deactivate parsing of additional content-types based on their MIME-types.==Mit diesen Einstellungen können Sie das Parsen zusätzlicher Fichiertypen basierend auf ihren MIME-Typen ermöglichen.
+For a detailed description of the various MIME-types take a look at==Für eine detailierte Beschreibung der verschiedenen MIME-Typen können Sie einen Blick auf
+http://www.iana.org/assignments/media-types/</a>==http://www.iana.org/assignments/media-types/</a> werfen.
+Changes take effect immediately==Änderungen sind sofort wirksam
+#-----------------------------
+
+#File: Settings_Crawler.inc
+#---------------------------
+Generic Crawler Settings==Allgemeine Crawler Einstellungen
+Connection timeout in ms==Verbindungs-Timeout in ms
+means unlimited==schaltet die Begrenzung ab
+Crawler Settings==Crawler Einstellungen
+Maximum Filesize==Maximale Fichiergröße
+Maximum allowed file size in bytes that should be downloaded==Maximale Größe der herunterzuladenden Fichier in Byte
+Larger files will be skipped==Größere Fichieren werden übersprungen
+Please note that if the crawler uses content compression, this limit is used to check the compressed content size==Beachten Sie, dass beim Herunterladen der Fichieren mittels "Content-Compression" die komprimierte Fichiergröße maßgeblich ist
+Submit==Speichern
+Changes will take effect immediately==Änderungen sind sofort aktiv
+#-----------------------------
+
+#File: SettingsAck_p.html
+#---------------------------
+YaCy \'\#\[clientname\]\#\': Settings Acknowledge==YaCy '#[clientname]#': Einstellung Verarbeitung
+Settings Receipt:==Einstellungen angenommen:
+No information has been submitted==Es wurden keine Informationen übertragen.
+Nothing changed==Nichts wurde verändert.
+Error with submitted information.==Es gab einen Fehler bei der Übertragung der Informationen.
+Nothing changed.==Nichts wurde verändert.
+The user name must be given.==Der User Name muss angegeben werden
+Your request cannot be processed.<br />Nothing changed.==Ihre Anfrage konnte nicht bearbeitet werden.<br />Nichts wurde verändert.
+The password redundancy check failed. You have probably misstyped your password.==Die mot de passeüberprüfung schlug fehl. Sie haben sich wahrscheinlich vertippt.
+Shutting down.</strong><br />Application will terminate after working off all crawling tasks.==Runterfahren</strong><br />Die Anwendung wird geschlossen, nachdem alle Crawls abgearbeitet wurden.
+Your administration account setting has been made.==Ihre Administrator Account Einstellungen wurden gespeichert.
+Your new administration account name is \#\[user\]\#. The password has been accepted.<br />If you go back to the Settings page, you must log-in again.==Ihr neuer Administrator Account Name ist #[user]#. Das mot de passe wurde akzeptiert.<br />Wenn Sie zurück zu den Einstellungen gehen wollen, müssen Sie sich neu einloggen.
+Your proxy access setting has been changed.==Die Proxy Zugangs Einstellungen wurden geändert.
+Your proxy account check has been disabled, since you did not supply a password.==
+The new proxy IP filter is set to==Der neue Proxy IP-Filter ist
+The proxy port is:==Der Proxy Port ist:
+if you changed the Port or Port Forwarding Settings, you need to restart YaCy.==Wenn Sie den Port oder die Post Weiterleitungs geändert haben, müssen Sie YaCy neu starten.
+Your proxy access setting has been changed.==Ihre Proxy Zugangs Einstellung wurden geändert.
+Your new proxy account name is \#\[user\]\#. The password has been accepted.==Ihr neuer Proxy Account Name ist #[user]#. Ihr mot de passe wurde akzeptiert.
+If you open any public web page through the proxy, you must log-in then.==
+Your server access filter is now set to #[filter]#
+Auto pop-up of the Status page is now <strong>disabled</strong>==Das
+ automatisches Pop-Up der Status Seite beim Browserstart ist nun <strong>deaktiviert.</strong>
+Auto pop-up of the Status page is now <strong>enabled</strong>==Das automatisches Pop-Up der Status Seite beim Browserstart ist nun <strong>aktiviert.</strong>
+You are now permanently <strong>online</strong>.==Sie sind nun im <strong>permanenten Online Modus</strong>.
+After a short while you should see the effect on the====Nach kurzer Zeit können Sie die Änderungen auf der
+status</a> page.==Status-Seite</a> sehen.
+The Noeud Name is:==Der Name dieses Noeuds ist:
+Your static Ip\(or DynDns\) is:==Ihre statische IP(oder DynDns) ist:
+Seed Settings changed.\#\(success\)\#::You are now a principal peer.==Seed Einstellungen wurden geändert.#(success)#::Sie sind nun ein Principal Noeud.
+Seed Settings changed, but something is wrong.==Seed Einstellungen wurden geändert, aber etwas war falsch.
+Seed Uploading was deactivated automatically.==Seed Upload wurde automatisch deaktiviert.
+Please return to the settings page and modify the data.==Bitte kehren Sie zu den Einstellungen zurück und modifizieren Sie die Daten.
+The remote-proxy setting has been changed==Die remote-proxy Einstellungen wurden geändert.
+The new setting is effective immediately, you don't need to re-start.==Die neuen Einstellungen wirken sofort. Sie brauchen den Noeud nicht neu zu starten.
+The submitted peer name is already used by another peer. Please choose a different name.</strong> The Noeud name has not been changed.==Der eingegebene Noeudname wird bereits von einem anderen Noeud benutzt. Bitte wählen Sie einen anderen Namen.</strong> Der Noeudname wurde nicht geändert.  
+Your Noeud Language is:==Ihre Noeud Sprache ist:
+The submitted peer name is not well-formed. Please choose a different name.</strong> The Noeud name has not been changed.
+Noeud names must not contain characters other than (a-z, A-Z, 0-9, '-', '_') and must not be longer than 80 characters.
+The new parser settings where changed successfully.==Die neuen Parser Einstellungen wurden erfolgreich gespeichert.
+Parsing of the following mime-types was enabled:
+Seed Upload method was changed successfully.==Seed Upload Methode wurde erfolgreich geändert.
+You are now a principal peer.==Sie sind nun ein Principal Noeud.
+Seed Upload Method:==Seed Upload Methode:
+Seed File URL:==Seed Fichier URL:
+Your proxy networking settings have been changed.==Ihre Proxy Netzwerk Einstellungen wurden geändert.
+Transparent Proxy Support is:==Durchsichtige Proxy Unterstützung ist: 
+Connection Keep-Alive Support is:==Verbindung aufrecht erhalten Unterstützung ist:
+Your message forwarding settings have been changed.==Ihre Nachrichten Weiterleitungseinstellungen haben sich geändert.
+Message Forwarding Support is:==Nachrichten Weiterleitungs Unterst¨tzung:
+Message Forwarding Command:==Nachrichten Weiterleitungskommando:
+Recipient Address:==Empfänger Adresse:
+Your port forwarding settings have been changed.==Ihre Port Weiterleitungs-Einstellungen wurden geändert.
+Port Forwarding Support is:==Port Weiterleitungs Unterstützung ist:
+Port Forwarding Port:==Port Weiterleitungs Port:
+Port Forwarding Host:==Port Weiterleitungs Host:
+Port Forwarding uses proxy:==Port Weiterleitung benutzt Proxy:
+Port Forwarding Settings changed, but something is wrong.==Port Weiterleitungs-Einstellungen wurden geändert. aber etwas ist falsch.
+Port Forwarding was deactivated automatically.==Port Weiterleitung wurde automatisch deaktiviert.
+Please return to the settings page and modify the data.==Bitte kehren Sie zu den Einstellungen zurück und modifizieren Sie die Daten.
+You are now <strong>event-based online</strong>.==Sie sind nun im  <strong>aktivitätsbasierten Modus</strong>.
+After a short while you should see the effect on the==Nach kurzer Zeit können Sie die Änderungen auf der
+You are now in <strong>Cache Mode</strong>.==Sie sind nun im <strong>Cache Modus</strong>.
+Only Proxy-cache ist available in this mode.==Nur der Proxy Cache ist in diesem Modus verfügbar.
+After a short while you should see the effect on the==Nach kurzer Zeit können Sie die Änderungen auf der
+You can now go back to the==Sie können nun zurück zu den
+Settings</a> page if you want to make more changes.==Einstellungen</a> gehen, um weitere Änderungen vorzunehmen.
+Port rebinding will be done in a few seconds==Der neue Port wird in ein paar Sekunden übernommen.
+You can reach your YaCy server under the new location==Dieser YaCy-Noeud kann nun unter seiner neuen Adresse erreicht werden: 
+#-----------------------------
+
+#File: Settings_Admin.inc
+#---------------------------
+Administration Account Settings==Administrator Konto Einstellungen
+This is the account that restricts access to this 'Settings' page. If you have not customized it yet, you should do so now:==Dies ist das Konto, das Zugriff auf diese sonst geschützte "Einstellungen" Seite hat. Wenn Sie es noch nicht eingerichtet haben, sollten Sie es nun tun:
+Account Name:==Konto Name:
+Password:==mot de passe:
+Password \(repeat same as above\):==mot de passe (bitte zur Sicherheit erneut eingeben):
+value="submit">==value="Speichern">
+#-----------------------------
+
+#File: Settings_SystemBehaviour.inc
+#---------------------------
+System Behaviour Settings==System Einstellungen
+Auto pop-up of status page on start-up:==Automatisches Pop-Up der Status-Seite beim Start von YaCy:
+"enable"=="Aktivieren"
+"disable"=="Deaktivieren"
+
+#-----------------------------
+
+#File: Status.html
+#---------------------------
+System-, Index- and Noeud-Status==System-, Index- und Noeud-Status
+Welcome to YaCy!==Willkommen bei YaCy!
+"Restart"=="Neustarten"
+"Shutdown"=="Herunterfahren"
+Public System Properties==Allgemeine Systemangaben
+System version==Systemversion
+the latest public version is==Die neueste stabile Version ist
+Click here to==Klicken Sie
+download</a> it.==hier</a>, um sie herunterzuladen.
+This peer's address==Adresse dieses Noeuds
+#Not assigned==nicht zugewiesen
+Not assigned. The peer must go online to get an address.==Nicht zugewiesen. Ihr Noeud muss online gehen, um eine Adresse zu bekommen.
+#---
+The peer does not go online until you use the proxy to surf the internet,==Ihr Noeud geht nicht online, bis Sie den Proxy benutzen,
+thus proving that you <em>want</em> to go online.==wodurch Sie signalisieren, online gehen zu <em>wollen</em>.
+#---
+If you don't know how to configure your system to use a proxy,==Wenn Sie nicht wissen, wie Sie Ihr System konfigurieren, sodass es einen Proxy benutzt,
+see the <a==lesen Sie die <a
+installation instructions</a>.==Installationsanleitung</a>.
+#---
+Your '.yacy' home at==Ihre YaCy-Domain ist
+This peer's name==Name dieses Noeuds
+This peer's statistics==Statistik dieses Noeuds
+Unknown==unbekannt
+Uptime==Online seit
+Connects \(==Verbindungen (
+"connected Juniors"=="verbundene Juniors"
+"connected Seniors"=="verbundene Seniors"
+"connected Principals"=="verbundene Principals"
+"disconnected peers"=="nichtverbundene Noeuds"
+peers/hour==Noeuds/Stunde
+This peer's status==Status dieses Noeuds
+Virgin - You have not published your peer seed yet. This happens automatically, just wait. While you have this status you are not allowed to search other peers.==Virgin - Ihr Noeud ist dem Netzwerk noch nicht bekannt. Warten Sie noch ein wenig, dies geschieht automatisch. Während Sie diesen Status haben, ist es Ihnen nicht erlaubt andere Noeuds zu durchsuchen.
+Junior - You cannot be reached from outside. A possible reason is that you are behind a firewall, NAT or Router. But you can <a href="index.html">search the internet</a> using the other peers' global index on your own search page. We encourage you to open your firewall for the port you configured \(usually: 8080\), or to set up a 'virtual server' in your router settings \(often called DMZ\). Please be fair, contribute your own index to the global index.==Junior - Ihr Noeud kann nicht von außen erreicht werden. Ein möglicher Grund ist, dass Sie sich hinter einer Firewall, NAT oder einem Router befinden. Trotzdem können Sie <a href="index.html">das Internet durchsuchen</a>, indem Sie den globalen Index der anderen Noeuds von Ihrer Suchseite aus benutzen. Wir möchten Sie ermutigen den Port, den Sie für YaCy eingestellt haben (Vorgabe: 8080) in Ihrer Firewall zu öffnen, oder einen "virtuellen Server" in Ihrem Router aufzusetzten (oft auch DMZ genannt). Bitte seien Sie fair und tragen Sie Ihren Teil zum globalen Index bei!
+Senior - You are running a server and you support the global internet index, which you can also <a href="index.html">search yourself</a>. Thank you!==Senior - Sie lassen YaCy bei sich laufen und unterstützen den globalen Index, den Sie auch selbst <a href="index.html">durchsuchen</a> können. Danke!
+Principal - You are senior and you publish your seed-list to a public accessible server where it can be retrieved using the URL==Principal - Sie haben den Senior-Status und laden zusätzlich Ihre Seed-Liste auf einen öffentlich zugänglichen Server hoch, von wo aus sie unter folgender Adresse erreichbar ist:
+You can of course <a href="index.html">search the internet</a> using the other peers' global index on your own search page.==Natürlich können Sie auch mithilfe des globalen Indexes von Ihrer Suchseite aus <a href="index.html">das Internet durchsuchen</a>.
+Other peers==Andere Noeuds
+other peers online.==andere Noeuds online.
+not online==nicht online
+Online-mode==Onlinemodus
+You are in <em>Cache-browsing</em> mode.==Sie sind im <em>Cache</em> Modus.
+Only websites from the proxy-cache are accessible.==Nur Webseiten aus dem Proxycache sind abrufbar.
+To switch online-mode, press one of the following buttons:==Um den Online Modus zu wechseln, klicken Sie auf einen der folgenden Buttons:
+"event-based
+ Mode"=="aktivitätsbasierten Modus"
+"Permanent Mode"=="Permanenter Modus"
+You are in <em>event-based</em> online mode.==Sie sind im <em>aktivitätsbasierten</em> Onlinemodus.
+The YaCy p2p network will boot when you start using YaCy as a web proxy or you switch to permanent mode.==Das YaCy-P2P-Netzwerk wird aktiviert, wenn Sie YaCy zum ersten Mal als Web Proxy benutzen oder Sie in den permanenten Modus wechseln.
+"Go on-line"=="Online gehen"
+"Go to Cache-Mode"=="In Cache-Modus gehen"
+You are in <em>permanent</em> mode.==Sie sind im <em>permanenten</em> Modus. 
+Last Refresh:==Letzte Aktualisierung:
+Click here to==Klicken Sie
+log in</a> as administrator and see full status.==hier</a>, um sich als Administrator einzuloggen und den vollständigen Status zu sehen.
+Disable==Abschalten
+Disabled==Abgeschaltet
+Enable==Anschalten
+Enabled==Angeschaltet
+#-----------------------------
 
 #File: Status_p.inc
 #---------------------------
@@ -1318,10 +1701,10 @@ Name==Nom
 Nick Name==Pseudo
 Homepage==Page d'accueil
 eMail==courriel
-ICQ==ICQ
-Jabber==Jabber
-Yahoo!==Yahoo!
-MSN==MSN
+#ICQ==ICQ
+#Jabber==Jabber
+#Yahoo!==Yahoo!
+#MSN==MSN
 Comment==Commentaire
 #-----------------------------
 
@@ -1360,7 +1743,7 @@ Please wait some seconds, it may take some seconds until the first result appear
 If you crawl any un-wanted pages, you can delete them <a href="IndexCreateWWWLocalQueue_p.html">here</a>.==Si votre crawl indexe des pages que vous ne voulez pas indexer, vous pouvez les supprimmer <a href="IndexCreateWWWLocalQueue_p.html">ici</a>.
 Crawl Profiles:==Crawl Profile:
 Crawl Thread==Crawl Art
-#Start URL==Start URL
+Start URL==URL de démarrage
 Depth</strong>==Profondeur</strong>
 Filter</strong>==Filtre</strong>
 MaxAge</strong>==Age max.</strong>
@@ -1421,7 +1804,7 @@ Code==Code
 Description==Description
 \=\=headline====Entête
 This tags create headlines. If a page has three or more headlines, a directory will be created automaticly.==Ces tags créent des entêtes. Si la page contient trois entêtes ou plus, un dossier est automatiquement créé.
-#text==Text
+text==Texte
 This tags create stressed texts. Most browsers will display the texts in italics, bold, and a combination of both.==Ces tags créent un text souligné. La plupart des browsers affichent le text en italique, en gras ou en combinaison des deux.
 Lines will be indented. This tag is supposed to mark citations.==Le text apparaîtra indenté. Ce tag est utilisé pour marquer les citations.  
 point==point
@@ -1457,10 +1840,10 @@ Search Page==Page de recherche
 "Search"=="Rechercher"
 "search again - catch up more links"=="Nouvelle recherche - plus de résultats" 
 more options==Plus d'options
-#Text==Text
-Images==Images
+Text==Texte
+#Images==Images
 #Audio==Audio
-Video==Video
+Video==Vidéo
 Applications==Applications
 The following words are stop-words and had been excluded from the search:==Les termes suivant sont des termes d'arrêt et seront exclus de la recherche:
 No Results.==Aucun résultat.
@@ -1510,7 +1893,7 @@ Architecture \(C\) by Michael Peter Christen==Architecture (C) de Michael Peter 
 
 #File: env/templates/simpleheader.template
 #---------------------------
-#Noeud Administration==Noeud Administration
+Noeud Administration==Administration des noeuds
 Web Search==Recherche Web
 Noeud Owner Profile==Impressum dieses Noeuds
 Help / Wiki==Aide / Wiki
@@ -1535,12 +1918,12 @@ Detailed Search==Recherche détaillée
 >Help==>Aide
 Index Create==Création d'index
 Index Control==Contrôle d'Index
-#Index Monitor==Index Monitor
-#Blacklist==Blacklist
+Index Monitor==Moniteur d'index
+Blacklist==Liste noire
 Proxy Indexing==Indexation de Proxy
-#Cache Monitor==Cache Monitor
-#Cookie Monitor==Cookie Monitor
-#Home Page==Homepage
+Cache Monitor==Moniteur de cache
+Cookie Monitor==Moniteur de cookies
+Home Page==Page d'accueil
 File Share==Partage de fichier
 #Wiki==Wiki
 >Messages==>Messages
@@ -1557,9 +1940,9 @@ Project Home==Accueil projet
 Project News==Nouveautés
 English Forum==Forum anglais
 Newsletters==Newsletter
-#Deutsches Forum==Deutsches Forum
+Deutsches Forum==Forum Allemand
 Download YaCy==Télécharger YaCy 
-#YaCy Wiki==YaCy Wiki
+YaCy Wiki==Wiki YaCy
 >Contact==>Contact
 #-----------------------------
 
@@ -1583,9 +1966,9 @@ Outgoing Cookies==Cookies sortants
 #File: env/templates/submenuIndexControl.template
 #---------------------------
 Index Control Menu==Menu contrôle d'index
-#Index Administration==Index Administration
-#Index Import==Index Import
-#Index Transfer==Index Transfer
+Index Administration==Administration de l'index
+Index Import==Importer un index
+Index Transfer==Transferer un index
 #-----------------------------
 
 #File: env/templates/submenuIndexCreate.template
@@ -1594,7 +1977,7 @@ Index Creation Menu==Menu création d'index
 Control Queues==Contrôle des queues
 WWW Crawl Queues==Files d'attente de Crawl WWW Crawl
 Media Crawl Queues==Files d'attente de Crawl Media
-#Crawl Start==Crawl Start
+Crawl Start==Démarrer le crawl
 >Indexing==>Indexation
 >Loader==>Chargeur
 >Local==>Local
