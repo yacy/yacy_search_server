@@ -210,7 +210,7 @@ public final class plasmaSearchEvent {
                 while ((rankedCache.size() > 0) && ((uentry = rankedCache.bestURL(true)) != null) && (resultList.size() < (query.neededResults()))) {
                     url = uentry.comp().url();
                     if (url == null) continue;
-                    System.out.println("***DEBUG*** SEARCH RESULT URL=" + url.toNormalform(false, false));
+                    //System.out.println("***DEBUG*** SEARCH RESULT URL=" + url.toNormalform(false, false));
                 
                     resultEntry = obtainResultEntry(uentry, (snippetComputationAllTime < 300) ? 1 : 0);
                     if (resultEntry == null) continue; // the entry had some problems, cannot be used
@@ -389,7 +389,9 @@ public final class plasmaSearchEvent {
     private boolean anyWorkerAlive() {
         if (this.workerThreads == null) return false;
         for (int i = 0; i < workerThreadCount; i++) {
-           if ((this.workerThreads[i] != null) && (this.workerThreads[i].isAlive())) return true;
+           if ((this.workerThreads[i] != null) &&
+        	   (this.workerThreads[i].isAlive()) &&
+        	   (this.workerThreads[i].busytime() < 3000)) return true;
         }
         return false;
     }
@@ -401,7 +403,7 @@ public final class plasmaSearchEvent {
                 if ((this.primarySearchThreads[i] != null) && (this.primarySearchThreads[i].isAlive())) return true;
             }
         }
-        // maybe a secondary search thread is alivem check this
+        // maybe a secondary search thread is alive, check this
         if ((this.secondarySearchThreads != null) && (this.secondarySearchThreads.length != 0)) {
             for (int i = 0; i < this.secondarySearchThreads.length; i++) {
                 if ((this.secondarySearchThreads[i] != null) && (this.secondarySearchThreads[i].isAlive())) return true;
@@ -494,26 +496,29 @@ public final class plasmaSearchEvent {
         
         private long timeout; // the date until this thread should try to work
         private long sleeptime; // the sleeptime of this thread at the beginning of its life
+        private long lastLifeSign; // when the last time the run()-loop was executed
         private int id;
         
-        public resultWorker(int id, long lifetime) {
+        public resultWorker(int id, long maxlifetime) {
             this.id = id;
-            this.timeout = System.currentTimeMillis() + lifetime;
-            this.sleeptime = lifetime / 10 * id;
+            this.lastLifeSign = System.currentTimeMillis();
+            this.timeout = System.currentTimeMillis() + maxlifetime;
+            this.sleeptime = Math.min(300, maxlifetime / 10 * id);
         }
 
         public void run() {
 
-            // sleep first to give remote loading threads a chance to fetch entries
-            if (anyRemoteSearchAlive()) try {Thread.sleep(this.sleeptime);} catch (InterruptedException e1) {}
-            
             // start fetching urls and snippets
             indexURLEntry page;
             while (System.currentTimeMillis() < this.timeout) {
-                
+                this.lastLifeSign = System.currentTimeMillis();
+
+                if (resultList.size() >= query.neededResults() + query.displayResults()) break; // we have enough
+
                 // get next entry
                 page = rankedCache.bestURL(true);
                 if (page == null) {
+                	if (!anyRemoteSearchAlive()) break; // we cannot expect more results
                     // if we did not get another entry, sleep some time and try again
                     try {Thread.sleep(100);} catch (InterruptedException e1) {}
                     continue;
@@ -542,6 +547,9 @@ public final class plasmaSearchEvent {
                 //System.out.println("DEBUG SNIPPET_LOADING: thread " + id + " got " + resultEntry.url());
 
                 if (resultList.size() >= query.neededResults() + query.displayResults()) break; // we have enough
+
+                // sleep first to give remote loading threads a chance to fetch entries
+                if (anyRemoteSearchAlive()) try {Thread.sleep(this.sleeptime);} catch (InterruptedException e1) {}
             }
             serverLog.logInfo("SEARCH", "resultWorker thread " + id + " terminated");
         }
@@ -556,6 +564,10 @@ public final class plasmaSearchEvent {
         private boolean anyFailureWith(String urlhash) {
             return (failedURLs.get(urlhash) != null);
         }
+        
+        public long busytime() {
+        	return System.currentTimeMillis() - this.lastLifeSign;
+        }
     }
     
     private void registerFailure(String urlhash, String reason) {
@@ -565,23 +577,19 @@ public final class plasmaSearchEvent {
     
     public ResultEntry oneResult(int item) {
         // first sleep a while to give accumulation threads a chance to work
-        long sleeptime = this.eventTime + (this.query.maximumTime / this.query.displayResults() * ((item % this.query.displayResults()) + 1)) - System.currentTimeMillis();
-        if ((anyWorkerAlive()) && (sleeptime > 0)) {
-            try {Thread.sleep(sleeptime);} catch (InterruptedException e) {}
-            //System.out.println("+++DEBUG-oneResult+++ (1) sleeping " + sleeptime);
+        if (anyWorkerAlive()) {
+        	long sleeptime = Math.min(600, this.eventTime + (this.query.maximumTime / this.query.displayResults() * ((item % this.query.displayResults()) + 1)) - System.currentTimeMillis());
+        	if (this.resultList.size() <= item + 10) sleeptime = Math.min(sleeptime + 300, 600);
+        	if (sleeptime > 0) try {Thread.sleep(sleeptime);} catch (InterruptedException e) {}
+            System.out.println("+++DEBUG-oneResult+++ (1) sleeping " + sleeptime);
+            
+            // then sleep until any result is available (that should not happen)
+            while ((this.resultList.size() <= item) && (anyWorkerAlive())) {
+                try {Thread.sleep(100);} catch (InterruptedException e) {}
+                System.out.println("+++DEBUG-oneResult+++ (2) sleeping " + 100);
+            }
+            
         }
-        
-        // if there are less than 10 more results available, sleep some extra time to get a chance that the "common sense" ranking algorithm can work
-        if ((this.resultList.size() <= item + 10) && (anyWorkerAlive())) {
-            try {Thread.sleep(300);} catch (InterruptedException e) {}
-            //System.out.println("+++DEBUG-oneResult+++ (2) sleeping " + 300);
-        }
-        // then sleep until any result is available (that should not happen)
-        while ((this.resultList.size() <= item) && (anyWorkerAlive())) {
-            try {Thread.sleep(100);} catch (InterruptedException e) {}
-            //System.out.println("+++DEBUG-oneResult+++ (3) sleeping " + 100);
-        }
-        
         // finally, if there is something, return the result
         synchronized (this.resultList) {
             // check if we have enough entries

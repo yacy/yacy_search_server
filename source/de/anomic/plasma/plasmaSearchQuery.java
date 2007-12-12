@@ -105,7 +105,7 @@ public final class plasmaSearchQuery {
         this.contentdom = CONTENTDOM_ALL;
         this.linesPerPage = lines;
         this.offset = 0;
-        this.maximumTime = 10000;
+        this.maximumTime = 3000;
         this.urlMask = ".*";
         this.domType = SEARCHDOM_LOCAL;
         this.domGroupName = "";
@@ -128,7 +128,7 @@ public plasmaSearchQuery(String queryString, TreeSet queryHashes, TreeSet exclud
 		this.contentdom = contentdom;
 		this.linesPerPage = lines;
 		this.offset = offset;
-		this.maximumTime = maximumTime;
+		this.maximumTime = Math.min(6000, maximumTime);
 		this.urlMask = urlMask;
 		this.domType = domType;
 		this.domGroupName = domGroupName;
