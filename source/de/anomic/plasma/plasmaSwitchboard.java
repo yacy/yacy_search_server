@@ -1905,7 +1905,7 @@ public final class plasmaSwitchboard extends serverAbstractSwitch implements ser
         try {
             boolean hasDoneSomething = false;
 
-            // do transmission of cr-files
+            // do transmission of CR-files
             checkInterruption();
             int count = rankingOwnDistribution.size() / 100;
             if (count == 0) count = 1;

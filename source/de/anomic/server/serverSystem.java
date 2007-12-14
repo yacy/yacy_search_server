@@ -340,7 +340,7 @@ public final class serverSystem {
         // runs a unix/linux script as separate thread
         File starterFile = new File(scriptFile.getAbsolutePath() + ".starter.sh");
         //deployScript(starterFile, "touch restart.starter.startet1");
-        deployScript(starterFile, "#!/bin/sh" + serverCore.lfstring + scriptFile.getAbsolutePath() + " &" + serverCore.lfstring);
+        deployScript(starterFile, "#!/bin/sh" + serverCore.LF_STRING + scriptFile.getAbsolutePath() + " &" + serverCore.LF_STRING);
         try {
             Runtime.getRuntime().exec(starterFile.getAbsolutePath()).waitFor();
         } catch (InterruptedException e) {

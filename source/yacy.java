@@ -813,7 +813,7 @@ public final class yacy {
                     counter++;
                     container = (indexContainer) indexContainerIterator.next();
                     bos.write((container.getWordHash()).getBytes());
-                    bos.write(serverCore.crlf);
+                    bos.write(serverCore.CRLF);
                     if (counter % 500 == 0) {
                         log.logInfo("Found " + counter + " Hashs until now. Last found Hash: " + container.getWordHash());
                     }
@@ -828,7 +828,7 @@ public final class yacy {
                     counter++;
                     container = (indexContainer) indexContainerIterator.next();
                     bos.write((container.getWordHash()).getBytes());
-                    bos.write(serverCore.crlf);
+                    bos.write(serverCore.CRLF);
                     if (counter % 500 == 0) {
                         log.logInfo("Found " + counter + " Hashs until now. Last found Hash: " + container.getWordHash());
                     }

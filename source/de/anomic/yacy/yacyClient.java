@@ -961,7 +961,7 @@ public final class yacyClient {
                 entry = (indexRWIEntry) eenum.next();
                 entrypost.append(indexes[i].getWordHash()) 
                          .append(entry.toPropertyForm()) 
-                         .append(serverCore.crlfString);
+                         .append(serverCore.CRLF_STRING);
                 indexcount++;
             }
         }

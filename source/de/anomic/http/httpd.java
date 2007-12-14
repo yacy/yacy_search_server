@@ -315,18 +315,18 @@ public final class httpd implements serverHandler {
             String auth = (String) header.get(httpHeader.AUTHORIZATION);
             if (auth == null) {
                 // authorization requested, but no authorizeation given in header. Ask for authenticate:
-                this.session.out.write((httpVersion + " 401 log-in required" + serverCore.crlfString +
-                        httpHeader.WWW_AUTHENTICATE + ": Basic realm=\"log-in\"" + serverCore.crlfString +
-                        serverCore.crlfString).getBytes());
+                this.session.out.write((httpVersion + " 401 log-in required" + serverCore.CRLF_STRING +
+                        httpHeader.WWW_AUTHENTICATE + ": Basic realm=\"log-in\"" + serverCore.CRLF_STRING +
+                        serverCore.CRLF_STRING).getBytes());
                 this.session.out.write((httpHeader.CONTENT_LENGTH + ": 0\r\n").getBytes());
                 this.session.out.write("\r\n".getBytes());
                 return false;
             } else if (!this.serverAccountBase64MD5.equals(serverCodings.encodeMD5Hex(auth.trim().substring(6)))) {
                 // wrong password given: ask for authenticate again
                 serverLog.logInfo("HTTPD", "Wrong log-in for account 'server' in HTTPD.GET " + this.prop.getProperty("PATH") + " from IP " + this.clientIP);
-                this.session.out.write((httpVersion + " 401 log-in required" + serverCore.crlfString +
+                this.session.out.write((httpVersion + " 401 log-in required" + serverCore.CRLF_STRING +
                         httpHeader.WWW_AUTHENTICATE + ": Basic realm=\"log-in\"" + 
-                        serverCore.crlfString).getBytes());
+                        serverCore.CRLF_STRING).getBytes());
                 this.session.out.write((httpHeader.CONTENT_LENGTH + ": 0\r\n").getBytes());
                 this.session.out.write("\r\n".getBytes());                
                 return false;
@@ -420,8 +420,8 @@ public final class httpd implements serverHandler {
                 return false;
 			}
             // ask for authenticate
-            this.session.out.write((httpVersion + " 407 Proxy Authentication Required" + serverCore.crlfString +
-				httpHeader.PROXY_AUTHENTICATE + ": Basic realm=\"log-in\"" + serverCore.crlfString).getBytes());
+            this.session.out.write((httpVersion + " 407 Proxy Authentication Required" + serverCore.CRLF_STRING +
+				httpHeader.PROXY_AUTHENTICATE + ": Basic realm=\"log-in\"" + serverCore.CRLF_STRING).getBytes());
             this.session.out.write((httpHeader.CONTENT_LENGTH + ": 0\r\n").getBytes());
             this.session.out.write("\r\n".getBytes());                   
             return false;
@@ -490,7 +490,7 @@ public final class httpd implements serverHandler {
                     }
                 } else {
                     // not authorized through firewall blocking (ip does not match filter)
-                    this.session.out.write((httpVersion + " 403 refused (IP not granted)" + serverCore.crlfString + serverCore.crlfString + "you are not allowed to connect to this server, because you are using the non-granted IP " + clientIP + ". allowed are only connections that match with the following filter: " + switchboard.getConfig("serverClient", "*") + serverCore.crlfString).getBytes());
+                    this.session.out.write((httpVersion + " 403 refused (IP not granted)" + serverCore.CRLF_STRING + serverCore.CRLF_STRING + "you are not allowed to connect to this server, because you are using the non-granted IP " + clientIP + ". allowed are only connections that match with the following filter: " + switchboard.getConfig("serverClient", "*") + serverCore.CRLF_STRING).getBytes());
                     return serverCore.TERMINATE_CONNECTION;
                 }
             } else {
@@ -500,7 +500,7 @@ public final class httpd implements serverHandler {
                     httpdProxyHandler.doGet(this.prop, header, this.session.out);
                 } else {
                     // not authorized through firewall blocking (ip does not match filter)
-                    this.session.out.write((httpVersion + " 403 refused (IP not granted)" + serverCore.crlfString + serverCore.crlfString + "you are not allowed to connect to this proxy, because you are using the non-granted IP " + clientIP + ". allowed are only connections that match with the following filter: " + switchboard.getConfig("proxyClient", "*") + serverCore.crlfString).getBytes());
+                    this.session.out.write((httpVersion + " 403 refused (IP not granted)" + serverCore.CRLF_STRING + serverCore.CRLF_STRING + "you are not allowed to connect to this proxy, because you are using the non-granted IP " + clientIP + ". allowed are only connections that match with the following filter: " + switchboard.getConfig("proxyClient", "*") + serverCore.CRLF_STRING).getBytes());
                     return serverCore.TERMINATE_CONNECTION;
                 }
             }
@@ -562,7 +562,7 @@ public final class httpd implements serverHandler {
                 } else {
                     // not authorized through firewall blocking (ip does not match filter)
                     session.out.write((httpVersion + " 403 refused (IP not granted)" +
-                            serverCore.crlfString).getBytes());
+                            serverCore.CRLF_STRING).getBytes());
                     return serverCore.TERMINATE_CONNECTION;
                 }
             } else {
@@ -573,7 +573,7 @@ public final class httpd implements serverHandler {
                 } else {
                     // not authorized through firewall blocking (ip does not match filter)
                     session.out.write((httpVersion + " 403 refused (IP not granted)" +
-                            serverCore.crlfString).getBytes());
+                            serverCore.CRLF_STRING).getBytes());
                     return serverCore.TERMINATE_CONNECTION;
                 }
             }
@@ -611,7 +611,7 @@ public final class httpd implements serverHandler {
                     }
                 } else {
                     // not authorized through firewall blocking (ip does not match filter)
-                    session.out.write((httpVersion + " 403 refused (IP not granted)" + serverCore.crlfString + serverCore.crlfString + "you are not allowed to connect to this server, because you are using the non-granted IP " + clientIP + ". allowed are only connections that match with the following filter: " + switchboard.getConfig("serverClient", "*") + serverCore.crlfString).getBytes());
+                    session.out.write((httpVersion + " 403 refused (IP not granted)" + serverCore.CRLF_STRING + serverCore.CRLF_STRING + "you are not allowed to connect to this server, because you are using the non-granted IP " + clientIP + ". allowed are only connections that match with the following filter: " + switchboard.getConfig("serverClient", "*") + serverCore.CRLF_STRING).getBytes());
                     return serverCore.TERMINATE_CONNECTION;
                 }
             } else {
@@ -621,7 +621,7 @@ public final class httpd implements serverHandler {
                     httpdProxyHandler.doPost(prop, header, this.session.out, this.session.in);
                 } else {
                     // not authorized through firewall blocking (ip does not match filter)
-                    session.out.write((httpVersion + " 403 refused (IP not granted)" + serverCore.crlfString + serverCore.crlfString + "you are not allowed to connect to this proxy, because you are using the non-granted IP " + clientIP + ". allowed are only connections that match with the following filter: " + switchboard.getConfig("proxyClient", "*") + serverCore.crlfString).getBytes());
+                    session.out.write((httpVersion + " 403 refused (IP not granted)" + serverCore.CRLF_STRING + serverCore.CRLF_STRING + "you are not allowed to connect to this proxy, because you are using the non-granted IP " + clientIP + ". allowed are only connections that match with the following filter: " + switchboard.getConfig("proxyClient", "*") + serverCore.CRLF_STRING).getBytes());
                     return serverCore.TERMINATE_CONNECTION;
                 }
             }
@@ -670,7 +670,7 @@ public final class httpd implements serverHandler {
         
         if (!(allowProxy)) {
             // not authorized through firewall blocking (ip does not match filter)          
-            session.out.write((httpVersion + " 403 refused (IP not granted)" + serverCore.crlfString + serverCore.crlfString + "you are not allowed to connect to this proxy, because you are using the non-granted IP " + clientIP + ". allowed are only connections that match with the following filter: " + switchboard.getConfig("proxyClient", "*") + serverCore.crlfString).getBytes());
+            session.out.write((httpVersion + " 403 refused (IP not granted)" + serverCore.CRLF_STRING + serverCore.CRLF_STRING + "you are not allowed to connect to this proxy, because you are using the non-granted IP " + clientIP + ". allowed are only connections that match with the following filter: " + switchboard.getConfig("proxyClient", "*") + serverCore.CRLF_STRING).getBytes());
             return serverCore.TERMINATE_CONNECTION;
         }        
         
@@ -678,7 +678,7 @@ public final class httpd implements serverHandler {
             // security: connection only to ssl port
             // we send a 403 (forbidden) error back
             session.out.write((httpVersion + " 403 Connection to non-443 forbidden" +
-                    serverCore.crlfString + serverCore.crlfString).getBytes());
+                    serverCore.CRLF_STRING + serverCore.CRLF_STRING).getBytes());
             return serverCore.TERMINATE_CONNECTION;
         }
         
@@ -688,7 +688,7 @@ public final class httpd implements serverHandler {
             httpdProxyHandler.doConnect(prop, header, this.session.in, this.session.out);
         } else {
             // not authorized through firewall blocking (ip does not match filter)
-            session.out.write((httpVersion + " 403 refused (IP not granted)" + serverCore.crlfString + serverCore.crlfString + "you are not allowed to connect to this proxy, because you are using the non-granted IP " + clientIP + ". allowed are only connections that match with the following filter: " + switchboard.getConfig("proxyClient", "*") + serverCore.crlfString).getBytes());
+            session.out.write((httpVersion + " 403 refused (IP not granted)" + serverCore.CRLF_STRING + serverCore.CRLF_STRING + "you are not allowed to connect to this proxy, because you are using the non-granted IP " + clientIP + ". allowed are only connections that match with the following filter: " + switchboard.getConfig("proxyClient", "*") + serverCore.CRLF_STRING).getBytes());
         }
         
         return serverCore.TERMINATE_CONNECTION;
@@ -952,14 +952,14 @@ public final class httpd implements serverHandler {
                 break;
             }
             
-            // we don't know if the value is terminated by lf, cr or crlf
-            // (it's suppose to be crlf, but we want to be lazy about wrong terminations)
-            if (buffer[p - 2] == serverCore.cr) // ERROR: IndexOutOfBounds: -2
-                /* crlf */ q = p - 2;
+            // we don't know if the value is terminated by LF, CR or CRLF
+            // (it's suppose to be CRLF, but we want to be lazy about wrong terminations)
+            if (buffer[p - 2] == serverCore.CR) // ERROR: IndexOutOfBounds: -2
+                /* CRLF */ q = p - 2;
             else
-                /* cr or lf only */ q = p - 1;
-            // the above line is wrong if we uploaded a file that has a cr as it's last byte
-            // and the client's line termination symbol is only a cr or lf (which would be incorrect)
+                /* CR or LF only */ q = p - 1;
+            // the above line is wrong if we uploaded a file that has a CR as it's last byte
+            // and the client's line termination symbol is only a CR or LF (which would be incorrect)
             // the value is between 'pos' and 'q', while the next marker is 'p'
             line = new byte[q - pos];
             java.lang.System.arraycopy(buffer, pos, line, 0, q - pos);
@@ -1007,11 +1007,11 @@ public final class httpd implements serverHandler {
     private static byte[] readLine(int start, byte[] array) {
         // read a string from an array; line ending is always CRLF
         // but we are also fuzzy with that: may also be only CR or LF
-        // if no remaining cr, crlf or lf can be found, return null
+        // if no remaining CR, CRLF or LF can be found, return null
         if (start > array.length) return null;
-        int pos = indexOf(start, array, serverCore.crlf); nextPos = pos + 2;
-        if (pos < 0) {pos = indexOf(start, array, new byte[] {serverCore.cr}); nextPos = pos + 1;}
-        if (pos < 0) {pos = indexOf(start, array, new byte[] {serverCore.lf}); nextPos = pos + 1;}
+        int pos = indexOf(start, array, serverCore.CRLF); nextPos = pos + 2;
+        if (pos < 0) {pos = indexOf(start, array, new byte[] {serverCore.CR}); nextPos = pos + 1;}
+        if (pos < 0) {pos = indexOf(start, array, new byte[] {serverCore.LF}); nextPos = pos + 1;}
         if (pos < 0) {nextPos = start; return null;}
         byte[] result = new byte[pos - start];
         java.lang.System.arraycopy(array, start, result, 0, pos - start);

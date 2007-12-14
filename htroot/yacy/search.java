@@ -159,7 +159,7 @@ public final class search {
                     wordhash = (String) entry.getKey();
                     indexContainer container = (indexContainer) entry.getValue();
                     indexabstractContainercount += container.size();
-                    indexabstract.append("indexabstract." + wordhash + "=").append(indexContainer.compressIndex(container, null, 1000).toString()).append(serverCore.crlfString);                
+                    indexabstract.append("indexabstract." + wordhash + "=").append(indexContainer.compressIndex(container, null, 1000).toString()).append(serverCore.CRLF_STRING);                
                 }
             }
             
@@ -191,7 +191,7 @@ public final class search {
                 Iterator i = theSearch.IACount.entrySet().iterator();
                 while (i.hasNext()) {
                     entry = (Map.Entry) i.next();
-                    indexcount.append("indexcount.").append((String) entry.getKey()).append('=').append(((Integer) entry.getValue()).toString()).append(serverCore.crlfString);
+                    indexcount.append("indexcount.").append((String) entry.getKey()).append('=').append(((Integer) entry.getValue()).toString()).append(serverCore.CRLF_STRING);
                 }
                 if (abstractSet != null) {
                     // if a specific index-abstract is demanded, attach it here
@@ -200,7 +200,7 @@ public final class search {
                     while (i.hasNext()) {
                         wordhash = (String) i.next();
                         indexabstractContainercount += ((Integer) theSearch.IACount.get(wordhash)).intValue();
-                        indexabstract.append("indexabstract." + wordhash + "=").append((String) theSearch.IAResults.get(wordhash)).append(serverCore.crlfString);
+                        indexabstract.append("indexabstract." + wordhash + "=").append((String) theSearch.IAResults.get(wordhash)).append(serverCore.CRLF_STRING);
                     }
                 }
                 prop.put("indexcount", indexcount.toString());
@@ -222,11 +222,11 @@ public final class search {
                 } else if (abstracts.equals("auto")) {
                     // automatically attach the index abstract for the index that has the most references. This should be our target dht position
                     indexabstractContainercount += ((Integer) theSearch.IACount.get(theSearch.IAmaxcounthash)).intValue();
-                    indexabstract.append("indexabstract." + theSearch.IAmaxcounthash + "=").append((String) theSearch.IAResults.get(theSearch.IAmaxcounthash)).append(serverCore.crlfString);
+                    indexabstract.append("indexabstract." + theSearch.IAmaxcounthash + "=").append((String) theSearch.IAResults.get(theSearch.IAmaxcounthash)).append(serverCore.CRLF_STRING);
                     if ((theSearch.IAneardhthash != null) && (!(theSearch.IAneardhthash.equals(theSearch.IAmaxcounthash)))) {
                         // in case that the neardhthash is different from the maxcounthash attach also the neardhthash-container
                         indexabstractContainercount += ((Integer) theSearch.IACount.get(theSearch.IAneardhthash)).intValue();
-                        indexabstract.append("indexabstract." + theSearch.IAneardhthash + "=").append((String) theSearch.IAResults.get(theSearch.IAneardhthash)).append(serverCore.crlfString);
+                        indexabstract.append("indexabstract." + theSearch.IAneardhthash + "=").append((String) theSearch.IAResults.get(theSearch.IAneardhthash)).append(serverCore.CRLF_STRING);
                     }
                     //System.out.println("DEBUG-ABSTRACTGENERATION: maxcounthash = " + maxcounthash);
                     //System.out.println("DEBUG-ABSTRACTGENERATION: neardhthash  = "+ neardhthash);
@@ -266,7 +266,7 @@ public final class search {
                 entry = (plasmaSearchEvent.ResultEntry) accu.get(i);
                 resource = entry.resource();
                 if (resource != null) {
-                    links.append("resource").append(i).append('=').append(resource).append(serverCore.crlfString);
+                    links.append("resource").append(i).append('=').append(resource).append(serverCore.CRLF_STRING);
                 }
             }
             prop.put("links", links.toString());

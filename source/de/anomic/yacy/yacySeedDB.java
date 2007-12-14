@@ -734,7 +734,7 @@ public final class yacySeedDB {
             if (addMySeed) {
                 line = mySeed.genSeedStr(null);
                 v.add(line);
-                pw.print(line + serverCore.crlfString);
+                pw.print(line + serverCore.CRLF_STRING);
             }
             
             // store other seeds
@@ -745,7 +745,7 @@ public final class yacySeedDB {
                 if (ys != null) {
                     line = ys.genSeedStr(null);
                     v.add(line);
-                    pw.print(line + serverCore.crlfString);
+                    pw.print(line + serverCore.CRLF_STRING);
                 }
             }
             pw.flush();
@@ -787,9 +787,9 @@ public final class yacySeedDB {
             // Comparing if local copy and uploaded copy are equal
             String errorMsg = checkCache(uv, check);
             if (errorMsg == null)
-                log = log + "UPLOAD CHECK - Success: the result vectors are equal" + serverCore.crlfString;
+                log = log + "UPLOAD CHECK - Success: the result vectors are equal" + serverCore.CRLF_STRING;
             else {
-                throw new Exception("UPLOAD CHECK - Error: the result vector is different. " + errorMsg + serverCore.crlfString);
+                throw new Exception("UPLOAD CHECK - Error: the result vector is different. " + errorMsg + serverCore.CRLF_STRING);
             }
         } finally {
             if (seedFile != null) try { seedFile.delete(); } catch (Exception e) {/* ignore this */}

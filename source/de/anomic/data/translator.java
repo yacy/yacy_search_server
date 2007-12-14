@@ -151,7 +151,7 @@ public class translator {
 		try{
 			br = new BufferedReader(new InputStreamReader(new FileInputStream(sourceFile),"UTF-8"));
 			while( (line = br.readLine()) != null){
-				content += line + de.anomic.server.serverCore.crlfString;
+				content += line + de.anomic.server.serverCore.CRLF_STRING;
 			}
 			br.close();
 		}catch(IOException e){

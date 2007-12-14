@@ -660,7 +660,7 @@ public final class httpc {
         // send request
         if ((this.remoteProxyUse) && (!(method.equals(httpHeader.METHOD_CONNECT))))
             path = ((this.adressed_port == 443) ? "https://" : "http://") + this.adressed_host + ":" + this.adressed_port + path;
-        sb.append(method + " " + path + " HTTP/1.0" + serverCore.crlfString); // TODO if set to HTTP/1.1, servers give time-outs?
+        sb.append(method + " " + path + " HTTP/1.0" + serverCore.CRLF_STRING); // TODO if set to HTTP/1.1, servers give time-outs?
 
         // send header
         //System.out.println("***HEADER for path " + path + ": PROXY TO SERVER = " + header.toString()); // DEBUG
@@ -674,14 +674,14 @@ public final class httpc {
             if ((tag != '*') && (tag != '#')) {
                 count = header.keyCount(key);
                 for (int j = 0; j < count; j++) {
-                    sb.append(key + ": " + ((String) header.getSingle(key, j)).trim() + serverCore.crlfString);
+                    sb.append(key + ": " + ((String) header.getSingle(key, j)).trim() + serverCore.CRLF_STRING);
                 }
                 //System.out.println("#" + key + ": " + value);
             }
         }
 
         // add terminating line
-        sb.append(serverCore.crlfString);
+        sb.append(serverCore.CRLF_STRING);
         serverCore.send(this.clientOutput, sb.toString());
         this.clientOutput.flush();
 
@@ -849,29 +849,29 @@ public final class httpc {
             while (e.hasMoreElements()) {
                 // start with a boundary
                 out.write(boundary.getBytes("UTF-8"));
-                out.write(serverCore.crlf);
+                out.write(serverCore.CRLF);
                 // write value
                 key = (String) e.nextElement();
                 value = args.get(key, "");
                 if ((files != null) && (files.containsKey(key))) {
                     // we are about to write a file
                     out.write(("Content-Disposition: form-data; name=" + '"' + key + '"' + "; filename=" + '"' + value + '"').getBytes("UTF-8"));
-                    out.write(serverCore.crlf);
-                    out.write(serverCore.crlf);
+                    out.write(serverCore.CRLF);
+                    out.write(serverCore.CRLF);
                     out.write((byte[]) files.get(key));
-                    out.write(serverCore.crlf);
+                    out.write(serverCore.CRLF);
                 } else {
                     // write a single value
                     out.write(("Content-Disposition: form-data; name=" + '"' + key + '"').getBytes("UTF-8"));
-                    out.write(serverCore.crlf);
-                    out.write(serverCore.crlf);
+                    out.write(serverCore.CRLF);
+                    out.write(serverCore.CRLF);
                     out.write(value.getBytes("UTF-8"));
-                    out.write(serverCore.crlf);
+                    out.write(serverCore.CRLF);
                 }
             }
             // finish with a boundary
             out.write(boundary.getBytes("UTF-8"));
-            out.write(serverCore.crlf);
+            out.write(serverCore.CRLF);
         }
         // create body array
         out.close();
@@ -1293,7 +1293,8 @@ public final class httpc {
                 buffer = new String(b);
                 buffer=buffer.trim();
                 //System.out.println("#H#" + buffer); // debug
-                if (buffer.charAt(0) <= 32) {
+                // RFC2616 4.2: headers beginning with LWS are appended to the previous line
+                if (b[0] == serverCore.SP || b[0] == serverCore.HT) {
                     // use old entry
                     if (key.length() == 0) throw new IOException("header corrupted - input error");
                     // attach new line

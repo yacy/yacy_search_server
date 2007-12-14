@@ -1169,9 +1169,9 @@ public final class httpdProxyHandler {
         OutputStream promiscuousOut = sslSocket.getOutputStream();
         
         // now then we can return a success message
-        clientOut.write((httpVersion + " 200 Connection established" + serverCore.crlfString +
-                "Proxy-agent: YACY" + serverCore.crlfString +
-                serverCore.crlfString).getBytes());
+        clientOut.write((httpVersion + " 200 Connection established" + serverCore.CRLF_STRING +
+                "Proxy-agent: YACY" + serverCore.CRLF_STRING +
+                serverCore.CRLF_STRING).getBytes());
         
         theLogger.logInfo("SSL connection to " + host + ":" + port + " established.");
         

@@ -193,7 +193,7 @@ public class listManager {
         for(int i=0;i < list.length; i++){
             out
             .append(list[i])
-            .append(serverCore.crlfString);
+            .append(serverCore.CRLF_STRING);
         }
         return writeList(listFile, new String(out)); //(File, String)
     }
@@ -223,9 +223,9 @@ public class listManager {
             String line = "";
             while ((line = br.readLine()) != null) {
                 if ((!line.startsWith("#") || withcomments) || !line.equals("")) {
-                    //temp += line + serverCore.crlfString;
+                    //temp += line + serverCore.CRLF_STRING;
                     temp.append(line)
-                        .append(serverCore.crlfString);
+                        .append(serverCore.CRLF_STRING);
                 }
             }
             br.close();

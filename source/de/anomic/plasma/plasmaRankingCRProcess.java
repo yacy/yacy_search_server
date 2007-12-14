@@ -283,18 +283,18 @@ public class plasmaRankingCRProcess {
             source_file = new File(from_dir, files[i]);
             if (newdb) {
                 if (accumulate_upd(source_file, newacc, newseq)) {
-                    // move cr file to temporary folder
+                    // move CR file to temporary folder
                     source_file.renameTo(new File(tmp_dir, files[i]));
                 } else {
-                    // error case: the cr-file is not valid; move to error path
+                    // error case: the CR-file is not valid; move to error path
                     source_file.renameTo(new File(err_dir, files[i]));
                 }
             } else {
                 if (accumulate_upd(source_file, acc)) {
-                    // move cr file to temporary folder
+                    // move CR file to temporary folder
                     source_file.renameTo(new File(tmp_dir, files[i]));
                 } else {
-                    // error case: the cr-file is not valid; move to error path
+                    // error case: the CR-file is not valid; move to error path
                     source_file.renameTo(new File(err_dir, files[i]));
                 }
             }

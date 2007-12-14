@@ -462,7 +462,7 @@ public final class httpTemplate {
                             //Read the Include
                             String line = "";
                             while( (line = br.readLine()) != null ){
-                                include.append(line.getBytes("UTF-8")).append(de.anomic.server.serverCore.crlfString.getBytes("UTF-8"));
+                                include.append(line.getBytes("UTF-8")).append(de.anomic.server.serverCore.CRLF_STRING.getBytes("UTF-8"));
                             }
                         } catch (IOException e) {
                             //file not found?                    

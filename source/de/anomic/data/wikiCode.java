@@ -110,7 +110,7 @@ public class wikiCode extends abstractWikiParser implements wikiParser {
         StringBuffer out = new StringBuffer(length);
         String line;
         while ((line = reader.readLine()) != null)
-            out.append(transformLine(line, publicAddress, switchboard)).append(serverCore.crlfString);
+            out.append(transformLine(line, publicAddress, switchboard)).append(serverCore.CRLF_STRING);
         return out.insert(0, directory()).toString();
     }
 
@@ -246,7 +246,7 @@ public class wikiCode extends abstractWikiParser implements wikiParser {
             if(result.startsWith(numListLevel + "#")){ //more #
                 p0 = result.indexOf(numListLevel);
                 p1 = result.length();
-                result = "<ol>" + serverCore.crlfString +
+                result = "<ol>" + serverCore.CRLF_STRING +
                     "<li>" +
                     result.substring(numListLevel.length() + 1, p1) +
                     "</li>";
@@ -294,7 +294,7 @@ public class wikiCode extends abstractWikiParser implements wikiParser {
             if(result.startsWith(ListLevel + "*")){ //more stars
                p0 = result.indexOf(ListLevel);
                 p1 = result.length();
-                result = "<ul>" + serverCore.crlfString +
+                result = "<ul>" + serverCore.CRLF_STRING +
                     "<li>" +
                 result.substring(ListLevel.length() + 1, p1) +
                     "</li>";

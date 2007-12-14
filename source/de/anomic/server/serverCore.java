@@ -86,12 +86,14 @@ import de.anomic.yacy.yacySeed;
 
 public final class serverCore extends serverAbstractThread implements serverThread {
 
-    // generic input/output static methods
-    public static final byte cr = 13;
-    public static final byte lf = 10;
-    public static final byte[] crlf = {cr, lf};
-    public static final String crlfString = new String(crlf);
-    public static final String lfstring = new String(new byte[]{lf});
+    // special ASCII codes used for protocol handling
+    public static final byte HT = 9;  // Horizontal Tab
+    public static final byte LF = 10; // Line Feed
+    public static final byte CR = 13; // Carriage Return
+    public static final byte SP = 32; // Space
+    public static final byte[] CRLF = {CR, LF}; // Line End of HTTP/ICAP headers
+    public static final String CRLF_STRING = new String(CRLF);
+    public static final String LF_STRING = new String(new byte[]{LF});
     public static final Class[] stringType = {"".getClass()}; //  set up some reflection
     public static final long startupTime = System.currentTimeMillis();
     
@@ -848,7 +850,7 @@ public final class serverCore extends serverAbstractThread implements serverThre
     	}
     
     	public void writeLine(String messg) throws IOException {
-    	    send(this.out, messg + crlfString);
+    	    send(this.out, messg + CRLF_STRING);
     	    log(true, messg);
     	}
     
@@ -1189,21 +1191,21 @@ public final class serverCore extends serverAbstractThread implements serverThre
             while (bufferSize < maxSize) {
                 b = pbis.read();
             
-                if ((b > 31 && b != 127) || b == 9) {
+                if ((b > 31 && b != 127) || b == HT) {
                     // add legal chars to the result
                     readLineBuffer.append(b);
                     bufferSize++;
-                } else if (b == cr) {
+                } else if (b == CR) {
                     // possible beginning of CRLF, check following byte
                     b = pbis.read();
-                    if (b == lf) {
+                    if (b == LF) {
                         // line end catched: break the loop
                         break;
                     } else if (b >= 0) {
                         // no line end: push back the byte, ignore the CR
                         pbis.unread(b);
                     }
-                } else if (b == lf || b < 0) {
+                } else if (b == LF || b < 0) {
                     // LF without precedent CR: treat as line end of broken servers
                     // b < 0: EOS
                     break;
@@ -1225,13 +1227,13 @@ public final class serverCore extends serverAbstractThread implements serverThre
     public static void send(OutputStream os, String buf) throws IOException {
     	os.write(buf.getBytes());
     	// TODO make sure there was no reason to add this additional newline
-    	//os.write(crlf);
+    	//os.write(CRLF);
     	os.flush();
     }
     
     public static void send(OutputStream os, byte[] buf) throws IOException {
     	os.write(buf);
-    	os.write(crlf);
+    	os.write(CRLF);
     	os.flush();
     }
         
@@ -1240,7 +1242,7 @@ public final class serverCore extends serverAbstractThread implements serverThre
     	byte[] buffer = new byte[((bufferSize < 1) || (bufferSize > 4096)) ? 4096 : bufferSize];
     	int l;
     	while ((l = is.read(buffer)) > 0) {os.write(buffer, 0, l);}
-    	os.write(crlf);
+    	os.write(CRLF);
     	os.flush();
     	if (bufferSize > 80) return "<LONG STREAM>"; else return new String(buffer);
     }

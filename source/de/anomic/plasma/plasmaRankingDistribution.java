@@ -69,7 +69,7 @@ public final class plasmaRankingDistribution {
     public static final int METHOD_FIXEDADDRESS   = 99;
     
     private final serverLog log;
-    private File sourcePath;     // where to load cr-files
+    private File sourcePath;     // where to load CR-files
     private int method;          // of peer selection
     private int percentage;      // to select any other peer
     private String address[];      // of fixed other peer

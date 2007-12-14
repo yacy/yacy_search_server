@@ -67,8 +67,8 @@ public final class httpChunkedOutputStream extends FilterOutputStream {
     public void finish() throws IOException {
         if (!this.finished) {
             this.out.write((byte) 48);
-            this.out.write(serverCore.crlf);
-            this.out.write(serverCore.crlf);
+            this.out.write(serverCore.CRLF);
+            this.out.write(serverCore.CRLF);
             this.out.flush();
             this.finished = true;
         }
@@ -79,9 +79,9 @@ public final class httpChunkedOutputStream extends FilterOutputStream {
         if (b.length == 0) return;
             
         this.out.write(Integer.toHexString(b.length).getBytes());
-        this.out.write(serverCore.crlf);
+        this.out.write(serverCore.CRLF);
         this.out.write(b);
-        this.out.write(serverCore.crlf);
+        this.out.write(serverCore.CRLF);
         this.out.flush();
     }
     
@@ -90,9 +90,9 @@ public final class httpChunkedOutputStream extends FilterOutputStream {
         if (len == 0) return;
         
         this.out.write(Integer.toHexString(len).getBytes());
-        this.out.write(serverCore.crlf);
+        this.out.write(serverCore.CRLF);
         this.out.write(b, off, len);
-        this.out.write(serverCore.crlf);
+        this.out.write(serverCore.CRLF);
         this.out.flush();
     }
     
@@ -101,9 +101,9 @@ public final class httpChunkedOutputStream extends FilterOutputStream {
         if (len == 0) return;
         
         this.out.write(Integer.toHexString(len).getBytes());
-        this.out.write(serverCore.crlf);
+        this.out.write(serverCore.CRLF);
         this.out.write(b.getBytes(off, len));
-        this.out.write(serverCore.crlf);
+        this.out.write(serverCore.CRLF);
         this.out.flush();
     }
     
@@ -113,9 +113,9 @@ public final class httpChunkedOutputStream extends FilterOutputStream {
         if (len == 0) return;
         
         this.out.write(Integer.toHexString(len).getBytes());
-        this.out.write(serverCore.crlf);
+        this.out.write(serverCore.CRLF);
         serverFileUtils.copy(b, out, len);
-        this.out.write(serverCore.crlf);
+        this.out.write(serverCore.CRLF);
         this.out.flush();
     }
     
@@ -123,9 +123,9 @@ public final class httpChunkedOutputStream extends FilterOutputStream {
         if (this.finished) throw new IOException("ChunkedOutputStream already finalized.");
         
         this.out.write("1".getBytes());
-        this.out.write(serverCore.crlf);
+        this.out.write(serverCore.CRLF);
         this.out.write(b);
-        this.out.write(serverCore.crlf);
+        this.out.write(serverCore.CRLF);
         this.out.flush();
     }
 }
