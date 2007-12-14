@@ -526,23 +526,23 @@ public final class httpHeader extends TreeMap implements Map {
     public static Properties parseRequestLine(String cmd, String args, Properties prop, String virtualHost) {
         
         // getting the last request line for debugging purposes
-        String prevRequestLine = prop.containsKey(httpHeader.CONNECTION_PROP_REQUESTLINE)?
-                prop.getProperty(httpHeader.CONNECTION_PROP_REQUESTLINE) : "";
+        String prevRequestLine = prop.containsKey(CONNECTION_PROP_REQUESTLINE)?
+                prop.getProperty(CONNECTION_PROP_REQUESTLINE) : "";
         
         // reset property from previous run   
         prop.clear();
 
         // storing informations about the request
-        prop.setProperty(httpHeader.CONNECTION_PROP_METHOD, cmd);
-        prop.setProperty(httpHeader.CONNECTION_PROP_REQUESTLINE,cmd + " " + args);
-        prop.setProperty(httpHeader.CONNECTION_PROP_PREV_REQUESTLINE,prevRequestLine);
+        prop.setProperty(CONNECTION_PROP_METHOD, cmd);
+        prop.setProperty(CONNECTION_PROP_REQUESTLINE,cmd + " " + args);
+        prop.setProperty(CONNECTION_PROP_PREV_REQUESTLINE,prevRequestLine);
         
         // this parses a whole URL
         if (args.length() == 0) {
-            prop.setProperty(httpHeader.CONNECTION_PROP_HOST, virtualHost);
-            prop.setProperty(httpHeader.CONNECTION_PROP_PATH, "/");
-            prop.setProperty(httpHeader.CONNECTION_PROP_HTTP_VER, "HTTP/0.9");
-            prop.setProperty(httpHeader.CONNECTION_PROP_EXT, "");
+            prop.setProperty(CONNECTION_PROP_HOST, virtualHost);
+            prop.setProperty(CONNECTION_PROP_PATH, "/");
+            prop.setProperty(CONNECTION_PROP_HTTP_VER, HTTP_VERSION_0_9);
+            prop.setProperty(CONNECTION_PROP_EXT, "");
             return prop;
         }
         
@@ -550,11 +550,11 @@ public final class httpHeader extends TreeMap implements Map {
         int sep = args.lastIndexOf(" ");
         if ((sep >= 0)&&(args.substring(sep + 1).toLowerCase().startsWith("http/"))) {
             // HTTP version is given
-            prop.setProperty(httpHeader.CONNECTION_PROP_HTTP_VER, args.substring(sep + 1).trim());
+            prop.setProperty(CONNECTION_PROP_HTTP_VER, args.substring(sep + 1).trim());
             args = args.substring(0, sep).trim(); // cut off HTTP version mark
         } else {
             // HTTP version is not given, it will be treated as ver 0.9
-            prop.setProperty(httpHeader.CONNECTION_PROP_HTTP_VER, "HTTP/0.9");
+            prop.setProperty(CONNECTION_PROP_HTTP_VER, HTTP_VERSION_0_9);
         }
         
         // replacing spaces in the url string correctly
@@ -568,49 +568,33 @@ public final class httpHeader extends TreeMap implements Map {
         sep = args.indexOf("?");
         if (sep >= 0) {
             // there are values attached to the query string
-            argsString = args.substring(sep + 1); // cut haed from tail of query
+            argsString = args.substring(sep + 1); // cut head from tail of query
             args = args.substring(0, sep);
         }
-        prop.setProperty(httpHeader.CONNECTION_PROP_URL, args); // store URL
+        prop.setProperty(CONNECTION_PROP_URL, args); // store URL
         //System.out.println("HTTPD: ARGS=" + argsString);
-        if (argsString.length() != 0) prop.setProperty(httpHeader.CONNECTION_PROP_ARGS, argsString); // store arguments in original form
-        
-        // find out file extension
-        sep = args.lastIndexOf(".");
-        if (sep >= 0) {
-            if (args.indexOf("?", sep + 1) >= sep)
-                prop.setProperty(httpHeader.CONNECTION_PROP_EXT, args.substring(sep + 1, args.indexOf("?", sep + 1)).toLowerCase());
-            else if (args.indexOf("#", sep + 1) >= sep)
-                prop.setProperty(httpHeader.CONNECTION_PROP_EXT, args.substring(sep + 1, args.indexOf("#", sep + 1)).toLowerCase());
-            else
-                prop.setProperty(httpHeader.CONNECTION_PROP_EXT, args.substring(sep + 1).toLowerCase());
-        } else {
-            prop.setProperty(httpHeader.CONNECTION_PROP_EXT, "");
-        }
+        if (argsString.length() != 0) prop.setProperty(CONNECTION_PROP_ARGS, argsString); // store arguments in original form
         
         // finally find host string
+        String path;
         if (args.toUpperCase().startsWith("HTTP://")) {
             // a host was given. extract it and set path
             args = args.substring(7);
             sep = args.indexOf("/");
             if (sep < 0) {
-            	/*
                 // this is a malformed url, something like
                 // http://index.html
                 // we are lazy and guess that it means
                 // /index.html
                 // which is a localhost access to the file servlet
-                prop.setProperty(httpHeader.CONNECTION_PROP_HOST, virtualHost);
-                prop.setProperty(httpHeader.CONNECTION_PROP_PATH, "/" + args);
-                */
-                prop.setProperty(httpHeader.CONNECTION_PROP_HOST, args);
-                prop.setProperty(httpHeader.CONNECTION_PROP_PATH, "/");            	
+                prop.setProperty(CONNECTION_PROP_HOST, args);
+                path = "/";
             } else {
                 // THIS IS THE "GOOD" CASE
                 // a perfect formulated url
                 String dstHostSocket = args.substring(0, sep);
-                prop.setProperty(httpHeader.CONNECTION_PROP_HOST, (httpd.isThisHostName(dstHostSocket)?virtualHost:dstHostSocket));
-                prop.setProperty(httpHeader.CONNECTION_PROP_PATH, args.substring(sep)); // yes, including beginning "/"
+                prop.setProperty(CONNECTION_PROP_HOST, (httpd.isThisHostName(dstHostSocket)?virtualHost:dstHostSocket));
+                path = args.substring(sep); // yes, including beginning "/"
             }
         } else {
             // no host in url. set path
@@ -619,24 +603,41 @@ public final class httpHeader extends TreeMap implements Map {
                 // in this case, we simulate a
                 // http://localhost/s
                 // access by setting a virtual host
-                prop.setProperty(httpHeader.CONNECTION_PROP_HOST, virtualHost);
-                prop.setProperty(httpHeader.CONNECTION_PROP_PATH, args);
+                prop.setProperty(CONNECTION_PROP_HOST, virtualHost);
+                path = args;
             } else {
                 // the client 'forgot' to set a leading '/'
                 // this is the same case as above, with some lazyness
-                prop.setProperty(httpHeader.CONNECTION_PROP_HOST, virtualHost);
-                prop.setProperty(httpHeader.CONNECTION_PROP_PATH, "/" + args);
+                prop.setProperty(CONNECTION_PROP_HOST, virtualHost);
+                path = "/" + args;
+            }
+            prop.setProperty(CONNECTION_PROP_PATH, path);
+        }
+
+        // find out file extension (we already stripped ?-parameters from args)
+        String ext = "";  // default when no file extension
+        sep = path.lastIndexOf(".");
+        if (sep >= 0) {
+            int ancpos = path.indexOf("#", sep + 1);
+            if (ancpos  >= sep) {
+                // ex: /foo/bar.html#xy => html
+                ext = path.substring(sep + 1, ancpos).toLowerCase();
+            } else {
+                // ex: /foo/bar.php => php
+                ext = path.substring(sep + 1).toLowerCase();
             }
         }
+        prop.setProperty(CONNECTION_PROP_EXT, ext);
+        
         return prop;
     }    
     
     public static boolean supportChunkedEncoding(Properties conProp) {
     	// getting the http version of the client
-    	String httpVer = conProp.getProperty(httpHeader.CONNECTION_PROP_HTTP_VER); 
+    	String httpVer = conProp.getProperty(CONNECTION_PROP_HTTP_VER); 
     	
     	// only clients with http version 1.1 supports chunk
-        return !(httpVer.equals(httpHeader.HTTP_VERSION_0_9) || httpVer.equals(httpHeader.HTTP_VERSION_1_0));
+        return !(httpVer.equals(HTTP_VERSION_0_9) || httpVer.equals(HTTP_VERSION_1_0));
     }    
     
     /**
