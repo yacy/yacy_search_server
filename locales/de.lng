@@ -1918,6 +1918,7 @@ Auto pop-up of status page on start-up:==Automatisches Pop-Up der Status-Seite b
 #File: Status.html
 #---------------------------
 Console Status==Konsolen Status
+Log-in as administrator to see full status==Als Administrator einloggen, f&uuml;r kompletten Status
 Welcome to YaCy!==Willkommen bei YaCy!
 Your settings are _not_ protected!</strong>==Ihre Einstellungen sind _nicht_ mit einem Kennwort gesch&uuml;tzt!</strong>
 Please open the <a href="ConfigBasic.html">settings</a> page <strong>immediately</strong>==Bitte &ouml;ffnen Sie die <a href="ConfigBasic.html">Einstellungen-Seite</a> <strong>sofort</strong>
@@ -2316,7 +2317,7 @@ Project Home==Projektseite
 YaCy - Distributed Web Search==YaCy - Verteilte Internet Suche
 Search&nbsp;&amp;&nbsp;Browse==Suchen&nbsp;&amp;&nbsp;Surfen
 Search Page==Suchseite
-Ranking Config==Ranking einstellen
+Ranking Config==Ranking Einstellungen
 >Surftips==>Surftipps
 Publication==Ver&ouml;ffentlichung
 >Bookmarks==>Lesezeichen
@@ -2415,7 +2416,7 @@ Crawl Start \(easy\)==Crawl starten (Anf&auml;nger)
 Crawl Start \(expert\)==Crawl starten (Experte)
 Crawl Profile Editor==Crawl Profil Editor
 Crawler Queues==Crawler Puffer
-Control Queues==Kontolle des Puffers
+Control Queues==Kontrolle des Puffers
 Indexing<==Indexierung<
 Loader<==Lader<
 WWW Crawl Queues==WWW Crawl-Puffer
