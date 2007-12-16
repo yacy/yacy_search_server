@@ -61,6 +61,7 @@ public class ymageMatrix {
     
     public static final byte FILTER_ANTIALIASING = 0;
     public static final byte FILTER_BLUR = 1;
+    public static final byte FILTER_INVERT = 2;
     
     protected int            width, height;
     private   BufferedImage  image;
@@ -391,7 +392,46 @@ public class ymageMatrix {
      */
     public void insertBitmap(BufferedImage bitmap, int x, int y, int transRGB, byte filter) {
         insertBitmap(bitmap, x, y, transRGB);
-        filter(x-1, y-1, x + bitmap.getWidth(), y + bitmap.getHeight(), filter, image.getRGB(x, y));
+
+        int bitmapWidth = bitmap.getWidth();
+        int bitmapHeight = bitmap.getHeight();        
+        
+        if (filter == FILTER_ANTIALIASING) {
+            
+            int transX = -1;
+            int transY = -1;
+            int imageWidth = image.getWidth();
+            int imageHeight = image.getHeight();
+            
+            // find first pixel in bitmap that equals transRGB
+            // and also lies in area of image that will be covered by bitmap
+            int i = 0;
+            int j = 0;
+            boolean found = false;
+            while ((i < bitmapWidth) && (i + x < imageWidth) && !found) {
+                while ((j < bitmapHeight) && (j + y < imageHeight) && !found) {
+                    if (bitmap.getRGB(i, j) == transRGB) {
+                        transX = i;
+                        transY = j;
+                    }
+                    j++;
+                }
+                i++;
+            }
+
+            // if there is a transparent pixel in the bitmap that covers an area
+            // of the image, the fiter will be used. If no such pixel has been found that
+            // means that there either is no transparent pixel in the bitmap or part
+            // of the bitmap that covers part of tha image is not within the borders of
+            // the image (i.e. bitmap is larger than image)
+            if (transX != -1) {
+                filter(x - 1, y - 1, x + bitmapWidth, y + bitmapHeight, filter, image.getRGB(transX + x, transY + y));
+            }
+
+        } else {
+            filter(x - 1, y - 1, x + bitmapWidth, y + bitmapHeight, filter, -1);
+        }
+
     }
     
     /**
@@ -418,6 +458,18 @@ public class ymageMatrix {
     public void blur(int lox, int loy, int rux, int ruy) {
         filter(lox, loy, rux, ruy, FILTER_BLUR, -1);
     }
+
+    /**
+     * invert filter for a square part of the ymageMatrix
+     * @param lox x value for left upper coordinate
+     * @param loy y value for left upper coordinate
+     * @param rux x value for right lower coordinate
+     * @param ruy y value for right lower coordinate
+     * @author Marc Nause
+     */
+    public void invert(int lox, int loy, int rux, int ruy) {
+        filter(lox, loy, rux, ruy, FILTER_INVERT, -1);
+    }
     
     /**
      * filter for a square part of the ymageMatrix
@@ -438,7 +490,7 @@ public class ymageMatrix {
         if (lox > width) { lox = width - 1; }
         if (loy > height){ loy = height - 1; }
         if (rux > width) { rux = width - 1; }
-        if (ruy > height){ ruy = width - 1; }        
+        if (ruy > height){ ruy = height - 1; }        
         if (lox > rux) {
             int tmp = lox;
             lox = rux;
@@ -468,77 +520,80 @@ public class ymageMatrix {
                 rgbG = 0;
                 rgbB = 0;  
                 
-                // taking samples from neighbours of pixel
-                if (i > lox) { 
-                    rgb = image.getRGB(i-1, j);
-                    if (rgb == bgcolor) {
-                        border = true;
+                if (filter == FILTER_ANTIALIASING || filter == FILTER_BLUR) {
+                    // taking samples from neighbours of pixel
+                    if (i > lox) {
+                        rgb = image.getRGB(i - 1, j);
+                        if (rgb == bgcolor) {
+                            border = true;
+                        }
+                        rgbR += rgb >> 16 & 0xff;
+                        rgbG += rgb >> 8 & 0xff;
+                        rgbB += rgb & 0xff;
+                        numberOfNeighbours++;
                     }
-                    rgbR += rgb >> 16 & 0xff;
-                    rgbG += rgb >> 8& 0xff;
-                    rgbB += rgb & 0xff;  
-                    numberOfNeighbours++;
+                    if (j > loy) {
+                        rgb = image.getRGB(i, j - 1);
+                        if (rgb == bgcolor) {
+                            border = true;
+                        }
+                        rgbR += rgb >> 16 & 0xff;
+                        rgbG += rgb >> 8 & 0xff;
+                        rgbB += rgb & 0xff;
+                        numberOfNeighbours++;
+                    }
+                    if (i < width - 1) {
+                        rgb = image.getRGB(i + 1, j);
+                        if (rgb == bgcolor) {
+                            border = true;
+                        }
+                        rgbR += rgb >> 16 & 0xff;
+                        rgbG += rgb >> 8 & 0xff;
+                        rgbB += rgb & 0xff;
+                        numberOfNeighbours++;
+                    }
+                    if (i < height - 1) {
+                        rgb = image.getRGB(i, j + 1);
+                        if (rgb == bgcolor) {
+                            border = true;
+                        }
+                        rgbR += rgb >> 16 & 0xff;
+                        rgbG += rgb >> 8 & 0xff;
+                        rgbB += rgb & 0xff;
+                        numberOfNeighbours++;
+                    }
+
                 }
-                if (j > loy) { 
-                    rgb = image.getRGB(i, j-1); 
-                    if (rgb == bgcolor) {
-                        border = true;
-                    }                    
-                    rgbR += rgb >> 16 & 0xff;
-                    rgbG += rgb >> 8& 0xff;
-                    rgbB += rgb & 0xff;                   
-                    numberOfNeighbours++;
-                }
-                if (i < width- 1) {
-                    rgb = image.getRGB(i+1, j); 
-                    if (rgb == bgcolor) {
-                        border = true;
-                    }  
-                    rgbR += rgb >> 16 & 0xff;
-                    rgbG += rgb >> 8& 0xff;
-                    rgbB += rgb & 0xff;              
-                    numberOfNeighbours++;
-                }
-                if (i < height - 1) { 
-                    rgb = image.getRGB(i, j+1);
-                    if (rgb == bgcolor) {
-                        border = true;
-                    }  
-                    rgbR += rgb >> 16 & 0xff;
-                    rgbG += rgb >> 8& 0xff;
-                    rgbB += rgb & 0xff;                 
-                    numberOfNeighbours++;
-                }
-                
+
                 rgb = image.getRGB(i, j);
                 
-                // put more weight on pixle than on neighbours
-                if (filter == FILTER_ANTIALIASING && border) {
-//                    rgbR += (rgb >> 16 & 0xff) * numberOfNeighbours;
-//                    rgbG += (rgb >> 8 & 0xff) * numberOfNeighbours;
-//                    rgbB += (rgb & 0xff) * numberOfNeighbours;
-//                    numberOfNeighbours += numberOfNeighbours;
+                // add value of pixel
+                // in case filter is used for antialiasing this will only be done if
+                // the pixel is on the edge to the background color
+                if ((filter == FILTER_ANTIALIASING && border) || (filter == FILTER_BLUR)) {
                     rgbR += (rgb >> 16 & 0xff);
                     rgbG += (rgb >> 8 & 0xff);
                     rgbB += (rgb & 0xff);
                     numberOfNeighbours++;                    
                     border = false;
                 } 
+                // set to value of pixel => keep value
                 else if (filter == FILTER_ANTIALIASING) {
                     rgbR = (rgb >> 16 & 0xff);
                     rgbG = (rgb >> 8 & 0xff);
                     rgbB = (rgb & 0xff);
                     numberOfNeighbours = 1;
                 }
-                // put same weight in neighbours as on pixel
-                else if (filter == FILTER_BLUR) {
-                    rgbR += (rgb >> 16 & 0xff);
-                    rgbG += (rgb >> 8 & 0xff);
-                    rgbB += (rgb & 0xff);
-                    numberOfNeighbours++;
+                // set value of pixel to inverted value (using XOR)
+                else if (filter == FILTER_INVERT) {
+                    rgb = rgb ^ 0xffffff;
+                    rgbR = (rgb >> 16 & 0xff);
+                    rgbG = (rgb >> 8 & 0xff);
+                    rgbB = (rgb & 0xff);
+                    numberOfNeighbours = 1;
                 }
 
-                // calculatinc the average
+                // calculating the average
                 rgbR = (int) (rgbR / numberOfNeighbours);
                 rgbG = (int) (rgbG / numberOfNeighbours);
                 rgbB = (int) (rgbB / numberOfNeighbours);
