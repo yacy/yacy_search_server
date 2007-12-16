@@ -611,8 +611,8 @@ public final class httpHeader extends TreeMap implements Map {
                 prop.setProperty(CONNECTION_PROP_HOST, virtualHost);
                 path = "/" + args;
             }
-            prop.setProperty(CONNECTION_PROP_PATH, path);
         }
+        prop.setProperty(CONNECTION_PROP_PATH, path);
 
         // find out file extension (we already stripped ?-parameters from args)
         String ext = "";  // default when no file extension
