@@ -1,4 +1,4 @@
-// Blog.java 
+// Blog.java
 // -----------------------
 // part of YACY
 // (C) by Michael Peter Christen; mc@anomic.de
@@ -69,23 +69,23 @@ import de.anomic.yacy.yacyNewsRecord;
 public class Blog {
 
     private static final String DEFAULT_PAGE = "blog_default";
-    
-	private static SimpleDateFormat SimpleFormatter = new SimpleDateFormat("yyyy/MM/dd HH:mm:ss");
-//	TODO: make userdefined date/time-strings (localisation)
-	
+
+        private static SimpleDateFormat SimpleFormatter = new SimpleDateFormat("yyyy/MM/dd HH:mm:ss");
+        // TODO: make userdefined date/time-strings (localisation)
+
     public static String dateString(Date date) {
-    	return SimpleFormatter.format(date);
+        return SimpleFormatter.format(date);
     }
-	
-	public static serverObjects respond(httpHeader header, serverObjects post, serverSwitch env) {
-		final plasmaSwitchboard switchboard = (plasmaSwitchboard) env;
-		final serverObjects prop = new serverObjects();
-		blogBoard.entry page = null;
-		
+
+    public static serverObjects respond(httpHeader header, serverObjects post, serverSwitch env) {
+        final plasmaSwitchboard switchboard = (plasmaSwitchboard) env;
+        final serverObjects prop = new serverObjects();
+        blogBoard.entry page = null;
+
         final boolean authenticated = switchboard.adminAuthenticated(header) >= 2;
         final int display = ((post == null) || (!authenticated)) ? 0 : post.getInt("display", 0);
         prop.put("display", display);
-        
+
         boolean hasRights = switchboard.verifyAuthentication(header, true);
         final boolean xml = ((String)header.get(httpHeader.CONNECTION_PROP_PATH)).endsWith(".xml");
         final String address = yacyCore.seedDB.mySeed().getPublicAddress();
@@ -95,16 +95,16 @@ public class Blog {
         } else {
             prop.put("mode_admin", "0");
         }
-        
+
         if (post == null) {
             prop.putHTML("peername", yacyCore.seedDB.mySeed().getName());
             prop.put("address", address);
             return putBlogDefault(prop, switchboard, address, 0, 20, hasRights, xml);
         }
-        
+
         final int start = post.getInt("start",0); //indicates from where entries should be shown
         final int num   = post.getInt("num",20);  //indicates how many entries should be shown
-        
+
         if(!hasRights){
             final userDB.Entry userentry = switchboard.userDB.proxyAuth((String)header.get("Authorization", "xxxxxx"));
             if(userentry != null && userentry.hasRight(userDB.Entry.BLOG_RIGHT)){
@@ -113,172 +113,175 @@ public class Blog {
                 //opens login window if login link is clicked - contrib [MN]
                 prop.put("AUTHENTICATE","admin log-in");
             }
-		}
+        }
 
-		String pagename = post.get("page", DEFAULT_PAGE);
-	    final String ip = (String)header.get(httpHeader.CONNECTION_PROP_CLIENTIP, "127.0.0.1");
-	    
-		String StrAuthor = post.get("author", "");
-		
-		if (StrAuthor.equals("anonymous")) {
-			StrAuthor = switchboard.blogDB.guessAuthor(ip);
-			
-	    	if (StrAuthor == null || StrAuthor.length() == 0) {
-	    		if (de.anomic.yacy.yacyCore.seedDB.mySeed() == null)
-	    			StrAuthor = "anonymous";
-	        	else {
-	        		StrAuthor = de.anomic.yacy.yacyCore.seedDB.mySeed().get("Name", "anonymous");
-	        	}
-	        }
-	    }
-		
-		byte[] author;
-		try {
-			author = StrAuthor.getBytes("UTF-8");
-		} catch (UnsupportedEncodingException e) {
-			author = StrAuthor.getBytes();
-		}
+        String pagename = post.get("page", DEFAULT_PAGE);
+        final String ip = (String)header.get(httpHeader.CONNECTION_PROP_CLIENTIP, "127.0.0.1");
 
-		if(hasRights && post.containsKey("delete") && post.get("delete").equals("sure")) {
+        String StrAuthor = post.get("author", "");
+
+        if (StrAuthor.equals("anonymous")) {
+            StrAuthor = switchboard.blogDB.guessAuthor(ip);
+
+            if (StrAuthor == null || StrAuthor.length() == 0) {
+                if (de.anomic.yacy.yacyCore.seedDB.mySeed() == null) {
+                    StrAuthor = "anonymous";
+                } else {
+                    StrAuthor = de.anomic.yacy.yacyCore.seedDB.mySeed().get("Name", "anonymous");
+                }
+            }
+        }
+
+        byte[] author;
+        try {
+            author = StrAuthor.getBytes("UTF-8");
+        } catch (UnsupportedEncodingException e) {
+            author = StrAuthor.getBytes();
+        }
+
+        if(hasRights && post.containsKey("delete") && post.get("delete").equals("sure")) {
             page = switchboard.blogDB.read(pagename);
             final Iterator i = page.comments().iterator();
             while(i.hasNext()) {
                 switchboard.blogCommentDB.delete((String) i.next());
             }
-			switchboard.blogDB.delete(pagename);
-			pagename = DEFAULT_PAGE;
-		}
-        
-        if (post.containsKey("discard"))
+            switchboard.blogDB.delete(pagename);
             pagename = DEFAULT_PAGE;
-        
+        }
+
+        if (post.containsKey("discard")) {
+            pagename = DEFAULT_PAGE;
+        }
+
         if (post.containsKey("submit") && (hasRights)) {
-			// store a new/edited blog-entry
-			byte[] content;
-			try {
-				content = post.get("content", "").getBytes("UTF-8");
-			} catch (UnsupportedEncodingException e) {
-				content = post.get("content", "").getBytes();
-			}
+            // store a new/edited blog-entry
+            byte[] content;
+            try {
+                content = post.get("content", "").getBytes("UTF-8");
+            } catch (UnsupportedEncodingException e) {
+                content = post.get("content", "").getBytes();
+            }
 
-			Date date = null;
+            Date date = null;
             ArrayList comments = null;
-			
-			//set name for new entry or date for old entry
-			if(pagename.equals(DEFAULT_PAGE))
-				pagename = String.valueOf(System.currentTimeMillis());
-			else {
-				page = switchboard.blogDB.read(pagename);
+
+            //set name for new entry or date for old entry
+            if(pagename.equals(DEFAULT_PAGE)) {
+                pagename = String.valueOf(System.currentTimeMillis());
+            } else {
+                page = switchboard.blogDB.read(pagename);
                 comments = page.comments();
-				date = page.date();
-			}
-			final String commentMode = post.get("commentMode", "1");
-			final String StrSubject = post.get("subject", "");
-			byte[] subject;
-			try {
-				subject = StrSubject.getBytes("UTF-8");
-			} catch (UnsupportedEncodingException e) {
-				subject = StrSubject.getBytes();
-			}
-         
-			switchboard.blogDB.write(switchboard.blogDB.newEntry(pagename, subject, author, ip, date, content, comments, commentMode));
-            
-			// create a news message
-			final HashMap map = new HashMap();
-			map.put("page", pagename);
-			map.put("subject", StrSubject.replace(',', ' '));
-			map.put("author", StrAuthor.replace(',', ' '));
-			yacyCore.newsPool.publishMyNews(yacyNewsRecord.newRecord(yacyNewsPool.CATEGORY_BLOG_ADD, map));
-		}
+                date = page.date();
+            }
+            final String commentMode = post.get("commentMode", "1");
+            final String StrSubject = post.get("subject", "");
+            byte[] subject;
+            try {
+                subject = StrSubject.getBytes("UTF-8");
+            } catch (UnsupportedEncodingException e) {
+                subject = StrSubject.getBytes();
+            }
 
-		page = switchboard.blogDB.read(pagename); //maybe "if(page == null)"
+            switchboard.blogDB.write(switchboard.blogDB.newEntry(pagename, subject, author, ip, date, content, comments, commentMode));
 
-		if (post.containsKey("edit")) {
-		    //edit an entry
-			if(hasRights) {
-				try {
+            // create a news message
+            final HashMap map = new HashMap();
+            map.put("page", pagename);
+            map.put("subject", StrSubject.replace(',', ' '));
+            map.put("author", StrAuthor.replace(',', ' '));
+            yacyCore.newsPool.publishMyNews(yacyNewsRecord.newRecord(yacyNewsPool.CATEGORY_BLOG_ADD, map));
+        }
+
+        page = switchboard.blogDB.read(pagename); //maybe "if(page == null)"
+
+        if (post.containsKey("edit")) {
+            //edit an entry
+            if(hasRights) {
+                try {
                     prop.put("mode", "1"); //edit
                     prop.put("mode_commentMode", page.getCommentMode());
-			        prop.putHTML("mode_author", new String(page.author(),"UTF-8"), xml);
-			        prop.put("mode_pageid", page.key());
-			        prop.putHTML("mode_subject", new String(page.subject(), "UTF-8"), xml);
-			        prop.put("mode_page-code", new String(page.page(), "UTF-8"));
-			    } catch (UnsupportedEncodingException e) {}
-			}
-			else {
-				prop.put("mode", "3"); //access denied (no rights)
-			}
-		}
-		else if(post.containsKey("preview")) {
-			//preview the page
-			if(hasRights) {
-	            prop.put("mode", "2");//preview
+                    prop.putHTML("mode_author", new String(page.author(),"UTF-8"), xml);
+                    prop.put("mode_pageid", page.key());
+                    prop.putHTML("mode_subject", new String(page.subject(), "UTF-8"), xml);
+                    prop.put("mode_page-code", new String(page.page(), "UTF-8"));
+                } catch (UnsupportedEncodingException e) {}
+            }
+            else {
+                prop.put("mode", "3"); //access denied (no rights)
+            }
+        }
+        else if(post.containsKey("preview")) {
+            //preview the page
+            if(hasRights) {
+                prop.put("mode", "2");//preview
                 prop.put("mode_commentMode", post.getInt("commentMode", 1));
-	            prop.putHTML("mode_pageid", pagename, xml);
-	            try {
-					prop.putHTML("mode_author", new String(author, "UTF-8"), xml);
-				} catch (UnsupportedEncodingException e) {
-					prop.putHTML("mode_author", new String(author), xml);
-				}
-	            prop.putHTML("mode_subject", post.get("subject",""), xml);
-	            prop.put("mode_date", dateString(new Date()));
-	            prop.putWiki("mode_page", post.get("content", ""));
-	            prop.putHTML("mode_page-code", post.get("content", ""), xml);
-			}
-			else prop.put("mode", "3"); //access denied (no rights)
-		}
-		else if(post.get("delete", "").equals("try")) {
-			if(hasRights) {
-				prop.put("mode", "4");
-				prop.put("mode_pageid", pagename);
-				try {
-					prop.putHTML("mode_author",new String(page.author(), "UTF-8"), xml);
-				} catch (UnsupportedEncodingException e) {
-					prop.putHTML("mode_author",new String(page.author()), xml);
-				}
-				try {
-					prop.putHTML("mode_subject",new String(page.subject(),"UTF-8"), xml);
-				} catch (UnsupportedEncodingException e) {
-					prop.putHTML("mode_subject",new String(page.subject()), xml);
-				}
-			}
-			else prop.put("mode", "3"); //access denied (no rights)
-		}
-		else if(post.containsKey("import")) {
-			prop.put("mode", "5");
-			prop.put("mode_state", "0");
-		}
-		else if(post.containsKey("xmlfile")) {
-			prop.put("mode", "5");
-			if(switchboard.blogDB.importXML(new String((byte[])post.get("xmlfile$file")))) {
-				prop.put("mode_state", "1");
-			}
-			else {
-				prop.put("mode_state", "2");
-			}
-		}
-		else {
-		    // show blog-entry/entries
-	        prop.put("mode", "0"); //viewing
-	        if(pagename.equals(DEFAULT_PAGE)) {
-	            // XXX: where are "peername" and "address" used in the template?
+                prop.putHTML("mode_pageid", pagename, xml);
+                try {
+                    prop.putHTML("mode_author", new String(author, "UTF-8"), xml);
+                } catch (UnsupportedEncodingException e) {
+                    prop.putHTML("mode_author", new String(author), xml);
+                }
+                prop.putHTML("mode_subject", post.get("subject",""), xml);
+                prop.put("mode_date", dateString(new Date()));
+                prop.putWiki("mode_page", post.get("content", ""));
+                prop.putHTML("mode_page-code", post.get("content", ""), xml);
+            }
+            else {
+                prop.put("mode", "3"); //access denied (no rights)
+            }
+        }
+        else if(post.get("delete", "").equals("try")) {
+            if(hasRights) {
+                prop.put("mode", "4");
+                prop.put("mode_pageid", pagename);
+                try {
+                    prop.putHTML("mode_author",new String(page.author(), "UTF-8"), xml);
+                } catch (UnsupportedEncodingException e) {
+                    prop.putHTML("mode_author",new String(page.author()), xml);
+                }
+                try {
+                    prop.putHTML("mode_subject",new String(page.subject(),"UTF-8"), xml);
+                } catch (UnsupportedEncodingException e) {
+                    prop.putHTML("mode_subject",new String(page.subject()), xml);
+                }
+            }
+            else prop.put("mode", "3"); //access denied (no rights)
+        }
+        else if(post.containsKey("import")) {
+            prop.put("mode", "5");
+            prop.put("mode_state", "0");
+        }
+        else if(post.containsKey("xmlfile")) {
+            prop.put("mode", "5");
+            if(switchboard.blogDB.importXML(new String((byte[])post.get("xmlfile$file")))) {
+                prop.put("mode_state", "1");
+            }
+            else {
+                prop.put("mode_state", "2");
+            }
+        }
+        else {
+            // show blog-entry/entries
+            prop.put("mode", "0"); //viewing
+            if(pagename.equals(DEFAULT_PAGE)) {
+                // XXX: where are "peername" and "address" used in the template?
                 // XXX: "clientname" is already set to the peername, no need for a new setting
                 prop.putHTML("peername", yacyCore.seedDB.mySeed().getName(), xml);
                 prop.put("address", address);
-	        	//index all entries
+                //index all entries
                 putBlogDefault(prop, switchboard, address, start, num, hasRights, xml);
-	        }
-	        else {
-	        	//only show 1 entry
-	        	prop.put("mode_entries", "1");
+            }
+            else {
+                //only show 1 entry
+                prop.put("mode_entries", "1");
                 putBlogEntry(prop, page, address, 0, hasRights, xml);
-	        }
-		}
+            }
+        }
 
-		// return rewrite properties
-		return prop;
-	}
-    
+        // return rewrite properties
+        return prop;
+    }
+
     private static serverObjects putBlogDefault(
             final serverObjects prop,
             final plasmaSwitchboard switchboard,
@@ -286,7 +289,8 @@ public class Blog {
             int start,
             int num,
             final boolean hasRights,
-            final boolean xml) {
+            final boolean xml) 
+    {
         try {
             final Iterator i = switchboard.blogDB.keys(false);
             String pageid;
@@ -305,7 +309,7 @@ public class Blog {
                         xml);
             }
             prop.put("mode_entries", count);
-            
+
             if(i.hasNext()) {
                 prop.put("mode_moreentries", "1"); //more entries are availible
                 prop.put("mode_moreentries_start", nextstart);
@@ -316,29 +320,29 @@ public class Blog {
         } catch (IOException e) { serverLog.logSevere("BLOG", "Error reading blog-DB", e); }
         return prop;
     }
-    
+
     private static serverObjects putBlogEntry(
             final serverObjects prop,
             final blogBoard.entry entry,
             final String address,
             final int number,
             final boolean hasRights,
-            final boolean xml) {
-        
+            final boolean xml) 
+    {
         // subject
         try {
             prop.putHTML("mode_entries_" + number + "_subject", new String(entry.subject(),"UTF-8"), xml);
         } catch (UnsupportedEncodingException e) {
             prop.putHTML("mode_entries_" + number + "_subject", new String(entry.subject()), xml);
         }
-        
+
         // author
         try {
             prop.putHTML("mode_entries_" + number + "_author", new String(entry.author(),"UTF-8"), xml);
         } catch (UnsupportedEncodingException e) {
             prop.putHTML("mode_entries_" + number + "_author", new String(entry.author()), xml);
         }
-        
+
         // comments
         if(entry.getCommentMode() == 0) {
             prop.put("mode_entries_" + number + "_commentsactive", "0");
@@ -352,27 +356,27 @@ public class Blog {
                 prop.put("mode_entries_" + number + "_commentsactive_comments", new String(entry.commentsSize()));
             }
         }
-        
+
         prop.put("mode_entries_" + number + "_date", dateString(entry.date()));
         prop.put("mode_entries_" + number + "_rfc822date", httpc.dateString(entry.date()));
         prop.put("mode_entries_" + number + "_pageid", entry.key());
         prop.put("mode_entries_" + number + "_address", address);
         prop.put("mode_entries_" + number + "_ip", entry.ip());
-        
+
         if(xml) {
             prop.put("mode_entries_" + number + "_page", entry.page());
             prop.put("mode_entries_" + number + "_timestamp", entry.timestamp());
         } else {
             prop.putWiki("mode_entries_" + number + "_page", entry.page());
         }
-        
+
         if(hasRights) {
             prop.put("mode_entries_" + number + "_admin", "1");
             prop.put("mode_entries_" + number + "_admin_pageid",entry.key());
         } else {
             prop.put("mode_entries_" + number + "_admin", "0");
         }
-        
+
         return prop;
     }
 }

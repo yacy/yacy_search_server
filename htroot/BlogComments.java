@@ -1,4 +1,4 @@
-// Blog.java 
+// Blog.java
 // -----------------------
 // part of YACY
 // (C) by Michael Peter Christen; mc@anomic.de
@@ -69,18 +69,18 @@ import de.anomic.yacy.yacyCore;
 
 public class BlogComments {
 
-	private static SimpleDateFormat SimpleFormatter = new SimpleDateFormat("yyyy/MM/dd HH:mm:ss");
-//	TODO: make userdefined date/time-strings (localisation)
-	
+    private static SimpleDateFormat SimpleFormatter = new SimpleDateFormat("yyyy/MM/dd HH:mm:ss");
+    // TODO: make userdefined date/time-strings (localisation)
+
     public static String dateString(Date date) {
-    	return SimpleFormatter.format(date);
+        return SimpleFormatter.format(date);
     }
-	
-	public static serverObjects respond(httpHeader header, serverObjects post, serverSwitch env) {
-		plasmaSwitchboard switchboard = (plasmaSwitchboard) env;
-		serverObjects prop = new serverObjects();
-		blogBoard.entry page = null;
-		boolean hasRights = switchboard.verifyAuthentication(header, true);
+
+    public static serverObjects respond(httpHeader header, serverObjects post, serverSwitch env) {
+        plasmaSwitchboard switchboard = (plasmaSwitchboard) env;
+        serverObjects prop = new serverObjects();
+        blogBoard.entry page = null;
+        boolean hasRights = switchboard.verifyAuthentication(header, true);
 
         if (hasRights) prop.put("mode_admin", "1");
         else prop.put("mode_admin", "0");
@@ -99,35 +99,36 @@ public class BlogComments {
             else if(post.containsKey("login")){
                 prop.put("AUTHENTICATE","admin log-in");
             }
-		}
+        }
 
-		String pagename = post.get("page", "blog_default");
-	    String ip = post.get("CLIENTIP", "127.0.0.1");
-	    
-		String StrAuthor = post.get("author", "anonymous");
-		
-		if (StrAuthor.equals("anonymous")) {
-			StrAuthor = switchboard.blogDB.guessAuthor(ip);
-			
-	    	if (StrAuthor == null || StrAuthor.length() == 0) {
-	    		if (de.anomic.yacy.yacyCore.seedDB.mySeed() == null)
-	    			StrAuthor = "anonymous";
-	        	else {
-	        		StrAuthor = de.anomic.yacy.yacyCore.seedDB.mySeed().get("Name", "anonymous");
-	        	}
-	        }
-	    }
-		
-		byte[] author;
-		try {
-			author = StrAuthor.getBytes("UTF-8");
-		} catch (UnsupportedEncodingException e) {
-			author = StrAuthor.getBytes();
-		}
+        String pagename = post.get("page", "blog_default");
+        String ip = post.get("CLIENTIP", "127.0.0.1");
 
-		if (post.containsKey("submit")) {
-			// store a new/edited blog-entry
-			byte[] content;
+        String StrAuthor = post.get("author", "anonymous");
+
+        if (StrAuthor.equals("anonymous")) {
+            StrAuthor = switchboard.blogDB.guessAuthor(ip);
+
+            if (StrAuthor == null || StrAuthor.length() == 0) {
+                if (de.anomic.yacy.yacyCore.seedDB.mySeed() == null) {
+                    StrAuthor = "anonymous";
+                }
+                else {
+                    StrAuthor = de.anomic.yacy.yacyCore.seedDB.mySeed().get("Name", "anonymous");
+                }
+            }
+        }
+
+        byte[] author;
+        try {
+            author = StrAuthor.getBytes("UTF-8");
+        } catch (UnsupportedEncodingException e) {
+            author = StrAuthor.getBytes();
+        }
+
+        if (post.containsKey("submit")) {
+            // store a new/edited blog-entry
+            byte[] content;
             if(!post.get("content", "").equals(""))
             {
                 if(post.get("subject", "").equals("")) post.putHTML("subject", "no title");
@@ -138,9 +139,8 @@ public class BlogComments {
                 }
 
                 Date date = null;
-                
+
                 //set name for new entry or date for old entry
-                
                 String StrSubject = post.get("subject", "");
                 byte[] subject;
                 try {
@@ -154,7 +154,7 @@ public class BlogComments {
                 switchboard.blogDB.write(blogEntry);
                 switchboard.blogCommentDB.write(switchboard.blogCommentDB.newEntry(commentID, subject, author, ip, date, content));
                 prop.put("LOCATION","BlogComments.html?page=" + pagename);
-                
+
                 messageBoard.entry msgEntry = null;
                 try {
                     switchboard.messageDB.write(msgEntry = switchboard.messageDB.newEntry(
@@ -173,7 +173,7 @@ public class BlogComments {
                 }
 
                 messageForwardingViaEmail(env, msgEntry);
-                
+
                 // finally write notification
                 File notifierSource = new File(switchboard.getRootPath(), switchboard.getConfig("htRootPath","htroot") + "/env/grafics/message.gif");
                 File notifierDest   = new File(switchboard.getConfigPath("htDocsPath", "DATA/HTDOCS"), "notifier.gif");
@@ -181,26 +181,26 @@ public class BlogComments {
                     serverFileUtils.copy(notifierSource, notifierDest);
                 } catch (IOException e) {
                     serverLog.logSevere("MESSAGE", "NEW MESSAGE ARRIVED! (error: " + e.getMessage() + ")");
-                  
+
                 }
             }
-		}
+        }
 
-		page = switchboard.blogDB.read(pagename); //maybe "if(page == null)"
+        page = switchboard.blogDB.read(pagename); //maybe "if(page == null)"
         if(hasRights && post.containsKey("delete") && post.containsKey("page") && post.containsKey("comment")) {
             if(page.removeComment((String) post.get("comment"))) {
                 switchboard.blogCommentDB.delete((String) post.get("comment"));
             }
-        }   
+        }
 
         if(hasRights && post.containsKey("allow") && post.containsKey("page") && post.containsKey("comment")) {
             blogBoardComments.CommentEntry entry = switchboard.blogCommentDB.read((String) post.get("comment"));
             entry.allow();
             switchboard.blogCommentDB.write(entry);
         }
-        
+
         if(post.containsKey("preview")) {
-			//preview the page
+            //preview the page
             prop.put("mode", "1");//preview
             prop.put("mode_pageid", pagename);
             try {
@@ -212,37 +212,37 @@ public class BlogComments {
             prop.put("mode_date", dateString(new Date()));
             prop.putWiki("mode_page", post.get("content", ""));
             prop.put("mode_page-code", post.get("content", ""));
-		}
-		else {
-		    // show blog-entry/entries
-	        prop.put("mode", "0"); //viewing
-	        if(pagename.equals("blog_default")) {
+        }
+        else {
+            // show blog-entry/entries
+            prop.put("mode", "0"); //viewing
+            if(pagename.equals("blog_default")) {
                 prop.put("LOCATION","Blog.html");
-	        }
-	        else {
-	        	//show 1 blog entry
-	        	prop.put("mode_pageid", page.key());
-	        	try {
-					prop.putHTML("mode_subject", new String(page.subject(),"UTF-8"));
-				} catch (UnsupportedEncodingException e) {
-					prop.putHTML("mode_subject", new String(page.subject()));
-				}
-	        	try {
-					prop.putHTML("mode_author", new String(page.author(),"UTF-8"));
-				} catch (UnsupportedEncodingException e) {
-					prop.putHTML("mode_author", new String(page.author()));
-				}
+            }
+            else {
+                //show 1 blog entry
+                prop.put("mode_pageid", page.key());
+                try {
+                    prop.putHTML("mode_subject", new String(page.subject(),"UTF-8"));
+                } catch (UnsupportedEncodingException e) {
+                    prop.putHTML("mode_subject", new String(page.subject()));
+                }
+                try {
+                    prop.putHTML("mode_author", new String(page.author(),"UTF-8"));
+                } catch (UnsupportedEncodingException e) {
+                    prop.putHTML("mode_author", new String(page.author()));
+                }
                 try {
                     prop.put("mode_comments", new String(page.commentsSize(),"UTF-8"));
                 } catch (UnsupportedEncodingException e) {
                     prop.put("mode_comments", new String(page.commentsSize()));
                 }
-	        	prop.put("mode_date", dateString(page.date()));
-	        	prop.putWiki("mode_page", page.page());
-	        	if(hasRights) {
-    				prop.put("mode_admin", "1");
-    				prop.put("mode_admin_pageid", page.key());
-    			}
+                prop.put("mode_date", dateString(page.date()));
+                prop.putWiki("mode_page", page.page());
+                if(hasRights) {
+                    prop.put("mode_admin", "1");
+                    prop.put("mode_admin_pageid", page.key());
+                }
                 //show all commments
                 try {
                     Iterator i = page.comments().iterator();
@@ -250,8 +250,9 @@ public class BlogComments {
                     String pageid;
                     blogBoardComments.CommentEntry entry;
                     boolean xml = false;
-                    if(post.containsKey("xml"))
+                    if(post.containsKey("xml")) {
                         xml = true;
+                    }
                     int count = 0; //counts how many entries are shown to the user
                     int start = post.getInt("start",0); //indicates from where entries should be shown
                     int num   = post.getInt("num",20);  //indicates how many entries should be shown
@@ -267,7 +268,7 @@ public class BlogComments {
 
                         if (commentMode == 2 && !hasRights && !entry.isAllowed())
                             continue;
-                        
+
                         prop.put("mode", "0");
                         prop.put("mode_entries_"+count+"_pageid", entry.key());
                         if(!xml) {
@@ -307,20 +308,20 @@ public class BlogComments {
                 } catch (IOException e) {
 
                 }
-	        }
-		}
+            }
+        }
 
-		// return rewrite properties
-		return prop;
-	}
-    
+        // return rewrite properties
+        return prop;
+    }
+
     private static void messageForwardingViaEmail(serverSwitch env, messageBoard.entry msgEntry) {
         try {
             if (!Boolean.valueOf(env.getConfig("msgForwardingEnabled","false")).booleanValue()) return;
 
             // getting the recipient address
             String sendMailTo = env.getConfig("msgForwardingTo","root@localhost").trim();
-            
+
             // getting the sendmail configuration
             String sendMailStr = env.getConfig("msgForwardingCmd","/usr/bin/sendmail")+" "+sendMailTo;
             String[] sendMail = sendMailStr.trim().split(" ");
@@ -353,10 +354,9 @@ public class BlogComments {
             Process process=Runtime.getRuntime().exec(sendMail);
             PrintWriter email = new PrintWriter(process.getOutputStream());
             email.print(new String(emailTxt));
-            email.close();                        
+            email.close();
         } catch (Exception e) {
             yacyCore.log.logWarning("message: message forwarding via email failed. ",e);
         }
-
     }
 }
