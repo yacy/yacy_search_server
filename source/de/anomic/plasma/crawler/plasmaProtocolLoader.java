@@ -45,7 +45,7 @@ public final class plasmaProtocolLoader {
     public plasmaProtocolLoader(plasmaSwitchboard sb, serverLog log) {
         this.sb = sb;
         this.log = log;
-        this.supportedProtocols = new HashSet(Arrays.asList(new String[]{"http","https"/* ,"ftp" */}));
+        this.supportedProtocols = new HashSet(Arrays.asList(new String[]{"http","https","ftp"}));
         
         // initiate loader objects
         httpLoader = new plasmaHTTPLoader(sb, log);
