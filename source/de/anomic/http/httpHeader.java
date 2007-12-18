@@ -71,6 +71,7 @@ import java.util.TreeMap;
 import java.util.Vector;
 
 import de.anomic.server.serverCore;
+import de.anomic.server.serverDate;
 import de.anomic.yacy.yacyURL;
 
 
@@ -386,7 +387,7 @@ public final class httpHeader extends TreeMap implements Map {
     
     private Date headerDate(String kind) {
         if (containsKey(kind)) {
-            Date parsedDate = httpDate.parseHTTPDate((String) get(kind));
+            Date parsedDate = serverDate.parseHTTPDate((String) get(kind));
             if (parsedDate == null) parsedDate = new Date();
             return new Date(parsedDate.getTime());
         }
@@ -439,10 +440,10 @@ public final class httpHeader extends TreeMap implements Map {
     
     public Object ifRange() {
         if (containsKey(httpHeader.IF_RANGE)) {
-            try {
-                Date rangeDate = httpDate.parseHTTPDate((String) get(httpHeader.IF_RANGE),false);
-                if (rangeDate != null) return new Date(rangeDate.getTime());
-            } catch (Exception e) {}
+            Date rangeDate = serverDate.parseHTTPDate((String) get(httpHeader.IF_RANGE));
+            if (rangeDate != null) 
+                return new Date(rangeDate.getTime());
+            
             return get(httpHeader.IF_RANGE);
         } 
         return null;

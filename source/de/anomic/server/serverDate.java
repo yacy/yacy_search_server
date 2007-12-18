@@ -1,8 +1,9 @@
 // serverDate.java 
 // -------------------------------------------
 // (C) by Michael Peter Christen; mc@anomic.de
+// (C) by by Bjoern 'Fuchs' Krombholz; fox.box@gmail.com
 // first published on http://www.anomic.de
-// Frankfurt, Germany, 2005
+// Frankfurt, Germany, 2005, 2007
 // last major change: 14.03.2005
 //
 // This program is free software; you can redistribute it and/or modify
@@ -58,20 +59,77 @@ public final class serverDate {
     // standard date formatters
     public static final String shortDayFormatterPattern = "yyyyMMdd";
     public static final String shortSecondFormatterPattern = "yyyyMMddHHmmss";
+    public static final String PAT_DATE_ANSI    = "EEE MMM d HH:mm:ss yyyy";
+    public static final String PAT_DATE_RFC1036 = "EEEE, dd-MMM-yy HH:mm:ss zzz";
+    public static final String PAT_DATE_RFC1123 = "EEE, dd MMM yyyy HH:mm:ss zzz";
+
     public static final SimpleDateFormat shortDayFormatter = new SimpleDateFormat(shortDayFormatterPattern);
     public static final SimpleDateFormat shortSecondFormatter = new SimpleDateFormat(shortSecondFormatterPattern);
     public static final SimpleDateFormat longFullFormatter = new SimpleDateFormat("EEE, dd MMM yyyy HH:mm:ss 'GMT'", Locale.US);
 
-    private static TimeZone GMTTimeZone = TimeZone.getTimeZone("GMT");
+    private static TimeZone TZ_GMT = TimeZone.getTimeZone("GMT");
+
+    /**
+     * RFC 2616 requires that HTTP clients are able to parse all 3 different
+     * formats. All times MUST be in GMT/UTC, but ...
+     */
+    public static SimpleDateFormat[] DATE_PARSERS = new SimpleDateFormat[] {
+            // RFC 1123/822 (Standard) "Mon, 12 Nov 2007 10:11:12 GMT"
+            new SimpleDateFormat(PAT_DATE_RFC1123, Locale.US),
+            // RFC 1036/850 (old)      "Monday, 12-Nov-07 10:11:12 GMT"
+            new SimpleDateFormat(PAT_DATE_RFC1036, Locale.US),
+            // ANSI C asctime()        "Mon Nov 12 10:11:12 2007"
+            new SimpleDateFormat(PAT_DATE_ANSI, Locale.US),
+    };
     
+    static {
+        // 2-digit dates are automatically parsed by SimpleDateFormat,
+        // we need to detect the real year by adding 1900 or 2000 to
+        // the year value starting with 1970
+        Calendar c = Calendar.getInstance(TZ_GMT, Locale.US);
+        // 01 Jan 1970 00:00:00
+        c.set(1970, 1, 1, 0, 0, 0);
+        
+        for (int i = 0; i < serverDate.DATE_PARSERS.length; i++) {
+            SimpleDateFormat f = serverDate.DATE_PARSERS[i];
+            f.setTimeZone(TZ_GMT);
+            f.set2DigitYearStart(c.getTime());
+        }
+    }
+
     public static long nowTime() {
         return nowDate().getTime();
     }
 
     public static Date nowDate() {
-        return new GregorianCalendar(GMTTimeZone).getTime();
+        return new GregorianCalendar(TZ_GMT).getTime();
     }
   
+    /**
+     * Parse a HTTP string representation of a date into a Date instance.
+     * @param s The date String to parse.
+     * @return The Date instance if successful, <code>null</code> otherwise.
+     */
+    public static Date parseHTTPDate(String s) {
+        s = s.trim();
+        if ((s == null) || (s.length() < 9)) return null;
+    
+        for(int i = 0; i < DATE_PARSERS.length; i++) {
+            try {
+                synchronized (DATE_PARSERS[i]) {
+                    return DATE_PARSERS[i].parse(s);
+                }
+            } catch (ParseException e) {
+                // on ParseException try again with next parser
+            }
+        }
+    
+        // the method didn't return a Date, so we got an illegal
+        serverLog.logSevere("HTTPC-header", "DATE ERROR (Parse): " + s);
+        return null;
+    }
+
+    
     /*
      * Synchronization of formatters is needed because SimpleDateFormat is not thread-safe.
      * See: http://bugs.sun.com/bugdatabase/view_bug.do?bug_id=6231579
@@ -113,10 +171,6 @@ public final class serverDate {
         if (remoteTimeString == null || remoteTimeString.length() == 0) { return new Date(); }
         if (remoteUTCOffset == null || remoteUTCOffset.length() == 0) { return new Date(); }
         try {
-            /*
-             * This synchronized is needed because SimpleDateFormat is not thread-safe.
-             * See: http://bugs.sun.com/bugdatabase/view_bug.do?bug_id=6231579
-             */         
             synchronized(serverDate.shortSecondFormatter) {
                 return new Date(serverDate.shortSecondFormatter.parse(remoteTimeString).getTime() - serverDate.UTCDiff() + serverDate.UTCDiff(remoteUTCOffset));
             }
@@ -129,7 +183,6 @@ public final class serverDate {
         }
     }
 
-    
     // statics
     public final static long secondMillis = 1000;
     public final static long minuteMillis = 60 * secondMillis;
