@@ -26,6 +26,7 @@
 
 package de.anomic.plasma;
 
+import java.util.ConcurrentModificationException;
 import java.util.Iterator;
 
 import de.anomic.server.serverProfiling;
@@ -34,6 +35,8 @@ import de.anomic.ymage.ymageChart;
 import de.anomic.ymage.ymageMatrix;
 
 public class plasmaProfiling {
+    
+    private static ymageChart bufferChart = null;
 
     public static long lastPPMUpdate = System.currentTimeMillis()- 30000;
 
@@ -85,33 +88,38 @@ public class plasmaProfiling {
         long time, now = System.currentTimeMillis(), bytes;
         int x0 = 1, x1, y0 = 0, y1, ppm;
         serverProfiling.Event event;
-        while (i.hasNext()) {
-        	event = (serverProfiling.Event) i.next();
-            time = event.time - now;
-            ppm = (int) ((Long) event.payload).longValue();
-            x1 = (int) (time/1000);
-            y1 = ppm;
-            chart.setColor("228822");
-            chart.chartDot(ymageChart.DIMENSION_BOTTOM, ymageChart.DIMENSION_LEFT, x1, y1, 2);
-            chart.setColor("008800");
-            if (x0 < 0) chart.chartLine(ymageChart.DIMENSION_BOTTOM, ymageChart.DIMENSION_LEFT, x0, y0, x1, y1);
-            x0 = x1; y0 = y1;
-        }
-        
-        // draw memory
-        i = serverProfiling.history("memory");
-        x0 = 1;
-        while (i.hasNext()) {
-        	event = (serverProfiling.Event) i.next();
-            time = event.time - now;
-            bytes = ((Long) event.payload).longValue();
-            x1 = (int) (time/1000);
-            y1 = (int) (bytes / 1024 / 1024);
-            chart.setColor("AAAAFF");
-            chart.chartDot(ymageChart.DIMENSION_BOTTOM, ymageChart.DIMENSION_RIGHT, x1, y1, 2);
-            chart.setColor("0000FF");
-            if (x0 < 0) chart.chartLine(ymageChart.DIMENSION_BOTTOM, ymageChart.DIMENSION_RIGHT, x0, y0, x1, y1);
-            x0 = x1; y0 = y1;
+        try {
+            while (i.hasNext()) {
+                event = (serverProfiling.Event) i.next();
+                time = event.time - now;
+                ppm = (int) ((Long) event.payload).longValue();
+                x1 = (int) (time/1000);
+                y1 = ppm;
+                chart.setColor("228822");
+                chart.chartDot(ymageChart.DIMENSION_BOTTOM, ymageChart.DIMENSION_LEFT, x1, y1, 2);
+                chart.setColor("008800");
+                if (x0 < 0) chart.chartLine(ymageChart.DIMENSION_BOTTOM, ymageChart.DIMENSION_LEFT, x0, y0, x1, y1);
+                x0 = x1; y0 = y1;
+            }
+
+            // draw memory
+            i = serverProfiling.history("memory");
+            x0 = 1;
+            while (i.hasNext()) {
+                event = (serverProfiling.Event) i.next();
+                time = event.time - now;
+                bytes = ((Long) event.payload).longValue();
+                x1 = (int) (time/1000);
+                y1 = (int) (bytes / 1024 / 1024);
+                chart.setColor("AAAAFF");
+                chart.chartDot(ymageChart.DIMENSION_BOTTOM, ymageChart.DIMENSION_RIGHT, x1, y1, 2);
+                chart.setColor("0000FF");
+                if (x0 < 0) chart.chartLine(ymageChart.DIMENSION_BOTTOM, ymageChart.DIMENSION_RIGHT, x0, y0, x1, y1);
+                x0 = x1; y0 = y1;
+            }
+            bufferChart = chart;
+        } catch (ConcurrentModificationException cme) {
+            chart = bufferChart;
         }
         
         return chart;
