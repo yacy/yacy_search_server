@@ -276,7 +276,7 @@ public class Bookmarks {
         		prop.put("bookmarks_"+count+"_link",bookmark.getUrl());
             prop.putHTML("bookmarks_"+count+"_title", bookmark.getTitle());
             prop.putHTML("bookmarks_"+count+"_description", bookmark.getDescription());
-            prop.put("bookmarks_"+count+"_date", serverDate.dateToiso8601(new Date(bookmark.getTimeStamp())));
+            prop.put("bookmarks_"+count+"_date", serverDate.formatISO8601(new Date(bookmark.getTimeStamp())));
             prop.put("bookmarks_"+count+"_rfc822date", httpc.dateString(new Date(bookmark.getTimeStamp())));
             prop.put("bookmarks_"+count+"_public", (bookmark.getPublic() ? "1" : "0"));
             

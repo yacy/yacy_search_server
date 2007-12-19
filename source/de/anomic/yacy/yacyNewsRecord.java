@@ -56,7 +56,7 @@ public class yacyNewsRecord {
 
     public static final int maxNewsRecordLength  = 512;
     public static final int categoryStringLength = 8;
-    public static final int idLength = serverDate.shortSecondFormatterPattern.length() + yacySeedDB.commonHashLength;
+    public static final int idLength = serverDate.PATTERN_SHORT_SECOND.length() + yacySeedDB.commonHashLength;
 
     private String originator;  // hash of originating peer
     private Date   created;     // Date when news was created by originator
@@ -68,13 +68,13 @@ public class yacyNewsRecord {
     public static final int attributesMaxLength = maxNewsRecordLength
                                                   - idLength
                                                   - categoryStringLength
-                                                  - serverDate.shortSecondFormatterPattern.length()
+                                                  - serverDate.PATTERN_SHORT_SECOND.length()
                                                   - 2;
     
     public static final kelondroRow rowdef = new kelondroRow(
             "String idx-" + idLength + " \"id = created + originator\"," +
             "String cat-" + categoryStringLength + "," +
-            "String rec-" + serverDate.shortSecondFormatterPattern.length() + "," +
+            "String rec-" + serverDate.PATTERN_SHORT_SECOND.length() + "," +
             "short  dis-2 {b64e}," +
             "String att-" + attributesMaxLength,
             kelondroNaturalOrder.naturalOrder, 0
@@ -136,10 +136,10 @@ public class yacyNewsRecord {
         if (attributes.toString().length() > attributesMaxLength) throw new IllegalArgumentException("attributes length (" + attributes.toString().length() + ") exceeds maximum (" + attributesMaxLength + ")");
         this.attributes = attributes;
         this.received = received;
-        this.created = serverDate.parseShortSecondTime(id.substring(0, serverDate.shortSecondFormatterPattern.length()), serverDate.UTCDiffString());
+        this.created = serverDate.parseShortSecondTime(id.substring(0, serverDate.PATTERN_SHORT_SECOND.length()), serverDate.UTCDiffString());
         this.category = category;
         this.distributed = distributed;
-        this.originator = id.substring(serverDate.shortSecondFormatterPattern.length());
+        this.originator = id.substring(serverDate.PATTERN_SHORT_SECOND.length());
         removeStandards();
     }
 

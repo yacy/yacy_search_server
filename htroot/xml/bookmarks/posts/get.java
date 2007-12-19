@@ -48,7 +48,7 @@ public class get {
         if(post != null && post.containsKey("date")){
             date=(String)post.get("date");
         }else{
-            date=serverDate.dateToiso8601(new Date(System.currentTimeMillis()));
+            date=serverDate.formatISO8601(new Date(System.currentTimeMillis()));
         }
         
         // if an extended xml should be used
@@ -68,7 +68,7 @@ public class get {
         bookmarksDB.Bookmark bookmark=null;
         while(it.hasNext()){
             bookmark=switchboard.bookmarksDB.getBookmark((String) it.next());
-            if(serverDate.dateToiso8601(new Date(bookmark.getTimeStamp())) == date &&
+            if(serverDate.formatISO8601(new Date(bookmark.getTimeStamp())) == date &&
                     tag==null || bookmark.getTags().contains(tag) &&
                     isAdmin || bookmark.getPublic()){
                 prop.put("posts_"+count+"_url", bookmark.getUrl());

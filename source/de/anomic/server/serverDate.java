@@ -56,50 +56,59 @@ import de.anomic.server.logging.serverLog;
 
 public final class serverDate {
     
-    // standard date formatters
-    public static final String shortDayFormatterPattern = "yyyyMMdd";
-    public static final String shortSecondFormatterPattern = "yyyyMMddHHmmss";
-    public static final String PAT_DATE_ANSI    = "EEE MMM d HH:mm:ss yyyy";
-    public static final String PAT_DATE_RFC1036 = "EEEE, dd-MMM-yy HH:mm:ss zzz";
-    public static final String PAT_DATE_RFC1123 = "EEE, dd MMM yyyy HH:mm:ss zzz";
+    /** minimal date format without time information */
+    public static final String PATTERN_SHORT_DAY = "yyyyMMdd";
+    /** minimal date format */
+    public static final String PATTERN_SHORT_SECOND = "yyyyMMddHHmmss";
+    
+    /** default HTTP 1.1 header date format pattern */
+    public static final String PATTERN_RFC1123 = "EEE, dd MMM yyyy HH:mm:ss zzz";
+    /** date pattern used in older HTTP implementations */
+    public static final String PATTERN_ANSIC   = "EEE MMM d HH:mm:ss yyyy";
+    /** date pattern used in older HTTP implementations */
+    public static final String PATTERN_RFC1036 = "EEEE, dd-MMM-yy HH:mm:ss zzz";
+    
+    /** pattern for a W3C datetime variant of a non-localized ISO8601 date */
+    public static final String PATTERN_ISO8601 = "yyyy-MM-dd'T'HH:mm:ss'Z'";
 
-    public static final SimpleDateFormat shortDayFormatter = new SimpleDateFormat(shortDayFormatterPattern);
-    public static final SimpleDateFormat shortSecondFormatter = new SimpleDateFormat(shortSecondFormatterPattern);
+    public static final SimpleDateFormat shortDayFormatter = new SimpleDateFormat(PATTERN_SHORT_DAY);
+    public static final SimpleDateFormat shortSecondFormatter = new SimpleDateFormat(PATTERN_SHORT_SECOND);
     public static final SimpleDateFormat longFullFormatter = new SimpleDateFormat("EEE, dd MMM yyyy HH:mm:ss 'GMT'", Locale.US);
 
-    private static TimeZone TZ_GMT = TimeZone.getTimeZone("GMT");
+    /** predefined GMT TimeZone object */
+    private static final TimeZone TZ_GMT = TimeZone.getTimeZone("GMT");
+    /** predefined non-localized Calendar object for generic GMT dates */ 
+    private static final Calendar CAL_GMT = Calendar.getInstance(TZ_GMT, Locale.US);
 
     /**
      * RFC 2616 requires that HTTP clients are able to parse all 3 different
      * formats. All times MUST be in GMT/UTC, but ...
      */
-    public static SimpleDateFormat[] DATE_PARSERS = new SimpleDateFormat[] {
+    public static SimpleDateFormat[] FORMATS_HTTP = new SimpleDateFormat[] {
             // RFC 1123/822 (Standard) "Mon, 12 Nov 2007 10:11:12 GMT"
-            new SimpleDateFormat(PAT_DATE_RFC1123, Locale.US),
+            new SimpleDateFormat(PATTERN_RFC1123, Locale.US),
             // RFC 1036/850 (old)      "Monday, 12-Nov-07 10:11:12 GMT"
-            new SimpleDateFormat(PAT_DATE_RFC1036, Locale.US),
+            new SimpleDateFormat(PATTERN_RFC1036, Locale.US),
             // ANSI C asctime()        "Mon Nov 12 10:11:12 2007"
-            new SimpleDateFormat(PAT_DATE_ANSI, Locale.US),
+            new SimpleDateFormat(PATTERN_ANSIC, Locale.US),
     };
     
     static {
         // 2-digit dates are automatically parsed by SimpleDateFormat,
         // we need to detect the real year by adding 1900 or 2000 to
         // the year value starting with 1970
-        Calendar c = Calendar.getInstance(TZ_GMT, Locale.US);
-        // 01 Jan 1970 00:00:00
-        c.set(1970, 1, 1, 0, 0, 0);
+        CAL_GMT.setTimeInMillis(0);
         
-        for (int i = 0; i < serverDate.DATE_PARSERS.length; i++) {
-            SimpleDateFormat f = serverDate.DATE_PARSERS[i];
+        for (int i = 0; i < serverDate.FORMATS_HTTP.length; i++) {
+            SimpleDateFormat f = serverDate.FORMATS_HTTP[i];
             f.setTimeZone(TZ_GMT);
-            f.set2DigitYearStart(c.getTime());
+            f.set2DigitYearStart(CAL_GMT.getTime());
         }
     }
 
-    public static long nowTime() {
-        return nowDate().getTime();
-    }
+//    public static long nowTime() {
+//        return nowDate().getTime();
+//    }
 
     public static Date nowDate() {
         return new GregorianCalendar(TZ_GMT).getTime();
@@ -114,10 +123,10 @@ public final class serverDate {
         s = s.trim();
         if ((s == null) || (s.length() < 9)) return null;
     
-        for(int i = 0; i < DATE_PARSERS.length; i++) {
+        for(int i = 0; i < FORMATS_HTTP.length; i++) {
             try {
-                synchronized (DATE_PARSERS[i]) {
-                    return DATE_PARSERS[i].parse(s);
+                synchronized (FORMATS_HTTP[i]) {
+                    return FORMATS_HTTP[i].parse(s);
                 }
             } catch (ParseException e) {
                 // on ParseException try again with next parser
@@ -200,9 +209,6 @@ public final class serverDate {
 
     // find out time zone and DST offset
     private static Calendar thisCalendar = Calendar.getInstance();
-    //private static long zoneOffsetHours = thisCalendar.get(Calendar.ZONE_OFFSET);
-    //private static long DSTOffsetHours = thisCalendar.get(Calendar.DST_OFFSET);
-    //private static long offsetHours = zoneOffsetHours + DSTOffsetHours; // this must be subtracted from current Date().getTime() to produce a GMT Time
 
     // pre-calculation of time tables
     private final static long[] dimnormalacc, dimleapacc;
@@ -276,11 +282,6 @@ public final class serverDate {
         return ((ahead) ? (long) 1 : (long) -1) * (oh * hourMillis + om * minuteMillis);
     }
     
-    /*
-    public static Date UTC0Date() {
-        return new Date(UTC0Time());
-    }
-    */
 
     public static long correctedUTCTime() {
         return System.currentTimeMillis() - UTCDiff();
@@ -423,9 +424,18 @@ public final class serverDate {
 		return date.getTime();
 	}
 
-	public static String dateToiso8601(Date date){
-		return new SimpleDateFormat("yyyy-MM-dd").format(date)+"T"+(new SimpleDateFormat("HH:mm:ss")).format(date)+"Z";
-	}
+    /**
+     * Creates a String representation of a Date using the format defined
+     * in ISO8601. 
+     * The result will be in UTC/GMT, e.g. "2007-12-19T10:20:30Z"
+     * @param date The Date instance to transform.
+     * @return A fixed width (20 chars) ISO8601 date String.
+     */
+    public static String formatISO8601(Date date){
+        SimpleDateFormat df = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss'Z'");
+        df.setTimeZone(TZ_GMT);
+        return df.format(date);
+    }
     
     public static String intervalToString(long millis) {
         try {

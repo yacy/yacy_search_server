@@ -83,7 +83,7 @@ public class all {
             prop.putHTML("posts_"+count+"_description", bookmark.getDescription());
             prop.put("posts_"+count+"_md5", serverCodings.encodeMD5Hex(bookmark.getUrl()));
             date=new Date(bookmark.getTimeStamp());
-            prop.put("posts_"+count+"_time", serverDate.dateToiso8601(date));
+            prop.put("posts_"+count+"_time", serverDate.formatISO8601(date));
             prop.putHTML("posts_"+count+"_tags", bookmark.getTagsString().replaceAll(","," "));
             
             // additional XML tags

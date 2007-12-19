@@ -63,7 +63,7 @@ public class yacyNewsQueue {
     
     public static final kelondroRow rowdef = new kelondroRow(new kelondroColumn[]{
             new kelondroColumn("newsid", kelondroColumn.celltype_string, kelondroColumn.encoder_bytes, yacyNewsRecord.idLength, "id = created + originator"),
-            new kelondroColumn("last touched", kelondroColumn.celltype_string, kelondroColumn.encoder_bytes, serverDate.shortSecondFormatterPattern.length(), "")
+            new kelondroColumn("last touched", kelondroColumn.celltype_string, kelondroColumn.encoder_bytes, serverDate.PATTERN_SHORT_SECOND.length(), "")
         },
         kelondroNaturalOrder.naturalOrder, 0
     );
