@@ -337,7 +337,7 @@ public class SitemapParser extends DefaultHandler {
 		} else if (this.currentElement.equalsIgnoreCase(SITEMAP_URL_LASTMOD)) {
 			String dateStr = new String(buf,offset,len);
 			try {
-				this.lastMod = serverDate.iso8601ToDate(dateStr);
+				this.lastMod = serverDate.parseISO8601(dateStr);
 			} catch (ParseException e) {
 				this.logger.logInfo("Unable to parse datestring '" + dateStr + "'");
 			}

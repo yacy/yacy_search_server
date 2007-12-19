@@ -507,7 +507,7 @@ public class bookmarksDB {
             	
             	Date parsedDate = null;
             	try {
-					parsedDate = serverDate.iso8601ToDate(time);
+					parsedDate = serverDate.parseISO8601(time);
 				} catch (ParseException e) {
 					parsedDate = new Date();
 				}            	

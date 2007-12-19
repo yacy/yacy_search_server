@@ -58,7 +58,7 @@ public class get {
         
         Date parsedDate = null; 
         try {
-			parsedDate = serverDate.iso8601ToDate(date);
+			parsedDate = serverDate.parseISO8601(date);
 		} catch (ParseException e) {
 			parsedDate = new Date();
 		}
