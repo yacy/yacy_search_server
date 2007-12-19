@@ -122,7 +122,7 @@ public class blogBoard {
 	    record = new HashMap();
 	    key = nkey;
 	    if (key.length() > keyLength) key = key.substring(0, keyLength);
-	    if(date == null) date = serverDate.nowDate();
+	    if(date == null) date = new Date();
 	    record.put("date", serverDate.shortSecondTime(date));
 	    if (subject == null) record.put("subject","");
 	    else record.put("subject", kelondroBase64Order.enhancedCoder.encode(subject));
@@ -167,7 +167,7 @@ public class blogBoard {
             System.out.println("DEBUG - ERROR: date field missing in blogBoard");
             return new Date();
         }
-		return serverDate.shortSecondFormatter.parse(c);
+		return serverDate.parseShortSecondTime(c);
 	    } catch (ParseException e) {
 		return new Date();
 	    }
@@ -254,7 +254,7 @@ public class blogBoard {
     	key = normalize(key);
         if (key.length() > keyLength) key = key.substring(0, keyLength);
         Map record = base.getMap(key);
-        if (record == null) return newEntry(key, "".getBytes(), "anonymous".getBytes(), "127.0.0.1", serverDate.nowDate(), "".getBytes(), null, null);
+        if (record == null) return newEntry(key, "".getBytes(), "anonymous".getBytes(), "127.0.0.1", new Date(), "".getBytes(), null, null);
         return new entry(key, record);
     }
     
@@ -305,7 +305,7 @@ public class blogBoard {
     		}
     		
     		try {
-				date = serverDate.shortSecondFormatter.parse(StrDate);
+				date = serverDate.parseShortSecondTime(StrDate);
 			} catch (ParseException e1) {
 				date = new Date();
 			}

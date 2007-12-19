@@ -212,17 +212,17 @@ public class indexURLEntry {
         this.entry.setCol(col_hash, url.hash(), null);
         this.entry.setCol(col_comp, encodeComp(url, descr, author, tags, ETag));
         try {
-            encodeDate(col_mod, serverDate.shortDayFormatter.parse(prop.getProperty("mod", "20000101")));
+            encodeDate(col_mod, serverDate.parseShortDayTime(prop.getProperty("mod", "20000101")));
         } catch (ParseException e) {
             encodeDate(col_mod, new Date());
         }
         try {
-            encodeDate(col_load, serverDate.shortDayFormatter.parse(prop.getProperty("load", "20000101")));
+            encodeDate(col_load, serverDate.parseShortDayTime(prop.getProperty("load", "20000101")));
         } catch (ParseException e) {
             encodeDate(col_load, new Date());
         }
         try {
-            encodeDate(col_fresh, serverDate.shortDayFormatter.parse(prop.getProperty("fresh", "20000101")));
+            encodeDate(col_fresh, serverDate.parseShortDayTime(prop.getProperty("fresh", "20000101")));
         } catch (ParseException e) {
             encodeDate(col_fresh, new Date());
         }
@@ -261,9 +261,9 @@ public class indexURLEntry {
             s.append(",author=").append(crypt.simpleEncode(comp.author()));
             s.append(",tags=").append(crypt.simpleEncode(comp.tags()));
             s.append(",ETag=").append(crypt.simpleEncode(comp.ETag()));
-            s.append(",mod=").append(serverDate.shortDayFormatter.format(moddate()));
-            s.append(",load=").append(serverDate.shortDayFormatter.format(loaddate()));
-            s.append(",fresh=").append(serverDate.shortDayFormatter.format(freshdate()));
+            s.append(",mod=").append(serverDate.formatShortDay(moddate()));
+            s.append(",load=").append(serverDate.formatShortDay(loaddate()));
+            s.append(",fresh=").append(serverDate.formatShortDay(freshdate()));
             s.append(",referrer=").append(referrerHash());
             s.append(",md5=").append(md5());
             s.append(",size=").append(size());

@@ -44,11 +44,11 @@
 
 package de.anomic.server;
 
+import java.text.DateFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.Date;
-import java.util.GregorianCalendar;
 import java.util.Locale;
 import java.util.TimeZone;
 
@@ -56,10 +56,12 @@ import de.anomic.server.logging.serverLog;
 
 public final class serverDate {
     
-    /** minimal date format without time information */
-    public static final String PATTERN_SHORT_DAY = "yyyyMMdd";
-    /** minimal date format */
+    /** minimal date format without time information (fixed width: 8) */
+    public static final String PATTERN_SHORT_DAY    = "yyyyMMdd";
+    /** minimal date format (fixed width: 14) */
     public static final String PATTERN_SHORT_SECOND = "yyyyMMddHHmmss";
+    /** minimal date format including milliseconds (fixed width: 17) */
+    public static final String PATTERN_SHORT_MILSEC = "yyyyMMddHHmmssSSS";
     
     /** default HTTP 1.1 header date format pattern */
     public static final String PATTERN_RFC1123 = "EEE, dd MMM yyyy HH:mm:ss zzz";
@@ -71,14 +73,24 @@ public final class serverDate {
     /** pattern for a W3C datetime variant of a non-localized ISO8601 date */
     public static final String PATTERN_ISO8601 = "yyyy-MM-dd'T'HH:mm:ss'Z'";
 
-    public static final SimpleDateFormat shortDayFormatter = new SimpleDateFormat(PATTERN_SHORT_DAY);
-    public static final SimpleDateFormat shortSecondFormatter = new SimpleDateFormat(PATTERN_SHORT_SECOND);
-    public static final SimpleDateFormat longFullFormatter = new SimpleDateFormat("EEE, dd MMM yyyy HH:mm:ss 'GMT'", Locale.US);
-
     /** predefined GMT TimeZone object */
     private static final TimeZone TZ_GMT = TimeZone.getTimeZone("GMT");
+    
     /** predefined non-localized Calendar object for generic GMT dates */ 
     private static final Calendar CAL_GMT = Calendar.getInstance(TZ_GMT, Locale.US);
+
+    /** Date formatter/parser for minimal yyyyMMdd pattern */
+    public static final SimpleDateFormat FORMAT_SHORT_DAY    = new SimpleDateFormat(PATTERN_SHORT_DAY);
+    /** Date formatter/parser for minimal yyyyMMddHHmmss pattern */
+    public static final SimpleDateFormat FORMAT_SHORT_SECOND = new SimpleDateFormat(PATTERN_SHORT_SECOND);
+    /** Date formatter/parser for minimal yyyyMMddHHmmssSSS pattern */
+    public static final SimpleDateFormat FORMAT_SHORT_MILSEC = new SimpleDateFormat(PATTERN_SHORT_MILSEC);
+    
+    /** Date formatter/non-sloppy parser for W3C datetime (ISO8601) in GMT/UTC */
+    public static final SimpleDateFormat FORMAT_ISO8601      = new SimpleDateFormat(PATTERN_ISO8601);
+    
+    /** Date formatter/parser for standard compliant HTTP header dates (RFC 1123) */
+    public static final SimpleDateFormat FORMAT_RFC1123      = new SimpleDateFormat(PATTERN_RFC1123, Locale.US); 
 
     /**
      * RFC 2616 requires that HTTP clients are able to parse all 3 different
@@ -86,13 +98,14 @@ public final class serverDate {
      */
     public static SimpleDateFormat[] FORMATS_HTTP = new SimpleDateFormat[] {
             // RFC 1123/822 (Standard) "Mon, 12 Nov 2007 10:11:12 GMT"
-            new SimpleDateFormat(PATTERN_RFC1123, Locale.US),
+            FORMAT_RFC1123,
             // RFC 1036/850 (old)      "Monday, 12-Nov-07 10:11:12 GMT"
             new SimpleDateFormat(PATTERN_RFC1036, Locale.US),
             // ANSI C asctime()        "Mon Nov 12 10:11:12 2007"
             new SimpleDateFormat(PATTERN_ANSIC, Locale.US),
     };
     
+    /** Initialization of static formats */
     static {
         // 2-digit dates are automatically parsed by SimpleDateFormat,
         // we need to detect the real year by adding 1900 or 2000 to
@@ -104,16 +117,14 @@ public final class serverDate {
             f.setTimeZone(TZ_GMT);
             f.set2DigitYearStart(CAL_GMT.getTime());
         }
+        
+        // we want GMT times on the SHORT formats as well as they don't support any timezone
+        FORMAT_SHORT_DAY.setTimeZone(TZ_GMT);
+        FORMAT_SHORT_SECOND.setTimeZone(TZ_GMT);
+        FORMAT_SHORT_MILSEC.setTimeZone(TZ_GMT);
+        FORMAT_ISO8601.setTimeZone(TZ_GMT);
     }
 
-//    public static long nowTime() {
-//        return nowDate().getTime();
-//    }
-
-    public static Date nowDate() {
-        return new GregorianCalendar(TZ_GMT).getTime();
-    }
-  
     /**
      * Parse a HTTP string representation of a date into a Date instance.
      * @param s The date String to parse.
@@ -133,46 +144,67 @@ public final class serverDate {
             }
         }
     
-        // the method didn't return a Date, so we got an illegal
+        // the method didn't return a Date, so we got an illegal String
         serverLog.logSevere("HTTPC-header", "DATE ERROR (Parse): " + s);
         return null;
     }
 
-    
-    /*
-     * Synchronization of formatters is needed because SimpleDateFormat is not thread-safe.
-     * See: http://bugs.sun.com/bugdatabase/view_bug.do?bug_id=6231579
+    /**
+     * Note: The short day format doesn't include any timezone information. This method
+     * transforms the date into the GMT/UTC timezone. Example: If the local system time is,
+     * 2007-12-18 01:15:00 +0200, then the resulting String will be "2007-12-17".
+     * In case you need a format with a timezon offset, use {@link #formatShortDay(TimeZone)}
+     * @return a String representation of the current system date in GMT using the
+     *         short day format, e.g. "20071218".
      */
-    
-    public static String shortDayTime() {
-        return shortDayTime(nowDate());
+    public static String formatShortDay() {
+        return format(FORMAT_SHORT_DAY, new Date());
     }
 
-    public static String shortDayTime(Date date) {
-        synchronized (serverDate.shortDayFormatter) {
-            return shortDayFormatter.format(date);
-        }
+    /**
+     * @see #formatShortDay()
+     * @param tz a TimeZone the resulting date is aligned to.
+     */
+    public static String formatShortDay(TimeZone tz) {
+        return format(FORMAT_SHORT_DAY, new Date(), tz);
     }
-    
+
+    /**
+     * @see #formatShortDay()
+     * @param date the Date to transform
+     */
+    public static String formatShortDay(Date date) {
+        return format(FORMAT_SHORT_DAY, date);
+    }
+
+    /**
+     * @see #formatShortDay()
+     * @param date the Date to transform
+     * @param tz a TimeZone the resulting date String should be aligned to.
+     */
+    public static String formatShortDay(Date date, TimeZone tz) {
+        return format(FORMAT_SHORT_DAY, date);
+    }
+
     public static Date parseShortDayTime(String timeString) throws ParseException {
-        synchronized (serverDate.shortDayFormatter) {
-            return serverDate.shortDayFormatter.parse(timeString);
+        synchronized (serverDate.FORMAT_SHORT_DAY) {
+            return serverDate.FORMAT_SHORT_DAY.parse(timeString);
         }
     }
 
     public static String shortSecondTime() {
-        return shortSecondTime(nowDate());
+        return shortSecondTime(new Date());
     }
 
     public static String shortSecondTime(Date date) {
-        synchronized (serverDate.shortSecondFormatter) {       
-            return serverDate.shortSecondFormatter.format(date);
+        synchronized (serverDate.FORMAT_SHORT_SECOND) {       
+            return serverDate.FORMAT_SHORT_SECOND.format(date);
         }
     }
     
     public static Date parseShortSecondTime(String timeString) throws ParseException {
-        synchronized (serverDate.shortSecondFormatter) {
-            return serverDate.shortSecondFormatter.parse(timeString);
+        synchronized (serverDate.FORMAT_SHORT_SECOND) {
+            return serverDate.FORMAT_SHORT_SECOND.parse(timeString);
         }
     }
 
@@ -180,8 +212,8 @@ public final class serverDate {
         if (remoteTimeString == null || remoteTimeString.length() == 0) { return new Date(); }
         if (remoteUTCOffset == null || remoteUTCOffset.length() == 0) { return new Date(); }
         try {
-            synchronized(serverDate.shortSecondFormatter) {
-                return new Date(serverDate.shortSecondFormatter.parse(remoteTimeString).getTime() - serverDate.UTCDiff() + serverDate.UTCDiff(remoteUTCOffset));
+            synchronized(serverDate.FORMAT_SHORT_SECOND) {
+                return new Date(serverDate.FORMAT_SHORT_SECOND.parse(remoteTimeString).getTime() - serverDate.UTCDiff() + serverDate.UTCDiff(remoteUTCOffset));
             }
         } catch (java.text.ParseException e) {
             serverLog.logFinest("parseUniversalDate", e.getMessage() + ", remoteTimeString=[" + remoteTimeString + "]");
@@ -191,6 +223,36 @@ public final class serverDate {
             return new Date();
         }
     }
+
+    /**
+     * called by all public format...(..., TimeZone) methods
+     */
+    private static String format(SimpleDateFormat format, Date date, TimeZone tz) {
+        TimeZone bakTZ = format.getTimeZone();
+        String result;
+        
+        synchronized (format) {
+            format.setTimeZone(tz == null ? TZ_GMT : tz);
+            result = format.format(date);
+            format.setTimeZone(bakTZ);
+        }
+        
+        return result;
+    }
+
+    /**
+     * called by all public format...(...) methods
+     */
+    private static String format(SimpleDateFormat format, Date date) {
+        String result;
+        
+        synchronized (format) {
+            result = format.format(date);
+        }
+        
+        return result;
+    }
+
 
     // statics
     public final static long secondMillis = 1000;
@@ -432,9 +494,9 @@ public final class serverDate {
      * @return A fixed width (20 chars) ISO8601 date String.
      */
     public static String formatISO8601(Date date){
-        SimpleDateFormat df = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss'Z'");
-        df.setTimeZone(TZ_GMT);
-        return df.format(date);
+        synchronized (FORMAT_ISO8601) {
+            return FORMAT_ISO8601.format(date);
+        }
     }
     
     public static String intervalToString(long millis) {
@@ -473,11 +535,11 @@ public final class serverDate {
         System.out.println("serverDate : " + new serverDate().toShortString(false));
         System.out.println("  javaDate : " + shortSecondTime());
         System.out.println("serverDate : " + new serverDate().toString());
-        System.out.println("  JavaDate : " + longFullFormatter.format(new Date()));
+        System.out.println("  JavaDate : " + DateFormat.getDateInstance().format(new Date()));
         System.out.println("serverDate0: " + new serverDate(0).toShortString(false));
-        System.out.println("  JavaDate0: " + shortSecondFormatter.format(new Date(0)));
+        System.out.println("  JavaDate0: " + FORMAT_SHORT_SECOND.format(new Date(0)));
         System.out.println("serverDate0: " + new serverDate(0).toString());
-        System.out.println("  JavaDate0: " + longFullFormatter.format(new Date(0)));
+        System.out.println("  JavaDate0: " + DateFormat.getDateInstance().format(new Date(0)));
         // parse test
         try {
             System.out.println("serverDate re-parse short: " + new serverDate(new serverDate().toShortString(false)).toShortString(true));
@@ -489,12 +551,13 @@ public final class serverDate {
         int cycles = 10000;
         long start;
         
+        String[] testresult = new String[10000];
         start = System.currentTimeMillis();
-        for (int i = 0; i < cycles; i++) /*testresult =*/ new serverDate().toShortString(false);
+        for (int i = 0; i < cycles; i++) testresult[i] = new serverDate().toShortString(false);
         System.out.println("time for " + cycles + " calls to serverDate:" + (System.currentTimeMillis() - start) + " milliseconds");
         
         start = System.currentTimeMillis();
-        for (int i = 0; i < cycles; i++) /*testresult =*/ shortSecondTime();
+        for (int i = 0; i < cycles; i++) testresult[i] = FORMAT_SHORT_SECOND.format(new Date());
         System.out.println("time for " + cycles + " calls to   javaDate:" + (System.currentTimeMillis() - start) + " milliseconds");
     }    
 }
