@@ -581,12 +581,12 @@ public final class plasmaSearchEvent {
         	long sleeptime = Math.min(600, this.eventTime + (this.query.maximumTime / this.query.displayResults() * ((item % this.query.displayResults()) + 1)) - System.currentTimeMillis());
         	if (this.resultList.size() <= item + 10) sleeptime = Math.min(sleeptime + 300, 600);
         	if (sleeptime > 0) try {Thread.sleep(sleeptime);} catch (InterruptedException e) {}
-            System.out.println("+++DEBUG-oneResult+++ (1) sleeping " + sleeptime);
+            //System.out.println("+++DEBUG-oneResult+++ (1) sleeping " + sleeptime);
             
             // then sleep until any result is available (that should not happen)
             while ((this.resultList.size() <= item) && (anyWorkerAlive())) {
                 try {Thread.sleep(100);} catch (InterruptedException e) {}
-                System.out.println("+++DEBUG-oneResult+++ (2) sleeping " + 100);
+                //System.out.println("+++DEBUG-oneResult+++ (2) sleeping " + 100);
             }
             
         }

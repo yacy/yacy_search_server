@@ -142,7 +142,7 @@ public class ConfigUpdate_p {
         int relcount = 0;
         while (i.hasNext()) {
             release = (yacyVersion) i.next();
-            prop.put("candeploy_downloadedreleases_" + relcount + "_name", (release.proRelease ? "pro" : "standard") + "/" + ((release.mainRelease) ? "main" : "dev") + " " + release.releaseNr + "/" + release.svn);
+            prop.put("candeploy_downloadedreleases_" + relcount + "_name", (release.fullRelease ? "pro" : "standard") + "/" + ((release.mainRelease) ? "main" : "dev") + " " + release.releaseNr + "/" + release.svn);
             prop.put("candeploy_downloadedreleases_" + relcount + "_file", release.name);
             prop.put("candeploy_downloadedreleases_" + relcount + "_selected", (release == dflt) ? "1" : "0");
             relcount++;
@@ -158,7 +158,7 @@ public class ConfigUpdate_p {
         i = releases.iterator();
         while (i.hasNext()) {
             release = (yacyVersion) i.next();
-            prop.put("candeploy_availreleases_" + relcount + "_name", (release.proRelease ? "pro" : "standard") + "/" + ((release.mainRelease) ? "main" : "dev") + " " + release.releaseNr + "/" + release.svn);
+            prop.put("candeploy_availreleases_" + relcount + "_name", (release.fullRelease ? "pro" : "standard") + "/" + ((release.mainRelease) ? "main" : "dev") + " " + release.releaseNr + "/" + release.svn);
             prop.put("candeploy_availreleases_" + relcount + "_url", release.url.toString());
             prop.put("candeploy_availreleases_" + relcount + "_selected", "0");
             relcount++;
@@ -170,7 +170,7 @@ public class ConfigUpdate_p {
         i = releases.iterator();
         while (i.hasNext()) {
             release = (yacyVersion) i.next();
-            prop.put("candeploy_availreleases_" + relcount + "_name", (release.proRelease ? "pro" : "standard") + "/" + ((release.mainRelease) ? "main" : "dev") + " " + release.releaseNr + "/" + release.svn);
+            prop.put("candeploy_availreleases_" + relcount + "_name", (release.fullRelease ? "pro" : "standard") + "/" + ((release.mainRelease) ? "main" : "dev") + " " + release.releaseNr + "/" + release.svn);
             prop.put("candeploy_availreleases_" + relcount + "_url", release.url.toString());
             prop.put("candeploy_availreleases_" + relcount + "_selected", (release == dflt) ? "1" : "0");
             relcount++;

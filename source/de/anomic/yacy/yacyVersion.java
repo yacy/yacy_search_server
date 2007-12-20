@@ -54,6 +54,7 @@ public final class yacyVersion implements Comparator, Comparable {
     public static final float YACY_ACCEPTS_RANKING_TRANSMISSION = (float) 0.414;
     public static final float YACY_HANDLES_COLLECTION_INDEX = (float) 0.486;
     public static final float YACY_POVIDES_REMOTECRAWL_LISTS = (float) 0.550;
+    public static final float YACY_STANDARDREL_IS_PRO = (float) 0.557;
 
     // information about latest release, retrieved by other peers release version
     public static double latestRelease = 0.1; // this value is overwritten when a peer with later version appears
@@ -71,7 +72,7 @@ public final class yacyVersion implements Comparator, Comparable {
     public float releaseNr;
     public String dateStamp;
     public int svn;
-    public boolean proRelease, mainRelease;
+    public boolean fullRelease, mainRelease;
     public yacyURL url;
     public String name;
     
@@ -94,10 +95,13 @@ public final class yacyVersion implements Comparator, Comparable {
         // cut off tail
         release = release.substring(0, release.length() - 7);
         if (release.startsWith("yacy_pro_v")) {
-            proRelease = true;
+            fullRelease = true;
+            release = release.substring(10);
+        } else if (release.startsWith("yacy_emb_v")) {
+            fullRelease = false;
             release = release.substring(10);
         } else if (release.startsWith("yacy_v")) {
-            proRelease = false;
+            fullRelease = false;
             release = release.substring(6);
         } else {
             throw new RuntimeException("release file name '" + release + "' is not valid, wrong prefix");
@@ -123,6 +127,10 @@ public final class yacyVersion implements Comparator, Comparable {
             this.svn = Integer.parseInt(comp[2]);
         } catch (NumberFormatException e) {
             throw new RuntimeException("release file name '" + release + "' is not valid, '" + comp[2] + "' should be a integer number");
+        }
+        if ((this.releaseNr > YACY_STANDARDREL_IS_PRO) && (release.startsWith("yacy_v"))) {
+            // patch for new release strategy
+            this.fullRelease = true;
         }
         // finished! we parsed a relase string
     }
@@ -152,7 +160,7 @@ public final class yacyVersion implements Comparator, Comparable {
     
     public String toAnchor() {
         // generates an anchor string that can be used to embed in an html for direct download
-        return "<a href=" + this.url.toNormalform(true, true) + ">YaCy " + ((this.proRelease) ? "pro release" : "standard release") + " v" + this.releaseNr + ", SVN " + this.svn + "</a>";
+        return "<a href=" + this.url.toNormalform(true, true) + ">YaCy " + ((this.fullRelease) ? "standard/full release" : "embedded release") + " v" + this.releaseNr + ", SVN " + this.svn + "</a>";
     }
     
     // static methods:
@@ -161,9 +169,9 @@ public final class yacyVersion implements Comparator, Comparable {
         // construct a virtual release name for this release
         if (thisVersion == null) {
             plasmaSwitchboard sb = plasmaSwitchboard.getSwitchboard();
-            boolean pro = new File(sb.getRootPath(), "libx").exists();
+            boolean full = new File(sb.getRootPath(), "libx").exists();
             thisVersion = new yacyVersion(
-                "yacy" + ((pro) ? "_pro" : "") +
+                "yacy" + ((full) ? "" : "_emb") +
                 "_v" + sb.getConfig("version", "0.1") + "_" +
                 sb.getConfig("vdate", "19700101") + "_" +
                 sb.getConfig("svnRevision", "0") + ".tar.gz");
@@ -177,7 +185,7 @@ public final class yacyVersion implements Comparator, Comparable {
         // if false, null is returned
         plasmaSwitchboard sb = plasmaSwitchboard.getSwitchboard();
         
-        // check if update process allowes update retrieve
+        // check if update process allows update retrieve
         String process = sb.getConfig("update.process", "manual");
         if ((!manual) && (!process.equals("auto"))) {
             yacyCore.log.logInfo("rulebasedUpdateInfo: not an automatic update selected");
@@ -194,9 +202,9 @@ public final class yacyVersion implements Comparator, Comparable {
         
         // check if we know that there is a release that is more recent than that which we are using
         TreeSet[] releasess = yacyVersion.allReleases(true); // {0=promain, 1=prodev, 2=stdmain, 3=stddev}
-        boolean pro = new File(sb.getRootPath(), "libx").exists();
-        yacyVersion latestmain = (releasess[(pro) ? 0 : 2].size() == 0) ? null : (yacyVersion) releasess[(pro) ? 0 : 2].last();
-        yacyVersion latestdev  = (releasess[(pro) ? 1 : 3].size() == 0) ? null : (yacyVersion) releasess[(pro) ? 1 : 3].last();
+        boolean full = new File(sb.getRootPath(), "libx").exists();
+        yacyVersion latestmain = (releasess[(full) ? 0 : 2].size() == 0) ? null : (yacyVersion) releasess[(full) ? 0 : 2].last();
+        yacyVersion latestdev  = (releasess[(full) ? 1 : 3].size() == 0) ? null : (yacyVersion) releasess[(full) ? 1 : 3].last();
         String concept = sb.getConfig("update.concept", "any");
         String blacklist = sb.getConfig("update.blacklist", ".\\...[123]");
         
@@ -314,10 +322,10 @@ public final class yacyVersion implements Comparator, Comparable {
             try {
                 release = new yacyVersion(url);
                 //System.out.println("r " + release.toAnchor());
-                if ( release.proRelease &&  release.mainRelease) promainreleases.add(release);
-                if ( release.proRelease && !release.mainRelease) prodevreleases.add(release);
-                if (!release.proRelease &&  release.mainRelease) stdmainreleases.add(release);
-                if (!release.proRelease && !release.mainRelease) stddevreleases.add(release);
+                if ( release.fullRelease &&  release.mainRelease) promainreleases.add(release);
+                if ( release.fullRelease && !release.mainRelease) prodevreleases.add(release);
+                if (!release.fullRelease &&  release.mainRelease) stdmainreleases.add(release);
+                if (!release.fullRelease && !release.mainRelease) stddevreleases.add(release);
             } catch (RuntimeException e) {
                 // the release string was not well-formed.
                 // that might have been another link

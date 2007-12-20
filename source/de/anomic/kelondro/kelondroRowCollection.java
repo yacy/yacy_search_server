@@ -250,7 +250,6 @@ public class kelondroRowCollection {
         set(index, a);
     }
     
-    
     public synchronized void addUnique(kelondroRow.Entry row) {
         byte[] r = row.bytes();
         addUnique(r, 0, r.length);
@@ -663,14 +662,26 @@ public class kelondroRowCollection {
     	kelondroRow r = new kelondroRow(new kelondroColumn[]{
     			new kelondroColumn("hash", kelondroColumn.celltype_string, kelondroColumn.encoder_bytes, yacySeedDB.commonHashLength, "hash")},
     			kelondroBase64Order.enhancedCoder, 0);
+    	
+    	kelondroRowCollection a = new kelondroRowCollection(r, testsize);
+        System.out.println("kelondroRowCollection test with size = " + testsize);
+        long t0 = System.currentTimeMillis();
+        random = new Random(0);
+        for (int i = 0; i < testsize; i++) a.add(randomHash().getBytes());
+        random = new Random(0);
+        for (int i = 0; i < testsize; i++) a.add(randomHash().getBytes());
+        a.sort();
+        a.uniq();
+        long t1 = System.currentTimeMillis();
+        System.out.println("create a   : " + (t1 - t0) + " milliseconds, " + d(testsize, (t1 - t0)) + " entries/millisecond; a.size() = " + a.size());
+        
     	kelondroRowCollection c = new kelondroRowCollection(r, testsize);
-    	System.out.println("kelondroRowCollection test with size = " + testsize);
     	random = new Random(0);
-    	long t0 = System.currentTimeMillis();
+    	t0 = System.currentTimeMillis();
     	for (int i = 0; i < testsize; i++) {
     		c.add(randomHash().getBytes());
     	}
-    	long t1 = System.currentTimeMillis();
+    	t1 = System.currentTimeMillis();
     	System.out.println("create c   : " + (t1 - t0) + " milliseconds, " + d(testsize, (t1 - t0)) + " entries/millisecond");
     	kelondroRowCollection d = new kelondroRowCollection(r, testsize);
     	for (int i = 0; i < testsize; i++) {

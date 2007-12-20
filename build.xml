@@ -155,7 +155,7 @@
 
   <!-- YaCy Release Date -->
   <filter token="REPL_DATE" value="${DSTAMP}"/>
-  <filter token="REPL_RELEASE" value="${releaseFile}"/>
+  <filter token="REPL_RELEASE" value="${stdReleaseFile}"/>
 
   <!-- YaCy Release Version number -->
   <echo message="YaCy Version number: ${releaseVersion}" />
@@ -517,9 +517,9 @@
 <!-- ======================================================================================================= 
 	 making a release file for yacy 
 	 ======================================================================================================= -->   
-<target name="dist" depends="copyMain4Dist" description="Compiling sources and make a release file ...">
+<target name="distEmb" depends="copyMain4Dist" description="make for embedded YaCy (no extra parsers)">
 
-	<tar destfile="${release}/${releaseFile}" compression="gzip" defaultexcludes="yes" longfile="fail">  	
+	<tar destfile="${release}/${embReleaseFile}" compression="gzip" defaultexcludes="yes" longfile="fail">  	
   	 
 		<!-- packing all files into a gzipped tar -->
   		<tarfileset dir="${release_main}" prefix="${releaseFileParentDir}/" dirmode="${accessRightsDir}" mode="${accessRightsExecutable}">
@@ -536,8 +536,33 @@
   <!-- deleting unneeded files -->
   <delete dir="${release_main}"/>
 </target>
+
+<target name="dist" depends="compileExtensions,copyMain4Dist,copyExt4Dist" description="make for standard YaCy (same as pro)">
+	<tar destfile="${release}/${stdReleaseFile}" compression="gzip" defaultexcludes="yes" longfile="fail">  	
+  	 
+		<!-- packing all files into a gzipped tar -->
+  		<tarfileset dir="${release_main}" prefix="${releaseFileParentDir}/" dirmode="${accessRightsDir}" mode="${accessRightsExecutable}">
+  		    <include name="**/*.sh"/>
+  		    <include name="**/*.command"/>  			
+		</tarfileset>
+  		<tarfileset dir="${release_main}" prefix="${releaseFileParentDir}/" dirmode="${accessRightsDir}" mode="${accessRightsFile}" >
+    		<include name="**/*.*"/>			
+   		    <exclude name="**/*.sh"/>
+   		    <exclude name="**/*.command"/>  			    			
+		</tarfileset>
+  			
+  		<tarfileset dir="${release_ext}" prefix="${releaseFileParentDir}/" dirmode="${accessRightsDir}" mode="${accessRightsFile}" >
+  			<include name="**/*.*"/>
+  		</tarfileset>  			
+	</tar>	
 	
-<target name="distPro" depends="compileExtensions,copyMain4Dist,copyExt4Dist">
+	<delete dir="${release_main}"/>
+	<delete dir="${release_ext}"/>	
+	<delete dir="${release}/WINDOWS" failonerror="false" />
+	<delete dir="${release}/SPECS" failonerror="false" />
+</target>
+
+<target name="distPro" depends="compileExtensions,copyMain4Dist,copyExt4Dist" description="make for standard YaCy">
 	<tar destfile="${release}/${proReleaseFile}" compression="gzip" defaultexcludes="yes" longfile="fail">  	
   	 
 		<!-- packing all files into a gzipped tar -->
