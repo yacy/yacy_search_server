@@ -45,7 +45,6 @@ import java.io.IOException;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
-import java.util.GregorianCalendar;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
@@ -62,8 +61,11 @@ public class wikiBoard {
     private static final String dateFormat = "yyyyMMddHHmmss";
     private static final int recordSize = 512;
 
-    private static TimeZone GMTTimeZone = TimeZone.getTimeZone("PST");
     private static SimpleDateFormat SimpleFormatter = new SimpleDateFormat(dateFormat);
+
+    static {
+        SimpleFormatter.setTimeZone(TimeZone.getTimeZone("GMT"));
+    }
 
     private kelondroMapObjects datbase = null;
     private kelondroMapObjects bkpbase = null;
@@ -94,11 +96,13 @@ public class wikiBoard {
     }
 
     private static String dateString() {
-        return dateString(new GregorianCalendar(GMTTimeZone).getTime());
+        return dateString(new Date());
     }
 
     public static String dateString(Date date) {
-        return SimpleFormatter.format(date);
+        synchronized (SimpleFormatter) {
+            return SimpleFormatter.format(date);
+        }
     }
 
     private static String normalize(String key) {
@@ -169,7 +173,9 @@ public class wikiBoard {
                     System.out.println("DEBUG - ERROR: date field missing in wikiBoard");
                     return new Date();
                 }
-                return SimpleFormatter.parse(c);
+                synchronized (SimpleFormatter) {
+                    return SimpleFormatter.parse(c);
+                }
             } catch (ParseException e) {
                 return new Date();
             }
@@ -207,7 +213,9 @@ public class wikiBoard {
             try {
                 String c = (String) record.get("date");
                 if (c == null) return null;
-                return SimpleFormatter.parse(c);
+                synchronized (SimpleFormatter) {
+                    return SimpleFormatter.parse(c);
+                }
             } catch (ParseException e) {
                 return null;
             }

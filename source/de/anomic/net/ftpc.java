@@ -64,12 +64,10 @@ import java.net.InetAddress;
 import java.net.ServerSocket;
 import java.net.Socket;
 import java.text.DateFormat;
-import java.util.Calendar;
 import java.util.Date;
 import java.util.Enumeration;
 import java.util.Properties;
 import java.util.StringTokenizer;
-import java.util.TimeZone;
 import java.util.Vector;
 
 import de.anomic.server.serverDomains;
@@ -84,9 +82,6 @@ public class ftpc {
   private PrintStream out;
   private PrintStream err;
   private boolean glob = true; // glob = false -> filenames are taken literally for mget, ..
-
-  // for time measurement
-  private static final TimeZone GMTTimeZone = TimeZone.getTimeZone("PST"); // the GMT Time Zone
 
   // transfer type
   private static final char transferType = 'i'; // transfer binary
@@ -1673,7 +1668,7 @@ cd ..
 
   private void get(String fileDest, String fileName) throws IOException {
     // store time for statistics
-    long start = Calendar.getInstance(GMTTimeZone).getTime().getTime();
+    long start = System.currentTimeMillis();
 
     // prepare data channel
     if (DataSocketPassiveMode) createPassiveDataPort(); else createActiveDataPort();
@@ -1729,7 +1724,7 @@ cd ..
       //if (!success) throw new IOException(reply);
 
       // write statistics
-      long stop = Calendar.getInstance(GMTTimeZone).getTime().getTime();
+      long stop = System.currentTimeMillis();
       out.print("---- downloaded " +
         ((length < 2048) ? length + " bytes" : ((int) length / 1024) + " kbytes") +
         " in " +

@@ -51,7 +51,6 @@ import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
-import java.util.GregorianCalendar;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
@@ -77,8 +76,11 @@ public class blogBoardComments {
     private static final String dateFormat = "yyyyMMddHHmmss";
     private static final int recordSize = 512;
 
-    private static TimeZone GMTTimeZone = TimeZone.getTimeZone("PST");
     private static SimpleDateFormat SimpleFormatter = new SimpleDateFormat(dateFormat);
+
+    static {
+        SimpleFormatter.setTimeZone(TimeZone.getTimeZone("GMT"));
+    }
 
     private kelondroMapObjects datbase = null;
     
@@ -98,7 +100,9 @@ public class blogBoardComments {
     }
 
     private static String dateString(Date date) {
-	return SimpleFormatter.format(date);
+        synchronized (SimpleFormatter) {
+            return SimpleFormatter.format(date);
+        }
     }
 
     private static String normalize(String key) {
@@ -132,7 +136,7 @@ public class blogBoardComments {
 	    record = new HashMap();
 	    key = nkey;
 	    if (key.length() > keyLength) key = key.substring(0, keyLength);
-	    if(date == null) date = new GregorianCalendar(GMTTimeZone).getTime(); 
+	    if(date == null) date = new Date(); 
 	    record.put("date", dateString(date));
 	    if (subject == null) record.put("subject","");
 	    else record.put("subject", kelondroBase64Order.enhancedCoder.encode(subject));
@@ -169,10 +173,12 @@ public class blogBoardComments {
 	    try {
 		String c = (String) record.get("date");
 		if (c == null) {
-            System.out.println("DEBUG - ERROR: date field missing in blogBoard");
-            return new Date();
-        }
-		return SimpleFormatter.parse(c);
+                    System.out.println("DEBUG - ERROR: date field missing in blogBoard");
+                    return new Date();
+                }
+                synchronized (SimpleFormatter) {
+                    return SimpleFormatter.parse(c);
+                }
 	    } catch (ParseException e) {
 		return new Date();
 	    }
@@ -240,7 +246,7 @@ public class blogBoardComments {
         key = normalize(key);
         if (key.length() > keyLength) key = key.substring(0, keyLength);
         Map record = base.getMap(key);
-        if (record == null) return newEntry(key, "".getBytes(), "anonymous".getBytes(), "127.0.0.1", new GregorianCalendar(GMTTimeZone).getTime(), "".getBytes());
+        if (record == null) return newEntry(key, "".getBytes(), "anonymous".getBytes(), "127.0.0.1", new Date(), "".getBytes());
         return new CommentEntry(key, record);
     }
     
@@ -253,7 +259,7 @@ public class blogBoardComments {
         } catch (IOException e) {
             e.printStackTrace();
         }
-        if (record == null) return newEntry(key, "".getBytes(), "anonymous".getBytes(), "127.0.0.1", new GregorianCalendar(GMTTimeZone).getTime(), "".getBytes());
+        if (record == null) return newEntry(key, "".getBytes(), "anonymous".getBytes(), "127.0.0.1", new Date(), "".getBytes());
         return new CommentEntry(key, record.record);
     }*/
     

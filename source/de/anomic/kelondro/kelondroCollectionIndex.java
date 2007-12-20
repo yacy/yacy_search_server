@@ -33,8 +33,7 @@ import java.io.File;
 import java.io.IOException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
-import java.util.Calendar;
-import java.util.GregorianCalendar;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
@@ -818,10 +817,9 @@ public class kelondroCollectionIndex {
         
         // finally dump the removed entries to a file
         newcommon.sort();
-        TimeZone GMTTimeZone = TimeZone.getTimeZone("GMT");
-        Calendar gregorian = new GregorianCalendar(GMTTimeZone);
         SimpleDateFormat formatter = new SimpleDateFormat("yyyyMMddHHmmss");
-        String filename = serverCodings.encodeHex(kelondroBase64Order.enhancedCoder.decode(new String(key))) + "_" + formatter.format(gregorian.getTime()) + ".collection";
+        formatter.setTimeZone(TimeZone.getTimeZone("GMT"));
+        String filename = serverCodings.encodeHex(kelondroBase64Order.enhancedCoder.decode(new String(key))) + "_" + formatter.format(new Date()) + ".collection";
         File storagePath = new File(commonsPath, filename.substring(0, 2)); // make a subpath
         storagePath.mkdirs();
         File file = new File(storagePath, filename);

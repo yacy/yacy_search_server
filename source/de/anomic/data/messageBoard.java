@@ -45,7 +45,6 @@ import java.io.IOException;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
-import java.util.GregorianCalendar;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
@@ -62,8 +61,11 @@ public class messageBoard {
     private static final String dateFormat = "yyyyMMddHHmmss";
     private static final int recordSize = 512;
 
-    private static TimeZone GMTTimeZone = TimeZone.getTimeZone("PST");
     private static SimpleDateFormat SimpleFormatter = new SimpleDateFormat(dateFormat);
+
+    static {
+        SimpleFormatter.setTimeZone(TimeZone.getTimeZone("GMT"));
+    }
 
     private kelondroMapObjects database = null;
     private int sn = 0;
@@ -85,7 +87,9 @@ public class messageBoard {
     }
     
     private static String dateString() {
-	return SimpleFormatter.format(new GregorianCalendar(GMTTimeZone).getTime());
+        synchronized (SimpleFormatter) {
+            return SimpleFormatter.format(new Date());
+        }
     }
 
     private String snString() {
@@ -143,7 +147,9 @@ public class messageBoard {
 	    try {
 		String c = key.substring(categoryLength);
 		c = c.substring(0, c.length() - 2);
-		return SimpleFormatter.parse(c);
+                synchronized (SimpleFormatter) {
+                    return SimpleFormatter.parse(c);
+                }
 	    } catch (ParseException e) {
 		return new Date();
 	    }

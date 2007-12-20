@@ -62,7 +62,6 @@ import java.util.Arrays;
 import java.util.Comparator;
 import java.util.Date;
 import java.util.Enumeration;
-import java.util.GregorianCalendar;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
@@ -109,7 +108,6 @@ public final class httpc {
     // final statics
     private static final String vDATE = "20040602";
     private static final int terminalMaxLength = 30000;
-    private static final TimeZone GMTTimeZone = TimeZone.getTimeZone("GMT");
     private static final SimpleDateFormat HTTPGMTFormatter = new SimpleDateFormat("EEE, dd MMM yyyy HH:mm:ss zzz", Locale.US);
     private static final HashMap reverseMappingCache = new HashMap();
     private static final HashSet activeConnections = new HashSet(); // all connections are stored here and deleted when they are finished
@@ -130,7 +128,7 @@ public final class httpc {
     
     static {
         // set the time zone
-        HTTPGMTFormatter.setTimeZone(GMTTimeZone); // The GMT standard date format used in the HTTP protocol
+        HTTPGMTFormatter.setTimeZone(TimeZone.getTimeZone("GMT")); // The GMT standard date format used in the HTTP protocol
         
         // set time-out of InetAddress.getByName cache ttl
         java.security.Security.setProperty("networkaddress.cache.ttl" , "60");
@@ -343,7 +341,7 @@ public final class httpc {
     * @return Date-object with the current time.
     */
     public static Date nowDate() {
-        return new GregorianCalendar(GMTTimeZone).getTime();
+        return new Date();
     }
     
     public int hashCode() {

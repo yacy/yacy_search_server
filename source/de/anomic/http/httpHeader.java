@@ -389,7 +389,7 @@ public final class httpHeader extends TreeMap implements Map {
         if (containsKey(kind)) {
             Date parsedDate = serverDate.parseHTTPDate((String) get(kind));
             if (parsedDate == null) parsedDate = new Date();
-            return new Date(parsedDate.getTime());
+            return parsedDate;
         }
         return null;
     }
@@ -442,7 +442,7 @@ public final class httpHeader extends TreeMap implements Map {
         if (containsKey(httpHeader.IF_RANGE)) {
             Date rangeDate = serverDate.parseHTTPDate((String) get(httpHeader.IF_RANGE));
             if (rangeDate != null) 
-                return new Date(rangeDate.getTime());
+                return rangeDate;
             
             return get(httpHeader.IF_RANGE);
         } 
