@@ -112,8 +112,8 @@ public class yacyNewsRecord {
         if (attributes.toString().length() > attributesMaxLength) throw new IllegalArgumentException("attributes length (" + attributes.toString().length() + ") exceeds maximum (" + attributesMaxLength + ")");
         this.category = (attributes.containsKey("cat")) ? (String) attributes.get("cat") : "";
         if (category.length() > categoryStringLength) throw new IllegalArgumentException("category length (" + category.length() + ") exceeds maximum (" + categoryStringLength + ")");
-        this.received = (attributes.containsKey("rec")) ? serverDate.parseShortSecondTime((String) attributes.get("rec"), serverDate.UTCDiffString()) : new Date();
-        this.created = (attributes.containsKey("cre")) ? serverDate.parseShortSecondTime((String) attributes.get("cre"), serverDate.UTCDiffString()) : new Date();
+        this.received = (attributes.containsKey("rec")) ? serverDate.parseShortSecond((String) attributes.get("rec"), serverDate.UTCDiffString()) : new Date();
+        this.created = (attributes.containsKey("cre")) ? serverDate.parseShortSecond((String) attributes.get("cre"), serverDate.UTCDiffString()) : new Date();
         this.distributed = (attributes.containsKey("dis")) ? Integer.parseInt((String) attributes.get("dis")) : 0;
         this.originator = (attributes.containsKey("ori")) ? (String) attributes.get("ori") : "";
         removeStandards();
@@ -136,7 +136,7 @@ public class yacyNewsRecord {
         if (attributes.toString().length() > attributesMaxLength) throw new IllegalArgumentException("attributes length (" + attributes.toString().length() + ") exceeds maximum (" + attributesMaxLength + ")");
         this.attributes = attributes;
         this.received = received;
-        this.created = serverDate.parseShortSecondTime(id.substring(0, serverDate.PATTERN_SHORT_SECOND.length()), serverDate.UTCDiffString());
+        this.created = serverDate.parseShortSecond(id.substring(0, serverDate.PATTERN_SHORT_SECOND.length()), serverDate.UTCDiffString());
         this.category = category;
         this.distributed = distributed;
         this.originator = id.substring(serverDate.PATTERN_SHORT_SECOND.length());
@@ -156,8 +156,8 @@ public class yacyNewsRecord {
         // attention: this has no additional encoding
         if (this.originator != null) attributes.put("ori", this.originator);
         if (this.category != null)   attributes.put("cat", this.category);
-        if (this.created != null)    attributes.put("cre", serverDate.shortSecondTime(this.created));
-        if (this.received != null)   attributes.put("rec", serverDate.shortSecondTime(this.received));
+        if (this.created != null)    attributes.put("cre", serverDate.formatShortSecond(this.created));
+        if (this.received != null)   attributes.put("rec", serverDate.formatShortSecond(this.received));
         attributes.put("dis", Integer.toString(this.distributed));
         String theString = attributes.toString();
         removeStandards();
@@ -165,7 +165,7 @@ public class yacyNewsRecord {
     }
 
     public String id() {
-        return serverDate.shortSecondTime(created) + originator;
+        return serverDate.formatShortSecond(created) + originator;
     }
 
     public String originator() {

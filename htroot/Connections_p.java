@@ -214,7 +214,7 @@ public final class Connections_p {
                 prop.put("list_" + idx + "_proto", prot);
                 if (sessionTime > 1000*60) {
                     prop.put("list_" + idx + "_ms", "0");
-                    prop.put("list_" + idx + "_ms_duration",serverDate.intervalToString(sessionTime));
+                    prop.put("list_" + idx + "_ms_duration",serverDate.formatInterval(sessionTime));
                 } else {
                     prop.put("list_" + idx + "_ms", "1");
                     prop.putNum("list_" + idx + "_ms_duration", sessionTime);

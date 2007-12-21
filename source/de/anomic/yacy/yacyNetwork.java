@@ -79,7 +79,7 @@ public class yacyNetwork {
 		if (targetHash != null) post.put("youare", targetHash);
         
         // time information for synchronization
-		post.put("mytime", serverDate.shortSecondTime(new Date()));
+		post.put("mytime", serverDate.formatShortSecond(new Date()));
 		post.put("myUTC", System.currentTimeMillis());
 
         // network identification

@@ -66,7 +66,7 @@ public final class transferURL {
     public static serverObjects respond(httpHeader header, serverObjects post, serverSwitch env) throws InterruptedException {
         long start = System.currentTimeMillis();
         long freshdate = 0;
-        try {freshdate = serverDate.parseShortDayTime("20061101").getTime();} catch (ParseException e1) {}
+        try {freshdate = serverDate.parseShortDay("20061101").getTime();} catch (ParseException e1) {}
         
         // return variable that accumulates replacements
         final plasmaSwitchboard sb = (plasmaSwitchboard) env;

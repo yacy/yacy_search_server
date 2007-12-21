@@ -79,7 +79,7 @@ public class urls {
                 prop.putHTML("item_" + c + "_referrer", (referrer == null) ? "" : referrer.toNormalform(true, false));
                 prop.putHTML("item_" + c + "_description", entry.name());
                 prop.put("item_" + c + "_author", "");
-                prop.put("item_" + c + "_pubDate", serverDate.shortSecondTime(entry.appdate()));
+                prop.put("item_" + c + "_pubDate", serverDate.formatShortSecond(entry.appdate()));
                 prop.put("item_" + c + "_guid", entry.url().hash());
                 c++;
                 count--;
@@ -109,7 +109,7 @@ public class urls {
                 prop.putHTML("item_" + c + "_referrer", (referrer == null) ? "" : referrer.toNormalform(true, false));
                 prop.putHTML("item_" + c + "_description", comp.title());
                 prop.put("item_" + c + "_author", comp.author());
-                prop.put("item_" + c + "_pubDate", serverDate.shortSecondTime(entry.moddate()));
+                prop.put("item_" + c + "_pubDate", serverDate.formatShortSecond(entry.moddate()));
                 prop.put("item_" + c + "_guid", entry.hash());
                 c++;
             }

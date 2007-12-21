@@ -325,14 +325,14 @@ public class yacyCore {
                             if (newSeed.getLastSeenUTC() >= this.seed.getLastSeenUTC()) {
                                 log.logFine("publish: recently handshaked " + this.seed.get(yacySeed.PEERTYPE, yacySeed.PEERTYPE_SENIOR) +
                                     " peer '" + this.seed.getName() + "' at " + this.seed.getPublicAddress() + " with old LastSeen: '" +
-                                    serverDate.shortSecondTime(new Date(newSeed.getLastSeenUTC())) + "'");
+                                    serverDate.formatShortSecond(new Date(newSeed.getLastSeenUTC())) + "'");
                                 newSeed.setLastSeenUTC();
                                 peerActions.peerArrival(newSeed, true);
                             } else {
                                 log.logFine("publish: recently handshaked " + this.seed.get(yacySeed.PEERTYPE, yacySeed.PEERTYPE_SENIOR) +
                                     " peer '" + this.seed.getName() + "' at " + this.seed.getPublicAddress() + " with old LastSeen: '" +
-                                    serverDate.shortSecondTime(new Date(newSeed.getLastSeenUTC())) + "', this is more recent: '" +
-                                    serverDate.shortSecondTime(new Date(this.seed.getLastSeenUTC())) + "'");
+                                    serverDate.formatShortSecond(new Date(newSeed.getLastSeenUTC())) + "', this is more recent: '" +
+                                    serverDate.formatShortSecond(new Date(this.seed.getLastSeenUTC())) + "'");
                                 this.seed.setLastSeenUTC();
                                 peerActions.peerArrival(this.seed, true);
                             }

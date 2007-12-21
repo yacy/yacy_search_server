@@ -212,17 +212,17 @@ public class indexURLEntry {
         this.entry.setCol(col_hash, url.hash(), null);
         this.entry.setCol(col_comp, encodeComp(url, descr, author, tags, ETag));
         try {
-            encodeDate(col_mod, serverDate.parseShortDayTime(prop.getProperty("mod", "20000101")));
+            encodeDate(col_mod, serverDate.parseShortDay(prop.getProperty("mod", "20000101")));
         } catch (ParseException e) {
             encodeDate(col_mod, new Date());
         }
         try {
-            encodeDate(col_load, serverDate.parseShortDayTime(prop.getProperty("load", "20000101")));
+            encodeDate(col_load, serverDate.parseShortDay(prop.getProperty("load", "20000101")));
         } catch (ParseException e) {
             encodeDate(col_load, new Date());
         }
         try {
-            encodeDate(col_fresh, serverDate.parseShortDayTime(prop.getProperty("fresh", "20000101")));
+            encodeDate(col_fresh, serverDate.parseShortDay(prop.getProperty("fresh", "20000101")));
         } catch (ParseException e) {
             encodeDate(col_fresh, new Date());
         }

@@ -237,8 +237,8 @@ public class plasmaDbImporter extends AbstractImporter implements dbImporter {
                                 "[" + this.wordChunkStartHash + " .. " + this.wordChunkEndHash + "] " +
                                 this.getProcessingStatusPercent() + "%\n" + 
                                 "Speed: "+ 500*1000/duration + " word entities/s" +
-                                " | Elapsed time: " + serverDate.intervalToString(getElapsedTime()) +
-                                " | Estimated time: " + serverDate.intervalToString(getEstimatedTime()) + "\n" + 
+                                " | Elapsed time: " + serverDate.formatInterval(getElapsedTime()) +
+                                " | Estimated time: " + serverDate.formatInterval(getEstimatedTime()) + "\n" + 
                                 "Home Words = " + homeWordIndex.size() + 
                                 " | Import Words = " + this.importWordIndex.size());
                         this.wordChunkStart = this.wordChunkEnd;

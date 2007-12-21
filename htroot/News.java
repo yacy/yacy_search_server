@@ -138,10 +138,10 @@ public class News {
                     String category = record.category();
                     prop.put("table_list_" + i + "_id", record.id());
                     prop.putHTML("table_list_" + i + "_ori", (seed == null) ? record.originator() : seed.getName());
-                    prop.put("table_list_" + i + "_cre", serverDate.shortSecondTime(record.created()));
+                    prop.put("table_list_" + i + "_cre", serverDate.formatShortSecond(record.created()));
                     prop.put("table_list_" + i + "_crerfcdate", httpc.dateString(record.created()));
                     prop.put("table_list_" + i + "_cat", category);
-                    prop.put("table_list_" + i + "_rec", (record.received() == null) ? "-" : serverDate.shortSecondTime(record.received()));
+                    prop.put("table_list_" + i + "_rec", (record.received() == null) ? "-" : serverDate.formatShortSecond(record.received()));
                     prop.put("table_list_" + i + "_dis", record.distributed());
                     
                     Map attributeMap = record.attributes();

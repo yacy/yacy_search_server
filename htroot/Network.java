@@ -146,7 +146,7 @@ public class Network {
                 myqph = 60d * seed.getQPM();
                 prop.put("table_my-version", seed.get(yacySeed.VERSION, "-"));
                 prop.put("table_my-utc", seed.get(yacySeed.UTC, "-"));
-                prop.put("table_my-uptime", serverDate.intervalToString(60000 * Long.parseLong(seed.get(yacySeed.UPTIME, ""))));
+                prop.put("table_my-uptime", serverDate.formatInterval(60000 * Long.parseLong(seed.get(yacySeed.UPTIME, ""))));
                 prop.putNum("table_my-LCount", LCount);
                 prop.putNum("table_my-ICount", ICount);
                 prop.putNum("table_my-RCount", RCount);
@@ -452,7 +452,7 @@ public class Network {
                             prop.putHTML(STR_TABLE_LIST + conCount + "_version", yacyVersion.combined2prettyVersion(seed.get(yacySeed.VERSION, "0.1"), shortname));
                             prop.putNum(STR_TABLE_LIST + conCount + "_lastSeen", /*seed.getLastSeenString() + " " +*/ lastseen);
                             prop.put(STR_TABLE_LIST + conCount + "_utc", seed.get(yacySeed.UTC, "-"));
-                            prop.putHTML(STR_TABLE_LIST + conCount + "_uptime", serverDate.intervalToString(60000 * Long.parseLong(seed.get(yacySeed.UPTIME, "0"))));
+                            prop.putHTML(STR_TABLE_LIST + conCount + "_uptime", serverDate.formatInterval(60000 * Long.parseLong(seed.get(yacySeed.UPTIME, "0"))));
                             prop.putNum(STR_TABLE_LIST + conCount + "_LCount", seed.getLong(yacySeed.LCOUNT, 0));
                             prop.putNum(STR_TABLE_LIST + conCount + "_ICount", seed.getLong(yacySeed.ICOUNT, 0));
                             prop.putNum(STR_TABLE_LIST + conCount + "_RCount", seed.getLong(yacySeed.RCOUNT, 0));

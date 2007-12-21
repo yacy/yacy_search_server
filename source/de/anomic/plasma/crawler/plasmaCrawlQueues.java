@@ -304,7 +304,7 @@ public class plasmaCrawlQueues {
                 referrer = null;
             }
             try {
-                loaddate = serverDate.parseShortSecondTime(item.getPubDate());
+                loaddate = serverDate.parseShortSecond(item.getPubDate());
             } catch (ParseException e) {
                 loaddate = new Date();
             }

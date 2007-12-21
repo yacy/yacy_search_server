@@ -63,7 +63,7 @@ public class IndexControlURLs_p {
             prop.put("lurlexport_urlcount", sb.wordIndex.loadedURL.export_count());
         } else {
         	prop.put("lurlexport", 1);
-    		prop.put("lurlexport_exportfile", sb.getRootPath() + "/DATA/EXPORT/" + serverDate.shortSecondTime());
+    		prop.put("lurlexport_exportfile", sb.getRootPath() + "/DATA/EXPORT/" + serverDate.formatShortSecond());
 
     		prop.put("lurlexportfinished", 0);
     		prop.put("lurlexporterror", 0);

@@ -161,7 +161,7 @@ public class yacyNewsQueue {
         }
         kelondroRow.Entry b = queueStack.row().newEntry(new byte[][]{
                 r.id().getBytes(),
-                serverDate.shortSecondTime(new Date()).getBytes()});
+                serverDate.formatShortSecond(new Date()).getBytes()});
         return b;
     }
     

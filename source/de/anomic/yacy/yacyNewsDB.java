@@ -142,7 +142,7 @@ public class yacyNewsDB {
         return yacyNewsRecord.newRecord(
             b.getColString(0, null),
             b.getColString(1, "UTF-8"),
-            (b.empty(2)) ? null : serverDate.parseShortSecondTime(b.getColString(2, null), serverDate.UTCDiffString()),
+            (b.empty(2)) ? null : serverDate.parseShortSecond(b.getColString(2, null), serverDate.UTCDiffString()),
             (int) b.getColLong(3),
             serverCodings.string2map(b.getColString(4, "UTF-8"), ",")
         );
@@ -156,7 +156,7 @@ public class yacyNewsDB {
             kelondroRow.Entry entry = this.news.row().newEntry();
             entry.setCol(0, r.id().getBytes());
             entry.setCol(1, r.category().getBytes("UTF-8"));
-            entry.setCol(2, (r.received() == null) ? null : serverDate.shortSecondTime(r.received()).getBytes());
+            entry.setCol(2, (r.received() == null) ? null : serverDate.formatShortSecond(r.received()).getBytes());
             entry.setCol(3, kelondroBase64Order.enhancedCoder.encodeLong(r.distributed(), 2).getBytes());
             entry.setCol(4, attributes.getBytes("UTF-8"));
             return entry;

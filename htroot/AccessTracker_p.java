@@ -99,7 +99,7 @@ public class AccessTracker_p {
 						while (ii.hasNext()) {
 							entry = (Map.Entry) ii.next();
 							prop.putHTML("page_list_" + entCount + "_host", host);
-							prop.put("page_list_" + entCount + "_date", serverDate.shortSecondTime(new Date(((Long) entry.getKey()).longValue())));
+							prop.put("page_list_" + entCount + "_date", serverDate.formatShortSecond(new Date(((Long) entry.getKey()).longValue())));
 							prop.putHTML("page_list_" + entCount + "_path", (String) entry.getValue());
 							entCount++;
 						}
@@ -115,7 +115,7 @@ public class AccessTracker_p {
 						while (ii.hasNext()) {
 							entry = (Map.Entry) ii.next();
 							prop.putHTML("page_list_" + entCount + "_host", host);
-							prop.put("page_list_" + entCount + "_date", serverDate.shortSecondTime(new Date(((Long) entry.getKey()).longValue())));
+							prop.put("page_list_" + entCount + "_date", serverDate.formatShortSecond(new Date(((Long) entry.getKey()).longValue())));
 							prop.putHTML("page_list_" + entCount + "_path", (String) entry.getValue());
 							entCount++;
 						}
@@ -145,7 +145,7 @@ public class AccessTracker_p {
                 prop.put("page_list_" + entCount + "_dark", ((dark) ? 1 : 0) );
                 dark =! dark;
                 prop.putHTML("page_list_" + entCount + "_host", (String) searchProfile.get("host"));
-                prop.put("page_list_" + entCount + "_date", serverDate.shortSecondTime(new Date(trackerHandle.longValue())));
+                prop.put("page_list_" + entCount + "_date", serverDate.formatShortSecond(new Date(trackerHandle.longValue())));
                 prop.put("page_list_" + entCount + "_timestamp", trackerHandle.longValue());
                 if (page == 2) {
                     // local search
@@ -199,7 +199,7 @@ public class AccessTracker_p {
                 Iterator ii = handles.iterator();
                 while (ii.hasNext()) {
                 	Long timestamp = (Long) ii.next();
-                	prop.put("page_list_" + entCount + "_dates_" + dateCount + "_date", serverDate.shortSecondTime(new Date(timestamp.longValue())));
+                	prop.put("page_list_" + entCount + "_dates_" + dateCount + "_date", serverDate.formatShortSecond(new Date(timestamp.longValue())));
                 	prop.put("page_list_" + entCount + "_dates_" + dateCount + "_timestamp", timestamp.toString());
                 	dateCount++;
                 }

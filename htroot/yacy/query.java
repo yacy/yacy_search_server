@@ -85,7 +85,7 @@ public final class query {
         final String obj    = post.get("object", ""); // keyword for query subject
         final String env    = post.get("env", "");    // argument to query
 
-        prop.put("mytime", serverDate.shortSecondTime());
+        prop.put("mytime", serverDate.formatShortSecond());
 
         // check if we are the right target and requester has correct information about this peer
         if (yacyCore.seedDB.mySeed() == null || !yacyCore.seedDB.mySeed().hash.equals(youare)) {

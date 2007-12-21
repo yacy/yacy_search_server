@@ -123,7 +123,7 @@ public class blogBoard {
 	    key = nkey;
 	    if (key.length() > keyLength) key = key.substring(0, keyLength);
 	    if(date == null) date = new Date();
-	    record.put("date", serverDate.shortSecondTime(date));
+	    record.put("date", serverDate.formatShortSecond(date));
 	    if (subject == null) record.put("subject","");
 	    else record.put("subject", kelondroBase64Order.enhancedCoder.encode(subject));
 	    if (author == null) record.put("author","");
@@ -167,7 +167,7 @@ public class blogBoard {
             System.out.println("DEBUG - ERROR: date field missing in blogBoard");
             return new Date();
         }
-		return serverDate.parseShortSecondTime(c);
+		return serverDate.parseShortSecond(c);
 	    } catch (ParseException e) {
 		return new Date();
 	    }
@@ -177,7 +177,7 @@ public class blogBoard {
 		String c = (String) record.get("date");
 		if (c == null) {
 	        System.out.println("DEBUG - ERROR: date field missing in blogBoard");
-	        return serverDate.shortSecondTime();
+	        return serverDate.formatShortSecond();
 		}
 		return c;
 	}
@@ -305,7 +305,7 @@ public class blogBoard {
     		}
     		
     		try {
-				date = serverDate.parseShortSecondTime(StrDate);
+				date = serverDate.parseShortSecond(StrDate);
 			} catch (ParseException e1) {
 				date = new Date();
 			}

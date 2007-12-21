@@ -198,7 +198,7 @@ public class Status {
         } else {
             final long uptime = 60000 * Long.parseLong(yacyCore.seedDB.mySeed().get(yacySeed.UPTIME, "0"));
             prop.put("peerStatistics", "1");
-            prop.put("peerStatistics_uptime", serverDate.intervalToString(uptime));
+            prop.put("peerStatistics_uptime", serverDate.formatInterval(uptime));
             prop.putNum("peerStatistics_pagesperminute", yacyCore.seedDB.mySeed().getPPM());
             prop.putNum("peerStatistics_queriesperhour", Math.round(6000d * yacyCore.seedDB.mySeed().getQPM()) / 100d);
             prop.putNum("peerStatistics_links", yacyCore.seedDB.mySeed().getLinkCount());
@@ -261,7 +261,7 @@ public class Status {
                 prop.put("seedServer_seedFile", sb.getConfig("seedFilePath", ""));
             }
             prop.put("seedServer_lastUpload",
-                    serverDate.intervalToString(System.currentTimeMillis() - sb.yc.lastSeedUpload_timeStamp));
+                    serverDate.formatInterval(System.currentTimeMillis() - sb.yc.lastSeedUpload_timeStamp));
         } else {
             prop.put(SEEDSERVER, "0"); // disabled
         }

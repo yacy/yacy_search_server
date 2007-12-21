@@ -652,7 +652,7 @@ public class SettingsAck_p {
             }                        
             
             // everything is ok
-            prop.put("info_crawler.clientTimeout",(crawlerTimeout==0) ? "0" :serverDate.intervalToString(crawlerTimeout));
+            prop.put("info_crawler.clientTimeout",(crawlerTimeout==0) ? "0" :serverDate.formatInterval(crawlerTimeout));
             prop.put("info_crawler.http.maxFileSize",(maxHttpSize==-1)? "-1":serverMemory.bytesToString(maxHttpSize));
             prop.put("info_crawler.ftp.maxFileSize", (maxFtpSize==-1) ? "-1":serverMemory.bytesToString(maxFtpSize));
             prop.put("info", "28");

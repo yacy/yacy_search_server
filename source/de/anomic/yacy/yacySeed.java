@@ -222,7 +222,7 @@ public class yacySeed {
         this.dna.put(yacySeed.IPTYPE, "&empty;");
 
         // settings that can only be computed by visiting peer
-        this.dna.put(yacySeed.LASTSEEN, serverDate.shortSecondTime(new Date(System.currentTimeMillis() - serverDate.UTCDiff()))); // for last-seen date
+        this.dna.put(yacySeed.LASTSEEN, serverDate.formatShortSecond(new Date(System.currentTimeMillis() - serverDate.UTCDiff()))); // for last-seen date
         this.dna.put(yacySeed.USPEED, yacySeed.ZERO);  // the computated uplink speed of the peer
 
         this.dna.put(yacySeed.CRWCNT, yacySeed.ZERO);
@@ -527,7 +527,7 @@ public class yacySeed {
         // because java thinks it must apply the UTC offset to the current time,
         // to create a string that looks like our current time, it adds the local UTC offset to the
         // time. To create a corrected UTC Date string, we first subtract the local UTC offset.
-        dna.put(yacySeed.LASTSEEN, serverDate.shortSecondTime(new Date(System.currentTimeMillis() - serverDate.UTCDiff())) );
+        dna.put(yacySeed.LASTSEEN, serverDate.formatShortSecond(new Date(System.currentTimeMillis() - serverDate.UTCDiff())) );
     }
     
     /**
@@ -535,7 +535,7 @@ public class yacySeed {
      */
     public final long getLastSeenUTC() {
         try {
-            final long t = serverDate.parseShortSecondTime(get(yacySeed.LASTSEEN, "20040101000000")).getTime();
+            final long t = serverDate.parseShortSecond(get(yacySeed.LASTSEEN, "20040101000000")).getTime();
             // getTime creates a UTC time number. But in this case java thinks, that the given
             // time string is a local time, which has a local UTC offset applied.
             // Therefore java subtracts the local UTC offset, to get a UTC number.
@@ -562,7 +562,7 @@ public class yacySeed {
     /** @return the age of the seed in number of days */
     public final int getAge() {
         try {
-            final long t = serverDate.parseShortSecondTime(get(yacySeed.BDATE, "20040101000000")).getTime();
+            final long t = serverDate.parseShortSecond(get(yacySeed.BDATE, "20040101000000")).getTime();
             return (int) ((System.currentTimeMillis() - (t - getUTCDiff() + serverDate.UTCDiff())) / 1000 / 60 / 60 / 24);
         } catch (java.text.ParseException e) {
             return -1;
@@ -775,7 +775,7 @@ public class yacySeed {
         } else {
             newSeed.dna.put(yacySeed.PORT, Integer.toString(serverCore.getPortNr(sb.getConfig("port", "8080"))));
         }
-        newSeed.dna.put(yacySeed.BDATE, serverDate.shortSecondTime(new Date(System.currentTimeMillis() - serverDate.UTCDiff())) );
+        newSeed.dna.put(yacySeed.BDATE, serverDate.formatShortSecond(new Date(System.currentTimeMillis() - serverDate.UTCDiff())) );
         newSeed.dna.put(yacySeed.LASTSEEN, newSeed.dna.get(yacySeed.BDATE)); // just as initial setting
         newSeed.dna.put(yacySeed.UTC, serverDate.UTCDiffString());
         newSeed.dna.put(yacySeed.PEERTYPE, yacySeed.PEERTYPE_VIRGIN);

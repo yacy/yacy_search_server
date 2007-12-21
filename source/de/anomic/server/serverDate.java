@@ -138,9 +138,7 @@ public final class serverDate {
     
         for(int i = 0; i < FORMATS_HTTP.length; i++) {
             try {
-                synchronized (FORMATS_HTTP[i]) {
-                    return FORMATS_HTTP[i].parse(s);
-                }
+                return parse(FORMATS_HTTP[i], s);
             } catch (ParseException e) {
                 // on ParseException try again with next parser
             }
@@ -284,14 +282,6 @@ public final class serverDate {
 
     /**
      * @see #formatShortDay()
-     * @param tz a TimeZone the resulting date is aligned to.
-     */
-    public static String formatShortDay(TimeZone tz) {
-        return format(FORMAT_SHORT_DAY, new Date(), tz);
-    }
-
-    /**
-     * @see #formatShortDay()
      * @param date the Date to transform
      */
     public static String formatShortDay(Date date) {
@@ -299,43 +289,73 @@ public final class serverDate {
     }
 
     /**
+     * This should only be used, if you need a short date String that needs to be aligned to
+     * a special timezone other than GMT/UTC. Be aware that a receiver won't be able to
+     * recreate the original Date without additional timezone information.
      * @see #formatShortDay()
      * @param date the Date to transform
      * @param tz a TimeZone the resulting date String should be aligned to.
      */
     public static String formatShortDay(Date date, TimeZone tz) {
-        return format(FORMAT_SHORT_DAY, date);
+        return format(FORMAT_SHORT_DAY, date, tz);
     }
 
-    public static Date parseShortDayTime(String timeString) throws ParseException {
-        synchronized (serverDate.FORMAT_SHORT_DAY) {
-            return serverDate.FORMAT_SHORT_DAY.parse(timeString);
-        }
+    /**
+     * Parse a String representation of a Date in short day format assuming the date
+     * is aligned to the GMT/UTC timezone. An example for such a date string is "20071218".
+     * @see #formatShortDay()
+     * @throws ParseException The exception is thrown if an error occured during while parsing
+     * the String.
+     */
+    public static Date parseShortDay(String timeString) throws ParseException {
+        return parse(FORMAT_SHORT_DAY, timeString);
     }
 
-    public static String shortSecondTime() {
-        return shortSecondTime(new Date());
+    /**
+     * Returns the current date in short second format which is a fixed width (14 chars)
+     * String including the date and the time like "20071218233510". The result is in GMT/UTC.
+     * @see #formatShortDay()
+     */
+    public static String formatShortSecond() {
+        return formatShortSecond(new Date());
     }
 
-    public static String shortSecondTime(Date date) {
-        synchronized (serverDate.FORMAT_SHORT_SECOND) {       
-            return serverDate.FORMAT_SHORT_SECOND.format(date);
-        }
+    /**
+     * Identical to {@link #formatShortDay(Date)}, but for short second format.
+     */
+    public static String formatShortSecond(Date date) {
+        return format(FORMAT_SHORT_SECOND, date);
     }
     
-    public static Date parseShortSecondTime(String timeString) throws ParseException {
-        synchronized (serverDate.FORMAT_SHORT_SECOND) {
-            return serverDate.FORMAT_SHORT_SECOND.parse(timeString);
-        }
+    /**
+     * Identical to {@link #formatShortDay(Date, TimeZone)}, but for short second format.
+     */
+    public static String formatShortSecond(Date date, TimeZone tz) {
+        return format(FORMAT_SHORT_SECOND, date, tz);
+    }
+    
+    //TODO check the following 2 parse methods for correct use (GMT vs. different timezone)
+    /**
+     * Like {@link #parseShortDay(String)}, but for the "short second" format which is short date
+     * plus a 6 digit day time value, like "20071218233510". The String should be in GMT/UTC to
+     * get a correct Date.
+     */
+    public static Date parseShortSecond(String timeString) throws ParseException {
+            return parse(FORMAT_SHORT_SECOND, timeString);
     }
 
-    public static Date parseShortSecondTime(String remoteTimeString, String remoteUTCOffset) {
+    /**
+     * Like {@link #parseShortSecond(String)} using additional timezone information provided in an
+     * offset String, like "+0100" for CET.
+     */
+    public static Date parseShortSecond(String remoteTimeString, String remoteUTCOffset) {
+        // FIXME: This method returns an incorrect date, check callers!
+        // ex: de.anomic.server.serverDate.parseShortSecond("20070101120000", "+0200").toGMTString()
+        // => 1 Jan 2007 13:00:00 GMT
         if (remoteTimeString == null || remoteTimeString.length() == 0) { return new Date(); }
         if (remoteUTCOffset == null || remoteUTCOffset.length() == 0) { return new Date(); }
         try {
-            synchronized(serverDate.FORMAT_SHORT_SECOND) {
-                return new Date(serverDate.FORMAT_SHORT_SECOND.parse(remoteTimeString).getTime() - serverDate.UTCDiff() + serverDate.UTCDiff(remoteUTCOffset));
-            }
+            return new Date(parse(FORMAT_SHORT_SECOND, remoteTimeString).getTime() - serverDate.UTCDiff() + serverDate.UTCDiff(remoteUTCOffset));
         } catch (java.text.ParseException e) {
             serverLog.logFinest("parseUniversalDate", e.getMessage() + ", remoteTimeString=[" + remoteTimeString + "]");
             return new Date();
@@ -345,9 +365,36 @@ public final class serverDate {
         }
     }
 
+
     /**
-     * called by all public format...(..., TimeZone) methods
+     * Format a time inteval in milliseconds into a String of the form
+     * X 'day'['s'] HH':'mm
      */
+    public static String formatInterval(long millis) {
+        try {
+            long mins = millis / 60000;
+            
+            StringBuffer uptime = new StringBuffer();
+            
+            int uptimeDays  = (int) (Math.floor(mins/1440));
+            int uptimeHours = (int) (Math.floor(mins/60)%24);
+            int uptimeMins  = (int) mins%60;
+            
+            uptime.append(uptimeDays)
+                  .append(((uptimeDays == 1)?" day ":" days "))
+                  .append((uptimeHours < 10)?"0":"")
+                  .append(uptimeHours)
+                  .append(":")
+                  .append((uptimeMins < 10)?"0":"")
+                  .append(uptimeMins);            
+            
+            return uptime.toString();       
+        } catch (Exception e) {
+            return "unknown";
+        }
+    }
+    
+    /** called by all public format...(..., TimeZone) methods */
     private static String format(SimpleDateFormat format, Date date, TimeZone tz) {
         TimeZone bakTZ = format.getTimeZone();
         String result;
@@ -361,19 +408,19 @@ public final class serverDate {
         return result;
     }
 
-    /**
-     * called by all public format...(...) methods
-     */
+    /** called by all public format...(...) methods */
     private static String format(SimpleDateFormat format, Date date) {
-        String result;
-        
         synchronized (format) {
-            result = format.format(date);
+            return format.format(date);
         }
-        
-        return result;
     }
 
+    /** calles by all public parse...(...) methods */
+    private static Date parse(SimpleDateFormat format, String dateString) throws ParseException {
+        synchronized (format) {
+            return format.parse(dateString);
+        }
+    }
 
     // statics
     public final static long secondMillis = 1000;
@@ -583,30 +630,6 @@ public final class serverDate {
         return new String(result);
     }
     
-    public static String intervalToString(long millis) {
-        try {
-            long mins = millis / 60000;
-            
-            StringBuffer uptime = new StringBuffer();
-            
-            int uptimeDays  = (int) (Math.floor(mins/1440));
-            int uptimeHours = (int) (Math.floor(mins/60)%24);
-            int uptimeMins  = (int) mins%60;
-            
-            uptime.append(uptimeDays)
-                  .append(((uptimeDays == 1)?" day ":" days "))
-                  .append((uptimeHours < 10)?"0":"")
-                  .append(uptimeHours)
-                  .append(":")
-                  .append((uptimeMins < 10)?"0":"")
-                  .append(uptimeMins);            
-            
-            return uptime.toString();       
-        } catch (Exception e) {
-            return "unknown";
-        }
-    }
-    
     public static long remainingTime(long start, long due, long minimum) {
         if (due < 0) return -1;
         long r = due + start - System.currentTimeMillis();
@@ -617,7 +640,7 @@ public final class serverDate {
         //System.out.println("kelondroDate is (" + new kelondroDate().toString() + ")");
         System.out.println("offset is " + (UTCDiff()/1000/60/60) + " hours, javaDate is " + new Date() + ", correctedDate is " + new Date(correctedUTCTime()));
         System.out.println("serverDate : " + new serverDate().toShortString(false));
-        System.out.println("  javaDate : " + shortSecondTime());
+        System.out.println("  javaDate : " + formatShortSecond());
         System.out.println("serverDate : " + new serverDate().toString());
         System.out.println("  JavaDate : " + DateFormat.getDateInstance().format(new Date()));
         System.out.println("serverDate0: " + new serverDate(0).toShortString(false));

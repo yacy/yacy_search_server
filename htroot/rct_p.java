@@ -68,7 +68,7 @@ public class rct_p {
                         }
                         Date loaddate;
                         try {
-                            loaddate = serverDate.parseShortSecondTime(item.getPubDate());
+                            loaddate = serverDate.parseShortSecond(item.getPubDate());
                         } catch (ParseException e) {
                             loaddate = new Date();
                         }

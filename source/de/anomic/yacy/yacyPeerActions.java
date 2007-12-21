@@ -263,7 +263,7 @@ public class yacyPeerActions {
         }
         if (Math.abs(nowUTC0Time - ctimeUTC0) > 60 * 60 * 24 * 1000) {
             // the new connection is out-of-age, we reject the connection
-            yacyCore.log.logFine("connect: rejecting out-dated peer '" + seed.getName() + "' from " + seed.getPublicAddress() + "; nowUTC0=" + nowUTC0Time + ", seedUTC0=" + ctimeUTC0 + ", TimeDiff=" + serverDate.intervalToString(Math.abs(nowUTC0Time - ctimeUTC0)));
+            yacyCore.log.logFine("connect: rejecting out-dated peer '" + seed.getName() + "' from " + seed.getPublicAddress() + "; nowUTC0=" + nowUTC0Time + ", seedUTC0=" + ctimeUTC0 + ", TimeDiff=" + serverDate.formatInterval(Math.abs(nowUTC0Time - ctimeUTC0)));
             return false;
         }
 
