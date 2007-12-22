@@ -55,12 +55,11 @@ network.unit.domain = global
 network.unit.search.time = 4
 network.unit.dhtredundancy.junior = 1
 network.unit.dhtredundancy.senior = 3
-network.unit.bootstrap.seedlist0 = http://de.geocities.com/d15511z/yacy/angel/seed.txt
+network.unit.bootstrap.seedlist0 = http://www.yacy.net/seed.txt
 network.unit.bootstrap.seedlist1 = http://home.arcor.de/hermens/yacy/seed.txt
 network.unit.bootstrap.seedlist2 = http://low.audioattack.de/yacy/seed.txt
 network.unit.bootstrap.seedlist3 = http://www.lulabad.de/seed.txt
-network.unit.bootstrap.seedlist4 = http://www.yacy.net/seed.txt
-network.unit.bootstrap.seedlist5 = http://www.marcelhenseler.de/yacy/seed.txt
+network.unit.bootstrap.seedlist4 = http://www.marcelhenseler.de/yacy/seed.txt
 
 # each network may use different yacy distributions.
 # the auto-updater can access network-specific update locations

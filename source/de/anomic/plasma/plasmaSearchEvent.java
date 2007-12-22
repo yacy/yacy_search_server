@@ -502,7 +502,7 @@ public final class plasmaSearchEvent {
         public resultWorker(int id, long maxlifetime) {
             this.id = id;
             this.lastLifeSign = System.currentTimeMillis();
-            this.timeout = System.currentTimeMillis() + maxlifetime;
+            this.timeout = System.currentTimeMillis() + Math.max(1000, maxlifetime);
             this.sleeptime = Math.min(300, maxlifetime / 10 * id);
         }
 
@@ -629,6 +629,7 @@ public final class plasmaSearchEvent {
         if ((rcAbstracts == null) || (rcAbstracts.size() != query.queryHashes.size())) return; // secondary search not possible (yet)
         this.secondarySearchStartet = true;
         
+        /*        
         // catch up index abstracts and join them; then call peers again to submit their urls
         System.out.println("DEBUG-INDEXABSTRACT: " + rcAbstracts.size() + " word references catched, " + query.queryHashes.size() + " needed");
 
@@ -638,12 +639,12 @@ public final class plasmaSearchEvent {
             entry = (Map.Entry) i.next();
             System.out.println("DEBUG-INDEXABSTRACT: hash " + (String) entry.getKey() + ": " + ((query.queryHashes.contains((String) entry.getKey())) ? "NEEDED" : "NOT NEEDED") + "; " + ((TreeMap) entry.getValue()).size() + " entries");
         }
-        
+         */
         TreeMap abstractJoin = (rcAbstracts.size() == query.queryHashes.size()) ? kelondroMSetTools.joinConstructive(rcAbstracts.values(), true) : new TreeMap();
         if (abstractJoin.size() == 0) {
-            System.out.println("DEBUG-INDEXABSTRACT: no success using index abstracts from remote peers");
+            //System.out.println("DEBUG-INDEXABSTRACT: no success using index abstracts from remote peers");
         } else {
-            System.out.println("DEBUG-INDEXABSTRACT: index abstracts delivered " + abstractJoin.size() + " additional results for secondary search");
+            //System.out.println("DEBUG-INDEXABSTRACT: index abstracts delivered " + abstractJoin.size() + " additional results for secondary search");
             // generate query for secondary search
             TreeMap secondarySearchURLs = new TreeMap(); // a (peerhash:urlhash-liststring) mapping
             Iterator i1 = abstractJoin.entrySet().iterator();
@@ -656,7 +657,7 @@ public final class plasmaSearchEvent {
                 entry1 = (Map.Entry) i1.next();
                 url = (String) entry1.getKey();
                 peers = (String) entry1.getValue();
-                System.out.println("DEBUG-INDEXABSTRACT: url " + url + ": from peers " + peers);
+                //System.out.println("DEBUG-INDEXABSTRACT: url " + url + ": from peers " + peers);
                 mypeercount = 0;
                 for (int j = 0; j < peers.length(); j = j + 12) {
                     peer = peers.substring(j, j + 12);
@@ -680,8 +681,8 @@ public final class plasmaSearchEvent {
                 if (peer.equals(mypeerhash)) continue; // we dont need to ask ourself
                 urls = (String) entry1.getValue();
                 words = wordsFromPeer(peer, urls);
-                System.out.println("DEBUG-INDEXABSTRACT ***: peer " + peer + "   has urls: " + urls);
-                System.out.println("DEBUG-INDEXABSTRACT ***: peer " + peer + " from words: " + words);
+                //System.out.println("DEBUG-INDEXABSTRACT ***: peer " + peer + "   has urls: " + urls);
+                //System.out.println("DEBUG-INDEXABSTRACT ***: peer " + peer + " from words: " + words);
                 secondarySearchThreads[c++] = yacySearch.secondaryRemoteSearch(
                         words, "", urls, wordIndex, this.rankedCache, peer, plasmaSwitchboard.urlBlacklist,
                         ranking, query.constraint, preselectedPeerHashes);

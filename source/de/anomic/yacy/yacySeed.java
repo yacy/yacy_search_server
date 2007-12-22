@@ -694,15 +694,10 @@ public class yacySeed {
     }
     
     private static String bestNewHash(yacySeedDB seedDB) {
-        int con = seedDB.sizeConnected();
-        if (con == 0) return positionToHash(0.0);
-        if (con == 1) return positionToHash(0.5);
-        if (con == 2) return positionToHash(0.25);
-        if (con == 3) return positionToHash(0.75);
-        if (con == 4) return positionToHash(0.125);
-        if (con == 5) return positionToHash(0.625);
-        if (con == 6) return positionToHash(0.375);
-        if (con == 7) return positionToHash(0.875);
+        if ((seedDB == null) || (seedDB.sizeConnected() <= 8)) {
+            // use random hash
+            return randomHash();
+        }
         
         int tries = Math.max(1, Math.min(32, seedDB.sizeConnected() / 2));
         String hash;
