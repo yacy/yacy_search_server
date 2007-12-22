@@ -63,7 +63,7 @@ network.unit.bootstrap.seedlist4 = http://www.marcelhenseler.de/yacy/seed.txt
 
 # each network may use different yacy distributions.
 # the auto-updater can access network-specific update locations
-network.unit.update.location0 = http://yacy.net/Download.html
+network.unit.update.location0 = http://yacy.net/index.html
 network.unit.update.location1 = http://latest.yacy.de
 network.unit.update.location2 = http://www.findenstattsuchen.info/YaCy/latest/index.php
 
