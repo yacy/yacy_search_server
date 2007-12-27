@@ -26,7 +26,10 @@
 
 package de.anomic.index;
 
+import de.anomic.kelondro.kelondroNode;
 import de.anomic.kelondro.kelondroOrder;
+import de.anomic.kelondro.kelondroRow;
+import de.anomic.kelondro.kelondroRow.Entry;
 
 public class indexContainerOrder implements kelondroOrder {
 
@@ -52,11 +55,8 @@ public class indexContainerOrder implements kelondroOrder {
         return this.embeddedOrder.partition(key, forks);
     }
 
-    public int compare(Object a, Object b) {
-        if ((a instanceof indexContainer) && (b instanceof indexContainer)) {
-            return this.embeddedOrder.compare(((indexContainer) a).getWordHash(), ((indexContainer) b).getWordHash());
-        }
-        return this.embeddedOrder.compare(a, b);
+    public int compare(indexContainer a, indexContainer b) {
+        return this.embeddedOrder.compare(a.getWordHash().getBytes(), b.getWordHash().getBytes());
     }
 
     public byte[] zero() {
@@ -79,6 +79,46 @@ public class indexContainerOrder implements kelondroOrder {
         return this.embeddedOrder.cardinal(key);
     }
 
+    public int compare(Object a, Object b) {
+    	if ((a instanceof byte[]) && (b instanceof byte[])) {
+    		return this.embeddedOrder.compare((byte[]) a, (byte[]) b);
+    	}
+    	if ((a instanceof Integer) && (b instanceof Integer)) {
+    		return ((Integer) a).compareTo((Integer) b);
+    	}
+    	if ((a instanceof String) && (b instanceof String)) {
+    		return this.embeddedOrder.compare(((String) a).getBytes(), ((String) b).getBytes());
+    	}
+    	if ((a instanceof kelondroNode) && (b instanceof kelondroNode)) {
+    		return this.embeddedOrder.compare((kelondroNode) a, (kelondroNode) b);
+    	}
+    	if ((a instanceof kelondroRow.Entry) && (b instanceof kelondroRow.Entry)) {
+    		return this.embeddedOrder.compare((kelondroRow.Entry) a, (kelondroRow.Entry) b);
+    	}
+    	if ((a instanceof indexContainer) && (b instanceof indexContainer)) {
+    		return this.embeddedOrder.compare((indexContainer) a, (indexContainer) b); 
+    	}
+    	Class<? extends Object> ac = a.getClass();
+    	Class<? extends Object> bc = b.getClass();
+    	if (ac.equals(bc)) {
+    		throw new UnsupportedOperationException("compare not implemented for this object type: " + ac);
+    	} else {
+    		throw new UnsupportedOperationException("compare must be applied to same object classes; here a = " + ac + ", b = " + bc);
+    	}
+    }
+    
+    public int compare(String a, String b) {
+        return this.embeddedOrder.compare(a, b);
+    }
+
+	public int compare(kelondroNode a, kelondroNode b) {
+		return this.embeddedOrder.compare(a, b);
+	}
+
+	public int compare(Entry a, Entry b) {
+		return this.embeddedOrder.compare(a, b);
+	}
+	
     public int compare(byte[] a, byte[] b) {
         return this.embeddedOrder.compare(a, b);
     }
@@ -91,4 +131,5 @@ public class indexContainerOrder implements kelondroOrder {
         if (!(otherOrder instanceof indexContainerOrder)) return false;
         return this.embeddedOrder.equals(((indexContainerOrder) otherOrder).embeddedOrder);
     }
+
 }

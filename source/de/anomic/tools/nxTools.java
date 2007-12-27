@@ -53,30 +53,29 @@ import java.util.Vector;
 public class nxTools {
 
 
-    public static HashMap table(Vector list) {
-	Enumeration i = list.elements();
-	int pos;
-	String line;
-	HashMap props = new HashMap(list.size());
-	while (i.hasMoreElements()) {
-	    line = ((String) i.nextElement()).trim();
-	    //System.out.println("NXTOOLS_PROPS - LINE:" + line);
-	    pos = line.indexOf("=");
-	    if (pos > 0) props.put(line.substring(0, pos).trim(), line.substring(pos + 1).trim());
+    public static HashMap<String, String> table(Vector<String> list) {
+    	Enumeration<String> i = list.elements();
+    	int pos;
+    	String line;
+    	HashMap<String, String> props = new HashMap<String, String>(list.size());
+    	while (i.hasMoreElements()) {
+    		line = ((String) i.nextElement()).trim();
+    		pos = line.indexOf("=");
+    		if (pos > 0) props.put(line.substring(0, pos).trim(), line.substring(pos + 1).trim());
+    	}
+    	return props;
 	}
-	return props;
-    }
     
-    public static HashMap table(byte[] a, String encoding) {
+    public static HashMap<String, String> table(byte[] a, String encoding) {
         return table(strings(a, encoding));
     }
     
-    public static HashMap table(ArrayList list) {
-        if (list == null) return new HashMap();
-        Iterator i = list.iterator();
+    public static HashMap<String, String> table(ArrayList<String> list) {
+        if (list == null) return new HashMap<String, String>();
+        Iterator<String> i = list.iterator();
         int pos;
         String line;
-        HashMap props = new HashMap(list.size());
+        HashMap<String, String> props = new HashMap<String, String>(list.size());
         while (i.hasNext()) {
             line = ((String) i.next()).trim();
             if (line.startsWith("#")) continue; // exclude comments
@@ -87,29 +86,29 @@ public class nxTools {
         return props;
     }
 
-    public static Vector grep(Vector list, int afterContext, String pattern) {
-	Enumeration i = list.elements();
-	int ac = 0;
-	String line;
-	Vector result = new Vector();
-	while (i.hasMoreElements()) {
-	    line = (String) i.nextElement();
-	    if (line.indexOf(pattern) >= 0) {
-		result.add(line);
-		ac = afterContext + 1;
-	    } else if (ac > 0) {
-		result.add(line);
-	    }
-	    ac--;
+    public static Vector<String> grep(Vector<String> list, int afterContext, String pattern) {
+    	Enumeration<String> i = list.elements();
+    	int ac = 0;
+		String line;
+		Vector<String> result = new Vector<String>();
+		while (i.hasMoreElements()) {
+			line = (String) i.nextElement();
+			if (line.indexOf(pattern) >= 0) {
+				result.add(line);
+				ac = afterContext + 1;
+			} else if (ac > 0) {
+				result.add(line);
+			}
+			ac--;
+		}
+		return result;
 	}
-	return result;
-    }
     
-    public static ArrayList grep(ArrayList list, int afterContext, String pattern) {
-        Iterator i = list.iterator();
+    public static ArrayList<String> grep(ArrayList<String> list, int afterContext, String pattern) {
+        Iterator<String> i = list.iterator();
         int ac = 0;
         String line;
-        ArrayList result = new ArrayList();
+        ArrayList<String> result = new ArrayList<String>();
         while (i.hasNext()) {
             line = (String) i.next();
             if (line.indexOf(pattern) >= 0) {
@@ -123,12 +122,12 @@ public class nxTools {
         return result;
         }    
 
-    public static String tail1(Vector list) {
-	if ((list == null) || (list.size() == 0)) return "";
-	return (String) list.lastElement();
+    public static String tail1(Vector<String> list) {
+    	if ((list == null) || (list.size() == 0)) return "";
+    	return (String) list.lastElement();
     }
     
-    public static String tail1(ArrayList list) {
+    public static String tail1(ArrayList<String> list) {
         if ((list == null) || (list.size() == 0)) return "";
         return (String) list.get(list.size()-1);
         }
@@ -151,15 +150,15 @@ public class nxTools {
         return null;
     }
 
-    public static ArrayList strings(byte[] a) {
+    public static ArrayList<String> strings(byte[] a) {
         return strings(a, null);
     }
     
-    public static ArrayList strings(byte[] a, String encoding) {
-        if (a == null) return new ArrayList();
+    public static ArrayList<String> strings(byte[] a, String encoding) {
+        if (a == null) return new ArrayList<String>();
         int s = 0;
         int e;
-        ArrayList v = new ArrayList();
+        ArrayList<String> v = new ArrayList<String>();
         byte b;
         while (s < a.length) {
             // find eol

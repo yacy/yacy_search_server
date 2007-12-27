@@ -150,25 +150,26 @@ public class kelondroDyn {
         return new String(rawKey, 0, n + 1);
     }
 
-    public class dynKeyIterator implements kelondroCloneableIterator {
-        // the iterator iterates all keys, which are byte[] objects
-        kelondroCloneableIterator ri;
+    public class dynKeyIterator implements kelondroCloneableIterator<String> {
+        // the iterator iterates all keys
+        kelondroCloneableIterator<kelondroRow.Entry> ri;
         String nextKey;
 
-        public dynKeyIterator(kelondroCloneableIterator iter) {
+        public dynKeyIterator(kelondroCloneableIterator<kelondroRow.Entry> iter) {
             ri = iter;
             nextKey = n();
         }
-        
-        public Object clone(Object modifier) {
-            return new dynKeyIterator((kelondroCloneableIterator) ri.clone(modifier));
-        }
+
+		@SuppressWarnings("unchecked")
+		public dynKeyIterator clone(Object modifier) {
+			return new dynKeyIterator(ri.clone(modifier));
+		}
 
         public boolean hasNext() {
             return nextKey != null;
         }
 
-        public Object next() {
+        public String next() {
             String result = nextKey;
             nextKey = n();
             return origKey(result.getBytes());
@@ -202,11 +203,11 @@ public class kelondroDyn {
         }
     }
 
-    public synchronized kelondroCloneableIterator dynKeys(boolean up, boolean rotating) throws IOException {
+    public synchronized kelondroCloneableIterator<String> dynKeys(boolean up, boolean rotating) throws IOException {
         // iterates only the keys of the Nodes
         // enumerated objects are of type String
         dynKeyIterator i = new dynKeyIterator(index.rows(up, null));
-        if (rotating) return new kelondroRotateIterator(i, null); else return i;
+        if (rotating) return new kelondroRotateIterator<String>(i, null); else return i;
     }
 
     public synchronized dynKeyIterator dynKeys(boolean up, byte[] firstKey) throws IOException {
@@ -471,9 +472,9 @@ public class kelondroDyn {
             try {
                 kelondroDyn kd = new kelondroDyn(new File(args[0]), true, true, 0, 4 ,100, '_', kelondroNaturalOrder.naturalOrder, false, false, true);
                 System.out.println(kd.sizeDyn() + " elements in DB");
-                Iterator i = kd.dynKeys(true, false);
+                Iterator<String> i = kd.dynKeys(true, false);
                 while (i.hasNext())
-                    System.out.println((String) i.next());
+                    System.out.println(i.next());
                 kd.close();
             } catch (IOException e) {
                 e.printStackTrace();
@@ -500,7 +501,7 @@ public class kelondroDyn {
     public static int countElementsDyn(kelondroDyn t) {
         int count = 0;
         try {
-            Iterator iter = t.dynKeys(true, false);
+            Iterator<String> iter = t.dynKeys(true, false);
             while (iter.hasNext()) {count++; if (iter.next() == null) System.out.println("ERROR! null element found");}
             return count;
         } catch (IOException e) {

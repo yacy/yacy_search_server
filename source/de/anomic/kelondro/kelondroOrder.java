@@ -47,7 +47,9 @@ package de.anomic.kelondro;
 
 import java.util.Comparator;
 
-public interface kelondroOrder extends Comparator {
+import de.anomic.index.indexContainer;
+
+public interface kelondroOrder extends Comparator<Object> {
 
     public boolean wellformed(byte[] a); // returns true if and only if a has only characters that belong to the implemented order
     public boolean wellformed(byte[] a, int astart, int alength);
@@ -63,7 +65,11 @@ public interface kelondroOrder extends Comparator {
     public long cardinal(byte[] key); // returns a cardinal number in the range of 0 .. Long.MAX_VALUE
 
     public int compare(byte[] a, byte[] b);
-
+    public int compare(String a, String b);
+    public int compare(kelondroNode a, kelondroNode b);
+    public int compare(indexContainer a, indexContainer b);
+    public int compare(kelondroRow.Entry a, kelondroRow.Entry b);
+    
     public int compare(byte[] a, int aoffset, int alength, byte[] b, int boffset, int blength);
     
     public byte[] zero(); // returns the zero point of the Ordering; null if not defined

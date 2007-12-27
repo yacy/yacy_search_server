@@ -351,8 +351,8 @@ public final class serverFileUtils {
         return source;
     }
 
-    public static HashSet loadList(File file) {
-        HashSet set = new HashSet();
+    public static HashSet<String> loadList(File file) {
+        HashSet<String> set = new HashSet<String>();
         BufferedReader br = null;
         try {
             br = new BufferedReader(new InputStreamReader(new FileInputStream(file)));
@@ -369,7 +369,7 @@ public final class serverFileUtils {
         return set;
     }
 
-    public static Map loadHashMap(File f) {
+    public static Map<String, String> loadHashMap(File f) {
         // load props
         try {
             byte[] b = read(f);
@@ -379,35 +379,19 @@ public final class serverFileUtils {
             return null;
         }
     }
-
-    /* 
-    public static Map loadHashMap(File f) {
-        // load props
-        Properties prop = new Properties();
-        BufferedInputStream bufferedIn = null;
-        try {
-            prop.load(bufferedIn = new BufferedInputStream(new FileInputStream(f)));
-        } catch (IOException e1) {
-            System.err.println("ERROR: " + f.toString() + " not found in settings path");
-            prop = null;
-        } finally {
-            if (bufferedIn != null)try{bufferedIn.close();}catch(Exception e){}
-        }
-        return (Hashtable) prop;
-    }
-     */
-    public static void saveMap(File file, Map props, String comment) throws IOException {
+    
+    public static void saveMap(File file, Map<String, String> props, String comment) throws IOException {
         PrintWriter pw = null;
         File tf = new File(file.toString() + "." + (System.currentTimeMillis() % 1000));
         pw = new PrintWriter(new BufferedOutputStream(new FileOutputStream(tf)));
         pw.println("# " + comment);
-        Iterator i = props.entrySet().iterator();
+        Iterator<Map.Entry<String, String>> i = props.entrySet().iterator();
         String key, value;
-        Map.Entry entry;
+        Map.Entry<String, String> entry;
         while (i.hasNext()) {
-            entry  = (Map.Entry) i.next();
-            key = (String) entry.getKey();
-            value = ((String) entry.getValue()).replaceAll("\n", "\\\\n");
+            entry  = i.next();
+            key = entry.getKey();
+            value = entry.getValue().replaceAll("\n", "\\\\n");
             pw.println(key + "=" + value);
         }
         pw.println("# EOF");
@@ -416,8 +400,8 @@ public final class serverFileUtils {
         tf.renameTo(file);
     }
 
-    public static Set loadSet(File file, int chunksize, boolean tree) throws IOException {
-        Set set = (tree) ? (Set) new TreeSet() : (Set) new HashSet();
+    public static Set<String> loadSet(File file, int chunksize, boolean tree) throws IOException {
+        Set<String> set = (tree) ? (Set<String>) new TreeSet<String>() : (Set<String>) new HashSet<String>();
         byte[] b = read(file);
         for (int i = 0; (i + chunksize) <= b.length; i++) {
             set.add(new String(b, i, chunksize));
@@ -425,8 +409,8 @@ public final class serverFileUtils {
         return set;
     }
 
-    public static Set loadSet(File file, String sep, boolean tree) throws IOException {
-        Set set = (tree) ? (Set) new TreeSet() : (Set) new HashSet();
+    public static Set<String> loadSet(File file, String sep, boolean tree) throws IOException {
+        Set<String> set = (tree) ? (Set<String>) new TreeSet<String>() : (Set<String>) new HashSet<String>();
         byte[] b = read(file);
         StringTokenizer st = new StringTokenizer(new String(b, "UTF-8"), sep);
         while (st.hasMoreTokens()) {
@@ -435,7 +419,7 @@ public final class serverFileUtils {
         return set;
     }
 
-    public static void saveSet(File file, String format, Set set, String sep) throws IOException {
+    public static void saveSet(File file, String format, Set<String> set, String sep) throws IOException {
         File tf = new File(file.toString() + ".tmp" + (System.currentTimeMillis() % 1000));
         OutputStream os = null;
         if ((format == null) || (format.equals("plain"))) {
@@ -449,7 +433,7 @@ public final class serverFileUtils {
             zos.putNextEntry(new ZipEntry(name + ".txt"));
             os = zos;
         }
-        for (Iterator i = set.iterator(); i.hasNext(); ) {
+        for (Iterator<String> i = set.iterator(); i.hasNext(); ) {
             os.write((i.next().toString()).getBytes());
             if (sep != null) os.write(sep.getBytes());
         }
@@ -472,10 +456,10 @@ public final class serverFileUtils {
             zos.putNextEntry(new ZipEntry(name + ".txt"));
             os = zos;
         }
-        Iterator i = set.rows();
+        Iterator<kelondroRow.Entry> i = set.rows();
         String key;
         if (i.hasNext()) {
-            key = new String(((kelondroRow.Entry) i.next()).getColBytes(0));
+            key = new String(i.next().getColBytes(0));
             os.write(key.getBytes());
         }
         while (i.hasNext()) {

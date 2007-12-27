@@ -68,10 +68,10 @@ public class indexRWIEntryOrder extends kelondroAbstractOrder implements kelondr
             mmf1.run(); // execute other fork in this thread
             if (this.min == null) this.min = mmf1.entryMin; else indexRWIVarEntry.min(this.min, mmf1.entryMin);
             if (this.max == null) this.max = mmf1.entryMax; else indexRWIVarEntry.max(this.max, mmf1.entryMax);
-            Map.Entry entry;
-            Iterator di = mmf1.domcount().entrySet().iterator();
+            Map.Entry<String, Integer> entry;
+            Iterator<Map.Entry<String, Integer>> di = mmf1.domcount().entrySet().iterator();
             while (di.hasNext()) {
-            	entry = (Map.Entry) di.next();
+            	entry = di.next();
             	this.doms.addScore(entry.getKey(), ((Integer) entry.getValue()).intValue());
             }
             try {mmf0.join();} catch (InterruptedException e) {} // wait for fork thread to finish
@@ -79,7 +79,7 @@ public class indexRWIEntryOrder extends kelondroAbstractOrder implements kelondr
             if (this.max == null) this.max = mmf0.entryMax; else indexRWIVarEntry.max(this.max, mmf0.entryMax);
             di = mmf0.domcount().entrySet().iterator();
             while (di.hasNext()) {
-            	entry = (Map.Entry) di.next();
+            	entry = di.next();
             	this.doms.addScore(entry.getKey(), ((Integer) entry.getValue()).intValue());
             }
             //long s1= System.currentTimeMillis(), sc = Math.max(1, s1 - s0);
@@ -90,10 +90,10 @@ public class indexRWIEntryOrder extends kelondroAbstractOrder implements kelondr
             mmf.run(); // execute without multi-threading
             if (this.min == null) this.min = mmf.entryMin; else indexRWIVarEntry.min(this.min, mmf.entryMin);
             if (this.max == null) this.max = mmf.entryMax; else indexRWIVarEntry.max(this.max, mmf.entryMax);
-            Map.Entry entry;
-            Iterator di = mmf.domcount().entrySet().iterator();
+            Map.Entry<String, Integer> entry;
+            Iterator<Map.Entry<String, Integer>> di = mmf.domcount().entrySet().iterator();
             while (di.hasNext()) {
-            	entry = (Map.Entry) di.next();
+            	entry = di.next();
             	this.doms.addScore(entry.getKey(), ((Integer) entry.getValue()).intValue());
             }
             //long s1= System.currentTimeMillis(), sc = Math.max(1, s1 - s0);
@@ -151,25 +151,17 @@ public class indexRWIEntryOrder extends kelondroAbstractOrder implements kelondr
 
         return Long.MAX_VALUE - r; // returns a reversed number: the lower the number the better the ranking. This is used for simple sorting with a TreeMap
     }
-
-    public int compare(Object a, Object b) {
-        if ((a instanceof indexRWIEntry) && (b instanceof indexRWIEntry)) {
-            return compare((indexRWIEntry) a, (indexRWIEntry) b);
-        } else {
-            return super.compare(a, b);
-        }
-    }
-    
-    public int compare(indexRWIEntry a, indexRWIEntry b) {
-        return 0;
-    }
     
     public int compare(byte[] a, byte[] b) {
-        return compare(new indexRWIRowEntry(a), new indexRWIRowEntry(b));
+    	long ca = cardinal(new indexRWIRowEntry(a));
+    	long cb = cardinal(new indexRWIRowEntry(b));
+        return (ca > cb) ? 1 : (ca < cb) ? -1 : 0;
     }
 
     public int compare(byte[] a, int aoffset, int alength, byte[] b, int boffset, int blength) {
-        return compare(new indexRWIRowEntry(a, aoffset, false), new indexRWIRowEntry(b, boffset, false));
+    	long ca = cardinal(new indexRWIRowEntry(a, aoffset, false));
+    	long cb = cardinal(new indexRWIRowEntry(b, boffset, false));
+        return (ca > cb) ? 1 : (ca < cb) ? -1 : 0;
     }
 
     public String signature() {
@@ -189,14 +181,14 @@ public class indexRWIEntryOrder extends kelondroAbstractOrder implements kelondr
         private indexRWIVarEntry entryMin, entryMax;
         private indexContainer container;
         private int start, end;
-        private HashMap doms;
+        private HashMap<String, Integer> doms;
         private Integer int1;
         
         public minmaxfinder(indexContainer container, int start /*including*/, int end /*excluding*/) {
             this.container = container;
             this.start = start;
             this.end = end;
-            this.doms = new HashMap();
+            this.doms = new HashMap<String, Integer>();
             this.int1 = new Integer(1);
         }
         
@@ -224,7 +216,7 @@ public class indexRWIEntryOrder extends kelondroAbstractOrder implements kelondr
             }
         }
         
-        public HashMap domcount() {
+        public HashMap<String, Integer> domcount() {
         	return this.doms;
         }
     }

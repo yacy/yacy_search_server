@@ -54,7 +54,7 @@ public final class kelondroBufferedIOChunks extends kelondroAbstractIOChunks imp
     protected kelondroRA ra;
     private long bufferMaxSize, bufferCurrSize;
     private long commitTimeout;
-    private TreeMap buffer;
+    private TreeMap<Long, byte[]> buffer;
     private long lastCommit = 0;
     
     private static final int overhead = 40;
@@ -66,7 +66,7 @@ public final class kelondroBufferedIOChunks extends kelondroAbstractIOChunks imp
         this.bufferMaxSize = buffer;
         this.bufferCurrSize = 0;
         this.commitTimeout = commitTimeout;
-        this.buffer = new TreeMap();
+        this.buffer = new TreeMap<Long, byte[]>();
         this.lastCommit = System.currentTimeMillis();
     }
 
@@ -134,15 +134,15 @@ public final class kelondroBufferedIOChunks extends kelondroAbstractIOChunks imp
     public synchronized void commit() throws IOException {
         synchronized (buffer) {
             if (buffer.size() == 0) return;
-            Iterator i = buffer.entrySet().iterator();
-            Map.Entry entry = (Map.Entry) i.next();
+            Iterator<Map.Entry<Long, byte[]>> i = buffer.entrySet().iterator();
+            Map.Entry<Long, byte[]> entry = i.next();
             long lastPos = ((Long) entry.getKey()).longValue();
             byte[] lastChunk = (byte[]) entry.getValue();
             long nextPos;
             byte[] nextChunk, tmpChunk;
             synchronized (this.ra) {
                 while (i.hasNext()) {
-                    entry = (Map.Entry) i.next();
+                    entry = i.next();
                     nextPos = ((Long) entry.getKey()).longValue();
                     nextChunk = (byte[]) entry.getValue();
                     if (lastPos + lastChunk.length == nextPos) {

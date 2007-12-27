@@ -69,7 +69,7 @@ public class kelondroAttrSeq {
     
     // class objects
     private File file;
-    private Map entries;
+    private Map<String, Object> entries; // value may be of type String or of type Entry
     protected Structure structure;
     private String name;
     private long created;
@@ -79,19 +79,19 @@ public class kelondroAttrSeq {
     
     public kelondroAttrSeq(File file, boolean tree) throws IOException {
         this.file = file;
-	this.structure = null;
+        this.structure = null;
         this.created = -1;
         this.name = "";
-        this.entries = (tree) ? (Map) new TreeMap() : (Map) new HashMap();
+        this.entries = (tree) ? (Map<String, Object>) new TreeMap<String, Object>() : (Map<String, Object>) new HashMap<String, Object>();
         readAttrFile(file);
     }
 
     public kelondroAttrSeq(String name, String struct, boolean tree) {
         this.file = null;
-	this.structure = new Structure(struct);
+        this.structure = new Structure(struct);
         this.created = System.currentTimeMillis();
         this.name = name;
-        this.entries = (tree) ? (Map) new TreeMap() : (Map) new HashMap();
+        this.entries = (tree) ? (Map<String, Object>) new TreeMap<String, Object>() : (Map<String, Object>) new HashMap<String, Object>();
     }
         
     public void setLogger(Logger newLogger) {
@@ -188,12 +188,12 @@ public class kelondroAttrSeq {
         sb.append("# Created=" + this.created); sb.append((char) 13); sb.append((char) 10);
         sb.append("# Structure=" + this.structure.toString()); sb.append((char) 13); sb.append((char) 10);
         sb.append("# ---"); sb.append((char) 13); sb.append((char) 10);
-        Iterator i = entries.entrySet().iterator();
-        Map.Entry entry;
+        Iterator<Map.Entry<String, Object>> i = entries.entrySet().iterator();
+        Map.Entry<String, Object> entry;
         String k;
         Object v;
         while (i.hasNext()) {
-            entry = (Map.Entry) i.next();
+            entry = i.next();
             k = (String) entry.getKey();
             v = entry.getValue();
             sb.append(k); sb.append('=');
@@ -208,15 +208,15 @@ public class kelondroAttrSeq {
         }
     }
     
-    public Iterator keys() {
+    public Iterator<String> keys() {
         return entries.keySet().iterator();
     }
     
     public Entry newEntry(String pivot, boolean tree) {
-        return new Entry(pivot, new HashMap(), (tree) ? (Set) new TreeSet() : (Set) new HashSet());
+        return new Entry(pivot, new HashMap<String, Long>(), (tree) ? (Set<String>) new TreeSet<String>() : (Set<String>) new HashSet<String>());
     }
     
-    public Entry newEntry(String pivot, HashMap props, Set seq) {
+    public Entry newEntry(String pivot, HashMap<String, Long> props, Set<String> seq) {
         return new Entry(pivot, props, seq);
     }
     
@@ -280,7 +280,7 @@ public class kelondroAttrSeq {
             // parse property part definition:
             p = structure.indexOf(",'|'");
             if (p < 0) return;
-            ArrayList l = new ArrayList();
+            ArrayList<kelondroColumn> l = new ArrayList<kelondroColumn>();
             String attr = structure.substring(0, p);
             String seqs = structure.substring(p + 5);
             StringTokenizer st = new StringTokenizer(attr, ",");
@@ -303,7 +303,7 @@ public class kelondroAttrSeq {
             
             // parse sequence definition:
             if (seqs.startsWith("*")) seqs = seqs.substring(1);
-            l = new ArrayList();
+            l = new ArrayList<kelondroColumn>();
             st = new StringTokenizer(seqs, ",");
             while (st.hasMoreTokens()) {
                 a = new kelondroColumn(st.nextToken());
@@ -357,11 +357,11 @@ public class kelondroAttrSeq {
     }
     
     public class Entry {
-        String  pivot;
-        HashMap attrs;
-        Set     seq;
+        String                pivot;
+        HashMap<String, Long> attrs;
+        Set<String>           seq;
         
-        public Entry(String pivot, HashMap attrs, Set seq) {
+        public Entry(String pivot, HashMap<String, Long> attrs, Set<String> seq) {
             this.pivot = pivot;
             this.attrs = attrs;
             this.seq = seq;
@@ -369,8 +369,8 @@ public class kelondroAttrSeq {
         
         public Entry(String pivot, String attrseq, boolean tree) {
             this.pivot = pivot;
-            attrs = new HashMap();
-            seq = (tree) ? (Set) new TreeSet() : (Set) new HashSet();
+            attrs = new HashMap<String, Long>();
+            seq = (tree) ? (Set<String>) new TreeSet<String>() : (Set<String>) new HashSet<String>();
             for (int i = 0; i < structure.prop_names.length; i++) {
                 attrs.put(structure.prop_names[i], new Long(kelondroBase64Order.enhancedCoder.decodeLong(attrseq.substring(structure.prop_pos[i], structure.prop_pos[i] + structure.prop_len[i]))));
             }
@@ -389,7 +389,7 @@ public class kelondroAttrSeq {
             }
         }
         
-        public HashMap getAttrs() {
+        public HashMap<String, Long> getAttrs() {
             return attrs;
         }
         
@@ -403,20 +403,20 @@ public class kelondroAttrSeq {
             attrs.put(key, new Long(attr));
         }
         
-        public Set getSeqSet() {
+        public Set<String> getSeqSet() {
             return seq;
         }
         
         public kelondroRowCollection getSeqCollection() {
             kelondroRowCollection collection = new kelondroRowCollection(structure.seqrow, seq.size());
-            Iterator i = seq.iterator();
+            Iterator<String> i = seq.iterator();
             while (i.hasNext()) {
-                collection.addUnique(structure.seqrow.newEntry(((String) i.next()).getBytes()));
+                collection.addUnique(structure.seqrow.newEntry(i.next().getBytes()));
             }
             return collection;
         }
         
-        public void setSeq(Set seq) {
+        public void setSeq(Set<String> seq) {
             this.seq = seq;
         }
         
@@ -433,7 +433,7 @@ public class kelondroAttrSeq {
                 sb.append(kelondroBase64Order.enhancedCoder.encodeLongSmart((val == null) ? 0 : val.longValue(), structure.prop_len[i]));
             }
             sb.append('|');
-            Iterator q = seq.iterator();
+            Iterator<String> q = seq.iterator();
             //long[] seqattrs;
             while (q.hasNext()) {
                 sb.append((String) q.next());
@@ -461,13 +461,9 @@ public class kelondroAttrSeq {
         kelondroAttrSeq crp = new kelondroAttrSeq(from_file, true);
         //crp.toFile(new File(args[1]));
         kelondroAttrSeq cro = new kelondroAttrSeq(crp.name + "/Transcoded from " + crp.file.getName(), crp.structure.toString(), true);
-        Iterator i = crp.entries.keySet().iterator();
-        String key;
-        kelondroAttrSeq.Entry entry;
+        Iterator<String> i = crp.entries.keySet().iterator();
         while (i.hasNext()) {
-            key = (String) i.next();
-            entry = crp.getEntry(key);
-            cro.putEntry(entry);
+            cro.putEntry(crp.getEntry(i.next()));
         }
         cro.toFile(to_file);
     }

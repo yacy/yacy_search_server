@@ -118,13 +118,14 @@ public class kelondroSplittedTree implements kelondroIndex {
         return ktfs[partition(key)].get(key);
     }
 
-    public synchronized void putMultiple(List rows) throws IOException {
-        Iterator i = rows.iterator();
+    @SuppressWarnings("unchecked")
+	public synchronized void putMultiple(List<kelondroRow.Entry> rows) throws IOException {
+        Iterator<kelondroRow.Entry> i = rows.iterator();
         kelondroRow.Entry row;
-        ArrayList[] parts = new ArrayList[ktfs.length];
-        for (int j = 0; j < ktfs.length; j++) parts[j] = new ArrayList();
+        ArrayList<kelondroRow.Entry>[] parts = new ArrayList[ktfs.length];
+        for (int j = 0; j < ktfs.length; j++) parts[j] = new ArrayList<kelondroRow.Entry>();
         while (i.hasNext()) {
-            row = (kelondroRow.Entry) i.next();
+            row = i.next();
             parts[partition(row.getColBytes(0))].add(row);
         }
         for (int j = 0; j < ktfs.length; j++) ktfs[j].putMultiple(parts[j]);
@@ -142,7 +143,7 @@ public class kelondroSplittedTree implements kelondroIndex {
         throw new UnsupportedOperationException();
     }
     
-    public synchronized void addUniqueMultiple(List rows) throws IOException {
+    public synchronized void addUniqueMultiple(List<kelondroRow.Entry> rows) throws IOException {
         throw new UnsupportedOperationException();
     }
     
@@ -170,26 +171,27 @@ public class kelondroSplittedTree implements kelondroIndex {
         }
     }
     
-    public kelondroCloneableIterator rows(boolean up, byte[] firstKey) throws IOException {
-        return new ktfsIterator(up, firstKey);
+    public kelondroCloneableIterator<kelondroRow.Entry> rows(boolean up, byte[] firstKey) throws IOException {
+        return new rowIterator(up, firstKey);
     }
     
-    public class ktfsIterator implements kelondroCloneableIterator {
+    public class rowIterator implements kelondroCloneableIterator<kelondroRow.Entry> {
 
         int c = 0;
-        Iterator ktfsI;
+        Iterator<kelondroRow.Entry> ktfsI;
         boolean up;
         
-        public ktfsIterator(boolean up, byte[] firstKey) throws IOException {
+        public rowIterator(boolean up, byte[] firstKey) throws IOException {
             this.up = up;
             c = (up) ? 0 : (ff - 1);
             if (firstKey != null) throw new UnsupportedOperationException("ktfsIterator does not work with a start key");
             ktfsI = ktfs[c].rows(up, firstKey); // FIXME: this works only correct with firstKey == null
         }
         
-        public Object clone(Object secondKey) {
+        @SuppressWarnings("unchecked")
+		public rowIterator clone(Object secondKey) {
             try {
-                return new ktfsIterator(up, (byte[]) secondKey);
+                return new rowIterator(up, (byte[]) secondKey);
             } catch (IOException e) {
                 return null;
             }
@@ -201,7 +203,7 @@ public class kelondroSplittedTree implements kelondroIndex {
                     ((!(up)) && (c > 0)));
         }
 
-        public Object next() {
+        public kelondroRow.Entry next() {
             if (ktfsI.hasNext()) return ktfsI.next();
             if (up) {
                 if (c < (ff - 1)) {
@@ -236,6 +238,73 @@ public class kelondroSplittedTree implements kelondroIndex {
         
     }
 
+	public kelondroCloneableIterator<byte[]> keys(boolean up, byte[] firstKey) throws IOException {
+		return new keyIterator(up, firstKey);
+	}
+	
+    public class keyIterator implements kelondroCloneableIterator<byte[]> {
+
+        int c = 0;
+        Iterator<byte[]> ktfsI;
+        boolean up;
+        
+        public keyIterator(boolean up, byte[] firstKey) throws IOException {
+            this.up = up;
+            c = (up) ? 0 : (ff - 1);
+            if (firstKey != null) throw new UnsupportedOperationException("ktfsIterator does not work with a start key");
+            ktfsI = ktfs[c].keys(up, firstKey); // FIXME: this works only correct with firstKey == null
+        }
+        
+        @SuppressWarnings("unchecked")
+		public keyIterator clone(Object secondKey) {
+            try {
+                return new keyIterator(up, (byte[]) secondKey);
+            } catch (IOException e) {
+                return null;
+            }
+        }
+        
+        public boolean hasNext() {
+            return ((ktfsI.hasNext()) ||
+                    ((up) && (c < ff)) ||
+                    ((!(up)) && (c > 0)));
+        }
+
+        public byte[] next() {
+            if (ktfsI.hasNext()) return ktfsI.next();
+            if (up) {
+                if (c < (ff - 1)) {
+                    c++;
+                    try {
+                        ktfsI = ktfs[c].keys(true, null);
+                    } catch (IOException e) {
+                        return null;
+                    }
+                    return ktfsI.next();
+                } else {
+                    return null;
+                }
+            } else {
+                if (c > 0) {
+                    c--;
+                    try {
+                        ktfsI = ktfs[c].keys(false, null);
+                    } catch (IOException e) {
+                        return null;
+                    }
+                    return ktfsI.next();
+                } else {
+                    return null;
+                }
+            }
+        }
+
+        public void remove() {
+            ktfsI.remove();
+        }
+        
+    }
+    
     public kelondroOrder order() {
         return this.order;
     }

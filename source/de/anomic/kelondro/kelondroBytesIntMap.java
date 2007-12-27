@@ -196,6 +196,35 @@ public class kelondroBytesIntMap {
         return index0.size() + index1.size();
     }
     
+    public synchronized kelondroCloneableIterator keys(boolean up, byte[] firstKey) throws IOException {
+        // returns the key-iterator of the underlying kelondroIndex
+        // col[0] = key
+        // col[1] = integer as {b265}
+        if ((index0 != null) && (index1 == null)) {
+            // finish initialization phase
+            if (index0 instanceof kelondroRowSet) {
+                ((kelondroRowSet) index0).sort();
+                ((kelondroRowSet) index0).uniq();
+            }
+            index1 = new kelondroRowSet(rowdef, 0);
+            //System.out.println("finished initialization phase at size = " + index0.size() + " in rows");
+            //assert consistencyAnalysis0() : "consistency problem: " + consistencyAnalysis();
+            return index0.keys(up, firstKey);
+        }
+        assert (index1 != null);
+        if (index0 == null) {
+            //assert consistencyAnalysis0() : "consistency problem: " + consistencyAnalysis();
+            return index1.keys(up, firstKey);
+        }
+        //assert consistencyAnalysis0() : "consistency problem: " + consistencyAnalysis();
+        return new kelondroMergeIterator(
+                index0.keys(up, firstKey),
+                index1.keys(up, firstKey),
+                rowdef.objectOrder,
+                kelondroMergeIterator.simpleMerge,
+                true);
+    }
+
     public synchronized kelondroCloneableIterator rows(boolean up, byte[] firstKey) throws IOException {
         // returns the row-iterator of the underlying kelondroIndex
         // col[0] = key

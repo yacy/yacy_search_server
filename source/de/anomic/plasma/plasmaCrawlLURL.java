@@ -329,7 +329,7 @@ public final class plasmaCrawlLURL {
             this.error = false;
         }
 
-        public Object clone(Object secondHash) {
+        public kiter clone(Object secondHash) {
             try {
                 return new kiter(up, (String) secondHash);
             } catch (IOException e) {

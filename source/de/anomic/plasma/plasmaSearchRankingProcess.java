@@ -39,6 +39,7 @@ import de.anomic.htmlFilter.htmlFilterContentScraper;
 import de.anomic.index.indexContainer;
 import de.anomic.index.indexRWIEntry;
 import de.anomic.index.indexRWIEntryOrder;
+import de.anomic.index.indexRWIRowEntry;
 import de.anomic.index.indexURLEntry;
 import de.anomic.kelondro.kelondroBinSearch;
 import de.anomic.kelondro.kelondroMScoreCluster;
@@ -51,9 +52,9 @@ public final class plasmaSearchRankingProcess {
     public  static kelondroBinSearch[] ybrTables = null; // block-rank tables
     private static boolean useYBR = true;
     
-    private TreeMap sortedRWIEntries; // key = ranking (Long); value = indexRWIEntry; if sortorder < 2 then key is instance of String
-    private HashMap doubleDomCache; // key = domhash (6 bytes); value = TreeMap like sortedRWIEntries
-    private HashMap handover; // key = urlhash, value = urlstring; used for double-check of urls that had been handed over to search process
+    private TreeMap<Object, indexRWIEntry> sortedRWIEntries; // key = ranking (Long); value = indexRWIEntry; if sortorder < 2 then key is instance of String
+    private HashMap<String, TreeMap<Object, indexRWIEntry>> doubleDomCache; // key = domhash (6 bytes); value = TreeMap like sortedRWIEntries
+    private HashMap<String, String> handover; // key = urlhash, value = urlstring; used for double-check of urls that had been handed over to search process
     private plasmaSearchQuery query;
     private plasmaSearchRankingProfile ranking;
     private int sortorder;
@@ -61,30 +62,30 @@ public final class plasmaSearchRankingProcess {
     private int maxentries;
     private int globalcount;
     private indexRWIEntryOrder order;
-    private HashMap urlhashes; // map for double-check; String/Long relation, addresses ranking number (backreference for deletion)
+    private HashMap<String, Object> urlhashes; // map for double-check; String/Long relation, addresses ranking number (backreference for deletion)
     private kelondroMScoreCluster ref;  // reference score computation for the commonSense heuristic
     private int[] flagcount; // flag counter
-    private TreeSet misses; // contains url-hashes that could not been found in the LURL-DB
+    private TreeSet<String> misses; // contains url-hashes that could not been found in the LURL-DB
     private plasmaWordIndex wordIndex;
-    private Map[] localSearchContainerMaps;
+    private Map<String, indexContainer>[] localSearchContainerMaps;
     
     public plasmaSearchRankingProcess(plasmaWordIndex wordIndex, plasmaSearchQuery query, plasmaSearchRankingProfile ranking, int sortorder, int maxentries) {
         // we collect the urlhashes and construct a list with urlEntry objects
         // attention: if minEntries is too high, this method will not terminate within the maxTime
         // sortorder: 0 = hash, 1 = url, 2 = ranking
         this.localSearchContainerMaps = null;
-        this.sortedRWIEntries = new TreeMap();
-        this.doubleDomCache = new HashMap();
-        this.handover = new HashMap();
+        this.sortedRWIEntries = new TreeMap<Object, indexRWIEntry>();
+        this.doubleDomCache = new HashMap<String, TreeMap<Object, indexRWIEntry>>();
+        this.handover = new HashMap<String, String>();
         this.filteredCount = 0;
         this.order = null;
         this.query = query;
         this.ranking = ranking;
         this.maxentries = maxentries;
         this.globalcount = 0;
-        this.urlhashes = new HashMap();
+        this.urlhashes = new HashMap<String, Object>();
         this.ref = new kelondroMScoreCluster();
-        this.misses = new TreeSet();
+        this.misses = new TreeSet<String>();
         this.wordIndex = wordIndex;
         this.sortorder = sortorder;
         this.flagcount = new int[32];
@@ -116,7 +117,7 @@ public final class plasmaSearchRankingProcess {
         if (sortorder == 2) {
             insert(index, true);
         } else {            
-            final Iterator en = index.entries();
+            final Iterator<indexRWIRowEntry> en = index.entries();
             // generate a new map where the urls are sorted (not by hash but by the url text)
             
             indexRWIEntry ientry;
@@ -181,7 +182,7 @@ public final class plasmaSearchRankingProcess {
         
         // normalize entries and get ranking
         timer = System.currentTimeMillis();
-        Iterator i = container.entries();
+        Iterator<indexRWIRowEntry> i = container.entries();
         indexRWIEntry iEntry, l;
         long biggestEntry = 0;
         //long s0 = System.currentTimeMillis();

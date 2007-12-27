@@ -156,21 +156,21 @@ public class indexContainer extends kelondroRowSet {
         return new indexRWIRowEntry(entry);
     }
 
-    public int removeEntries(Set urlHashes) {
+    public int removeEntries(Set<String> urlHashes) {
         int count = 0;
-        Iterator i = urlHashes.iterator();
-        while (i.hasNext()) count += (remove((String) i.next()) == null) ? 0 : 1;
+        Iterator<String> i = urlHashes.iterator();
+        while (i.hasNext()) count += (remove(i.next()) == null) ? 0 : 1;
         return count;
     }
 
-    public Iterator entries() {
+    public Iterator<indexRWIRowEntry> entries() {
         // returns an iterator of indexRWIEntry objects
         return new entryIterator();
     }
 
-    public class entryIterator implements Iterator {
+    public class entryIterator implements Iterator<indexRWIRowEntry> {
 
-        Iterator rowEntryIterator;
+        Iterator<kelondroRow.Entry> rowEntryIterator;
         
         public entryIterator() {
             rowEntryIterator = rows();
@@ -180,7 +180,7 @@ public class indexContainer extends kelondroRowSet {
             return rowEntryIterator.hasNext();
         }
 
-        public Object next() {
+        public indexRWIRowEntry next() {
             kelondroRow.Entry rentry = (kelondroRow.Entry) rowEntryIterator.next();
             if (rentry == null) return null;
             return new indexRWIRowEntry(rentry);
@@ -340,8 +340,8 @@ public class indexContainer extends kelondroRowSet {
         indexContainer conj = new indexContainer(null, i1.rowdef, 0); // start with empty search result
         if (!((i1.rowdef.getOrdering().signature().equals(i2.rowdef.getOrdering().signature())) &&
               (i1.rowdef.primaryKeyIndex == i2.rowdef.primaryKeyIndex))) return conj; // ordering must be equal
-        Iterator e1 = i1.entries();
-        Iterator e2 = i2.entries();
+        Iterator<indexRWIRowEntry> e1 = i1.entries();
+        Iterator<indexRWIRowEntry> e2 = i2.entries();
         int c;
         if ((e1.hasNext()) && (e2.hasNext())) {
             indexRWIEntry ie1;
@@ -352,7 +352,7 @@ public class indexContainer extends kelondroRowSet {
             while (true) {
                 assert (ie1.urlHash().length() == keylength) : "ie1.urlHash() = " + ie1.urlHash();
                 assert (ie2.urlHash().length() == keylength) : "ie2.urlHash() = " + ie2.urlHash();
-                c = i1.rowdef.getOrdering().compare(ie1.urlHash(), ie2.urlHash());
+                c = i1.rowdef.getOrdering().compare(ie1.urlHash().getBytes(), ie2.urlHash().getBytes());
                 //System.out.println("** '" + ie1.getUrlHash() + "'.compareTo('" + ie2.getUrlHash() + "')="+c);
                 if (c < 0) {
                     if (e1.hasNext()) ie1 = (indexRWIEntry) e1.next(); else break;
@@ -415,8 +415,8 @@ public class indexContainer extends kelondroRowSet {
         assert (keylength == excl.rowdef.width(0));
         if (!((pivot.rowdef.getOrdering().signature().equals(excl.rowdef.getOrdering().signature())) &&
               (pivot.rowdef.primaryKeyIndex == excl.rowdef.primaryKeyIndex))) return pivot; // ordering must be equal
-        Iterator e1 = pivot.entries();
-        Iterator e2 = excl.entries();
+        Iterator<indexRWIRowEntry> e1 = pivot.entries();
+        Iterator<indexRWIRowEntry> e2 = excl.entries();
         int c;
         if ((e1.hasNext()) && (e2.hasNext())) {
             indexRWIEntry ie1;
@@ -427,7 +427,7 @@ public class indexContainer extends kelondroRowSet {
             while (true) {
                 assert (ie1.urlHash().length() == keylength) : "ie1.urlHash() = " + ie1.urlHash();
                 assert (ie2.urlHash().length() == keylength) : "ie2.urlHash() = " + ie2.urlHash();
-                c = pivot.rowdef.getOrdering().compare(ie1.urlHash(), ie2.urlHash());
+                c = pivot.rowdef.getOrdering().compare(ie1.urlHash().getBytes(), ie2.urlHash().getBytes());
                 //System.out.println("** '" + ie1.getUrlHash() + "'.compareTo('" + ie2.getUrlHash() + "')="+c);
                 if (c < 0) {
                     if (e1.hasNext()) ie1 = (indexRWIEntry) e1.next(); else break;

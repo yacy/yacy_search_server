@@ -44,6 +44,7 @@ import java.util.TimeZone;
 import java.util.TreeMap;
 
 import de.anomic.index.indexContainer;
+import de.anomic.kelondro.kelondroRow.EntryIndex;
 import de.anomic.server.serverCodings;
 import de.anomic.server.serverFileUtils;
 import de.anomic.server.serverMemory;
@@ -60,7 +61,7 @@ public class kelondroCollectionIndex {
     private String        filenameStub;
     private File          commonsPath;
     private int           loadfactor;
-    private Map           arrays; // Map of (partitionNumber"-"chunksize)/kelondroFixedWidthArray - Objects
+    private Map<String, kelondroFixedWidthArray> arrays; // Map of (partitionNumber"-"chunksize)/kelondroFixedWidthArray - Objects
     private kelondroRow   payloadrow; // definition of the payload (chunks inside the collections)
     private int           maxPartitions;  // this is the maxmimum number of array files
     
@@ -126,7 +127,7 @@ public class kelondroCollectionIndex {
             serverLog.logFine("STARTUP", "OPENING COLLECTION INDEX");
             
             // open index and array files
-            this.arrays = new HashMap(); // all entries will be dynamically created with getArray()
+            this.arrays = new HashMap<String, kelondroFixedWidthArray>(); // all entries will be dynamically created with getArray()
             index = openIndexFile(path, filenameStub, indexOrder, preloadTime, loadfactor, rowdef, 0);
             openAllArrayFiles(false, indexOrder);
         } else {
@@ -155,7 +156,7 @@ public class kelondroCollectionIndex {
             index = new kelondroFlexTable(path, filenameStub + ".index", preloadTime, indexRow(keyLength, indexOrder), initialSpace, true);
             
             // open array files
-            this.arrays = new HashMap(); // all entries will be dynamically created with getArray()
+            this.arrays = new HashMap<String, kelondroFixedWidthArray>(); // all entries will be dynamically created with getArray()
             openAllArrayFiles(true, indexOrder);
         }
     }
@@ -189,7 +190,7 @@ public class kelondroCollectionIndex {
                 // loop over all elements in array and create index entry for each row
                 kelondroRow.EntryIndex aentry;
                 kelondroRow.Entry      ientry;
-                Iterator ei = array.contentRows(-1);
+                Iterator<EntryIndex> ei = array.contentRows(-1);
                 byte[] key;
                 long start = System.currentTimeMillis();
                 long lastlog = start;
@@ -229,7 +230,7 @@ public class kelondroCollectionIndex {
 
         // save/check property file for this array
         File propfile = propertyFile(path, filenameStub, loadfactor, rowdef.objectsize);
-        Map props = new HashMap();
+        Map<String, String> props = new HashMap<String, String>();
         if (propfile.exists()) {
             props = serverFileUtils.loadHashMap(propfile);
             String stored_rowdef = (String) props.get("rowdef");
@@ -369,25 +370,24 @@ public class kelondroCollectionIndex {
         // after calling this method there must be a index.put(indexrow);
     }
     
-    private ArrayList array_add_multiple(TreeMap array_add_map, int serialNumber, int chunkSize) throws IOException {
+    private ArrayList<kelondroRow.Entry> array_add_multiple(TreeMap<Integer, ArrayList<Object[]>> array_add_map, int serialNumber, int chunkSize) throws IOException {
         // returns a List of kelondroRow.Entry entries for indexrow storage
-        Map.Entry entry;
-        Iterator i = array_add_map.entrySet().iterator();
-        Iterator j;
-        ArrayList actionList;
+        Map.Entry<Integer, ArrayList<Object[]>> entry;
+        Iterator<Map.Entry<Integer, ArrayList<Object[]>>> i = array_add_map.entrySet().iterator();
+        Iterator<Object[]> j;
+        ArrayList<Object[]> actionList;
         int partitionNumber;
         kelondroFixedWidthArray array;
         Object[] objs;
         byte[] key;
         kelondroRowCollection collection;
         kelondroRow.Entry indexrow;
-        ArrayList indexrows = new ArrayList();
+        ArrayList<kelondroRow.Entry> indexrows = new ArrayList<kelondroRow.Entry>();
         while (i.hasNext()) {
-            entry = (Map.Entry) i.next();
-            actionList = (ArrayList) entry.getValue();
-            partitionNumber = ((Integer) entry.getKey()).intValue();
+            entry = i.next();
+            actionList = entry.getValue();
+            partitionNumber = entry.getKey();
             array = getArray(partitionNumber, serialNumber, index.row().objectOrder, chunkSize);
-        
             j = actionList.iterator();
             while (j.hasNext()) {
                 objs = (Object[]) j.next();
@@ -441,28 +441,29 @@ public class kelondroCollectionIndex {
         // after calling this method there must be a index.put(indexrow);
     }
     
-    private ArrayList array_replace_multiple(TreeMap array_replace_map, int serialNumber, int chunkSize) throws IOException {
-        Map.Entry entry, e;
-        Iterator i = array_replace_map.entrySet().iterator();
-        Iterator j;
-        TreeMap actionMap;
+    private ArrayList<kelondroRow.Entry> array_replace_multiple(TreeMap<Integer, TreeMap<Integer, Object[]>> array_replace_map, int serialNumber, int chunkSize) throws IOException {
+        Map.Entry<Integer, TreeMap<Integer, Object[]>> entry;
+        Map.Entry<Integer, Object[]> e;
+        Iterator<Map.Entry<Integer, TreeMap<Integer, Object[]>>> i = array_replace_map.entrySet().iterator();
+        Iterator<Map.Entry<Integer, Object[]>> j;
+        TreeMap<Integer, Object[]> actionMap;
         int partitionNumber;
         kelondroFixedWidthArray array;
-        ArrayList indexrows = new ArrayList();
+        ArrayList<kelondroRow.Entry> indexrows = new ArrayList<kelondroRow.Entry>();
         Object[] objs;
         int rowNumber;
         byte[] key;
         kelondroRowCollection collection;
         kelondroRow.Entry indexrow;
         while (i.hasNext()) {
-            entry = (Map.Entry) i.next();
-            actionMap = (TreeMap) entry.getValue();
+            entry = i.next();
+            actionMap = entry.getValue();
             partitionNumber = ((Integer) entry.getKey()).intValue();
             array = getArray(partitionNumber, serialNumber, index.row().objectOrder, chunkSize);
         
             j = actionMap.entrySet().iterator();
             while (j.hasNext()) {
-                e = (Map.Entry) j.next();
+                e = j.next();
                 rowNumber = ((Integer) e.getKey()).intValue();
                 objs = (Object[]) e.getValue();
                 key = (byte[]) objs[0];
@@ -536,19 +537,19 @@ public class kelondroCollectionIndex {
         index.put(indexrow); // write modified indexrow
     }
     
-    public synchronized void mergeMultiple(List /* of indexContainer */ containerList) throws IOException, kelondroOutOfLimitsException {
+    public synchronized void mergeMultiple(List<indexContainer> containerList) throws IOException, kelondroOutOfLimitsException {
         // merge a bulk of index containers
         // this method should be used to optimize the R/W head path length
         
         // separate the list in two halves:
         // - containers that do not exist yet in the collection
         // - containers that do exist in the collection and must be merged
-        Iterator i = containerList.iterator();
+        Iterator<indexContainer> i = containerList.iterator();
         indexContainer container;
         byte[] key;
-        ArrayList newContainer = new ArrayList();
-        TreeMap existingContainer = new TreeMap(); // a mapping from Integer (partition) to a TreeMap (mapping from index to object triple)
-        TreeMap containerMap; // temporary map; mapping from index position to object triple with {key, container, indexrow}
+        ArrayList<Object[]> newContainer = new ArrayList<Object[]>();
+        TreeMap<Integer, TreeMap<Integer, Object[]>> existingContainer = new TreeMap<Integer, TreeMap<Integer, Object[]>>(); // a mapping from Integer (partition) to a TreeMap (mapping from index to object triple)
+        TreeMap<Integer, Object[]> containerMap; // temporary map; mapping from index position to object triple with {key, container, indexrow}
         kelondroRow.Entry indexrow;
         int oldrownumber1;       // index of the entry in array
         int oldPartitionNumber1; // points to array file
@@ -565,8 +566,8 @@ public class kelondroCollectionIndex {
             } else {
                 oldrownumber1       = (int) indexrow.getColLong(idx_col_indexpos);
                 oldPartitionNumber1 = (int) indexrow.getColByte(idx_col_clusteridx);
-                containerMap = (TreeMap) existingContainer.get(new Integer(oldPartitionNumber1));
-                if (containerMap == null) containerMap = new TreeMap();
+                containerMap = existingContainer.get(new Integer(oldPartitionNumber1));
+                if (containerMap == null) containerMap = new TreeMap<Integer, Object[]>();
                 containerMap.put(new Integer(oldrownumber1), new Object[]{key, container, indexrow});
                 existingContainer.put(new Integer(oldPartitionNumber1), containerMap);
             }
@@ -576,22 +577,22 @@ public class kelondroCollectionIndex {
         // this is done in such a way, that there is a optimized path for the R/W head
         
         // merge existing containers
-        Map.Entry tripleEntry;
+        Map.Entry<Integer, Object[]> tripleEntry;
         Object[] record;
-        ArrayList indexrows_existing = new ArrayList();
+        ArrayList<kelondroRow.Entry> indexrows_existing = new ArrayList<kelondroRow.Entry>();
         kelondroRowCollection collection;
-        TreeMap array_replace_map = new TreeMap();
-        TreeMap array_add_map = new TreeMap();
-        ArrayList actionList;
-        TreeMap actionMap;
+        TreeMap<Integer, TreeMap<Integer, Object[]>> array_replace_map = new TreeMap<Integer, TreeMap<Integer, Object[]>>();
+        TreeMap<Integer, ArrayList<Object[]>> array_add_map = new TreeMap<Integer, ArrayList<Object[]>>();
+        ArrayList<Object[]> actionList;
+        TreeMap<Integer, Object[]> actionMap;
         //boolean madegc = false;
         //System.out.println("DEBUG existingContainer: " + existingContainer.toString());
         while (existingContainer.size() > 0) {
             oldPartitionNumber1 = ((Integer) existingContainer.lastKey()).intValue();
-            containerMap = (TreeMap) existingContainer.remove(new Integer(oldPartitionNumber1));
-            Iterator j = containerMap.entrySet().iterator();
+            containerMap = existingContainer.remove(new Integer(oldPartitionNumber1));
+            Iterator<Map.Entry<Integer, Object[]>> j = containerMap.entrySet().iterator();
             while (j.hasNext()) {
-                tripleEntry = (Map.Entry) j.next();
+                tripleEntry = j.next();
                 oldrownumber1 = ((Integer) tripleEntry.getKey()).intValue();
                 record = (Object[]) tripleEntry.getValue(); // {byte[], indexContainer, kelondroRow.Entry}
             
@@ -628,8 +629,8 @@ public class kelondroCollectionIndex {
 
                 // see if we need new space or if we can overwrite the old space
                 if (oldPartitionNumber == newPartitionNumber) {
-                    actionMap = (TreeMap) array_replace_map.get(new Integer(oldPartitionNumber));
-                    if (actionMap == null) actionMap = new TreeMap();
+                    actionMap = array_replace_map.get(new Integer(oldPartitionNumber));
+                    if (actionMap == null) actionMap = new TreeMap<Integer, Object[]>();
                     actionMap.put(new Integer(oldrownumber), new Object[]{key, collection, indexrow});
                     array_replace_map.put(new Integer(oldPartitionNumber), actionMap);
                     /*
@@ -644,8 +645,8 @@ public class kelondroCollectionIndex {
                             oldPartitionNumber, oldSerialNumber, this.payloadrow.objectsize,
                             oldrownumber);
                 
-                    actionList = (ArrayList) array_add_map.get(new Integer(newPartitionNumber));
-                    if (actionList == null) actionList = new ArrayList();
+                    actionList = array_add_map.get(new Integer(newPartitionNumber));
+                    if (actionList == null) actionList = new ArrayList<Object[]>();
                     actionList.add(new Object[]{key, collection, indexrow});
                     array_add_map.put(new Integer(newPartitionNumber), actionList);
                     /*
@@ -660,9 +661,9 @@ public class kelondroCollectionIndex {
                 if (serverMemory.available() < minMem()) {
                     // emergency flush
                     indexrows_existing.addAll(array_replace_multiple(array_replace_map, 0, this.payloadrow.objectsize));
-                    array_replace_map = new TreeMap(); // delete references
+                    array_replace_map = new TreeMap<Integer, TreeMap<Integer, Object[]>>(); // delete references
                     indexrows_existing.addAll(array_add_multiple(array_add_map, 0, this.payloadrow.objectsize));
-                    array_add_map = new TreeMap(); // delete references
+                    array_add_map = new TreeMap<Integer, ArrayList<Object[]>>(); // delete references
                     //if (!madegc) {
                     //    prevent that this flush is made again even when there is enough memory
                     serverMemory.gc(10000, "kelendroCollectionIndex.mergeMultiple(...)"); // thq
@@ -675,15 +676,15 @@ public class kelondroCollectionIndex {
         
         // finallly flush the collected collections
         indexrows_existing.addAll(array_replace_multiple(array_replace_map, 0, this.payloadrow.objectsize));
-        array_replace_map = new TreeMap(); // delete references
+        array_replace_map = new TreeMap<Integer, TreeMap<Integer, Object[]>>(); // delete references
         indexrows_existing.addAll(array_add_multiple(array_add_map, 0, this.payloadrow.objectsize));
-        array_add_map = new TreeMap(); // delete references
+        array_add_map = new TreeMap<Integer, ArrayList<Object[]>>(); // delete references
         
         // write new containers
-        i = newContainer.iterator();
-        ArrayList indexrows_new = new ArrayList();
-        while (i.hasNext()) {
-            record = (Object[]) i.next(); // {byte[], indexContainer}
+        Iterator<Object[]> k = newContainer.iterator();
+        ArrayList<kelondroRow.Entry> indexrows_new = new ArrayList<kelondroRow.Entry>();
+        while (k.hasNext()) {
+            record = k.next(); // {byte[], indexContainer}
             key = (byte[]) record[0];
             collection = (indexContainer) record[1];
             indexrow = array_new(key, collection); // modifies indexrow
@@ -771,12 +772,12 @@ public class kelondroCollectionIndex {
         long t1 = 0, t2 = 0;
         
         // delete some entries, which are bad rated
-        Iterator i = collection.rows();
+        Iterator<kelondroRow.Entry> i = collection.rows();
         kelondroRow.Entry entry;
         byte[] ref;
         t1 = System.currentTimeMillis();
         while (i.hasNext()) {
-            entry = (kelondroRow.Entry) i.next();
+            entry = i.next();
             ref = entry.getColBytes(0);
             if ((ref.length != 12) || (!yacyURL.probablyRootURL(new String(ref)))) {
                 t2 = System.currentTimeMillis();
@@ -833,7 +834,7 @@ public class kelondroCollectionIndex {
         
     }
     
-    public synchronized int remove(byte[] key, Set removekeys) throws IOException, kelondroOutOfLimitsException {
+    public synchronized int remove(byte[] key, Set<byte[]> removekeys) throws IOException, kelondroOutOfLimitsException {
         
         if ((removekeys == null) || (removekeys.size() == 0)) return 0;
         
@@ -856,12 +857,9 @@ public class kelondroCollectionIndex {
         kelondroRowSet oldcollection = getwithparams(indexrow, oldchunksize, oldchunkcount, oldPartitionNumber, oldrownumber, serialNumber, false);
 
         // remove the keys from the set
-        Iterator i = removekeys.iterator();
-        Object k;
+        Iterator<byte[]> i = removekeys.iterator();
         while (i.hasNext()) {
-            k = i.next();
-            if ((k instanceof byte[]) && (oldcollection.remove((byte[]) k, false) != null)) removed++;
-            if ((k instanceof String) && (oldcollection.remove(((String) k).getBytes(), false) != null)) removed++;
+            if (oldcollection.remove(i.next(), false) != null) removed++;
         }
         oldcollection.sort();
         oldcollection.trim(false);
@@ -983,7 +981,7 @@ public class kelondroCollectionIndex {
         return collection;
     }
     
-    public synchronized Iterator keycollections(byte[] startKey, byte[] secondKey, boolean rot) {
+    public synchronized Iterator<Object[]> keycollections(byte[] startKey, byte[] secondKey, boolean rot) {
         // returns an iteration of {byte[], kelondroRowSet} Objects
         try {
             return new keycollectionIterator(startKey, secondKey, rot);
@@ -993,21 +991,21 @@ public class kelondroCollectionIndex {
         }
     }
     
-    public class keycollectionIterator implements Iterator {
+    public class keycollectionIterator implements Iterator<Object[]> {
         
-        Iterator indexRowIterator;
+        Iterator<kelondroRow.Entry> indexRowIterator;
         
         public keycollectionIterator(byte[] startKey, byte[] secondKey, boolean rot) throws IOException {
             // iterator of {byte[], kelondroRowSet} Objects
-            kelondroCloneableIterator i = index.rows(true, startKey);
-            indexRowIterator = (rot) ? new kelondroRotateIterator(i, secondKey) : i;
+            kelondroCloneableIterator<kelondroRow.Entry> i = index.rows(true, startKey);
+            indexRowIterator = (rot) ? new kelondroRotateIterator<kelondroRow.Entry>(i, secondKey) : i;
         }
         
         public boolean hasNext() {
             return indexRowIterator.hasNext();
         }
 
-        public Object next() {
+        public Object[] next() {
             kelondroRow.Entry indexrow = (kelondroRow.Entry) indexRowIterator.next();
             assert (indexrow != null);
             if (indexrow == null) return null;
@@ -1027,10 +1025,8 @@ public class kelondroCollectionIndex {
     
     public synchronized void close() {
         this.index.close();
-        Iterator i = arrays.values().iterator();
-        while (i.hasNext()) {
-            ((kelondroFixedWidthArray) i.next()).close();
-        }
+        Iterator<kelondroFixedWidthArray> i = arrays.values().iterator();
+        while (i.hasNext()) i.next().close();
     }
     
     public static void main(String[] args) {

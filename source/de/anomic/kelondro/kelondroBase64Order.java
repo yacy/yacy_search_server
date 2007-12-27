@@ -51,7 +51,7 @@ import java.util.Comparator;
 
 import de.anomic.server.logging.serverLog;
 
-public class kelondroBase64Order extends kelondroAbstractOrder implements kelondroOrder, kelondroCoding, Comparator {
+public class kelondroBase64Order extends kelondroAbstractOrder implements kelondroOrder, kelondroCoding, Comparator<Object> {
 
     protected static final char[] alpha_standard = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/".toCharArray();
     protected static final char[] alpha_enhanced = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789-_".toCharArray();

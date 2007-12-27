@@ -344,6 +344,10 @@ public class kelondroFlexTable extends kelondroFlexWidthArray implements kelondr
 		return r;
     }
     
+    public synchronized kelondroCloneableIterator keys(boolean up, byte[] firstKey) throws IOException {
+    	return index.keys(up, firstKey);
+    }
+    
     public synchronized kelondroCloneableIterator rows(boolean up, byte[] firstKey) throws IOException {
         if (index == null) return new rowIterator(index, up, firstKey);
         assert this.size() == index.size() : "content.size() = " + this.size() + ", index.size() = " + index.size();
@@ -362,7 +366,7 @@ public class kelondroFlexTable extends kelondroFlexWidthArray implements kelondr
             indexIterator = index.rows(up, firstKey);
         }
         
-        public Object clone(Object modifier) {
+        public rowIterator clone(Object modifier) {
             try {
                 return new rowIterator(index, up, (byte[]) modifier);
             } catch (IOException e) {

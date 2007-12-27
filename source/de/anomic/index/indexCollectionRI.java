@@ -99,7 +99,7 @@ public class indexCollectionRI implements indexRI {
             this.wci = collectionIndex.keycollections(startWordHash.getBytes(), kelondroBase64Order.zero(startWordHash.length()), rot);
         }
         
-        public Object clone(Object secondWordHash) {
+        public wordContainersIterator clone(Object secondWordHash) {
             return new wordContainersIterator((String) secondWordHash, rot);
         }
         

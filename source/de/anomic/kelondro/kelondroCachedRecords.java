@@ -41,7 +41,7 @@ public class kelondroCachedRecords extends kelondroAbstractRecords implements ke
     private   static final int element_in_cache = 4; // for kelondroCollectionObjectMap: 4; for HashMap: 52
     
     // static supervision objects: recognize and coordinate all activites
-    private static TreeMap recordTracker = new TreeMap(); // a String/filename - kelondroTray mapping
+    private static TreeMap<String, kelondroCachedRecords> recordTracker = new TreeMap<String, kelondroCachedRecords>();
     private static long memStopGrow    = 10000000; // a limit for the node cache to stop growing if less than this memory amount is available
     private static long memStartShrink =  6000000; // a limit for the node cache to start with shrinking if less than this memory amount is available
     
@@ -93,7 +93,7 @@ public class kelondroCachedRecords extends kelondroAbstractRecords implements ke
             long stop = System.currentTimeMillis() + preloadTime;
             int count = 0;
             try {
-                Iterator i = contentNodes(preloadTime);
+                Iterator<kelondroNode> i = contentNodes(preloadTime);
                 CacheNode n;
                 while ((System.currentTimeMillis() < stop) && (cacheGrowStatus() == 2) && (i.hasNext())) {
                     n = (CacheNode) i.next();
@@ -143,12 +143,12 @@ public class kelondroCachedRecords extends kelondroAbstractRecords implements ke
         return memStartShrink ;
     }
     
-    public static final Iterator filenames() {
+    public static final Iterator<String> filenames() {
         // iterates string objects; all file names from record tracker
         return recordTracker.keySet().iterator();
     }
 
-    public static final Map memoryStats(String filename) {
+    public static final Map<String, String> memoryStats(String filename) {
         // returns a map for each file in the tracker;
         // the map represents properties for each record oobjects,
         // i.e. for cache memory allocation
@@ -156,10 +156,10 @@ public class kelondroCachedRecords extends kelondroAbstractRecords implements ke
         return theRecord.memoryStats();
     }
     
-    private final Map memoryStats() {
+    private final Map<String, String> memoryStats() {
         // returns statistical data about this object
         if (cacheHeaders == null) return null;
-        HashMap map = new HashMap();
+        HashMap<String, String> map = new HashMap<String, String>();
         map.put("nodeChunkSize", Integer.toString(this.headchunksize + element_in_cache));
         map.put("nodeCacheCount", Integer.toString(cacheHeaders.size()));
         map.put("nodeCacheMem", Integer.toString(cacheHeaders.size() * (this.headchunksize + element_in_cache)));
@@ -202,10 +202,10 @@ public class kelondroCachedRecords extends kelondroAbstractRecords implements ke
         } else {
             System.out.println("### cache report: " + cacheHeaders.size() + " entries");
             
-                Iterator i = cacheHeaders.rows();
+                Iterator<kelondroRow.Entry> i = cacheHeaders.rows();
                 kelondroRow.Entry entry;
                 while (i.hasNext()) {
-                    entry = (kelondroRow.Entry) i.next();
+                    entry = i.next();
                     
                     // print from cache
                     System.out.print("#C ");
@@ -260,7 +260,7 @@ public class kelondroCachedRecords extends kelondroAbstractRecords implements ke
         printCache();
         System.out.println("--");
         System.out.println("NODES");
-        Iterator i = new contentNodeIterator(-1);
+        Iterator<kelondroNode> i = new contentNodeIterator(-1);
         kelondroNode n;
         while (i.hasNext()) {
             n = (kelondroNode) i.next();

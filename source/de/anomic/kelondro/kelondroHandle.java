@@ -26,7 +26,7 @@
 
 package de.anomic.kelondro;
 
-public class kelondroHandle implements Comparable {
+public class kelondroHandle implements Comparable<kelondroHandle> {
     
     public final static int NUL = Integer.MIN_VALUE; // the meta value for the kelondroTray' NUL abstraction
 
@@ -62,7 +62,7 @@ public class kelondroHandle implements Comparable {
         return (this.index == ((kelondroHandle) h).index);
     }
 
-    public int compare(Object h0, Object h1) {
+    public int compare(kelondroHandle h0, kelondroHandle h1) {
         assert (((kelondroHandle) h0).index != NUL);
         assert (((kelondroHandle) h1).index != NUL);
         if (((kelondroHandle) h0).index < ((kelondroHandle) h1).index) return -1;
@@ -70,7 +70,7 @@ public class kelondroHandle implements Comparable {
         return 0;
     }
 
-    public int compareTo(Object h) {
+    public int compareTo(kelondroHandle h) {
         // this is needed for a TreeMap
         assert (index != NUL) : "this.index is NUL in compareTo";
         assert (((kelondroHandle) h).index != NUL) : "handle.index is NUL in compareTo";

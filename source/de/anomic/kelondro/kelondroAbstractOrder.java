@@ -45,6 +45,8 @@
 
 package de.anomic.kelondro;
 
+import de.anomic.index.indexContainer;
+
 public abstract class kelondroAbstractOrder implements kelondroOrder {
 
     protected byte[] zero = null;
@@ -62,20 +64,50 @@ public abstract class kelondroAbstractOrder implements kelondroOrder {
     }
     
     public int compare(Object a, Object b) {
-        if ((a instanceof byte[]) && (b instanceof byte[])) {
-            return compare((byte[]) a, (byte[]) b);
-        } else if ((a instanceof kelondroNode) && (b instanceof kelondroNode)) {
-            return compare(((kelondroNode) a).getKey(), ((kelondroNode) b).getKey());
-        } else if ((a instanceof String) && (b instanceof String)) {
-            return compare(((String) a).getBytes(), ((String) b).getBytes());
-        } else if ((a instanceof kelondroRow.Entry) && (b instanceof kelondroRow.Entry)) {
-            return compare(((kelondroRow.Entry) a).getColBytes(0), ((kelondroRow.Entry) b).getColBytes(0));
-        } /* else if ((a instanceof Integer) && (b instanceof Integer)) {
-            return ((Integer) a).compareTo((Integer) b);
-        } */ else
-            throw new IllegalArgumentException("Object type or Object type combination not supported: a=" + a + "[" + ((a == null) ? "" : a.getClass().getName()) + "], b=" + b + "[" + ((b == null) ? "" : b.getClass().getName()) + "]");
+    	if ((a instanceof byte[]) && (b instanceof byte[])) {
+    		return compare((byte[]) a, (byte[]) b);
+    	}
+    	if ((a instanceof Integer) && (b instanceof Integer)) {
+    		return compare((Integer) a, (Integer) b);
+    	}
+    	if ((a instanceof String) && (b instanceof String)) {
+    		return compare(((String) a).getBytes(), ((String) b).getBytes());
+    	}
+    	if ((a instanceof kelondroNode) && (b instanceof kelondroNode)) {
+    		return compare((kelondroNode) a, (kelondroNode) b);
+    	}
+    	if ((a instanceof kelondroRow.Entry) && (b instanceof kelondroRow.Entry)) {
+    		return compare((kelondroRow.Entry) a, (kelondroRow.Entry) b);
+    	}
+    	Class<? extends Object> ac = a.getClass();
+    	Class<? extends Object> bc = b.getClass();
+    	if (ac.equals(bc)) {
+    		throw new UnsupportedOperationException("compare not implemented for this object type: " + ac);
+    	} else {
+    		throw new UnsupportedOperationException("compare must be applied to same object classes; here a = " + ac + ", b = " + bc);
+    	}
     }
-
+    
+    public int compare(kelondroNode a, kelondroNode b) {
+        return compare(a.getKey(), b.getKey());
+    }
+    
+    public int compare(String a, String b) {
+        return compare(a.getBytes(), b.getBytes());
+    }
+    
+    public int compare(kelondroRow.Entry a, kelondroRow.Entry b) {
+        return a.compareTo(b);
+    }
+    
+    public int compare(indexContainer a, indexContainer b) {
+    	return compare(a.getWordHash(), b.getWordHash());
+    }
+    
+    public int compare(Integer a, Integer b) {
+        return a.compareTo(b);
+    }
+    
     public byte[] zero() {
         return zero;
     }

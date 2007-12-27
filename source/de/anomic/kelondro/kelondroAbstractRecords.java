@@ -39,6 +39,7 @@ import java.util.TreeSet;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
+import de.anomic.kelondro.kelondroRow.EntryIndex;
 import de.anomic.server.logging.serverLog;
 
 public abstract class kelondroAbstractRecords implements kelondroRecords {
@@ -704,11 +705,11 @@ public abstract class kelondroAbstractRecords implements kelondroRecords {
         return USAGE.FREEC;
     }
     
-    protected final Set deletedHandles(long maxTime) throws kelondroException, IOException {
+    protected final Set<kelondroHandle> deletedHandles(long maxTime) throws kelondroException, IOException {
         // initialize set with deleted nodes; the set contains Handle-Objects
         // this may last only the given maxInitTime
         // if the initTime is exceeded, the method throws an kelondroException
-        TreeSet markedDeleted = new TreeSet();
+        TreeSet<kelondroHandle> markedDeleted = new TreeSet<kelondroHandle>();
         long timeLimit = (maxTime < 0) ? Long.MAX_VALUE : System.currentTimeMillis() + maxTime;
         long seekp;
         synchronized (USAGE) {
@@ -851,8 +852,8 @@ public abstract class kelondroAbstractRecords implements kelondroRecords {
         System.out.println("  Recordsize : " + this.recordsize + " bytes");
         System.out.println("--");
         System.out.println("DELETED HANDLES");
-        Set dh =  deletedHandles(-1);
-        Iterator dhi = dh.iterator();
+        Set<kelondroHandle> dh =  deletedHandles(-1);
+        Iterator<kelondroHandle> dhi = dh.iterator();
         kelondroHandle h;
         while (dhi.hasNext()) {
             h = (kelondroHandle) dhi.next();
@@ -866,15 +867,15 @@ public abstract class kelondroAbstractRecords implements kelondroRecords {
     }
     
 
-    public final Iterator contentRows(long maxInitTime) throws kelondroException {
+    public final Iterator<EntryIndex> contentRows(long maxInitTime) throws kelondroException {
         return new contentRowIterator(maxInitTime);
     }
     
-    public final class contentRowIterator implements Iterator {
+    public final class contentRowIterator implements Iterator<EntryIndex> {
         // iterator that iterates all kelondroRow.Entry-objects in the file
-        // all records that are marked as deleted are ommitted
+        // all records that are marked as deleted are omitted
         
-        private Iterator nodeIterator;
+        private Iterator<kelondroNode> nodeIterator;
         
         public contentRowIterator(long maxInitTime) {
             nodeIterator = contentNodes(maxInitTime);
@@ -884,7 +885,7 @@ public abstract class kelondroAbstractRecords implements kelondroRecords {
             return nodeIterator.hasNext();
         }
 
-        public Object next() {
+        public EntryIndex next() {
             try {
                 kelondroNode n = (kelondroNode) nodeIterator.next();
                 return row().newEntryIndex(n.getValueRow(), n.handle().index);
@@ -899,21 +900,21 @@ public abstract class kelondroAbstractRecords implements kelondroRecords {
         
     }
     
-    protected final Iterator contentNodes(long maxInitTime) throws kelondroException {
+    protected final Iterator<kelondroNode> contentNodes(long maxInitTime) throws kelondroException {
         // returns an iterator of Node-objects that are not marked as 'deleted'
         try {
             return new contentNodeIterator(maxInitTime);
         } catch (IOException e) {
-            return new HashSet().iterator();
+            return new HashSet<kelondroNode>().iterator();
         }
     }
     
-    protected final class contentNodeIterator implements Iterator {
+    protected final class contentNodeIterator implements Iterator<kelondroNode> {
         // iterator that iterates all Node-objects in the file
         // all records that are marked as deleted are ommitted
         // this is probably also the fastest way to iterate all objects
         
-        private Set markedDeleted;
+        private Set<kelondroHandle> markedDeleted;
         private kelondroHandle pos;
         private byte[] bulk;
         private int bulksize;
@@ -937,7 +938,7 @@ public abstract class kelondroAbstractRecords implements kelondroRecords {
             next = (hasNext0()) ? next0() : null;
         }
 
-        public Object next() {
+        public kelondroNode next() {
             kelondroNode n = next;
             next = next0();
             return n;

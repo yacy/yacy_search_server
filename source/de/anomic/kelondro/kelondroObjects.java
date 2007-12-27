@@ -35,14 +35,14 @@ public class kelondroObjects {
 
     private kelondroDyn dyn;
     private kelondroMScoreCluster cacheScore;
-    private HashMap cache;
+    private HashMap<String, kelondroObjectsEntry> cache;
     private long startup;
     private int cachesize;
 
 
     public kelondroObjects(kelondroDyn dyn, int cachesize) {
         this.dyn = dyn;
-        this.cache = new HashMap();
+        this.cache = new HashMap<String, kelondroObjectsEntry>();
         this.cacheScore = new kelondroMScoreCluster();
         this.startup = System.currentTimeMillis();
         this.cachesize = cachesize;
@@ -50,7 +50,7 @@ public class kelondroObjects {
     
     public void reset() throws IOException {
     	this.dyn.reset();
-        this.cache = new HashMap();
+        this.cache = new HashMap<String, kelondroObjectsEntry>();
         this.cacheScore = new kelondroMScoreCluster();
     }
 
@@ -132,15 +132,15 @@ public class kelondroObjects {
         }
     }
 
-    public synchronized kelondroCloneableIterator keys(final boolean up, final boolean rotating) throws IOException {
+    public synchronized kelondroCloneableIterator<String> keys(final boolean up, final boolean rotating) throws IOException {
         // simple enumeration of key names without special ordering
         return dyn.dynKeys(up, rotating);
     }
 
-    public synchronized kelondroCloneableIterator keys(final boolean up, final boolean rotating, final byte[] firstKey, final byte[] secondKey) throws IOException {
+    public synchronized kelondroCloneableIterator<String> keys(final boolean up, final boolean rotating, final byte[] firstKey, final byte[] secondKey) throws IOException {
         // simple enumeration of key names without special ordering
-        kelondroCloneableIterator i = dyn.dynKeys(up, firstKey);
-        if (rotating) return new kelondroRotateIterator(i, secondKey); else return i;
+        kelondroCloneableIterator<String> i = dyn.dynKeys(up, firstKey);
+        if (rotating) return new kelondroRotateIterator<String>(i, secondKey); else return i;
     }
 
 
@@ -167,14 +167,14 @@ public class kelondroObjects {
         dyn.close();
     }
 
-    public class objectIterator implements Iterator {
+    public class objectIterator implements Iterator<kelondroObjectsEntry> {
         // enumerates Map-Type elements
         // the key is also included in every map that is returned; it's key is 'key'
 
-        Iterator keyIterator;
+        Iterator<String> keyIterator;
         boolean finish;
 
-        public objectIterator(Iterator keyIterator) {
+        public objectIterator(Iterator<String> keyIterator) {
             this.keyIterator = keyIterator;
             this.finish = false;
         }
@@ -183,7 +183,7 @@ public class kelondroObjects {
             return (!(finish)) && (keyIterator.hasNext());
         }
 
-        public Object next() {
+        public kelondroObjectsEntry next() {
             final String nextKey = (String) keyIterator.next();
             if (nextKey == null) {
                 finish = true;

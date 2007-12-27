@@ -29,6 +29,7 @@ package de.anomic.kelondro;
 
 import java.io.UnsupportedEncodingException;
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.StringTokenizer;
@@ -38,12 +39,12 @@ import de.anomic.server.logging.serverLog;
 
 public final class kelondroRow {
    
-    protected kelondroColumn[] row;
-    protected int[]            colstart;
-    protected kelondroOrder    objectOrder;
-    public    int              objectsize;
-    public    int              primaryKeyIndex, primaryKeyLength;
-    protected Map              nickref = null; // a mapping from nicknames to Object[2]{kelondroColumn, Integer(colstart)}
+    protected kelondroColumn[]      row;
+    protected int[]                 colstart;
+    protected kelondroOrder         objectOrder;
+    public    int                   objectsize;
+    public    int                   primaryKeyIndex, primaryKeyLength;
+    protected Map<String, Object[]> nickref = null; // a mapping from nicknames to Object[2]{kelondroColumn, Integer(colstart)}
     
     public kelondroRow(kelondroColumn[] row, kelondroOrder objectOrder, int primaryKey) {
         assert objectOrder != null;
@@ -73,7 +74,7 @@ public final class kelondroRow {
         // parse property part definition:
         int p = structure.indexOf('|');
         if (p < 0) p = structure.length();
-        ArrayList l = new ArrayList();
+        ArrayList<kelondroColumn> l = new ArrayList<kelondroColumn>();
         String attr = structure.substring(0, p);
         StringTokenizer st = new StringTokenizer(attr, ",");
         while (st.hasMoreTokens()) {
@@ -106,7 +107,7 @@ public final class kelondroRow {
     
     protected final void genNickRef() {
         if (nickref != null) return;
-        nickref = new HashMap(row.length);
+        nickref = new HashMap<String, Object[]>(row.length);
         for (int i = 0; i < row.length; i++) nickref.put(row[i].nickname, new Object[]{row[i], new Integer(colstart[i])});
     }
     
@@ -190,7 +191,17 @@ public final class kelondroRow {
         return new EntryIndex(rowinstance, index);
     }
     
-    public class Entry implements Comparable {
+    public static final Comparator<Entry> entryComparator = new EntryComparator();
+    
+    public static class EntryComparator implements Comparator<Entry> {
+
+		public int compare(Entry a, Entry b) {
+			return a.compareTo(b);
+		}
+    	
+    }
+    
+    public class Entry implements Comparable<Entry> {
 
         private byte[] rowinstance;
         private int offset; // the offset where the row starts within rowinstance
@@ -290,12 +301,9 @@ public final class kelondroRow {
         	return row[column].cellwidth;
         }
         
-        public final int compareTo(Object o) {
+        public final int compareTo(Entry o) {
             if (objectOrder == null) throw new kelondroException("objects cannot be compared, no order given");
-            if (o instanceof Entry) {
-                return objectOrder.compare(this.getPrimaryKeyBytes(), ((Entry) o).getPrimaryKeyBytes());
-            }
-            throw new UnsupportedOperationException("works only for kelondroRow.Entry objects");
+            return objectOrder.compare(this.getPrimaryKeyBytes(), ((Entry) o).getPrimaryKeyBytes());
         }
         
         public final byte[] bytes() {

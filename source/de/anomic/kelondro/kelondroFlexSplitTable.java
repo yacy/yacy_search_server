@@ -290,6 +290,15 @@ public class kelondroFlexSplitTable implements kelondroIndex {
         }
     }
     
+    public synchronized kelondroCloneableIterator keys(boolean up, byte[] firstKey) throws IOException {
+        HashSet set = new HashSet();
+        Iterator i = tables.values().iterator();
+        while (i.hasNext()) {
+            set.add(((kelondroIndex) i.next()).keys(up, firstKey));
+        }
+        return kelondroMergeIterator.cascade(set, rowdef.objectOrder, kelondroMergeIterator.simpleMerge, up);
+    }
+    
     public synchronized kelondroCloneableIterator rows(boolean up, byte[] firstKey) throws IOException {
         HashSet set = new HashSet();
         Iterator i = tables.values().iterator();

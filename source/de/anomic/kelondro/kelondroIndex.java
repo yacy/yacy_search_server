@@ -64,12 +64,13 @@ public interface kelondroIndex {
     public kelondroRow.Entry get(byte[] key) throws IOException;
     public kelondroRow.Entry put(kelondroRow.Entry row) throws IOException;
     public kelondroRow.Entry put(kelondroRow.Entry row, Date entryDate) throws IOException;
-    public void putMultiple(List /* of kelondroRow.Entry*/ rows) throws IOException; // for R/W head path optimization
+    public void putMultiple(List<kelondroRow.Entry> rows) throws IOException; // for R/W head path optimization
     public void addUnique(kelondroRow.Entry row) throws IOException; // no double-check
-    public void addUniqueMultiple(List /* of kelondroRow.Entry*/ rows) throws IOException; // no double-check
+    public void addUniqueMultiple(List<kelondroRow.Entry> rows) throws IOException; // no double-check
     public kelondroRow.Entry remove(byte[] key, boolean keepOrder) throws IOException;
     public kelondroRow.Entry removeOne() throws IOException;
-    public kelondroCloneableIterator rows(boolean up, byte[] firstKey) throws IOException;
+    public kelondroCloneableIterator<byte[]> keys(boolean up, byte[] firstKey) throws IOException; // iterates only the key
+    public kelondroCloneableIterator<kelondroRow.Entry> rows(boolean up, byte[] firstKey) throws IOException; // iterates the whole row
     public void close();
     public void reset() throws IOException;
 }

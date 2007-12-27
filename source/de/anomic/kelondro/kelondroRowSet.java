@@ -92,9 +92,9 @@ public class kelondroRowSet extends kelondroRowCollection implements kelondroInd
         return entry;
     }
     
-    public synchronized void putMultiple(List rows) throws IOException {
-        Iterator i = rows.iterator();
-        while (i.hasNext()) put((kelondroRow.Entry) i.next());
+    public synchronized void putMultiple(List<kelondroRow.Entry> rows) throws IOException {
+        Iterator<kelondroRow.Entry> i = rows.iterator();
+        while (i.hasNext()) put(i.next());
     }
     
     public kelondroRow.Entry put(kelondroRow.Entry row, Date entryDate) {
@@ -246,17 +246,72 @@ public class kelondroRowSet extends kelondroRowCollection implements kelondroInd
         return profile;
     }
     
-    public synchronized Iterator rows() {
+    public synchronized Iterator<byte[]> keys() {
+        sort();
+        return super.keys();
+    }
+    
+    public synchronized kelondroCloneableIterator<byte[]> keys(boolean up, byte[] firstKey) {
+        return new keyIterator(up, firstKey);
+    }
+    
+    public class keyIterator implements kelondroCloneableIterator<byte[]> {
+
+        private boolean up;
+        private byte[] first;
+        private int p, bound;
+        
+        public keyIterator(boolean up, byte[] firstKey) {
+            // see that all elements are sorted
+            sort();
+            this.up = up;
+            this.first = firstKey;
+            this.bound = sortBound;
+            if (first == null) {
+                p = 0;
+            } else {
+                p = binaryPosition(first, 0, first.length); // check this to find bug in DHT selection enumeration
+                //System.out.println("binaryposition for key " + new String(firstKey) + " is " + p);
+            }
+        }
+        
+        @SuppressWarnings("unchecked")
+		public keyIterator clone(Object second) {
+            return new keyIterator(up, (byte[]) second);
+        }
+        
+        public boolean hasNext() {
+        	if (p < 0) return false;
+        	if (p >= size()) return false;
+            if (up) {
+                return p < bound;
+            } else {
+                return p >= 0;
+            }
+        }
+
+        public byte[] next() {
+            byte[] key = getKey(p);
+            if (up) p++; else p--;
+            return key;
+        }
+        
+        public void remove() {
+            throw new UnsupportedOperationException();
+        }
+    }
+    
+    public synchronized Iterator<kelondroRow.Entry> rows() {
         // iterates kelondroRow.Entry - type entries
         sort();
         return super.rows();
     }
     
-    public synchronized kelondroCloneableIterator rows(boolean up, byte[] firstKey) {
+    public synchronized kelondroCloneableIterator<kelondroRow.Entry> rows(boolean up, byte[] firstKey) {
         return new rowIterator(up, firstKey);
     }
     
-    public class rowIterator implements kelondroCloneableIterator {
+    public class rowIterator implements kelondroCloneableIterator<kelondroRow.Entry> {
 
         private boolean up;
         private byte[] first;
@@ -276,7 +331,8 @@ public class kelondroRowSet extends kelondroRowCollection implements kelondroInd
             }
         }
         
-        public Object clone(Object second) {
+        @SuppressWarnings("unchecked")
+		public rowIterator clone(Object second) {
             return new rowIterator(up, (byte[]) second);
         }
         
@@ -290,7 +346,7 @@ public class kelondroRowSet extends kelondroRowCollection implements kelondroInd
             }
         }
 
-        public Object next() {
+        public kelondroRow.Entry next() {
             kelondroRow.Entry entry = get(p);
             if (up) p++; else p--;
             return entry;
@@ -328,7 +384,7 @@ public class kelondroRowSet extends kelondroRowCollection implements kelondroInd
         for (int ii = 0; ii < test.length; ii++) d.add(test[ii].getBytes());
         d.sort();
         d.remove("fuenf".getBytes(), 0, 5, false);
-        Iterator ii = d.rows();
+        Iterator<kelondroRow.Entry> ii = d.rows();
         String s;
         System.out.print("INPUT-ITERATOR: ");
         kelondroRow.Entry entry;

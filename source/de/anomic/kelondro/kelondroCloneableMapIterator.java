@@ -30,15 +30,15 @@ package de.anomic.kelondro;
 import java.util.Iterator;
 import java.util.TreeMap;
 
-public class kelondroCloneableMapIterator implements kelondroCloneableIterator {
+public class kelondroCloneableMapIterator<E> implements kelondroCloneableIterator<E> {
 
-	TreeMap map;
-	Object next, last;
+	TreeMap<E, ?> map;
+	E next, last;
 	Object start;
-	Iterator iter;
+	Iterator<E> iter;
 	
 
-	public kelondroCloneableMapIterator(TreeMap map, Object start) {
+	public kelondroCloneableMapIterator(TreeMap<E, ?> map, E start) {
 		// map must contain eiter a byte[]/Object or a String/Object mapping.
 		// start must be either of type byte[] or String
         // this iterator iterates then only the key elements of the map
@@ -54,7 +54,8 @@ public class kelondroCloneableMapIterator implements kelondroCloneableIterator {
 		this.last = null;
 	}
 	
-	public Object clone(Object modifier) {
+	@SuppressWarnings("unchecked")
+	public kelondroCloneableMapIterator<E> clone(Object modifier) {
 		return new kelondroCloneableMapIterator(map, modifier);
 	}
 
@@ -62,7 +63,7 @@ public class kelondroCloneableMapIterator implements kelondroCloneableIterator {
 		return this.next != null;
 	}
 
-	public Object next() {
+	public E next() {
 		// returns key-elements, not entry-elements
 		this.last = this.next;
 		if (this.iter.hasNext()) {

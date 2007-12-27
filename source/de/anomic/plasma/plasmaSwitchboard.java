@@ -152,13 +152,13 @@ import de.anomic.server.serverSwitch;
 import de.anomic.server.serverThread;
 import de.anomic.server.logging.serverLog;
 import de.anomic.tools.crypt;
-import de.anomic.yacy.yacyURL;
-import de.anomic.yacy.yacyVersion;
 import de.anomic.yacy.yacyClient;
 import de.anomic.yacy.yacyCore;
 import de.anomic.yacy.yacyNewsPool;
 import de.anomic.yacy.yacyNewsRecord;
 import de.anomic.yacy.yacySeed;
+import de.anomic.yacy.yacyURL;
+import de.anomic.yacy.yacyVersion;
 
 public final class plasmaSwitchboard extends serverAbstractSwitch implements serverSwitch {
     

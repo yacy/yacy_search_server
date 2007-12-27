@@ -28,10 +28,10 @@ package de.anomic.kelondro;
 
 import java.util.Iterator;
 
-public interface kelondroCloneableIterator extends Iterator {
+public interface kelondroCloneableIterator<E> extends Iterator<E> {
 
     // clone the iterator using a modifier
     // the modifier can be i.e. a re-start position
-    public Object /* instance of kelondroCloneableIterator*/ clone(Object modifier);
+    public kelondroCloneableIterator<E> clone(Object modifier);
     
 }

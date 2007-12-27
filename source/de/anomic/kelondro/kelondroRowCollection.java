@@ -218,6 +218,19 @@ public class kelondroRowCollection {
         return lastTimeWrote;
     }
     
+    public synchronized final byte[] getKey(int index) {
+        assert (index >= 0) : "get: access with index " + index + " is below zero";
+        assert (index < chunkcount) : "get: access with index " + index + " is above chunkcount " + chunkcount + "; sortBound = " + sortBound;
+        assert (index * rowdef.objectsize < chunkcache.length);
+        if ((chunkcache == null) || (rowdef == null)) return null; // case may appear during shutdown
+        if (index >= chunkcount) return null;
+        if (index * rowdef.objectsize >= chunkcache.length) return null;
+        this.lastTimeRead = System.currentTimeMillis();
+        byte[] b = new byte[this.rowdef.width(0)];
+        System.arraycopy(chunkcache, index * rowdef.objectsize, b, 0, b.length);
+        return b;
+    }
+    
     public synchronized final kelondroRow.Entry get(int index) {
         assert (index >= 0) : "get: access with index " + index + " is below zero";
         assert (index < chunkcount) : "get: access with index " + index + " is above chunkcount " + chunkcount + "; sortBound = " + sortBound;
@@ -255,10 +268,10 @@ public class kelondroRowCollection {
         addUnique(r, 0, r.length);
     }
 
-    public synchronized void addUniqueMultiple(List rows) {
+    public synchronized void addUniqueMultiple(List<kelondroRow.Entry> rows) {
         assert this.sortBound == 0 : "sortBound = " + this.sortBound + ", chunkcount = " + this.chunkcount;
-        Iterator i = rows.iterator();
-        while (i.hasNext()) addUnique((kelondroRow.Entry) i.next());
+        Iterator<kelondroRow.Entry> i = rows.iterator();
+        while (i.hasNext()) addUnique(i.next());
     }
     
     public synchronized void add(byte[] a) {
@@ -362,7 +375,40 @@ public class kelondroRowCollection {
         return chunkcount;
     }
     
-    public synchronized Iterator rows() {
+    public synchronized Iterator<byte[]> keys() {
+        // iterates byte[] - type entries
+        return new keyIterator();
+    }
+    
+    /**
+     * Iterator for kelondroRowCollection.
+     * It supports remove() though it doesn't contain the order of the underlying
+     * collection during removes.
+     *
+     */
+    public class keyIterator implements Iterator<byte[]> {
+
+        private int p;
+        
+        public keyIterator() {
+            p = 0;
+        }
+        
+        public boolean hasNext() {
+            return p < chunkcount;
+        }
+
+        public byte[] next() {
+            return getKey(p++);
+        }
+        
+        public void remove() {
+            p--;
+            removeRow(p, false);
+        }
+    }
+    
+    public synchronized Iterator<kelondroRow.Entry> rows() {
         // iterates kelondroRow.Entry - type entries
         return new rowIterator();
     }
@@ -373,7 +419,7 @@ public class kelondroRowCollection {
      * collection during removes.
      *
      */
-    public class rowIterator implements Iterator {
+    public class rowIterator implements Iterator<kelondroRow.Entry> {
 
         private int p;
         
@@ -385,7 +431,7 @@ public class kelondroRowCollection {
             return p < chunkcount;
         }
 
-        public Object next() {
+        public kelondroRow.Entry next() {
             return get(p++);
         }
         
@@ -395,10 +441,10 @@ public class kelondroRowCollection {
         }
     }
     
-    public synchronized void select(Set keys) {
+    public synchronized void select(Set<kelondroRow.Entry> keys) {
         // removes all entries but the ones given by urlselection
         if ((keys == null) || (keys.size() == 0)) return;
-        Iterator i = rows();
+        Iterator<kelondroRow.Entry> i = rows();
         kelondroRow.Entry row;
         while (i.hasNext()) {
             row = (kelondroRow.Entry) i.next();
@@ -568,8 +614,8 @@ public class kelondroRowCollection {
     
     public synchronized String toString() {
         StringBuffer s = new StringBuffer();
-        Iterator i = rows();
-        if (i.hasNext()) s.append(((kelondroRow.Entry) i.next()).toString());
+        Iterator<kelondroRow.Entry> i = rows();
+        if (i.hasNext()) s.append(i.next().toString());
         while (i.hasNext()) s.append(", " + ((kelondroRow.Entry) i.next()).toString());
         return new String(s);
     }

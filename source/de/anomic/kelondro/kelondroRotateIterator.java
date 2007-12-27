@@ -26,32 +26,33 @@
 
 package de.anomic.kelondro;
 
-public class kelondroRotateIterator implements kelondroCloneableIterator {
+public class kelondroRotateIterator<E> implements kelondroCloneableIterator<E> {
     
-    kelondroCloneableIterator a, clone;
+    kelondroCloneableIterator<E> a, clone;
     Object modifier;
     
-    public kelondroRotateIterator(kelondroCloneableIterator a, Object modifier) {
+    public kelondroRotateIterator(kelondroCloneableIterator<E> a, Object modifier) {
         // this works currently only for String-type key iterations
         this.a = a;
         this.modifier = modifier;
-        this.clone = (kelondroCloneableIterator) a.clone(modifier);
+        this.clone = (kelondroCloneableIterator<E>) a.clone(modifier);
     }
     
-    public Object clone(Object modifier) {
-        return new kelondroRotateIterator(a, modifier);
+    @SuppressWarnings("unchecked")
+	public kelondroRotateIterator<E> clone(Object modifier) {
+        return new kelondroRotateIterator<E>(a, modifier);
     }
     
     public boolean hasNext() {
         return true;
     }
     
-    public Object next() {
+    public E next() {
     	// attention: this iterator has no termination - on purpose.
     	// it must be taken care that a calling method has a termination predicate different
     	// from the hasNext() method
         if (!(a.hasNext())) {
-            a = (kelondroCloneableIterator) clone.clone(modifier);
+            a = (kelondroCloneableIterator<E>) clone.clone(modifier);
         }
         return a.next();
     }

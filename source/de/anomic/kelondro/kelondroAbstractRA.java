@@ -197,14 +197,14 @@ abstract class kelondroAbstractRA implements kelondroRA {
         }
     }
 
-    public void writeMap(final Map map, final String comment) throws IOException {
+    public void writeMap(final Map<String, String> map, final String comment) throws IOException {
         this.seek(0);
-        final Iterator iter = map.entrySet().iterator();
-        Map.Entry entry;
+        final Iterator<Map.Entry<String, String>> iter = map.entrySet().iterator();
+        Map.Entry<String, String> entry;
         final serverByteBuffer bb = new serverByteBuffer(map.size() * 40);
         bb.append("# ").append(comment).append("\r\n");
         while (iter.hasNext()) {
-            entry = (Map.Entry) iter.next();
+            entry = iter.next();
             bb.append(entry.getKey()).append('=');
             if (entry.getValue() != null) { bb.append(entry.getValue()); }
             bb.append("\r\n");
@@ -213,11 +213,11 @@ abstract class kelondroAbstractRA implements kelondroRA {
         write(bb.getBytes());
     }
 
-    public Map readMap() throws IOException {
+    public Map<String, String> readMap() throws IOException {
         this.seek(0);
         byte[] b = readFully();
         BufferedReader br = new BufferedReader(new InputStreamReader(new ByteArrayInputStream(b)));
-        final TreeMap map = new TreeMap();
+        final TreeMap<String, String> map = new TreeMap<String, String>();
         String line;
         int pos;
         while ((line = br.readLine()) != null) { // very slow readLine????

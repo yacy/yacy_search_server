@@ -47,7 +47,7 @@ package de.anomic.kelondro;
 
 import java.util.Comparator;
 
-public final class kelondroNaturalOrder extends kelondroAbstractOrder implements kelondroOrder, Comparator, Cloneable {
+public final class kelondroNaturalOrder extends kelondroAbstractOrder implements kelondroOrder, Comparator<Object>, Cloneable {
     
     public static final kelondroOrder naturalOrder = new kelondroNaturalOrder(true);
     

@@ -51,8 +51,8 @@ import de.anomic.kelondro.kelondroMergeIterator;
 import de.anomic.kelondro.kelondroOrder;
 import de.anomic.kelondro.kelondroRotateIterator;
 import de.anomic.plasma.urlPattern.plasmaURLPattern;
-import de.anomic.server.logging.serverLog;
 import de.anomic.server.serverMemory;
+import de.anomic.server.logging.serverLog;
 import de.anomic.yacy.yacyDHTAction;
 import de.anomic.yacy.yacySeedDB;
 import de.anomic.yacy.yacyURL;
@@ -363,14 +363,14 @@ public final class plasmaWordIndex implements indexRI {
         return container;
     }
 
-    public Map getContainers(Set wordHashes, Set urlselection, boolean deleteIfEmpty, boolean interruptIfEmpty) {
+    public Map<String, indexContainer> getContainers(Set<String> wordHashes, Set<String> urlselection, boolean deleteIfEmpty, boolean interruptIfEmpty) {
         // return map of wordhash:indexContainer
         
         // retrieve entities that belong to the hashes
-        HashMap containers = new HashMap();
+        HashMap<String, indexContainer> containers = new HashMap<String, indexContainer>();
         String singleHash;
         indexContainer singleContainer;
-            Iterator i = wordHashes.iterator();
+            Iterator<String> i = wordHashes.iterator();
             while (i.hasNext()) {
             
                 // get next word hash:
@@ -380,24 +380,24 @@ public final class plasmaWordIndex implements indexRI {
                 singleContainer = getContainer(singleHash, urlselection);
             
                 // check result
-                if (((singleContainer == null) || (singleContainer.size() == 0)) && (interruptIfEmpty)) return new HashMap();
+                if (((singleContainer == null) || (singleContainer.size() == 0)) && (interruptIfEmpty)) return new HashMap<String, indexContainer>();
             
                 containers.put(singleHash, singleContainer);
             }
         return containers;
     }
 
-    public Map[] localSearchContainers(plasmaSearchQuery query, Set urlselection) {
+    public Map<String, indexContainer>[] localSearchContainers(plasmaSearchQuery query, Set<String> urlselection) {
         // search for the set of hashes and return a map of of wordhash:indexContainer containing the seach result
 
         // retrieve entities that belong to the hashes
-        Map inclusionContainers = (query.queryHashes.size() == 0) ? new HashMap() : getContainers(
+        Map<String, indexContainer> inclusionContainers = (query.queryHashes.size() == 0) ? new HashMap<String, indexContainer>() : getContainers(
                         query.queryHashes,
                         urlselection,
                         true,
                         true);
-        if ((inclusionContainers.size() != 0) && (inclusionContainers.size() < query.queryHashes.size())) inclusionContainers = new HashMap(); // prevent that only a subset is returned
-        Map exclusionContainers = (inclusionContainers.size() == 0) ? new HashMap() : getContainers(
+        if ((inclusionContainers.size() != 0) && (inclusionContainers.size() < query.queryHashes.size())) inclusionContainers = new HashMap<String, indexContainer>(); // prevent that only a subset is returned
+        Map<String, indexContainer> exclusionContainers = (inclusionContainers.size() == 0) ? new HashMap<String, indexContainer>() : getContainers(
                 query.excludeHashes,
                 urlselection,
                 true,

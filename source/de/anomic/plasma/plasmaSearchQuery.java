@@ -51,7 +51,6 @@ import de.anomic.htmlFilter.htmlFilterAbstractScraper;
 import de.anomic.kelondro.kelondroBase64Order;
 import de.anomic.kelondro.kelondroBitfield;
 import de.anomic.kelondro.kelondroMSetTools;
-import de.anomic.kelondro.kelondroNaturalOrder;
 import de.anomic.server.serverCharBuffer;
 import de.anomic.yacy.yacySeedDB;
 
@@ -74,7 +73,7 @@ public final class plasmaSearchQuery {
     public static final kelondroBitfield catchall_constraint = new kelondroBitfield(4, "______");
     
     public String queryString;
-    public TreeSet queryHashes, excludeHashes;
+    public TreeSet<String> queryHashes, excludeHashes;
     private int linesPerPage, offset;
     public String prefer;
     public int contentdom;
@@ -91,8 +90,8 @@ public final class plasmaSearchQuery {
     public plasmaSearchQuery(String queryString, int lines, kelondroBitfield constraint) {
     	if ((queryString.length() == 12) && (kelondroBase64Order.enhancedCoder.wellformed(queryString.getBytes()))) {
     		this.queryString = null;
-            this.queryHashes = new TreeSet();
-            this.excludeHashes = new TreeSet();
+            this.queryHashes = new TreeSet<String>();
+            this.excludeHashes = new TreeSet<String>();
             this.queryHashes.add(queryString);
     	} else {
     		this.queryString = queryString;
@@ -174,7 +173,7 @@ public plasmaSearchQuery(String queryString, TreeSet queryHashes, TreeSet exclud
         return (this.domType == SEARCHDOM_LOCAL) ? "local" : "global";
     }
     
-    public static TreeSet hashes2Set(String query) {
+    public static TreeSet<String> hashes2Set(String query) {
         if (query == null) return new TreeSet(kelondroBase64Order.enhancedCoder);
         final TreeSet keyhashes = new TreeSet(kelondroBase64Order.enhancedCoder);
         for (int i = 0; i < (query.length() / yacySeedDB.commonHashLength); i++) {
@@ -208,16 +207,16 @@ public plasmaSearchQuery(String queryString, TreeSet queryHashes, TreeSet exclud
         return new String(sb);
     }
     
-    public static final boolean matches(String text, TreeSet keyhashes) {
+    public static final boolean matches(String text, TreeSet<String> keyhashes) {
     	// returns true if any of the word hashes in keyhashes appear in the String text
     	// to do this, all words in the string must be recognized and transcoded to word hashes
-    	TreeSet wordhashes = plasmaCondenser.words2hashes(plasmaCondenser.getWords(text).keySet());
+    	TreeSet<String> wordhashes = plasmaCondenser.words2hashes(plasmaCondenser.getWords(text).keySet());
     	return kelondroMSetTools.anymatch(wordhashes, keyhashes);
     }
     
-    public static TreeSet[] cleanQuery(String querystring) {
+    public static TreeSet<String>[] cleanQuery(String querystring) {
     	// returns two sets: a query set and a exclude set
-    	if ((querystring == null) || (querystring.length() == 0)) return new TreeSet[]{new TreeSet(kelondroBase64Order.enhancedCoder), new TreeSet(kelondroBase64Order.enhancedCoder)};
+    	if ((querystring == null) || (querystring.length() == 0)) return new TreeSet[]{new TreeSet<String>(), new TreeSet<String>()};
         
         // convert Umlaute
         querystring = htmlFilterAbstractScraper.convertUmlaute(new serverCharBuffer(querystring.toCharArray())).toString();
@@ -231,8 +230,8 @@ public plasmaSearchQuery(String queryString, TreeSet queryHashes, TreeSet exclud
         }
         
         // the string is clean now, but we must generate a set out of it
-        final TreeSet query = new TreeSet(kelondroNaturalOrder.naturalOrder);
-        final TreeSet exclude = new TreeSet(kelondroNaturalOrder.naturalOrder);
+        final TreeSet<String> query = new TreeSet<String>();
+        final TreeSet<String> exclude = new TreeSet<String>();
         final String[] a = querystring.split(" ");
         for (int i = 0; i < a.length; i++) {
         	if (a[i].startsWith("-")) {

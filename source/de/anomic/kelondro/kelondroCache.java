@@ -49,7 +49,7 @@ public class kelondroCache implements kelondroIndex {
     // furthermore, if we access a kelondroFlexTable, we can use the ram index of the underlying index
 
     // static object tracker; stores information about object cache usage
-    private static final TreeMap objectTracker = new TreeMap();
+    private static final TreeMap<String, kelondroCache> objectTracker = new TreeMap<String, kelondroCache>();
     private static long memStopGrow    = 10000000; // a limit for the node cache to stop growing if less than this memory amount is available
     private static long memStartShrink =  6000000; // a limit for the node cache to start with shrinking if less than this memory amount is available
     
@@ -119,12 +119,12 @@ public class kelondroCache implements kelondroIndex {
         return memStartShrink ;
     }
     
-    public static final Iterator filenames() {
+    public static final Iterator<String> filenames() {
         // iterates string objects; all file names from record tracker
         return objectTracker.keySet().iterator();
     }
 
-    public static final Map memoryStats(String filename) {
+    public static final Map<String, String> memoryStats(String filename) {
         // returns a map for each file in the tracker;
         // the map represents properties for each record oobjects,
         // i.e. for cache memory allocation
@@ -132,9 +132,9 @@ public class kelondroCache implements kelondroIndex {
         return theObjectsCache.memoryStats();
     }
     
-    private final Map memoryStats() {
+    private final Map<String, String> memoryStats() {
         // returns statistical data about this object
-        HashMap map = new HashMap();
+        HashMap<String, String> map = new HashMap<String, String>();
         map.put("objectHitChunkSize", (readHitCache == null) ? "0" : Integer.toString(readHitCache.rowdef.objectsize));
         map.put("objectHitCacheCount", (readHitCache == null) ? "0" : Integer.toString(readHitCache.size()));
         map.put("objectHitMem", (readHitCache == null) ? "0" : Integer.toString((int) (readHitCache.rowdef.objectsize * readHitCache.size() * kelondroRowCollection.growfactor)));
@@ -166,9 +166,9 @@ public class kelondroCache implements kelondroIndex {
     private void flushUnique() throws IOException {
         if (writeBufferUnique == null) return;
         synchronized (writeBufferUnique) {
-            Iterator i = writeBufferUnique.rows();
+            Iterator<kelondroRow.Entry> i = writeBufferUnique.rows();
             while (i.hasNext()) {
-                this.index.addUnique((kelondroRow.Entry) i.next());
+                this.index.addUnique(i.next());
                 this.cacheFlush++;
             }
             writeBufferUnique.clear();
@@ -180,10 +180,10 @@ public class kelondroCache implements kelondroIndex {
         if (maxcount == 0) return;
         synchronized (writeBufferUnique) {
             kelondroRowCollection delete = new kelondroRowCollection(this.keyrow, maxcount);
-            Iterator i = writeBufferUnique.rows();
+            Iterator<kelondroRow.Entry> i = writeBufferUnique.rows();
             kelondroRow.Entry row;
             while ((i.hasNext()) && (maxcount-- > 0)) {
-                row = (kelondroRow.Entry) i.next();
+                row = i.next();
                 delete.add(row.getPrimaryKeyBytes());
                 this.index.addUnique(row);
                 this.cacheFlush++;
@@ -200,9 +200,9 @@ public class kelondroCache implements kelondroIndex {
     private void flushDoubles() throws IOException {
         if (writeBufferDoubles == null) return;
         synchronized (writeBufferDoubles) {
-            Iterator i = writeBufferDoubles.rows();
+            Iterator<kelondroRow.Entry> i = writeBufferDoubles.rows();
             while (i.hasNext()) {
-                this.index.put((kelondroRow.Entry) i.next());
+                this.index.put(i.next());
                 this.cacheFlush++;
             }
             writeBufferDoubles.clear();
@@ -214,10 +214,10 @@ public class kelondroCache implements kelondroIndex {
         if (maxcount == 0) return;
         synchronized (writeBufferDoubles) {
             kelondroRowCollection delete = new kelondroRowCollection(this.keyrow, maxcount);
-            Iterator i = writeBufferDoubles.rows();
+            Iterator<kelondroRow.Entry> i = writeBufferDoubles.rows();
             kelondroRow.Entry row;
             while ((i.hasNext()) && (maxcount-- > 0)) {
-                row = (kelondroRow.Entry) i.next();
+                row = i.next();
                 delete.add(row.getPrimaryKeyBytes());
                 this.index.addUnique(row);
                 this.cacheFlush++;
@@ -349,14 +349,14 @@ public class kelondroCache implements kelondroIndex {
         }
     }
 
-    public synchronized void putMultiple(List rows) throws IOException {
-        Iterator i = rows.iterator();
-        while (i.hasNext()) put ((Entry) i.next());
+    public synchronized void putMultiple(List<Entry> rows) throws IOException {
+        Iterator<Entry> i = rows.iterator();
+        while (i.hasNext()) put(i.next());
     }
     
-    public synchronized void putMultiple(List rows, Date entryDate) throws IOException {
-        Iterator i = rows.iterator();
-        while (i.hasNext()) put ((Entry) i.next(), entryDate);
+    public synchronized void putMultiple(List<Entry> rows, Date entryDate) throws IOException {
+        Iterator<Entry> i = rows.iterator();
+        while (i.hasNext()) put(i.next(), entryDate);
     }
     
     public synchronized Entry put(Entry row) throws IOException {
@@ -531,8 +531,8 @@ public class kelondroCache implements kelondroIndex {
         }
     }
     
-    public synchronized void addUniqueMultiple(List rows) throws IOException {
-        Iterator i = rows.iterator();
+    public synchronized void addUniqueMultiple(List<Entry> rows) throws IOException {
+        Iterator<Entry> i = rows.iterator();
         while (i.hasNext()) addUnique((Entry) i.next());
     }
 
@@ -620,7 +620,12 @@ public class kelondroCache implements kelondroIndex {
         return index.row();
     }
 
-    public synchronized kelondroCloneableIterator rows(boolean up, byte[] firstKey) throws IOException {
+    public synchronized kelondroCloneableIterator<byte[]> keys(boolean up, byte[] firstKey) throws IOException {
+        flushUnique();
+        return index.keys(up, firstKey);
+    }
+
+    public synchronized kelondroCloneableIterator<kelondroRow.Entry> rows(boolean up, byte[] firstKey) throws IOException {
         flushUnique();
         return index.rows(up, firstKey);
     }

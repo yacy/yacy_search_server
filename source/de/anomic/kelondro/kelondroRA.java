@@ -91,8 +91,8 @@ public interface kelondroRA {
     public void writeLine(String line) throws IOException;
     public String readLine() throws IOException;
 
-    public void writeMap(Map props, String comment) throws IOException;
-    public Map readMap() throws IOException;
+    public void writeMap(Map<String, String> props, String comment) throws IOException;
+    public Map<String, String> readMap() throws IOException;
 
     public void writeArray(byte[] b) throws IOException;
     public byte[] readArray() throws IOException;

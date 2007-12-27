@@ -243,12 +243,12 @@ public class kelondroSQLTable implements kelondroIndex {
     }
     
     public kelondroCloneableIterator rows(boolean up, byte[] startKey) throws IOException {
-        // Objects are of type byte[][]
+        // Objects are of type kelondroRow.Entry
         return null;
     }
 
-    public Iterator keys(boolean up, boolean rotating, byte[] startKey) {
-        // Objects are of type String
+    public kelondroCloneableIterator keys(boolean up, byte[] startKey) {
+        // Objects are of type byte[]
         return null;
     }
 

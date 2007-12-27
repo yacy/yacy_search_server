@@ -278,14 +278,14 @@ public final class indexRAMRI implements indexRI {
         return cacheIndex.size();
     }
 
-    public synchronized kelondroCloneableIterator wordContainers(String startWordHash, boolean rot) {
+    public synchronized kelondroCloneableIterator<indexContainer> wordContainers(String startWordHash, boolean rot) {
         // we return an iterator object that creates top-level-clones of the indexContainers
         // in the cache, so that manipulations of the iterated objects do not change
         // objects in the cache.
         return new wordContainerIterator(startWordHash, rot);
     }
 
-    public class wordContainerIterator implements kelondroCloneableIterator {
+    public class wordContainerIterator implements kelondroCloneableIterator<indexContainer> {
 
         // this class exists, because the wCache cannot be iterated with rotation
         // and because every indexContainer Object that is iterated must be returned as top-level-clone
@@ -301,7 +301,7 @@ public final class indexRAMRI implements indexRI {
             // The collection's iterator will return the values in the order that their corresponding keys appear in the tree.
         }
         
-        public Object clone(Object secondWordHash) {
+        public wordContainerIterator clone(Object secondWordHash) {
             return new wordContainerIterator((String) secondWordHash, rot);
         }
         
@@ -310,7 +310,7 @@ public final class indexRAMRI implements indexRI {
             return iterator.hasNext();
         }
 
-        public Object next() {
+        public indexContainer next() {
             if (iterator.hasNext()) {
                 return ((indexContainer) iterator.next()).topLevelClone();
             } else {

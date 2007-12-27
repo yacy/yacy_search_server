@@ -176,13 +176,13 @@ public class kelondroIntBytesMap {
         return index0.size() + index1.size();
     }
     
-    public Iterator rows() {
+    public Iterator<kelondroRow.Entry> rows() {
         if (index0 != null) {
             if (index1 == null) {
                 // finish initialization phase
                 index0.sort();
                 index0.uniq();
-                index1 = new kelondroRowSet(rowdef, 0); 
+                index1 = new kelondroRowSet(rowdef, 0);
             }
             return index0.rows(true, null);
         }
@@ -190,10 +190,10 @@ public class kelondroIntBytesMap {
     	if (index0 == null) {
             return index1.rows(true, null);
         }
-        return new kelondroMergeIterator(
+        return new kelondroMergeIterator<kelondroRow.Entry>(
     				index0.rows(true, null),
     				index1.rows(true, null),
-    				rowdef.objectOrder,
+    				kelondroRow.entryComparator,
     				kelondroMergeIterator.simpleMerge,
                     true);
     }
@@ -225,8 +225,8 @@ public class kelondroIntBytesMap {
 		long r;
 		Long R;
 		int p, rc = 0;
-		ArrayList ra = new ArrayList();
-		HashSet jcontrol = new HashSet();
+		ArrayList<Long> ra = new ArrayList<Long>();
+		HashSet<Long> jcontrol = new HashSet<Long>();
 		kelondroIntBytesMap kcontrol = new kelondroIntBytesMap(1, 0);
 		for (int i = 0; i < 1000000; i++) {
 			r = Math.abs(random.nextLong() % 10000);
