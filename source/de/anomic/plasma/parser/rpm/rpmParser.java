@@ -70,7 +70,7 @@ public class rpmParser extends AbstractParser implements Parser {
      * a list of mime types that are supported by this parser class
      * @see #getSupportedMimeTypes()
      */
-    public static final Hashtable SUPPORTED_MIME_TYPES = new Hashtable();    
+    public static final Hashtable<String, String> SUPPORTED_MIME_TYPES = new Hashtable<String, String>();   
     static { 
         SUPPORTED_MIME_TYPES.put("application/x-rpm","rpm");
         SUPPORTED_MIME_TYPES.put("application/x-redhat packet manager","rpm");    
@@ -110,7 +110,7 @@ public class rpmParser extends AbstractParser implements Parser {
         RPMFile rpmFile = null;        
         try {
             String summary = null, description = null, packager = null, name = sourceFile.getName();
-            HashMap anchors = new HashMap();
+            HashMap<String, String> anchors = new HashMap<String, String>();
             StringBuffer content = new StringBuffer();            
             
             // opening the rpm file

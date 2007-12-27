@@ -59,6 +59,7 @@ import java.util.zip.GZIPInputStream;
 import com.ice.tar.TarEntry;
 import com.ice.tar.TarInputStream;
 
+import de.anomic.htmlFilter.htmlFilterImageEntry;
 import de.anomic.plasma.plasmaParser;
 import de.anomic.plasma.plasmaParserDocument;
 import de.anomic.plasma.parser.AbstractParser;
@@ -74,7 +75,7 @@ public class tarParser extends AbstractParser implements Parser {
      * a list of mime types that are supported by this parser class
      * @see #getSupportedMimeTypes()
      */
-    public static final Hashtable SUPPORTED_MIME_TYPES = new Hashtable();    
+    public static final Hashtable<String, String> SUPPORTED_MIME_TYPES = new Hashtable<String, String>();  
     static { 
         SUPPORTED_MIME_TYPES.put("application/x-tar","tar");
         SUPPORTED_MIME_TYPES.put("application/tar","tar");
@@ -127,11 +128,11 @@ public class tarParser extends AbstractParser implements Parser {
 
             StringBuffer docKeywords = new StringBuffer();
             StringBuffer docLongTitle = new StringBuffer();   
-            LinkedList docSections = new LinkedList();
+            LinkedList<String> docSections = new LinkedList<String>();
             StringBuffer docAbstrct = new StringBuffer();
 
-            Map docAnchors = new HashMap();
-            TreeSet docImages = new TreeSet(); 
+            Map<String, String> docAnchors = new HashMap<String, String>();
+            TreeSet<htmlFilterImageEntry> docImages = new TreeSet<htmlFilterImageEntry>(); 
                         
             // looping through the contained files
             TarEntry entry;

@@ -70,7 +70,7 @@ public class mimeTypeParser extends AbstractParser implements Parser {
      * a list of mime types that are supported by this parser class
      * @see #getSupportedMimeTypes()
      */    
-    public static final Hashtable SUPPORTED_MIME_TYPES = new Hashtable();    
+    public static final Hashtable<String, String> SUPPORTED_MIME_TYPES = new Hashtable<String, String>();   
     static { 
         SUPPORTED_MIME_TYPES.put("text/xml","xml");
         SUPPORTED_MIME_TYPES.put("application/xml","xml"); 
@@ -96,7 +96,7 @@ public class mimeTypeParser extends AbstractParser implements Parser {
      * Helping structure used to detect loops in the mimeType detection
      * process
      */
-    private static Hashtable threadLoopDetection = new Hashtable();
+    private static Hashtable<Thread, Integer> threadLoopDetection = new Hashtable<Thread, Integer>();
     
     public mimeTypeParser() {
         super(LIBX_DEPENDENCIES);

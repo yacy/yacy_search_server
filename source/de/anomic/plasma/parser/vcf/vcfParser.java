@@ -76,7 +76,7 @@ public class vcfParser extends AbstractParser implements Parser {
      * 
      * TODO: support of x-mozilla-cpt and x-mozilla-html tags
      */
-    public static final Hashtable SUPPORTED_MIME_TYPES = new Hashtable();    
+    public static final Hashtable<String, String> SUPPORTED_MIME_TYPES = new Hashtable<String, String>();
     static { 
         SUPPORTED_MIME_TYPES.put("text/x-vcard","vcf");
         SUPPORTED_MIME_TYPES.put("application/vcard","vcf");        
@@ -102,9 +102,9 @@ public class vcfParser extends AbstractParser implements Parser {
         try {
             StringBuffer parsedTitle = new StringBuffer();
             StringBuffer parsedDataText = new StringBuffer();
-            HashMap parsedData = new HashMap();
-            HashMap anchors = new HashMap();
-            LinkedList parsedNames = new LinkedList();
+            HashMap<String, String> parsedData = new HashMap<String, String>();
+            HashMap<String, String> anchors = new HashMap<String, String>();
+            LinkedList<String> parsedNames = new LinkedList<String>();
             
             boolean useLastLine = false;
             int lineNr = 0;

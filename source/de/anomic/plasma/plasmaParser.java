@@ -66,7 +66,7 @@ public final class plasmaParser {
     public static final String PARSER_MODE_URLREDIRECTOR = "URLREDIRECTOR";
     public static final String PARSER_MODE_ICAP          = "ICAP";
     public static final String PARSER_MODE_IMAGE         = "IMAGE";
-    public static final HashSet PARSER_MODE = new HashSet(Arrays.asList(new String[]{
+    public static final HashSet<String> PARSER_MODE = new HashSet<String>(Arrays.asList(new String[]{
             PARSER_MODE_PROXY,
             PARSER_MODE_CRAWLER,
             PARSER_MODE_ICAP,
@@ -74,7 +74,7 @@ public final class plasmaParser {
             PARSER_MODE_IMAGE
     }));
     
-    private static final HashMap parserConfigList = new HashMap();
+    private static final HashMap<String, plasmaParserConfig> parserConfigList = new HashMap<String, plasmaParserConfig>();
     
     /**
      * A list containing all installed parsers and the mimeType that they support
@@ -85,8 +85,8 @@ public final class plasmaParser {
     /**
      * A list of file extensions and mime types that are supported by the html-parser
      */
-    public static final HashSet supportedHTMLFileExt = new HashSet();
-    public static final HashSet supportedHTMLMimeTypes = new HashSet();    
+    public static final HashSet<String> supportedHTMLFileExt = new HashSet<String>();
+    public static final HashSet<String> supportedHTMLMimeTypes = new HashSet<String>();    
     
     private static final Properties mimeTypeLookupByFileExt = new Properties();
     static {
@@ -104,15 +104,15 @@ public final class plasmaParser {
     /**
      * A list of media extensions that should <b>not</b> be handled by the plasmaParser
      */
-    private static final HashSet mediaExtSet = new HashSet();
+    private static final HashSet<String> mediaExtSet = new HashSet<String>();
     
     /**
      * A list of image, audio, video and application extensions
      */
-    private static final HashSet imageExtSet = new HashSet();
-    private static final HashSet audioExtSet = new HashSet();
-    private static final HashSet videoExtSet = new HashSet();
-    private static final HashSet appsExtSet = new HashSet();
+    private static final HashSet<String> imageExtSet = new HashSet<String>();
+    private static final HashSet<String> audioExtSet = new HashSet<String>();
+    private static final HashSet<String> videoExtSet = new HashSet<String>();
+    private static final HashSet<String> appsExtSet = new HashSet<String>();
     
     /**
      * This {@link FilenameFilter} is used to find all classes based on there filenames 
@@ -181,7 +181,7 @@ public final class plasmaParser {
      * yacy html parser
      */
     public static void initHTMLParsableMimeTypes(String htmlParsableMimeTypes) {
-        LinkedList mimeTypes = new LinkedList();
+        LinkedList<String> mimeTypes = new LinkedList<String>();
         if ((htmlParsableMimeTypes == null) || (htmlParsableMimeTypes.length() == 0)) {
             return;
         }
@@ -195,8 +195,8 @@ public final class plasmaParser {
         }        
     }
     
-    public static List extString2extList(String extString) {
-        LinkedList extensions = new LinkedList();
+    public static List<String> extString2extList(String extString) {
+        LinkedList<String> extensions = new LinkedList<String>();
         if ((extString == null) || (extString.length() == 0)) {
             return extensions;
         } else {
@@ -206,35 +206,35 @@ public final class plasmaParser {
         return extensions;
     }
     
-    public static void initMediaExt(List mediaExtList) {
+    public static void initMediaExt(List<String> mediaExtList) {
         synchronized (mediaExtSet) {
             mediaExtSet.clear();
             mediaExtSet.addAll(mediaExtList);
         }
     }
     
-    public static void initImageExt(List imageExtList) {
+    public static void initImageExt(List<String> imageExtList) {
         synchronized (imageExtSet) {
             imageExtSet.clear();
             imageExtSet.addAll(imageExtList);
         }
     }
     
-    public static void initAudioExt(List audioExtList) {
+    public static void initAudioExt(List<String> audioExtList) {
         synchronized (audioExtSet) {
             audioExtSet.clear();
             audioExtSet.addAll(audioExtList);
         }
     }
     
-    public static void initVideoExt(List videoExtList) {
+    public static void initVideoExt(List<String> videoExtList) {
         synchronized (videoExtSet) {
             videoExtSet.clear();
             videoExtSet.addAll(videoExtList);
         }
     }
     
-    public static void initAppsExt(List appsExtList) {
+    public static void initAppsExt(List<String> appsExtList) {
         synchronized (appsExtSet) {
             appsExtSet.clear();
             appsExtSet.addAll(appsExtList);
@@ -247,7 +247,7 @@ public final class plasmaParser {
         }        
     }
     
-    public static void initSupportedHTMLFileExt(List supportedRealtimeFileExtList) {
+    public static void initSupportedHTMLFileExt(List<String> supportedRealtimeFileExtList) {
         synchronized (supportedHTMLFileExt) {
             supportedHTMLFileExt.clear();
             supportedHTMLFileExt.addAll(supportedRealtimeFileExtList);
@@ -750,10 +750,10 @@ public final class plasmaParser {
         
     }
     
-    static Map allReflinks(Set links) {
+    static Map<String, String> allReflinks(Set links) {
         // links is either a Set of Strings (with urls) or htmlFilterImageEntries
         // we find all links that are part of a reference inside a url
-        HashMap v = new HashMap();
+        HashMap<String, String> v = new HashMap<String, String>();
         Iterator i = links.iterator();
         Object o;
         String url;
@@ -784,9 +784,9 @@ public final class plasmaParser {
         return v;
     }
     
-    static Map allSubpaths(Set links) {
+    static Map<String, String> allSubpaths(Set links) {
         // links is either a Set of Strings (urls) or a Set of htmlFilterImageEntries
-        HashMap v = new HashMap();
+        HashMap<String, String> v = new HashMap<String, String>();
         Iterator i = links.iterator();
         Object o;
         String url;

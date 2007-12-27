@@ -73,7 +73,7 @@ public class rssParser extends AbstractParser implements Parser {
      * a list of mime types that are supported by this parser class
      * @see #getSupportedMimeTypes()
      */  
-    public static final Hashtable SUPPORTED_MIME_TYPES = new Hashtable();    
+    public static final Hashtable<String, String> SUPPORTED_MIME_TYPES = new Hashtable<String, String>(); 
     static {
         SUPPORTED_MIME_TYPES.put("text/rss","xml,rss,rdf"); 
         SUPPORTED_MIME_TYPES.put("application/rdf+xml","xml,rss,rdf");
@@ -95,9 +95,9 @@ public class rssParser extends AbstractParser implements Parser {
 	public plasmaParserDocument parse(yacyURL location, String mimeType, String charset, InputStream source) throws ParserException, InterruptedException {
 
         try {
-            LinkedList feedSections = new LinkedList();
-            HashMap anchors = new HashMap();
-            TreeSet images  = new TreeSet();
+            LinkedList<String> feedSections = new LinkedList<String>();
+            HashMap<String, String> anchors = new HashMap<String, String>();
+            TreeSet<htmlFilterImageEntry> images  = new TreeSet<htmlFilterImageEntry>();
             serverByteBuffer text = new serverByteBuffer();
             serverCharBuffer authors = new serverCharBuffer();
             
@@ -149,12 +149,12 @@ public class rssParser extends AbstractParser implements Parser {
                             feedSections.add(itemHeadline);
                         }
                         
-                        Map itemLinks = scraper.getAnchors();
+                        Map<String, String> itemLinks = scraper.getAnchors();
                         if ((itemLinks != null) && (itemLinks.size() > 0)) {
                             anchors.putAll(itemLinks);
                         }
                         
-                        TreeSet itemImages = scraper.getImages();
+                        TreeSet<htmlFilterImageEntry> itemImages = scraper.getImages();
                         if ((itemImages != null) && (itemImages.size() > 0)) {
                             images.addAll(itemImages);
                         }

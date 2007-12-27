@@ -43,6 +43,7 @@
 
 package de.anomic.plasma.parser.zip;
 
+import de.anomic.htmlFilter.htmlFilterImageEntry;
 import java.io.BufferedOutputStream;
 import java.io.File;
 import java.io.FileOutputStream;
@@ -72,7 +73,7 @@ public class zipParser extends AbstractParser implements Parser {
      * a list of mime types that are supported by this parser class
      * @see #getSupportedMimeTypes()
      */
-    public static final Hashtable SUPPORTED_MIME_TYPES = new Hashtable();    
+    public static final Hashtable<String, String> SUPPORTED_MIME_TYPES = new Hashtable<String, String>(); 
     static { 
         SUPPORTED_MIME_TYPES.put("application/zip","zip");
         SUPPORTED_MIME_TYPES.put("application/x-zip","zip");
@@ -91,7 +92,7 @@ public class zipParser extends AbstractParser implements Parser {
         this.parserName = "Compressed Archive File Parser"; 
     }
     
-    public Hashtable getSupportedMimeTypes() {
+    public Hashtable<String, String> getSupportedMimeTypes() {
         return SUPPORTED_MIME_TYPES;
     }
     
@@ -111,10 +112,10 @@ public class zipParser extends AbstractParser implements Parser {
             
             StringBuffer docKeywords = new StringBuffer();
             StringBuffer docLongTitle = new StringBuffer();   
-            LinkedList docSections = new LinkedList();
+            LinkedList<String> docSections = new LinkedList<String>();
             StringBuffer docAbstrct = new StringBuffer();
-            Map docAnchors = new HashMap();
-            TreeSet docImages = new TreeSet(); 
+            Map<String, String> docAnchors = new HashMap<String, String>();
+            TreeSet<htmlFilterImageEntry> docImages = new TreeSet<htmlFilterImageEntry>(); 
             
             // creating a new parser class to parse the unzipped content
             plasmaParser theParser = new plasmaParser();            

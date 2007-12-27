@@ -70,8 +70,8 @@ import de.anomic.yacy.yacyURL;
 public class htmlFilterContentScraper extends htmlFilterAbstractScraper implements htmlFilterScraper {
 
     // statics: for initialisation of the HTMLFilterAbstractScraper
-    private static TreeSet linkTags0;
-    private static TreeSet linkTags1;
+    private static TreeSet<String> linkTags0;
+    private static TreeSet<String> linkTags1;
 
     private static final Collator insensitiveCollator = Collator.getInstance(Locale.US);
     static {
@@ -80,7 +80,7 @@ public class htmlFilterContentScraper extends htmlFilterAbstractScraper implemen
     }
 
     static {
-        linkTags0 = new TreeSet(insensitiveCollator);
+        linkTags0 = new TreeSet<String>(insensitiveCollator);
         linkTags0.add("img");
         linkTags0.add("base");
         linkTags0.add("frame");
@@ -90,7 +90,7 @@ public class htmlFilterContentScraper extends htmlFilterAbstractScraper implemen
         linkTags0.add("embed");     //added by [MN]
         linkTags0.add("param");     //added by [MN]
 
-        linkTags1 = new TreeSet(insensitiveCollator);
+        linkTags1 = new TreeSet<String>(insensitiveCollator);
         linkTags1.add("a");
         linkTags1.add("h1");
         linkTags1.add("h2");
@@ -100,9 +100,9 @@ public class htmlFilterContentScraper extends htmlFilterAbstractScraper implemen
     }
 
     // class variables: collectors for links
-    private HashMap anchors;
-    private TreeSet images; // String(absolute url)/ImageEntry relation
-    private HashMap metas;
+    private HashMap<String, String> anchors;
+    private TreeSet<htmlFilterImageEntry> images; // String(absolute url)/ImageEntry relation
+    private HashMap<String, String> metas;
     private String title;
     //private String headline;
     private List[] headlines;
@@ -124,12 +124,12 @@ public class htmlFilterContentScraper extends htmlFilterAbstractScraper implemen
         // it is only the reference for relative links
         super(linkTags0, linkTags1);
         this.root = root;
-        this.anchors = new HashMap();
-        this.images = new TreeSet();
-        this.metas = new HashMap();
+        this.anchors = new HashMap<String, String>();
+        this.images = new TreeSet<htmlFilterImageEntry>();
+        this.metas = new HashMap<String, String>();
         this.title = "";
         this.headlines = new ArrayList[4];
-        for (int i = 0; i < 4; i++) headlines[i] = new ArrayList();
+        for (int i = 0; i < 4; i++) headlines[i] = new ArrayList<String>();
         this.content = new serverCharBuffer(1024);
     }
     
@@ -311,7 +311,7 @@ public class htmlFilterContentScraper extends htmlFilterAbstractScraper implemen
             }
         }
         
-        // othervise take any headline
+        // otherwise take any headline
         for (int i = 0; i < 4; i++) {
             if (headlines[i].size() > 0) return (String) headlines[i].get(0);
         }
@@ -346,17 +346,17 @@ public class htmlFilterContentScraper extends htmlFilterAbstractScraper implemen
         }
     }
 
-    public Map getAnchors() {
+    public Map<String, String> getAnchors() {
         // returns a url (String) / name (String) relation
         return anchors;
     }
 
-    public TreeSet getImages() {
+    public TreeSet<htmlFilterImageEntry> getImages() {
         // this resturns a String(absolute url)/htmlFilterImageEntry - relation
         return images;
     }
 
-    public Map getMetas() {
+    public Map<String, String> getMetas() {
         return metas;
     }
     

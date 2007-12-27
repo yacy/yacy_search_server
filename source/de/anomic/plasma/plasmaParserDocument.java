@@ -68,21 +68,21 @@ import de.anomic.plasma.parser.Parser;
 public class plasmaParserDocument {
     
     private yacyURL location;       // the source url
-    private String mimeType;    // mimeType as taken from http header
-    private String charset;     // the charset of the document
-    private List keywords;  // most resources provide a keyword field
-    private StringBuffer title;       // a document title, taken from title or h1 tag; shall appear as headline of search result
-    private StringBuffer author;      // author or copyright
-    private List sections;  // if present: more titles/headlines appearing in the document
-    private StringBuffer abstrct;     // an abstract, if present: short content description
-    private Object text;  // the clear text, all that is visible
-    private Map anchors;        // all links embedded as clickeable entities (anchor tags)
-    private TreeSet images;     // all visible pictures in document
+    private String mimeType;        // mimeType as taken from http header
+    private String charset;         // the charset of the document
+    private List<String> keywords;  // most resources provide a keyword field
+    private StringBuffer title;     // a document title, taken from title or h1 tag; shall appear as headline of search result
+    private StringBuffer author;    // author or copyright
+    private List<String> sections;  // if present: more titles/headlines appearing in the document
+    private StringBuffer abstrct;   // an abstract, if present: short content description
+    private Object text;            // the clear text, all that is visible
+    private Map<String, String> anchors;    // all links embedded as clickeable entities (anchor tags)
+    private TreeSet<htmlFilterImageEntry> images;         // all visible pictures in document
     // the anchors and images - Maps are URL-to-EntityDescription mappings.
     // The EntityDescription appear either as visible text in anchors or as alternative
     // text in image tags.
-    private Map hyperlinks, audiolinks, videolinks, applinks;
-    private Map emaillinks;
+    private Map<String, String> hyperlinks, audiolinks, videolinks, applinks;
+    private Map<String, String> emaillinks;
     private yacyURL favicon;
     private boolean resorted;
     private InputStream textStream;
@@ -90,17 +90,17 @@ public class plasmaParserDocument {
     protected plasmaParserDocument(yacyURL location, String mimeType, String charset,
                     String[] keywords, String title, String author,
                     String[] sections, String abstrct,
-                    Object text, Map anchors, TreeSet images) {
+                    Object text, Map<String, String> anchors, TreeSet<htmlFilterImageEntry> images) {
         this.location = location;
         this.mimeType = (mimeType == null) ? "application/octet-stream" : mimeType;
         this.charset = charset;
-        this.keywords = (keywords == null) ? new LinkedList() : Arrays.asList(keywords);
+        this.keywords = (keywords == null) ? new LinkedList<String>() : Arrays.asList(keywords);
         this.title = (title == null) ? new StringBuffer() : new StringBuffer(title);
         this.author = (author == null) ? new StringBuffer() : new StringBuffer(author);
-        this.sections = (sections == null) ? new LinkedList() : Arrays.asList(sections);
+        this.sections = (sections == null) ? new LinkedList<String>() : Arrays.asList(sections);
         this.abstrct = (abstrct == null) ? new StringBuffer() : new StringBuffer(abstrct);
-        this.anchors = (anchors == null) ? new HashMap(0) : anchors;
-        this.images = (images == null) ? new TreeSet() : images;
+        this.anchors = (anchors == null) ? new HashMap<String, String>(0) : anchors;
+        this.images =  (images == null) ? new TreeSet<htmlFilterImageEntry>() : images;
         this.hyperlinks = null;
         this.audiolinks = null;
         this.videolinks = null;
@@ -125,21 +125,21 @@ public class plasmaParserDocument {
     public plasmaParserDocument(yacyURL location, String mimeType, String charset,
                     String[] keywords, String title, String author,
                     String[] sections, String abstrct,
-                    byte[] text, Map anchors, TreeSet images) {
+                    byte[] text, Map<String, String> anchors, TreeSet<htmlFilterImageEntry> images) {
         this(location, mimeType, charset, keywords, title, author, sections, abstrct, (Object)text, anchors, images);
     }
     
     public plasmaParserDocument(yacyURL location, String mimeType, String charset,
             String[] keywords, String title, String author,
             String[] sections, String abstrct,
-            File text, Map anchors, TreeSet images) {
+            File text, Map<String, String> anchors, TreeSet<htmlFilterImageEntry> images) {
         this(location, mimeType, charset, keywords, title, author, sections, abstrct, (Object)text, anchors, images);
     }
     
     public plasmaParserDocument(yacyURL location, String mimeType, String charset,
             String[] keywords, String title, String author,
             String[] sections, String abstrct,
-            serverCachedFileOutputStream text, Map anchors, TreeSet images) {
+            serverCachedFileOutputStream text, Map<String, String> anchors, TreeSet<htmlFilterImageEntry> images) {
         this(location, mimeType, charset, keywords, title, author, sections, abstrct, (Object)text, anchors, images);
     }
 
@@ -238,7 +238,7 @@ public class plasmaParserDocument {
     
     public String getKeywords(char separator) {
         // sort out doubles and empty words
-        TreeSet hs = new TreeSet();
+        TreeSet<String> hs = new TreeSet<String>();
         String s;
         for (int i = 0; i < this.keywords.size(); i++) {
             if (this.keywords.get(i) == null) continue;
@@ -253,11 +253,11 @@ public class plasmaParserDocument {
         return sb.substring(0, sb.length() - 1);
     }
     
-    public List getKeywords() {
+    public List<String> getKeywords() {
         return this.keywords;
     }
     
-    public Map getAnchors() {
+    public Map<String, String> getAnchors() {
         // returns all links embedded as anchors (clickeable entities)
         // this is a url(String)/text(String) map
         return anchors;
@@ -266,35 +266,35 @@ public class plasmaParserDocument {
     
     // the next three methods provide a calculated view on the getAnchors/getImages:
     
-    public Map getHyperlinks() {
+    public Map<String, String> getHyperlinks() {
         // this is a subset of the getAnchor-set: only links to other hyperrefs
         if (!resorted) resortLinks();
         return hyperlinks;
     }
     
-    public Map getAudiolinks() {
+    public Map<String, String> getAudiolinks() {
         if (!resorted) resortLinks();
         return this.audiolinks;
     }
     
-    public Map getVideolinks() {
+    public Map<String, String> getVideolinks() {
         if (!resorted) resortLinks();
         return this.videolinks;
     }
     
-    public TreeSet getImages() {
+    public TreeSet<htmlFilterImageEntry> getImages() {
         // returns all links enbedded as pictures (visible in document)
         // this resturns a htmlFilterImageEntry collection
         if (!resorted) resortLinks();
         return images;
     }
     
-    public Map getApplinks() {
+    public Map<String, String> getApplinks() {
         if (!resorted) resortLinks();
         return this.applinks;
     }
     
-    public Map getEmaillinks() {
+    public Map<String, String> getEmaillinks() {
         // this is part of the getAnchor-set: only links to email addresses
         if (!resorted) resortLinks();
         return emaillinks;
@@ -309,18 +309,18 @@ public class plasmaParserDocument {
         int extpos, qpos;
         String ext = null;
         i = anchors.entrySet().iterator();
-        hyperlinks = new HashMap();
-        videolinks = new HashMap();
-        audiolinks = new HashMap();
-        applinks   = new HashMap();
-        emaillinks = new HashMap();
-        TreeSet collectedImages = new TreeSet(); // this is a set that is collected now and joined later to the imagelinks
+        hyperlinks = new HashMap<String, String>();
+        videolinks = new HashMap<String, String>();
+        audiolinks = new HashMap<String, String>();
+        applinks   = new HashMap<String, String>();
+        emaillinks = new HashMap<String, String>();
+        TreeSet<htmlFilterImageEntry> collectedImages = new TreeSet<htmlFilterImageEntry>(); // this is a set that is collected now and joined later to the imagelinks
         Map.Entry entry;
         while (i.hasNext()) {
             entry = (Map.Entry) i.next();
             u = (String) entry.getKey();
             if ((u != null) && (u.startsWith("mailto:"))) {
-                emaillinks.put(u.substring(7), entry.getValue());
+                emaillinks.put(u.substring(7), (String)entry.getValue());
             } else {
                 extpos = u.lastIndexOf(".");
                 if (extpos > 0) {
@@ -337,11 +337,11 @@ public class plasmaParserDocument {
                             if (plasmaParser.imageExtContains(ext)) {
                                 collectedImages.add(new htmlFilterImageEntry(url, (String) entry.getValue(), -1, -1));
                             }
-                            else if (plasmaParser.audioExtContains(ext)) audiolinks.put(u, entry.getValue());
-                            else if (plasmaParser.videoExtContains(ext)) videolinks.put(u, entry.getValue());
-                            else if (plasmaParser.appsExtContains(ext)) applinks.put(u, entry.getValue());
+                            else if (plasmaParser.audioExtContains(ext)) audiolinks.put(u, (String)entry.getValue());
+                            else if (plasmaParser.videoExtContains(ext)) videolinks.put(u, (String)entry.getValue());
+                            else if (plasmaParser.appsExtContains(ext)) applinks.put(u, (String)entry.getValue());
                         } else {
-                            hyperlinks.put(u, entry.getValue());
+                            hyperlinks.put(u, (String)entry.getValue());
                         }
                     } catch (MalformedURLException e1) {
                     }
@@ -356,11 +356,11 @@ public class plasmaParserDocument {
             iEntry = (htmlFilterImageEntry) i.next();
             if (!images.contains(iEntry)) images.add(iEntry);
         }
-        
+       
         // expand the hyperlinks:
         // we add artificial hyperlinks to the hyperlink set
         // that can be calculated from given hyperlinks and imagelinks
-        hyperlinks.putAll(plasmaParser.allReflinks(hyperlinks.keySet()));
+        
         hyperlinks.putAll(plasmaParser.allReflinks(images));
         hyperlinks.putAll(plasmaParser.allReflinks(audiolinks.keySet()));
         hyperlinks.putAll(plasmaParser.allReflinks(videolinks.keySet()));

@@ -93,7 +93,7 @@ public class SZParserExtractCallback extends ArchiveExtractCallback {
             case IInArchive.NExtract_NAskMode_kSkip:
                 this.log.logFine("Skipping " + this.filePath);
                 break;
-        };
+        }
     }
 
     public void SetOperationResult(int arg0) throws IOException {
@@ -126,7 +126,7 @@ public class SZParserExtractCallback extends ArchiveExtractCallback {
                 }
                 
                 // revert the above workaround
-                Map nanchors = new HashMap(theDoc.getAnchors().size(), 1f);
+                Map<String, String> nanchors = new HashMap<String, String>(theDoc.getAnchors().size(), 1f);
                 Iterator it = theDoc.getAnchors().entrySet().iterator();
                 Map.Entry entry;
                 String base = doc.getLocation().toNormalform(false, true);
@@ -135,9 +135,9 @@ public class SZParserExtractCallback extends ArchiveExtractCallback {
                     if (((String)entry.getKey()).startsWith(base + "/")) {
                         String ref = "#" + ((String)entry.getKey()).substring(base.length() + 1);
                         this.log.logFinest("changing " + entry.getKey() + " to use reference " + ref);
-                        nanchors.put(base + ref, entry.getValue());
+                        nanchors.put(base + ref, (String)entry.getValue());
                     } else {
-                        nanchors.put(entry.getKey(), entry.getValue());
+                        nanchors.put((String)entry.getKey(), (String)entry.getValue());
                     }
                 }
                 theDoc.getAnchors().clear();

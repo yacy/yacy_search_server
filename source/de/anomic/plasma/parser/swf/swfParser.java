@@ -61,7 +61,7 @@ public class swfParser extends AbstractParser implements Parser {
      * a list of mime types that are supported by this parser class
      * @see #getSupportedMimeTypes()
      */
-    public static final Hashtable SUPPORTED_MIME_TYPES = new Hashtable();
+    public static final Hashtable<String, String> SUPPORTED_MIME_TYPES = new Hashtable<String, String>();
     static {
         SUPPORTED_MIME_TYPES.put("application/x-shockwave-flash","swf");
         SUPPORTED_MIME_TYPES.put("application/x-shockwave-flash2-preview","swf");
@@ -101,7 +101,7 @@ public class swfParser extends AbstractParser implements Parser {
             String[] sections =  null;
             String abstrct = null;
             //TreeSet images = null;
-            HashMap anchors = new HashMap();
+            HashMap<String, String> anchors = new HashMap<String, String>();
             int urls = 0;
             int urlStart = -1;
             int urlEnd = 0;
