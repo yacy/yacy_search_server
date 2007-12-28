@@ -54,8 +54,8 @@ public final class indexRAMRI implements indexRI {
     // class variables
     private final File databaseRoot;
     protected final SortedMap cache; // wordhash-container
-    private final kelondroMScoreCluster hashScore;
-    private final kelondroMScoreCluster hashDate;
+    private final kelondroMScoreCluster<String> hashScore;
+    private final kelondroMScoreCluster<String> hashDate;
     private long  initTime;
     private int   cacheMaxCount;
     public  int   cacheReferenceCountLimit;
@@ -71,8 +71,8 @@ public final class indexRAMRI implements indexRI {
         // the cache has a back-end where indexes that do not fit in the cache are flushed
         this.databaseRoot = databaseRoot;
         this.cache = Collections.synchronizedSortedMap(new TreeMap());
-        this.hashScore = new kelondroMScoreCluster();
-        this.hashDate  = new kelondroMScoreCluster();
+        this.hashScore = new kelondroMScoreCluster<String>();
+        this.hashDate  = new kelondroMScoreCluster<String>();
         this.initTime = System.currentTimeMillis();
         this.cacheMaxCount = 10000;
         this.cacheReferenceCountLimit = wCacheReferenceCountLimitInit;

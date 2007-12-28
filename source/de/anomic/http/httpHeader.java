@@ -75,7 +75,7 @@ import de.anomic.server.serverDate;
 import de.anomic.yacy.yacyURL;
 
 
-public final class httpHeader extends TreeMap implements Map {
+public final class httpHeader extends TreeMap<String, Object> implements Map<String, Object> {
 
     
 	private static final long serialVersionUID = 17L;
@@ -172,8 +172,8 @@ public final class httpHeader extends TreeMap implements Map {
     /* =============================================================
      * defining default http status messages
      * ============================================================= */
-    public static final HashMap http0_9 = new HashMap();
-    public static final HashMap http1_0 = new HashMap();
+    public static final HashMap<String, String> http0_9 = new HashMap<String, String>();
+    public static final HashMap<String, String> http1_0 = new HashMap<String, String>();
     static {
         http1_0.putAll(http0_9);
         http1_0.put("200","OK");
@@ -193,7 +193,7 @@ public final class httpHeader extends TreeMap implements Map {
         http1_0.put("502","Bad Gateway");
         http1_0.put("503","Service Unavailable");        
     }
-    public static final HashMap http1_1 = new HashMap(); 
+    public static final HashMap<String, String> http1_1 = new HashMap<String, String>(); 
     static {
         http1_1.putAll(http1_0);
         http1_1.put("100","Continue");
@@ -251,63 +251,62 @@ public final class httpHeader extends TreeMap implements Map {
     public static final String CONNECTION_PROP_PROXY_RESPOND_HEADER = "PROXY_RESPOND_HEADER";
     public static final String CONNECTION_PROP_PROXY_RESPOND_SIZE = "PROXY_REQUEST_SIZE";    
 
-    private final HashMap reverseMappingCache;
+    private final HashMap<String, String> reverseMappingCache;
 
     
     private static final Collator insensitiveCollator = Collator.getInstance(Locale.US);
     static {
-	insensitiveCollator.setStrength(Collator.SECONDARY);
-	insensitiveCollator.setDecomposition(Collator.NO_DECOMPOSITION);
+        insensitiveCollator.setStrength(Collator.SECONDARY);
+        insensitiveCollator.setDecomposition(Collator.NO_DECOMPOSITION);
     }
 
     public httpHeader() {
-	this(null);
+        this(null);
     }
 
-    public httpHeader(HashMap reverseMappingCache) {
-	// this creates a new TreeMap with a case insesitive mapping
-	// to provide a put-method that translates given keys into their
-	// 'proper' appearance, a translation cache is needed.
-	// upon instantiation, such a mapping cache can be handed over
-	// If the reverseMappingCache is null, none is used
-	super((Collator) insensitiveCollator.clone());
-	this.reverseMappingCache = reverseMappingCache;
+    public httpHeader(HashMap<String, String> reverseMappingCache) {
+        // this creates a new TreeMap with a case insesitive mapping
+        // to provide a put-method that translates given keys into their
+        // 'proper' appearance, a translation cache is needed.
+        // upon instantiation, such a mapping cache can be handed over
+        // If the reverseMappingCache is null, none is used
+        super((Collator) insensitiveCollator.clone());
+        this.reverseMappingCache = reverseMappingCache;
     }
 
-    public httpHeader(HashMap reverseMappingCache, File f) throws IOException {
-	// creates also a case insensitive map and loads it initially
-	// with some values
-	super((Collator) insensitiveCollator.clone());
-	this.reverseMappingCache = reverseMappingCache;
+    public httpHeader(HashMap<String, String> reverseMappingCache, File f) throws IOException {
+        // creates also a case insensitive map and loads it initially
+        // with some values
+        super((Collator) insensitiveCollator.clone());
+        this.reverseMappingCache = reverseMappingCache;
 
-	// load with data
-	BufferedReader br = new BufferedReader(new FileReader(f));
-	String line;
-	int pos;
-	while ((line = br.readLine()) != null) {
-	    pos = line.indexOf("=");
-	    if (pos >= 0) put(line.substring(0, pos), line.substring(pos + 1));
-	}
-	br.close();
+        // load with data
+        BufferedReader br = new BufferedReader(new FileReader(f));
+        String line;
+        int pos;
+        while ((line = br.readLine()) != null) {
+            pos = line.indexOf("=");
+            if (pos >= 0) put(line.substring(0, pos), line.substring(pos + 1));
+            }
+        br.close();
     }
 
-    public httpHeader(HashMap reverseMappingCache, Map othermap)  {
-	// creates a case insensitive map from another map
-	super((Collator) insensitiveCollator.clone());
-	this.reverseMappingCache = reverseMappingCache;
+    public httpHeader(HashMap<String, String> reverseMappingCache, Map<String, String> othermap)  {
+        // creates a case insensitive map from another map
+        super((Collator) insensitiveCollator.clone());
+        this.reverseMappingCache = reverseMappingCache;
 
-	// load with data
-	if (othermap != null) this.putAll(othermap);
+        // load with data
+        if (othermap != null) this.putAll(othermap);
     }
 
 
     // we override the put method to make use of the reverseMappingCache
-    public Object put(Object key, Object value) {
-        String k = (String) key;
-        String upperK = k.toUpperCase();
+    public Object put(String key, Object value) {
+        String upperK = key.toUpperCase();
         
         if (reverseMappingCache == null) {
-            return super.put(k, value);
+            return super.put(key, value);
         }
         
         if (reverseMappingCache.containsKey(upperK)) {
@@ -316,13 +315,13 @@ public final class httpHeader extends TreeMap implements Map {
         }
         
         // we put in without a cached key and store the key afterwards
-        Object r = super.put(k, value);
-        reverseMappingCache.put(upperK, k);
+        Object r = super.put(key, value);
+        reverseMappingCache.put(upperK, key);
         return r;
     }
 
     // to make the occurrence of multiple keys possible, we add them using a counter
-    public Object add(Object key, Object value) {
+    public Object add(String key, Object value) {
         int c = keyCount((String) key);
         if (c == 0) return put(key, value);
         return put("*" + key + "-" + c, value);
@@ -360,10 +359,10 @@ public final class httpHeader extends TreeMap implements Map {
         FileOutputStream fos = null;
         try {
             fos = new FileOutputStream(f);
-            Iterator i = keySet().iterator();
+            Iterator<String> i = keySet().iterator();
             String key, value;
             while (i.hasNext()) {
-                key = (String) i.next();
+                key = i.next();
                 value = (String) get(key);
                 fos.write((key + "=" + value + "\r\n").getBytes());
             }
@@ -734,12 +733,12 @@ public final class httpHeader extends TreeMap implements Map {
                  .append(httpStatusText).append("\r\n");
         
         // write header
-        Iterator i = keySet().iterator();
+        Iterator<String> i = keySet().iterator();
         String key;
         char tag;
         int count;
         while (i.hasNext()) {
-            key = (String) i.next();
+            key = i.next();
             tag = key.charAt(0);
             if ((tag != '*') && (tag != '#')) { // '#' in key is reserved for proxy attributes as artificial header values
                 count = keyCount(key);
@@ -797,7 +796,7 @@ public final class httpHeader extends TreeMap implements Map {
      * Holds header properties
      */
     //Since properties such as cookies can be multiple, we cannot use HashMap here. We have to use Vector.
-    private Vector cookies=new Vector();
+    private Vector<Entry> cookies = new Vector<Entry>();
     
     /**
      * Implementation of Map.Entry. Structure that hold two values - exactly what we need!
@@ -912,10 +911,10 @@ public final class httpHeader extends TreeMap implements Map {
         }
         return "";
     }
-    public Vector getCookieVector(){
+    public Vector<Entry> getCookieVector(){
         return cookies;
     }
-    public void setCookieVector(Vector mycookies){
+    public void setCookieVector(Vector<Entry> mycookies){
         cookies=mycookies;
     }
     /**
@@ -933,7 +932,7 @@ public final class httpHeader extends TreeMap implements Map {
      * }</pre>
      * @return iterator to read all request properties.
      */
-    public Iterator getCookies()
+    public Iterator<Entry> getCookies()
     {
         return cookies.iterator();
     }

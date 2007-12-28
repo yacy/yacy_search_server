@@ -48,16 +48,16 @@ import java.util.Random;
 import java.util.SortedMap;
 import java.util.TreeMap;
 
-public final class kelondroMScoreCluster {
+public final class kelondroMScoreCluster<E> {
     
-    protected final TreeMap<Object, Long> refkeyDB; // a mapping from a reference to the cluster key
-    protected final TreeMap<Long, Object> keyrefDB; // a mapping from the cluster key to the reference
+    protected final TreeMap<E, Long> refkeyDB; // a mapping from a reference to the cluster key
+    protected final TreeMap<Long, E> keyrefDB; // a mapping from the cluster key to the reference
     private long gcount;
     private int encnt;
     
     public kelondroMScoreCluster()  {
-        refkeyDB = new TreeMap<Object, Long>();
-        keyrefDB = new TreeMap<Long, Object>();
+        refkeyDB = new TreeMap<E, Long>();
+        keyrefDB = new TreeMap<Long, E>();
         gcount = 0;
         encnt = 0;
     }
@@ -146,23 +146,23 @@ public final class kelondroMScoreCluster {
         return refkeyDB.size();
     }
     
-    public synchronized void incScore(Object[] objs) {
-        addScore(objs, 1);
+    public synchronized void incScore(E[] objs) {
+        for (int i = 0; i < objs.length; i++) addScore(objs[i], 1);
     }
     
-    public synchronized void decScore(Object[] objs) {
-        addScore(objs, -1);
+    public synchronized void decScore(E[] objs) {
+        for (int i = 0; i < objs.length; i++) addScore(objs[i], -1);
     }
     
-    public synchronized void incScore(Object obj) {
+    public synchronized void incScore(E obj) {
         addScore(obj, 1);
     }
     
-    public synchronized void decScore(Object obj) {
+    public synchronized void decScore(E obj) {
         addScore(obj, -1);
     }
     
-    public synchronized void setScore(Object obj, int newScore) {
+    public synchronized void setScore(E obj, int newScore) {
         if (obj == null) return;
         //System.out.println("setScore " + obj.getClass().getName());
         Long usk = refkeyDB.remove(obj); // get unique score key, old entry is not needed any more
@@ -196,7 +196,7 @@ public final class kelondroMScoreCluster {
         gcount += newScore;
     }
     
-    public synchronized void addScore(Object obj, int incrementScore) {
+    public synchronized void addScore(E obj, int incrementScore) {
         if (obj == null) return;
         //System.out.println("setScore " + obj.getClass().getName());
         Long usk = refkeyDB.remove(obj); // get unique score key, old entry is not needed any more
@@ -232,7 +232,7 @@ public final class kelondroMScoreCluster {
         gcount += incrementScore;
     }
     
-    public synchronized int deleteScore(Object obj) {
+    public synchronized int deleteScore(E obj) {
         // deletes entry and returns previous score
         if (obj == null) return 0;
         //System.out.println("setScore " + obj.getClass().getName());
@@ -251,11 +251,11 @@ public final class kelondroMScoreCluster {
         return oldScore;        
     }
 
-    public synchronized boolean existsScore(Object obj) {
+    public synchronized boolean existsScore(E obj) {
         return (refkeyDB.get(obj) != null);
     }
     
-    public synchronized int getScore(Object obj) {
+    public synchronized int getScore(E obj) {
         if (obj == null) return 0;
         Long cs = refkeyDB.get(obj);
         if (cs == null) return 0;
@@ -284,19 +284,20 @@ public final class kelondroMScoreCluster {
         return keyrefDB.get(keyrefDB.firstKey());
     }
     
-    public synchronized Object[] getScores(int maxCount, boolean up) {
+    public synchronized E[] getScores(int maxCount, boolean up) {
         return getScores(maxCount, up, Integer.MIN_VALUE, Integer.MAX_VALUE);
     }
     
-    public synchronized Object[] getScores(int maxCount, boolean up, int minScore, int maxScore) {
+    @SuppressWarnings("unchecked")
+    public synchronized E[] getScores(int maxCount, boolean up, int minScore, int maxScore) {
         if (maxCount > refkeyDB.size()) maxCount = refkeyDB.size();
-        Object[] s = new Object[maxCount];
-        Iterator<Object> it = scores(up, minScore, maxScore);
+        E[] s = (E[]) new Object[maxCount];
+        Iterator<E> it = scores(up, minScore, maxScore);
         int i = 0;
         while ((i < maxCount) && (it.hasNext())) s[i++] = it.next();
         if (i < maxCount) {
             // re-copy the result array
-            Object[] sc = new Object[i];
+            E[] sc = (E[]) new Object[i];
             System.arraycopy(s, 0, sc, 0, i);
             s = sc;
             sc = null;
@@ -308,20 +309,20 @@ public final class kelondroMScoreCluster {
         return refkeyDB + " / " + keyrefDB;
     }
     
-    public synchronized Iterator<Object> scores(boolean up) {
+    public synchronized Iterator<E> scores(boolean up) {
         if (up) return new simpleScoreIterator();
         return new reverseScoreIterator();
     }
     
-    public synchronized Iterator<Object> scores(boolean up, int minScore, int maxScore) {
+    public synchronized Iterator<E> scores(boolean up, int minScore, int maxScore) {
         return new komplexScoreIterator(up, minScore, maxScore);
     }
     
-    private class komplexScoreIterator implements Iterator<Object> {
+    private class komplexScoreIterator implements Iterator<E> {
 
         boolean up;
-        TreeMap<Long, Object> keyrefDBcopy;
-        Object n;
+        TreeMap<Long, E> keyrefDBcopy;
+        E n;
         int min, max;
         
         @SuppressWarnings("unchecked")
@@ -329,7 +330,7 @@ public final class kelondroMScoreCluster {
             this.up = up;
             this.min = minScore;
             this.max = maxScore;
-            this.keyrefDBcopy = (TreeMap<Long, Object>) keyrefDB.clone(); // NoSuchElementException here?
+            this.keyrefDBcopy = (TreeMap<Long, E>) keyrefDB.clone(); // NoSuchElementException here?
             internalNext();
         }
        
@@ -342,11 +343,11 @@ public final class kelondroMScoreCluster {
             int score = (max + min) / 2;
             while (keyrefDBcopy.size() > 0) {
                 key = (Long) ((up) ? keyrefDBcopy.firstKey() : keyrefDBcopy.lastKey());
-                n = keyrefDBcopy.remove(key);
+                n = (E) keyrefDBcopy.remove(key);
                 score = (int) ((key.longValue() & 0xFFFFFFFF00000000L) >> 32);
                 if ((score >= min) && (score <= max)) return;
                 if (((up) && (score > max)) || ((!(up)) && (score < min))) {
-                    keyrefDBcopy = new TreeMap<Long, Object>();
+                    keyrefDBcopy = new TreeMap<Long, E>();
                     n = null;
                     return;
                 }
@@ -354,8 +355,8 @@ public final class kelondroMScoreCluster {
             n = null;
         }
         
-        public Object next() {
-            Object o = n;
+        public E next() {
+            E o = n;
             internalNext();
             return o;
         }
@@ -366,9 +367,9 @@ public final class kelondroMScoreCluster {
         
     }
     
-    private class reverseScoreIterator implements Iterator<Object> {
+    private class reverseScoreIterator implements Iterator<E> {
 
-        SortedMap<Long, Object> view;
+        SortedMap<Long, E> view;
         Long key;
         
         public reverseScoreIterator() {
@@ -379,10 +380,10 @@ public final class kelondroMScoreCluster {
             return view.size() > 0;
         }
         
-        public Object next() {
+        public E next() {
             key = view.lastKey();
             view = view.headMap(key);
-            Object value = keyrefDB.get(key);
+            E value = keyrefDB.get(key);
             //System.out.println("cluster reverse iterator: score = " + ((((Long) key).longValue() & 0xFFFFFFFF00000000L) >> 32) + ", handle = " + (((Long) key).longValue() & 0xFFFFFFFFL) + ", value = " + value);
             return value;
         }
@@ -394,10 +395,10 @@ public final class kelondroMScoreCluster {
         
     }
     
-    private class simpleScoreIterator implements Iterator<Object> {
+    private class simpleScoreIterator implements Iterator<E> {
 
-        Iterator<Map.Entry<Long, Object>> ii;
-        Map.Entry<Long, Object> entry;
+        Iterator<Map.Entry<Long, E>> ii;
+        Map.Entry<Long, E> entry;
         
         public simpleScoreIterator() {
             ii = keyrefDB.entrySet().iterator();
@@ -407,7 +408,7 @@ public final class kelondroMScoreCluster {
             return ii.hasNext();
         }
         
-        public Object next() {
+        public E next() {
             entry = ii.next();
             //System.out.println("cluster simple iterator: score = " + ((((Long) entry.getKey()).longValue() & 0xFFFFFFFF00000000L) >> 32) + ", handle = " + (((Long) entry.getKey()).longValue() & 0xFFFFFFFFL) + ", value = " + entry.getValue());
             return entry.getValue();
@@ -430,7 +431,7 @@ public final class kelondroMScoreCluster {
         }
         
         System.out.println("Test for Score: start");
-        kelondroMScoreCluster s = new kelondroMScoreCluster();
+        kelondroMScoreCluster<String> s = new kelondroMScoreCluster<String>();
         long c = 0;
 
         // create cluster

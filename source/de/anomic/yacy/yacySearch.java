@@ -169,7 +169,7 @@ public class yacySearch extends Thread {
         }
         
         // put in seeds according to dht
-        final kelondroMScoreCluster ranking = new kelondroMScoreCluster();
+        final kelondroMScoreCluster<String> ranking = new kelondroMScoreCluster<String>();
         final HashMap seeds = new HashMap();
         yacySeed seed;
         Iterator dhtEnum;         

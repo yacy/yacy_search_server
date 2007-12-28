@@ -346,7 +346,7 @@ public final class yacySeedDB {
         if (count > sizeConnected()) count = sizeConnected();
 
         // fill a score object
-        kelondroMScoreCluster seedScore = new kelondroMScoreCluster();
+        kelondroMScoreCluster<String> seedScore = new kelondroMScoreCluster<String>();
         yacySeed ys;
         long absage;
         Iterator s = seedsConnected(true, false, null, (float) 0.0);

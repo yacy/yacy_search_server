@@ -50,7 +50,7 @@ public interface htmlFilterTransformer {
     public void init(String initarg);
 
     // ask if this transformer will do any transformation whatsoever
-    // this may return true if the initialization resultet in a status
+    // this may return true if the initialization resulted in a status
     // that does not allow any transformation
     public boolean isIdentityTransformer();
     

@@ -42,7 +42,7 @@ import de.anomic.yacy.yacyURL;
 public class indexRWIEntryOrder extends kelondroAbstractOrder implements kelondroOrder {
     private indexRWIVarEntry min, max;
     private plasmaSearchRankingProfile ranking;
-    private kelondroMScoreCluster doms;
+    private kelondroMScoreCluster<String> doms;
     private int maxdomcount;
     
     private static final int processors = Runtime.getRuntime().availableProcessors(); // for multiprocessor support, used during normalization
@@ -51,7 +51,7 @@ public class indexRWIEntryOrder extends kelondroAbstractOrder implements kelondr
         this.min = null;
         this.max = null;
         this.ranking = profile;
-        this.doms = new kelondroMScoreCluster();
+        this.doms = new kelondroMScoreCluster<String>();
         this.maxdomcount = 0;
     }
     

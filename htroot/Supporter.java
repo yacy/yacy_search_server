@@ -103,7 +103,7 @@ public class Supporter {
             accumulateVotes(negativeHashes, positiveHashes, yacyNewsPool.INCOMING_DB);
             //accumulateVotes(negativeHashes, positiveHashes, yacyNewsPool.OUTGOING_DB);
             //accumulateVotes(negativeHashes, positiveHashes, yacyNewsPool.PUBLISHED_DB);
-            kelondroMScoreCluster ranking = new kelondroMScoreCluster(); // score cluster for url hashes
+            kelondroMScoreCluster<String> ranking = new kelondroMScoreCluster<String>(); // score cluster for url hashes
             kelondroRow rowdef = new kelondroRow("String url-255, String title-120, String description-120, String refid-" + (serverDate.PATTERN_SHORT_SECOND.length() + 12), kelondroNaturalOrder.naturalOrder, 0);
             HashMap Supporter = new HashMap(); // a mapping from an url hash to a kelondroRow.Entry with display properties
             accumulateSupporter(Supporter, ranking, rowdef, negativeHashes, positiveHashes, yacyNewsPool.INCOMING_DB);

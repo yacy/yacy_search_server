@@ -561,7 +561,7 @@ public final class yacy {
         enumerateFiles ef = new enumerateFiles(new File(dbRoot, "WORDS"), true, false, true, true);
         File f;
         String h;
-        kelondroMScoreCluster hs = new kelondroMScoreCluster();
+        kelondroMScoreCluster<String> hs = new kelondroMScoreCluster<String>();
         while (ef.hasMoreElements()) {
             f = (File) ef.nextElement();
             h = f.getName().substring(0, yacySeedDB.commonHashLength);

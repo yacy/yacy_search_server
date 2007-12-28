@@ -42,16 +42,16 @@ import de.anomic.plasma.plasmaSwitchboard;
 public class serverDomains {
 
     // a dns cache
-    private static final Map nameCacheHit = Collections.synchronizedMap(new HashMap()); // a not-synchronized map resulted in deadlocks
-    private static final Set nameCacheMiss = Collections.synchronizedSet(new HashSet());
-    private static final kelondroMScoreCluster nameCacheHitAges = new kelondroMScoreCluster();
-    private static final kelondroMScoreCluster nameCacheMissAges = new kelondroMScoreCluster();
+    private static final Map<String, InetAddress> nameCacheHit = Collections.synchronizedMap(new HashMap<String, InetAddress>()); // a not-synchronized map resulted in deadlocks
+    private static final Set<String> nameCacheMiss = Collections.synchronizedSet(new HashSet<String>());
+    private static final kelondroMScoreCluster<String> nameCacheHitAges = new kelondroMScoreCluster<String>();
+    private static final kelondroMScoreCluster<String> nameCacheMissAges = new kelondroMScoreCluster<String>();
     private static final int maxNameCacheHitAge = 24 * 60 * 60; // 24 hours in minutes
     private static final int maxNameCacheMissAge = 24 * 60 * 60; // 24 hours in minutes
     private static final int maxNameCacheHitSize = 3000; 
     private static final int maxNameCacheMissSize = 3000; 
-    public  static final List nameCacheNoCachingPatterns = Collections.synchronizedList(new LinkedList());
-    private static final Set nameCacheNoCachingList = Collections.synchronizedSet(new HashSet());
+    public  static final List<String> nameCacheNoCachingPatterns = Collections.synchronizedList(new LinkedList<String>());
+    private static final Set<String> nameCacheNoCachingList = Collections.synchronizedSet(new HashSet<String>());
     private static final long startTime = System.currentTimeMillis();
 
     /**
@@ -101,9 +101,10 @@ public class serverDomains {
             ) {
                 doCaching = false;
             } else {
-                Iterator noCachingPatternIter = nameCacheNoCachingPatterns.iterator();
+                Iterator<String> noCachingPatternIter = nameCacheNoCachingPatterns.iterator();
+                String nextPattern;
                 while (noCachingPatternIter.hasNext()) {
-                    String nextPattern = (String) noCachingPatternIter.next();
+                    nextPattern = noCachingPatternIter.next();
                     if (ip.getHostName().matches(nextPattern)) {
                         // disallow dns caching for this host
                         nameCacheNoCachingList.add(ip.getHostName());

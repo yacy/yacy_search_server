@@ -84,7 +84,7 @@ public class plasmaSnippetCache {
     public static final int ERROR_NO_MATCH = 16;
     
     private static int                   snippetsScoreCounter;
-    private static kelondroMScoreCluster snippetsScore;
+    private static kelondroMScoreCluster<String> snippetsScore;
     private static HashMap               snippetsCache;
     
     /**
@@ -104,7 +104,7 @@ public class plasmaSnippetCache {
         parser = parserx;
         log = logx;
         snippetsScoreCounter = 0;
-        snippetsScore = new kelondroMScoreCluster();
+        snippetsScore = new kelondroMScoreCluster<String>();
         snippetsCache = new HashMap(); 
         faviconCache = new HashMap();
     }
@@ -450,7 +450,7 @@ public class plasmaSnippetCache {
         // care for counter
         if (snippetsScoreCounter == java.lang.Integer.MAX_VALUE) {
             snippetsScoreCounter = 0;
-            snippetsScore = new kelondroMScoreCluster();
+            snippetsScore = new kelondroMScoreCluster<String>();
             snippetsCache = new HashMap();
         }
         

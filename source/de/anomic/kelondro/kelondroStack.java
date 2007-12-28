@@ -58,7 +58,7 @@ public final class kelondroStack extends kelondroEcoRecords {
     // define the Over-Head-Array
     private static short thisOHBytes   = 0; // our record definition does not need extra bytes
     private static short thisOHHandles = 2; // and two handles overhead for a double-chained list
-    private static short thisFHandles  = 2; // two file handles for root handle and handle to last lement
+    private static short thisFHandles  = 2; // two file handles for root handle and handle to last element
 
     // define pointers for OH array access
     protected static final int left  = 0; // pointer for OHHandle-array: handle()-Value of left child Node
@@ -106,13 +106,13 @@ public final class kelondroStack extends kelondroEcoRecords {
         return open(f, row);
     }
 
-    public Iterator stackIterator(boolean up) {
+    public Iterator<kelondroRow.Entry> stackIterator(boolean up) {
         // iterates the elements in an ordered way.
         // returns kelondroRow.Entry - type Objects
         return new stackIterator(up);
     }
 
-    public class stackIterator implements Iterator {
+    public class stackIterator implements Iterator<kelondroRow.Entry> {
         kelondroHandle nextHandle = null;
         kelondroHandle lastHandle = null;
         boolean up;
@@ -126,7 +126,7 @@ public final class kelondroStack extends kelondroEcoRecords {
             return (nextHandle != null);
         }
 
-        public Object next() {
+        public kelondroRow.Entry next() {
         	lastHandle = nextHandle;
             try {
                 nextHandle = new EcoNode(nextHandle).getOHHandle((up) ? right : left);
@@ -306,10 +306,10 @@ public final class kelondroStack extends kelondroEcoRecords {
 
     public void print() throws IOException {
         super.print();
-        Iterator it = stackIterator(true);
+        Iterator<kelondroRow.Entry> it = stackIterator(true);
         kelondroRow.Entry r;
         while (it.hasNext()) {
-            r = (kelondroRow.Entry) it.next();
+            r = it.next();
             System.out.print("  KEY:'" + r.getColString(0, null) + "'");
             for (int j = 1; j < row().columns(); j++)
                 System.out.print(", V[" + j + "]:'" + r.getColString(j, null) + "'");

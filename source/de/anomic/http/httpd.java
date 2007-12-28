@@ -116,7 +116,7 @@ public final class httpd implements serverHandler {
     public static final String copyright = "[ HTTP SERVER: AnomicHTTPD v" + vDATE + " by Michael Christen / www.anomic.de ]";
     public static final String hline = "-------------------------------------------------------------------------------";
     
-    public static HashMap reverseMappingCache = new HashMap();
+    public static HashMap<String, String> reverseMappingCache = new HashMap<String, String>();
     private static plasmaSwitchboard switchboard = null;
     private static String virtualHost = null;
     

@@ -56,7 +56,7 @@ import java.util.Hashtable;
 
 public class kelondroXMLTables {
 
-    private Hashtable tables;
+    private Hashtable<String, Hashtable<String, String>> tables;
 
     // tables is a hashtable that contains hashtables as values in the table
     private File propFile;
@@ -65,18 +65,19 @@ public class kelondroXMLTables {
     public kelondroXMLTables() {
         this.propFile = null;
         this.timestamp = System.currentTimeMillis();
-        this.tables = new Hashtable();
+        this.tables = new Hashtable<String, Hashtable<String, String>>();
     }
 
+    @SuppressWarnings("unchecked")
     public kelondroXMLTables(File file) throws IOException {
         this.propFile = file;
         this.timestamp = System.currentTimeMillis();
         if (propFile.exists()) {
             XMLDecoder xmldec = new XMLDecoder(new FileInputStream(propFile));
-            tables = (Hashtable) xmldec.readObject();
+            tables = (Hashtable<String, Hashtable<String, String>>) xmldec.readObject();
             xmldec.close();
         } else {
-            tables = new Hashtable();
+            tables = new Hashtable<String, Hashtable<String, String>>();
         }
     }
 
@@ -120,29 +121,25 @@ public class kelondroXMLTables {
 
     public int sizeTable(String table) {
         // returns number of entries in table; if table does not exist -1
-        Hashtable l = (Hashtable) tables.get(table);
-        if (l == null)
-            return -1;
+        Hashtable<String, String> l = tables.get(table);
+        if (l == null) return -1;
         return l.size();
     }
 
     public void createTable(String table) throws IOException {
         // creates a new table
-        Hashtable l = (Hashtable) tables.get(table);
+        Hashtable<String, String> l = tables.get(table);
         if (l != null)
             return; // we do not overwite
-        tables.put(table, new Hashtable());
-        if (this.propFile != null)
-            commit(false);
+        tables.put(table, new Hashtable<String, String>());
+        if (this.propFile != null) commit(false);
     }
 
     public void set(String table, String key, String value) throws IOException {
         if (table != null) {
-            Hashtable l = (Hashtable) tables.get(table);
-            if (l == null)
-                throw new RuntimeException("Microtables.set: table does not exist");
-            if (value == null)
-                value = "";
+            Hashtable<String, String> l = tables.get(table);
+            if (l == null) throw new RuntimeException("Microtables.set: table does not exist");
+            if (value == null) value = "";
             l.put(key, value);
         }
         if (this.propFile != null)
@@ -151,7 +148,7 @@ public class kelondroXMLTables {
 
     public String get(String table, String key, String deflt) {
         if (table != null) {
-            Hashtable l = (Hashtable) tables.get(table);
+            Hashtable<String, String> l = tables.get(table);
             if (l == null)
                 throw new RuntimeException("Microtables.get: table does not exist");
             if (l.containsKey(key))
@@ -164,7 +161,7 @@ public class kelondroXMLTables {
 
     public boolean has(String table, String key) {
         if (table != null) {
-            Hashtable l = (Hashtable) tables.get(table);
+            Hashtable<String, String> l = tables.get(table);
             if (l == null)
                 throw new RuntimeException("Microtables.has: table does not exist");
             return (l.containsKey(key));
@@ -172,9 +169,9 @@ public class kelondroXMLTables {
         return false;
     }
 
-    public Enumeration keys(String table) {
+    public Enumeration<String> keys(String table) {
         if (table != null) {
-            Hashtable l = (Hashtable) tables.get(table);
+            Hashtable<String, String> l = tables.get(table);
             if (l == null)
                 throw new RuntimeException("Microtables.keys: table does not exist");
             return l.keys();

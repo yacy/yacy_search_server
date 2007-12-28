@@ -49,7 +49,7 @@ import java.util.Iterator;
 public class kelondroCachedRA extends kelondroAbstractRA implements kelondroRA {
 
     protected kelondroRA ra; 
-    protected kelondroMScoreCluster cacheScore;
+    protected kelondroMScoreCluster<Integer> cacheScore;
     protected HashMap<Integer, byte[]> cacheMemory;
     private int cacheMaxElements;
     private int cacheElementSize;
@@ -59,7 +59,7 @@ public class kelondroCachedRA extends kelondroAbstractRA implements kelondroRA {
 	this.ra  = ra;
         this.name = ra.name();
         this.cacheMemory = new HashMap<Integer, byte[]>();
-        this.cacheScore = new kelondroMScoreCluster();
+        this.cacheScore = new kelondroMScoreCluster<Integer>();
         this.cacheElementSize = elementsize;
         this.cacheMaxElements = cachesize / cacheElementSize;
         this.seekpos = 0;
@@ -90,7 +90,7 @@ public class kelondroCachedRA extends kelondroAbstractRA implements kelondroRA {
         if (cache == null) {
             if (cacheMemory.size() >= cacheMaxElements) {
                 // delete elements in buffer if buffer too big
-                Iterator<Object> it = cacheScore.scores(true);
+                Iterator<Integer> it = cacheScore.scores(true);
                 Integer element = (Integer) it.next();
                 writeCache((byte[]) cacheMemory.get(element), element.intValue());
                 cacheMemory.remove(element);
@@ -182,9 +182,9 @@ public class kelondroCachedRA extends kelondroAbstractRA implements kelondroRA {
     public void close() throws IOException {
         // write all unwritten buffers
         if (cacheMemory == null) return;
-        Iterator<Object> it = cacheScore.scores(true);
+        Iterator<Integer> it = cacheScore.scores(true);
         while (it.hasNext()) {
-            Integer element = (Integer) it.next();
+            Integer element = it.next();
             writeCache((byte[]) cacheMemory.get(element), element.intValue());
             cacheMemory.remove(element);
         }

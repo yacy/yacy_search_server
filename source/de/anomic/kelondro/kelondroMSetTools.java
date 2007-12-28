@@ -81,25 +81,25 @@ public class kelondroMSetTools {
     // We distinguish two principal solutions
     // - constructive join (generate new data structure)
     // - destructive join (remove non-valid elements from given data structure)
-    // The alogorithm to perform the join can be also of two kind:
-    // - join by pairvise enumeration
+    // The algorithm to perform the join can be also of two kind:
+    // - join by pairwise enumeration
     // - join by iterative tests (where we distinguish left-right and right-left tests)
 
     
-    public static TreeMap joinConstructive(Collection maps, boolean concatStrings) {
+    public static <A, B> TreeMap<A, B> joinConstructive(Collection<TreeMap<A, B>> maps, boolean concatStrings) {
         // this joins all TreeMap(s) contained in maps
         
         // first order entities by their size
-        TreeMap orderMap = new TreeMap();
-        TreeMap singleMap;
-        Iterator i = maps.iterator();
+        TreeMap<Long, TreeMap<A, B>> orderMap = new TreeMap<Long, TreeMap<A, B>>();
+        TreeMap<A, B> singleMap;
+        Iterator<TreeMap<A, B>> i = maps.iterator();
         int count = 0;
         while (i.hasNext()) {
             // get next entity:
-            singleMap = (TreeMap) i.next();
+            singleMap = i.next();
             
             // check result
-            if ((singleMap == null) || (singleMap.size() == 0)) return new TreeMap();
+            if ((singleMap == null) || (singleMap.size() == 0)) return new TreeMap<A, B>();
             
             // store result in order of result size
             orderMap.put(new Long(singleMap.size() * 1000 + count), singleMap);
@@ -107,16 +107,16 @@ public class kelondroMSetTools {
         }
         
         // check if there is any result
-        if (orderMap.size() == 0) return new TreeMap();
+        if (orderMap.size() == 0) return new TreeMap<A, B>();
         
         // we now must pairwise build up a conjunction of these maps
         Long k = (Long) orderMap.firstKey(); // the smallest, which means, the one with the least entries
-        TreeMap mapA, mapB, joinResult = (TreeMap) orderMap.remove(k);
+        TreeMap<A, B> mapA, mapB, joinResult = (TreeMap<A, B>) orderMap.remove(k);
         while ((orderMap.size() > 0) && (joinResult.size() > 0)) {
             // take the first element of map which is a result and combine it with result
             k = (Long) orderMap.firstKey(); // the next smallest...
             mapA = joinResult;
-            mapB = (TreeMap) orderMap.remove(k);
+            mapB = (TreeMap<A, B>) orderMap.remove(k);
             joinResult = joinConstructiveByTest(mapA, mapB, concatStrings); // TODO: better with enumeration?
             // free resources
             mapA = null;
@@ -124,15 +124,15 @@ public class kelondroMSetTools {
         }
 
         // in 'searchResult' is now the combined search result
-        if (joinResult.size() == 0) return new TreeMap();
+        if (joinResult.size() == 0) return new TreeMap<A, B>();
         return joinResult;
     }
     
-    public static TreeMap joinConstructive(TreeMap map1, TreeMap map2, boolean concatStrings) {
+    public static <A, B> TreeMap<A, B> joinConstructive(TreeMap<A, B> map1, TreeMap<A, B> map2, boolean concatStrings) {
         // comparators must be equal
         if ((map1 == null) || (map2 == null)) return null;
         if (map1.comparator() != map2.comparator()) return null;
-        if ((map1.size() == 0) || (map2.size() == 0)) return new TreeMap(map1.comparator());
+        if ((map1.size() == 0) || (map2.size() == 0)) return new TreeMap<A, B>(map1.comparator());
 
         // decide which method to use
         int high = ((map1.size() > map2.size()) ? map1.size() : map2.size());
@@ -148,39 +148,49 @@ public class kelondroMSetTools {
         return joinConstructiveByEnumeration(map1, map2, concatStrings);
     }
     
-    private static TreeMap joinConstructiveByTest(TreeMap small, TreeMap large, boolean concatStrings) {
-        Iterator mi = small.entrySet().iterator();
-        TreeMap result = new TreeMap(large.comparator());
-        Map.Entry mentry1;
+    private static <A, B> TreeMap<A, B> joinConstructiveByTest(TreeMap<A, B> small, TreeMap<A, B> large, boolean concatStrings) {
+        Iterator<Map.Entry<A, B>> mi = small.entrySet().iterator();
+        TreeMap<A, B> result = new TreeMap<A, B>(large.comparator());
+        Map.Entry<A, B> mentry1;
         Object mobj2;
         while (mi.hasNext()) {
-            mentry1 = (Map.Entry) mi.next();
+            mentry1 = mi.next();
             mobj2 = large.get(mentry1.getKey());
-            if (mobj2 != null) result.put(mentry1.getKey(), (concatStrings) ? ((String) mentry1.getValue() + (String) mobj2) : mentry1.getValue());
+            if (mobj2 != null) {
+                if (mentry1.getValue() instanceof String) {
+                    result.put(mentry1.getKey(), (B) ((concatStrings) ? ((String) mentry1.getValue() + (String) mobj2) : (String) mentry1.getValue()));
+                } else {
+                    result.put(mentry1.getKey(), mentry1.getValue());
+                }
+            }
         }
         return result;
     }
 
-    private static TreeMap joinConstructiveByEnumeration(TreeMap map1, TreeMap map2, boolean concatStrings) {
-        // implement pairvise enumeration
-        Comparator comp = map1.comparator();
-        Iterator mi1 = map1.entrySet().iterator();
-        Iterator mi2 = map2.entrySet().iterator();
-        TreeMap result = new TreeMap(map1.comparator());
+    private static <A, B> TreeMap<A, B> joinConstructiveByEnumeration(TreeMap<A, B> map1, TreeMap<A, B> map2, boolean concatStrings) {
+        // implement pairwise enumeration
+        Comparator<? super A> comp = map1.comparator();
+        Iterator<Map.Entry<A, B>> mi1 = map1.entrySet().iterator();
+        Iterator<Map.Entry<A, B>> mi2 = map2.entrySet().iterator();
+        TreeMap<A, B> result = new TreeMap<A, B>(map1.comparator());
         int c;
         if ((mi1.hasNext()) && (mi2.hasNext())) {
-            Map.Entry mentry1 = (Map.Entry) mi1.next();
-            Map.Entry mentry2 = (Map.Entry) mi2.next();
+            Map.Entry<A, B> mentry1 = mi1.next();
+            Map.Entry<A, B> mentry2 = mi2.next();
             while (true) {
                 c = compare(mentry1.getKey(), mentry2.getKey(), comp);
                 if (c < 0) {
-                    if (mi1.hasNext()) mentry1 = (Map.Entry) mi1.next(); else break;
+                    if (mi1.hasNext()) mentry1 = mi1.next(); else break;
                 } else if (c > 0) {
-                    if (mi2.hasNext()) mentry2 = (Map.Entry) mi2.next(); else break;
+                    if (mi2.hasNext()) mentry2 = mi2.next(); else break;
                 } else {
-                    result.put(mentry1.getKey(), (concatStrings) ? ((String) mentry1.getValue() + (String) mentry2.getValue()) : mentry1.getValue());
-                    if (mi1.hasNext()) mentry1 = (Map.Entry) mi1.next(); else break;
-                    if (mi2.hasNext()) mentry2 = (Map.Entry) mi2.next(); else break;
+                    if (mentry1.getValue() instanceof String) {
+                        result.put(mentry1.getKey(), (B) ((concatStrings) ? ((String) mentry1.getValue() + (String) mentry2.getValue()) : (String) mentry1.getValue()));
+                    } else {
+                        result.put(mentry1.getKey(), mentry1.getValue());
+                    }
+                    if (mi1.hasNext()) mentry1 = mi1.next(); else break;
+                    if (mi2.hasNext()) mentry2 = mi2.next(); else break;
                 }
             }
         }

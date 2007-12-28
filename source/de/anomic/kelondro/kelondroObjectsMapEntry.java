@@ -33,13 +33,13 @@ import java.util.Map;
 
 public class kelondroObjectsMapEntry implements kelondroObjectsEntry {
 
-    protected Map entry;
+    protected Map<String, String> entry;
     
     public kelondroObjectsMapEntry() {
-        this.entry = new HashMap();
+        this.entry = new HashMap<String, String>();
     }
     
-    public kelondroObjectsMapEntry(Map map) {
+    public kelondroObjectsMapEntry(Map<String, String> map) {
         this.entry = map;
     }
     
@@ -63,7 +63,7 @@ public class kelondroObjectsMapEntry implements kelondroObjectsEntry {
         }
     }
     
-    public Map map() {
+    public Map<String, String> map() {
         return this.entry;
     }
 

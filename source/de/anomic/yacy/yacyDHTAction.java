@@ -59,11 +59,11 @@ import de.anomic.server.logging.serverLog;
 public class yacyDHTAction implements yacyPeerAction {
    
     protected yacySeedDB seedDB;
-    protected kelondroMScoreCluster seedCrawlReady;
+    protected kelondroMScoreCluster<String> seedCrawlReady;
     
     public yacyDHTAction(yacySeedDB seedDB) {
         this.seedDB = seedDB;
-        this.seedCrawlReady = new kelondroMScoreCluster();
+        this.seedCrawlReady = new kelondroMScoreCluster<String>();
         // init crawl-ready table
         try {
             Iterator en = seedDB.seedsConnected(true, false, null, (float) 0.0);

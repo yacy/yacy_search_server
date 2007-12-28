@@ -167,8 +167,8 @@ public class kelondroSQLTable implements kelondroIndex {
         }
     }
 
-    public synchronized void putMultiple(List rows) throws IOException {
-        Iterator i = rows.iterator();
+    public synchronized void putMultiple(List<kelondroRow.Entry> rows) throws IOException {
+        Iterator<kelondroRow.Entry> i = rows.iterator();
         while (i.hasNext()) put((Entry) i.next());
     }
     
@@ -212,7 +212,7 @@ public class kelondroSQLTable implements kelondroIndex {
         throw new UnsupportedOperationException();
     }
     
-    public synchronized void addUniqueMultiple(List rows) throws IOException {
+    public synchronized void addUniqueMultiple(List<kelondroRow.Entry> rows) throws IOException {
         throw new UnsupportedOperationException();
     }
     
@@ -242,12 +242,12 @@ public class kelondroSQLTable implements kelondroIndex {
         return null;
     }
     
-    public kelondroCloneableIterator rows(boolean up, byte[] startKey) throws IOException {
+    public kelondroCloneableIterator<kelondroRow.Entry> rows(boolean up, byte[] startKey) throws IOException {
         // Objects are of type kelondroRow.Entry
         return null;
     }
 
-    public kelondroCloneableIterator keys(boolean up, byte[] startKey) {
+    public kelondroCloneableIterator<byte[]> keys(boolean up, byte[] startKey) {
         // Objects are of type byte[]
         return null;
     }

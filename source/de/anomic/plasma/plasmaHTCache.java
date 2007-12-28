@@ -514,7 +514,7 @@ public final class plasmaHTCache {
 
     public static void cacheScan() {
         log.logConfig("STARTING HTCACHE SCANNING");
-        kelondroMScoreCluster doms = new kelondroMScoreCluster();
+        kelondroMScoreCluster<String> doms = new kelondroMScoreCluster<String>();
         int fileCount = 0;
         enumerateFiles fileEnum = new enumerateFiles(cachePath, true, false, true, true);
         File dbfile = new File(cachePath, "responseHeader.db");

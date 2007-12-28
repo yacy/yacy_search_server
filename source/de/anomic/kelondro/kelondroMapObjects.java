@@ -37,8 +37,8 @@ import java.util.Map;
 public class kelondroMapObjects extends kelondroObjects {
 
     private String[] sortfields, longaccfields, doubleaccfields;
-    private HashMap sortClusterMap; // a String-kelondroMScoreCluster - relation
-    private HashMap accMap; // to store accumulations of specific fields
+    private HashMap<String, kelondroMScoreCluster<String>> sortClusterMap; // a String-kelondroMScoreCluster - relation
+    private HashMap<String, Object> accMap; // to store accumulations of specific fields
     private int elementCount;
     
     public kelondroMapObjects(kelondroDyn dyn, int cachesize) {
@@ -53,12 +53,12 @@ public class kelondroMapObjects extends kelondroObjects {
         this.longaccfields = longaccfields;
         this.doubleaccfields = doubleaccfields;
 
-        kelondroMScoreCluster[] cluster = null;
+        kelondroMScoreCluster<String>[] cluster = null;
         if (sortfields == null) sortClusterMap = null; else {
-            sortClusterMap = new HashMap();
+            sortClusterMap = new HashMap<String, kelondroMScoreCluster<String>>();
             cluster = new kelondroMScoreCluster[sortfields.length];
             for (int i = 0; i < sortfields.length; i++) {
-                cluster[i] = new kelondroMScoreCluster();   
+                cluster[i] = new kelondroMScoreCluster<String>();   
             }
         }
 
@@ -67,7 +67,7 @@ public class kelondroMapObjects extends kelondroObjects {
         if ((longaccfields == null) && (doubleaccfields == null)) {
         	accMap = null;
         } else {
-            accMap = new HashMap();
+            accMap = new HashMap<String, Object>();
             if (longaccfields != null) {
                 longaccumulator = new Long[longaccfields.length];
                 for (int i = 0; i < longaccfields.length; i++) {
@@ -84,15 +84,15 @@ public class kelondroMapObjects extends kelondroObjects {
 
         // fill cluster and accumulator with values
         if ((sortfields != null) || (longaccfields != null) || (doubleaccfields != null)) try {
-            kelondroCloneableIterator it = dyn.dynKeys(true, false);
+            kelondroCloneableIterator<String> it = dyn.dynKeys(true, false);
             String mapname;
             Object cell;
             long valuel;
             double valued;
-            Map map;
+            Map<String, String> map;
             this.elementCount = 0;
             while (it.hasNext()) {
-                mapname = (String) it.next();
+                mapname = it.next();
                 map = getMap(mapname);
                 if (map == null) break;
                 
@@ -147,16 +147,16 @@ public class kelondroMapObjects extends kelondroObjects {
     public void reset() throws IOException {
     	super.reset();
         if (sortfields == null) sortClusterMap = null; else {
-            sortClusterMap = new HashMap();
+            sortClusterMap = new HashMap<String, kelondroMScoreCluster<String>>();
             for (int i = 0; i < sortfields.length; i++) {
-            	sortClusterMap.put(sortfields[i], new kelondroMScoreCluster());
+            	sortClusterMap.put(sortfields[i], new kelondroMScoreCluster<String>());
             }
         }
         
         if ((longaccfields == null) && (doubleaccfields == null)) {
         	accMap = null;
         } else {
-        	accMap = new HashMap();
+        	accMap = new HashMap<String, Object>();
         	if (longaccfields != null) {
                 for (int i = 0; i < longaccfields.length; i++) {
             		accMap.put(longaccfields[i], new Long(0));
@@ -171,14 +171,14 @@ public class kelondroMapObjects extends kelondroObjects {
         this.elementCount = 0;
     }
     
-    public synchronized void set(String key, Map newMap) throws IOException {
+    public synchronized void set(String key, Map<String, String> newMap) throws IOException {
         assert (key != null);
         assert (key.length() > 0);
         assert (newMap != null);
 
         // update elementCount
         if ((longaccfields != null) || (doubleaccfields != null)) {
-            final Map oldMap = getMap(key, false);
+            final Map<String, String> oldMap = getMap(key, false);
             if (oldMap == null) {
                 // new element
                 elementCount++;
@@ -197,14 +197,14 @@ public class kelondroMapObjects extends kelondroObjects {
         if ((longaccfields != null) || (doubleaccfields != null)) updateAcc(newMap, true);
     }
     
-    private void updateAcc(Map map, boolean add) {
+    private void updateAcc(Map<String, String> map, boolean add) {
         String value;
         long valuel;
         double valued;
         Long longaccumulator;
         Double doubleaccumulator;
         if (longaccfields != null) for (int i = 0; i < longaccfields.length; i++) {
-            value = (String) map.get(longaccfields[i]);
+            value = map.get(longaccfields[i]);
             if (value != null) {
                 try {
                     valuel = Long.parseLong(value);
@@ -218,7 +218,7 @@ public class kelondroMapObjects extends kelondroObjects {
             }
         }
         if (doubleaccfields != null) for (int i = 0; i < doubleaccfields.length; i++) {
-            value = (String) map.get(doubleaccfields[i]);
+            value = map.get(doubleaccfields[i]);
             if (value != null) {
                 try {
                     valued = Double.parseDouble(value);
@@ -233,13 +233,13 @@ public class kelondroMapObjects extends kelondroObjects {
         }
     }
 
-    private void updateSortCluster(final String key, final Map map) {
+    private void updateSortCluster(final String key, final Map<String, String> map) {
         Object cell;
-        kelondroMScoreCluster cluster;
+        kelondroMScoreCluster<String> cluster;
         for (int i = 0; i < sortfields.length; i++) {
             cell = map.get(sortfields[i]);
             if (cell != null) {
-                cluster = (kelondroMScoreCluster) sortClusterMap.get(sortfields[i]);
+                cluster = (kelondroMScoreCluster<String>) sortClusterMap.get(sortfields[i]);
                 cluster.setScore(key, kelondroMScoreCluster.object2score(cell));
                 sortClusterMap.put(sortfields[i], cluster);
             }
@@ -251,7 +251,7 @@ public class kelondroMapObjects extends kelondroObjects {
         
         // update elementCount
         if ((sortfields != null) || (longaccfields != null) || (doubleaccfields != null)) {
-            final Map map = getMap(key);
+            final Map<String, String> map = getMap(key);
             if (map != null) {
                 // update count
                 elementCount--;
@@ -266,7 +266,7 @@ public class kelondroMapObjects extends kelondroObjects {
         super.remove(key);
     }
     
-    public Map getMap(String key) {
+    public Map<String, String> getMap(String key) {
         try {
             kelondroObjectsMapEntry mapEntry = (kelondroObjectsMapEntry) super.get(key);
             if (mapEntry == null) return null;
@@ -277,7 +277,7 @@ public class kelondroMapObjects extends kelondroObjects {
         }
     }
     
-    protected Map getMap(String key, boolean cache) {
+    protected Map<String, String> getMap(String key, boolean cache) {
         try {
             kelondroObjectsMapEntry mapEntry = (kelondroObjectsMapEntry) super.get(key, cache);
             if (mapEntry == null) return null;
@@ -290,18 +290,18 @@ public class kelondroMapObjects extends kelondroObjects {
     
     private void deleteSortCluster(final String key) {
         if (key == null) return;
-        kelondroMScoreCluster cluster;
+        kelondroMScoreCluster<String> cluster;
         for (int i = 0; i < sortfields.length; i++) {
-            cluster = (kelondroMScoreCluster) sortClusterMap.get(sortfields[i]);
+            cluster = sortClusterMap.get(sortfields[i]);
             cluster.deleteScore(key);
             sortClusterMap.put(sortfields[i], cluster);
         }
     }
     
-    public synchronized Iterator keys(final boolean up, /* sorted by */ String field) {
+    public synchronized Iterator<String> keys(final boolean up, /* sorted by */ String field) {
         // sorted iteration using the sortClusters
         if (sortClusterMap == null) return null;
-        final kelondroMScoreCluster cluster = (kelondroMScoreCluster) sortClusterMap.get(field);
+        final kelondroMScoreCluster<String> cluster = sortClusterMap.get(field);
         if (cluster == null) return null; // sort field does not exist
         //System.out.println("DEBUG: cluster for field " + field + ": " + cluster.toString());
         return cluster.scores(up);
@@ -346,14 +346,14 @@ public class kelondroMapObjects extends kelondroObjects {
         super.close();
     }
     
-    public class mapIterator implements Iterator {
+    public class mapIterator implements Iterator<Map<String, String>> {
         // enumerates Map-Type elements
         // the key is also included in every map that is returned; it's key is 'key'
 
-        Iterator keyIterator;
+        Iterator<String> keyIterator;
         boolean finish;
 
-        public mapIterator(Iterator keyIterator) {
+        public mapIterator(Iterator<String> keyIterator) {
             this.keyIterator = keyIterator;
             this.finish = false;
         }
@@ -362,11 +362,11 @@ public class kelondroMapObjects extends kelondroObjects {
             return (!(finish)) && (keyIterator != null) && (keyIterator.hasNext());
         }
 
-        public Object next() {
+        public Map<String, String> next() {
             String nextKey;
-            Map map;
+            Map<String, String> map;
             while (keyIterator.hasNext()) {
-                nextKey = (String) keyIterator.next();
+                nextKey = keyIterator.next();
                 if (nextKey == null) {
                     finish = true;
                     return null;

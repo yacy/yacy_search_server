@@ -107,8 +107,8 @@ public final class plasmaCondenser {
     private final static int numlength = 5;
 
     //private Properties analysis;
-    private TreeMap words; // a string (the words) to (wordStatProp) - relation
-    private HashMap sentences;
+    private TreeMap<String, wordStatProp> words; // a string (the words) to (wordStatProp) - relation
+    private HashMap<StringBuffer, phraseStatProp> sentences;
     private int wordminsize;
     private int wordcut;
 
@@ -124,8 +124,8 @@ public final class plasmaCondenser {
         // added media words are flagged with the appropriate media flag
         this.wordminsize = 3;
         this.wordcut = 2;
-        this.words = new TreeMap();
-        this.sentences = new HashMap();
+        this.words = new TreeMap<String, wordStatProp>();
+        this.sentences = new HashMap<StringBuffer, phraseStatProp>();
         this.RESULT_FLAGS = new kelondroBitfield(4);
         
         //System.out.println("DEBUG: condensing " + document.getMainLongTitle() + ", indexText=" + Boolean.toString(indexText) + ", indexMedia=" + Boolean.toString(indexMedia));
@@ -205,14 +205,15 @@ public final class plasmaCondenser {
             }
         
             // finally check all words for missing flag entry
-            i = words.entrySet().iterator();
+            Iterator<Map.Entry<String, wordStatProp>> j = words.entrySet().iterator();
             wordStatProp wprop;
-            while (i.hasNext()) {
-                entry = (Map.Entry) i.next();
-                wprop = (wordStatProp) entry.getValue();
+            Map.Entry<String, wordStatProp> we;
+            while (j.hasNext()) {
+                we = j.next();
+                wprop = (wordStatProp) we.getValue();
                 if (wprop.flags == null) {
                     wprop.flags = (kelondroBitfield) RESULT_FLAGS.clone();
-                    words.put(entry.getKey(), wprop);
+                    words.put(we.getKey(), wprop);
                 }
             }
         }
@@ -255,8 +256,8 @@ public final class plasmaCondenser {
         this.wordminsize = wordminsize;
         this.wordcut = wordcut;
         // analysis = new Properties();
-        words = new TreeMap();
-        sentences = new HashMap();
+        words = new TreeMap<String, wordStatProp>();
+        sentences = new HashMap<StringBuffer, phraseStatProp>();
         createCondensement(text, charset);
     }
     
@@ -265,8 +266,8 @@ public final class plasmaCondenser {
         return kelondroBase64Order.enhancedCoder.encode(serverCodings.encodeMD5Raw(word.toLowerCase())).substring(0, yacySeedDB.commonHashLength);
     }
     
-    public static final Set words2hashSet(String[] words) {
-        TreeSet hashes = new TreeSet(kelondroBase64Order.enhancedCoder);
+    public static final Set<String> words2hashSet(String[] words) {
+        TreeSet<String> hashes = new TreeSet<String>(kelondroBase64Order.enhancedCoder);
         for (int i = 0; i < words.length; i++) hashes.add(word2hash(words[i]));
         return hashes;
     }
@@ -277,14 +278,14 @@ public final class plasmaCondenser {
         return new String(sb);
     }
 
-    public static final TreeSet words2hashes(Set words) {
-        Iterator i = words.iterator();
-        TreeSet hashes = new TreeSet(kelondroBase64Order.enhancedCoder);
-        while (i.hasNext()) hashes.add(word2hash((String) i.next()));
+    public static final TreeSet<String> words2hashes(Set<String> words) {
+        Iterator<String> i = words.iterator();
+        TreeSet<String> hashes = new TreeSet<String>(kelondroBase64Order.enhancedCoder);
+        while (i.hasNext()) hashes.add(word2hash(i.next()));
         return hashes;
     }
     
-    public int excludeWords(TreeSet stopwords) {
+    public int excludeWords(TreeSet<String> stopwords) {
         // subtracts the given stopwords from the word list
         // the word list shrinkes. This returns the number of shrinked words
         int oldsize = words.size();
@@ -292,12 +293,12 @@ public final class plasmaCondenser {
         return oldsize - words.size();
     }
 
-    public Map words() {
+    public Map<String, wordStatProp> words() {
         // returns the words as word/wordStatProp relation map
         return words;
     }
     
-    public Map sentences() {
+    public Map<StringBuffer, phraseStatProp> sentences() {
         return sentences;
     }
     

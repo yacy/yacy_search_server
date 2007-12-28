@@ -34,7 +34,7 @@ import java.util.Iterator;
 public class kelondroObjects {
 
     private kelondroDyn dyn;
-    private kelondroMScoreCluster cacheScore;
+    private kelondroMScoreCluster<String> cacheScore;
     private HashMap<String, kelondroObjectsEntry> cache;
     private long startup;
     private int cachesize;
@@ -43,7 +43,7 @@ public class kelondroObjects {
     public kelondroObjects(kelondroDyn dyn, int cachesize) {
         this.dyn = dyn;
         this.cache = new HashMap<String, kelondroObjectsEntry>();
-        this.cacheScore = new kelondroMScoreCluster();
+        this.cacheScore = new kelondroMScoreCluster<String>();
         this.startup = System.currentTimeMillis();
         this.cachesize = cachesize;
     }
@@ -51,7 +51,7 @@ public class kelondroObjects {
     public void reset() throws IOException {
     	this.dyn.reset();
         this.cache = new HashMap<String, kelondroObjectsEntry>();
-        this.cacheScore = new kelondroMScoreCluster();
+        this.cacheScore = new kelondroMScoreCluster<String>();
     }
 
     public int keySize() {
