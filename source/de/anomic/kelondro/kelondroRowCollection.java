@@ -441,7 +441,7 @@ public class kelondroRowCollection {
         }
     }
     
-    public synchronized void select(Set<kelondroRow.Entry> keys) {
+    public synchronized void select(Set<String> keys) {
         // removes all entries but the ones given by urlselection
         if ((keys == null) || (keys.size() == 0)) return;
         Iterator<kelondroRow.Entry> i = rows();

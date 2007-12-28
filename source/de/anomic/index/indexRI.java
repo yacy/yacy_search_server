@@ -42,11 +42,11 @@ public interface indexRI {
     public long getUpdateTime(String wordHash);
     public int indexSize(String wordHash);
     public boolean hasContainer(String wordHash); // should only be used if in case that true is returned the getContainer is NOT called
-    public indexContainer getContainer(String wordHash, Set urlselection);
+    public indexContainer getContainer(String wordHash, Set<String> urlselection); // if urlselection != null all url references which are not in urlselection are removed from the container
     public indexContainer deleteContainer(String wordHash);
     
     public boolean removeEntry(String wordHash, String urlHash);
-    public int removeEntries(String wordHash, Set urlHashes);
+    public int removeEntries(String wordHash, Set<String> urlHashes);
     public void addEntries(indexContainer newEntries, long creationTime, boolean dhtCase);
 
     public void close();

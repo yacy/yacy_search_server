@@ -458,7 +458,7 @@ public final class plasmaWordIndex implements indexRI {
         return removed;
     }
     
-    public int removeEntryMultiple(Set wordHashes, String urlHash) {
+    public int removeEntryMultiple(Set<String> wordHashes, String urlHash) {
         // remove the same url hashes for multiple words
         // this is mainly used when correcting a index after a search
         Iterator i = wordHashes.iterator();
@@ -469,7 +469,7 @@ public final class plasmaWordIndex implements indexRI {
         return count;
     }
     
-    public int removeEntries(String wordHash, Set urlHashes) {
+    public int removeEntries(String wordHash, Set<String> urlHashes) {
         int removed = 0;
         synchronized (dhtInCache) {
             removed += dhtInCache.removeEntries(wordHash, urlHashes);
@@ -483,7 +483,7 @@ public final class plasmaWordIndex implements indexRI {
         return removed;
     }
     
-    public String removeEntriesExpl(String wordHash, Set urlHashes) {
+    public String removeEntriesExpl(String wordHash, Set<String> urlHashes) {
         String removed = "";
         synchronized (dhtInCache) {
             removed += dhtInCache.removeEntries(wordHash, urlHashes) + ", ";
@@ -497,7 +497,7 @@ public final class plasmaWordIndex implements indexRI {
         return removed;
     }
     
-    public void removeEntriesMultiple(Set wordHashes, Set urlHashes) {
+    public void removeEntriesMultiple(Set<String> wordHashes, Set<String> urlHashes) {
         // remove the same url hashes for multiple words
         // this is mainly used when correcting a index after a search
         Iterator i = wordHashes.iterator();
@@ -506,7 +506,7 @@ public final class plasmaWordIndex implements indexRI {
         }
     }
     
-    public int removeWordReferences(Set words, String urlhash) {
+    public int removeWordReferences(Set<String> words, String urlhash) {
         // sequentially delete all word references
         // returns number of deletions
         Iterator iter = words.iterator();

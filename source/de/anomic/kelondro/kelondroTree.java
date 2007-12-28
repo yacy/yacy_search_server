@@ -199,7 +199,7 @@ public class kelondroTree extends kelondroCachedRecords implements kelondroIndex
 
         // temporary variables
         private kelondroHandle thisHandle;
-        byte[] keybuffer;
+        String keybuffer;
         
         protected Search() {
         }
@@ -229,7 +229,7 @@ public class kelondroTree extends kelondroCachedRecords implements kelondroIndex
             found = false;
             int c;
             
-            TreeSet<byte[]> visitedNodeKeys = new TreeSet<byte[]>(loopDetectionOrder); // to detect loops
+            TreeSet<String> visitedNodeKeys = new TreeSet<String>(loopDetectionOrder); // to detect loops
             // System.out.println("Starting Compare Loop in Database " + filename); // debug
             while (thisHandle != null) {
                 try {
@@ -242,7 +242,7 @@ public class kelondroTree extends kelondroCachedRecords implements kelondroIndex
                 }
                 if (thenode == null) throw new kelondroException(filename, "kelondroTree.Search.process: thenode==null");
 
-                keybuffer = thenode.getKey();
+                keybuffer = new String(thenode.getKey());
                 if (keybuffer == null) {
                     // this is an error. distinguish two cases:
                     // 1. thenode is a leaf node. Then this error can be fixed if we can consider this node as a good node to be replaced with a new value
@@ -272,7 +272,7 @@ public class kelondroTree extends kelondroCachedRecords implements kelondroIndex
                     return;
                 }
                 // System.out.println("Comparing key = '" + new String(key) + "' with '" + otherkey + "':"); // debug
-                c = row().objectOrder.compare(key, keybuffer);
+                c = row().objectOrder.compare(new String(key), keybuffer);
                 // System.out.println(c); // debug
                 if (c == 0) {
                     found = true;
@@ -986,12 +986,12 @@ public class kelondroTree extends kelondroCachedRecords implements kelondroIndex
         }
     }
 
-    public TreeMap<byte[], kelondroRow.Entry> rowMap(boolean up, byte[] firstKey, boolean including, int count) throws IOException {
+    public TreeMap<String, kelondroRow.Entry> rowMap(boolean up, byte[] firstKey, boolean including, int count) throws IOException {
         // returns an ordered map of keys/row relations; key objects are of type String, value objects are of type byte[][]
         kelondroOrder setOrder = (kelondroOrder) row().objectOrder.clone();
         setOrder.direction(up);
         setOrder.rotate(firstKey);
-        TreeMap<byte[], kelondroRow.Entry> rows = new TreeMap<byte[], kelondroRow.Entry>(setOrder);
+        TreeMap<String, kelondroRow.Entry> rows = new TreeMap<String, kelondroRow.Entry>(setOrder);
         CacheNode n;
         String key;
         synchronized (this) {
@@ -1000,24 +1000,24 @@ public class kelondroTree extends kelondroCachedRecords implements kelondroIndex
                 n = i.next();
                 if (n == null) return rows;
                 key = new String(n.getKey());
-                if (rows.put(key.getBytes(), row().newEntry(n.getValueRow())) != null) return rows; // protection against loops
+                if (rows.put(key, row().newEntry(n.getValueRow())) != null) return rows; // protection against loops
             }
         }
         return rows;
     }
     
-    public TreeSet<byte[]> keySet(boolean up, boolean rotating, byte[] firstKey, boolean including, int count) throws IOException {
+    public TreeSet<String> keySet(boolean up, boolean rotating, byte[] firstKey, boolean including, int count) throws IOException {
         // returns an ordered set of keys; objects are of type String
         kelondroOrder setOrder = (kelondroOrder) row().objectOrder.clone();
         setOrder.direction(up);
         setOrder.rotate(firstKey);
-        TreeSet<byte[]> set = new TreeSet<byte[]>(setOrder);
+        TreeSet<String> set = new TreeSet<String>(setOrder);
         kelondroNode n;
         synchronized (this) {
             Iterator<CacheNode> i = (firstKey == null) ? new nodeIterator(up, rotating) : new nodeIterator(up, rotating, firstKey, including);
             while ((set.size() < count) && (i.hasNext())) {
                 n = (kelondroNode) i.next();
-                if ((n != null) && (n.getKey() != null)) set.add(n.getKey());
+                if ((n != null) && (n.getKey() != null)) set.add(new String(n.getKey()));
             }
         }
         return set;
@@ -1037,8 +1037,8 @@ public class kelondroTree extends kelondroCachedRecords implements kelondroIndex
         boolean inc;
         long count;
         byte[] lastKey;
-        TreeMap<byte[], kelondroRow.Entry> rowBuffer;
-        Iterator<Map.Entry<byte[], kelondroRow.Entry>> bufferIterator;
+        TreeMap<String, kelondroRow.Entry> rowBuffer;
+        Iterator<Map.Entry<String, kelondroRow.Entry>> bufferIterator;
         long guessedCountLimit;
         
         public rowIterator(boolean up, byte[] firstKey, long guessedCountLimit) throws IOException {
@@ -1069,14 +1069,14 @@ public class kelondroTree extends kelondroCachedRecords implements kelondroIndex
         
         public kelondroRow.Entry next() {
             if (!(bufferIterator.hasNext())) return null;
-            Map.Entry<byte[], kelondroRow.Entry> entry = bufferIterator.next();
-            lastKey = (byte[]) entry.getKey();
+            Map.Entry<String, kelondroRow.Entry> entry = bufferIterator.next();
+            lastKey = entry.getKey().getBytes();
             
             // check if this was the last entry in the rowBuffer
             if (!(bufferIterator.hasNext())) {
                 // assign next buffer chunk
                 try {
-                    lastKey[lastKey.length - 1]++;
+                    lastKey[lastKey.length - 1]++; // ***BUG??? FIXME
                     rowBuffer = rowMap(inc, lastKey, false, chunkSize);
                     bufferIterator = rowBuffer.entrySet().iterator();
                 } catch (IOException e) {
@@ -1111,8 +1111,8 @@ public class kelondroTree extends kelondroCachedRecords implements kelondroIndex
         boolean inc;
         long count;
         byte[] lastKey;
-        TreeSet<byte[]> keyBuffer;
-        Iterator<byte[]> bufferIterator;
+        TreeSet<String> keyBuffer;
+        Iterator<String> bufferIterator;
         long guessedCountLimit;
         
         public keyIterator(boolean up, byte[] firstKey, long guessedCountLimit) throws IOException {
@@ -1143,13 +1143,13 @@ public class kelondroTree extends kelondroCachedRecords implements kelondroIndex
         
         public byte[] next() {
             if (!(bufferIterator.hasNext())) return null;
-            lastKey = bufferIterator.next();
+            lastKey = bufferIterator.next().getBytes();
             
             // check if this was the last entry in the rowBuffer
             if (!(bufferIterator.hasNext())) {
                 // assign next buffer chunk
                 try {
-                    lastKey[lastKey.length - 1]++;
+                    lastKey[lastKey.length - 1]++; // ***BUG??? FIXME
                     keyBuffer = keySet(inc, false, lastKey, false, chunkSize);
                     bufferIterator = keyBuffer.iterator();
                 } catch (IOException e) {

@@ -85,13 +85,13 @@ public class indexCollectionRI implements indexRI {
         return 100 * 1024 /* overhead here */ + collectionIndex.minMem();
     }
 
-    public synchronized kelondroCloneableIterator wordContainers(String startWordHash, boolean rot) {
+    public synchronized kelondroCloneableIterator<indexContainer> wordContainers(String startWordHash, boolean rot) {
         return new wordContainersIterator(startWordHash, rot);
     }
 
-    public class wordContainersIterator implements kelondroCloneableIterator {
+    public class wordContainersIterator implements kelondroCloneableIterator<indexContainer> {
 
-        private Iterator wci;
+        private Iterator<Object[]> wci;
         private boolean rot;
         
         public wordContainersIterator(String startWordHash, boolean rot) {
@@ -107,7 +107,7 @@ public class indexCollectionRI implements indexRI {
             return wci.hasNext();
         }
 
-        public Object next() {
+        public indexContainer next() {
             Object[] oo = (Object[]) wci.next();
             if (oo == null) return null;
             byte[] key = (byte[]) oo[0];
@@ -130,7 +130,7 @@ public class indexCollectionRI implements indexRI {
         }
     }
     
-    public indexContainer getContainer(String wordHash, Set urlselection) {
+    public indexContainer getContainer(String wordHash, Set<String> urlselection) {
         try {
             kelondroRowSet collection = collectionIndex.get(wordHash.getBytes());
             if (collection != null) collection.select(urlselection);
@@ -152,12 +152,12 @@ public class indexCollectionRI implements indexRI {
     }
 
     public boolean removeEntry(String wordHash, String urlHash) {
-        HashSet hs = new HashSet();
-        hs.add(urlHash.getBytes());
+        HashSet<String> hs = new HashSet<String>();
+        hs.add(urlHash);
         return removeEntries(wordHash, hs) == 1;
     }
     
-    public int removeEntries(String wordHash, Set urlHashes) {
+    public int removeEntries(String wordHash, Set<String> urlHashes) {
         try {
             return collectionIndex.remove(wordHash.getBytes(), urlHashes);
         } catch (kelondroOutOfLimitsException e) {
@@ -179,7 +179,7 @@ public class indexCollectionRI implements indexRI {
         }
     }
 
-    public void addMultipleEntries(List /*of indexContainer*/ containerList) {
+    public void addMultipleEntries(List<indexContainer> containerList) {
         try {
         	//for (int i = 0; i < containerList.size(); i++) collectionIndex.merge((indexContainer) containerList.get(i));
             collectionIndex.mergeMultiple(containerList);

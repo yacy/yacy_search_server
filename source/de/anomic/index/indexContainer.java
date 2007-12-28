@@ -131,7 +131,7 @@ public class indexContainer extends kelondroRowSet {
         if (c == null) return 0;
         int x = 0;
         synchronized (c) {
-            Iterator i = c.entries();
+            Iterator<indexRWIRowEntry> i = c.entries();
             while (i.hasNext()) {
                 try {
                     if (putRecent((indexRWIEntry) i.next())) x++;
@@ -195,7 +195,7 @@ public class indexContainer extends kelondroRowSet {
     public static Method containerMergeMethod = null;
     static {
         try {
-            Class c = Class.forName("de.anomic.index.indexContainer");
+            Class<?> c = Class.forName("de.anomic.index.indexContainer");
             containerMergeMethod = c.getMethod("mergeUnique", new Class[]{Object.class, Object.class});
         } catch (SecurityException e) {
             System.out.println("Error while initializing containerMerge.SecurityException: " + e.getMessage());
@@ -210,8 +210,8 @@ public class indexContainer extends kelondroRowSet {
     }
 
     public static indexContainer joinExcludeContainers(
-            Collection includeContainers,
-            Collection excludeContainers,
+            Collection<indexContainer> includeContainers,
+            Collection<indexContainer> excludeContainers,
             int maxDistance) {
         // join a search result and return the joincount (number of pages after join)
 
@@ -226,12 +226,12 @@ public class indexContainer extends kelondroRowSet {
         return rcLocal;
     }
     
-    public static indexContainer joinContainers(Collection containers, int maxDistance) {
+    public static indexContainer joinContainers(Collection<indexContainer> containers, int maxDistance) {
         
         // order entities by their size
-        TreeMap map = new TreeMap();
+        TreeMap<Long, indexContainer> map = new TreeMap<Long, indexContainer>();
         indexContainer singleContainer;
-        Iterator i = containers.iterator();
+        Iterator<indexContainer> i = containers.iterator();
         int count = 0;
         while (i.hasNext()) {
             // get next entity:
@@ -268,12 +268,12 @@ public class indexContainer extends kelondroRowSet {
         return searchResult;
     }
     
-    public static indexContainer excludeContainers(indexContainer pivot, Collection containers) {
+    public static indexContainer excludeContainers(indexContainer pivot, Collection<indexContainer> containers) {
         
         // check if there is any result
         if ((containers == null) || (containers.size() == 0)) return pivot; // no result, nothing found
         
-        Iterator i = containers.iterator();
+        Iterator<indexContainer> i = containers.iterator();
         while (i.hasNext()) {
         	pivot = excludeDestructive(pivot, (indexContainer) i.next());
         	if ((pivot == null) || (pivot.size() == 0)) return null;
@@ -316,7 +316,7 @@ public class indexContainer extends kelondroRowSet {
         int keylength = small.rowdef.width(0);
         assert (keylength == large.rowdef.width(0));
         indexContainer conj = new indexContainer(null, small.rowdef, 0); // start with empty search result
-        Iterator se = small.entries();
+        Iterator<indexRWIRowEntry> se = small.entries();
         indexRWIEntry ie0, ie1;
             while (se.hasNext()) {
                 ie0 = (indexRWIEntry) se.next();
@@ -395,7 +395,7 @@ public class indexContainer extends kelondroRowSet {
         int keylength = pivot.rowdef.width(0);
         assert (keylength == excl.rowdef.width(0));
         boolean iterate_pivot = pivot.size() < excl.size();
-        Iterator se = (iterate_pivot) ? pivot.entries() : excl.entries();
+        Iterator<indexRWIRowEntry> se = (iterate_pivot) ? pivot.entries() : excl.entries();
         indexRWIEntry ie0, ie1;
             while (se.hasNext()) {
                 ie0 = (indexRWIEntry) se.next();

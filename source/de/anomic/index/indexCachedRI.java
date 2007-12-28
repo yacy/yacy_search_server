@@ -116,7 +116,7 @@ public class indexCachedRI implements indexRI {
         if (count > 5000) count = 5000;
         busyCacheFlush = true;
         String wordHash;
-        ArrayList containerList = new ArrayList();
+        ArrayList<indexContainer> containerList = new ArrayList<indexContainer>();
         synchronized (this) {
             for (int i = 0; i < count; i++) { // possible position of outOfMemoryError ?
                 if (ram.size() == 0) break;
@@ -140,7 +140,7 @@ public class indexCachedRI implements indexRI {
         return false;
     }
     
-    public indexContainer getContainer(String wordHash, Set urlselection) {
+    public indexContainer getContainer(String wordHash, Set<String> urlselection) {
         // get from cache
         indexContainer container = riExtern.getContainer(wordHash, urlselection);
         if (container == null) {
@@ -158,23 +158,23 @@ public class indexCachedRI implements indexRI {
         return container;
     }
 
-    public Map getContainers(Set wordHashes, Set urlselection, boolean interruptIfEmpty) {
+    public Map<String, indexContainer> getContainers(Set<String> wordHashes, Set<String> urlselection, boolean interruptIfEmpty) {
         // return map of wordhash:indexContainer
         
         // retrieve entities that belong to the hashes
-        HashMap containers = new HashMap();
+        HashMap<String, indexContainer> containers = new HashMap<String, indexContainer>();
         String singleHash;
         indexContainer singleContainer;
-            Iterator i = wordHashes.iterator();
+            Iterator<String> i = wordHashes.iterator();
             while (i.hasNext()) {
                 // get next word hash:
-                singleHash = (String) i.next();
+                singleHash = i.next();
             
                 // retrieve index
                 singleContainer = getContainer(singleHash, urlselection);
             
                 // check result
-                if (((singleContainer == null) || (singleContainer.size() == 0)) && (interruptIfEmpty)) return new HashMap();
+                if (((singleContainer == null) || (singleContainer.size() == 0)) && (interruptIfEmpty)) return new HashMap<String, indexContainer>();
             
                 containers.put(singleHash, singleContainer);
             }
@@ -215,7 +215,7 @@ public class indexCachedRI implements indexRI {
         return removed;
     }
     
-    public int removeEntries(String wordHash, Set urlHashes) {
+    public int removeEntries(String wordHash, Set<String> urlHashes) {
         int removed = 0;
         removed += riIntern.removeEntries(wordHash, urlHashes);
         removed += riExtern.removeEntries(wordHash, urlHashes);
@@ -223,7 +223,7 @@ public class indexCachedRI implements indexRI {
         return removed;
     }
     
-    public String removeEntriesExpl(String wordHash, Set urlHashes) {
+    public String removeEntriesExpl(String wordHash, Set<String> urlHashes) {
         String removed = "";
         removed += riIntern.removeEntries(wordHash, urlHashes) + ", ";
         removed += riExtern.removeEntries(wordHash, urlHashes) + ", ";
@@ -231,17 +231,17 @@ public class indexCachedRI implements indexRI {
         return removed;
     }
     
-    public TreeSet indexContainerSet(String startHash, boolean ramOnly, boolean rot, int count) {
+    public TreeSet<indexContainer> indexContainerSet(String startHash, boolean ramOnly, boolean rot, int count) {
         // creates a set of indexContainers
         // this does not use the dhtInCache
         kelondroOrder containerOrder = new indexContainerOrder((kelondroOrder) indexOrder.clone());
         containerOrder.rotate(startHash.getBytes());
-        TreeSet containers = new TreeSet(containerOrder);
-        Iterator i = wordContainers(startHash, ramOnly, rot);
+        TreeSet<indexContainer> containers = new TreeSet<indexContainer>(containerOrder);
+        Iterator<indexContainer> i = wordContainers(startHash, ramOnly, rot);
         if (ramOnly) count = Math.min(riExtern.size(), count);
         indexContainer container;
         while ((count > 0) && (i.hasNext())) {
-            container = (indexContainer) i.next();
+            container = i.next();
             if ((container != null) && (container.size() > 0)) {
                 containers.add(container);
                 count--;
@@ -250,12 +250,12 @@ public class indexCachedRI implements indexRI {
         return containers;
     }
     
-    public kelondroCloneableIterator wordContainers(String startHash, boolean rot) {
+    public kelondroCloneableIterator<indexContainer> wordContainers(String startHash, boolean rot) {
         // returns an iteration of indexContainers
         return wordContainers(startHash, false, rot);
     }
     
-    public kelondroCloneableIterator wordContainers(String startHash, boolean ramOnly, boolean rot) {
+    public kelondroCloneableIterator<indexContainer> wordContainers(String startHash, boolean ramOnly, boolean rot) {
         kelondroCloneableIterator i;
         if (ramOnly) {
             i = riExtern.wordContainers(startHash, false);
@@ -268,7 +268,7 @@ public class indexCachedRI implements indexRI {
                             true);
         }
         if (rot) {
-            return new kelondroRotateIterator(i, new String(kelondroBase64Order.zero(startHash.length())));
+            return new kelondroRotateIterator<indexContainer>(i, new String(kelondroBase64Order.zero(startHash.length())));
         } else {
             return i;
         }

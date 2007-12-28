@@ -51,6 +51,7 @@ import de.anomic.htmlFilter.htmlFilterAbstractScraper;
 import de.anomic.kelondro.kelondroBase64Order;
 import de.anomic.kelondro.kelondroBitfield;
 import de.anomic.kelondro.kelondroMSetTools;
+import de.anomic.kelondro.kelondroNaturalOrder;
 import de.anomic.server.serverCharBuffer;
 import de.anomic.yacy.yacySeedDB;
 
@@ -216,7 +217,7 @@ public plasmaSearchQuery(String queryString, TreeSet queryHashes, TreeSet exclud
     
     public static TreeSet<String>[] cleanQuery(String querystring) {
     	// returns two sets: a query set and a exclude set
-    	if ((querystring == null) || (querystring.length() == 0)) return new TreeSet[]{new TreeSet<String>(), new TreeSet<String>()};
+    	if ((querystring == null) || (querystring.length() == 0)) return new TreeSet[]{new TreeSet<String>(kelondroNaturalOrder.naturalOrder), new TreeSet<String>(kelondroNaturalOrder.naturalOrder)};
         
         // convert Umlaute
         querystring = htmlFilterAbstractScraper.convertUmlaute(new serverCharBuffer(querystring.toCharArray())).toString();
@@ -230,8 +231,8 @@ public plasmaSearchQuery(String queryString, TreeSet queryHashes, TreeSet exclud
         }
         
         // the string is clean now, but we must generate a set out of it
-        final TreeSet<String> query = new TreeSet<String>();
-        final TreeSet<String> exclude = new TreeSet<String>();
+        final TreeSet<String> query = new TreeSet<String>(kelondroNaturalOrder.naturalOrder);
+        final TreeSet<String> exclude = new TreeSet<String>(kelondroNaturalOrder.naturalOrder);
         final String[] a = querystring.split(" ");
         for (int i = 0; i < a.length; i++) {
         	if (a[i].startsWith("-")) {

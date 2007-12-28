@@ -834,7 +834,7 @@ public class kelondroCollectionIndex {
         
     }
     
-    public synchronized int remove(byte[] key, Set<byte[]> removekeys) throws IOException, kelondroOutOfLimitsException {
+    public synchronized int remove(byte[] key, Set<String> removekeys) throws IOException, kelondroOutOfLimitsException {
         
         if ((removekeys == null) || (removekeys.size() == 0)) return 0;
         
@@ -857,9 +857,9 @@ public class kelondroCollectionIndex {
         kelondroRowSet oldcollection = getwithparams(indexrow, oldchunksize, oldchunkcount, oldPartitionNumber, oldrownumber, serialNumber, false);
 
         // remove the keys from the set
-        Iterator<byte[]> i = removekeys.iterator();
+        Iterator<String> i = removekeys.iterator();
         while (i.hasNext()) {
-            if (oldcollection.remove(i.next(), false) != null) removed++;
+            if (oldcollection.remove(i.next().getBytes(), false) != null) removed++;
         }
         oldcollection.sort();
         oldcollection.trim(false);
