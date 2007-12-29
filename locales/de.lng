@@ -306,6 +306,7 @@ Peer-to-Peer Mode==Peer-to-Peer Modus
 This enables automated, DHT-ruled Index Transmission to other peers==Dies aktiviert den automatischen, DHT-basierten Versand an andere Peers
 >enabled==>aktiviert
 disabled during crawling==w&auml;hrend des Crawlings deaktiviert
+disabled during indexing==w&auml;hrend des Indexierens deaktiviert
 >Index Receive==>Index-Empfang
 Accept remote Index Transmissions==Remote Index-&Uuml;bertragungen akzeptieren
 This works only if you have a senior peer. The DHT-rules do not work without this function==Dies funktioniert nur, wenn Sie einen Senior-Peer haben. Die DHT-Regeln arbeiten nicht ohne diese Funktion
@@ -808,11 +809,11 @@ RWIs now:==RWIs jetzt:
 wordHash in Progress:==Wort-Hash in Benutzung:
 last wordHash with deleted URLs:==letzter Wort-Hash mit gel&ouml;schten URLs:
 Number of deleted URLs in on this Hash:==Anzahl an gel&ouml;schten URLs in diesem Hash:
-UrldbCleaner - Clean up the database by deletion of blacklisted urls:==UrlDBCleaner - R&auml;umen Sie Ihre Datenbank auf, indem Sie URLs die auf Ihrer Blacklist stehen l&ouml;schen:
+UrldbCleaner - Clean up the database by deletion of blacklisted urls:==UrlDBCleaner - R&auml;umen Sie Ihre Datenbank auf, indem Sie URLs, die auf Ihrer Blacklist stehen, l&ouml;schen:
 Start/Resume==Start/Fortzsetzen
 Stop==Stopp
 Pause==Anhalten
-RWIDbCleaner - Clean up the database by deletion of words with reference to blacklisted urls:==RWIDBCleaner - R&auml;umen Sie Ihre Datenbank auf, indem Sie W&ouml;rter die mit Ihrer Blacklist verbunden sind l&ouml;schen:
+RWIDbCleaner - Clean up the database by deletion of words with reference to blacklisted urls:==RWIDBCleaner - R&auml;umen Sie Ihre Datenbank auf, indem Sie W&ouml;rter, die mit Ihrer Blacklist verbunden sind, l&ouml;schen:
 #-----------------------------
 
 #File: IndexControlRWIs_p.html
@@ -1047,7 +1048,7 @@ Usage Examples==Benutzungs-<br />beispiele
 Import&nbsp;Path:==Import-Pfad:
 "Start Import"=="Import starten"
 Attention:==Achtung:
-Always do a backup of your source and destination database before starting to use this import function.==Machen Sie immer ein Backup von Ihrer Quell- und Zieldatenbank bevor Sie die Import-Funktion nutzen.
+Always do a backup of your source and destination database before starting to use this import function.==Machen Sie immer ein Backup von Ihrer Quell- und Zieldatenbank, bevor Sie die Import-Funktion nutzen.
 Currently running jobs==Gerade laufende Aufgaben
 Job Type==Job-Typ
 >Path==>Pfad
@@ -1085,7 +1086,7 @@ you have to rename it first.==m&uuml;ssen Sie sie zuerst umbenennen.
 Please note that the imported words are useless if the destination peer doesn't know==Bitte bedenken Sie, dass die importierten W&ouml;rter nutzlos sind, wenn der Ziel-Peer nicht wei&szlig;,
 the URLs the imported words belongs to.==zu welchen URLs sie geh&ouml;ren.
 Crawling Queue Import:==Crawler-Puffer-Import:
-Contains data about the crawljob an URL belongs to==Enth&auml;lt Daten &uuml;ber den Crawljob zu dem eine URL geh&ouml;rt
+Contains data about the crawljob an URL belongs to==Enth&auml;lt Daten &uuml;ber den Crawljob, zu dem eine URL geh&ouml;rt
 The crawling queue==Der Crawler-Puffer
 Various stack files that belong to the crawling queue==Verschiedene Stack-Dateien, die zum Crawler-Puffer geh&ouml;ren
 #-----------------------------
