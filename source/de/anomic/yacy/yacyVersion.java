@@ -405,12 +405,18 @@ public final class yacyVersion implements Comparator, Comparable {
             String script =
                 "#!/bin/sh" + serverCore.LF_STRING +
                 "cd " + sb.getRootPath() + "/DATA/RELEASE/" + serverCore.LF_STRING +
+                "if gunzip -t " + release + serverCore.LF_STRING +
+                "then" + serverCore.LF_STRING + 
                 "gunzip -c " + release + " | tar xf -" + serverCore.LF_STRING +
                 "while [ -f ../yacy.running ]; do" + serverCore.LF_STRING +
                 "sleep 1" + serverCore.LF_STRING +
                 "done" + serverCore.LF_STRING +
                 "cp -Rf yacy/* ../../" + serverCore.LF_STRING +
                 "rm -Rf yacy" + serverCore.LF_STRING +
+                "else" + serverCore.LF_STRING +
+                "while [ -f ../yacy.running ]; do" + serverCore.LF_STRING +
+                "sleep 1" + serverCore.LF_STRING +
+                "fi" + serverCore.LF_STRING +
                 "cd ../../" + serverCore.LF_STRING +
                 "nohup ./startYACY.sh > /dev/null" + serverCore.LF_STRING;
             File scriptFile = new File(sb.getRootPath(), "DATA/RELEASE/update.sh");
