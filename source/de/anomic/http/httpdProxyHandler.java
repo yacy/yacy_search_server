@@ -1492,7 +1492,14 @@ public final class httpdProxyHandler {
             hostNameCount++;     
         }
         
-        detailedErrorMsgMap.put("list", hostNameCount);  
+        detailedErrorMsgMap.put("list", hostNameCount);
+        
+        if (hostNameCount != 0) {
+            detailedErrorMsgMap.put("showList", 1);
+        } else {
+            detailedErrorMsgMap.put("showList", 0);
+        }        
+        
         return detailedErrorMsgMap;
     }
     
