@@ -416,6 +416,7 @@ public final class yacyVersion implements Comparator, Comparable {
                 "else" + serverCore.LF_STRING +
                 "while [ -f ../yacy.running ]; do" + serverCore.LF_STRING +
                 "sleep 1" + serverCore.LF_STRING +
+                "done" + serverCore.LF_STRING +
                 "fi" + serverCore.LF_STRING +
                 "cd ../../" + serverCore.LF_STRING +
                 "nohup ./startYACY.sh > /dev/null" + serverCore.LF_STRING;
