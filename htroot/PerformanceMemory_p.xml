@@ -1,0 +1,90 @@
+<?xml version="1.0"?>
+<PerformanceMemory>
+
+	<memoryAvailAfterStartup>#[memoryAvailAfterStartup]#</memoryAvailAfterStartup>
+	<memoryAvailAfterInitBGC>#[memoryAvailAfterInitBGC]#</memoryAvailAfterInitBGC>
+	<memoryAvailAfterInitAGC>#[memoryAvailAfterInitAGC]#</memoryAvailAfterInitAGC>
+	<memoryAvailNow>#[memoryAvailNow]#</memoryAvailNow>
+	
+	<memoryTotalAfterStartup>#[memoryTotalAfterStartup]#</memoryTotalAfterStartup>
+	<memoryTotalAfterInitBGC>#[memoryTotalAfterInitBGC]#</memoryTotalAfterInitBGC>
+	<memoryTotalAfterInitAGC>#[memoryTotalAfterInitAGC]#</memoryTotalAfterInitAGC>
+	<memoryTotalNow>#[memoryTotalNow]#</memoryTotalNow>
+	
+	<memoryFreeAfterStartup>#[memoryFreeAfterStartup]#</memoryFreeAfterStartup>
+	<memoryFreeAfterInitBGC>#[memoryFreeAfterInitBGC]#</memoryFreeAfterInitBGC>
+	<memoryFreeAfterInitAGC>#[memoryFreeAfterInitAGC]#</memoryFreeAfterInitAGC>
+	<memoryFreeNow>#[memoryFreeNow]#</memoryFreeNow>
+	
+	<memoryUsedAfterStartup>#[memoryUsedAfterStartup]#</memoryUsedAfterStartup>
+	<memoryUsedAfterInitBGC>#[memoryUsedAfterInitBGC]#</memoryUsedAfterInitBGC>
+	<memoryUsedAfterInitAGC>#[memoryUsedAfterInitAGC]#</memoryUsedAfterInitAGC>
+	<memoryUsedNow>#[memoryUsedNow]#</memoryUsedNow>
+
+	<Xmx>#[Xmx]#</Xmx>
+	
+	<FlexTable>
+	#{TableList}#
+		<entry>
+			<tableIndexPath>#[tableIndexPath]#</tableIndexPath>
+			<tableIndexChunkSize>#[tableIndexChunkSize]#</tableIndexChunkSize>
+			<tableIndexCount>#[tableIndexCount]#</tableIndexCount>
+			<tableIndexMem>#[tableIndexMem]#</tableIndexMem>
+		</entry>
+	#{/TableList}#
+	<TableIndexTotalMem>#[TableIndexTotalMem]#</TableIndexTotalMem>
+	</FlexTable>
+	
+	<NodeCaches>
+	#{NodeList}#
+		<entry>
+			<nodeCachePath>#[nodeCachePath]#</nodeCachePath>
+			<nodeChunkSize>#[nodeChunkSize]#</nodeChunkSize>
+			<nodeCacheCount>#[nodeCacheCount]#</nodeCacheCount>
+			<nodeCacheMem>#[nodeCacheMem]#</nodeCacheMem>
+			<nodeCacheReadHit>#[nodeCacheReadHit]#</nodeCacheReadHit>
+			<nodeCacheReadMiss>#[nodeCacheReadMiss]#</nodeCacheReadMiss>
+			<nodeCacheWriteUnique>#[nodeCacheWriteUnique]#</nodeCacheWriteUnique>
+			<nodeCacheWriteDouble>#[nodeCacheWriteDouble]#</nodeCacheWriteDouble>
+			<nodeCacheDeletes>#[nodeCacheDeletes]#</nodeCacheDeletes>
+			<nodeCacheFlushes>#[nodeCacheFlushes]#</nodeCacheFlushes>
+		</entry>
+	#{/NodeList}#
+	<nodeCacheTotalMem>#[nodeCacheTotalMem]#</nodeCacheTotalMem>
+	<nodeCacheStopGrow>#[nodeCacheStopGrow]#</nodeCacheStopGrow>
+	<nodeCacheStartShrink>#[nodeCacheStartShrink]#</nodeCacheStartShrink>
+	</NodeCaches>
+	
+	<ObjectReadCaches>
+	#{ObjectList}#
+		<entry>
+			<objectCachePath>#[objectCachePath]#</objectCachePath>
+			<objectHitChunkSize>#[objectHitChunkSize]#</objectHitChunkSize>
+			<objectHitCacheCount>#[objectHitCacheCount]#</objectHitCacheCount>
+			<objectHitCacheMem>#[objectHitCacheMem]#</objectHitCacheMem>
+			<objectHitCacheReadHit>#[objectHitCacheReadHit]#</objectHitCacheReadHit>
+			<objectHitCacheReadMiss>#[objectHitCacheReadMiss]#</objectHitCacheReadMiss>
+			<objectHitCacheWriteUnique>#[objectHitCacheWriteUnique]#</objectHitCacheWriteUnique>
+			<objectHitCacheWriteDouble>#[objectHitCacheWriteDouble]#</objectHitCacheWriteDouble>
+			<objectHitCacheDeletes>#[objectHitCacheDeletes]#</objectHitCacheDeletes>
+			<objectHitCacheFlushes>#[objectHitCacheFlushes]#</objectHitCacheFlushes>
+			<objectMissChunkSize>#[objectMissChunkSize]#</objectMissChunkSize>
+			<objectMissCacheCount>#[objectMissCacheCount]#</objectMissCacheCount>
+			<objectMissCacheMem>#[objectMissCacheMem]#</objectMissCacheMem>
+			<objectMissCacheReadHit>#[objectMissCacheReadHit]#</objectMissCacheReadHit>
+			<objectMissCacheReadMiss>#[objectMissCacheReadMiss]#</objectMissCacheReadMiss>
+			<objectMissCacheWriteUnique>#[objectMissCacheWriteUnique]#</objectMissCacheWriteUnique>
+			<objectMissCacheWriteDouble>#[objectMissCacheWriteDouble]#</objectMissCacheWriteDouble>
+			<objectMissCacheDeletes>#[objectMissCacheDeletes]#</objectMissCacheDeletes>
+		</entry>
+	#{/ObjectList}#
+		<objectHitCacheTotalMem>#[objectHitCacheTotalMem]#</objectHitCacheTotalMem>
+		<objectMissCacheTotalMem>#[objectMissCacheTotalMem]#</objectMissCacheTotalMem>
+		<objectCacheStopGrow>#[objectCacheStopGrow]#</objectCacheStopGrow>
+		<objectCacheStartShrink>#[objectCacheStartShrink]#</objectCacheStartShrink>
+	</ObjectReadCaches>
+	<DNSCache>#[namecache.hit]#</DNSCache>
+	<DNSNoCache>#[namecache.noCache]#</DNSNoCache>
+	<HashBlacklistedCache>#[blacklistcache.size]#</HashBlacklistedCache>
+	
+</PerformanceMemory>
