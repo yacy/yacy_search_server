@@ -40,13 +40,12 @@
 
 package xml;
 import de.anomic.http.httpHeader;
+import de.anomic.http.httpdByteCountInputStream;
+import de.anomic.http.httpdByteCountOutputStream;
 import de.anomic.plasma.plasmaSwitchboard;
 import de.anomic.server.serverObjects;
 import de.anomic.server.serverSwitch;
-import de.anomic.server.serverMemory;
 import de.anomic.yacy.yacyCore;
-import de.anomic.http.httpdByteCountInputStream;
-import de.anomic.http.httpdByteCountOutputStream;
 
 public class status_p {
     
@@ -75,7 +74,7 @@ public class status_p {
 		final Runtime rt = Runtime.getRuntime();
         prop.putNum("freeMemory", rt.freeMemory());
         prop.putNum("totalMemory", rt.totalMemory());
-        prop.putNum("maxMemory", serverMemory.max);
+        prop.putNum("maxMemory", rt.maxMemory());
         prop.putNum("processors", rt.availableProcessors());
 
 		// proxy traffic

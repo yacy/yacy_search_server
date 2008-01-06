@@ -81,7 +81,6 @@ import de.anomic.plasma.plasmaWordIndex;
 import de.anomic.server.serverCore;
 import de.anomic.server.serverDate;
 import de.anomic.server.serverFileUtils;
-import de.anomic.server.serverMemory;
 import de.anomic.server.serverSemaphore;
 import de.anomic.server.serverSystem;
 import de.anomic.server.logging.serverLog;
@@ -604,7 +603,7 @@ public final class yacy {
             plasmaCrawlLURL minimizedUrlDB = new plasmaCrawlLURL(indexRoot2, 10000);
             
             Runtime rt = Runtime.getRuntime();
-            int cacheMem = (int)(serverMemory.max-rt.totalMemory());
+            int cacheMem = (int)(rt.maxMemory() - rt.totalMemory());
             if (cacheMem < 2048000) throw new OutOfMemoryError("Not enough memory available to start clean up.");
                 
             plasmaWordIndex wordIndex = new plasmaWordIndex(indexPrimaryRoot, indexSecondaryRoot, 10000, log);
@@ -901,7 +900,6 @@ public final class yacy {
         System.gc();
         long startupMemFree  = Runtime.getRuntime().freeMemory(); // the amount of free memory in the Java Virtual Machine
         long startupMemTotal = Runtime.getRuntime().totalMemory(); // the total amount of memory in the Java virtual machine; may vary over time
-        serverMemory.available(); // force initialization of class serverMemory
         
         // go into headless awt mode
         System.setProperty("java.awt.headless", "true");

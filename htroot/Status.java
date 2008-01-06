@@ -54,8 +54,8 @@ import de.anomic.http.httpdByteCountInputStream;
 import de.anomic.http.httpdByteCountOutputStream;
 import de.anomic.plasma.plasmaSwitchboard;
 import de.anomic.server.serverCore;
-import de.anomic.server.serverDomains;
 import de.anomic.server.serverDate;
+import de.anomic.server.serverDomains;
 import de.anomic.server.serverMemory;
 import de.anomic.server.serverObjects;
 import de.anomic.server.serverSwitch;
@@ -292,7 +292,7 @@ public class Status {
         // memory usage and system attributes
         prop.put("freeMemory", serverMemory.bytesToString(rt.freeMemory()));
         prop.put("totalMemory", serverMemory.bytesToString(rt.totalMemory()));
-        prop.put("maxMemory", serverMemory.bytesToString(serverMemory.max));
+        prop.put("maxMemory", serverMemory.bytesToString(rt.maxMemory()));
         prop.put("processors", rt.availableProcessors());
 
         // proxy traffic

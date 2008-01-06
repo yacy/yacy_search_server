@@ -30,8 +30,6 @@ import de.anomic.tools.yFormatter;
 
 public class serverMemory {
 
-    public static boolean vm14 = System.getProperty("java.vm.version").startsWith("1.4");
-    public static final long max = (vm14) ? computedMaxMemory() : Runtime.getRuntime().maxMemory() ; // patch for maxMemory bug in Java 1.4.2
     private static final Runtime runtime = Runtime.getRuntime();
     private static final serverLog log = new serverLog("MEMORY");
     
@@ -54,9 +52,9 @@ public class serverMemory {
 
     /** @return the amount of freed bytes by a forced GC this method performes */
     private static long runGC(final boolean count) {
-        final long memnow = available();
+        final long memnow = runtime.maxMemory() - runtime.totalMemory() + runtime.freeMemory();
         gc(1000, "serverMemory.runGC(...)");
-        final long freed = available() - memnow;
+        final long freed = runtime.maxMemory() - runtime.totalMemory() + runtime.freeMemory() - memnow;
         if (count) {
             gcs[gcs_pos] = freed;
             gcs_pos = (gcs_pos + 1) % gcs.length;
@@ -96,19 +94,10 @@ public class serverMemory {
      * @param gciffail if not enough memory is available, this parameter specifies whether to perform
      * a Full GC to free enough RAM
      * @return whether enough RAM is available
-     * @deprecated use {@link serverMemory#request(long, boolean)} instead to enable the collection of
-     * heuristics about explicit usage of Full GCs.
      */
-    public static boolean available(long memory, boolean gciffail) {
-        if (available() >= memory) return true;
-        if (!gciffail) return false;
-        gc(4000, "serverMemory.available(...)");
-        return (available() >= memory);
-    }
-    
     public static long available() {
         // memory that is available including increasing total memory up to maximum
-        return max - runtime.totalMemory() + runtime.freeMemory();
+        return runtime.maxMemory() - runtime.totalMemory() + runtime.freeMemory();
     }
     
     /**
@@ -131,7 +120,7 @@ public class serverMemory {
      * @return whether enough memory could be freed (or is free) or not
      */
     public static boolean request(final long size, final boolean force) {
-        long avail = available();
+        long avail = runtime.maxMemory() - runtime.totalMemory() + runtime.freeMemory();
         if (avail >= size) return true;
         if (log.isFine()) {
             String t = new Throwable("Stack trace").getStackTrace()[1].toString();
@@ -141,10 +130,10 @@ public class serverMemory {
         if (force || avg == 0 || avg + avail >= size) {
             // this is only called if we expect that an allocation of <size> bytes would cause the jvm to call the GC anyway
             final long freed = runGC(!force);
-            avail = available();
+            avail = runtime.maxMemory() - runtime.totalMemory() + runtime.freeMemory();
             log.logInfo("performed " + ((force) ? "explicit" : "necessary") + " GC, freed " + (freed >> 10)
-                    + " KB (requested/available/average: " + (size >> 10) + " / "
-                    + (avail >> 10) + " / " + (avg >> 10) + " KB)");
+                    + " KB (requested/available/average: "
+                    + (size >> 10) + " / " + (avail >> 10) + " / " + (avg >> 10) + " KB)");
             return avail >= size;
         } else {
             log.logInfo("former GCs indicate to not be able to free enough memory (requested/available/average: "
@@ -182,30 +171,11 @@ public class serverMemory {
         }
     }
     
-    private static int computedMaxMemory() {
-        // there is a bug in java 1.4.2 for maxMemory()
-        // see for bug description:
-        // http://bugs.sun.com/bugdatabase/view_bug.do?bug_id=4686462
-        // to get the correct maxMemory, we force a OutOfMemoryError here to measure the 'real' maxMemory()
-        int mb = 1024 * 1024;
-        byte[][] x = new byte[2048][];
-        for (int i = 0; i < x.length; i++) {
-            try {
-                x[i] = new byte[mb];
-            } catch (OutOfMemoryError e) {
-                x = null; // free memory
-                //System.out.println("* computed maxMemory = " + i + " mb");
-                return (int) Math.max(i * mb, Runtime.getRuntime().totalMemory());
-            }
-        }
-        return 2048 * mb;
-    }
-    
     public static void main(String[] args) {
         // try this with a jvm 1.4.2 and with a jvm 1.5 and compare results
         int mb = 1024 * 1024;
         System.out.println("vm: " + System.getProperty("java.vm.version"));
-        System.out.println("computed max = " + (computedMaxMemory() / mb) + " mb");
+        System.out.println("computed max = " + (Runtime.getRuntime().maxMemory() / mb) + " mb");
         int alloc = 10000;
         Runtime rt = Runtime.getRuntime();
         byte[][] x = new byte[100000][];

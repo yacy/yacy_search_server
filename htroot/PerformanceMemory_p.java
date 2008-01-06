@@ -58,7 +58,6 @@ import de.anomic.server.serverFileUtils;
 import de.anomic.server.serverMemory;
 import de.anomic.server.serverObjects;
 import de.anomic.server.serverSwitch;
-//import de.anomic.kelondro.kelondroObjectSpace;
 
 public class PerformanceMemory_p {
     
@@ -95,7 +94,7 @@ public class PerformanceMemory_p {
         long memoryTotalAfterInitBGC = Long.parseLong(env.getConfig("memoryTotalAfterInitBGC", "0"));
         long memoryTotalAfterInitAGC = Long.parseLong(env.getConfig("memoryTotalAfterInitAGC", "0"));
         long memoryTotalAfterStartup = Long.parseLong(env.getConfig("memoryTotalAfterStartup", "0"));
-        long memoryMax = serverMemory.max;
+        long memoryMax = Runtime.getRuntime().maxMemory();
         
         prop.putNum("memoryMax", memoryMax / MB);
         prop.putNum("memoryAvailAfterStartup", (memoryMax - memoryTotalAfterStartup + memoryFreeAfterStartup) / MB);
