@@ -1916,6 +1916,23 @@ Auto pop-up of status page on start-up:==Automatisches Pop-Up der Status-Seite b
 
 #-----------------------------
 
+#File: sharedBlacklist_p.html
+#---------------------------
+Shared Blacklist==Freigegebene Blacklist
+Add Items to Blacklist==Hinzuf&uuml;gen von Daten zur Blacklist
+Unable to store the items into the blacklist file:==Es war nicht m&ouml;glich in folgender Blacklist Datei die Daten zu speichern: File Error! Wrong Path?==Datei Fehler! Falscher Pfad?
+YaCy-Peer &quot;<span class="settingsValue">\#\[name\]\#</span>&quot; not found.==YaCy Peer YaCy-Peer &quot;<span class="settingsValue">#[name]#</span>&quot; nicht gefunden.
+not found or empty list.==nicht gefunden oder leere Liste.
+Wrong Invocation! Please invoke with==Falscher Aufruf! Bitte nur so aufrufen
+Blacklist source:==Blacklist Quelle:
+Blacklist target:==Blacklist Ziel:
+Blacklist item==Blacklist Eintrag
+"select all"=="alle ausw&auml;hlen"
+"deselect all"=="alle abw&auml;hlen"
+value="add"==value="hinzuf&uuml;gen"
+#---------------------------
+
+
 #File: Status.html
 #---------------------------
 Console Status==Konsolen Status
