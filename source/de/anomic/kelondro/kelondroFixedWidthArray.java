@@ -113,14 +113,14 @@ public class kelondroFixedWidthArray extends kelondroEcoRecords implements kelon
         // the OHbytes and OHhandles are zero.
     }
     
-    public synchronized void setMultiple(TreeMap /* of Integer/kelondroRow.Entry */ rows) throws IOException {
-        Iterator i = rows.entrySet().iterator();
-        Map.Entry entry;
-        Integer k;
+    public synchronized void setMultiple(TreeMap<Integer, kelondroRow.Entry> rows) throws IOException {
+        Iterator<Map.Entry<Integer, kelondroRow.Entry>> i = rows.entrySet().iterator();
+        Map.Entry<Integer, kelondroRow.Entry> entry;
+        int k;
         while (i.hasNext()) {
-            entry = (Map.Entry) i.next();
-            k = (Integer) entry.getKey();
-            set(k.intValue(), (kelondroRow.Entry) entry.getValue());
+            entry = i.next();
+            k = entry.getKey().intValue();
+            set(k, entry.getValue());
         }
     }
    

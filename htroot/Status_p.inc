@@ -58,7 +58,7 @@
     <dd>Proxy: #[trafficProxy]#<br/>Crawler: #[trafficCrawler]#</dd>
     
     <dt><a href="Connections_p.html">Incoming Connections</a></dt>
-    <dd>Active: #[connectionsActive]# | Idle: #[connectionsIdle]# | Max: #[connectionsMax]#</dd>
+    <dd>Active: #[connectionsActive]# | Max: #[connectionsMax]#</dd>
     
     <dt>Queues</dt>
     <dd>

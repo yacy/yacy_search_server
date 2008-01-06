@@ -302,12 +302,8 @@ public class Status {
 
         // connection information
         serverCore httpd = (serverCore) sb.getThread("10_httpd");
-        int activeSessionCount = httpd.getActiveSessionCount();
-        int idleSessionCount = httpd.getIdleSessionCount();
-        int maxSessionCount = httpd.getMaxSessionCount();
-        prop.putNum("connectionsActive", activeSessionCount);
-        prop.putNum("connectionsMax", maxSessionCount);
-        prop.putNum("connectionsIdle", idleSessionCount);
+        prop.putNum("connectionsActive", httpd.getJobCount());
+        prop.putNum("connectionsMax", httpd.getMaxSessionCount());
         
         // Queue information
         int indexingJobCount = sb.getThread("80_indexing").getJobCount()+sb.indexingTasksInProcess.size();

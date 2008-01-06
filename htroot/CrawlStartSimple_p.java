@@ -112,7 +112,7 @@ public class CrawlStartSimple_p {
                 peer = yacyCore.seedDB.get(record.originator());
                 if (peer == null) peername = record.originator(); else peername = peer.getName();
                 prop.put("otherCrawlStartInProgress_" + showedCrawl + "_dark", dark ? "1" : "0");
-                prop.put("otherCrawlStartInProgress_" + showedCrawl + "_cre", record.created());
+                prop.put("otherCrawlStartInProgress_" + showedCrawl + "_cre", record.created().toString());
                 prop.put("otherCrawlStartInProgress_" + showedCrawl + "_peername", peername);
                 prop.put("otherCrawlStartInProgress_" + showedCrawl + "_startURL", record.attributes().get("startURL").toString());
                 prop.put("otherCrawlStartInProgress_" + showedCrawl + "_intention", record.attributes().get("intention").toString());
@@ -134,7 +134,7 @@ public class CrawlStartSimple_p {
                 peer = yacyCore.seedDB.get(record.originator());
                 if (peer == null) peername = record.originator(); else peername = peer.getName();
                 prop.put("otherCrawlStartFinished_" + showedCrawl + "_dark", dark ? "1" : "0");
-                prop.put("otherCrawlStartFinished_" + showedCrawl + "_cre", record.created());
+                prop.put("otherCrawlStartFinished_" + showedCrawl + "_cre", record.created().toString());
                 prop.put("otherCrawlStartFinished_" + showedCrawl + "_peername", peername);
                 prop.put("otherCrawlStartFinished_" + showedCrawl + "_startURL", record.attributes().get("startURL").toString());
                 prop.put("otherCrawlStartFinished_" + showedCrawl + "_intention", record.attributes().get("intention").toString());

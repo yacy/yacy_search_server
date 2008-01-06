@@ -71,15 +71,15 @@ public class Statistics {
                     prop.put("page_backlinks", "0");
                 } else {
                     prop.put("page_backlinks", "1");
-                    Iterator it = switchboard.facilityDB.maps("backlinks", false, "date");
+                    Iterator<Map<String, String>> it = switchboard.facilityDB.maps("backlinks", false, "date");
                     int count = 0;
                     int maxCount = 100;
                     boolean dark = true;
-                    Map map;
+                    Map<String, String> map;
                     String urlString;
                     yacyURL url;
                     while ((it.hasNext()) && (count < maxCount)) {
-                        map = (Map) it.next();
+                        map = it.next();
                         if (count >= maxCount) break;
                         urlString = (String) map.get("key");
                         try { url = new yacyURL(urlString, null); } catch (MalformedURLException e) { url = null; }

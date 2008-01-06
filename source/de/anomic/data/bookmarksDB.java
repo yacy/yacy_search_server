@@ -697,7 +697,7 @@ public class bookmarksDB {
         public static final String BOOKMARK_OWNER="bookmarkOwner";
         public static final String BOOKMARK_IS_FEED="bookmarkIsFeed";
         private String urlHash;
-        private Set tags;
+        private Set<String> tags;
         private long timestamp;
         public Bookmark(String urlHash, Map map){
             super(map);
@@ -767,7 +767,7 @@ public class bookmarksDB {
         public String getUrl(){
             return (String) entry.get(BOOKMARK_URL);
         }
-        public Set getTags(){
+        public Set<String> getTags(){
             return tags;
         }
         public String getTagsString(){
@@ -831,7 +831,7 @@ public class bookmarksDB {
          * set the Tags of the bookmark, and write them into the tags table.
          * @param tags2 a ArrayList with the tags
          */
-        public void setTags(Set tags2){
+        public void setTags(Set<String> tags2){
             setTags(tags2, true);
         }
         /**
@@ -839,9 +839,9 @@ public class bookmarksDB {
          * @param tags ArrayList with the tagnames
          * @param local sets, whether the updated tags should be stored to tagsDB
          */
-        public void setTags(Set tags2, boolean local){
+        public void setTags(Set<String> tags2, boolean local){
             tags.addAll(tags2);
-            Iterator it=tags.iterator();
+            Iterator<String> it=tags.iterator();
             while(it.hasNext()){
                 String tagName=(String) it.next();
                 Tag tag=getTag(tagHash(tagName));
@@ -863,8 +863,8 @@ public class bookmarksDB {
         	this.timestamp=ts;
         }
     }
-    public class tagIterator implements Iterator{
-        kelondroCloneableIterator tagIter;
+    public class tagIterator implements Iterator<Tag> {
+        kelondroCloneableIterator<String> tagIter;
         bookmarksDB.Tag nextEntry;
         public tagIterator(boolean up) throws IOException {
             flushTagCache(); //XXX: This costs performace :-((
@@ -879,9 +879,9 @@ public class bookmarksDB {
                 return false;
             }
         }
-        public Object next() {
+        public Tag next() {
             try {
-                return getTag((String) this.tagIter.next());
+                return getTag(this.tagIter.next());
             } catch (kelondroException e) {
                 //resetDatabase();
                 return null;
@@ -898,7 +898,7 @@ public class bookmarksDB {
             }
         }
     }
-    public class bookmarkIterator implements Iterator{
+    public class bookmarkIterator implements Iterator<Bookmark> {
         Iterator bookmarkIter;
         bookmarksDB.Bookmark nextEntry;
         public bookmarkIterator(boolean up) throws IOException {
@@ -914,7 +914,7 @@ public class bookmarksDB {
                 return false;
             }
         }
-        public Object next() {
+        public Bookmark next() {
             try {
                 return getBookmark((String) this.bookmarkIter.next());
             } catch (kelondroException e) {
@@ -936,7 +936,7 @@ public class bookmarksDB {
     /**
      * Comparator to sort the Bookmarks with Timestamps
      */
-    public class bookmarkComparator implements Comparator{
+    public class bookmarkComparator implements Comparator {
         
         private boolean newestFirst;
         /**

@@ -49,10 +49,7 @@
 		#{pool}#<Pool>
 			<Name><![CDATA[#[name]#]]></Name>
 			<maxActive>#[maxActive]#</maxActive>
-			<maxIdle>#[maxIdle]#</maxIdle>
-			<minIdle>#[minIdle]#</minIdle>
 			<numActive>#[numActive]#</numActive>
-			<numIdle>#[numIdle]#</numIdle>
 		</Pool>#{/pool}#
 	</ThreadPools>
 </PerfmanceQueues>

@@ -56,18 +56,18 @@ public abstract class serverAbstractSwitch implements serverSwitch {
     private static final long maxTrackingTimeDefault = 1000 * 60 * 60; // store only access data from the last hour to save ram space
     
     // configuration management
-    private final File      configFile;
-    private Map             configProps;
-    private final String    configComment;
-    private Map             configRemoved;
-    private final HashMap   authorization;
-    private String          rootPath;
-    private final TreeMap   workerThreads;
-    private final TreeMap   switchActions;
-    protected serverLog     log;
-    protected int           serverJobs;
-    protected HashMap       accessTracker; // mappings from requesting host to an ArrayList of serverTrack-entries
-    protected long maxTrackingTime;
+    private   File      configFile;
+    private   String    configComment;
+    private   String    rootPath;
+    protected serverLog log;
+    protected int       serverJobs;
+    protected long      maxTrackingTime;
+    private   Map<String, String>                    configProps;
+    private   Map<String, String>                    configRemoved;
+    private   HashMap<InetAddress, String>           authorization;
+    private   TreeMap<String, serverThread>          workerThreads;
+    private   TreeMap<String, serverSwitchAction>    switchActions;
+    protected HashMap<String, TreeMap<Long, String>> accessTracker; // mappings from requesting host to an ArrayList of serverTrack-entries
     
     public serverAbstractSwitch(String rootPath, String initPath, String configPath, boolean applyPro) {
         // we initialize the switchboard with a property file,
@@ -83,17 +83,17 @@ public abstract class serverAbstractSwitch implements serverSwitch {
         new File(configFile.getParent()).mkdir();
 
         // predefine init's
-        Map initProps;
+        Map<String, String> initProps;
         if (initFile.exists())
             initProps = serverFileUtils.loadHashMap(initFile);
         else
-            initProps = new HashMap();
+            initProps = new HashMap<String, String>();
         
         // if 'pro'-version is selected, overload standard settings with 'pro'-settings
-        Iterator i;
+        Iterator<String> i;
         String prop;
     	if (applyPro) {
-        	i = new HashMap(initProps).keySet().iterator(); // clone the map to avoid concurrent modification exceptions
+        	i = new HashMap<String, String>(initProps).keySet().iterator(); // clone the map to avoid concurrent modification exceptions
         	while (i.hasNext()) {
         		prop = (String) i.next();
         		if (prop.endsWith("__pro")) {
@@ -114,15 +114,15 @@ public abstract class serverAbstractSwitch implements serverSwitch {
         if (configFile.exists())
             configProps = serverFileUtils.loadHashMap(configFile);
         else
-            configProps = new HashMap();
+            configProps = new HashMap<String, String>();
 
         // remove all values from config that do not appear in init
-        configRemoved = new HashMap();
+        configRemoved = new HashMap<String, String>();
         synchronized (configProps) {
             i = configProps.keySet().iterator();
             String key;
             while (i.hasNext()) {
-                key = (String) i.next();
+                key = i.next();
                 if (!(initProps.containsKey(key))) {
                     configRemoved.put(key, this.configProps.get(key));
                     i.remove();
@@ -144,14 +144,14 @@ public abstract class serverAbstractSwitch implements serverSwitch {
         }
 
         // other settings
-        authorization = new HashMap();
-        accessTracker = new HashMap();
+        authorization = new HashMap<InetAddress, String>();
+        accessTracker = new HashMap<String, TreeMap<Long, String>>();
 
         // init thread control
-        workerThreads = new TreeMap();
+        workerThreads = new TreeMap<String, serverThread>();
 
         // init switch actions
-        switchActions = new TreeMap();
+        switchActions = new TreeMap<String, serverSwitchAction>();
 
         // init busy state control
         serverJobs = 0;
@@ -172,8 +172,8 @@ public abstract class serverAbstractSwitch implements serverSwitch {
     public void track(String host, String accessPath) {
         // learn that a specific host has accessed a specific path
         if (accessPath == null) accessPath="NULL";
-        TreeMap access = (TreeMap) accessTracker.get(host);
-        if (access == null) access = new TreeMap();
+        TreeMap<Long, String> access = accessTracker.get(host);
+        if (access == null) access = new TreeMap<Long, String>();
         synchronized (access) {
             access.put(new Long(System.currentTimeMillis()), accessPath);
 
@@ -184,10 +184,10 @@ public abstract class serverAbstractSwitch implements serverSwitch {
         }
     }
     
-    public TreeMap accessTrack(String host) {
+    public TreeMap<Long, String> accessTrack(String host) {
         // returns mapping from Long(accesstime) to path
         
-        TreeMap access = (TreeMap) accessTracker.get(host);
+        TreeMap<Long, String> access = accessTracker.get(host);
         if (access == null) return null;
         synchronized (access) {
             // clear too old entries
@@ -205,25 +205,25 @@ public abstract class serverAbstractSwitch implements serverSwitch {
         }
     }
     
-    private TreeMap clearTooOldAccess(TreeMap access) {
-        return new TreeMap(access.tailMap(new Long(System.currentTimeMillis() - maxTrackingTime)));
+    private TreeMap<Long, String> clearTooOldAccess(TreeMap<Long, String> access) {
+        return new TreeMap<Long, String>(access.tailMap(new Long(System.currentTimeMillis() - maxTrackingTime)));
     }
     
-    public Iterator accessHosts() {
+    public Iterator<String> accessHosts() {
         // returns an iterator of hosts in tracker (String)
-    	HashMap accessTrackerClone = new HashMap();
+    	HashMap<String, TreeMap<Long, String>> accessTrackerClone = new HashMap<String, TreeMap<Long, String>>();
     	try {
     		accessTrackerClone.putAll(accessTracker);
     	} catch (ConcurrentModificationException e) {}
     	return accessTrackerClone.keySet().iterator();
     }
 
-    public void setConfig(Map otherConfigs) {
-        Iterator i = otherConfigs.entrySet().iterator();
-        Map.Entry entry;
+    public void setConfig(Map<String, String> otherConfigs) {
+        Iterator<Map.Entry<String, String>> i = otherConfigs.entrySet().iterator();
+        Map.Entry<String, String> entry;
         while (i.hasNext()) {
-            entry = (Map.Entry) i.next();
-            setConfig((String) entry.getKey(), (String) entry.getValue());
+            entry = i.next();
+            setConfig(entry.getKey(), entry.getValue());
         }
     }
 
@@ -241,15 +241,13 @@ public abstract class serverAbstractSwitch implements serverSwitch {
 
     public void setConfig(String key, String value) {
         // perform action before setting new value
-        Iterator bevore = switchActions.entrySet().iterator();
-        Iterator after  = switchActions.entrySet().iterator();
+        Iterator<serverSwitchAction> bevore = switchActions.values().iterator();
+        Iterator<serverSwitchAction> after  = switchActions.values().iterator();
         synchronized (configProps) {
-            Map.Entry entry;
             serverSwitchAction action;
             
             while (bevore.hasNext()) {
-                entry = (Map.Entry) bevore.next();
-                action = (serverSwitchAction) entry.getValue();
+                action = bevore.next();
                 try {
                     action.doBevoreSetConfig(key, value);
                 } catch (Exception e) {
@@ -263,8 +261,7 @@ public abstract class serverAbstractSwitch implements serverSwitch {
 
             // perform actions afterwards
             while (after.hasNext()) {
-                entry = (Map.Entry) after.next();
-                action = (serverSwitchAction) entry.getValue();
+                action = after.next();
                 try {
                     action.doAfterSetConfig(key, value, (oldValue == null) ? null : (String) oldValue);
                 } catch (Exception e) {
@@ -275,17 +272,15 @@ public abstract class serverAbstractSwitch implements serverSwitch {
     }
 
     public String getConfig(String key, String dflt) {
-        Iterator i = switchActions.entrySet().iterator();
+        Iterator<serverSwitchAction> i = switchActions.values().iterator();
         synchronized (configProps) {
             // get the value
             Object s = configProps.get(key);
 
             // do action
-            Map.Entry entry;
             serverSwitchAction action;
             while (i.hasNext()) {
-                entry = (Map.Entry) i.next();
-                action = (serverSwitchAction) entry.getValue();
+                action = i.next();
                 try {
                     action.doWhenGetConfig(key, (s == null) ? null : (String) s, dflt);
                 } catch (Exception e) {
@@ -341,8 +336,8 @@ public abstract class serverAbstractSwitch implements serverSwitch {
         return ret;
     }
 
-    public Iterator configKeys() {
-	return configProps.keySet().iterator();
+    public Iterator<String> configKeys() {
+        return configProps.keySet().iterator();
     }
 
     private void saveConfig() {
@@ -355,7 +350,7 @@ public abstract class serverAbstractSwitch implements serverSwitch {
         }
     }
 
-    public Map getRemoved() {
+    public Map<String, String> getRemoved() {
         // returns configuration that had been removed during initialization
         return configRemoved;
     }
@@ -366,7 +361,7 @@ public abstract class serverAbstractSwitch implements serverSwitch {
         newAction.setLog(log);
         newAction.setDescription(actionShortDescription, actionLongDescription);
         switchActions.put(actionName, newAction);
-	log.logInfo("Deployed Action '" + actionShortDescription + "', (" + switchActions.size() + " actions registered)");
+        log.logInfo("Deployed Action '" + actionShortDescription + "', (" + switchActions.size() + " actions registered)");
     }
 
     public void undeployAction(String actionName) {
@@ -452,14 +447,14 @@ public abstract class serverAbstractSwitch implements serverSwitch {
     }
 
     public void intermissionAllThreads(long pause) {
-        Iterator e = workerThreads.keySet().iterator();
+        Iterator<String> e = workerThreads.keySet().iterator();
         while (e.hasNext()) {
             ((serverThread) workerThreads.get(e.next())).intermission(pause);
         }
     }
     
     public synchronized void terminateAllThreads(boolean waitFor) {
-        Iterator e = workerThreads.keySet().iterator();
+        Iterator<String> e = workerThreads.keySet().iterator();
         while (e.hasNext()) {
             ((serverThread) workerThreads.get(e.next())).terminate(false);
         }
@@ -472,7 +467,7 @@ public abstract class serverAbstractSwitch implements serverSwitch {
         }
     }
     
-    public Iterator /*of serverThread-Names (String)*/ threadNames() {
+    public Iterator<String> /*of serverThread-Names (String)*/ threadNames() {
         return workerThreads.keySet().iterator();
     }
     
@@ -484,13 +479,13 @@ public abstract class serverAbstractSwitch implements serverSwitch {
     // authentification routines:
     
     public void setAuthentify(InetAddress host, String user, String rights) {
-	// sets access attributes according to host addresses
-	authorization.put(host, user + "@" + rights);
+        // sets access attributes according to host addresses
+        authorization.put(host, user + "@" + rights);
     }
 
     public void removeAuthentify(InetAddress host) {
-	// remove access attributes according to host addresses
-	authorization.remove(host);
+        // remove access attributes according to host addresses
+        authorization.remove(host);
     }
 
     public String getAuthentifyUser(InetAddress host) {

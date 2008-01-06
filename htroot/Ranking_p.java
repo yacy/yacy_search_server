@@ -42,7 +42,7 @@ public class Ranking_p {
 	
 	private static final int maxRankingRange = 16;
 	
-	private static final HashMap rankingParameters = new HashMap();
+	private static final HashMap<String, String> rankingParameters = new HashMap<String, String>();
 	static {
 		rankingParameters.put(plasmaSearchRankingProfile.APPAUTHOR, "Appearance In Author");
 		rankingParameters.put(plasmaSearchRankingProfile.APPDESCR, "Appearance In Description");

@@ -168,20 +168,14 @@
       <tr class="TableHeader" valign="bottom">
         <td>Thread Pool</td>
         <td>maximum Active</td>
-        <td>maximum Idle</td>
-        <td>minimum Idle</td>
         <td>current Active</td>
-        <td>current Idle</td>
         <td>Full Description</td>
       </tr>
       #{pool}#
       <tr class="TableCellDark">
         <td align="left">#[name]#</td>
         <td align="right"><input name="#[name]#_maxActive" type="text" size="8" maxlength="8" value="#[maxActive]#" /></td>
-        <td align="right"><input name="#[name]#_maxIdle" type="text" size="8" maxlength="8" value="#[maxIdle]#" /></td>
-        <td align="right"><input name="#[name]#_minIdle" type="text" size="8" maxlength="8" value="#[minIdle]#" #(minIdleConfigurable)#disabled="disabled"::#(/minIdleConfigurable)# /></td>
         <td align="right">#[numActive]#</td>
-        <td align="right">#[numIdle]#</td>
         <td align="left"></td>
       </tr>
       #{/pool}#

@@ -66,6 +66,7 @@ import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
+import java.net.InetAddress;
 import java.util.ArrayList;
 import java.util.Enumeration;
 import java.util.Hashtable;
@@ -75,7 +76,7 @@ import de.anomic.data.htmlTools;
 import de.anomic.plasma.plasmaSwitchboard;
 import de.anomic.tools.yFormatter;
 
-public class serverObjects extends Hashtable implements Cloneable {
+public class serverObjects extends Hashtable<String, String> implements Cloneable {
 
     private static final long serialVersionUID = 1L;
     private boolean localized = true; 
@@ -88,7 +89,7 @@ public class serverObjects extends Hashtable implements Cloneable {
         super(initialCapacity);
     }
 
-    public serverObjects(Map input) {
+    public serverObjects(Map<String, String> input) {
         super(input);
     }
 
@@ -101,7 +102,7 @@ public class serverObjects extends Hashtable implements Cloneable {
      * @return The value that was added to the map. 
      * @see java.util.Hashtable#put(K, V)
      */
-    public Object put(Object key, Object value) {
+    public String put(String key, String value) {
         if (key == null) {
             // this does nothing
             return null;
@@ -114,20 +115,13 @@ public class serverObjects extends Hashtable implements Cloneable {
     }
 
     /**
-     * This method just calls {@link #put(Object, Object)}.
-     */
-    public String put(String key, String value) {
-        return (String) this.put((Object) key, value);
-    }
-
-    /**
      * Add byte array to the map, value is kept as it is.
      * @param key   key name as String.
      * @param value mapped value as a byte array.
-     * @return      the added value.
+     * @return      the previous value as String.
      */
-    public byte[] put(String key, byte[] value) {
-        return (byte[]) this.put((Object) key, (Object) value); //TODO: do we need an encoding method for byte[]?
+    public String put(String key, byte[] value) {
+        return this.put(key, new String(value)); //TODO: do we need an encoding method for byte[]?
     }
 
     /**
@@ -157,6 +151,18 @@ public class serverObjects extends Hashtable implements Cloneable {
         }
     }
 
+    public String put(String key, java.util.Date value) {
+        return this.put(key, value.toString());
+    }
+    
+    public String put(String key, serverDate value) {
+        return this.put(key, value.toString());
+    }
+    
+    public String put(String key, InetAddress value) {
+        return this.put(key, value.toString());
+    }
+    
     /**
      * Add a String to the map. The content of the String is escaped to be usable in HTML output.
      * @param key   key name as String.
@@ -175,7 +181,7 @@ public class serverObjects extends Hashtable implements Cloneable {
      * replaced in the returned String.
      */
     public String putHTML(String key, String value, boolean forXML) {
-        return (String) put((Object) key, htmlTools.encodeUnicode2html(value, true, forXML));
+        return (String) put(key, htmlTools.encodeUnicode2html(value, true, forXML));
     }
 
     /**
@@ -187,7 +193,7 @@ public class serverObjects extends Hashtable implements Cloneable {
      * @return the String value added to the map.
      */
     public String putNum(String key, long value) {
-        return (String) this.put((Object) key, yFormatter.number(value, this.localized));
+        return (String) this.put(key, yFormatter.number(value, this.localized));
     }
 
     /**
@@ -195,7 +201,7 @@ public class serverObjects extends Hashtable implements Cloneable {
      * @see #putNum(String, long)
      */
     public String putNum(String key, double value) {
-        return (String) this.put((Object) key, yFormatter.number(value, this.localized));
+        return (String) this.put(key, yFormatter.number(value, this.localized));
     }
 
     /**
@@ -203,28 +209,28 @@ public class serverObjects extends Hashtable implements Cloneable {
      * @see #putNum(String, long)
      */
     public String putNum(String key, String value) {
-        return (String) this.put((Object) key, yFormatter.number(value));
+        return (String) this.put(key, yFormatter.number(value));
     }
 
     
     public String putWiki(String key, String wikiCode){
-        return this.put(key, plasmaSwitchboard.wikiParser.transform(wikiCode));
+        return (String) this.put(key, plasmaSwitchboard.wikiParser.transform(wikiCode));
     }
     public String putWiki(String key, byte[] wikiCode) {
         try {
-            return this.put(key, plasmaSwitchboard.wikiParser.transform(wikiCode));
+            return (String) this.put(key, plasmaSwitchboard.wikiParser.transform(wikiCode));
         } catch (UnsupportedEncodingException e) {
-            return this.put(key, "Internal error pasting wiki-code: " + e.getMessage());
+            return (String) this.put(key, "Internal error pasting wiki-code: " + e.getMessage());
         }
     }
     public String putWiki(String key, String wikiCode, String publicAddress) {
-        return this.put(key, plasmaSwitchboard.wikiParser.transform(wikiCode, publicAddress));
+        return (String) this.put(key, plasmaSwitchboard.wikiParser.transform(wikiCode, publicAddress));
     }
     public String putWiki(String key, byte[] wikiCode, String publicAddress) {
         try {
-            return this.put(key, plasmaSwitchboard.wikiParser.transform(wikiCode, "UTF-8", publicAddress));
+            return (String) this.put(key, plasmaSwitchboard.wikiParser.transform(wikiCode, "UTF-8", publicAddress));
         } catch (UnsupportedEncodingException e) {
-            return this.put(key, "Internal error pasting wiki-code: " + e.getMessage());
+            return (String) this.put(key, "Internal error pasting wiki-code: " + e.getMessage());
         }
     }
 
@@ -245,7 +251,8 @@ public class serverObjects extends Hashtable implements Cloneable {
 
     // string variant
     public String get(String key, String dflt) {
-        return (String) this.get(key, (Object) dflt);
+        Object result = super.get(key);
+        if (result == null) return dflt; else return (String) result;
     }
 
     public int getInt(String key, int dflt) {
@@ -272,12 +279,12 @@ public class serverObjects extends Hashtable implements Cloneable {
     public String[] getAll(String keyMapper) {
         // the keyMapper may contain regular expressions as defined in String.matches
         // this method is particulary useful when parsing the result of checkbox forms
-        ArrayList v = new ArrayList();
-        Enumeration e = keys();
+        ArrayList<String> v = new ArrayList<String>();
+        Enumeration<String> e = keys();
         String key;
         while (e.hasMoreElements()) {
-            key = (String) e.nextElement();
-            if (key.matches(keyMapper)) v.add(get(key));
+            key = e.nextElement();
+            if (key.matches(keyMapper)) v.add((String) get(key));
         }
         // make a String[]
         String[] result = new String[v.size()];
@@ -285,10 +292,10 @@ public class serverObjects extends Hashtable implements Cloneable {
         return result;
     }
 
-    // put all elements of another hastable into the own table
+    // put all elements of another hashtable into the own table
     public void putAll(serverObjects add) {
-        Enumeration e = add.keys();
-        Object k;
+        Enumeration<String> e = add.keys();
+        String k;
         while (e.hasMoreElements()) {
             k = e.nextElement();
             put(k, add.get(k));
@@ -300,10 +307,10 @@ public class serverObjects extends Hashtable implements Cloneable {
         BufferedOutputStream fos = null;
         try {
             fos = new BufferedOutputStream(new FileOutputStream(f));
-            Enumeration e = keys();
+            Enumeration<String> e = keys();
             String key, value;
             while (e.hasMoreElements()) {
-                key = (String) e.nextElement();
+                key = e.nextElement();
                 value = ((String) get(key)).replaceAll("\n", "\\\\n");  
                 fos.write((key + "=" + value + "\r\n").getBytes());
             }

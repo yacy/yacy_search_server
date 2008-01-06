@@ -242,8 +242,8 @@ public class IndexControlURLs_p {
         prop.putHTML("genUrlProfile_urlNormalform", comp.url().toNormalform(false, true));
         prop.put("genUrlProfile_urlhash", urlhash);
         prop.put("genUrlProfile_urlDescr", comp.title());
-        prop.put("genUrlProfile_moddate", entry.moddate());
-        prop.put("genUrlProfile_loaddate", entry.loaddate());
+        prop.put("genUrlProfile_moddate", entry.moddate().toString());
+        prop.put("genUrlProfile_loaddate", entry.loaddate().toString());
         prop.put("genUrlProfile_referrer", (le == null) ? 0 : 1);
         prop.putHTML("genUrlProfile_referrer_url", (le == null) ? "<unknown>" : le.comp().url().toNormalform(false, true));
         prop.put("genUrlProfile_referrer_hash", (le == null) ? "" : le.hash());

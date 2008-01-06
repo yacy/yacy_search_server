@@ -247,13 +247,13 @@ public class Blog {
             }
             else prop.put("mode", "3"); //access denied (no rights)
         }
-        else if(post.containsKey("import")) {
+        else if (post.containsKey("import")) {
             prop.put("mode", "5");
             prop.put("mode_state", "0");
         }
-        else if(post.containsKey("xmlfile")) {
+        else if (post.containsKey("xmlfile")) {
             prop.put("mode", "5");
-            if(switchboard.blogDB.importXML(new String((byte[])post.get("xmlfile$file")))) {
+            if(switchboard.blogDB.importXML(post.get("xmlfile$file"))) {
                 prop.put("mode_state", "1");
             }
             else {

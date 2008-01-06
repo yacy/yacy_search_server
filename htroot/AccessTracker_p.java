@@ -126,7 +126,7 @@ public class AccessTracker_p {
             prop.put("page_num", entCount);
         }
         if ((page == 2) || (page == 4)) {
-            ArrayList array = (page == 2) ? switchboard.localSearches : switchboard.remoteSearches;
+            ArrayList<HashMap<String, Object>> array = (page == 2) ? switchboard.localSearches : switchboard.remoteSearches;
             Long trackerHandle;
             HashMap searchProfile;
             int m = Math.min(maxCount, array.size());
@@ -138,7 +138,7 @@ public class AccessTracker_p {
             long rtimeSum = 0;
             
             for (int entCount = 0; entCount < m; entCount++) {
-                searchProfile = (HashMap) array.get(array.size() - entCount - 1);
+                searchProfile = (HashMap<String, Object>) array.get(array.size() - entCount - 1);
                 trackerHandle = (Long) searchProfile.get("time");
             
                 // put values in template
@@ -150,7 +150,7 @@ public class AccessTracker_p {
                 if (page == 2) {
                     // local search
                     prop.putNum("page_list_" + entCount + "_offset", ((Integer) searchProfile.get("offset")).longValue());
-                    prop.put("page_list_" + entCount + "_querystring", searchProfile.get("querystring"));
+                    prop.put("page_list_" + entCount + "_querystring", (String) searchProfile.get("querystring"));
                 } else {
                     // remote search
                     prop.putHTML("page_list_" + entCount + "_peername", (String) searchProfile.get("peername"));

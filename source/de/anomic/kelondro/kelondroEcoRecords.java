@@ -33,8 +33,8 @@ import java.util.TreeMap;
 
 public class kelondroEcoRecords extends kelondroAbstractRecords {
 
-    // static supervision objects: recognize and coordinate all activites
-    private static TreeMap recordTracker = new TreeMap(); // a String/filename - kelondroTray mapping
+    // static supervision objects: recognize and coordinate all activities
+    private static TreeMap<String, kelondroEcoRecords> recordTracker = new TreeMap<String, kelondroEcoRecords>();
     
     public kelondroEcoRecords(
             File file,
@@ -59,7 +59,7 @@ public class kelondroEcoRecords extends kelondroAbstractRecords {
         recordTracker.put(this.filename, this);
     }
 
-    public static final Iterator filenames() {
+    public static final Iterator<String> filenames() {
         // iterates string objects; all file names from record tracker
         return recordTracker.keySet().iterator();
     }

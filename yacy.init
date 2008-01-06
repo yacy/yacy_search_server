@@ -141,11 +141,10 @@ bootstrapLoadTimeout = 6000
 clientTimeout = 10000
 
 # maximal number of httpd sessions
-# a client may open several connections at one, and the httpdMaxActiveSessions value sets
+# a client may open several connections at once, and the httpdMaxBusySessions value sets
 # a limit on the number of concurrent connections
-httpdMaxActiveSessions = 150
-httpdMaxIdleSessions = 75
-httpdMinIdleSessions = 5
+httpdMaxBusySessions = 100
+httpdMaxBusySessions__pro = 200
 
 # default root path for the file server
 # may be overridden by the htdocs parameter

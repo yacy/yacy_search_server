@@ -77,6 +77,6 @@ public interface LogParser {
      * <b>PLASMA</b> or <b>YACY</b>
      */
     public String getParserType();
-    public Hashtable getResults();
+    public Hashtable<String, Object> getResults();
     public double getParserVersion();
 }

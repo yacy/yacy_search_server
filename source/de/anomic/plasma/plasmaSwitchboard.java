@@ -229,7 +229,7 @@ public final class plasmaSwitchboard extends serverAbstractSwitch implements ser
     public  dbImportManager             dbImportManager;
     public  plasmaDHTFlush              transferIdxThread = null;
     private plasmaDHTChunk              dhtTransferChunk = null;
-    public  ArrayList                   localSearches, remoteSearches; // array of search result properties as HashMaps
+    public  ArrayList<HashMap<String, Object>> localSearches, remoteSearches; // array of search result properties as HashMaps
     public  HashMap                     localSearchTracker, remoteSearchTracker; // mappings from requesting host to a TreeSet of Long(access time)
     public  long                        lastseedcheckuptime = -1;
     public  long                        indexedPages = 0;
@@ -1207,8 +1207,8 @@ public final class plasmaSwitchboard extends serverAbstractSwitch implements ser
         // init search history trackers
         this.localSearchTracker = new HashMap(); // String:TreeSet - IP:set of Long(accessTime)
         this.remoteSearchTracker = new HashMap();
-        this.localSearches = new ArrayList(); // contains search result properties as HashMaps
-        this.remoteSearches = new ArrayList();
+        this.localSearches = new ArrayList<HashMap<String, Object>>(); // contains search result properties as HashMaps
+        this.remoteSearches = new ArrayList<HashMap<String, Object>>();
         
         // init messages: clean up message symbol
         File notifierSource = new File(getRootPath(), getConfig(HTROOT_PATH, HTROOT_PATH_DEFAULT) + "/env/grafics/empty.gif");

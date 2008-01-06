@@ -119,7 +119,7 @@ public final class transfer {
         if (process.equals("store")) {
             prop.put("process", "1");
             if (purpose.equals("crcon")) {
-                byte[] filebytes = (byte[]) post.get("filename$file");
+                String fileString = post.get("filename$file");
                 String accesscode = post.get("access", "");   // one-time authentication
                 String md5 = post.get("md5", "");   // one-time authentication
                 //java.util.HashMap perm = sb.rankingPermissions;
@@ -137,7 +137,7 @@ public final class transfer {
                     File file = new File(path, filename);
                     try {
                         if (file.getCanonicalPath().toString().startsWith(path.getCanonicalPath().toString())){
-                            serverFileUtils.write(filebytes, file);
+                            serverFileUtils.write(fileString.getBytes(), file);
                             String md5t = serverCodings.encodeMD5Hex(file);
                             if (md5t.equals(md5)) {
                                 prop.put("response", "ok");

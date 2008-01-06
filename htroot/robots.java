@@ -31,7 +31,7 @@ public class robots {
             if (rbc.isProfileDisallowed()) prop.put(httpdRobotsTxtConfig.ALL + "_" + httpdRobotsTxtConfig.PROFILE, "1");
             
             if (rbc.isLockedDisallowed() || rbc.isDirsDisallowed()) {
-                final ArrayList[] p = getFiles(env.getConfig(plasmaSwitchboard.HTROOT_PATH, plasmaSwitchboard.HTROOT_PATH_DEFAULT));
+                final ArrayList<String>[] p = getFiles(env.getConfig(plasmaSwitchboard.HTROOT_PATH, plasmaSwitchboard.HTROOT_PATH_DEFAULT));
                 if (rbc.isLockedDisallowed()) {
                     prop.put(httpdRobotsTxtConfig.ALL + "_" + httpdRobotsTxtConfig.LOCKED, p[0].size());
                     for (int i=0; i<p[0].size(); i++)
@@ -48,11 +48,11 @@ public class robots {
         return prop;
     }
     
-    private static ArrayList[] getFiles(String htrootPath) {
+    private static ArrayList<String>[] getFiles(String htrootPath) {
         final File htroot = new File(htrootPath);
         if (!htroot.exists()) return null;
-        final ArrayList htrootFiles = new ArrayList();
-        final ArrayList htrootDirs = new ArrayList();
+        final ArrayList<String> htrootFiles = new ArrayList<String>();
+        final ArrayList<String> htrootDirs = new ArrayList<String>();
         final String[] htroots = htroot.list();
         File file;
         for (int i=0, dot; i<htroots.length; i++) {

@@ -375,7 +375,8 @@ public final class httpHeader extends TreeMap<String, Object> implements Map<Str
     public String toString() {
         return super.toString();
     }
-    	/*
+    /*
+     * example header
 	  Connection=close
 	  Content-Encoding=gzip
 	  Content-Length=7281
@@ -801,11 +802,10 @@ public final class httpHeader extends TreeMap<String, Object> implements Map<Str
     /**
      * Implementation of Map.Entry. Structure that hold two values - exactly what we need!
      */
-    class Entry implements Map.Entry
-    {
+    class Entry implements Map.Entry {
         private Object Key;
         private Object Value;
-        Entry(Object Key,String Value){this.Key=Key;this.Value=Value;}
+        Entry(Object Key, String Value){this.Key=Key;this.Value=Value;}
         public Object getKey() {return Key;}
         public Object getValue() {return Value;}
         public Object setValue(Object Value) {return(this.Value=Value);}
@@ -829,16 +829,12 @@ public final class httpHeader extends TreeMap<String, Object> implements Map<Str
          * For example semicolon should be not in any of the values
          * However an exception in this case would be an overhead IMHO.
          */
-        String cookieString=name+"="+value+";";
-        if(expires!=null)
-            cookieString+=" expires="+expires+";";
-        if(path!=null)
-            cookieString+=" path="+path+";";
-        if(domain!=null)
-            cookieString+=" domain="+domain+";";
-        if(secure)
-            cookieString+=" secure;";
-        cookies.add(new Entry("Set-Cookie",cookieString));
+        String cookieString = name + "=" + value + ";";
+        if (expires != null) cookieString += " expires=" + expires + ";";
+        if (path != null) cookieString += " path=" + path + ";";
+        if (domain != null) cookieString += " domain=" + domain + ";";
+        if (secure) cookieString += " secure;";
+        cookies.add(new Entry("Set-Cookie", cookieString));
     }
     /**
      * Sets Cookie on the client machine.

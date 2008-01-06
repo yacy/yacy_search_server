@@ -45,7 +45,11 @@
 package de.anomic.yacy;
 
 import java.util.Date;
+import java.util.HashMap;
+import java.util.Iterator;
 import java.util.Map;
+import java.util.Properties;
+import java.util.Map.Entry;
 
 import de.anomic.kelondro.kelondroNaturalOrder;
 import de.anomic.kelondro.kelondroRow;
@@ -63,7 +67,7 @@ public class yacyNewsRecord {
     private Date   received;    // Date when news was received here at this peer
     private String category;    // keyword that adresses possible actions
     private int    distributed; // counter that counts number of distributions of this news record
-    private Map    attributes;  // elemets of the news for a special category
+    private Map<String, String> attributes;  // elemets of the news for a special category
 
     public static final int attributesMaxLength = maxNewsRecordLength
                                                   - idLength
@@ -88,8 +92,24 @@ public class yacyNewsRecord {
             return null;
         }
     }
+
+    public static yacyNewsRecord newRecord(String category, Properties attributes) {
+        try {
+            HashMap<String, String> m = new HashMap<String, String>();
+            Iterator<Entry<Object, Object>> e = attributes.entrySet().iterator();
+            Map.Entry<Object, Object> entry;
+            while (e.hasNext()) {
+                entry = e.next();
+                m.put((String) entry.getKey(), (String) entry.getValue());
+            }
+            return new yacyNewsRecord(category, m);
+        } catch (IllegalArgumentException e) {
+            yacyCore.log.logWarning("rejected bad yacy news record: " + e.getMessage());
+            return null;
+        }
+    }
     
-    public static yacyNewsRecord newRecord(String category, Map attributes) {
+    public static yacyNewsRecord newRecord(String category, Map<String, String> attributes) {
         try {
             return new yacyNewsRecord(category, attributes);
         } catch (IllegalArgumentException e) {
@@ -98,7 +118,7 @@ public class yacyNewsRecord {
         }
     }
     
-    public static yacyNewsRecord newRecord(String id, String category, Date received, int distributed, Map attributes) {
+    public static yacyNewsRecord newRecord(String id, String category, Date received, int distributed, Map<String, String> attributes) {
         try {
             return new yacyNewsRecord(id, category, received, distributed, attributes);
         } catch (IllegalArgumentException e) {
@@ -119,7 +139,7 @@ public class yacyNewsRecord {
         removeStandards();
     }
 
-    public yacyNewsRecord(String category, Map attributes) {
+    public yacyNewsRecord(String category, Map<String, String> attributes) {
         if (category.length() > categoryStringLength) throw new IllegalArgumentException("category length (" + category.length() + ") exceeds maximum (" + categoryStringLength + ")");
         if (attributes.toString().length() > attributesMaxLength) throw new IllegalArgumentException("attributes length (" + attributes.toString().length() + ") exceeds maximum (" + attributesMaxLength + ")");
         this.attributes = attributes;
@@ -131,7 +151,7 @@ public class yacyNewsRecord {
         removeStandards();
     }
 
-    protected yacyNewsRecord(String id, String category, Date received, int distributed, Map attributes) {
+    protected yacyNewsRecord(String id, String category, Date received, int distributed, Map<String, String> attributes) {
         if (category.length() > categoryStringLength) throw new IllegalArgumentException("category length (" + category.length() + ") exceeds maximum (" + categoryStringLength + ")");
         if (attributes.toString().length() > attributesMaxLength) throw new IllegalArgumentException("attributes length (" + attributes.toString().length() + ") exceeds maximum (" + attributesMaxLength + ")");
         this.attributes = attributes;
@@ -192,7 +212,7 @@ public class yacyNewsRecord {
         distributed++;
     }
 
-    public Map attributes() {
+    public Map<String, String> attributes() {
         return attributes;
     }
     

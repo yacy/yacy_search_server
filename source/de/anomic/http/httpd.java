@@ -853,7 +853,7 @@ public final class httpd implements serverHandler {
         return b.toString();
     }
     
-    public static HashMap parseMultipart(httpHeader header, serverObjects args, InputStream in, int length) throws IOException {
+    public static HashMap<String, byte[]> parseMultipart(httpHeader header, serverObjects args, InputStream in, int length) throws IOException {
         // this is a quick hack using a previously coded parseMultipart based on a buffer
         // should be replaced sometime by a 'right' implementation
 
@@ -877,12 +877,12 @@ public final class httpd implements serverHandler {
         }
         
         //System.out.println("MULTIPART-BUFFER=" + new String(buffer));
-        HashMap files = parseMultipart(header, args, buffer);
+        HashMap<String, byte[]> files = parseMultipart(header, args, buffer);
         buffer = null;
         return files;
     }
     
-    public static HashMap parseMultipart(httpHeader header, serverObjects args, byte[] buffer) throws IOException {
+    public static HashMap<String, byte[]> parseMultipart(httpHeader header, serverObjects args, byte[] buffer) throws IOException {
         // we parse a multipart message and put results into the properties
         // find/identify boundary marker
         //System.out.println("DEBUG parseMultipart = <<" + new String(buffer) + ">>");
@@ -910,7 +910,7 @@ public final class httpd implements serverHandler {
         // now loop over boundaries
         byte [] name;
         byte [] filename;
-        HashMap files = new HashMap();
+        HashMap<String, byte[]> files = new HashMap<String, byte[]>();
         int argc = 0;
         //System.out.println("DEBUG: parsing multipart body:" + new String(buffer));
         while (pos < buffer.length) { // boundary enumerator
@@ -1184,7 +1184,7 @@ public final class httpd implements serverHandler {
                     tp.put("errorMessageType_detailedErrorMsg", (detailedErrorMsgText == null) ? "" : detailedErrorMsgText.replaceAll("\n", "<br />"));
                     break;
                 case ERRORCASE_FILE:
-                    tp.put("errorMessageType_file", (detailedErrorMsgFile == null) ? "" : detailedErrorMsgFile);
+                    tp.put("errorMessageType_file", (detailedErrorMsgFile == null) ? "" : detailedErrorMsgFile.toString());
                     if ((detailedErrorMsgValues != null) && (detailedErrorMsgValues.size() > 0)) {
                         // rewriting the value-names and add the proper name prefix:
                         Iterator nameIter = detailedErrorMsgValues.keySet().iterator();

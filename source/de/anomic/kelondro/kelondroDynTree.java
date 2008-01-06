@@ -46,15 +46,15 @@ package de.anomic.kelondro;
 
 import java.io.File;
 import java.io.IOException;
-import java.util.Enumeration;
-import java.util.Hashtable;
+import java.util.HashMap;
+import java.util.Iterator;
 
 public class kelondroDynTree {
     
     // basic data structures
     private kelondroRow rowdef;
     private kelondroDyn table;
-    private Hashtable treeRAHandles;
+    private HashMap<String, kelondroRA> treeRAHandles;
     private File file;
 
     // some properties to control caching and buffering
@@ -65,7 +65,8 @@ public class kelondroDynTree {
     private long preloadTime = 0;
 
     // data structures for the cache and buffer
-    private Hashtable buffer, cache;
+    private HashMap<String, treeBuffer> buffer;
+    private HashMap<String, treeCache> cache;
     private long cycleBuffer;
     
     public kelondroDynTree(File file, long preloadTime, int keylength, int nodesize, kelondroRow rowdef, char fillChar, boolean resetOnFail) {
@@ -73,17 +74,17 @@ public class kelondroDynTree {
         this.file = file;
         this.preloadTime = preloadTime;
         this.rowdef = rowdef;
-        this.buffer = new Hashtable();
-        this.cache = new Hashtable();
+        this.buffer = new HashMap<String, treeBuffer>();
+        this.cache = new HashMap<String, treeCache>();
         //this.cycleCache = Long.MIN_VALUE;
         this.cycleBuffer = Long.MIN_VALUE;
         this.table = new kelondroDyn(file, true, true, preloadTime, keylength, nodesize, fillChar, rowdef.objectOrder, true, false, resetOnFail);
-        this.treeRAHandles = new Hashtable();
+        this.treeRAHandles = new HashMap<String, kelondroRA>();
     }
     
     public void close() throws IOException {
-        Enumeration e = treeRAHandles.keys();
-        while (e.hasMoreElements()) closeTree((String) e.nextElement());
+        Iterator<String> e = treeRAHandles.keySet().iterator();
+        while (e.hasNext()) closeTree((String) e.next());
         int size = table.sizeDyn();
         table.close();
         if (size == 0) this.file.delete();
@@ -143,34 +144,34 @@ public class kelondroDynTree {
     protected class treeCache {
 
         private String tablename;
-        private Hashtable tcache;
+        private HashMap<String, kelondroRow.Entry> tcache;
         public long timestamp;
         
         treeCache(String tablename) {
             this.tablename = tablename;
-            this.tcache = new Hashtable(); // for key-row relations
+            this.tcache = new HashMap<String, kelondroRow.Entry>(); // for key-row relations
             this.timestamp = Long.MAX_VALUE; // to flag no-update
         }
         
         public kelondroRow.Entry get(byte[] key) throws IOException {
-            kelondroRow.Entry entry = (kelondroRow.Entry) tcache.get(key);
+            kelondroRow.Entry entry = (kelondroRow.Entry) tcache.get(new String(key));
             if (entry == null) {
                 kelondroTree t = getTree(this.tablename);
                 entry = t.get(key);
                 t.close();
-                this.tcache.put(key, entry);
+                this.tcache.put(new String(key), entry);
                 this.timestamp = System.currentTimeMillis();
             } 
             return entry;
         }
         
         protected void put(kelondroRow.Entry entry) { // this is only used internal
-            this.tcache.put(entry.getColBytes(0), entry);
+            this.tcache.put(entry.getColString(0, null), entry);
             this.timestamp = System.currentTimeMillis();
         }
         
         protected void remove(byte[] key) {
-            this.tcache.remove(key);
+            this.tcache.remove(new String(key));
             this.timestamp = System.currentTimeMillis();
         }
     }
@@ -178,34 +179,34 @@ public class kelondroDynTree {
     protected class treeBuffer {
         
         private String tablename;
-        protected Hashtable tbuffer;
+        protected HashMap<String, kelondroRow.Entry> tbuffer;
         public long timestamp;
         
         treeBuffer(String tablename) {
             this.tablename = tablename;
-            this.tbuffer = new Hashtable(); // for key-row relations
+            this.tbuffer = new HashMap<String, kelondroRow.Entry>(); // for key-row relations
             this.timestamp = Long.MAX_VALUE; // to flag no-update
         }
         
         public void put(kelondroRow.Entry entry) {
-            this.tbuffer.put(entry.getColBytes(0), entry);
+            this.tbuffer.put(entry.getColString(0, null), entry);
             this.timestamp = System.currentTimeMillis();
         }
         
         public void remove(byte[] key) {
-            this.tbuffer.remove(key);
+            this.tbuffer.remove(new String(key));
             this.timestamp = System.currentTimeMillis();
         }
 
         protected void flush() throws IOException {
             this.timestamp = System.currentTimeMillis();
             if (this.tbuffer.size() == 0) return;
-            Enumeration e = this.tbuffer.keys();
+            Iterator<String> e = this.tbuffer.keySet().iterator();
             kelondroTree t = getTree(this.tablename);
             kelondroRow.Entry entry;
-            byte[] key;
-            while (e.hasMoreElements()) {
-                key = (byte[]) e.nextElement();
+            String key;
+            while (e.hasNext()) {
+                key = e.next();
                 entry = (kelondroRow.Entry) this.tbuffer.get(key);
                 t.put(entry);
             }
@@ -271,11 +272,11 @@ public class kelondroDynTree {
             (buffer.size() < this.maxcountBuffer))  return;
         this.cycleBuffer = System.currentTimeMillis();
         // collect all buffers which have a time > maxageBuffer
-        Enumeration e = buffer.keys();
+        Iterator<String> e = buffer.keySet().iterator();
         String tablename;
         treeBuffer tb;
-        while (e.hasMoreElements()) {
-            tablename = (String) e.nextElement();
+        while (e.hasNext()) {
+            tablename = e.next();
             tb = (treeBuffer) buffer.get(tablename);
             if ((System.currentTimeMillis() - tb.timestamp > this.maxageBuffer) ||
                 (tb.tbuffer.size() > this.maxsizeBuffer) ||

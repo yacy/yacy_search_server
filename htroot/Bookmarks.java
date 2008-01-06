@@ -214,7 +214,7 @@ public class Bookmarks {
             }
             try {
                 File file=new File((String)post.get("bookmarksfile"));
-                switchboard.bookmarksDB.importFromBookmarks(new yacyURL(file) , new String((byte[])post.get("bookmarksfile$file")), tags, isPublic);
+                switchboard.bookmarksDB.importFromBookmarks(new yacyURL(file) , post.get("bookmarksfile$file"), tags, isPublic);
             } catch (MalformedURLException e) {}
             
         }else if(post.containsKey("xmlfile")){
@@ -222,7 +222,7 @@ public class Bookmarks {
         	if(((String) post.get("public")).equals("public")){
             	isPublic=true;
             }
-        	switchboard.bookmarksDB.importFromXML(new String((byte[])post.get("xmlfile$file")), isPublic);
+        	switchboard.bookmarksDB.importFromXML(post.get("xmlfile$file"), isPublic);
         }else if(post.containsKey("delete")){
             String urlHash=(String) post.get("delete");
             switchboard.bookmarksDB.removeBookmark(urlHash);
@@ -264,8 +264,8 @@ public class Bookmarks {
         count++;
     }
     count=0;
-    Set tags;
-    Iterator tagsIt;
+    Set<String> tags;
+    Iterator<String> tagsIt;
     int tagCount;
     while(count<max_count && it.hasNext()){
         bookmark=switchboard.bookmarksDB.getBookmark((String)it.next());
@@ -284,7 +284,7 @@ public class Bookmarks {
             tags=bookmark.getTags();
             tagsIt=tags.iterator();
             tagCount=0;
-            while(tagsIt.hasNext()){
+            while (tagsIt.hasNext()) {
             	prop.put("bookmarks_"+count+"_tags_"+tagCount+"_tag", tagsIt.next());
             	tagCount++;
             }

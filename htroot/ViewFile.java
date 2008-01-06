@@ -399,12 +399,12 @@ public class ViewFile {
         return message;
     }
     
-    private static int putMediaInfo(serverObjects prop, String[] wordArray, int c, Map media, String name, boolean dark) {
-        Iterator mi = media.entrySet().iterator();
-        Map.Entry entry;
+    private static int putMediaInfo(serverObjects prop, String[] wordArray, int c, Map<String, String> media, String name, boolean dark) {
+        Iterator<Map.Entry<String, String>> mi = media.entrySet().iterator();
+        Map.Entry<String, String> entry;
         int i = 0;
         while (mi.hasNext()) {
-            entry = (Map.Entry) mi.next();
+            entry = mi.next();
             prop.put("viewMode_links_" + c + "_nr", c);
             prop.put("viewMode_links_" + c + "_dark", ((dark) ? 1 : 0));
             prop.putHTML("viewMode_links_" + c + "_type", name);

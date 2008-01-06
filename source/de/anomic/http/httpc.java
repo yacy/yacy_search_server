@@ -109,14 +109,14 @@ public final class httpc {
     private static final String vDATE = "20040602";
     private static final int terminalMaxLength = 30000;
     private static final SimpleDateFormat HTTPGMTFormatter = new SimpleDateFormat("EEE, dd MMM yyyy HH:mm:ss zzz", Locale.US);
-    private static final HashMap reverseMappingCache = new HashMap();
-    private static final HashSet activeConnections = new HashSet(); // all connections are stored here and deleted when they are finished
+    private static final HashMap<String, String> reverseMappingCache = new HashMap<String, String>();
+    private static final HashSet<httpc> activeConnections = new HashSet<httpc>(); // all connections are stored here and deleted when they are finished
     private static final long minimumTime_before_activeConnections_cleanup = 3600000; // 1 Hour
     private static final long minimumTime_before_idleConnections_cleanup   =  120000; // 2 Minutes
     private static final int activeConnections_maximum = 64;
     public  static final connectionTimeComparator connectionTimeComparatorInstance = new connectionTimeComparator();
     
-    private static int objCounter = 0; // will be increased with each object and is use to return a hash code
+    private static int objCounter = 0; // will be increased with each object and is used to return a hash code
     
     // defined during set-up of switchboard
     public static boolean yacyDebugMode = false;
@@ -234,9 +234,6 @@ public final class httpc {
     	checkIdleConnections();
     	assert timeout != 0;
     	
-        // register new connection
-        this.hashIndex = objCounter;
-        
     	// register new connection
     	this.hashIndex = objCounter;
     	objCounter++;
@@ -499,26 +496,24 @@ public final class httpc {
         httpc[] a = null;
         synchronized (activeConnections) {
             a = new httpc[activeConnections.size()];
-            Iterator i = httpc.activeConnections.iterator();
+            Iterator<httpc> i = httpc.activeConnections.iterator();
             int c = 0;
             while (i.hasNext()) {
-                a[c++] = (httpc) i.next();
+                a[c++] = i.next();
             }
         }
         return a;
     }
     
-    public static class connectionTimeComparator implements Comparator {
+    public static class connectionTimeComparator implements Comparator<httpc> {
 
         public connectionTimeComparator() {
             super();
         }
         
-        public int compare(Object o1, Object o2) {
-            httpc c1 = (httpc) o1;
-            httpc c2 = (httpc) o2;
-            long l1 = System.currentTimeMillis() - c1.lastIO;
-            long l2 = System.currentTimeMillis() - c2.lastIO;
+        public int compare(httpc o1, httpc o2) {
+            long l1 = System.currentTimeMillis() - o1.lastIO;
+            long l2 = System.currentTimeMillis() - o2.lastIO;
             if (l1 < l2) return 1;
             if (l1 > l2) return -1;
             return 0;
@@ -662,12 +657,12 @@ public final class httpc {
 
         // send header
         //System.out.println("***HEADER for path " + path + ": PROXY TO SERVER = " + header.toString()); // DEBUG
-        Iterator i = header.keySet().iterator();
+        Iterator<String> i = header.keySet().iterator();
         String key;
         int count;
         char tag;
         while (i.hasNext()) {
-            key = (String) i.next();
+            key = i.next();
             tag = key.charAt(0);
             if ((tag != '*') && (tag != '#')) {
                 count = header.keyCount(key);
@@ -805,7 +800,7 @@ public final class httpc {
     * @return Instance of response with the content.
     * @throws IOException
     */
-    public response POST(String path, httpHeader requestHeader, serverObjects args, HashMap files) throws IOException {
+    public response POST(String path, httpHeader requestHeader, serverObjects args, HashMap<String, byte[]> files) throws IOException {
         // make shure, the header has a boundary information like
         // CONTENT-TYPE=multipart/form-data; boundary=----------0xKhTmLbOuNdArY
         if (requestHeader == null) requestHeader = new httpHeader();
@@ -843,7 +838,7 @@ public final class httpc {
         if (args.size() != 0) {
             // we have values for the POST, start with one boundary
             String key, value;
-            Enumeration e = args.keys();
+            Enumeration<String> e = args.keys();
             while (e.hasMoreElements()) {
                 // start with a boundary
                 out.write(boundary.getBytes("UTF-8"));
@@ -967,7 +962,7 @@ public final class httpc {
             httpRemoteProxyConfig theRemoteProxyConfig,
             httpHeader requestHeader, 
             serverObjects props,
-            HashMap files
+            HashMap<String, byte[]> files
     ) throws IOException {
 
         if (requestHeader == null) requestHeader = new httpHeader();
@@ -1000,7 +995,7 @@ public final class httpc {
             String password,
             httpRemoteProxyConfig theRemoteProxyConfig,
             serverObjects props,
-            HashMap files
+            HashMap<String, byte[]> files
     ) throws IOException {
         int port = u.getPort();
         boolean ssl = u.getProtocol().equals("https");
@@ -1066,7 +1061,7 @@ public final class httpc {
         return a;
     }
     
-    public static Map loadHashMap(yacyURL url, httpRemoteProxyConfig proxy) {
+    public static Map<String, String> loadHashMap(yacyURL url, httpRemoteProxyConfig proxy) {
         try {
             // should we use the proxy?
             boolean useProxy = (proxy != null) &&  
@@ -1074,7 +1069,7 @@ public final class httpc {
                                (proxy.useProxy4Yacy());
             
             // sending request
-            final HashMap result = nxTools.table(
+            final HashMap<String, String> result = nxTools.table(
                     httpc.wget(
                             url,
                             url.getHost(),
@@ -1087,10 +1082,10 @@ public final class httpc {
                     )
                     , "UTF-8");
             
-            if (result == null) return new HashMap();
+            if (result == null) return new HashMap<String, String>();
             return result;
         } catch (Exception e) {
-            return new HashMap();
+            return new HashMap<String, String>();
         }
     }
 
@@ -1145,7 +1140,7 @@ public final class httpc {
             String password, 
             httpRemoteProxyConfig theRemoteProxyConfig, 
             serverObjects props,
-            HashMap files
+            HashMap<String, byte[]> files
     ) throws IOException {
         // splitting of the byte array into lines
         byte[] a = singlePOST(
@@ -1175,7 +1170,7 @@ public final class httpc {
         System.out.println("ANOMIC.DE HTTP CLIENT v" + vDATE);
         String url = args[0];
         if (!(url.toUpperCase().startsWith("HTTP://"))) url = "http://" + url;
-        ArrayList text = new ArrayList();
+        ArrayList<String> text = new ArrayList<String>();
         if (args.length == 4) {
             int timeout = Integer.parseInt(args[1]);
             String proxyHost = args[2];
@@ -1199,8 +1194,8 @@ public final class httpc {
             }
             text = wput(url, post);
         }*/
-        Iterator i = text.listIterator();
-        while (i.hasNext()) System.out.println((String) i.next());
+        Iterator<String> i = text.listIterator();
+        while (i.hasNext()) System.out.println(i.next());
     }
 
     /**

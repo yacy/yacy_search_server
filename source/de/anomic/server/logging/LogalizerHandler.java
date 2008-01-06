@@ -161,7 +161,7 @@ public class LogalizerHandler extends Handler {
         return null;
     }
     
-    public Hashtable getParserResults(LogParser parsername) {
+    public Hashtable<String, Object> getParserResults(LogParser parsername) {
         return parsername.getResults();
     }
     

@@ -354,8 +354,8 @@ public class yacyURL {
 
     public static String dummyHash;
 
-    private static HashMap TLDID = new HashMap();
-    private static HashMap TLDName = new HashMap();
+    private static HashMap<String, Integer> TLDID = new HashMap<String, Integer>();
+    private static HashMap<String, String> TLDName = new HashMap<String, String>();
 
     private static void insertTLDProps(String[] TLDList, int id) {
         int p;
@@ -1004,11 +1004,11 @@ public class yacyURL {
 
     private static String[] testTLDs = new String[] { "com", "net", "org", "uk", "fr", "de", "es", "it" };
 
-    public static final yacyURL probablyWordURL(String urlHash, TreeSet words) {
-        Iterator wi = words.iterator();
+    public static final yacyURL probablyWordURL(String urlHash, TreeSet<String> words) {
+        Iterator<String> wi = words.iterator();
         String word;
         while (wi.hasNext()) {
-            word = (String) wi.next();
+            word = wi.next();
             if ((word == null) || (word.length() == 0)) continue;
             String pattern = urlHash.substring(6, 11);
             for (int i = 0; i < testTLDs.length; i++) {
@@ -1023,7 +1023,7 @@ public class yacyURL {
         return null;
     }
 
-    public static final boolean isWordRootURL(String givenURLHash, TreeSet words) {
+    public static final boolean isWordRootURL(String givenURLHash, TreeSet<String> words) {
         if (!(probablyRootURL(givenURLHash))) return false;
         yacyURL wordURL = probablyWordURL(givenURLHash, words);
         if (wordURL == null) return false;

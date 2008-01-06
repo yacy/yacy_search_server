@@ -256,7 +256,7 @@ public class indexCachedRI implements indexRI {
     }
     
     public kelondroCloneableIterator<indexContainer> wordContainers(String startHash, boolean ramOnly, boolean rot) {
-        kelondroCloneableIterator i;
+        kelondroCloneableIterator<indexContainer> i;
         if (ramOnly) {
             i = riExtern.wordContainers(startHash, false);
         } else {

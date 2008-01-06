@@ -256,10 +256,7 @@ public class WatchCrawler_p {
                                 File file = new File(fileName);
                                 
                                 // getting the content of the bookmark file
-                                byte[] fileContent = (byte[]) post.get("crawlingFile$file");
-                                
-                                // TODO: determine the real charset here ....
-                                String fileString = new String(fileContent,"UTF-8");
+                                String fileString = post.get("crawlingFile$file");
                                 
                                 // parsing the bookmark file and fetching the headline and contained links
                                 htmlFilterContentScraper scraper = new htmlFilterContentScraper(new yacyURL(file));

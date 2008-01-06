@@ -271,12 +271,12 @@ public class kelondroBytesIntMap {
         String combined = "";
         if ((index0 == null) && (index1 == null)) return "all null";
         if ((index0 != null) && (index1 != null)) {
-            Iterator i;
+            Iterator<kelondroRow.Entry> i;
             try {
                 i = index0.rows(true, null);
                 kelondroRow.Entry entry;
                 while (i.hasNext()) {
-                    entry = (kelondroRow.Entry) i.next();
+                    entry = i.next();
                     if (index1.has(entry.getColBytes(0))) {
                         combined = combined + ", common = " + new String(entry.getColBytes(0));
                     }
@@ -292,12 +292,12 @@ public class kelondroBytesIntMap {
         if (!(s0 && s1)) return false;
         if ((index0 == null) && (index1 == null)) return true;
         if ((index0 != null) && (index1 != null)) {
-            Iterator i;
+            Iterator<kelondroRow.Entry> i;
             try {
                 i = index0.rows(true, null);
                 kelondroRow.Entry entry;
                 while (i.hasNext()) {
-                    entry = (kelondroRow.Entry) i.next();
+                    entry = i.next();
                     if (index1.has(entry.getColBytes(0))) return false;
                 }
             } catch (IOException e) {}

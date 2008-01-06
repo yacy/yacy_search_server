@@ -68,8 +68,8 @@ public interface serverSwitch {
 
     // access tracker
     public void track(String host, String accessPath); // learn that a specific host has accessed a specific path
-    public TreeMap accessTrack(String host); // returns mapping from Long(accesstime) to path
-    public Iterator accessHosts(); // returns an iterator of hosts in tracker (String)
+    public TreeMap<Long, String> accessTrack(String host); // returns mapping from Long(accesstime) to path
+    public Iterator<String> accessHosts(); // returns an iterator of hosts in tracker (String)
         
     // a switchboard can have action listener
     // these listeners are hooks for numerous methods below
@@ -94,18 +94,18 @@ public interface serverSwitch {
     public void intermissionAllThreads(long pause);
     public void terminateAllThreads(boolean waitFor);
 
-    public Iterator /*of serverThread-Names (String)*/ threadNames();
+    public Iterator<String> /*of serverThread-Names (String)*/ threadNames();
 
     // the switchboard can be used to set and read properties
-    public void setConfig(Map otherConfigs);
+    public void setConfig(Map<String, String> otherConfigs);
     public void setConfig(String key, long value);
     public void setConfig(String key, String value);
     public String getConfig(String key, String dflt);
     public long getConfigLong(String key, long dflt);
     public boolean getConfigBool(String key, boolean dflt);
     public File getConfigPath(String key, String dflt);
-    public Iterator configKeys();
-    public Map getRemoved();
+    public Iterator<String> configKeys();
+    public Map<String, String> getRemoved();
         
     // the switchboard also shall maintain a job list
     // jobs can be queued by submitting a job object

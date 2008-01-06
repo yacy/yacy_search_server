@@ -152,7 +152,7 @@ public class MessageSend_p {
                 HashMap result = yacyClient.postMessage(hash, subject, mb);
 
                 //message has been sent
-                prop.put("mode_status_response", result.get("response"));
+                prop.put("mode_status_response", (String) result.get("response"));
 
             } catch (NumberFormatException e) {
                 prop.put("mode_status", "1");

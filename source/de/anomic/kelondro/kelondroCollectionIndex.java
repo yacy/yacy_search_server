@@ -386,7 +386,7 @@ public class kelondroCollectionIndex {
         while (i.hasNext()) {
             entry = i.next();
             actionList = entry.getValue();
-            partitionNumber = entry.getKey();
+            partitionNumber = entry.getKey().intValue();
             array = getArray(partitionNumber, serialNumber, index.row().objectOrder, chunkSize);
             j = actionList.iterator();
             while (j.hasNext()) {

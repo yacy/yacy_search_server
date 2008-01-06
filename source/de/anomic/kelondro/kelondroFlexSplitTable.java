@@ -41,7 +41,7 @@ public class kelondroFlexSplitTable implements kelondroIndex {
     // this is a set of kelondroFlex tables
     // the set is divided into FlexTables with different entry date
     
-    private HashMap tables; // a map from a date string to a kelondroIndex object
+    private HashMap<String, kelondroIndex> tables; // a map from a date string to a kelondroIndex object
     private kelondroRow rowdef;
     private File path;
     private String tablename;
@@ -56,13 +56,13 @@ public class kelondroFlexSplitTable implements kelondroIndex {
     public void init(long preloadTime, boolean resetOnFail) {
         
         // initialized tables map
-        this.tables = new HashMap();
+        this.tables = new HashMap<String, kelondroIndex>();
         if (!(path.exists())) path.mkdirs();
         String[] dir = path.list();
         String date;
         
         // first pass: find tables
-        HashMap t = new HashMap(); // file/Integer(size) relation
+        HashMap<String, Long> t = new HashMap<String, Long>();
         long ram, sum = 0;
         for (int i = 0; i < dir.length; i++) {
             if ((dir[i].startsWith(tablename)) &&
@@ -77,9 +77,9 @@ public class kelondroFlexSplitTable implements kelondroIndex {
         }
         
         // second pass: open tables
-        Iterator i;
-        Map.Entry entry;
-        String f, maxf;
+        Iterator<Map.Entry<String, Long>> i;
+        Map.Entry<String, Long> entry;
+        String maxf;
         long maxram;
         kelondroIndex table;
         while (t.size() > 0) {
@@ -88,11 +88,10 @@ public class kelondroFlexSplitTable implements kelondroIndex {
             maxf = null;
             i = t.entrySet().iterator();
             while (i.hasNext()) {
-                entry = (Map.Entry) i.next();
-                f = (String) entry.getKey();
-                ram = ((Long) entry.getValue()).longValue();
+                entry = i.next();
+                ram = entry.getValue().longValue();
                 if (ram > maxram) {
-                    maxf = f;
+                    maxf = entry.getKey();
                     maxram = ram;
                 }
             }
@@ -138,11 +137,9 @@ public class kelondroFlexSplitTable implements kelondroIndex {
     }
     
     public int size() {
-        Iterator i = tables.values().iterator();
+        Iterator<kelondroIndex> i = tables.values().iterator();
         int s = 0;
-        while (i.hasNext()) {
-            s += ((kelondroIndex) i.next()).size();
-        }
+        while (i.hasNext()) s += i.next().size();
         return s;
     }
     
@@ -250,22 +247,22 @@ public class kelondroFlexSplitTable implements kelondroIndex {
         table.addUnique(row);
     }
     
-    public synchronized void addUniqueMultiple(List rows) throws IOException {
-        Iterator i = rows.iterator();
-        while (i.hasNext()) addUnique((kelondroRow.Entry) i.next());
+    public synchronized void addUniqueMultiple(List<kelondroRow.Entry> rows) throws IOException {
+        Iterator<kelondroRow.Entry> i = rows.iterator();
+        while (i.hasNext()) addUnique(i.next());
     }
     
-    public synchronized void addUniqueMultiple(List rows, Date entryDate) throws IOException {
-        Iterator i = rows.iterator();
-        while (i.hasNext()) addUnique((kelondroRow.Entry) i.next(), entryDate);
+    public synchronized void addUniqueMultiple(List<kelondroRow.Entry> rows, Date entryDate) throws IOException {
+        Iterator<kelondroRow.Entry> i = rows.iterator();
+        while (i.hasNext()) addUnique(i.next(), entryDate);
     }
     
     public synchronized kelondroRow.Entry remove(byte[] key, boolean keepOrder) throws IOException {
-        Iterator i = tables.values().iterator();
+        Iterator<kelondroIndex> i = tables.values().iterator();
         kelondroIndex table;
         kelondroRow.Entry entry;
         while (i.hasNext()) {
-            table = (kelondroIndex) i.next();
+            table = i.next();
             entry = table.remove(key, keepOrder);
             if (entry != null) return entry;
         }
@@ -273,7 +270,7 @@ public class kelondroFlexSplitTable implements kelondroIndex {
     }
     
     public synchronized kelondroRow.Entry removeOne() throws IOException {
-        Iterator i = tables.values().iterator();
+        Iterator<kelondroIndex> i = tables.values().iterator();
         kelondroIndex table, maxtable = null;
         int maxcount = -1;
         while (i.hasNext()) {
@@ -291,19 +288,19 @@ public class kelondroFlexSplitTable implements kelondroIndex {
     }
     
     public synchronized kelondroCloneableIterator keys(boolean up, byte[] firstKey) throws IOException {
-        HashSet set = new HashSet();
-        Iterator i = tables.values().iterator();
+        HashSet<kelondroCloneableIterator<?>> set = new HashSet<kelondroCloneableIterator<?>>();
+        Iterator<kelondroIndex> i = tables.values().iterator();
         while (i.hasNext()) {
-            set.add(((kelondroIndex) i.next()).keys(up, firstKey));
+            set.add(i.next().keys(up, firstKey));
         }
         return kelondroMergeIterator.cascade(set, rowdef.objectOrder, kelondroMergeIterator.simpleMerge, up);
     }
     
     public synchronized kelondroCloneableIterator rows(boolean up, byte[] firstKey) throws IOException {
-        HashSet set = new HashSet();
-        Iterator i = tables.values().iterator();
+        HashSet<kelondroCloneableIterator<?>> set = new HashSet<kelondroCloneableIterator<?>>();
+        Iterator<kelondroIndex> i = tables.values().iterator();
         while (i.hasNext()) {
-            set.add(((kelondroIndex) i.next()).rows(up, firstKey));
+            set.add(i.next().rows(up, firstKey));
         }
         return kelondroMergeIterator.cascade(set, rowdef.objectOrder, kelondroMergeIterator.simpleMerge, up);
     }
@@ -330,9 +327,9 @@ public class kelondroFlexSplitTable implements kelondroIndex {
     
     public synchronized void close() {
         if (tables == null) return;
-        Iterator i = tables.values().iterator();
+        Iterator<kelondroIndex> i = tables.values().iterator();
         while (i.hasNext()) {
-            ((kelondroIndex) i.next()).close();
+            i.next().close();
         }
         tables = null;
     }

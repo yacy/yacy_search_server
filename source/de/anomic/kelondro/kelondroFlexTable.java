@@ -419,17 +419,17 @@ public class kelondroFlexTable extends kelondroFlexWidthArray implements kelondr
         return theFlexTable.profile();
     }
     
-    public static final Map memoryStats(String filename) {
+    public static final Map<String, String> memoryStats(String filename) {
         // returns a map for each file in the tracker;
-        // the map represents properties for each record oobjects,
+        // the map represents properties for each record objects,
         // i.e. for cache memory allocation
         kelondroFlexTable theFlexTable = (kelondroFlexTable) tableTracker.get(filename);
         return theFlexTable.memoryStats();
     }
     
-    private final Map memoryStats() {
+    private final Map<String, String> memoryStats() {
         // returns statistical data about this object
-        HashMap map = new HashMap();
+        HashMap<String, String> map = new HashMap<String, String>();
         map.put("tableIndexChunkSize", (!RAMIndex) ? "0" : Integer.toString(index.row().objectsize));
         map.put("tableIndexCount", (!RAMIndex) ? "0" : Integer.toString(index.size()));
         map.put("tableIndexMem", (!RAMIndex) ? "0" : Integer.toString((int) (index.row().objectsize * index.size() * kelondroRowCollection.growfactor)));

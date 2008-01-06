@@ -64,7 +64,9 @@ import java.net.SocketException;
 import java.nio.channels.ClosedByInterruptException;
 import java.security.KeyStore;
 import java.util.Enumeration;
-import java.util.Hashtable;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Iterator;
 
 import javax.net.ssl.HandshakeCompletedEvent;
 import javax.net.ssl.HandshakeCompletedListener;
@@ -72,9 +74,6 @@ import javax.net.ssl.KeyManagerFactory;
 import javax.net.ssl.SSLContext;
 import javax.net.ssl.SSLSocket;
 import javax.net.ssl.SSLSocketFactory;
-
-import org.apache.commons.pool.impl.GenericObjectPool;
-import org.apache.commons.pool.impl.GenericObjectPool.Config;
 
 import de.anomic.icap.icapd;
 import de.anomic.server.logging.serverLog;
@@ -94,21 +93,20 @@ public final class serverCore extends serverAbstractThread implements serverThre
     public static final byte[] CRLF = {CR, LF}; // Line End of HTTP/ICAP headers
     public static final String CRLF_STRING = new String(CRLF);
     public static final String LF_STRING = new String(new byte[]{LF});
-    public static final Class[] stringType = {"".getClass()}; //  set up some reflection
+    public static final Class<?>[] stringType = {"".getClass()}; //  set up some reflection
     public static final long startupTime = System.currentTimeMillis();
-    
-    //Class[] exceptionType = {Class.forName("java.lang.Throwable")};
-    
+    public static final ThreadGroup sessionThreadGroup = new ThreadGroup("sessionThreadGroup");
+    private static int sessionCounter = 0; // will be increased with each session and is used to return a hash code
     
     // static variables
     public static final Boolean TERMINATE_CONNECTION = Boolean.FALSE;
     public static final Boolean RESUME_CONNECTION = Boolean.TRUE;
-    public static Hashtable bfHost = new Hashtable(); // for brute-force prevention
+    public static HashMap<String, Integer> bfHost = new HashMap<String, Integer>(); // for brute-force prevention
     
     // class variables
-    private String extendedPort;                      // the port, which is visible from outside (in most cases bind-port)
-	private String bindPort;						// if set, yacy will bind to this port, but set extendedPort in the seed
-    public boolean forceRestart = false;     // specifies if the server should try to do a restart
+    private String extendedPort;           // the port, which is visible from outside (in most cases bind-port)
+	private String bindPort;               // if set, yacy will bind to this port, but set extendedPort in the seed
+    public boolean forceRestart = false;   // specifies if the server should try to do a restart
     
     public static boolean portForwardingEnabled = false;
     public static boolean useStaticIP = false;
@@ -118,24 +116,13 @@ public final class serverCore extends serverAbstractThread implements serverThre
     private ServerSocket socket;           // listener
     serverLog log;                         // log object
     private int timeout;                   // connection time-out of the socket
-    private int thresholdSleep = 30000;    // after that time a thread is considered as beeing sleeping (30 seconds)
     serverHandler handlerPrototype;        // the command class (a serverHandler) 
 
     private serverSwitch switchboard;      // the command class switchboard
-    Hashtable denyHost;
+    HashMap<String, String> denyHost;
     int commandMaxLength;
-
-    
-    /**
-     * The session-object pool
-     */
-    SessionPool theSessionPool;
-    final ThreadGroup theSessionThreadGroup = new ThreadGroup("sessionThreadGroup");
-    private Config sessionPoolConfig = null;
-
-    public ThreadGroup getSessionThreadGroup() {
-        return this.theSessionThreadGroup;
-    }
+    private int maxBusySessions;
+    private HashSet<Session> busySessions;
     
     /*
     private static ServerSocketFactory getServerSocketFactory(boolean dflt, File keyfile, String passphrase) {
@@ -197,7 +184,7 @@ public final class serverCore extends serverAbstractThread implements serverThre
         this.timeout = timeout;
         
         this.commandMaxLength = commandMaxLength;
-        this.denyHost = (blockAttack) ? new Hashtable() : null;
+        this.denyHost = (blockAttack) ? new HashMap<String, String>() : null;
         this.handlerPrototype = handlerPrototype;
         this.switchboard = switchboard;
         
@@ -206,6 +193,10 @@ public final class serverCore extends serverAbstractThread implements serverThre
 
         // init the ssl socket factory
         this.sslSocketFactory = initSSLFactory();
+
+        // init session parameter
+        maxBusySessions = Integer.valueOf(switchboard.getConfig("httpdMaxBusySessions","100")).intValue();
+        busySessions = new HashSet<Session>();
         
         // init servercore
         init();
@@ -224,7 +215,20 @@ public final class serverCore extends serverAbstractThread implements serverThre
         
         // Open a new server-socket channel
         try {
-            this.initPort(this.extendedPort, this.bindPort);
+            // bind the ServerSocket to a specific address 
+            // InetSocketAddress bindAddress = null;
+            this.socket = new ServerSocket();
+            if (bindPort == null || bindPort.equals("")) {
+                this.log.logInfo("Trying to bind server to port " + extendedPort);
+                this.socket.bind(/*bindAddress = */generateSocketAddress(extendedPort));
+            } else { //bindPort set, use another port to bind than the port reachable from outside
+                this.log.logInfo("Trying to bind server to port " + bindPort+ " with "+ extendedPort + "as seedPort.");
+                this.socket.bind(/*bindAddress = */generateSocketAddress(bindPort));
+            }
+            
+            // updating the port information
+            //yacyCore.seedDB.mySeed.put(yacySeed.PORT,Integer.toString(bindAddress.getPort()));    
+            yacyCore.seedDB.mySeed().put(yacySeed.PORT, extendedPort);
         } catch (Exception e) {
             String errorMsg = "FATAL ERROR: " + e.getMessage() + " - probably root access rights needed. check port number";
             this.log.logSevere(errorMsg);
@@ -242,55 +246,7 @@ public final class serverCore extends serverAbstractThread implements serverThre
             this.log.logSevere("Unable to initialize server port forwarding.",e);
             this.switchboard.setConfig("portForwardingEnabled","false");
         }
-        
-        // init session pool
-        initSessionPool();        
-    }
-    
-    public void initSessionPool() {
-        this.log.logInfo("Initializing session pool ...");
-        
-        // implementation of session thread pool
-        this.sessionPoolConfig = new GenericObjectPool.Config();
-        
-        // The maximum number of active connections that can be allocated from pool at the same time,
-        // 0 for no limit
-        this.sessionPoolConfig.maxActive = Integer.valueOf(switchboard.getConfig("httpdMaxActiveSessions","150")).intValue();
-        
-        // The maximum number of idle connections connections in the pool
-        // 0 = no limit.        
-        this.sessionPoolConfig.maxIdle = Integer.valueOf(switchboard.getConfig("httpdMaxIdleSessions","75")).intValue();
-        this.sessionPoolConfig.minIdle = Integer.valueOf(switchboard.getConfig("httpdMinIdleSessions","5")).intValue();    
-        
-        // block undefinitely 
-        this.sessionPoolConfig.maxWait = timeout; 
-        
-        // Action to take in case of an exhausted DBCP statement pool
-        // 0 = fail, 1 = block, 2= grow        
-        this.sessionPoolConfig.whenExhaustedAction = GenericObjectPool.WHEN_EXHAUSTED_BLOCK; 
-        this.sessionPoolConfig.minEvictableIdleTimeMillis = this.thresholdSleep; 
-        //this.sessionPoolConfig.timeBetweenEvictionRunsMillis = 30000;
-        this.sessionPoolConfig.testOnReturn = true;
-        
-        this.theSessionPool = new SessionPool(new SessionFactory(this.theSessionThreadGroup),this.sessionPoolConfig);        
-    }
-    
-    public void initPort(String seedPort, String bindPort) throws IOException {
-        
-        // Binds the ServerSocket to a specific address 
-        //InetSocketAddress bindAddress = null;
-        this.socket = new ServerSocket();
-		if(bindPort == null || bindPort.equals("")){
-			this.log.logInfo("Trying to bind server to port " + seedPort);
-	        this.socket.bind(/*bindAddress = */generateSocketAddress(seedPort));
-		}else{ //bindPort set, use another port to bind than the port reachable from outside
-			this.log.logInfo("Trying to bind server to port " + bindPort+ " with "+ seedPort + "as seedPort.");
-	        this.socket.bind(/*bindAddress = */generateSocketAddress(bindPort));
-		}
-        
-        // updating the port information
-        //yacyCore.seedDB.mySeed.put(yacySeed.PORT,Integer.toString(bindAddress.getPort()));    
-        yacyCore.seedDB.mySeed().put(yacySeed.PORT, seedPort);    
+
     }
     
     public static int getPortNr(String extendedPortString) {
@@ -317,12 +273,12 @@ public final class serverCore extends serverAbstractThread implements serverThre
                 String hostName = null;
                 this.log.logFine("Trying to determine IP address of interface '" + interfaceName + "'.");                    
 
-                Enumeration interfaces = NetworkInterface.getNetworkInterfaces();
+                Enumeration<NetworkInterface> interfaces = NetworkInterface.getNetworkInterfaces();
                 if (interfaces != null) {
                     while (interfaces.hasMoreElements()) {
-                        NetworkInterface interf = (NetworkInterface) interfaces.nextElement();
+                        NetworkInterface interf = interfaces.nextElement();
                         if (interf.getName().equalsIgnoreCase(interfaceName)) {
-                            Enumeration addresses = interf.getInetAddresses();
+                            Enumeration<InetAddress> addresses = interf.getInetAddresses();
                             if (addresses != null) {
                                 while (addresses.hasMoreElements()) {
                                     InetAddress address = (InetAddress)addresses.nextElement();
@@ -363,7 +319,7 @@ public final class serverCore extends serverAbstractThread implements serverThre
                 this.log.logInfo("Trying to load port forwarding class for forwarding type '" + forwardingType + "'.");
                 String forwardingClass = this.switchboard.getConfig("portForwarding." + forwardingType ,"");
                 
-                Class forwarderClass = Class.forName(forwardingClass);
+                Class<?> forwarderClass = Class.forName(forwardingClass);
                 serverCore.portForwarding = (serverPortForwarding) forwarderClass.newInstance();                
                 
                 // initializing port forwarding
@@ -401,15 +357,7 @@ public final class serverCore extends serverAbstractThread implements serverThre
             serverCore.useStaticIP=true;
 
     }
-
-    public GenericObjectPool.Config getPoolConfig() {
-        return this.sessionPoolConfig ;
-    }
     
-    public void setPoolConfig(GenericObjectPool.Config newConfig) {
-        this.theSessionPool.setConfig(newConfig);
-    }
-
     public void open() {
         this.log.logConfig("* server started on " + serverDomains.myPublicLocalIP() + ":" + this.extendedPort);
     }
@@ -424,11 +372,8 @@ public final class serverCore extends serverAbstractThread implements serverThre
         try {
             // prepare for new connection
             // idleThreadCheck();
-            this.switchboard.handleBusyState(this.theSessionPool.getNumActive() /*activeThreads.size() */);
-            
-            this.log.logFinest(
-                    "* waiting for connections, " + this.theSessionPool.getNumActive() + " sessions running, " +
-                    this.theSessionPool.getNumIdle() + " sleeping");
+            this.switchboard.handleBusyState(this.busySessions.size());
+            this.log.logFinest("* waiting for connections, " + this.busySessions.size() + " sessions running");
                         
             announceThreadBlockApply();
             
@@ -467,11 +412,9 @@ public final class serverCore extends serverAbstractThread implements serverThre
                 // setting the timeout properly
                 controlSocket.setSoTimeout(this.timeout);
                 
-                // getting a free session thread from the pool
-                Session connection = (Session) this.theSessionPool.borrowObject();
-                
-                // processing the new request
-                connection.execute(controlSocket,this.timeout);
+                // create session
+                Session connection = new Session(sessionThreadGroup, controlSocket, this.timeout);
+                this.busySessions.add(connection);
             } else {
                 this.log.logWarning("ACCESS FROM " + cIP + " DENIED");
             }
@@ -504,7 +447,7 @@ public final class serverCore extends serverAbstractThread implements serverThre
             }
         }
         
-        // closing the serverchannel and socket
+        // close the serverchannel and socket
         try {
             this.log.logInfo("Closing server socket ...");
             this.socket.close();
@@ -512,243 +455,47 @@ public final class serverCore extends serverAbstractThread implements serverThre
             this.log.logWarning("Unable to close the server socket."); 
         }
 
-        // closing the session pool
-        try {
-            this.log.logInfo("Closing server session pool ...");
-            this.theSessionPool.close();
-        } catch (Exception e) {
-            this.log.logWarning("Unable to close the session pool.");
-        }        
+        // close all sessions
+        this.log.logInfo("Closing server sessions ...");
+        Iterator<Session> i = this.busySessions.iterator();
+        Session s;
+        while (i.hasNext()) {
+            s = i.next();
+            s.interrupt();
+            s.close();
+        }
+        this.busySessions = null;
         
         this.log.logConfig("* terminated");
     }
     
     public int getJobCount() {
-        return this.theSessionPool.getNumActive();
-    }
-    
-    public int getActiveSessionCount() {
-        return this.theSessionPool.getNumActive();
-    }    
-    
-    public int getIdleSessionCount() {
-        return this.theSessionPool.getNumIdle();
+        return this.busySessions.size();
     }
     
     public int getMaxSessionCount() {
-        return this.theSessionPool.getMaxActive();
+        return this.maxBusySessions;
+    }
+    
+    public void setMaxSessionCount(int count) {
+        this.maxBusySessions = count;
     }
     
     // idle sensor: the thread is idle if there are no sessions running
     public boolean idle() {
         // idleThreadCheck();
-        return (this.theSessionPool.getNumActive() == 0);
+        return (this.busySessions.size() == 0);
     }
-    
-    public final class SessionPool extends GenericObjectPool {
-        public boolean isClosed = false;
-        
-        /**
-         * First constructor.
-         * @param objFactory
-         */        
-        public SessionPool(SessionFactory objFactory) {
-            super(objFactory);
-            this.setMaxIdle(50); // Maximum idle threads.
-            this.setMaxActive(100); // Maximum active threads.
-            this.setMinEvictableIdleTimeMillis(30000); //Evictor runs every 30 secs.
-            //this.setMaxWait(1000); // Wait 1 second till a thread is available
-        }
-        
-        public SessionPool(SessionFactory objFactory,
-                           GenericObjectPool.Config config) {
-            super(objFactory, config);
-        }
-        
-        /**
-         * @see org.apache.commons.pool.impl.GenericObjectPool#borrowObject()
-         */
-        public Object borrowObject() throws Exception  {
-           return super.borrowObject();
-        }
 
-        /**
-         * @see org.apache.commons.pool.impl.GenericObjectPool#returnObject(java.lang.Object)
-         */
-        public void returnObject(Object obj) {
-            if (obj == null) return;
-            if (obj instanceof Session) {
-                try {
-                    ((Session)obj).setName("Session_inPool");
-                    super.returnObject(obj);
-                } catch (Exception e) {
-                    ((Session)obj).setStopped(true);
-                    serverLog.logSevere("SESSION-POOL","Unable to return session thread to pool.",e);
-                }
-            } else {
-                serverLog.logSevere("SESSION-POOL","Object of wront type '" + obj.getClass().getName() +
-                                    "' returned to pool.");
-            }
-        }        
-        
-        public void invalidateObject(Object obj) {
-            if (obj == null) return;
-            if (this.isClosed) return;
-            if (obj instanceof Session) {
-                try {
-                    ((Session)obj).setName("Session_invalidated");
-                    ((Session)obj).setStopped(true);
-                    super.invalidateObject(obj);
-                } catch (Exception e) {
-                    serverLog.logSevere("SESSION-POOL","Unable to invalidate session thread.",e); 
-                }
-            }
-        }        
-        
-        public synchronized void close() throws Exception {
-
-            /*
-             * shutdown all still running session threads ...
-             */
-            this.isClosed = true;
-            
-            /* waiting for all threads to finish */
-            int threadCount  = serverCore.this.theSessionThreadGroup.activeCount();    
-            Thread[] threadList = new Thread[threadCount];     
-            threadCount = serverCore.this.theSessionThreadGroup.enumerate(threadList);
-            
-            try {
-                // trying to gracefull stop all still running sessions ...
-                serverCore.this.log.logInfo("Signaling shutdown to " + threadCount + " remaining session threads ...");
-                for ( int currentThreadIdx = 0; currentThreadIdx < threadCount; currentThreadIdx++ )  {
-                    Thread currentThread = threadList[currentThreadIdx];
-                    if (currentThread.isAlive()) {
-                        if (currentThread instanceof Session) {
-                            ((Session)currentThread).setStopped(true);
-                        }
-                    }
-                }          
-
-                // waiting a frew ms for the session objects to continue processing
-                try { Thread.sleep(500); } catch (InterruptedException ex) {}                
-                
-                // interrupting all still running or pooled threads ...
-                serverCore.this.log.logInfo("Sending interruption signal to " + serverCore.this.theSessionThreadGroup.activeCount() + " remaining session threads ...");
-                serverCore.this.theSessionThreadGroup.interrupt();                
-                
-                // if there are some sessions that are blocking in IO, we simply close the socket
-                serverCore.this.log.logFine("Trying to abort " + serverCore.this.theSessionThreadGroup.activeCount() + " remaining session threads ...");
-                for ( int currentThreadIdx = 0; currentThreadIdx < threadCount; currentThreadIdx++ )  {
-                    Thread currentThread = threadList[currentThreadIdx];
-                    if (currentThread.isAlive()) {
-                        if (currentThread instanceof Session) {
-                            serverCore.this.log.logInfo("Trying to shutdown session thread '" + currentThread.getName() + "' [" + currentThreadIdx + "].");
-                            ((Session)currentThread).close();
-                        }
-                    }
-                }                
-                
-                // we need to use a timeout here because of missing interruptable session threads ...
-                serverCore.this.log.logFine("Waiting for " + serverCore.this.theSessionThreadGroup.activeCount() + " remaining session threads to finish shutdown ...");
-                for ( int currentThreadIdx = 0; currentThreadIdx < threadCount; currentThreadIdx++ )  {
-                    Thread currentThread = threadList[currentThreadIdx];
-                    if (currentThread.isAlive()) {
-                        if (currentThread instanceof Session) {
-                            serverCore.this.log.logFine("Waiting for session thread '" + currentThread.getName() + "' [" + currentThreadIdx + "] to finish shutdown.");
-                            try { currentThread.join(500); } catch (InterruptedException ex) {}
-                        }
-                    }
-                }
-                
-                serverCore.this.log.logInfo("Shutdown of remaining session threads finish.");
-            } catch (Exception e) {
-                serverCore.this.log.logSevere("Unexpected error while trying to shutdown all remaining session threads.",e);
-            }
-            
-            super.close();  
-        }        
-    }
-    
-    public final class SessionFactory implements org.apache.commons.pool.PoolableObjectFactory {
-
-        final ThreadGroup sessionThreadGroup;
-        public SessionFactory(ThreadGroup theSessionThreadGroup) {
-            super();  
-            
-            if (theSessionThreadGroup == null)
-                throw new IllegalArgumentException("The threadgroup object must not be null.");
-            
-            this.sessionThreadGroup = theSessionThreadGroup;
-        }
-        
-        /**
-         * @see org.apache.commons.pool.PoolableObjectFactory#makeObject()
-         */
-        public Object makeObject() {
-            Session newSession = new Session(this.sessionThreadGroup);
-            newSession.setPriority(Thread.MAX_PRIORITY);
-            return newSession;
-        }
-        
-         /**
-         * @see org.apache.commons.pool.PoolableObjectFactory#destroyObject(java.lang.Object)
-         */
-        public void destroyObject(Object obj) {
-            if (obj instanceof Session) {
-                Session theSession = (Session) obj;
-                synchronized(theSession) {
-                    theSession.destroyed = true;
-                    theSession.setName("Session_destroyed");
-                    theSession.setStopped(true);
-                    theSession.interrupt();
-                }
-            }
-        }
-        
-        /**
-         * @see org.apache.commons.pool.PoolableObjectFactory#validateObject(java.lang.Object)
-         */
-        public boolean validateObject(Object obj) {
-            return true;
-        }
-        
-        /**
-         * @param obj 
-         * 
-         */
-        public void activateObject(Object obj)  {
-            //log.debug(" activateObject...");
-        }
-
-        /**
-         * @param obj 
-         * 
-         */
-        public void passivateObject(Object obj) { 
-            //log.debug(" passivateObject..." + obj);
-//            if (obj instanceof Session)  {
-//                Session theSession = (Session) obj;              
-//            }
-        }        
-    }
-    
     public final class Session extends Thread {
-	
-        // used as replacement for activeThreads, sleepingThreads
-        // static ThreadGroup sessionThreadGroup = new ThreadGroup("sessionThreadGroup");
-        
-        // synchronization object needed for the threadpool implementation
-        private Object syncObject;        
-        
+
         boolean destroyed = false;
         private boolean running = false;
         private boolean stopped = false;
-        private boolean done = false;        
-        
         
         private long start;                // startup time
         private serverHandler commandObj;
-        private Hashtable commandObjMethodCache = new Hashtable(5);
+        private HashMap<String, Object> commandObjMethodCache = new HashMap<String, Object>(5);
         
     	private String request;            // current command line
     	private int commandCounter;        // for logging: number of commands in this session
@@ -759,13 +506,30 @@ public final class serverCore extends serverAbstractThread implements serverThre
     	public  InetAddress userAddress;   // the address of the client
         public  int userPort;              // the ip port used by the client 
     	public  PushbackInputStream in;    // on control input stream
-    	public  OutputStream out;          // on control output stream, autoflush
+    	public  OutputStream out;          // on control output stream, auto-flush
         public  int socketTimeout;
+        public  int hashIndex;
 
-    	public Session(ThreadGroup theThreadGroup) {
-            super(theThreadGroup,"Session_created");
-    	}
-        
+    	public Session(ThreadGroup theThreadGroup, Socket controlSocket, int socketTimeout) {
+            super(theThreadGroup, controlSocket.getInetAddress().toString() + "@" + Long.toString(System.currentTimeMillis()));
+            this.socketTimeout = socketTimeout;
+            this.controlSocket = controlSocket;
+            this.hashIndex = sessionCounter;
+            sessionCounter++;
+            
+            if (!this.running)  {
+               // this.setDaemon(true);
+               this.start();
+            }  else { 
+               this.notifyAll();
+            }          
+        }
+
+        public int hashCode() {
+            // return a hash code so it is possible to store objects of httpc objects in a HashSet
+            return this.hashIndex;
+        }
+    	
         public int getCommandCount() {
             return this.commandCounter;
         }
@@ -805,24 +569,6 @@ public final class serverCore extends serverAbstractThread implements serverThre
                 } catch (Exception e) {}
             }            
         }
-
-        public void execute(Socket controlSocket, int socketTimeout) {
-            this.execute(controlSocket, socketTimeout, null);
-        }
-        
-        public synchronized void execute(Socket controlSocket, int socketTimeout, Object synObj) {
-            this.socketTimeout = socketTimeout;
-            this.controlSocket = controlSocket;
-            this.syncObject = synObj;
-            this.done = false;
-            
-            if (!this.running)  {
-               // this.setDaemon(true);
-               this.start();
-            }  else { 
-               this.notifyAll();
-            }          
-        }
         
         public long getRequestStartTime() {
             return this.start;
@@ -844,7 +590,7 @@ public final class serverCore extends serverAbstractThread implements serverThre
     
     	public void log(boolean outgoing, String request) {
     	    serverCore.this.log.logFine(this.userAddress.getHostAddress() + "/" + this.identity + " " +
-    		     "[" + ((serverCore.this.theSessionPool.isClosed)? -1 : serverCore.this.theSessionPool.getNumActive()) + ", " + this.commandCounter +
+    		     "[" + ((busySessions == null)? -1 : busySessions.size()) + ", " + this.commandCounter +
     		     ((outgoing) ? "] > " : "] < ") +
     		     request);
     	}
@@ -874,23 +620,6 @@ public final class serverCore extends serverAbstractThread implements serverThre
         public boolean isRunning() {
             return this.running;
         }
-    
-        /**
-         * 
-         */
-        public void reset()  {
-            this.done = true;
-            this.syncObject = null;
-            if (this.commandObj !=null) this.commandObj.reset();
-            this.userAddress = null;
-            this.userPort = 0;
-            this.controlSocket = null;
-            this.request = null;
-        }    
-        
-        private void shortReset() {
-            this.request = null;
-        }
         
         /**
          * 
@@ -901,47 +630,10 @@ public final class serverCore extends serverAbstractThread implements serverThre
             this.running = true;
             
             try {
-                // The thread keeps running.
-                while (!this.stopped && !this.isInterrupted() && !serverCore.this.theSessionPool.isClosed) {
-                    if (this.done)  {
-                        synchronized (this) {
-                            // return thread back into pool
-                            serverCore.this.theSessionPool.returnObject(this);
-                            
-                            // We are waiting for a new task now.
-                            if (!this.stopped && !this.destroyed && !this.isInterrupted()) { 
-                                this.wait();
-                            }
-                        }
-                    } else {
-                        try  {
-                            // executing the new task
-                            execute();
-                        } finally  {
-                            // Notify the completion.
-                            if (this.syncObject != null) {
-                                synchronized (this.syncObject) { this.syncObject.notifyAll(); }
-                            }
-                            
-                            // reset thread
-                            reset();
-                        }
-                    }
-                }
-            } catch (InterruptedException ex) {
-                serverLog.logFiner("SESSION-POOL","Interruption of thread '" + this.getName() + "' detected.");
-            } finally {
-                if (serverCore.this.theSessionPool != null && !this.destroyed) 
-                    serverCore.this.theSessionPool.invalidateObject(this);
-            }
-        }  
-        
-        private void execute() throws InterruptedException {                   
-            try {
                 // setting the session startup time
                 this.start = System.currentTimeMillis();                 
                 
-                // settin the session identity
+                // set the session identity
                 this.identity = "-";
                 
                 // getting some client information
@@ -963,15 +655,14 @@ public final class serverCore extends serverAbstractThread implements serverThre
                 this.commandCounter = 0;
                 
                 // listen for commands
-    		    listen();
+                listen();
             } catch (Exception e) {
-                if (e instanceof InterruptedException) throw (InterruptedException) e;
                 System.err.println("ERROR: (internal) " + e);        
-    	    } finally {
-        		try {
-        			if (this.controlSocket.isClosed()) return;
-        			
-        			// flush data
+            } finally {
+                try {
+                    if (this.controlSocket.isClosed()) return;
+                    
+                    // flush data
                     this.out.flush();
                     
                     // maybe this doesn't work for all SSL socket implementations
@@ -991,14 +682,14 @@ public final class serverCore extends serverAbstractThread implements serverThre
                     this.controlSocket.close();
                     this.controlSocket = null;
                                       
-        		} catch (IOException e) {
-        		    e.printStackTrace();
+                } catch (IOException e) {
+                    e.printStackTrace();
                 }
-    	    }
+                busySessions.remove(this);
+            }
             
-            //log.logDebug("* session " + handle + " completed. time = " + (System.currentTimeMillis() - handle));
-    	}
-    	
+        }
+        
         private void listen() {
             try {
                 
@@ -1076,7 +767,7 @@ public final class serverCore extends serverAbstractThread implements serverThre
                         if (commandMethod == null) {
                             try {
                                 commandMethod = this.commandObj.getClass().getMethod(reqCmd, stringType);
-                                this.commandObjMethodCache.put(reqProtocol + "_" + reqCmd,commandMethod);
+                                this.commandObjMethodCache.put(reqProtocol + "_" + reqCmd, commandMethod);
                             } catch (NoSuchMethodException noMethod) {
                                 commandMethod = this.commandObj.getClass().getMethod("UNKNOWN", stringType);
                                 stringParameter[0] = this.request.trim();
@@ -1144,10 +835,7 @@ public final class serverCore extends serverAbstractThread implements serverThre
                         System.out.println("ERROR E " + this.userAddress.getHostAddress());
                         // whatever happens: the thread has to survive!
                         writeLine("UNKNOWN REASON:" + this.commandObj.error(e));
-                    }      
-                    
-                    shortReset();
-                    
+                    }
                 } // end of while
             } /* catch (java.lang.ClassNotFoundException e) {
                 System.out.println("Internal error: Wrapper class not found: " + e.getMessage());
@@ -1248,7 +936,6 @@ public final class serverCore extends serverAbstractThread implements serverThre
     }
     
     protected void finalize() throws Throwable {
-        if (!this.theSessionPool.isClosed) this.theSessionPool.close();
         super.finalize();
     }
     

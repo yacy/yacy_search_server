@@ -52,8 +52,6 @@ import java.net.URLEncoder;
 import java.util.Arrays;
 import java.util.Properties;
 
-import org.apache.commons.pool.impl.GenericObjectPool;
-
 import de.anomic.http.httpHeader;
 import de.anomic.http.httpc;
 import de.anomic.http.httpd;
@@ -77,22 +75,16 @@ public final class Connections_p {
         serverObjects prop = new serverObjects();
          
         
-        // getting the virtualHost string
+        // get the virtualHost string
         String virtualHost = switchboard.getConfig("fileHost","localhost");
         
-        // getting the serverCore thread
+        // get the serverCore thread
         serverThread httpd = switchboard.getThread("10_httpd");
         
-        // getting the session threadgroup
-        ThreadGroup httpSessions = ((serverCore)httpd).getSessionThreadGroup();        
-        
-        // getting the server core pool configuration
-        GenericObjectPool.Config httpdPoolConfig = ((serverCore)httpd).getPoolConfig();  
-        
         /* waiting for all threads to finish */
-        int threadCount  = httpSessions.activeCount();    
-        Thread[] threadList = new Thread[httpdPoolConfig.maxActive];     
-        threadCount = httpSessions.enumerate(threadList);              
+        int threadCount  = serverCore.sessionThreadGroup.activeCount();    
+        Thread[] threadList = new Thread[((serverCore) httpd).getJobCount()];     
+        threadCount = serverCore.sessionThreadGroup.enumerate(threadList);              
         
         // determines if name lookup should be done or not 
         boolean doNameLookup = false;
@@ -130,19 +122,15 @@ public final class Connections_p {
                             if (currentThread.isAlive()) {
                                 try { currentThread.join(500); } catch (InterruptedException ex) {}
                             }
-                            
-
                         }
                     }
-                    
                 }
-                
                 prop.put("LOCATION","");
                 return prop;                
             }
         }  
         
-        int idx = 0, numActiveRunning = 0, numActivePending = 0, numMax = ((serverCore)httpd).getMaxSessionCount();
+        int idx = 0, numActiveRunning = 0, numActivePending = 0;
         boolean dark = true;
         for ( int currentThreadIdx = 0; currentThreadIdx < threadCount; currentThreadIdx++ )  {
             Thread currentThread = threadList[currentThreadIdx];
@@ -236,7 +224,7 @@ public final class Connections_p {
         }     
         prop.put("list", idx);
         
-        prop.putNum("numMax", numMax);
+        prop.putNum("numMax", ((serverCore)httpd).getMaxSessionCount());
         prop.putNum("numActiveRunning", numActiveRunning);
         prop.putNum("numActivePending", numActivePending);
         

@@ -171,13 +171,13 @@ public class CrawlProfileEditor_p {
 			count = 0;
 			while (it.hasNext()) {
 				eentry ee = (eentry) it.next();
-				Object val = selentry.map().get(ee.name);
+				String val = selentry.map().get(ee.name);
 				prop.put("edit_entries_" + count + "_readonly", ee.readonly ? "1" : "0");
 				prop.put("edit_entries_" + count + "_readonly_name", ee.name);
 				prop.put("edit_entries_" + count + "_readonly_label", ee.label);
 				prop.put("edit_entries_" + count + "_readonly_type", ee.type);
 				if (ee.type == eentry.BOOLEAN) {
-					prop.put("edit_entries_" + count + "_readonly_type_checked", Boolean.valueOf((String) val).booleanValue() ? "1" : "0");
+					prop.put("edit_entries_" + count + "_readonly_type_checked", Boolean.valueOf(val).booleanValue() ? "1" : "0");
 				} else {
 					prop.put("edit_entries_" + count + "_readonly_type_value", val);
 				}

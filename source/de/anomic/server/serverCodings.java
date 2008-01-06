@@ -176,10 +176,10 @@ public final class serverCodings {
 	return p;
     }
     
-    public static Map string2map(String string, String separator) {
+    public static Map<String, String> string2map(String string, String separator) {
         // this can be used to parse a Map.toString() into a Map again
         if (string == null) return null;
-        Map map = Collections.synchronizedMap(new HashMap());
+        Map<String, String> map = Collections.synchronizedMap(new HashMap<String, String>());
         int pos;
         if ((pos = string.indexOf("{")) >= 0) string = string.substring(pos + 1).trim();
         if ((pos = string.lastIndexOf("}")) >= 0) string = string.substring(0, pos).trim();
@@ -193,12 +193,12 @@ public final class serverCodings {
         return map;
     }
 
-    public static String map2string(Map m, String separator, boolean braces) {
+    public static String map2string(Map<String, String> m, String separator, boolean braces) {
         final StringBuffer buf = new StringBuffer(20 * m.size());
         if (braces) { buf.append("{"); }
-        final Iterator i = m.entrySet().iterator();
+        final Iterator<Map.Entry<String, String>> i = m.entrySet().iterator();
         while (i.hasNext()) {
-            final Entry e = (Entry) (i.next());
+            final Entry<String, String> e = i.next();
             buf.append(e.getKey()).append('=');
             if (e.getValue() != null) { buf.append(e.getValue()); }
             buf.append(separator);
@@ -208,10 +208,10 @@ public final class serverCodings {
         return new String(buf);
     }
 
-    public static Set string2set(String string, String separator) {
+    public static Set<String> string2set(String string, String separator) {
         // this can be used to parse a Map.toString() into a Map again
         if (string == null) return null;
-        Set set = Collections.synchronizedSet(new HashSet());
+        Set<String> set = Collections.synchronizedSet(new HashSet<String>());
         int pos;
         if ((pos = string.indexOf("{")) >= 0) string = string.substring(pos + 1).trim();
         if ((pos = string.lastIndexOf("}")) >= 0) string = string.substring(0, pos).trim();
@@ -222,10 +222,10 @@ public final class serverCodings {
         return set;
     }
     
-    public static String set2string(Set s, String separator, boolean braces) {
+    public static String set2string(Set<String> s, String separator, boolean braces) {
         StringBuffer buf = new StringBuffer();
         if (braces) buf.append("{");
-        Iterator i = s.iterator();
+        Iterator<String> i = s.iterator();
         boolean hasNext = i.hasNext();
         while (hasNext) {
             buf.append(i.next().toString());

@@ -117,7 +117,7 @@ public class PerformanceMemory_p {
         // write table for FlexTable index sizes
         Iterator i = kelondroFlexTable.filenames();
         String filename;
-        Map map;
+        Map<String, String> map;
         int p, c = 0;
         long mem, totalmem = 0;
         while (i.hasNext()) {

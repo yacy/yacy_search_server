@@ -267,8 +267,8 @@ public class CacheAdmin_p {
             Map.Entry entry;
             while (iter.hasNext()) {
             	entry = (Map.Entry) iter.next();
-            	prop.put("info_header_line_" + i + "_property", entry.getKey());
-            	prop.put("info_header_line_" + i + "_value", entry.getValue());
+            	prop.put("info_header_line_" + i + "_property", (String) entry.getKey());
+            	prop.put("info_header_line_" + i + "_value", (String) entry.getValue());
             	i++;
             }
             prop.put("info_header_line", i);

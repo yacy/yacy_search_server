@@ -60,7 +60,7 @@ import de.anomic.yacy.yacyURL;
 
 public class plasmaCrawlProfile {
     
-    private static HashMap domsCache = new HashMap();
+    private static HashMap<String, Map<String, DomProfile>> domsCache = new HashMap<String, Map<String, DomProfile>>();
     
     private kelondroMapObjects profileTable;
     private File profileTableFile;
@@ -204,7 +204,7 @@ public class plasmaCrawlProfile {
     }
     
     public entry getEntry(String handle) {
-        Map m = profileTable.getMap(handle);
+        Map<String, String> m = profileTable.getMap(handle);
         if (m == null) return null;
         return new entry(m);
     }
@@ -254,8 +254,8 @@ public class plasmaCrawlProfile {
         public static final String XDSTOPW          = "xdstopw";
         public static final String XPSTOPW          = "xpstopw";
         
-        private Map mem;
-        private Map doms;
+        private Map<String, String> mem;
+        private Map<String, DomProfile> doms;
         
         public entry(String name, yacyURL startURL, String generalFilter, String specificFilter,
                      int generalDepth, int specificDepth,
@@ -267,7 +267,7 @@ public class plasmaCrawlProfile {
                      boolean xsstopw, boolean xdstopw, boolean xpstopw) {
             if (name == null || name.length() == 0) throw new NullPointerException("name must not be null");
             String handle = (startURL == null) ? kelondroBase64Order.enhancedCoder.encode(serverCodings.encodeMD5Raw(Long.toString(System.currentTimeMillis()))).substring(0, yacySeedDB.commonHashLength) : startURL.hash();
-            mem = new HashMap();
+            mem = new HashMap<String, String>();
             mem.put(HANDLE,           handle);
             mem.put(NAME,             name);
             mem.put(START_URL,        (startURL == null) ? "" : startURL.toNormalform(true, false));
@@ -288,7 +288,7 @@ public class plasmaCrawlProfile {
             mem.put(XDSTOPW,          Boolean.toString(xdstopw)); // exclude dynamic stop-word
             mem.put(XPSTOPW,          Boolean.toString(xpstopw)); // exclude parent stop-words
 
-            doms = new HashMap();
+            doms = new HashMap<String, DomProfile>();
         }
         
         public String toString() {
@@ -301,13 +301,13 @@ public class plasmaCrawlProfile {
             return str.toString();
         }        
         
-        public entry(Map mem) {
+        public entry(Map<String, String> mem) {
             this.mem = mem;
-            this.doms = (HashMap) domsCache.get(this.mem.get(HANDLE));
-            if (this.doms == null) this.doms = new HashMap();
+            this.doms = (HashMap<String, DomProfile>) domsCache.get(this.mem.get(HANDLE));
+            if (this.doms == null) this.doms = new HashMap<String, DomProfile>();
         }
         
-        public Map map() {
+        public Map<String, String> map() {
             return mem;
         }
         public String handle() {

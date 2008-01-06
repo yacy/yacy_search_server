@@ -104,7 +104,7 @@ public final class kelondroFileRA extends kelondroAbstractRA implements kelondro
     }
     
     // some static tools
-    public static void writeMap(File f, Map map, String comment) throws IOException {
+    public static void writeMap(File f, Map<String, String> map, String comment) throws IOException {
         File fp = f.getParentFile();
         if (fp != null) fp.mkdirs();
         kelondroRA kra = null;
@@ -117,11 +117,11 @@ public final class kelondroFileRA extends kelondroAbstractRA implements kelondro
         }
     }
 
-    public static Map readMap(File f) throws IOException {
+    public static Map<String, String> readMap(File f) throws IOException {
         kelondroRA kra = null;
         try {
             kra = new kelondroFileRA(f);
-            Map map = kra.readMap();
+            Map<String, String> map = kra.readMap();
             kra.close();
             return map;
         } finally {

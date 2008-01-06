@@ -47,8 +47,6 @@ import java.io.File;
 import java.util.Iterator;
 import java.util.Map;
 
-import org.apache.commons.pool.impl.GenericObjectPool;
-
 import de.anomic.http.httpHeader;
 import de.anomic.plasma.plasmaSwitchboard;
 import de.anomic.server.serverCore;
@@ -65,8 +63,8 @@ public class PerformanceQueues_p {
         plasmaSwitchboard switchboard = (plasmaSwitchboard) sb;
         serverObjects prop = new serverObjects();
         File defaultSettingsFile = new File(switchboard.getRootPath(), "yacy.init");
-        Map defaultSettings = ((post == null) || (!(post.containsKey("submitdefault")))) ? null : serverFileUtils.loadHashMap(defaultSettingsFile);
-        Iterator threads = switchboard.threadNames();
+        Map<String, String> defaultSettings = ((post == null) || (!(post.containsKey("submitdefault")))) ? null : serverFileUtils.loadHashMap(defaultSettingsFile);
+        Iterator<String> threads = switchboard.threadNames();
         String threadName;
         serverThread thread;
         
@@ -202,45 +200,26 @@ public class PerformanceQueues_p {
              * configuring the crawler pool 
              */
             // getting the current crawler pool configuration
-            int maxActive = Integer.parseInt(post.get("Crawler Pool_maxActive","8"));
+            int maxBusy = Integer.parseInt(post.get("Crawler Pool_maxActive","8"));
             
             // storing the new values into configfile
-            switchboard.setConfig(plasmaSwitchboard.CRAWLER_THREADS_ACTIVE_MAX,maxActive);
+            switchboard.setConfig(plasmaSwitchboard.CRAWLER_THREADS_ACTIVE_MAX,maxBusy);
             //switchboard.setConfig("crawler.MinIdleThreads",minIdle);
             
             /* 
              * configuring the http pool 
              */
             serverThread httpd = switchboard.getThread("10_httpd");
-            GenericObjectPool.Config httpdPoolConfig = ((serverCore)httpd).getPoolConfig();
             try {
-                maxActive = Integer.parseInt(post.get("httpd Session Pool_maxActive","8"));
+                maxBusy = Integer.parseInt(post.get("httpd Session Pool_maxActive","8"));
             } catch (NumberFormatException e) {
-                maxActive = 8;
-            }
-            int maxIdle = 0;
-            int minIdle = 0;
-            try {
-                maxIdle = Integer.parseInt(post.get("httpd Session Pool_maxIdle","4"));
-            } catch (NumberFormatException e) {
-                maxIdle = 4;
-            }
-            try {
-                minIdle = Integer.parseInt(post.get("httpd Session Pool_minIdle","0"));
-            } catch (NumberFormatException e) {
-                minIdle = 0;
+                maxBusy = 8;
             }
 
-            httpdPoolConfig.minIdle = (minIdle > maxIdle) ? maxIdle/2 : minIdle;
-            httpdPoolConfig.maxIdle = (maxIdle > maxActive) ? maxActive/2 : maxIdle;
-            httpdPoolConfig.maxActive = maxActive;    
-            
-            ((serverCore)httpd).setPoolConfig(httpdPoolConfig);     
+            ((serverCore)httpd).setMaxSessionCount(maxBusy);    
             
             // storing the new values into configfile
-            switchboard.setConfig("httpdMaxActiveSessions",maxActive);
-            switchboard.setConfig("httpdMaxIdleSessions",maxIdle);
-            switchboard.setConfig("httpdMinIdleSessions",minIdle);
+            switchboard.setConfig("httpdMaxBusySessions",maxBusy);
 
         }        
         
@@ -275,21 +254,12 @@ public class PerformanceQueues_p {
         // table thread pool settings
         prop.put("pool_0_name","Crawler Pool");
         prop.put("pool_0_maxActive", switchboard.getConfigLong("crawler.MaxActiveThreads", 0));
-        prop.put("pool_0_maxIdle", 0);
-        prop.put("pool_0_minIdleConfigurable",0);
-        prop.put("pool_0_minIdle", 0);
         prop.put("pool_0_numActive",switchboard.crawlQueues.size());
-        prop.put("pool_0_numIdle", 0);
         
         serverThread httpd = switchboard.getThread("10_httpd");
-        GenericObjectPool.Config httpdPoolConfig = ((serverCore)httpd).getPoolConfig();
         prop.put("pool_1_name", "httpd Session Pool");
-        prop.put("pool_1_maxActive", httpdPoolConfig.maxActive);
-        prop.put("pool_1_maxIdle", httpdPoolConfig.maxIdle);
-        prop.put("pool_1_minIdleConfigurable", "1");
-        prop.put("pool_1_minIdle", httpdPoolConfig.minIdle);  
-        prop.put("pool_1_numActive", ((serverCore)httpd).getActiveSessionCount());
-        prop.put("pool_1_numIdle", ((serverCore)httpd).getIdleSessionCount());
+        prop.put("pool_1_maxActive", ((serverCore)httpd).getMaxSessionCount());
+        prop.put("pool_1_numActive", ((serverCore)httpd).getJobCount());
         
         prop.put("pool", "2");
         
