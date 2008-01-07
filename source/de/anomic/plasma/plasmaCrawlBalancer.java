@@ -51,13 +51,13 @@ import java.util.LinkedList;
 import java.util.Map;
 import java.util.TreeMap;
 
+import de.anomic.kelondro.kelondroAbstractRecords;
 import de.anomic.kelondro.kelondroBase64Order;
 import de.anomic.kelondro.kelondroCache;
 import de.anomic.kelondro.kelondroFlexTable;
 import de.anomic.kelondro.kelondroIndex;
 import de.anomic.kelondro.kelondroRow;
 import de.anomic.kelondro.kelondroStack;
-import de.anomic.kelondro.kelondroAbstractRecords;
 import de.anomic.server.logging.serverLog;
 import de.anomic.yacy.yacySeedDB;
 
@@ -67,27 +67,46 @@ public class plasmaCrawlBalancer {
     private static final String indexSuffix = "8.db";
 
     // a shared domainAccess map for all balancers
-    private static final Map domainAccess = Collections.synchronizedMap(new HashMap());
+    private static final Map<String, domaccess> domainAccess = Collections.synchronizedMap(new HashMap<String, domaccess>());
     
     // definition of payload for fileStack
     private static final kelondroRow stackrow = new kelondroRow("byte[] urlhash-" + yacySeedDB.commonHashLength, kelondroBase64Order.enhancedCoder, 0);
     
     // class variables
-    private ArrayList     urlRAMStack;     // a list that is flused first
-    private kelondroStack urlFileStack;    // a file with url hashes
-    private kelondroIndex urlFileIndex;
-    private HashMap       domainStacks;    // a map from domain name part to Lists with url hashs
-    private File          cacheStacksPath;
-    private String        stackname;
-    private boolean       top;             // to alternate between top and bottom of the file stack
+    private ArrayList<String>                   urlRAMStack;     // a list that is flushed first
+    private kelondroStack                       urlFileStack;    // a file with url hashes
+    private kelondroIndex                       urlFileIndex;
+    private HashMap<String, LinkedList<String>> domainStacks;    // a map from domain name part to Lists with url hashs
+    private File                                cacheStacksPath;
+    private String                              stackname;
+    private boolean                             top;             // to alternate between top and bottom of the file stack
+
+    public static class domaccess {
+    	long time;
+    	int count;
+    	public domaccess() {
+    		this.time = System.currentTimeMillis();
+    		this.count = 0;
+    	}
+    	public void update() {
+    		this.time = System.currentTimeMillis();
+    		this.count++;
+    	}
+    	public long time() {
+    		return this.time;
+    	}
+    	public int count() {
+    		return this.count;
+    	}
+    }
     
     public plasmaCrawlBalancer(File cachePath, String stackname) {
         this.cacheStacksPath = cachePath;
         this.stackname = stackname;
         File stackFile = new File(cachePath, stackname + stackSuffix);
         this.urlFileStack   = kelondroStack.open(stackFile, stackrow);
-        this.domainStacks   = new HashMap();
-        this.urlRAMStack    = new ArrayList();
+        this.domainStacks   = new HashMap<String, LinkedList<String>>();
+        this.urlRAMStack    = new ArrayList<String>();
         this.top            = true;
         
         // create a stack for newly entered entries
@@ -147,8 +166,8 @@ public class plasmaCrawlBalancer {
         // returns number of deletions
         
         // first find a list of url hashes that shall be deleted
-        Iterator i = urlFileIndex.rows(true, null);
-        ArrayList urlHashes = new ArrayList();
+        Iterator<kelondroRow.Entry> i = urlFileIndex.rows(true, null);
+        ArrayList<String> urlHashes = new ArrayList<String>();
         kelondroRow.Entry rowEntry;
         plasmaCrawlEntry crawlEntry;
         while (i.hasNext()) {
@@ -160,15 +179,15 @@ public class plasmaCrawlBalancer {
         }
         
         // then delete all these urls from the queues and the file index
-        i = urlHashes.iterator();
-        while (i.hasNext()) this.remove((String) i.next());
+        Iterator<String> j = urlHashes.iterator();
+        while (j.hasNext()) this.remove(j.next());
         return urlHashes.size();
     }
     
     public synchronized plasmaCrawlEntry remove(String urlhash) throws IOException {
         // this method is only here, because so many import/export methods need it
         // and it was implemented in the previous architecture
-        // however, usage is not recommendet
+        // however, usage is not recommended
     	int s = urlFileIndex.size();
        kelondroRow.Entry entry = urlFileIndex.remove(urlhash.getBytes(), false);
        if (entry == null) return null;
@@ -177,7 +196,7 @@ public class plasmaCrawlBalancer {
        // now delete that thing also from the queues
 
        // iterate through the RAM stack
-       Iterator i = urlRAMStack.iterator();
+       Iterator<String> i = urlRAMStack.iterator();
        String h;
        while (i.hasNext()) {
            h = (String) i.next();
@@ -189,11 +208,11 @@ public class plasmaCrawlBalancer {
        
        // iterate through the file stack
        // in general this is a bad idea. But this can only be avoided by avoidance of this method
-       i = urlFileStack.stackIterator(true);
-       while (i.hasNext()) {
-           h = new String(((kelondroRow.Entry) i.next()).getColBytes(0));
+       Iterator<kelondroRow.Entry> j = urlFileStack.stackIterator(true);
+       while (j.hasNext()) {
+           h = new String(j.next().getColBytes(0));
            if (h.equals(urlhash)) {
-               i.remove();
+               j.remove();
                return new plasmaCrawlEntry(entry);
            }
        }
@@ -236,9 +255,9 @@ public class plasmaCrawlBalancer {
     private boolean domainStacksNotEmpty() {
         if (domainStacks == null) return false;
         synchronized (domainStacks) {
-            Iterator i = domainStacks.values().iterator();
+            Iterator<LinkedList<String>> i = domainStacks.values().iterator();
             while (i.hasNext()) {
-                if (((LinkedList) i.next()).size() > 0) return true;
+                if (i.next().size() > 0) return true;
             }
         }
         return false;
@@ -248,8 +267,8 @@ public class plasmaCrawlBalancer {
         if (domainStacks == null) return 0;
         int sum = 0;
         synchronized (domainStacks) {
-            Iterator i = domainStacks.values().iterator();
-            while (i.hasNext()) sum += ((LinkedList) i.next()).size();
+            Iterator<LinkedList<String>> i = domainStacks.values().iterator();
+            while (i.hasNext()) sum += i.next().size();
         }
         return sum;
     }
@@ -259,12 +278,12 @@ public class plasmaCrawlBalancer {
         // the minimumleft value is a limit for the number of entries that should be left
         if (domainStacks.size() == 0) return;
         synchronized (domainStacks) {
-            Iterator i = domainStacks.entrySet().iterator();
-            Map.Entry entry;
-            LinkedList list;
+            Iterator<Map.Entry<String, LinkedList<String>>> i = domainStacks.entrySet().iterator();
+            Map.Entry<String, LinkedList<String>> entry;
+            LinkedList<String> list;
             while (i.hasNext()) {
-                entry = (Map.Entry) i.next();
-                list = (LinkedList) entry.getValue();
+                entry = i.next();
+                list = entry.getValue();
                 if (list.size() > minimumleft) {
                     if (ram) {
                         urlRAMStack.add(list.removeFirst());
@@ -298,10 +317,10 @@ public class plasmaCrawlBalancer {
         
         // extend domain stack
         String dom = entry.url().hash().substring(6);
-        LinkedList domainList = (LinkedList) domainStacks.get(dom);
+        LinkedList<String> domainList = domainStacks.get(dom);
         if (domainList == null) {
             // create new list
-            domainList = new LinkedList();
+            domainList = new LinkedList<String>();
             synchronized (domainStacks) {
                 domainList.add(entry.url().hash());
                 domainStacks.put(dom, domainList);
@@ -336,19 +355,19 @@ public class plasmaCrawlBalancer {
             // we select specific domains that have not been used for a long time
             // i.e. 60 seconds. Latest arrivals that have not yet been crawled
             // fit also in that scheme
-            Iterator i = domainStacks.entrySet().iterator();
-            Map.Entry entry;
+            Iterator<Map.Entry<String, LinkedList<String>>> i = domainStacks.entrySet().iterator();
+            Map.Entry<String, LinkedList<String>> entry;
             String domhash;
             long delta, maxdelta = 0;
             String maxhash = null;
-            LinkedList domlist;
+            LinkedList<String> domlist;
             while (i.hasNext()) {
-                entry = (Map.Entry) i.next();
+                entry = i.next();
                 domhash = (String) entry.getKey();
                 delta = lastAccessDelta(domhash);
                 if (delta == Integer.MAX_VALUE) {
                     // a brand new domain - we take it
-                    domlist = (LinkedList) entry.getValue();
+                    domlist = entry.getValue();
                     result = (String) domlist.removeFirst();
                     if (domlist.size() == 0) i.remove();
                     break;
@@ -360,7 +379,7 @@ public class plasmaCrawlBalancer {
             }
             if (maxdelta > maximumAge) {
                 // success - we found an entry from a domain that has not been used for a long time
-                domlist = (LinkedList) domainStacks.get(maxhash);
+                domlist = domainStacks.get(maxhash);
                 result = (String) domlist.removeFirst();
                 if (domlist.size() == 0) domainStacks.remove(maxhash);
             }
@@ -371,17 +390,17 @@ public class plasmaCrawlBalancer {
             // we order all domains by the number of entries per domain
             // then we iterate through these domains in descending entry order
             // and that that one, that has a delta > minimumDelta
-            Iterator i = domainStacks.entrySet().iterator();
-            Map.Entry entry;
+            Iterator<Map.Entry<String, LinkedList<String>>> i = domainStacks.entrySet().iterator();
+            Map.Entry<String, LinkedList<String>> entry;
             String domhash;
-            LinkedList domlist;
-            TreeMap hitlist = new TreeMap();
+            LinkedList<String> domlist;
+            TreeMap<Integer, String> hitlist = new TreeMap<Integer, String>();
             int count = 0;
             // first collect information about sizes of the domain lists
             while (i.hasNext()) {
-                entry = (Map.Entry) i.next();
-                domhash = (String) entry.getKey();
-                domlist = (LinkedList) entry.getValue();
+                entry = i.next();
+                domhash = entry.getKey();
+                domlist = entry.getValue();
                 hitlist.put(new Integer(domlist.size() * 100 + count++), domhash);
             }
             
@@ -394,7 +413,7 @@ public class plasmaCrawlBalancer {
                 if (maxhash == null) maxhash = domhash; // remember first entry
                 delta = lastAccessDelta(domhash);
                 if (delta > minimumGlobalDelta) {
-                    domlist = (LinkedList) domainStacks.get(domhash);
+                    domlist = domainStacks.get(domhash);
                     result = (String) domlist.removeFirst();
                     if (domlist.size() == 0) domainStacks.remove(domhash);
                     break;
@@ -403,7 +422,7 @@ public class plasmaCrawlBalancer {
             
             // if we did yet not choose any entry, we simply take that one with the most entries
             if ((result == null) && (maxhash != null)) {
-                domlist = (LinkedList) domainStacks.get(maxhash);
+                domlist = domainStacks.get(maxhash);
                 result = (String) domlist.removeFirst();
                 if (domlist.size() == 0) domainStacks.remove(maxhash);
             }
@@ -467,16 +486,18 @@ public class plasmaCrawlBalancer {
         }
         
         // update statistical data
-        domainAccess.put(result.substring(6), new Long(System.currentTimeMillis()));
+        domaccess lastAccess = domainAccess.get(result.substring(6));
+        if (lastAccess == null) lastAccess = new domaccess(); else lastAccess.update();
+        domainAccess.put(result.substring(6), lastAccess);
         
         return crawlEntry;
     }
     
     private long lastAccessDelta(String hash) {
         assert hash != null;
-        Long lastAccess = (Long) domainAccess.get((hash.length() > 6) ? hash.substring(6) : hash);
+        domaccess lastAccess = domainAccess.get((hash.length() > 6) ? hash.substring(6) : hash);
         if (lastAccess == null) return Long.MAX_VALUE; // never accessed
-        return System.currentTimeMillis() - lastAccess.longValue();
+        return System.currentTimeMillis() - lastAccess.time();
     }
     
     public synchronized plasmaCrawlEntry top(int dist) throws IOException {
@@ -507,13 +528,13 @@ public class plasmaCrawlBalancer {
         return new plasmaCrawlEntry(entry);
     }
 
-    public synchronized Iterator iterator() throws IOException {
+    public synchronized Iterator<plasmaCrawlEntry> iterator() throws IOException {
         return new EntryIterator();
     }
     
-    private class EntryIterator implements Iterator {
+    private class EntryIterator implements Iterator<plasmaCrawlEntry> {
 
-        private Iterator rowIterator;
+        private Iterator<kelondroRow.Entry> rowIterator;
         
         public EntryIterator() throws IOException {
             rowIterator = urlFileIndex.rows(true, null);
@@ -523,7 +544,7 @@ public class plasmaCrawlBalancer {
             return (rowIterator == null) ? false : rowIterator.hasNext();
         }
 
-        public Object next() {
+        public plasmaCrawlEntry next() {
             kelondroRow.Entry entry = (kelondroRow.Entry) rowIterator.next();
             try {
                 return (entry == null) ? null : new plasmaCrawlEntry(entry);

@@ -52,8 +52,8 @@ public class kelondroObjectSpace {
     private static final int minSize = 10;
     private static final int maxSize = 256;
     
-    private static HashMap objHeap = new HashMap();
-    private static TreeMap aliveNow = new TreeMap();
+    private static HashMap<Integer, ArrayList<byte[]>> objHeap = new HashMap<Integer, ArrayList<byte[]>>();
+    private static TreeMap<Integer, Integer> aliveNow = new TreeMap<Integer, Integer>();
     //private static TreeMap aliveMax = new TreeMap();
     
     private static void incAlive(int size) {
@@ -67,7 +67,7 @@ public class kelondroObjectSpace {
     private static void decAlive(int size) {
         final Integer s = new Integer(size);
         synchronized (aliveNow) {
-            final Integer x = (Integer) aliveNow.get(s);
+            final Integer x = aliveNow.get(s);
             if (x == null) aliveNow.put(s, new Integer(-1)); else aliveNow.put(s, new Integer(x.intValue() - 1));
         }
     }
@@ -76,9 +76,9 @@ public class kelondroObjectSpace {
         if ((len < minSize) || (len > maxSize)) return new byte[len];
         incAlive(len);
         synchronized (objHeap) {
-            ArrayList buf = (ArrayList) objHeap.get(new Integer(len));
+            ArrayList<byte[]> buf = objHeap.get(new Integer(len));
             if ((buf == null) || (buf.size() == 0)) return new byte[len];
-            return (byte[]) buf.remove(buf.size() - 1);
+            return buf.remove(buf.size() - 1);
         }
     }
     
@@ -90,9 +90,9 @@ public class kelondroObjectSpace {
         decAlive(b.length);
         synchronized (objHeap) {
             final Integer i = new Integer(b.length);
-            ArrayList buf = (ArrayList) objHeap.get(i);
+            ArrayList<byte[]> buf = objHeap.get(i);
             if (buf == null) {
-                buf = new ArrayList();
+                buf = new ArrayList<byte[]>();
                 buf.add(b);
                 objHeap.put(i, buf);
             } else {
@@ -102,21 +102,21 @@ public class kelondroObjectSpace {
         b = null;
     }
     
-    public static TreeMap statAlive() {
+    public static TreeMap<Integer, Integer> statAlive() {
         return aliveNow;
     }
     
-    public static TreeMap statHeap() {
+    public static TreeMap<Integer, Integer> statHeap() {
         // creates a statistic output of this object space
         // the result is a mapping from Integer (chunk size) to Integer (number of counts)
         // and shows how many Objects are held in this space for usage
-        TreeMap result = new TreeMap();
+        TreeMap<Integer, Integer> result = new TreeMap<Integer, Integer>();
         synchronized (objHeap) {
-            Iterator i = objHeap.entrySet().iterator();
-            Map.Entry entry;
+            Iterator<Map.Entry<Integer, ArrayList<byte[]>>> i = objHeap.entrySet().iterator();
+            Map.Entry<Integer, ArrayList<byte[]>> entry;
             while (i.hasNext()) {
-                entry = (Map.Entry) i.next();
-                result.put(entry.getKey(), new Integer(((ArrayList) entry.getValue()).size()));
+                entry = i.next();
+                result.put(entry.getKey(), new Integer(entry.getValue().size()));
             }
         }
         return result;

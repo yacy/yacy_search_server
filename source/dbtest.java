@@ -372,6 +372,7 @@ public class dbtest {
             if (command.equals("stressThreaded")) {
                 // 
                 // args: <number-of-writes> <number-of-reads-per-write> <random-startpoint>
+            	// example: kelondroFlexTable stressThreaded /Users/admin/dbtest 500 50 0
                 long writeCount = Long.parseLong(args[3]);
                 long readCount = Long.parseLong(args[4]);
                 long randomstart = Long.parseLong(args[5]);

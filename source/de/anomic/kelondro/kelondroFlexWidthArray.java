@@ -101,10 +101,10 @@ public class kelondroFlexWidthArray implements kelondroArray {
 
         // save/check property file for this array
         File propfile = new File(tabledir, "properties");
-        Map props = new HashMap();
+        Map<String, String> props = new HashMap<String, String>();
         if (propfile.exists()) {
             props = serverFileUtils.loadHashMap(propfile);
-            String stored_rowdef = (String) props.get("rowdef");
+            String stored_rowdef = props.get("rowdef");
             if ((stored_rowdef == null) || (!(rowdef.subsumes(new kelondroRow(stored_rowdef, rowdef.objectOrder, 0))))) {
                 System.out.println("FATAL ERROR: stored rowdef '" + stored_rowdef + "' does not match with new rowdef '" + 
                         rowdef + "' for flex table '" + path + "', table " + tablename);
@@ -218,19 +218,19 @@ public class kelondroFlexWidthArray implements kelondroArray {
         return col[0].size();
     }
     
-    public synchronized void setMultiple(TreeMap /*of {Integer, kelondroRow.Entry}*/ entries) throws IOException {
+    public synchronized void setMultiple(TreeMap<Integer, kelondroRow.Entry> entries) throws IOException {
         // a R/W head path-optimized option to write a set of entries
-        Iterator i;
-        Map.Entry entry;
+        Iterator<Map.Entry<Integer, kelondroRow.Entry>> i;
+        Map.Entry<Integer, kelondroRow.Entry> entry;
         kelondroRow.Entry rowentry, e;
         int c = 0, index;
         // go across each file
         while (c < rowdef.columns()) {
             i = entries.entrySet().iterator();
             while (i.hasNext()) {
-                entry = (Map.Entry) i.next();
-                index = ((Integer) entry.getKey()).intValue();
-                rowentry = (kelondroRow.Entry) entry.getValue();
+                entry = i.next();
+                index = entry.getKey().intValue();
+                rowentry = entry.getValue();
                 assert rowentry.objectsize() == this.rowdef.objectsize;
                         
                 e = col[c].row().newEntry(rowentry.bytes(), rowdef.colstart[c], false);
@@ -266,20 +266,20 @@ public class kelondroFlexWidthArray implements kelondroArray {
 		return index;
     }
 
-    protected synchronized TreeMap addMultiple(List rows) throws IOException {
+    protected synchronized TreeMap<Integer, byte[]> addMultiple(List<kelondroRow.Entry> rows) throws IOException {
         // result is a Integer/byte[] relation
         // of newly added rows (index, key)
-        TreeMap indexref = new TreeMap();
-        Iterator i;
+        TreeMap<Integer, byte[]> indexref = new TreeMap<Integer, byte[]>();
+        Iterator<kelondroRow.Entry> i;
         kelondroRow.Entry rowentry;
         // prepare storage for other columns
-        TreeMap[] colm = new TreeMap[col.length];
+        TreeMap<Integer, kelondroRow.Entry>[] colm = new TreeMap[col.length];
         for (int j = 0; j < col.length; j++) {
-            if (col[j] == null) colm[j] = null; else colm[j] = new TreeMap();
+            if (col[j] == null) colm[j] = null; else colm[j] = new TreeMap<Integer, kelondroRow.Entry>();
         }
         i = rows.iterator();
         while (i.hasNext()) {
-            rowentry = (kelondroRow.Entry) i.next();
+            rowentry = i.next();
             assert rowentry.objectsize() == this.rowdef.objectsize;
             
             kelondroRow.Entry e;
@@ -301,7 +301,7 @@ public class kelondroFlexWidthArray implements kelondroArray {
         for (int j = 1; j < col.length; j++) {
             if (col[j] != null) col[j].setMultiple(colm[j]);
         }
-        // retrun references to entries with key
+        // return references to entries with key
         return indexref;
     }
     

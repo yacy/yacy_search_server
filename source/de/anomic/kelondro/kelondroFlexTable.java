@@ -40,7 +40,7 @@ import de.anomic.server.logging.serverLog;
 public class kelondroFlexTable extends kelondroFlexWidthArray implements kelondroIndex {
 
     // static tracker objects
-    private static TreeMap tableTracker = new TreeMap();
+    private static TreeMap<String, kelondroFlexTable> tableTracker = new TreeMap<String, kelondroFlexTable>();
     
     // class objects
     protected kelondroBytesIntMap index;
@@ -156,12 +156,12 @@ public class kelondroFlexTable extends kelondroFlexWidthArray implements kelondr
     	int space = Math.max(super.col[0].size(), initialSpace) + 1;
     	if (space < 0) throw new kelondroException("wrong space: " + space);
         kelondroBytesIntMap ri = new kelondroBytesIntMap(super.row().column(0).cellwidth, super.rowdef.objectOrder, space);
-        Iterator content = super.col[0].contentNodes(-1);
+        Iterator<kelondroNode> content = super.col[0].contentNodes(-1);
         kelondroNode node;
         int i;
         byte[] key;
         while (content.hasNext()) {
-            node = (kelondroNode) content.next();
+            node = content.next();
             i = node.handle().hashCode();
             key = node.getKey();
             assert (key != null) : "DEBUG: empty key in initializeRamIndex"; // should not happen; if it does, it is an error of the condentNodes iterator
@@ -181,14 +181,14 @@ public class kelondroFlexTable extends kelondroFlexWidthArray implements kelondr
     
     private kelondroIndex initializeTreeIndex(File indexfile, long preloadTime, kelondroOrder objectOrder) throws IOException {
         kelondroIndex treeindex = new kelondroCache(new kelondroTree(indexfile, true, preloadTime, treeIndexRow(rowdef.primaryKeyLength, objectOrder), 2, 80), true, false);
-        Iterator content = super.col[0].contentNodes(-1);
+        Iterator<kelondroNode> content = super.col[0].contentNodes(-1);
         kelondroNode node;
         kelondroRow.Entry indexentry;
         int i, c = 0, all = super.col[0].size();
         long start = System.currentTimeMillis();
         long last = start;
         while (content.hasNext()) {
-            node = (kelondroNode) content.next();
+            node = content.next();
             i = node.handle().hashCode();
             indexentry = treeindex.row().newEntry();
             indexentry.setCol(0, node.getValueRow());
@@ -211,7 +211,7 @@ public class kelondroFlexTable extends kelondroFlexWidthArray implements kelondr
     public synchronized kelondroRow.Entry get(byte[] key) throws IOException {
         if (index == null) return null; // case may happen during shutdown
 		int pos = index.geti(key);
-		assert this.size() == index.size() : "content.size() = " + this.size() + ", index.size() = " + index.size() + ", analysis: " + index.consistencyAnalysis();
+		assert this.size() == index.size() : "content.size() = " + this.size() + ", index.size() = " + index.size();
 		if (pos < 0) return null;
 		// i may be greater than this.size(), because this table may have deleted entries
 		// the deleted entries are subtracted from the 'real' tablesize,
@@ -222,18 +222,18 @@ public class kelondroFlexTable extends kelondroFlexWidthArray implements kelondr
         return result;
 	}
     
-    public synchronized void putMultiple(List rows) throws IOException {
+    public synchronized void putMultiple(List<kelondroRow.Entry> rows) throws IOException {
         // put a list of entries in a ordered way.
         // this should save R/W head positioning time
-        Iterator i = rows.iterator();
+        Iterator<kelondroRow.Entry> i = rows.iterator();
         kelondroRow.Entry row;
         int pos;
         byte[] key;
-        TreeMap   old_rows_ordered    = new TreeMap();
-        ArrayList new_rows_sequential = new ArrayList();
+        TreeMap<Integer, kelondroRow.Entry> old_rows_ordered = new TreeMap<Integer, kelondroRow.Entry>();
+        ArrayList<kelondroRow.Entry> new_rows_sequential = new ArrayList<kelondroRow.Entry>();
         assert this.size() == index.size() : "content.size() = " + this.size() + ", index.size() = " + index.size();
         while (i.hasNext()) {
-            row = (kelondroRow.Entry) i.next();
+            row = i.next();
             key = row.getColBytes(0);
             pos = index.geti(key);
             if (pos < 0) {
@@ -295,17 +295,17 @@ public class kelondroFlexTable extends kelondroFlexWidthArray implements kelondr
 		index.addi(row.getColBytes(0), super.add(row));
     }
     
-    public synchronized void addUniqueMultiple(List rows) throws IOException {
+    public synchronized void addUniqueMultiple(List<kelondroRow.Entry> rows) throws IOException {
         // add a list of entries in a ordered way.
         // this should save R/W head positioning time
-        TreeMap indexed_result = super.addMultiple(rows);
+        TreeMap<Integer, byte[]> indexed_result = super.addMultiple(rows);
         // indexed_result is a Integer/byte[] relation
         // that is used here to store the index
-        Iterator i = indexed_result.entrySet().iterator();
-        Map.Entry entry;
+        Iterator<Map.Entry<Integer, byte[]>> i = indexed_result.entrySet().iterator();
+        Map.Entry<Integer, byte[]> entry;
         while (i.hasNext()) {
-            entry = (Map.Entry) i.next();
-            index.puti((byte[]) entry.getValue(), ((Integer) entry.getKey()).intValue());
+            entry = i.next();
+            index.puti(entry.getValue(), entry.getKey().intValue());
         }
         assert this.size() == index.size() : "content.size() = " + this.size() + ", index.size() = " + index.size();
 		
@@ -406,7 +406,7 @@ public class kelondroFlexTable extends kelondroFlexWidthArray implements kelondr
         return index.profile();
     }
     
-    public static final Iterator filenames() {
+    public static final Iterator<String> filenames() {
         // iterates string objects; all file names from record tracker
         return tableTracker.keySet().iterator();
     }
