@@ -102,8 +102,8 @@
 			<fieldset>
 				<legend>Tags</legend>
 				<p>
-					<form action="Bookmarks.html" method="get" accept-charset="UTF-8">
-						<select size="1" name="tag" width="175">
+					<form action="Bookmarks.html" name="choosetag" method="get" accept-charset="UTF-8">
+						<select size="1" name="tag" width="175" onChange="document.choosetag.submit();">
 							<option value="" selected="selected">[All]</option>
 							#{taglist}# 
 							<option value="#[tag]#">#[name]# (#[num]#)</option>
