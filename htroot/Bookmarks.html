@@ -9,14 +9,23 @@
   </head>
   <body id="Bookmarks">
   #%env/templates/header.template%#
-    <h2>Bookmarks</h2>
-    #(mode)#
-    <div class="Navigation"><a href="Bookmarks.html?login=true">Login</a></div>
-    ::
-    <div class="Navigation">
-      <a href="Bookmarks.html?mode=add">Add Bookmark</a>
-      <a href="Bookmarks.html?mode=importxml">Import XML Bookmarks</a>
-      <!-- <a href="Bookmarks.html?mode=importbookmarks">Import Bookmarks.html</a> -->
+  		#(mode)#
+		<div class="SubMenu">
+			<h3>Bookmarks</h3>			
+	  		<ul class="SubMenu">
+		    	<li><a href="Bookmarks.html?login=true&mode=add" class="MenuItemLink lock">Add Bookmark</a></li>
+		    	<li><a href="Bookmarks.html?login=true&mode=importxml" class="MenuItemLink lock">Import XML Bookmarks</a></li>
+			</ul>  		
+	  		<p/>
+	  	</div>
+	  	::
+	  	<div class="SubMenu">
+			<h3>Bookmarks</h3>	
+	  		<ul class="SubMenu">
+		    	<li><a href="Bookmarks.html?mode=add" class="MenuItemLink lock">Add Bookmark</a></li>
+		    	<li><a href="Bookmarks.html?mode=importxml" class="MenuItemLink lock">Import XML Bookmarks</a></li>
+			</ul>
+			<p/>
     </div>
     ::
     <form action="Bookmarks.html" method="get">
@@ -89,15 +98,27 @@
       </fieldset>
     </form>
     #(/mode)#
-    <div class="Tags">
-      <h3>Tags</h3>
-      <ul class="tagList">
-        <li><a href="Bookmarks.html" class="bookmarkTags">All</a> (#[num-bookmarks]#)</li>
-        #{taglist}#
-        <li><a href="Bookmarks.html?tag=#[tag]#" class="bookmarkTags">#[name]#</a> (#[num]#)</li>
-        #{/taglist}#
-      </ul>
-    </div>
+    <div class="TagList">
+			<fieldset>
+				<legend>Tags</legend>
+				<p>
+					<form action="Bookmarks.html" method="get" accept-charset="UTF-8">
+						<select size="1" name="tag" width="175">
+							<option value="" selected="selected">[All]</option>
+							#{taglist}# 
+							<option value="#[tag]#">#[name]# (#[num]#)</option>
+							#{/taglist}#
+						</select>
+						<input type="submit" value=" ... ">
+					</form>
+				</p>
+				<p>
+					#{taglist}# 
+					<span style="font-size:#[size]#em"><a href="Bookmarks.html?tag=#[tag]#">#[name]#</a></span>
+					#{/taglist}#
+				</p>
+			</fieldset>
+		</div>
     <div class="bookmarkList">
       <h3>Bookmark List</h3>
       #{bookmarks}#

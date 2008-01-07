@@ -52,6 +52,8 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Set;
 
+import java.lang.Math;
+
 import de.anomic.data.bookmarksDB;
 import de.anomic.data.listManager;
 import de.anomic.data.userDB;
@@ -247,6 +249,7 @@ public class Bookmarks {
         prop.putHTML("taglist_"+count+"_name", tag.getFriendlyName());
         prop.putHTML("taglist_"+count+"_tag", tag.getTagName());
         prop.put("taglist_"+count+"_num", tag.size());
+        prop.put("taglist_"+count+"_size", 1.1+(Math.log(tag.size())/4));
         count++;
     }
     prop.put("taglist", count);
