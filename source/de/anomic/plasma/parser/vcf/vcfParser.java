@@ -53,8 +53,6 @@ import java.util.Hashtable;
 import java.util.Iterator;
 import java.util.LinkedList;
 
-import org.apache.commons.codec.net.QuotedPrintableCodec;
-
 import de.anomic.http.httpc;
 import de.anomic.kelondro.kelondroBase64Order;
 import de.anomic.plasma.plasmaParserDocument;
@@ -86,14 +84,14 @@ public class vcfParser extends AbstractParser implements Parser {
      * a list of library names that are needed by this parser
      * @see Parser#getLibxDependences()
      */
-    private static final String[] LIBX_DEPENDENCIES = new String[] {"commons-codec-1.3.jar"};        
+    private static final String[] LIBX_DEPENDENCIES = new String[] {};        
     
     public vcfParser() {        
         super(LIBX_DEPENDENCIES);
         this.parserName = "vCard Parser"; 
     }
     
-    public Hashtable getSupportedMimeTypes() {
+    public Hashtable<String, String> getSupportedMimeTypes() {
         return SUPPORTED_MIME_TYPES;
     }
     
@@ -157,7 +155,7 @@ public class vcfParser extends AbstractParser implements Parser {
                                             value += line; 
                                         } while (line.endsWith("="));
                                     }
-                                    value = (new QuotedPrintableCodec()).decode(value);
+                                    value = decodeQuotedPrintable(value);
                                 } else if (encoding.equalsIgnoreCase("base64")) {
                                     do {
                                         line = inputReader.readLine();
@@ -183,7 +181,7 @@ public class vcfParser extends AbstractParser implements Parser {
                     if (key.equalsIgnoreCase("END")) {
                         String name = null, title = null;
                         
-                        // using the name of the current persion as section headline
+                        // using the name of the current version as section headline
                         if (parsedData.containsKey("FN")) {
                             parsedNames.add(name = (String)parsedData.get("FN"));
                         } else if (parsedData.containsKey("N")) {
@@ -203,7 +201,7 @@ public class vcfParser extends AbstractParser implements Parser {
                         
                         // looping through the properties and add there values to
                         // the text representation of the vCard
-                        Iterator iter = parsedData.values().iterator();  
+                        Iterator<String> iter = parsedData.values().iterator();  
                         while (iter.hasNext()) {
                             value = (String) iter.next();
                             parsedDataText.append(value).append("\r\n");
@@ -265,6 +263,28 @@ public class vcfParser extends AbstractParser implements Parser {
         // Nothing todo here at the moment
         super.reset();
     }
+    
+    public static final String decodeQuotedPrintable(String s) {
+		if (s == null) return null;
+		byte[] b = s.getBytes();
+		StringBuffer sb = new StringBuffer();
+		for (int i = 0; i < b.length; i++) {
+			int c = b[i];
+			if (c == '=') {
+				try {
+					int u = Character.digit((char) b[++i], 16);
+					int l = Character.digit((char) b[++i], 16);
+					if (u == -1 || l == -1) throw new RuntimeException("bad quoted-printable encoding");
+					sb.append((char) ((u << 4) + l));
+				} catch (ArrayIndexOutOfBoundsException e) {
+					throw new RuntimeException("bad quoted-printable encoding");
+				}
+			} else {
+				sb.append((char) c);
+			}
+		}
+		return sb.toString();
+	}
     
     public static void main(String[] args) {
         try {

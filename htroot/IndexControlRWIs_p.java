@@ -359,8 +359,8 @@ public class IndexControlRWIs_p {
     }
 
     private static plasmaSearchRankingProcess genSearchresult(serverObjects prop, plasmaSwitchboard sb, String keyhash, kelondroBitfield filter, int sortorder, boolean fetchURLs) {
-        plasmaSearchQuery query = new plasmaSearchQuery(keyhash, -1, filter);
-        plasmaSearchRankingProcess ranked = new plasmaSearchRankingProcess(sb.wordIndex, query, sb.getRanking(), sortorder, Integer.MAX_VALUE);
+        plasmaSearchQuery query = new plasmaSearchQuery(keyhash, -1, sb.getRanking(), filter);
+        plasmaSearchRankingProcess ranked = new plasmaSearchRankingProcess(sb.wordIndex, query, sortorder, Integer.MAX_VALUE);
         ranked.execQuery(fetchURLs);
         
         if (ranked.filteredCount() == 0) {

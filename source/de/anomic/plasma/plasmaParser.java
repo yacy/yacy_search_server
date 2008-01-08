@@ -48,6 +48,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Properties;
 import java.util.Set;
+
 import de.anomic.htmlFilter.htmlFilterContentScraper;
 import de.anomic.htmlFilter.htmlFilterImageEntry;
 import de.anomic.htmlFilter.htmlFilterInputStream;
@@ -812,8 +813,8 @@ public final class plasmaParser {
     }
     
     public static void main(String[] args) {
-        //javac -classpath lib/commons-collections.jar:lib/commons-pool-1.2.jar -sourcepath source source/de/anomic/plasma/plasmaParser.java
-        //java -cp source:lib/commons-collections.jar:lib/commons-pool-1.2.jar de.anomic.plasma.plasmaParser bug.html bug.out
+        //javac -sourcepath source source/de/anomic/plasma/plasmaParser.java
+        //java -cp source de.anomic.plasma.plasmaParser bug.html bug.out
     	httpc remote = null;
         try {
             Object content = null;

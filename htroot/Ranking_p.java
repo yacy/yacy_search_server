@@ -101,9 +101,9 @@ public class Ranking_p {
     	putRanking(prop, rankingProfile.postToExternalMap(prefix), prefix, "Post");
     }
     
-    private static void putRanking(serverObjects prop, Map map, String prefix, String attrExtension) {
+    private static void putRanking(serverObjects prop, Map<String, String> map, String prefix, String attrExtension) {
     	prop.put("attr" + attrExtension, map.size());
-    	Iterator it = map.keySet().iterator();
+    	Iterator<String> it = map.keySet().iterator();
     	String key;
     	int i, j = 0;
     	while (it.hasNext()) {

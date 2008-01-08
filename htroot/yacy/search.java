@@ -36,9 +36,9 @@ import java.util.Set;
 import java.util.TreeSet;
 
 import de.anomic.http.httpHeader;
+import de.anomic.index.indexContainer;
 import de.anomic.kelondro.kelondroBase64Order;
 import de.anomic.kelondro.kelondroBitfield;
-import de.anomic.index.indexContainer;
 import de.anomic.net.natLib;
 import de.anomic.plasma.plasmaProfiling;
 import de.anomic.plasma.plasmaSearchEvent;
@@ -49,10 +49,10 @@ import de.anomic.server.serverCore;
 import de.anomic.server.serverObjects;
 import de.anomic.server.serverProfiling;
 import de.anomic.server.serverSwitch;
+import de.anomic.tools.crypt;
 import de.anomic.yacy.yacyCore;
 import de.anomic.yacy.yacyNetwork;
 import de.anomic.yacy.yacySeed;
-import de.anomic.tools.crypt;
 
 public final class search {
 
@@ -134,6 +134,9 @@ public final class search {
         final TreeSet excludehashes = (exclude.length() == 0) ? new TreeSet(kelondroBase64Order.enhancedCoder) : plasmaSearchQuery.hashes2Set(exclude);
         final long timestamp = System.currentTimeMillis();
         
+    	// prepare a search profile
+        plasmaSearchRankingProfile rankingProfile = (profile.length() == 0) ? new plasmaSearchRankingProfile(plasmaSearchQuery.contentdomParser(contentdom)) : new plasmaSearchRankingProfile("", profile);
+        
         // prepare an abstract result
         StringBuffer indexabstract = new StringBuffer();
         int indexabstractContainercount = 0;
@@ -143,7 +146,7 @@ public final class search {
         long urlRetrievalAllTime = 0, snippetComputationAllTime = 0;
         if ((query.length() == 0) && (abstractSet != null)) {
             // this is _not_ a normal search, only a request for index abstracts
-            theQuery = new plasmaSearchQuery(null, abstractSet, new TreeSet(kelondroBase64Order.enhancedCoder), maxdist, prefer, plasmaSearchQuery.contentdomParser(contentdom), false, count, 0, duetime, filter, plasmaSearchQuery.SEARCHDOM_LOCAL, null, -1, null, false);
+            theQuery = new plasmaSearchQuery(null, abstractSet, new TreeSet(kelondroBase64Order.enhancedCoder), rankingProfile, maxdist, prefer, plasmaSearchQuery.contentdomParser(contentdom), false, count, 0, duetime, filter, plasmaSearchQuery.SEARCHDOM_LOCAL, null, -1, null, false);
             theQuery.domType = plasmaSearchQuery.SEARCHDOM_LOCAL;
             yacyCore.log.logInfo("INIT HASH SEARCH (abstracts only): " + plasmaSearchQuery.anonymizedQueryHashes(theQuery.queryHashes) + " - " + theQuery.displayResults() + " links");
 
@@ -168,14 +171,12 @@ public final class search {
             prop.put("references", "");
             
         } else {
-            
             // retrieve index containers from search request
-            theQuery = new plasmaSearchQuery(null, queryhashes, excludehashes, maxdist, prefer, plasmaSearchQuery.contentdomParser(contentdom), false, count, 0, duetime, filter, plasmaSearchQuery.SEARCHDOM_LOCAL, null, -1, constraint, false);
+            theQuery = new plasmaSearchQuery(null, queryhashes, excludehashes, rankingProfile, maxdist, prefer, plasmaSearchQuery.contentdomParser(contentdom), false, count, 0, duetime, filter, plasmaSearchQuery.SEARCHDOM_LOCAL, null, -1, constraint, false);
             theQuery.domType = plasmaSearchQuery.SEARCHDOM_LOCAL;
             yacyCore.log.logInfo("INIT HASH SEARCH (query-" + abstracts + "): " + plasmaSearchQuery.anonymizedQueryHashes(theQuery.queryHashes) + " - " + theQuery.displayResults() + " links");
             
-            // prepare a search profile
-            plasmaSearchRankingProfile rankingProfile = (profile.length() == 0) ? new plasmaSearchRankingProfile(plasmaSearchQuery.contentdomParser(contentdom)) : new plasmaSearchRankingProfile("", profile);
+            // make event
             plasmaSearchEvent theSearch = plasmaSearchEvent.getEvent(theQuery, rankingProfile, sb.wordIndex, null, true, abstractSet);
             urlRetrievalAllTime = theSearch.getURLRetrievalTime();
             snippetComputationAllTime = theSearch.getSnippetComputationTime();

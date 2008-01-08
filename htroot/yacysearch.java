@@ -57,6 +57,7 @@ import de.anomic.plasma.plasmaCondenser;
 import de.anomic.plasma.plasmaParserDocument;
 import de.anomic.plasma.plasmaSearchEvent;
 import de.anomic.plasma.plasmaSearchQuery;
+import de.anomic.plasma.plasmaSearchRankingProfile;
 import de.anomic.plasma.plasmaSnippetCache;
 import de.anomic.plasma.plasmaSwitchboard;
 import de.anomic.server.serverCore;
@@ -85,10 +86,10 @@ public class yacysearch {
         if (env.getConfigBool("promoteSearchPageGreeting.useNetworkName", false)) promoteSearchPageGreeting = env.getConfig("network.unit.description", "");
         if (promoteSearchPageGreeting.length() == 0) promoteSearchPageGreeting = "P2P WEB SEARCH";
 
-        // case if no values are requested
+        // get query
         String querystring = (post == null) ? "" : post.get("search", "").trim();
-        boolean rss = (post == null) ? false : post.get("rss", "false").equals("true");
         
+        boolean rss = (post == null) ? false : post.get("rss", "false").equals("true");
         if ((post == null) || (env == null) || (querystring.length() == 0) || (!searchAllowed)) {
         	/*
             // save referrer
@@ -188,7 +189,16 @@ public class yacysearch {
         serverObjects prop = new serverObjects();
         if (post.get("cat", "href").equals("href")) {
 
-            final TreeSet[] query = plasmaSearchQuery.cleanQuery(querystring); // converts also umlaute
+            final TreeSet<String>[] query = plasmaSearchQuery.cleanQuery(querystring); // converts also umlaute
+            boolean near = (query[0].contains("near")) && (querystring.indexOf("NEAR") >= 0);
+            if (near) {
+            	query[0].remove("near");
+            }
+            plasmaSearchRankingProfile ranking = sb.getRanking();
+            if (near) {
+            	ranking.coeff_worddistance = plasmaSearchRankingProfile.COEFF_MAX;
+            }
+            	
             // filter out stopwords
             final TreeSet filtered = kelondroMSetTools.joinConstructive(query[0], plasmaSwitchboard.stopwords);
             if (filtered.size() > 0) {
@@ -250,6 +260,7 @@ public class yacysearch {
         			querystring,
         			queryHashes,
         			plasmaCondenser.words2hashes(query[1]),
+        			ranking,
                     maxDistance,
                     prefermask,
                     contentdomCode,
@@ -282,7 +293,7 @@ public class yacysearch {
                 theQuery.setOffset(0); // in case that this is a new search, always start without a offset 
                 offset = 0;
             }
-            plasmaSearchEvent theSearch = plasmaSearchEvent.getEvent(theQuery, sb.getRanking(), sb.wordIndex, (sb.isRobinsonMode()) ? sb.clusterhashes : null, false, null);
+            plasmaSearchEvent theSearch = plasmaSearchEvent.getEvent(theQuery, ranking, sb.wordIndex, (sb.isRobinsonMode()) ? sb.clusterhashes : null, false, null);
             
             // generate result object
             serverLog.logFine("LOCAL_SEARCH", "SEARCH TIME AFTER ORDERING OF SEARCH RESULTS: " + ((System.currentTimeMillis() - timestamp) / 1000) + " seconds");

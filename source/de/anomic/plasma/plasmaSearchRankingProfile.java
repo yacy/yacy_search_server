@@ -81,6 +81,10 @@ public class plasmaSearchRankingProfile {
     public static final String DESCRCOMPINTOPLIST = "descrcompintoplist";
     public static final String PREFER = "prefer";
 
+    // coefficient max/min values
+    public static final int COEFF_MIN =  0;
+    public static final int COEFF_MAX = 15;
+    
     public int
         coeff_domlength, coeff_ybr, coeff_date, coeff_wordsintitle, coeff_wordsintext, coeff_phrasesintext,
         coeff_llocal, coeff_lother, coeff_urllength, coeff_urlcomps, coeff_hitcount, 
@@ -127,7 +131,7 @@ public class plasmaSearchRankingProfile {
         this(plasmaSearchQuery.CONTENTDOM_TEXT); // set defaults
         if ((profile != null) && (profile.length() > 0)) {
             //parse external form
-            HashMap coeff = new HashMap();
+            HashMap<String, Integer> coeff = new HashMap<String, Integer>();
             String[] elts = ((profile.startsWith("{") && (profile.endsWith("}"))) ? profile.substring(1, profile.length() - 1) : profile).split(",");
             int p;
             int s = (prefix == null) ? 0 : prefix.length();
@@ -174,7 +178,7 @@ public class plasmaSearchRankingProfile {
         }
     }
     
-    private static int parseMap(HashMap coeff, String attr, int dflt) {
+    private static int parseMap(HashMap<String, Integer> coeff, String attr, int dflt) {
         if (coeff.containsKey(attr)) try {
             return ((Integer) coeff.get(attr)).intValue();
         } catch (NumberFormatException e) {
@@ -188,14 +192,14 @@ public class plasmaSearchRankingProfile {
         return toExternalMap("").toString();
     }
     
-    public Map toExternalMap(String prefix) {
-    	Map ext = preToExternalMap(prefix);
+    public Map<String, String> toExternalMap(String prefix) {
+    	Map<String, String> ext = preToExternalMap(prefix);
     	ext.putAll(postToExternalMap(prefix));
     	return ext;
     }
     
-    public Map preToExternalMap(String prefix) {
-        Map ext = new HashMap();
+    public Map<String, String> preToExternalMap(String prefix) {
+        Map<String, String> ext = new HashMap<String, String>();
         ext.put(prefix + DOMLENGTH, Integer.toString(coeff_domlength));
         ext.put(prefix + YBR, Integer.toString(coeff_ybr));
         ext.put(prefix + DATE, Integer.toString(coeff_date));
@@ -226,8 +230,8 @@ public class plasmaSearchRankingProfile {
         return ext;
     }
     
-    public Map postToExternalMap(String prefix) {
-    	Map ext = new HashMap();
+    public Map<String, String> postToExternalMap(String prefix) {
+    	Map<String, String> ext = new HashMap<String, String>();
         ext.put(prefix + URLCOMPINTOPLIST, Integer.toString(coeff_urlcompintoplist));
         ext.put(prefix + DESCRCOMPINTOPLIST, Integer.toString(coeff_descrcompintoplist));
         ext.put(prefix + PREFER, Integer.toString(coeff_prefer));
@@ -235,14 +239,14 @@ public class plasmaSearchRankingProfile {
     }
     
     public String toExternalURLGet(String prefix) {
-        Iterator i = toExternalMap("").entrySet().iterator();
-        Map.Entry entry;
+        Iterator<Map.Entry<String, String>> i = toExternalMap("").entrySet().iterator();
+        Map.Entry<String, String> entry;
         StringBuffer ext = new StringBuffer();
         while (i.hasNext()) {
-            entry = (Map.Entry) i.next();
+            entry = i.next();
             ext.append("&");
             ext.append(prefix);
-            ext.append((String) entry.getKey());
+            ext.append(entry.getKey());
             ext.append("=");
             ext.append(entry.getValue());
         }

@@ -87,8 +87,12 @@ public final class plasmaSearchQuery {
     public kelondroBitfield constraint;
     public boolean allofconstraint;
     public boolean onlineSnippetFetch;
+    public plasmaSearchRankingProfile ranking;
 
-    public plasmaSearchQuery(String queryString, int lines, kelondroBitfield constraint) {
+    public plasmaSearchQuery(String queryString,
+    						 int lines,
+    		                 plasmaSearchRankingProfile ranking,
+    		                 kelondroBitfield constraint) {
     	if ((queryString.length() == 12) && (kelondroBase64Order.enhancedCoder.wellformed(queryString.getBytes()))) {
     		this.queryString = null;
             this.queryHashes = new TreeSet<String>();
@@ -96,10 +100,11 @@ public final class plasmaSearchQuery {
             this.queryHashes.add(queryString);
     	} else {
     		this.queryString = queryString;
-    		TreeSet[] cq = cleanQuery(queryString);
+    		TreeSet<String>[] cq = cleanQuery(queryString);
     		this.queryHashes = plasmaCondenser.words2hashes(cq[0]);
     		this.excludeHashes = plasmaCondenser.words2hashes(cq[1]);
     	}
+    	this.ranking = ranking;
         this.maxDistance = Integer.MAX_VALUE;
         this.prefer = "";
         this.contentdom = CONTENTDOM_ALL;
@@ -115,7 +120,10 @@ public final class plasmaSearchQuery {
         this.onlineSnippetFetch = false;
     }
     
-public plasmaSearchQuery(String queryString, TreeSet queryHashes, TreeSet excludeHashes, int maxDistance, String prefer, int contentdom,
+public plasmaSearchQuery(
+		String queryString, TreeSet<String> queryHashes, TreeSet<String> excludeHashes, 
+        plasmaSearchRankingProfile ranking,
+        int maxDistance, String prefer, int contentdom,
         boolean onlineSnippetFetch,
         int lines, int offset, long maximumTime, String urlMask,
         int domType, String domGroupName, int domMaxTargets,
@@ -123,6 +131,7 @@ public plasmaSearchQuery(String queryString, TreeSet queryHashes, TreeSet exclud
 		this.queryString = queryString;
 		this.queryHashes = queryHashes;
 		this.excludeHashes = excludeHashes;
+		this.ranking = ranking;
 		this.maxDistance = maxDistance;
 		this.prefer = prefer;
 		this.contentdom = contentdom;
@@ -175,33 +184,33 @@ public plasmaSearchQuery(String queryString, TreeSet queryHashes, TreeSet exclud
     }
     
     public static TreeSet<String> hashes2Set(String query) {
-        if (query == null) return new TreeSet(kelondroBase64Order.enhancedCoder);
-        final TreeSet keyhashes = new TreeSet(kelondroBase64Order.enhancedCoder);
+        if (query == null) return new TreeSet<String>(kelondroBase64Order.enhancedCoder);
+        final TreeSet<String> keyhashes = new TreeSet<String>(kelondroBase64Order.enhancedCoder);
         for (int i = 0; i < (query.length() / yacySeedDB.commonHashLength); i++) {
             keyhashes.add(query.substring(i * yacySeedDB.commonHashLength, (i + 1) * yacySeedDB.commonHashLength));
         }
         return keyhashes;
     }
     
-    public static String hashSet2hashString(Set hashes) {
-        Iterator i = hashes.iterator();
+    public static String hashSet2hashString(Set<String> hashes) {
+        Iterator<String> i = hashes.iterator();
         StringBuffer sb = new StringBuffer(hashes.size() * yacySeedDB.commonHashLength);
-        while (i.hasNext()) sb.append((String) i.next());
+        while (i.hasNext()) sb.append(i.next());
         return new String(sb);
     }
 
-    public static String anonymizedQueryHashes(Set hashes) {
+    public static String anonymizedQueryHashes(Set<String> hashes) {
         // create a more anonymized representation of euqery hashes for logging
-        Iterator i = hashes.iterator();
+        Iterator<String> i = hashes.iterator();
         StringBuffer sb = new StringBuffer(hashes.size() * (yacySeedDB.commonHashLength + 2) + 2);
         sb.append("[");
         String hash;
         if (i.hasNext()) {
-            hash = (String) i.next();
+            hash = i.next();
             sb.append(hash.substring(0, 3)).append(".........");
         }
         while (i.hasNext()) {
-            hash = (String) i.next();
+            hash = i.next();
             sb.append(", ").append(hash.substring(0, 3)).append(".........");
         }
         sb.append("]");
@@ -252,29 +261,29 @@ public plasmaSearchQuery(String queryString, TreeSet queryHashes, TreeSet exclud
     	return this.queryString;
     }
     
-    public TreeSet[] queryWords() {
+    public TreeSet<String>[] queryWords() {
         return cleanQuery(this.queryString);
     }
     
-    public void filterOut(Set blueList) {
+    public void filterOut(Set<String> blueList) {
         // filter out words that appear in this set
     	// this is applied to the queryHashes
-    	TreeSet blues = plasmaCondenser.words2hashes(blueList);
+    	TreeSet<String> blues = plasmaCondenser.words2hashes(blueList);
     	kelondroMSetTools.excludeDestructive(queryHashes, blues);
     }
 
     public String id(boolean anonymized) {
         // generate a string that identifies a search so results can be re-used in a cache
         if (anonymized) {
-            return anonymizedQueryHashes(this.queryHashes) + "-" + anonymizedQueryHashes(this.excludeHashes) + ":" + this.contentdom;
+            return anonymizedQueryHashes(this.queryHashes) + "-" + anonymizedQueryHashes(this.excludeHashes) + ":" + this.contentdom + "*" + this.ranking.toExternalString();
         } else {
-            return hashSet2hashString(this.queryHashes) + "-" + hashSet2hashString(this.excludeHashes) + ":" + this.contentdom;
+            return hashSet2hashString(this.queryHashes) + "-" + hashSet2hashString(this.excludeHashes) + ":" + this.contentdom + this.ranking.toExternalString();
         }
     }
     
-    public HashMap resultProfile(int searchcount, long searchtime, long urlretrieval, long snippetcomputation) {
+    public HashMap<String, Object> resultProfile(int searchcount, long searchtime, long urlretrieval, long snippetcomputation) {
         // generate statistics about search: query, time, etc
-        HashMap r = new HashMap();
+        HashMap<String, Object> r = new HashMap<String, Object>();
         r.put("queryhashes", queryHashes);
         r.put("querystring", queryString);
         r.put("querycount", new Integer(linesPerPage));

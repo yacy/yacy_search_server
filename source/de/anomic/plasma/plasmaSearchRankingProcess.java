@@ -56,7 +56,6 @@ public final class plasmaSearchRankingProcess {
     private HashMap<String, TreeMap<Object, indexRWIEntry>> doubleDomCache; // key = domhash (6 bytes); value = TreeMap like sortedRWIEntries
     private HashMap<String, String> handover; // key = urlhash, value = urlstring; used for double-check of urls that had been handed over to search process
     private plasmaSearchQuery query;
-    private plasmaSearchRankingProfile ranking;
     private int sortorder;
     private int filteredCount;
     private int maxentries;
@@ -69,7 +68,7 @@ public final class plasmaSearchRankingProcess {
     private plasmaWordIndex wordIndex;
     private Map<String, indexContainer>[] localSearchContainerMaps;
     
-    public plasmaSearchRankingProcess(plasmaWordIndex wordIndex, plasmaSearchQuery query, plasmaSearchRankingProfile ranking, int sortorder, int maxentries) {
+    public plasmaSearchRankingProcess(plasmaWordIndex wordIndex, plasmaSearchQuery query, int sortorder, int maxentries) {
         // we collect the urlhashes and construct a list with urlEntry objects
         // attention: if minEntries is too high, this method will not terminate within the maxTime
         // sortorder: 0 = hash, 1 = url, 2 = ranking
@@ -80,7 +79,6 @@ public final class plasmaSearchRankingProcess {
         this.filteredCount = 0;
         this.order = null;
         this.query = query;
-        this.ranking = ranking;
         this.maxentries = maxentries;
         this.globalcount = 0;
         this.urlhashes = new HashMap<String, Object>();
@@ -170,7 +168,7 @@ public final class plasmaSearchRankingProcess {
         
         long timer = System.currentTimeMillis();
         if (this.order == null) {
-            this.order = new indexRWIEntryOrder(ranking);
+            this.order = new indexRWIEntryOrder(query.ranking);
         }
         this.order.extend(container);
         serverProfiling.update("SEARCH", new plasmaProfiling.searchEvent(query.id(true), plasmaSearchEvent.NORMALIZING, container.size(), System.currentTimeMillis() - timer));
@@ -463,42 +461,42 @@ public final class plasmaSearchRankingProcess {
     }
     
     public long postRanking(
-                    Set topwords,
+                    Set<String> topwords,
                     plasmaSearchEvent.ResultEntry rentry,
                     int position) {
 
         long r = (255 - position) << 8;
         
         // for media search: prefer pages with many links
-        if (query.contentdom == plasmaSearchQuery.CONTENTDOM_IMAGE) r += rentry.limage() << ranking.coeff_cathasimage;
-        if (query.contentdom == plasmaSearchQuery.CONTENTDOM_AUDIO) r += rentry.laudio() << ranking.coeff_cathasaudio;
-        if (query.contentdom == plasmaSearchQuery.CONTENTDOM_VIDEO) r += rentry.lvideo() << ranking.coeff_cathasvideo;
-        if (query.contentdom == plasmaSearchQuery.CONTENTDOM_APP  ) r += rentry.lapp()   << ranking.coeff_cathasapp;
+        if (query.contentdom == plasmaSearchQuery.CONTENTDOM_IMAGE) r += rentry.limage() << query.ranking.coeff_cathasimage;
+        if (query.contentdom == plasmaSearchQuery.CONTENTDOM_AUDIO) r += rentry.laudio() << query.ranking.coeff_cathasaudio;
+        if (query.contentdom == plasmaSearchQuery.CONTENTDOM_VIDEO) r += rentry.lvideo() << query.ranking.coeff_cathasvideo;
+        if (query.contentdom == plasmaSearchQuery.CONTENTDOM_APP  ) r += rentry.lapp()   << query.ranking.coeff_cathasapp;
         
         // prefer hit with 'prefer' pattern
-        if (rentry.url().toNormalform(true, true).matches(query.prefer)) r += 256 << ranking.coeff_prefer;
-        if (rentry.title().matches(query.prefer)) r += 256 << ranking.coeff_prefer;
+        if (rentry.url().toNormalform(true, true).matches(query.prefer)) r += 256 << query.ranking.coeff_prefer;
+        if (rentry.title().matches(query.prefer)) r += 256 << query.ranking.coeff_prefer;
         
         // apply 'common-sense' heuristic using references
         String urlstring = rentry.url().toNormalform(true, true);
         String[] urlcomps = htmlFilterContentScraper.urlComps(urlstring);
         String[] descrcomps = rentry.title().toLowerCase().split(htmlFilterContentScraper.splitrex);
         for (int j = 0; j < urlcomps.length; j++) {
-            if (topwords.contains(urlcomps[j])) r += Math.max(1, 256 - urlstring.length()) << ranking.coeff_urlcompintoplist;
+            if (topwords.contains(urlcomps[j])) r += Math.max(1, 256 - urlstring.length()) << query.ranking.coeff_urlcompintoplist;
         }
         for (int j = 0; j < descrcomps.length; j++) {
-            if (topwords.contains(descrcomps[j])) r += Math.max(1, 256 - rentry.title().length()) << ranking.coeff_descrcompintoplist;
+            if (topwords.contains(descrcomps[j])) r += Math.max(1, 256 - rentry.title().length()) << query.ranking.coeff_descrcompintoplist;
         }
 
         // apply query-in-result matching
-        Set urlcomph = plasmaCondenser.words2hashSet(urlcomps);
-        Set descrcomph = plasmaCondenser.words2hashSet(descrcomps);
-        Iterator shi = query.queryHashes.iterator();
+        Set<String> urlcomph = plasmaCondenser.words2hashSet(urlcomps);
+        Set<String> descrcomph = plasmaCondenser.words2hashSet(descrcomps);
+        Iterator<String> shi = query.queryHashes.iterator();
         String queryhash;
         while (shi.hasNext()) {
-            queryhash = (String) shi.next();
-            if (urlcomph.contains(queryhash)) r += 256 << ranking.coeff_appurl;
-            if (descrcomph.contains(queryhash)) r += 256 << ranking.coeff_appdescr;
+            queryhash = shi.next();
+            if (urlcomph.contains(queryhash)) r += 256 << query.ranking.coeff_appurl;
+            if (descrcomph.contains(queryhash)) r += 256 << query.ranking.coeff_appdescr;
         }
 
         return r;

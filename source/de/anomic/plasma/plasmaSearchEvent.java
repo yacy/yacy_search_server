@@ -59,13 +59,12 @@ public final class plasmaSearchEvent {
     
     public static int workerThreadCount = 8;
     public static String lastEventID = "";
-    private static HashMap lastEvents = new HashMap(); // a cache for objects from this class: re-use old search requests
+    private static HashMap<String, plasmaSearchEvent> lastEvents = new HashMap<String, plasmaSearchEvent>(); // a cache for objects from this class: re-use old search requests
     public static final long eventLifetime = 600000; // the time an event will stay in the cache, 10 Minutes
     private static final int max_results_preparation = 200;
     
     private long eventTime;
     private plasmaSearchQuery query;
-    private plasmaSearchRankingProfile ranking;
     private plasmaWordIndex wordIndex;
     private plasmaSearchRankingProcess rankedCache; // ordered search results, grows dynamically as all the query threads enrich this container
     private Map rcAbstracts; // cache for index abstracts; word:TreeMap mapping where the embedded TreeMap is a urlhash:peerlist relation
@@ -85,7 +84,6 @@ public final class plasmaSearchEvent {
     private long snippetComputationAllTime;
     
     private plasmaSearchEvent(plasmaSearchQuery query,
-                             plasmaSearchRankingProfile ranking,
                              plasmaWordIndex wordIndex,
                              TreeMap preselectedPeerHashes,
                              boolean generateAbstracts,
@@ -93,7 +91,6 @@ public final class plasmaSearchEvent {
         this.eventTime = System.currentTimeMillis(); // for lifetime check
         this.wordIndex = wordIndex;
         this.query = query;
-        this.ranking = ranking;
         this.rcAbstracts = (query.queryHashes.size() > 1) ? new TreeMap() : null; // generate abstracts only for combined searches
         this.primarySearchThreads = null;
         this.secondarySearchThreads = null;
@@ -122,7 +119,7 @@ public final class plasmaSearchEvent {
         if ((query.domType == plasmaSearchQuery.SEARCHDOM_GLOBALDHT) ||
             (query.domType == plasmaSearchQuery.SEARCHDOM_CLUSTERALL)) {
             // do a global search
-            this.rankedCache = new plasmaSearchRankingProcess(wordIndex, query, ranking, 2, max_results_preparation);
+            this.rankedCache = new plasmaSearchRankingProcess(wordIndex, query, 2, max_results_preparation);
             
             int fetchpeers = (int) (query.maximumTime / 500L); // number of target peers; means 10 peers in 10 seconds
             if (fetchpeers > 50) fetchpeers = 50;
@@ -144,7 +141,7 @@ public final class plasmaSearchEvent {
                     rcAbstracts,
                     fetchpeers,
                     plasmaSwitchboard.urlBlacklist,
-                    ranking,
+                    query.ranking,
                     query.constraint,
                     (query.domType == plasmaSearchQuery.SEARCHDOM_GLOBALDHT) ? null : preselectedPeerHashes);
             serverProfiling.update("SEARCH", new plasmaProfiling.searchEvent(query.id(true), "remote search thread start", this.primarySearchThreads.length, System.currentTimeMillis() - timer));
@@ -157,7 +154,7 @@ public final class plasmaSearchEvent {
             serverLog.logFine("SEARCH_EVENT", "SEARCH TIME AFTER GLOBAL-TRIGGER TO " + primarySearchThreads.length + " PEERS: " + ((System.currentTimeMillis() - start) / 1000) + " seconds");
         } else {
             // do a local search
-            this.rankedCache = new plasmaSearchRankingProcess(wordIndex, query, ranking, 2, max_results_preparation);
+            this.rankedCache = new plasmaSearchRankingProcess(wordIndex, query, 2, max_results_preparation);
             this.rankedCache.execQuery(true);
             this.localcount = this.rankedCache.filteredCount();
             //plasmaWordIndex.Finding finding = wordIndex.retrieveURLs(query, false, 2, ranking, process);
@@ -416,10 +413,6 @@ public final class plasmaSearchEvent {
         return query;
     }
     
-    public plasmaSearchRankingProfile getRanking() {
-        return ranking;
-    }
-    
     public yacySearch[] getPrimarySearchThreads() {
         return primarySearchThreads;
     }
@@ -459,7 +452,7 @@ public final class plasmaSearchEvent {
         synchronized (lastEvents) {
             plasmaSearchEvent event = (plasmaSearchEvent) lastEvents.get(query.id(false));
             if (event == null) {
-                event = new plasmaSearchEvent(query, ranking, wordIndex, preselectedPeerHashes, generateAbstracts, abstractSet);
+                event = new plasmaSearchEvent(query, wordIndex, preselectedPeerHashes, generateAbstracts, abstractSet);
             } else {
                 //re-new the event time for this event, so it is not deleted next time too early
                 event.eventTime = System.currentTimeMillis();
@@ -685,7 +678,7 @@ public final class plasmaSearchEvent {
                 //System.out.println("DEBUG-INDEXABSTRACT ***: peer " + peer + " from words: " + words);
                 secondarySearchThreads[c++] = yacySearch.secondaryRemoteSearch(
                         words, "", urls, wordIndex, this.rankedCache, peer, plasmaSwitchboard.urlBlacklist,
-                        ranking, query.constraint, preselectedPeerHashes);
+                        query.ranking, query.constraint, preselectedPeerHashes);
 
             }
         }

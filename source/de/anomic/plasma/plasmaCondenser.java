@@ -886,14 +886,14 @@ public final class plasmaCondenser {
         return s;
     }
 
-    public static Map getWords(byte[] text, String charset) throws UnsupportedEncodingException {
+    public static Map<String, wordStatProp> getWords(byte[] text, String charset) throws UnsupportedEncodingException {
         // returns a word/wordStatProp relation map
         if (text == null) return null;
         ByteArrayInputStream buffer = new ByteArrayInputStream(text);
         return new plasmaCondenser(buffer, charset, 2, 1).words();
     }
     
-    public static Map getWords(String text) {
+    public static Map<String, wordStatProp> getWords(String text) {
         // returns a word/wordStatProp relation map
         if (text == null) return null;
         ByteArrayInputStream buffer = new ByteArrayInputStream(text.getBytes());
@@ -905,7 +905,7 @@ public final class plasmaCondenser {
     }
     
     public static void main(String[] args) {
-        // read a property file and converty them into configuration lines
+        // read a property file and convert them into configuration lines
         try {
             File f = new File(args[0]);
             Properties p = new Properties();
