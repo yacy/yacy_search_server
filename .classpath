@@ -6,13 +6,10 @@
 	<classpathentry kind="src" path="htroot/yacy"/>
 	<classpathentry kind="src" path="htroot/env"/>
 	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER"/>
-	<classpathentry kind="lib" path="lib/commons-collections.jar"/>
-	<classpathentry kind="lib" path="lib/commons-pool.jar"/>
 	<classpathentry kind="lib" path="lib/tar.jar"/>
 	<classpathentry kind="lib" path="libx/axis-ant.jar"/>
 	<classpathentry kind="lib" path="libx/axis.jar"/>
 	<classpathentry kind="lib" path="libx/bzip2.jar"/>
-	<classpathentry kind="lib" path="libx/commons-codec-1.3.jar"/>
 	<classpathentry kind="lib" path="libx/commons-discovery.jar"/>
 	<classpathentry kind="lib" path="libx/commons-jxpath-1.1.jar"/>
 	<classpathentry kind="lib" path="libx/jakarta-oro-2.0.7.jar"/>
@@ -39,5 +36,6 @@
 	<classpathentry kind="lib" path="libx/PDFBox-0.7.3.jar"/>
 	<classpathentry kind="lib" path="libx/FontBox-0.1.0-dev.jar"/>
 	<classpathentry kind="lib" path="libx/bcprov-jdk14-132.jar"/>
+	<classpathentry kind="lib" path="libx/commons-codec-1.3.jar"/>
 	<classpathentry kind="output" path="gen"/>
 </classpath>
