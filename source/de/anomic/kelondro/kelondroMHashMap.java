@@ -164,11 +164,11 @@ public class kelondroMHashMap {
                     int newspace = mem.length * 2;
                     int newcapacity = capacity() * 2;
                     byte[] newmem = new byte[newspace];
-                    Iterator i = entries();
+                    Iterator<entry> i = entries();
                     kelondroMHashMap.entry e;
                     int mempos;
                     while (i.hasNext()) {
-                        e = (kelondroMHashMap.entry) i.next();
+                        e = i.next();
                         hash = findSpace(newmem, e.key, reclen, newspace, newcapacity);
                         mempos = hash * reclen;
                         System.arraycopy(e.key, 0, newmem, mempos, keylen);
@@ -233,11 +233,11 @@ public class kelondroMHashMap {
         }
     }
                     
-    Iterator entries() {
+    Iterator<entry> entries() {
         return new entryIterator();
     }
     
-    public class entryIterator implements Iterator {
+    public class entryIterator implements Iterator<entry> {
 
         int hashkey;
         
@@ -249,7 +249,7 @@ public class kelondroMHashMap {
             return hashkey >= 0;
         }
 
-        public Object next() {
+        public entry next() {
             int i = hashkey;
             hashkey = anyhashpos(hashkey + 1);
             return new entry(i);
@@ -320,12 +320,12 @@ public class kelondroMHashMap {
         long start = System.currentTimeMillis();
         kelondroMHashMap map = new kelondroMHashMap(4);
         for (int i = 0; i < 100; i++) map.put(3333 + i, ("" + (1000 + i)).getBytes());
-        Iterator i = map.entries();
+        Iterator<entry> i = map.entries();
         kelondroMHashMap.entry e;
         System.out.println("Enumeration of elements: count=" + map.size());
         int c = 0;
         while (i.hasNext()) {
-            e = (kelondroMHashMap.entry) i.next();
+            e = i.next();
             System.out.println("key=" + new String(e.key) + ", value=" + new String(e.value) + ", retrieved=" + new String(map.get(e.key)));
             c++;
         }

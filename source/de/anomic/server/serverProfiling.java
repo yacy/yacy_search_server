@@ -34,15 +34,15 @@ import java.util.TreeMap;
 
 public class serverProfiling extends Thread {
     
-    private static Map historyMaps; // key=name of history, value=TreeMap of Long/Event
-    private static Map eventCounter; // key=name of history, value=Integer of event counter
+    private static Map<String, TreeMap<Long, Event>> historyMaps; // key=name of history, value=TreeMap of Long/Event
+    private static Map<String, Integer> eventCounter; // key=name of history, value=Integer of event counter
     private static long lastCompleteCleanup;
     private static serverProfiling systemProfiler;
     
     static {
         // initialize profiling
-        historyMaps = Collections.synchronizedMap(new HashMap());
-        eventCounter = Collections.synchronizedMap(new HashMap());
+        historyMaps = Collections.synchronizedMap(new HashMap<String, TreeMap<Long, Event>>());
+        eventCounter = Collections.synchronizedMap(new HashMap<String, Integer>());
         lastCompleteCleanup = System.currentTimeMillis();
         systemProfiler = null;
     }
@@ -78,7 +78,7 @@ public class serverProfiling extends Thread {
     public static void update(String eventName, Object eventPayload) {
     	// get event history container
     	int counter = eventCounter.containsKey(eventName) ? ((Integer) eventCounter.get(eventName)).intValue() : 0;
-    	TreeMap history = historyMaps.containsKey(eventName) ? ((TreeMap) historyMaps.get(eventName)) : new TreeMap();
+    	TreeMap<Long, Event> history = historyMaps.containsKey(eventName) ? (historyMaps.get(eventName)) : new TreeMap<Long, Event>();
 
     	// update entry
         Long time = new Long(System.currentTimeMillis());
@@ -105,7 +105,7 @@ public class serverProfiling extends Thread {
     
     private static void cleanup(String eventName) {
     	if (historyMaps.containsKey(eventName)) {
-    		TreeMap history = (TreeMap) historyMaps.get(eventName);
+    		TreeMap<Long, Event> history = historyMaps.get(eventName);
     		cleanup(history);
     		if (history.size() > 0) {
     			historyMaps.put(eventName, history);
@@ -115,18 +115,18 @@ public class serverProfiling extends Thread {
     	}
     }
     
-    private static void cleanup(TreeMap history) {
+    private static void cleanup(TreeMap<Long, Event> history) {
     	// clean up too old entries
         while (history.size() > 0) {
-        	Long time = (Long) history.firstKey();
+        	Long time = history.firstKey();
             if (System.currentTimeMillis() - time.longValue() < 600000) break;
             history.remove(time);
         }
         
     }
     
-    public static Iterator history(String eventName) {
-    	return (historyMaps.containsKey(eventName) ? ((TreeMap) historyMaps.get(eventName)) : new TreeMap()).values().iterator();
+    public static Iterator<Event> history(String eventName) {
+    	return (historyMaps.containsKey(eventName) ? (historyMaps.get(eventName)) : new TreeMap<Long, Event>()).values().iterator();
     }
 
     public static class Event {

@@ -53,13 +53,13 @@ public final class serverInstantThread extends serverAbstractThread implements s
     private Long   handle;
     
     public static int instantThreadCounter = 0;
-    public static TreeMap jobs = new TreeMap();
+    public static TreeMap<Long, String> jobs = new TreeMap<Long, String>();
     
     public serverInstantThread(Object env, String jobExec, String jobCount, String freemem) {
         // jobExec is the name of a method of the object 'env' that executes the one-step-run
         // jobCount is the name of a method that returns the size of the job
         // freemem is the name of a method that tries to free memory and returns void
-        Class theClass = (env instanceof Class) ? (Class) env : env.getClass();
+        Class<?> theClass = (env instanceof Class) ? (Class<?>) env : env.getClass();
         try {
             this.jobExecMethod = theClass.getMethod(jobExec, new Class[0]);
         } catch (NoSuchMethodException e) {

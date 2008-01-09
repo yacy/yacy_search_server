@@ -72,19 +72,17 @@ public final class serverSystem {
     public static int maxPathLength = 65535;
     
     // Macintosh-specific statics
-    private static Class       macMRJFileUtils = null;
-    private static Class       macMRJOSType = null;
-    private static Constructor macMRJOSTypeConstructor = null;
+    private static Class<?>    macMRJFileUtils = null;
+    private static Class<?>    macMRJOSType = null;
+    private static Constructor<?> macMRJOSTypeConstructor = null;
     private static Object      macMRJOSNullObj = null;
     private static Method      macGetFileCreator = null;
     private static Method      macGetFileType = null;
     private static Method      macSetFileCreator = null;
     private static Method      macSetFileType = null;
     private static Method      macOpenURL = null;
-    public  static Hashtable   macFSTypeCache = null;
-    public  static Hashtable   macFSCreatorCache = null;
-
-
+    public  static Hashtable<String, String> macFSTypeCache = null;
+    public  static Hashtable<String, String> macFSCreatorCache = null;
 
     // static initialization
     static {
@@ -114,8 +112,8 @@ public final class serverSystem {
 	    byte[] nullb = new byte[4];
 	    for (int i = 0; i < 4; i++) nullb[i] = 0;
 	    macMRJOSNullObj = macMRJOSTypeConstructor.newInstance(new Object[] {new String(nullb)});
-	    macFSTypeCache = new Hashtable();
-	    macFSCreatorCache = new Hashtable();
+	    macFSTypeCache = new Hashtable<String, String>();
+	    macFSCreatorCache = new Hashtable<String, String>();
 	} catch (Exception e) {
 	    //e.printStackTrace();
 	    macMRJFileUtils = null; macMRJOSType = null;
@@ -349,13 +347,13 @@ public final class serverSystem {
         starterFile.delete();
     }
     
-    public static Vector execSynchronous(String command) throws IOException {
+    public static Vector<String> execSynchronous(String command) throws IOException {
         // runs a unix/linux command and returns output as Vector of Strings
         // this method blocks until the command is executed
         Process p = Runtime.getRuntime().exec(command);
         BufferedReader in = new BufferedReader(new InputStreamReader(p.getInputStream()));
         String text;
-        Vector output = new Vector();
+        Vector<String> output = new Vector<String>();
         while ((text = in.readLine()) != null) {
             output.add(text);
         }

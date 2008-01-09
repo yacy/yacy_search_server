@@ -145,14 +145,14 @@ public class kelondroFlexSplitTable implements kelondroIndex {
     
     public synchronized kelondroProfile profile() {
         kelondroProfile[] profiles = new kelondroProfile[tables.size()];
-        Iterator i = tables.values().iterator();
+        Iterator<kelondroIndex> i = tables.values().iterator();
         int c = 0;
         while (i.hasNext()) profiles[c++] = ((kelondroIndex) i.next()).profile();
         return kelondroProfile.consolidate(profiles);
     }
     
     public int writeBufferSize() {
-        Iterator i = tables.values().iterator();
+        Iterator<kelondroIndex> i = tables.values().iterator();
         int s = 0;
         kelondroIndex ki;
         while (i.hasNext()) {
@@ -163,7 +163,7 @@ public class kelondroFlexSplitTable implements kelondroIndex {
     }
     
     public void flushSome() {
-        Iterator i = tables.values().iterator();
+        Iterator<kelondroIndex> i = tables.values().iterator();
         kelondroIndex ki;
         while (i.hasNext()) {
             ki = ((kelondroIndex) i.next());
@@ -177,7 +177,7 @@ public class kelondroFlexSplitTable implements kelondroIndex {
     }
     
     public boolean has(byte[] key) throws IOException {
-        Iterator i = tables.values().iterator();
+        Iterator<kelondroIndex> i = tables.values().iterator();
         kelondroIndex table;
         while (i.hasNext()) {
             table = (kelondroIndex) i.next();
@@ -218,7 +218,7 @@ public class kelondroFlexSplitTable implements kelondroIndex {
     }
     
     public synchronized Object[] keeperOf(byte[] key) throws IOException {
-        Iterator i = tables.values().iterator();
+        Iterator<kelondroIndex> i = tables.values().iterator();
         kelondroIndex table;
         kelondroRow.Entry entry;
         while (i.hasNext()) {

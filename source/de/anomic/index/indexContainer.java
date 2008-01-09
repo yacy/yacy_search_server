@@ -457,13 +457,13 @@ public class indexContainer extends kelondroRowSet {
     public static final serverByteBuffer compressIndex(indexContainer inputContainer, indexContainer excludeContainer, long maxtime) {
         // collect references according to domains
         long timeout = (maxtime < 0) ? Long.MAX_VALUE : System.currentTimeMillis() + maxtime;
-        TreeMap doms = new TreeMap();
+        TreeMap<String, String> doms = new TreeMap<String, String>();
         synchronized (inputContainer) {
-            Iterator i = inputContainer.entries();
+            Iterator<indexRWIRowEntry> i = inputContainer.entries();
             indexRWIEntry iEntry;
             String dom, paths;
             while (i.hasNext()) {
-                iEntry = (indexRWIEntry) i.next();
+                iEntry = i.next();
                 if ((excludeContainer != null) && (excludeContainer.get(iEntry.urlHash()) != null)) continue; // do not include urls that are in excludeContainer
                 dom = iEntry.urlHash().substring(6);
                 if ((paths = (String) doms.get(dom)) == null) {
@@ -478,10 +478,10 @@ public class indexContainer extends kelondroRowSet {
         // construct a result string
         serverByteBuffer bb = new serverByteBuffer(inputContainer.size() * 6);
         bb.append('{');
-        Iterator i = doms.entrySet().iterator();
-        Map.Entry entry;
+        Iterator<Map.Entry<String, String>> i = doms.entrySet().iterator();
+        Map.Entry<String, String> entry;
         while (i.hasNext()) {
-            entry = (Map.Entry) i.next();
+            entry = i.next();
             bb.append((String) entry.getKey());
             bb.append(':');
             bb.append((String) entry.getValue());
@@ -494,7 +494,7 @@ public class indexContainer extends kelondroRowSet {
         return bb;
     }
 
-    public static final void decompressIndex(TreeMap target, serverByteBuffer ci, String peerhash) {
+    public static final void decompressIndex(TreeMap<String, String> target, serverByteBuffer ci, String peerhash) {
         // target is a mapping from url-hashes to a string of peer-hashes
         if ((ci.byteAt(0) == '{') && (ci.byteAt(ci.length() - 1) == '}')) {
             //System.out.println("DEBUG-DECOMPRESS: input is " + ci.toString());
@@ -508,7 +508,7 @@ public class indexContainer extends kelondroRowSet {
                     assert ci.length() >= 6 : "ci.length() = " + ci.length();
                     url = ci.toString(0, 6) + dom;
                     ci.trim(6);
-                    peers = (String) target.get(url);
+                    peers = target.get(url);
                     if (peers == null) {
                         target.put(url, peerhash);
                     } else {

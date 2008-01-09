@@ -152,13 +152,13 @@ public class kelondroMSetTools {
         Iterator<Map.Entry<A, B>> mi = small.entrySet().iterator();
         TreeMap<A, B> result = new TreeMap<A, B>(large.comparator());
         Map.Entry<A, B> mentry1;
-        Object mobj2;
+        B mobj2;
         while (mi.hasNext()) {
             mentry1 = mi.next();
             mobj2 = large.get(mentry1.getKey());
             if (mobj2 != null) {
                 if (mentry1.getValue() instanceof String) {
-                    result.put(mentry1.getKey(), (B) ((concatStrings) ? ((String) mentry1.getValue() + (String) mobj2) : (String) mentry1.getValue()));
+                    result.put(mentry1.getKey(), (B) ((concatStrings) ? (mentry1.getValue() + (String) mobj2) : mentry1.getValue()));
                 } else {
                     result.put(mentry1.getKey(), mentry1.getValue());
                 }

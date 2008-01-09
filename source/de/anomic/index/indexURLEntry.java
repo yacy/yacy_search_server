@@ -46,7 +46,6 @@ import de.anomic.server.serverDate;
 import de.anomic.tools.crypt;
 import de.anomic.tools.nxTools;
 import de.anomic.yacy.yacyURL;
-import de.anomic.index.indexRWIEntry;
 
 public class indexURLEntry {
 
@@ -310,7 +309,7 @@ public class indexURLEntry {
     }
     
     public indexURLEntry.Components comp() {
-        ArrayList cl = nxTools.strings(this.entry.getCol("comp", null), "UTF-8");
+        ArrayList<String> cl = nxTools.strings(this.entry.getCol("comp", null), "UTF-8");
         return new indexURLEntry.Components(
                 (cl.size() > 0) ? ((String) cl.get(0)).trim() : "",
                 hash(),

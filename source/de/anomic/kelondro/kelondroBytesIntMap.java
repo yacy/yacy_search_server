@@ -91,11 +91,11 @@ public class kelondroBytesIntMap {
         return index.size();
     }
     
-    public synchronized kelondroCloneableIterator keys(boolean up, byte[] firstKey) throws IOException {
+    public synchronized kelondroCloneableIterator<byte[]> keys(boolean up, byte[] firstKey) throws IOException {
         return index.keys(up, firstKey);
     }
 
-    public synchronized kelondroCloneableIterator rows(boolean up, byte[] firstKey) throws IOException {
+    public synchronized kelondroCloneableIterator<kelondroRow.Entry> rows(boolean up, byte[] firstKey) throws IOException {
         return index.rows(up, firstKey);
     }
     

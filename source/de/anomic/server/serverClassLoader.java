@@ -47,24 +47,24 @@ import java.util.HashMap;
 
 public final class serverClassLoader extends ClassLoader {
 
-    private final HashMap classes;
+    private final HashMap<File, Class<?>> classes;
 
     public serverClassLoader() {
         //super(ClassLoader.getSystemClassLoader());
     	super(Thread.currentThread().getContextClassLoader());
-        this.classes = new HashMap();
+        this.classes = new HashMap<File, Class<?>>();
     }
 
     public serverClassLoader(ClassLoader parent) {
         super(parent);
-        classes = new HashMap();
+        classes = new HashMap<File, Class<?>>();
     }
 
     public Package[] packages() {
         return super.getPackages();
     }
 
-    public Class loadClass(File classfile) throws ClassNotFoundException {
+    public Class<?> loadClass(File classfile) throws ClassNotFoundException {
         // we consider that the classkey can either be only the name of a class, or a partial or
         // complete path to a class file
         
@@ -81,7 +81,7 @@ public final class serverClassLoader extends ClassLoader {
         // try to load the class
         synchronized(classFileName.intern()) {
             // first try: take the class out of the cache, denoted by the classname    
-            Class c = (Class) this.classes.get(classfile);
+            Class<?> c = (Class<?>) this.classes.get(classfile);
             if (c != null) return c;
             
             // consider classkey as a file and extract the file name

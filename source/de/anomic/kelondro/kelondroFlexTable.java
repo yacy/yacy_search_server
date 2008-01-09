@@ -344,19 +344,19 @@ public class kelondroFlexTable extends kelondroFlexWidthArray implements kelondr
 		return r;
     }
     
-    public synchronized kelondroCloneableIterator keys(boolean up, byte[] firstKey) throws IOException {
+    public synchronized kelondroCloneableIterator<byte[]> keys(boolean up, byte[] firstKey) throws IOException {
     	return index.keys(up, firstKey);
     }
     
-    public synchronized kelondroCloneableIterator rows(boolean up, byte[] firstKey) throws IOException {
+    public synchronized kelondroCloneableIterator<kelondroRow.Entry> rows(boolean up, byte[] firstKey) throws IOException {
         if (index == null) return new rowIterator(index, up, firstKey);
         assert this.size() == index.size() : "content.size() = " + this.size() + ", index.size() = " + index.size();
 		return new rowIterator(index, up, firstKey);
     }
     
-    public class rowIterator implements kelondroCloneableIterator {
+    public class rowIterator implements kelondroCloneableIterator<kelondroRow.Entry> {
 
-        kelondroCloneableIterator indexIterator;
+        kelondroCloneableIterator<kelondroRow.Entry> indexIterator;
         kelondroBytesIntMap index;
         boolean up;
         
@@ -378,7 +378,7 @@ public class kelondroFlexTable extends kelondroFlexWidthArray implements kelondr
             return indexIterator.hasNext();
         }
 
-        public Object next() {
+        public kelondroRow.Entry next() {
             kelondroRow.Entry idxEntry = null;
             while ((indexIterator.hasNext()) && (idxEntry == null)) {
                 idxEntry = (kelondroRow.Entry) indexIterator.next();

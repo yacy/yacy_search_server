@@ -43,6 +43,7 @@ import de.anomic.kelondro.kelondroFixedWidthArray;
 import de.anomic.kelondro.kelondroMScoreCluster;
 import de.anomic.kelondro.kelondroNaturalOrder;
 import de.anomic.kelondro.kelondroRow;
+import de.anomic.kelondro.kelondroRow.EntryIndex;
 import de.anomic.server.serverByteBuffer;
 import de.anomic.server.serverFileUtils;
 import de.anomic.server.serverMemory;
@@ -53,7 +54,7 @@ public final class indexRAMRI implements indexRI {
 
     // class variables
     private final File databaseRoot;
-    protected final SortedMap cache; // wordhash-container
+    protected final SortedMap<String, indexContainer> cache; // wordhash-container
     private final kelondroMScoreCluster<String> hashScore;
     private final kelondroMScoreCluster<String> hashDate;
     private long  initTime;
@@ -70,7 +71,7 @@ public final class indexRAMRI implements indexRI {
         // creates a new index cache
         // the cache has a back-end where indexes that do not fit in the cache are flushed
         this.databaseRoot = databaseRoot;
-        this.cache = Collections.synchronizedSortedMap(new TreeMap());
+        this.cache = Collections.synchronizedSortedMap(new TreeMap<String, indexContainer>());
         this.hashScore = new kelondroMScoreCluster<String>();
         this.hashDate  = new kelondroMScoreCluster<String>();
         this.initTime = System.currentTimeMillis();
@@ -124,7 +125,7 @@ public final class indexRAMRI implements indexRI {
         long startTime = System.currentTimeMillis();
         long messageTime = System.currentTimeMillis() + 5000;
         long wordsPerSecond = 0, wordcount = 0, urlcount = 0;
-        Map.Entry entry;
+        Map.Entry<String, indexContainer> entry;
         String wordHash;
         indexContainer container;
         long updateTime;
@@ -134,21 +135,21 @@ public final class indexRAMRI implements indexRI {
 
         // write wCache
         synchronized (cache) {
-            Iterator i = cache.entrySet().iterator();
+            Iterator<Map.Entry<String, indexContainer>> i = cache.entrySet().iterator();
             while (i.hasNext()) {
                 // get entries
-                entry = (Map.Entry) i.next();
-                wordHash = (String) entry.getKey();
+                entry = i.next();
+                wordHash = entry.getKey();
                 updateTime = getUpdateTime(wordHash);
-                container = (indexContainer) entry.getValue();
+                container = entry.getValue();
 
                 // put entries on stack
                 if (container != null) {
-                    Iterator ci = container.entries();
+                    Iterator<indexRWIRowEntry> ci = container.entries();
                     occ = kelondroNaturalOrder.encodeLong(container.size(), 4);
                     time = kelondroNaturalOrder.encodeLong(updateTime, 8);
                     while (ci.hasNext()) {
-                        iEntry = (indexRWIEntry) ci.next();
+                        iEntry = ci.next();
                         row.setCol(0, wordHash.getBytes());
                         row.setCol(1, occ);
                         row.setCol(2, time);
@@ -203,7 +204,7 @@ public final class indexRAMRI implements indexRI {
         long urlCount = 0, urlsPerSecond = 0;
         try {
             synchronized (cache) {
-                Iterator i = dumpArray.contentRows(-1);
+                Iterator<EntryIndex> i = dumpArray.contentRows(-1);
                 String wordHash;
                 //long creationTime;
                 indexRWIEntry wordEntry;
@@ -211,7 +212,7 @@ public final class indexRAMRI implements indexRI {
                 //Runtime rt = Runtime.getRuntime();
                 while (i.hasNext()) {
                     // get out one entry
-                    row = (kelondroRow.EntryIndex) i.next();
+                    row = i.next();
                     if ((row == null) || (row.empty(0)) || (row.empty(3))) continue;
                     wordHash = row.getColString(0, "UTF-8");
                     //creationTime = kelondroRecords.bytes2long(row[2]);
@@ -293,7 +294,7 @@ public final class indexRAMRI implements indexRI {
         // plus the mentioned features
         
         private boolean rot;
-        private Iterator iterator;
+        private Iterator<indexContainer> iterator;
         
         public wordContainerIterator(String startWordHash, boolean rot) {
             this.rot = rot;
@@ -393,7 +394,7 @@ public final class indexRAMRI implements indexRI {
         return (c == null) ? 0 : c.size();
     }
 
-    public synchronized indexContainer getContainer(String wordHash, Set urlselection) {
+    public synchronized indexContainer getContainer(String wordHash, Set<String> urlselection) {
         if (wordHash == null) return null;
         
         // retrieve container
@@ -435,7 +436,7 @@ public final class indexRAMRI implements indexRI {
         return false;
     }
     
-    public synchronized int removeEntries(String wordHash, Set urlHashes) {
+    public synchronized int removeEntries(String wordHash, Set<String> urlHashes) {
         if (urlHashes.size() == 0) return 0;
         indexContainer c = (indexContainer) cache.get(wordHash);
         int count;
@@ -458,16 +459,16 @@ public final class indexRAMRI implements indexRI {
         // urlHash assigned. This can only work if the entry is really fresh
         // Such entries must be searched in the latest entries
         int delCount = 0;
-            Iterator i = cache.entrySet().iterator();
-            Map.Entry entry;
+            Iterator<Map.Entry<String, indexContainer>> i = cache.entrySet().iterator();
+            Map.Entry<String, indexContainer> entry;
             String wordhash;
             indexContainer c;
             while (i.hasNext()) {
-                entry = (Map.Entry) i.next();
-                wordhash = (String) entry.getKey();
+                entry = i.next();
+                wordhash = entry.getKey();
             
                 // get container
-                c = (indexContainer) entry.getValue();
+                c = entry.getValue();
                 if (c.remove(urlHash) != null) {
                     if (c.size() == 0) {
                         i.remove();
