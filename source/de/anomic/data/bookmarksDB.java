@@ -344,6 +344,26 @@ public class bookmarksDB {
     	}
     	return set.iterator();
     }
+    public Iterator getTagIterator(String tagName, boolean priv){
+     	TreeSet set=new TreeSet(new tagComparator());
+    	Iterator it=null;
+    	Iterator bit=getBookmarksIterator(tagName, priv);
+    	Bookmark bm;
+    	Tag tag;
+    	Set<String> tags;
+    	while(bit.hasNext()){
+    		bm=getBookmark((String)bit.next());
+    		tags = bm.getTags();
+    		it = tags.iterator();
+    		while (it.hasNext()) {
+    			tag=getTag( tagHash((String) it.next()) );
+        		if(priv ||tag.hasPublicItems()){
+        			set.add(tag);
+        		}
+    		}
+    	}
+    	return set.iterator();
+    }
     public boolean removeBookmark(String urlHash){
         Bookmark bookmark = getBookmark(urlHash);
         if(bookmark == null) return false; //does not exist
