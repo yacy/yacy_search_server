@@ -104,9 +104,9 @@
 				<p>
 					<form action="Bookmarks.html" name="choosetag" method="get" accept-charset="UTF-8">
 						<select size="1" name="tag" width="175" onChange="document.choosetag.submit();">
-							<option value="" selected="selected">[All]</option>
+							<option value=""#[selected]#>All (#[num-bookmarks]#)</option>
 							#{taglist}# 
-							<option value="#[tag]#">#[name]# (#[num]#)</option>
+							<option value="#[name]#"#[selected]#>#[name]# (#[num]#)</option>
 							#{/taglist}#
 						</select>
 						<input type="submit" value=" ... ">
@@ -114,7 +114,7 @@
 				</p>
 				<p>
 					#{taglist}# 
-					<span style="font-size:#[size]#em"><a href="Bookmarks.html?tag=#[tag]#">#[name]#</a></span>
+					<span style="font-size:#[size]#em"><a href="Bookmarks.html?tag=#[name]#">#[name]#</a></span>
 					#{/taglist}#
 				</p>
 			</fieldset>
