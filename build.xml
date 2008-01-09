@@ -537,33 +537,8 @@
   <delete dir="${release_main}"/>
 </target>
 
-<target name="dist" depends="compileExtensions,copyMain4Dist,copyExt4Dist" description="make for standard YaCy (same as pro)">
+<target name="dist" depends="compileExtensions,copyMain4Dist,copyExt4Dist" description="make for standard YaCy">
 	<tar destfile="${release}/${stdReleaseFile}" compression="gzip" defaultexcludes="yes" longfile="fail">  	
-  	 
-		<!-- packing all files into a gzipped tar -->
-  		<tarfileset dir="${release_main}" prefix="${releaseFileParentDir}/" dirmode="${accessRightsDir}" mode="${accessRightsExecutable}">
-  		    <include name="**/*.sh"/>
-  		    <include name="**/*.command"/>  			
-		</tarfileset>
-  		<tarfileset dir="${release_main}" prefix="${releaseFileParentDir}/" dirmode="${accessRightsDir}" mode="${accessRightsFile}" >
-    		<include name="**/*.*"/>			
-   		    <exclude name="**/*.sh"/>
-   		    <exclude name="**/*.command"/>  			    			
-		</tarfileset>
-  			
-  		<tarfileset dir="${release_ext}" prefix="${releaseFileParentDir}/" dirmode="${accessRightsDir}" mode="${accessRightsFile}" >
-  			<include name="**/*.*"/>
-  		</tarfileset>  			
-	</tar>	
-	
-	<delete dir="${release_main}"/>
-	<delete dir="${release_ext}"/>	
-	<delete dir="${release}/WINDOWS" failonerror="false" />
-	<delete dir="${release}/SPECS" failonerror="false" />
-</target>
-
-<target name="distPro" depends="compileExtensions,copyMain4Dist,copyExt4Dist" description="make for standard YaCy">
-	<tar destfile="${release}/${proReleaseFile}" compression="gzip" defaultexcludes="yes" longfile="fail">  	
   	 
 		<!-- packing all files into a gzipped tar -->
   		<tarfileset dir="${release_main}" prefix="${releaseFileParentDir}/" dirmode="${accessRightsDir}" mode="${accessRightsExecutable}">
@@ -767,7 +742,7 @@ This needs nsis-ant-1.2.jar in the yacyfolder.
 
 -->
 
-<target name="distWithWinStartExe" depends="makeWinStartExe,distPro">	
+<target name="distWithWinStartExe" depends="makeWinStartExe,dist">	
 </target>
 
 <target name="rpm" depends="all" description="Creates the main rpm-package and another for libx">

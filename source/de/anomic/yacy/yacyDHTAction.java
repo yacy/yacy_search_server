@@ -124,11 +124,11 @@ public class yacyDHTAction implements yacyPeerAction {
         }
     }
     
-    public Iterator getProvidesRemoteCrawlURLs() {
+    public Iterator<yacySeed> getProvidesRemoteCrawlURLs() {
         return new providesRemoteCrawlURLsEnum();
     }
     
-    class providesRemoteCrawlURLsEnum implements Iterator {
+    class providesRemoteCrawlURLsEnum implements Iterator<yacySeed> {
 
         Iterator se;
         yacySeed nextSeed;
@@ -159,7 +159,7 @@ public class yacyDHTAction implements yacyPeerAction {
             return null;
         }
         
-        public Object next() {
+        public yacySeed next() {
             yacySeed next = nextSeed;
             nextSeed = nextInternal();
             return next;

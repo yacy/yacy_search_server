@@ -55,9 +55,9 @@ public class plasmaCrawlQueues {
 
     private plasmaSwitchboard sb;
     private serverLog log;
-    private HashMap workers; // mapping from url hash to Worker thread object
+    private HashMap<String, crawlWorker> workers; // mapping from url hash to Worker thread object
     private plasmaProtocolLoader loader;
-    private ArrayList remoteCrawlProviderHashes;
+    private ArrayList<String> remoteCrawlProviderHashes;
 
     public  plasmaCrawlNURL             noticeURL;
     public  plasmaCrawlZURL             errorURL, delegatedURL;
@@ -65,9 +65,9 @@ public class plasmaCrawlQueues {
     public plasmaCrawlQueues(plasmaSwitchboard sb, File plasmaPath) {
         this.sb = sb;
         this.log = new serverLog("CRAWLER");
-        this.workers = new HashMap();
+        this.workers = new HashMap<String, crawlWorker>();
         this.loader = new plasmaProtocolLoader(sb, log);
-        this.remoteCrawlProviderHashes = new ArrayList();
+        this.remoteCrawlProviderHashes = new ArrayList<String>();
         
         // start crawling management
         log.logConfig("Starting Crawling Management");
@@ -85,7 +85,7 @@ public class plasmaCrawlQueues {
         if (noticeURL.existsInStack(hash)) return "crawler";
         if (delegatedURL.exists(hash)) return "delegated";
         if (errorURL.exists(hash)) return "errors";
-        if (workers.containsKey(new Integer(hash.hashCode()))) return "workers";
+        if (workers.containsKey(hash)) return "workers";
         return null;
     }
     
@@ -97,9 +97,9 @@ public class plasmaCrawlQueues {
     
     public yacyURL getURL(String urlhash) {
         if (urlhash.equals(yacyURL.dummyHash)) return null;
-        plasmaCrawlEntry ne = (plasmaCrawlEntry) workers.get(new Integer(urlhash.hashCode()));
-        if (ne != null) return ne.url();
-        ne = noticeURL.get(urlhash);
+        crawlWorker w = workers.get(urlhash);
+        if (w != null) return w.entry.url();
+        plasmaCrawlEntry ne = noticeURL.get(urlhash);
         if (ne != null) return ne.url();
         plasmaCrawlZURL.Entry ee = delegatedURL.getEntry(urlhash);
         if (ee != null) return ee.url();
@@ -110,7 +110,7 @@ public class plasmaCrawlQueues {
     
     public void close() {
         // wait for all workers to finish
-        Iterator i = workers.values().iterator();
+        Iterator<crawlWorker> i = workers.values().iterator();
         while (i.hasNext()) ((Thread) i.next()).interrupt();
         // TODO: wait some more time until all threads are finished
         noticeURL.close();
@@ -122,9 +122,9 @@ public class plasmaCrawlQueues {
         synchronized (workers) {
             plasmaCrawlEntry[] w = new plasmaCrawlEntry[workers.size()];
             int i = 0;
-            Iterator j = workers.values().iterator();
+            Iterator<crawlWorker> j = workers.values().iterator();
             while (j.hasNext()) {
-                w[i++] = ((crawlWorker) j.next()).entry;
+                w[i++] = j.next().entry;
             }
             return w;
         }
@@ -260,9 +260,9 @@ public class plasmaCrawlQueues {
             (remoteTriggeredCrawlJobSize() == 0) &&
             (sb.queueSize() < 10)) {
             if (yacyCore.seedDB != null && yacyCore.seedDB.sizeConnected() > 0) {
-                Iterator e = yacyCore.dhtAgent.getProvidesRemoteCrawlURLs();
+                Iterator<yacySeed> e = yacyCore.dhtAgent.getProvidesRemoteCrawlURLs();
                 while (e.hasNext()) {
-                    seed = (yacySeed) e.next();
+                    seed = e.next();
                     if (seed != null) {
                         remoteCrawlProviderHashes.add(seed.hash);
                         
@@ -277,7 +277,14 @@ public class plasmaCrawlQueues {
         String hash = null;
         while ((seed == null) && (remoteCrawlProviderHashes.size() > 0)) {
             hash = (String) remoteCrawlProviderHashes.remove(remoteCrawlProviderHashes.size() - 1);
+            if (hash == null) continue;
             seed = yacyCore.seedDB.get(hash);
+            if (seed == null) continue;
+            // check if the peer is inside our cluster
+            if ((sb.isRobinsonMode()) && (!sb.isInMyCluster(seed))) {
+                seed = null;
+                continue;
+            }
         }
         if (seed == null) return false;
         
@@ -416,7 +423,7 @@ public class plasmaCrawlQueues {
         synchronized (this.workers) {
             crawlWorker w = new crawlWorker(entry);
             synchronized (workers) {
-                workers.put(new Integer(entry.hashCode()), w);
+                workers.put(entry.url().hash(), w);
             }
         }
         
