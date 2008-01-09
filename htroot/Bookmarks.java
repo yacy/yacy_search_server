@@ -127,9 +127,9 @@ public class Bookmarks {
             String description=(String) post.get("description");
             String tagsString = (String)post.get("tags");
             if(tagsString.equals("")){
-                tagsString="unsorted"; //defaulttag
+                tagsString="unsorted"; //default tag
             }
-            Set tags=listManager.string2set(tagsString);
+            Set tags=listManager.string2set(tagsString.replaceAll(",\\s+", ",")); // space characters following a comma are removed
         
             bookmarksDB.Bookmark bookmark = switchboard.bookmarksDB.createBookmark(url, username);
             if(bookmark != null){
@@ -240,7 +240,15 @@ public class Bookmarks {
             max_count=Integer.parseInt((String) post.get("num"));
         }
     }
-    Iterator it=switchboard.bookmarksDB.getTagIterator(isAdmin);
+    // only list tags according to current tag-selection
+    Iterator it = null;
+        if (tagName.equals("")) {
+        	it = switchboard.bookmarksDB.getTagIterator(isAdmin);
+        } else {
+        	it = switchboard.bookmarksDB.getTagIterator(tagName, isAdmin);
+        }
+    
+    // Iterator it=switchboard.bookmarksDB.getTagIterator(isAdmin);
     int count=0;
     bookmarksDB.Tag tag;
     prop.put("num-bookmarks", switchboard.bookmarksDB.bookmarksSize());
@@ -249,15 +257,23 @@ public class Bookmarks {
         prop.putHTML("taglist_"+count+"_name", tag.getFriendlyName());
         prop.putHTML("taglist_"+count+"_tag", tag.getTagName());
         prop.put("taglist_"+count+"_num", tag.size());
-        prop.put("taglist_"+count+"_size", 1.1+(Math.log(tag.size())/4));
+        prop.put("taglist_"+count+"_size", Math.round((1.1+Math.log(tag.size())/4)*100)/100.); // font-size is pseudo-rounded to 2 decimals
+        if(tagName.equals(tag.getFriendlyName())){
+        	prop.put("taglist_"+count+"_selected", " selected=\"selected\"");
+        } else {
+        	prop.put("taglist_"+count+"_selected", "");
+        };
+        	
         count++;
     }
     prop.put("taglist", count);
     count=0;
     if(!tagName.equals("")){
+    	prop.put("selected", "");
         it=switchboard.bookmarksDB.getBookmarksIterator(tagName, isAdmin);
     }else{
-        it=switchboard.bookmarksDB.getBookmarksIterator(isAdmin);
+    	prop.put("selected", " selected=\"selected\"");
+    	it=switchboard.bookmarksDB.getBookmarksIterator(isAdmin);
     }
     bookmarksDB.Bookmark bookmark;
     //skip the first entries (display next page)
