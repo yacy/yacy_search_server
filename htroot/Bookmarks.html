@@ -1,111 +1,156 @@
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml">
-  <head>
-    <title>YaCy '#[clientname]#': Bookmarks</title>
-    #%env/templates/metas.template%#
-    <script src="/js/ajax.js" type="text/javascript"></script>
-    <script src="/js/Bookmarks.js" type="text/javascript"></script>
-    <link rel="alternate" type="application/rss+xml" title="RSS" href="Bookmarks.rss" />
-  </head>
-  <body id="Bookmarks">
-  #%env/templates/header.template%#
-  		#(mode)#
+	<head>
+		<title>YaCy '#[clientname]#': Bookmarks</title>
+		#%env/templates/metas.template%#
+		<script src="/js/ajax.js" type="text/javascript"></script>
+		<script src="/js/Bookmarks.js" type="text/javascript"></script>
+		<link rel="alternate" type="application/rss+xml" title="RSS" href="Bookmarks.rss" />
+	</head>
+	<body id="Bookmarks">
+		#%env/templates/header.template%#
+		#(mode)#
+		<!-- SubMenu (mode=0) -->
 		<div class="SubMenu">
-			<h3>Bookmarks</h3>			
-	  		<ul class="SubMenu">
-		    	<li><a href="Bookmarks.html?login=true&mode=add" class="MenuItemLink lock">Add Bookmark</a></li>
-		    	<li><a href="Bookmarks.html?login=true&mode=importxml" class="MenuItemLink lock">Import XML Bookmarks</a></li>
-			</ul>  		
-	  		<p/>
-	  	</div>
-	  	::
-	  	<div class="SubMenu">
-			<h3>Bookmarks</h3>	
-	  		<ul class="SubMenu">
-		    	<li><a href="Bookmarks.html?mode=add" class="MenuItemLink lock">Add Bookmark</a></li>
-		    	<li><a href="Bookmarks.html?mode=importxml" class="MenuItemLink lock">Import XML Bookmarks</a></li>
+			<h3>Bookmarks</h3>
+			<ul class="SubMenu">
+				<li>
+					<a href="Bookmarks.html?login=true&mode=add" class="MenuItemLink lock">Add Bookmark</a>
+				</li>
+				<li>
+					<a href="Bookmarks.html?login=true&mode=importxml" class="MenuItemLink lock">Import XML Bookmarks</a>
+				</li>
 			</ul>
 			<p/>
-    </div>
-    ::
-    <form action="Bookmarks.html" method="get">
-      <fieldset>
-        <legend>#(edit)#Add Bookmark::Edit Bookmark#(/edit)#</legend>
-        <dl>
-          <dt><label for="url">URL:</label></dt>
-          <dd><input type="text" name="url" id="url" value="#[url]#" onblur="loadTitle()" size="80" /></dd>
-          <dt><label for="title">Title:</label></dt>
-          <dd><input type="text" name="title" id="title" value="#[title]#" size="80" /></dd>
-          <dt><label for="description">Description:</label></dt>
-          <dd><input type="text" name="description" id="description" value="#[description]#" size="80" /></dd>
-          <dt><label for="tags">Tags (comma separated):</label></dt>
-          <dd><input type="text" name="tags" id="tags" value="#[tags]#" size="80" /></dd>
-          <dt><label for="public">Public:</label></dt>
-          <dd>
-            <select name="public" id="public">
-              <option value="public" #(public)#::selected="selected"#(/public)#>yes</option>
-              <option value="private" #(public)#selected="selected"::#(/public)#>no</option>
-            </select>
-          </dd>
-          <dt><input type="checkbox" value="true" name="feed" id="feed" #(feed)#::checked#(/feed)# /><label for="feed">Bookmark is a newsfeed</label></dt>
-        </dl>
-        #(edit)#
-        <input type="submit" name="add" value="create" />
-        ::
-        <input type="submit" name="add" value="edit" />
-        #(/edit)#
-        <img src="/env/grafics/empty.gif" name="ajax" />
-      </fieldset>
-    </form>
-    ::
-    <!-- import XML Bookmarks -->
-    <form action="Bookmarks.html" method="post"  enctype="multipart/form-data">
-      <fieldset>
-        <legend>Import XML Bookmarks</legend>
-        <dl>
-          <dt><label for="xmlfile">File:</label></dt>
-          <dd><input type="file" name="xmlfile" id="xmlfile" /></dd>
-          <dt><label for="public">import as Public:</label></dt>
-          <dd>
-            <select name="public" id="public">
-              <option value="public">yes</option>
-              <option value="private">no</option>
-            </select>
-          </dd>
-        </dl>
-        <input type="submit" name="importxml" value="import" />
-      </fieldset>
-    </form>
-    ::
-    <!-- import Netscape Bookmarks -->
-    <form action="Bookmarks.html" method="post"  enctype="multipart/form-data">
-      <fieldset>
-        <legend>Import Bookmarks</legend>
-        <dl>
-          <dt><label for="bookmarksfile">File:</label></dt>
-          <dd><input type="file" name="bookmarksfile" id="bookmarksfile" /></dd>
-          <dt><label for="tags">Default Tags:</label></dt>
-          <dd><input type="text" name="tags" id="tags" value="imported" /></dd>
-          <dt><label for="public">import as Public:</label></dt>
-          <dd>
-            <select name="public" id="public">
-              <option value="public">yes</option>
-              <option value="private">no</option>
-           </select>
-          </dd>
-        </dl>
-        <input type="submit" name="importbookmarks" value="import" />
-      </fieldset>
-    </form>
-    #(/mode)#
-    <div class="TagList">
+		</div>
+		:: <!-- Submenu isAdmin (mode=1) -->
+		<div class="SubMenu">
+			<h3>Bookmarks</h3>
+			<ul class="SubMenu">
+				<li>
+					<a href="Bookmarks.html?mode=add" class="MenuItemLink lock">Add Bookmark</a>
+				</li>
+				<li>
+					<a href="Bookmarks.html?mode=importxml" class="MenuItemLink lock">Import XML Bookmarks</a>
+				</li>
+			</ul>
+			<p/>
+		</div>
+		:: <!-- add or edit Bookmark (mode=2) -->
+		<form action="Bookmarks.html" method="get">
+			<fieldset>
+				<legend>#(edit)#Add Bookmark::Edit Bookmark#(/edit)#</legend>
+				<dl>
+					<dt>
+						<label for="url">URL:</label>
+					</dt>
+					<dd>
+						<input type="text" name="url" id="url" value="#[url]#" onblur="loadTitle()" size="80" />
+					</dd>
+					<dt>
+						<label for="title">Title:</label>
+					</dt>
+					<dd>
+						<input type="text" name="title" id="title" value="#[title]#" size="80" />
+					</dd>
+					<dt>
+						<label for="description">Description:</label>
+					</dt>
+					<dd>
+						<input type="text" name="description" id="description" value="#[description]#" size="80" />
+					</dd>
+					<dt>
+						<label for="tags">Tags (comma separated):</label>
+					</dt>
+					<dd>
+						<input type="text" name="tags" id="tags" value="#[tags]#" size="80" />
+					</dd>
+					<dt>
+						<label for="public">Public:</label>
+					</dt>
+					<dd>
+						<select name="public" id="public">
+							<option value="public" #(public)#::selected="selected"#(/public)#>yes</option>
+							<option value="private" #(public)#selected="selected"::#(/public)#>no</option>
+						</select>
+					</dd>
+					<dt>
+						<input type="checkbox" value="true" name="feed" id="feed" #(feed)#::checked#(/feed)# />
+						<label for="feed">Bookmark is a newsfeed</label>
+					</dt>
+				</dl>
+				#(edit)#
+				<input type="submit" name="add" value="create" />
+				::
+				<input type="submit" name="add" value="edit" />
+				#(/edit)#
+				<img src="/env/grafics/empty.gif" name="ajax" />
+			</fieldset>
+		</form>
+		:: <!-- import XML Bookmarks (mode=3) -->
+		<form action="Bookmarks.html" method="post"  enctype="multipart/form-data">
+			<fieldset>
+				<legend>Import XML Bookmarks</legend>
+				<dl>
+					<dt>
+						<label for="xmlfile">File:</label>
+					</dt>
+					<dd>
+						<input type="file" name="xmlfile" id="xmlfile" />
+					</dd>
+					<dt>
+						<label for="public">import as Public:</label>
+					</dt>
+					<dd>
+						<select name="public" id="public">
+							<option value="public">yes</option>
+							<option value="private">no</option>
+						</select>
+					</dd>
+				</dl>
+				<input type="submit" name="importxml" value="import" />
+			</fieldset>
+		</form>
+		:: <!-- import Netscape Bookmarks (mode=4) -->
+		<form action="Bookmarks.html" method="post"  enctype="multipart/form-data">
+			<fieldset>
+				<legend>Import Bookmarks</legend>
+				<dl>
+					<dt>
+						<label for="bookmarksfile">File:</label>
+					</dt>
+					<dd>
+						<input type="file" name="bookmarksfile" id="bookmarksfile" />
+					</dd>
+					<dt>
+						<label for="tags">Default Tags:</label>
+					</dt>
+					<dd>
+						<input type="text" name="tags" id="tags" value="imported" />
+					</dd>
+					<dt>
+						<label for="public">import as Public:</label>
+					</dt>
+					<dd>
+						<select name="public" id="public">
+							<option value="public">yes</option>
+							<option value="private">no</option>
+						</select>
+					</dd>
+				</dl>
+				<input type="submit" name="importbookmarks" value="import" />
+			</fieldset>
+		</form>
+		#(/mode)#
+		<!-- show TagList -->
+		<div class="TagList">
 			<fieldset>
 				<legend>Tags</legend>
 				<p>
 					<form action="Bookmarks.html" name="choosetag" method="get" accept-charset="UTF-8">
 						<select size="1" name="tag" width="175" onChange="document.choosetag.submit();">
 							<option value=""#[selected]#>All (#[num-bookmarks]#)</option>
-							#{taglist}# 
+							#{taglist}#
 							<option value="#[name]#"#[selected]#>#[name]# (#[num]#)</option>
 							#{/taglist}#
 						</select>
@@ -113,46 +158,52 @@
 					</form>
 				</p>
 				<p>
-					#{taglist}# 
-					<span style="font-size:#[size]#em"><a href="Bookmarks.html?tag=#[name]#">#[name]#</a></span>
+					#{taglist}#
+					<span style="font-size:#[size]#em">
+						<a href="Bookmarks.html?tag=#[name]#">#[name]#</a>
+					</span>
 					#{/taglist}#
 				</p>
 			</fieldset>
 		</div>
-    <div class="bookmarkList">
-      <h3>Bookmark List</h3>
-      #{bookmarks}#
-      <div class="bookmark #(public)#public::private#(/public)#">
-        <h4 class="bookmarkTitle">
-          #(public)#
-          <img class="bookmarkIcon" src="env/grafics/bookmarkpriv.png" alt="private bookmark" title="private bookmark" />::<img class="bookmarkIcon" src="env/grafics/bookmarkpub.png" alt="public bookmark" title="public bookmark" />
-          #(/public)#
-          <a href="#[link]#" class="bookmarkTitle">#[title]#</a>
-        </h4>
-        <p class="bookmarkDescription">#[description]#</p>
-        <p class="tags">Tagged with | #{tags}#<a href="Bookmarks.html?tag=#[tag]#" class="bookmarkTags">#[tag]#</a> | #{/tags}#</p>
-        <p class="bookmarkActions">
-          <a href="Bookmarks.html?edit=#[hash]#" class="bookmarkAction">Edit</a> /
-          <a href="Bookmarks.html?delete=#[hash]#" class="bookmarkAction">Delete</a>
-        </p>
-      </div>
-      #{/bookmarks}#
-      <p class="Navigation">
-        #(prev-page)#
-        ::<a href="Bookmarks.html?tag=#[tag]#&amp;start=#[start]#&amp;num=#[num]#">previous page</a>
-        #(/prev-page)#
-        #(next-page)#
-        ::<a href="Bookmarks.html?tag=#[tag]#&amp;start=#[start]#&amp;num=#[num]#">next page</a>
-        #(/next-page)#
-      </p>
-      <p class="bookmarkNavigation">
-        Show
-        <a href="Bookmarks.html?tag=#[tag]#&amp;start=#[start]#&amp;num=10">10</a>
-        <a href="Bookmarks.html?tag=#[tag]#&amp;start=#[start]#&amp;num=50">50</a>
-        <a href="Bookmarks.html?tag=#[tag]#&amp;start=#[start]#&amp;num=100">100</a>
-        Bookmarks per page.
-      </p>
-    </div>
-    #%env/templates/footer.template%#
-  </body>
+		<!-- show BookmarkList -->
+		<div class="bookmarkList">
+			<h3>Bookmark List</h3>
+			#{bookmarks}#
+			<div class="bookmark #(public)#public::private#(/public)#">
+				<h4 class="bookmarkTitle">
+					#(public)#
+					<img class="bookmarkIcon" src="env/grafics/bookmarkpriv.png" alt="private bookmark" title="private bookmark" />
+					::
+					<img class="bookmarkIcon" src="env/grafics/bookmarkpub.png" alt="public bookmark" title="public bookmark" />
+					#(/public)#
+					<a href="#[link]#" class="bookmarkTitle">#[title]#</a>
+				</h4>
+				<p class="bookmarkDescription">#[description]#</p>
+				<p class="tags">Tagged with | #{tags}#<a href="Bookmarks.html?tag=#[tag]#" class="bookmarkTags">#[tag]#</a> | #{/tags}#</p>
+				<p class="bookmarkActions">
+					<a href="Bookmarks.html?edit=#[hash]#" class="bookmarkAction">Edit</a>
+					/
+					<a href="Bookmarks.html?delete=#[hash]#" class="bookmarkAction">Delete</a>
+				</p>
+			</div>
+			#{/bookmarks}#
+			<p class="Navigation">
+				#(prev-page)#
+				::<a href="Bookmarks.html?tag=#[tag]#&amp;start=#[start]#&amp;num=#[num]#">previous page</a>
+				#(/prev-page)#
+				#(next-page)#
+				::<a href="Bookmarks.html?tag=#[tag]#&amp;start=#[start]#&amp;num=#[num]#">next page</a>
+				#(/next-page)#
+			</p>
+			<p class="bookmarkNavigation">
+				Show
+				<a href="Bookmarks.html?tag=#[tag]#&amp;start=#[start]#&amp;num=10">10</a>
+				<a href="Bookmarks.html?tag=#[tag]#&amp;start=#[start]#&amp;num=50">50</a>
+				<a href="Bookmarks.html?tag=#[tag]#&amp;start=#[start]#&amp;num=100">100</a>
+				Bookmarks per page.
+			</p>
+		</div>
+		#%env/templates/footer.template%#
+	</body>
 </html>
