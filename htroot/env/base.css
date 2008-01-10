@@ -273,6 +273,8 @@ div.ProgressBarFill {
 
 div.bookmarkList {
 	margin-top:3em;
+	margin-right:1em;
+	padding-right:13em;
 }
 
 div.bookmark {
