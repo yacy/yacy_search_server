@@ -198,7 +198,7 @@ public final class hello {
             if (count > 100) { count = 100; }
             
             // latest seeds
-            final Map ySeeds = yacyCore.seedDB.seedsByAge(true, count); // peerhash/yacySeed relation
+            final Map<String, yacySeed> ySeeds = yacyCore.seedDB.seedsByAge(true, count); // peerhash/yacySeed relation
             
             // attach also my own seed
             seeds.append("seed0=").append(yacyCore.seedDB.mySeed().genSeedStr(key)).append(serverCore.CRLF_STRING);
@@ -207,7 +207,7 @@ public final class hello {
             // attach other seeds
             if (ySeeds != null) {
                 seeds.ensureCapacity((ySeeds.size() + 1) * 768);
-                Iterator si = ySeeds.values().iterator();
+                Iterator<yacySeed> si = ySeeds.values().iterator();
                 yacySeed s;
                 while (si.hasNext()) {
                 	s = (yacySeed) si.next();

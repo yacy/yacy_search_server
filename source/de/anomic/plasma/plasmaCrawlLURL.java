@@ -86,12 +86,12 @@ public final class plasmaCrawlLURL {
     // result stacks;
     // these have all entries of form
     // strings: urlHash + initiatorHash + ExecutorHash
-    private final LinkedList externResultStack; // 1 - remote index: retrieved by other peer
-    private final LinkedList searchResultStack; // 2 - partly remote/local index: result of search queries
-    private final LinkedList transfResultStack; // 3 - partly remote/local index: result of index transfer
-    private final LinkedList proxyResultStack;  // 4 - local index: result of proxy fetch/prefetch
-    private final LinkedList lcrawlResultStack; // 5 - local index: result of local crawling
-    private final LinkedList gcrawlResultStack; // 6 - local index: triggered external
+    private final LinkedList<String> externResultStack; // 1 - remote index: retrieved by other peer
+    private final LinkedList<String> searchResultStack; // 2 - partly remote/local index: result of search queries
+    private final LinkedList<String> transfResultStack; // 3 - partly remote/local index: result of index transfer
+    private final LinkedList<String> proxyResultStack;  // 4 - local index: result of proxy fetch/prefetch
+    private final LinkedList<String> lcrawlResultStack; // 5 - local index: result of local crawling
+    private final LinkedList<String> gcrawlResultStack; // 6 - local index: triggered external
 
     // the class object
     private kelondroIndex urlIndexFile;
@@ -102,12 +102,12 @@ public final class plasmaCrawlLURL {
         urlIndexFile = new kelondroFlexSplitTable(new File(indexPath, "PUBLIC/TEXT"), "urls", preloadTime, indexURLEntry.rowdef, false);
 
         // init result stacks
-        externResultStack = new LinkedList();
-        searchResultStack = new LinkedList();
-        transfResultStack = new LinkedList();
-        proxyResultStack  = new LinkedList();
-        lcrawlResultStack = new LinkedList();
-        gcrawlResultStack = new LinkedList();
+        externResultStack = new LinkedList<String>();
+        searchResultStack = new LinkedList<String>();
+        transfResultStack = new LinkedList<String>();
+        proxyResultStack  = new LinkedList<String>();
+        lcrawlResultStack = new LinkedList<String>();
+        gcrawlResultStack = new LinkedList<String>();
     }
 
     public int size() {
@@ -312,14 +312,14 @@ public final class plasmaCrawlLURL {
         }
     }
 
-    public kelondroCloneableIterator entries(boolean up, String firstHash) throws IOException {
+    public kelondroCloneableIterator<indexURLEntry> entries(boolean up, String firstHash) throws IOException {
         // enumerates entry elements
         return new kiter(up, firstHash);
     }
 
-    public class kiter implements kelondroCloneableIterator {
+    public class kiter implements kelondroCloneableIterator<indexURLEntry> {
         // enumerates entry elements
-        private Iterator iter;
+        private Iterator<kelondroRow.Entry> iter;
         private boolean error;
         boolean up;
 
@@ -343,10 +343,10 @@ public final class plasmaCrawlLURL {
             return this.iter.hasNext();
         }
 
-        public final Object next() {
+        public final indexURLEntry next() {
             kelondroRow.Entry e = null;
             if (this.iter == null) { return null; }
-            if (this.iter.hasNext()) { e = (kelondroRow.Entry) this.iter.next(); }
+            if (this.iter.hasNext()) { e = this.iter.next(); }
             if (e == null) { return null; }
             return new indexURLEntry(e, null, 0);
         }
@@ -364,9 +364,9 @@ public final class plasmaCrawlLURL {
      */
     public void urldbcleanup() {
         serverLog log = new serverLog("URLDBCLEANUP");
-        HashSet damagedURLS = new HashSet();
+        HashSet<String> damagedURLS = new HashSet<String>();
         try {
-            Iterator eiter = entries(true, null);
+            Iterator<indexURLEntry> eiter = entries(true, null);
             int iteratorCount = 0;
             while (eiter.hasNext()) try {
                 eiter.next();
@@ -382,7 +382,7 @@ public final class plasmaCrawlLURL {
             try { Thread.sleep(1000); } catch (InterruptedException e) { }
             log.logInfo("URLs vorher: " + size() + " Entries loaded during Iteratorloop: " + iteratorCount + " kaputte URLs: " + damagedURLS.size());
 
-            Iterator eiter2 = damagedURLS.iterator();
+            Iterator<String> eiter2 = damagedURLS.iterator();
             String urlHash;
             while (eiter2.hasNext()) {
                 urlHash = (String) eiter2.next();
@@ -455,7 +455,7 @@ public final class plasmaCrawlLURL {
         public void run() {
             try {
                 serverLog.logInfo("URLDBCLEANER", "UrldbCleaner-Thread startet");
-                final Iterator eiter = entries(true, null);
+                final Iterator<indexURLEntry> eiter = entries(true, null);
                 while (eiter.hasNext() && run) {
                     synchronized (this) {
                         if (this.pause) {
@@ -468,7 +468,7 @@ public final class plasmaCrawlLURL {
                             }
                         }
                     }
-                    final indexURLEntry entry = (indexURLEntry) eiter.next();
+                    final indexURLEntry entry = eiter.next();
                     if (entry == null) {
                         serverLog.logFine("URLDBCLEANER", "entry == null");
                     } else if (entry.hash() == null) {
@@ -605,12 +605,12 @@ public final class plasmaCrawlLURL {
     				pw.println("<link>http://yacy.net</link>");
     			}
     			
-    			Iterator i = entries(true, null); // iterates indexURLEntry objects
+    			Iterator<indexURLEntry> i = entries(true, null); // iterates indexURLEntry objects
         		indexURLEntry entry;
         		indexURLEntry.Components comp;
         		String url;
         		loop: while (i.hasNext()) {
-        			entry = (indexURLEntry) i.next();
+        			entry = i.next();
         			comp = entry.comp();
         			url = comp.url().toNormalform(true, false);
         			if (!url.matches(filter)) continue;
@@ -683,9 +683,9 @@ public final class plasmaCrawlLURL {
         if (args[0].equals("-l")) try {
             // arg 1 is path to URLCache
             final plasmaCrawlLURL urls = new plasmaCrawlLURL(new File(args[2]), 0);
-            final Iterator enu = urls.entries(true, null);
+            final Iterator<indexURLEntry> enu = urls.entries(true, null);
             while (enu.hasNext()) {
-                System.out.println(((indexURLEntry) enu.next()).toString());
+                System.out.println(enu.next().toString());
             }
         } catch (Exception e) {
             e.printStackTrace();

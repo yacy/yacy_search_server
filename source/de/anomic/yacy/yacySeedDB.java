@@ -62,16 +62,16 @@ import java.util.TreeMap;
 import de.anomic.http.httpHeader;
 import de.anomic.http.httpc;
 import de.anomic.http.httpd;
+import de.anomic.kelondro.kelondroBase64Order;
 import de.anomic.kelondro.kelondroDyn;
 import de.anomic.kelondro.kelondroException;
 import de.anomic.kelondro.kelondroMScoreCluster;
 import de.anomic.kelondro.kelondroMapObjects;
-import de.anomic.kelondro.kelondroBase64Order;
 import de.anomic.plasma.plasmaHTCache;
 import de.anomic.plasma.plasmaSwitchboard;
 import de.anomic.server.serverCore;
-import de.anomic.server.serverDomains;
 import de.anomic.server.serverDate;
+import de.anomic.server.serverDomains;
 import de.anomic.server.serverFileUtils;
 import de.anomic.server.serverSwitch;
 import de.anomic.server.logging.serverLog;
@@ -256,17 +256,17 @@ public final class yacySeedDB {
         
     }
     
-    public Iterator seedsSortedConnected(boolean up, String field) {
+    public Iterator<yacySeed> seedsSortedConnected(boolean up, String field) {
         // enumerates seed-type objects: all seeds sequentially ordered by field
         return new seedEnum(up, field, seedActiveDB);
     }
     
-    public Iterator seedsSortedDisconnected(boolean up, String field) {
+    public Iterator<yacySeed> seedsSortedDisconnected(boolean up, String field) {
         // enumerates seed-type objects: all seeds sequentially ordered by field
         return new seedEnum(up, field, seedPassiveDB);
     }
     
-    public Iterator seedsSortedPotential(boolean up, String field) {
+    public Iterator<yacySeed> seedsSortedPotential(boolean up, String field) {
         // enumerates seed-type objects: all seeds sequentially ordered by field
         return new seedEnum(up, field, seedPotentialDB);
     }
@@ -318,28 +318,28 @@ public final class yacySeedDB {
     	return clustermap;
     }
     
-    public Iterator seedsConnected(boolean up, boolean rot, String firstHash, float minVersion) {
+    public Iterator<yacySeed> seedsConnected(boolean up, boolean rot, String firstHash, float minVersion) {
         // enumerates seed-type objects: all seeds sequentially without order
         return new seedEnum(up, rot, (firstHash == null) ? null : firstHash.getBytes(), null, seedActiveDB, minVersion);
     }
     
-    public Iterator seedsDisconnected(boolean up, boolean rot, String firstHash, float minVersion) {
+    public Iterator<yacySeed> seedsDisconnected(boolean up, boolean rot, String firstHash, float minVersion) {
         // enumerates seed-type objects: all seeds sequentially without order
         return new seedEnum(up, rot, (firstHash == null) ? null : firstHash.getBytes(), null, seedPassiveDB, minVersion);
     }
     
-    public Iterator seedsPotential(boolean up, boolean rot, String firstHash, float minVersion) {
+    public Iterator<yacySeed> seedsPotential(boolean up, boolean rot, String firstHash, float minVersion) {
         // enumerates seed-type objects: all seeds sequentially without order
         return new seedEnum(up, rot, (firstHash == null) ? null : firstHash.getBytes(), null, seedPotentialDB, minVersion);
     }
     
     public yacySeed anySeedVersion(float minVersion) {
         // return just any seed that has a specific minimum version number
-        Iterator e = seedsConnected(true, true, yacySeed.randomHash(), minVersion);
+        Iterator<yacySeed> e = seedsConnected(true, true, yacySeed.randomHash(), minVersion);
         return (yacySeed) e.next();
     }
 
-    public HashMap seedsByAge(boolean up, int count) {
+    public HashMap<String, yacySeed> seedsByAge(boolean up, int count) {
     	// returns a peerhash/yacySeed relation
         // to get most recent peers, set up = true; for oldest peers, set up = false
     	
@@ -349,12 +349,12 @@ public final class yacySeedDB {
         kelondroMScoreCluster<String> seedScore = new kelondroMScoreCluster<String>();
         yacySeed ys;
         long absage;
-        Iterator s = seedsConnected(true, false, null, (float) 0.0);
+        Iterator<yacySeed> s = seedsConnected(true, false, null, (float) 0.0);
         int searchcount = 1000;
         if (searchcount > sizeConnected()) searchcount = sizeConnected();
         try {
             while ((s.hasNext()) && (searchcount-- > 0)) {
-                ys = (yacySeed) s.next();
+                ys = s.next();
                 if ((ys != null) && (ys.get(yacySeed.LASTSEEN, "").length() > 10)) try {
                     absage = Math.abs(System.currentTimeMillis() + serverDate.dayMillis - ys.getLastSeenUTC());
                     seedScore.addScore(ys.hash, (int) absage); // the higher absage, the older is the peer
@@ -362,8 +362,8 @@ public final class yacySeedDB {
             }
             
             // result is now in the score object; create a result vector
-            HashMap result = new HashMap();
-            Iterator it = seedScore.scores(up);
+            HashMap<String, yacySeed> result = new HashMap<String, yacySeed>();
+            Iterator<String> it = seedScore.scores(up);
             int c = 0;
             while ((c < count) && (it.hasNext())) {
             	c++;
@@ -907,7 +907,7 @@ public final class yacySeedDB {
         }
     }
 
-    class seedEnum implements Iterator {
+    class seedEnum implements Iterator<yacySeed> {
         
         kelondroMapObjects.mapIterator it;
         yacySeed nextSeed;
@@ -967,7 +967,7 @@ public final class yacySeedDB {
             return new yacySeed(hash, dna);
         }
         
-        public Object next() {
+        public yacySeed next() {
             yacySeed seed = nextSeed;
             try {while (true) {
                 nextSeed = internalNext();

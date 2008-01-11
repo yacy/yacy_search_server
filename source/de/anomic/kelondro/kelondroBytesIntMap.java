@@ -38,7 +38,7 @@ public class kelondroBytesIntMap {
         this.rowdef = ki.row();
     }
     
-    public kelondroBytesIntMap(int keylength, kelondroOrder objectOrder, int space) {
+    public kelondroBytesIntMap(int keylength, kelondroByteOrder objectOrder, int space) {
         this.rowdef = new kelondroRow(new kelondroColumn[]{new kelondroColumn("key", kelondroColumn.celltype_binary, kelondroColumn.encoder_bytes, keylength, "key"), new kelondroColumn("int c-4 {b256}")}, objectOrder, 0);
         this.index = new kelondroRAMIndex(rowdef, space);
     }

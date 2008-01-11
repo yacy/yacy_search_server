@@ -51,7 +51,7 @@ import java.util.Comparator;
 
 import de.anomic.server.logging.serverLog;
 
-public class kelondroBase64Order extends kelondroAbstractOrder implements kelondroOrder, kelondroCoding, Comparator<Object> {
+public class kelondroBase64Order extends kelondroAbstractOrder<byte[]> implements kelondroByteOrder, kelondroCoding, Comparator<byte[]> {
 
     protected static final char[] alpha_standard = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/".toCharArray();
     protected static final char[] alpha_enhanced = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789-_".toCharArray();
@@ -73,6 +73,8 @@ public class kelondroBase64Order extends kelondroAbstractOrder implements kelond
 
     public static final kelondroBase64Order standardCoder = new kelondroBase64Order(true, true);
     public static final kelondroBase64Order enhancedCoder = new kelondroBase64Order(true, false);
+    public static final Comparator<String> standardComparator = new kelondroByteOrder.StringOrder(standardCoder);
+    public static final Comparator<String> enhancedComparator = new kelondroByteOrder.StringOrder(enhancedCoder);
 
     private boolean rfc1113compliant;
     private final char[] alpha;
@@ -95,9 +97,9 @@ public class kelondroBase64Order extends kelondroAbstractOrder implements kelond
         return z;
     }
     
-    public Object clone() {
+    public kelondroOrder<byte[]> clone() {
         kelondroBase64Order o = new kelondroBase64Order(this.asc, this.rfc1113compliant);
-        o.rotate(this.zero);
+        o.rotate(zero);
         return o;
     }
     
@@ -115,7 +117,7 @@ public class kelondroBase64Order extends kelondroAbstractOrder implements kelond
         return true;
     }
     
-    public final static kelondroOrder bySignature(String signature) {
+    public final static kelondroByteOrder bySignature(String signature) {
         if (signature.equals("Bd")) return new kelondroBase64Order(false, false);
         if (signature.equals("bd")) return new kelondroBase64Order(false, true);
         if (signature.equals("Bu")) return new kelondroBase64Order(true, false);
@@ -396,5 +398,4 @@ public class kelondroBase64Order extends kelondroAbstractOrder implements kelond
             System.out.println(b64.decodeString(s[1]));
         }
     }
-
 }

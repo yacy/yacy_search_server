@@ -26,25 +26,19 @@
 
 package de.anomic.index;
 
-import de.anomic.kelondro.kelondroNode;
+import de.anomic.kelondro.kelondroAbstractOrder;
 import de.anomic.kelondro.kelondroOrder;
-import de.anomic.kelondro.kelondroRow;
-import de.anomic.kelondro.kelondroRow.Entry;
 
-public class indexContainerOrder implements kelondroOrder {
+public class indexContainerOrder extends kelondroAbstractOrder<indexContainer> implements kelondroOrder<indexContainer> {
 
-    private kelondroOrder embeddedOrder;
+    private kelondroOrder<byte[]> embeddedOrder;
 
-    public indexContainerOrder(kelondroOrder embedOrder) {
+    public indexContainerOrder(kelondroOrder<byte[]> embedOrder) {
         this.embeddedOrder = embedOrder;
     }
 
-    public boolean wellformed(byte[] a) {
-        return embeddedOrder.wellformed(a);
-    }
-    
-    public boolean wellformed(byte[] a, int astart, int alength) {
-        return embeddedOrder.wellformed(a, astart, alength);
+    public boolean wellformed(indexContainer a) {
+        return embeddedOrder.wellformed(a.getWordHash().getBytes());
     }
     
     public void direction(boolean ascending) {
@@ -59,16 +53,13 @@ public class indexContainerOrder implements kelondroOrder {
         return this.embeddedOrder.compare(a.getWordHash().getBytes(), b.getWordHash().getBytes());
     }
 
-    public byte[] zero() {
-        return this.embeddedOrder.zero();
+    public void rotate(indexContainer zero) {
+        this.embeddedOrder.rotate(zero.getWordHash().getBytes());
+        this.zero = new indexContainer(new String(this.embeddedOrder.zero()), zero);
     }
 
-    public void rotate(byte[] zero) {
-        this.embeddedOrder.rotate(zero);
-    }
-
-    public Object clone() {
-        return new indexContainerOrder((kelondroOrder) this.embeddedOrder.clone());
+    public kelondroOrder<indexContainer> clone() {
+        return new indexContainerOrder(this.embeddedOrder.clone());
     }
 
     public String signature() {
@@ -78,58 +69,14 @@ public class indexContainerOrder implements kelondroOrder {
     public long cardinal(byte[] key) {
         return this.embeddedOrder.cardinal(key);
     }
-
-    public int compare(Object a, Object b) {
-    	if ((a instanceof byte[]) && (b instanceof byte[])) {
-    		return this.embeddedOrder.compare((byte[]) a, (byte[]) b);
-    	}
-    	if ((a instanceof Integer) && (b instanceof Integer)) {
-    		return ((Integer) a).compareTo((Integer) b);
-    	}
-    	if ((a instanceof String) && (b instanceof String)) {
-    		return this.embeddedOrder.compare(((String) a).getBytes(), ((String) b).getBytes());
-    	}
-    	if ((a instanceof kelondroNode) && (b instanceof kelondroNode)) {
-    		return this.embeddedOrder.compare((kelondroNode) a, (kelondroNode) b);
-    	}
-    	if ((a instanceof kelondroRow.Entry) && (b instanceof kelondroRow.Entry)) {
-    		return this.embeddedOrder.compare((kelondroRow.Entry) a, (kelondroRow.Entry) b);
-    	}
-    	if ((a instanceof indexContainer) && (b instanceof indexContainer)) {
-    		return this.embeddedOrder.compare((indexContainer) a, (indexContainer) b); 
-    	}
-    	Class<? extends Object> ac = a.getClass();
-    	Class<? extends Object> bc = b.getClass();
-    	if (ac.equals(bc)) {
-    		throw new UnsupportedOperationException("compare not implemented for this object type: " + ac);
-    	} else {
-    		throw new UnsupportedOperationException("compare must be applied to same object classes; here a = " + ac + ", b = " + bc);
-    	}
-    }
     
-    public int compare(String a, String b) {
-        return this.embeddedOrder.compare(a, b);
-    }
-
-	public int compare(kelondroNode a, kelondroNode b) {
-		return this.embeddedOrder.compare(a, b);
-	}
-
-	public int compare(Entry a, Entry b) {
-		return this.embeddedOrder.compare(a, b);
-	}
-	
-    public int compare(byte[] a, byte[] b) {
-        return this.embeddedOrder.compare(a, b);
-    }
-
-    public int compare(byte[] a, int aoffset, int alength, byte[] b, int boffset, int blength) {
-        return this.embeddedOrder.compare(a, aoffset, alength, b, boffset, blength);
-    }
-
-    public boolean equals(kelondroOrder otherOrder) {
+    public boolean equals(kelondroOrder<indexContainer> otherOrder) {
         if (!(otherOrder instanceof indexContainerOrder)) return false;
         return this.embeddedOrder.equals(((indexContainerOrder) otherOrder).embeddedOrder);
     }
+
+	public long cardinal(indexContainer key) {
+		return this.embeddedOrder.cardinal(key.getWordHash().getBytes());
+	}
 
 }

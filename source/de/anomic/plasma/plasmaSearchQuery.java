@@ -184,8 +184,8 @@ public plasmaSearchQuery(
     }
     
     public static TreeSet<String> hashes2Set(String query) {
-        if (query == null) return new TreeSet<String>(kelondroBase64Order.enhancedCoder);
-        final TreeSet<String> keyhashes = new TreeSet<String>(kelondroBase64Order.enhancedCoder);
+        if (query == null) return new TreeSet<String>(kelondroBase64Order.enhancedComparator);
+        final TreeSet<String> keyhashes = new TreeSet<String>(kelondroBase64Order.enhancedComparator);
         for (int i = 0; i < (query.length() / yacySeedDB.commonHashLength); i++) {
             keyhashes.add(query.substring(i * yacySeedDB.commonHashLength, (i + 1) * yacySeedDB.commonHashLength));
         }
@@ -226,7 +226,7 @@ public plasmaSearchQuery(
     
     public static TreeSet<String>[] cleanQuery(String querystring) {
     	// returns two sets: a query set and a exclude set
-    	if ((querystring == null) || (querystring.length() == 0)) return new TreeSet[]{new TreeSet<String>(kelondroNaturalOrder.naturalOrder), new TreeSet<String>(kelondroNaturalOrder.naturalOrder)};
+    	if ((querystring == null) || (querystring.length() == 0)) return new TreeSet[]{new TreeSet<String>(kelondroNaturalOrder.naturalComparator), new TreeSet<String>(kelondroNaturalOrder.naturalComparator)};
         
         // convert Umlaute
         querystring = htmlFilterAbstractScraper.convertUmlaute(new serverCharBuffer(querystring.toCharArray())).toString();
@@ -240,8 +240,8 @@ public plasmaSearchQuery(
         }
         
         // the string is clean now, but we must generate a set out of it
-        final TreeSet<String> query = new TreeSet<String>(kelondroNaturalOrder.naturalOrder);
-        final TreeSet<String> exclude = new TreeSet<String>(kelondroNaturalOrder.naturalOrder);
+        final TreeSet<String> query = new TreeSet<String>(kelondroNaturalOrder.naturalComparator);
+        final TreeSet<String> exclude = new TreeSet<String>(kelondroNaturalOrder.naturalComparator);
         final String[] a = querystring.split(" ");
         for (int i = 0; i < a.length; i++) {
         	if (a[i].startsWith("-")) {

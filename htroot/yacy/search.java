@@ -45,6 +45,7 @@ import de.anomic.plasma.plasmaSearchEvent;
 import de.anomic.plasma.plasmaSearchQuery;
 import de.anomic.plasma.plasmaSearchRankingProfile;
 import de.anomic.plasma.plasmaSwitchboard;
+import de.anomic.plasma.plasmaSearchEvent.ResultEntry;
 import de.anomic.server.serverCore;
 import de.anomic.server.serverObjects;
 import de.anomic.server.serverProfiling;
@@ -120,7 +121,7 @@ public final class search {
         // tell all threads to do nothing for a specific time
         sb.intermissionAllThreads(2 * duetime);
 
-        TreeSet abstractSet = ((abstracts.length() == 0) || (abstracts.equals("auto"))) ? null : plasmaSearchQuery.hashes2Set(abstracts);
+        TreeSet<String> abstractSet = ((abstracts.length() == 0) || (abstracts.equals("auto"))) ? null : plasmaSearchQuery.hashes2Set(abstracts);
         
         // store accessing peer
         if (yacyCore.seedDB == null) {
@@ -130,8 +131,8 @@ public final class search {
         }
 
         // prepare search
-        final TreeSet queryhashes = plasmaSearchQuery.hashes2Set(query);
-        final TreeSet excludehashes = (exclude.length() == 0) ? new TreeSet(kelondroBase64Order.enhancedCoder) : plasmaSearchQuery.hashes2Set(exclude);
+        final TreeSet<String> queryhashes = plasmaSearchQuery.hashes2Set(query);
+        final TreeSet<String> excludehashes = (exclude.length() == 0) ? new TreeSet<String>(kelondroBase64Order.enhancedComparator) : plasmaSearchQuery.hashes2Set(exclude);
         final long timestamp = System.currentTimeMillis();
         
     	// prepare a search profile
@@ -142,25 +143,25 @@ public final class search {
         int indexabstractContainercount = 0;
         int joincount = 0;
         plasmaSearchQuery theQuery = null;
-        ArrayList accu = null;
+        ArrayList<ResultEntry> accu = null;
         long urlRetrievalAllTime = 0, snippetComputationAllTime = 0;
         if ((query.length() == 0) && (abstractSet != null)) {
             // this is _not_ a normal search, only a request for index abstracts
-            theQuery = new plasmaSearchQuery(null, abstractSet, new TreeSet(kelondroBase64Order.enhancedCoder), rankingProfile, maxdist, prefer, plasmaSearchQuery.contentdomParser(contentdom), false, count, 0, duetime, filter, plasmaSearchQuery.SEARCHDOM_LOCAL, null, -1, null, false);
+            theQuery = new plasmaSearchQuery(null, abstractSet, new TreeSet<String>(kelondroBase64Order.enhancedComparator), rankingProfile, maxdist, prefer, plasmaSearchQuery.contentdomParser(contentdom), false, count, 0, duetime, filter, plasmaSearchQuery.SEARCHDOM_LOCAL, null, -1, null, false);
             theQuery.domType = plasmaSearchQuery.SEARCHDOM_LOCAL;
             yacyCore.log.logInfo("INIT HASH SEARCH (abstracts only): " + plasmaSearchQuery.anonymizedQueryHashes(theQuery.queryHashes) + " - " + theQuery.displayResults() + " links");
 
             long timer = System.currentTimeMillis();
-            Map[] containers = sb.wordIndex.localSearchContainers(theQuery, plasmaSearchQuery.hashes2Set(urls));
+            Map<String, indexContainer>[] containers = sb.wordIndex.localSearchContainers(theQuery, plasmaSearchQuery.hashes2Set(urls));
             serverProfiling.update("SEARCH", new plasmaProfiling.searchEvent(theQuery.id(true), plasmaSearchEvent.COLLECTION, containers[0].size(), System.currentTimeMillis() - timer));
             if (containers != null) {
-                Iterator ci = containers[0].entrySet().iterator();
-                Map.Entry entry;
+                Iterator<Map.Entry<String, indexContainer>> ci = containers[0].entrySet().iterator();
+                Map.Entry<String, indexContainer> entry;
                 String wordhash;
                 while (ci.hasNext()) {
-                    entry = (Map.Entry) ci.next();
-                    wordhash = (String) entry.getKey();
-                    indexContainer container = (indexContainer) entry.getValue();
+                    entry = ci.next();
+                    wordhash = entry.getKey();
+                    indexContainer container = entry.getValue();
                     indexabstractContainercount += container.size();
                     indexabstract.append("indexabstract." + wordhash + "=").append(indexContainer.compressIndex(container, null, 1000).toString()).append(serverCore.CRLF_STRING);                
                 }
@@ -188,18 +189,18 @@ public final class search {
             } else {
                 // attach information about index abstracts
                 StringBuffer indexcount = new StringBuffer();
-                Map.Entry entry;
-                Iterator i = theSearch.IACount.entrySet().iterator();
+                Map.Entry<String, Integer> entry;
+                Iterator<Map.Entry<String, Integer>> i = theSearch.IACount.entrySet().iterator();
                 while (i.hasNext()) {
-                    entry = (Map.Entry) i.next();
+                    entry = i.next();
                     indexcount.append("indexcount.").append((String) entry.getKey()).append('=').append(((Integer) entry.getValue()).toString()).append(serverCore.CRLF_STRING);
                 }
                 if (abstractSet != null) {
                     // if a specific index-abstract is demanded, attach it here
-                    i = abstractSet.iterator();
+                    Iterator<String> j = abstractSet.iterator();
                     String wordhash;
-                    while (i.hasNext()) {
-                        wordhash = (String) i.next();
+                    while (j.hasNext()) {
+                        wordhash = (String) j.next();
                         indexabstractContainercount += ((Integer) theSearch.IACount.get(wordhash)).intValue();
                         indexabstract.append("indexabstract." + wordhash + "=").append((String) theSearch.IAResults.get(wordhash)).append(serverCore.CRLF_STRING);
                     }
@@ -238,9 +239,9 @@ public final class search {
             
             // prepare reference hints
             long timer = System.currentTimeMillis();
-            Set ws = theSearch.references(10);
+            Set<String> ws = theSearch.references(10);
             StringBuffer refstr = new StringBuffer();
-            Iterator j = ws.iterator();
+            Iterator<String> j = ws.iterator();
             while (j.hasNext()) {
                 refstr.append(",").append((String) j.next());
             }
@@ -282,15 +283,15 @@ public final class search {
 
         // prepare search statistics
         Long trackerHandle = new Long(System.currentTimeMillis());
-        HashMap searchProfile = theQuery.resultProfile(joincount, System.currentTimeMillis() - timestamp, urlRetrievalAllTime, snippetComputationAllTime);
+        HashMap<String, Object> searchProfile = theQuery.resultProfile(joincount, System.currentTimeMillis() - timestamp, urlRetrievalAllTime, snippetComputationAllTime);
         String client = (String) header.get("CLIENTIP");
         searchProfile.put("host", client);
         yacySeed remotepeer = yacyCore.seedDB.lookupByIP(natLib.getInetAddress(client), true, false, false);
         searchProfile.put("peername", (remotepeer == null) ? "unknown" : remotepeer.getName());
         searchProfile.put("time", trackerHandle);
         sb.remoteSearches.add(searchProfile);
-        TreeSet handles = (TreeSet) sb.remoteSearchTracker.get(client);
-        if (handles == null) handles = new TreeSet();
+        TreeSet<Long> handles = sb.remoteSearchTracker.get(client);
+        if (handles == null) handles = new TreeSet<Long>();
         handles.add(trackerHandle);
         sb.remoteSearchTracker.put(client, handles);
         

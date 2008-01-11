@@ -45,11 +45,13 @@ public class kelondroFlexSplitTable implements kelondroIndex {
     private kelondroRow rowdef;
     private File path;
     private String tablename;
+    private kelondroOrder<kelondroRow.Entry> entryOrder;
     
     public kelondroFlexSplitTable(File path, String tablename, long preloadTime, kelondroRow rowdef, boolean resetOnFail) {
         this.path = path;
         this.tablename = tablename;
         this.rowdef = rowdef;
+        this.entryOrder = new kelondroRow.EntryComparator(rowdef.objectOrder);
         init(preloadTime, resetOnFail);
     }
     
@@ -192,7 +194,7 @@ public class kelondroFlexSplitTable implements kelondroIndex {
         return (kelondroRow.Entry) keeper[1];
     }
     
-    public synchronized void putMultiple(List rows) throws IOException {
+    public synchronized void putMultiple(List<kelondroRow.Entry> rows) throws IOException {
         throw new UnsupportedOperationException("not yet implemented");
     }
     
@@ -287,8 +289,8 @@ public class kelondroFlexSplitTable implements kelondroIndex {
         }
     }
     
-    public synchronized kelondroCloneableIterator keys(boolean up, byte[] firstKey) throws IOException {
-        HashSet<kelondroCloneableIterator<?>> set = new HashSet<kelondroCloneableIterator<?>>();
+    public synchronized kelondroCloneableIterator<byte[]> keys(boolean up, byte[] firstKey) throws IOException {
+        HashSet<kelondroCloneableIterator<byte[]>> set = new HashSet<kelondroCloneableIterator<byte[]>>();
         Iterator<kelondroIndex> i = tables.values().iterator();
         while (i.hasNext()) {
             set.add(i.next().keys(up, firstKey));
@@ -296,13 +298,13 @@ public class kelondroFlexSplitTable implements kelondroIndex {
         return kelondroMergeIterator.cascade(set, rowdef.objectOrder, kelondroMergeIterator.simpleMerge, up);
     }
     
-    public synchronized kelondroCloneableIterator rows(boolean up, byte[] firstKey) throws IOException {
-        HashSet<kelondroCloneableIterator<?>> set = new HashSet<kelondroCloneableIterator<?>>();
+    public synchronized kelondroCloneableIterator<kelondroRow.Entry> rows(boolean up, byte[] firstKey) throws IOException {
+        HashSet<kelondroCloneableIterator<kelondroRow.Entry>> set = new HashSet<kelondroCloneableIterator<kelondroRow.Entry>>();
         Iterator<kelondroIndex> i = tables.values().iterator();
         while (i.hasNext()) {
             set.add(i.next().rows(up, firstKey));
         }
-        return kelondroMergeIterator.cascade(set, rowdef.objectOrder, kelondroMergeIterator.simpleMerge, up);
+        return kelondroMergeIterator.cascade(set, entryOrder, kelondroMergeIterator.simpleMerge, up);
     }
 
     public final int cacheObjectChunkSize() {

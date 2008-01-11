@@ -55,7 +55,7 @@ import java.util.List;
 public class kelondroSplittedTree implements kelondroIndex {
 
     private kelondroTree[] ktfs;
-    private kelondroOrder order;
+    private kelondroByteOrder order;
     private int ff;
     private String filename;
     
@@ -69,7 +69,7 @@ public class kelondroSplittedTree implements kelondroIndex {
         return new File(path, filenameStub + "." + ff + "." + co + "." + ns + ".ktc");
     }
     
-    public kelondroSplittedTree(File pathToFiles, String filenameStub, kelondroOrder objectOrder,
+    public kelondroSplittedTree(File pathToFiles, String filenameStub, kelondroByteOrder objectOrder,
                             long preloadTime,
                             int forkfactor, kelondroRow rowdef, int txtProps, int txtPropsWidth) {
         try {
@@ -118,7 +118,6 @@ public class kelondroSplittedTree implements kelondroIndex {
         return ktfs[partition(key)].get(key);
     }
 
-    @SuppressWarnings("unchecked")
 	public synchronized void putMultiple(List<kelondroRow.Entry> rows) throws IOException {
         Iterator<kelondroRow.Entry> i = rows.iterator();
         kelondroRow.Entry row;
@@ -188,7 +187,6 @@ public class kelondroSplittedTree implements kelondroIndex {
             ktfsI = ktfs[c].rows(up, firstKey); // FIXME: this works only correct with firstKey == null
         }
         
-        @SuppressWarnings("unchecked")
 		public rowIterator clone(Object secondKey) {
             try {
                 return new rowIterator(up, (byte[]) secondKey);
@@ -255,7 +253,6 @@ public class kelondroSplittedTree implements kelondroIndex {
             ktfsI = ktfs[c].keys(up, firstKey); // FIXME: this works only correct with firstKey == null
         }
         
-        @SuppressWarnings("unchecked")
 		public keyIterator clone(Object secondKey) {
             try {
                 return new keyIterator(up, (byte[]) secondKey);
@@ -305,7 +302,7 @@ public class kelondroSplittedTree implements kelondroIndex {
         
     }
     
-    public kelondroOrder order() {
+    public kelondroByteOrder order() {
         return this.order;
     }
 

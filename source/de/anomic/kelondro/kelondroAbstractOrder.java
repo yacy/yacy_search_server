@@ -45,83 +45,36 @@
 
 package de.anomic.kelondro;
 
-import de.anomic.index.indexContainer;
 
-public abstract class kelondroAbstractOrder implements kelondroOrder {
+public abstract class kelondroAbstractOrder<A> implements kelondroOrder<A> {
 
-    protected byte[] zero = null;
+    protected A zero = null;
     protected boolean asc = true;
     
-    public abstract Object clone();
+    abstract public kelondroOrder<A> clone();
 
+    public A zero() {
+    	return zero;
+    }
+    
     public void direction(boolean ascending) {
         asc = ascending;
     }
     
-    public long partition(byte[] key, int forks) {
+    public long partition(A key, int forks) {
         final long d = (Long.MAX_VALUE / forks) + ((Long.MAX_VALUE % forks) + 1) / forks;
         return cardinal(key) / d;
     }
     
-    public int compare(Object a, Object b) {
-    	if ((a instanceof byte[]) && (b instanceof byte[])) {
-    		return compare((byte[]) a, (byte[]) b);
-    	}
-    	if ((a instanceof Integer) && (b instanceof Integer)) {
-    		return compare((Integer) a, (Integer) b);
-    	}
-    	if ((a instanceof String) && (b instanceof String)) {
-    		return compare(((String) a).getBytes(), ((String) b).getBytes());
-    	}
-    	if ((a instanceof kelondroNode) && (b instanceof kelondroNode)) {
-    		return compare((kelondroNode) a, (kelondroNode) b);
-    	}
-    	if ((a instanceof kelondroRow.Entry) && (b instanceof kelondroRow.Entry)) {
-    		return compare((kelondroRow.Entry) a, (kelondroRow.Entry) b);
-    	}
-    	Class<? extends Object> ac = a.getClass();
-    	Class<? extends Object> bc = b.getClass();
-    	if (ac.equals(bc)) {
-    		throw new UnsupportedOperationException("compare not implemented for this object type: " + ac);
-    	} else {
-    		throw new UnsupportedOperationException("compare must be applied to same object classes; here a = " + ac + ", b = " + bc);
-    	}
-    }
-    
-    public int compare(kelondroNode a, kelondroNode b) {
-        return compare(a.getKey(), b.getKey());
-    }
-    
-    public int compare(String a, String b) {
-        return compare(a.getBytes(), b.getBytes());
-    }
-    
-    public int compare(kelondroRow.Entry a, kelondroRow.Entry b) {
-        return a.compareTo(b);
-    }
-    
-    public int compare(indexContainer a, indexContainer b) {
-    	return compare(a.getWordHash(), b.getWordHash());
-    }
-    
-    public int compare(Integer a, Integer b) {
-        return a.compareTo(b);
-    }
-    
-    public byte[] zero() {
-        return zero;
-    }
-    
-    public void rotate(byte[] newzero) {
+    public void rotate(A newzero) {
         this.zero = newzero;
     }
     
-    public boolean equals(kelondroOrder otherOrder) {
+    public boolean equals(kelondroOrder<A> otherOrder) {
         if (otherOrder == null) return false;
         String thisSig = this.signature();
         String otherSig = otherOrder.signature();
         if ((thisSig == null) || (otherSig == null)) return false;
         return thisSig.equals(otherSig);
     }
-    
 }

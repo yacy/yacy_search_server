@@ -173,7 +173,7 @@ public final class plasmaSwitchboard extends serverAbstractSwitch implements ser
     // 3) result of index transfer, some of them are here (not possible here)
     // 4) proxy-load (initiator is "------------")
     // 5) local prefetch/crawling (initiator is own seedHash)
-    // 6) local fetching for global crawling (other known or unknwon initiator)
+    // 6) local fetching for global crawling (other known or unknown initiator)
     public static final int PROCESSCASE_0_UNKNOWN = 0;
     public static final int PROCESSCASE_1_GLOBAL_CRAWLING = 1;
     public static final int PROCESSCASE_2_SEARCH_QUERY_RESULT = 2;
@@ -183,9 +183,9 @@ public final class plasmaSwitchboard extends serverAbstractSwitch implements ser
     public static final int PROCESSCASE_6_GLOBAL_CRAWLING = 6;
     
     // couloured list management
-    public static TreeSet badwords = null;
-    public static TreeSet blueList = null;
-    public static TreeSet stopwords = null;    
+    public static TreeSet<String> badwords = null;
+    public static TreeSet<String> blueList = null;
+    public static TreeSet<String> stopwords = null;    
     public static plasmaURLPattern urlBlacklist;
     
     public static wikiParser wikiParser = null;
@@ -199,7 +199,7 @@ public final class plasmaSwitchboard extends serverAbstractSwitch implements ser
     public  File                        rankingPath;
     public  File                        workPath;
     public  File                        releasePath;
-    public  HashMap                     rankingPermissions;
+    public  HashMap<String, String>     rankingPermissions;
     public  plasmaWordIndex             wordIndex;
     public  plasmaCrawlQueues           crawlQueues;
     public  plasmaSwitchboardQueue      sbQueue;
@@ -230,7 +230,7 @@ public final class plasmaSwitchboard extends serverAbstractSwitch implements ser
     public  plasmaDHTFlush              transferIdxThread = null;
     private plasmaDHTChunk              dhtTransferChunk = null;
     public  ArrayList<HashMap<String, Object>> localSearches, remoteSearches; // array of search result properties as HashMaps
-    public  HashMap                     localSearchTracker, remoteSearchTracker; // mappings from requesting host to a TreeSet of Long(access time)
+    public  HashMap<String, TreeSet<Long>> localSearchTracker, remoteSearchTracker; // mappings from requesting host to a TreeSet of Long(access time)
     public  long                        lastseedcheckuptime = -1;
     public  long                        indexedPages = 0;
     public  long                        lastindexedPages = 0;
@@ -985,7 +985,7 @@ public final class plasmaSwitchboard extends serverAbstractSwitch implements ser
             // read only once upon first instantiation of this class
             String f = getConfig(LIST_BLUE, LIST_BLUE_DEFAULT);
             File plasmaBlueListFile = new File(f);
-            if (f != null) blueList = kelondroMSetTools.loadList(plasmaBlueListFile, kelondroNaturalOrder.naturalOrder); else blueList= new TreeSet();
+            if (f != null) blueList = kelondroMSetTools.loadList(plasmaBlueListFile, kelondroNaturalOrder.naturalComparator); else blueList= new TreeSet();
             this.log.logConfig("loaded blue-list from file " + plasmaBlueListFile.getName() + ", " +
             blueList.size() + " entries, " +
             ppRamString(plasmaBlueListFile.length()/1024));
@@ -1018,7 +1018,7 @@ public final class plasmaSwitchboard extends serverAbstractSwitch implements ser
         // load badwords (to filter the topwords)
         if (badwords == null) {
             File badwordsFile = new File(rootPath, LIST_BADWORDS_DEFAULT);
-            badwords = kelondroMSetTools.loadList(badwordsFile, kelondroNaturalOrder.naturalOrder);
+            badwords = kelondroMSetTools.loadList(badwordsFile, kelondroNaturalOrder.naturalComparator);
             this.log.logConfig("loaded badwords from file " + badwordsFile.getName() +
                                ", " + badwords.size() + " entries, " +
                                ppRamString(badwordsFile.length()/1024));
@@ -1027,7 +1027,7 @@ public final class plasmaSwitchboard extends serverAbstractSwitch implements ser
         // load stopwords
         if (stopwords == null) {
             File stopwordsFile = new File(rootPath, LIST_STOPWORDS_DEFAULT);
-            stopwords = kelondroMSetTools.loadList(stopwordsFile, kelondroNaturalOrder.naturalOrder);
+            stopwords = kelondroMSetTools.loadList(stopwordsFile, kelondroNaturalOrder.naturalComparator);
             this.log.logConfig("loaded stopwords from file " + stopwordsFile.getName() + ", " +
             stopwords.size() + " entries, " +
             ppRamString(stopwordsFile.length()/1024));
@@ -1205,8 +1205,8 @@ public final class plasmaSwitchboard extends serverAbstractSwitch implements ser
         this.incomingCookies = new HashMap();
         
         // init search history trackers
-        this.localSearchTracker = new HashMap(); // String:TreeSet - IP:set of Long(accessTime)
-        this.remoteSearchTracker = new HashMap();
+        this.localSearchTracker = new HashMap<String, TreeSet<Long>>(); // String:TreeSet - IP:set of Long(accessTime)
+        this.remoteSearchTracker = new HashMap<String, TreeSet<Long>>();
         this.localSearches = new ArrayList<HashMap<String, Object>>(); // contains search result properties as HashMaps
         this.remoteSearches = new ArrayList<HashMap<String, Object>>();
         

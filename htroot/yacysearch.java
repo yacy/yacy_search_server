@@ -200,7 +200,7 @@ public class yacysearch {
             }
             	
             // filter out stopwords
-            final TreeSet filtered = kelondroMSetTools.joinConstructive(query[0], plasmaSwitchboard.stopwords);
+            final TreeSet<String> filtered = kelondroMSetTools.joinConstructive(query[0], plasmaSwitchboard.stopwords);
             if (filtered.size() > 0) {
                 kelondroMSetTools.excludeDestructive(query[0], plasmaSwitchboard.stopwords);
             }
@@ -217,7 +217,7 @@ public class yacysearch {
                 sb.wordIndex.removeWordReferences(query[0], delHash);
 
                 // make new news message with negative voting
-                HashMap map = new HashMap();
+                HashMap<String, String> map = new HashMap<String, String>();
                 map.put("urlhash", delHash);
                 map.put("vote", "negative");
                 map.put("refid", "");
@@ -238,7 +238,7 @@ public class yacysearch {
                     document = plasmaSnippetCache.retrieveDocument(comp.url(), true, 5000, true);
                     if (document != null) {
                         // create a news message
-                        HashMap map = new HashMap();
+                        HashMap<String, String> map = new HashMap<String, String>();
                         map.put("url", comp.url().toNormalform(false, true).replace(',', '|'));
                         map.put("title", comp.title().replace(',', ' '));
                         map.put("description", ((document == null) ? comp.title() : document.getTitle()).replace(',', ' '));
@@ -255,7 +255,7 @@ public class yacysearch {
             final boolean globalsearch = (global) && (yacyonline);
         
             // do the search
-            TreeSet queryHashes = plasmaCondenser.words2hashes(query[0]);
+            TreeSet<String> queryHashes = plasmaCondenser.words2hashes(query[0]);
             plasmaSearchQuery theQuery = new plasmaSearchQuery(
         			querystring,
         			queryHashes,
@@ -311,14 +311,14 @@ public class yacysearch {
 
             // prepare search statistics
             Long trackerHandle = new Long(System.currentTimeMillis());
-            HashMap searchProfile = theQuery.resultProfile(theSearch.getLocalCount() + theSearch.getGlobalCount(), System.currentTimeMillis() - timestamp, theSearch.getURLRetrievalTime(), theSearch.getSnippetComputationTime());
+            HashMap<String, Object> searchProfile = theQuery.resultProfile(theSearch.getLocalCount() + theSearch.getGlobalCount(), System.currentTimeMillis() - timestamp, theSearch.getURLRetrievalTime(), theSearch.getSnippetComputationTime());
             searchProfile.put("querystring", theQuery.queryString);
             searchProfile.put("time", trackerHandle);
             searchProfile.put("host", client);
             searchProfile.put("offset", new Integer(0));
             sb.localSearches.add(searchProfile);
-            TreeSet handles = (TreeSet) sb.localSearchTracker.get(client);
-            if (handles == null) handles = new TreeSet();
+            TreeSet<Long> handles = sb.localSearchTracker.get(client);
+            if (handles == null) handles = new TreeSet<Long>();
             handles.add(trackerHandle);
             sb.localSearchTracker.put(client, handles);
         

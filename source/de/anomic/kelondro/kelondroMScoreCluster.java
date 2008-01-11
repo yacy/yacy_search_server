@@ -288,7 +288,6 @@ public final class kelondroMScoreCluster<E> {
         return getScores(maxCount, up, Integer.MIN_VALUE, Integer.MAX_VALUE);
     }
     
-    @SuppressWarnings("unchecked")
     public synchronized E[] getScores(int maxCount, boolean up, int minScore, int maxScore) {
         if (maxCount > refkeyDB.size()) maxCount = refkeyDB.size();
         E[] s = (E[]) new Object[maxCount];
@@ -325,7 +324,6 @@ public final class kelondroMScoreCluster<E> {
         E n;
         int min, max;
         
-        @SuppressWarnings("unchecked")
 		public komplexScoreIterator(boolean up, int minScore, int maxScore) {
             this.up = up;
             this.min = minScore;

@@ -47,10 +47,10 @@ package de.anomic.kelondro;
 
 import java.util.Comparator;
 
-public final class kelondroNaturalOrder extends kelondroAbstractOrder implements kelondroOrder, Comparator<Object>, Cloneable {
+public final class kelondroNaturalOrder extends kelondroAbstractOrder<byte[]> implements kelondroByteOrder, Comparator<byte[]>, Cloneable {
     
-    public static final kelondroOrder naturalOrder = new kelondroNaturalOrder(true);
-    
+    public static final kelondroByteOrder naturalOrder = new kelondroNaturalOrder(true);
+    public static final Comparator<String> naturalComparator = new kelondroByteOrder.StringOrder(naturalOrder);
     public kelondroNaturalOrder(boolean ascending) {
         this.asc = ascending;
         this.zero = null;
@@ -64,13 +64,13 @@ public final class kelondroNaturalOrder extends kelondroAbstractOrder implements
         return true;
     }
     
-    public final Object clone() {
+    public final kelondroOrder<byte[]> clone() {
         kelondroNaturalOrder o = new kelondroNaturalOrder(this.asc);
         o.rotate(this.zero);
         return o;
     }
     
-    public final static kelondroOrder bySignature(String signature) {
+    public final static kelondroByteOrder bySignature(String signature) {
         if (signature.equals("nd")) return new kelondroNaturalOrder(false);
         if (signature.equals("nu")) return new kelondroNaturalOrder(true);
         return null;
@@ -189,7 +189,7 @@ public final class kelondroNaturalOrder extends kelondroAbstractOrder implements
         byte[] t = new byte[12];
         for (int i = 0; i < 12; i++) t[i] = (byte) 255;
         t[0] = (byte) 127;
-        kelondroOrder o = new kelondroNaturalOrder(true);
+        kelondroOrder<byte[]> o = new kelondroNaturalOrder(true);
         System.out.println(o.partition(t, 16));
     }
     

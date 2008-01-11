@@ -72,11 +72,12 @@ public final class plasmaSearchEvent {
     private Thread localSearchThread;
     private TreeMap preselectedPeerHashes;
     //private Object[] references;
-    public  TreeMap IAResults, IACount;
+    public  TreeMap IAResults;
+    public  TreeMap<String, Integer> IACount;
     public  String IAmaxcounthash, IAneardhthash;
     private int localcount;
     private resultWorker[] workerThreads;
-    private ArrayList resultList; // list of this.Entry objects
+    private ArrayList<ResultEntry> resultList;
     //private int resultListLock; // a pointer that shows that all elements below this pointer are fixed and may not be changed again
     private HashMap failedURLs; // a mapping from a urlhash to a fail reason string
     TreeSet snippetFetchWordHashes; // a set of word hashes that are used to match with the snippets
@@ -605,7 +606,7 @@ public final class plasmaSearchEvent {
         }
     }
     
-    public ArrayList completeResults(long waitingtime) {
+    public ArrayList<ResultEntry> completeResults(long waitingtime) {
         long timeout = System.currentTimeMillis() + waitingtime;
         while ((this.resultList.size() < query.neededResults()) && (anyWorkerAlive()) && (System.currentTimeMillis() < timeout)) {
             try {Thread.sleep(200);} catch (InterruptedException e) {}
@@ -718,7 +719,7 @@ public final class plasmaSearchEvent {
         //assert e != null;
     }
     
-    public Set references(int count) {
+    public Set<String> references(int count) {
         // returns a set of words that are computed as toplist
         return this.rankedCache.getReferences(count);
     }
@@ -730,12 +731,14 @@ public final class plasmaSearchEvent {
         private String alternative_urlstring;
         private String alternative_urlname;
         private plasmaSnippetCache.TextSnippet textSnippet;
-        private ArrayList /* of plasmaSnippetCache.MediaSnippet */ mediaSnippets;
+        private ArrayList<plasmaSnippetCache.MediaSnippet> mediaSnippets;
         
         // statistic objects
         public long dbRetrievalTime, snippetComputationTime;
         
-        public ResultEntry(indexURLEntry urlentry, plasmaWordIndex wordIndex, plasmaSnippetCache.TextSnippet textSnippet, ArrayList mediaSnippets,
+        public ResultEntry(indexURLEntry urlentry, plasmaWordIndex wordIndex,
+        				   plasmaSnippetCache.TextSnippet textSnippet,
+        				   ArrayList<plasmaSnippetCache.MediaSnippet> mediaSnippets,
                            long dbRetrievalTime, long snippetComputationTime) {
             this.urlentry = urlentry;
             this.urlcomps = urlentry.comp();
@@ -796,7 +799,7 @@ public final class plasmaSearchEvent {
         public plasmaSnippetCache.TextSnippet textSnippet() {
             return this.textSnippet;
         }
-        public ArrayList /* of plasmaSnippetCache.MediaSnippet */ mediaSnippets() {
+        public ArrayList<plasmaSnippetCache.MediaSnippet> mediaSnippets() {
             return this.mediaSnippets;
         }
         public Date modified() {

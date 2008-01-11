@@ -51,7 +51,7 @@ public class kelondroBinSearch {
     private byte[] chunks;
     private int    chunksize;
     private int    count;
-    private kelondroOrder objectOrder = new kelondroNaturalOrder(true);
+    private kelondroByteOrder objectOrder = new kelondroNaturalOrder(true);
     
     public kelondroBinSearch(byte[] chunks, int chunksize) {
         this.chunks = chunks;

@@ -155,7 +155,7 @@ public class plasmaRankingRCIEvaluation {
     
     public static TreeSet[] genRankingTable(kelondroAttrSeq rci, int[] partition) {
         TreeSet[] ranked = new TreeSet[partition.length];
-        for (int i = 0; i < partition.length; i++) ranked[i] = new TreeSet(kelondroBase64Order.enhancedCoder);
+        for (int i = 0; i < partition.length; i++) ranked[i] = new TreeSet(kelondroBase64Order.enhancedComparator);
         Iterator i = rci.keys();
         String key;
         kelondroAttrSeq.Entry entry;

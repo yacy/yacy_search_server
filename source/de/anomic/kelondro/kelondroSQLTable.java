@@ -61,7 +61,7 @@ public class kelondroSQLTable implements kelondroIndex {
     private final String db_pwd_str    = "yacy";
     
     private Connection theDBConnection = null;
-    private final kelondroOrder order = new kelondroNaturalOrder(true);
+    private final kelondroByteOrder order = new kelondroNaturalOrder(true);
     private kelondroRow rowdef;
     
     public kelondroSQLTable(String dbType, kelondroRow rowdef) throws Exception {
@@ -262,7 +262,7 @@ public class kelondroSQLTable implements kelondroIndex {
         return 0;
     }
 
-    public kelondroOrder order() {
+    public kelondroByteOrder order() {
         return this.order;
     }
     

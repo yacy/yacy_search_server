@@ -80,7 +80,7 @@ public class kelondroFlexTable extends kelondroFlexWidthArray implements kelondr
             System.out.println("*** Delete File index " + indexfile);
             indexfile.delete();
         }
-        	
+        
         // fill the index
         System.out.print("*** Loading RAM index for " + size() + " entries from "+ newpath);
         index = initializeRamIndex(minimumSpace);
@@ -153,38 +153,7 @@ public class kelondroFlexTable extends kelondroFlexWidthArray implements kelondr
         }
         System.out.print(" -ordering- ");
         System.out.flush();
-        //int sbu = ri.size();
-        //if (ri.size() != sbu) serverLog.logSevere("kelondroFlexTable.initializeRamIndex: " + tablename, "; size before uniq = " + sbu + ", after uniq = " + ri.size());
         return ri;
-    }
-    
-    private kelondroIndex initializeTreeIndex(File indexfile, long preloadTime, kelondroOrder objectOrder) throws IOException {
-        kelondroIndex treeindex = new kelondroCache(new kelondroTree(indexfile, true, preloadTime, treeIndexRow(rowdef.primaryKeyLength, objectOrder), 2, 80), true, false);
-        Iterator<kelondroNode> content = super.col[0].contentNodes(-1);
-        kelondroNode node;
-        kelondroRow.Entry indexentry;
-        int i, c = 0, all = super.col[0].size();
-        long start = System.currentTimeMillis();
-        long last = start;
-        while (content.hasNext()) {
-            node = content.next();
-            i = node.handle().hashCode();
-            indexentry = treeindex.row().newEntry();
-            indexentry.setCol(0, node.getValueRow());
-            indexentry.setCol(1, i);
-            treeindex.addUnique(indexentry);
-            c++;
-            if (System.currentTimeMillis() - last > 30000) {
-                System.out.println(".. generated " + c + "/" + all + " entries, " + ((System.currentTimeMillis() - start) / c * (all - c) / 60000) + " minutes remaining");
-                System.out.flush();
-                last = System.currentTimeMillis();
-            }
-        }
-        return treeindex;
-    }
-    
-    private static final kelondroRow treeIndexRow(int keywidth, kelondroOrder objectOrder) {
-        return new kelondroRow("byte[] key-" + keywidth + ", int reference-4 {b256}", objectOrder, 0);
     }
     
     public synchronized kelondroRow.Entry get(byte[] key) throws IOException {
@@ -192,13 +161,22 @@ public class kelondroFlexTable extends kelondroFlexWidthArray implements kelondr
 		int pos = index.geti(key);
 		assert this.size() == index.size() : "content.size() = " + this.size() + ", index.size() = " + index.size();
 		if (pos < 0) return null;
-		// i may be greater than this.size(), because this table may have deleted entries
+		// pos may be greater than this.size(), because this table may have deleted entries
 		// the deleted entries are subtracted from the 'real' tablesize,
 		// so the size may be smaller than an index to a row entry
-		kelondroRow.Entry result = super.get(pos);
-		assert result != null;
-		assert rowdef.objectOrder.compare(result.getPrimaryKeyBytes(), key) == 0 : "key and row does not match; key = " + serverLog.arrayList(key, 0, key.length) + " row.key = " + serverLog.arrayList(result.getPrimaryKeyBytes(), 0, rowdef.primaryKeyLength);
-        return result;
+		/*if (kelondroAbstractRecords.debugmode) {
+			kelondroRow.Entry result = super.get(pos);
+			assert result != null;
+			assert rowdef.objectOrder.compare(result.getPrimaryKeyBytes(), key) == 0 : "key and row does not match; key = " + serverLog.arrayList(key, 0, key.length) + " row.key = " + serverLog.arrayList(result.getPrimaryKeyBytes(), 0, rowdef.primaryKeyLength);
+			return result;
+		} else {*/
+			// assume that the column for the primary key is 0,
+			// and the column 0 is stored in a file only for that column
+			// then we don't need to lookup from that file, because we already know the value (it's the key)
+			kelondroRow.Entry result = super.getOmitCol0(pos, key);
+			assert result != null;
+			return result;
+		//}
 	}
     
     public synchronized void putMultiple(List<kelondroRow.Entry> rows) throws IOException {
@@ -298,7 +276,7 @@ public class kelondroFlexTable extends kelondroFlexWidthArray implements kelondr
         	assert this.size() == index.size() : "content.size() = " + this.size() + ", index.size() = " + index.size();
     		return null;
         }
-        kelondroRow.Entry r = super.get(i);
+        kelondroRow.Entry r = super.getOmitCol0(i, key);
         if (r == null) {
         	serverLog.logSevere("kelondroFlexTable", "remove(): index failure; the index pointed to a cell which is empty. content.size() = " + this.size() + ", index.size() = " + ((index == null) ? 0 : index.size()));
         	// patch bug ***** FIND CAUSE! (see also: put)

@@ -52,6 +52,7 @@ import java.util.Iterator;
 
 import de.anomic.index.indexContainer;
 import de.anomic.index.indexRWIEntry;
+import de.anomic.index.indexRWIRowEntry;
 import de.anomic.index.indexURLEntry;
 import de.anomic.kelondro.kelondroBase64Order;
 import de.anomic.kelondro.kelondroException;
@@ -78,7 +79,7 @@ public class plasmaDHTChunk {
     private int status = chunkStatus_UNDEFINED;
     private String startPointHash = "AAAAAAAAAAAA";
     private indexContainer[] indexContainers = null;
-    private HashMap urlCache; // String (url-hash) / plasmaCrawlLURL.Entry
+    private HashMap<String, indexURLEntry> urlCache; // String (url-hash) / plasmaCrawlLURL.Entry
     private int idxCount;
     
     private long selectionStartTime = 0;
@@ -114,7 +115,7 @@ public class plasmaDHTChunk {
         return c;
     }
     
-    public HashMap urlCacheMap() {
+    public HashMap<String, indexURLEntry> urlCacheMap() {
         return urlCache;
     }
     
@@ -207,17 +208,17 @@ public class plasmaDHTChunk {
     private int selectTransferContainersResource(String hash, boolean ram, int maxcount, int maxtime) throws InterruptedException {
         // if (maxcount > 500) { maxcount = 500; } // flooding & OOM reduce
         // the hash is a start hash from where the indexes are picked
-        final ArrayList tmpContainers = new ArrayList(maxcount);
+        final ArrayList<indexContainer> tmpContainers = new ArrayList<indexContainer>(maxcount);
         try {
-            final Iterator indexContainerIterator = wordIndex.indexContainerSet(hash, ram, true, maxcount).iterator();
+            final Iterator<indexContainer> indexContainerIterator = wordIndex.indexContainerSet(hash, ram, true, maxcount).iterator();
             indexContainer container;
-            Iterator urlIter;
+            Iterator<indexRWIRowEntry> urlIter;
             indexRWIEntry iEntry;
             indexURLEntry lurl;
             int refcount = 0;
             int wholesize;
 
-            urlCache = new HashMap();
+            urlCache = new HashMap<String, indexURLEntry>();
             final double maximumDistance = ((double) peerRedundancy * 2) / ((double) yacyCore.seedDB.sizeConnected());
             final long timeout = (maxtime < 0) ? Long.MAX_VALUE : System.currentTimeMillis() + maxtime;
             while (
@@ -226,7 +227,7 @@ public class plasmaDHTChunk {
                     ((container = (indexContainer) indexContainerIterator.next()) != null) &&
                     (container.size() > 0) &&
                     ((tmpContainers.size() == 0) ||
-                     (yacyDHTAction.dhtDistance(container.getWordHash(), ((indexContainer) tmpContainers.get(0)).getWordHash()) < maximumDistance)) &&
+                     (yacyDHTAction.dhtDistance(container.getWordHash(), tmpContainers.get(0).getWordHash()) < maximumDistance)) &&
                     (System.currentTimeMillis() < timeout)
             ) {
                 // check for interruption
@@ -288,16 +289,16 @@ public class plasmaDHTChunk {
         } catch (kelondroException e) {
             log.logSevere("selectTransferIndexes database corrupted: " + e.getMessage(), e);
             indexContainers = new indexContainer[0];
-            urlCache = new HashMap();
+            urlCache = new HashMap<String, indexURLEntry>();
             this.status = chunkStatus_FAILED;
             return 0;
         }
     }
 
     public synchronized String deleteTransferIndexes() {
-        Iterator urlIter;
+        Iterator<indexRWIRowEntry> urlIter;
         indexRWIEntry iEntry;
-        HashSet urlHashes;
+        HashSet<String> urlHashes;
         String count = "0";
         
         for (int i = 0; i < this.indexContainers.length; i++) {
@@ -307,10 +308,10 @@ public class plasmaDHTChunk {
                 continue;
             }
             int c = this.indexContainers[i].size();
-            urlHashes = new HashSet(this.indexContainers[i].size());
+            urlHashes = new HashSet<String>(this.indexContainers[i].size());
             urlIter = this.indexContainers[i].entries();
             while (urlIter.hasNext()) {
-                iEntry = (indexRWIEntry) urlIter.next();
+                iEntry = urlIter.next();
                 urlHashes.add(iEntry.urlHash());
             }
             String wordHash = indexContainers[i].getWordHash();

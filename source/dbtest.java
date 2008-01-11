@@ -7,13 +7,13 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashSet;
-import java.util.Iterator;
 import java.util.Random;
 
 import javax.imageio.ImageIO;
 
 import de.anomic.kelondro.kelondroBase64Order;
 import de.anomic.kelondro.kelondroCache;
+import de.anomic.kelondro.kelondroCloneableIterator;
 import de.anomic.kelondro.kelondroFlexSplitTable;
 import de.anomic.kelondro.kelondroFlexTable;
 import de.anomic.kelondro.kelondroIndex;
@@ -357,14 +357,14 @@ public class dbtest {
             }
             
             if (command.equals("list")) {
-                Iterator i = null;
+                kelondroCloneableIterator<kelondroRow.Entry> i = null;
                 if (table instanceof kelondroSplittedTree) i = ((kelondroSplittedTree) table).rows(true, null);
                 if (table instanceof kelondroTree) i = ((kelondroTree) table).rows(true, null);
                 if (table instanceof kelondroSQLTable) i = ((kelondroSQLTable) table).rows(true, null);
-                byte[][] row;
+                kelondroRow.Entry row;
                 while (i.hasNext()) {
-                    row = (byte[][]) i.next();
-                    for (int j = 0; j < row.length; j++) System.out.print(new String(row[j]) + ",");
+                    row = i.next();
+                    for (int j = 0; j < row.columns(); j++) System.out.print(row.getColString(j, null) + ",");
                     System.out.println();
                 }
             }
@@ -380,8 +380,8 @@ public class dbtest {
                 long r;
                 Long R;
                 int p, rc=0;
-                ArrayList ra = new ArrayList();
-                HashSet jcontrol = new HashSet();
+                ArrayList<Long> ra = new ArrayList<Long>();
+                HashSet<Long> jcontrol = new HashSet<Long>();
                 kelondroIntBytesMap kcontrol = new kelondroIntBytesMap(1, 0);
                 for (int i = 0; i < writeCount; i++) {
                 	r = Math.abs(random.nextLong() % 1000);
@@ -420,8 +420,8 @@ public class dbtest {
                 long r;
                 Long R;
                 int p, rc=0;
-                ArrayList ra = new ArrayList();
-                HashSet jcontrol = new HashSet();
+                ArrayList<Long> ra = new ArrayList<Long>();
+                HashSet<Long> jcontrol = new HashSet<Long>();
                 kelondroIntBytesMap kcontrol = new kelondroIntBytesMap(1, 0);
                 for (int i = 0; i < writeCount; i++) {
                 	//if (i == 30) random = new Random(randomstart);

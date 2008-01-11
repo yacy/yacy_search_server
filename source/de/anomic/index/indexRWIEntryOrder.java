@@ -39,7 +39,7 @@ import de.anomic.plasma.plasmaSearchRankingProcess;
 import de.anomic.plasma.plasmaSearchRankingProfile;
 import de.anomic.yacy.yacyURL;
 
-public class indexRWIEntryOrder extends kelondroAbstractOrder implements kelondroOrder {
+public class indexRWIEntryOrder extends kelondroAbstractOrder<indexRWIEntry> implements kelondroOrder<indexRWIEntry> {
     private indexRWIVarEntry min, max;
     private plasmaSearchRankingProfile ranking;
     private kelondroMScoreCluster<String> doms;
@@ -102,7 +102,7 @@ public class indexRWIEntryOrder extends kelondroAbstractOrder implements kelondr
         if (this.doms.size() > 0) this.maxdomcount = this.doms.getMaxScore();
     }
     
-    public Object clone() {
+    public kelondroOrder<indexRWIEntry> clone() {
         return null;
     }
     
@@ -152,27 +152,17 @@ public class indexRWIEntryOrder extends kelondroAbstractOrder implements kelondr
         return Long.MAX_VALUE - r; // returns a reversed number: the lower the number the better the ranking. This is used for simple sorting with a TreeMap
     }
     
-    public int compare(byte[] a, byte[] b) {
-    	long ca = cardinal(new indexRWIRowEntry(a));
-    	long cb = cardinal(new indexRWIRowEntry(b));
+    public int compare(indexRWIEntry a, indexRWIEntry b) {
+    	long ca = cardinal(a);
+    	long cb = cardinal(b);
         return (ca > cb) ? 1 : (ca < cb) ? -1 : 0;
     }
-
-    public int compare(byte[] a, int aoffset, int alength, byte[] b, int boffset, int blength) {
-    	long ca = cardinal(new indexRWIRowEntry(a, aoffset, false));
-    	long cb = cardinal(new indexRWIRowEntry(b, boffset, false));
-        return (ca > cb) ? 1 : (ca < cb) ? -1 : 0;
-    }
-
+    
     public String signature() {
         return "rx";
     }
 
-    public boolean wellformed(byte[] a) {
-        return true;
-    }
-
-    public boolean wellformed(byte[] a, int astart, int alength) {
+    public boolean wellformed(indexRWIEntry a) {
         return true;
     }
 

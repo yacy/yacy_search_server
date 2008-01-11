@@ -74,7 +74,7 @@ public class kelondroCollectionIndex {
     private static final int idx_col_lastread   = 6;  // a time stamp, update time in days since 1.1.2000
     private static final int idx_col_lastwrote  = 7;  // a time stamp, update time in days since 1.1.2000
 
-    private static kelondroRow indexRow(int keylength, kelondroOrder payloadOrder) {
+    private static kelondroRow indexRow(int keylength, kelondroByteOrder payloadOrder) {
         return new kelondroRow(
             "byte[] key-" + keylength + "," +
             "int chunksize-4 {b256}," +
@@ -111,7 +111,7 @@ public class kelondroCollectionIndex {
         return new File(path, filenameStub + "." + lf + "." + cs + ".properties");
     }
     
-    public kelondroCollectionIndex(File path, String filenameStub, int keyLength, kelondroOrder indexOrder,
+    public kelondroCollectionIndex(File path, String filenameStub, int keyLength, kelondroByteOrder indexOrder,
                                    long preloadTime, int loadfactor, int maxpartitions, kelondroRow rowdef) throws IOException {
         // the buffersize is number of bytes that are only used if the kelondroFlexTable is backed up with a kelondroTree
         this.path = path;
@@ -161,7 +161,7 @@ public class kelondroCollectionIndex {
         }
     }
     
-    private void openAllArrayFiles(boolean indexGeneration, kelondroOrder indexOrder) throws IOException {
+    private void openAllArrayFiles(boolean indexGeneration, kelondroByteOrder indexOrder) throws IOException {
         
         String[] list = this.path.list();
         kelondroFixedWidthArray array;
@@ -222,7 +222,7 @@ public class kelondroCollectionIndex {
         }
     }
     
-    private kelondroIndex openIndexFile(File path, String filenameStub, kelondroOrder indexOrder,
+    private kelondroIndex openIndexFile(File path, String filenameStub, kelondroByteOrder indexOrder,
             long preloadTime, int loadfactor, kelondroRow rowdef, int initialSpace) throws IOException {
         // open/create index table
         kelondroIndex theindex = new kelondroCache(new kelondroFlexTable(path, filenameStub + ".index", preloadTime, indexRow(keylength, indexOrder), initialSpace, true), true, false);
@@ -246,7 +246,7 @@ public class kelondroCollectionIndex {
         return theindex;
     }
     
-    private kelondroFixedWidthArray openArrayFile(int partitionNumber, int serialNumber, kelondroOrder indexOrder, boolean create) throws IOException {
+    private kelondroFixedWidthArray openArrayFile(int partitionNumber, int serialNumber, kelondroByteOrder indexOrder, boolean create) throws IOException {
         File f = arrayFile(path, filenameStub, loadfactor, payloadrow.objectsize, partitionNumber, serialNumber);
         int load = arrayCapacity(partitionNumber);
         kelondroRow rowdef = new kelondroRow(
@@ -261,7 +261,7 @@ public class kelondroCollectionIndex {
         return a;
     }
     
-    private kelondroFixedWidthArray getArray(int partitionNumber, int serialNumber, kelondroOrder indexOrder, int chunksize) {
+    private kelondroFixedWidthArray getArray(int partitionNumber, int serialNumber, kelondroByteOrder indexOrder, int chunksize) {
         String accessKey = partitionNumber + "-" + chunksize;
         kelondroFixedWidthArray array = (kelondroFixedWidthArray) arrays.get(accessKey);
         if (array != null) return array;

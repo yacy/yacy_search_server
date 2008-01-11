@@ -68,7 +68,6 @@ public class kelondroXMLTables {
         this.tables = new Hashtable<String, Hashtable<String, String>>();
     }
 
-    @SuppressWarnings("unchecked")
     public kelondroXMLTables(File file) throws IOException {
         this.propFile = file;
         this.timestamp = System.currentTimeMillis();

@@ -71,7 +71,7 @@ public class kelondroDyn {
     private kelondroRow rowdef;
     
     public kelondroDyn(File file, boolean useNodeCache, boolean useObjectCache, long preloadTime, int key,
-            int nodesize, char fillChar, kelondroOrder objectOrder, boolean usetree, boolean writebuffer, boolean resetOnFail) {
+            int nodesize, char fillChar, kelondroByteOrder objectOrder, boolean usetree, boolean writebuffer, boolean resetOnFail) {
         // creates or opens a dynamic tree
         rowdef = new kelondroRow("byte[] key-" + (key + counterlen) + ", byte[] node-" + nodesize, objectOrder, 0);
         kelondroIndex fbi;
@@ -160,7 +160,6 @@ public class kelondroDyn {
             nextKey = n();
         }
 
-		@SuppressWarnings("unchecked")
 		public dynKeyIterator clone(Object modifier) {
 			return new dynKeyIterator(ri.clone(modifier));
 		}

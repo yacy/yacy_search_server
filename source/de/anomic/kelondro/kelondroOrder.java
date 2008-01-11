@@ -47,34 +47,25 @@ package de.anomic.kelondro;
 
 import java.util.Comparator;
 
-import de.anomic.index.indexContainer;
+public interface kelondroOrder<A> extends Comparator<A> {
 
-public interface kelondroOrder extends Comparator<Object> {
-
-    public boolean wellformed(byte[] a); // returns true if and only if a has only characters that belong to the implemented order
-    public boolean wellformed(byte[] a, int astart, int alength);
+    public boolean wellformed(A a); // returns true if and only if a has only characters that belong to the implemented order
     
-    public Object clone();
+    public kelondroOrder<A> clone();
     
     public void direction(boolean ascending); // the ordering direction can be changed at any time
     
     public String signature(); // returns a signature String so that different orderings have different signatures
     
-    public long partition(byte[] key, int forkes);
+    public long partition(A key, int forkes);
 
-    public long cardinal(byte[] key); // returns a cardinal number in the range of 0 .. Long.MAX_VALUE
+    public long cardinal(A key); // returns a cardinal number in the range of 0 .. Long.MAX_VALUE
 
-    public int compare(byte[] a, byte[] b);
-    public int compare(String a, String b);
-    public int compare(kelondroNode a, kelondroNode b);
-    public int compare(indexContainer a, indexContainer b);
-    public int compare(kelondroRow.Entry a, kelondroRow.Entry b);
+    public int compare(A a, A b);
     
-    public int compare(byte[] a, int aoffset, int alength, byte[] b, int boffset, int blength);
-    
-    public byte[] zero(); // returns the zero point of the Ordering; null if not defined
+    public A zero(); // returns the zero point of the Ordering; null if not defined
 
-    public void rotate(byte[] zero); // defines that the ordering rotates, and sets the zero point for the rotation
+    public void rotate(A zero); // defines that the ordering rotates, and sets the zero point for the rotation
     
-    public boolean equals(kelondroOrder o); // used to compare different order objects; they may define the same ordering
+    public boolean equals(kelondroOrder<A> o); // used to compare different order objects; they may define the same ordering
 }

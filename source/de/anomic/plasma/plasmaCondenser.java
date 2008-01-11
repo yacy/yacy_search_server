@@ -267,7 +267,7 @@ public final class plasmaCondenser {
     }
     
     public static final Set<String> words2hashSet(String[] words) {
-        TreeSet<String> hashes = new TreeSet<String>(kelondroBase64Order.enhancedCoder);
+        TreeSet<String> hashes = new TreeSet<String>(kelondroBase64Order.enhancedComparator);
         for (int i = 0; i < words.length; i++) hashes.add(word2hash(words[i]));
         return hashes;
     }
@@ -280,7 +280,7 @@ public final class plasmaCondenser {
 
     public static final TreeSet<String> words2hashes(Set<String> words) {
         Iterator<String> i = words.iterator();
-        TreeSet<String> hashes = new TreeSet<String>(kelondroBase64Order.enhancedCoder);
+        TreeSet<String> hashes = new TreeSet<String>(kelondroBase64Order.enhancedComparator);
         while (i.hasNext()) hashes.add(word2hash(i.next()));
         return hashes;
     }

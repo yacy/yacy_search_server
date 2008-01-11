@@ -93,21 +93,21 @@ public class yacysearchitem {
         
         if (bottomline) {
             // attach the bottom line with search references (topwords)
-            final Set references = theSearch.references(20);
+            final Set<String> references = theSearch.references(20);
             if (references.size() > 0) {
                 // get the topwords
-                final TreeSet topwords = new TreeSet(kelondroNaturalOrder.naturalOrder);
+                final TreeSet<String> topwords = new TreeSet<String>(kelondroNaturalOrder.naturalComparator);
                 String tmp = "";
-                Iterator i = references.iterator();
+                Iterator<String> i = references.iterator();
                 while (i.hasNext()) {
-                    tmp = (String) i.next();
+                    tmp = i.next();
                     if (tmp.matches("[a-z]+")) {
                         topwords.add(tmp);
                     }
                 }
 
                 // filter out the badwords
-                final TreeSet filteredtopwords = kelondroMSetTools.joinConstructive(topwords, plasmaSwitchboard.badwords);
+                final TreeSet<String> filteredtopwords = kelondroMSetTools.joinConstructive(topwords, plasmaSwitchboard.badwords);
                 if (filteredtopwords.size() > 0) {
                     kelondroMSetTools.excludeDestructive(topwords, plasmaSwitchboard.badwords);
                 }
@@ -122,7 +122,7 @@ public class yacysearchitem {
                 if (rss) {
                     String word;
                     int hintcount = 0;
-                    final Iterator iter = topwords.iterator();
+                    final Iterator<String> iter = topwords.iterator();
                     while (iter.hasNext()) {
                         word = (String) iter.next();
                         if (word != null) {
@@ -137,7 +137,7 @@ public class yacysearchitem {
                 } else {
                     String word;
                     int hintcount = 0;
-                    final Iterator iter = topwords.iterator();
+                    final Iterator<String> iter = topwords.iterator();
                     while (iter.hasNext()) {
                         word = (String) iter.next();
                         if (word != null) {
@@ -209,7 +209,7 @@ public class yacysearchitem {
             prop.put("content_ybr", plasmaSearchRankingProcess.ybr(result.hash()));
             prop.putNum("content_size", result.filesize());
         
-            TreeSet[] query = theQuery.queryWords();
+            TreeSet<String>[] query = theQuery.queryWords();
             yacyURL wordURL = null;
             try {
                 prop.putHTML("content_words", URLEncoder.encode(query[0].toString(),"UTF-8"));
@@ -227,7 +227,7 @@ public class yacysearchitem {
             // image search; shows thumbnails
             // iterate over all images in the result
             prop.put("content", theQuery.contentdom + 1); // switch on specific content
-            ArrayList /* of plasmaSnippetCache.MediaSnippet */ images = result.mediaSnippets();
+            ArrayList<plasmaSnippetCache.MediaSnippet> images = result.mediaSnippets();
             if (images != null) {
                 plasmaSnippetCache.MediaSnippet ms;
                 yacyURL url;
@@ -253,7 +253,7 @@ public class yacysearchitem {
             (theQuery.contentdom == plasmaSearchQuery.CONTENTDOM_APP)) {
             // any other media content
             prop.put("content", theQuery.contentdom + 1); // switch on specific content
-            ArrayList /* of plasmaSnippetCache.MediaSnippet */ media = result.mediaSnippets();
+            ArrayList<plasmaSnippetCache.MediaSnippet> media = result.mediaSnippets();
             if (item == 0) col = true;
             if (media != null) {
                 plasmaSnippetCache.MediaSnippet ms;

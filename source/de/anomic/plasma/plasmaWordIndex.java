@@ -46,6 +46,7 @@ import de.anomic.index.indexRWIEntry;
 import de.anomic.index.indexRWIRowEntry;
 import de.anomic.index.indexURLEntry;
 import de.anomic.kelondro.kelondroBase64Order;
+import de.anomic.kelondro.kelondroByteOrder;
 import de.anomic.kelondro.kelondroCloneableIterator;
 import de.anomic.kelondro.kelondroMergeIterator;
 import de.anomic.kelondro.kelondroOrder;
@@ -65,7 +66,7 @@ public final class plasmaWordIndex implements indexRI {
     public  static final int  lowcachedivisor = 320;
     public  static final int  maxCollectionPartition = 7; // should be 7
     
-    private final kelondroOrder      indexOrder = kelondroBase64Order.enhancedCoder;
+    private final kelondroByteOrder  indexOrder = kelondroBase64Order.enhancedCoder;
     private final indexRAMRI         dhtOutCache, dhtInCache;
     private final indexCollectionRI  collections;          // new database structure to replace AssortmentCluster and FileCluster
     public        boolean            busyCacheFlush;       // shows if a cache flush is currently performed
@@ -133,12 +134,8 @@ public final class plasmaWordIndex implements indexRI {
         long entryBytes = indexRWIRowEntry.urlEntryRow.objectsize;
         indexRAMRI cache = (in ? dhtInCache : dhtOutCache);
         synchronized (cache) {
-            Iterator it = cache.wordContainers(null, false);
-            indexContainer ic;
-            while ( it.hasNext() ) {
-                ic = (indexContainer)it.next();
-                cacheBytes += ic.size() * entryBytes;
-            }
+            Iterator<indexContainer> it = cache.wordContainers(null, false);
+            while (it.hasNext()) cacheBytes += it.next().size() * entryBytes;
         }
         
         return cacheBytes;
@@ -216,7 +213,7 @@ public final class plasmaWordIndex implements indexRI {
         
         busyCacheFlush = true;
         String wordHash;
-        ArrayList containerList = new ArrayList();
+        ArrayList<indexContainer> containerList = new ArrayList<indexContainer>();
         count = Math.min(5000, Math.min(count, ram.size()));
         boolean collectMax = true;
         indexContainer c;
@@ -293,15 +290,15 @@ public final class plasmaWordIndex implements indexRI {
         int urlComps = htmlFilterContentScraper.urlComps(url.toString()).length;
         
         // iterate over all words of context text
-        Iterator i = condenser.words().entrySet().iterator();
-        Map.Entry wentry;
+        Iterator<Map.Entry<String, plasmaCondenser.wordStatProp>> i = condenser.words().entrySet().iterator();
+        Map.Entry<String, plasmaCondenser.wordStatProp> wentry;
         String word;
         indexRWIEntry ientry;
         plasmaCondenser.wordStatProp wprop;
         while (i.hasNext()) {
-            wentry = (Map.Entry) i.next();
-            word = (String) wentry.getKey();
-            wprop = (plasmaCondenser.wordStatProp) wentry.getValue();
+            wentry = i.next();
+            word = wentry.getKey();
+            wprop = wentry.getValue();
             assert (wprop.flags != null);
             ientry = new indexRWIRowEntry(url.hash(),
                         urlLength, urlComps, (document == null) ? urlLength : document.getTitle().length(),
@@ -333,7 +330,7 @@ public final class plasmaWordIndex implements indexRI {
         return false;
     }
     
-    public indexContainer getContainer(String wordHash, Set urlselection) {
+    public indexContainer getContainer(String wordHash, Set<String> urlselection) {
         if ((wordHash == null) || (wordHash.length() != yacySeedDB.commonHashLength)) {
             // wrong input
             return null;
@@ -461,7 +458,7 @@ public final class plasmaWordIndex implements indexRI {
     public int removeEntryMultiple(Set<String> wordHashes, String urlHash) {
         // remove the same url hashes for multiple words
         // this is mainly used when correcting a index after a search
-        Iterator i = wordHashes.iterator();
+        Iterator<String> i = wordHashes.iterator();
         int count = 0;
         while (i.hasNext()) {
             if (removeEntry((String) i.next(), urlHash)) count++;
@@ -500,7 +497,7 @@ public final class plasmaWordIndex implements indexRI {
     public void removeEntriesMultiple(Set<String> wordHashes, Set<String> urlHashes) {
         // remove the same url hashes for multiple words
         // this is mainly used when correcting a index after a search
-        Iterator i = wordHashes.iterator();
+        Iterator<String> i = wordHashes.iterator();
         while (i.hasNext()) {
             removeEntries((String) i.next(), urlHashes);
         }
@@ -509,7 +506,7 @@ public final class plasmaWordIndex implements indexRI {
     public int removeWordReferences(Set<String> words, String urlhash) {
         // sequentially delete all word references
         // returns number of deletions
-        Iterator iter = words.iterator();
+        Iterator<String> iter = words.iterator();
         int count = 0;
         while (iter.hasNext()) {
             // delete the URL reference in this word index
@@ -528,13 +525,13 @@ public final class plasmaWordIndex implements indexRI {
     	if (d > 0) return d; else return dhtOutCache.tryRemoveURLs(urlHash);
     }
     
-    public synchronized TreeSet indexContainerSet(String startHash, boolean ram, boolean rot, int count) {
+    public synchronized TreeSet<indexContainer> indexContainerSet(String startHash, boolean ram, boolean rot, int count) {
         // creates a set of indexContainers
         // this does not use the dhtInCache
-        kelondroOrder containerOrder = new indexContainerOrder((kelondroOrder) indexOrder.clone());
-        containerOrder.rotate(startHash.getBytes());
-        TreeSet containers = new TreeSet(containerOrder);
-        Iterator i = wordContainers(startHash, ram, rot);
+        kelondroOrder<indexContainer> containerOrder = new indexContainerOrder(indexOrder.clone());
+        containerOrder.rotate(emptyContainer(startHash, 0));
+        TreeSet<indexContainer> containers = new TreeSet<indexContainer>(containerOrder);
+        Iterator<indexContainer> i = wordContainers(startHash, ram, rot);
         if (ram) count = Math.min(dhtOutCache.size(), count);
         indexContainer container;
         // this loop does not terminate using the i.hasNex() predicate when rot == true
@@ -542,7 +539,7 @@ public final class plasmaWordIndex implements indexRI {
         // in this case a termination must be ensured with a counter
         // It must also be ensured that the counter is in/decreased every loop
         while ((count > 0) && (i.hasNext())) {
-            container = (indexContainer) i.next();
+            container = i.next();
             if ((container != null) && (container.size() > 0)) {
                 containers.add(container);
             }
@@ -551,22 +548,22 @@ public final class plasmaWordIndex implements indexRI {
         return containers; // this may return less containers as demanded
     }
 
-    public synchronized kelondroCloneableIterator wordContainers(String startHash, boolean ram, boolean rot) {
-        kelondroCloneableIterator i = wordContainers(startHash, ram);
+    public synchronized kelondroCloneableIterator<indexContainer> wordContainers(String startHash, boolean ram, boolean rot) {
+        kelondroCloneableIterator<indexContainer> i = wordContainers(startHash, ram);
         if (rot) {
-            return new kelondroRotateIterator(i, new String(kelondroBase64Order.zero(startHash.length())));
+            return new kelondroRotateIterator<indexContainer>(i, new String(kelondroBase64Order.zero(startHash.length())));
         } else {
             return i;
         }
     }
 
-    public synchronized kelondroCloneableIterator wordContainers(String startWordHash, boolean ram) {
-        kelondroOrder containerOrder = new indexContainerOrder((kelondroOrder) indexOrder.clone());
-        containerOrder.rotate(startWordHash.getBytes());
+    public synchronized kelondroCloneableIterator<indexContainer> wordContainers(String startWordHash, boolean ram) {
+        kelondroOrder<indexContainer> containerOrder = new indexContainerOrder(indexOrder.clone());
+        containerOrder.rotate(emptyContainer(startWordHash, 0));
         if (ram) {
             return dhtOutCache.wordContainers(startWordHash, false);
         } else {
-            return new kelondroMergeIterator(
+            return new kelondroMergeIterator<indexContainer>(
                             dhtOutCache.wordContainers(startWordHash, false),
                             collections.wordContainers(startWordHash, false),
                             containerOrder,
@@ -602,12 +599,12 @@ public final class plasmaWordIndex implements indexRI {
             indexContainer container = null;
             indexRWIEntry entry = null;
             yacyURL url = null;
-            HashSet urlHashs = new HashSet();
-            Iterator indexContainerIterator = indexContainerSet(startHash, false, false, 100).iterator();
+            HashSet<String> urlHashs = new HashSet<String>();
+            Iterator<indexContainer> indexContainerIterator = indexContainerSet(startHash, false, false, 100).iterator();
             while (indexContainerIterator.hasNext() && run) {
                 waiter();
                 container = (indexContainer) indexContainerIterator.next();
-                Iterator containerIterator = container.entries();
+                Iterator<indexRWIRowEntry> containerIterator = container.entries();
                 wordHashNow = container.getWordHash();
                 while (containerIterator.hasNext() && run) {
                     waiter();
@@ -633,7 +630,7 @@ public final class plasmaWordIndex implements indexRI {
                 }
                 if (!containerIterator.hasNext()) {
                     // We may not be finished yet, try to get the next chunk of wordHashes
-                    TreeSet containers = indexContainerSet(container.getWordHash(), false, false, 100);
+                    TreeSet<indexContainer> containers = indexContainerSet(container.getWordHash(), false, false, 100);
                     indexContainerIterator = containers.iterator();
                     // Make sure we don't get the same wordhash twice, but don't skip a word
                     if ((indexContainerIterator.hasNext()) && (!container.getWordHash().equals(((indexContainer) indexContainerIterator.next()).getWordHash()))) {

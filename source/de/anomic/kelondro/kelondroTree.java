@@ -50,6 +50,7 @@ import java.io.File;
 import java.io.FileReader;
 import java.io.IOException;
 import java.io.RandomAccessFile;
+import java.util.Comparator;
 import java.util.Date;
 import java.util.HashSet;
 import java.util.Iterator;
@@ -86,11 +87,11 @@ public class kelondroTree extends kelondroCachedRecords implements kelondroIndex
     protected static final int root       = 0; // pointer for FHandles-array: pointer to root node
     
     // class variables
-    private   final Search              writeSearchObj = new Search();
-    protected       kelondroOrder       loopDetectionOrder = new kelondroNaturalOrder(true);
-    protected       int                 readAheadChunkSize = 100;
-    protected       long                lastIteratorCount = readAheadChunkSize;
-
+    private   final Search             writeSearchObj = new Search();
+    protected       Comparator<String> loopDetectionOrder;
+    protected       int                readAheadChunkSize = 100;
+    protected       long               lastIteratorCount = readAheadChunkSize;
+    
     public kelondroTree(File file, boolean useNodeCache, long preloadTime, kelondroRow rowdef) throws IOException {
         this(file, useNodeCache, preloadTime, rowdef, rowdef.columns() /* txtProps */, 80 /* txtPropWidth */);
     }
@@ -105,7 +106,7 @@ public class kelondroTree extends kelondroCachedRecords implements kelondroIndex
             setHandle(root, null); // define the root value
         }
         super.setLogger(log);
-
+        this.loopDetectionOrder = new kelondroByteOrder.StringOrder(rowdef.objectOrder);
     }
     
     public static final kelondroTree open(File file, boolean useNodeCache, long preloadTime, kelondroRow rowdef) {
@@ -135,7 +136,7 @@ public class kelondroTree extends kelondroCachedRecords implements kelondroIndex
         this(ra, filename, useNodeCache, preloadTime, rowdef, new kelondroNaturalOrder(true), rowdef.columns() /* txtProps */, 80 /* txtPropWidth */, exitOnFail);
     }
 
-    public kelondroTree(kelondroRA ra, String filename, boolean useNodeCache, long preloadTime, kelondroRow rowdef, kelondroOrder objectOrder, int txtProps, int txtPropsWidth, boolean exitOnFail) {
+    public kelondroTree(kelondroRA ra, String filename, boolean useNodeCache, long preloadTime, kelondroRow rowdef, kelondroByteOrder objectOrder, int txtProps, int txtPropsWidth, boolean exitOnFail) {
         // this creates a new tree within a kelondroRA
         super(ra, filename, useNodeCache, preloadTime,
               thisOHBytes, thisOHHandles, rowdef,
@@ -148,6 +149,7 @@ public class kelondroTree extends kelondroCachedRecords implements kelondroIndex
             throw new RuntimeException("cannot set root handle / " + e.getMessage());
         }
         super.setLogger(log);
+        this.loopDetectionOrder = new kelondroByteOrder.StringOrder(rowdef.objectOrder);
     }
     
     public kelondroTree(kelondroRA ra, String filename, boolean useNodeCache, long preloadTime) throws IOException {
@@ -272,7 +274,7 @@ public class kelondroTree extends kelondroCachedRecords implements kelondroIndex
                     return;
                 }
                 // System.out.println("Comparing key = '" + new String(key) + "' with '" + otherkey + "':"); // debug
-                c = row().objectOrder.compare(new String(key), keybuffer);
+                c = row().objectOrder.compare(key, keybuffer.getBytes());
                 // System.out.println(c); // debug
                 if (c == 0) {
                     found = true;
@@ -988,10 +990,10 @@ public class kelondroTree extends kelondroCachedRecords implements kelondroIndex
 
     public TreeMap<String, kelondroRow.Entry> rowMap(boolean up, byte[] firstKey, boolean including, int count) throws IOException {
         // returns an ordered map of keys/row relations; key objects are of type String, value objects are of type byte[][]
-        kelondroOrder setOrder = (kelondroOrder) row().objectOrder.clone();
+        kelondroByteOrder setOrder = (kelondroByteOrder) row().objectOrder.clone();
         setOrder.direction(up);
         setOrder.rotate(firstKey);
-        TreeMap<String, kelondroRow.Entry> rows = new TreeMap<String, kelondroRow.Entry>(setOrder);
+        TreeMap<String, kelondroRow.Entry> rows = new TreeMap<String, kelondroRow.Entry>(this.loopDetectionOrder);
         CacheNode n;
         String key;
         synchronized (this) {
@@ -1008,10 +1010,10 @@ public class kelondroTree extends kelondroCachedRecords implements kelondroIndex
     
     public TreeSet<String> keySet(boolean up, boolean rotating, byte[] firstKey, boolean including, int count) throws IOException {
         // returns an ordered set of keys; objects are of type String
-        kelondroOrder setOrder = (kelondroOrder) row().objectOrder.clone();
+        kelondroByteOrder setOrder = (kelondroByteOrder) row().objectOrder.clone();
         setOrder.direction(up);
         setOrder.rotate(firstKey);
-        TreeSet<String> set = new TreeSet<String>(setOrder);
+        TreeSet<String> set = new TreeSet<String>(this.loopDetectionOrder);
         kelondroNode n;
         synchronized (this) {
             Iterator<CacheNode> i = (firstKey == null) ? new nodeIterator(up, rotating) : new nodeIterator(up, rotating, firstKey, including);
@@ -1054,7 +1056,6 @@ public class kelondroTree extends kelondroCachedRecords implements kelondroIndex
             lastIteratorCount = 0;
         }
         
-        @SuppressWarnings("unchecked")
 		public rowIterator clone(Object secondStart) {
             try {
                 return new rowIterator(inc, (byte[]) secondStart, guessedCountLimit);
@@ -1128,7 +1129,6 @@ public class kelondroTree extends kelondroCachedRecords implements kelondroIndex
             lastIteratorCount = 0;
         }
         
-        @SuppressWarnings("unchecked")
 		public keyIterator clone(Object secondStart) {
             try {
                 return new keyIterator(inc, (byte[]) secondStart, guessedCountLimit);

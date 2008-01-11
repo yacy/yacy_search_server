@@ -41,16 +41,16 @@ public final class kelondroRow {
    
     protected kelondroColumn[]      row;
     protected int[]                 colstart;
-    protected kelondroOrder         objectOrder;
+    protected kelondroByteOrder     objectOrder;
     public    int                   objectsize;
     public    int                   primaryKeyIndex, primaryKeyLength;
     protected Map<String, Object[]> nickref = null; // a mapping from nicknames to Object[2]{kelondroColumn, Integer(colstart)}
     
-    public kelondroRow(kelondroColumn[] row, kelondroOrder objectOrder, int primaryKey) {
+    public kelondroRow(kelondroColumn[] row, kelondroByteOrder objectOrder, int primaryKey) {
         assert objectOrder != null;
+        this.objectOrder = objectOrder;
         this.row = row;
         assert (objectOrder != null);
-        this.objectOrder = objectOrder;
         this.colstart = new int[row.length];
         this.objectsize = 0;
         for (int i = 0; i < row.length; i++) {
@@ -61,7 +61,7 @@ public final class kelondroRow {
         this.primaryKeyLength = (primaryKey < 0) ? this.objectsize : row[primaryKeyIndex].cellwidth;
     }
 
-    public kelondroRow(String structure, kelondroOrder objectOrder, int primaryKey) {
+    public kelondroRow(String structure, kelondroByteOrder objectOrder, int primaryKey) {
     	assert (objectOrder != null);
     	this.objectOrder = objectOrder;
         // define row with row syntax
@@ -94,14 +94,14 @@ public final class kelondroRow {
         this.primaryKeyLength = (primaryKey < 0) ? this.objectsize : row[primaryKeyIndex].cellwidth;
     }
     
-    public final void setOrdering(kelondroOrder objectOrder, int primaryKey) {
+    public final void setOrdering(kelondroByteOrder objectOrder, int primaryKey) {
     	assert (objectOrder != null);
     	this.objectOrder = objectOrder;
         this.primaryKeyIndex = primaryKey;
         this.primaryKeyLength = (primaryKey < 0) ? this.objectsize : row[primaryKeyIndex].cellwidth;
     }
     
-    public final kelondroOrder getOrdering() {
+    public final kelondroOrder<byte[]> getOrdering() {
         return this.objectOrder;
     }
     
@@ -191,14 +191,33 @@ public final class kelondroRow {
         return new EntryIndex(rowinstance, index);
     }
     
-    public static final Comparator<Entry> entryComparator = new EntryComparator();
-    
-    public static class EntryComparator implements Comparator<Entry> {
+    public static class EntryComparator extends kelondroAbstractOrder<Entry> implements kelondroOrder<Entry>, Comparator<Entry> {
 
+    	kelondroByteOrder base;
+    	public EntryComparator(kelondroByteOrder baseOrder) {
+    		this.base = baseOrder;
+    	}
+    	
 		public int compare(Entry a, Entry b) {
 			return a.compareTo(b);
 		}
-    	
+
+		public kelondroOrder<Entry> clone() {
+			return new EntryComparator(base);
+		}
+
+		public long cardinal(Entry key) {
+			return base.cardinal(key.getPrimaryKeyBytes());
+		}
+
+		public String signature() {
+			return base.signature();
+		}
+
+		public boolean wellformed(Entry a) {
+			return base.wellformed(a.getPrimaryKeyBytes());
+		}
+
     }
     
     public class Entry implements Comparable<Entry> {

@@ -98,7 +98,7 @@ public class kelondroRowCollection {
         this.lastTimeRead = (exportedCollection.getColLong(exp_last_read) + 10957) * day;
         this.lastTimeWrote = (exportedCollection.getColLong(exp_last_wrote) + 10957) * day;
         String sortOrderKey = exportedCollection.getColString(exp_order_type, null);
-        kelondroOrder oldOrder = null;
+        kelondroByteOrder oldOrder = null;
         if ((sortOrderKey == null) || (sortOrderKey.equals("__"))) {
             oldOrder = null;
         } else {

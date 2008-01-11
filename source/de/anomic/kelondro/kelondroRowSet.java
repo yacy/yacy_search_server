@@ -61,7 +61,7 @@ public class kelondroRowSet extends kelondroRowCollection implements kelondroInd
         this.profile = new kelondroProfile();
     }
 
-    public void setOrdering(kelondroOrder newOrder, int newColumn) {
+    public void setOrdering(kelondroByteOrder newOrder, int newColumn) {
         assert newOrder != null;
         if ((rowdef.objectOrder == null) ||
             (!(rowdef.objectOrder.signature().equals(newOrder.signature()))) ||
@@ -275,7 +275,6 @@ public class kelondroRowSet extends kelondroRowCollection implements kelondroInd
             }
         }
         
-        @SuppressWarnings("unchecked")
 		public keyIterator clone(Object second) {
             return new keyIterator(up, (byte[]) second);
         }
@@ -331,7 +330,6 @@ public class kelondroRowSet extends kelondroRowCollection implements kelondroInd
             }
         }
         
-        @SuppressWarnings("unchecked")
 		public rowIterator clone(Object second) {
             return new rowIterator(up, (byte[]) second);
         }

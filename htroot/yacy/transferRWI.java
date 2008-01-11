@@ -123,7 +123,7 @@ public final class transferRWI {
             final long startProcess = System.currentTimeMillis();
 
             // decode request
-            final List v = nxTools.strings(indexes, null);
+            final List<String> v = nxTools.strings(indexes, null);
 
             // free memory
             indexes = null;

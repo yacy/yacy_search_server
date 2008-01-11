@@ -35,9 +35,11 @@ public class kelondroRAMIndex implements kelondroIndex {
     
     private kelondroRow rowdef;
     private kelondroRowSet index0, index1;
+    private kelondroRow.EntryComparator entryComparator;
     
     public kelondroRAMIndex(kelondroRow rowdef, int initialspace) {
     	this.rowdef = rowdef;
+    	this.entryComparator = new kelondroRow.EntryComparator(rowdef.objectOrder);
         reset(initialspace);
     }
     
@@ -153,8 +155,7 @@ public class kelondroRAMIndex implements kelondroIndex {
         return index0.size() + index1.size();
     }
     
-    @SuppressWarnings("unchecked")
-	public synchronized kelondroCloneableIterator<byte[]> keys(boolean up, byte[] firstKey) throws IOException {
+    public synchronized kelondroCloneableIterator<byte[]> keys(boolean up, byte[] firstKey) throws IOException {
         // returns the key-iterator of the underlying kelondroIndex
         if (index1 == null) {
             // finish initialization phase
@@ -169,7 +170,7 @@ public class kelondroRAMIndex implements kelondroIndex {
             return index1.keys(up, firstKey);
         }
         //assert consistencyAnalysis0() : "consistency problem: " + consistencyAnalysis();
-        return new kelondroMergeIterator(
+        return new kelondroMergeIterator<byte[]>(
                 index0.keys(up, firstKey),
                 index1.keys(up, firstKey),
                 rowdef.objectOrder,
@@ -177,8 +178,7 @@ public class kelondroRAMIndex implements kelondroIndex {
                 true);
     }
 
-    @SuppressWarnings("unchecked")
-	public synchronized kelondroCloneableIterator<kelondroRow.Entry> rows(boolean up, byte[] firstKey) throws IOException {
+    public synchronized kelondroCloneableIterator<kelondroRow.Entry> rows(boolean up, byte[] firstKey) throws IOException {
         // returns the row-iterator of the underlying kelondroIndex
         if (index1 == null) {
             // finish initialization phase
@@ -193,10 +193,10 @@ public class kelondroRAMIndex implements kelondroIndex {
             return index1.rows(up, firstKey);
         }
         //assert consistencyAnalysis0() : "consistency problem: " + consistencyAnalysis();
-        return new kelondroMergeIterator(
+        return new kelondroMergeIterator<kelondroRow.Entry>(
                 index0.rows(up, firstKey),
                 index1.rows(up, firstKey),
-                rowdef.objectOrder,
+                entryComparator,
                 kelondroMergeIterator.simpleMerge,
                 true);
     }

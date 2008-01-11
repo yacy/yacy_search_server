@@ -370,7 +370,7 @@ public abstract class kelondroAbstractRecords implements kelondroRecords {
         }
         assignRowdef(rowdef);
         if (fileExisted) {
-            kelondroOrder oldOrder = readOrderType();
+        	kelondroByteOrder oldOrder = readOrderType();
             if ((oldOrder != null) && (!(oldOrder.equals(rowdef.objectOrder)))) {
                 writeOrderType(); // write new order type
                 //throw new IOException("wrong object order upon initialization. new order is " + rowdef.objectOrder.toString() + ", old order was " + oldOrder.toString());
@@ -580,7 +580,7 @@ public abstract class kelondroAbstractRecords implements kelondroRecords {
         } catch (IOException e) {}
     }
     
-    private kelondroOrder readOrderType() {
+    private kelondroByteOrder readOrderType() {
         try {
             byte[] d = getDescription();
             String s = new String(d).substring(0, 2);
@@ -590,8 +590,8 @@ public abstract class kelondroAbstractRecords implements kelondroRecords {
         }
     }
     
-    public static kelondroOrder orderBySignature(String signature) {
-        kelondroOrder oo = null;
+    public static kelondroByteOrder orderBySignature(String signature) {
+    	kelondroByteOrder oo = null;
         if (oo == null) oo = kelondroNaturalOrder.bySignature(signature);
         if (oo == null) oo = kelondroBase64Order.bySignature(signature);
         if (oo == null) oo = new kelondroNaturalOrder(true);

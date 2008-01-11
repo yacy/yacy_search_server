@@ -192,11 +192,11 @@ public class kelondroByteArray {
         this.offset = 0;
     }
     
-    public int compareTo(kelondroByteArray b, kelondroOrder order) {
+    public int compareTo(kelondroByteArray b, kelondroByteOrder order) {
         return order.compare(this.buffer, this.offset, this.length, b.buffer, b.offset, b.length);
     }
     
-    public int compareTo(int aoffset, int alength, kelondroByteArray b, int boffset, int blength, kelondroOrder order) {
+    public int compareTo(int aoffset, int alength, kelondroByteArray b, int boffset, int blength, kelondroByteOrder order) {
         return order.compare(this.buffer, this.offset + aoffset, alength, b.buffer, b.offset + boffset, blength);
     }
 }

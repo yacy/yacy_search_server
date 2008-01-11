@@ -40,11 +40,13 @@ public class kelondroIntBytesMap {
 	
     private kelondroRow rowdef;
     private kelondroRowSet index0, index1;
+    private kelondroOrder<kelondroRow.Entry> entryOrder;
     
     public kelondroIntBytesMap(int payloadSize, int initSize) {
-    	rowdef = new kelondroRow("Cardinal key-4 {b256}, byte[] payload-" + payloadSize, kelondroNaturalOrder.naturalOrder, 0);
-        index0 = new kelondroRowSet(rowdef, initSize);
-        index1 = null;
+    	this.rowdef = new kelondroRow("Cardinal key-4 {b256}, byte[] payload-" + payloadSize, kelondroNaturalOrder.naturalOrder, 0);
+    	this.index0 = new kelondroRowSet(rowdef, initSize);
+    	this.index1 = null;
+        this.entryOrder = new kelondroRow.EntryComparator(rowdef.objectOrder);
     }
     
     public long memoryNeededForGrow() {
@@ -193,7 +195,7 @@ public class kelondroIntBytesMap {
         return new kelondroMergeIterator<kelondroRow.Entry>(
     				index0.rows(true, null),
     				index1.rows(true, null),
-    				kelondroRow.entryComparator,
+    				entryOrder,
     				kelondroMergeIterator.simpleMerge,
                     true);
     }

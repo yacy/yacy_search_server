@@ -266,7 +266,7 @@ public class kelondroFlexWidthArray implements kelondroArray {
 		return index;
     }
 
-    protected synchronized TreeMap<Integer, byte[]> addMultiple(List<kelondroRow.Entry> rows) throws IOException {
+	protected synchronized TreeMap<Integer, byte[]> addMultiple(List<kelondroRow.Entry> rows) throws IOException {
         // result is a Integer/byte[] relation
         // of newly added rows (index, key)
         TreeMap<Integer, byte[]> indexref = new TreeMap<Integer, byte[]>();
@@ -307,10 +307,27 @@ public class kelondroFlexWidthArray implements kelondroArray {
     
     public synchronized kelondroRow.Entry get(int index) throws IOException {
         kelondroRow.Entry e = col[0].getIfValid(index);
+        //assert e != null;
 		if (e == null) return null; // probably a deleted entry
 		kelondroRow.Entry p = rowdef.newEntry();
         p.setCol(0, e.getColBytes(0));
 		int r = col[0].row().columns();
+		while (r < rowdef.columns()) {
+			e = col[r].get(index);
+			for (int i = 0; i < col[r].row().columns(); i++) {
+				p.setCol(r + i, e.getColBytes(i));
+			}
+			r = r + col[r].row().columns();
+		}
+		return p;
+    }
+    
+    public synchronized kelondroRow.Entry getOmitCol0(int index, byte[] col0) throws IOException {
+    	assert col[0].row().columns() == 1;
+    	kelondroRow.Entry p = rowdef.newEntry();
+    	kelondroRow.Entry e;
+        p.setCol(0, col0);
+		int r = 1;
 		while (r < rowdef.columns()) {
 			e = col[r].get(index);
 			for (int i = 0; i < col[r].row().columns(); i++) {

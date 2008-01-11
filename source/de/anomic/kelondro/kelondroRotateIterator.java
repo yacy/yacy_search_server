@@ -38,7 +38,6 @@ public class kelondroRotateIterator<E> implements kelondroCloneableIterator<E> {
         this.clone = (kelondroCloneableIterator<E>) a.clone(modifier);
     }
     
-    @SuppressWarnings("unchecked")
 	public kelondroRotateIterator<E> clone(Object modifier) {
         return new kelondroRotateIterator<E>(a, modifier);
     }
