@@ -137,13 +137,13 @@ public final class transferRWI {
             String wordHash;
             String urlHash;
             indexRWIEntry iEntry;
-            final HashSet unknownURL = new HashSet();
-            final HashSet knownURL = new HashSet();
+            final HashSet<String> unknownURL = new HashSet<String>();
+            final HashSet<String> knownURL = new HashSet<String>();
             String[] wordhashes = new String[v.size()];
             int received = 0;
             int blocked = 0;
             int receivedURL = 0;
-            Iterator i = v.iterator();
+            Iterator<String> i = v.iterator();
             while (i.hasNext()) {
                 serverCore.checkInterruption();
                 estring = (String) i.next();
@@ -189,10 +189,10 @@ public final class transferRWI {
             yacyCore.seedDB.mySeed().incRI(received);
 
             // finally compose the unknownURL hash list
-            final Iterator it = unknownURL.iterator();  
+            final Iterator<String> it = unknownURL.iterator();  
             unknownURLs.ensureCapacity(unknownURL.size()*13);
             while (it.hasNext()) {
-                unknownURLs.append(",").append((String) it.next());
+                unknownURLs.append(",").append(it.next());
             }
             if (unknownURLs.length() > 0) { unknownURLs.delete(0, 1); }
             if ((wordhashes.length == 0) || (received == 0)) {

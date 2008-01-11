@@ -46,7 +46,7 @@ import de.anomic.server.serverCore;
 import de.anomic.server.serverSystem;
 import de.anomic.server.logging.serverLog;
 
-public final class yacyVersion implements Comparator, Comparable {
+public final class yacyVersion implements Comparator<yacyVersion>, Comparable<yacyVersion> {
     
     // general release info
     public static final float YACY_SUPPORTS_PORT_FORWARDING = (float) 0.383;
@@ -135,18 +135,16 @@ public final class yacyVersion implements Comparator, Comparable {
         // finished! we parsed a relase string
     }
     
-    public int compareTo(Object obj) {
+    public int compareTo(yacyVersion obj) {
         // returns 0 if this object is equal to the obj, -1 if this is smaller than obj and 1 if this is greater than obj
-        yacyVersion v = (yacyVersion) obj;
-        return compare(this, v);
+        return compare(this, obj);
     }
     
-    public int compare(Object arg0, Object arg1) {
+    public int compare(yacyVersion v0, yacyVersion v1) {
         // compare-operator for two yacyVersion objects
         // must be implemented to make it possible to put this object into
         // a ordered structure, like TreeSet or TreeMap
-        yacyVersion a0 = (yacyVersion) arg0, a1 = (yacyVersion) arg1;
-        return (new Integer(a0.svn)).compareTo(new Integer(a1.svn));
+        return (new Integer(v0.svn)).compareTo(new Integer(v1.svn));
     }
     
     public boolean equals(Object obj) {

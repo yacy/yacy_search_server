@@ -45,6 +45,7 @@ public class kelondroMapObjects extends kelondroObjects {
         this(dyn, cachesize, null, null, null, null, null);
     }
     
+	@SuppressWarnings("unchecked")
 	public kelondroMapObjects(kelondroDyn dyn, int cachesize, String[] sortfields, String[] longaccfields, String[] doubleaccfields, Method externalInitializer, Object externalHandler) {
         super(dyn, cachesize);
         

@@ -52,7 +52,6 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.util.Iterator;
-import java.util.Map;
 import java.util.Properties;
 
 import de.anomic.http.httpHeader;
@@ -92,9 +91,9 @@ public final class profile {
             if (fileIn != null) try { fileIn.close(); fileIn = null; } catch (Exception e) {}
         }
 
-        Iterator<String> it = ((Map)profile).keySet().iterator();
+        Iterator<Object> it = profile.keySet().iterator();
         while (it.hasNext()) {
-            key = it.next();
+            key = (String) it.next();
             value=profile.getProperty(key, "").replaceAll("\r","").replaceAll("\n","\\\\n");
             if( !(key.equals("")) && !(value.equals("")) ){
                 prop.put("list_"+count+"_key", key);

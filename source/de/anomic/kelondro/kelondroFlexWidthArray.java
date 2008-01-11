@@ -266,6 +266,7 @@ public class kelondroFlexWidthArray implements kelondroArray {
 		return index;
     }
 
+	@SuppressWarnings("unchecked")
 	protected synchronized TreeMap<Integer, byte[]> addMultiple(List<kelondroRow.Entry> rows) throws IOException {
         // result is a Integer/byte[] relation
         // of newly added rows (index, key)

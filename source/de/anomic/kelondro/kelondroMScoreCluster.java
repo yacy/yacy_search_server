@@ -288,7 +288,8 @@ public final class kelondroMScoreCluster<E> {
         return getScores(maxCount, up, Integer.MIN_VALUE, Integer.MAX_VALUE);
     }
     
-    public synchronized E[] getScores(int maxCount, boolean up, int minScore, int maxScore) {
+    @SuppressWarnings("unchecked")
+	public synchronized E[] getScores(int maxCount, boolean up, int minScore, int maxScore) {
         if (maxCount > refkeyDB.size()) maxCount = refkeyDB.size();
         E[] s = (E[]) new Object[maxCount];
         Iterator<E> it = scores(up, minScore, maxScore);
@@ -309,21 +310,22 @@ public final class kelondroMScoreCluster<E> {
     }
     
     public synchronized Iterator<E> scores(boolean up) {
-        if (up) return new simpleScoreIterator();
-        return new reverseScoreIterator();
+        if (up) return new simpleScoreIterator<E>();
+        return new reverseScoreIterator<E>();
     }
     
     public synchronized Iterator<E> scores(boolean up, int minScore, int maxScore) {
-        return new komplexScoreIterator(up, minScore, maxScore);
+        return new komplexScoreIterator<E>(up, minScore, maxScore);
     }
     
-    private class komplexScoreIterator implements Iterator<E> {
+    private class komplexScoreIterator<A extends E> implements Iterator<E> {
 
         boolean up;
         TreeMap<Long, E> keyrefDBcopy;
         E n;
         int min, max;
         
+		@SuppressWarnings("unchecked")
 		public komplexScoreIterator(boolean up, int minScore, int maxScore) {
             this.up = up;
             this.min = minScore;
@@ -365,7 +367,7 @@ public final class kelondroMScoreCluster<E> {
         
     }
     
-    private class reverseScoreIterator implements Iterator<E> {
+    private class reverseScoreIterator<A extends E> implements Iterator<E> {
 
         SortedMap<Long, E> view;
         Long key;
@@ -393,7 +395,7 @@ public final class kelondroMScoreCluster<E> {
         
     }
     
-    private class simpleScoreIterator implements Iterator<E> {
+    private class simpleScoreIterator<A extends E> implements Iterator<E> {
 
         Iterator<Map.Entry<Long, E>> ii;
         Map.Entry<Long, E> entry;

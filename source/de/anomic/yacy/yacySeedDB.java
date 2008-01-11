@@ -104,8 +104,8 @@ public final class yacySeedDB {
     private final plasmaSwitchboard sb;
     private yacySeed mySeed; // my own seed
     
-    private final Hashtable nameLookupCache;
-    private final Hashtable ipLookupCache;
+    private final Hashtable<String, yacySeed> nameLookupCache;
+    private final Hashtable<InetAddress, SoftReference<yacySeed>> ipLookupCache;
     
     public yacySeedDB(plasmaSwitchboard sb,
             File seedActiveDBFile,
@@ -126,10 +126,10 @@ public final class yacySeedDB {
         seedPotentialDB = openSeedTable(seedPotentialDBFile);
         
         // start our virtual DNS service for yacy peers with empty cache
-        nameLookupCache = new Hashtable();
+        nameLookupCache = new Hashtable<String, yacySeed>();
         
         // cache for reverse name lookup
-        ipLookupCache = new Hashtable();
+        ipLookupCache = new Hashtable<InetAddress, SoftReference<yacySeed>>();
         
         // check if we are in the seedCaches: this can happen if someone else published our seed
         removeMySeed();
@@ -271,7 +271,7 @@ public final class yacySeedDB {
         return new seedEnum(up, field, seedPotentialDB);
     }
     
-    public TreeMap /* peer-b64-hashes/ipport */ clusterHashes(String clusterdefinition) {
+    public TreeMap<String, String> /* peer-b64-hashes/ipport */ clusterHashes(String clusterdefinition) {
     	// collects seeds according to cluster definition string, which consists of
     	// comma-separated .yacy or .yacyh-domains
     	// the domain may be extended by an alternative address specification of the form
@@ -281,7 +281,7 @@ public final class yacySeedDB {
     	// address    ::= (<peername>'.yacy'|<peerhexhash>'.yacyh'){'='<ip>{':'<port}}
     	// clusterdef ::= {address}{','address}*
     	String[] addresses = (clusterdefinition.length() == 0) ? new String[0] : clusterdefinition.split(",");
-    	TreeMap clustermap = new TreeMap(kelondroBase64Order.enhancedCoder);
+    	TreeMap<String, String> clustermap = new TreeMap<String, String>(kelondroBase64Order.enhancedComparator);
     	yacySeed seed;
     	String hash, yacydom, ipport;
     	int p;
@@ -419,7 +419,7 @@ public final class yacySeedDB {
         //seed.put(yacySeed.LASTSEEN, yacyCore.shortFormatter.format(new Date(yacyCore.universalTime())));
         try {
             nameLookupCache.put(seed.getName(), seed);
-            Map seedPropMap = seed.getMap();
+            Map<String, String> seedPropMap = seed.getMap();
             synchronized(seedPropMap) {
                 seedActiveDB.set(seed.hash, seedPropMap);
             }
@@ -446,7 +446,7 @@ public final class yacySeedDB {
         } catch (Exception e) {}
         //seed.put(yacySeed.LASTSEEN, yacyCore.shortFormatter.format(new Date(yacyCore.universalTime())));
         try {
-            Map seedPropMap = seed.getMap();
+            Map<String, String> seedPropMap = seed.getMap();
             synchronized(seedPropMap) {
                 seedPassiveDB.set(seed.hash, seedPropMap);
             }
@@ -472,7 +472,7 @@ public final class yacySeedDB {
     if (seed.isProper() != null) return;
     //seed.put(yacySeed.LASTSEEN, yacyCore.shortFormatter.format(new Date(yacyCore.universalTime())));
         try {
-            Map seedPropMap = seed.getMap();
+            Map<String, String> seedPropMap = seed.getMap();
             synchronized(seedPropMap) {
                 seedPotentialDB.set(seed.hash, seedPropMap);
             }
@@ -529,7 +529,7 @@ public final class yacySeedDB {
     private yacySeed get(String hash, kelondroMapObjects database) {
         if (hash == null) return null;
         if ((this.mySeed != null) && (hash.equals(mySeed.hash))) return mySeed;
-        Map entry = database.getMap(hash);
+        Map<String, String> entry = database.getMap(hash);
         if (entry == null) return null;
         return new yacySeed(hash, entry);
     }
@@ -586,7 +586,7 @@ public final class yacySeedDB {
         // enumerate the cache and simultanous insert values
         String name;
     	for (int table = 0; table < 2; table++) {
-            Iterator e = (table == 0) ? seedsConnected(true, false, null, (float) 0.0) : seedsDisconnected(true, false, null, (float) 0.0);
+            Iterator<yacySeed> e = (table == 0) ? seedsConnected(true, false, null, (float) 0.0) : seedsDisconnected(true, false, null, (float) 0.0);
         	while (e.hasNext()) {
         		seed = (yacySeed) e.next();
         		if (seed != null) {
@@ -622,7 +622,7 @@ public final class yacySeedDB {
         }
         
         // then try to use the cache
-        SoftReference ref = (SoftReference) ipLookupCache.get(peerIP);
+        SoftReference<yacySeed> ref = ipLookupCache.get(peerIP);
         if (ref != null) {        
             seed = (yacySeed) ref.get();
             if (seed != null) return seed;
@@ -634,7 +634,7 @@ public final class yacySeedDB {
         
         if (lookupConnected) {
             // enumerate the cache and simultanous insert values
-            Iterator e = seedsConnected(true, false, null, (float) 0.0);
+            Iterator<yacySeed> e = seedsConnected(true, false, null, (float) 0.0);
 
             while (e.hasNext()) {
                 try {
@@ -649,7 +649,7 @@ public final class yacySeedDB {
                             addressStr = addressStr.substring(0,pos);
                         }
                         seedIPAddress = InetAddress.getByName(addressStr);
-                        if (seed.isProper() == null) ipLookupCache.put(seedIPAddress, new SoftReference(seed));
+                        if (seed.isProper() == null) ipLookupCache.put(seedIPAddress, new SoftReference<yacySeed>(seed));
                         if (seedIPAddress.equals(peerIP)) return seed;
                     }
                 } catch (UnknownHostException ex) {}
@@ -658,7 +658,7 @@ public final class yacySeedDB {
         
         if (lookupDisconnected) {
             // enumerate the cache and simultanous insert values
-            Iterator e = seedsDisconnected(true, false, null, (float) 0.0);
+            Iterator<yacySeed>e = seedsDisconnected(true, false, null, (float) 0.0);
 
             while (e.hasNext()) {
                 try {
@@ -673,7 +673,7 @@ public final class yacySeedDB {
                             addressStr = addressStr.substring(0,pos);
                         }
                         seedIPAddress = InetAddress.getByName(addressStr);
-                        if (seed.isProper() == null) ipLookupCache.put(seedIPAddress, new SoftReference(seed));
+                        if (seed.isProper() == null) ipLookupCache.put(seedIPAddress, new SoftReference<yacySeed>(seed));
                         if (seedIPAddress.equals(peerIP)) return seed;
                     }
                 } catch (UnknownHostException ex) {}
@@ -682,7 +682,7 @@ public final class yacySeedDB {
         
         if (lookupPotential) {
             // enumerate the cache and simultanous insert values
-            Iterator e = seedsPotential(true, false, null, (float) 0.0);
+            Iterator<yacySeed> e = seedsPotential(true, false, null, (float) 0.0);
 
             while (e.hasNext()) {
                 try {
@@ -692,7 +692,7 @@ public final class yacySeedDB {
                             addressStr = addressStr.substring(0,pos);
                         }
                         seedIPAddress = InetAddress.getByName(addressStr);
-                        if (seed.isProper() == null) ipLookupCache.put(seedIPAddress, new SoftReference(seed));
+                        if (seed.isProper() == null) ipLookupCache.put(seedIPAddress, new SoftReference<yacySeed>(seed));
                         if (seedIPAddress.equals(peerIP)) return seed;
                     }
                 } catch (UnknownHostException ex) {}
@@ -708,7 +708,7 @@ public final class yacySeedDB {
                 addressStr = addressStr.substring(0,pos);
             }
             seedIPAddress = InetAddress.getByName(addressStr);
-            if (mySeed.isProper() == null) ipLookupCache.put(seedIPAddress,  new SoftReference(mySeed));
+            if (mySeed.isProper() == null) ipLookupCache.put(seedIPAddress,  new SoftReference<yacySeed>(mySeed));
             if (seedIPAddress.equals(peerIP)) return mySeed;
             // nothing found
             return null;
@@ -717,13 +717,13 @@ public final class yacySeedDB {
         }
     }
     
-    public ArrayList storeCache(File seedFile) throws IOException {
-    return storeCache(seedFile, false);
+    public ArrayList<String> storeCache(File seedFile) throws IOException {
+    	return storeCache(seedFile, false);
     }
 
-    private ArrayList storeCache(File seedFile, boolean addMySeed) throws IOException {
+    private ArrayList<String> storeCache(File seedFile, boolean addMySeed) throws IOException {
         PrintWriter pw = null;
-        ArrayList v = new ArrayList(seedActiveDB.size()+1);
+        ArrayList<String> v = new ArrayList<String>(seedActiveDB.size() + 1);
         try {
             
             pw = new PrintWriter(new BufferedWriter(new FileWriter(seedFile)));
@@ -739,7 +739,7 @@ public final class yacySeedDB {
             
             // store other seeds
             yacySeed ys;
-            Iterator se = seedsConnected(true, false, null, (float) 0.0);
+            Iterator<yacySeed> se = seedsConnected(true, false, null, (float) 0.0);
             while (se.hasNext()) {
                 ys = (yacySeed) se.next();
                 if (ys != null) {
@@ -774,7 +774,7 @@ public final class yacySeedDB {
             seedFile = File.createTempFile("seedFile",".txt", plasmaHTCache.cachePath);
             seedFile.deleteOnExit();
             serverLog.logFine("YACY","SaveSeedList: Storing seedlist into tempfile " + seedFile.toString());
-            ArrayList uv = storeCache(seedFile, true);            
+            ArrayList<String> uv = storeCache(seedFile, true);            
             
             // uploading the seed file
             serverLog.logFine("YACY","SaveSeedList: Trying to upload seed-file, " + seedFile.length() + " bytes, " + uv.size() + " entries.");
@@ -782,7 +782,7 @@ public final class yacySeedDB {
             
             // test download
             serverLog.logFine("YACY","SaveSeedList: Trying to download seed-file '" + seedURL + "'.");
-            ArrayList check = downloadSeedFile(seedURL);
+            ArrayList<String> check = downloadSeedFile(seedURL);
             
             // Comparing if local copy and uploaded copy are equal
             String errorMsg = checkCache(uv, check);
@@ -798,7 +798,7 @@ public final class yacySeedDB {
         return log;
     }
     
-    private ArrayList downloadSeedFile(yacyURL seedURL) throws IOException {
+    private ArrayList<String> downloadSeedFile(yacyURL seedURL) throws IOException {
     	httpc remote = null;
         try {
             // init httpc
@@ -838,7 +838,7 @@ public final class yacySeedDB {
         }
     }
 
-    private String checkCache(ArrayList uv, ArrayList check) {                
+    private String checkCache(ArrayList<String> uv, ArrayList<String> check) {                
         if ((check == null) || (uv == null) || (uv.size() != check.size())) {
             serverLog.logFine("YACY","SaveSeedList: Local and uploades seed-list " +
                                "contains varying numbers of entries." +
@@ -960,7 +960,7 @@ public final class yacySeedDB {
         
         public yacySeed internalNext() {
             if ((it == null) || (!(it.hasNext()))) return null;
-            Map dna = (Map) it.next();
+            Map<String, String> dna = it.next();
             if (dna == null) return null;
             String hash = (String) dna.remove("key");
             //while (hash.length() < commonHashLength) { hash = hash + "_"; }

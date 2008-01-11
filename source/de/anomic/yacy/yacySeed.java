@@ -78,8 +78,8 @@ import de.anomic.plasma.plasmaCondenser;
 import de.anomic.plasma.plasmaSwitchboard;
 import de.anomic.server.serverCodings;
 import de.anomic.server.serverCore;
-import de.anomic.server.serverDomains;
 import de.anomic.server.serverDate;
+import de.anomic.server.serverDomains;
 import de.anomic.server.serverSystem;
 import de.anomic.tools.bitfield;
 import de.anomic.tools.crypt;
@@ -180,12 +180,12 @@ public class yacySeed {
     /** the peer-hash */
     public String hash;
     /** a set of identity founding values, eg. IP, name of the peer, YaCy-version, ...*/
-    private final Map dna;
+    private final Map<String, String> dna;
     public int available;
     public int selectscore = -1; // only for debugging
     public String alternativeIP = null;
 
-    public yacySeed(String theHash, Map theDna) {
+    public yacySeed(String theHash, Map<String, String> theDna) {
         // create a seed with a pre-defined hash map
         this.hash = theHash;
         this.dna = theDna;
@@ -195,7 +195,7 @@ public class yacySeed {
     }
 
     public yacySeed(String theHash) {
-        this.dna = Collections.synchronizedMap(new HashMap());
+        this.dna = Collections.synchronizedMap(new HashMap<String, String>());
 
         // settings that can only be computed by originating peer:
         // at first startup -
@@ -359,7 +359,7 @@ public class yacySeed {
     }
 
     /** @return the DNA-map of this peer */
-    public final Map getMap() {
+    public final Map<String, String> getMap() {
         return this.dna;
     }
 
@@ -571,17 +571,17 @@ public class yacySeed {
         }
     }
 
-    public void setPeerTags(Set keys) {
+    public void setPeerTags(Set<String> keys) {
         dna.put(PEERTAGS, serverCodings.set2string(keys, "|", false));
     }
 
-    public Set getPeerTags() {
+    public Set<String> getPeerTags() {
         return serverCodings.string2set(get(PEERTAGS, ""), "|");
     }
 
-    public boolean matchPeerTags(Set searchHashes) {
-        Set tags = serverCodings.string2set(get(PEERTAGS, ""), "|");
-        Iterator i = tags.iterator();
+    public boolean matchPeerTags(Set<String> searchHashes) {
+        Set<String> tags = serverCodings.string2set(get(PEERTAGS, ""), "|");
+        Iterator<String> i = tags.iterator();
         while (i.hasNext()) {
         	if (searchHashes.contains(plasmaCondenser.word2hash((String) i.next()))) return true;
         }
@@ -704,7 +704,7 @@ public class yacySeed {
         String bestHash = null;
         double c, bestC = Double.MAX_VALUE;
         double segmentSize = Math.min(0.9, 4.0 / seedDB.sizeConnected());
-        Iterator i;
+        Iterator<yacySeed> i;
         double d;
         yacySeed s;
         for (int t = 0; t < tries; t++) {
@@ -712,7 +712,7 @@ public class yacySeed {
             i = seedDB.seedsConnected(true, true, hash, (float) 0.0);
             c = 0.0;
             while (i.hasNext()) {
-                s = (yacySeed) i.next();
+                s = i.next();
                 d = dhtDistance(hash, s.hash);
                 if (d > segmentSize) break;
                 c = c + 1.0/d;
@@ -793,7 +793,7 @@ public class yacySeed {
         if (seedStr == null) { return null; }
         final String seed = crypt.simpleDecode(seedStr, key);
         if (seed == null) { return null; }
-        final Map dna = serverCodings.string2map(seed, ",");
+        final Map<String, String> dna = serverCodings.string2map(seed, ",");
         final String hash = (String) dna.remove(yacySeed.HASH);
         final yacySeed resultSeed = new yacySeed(hash, dna);
         if (properTest) {
@@ -856,7 +856,7 @@ public class yacySeed {
 
     public final Object clone() {
         synchronized (this.dna) {
-            return new yacySeed(this.hash, (HashMap) (new HashMap(this.dna)).clone());
+            return new yacySeed(this.hash, (HashMap<String, String>) (new HashMap<String, String>(this.dna)).clone());
         }
     }
 
