@@ -127,7 +127,7 @@ public class ConfigUpdate_p {
             
         prop.put("candeploy_deployenabled", (downloaded.length == 0) ? "0" : ((devenvironment) ? "1" : "2")); // prevent that a developer-version is over-deployed
           
-        TreeSet downloadedreleases = new TreeSet();
+        TreeSet<yacyVersion> downloadedreleases = new TreeSet<yacyVersion>();
         for (int j = 0; j < downloaded.length; j++) {
             try {
                 release = new yacyVersion(downloaded[j]);
@@ -137,12 +137,12 @@ public class ConfigUpdate_p {
                 new File(sb.releasePath, downloaded[j]).deleteOnExit(); // can be also a restart- or deploy-file
             }
         }
-        dflt = (downloadedreleases.size() == 0) ? null : (yacyVersion) downloadedreleases.last();
-        Iterator i = downloadedreleases.iterator();
+        dflt = (downloadedreleases.size() == 0) ? null : downloadedreleases.last();
+        Iterator<yacyVersion> i = downloadedreleases.iterator();
         int relcount = 0;
         while (i.hasNext()) {
-            release = (yacyVersion) i.next();
-            prop.put("candeploy_downloadedreleases_" + relcount + "_name", (release.fullRelease ? "pro" : "standard") + "/" + ((release.mainRelease) ? "main" : "dev") + " " + release.releaseNr + "/" + release.svn);
+            release = i.next();
+            prop.put("candeploy_downloadedreleases_" + relcount + "_name", ((release.mainRelease) ? "main" : "dev") + " " + release.releaseNr + "/" + release.svn);
             prop.put("candeploy_downloadedreleases_" + relcount + "_file", release.name);
             prop.put("candeploy_downloadedreleases_" + relcount + "_selected", (release == dflt) ? "1" : "0");
             relcount++;
@@ -150,27 +150,29 @@ public class ConfigUpdate_p {
         prop.put("candeploy_downloadedreleases", relcount);
 
         // list remotely available releases
-        TreeSet[] releasess = yacyVersion.allReleases(false); // {0=promain, 1=prodev, 2=stdmain, 3=stddev}
+        yacyVersion.DevMain releasess = yacyVersion.allReleases(false);
         relcount = 0;
+        
         // main
-        TreeSet releases = releasess[(yacy.pro) ? 0 : 2];
+        TreeSet<yacyVersion> releases = releasess.main;
         releases.removeAll(downloadedreleases);
         i = releases.iterator();
         while (i.hasNext()) {
-            release = (yacyVersion) i.next();
-            prop.put("candeploy_availreleases_" + relcount + "_name", (release.fullRelease ? "pro" : "standard") + "/" + ((release.mainRelease) ? "main" : "dev") + " " + release.releaseNr + "/" + release.svn);
+            release = i.next();
+            prop.put("candeploy_availreleases_" + relcount + "_name", ((release.mainRelease) ? "main" : "dev") + " " + release.releaseNr + "/" + release.svn);
             prop.put("candeploy_availreleases_" + relcount + "_url", release.url.toString());
             prop.put("candeploy_availreleases_" + relcount + "_selected", "0");
             relcount++;
         }
+        
         // dev
-        dflt = (releasess[(yacy.pro) ? 1 : 3].size() == 0) ? null : (yacyVersion) releasess[(yacy.pro) ? 1 : 3].last();
-        releases = releasess[(yacy.pro) ? 1 : 3];
+        dflt = (releasess.dev.size() == 0) ? null : releasess.dev.last();
+        releases = releasess.dev;
         releases.removeAll(downloadedreleases);
         i = releases.iterator();
         while (i.hasNext()) {
-            release = (yacyVersion) i.next();
-            prop.put("candeploy_availreleases_" + relcount + "_name", (release.fullRelease ? "pro" : "standard") + "/" + ((release.mainRelease) ? "main" : "dev") + " " + release.releaseNr + "/" + release.svn);
+            release = i.next();
+            prop.put("candeploy_availreleases_" + relcount + "_name", ((release.mainRelease) ? "main" : "dev") + " " + release.releaseNr + "/" + release.svn);
             prop.put("candeploy_availreleases_" + relcount + "_url", release.url.toString());
             prop.put("candeploy_availreleases_" + relcount + "_selected", (release == dflt) ? "1" : "0");
             relcount++;

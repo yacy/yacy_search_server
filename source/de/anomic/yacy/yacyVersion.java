@@ -62,8 +62,8 @@ public final class yacyVersion implements Comparator<yacyVersion>, Comparable<ya
     // information about latest release, retrieved from download pages
     // this static information should be overwritten by network-specific locations
     // for details see yacy.network.unit
-    private static HashMap /* URL:TreeSet[]*/ latestReleases = new HashMap();
-    public  static ArrayList latestReleaseLocations /*string*/ = new ArrayList(); // will be initialized with value in yacy.network.unit
+    private static HashMap<yacyURL, DevMain> latestReleases = new HashMap<yacyURL, DevMain>();
+    public  static ArrayList<yacyURL> latestReleaseLocations = new ArrayList<yacyURL>(); // will be initialized with value in yacy.network.unit
     
     // private static release info about this release; is generated only once and can be retrieved by thisVersion()
     private static yacyVersion thisVersion = null;
@@ -72,7 +72,7 @@ public final class yacyVersion implements Comparator<yacyVersion>, Comparable<ya
     public float releaseNr;
     public String dateStamp;
     public int svn;
-    public boolean fullRelease, mainRelease;
+    public boolean mainRelease;
     public yacyURL url;
     public String name;
     
@@ -95,13 +95,10 @@ public final class yacyVersion implements Comparator<yacyVersion>, Comparable<ya
         // cut off tail
         release = release.substring(0, release.length() - 7);
         if (release.startsWith("yacy_pro_v")) {
-            fullRelease = true;
             release = release.substring(10);
         } else if (release.startsWith("yacy_emb_v")) {
-            fullRelease = false;
-            release = release.substring(10);
+            throw new RuntimeException("release file name '" + release + "' is not valid, no support for emb");
         } else if (release.startsWith("yacy_v")) {
-            fullRelease = false;
             release = release.substring(6);
         } else {
             throw new RuntimeException("release file name '" + release + "' is not valid, wrong prefix");
@@ -128,11 +125,15 @@ public final class yacyVersion implements Comparator<yacyVersion>, Comparable<ya
         } catch (NumberFormatException e) {
             throw new RuntimeException("release file name '" + release + "' is not valid, '" + comp[2] + "' should be a integer number");
         }
-        if ((this.releaseNr > YACY_STANDARDREL_IS_PRO) && (release.startsWith("yacy_v"))) {
-            // patch for new release strategy
-            this.fullRelease = true;
-        }
         // finished! we parsed a relase string
+    }
+    
+    public static final class DevMain {
+        public TreeSet<yacyVersion> dev, main;
+        public DevMain(TreeSet<yacyVersion> dev, TreeSet<yacyVersion> main) {
+            this.dev = dev;
+            this.main = main;
+        }
     }
     
     public int compareTo(yacyVersion obj) {
@@ -158,7 +159,7 @@ public final class yacyVersion implements Comparator<yacyVersion>, Comparable<ya
     
     public String toAnchor() {
         // generates an anchor string that can be used to embed in an html for direct download
-        return "<a href=" + this.url.toNormalform(true, true) + ">YaCy " + ((this.fullRelease) ? "standard/full release" : "embedded release") + " v" + this.releaseNr + ", SVN " + this.svn + "</a>";
+        return "<a href=" + this.url.toNormalform(true, true) + ">YaCy " + ((this.mainRelease) ? "main release" : "dev release") + " v" + this.releaseNr + ", SVN " + this.svn + "</a>";
     }
     
     // static methods:
@@ -199,10 +200,9 @@ public final class yacyVersion implements Comparator<yacyVersion>, Comparable<ya
         }
         
         // check if we know that there is a release that is more recent than that which we are using
-        TreeSet[] releasess = yacyVersion.allReleases(true); // {0=promain, 1=prodev, 2=stdmain, 3=stddev}
-        boolean full = new File(sb.getRootPath(), "libx").exists();
-        yacyVersion latestmain = (releasess[(full) ? 0 : 2].size() == 0) ? null : (yacyVersion) releasess[(full) ? 0 : 2].last();
-        yacyVersion latestdev  = (releasess[(full) ? 1 : 3].size() == 0) ? null : (yacyVersion) releasess[(full) ? 1 : 3].last();
+        DevMain releasess = yacyVersion.allReleases(true);
+        yacyVersion latestmain = (releasess.main.size() == 0) ? null : releasess.main.last();
+        yacyVersion latestdev  = (releasess.dev.size() == 0) ? null : releasess.dev.last();
         String concept = sb.getConfig("update.concept", "any");
         String blacklist = sb.getConfig("update.blacklist", ".\\...[123]");
         
@@ -256,29 +256,23 @@ public final class yacyVersion implements Comparator<yacyVersion>, Comparable<ya
         return null;
     }
     
-    public static TreeSet[] allReleases(boolean force) {
+    public static DevMain allReleases(boolean force) {
         // join the release infos
-        // {promainreleases, prodevreleases, stdmainreleases, stddevreleases}
-        Object[] a = new Object[latestReleaseLocations.size()];
+        DevMain[] a = new DevMain[latestReleaseLocations.size()];
         for (int j = 0; j < latestReleaseLocations.size(); j++) {
-            a[j] = getReleases((yacyURL) latestReleaseLocations.get(j), force);
+            a[j] = getReleases(latestReleaseLocations.get(j), force);
         }
-        TreeSet[] r = new TreeSet[4];
-        TreeSet s;
-        for (int i = 0; i < 4; i++) {
-            s = new TreeSet();
-            for (int j = 0; j < a.length; j++) {
-                if ((a[j] != null) && (((TreeSet[]) a[j])[i] != null)) s.addAll(((TreeSet[]) a[j])[i]);
-            }
-            r[i] = s;
-        }
-        return r;
+        TreeSet<yacyVersion> alldev = new TreeSet<yacyVersion>();
+        TreeSet<yacyVersion> allmain = new TreeSet<yacyVersion>();
+        for (int j = 0; j < a.length; j++) if ((a[j] != null) && (a[j].dev != null)) alldev.addAll(a[j].dev);
+        for (int j = 0; j < a.length; j++) if ((a[j] != null) && (a[j].main != null)) allmain.addAll(a[j].main);
+            
+        return new DevMain(alldev, allmain);
     }
     
-    private static TreeSet[] getReleases(yacyURL location, boolean force) {
+    private static DevMain getReleases(yacyURL location, boolean force) {
         // get release info from a internet resource
-        // {promainreleases, prodevreleases, stdmainreleases, stddevreleases} 
-        TreeSet[] latestRelease = (TreeSet[]) latestReleases.get(location);
+        DevMain latestRelease = latestReleases.get(location);
         if (force ||
             (latestRelease == null) /*||
             ((latestRelease[0].size() == 0) &&
@@ -291,7 +285,7 @@ public final class yacyVersion implements Comparator<yacyVersion>, Comparable<ya
         return latestRelease;
     }
     
-    private static TreeSet[] allReleaseFrom(yacyURL url) {
+    private static DevMain allReleaseFrom(yacyURL url) {
         // retrieves the latest info about releases
         // this is done by contacting a release location,
         // parsing the content and filtering+parsing links
@@ -304,12 +298,10 @@ public final class yacyVersion implements Comparator<yacyVersion>, Comparable<ya
         }
         
         // analyse links in scraper resource, and find link to latest release in it
-        Map anchors = scraper.getAnchors(); // a url (String) / name (String) relation
-        Iterator i = anchors.keySet().iterator();
-        TreeSet stddevreleases = new TreeSet();
-        TreeSet prodevreleases = new TreeSet();
-        TreeSet stdmainreleases = new TreeSet();
-        TreeSet promainreleases = new TreeSet();
+        Map<String, String> anchors = scraper.getAnchors(); // a url (String) / name (String) relation
+        Iterator<String> i = anchors.keySet().iterator();
+        TreeSet<yacyVersion> devreleases = new TreeSet<yacyVersion>();
+        TreeSet<yacyVersion> mainreleases = new TreeSet<yacyVersion>();
         yacyVersion release;
         while (i.hasNext()) {
             try {
@@ -320,10 +312,8 @@ public final class yacyVersion implements Comparator<yacyVersion>, Comparable<ya
             try {
                 release = new yacyVersion(url);
                 //System.out.println("r " + release.toAnchor());
-                if ( release.fullRelease &&  release.mainRelease) promainreleases.add(release);
-                if ( release.fullRelease && !release.mainRelease) prodevreleases.add(release);
-                if (!release.fullRelease &&  release.mainRelease) stdmainreleases.add(release);
-                if (!release.fullRelease && !release.mainRelease) stddevreleases.add(release);
+                if ( release.mainRelease) mainreleases.add(release);
+                if (!release.mainRelease) devreleases.add(release);
             } catch (RuntimeException e) {
                 // the release string was not well-formed.
                 // that might have been another link
@@ -332,7 +322,7 @@ public final class yacyVersion implements Comparator<yacyVersion>, Comparable<ya
             }
         }
         plasmaSwitchboard.getSwitchboard().setConfig("update.time.lookup", System.currentTimeMillis());
-        return new TreeSet[] {promainreleases, prodevreleases, stdmainreleases, stddevreleases} ;
+        return new DevMain(devreleases, mainreleases);
     }
     
     public static void downloadRelease(yacyVersion release) throws IOException {
