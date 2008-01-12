@@ -184,7 +184,7 @@ public class wikiBoard {
         public String author() {
             String a = (String) record.get("author");
             if (a == null) return "anonymous";
-            byte[] b = kelondroBase64Order.enhancedCoder.decode(a);
+            byte[] b = kelondroBase64Order.enhancedCoder.decode(a, "de.anomic.data.wikiBoard.author()");
             if (b == null) return "anonymous";
             return new String(b);
         }
@@ -192,7 +192,7 @@ public class wikiBoard {
         public String reason() {
             String r = (String) record.get("reason");
             if (r == null) return "";
-            byte[] b = kelondroBase64Order.enhancedCoder.decode(r);
+            byte[] b = kelondroBase64Order.enhancedCoder.decode(r, "de.anomic.data.wikiBoard.reason()");
             if (b == null) return "unknown";
             return new String(b);
         }
@@ -200,7 +200,7 @@ public class wikiBoard {
         public byte[] page() {
             String m = (String) record.get("page");
             if (m == null) return new byte[0];
-            byte[] b = kelondroBase64Order.enhancedCoder.decode(m);
+            byte[] b = kelondroBase64Order.enhancedCoder.decode(m, "de.anomic.data.wikiBoard.page()");
             if (b == null) return "".getBytes();
             return b;
         }
@@ -246,7 +246,7 @@ public class wikiBoard {
         private String getChildName() {
             String c = (String) record.get("child");
             if (c == null) return null;
-            byte[] subject = kelondroBase64Order.enhancedCoder.decode(c);
+            byte[] subject = kelondroBase64Order.enhancedCoder.decode(c, "de.anomic.data.wikiBoard.getChildName()");
             if (subject == null) return null;
             return new String(subject);
         }
@@ -254,7 +254,7 @@ public class wikiBoard {
         public boolean hasChild() {
             String c = (String) record.get("child");
             if (c == null) return false;
-            byte[] subject = kelondroBase64Order.enhancedCoder.decode(c);
+            byte[] subject = kelondroBase64Order.enhancedCoder.decode(c, "de.anomic.data.wikiBoard.hasChild()");
             return (subject != null);
         }
 

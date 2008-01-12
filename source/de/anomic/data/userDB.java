@@ -137,7 +137,7 @@ public final class userDB {
 		auth=auth.trim().substring(6);
         
         try{
-            auth=kelondroBase64Order.standardCoder.decodeString(auth);
+            auth=kelondroBase64Order.standardCoder.decodeString(auth, "de.anomic.data.userDB.proxyAuth()");
         }catch(RuntimeException e){} //no valid Base64
         String[] tmp=auth.split(":");
         if(tmp.length == 2){

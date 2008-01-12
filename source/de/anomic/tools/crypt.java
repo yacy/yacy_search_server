@@ -122,8 +122,8 @@ public class crypt {
     if (encoded == null || encoded.length() < 3) { return null; }
     if (encoded.charAt(1) != '|') { return encoded; } // not encoded
     switch (encoded.charAt(0)) {
-    case 'b' : return kelondroBase64Order.enhancedCoder.decodeString(encoded.substring(2));
-    case 'z' : return gzip.gunzipString(kelondroBase64Order.enhancedCoder.decode(encoded.substring(2)));
+    case 'b' : return kelondroBase64Order.enhancedCoder.decodeString(encoded.substring(2), "de.anomic.tools.crypt.simpleDecode()");
+    case 'z' : return gzip.gunzipString(kelondroBase64Order.enhancedCoder.decode(encoded.substring(2), "de.anomic.tools.crypt.simpleDecode()"));
     case 'p' : return encoded.substring(2);
     default  : return null;
     }

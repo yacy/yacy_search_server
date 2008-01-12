@@ -195,7 +195,7 @@ public class messageBoard {
 	    String m = (String) record.get("message");
 	    if (m == null) return new byte[0];
             record.put("read", "true");
-	    return kelondroBase64Order.enhancedCoder.decode(m);
+	    return kelondroBase64Order.enhancedCoder.decode(m, "de.anomic.data.messageBoard.message()");
 	}
         
         public boolean read() {

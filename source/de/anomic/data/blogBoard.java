@@ -155,7 +155,7 @@ public class blogBoard {
 	public byte[] subject() {
 		String m = (String) record.get("subject");
 	    if (m == null) return new byte[0];
-	    byte[] b = kelondroBase64Order.enhancedCoder.decode(m);
+	    byte[] b = kelondroBase64Order.enhancedCoder.decode(m, "de.anomic.data.blogBoard.subject()");
 	    if (b == null) return "".getBytes();
 	    return b;
 	}
@@ -185,7 +185,7 @@ public class blogBoard {
     public byte[] author() {
         String m = (String) record.get("author");
         if (m == null) return new byte[0];
-        byte[] b = kelondroBase64Order.enhancedCoder.decode(m);
+        byte[] b = kelondroBase64Order.enhancedCoder.decode(m, "de.anomic.data.blogBoard.author()");
         if (b == null) return "".getBytes();
         return b;
     }
@@ -213,7 +213,7 @@ public class blogBoard {
 	public byte[] page() {
 	    String m = (String) record.get("page");
 	    if (m == null) return new byte[0];
-	    byte[] b = kelondroBase64Order.enhancedCoder.decode(m);
+	    byte[] b = kelondroBase64Order.enhancedCoder.decode(m, "de.anomic.data.blogBoard.page()");
 	    if (b == null) return "".getBytes();
 	    return b;
 	}        

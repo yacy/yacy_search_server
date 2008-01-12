@@ -820,7 +820,7 @@ public class kelondroCollectionIndex {
         newcommon.sort();
         SimpleDateFormat formatter = new SimpleDateFormat("yyyyMMddHHmmss");
         formatter.setTimeZone(TimeZone.getTimeZone("GMT"));
-        String filename = serverCodings.encodeHex(kelondroBase64Order.enhancedCoder.decode(new String(key))) + "_" + formatter.format(new Date()) + ".collection";
+        String filename = serverCodings.encodeHex(kelondroBase64Order.enhancedCoder.decode(new String(key), "de.anomic.kelondro.kelondroCollectionIndex.shrinkCollection(...)")) + "_" + formatter.format(new Date()) + ".collection";
         File storagePath = new File(commonsPath, filename.substring(0, 2)); // make a subpath
         storagePath.mkdirs();
         File file = new File(storagePath, filename);

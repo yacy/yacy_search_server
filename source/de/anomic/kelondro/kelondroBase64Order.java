@@ -219,17 +219,17 @@ public class kelondroBase64Order extends kelondroAbstractOrder<byte[]> implement
         return new String(out);
     }
 
-    public final String decodeString(String in) {
+    public final String decodeString(String in, String info) {
         try {
             //return new String(decode(in), "ISO-8859-1");
-            return new String(decode(in), "UTF-8");
+            return new String(decode(in, info), "UTF-8");
         } catch (java.io.UnsupportedEncodingException e) {
             System.out.println("internal error in base64: " + e.getMessage());
             return null;
         }
     }
 
-    public final byte[] decode(String in) {
+    public final byte[] decode(String in, String info) {
         if ((in == null) || (in.length() == 0)) return new byte[0];
         try {
             int posIn = 0;
@@ -267,7 +267,7 @@ public class kelondroBase64Order extends kelondroAbstractOrder<byte[]> implement
         } catch (ArrayIndexOutOfBoundsException e) {
             // maybe the input was not base64
             // throw new RuntimeException("input probably not base64");
-            this.log.logFine("wrong string receive: [" + in + "]");
+            this.log.logFine("wrong string receive: " + in + ", call: " + info);
             return new byte[0];
         }
     }
@@ -395,7 +395,17 @@ public class kelondroBase64Order extends kelondroAbstractOrder<byte[]> implement
         }
         if (s[0].equals("-ds")) {
             // generate a b64 decoding from a given string
-            System.out.println(b64.decodeString(s[1]));
+            System.out.println(b64.decodeString(s[1], ""));
         }
+    }
+
+    public byte[] decode(String in) {
+        // TODO Auto-generated method stub
+        return null;
+    }
+
+    public String decodeString(String in) {
+        // TODO Auto-generated method stub
+        return null;
     }
 }

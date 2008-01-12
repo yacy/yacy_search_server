@@ -406,7 +406,7 @@ public class yacySeed {
      * @return the octal representation of the given base64 hash
      */
     public static String b64Hash2octalHash(String b64Hash) {
-        return serverCodings.encodeOctal(kelondroBase64Order.enhancedCoder.decode(b64Hash));
+        return serverCodings.encodeOctal(kelondroBase64Order.enhancedCoder.decode(b64Hash, "de.anomic.yacy.yacySeed.b64Hash2octalHash()"));
     }
 
     /**
@@ -416,7 +416,7 @@ public class yacySeed {
      */
     public static String b64Hash2hexHash(String b64Hash) {
         // the hash string represents 12 * 6 bit = 72 bits. This is too much for a long integer.
-        return serverCodings.encodeHex(kelondroBase64Order.enhancedCoder.decode(b64Hash));
+        return serverCodings.encodeHex(kelondroBase64Order.enhancedCoder.decode(b64Hash, "de.anomic.yacy.yacySeed.b64Hash2hexHash()"));
     }
     
     /**
@@ -434,7 +434,7 @@ public class yacySeed {
      */
     public static byte[] b64Hash2b256Hash(String b64Hash) {
         assert b64Hash.length() == 12;
-        return kelondroBase64Order.enhancedCoder.decode(b64Hash);
+        return kelondroBase64Order.enhancedCoder.decode(b64Hash, "de.anomic.yacy.yacySeed.b64Hash2b256Hash()");
     }
     
     /**
