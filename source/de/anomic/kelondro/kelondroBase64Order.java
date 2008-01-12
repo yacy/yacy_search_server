@@ -398,14 +398,4 @@ public class kelondroBase64Order extends kelondroAbstractOrder<byte[]> implement
             System.out.println(b64.decodeString(s[1], ""));
         }
     }
-
-    public byte[] decode(String in) {
-        // TODO Auto-generated method stub
-        return null;
-    }
-
-    public String decodeString(String in) {
-        // TODO Auto-generated method stub
-        return null;
-    }
 }

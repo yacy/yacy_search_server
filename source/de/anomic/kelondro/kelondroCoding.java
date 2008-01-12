@@ -55,9 +55,9 @@ public interface kelondroCoding {
     public long decodeLong(String s);
     
     public String encodeString(String in);
-    public String decodeString(String in);
+    public String decodeString(String in, String info);
     
     public String encode(byte[] in);
-    public byte[] decode(String in);
+    public byte[] decode(String in, String info);
 
 }

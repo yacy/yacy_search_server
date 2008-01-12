@@ -160,7 +160,7 @@ public class cryptbig {
     // Decode a string into a new string using b64, crypt and utf-8
     public String decryptString(String str) {
 	try {
-	    byte[] b64dec = kelondroBase64Order.standardCoder.decode(str);
+	    byte[] b64dec = kelondroBase64Order.standardCoder.decode(str, "de.anomic.tools.cryptbig.decryptString()");
 	    if (b64dec == null) return null; // error in input string (inconsistency)
 	    byte[] dec = decryptArray(b64dec);
 	    if (dec == null) return null;
@@ -400,7 +400,7 @@ public class cryptbig {
 	boolean gzFlag = (s.charAt(8) == '1');
 	s = s.substring(9);
 	cryptbig c = new cryptbig(key, salt);
-	byte[] b64dec = kelondroBase64Order.enhancedCoder.decode(s);
+	byte[] b64dec = kelondroBase64Order.enhancedCoder.decode(s, "de.anomic.tools.cryptbig.descrambleString()");
 	if (b64dec == null) return null; // error in input string (inconsistency)
 	byte[] dec = c.decryptArray(b64dec);
 	if (dec == null) return null;
@@ -440,8 +440,8 @@ public class cryptbig {
 	char method = encoded.charAt(0);
 	encoded = encoded.substring(2);
 	if (method == 'p') return encoded;
-	if (method == 'b') return kelondroBase64Order.enhancedCoder.decodeString(encoded);
-	if (method == 'z') return gzip.gunzipString(kelondroBase64Order.enhancedCoder.decode(encoded));
+	if (method == 'b') return kelondroBase64Order.enhancedCoder.decodeString(encoded, "de.anomic.tools.cryptbig.simpleDecode()");
+	if (method == 'z') return gzip.gunzipString(kelondroBase64Order.enhancedCoder.decode(encoded, "de.anomic.tools.cryptbig.simpleDecode()"));
 	if (method == 'c') return descrambleString(key, encoded);
 	return null;
     }
@@ -605,7 +605,7 @@ public class cryptbig {
 	if (s[0].equals("-ds64")) {
 	    // generate a b64 decoding from a given string
 	    if (s.length != 2) {help(); System.exit(-1);}
-	    System.out.println(kelondroBase64Order.standardCoder.decodeString(s[1]));
+	    System.out.println(kelondroBase64Order.standardCoder.decodeString(s[1], ""));
 	    System.exit(0);
 	}
 	if (s[0].equals("-ess")) {

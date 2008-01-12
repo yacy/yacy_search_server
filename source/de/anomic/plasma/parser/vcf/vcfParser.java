@@ -167,7 +167,7 @@ public class vcfParser extends AbstractParser implements Parser {
                                         if (!useLastLine) value += line.trim();
                                         else break;
                                     } while (line.length()!=0);
-                                    value = kelondroBase64Order.standardCoder.decodeString(value);
+                                    value = kelondroBase64Order.standardCoder.decodeString(value, "de.anomic.plasma.parser.vcf.vcfParser.parse(...)");
                                 }  
                             } catch (Exception ey) {
                                 // Encoding error: This could occure e.g. if the base64 doesn't 
