@@ -269,15 +269,22 @@ public class BlogComments {
                     }
                     int count = 0; //counts how many entries are shown to the user
                     int start = post.getInt("start",0); //indicates from where entries should be shown
-                    int num   = post.getInt("num",20);  //indicates how many entries should be shown
+                    int num   = post.getInt("num",10);  //indicates how many entries should be shown
+                    boolean prev = false;               //indicates if there were previous comments to the ones that are dispalyed
                     if(xml) num = 0;
+                    if (start < 1) start = 1;       // dirrrty fix for incorrect comment count, need to find reason
+                    if (start > 1) prev = true;
                     int nextstart = start+num;      //indicates the starting offset for next results
-                    while(i.hasNext()) {
-                        if(count >= num && num > 0)
-                            break;
+                    int prevstart = start-num;      //indicates the starting offset for previous results
+                    while(i.hasNext() && count < num) {
+
                         pageid = (String) i.next();
-                        if(0 < start--)
+                        
+                        if(start > 0) {
+                            start--;
                             continue;
+                        }
+                            
                         entry = switchboard.blogCommentDB.read(pageid);
 
                         if (commentMode == 2 && !hasRights && !entry.isAllowed())
@@ -317,8 +324,16 @@ public class BlogComments {
                         prop.put("mode_moreentries", "1"); //more entries are availible
                         prop.put("mode_moreentries_start", nextstart);
                         prop.put("mode_moreentries_num", num);
+                        prop.put("mode_moreentries_pageid", page.key());
                     }
                     else prop.put("moreentries", "0");
+                    if(prev) {
+                        prop.put("mode_preventries", "1");
+                        if (prevstart < 0) prevstart = 0;
+                        prop.put("mode_preventries_start", prevstart);
+                        prop.put("mode_preventries_num", num);
+                        prop.put("mode_preventries_pageid", page.key());
+                    } else prop.put("preventries", "0");
                 } catch (IOException e) {
 
                 }

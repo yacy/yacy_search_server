@@ -732,6 +732,10 @@ margin: 0px 30px 0px 30px;
 background-color:#eeeeee;
 }
 
+div.BlogCommentPrevNext {
+text-align: center;
+}
+
 /* other ------------------------------------*/
 ul#menu {
   padding:0;
