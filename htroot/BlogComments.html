@@ -16,7 +16,7 @@
       </p>
     </div>
     <p class="Navigation">
-      #(admin)#<a href="Blog.html?login=true">Login</a> #(/admin)#<a href="Blog.html">Blog-Home</a>
+      #(admin)#<a href="Blog.html?login=true">Login</a> - ::#(/admin)#<a href="Blog.html">Blog-Home</a>
     </p>
     #{entries}#
     <div class="BlogCommentPost">
@@ -28,6 +28,11 @@
       </p>
     </div>
     #{/entries}#
+    #(allow)#
+    <fieldset>
+    <p>Comments are not allowed for this posting!</p>
+    </fieldset>
+    ::
     <form action="BlogComments.html" method="post" enctype="multipart/form-data" accept-charset="UTF-8">
       <fieldset>
         <dl>
@@ -53,6 +58,7 @@
         <input type="submit" name="view" value="Discard" />
       </fieldset>
     </form>
+    #(/allow)#
     ::
     <!-- 1: preview -->
     <div class="Post">
@@ -92,6 +98,7 @@
       </fieldset>
     </form>
     #(/mode)#
+    
   #%env/templates/footer.template%#
   </body>
 </html>

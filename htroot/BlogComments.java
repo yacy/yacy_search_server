@@ -126,7 +126,16 @@ public class BlogComments {
             author = StrAuthor.getBytes();
         }
 
-        if (post.containsKey("submit")) {
+        page = switchboard.blogDB.read(pagename); //maybe "if(page == null)"
+        
+        // comments not allowed
+        if (page.getCommentMode() == 0) {
+            prop.put("mode_allow", 0);
+        } else {
+            prop.put("mode_allow", 1);
+        } 
+
+        if (post.containsKey("submit") && page.getCommentMode() != 0) {
             // store a new/edited blog-entry
             byte[] content;
             if(!post.get("content", "").equals(""))
@@ -186,7 +195,6 @@ public class BlogComments {
             }
         }
 
-        page = switchboard.blogDB.read(pagename); //maybe "if(page == null)"
         if(hasRights && post.containsKey("delete") && post.containsKey("page") && post.containsKey("comment")) {
             if(page.removeComment((String) post.get("comment"))) {
                 switchboard.blogCommentDB.delete((String) post.get("comment"));
@@ -199,14 +207,17 @@ public class BlogComments {
             switchboard.blogCommentDB.write(entry);
         }
 
-        if(post.containsKey("preview")) {
+        if(post.containsKey("preview") && page.getCommentMode() != 0) {
             //preview the page
             prop.put("mode", "1");//preview
             prop.put("mode_pageid", pagename);
+            prop.put("mode_allow_pageid", pagename);
             try {
                 prop.putHTML("mode_author", new String(author, "UTF-8"));
+                prop.putHTML("mode_allow_author", new String(author, "UTF-8"));
             } catch (UnsupportedEncodingException e) {
                 prop.putHTML("mode_author", new String(author));
+                prop.putHTML("mode_allow_author", new String(author));
             }
             prop.putHTML("mode_subject", post.get("subject",""));
             prop.put("mode_date", dateString(new Date()));
@@ -222,6 +233,7 @@ public class BlogComments {
             else {
                 //show 1 blog entry
                 prop.put("mode_pageid", page.key());
+                prop.put("mode_allow_pageid", pagename);
                 try {
                     prop.putHTML("mode_subject", new String(page.subject(),"UTF-8"));
                 } catch (UnsupportedEncodingException e) {
@@ -229,8 +241,10 @@ public class BlogComments {
                 }
                 try {
                     prop.putHTML("mode_author", new String(page.author(),"UTF-8"));
+                    prop.putHTML("mode_allow_author", new String(author, "UTF-8"));
                 } catch (UnsupportedEncodingException e) {
                     prop.putHTML("mode_author", new String(page.author()));
+                    prop.putHTML("mode_allow_author", new String(author));
                 }
                 try {
                     prop.put("mode_comments", new String(page.commentsSize(),"UTF-8"));
