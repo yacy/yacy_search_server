@@ -53,7 +53,7 @@ import java.io.RandomAccessFile;
 import java.util.Iterator;
 import java.util.StringTokenizer;
 
-public final class kelondroStack extends kelondroEcoRecords {
+public final class kelondroStack extends kelondroFullRecords {
 
     // define the Over-Head-Array
     private static short thisOHBytes   = 0; // our record definition does not need extra bytes

@@ -52,7 +52,7 @@ import java.util.Iterator;
 import java.util.Map;
 import java.util.TreeMap;
 
-public class kelondroFixedWidthArray extends kelondroEcoRecords implements kelondroArray {
+public class kelondroFixedWidthArray extends kelondroFullRecords implements kelondroArray {
 
     // define the Over-Head-Array
     private static short thisOHBytes   = 0; // our record definition does not need extra bytes

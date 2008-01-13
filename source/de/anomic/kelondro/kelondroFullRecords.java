@@ -31,12 +31,12 @@ import java.io.IOException;
 import java.util.Iterator;
 import java.util.TreeMap;
 
-public class kelondroEcoRecords extends kelondroAbstractRecords {
+public class kelondroFullRecords extends kelondroAbstractRecords {
 
     // static supervision objects: recognize and coordinate all activities
-    private static TreeMap<String, kelondroEcoRecords> recordTracker = new TreeMap<String, kelondroEcoRecords>();
+    private static TreeMap<String, kelondroFullRecords> recordTracker = new TreeMap<String, kelondroFullRecords>();
     
-    public kelondroEcoRecords(
+    public kelondroFullRecords(
             File file,
             short ohbytec, short ohhandlec,
             kelondroRow rowdef, int FHandles, int txtProps, int txtPropWidth) throws IOException {
@@ -44,7 +44,7 @@ public class kelondroEcoRecords extends kelondroAbstractRecords {
         recordTracker.put(this.filename, this);
     }
     
-    public kelondroEcoRecords(
+    public kelondroFullRecords(
             kelondroRA ra, String filename,
             short ohbytec, short ohhandlec,
             kelondroRow rowdef, int FHandles, int txtProps, int txtPropWidth,
@@ -53,7 +53,7 @@ public class kelondroEcoRecords extends kelondroAbstractRecords {
         recordTracker.put(this.filename, this);
     }
     
-    public kelondroEcoRecords(
+    public kelondroFullRecords(
             kelondroRA ra, String filename) throws IOException{
         super(ra, filename, true);
         recordTracker.put(this.filename, this);
