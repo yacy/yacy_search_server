@@ -494,7 +494,7 @@ public class plasmaCrawlQueues {
                 e.printStackTrace();
             } finally {
                 synchronized (workers) {
-                    workers.remove(new Integer(entry.hashCode()));
+                    workers.remove(entry.url().hash());
                 }
                 this.entry.setStatus("worker-finalized");
             }
