@@ -326,14 +326,14 @@ public class BlogComments {
                         prop.put("mode_moreentries_num", num);
                         prop.put("mode_moreentries_pageid", page.key());
                     }
-                    else prop.put("moreentries", "0");
+                    else prop.put("mode_moreentries", "0");
                     if(prev) {
                         prop.put("mode_preventries", "1");
                         if (prevstart < 0) prevstart = 0;
                         prop.put("mode_preventries_start", prevstart);
                         prop.put("mode_preventries_num", num);
                         prop.put("mode_preventries_pageid", page.key());
-                    } else prop.put("preventries", "0");
+                    } else prop.put("mode_preventries", "0");
                 } catch (IOException e) {
 
                 }
