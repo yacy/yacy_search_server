@@ -99,11 +99,11 @@ public class Blog {
         if (post == null) {
             prop.putHTML("peername", yacyCore.seedDB.mySeed().getName());
             prop.put("address", address);
-            return putBlogDefault(prop, switchboard, address, 0, 20, hasRights, xml);
+            return putBlogDefault(prop, switchboard, address, 0, 10, hasRights, xml);
         }
 
         final int start = post.getInt("start",0); //indicates from where entries should be shown
-        final int num   = post.getInt("num",20);  //indicates how many entries should be shown
+        final int num   = post.getInt("num",10);  //indicates how many entries should be shown
 
         if(!hasRights){
             final userDB.Entry userentry = switchboard.userDB.proxyAuth((String)header.get("Authorization", "xxxxxx"));
@@ -294,9 +294,12 @@ public class Blog {
         try {
             final Iterator i = switchboard.blogDB.keys(false);
             String pageid;
-            int count = 0; //counts how many entries are shown to the user
+            int count = 0;                        //counts how many entries are shown to the user
             if(xml) num = 0;
             final int nextstart = start+num;      //indicates the starting offset for next results
+            int prevstart = start-num;            //indicates the starting offset for previous results
+            boolean prev = false;                 //indicates if there were previous comments to the ones that are dispalyed
+            if (start > 0) prev = true;
             while(i.hasNext() && (num == 0 || num > count)) {
                 pageid = (String) i.next();
                 if(0 < start--) continue;
@@ -317,6 +320,15 @@ public class Blog {
             } else {
                 prop.put("moreentries", "0");
             }
+            
+            if(prev) {
+                prop.put("mode_preventries", "1");
+                if (prevstart < 0) prevstart = 0;
+                prop.put("mode_preventries_start", prevstart);
+                prop.put("mode_preventries_num", num);
+            } else prop.put("mode_preventries", "0");
+            
+            
         } catch (IOException e) { serverLog.logSevere("BLOG", "Error reading blog-DB", e); }
         return prop;
     }
