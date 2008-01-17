@@ -345,8 +345,8 @@ public class kelondroBase64Order extends kelondroAbstractOrder<byte[]> implement
     }
     
     public final int comparePivot(byte[] compiledPivot, byte[] b, int boffset, int blength) {
-    	assert zero == null;
-    	assert asc;
+        assert zero == null;
+        assert asc;
         assert (boffset + blength <= b.length) : "b.length = " + b.length + ", boffset = " + boffset + ", blength = " + blength;
         int i = 0;
         final int bl = Math.min(blength, b.length - boffset);

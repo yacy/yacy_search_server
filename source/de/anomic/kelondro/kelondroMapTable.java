@@ -93,7 +93,7 @@ public class kelondroMapTable {
         if (mTables.containsKey(tablename)) throw new RuntimeException("kelondroTables.declareTree: table '" + tablename + "' declared already in other context.");
         if (tTables.containsKey(tablename)) throw new RuntimeException("kelondroTables.declareTree: table '" + tablename + "' declared twice.");
         File tablefile = new File(tablesPath, "table." + tablename + ".tdb");
-        kelondroIndex Tree = new kelondroCache(kelondroTree.open(tablefile, true, preloadTime, rowdef), true, false);
+        kelondroIndex Tree = new kelondroCache(kelondroTree.open(tablefile, true, preloadTime, rowdef));
         tTables.put(tablename, Tree);
     }
 

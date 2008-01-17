@@ -67,13 +67,13 @@ public class yacyNewsDB {
     public yacyNewsDB(File path, long preloadTime) {
         this.path = path;
         this.preloadTime = preloadTime;
-        this.news = new kelondroCache(kelondroTree.open(path, true, preloadTime, yacyNewsRecord.rowdef), true, false);
+        this.news = new kelondroCache(kelondroTree.open(path, true, preloadTime, yacyNewsRecord.rowdef));
     }
 
     private void resetDB() {
         try {close();} catch (Exception e) {}
         if (path.exists()) path.delete();
-        this.news = new kelondroCache(kelondroTree.open(path, true, preloadTime, yacyNewsRecord.rowdef), true, false);
+        this.news = new kelondroCache(kelondroTree.open(path, true, preloadTime, yacyNewsRecord.rowdef));
     }
     
     public void close() {
@@ -102,14 +102,14 @@ public class yacyNewsDB {
         }
     }
 
-    public synchronized Iterator news() throws IOException {
+    public synchronized Iterator<yacyNewsRecord> news() throws IOException {
         // the iteration iterates yacyNewsRecord - type objects
         return new recordIterator();
     }
 
-    public class recordIterator implements Iterator {
+    public class recordIterator implements Iterator<yacyNewsRecord> {
 
-        Iterator rowIterator;
+        Iterator<kelondroRow.Entry> rowIterator;
 
         public recordIterator() throws IOException {
             rowIterator = news.rows(true, null);
@@ -119,7 +119,7 @@ public class yacyNewsDB {
             return rowIterator.hasNext();
         }
 
-        public Object next() {
+        public yacyNewsRecord next() {
             return b2r((kelondroRow.Entry) rowIterator.next());
         }
 

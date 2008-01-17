@@ -55,7 +55,7 @@ public class kelondroBytesIntMap {
     }
     
     public synchronized int puti(byte[] key, int i) throws IOException {
-    	assert i >= 0 : "i = " + i;
+        assert i >= 0 : "i = " + i;
         assert (key != null);
         kelondroRow.Entry newentry = index.row().newEntry();
         newentry.setCol(0, key);
@@ -66,7 +66,7 @@ public class kelondroBytesIntMap {
     }
     
     public synchronized void addi(byte[] key, int i) throws IOException {
-    	assert i >= 0 : "i = " + i;
+        assert i >= 0 : "i = " + i;
         assert (key != null);
         kelondroRow.Entry newentry = this.rowdef.newEntry();
         newentry.setCol(0, key);
@@ -82,8 +82,8 @@ public class kelondroBytesIntMap {
     }
 
     public synchronized int removeonei() throws IOException {
-    	kelondroRow.Entry indexentry = index.removeOne();
-    	if (indexentry == null) return -1;
+        kelondroRow.Entry indexentry = index.removeOne();
+        if (indexentry == null) return -1;
         return (int) indexentry.getColLong(1);
     }
     

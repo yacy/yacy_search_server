@@ -1802,7 +1802,6 @@ public final class plasmaSwitchboard extends serverAbstractSwitch implements ser
             
             // flush some entries from the RAM cache
             if (sbQueue.size() == 0) wordIndex.flushCacheSome(); // permanent flushing only if we are not busy
-            wordIndex.loadedURL.flushCacheSome();
 
             boolean doneSomething = false;
 

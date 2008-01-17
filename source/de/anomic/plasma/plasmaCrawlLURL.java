@@ -146,13 +146,6 @@ public final class plasmaCrawlLURL {
         gcrawlResultStack.add(urlHash + initiatorHash + executorHash);
     }
 
-    public synchronized void flushCacheSome() {
-        try {
-            if (urlIndexFile instanceof kelondroFlexSplitTable) ((kelondroFlexSplitTable) urlIndexFile).flushSome();
-            if (urlIndexFile instanceof kelondroCache) ((kelondroCache) urlIndexFile).flushSome();
-        } catch (IOException e) {}
-    }
-
     public synchronized int writeCacheSize() {
         if (urlIndexFile instanceof kelondroFlexSplitTable) return ((kelondroFlexSplitTable) urlIndexFile).writeBufferSize();
         if (urlIndexFile instanceof kelondroCache) return ((kelondroCache) urlIndexFile).writeBufferSize();

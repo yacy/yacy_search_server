@@ -93,7 +93,7 @@ public class kelondroFlexTable extends kelondroFlexWidthArray implements kelondr
 			if (indexfile.exists()) {
 				// use existing index file
 				System.out.println("*** Using File index " + indexfile);
-				ki = new kelondroCache(kelondroTree.open(indexfile, true, preloadTime, treeIndexRow(rowdef.width(0), rowdef.objectOrder), 2, 80), true, false);
+				ki = new kelondroCache(kelondroTree.open(indexfile, true, preloadTime, treeIndexRow(rowdef.width(0), rowdef.objectOrder), 2, 80));
 				RAMIndex = false;
 			} else {
 				// generate new index file
@@ -175,7 +175,7 @@ public class kelondroFlexTable extends kelondroFlexWidthArray implements kelondr
     
 
         private kelondroIndex initializeTreeIndex(File indexfile, long preloadTime, kelondroByteOrder objectOrder) throws IOException {
-		kelondroIndex treeindex = new kelondroCache(new kelondroTree(indexfile, true, preloadTime, treeIndexRow(rowdef.primaryKeyLength, objectOrder), 2, 80), true, false);
+		kelondroIndex treeindex = new kelondroCache(new kelondroTree(indexfile, true, preloadTime, treeIndexRow(rowdef.primaryKeyLength, objectOrder), 2, 80));
 		Iterator<kelondroNode> content = super.col[0].contentNodes(-1);
 		kelondroNode node;
 		kelondroRow.Entry indexentry;

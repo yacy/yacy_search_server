@@ -74,6 +74,8 @@ public class kelondroCollectionIndex {
     private static final int idx_col_lastread   = 6;  // a time stamp, update time in days since 1.1.2000
     private static final int idx_col_lastwrote  = 7;  // a time stamp, update time in days since 1.1.2000
 
+    private static final boolean useEcoTable = false;
+    
     private static kelondroRow indexRow(int keylength, kelondroByteOrder payloadOrder) {
         return new kelondroRow(
             "byte[] key-" + keylength + "," +
@@ -122,8 +124,9 @@ public class kelondroCollectionIndex {
         this.maxPartitions = maxpartitions;
         this.commonsPath = new File(path, filenameStub + "." + fillZ(Integer.toHexString(rowdef.objectsize).toUpperCase(), 4) + ".commons");
         this.commonsPath.mkdirs();
+        File f = new File(path, filenameStub + ".index");
         
-        if (new File(path, filenameStub + ".index").exists()) {
+        if (f.exists()) {
             serverLog.logFine("STARTUP", "OPENING COLLECTION INDEX");
             
             // open index and array files
@@ -153,7 +156,11 @@ public class kelondroCollectionIndex {
             serverLog.logFine("STARTUP", "STARTED INITIALIZATION OF NEW COLLECTION INDEX WITH " + initialSpace + " ENTRIES. THIS WILL TAKE SOME TIME");
 
             // initialize (new generation) index table from file
-            index = new kelondroFlexTable(path, filenameStub + ".index", preloadTime, indexRow(keyLength, indexOrder), initialSpace, true);
+            if (useEcoTable) {
+                index = new kelondroEcoTable(f, indexRow(keyLength, indexOrder), 100);
+            } else {
+                index = new kelondroFlexTable(path, filenameStub + ".index", preloadTime, indexRow(keyLength, indexOrder), initialSpace, true);
+            }
             
             // open array files
             this.arrays = new HashMap<String, kelondroFixedWidthArray>(); // all entries will be dynamically created with getArray()
@@ -225,25 +232,31 @@ public class kelondroCollectionIndex {
     private kelondroIndex openIndexFile(File path, String filenameStub, kelondroByteOrder indexOrder,
             long preloadTime, int loadfactor, kelondroRow rowdef, int initialSpace) throws IOException {
         // open/create index table
-        kelondroIndex theindex = new kelondroCache(new kelondroFlexTable(path, filenameStub + ".index", preloadTime, indexRow(keylength, indexOrder), initialSpace, true), true, false);
-        //kelondroIndex theindex = new kelondroFlexTable(path, filenameStub + ".index", preloadTime, indexRow(keylength, indexOrder), true);
-
-        // save/check property file for this array
-        File propfile = propertyFile(path, filenameStub, loadfactor, rowdef.objectsize);
-        Map<String, String> props = new HashMap<String, String>();
-        if (propfile.exists()) {
-            props = serverFileUtils.loadHashMap(propfile);
-            String stored_rowdef = (String) props.get("rowdef");
-            if ((stored_rowdef == null) || (!(rowdef.subsumes(new kelondroRow(stored_rowdef, rowdef.objectOrder, 0))))) {
-                System.out.println("FATAL ERROR: stored rowdef '" + stored_rowdef + "' does not match with new rowdef '" + 
-                        rowdef + "' for array cluster '" + path + "/" + filenameStub + "'");
-                System.exit(-1);
-            }
-        }
-        props.put("rowdef", rowdef.toString());
-        serverFileUtils.saveMap(propfile, props, "CollectionIndex properties");
+        File f = new File(path, filenameStub + ".index");
+        if (f.isDirectory()) {
+            // use a flextable
+            kelondroIndex theindex = new kelondroCache(new kelondroFlexTable(path, filenameStub + ".index", preloadTime, indexRow(keylength, indexOrder), initialSpace, true));
         
-        return theindex;
+            // save/check property file for this array
+            File propfile = propertyFile(path, filenameStub, loadfactor, rowdef.objectsize);
+            Map<String, String> props = new HashMap<String, String>();
+            if (propfile.exists()) {
+                props = serverFileUtils.loadHashMap(propfile);
+                String stored_rowdef = (String) props.get("rowdef");
+                if ((stored_rowdef == null) || (!(rowdef.subsumes(new kelondroRow(stored_rowdef, rowdef.objectOrder, 0))))) {
+                    System.out.println("FATAL ERROR: stored rowdef '" + stored_rowdef + "' does not match with new rowdef '" + 
+                            rowdef + "' for array cluster '" + path + "/" + filenameStub + "'");
+                    System.exit(-1);
+                }
+            }
+            props.put("rowdef", rowdef.toString());
+            serverFileUtils.saveMap(propfile, props, "CollectionIndex properties");
+        
+            return theindex;
+        } else {
+            // open a ecotable
+            return new kelondroEcoTable(f, indexRow(keylength, indexOrder), 100);
+        }
     }
     
     private kelondroFixedWidthArray openArrayFile(int partitionNumber, int serialNumber, kelondroByteOrder indexOrder, boolean create) throws IOException {

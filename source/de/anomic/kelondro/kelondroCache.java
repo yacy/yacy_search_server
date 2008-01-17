@@ -56,29 +56,21 @@ public class kelondroCache implements kelondroIndex {
     // class objects
     private kelondroRowSet readHitCache;
     private kelondroRowSet readMissCache;
-    private kelondroRowSet writeBufferUnique;  // entries of that buffer are not contained in index
-    private kelondroRowSet writeBufferDoubles; // entries of that buffer shall overwrite entries in index
     private kelondroIndex  index;
     private kelondroRow    keyrow;
     private int            readHit, readMiss, writeUnique, writeDouble, cacheDelete, cacheFlush;
     private int            hasnotHit, hasnotMiss, hasnotUnique, hasnotDouble, hasnotDelete;
-    private boolean 	   read, write;
     
-    public kelondroCache(kelondroIndex backupIndex, boolean read, boolean write) {
-        assert write == false;
+    public kelondroCache(kelondroIndex backupIndex) {
         this.index = backupIndex;
-        this.read = read;
-        this.write = write;
         init();
         objectTracker.put(backupIndex.filename(), this);
     }
     
     private void init() {
         this.keyrow = new kelondroRow(new kelondroColumn[]{index.row().column(index.row().primaryKeyIndex)}, index.row().objectOrder, 0);
-        this.readHitCache = (read) ? new kelondroRowSet(index.row(), 0) : null;
-        this.readMissCache = (read) ? new kelondroRowSet(this.keyrow, 0) : null;
-        this.writeBufferUnique = (write) ? new kelondroRowSet(index.row(), 0) : null;
-        this.writeBufferDoubles = (write) ? new kelondroRowSet(index.row(), 0) : null;
+        this.readHitCache = new kelondroRowSet(index.row(), 0);
+        this.readMissCache = new kelondroRowSet(this.keyrow, 0);
         this.readHit = 0;
         this.readMiss = 0;
         this.writeUnique = 0;
@@ -97,9 +89,7 @@ public class kelondroCache implements kelondroIndex {
     }
     
     public int writeBufferSize() {
-        return
-          ((writeBufferUnique  == null) ? 0 : writeBufferUnique.size()) + 
-          ((writeBufferDoubles == null) ? 0 : writeBufferDoubles.size());
+        return 0;
     }
     
     public kelondroProfile profile() {
@@ -163,84 +153,6 @@ public class kelondroCache implements kelondroIndex {
         return kelondroCachedRecords.cacheGrowStatus(serverMemory.available(), memStopGrow, memStartShrink);
     }
     
-    private void flushUnique() throws IOException {
-        if (writeBufferUnique == null) return;
-        synchronized (writeBufferUnique) {
-            Iterator<kelondroRow.Entry> i = writeBufferUnique.rows();
-            while (i.hasNext()) {
-                this.index.addUnique(i.next());
-                this.cacheFlush++;
-            }
-            writeBufferUnique.clear();
-        }
-    }
-
-    private void flushUnique(int maxcount) throws IOException {
-        if (writeBufferUnique == null) return;
-        if (maxcount == 0) return;
-        synchronized (writeBufferUnique) {
-            kelondroRowCollection delete = new kelondroRowCollection(this.keyrow, maxcount);
-            Iterator<kelondroRow.Entry> i = writeBufferUnique.rows();
-            kelondroRow.Entry row;
-            while ((i.hasNext()) && (maxcount-- > 0)) {
-                row = i.next();
-                delete.add(row.getPrimaryKeyBytes());
-                this.index.addUnique(row);
-                this.cacheFlush++;
-            }
-            i = delete.rows();
-            while (i.hasNext()) {
-                writeBufferUnique.remove(((kelondroRow.Entry) i.next()).getColBytes(0), true);
-            }
-            delete = null;
-            writeBufferUnique.trim(true);
-        }
-    }
-
-    private void flushDoubles() throws IOException {
-        if (writeBufferDoubles == null) return;
-        synchronized (writeBufferDoubles) {
-            Iterator<kelondroRow.Entry> i = writeBufferDoubles.rows();
-            while (i.hasNext()) {
-                this.index.put(i.next());
-                this.cacheFlush++;
-            }
-            writeBufferDoubles.clear();
-        }
-    }
-
-    private void flushDoubles(int maxcount) throws IOException {
-        if (writeBufferDoubles == null) return;
-        if (maxcount == 0) return;
-        synchronized (writeBufferDoubles) {
-            kelondroRowCollection delete = new kelondroRowCollection(this.keyrow, maxcount);
-            Iterator<kelondroRow.Entry> i = writeBufferDoubles.rows();
-            kelondroRow.Entry row;
-            while ((i.hasNext()) && (maxcount-- > 0)) {
-                row = i.next();
-                delete.add(row.getPrimaryKeyBytes());
-                this.index.addUnique(row);
-                this.cacheFlush++;
-            }
-            i = delete.rows();
-            while (i.hasNext()) writeBufferDoubles.remove(((kelondroRow.Entry) i.next()).getColBytes(0), true);
-            delete = null;
-            writeBufferDoubles.trim(true);
-        }
-    }
-
-    public void flushSome() throws IOException {
-        if (writeBufferUnique != null) flushUnique(writeBufferUnique.size() / 10);
-        if (writeBufferDoubles != null) flushDoubles(writeBufferDoubles.size() / 10);
-    }
-
-    private int sumRecords() {
-        return
-          ((readHitCache       == null) ? 0 : readHitCache.size()) + 
-          ((writeBufferUnique  == null) ? 0 : writeBufferUnique.size()) + 
-          ((writeBufferDoubles == null) ? 0 : writeBufferDoubles.size());
-    }
-    
     private boolean checkMissSpace() {
         // returns true if it is allowed to write into this cache
         if (cacheGrowStatus() < 1) {
@@ -256,38 +168,21 @@ public class kelondroCache implements kelondroIndex {
         // returns true if it is allowed to write into this cache
         int status = cacheGrowStatus();
         if (status < 1) {
-            flushUnique();
-            flushDoubles();
             if (readHitCache != null) {
                 readHitCache.clear();
             }
             return false;
         }
         if (status < 2) {
-            int s = sumRecords();
-            flushDoubles(s / 4);
-            flushUnique(s / 4);
             if (readHitCache != null) readHitCache.clear();
         }
         return true;
     }
     
     public synchronized void close() {
-        try {
-            flushUnique();
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-        try {
-            flushDoubles();
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
         index.close();
         readHitCache = null;
         readMissCache = null;
-        writeBufferUnique = null;
-        writeBufferDoubles = null;
     }
 
     public boolean has(byte[] key) throws IOException {
@@ -310,20 +205,6 @@ public class kelondroCache implements kelondroIndex {
         // then try the hit cache and the buffers
         if (readHitCache != null) {
             entry = readHitCache.get(key);
-            if (entry != null) {
-                this.readHit++;
-                return entry;
-            }
-        }
-        if (writeBufferUnique != null) {
-            entry = writeBufferUnique.get(key);
-            if (entry != null) {
-                this.readHit++;
-                return entry;
-            }
-        }
-        if (writeBufferDoubles != null) {
-            entry = writeBufferDoubles.get(key);
             if (entry != null) {
                 this.readHit++;
                 return entry;
@@ -371,14 +252,7 @@ public class kelondroCache implements kelondroIndex {
         if (readMissCache != null) {
             if (readMissCache.remove(key, true) != null) {
                 this.hasnotHit++;
-                // the entry does not exist before                
-                if (writeBufferUnique != null) {
-                    // since we know that the entry does not exist, we know that new
-                    // entry belongs to the unique buffer
-                    writeBufferUnique.put(row);
-                    return null;
-                }
-                assert (writeBufferDoubles == null);
+                // the entry does not exist before
                 index.put(row); // write to backend
                 if (readHitCache != null) {
                     kelondroRow.Entry dummy = readHitCache.put(row); // learn that entry
@@ -394,51 +268,13 @@ public class kelondroCache implements kelondroIndex {
             entry = readHitCache.get(key);
             if (entry != null) {
                 // since we know that the entry was in the read cache, it cannot be in any write cache
-                if (writeBufferDoubles != null) {
-                    // because the entry exists, it must be written in the doubles buffer
-                    readHitCache.remove(key, true);
-                    this.cacheDelete++;
-                    writeBufferDoubles.put(row);
-                    return entry;
-                } else {
                     // write directly to backend index
                     index.put(row);
                     // learn from situation
                     kelondroRow.Entry dummy = readHitCache.put(row); // overwrite old entry
                     if (dummy == null) this.writeUnique++; else this.writeDouble++;
                     return entry;
-                }
             }
-        }
-
-        // we still don't know if the key exists. Look into the buffers
-        if (writeBufferUnique != null) {
-            entry = writeBufferUnique.get(key);
-            if (entry != null) {
-                writeBufferUnique.put(row);
-                return entry;
-            }
-        }
-        if (writeBufferDoubles != null) {
-            entry = writeBufferDoubles.get(key);
-            if (entry != null) {
-                writeBufferDoubles.put(row);
-                return entry;
-            }
-        }
-        
-        // finally, we still don't know if this is a double-entry or unique-entry
-        // there is a chance to get that information 'cheap':
-        // look into the node ram cache of the back-end index.
-        // that does only work, if the node cache is complete
-        // that is the case for kelondroFlexTables with ram index
-        if ((writeBufferUnique != null) &&
-            (index instanceof kelondroFlexTable) && 
-            (((kelondroFlexTable) index).hasRAMIndex()) &&
-            (!(((kelondroFlexTable) index).has(key)))) {
-            // this an unique entry
-            writeBufferUnique.put(row);
-            return null; // since that was unique, there was no entry before
         }
 
         // the worst case: we must write to the back-end directly
@@ -470,13 +306,6 @@ public class kelondroCache implements kelondroIndex {
             this.readMissCache.remove(key, true);
             this.hasnotDelete++;
             // the entry does not exist before
-            if (writeBufferUnique != null) {
-                // since we know that the entry does not exist, we know that new
-                // entry belongs to the unique buffer
-                writeBufferUnique.put(row);
-                return;
-            }
-            assert (writeBufferDoubles == null);
             index.addUnique(row); // write to backend
             if (readHitCache != null) {
                 kelondroRow.Entry dummy = readHitCache.put(row); // learn that entry
@@ -485,15 +314,6 @@ public class kelondroCache implements kelondroIndex {
             return;
         }
         
-        if ((writeBufferUnique != null) &&
-            (index instanceof kelondroFlexTable) && 
-            (((kelondroFlexTable) index).hasRAMIndex()) &&
-            (!(((kelondroFlexTable) index).has(key)))) {
-            // this an unique entry
-            writeBufferUnique.addUnique(row);
-            return;
-        }
-
         // the worst case: we must write to the back-end directly
         index.addUnique(row);
         if (readHitCache != null) {
@@ -510,9 +330,6 @@ public class kelondroCache implements kelondroIndex {
         
         assert (row != null);
         assert (row.columns() == row().columns());
-        //assert (!(serverLog.allZero(row.getColBytes(index.primarykey()))));
-        assert (writeBufferUnique == null);
-        assert (writeBufferDoubles == null);
         
         byte[] key = row.getPrimaryKeyBytes();
         checkHitSpace();
@@ -562,45 +379,12 @@ public class kelondroCache implements kelondroIndex {
             }
         }
         
-        // if the key already exists in one buffer, remove that buffer
-        if (writeBufferUnique != null) {
-            Entry entry = writeBufferUnique.remove(key, true);
-            if (entry != null) return entry;
-        }
-        if (writeBufferDoubles != null) {
-            Entry entry = writeBufferDoubles.remove(key, true);
-            if (entry != null) {
-                index.remove(key, false);
-                return entry;
-            }
-        }
-        
         return index.remove(key, false);
     }
 
     public synchronized Entry removeOne() throws IOException {
         
         checkMissSpace();
-        
-        if ((writeBufferUnique != null) && (writeBufferUnique.size() > 0)) {
-            Entry entry = writeBufferUnique.removeOne();
-            if (readMissCache != null) {
-                kelondroRow.Entry dummy = readMissCache.put(readMissCache.row().newEntry(entry.getPrimaryKeyBytes()));
-                if (dummy == null) this.hasnotUnique++; else this.hasnotDouble++;
-            }
-            return entry;
-        }
-
-        if ((writeBufferDoubles != null) && (writeBufferDoubles.size() > 0)) {
-            Entry entry = writeBufferDoubles.removeOne();
-            byte[] key = entry.getPrimaryKeyBytes();
-            if (readMissCache != null) {
-                kelondroRow.Entry dummy = readMissCache.put(readMissCache.row().newEntry(key));
-                if (dummy == null) this.hasnotUnique++; else this.hasnotDouble++;
-            }
-            index.remove(key, false);
-            return entry;
-        }
         
         Entry entry = index.removeOne();
         if (entry == null) return null;
@@ -621,17 +405,15 @@ public class kelondroCache implements kelondroIndex {
     }
 
     public synchronized kelondroCloneableIterator<byte[]> keys(boolean up, byte[] firstKey) throws IOException {
-        flushUnique();
         return index.keys(up, firstKey);
     }
 
     public synchronized kelondroCloneableIterator<kelondroRow.Entry> rows(boolean up, byte[] firstKey) throws IOException {
-        flushUnique();
         return index.rows(up, firstKey);
     }
 
     public int size() {
-        return index.size() + ((writeBufferUnique == null) ? 0 : writeBufferUnique.size());
+        return index.size();
     }
 
     public String filename() {

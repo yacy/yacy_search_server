@@ -140,7 +140,7 @@ public class plasmaCrawlBalancer {
     
     private void openFileIndex() {
         cacheStacksPath.mkdirs();
-        urlFileIndex = new kelondroCache(new kelondroFlexTable(cacheStacksPath, stackname + indexSuffix, -1, plasmaCrawlEntry.rowdef, 0, true), true, false);
+        urlFileIndex = new kelondroCache(new kelondroFlexTable(cacheStacksPath, stackname + indexSuffix, -1, plasmaCrawlEntry.rowdef, 0, true));
     }
     
     private void resetFileIndex() {

@@ -355,6 +355,7 @@ public class kelondroRowCollection {
     }
     
     public synchronized kelondroRow.Entry removeOne() {
+    	// removes the last entry from the collection
         if (chunkcount == 0) return null;
         kelondroRow.Entry r = get(chunkcount - 1);
         if (chunkcount == sortBound) sortBound--;

@@ -101,7 +101,7 @@ public class kelondroFlexSplitTable implements kelondroIndex {
             // open next biggest table
             t.remove(maxf);
             date = maxf.substring(tablename.length() + 1);
-            table = new kelondroCache(new kelondroFlexTable(path, maxf, preloadTime, rowdef, 0, resetOnFail), true, false);
+            table = new kelondroCache(new kelondroFlexTable(path, maxf, preloadTime, rowdef, 0, resetOnFail));
             tables.put(date, table);
         }
     }
@@ -162,16 +162,6 @@ public class kelondroFlexSplitTable implements kelondroIndex {
             if (ki instanceof kelondroCache) s += ((kelondroCache) ki).writeBufferSize();
         }
         return s;
-    }
-    
-    public void flushSome() {
-        Iterator<kelondroIndex> i = tables.values().iterator();
-        kelondroIndex ki;
-        while (i.hasNext()) {
-            ki = ((kelondroIndex) i.next());
-            if (ki instanceof kelondroCache)
-                try {((kelondroCache) ki).flushSome();} catch (IOException e) {}
-        }
     }
     
     public kelondroRow row() {

@@ -80,7 +80,7 @@ public final class plasmaCrawlStacker extends Thread {
     final serverLog log = new serverLog("STACKCRAWL");
     
     private plasmaSwitchboard sb;
-    private final LinkedList urlEntryHashCache;
+    private final LinkedList<String> urlEntryHashCache;
     private kelondroIndex urlEntryCache;
     private File cacheStacksPath;
     private long preloadTime;
@@ -91,7 +91,7 @@ public final class plasmaCrawlStacker extends Thread {
     
     
     // objects for the prefetch task
-    private ArrayList dnsfetchHosts = new ArrayList();    
+    private ArrayList<String> dnsfetchHosts = new ArrayList<String>();    
     
     public plasmaCrawlStacker(plasmaSwitchboard sb, File dbPath, long preloadTime, int dbtype, boolean prequeue) {
         this.sb = sb;
@@ -101,7 +101,7 @@ public final class plasmaCrawlStacker extends Thread {
         this.alternateCount = 0;
         
         // init the message list
-        this.urlEntryHashCache = new LinkedList();
+        this.urlEntryHashCache = new LinkedList<String>();
         
         // create a stack for newly entered entries
         this.cacheStacksPath = dbPath;
@@ -111,7 +111,7 @@ public final class plasmaCrawlStacker extends Thread {
         openDB();
         try {
             // loop through the list and fill the messageList with url hashs
-            Iterator rows = this.urlEntryCache.rows(true, null);
+            Iterator<kelondroRow.Entry> rows = this.urlEntryCache.rows(true, null);
             kelondroRow.Entry entry;
             while (rows.hasNext()) {
                 entry = (kelondroRow.Entry) rows.next();
@@ -299,13 +299,13 @@ public final class plasmaCrawlStacker extends Thread {
             String newCacheName = "urlNoticeStacker8.db";
             cacheStacksPath.mkdirs();
             try {
-                this.urlEntryCache = new kelondroCache(new kelondroFlexTable(cacheStacksPath, newCacheName, preloadTime, plasmaCrawlEntry.rowdef, 0, true), true, false);
+                this.urlEntryCache = new kelondroCache(new kelondroFlexTable(cacheStacksPath, newCacheName, preloadTime, plasmaCrawlEntry.rowdef, 0, true));
             } catch (Exception e) {
                 e.printStackTrace();
                 // kill DB and try again
                 kelondroFlexTable.delete(cacheStacksPath, newCacheName);
                 try {
-                    this.urlEntryCache = new kelondroCache(new kelondroFlexTable(cacheStacksPath, newCacheName, preloadTime, plasmaCrawlEntry.rowdef, 0, true), true, false);
+                    this.urlEntryCache = new kelondroCache(new kelondroFlexTable(cacheStacksPath, newCacheName, preloadTime, plasmaCrawlEntry.rowdef, 0, true));
                 } catch (Exception ee) {
                     ee.printStackTrace();
                     System.exit(-1);
@@ -315,7 +315,7 @@ public final class plasmaCrawlStacker extends Thread {
         if (this.dbtype == QUEUE_DB_TYPE_TREE) {
             File cacheFile = new File(cacheStacksPath, "urlNoticeStacker8.db");
             cacheFile.getParentFile().mkdirs();
-            this.urlEntryCache = new kelondroCache(kelondroTree.open(cacheFile, true, preloadTime, plasmaCrawlEntry.rowdef), true, true);
+            this.urlEntryCache = new kelondroCache(kelondroTree.open(cacheFile, true, preloadTime, plasmaCrawlEntry.rowdef));
         }
     }
 

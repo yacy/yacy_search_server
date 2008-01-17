@@ -14,6 +14,7 @@ import javax.imageio.ImageIO;
 import de.anomic.kelondro.kelondroBase64Order;
 import de.anomic.kelondro.kelondroCache;
 import de.anomic.kelondro.kelondroCloneableIterator;
+import de.anomic.kelondro.kelondroEcoTable;
 import de.anomic.kelondro.kelondroFlexSplitTable;
 import de.anomic.kelondro.kelondroFlexTable;
 import de.anomic.kelondro.kelondroIndex;
@@ -163,10 +164,10 @@ public class dbtest {
                     final STEntry dbEntry = new STEntry(entryBytes.getColBytes(0), entryBytes.getColBytes(1));
                     if (!dbEntry.isValid()) {
                         System.out.println("INVALID: " + dbEntry);
-                    }/* else {
+                    } /* else {
                         System.out.println("_VALID_: " + dbEntry);
-                        getTable().remove(entry.getKey());
-                    }*/
+                        getTable().remove(entry.getKey(), true);
+                    } */
                 }
             } catch (IOException e) {
                 System.err.println(e);
@@ -197,7 +198,7 @@ public class dbtest {
             }
             if (dbe.equals("kelondroTree")) {
                 File tablefile = new File(tablename + ".kelondro.db");
-                table = new kelondroCache(new kelondroTree(tablefile, true, preload, testRow), true, false);
+                table = new kelondroCache(new kelondroTree(tablefile, true, preload, testRow));
             }
             if (dbe.equals("kelondroSplittedTree")) {
                 File tablepath = new File(tablename).getParentFile();
@@ -212,6 +213,9 @@ public class dbtest {
             if (dbe.equals("kelondroFlexSplitTable")) {
                 File tablepath = new File(tablename).getParentFile();
                 table = new kelondroFlexSplitTable(tablepath, new File(tablename).getName(), preload, testRow, true);
+            }
+            if (dbe.equals("kelondroEcoTable")) {
+                table = new kelondroEcoTable(new File(tablename), testRow, 100);
             }
             if (dbe.equals("mysql")) {
                 table = new kelondroSQLTable("mysql", testRow);
@@ -372,7 +376,7 @@ public class dbtest {
             if (command.equals("stressThreaded")) {
                 // 
                 // args: <number-of-writes> <number-of-reads-per-write> <random-startpoint>
-            	// example: kelondroFlexTable stressThreaded /Users/admin/dbtest 500 50 0
+                // example: kelondroFlexTable stressThreaded /Users/admin/dbtest 500 50 0
                 long writeCount = Long.parseLong(args[3]);
                 long readCount = Long.parseLong(args[4]);
                 long randomstart = Long.parseLong(args[5]);
@@ -384,22 +388,22 @@ public class dbtest {
                 HashSet<Long> jcontrol = new HashSet<Long>();
                 kelondroIntBytesMap kcontrol = new kelondroIntBytesMap(1, 0);
                 for (int i = 0; i < writeCount; i++) {
-                	r = Math.abs(random.nextLong() % 1000);
-                	jcontrol.add(new Long(r));
-                	kcontrol.putb((int) r, "x".getBytes());
+                    r = Math.abs(random.nextLong() % 1000);
+                    jcontrol.add(new Long(r));
+                    kcontrol.putb((int) r, "x".getBytes());
                     serverInstantThread.oneTimeJob(new WriteJob(table, r), 0, 50);
                     if (random.nextLong() % 5 == 0) ra.add(new Long(r));
                     for (int j = 0; j < readCount; j++) {
                         serverInstantThread.oneTimeJob(new ReadJob(table, random.nextLong() % writeCount), random.nextLong() % 1000, 20);
                     }
                     if ((ra.size() > 0) && (random.nextLong() % 7 == 0)) {
-                    	rc++;
-                    	p = Math.abs(random.nextInt()) % ra.size();
-                    	R = (Long) ra.get(p);
-                    	jcontrol.remove(R);
-                    	kcontrol.removeb((int) R.longValue());
-                    	System.out.println("remove: " + R.longValue());
-                    	serverInstantThread.oneTimeJob(new RemoveJob(table, ((Long) ra.remove(p)).longValue()), 0, 50);
+                        rc++;
+                        p = Math.abs(random.nextInt()) % ra.size();
+                        R = (Long) ra.get(p);
+                        jcontrol.remove(R);
+                        kcontrol.removeb((int) R.longValue());
+                        System.out.println("remove: " + R.longValue());
+                        serverInstantThread.oneTimeJob(new RemoveJob(table, ((Long) ra.remove(p)).longValue()), 0, 50);
                     }
                 }
                 System.out.println("removed: " + rc + ", size of jcontrol set: " + jcontrol.size() + ", size of kcontrol set: " + kcontrol.size());
@@ -424,22 +428,22 @@ public class dbtest {
                 HashSet<Long> jcontrol = new HashSet<Long>();
                 kelondroIntBytesMap kcontrol = new kelondroIntBytesMap(1, 0);
                 for (int i = 0; i < writeCount; i++) {
-                	//if (i == 30) random = new Random(randomstart);
-                	r = Math.abs(random.nextLong() % 1000);
-                	jcontrol.add(new Long(r));
-                	kcontrol.putb((int) r, "x".getBytes());
+                    //if (i == 30) random = new Random(randomstart);
+                    r = Math.abs(random.nextLong() % 1000);
+                    jcontrol.add(new Long(r));
+                    kcontrol.putb((int) r, "x".getBytes());
                     new WriteJob(table, r).run();
                     if (random.nextLong() % 5 == 0) ra.add(new Long(r));
                     for (int j = 0; j < readCount; j++) {
                         new ReadJob(table, random.nextLong() % writeCount).run();
                     }
                     if ((ra.size() > 0) && (random.nextLong() % 7 == 0)) {
-                    	rc++;
-                    	p = Math.abs(random.nextInt()) % ra.size();
-                    	R = (Long) ra.get(p);
-                    	jcontrol.remove(R);
-                    	kcontrol.removeb((int) R.longValue());
-                    	new RemoveJob(table, ((Long) ra.remove(p)).longValue()).run();
+                        rc++;
+                        p = Math.abs(random.nextInt()) % ra.size();
+                        R = (Long) ra.get(p);
+                        jcontrol.remove(R);
+                        kcontrol.removeb((int) R.longValue());
+                        new RemoveJob(table, ((Long) ra.remove(p)).longValue()).run();
                     }
                 }
                 try {Thread.sleep(1000);} catch (InterruptedException e) {}

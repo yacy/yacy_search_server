@@ -62,8 +62,8 @@ public final class kelondroRow {
     }
 
     public kelondroRow(String structure, kelondroByteOrder objectOrder, int primaryKey) {
-    	assert (objectOrder != null);
-    	this.objectOrder = objectOrder;
+        assert (objectOrder != null);
+        this.objectOrder = objectOrder;
         // define row with row syntax
         // example:
         //# Structure=<pivot-12>,'=',<UDate-3>,<VDate-3>,<LCount-2>,<GCount-2>,<ICount-2>,<DCount-2>,<TLength-3>,<WACount-3>,<WUCount-3>,<Flags-1>
@@ -95,8 +95,8 @@ public final class kelondroRow {
     }
     
     public final void setOrdering(kelondroByteOrder objectOrder, int primaryKey) {
-    	assert (objectOrder != null);
-    	this.objectOrder = objectOrder;
+        assert (objectOrder != null);
+        this.objectOrder = objectOrder;
         this.primaryKeyIndex = primaryKey;
         this.primaryKeyLength = (primaryKey < 0) ? this.objectsize : row[primaryKeyIndex].cellwidth;
     }
@@ -165,7 +165,7 @@ public final class kelondroRow {
     public final Entry newEntry(byte[] rowinstance, int start, boolean clone) {
         if (rowinstance == null) return null;
         //assert (rowinstance[0] != 0);
-        assert (this.objectOrder.wellformed(rowinstance, start, row[0].cellwidth));
+        assert (this.objectOrder.wellformed(rowinstance, start, row[0].cellwidth)) : "rowinstance = " + new String(rowinstance);
         // this method offers the option to clone the content
         // this is necessary if it is known that the underlying byte array may change and therefore
         // the reference to the byte array does not contain the original content
@@ -185,38 +185,38 @@ public final class kelondroRow {
     }
     
     public final EntryIndex newEntryIndex(byte[] rowinstance, int index) {
-    	if (rowinstance == null) return null;
-    	assert (rowinstance[0] != 0);
-    	assert (this.objectOrder.wellformed(rowinstance, 0, row[0].cellwidth));
+        if (rowinstance == null) return null;
+        assert (rowinstance[0] != 0);
+        assert (this.objectOrder.wellformed(rowinstance, 0, row[0].cellwidth));
         return new EntryIndex(rowinstance, index);
     }
     
     public static class EntryComparator extends kelondroAbstractOrder<Entry> implements kelondroOrder<Entry>, Comparator<Entry> {
 
-    	kelondroByteOrder base;
-    	public EntryComparator(kelondroByteOrder baseOrder) {
-    		this.base = baseOrder;
-    	}
-    	
-		public int compare(Entry a, Entry b) {
-			return a.compareTo(b);
-		}
+        kelondroByteOrder base;
+        public EntryComparator(kelondroByteOrder baseOrder) {
+            this.base = baseOrder;
+        }
+        
+        public int compare(Entry a, Entry b) {
+            return a.compareTo(b);
+        }
 
-		public kelondroOrder<Entry> clone() {
-			return new EntryComparator(base);
-		}
+        public kelondroOrder<Entry> clone() {
+            return new EntryComparator(base);
+        }
 
-		public long cardinal(Entry key) {
-			return base.cardinal(key.getPrimaryKeyBytes());
-		}
+        public long cardinal(Entry key) {
+            return base.cardinal(key.getPrimaryKeyBytes());
+        }
 
-		public String signature() {
-			return base.signature();
-		}
+        public String signature() {
+            return base.signature();
+        }
 
-		public boolean wellformed(Entry a) {
-			return base.wellformed(a.getPrimaryKeyBytes());
-		}
+        public boolean wellformed(Entry a) {
+            return base.wellformed(a.getPrimaryKeyBytes());
+        }
 
     }
     
@@ -240,14 +240,14 @@ public final class kelondroRow {
         }
         
         public Entry(byte[] newrow, int start, boolean forceclone) {
-        	if ((!forceclone) && (newrow.length - start >= objectsize)) {
-        		this.rowinstance = newrow;
-        		this.offset = start;
-        	} else {
-        		this.rowinstance = new byte[objectsize];
-        		System.arraycopy(newrow, start, this.rowinstance, 0, objectsize);
-        		this.offset = 0;
-        	}
+            if ((!forceclone) && (newrow.length - start >= objectsize)) {
+                this.rowinstance = newrow;
+                this.offset = start;
+            } else {
+                this.rowinstance = new byte[objectsize];
+                System.arraycopy(newrow, start, this.rowinstance, 0, objectsize);
+                this.offset = 0;
+            }
             //for (int i = ll; i < objectsize; i++) this.rowinstance[i] = 0;
         }
         
@@ -291,7 +291,7 @@ public final class kelondroRow {
                             try {
                                 setCol(nick, Long.parseLong(elts[i].substring(p + 1).trim()));
                             } catch (NumberFormatException e) {
-                            	serverLog.logSevere("kelondroRow", "NumberFormatException for celltype_cardinal; row = " + i + ", celltype = " + row[i].celltype + ", encoder = " + row[i].encoder + ", value = '" + elts[i].substring(p + 1).trim() + "'");
+                                serverLog.logSevere("kelondroRow", "NumberFormatException for celltype_cardinal; row = " + i + ", celltype = " + row[i].celltype + ", encoder = " + row[i].encoder + ", value = '" + elts[i].substring(p + 1).trim() + "'");
                                 setCol(nick, 0);
                             }
                         } else if ((decimalCardinal) && (row[i].celltype == kelondroColumn.celltype_binary)) {
@@ -299,7 +299,7 @@ public final class kelondroRow {
                             try {
                                 setCol(nick, new byte[]{(byte) Integer.parseInt(elts[i].substring(p + 1).trim())});
                             } catch (NumberFormatException e) {
-                            	serverLog.logSevere("kelondroRow", "NumberFormatException for celltype_binary; row = " + i + ", celltype = " + row[i].celltype + ", encoder = " + row[i].encoder + ", value = '" + elts[i].substring(p + 1).trim() + "'");
+                                serverLog.logSevere("kelondroRow", "NumberFormatException for celltype_binary; row = " + i + ", celltype = " + row[i].celltype + ", encoder = " + row[i].encoder + ", value = '" + elts[i].substring(p + 1).trim() + "'");
                                 setCol(nick, new byte[]{0});
                             }
                         } else if ((decimalCardinal) && (row[i].celltype == kelondroColumn.celltype_bitfield)) {
@@ -313,11 +313,11 @@ public final class kelondroRow {
         }
 
         protected final int colstart(int column) {
-        	return colstart[column];
+            return colstart[column];
         }
         
         protected final int cellwidth(int column) {
-        	return row[column].cellwidth;
+            return row[column].cellwidth;
         }
         
         public final int compareTo(Entry o) {
@@ -326,18 +326,18 @@ public final class kelondroRow {
         }
         
         public final byte[] bytes() {
-        	if ((offset == 0) && (rowinstance.length == objectsize)) {
-        		return rowinstance;
-        	} else {
-        		byte[] tmp = new byte[objectsize];
-        		System.arraycopy(rowinstance, offset, tmp, 0, objectsize);
-        		return tmp;
-        	}
+            if ((offset == 0) && (rowinstance.length == objectsize)) {
+                return rowinstance;
+            } else {
+                byte[] tmp = new byte[objectsize];
+                System.arraycopy(rowinstance, offset, tmp, 0, objectsize);
+                return tmp;
+            }
         }
         
         public final void writeToArray(byte[] target, int targetOffset) {
-        	// this method shall replace the byte()s where possible, bacause it may reduce the number of new byte[] allocations
-        	assert (targetOffset + objectsize <= target.length) : "targetOffset = " + targetOffset + ", target.length = " + target.length + ", objectsize = " + objectsize;
+            // this method shall replace the byte()s where possible, bacause it may reduce the number of new byte[] allocations
+            assert (targetOffset + objectsize <= target.length) : "targetOffset = " + targetOffset + ", target.length = " + target.length + ", objectsize = " + objectsize;
             System.arraycopy(rowinstance, offset, target, targetOffset, objectsize);
         }
         
@@ -498,7 +498,7 @@ public final class kelondroRow {
         }
         
         protected final long getColLong(int encoder, int clstrt, int length) {
-        	switch (encoder) {
+            switch (encoder) {
             case kelondroColumn.encoder_none:
                 throw new kelondroException("ROW", "getColLong has celltype none, no encoder given");
             case kelondroColumn.encoder_b64e:
@@ -553,8 +553,8 @@ public final class kelondroRow {
         }
         
         public final void writeToArray(int column, byte[] target, int targetOffset) {
-        	// this method shall replace the getColBytes where possible, bacause it may reduce the number of new byte[] allocations
-        	assert (targetOffset + row[column].cellwidth <= target.length) : "targetOffset = " + targetOffset + ", target.length = " + target.length + ", row[column].cellwidth() = " + row[column].cellwidth;
+            // this method shall replace the getColBytes where possible, bacause it may reduce the number of new byte[] allocations
+            assert (targetOffset + row[column].cellwidth <= target.length) : "targetOffset = " + targetOffset + ", target.length = " + target.length + ", row[column].cellwidth() = " + row[column].cellwidth;
             System.arraycopy(rowinstance, offset + colstart[column], target, targetOffset, row[column].cellwidth);
         }
         

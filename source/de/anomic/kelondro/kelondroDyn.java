@@ -96,7 +96,7 @@ public class kelondroDyn {
         } else {
             fbi = new kelondroFlexTable(file.getParentFile(), file.getName(), 10000, rowdef, 0, resetOnFail);
         }
-        this.index = (useObjectCache) ? (kelondroIndex) new kelondroCache(fbi, true, writebuffer) : fbi;
+        this.index = (useObjectCache) ? (kelondroIndex) new kelondroCache(fbi) : fbi;
         this.keylen = key;
         this.reclen = nodesize;
         this.fillChar = fillChar;

@@ -1637,7 +1637,7 @@ public class kelondroTree extends kelondroCachedRecords implements kelondroIndex
         }
     }
     
-    public static int countElements(kelondroTree t) {
+    public static int countElements(kelondroIndex t) {
         int count = 0;
         try {
             Iterator<kelondroRow.Entry> iter = t.rows(true, null);

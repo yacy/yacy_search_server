@@ -169,6 +169,9 @@ public class kelondroRAMIndex implements kelondroIndex {
             //assert consistencyAnalysis0() : "consistency problem: " + consistencyAnalysis();
             return index1.keys(up, firstKey);
         }
+        // index0 should be sorted
+        // sort index1 to enable working of the merge iterator
+        index1.sort();
         //assert consistencyAnalysis0() : "consistency problem: " + consistencyAnalysis();
         return new kelondroMergeIterator<byte[]>(
                 index0.keys(up, firstKey),
@@ -192,6 +195,9 @@ public class kelondroRAMIndex implements kelondroIndex {
             //assert consistencyAnalysis0() : "consistency problem: " + consistencyAnalysis();
             return index1.rows(up, firstKey);
         }
+        // index0 should be sorted
+        // sort index1 to enable working of the merge iterator
+        index1.sort();
         //assert consistencyAnalysis0() : "consistency problem: " + consistencyAnalysis();
         return new kelondroMergeIterator<kelondroRow.Entry>(
                 index0.rows(up, firstKey),
