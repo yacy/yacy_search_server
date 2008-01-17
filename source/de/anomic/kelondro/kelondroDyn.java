@@ -61,7 +61,8 @@ import java.util.Iterator;
 public class kelondroDyn {
 
     private static final int counterlen = 8;
-
+    private static final int EcoFSBufferSize = 20;
+    
     protected int keylen;
     private int reclen;
     //private int segmentCount;
@@ -94,7 +95,15 @@ public class kelondroDyn {
 			}
             
         } else {
-            fbi = new kelondroFlexTable(file.getParentFile(), file.getName(), 10000, rowdef, 0, resetOnFail);
+            if (file.exists()) {
+                if (file.isDirectory()) {
+                    fbi = new kelondroFlexTable(file.getParentFile(), file.getName(), 10000, rowdef, 0, resetOnFail);
+                } else {
+                    fbi = new kelondroEcoTable(file, rowdef, false, EcoFSBufferSize);
+                }
+            } else {
+                fbi = new kelondroEcoTable(file, rowdef, false, EcoFSBufferSize);
+            }
         }
         this.index = (useObjectCache) ? (kelondroIndex) new kelondroCache(fbi) : fbi;
         this.keylen = key;
@@ -109,7 +118,11 @@ public class kelondroDyn {
         if (usetree) {
             file.delete();
         } else {
-            kelondroFlexTable.delete(file.getParentFile(), file.getName());
+            if (file.isDirectory()) {
+                kelondroFlexTable.delete(file.getParentFile(), file.getName());
+            } else {
+                file.delete();
+            }
         }
     }
     

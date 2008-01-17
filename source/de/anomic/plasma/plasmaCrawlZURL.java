@@ -33,6 +33,7 @@ import java.util.Iterator;
 import java.util.LinkedList;
 
 import de.anomic.kelondro.kelondroBase64Order;
+import de.anomic.kelondro.kelondroEcoTable;
 import de.anomic.kelondro.kelondroFlexTable;
 import de.anomic.kelondro.kelondroIndex;
 import de.anomic.kelondro.kelondroRow;
@@ -42,6 +43,8 @@ import de.anomic.yacy.yacySeedDB;
 import de.anomic.yacy.yacyURL;
 
 public class plasmaCrawlZURL {
+    
+    private static final int EcoFSBufferSize = 200;
     
     public final static kelondroRow rowdef = new kelondroRow(
             "String urlhash-"   + yacySeedDB.commonHashLength + ", " + // the url's hash
@@ -55,13 +58,19 @@ public class plasmaCrawlZURL {
 
     // the class object
     private kelondroIndex urlIndex = null;
-    private LinkedList stack = new LinkedList(); // strings: url
+    private LinkedList<String> stack = new LinkedList<String>(); // strings: url
     
     public plasmaCrawlZURL(File cachePath, String tablename, boolean startWithEmptyFile) {
     	// creates a new ZURL in a file
         cachePath.mkdirs();
-        if (startWithEmptyFile) kelondroFlexTable.delete(cachePath, tablename);
-        urlIndex = new kelondroFlexTable(cachePath, tablename, -1, rowdef, 0, true);
+        File f = new File(cachePath, tablename);
+        if (startWithEmptyFile) {
+            if (f.exists()) {
+                if (f.isDirectory()) kelondroFlexTable.delete(cachePath, tablename); else f.delete();
+            }
+        }
+        urlIndex = new kelondroEcoTable(f, rowdef, true, EcoFSBufferSize);
+        //urlIndex = new kelondroFlexTable(cachePath, tablename, -1, rowdef, 0, true);
     }
     
     public plasmaCrawlZURL() {
@@ -121,10 +130,6 @@ public class plasmaCrawlZURL {
             e.printStackTrace();
             return null;
         }
-    }
-    
-    public boolean getUseNewDB() {
-        return (urlIndex instanceof kelondroFlexTable);
     }
 
     public boolean exists(String urlHash) {
@@ -235,9 +240,9 @@ public class plasmaCrawlZURL {
 
     }
 
-    public class kiter implements Iterator {
+    public class kiter implements Iterator<Entry> {
         // enumerates entry elements
-        Iterator i;
+        Iterator<kelondroRow.Entry> i;
         boolean error = false;
         
         public kiter(boolean up, String firstHash) throws IOException {
@@ -250,7 +255,7 @@ public class plasmaCrawlZURL {
             return i.hasNext();
         }
 
-        public Object next() throws RuntimeException {
+        public Entry next() throws RuntimeException {
             kelondroRow.Entry e = (kelondroRow.Entry) i.next();
             if (e == null) return null;
             try {
@@ -266,7 +271,7 @@ public class plasmaCrawlZURL {
         
     }
 
-    public Iterator entries(boolean up, String firstHash) throws IOException {
+    public Iterator<Entry> entries(boolean up, String firstHash) throws IOException {
         // enumerates entry elements
         return new kiter(up, firstHash);
     }

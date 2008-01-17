@@ -80,6 +80,33 @@
     
     <p><img src="PerformanceGraph.png" name="graph" /></p>
     
+    <p><strong>EcoTable RAM Index:</strong></p>
+    <table border="0" cellpadding="2" cellspacing="1">
+      <tr class="TableHeader" valign="bottom">
+        <td>Table</td>
+        <td>Key Chunk Size</td>
+        <td>Key Count</td>
+        <td>Key Used Memory</td>
+        <td>Value Chunk Size</td>
+        <td>Value Count</td>
+        <td>Value Used Memory</td>
+      </tr>
+      #{EcoList}#
+      <tr class="TableCellLight">
+        <td align="left" class="TableCellDark">#[tableIndexPath]#</td>
+        <td align="right">#[tableIndexChunkSize]#</td>
+        <td align="right">#[tableIndexCount]#</td>
+        <td align="right">#[tableIndexMem]#</td>
+        <td align="right">#[tableTailChunkSize]#</td>
+        <td align="right">#[tableTailCount]#</td>
+        <td align="right">#[tableTailMem]#</td>
+      </tr>
+      #{/EcoList}#
+      <tr class="TableCellDark">
+        <td colspan="9">Total Mem = #[EcoIndexTotalMem]# MB</td>
+      </tr>
+    </table>
+    
     <p><strong>FlexTable RAM Index:</strong></p>
     <table border="0" cellpadding="2" cellspacing="1">
       <tr class="TableHeader" valign="bottom">

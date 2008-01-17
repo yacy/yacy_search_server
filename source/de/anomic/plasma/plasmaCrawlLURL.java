@@ -71,7 +71,7 @@ import de.anomic.kelondro.kelondroBase64Order;
 import de.anomic.kelondro.kelondroCache;
 import de.anomic.kelondro.kelondroCloneableIterator;
 import de.anomic.kelondro.kelondroException;
-import de.anomic.kelondro.kelondroFlexSplitTable;
+import de.anomic.kelondro.kelondroSplitTable;
 import de.anomic.kelondro.kelondroIndex;
 import de.anomic.kelondro.kelondroRow;
 import de.anomic.kelondro.kelondroRowSet;
@@ -99,7 +99,7 @@ public final class plasmaCrawlLURL {
     public plasmaCrawlLURL(File indexPath, long preloadTime) {
         super();
 
-        urlIndexFile = new kelondroFlexSplitTable(new File(indexPath, "PUBLIC/TEXT"), "urls", preloadTime, indexURLEntry.rowdef, false);
+        urlIndexFile = new kelondroSplitTable(new File(indexPath, "PUBLIC/TEXT"), "urls", preloadTime, indexURLEntry.rowdef, false);
 
         // init result stacks
         externResultStack = new LinkedList<String>();
@@ -147,7 +147,7 @@ public final class plasmaCrawlLURL {
     }
 
     public synchronized int writeCacheSize() {
-        if (urlIndexFile instanceof kelondroFlexSplitTable) return ((kelondroFlexSplitTable) urlIndexFile).writeBufferSize();
+        if (urlIndexFile instanceof kelondroSplitTable) return ((kelondroSplitTable) urlIndexFile).writeBufferSize();
         if (urlIndexFile instanceof kelondroCache) return ((kelondroCache) urlIndexFile).writeBufferSize();
         return 0;
     }

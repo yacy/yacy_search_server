@@ -53,8 +53,7 @@ import java.util.TreeMap;
 
 import de.anomic.kelondro.kelondroAbstractRecords;
 import de.anomic.kelondro.kelondroBase64Order;
-import de.anomic.kelondro.kelondroCache;
-import de.anomic.kelondro.kelondroFlexTable;
+import de.anomic.kelondro.kelondroEcoTable;
 import de.anomic.kelondro.kelondroIndex;
 import de.anomic.kelondro.kelondroRow;
 import de.anomic.kelondro.kelondroStack;
@@ -63,8 +62,9 @@ import de.anomic.yacy.yacySeedDB;
 
 public class plasmaCrawlBalancer {
     
-    private static final String stackSuffix = "8.stack";
-    private static final String indexSuffix = "8.db";
+    private static final String stackSuffix = "9.stack";
+    private static final String indexSuffix = "9.db";
+    private static final int EcoFSBufferSize = 200;
 
     // a shared domainAccess map for all balancers
     private static final Map<String, domaccess> domainAccess = Collections.synchronizedMap(new HashMap<String, domaccess>());
@@ -140,16 +140,14 @@ public class plasmaCrawlBalancer {
     
     private void openFileIndex() {
         cacheStacksPath.mkdirs();
-        urlFileIndex = new kelondroCache(new kelondroFlexTable(cacheStacksPath, stackname + indexSuffix, -1, plasmaCrawlEntry.rowdef, 0, true));
+        urlFileIndex = new kelondroEcoTable(new File(cacheStacksPath, stackname + indexSuffix), plasmaCrawlEntry.rowdef, true, EcoFSBufferSize);
     }
     
     private void resetFileIndex() {
         if (urlFileIndex != null) {
             urlFileIndex.close();
             urlFileIndex = null;
-            kelondroFlexTable.delete(cacheStacksPath, stackname + indexSuffix);
-            //File cacheFile = new File(cacheStacksPath, stackname + indexSuffix);
-             //cacheFile.delete();
+            new File(cacheStacksPath, stackname + indexSuffix).delete();
         }
         openFileIndex();
     }

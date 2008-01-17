@@ -56,7 +56,7 @@ public class kelondroEcoFS {
     private int cacheindex, cachecount, buffercount; // number of entries in buffer
     private byte[] cache, buffer, zero;
     
-    private static final int maxBuffer = 512;
+    private static final int maxBuffer = 4 * 1024; // stay below hard disc cache (is that necessary?)
     
     
     public kelondroEcoFS(File tablefile, int recordsize) throws IOException {

@@ -29,8 +29,10 @@ import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
 import java.util.TreeMap;
 
 import de.anomic.kelondro.kelondroRow.Entry;
@@ -58,7 +60,7 @@ public class kelondroEcoTable implements kelondroIndex {
     private kelondroRow rowdef, taildef;
     private int buffersize;
     
-    public kelondroEcoTable(File tablefile, kelondroRow rowdef, int buffersize) throws IOException {
+    public kelondroEcoTable(File tablefile, kelondroRow rowdef, boolean useTailCache, int buffersize) {
         this.rowdef = rowdef;
         this.buffersize = buffersize;
         assert rowdef.primaryKeyIndex == 0;
@@ -82,33 +84,37 @@ public class kelondroEcoTable implements kelondroIndex {
             try { fos.close(); } catch (IOException e) {}
         }
         
-        // open an existing table file
         try {
+            // open an existing table file
             this.file = new kelondroBufferedEcoFS(new kelondroEcoFS(tablefile, rowdef.objectsize), this.buffersize);
+        
+            // initialize index and copy table
+            int records = file.size();
+            long neededRAM4table = records * taildef.objectsize * 3 / 2;
+            table = ((useTailCache) && (serverMemory.request(neededRAM4table, true))) ? new kelondroRowSet(taildef, records + 1) : null;
+            index = new kelondroBytesIntMap(rowdef.primaryKeyLength, rowdef.objectOrder, records + 1);
+        
+            // read all elements from the file into the copy table
+            byte[] record = new byte[rowdef.objectsize];
+            byte[] key = new byte[rowdef.primaryKeyLength];
+            for (int i = 0; i < records; i++) {
+                // read entry
+                file.get(i, record, 0);
+            
+                // write the key into the index table
+                System.arraycopy(record, 0, key, 0, rowdef.primaryKeyLength);
+                index.addi(key, i);
+            
+                // write the tail into the table
+                if (table != null) table.addUnique(taildef.newEntry(record, rowdef.primaryKeyLength, true));
+            }
         } catch (FileNotFoundException e) {
             // should never happen
             e.printStackTrace();
-        }
-        
-        // initialize index and copy table
-        int records = file.size();
-        long neededRAM4table = records * taildef.objectsize * 3 / 2;
-        table = (serverMemory.request(neededRAM4table, true)) ? new kelondroRowSet(taildef, records + 1) : null;
-        index = new kelondroBytesIntMap(rowdef.primaryKeyLength, rowdef.objectOrder, records + 1);
-        
-        // read all elements from the file into the copy table
-        byte[] record = new byte[rowdef.objectsize];
-        byte[] key = new byte[rowdef.primaryKeyLength];
-        for (int i = 0; i < records; i++) {
-            // read entry
-            file.get(i, record, 0);
-            
-            // write the key into the index table
-            System.arraycopy(record, 0, key, 0, rowdef.primaryKeyLength);
-            index.addi(key, i);
-            
-            // write the tail into the table
-            if (table != null) table.addUnique(taildef.newEntry(record, rowdef.primaryKeyLength, true));
+            throw new kelondroException(e.getMessage());
+        } catch (IOException e) {
+            e.printStackTrace();
+            throw new kelondroException(e.getMessage());
         }
         
         // track this table
@@ -118,6 +124,35 @@ public class kelondroEcoTable implements kelondroIndex {
     public static long tableSize(File tablefile, int recordsize) {
         // returns number of records in table
         return kelondroEcoFS.tableSize(tablefile, recordsize);
+    }
+
+    public static final Iterator<String> filenames() {
+        // iterates string objects; all file names from record tracker
+        return tableTracker.keySet().iterator();
+    }
+
+    public static final Map<String, String> memoryStats(String filename) {
+        // returns a map for each file in the tracker;
+        // the map represents properties for each record objects,
+        // i.e. for cache memory allocation
+        kelondroEcoTable theEcoTable = tableTracker.get(filename);
+        return theEcoTable.memoryStats();
+    }
+
+    private final Map<String, String> memoryStats() {
+        // returns statistical data about this object
+        HashMap<String, String> map = new HashMap<String, String>();
+        map.put("tableIndexChunkSize", Integer.toString(index.row().objectsize));
+        map.put("tableIndexCount", Integer.toString(index.size()));
+        map.put("tableIndexMem", Integer.toString((int) (index.row().objectsize * index.size() * kelondroRowCollection.growfactor)));
+        map.put("tableTailChunkSize", (table == null) ? "0" : Integer.toString(table.row().objectsize));
+        map.put("tableTailCount", (table == null) ? "0" : Integer.toString(table.size()));
+        map.put("tableTailMem", (table == null) ? "0" : Integer.toString((int) (table.row().objectsize * table.size() * kelondroRowCollection.growfactor)));
+        return map;
+    }
+    
+    public static int staticRAMIndexNeed(File f, kelondroRow rowdef) {
+        return (int) ((rowdef.primaryKeyLength + 4) * tableSize(f, rowdef.objectsize) * kelondroRowSet.growfactor);
     }
     
     public synchronized void addUnique(Entry row) throws IOException {
@@ -396,7 +431,7 @@ public class kelondroEcoTable implements kelondroIndex {
     public static kelondroIndex testTable(File f, String testentities) throws IOException {
         if (f.exists()) f.delete();
         kelondroRow rowdef = new kelondroRow("byte[] a-4, byte[] b-4", kelondroNaturalOrder.naturalOrder, 0);
-        kelondroIndex tt = new kelondroEcoTable(f, rowdef, 100);
+        kelondroIndex tt = new kelondroEcoTable(f, rowdef, true, 100);
         byte[] b;
         kelondroRow.Entry row = rowdef.newEntry();
         for (int i = 0; i < testentities.length(); i++) {

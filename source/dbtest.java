@@ -15,7 +15,6 @@ import de.anomic.kelondro.kelondroBase64Order;
 import de.anomic.kelondro.kelondroCache;
 import de.anomic.kelondro.kelondroCloneableIterator;
 import de.anomic.kelondro.kelondroEcoTable;
-import de.anomic.kelondro.kelondroFlexSplitTable;
 import de.anomic.kelondro.kelondroFlexTable;
 import de.anomic.kelondro.kelondroIndex;
 import de.anomic.kelondro.kelondroIntBytesMap;
@@ -23,6 +22,7 @@ import de.anomic.kelondro.kelondroProfile;
 import de.anomic.kelondro.kelondroRow;
 import de.anomic.kelondro.kelondroRowSet;
 import de.anomic.kelondro.kelondroSQLTable;
+import de.anomic.kelondro.kelondroSplitTable;
 import de.anomic.kelondro.kelondroSplittedTree;
 import de.anomic.kelondro.kelondroTree;
 import de.anomic.server.serverInstantThread;
@@ -212,10 +212,10 @@ public class dbtest {
             }
             if (dbe.equals("kelondroFlexSplitTable")) {
                 File tablepath = new File(tablename).getParentFile();
-                table = new kelondroFlexSplitTable(tablepath, new File(tablename).getName(), preload, testRow, true);
+                table = new kelondroSplitTable(tablepath, new File(tablename).getName(), preload, testRow, true);
             }
             if (dbe.equals("kelondroEcoTable")) {
-                table = new kelondroEcoTable(new File(tablename), testRow, 100);
+                table = new kelondroEcoTable(new File(tablename), testRow, true, 100);
             }
             if (dbe.equals("mysql")) {
                 table = new kelondroSQLTable("mysql", testRow);

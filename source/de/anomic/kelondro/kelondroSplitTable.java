@@ -1,4 +1,4 @@
-// kelondroFlexSplitTable.java
+// kelondroSplitTable.java
 // (C) 2006 by Michael Peter Christen; mc@anomic.de, Frankfurt a. M., Germany
 // first published 12.10.2006 on http://www.anomic.de
 //
@@ -36,10 +36,16 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
-public class kelondroFlexSplitTable implements kelondroIndex {
+import de.anomic.server.serverMemory;
 
-    // this is a set of kelondroFlex tables
-    // the set is divided into FlexTables with different entry date
+public class kelondroSplitTable implements kelondroIndex {
+
+    // this is a set of kelondro tables
+    // the set is divided into tables with different entry date
+    // the table type can be either kelondroFlex or kelondroEco
+
+    private static final long minimumRAM4Eco = 80 * 1024 * 1024;
+    private static final int EcoFSBufferSize = 20;
     
     private HashMap<String, kelondroIndex> tables; // a map from a date string to a kelondroIndex object
     private kelondroRow rowdef;
@@ -47,7 +53,7 @@ public class kelondroFlexSplitTable implements kelondroIndex {
     private String tablename;
     private kelondroOrder<kelondroRow.Entry> entryOrder;
     
-    public kelondroFlexSplitTable(File path, String tablename, long preloadTime, kelondroRow rowdef, boolean resetOnFail) {
+    public kelondroSplitTable(File path, String tablename, long preloadTime, kelondroRow rowdef, boolean resetOnFail) {
         this.path = path;
         this.tablename = tablename;
         this.rowdef = rowdef;
@@ -60,19 +66,25 @@ public class kelondroFlexSplitTable implements kelondroIndex {
         // initialized tables map
         this.tables = new HashMap<String, kelondroIndex>();
         if (!(path.exists())) path.mkdirs();
-        String[] dir = path.list();
+        String[] tablefile = path.list();
         String date;
         
         // first pass: find tables
         HashMap<String, Long> t = new HashMap<String, Long>();
         long ram, sum = 0;
-        for (int i = 0; i < dir.length; i++) {
-            if ((dir[i].startsWith(tablename)) &&
-                (dir[i].charAt(tablename.length()) == '.') &&
-                (dir[i].length() == tablename.length() + 7)) {
-                ram = kelondroFlexTable.staticRAMIndexNeed(path, dir[i], rowdef);
+        File f;
+        for (int i = 0; i < tablefile.length; i++) {
+            if ((tablefile[i].startsWith(tablename)) &&
+                (tablefile[i].charAt(tablename.length()) == '.') &&
+                (tablefile[i].length() == tablename.length() + 7)) {
+                f = new File(path, tablefile[i]);
+                if (f.isDirectory()) {
+                    ram = kelondroFlexTable.staticRAMIndexNeed(path, tablefile[i], rowdef);
+                } else {
+                    ram = kelondroEcoTable.staticRAMIndexNeed(f, rowdef);
+                }
                 if (ram > 0) {
-                    t.put(dir[i], new Long(ram));
+                    t.put(tablefile[i], new Long(ram));
                     sum += ram;
                 }
             }
@@ -101,7 +113,13 @@ public class kelondroFlexSplitTable implements kelondroIndex {
             // open next biggest table
             t.remove(maxf);
             date = maxf.substring(tablename.length() + 1);
-            table = new kelondroCache(new kelondroFlexTable(path, maxf, preloadTime, rowdef, 0, resetOnFail));
+            f = new File(path, maxf);
+            if (f.isDirectory()) {
+                // this is a kelonodroFlex table
+                table = new kelondroCache(new kelondroFlexTable(path, maxf, preloadTime, rowdef, 0, resetOnFail));
+            } else {
+                table = new kelondroEcoTable(f, rowdef, false, EcoFSBufferSize);
+            }
             tables.put(date, table);
         }
     }
@@ -111,7 +129,8 @@ public class kelondroFlexSplitTable implements kelondroIndex {
     	String[] l = path.list();
     	for (int i = 0; i < l.length; i++) {
     		if (l[i].startsWith(tablename)) {
-    			kelondroFlexTable.delete(path, l[i]);
+    		    File f = new File(path, l[i]);
+    		    if (f.isDirectory()) kelondroFlexTable.delete(path, l[i]); else f.delete();
     		}
     	}
     	init(-1, true);
@@ -202,7 +221,13 @@ public class kelondroFlexSplitTable implements kelondroIndex {
         kelondroIndex table = (kelondroIndex) tables.get(suffix);
         if (table == null) {
             // make new table
-            table = new kelondroFlexTable(path, tablename + "." + suffix, -1, rowdef, 0, true);
+            if (serverMemory.request(minimumRAM4Eco, true)) {
+                // enough memory for a ecoTable
+                table = new kelondroEcoTable(new File(path, tablename + "." + suffix), rowdef, false, EcoFSBufferSize);
+            } else {
+                // use the flex table
+                table = new kelondroFlexTable(path, tablename + "." + suffix, -1, rowdef, 0, true);
+            }
             tables.put(suffix, table);
         }
         table.put(row);
@@ -233,7 +258,13 @@ public class kelondroFlexSplitTable implements kelondroIndex {
         kelondroIndex table = (kelondroIndex) tables.get(suffix);
         if (table == null) {
             // make new table
-            table = new kelondroFlexTable(path, tablename + "." + suffix, -1, rowdef, 0, true);
+            if (serverMemory.request(minimumRAM4Eco, true)) {
+                // enough memory for a ecoTable
+                table = new kelondroEcoTable(new File(path, tablename + "." + suffix), rowdef, false, EcoFSBufferSize);
+            } else {
+                // use the flex table
+                table = new kelondroFlexTable(path, tablename + "." + suffix, -1, rowdef, 0, true);
+            }
             tables.put(suffix, table);
         }
         table.addUnique(row);

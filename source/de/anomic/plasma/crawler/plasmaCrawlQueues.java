@@ -61,8 +61,8 @@ public class plasmaCrawlQueues {
     private plasmaProtocolLoader loader;
     private ArrayList<String> remoteCrawlProviderHashes;
 
-    public  plasmaCrawlNURL             noticeURL;
-    public  plasmaCrawlZURL             errorURL, delegatedURL;
+    public  plasmaCrawlNURL noticeURL;
+    public  plasmaCrawlZURL errorURL, delegatedURL;
     
     public plasmaCrawlQueues(plasmaSwitchboard sb, File plasmaPath) {
         this.sb = sb;
@@ -75,8 +75,8 @@ public class plasmaCrawlQueues {
         log.logConfig("Starting Crawling Management");
         noticeURL = new plasmaCrawlNURL(plasmaPath);
         //errorURL = new plasmaCrawlZURL(); // fresh error DB each startup; can be hold in RAM and reduces IO;
-        errorURL = new plasmaCrawlZURL(plasmaPath, "urlError1.db", true);
-        delegatedURL = new plasmaCrawlZURL(plasmaPath, "urlDelegated1.db", false);
+        errorURL = new plasmaCrawlZURL(plasmaPath, "urlError2.db", true);
+        delegatedURL = new plasmaCrawlZURL(plasmaPath, "urlDelegated2.db", false);
         
     }
 

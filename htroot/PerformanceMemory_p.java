@@ -51,6 +51,7 @@ import java.util.Map;
 import de.anomic.http.httpHeader;
 import de.anomic.kelondro.kelondroCache;
 import de.anomic.kelondro.kelondroCachedRecords;
+import de.anomic.kelondro.kelondroEcoTable;
 import de.anomic.kelondro.kelondroFlexTable;
 import de.anomic.plasma.plasmaSwitchboard;
 import de.anomic.server.serverDomains;
@@ -63,7 +64,7 @@ public class PerformanceMemory_p {
     
     private static final long KB = 1024;
     private static final long MB = 1024 * KB;
-    private static Map defaultSettings = null;
+    private static Map<String, String> defaultSettings = null;
         
     public static serverObjects respond(httpHeader header, serverObjects post, serverSwitch env) {
         // return variable that accumulates replacements
@@ -115,7 +116,7 @@ public class PerformanceMemory_p {
         prop.putNum("memoryUsedNow", (memoryTotalNow - memoryFreeNow) / MB);
         
         // write table for FlexTable index sizes
-        Iterator i = kelondroFlexTable.filenames();
+        Iterator<String> i = kelondroFlexTable.filenames();
         String filename;
         Map<String, String> map;
         int p, c = 0;
@@ -133,6 +134,32 @@ public class PerformanceMemory_p {
         }
         prop.put("TableList", c);
         prop.putNum("TableIndexTotalMem", totalmem / (1024 * 1024d));
+        
+        // write table for EcoTable index sizes
+        i = kelondroEcoTable.filenames();
+        c = 0;
+        totalmem = 0;
+        while (i.hasNext()) {
+            filename = (String) i.next();
+            prop.put("EcoList_" + c + "_tableIndexPath", ((p = filename.indexOf("DATA")) < 0) ? filename : filename.substring(p));
+            map = kelondroEcoTable.memoryStats(filename);
+            
+            mem = Long.parseLong((String) map.get("tableIndexMem"));
+            totalmem += mem;
+            prop.put("EcoList_" + c + "_tableIndexMem", serverMemory.bytesToString(mem));
+            prop.put("EcoList_" + c + "_tableIndexChunkSize", map.get("tableIndexChunkSize"));
+            prop.putNum("EcoList_" + c + "_tableIndexCount", (String)map.get("tableIndexCount"));
+            
+            mem = Long.parseLong((String) map.get("tableTailMem"));
+            totalmem += mem;
+            prop.put("EcoList_" + c + "_tableTailMem", serverMemory.bytesToString(mem));
+            prop.put("EcoList_" + c + "_tableTailChunkSize", map.get("tableTailChunkSize"));
+            prop.putNum("EcoList_" + c + "_tableTailCount", (String)map.get("tableTailCount"));
+            
+            c++;
+        }
+        prop.put("EcoList", c);
+        prop.putNum("EcoIndexTotalMem", totalmem / (1024 * 1024d));
         
         // write node cache table
         i = kelondroCachedRecords.filenames();

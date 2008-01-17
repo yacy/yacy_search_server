@@ -23,19 +23,34 @@
 
 	<Xmx>#[Xmx]#</Xmx>
 	
-	<FlexTable>
-	#{TableList}#
+	<EcoTable>
+	#{EcoList}#
 		<entry>
 			<tableIndexPath>#[tableIndexPath]#</tableIndexPath>
 			<tableIndexChunkSize>#[tableIndexChunkSize]#</tableIndexChunkSize>
 			<tableIndexCount>#[tableIndexCount]#</tableIndexCount>
 			<tableIndexMem>#[tableIndexMem]#</tableIndexMem>
+            <tableTailChunkSize>#[tableTailChunkSize]#</tableTailChunkSize>
+            <tableTailCount>#[tableTailCount]#</tableTailCount>
+            <tableTailMem>#[tableTailMem]#</tableTailMem>
 		</entry>
-	#{/TableList}#
-	<TableIndexTotalMem>#[TableIndexTotalMem]#</TableIndexTotalMem>
-	</FlexTable>
+	#{/EcoList}#
+	<EcoIndexTotalMem>#[EcoIndexTotalMem]#</EcoIndexTotalMem>
+	</EcoTable>
 	
-	<NodeCaches>
+	<FlexTable>
+    #{TableList}#
+        <entry>
+            <tableIndexPath>#[tableIndexPath]#</tableIndexPath>
+            <tableIndexChunkSize>#[tableIndexChunkSize]#</tableIndexChunkSize>
+            <tableIndexCount>#[tableIndexCount]#</tableIndexCount>
+            <tableIndexMem>#[tableIndexMem]#</tableIndexMem>
+        </entry>
+    #{/TableList}#
+    <TableIndexTotalMem>#[TableIndexTotalMem]#</TableIndexTotalMem>
+    </FlexTable>
+    
+    <NodeCaches>
 	#{NodeList}#
 		<entry>
 			<nodeCachePath>#[nodeCachePath]#</nodeCachePath>

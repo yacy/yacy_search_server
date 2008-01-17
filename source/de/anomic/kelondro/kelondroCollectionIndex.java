@@ -54,6 +54,8 @@ import de.anomic.yacy.yacyURL;
 public class kelondroCollectionIndex {
 
     private static final int serialNumber = 0;
+    private static final long minimumRAM4Eco = 200 * 1024 * 1024;
+    private static final int EcoFSBufferSize = 1000;
     
     private kelondroIndex index;
     private int           keylength;
@@ -73,8 +75,6 @@ public class kelondroCollectionIndex {
     private static final int idx_col_indexpos   = 5;  // indexpos (position in array file)
     private static final int idx_col_lastread   = 6;  // a time stamp, update time in days since 1.1.2000
     private static final int idx_col_lastwrote  = 7;  // a time stamp, update time in days since 1.1.2000
-
-    private static final boolean useEcoTable = false;
     
     private static kelondroRow indexRow(int keylength, kelondroByteOrder payloadOrder) {
         return new kelondroRow(
@@ -156,8 +156,8 @@ public class kelondroCollectionIndex {
             serverLog.logFine("STARTUP", "STARTED INITIALIZATION OF NEW COLLECTION INDEX WITH " + initialSpace + " ENTRIES. THIS WILL TAKE SOME TIME");
 
             // initialize (new generation) index table from file
-            if (useEcoTable) {
-                index = new kelondroEcoTable(f, indexRow(keyLength, indexOrder), 100);
+            if (serverMemory.request(minimumRAM4Eco, false)) {
+                index = new kelondroEcoTable(f, indexRow(keyLength, indexOrder), true, EcoFSBufferSize);
             } else {
                 index = new kelondroFlexTable(path, filenameStub + ".index", preloadTime, indexRow(keyLength, indexOrder), initialSpace, true);
             }
@@ -255,7 +255,7 @@ public class kelondroCollectionIndex {
             return theindex;
         } else {
             // open a ecotable
-            return new kelondroEcoTable(f, indexRow(keylength, indexOrder), 100);
+            return new kelondroEcoTable(f, indexRow(keylength, indexOrder), true, EcoFSBufferSize);
         }
     }
     
