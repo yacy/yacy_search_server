@@ -66,7 +66,7 @@ public class yacySearch extends Thread {
     final private int partitions;
     final private plasmaWordIndex wordIndex;
     final private plasmaSearchRankingProcess containerCache;
-    final private Map abstractCache;
+    final private Map<String, TreeMap<String, String>> abstractCache;
     final private plasmaURLPattern blacklist;
     final private yacySeed targetPeer;
     private String[] urls;
@@ -77,7 +77,8 @@ public class yacySearch extends Thread {
     
     public yacySearch(String wordhashes, String excludehashes, String urlhashes, String prefer, String filter, int count, int maxDistance, 
                       boolean global, int partitions, yacySeed targetPeer, plasmaWordIndex wordIndex,
-                      plasmaSearchRankingProcess containerCache, Map abstractCache,
+                      plasmaSearchRankingProcess containerCache,
+                      Map<String, TreeMap<String, String>> abstractCache,
                       plasmaURLPattern blacklist,
                       plasmaSearchRankingProfile rankingProfile,
                       kelondroBitfield constraint) {
@@ -247,10 +248,13 @@ public class yacySearch extends Thread {
             String wordhashes, String excludehashes, String urlhashes,
             String prefer, String filter, int count, int maxDist,
             plasmaWordIndex wordIndex,
-            plasmaSearchRankingProcess containerCache, Map abstractCache,
-            int targets, plasmaURLPattern blacklist,
+            plasmaSearchRankingProcess containerCache,
+            Map<String, TreeMap<String, String>> abstractCache,
+            int targets,
+            plasmaURLPattern blacklist,
             plasmaSearchRankingProfile rankingProfile,
-            kelondroBitfield constraint, TreeMap clusterselection) {
+            kelondroBitfield constraint,
+            TreeMap clusterselection) {
         // check own peer status
         if (yacyCore.seedDB.mySeed() == null || yacyCore.seedDB.mySeed().getPublicAddress() == null) { return null; }
 
@@ -283,7 +287,7 @@ public class yacySearch extends Thread {
         if (targetPeer == null) return null;
         if (clusterselection != null) targetPeer.setAlternativeAddress((String) clusterselection.get(targetPeer.hash));
         yacySearch searchThread = new yacySearch(wordhashes, excludehashes, urlhashes, "", "", 0, 9999, true, 0, targetPeer,
-                                             wordIndex, containerCache, new TreeMap(), blacklist, rankingProfile, constraint);
+                                             wordIndex, containerCache, new TreeMap<String, TreeMap<String, String>>(), blacklist, rankingProfile, constraint);
         searchThread.start();
         return searchThread;
     }

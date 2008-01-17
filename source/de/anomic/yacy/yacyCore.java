@@ -91,7 +91,7 @@ public class yacyCore {
     /** pseudo-random key derived from a time-interval while YaCy startup*/
     public static long speedKey = 0;
     public static File yacyDBPath;
-    public static final Map amIAccessibleDB = Collections.synchronizedMap(new HashMap()); // Holds PeerHash / yacyAccessible Relations
+    public static final Map<String, yacyAccessible> amIAccessibleDB = Collections.synchronizedMap(new HashMap<String, yacyAccessible>()); // Holds PeerHash / yacyAccessible Relations
     // constants for PeerPing behaviour
     private static final int PING_INITIAL = 10;
     private static final int PING_MAX_RUNNING = 3;

@@ -67,12 +67,12 @@ public final class plasmaSearchEvent {
     private plasmaSearchQuery query;
     private plasmaWordIndex wordIndex;
     private plasmaSearchRankingProcess rankedCache; // ordered search results, grows dynamically as all the query threads enrich this container
-    private Map rcAbstracts; // cache for index abstracts; word:TreeMap mapping where the embedded TreeMap is a urlhash:peerlist relation
+    private Map<String, TreeMap<String, String>> rcAbstracts; // cache for index abstracts; word:TreeMap mapping where the embedded TreeMap is a urlhash:peerlist relation
     private yacySearch[] primarySearchThreads, secondarySearchThreads;
     private Thread localSearchThread;
     private TreeMap preselectedPeerHashes;
     //private Object[] references;
-    public  TreeMap IAResults;
+    public  TreeMap<String, String> IAResults;
     public  TreeMap<String, Integer> IACount;
     public  String IAmaxcounthash, IAneardhthash;
     private int localcount;
@@ -92,12 +92,12 @@ public final class plasmaSearchEvent {
         this.eventTime = System.currentTimeMillis(); // for lifetime check
         this.wordIndex = wordIndex;
         this.query = query;
-        this.rcAbstracts = (query.queryHashes.size() > 1) ? new TreeMap() : null; // generate abstracts only for combined searches
+        this.rcAbstracts = (query.queryHashes.size() > 1) ? new TreeMap<String, TreeMap<String, String>>() : null; // generate abstracts only for combined searches
         this.primarySearchThreads = null;
         this.secondarySearchThreads = null;
         this.preselectedPeerHashes = preselectedPeerHashes;
-        this.IAResults = new TreeMap();
-        this.IACount = new TreeMap();
+        this.IAResults = new TreeMap<String, String>();
+        this.IACount = new TreeMap<String, Integer>();
         this.IAmaxcounthash = null;
         this.IAneardhthash = null;
         this.localcount = 0;
