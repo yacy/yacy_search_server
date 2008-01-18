@@ -77,7 +77,7 @@ public final class plasmaCrawlStacker extends Thread {
     // keys for different database types
     public static final int QUEUE_DB_TYPE_RAM  = 0;
     public static final int QUEUE_DB_TYPE_TREE = 1;
-    public static final int QUEUE_DB_TYPE_FLEX = 2;
+    public static final int QUEUE_DB_TYPE_ECO = 2;
     
     final serverLog log = new serverLog("STACKCRAWL");
     
@@ -282,7 +282,7 @@ public final class plasmaCrawlStacker extends Thread {
         if (this.dbtype == QUEUE_DB_TYPE_RAM) {
             // do nothing..
         }
-        if (this.dbtype == QUEUE_DB_TYPE_FLEX) {
+        if (this.dbtype == QUEUE_DB_TYPE_ECO) {
             new File(cacheStacksPath, stackfile).delete();
             //kelondroFlexWidthArray.delete(cacheStacksPath, stackfile);
         }
@@ -298,7 +298,7 @@ public final class plasmaCrawlStacker extends Thread {
         if (this.dbtype == QUEUE_DB_TYPE_RAM) {
             this.urlEntryCache = new kelondroRowSet(plasmaCrawlEntry.rowdef, 0);
         }
-        if (this.dbtype == QUEUE_DB_TYPE_FLEX) {
+        if (this.dbtype == QUEUE_DB_TYPE_ECO) {
             cacheStacksPath.mkdirs();
             File f = new File(cacheStacksPath, stackfile);
             try {

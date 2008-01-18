@@ -178,7 +178,7 @@ public final class search {
             yacyCore.log.logInfo("INIT HASH SEARCH (query-" + abstracts + "): " + plasmaSearchQuery.anonymizedQueryHashes(theQuery.queryHashes) + " - " + theQuery.displayResults() + " links");
             
             // make event
-            plasmaSearchEvent theSearch = plasmaSearchEvent.getEvent(theQuery, rankingProfile, sb.wordIndex, null, true, abstractSet);
+            plasmaSearchEvent theSearch = plasmaSearchEvent.getEvent(theQuery, rankingProfile, sb.wordIndex, null, true);
             urlRetrievalAllTime = theSearch.getURLRetrievalTime();
             snippetComputationAllTime = theSearch.getSnippetComputationTime();
             

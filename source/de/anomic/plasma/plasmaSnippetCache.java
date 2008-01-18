@@ -64,8 +64,8 @@ import de.anomic.kelondro.kelondroMSetTools;
 import de.anomic.plasma.cache.IResourceInfo;
 import de.anomic.plasma.parser.ParserException;
 import de.anomic.server.logging.serverLog;
-import de.anomic.yacy.yacySearch;
 import de.anomic.yacy.yacyCore;
+import de.anomic.yacy.yacySearch;
 import de.anomic.yacy.yacyURL;
 
 public class plasmaSnippetCache {
@@ -623,14 +623,14 @@ public class plasmaSnippetCache {
         }
     }
     
-    public static ArrayList retrieveMediaSnippets(yacyURL url, Set queryhashes, int mediatype, boolean fetchOnline, int timeout) {
+    public static ArrayList<MediaSnippet> retrieveMediaSnippets(yacyURL url, Set<String> queryhashes, int mediatype, boolean fetchOnline, int timeout) {
         if (queryhashes.size() == 0) {
             serverLog.logFine("snippet fetch", "no query hashes given for url " + url);
-            return new ArrayList();
+            return new ArrayList<MediaSnippet>();
         }
         
         plasmaParserDocument document = retrieveDocument(url, fetchOnline, timeout, false);
-        ArrayList a = new ArrayList();
+        ArrayList<MediaSnippet> a = new ArrayList<MediaSnippet>();
         if (document != null) {
             if ((mediatype == plasmaSearchQuery.CONTENTDOM_ALL) || (mediatype == plasmaSearchQuery.CONTENTDOM_AUDIO)) a.addAll(computeMediaSnippets(document, queryhashes, plasmaSearchQuery.CONTENTDOM_AUDIO));
             if ((mediatype == plasmaSearchQuery.CONTENTDOM_ALL) || (mediatype == plasmaSearchQuery.CONTENTDOM_VIDEO)) a.addAll(computeMediaSnippets(document, queryhashes, plasmaSearchQuery.CONTENTDOM_VIDEO));
@@ -640,24 +640,24 @@ public class plasmaSnippetCache {
         return a;
     }
     
-    public static ArrayList computeMediaSnippets(plasmaParserDocument document, Set queryhashes, int mediatype) {
+    public static ArrayList<MediaSnippet> computeMediaSnippets(plasmaParserDocument document, Set<String> queryhashes, int mediatype) {
         
-        if (document == null) return new ArrayList();
-        Map media = null;
+        if (document == null) return new ArrayList<MediaSnippet>();
+        Map<String, String> media = null;
         if (mediatype == plasmaSearchQuery.CONTENTDOM_AUDIO) media = document.getAudiolinks();
         else if (mediatype == plasmaSearchQuery.CONTENTDOM_VIDEO) media = document.getVideolinks();
         else if (mediatype == plasmaSearchQuery.CONTENTDOM_APP) media = document.getApplinks();
         if (media == null) return null;
         
-        Iterator i = media.entrySet().iterator();
-        Map.Entry entry;
+        Iterator<Map.Entry<String, String>> i = media.entrySet().iterator();
+        Map.Entry<String, String> entry;
         String url, desc;
-        Set s;
-        ArrayList result = new ArrayList();
+        Set<String> s;
+        ArrayList<MediaSnippet> result = new ArrayList<MediaSnippet>();
         while (i.hasNext()) {
-            entry = (Map.Entry) i.next();
-            url = (String) entry.getKey();
-            desc = (String) entry.getValue();
+            entry = i.next();
+            url = entry.getKey();
+            desc = entry.getValue();
             s = removeAppearanceHashes(url, queryhashes);
             if (s.size() == 0) {
                 result.add(new MediaSnippet(mediatype, url, desc, null));
@@ -672,17 +672,17 @@ public class plasmaSnippetCache {
         return result;
     }
     
-    public static ArrayList computeImageSnippets(plasmaParserDocument document, Set queryhashes) {
+    public static ArrayList<MediaSnippet> computeImageSnippets(plasmaParserDocument document, Set<String> queryhashes) {
         
-        TreeSet images = document.getImages();
+        TreeSet<htmlFilterImageEntry> images = document.getImages();
         
-        Iterator i = images.iterator();
+        Iterator<htmlFilterImageEntry> i = images.iterator();
         htmlFilterImageEntry ientry;
         String url, desc;
-        Set s;
-        ArrayList result = new ArrayList();
+        Set<String> s;
+        ArrayList<MediaSnippet> result = new ArrayList<MediaSnippet>();
         while (i.hasNext()) {
-            ientry = (htmlFilterImageEntry) i.next();
+            ientry = i.next();
             url = ientry.url().toNormalform(true, true);
             desc = ientry.alt();
             s = removeAppearanceHashes(url, queryhashes);
@@ -699,17 +699,17 @@ public class plasmaSnippetCache {
         return result;
     }
     
-    private static Set removeAppearanceHashes(String sentence, Set queryhashes) {
+    private static Set<String> removeAppearanceHashes(String sentence, Set<String> queryhashes) {
         // remove all hashes that appear in the sentence
         if (sentence == null) return queryhashes;
-        HashMap hs = hashSentence(sentence);
-        Iterator j = queryhashes.iterator();
+        HashMap<String, Integer> hs = hashSentence(sentence);
+        Iterator<String> j = queryhashes.iterator();
         String hash;
         Integer pos;
-        Set remaininghashes = new HashSet();
+        Set<String> remaininghashes = new HashSet<String>();
         while (j.hasNext()) {
-            hash = (String) j.next();
-            pos = (Integer) hs.get(hash);
+            hash = j.next();
+            pos = hs.get(hash);
             if (pos == null) {
                 remaininghashes.add(new String(hash));
             }
@@ -717,15 +717,15 @@ public class plasmaSnippetCache {
         return remaininghashes;
     }
     
-    private static HashMap hashSentence(String sentence) {
+    private static HashMap<String, Integer> hashSentence(String sentence) {
         // generates a word-wordPos mapping
-        HashMap map = new HashMap();
-        Enumeration words = plasmaCondenser.wordTokenizer(sentence, "UTF-8", 0);
+        HashMap<String, Integer> map = new HashMap<String, Integer>();
+        Enumeration<StringBuffer> words = plasmaCondenser.wordTokenizer(sentence, "UTF-8", 0);
         int pos = 0;
         StringBuffer word;
         String hash;
         while (words.hasMoreElements()) {
-            word = (StringBuffer) words.nextElement();
+            word = words.nextElement();
             hash = plasmaCondenser.word2hash(new String(word));
             if (!map.containsKey(hash)) map.put(hash, new Integer(pos)); // dont overwrite old values, that leads to too far word distances
             pos += word.length() + 1;

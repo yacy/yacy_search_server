@@ -41,6 +41,7 @@ import de.anomic.index.indexRWIEntry;
 import de.anomic.index.indexURLEntry;
 import de.anomic.kelondro.kelondroBitfield;
 import de.anomic.kelondro.kelondroMSetTools;
+import de.anomic.plasma.plasmaSnippetCache.MediaSnippet;
 import de.anomic.server.serverProfiling;
 import de.anomic.server.logging.serverLog;
 import de.anomic.yacy.yacyCore;
@@ -70,7 +71,7 @@ public final class plasmaSearchEvent {
     private Map<String, TreeMap<String, String>> rcAbstracts; // cache for index abstracts; word:TreeMap mapping where the embedded TreeMap is a urlhash:peerlist relation
     private yacySearch[] primarySearchThreads, secondarySearchThreads;
     private Thread localSearchThread;
-    private TreeMap preselectedPeerHashes;
+    private TreeMap<String, String> preselectedPeerHashes;
     //private Object[] references;
     public  TreeMap<String, String> IAResults;
     public  TreeMap<String, Integer> IACount;
@@ -79,16 +80,16 @@ public final class plasmaSearchEvent {
     private resultWorker[] workerThreads;
     private ArrayList<ResultEntry> resultList;
     //private int resultListLock; // a pointer that shows that all elements below this pointer are fixed and may not be changed again
-    private HashMap failedURLs; // a mapping from a urlhash to a fail reason string
-    TreeSet snippetFetchWordHashes; // a set of word hashes that are used to match with the snippets
+    private HashMap<String, String> failedURLs; // a mapping from a urlhash to a fail reason string
+    TreeSet<String> snippetFetchWordHashes; // a set of word hashes that are used to match with the snippets
     private long urlRetrievalAllTime;
     private long snippetComputationAllTime;
     
+    @SuppressWarnings("unchecked")
     private plasmaSearchEvent(plasmaSearchQuery query,
                              plasmaWordIndex wordIndex,
-                             TreeMap preselectedPeerHashes,
-                             boolean generateAbstracts,
-                             TreeSet abstractSet) {
+                             TreeMap<String, String> preselectedPeerHashes,
+                             boolean generateAbstracts) {
         this.eventTime = System.currentTimeMillis(); // for lifetime check
         this.wordIndex = wordIndex;
         this.query = query;
@@ -104,14 +105,14 @@ public final class plasmaSearchEvent {
         this.urlRetrievalAllTime = 0;
         this.snippetComputationAllTime = 0;
         this.workerThreads = null;
-        this.resultList = new ArrayList(10); // this is the result set which is filled up with search results, enriched with snippets
+        this.resultList = new ArrayList<ResultEntry>(10); // this is the result set which is filled up with search results, enriched with snippets
         //this.resultListLock = 0; // no locked elements until now
-        this.failedURLs = new HashMap(); // a map of urls to reason strings where a worker thread tried to work on, but failed.
+        this.failedURLs = new HashMap<String, String>(); // a map of urls to reason strings where a worker thread tried to work on, but failed.
         
         // snippets do not need to match with the complete query hashes,
         // only with the query minus the stopwords which had not been used for the search
-        final TreeSet filtered = kelondroMSetTools.joinConstructive(query.queryHashes, plasmaSwitchboard.stopwords);
-        this.snippetFetchWordHashes = (TreeSet) query.queryHashes.clone();
+        final TreeSet<String> filtered = kelondroMSetTools.joinConstructive(query.queryHashes, plasmaSwitchboard.stopwords);
+        this.snippetFetchWordHashes = (TreeSet<String>) query.queryHashes.clone();
         if ((filtered != null) && (filtered.size() > 0)) {
             kelondroMSetTools.excludeDestructive(this.snippetFetchWordHashes, plasmaSwitchboard.stopwords);
         }
@@ -163,15 +164,15 @@ public final class plasmaSearchEvent {
             if (generateAbstracts) {
                 // compute index abstracts
                 long timer = System.currentTimeMillis();
-                Iterator ci = this.rankedCache.searchContainerMaps()[0].entrySet().iterator();
-                Map.Entry entry;
+                Iterator<Map.Entry<String, indexContainer>> ci = this.rankedCache.searchContainerMaps()[0].entrySet().iterator();
+                Map.Entry<String, indexContainer> entry;
                 int maxcount = -1;
                 double mindhtdistance = 1.1, d;
                 String wordhash;
                 while (ci.hasNext()) {
-                    entry = (Map.Entry) ci.next();
-                    wordhash = (String) entry.getKey();
-                    indexContainer container = (indexContainer) entry.getValue();
+                    entry = ci.next();
+                    wordhash = entry.getKey();
+                    indexContainer container = entry.getValue();
                     assert (container.getWordHash().equals(wordhash));
                     if (container.size() > maxcount) {
                         IAmaxcounthash = wordhash;
@@ -256,13 +257,13 @@ public final class plasmaSearchEvent {
 
     public static void cleanupEvents(boolean all) {
         // remove old events in the event cache
-        Iterator i = lastEvents.entrySet().iterator();
+        Iterator<plasmaSearchEvent> i = lastEvents.values().iterator();
         plasmaSearchEvent cleanEvent;
         while (i.hasNext()) {
-            cleanEvent = (plasmaSearchEvent) ((Map.Entry) i.next()).getValue();
+            cleanEvent = i.next();
             if ((all) || (cleanEvent.eventTime + eventLifetime < System.currentTimeMillis())) {
                 // execute deletion of failed words
-                Set removeWords = cleanEvent.query.queryHashes;
+                Set<String> removeWords = cleanEvent.query.queryHashes;
                 removeWords.addAll(cleanEvent.query.excludeHashes);
                 cleanEvent.wordIndex.removeEntriesMultiple(removeWords, cleanEvent.failedURLs.keySet());
                 serverLog.logInfo("SearchEvents", "cleaning up event " + cleanEvent.query.id(true) + ", removed " + cleanEvent.failedURLs.size() + " URL references on " + removeWords.size() + " words");
@@ -315,7 +316,7 @@ public final class plasmaSearchEvent {
         if ((query.constraint != null) &&
             (query.constraint.get(plasmaCondenser.flag_cat_indexof)) &&
             (!(comp.title().startsWith("Index of")))) {
-            final Iterator wi = query.queryHashes.iterator();
+            final Iterator<String> wi = query.queryHashes.iterator();
             while (wi.hasNext()) wordIndex.removeEntry((String) wi.next(), page.hash());
             registerFailure(page.hash(), "index-of constraint not fullfilled");
             return null;
@@ -366,7 +367,7 @@ public final class plasmaSearchEvent {
         } else {
             // attach media information
             startTime = System.currentTimeMillis();
-            ArrayList mediaSnippets = plasmaSnippetCache.retrieveMediaSnippets(comp.url(), snippetFetchWordHashes, query.contentdom, (snippetFetchMode == 2), 6000);
+            ArrayList<MediaSnippet> mediaSnippets = plasmaSnippetCache.retrieveMediaSnippets(comp.url(), snippetFetchWordHashes, query.contentdom, (snippetFetchMode == 2), 6000);
             long snippetComputationTime = System.currentTimeMillis() - startTime;
             serverLog.logInfo("SEARCH_EVENT", "media snippet load time for " + comp.url() + ": " + snippetComputationTime);
             
@@ -447,13 +448,12 @@ public final class plasmaSearchEvent {
     public static plasmaSearchEvent getEvent(plasmaSearchQuery query,
             plasmaSearchRankingProfile ranking,
             plasmaWordIndex wordIndex,
-            TreeMap preselectedPeerHashes,
-            boolean generateAbstracts,
-            TreeSet abstractSet) {
+            TreeMap<String, String> preselectedPeerHashes,
+            boolean generateAbstracts) {
         synchronized (lastEvents) {
             plasmaSearchEvent event = (plasmaSearchEvent) lastEvents.get(query.id(false));
             if (event == null) {
-                event = new plasmaSearchEvent(query, wordIndex, preselectedPeerHashes, generateAbstracts, abstractSet);
+                event = new plasmaSearchEvent(query, wordIndex, preselectedPeerHashes, generateAbstracts);
             } else {
                 //re-new the event time for this event, so it is not deleted next time too early
                 event.eventTime = System.currentTimeMillis();
@@ -634,23 +634,23 @@ public final class plasmaSearchEvent {
             System.out.println("DEBUG-INDEXABSTRACT: hash " + (String) entry.getKey() + ": " + ((query.queryHashes.contains((String) entry.getKey())) ? "NEEDED" : "NOT NEEDED") + "; " + ((TreeMap) entry.getValue()).size() + " entries");
         }
          */
-        TreeMap abstractJoin = (rcAbstracts.size() == query.queryHashes.size()) ? kelondroMSetTools.joinConstructive(rcAbstracts.values(), true) : new TreeMap();
+        TreeMap<String, String> abstractJoin = (rcAbstracts.size() == query.queryHashes.size()) ? kelondroMSetTools.joinConstructive(rcAbstracts.values(), true) : new TreeMap<String, String>();
         if (abstractJoin.size() == 0) {
             //System.out.println("DEBUG-INDEXABSTRACT: no success using index abstracts from remote peers");
         } else {
             //System.out.println("DEBUG-INDEXABSTRACT: index abstracts delivered " + abstractJoin.size() + " additional results for secondary search");
             // generate query for secondary search
-            TreeMap secondarySearchURLs = new TreeMap(); // a (peerhash:urlhash-liststring) mapping
-            Iterator i1 = abstractJoin.entrySet().iterator();
-            Map.Entry entry1;
+            TreeMap<String, String> secondarySearchURLs = new TreeMap<String, String>(); // a (peerhash:urlhash-liststring) mapping
+            Iterator<Map.Entry<String, String>> i1 = abstractJoin.entrySet().iterator();
+            Map.Entry<String, String> entry1;
             String url, urls, peer, peers;
             String mypeerhash = yacyCore.seedDB.mySeed().hash;
             boolean mypeerinvolved = false;
             int mypeercount;
             while (i1.hasNext()) {
-                entry1 = (Map.Entry) i1.next();
-                url = (String) entry1.getKey();
-                peers = (String) entry1.getValue();
+                entry1 = i1.next();
+                url = entry1.getKey();
+                peers = entry1.getValue();
                 //System.out.println("DEBUG-INDEXABSTRACT: url " + url + ": from peers " + peers);
                 mypeercount = 0;
                 for (int j = 0; j < peers.length(); j = j + 12) {
@@ -670,8 +670,8 @@ public final class plasmaSearchEvent {
             secondarySearchThreads = new yacySearch[(mypeerinvolved) ? secondarySearchURLs.size() - 1 : secondarySearchURLs.size()];
             int c = 0;
             while (i1.hasNext()) {
-                entry1 = (Map.Entry) i1.next();
-                peer = (String) entry1.getKey();
+                entry1 = i1.next();
+                peer = entry1.getKey();
                 if (peer.equals(mypeerhash)) continue; // we dont need to ask ourself
                 urls = (String) entry1.getValue();
                 words = wordsFromPeer(peer, urls);
@@ -686,17 +686,17 @@ public final class plasmaSearchEvent {
     }
     
     private String wordsFromPeer(String peerhash, String urls) {
-        Map.Entry entry;
+        Map.Entry<String, TreeMap<String, String>> entry;
         String word, peerlist, url, wordlist = "";
-        TreeMap urlPeerlist;
+        TreeMap<String, String> urlPeerlist;
         int p;
         boolean hasURL;
         synchronized (rcAbstracts) {
-            Iterator i = rcAbstracts.entrySet().iterator();
+            Iterator<Map.Entry <String, TreeMap<String, String>>> i = rcAbstracts.entrySet().iterator();
             while (i.hasNext()) {
-                entry = (Map.Entry) i.next();
-                word = (String) entry.getKey();
-                urlPeerlist = (TreeMap) entry.getValue();
+                entry = i.next();
+                word = entry.getKey();
+                urlPeerlist = entry.getValue();
                 hasURL = true;
                 for (int j = 0; j < urls.length(); j = j + 12) {
                     url = urls.substring(j, j + 12);

@@ -238,7 +238,7 @@ public final class plasmaSwitchboard extends serverAbstractSwitch implements ser
     public  double                      lastrequestedQueries = 0d;
     public  int                         totalPPM = 0;
     public  double                      totalQPM = 0d;
-    public  TreeMap                     clusterhashes; // map of peerhash(String)/alternative-local-address as ip:port or only ip (String) or null if address in seed should be used
+    public  TreeMap<String, String>     clusterhashes; // map of peerhash(String)/alternative-local-address as ip:port or only ip (String) or null if address in seed should be used
     public  boolean                     acceptLocalURLs, acceptGlobalURLs;
     public  URLLicense                  licensedURLs;
     public  Timer                       moreMemory;

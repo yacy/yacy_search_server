@@ -224,6 +224,7 @@ public plasmaSearchQuery(
     	return kelondroMSetTools.anymatch(wordhashes, keyhashes);
     }
     
+    @SuppressWarnings("unchecked")
     public static TreeSet<String>[] cleanQuery(String querystring) {
     	// returns two sets: a query set and a exclude set
     	if ((querystring == null) || (querystring.length() == 0)) return new TreeSet[]{new TreeSet<String>(kelondroNaturalOrder.naturalComparator), new TreeSet<String>(kelondroNaturalOrder.naturalComparator)};

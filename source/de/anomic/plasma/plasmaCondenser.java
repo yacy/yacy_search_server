@@ -660,7 +660,7 @@ public final class plasmaCondenser {
         return ("$%&/()=\"$%&/()=`^+*~#'-_:;,|<>[]\\".indexOf(c) >= 0);
     }
 
-    public static Enumeration wordTokenizer(String s, String charset, int minLength) {
+    public static Enumeration<StringBuffer> wordTokenizer(String s, String charset, int minLength) {
         try {
             return new sievedWordsEnum(new ByteArrayInputStream(s.getBytes()), charset, minLength);
         } catch (Exception e) {
@@ -668,10 +668,10 @@ public final class plasmaCondenser {
         }
     }
 	
-    public static class sievedWordsEnum implements Enumeration {
+    public static class sievedWordsEnum implements Enumeration<StringBuffer> {
         // this enumeration removes all words that contain either wrong characters or are too short
         
-        Object buffer = null;
+        StringBuffer buffer = null;
         unsievedWordsEnum e;
         int ml;
 
@@ -685,7 +685,7 @@ public final class plasmaCondenser {
             e.pre(x);
         }
         
-        private Object nextElement0() {
+        private StringBuffer nextElement0() {
             StringBuffer s;
             char c;
             loop: while (e.hasMoreElements()) {
@@ -709,8 +709,8 @@ public final class plasmaCondenser {
             return buffer != null;
         }
 
-        public Object nextElement() {
-            Object r = buffer;
+        public StringBuffer nextElement() {
+            StringBuffer r = buffer;
             buffer = nextElement0();
             return r;
         }
@@ -794,7 +794,7 @@ public final class plasmaCondenser {
         }
     }
     
-    public static class sentencesFromInputStreamEnum implements Iterator {
+    public static class sentencesFromInputStreamEnum implements Iterator<StringBuffer> {
         // read sentences from a given input stream
         // this enumerates StringBuffer objects
         
@@ -836,7 +836,7 @@ public final class plasmaCondenser {
             return buffer != null;
         }
 
-        public Object next() {
+        public StringBuffer next() {
             if (buffer == null) {
                 return null;
             } else {

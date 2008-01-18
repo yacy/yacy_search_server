@@ -229,7 +229,7 @@ public class plasmaParserDocument {
         return -1; 
     }
     
-    public Iterator getSentences(boolean pre) {
+    public Iterator<StringBuffer> getSentences(boolean pre) {
         if (this.text == null) return null;
         plasmaCondenser.sentencesFromInputStreamEnum e = plasmaCondenser.sentencesFromInputStream(getText(), this.charset);
         e.pre(pre);
@@ -248,8 +248,8 @@ public class plasmaParserDocument {
         if (hs.size() == 0) return "";
         // generate a new list
         StringBuffer sb = new StringBuffer(this.keywords.size() * 6);
-        Iterator i = hs.iterator();
-        while (i.hasNext()) sb.append((String) i.next()).append(separator);
+        Iterator<String> i = hs.iterator();
+        while (i.hasNext()) sb.append(i.next()).append(separator);
         return sb.substring(0, sb.length() - 1);
     }
     
@@ -303,24 +303,23 @@ public class plasmaParserDocument {
     private synchronized void resortLinks() {
         
         // extract hyperlinks, medialinks and emaillinks from anchorlinks
-        Iterator i;
         yacyURL url;
         String u;
         int extpos, qpos;
         String ext = null;
-        i = anchors.entrySet().iterator();
+        Iterator<Map.Entry<String, String>> i = anchors.entrySet().iterator();
         hyperlinks = new HashMap<String, String>();
         videolinks = new HashMap<String, String>();
         audiolinks = new HashMap<String, String>();
         applinks   = new HashMap<String, String>();
         emaillinks = new HashMap<String, String>();
         TreeSet<htmlFilterImageEntry> collectedImages = new TreeSet<htmlFilterImageEntry>(); // this is a set that is collected now and joined later to the imagelinks
-        Map.Entry entry;
+        Map.Entry<String, String> entry;
         while (i.hasNext()) {
-            entry = (Map.Entry) i.next();
-            u = (String) entry.getKey();
+            entry = i.next();
+            u = entry.getKey();
             if ((u != null) && (u.startsWith("mailto:"))) {
-                emaillinks.put(u.substring(7), (String)entry.getValue());
+                emaillinks.put(u.substring(7), entry.getValue());
             } else {
                 extpos = u.lastIndexOf(".");
                 if (extpos > 0) {
@@ -350,10 +349,10 @@ public class plasmaParserDocument {
         }
         
         // add image links that we collected from the anchors to the image map
-        i = collectedImages.iterator();
+        Iterator<htmlFilterImageEntry>  j = collectedImages.iterator();
         htmlFilterImageEntry iEntry;
-        while (i.hasNext()) {
-            iEntry = (htmlFilterImageEntry) i.next();
+        while (j.hasNext()) {
+            iEntry = (htmlFilterImageEntry) j.next();
             if (!images.contains(iEntry)) images.add(iEntry);
         }
        
