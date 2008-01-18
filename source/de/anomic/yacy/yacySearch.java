@@ -254,7 +254,7 @@ public class yacySearch extends Thread {
             plasmaURLPattern blacklist,
             plasmaSearchRankingProfile rankingProfile,
             kelondroBitfield constraint,
-            TreeMap clusterselection) {
+            TreeMap<String, String> clusterselection) {
         // check own peer status
         if (yacyCore.seedDB.mySeed() == null || yacyCore.seedDB.mySeed().getPublicAddress() == null) { return null; }
 
@@ -278,7 +278,7 @@ public class yacySearch extends Thread {
             plasmaSearchRankingProcess containerCache,
             String targethash, plasmaURLPattern blacklist,
             plasmaSearchRankingProfile rankingProfile,
-            kelondroBitfield constraint, TreeMap clusterselection) {
+            kelondroBitfield constraint, TreeMap<String, String> clusterselection) {
         // check own peer status
         if (yacyCore.seedDB.mySeed() == null || yacyCore.seedDB.mySeed().getPublicAddress() == null) { return null; }
 
