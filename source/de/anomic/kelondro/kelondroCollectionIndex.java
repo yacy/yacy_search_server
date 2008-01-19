@@ -154,12 +154,17 @@ public class kelondroCollectionIndex {
                 }
             }
             serverLog.logFine("STARTUP", "STARTED INITIALIZATION OF NEW COLLECTION INDEX WITH " + initialSpace + " ENTRIES. THIS WILL TAKE SOME TIME");
-
+            kelondroRow indexRowdef = indexRow(keyLength, indexOrder);
+            long necessaryRAM4fullTable = minimumRAM4Eco + (indexRowdef.objectsize + 4) * initialSpace * 3 / 2;
+            long necessaryRAM4fullIndex = minimumRAM4Eco + (indexRowdef.primaryKeyLength + 4) * initialSpace * 3 / 2;
+            
             // initialize (new generation) index table from file
-            if (serverMemory.request(minimumRAM4Eco, false)) {
-                index = new kelondroEcoTable(f, indexRow(keyLength, indexOrder), true, EcoFSBufferSize);
+            if (serverMemory.request(necessaryRAM4fullTable, false)) {
+                index = new kelondroEcoTable(f, indexRowdef, true, EcoFSBufferSize);
+            } else if (serverMemory.request(necessaryRAM4fullIndex, false)) {
+                index = new kelondroEcoTable(f, indexRowdef, false, EcoFSBufferSize);
             } else {
-                index = new kelondroFlexTable(path, filenameStub + ".index", preloadTime, indexRow(keyLength, indexOrder), initialSpace, true);
+                index = new kelondroFlexTable(path, filenameStub + ".index", preloadTime, indexRowdef, initialSpace, true);
             }
             
             // open array files
@@ -233,9 +238,11 @@ public class kelondroCollectionIndex {
             long preloadTime, int loadfactor, kelondroRow rowdef, int initialSpace) throws IOException {
         // open/create index table
         File f = new File(path, filenameStub + ".index");
+        kelondroRow indexRowdef = indexRow(keylength, indexOrder);
+        
         if (f.isDirectory()) {
             // use a flextable
-            kelondroIndex theindex = new kelondroCache(new kelondroFlexTable(path, filenameStub + ".index", preloadTime, indexRow(keylength, indexOrder), initialSpace, true));
+            kelondroIndex theindex = new kelondroCache(new kelondroFlexTable(path, filenameStub + ".index", preloadTime, indexRowdef, initialSpace, true));
         
             // save/check property file for this array
             File propfile = propertyFile(path, filenameStub, loadfactor, rowdef.objectsize);
@@ -255,7 +262,9 @@ public class kelondroCollectionIndex {
             return theindex;
         } else {
             // open a ecotable
-            return new kelondroEcoTable(f, indexRow(keylength, indexOrder), true, EcoFSBufferSize);
+            long records = f.length() / indexRowdef.objectsize;
+            long necessaryRAM4fullTable = minimumRAM4Eco + (indexRowdef.objectsize + 4) * records * 3 / 2;
+            return new kelondroEcoTable(f, indexRowdef, serverMemory.request(necessaryRAM4fullTable, false), EcoFSBufferSize);
         }
     }
     

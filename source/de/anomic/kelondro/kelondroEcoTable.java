@@ -90,7 +90,7 @@ public class kelondroEcoTable implements kelondroIndex {
         
             // initialize index and copy table
             int records = file.size();
-            long neededRAM4table = records * taildef.objectsize * 3 / 2;
+            long neededRAM4table = 10 * 1024 * 1024 + records * (rowdef.objectsize + 4) * 3 / 2;
             table = ((useTailCache) && (serverMemory.request(neededRAM4table, true))) ? new kelondroRowSet(taildef, records + 1) : null;
             index = new kelondroBytesIntMap(rowdef.primaryKeyLength, rowdef.objectOrder, records + 1);
         

@@ -80,6 +80,7 @@ public class plasmaCrawlBalancer {
     private File                                cacheStacksPath;
     private String                              stackname;
     private boolean                             top;             // to alternate between top and bottom of the file stack
+    private boolean                             fullram;
 
     public static class domaccess {
     	long time;
@@ -100,7 +101,7 @@ public class plasmaCrawlBalancer {
     	}
     }
     
-    public plasmaCrawlBalancer(File cachePath, String stackname) {
+    public plasmaCrawlBalancer(File cachePath, String stackname, boolean fullram) {
         this.cacheStacksPath = cachePath;
         this.stackname = stackname;
         File stackFile = new File(cachePath, stackname + stackSuffix);
@@ -108,6 +109,7 @@ public class plasmaCrawlBalancer {
         this.domainStacks   = new HashMap<String, LinkedList<String>>();
         this.urlRAMStack    = new ArrayList<String>();
         this.top            = true;
+        this.fullram        = fullram;
         
         // create a stack for newly entered entries
         if (!(cachePath.exists())) cachePath.mkdir(); // make the path
@@ -140,7 +142,7 @@ public class plasmaCrawlBalancer {
     
     private void openFileIndex() {
         cacheStacksPath.mkdirs();
-        urlFileIndex = new kelondroEcoTable(new File(cacheStacksPath, stackname + indexSuffix), plasmaCrawlEntry.rowdef, true, EcoFSBufferSize);
+        urlFileIndex = new kelondroEcoTable(new File(cacheStacksPath, stackname + indexSuffix), plasmaCrawlEntry.rowdef, fullram, EcoFSBufferSize);
     }
     
     private void resetFileIndex() {

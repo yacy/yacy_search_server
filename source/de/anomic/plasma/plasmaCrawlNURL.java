@@ -74,10 +74,10 @@ public class plasmaCrawlNURL {
 
     public plasmaCrawlNURL(File cachePath) {
         super();
-        coreStack = new plasmaCrawlBalancer(cachePath, "urlNoticeCoreStack");
-        limitStack = new plasmaCrawlBalancer(cachePath, "urlNoticeLimitStack");
+        coreStack = new plasmaCrawlBalancer(cachePath, "urlNoticeCoreStack", true);
+        limitStack = new plasmaCrawlBalancer(cachePath, "urlNoticeLimitStack", false);
         //overhangStack = new plasmaCrawlBalancer(overhangStackFile);
-        remoteStack = new plasmaCrawlBalancer(cachePath, "urlNoticeRemoteStack");
+        remoteStack = new plasmaCrawlBalancer(cachePath, "urlNoticeRemoteStack", true);
     }
 
     public void close() {
@@ -213,7 +213,7 @@ public class plasmaCrawlNURL {
     private plasmaCrawlEntry[] top(plasmaCrawlBalancer balancer, int count) {
         // this is a filo - top
         if (count > balancer.size()) count = balancer.size();
-        ArrayList list = new ArrayList(count);
+        ArrayList<plasmaCrawlEntry> list = new ArrayList<plasmaCrawlEntry>(count);
         for (int i = 0; i < count; i++) {
             try {
                 plasmaCrawlEntry entry = balancer.top(i);
@@ -226,15 +226,15 @@ public class plasmaCrawlNURL {
         return (plasmaCrawlEntry[]) list.toArray(new plasmaCrawlEntry[list.size()]);
     }
     
-    public Iterator iterator(int stackType) {
+    public Iterator<plasmaCrawlEntry> iterator(int stackType) {
         // returns an iterator of plasmaCrawlBalancerEntry Objects
         try {switch (stackType) {
-        case STACK_TYPE_CORE:     return coreStack.iterator();
-        case STACK_TYPE_LIMIT:    return limitStack.iterator();
-        case STACK_TYPE_REMOTE:   return remoteStack.iterator();
-        default: return null;
+            case STACK_TYPE_CORE:     return coreStack.iterator();
+            case STACK_TYPE_LIMIT:    return limitStack.iterator();
+            case STACK_TYPE_REMOTE:   return remoteStack.iterator();
+            default: return null;
         }} catch (IOException e) {
-            return new HashSet().iterator();
+            return new HashSet<plasmaCrawlEntry>().iterator();
         }
     }
     
