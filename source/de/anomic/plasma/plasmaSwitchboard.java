@@ -138,6 +138,7 @@ import de.anomic.plasma.crawler.plasmaCrawlQueues;
 import de.anomic.plasma.crawler.plasmaProtocolLoader;
 import de.anomic.plasma.dbImport.dbImportManager;
 import de.anomic.plasma.parser.ParserException;
+import de.anomic.plasma.plasmaSwitchboardQueue.Entry;
 import de.anomic.plasma.urlPattern.defaultURLPattern;
 import de.anomic.plasma.urlPattern.plasmaURLPattern;
 import de.anomic.server.serverAbstractSwitch;
@@ -217,12 +218,12 @@ public final class plasmaSwitchboard extends serverAbstractSwitch implements ser
     public  boolean                     rankingOn;
     public  plasmaRankingDistribution   rankingOwnDistribution;
     public  plasmaRankingDistribution   rankingOtherDistribution;
-    public  HashMap                     outgoingCookies, incomingCookies;
+    public  HashMap<String, Object[]>   outgoingCookies, incomingCookies;
     public  kelondroMapTable            facilityDB;
     public  plasmaParser                parser;
     public  long                        proxyLastAccess, localSearchLastAccess, remoteSearchLastAccess;
     public  yacyCore                    yc;
-    public  HashMap                     indexingTasksInProcess;
+    public  HashMap<String, plasmaSwitchboardQueue.Entry> indexingTasksInProcess;
     public  userDB                      userDB;
     public  bookmarksDB                 bookmarksDB;
     public  plasmaWebStructure          webStructure;
@@ -872,7 +873,7 @@ public final class plasmaSwitchboard extends serverAbstractSwitch implements ser
     public static final String DBFILE_USER              = "DATA/SETTINGS/user.db";
     
     
-    public Hashtable crawlJobsStatus = new Hashtable(); 
+    public Hashtable<String, Object[]> crawlJobsStatus = new Hashtable<String, Object[]>(); 
     
     private static plasmaSwitchboard sb;
     
@@ -898,7 +899,7 @@ public final class plasmaSwitchboard extends serverAbstractSwitch implements ser
         // _always_ overwritten each time with the default values. This is done so on purpose.
         // the network definition should be made either consistent for all peers,
         // or independently using a bootstrap URL
-        Map initProps;
+        Map<String, String> initProps;
         if (networkUnitDefinition.startsWith("http://")) {
             try {
                 this.setConfig(httpc.loadHashMap(new yacyURL(networkUnitDefinition, null), remoteProxyConfig));
@@ -964,7 +965,7 @@ public final class plasmaSwitchboard extends serverAbstractSwitch implements ser
         this.log.logConfig("HTDOCS Path:    " + this.htDocsPath.toString());
         this.rankingPath   = getConfigPath(RANKING_PATH, RANKING_PATH_DEFAULT);
         this.log.logConfig("Ranking Path:    " + this.rankingPath.toString());
-        this.rankingPermissions = new HashMap(); // mapping of permission - to filename.
+        this.rankingPermissions = new HashMap<String, String>(); // mapping of permission - to filename.
         this.workPath   = getConfigPath(WORK_PATH, WORK_PATH_DEFAULT);
         this.log.logConfig("Work Path:    " + this.workPath.toString());
         
@@ -985,7 +986,7 @@ public final class plasmaSwitchboard extends serverAbstractSwitch implements ser
             // read only once upon first instantiation of this class
             String f = getConfig(LIST_BLUE, LIST_BLUE_DEFAULT);
             File plasmaBlueListFile = new File(f);
-            if (f != null) blueList = kelondroMSetTools.loadList(plasmaBlueListFile, kelondroNaturalOrder.naturalComparator); else blueList= new TreeSet();
+            if (f != null) blueList = kelondroMSetTools.loadList(plasmaBlueListFile, kelondroNaturalOrder.naturalComparator); else blueList= new TreeSet<String>();
             this.log.logConfig("loaded blue-list from file " + plasmaBlueListFile.getName() + ", " +
             blueList.size() + " entries, " +
             ppRamString(plasmaBlueListFile.length()/1024));
@@ -1150,14 +1151,14 @@ public final class plasmaSwitchboard extends serverAbstractSwitch implements ser
         this.sbQueue = new plasmaSwitchboardQueue(this.wordIndex.loadedURL, new File(this.plasmaPath, "switchboardQueue2.stack"), this.profilesActiveCrawls);
         
         // create in process list
-        this.indexingTasksInProcess = new HashMap();
+        this.indexingTasksInProcess = new HashMap<String, plasmaSwitchboardQueue.Entry>();
         
         // going through the sbQueue Entries and registering all content files as in use
         int count = 0;
         plasmaSwitchboardQueue.Entry queueEntry;
-        Iterator i1 = sbQueue.entryIterator(true);
+        Iterator<plasmaSwitchboardQueue.Entry> i1 = sbQueue.entryIterator(true);
         while (i1.hasNext()) {
-            queueEntry = (plasmaSwitchboardQueue.Entry) i1.next();
+            queueEntry = i1.next();
             if ((queueEntry != null) && (queueEntry.url() != null) && (queueEntry.cacheFile().exists())) {
                 plasmaHTCache.filesInUse.add(queueEntry.cacheFile());
                 count++;
@@ -1201,8 +1202,8 @@ public final class plasmaSwitchboard extends serverAbstractSwitch implements ser
         
         // init cookie-Monitor
         this.log.logConfig("Starting Cookie Monitor");
-        this.outgoingCookies = new HashMap();
-        this.incomingCookies = new HashMap();
+        this.outgoingCookies = new HashMap<String, Object[]>();
+        this.incomingCookies = new HashMap<String, Object[]>();
         
         // init search history trackers
         this.localSearchTracker = new HashMap<String, TreeSet<Long>>(); // String:TreeSet - IP:set of Long(accessTime)

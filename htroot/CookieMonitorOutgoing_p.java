@@ -65,17 +65,17 @@ public class CookieMonitorOutgoing_p {
         int entCount = 0;
         int tmpCount = 0;
         boolean dark = true;
-        Iterator i = switchboard.outgoingCookies.entrySet().iterator();
-        Map.Entry entry;
+        Iterator<Map.Entry<String, Object[]>> i = switchboard.outgoingCookies.entrySet().iterator();
+        Map.Entry<String, Object[]> entry;
         String host, client;
         Object[] cookies;
         Date date;
         Object[] oa;
         while ((entCount < maxCount) && (i.hasNext())) {
             // get out values
-            entry = (Map.Entry) i.next();
-            host = (String) entry.getKey();
-            oa = (Object[]) entry.getValue();
+            entry = i.next();
+            host = entry.getKey();
+            oa = entry.getValue();
             date = (Date) oa[0];
             client = (String) oa[1];
             cookies = (Object[]) oa[2];

@@ -201,6 +201,7 @@ public final class yacySeedDB {
         return this.sizeConnected() <= dhtActivityMagic;
     }
     
+    @SuppressWarnings("unchecked")
     private synchronized kelondroMapObjects openSeedTable(File seedDBFile) {
         final boolean usetree = false;
         new File(seedDBFile.getParent()).mkdirs();
@@ -251,6 +252,7 @@ public final class yacySeedDB {
         if (seedPotentialDB != null) seedPotentialDB.close();
     }
 
+    @SuppressWarnings("unchecked")
     public void initializeHandler(String mapname, Map map) {
         // this is used to set up a lastSeen lookup table
         

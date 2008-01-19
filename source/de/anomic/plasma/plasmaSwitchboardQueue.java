@@ -124,7 +124,7 @@ public class plasmaSwitchboardQueue {
     }
 
     public synchronized Entry remove(String urlHash) {
-        Iterator i = sbQueueStack.stackIterator(true);
+        Iterator<kelondroRow.Entry> i = sbQueueStack.stackIterator(true);
         kelondroRow.Entry rowentry;
         Entry entry;
         while (i.hasNext()) {
@@ -158,15 +158,15 @@ public class plasmaSwitchboardQueue {
         super.finalize();
     }
 
-    public Iterator entryIterator(boolean up) {
+    public Iterator<Entry> entryIterator(boolean up) {
         // iterates the elements in an ordered way.
         // returns plasmaSwitchboardQueue.Entry - type Objects
         return new entryIterator(up);
     }
 
-    public class entryIterator implements Iterator {
+    public class entryIterator implements Iterator<Entry> {
 
-        Iterator rows;
+        Iterator<kelondroRow.Entry> rows;
         
         public entryIterator(boolean up) {
             rows = sbQueueStack.stackIterator(up);
@@ -176,7 +176,7 @@ public class plasmaSwitchboardQueue {
             return rows.hasNext();
         }
 
-        public Object next() {
+        public Entry next() {
             return new Entry((kelondroRow.Entry) rows.next());
         }
 

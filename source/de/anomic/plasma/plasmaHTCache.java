@@ -99,13 +99,13 @@ public final class plasmaHTCache {
     public  static final long oneday = 1000 * 60 * 60 * 24; // milliseconds of a day
 
     private static kelondroMapObjects responseHeaderDB = null;
-    private static final LinkedList cacheStack = new LinkedList();
-    private static final Map cacheAge = Collections.synchronizedMap(new TreeMap()); // a <date+hash, cache-path> - relation
+    private static final LinkedList<Entry> cacheStack = new LinkedList<Entry>();
+    private static final Map<String, File> cacheAge = Collections.synchronizedMap(new TreeMap<String, File>()); // a <date+hash, cache-path> - relation
     public static long curCacheSize = 0;
     public static long maxCacheSize;
     public static File cachePath;
     public static final serverLog log = new serverLog("HTCACHE");
-    public static final HashSet filesInUse = new HashSet(); // can we delete this file
+    public static final HashSet<File> filesInUse = new HashSet<File>(); // can we delete this file
     public static String cacheLayout;
     public static boolean cacheMigration;
 
@@ -446,13 +446,13 @@ public final class plasmaHTCache {
     private static void cleanupDoIt(long newCacheSize) {
         File file;
         synchronized (cacheAge) {
-            Iterator iter = cacheAge.entrySet().iterator();
-            Map.Entry entry;
+            Iterator<Map.Entry<String, File>> iter = cacheAge.entrySet().iterator();
+            Map.Entry<String, File> entry;
             while (iter.hasNext() && curCacheSize >= newCacheSize) {
                 if (Thread.currentThread().isInterrupted()) return;
-                entry = (Map.Entry) iter.next();
-                String key = (String) entry.getKey();
-                file = (File) entry.getValue();
+                entry = iter.next();
+                String key = entry.getKey();
+                file = entry.getValue();
                 long t = Long.parseLong(key.substring(0, 16), 16);
                 if (System.currentTimeMillis() - t < 300000) break; // files must have been at least 5 minutes in the cache before they are deleted
                 if (file != null) {
@@ -536,9 +536,9 @@ public final class plasmaHTCache {
         //System.out.println("%" + (String) cacheAge.firstKey() + "=" + cacheAge.get(cacheAge.firstKey()));
         long ageHours = 0;
         if (!cacheAge.isEmpty()) {
-            Iterator i = cacheAge.keySet().iterator();
+            Iterator<String> i = cacheAge.keySet().iterator();
             if (i.hasNext()) try {
-                ageHours = (System.currentTimeMillis() - Long.parseLong(((String) i.next()).substring(0, 16), 16)) / 3600000;
+                ageHours = (System.currentTimeMillis() - Long.parseLong(i.next().substring(0, 16), 16)) / 3600000;
             } catch (NumberFormatException e) {
                 ageHours = 0;
             } else {
@@ -610,7 +610,7 @@ public final class plasmaHTCache {
     public static IResourceInfo loadResourceInfo(yacyURL url) throws UnsupportedProtocolException, IllegalAccessException {    
         
         // loading data from database
-        Map hdb = responseHeaderDB.getMap(url.hash());
+        Map<String, String> hdb = responseHeaderDB.getMap(url.hash());
         if (hdb == null) return null;
         
         // generate the cached object
@@ -841,8 +841,7 @@ public final class plasmaHTCache {
             }
             if (url != null) return url;
             // try responseHeaderDB
-            Map hdb;
-            hdb = responseHeaderDB.getMap(urlHash);
+            Map<String, String> hdb = responseHeaderDB.getMap(urlHash);
             if (hdb != null) {
                 Object origRequestLine = hdb.get(httpHeader.X_YACY_ORIGINAL_REQUEST_LINE);
                 if ((origRequestLine != null)&&(origRequestLine instanceof String)) {

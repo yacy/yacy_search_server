@@ -272,7 +272,7 @@ public final class Settings_p {
         HashMap configList = plasmaParser.getParserConfigList();        
         plasmaParserConfig[] configArray = (plasmaParserConfig[]) configList.values().toArray(new plasmaParserConfig[configList.size()]);
         
-        HashSet parserInfos = new HashSet(sb.parser.getAvailableParserList().values());
+        HashSet<ParserInfo> parserInfos = new HashSet<ParserInfo>(sb.parser.getAvailableParserList().values());
         
 //        // fetching a list of all available mimetypes
 //        List availableParserKeys = Arrays.asList(availableParsers.entrySet().toArray(new ParserInfo[availableParsers.size()]));
@@ -295,9 +295,9 @@ public final class Settings_p {
             prop.put("parser_" + parserIdx + "_colspan", configArray.length);
             
             int mimeIdx = 0;
-            Enumeration mimeTypeIter = parserInfo.supportedMimeTypes.keys();
+            Enumeration<String> mimeTypeIter = parserInfo.supportedMimeTypes.keys();
             while (mimeTypeIter.hasMoreElements()) {
-                String mimeType = (String)mimeTypeIter.nextElement();
+                String mimeType = mimeTypeIter.nextElement();
                 
                 prop.put("parser_" + parserIdx + "_mime_" + mimeIdx + "_mimetype", mimeType);
                 //prop.put("parser_" + parserIdx + "_name", parserName);

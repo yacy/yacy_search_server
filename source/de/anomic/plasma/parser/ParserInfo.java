@@ -4,7 +4,7 @@ import java.util.Hashtable;
 
 public class ParserInfo {
     // general parser info
-    public Class parserClass;
+    public Class<?> parserClass;
     public String parserClassName;
     
     public String parserName;
@@ -12,7 +12,7 @@ public class ParserInfo {
     
     // parser properties
     public String[] libxDependencies;
-    public Hashtable supportedMimeTypes;
+    public Hashtable<String, String> supportedMimeTypes;
     
     // usage statistic
     public int usageCount = 0;

@@ -30,6 +30,7 @@ import java.util.ConcurrentModificationException;
 import java.util.Iterator;
 
 import de.anomic.server.serverProfiling;
+import de.anomic.server.serverProfiling.Event;
 import de.anomic.yacy.yacyCore;
 import de.anomic.ymage.ymageChart;
 import de.anomic.ymage.ymageMatrix;
@@ -51,11 +52,11 @@ public class plasmaProfiling {
     }
     
     public static long maxPayload(String eventname, long min) {
-    	Iterator i = serverProfiling.history(eventname);
+    	Iterator<Event> i = serverProfiling.history(eventname);
         serverProfiling.Event event;
         long max = min, l;
         while (i.hasNext()) {
-        	event = (serverProfiling.Event) i.next();
+        	event = i.next();
             l = ((Long) event.payload).longValue();
             if (l > max) max = l;
         }
@@ -84,13 +85,13 @@ public class plasmaProfiling {
         chart.declareDimension(ymageChart.DIMENSION_RIGHT, rightscale, vspace * rightscale / (int)(maxbytes / 1024 / 1024), 0, "0000FF", "CCCCCC", "MEMORY/MEGABYTE");
         
         // draw ppm
-        Iterator i = serverProfiling.history("ppm");
+        Iterator<Event> i = serverProfiling.history("ppm");
         long time, now = System.currentTimeMillis(), bytes;
         int x0 = 1, x1, y0 = 0, y1, ppm;
         serverProfiling.Event event;
         try {
             while (i.hasNext()) {
-                event = (serverProfiling.Event) i.next();
+                event = i.next();
                 time = event.time - now;
                 ppm = (int) ((Long) event.payload).longValue();
                 x1 = (int) (time/1000);

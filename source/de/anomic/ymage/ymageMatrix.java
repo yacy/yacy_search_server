@@ -676,14 +676,14 @@ public class ymageMatrix {
     		return System.currentTimeMillis() - this.access > timeout;
     	}
     }
-    private static final ArrayList sbbPool = new ArrayList();
+    private static final ArrayList<sbbBuffer> sbbPool = new ArrayList<sbbBuffer>();
     private static serverByteBuffer sbbFromPool(int width, int height, long timeout) {
     	// returns an Image object from the image pool
     	// if the pooled Image was created recently (before timeout), it is not used
     	synchronized (sbbPool) {
     		sbbBuffer b;
     		for (int i = 0; i < sbbPool.size(); i++) {
-    			b = (sbbBuffer) sbbPool.get(i);
+    			b = sbbPool.get(i);
     			if ((b.enoughSize(width, height)) && (b.olderThan(timeout))) {
     				// use this buffer
     				b.access = System.currentTimeMillis();

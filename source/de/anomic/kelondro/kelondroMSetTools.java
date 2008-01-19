@@ -142,6 +142,7 @@ public class kelondroMSetTools {
         return joinConstructiveByEnumeration(map1, map2, concatStrings);
     }
     
+    @SuppressWarnings("unchecked")
     private static <A, B> TreeMap<A, B> joinConstructiveByTest(TreeMap<A, B> small, TreeMap<A, B> large, boolean concatStrings) {
         Iterator<Map.Entry<A, B>> mi = small.entrySet().iterator();
         TreeMap<A, B> result = new TreeMap<A, B>(large.comparator());
@@ -161,6 +162,7 @@ public class kelondroMSetTools {
         return result;
     }
 
+    @SuppressWarnings("unchecked")
     private static <A, B> TreeMap<A, B> joinConstructiveByEnumeration(TreeMap<A, B> map1, TreeMap<A, B> map2, boolean concatStrings) {
         // implement pairwise enumeration
         Comparator<? super A> comp = map1.comparator();

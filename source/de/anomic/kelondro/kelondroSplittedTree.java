@@ -118,7 +118,8 @@ public class kelondroSplittedTree implements kelondroIndex {
         return ktfs[partition(key)].get(key);
     }
 
-	public synchronized void putMultiple(List<kelondroRow.Entry> rows) throws IOException {
+	@SuppressWarnings("unchecked")
+    public synchronized void putMultiple(List<kelondroRow.Entry> rows) throws IOException {
         Iterator<kelondroRow.Entry> i = rows.iterator();
         kelondroRow.Entry row;
         ArrayList<kelondroRow.Entry>[] parts = new ArrayList[ktfs.length];

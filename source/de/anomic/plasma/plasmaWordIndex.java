@@ -384,6 +384,7 @@ public final class plasmaWordIndex implements indexRI {
         return containers;
     }
 
+    @SuppressWarnings("unchecked")
     public Map<String, indexContainer>[] localSearchContainers(plasmaSearchQuery query, Set<String> urlselection) {
         // search for the set of hashes and return a map of of wordhash:indexContainer containing the seach result
 

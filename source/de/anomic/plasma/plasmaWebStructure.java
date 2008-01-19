@@ -56,7 +56,7 @@ public class plasmaWebStructure {
     private serverLog    log;
     private File         rankingPath, structureFile;
     private String       crlFile, crgFile;
-    private TreeMap      structure; // String2String with <b64hash(6)>','<host> to <date-yyyymmdd(8)>{<target-b64hash(6)><target-count-hex(4)>}*
+    private TreeMap<String, String> structure; // <b64hash(6)>','<host> to <date-yyyymmdd(8)>{<target-b64hash(6)><target-count-hex(4)>}*
     
     public plasmaWebStructure(serverLog log, File rankingPath, String crlFile, String crgFile, File structureFile) {
         this.log = log;
@@ -64,30 +64,30 @@ public class plasmaWebStructure {
         this.crlFile = crlFile;
         this.crgFile = crgFile;
         this.crg = new StringBuffer(maxCRGDump);
-        this.structure = new TreeMap();
+        this.structure = new TreeMap<String, String>();
         this.structureFile = structureFile;
         
         // load web structure
-        Map loadedStructure = serverFileUtils.loadHashMap(this.structureFile);
+        Map<String, String> loadedStructure = serverFileUtils.loadHashMap(this.structureFile);
         if (loadedStructure != null) this.structure.putAll(loadedStructure);
         
         // delete outdated entries in case the structure is too big
         if (this.structure.size() > maxhosts) {
         	// fill a set with last-modified - dates of the structure
-        	TreeSet delset = new TreeSet();
-        	Map.Entry entry;
-        	Iterator i = this.structure.entrySet().iterator();
+        	TreeSet<String> delset = new TreeSet<String>();
+        	Map.Entry<String, String> entry;
+        	Iterator<Map.Entry<String, String>> i = this.structure.entrySet().iterator();
         	String key, value;
         	while (i.hasNext()) {
-        		entry = (Map.Entry) i.next();
-        		key = (String) entry.getKey();
-        		value = (String) entry.getValue();
+        		entry = i.next();
+        		key = entry.getKey();
+        		value = entry.getValue();
         		delset.add(value.substring(0, 8) + key);
         	}
         	int delcount = this.structure.size() - (maxhosts * 9 / 10);
-        	i = delset.iterator();
-        	while ((delcount > 0) && (i.hasNext())) {
-        		this.structure.remove(((String) i.next()).substring(8));
+        	Iterator<String> j = delset.iterator();
+        	while ((delcount > 0) && (j.hasNext())) {
+        		this.structure.remove(j.next().substring(8));
         		delcount--;
         	}
         }
@@ -97,8 +97,8 @@ public class plasmaWebStructure {
         assert url.hash().equals(baseurlhash);
         
         // generate citation reference
-        Map hl = document.getHyperlinks();
-        Iterator it = hl.entrySet().iterator();
+        Map<String, String> hl = document.getHyperlinks();
+        Iterator<String> it = hl.keySet().iterator();
         String nexturlhash;
         StringBuffer cpg = new StringBuffer(12 * (hl.size() + 1) + 1);
         StringBuffer cpl = new StringBuffer(12 * (hl.size() + 1) + 1);
@@ -107,7 +107,7 @@ public class plasmaWebStructure {
         int LCount = 0;
         while (it.hasNext()) {
             try {
-                nexturlhash = (new yacyURL((String) ((Map.Entry) it.next()).getKey(), null)).hash();
+                nexturlhash = (new yacyURL(it.next(), null)).hash();
                 if (nexturlhash != null) {
                     if (nexturlhash.substring(6).equals(lhp)) {
                         // this is a inbound link
@@ -184,9 +184,9 @@ public class plasmaWebStructure {
         return (refs.length() - 8) / 10;
     }
     
-    private static Map refstr2map(String refs) {
-        if ((refs == null) || (refs.length() <= 8)) return new HashMap();
-        Map map = new HashMap();
+    private static Map<String, Integer> refstr2map(String refs) {
+        if ((refs == null) || (refs.length() <= 8)) return new HashMap<String, Integer>();
+        Map<String, Integer> map = new HashMap<String, Integer>();
         String c;
         int refsc = refstr2count(refs);
         for (int i = 0; i < refsc; i++) {
@@ -196,16 +196,16 @@ public class plasmaWebStructure {
         return map;
     }
     
-    private static String map2refstr(Map map) {
+    private static String map2refstr(Map<String, Integer> map) {
         StringBuffer s = new StringBuffer(map.size() * 10);
         s.append(serverDate.formatShortDay(new Date()));
-        Iterator i = map.entrySet().iterator();
-        Map.Entry entry;
+        Iterator<Map.Entry<String, Integer>> i = map.entrySet().iterator();
+        Map.Entry<String, Integer> entry;
         String h;
         while (i.hasNext()) {
-            entry = (Map.Entry) i.next();
-            s.append((String) entry.getKey());
-            h = Integer.toHexString(((Integer) entry.getValue()).intValue());
+            entry = i.next();
+            s.append(entry.getKey());
+            h = Integer.toHexString(entry.getValue().intValue());
             if (h.length() == 0) {
                 s.append("0000");
             } else if (h.length() == 1) {
@@ -223,16 +223,16 @@ public class plasmaWebStructure {
         return s.toString();
     }
     
-    public Map references(String domhash) {
+    public Map<String, Integer> references(String domhash) {
         // returns a map with a domhash(String):refcount(Integer) relation
         assert domhash.length() == 6;
-        SortedMap tailMap = structure.tailMap(domhash);
-        if ((tailMap == null) || (tailMap.size() == 0)) return new HashMap();
-        String key = (String) tailMap.firstKey();
+        SortedMap<String, String> tailMap = structure.tailMap(domhash);
+        if ((tailMap == null) || (tailMap.size() == 0)) return new HashMap<String, Integer>();
+        String key = tailMap.firstKey();
         if (key.startsWith(domhash)) {
-            return refstr2map((String) tailMap.get(key));
+            return refstr2map(tailMap.get(key));
         } else {
-            return new HashMap();
+            return new HashMap<String, Integer>();
         }
     }
     
@@ -240,11 +240,11 @@ public class plasmaWebStructure {
         // returns the number of domains that are referenced by this domhash
         assert domhash.length() == 6 : "domhash = " + domhash;
         try {
-            SortedMap tailMap = structure.tailMap(domhash);
+            SortedMap<String, String> tailMap = structure.tailMap(domhash);
             if ((tailMap == null) || (tailMap.size() == 0)) return 0;
-            String key = (String) tailMap.firstKey();
+            String key = tailMap.firstKey();
             if (key.startsWith(domhash)) {
-                return refstr2count((String) tailMap.get(key));
+                return refstr2count(tailMap.get(key));
             } else {
                 return 0;
             }
@@ -257,16 +257,16 @@ public class plasmaWebStructure {
         // returns the domain as string, null if unknown
         assert domhash.length() == 6;
         try {
-            SortedMap tailMap = structure.tailMap(domhash);
+            SortedMap<String, String> tailMap = structure.tailMap(domhash);
             if ((tailMap == null) || (tailMap.size() == 0)) return null;
-            String key = (String) tailMap.firstKey();
+            String key = tailMap.firstKey();
             if (key.startsWith(domhash)) {
                 return key.substring(7);
             } else {
                 return null;
             }
         } catch (ConcurrentModificationException e) {
-            // we dont want to implement a synchronization here,
+            // we don't want to implement a synchronization here,
             // because this is 'only' used for a graphics application
             // just return null
             return null;
@@ -277,7 +277,7 @@ public class plasmaWebStructure {
         String domhash = url.hash().substring(6);
 
         // parse the new reference string and join it with the stored references
-        Map refs = references(domhash);
+        Map<String, Integer> refs = references(domhash);
         assert reference.length() % 12 == 0;
         String dom;
         int c;
@@ -297,13 +297,13 @@ public class plasmaWebStructure {
 				// shrink the references: the entry with the smallest number of references is removed
 				int minrefcount = Integer.MAX_VALUE;
 				String minrefkey = null;
-				Iterator i = refs.entrySet().iterator();
-				Map.Entry entry;
+				Iterator<Map.Entry<String, Integer>> i = refs.entrySet().iterator();
+				Map.Entry<String, Integer> entry;
 				findloop: while (i.hasNext()) {
-					entry = (Map.Entry) i.next();
-					if (((Integer) entry.getValue()).intValue() < minrefcount) {
-						minrefcount = ((Integer) entry.getValue()).intValue();
-						minrefkey = (String) entry.getKey();
+					entry = i.next();
+					if (entry.getValue().intValue() < minrefcount) {
+						minrefcount = entry.getValue().intValue();
+						minrefkey = entry.getKey();
 					}
 					if (minrefcount == 1) break findloop;
 				}
@@ -328,29 +328,29 @@ public class plasmaWebStructure {
     
     public String hostWithMaxReferences() {
         // find domain with most references
-        Iterator i = structure.entrySet().iterator();
+        Iterator<Map.Entry<String, String>> i = structure.entrySet().iterator();
         int refsize, maxref = 0;
         String maxhost = null;
-        Map.Entry entry;
+        Map.Entry<String, String> entry;
         while (i.hasNext()) {
-            entry = (Map.Entry) i.next();
-            refsize = ((String) entry.getValue()).length();
+            entry = i.next();
+            refsize = entry.getValue().length();
             if (refsize > maxref) {
                 maxref = refsize;
-                maxhost = ((String) entry.getKey()).substring(7);
+                maxhost = entry.getKey().substring(7);
             }
         }
         return maxhost;
     }
     
-    public Iterator structureEntryIterator() {
+    public Iterator<structureEntry> structureEntryIterator() {
         // iterates objects of type structureEntry
         return new structureIterator();
     }
     
-    public class structureIterator implements Iterator {
+    public class structureIterator implements Iterator<structureEntry> {
 
-        private Iterator i;
+        private Iterator<Map.Entry<String, String>> i;
         private structureEntry nextentry;
         
         public structureIterator() {
@@ -363,11 +363,11 @@ public class plasmaWebStructure {
         }
 
         private void next0() {
-            Map.Entry entry = null;
+            Map.Entry<String, String> entry = null;
             String dom = null, ref;
             while (i.hasNext()) {
-                entry = (Map.Entry) i.next();
-                dom = (String) entry.getKey();
+                entry = i.next();
+                dom = entry.getKey();
                 if (dom.length() >= 8) break;
                 if (!i.hasNext()) {
                     nextentry = null;
@@ -378,11 +378,11 @@ public class plasmaWebStructure {
                 nextentry = null;
                 return;
             }
-            ref = (String) entry.getValue();
+            ref = entry.getValue();
             nextentry = new structureEntry(dom.substring(0, 6), dom.substring(7), ref.substring(0, 8), refstr2map(ref));
         }
         
-        public Object next() {
+        public structureEntry next() {
             structureEntry r = nextentry;
             next0();
             return r;
@@ -396,8 +396,8 @@ public class plasmaWebStructure {
     
     public class structureEntry {
         public String domhash, domain, date;
-        public Map references;
-        public structureEntry(String domhash, String domain, String date, Map references) {
+        public Map<String, Integer> references;
+        public structureEntry(String domhash, String domain, String date, Map<String, Integer> references) {
             this.domhash = domhash;
             this.domain = domain;
             this.date = date;

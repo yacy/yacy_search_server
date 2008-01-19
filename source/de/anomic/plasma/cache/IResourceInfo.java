@@ -61,7 +61,7 @@ public interface IResourceInfo {
     /**
      * @return the resource information
      */
-    public Map getMap();
+    public Map<String, String> getMap();
     
     /**
      * @return the URL of this content

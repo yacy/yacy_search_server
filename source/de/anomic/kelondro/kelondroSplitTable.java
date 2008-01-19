@@ -220,13 +220,25 @@ public class kelondroSplitTable implements kelondroIndex {
         if (suffix == null) return null;
         kelondroIndex table = (kelondroIndex) tables.get(suffix);
         if (table == null) {
-            // make new table
-            if (serverMemory.request(minimumRAM4Eco, true)) {
-                // enough memory for a ecoTable
-                table = new kelondroEcoTable(new File(path, tablename + "." + suffix), rowdef, false, EcoFSBufferSize);
+            // open table
+            File f = new File(path, tablename + "." + suffix);
+            if (f.exists()) {
+                if (f.isDirectory()) {
+                    // open a flex table
+                    table = new kelondroFlexTable(path, tablename + "." + suffix, -1, rowdef, 0, true);
+                } else {
+                    // open a eco table
+                    table = new kelondroEcoTable(f, rowdef, false, EcoFSBufferSize);
+                }
             } else {
-                // use the flex table
-                table = new kelondroFlexTable(path, tablename + "." + suffix, -1, rowdef, 0, true);
+                // make new table
+                if (serverMemory.request(minimumRAM4Eco, true)) {
+                    // enough memory for a ecoTable
+                    table = new kelondroEcoTable(f, rowdef, false, EcoFSBufferSize);
+                } else {
+                    // use the flex table
+                    table = new kelondroFlexTable(path, tablename + "." + suffix, -1, rowdef, 0, true);
+                }
             }
             tables.put(suffix, table);
         }

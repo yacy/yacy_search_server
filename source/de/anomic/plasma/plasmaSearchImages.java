@@ -44,7 +44,6 @@ package de.anomic.plasma;
 import java.io.InputStream;
 import java.net.MalformedURLException;
 import java.util.Iterator;
-import java.util.Map;
 import java.util.TreeSet;
 
 import de.anomic.htmlFilter.htmlFilterImageEntry;
@@ -54,11 +53,11 @@ import de.anomic.yacy.yacyURL;
 
 public final class plasmaSearchImages {
 
-    private TreeSet images;
+    private TreeSet<htmlFilterImageEntry> images;
     
     public plasmaSearchImages(long maxTime, yacyURL url, int depth) {
         long start = System.currentTimeMillis();
-        this.images = new TreeSet();
+        this.images = new TreeSet<htmlFilterImageEntry>();
         if (maxTime > 10) {
             Object[] resource = plasmaSnippetCache.getResource(url, true, (int) maxTime, false);
             InputStream res = (InputStream) resource[0];
@@ -80,13 +79,11 @@ public final class plasmaSearchImages {
 
                 // add also links from pages one step deeper, if depth > 0
                 if (depth > 0) {
-                    Map hl = document.getHyperlinks();
-                    Iterator i = hl.entrySet().iterator();
+                    Iterator<String> i = document.getHyperlinks().keySet().iterator();
+                    String nexturlstring;
                     while (i.hasNext()) {
-                        Map.Entry e = (Map.Entry) i.next();
-                        String nexturlstring;
                         try {
-                            nexturlstring = new yacyURL((String) e.getKey(), null).toNormalform(true, true);
+                            nexturlstring = new yacyURL(i.next(), null).toNormalform(true, true);
                             addAll(new plasmaSearchImages(serverDate.remainingTime(start, maxTime, 10), new yacyURL(nexturlstring, null), depth - 1));
                         } catch (MalformedURLException e1) {
                             e1.printStackTrace();
@@ -104,11 +101,11 @@ public final class plasmaSearchImages {
         }
     }
     
-    private void addAll(TreeSet ts) {
-        Iterator i = ts.iterator();
+    private void addAll(TreeSet<htmlFilterImageEntry> ts) {
+        Iterator<htmlFilterImageEntry> i = ts.iterator();
         htmlFilterImageEntry ie;
         while (i.hasNext()) {
-            ie = (htmlFilterImageEntry) i.next();
+            ie = i.next();
             if (images.contains(ie)) {
                 if ((ie.height() > 0) && (ie.width() > 0)) images.add(ie);
             } else {
@@ -117,7 +114,7 @@ public final class plasmaSearchImages {
         }
     }
     
-    public Iterator entries() {
+    public Iterator<htmlFilterImageEntry> entries() {
         // returns htmlFilterImageEntry - Objects
         return images.iterator();
     }

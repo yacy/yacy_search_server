@@ -43,13 +43,13 @@ public class ymageGraph {
     // a ymageGraph is a set of points and borders between the points
     // to reference the points, they must all have a nickname
 
-    HashMap points;
-    HashSet borders;
+    HashMap<String, coordinate> points;
+    HashSet<String> borders;
     double leftmost, rightmost, topmost, bottommost;
     
     public ymageGraph() {
-        points = new HashMap();
-        borders = new HashSet();
+        points = new HashMap<String, coordinate>();
+        borders = new HashSet<String>();
         leftmost = 1.0;
         rightmost = -1.0;
         topmost = -1.0;
@@ -57,7 +57,7 @@ public class ymageGraph {
     }
     
     public coordinate getPoint(String name) {
-        return (coordinate) points.get(name);
+        return points.get(name);
     }
     
     public coordinate[] getBorder(String name) {
@@ -71,7 +71,7 @@ public class ymageGraph {
     
     public coordinate addPoint(String name, double x, double y, int layer) {
         coordinate newc = new coordinate(x, y, layer);
-        coordinate oldc = (coordinate) points.put(name, newc);
+        coordinate oldc = points.put(name, newc);
         assert oldc == null; // all add shall be unique
         if (x > rightmost) rightmost = x;
         if (x < leftmost) leftmost = x;
@@ -85,8 +85,8 @@ public class ymageGraph {
     }
     
     public void setBorder(String fromPoint, String toPoint) {
-        coordinate from = (coordinate) points.get(fromPoint);
-        coordinate to = (coordinate) points.get(toPoint);
+        coordinate from = points.get(fromPoint);
+        coordinate to = points.get(toPoint);
         assert from != null;
         assert to != null;
         borders.add(fromPoint + "$" + toPoint);
@@ -108,19 +108,19 @@ public class ymageGraph {
     
     public void print() {
         // for debug purpose: print out all coordinates
-        Iterator i = points.entrySet().iterator();
-        Map.Entry entry;
+        Iterator<Map.Entry<String, coordinate>> i = points.entrySet().iterator();
+        Map.Entry<String, coordinate> entry;
         String name;
         coordinate c;
         while (i.hasNext()) {
-            entry = (Map.Entry) i.next();
-            name = (String) entry.getKey();
-            c = (coordinate) entry.getValue();
+            entry = i.next();
+            name = entry.getKey();
+            c = entry.getValue();
             System.out.println("point(" + c.x + ", " + c.y + ", " + c.layer + ") [" + name + "]");
         }
-        i = borders.iterator();
-        while (i.hasNext()) {
-            System.out.println("border(" + i.next() + ")");
+        Iterator<String> j = borders.iterator();
+        while (j.hasNext()) {
+            System.out.println("border(" + j.next() + ")");
         }
     }
     
@@ -136,15 +136,15 @@ public class ymageGraph {
         double yfactor = ((topmost - bottommost) == 0.0) ? 0.0 : (height - topborder - bottomborder) / (topmost - bottommost);
         
         // draw dots and names
-        Iterator i = points.entrySet().iterator();
-        Map.Entry entry;
+        Iterator<Map.Entry<String, coordinate>> i = points.entrySet().iterator();
+        Map.Entry<String, coordinate> entry;
         String name;
         coordinate c;
         int x, y;
         while (i.hasNext()) {
-            entry = (Map.Entry) i.next();
-            name = (String) entry.getKey();
-            c = (coordinate) entry.getValue();
+            entry = i.next();
+            name = entry.getKey();
+            c = entry.getValue();
             x = (xfactor == 0.0) ? width / 2 : (int) (leftborder + (c.x - leftmost) * xfactor);
             y = (yfactor == 0.0) ? height / 2 : (int) (height - bottomborder - (c.y - bottommost) * yfactor);
             image.setColor(color_dot);
@@ -154,12 +154,12 @@ public class ymageGraph {
         }
         
         // draw lines
-        i = borders.iterator();
+        Iterator<String> j = borders.iterator();
         coordinate[] border;
         image.setColor(color_line);
         int x0, x1, y0, y1;
-        while (i.hasNext()) {
-            border = getBorder((String) i.next());
+        while (j.hasNext()) {
+            border = getBorder(j.next());
             if (border == null) continue;
             if (xfactor == 0.0) {
                 x0 = width / 2;

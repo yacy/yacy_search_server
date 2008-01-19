@@ -81,7 +81,7 @@ public final class plasmaParser {
      * A list containing all installed parsers and the mimeType that they support
      * @see #loadAvailableParserList()
      */
-    public static final Properties availableParserList = new Properties();
+    public static final HashMap<String, ParserInfo> availableParserList = new HashMap<String, ParserInfo>();
     
     /**
      * A list of file extensions and mime types that are supported by the html-parser
@@ -170,7 +170,7 @@ public final class plasmaParser {
         return this.theLogger;
     }
     
-    public static HashMap getParserConfigList() {
+    public static HashMap<String, plasmaParserConfig> getParserConfigList() {
         return parserConfigList;
     }
     
@@ -389,7 +389,7 @@ public final class plasmaParser {
         return mimeTypeLookupByFileExt.getProperty(fileExt,"application/octet-stream");
     }
 
-    public Hashtable getAvailableParserList() {
+    public HashMap<String, ParserInfo> getAvailableParserList() {
         return plasmaParser.availableParserList;
     }    
     
@@ -451,7 +451,7 @@ public final class plasmaParser {
                         }
                         
                         // loading the list of mime-types that are supported by this parser class
-                        Hashtable supportedMimeTypes = ((Parser)theParser).getSupportedMimeTypes();
+                        Hashtable<String, String> supportedMimeTypes = ((Parser) theParser).getSupportedMimeTypes();
                         
                         // creating a parser info object
                         ParserInfo parserInfo = new ParserInfo();
@@ -460,12 +460,12 @@ public final class plasmaParser {
                         parserInfo.libxDependencies = neededLibx;
                         parserInfo.supportedMimeTypes = supportedMimeTypes;
                         parserInfo.parserVersionNr = ((Parser)theParser).getVersion();
-                        parserInfo.parserName = ((Parser)theParser).getName();
+                        parserInfo.parserName = ((Parser) theParser).getName();
                         
                         Iterator mimeTypeIterator = supportedMimeTypes.keySet().iterator();
                         while (mimeTypeIterator.hasNext()) {
                             String mimeType = (String) mimeTypeIterator.next();
-                            availableParserList.put(mimeType,parserInfo );
+                            availableParserList.put(mimeType, parserInfo);
                             serverLog.logInfo("PARSER", "Found functional parser for mimeType '" + mimeType + "'." +
                                               "\n\tName:    " + parserInfo.parserName + 
                                               "\n\tVersion: " + parserInfo.parserVersionNr + 

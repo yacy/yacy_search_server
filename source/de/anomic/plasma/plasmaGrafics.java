@@ -166,10 +166,10 @@ public class plasmaGrafics {
         
         // draw in the search target
         plasmaSearchQuery query = event.getQuery();
-        Iterator i = query.queryHashes.iterator();
+        Iterator<String> i = query.queryHashes.iterator();
         eventPicture.setColor(ymageMatrix.GREY);
         while (i.hasNext()) {
-            hash = (String) i.next();
+            hash = i.next();
             angle = (int) (360 * yacySeed.dhtPosition(hash));
             eventPicture.arcLine(cx, cy, cr - 20, cr, angle);
         }
@@ -211,7 +211,7 @@ public class plasmaGrafics {
         // draw connected senior and principals
         int count = 0;
         int totalCount = 0;
-        Iterator e = yacyCore.seedDB.seedsConnected(true, false, null, (float) 0.0);
+        Iterator<yacySeed> e = yacyCore.seedDB.seedsConnected(true, false, null, (float) 0.0);
         
         while (e.hasNext() && count < maxCount) {
             seed = (yacySeed) e.next();

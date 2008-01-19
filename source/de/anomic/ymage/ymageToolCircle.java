@@ -12,7 +12,7 @@ public class ymageToolCircle {
         if ((radius - 1) < circles.length) return circles[radius - 1];
         
         // read some lines from known circles
-        HashSet crds = new HashSet();
+        HashSet<String> crds = new HashSet<String>();
         crds.add("0|0");
         String co;
         for (int i = Math.max(0, circles.length - 5); i < circles.length; i++) {
@@ -28,9 +28,9 @@ public class ymageToolCircle {
         
         // compute more lines in new circles
         int x, y;
-        ArrayList crc;
+        ArrayList<int[]> crc;
         for (int r = circles.length; r < newCircles.length; r++) {
-            crc = new ArrayList();
+            crc = new ArrayList<int[]>();
             for (int a = 0; a <= 2 * (r + 1); a++) {
                 x = (int) ((r + 1) * Math.cos(Math.PI * a / (4 * (r + 1))));
                 y = (int) ((r + 1) * Math.sin(Math.PI * a / (4 * (r + 1))));
@@ -52,7 +52,7 @@ public class ymageToolCircle {
             newCircles[r] = new int[2 * (crc.size() - 1)];
             int[] coords;
             for (int i = 0; i < crc.size() - 1; i++) {
-                coords = (int[]) crc.get(i);
+                coords = crc.get(i);
                 newCircles[r][2 * i    ] = coords[0];
                 newCircles[r][2 * i + 1] = coords[1];
                 //System.out.print(circles[r][i][0] + "," +circles[r][i][1] + "; "); 

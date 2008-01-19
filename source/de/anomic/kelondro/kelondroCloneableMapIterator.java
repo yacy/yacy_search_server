@@ -54,7 +54,8 @@ public class kelondroCloneableMapIterator<E> implements kelondroCloneableIterato
 		this.last = null;
 	}
 	
-	public kelondroCloneableMapIterator<E> clone(Object modifier) {
+	@SuppressWarnings("unchecked")
+    public kelondroCloneableMapIterator<E> clone(Object modifier) {
 		return new kelondroCloneableMapIterator(map, modifier);
 	}
 
