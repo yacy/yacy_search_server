@@ -1,0 +1,9 @@
+<?xml version="1.0"?>
+<root>
+
+#{item}#
+<item>
+<text>#[text]#</text>
+</item>
+#{/item}#
+</root>
