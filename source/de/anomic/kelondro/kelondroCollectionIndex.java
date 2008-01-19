@@ -160,9 +160,9 @@ public class kelondroCollectionIndex {
             
             // initialize (new generation) index table from file
             if (serverMemory.request(necessaryRAM4fullTable, false)) {
-                index = new kelondroEcoTable(f, indexRowdef, true, EcoFSBufferSize);
+                index = new kelondroEcoTable(f, indexRowdef, kelondroEcoTable.tailCacheUsageAuto, EcoFSBufferSize);
             } else if (serverMemory.request(necessaryRAM4fullIndex, false)) {
-                index = new kelondroEcoTable(f, indexRowdef, false, EcoFSBufferSize);
+                index = new kelondroEcoTable(f, indexRowdef, kelondroEcoTable.tailCacheDenyUsage, EcoFSBufferSize);
             } else {
                 index = new kelondroFlexTable(path, filenameStub + ".index", preloadTime, indexRowdef, initialSpace, true);
             }
@@ -221,7 +221,8 @@ public class kelondroCollectionIndex {
                     ientry.setCol(idx_col_indexpos,   aentry.index());
                     ientry.setCol(idx_col_lastread,   t);
                     ientry.setCol(idx_col_lastwrote,  t);
-                    index.addUnique(ientry); // FIXME: this should avoid doubles
+                    //index.addUnique(ientry); // FIXME: this should avoid doubles
+                    index.put(ientry);
                     count++;
                     
                     // write a log
@@ -264,7 +265,7 @@ public class kelondroCollectionIndex {
             // open a ecotable
             long records = f.length() / indexRowdef.objectsize;
             long necessaryRAM4fullTable = minimumRAM4Eco + (indexRowdef.objectsize + 4) * records * 3 / 2;
-            return new kelondroEcoTable(f, indexRowdef, serverMemory.request(necessaryRAM4fullTable, false), EcoFSBufferSize);
+            return new kelondroEcoTable(f, indexRowdef, (serverMemory.request(necessaryRAM4fullTable, false)) ? kelondroEcoTable.tailCacheUsageAuto : kelondroEcoTable.tailCacheDenyUsage, EcoFSBufferSize);
         }
     }
     
@@ -978,7 +979,7 @@ public class kelondroCollectionIndex {
         kelondroRowSet collection = new kelondroRowSet(this.payloadrow, arrayrow, 1); // FIXME: this does not yet work with different rowdef in case of several rowdef.objectsize()
         if ((!(index.row().objectOrder.wellformed(indexkey))) || (index.row().objectOrder.compare(arraykey, indexkey) != 0)) {
             // check if we got the right row; this row is wrong. Fix it:
-            index.remove(indexkey, true); // the wrong row cannot be fixed
+            index.remove(indexkey, false); // the wrong row cannot be fixed
             // store the row number in the index; this may be a double-entry, but better than nothing
             kelondroRow.Entry indexEntry = index.row().newEntry();
             indexEntry.setCol(idx_col_key, arrayrow.getColBytes(0));

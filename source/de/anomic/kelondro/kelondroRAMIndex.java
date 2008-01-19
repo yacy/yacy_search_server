@@ -123,6 +123,7 @@ public class kelondroRAMIndex implements kelondroIndex {
 	}
 	
     public synchronized kelondroRow.Entry remove(byte[] key, boolean keepOrder) throws IOException {
+        assert keepOrder == true; // if this is false, the index must be re-ordered so many times which will cause a major CPU usage
     	finishInitialization();
         // if the new entry is within the initialization part, just delete it
         kelondroRow.Entry indexentry = index0.remove(key, keepOrder);

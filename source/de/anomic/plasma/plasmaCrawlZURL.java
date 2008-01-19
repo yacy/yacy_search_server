@@ -69,7 +69,7 @@ public class plasmaCrawlZURL {
                 if (f.isDirectory()) kelondroFlexTable.delete(cachePath, tablename); else f.delete();
             }
         }
-        urlIndex = new kelondroEcoTable(f, rowdef, true, EcoFSBufferSize);
+        urlIndex = new kelondroEcoTable(f, rowdef, kelondroEcoTable.tailCacheUsageAuto, EcoFSBufferSize);
         //urlIndex = new kelondroFlexTable(cachePath, tablename, -1, rowdef, 0, true);
     }
     

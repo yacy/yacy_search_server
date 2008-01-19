@@ -99,10 +99,10 @@ public class kelondroDyn {
                 if (file.isDirectory()) {
                     fbi = new kelondroFlexTable(file.getParentFile(), file.getName(), 10000, rowdef, 0, resetOnFail);
                 } else {
-                    fbi = new kelondroEcoTable(file, rowdef, false, EcoFSBufferSize);
+                    fbi = new kelondroEcoTable(file, rowdef, kelondroEcoTable.tailCacheUsageAuto, EcoFSBufferSize);
                 }
             } else {
-                fbi = new kelondroEcoTable(file, rowdef, false, EcoFSBufferSize);
+                fbi = new kelondroEcoTable(file, rowdef, kelondroEcoTable.tailCacheUsageAuto, EcoFSBufferSize);
             }
         }
         this.index = (useObjectCache) ? (kelondroIndex) new kelondroCache(fbi) : fbi;

@@ -302,7 +302,7 @@ public final class plasmaCrawlStacker extends Thread {
             cacheStacksPath.mkdirs();
             File f = new File(cacheStacksPath, stackfile);
             try {
-                this.urlEntryCache = new kelondroEcoTable(f, plasmaCrawlEntry.rowdef, true, EcoFSBufferSize);
+                this.urlEntryCache = new kelondroEcoTable(f, plasmaCrawlEntry.rowdef, kelondroEcoTable.tailCacheUsageAuto, EcoFSBufferSize);
                 //this.urlEntryCache = new kelondroCache(new kelondroFlexTable(cacheStacksPath, newCacheName, preloadTime, plasmaCrawlEntry.rowdef, 0, true));
             } catch (Exception e) {
                 e.printStackTrace();
@@ -310,7 +310,7 @@ public final class plasmaCrawlStacker extends Thread {
                 f.delete();
                 //kelondroFlexTable.delete(cacheStacksPath, newCacheName);
                 try {
-                    this.urlEntryCache = new kelondroEcoTable(f, plasmaCrawlEntry.rowdef, true, EcoFSBufferSize);
+                    this.urlEntryCache = new kelondroEcoTable(f, plasmaCrawlEntry.rowdef, kelondroEcoTable.tailCacheUsageAuto, EcoFSBufferSize);
                     //this.urlEntryCache = new kelondroCache(new kelondroFlexTable(cacheStacksPath, newCacheName, preloadTime, plasmaCrawlEntry.rowdef, 0, true));
                 } catch (Exception ee) {
                     ee.printStackTrace();

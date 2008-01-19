@@ -485,7 +485,14 @@ public class kelondroEcoFS {
             System.out.println("size = " + t.size());
             t.clean(t.size() - 2);
             t.cleanLast();
-            System.out.println("size = " + t.size());
+            long start = System.currentTimeMillis();
+            long c = 0;
+            for (int i = 0; i < 100000; i++) {
+                c = t.size();
+            }
+            System.out.println("size() needs " + ((System.currentTimeMillis() - start) / 100) + " nanoseconds");
+            System.out.println("size = " + c);
+            
             t.close();
         } catch (IOException e) {
             e.printStackTrace();

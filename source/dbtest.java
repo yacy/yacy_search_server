@@ -215,7 +215,7 @@ public class dbtest {
                 table = new kelondroSplitTable(tablepath, new File(tablename).getName(), preload, testRow, true);
             }
             if (dbe.equals("kelondroEcoTable")) {
-                table = new kelondroEcoTable(new File(tablename), testRow, true, 100);
+                table = new kelondroEcoTable(new File(tablename), testRow, kelondroEcoTable.tailCacheDenyUsage /*kelondroEcoTable.tailCacheForceUsage*/, 100);
             }
             if (dbe.equals("mysql")) {
                 table = new kelondroSQLTable("mysql", testRow);
@@ -377,6 +377,16 @@ public class dbtest {
                 // 
                 // args: <number-of-writes> <number-of-reads-per-write> <random-startpoint>
                 // example: kelondroFlexTable stressThreaded /Users/admin/dbtest 500 50 0
+                /* result with svn 4346
+                   kelondroFlex:
+                   removed: 70, size of jcontrol set: 354, size of kcontrol set: 354
+                   Database size = 354 unique entries.
+                   Execution time: open=1329, command=36234, close=17, total=37580
+                   kelondroEco:
+                   removed: 70, size of jcontrol set: 354, size of kcontrol set: 354
+                   Database size = 354 unique entries.
+                   Execution time: open=1324, command=34032, close=1, total=35357
+                 */
                 long writeCount = Long.parseLong(args[3]);
                 long readCount = Long.parseLong(args[4]);
                 long randomstart = Long.parseLong(args[5]);

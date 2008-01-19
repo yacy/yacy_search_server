@@ -76,7 +76,7 @@ public class kelondroBytesIntMap {
     
     public synchronized int removei(byte[] key) throws IOException {
         assert (key != null);
-        kelondroRow.Entry indexentry = index.remove(key, false);
+        kelondroRow.Entry indexentry = index.remove(key, true); // keeping the order will prevent multiple re-sorts
         if (indexentry == null) return -1;
         return (int) indexentry.getColLong(1);
     }
