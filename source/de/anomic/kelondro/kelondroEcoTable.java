@@ -59,6 +59,8 @@ public class kelondroEcoTable implements kelondroIndex {
     public static final int tailCacheForceUsage = 1;
     public static final int tailCacheUsageAuto  = 2;
     
+    public static final long maxarraylength = 134217727; // that may be the maxmimum size of array length in some JVMs
+    
     private kelondroRowSet table;
     private kelondroBytesIntMap index;
     private kelondroBufferedEcoFS file;
@@ -94,10 +96,11 @@ public class kelondroEcoTable implements kelondroIndex {
             this.file = new kelondroBufferedEcoFS(new kelondroEcoFS(tablefile, rowdef.objectsize), this.buffersize);
         
             // initialize index and copy table
-            int records = Math.max(file.size(), initialSpace);
+            int  records = (int) Math.max(file.size(), initialSpace);
             long neededRAM4table = 10 * 1024 * 1024 + records * (rowdef.objectsize + 4) * 3 / 2;
-            table = ((useTailCache == tailCacheForceUsage) ||
-                     ((useTailCache == tailCacheUsageAuto) && (serverMemory.request(neededRAM4table, true)))) ?
+            table = ((neededRAM4table < maxarraylength) &&
+                     ((useTailCache == tailCacheForceUsage) ||
+                      ((useTailCache == tailCacheUsageAuto) && (serverMemory.request(neededRAM4table, true))))) ?
                     new kelondroRowSet(taildef, records) : null;
             index = new kelondroBytesIntMap(rowdef.primaryKeyLength, rowdef.objectOrder, records);
             System.out.println("*** DEBUG: EcoTable " + tablefile.toString() + " has table copy " + ((table == null) ? "DISABLED" : "ENABLED"));
@@ -105,7 +108,7 @@ public class kelondroEcoTable implements kelondroIndex {
             // read all elements from the file into the copy table
             byte[] record = new byte[rowdef.objectsize];
             byte[] key = new byte[rowdef.primaryKeyLength];
-            int fs = file.size();
+            int fs = (int) file.size();
             for (int i = 0; i < fs; i++) {
                 // read entry
                 file.get(i, record, 0);
@@ -177,7 +180,7 @@ public class kelondroEcoTable implements kelondroIndex {
     public synchronized void addUnique(Entry row) throws IOException {
         assert file.size() == index.size() : "file.size() = " + file.size() + ", index.size() = " + index.size();
         assert ((table == null) || (table.size() == index.size()));
-        int i = file.size();
+        int i = (int) file.size();
         index.addi(row.getPrimaryKeyBytes(), i);
         if (table != null) {
             assert table.size() == i;
