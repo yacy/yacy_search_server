@@ -51,6 +51,7 @@
 package de.anomic.kelondro;
 
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
@@ -67,6 +68,7 @@ public interface kelondroIndex {
     public void putMultiple(List<kelondroRow.Entry> rows) throws IOException; // for R/W head path optimization
     public void addUnique(kelondroRow.Entry row) throws IOException; // no double-check
     public void addUniqueMultiple(List<kelondroRow.Entry> rows) throws IOException; // no double-check
+    public ArrayList<kelondroRowSet> removeDoubles() throws IOException; // removes all elements that are double (to be used after all addUnique)
     public kelondroRow.Entry remove(byte[] key, boolean keepOrder) throws IOException;
     public kelondroRow.Entry removeOne() throws IOException;
     public kelondroCloneableIterator<byte[]> keys(boolean up, byte[] firstKey) throws IOException; // iterates only the key

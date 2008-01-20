@@ -28,6 +28,7 @@ package de.anomic.kelondro;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.HashMap;
@@ -290,6 +291,15 @@ public class kelondroSplitTable implements kelondroIndex {
     public synchronized void addUniqueMultiple(List<kelondroRow.Entry> rows, Date entryDate) throws IOException {
         Iterator<kelondroRow.Entry> i = rows.iterator();
         while (i.hasNext()) addUnique(i.next(), entryDate);
+    }
+    
+    public ArrayList<kelondroRowSet> removeDoubles() throws IOException {
+        Iterator<kelondroIndex> i = tables.values().iterator();
+        ArrayList<kelondroRowSet> report = new ArrayList<kelondroRowSet>();
+        while (i.hasNext()) {
+            report.addAll(i.next().removeDoubles());
+        }
+        return report;
     }
     
     public synchronized kelondroRow.Entry remove(byte[] key, boolean keepOrder) throws IOException {

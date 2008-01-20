@@ -33,6 +33,7 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.TreeMap;
+import java.util.TreeSet;
 
 import de.anomic.server.serverMemory;
 import de.anomic.server.logging.serverLog;
@@ -172,9 +173,8 @@ public class kelondroFlexTable extends kelondroFlexWidthArray implements kelondr
         System.out.flush();
         return ri;
     }
-    
 
-        private kelondroIndex initializeTreeIndex(File indexfile, long preloadTime, kelondroByteOrder objectOrder) throws IOException {
+    private kelondroIndex initializeTreeIndex(File indexfile, long preloadTime, kelondroByteOrder objectOrder) throws IOException {
 		kelondroIndex treeindex = new kelondroCache(new kelondroTree(indexfile, true, preloadTime, treeIndexRow(rowdef.primaryKeyLength, objectOrder), 2, 80));
 		Iterator<kelondroNode> content = super.col[0].contentNodes(-1);
 		kelondroNode node;
@@ -313,6 +313,32 @@ public class kelondroFlexTable extends kelondroFlexWidthArray implements kelondr
         }
         assert this.size() == index.size() : "content.size() = " + this.size() + ", index.size() = " + index.size();
 		
+    }
+    
+    public synchronized ArrayList<kelondroRowSet> removeDoubles() throws IOException {
+        ArrayList<Integer[]> indexreport = index.removeDoubles();
+        ArrayList<kelondroRowSet> report = new ArrayList<kelondroRowSet>();
+        Iterator<Integer[]> i = indexreport.iterator();
+        Integer[] is;
+        kelondroRowSet rows;
+        TreeSet<Integer> d = new TreeSet<Integer>();
+        while (i.hasNext()) {
+            is = i.next();
+            rows = new kelondroRowSet(this.rowdef, is.length);
+            for (int j = 0; j < is.length; j++) {
+                d.add(is[j]);
+                rows.addUnique(this.get(is[j].intValue()));
+            }
+            report.add(rows);
+        }
+        // finally delete the affected rows, but start with largest id first, othervise we overwrite wrong entries
+        Integer s;
+        while (d.size() > 0) {
+            s = d.last();
+            d.remove(s);
+            this.remove(s.intValue());
+        }
+        return report;
     }
     
     public synchronized kelondroRow.Entry remove(byte[] key, boolean keepOrder) throws IOException {

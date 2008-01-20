@@ -23,7 +23,6 @@ import de.anomic.kelondro.kelondroRow;
 import de.anomic.kelondro.kelondroRowSet;
 import de.anomic.kelondro.kelondroSQLTable;
 import de.anomic.kelondro.kelondroSplitTable;
-import de.anomic.kelondro.kelondroSplittedTree;
 import de.anomic.kelondro.kelondroTree;
 import de.anomic.server.serverInstantThread;
 import de.anomic.server.serverMemory;
@@ -200,12 +199,6 @@ public class dbtest {
                 File tablefile = new File(tablename + ".kelondro.db");
                 table = new kelondroCache(new kelondroTree(tablefile, true, preload, testRow));
             }
-            if (dbe.equals("kelondroSplittedTree")) {
-                File tablepath = new File(tablename).getParentFile();
-                tablename = new File(tablename).getName();
-                table = new kelondroSplittedTree(tablepath, tablename, kelondroBase64Order.enhancedCoder,
-                                preload, 8, testRow, 1, 80);
-            }
             if (dbe.equals("kelondroFlexTable")) {
                 File tablepath = new File(tablename).getParentFile();
                 table = new kelondroFlexTable(tablepath, new File(tablename).getName(), preload, testRow, 0, true);
@@ -362,7 +355,6 @@ public class dbtest {
             
             if (command.equals("list")) {
                 kelondroCloneableIterator<kelondroRow.Entry> i = null;
-                if (table instanceof kelondroSplittedTree) i = ((kelondroSplittedTree) table).rows(true, null);
                 if (table instanceof kelondroTree) i = ((kelondroTree) table).rows(true, null);
                 if (table instanceof kelondroSQLTable) i = ((kelondroSQLTable) table).rows(true, null);
                 kelondroRow.Entry row;

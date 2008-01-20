@@ -24,7 +24,7 @@
 
 package de.anomic.kelondro;
 
-import java.io.IOException;
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.Iterator;
 import java.util.List;
@@ -65,7 +65,7 @@ public class kelondroRAMIndex implements kelondroIndex {
         }
     }
     
-    public synchronized kelondroRow.Entry get(byte[] key) throws IOException {
+    public synchronized kelondroRow.Entry get(byte[] key) {
         assert (key != null);
         finishInitialization();
         kelondroRow.Entry indexentry = index0.get(key);
@@ -73,14 +73,14 @@ public class kelondroRAMIndex implements kelondroIndex {
         return index1.get(key);
     }
 
-	public boolean has(byte[] key) throws IOException {
+	public boolean has(byte[] key) {
 		assert (key != null);
         finishInitialization();
         if (index0.has(key)) return true;
         return index1.has(key);
 	}
     
-    public synchronized kelondroRow.Entry put(kelondroRow.Entry entry) throws IOException {
+    public synchronized kelondroRow.Entry put(kelondroRow.Entry entry) {
     	assert (entry != null);
     	finishInitialization();
         // if the new entry is within the initialization part, just overwrite it
@@ -93,18 +93,18 @@ public class kelondroRAMIndex implements kelondroIndex {
         return index1.put(entry);
     }
     
-	public Entry put(Entry row, Date entryDate) throws IOException {
+	public Entry put(Entry row, Date entryDate) {
 		return put(row);
 	}
 	
-	public void putMultiple(List<Entry> rows) throws IOException {
+	public void putMultiple(List<Entry> rows) {
 		Iterator<Entry> i = rows.iterator();
 		while (i.hasNext()) {
 			put(i.next());
 		}
 	}
 
-	public synchronized void addUnique(kelondroRow.Entry entry) throws IOException {    	
+	public synchronized void addUnique(kelondroRow.Entry entry) {    	
     	assert (entry != null);
         if (index1 == null) {
             // we are in the initialization phase
@@ -115,14 +115,20 @@ public class kelondroRAMIndex implements kelondroIndex {
         }
     }
 
-	public void addUniqueMultiple(List<Entry> rows) throws IOException {
+	public void addUniqueMultiple(List<Entry> rows) {
 		Iterator<Entry> i = rows.iterator();
 		while (i.hasNext()) {
 			addUnique(i.next());
 		}
 	}
 	
-    public synchronized kelondroRow.Entry remove(byte[] key, boolean keepOrder) throws IOException {
+	public synchronized ArrayList<kelondroRowSet> removeDoubles() {
+	    // finish initialization phase explicitely
+	    if (index1 == null) index1 = new kelondroRowSet(rowdef, 0);
+	    return index0.removeDoubles();
+	}
+	
+    public synchronized kelondroRow.Entry remove(byte[] key, boolean keepOrder) {
         assert keepOrder == true; // if this is false, the index must be re-ordered so many times which will cause a major CPU usage
     	finishInitialization();
         // if the new entry is within the initialization part, just delete it
@@ -135,7 +141,7 @@ public class kelondroRAMIndex implements kelondroIndex {
         return index1.remove(key, keepOrder);
     }
 
-    public synchronized kelondroRow.Entry removeOne() throws IOException {
+    public synchronized kelondroRow.Entry removeOne() {
         if ((index1 != null) && (index1.size() != 0)) {
             return index1.removeOne();
         }
@@ -156,7 +162,7 @@ public class kelondroRAMIndex implements kelondroIndex {
         return index0.size() + index1.size();
     }
     
-    public synchronized kelondroCloneableIterator<byte[]> keys(boolean up, byte[] firstKey) throws IOException {
+    public synchronized kelondroCloneableIterator<byte[]> keys(boolean up, byte[] firstKey) {
         // returns the key-iterator of the underlying kelondroIndex
         if (index1 == null) {
             // finish initialization phase
@@ -182,7 +188,7 @@ public class kelondroRAMIndex implements kelondroIndex {
                 true);
     }
 
-    public synchronized kelondroCloneableIterator<kelondroRow.Entry> rows(boolean up, byte[] firstKey) throws IOException {
+    public synchronized kelondroCloneableIterator<kelondroRow.Entry> rows(boolean up, byte[] firstKey) {
         // returns the row-iterator of the underlying kelondroIndex
         if (index1 == null) {
             // finish initialization phase

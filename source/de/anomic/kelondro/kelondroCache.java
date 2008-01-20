@@ -28,6 +28,7 @@
 package de.anomic.kelondro;
 
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Iterator;
@@ -353,6 +354,11 @@ public class kelondroCache implements kelondroIndex {
         while (i.hasNext()) addUnique((Entry) i.next());
     }
 
+    public synchronized ArrayList<kelondroRowSet> removeDoubles() throws IOException {
+        return index.removeDoubles();
+        // todo: remove reported entries from the cache!!!
+    }
+    
     public synchronized Entry remove(byte[] key, boolean keepOrder) throws IOException {
         checkMissSpace();
         

@@ -25,6 +25,8 @@
 package de.anomic.kelondro;
 
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.Iterator;
 
 public class kelondroBytesIntMap {
     
@@ -72,6 +74,27 @@ public class kelondroBytesIntMap {
         newentry.setCol(0, key);
         newentry.setCol(1, i);
         index.addUnique(newentry);
+    }
+    
+    public synchronized ArrayList<Integer[]> removeDoubles() throws IOException {
+        ArrayList<kelondroRowSet> indexreport = index.removeDoubles();
+        ArrayList<Integer[]> report = new ArrayList<Integer[]>();
+        Iterator<kelondroRowSet> i = indexreport.iterator();
+        kelondroRowSet rowset;
+        Integer[] is;
+        Iterator<kelondroRow.Entry> ei;
+        int c;
+        while (i.hasNext()) {
+            rowset = i.next();
+            is = new Integer[rowset.size()];
+            ei = rowset.rows();
+            c = 0;
+            while (ei.hasNext()) {
+                is[c++] = new Integer((int) ei.next().getColLong(1));
+            }
+            report.add(is);
+        }
+        return report;
     }
     
     public synchronized int removei(byte[] key) throws IOException {

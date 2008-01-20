@@ -24,7 +24,6 @@
 
 package de.anomic.kelondro;
 
-import java.io.IOException;
 import java.util.Date;
 import java.util.Iterator;
 import java.util.List;
@@ -76,7 +75,7 @@ public class kelondroRowSet extends kelondroRowCollection implements kelondroInd
 		this.profile = new kelondroProfile();
 	}
    
-    public synchronized boolean has(byte[] key) throws IOException {
+    public synchronized boolean has(byte[] key) {
         return (get(key) != null);
     }
     
@@ -92,7 +91,7 @@ public class kelondroRowSet extends kelondroRowCollection implements kelondroInd
         return entry;
     }
     
-    public synchronized void putMultiple(List<kelondroRow.Entry> rows) throws IOException {
+    public synchronized void putMultiple(List<kelondroRow.Entry> rows) {
         Iterator<kelondroRow.Entry> i = rows.iterator();
         while (i.hasNext()) put(i.next());
     }

@@ -26,6 +26,7 @@ package de.anomic.kelondro;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Random;
@@ -583,9 +584,9 @@ public class kelondroRowCollection {
         try {
             while (i >= 0) {
                 if (compare(i, i + 1) == 0) {
-                    removeRow(i, false);
+                    removeRow(i + 1, false);
                     d++;
-                    if (i < chunkcount - 2) u = false;
+                    if (i + 1 < chunkcount - 1) u = false;
                 }
                 i--;
                 if (System.currentTimeMillis() - t > 10000) {
@@ -597,6 +598,45 @@ public class kelondroRowCollection {
         } finally {
             if (!u) this.sort();
         }
+    }
+    
+    public synchronized ArrayList<kelondroRowSet> removeDoubles() {
+        assert (this.rowdef.objectOrder != null);
+        // removes double-occurrences of chunks
+        // in contrast to uniq() this removes also the remaining, non-double entry that had a double-occurrance to the others
+        // all removed chunks are returned in an array
+        this.sort();
+        ArrayList<kelondroRowSet> report = new ArrayList<kelondroRowSet>();
+        if (chunkcount < 2) return report;
+        int i = chunkcount - 2;
+        int d = 0;
+        boolean u = true;
+        kelondroRowSet collection = new kelondroRowSet(this.rowdef, 2);
+        try {
+            while (i >= 0) {
+                if (compare(i, i + 1) == 0) {
+                    collection.addUnique(get(i + 1));
+                    removeRow(i + 1, false);
+                    d++;
+                    if (i + 1 < chunkcount - 1) u = false;
+                } else if (collection.size() > 0) {
+                    // finish collection of double occurrences
+                    collection.addUnique(get(i + 1));
+                    removeRow(i + 1, false);
+                    d++;
+                    if (i + 1 < chunkcount - 1) u = false;
+                    collection.trim(false);
+                    report.add(collection);
+                    collection = new kelondroRowSet(this.rowdef, 2);
+                }
+                i--;
+            }
+        } catch (RuntimeException e) {
+            serverLog.logWarning("kelondroRowCollection", e.getMessage(), e);
+        } finally {
+            if (!u) this.sort();
+        }
+        return report;
     }
     
     public synchronized boolean isSorted() {
@@ -711,7 +751,18 @@ public class kelondroRowCollection {
     			kelondroBase64Order.enhancedCoder, 0);
     	
     	kelondroRowCollection a = new kelondroRowCollection(r, testsize);
+    	a.add("AAAAAAAAAAAA".getBytes());
+    	a.add("BBBBBBBBBBBB".getBytes());
+    	a.add("BBBBBBBBBBBB".getBytes());
+    	a.add("BBBBBBBBBBBB".getBytes());
+    	a.add("CCCCCCCCCCCC".getBytes());
+    	ArrayList<kelondroRowSet> del = a.removeDoubles();
+    	System.out.println(del + "rows double");
+    	Iterator<kelondroRow.Entry> j = a.rows();
+    	while (j.hasNext()) System.out.println(new String(j.next().bytes()));
+    	
         System.out.println("kelondroRowCollection test with size = " + testsize);
+        a = new kelondroRowCollection(r, testsize);
         long t0 = System.currentTimeMillis();
         random = new Random(0);
         for (int i = 0; i < testsize; i++) a.add(randomHash().getBytes());
@@ -807,40 +858,4 @@ public class kelondroRowCollection {
         System.out.println(daysSince2000(System.currentTimeMillis()));
         */
     }
-    
-    /*
-kelondroRowCollection test with size = 10000
-create c   : 134 milliseconds, 74 entries/millisecond
-copy c -> d: 47 milliseconds, 212 entries/millisecond
-sort c (1) : 66 milliseconds, 151 entries/millisecond
-sort d (2) : 23 milliseconds, 434 entries/millisecond
-uniq c     : 3 milliseconds, 3333 entries/millisecond
-uniq d     : 2 milliseconds, 5000 entries/millisecond
-create e   : 528 milliseconds, 18 entries/millisecond
-sort e (2) : 13 milliseconds, 769 entries/millisecond
-uniq e     : 2 milliseconds, 5000 entries/millisecond
-c isSorted = true: 2 milliseconds
-d isSorted = true: 3 milliseconds
-e isSorted = true: 2 milliseconds
-e allfound = true: 85 milliseconds
-e noghosts = true: 75 milliseconds
-Result size: c = 10000, d = 10000, e = 10000
-
-kelondroRowCollection test with size = 100000
-create c   : 589 milliseconds, 169 entries/millisecond
-copy c -> d: 141 milliseconds, 709 entries/millisecond
-sort c (1) : 268 milliseconds, 373 entries/millisecond
-sort d (2) : 187 milliseconds, 534 entries/millisecond
-uniq c     : 13 milliseconds, 7692 entries/millisecond
-uniq d     : 14 milliseconds, 7142 entries/millisecond
-create e   : 22068 milliseconds, 4 entries/millisecond
-sort e (2) : 167 milliseconds, 598 entries/millisecond
-uniq e     : 14 milliseconds, 7142 entries/millisecond
-c isSorted = true: 13 milliseconds
-d isSorted = true: 14 milliseconds
-e isSorted = true: 13 milliseconds
-e allfound = true: 815 milliseconds
-e noghosts = true: 787 milliseconds
-Result size: c = 100000, d = 100000, e = 100000
-     */
 }

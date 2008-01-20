@@ -221,8 +221,7 @@ public class kelondroCollectionIndex {
                     ientry.setCol(idx_col_indexpos,   aentry.index());
                     ientry.setCol(idx_col_lastread,   t);
                     ientry.setCol(idx_col_lastwrote,  t);
-                    //index.addUnique(ientry); // FIXME: this should avoid doubles
-                    index.put(ientry);
+                    index.addUnique(ientry); // FIXME: this should avoid doubles
                     count++;
                     
                     // write a log
@@ -233,6 +232,35 @@ public class kelondroCollectionIndex {
                 }
             }
         }
+        // care for double entries
+        ArrayList<kelondroRowSet> del = index.removeDoubles();
+        Iterator<kelondroRowSet> j = del.iterator();
+        kelondroRowSet rowset;
+        Iterator<kelondroRow.Entry> rowiter;
+        int partition, maxpartition;
+        kelondroRow.Entry entry, maxentry;
+        int doublecount = 0;
+        while (j.hasNext()) {
+            rowset = j.next();
+            // for each entry in row set choose one which we want to keep
+            rowiter = rowset.rows();
+            maxentry = null;
+            maxpartition = -1;
+            while (rowiter.hasNext()) {
+                entry = rowiter.next();
+                partition = (int) entry.getColLong(idx_col_clusteridx);
+                if (partition > maxpartition) {
+                    maxpartition = partition;
+                    maxentry = entry;
+                }
+            }
+            if (maxentry != null) {
+                // put back a single entry to the index, which is then not double to any other entry
+                index.put(maxentry);
+                doublecount++;
+            }
+        }
+        if (doublecount > 0) serverLog.logWarning("STARTUP", "found " + doublecount + " RWI entries with references to several collections. All have been fixed (zombies still exists).");
     }
     
     private kelondroIndex openIndexFile(File path, String filenameStub, kelondroByteOrder indexOrder,

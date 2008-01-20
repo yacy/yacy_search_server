@@ -50,6 +50,7 @@ import java.io.File;
 import java.io.FileReader;
 import java.io.IOException;
 import java.io.RandomAccessFile;
+import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.Date;
 import java.util.HashSet;
@@ -186,7 +187,12 @@ public class kelondroTree extends kelondroCachedRecords implements kelondroIndex
         }
         return result;
     }
-
+    
+    public ArrayList<kelondroRowSet> removeDoubles() {
+        // this data structure cannot have doubles; return empty array
+        return new ArrayList<kelondroRowSet>();
+    }
+    
     public class Search {
 
         // a search object combines the results of a search in the tree, which are

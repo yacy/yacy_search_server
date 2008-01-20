@@ -32,6 +32,7 @@ import java.sql.DriverManager;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.Iterator;
 import java.util.List;
@@ -138,6 +139,10 @@ public class kelondroSQLTable implements kelondroIndex {
     
     public boolean has(byte[] key) throws IOException {
         return (get(key) != null);
+    }
+    
+    public ArrayList<kelondroRowSet> removeDoubles() {
+        return new ArrayList<kelondroRowSet>();
     }
     
     public kelondroRow.Entry get(byte[] key) throws IOException {

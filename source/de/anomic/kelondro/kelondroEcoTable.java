@@ -28,12 +28,14 @@ import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.TreeMap;
+import java.util.TreeSet;
 
 import de.anomic.kelondro.kelondroRow.Entry;
 import de.anomic.server.serverMemory;
@@ -189,6 +191,34 @@ public class kelondroEcoTable implements kelondroIndex {
         assert file.size() == index.size() : "file.size() = " + file.size() + ", index.size() = " + index.size();
     }
 
+    public synchronized ArrayList<kelondroRowSet> removeDoubles() throws IOException {
+        ArrayList<Integer[]> indexreport = index.removeDoubles();
+        ArrayList<kelondroRowSet> report = new ArrayList<kelondroRowSet>();
+        Iterator<Integer[]> i = indexreport.iterator();
+        Integer[] is;
+        kelondroRowSet rows;
+        TreeSet<Integer> d = new TreeSet<Integer>();
+        byte[] b = new byte[rowdef.objectsize];
+        while (i.hasNext()) {
+            is = i.next();
+            rows = new kelondroRowSet(this.rowdef, is.length);
+            for (int j = 0; j < is.length; j++) {
+                d.add(is[j]);
+                file.get(is[j].intValue(), b, 0);
+                rows.addUnique(rowdef.newEntry(b));
+            }
+            report.add(rows);
+        }
+        // finally delete the affected rows, but start with largest id first, othervise we overwrite wrong entries
+        Integer s;
+        while (d.size() > 0) {
+            s = d.last();
+            d.remove(s);
+            this.removeInFile(s.intValue());
+        }
+        return report;
+    }
+    
     public void close() {
         file.close();
         file = null;
@@ -201,7 +231,7 @@ public class kelondroEcoTable implements kelondroIndex {
     public String filename() {
         return this.file.filename().toString();
     }
-
+    
     public synchronized Entry get(byte[] key) throws IOException {
         assert file.size() == index.size() : "file.size() = " + file.size() + ", index.size() = " + index.size();
         assert ((table == null) || (table.size() == index.size()));
@@ -281,6 +311,34 @@ public class kelondroEcoTable implements kelondroIndex {
         assert file.size() == index.size() : "file.size() = " + file.size() + ", index.size() = " + index.size();
     }
 
+    private void removeInFile(int i) throws IOException {
+        assert i >= 0;
+        
+        byte[] p = new byte[rowdef.objectsize];
+        if (table == null) {
+            file.cleanLast(p, 0);
+            file.put(i, p, 0);
+            byte[] k = new byte[rowdef.primaryKeyLength];
+            System.arraycopy(p, 0, k, 0, rowdef.primaryKeyLength);
+            index.puti(k, i);
+        } else {
+            if (i == index.size() - 1) {
+                // special handling if the entry is the last entry in the file
+                table.removeRow(i, false);
+                file.clean(i);
+            } else {
+                // switch values
+                kelondroRow.Entry te = table.removeOne();
+                table.set(i, te);
+
+                file.cleanLast(p, 0);
+                file.put(i, p, 0);
+                kelondroRow.Entry lr = rowdef.newEntry(p);
+                index.puti(lr.getPrimaryKeyBytes(), i);
+            }
+        }
+    }
+    
     public synchronized Entry remove(byte[] key, boolean keepOrder) throws IOException {
         assert file.size() == index.size() : "file.size() = " + file.size() + ", index.size() = " + index.size();
         assert ((table == null) || (table.size() == index.size()));
