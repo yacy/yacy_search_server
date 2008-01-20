@@ -321,8 +321,20 @@ public final class kelondroRow {
         }
         
         public final int compareTo(Entry o) {
+            // compares only the content of the primary key
             if (objectOrder == null) throw new kelondroException("objects cannot be compared, no order given");
             return objectOrder.compare(this.getPrimaryKeyBytes(), ((Entry) o).getPrimaryKeyBytes());
+        }
+        
+        public final boolean equals(Entry otherEntry) {
+            // compares the content of the complete entry
+            byte[] t = this.bytes();
+            byte[] o = otherEntry.bytes();
+            if (o.length != t.length) return false;
+            for (int i = 0; i < t.length; i++) {
+                if (t[i] != o[i]) return false;
+            }
+            return true;
         }
         
         public final byte[] bytes() {
@@ -630,6 +642,7 @@ public final class kelondroRow {
     
     public final boolean equals(kelondroRow otherRow) {
         if (this.objectsize != otherRow.objectsize) return false;
+        if (this.columns() != otherRow.columns()) return false;
         for (int i = 0; i < otherRow.row.length; i++) {
             if (!(this.row[i].equals(otherRow.row[i]))) return false;
         }

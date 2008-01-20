@@ -160,9 +160,9 @@ public class kelondroCollectionIndex {
             
             // initialize (new generation) index table from file
             if (serverMemory.request(necessaryRAM4fullTable, false)) {
-                index = new kelondroEcoTable(f, indexRowdef, kelondroEcoTable.tailCacheUsageAuto, EcoFSBufferSize);
+                index = new kelondroEcoTable(f, indexRowdef, kelondroEcoTable.tailCacheUsageAuto, EcoFSBufferSize, initialSpace);
             } else if (serverMemory.request(necessaryRAM4fullIndex, false)) {
-                index = new kelondroEcoTable(f, indexRowdef, kelondroEcoTable.tailCacheDenyUsage, EcoFSBufferSize);
+                index = new kelondroEcoTable(f, indexRowdef, kelondroEcoTable.tailCacheDenyUsage, EcoFSBufferSize, initialSpace);
             } else {
                 index = new kelondroFlexTable(path, filenameStub + ".index", preloadTime, indexRowdef, initialSpace, true);
             }
@@ -293,7 +293,7 @@ public class kelondroCollectionIndex {
             // open a ecotable
             long records = f.length() / indexRowdef.objectsize;
             long necessaryRAM4fullTable = minimumRAM4Eco + (indexRowdef.objectsize + 4) * records * 3 / 2;
-            return new kelondroEcoTable(f, indexRowdef, (serverMemory.request(necessaryRAM4fullTable, false)) ? kelondroEcoTable.tailCacheUsageAuto : kelondroEcoTable.tailCacheDenyUsage, EcoFSBufferSize);
+            return new kelondroEcoTable(f, indexRowdef, (serverMemory.request(necessaryRAM4fullTable, false)) ? kelondroEcoTable.tailCacheUsageAuto : kelondroEcoTable.tailCacheDenyUsage, EcoFSBufferSize, initialSpace);
         }
     }
     

@@ -109,6 +109,12 @@ public class kelondroFlexTable extends kelondroFlexWidthArray implements kelondr
 			index = new kelondroBytesIntMap(ki);
 			assert this.size() == index.size() : "content.size() = " + this.size() + ", index.size() = " + index.size();
 		}
+
+        // check consistency
+        ArrayList<Integer[]> doubles = index.removeDoubles();
+        if (doubles.size() > 0) {
+            System.out.println("DEBUG: WARNING - FlexTable " + newpath.toString() + " has " + doubles.size() + " doubles");
+        }
         
         // assign index to wrapper
         description = "stt=" + Long.toString(System.currentTimeMillis() - start) + ";";

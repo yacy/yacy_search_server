@@ -119,7 +119,7 @@ public class kelondroSplitTable implements kelondroIndex {
                 // this is a kelonodroFlex table
                 table = new kelondroCache(new kelondroFlexTable(path, maxf, preloadTime, rowdef, 0, resetOnFail));
             } else {
-                table = new kelondroEcoTable(f, rowdef, kelondroEcoTable.tailCacheDenyUsage, EcoFSBufferSize);
+                table = new kelondroEcoTable(f, rowdef, kelondroEcoTable.tailCacheDenyUsage, EcoFSBufferSize, 0);
             }
             tables.put(date, table);
         }
@@ -229,13 +229,13 @@ public class kelondroSplitTable implements kelondroIndex {
                     table = new kelondroFlexTable(path, tablename + "." + suffix, -1, rowdef, 0, true);
                 } else {
                     // open a eco table
-                    table = new kelondroEcoTable(f, rowdef, kelondroEcoTable.tailCacheDenyUsage, EcoFSBufferSize);
+                    table = new kelondroEcoTable(f, rowdef, kelondroEcoTable.tailCacheDenyUsage, EcoFSBufferSize, 0);
                 }
             } else {
                 // make new table
                 if (serverMemory.request(minimumRAM4Eco, true)) {
                     // enough memory for a ecoTable
-                    table = new kelondroEcoTable(f, rowdef, kelondroEcoTable.tailCacheDenyUsage, EcoFSBufferSize);
+                    table = new kelondroEcoTable(f, rowdef, kelondroEcoTable.tailCacheDenyUsage, EcoFSBufferSize, 0);
                 } else {
                     // use the flex table
                     table = new kelondroFlexTable(path, tablename + "." + suffix, -1, rowdef, 0, true);
@@ -273,7 +273,7 @@ public class kelondroSplitTable implements kelondroIndex {
             // make new table
             if (serverMemory.request(minimumRAM4Eco, true)) {
                 // enough memory for a ecoTable
-                table = new kelondroEcoTable(new File(path, tablename + "." + suffix), rowdef, kelondroEcoTable.tailCacheDenyUsage, EcoFSBufferSize);
+                table = new kelondroEcoTable(new File(path, tablename + "." + suffix), rowdef, kelondroEcoTable.tailCacheDenyUsage, EcoFSBufferSize, 0);
             } else {
                 // use the flex table
                 table = new kelondroFlexTable(path, tablename + "." + suffix, -1, rowdef, 0, true);

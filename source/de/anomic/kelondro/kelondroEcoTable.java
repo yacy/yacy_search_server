@@ -48,7 +48,6 @@ import de.anomic.server.serverMemory;
  * - the access index can be either completely in RAM (kelondroRAMIndex) or it is file-based (kelondroTree)
  * - the content cache can be either a complete RAM-based shadow of the File, or empty.
  * The content cache can also be deleted during run-time, if the available RAM gets too low.
- * 
  */
 
 public class kelondroEcoTable implements kelondroIndex {
@@ -66,7 +65,7 @@ public class kelondroEcoTable implements kelondroIndex {
     private kelondroRow rowdef, taildef;
     private int buffersize;
     
-    public kelondroEcoTable(File tablefile, kelondroRow rowdef, int useTailCache, int buffersize) {
+    public kelondroEcoTable(File tablefile, kelondroRow rowdef, int useTailCache, int buffersize, int initialSpace) {
         this.rowdef = rowdef;
         this.buffersize = buffersize;
         assert rowdef.primaryKeyIndex == 0;
@@ -95,27 +94,33 @@ public class kelondroEcoTable implements kelondroIndex {
             this.file = new kelondroBufferedEcoFS(new kelondroEcoFS(tablefile, rowdef.objectsize), this.buffersize);
         
             // initialize index and copy table
-            int records = file.size();
+            int records = Math.max(file.size(), initialSpace);
             long neededRAM4table = 10 * 1024 * 1024 + records * (rowdef.objectsize + 4) * 3 / 2;
             table = ((useTailCache == tailCacheForceUsage) ||
                      ((useTailCache == tailCacheUsageAuto) && (serverMemory.request(neededRAM4table, true)))) ?
-                    new kelondroRowSet(taildef, records + 1) : null;
-            index = new kelondroBytesIntMap(rowdef.primaryKeyLength, rowdef.objectOrder, records + 1);
-        
+                    new kelondroRowSet(taildef, records) : null;
+            index = new kelondroBytesIntMap(rowdef.primaryKeyLength, rowdef.objectOrder, records);
+            System.out.println("*** DEBUG: EcoTable " + tablefile.toString() + " has table copy " + ((table == null) ? "DISABLED" : "ENABLED"));
+
             // read all elements from the file into the copy table
             byte[] record = new byte[rowdef.objectsize];
             byte[] key = new byte[rowdef.primaryKeyLength];
-            for (int i = 0; i < records; i++) {
+            int fs = file.size();
+            for (int i = 0; i < fs; i++) {
                 // read entry
                 file.get(i, record, 0);
             
                 // write the key into the index table
                 System.arraycopy(record, 0, key, 0, rowdef.primaryKeyLength);
                 index.addi(key, i);
-                //index.puti(key, i);
             
                 // write the tail into the table
                 if (table != null) table.addUnique(taildef.newEntry(record, rowdef.primaryKeyLength, true));
+            }
+            // check consistency
+            ArrayList<Integer[]> doubles = index.removeDoubles();
+            if (doubles.size() > 0) {
+                System.out.println("DEBUG: WARNING - EcoTable " + tablefile + " has " + doubles.size() + " doubles");
             }
         } catch (FileNotFoundException e) {
             // should never happen
@@ -507,7 +512,7 @@ public class kelondroEcoTable implements kelondroIndex {
     public static kelondroIndex testTable(File f, String testentities, int testcase) throws IOException {
         if (f.exists()) f.delete();
         kelondroRow rowdef = new kelondroRow("byte[] a-4, byte[] b-4", kelondroNaturalOrder.naturalOrder, 0);
-        kelondroIndex tt = new kelondroEcoTable(f, rowdef, testcase, 100);
+        kelondroIndex tt = new kelondroEcoTable(f, rowdef, testcase, 100, 0);
         byte[] b;
         kelondroRow.Entry row = rowdef.newEntry();
         for (int i = 0; i < testentities.length(); i++) {

@@ -7,6 +7,7 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashSet;
+import java.util.Iterator;
 import java.util.Random;
 
 import javax.imageio.ImageIO;
@@ -93,17 +94,22 @@ public class dbtest {
     }
 
     public static abstract class STJob implements Runnable {
-        private final kelondroIndex table;
+        private final kelondroIndex table_test, table_reference;
 
         private final long source;
 
-        public STJob(final kelondroIndex aTable, final long aSource) {
-            this.table = aTable;
+        public STJob(final kelondroIndex table_test, final kelondroIndex table_reference, final long aSource) {
+            this.table_test = table_test;
+            this.table_reference = table_reference;
             this.source = aSource;
         }
 
-        public kelondroIndex getTable() {
-            return this.table;
+        public kelondroIndex getTable_test() {
+            return this.table_test;
+        }
+
+        public kelondroIndex getTable_reference() {
+            return this.table_reference;
         }
 
         public abstract void run();
@@ -114,15 +120,16 @@ public class dbtest {
     }
 
     public static final class WriteJob extends STJob {
-        public WriteJob(final kelondroIndex aTable, final long aSource) {
-            super(aTable, aSource);
+        public WriteJob(final kelondroIndex table_test, final kelondroIndex table_reference, final long aSource) {
+            super(table_test, table_reference, aSource);
         }
 
         public void run() {
             final STEntry entry = new STEntry(this.getSource());
             System.out.println("write:  " + serverLog.arrayList(entry.getKey(), 0, entry.getKey().length));
             try {
-                getTable().put(getTable().row().newEntry(new byte[][] { entry.getKey(), entry.getValue() , entry.getValue() }));
+                getTable_test().put(getTable_test().row().newEntry(new byte[][] { entry.getKey(), entry.getValue() , entry.getValue() }));
+                if (getTable_reference() != null) getTable_reference().put(getTable_test().row().newEntry(new byte[][] { entry.getKey(), entry.getValue() , entry.getValue() }));
             } catch (IOException e) {
                 System.err.println(e);
                 e.printStackTrace();
@@ -132,15 +139,16 @@ public class dbtest {
     }
 
     public static final class RemoveJob extends STJob {
-        public RemoveJob(final kelondroIndex aTable, final long aSource) {
-            super(aTable, aSource);
+        public RemoveJob(final kelondroIndex table_test, final kelondroIndex table_reference, final long aSource) {
+            super(table_test, table_reference, aSource);
         }
 
         public void run() {
             final STEntry entry = new STEntry(this.getSource());
             System.out.println("remove: " + serverLog.arrayList(entry.getKey(), 0, entry.getKey().length));
             try {
-                getTable().remove(entry.getKey(), false);
+                getTable_test().remove(entry.getKey(), false);
+                if (getTable_reference() != null) getTable_reference().remove(entry.getKey(), false);
             } catch (IOException e) {
                 System.err.println(e);
                 e.printStackTrace();
@@ -150,23 +158,34 @@ public class dbtest {
     }
 
     public static final class ReadJob extends STJob {
-        public ReadJob(final kelondroIndex aTable, final long aSource) {
-            super(aTable, aSource);
+        public ReadJob(final kelondroIndex table_test, final kelondroIndex table_reference, final long aSource) {
+            super(table_test, table_reference, aSource);
         }
 
         public void run() {
             final STEntry entry = new STEntry(this.getSource());
             try {
-                final kelondroRow.Entry entryBytes = getTable().get(entry.getKey());
+                kelondroRow.Entry entryBytes = getTable_test().get(entry.getKey());
                 if (entryBytes != null) {
-                    //System.out.println("ENTRY=" + entryBytes.getColString(1, null));
                     final STEntry dbEntry = new STEntry(entryBytes.getColBytes(0), entryBytes.getColBytes(1));
                     if (!dbEntry.isValid()) {
-                        System.out.println("INVALID: " + dbEntry);
+                        System.out.println("INVALID table_test: " + dbEntry);
                     } /* else {
-                        System.out.println("_VALID_: " + dbEntry);
+                        System.out.println("_VALID_ table_test: " + dbEntry);
                         getTable().remove(entry.getKey(), true);
                     } */
+                }
+                if (getTable_reference() != null) {
+                entryBytes = getTable_reference().get(entry.getKey());
+                if (entryBytes != null) {
+                    final STEntry dbEntry = new STEntry(entryBytes.getColBytes(0), entryBytes.getColBytes(1));
+                    if (!dbEntry.isValid()) {
+                        System.out.println("INVALID table_reference: " + dbEntry);
+                    } /* else {
+                        System.out.println("_VALID_ table_reference: " + dbEntry);
+                        getTable().remove(entry.getKey(), true);
+                    } */
+                }
                 }
             } catch (IOException e) {
                 System.err.println(e);
@@ -176,50 +195,114 @@ public class dbtest {
         }
     }
     
+    public static kelondroIndex selectTableType(String dbe, String tablename, kelondroRow testRow) throws Exception {
+        if (dbe.equals("kelondroRowSet")) {
+            return new kelondroRowSet(testRow, 0);
+        }
+        if (dbe.equals("kelondroTree")) {
+            File tablefile = new File(tablename + ".kelondro.db");
+            return new kelondroCache(new kelondroTree(tablefile, true, preload, testRow));
+        }
+        if (dbe.equals("kelondroFlexTable")) {
+            File tablepath = new File(tablename).getParentFile();
+            return new kelondroFlexTable(tablepath, new File(tablename).getName(), preload, testRow, 0, true);
+        }
+        if (dbe.equals("kelondroSplitTable")) {
+            File tablepath = new File(tablename).getParentFile();
+            return new kelondroSplitTable(tablepath, new File(tablename).getName(), preload, testRow, true);
+        }
+        if (dbe.equals("kelondroEcoTable")) {
+            return new kelondroEcoTable(new File(tablename), testRow, kelondroEcoTable.tailCacheForceUsage, 1000, 0);
+        }
+        if (dbe.equals("mysql")) {
+            return new kelondroSQLTable("mysql", testRow);
+        }
+        if (dbe.equals("pgsql")) {
+            return new kelondroSQLTable("pgsql", testRow);
+        }
+        return null;
+    }
+    
+    public static boolean checkEquivalence(kelondroIndex test, kelondroIndex reference) throws IOException {
+        if (reference == null) return true;
+        if (test.size() == reference.size()) {
+            System.out.println("* Testing equivalence of test table to reference table, " + test.size() + " entries");
+        } else  {
+            System.out.println("* Testing equivalence of test table to reference table: FAILED! the tables have different sizes: test.size() = " + test.size() + ", reference.size() = " + reference.size());
+            return false;
+        }
+        boolean eq = true;
+        kelondroRow.Entry test_entry, reference_entry;
+        
+        Iterator<kelondroRow.Entry> i = test.rows(true, null);
+        System.out.println("* Testing now by enumeration over test table");
+        long ts = System.currentTimeMillis();
+        while (i.hasNext()) {
+            test_entry = i.next();
+            reference_entry = reference.get(test_entry.getPrimaryKeyBytes());
+            if (!test_entry.equals(reference_entry)) {
+                System.out.println("* FAILED: test entry with key '" + new String(test_entry.getPrimaryKeyBytes()) + "' has no equivalent entry in reference");
+                eq = false;
+            }
+        }
+        
+        i = reference.rows(true, null);
+        System.out.println("* Testing now by enumeration over reference table");
+        long rs = System.currentTimeMillis();
+        while (i.hasNext()) {
+            reference_entry = i.next();
+            test_entry = test.get(reference_entry.getPrimaryKeyBytes());
+            if (!test_entry.equals(reference_entry)) {
+                System.out.println("* FAILED: reference entry with key '" + new String(test_entry.getPrimaryKeyBytes()) + "' has no equivalent entry in test");
+                eq = false;
+            }
+        }
+        
+        System.out.println("* finished checkEquivalence; test-enumeration = " + ((rs - ts) / 1000) + " seconds, reference-enumeration = "+ ((System.currentTimeMillis() - rs) / 1000) + " seconds");
+        if (eq) System.out.println("* SUCCESS! the tables are equal."); else System.out.println("* FAILED! the tables are not equal."); 
+        return eq;
+    }
+    
     public static void main(String[] args) {
         System.setProperty("java.awt.headless", "true");
         
-        String dbe = args[0];       // the database engine
-        String command = args[1];   // test command
-        String tablename = args[2]; // name of test-table
-        long startup = System.currentTimeMillis();
+        System.out.println("*** YaCy Database Test");
+        // print out command line
+        boolean assertionenabled = false;
+        assert assertionenabled = true;
+        if (assertionenabled) System.out.println("*** Asserts are enabled"); else System.out.println("*** HINT: YOU SHOULD ENABLE ASSERTS! (include -ea in start arguments");
+        Runtime runtime = Runtime.getRuntime();
+        long mb = (runtime.maxMemory() - runtime.totalMemory() + runtime.freeMemory()) / 1024 / 1024;
+        System.out.println("*** RAM = " + mb + " MB");
+        System.out.print(">java " +
+                ((assertionenabled) ? "-ea " : "") +
+                ((mb > 100) ? ("-Xmx" + (mb + 11) + "m ") : " ") +
+                "-classpath classes dbtest ");
+        for (int i = 0; i < args.length; i++) System.out.print(args[i] + " ");
+        System.out.println();
         
+        // read command options
+        String command        = args[0]; // test command
+        String dbe_test       = args[1]; // the database engine that shall be tested
+        String dbe_reference  = args[2]; // the reference database engine (may be null)
+        String tablename_test = args[3]; // name of test-table
+        if (dbe_reference.toLowerCase().equals("null")) dbe_reference = null;
+        String tablename_reference = (dbe_reference == null) ? null : (tablename_test + ".reference");
+        
+        // start test
+        long startup = System.currentTimeMillis();
         try {
-            kelondroIndex table = null;
             // create a memory profiler
-            memprofiler profiler = new memprofiler(1024, 320, 120, new File(tablename + ".profile.png"));
+            memprofiler profiler = new memprofiler(1024, 320, 120, new File(tablename_test + ".profile.png"));
             profiler.start();
             
             // create the database access
             kelondroRow testRow = new kelondroRow("byte[] key-" + keylength + ", byte[] dummy-" + keylength + ", value-" + valuelength, kelondroBase64Order.enhancedCoder, 0);
-            if (dbe.equals("kelondroRowSet")) {
-                table = new kelondroRowSet(testRow, 0);
-            }
-            if (dbe.equals("kelondroTree")) {
-                File tablefile = new File(tablename + ".kelondro.db");
-                table = new kelondroCache(new kelondroTree(tablefile, true, preload, testRow));
-            }
-            if (dbe.equals("kelondroFlexTable")) {
-                File tablepath = new File(tablename).getParentFile();
-                table = new kelondroFlexTable(tablepath, new File(tablename).getName(), preload, testRow, 0, true);
-            }
-            if (dbe.equals("kelondroFlexSplitTable")) {
-                File tablepath = new File(tablename).getParentFile();
-                table = new kelondroSplitTable(tablepath, new File(tablename).getName(), preload, testRow, true);
-            }
-            if (dbe.equals("kelondroEcoTable")) {
-                table = new kelondroEcoTable(new File(tablename), testRow, kelondroEcoTable.tailCacheDenyUsage /*kelondroEcoTable.tailCacheForceUsage*/, 100);
-            }
-            if (dbe.equals("mysql")) {
-                table = new kelondroSQLTable("mysql", testRow);
-            }
-            
-            if (dbe.equals("pgsql")) {
-                table = new kelondroSQLTable("pgsql", testRow);
-            }
+            kelondroIndex table_test = selectTableType(dbe_test, tablename_test, testRow);
+            kelondroIndex table_reference = (dbe_reference == null) ? null : selectTableType(dbe_reference, tablename_reference, testRow);
             
             long afterinit = System.currentTimeMillis();
-            System.out.println("Test for db-engine " + dbe +  " started to create file " + tablename + " with test " + command);
+            System.out.println("Test for db-engine " + dbe_test +  " started to create file " + tablename_test + " with test " + command);
             
             // execute command
             if (command.equals("create")) {
@@ -230,8 +313,9 @@ public class dbtest {
             if (command.equals("fill")) {
                 // fill database with random entries;
                 // args: <number-of-entries> <random-startpoint>
-                long count = Long.parseLong(args[3]);
-                long randomstart = Long.parseLong(args[4]);
+                // example: java -ea -Xmx200m fill kelondroEcoTable kelondroFlexTable filldbtest 50000 0 
+                long count = Long.parseLong(args[4]);
+                long randomstart = Long.parseLong(args[5]);
                 Random random = new Random(randomstart);
                 byte[] key;
                 kelondroProfile ioProfileAcc = new kelondroProfile();
@@ -239,11 +323,12 @@ public class dbtest {
                 kelondroProfile[] profiles;
                 for (int i = 0; i < count; i++) {
                     key = randomHash(random);
-                    table.put(table.row().newEntry(new byte[][]{key, key, dummyvalue2}));
+                    table_test.put(testRow.newEntry(new byte[][]{key, key, dummyvalue2}));
+                    if (table_reference != null) table_reference.put(testRow.newEntry(new byte[][]{key, key, dummyvalue2}));
                     if (i % 1000 == 0) {
                         System.out.println(i + " entries. ");
-                        if (table instanceof kelondroTree) {
-                            profiles = ((kelondroTree) table).profiles();
+                        if (table_test instanceof kelondroTree) {
+                            profiles = ((kelondroTree) table_test).profiles();
                             System.out.println("Cache Delta: " + kelondroProfile.delta(profiles[0], cacheProfileAcc).toString());
                             System.out.println("IO    Delta: " + kelondroProfile.delta(profiles[1],    ioProfileAcc).toString());
                             cacheProfileAcc = (kelondroProfile) profiles[0].clone();
@@ -253,58 +338,31 @@ public class dbtest {
                 }
             }
             
-            if (command.equals("benchfill")) {
-                // fill database with random entries;
-                // args: <number-of-entries> <random-startpoint>
-                long count = Long.parseLong(args[3]);
-                long time = System.currentTimeMillis();
-                long randomstart = Long.parseLong(args[4]);
-                Random random = new Random(randomstart);
-                byte[] key;
-                for (int i = 0; i < count; i++) {
-                    key = randomHash(random);
-                    table.put(table.row().newEntry(new byte[][]{key, key, dummyvalue2}));
-                    if (i % 10000 == 0) {
-                        System.out.println(System.currentTimeMillis() - time);
-                    }
-                }
-            }
-            
             if (command.equals("read")) {
                 // read the database and compare with random entries;
                 // args: <number-of-entries> <random-startpoint>
-                long count = Long.parseLong(args[3]);
-                long randomstart = Long.parseLong(args[4]);
+                long count = Long.parseLong(args[4]);
+                long randomstart = Long.parseLong(args[5]);
                 Random random = new Random(randomstart);
                 kelondroRow.Entry entry;
                 byte[] key;
                 for (int i = 0; i < count; i++) {
                     key = randomHash(random);
-                    entry = table.get(key);
-                    if (entry == null) System.out.println("missing value for entry " + new String(key)); else
-                    if (!(new String(entry.getColBytes(1)).equals(new String(key)))) System.out.println("wrong value for entry " + new String(key) + ": " + new String(entry.getColBytes(1)));
+                    entry = table_test.get(key);
+                    if (entry == null)
+                        System.out.println("missing value for entry " + new String(key) + " in test table");
+                    else
+                        if (!(new String(entry.getColBytes(1)).equals(new String(key)))) System.out.println("wrong value for entry " + new String(key) + ": " + new String(entry.getColBytes(1)) + " in test table");
+                    if (table_reference != null) {
+                        entry = table_reference.get(key);
+                        if (entry == null)
+                            System.out.println("missing value for entry " + new String(key) + " in reference table");
+                        else
+                            if (!(new String(entry.getColBytes(1)).equals(new String(key)))) System.out.println("wrong value for entry " + new String(key) + ": " + new String(entry.getColBytes(1)) + " in reference table");
+                    }
+                    
                     if (i % 1000 == 0) {
                         System.out.println(i + " entries processed so far.");
-                    }
-                }
-            }
-            
-            if (command.equals("benchread")) {
-                // read the database and compare with random entries;
-                // args: <number-of-entries> <random-startpoint>
-                long count = Long.parseLong(args[3]);
-                long time = System.currentTimeMillis();
-                long randomstart = Long.parseLong(args[4]);
-                Random random = new Random(randomstart);
-                kelondroRow.Entry entry;
-                byte[] key;
-                for (int i = 0; i < count; i++) {
-                    key = randomHash(random);
-                    entry = table.get(key);
-                    if (entry == null) System.out.println("missing value for entry " + new String(key)); else
-                    if (!(new String(entry.getColBytes(1)).equals(new String(key)))) System.out.println("wrong value for entry " + new String(key) + ": " + new String(entry.getColBytes(1)));
-                    if (i % 10000 == 0) {
-                        System.out.println(System.currentTimeMillis() - time);
                     }
                 }
             }
@@ -314,8 +372,8 @@ public class dbtest {
                 // this is repeated without termination; after each loop
                 // the current ram is printed out
                 // args: <number-of-entries> <random-startpoint>
-                long count = Long.parseLong(args[3]);
-                long randomstart = Long.parseLong(args[4]);
+                long count = Long.parseLong(args[4]);
+                long randomstart = Long.parseLong(args[5]);
                 byte[] key;
                 Random random;
                 long start, write, remove;
@@ -326,7 +384,7 @@ public class dbtest {
                     start = System.currentTimeMillis();
                     for (int i = 0; i < count; i++) {
                         key = randomHash(random);
-                        table.put(table.row().newEntry(new byte[][]{key, key, dummyvalue2}));
+                        table_test.put(table_test.row().newEntry(new byte[][]{key, key, dummyvalue2}));
                     }
                     write = System.currentTimeMillis() - start;
 
@@ -335,7 +393,7 @@ public class dbtest {
                     start = System.currentTimeMillis();
                     for (int i = 0; i < count; i++) {
                         key = randomHash(random);
-                        table.remove(key, false);
+                        table_test.remove(key, false);
                     }
                     remove = System.currentTimeMillis() - start;
                     
@@ -355,8 +413,8 @@ public class dbtest {
             
             if (command.equals("list")) {
                 kelondroCloneableIterator<kelondroRow.Entry> i = null;
-                if (table instanceof kelondroTree) i = ((kelondroTree) table).rows(true, null);
-                if (table instanceof kelondroSQLTable) i = ((kelondroSQLTable) table).rows(true, null);
+                if (table_test instanceof kelondroTree) i = ((kelondroTree) table_test).rows(true, null);
+                if (table_test instanceof kelondroSQLTable) i = ((kelondroSQLTable) table_test).rows(true, null);
                 kelondroRow.Entry row;
                 while (i.hasNext()) {
                     row = i.next();
@@ -368,7 +426,7 @@ public class dbtest {
             if (command.equals("stressThreaded")) {
                 // 
                 // args: <number-of-writes> <number-of-reads-per-write> <random-startpoint>
-                // example: kelondroFlexTable stressThreaded /Users/admin/dbtest 500 50 0
+                // example: java -ea  -classpath classes dbtest stressThreaded kelondroEcoTable kelondroFlexTable stressthreadedtest 500 50 0 
                 /* result with svn 4346
                    kelondroFlex:
                    removed: 70, size of jcontrol set: 354, size of kcontrol set: 354
@@ -379,9 +437,9 @@ public class dbtest {
                    Database size = 354 unique entries.
                    Execution time: open=1324, command=34032, close=1, total=35357
                  */
-                long writeCount = Long.parseLong(args[3]);
-                long readCount = Long.parseLong(args[4]);
-                long randomstart = Long.parseLong(args[5]);
+                long writeCount = Long.parseLong(args[4]);
+                long readCount = Long.parseLong(args[5]);
+                long randomstart = Long.parseLong(args[6]);
                 final Random random = new Random(randomstart);
                 long r;
                 Long R;
@@ -393,10 +451,10 @@ public class dbtest {
                     r = Math.abs(random.nextLong() % 1000);
                     jcontrol.add(new Long(r));
                     kcontrol.putb((int) r, "x".getBytes());
-                    serverInstantThread.oneTimeJob(new WriteJob(table, r), 0, 50);
+                    serverInstantThread.oneTimeJob(new WriteJob(table_test, table_reference, r), 0, 50);
                     if (random.nextLong() % 5 == 0) ra.add(new Long(r));
                     for (int j = 0; j < readCount; j++) {
-                        serverInstantThread.oneTimeJob(new ReadJob(table, random.nextLong() % writeCount), random.nextLong() % 1000, 20);
+                        serverInstantThread.oneTimeJob(new ReadJob(table_test, table_reference, random.nextLong() % writeCount), random.nextLong() % 1000, 20);
                     }
                     if ((ra.size() > 0) && (random.nextLong() % 7 == 0)) {
                         rc++;
@@ -405,7 +463,7 @@ public class dbtest {
                         jcontrol.remove(R);
                         kcontrol.removeb((int) R.longValue());
                         System.out.println("remove: " + R.longValue());
-                        serverInstantThread.oneTimeJob(new RemoveJob(table, ((Long) ra.remove(p)).longValue()), 0, 50);
+                        serverInstantThread.oneTimeJob(new RemoveJob(table_test, table_reference, ((Long) ra.remove(p)).longValue()), 0, 50);
                     }
                 }
                 System.out.println("removed: " + rc + ", size of jcontrol set: " + jcontrol.size() + ", size of kcontrol set: " + kcontrol.size());
@@ -419,9 +477,9 @@ public class dbtest {
             if (command.equals("stressSequential")) {
                 // 
                 // args: <number-of-writes> <number-of-reads> <random-startpoint>
-                long writeCount = Long.parseLong(args[3]);
-                long readCount = Long.parseLong(args[4]);
-                long randomstart = Long.parseLong(args[5]);
+                long writeCount = Long.parseLong(args[4]);
+                long readCount = Long.parseLong(args[5]);
+                long randomstart = Long.parseLong(args[6]);
                 Random random = new Random(randomstart);
                 long r;
                 Long R;
@@ -434,10 +492,10 @@ public class dbtest {
                     r = Math.abs(random.nextLong() % 1000);
                     jcontrol.add(new Long(r));
                     kcontrol.putb((int) r, "x".getBytes());
-                    new WriteJob(table, r).run();
+                    new WriteJob(table_test, table_reference, r).run();
                     if (random.nextLong() % 5 == 0) ra.add(new Long(r));
                     for (int j = 0; j < readCount; j++) {
-                        new ReadJob(table, random.nextLong() % writeCount).run();
+                        new ReadJob(table_test, table_reference, random.nextLong() % writeCount).run();
                     }
                     if ((ra.size() > 0) && (random.nextLong() % 7 == 0)) {
                         rc++;
@@ -445,7 +503,7 @@ public class dbtest {
                         R = (Long) ra.get(p);
                         jcontrol.remove(R);
                         kcontrol.removeb((int) R.longValue());
-                        new RemoveJob(table, ((Long) ra.remove(p)).longValue()).run();
+                        new RemoveJob(table_test, table_reference, ((Long) ra.remove(p)).longValue()).run();
                     }
                 }
                 try {Thread.sleep(1000);} catch (InterruptedException e) {}
@@ -453,15 +511,22 @@ public class dbtest {
             }
             
             long aftercommand = System.currentTimeMillis();
+            checkEquivalence(table_test, table_reference);
+            long afterequiv = System.currentTimeMillis();
             // final report
-            System.out.println("Database size = " + table.size() + " unique entries.");
+            System.out.println("Database size = " + table_test.size() + " unique entries.");
             
             // finally close the database/table
-            table.close();
+            table_test.close();
+            if (table_reference != null) table_reference.close();
             
             long afterclose = System.currentTimeMillis();
             
-            System.out.println("Execution time: open=" + (afterinit - startup) + ", command=" + (aftercommand - afterinit) + ", close=" + (afterclose - aftercommand) + ", total=" + (afterclose - startup));
+            System.out.println("Execution time: open=" + (afterinit - startup) +
+                    ", command=" + (aftercommand - afterinit) +
+                    ", equiv=" + (afterequiv - aftercommand) +
+                    ", close=" + (afterclose - afterequiv) +
+                    ", total=" + (afterclose - startup));
             profiler.terminate();
         } catch (Exception e) {
             e.printStackTrace();

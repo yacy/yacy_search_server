@@ -142,7 +142,7 @@ public class plasmaCrawlBalancer {
     
     private void openFileIndex() {
         cacheStacksPath.mkdirs();
-        urlFileIndex = new kelondroEcoTable(new File(cacheStacksPath, stackname + indexSuffix), plasmaCrawlEntry.rowdef, (fullram) ? kelondroEcoTable.tailCacheUsageAuto : kelondroEcoTable.tailCacheDenyUsage, EcoFSBufferSize);
+        urlFileIndex = new kelondroEcoTable(new File(cacheStacksPath, stackname + indexSuffix), plasmaCrawlEntry.rowdef, (fullram) ? kelondroEcoTable.tailCacheUsageAuto : kelondroEcoTable.tailCacheDenyUsage, EcoFSBufferSize, 0);
     }
     
     private void resetFileIndex() {
