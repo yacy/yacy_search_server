@@ -155,13 +155,13 @@ public class kelondroEcoTable implements kelondroIndex {
 
     private final Map<String, String> memoryStats() {
         // returns statistical data about this object
+        assert ((table == null) || (table.size() == index.size()));
         HashMap<String, String> map = new HashMap<String, String>();
-        map.put("tableIndexChunkSize", Integer.toString(index.row().objectsize));
-        map.put("tableIndexCount", Integer.toString(index.size()));
-        map.put("tableIndexMem", Integer.toString((int) (index.row().objectsize * index.size() * kelondroRowCollection.growfactor)));
-        map.put("tableTailChunkSize", (table == null) ? "0" : Integer.toString(table.row().objectsize));
-        map.put("tableTailCount", (table == null) ? "0" : Integer.toString(table.size()));
-        map.put("tableTailMem", (table == null) ? "0" : Integer.toString((int) (table.row().objectsize * table.size() * kelondroRowCollection.growfactor)));
+        map.put("tableSize", Integer.toString(index.size()));
+        map.put("tableKeyChunkSize", Integer.toString(index.row().objectsize));
+        map.put("tableKeyMem", Integer.toString((int) (index.row().objectsize * index.size() * kelondroRowCollection.growfactor)));
+        map.put("tableValueChunkSize", (table == null) ? "0" : Integer.toString(table.row().objectsize));
+        map.put("tableValueMem", (table == null) ? "0" : Integer.toString((int) (table.row().objectsize * table.size() * kelondroRowCollection.growfactor)));
         return map;
     }
     

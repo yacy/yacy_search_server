@@ -58,6 +58,7 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.net.MalformedURLException;
+import java.util.Date;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.LinkedList;
@@ -191,7 +192,7 @@ public final class plasmaCrawlLURL {
             return; // this did not need to be stored, but is updated
         }
 
-        urlIndexFile.put(entry.toRowEntry(), entry.loaddate());
+        urlIndexFile.put(entry.toRowEntry(), new Date() /*entry.loaddate()*/);
     }
 
     public synchronized indexURLEntry newEntry(String propStr) {

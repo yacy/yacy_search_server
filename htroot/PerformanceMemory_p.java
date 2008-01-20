@@ -141,20 +141,19 @@ public class PerformanceMemory_p {
         totalmem = 0;
         while (i.hasNext()) {
             filename = (String) i.next();
-            prop.put("EcoList_" + c + "_tableIndexPath", ((p = filename.indexOf("DATA")) < 0) ? filename : filename.substring(p));
             map = kelondroEcoTable.memoryStats(filename);
+            prop.put("EcoList_" + c + "_tableIndexPath", ((p = filename.indexOf("DATA")) < 0) ? filename : filename.substring(p));
+            prop.putNum("EcoList_" + c + "_tableSize", (String) map.get("tableSize"));
             
-            mem = Long.parseLong((String) map.get("tableIndexMem"));
+            mem = Long.parseLong((String) map.get("tableKeyMem"));
             totalmem += mem;
-            prop.put("EcoList_" + c + "_tableIndexMem", serverMemory.bytesToString(mem));
-            prop.put("EcoList_" + c + "_tableIndexChunkSize", map.get("tableIndexChunkSize"));
-            prop.putNum("EcoList_" + c + "_tableIndexCount", (String)map.get("tableIndexCount"));
+            prop.put("EcoList_" + c + "_tableKeyMem", serverMemory.bytesToString(mem));
+            prop.put("EcoList_" + c + "_tableKeyChunkSize", map.get("tableKeyChunkSize"));
             
-            mem = Long.parseLong((String) map.get("tableTailMem"));
+            mem = Long.parseLong((String) map.get("tableValueMem"));
             totalmem += mem;
-            prop.put("EcoList_" + c + "_tableTailMem", serverMemory.bytesToString(mem));
-            prop.put("EcoList_" + c + "_tableTailChunkSize", map.get("tableTailChunkSize"));
-            prop.putNum("EcoList_" + c + "_tableTailCount", (String)map.get("tableTailCount"));
+            prop.put("EcoList_" + c + "_tableValueMem", serverMemory.bytesToString(mem));
+            prop.put("EcoList_" + c + "_tableValueChunkSize", map.get("tableValueChunkSize"));
             
             c++;
         }

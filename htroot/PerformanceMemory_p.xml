@@ -27,12 +27,11 @@
 	#{EcoList}#
 		<entry>
 			<tableIndexPath>#[tableIndexPath]#</tableIndexPath>
-			<tableIndexChunkSize>#[tableIndexChunkSize]#</tableIndexChunkSize>
-			<tableIndexCount>#[tableIndexCount]#</tableIndexCount>
-			<tableIndexMem>#[tableIndexMem]#</tableIndexMem>
-            <tableTailChunkSize>#[tableTailChunkSize]#</tableTailChunkSize>
-            <tableTailCount>#[tableTailCount]#</tableTailCount>
-            <tableTailMem>#[tableTailMem]#</tableTailMem>
+            <tableCount>#[tableCount]#</tableCount>
+			<tableKeyChunkSize>#[tableKeyChunkSize]#</tableKeyChunkSize>
+			<tableKeyMem>#[tableKeyMem]#</tableKeyMem>
+            <tableValueChunkSize>#[tableValueChunkSize]#</tableValueChunkSize>
+            <tableValueMem>#[tableValueMem]#</tableValueMem>
 		</entry>
 	#{/EcoList}#
 	<EcoIndexTotalMem>#[EcoIndexTotalMem]#</EcoIndexTotalMem>
