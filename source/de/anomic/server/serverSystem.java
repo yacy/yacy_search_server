@@ -328,7 +328,7 @@ public final class serverSystem {
     public static void deployScript(File scriptFile, String theScript) throws IOException {
         serverFileUtils.write(theScript.getBytes(), scriptFile);
         try {
-            Runtime.getRuntime().exec("chmod 755 " + scriptFile.getAbsolutePath()).waitFor();
+            Runtime.getRuntime().exec("chmod 755 " + scriptFile.getAbsolutePath().replaceAll(" ", "\\ ")).waitFor();
         } catch (InterruptedException e) {
             throw new IOException(e.getMessage());
         }
@@ -336,11 +336,11 @@ public final class serverSystem {
     
     public static void execAsynchronous(File scriptFile) throws IOException {
         // runs a unix/linux script as separate thread
-        File starterFile = new File(scriptFile.getAbsolutePath() + ".starter.sh");
+        File starterFile = new File(scriptFile.getAbsolutePath().replaceAll(" ", "\\ ") + ".starter.sh");
         //deployScript(starterFile, "touch restart.starter.startet1");
-        deployScript(starterFile, "#!/bin/sh" + serverCore.LF_STRING + scriptFile.getAbsolutePath() + " &" + serverCore.LF_STRING);
+        deployScript(starterFile, "#!/bin/sh" + serverCore.LF_STRING + scriptFile.getAbsolutePath().replaceAll(" ", "\\ ") + " &" + serverCore.LF_STRING);
         try {
-            Runtime.getRuntime().exec(starterFile.getAbsolutePath()).waitFor();
+            Runtime.getRuntime().exec(starterFile.getAbsolutePath().replaceAll(" ", "\\ ")).waitFor();
         } catch (InterruptedException e) {
             throw new IOException(e.getMessage());
         }
