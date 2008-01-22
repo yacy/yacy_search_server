@@ -73,6 +73,7 @@ import de.anomic.kelondro.kelondroBitfield;
 import de.anomic.kelondro.kelondroMSetTools;
 import de.anomic.server.serverCodings;
 import de.anomic.yacy.yacySeedDB;
+import de.anomic.yacy.yacyURL;
 
 public final class plasmaCondenser {
 
@@ -130,9 +131,9 @@ public final class plasmaCondenser {
         
         //System.out.println("DEBUG: condensing " + document.getMainLongTitle() + ", indexText=" + Boolean.toString(indexText) + ", indexMedia=" + Boolean.toString(indexMedia));
 
-        insertTextToWords(document.getLocation().toNormalform(false, true), 0, indexRWIEntry.flag_app_url, RESULT_FLAGS);
+        insertTextToWords(document.dc_source().toNormalform(false, true), 0, indexRWIEntry.flag_app_url, RESULT_FLAGS);
         
-        Map.Entry entry;
+        Map.Entry<yacyURL, String> entry;
         if (indexText) {
             createCondensement(document.getText(), document.getCharset());        
             // the phrase counter:
@@ -147,9 +148,9 @@ public final class plasmaCondenser {
             // phrase  99 is taken from the media Link url and anchor description
             // phrase 100 and above are lines from the text
       
-            insertTextToWords(document.getTitle(),    1, indexRWIEntry.flag_app_descr, RESULT_FLAGS);
-            insertTextToWords(document.getAbstract(), 3, indexRWIEntry.flag_app_descr, RESULT_FLAGS);
-            insertTextToWords(document.getAuthor(),   4, indexRWIEntry.flag_app_descr, RESULT_FLAGS);
+            insertTextToWords(document.dc_title(),    1, indexRWIEntry.flag_app_descr, RESULT_FLAGS);
+            insertTextToWords(document.dc_description(), 3, indexRWIEntry.flag_app_descr, RESULT_FLAGS);
+            insertTextToWords(document.dc_creator(),   4, indexRWIEntry.flag_app_descr, RESULT_FLAGS);
             // missing: tags!
             String[] titles = document.getSectionTitles();
             for (int i = 0; i < titles.length; i++) {
@@ -157,10 +158,10 @@ public final class plasmaCondenser {
             }
             
             // anchors
-            Iterator i = document.getAnchors().entrySet().iterator();
+            Iterator<Map.Entry<yacyURL, String>> i = document.getAnchors().entrySet().iterator();
             while (i.hasNext()) {
-                entry = (Map.Entry) i.next();
-                insertTextToWords((String) entry.getKey(), 98, indexRWIEntry.flag_app_reference, RESULT_FLAGS);
+                entry = i.next();
+                insertTextToWords(entry.getKey().toNormalform(false, false), 98, indexRWIEntry.flag_app_reference, RESULT_FLAGS);
                 insertTextToWords((String) entry.getValue(), 98, indexRWIEntry.flag_app_reference, RESULT_FLAGS);
             }
         } else {
@@ -172,45 +173,45 @@ public final class plasmaCondenser {
         
         if (indexMedia) {
             // audio
-            Iterator i = document.getAudiolinks().entrySet().iterator();
+            Iterator<Map.Entry<yacyURL, String>> i = document.getAudiolinks().entrySet().iterator();
             while (i.hasNext()) {
-                entry = (Map.Entry) i.next();
-                insertTextToWords((String) entry.getKey(), 99, flag_cat_hasaudio, RESULT_FLAGS);
+                entry = i.next();
+                insertTextToWords(entry.getKey().toNormalform(false, false), 99, flag_cat_hasaudio, RESULT_FLAGS);
                 insertTextToWords((String) entry.getValue(), 99, flag_cat_hasaudio, RESULT_FLAGS);
             }
 
             // video
             i = document.getVideolinks().entrySet().iterator();
             while (i.hasNext()) {
-                entry = (Map.Entry) i.next();
-                insertTextToWords((String) entry.getKey(), 99, flag_cat_hasvideo, RESULT_FLAGS);
+                entry = i.next();
+                insertTextToWords(entry.getKey().toNormalform(false, false), 99, flag_cat_hasvideo, RESULT_FLAGS);
                 insertTextToWords((String) entry.getValue(), 99, flag_cat_hasvideo, RESULT_FLAGS);
             }
 
             // applications
             i = document.getApplinks().entrySet().iterator();
             while (i.hasNext()) {
-                entry = (Map.Entry) i.next();
-                insertTextToWords((String) entry.getKey(), 99, flag_cat_hasapp, RESULT_FLAGS);
+                entry = i.next();
+                insertTextToWords(entry.getKey().toNormalform(false, false), 99, flag_cat_hasapp, RESULT_FLAGS);
                 insertTextToWords((String) entry.getValue(), 99, flag_cat_hasapp, RESULT_FLAGS);
             }
 
             // images
-            i = document.getImages().iterator();
+            Iterator<htmlFilterImageEntry> j = document.getImages().iterator();
             htmlFilterImageEntry ientry;
-            while (i.hasNext()) {
-                ientry = (htmlFilterImageEntry) i.next();
-                insertTextToWords(ientry.url().toNormalform(false, true), 99, flag_cat_hasimage, RESULT_FLAGS);
+            while (j.hasNext()) {
+                ientry = j.next();
+                insertTextToWords(ientry.url().toNormalform(false, false), 99, flag_cat_hasimage, RESULT_FLAGS);
                 insertTextToWords(ientry.alt(), 99, flag_cat_hasimage, RESULT_FLAGS);
             }
         
             // finally check all words for missing flag entry
-            Iterator<Map.Entry<String, wordStatProp>> j = words.entrySet().iterator();
+            Iterator<Map.Entry<String, wordStatProp>> k = words.entrySet().iterator();
             wordStatProp wprop;
             Map.Entry<String, wordStatProp> we;
-            while (j.hasNext()) {
-                we = j.next();
-                wprop = (wordStatProp) we.getValue();
+            while (k.hasNext()) {
+                we = k.next();
+                wprop = we.getValue();
                 if (wprop.flags == null) {
                     wprop.flags = (kelondroBitfield) RESULT_FLAGS.clone();
                     words.put(we.getKey(), wprop);
@@ -305,19 +306,19 @@ public final class plasmaCondenser {
     public static class wordStatProp {
         // object carries statistics for words and sentences
         
-        public int              count;       // number of occurrences
-        public int              posInText;   // unique handle, is initialized with word position (excluding double occurring words)
-        public int              posInPhrase; // position of word in phrase
-        public int              numOfPhrase; // number of phrase. 'normal' phrases begin with number 100
-        public HashSet          hash;        // a set of handles to all sentences where this word appears
-        public kelondroBitfield flags;       // the flag bits for each word
+        public  int              count;       // number of occurrences
+        public  int              posInText;   // unique handle, is initialized with word position (excluding double occurring words)
+        public  int              posInPhrase; // position of word in phrase
+        public  int              numOfPhrase; // number of phrase. 'normal' phrases begin with number 100
+        private HashSet<Integer> hash;        // a set of handles to all sentences where this word appears
+        public  kelondroBitfield flags;       // the flag bits for each word
 
         public wordStatProp(int handle, int pip, int nop) {
             this.count = 1;
             this.posInText = handle;
             this.posInPhrase = pip;
             this.numOfPhrase = nop;
-            this.hash = new HashSet();
+            this.hash = new HashSet<Integer>();
             this.flags = null;
         }
 
@@ -326,7 +327,7 @@ public final class plasmaCondenser {
         }
 
         public void check(int i) {
-            hash.add(Integer.toString(i));
+            hash.add(new Integer(i));
         }
 
     }
@@ -334,14 +335,14 @@ public final class plasmaCondenser {
     public static class phraseStatProp {
         // object carries statistics for words and sentences
         
-        public int count;       // number of occurrences
-        public int handle;      // unique handle, is initialized with sentence counter
-        public HashSet hash;    //
+        public  int count;       // number of occurrences
+        public  int handle;      // unique handle, is initialized with sentence counter
+        private HashSet<Integer> hash;    //
 
         public phraseStatProp(int handle) {
             this.count = 1;
             this.handle = handle;
-            this.hash = new HashSet();
+            this.hash = new HashSet<Integer>();
         }
 
         public void inc() {
@@ -349,7 +350,7 @@ public final class plasmaCondenser {
         }
 
         public void check(int i) {
-            hash.add(Integer.toString(i));
+            hash.add(new Integer(i));
         }
 
     }
@@ -362,7 +363,7 @@ public final class plasmaCondenser {
     }
 
     private void createCondensement(InputStream is, String charset) throws UnsupportedEncodingException {
-        HashSet currsentwords = new HashSet();
+        HashSet<String> currsentwords = new HashSet<String>();
         StringBuffer sentence = new StringBuffer(100);
         String word = "";
         String k;
@@ -376,7 +377,6 @@ public final class plasmaCondenser {
         int allsentencecounter = 0;
         int idx;
         int wordInSentenceCounter = 1;
-        Iterator it, it1;
         boolean comb_indexof = false, last_last = false, last_index = false;
         RandomAccessFile fa;
         final boolean dumpWords = false;
@@ -405,6 +405,7 @@ public final class plasmaCondenser {
             
             // distinguish punctuation and words
             wordlen = word.length();
+            Iterator<String> it;
             if ((wordlen == 1) && (htmlFilterContentScraper.punctuation(word.charAt(0)))) {
                 // store sentence
                 if (sentence.length() > 0) {
@@ -493,9 +494,9 @@ public final class plasmaCondenser {
         String[] s;
         int wc;
         Object o;
-        it = sentences.keySet().iterator();
-        while (it.hasNext()) {
-            o = it.next();
+        Iterator<StringBuffer> sit = sentences.keySet().iterator();
+        while (sit.hasNext()) {
+            o = sit.next();
             if (o != null) {
                 sentence = (StringBuffer) o;
                 wc = (sentence.length() - 1) / numlength;
@@ -511,15 +512,15 @@ public final class plasmaCondenser {
             }
         }
 
-        Map.Entry entry;
+        Map.Entry<String, wordStatProp> entry;
         // we search for similar words and reorganize the corresponding sentences
         // a word is similar, if a shortened version is equal
-        it = words.entrySet().iterator(); // enumerates the keys in descending order
-        wordsearch: while (it.hasNext()) {
-            entry = (Map.Entry) it.next();
-            word = (String) entry.getKey();
+        Iterator<Map.Entry<String, wordStatProp>> wi = words.entrySet().iterator(); // enumerates the keys in descending order
+        wordsearch: while (wi.hasNext()) {
+            entry = wi.next();
+            word = entry.getKey();
             wordlen = word.length();
-            wsp = (wordStatProp) entry.getValue();
+            wsp = entry.getValue();
             for (int i = wordcut; i > 0; i--) {
                 if (wordlen > i) {
                     k = word.substring(0, wordlen - i);
@@ -528,9 +529,9 @@ public final class plasmaCondenser {
                         // corresponding links
                         // in sentences that use this word
                         wsp1 = (wordStatProp) words.get(k);
-                        it1 = wsp.hash.iterator(); // we iterate over all sentences that refer to this word
+                        Iterator<Integer> it1 = wsp.hash.iterator(); // we iterate over all sentences that refer to this word
                         while (it1.hasNext()) {
-                            idx = Integer.parseInt((String) it1.next()); // number of a sentence
+                            idx = it1.next().intValue(); // number of a sentence
                             s = (String[]) orderedSentences[idx];
                             for (int j = 2; j < s.length; j++) {
                                 if (s[j].equals(intString(wsp.posInText, numlength)))
@@ -542,7 +543,7 @@ public final class plasmaCondenser {
                         wsp1.count = wsp1.count + wsp.count;
                         words.put(k, wsp1);
                         // remove current word
-                        it.remove();
+                        wi.remove();
                         continue wordsearch;
                     }
                 }
@@ -550,8 +551,8 @@ public final class plasmaCondenser {
         }
 
         // depending on the orderedSentences structure, we rebuild the sentence
-        // HashMap to eliminate double occuring sentences
-        sentences = new HashMap();
+        // HashMap to eliminate double occurring sentences
+        sentences = new HashMap<StringBuffer, phraseStatProp>();
         int le;
         for (int i = 0; i < orderedSentences.length; i++) {
             le = ((String[]) orderedSentences[i]).length;
@@ -560,7 +561,7 @@ public final class plasmaCondenser {
                 sentence.append(((String[]) orderedSentences[i])[j]);
             if (sentences.containsKey(sentence)) {
                 // add sentence counter to counter of found sentence
-                psp = (phraseStatProp) sentences.get(sentence);
+                psp = sentences.get(sentence);
                 psp.count = psp.count + Integer.parseInt(((String[]) orderedSentences[i])[0]);
                 sentences.put(sentence, psp);
                 // System.out.println("Found double occurring sentence " + i + "
@@ -596,14 +597,14 @@ public final class plasmaCondenser {
         // this structure is only needed to reconstruct the text
         String word;
         wordStatProp wsp;
-        Map.Entry entry;
-        Iterator it;
+        Map.Entry<String, wordStatProp> entry;
+        Iterator<Map.Entry<String, wordStatProp>> it;
         String[] orderedWords = new String[words.size() + 99]; // uuiiii, the '99' is only a quick hack...
         it = words.entrySet().iterator(); // enumerates the keys in ascending order
         while (it.hasNext()) {
-            entry = (Map.Entry) it.next();
-            word = (String) entry.getKey();
-            wsp = (wordStatProp) entry.getValue();
+            entry = it.next();
+            word = entry.getKey();
+            wsp = entry.getValue();
             orderedWords[wsp.posInText] = word;
         }
 
@@ -632,14 +633,14 @@ public final class plasmaCondenser {
         // we reconstruct the sentence hashtable again and create by-handle ordered entries
         // this structure is needed to present the strings in the right order in a printout
         int wc;
-        Iterator it;
         phraseStatProp psp;
         String[] s;
         StringBuffer sentence;
         Object[] orderedSentences = new Object[sentences.size()];
-        for (int i = 0; i < sentences.size(); i++)
+        for (int i = 0; i < sentences.size(); i++) {
             orderedSentences[i] = null; // this array must be initialized
-        it = sentences.keySet().iterator();
+        }
+        Iterator<StringBuffer> it = sentences.keySet().iterator();
         while (it.hasNext()) {
             sentence = (StringBuffer) it.next();
             wc = (sentence.length() - 1) / numlength;
@@ -717,9 +718,9 @@ public final class plasmaCondenser {
 
     }
 
-    private static class unsievedWordsEnum implements Enumeration {
+    private static class unsievedWordsEnum implements Enumeration<StringBuffer> {
         // returns an enumeration of StringBuffer Objects
-        Object buffer = null;
+        StringBuffer buffer = null;
         sentencesFromInputStreamEnum e;
         StringBuffer s;
 
@@ -770,8 +771,8 @@ public final class plasmaCondenser {
             return buffer != null;
         }
 
-        public Object nextElement() {
-            Object r = buffer;
+        public StringBuffer nextElement() {
+            StringBuffer r = buffer;
             buffer = nextElement0();
             return r;
         }

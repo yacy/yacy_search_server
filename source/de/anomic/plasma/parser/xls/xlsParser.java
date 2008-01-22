@@ -162,7 +162,7 @@ public class xlsParser extends AbstractParser implements Parser, HSSFListener {
         }
     }
     
-    public Hashtable getSupportedMimeTypes() {
+    public Hashtable<String, String> getSupportedMimeTypes() {
         return SUPPORTED_MIME_TYPES;
     }
 

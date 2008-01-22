@@ -55,6 +55,7 @@ import de.anomic.http.httpRemoteProxyConfig;
 import de.anomic.http.httpc;
 import de.anomic.index.indexContainer;
 import de.anomic.index.indexRWIEntry;
+import de.anomic.index.indexRWIRowEntry;
 import de.anomic.index.indexURLEntry;
 import de.anomic.kelondro.kelondroBase64Order;
 import de.anomic.kelondro.kelondroBitfield;
@@ -575,19 +576,19 @@ public final class yacyClient {
         
 		// read index abstract
 		if (abstractCache != null) {
-			Iterator i = result.entrySet().iterator();
-			Map.Entry entry;
-			TreeMap singleAbstract;
+			Iterator<Map.Entry<String, String>> i = result.entrySet().iterator();
+			Map.Entry<String, String> entry;
+			TreeMap<String, String> singleAbstract;
 			String wordhash;
 			serverByteBuffer ci;
 			while (i.hasNext()) {
-				entry = (Map.Entry) i.next();
-				if (((String) entry.getKey()).startsWith("indexabstract.")) {
-					wordhash = ((String) entry.getKey()).substring(14);
+				entry = i.next();
+				if (entry.getKey().startsWith("indexabstract.")) {
+					wordhash = entry.getKey().substring(14);
 					synchronized (abstractCache) {
 						singleAbstract = (TreeMap<String, String>) abstractCache.get(wordhash); // a mapping from url-hashes to a string of peer-hashes
-						if (singleAbstract == null) singleAbstract = new TreeMap();
-						ci = new serverByteBuffer(((String) entry.getValue()).getBytes());
+						if (singleAbstract == null) singleAbstract = new TreeMap<String, String>();
+						ci = new serverByteBuffer(entry.getValue().getBytes());
 						//System.out.println("DEBUG-ABSTRACTFETCH: for word hash " + wordhash + " received " + ci.toString());
 						indexContainer.decompressIndex(singleAbstract, ci, target.hash);
 						abstractCache.put(wordhash, singleAbstract);
@@ -621,7 +622,7 @@ public final class yacyClient {
 		return urls;
 	}
 
-    public static HashMap permissionMessage(String targetHash) {
+    public static HashMap<String, String> permissionMessage(String targetHash) {
         // ask for allowed message size and attachement size
         // if this replies null, the peer does not answer
         if (yacyCore.seedDB == null || yacyCore.seedDB.mySeed() == null) { return null; }
@@ -651,7 +652,7 @@ public final class yacyClient {
         }
     }
 
-    public static HashMap postMessage(String targetHash, String subject, byte[] message) {
+    public static HashMap<String, String> postMessage(String targetHash, String subject, byte[] message) {
         // this post a message to the remote message board
 
         // prepare request
@@ -699,7 +700,7 @@ public final class yacyClient {
         return address;
     }
     
-    public static HashMap transferPermission(String targetAddress, long filesize, String filename) {
+    public static HashMap<String, String> transferPermission(String targetAddress, long filesize, String filename) {
 
         // prepare request
         final serverObjects post = yacyNetwork.basicRequestPost(plasmaSwitchboard.getSwitchboard(), null);
@@ -731,7 +732,7 @@ public final class yacyClient {
         }
     }
 
-    public static HashMap transferStore(String targetAddress, String access, String filename, byte[] file) {
+    public static HashMap<String, String> transferStore(String targetAddress, String access, String filename, byte[] file) {
         
         // prepare request
         final serverObjects post = yacyNetwork.basicRequestPost(plasmaSwitchboard.getSwitchboard(), null);
@@ -741,7 +742,7 @@ public final class yacyClient {
         post.put("filesize", Long.toString(file.length));
         post.put("md5", serverCodings.encodeMD5Hex(file));
         post.put("access", access);
-        HashMap files = new HashMap();
+        HashMap<String, byte[]> files = new HashMap<String, byte[]>();
         files.put("filename", file);
         
         // send request
@@ -766,7 +767,7 @@ public final class yacyClient {
     }
     
     public static String transfer(String targetAddress, String filename, byte[] file) {
-        HashMap phase1 = transferPermission(targetAddress, file.length, filename);
+        HashMap<String, String> phase1 = transferPermission(targetAddress, file.length, filename);
         if (phase1 == null) return "no connection to remote address " + targetAddress + "; phase 1";
         String access = (String) phase1.get("access");
         String nextaddress = (String) phase1.get("address");
@@ -778,7 +779,7 @@ public final class yacyClient {
         if (!(response.equals("ok"))) return "remote peer rejected transfer: " + response;
         String accesscode = serverCodings.encodeMD5Hex(kelondroBase64Order.standardCoder.encodeString(access));
         if (protocol.equals("http")) {
-            HashMap phase2 = transferStore(nextaddress, accesscode, filename, file);
+            HashMap<String, String> phase2 = transferStore(nextaddress, accesscode, filename, file);
             if (phase2 == null) return "no connection to remote address " + targetAddress + "; phase 2";
             response = (String) phase2.get("response");
             if (response == null) return "wrong return values from other peer; phase 2";
@@ -848,14 +849,14 @@ public final class yacyClient {
         }
     }
 
-    public static HashMap transferIndex(yacySeed targetSeed, indexContainer[] indexes, HashMap urlCache, boolean gzipBody, int timeout) {
+    public static HashMap<String, Object> transferIndex(yacySeed targetSeed, indexContainer[] indexes, HashMap<String, indexURLEntry> urlCache, boolean gzipBody, int timeout) {
         
-        HashMap resultObj = new HashMap();
+        HashMap<String, Object> resultObj = new HashMap<String, Object>();
         int payloadSize = 0;
         try {
             
             // check if we got all necessary urls in the urlCache (only for debugging)
-            Iterator eenum;
+            Iterator<indexRWIRowEntry> eenum;
             indexRWIEntry entry;
             for (int i = 0; i < indexes.length; i++) {
                 eenum = indexes[i].entries();
@@ -879,13 +880,13 @@ public final class yacyClient {
             
             String result = (String) in.get("result");
             if (result == null) { 
-                resultObj.put("result","no_result_1"); 
+                resultObj.put("result", "no_result_1"); 
                 return resultObj;
             }
             if (!(result.equals("ok"))) {
                 targetSeed.setFlagAcceptRemoteIndex(false);
                 yacyCore.seedDB.update(targetSeed.hash, targetSeed);
-                resultObj.put("result",result);
+                resultObj.put("result", result);
                 return resultObj;
             }
             
@@ -938,7 +939,7 @@ public final class yacyClient {
         }
     }
 
-    private static HashMap transferRWI(yacySeed targetSeed, indexContainer[] indexes, boolean gzipBody, int timeout) {
+    private static HashMap<String, String> transferRWI(yacySeed targetSeed, indexContainer[] indexes, boolean gzipBody, int timeout) {
         final String address = targetSeed.getPublicAddress();
         if (address == null) { return null; }
 
@@ -953,7 +954,7 @@ public final class yacyClient {
         
         int indexcount = 0;
         final StringBuffer entrypost = new StringBuffer(indexes.length*73);
-        Iterator eenum;
+        Iterator<indexRWIRowEntry> eenum;
         indexRWIEntry entry;
         for (int i = 0; i < indexes.length; i++) {
             eenum = indexes[i].entries();
@@ -968,7 +969,7 @@ public final class yacyClient {
 
         if (indexcount == 0) {
             // nothing to do but everything ok
-            final HashMap result = new HashMap(2);
+            final HashMap<String, String> result = new HashMap<String, String>(2);
             result.put("result", "ok");
             result.put("unknownURL", "");
             return result;

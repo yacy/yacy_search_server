@@ -91,7 +91,7 @@ public class odtParser extends AbstractParser implements Parser {
         this.parserName = "OASIS OpenDocument V2 Text Document Parser"; 
     }
     
-    public Hashtable getSupportedMimeTypes() {
+    public Hashtable<String, String> getSupportedMimeTypes() {
         return SUPPORTED_MIME_TYPES;
     }
     
@@ -108,7 +108,7 @@ public class odtParser extends AbstractParser implements Parser {
             
             // opening the file as zip file
             ZipFile zipFile= new ZipFile(dest);
-            Enumeration zipEnum = zipFile.entries();
+            Enumeration<? extends ZipEntry> zipEnum = zipFile.entries();
             
             // looping through all containing files
             while (zipEnum.hasMoreElements()) {

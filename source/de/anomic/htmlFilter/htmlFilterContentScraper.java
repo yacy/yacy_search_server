@@ -100,12 +100,12 @@ public class htmlFilterContentScraper extends htmlFilterAbstractScraper implemen
     }
 
     // class variables: collectors for links
-    private HashMap<String, String> anchors;
+    private HashMap<yacyURL, String> anchors;
     private TreeSet<htmlFilterImageEntry> images; // String(absolute url)/ImageEntry relation
     private HashMap<String, String> metas;
     private String title;
     //private String headline;
-    private List[] headlines;
+    private List<String>[] headlines;
     private serverCharBuffer content;
     private EventListenerList htmlFilterEventListeners = new EventListenerList();
     
@@ -119,12 +119,13 @@ public class htmlFilterContentScraper extends htmlFilterAbstractScraper implemen
      */
     private yacyURL root;
 
+    @SuppressWarnings("unchecked")
     public htmlFilterContentScraper(yacyURL root) {
         // the root value here will not be used to load the resource.
         // it is only the reference for relative links
         super(linkTags0, linkTags1);
         this.root = root;
-        this.anchors = new HashMap<String, String>();
+        this.anchors = new HashMap<yacyURL, String>();
         this.images = new TreeSet<htmlFilterImageEntry>();
         this.metas = new HashMap<String, String>();
         this.title = "";
@@ -159,11 +160,11 @@ public class htmlFilterContentScraper extends htmlFilterAbstractScraper implemen
         return normalizedURL.toLowerCase().split(splitrex); // word components of the url
     }
     
-    private String absolutePath(String relativePath) {
+    private yacyURL absolutePath(String relativePath) {
         try {
-            return yacyURL.newURL(root, relativePath).toNormalform(false, true);
+            return yacyURL.newURL(root, relativePath);
         } catch (Exception e) {
-            return "";
+            return null;
         }
     }
 
@@ -174,11 +175,9 @@ public class htmlFilterContentScraper extends htmlFilterAbstractScraper implemen
                 width = Integer.parseInt(tagopts.getProperty("width", "-1"));
                 height = Integer.parseInt(tagopts.getProperty("height", "-1"));
             } catch (NumberFormatException e) {}
-            try {
-                yacyURL url = new yacyURL(absolutePath(tagopts.getProperty("src", "")), null);
-                htmlFilterImageEntry ie = new htmlFilterImageEntry(url, tagopts.getProperty("alt",""), width, height);
-                images.add(ie);
-            } catch (MalformedURLException e) {}
+            yacyURL url = absolutePath(tagopts.getProperty("src", ""));
+            htmlFilterImageEntry ie = new htmlFilterImageEntry(url, tagopts.getProperty("alt",""), width, height);
+            images.add(ie);
         }
         if (tagname.equalsIgnoreCase("base")) try {
             root = new yacyURL(tagopts.getProperty("href", ""), null);
@@ -204,10 +203,7 @@ public class htmlFilterContentScraper extends htmlFilterAbstractScraper implemen
             if (href.length() > 0) anchors.put(absolutePath(href), areatitle);
         }
         if (tagname.equalsIgnoreCase("link")) {
-            yacyURL newLink = null;
-            try {
-                newLink = new yacyURL(absolutePath(tagopts.getProperty("href", "")), null);
-            } catch (MalformedURLException e) {}
+            yacyURL newLink = absolutePath(tagopts.getProperty("href", ""));
 
             if (newLink != null) {
                 String type = tagopts.getProperty("rel", "");
@@ -218,7 +214,7 @@ public class htmlFilterContentScraper extends htmlFilterAbstractScraper implemen
                     images.add(ie);    
                     this.favicon = newLink;
                 } else if (!type.equalsIgnoreCase("stylesheet") && !type.equalsIgnoreCase("alternate stylesheet")) {
-                    anchors.put(newLink.toString(), linktitle);                    
+                    anchors.put(newLink, linktitle);
                 }
             }
         }
@@ -346,7 +342,7 @@ public class htmlFilterContentScraper extends htmlFilterAbstractScraper implemen
         }
     }
 
-    public Map<String, String> getAnchors() {
+    public Map<yacyURL, String> getAnchors() {
         // returns a url (String) / name (String) relation
         return anchors;
     }
@@ -367,31 +363,44 @@ public class htmlFilterContentScraper extends htmlFilterAbstractScraper implemen
         return this.favicon;
     }
 
+    /*
+    DC in html example:
+    <meta name="DC.title" lang="en" content="Expressing Dublin Core in HTML/XHTML meta and link elements" />
+    <meta name="DC.creator" content="Andy Powell, UKOLN, University of Bath" />
+    <meta name="DC.identifier" scheme="DCTERMS.URI" content="http://dublincore.org/documents/dcq-html/" />
+    <meta name="DC.format" scheme="DCTERMS.IMT" content="text/html" />
+    <meta name="DC.type" scheme="DCTERMS.DCMIType" content="Text" />
+    */
+    
     public String getDescription() {
-        String s = (String) metas.get("description");
+        String s = metas.get("description");
+        if (s == null) s = metas.get("DC.description");
         if (s == null) return ""; else return s;
     }
     
     public String getContentType() {
-        String s = (String) metas.get("content-type");
+        String s = metas.get("content-type");
         if (s == null) return ""; else return s;
     }
     
     public String getAuthor() {
-        String s = (String) metas.get("author");
-        if (s == null) s = (String) metas.get("copyright");
+        String s = metas.get("author");
+        if (s == null) s = metas.get("copyright");
+        if (s == null) s = metas.get("DC.creator");
         if (s == null) return "";
         return s;
     }
     
     public String[] getContentLanguages() {
-        String s = (String) metas.get("content-language");
+        String s = metas.get("content-language");
+        if (s == null) s = metas.get("DC.language");
         if (s == null) s = "";
         return s.split(" |,");
     }
     
     public String[] getKeywords() {
-        String s = (String) metas.get("keywords");
+        String s = metas.get("keywords");
+        if (s == null) s = metas.get("DC.description");
         if (s == null) s = "";
         if (s.length() == 0) {
             return getTitle().toLowerCase().split(splitrex);
@@ -500,3 +509,4 @@ public class htmlFilterContentScraper extends htmlFilterAbstractScraper implemen
         return scraper;
     }
 }
+

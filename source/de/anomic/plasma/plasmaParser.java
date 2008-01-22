@@ -432,12 +432,13 @@ public final class plasmaParser {
                     String fullClassName = plasmaParserPkgName + "." + currentDir.getName() + "." + className;
                     try {
                         // trying to load the parser class by its name
-                        Class parserClass = Class.forName(fullClassName);
-                        Object theParser = parserClass.newInstance();
-                        if (!(theParser instanceof Parser)) continue;
+                        Class<?> parserClass = Class.forName(fullClassName);
+                        Object theParser0 = (Parser) parserClass.newInstance();
+                        if (!(theParser0 instanceof Parser)) continue;
+                        Parser theParser = (Parser) theParser0;
                         
                         // testing if all needed libx libraries are available
-                        String[] neededLibx = ((Parser)theParser).getLibxDependences();
+                        String[] neededLibx = theParser.getLibxDependences();
                         StringBuffer neededLibxBuf = new StringBuffer();
                         if (neededLibx != null) {
                             for (int libxId=0; libxId < neededLibx.length; libxId++) {
@@ -451,7 +452,7 @@ public final class plasmaParser {
                         }
                         
                         // loading the list of mime-types that are supported by this parser class
-                        Hashtable<String, String> supportedMimeTypes = ((Parser) theParser).getSupportedMimeTypes();
+                        Hashtable<String, String> supportedMimeTypes = theParser.getSupportedMimeTypes();
                         
                         // creating a parser info object
                         ParserInfo parserInfo = new ParserInfo();
@@ -462,7 +463,7 @@ public final class plasmaParser {
                         parserInfo.parserVersionNr = ((Parser)theParser).getVersion();
                         parserInfo.parserName = ((Parser) theParser).getName();
                         
-                        Iterator mimeTypeIterator = supportedMimeTypes.keySet().iterator();
+                        Iterator<String> mimeTypeIterator = supportedMimeTypes.keySet().iterator();
                         while (mimeTypeIterator.hasNext()) {
                             String mimeType = (String) mimeTypeIterator.next();
                             availableParserList.put(mimeType, parserInfo);
@@ -490,9 +491,9 @@ public final class plasmaParser {
     
     public void close() {
         // clearing the parser list
-        Iterator configs = parserConfigList.values().iterator();
+        Iterator<plasmaParserConfig> configs = parserConfigList.values().iterator();
         while (configs.hasNext()) {
-            plasmaParserConfig currentConfig = (plasmaParserConfig) configs.next();
+            plasmaParserConfig currentConfig = configs.next();
             synchronized (currentConfig.enabledParserList) {
                 currentConfig.enabledParserList.clear();
             }
@@ -684,29 +685,24 @@ public final class plasmaParser {
     }
     
     public plasmaParserDocument transformScraper(yacyURL location, String mimeType, String charSet, htmlFilterContentScraper scraper) {
-        try {
-            String[] sections = new String[scraper.getHeadlines(1).length + scraper.getHeadlines(2).length + scraper.getHeadlines(3).length + scraper.getHeadlines(4).length];
-            int p = 0;
-            for (int i = 1; i <= 4; i++) for (int j = 0; j < scraper.getHeadlines(i).length; j++) sections[p++] = scraper.getHeadlines(i)[j];
-            plasmaParserDocument ppd =  new plasmaParserDocument(
-                    new yacyURL(location.toNormalform(true, true), null),
-                    mimeType,
-                    charSet,
-                    scraper.getKeywords(),
-                    scraper.getTitle(),
-                    scraper.getAuthor(),
-                    sections,
-                    scraper.getDescription(),
-                    scraper.getText(),
-                    scraper.getAnchors(),
-                    scraper.getImages());
-            //scraper.close();            
-            ppd.setFavicon(scraper.getFavicon());
-            return ppd;
-        } catch (MalformedURLException e) {
-            //e.printStackTrace();
-            return null;
-        }
+        String[] sections = new String[scraper.getHeadlines(1).length + scraper.getHeadlines(2).length + scraper.getHeadlines(3).length + scraper.getHeadlines(4).length];
+        int p = 0;
+        for (int i = 1; i <= 4; i++) for (int j = 0; j < scraper.getHeadlines(i).length; j++) sections[p++] = scraper.getHeadlines(i)[j];
+        plasmaParserDocument ppd =  new plasmaParserDocument(
+                location,
+                mimeType,
+                charSet,
+                scraper.getKeywords(),
+                scraper.getTitle(),
+                scraper.getAuthor(),
+                sections,
+                scraper.getDescription(),
+                scraper.getText(),
+                scraper.getAnchors(),
+                scraper.getImages());
+        //scraper.close();            
+        ppd.setFavicon(scraper.getFavicon());
+        return ppd;
     }
     
     /**
@@ -737,7 +733,7 @@ public final class plasmaParser {
 			Parser theParser = makeParser(parserClassName);
             
             // checking if the created parser really supports the given mimetype 
-            Hashtable supportedMimeTypes = theParser.getSupportedMimeTypes();
+            Hashtable<String, String> supportedMimeTypes = theParser.getSupportedMimeTypes();
             if ((supportedMimeTypes != null) && (supportedMimeTypes.containsKey(mimeType))) {
                 parserInfo.incUsageCounter();
 				return theParser;
@@ -751,64 +747,73 @@ public final class plasmaParser {
         
     }
     
-    static Map<String, String> allReflinks(Set links) {
+    static Map<yacyURL, String> allReflinks(Set<?> links) {
         // links is either a Set of Strings (with urls) or htmlFilterImageEntries
         // we find all links that are part of a reference inside a url
-        HashMap<String, String> v = new HashMap<String, String>();
-        Iterator i = links.iterator();
+        HashMap<yacyURL, String> v = new HashMap<yacyURL, String>();
+        Iterator<?> i = links.iterator();
         Object o;
-        String url;
+        yacyURL url;
+        String u;
         int pos;
-        loop: while (i.hasNext()) {
+        loop: while (i.hasNext()) try {
             o = i.next();
-            if (o instanceof String) url = (String) o;
-            else if (o instanceof htmlFilterImageEntry) url = ((htmlFilterImageEntry) o).url().toNormalform(true, true);
+            if (o instanceof yacyURL) url = (yacyURL) o;
+            else if (o instanceof String) url = new yacyURL((String) o, null);
+            else if (o instanceof htmlFilterImageEntry) url = ((htmlFilterImageEntry) o).url();
             else {
                 assert false;
                 continue;
             }
-            if ((pos = url.toLowerCase().indexOf("http://",7)) > 0) {
+            u = url.toNormalform(true, true);
+            if ((pos = u.toLowerCase().indexOf("http://",7)) > 0) {
                 i.remove();
-                url = url.substring(pos);
-                while ((pos = url.toLowerCase().indexOf("http://",7)) > 0) url = url.substring(pos);
+                u = u.substring(pos);
+                while ((pos = u.toLowerCase().indexOf("http://",7)) > 0) u = u.substring(pos);
+                url = new yacyURL(u, null);
                 if (!(v.containsKey(url))) v.put(url, "ref");
                 continue loop;
             }
-            if ((pos = url.toLowerCase().indexOf("/www.",7)) > 0) {
+            if ((pos = u.toLowerCase().indexOf("/www.",7)) > 0) {
                 i.remove();
-                url = "http:/" + url.substring(pos);
-                while ((pos = url.toLowerCase().indexOf("/www.",7)) > 0) url = "http:/" + url.substring(pos);
+                u = "http:/" + u.substring(pos);
+                while ((pos = u.toLowerCase().indexOf("/www.",7)) > 0) u = "http:/" + u.substring(pos);
+                url = new yacyURL(u, null);
                 if (!(v.containsKey(url))) v.put(url, "ref");
                 continue loop;
             }
-        }
+        } catch (MalformedURLException e) {}
         return v;
     }
     
-    static Map<String, String> allSubpaths(Set links) {
+    static Map<yacyURL, String> allSubpaths(Set<?> links) {
         // links is either a Set of Strings (urls) or a Set of htmlFilterImageEntries
-        HashMap<String, String> v = new HashMap<String, String>();
-        Iterator i = links.iterator();
+        HashMap<yacyURL, String> v = new HashMap<yacyURL, String>();
+        Iterator<?> i = links.iterator();
         Object o;
-        String url;
+        yacyURL url;
+        String u;
         int pos;
-        while (i.hasNext()) {
+        while (i.hasNext()) try {
             o = i.next();
-            if (o instanceof String) url = (String) o;
-            else if (o instanceof htmlFilterImageEntry) url = ((htmlFilterImageEntry) o).url().toNormalform(true, true);
+            if (o instanceof yacyURL) url = (yacyURL) o;
+            else if (o instanceof String) url = new yacyURL((String) o, null);
+            else if (o instanceof htmlFilterImageEntry) url = ((htmlFilterImageEntry) o).url();
             else {
                 assert false;
                 continue;
             }
-            if (url.endsWith("/")) url = url.substring(0, url.length() - 1);
-            pos = url.lastIndexOf("/");
+            u = url.toNormalform(true, true);
+            if (u.endsWith("/")) u = u.substring(0, u.length() - 1);
+            pos = u.lastIndexOf("/");
             while (pos > 8) {
-                url = url.substring(0, pos + 1);
+                u = u.substring(0, pos + 1);
+                url = new yacyURL(u, null);
                 if (!(v.containsKey(url))) v.put(url, "sub");
-                url = url.substring(0, pos);
-                pos = url.lastIndexOf("/");
+                u = u.substring(0, pos);
+                pos = u.lastIndexOf("/");
             }
-        }
+        } catch (MalformedURLException e) {}
         return v;
     }
     
@@ -883,24 +888,24 @@ public final class plasmaParser {
             // printing out all parsed sentences
             if (document != null) {
                 System.out.print("Document titel: ");
-                System.out.println(document.getTitle());
+                System.out.println(document.dc_title());
                 
                 // found text
-                final Iterator sentences = document.getSentences(false);
+                final Iterator<StringBuffer> sentences = document.getSentences(false);
                 int i = 0;
                 if (sentences != null) while (sentences.hasNext()) {
                         System.out.print("line " + i + ": ");
-                        System.out.println(((StringBuffer) sentences.next()).toString());
+                        System.out.println(sentences.next().toString());
                         i++;
                 }
                 
                 // found links
                 int anchorNr = 0;
-                Map anchors = document.getAnchors();
-                Iterator anchorIter = anchors.keySet().iterator();
+                Map<yacyURL, String> anchors = document.getAnchors();
+                Iterator<yacyURL> anchorIter = anchors.keySet().iterator();
                 while (anchorIter.hasNext()) {
-                    String key = (String) anchorIter.next();
-                    System.out.println("URL " + anchorNr + ":\t" + key + " | " + anchors.get(key));
+                    yacyURL key = anchorIter.next();
+                    System.out.println("URL " + anchorNr + ":\t" + key.toString() + " | " + anchors.get(key));
                     anchorNr++;
                 }
                 document.close();
@@ -913,9 +918,9 @@ public final class plasmaParser {
     public static boolean supportedContent(yacyURL url, String mimeType) {
         if (url == null) throw new NullPointerException();
         
-        Iterator configs = parserConfigList.values().iterator();
+        Iterator<plasmaParserConfig> configs = parserConfigList.values().iterator();
         while (configs.hasNext()) {
-            plasmaParserConfig currentConfig = (plasmaParserConfig) configs.next();
+            plasmaParserConfig currentConfig = configs.next();
             synchronized (currentConfig.enabledParserList) {
                 if (currentConfig.supportedContent(url, mimeType)) return true;
             }
@@ -944,7 +949,7 @@ public final class plasmaParser {
         config.initParseableMimeTypes(configStr);
     }
 
-    public static String[] setEnabledParserList(String parserMode, Set mimeTypeSet) {
+    public static String[] setEnabledParserList(String parserMode, Set<String> mimeTypeSet) {
         if (!PARSER_MODE.contains(parserMode)) throw new IllegalArgumentException();
         
         plasmaParserConfig config = (plasmaParserConfig) parserConfigList.get(parserMode);
@@ -956,9 +961,9 @@ public final class plasmaParser {
     }
     
     public static boolean supportedFileExtContains(String fileExt) {
-        Iterator configs = parserConfigList.values().iterator();
+        Iterator<plasmaParserConfig> configs = parserConfigList.values().iterator();
         while (configs.hasNext()) {
-            plasmaParserConfig currentConfig = (plasmaParserConfig) configs.next();
+            plasmaParserConfig currentConfig = configs.next();
             synchronized (currentConfig.enabledParserList) {
                 if (currentConfig.supportedFileExtContains(fileExt)) return true;
             }
@@ -968,9 +973,9 @@ public final class plasmaParser {
     }
 
     public static boolean supportedMimeTypesContains(String mimeType) {
-        Iterator configs = parserConfigList.values().iterator();
+        Iterator<plasmaParserConfig> configs = parserConfigList.values().iterator();
         while (configs.hasNext()) {
-            plasmaParserConfig currentConfig = (plasmaParserConfig) configs.next();
+            plasmaParserConfig currentConfig = configs.next();
             synchronized (currentConfig.enabledParserList) {
                 if (currentConfig.supportedMimeTypesContains(mimeType)) return true;
             }
@@ -985,7 +990,7 @@ public final class plasmaParser {
             throw new IllegalArgumentException("The object key must be of type string.");
         
         // loading class by name
-        Class moduleClass = Class.forName((String)name);
+        Class<?> moduleClass = Class.forName((String)name);
         
         // instantiating class
         Parser theParser = (Parser) moduleClass.newInstance();

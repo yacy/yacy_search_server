@@ -241,9 +241,9 @@ public class yacysearch {
                         HashMap<String, String> map = new HashMap<String, String>();
                         map.put("url", comp.url().toNormalform(false, true).replace(',', '|'));
                         map.put("title", comp.title().replace(',', ' '));
-                        map.put("description", ((document == null) ? comp.title() : document.getTitle()).replace(',', ' '));
-                        map.put("author", ((document == null) ? "" : document.getAuthor()));
-                        map.put("tags", ((document == null) ? "" : document.getKeywords(' ')));
+                        map.put("description", ((document == null) ? comp.title() : document.dc_title()).replace(',', ' '));
+                        map.put("author", ((document == null) ? "" : document.dc_creator()));
+                        map.put("tags", ((document == null) ? "" : document.dc_subject(' ')));
                         yacyCore.newsPool.publishMyNews(yacyNewsRecord.newRecord(yacyNewsPool.CATEGORY_SURFTIPP_ADD, map));
                         document.close();
                     }

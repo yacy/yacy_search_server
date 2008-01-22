@@ -48,6 +48,9 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
 
+import SevenZip.ArchiveExtractCallback;
+import SevenZip.Archive.IInArchive;
+import SevenZip.Archive.SevenZipEntry;
 import de.anomic.plasma.plasmaParser;
 import de.anomic.plasma.plasmaParserDocument;
 import de.anomic.plasma.parser.AbstractParser;
@@ -55,10 +58,6 @@ import de.anomic.plasma.parser.ParserException;
 import de.anomic.server.serverCachedFileOutputStream;
 import de.anomic.server.logging.serverLog;
 import de.anomic.yacy.yacyURL;
-
-import SevenZip.ArchiveExtractCallback;
-import SevenZip.Archive.IInArchive;
-import SevenZip.Archive.SevenZipEntry;
 
 // wrapper class to redirect output of standard ArchiveExtractCallback to serverLog
 // and parse the extracted content
@@ -117,7 +116,7 @@ public class SZParserExtractCallback extends ArchiveExtractCallback {
                 plasmaParserDocument theDoc;
                 // workaround for relative links in file, normally '#' shall be used behind the location, see
                 // below for reversion of the effects
-                yacyURL url = yacyURL.newURL(doc.getLocation(), this.prefix + "/" + super.filePath);
+                yacyURL url = yacyURL.newURL(doc.dc_source(), this.prefix + "/" + super.filePath);
                 String mime = plasmaParser.getMimeTypeByFileExt(super.filePath.substring(super.filePath.lastIndexOf('.') + 1));
                 if (this.cfos.isFallback()) {
                     theDoc = this.parser.parseSource(url, mime, null, this.cfos.getContentFile());
@@ -126,18 +125,20 @@ public class SZParserExtractCallback extends ArchiveExtractCallback {
                 }
                 
                 // revert the above workaround
-                Map<String, String> nanchors = new HashMap<String, String>(theDoc.getAnchors().size(), 1f);
-                Iterator it = theDoc.getAnchors().entrySet().iterator();
-                Map.Entry entry;
-                String base = doc.getLocation().toNormalform(false, true);
+                Map<yacyURL, String> nanchors = new HashMap<yacyURL, String>(theDoc.getAnchors().size(), 1f);
+                Iterator<Map.Entry<yacyURL, String>> it = theDoc.getAnchors().entrySet().iterator();
+                Map.Entry<yacyURL, String> entry;
+                String base = doc.dc_source().toNormalform(false, true);
+                String u;
                 while (it.hasNext()) {
-                    entry = (Map.Entry)it.next();
-                    if (((String)entry.getKey()).startsWith(base + "/")) {
-                        String ref = "#" + ((String)entry.getKey()).substring(base.length() + 1);
+                    entry = it.next();
+                    u = entry.getKey().toNormalform(true, true);
+                    if (u.startsWith(base + "/")) {
+                        String ref = "#" + u.substring(base.length() + 1);
                         this.log.logFinest("changing " + entry.getKey() + " to use reference " + ref);
-                        nanchors.put(base + ref, (String)entry.getValue());
+                        nanchors.put(new yacyURL(base + ref, null), entry.getValue());
                     } else {
-                        nanchors.put((String)entry.getKey(), (String)entry.getValue());
+                        nanchors.put(entry.getKey(), entry.getValue());
                     }
                 }
                 theDoc.getAnchors().clear();

@@ -86,7 +86,7 @@ public class pdfParser extends AbstractParser implements Parser {
         this.parserName = "Acrobat Portable Document Parser"; 
     }
     
-    public Hashtable getSupportedMimeTypes() {
+    public Hashtable<String, String> getSupportedMimeTypes() {
         return SUPPORTED_MIME_TYPES;
     }
     

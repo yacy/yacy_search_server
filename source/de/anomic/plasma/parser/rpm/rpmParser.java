@@ -88,7 +88,7 @@ public class rpmParser extends AbstractParser implements Parser {
         this.parserName = "rpm Parser"; 
     }
     
-    public Hashtable getSupportedMimeTypes() {
+    public Hashtable<String, String> getSupportedMimeTypes() {
         return SUPPORTED_MIME_TYPES;
     }
     
@@ -110,7 +110,7 @@ public class rpmParser extends AbstractParser implements Parser {
         RPMFile rpmFile = null;        
         try {
             String summary = null, description = null, packager = null, name = sourceFile.getName();
-            HashMap<String, String> anchors = new HashMap<String, String>();
+            HashMap<yacyURL, String> anchors = new HashMap<yacyURL, String>();
             StringBuffer content = new StringBuffer();            
             
             // opening the rpm file
@@ -138,7 +138,7 @@ public class rpmParser extends AbstractParser implements Parser {
                 else if (headerNames[i].equalsIgnoreCase("SUMMARY")) summary = tag.toString();
                 else if (headerNames[i].equalsIgnoreCase("DESCRIPTION")) description = tag.toString();
                 else if (headerNames[i].equalsIgnoreCase("PACKAGER")) packager = tag.toString();
-                else if (headerNames[i].equalsIgnoreCase("URL")) anchors.put(tag.toString(), tag.toString());
+                else if (headerNames[i].equalsIgnoreCase("URL")) anchors.put(new yacyURL(tag.toString(), null), tag.toString());
             }
 
             // closing the rpm file

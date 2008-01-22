@@ -230,13 +230,11 @@ public class yacysearchitem {
             ArrayList<plasmaSnippetCache.MediaSnippet> images = result.mediaSnippets();
             if (images != null) {
                 plasmaSnippetCache.MediaSnippet ms;
-                yacyURL url;
                 int c = 0;
                 for (int i = 0; i < images.size(); i++) {
                     ms = (plasmaSnippetCache.MediaSnippet) images.get(i);
-                    try {url = new yacyURL(ms.href, null);} catch (MalformedURLException e) {continue;}
-                    prop.putHTML("content_items_" + i + "_href", ms.href);
-                    prop.put("content_items_" + i + "_code", sb.licensedURLs.aquireLicense(url));
+                    prop.putHTML("content_items_" + i + "_href", ms.href.toNormalform(true, false));
+                    prop.put("content_items_" + i + "_code", sb.licensedURLs.aquireLicense(ms.href));
                     prop.putHTML("content_items_" + i + "_name", shorten(ms.name, namelength));
                     prop.put("content_items_" + i + "_attr", ms.attr); // attributes, here: original size of image
                     c++;
@@ -260,8 +258,8 @@ public class yacysearchitem {
                 int c = 0;
                 for (int i = 0; i < media.size(); i++) {
                     ms = (plasmaSnippetCache.MediaSnippet) media.get(i);
-                    prop.putHTML("content_items_" + i + "_href", ms.href);
-                    prop.putHTML("content_items_" + i + "_hrefshort", nxTools.shortenURLString(ms.href, urllength));
+                    prop.putHTML("content_items_" + i + "_href", ms.href.toNormalform(true, false));
+                    prop.putHTML("content_items_" + i + "_hrefshort", nxTools.shortenURLString(ms.href.toNormalform(true, false), urllength));
                     prop.putHTML("content_items_" + i + "_name", shorten(ms.name, namelength));
                     prop.put("content_items_" + i + "_col", (col) ? "0" : "1");
                     c++;

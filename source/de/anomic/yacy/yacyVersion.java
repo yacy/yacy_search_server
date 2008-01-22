@@ -29,7 +29,6 @@ package de.anomic.yacy;
 
 import java.io.File;
 import java.io.IOException;
-import java.net.MalformedURLException;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.HashMap;
@@ -298,17 +297,13 @@ public final class yacyVersion implements Comparator<yacyVersion>, Comparable<ya
         }
         
         // analyse links in scraper resource, and find link to latest release in it
-        Map<String, String> anchors = scraper.getAnchors(); // a url (String) / name (String) relation
-        Iterator<String> i = anchors.keySet().iterator();
+        Map<yacyURL, String> anchors = scraper.getAnchors(); // a url (String) / name (String) relation
+        Iterator<yacyURL> i = anchors.keySet().iterator();
         TreeSet<yacyVersion> devreleases = new TreeSet<yacyVersion>();
         TreeSet<yacyVersion> mainreleases = new TreeSet<yacyVersion>();
         yacyVersion release;
         while (i.hasNext()) {
-            try {
-                url = new yacyURL((String) i.next(), null);
-            } catch (MalformedURLException e1) {
-                continue; // just ignore invalid urls
-            }
+            url = i.next();
             try {
                 release = new yacyVersion(url);
                 //System.out.println("r " + release.toAnchor());

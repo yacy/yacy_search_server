@@ -79,11 +79,11 @@ public final class plasmaSearchImages {
 
                 // add also links from pages one step deeper, if depth > 0
                 if (depth > 0) {
-                    Iterator<String> i = document.getHyperlinks().keySet().iterator();
+                    Iterator<yacyURL> i = document.getHyperlinks().keySet().iterator();
                     String nexturlstring;
                     while (i.hasNext()) {
                         try {
-                            nexturlstring = new yacyURL(i.next(), null).toNormalform(true, true);
+                            nexturlstring = i.next().toNormalform(true, true);
                             addAll(new plasmaSearchImages(serverDate.remainingTime(start, maxTime, 10), new yacyURL(nexturlstring, null), depth - 1));
                         } catch (MalformedURLException e1) {
                             e1.printStackTrace();

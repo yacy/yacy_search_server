@@ -110,7 +110,7 @@ public interface Parser {
      * @return a {@link Hashtable} containing a list of MimeTypes that are supported by 
      * the parser
      */
-    public Hashtable getSupportedMimeTypes();
+    public Hashtable<String, String> getSupportedMimeTypes();
     
     /**
      * This function should be called before reusing the parser object.

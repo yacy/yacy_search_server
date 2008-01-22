@@ -116,7 +116,7 @@ public class rtfParser extends AbstractParser implements Parser {
 		}        
 	}
 
-	public java.util.Hashtable getSupportedMimeTypes() {
+	public Hashtable<String, String> getSupportedMimeTypes() {
 		return rtfParser.SUPPORTED_MIME_TYPES;
 	}
 

@@ -891,7 +891,7 @@ public class yacyURL {
     }
     
     public int hashCode() {
-        return this.toString().hashCode();
+        return this.hash().hashCode();
     }
     
     public int compareTo(Object h) {

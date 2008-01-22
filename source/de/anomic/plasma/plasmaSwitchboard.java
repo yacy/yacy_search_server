@@ -138,7 +138,7 @@ import de.anomic.plasma.crawler.plasmaCrawlQueues;
 import de.anomic.plasma.crawler.plasmaProtocolLoader;
 import de.anomic.plasma.dbImport.dbImportManager;
 import de.anomic.plasma.parser.ParserException;
-import de.anomic.plasma.plasmaSwitchboardQueue.Entry;
+import de.anomic.plasma.plasmaCondenser.wordStatProp;
 import de.anomic.plasma.urlPattern.defaultURLPattern;
 import de.anomic.plasma.urlPattern.plasmaURLPattern;
 import de.anomic.server.serverAbstractSwitch;
@@ -998,8 +998,8 @@ public final class plasmaSwitchboard extends serverAbstractSwitch implements ser
         
         this.log.logConfig("Starting blacklist engine ...");
         try {
-            Class blacklistClass = Class.forName(blacklistClassName);
-            Constructor blacklistClassConstr = blacklistClass.getConstructor( new Class[] { File.class } );
+            Class<?> blacklistClass = Class.forName(blacklistClassName);
+            Constructor<?> blacklistClassConstr = blacklistClass.getConstructor( new Class[] { File.class } );
             urlBlacklist = (plasmaURLPattern) blacklistClassConstr.newInstance(new Object[] { blacklistsPath });
             this.log.logFine("Used blacklist engine class: " + blacklistClassName);
             this.log.logConfig("Using blacklist engine: " + urlBlacklist.getEngineInfo());
@@ -1276,8 +1276,8 @@ public final class plasmaSwitchboard extends serverAbstractSwitch implements ser
         String wikiParserClassName = getConfig(WIKIPARSER_CLASS, WIKIPARSER_CLASS_DEFAULT);
         this.log.logConfig("Loading wiki parser " + wikiParserClassName + " ...");
         try {
-            Class wikiParserClass = Class.forName(wikiParserClassName);
-            Constructor wikiParserClassConstr = wikiParserClass.getConstructor(new Class[] { plasmaSwitchboard.class });
+            Class<?> wikiParserClass = Class.forName(wikiParserClassName);
+            Constructor<?> wikiParserClassConstr = wikiParserClass.getConstructor(new Class[] { plasmaSwitchboard.class });
             wikiParser = (wikiParser)wikiParserClassConstr.newInstance(new Object[] { this });
         } catch (Exception e) {
             this.log.logSevere("Unable to load wiki parser, the wiki won't work", e);
@@ -1532,11 +1532,11 @@ public final class plasmaSwitchboard extends serverAbstractSwitch implements ser
         this.defaultRemoteProfile = null;
         this.defaultTextSnippetProfile = null;
         this.defaultMediaSnippetProfile = null;
-        Iterator i = this.profilesActiveCrawls.profiles(true);
+        Iterator<plasmaCrawlProfile.entry> i = this.profilesActiveCrawls.profiles(true);
         plasmaCrawlProfile.entry profile;
         String name;
         while (i.hasNext()) {
-            profile = (plasmaCrawlProfile.entry) i.next();
+            profile = i.next();
             name = profile.name();
             if (name.equals(CRAWL_PROFILE_PROXY)) this.defaultProxyProfile = profile;
             if (name.equals(CRAWL_PROFILE_REMOTE)) this.defaultRemoteProfile = profile;
@@ -1606,7 +1606,7 @@ public final class plasmaSwitchboard extends serverAbstractSwitch implements ser
                 (crawlStacker != null && crawlStacker.size() > 0) ||
                 (crawlQueues.noticeURL.notEmpty())) 
             return false;
-        final Iterator iter = profilesActiveCrawls.profiles(true);
+        final Iterator<plasmaCrawlProfile.entry> iter = profilesActiveCrawls.profiles(true);
         plasmaCrawlProfile.entry entry;
         boolean hasDoneSomething = false;
         try {
@@ -1615,7 +1615,7 @@ public final class plasmaSwitchboard extends serverAbstractSwitch implements ser
                 if (Thread.currentThread().isInterrupted()) throw new InterruptedException("Shutdown in progress");
                 
                 // getting next profile
-                entry = (plasmaCrawlProfile.entry) iter.next();
+                entry = iter.next();
                 if (!((entry.name().equals(CRAWL_PROFILE_PROXY))  ||
                       (entry.name().equals(CRAWL_PROFILE_REMOTE)) ||
                       (entry.name().equals(CRAWL_PROFILE_SNIPPET_TEXT)) ||
@@ -1961,13 +1961,13 @@ public final class plasmaSwitchboard extends serverAbstractSwitch implements ser
             // clean up seed-dbs
             if(getConfigBool("routing.deleteOldSeeds.permission",true)) {
             	final long deleteOldSeedsTime = getConfigLong("routing.deleteOldSeeds.time",7)*24*3600000;
-                Iterator e = yacyCore.seedDB.seedsSortedDisconnected(true,yacySeed.LASTSEEN);
+                Iterator<yacySeed> e = yacyCore.seedDB.seedsSortedDisconnected(true,yacySeed.LASTSEEN);
                 yacySeed seed = null;
-                ArrayList deleteQueue = new ArrayList();
+                ArrayList<String> deleteQueue = new ArrayList<String>();
                 checkInterruption();
                 //clean passive seeds
                 while(e.hasNext()) {
-                	seed = (yacySeed)e.next();
+                	seed = e.next();
                 	if(seed != null) {
                 		//list is sorted -> break when peers are too young to delete
                 		if(seed.getLastSeenUTC() > (System.currentTimeMillis()-deleteOldSeedsTime))
@@ -2183,24 +2183,19 @@ public final class plasmaSwitchboard extends serverAbstractSwitch implements ser
                     ((processCase == PROCESSCASE_4_PROXY_LOAD) || (processCase == PROCESSCASE_5_LOCAL_CRAWLING)) &&
                     ((entry.profile() == null) || (entry.depth() < entry.profile().generalDepth()))
             ) {
-                Map hl = document.getHyperlinks();
-                Iterator i = hl.entrySet().iterator();
-                String nextUrlString;
+                Map<yacyURL, String> hl = document.getHyperlinks();
+                Iterator<Map.Entry<yacyURL, String>> i = hl.entrySet().iterator();
                 yacyURL nextUrl;
-                Map.Entry nextEntry;
+                Map.Entry<yacyURL, String> nextEntry;
                 while (i.hasNext()) {
                     // check for interruption
                     checkInterruption();
                     
                     // fetching the next hyperlink
-                    nextEntry = (Map.Entry) i.next();
-                    nextUrlString = (String) nextEntry.getKey();
-                    try {                        
-                        nextUrl = new yacyURL(nextUrlString, null);
-                        
-                        // enqueue the hyperlink into the pre-notice-url db
-                        crawlStacker.enqueueEntry(nextUrl, entry.urlHash(), initiatorPeerHash, (String) nextEntry.getValue(), docDate, entry.depth() + 1, entry.profile());
-                    } catch (MalformedURLException e1) {}                    
+                    nextEntry = i.next();
+                    nextUrl = nextEntry.getKey();
+                    // enqueue the hyperlink into the pre-notice-url db
+                    crawlStacker.enqueueEntry(nextUrl, entry.urlHash(), initiatorPeerHash, nextEntry.getValue(), docDate, entry.depth() + 1, entry.profile());
                 }
                 log.logInfo("CRAWL: ADDED " + hl.size() + " LINKS FROM " + entry.url().toNormalform(false, true) +
                         ", NEW CRAWL STACK SIZE IS " + crawlQueues.noticeURL.stackSize(plasmaCrawlNURL.STACK_TYPE_CORE));
@@ -2210,7 +2205,7 @@ public final class plasmaSwitchboard extends serverAbstractSwitch implements ser
             /* =========================================================================
              * CREATE INDEX
              * ========================================================================= */  
-            String docDescription = document.getTitle();
+            String docDescription = document.dc_title();
             yacyURL referrerURL = entry.referrerURL();
 
             String noIndexReason = plasmaCrawlEURL.DENIED_UNSPECIFIED_INDEXING_ERROR;
@@ -2242,8 +2237,8 @@ public final class plasmaSwitchboard extends serverAbstractSwitch implements ser
                     indexURLEntry newEntry = new indexURLEntry(
                             entry.url(),                               // URL
                             docDescription,                            // document description
-                            document.getAuthor(),                      // author
-                            document.getKeywords(' '),                 // tags
+                            document.dc_creator(),                      // author
+                            document.dc_subject(' '),                 // tags
                             "",                                        // ETag
                             docDate,                                   // modification date
                             new Date(),                                // loaded date
@@ -2252,7 +2247,7 @@ public final class plasmaSwitchboard extends serverAbstractSwitch implements ser
                             new byte[0],                               // md5
                             (int) entry.size(),                        // size
                             condenser.RESULT_NUMB_WORDS,               // word count
-                            plasmaHTCache.docType(document.getMimeType()), // doctype
+                            plasmaHTCache.docType(document.dc_format()), // doctype
                             condenser.RESULT_FLAGS,                    // flags
                             yacyURL.language(entry.url()),             // language
                             ioLinks[0].intValue(),                     // llocal
@@ -2314,7 +2309,7 @@ public final class plasmaSwitchboard extends serverAbstractSwitch implements ser
                                     document,                                     // document content
                                     condenser,                                    // document condenser
                                     yacyURL.language(entry.url()),                // document language
-                                    plasmaHTCache.docType(document.getMimeType()),// document type
+                                    plasmaHTCache.docType(document.dc_format()),// document type
                                     ioLinks[0].intValue(),                        // outlinkSame
                                     ioLinks[1].intValue()                         // outlinkOthers
                             );
@@ -2322,31 +2317,31 @@ public final class plasmaSwitchboard extends serverAbstractSwitch implements ser
                             /* ========================================================================
                              * SEND PAGE INDEX TO STORAGE PEER
                              * ======================================================================== */                            
-                            HashMap urlCache = new HashMap(1);
-                            urlCache.put(newEntry.hash(),newEntry);
+                            HashMap<String, indexURLEntry> urlCache = new HashMap<String, indexURLEntry>(1);
+                            urlCache.put(newEntry.hash(), newEntry);
                             
-                            ArrayList tmpContainers = new ArrayList(condenser.words().size());
+                            ArrayList<indexContainer> tmpContainers = new ArrayList<indexContainer>(condenser.words().size());
                             
                             String language = yacyURL.language(entry.url());                            
-                            char doctype = plasmaHTCache.docType(document.getMimeType());
+                            char doctype = plasmaHTCache.docType(document.dc_format());
                             indexURLEntry.Components comp = newEntry.comp();
                             int urlLength = comp.url().toNormalform(true, true).length();
                             int urlComps = htmlFilterContentScraper.urlComps(comp.url().toNormalform(true, true)).length;
 
                             // iterate over all words
-                            Iterator i = condenser.words().entrySet().iterator();
-                            Map.Entry wentry;
+                            Iterator<Map.Entry<String, wordStatProp>> i = condenser.words().entrySet().iterator();
+                            Map.Entry<String, wordStatProp> wentry;
                             plasmaCondenser.wordStatProp wordStat;
                             while (i.hasNext()) {
-                                wentry = (Map.Entry) i.next();
-                                String word = (String) wentry.getKey();
-                                wordStat = (plasmaCondenser.wordStatProp) wentry.getValue();
+                                wentry = i.next();
+                                String word = wentry.getKey();
+                                wordStat = wentry.getValue();
                                 String wordHash = plasmaCondenser.word2hash(word);
                                 indexRWIEntry wordIdxEntry = new indexRWIRowEntry(
                                             urlHash,
                                             urlLength, urlComps,
                                             wordStat.count,
-                                            document.getTitle().length(),
+                                            document.dc_title().length(),
                                             condenser.words().size(),
                                             condenser.sentences().size(),
                                             wordStat.posInText,
@@ -2371,7 +2366,7 @@ public final class plasmaSwitchboard extends serverAbstractSwitch implements ser
                             
                             // transfering the index to the storage peer
                             indexContainer[] indexData = (indexContainer[]) tmpContainers.toArray(new indexContainer[tmpContainers.size()]);
-                            HashMap resultObj = yacyClient.transferIndex(
+                            HashMap<String, Object> resultObj = yacyClient.transferIndex(
                                     seed,       // target seed
                                     indexData,  // word index data
                                     urlCache,   // urls
@@ -2392,7 +2387,7 @@ public final class plasmaSwitchboard extends serverAbstractSwitch implements ser
                                         document, 
                                         condenser,
                                         yacyURL.language(entry.url()),
-                                        plasmaHTCache.docType(document.getMimeType()),
+                                        plasmaHTCache.docType(document.dc_format()),
                                         ioLinks[0].intValue(), 
                                         ioLinks[1].intValue()
                                 );
@@ -2412,7 +2407,7 @@ public final class plasmaSwitchboard extends serverAbstractSwitch implements ser
                             log.logInfo("*Indexed " + words + " words in URL " + entry.url() +
                                     " [" + entry.urlHash() + "]" +
                                     "\n\tDescription:  " + docDescription +
-                                    "\n\tMimeType: "  + document.getMimeType() + " | Charset: " + document.getCharset() + " | " +
+                                    "\n\tMimeType: "  + document.dc_format() + " | Charset: " + document.getCharset() + " | " +
                                     "Size: " + document.getTextLength() + " bytes | " +
                                     "Anchors: " + ((document.getAnchors() == null) ? 0 : document.getAnchors().size()) +
                                     "\n\tStackingTime:  " + (stackEndTime-stackStartTime) + " ms | " +
@@ -2548,7 +2543,7 @@ public final class plasmaSwitchboard extends serverAbstractSwitch implements ser
             plasmaParserDocument document = plasmaSnippetCache.parseDocument(comp.url(), resourceContentLength.longValue(), resourceContent);
             
             // get the word set
-            Set words = null;
+            Set<String> words = null;
             try {
                 words = new plasmaCondenser(document, true, true).words().keySet();
             } catch (UnsupportedEncodingException e) {
@@ -2642,10 +2637,10 @@ public final class plasmaSwitchboard extends serverAbstractSwitch implements ser
         
     }
     
-    public static int accessFrequency(HashMap tracker, String host) {
+    public static int accessFrequency(HashMap<String, TreeSet<Long>> tracker, String host) {
     	// returns the access frequency in queries per hour for a given host and a specific tracker
     	long timeInterval = 1000 * 60 * 60;
-    	TreeSet accessSet = (TreeSet) tracker.get(host);
+    	TreeSet<Long> accessSet = tracker.get(host);
     	if (accessSet == null) return 0;
     	return accessSet.tailSet(new Long(System.currentTimeMillis() - timeInterval)).size();
     }
@@ -2769,7 +2764,7 @@ public final class plasmaSwitchboard extends serverAbstractSwitch implements ser
         try {
             // find a list of DHT-peers
             double maxDist = 0.2;
-            ArrayList seeds = yacyCore.dhtAgent.getDHTTargets(log, peerCount, Math.min(8, (int) (yacyCore.seedDB.sizeConnected() * maxDist)), dhtChunk.firstContainer().getWordHash(), dhtChunk.lastContainer().getWordHash(), maxDist);
+            ArrayList<yacySeed> seeds = yacyCore.dhtAgent.getDHTTargets(log, peerCount, Math.min(8, (int) (yacyCore.seedDB.sizeConnected() * maxDist)), dhtChunk.firstContainer().getWordHash(), dhtChunk.lastContainer().getWordHash(), maxDist);
             if (seeds.size() < peerCount) {
                 log.logWarning("found not enough (" + seeds.size() + ") peers for distribution for dhtchunk [" + dhtChunk.firstContainer().getWordHash() + " .. " + dhtChunk.lastContainer().getWordHash() + "]");
                 return false;
@@ -2784,8 +2779,8 @@ public final class plasmaSwitchboard extends serverAbstractSwitch implements ser
             int retries = 0;
 
             // starting up multiple DHT transfer threads   
-            Iterator seedIter = seeds.iterator();
-            ArrayList transfer = new ArrayList(peerCount);
+            Iterator<yacySeed> seedIter = seeds.iterator();
+            ArrayList<plasmaDHTTransfer> transfer = new ArrayList<plasmaDHTTransfer>(peerCount);
             while (hc1 < peerCount && (transfer.size() > 0 || seedIter.hasNext())) {
                 
                 // starting up some transfer threads
@@ -2804,12 +2799,12 @@ public final class plasmaSwitchboard extends serverAbstractSwitch implements ser
                 }
 
                 // waiting for the transfer threads to finish
-                Iterator transferIter = transfer.iterator();
+                Iterator<plasmaDHTTransfer> transferIter = transfer.iterator();
                 while (transferIter.hasNext()) {
                     // check for interruption
                     checkInterruption();
                     
-                    plasmaDHTTransfer t = (plasmaDHTTransfer)transferIter.next();
+                    plasmaDHTTransfer t = transferIter.next();
                     if (!t.isAlive()) {
                         // remove finished thread from the list
                         transferIter.remove();

@@ -65,12 +65,12 @@ public class plasmaParserConfig {
      * @see #loadEnabledParserList()
      * @see #setEnabledParserList(Enumeration)
      */
-    final HashSet enabledParserList = new HashSet();    
+    final HashSet<String> enabledParserList = new HashSet<String>();    
     
     /**
      * A list of file extensions that are supported by all enabled parsers
      */
-    final HashSet supportedFileExt = new HashSet();
+    final HashSet<String> supportedFileExt = new HashSet<String>();
     
     /**
      * Parsermode this configuration belongs to
@@ -134,29 +134,29 @@ public class plasmaParserConfig {
     }        
     
     public void initParseableMimeTypes(String enabledMimeTypes) {
-        HashSet mimeTypes = null;
+        HashSet<String> mimeTypes = null;
         if ((enabledMimeTypes == null) || (enabledMimeTypes.length() == 0)) {
-            mimeTypes = new HashSet();
+            mimeTypes = new HashSet<String>();
         } else {            
             String[] enabledMimeTypeList = enabledMimeTypes.split(",");
-            mimeTypes = new HashSet(enabledMimeTypeList.length);
+            mimeTypes = new HashSet<String>(enabledMimeTypeList.length);
             for (int i = 0; i < enabledMimeTypeList.length; i++) mimeTypes.add(enabledMimeTypeList[i].toLowerCase().trim());
         }
         setEnabledParserList(mimeTypes);
     }
     
     public void enableAllParsers() {
-        Set availableMimeTypes = plasmaParser.availableParserList.keySet();
+        Set<String> availableMimeTypes = plasmaParser.availableParserList.keySet();
         setEnabledParserList(availableMimeTypes);
     }
     
-    public  String[] setEnabledParserList(Set mimeTypeSet) {
+    public  String[] setEnabledParserList(Set<String> mimeTypeSet) {
         
-        HashSet newEnabledParsers = new HashSet();
-        HashSet newSupportedFileExt = new HashSet();
+        HashSet<String> newEnabledParsers = new HashSet<String>();
+        HashSet<String> newSupportedFileExt = new HashSet<String>();
         
         if (mimeTypeSet != null) {
-            Iterator mimeTypes = mimeTypeSet.iterator();
+            Iterator<String> mimeTypes = mimeTypeSet.iterator();
             while (mimeTypes.hasNext()) {
                 String mimeType = (String) mimeTypes.next();
                 if (plasmaParser.availableParserList.containsKey(mimeType)) {
@@ -166,7 +166,7 @@ public class plasmaParserConfig {
                         theParser = plasmaParser.makeParser(((ParserInfo)plasmaParser.availableParserList.get(mimeType)).parserClassName);
                         
                         // getting a list of mimeTypes that the parser supports
-                        Hashtable parserSupportsMimeTypes = theParser.getSupportedMimeTypes();
+                        Hashtable<String, String> parserSupportsMimeTypes = theParser.getSupportedMimeTypes();
                         if (parserSupportsMimeTypes != null) {
                             Object supportedExtensions = parserSupportsMimeTypes.get(mimeType);
                             if ((supportedExtensions != null) &&
@@ -202,9 +202,10 @@ public class plasmaParserConfig {
         return (String[])newEnabledParsers.toArray(new String[newEnabledParsers.size()]);
     }
     
-    public HashSet getEnabledParserList() {
+    @SuppressWarnings("unchecked")
+    public HashSet<String> getEnabledParserList() {
         synchronized (this.enabledParserList) {
-            return (HashSet) this.enabledParserList.clone();
+            return (HashSet<String>) this.enabledParserList.clone();
         }        
     }
 }

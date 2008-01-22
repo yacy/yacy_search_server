@@ -48,7 +48,6 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.net.MalformedURLException;
 
 import de.anomic.server.serverCachedFileOutputStream;
 import de.anomic.server.serverFileUtils;
@@ -67,21 +66,21 @@ import de.anomic.plasma.parser.Parser;
 
 public class plasmaParserDocument {
     
-    private yacyURL location;       // the source url
+    private yacyURL source;       // the source url
     private String mimeType;        // mimeType as taken from http header
     private String charset;         // the charset of the document
     private List<String> keywords;  // most resources provide a keyword field
     private StringBuffer title;     // a document title, taken from title or h1 tag; shall appear as headline of search result
-    private StringBuffer author;    // author or copyright
+    private StringBuffer creator;    // author or copyright
     private List<String> sections;  // if present: more titles/headlines appearing in the document
-    private StringBuffer abstrct;   // an abstract, if present: short content description
+    private StringBuffer description;   // an abstract, if present: short content description
     private Object text;            // the clear text, all that is visible
-    private Map<String, String> anchors;    // all links embedded as clickeable entities (anchor tags)
+    private Map<yacyURL, String> anchors;    // all links embedded as clickeable entities (anchor tags)
     private TreeSet<htmlFilterImageEntry> images;         // all visible pictures in document
     // the anchors and images - Maps are URL-to-EntityDescription mappings.
     // The EntityDescription appear either as visible text in anchors or as alternative
     // text in image tags.
-    private Map<String, String> hyperlinks, audiolinks, videolinks, applinks;
+    private Map<yacyURL, String> hyperlinks, audiolinks, videolinks, applinks;
     private Map<String, String> emaillinks;
     private yacyURL favicon;
     private boolean resorted;
@@ -90,16 +89,16 @@ public class plasmaParserDocument {
     protected plasmaParserDocument(yacyURL location, String mimeType, String charset,
                     String[] keywords, String title, String author,
                     String[] sections, String abstrct,
-                    Object text, Map<String, String> anchors, TreeSet<htmlFilterImageEntry> images) {
-        this.location = location;
+                    Object text, Map<yacyURL, String> anchors, TreeSet<htmlFilterImageEntry> images) {
+        this.source = location;
         this.mimeType = (mimeType == null) ? "application/octet-stream" : mimeType;
         this.charset = charset;
         this.keywords = (keywords == null) ? new LinkedList<String>() : Arrays.asList(keywords);
         this.title = (title == null) ? new StringBuffer() : new StringBuffer(title);
-        this.author = (author == null) ? new StringBuffer() : new StringBuffer(author);
+        this.creator = (author == null) ? new StringBuffer() : new StringBuffer(author);
         this.sections = (sections == null) ? new LinkedList<String>() : Arrays.asList(sections);
-        this.abstrct = (abstrct == null) ? new StringBuffer() : new StringBuffer(abstrct);
-        this.anchors = (anchors == null) ? new HashMap<String, String>(0) : anchors;
+        this.description = (abstrct == null) ? new StringBuffer() : new StringBuffer(abstrct);
+        this.anchors = (anchors == null) ? new HashMap<yacyURL, String>(0) : anchors;
         this.images =  (images == null) ? new TreeSet<htmlFilterImageEntry>() : images;
         this.hyperlinks = null;
         this.audiolinks = null;
@@ -125,30 +124,88 @@ public class plasmaParserDocument {
     public plasmaParserDocument(yacyURL location, String mimeType, String charset,
                     String[] keywords, String title, String author,
                     String[] sections, String abstrct,
-                    byte[] text, Map<String, String> anchors, TreeSet<htmlFilterImageEntry> images) {
+                    byte[] text, Map<yacyURL, String> anchors, TreeSet<htmlFilterImageEntry> images) {
         this(location, mimeType, charset, keywords, title, author, sections, abstrct, (Object)text, anchors, images);
     }
     
     public plasmaParserDocument(yacyURL location, String mimeType, String charset,
             String[] keywords, String title, String author,
             String[] sections, String abstrct,
-            File text, Map<String, String> anchors, TreeSet<htmlFilterImageEntry> images) {
+            File text, Map<yacyURL, String> anchors, TreeSet<htmlFilterImageEntry> images) {
         this(location, mimeType, charset, keywords, title, author, sections, abstrct, (Object)text, anchors, images);
     }
     
     public plasmaParserDocument(yacyURL location, String mimeType, String charset,
             String[] keywords, String title, String author,
             String[] sections, String abstrct,
-            serverCachedFileOutputStream text, Map<String, String> anchors, TreeSet<htmlFilterImageEntry> images) {
+            serverCachedFileOutputStream text, Map<yacyURL, String> anchors, TreeSet<htmlFilterImageEntry> images) {
         this(location, mimeType, charset, keywords, title, author, sections, abstrct, (Object)text, anchors, images);
     }
 
-    public yacyURL getLocation() {
-        return this.location;
+    /*
+DC according to rfc 5013
+
+* dc_title
+* dc_creator
+* dc_subject
+* dc_description
+* dc_publisher
+dc_contributor
+dc_date
+dc_type
+* dc_format
+* dc_identifier
+* dc_source
+dc_language
+dc_relation
+dc_coverage
+dc_rights
+     */
+    
+    public String dc_title() {
+        return title.toString();
+    }
+
+    public String dc_creator() {
+        if (creator != null) return creator.toString(); else return new String();
     }
     
-    public String getMimeType() {
+    public String dc_subject(char separator) {
+        // sort out doubles and empty words
+        TreeSet<String> hs = new TreeSet<String>();
+        String s;
+        for (int i = 0; i < this.keywords.size(); i++) {
+            if (this.keywords.get(i) == null) continue;
+            s = ((String)this.keywords.get(i)).trim();
+            if (s.length() > 0) hs.add(s.toLowerCase());
+        }
+        if (hs.size() == 0) return "";
+        // generate a new list
+        StringBuffer sb = new StringBuffer(this.keywords.size() * 6);
+        Iterator<String> i = hs.iterator();
+        while (i.hasNext()) sb.append(i.next()).append(separator);
+        return sb.substring(0, sb.length() - 1);
+    }
+    
+    public String dc_description() {
+        if (description != null) return description.toString(); else return dc_title();
+    }
+    
+    public String dc_publisher() {
+        // if we don't have a publisher, simply return the host/domain name
+        return this.source.getHost();
+    }
+    
+    public String dc_format() {
         return this.mimeType;
+    }
+    
+    public String dc_identifier() {
+        return "yacy.net:" + this.source.hash();
+    }
+    
+    public yacyURL dc_source() {
+        return this.source;
     }
     
     /**
@@ -158,26 +215,14 @@ public class plasmaParserDocument {
         return this.charset;
     }
     
-    public String getTitle() {
-        return title.toString();
-    }
-    
     public String[] getSectionTitles() {
         if (sections != null) {
             return (String[])sections.toArray(new String[this.sections.size()]);
         } else {
-            return new String[] { getTitle() };
+            return new String[] { dc_title() };
         }
     }
 
-    public String getAbstract() {
-        if (abstrct != null) return abstrct.toString(); else return getTitle();
-    }
-    
-    public String getAuthor() {
-        if (author != null) return author.toString(); else return new String();
-    }
-    
     public InputStream getText() {
         try {
             if (this.text == null) return null;
@@ -236,28 +281,11 @@ public class plasmaParserDocument {
         return e;
     }
     
-    public String getKeywords(char separator) {
-        // sort out doubles and empty words
-        TreeSet<String> hs = new TreeSet<String>();
-        String s;
-        for (int i = 0; i < this.keywords.size(); i++) {
-            if (this.keywords.get(i) == null) continue;
-            s = ((String)this.keywords.get(i)).trim();
-            if (s.length() > 0) hs.add(s.toLowerCase());
-        }
-        if (hs.size() == 0) return "";
-        // generate a new list
-        StringBuffer sb = new StringBuffer(this.keywords.size() * 6);
-        Iterator<String> i = hs.iterator();
-        while (i.hasNext()) sb.append(i.next()).append(separator);
-        return sb.substring(0, sb.length() - 1);
-    }
-    
     public List<String> getKeywords() {
         return this.keywords;
     }
     
-    public Map<String, String> getAnchors() {
+    public Map<yacyURL, String> getAnchors() {
         // returns all links embedded as anchors (clickeable entities)
         // this is a url(String)/text(String) map
         return anchors;
@@ -266,18 +294,18 @@ public class plasmaParserDocument {
     
     // the next three methods provide a calculated view on the getAnchors/getImages:
     
-    public Map<String, String> getHyperlinks() {
+    public Map<yacyURL, String> getHyperlinks() {
         // this is a subset of the getAnchor-set: only links to other hyperrefs
         if (!resorted) resortLinks();
         return hyperlinks;
     }
     
-    public Map<String, String> getAudiolinks() {
+    public Map<yacyURL, String> getAudiolinks() {
         if (!resorted) resortLinks();
         return this.audiolinks;
     }
     
-    public Map<String, String> getVideolinks() {
+    public Map<yacyURL, String> getVideolinks() {
         if (!resorted) resortLinks();
         return this.videolinks;
     }
@@ -289,7 +317,7 @@ public class plasmaParserDocument {
         return images;
     }
     
-    public Map<String, String> getApplinks() {
+    public Map<yacyURL, String> getApplinks() {
         if (!resorted) resortLinks();
         return this.applinks;
     }
@@ -307,17 +335,19 @@ public class plasmaParserDocument {
         String u;
         int extpos, qpos;
         String ext = null;
-        Iterator<Map.Entry<String, String>> i = anchors.entrySet().iterator();
-        hyperlinks = new HashMap<String, String>();
-        videolinks = new HashMap<String, String>();
-        audiolinks = new HashMap<String, String>();
-        applinks   = new HashMap<String, String>();
+        Iterator<Map.Entry<yacyURL, String>> i = anchors.entrySet().iterator();
+        hyperlinks = new HashMap<yacyURL, String>();
+        videolinks = new HashMap<yacyURL, String>();
+        audiolinks = new HashMap<yacyURL, String>();
+        applinks   = new HashMap<yacyURL, String>();
         emaillinks = new HashMap<String, String>();
         TreeSet<htmlFilterImageEntry> collectedImages = new TreeSet<htmlFilterImageEntry>(); // this is a set that is collected now and joined later to the imagelinks
-        Map.Entry<String, String> entry;
+        Map.Entry<yacyURL, String> entry;
         while (i.hasNext()) {
             entry = i.next();
-            u = entry.getKey();
+            url = entry.getKey();
+            if (url == null) continue;
+            u = url.toNormalform(true, false);
             if ((u != null) && (u.startsWith("mailto:"))) {
                 emaillinks.put(u.substring(7), entry.getValue());
             } else {
@@ -328,21 +358,16 @@ public class plasmaParserDocument {
                     } else {
                         ext = u.substring(extpos + 1).toLowerCase();
                     }
-                    try {
-                        url = new yacyURL(u, null);
-                        u = url.toNormalform(true, true);
-                        if (plasmaParser.mediaExtContains(ext)) {
-                            // this is not a normal anchor, its a media link
-                            if (plasmaParser.imageExtContains(ext)) {
-                                collectedImages.add(new htmlFilterImageEntry(url, (String) entry.getValue(), -1, -1));
-                            }
-                            else if (plasmaParser.audioExtContains(ext)) audiolinks.put(u, (String)entry.getValue());
-                            else if (plasmaParser.videoExtContains(ext)) videolinks.put(u, (String)entry.getValue());
-                            else if (plasmaParser.appsExtContains(ext)) applinks.put(u, (String)entry.getValue());
-                        } else {
-                            hyperlinks.put(u, (String)entry.getValue());
+                    if (plasmaParser.mediaExtContains(ext)) {
+                        // this is not a normal anchor, its a media link
+                        if (plasmaParser.imageExtContains(ext)) {
+                            collectedImages.add(new htmlFilterImageEntry(url, (String) entry.getValue(), -1, -1));
                         }
-                    } catch (MalformedURLException e1) {
+                        else if (plasmaParser.audioExtContains(ext)) audiolinks.put(url, (String)entry.getValue());
+                        else if (plasmaParser.videoExtContains(ext)) videolinks.put(url, (String)entry.getValue());
+                        else if (plasmaParser.appsExtContains(ext)) applinks.put(url, (String)entry.getValue());
+                    } else {
+                        hyperlinks.put(url, (String) entry.getValue());
                     }
                 }
             }
@@ -378,12 +403,12 @@ public class plasmaParserDocument {
         this.sections.addAll(Arrays.asList(doc.getSectionTitles()));
         
         if (this.title.length() > 0) this.title.append('\n');
-        this.title.append(doc.getTitle());
+        this.title.append(doc.dc_title());
         
         this.keywords.addAll(doc.getKeywords());
         
-        if (this.abstrct.length() > 0) this.abstrct.append('\n');
-        this.abstrct.append(doc.getAbstract());
+        if (this.description.length() > 0) this.description.append('\n');
+        this.description.append(doc.dc_description());
         
         if (!(this.text instanceof serverCachedFileOutputStream)) {
             this.text = new serverCachedFileOutputStream(Parser.MAX_KEEP_IN_MEMORY_SIZE);

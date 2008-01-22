@@ -94,7 +94,7 @@ public class tarParser extends AbstractParser implements Parser {
         this.parserName = "Tape Archive File Parser"; 
     }
     
-    public Hashtable getSupportedMimeTypes() {
+    public Hashtable<String, String> getSupportedMimeTypes() {
         return SUPPORTED_MIME_TYPES;
     }
     
@@ -131,7 +131,7 @@ public class tarParser extends AbstractParser implements Parser {
             LinkedList<String> docSections = new LinkedList<String>();
             StringBuffer docAbstrct = new StringBuffer();
 
-            Map<String, String> docAnchors = new HashMap<String, String>();
+            Map<yacyURL, String> docAnchors = new HashMap<yacyURL, String>();
             TreeSet<htmlFilterImageEntry> docImages = new TreeSet<htmlFilterImageEntry>(); 
                         
             // looping through the contained files
@@ -177,15 +177,15 @@ public class tarParser extends AbstractParser implements Parser {
                 
                 // merging all documents together
                 if (docKeywords.length() > 0) docKeywords.append(",");
-                docKeywords.append(subDoc.getKeywords(','));
+                docKeywords.append(subDoc.dc_subject(','));
                 
                 if (docLongTitle.length() > 0) docLongTitle.append("\n");
-                docLongTitle.append(subDoc.getTitle());
+                docLongTitle.append(subDoc.dc_title());
                 
                 docSections.addAll(Arrays.asList(subDoc.getSectionTitles()));
                 
                 if (docAbstrct.length() > 0) docAbstrct.append("\n");
-                docAbstrct.append(subDoc.getAbstract());
+                docAbstrct.append(subDoc.dc_description());
 
                 if (subDoc.getTextLength() > 0) {
                     if (docTextLength > 0) docText.write('\n');

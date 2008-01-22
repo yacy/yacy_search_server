@@ -50,7 +50,6 @@ import java.util.Hashtable;
 import SevenZip.IInStream;
 import SevenZip.MyRandomAccessFile;
 import SevenZip.Archive.SevenZip.Handler;
-
 import de.anomic.plasma.plasmaParserDocument;
 import de.anomic.plasma.parser.AbstractParser;
 import de.anomic.plasma.parser.Parser;
@@ -140,7 +139,7 @@ public class sevenzipParser extends AbstractParser implements Parser {
         }
     }
     
-    public Hashtable getSupportedMimeTypes() {
+    public Hashtable<String, String> getSupportedMimeTypes() {
         return SUPPORTED_MIME_TYPES;
     }
 }

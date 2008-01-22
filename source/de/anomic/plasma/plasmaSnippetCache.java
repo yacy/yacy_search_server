@@ -228,8 +228,9 @@ public class plasmaSnippetCache {
     
     public static class MediaSnippet {
         public int type;
-        public String href, name, attr;
-        public MediaSnippet(int type, String href, String name, String attr) {
+        public yacyURL href;
+        public String name, attr;
+        public MediaSnippet(int type, yacyURL href, String name, String attr) {
             this.type = type;
             this.href = href;
             this.name = name;
@@ -469,17 +470,18 @@ public class plasmaSnippetCache {
         return snippetsCache.get(key);
     }
     
-    private static String computeMediaSnippet(Map<String, String> media, Set<String> queryhashes) {
-        Iterator<Map.Entry<String, String>> i = media.entrySet().iterator();
-        Map.Entry<String, String> entry;
-        String url, desc;
+    private static String computeMediaSnippet(Map<yacyURL, String> media, Set<String> queryhashes) {
+        Iterator<Map.Entry<yacyURL, String>> i = media.entrySet().iterator();
+        Map.Entry<yacyURL, String> entry;
+        yacyURL url;
+        String desc;
         Set<String> s;
         String result = "";
         while (i.hasNext()) {
             entry = i.next();
             url = entry.getKey();
             desc = entry.getValue();
-            s = removeAppearanceHashes(url, queryhashes);
+            s = removeAppearanceHashes(url.toNormalform(false, false), queryhashes);
             if (s.size() == 0) {
                 result += "<br /><a href=\"" + url + "\">" + ((desc.length() == 0) ? url : desc) + "</a>";
                 continue;
@@ -643,22 +645,23 @@ public class plasmaSnippetCache {
     public static ArrayList<MediaSnippet> computeMediaSnippets(plasmaParserDocument document, Set<String> queryhashes, int mediatype) {
         
         if (document == null) return new ArrayList<MediaSnippet>();
-        Map<String, String> media = null;
+        Map<yacyURL, String> media = null;
         if (mediatype == plasmaSearchQuery.CONTENTDOM_AUDIO) media = document.getAudiolinks();
         else if (mediatype == plasmaSearchQuery.CONTENTDOM_VIDEO) media = document.getVideolinks();
         else if (mediatype == plasmaSearchQuery.CONTENTDOM_APP) media = document.getApplinks();
         if (media == null) return null;
         
-        Iterator<Map.Entry<String, String>> i = media.entrySet().iterator();
-        Map.Entry<String, String> entry;
-        String url, desc;
+        Iterator<Map.Entry<yacyURL, String>> i = media.entrySet().iterator();
+        Map.Entry<yacyURL, String> entry;
+        yacyURL url;
+        String desc;
         Set<String> s;
         ArrayList<MediaSnippet> result = new ArrayList<MediaSnippet>();
         while (i.hasNext()) {
             entry = i.next();
             url = entry.getKey();
             desc = entry.getValue();
-            s = removeAppearanceHashes(url, queryhashes);
+            s = removeAppearanceHashes(url.toNormalform(false, false), queryhashes);
             if (s.size() == 0) {
                 result.add(new MediaSnippet(mediatype, url, desc, null));
                 continue;
@@ -678,14 +681,15 @@ public class plasmaSnippetCache {
         
         Iterator<htmlFilterImageEntry> i = images.iterator();
         htmlFilterImageEntry ientry;
-        String url, desc;
+        yacyURL url;
+        String desc;
         Set<String> s;
         ArrayList<MediaSnippet> result = new ArrayList<MediaSnippet>();
         while (i.hasNext()) {
             ientry = i.next();
-            url = ientry.url().toNormalform(true, true);
+            url = ientry.url();
             desc = ientry.alt();
-            s = removeAppearanceHashes(url, queryhashes);
+            s = removeAppearanceHashes(url.toNormalform(false, false), queryhashes);
             if (s.size() == 0) {
                 result.add(new MediaSnippet(plasmaSearchQuery.CONTENTDOM_IMAGE, url, desc, ientry.width() + " x " + ientry.height()));
                 continue;

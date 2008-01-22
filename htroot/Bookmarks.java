@@ -179,9 +179,9 @@ public class Bookmarks {
                             prop.put("mode_edit", "0"); // create mode
                             prop.put("mode_url", comp.url().toNormalform(false, true));
                             prop.putHTML("mode_title", comp.title());
-                            prop.putHTML("mode_description", (document == null) ? comp.title(): document.getTitle());
+                            prop.putHTML("mode_description", (document == null) ? comp.title(): document.dc_title());
                             prop.putHTML("mode_author", comp.author());
-                            prop.putHTML("mode_tags", (document == null) ? comp.tags() : document.getKeywords(','));
+                            prop.putHTML("mode_tags", (document == null) ? comp.tags() : document.dc_subject(','));
                             prop.put("mode_public", "0");
                             prop.put("mode_feed", "0"); //TODO: check if it IS a feed
                         }

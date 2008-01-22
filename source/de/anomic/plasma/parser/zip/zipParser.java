@@ -43,7 +43,6 @@
 
 package de.anomic.plasma.parser.zip;
 
-import de.anomic.htmlFilter.htmlFilterImageEntry;
 import java.io.BufferedOutputStream;
 import java.io.File;
 import java.io.FileOutputStream;
@@ -58,6 +57,7 @@ import java.util.TreeSet;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
 
+import de.anomic.htmlFilter.htmlFilterImageEntry;
 import de.anomic.plasma.plasmaParser;
 import de.anomic.plasma.plasmaParserDocument;
 import de.anomic.plasma.parser.AbstractParser;
@@ -114,7 +114,7 @@ public class zipParser extends AbstractParser implements Parser {
             StringBuffer docLongTitle = new StringBuffer();   
             LinkedList<String> docSections = new LinkedList<String>();
             StringBuffer docAbstrct = new StringBuffer();
-            Map<String, String> docAnchors = new HashMap<String, String>();
+            Map<yacyURL, String> docAnchors = new HashMap<yacyURL, String>();
             TreeSet<htmlFilterImageEntry> docImages = new TreeSet<htmlFilterImageEntry>(); 
             
             // creating a new parser class to parse the unzipped content
@@ -160,15 +160,15 @@ public class zipParser extends AbstractParser implements Parser {
                 
                 // merging all documents together
                 if (docKeywords.length() > 0) docKeywords.append(",");
-                docKeywords.append(subDoc.getKeywords(','));
+                docKeywords.append(subDoc.dc_subject(','));
                 
                 if (docLongTitle.length() > 0) docLongTitle.append("\n");
-                docLongTitle.append(subDoc.getTitle());
+                docLongTitle.append(subDoc.dc_title());
                 
                 docSections.addAll(Arrays.asList(subDoc.getSectionTitles()));
                 
                 if (docAbstrct.length() > 0) docAbstrct.append("\n");
-                docAbstrct.append(subDoc.getAbstract());
+                docAbstrct.append(subDoc.dc_description());
 
                 if (subDoc.getTextLength() > 0) {
                     if (docTextLength > 0) docText.write('\n');

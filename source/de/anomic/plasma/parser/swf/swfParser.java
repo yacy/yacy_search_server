@@ -44,11 +44,10 @@
 package de.anomic.plasma.parser.swf;
 
 import java.io.InputStream;
-import java.util.Hashtable;
 import java.util.HashMap;
+import java.util.Hashtable;
 
-import pt.tumba.parser.swf.*;
-
+import pt.tumba.parser.swf.SWF2HTML;
 import de.anomic.plasma.plasmaParserDocument;
 import de.anomic.plasma.parser.AbstractParser;
 import de.anomic.plasma.parser.Parser;
@@ -82,7 +81,7 @@ public class swfParser extends AbstractParser implements Parser {
     /**
      * returns a hashtable containing the mimetypes that are supported by this class
      */
-    public Hashtable getSupportedMimeTypes() {
+    public Hashtable<String, String> getSupportedMimeTypes() {
         return SUPPORTED_MIME_TYPES;
     }
 
@@ -101,7 +100,7 @@ public class swfParser extends AbstractParser implements Parser {
             String[] sections =  null;
             String abstrct = null;
             //TreeSet images = null;
-            HashMap<String, String> anchors = new HashMap<String, String>();
+            HashMap<yacyURL, String> anchors = new HashMap<yacyURL, String>();
             int urls = 0;
             int urlStart = -1;
             int urlEnd = 0;
@@ -118,7 +117,7 @@ public class swfParser extends AbstractParser implements Parser {
                 urlEnd = contents.indexOf(linebreak,urlStart);
                 url = contents.substring(urlStart,urlEnd);
                 urlnr = (new Integer(++urls)).toString();
-                anchors.put(url,urlnr);
+                anchors.put(new yacyURL(url, null), urlnr);
                 contents = contents.substring(0,urlStart)+contents.substring(urlEnd);
             }
 

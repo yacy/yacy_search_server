@@ -297,7 +297,7 @@ public class ViewFile {
                     }
             }
 
-            resMime = document.getMimeType();
+            resMime = document.dc_format();
             String[] wordArray = wordArray(post.get("words", null));
 
             if (viewMode.equals("parsed")) {
@@ -310,7 +310,7 @@ public class ViewFile {
                 
             } else if (viewMode.equals("sentences")) {
                 prop.put("viewMode", VIEW_MODE_AS_PARSED_SENTENCES);
-                final Iterator sentences = document.getSentences(pre);
+                final Iterator<StringBuffer> sentences = document.getSentences(pre);
 
                 boolean dark = true;
                 int i = 0;
@@ -319,7 +319,7 @@ public class ViewFile {
                     
                     // Search word highlighting
                     while (sentences.hasNext()) {
-                        sentence = ((StringBuffer) sentences.next()).toString();
+                        sentence = sentences.next().toString();
                         if (sentence.trim().length() > 0) {
                             prop.put("viewMode_sentences_" + i + "_nr", i + 1);
                             prop.put("viewMode_sentences_" + i + "_text", markup(wordArray, sentence));
@@ -339,11 +339,11 @@ public class ViewFile {
                 i += putMediaInfo(prop, wordArray, i, document.getAudiolinks(), "audio", (i % 2 == 0));
                 dark = (i % 2 == 0);
                 
-                TreeSet ts = document.getImages();
-                Iterator tsi = ts.iterator();
+                TreeSet<htmlFilterImageEntry> ts = document.getImages();
+                Iterator<htmlFilterImageEntry> tsi = ts.iterator();
                 htmlFilterImageEntry entry;
                 while (tsi.hasNext()) {
-                    entry = (htmlFilterImageEntry) tsi.next();
+                    entry = tsi.next();
                     prop.put("viewMode_links_" + i + "_nr", i);
                     prop.put("viewMode_links_" + i + "_dark", dark ? "1" : "0");
                     prop.put("viewMode_links_" + i + "_type", "image");
@@ -399,9 +399,9 @@ public class ViewFile {
         return message;
     }
     
-    private static int putMediaInfo(serverObjects prop, String[] wordArray, int c, Map<String, String> media, String name, boolean dark) {
-        Iterator<Map.Entry<String, String>> mi = media.entrySet().iterator();
-        Map.Entry<String, String> entry;
+    private static int putMediaInfo(serverObjects prop, String[] wordArray, int c, Map<yacyURL, String> media, String name, boolean dark) {
+        Iterator<Map.Entry<yacyURL, String>> mi = media.entrySet().iterator();
+        Map.Entry<yacyURL, String> entry;
         int i = 0;
         while (mi.hasNext()) {
             entry = mi.next();
@@ -409,8 +409,8 @@ public class ViewFile {
             prop.put("viewMode_links_" + c + "_dark", ((dark) ? 1 : 0));
             prop.putHTML("viewMode_links_" + c + "_type", name);
             prop.put("viewMode_links_" + c + "_text", markup(wordArray, (String) entry.getValue()));
-            prop.put("viewMode_links_" + c + "_link", markup(wordArray, (String) entry.getKey()));
-            prop.put("viewMode_links_" + c + "_url", entry.getKey());
+            prop.put("viewMode_links_" + c + "_link", markup(wordArray, entry.getKey().toNormalform(true, false)));
+            prop.put("viewMode_links_" + c + "_url", entry.getKey().toNormalform(true, false));
             prop.putHTML("viewMode_links_" + c + "_attr", "");
             dark = !dark;
             c++;

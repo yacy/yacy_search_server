@@ -101,7 +101,7 @@ public class vcfParser extends AbstractParser implements Parser {
             StringBuffer parsedTitle = new StringBuffer();
             StringBuffer parsedDataText = new StringBuffer();
             HashMap<String, String> parsedData = new HashMap<String, String>();
-            HashMap<String, String> anchors = new HashMap<String, String>();
+            HashMap<yacyURL, String> anchors = new HashMap<yacyURL, String>();
             LinkedList<String> parsedNames = new LinkedList<String>();
             
             boolean useLastLine = false;
@@ -211,7 +211,7 @@ public class vcfParser extends AbstractParser implements Parser {
                     } else if (key.toUpperCase().startsWith("URL")) {
                         try {
                             yacyURL newURL = new yacyURL(value, null);
-                            anchors.put(newURL.toString(),newURL.toString());   
+                            anchors.put(newURL, newURL.toString());   
                             //parsedData.put(key,value);
                         } catch (MalformedURLException ex) {/* ignore this */}                                                
                     } else if (

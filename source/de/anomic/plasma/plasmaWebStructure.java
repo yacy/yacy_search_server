@@ -29,14 +29,13 @@ package de.anomic.plasma;
 
 import java.io.File;
 import java.io.IOException;
-import java.net.MalformedURLException;
 import java.util.ConcurrentModificationException;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
-import java.util.HashMap;
-import java.util.TreeMap;
 import java.util.SortedMap;
+import java.util.TreeMap;
 import java.util.TreeSet;
 
 import de.anomic.kelondro.kelondroBase64Order;
@@ -97,8 +96,8 @@ public class plasmaWebStructure {
         assert url.hash().equals(baseurlhash);
         
         // generate citation reference
-        Map<String, String> hl = document.getHyperlinks();
-        Iterator<String> it = hl.keySet().iterator();
+        Map<yacyURL, String> hl = document.getHyperlinks();
+        Iterator<yacyURL> it = hl.keySet().iterator();
         String nexturlhash;
         StringBuffer cpg = new StringBuffer(12 * (hl.size() + 1) + 1);
         StringBuffer cpl = new StringBuffer(12 * (hl.size() + 1) + 1);
@@ -106,20 +105,18 @@ public class plasmaWebStructure {
         int GCount = 0;
         int LCount = 0;
         while (it.hasNext()) {
-            try {
-                nexturlhash = (new yacyURL(it.next(), null)).hash();
-                if (nexturlhash != null) {
-                    if (nexturlhash.substring(6).equals(lhp)) {
-                        // this is a inbound link
-                        cpl.append(nexturlhash.substring(0, 6)); // store only local part
-                        LCount++;
-                    } else {
-                        // this is a outbound link
-                        cpg.append(nexturlhash); // store complete hash
-                        GCount++;
-                    }
+            nexturlhash = it.next().hash();
+            if (nexturlhash != null) {
+                if (nexturlhash.substring(6).equals(lhp)) {
+                    // this is a inbound link
+                    cpl.append(nexturlhash.substring(0, 6)); // store only local part
+                    LCount++;
+                } else {
+                    // this is a outbound link
+                    cpg.append(nexturlhash); // store complete hash
+                    GCount++;
                 }
-            } catch (MalformedURLException e) {}
+            }
         }
         
         // append this reference to buffer

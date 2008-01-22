@@ -96,7 +96,7 @@ public class rssParser extends AbstractParser implements Parser {
 
         try {
             LinkedList<String> feedSections = new LinkedList<String>();
-            HashMap<String, String> anchors = new HashMap<String, String>();
+            HashMap<yacyURL, String> anchors = new HashMap<yacyURL, String>();
             TreeSet<htmlFilterImageEntry> images  = new TreeSet<htmlFilterImageEntry>();
             serverByteBuffer text = new serverByteBuffer();
             serverCharBuffer authors = new serverCharBuffer();
@@ -132,7 +132,7 @@ public class rssParser extends AbstractParser implements Parser {
         			if (itemCreator != null && itemCreator.length() > 0) authors.append(",").append(itemCreator);
                     
                     feedSections.add(itemTitle);
-                    anchors.put(itemURL.toString(),itemTitle);
+                    anchors.put(itemURL, itemTitle);
                     
                 	if ((text.length() != 0) && (text.byteAt(text.length() - 1) != 32)) text.append((byte) 32);
                 	text.append(new serverCharBuffer(htmlFilterAbstractScraper.stripAll(new serverCharBuffer(itemDescr.toCharArray()))).trim().toString()).append(' ');
@@ -149,7 +149,7 @@ public class rssParser extends AbstractParser implements Parser {
                             feedSections.add(itemHeadline);
                         }
                         
-                        Map<String, String> itemLinks = scraper.getAnchors();
+                        Map<yacyURL, String> itemLinks = scraper.getAnchors();
                         if ((itemLinks != null) && (itemLinks.size() > 0)) {
                             anchors.putAll(itemLinks);
                         }
@@ -191,7 +191,7 @@ public class rssParser extends AbstractParser implements Parser {
         }
 	}
 
-	public Hashtable getSupportedMimeTypes() {
+	public Hashtable<String, String> getSupportedMimeTypes() {
 		return SUPPORTED_MIME_TYPES;
 	}
 

@@ -91,18 +91,18 @@ public class plasmaCrawlProfile {
         return profileTable.size();
     }
     
-    public Iterator profiles(boolean up) {
+    public Iterator<entry> profiles(boolean up) {
         // enumerates profile entries
         try {
             return new profileIterator(up);
         } catch (IOException e) {
-            return new HashSet().iterator();
+            return new HashSet<entry>().iterator();
         }
     }
     
-    public class profileIterator implements Iterator {
+    public class profileIterator implements Iterator<entry> {
         // the iterator iterates all keys, which are byte[] objects
-        kelondroCloneableIterator handleIterator;
+        kelondroCloneableIterator<String> handleIterator;
         String lastkey;
         public profileIterator(boolean up) throws IOException {
             handleIterator = profileTable.keys(up, false);
@@ -116,7 +116,7 @@ public class plasmaCrawlProfile {
                 return false;
             }
         }
-        public Object next() {
+        public entry next() {
             try {
                 lastkey = (String) handleIterator.next();
                 return getEntry(lastkey);
@@ -140,7 +140,7 @@ public class plasmaCrawlProfile {
         } catch (IOException e) {}
     }
     
-    public entry newEntry(Map mem) {
+    public entry newEntry(Map<String, String> mem) {
         entry ne = new entry(mem);
         try {
             profileTable.set(ne.handle(), ne.map());
@@ -466,19 +466,19 @@ public class plasmaCrawlProfile {
         }
 
         public String domName(boolean attr, int index){
-            Iterator domnamesi = doms.entrySet().iterator();
+            Iterator<Map.Entry<String, DomProfile>> domnamesi = doms.entrySet().iterator();
             String domname="";
-            Map.Entry ey;
+            Map.Entry<String, DomProfile> ey;
             DomProfile dp;
             int i = 0;
             while ((domnamesi.hasNext()) && (i < index)) {
-                ey = (Map.Entry) domnamesi.next();
+                ey = domnamesi.next();
                 i++;
             }
             if(domnamesi.hasNext()){
-                ey = (Map.Entry) domnamesi.next();
-                dp = (DomProfile) ey.getValue();
-                domname = ((String) ey.getKey()) + ((attr) ? ("/r=" + dp.referrer + ", d=" + dp.depth + ", c=" + dp.count) : " ");
+                ey = domnamesi.next();
+                dp = ey.getValue();
+                domname = ey.getKey() + ((attr) ? ("/r=" + dp.referrer + ", d=" + dp.depth + ", c=" + dp.count) : " ");
             }
             return domname;
         }

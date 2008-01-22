@@ -91,7 +91,7 @@ public class psParser extends AbstractParser implements Parser {
 		}
     }
     
-    public Hashtable getSupportedMimeTypes() {
+    public Hashtable<String, String> getSupportedMimeTypes() {
         return SUPPORTED_MIME_TYPES;
     }
     
