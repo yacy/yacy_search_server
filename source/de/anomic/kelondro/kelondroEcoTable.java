@@ -102,9 +102,18 @@ public class kelondroEcoTable implements kelondroIndex {
                      ((useTailCache == tailCacheForceUsage) ||
                       ((useTailCache == tailCacheUsageAuto) && (serverMemory.request(neededRAM4table, false))))) ?
                     new kelondroRowSet(taildef, records) : null;
-            System.out.println("*** DEBUG: available RAM: " + (serverMemory.available() / 1024 / 1024) + "MB, allocating space for " + records + " entries");
+            System.out.println("*** DEBUG " + tablefile + ": available RAM: " + (serverMemory.available() / 1024 / 1024) + "MB, allocating space for " + records + " entries");
+            long neededRAM4index = 200 * 1024 * 1024 + records * (rowdef.primaryKeyLength + 4) * 3 / 2;
+            if (!serverMemory.request(neededRAM4index, false)) {
+                // despite calculations seemed to show that there is enough memory for the table AND the index
+                // there is now not enough memory left for the index. So delete the table again to free the memory
+                // for the index
+                System.out.println("*** DEBUG " + tablefile + ": not enough RAM (" + (serverMemory.available() / 1024 / 1024) + "MB) left for index, deleting allocated table space to enable index space allocation (needed: " + (neededRAM4index / 1024 / 1024) + "MB)");
+                table = null; System.gc();
+                System.out.println("*** DEBUG " + tablefile + ": RAM after releasing the table: " + (serverMemory.available() / 1024 / 1024) + "MB");
+            }
             index = new kelondroBytesIntMap(rowdef.primaryKeyLength, rowdef.objectOrder, records);
-            System.out.println("*** DEBUG: EcoTable " + tablefile.toString() + " has table copy " + ((table == null) ? "DISABLED" : "ENABLED"));
+            System.out.println("*** DEBUG " + tablefile + ": EcoTable " + tablefile.toString() + " has table copy " + ((table == null) ? "DISABLED" : "ENABLED"));
 
             // read all elements from the file into the copy table
             byte[] record = new byte[rowdef.objectsize];
@@ -124,7 +133,7 @@ public class kelondroEcoTable implements kelondroIndex {
             // check consistency
             ArrayList<Integer[]> doubles = index.removeDoubles();
             if (doubles.size() > 0) {
-                System.out.println("DEBUG: WARNING - EcoTable " + tablefile + " has " + doubles.size() + " doubles");
+                System.out.println("DEBUG " + tablefile + ": WARNING - EcoTable " + tablefile + " has " + doubles.size() + " doubles");
             }
         } catch (FileNotFoundException e) {
             // should never happen
