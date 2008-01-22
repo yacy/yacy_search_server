@@ -32,12 +32,13 @@ import de.anomic.kelondro.kelondroRow.Entry;
 public interface indexRWIEntry {
 
     // appearance flags, used in RWI entry
+    // some names are derived from the Dublin Core Metadata tag set
     // the flags 0..23 are identical to the category flags in plasmaCondenser
-    public  static final int flag_app_reference     = 24; // word appears in anchor description text (the reference to an url), or any alternative text field of a link
-    public  static final int flag_app_descr         = 25; // word appears in headline (or any description part)
-    public  static final int flag_app_author        = 26; // word appears in author
-    public  static final int flag_app_tags          = 27; // word appears in header tags
-    public  static final int flag_app_url           = 28; // word appears in url
+    public  static final int flag_app_dc_description= 24; // word appears in anchor description text (the reference to an url), or any alternative text field of a link
+    public  static final int flag_app_dc_title      = 25; // word appears in title or headline or any description part
+    public  static final int flag_app_dc_creator    = 26; // word appears in author
+    public  static final int flag_app_dc_subject    = 27; // word appears in header tags or other descriptive part
+    public  static final int flag_app_dc_identifier = 28; // word appears in url or document identifier
     public  static final int flag_app_emphasized    = 29; // word is emphasized in text (i.e. bold, italics, special size)
 
     public String toPropertyForm();

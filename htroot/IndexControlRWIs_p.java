@@ -39,6 +39,7 @@ import de.anomic.data.listManager;
 import de.anomic.http.httpHeader;
 import de.anomic.index.indexContainer;
 import de.anomic.index.indexRWIEntry;
+import de.anomic.index.indexRWIRowEntry;
 import de.anomic.index.indexURLEntry;
 import de.anomic.kelondro.kelondroBitfield;
 import de.anomic.plasma.plasmaCondenser;
@@ -115,11 +116,11 @@ public class IndexControlRWIs_p {
                     // generate an urlx array
                     indexContainer index = null;
                     index = sb.wordIndex.getContainer(keyhash, null);
-                    Iterator en = index.entries();
+                    Iterator<indexRWIRowEntry> en = index.entries();
                     int i = 0;
                     urlx = new String[index.size()];
                     while (en.hasNext()) {
-                        urlx[i++] = ((indexRWIEntry) en.next()).urlHash();
+                        urlx[i++] = en.next().urlHash();
                     }
                     index = null;
                 }
@@ -146,7 +147,7 @@ public class IndexControlRWIs_p {
                         sb.urlRemove(urlx[i]);
                     }
                 }
-                Set urlHashes = new HashSet();
+                Set<String> urlHashes = new HashSet<String>();
                 for (int i = 0; i < urlx.length; i++) urlHashes.add(urlx[i]);
                 sb.wordIndex.removeEntries(keyhash, urlHashes);
                 // this shall lead to a presentation of the list; so handle that the remaining program
@@ -193,13 +194,13 @@ public class IndexControlRWIs_p {
                 long starttime = System.currentTimeMillis();
                 index = sb.wordIndex.getContainer(keyhash, null);
                 // built urlCache
-                Iterator urlIter = index.entries();
-                HashMap knownURLs = new HashMap();
-                HashSet unknownURLEntries = new HashSet();
+                Iterator<indexRWIRowEntry> urlIter = index.entries();
+                HashMap<String, indexURLEntry> knownURLs = new HashMap<String, indexURLEntry>();
+                HashSet<String> unknownURLEntries = new HashSet<String>();
                 indexRWIEntry iEntry;
                 indexURLEntry lurl;
                 while (urlIter.hasNext()) {
-                    iEntry = (indexRWIEntry) urlIter.next();
+                    iEntry = urlIter.next();
                     lurl = sb.wordIndex.loadedURL.load(iEntry.urlHash(), null, 0);
                     if (lurl == null) {
                         unknownURLEntries.add(iEntry.urlHash());
@@ -212,7 +213,7 @@ public class IndexControlRWIs_p {
                 // transport to other peer
                 String gzipBody = sb.getConfig("indexControl.gzipBody","false");
                 int timeout = (int) sb.getConfigLong("indexControl.timeout",60000);
-                HashMap resultObj = yacyClient.transferIndex(
+                HashMap<String, Object> resultObj = yacyClient.transferIndex(
                              seed,
                              new indexContainer[]{index},
                              knownURLs,
@@ -225,7 +226,7 @@ public class IndexControlRWIs_p {
     
             // generate list
             if (post.containsKey("keyhashsimilar")) {
-                final Iterator containerIt = sb.wordIndex.indexContainerSet(keyhash, false, true, 256).iterator();
+                final Iterator<indexContainer> containerIt = sb.wordIndex.indexContainerSet(keyhash, false, true, 256).iterator();
                     indexContainer container;
                     int i = 0;
                     int rows = 0, cols = 0;
@@ -248,7 +249,7 @@ public class IndexControlRWIs_p {
             
             if (post.containsKey("blacklist")) {
                 String blacklist = post.get("blacklist", "");
-                Set urlHashes = new HashSet();
+                Set<String> urlHashes = new HashSet<String>();
                 if (post.containsKey("blacklisturls")) {
                     PrintWriter pw;
                     try {
@@ -323,11 +324,11 @@ public class IndexControlRWIs_p {
             if (post.get("flags","").length() == 0) return null;
             return new kelondroBitfield(4, (String) post.get("flags"));
         }
-        if (post.get("reference", "").equals("on")) b.set(indexRWIEntry.flag_app_reference, true);
-        if (post.get("description", "").equals("on")) b.set(indexRWIEntry.flag_app_descr, true);
-        if (post.get("author", "").equals("on")) b.set(indexRWIEntry.flag_app_author, true);
-        if (post.get("tag", "").equals("on")) b.set(indexRWIEntry.flag_app_tags, true);
-        if (post.get("url", "").equals("on")) b.set(indexRWIEntry.flag_app_url, true);
+        if (post.get("reference", "").equals("on")) b.set(indexRWIEntry.flag_app_dc_description, true);
+        if (post.get("description", "").equals("on")) b.set(indexRWIEntry.flag_app_dc_title, true);
+        if (post.get("author", "").equals("on")) b.set(indexRWIEntry.flag_app_dc_creator, true);
+        if (post.get("tag", "").equals("on")) b.set(indexRWIEntry.flag_app_dc_subject, true);
+        if (post.get("url", "").equals("on")) b.set(indexRWIEntry.flag_app_dc_identifier, true);
         if (post.get("emphasized", "").equals("on")) b.set(indexRWIEntry.flag_app_emphasized, true);
         if (post.get("image", "").equals("on")) b.set(plasmaCondenser.flag_cat_hasimage, true);
         if (post.get("audio", "").equals("on")) b.set(plasmaCondenser.flag_cat_hasaudio, true);
@@ -343,7 +344,7 @@ public class IndexControlRWIs_p {
         int hc = 0;
         prop.put("searchresult_keyhash", startHash);
         if (yacyCore.seedDB != null && yacyCore.seedDB.sizeConnected() > 0) {
-            Iterator e = yacyCore.dhtAgent.getAcceptRemoteIndexSeeds(startHash);
+            Iterator<yacySeed> e = yacyCore.dhtAgent.getAcceptRemoteIndexSeeds(startHash);
             while (e.hasNext()) {
                 seed = (yacySeed) e.next();
                 if (seed != null) {
@@ -369,11 +370,11 @@ public class IndexControlRWIs_p {
         } else {
             prop.put("searchresult", 3);
             prop.put("searchresult_allurl", ranked.filteredCount());
-            prop.put("searchresult_reference", ranked.flagCount()[indexRWIEntry.flag_app_reference]);
-            prop.put("searchresult_description", ranked.flagCount()[indexRWIEntry.flag_app_descr]);
-            prop.put("searchresult_author", ranked.flagCount()[indexRWIEntry.flag_app_author]);
-            prop.put("searchresult_tag", ranked.flagCount()[indexRWIEntry.flag_app_tags]);
-            prop.put("searchresult_url", ranked.flagCount()[indexRWIEntry.flag_app_url]);
+            prop.put("searchresult_reference", ranked.flagCount()[indexRWIEntry.flag_app_dc_description]);
+            prop.put("searchresult_description", ranked.flagCount()[indexRWIEntry.flag_app_dc_title]);
+            prop.put("searchresult_author", ranked.flagCount()[indexRWIEntry.flag_app_dc_creator]);
+            prop.put("searchresult_tag", ranked.flagCount()[indexRWIEntry.flag_app_dc_subject]);
+            prop.put("searchresult_url", ranked.flagCount()[indexRWIEntry.flag_app_dc_identifier]);
             prop.put("searchresult_emphasized", ranked.flagCount()[indexRWIEntry.flag_app_emphasized]);
             prop.put("searchresult_image", ranked.flagCount()[plasmaCondenser.flag_cat_hasimage]);
             prop.put("searchresult_audio", ranked.flagCount()[plasmaCondenser.flag_cat_hasaudio]);
@@ -439,11 +440,11 @@ public class IndexControlRWIs_p {
                         ((entry.word().flags().get(plasmaCondenser.flag_cat_hasaudio)) ? "contains audio, " : "") +
                         ((entry.word().flags().get(plasmaCondenser.flag_cat_hasvideo)) ? "contains video, " : "") +
                         ((entry.word().flags().get(plasmaCondenser.flag_cat_hasapp)) ? "contains applications, " : "") +
-                        ((entry.word().flags().get(indexRWIEntry.flag_app_url)) ? "appears in url, " : "") +
-                        ((entry.word().flags().get(indexRWIEntry.flag_app_descr)) ? "appears in description, " : "") +
-                        ((entry.word().flags().get(indexRWIEntry.flag_app_author)) ? "appears in author, " : "") +
-                        ((entry.word().flags().get(indexRWIEntry.flag_app_tags)) ? "appears in tags, " : "") +
-                        ((entry.word().flags().get(indexRWIEntry.flag_app_reference)) ? "appears in reference, " : "") +
+                        ((entry.word().flags().get(indexRWIEntry.flag_app_dc_identifier)) ? "appears in url, " : "") +
+                        ((entry.word().flags().get(indexRWIEntry.flag_app_dc_title)) ? "appears in description, " : "") +
+                        ((entry.word().flags().get(indexRWIEntry.flag_app_dc_creator)) ? "appears in author, " : "") +
+                        ((entry.word().flags().get(indexRWIEntry.flag_app_dc_subject)) ? "appears in tags, " : "") +
+                        ((entry.word().flags().get(indexRWIEntry.flag_app_dc_description)) ? "appears in reference, " : "") +
                         ((entry.word().flags().get(indexRWIEntry.flag_app_emphasized)) ? "appears emphasized, " : "") +
                         ((yacyURL.probablyRootURL(entry.word().urlHash())) ? "probably root url" : "")
                 );
@@ -453,7 +454,7 @@ public class IndexControlRWIs_p {
                 i++;
                 if ((maxlines >= 0) && (i >= maxlines)) break;
             }
-            Iterator iter = ranked.miss(); // iterates url hash strings
+            Iterator<String> iter = ranked.miss(); // iterates url hash strings
             while (iter.hasNext()) {
                 us = (String) iter.next();
                 prop.put("genUrlList_urlList_"+i+"_urlExists", "0");

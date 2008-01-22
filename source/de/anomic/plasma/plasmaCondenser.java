@@ -93,12 +93,12 @@ public final class plasmaCondenser {
     public  static final int flag_cat_entertainment = 10; // boulevard, entertainment, cultural content
     public  static final int flag_cat_knowledge     = 11; // science, school stuff, help for homework
     public  static final int flag_cat_computer      = 12; // any computer related stuff, networks, operation systems
-    public  static final int flag_cat_p2p           = 13; // p2p support, filesharing archives etc.
+    public  static final int flag_cat_p2p           = 13; // p2p support, file-sharing archives etc.
     public  static final int flag_cat_sex           = 14; // sexual content
     public  static final int flag_cat_spam          = 15; // pages that anybody would consider as not interesting
     public  static final int flag_cat_linux         = 16; // pages about linux software
     public  static final int flag_cat_macos         = 17; // pages about macintosh, apple computers and the mac os
-    public  static final int flag_cat_windows       = 18; // pages about windows os and softare
+    public  static final int flag_cat_windows       = 18; // pages about windows os and software
     public  static final int flag_cat_osreserve     = 19; // reserve
     public  static final int flag_cat_hasimage      = 20; // the page refers to (at least one) images
     public  static final int flag_cat_hasaudio      = 21; // the page refers to (at least one) audio file
@@ -131,7 +131,7 @@ public final class plasmaCondenser {
         
         //System.out.println("DEBUG: condensing " + document.getMainLongTitle() + ", indexText=" + Boolean.toString(indexText) + ", indexMedia=" + Boolean.toString(indexMedia));
 
-        insertTextToWords(document.dc_source().toNormalform(false, true), 0, indexRWIEntry.flag_app_url, RESULT_FLAGS);
+        insertTextToWords(document.dc_source().toNormalform(false, true), 0, indexRWIEntry.flag_app_dc_identifier, RESULT_FLAGS);
         
         Map.Entry<yacyURL, String> entry;
         if (indexText) {
@@ -148,9 +148,9 @@ public final class plasmaCondenser {
             // phrase  99 is taken from the media Link url and anchor description
             // phrase 100 and above are lines from the text
       
-            insertTextToWords(document.dc_title(),    1, indexRWIEntry.flag_app_descr, RESULT_FLAGS);
-            insertTextToWords(document.dc_description(), 3, indexRWIEntry.flag_app_descr, RESULT_FLAGS);
-            insertTextToWords(document.dc_creator(),   4, indexRWIEntry.flag_app_descr, RESULT_FLAGS);
+            insertTextToWords(document.dc_title(),    1, indexRWIEntry.flag_app_dc_title, RESULT_FLAGS);
+            insertTextToWords(document.dc_description(), 3, indexRWIEntry.flag_app_dc_description, RESULT_FLAGS);
+            insertTextToWords(document.dc_creator(),   4, indexRWIEntry.flag_app_dc_creator, RESULT_FLAGS);
             // missing: tags!
             String[] titles = document.getSectionTitles();
             for (int i = 0; i < titles.length; i++) {
@@ -161,8 +161,9 @@ public final class plasmaCondenser {
             Iterator<Map.Entry<yacyURL, String>> i = document.getAnchors().entrySet().iterator();
             while (i.hasNext()) {
                 entry = i.next();
-                insertTextToWords(entry.getKey().toNormalform(false, false), 98, indexRWIEntry.flag_app_reference, RESULT_FLAGS);
-                insertTextToWords((String) entry.getValue(), 98, indexRWIEntry.flag_app_reference, RESULT_FLAGS);
+                if ((entry == null) || (entry.getKey() == null)) continue;
+                insertTextToWords(entry.getKey().toNormalform(false, false), 98, indexRWIEntry.flag_app_dc_identifier, RESULT_FLAGS);
+                insertTextToWords((String) entry.getValue(), 98, indexRWIEntry.flag_app_dc_description, RESULT_FLAGS);
             }
         } else {
             this.RESULT_NUMB_WORDS = 0;
