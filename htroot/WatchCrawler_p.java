@@ -113,9 +113,12 @@ public class WatchCrawler_p {
                         newcrawlingfilter = ".*" + (new yacyURL(post.get("crawlingURL",""), null)).getHost() + ".*";
                     } catch (MalformedURLException e) {}
                     
+                    boolean crawlOrder = post.get("crawlOrder", "off").equals("on");
+                    env.setConfig("crawlOrder", (crawlOrder) ? "true" : "false");
+                    
                     int newcrawlingdepth = Integer.parseInt(post.get("crawlingDepth", "8"));
                     env.setConfig("crawlingDepth", Integer.toString(newcrawlingdepth));
-                    if ((fullDomain) && (newcrawlingdepth > 8)) newcrawlingdepth = 8;
+                    if ((crawlOrder) && (newcrawlingdepth > 8)) newcrawlingdepth = 8;
                     
                     boolean crawlingIfOlderCheck = post.get("crawlingIfOlderCheck", "off").equals("on");
                     int crawlingIfOlderNumber = Integer.parseInt(post.get("crawlingIfOlderNumber", "-1"));
@@ -142,9 +145,6 @@ public class WatchCrawler_p {
                     
                     boolean storeHTCache = post.get("storeHTCache", "off").equals("on");
                     env.setConfig("storeHTCache", (storeHTCache) ? "true" : "false");
-                    
-                    boolean crawlOrder = post.get("crawlOrder", "off").equals("on");
-                    env.setConfig("crawlOrder", (crawlOrder) ? "true" : "false");
                     
                     boolean xsstopw = post.get("xsstopw", "off").equals("on");
                     env.setConfig("xsstopw", (xsstopw) ? "true" : "false");
@@ -207,7 +207,7 @@ public class WatchCrawler_p {
                                 
                                 // generate a YaCyNews if the global flag was set
                                 if (crawlOrder) {
-                                    Map m = new HashMap(pe.map()); // must be cloned
+                                    Map<String, String> m = new HashMap<String, String>(pe.map()); // must be cloned
                                     m.remove("specificDepth");
                                     m.remove("indexText");
                                     m.remove("indexMedia");
@@ -266,7 +266,7 @@ public class WatchCrawler_p {
                                 writer.close();
                                 
                                 //String headline = scraper.getHeadline();
-                                HashMap hyperlinks = (HashMap) scraper.getAnchors();
+                                Map<yacyURL, String> hyperlinks = scraper.getAnchors();
                                 
                                 // creating a crawler profile
                                 yacyURL crawlURL = new yacyURL("file://" + file.toString(), null);
@@ -276,30 +276,16 @@ public class WatchCrawler_p {
                                 switchboard.pauseCrawlJob(plasmaSwitchboard.CRAWLJOB_LOCAL_CRAWL);
                                 
                                 // loop through the contained links
-                                Iterator linkiterator = hyperlinks.entrySet().iterator();
+                                Iterator<Map.Entry<yacyURL, String>> linkiterator = hyperlinks.entrySet().iterator();
+                                yacyURL nexturl;
                                 while (linkiterator.hasNext()) {
-                                    Map.Entry e = (Map.Entry) linkiterator.next();
-                                    String nexturlstring = (String) e.getKey();
-                                    
-                                    if (nexturlstring == null) continue;
-                                    
-                                    nexturlstring = nexturlstring.trim();
-                                    
-                                    // normalizing URL
-                                    nexturlstring = new yacyURL(nexturlstring, null).toNormalform(true, true);
-                                    
-                                    // generating an url object
-                                    yacyURL nexturlURL = null;
-                                    try {
-                                        nexturlURL = new yacyURL(nexturlstring, null);
-                                    } catch (MalformedURLException ex) {
-                                        nexturlURL = null;
-                                        continue;
-                                    }
+                                    Map.Entry<yacyURL, String> e = linkiterator.next();
+                                    nexturl = e.getKey();
+                                    if (nexturl == null) continue;
                                     
                                     // enqueuing the url for crawling
                                     switchboard.crawlStacker.enqueueEntry(
-                                            nexturlURL, 
+                                            nexturl, 
                                             null, 
                                             yacyCore.seedDB.mySeed().hash, 
                                             (String) e.getValue(), 
@@ -341,9 +327,9 @@ public class WatchCrawler_p {
                     		// create a new sitemap importer
                     		dbImporter importerThread = switchboard.dbImportManager.getNewImporter("sitemap");
                     		if (importerThread != null) {
-                    			HashMap initParams = new HashMap();
-                    			initParams.put("sitemapURL",sitemapURLStr);
-                    			initParams.put("crawlingProfile",pe.handle());
+                    			HashMap<String, String> initParams = new HashMap<String, String>();
+                    			initParams.put("sitemapURL", sitemapURLStr);
+                    			initParams.put("crawlingProfile", pe.handle());
                     			
                     			importerThread.init(initParams);
                     			importerThread.startIt();
