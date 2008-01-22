@@ -6,7 +6,10 @@
 // Frankfurt, Germany, 2004
 //
 // This File is contributed by Alexander Schier
-// last change: 26.12.2005
+//
+// $LastChangedDate: 2008-01-22 12:51:43 +0100 (Di, 22 Jan 2008) $
+// $LastChangedRevision: 4352 $
+// $LastChangedBy: orbiter $
 //
 // This program is free software; you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -154,6 +157,28 @@ public class Bookmarks {
     			if(tagsString.equals("")){
     				tagsString="unsorted"; //default tag
     			}
+                        
+                        // get rid of heading, trailing and double commas since they are useless
+                        while (tagsString.startsWith(",")) {
+                            tagsString = tagsString.substring(1);
+                        }
+                        while (tagsString.endsWith(",")) {
+                            tagsString = tagsString.substring(0,tagsString.length() -1);
+                        }
+                        while(tagsString.contains(",,")){
+                            tagsString = tagsString.replaceAll(",,", ",");
+                        }
+                        // get rid of double and trailing slashes
+                        while(tagsString.endsWith("/")){
+                            tagsString = tagsString.substring(0, tagsString.length() -1);
+                        }
+                        while(tagsString.contains("/,")){
+                            tagsString = tagsString.replaceAll("/,", ",");
+                        }
+                        while(tagsString.contains("//")){
+                            tagsString = tagsString.replaceAll("//", "/");
+                        }
+                        
     			Set tags=listManager.string2set(tagsString.replaceAll(",\\s+", ",")); // space characters following a comma are removed
         
     			bookmarksDB.Bookmark bookmark = switchboard.bookmarksDB.createBookmark(url, username);
@@ -360,7 +385,16 @@ public class Bookmarks {
        	while(it.hasNext()){
        		tag=(Tag) it.next();
        		if (tag.getFriendlyName().startsWith("/")) {
-       			path = tag.getFriendlyName();       	
+       			path = tag.getFriendlyName();
+                        
+                        // eliminate trailing and double slashes
+                        while(path.endsWith("/")){
+                            path = path.substring(0, path.length() -1);
+                        }
+                        while(path.contains("//")){
+                            path = path.replaceAll("//", "/");
+                        }
+                        
        			while(path.length() > 0){
        				folders.add(path);
        				path = path.replaceAll("(/.[^/]*$)", "");
