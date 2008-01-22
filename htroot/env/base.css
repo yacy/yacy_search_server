@@ -643,9 +643,13 @@ form.search.small fieldset * {
 <img>
 */
 
-img.bookmarkIcon, img.deleteIcon, img.recommendIcon {
+img.deleteIcon, img.recommendIcon {
   height: 11px;
   width: 11px;
+}
+img.bookmarkIcon {
+  height: 18px;
+  width: 18px;
 }
 
 .thumblink img {
@@ -751,4 +755,39 @@ ul#menu a.MenuItemLink {
   width:80%;
   padding:1px 5% 1px 15%;
 }
-
+/* Bookmark Folder---------------------------*/
+ul.folder {    
+	list-style-type: none;
+	margin-left: -3em;
+	white-space:nowrap;
+	overflow:hidden;	  
+}
+ul.folder > li a {
+	list-style-type: none;	
+	padding-left: 20px; 	
+ 	background: url(/env/grafics/doc2.gif) no-repeat;
+}
+ul.folder li.treeMenu_opened a {
+	list-style-type: none;
+	padding-left: 20px; 	
+ 	background: url(/env/grafics/doc2.gif) no-repeat;
+}
+ul.folder li.treeMenu_closed {
+	list-style-type: none;	
+	padding-left: 20px;	 
+ 	background: url(/env/grafics/closed.gif) no-repeat;
+}
+ul.folder li.treeMenu_opened {
+	list-style-type: none;	
+	padding-left: 20px;	 
+ 	background: url(/env/grafics/opened.gif) no-repeat;
+}
+/*
+ul.folder li.treeMenu_opened ul {
+ 	list-style-type: none;
+ 	margin-left: -2em;
+}
+*/
+ul.folder li.treeMenu_closed ul {
+ 	display: none;
+}
