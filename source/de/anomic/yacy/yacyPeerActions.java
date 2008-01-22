@@ -61,8 +61,8 @@ public class yacyPeerActions {
    
     private yacySeedDB seedDB;
     private plasmaSwitchboard sb;
-    private HashSet actions;
-    private HashMap userAgents;
+    private HashSet<yacyPeerAction> actions;
+    private HashMap<String, String> userAgents;
     public  long juniorConnects;
     public  long seniorConnects;
     public  long principalConnects;
@@ -72,8 +72,8 @@ public class yacyPeerActions {
     public yacyPeerActions(yacySeedDB seedDB, plasmaSwitchboard switchboard) {
         this.seedDB = seedDB;
         this.sb = switchboard;
-        this.actions = new HashSet();
-        this.userAgents = new HashMap();
+        this.actions = new HashSet<yacyPeerAction>();
+        this.userAgents = new HashMap<String, String>();
         this.juniorConnects = 0;
         this.seniorConnects = 0;
         this.principalConnects = 0;
@@ -142,14 +142,14 @@ public class yacyPeerActions {
     public void loadSeedLists() {
         // uses the superseed to initialize the database with known seeds
         
-        yacySeed     ys;
-        String       seedListFileURL;
-        yacyURL      url;
-        ArrayList    seedList;
-        Iterator     enu;
-        int          lc;
-        int          sc = seedDB.sizeConnected();
-        httpHeader   header;
+        yacySeed          ys;
+        String            seedListFileURL;
+        yacyURL           url;
+        ArrayList<String> seedList;
+        Iterator<String>  enu;
+        int               lc;
+        int               sc = seedDB.sizeConnected();
+        httpHeader        header;
         
         yacyCore.log.logInfo("BOOTSTRAP: " + sc + " seeds known from previous run");
         
@@ -366,8 +366,8 @@ public class yacyPeerActions {
         boolean res = connectPeer(peer, direct);
         // perform all actions if peer is effective new
         if (res) {
-            Iterator i = actions.iterator();
-            while (i.hasNext()) ((yacyPeerAction) i.next()).processPeerArrival(peer, direct);
+            Iterator<yacyPeerAction> i = actions.iterator();
+            while (i.hasNext()) i.next().processPeerArrival(peer, direct);
         }
         return res;
     }
@@ -376,8 +376,8 @@ public class yacyPeerActions {
         if (peer == null) return;
         disconnectPeer(peer, cause);
         // perform all actions
-        Iterator i = actions.iterator();
-        while (i.hasNext()) ((yacyPeerAction) i.next()).processPeerDeparture(peer);
+        Iterator<yacyPeerAction> i = actions.iterator();
+        while (i.hasNext()) i.next().processPeerDeparture(peer);
     }
     
     public void peerPing(yacySeed peer) {
@@ -385,8 +385,8 @@ public class yacyPeerActions {
         // this is called only if the peer has junior status
         seedDB.addPotential(peer);
         // perform all actions
-        Iterator i = actions.iterator();
-        while (i.hasNext()) ((yacyPeerAction) i.next()).processPeerPing(peer);
+        Iterator<yacyPeerAction> i = actions.iterator();
+        while (i.hasNext()) i.next().processPeerPing(peer);
     }
     
     public void setUserAgent(String IP, String userAgent) {

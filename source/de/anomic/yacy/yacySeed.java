@@ -496,7 +496,7 @@ public class yacySeed {
      * @return the IP address of the peer represented by this yacySeed object as {@link InetAddress}
      */
     public final InetAddress getInetAddress() {
-        return natLib.getInetAddress((String) this.dna.get(yacySeed.IP));
+        return natLib.getInetAddress(this.dna.get(yacySeed.IP));
     }
     
     /** @return the portnumber of this seed or <code>-1</code> if not present */
@@ -854,6 +854,7 @@ public class yacySeed {
         return genRemoteSeed(new String(b), null, false);
     }
 
+    @SuppressWarnings("unchecked")
     public final Object clone() {
         synchronized (this.dna) {
             return new yacySeed(this.hash, (HashMap<String, String>) (new HashMap<String, String>(this.dna)).clone());
