@@ -117,10 +117,13 @@ public class Bookmarks {
     	prop.put("address", address);
     
     	//defaultvalues
-    	if(isAdmin)
+    	if(isAdmin) {
     		prop.put("mode", "1");
-    	else
-    		prop.put("mode", "0");   
+                prop.put("admin", "1");
+        } else {
+    		prop.put("mode", "0");
+                prop.put("admin", "0");
+        }
     	prop.put("mode_edit", "0");
     	prop.put("mode_title", "");
     	prop.put("mode_description", "");
@@ -315,7 +318,7 @@ public class Bookmarks {
        			tagCount=0;
        			while (tagsIt.hasNext()) {            	
        				String tname = tagsIt.next();
-       				if (!tname.startsWith("/")) {
+       				if ((!tname.startsWith("/")) && (!tname.equals(""))) {
        					prop.put("bookmarks_"+count+"_tags_"+tagCount+"_tag", tname);
        					tagCount++;
        				}
@@ -389,7 +392,7 @@ public class Bookmarks {
         }
        	while(it.hasNext()){
        		tag=(Tag) it.next();
-       		if (!tag.getTagName().startsWith("/")) {
+       		if ((!tag.getTagName().startsWith("/")) && (!tag.getTagName().equals(""))) {
        			prop.putHTML(id+"_"+count+"_name", tag.getFriendlyName());
        			prop.putHTML(id+"_"+count+"_tag", tag.getTagName());
        			prop.put(id+"_"+count+"_num", tag.size());
