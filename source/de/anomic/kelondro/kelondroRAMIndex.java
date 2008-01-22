@@ -48,6 +48,7 @@ public class kelondroRAMIndex implements kelondroIndex {
 	}
     
 	public void reset(int initialspace) {
+	    this.index0 = null; // first flush RAM to make room
 		this.index0 = new kelondroRowSet(rowdef, initialspace);
         this.index1 = null; // to show that this is the initialization phase
 	}

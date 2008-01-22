@@ -153,7 +153,7 @@ public class kelondroCollectionIndex {
                     continue;
                 }
             }
-            serverLog.logFine("STARTUP", "STARTED INITIALIZATION OF NEW COLLECTION INDEX WITH " + initialSpace + " ENTRIES. THIS WILL TAKE SOME TIME");
+            serverLog.logFine("STARTUP", "STARTED INITIALIZATION OF NEW COLLECTION INDEX WITH " + initialSpace + " ENTRIES.  THIS WILL TAKE SOME TIME. " + (serverMemory.available() / 1024 / 1024) + "MB AVAILABLE.");
             kelondroRow indexRowdef = indexRow(keyLength, indexOrder);
             long necessaryRAM4fullTable = minimumRAM4Eco + (indexRowdef.objectsize + 4) * initialSpace * 3 / 2;
             long necessaryRAM4fullIndex = minimumRAM4Eco + (indexRowdef.primaryKeyLength + 4) * initialSpace * 3 / 2;

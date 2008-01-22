@@ -76,7 +76,7 @@ public class kelondroEcoTable implements kelondroIndex {
         for (int i = 0; i < cols.length; i++) {
             cols[i] = rowdef.column(i + 1);
         }
-        this.taildef = new kelondroRow(cols, kelondroNaturalOrder.naturalOrder, rowdef.primaryKeyIndex);
+        this.taildef = new kelondroRow(cols, kelondroNaturalOrder.naturalOrder, -1);
         
         // initialize table file
         if (!tablefile.exists()) {
@@ -97,11 +97,12 @@ public class kelondroEcoTable implements kelondroIndex {
         
             // initialize index and copy table
             int  records = (int) Math.max(file.size(), initialSpace);
-            long neededRAM4table = 10 * 1024 * 1024 + records * (rowdef.objectsize + 4) * 3 / 2;
+            long neededRAM4table = 200 * 1024 * 1024 + records * (rowdef.objectsize + 4) * 3 / 2;
             table = ((neededRAM4table < maxarraylength) &&
                      ((useTailCache == tailCacheForceUsage) ||
-                      ((useTailCache == tailCacheUsageAuto) && (serverMemory.request(neededRAM4table, true))))) ?
+                      ((useTailCache == tailCacheUsageAuto) && (serverMemory.request(neededRAM4table, false))))) ?
                     new kelondroRowSet(taildef, records) : null;
+            System.out.println("*** DEBUG: available RAM: " + (serverMemory.available() / 1024 / 1024) + "MB, allocating space for " + records + " entries");
             index = new kelondroBytesIntMap(rowdef.primaryKeyLength, rowdef.objectOrder, records);
             System.out.println("*** DEBUG: EcoTable " + tablefile.toString() + " has table copy " + ((table == null) ? "DISABLED" : "ENABLED"));
 
