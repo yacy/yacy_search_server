@@ -134,6 +134,24 @@ public class kelondroEcoTable implements kelondroIndex {
             ArrayList<Integer[]> doubles = index.removeDoubles();
             if (doubles.size() > 0) {
                 System.out.println("DEBUG " + tablefile + ": WARNING - EcoTable " + tablefile + " has " + doubles.size() + " doubles");
+                // from all the doubles take one, put it back to the index and remove the others from the file
+                Iterator<Integer[]> i = doubles.iterator();
+                Integer[] ds;
+                // first put back one element each
+                while (i.hasNext()) {
+                    ds = i.next();
+                    file.get(ds[0].longValue(), record, 0);
+                    System.arraycopy(record, 0, key, 0, rowdef.primaryKeyLength);
+                    index.addi(key, ds[0].intValue());
+                }
+                // then remove the other doubles by removing them from the table, but do a re-indexing while doing that
+                i = doubles.iterator();
+                while (i.hasNext()) {
+                    ds = i.next();
+                    for (int j = 1; j < ds.length; j++) {
+                        removeInFile(ds[j].intValue());
+                    }
+                }
             }
         } catch (FileNotFoundException e) {
             // should never happen
@@ -334,11 +352,15 @@ public class kelondroEcoTable implements kelondroIndex {
         
         byte[] p = new byte[rowdef.objectsize];
         if (table == null) {
-            file.cleanLast(p, 0);
-            file.put(i, p, 0);
-            byte[] k = new byte[rowdef.primaryKeyLength];
-            System.arraycopy(p, 0, k, 0, rowdef.primaryKeyLength);
-            index.puti(k, i);
+            if (i == index.size() - 1) {
+                file.clean(i);
+            } else {
+                file.cleanLast(p, 0);
+                file.put(i, p, 0);
+                byte[] k = new byte[rowdef.primaryKeyLength];
+                System.arraycopy(p, 0, k, 0, rowdef.primaryKeyLength);
+                index.puti(k, i);
+            }
         } else {
             if (i == index.size() - 1) {
                 // special handling if the entry is the last entry in the file
