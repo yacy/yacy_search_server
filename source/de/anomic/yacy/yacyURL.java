@@ -403,7 +403,14 @@ public class yacyURL {
         assert (url != null);
         url = url.trim();
         int p = url.indexOf(':');
-        if (p < 0) throw new MalformedURLException("protocol is not given in '" + url + "'");
+        if (p < 0) {
+            if (url.startsWith("www.")) {
+                url = "http://" + url;
+                p = 4;
+            } else {
+                throw new MalformedURLException("protocol is not given in '" + url + "'");
+            }
+        }
         this.protocol = url.substring(0, p).toLowerCase().trim();
         if (url.length() < p + 4) throw new MalformedURLException("URL not parseable: '" + url + "'");
         if (url.substring(p + 1, p + 3).equals("//")) {

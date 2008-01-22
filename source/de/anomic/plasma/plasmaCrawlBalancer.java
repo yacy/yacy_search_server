@@ -465,10 +465,12 @@ public class plasmaCrawlBalancer {
         assert delta >= 0: "delta = " + delta;
         int s = urlFileIndex.size();
         kelondroRow.Entry rowEntry = urlFileIndex.remove(result.getBytes(), false);
-        assert urlFileIndex.size() + 1 == s : "urlFileIndex.size() = " + urlFileIndex.size() + ", s = " + s + ", result = " + result;
+        assert (rowEntry != null) && (urlFileIndex.size() + 1 == s) : "urlFileIndex.size() = " + urlFileIndex.size() + ", s = " + s + ", result = " + result;
         if (rowEntry == null) {
             serverLog.logSevere("PLASMA BALANCER", "get() found a valid urlhash, but failed to fetch the corresponding url entry - total size = " + size() + ", fileStack.size() = " + urlFileStack.size() + ", ramStack.size() = " + urlRAMStack.size() + ", domainStacks.size() = " + domainStacks.size());
             return null;
+        } else {
+            assert urlFileIndex.size() + 1 == s : "urlFileIndex.size() = " + urlFileIndex.size() + ", s = " + s + ", result = " + result;
         }
         plasmaCrawlEntry crawlEntry = new plasmaCrawlEntry(rowEntry);
         long minimumDelta = (crawlEntry.url().isLocal()) ? minimumLocalDelta : minimumGlobalDelta;
