@@ -358,7 +358,7 @@ public class Bookmarks {
        		tag=(Tag) it.next();
        		if (tag.getFriendlyName().startsWith("/")) {
        			path = tag.getFriendlyName();       	
-       			while(!path.isEmpty()){
+       			while(!path.equals("")){
        				folders.add(path);
        				path = path.replaceAll("(/.[^/]*$)", "");
        				serverLog.logInfo("BOOKMARKS", "Path: "+path+" added to folder list.\n");
