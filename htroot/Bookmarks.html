@@ -7,7 +7,7 @@
 		<script src="/js/Bookmarks.js" type="text/javascript"></script>
 		<link rel="alternate" type="application/rss+xml" title="RSS" href="Bookmarks.rss" />
 	</head>
-	<body id="Bookmarks">
+	<body id="Bookmarks" onload="treeMenu_init(document.getElementById('folder'), '')">
 		#%env/templates/header.template%#
 		#(mode)#
 		<!-- SubMenu (mode=0) -->
@@ -80,9 +80,9 @@
 					</dt>
 				</dl>
 				#(edit)#
-				<input type="submit" name="add" value="create" />
+				<p><input type="submit" name="add" value="create" /></p>
 				::
-				<input type="submit" name="add" value="edit" />
+				<p><input type="submit" name="add" value="edit" /></p>
 				#(/edit)#
 				<img src="/env/grafics/empty.gif" name="ajax" />
 			</fieldset>
@@ -142,40 +142,59 @@
 			</fieldset>
 		</form>
 		#(/mode)#
-		<!-- show TagList -->
+		<!-- show Folders -->
 		<div class="TagList">
+			<fieldset>
+				<legend>Folders</legend>
+					<ul class="folder" id="folder">
+						<li>Bookmark Folder
+								<ul class="folder">
+								#{folderlist}#
+								#[folder]#
+								#{/folderlist}#	
+								</ul>
+						</li>
+					</ul>
+			</fieldset>
+		
+		<!-- show TagList -->		
+		
 			<fieldset>
 				<legend>Tags</legend>
 				<p>
 					<form action="Bookmarks.html" name="choosetag" method="get" accept-charset="UTF-8">
-						<select size="1" name="tag" width="175" onChange="document.choosetag.submit();">
+						<select size="1" name="tag" onChange="document.choosetag.submit();">
 							<option value=""#[selected]#>All (#[num-bookmarks]#)</option>
-							#{taglist}#
-							<option value="#[name]#"#[selected]#>#[name]# (#[num]#)</option>
-							#{/taglist}#
+							#{optlist}#<option value="#[name]#"#[selected]#>#[name]# (#[num]#)</option>
+							#{/optlist}#
 						</select>
 						<input type="submit" value=" ... ">
 					</form>
 				</p>
 				<p>
-					#{taglist}#
-					<span style="font-size:#[size]#em">
-						<a href="Bookmarks.html?tag=#[name]#">#[name]#</a>
-					</span>
+					#{taglist}#<span style="font-size:#[size]#em"><a href="Bookmarks.html?tag=#[name]#">#[name]#</a></span>
 					#{/taglist}#
 				</p>
 			</fieldset>
 		</div>
-		<!-- show BookmarkList -->
+		<!-- show BookmarkList -->		
 		<div class="bookmarkList">
+			<!-- show Info! -->	
+			<dt class="hintIcon"><img src="env/grafics/good.png" width="32" height="32" alt="good"/></dt>
+			<dd class="hint">Folders are now working! Just add Tags like /Folder/Subfolder to your bookmarks.
+				For more information please visit the <a href="http://forum.yacy-websuche.de/">YaCy forum</a>.
+				A proper display of the folder view requires JavaScript to be activated. This page has been testetd
+				with Firefox2 (Linux) and Safari (Mac OS X). Please report any issues with other browsers or
+				operating systems. [apfelmaennchen]
+			</dd>
 			<h3>Bookmark List</h3>
 			#{bookmarks}#
 			<div class="bookmark #(public)#public::private#(/public)#">
 				<h4 class="bookmarkTitle">
 					#(public)#
-					<img class="bookmarkIcon" src="env/grafics/bookmarkpriv.png" alt="private bookmark" title="private bookmark" />
+					<img class="bookmarkIcon" src="env/grafics/bookmarkpriv.png" alt="private bookmark" title="private bookmark"/>
 					::
-					<img class="bookmarkIcon" src="env/grafics/bookmarkpub.png" alt="public bookmark" title="public bookmark" />
+					<img class="bookmarkIcon" src="env/grafics/bookmarkpub.png" alt="public bookmark" title="public bookmark"/>
 					#(/public)#
 					<a href="#[link]#" class="bookmarkTitle">#[title]#</a>
 				</h4>
