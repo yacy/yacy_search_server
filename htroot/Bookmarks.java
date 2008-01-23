@@ -8,8 +8,8 @@
 // This File is contributed by Alexander Schier
 //
 // $LastChangedDate: 2008-01-22 12:51:43 +0100 (Di, 22 Jan 2008) $
-// $LastChangedRevision: 4352 $
-// $LastChangedBy: orbiter $
+// $LastChangedRevision: 4374 $
+// $LastChangedBy: low012 $
 //
 // This program is free software; you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -50,21 +50,15 @@
 
 import java.io.File;
 import java.net.MalformedURLException;
-import java.util.Comparator;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Iterator;
-import java.util.ListIterator;
 import java.util.Set;
 import java.util.TreeSet;
-
-import java.lang.Math;
-
 import de.anomic.data.bookmarksDB;
 import de.anomic.data.listManager;
 import de.anomic.data.userDB;
 import de.anomic.data.bookmarksDB.Tag;
-import de.anomic.data.bookmarksDB.tagComparator;
 import de.anomic.http.httpHeader;
 import de.anomic.http.httpc;
 import de.anomic.index.indexURLEntry;
@@ -487,7 +481,7 @@ public class Bookmarks {
 
     private static void publishNews(String url, String title, String description, String tagsString) {
     	// create a news message
-    	HashMap map = new HashMap();
+    	HashMap<String, String> map = new HashMap<String, String>();
     	map.put("url", url.replace(',', '|'));
     	map.put("title", title.replace(',', ' '));
     	map.put("description", description.replace(',', ' '));
