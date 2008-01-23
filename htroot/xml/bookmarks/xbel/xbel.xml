@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE xbel PUBLIC "+//IDN python.org//DTD XML Bookmark Exchange Language 1.0//EN//XML" "http://pyxml.sourceforge.net/topics/dtds/xbel-1.0.dtd">
+<xbel>
+  <folder>
+    <title>YaCy Bookmark Folder</title>	
+	#{xbel}#
+	#[elements]#
+	#{/xbel}#
+	</folder>
+</xbel>
