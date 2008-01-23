@@ -107,13 +107,13 @@ public class kelondroRowSet extends kelondroRowCollection implements kelondroInd
         long handle = profile.startWrite();
         int index = -1;
         kelondroRow.Entry oldentry = null;
+        // when reaching a specific amount of un-sorted entries, re-sort all
+        if ((this.chunkcount - this.sortBound) > collectionReSortLimit) {
+            sort();
+        }
         index = find(entry.bytes(), (rowdef.primaryKeyIndex < 0) ? 0 :super.rowdef.colstart[rowdef.primaryKeyIndex], super.rowdef.primaryKeyLength);
         if (index < 0) {
             super.addUnique(entry);
-            // when reaching a specific amount of un-sorted entries, re-sort all
-            if ((this.chunkcount - this.sortBound) > collectionReSortLimit) {
-                sort();
-            }
         } else {
             oldentry = get(index);
             set(index, entry);

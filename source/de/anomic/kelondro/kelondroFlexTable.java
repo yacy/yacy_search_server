@@ -59,9 +59,9 @@ public class kelondroFlexTable extends kelondroFlexWidthArray implements kelondr
             e2.printStackTrace();
             throw new kelondroException(e2.getMessage());
         }
-        
+        minimumSpace = Math.max(minimumSpace, super.size());
         try {
-    	long neededRAM = (long) ((super.row().column(0).cellwidth + 4) * Math.max(super.size(), minimumSpace) * kelondroRowCollection.growfactor);
+    	long neededRAM = 10 * 1024 * 104 + (long) ((super.row().column(0).cellwidth + 4) * minimumSpace * kelondroRowCollection.growfactor);
     	
     	File newpath = new File(path, tablename);
         File indexfile = new File(newpath, "col.000.index");
@@ -72,7 +72,7 @@ public class kelondroFlexTable extends kelondroFlexWidthArray implements kelondr
         System.out.println("*** Last Startup time: " + stt + " milliseconds");
         long start = System.currentTimeMillis();
 
-        if (serverMemory.request(neededRAM, true)) {
+        if (serverMemory.request(neededRAM, false)) {
 			// we can use a RAM index
 			if (indexfile.exists()) {
 				// delete existing index file
@@ -81,7 +81,7 @@ public class kelondroFlexTable extends kelondroFlexWidthArray implements kelondr
 			}
 
 			// fill the index
-			System.out.print("*** Loading RAM index for " + size() + " entries from " + newpath);
+			System.out.print("*** Loading RAM index for " + size() + " entries from " + newpath + "; available RAM = " + (serverMemory.available() >> 20) + " MB, allocating " + (neededRAM >> 20) + " MB for index.");
 			index = initializeRamIndex(minimumSpace);
 
 			System.out.println(" -done-");
