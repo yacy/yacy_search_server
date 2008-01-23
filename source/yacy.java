@@ -69,6 +69,7 @@ import de.anomic.http.httpc;
 import de.anomic.http.httpd;
 import de.anomic.index.indexContainer;
 import de.anomic.index.indexRWIEntry;
+import de.anomic.index.indexRWIRowEntry;
 import de.anomic.index.indexURLEntry;
 import de.anomic.kelondro.kelondroBase64Order;
 import de.anomic.kelondro.kelondroDyn;
@@ -552,7 +553,7 @@ public final class yacy {
 
         // load words
         serverLog.logInfo("GEN-WORDSTAT", "loading words...");
-        HashMap words = loadWordMap(new File(homePath, "yacy.words"));
+        HashMap<String, String> words = loadWordMap(new File(homePath, "yacy.words"));
 
         // find all hashes
         serverLog.logInfo("GEN-WORDSTAT", "searching all word-hash databases...");
@@ -570,10 +571,10 @@ public final class yacy {
         // list the hashes in reverse order
         serverLog.logInfo("GEN-WORDSTAT", "listing words in reverse size order...");
         String w;
-        Iterator i = hs.scores(false);
+        Iterator<String> i = hs.scores(false);
         while (i.hasNext()) {
-            h = (String) i.next();
-            w = (String) words.get(h);
+            h = i.next();
+            w = words.get(h);
             if (w == null) System.out.print("# " + h); else System.out.print(w);
             System.out.println(" - " + hs.getScore(h));
         }
@@ -607,7 +608,7 @@ public final class yacy {
             if (cacheMem < 2048000) throw new OutOfMemoryError("Not enough memory available to start clean up.");
                 
             plasmaWordIndex wordIndex = new plasmaWordIndex(indexPrimaryRoot, indexSecondaryRoot, 10000, log);
-            Iterator indexContainerIterator = wordIndex.wordContainers("AAAAAAAAAAAA", false, false);
+            Iterator<indexContainer> indexContainerIterator = wordIndex.wordContainers("AAAAAAAAAAAA", false, false);
             
             long urlCounter = 0, wordCounter = 0;
             long wordChunkStart = System.currentTimeMillis(), wordChunkEnd = 0;
@@ -617,10 +618,10 @@ public final class yacy {
                 indexContainer wordIdxContainer = null;
                 try {
                     wordCounter++;
-                    wordIdxContainer  = (indexContainer) indexContainerIterator.next();
+                    wordIdxContainer = indexContainerIterator.next();
                     
                     // the combined container will fit, read the container
-                    Iterator wordIdxEntries = wordIdxContainer.entries();
+                    Iterator<indexRWIRowEntry> wordIdxEntries = wordIdxContainer.entries();
                     indexRWIEntry iEntry;
                     while (wordIdxEntries.hasNext()) {
                         iEntry = (indexRWIEntry) wordIdxEntries.next();
@@ -684,13 +685,13 @@ public final class yacy {
     * @param wordlist File where the words are stored.
     * @return HashMap with the hash-word - relation.
     */
-    private static HashMap loadWordMap(File wordlist) {
+    private static HashMap<String, String> loadWordMap(File wordlist) {
         // returns a hash-word - Relation
-        HashMap wordmap = new HashMap();
+        HashMap<String, String> wordmap = new HashMap<String, String>();
         try {
             String word;
             BufferedReader br = new BufferedReader(new InputStreamReader(new FileInputStream(wordlist)));
-            while ((word = br.readLine()) != null) wordmap.put(plasmaCondenser.word2hash(word),word);
+            while ((word = br.readLine()) != null) wordmap.put(plasmaCondenser.word2hash(word), word);
             br.close();
         } catch (IOException e) {}
         return wordmap;
@@ -712,7 +713,7 @@ public final class yacy {
         serverLog.logConfig("CLEAN-WORDLIST", "START");
 
         String word;
-        TreeSet wordset = new TreeSet();
+        TreeSet<String> wordset = new TreeSet<String>();
         int count = 0;
         try {
             BufferedReader br = new BufferedReader(new InputStreamReader(new FileInputStream(wordlist)));
@@ -795,7 +796,7 @@ public final class yacy {
         log.logInfo("STARTING CREATION OF RWI-HASHLIST");
         File root = new File(homePath);
         try {
-            Iterator indexContainerIterator = null;
+            Iterator<indexContainer> indexContainerIterator = null;
             if (resource.equals("all")) {
                 WordIndex = new plasmaWordIndex(indexPrimaryRoot, indexSecondaryRoot, 3000, log);
                 indexContainerIterator = WordIndex.wordContainers(wordChunkStartHash, false, false);
@@ -810,7 +811,7 @@ public final class yacy {
                 bos.putNextEntry(zipEntry);
                 while (indexContainerIterator.hasNext()) {
                     counter++;
-                    container = (indexContainer) indexContainerIterator.next();
+                    container = indexContainerIterator.next();
                     bos.write((container.getWordHash()).getBytes());
                     bos.write(serverCore.CRLF);
                     if (counter % 500 == 0) {
@@ -825,7 +826,7 @@ public final class yacy {
                 BufferedOutputStream bos = new BufferedOutputStream(new FileOutputStream(file));
                 while (indexContainerIterator.hasNext()) {
                     counter++;
-                    container = (indexContainer) indexContainerIterator.next();
+                    container = indexContainerIterator.next();
                     bos.write((container.getWordHash()).getBytes());
                     bos.write(serverCore.CRLF);
                     if (counter % 500 == 0) {
@@ -862,7 +863,7 @@ public final class yacy {
                 kelondroMapObjects.mapIterator it;
                 it = db.maps(true, false);
                 while (it.hasNext()) {
-                    Map dna = (Map) it.next();
+                    Map<String, String> dna = it.next();
                     String peerHash = (String) dna.get("key");
                     if (peerHash.length() < yacySeedDB.commonHashLength) {
                         String peerName = (String) dna.get("Name");

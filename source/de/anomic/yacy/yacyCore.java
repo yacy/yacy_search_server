@@ -83,7 +83,7 @@ public class yacyCore {
     public static final ThreadGroup publishThreadGroup = new ThreadGroup("publishThreadGroup");
     public static yacySeedDB seedDB = null;
     public static yacyNewsPool newsPool = null;
-    public static final HashMap seedUploadMethods = new HashMap();
+    public static final HashMap<String, String> seedUploadMethods = new HashMap<String, String>();
     public static yacyPeerActions peerActions = null;
     public static yacyDHTAction dhtAgent = null;
     public static serverLog log;
@@ -291,10 +291,10 @@ public class yacyCore {
         private int added;
         private yacySeed seed;
         private final serverSemaphore sync;
-        private final List syncList;
+        private final List<Thread> syncList;
 
         public publishThread(ThreadGroup tg, yacySeed seed,
-                             serverSemaphore sync, List syncList) throws InterruptedException {
+                             serverSemaphore sync, List<Thread> syncList) throws InterruptedException {
             super(tg, "PublishSeed_" + seed.getName());
 
             this.sync = sync;
@@ -369,24 +369,24 @@ public class yacyCore {
             //    probed until we get a valid response.
 
             // init yacyHello-process
-            Map seeds; // hash/yacySeed relation
+            Map<String, yacySeed> seeds; // hash/yacySeed relation
 
             int attempts = seedDB.sizeConnected();
 
             // getting a list of peers to contact
             if (seedDB.mySeed().get(yacySeed.PEERTYPE, yacySeed.PEERTYPE_VIRGIN).equals(yacySeed.PEERTYPE_VIRGIN)) {
                 if (attempts > PING_INITIAL) { attempts = PING_INITIAL; }
-                Map ch = plasmaSwitchboard.getSwitchboard().clusterhashes;
+                Map<String, String> ch = plasmaSwitchboard.getSwitchboard().clusterhashes;
                 seeds = seedDB.seedsByAge(true, attempts - ((ch == null) ? 0 : ch.size())); // best for fast connection
                 // add also all peers from cluster if this is a public robinson cluster
                 if (plasmaSwitchboard.getSwitchboard().clusterhashes != null) {
-                    Iterator i = ch.entrySet().iterator();
+                    Iterator<Map.Entry<String, String>> i = ch.entrySet().iterator();
                     String hash;
-                    Map.Entry entry;
+                    Map.Entry<String, String> entry;
                     yacySeed seed;
                     while (i.hasNext()) {
-                        entry = (Map.Entry) i.next();
-                        hash = (String) entry.getKey();
+                        entry = i.next();
+                        hash = entry.getKey();
                         seed = (yacySeed) seeds.get(hash);
                         if (seed == null) {
                             seed = seedDB.get(hash);
@@ -411,7 +411,7 @@ public class yacyCore {
             if (seeds.size() < attempts) { attempts = seeds.size(); }
 
             // This will try to get Peers that are not currently in amIAccessibleDB
-            Iterator si = seeds.values().iterator();
+            Iterator<yacySeed> si = seeds.values().iterator();
             yacySeed seed;
 
             // include a YaCyNews record to my seed
@@ -434,7 +434,7 @@ public class yacyCore {
             //if (seeds.length > 1) {
             // holding a reference to all started threads
             int contactedSeedCount = 0;
-            final List syncList = Collections.synchronizedList(new LinkedList()); // memory for threads
+            final List<Thread> syncList = Collections.synchronizedList(new LinkedList<Thread>()); // memory for threads
             final serverSemaphore sync = new serverSemaphore(attempts);
 
             // going through the peer list and starting a new publisher thread for each peer
@@ -493,7 +493,7 @@ public class yacyCore {
             final int dbSize;
             synchronized (amIAccessibleDB) {
                 dbSize = amIAccessibleDB.size();
-                Iterator ai = amIAccessibleDB.keySet().iterator();
+                Iterator<String> ai = amIAccessibleDB.keySet().iterator();
                 while (ai.hasNext()) {
                     yacyAccessible ya = (yacyAccessible) amIAccessibleDB.get(ai.next());
                     if (ya.lastUpdated < cutofftime) {
@@ -611,9 +611,10 @@ public class yacyCore {
         }
     }
 
-    public static HashMap getSeedUploadMethods() {
+    @SuppressWarnings("unchecked")
+    public static HashMap<String, String> getSeedUploadMethods() {
         synchronized (yacyCore.seedUploadMethods) {
-            return (HashMap) yacyCore.seedUploadMethods.clone();
+            return (HashMap<String, String>) yacyCore.seedUploadMethods.clone();
         }
     }
 
@@ -627,7 +628,7 @@ public class yacyCore {
 
         if (className == null) { return null; }
         try {
-            final Class uploaderClass = Class.forName(className);
+            final Class<?> uploaderClass = Class.forName(className);
             final Object uploader = uploaderClass.newInstance();
             return (yacySeedUploader) uploader;
         } catch (Exception e) {
@@ -636,7 +637,7 @@ public class yacyCore {
     }
 
     public static void loadSeedUploadMethods() {
-        final HashMap availableUploaders = new HashMap();
+        final HashMap<String, String> availableUploaders = new HashMap<String, String>();
         try {
             final String uploadersPkgName = yacyCore.class.getPackage().getName() + ".seedUpload";
             final String packageURI = yacyCore.class.getResource("/" + uploadersPkgName.replace('.', '/')).toString();
@@ -661,7 +662,7 @@ public class yacyCore {
                 final String className = uploaderClasses[uploaderNr].substring(0, uploaderClasses[uploaderNr].indexOf(".class"));
                 final String fullClassName = uploadersPkgName + "." + className;
                 try {
-                    final Class uploaderClass = Class.forName(fullClassName);
+                    final Class<?> uploaderClass = Class.forName(fullClassName);
                     final Object theUploader = uploaderClass.newInstance();
                     if (!(theUploader instanceof yacySeedUploader)) { continue; }
                     final String[] neededLibx = ((yacySeedUploader)theUploader).getLibxDependencies();
