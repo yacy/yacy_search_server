@@ -254,9 +254,9 @@ public class yacyNewsPool {
     	CATEGORY_BLOG_ADD,
     	CATEGORY_BLOG_DEL
     };
-    public static HashSet categories;
+    public static HashSet<String> categories;
     static {
-        categories = new HashSet();
+        categories = new HashSet<String>();
         for (int i = 0; i < category.length; i++) categories.add(category[i]);
     }
     
@@ -286,7 +286,7 @@ public class yacyNewsPool {
         return newsDB.size();
     }
     
-    public Iterator recordIterator(int dbKey, boolean up) {
+    public Iterator<yacyNewsRecord> recordIterator(int dbKey, boolean up) {
         // returns an iterator of yacyNewsRecord-type objects
         yacyNewsQueue queue = switchQueue(dbKey);
         return queue.records(up);
@@ -323,15 +323,15 @@ public class yacyNewsPool {
         if (record.category() == null) return;
         if (!(categories.contains(record.category()))) return;
         if (record.created().getTime() == 0) return;
-        Map attributes = record.attributes();
+        Map<String, String> attributes = record.attributes();
         if (attributes.containsKey("url")){
-            if(plasmaSwitchboard.urlBlacklist.isListed(plasmaURLPattern.BLACKLIST_NEWS, new yacyURL((String) attributes.get("url"), null))){
+            if (plasmaSwitchboard.urlBlacklist.isListed(plasmaURLPattern.BLACKLIST_NEWS, new yacyURL((String) attributes.get("url"), null))){
                 System.out.println("DEBUG: ignored news-entry url blacklisted: " + attributes.get("url"));
                 return;
             }
         }
         if (attributes.containsKey("startURL")){
-            if(plasmaSwitchboard.urlBlacklist.isListed(plasmaURLPattern.BLACKLIST_NEWS, new yacyURL((String) attributes.get("startURL"), null))){
+            if (plasmaSwitchboard.urlBlacklist.isListed(plasmaURLPattern.BLACKLIST_NEWS, new yacyURL((String) attributes.get("startURL"), null))){
                 System.out.println("DEBUG: ignored news-entry url blacklisted: " + attributes.get("startURL"));
                 return;
             }
@@ -352,7 +352,7 @@ public class yacyNewsPool {
         yacyNewsRecord record;
         int pc = 0;
         synchronized (this.incomingNews) {
-            Iterator i = incomingNews.records(true);
+            Iterator<yacyNewsRecord> i = incomingNews.records(true);
             while (i.hasNext()) {
                 // check for interruption
                 if (Thread.currentThread().isInterrupted()) throw new InterruptedException("Shutdown in progress");
@@ -406,9 +406,9 @@ public class yacyNewsPool {
         yacyNewsQueue queue = switchQueue(dbKey);
         yacyNewsRecord record;
         String s;
-        Iterator i = queue.records(true);
+        Iterator<yacyNewsRecord> i = queue.records(true);
         while (i.hasNext()) {
-            record = (yacyNewsRecord) i.next();
+            record = i.next();
             if ((record != null) && (record.category().equals(category))) {
                 s = (String) record.attributes().get(key);
                 if ((s != null) && (s.equals(value))) return record;
@@ -420,9 +420,9 @@ public class yacyNewsPool {
     public synchronized yacyNewsRecord getByOriginator(int dbKey, String category, String originatorHash) {
         yacyNewsQueue queue = switchQueue(dbKey);
         yacyNewsRecord record;
-        Iterator i = queue.records(true);
+        Iterator<yacyNewsRecord> i = queue.records(true);
         while (i.hasNext()) {
-            record = (yacyNewsRecord) i.next();
+            record = i.next();
             if ((record != null) &&
                 (record.category().equals(category)) &&
                 (record.originator().equals(originatorHash))) {
@@ -500,7 +500,7 @@ public class yacyNewsPool {
 
     private int moveOffAll(yacyNewsQueue fromqueue, yacyNewsQueue toqueue) throws IOException {
         // move off all news from a specific queue to another queue
-        Iterator i = fromqueue.records(true);
+        Iterator<yacyNewsRecord> i = fromqueue.records(true);
         yacyNewsRecord record;
         if (toqueue == null) return 0;
         int c = 0;

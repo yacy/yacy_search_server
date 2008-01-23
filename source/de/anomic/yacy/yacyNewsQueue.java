@@ -123,9 +123,9 @@ public class yacyNewsQueue {
 
     public synchronized yacyNewsRecord get(String id) {
         yacyNewsRecord record;
-        Iterator i = records(true);
+        Iterator<yacyNewsRecord> i = records(true);
         while (i.hasNext()) {
-            record = (yacyNewsRecord) i.next();
+            record = i.next();
             if ((record != null) && (record.id().equals(id))) return record;
         }
         return null;
@@ -133,9 +133,9 @@ public class yacyNewsQueue {
 
     public synchronized yacyNewsRecord remove(String id) {
         yacyNewsRecord record;
-        Iterator i = records(true);
+        Iterator<yacyNewsRecord> i = records(true);
         while (i.hasNext()) {
-            record = (yacyNewsRecord) i.next();
+            record = i.next();
             if ((record != null) && (record.id().equals(id))) {
                 i.remove();
                 return record;
@@ -165,15 +165,15 @@ public class yacyNewsQueue {
         return b;
     }
     
-    public Iterator records(boolean up) {
+    public Iterator<yacyNewsRecord> records(boolean up) {
         // iterates yacyNewsRecord-type objects
         return new newsIterator(up);
     }
     
-    public class newsIterator implements Iterator {
+    public class newsIterator implements Iterator<yacyNewsRecord> {
         // iterates yacyNewsRecord-type objects
         
-        Iterator stackNodeIterator;
+        Iterator<kelondroRow.Entry> stackNodeIterator;
         
         public newsIterator(boolean up) {
             stackNodeIterator = queueStack.stackIterator(up);
@@ -183,7 +183,7 @@ public class yacyNewsQueue {
             return stackNodeIterator.hasNext();
         }
 
-        public Object next() {
+        public yacyNewsRecord next() {
             kelondroRow.Entry row = (kelondroRow.Entry) stackNodeIterator.next();
             try {
                 return b2r(row);

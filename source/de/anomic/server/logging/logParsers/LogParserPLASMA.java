@@ -220,10 +220,10 @@ public class LogParserPLASMA implements LogParser{
     private long DHTSendTraffic=0;
     private int DHTSendURLs=0;
     private int RWIRejectCount=0;
-    private HashSet RWIRejectPeerNames = new HashSet();
-    private HashSet RWIRejectPeerHashs = new HashSet();
-    private HashSet DHTPeerNames = new HashSet();
-    private HashSet DHTPeerHashs = new HashSet();
+    private HashSet<String> RWIRejectPeerNames = new HashSet<String>();
+    private HashSet<String> RWIRejectPeerHashs = new HashSet<String>();
+    private HashSet<String> DHTPeerNames = new HashSet<String>();
+    private HashSet<String> DHTPeerHashs = new HashSet<String>();
     private int DHTSelectionTargetCount = 0;
     private int DHTSelectionWordsCount = 0;
     private int DHTSelectionWordsTimeCount = 0;
@@ -440,8 +440,8 @@ public class LogParserPLASMA implements LogParser{
         return -1;
     }
 
-    public Hashtable getResults() {
-        Hashtable results = new Hashtable();
+    public Hashtable<String, Object> getResults() {
+        Hashtable<String, Object> results = new Hashtable<String, Object>();
         results.put(PARSER_VERSION          , new Double(parserVersion));
         results.put(URLS_RECEIVED           , new Integer(urlSum));
         results.put(URLS_REQUESTED          , new Integer(urlReqSum));

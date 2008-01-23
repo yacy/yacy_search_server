@@ -115,7 +115,7 @@ public final class ConsoleOutErrHandler extends Handler{
         
         Filter f = null;
         try {
-            Class c = Class.forName(name);
+            Class<?> c = Class.forName(name);
             f = (Filter)c.newInstance();
         } catch (Exception e) {
             if (name != null) {
@@ -130,7 +130,7 @@ public final class ConsoleOutErrHandler extends Handler{
         
         Formatter f = null;
         try {
-            Class c = Class.forName(name);
+            Class<?> c = Class.forName(name);
             f = (Formatter)c.newInstance();
         } catch (Exception e) {
             f = new SimpleFormatter();

@@ -35,7 +35,7 @@ public interface plasmaURLPattern {
          * @return unified String array of file names
          */
         public String[] getFileNamesUnified() {
-            HashSet hs = new HashSet(Arrays.asList(this.filename.split(",")));
+            HashSet<String> hs = new HashSet<String>(Arrays.asList(this.filename.split(",")));
             
             return (String[]) hs.toArray(new String[hs.size()]);
         }

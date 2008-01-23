@@ -65,10 +65,10 @@ public class defaultURLPattern extends abstractURLPattern implements plasmaURLPa
         if (path == null) throw new NullPointerException();
 
         // getting the proper blacklist
-        HashMap blacklistMap = super.getBlacklistMap(blacklistType);
+        HashMap<String, ArrayList<String>> blacklistMap = super.getBlacklistMap(blacklistType);
 
         if (path.length() > 0 && path.charAt(0) == '/') path = path.substring(1);
-        ArrayList app;
+        ArrayList<String> app;
         boolean matched = false;
         String pp = ""; // path-pattern
 
@@ -76,7 +76,7 @@ public class defaultURLPattern extends abstractURLPattern implements plasmaURLPa
         // [TL] While "." are found within the string
         int index = 0;
         while (!matched && (index = hostlow.indexOf('.', index + 1)) != -1) {
-            if ((app = (ArrayList) blacklistMap.get(hostlow.substring(0, index + 1) + "*")) != null) {
+            if ((app = blacklistMap.get(hostlow.substring(0, index + 1) + "*")) != null) {
                 for (int i=app.size()-1; !matched && i>-1; i--) {
                     pp = (String)app.get(i);
                     matched |= ((pp.equals("*")) || (path.matches(pp)));
@@ -85,7 +85,7 @@ public class defaultURLPattern extends abstractURLPattern implements plasmaURLPa
         }
         index = hostlow.length();
         while (!matched && (index = hostlow.lastIndexOf('.', index - 1)) != -1) {
-            if ((app = (ArrayList) blacklistMap.get("*" + hostlow.substring(index, hostlow.length()))) != null) {
+            if ((app = blacklistMap.get("*" + hostlow.substring(index, hostlow.length()))) != null) {
                 for (int i=app.size()-1; !matched && i>-1; i--) {
                     pp = (String)app.get(i);
                     matched |= ((pp.equals("*")) || (path.matches(pp)));
@@ -94,7 +94,7 @@ public class defaultURLPattern extends abstractURLPattern implements plasmaURLPa
         }
 
         // try to match without wildcard in domain
-        if (!matched && (app = (ArrayList)blacklistMap.get(hostlow)) != null) {
+        if (!matched && (app = blacklistMap.get(hostlow)) != null) {
             for (int i=app.size()-1; !matched && i>-1; i--) {
                 pp = (String)app.get(i);
                 matched |= ((pp.equals("*")) || (path.matches(pp)));

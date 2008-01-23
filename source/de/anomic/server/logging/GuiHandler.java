@@ -103,7 +103,7 @@ public class GuiHandler extends Handler{
         
         Filter f = null;
         try {
-            Class c = Class.forName(name);
+            Class<?> c = Class.forName(name);
             f = (Filter)c.newInstance();
         } catch (Exception e) {
             System.err.println("Unable to load filter: " + name);
@@ -116,7 +116,7 @@ public class GuiHandler extends Handler{
         
         Formatter f = null;
         try {
-            Class c = Class.forName(name);
+            Class<?> c = Class.forName(name);
             f = (Formatter)c.newInstance();
         } catch (Exception e) {
             f = new SimpleFormatter();
@@ -154,7 +154,7 @@ public class GuiHandler extends Handler{
 
 
     public synchronized LogRecord[] getLogArray(Long sequenceNumberStart) {
-        ArrayList tempBuffer = new ArrayList(this.count);
+        ArrayList<LogRecord> tempBuffer = new ArrayList<LogRecord>(this.count);
         
         for (int i = 0; i < this.count; i++) {
             int ix = (this.start+i)%this.buffer.length;
@@ -197,7 +197,7 @@ public class GuiHandler extends Handler{
         
         if ((lineCount > this.count)||(lineCount < 0)) lineCount = this.count;
         
-        ArrayList logMessages = new ArrayList(this.count);
+        ArrayList<String> logMessages = new ArrayList<String>(this.count);
         Formatter logFormatter = getFormatter();
         
         try {

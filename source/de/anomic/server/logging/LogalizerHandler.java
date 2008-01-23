@@ -64,15 +64,15 @@ public class LogalizerHandler extends Handler {
     public static boolean enabled=false;
     public static boolean debug=false;
     private String logParserPackage;
-    private HashMap parsers;
+    private HashMap<String, Object> parsers;
     
     public LogalizerHandler() {
         super();
         configure();
     }    
 
-    private HashMap loadParsers() {
-        HashMap parsers = new HashMap();
+    private HashMap<String, Object> loadParsers() {
+        HashMap<String, Object> parsers = new HashMap<String, Object>();
         try {
             if (debug) System.out.println("Searching for additional content parsers in package " + logParserPackage);
             // getting an uri to the parser subpackage
@@ -88,7 +88,7 @@ public class LogalizerHandler extends Handler {
             //System.out.println(parserDirFiles.length);
             for (int i=0; i<parserDirFiles.length; i++) {
                 String tmp = parserDirFiles[i].substring(0,parserDirFiles[i].indexOf(".class"));
-                Class tempClass = Class.forName(logParserPackage+"."+tmp);
+                Class<?> tempClass = Class.forName(logParserPackage+"."+tmp);
                 if (tempClass.isInterface()) {
                     if (debug) System.out.println(tempClass.getName() + " is an Interface");
                 } else {
@@ -145,18 +145,18 @@ public class LogalizerHandler extends Handler {
         }
     }
     
-    public Set getParserNames() {
+    public Set<String> getParserNames() {
         return parsers.keySet();
     }
     
     public LogParser getParser(int number) {
-        Object o;
-        Iterator it = parsers.keySet().iterator();
+        String o;
+        Iterator<String> it = parsers.keySet().iterator();
         int i = 0;
         while (it.hasNext()) {
             o = it.next();
             if (i++ == number)
-                return (LogParser)parsers.get(o);
+                return (LogParser) parsers.get(o);
         }
         return null;
     }
