@@ -57,7 +57,7 @@ public class loaderThreads {
     protected httpRemoteProxyConfig remoteProxyConfig;
 
     // management objects for collection of threads
-    Hashtable threads;
+    Hashtable<String, Thread> threads;
     int completed, failed;
     
     public loaderThreads() {
@@ -78,7 +78,7 @@ public class loaderThreads {
         this.user = user;
         this.password = password;
         this.remoteProxyConfig = theremoteProxyConfig;
-        this.threads = new Hashtable();
+        this.threads = new Hashtable<String, Thread>();
         this.completed = 0;
         this.failed = 0;
     }
@@ -199,7 +199,7 @@ public class loaderThreads {
             int line = 0;
             String s, key, value;
             int p;
-            ArrayList lines = nxTools.strings(v);
+            ArrayList<String> lines = nxTools.strings(v);
             try {
                 while ((this.run) && (line < lines.size())) {
                     // parse line and construct a property

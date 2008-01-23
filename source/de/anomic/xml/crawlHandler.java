@@ -54,7 +54,7 @@ public class crawlHandler extends DefaultHandler {
         "docs"         //
         };
 
-    private static final HashSet startpointTagsSet = new HashSet();
+    private static final HashSet<String> startpointTagsSet = new HashSet<String>();
     static {
         for (int i = 0; i < startpointTags.length; i++) {
             startpointTagsSet.add(startpointTags[i]);
@@ -65,8 +65,8 @@ public class crawlHandler extends DefaultHandler {
     private Startpoint channel, startpoint;
     private StringBuffer buffer;
     private boolean parsingAttributes, parsingStartpoint;
-    private ArrayList startpointsGUID; // a list of GUIDs, so the items can be retrieved by a specific order
-    private HashMap startpoints; // a guid:Item map
+    private ArrayList<String> startpointsGUID; // a list of GUIDs, so the items can be retrieved by a specific order
+    private HashMap<String, Startpoint> startpoints; // a guid:Item map
     
     
     public crawlHandler(String path) {
@@ -80,8 +80,8 @@ public class crawlHandler extends DefaultHandler {
     }
     
     private void init() {
-        startpointsGUID = new ArrayList();
-        startpoints = new HashMap();
+        startpointsGUID = new ArrayList<String>();
+        startpoints = new HashMap<String, Startpoint>();
         buffer = new StringBuffer();
         startpoint = null;
         channel = null;
@@ -165,10 +165,10 @@ public class crawlHandler extends DefaultHandler {
     
     public static class Attributes {
         
-        private HashMap map;
+        private HashMap<String, String> map;
 
         public Attributes() {
-            this.map = new HashMap();
+            this.map = new HashMap<String, String>();
         }
         
         public void setValue(String name, String value) {
@@ -222,10 +222,10 @@ public class crawlHandler extends DefaultHandler {
     
     public static class Startpoint {
         
-        private HashMap map;
+        private HashMap<String, String> map;
 
         public Startpoint() {
-            this.map = new HashMap();
+            this.map = new HashMap<String, String>();
             this.map.put("guid", Long.toHexString(System.currentTimeMillis()) + ":" + guidcount++);
         }
         

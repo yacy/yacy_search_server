@@ -194,15 +194,15 @@ public class cryptbig {
 
 
     // This method returns the available implementations for a service type
-    public static Set listCryptoMethods(String serviceType) {
-        Set result = new HashSet();
+    public static Set<String> listCryptoMethods(String serviceType) {
+        Set<String> result = new HashSet<String>();
     
         // All providers
         Provider[] providers = Security.getProviders();
         for (int i = 0; i < providers.length; i++) {
             // Get services provided by each provider
-            Set keys = providers[i].keySet();
-            for (Iterator it = keys.iterator(); it.hasNext(); ) {
+            Set<?> keys = providers[i].keySet();
+            for (Iterator<?> it = keys.iterator(); it.hasNext(); ) {
                 String key = (String) it.next();
                 key = key.split(" ")[0];
                 if (key.startsWith(serviceType + ".")) {
@@ -216,9 +216,9 @@ public class cryptbig {
         return result;
     }
 
-    public static void testCryptMethods(Set methods) {
+    public static void testCryptMethods(Set<String> methods) {
 	    String method;
-	    Iterator i = methods.iterator();
+	    Iterator<String> i = methods.iterator();
 	    while (i.hasNext()) {
 		method = (String) i.next();
 		System.out.print(method + " : ");
@@ -569,7 +569,7 @@ public class cryptbig {
 	}
 	if (s[0].equals("-tc")) {
 	    // list all available crypt mehtods:
-	    Set methods = listCryptoMethods("Cipher");
+	    Set<String> methods = listCryptoMethods("Cipher");
 	    System.out.println(methods.size() + " crypt methods:" + methods.toString());
 	    testCryptMethods(methods);
 	    System.exit(0);

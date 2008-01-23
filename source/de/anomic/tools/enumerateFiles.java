@@ -45,14 +45,14 @@ import java.util.ArrayList;
 import java.util.Enumeration;
 import java.util.TreeSet;
 
-public class enumerateFiles implements Enumeration {
+public class enumerateFiles implements Enumeration<File> {
     
     // implements iterative search through recursively defined subdirectories
     // and return all paths to the files
     
-    private ArrayList hierarchy; // contains TreeSet elements, each TreeSet contains File Entries
+    private ArrayList<TreeSet<File>> hierarchy; // contains TreeSet elements, each TreeSet contains File Entries
     private boolean incOrder;    // if true, the smallest value is returned first
-    private Object buffer;       // the prefetch-buffer
+    private File buffer;       // the prefetch-buffer
     private boolean return_files;
     private boolean return_folders;
     private boolean delete_emptyFolders;
@@ -62,10 +62,10 @@ public class enumerateFiles implements Enumeration {
         this.return_files = files;
         this.return_folders = folders;
         this.delete_emptyFolders = deleteEmptyFolders;
-        this.hierarchy = new ArrayList();
+        this.hierarchy = new ArrayList<TreeSet<File>>();
         this.incOrder = increasing;
         // the we initially fill the hierarchy with the content of the root folder
-        TreeSet t = new TreeSet();
+        TreeSet<File> t = new TreeSet<File>();
         String[] l = root.list();
         // System.out.println("D " + l.toString());
         if (l != null) for (int i = 0; i < l.length; i++) t.add(new File(root, l[i]));
@@ -74,15 +74,15 @@ public class enumerateFiles implements Enumeration {
         this.buffer = nextElement0();
     }
     
-    private Object nextElement0() {
+    private File nextElement0() {
         // the object is a File pointing to the corresponding file
         File f;
-        TreeSet t;
+        TreeSet<File> t;
         do {
             // System.out.println("D " + hierarchy.toString());
             t = null;
             while ((t == null) && (hierarchy.size() > 0)) {
-                t = (TreeSet) hierarchy.get(hierarchy.size() - 1);
+                t = hierarchy.get(hierarchy.size() - 1);
                 if (t.size() == 0) {
                     hierarchy.remove(hierarchy.size() - 1); // we step up one hierarchy
                     t = null;
@@ -94,7 +94,7 @@ public class enumerateFiles implements Enumeration {
             t.remove(f);
             // if the value represents another folder, we step into the next hierarchy
             if (f.isDirectory()) {
-                t = new TreeSet();
+                t = new TreeSet<File>();
                 String[] l = f.list();
                 if (l == null) {
                     // f has disappeared
@@ -125,8 +125,8 @@ public class enumerateFiles implements Enumeration {
         return buffer != null;
     }
     
-    public Object nextElement() {
-        Object r = buffer;
+    public File nextElement() {
+        File r = buffer;
         buffer = nextElement0();
         return r;
     }

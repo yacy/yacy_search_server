@@ -1,13 +1,15 @@
 // dir.java 
-// -----------------------
-// (C) by Michael Peter Christen; mc@anomic.de
-// first published on http://www.anomic.de
-// Frankfurt, Germany, 2004, 2005
+// (C) 2004, 2005 by Michael Peter Christen; mc@yacy.net, Frankfurt a. M., Germany
+// first published 2004 on http://yacy.net
+//
+// This is a part of YaCy, a peer-to-peer based web search engine
 //
 // $LastChangedDate$
 // $LastChangedRevision$
 // $LastChangedBy$
 //
+// LICENSE
+// 
 // This program is free software; you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
 // the Free Software Foundation; either version 2 of the License, or
@@ -21,30 +23,6 @@
 // You should have received a copy of the GNU General Public License
 // along with this program; if not, write to the Free Software
 // Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
-//
-// Using this software in any meaning (reading, learning, copying, compiling,
-// running) means that you agree that the Author(s) is (are) not responsible
-// for cost, loss of data or any harm that may be caused directly or indirectly
-// by usage of this softare or this documentation. The usage of this software
-// is on your own risk. The installation and usage (starting/running) of this
-// software may allow other people or application to access your computer and
-// any attached devices and is highly dependent on the configuration of the
-// software which must be done by the user of the software; the author(s) is
-// (are) also not responsible for proper configuration and usage of the
-// software, even if provoked by documentation provided together with
-// the software.
-//
-// Any changes to this file according to the GPL as documented in the file
-// gpl.txt aside this file in the shipment you received can be done to the
-// lines that follows this copyright notice here, but changes must not be
-// done inside the copyright notive above. A re-distribution must contain
-// the intact and unchanged copyright notice.
-// Contributions and changes to the program code must be marked as such.
-//
-// You must compile this file with
-// javac -classpath <application_root>/classes <application_root>/htroot/htdocsdefault/dir.java
-// which most probably means to compile this with
-// javac -classpath ../../classes dir.java
 
 import java.io.ByteArrayInputStream;
 import java.io.File;
@@ -53,6 +31,7 @@ import java.net.InetAddress;
 import java.net.UnknownHostException;
 import java.text.SimpleDateFormat;
 import java.util.Arrays;
+import java.util.Comparator;
 import java.util.Date;
 import java.util.Iterator;
 
@@ -74,7 +53,6 @@ import de.anomic.server.serverMemory;
 import de.anomic.server.serverObjects;
 import de.anomic.server.serverSwitch;
 import de.anomic.server.logging.serverLog;
-import de.anomic.tools.dirlistComparator;
 import de.anomic.tools.md5DirFileFilter;
 import de.anomic.yacy.yacyCore;
 import de.anomic.yacy.yacySeed;
@@ -233,7 +211,7 @@ public class dir {
             
             // sorting the dir list
             dirlistComparator comparator = new dirlistComparator();
-            Arrays.sort(list,comparator);
+            Arrays.sort(list, comparator);
             
             String md5s, description;
             // tree += "<span class=\"tt\">path&nbsp;=&nbsp;" + path + "</span><br><br>";
@@ -399,10 +377,10 @@ public class dir {
     public static void deletePhrase(plasmaSwitchboard switchboard, String urlstring, String phrase, String descr) {
         try {
             final String urlhash = (new yacyURL(urlstring, null)).hash();
-            final Iterator words = plasmaCondenser.getWords(("yacyshare " + phrase + " " + descr).getBytes("UTF-8"), "UTF-8").keySet().iterator();
+            final Iterator<String> words = plasmaCondenser.getWords(("yacyshare " + phrase + " " + descr).getBytes("UTF-8"), "UTF-8").keySet().iterator();
             String word;
             while (words.hasNext()) {
-                word = (String) words.next();
+                word = words.next();
                 switchboard.wordIndex.removeEntry(plasmaCondenser.word2hash(word), urlhash);
             }
             switchboard.wordIndex.loadedURL.remove(urlhash);
@@ -411,4 +389,17 @@ public class dir {
         }
     }
 
+    public static class dirlistComparator implements Comparator<File> {
+        
+        public int compare(File file1, File file2) {
+            if (file1.isDirectory() && !file2.isDirectory()) {
+                return -1;
+            } else if (!file1.isDirectory() && file2.isDirectory()) {
+                return 1;
+            } else {
+                return file1.getName().compareToIgnoreCase(file2.getName());
+            }
+         }
+        
+     }
 }

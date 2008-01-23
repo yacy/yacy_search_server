@@ -38,44 +38,43 @@
 // the intact and unchanged copyright notice.
 // Contributions and changes to the program code must be marked as such.
 
-
 package de.anomic.tools;
 
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Set;
 
-public class disorderSet extends HashSet implements Set {
+public class disorderSet extends HashSet<String> implements Set<String> {
 
     private static final long serialVersionUID = 1L;
-	disorderHeap dh;
+    disorderHeap dh;
 
     public disorderSet() {
-	super();
-	dh = null;
+        super();
+        dh = null;
     }
 
     public boolean hasAny() {
-	return (this.size() > 0);
+        return (this.size() > 0);
     }
 
     public Object any() {
-	// return just any element
-	if ((dh == null) || (dh.size() == 0)) {
-	    if (this.size() == 0) return null;
-	    // fill up the queue
-	    dh = new disorderHeap();
-	    Iterator elements = this.iterator();
-	    while (elements.hasNext()) dh.add(elements.next());
-	}
-	return dh.remove();
+        // return just any element
+        if ((dh == null) || (dh.size() == 0)) {
+            if (this.size() == 0) return null;
+            // fill up the queue
+            dh = new disorderHeap();
+            Iterator<String> elements = this.iterator();
+            while (elements.hasNext()) dh.add(elements.next());
+        }
+        return dh.remove();
     }
 
     public static void main(String[] args) {
-	disorderSet ds = new disorderSet();
-	for (int i = 0; i < args.length; i++) ds.add(args[i]);
-	for (int i = 0; i < args.length * 3; i++) System.out.print((String) ds.any() + " ");
-	System.out.println();
+        disorderSet ds = new disorderSet();
+        for (int i = 0; i < args.length; i++) ds.add(args[i]);
+        for (int i = 0; i < args.length * 3; i++) System.out.print((String) ds.any() + " ");
+        System.out.println();
     }
 
 }

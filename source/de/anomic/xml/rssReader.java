@@ -62,7 +62,7 @@ public class rssReader extends DefaultHandler {
         "docs"         //
         };
 
-    private static final HashSet tags = new HashSet();
+    private static final HashSet<String> tags = new HashSet<String>();
     static {
         for (int i = 0; i < tagsDef.length; i++) {
             tags.add(tagsDef[i]);
@@ -74,13 +74,13 @@ public class rssReader extends DefaultHandler {
     private StringBuffer buffer;
     private boolean parsingChannel, parsingImage, parsingItem;
     private String imageURL;
-    private ArrayList itemsGUID; // a list of GUIDs, so the items can be retrieved by a specific order
-    private HashMap items; // a guid:Item map
+    private ArrayList<String> itemsGUID; // a list of GUIDs, so the items can be retrieved by a specific order
+    private HashMap<String, Item> items; // a guid:Item map
     
     
     public rssReader() {
-        itemsGUID = new ArrayList();
-        items = new HashMap();
+        itemsGUID = new ArrayList<String>();
+        items = new HashMap<String, Item>();
         buffer = new StringBuffer();
         item = null;
         channel = null;
@@ -215,10 +215,10 @@ public class rssReader extends DefaultHandler {
     
     public static class Item {
         
-        private HashMap map;
+        private HashMap<String, String> map;
 
         public Item() {
-            this.map = new HashMap();
+            this.map = new HashMap<String, String>();
             this.map.put("guid", Long.toHexString(System.currentTimeMillis()) + ":" + guidcount++);
         }
         

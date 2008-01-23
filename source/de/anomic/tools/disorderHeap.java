@@ -45,51 +45,51 @@ import java.util.LinkedList;
 
 public class disorderHeap {
 
-    LinkedList list;
+    LinkedList<String> list;
 
     public disorderHeap() {
-	list = new LinkedList();
+        list = new LinkedList<String>();
     }
 
     public disorderHeap(int numbers) {
-	// create a disorder heap with numbers in it
-	// the numbers are 0..numbers-1
-	this();
-	for (int i = 0; i < numbers; i++) add(Integer.toString(i));
+        // create a disorder heap with numbers in it
+        // the numbers are 0..numbers-1
+        this();
+        for (int i = 0; i < numbers; i++) add(Integer.toString(i));
     }
     
-    public synchronized void add(Object element) {
-	// add one element into the list at an arbitrary position
-	int pos = (int) ((System.currentTimeMillis() / 7) % (list.size() + 1));
-	list.add(pos, element);
+    public synchronized void add(String element) {
+        // add one element into the list at an arbitrary position
+        int pos = (int) ((System.currentTimeMillis() / 7) % (list.size() + 1));
+        list.add(pos, element);
     }
 
-    public synchronized Object remove() {
-	if (list.size() == 0) return null;
-	int pos = (int) ((System.currentTimeMillis() / 13) % list.size());
-	return list.remove(pos);
+    public synchronized String remove() {
+        if (list.size() == 0) return null;
+        int pos = (int) ((System.currentTimeMillis() / 13) % list.size());
+        return list.remove(pos);
     }
 
     public synchronized int number() {
-	String n = (String) this.remove();
-	if (n == null) return -1;
-	try {
-	    return Integer.parseInt(n);
-	} catch (Exception e) {
-	    return -1;
-	}
+        String n = this.remove();
+        if (n == null) return -1;
+        try {
+            return Integer.parseInt(n);
+        } catch (Exception e) {
+            return -1;
+    	}
     }
 
     public synchronized int size() {
-	return list.size();
+        return list.size();
     }
 
 
     public static void main(String[] args) {
-	disorderHeap ul = new disorderHeap();
-	for (int i = 0; i < args.length; i++) ul.add(args[i]);
-	for (int i = 0; i < args.length; i++) System.out.print((String) ul.remove() + " ");
-	System.out.println();
+        disorderHeap ul = new disorderHeap();
+        for (int i = 0; i < args.length; i++) ul.add(args[i]);
+        for (int i = 0; i < args.length; i++) System.out.print(ul.remove() + " ");
+        System.out.println();
     }
 
 }

@@ -80,14 +80,13 @@ public class PKCS12Tool {
         fileIn.close();
     }
     
-    public Enumeration aliases() throws KeyStoreException {
-        Enumeration aliases = this.kspkcs12.aliases();
-        return aliases;
+    public Enumeration<String> aliases() throws KeyStoreException {
+        return this.kspkcs12.aliases();
     }
     
     public void printAliases() throws KeyStoreException {
-        Enumeration aliases = aliases();
-        while(aliases.hasMoreElements()) {
+        Enumeration<String> aliases = aliases();
+        while (aliases.hasMoreElements()) {
             System.out.println(aliases.nextElement());
         }    
     }
@@ -109,7 +108,7 @@ public class PKCS12Tool {
         jks.load(jksFileIn,(jksPassword!=null)?jksPassword.toCharArray():null);
         if (jksFileIn != null) jksFileIn.close();
          
-        Enumeration pkcs12Aliases = aliases();
+        Enumeration<String> pkcs12Aliases = aliases();
         while (pkcs12Aliases.hasMoreElements()) {
            String strAlias = (String)pkcs12Aliases.nextElement();
            System.err.println("Importing Alias '" + strAlias + "'");
