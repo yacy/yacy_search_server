@@ -145,12 +145,21 @@ public class kelondroEcoTable implements kelondroIndex {
                     index.addi(key, ds[0].intValue());
                 }
                 // then remove the other doubles by removing them from the table, but do a re-indexing while doing that
+                // first aggregate all the delete positions because the elements from the top positions must be removed first
                 i = doubles.iterator();
+                TreeSet<Integer> delpos = new TreeSet<Integer>();
                 while (i.hasNext()) {
                     ds = i.next();
                     for (int j = 1; j < ds.length; j++) {
-                        removeInFile(ds[j].intValue());
+                        delpos.add(ds[j]);
                     }
+                }
+                // now remove the entries in a sorted way (top-down)
+                Integer top;
+                while (delpos.size() > 0) {
+                    top = delpos.last();
+                    delpos.remove(top);
+                    removeInFile(top.intValue());
                 }
             }
         } catch (FileNotFoundException e) {

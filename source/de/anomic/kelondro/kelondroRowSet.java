@@ -110,6 +110,10 @@ public class kelondroRowSet extends kelondroRowCollection implements kelondroInd
         index = find(entry.bytes(), (rowdef.primaryKeyIndex < 0) ? 0 :super.rowdef.colstart[rowdef.primaryKeyIndex], super.rowdef.primaryKeyLength);
         if (index < 0) {
             super.addUnique(entry);
+            // when reaching a specific amount of un-sorted entries, re-sort all
+            if ((this.chunkcount - this.sortBound) > collectionReSortLimit) {
+                sort();
+            }
         } else {
             oldentry = get(index);
             set(index, entry);
@@ -140,10 +144,6 @@ public class kelondroRowSet extends kelondroRowCollection implements kelondroInd
         
         if (rowdef.objectOrder == null) return iterativeSearch(a, astart, alength, 0, this.chunkcount);
         
-        // check if a re-sorting makes sense
-        if ((this.chunkcount - this.sortBound) > collectionReSortLimit) {
-        	sort();
-        }
         if ((this.rowdef.objectOrder != null) && (this.rowdef.objectOrder instanceof kelondroBase64Order) && (this.sortBound > 4000)) {
             // first try to find in sorted area
             final byte[] compiledPivot = compilePivot(a, astart, alength);

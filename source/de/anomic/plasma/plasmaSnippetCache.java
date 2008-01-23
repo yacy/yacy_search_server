@@ -867,6 +867,10 @@ public class plasmaSnippetCache {
             log.logInfo("error: '" + snippet.getError() + "', remove url = " + snippet.getUrl().toNormalform(false, true) + ", cause: " + snippet.getError());
             plasmaSwitchboard.getSwitchboard().wordIndex.loadedURL.remove(urlHash);
             plasmaSearchEvent event = plasmaSearchEvent.getEvent(eventID);
+            assert plasmaSwitchboard.getSwitchboard() != null;
+            assert plasmaSwitchboard.getSwitchboard().wordIndex != null;
+            assert event != null;
+            assert event.getQuery() != null;
             plasmaSwitchboard.getSwitchboard().wordIndex.removeEntryMultiple(event.getQuery().queryHashes, urlHash);
             event.remove(urlHash);
         }
