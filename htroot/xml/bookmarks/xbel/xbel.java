@@ -49,7 +49,7 @@ public class xbel {
     	}
    
     	if(fn.startsWith(root)){
-    		prop.put("xbel_"+count+"_elements", "<folder id=\">"+bookmarksDB.tagHash(fn)+"\">");
+    		prop.put("xbel_"+count+"_elements", "<folder id=\""+bookmarksDB.tagHash(fn)+"\">");
     		count++;
     		prop.put("xbel_"+count+"_elements", "<title>"+fn.replaceFirst(root+"/*","")+"</title>");   		
     		count++;    
