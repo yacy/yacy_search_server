@@ -1,4 +1,4 @@
-<?xml version='1.0' standalone='yes'?>
+<?xml version='1.0' encoding="UTF-8" standalone='yes'?>
 <tags>
 #{tags}#<tag count="#[count]#" tag="#[name]#"/>
 #{/tags}#
