@@ -33,7 +33,7 @@ import de.anomic.server.logging.serverLog;
 
 public class kelondroRowSet extends kelondroRowCollection implements kelondroIndex {
 
-    private static final int collectionReSortLimit = 300;
+    private static final int collectionReSortLimit = 400;
     
     private kelondroProfile profile;
 
@@ -143,6 +143,10 @@ public class kelondroRowSet extends kelondroRowCollection implements kelondroInd
         // returns the chunknumber; -1 if not found
         
         if (rowdef.objectOrder == null) return iterativeSearch(a, astart, alength, 0, this.chunkcount);
+        
+        if ((this.chunkcount - this.sortBound) > (collectionReSortLimit << 1)) {
+            sort();
+        }
         
         if ((this.rowdef.objectOrder != null) && (this.rowdef.objectOrder instanceof kelondroBase64Order) && (this.sortBound > 4000)) {
             // first try to find in sorted area

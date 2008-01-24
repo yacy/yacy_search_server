@@ -120,9 +120,9 @@ public class yacySearch extends Thread {
         }
     }
 
-    public static String set2string(Set hashes) {
+    public static String set2string(Set<String> hashes) {
         String wh = "";
-        final Iterator iter = hashes.iterator();
+        final Iterator<String> iter = hashes.iterator();
         while (iter.hasNext()) { wh = wh + (String) iter.next(); }
         return wh;
     }
@@ -139,28 +139,28 @@ public class yacySearch extends Thread {
         return targetPeer;
     }
 
-    private static yacySeed[] selectClusterPeers(TreeMap peerhashes) {
-    	Iterator i = peerhashes.entrySet().iterator();
-    	ArrayList l = new ArrayList();
-    	Map.Entry entry;
+    private static yacySeed[] selectClusterPeers(TreeMap<String, String> peerhashes) {
+    	Iterator<Map.Entry<String, String>> i = peerhashes.entrySet().iterator();
+    	ArrayList<yacySeed> l = new ArrayList<yacySeed>();
+    	Map.Entry<String, String> entry;
     	yacySeed s;
     	while (i.hasNext()) {
-    		entry = (Map.Entry) i.next();
-    		s = yacyCore.seedDB.get((String) entry.getKey()); // should be getConnected; get only during testing time
+    		entry = i.next();
+    		s = yacyCore.seedDB.get(entry.getKey()); // should be getConnected; get only during testing time
     		if (s != null) {
-    			s.setAlternativeAddress((String) entry.getValue());
+    			s.setAlternativeAddress(entry.getValue());
     			l.add(s);
     		}
     	}
     	yacySeed[] result = new yacySeed[l.size()];
     	for (int j = 0; j < l.size(); j++) {
-    		result[j] = (yacySeed) l.get(j);
+    		result[j] = l.get(j);
     	}
     	return result;
     	//return (yacySeed[]) l.toArray();
     }
     
-    private static yacySeed[] selectSearchTargets(Set wordhashes, int seedcount) {
+    private static yacySeed[] selectSearchTargets(Set<String> wordhashes, int seedcount) {
         // find out a specific number of seeds, that would be relevant for the given word hash(es)
         // the result is ordered by relevance: [0] is most relevant
         // the seedcount is the maximum number of wanted results
@@ -171,15 +171,15 @@ public class yacySearch extends Thread {
         
         // put in seeds according to dht
         final kelondroMScoreCluster<String> ranking = new kelondroMScoreCluster<String>();
-        final HashMap seeds = new HashMap();
+        final HashMap<String, yacySeed> seeds = new HashMap<String, yacySeed>();
         yacySeed seed;
-        Iterator dhtEnum;         
+        Iterator<yacySeed> dhtEnum;         
         int c;
         String wordhash;
         double distance;
-        Iterator iter = wordhashes.iterator();
+        Iterator<String> iter = wordhashes.iterator();
         while (iter.hasNext()) {
-            wordhash = (String) iter.next();
+            wordhash = iter.next();
             dhtEnum = yacyCore.dhtAgent.getDHTSeeds(true, wordhash, (float) 0.0);
             c = seedcount;
             while (dhtEnum.hasNext() && c > 0) {
@@ -200,7 +200,7 @@ public class yacySearch extends Thread {
         int score;
         if (c > yacyCore.seedDB.sizeConnected()) { c = yacyCore.seedDB.sizeConnected(); }
         while (dhtEnum.hasNext() && c > 0) {
-            seed = (yacySeed) dhtEnum.next();
+            seed = dhtEnum.next();
             if (seed == null) continue;
             if (!seed.getFlagAcceptRemoteIndex()) continue; // probably a robinson peer
             score = (int) Math.round(Math.random() * ((c / 3) + 3));
@@ -214,7 +214,7 @@ public class yacySearch extends Thread {
         // or seeds that are newbies to ensure that public demonstrations always work
         dhtEnum = yacyCore.seedDB.seedsConnected(true, false, null, (float) 0.50);
         while (dhtEnum.hasNext()) {
-        	seed = (yacySeed) dhtEnum.next();
+        	seed = dhtEnum.next();
             if (seed == null) continue;
             if (seed.matchPeerTags(wordhashes)) { // access robinson peers with matching tag
             	serverLog.logInfo("PLASMA", "selectPeers/PeerTags: " + seed.hash + ":" + seed.getName() + ", is specialized peer for " + seed.getPeerTags().toString());
