@@ -1,12 +1,8 @@
 package xml.bookmarks.xbel;
 
 import java.util.Iterator;
-import java.util.Set;
-import java.util.TreeSet;
 
 import de.anomic.data.bookmarksDB;
-import de.anomic.data.userDB;
-import de.anomic.data.bookmarksDB.Tag;
 import de.anomic.http.httpHeader;
 import de.anomic.plasma.plasmaSwitchboard;
 import de.anomic.server.serverObjects;
@@ -16,45 +12,18 @@ public class xbel {
 
 	private static serverObjects prop;
 	private static plasmaSwitchboard switchboard;
-	private static userDB.Entry user;
 	private static boolean isAdmin;	
 	
     public static serverObjects respond(httpHeader header, serverObjects post, serverSwitch env) {
  
-    	int count = 0;
-    	String username="";
-    	Iterator it = null;    	
-    	bookmarksDB.Tag tag;
-    	Set<String> folders = new TreeSet<String>();
-       	String path = "";
+    	int count = 0;;
     	
     	prop = new serverObjects();
     	switchboard = (plasmaSwitchboard) env;    	
     	isAdmin=switchboard.verifyAuthentication(header, true);   
   
     	if(isAdmin) {
-    	
-        	//-----------------------
-        	// create folder list
-        	//-----------------------
-           	
-           	it = switchboard.bookmarksDB.getTagIterator(isAdmin);       	
-           	while(it.hasNext()){
-           		tag=(Tag) it.next();
-           		if (tag.getFriendlyName().startsWith("/")) {
-           			path = tag.getFriendlyName();
-           			path = cleanPathString(path);                  
-           			while(path.length() > 0){
-           				folders.add(path);
-           				path = path.replaceAll("(/.[^/]*$)", "");           				
-           			}       			
-           		}
-           	}
-           	
-           	folders.add("\uffff");
-           	it = folders.iterator();
-
-           	count = recurseFolders(it,"/",0,true,"");
+           	count = recurseFolders(switchboard.bookmarksDB.getFolderList(isAdmin),"/",0,true,"");
            	prop.put("xbel", count);  
            	
     	}    	
@@ -109,19 +78,5 @@ public class xbel {
     		count = recurseFolders(it, root, count, false, fn);
     	} 
     	return count;
-    }
-    private static String cleanPathString(String pathString){
-
-        // get rid of double and trailing slashes
-        while(pathString.endsWith("/")){
-        	pathString = pathString.substring(0, pathString.length() -1);
-        }
-        while(pathString.contains("/,")){
-        	pathString = pathString.replaceAll("/,", ",");
-        }
-        while(pathString.contains("//")){
-        	pathString = pathString.replaceAll("//", "/");
-        }
-        return pathString;
     }
 }
