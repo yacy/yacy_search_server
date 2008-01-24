@@ -14,12 +14,10 @@
 		<div class="SubMenu">
 			<h3>Bookmarks</h3>
 			<ul class="SubMenu">
-				<li>
-					<a href="Bookmarks.html?login=true&mode=add" class="MenuItemLink lock">Add Bookmark</a>
-				</li>
-				<li>
-					<a href="Bookmarks.html?login=true&mode=importxml" class="MenuItemLink lock">Import XML Bookmarks</a>
-				</li>
+				<li><a href="Bookmarks.html?login=true&login=true" class="MenuItemLink">Login</a></li>
+				<li><a href="Bookmarks.html?login=true&mode=add" class="MenuItemLink lock">Add Bookmark</a></li>
+				<li><a href="Bookmarks.html?login=true&mode=importxml" class="MenuItemLink lock">Import Bookmarks</a></li>
+				<li><a href="Bookmarks.html?login=true&mode=importxml" class="MenuItemLink lock">Export Bookmarks</a></li>
 			</ul>
 			<p/>
 		</div>
@@ -27,12 +25,9 @@
 		<div class="SubMenu">
 			<h3>Bookmarks</h3>
 			<ul class="SubMenu">
-				<li>
-					<a href="Bookmarks.html?mode=add" class="MenuItemLink lock">Add Bookmark</a>
-				</li>
-				<li>
-					<a href="Bookmarks.html?mode=importxml" class="MenuItemLink lock">Import XML Bookmarks</a>
-				</li>
+				<li><a href="Bookmarks.html?mode=add" class="MenuItemLink lock">Add Bookmark</a></li>
+				<li><a href="Bookmarks.html?mode=importxml" class="MenuItemLink lock">Import Bookmarks</a></li>
+				<li><a href="Bookmarks.html?mode=importxml" class="MenuItemLink lock">Export Bookmarks</a></li>
 			</ul>
 			<p/>
 		</div>
@@ -42,7 +37,7 @@
 				<legend>#(edit)#Add Bookmark::Edit Bookmark#(/edit)#</legend>
 				<dl>
 					<dt>
-						<label for="url">URL:</label>
+						<label for="url">URL:</label>					
 					</dt>
 					<dd>
 						<input type="text" name="url" id="url" value="#[url]#" onblur="loadTitle()" size="80" />
@@ -58,6 +53,12 @@
 					</dt>
 					<dd>
 						<input type="text" name="description" id="description" value="#[description]#" size="80" />
+					</dd>
+					<dt>
+						<label for="folder">Folder (/folder/subfolder):</label>
+					</dt>
+					<dd>
+						<input type="text" name="path" id="path" value="#[path]#" size="80" />
 					</dd>
 					<dt>
 						<label for="tags">Tags (comma separated):</label>
@@ -220,7 +221,7 @@
 				<a href="Bookmarks.html?tag=#[tag]#&amp;start=#[start]#&amp;num=10">10</a>
 				<a href="Bookmarks.html?tag=#[tag]#&amp;start=#[start]#&amp;num=50">50</a>
 				<a href="Bookmarks.html?tag=#[tag]#&amp;start=#[start]#&amp;num=100">100</a>
-                                 Bookmarks per page. #(admin)# - <a href="Bookmarks.html?login=true">Login</a>::#(/admin)#
+                                 Bookmarks per page. 
 			</p>
 		</div>
 		#%env/templates/footer.template%#
