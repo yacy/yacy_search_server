@@ -54,7 +54,6 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Set;
-import java.util.TreeSet;
 import de.anomic.data.bookmarksDB;
 import de.anomic.data.listManager;
 import de.anomic.data.userDB;
@@ -68,7 +67,6 @@ import de.anomic.plasma.plasmaSwitchboard;
 import de.anomic.server.serverDate;
 import de.anomic.server.serverObjects;
 import de.anomic.server.serverSwitch;
-import de.anomic.server.logging.serverLog;
 import de.anomic.yacy.yacyCore;
 import de.anomic.yacy.yacyNewsPool;
 import de.anomic.yacy.yacyNewsRecord;
@@ -85,6 +83,8 @@ public class Bookmarks {
 	final static int SORT_ALPHA = 1;
 	final static int SORT_SIZE = 2;
 	final static int SHOW_ALL = -1;
+	final static boolean TAGS = false;
+	final static boolean FOLDERS = true;
 	
     public static serverObjects respond(httpHeader header, serverObjects post, serverSwitch env) {
 
@@ -126,6 +126,7 @@ public class Bookmarks {
     	prop.put("mode_description", "");
     	prop.put("mode_url", "");
     	prop.put("mode_tags", "");
+    	prop.put("mode_path", "");
     	prop.put("mode_public", "1"); //1=is public
     	prop.put("mode_feed", "0"); //no newsfeed
     	
@@ -140,7 +141,7 @@ public class Bookmarks {
     				prop.put("mode", "2");
     			}else if(mode.equals("importxml")){
     				prop.put("mode", "3");
-    			}else if(mode.equals("importbookmarks")){
+    			}else if(mode.equals("exportXBEL")){
     				prop.put("mode", "4");
     			}
     		}else if(post.containsKey("add")){ //add an Entry
@@ -148,33 +149,12 @@ public class Bookmarks {
     			String title=(String) post.get("title");
     			String description=(String) post.get("description");
     			String tagsString = (String)post.get("tags");
+    			String pathString = (String)post.get("path");
+    			tagsString=tagsString+","+pathString;
     			if(tagsString.equals("")){
     				tagsString="unsorted"; //default tag
     			}
-                        
-                        // get rid of heading, trailing and double commas since they are useless
-                        while (tagsString.startsWith(",")) {
-                            tagsString = tagsString.substring(1);
-                        }
-                        while (tagsString.endsWith(",")) {
-                            tagsString = tagsString.substring(0,tagsString.length() -1);
-                        }
-                        while(tagsString.contains(",,")){
-                            tagsString = tagsString.replaceAll(",,", ",");
-                        }
-                        // get rid of double and trailing slashes
-                        while(tagsString.endsWith("/")){
-                            tagsString = tagsString.substring(0, tagsString.length() -1);
-                        }
-                        while(tagsString.contains("/,")){
-                            tagsString = tagsString.replaceAll("/,", ",");
-                        }
-                        while(tagsString.contains("//")){
-                            tagsString = tagsString.replaceAll("//", "/");
-                        }
-                        
-    			Set tags=listManager.string2set(tagsString.replaceAll(",\\s+", ",")); // space characters following a comma are removed
-        
+    			Set tags=listManager.string2set(bookmarksDB.cleanTagsString(tagsString)); 
     			bookmarksDB.Bookmark bookmark = switchboard.bookmarksDB.createBookmark(url, username);
     			if(bookmark != null){
     				bookmark.setProperty(bookmarksDB.Bookmark.BOOKMARK_TITLE, title);
@@ -207,6 +187,7 @@ public class Bookmarks {
     				prop.putHTML("mode_description", (String) post.get("description"));
     				prop.put("mode_url", (String) post.get("url"));
     				prop.putHTML("mode_tags", (String) post.get("tags"));
+    				prop.putHTML("mode_path", (String) post.get("path"));
     				prop.put("mode_public", "0");
     				prop.put("mode_feed", "0");
     			} else {
@@ -224,6 +205,7 @@ public class Bookmarks {
                             prop.putHTML("mode_description", (document == null) ? comp.title(): document.dc_title());
                             prop.putHTML("mode_author", comp.author());
                             prop.putHTML("mode_tags", (document == null) ? comp.tags() : document.dc_subject(','));
+                            prop.putHTML("mode_path","");
                             prop.put("mode_public", "0");
                             prop.put("mode_feed", "0"); //TODO: check if it IS a feed
                         }
@@ -235,6 +217,7 @@ public class Bookmarks {
                         prop.putHTML("mode_description", bookmark.getDescription());
                         prop.put("mode_url", bookmark.getUrl());
                         prop.putHTML("mode_tags", bookmark.getTagsString());
+                        prop.putHTML("mode_path",bookmark.getFoldersString());
                         if (bookmark.getPublic()) {
                             prop.put("mode_public", "1");
                         } else {
@@ -371,37 +354,9 @@ public class Bookmarks {
     	//-----------------------
     	// create folder list
     	//-----------------------
-      
-       	Set<String> folders = new TreeSet<String>();
-       	String path = "";
        	
-       	it=switchboard.bookmarksDB.getTagIterator(isAdmin);       	
-       	while(it.hasNext()){
-       		tag=(Tag) it.next();
-       		if (tag.getFriendlyName().startsWith("/")) {
-       			path = tag.getFriendlyName();
-                        
-                        // eliminate trailing and double slashes
-                        while(path.endsWith("/")){
-                            path = path.substring(0, path.length() -1);
-                        }
-                        while(path.contains("//")){
-                            path = path.replaceAll("//", "/");
-                        }
-                        
-       			while(path.length() > 0){
-       				folders.add(path);
-       				path = path.replaceAll("(/.[^/]*$)", "");
-       				serverLog.logInfo("BOOKMARKS", "Path: "+path+" added to folder list.\n");
-       			}       			
-       		}
-       	}
-       	
-       	folders.add("\uffff");
-       	it = folders.iterator(); 
-  
        	count = 0;
-       	count = recurseFolders(it,"/",0,true,"");
+       	count = recurseFolders(switchboard.bookmarksDB.getFolderList(isAdmin),"/",0,true,"");
        	prop.put("folderlist", count);
        	
     
@@ -477,7 +432,7 @@ public class Bookmarks {
     		count = recurseFolders(it, root, count, false, fn);
     	} 
     	return count;
-    }    
+    }
 
     private static void publishNews(String url, String title, String description, String tagsString) {
     	// create a news message
