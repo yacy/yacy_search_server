@@ -105,7 +105,7 @@ public class kelondroDyn {
                 fbi = new kelondroEcoTable(file, rowdef, kelondroEcoTable.tailCacheUsageAuto, EcoFSBufferSize, 0);
             }
         }
-        this.index = (useObjectCache) ? (kelondroIndex) new kelondroCache(fbi) : fbi;
+        this.index = ((useObjectCache) && (!(fbi instanceof kelondroEcoTable))) ? (kelondroIndex) new kelondroCache(fbi) : fbi;
         this.keylen = key;
         this.reclen = nodesize;
         this.fillChar = fillChar;
@@ -345,7 +345,7 @@ public class kelondroDyn {
         int recpos = 0;
         byte[] k;
         while (index.get(k = dynKey(key, recpos)) != null) {
-            index.remove(k, true);
+            index.remove(k, false);
             buffer.remove(k);
             recpos++;
         }

@@ -417,11 +417,8 @@ public final class httpc {
             
             // if we reached this point, we should have a connection
         } catch (UnknownHostException e) {
-            if (this.socket != null) {
-                // no need to track this, the socket cannot be established
-                synchronized (activeConnections) {activeConnections.remove(this);}
-            }
-            this.socket = null;
+            serverLog.logFine("HTTPC", "Couldn't find host " + server);
+            close();
             throw new IOException("unknown host: " + server);
         } catch (IOException e) {
             // There was an error while connecting the socket, probably a SocketTimeoutException

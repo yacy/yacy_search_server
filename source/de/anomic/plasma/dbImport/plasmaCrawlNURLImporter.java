@@ -15,7 +15,7 @@ import de.anomic.plasma.plasmaSwitchboard;
 public class plasmaCrawlNURLImporter extends AbstractImporter implements dbImporter {
 
 	private File plasmaPath = null;
-    private HashSet importProfileHandleCache = new HashSet();
+    private HashSet<String> importProfileHandleCache = new HashSet<String>();
     private plasmaCrawlProfile importProfileDB;
     private plasmaCrawlNURL importNurlDB;
     private int importStartSize;
@@ -129,8 +129,8 @@ public class plasmaCrawlNURLImporter extends AbstractImporter implements dbImpor
                     this.log.logInfo("Starting to import '" + this.importNurlDB.size() + "' entries not available in any stack.");
                 }
                 
-                // getting an interator and loop through the URL entries
-                Iterator entryIter = (stackTypes[stackType] == -1) ? this.importNurlDB.iterator(stackType) : null;
+                // getting an iterator and loop through the URL entries
+                Iterator<plasmaCrawlEntry> entryIter = (stackTypes[stackType] == -1) ? this.importNurlDB.iterator(stackType) : null;
                 while (true) {
                     
                     String nextHash = null;
@@ -147,7 +147,7 @@ public class plasmaCrawlNURLImporter extends AbstractImporter implements dbImpor
                             if (!entryIter.hasNext()) break;
                             
                             this.urlCount++;
-                            nextEntry = (plasmaCrawlEntry) entryIter.next();
+                            nextEntry = entryIter.next();
                             nextHash = nextEntry.url().hash();
                         }
                     } catch (IOException e) {

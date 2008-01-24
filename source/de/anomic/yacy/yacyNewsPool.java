@@ -265,8 +265,8 @@ public class yacyNewsPool {
     private int maxDistribution;
     
     
-    public yacyNewsPool(File yacyDBPath, long preloadTime) {
-        newsDB = new yacyNewsDB(new File(yacyDBPath, "news1.db"), preloadTime);
+    public yacyNewsPool(File yacyDBPath) {
+        newsDB = new yacyNewsDB(new File(yacyDBPath, "news2.db"));
         outgoingNews  = new yacyNewsQueue(new File(yacyDBPath, "newsOut1.stack"), newsDB);
         publishedNews = new yacyNewsQueue(new File(yacyDBPath, "newsPublished1.stack"), newsDB);
         incomingNews  = new yacyNewsQueue(new File(yacyDBPath, "newsIn1.stack"), newsDB);

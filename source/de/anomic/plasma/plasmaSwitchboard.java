@@ -856,15 +856,15 @@ public final class plasmaSwitchboard extends serverAbstractSwitch implements ser
      * 
      * @see plasmaSwitchboard#DBPATH for the folder this file lies in
      */
-    public static final String DBFILE_ACTIVE_CRAWL_PROFILES    = "crawlProfilesActive.db";
-    public static final String DBFILE_PASSIVE_CRAWL_PROFILES    = "crawlProfilesPassive.db";
+    public static final String DBFILE_ACTIVE_CRAWL_PROFILES    = "crawlProfilesActive1.db";
+    public static final String DBFILE_PASSIVE_CRAWL_PROFILES    = "crawlProfilesPassive1.db";
     /**
      * <p><code>public static final String <strong>DBFILE_CRAWL_ROBOTS</strong> = "crawlRobotsTxt.db"</code></p>
      * <p>Name of the file containing the database holding all <code>robots.txt</code>-entries of the lately crawled domains</p>
      * 
      * @see plasmaSwitchboard#DBPATH for the folder this file lies in
      */
-    public static final String DBFILE_CRAWL_ROBOTS      = "crawlRobotsTxt.db";
+    public static final String DBFILE_CRAWL_ROBOTS      = "crawlRobotsTxt1.db";
     /**
      * <p><code>public static final String <strong>DBFILE_USER</strong> = "DATA/SETTINGS/user.db"</code></p>
      * <p>Path to the user-DB, beginning from the YaCy-installation's top-folder. It holds all rights the created

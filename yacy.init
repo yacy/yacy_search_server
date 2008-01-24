@@ -627,9 +627,6 @@ ramCacheWiki_time    =      500
 # ram cache for blog.db
 ramCacheBlog_time    =      500
 
-# ram cache for news1.db
-ramCacheNews_time    =     1000
-
 # ram cache for robotsTxt.db
 ramCacheRobots_time  =        0
 

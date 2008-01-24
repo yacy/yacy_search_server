@@ -119,6 +119,7 @@ public class kelondroEcoTable implements kelondroIndex {
             byte[] record = new byte[rowdef.objectsize];
             byte[] key = new byte[rowdef.primaryKeyLength];
             int fs = (int) file.size();
+            System.out.print("*** initializing RAM index for EcoTable " + tablefile + ":");
             for (int i = 0; i < fs; i++) {
                 // read entry
                 file.get(i, record, 0);
@@ -129,9 +130,17 @@ public class kelondroEcoTable implements kelondroIndex {
             
                 // write the tail into the table
                 if (table != null) table.addUnique(taildef.newEntry(record, rowdef.primaryKeyLength, true));
+                
+                if ((i % 10000) == 0) {
+                    System.out.print('.');
+                    System.out.flush();
+                }
             }
+            System.out.print(" -ordering- ..");
+            System.out.flush();
             // check consistency
             ArrayList<Integer[]> doubles = index.removeDoubles();
+            System.out.println(" -removed " + doubles.size() + " doubles- done.");
             if (doubles.size() > 0) {
                 System.out.println("DEBUG " + tablefile + ": WARNING - EcoTable " + tablefile + " has " + doubles.size() + " doubles");
                 // from all the doubles take one, put it back to the index and remove the others from the file
@@ -392,51 +401,57 @@ public class kelondroEcoTable implements kelondroIndex {
         assert file.size() == index.size() : "file.size() = " + file.size() + ", index.size() = " + index.size();
         assert ((table == null) || (table.size() == index.size()));
         assert keepOrder == false; // this class cannot keep the order during a remove
+        assert key.length == rowdef.primaryKeyLength;
         int i = index.geti(key);
         if (i == -1) return null; // nothing to do
         
         // prepare result
         byte[] b = new byte[rowdef.objectsize];
         byte[] p = new byte[rowdef.objectsize];
+        int sb = index.size();
         if (table == null) {
-            index.removei(key);
-            file.get(i, b, 0);
-            file.cleanLast(p, 0);
-            file.put(i, p, 0);
-            byte[] k = new byte[rowdef.primaryKeyLength];
-            System.arraycopy(p, 0, k, 0, rowdef.primaryKeyLength);
-            index.puti(k, i);
+            if (i == index.size() - 1) {
+                index.removei(key);
+                file.clean(i, b, 0);
+            } else {
+                index.removei(key);
+                file.get(i, b, 0);
+                file.cleanLast(p, 0);
+                file.put(i, p, 0);
+                byte[] k = new byte[rowdef.primaryKeyLength];
+                System.arraycopy(p, 0, k, 0, rowdef.primaryKeyLength);
+                index.puti(k, i);
+            }
             assert (file.size() == index.size());
-            assert ((table == null) || (table.size() == index.size()));
         } else {
+            // get result value from the table copy, so we don't need to read it from the file
             kelondroRow.Entry v = table.get(i);
-            assert key.length == rowdef.primaryKeyLength;
             System.arraycopy(key, 0, b, 0, key.length);
             System.arraycopy(v.bytes(), 0, b, rowdef.primaryKeyLength, taildef.objectsize);
+            
             if (i == index.size() - 1) {
                 // special handling if the entry is the last entry in the file
                 index.removei(key);
                 table.removeRow(i, false);
                 file.clean(i);
-                assert (file.size() == index.size());
-                assert ((table == null) || (table.size() == index.size()));
             } else {
                 // switch values
+                index.removei(key);
+                
                 kelondroRow.Entry te = table.removeOne();
                 table.set(i, te);
 
                 file.cleanLast(p, 0);
                 file.put(i, p, 0);
                 kelondroRow.Entry lr = rowdef.newEntry(p);
-                
-                index.removei(key);
                 index.puti(lr.getPrimaryKeyBytes(), i);
-                assert (file.size() == index.size());
-                assert ((table == null) || (table.size() == index.size())) : "table.size() = " + table.size() + ", index.size() = " + index.size();
             }
+            assert (file.size() == index.size());
+            assert (table.size() == index.size()) : "table.size() = " + table.size() + ", index.size() = " + index.size();
         }
         assert file.size() == index.size() : "file.size() = " + file.size() + ", index.size() = " + index.size();
         assert ((table == null) || (table.size() == index.size()));
+        assert index.size() + 1 == sb : "index.size() = " + index.size() + ", sb = " + sb;
         return rowdef.newEntry(b);
     }
 
@@ -448,7 +463,7 @@ public class kelondroEcoTable implements kelondroIndex {
         kelondroRow.Entry lr = rowdef.newEntry(le);
         int i = index.removei(lr.getPrimaryKeyBytes());
         assert i >= 0;
-        table.removeRow(i, false);
+        if (table != null) table.removeOne();
         assert file.size() == index.size() : "file.size() = " + file.size() + ", index.size() = " + index.size();
         return lr;
     }

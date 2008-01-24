@@ -93,7 +93,7 @@ import de.anomic.yacy.yacyURL;
 
 public final class plasmaHTCache {
     
-    public static final String DB_NAME = "responseHeader1.db";
+    public static final String DB_NAME = "responseHeader2.db";
     
     private static final int stackLimit = 150; // if we exceed that limit, we do not check idle
     public  static final long oneday = 1000 * 60 * 60 * 24; // milliseconds of a day
@@ -307,7 +307,7 @@ public final class plasmaHTCache {
     private static void openResponseHeaderDB(long preloadTime) {
         // open the response header database
         File dbfile = new File(cachePath, DB_NAME);
-        responseHeaderDB = new kelondroMapObjects(new kelondroDyn(dbfile, true, true, preloadTime, yacySeedDB.commonHashLength, 150, '#', kelondroBase64Order.enhancedCoder, true, false, true), 500);
+        responseHeaderDB = new kelondroMapObjects(new kelondroDyn(dbfile, true, true, preloadTime, yacySeedDB.commonHashLength, 150, '#', kelondroBase64Order.enhancedCoder, false, false, true), 500);
     }
     
     private static void deleteOldHTCache(File directory) {

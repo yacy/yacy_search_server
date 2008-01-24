@@ -72,7 +72,7 @@ public class plasmaCrawlRobotsTxt {
         this.robotsTableFile = robotsTableFile;
         this.preloadTime = preloadTime;
         robotsTableFile.getParentFile().mkdirs();
-        robotsTable = new kelondroMapObjects(new kelondroDyn(robotsTableFile, true, true, preloadTime, 256, 512, '_', kelondroNaturalOrder.naturalOrder, true, false, true), 100);
+        robotsTable = new kelondroMapObjects(new kelondroDyn(robotsTableFile, true, true, preloadTime, 256, 512, '_', kelondroNaturalOrder.naturalOrder, false, false, true), 100);
     }
     
     private void resetDatabase() {
@@ -80,7 +80,7 @@ public class plasmaCrawlRobotsTxt {
         if (robotsTable != null) robotsTable.close();
         if (!(robotsTableFile.delete())) throw new RuntimeException("cannot delete robots.txt database");
         robotsTableFile.getParentFile().mkdirs();
-        robotsTable = new kelondroMapObjects(new kelondroDyn(robotsTableFile, true, true, preloadTime, 256, 512, '_', kelondroNaturalOrder.naturalOrder, true, false, true), 100);
+        robotsTable = new kelondroMapObjects(new kelondroDyn(robotsTableFile, true, true, preloadTime, 256, 512, '_', kelondroNaturalOrder.naturalOrder, false, false, true), 100);
     }
     
     public void close() {
@@ -103,7 +103,7 @@ public class plasmaCrawlRobotsTxt {
     
     public Entry getEntry(String hostName) {
         try {
-            Map record = this.robotsTable.getMap(hostName);
+            Map<String, String> record = this.robotsTable.getMap(hostName);
             if (record == null) return null;
             return new Entry(hostName, record);
         } catch (kelondroException e) {
@@ -114,14 +114,16 @@ public class plasmaCrawlRobotsTxt {
     
     public Entry addEntry(
     		String hostName, 
-    		ArrayList disallowPathList, 
+    		ArrayList<String> disallowPathList, 
     		Date loadedDate, 
     		Date modDate, 
     		String eTag, 
     		String sitemap,
     		Integer crawlDelay
     ) {
-        Entry entry = new Entry(hostName,disallowPathList,loadedDate,modDate,eTag,sitemap,crawlDelay);
+        Entry entry = new Entry(
+                hostName, disallowPathList, loadedDate, modDate,
+                eTag, sitemap, crawlDelay);
         addEntry(entry);
         return entry;
     }
@@ -129,7 +131,7 @@ public class plasmaCrawlRobotsTxt {
     public String addEntry(Entry entry) {
         // writes a new page and returns key
         try {
-            this.robotsTable.set(entry.hostName,entry.mem);
+            this.robotsTable.set(entry.hostName, entry.mem);
             return entry.hostName;
         } catch (IOException e) {
             return null;
@@ -145,16 +147,16 @@ public class plasmaCrawlRobotsTxt {
         public static final String CRAWL_DELAY = "crawlDelay";
         
         // this is a simple record structure that hold all properties of a single crawl start
-        Map mem;
-        private LinkedList disallowPathList;
+        Map<String, String> mem;
+        private LinkedList<String> disallowPathList;
         String hostName;
         
-        public Entry(String hostName, Map mem) {
+        public Entry(String hostName, Map<String, String> mem) {
             this.hostName = hostName.toLowerCase();
             this.mem = mem; 
             
             if (this.mem.containsKey(DISALLOW_PATH_LIST)) {
-                this.disallowPathList = new LinkedList();
+                this.disallowPathList = new LinkedList<String>();
                 String csPl = (String) this.mem.get(DISALLOW_PATH_LIST);
                 if (csPl.length() > 0){
                     String[] pathArray = csPl.split(ROBOTS_DB_PATH_SEPARATOR);
@@ -163,13 +165,13 @@ public class plasmaCrawlRobotsTxt {
                     }
                 }
             } else {
-                this.disallowPathList = new LinkedList();
+                this.disallowPathList = new LinkedList<String>();
             }
         }  
         
         public Entry(
                 String hostName, 
-                ArrayList disallowPathList, 
+                ArrayList<String> disallowPathList, 
                 Date loadedDate,
                 Date modDate,
                 String eTag,
@@ -179,9 +181,9 @@ public class plasmaCrawlRobotsTxt {
             if ((hostName == null) || (hostName.length() == 0)) throw new IllegalArgumentException("The hostname is missing");
             
             this.hostName = hostName.trim().toLowerCase();
-            this.disallowPathList = new LinkedList();
+            this.disallowPathList = new LinkedList<String>();
             
-            this.mem = new HashMap(5);
+            this.mem = new HashMap<String, String>(5);
             if (loadedDate != null) this.mem.put(LOADED_DATE,Long.toString(loadedDate.getTime()));
             if (modDate != null) this.mem.put(MOD_DATE,Long.toString(modDate.getTime()));
             if (eTag != null) this.mem.put(ETAG,eTag);
@@ -259,9 +261,9 @@ public class plasmaCrawlRobotsTxt {
             else  path = path.replaceAll(ROBOTS_DB_PATH_SEPARATOR,"%3B");
             
             
-            Iterator pathIter = this.disallowPathList.iterator();
+            Iterator<String> pathIter = this.disallowPathList.iterator();
             while (pathIter.hasNext()) {
-                String nextPath = (String) pathIter.next();
+                String nextPath = pathIter.next();
                 // allow rule
                 if (nextPath.startsWith("!") && nextPath.length() > 1 && path.startsWith(nextPath.substring(1))) {
                     return false;

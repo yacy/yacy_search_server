@@ -70,7 +70,7 @@ public class plasmaCrawlProfile {
         this.profileTableFile = file;
         this.preloadTime = preloadTime;
         profileTableFile.getParentFile().mkdirs();
-        kelondroDyn dyn = new kelondroDyn(profileTableFile, true, true, preloadTime, yacySeedDB.commonHashLength, 2000, '#', kelondroNaturalOrder.naturalOrder, true, false, true);
+        kelondroDyn dyn = new kelondroDyn(profileTableFile, true, true, preloadTime, yacySeedDB.commonHashLength, 2000, '#', kelondroNaturalOrder.naturalOrder, false, false, true);
         profileTable = new kelondroMapObjects(dyn, 500);
     }
     
@@ -79,7 +79,7 @@ public class plasmaCrawlProfile {
         if (profileTable != null) profileTable.close();
         if (!(profileTableFile.delete())) throw new RuntimeException("cannot delete crawl profile database");
         profileTableFile.getParentFile().mkdirs();
-        kelondroDyn dyn = new kelondroDyn(profileTableFile, true, true, preloadTime, yacySeedDB.commonHashLength, 2000, '#', kelondroNaturalOrder.naturalOrder, true, false, true);
+        kelondroDyn dyn = new kelondroDyn(profileTableFile, true, true, preloadTime, yacySeedDB.commonHashLength, 2000, '#', kelondroNaturalOrder.naturalOrder, false, false, true);
         profileTable = new kelondroMapObjects(dyn, 500);
     }
     

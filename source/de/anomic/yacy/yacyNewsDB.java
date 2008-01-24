@@ -50,30 +50,28 @@ import java.io.UnsupportedEncodingException;
 import java.util.Iterator;
 
 import de.anomic.kelondro.kelondroBase64Order;
-import de.anomic.kelondro.kelondroCache;
+import de.anomic.kelondro.kelondroEcoTable;
 import de.anomic.kelondro.kelondroException;
 import de.anomic.kelondro.kelondroIndex;
 import de.anomic.kelondro.kelondroRow;
-import de.anomic.kelondro.kelondroTree;
 import de.anomic.server.serverCodings;
 import de.anomic.server.serverDate;
 
 public class yacyNewsDB {
 
     private File path;
-    private long preloadTime;
     protected kelondroIndex news;
 
-    public yacyNewsDB(File path, long preloadTime) {
+    public yacyNewsDB(File path) {
         this.path = path;
-        this.preloadTime = preloadTime;
-        this.news = new kelondroCache(kelondroTree.open(path, true, preloadTime, yacyNewsRecord.rowdef));
+        this.news = new kelondroEcoTable(path, yacyNewsRecord.rowdef, kelondroEcoTable.tailCacheUsageAuto, 10, 0);
+        //this.news = new kelondroCache(kelondroTree.open(path, true, preloadTime, yacyNewsRecord.rowdef));
     }
 
     private void resetDB() {
         try {close();} catch (Exception e) {}
         if (path.exists()) path.delete();
-        this.news = new kelondroCache(kelondroTree.open(path, true, preloadTime, yacyNewsRecord.rowdef));
+        this.news = new kelondroEcoTable(path, yacyNewsRecord.rowdef, kelondroEcoTable.tailCacheUsageAuto, 10, 0);
     }
     
     public void close() {
