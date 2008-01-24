@@ -159,7 +159,57 @@ public class bookmarksDB {
     public static String tagHash(String tagName, String user){
         return plasmaCondenser.word2hash(user+":"+tagName.toLowerCase());
     }
-
+    
+    public Iterator<String> getFolderList(boolean priv){
+    
+    	Set<String> folders = new TreeSet<String>();
+    	String path = "";   	
+    	Iterator it = this.getTagIterator(priv);
+    	Tag tag;
+    	
+    	while(it.hasNext()){
+    		tag=(Tag) it.next();
+    		if (tag.getFriendlyName().startsWith("/")) {
+    			path = tag.getFriendlyName();
+    			path = cleanTagsString(path);                  
+    			while(path.length() > 0){
+    				folders.add(path);
+    				path = path.replaceAll("(/.[^/]*$)", "");	// create missing folders in path
+    			}       			
+    		}
+    	}
+    	folders.add("\uffff");
+    	return (Iterator<String>) folders.iterator();    	
+    }
+    
+    public static String cleanTagsString(String tagsString){
+    	
+    	// get rid of heading, trailing and double commas since they are useless
+        while (tagsString.startsWith(",")) {
+            tagsString = tagsString.substring(1);
+        }
+        while (tagsString.endsWith(",")) {
+            tagsString = tagsString.substring(0,tagsString.length() -1);
+        }
+        while(tagsString.contains(",,")){
+            tagsString = tagsString.replaceAll(",,", ",");
+        }
+        // get rid of double and trailing slashes
+        while(tagsString.endsWith("/")){
+            tagsString = tagsString.substring(0, tagsString.length() -1);
+        }
+        while(tagsString.contains("/,")){
+            tagsString = tagsString.replaceAll("/,", ",");
+        }
+        while(tagsString.contains("//")){
+            tagsString = tagsString.replaceAll("//", "/");
+        }
+        // space characters following a comma are removed
+        tagsString = tagsString.replaceAll(",\\s+", ","); 
+    	
+        return tagsString;
+    }
+ 
     // -----------------------------------------------------------
 	// bookmarksDB's functions for bookmarksTable / bookmarkCache
 	// ----------------------------------------------------------- 
@@ -303,7 +353,7 @@ public class bookmarksDB {
             return (Tag) tagCache.get(hash);
         }
         return loadTag(hash); //null if it does not exists
-    }
+    }    
     /**
      * store a Tag in tagsTable or remove an empty tag
      * @param tag an object of type Tag to be stored/removed
@@ -900,9 +950,26 @@ public class bookmarksDB {
         public Set<String> getTags(){
             return tags;
         }
-        public String getTagsString(){
-            return listManager.collection2string(getTags());
+        public String getTagsString(){        	
+        	String s[] = listManager.collection2string(getTags()).split(",");
+        	String tagsString="";        	
+        	for (int i=0; i<s.length; i++){
+        		if(!s[i].startsWith("/")){
+        			tagsString += s[i]+",";
+        		}
+        	}
+        	return tagsString;
         }
+        public String getFoldersString(){
+        	String s[] = listManager.collection2string(getTags()).split(",");
+        	String foldersString="";        	
+        	for (int i=0; i<s.length; i++){
+        		if(s[i].startsWith("/")){
+        			foldersString += s[i]+",";
+        		}
+        	}
+        	return foldersString;
+        }        
         public String getDescription(){
             if(entry.containsKey(BOOKMARK_DESCRIPTION)){
                 return (String) entry.get(BOOKMARK_DESCRIPTION);
