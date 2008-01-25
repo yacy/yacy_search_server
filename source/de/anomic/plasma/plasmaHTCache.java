@@ -458,10 +458,11 @@ public final class plasmaHTCache {
                 if (file != null) {
                     if (filesInUse.contains(file)) continue;
                     log.logFinest("Trying to delete [" + key + "] = old file: " + file.toString());
+                    // This needs to be called *before* the file is deleted
+                    String urlHash = getHash(file);
                     if (deleteFileandDirs(file, "OLD")) {
                         try {
                             // As the file is gone, the entry in responseHeader.db is not needed anymore
-                            String urlHash = getHash(file);
                             if (urlHash != null) {
                                 log.logFinest("Trying to remove responseHeader for URLhash: " + urlHash);
                                 responseHeaderDB.remove(urlHash);
