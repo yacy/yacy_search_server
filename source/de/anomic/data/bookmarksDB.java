@@ -580,30 +580,34 @@ public class bookmarksDB {
 		}        	
     }
     public int importFromBookmarks(yacyURL baseURL, InputStreamReader input, String tag, boolean importPublic){
+    	  	
     	int importCount = 0;
     	
     	HashMap links=new HashMap();
     	Iterator it;
-    	String url,title;
+    	String title;
+    	yacyURL url;
     	Bookmark bm;
     	Set tags=listManager.string2set(tag); //this allow multiple default tags
     	try {
     		//load the links
-    		htmlFilterContentScraper scraper = new htmlFilterContentScraper(baseURL);
+    		htmlFilterContentScraper scraper = new htmlFilterContentScraper(baseURL);    		
     		//OutputStream os = new htmlFilterOutputStream(null, scraper, null, false);
     		Writer writer= new htmlFilterWriter(null,null,scraper, null, false);
     		serverFileUtils.copy(input,writer);
     		writer.close();
-    		links = (HashMap) scraper.getAnchors();
+    		links = (HashMap) scraper.getAnchors();    		
     	} catch (IOException e) {}
     	it=links.keySet().iterator();
     	while(it.hasNext()){
-    		url=(String) it.next();
+    		// url=(String) it.next();
+    		url= (yacyURL) it.next();
     		title=(String) links.get(url);
+    		serverLog.logInfo("BOOKMARKS", "links.get(url)");
     		if(title.equals("")){//cannot be displayed
-    			title=url;
+    			title=url.toString();
     		}
-    		bm=new Bookmark(url);
+    		bm=new Bookmark(url.toString());
     		bm.setProperty(Bookmark.BOOKMARK_TITLE, title);
     		bm.setTags(tags);
     		bm.setPublic(importPublic);
