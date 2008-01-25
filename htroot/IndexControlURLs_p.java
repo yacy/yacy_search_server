@@ -164,7 +164,7 @@ public class IndexControlURLs_p {
         // generate list
         if (post.containsKey("urlhashsimilar")) {
             try {
-                final Iterator entryIt = new kelondroRotateIterator(sb.wordIndex.loadedURL.entries(true, urlhash), new String(kelondroBase64Order.zero(urlhash.length()))); 
+                final Iterator<indexURLEntry> entryIt = new kelondroRotateIterator<indexURLEntry>(sb.wordIndex.loadedURL.entries(true, urlhash), new String(kelondroBase64Order.zero(urlhash.length())), sb.wordIndex.size()); 
                 StringBuffer result = new StringBuffer("Sequential List of URL-Hashes:<br>");
                 indexURLEntry entry;
                 int i = 0;

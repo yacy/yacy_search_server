@@ -278,7 +278,7 @@ public class yacyDHTAction implements yacyPeerAction {
     
     public synchronized yacySeed getPublicClusterCrawlSeed(String urlHash, TreeMap<String, String> clusterhashes) {
         // clusterhashes is a String(hash)/String(IP) - mapping
-        kelondroCloneableIterator<String> i = new kelondroRotateIterator<String>(new kelondroCloneableMapIterator<String>(clusterhashes, urlHash), null);
+        kelondroCloneableIterator<String> i = new kelondroRotateIterator<String>(new kelondroCloneableMapIterator<String>(clusterhashes, urlHash), null, clusterhashes.size());
         String hash;
         int count = clusterhashes.size(); // counter to ensure termination
         while ((i.hasNext()) && (count-- > 0)) {

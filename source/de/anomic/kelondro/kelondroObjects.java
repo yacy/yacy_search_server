@@ -140,7 +140,7 @@ public class kelondroObjects {
     public synchronized kelondroCloneableIterator<String> keys(final boolean up, final boolean rotating, final byte[] firstKey, final byte[] secondKey) throws IOException {
         // simple enumeration of key names without special ordering
         kelondroCloneableIterator<String> i = dyn.dynKeys(up, firstKey);
-        if (rotating) return new kelondroRotateIterator<String>(i, secondKey); else return i;
+        if (rotating) return new kelondroRotateIterator<String>(i, secondKey, dyn.sizeDyn()); else return i;
     }
 
 

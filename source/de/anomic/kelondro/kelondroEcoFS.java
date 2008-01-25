@@ -39,14 +39,14 @@ public class kelondroEcoFS {
      * The access rules are in such a way that a minimum of IO operations are necessary
      * Two caches provide a mirror to content in the file: a read cache and a write buffer
      * The read cache contains a number of entries from the file; a mirror that moves
-     * whenever information outsite the mirror is requested.
+     * whenever information outside the mirror is requested.
      * The write buffer always exists only at the end of the file. It contains only records
      * that have never been written to the file before. When the write buffer is flushed,
      * the file grows
      * The record file may also shrink when the last entry of the file is removed.
      * Removal of Entries inside the file is not possible, but such entries can be erased
      * by overwriting the data with zero bytes
-     * All access to the file is made with byte[] that are generated outsite of this class
+     * All access to the file is made with byte[] that are generated outside of this class
      * This class only references byte[] that are handed over to methods of this class.
      */
     

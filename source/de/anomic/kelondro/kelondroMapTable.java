@@ -147,7 +147,7 @@ public class kelondroMapTable {
        kelondroIndex tree = (kelondroIndex) tTables.get(tablename);
         if (tree == null) throw new RuntimeException("kelondroTables.bytes: tree table '" + tablename + "' does not exist.");
         kelondroCloneableIterator<kelondroRow.Entry> i = tree.rows(up, firstKey);
-        if (rotating) return new kelondroRotateIterator<kelondroRow.Entry>(i, secondKey); else return i;
+        if (rotating) return new kelondroRotateIterator<kelondroRow.Entry>(i, secondKey, tree.size()); else return i;
     }
     
     // if you need the long-values from a row-iteration, please use kelondroRecords.bytes2long to convert from byte[] to long

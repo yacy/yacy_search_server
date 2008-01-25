@@ -119,7 +119,7 @@ public class kelondroEcoTable implements kelondroIndex {
             byte[] record = new byte[rowdef.objectsize];
             byte[] key = new byte[rowdef.primaryKeyLength];
             int fs = (int) file.size();
-            System.out.print("*** initializing RAM index for EcoTable " + tablefile + ":");
+            System.out.print("*** initializing RAM index for EcoTable " + tablefile.getName() + ":");
             for (int i = 0; i < fs; i++) {
                 // read entry
                 file.get(i, record, 0);
@@ -325,6 +325,9 @@ public class kelondroEcoTable implements kelondroIndex {
     public synchronized Entry put(Entry row) throws IOException {
         assert file.size() == index.size() : "file.size() = " + file.size() + ", index.size() = " + index.size();
         assert ((table == null) || (table.size() == index.size()));
+        assert row != null;
+        assert row.bytes() != null;
+        if ((row == null) || (row.bytes() == null)) return null;
         int i = index.geti(row.getPrimaryKeyBytes());
         if (i == -1) {
             addUnique(row);

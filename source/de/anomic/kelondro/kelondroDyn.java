@@ -219,7 +219,7 @@ public class kelondroDyn {
         // iterates only the keys of the Nodes
         // enumerated objects are of type String
         dynKeyIterator i = new dynKeyIterator(index.rows(up, null));
-        if (rotating) return new kelondroRotateIterator<String>(i, null); else return i;
+        if (rotating) return new kelondroRotateIterator<String>(i, null, index.size()); else return i;
     }
 
     public synchronized dynKeyIterator dynKeys(boolean up, byte[] firstKey) throws IOException {

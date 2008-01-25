@@ -1049,7 +1049,7 @@ public class kelondroCollectionIndex {
         public keycollectionIterator(byte[] startKey, byte[] secondKey, boolean rot) throws IOException {
             // iterator of {byte[], kelondroRowSet} Objects
             kelondroCloneableIterator<kelondroRow.Entry> i = index.rows(true, startKey);
-            indexRowIterator = (rot) ? new kelondroRotateIterator<kelondroRow.Entry>(i, secondKey) : i;
+            indexRowIterator = (rot) ? new kelondroRotateIterator<kelondroRow.Entry>(i, secondKey, index.size()) : i;
         }
         
         public boolean hasNext() {
