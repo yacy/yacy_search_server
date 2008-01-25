@@ -67,6 +67,7 @@ import de.anomic.plasma.plasmaSwitchboard;
 import de.anomic.server.serverDate;
 import de.anomic.server.serverObjects;
 import de.anomic.server.serverSwitch;
+import de.anomic.server.logging.serverLog;
 import de.anomic.yacy.yacyCore;
 import de.anomic.yacy.yacyNewsPool;
 import de.anomic.yacy.yacyNewsRecord;
@@ -141,7 +142,7 @@ public class Bookmarks {
     				prop.put("mode", "2");
     			}else if(mode.equals("importxml")){
     				prop.put("mode", "3");
-    			}else if(mode.equals("exportXBEL")){
+    			}else if(mode.equals("manage")){
     				prop.put("mode", "4");
     			}
     		}else if(post.containsKey("add")){ //add an Entry
@@ -230,7 +231,7 @@ public class Bookmarks {
                         }
                     }
                 }
-    		}else if(post.containsKey("bookmarksfile")){
+    		} else if(post.containsKey("htmlfile")){
     			boolean isPublic=false;
     			if(((String) post.get("public")).equals("public")){
     				isPublic=true;
@@ -239,10 +240,12 @@ public class Bookmarks {
     			if(tags.equals("")){
     				tags="unsorted";
     			}
+    			serverLog.logInfo("BOOKMARKS", "I try to import bookmarks from HTML-file");
     			try {
-    				File file=new File((String)post.get("bookmarksfile"));
-    				switchboard.bookmarksDB.importFromBookmarks(new yacyURL(file) , post.get("bookmarksfile$file"), tags, isPublic);
+    				File file=new File((String)post.get("htmlfile"));    			
+    				switchboard.bookmarksDB.importFromBookmarks(new yacyURL(file) , post.get("htmlfile$file"), tags, isPublic);
     			} catch (MalformedURLException e) {}
+    			serverLog.logInfo("BOOKMARKS", "success!!");
     		}else if(post.containsKey("xmlfile")){
     			boolean isPublic=false;
     			if(((String) post.get("public")).equals("public")){
