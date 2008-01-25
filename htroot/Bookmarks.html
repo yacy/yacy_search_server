@@ -88,8 +88,9 @@
 				<img src="/env/grafics/empty.gif" name="ajax" />
 			</fieldset>
 		</form>
-		:: <!-- import XML Bookmarks (mode=3) -->
+		:: <!-- import XML Bookmarks (mode=3) -->		
 		<form action="Bookmarks.html" method="post"  enctype="multipart/form-data">
+			<div class="BookmarksFieldset">
 			<fieldset>
 				<legend>Import XML Bookmarks</legend>
 				<dl>
@@ -111,17 +112,18 @@
 				</dl>
 				<input type="submit" name="importxml" value="import" />
 			</fieldset>
+			</div>
 		</form>
-		:: <!-- import Netscape Bookmarks (mode=4) -->
+		<!-- import Netscape Bookmarks -->
 		<form action="Bookmarks.html" method="post"  enctype="multipart/form-data">
 			<fieldset>
-				<legend>Import Bookmarks</legend>
+				<legend>Import HTML Bookmarks</legend>
 				<dl>
 					<dt>
-						<label for="bookmarksfile">File:</label>
+						<label for="file">File:</label>
 					</dt>
 					<dd>
-						<input type="file" name="bookmarksfile" id="bookmarksfile" />
+						<input type="file" name="htmlfile" id="htmlfile" />
 					</dd>
 					<dt>
 						<label for="tags">Default Tags:</label>
@@ -142,11 +144,47 @@
 				<input type="submit" name="importbookmarks" value="import" />
 			</fieldset>
 		</form>
+		:: 
+		<!-- manage Bookmarks (mode=4) -->
+		<fieldset>
+				<legend>Manage Bookmarks</legend>
+		</fieldset>		
+		<table border="0" width="60%" cellpadding="2" cellspacing="1">
+			<colgroup>
+				<col width="60" span="2" />
+				<col width="10" />
+				<col width="80" />
+				<col width="180" />
+				<col />
+				<col width="10" />
+			</colgroup>
+			<tr class="TableHeader">
+				<th>Initiator</th>
+				<th>Profile</th>
+				<th>Depth</th>
+				<th>Modified Date</th>
+				<th>Anchor Name</th>
+				<th>URL</th>
+				<th>Delete</th>
+			</tr>
+			#{bookmarks}#
+			<!--<tr class="TableCell#(dark)#Light::Dark#(/dark)#">-->
+			<tr>
+				<td>#[public]#</td>
+				<td><a href="#[link]#">#[title]#</a></td>
+				<td></td>
+				<td></td>
+				<td></td>
+				<td></td>
+				<td></td>
+			</tr>
+			#{/bookmarks}#
+		</table>		
 		#(/mode)#
 		<!-- show Folders -->
 		<div class="TagList">
 			<fieldset>
-				<legend>Folders</legend>
+				<legend>Folders</legend>					
 					<ul class="folder" id="folder">
 						<li>Bookmark Folder
 								<ul class="folder">
@@ -179,15 +217,7 @@
 			</fieldset>
 		</div>
 		<!-- show BookmarkList -->		
-		<div class="bookmarkList">
-			<!-- show Info! -->	
-			<dt class="hintIcon"><img src="env/grafics/good.png" width="32" height="32" alt="good"/></dt>
-			<dd class="hint">Folders are now working! Just add Tags like /Folder/Subfolder to your bookmarks.
-				For more information please visit the <a href="http://forum.yacy-websuche.de/">YaCy forum</a>.
-				A proper display of the folder view requires JavaScript to be activated. This page has been testetd
-				with Firefox2 (Linux) and Safari (Mac OS X). Please report any issues with other browsers or
-				operating systems. [apfelmaennchen]
-			</dd>
+		<div class="bookmarkList">			
 			<h3>Bookmark List</h3>
 			#{bookmarks}#
 			<div class="bookmark #(public)#public::private#(/public)#">
