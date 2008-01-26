@@ -7,7 +7,8 @@
   <body id="PerformanceMemory">
     <script type="text/javascript"><!--
 	function reloadGraph() {
-	  document.images["graph"].src="PerformanceGraph.png?time="+(new Date()).getTime() ;
+	  if(document.forms["optionreloadGraph"].option.checked)
+	  	document.images["graph"].src="PerformanceGraph.png?time="+(new Date()).getTime();
 	  window.status="";
 	}
 	window.setInterval("reloadGraph()", 1000);
@@ -77,9 +78,8 @@
         </dl>
       </fieldset>
     </form>
-    
-    <p><img src="PerformanceGraph.png" name="graph" /></p>
-    
+	<p><img src="PerformanceGraph.png" name="graph" /></p>
+    <p><form name="optionreloadGraph"><input type="checkbox" name="option" /> auto-reload graph</form></p>
     <p><strong>EcoTable RAM Index:</strong></p>
     <table border="0" cellpadding="2" cellspacing="1">
       <tr class="TableHeader" valign="bottom">
