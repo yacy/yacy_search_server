@@ -421,7 +421,7 @@ public class Bookmarks {
     		Iterator bit=switchboard.bookmarksDB.getBookmarksIterator(fn, isAdmin);
     		while(bit.hasNext()){
     			bookmark=switchboard.bookmarksDB.getBookmark((String)bit.next());
-    			prop.put("folderlist_"+count+"_folder", "<li><a href=\""+bookmark.getUrl()+"\">"+ bookmark.getTitle()+"</a></li>");
+    			prop.put("folderlist_"+count+"_folder", "<li><a href=\""+bookmark.getUrl()+"\" title=\""+bookmark.getDescription()+"\">"+ bookmark.getTitle()+"</a></li>");
     			count++;
     		}    	
     		if(it.hasNext()){
