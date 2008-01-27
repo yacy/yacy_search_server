@@ -425,7 +425,7 @@ manual update==manuelle Aktualisierung
 no automatic look-up, updates can be made manually using this interface \(see options above\)==Keine automatische Aktualisierung. Updates k&ouml;nnen manuell gemacht werden (siehe die Optionen oben). 
 automatic update==automatische Aktualisierung
 updates are made within fixed cycles:==Aktualisierungen werden nach festen Regeln gemacht:
-Time beween lookup==Zeit zwischen Checks
+Time between lookup==Zeit zwischen Checks
 Release blacklist==Versionen Blacklist
 regex on release number strings==regex mit Versionsnummern
 Release type==Release Typ
@@ -810,7 +810,7 @@ wordHash in Progress:==Wort-Hash in Benutzung:
 last wordHash with deleted URLs:==letzter Wort-Hash mit gel&ouml;schten URLs:
 Number of deleted URLs in on this Hash:==Anzahl an gel&ouml;schten URLs in diesem Hash:
 UrldbCleaner - Clean up the database by deletion of blacklisted urls:==UrlDBCleaner - R&auml;umen Sie Ihre Datenbank auf, indem Sie URLs, die auf Ihrer Blacklist stehen, l&ouml;schen:
-Start/Resume==Start/Fortzsetzen
+Start/Resume==Start/Fortsetzen
 Stop==Stopp
 Pause==Anhalten
 RWIDbCleaner - Clean up the database by deletion of words with reference to blacklisted urls:==RWIDBCleaner - R&auml;umen Sie Ihre Datenbank auf, indem Sie W&ouml;rter, die mit Ihrer Blacklist verbunden sind, l&ouml;schen:
@@ -1433,7 +1433,7 @@ FlexTable RAM Index:==FlexTabelle RAM Index:
 Table</td>==Tabelle</td>
 Chunk Size==Chunk Gr&ouml;&szlig;e
 Count</td>==Anzahl</td>
-Used Memory==Benutzer Speicher
+Used Memory==Benutzter Speicher
 Node Caches:==Knoten Cache:
 
 #TODO
