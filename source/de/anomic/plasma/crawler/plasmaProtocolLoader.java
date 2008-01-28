@@ -38,14 +38,14 @@ public final class plasmaProtocolLoader {
 
     private plasmaSwitchboard sb;
     private serverLog log;
-    private HashSet supportedProtocols;
+    private HashSet<String> supportedProtocols;
     private plasmaHTTPLoader httpLoader;
     private plasmaFTPLoader ftpLoader;
     
     public plasmaProtocolLoader(plasmaSwitchboard sb, serverLog log) {
         this.sb = sb;
         this.log = log;
-        this.supportedProtocols = new HashSet(Arrays.asList(new String[]{"http","https","ftp"}));
+        this.supportedProtocols = new HashSet<String>(Arrays.asList(new String[]{"http","https","ftp"}));
         
         // initiate loader objects
         httpLoader = new plasmaHTTPLoader(sb, log);
@@ -57,8 +57,9 @@ public final class plasmaProtocolLoader {
         return this.supportedProtocols.contains(protocol.trim().toLowerCase());
     }
     
-    public HashSet getSupportedProtocols() {
-        return (HashSet) this.supportedProtocols.clone();
+    @SuppressWarnings("unchecked")
+    public HashSet<String> getSupportedProtocols() {
+        return (HashSet<String>) this.supportedProtocols.clone();
     }
     
     public plasmaHTCache.Entry load(plasmaCrawlEntry entry, String parserMode) {

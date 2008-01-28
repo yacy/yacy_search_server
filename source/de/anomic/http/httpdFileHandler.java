@@ -530,8 +530,8 @@ public final class httpdFileHandler {
                 // call rewrite-class
                 requestHeader.put(httpHeader.CONNECTION_PROP_CLIENTIP, conProp.getProperty("CLIENTIP"));
                 requestHeader.put(httpHeader.CONNECTION_PROP_PATH, path);
-                requestHeader.put(httpHeader.CONNECTION_PROP_INPUTSTREAM, body);
-                requestHeader.put(httpHeader.CONNECTION_PROP_OUTPUTSTREAM, out);
+                //requestHeader.put(httpHeader.CONNECTION_PROP_INPUTSTREAM, body);
+                //requestHeader.put(httpHeader.CONNECTION_PROP_OUTPUTSTREAM, out);
              
                 httpd.sendRespondHeader(conProp, out, httpVersion, 200, null);                
                 

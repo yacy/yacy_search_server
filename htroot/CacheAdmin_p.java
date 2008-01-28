@@ -175,12 +175,12 @@ public class CacheAdmin_p {
                         formatAnchor(prop, document.getAudiolinks(), "audio");
                         formatAnchor(prop, document.getVideolinks(), "video");
                         formatAnchor(prop, document.getApplinks(), "apps");
-                        formatAnchor(prop, document.getEmaillinks(), "email");
+                        formatEmail(prop, document.getEmaillinks(), "email");
                         
                         prop.putHTML("info_type_text", new String(scraper.getText()));
                         
                         i = 0;
-                        final Iterator sentences = document.getSentences(false);
+                        final Iterator<StringBuffer> sentences = document.getSentences(false);
                         if (sentences != null)
                         	while (sentences.hasNext()) {
                         		prop.putHTML("info_type_lines_" + i + "_line",
@@ -217,8 +217,8 @@ public class CacheAdmin_p {
                 prop.put("info_empty", "1");
             } else {
             	prop.put("info_empty", "0");
-                final TreeSet dList = new TreeSet();
-                final TreeSet fList = new TreeSet();
+                final TreeSet<String> dList = new TreeSet<String>();
+                final TreeSet<String> fList = new TreeSet<String>();
                 int size = list.length - 1, i = size;
                 for (; i >= 0 ; i--) { // Rueckwaerts ist schneller
                     if (new File(dir, list[i]).isDirectory())
@@ -227,7 +227,7 @@ public class CacheAdmin_p {
                         fList.add(list[i]);
                 }
                 
-                Iterator iter = dList.iterator();
+                Iterator<String> iter = dList.iterator();
                 i = 0;
                 prop.put("info_treeFolders", dList.size());
                 while (iter.hasNext()) {
@@ -257,33 +257,33 @@ public class CacheAdmin_p {
         return prop;
     }
     
-    private static void formatHeader(serverObjects prop, Map header) {
+    private static void formatHeader(serverObjects prop, Map<String, String> header) {
         if (header == null) {
             prop.put("info_header", "0");
         } else {
         	prop.put("info_header", "1");
         	int i = 0;
-            final Iterator iter = header.entrySet().iterator();
-            Map.Entry entry;
+            final Iterator<Map.Entry<String, String>> iter = header.entrySet().iterator();
+            Map.Entry<String, String> entry;
             while (iter.hasNext()) {
-            	entry = (Map.Entry) iter.next();
-            	prop.put("info_header_line_" + i + "_property", (String) entry.getKey());
-            	prop.put("info_header_line_" + i + "_value", (String) entry.getValue());
+            	entry = iter.next();
+            	prop.put("info_header_line_" + i + "_property", entry.getKey());
+            	prop.put("info_header_line_" + i + "_value", entry.getValue());
             	i++;
             }
             prop.put("info_header_line", i);
         }
     }
 
-    private static void formatAnchor(serverObjects prop, Map anchor, String extension) {
-        final Iterator iter = anchor.entrySet().iterator();
+    private static void formatAnchor(serverObjects prop, Map<yacyURL, String> anchor, String extension) {
+        final Iterator<Map.Entry<yacyURL, String>> iter = anchor.entrySet().iterator();
         String descr;
-        Map.Entry entry;
+        Map.Entry<yacyURL, String> entry;
         prop.put("info_type_use." + extension + "_" + extension, anchor.size());
         int i = 0;
         while (iter.hasNext()) {
-            entry = (Map.Entry) iter.next();
-            descr = ((String) entry.getValue()).trim();
+            entry = iter.next();
+            descr = entry.getValue().trim();
             if (descr.length() == 0) { descr = "-"; }
             prop.put("info_type_use." + extension + "_" + extension + "_" + i + "_name",
             		de.anomic.data.htmlTools.encodeUnicode2html(descr.replaceAll("\n", "").trim(), true));
@@ -293,14 +293,33 @@ public class CacheAdmin_p {
         }
         prop.put("info_type_use." + extension, (i == 0) ? 0 : 1);
     }
+    
+    private static void formatEmail(serverObjects prop, Map<String, String> anchor, String extension) {
+        final Iterator<Map.Entry<String, String>> iter = anchor.entrySet().iterator();
+        String descr;
+        Map.Entry<String, String> entry;
+        prop.put("info_type_use." + extension + "_" + extension, anchor.size());
+        int i = 0;
+        while (iter.hasNext()) {
+            entry = iter.next();
+            descr = entry.getValue().trim();
+            if (descr.length() == 0) { descr = "-"; }
+            prop.put("info_type_use." + extension + "_" + extension + "_" + i + "_name",
+                    de.anomic.data.htmlTools.encodeUnicode2html(descr.replaceAll("\n", "").trim(), true));
+            prop.put("info_type_use." + extension + "_" + extension + "_" + i + "_link",
+                    de.anomic.data.htmlTools.encodeUnicode2html(entry.getKey().toString(), true));
+            i++;
+        }
+        prop.put("info_type_use." + extension, (i == 0) ? 0 : 1);
+    }
 
-    private static void formatImageAnchor(serverObjects prop, TreeSet anchor) {
-        final Iterator iter = anchor.iterator();
+    private static void formatImageAnchor(serverObjects prop, TreeSet<htmlFilterImageEntry> anchor) {
+        final Iterator<htmlFilterImageEntry> iter = anchor.iterator();
         htmlFilterImageEntry ie;
         prop.put("info_type_use.images_images", anchor.size());
         int i = 0;
         while (iter.hasNext()) {
-            ie = (htmlFilterImageEntry) iter.next();
+            ie = iter.next();
             prop.putHTML("info_type_use.images_images_" + i + "_name", ie.alt().replaceAll("\n", "").trim());
             prop.putHTML("info_type_use.images_images_" + i + "_link",
             		de.anomic.data.htmlTools.encodeUnicode2html(ie.url().toNormalform(false, true), false));

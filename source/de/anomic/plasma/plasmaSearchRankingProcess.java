@@ -96,7 +96,7 @@ public final class plasmaSearchRankingProcess {
         this.localSearchContainerMaps = wordIndex.localSearchContainers(query, null);
         serverProfiling.update("SEARCH", new plasmaProfiling.searchEvent(query.id(true), plasmaSearchEvent.COLLECTION, this.localSearchContainerMaps[0].size(), System.currentTimeMillis() - timer));
         
-        // join and exlcude the local result
+        // join and exclude the local result
         timer = System.currentTimeMillis();
         indexContainer index =
             (this.localSearchContainerMaps == null) ?

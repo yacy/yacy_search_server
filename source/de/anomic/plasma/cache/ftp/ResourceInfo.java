@@ -58,44 +58,44 @@ public class ResourceInfo implements IResourceInfo {
 
     public static final String MIMETYPE = "mimetype";
     public static final String MODIFICATION_DATE = "modificationDate";
-    public static final String REFERER = "referer";
     
-    private yacyURL url;
-    private HashMap propertyMap; 
+    private yacyURL objectURL, refererURL;
+    private HashMap<String, String> propertyMap; 
     
     /**
      * Constructor used by the {@link ResourceInfoFactory}
      * @param objectURL
      * @param objectInfo
      */
-    public ResourceInfo(yacyURL objectURL, Map objectInfo) {
+    public ResourceInfo(yacyURL objectURL, Map<String, String> objectInfo) {
         if (objectURL == null) throw new NullPointerException();
         if (objectInfo == null) throw new NullPointerException();
         
         // generating the url hash
-        this.url = objectURL;
+        this.objectURL = objectURL;
+        this.refererURL = null;
         
         // create the http header object
-        this.propertyMap =  new HashMap(objectInfo);
+        this.propertyMap =  new HashMap<String, String>(objectInfo);
     }    
     
     public ResourceInfo(yacyURL objectURL, yacyURL refererUrl, String mimeType, Date fileDate) {
         if (objectURL == null) throw new NullPointerException();
         
         // generating the url hash
-        this.url = objectURL;
+        this.objectURL = objectURL;
         
         // create the http header object
-        this.propertyMap =  new HashMap();
+        this.propertyMap =  new HashMap<String, String>();
         if (refererUrl != null) 
-            this.propertyMap.put(REFERER, refererUrl);
+            this.refererURL = refererUrl;
         if (mimeType != null) 
             this.propertyMap.put(MIMETYPE, mimeType);
         if (fileDate != null) 
             this.propertyMap.put(MODIFICATION_DATE, Long.toString(fileDate.getTime()));
     }
     
-    public Map getMap() {
+    public Map<String, String> getMap() {
         return this.propertyMap;
     }
 
@@ -109,11 +109,11 @@ public class ResourceInfo implements IResourceInfo {
     }
 
     public yacyURL getRefererUrl() {
-        return (this.propertyMap == null) ? null : ((yacyURL) this.propertyMap.get(REFERER));
+        return this.refererURL;
     }
 
     public yacyURL getUrl() {
-        return this.url;
+        return this.objectURL;
     }
     
     public Date ifModifiedSince() {

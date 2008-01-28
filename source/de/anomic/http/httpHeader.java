@@ -75,7 +75,7 @@ import de.anomic.server.serverDate;
 import de.anomic.yacy.yacyURL;
 
 
-public final class httpHeader extends TreeMap<String, Object> implements Map<String, Object> {
+public final class httpHeader extends TreeMap<String, String> implements Map<String, String> {
 
     
 	private static final long serialVersionUID = 17L;
@@ -239,8 +239,8 @@ public final class httpHeader extends TreeMap<String, Object> implements Map<Str
     public static final String CONNECTION_PROP_PREV_REQUESTLINE = "PREVREQUESTLINE";
     public static final String CONNECTION_PROP_REQUEST_START = "REQUEST_START";
     public static final String CONNECTION_PROP_REQUEST_END = "REQUEST_END";
-    public static final String CONNECTION_PROP_INPUTSTREAM = "INPUTSTREAM";
-    public static final String CONNECTION_PROP_OUTPUTSTREAM = "OUTPUTSTREAM";
+    //public static final String CONNECTION_PROP_INPUTSTREAM = "INPUTSTREAM";
+    //public static final String CONNECTION_PROP_OUTPUTSTREAM = "OUTPUTSTREAM";
     
     /* PROPERTIES: Client -> Proxy */
     public static final String CONNECTION_PROP_CLIENT_REQUEST_HEADER = "CLIENT_REQUEST_HEADER";
@@ -302,7 +302,7 @@ public final class httpHeader extends TreeMap<String, Object> implements Map<Str
 
 
     // we override the put method to make use of the reverseMappingCache
-    public Object put(String key, Object value) {
+    public String put(String key, String value) {
         String upperK = key.toUpperCase();
         
         if (reverseMappingCache == null) {
@@ -315,14 +315,14 @@ public final class httpHeader extends TreeMap<String, Object> implements Map<Str
         }
         
         // we put in without a cached key and store the key afterwards
-        Object r = super.put(key, value);
+        String r = super.put(key, value);
         reverseMappingCache.put(upperK, key);
         return r;
     }
 
     // to make the occurrence of multiple keys possible, we add them using a counter
-    public Object add(String key, Object value) {
-        int c = keyCount((String) key);
+    public String add(String key, String value) {
+        int c = keyCount(key);
         if (c == 0) return put(key, value);
         return put("*" + key + "-" + c, value);
     }
@@ -906,10 +906,10 @@ public final class httpHeader extends TreeMap<String, Object> implements Map<Str
         setCookie( name,  value,  null,  null,  null, false);
     }
     public String getHeaderCookies(){
-        Iterator<Map.Entry<String, Object>> it = this.entrySet().iterator();
+        Iterator<Map.Entry<String, String>> it = this.entrySet().iterator();
         while(it.hasNext())
         {
-            Map.Entry<String, Object> e = it.next();
+            Map.Entry<String, String> e = it.next();
             //System.out.println(""+e.getKey()+" : "+e.getValue());
             if(e.getKey().equals("Cookie"))
             {

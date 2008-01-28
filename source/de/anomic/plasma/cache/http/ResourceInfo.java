@@ -68,7 +68,7 @@ public class ResourceInfo implements IResourceInfo {
      * @param objectURL
      * @param objectInfo
      */
-    public ResourceInfo(yacyURL objectURL, Map objectInfo) {
+    public ResourceInfo(yacyURL objectURL, Map<String, String> objectInfo) {
         if (objectURL == null) throw new NullPointerException();
         if (objectInfo == null) throw new NullPointerException();
         
@@ -90,7 +90,7 @@ public class ResourceInfo implements IResourceInfo {
         this.responseHeader = responseHeaders;
     }
     
-    public Map getMap() {
+    public Map<String, String> getMap() {
         return this.responseHeader;
     }
     
