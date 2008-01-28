@@ -48,11 +48,11 @@ import de.anomic.server.serverSwitch;
 
 public final class httpdSwitchboard extends serverAbstractSwitch implements serverSwitch {
 
-    private final LinkedList cacheStack;
+    private final LinkedList<Object> cacheStack;
         
     public httpdSwitchboard(String rootPath, String initPath, String configPath, boolean applyPro) {
         super(rootPath, initPath, configPath, applyPro);
-        cacheStack = new LinkedList();
+        cacheStack = new LinkedList<Object>();
      }
 
     public int queueSize() {

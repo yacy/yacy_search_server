@@ -113,7 +113,7 @@ public final class httpdProxyHandler {
     // static variables
     // can only be instantiated upon first instantiation of this class object
     private static plasmaSwitchboard switchboard = null;
-    public  static HashSet yellowList = null;
+    public  static HashSet<String> yellowList = null;
     private static int timeout = 30000;
     private static boolean yacyTrigger = true;
     public static boolean isTransparentProxy = false;
@@ -205,7 +205,7 @@ public final class httpdProxyHandler {
             yellowList = serverFileUtils.loadList(new File(f)); 
             theLogger.logConfig("loaded yellow-list from file " + f + ", " + yellowList.size() + " entries");
         } else {
-            yellowList = new HashSet();
+            yellowList = new HashSet<String>();
         }
         
         String redirectorPath = switchboard.getConfig("externalRedirector", "");
@@ -1411,7 +1411,7 @@ public final class httpdProxyHandler {
         serverObjects detailedErrorMsgMap = new serverObjects();
         
         // generic toplevel domains        
-        HashSet topLevelDomains = new HashSet(Arrays.asList(new String[]{
+        HashSet<String> topLevelDomains = new HashSet<String>(Arrays.asList(new String[]{
                 "aero", // Fluggesellschaften/Luftfahrt
                 "arpa", // Einrichtung des ARPANet
                 "biz",  // Business
@@ -1453,7 +1453,7 @@ public final class httpdProxyHandler {
         detailedErrorMsgMap.put("hostName", orgHostName);
         
         // guessing hostnames
-        HashSet testHostNames = new HashSet();
+        HashSet<String> testHostNames = new HashSet<String>();
         String testHostName = null;
         if (!orgHostName.startsWith("www.")) {
             testHostName = "www." + orgHostName;
@@ -1472,9 +1472,9 @@ public final class httpdProxyHandler {
         
         pos = orgHostName.lastIndexOf(".");
         if (pos != -1) {
-            Iterator iter = topLevelDomains.iterator();
+            Iterator<String> iter = topLevelDomains.iterator();
             while (iter.hasNext()) {
-                String topLevelDomain = (String) iter.next();
+                String topLevelDomain = iter.next();
                 testHostName = orgHostName.substring(0,pos) + "." + topLevelDomain;
                 InetAddress addr = serverDomains.dnsResolve(testHostName);
                 if (addr != null) if (addr != null) testHostNames.add(testHostName);                        
@@ -1482,9 +1482,9 @@ public final class httpdProxyHandler {
         }
         
         int hostNameCount = 0;
-        Iterator iter = testHostNames.iterator();
+        Iterator<String> iter = testHostNames.iterator();
         while (iter.hasNext()) {
-            testHostName = (String) iter.next();
+            testHostName = iter.next();
             detailedErrorMsgMap.put("list_" + hostNameCount + "_hostName",testHostName);
             detailedErrorMsgMap.put("list_" + hostNameCount + "_hostPort",orgHostPort);
             detailedErrorMsgMap.put("list_" + hostNameCount + "_hostPath",orgHostPath);

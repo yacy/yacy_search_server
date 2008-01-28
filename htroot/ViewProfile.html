@@ -3,6 +3,7 @@
   <head>
     <title>YaCy '#[clientname]#': Remote Peer Profile</title>
     <link rel="alternate" type="text/x-vcard" title="vCard" href="ViewProfile.vcf?hash=#[hash]#" />
+    <link rel="meta" type="application/rdf+xml" title="rdf:foaf" href="ViewProfile.rdf?hash=#[hash]#" />
     #%env/templates/metas.template%#
   </head>
   <body id="ViewProfile">
@@ -25,7 +26,7 @@
     <p class="error">The peer #[peername]# is not online.</p>
     ::
     <h3>This is the Profile of #[peername]#:</h3>
-    
+    <fieldset>
     <dl class="pairs">
       <dt>Name</dt>
       <dd>#(name)#&nbsp;::#[value]##(/name)#</dd>
@@ -58,7 +59,10 @@
       <dd>#[value]#&nbsp;</dd>
       #{/other}#
     </dl>
+    </fieldset>
     #(/success)#
+    <p>View this profile as <a rel="meta" type="application/rdf+xml" title="rdf:foaf" href="ViewProfile.rdf?hash=#[hash]#"/>rdf:foaf</a> or 
+    <a rel="alternate" type="text/x-vcard" title="vCard" href="ViewProfile.vcf?hash=#[hash]#" />vCard</a></p>
     #(display)#
     #%env/templates/simplefooter.template%#
     ::

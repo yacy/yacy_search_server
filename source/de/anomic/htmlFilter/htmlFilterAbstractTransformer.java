@@ -45,20 +45,20 @@ import java.util.TreeSet;
 
 public abstract class htmlFilterAbstractTransformer implements htmlFilterTransformer {
 
-    private TreeSet      tags0;
-    private TreeSet      tags1;
+    private TreeSet<String> tags0;
+    private TreeSet<String> tags1;
 
-    public htmlFilterAbstractTransformer(TreeSet tags0, TreeSet tags1) {
-	this.tags0  = tags0;
-	this.tags1  = tags1;
+    public htmlFilterAbstractTransformer(TreeSet<String> tags0, TreeSet<String> tags1) {
+        this.tags0  = tags0;
+        this.tags1  = tags1;
     }
 
     public boolean isTag0(String tag) {
-	return tags0.contains(tag);
+        return tags0.contains(tag);
     }
 
     public boolean isTag1(String tag) {
-	return tags1.contains(tag);
+        return tags1.contains(tag);
     }
 
     //the 'missing' method that shall be implemented:
@@ -71,11 +71,11 @@ public abstract class htmlFilterAbstractTransformer implements htmlFilterTransfo
 
     // the other methods must take into account to construct the return value correctly
     public char[] transformTag0(String tagname, Properties tagopts, char quotechar) {
-	return htmlFilterWriter.genTag0(tagname, tagopts, quotechar);
+        return htmlFilterWriter.genTag0(tagname, tagopts, quotechar);
     }
 
     public char[] transformTag1(String tagname, Properties tagopts, char[] text, char quotechar) {
-	return htmlFilterWriter.genTag1(tagname, tagopts, text, quotechar);
+        return htmlFilterWriter.genTag1(tagname, tagopts, text, quotechar);
     }
 
     public void close() {

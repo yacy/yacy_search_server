@@ -91,7 +91,7 @@ public class TableToken extends AbstractToken {
 	
     // from de.anomic.data.wikiCode.java.parseTableProperties, modified by [FB]
 	private static final String[] tps = { "rowspan", "colspan", "vspace", "hspace", "cellspacing", "cellpadding", "border" };
-    private static final HashMap/* <String,String[]> */ ps = new HashMap();
+    private static final HashMap<String, String[]> ps = new HashMap<String, String[]>();
     static {
         Arrays.sort(tps);
         String[] array;

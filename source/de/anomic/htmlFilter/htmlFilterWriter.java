@@ -167,7 +167,7 @@ public final class htmlFilterWriter extends Writer {
 
     // a helper method for pretty-printing of properties for html tags
     public static char[] genOpts(Properties prop, char quotechar) {   
-            Enumeration e = prop.propertyNames();
+            Enumeration<?> e = prop.propertyNames();
             serverCharBuffer bb = new serverCharBuffer(prop.size() * 40);
             String key;
             while (e.hasMoreElements()) {

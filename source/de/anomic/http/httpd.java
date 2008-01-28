@@ -107,7 +107,7 @@ public final class httpd implements serverHandler {
      */
      
      //TODO: Load this from a file
-    private static final HashSet disallowZippedContentEncoding = new HashSet(Arrays.asList(new String[]{
+    private static final HashSet<String> disallowZippedContentEncoding = new HashSet<String>(Arrays.asList(new String[]{
             ".gz", ".tgz", ".jpg", ".jpeg", ".gif", ".zip", ".rar", ".bz2", ".lha", ".jar", ".rpm", ".arc", ".arj", ".wmv", ".png", ".ico", ".bmp"
     }));    
     
@@ -121,8 +121,8 @@ public final class httpd implements serverHandler {
     private static String virtualHost = null;
     
     public static boolean keepAliveSupport = false;
-    private static HashMap YaCyHopAccessRequester = new HashMap();
-    private static HashMap YaCyHopAccessTargets = new HashMap();
+    private static HashMap<String, Long> YaCyHopAccessRequester = new HashMap<String, Long>();
+    private static HashMap<String, Long> YaCyHopAccessTargets = new HashMap<String, Long>();
     
     // class objects
     private serverCore.Session session;  // holds the session object of the calling class
@@ -381,8 +381,8 @@ public final class httpd implements serverHandler {
         return true;
     }
 
-    private static long lastAccessDelta(HashMap accessTable, String domain) {
-        Long lastAccess = (Long) accessTable.get(domain);
+    private static long lastAccessDelta(HashMap<String, Long> accessTable, String domain) {
+        Long lastAccess = accessTable.get(domain);
         if (lastAccess == null) return Long.MAX_VALUE; // never accessed
         return System.currentTimeMillis() - lastAccess.longValue();
     }
@@ -1187,9 +1187,9 @@ public final class httpd implements serverHandler {
                     tp.put("errorMessageType_file", (detailedErrorMsgFile == null) ? "" : detailedErrorMsgFile.toString());
                     if ((detailedErrorMsgValues != null) && (detailedErrorMsgValues.size() > 0)) {
                         // rewriting the value-names and add the proper name prefix:
-                        Iterator nameIter = detailedErrorMsgValues.keySet().iterator();
+                        Iterator<String> nameIter = detailedErrorMsgValues.keySet().iterator();
                         while (nameIter.hasNext()) {
-                            String name = (String) nameIter.next();
+                            String name = nameIter.next();
                             tp.put("errorMessageType_" + name, detailedErrorMsgValues.get(name));
                         }                        
                     }                    
@@ -1405,12 +1405,11 @@ public final class httpd implements serverHandler {
                 	httpHeader outgoingHeader=requestProperties.getOutgoingHeader();
                 	if (outgoingHeader!=null)
                 	{*/
-                	Iterator it=header.getCookies();
-                	while(it.hasNext())
-                	{
+                	Iterator<httpHeader.Entry> it = header.getCookies();
+                	while(it.hasNext()) {
                 		//Append user properties to the main String
                 		//TODO: Should we check for user properites. What if they intersect properties that are already in header?
-                		java.util.Map.Entry e=(java.util.Map.Entry)it.next();
+                	    httpHeader.Entry e = it.next();
                         headerStringBuffer.append(e.getKey()).append(": ").append(e.getValue()).append("\r\n");   
                 	}
                 	
@@ -1419,13 +1418,13 @@ public final class httpd implements serverHandler {
                 }*/
                 
                 // write header
-                Iterator i = header.keySet().iterator();
+                Iterator<String> i = header.keySet().iterator();
                 String key;
                 char tag;
                 int count;
                 //System.out.println("vvvvvvvvvvvvvvvvvvvvvvvvvvvvvvv");
                 while (i.hasNext()) {
-                    key = (String) i.next();
+                    key = i.next();
                     tag = key.charAt(0);
                     if ((tag != '*') && (tag != '#')) { // '#' in key is reserved for proxy attributes as artificial header values
                         count = header.keyCount(key);

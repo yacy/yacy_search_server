@@ -721,9 +721,9 @@ public final class httpHeader extends TreeMap<String, Object> implements Map<Str
         // setting the status text if it was not already set
         if ((httpStatusText == null)||(httpStatusText.length()==0)) {
             if (httpVersion.equals("HTTP/1.0") && httpHeader.http1_0.containsKey(Integer.toString(httpStatusCode))) 
-                httpStatusText = (String) httpHeader.http1_0.get(Integer.toString(httpStatusCode));
+                httpStatusText = httpHeader.http1_0.get(Integer.toString(httpStatusCode));
             else if (httpVersion.equals("HTTP/1.1") && httpHeader.http1_1.containsKey(Integer.toString(httpStatusCode)))
-                httpStatusText = (String) httpHeader.http1_1.get(Integer.toString(httpStatusCode));
+                httpStatusText = httpHeader.http1_1.get(Integer.toString(httpStatusCode));
             else httpStatusText = "Unknown";
         }
         
@@ -802,13 +802,24 @@ public final class httpHeader extends TreeMap<String, Object> implements Map<Str
     /**
      * Implementation of Map.Entry. Structure that hold two values - exactly what we need!
      */
-    class Entry implements Map.Entry {
-        private Object Key;
-        private Object Value;
-        Entry(Object Key, String Value){this.Key=Key;this.Value=Value;}
-        public Object getKey() {return Key;}
-        public Object getValue() {return Value;}
-        public Object setValue(Object Value) {return(this.Value=Value);}
+    class Entry implements Map.Entry<String, Object> {
+        private String k;
+        private Object v;
+        Entry(String k, Object v) {
+            this.k = k;
+            this.v = v;
+        }
+        public String getKey() {
+            return k;
+        }
+        public Object getValue() {
+            return v;
+        }
+        public Object setValue(Object v) {
+            Object r = this.v;
+            this.v = v;
+            return r;
+        }
     }
 
     /**
@@ -895,10 +906,10 @@ public final class httpHeader extends TreeMap<String, Object> implements Map<Str
         setCookie( name,  value,  null,  null,  null, false);
     }
     public String getHeaderCookies(){
-        Iterator it = this.entrySet().iterator();
+        Iterator<Map.Entry<String, Object>> it = this.entrySet().iterator();
         while(it.hasNext())
         {
-            java.util.Map.Entry e = (java.util.Map.Entry) it.next();
+            Map.Entry<String, Object> e = it.next();
             //System.out.println(""+e.getKey()+" : "+e.getValue());
             if(e.getKey().equals("Cookie"))
             {

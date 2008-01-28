@@ -54,7 +54,7 @@ import java.util.TreeMap;
 
 import de.anomic.server.serverCore;
 
-public class icapHeader extends TreeMap implements Map {
+public class icapHeader extends TreeMap<String, String> implements Map<String, String> {
 
     private static final long serialVersionUID = 1L;
 	
@@ -91,7 +91,7 @@ public class icapHeader extends TreeMap implements Map {
     /* =============================================================
      * defining default icap status messages
      * ============================================================= */    
-    public static final HashMap icap1_0 = new HashMap();
+    public static final HashMap<String, String> icap1_0 = new HashMap<String, String>();
     static {
         // (1yz) Informational codes
         icap1_0.put("100","Continue after ICAP preview");
@@ -145,8 +145,8 @@ public class icapHeader extends TreeMap implements Map {
     }    
     
     // to make the occurrence of multiple keys possible, we add them using a counter
-    public Object add(Object key, Object value) {
-        int c = keyCount((String) key);
+    public String add(String key, String value) {
+        int c = keyCount(key);
         if (c == 0) return put(key, value);
         return put("*" + key + "-" + c, value);
     }
@@ -186,7 +186,7 @@ public class icapHeader extends TreeMap implements Map {
                  .append(icapStatusText).append("\r\n");
         
         // write header
-        Iterator i = keySet().iterator();
+        Iterator<String> i = keySet().iterator();
         String key;
         char tag;
         int count;

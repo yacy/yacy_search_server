@@ -74,7 +74,6 @@ import org.xml.sax.SAXException;
 
 import de.anomic.htmlFilter.htmlFilterContentScraper;
 import de.anomic.htmlFilter.htmlFilterWriter;
-import de.anomic.plasma.plasmaCondenser;
 import de.anomic.kelondro.kelondroCloneableIterator;
 import de.anomic.kelondro.kelondroDyn;
 import de.anomic.kelondro.kelondroException;
@@ -82,6 +81,7 @@ import de.anomic.kelondro.kelondroMapObjects;
 import de.anomic.kelondro.kelondroNaturalOrder;
 import de.anomic.kelondro.kelondroObjects;
 import de.anomic.kelondro.kelondroObjectsMapEntry;
+import de.anomic.plasma.plasmaCondenser;
 import de.anomic.server.serverDate;
 import de.anomic.server.serverFileUtils;
 import de.anomic.server.logging.serverLog;
@@ -722,15 +722,15 @@ public class bookmarksDB {
         public static final String TAG_NAME="tagName";
         private String tagHash;
         private Map mem;
-        private Set urlHashes;
+        private Set<String> urlHashes;
 
         public Tag(String hash, Map map){
         	tagHash=hash;
             mem=map;
             if(mem.containsKey(URL_HASHES))
-                urlHashes=listManager.string2set((String) mem.get(URL_HASHES));
+                urlHashes = listManager.string2set((String) mem.get(URL_HASHES));
             else
-                urlHashes=new HashSet();
+                urlHashes = new HashSet();
         }
         public Tag(String name, HashSet entries){
             tagHash=tagHash(name);
@@ -776,7 +776,7 @@ public class bookmarksDB {
             }
             return "notagname";
         }
-        public Set getUrlHashes(){
+        public Set<String> getUrlHashes(){
             return urlHashes;
         }
         public boolean hasPublicItems(){

@@ -271,8 +271,8 @@ public class ftpc {
       super();
     }
   
-    public Class loadClass(String classname, boolean resolve) throws ClassNotFoundException {
-        Class c = findLoadedClass(classname);
+    public Class<?> loadClass(String classname, boolean resolve) throws ClassNotFoundException {
+        Class<?> c = findLoadedClass(classname);
         if (c == null) try {
         	// second try: ask the system
           c = findSystemClass(classname);
@@ -324,11 +324,11 @@ public class ftpc {
       System.setProperties(pr);
       
       // locate object
-      Class c = (new cl()).loadClass(obj);
+      Class<?> c = (new cl()).loadClass(obj);
       //Class c = this.getClass().getClassLoader().loadClass(obj);
       
       // locate public static main(String[]) method
-      Class[] parameterType = new Class[1];
+      Class<?>[] parameterType = new Class[1];
       parameterType[0] = Class.forName("[Ljava.lang.String;");
       Method m = c.getMethod("main", parameterType);
       
@@ -477,11 +477,11 @@ public class ftpc {
     }
     if (ControlSocket == null) return LDIR();
     try {
-      Vector l;
+      Vector<String> l;
       if (cmd.length == 2) l = list(cmd[1],false); else l = list(".",false);
-      Enumeration x = l.elements();
+      Enumeration<String> x = l.elements();
       out.println(logPrefix + "---- v---v---v---v---v---v---v---v---v---v---v---v---v---v---v---v---v---v---v");
-      while (x.hasMoreElements()) out.println(logPrefix + (String) x.nextElement());
+      while (x.hasMoreElements()) out.println(logPrefix + x.nextElement());
       out.println(logPrefix + "---- ^---^---^---^---^---^---^---^---^---^---^---^---^---^---^---^---^---^---^");
     } catch (IOException e) {
       err.println(logPrefix + "---- Error: remote list not available");
@@ -581,8 +581,8 @@ public class ftpc {
         exec("cd \"" + remote + "\";lmkdir \"" + remote + "\";lcd \"" + remote + "\"",true);
         //exec("mget *",true);
         try {
-          Enumeration files = list(".",false).elements();
-          while (files.hasMoreElements()) retrieveFilesRecursively((String) files.nextElement(), delete);
+          Enumeration<String> files = list(".",false).elements();
+          while (files.hasMoreElements()) retrieveFilesRecursively(files.nextElement(), delete);
         } catch (IOException ee) {}
           exec("cd ..;lcd ..", true);
           try {if (delete) rmForced(remote);} catch (IOException eee) {
@@ -1009,9 +1009,9 @@ cd ..
     }
     if (ControlSocket == null) return LLS();
     try {
-      Vector l;
+      Vector<String> l;
       if (cmd.length == 2) l = list(cmd[1],true); else l = list(".",true);
-      Enumeration x = l.elements();
+      Enumeration<String> x = l.elements();
       out.println(logPrefix + "---- v---v---v---v---v---v---v---v---v---v---v---v---v---v---v---v---v---v---v");
       while (x.hasMoreElements()) out.println(logPrefix + (String) x.nextElement());
       out.println(logPrefix + "---- ^---^---^---^---^---^---^---^---^---^---^---^---^---^---^---^---^---^---^");
@@ -1022,7 +1022,7 @@ cd ..
   }
     
   
-  private Vector list(String path, boolean extended) throws IOException {   
+  private Vector<String> list(String path, boolean extended) throws IOException {   
     // prepare data channel
     if (DataSocketPassiveMode) createPassiveDataPort(); else createActiveDataPort();
 
@@ -1050,7 +1050,7 @@ cd ..
       
       // read file system data
       String line;
-      Vector files = new Vector();
+      Vector<String> files = new Vector<String>();
       while ((line = ClientStream.readLine()) != null)
         if (!line.startsWith("total ")) files.addElement(line);
 
@@ -1107,8 +1107,8 @@ cd ..
   }
 
   private void mget(String pattern, boolean remove) throws IOException {
-    Vector l = list(".",false);
-    Enumeration x = l.elements();
+    Vector<String> l = list(".",false);
+    Enumeration<String> x = l.elements();
     String remote;
     File local;
     //int idx; // the search for " " is only for improper lists from the server. this fails if the file name has a " " in it
@@ -1894,12 +1894,12 @@ cd ..
     public void checkPackageAccess(String pkg) { }
     public void checkPackageDefinition(String pkg) { }
     public void checkSetFactory() { }
-    public void checkMemberAccess(Class clazz, int which) { }
+    public void checkMemberAccess(Class<?> clazz, int which) { }
     public void checkSecurityAccess(String provider) { }
  }
 
     
-    public static Vector dir(String host,
+    public static Vector<String> dir(String host,
 			   String remotePath,
 			   String account, String password,
                            boolean extended) {
@@ -1907,7 +1907,7 @@ cd ..
 	    ftpc c = new ftpc();
             c.cmd = new String[]{"open", host}; c.OPEN();
             c.cmd = new String[]{"user", account, password}; c.USER();
-            c.cmd = new String[]{"ls"}; Vector v = c.list(remotePath, extended);
+            c.cmd = new String[]{"ls"}; Vector<String> v = c.list(remotePath, extended);
             c.cmd = new String[]{"close"}; c.CLOSE();
             c.cmd = new String[]{"exit"}; c.EXIT();
             return v;
@@ -1936,7 +1936,7 @@ cd ..
     public StringBuffer dirhtml(String remotePath) {
         // returns a directory listing using an existing connection
         try {
-            Vector list = list(remotePath, true);
+            Vector<String> list = list(remotePath, true);
             if (this.remotesystem == null) sys();
             String base = "ftp://" + ((account.equals("anonymous")) ? "" : (account + ":" + password + "@")) + host + ((port == 21) ? "" : (":" + port))  + ((remotePath.charAt(0) == '/') ? "" : "/") + remotePath;
             
@@ -1965,7 +1965,7 @@ cd ..
         }
     }
 
-    public static StringBuffer dirhtml(String base, String servermessage, String greeting, String system, Vector list) {
+    public static StringBuffer dirhtml(String base, String servermessage, String greeting, String system, Vector<String> list) {
         // this creates the html output from collected strings
             StringBuffer page = new StringBuffer(1024);
             String title = "Index of " + base;

@@ -158,14 +158,14 @@ public final class httpTemplate {
     };
 
     public static serverByteBuffer[] splitQuotations(serverByteBuffer text) {
-        List l = splitQuotation(text, 0);
+        List<serverByteBuffer> l = splitQuotation(text, 0);
         serverByteBuffer[] sbbs = new serverByteBuffer[l.size()];
-        for (int i = 0; i < l.size(); i++) sbbs[i] = (serverByteBuffer) l.get(i);
+        for (int i = 0; i < l.size(); i++) sbbs[i] = l.get(i);
         return sbbs;
     }
 
-    public static List splitQuotation(serverByteBuffer text, int qoff) {
-        ArrayList l = new ArrayList();
+    public static List<serverByteBuffer> splitQuotation(serverByteBuffer text, int qoff) {
+        ArrayList<serverByteBuffer> l = new ArrayList<serverByteBuffer>();
         if (qoff >= meta_quotation.length) {
             if (text.length() > 0) l.add(text);
             return l;
@@ -229,14 +229,14 @@ public final class httpTemplate {
         return false;
     }
 
-    public static void writeTemplate(InputStream in, OutputStream out, Hashtable pattern, byte[] dflt) throws IOException {
+    public static void writeTemplate(InputStream in, OutputStream out, Hashtable<String, String> pattern, byte[] dflt) throws IOException {
         writeTemplate(in, out, pattern, dflt, new byte[0]);
     }
 
     /**
      * Reads a input stream, and writes the data with replaced templates on a output stream
      */
-    public static byte[] writeTemplate(InputStream in, OutputStream out, Hashtable pattern, byte[] dflt, byte[] prefix) throws IOException {
+    public static byte[] writeTemplate(InputStream in, OutputStream out, Hashtable<String, String> pattern, byte[] dflt, byte[] prefix) throws IOException {
         PushbackInputStream pis = new PushbackInputStream(in, 100);
         ByteArrayOutputStream keyStream;
         byte[] key;
@@ -487,7 +487,7 @@ public final class httpTemplate {
         return structure.getBytes();
     }
 
-    public static byte[] replacePattern(String key, Hashtable pattern, byte dflt[]) {
+    public static byte[] replacePattern(String key, Hashtable<String, String> pattern, byte dflt[]) {
         byte[] replacement;
         Object value;
         if (pattern.containsKey(key)) {
@@ -515,8 +515,8 @@ public final class httpTemplate {
         // arg1 = test input; arg2 = replacement for pattern 'test'; arg3 = default replacement
         try {
             InputStream i = new ByteArrayInputStream(args[0].getBytes());
-            Hashtable h = new Hashtable();
-            h.put("test", args[1].getBytes());
+            Hashtable<String, String> h = new Hashtable<String, String>();
+            h.put("test", args[1]);
             writeTemplate(new PushbackInputStream(i, 100), System.out, h, args[2].getBytes());
             System.out.flush();
         } catch (Exception e) {
@@ -526,10 +526,10 @@ public final class httpTemplate {
     /*
      * loads all Files from path into a filename->content HashMap
      */
-    public static HashMap loadTemplates(File path) {
+    public static HashMap<String, String> loadTemplates(File path) {
         // reads all templates from a path
         // we use only the folder from the given file path
-        HashMap result = new HashMap();
+        HashMap<String, String> result = new HashMap<String, String>();
         if (path == null) return result;
         if (!(path.isDirectory())) path = path.getParentFile();
         if ((path == null) || (!(path.isDirectory()))) return result;

@@ -154,10 +154,10 @@ public class knwikiParser implements wikiParser {
                 new DefinitionListToken(),
                 new TableToken()
         };
-        ArrayList r = new ArrayList();
-        for (int i=0, k, j; i<tokens.length; i++)
+        ArrayList<String> r = new ArrayList<String>();
+        for (int i = 0, k, j; i < tokens.length; i++)
             if (tokens[i].getBlockElementNames() != null)
-                for (j=0; j<tokens[i].getBlockElementNames().length; j++) {
+                for (j = 0; j < tokens[i].getBlockElementNames().length; j++) {
                     if (tokens[i].getBlockElementNames()[j] == null) continue;
                     if ((k = tokens[i].getBlockElementNames()[j].indexOf(' ')) > 1) {
                         r.add(tokens[i].getBlockElementNames()[j].substring(0, k));
@@ -265,7 +265,7 @@ public class knwikiParser implements wikiParser {
 			
 			int startLen = escapeBegin.length();
             int endLen = escapeEnd.length();
-			ArrayList r = new ArrayList();
+			ArrayList<Text> r = new ArrayList<Text>();
 			boolean escaped = text.startsWith(escapeBegin);
 			if (escaped) r.add(new Text("", false, true));
 			int i, j = 0;

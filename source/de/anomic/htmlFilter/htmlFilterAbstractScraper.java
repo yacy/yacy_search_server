@@ -38,11 +38,11 @@ public abstract class htmlFilterAbstractScraper implements htmlFilterScraper {
     public static final char rb = '>';
     public static final char sl = '/';
  
-    private TreeSet      tags0;
-    private TreeSet      tags1;
+    private TreeSet<String> tags0;
+    private TreeSet<String> tags1;
 
     // define a translation table for html character codings
-    private static HashMap trans = new HashMap(300);
+    private static HashMap<String, String> trans = new HashMap<String, String>(300);
     static {
         trans.put("&quot;", "\""); //Anf&uuml;hrungszeichen oben
         trans.put("&amp;", "&"); //Ampersand-Zeichen, kaufm&auml;nnisches Und
@@ -290,7 +290,7 @@ public abstract class htmlFilterAbstractScraper implements htmlFilterScraper {
     }
 
 
-    public htmlFilterAbstractScraper(TreeSet tags0, TreeSet tags1) {
+    public htmlFilterAbstractScraper(TreeSet<String> tags0, TreeSet<String> tags1) {
         this.tags0  = tags0;
         this.tags1  = tags1;
     }

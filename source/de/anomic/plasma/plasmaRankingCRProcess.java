@@ -95,7 +95,7 @@ public class plasmaRankingCRProcess {
         }
         
         // put elements in accumulator file
-        Iterator el = source_cr.keys();
+        Iterator<String> el = source_cr.keys();
         String key;
         kelondroAttrSeq.Entry new_entry, acc_entry;
         int FUDate, FDDate, LUDate, UCount, PCount, ACount, VCount, Vita;
@@ -168,7 +168,7 @@ public class plasmaRankingCRProcess {
         }
         
         // put elements in accumulator file
-        Iterator el = source_cr.keys();
+        Iterator<String> el = source_cr.keys();
         String key;
         kelondroAttrSeq.Entry new_entry;
         kelondroRow.Entry acc_entry;
@@ -345,12 +345,12 @@ public class plasmaRankingCRProcess {
         int size = cr.size();
         long start = System.currentTimeMillis();
         long l;
-        final Iterator i = cr.keys();
+        final Iterator<String> i = cr.keys();
         String referee, anchor, anchorDom;
         kelondroAttrSeq.Entry cr_entry, rci_entry;
         long cr_UDate, rci_UDate;
         while (i.hasNext()) {
-            referee = (String) i.next();
+            referee = i.next();
             cr_entry = cr.getEntry(referee);
             cr_UDate = cr_entry.getAttr("UDate", 0);
             

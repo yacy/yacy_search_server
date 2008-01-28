@@ -54,7 +54,7 @@ import java.util.HashMap;
 public class httpdByteCountInputStream extends FilterInputStream {
     
     private static final Object syncObject = new Object();
-    private static final HashMap byteCountInfo = new HashMap(2);
+    private static final HashMap<String, Long> byteCountInfo = new HashMap<String, Long>(2);
     private static long globalByteCount = 0;
     
     private boolean finished = false;
@@ -144,7 +144,7 @@ public class httpdByteCountInputStream extends FilterInputStream {
             if (this.byteCountAccountName != null) {
                 long lastByteCount = 0;
                 if (byteCountInfo.containsKey(this.byteCountAccountName)) {
-                    lastByteCount = ((Long)byteCountInfo.get(this.byteCountAccountName)).longValue();
+                    lastByteCount = byteCountInfo.get(this.byteCountAccountName).longValue();
                 }
                 lastByteCount += this.byteCount;
                 byteCountInfo.put(this.byteCountAccountName,new Long(lastByteCount));

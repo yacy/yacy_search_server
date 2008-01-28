@@ -55,7 +55,7 @@ public class httpdByteCountOutputStream extends BufferedOutputStream {
     private static long globalByteCount = 0;    
     private boolean finished = false;    
     
-    private static final HashMap byteCountInfo = new HashMap(2);
+    private static final HashMap<String, Long> byteCountInfo = new HashMap<String, Long>(2);
     protected long byteCount;
     protected String byteCountAccountName = null; 
 

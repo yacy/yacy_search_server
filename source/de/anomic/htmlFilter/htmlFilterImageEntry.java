@@ -42,7 +42,7 @@ package de.anomic.htmlFilter;
 
 import de.anomic.yacy.yacyURL;
 
-public class htmlFilterImageEntry implements Comparable {
+public class htmlFilterImageEntry implements Comparable<htmlFilterImageEntry> {
 
     private yacyURL url;
     private String alt;
@@ -86,13 +86,12 @@ public class htmlFilterImageEntry implements Comparable {
             return 0xFFFF0000 | (url.hashCode() & 0xFFFF);
     }
     
-    public int compareTo(Object h) {
+    public int compareTo(htmlFilterImageEntry h) {
         // this is needed if this object is stored in a TreeSet
         // this method uses the image-size ordering from the hashCode method
         // assuming that hashCode would return a 'perfect hash' this method would
         // create a total ordering on images with respect on the image size
         assert (url != null);
-        assert (h instanceof htmlFilterImageEntry);
         if (this.url.toNormalform(true, true).equals(((htmlFilterImageEntry) h).url.toNormalform(true, true))) return 0;
         int thc = this.hashCode();
         int ohc = ((htmlFilterImageEntry) h).hashCode();
@@ -101,8 +100,7 @@ public class htmlFilterImageEntry implements Comparable {
         return this.url.toString().compareTo(((htmlFilterImageEntry) h).url.toString());
     }
     
-    public boolean equals(Object o) {
-        if (!(o instanceof htmlFilterImageEntry)) return false;
+    public boolean equals(htmlFilterImageEntry o) {
         return compareTo(o) == 0;
     }
 }

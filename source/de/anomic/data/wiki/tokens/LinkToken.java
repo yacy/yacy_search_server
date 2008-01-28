@@ -168,15 +168,15 @@ public class LinkToken extends AbstractToken {
     private Link[] getLinksFromBookmarkTag(String tagName) {
         Tag tag = this.sb.bookmarksDB.getTag(bookmarksDB.tagHash(tagName));
         if (tag == null) return null;
-        ArrayList r = new ArrayList();
-        Iterator it = tag.getUrlHashes().iterator();
+        ArrayList<Link> r = new ArrayList<Link>();
+        Iterator<String> it = tag.getUrlHashes().iterator();
         String hash;
         Bookmark bm;
         while (it.hasNext())
-            if ((hash = (String)it.next()) != null)
+            if ((hash = it.next()) != null)
                 if ((bm = this.sb.bookmarksDB.getBookmark(hash)) != null)
                     r.add(new Link(bm.getUrl(), bm.getTitle(), bm.getDescription()));
-        return (Link[])r.toArray(new Link[r.size()]);
+        return (Link[]) r.toArray(new Link[r.size()]);
     }
     
     private static class Link {

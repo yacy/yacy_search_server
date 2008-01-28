@@ -59,8 +59,8 @@ import de.anomic.server.serverCharBuffer;
 public class htmlFilterContentTransformer extends htmlFilterAbstractTransformer implements htmlFilterTransformer {
 
     // statics: for initialisation of the HTMLFilterAbstractTransformer
-    private static TreeSet linkTags0;
-    private static TreeSet linkTags1;
+    private static TreeSet<String> linkTags0;
+    private static TreeSet<String> linkTags1;
 
     private static final Collator insensitiveCollator = Collator.getInstance(Locale.US);
     static {
@@ -69,15 +69,15 @@ public class htmlFilterContentTransformer extends htmlFilterAbstractTransformer 
     }
 
     static {
-        linkTags0 = new TreeSet(insensitiveCollator);
+        linkTags0 = new TreeSet<String>(insensitiveCollator);
         linkTags0.add("img");
         linkTags0.add("input");
 
-        linkTags1 = new TreeSet(insensitiveCollator);
+        linkTags1 = new TreeSet<String>(insensitiveCollator);
         linkTags1.add("a");
     }
 
-    private ArrayList bluelist = null;
+    private ArrayList<String> bluelist = null;
 
     public htmlFilterContentTransformer() {
         super(linkTags0, linkTags1);
@@ -85,8 +85,8 @@ public class htmlFilterContentTransformer extends htmlFilterAbstractTransformer 
 
     public void init(String initarg) {
         if (bluelist == null) {
-            // here, the initarg is used to load a list of bluelisted words
-            bluelist = new ArrayList();
+            // here, the init arg is used to load a list of blue-listed words
+            bluelist = new ArrayList<String>();
             File f = new File(initarg);
             if (f.canRead()) {
                 try {
@@ -127,8 +127,8 @@ public class htmlFilterContentTransformer extends htmlFilterAbstractTransformer 
         return false;
     }
 
-    public ArrayList getStrings(byte[] text){
-        ArrayList result=new ArrayList();
+    public ArrayList<String> getStrings(byte[] text){
+        ArrayList<String> result = new ArrayList<String>();
         
         serverByteBuffer sbb = new serverByteBuffer(text);
         serverByteBuffer[] sbbs = httpTemplate.splitQuotations(sbb);

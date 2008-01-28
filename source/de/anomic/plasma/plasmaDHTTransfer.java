@@ -152,7 +152,7 @@ public class plasmaDHTTransfer extends Thread {
 
             // transfering seleted words to remote peer
             this.transferStatusMessage = "Running: Transfering chunk to target " + this.seed.hash + "/" + this.seed.getName();
-            HashMap result = yacyClient.transferIndex(this.seed, this.dhtChunk.containers(), this.dhtChunk.urlCacheMap(), this.gzipBody4Transfer, this.timeout4Transfer);
+            HashMap<String, Object> result = yacyClient.transferIndex(this.seed, this.dhtChunk.containers(), this.dhtChunk.urlCacheMap(), this.gzipBody4Transfer, this.timeout4Transfer);
             String error = (String) result.get("result");
             if (error == null) {
                 // words successfully transfered
@@ -254,11 +254,13 @@ public class plasmaDHTTransfer extends Thread {
         }
     }
     
-    private long getBusyTime(HashMap result) {
+    @SuppressWarnings("unchecked")
+    private long getBusyTime(HashMap<String, Object> result) {
         int pause = -1;
-        HashMap transferRWIResult = (HashMap) result.get("resultTransferRWI");
-        if (transferRWIResult != null && transferRWIResult.containsKey("pause")) {
-            String pauseStr = (String) transferRWIResult.get("pause");
+        Object transferRWIResult = result.get("resultTransferRWI");
+        assert transferRWIResult instanceof HashMap;
+        if (transferRWIResult != null && ((HashMap<String, String>) transferRWIResult).containsKey("pause")) {
+            String pauseStr = (String) ((HashMap<String, String>) transferRWIResult).get("pause");
             try { pause = Integer.valueOf(pauseStr).intValue(); } catch (NumberFormatException numEx){}
             if (pause < 0) pause = 5000;
             else if (pause > 30000) pause = 30000;

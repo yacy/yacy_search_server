@@ -70,8 +70,8 @@ public final class httpRemoteProxyConfig {
     private String   remoteProxyNoProxy = "";
     private String[] remoteProxyNoProxyPatterns = null;
     
-    public final HashSet remoteProxyAllowProxySet = new HashSet();
-    public final HashSet remoteProxyDisallowProxySet = new HashSet();
+    public final HashSet<String> remoteProxyAllowProxySet = new HashSet<String>();
+    public final HashSet<String> remoteProxyDisallowProxySet = new HashSet<String>();
 
     public boolean useProxy() {
         return this.remoteProxyUse;

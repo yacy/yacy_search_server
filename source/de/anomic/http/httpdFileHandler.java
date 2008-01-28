@@ -116,10 +116,8 @@ public final class httpdFileHandler {
     
     private static final boolean safeServletsMode = false; // if true then all servlets are called synchronized
     
-    // class variables
     private static final Properties mimeTable = new Properties();
     private static final serverClassLoader provider;
-    private static final HashMap templates = new HashMap();
     private static serverSwitch switchboard;
     private static plasmaSwitchboard sb = plasmaSwitchboard.getSwitchboard();
     
@@ -130,8 +128,8 @@ public final class httpdFileHandler {
     private static File htDefaultPath = null;
     private static File htLocalePath = null;
 
-    private static final HashMap templateCache;    
-    private static final HashMap templateMethodCache;
+    private static final HashMap<File, SoftReference<byte[]>> templateCache;    
+    private static final HashMap<File, SoftReference<Method>> templateMethodCache;
     
     public static boolean useTemplateCache = false;
     
@@ -141,8 +139,8 @@ public final class httpdFileHandler {
     static {
         serverSwitch switchboard = plasmaSwitchboard.getSwitchboard();
         useTemplateCache = switchboard.getConfig("enableTemplateCache","true").equalsIgnoreCase("true");
-        templateCache = (useTemplateCache)? new HashMap() : new HashMap(0);
-        templateMethodCache = (useTemplateCache) ? new HashMap() : new HashMap(0);
+        templateCache = (useTemplateCache)? new HashMap<File, SoftReference<byte[]>>() : new HashMap<File, SoftReference<byte[]>>(0);
+        templateMethodCache = (useTemplateCache) ? new HashMap<File, SoftReference<Method>>() : new HashMap<File, SoftReference<Method>>(0);
         
         // create a class loader
         provider = new serverClassLoader(/*this.getClass().getClassLoader()*/);
@@ -396,11 +394,11 @@ public final class httpdFileHandler {
             // check for cross site scripting - attacks in request arguments
             if (argc > 0) {
                 // check all values for occurrences of script values
-                Enumeration e = args.elements(); // enumeration of values
-                Object val;
+                Enumeration<String> e = args.elements(); // enumeration of values
+                String val;
                 while (e.hasMoreElements()) {
                     val = e.nextElement();
-                    if ((val != null) && (val instanceof String) && (((String) val).indexOf("<script") >= 0)) {
+                    if ((val != null) && (val.indexOf("<script") >= 0)) {
                         // deny request
                         httpd.sendRespondError(conProp,out,4,403,null,"bad post values",null);
                         return;
@@ -549,6 +547,7 @@ public final class httpdFileHandler {
                 boolean zipContent = requestHeader.acceptGzip() && httpd.shallTransportZipped("." + conProp.getProperty("EXT",""));
                 if (path.endsWith("html") || 
                         path.endsWith("xml") || 
+                        path.endsWith("rdf") || 
                         path.endsWith("rss") || 
                         path.endsWith("csv") ||
                         path.endsWith("pac") ||
@@ -633,8 +632,6 @@ public final class httpdFileHandler {
                         targetDate = new Date(System.currentTimeMillis());
                         nocache = true;
                     }
-                    // read templates
-                    tp.putAll(templates);
                     
                     // rewrite the file
                     InputStream fis = null;
@@ -645,7 +642,7 @@ public final class httpdFileHandler {
                         long fileSize = targetFile.length();
                         if (fileSize <= 512 * 1024) {
                             // read from cache
-                            SoftReference ref = (SoftReference) templateCache.get(targetFile);
+                            SoftReference<byte[]> ref = templateCache.get(targetFile);
                             if (ref != null) {
                                 templateContent = (byte[]) ref.get();
                                 if (templateContent == null) templateCache.remove(targetFile);
@@ -657,7 +654,7 @@ public final class httpdFileHandler {
                                 templateContent = serverFileUtils.read(targetFile);
 
                                 // storing the content into the cache
-                                ref = new SoftReference(templateContent);
+                                ref = new SoftReference<byte[]>(templateContent);
                                 templateCache.put(targetFile, ref);
                                 if (theLogger.isLoggable(Level.FINEST))
                                     theLogger.logFinest("Cache MISS for file " + targetFile);
@@ -931,7 +928,7 @@ public final class httpdFileHandler {
         // now make a class out of the stream
         try {
             if (useTemplateCache) {                
-                SoftReference ref = (SoftReference) templateMethodCache.get(classFile);
+                SoftReference<Method> ref = templateMethodCache.get(classFile);
                 if (ref != null) {
                     m = (Method) ref.get();
                     if (m == null) {
@@ -943,8 +940,8 @@ public final class httpdFileHandler {
                 }          
             }
             
-            Class c = provider.loadClass(classFile);
-            Class[] params = new Class[] {
+            Class<?> c = provider.loadClass(classFile);
+            Class<?>[] params = new Class[] {
                     httpHeader.class,
                     serverObjects.class,
                     serverSwitch.class };
@@ -952,8 +949,8 @@ public final class httpdFileHandler {
             
             if (useTemplateCache) {
                 // storing the method into the cache
-                SoftReference ref = new SoftReference(m);
-                templateMethodCache.put(classFile,ref);
+                SoftReference<Method> ref = new SoftReference<Method>(m);
+                templateMethodCache.put(classFile, ref);
             }
             
         } catch (ClassNotFoundException e) {

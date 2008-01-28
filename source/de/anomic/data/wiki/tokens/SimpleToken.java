@@ -66,13 +66,13 @@ public class SimpleToken extends AbstractToken {
 		this.definitionList = definitionList;
 		int i;
 		if (isBlockElements) {
-			ArrayList r = new ArrayList();
+			ArrayList<String> r = new ArrayList<String>();
 			int j;
-			for (i=0; i<definitionList.length; i++)
+			for (i = 0; i < definitionList.length; i++)
 				if (definitionList[i] != null)
-					for (j=0; j<definitionList[i].length; j++)
+					for (j = 0; j < definitionList[i].length; j++)
 						r.add(definitionList[i][j]);
-			this.blockElements = (String[])r.toArray(new String[r.size()]);
+			this.blockElements = (String[]) r.toArray(new String[r.size()]);
 		} else {
 			this.blockElements = null;
 		}
