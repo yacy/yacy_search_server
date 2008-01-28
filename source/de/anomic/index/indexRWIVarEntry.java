@@ -39,8 +39,9 @@ public class indexRWIVarEntry implements indexRWIEntry {
                posinphrase, posofphrase,
                quality, urlcomps, urllength, virtualAge,
                worddistance, wordsintext, wordsintitle;
+    public double termFrequency;
     
-    public indexRWIVarEntry(indexRWIRowEntry e) {
+    public indexRWIVarEntry(indexRWIEntry e) {
         this.flags = e.flags();
         this.freshUntil = e.freshUntil();
         this.lastModified = e.lastModified();
@@ -61,6 +62,7 @@ public class indexRWIVarEntry implements indexRWIEntry {
         this.worddistance = e.worddistance();
         this.wordsintext = e.wordsintext();
         this.wordsintitle = e.wordsintitle();
+        this.termFrequency = ((double) e.hitcount()) / ((double) (e.wordsintext() + e.wordsintitle() + 1));
     }
     
     public void combineDistance(indexRWIEntry oe) {
@@ -166,6 +168,10 @@ public class indexRWIVarEntry implements indexRWIEntry {
         return wordsintitle;
     }
 
+    public double termFrequency() {
+        return termFrequency;
+    }
+    
     public static final void min(indexRWIVarEntry t, indexRWIEntry other) {
         int v;
         long w;
@@ -185,6 +191,9 @@ public class indexRWIVarEntry implements indexRWIEntry {
         if (t.urllength() > (v = other.urllength())) t.urllength = v;
         if (t.urlcomps() > (v = other.urlcomps())) t.urlcomps = v;
         if (t.wordsintitle() > (v = other.wordsintitle())) t.wordsintitle = v;
+        double tf = (other instanceof indexRWIVarEntry) ? ((indexRWIVarEntry) other).termFrequency : indexRWIEntryOrder.termFrequency(other);
+        if (t.termFrequency > tf) t.termFrequency = tf;
+        
     }
     
     public static final void max(indexRWIVarEntry t, indexRWIEntry other) {
@@ -206,6 +215,8 @@ public class indexRWIVarEntry implements indexRWIEntry {
         if (t.urllength() < (v = other.urllength())) t.urllength = v;
         if (t.urlcomps() < (v = other.urlcomps())) t.urlcomps = v;
         if (t.wordsintitle() < (v = other.wordsintitle())) t.wordsintitle = v;
+        double tf = (other instanceof indexRWIVarEntry) ? ((indexRWIVarEntry) other).termFrequency : indexRWIEntryOrder.termFrequency(other);
+        if (t.termFrequency < tf) t.termFrequency = tf;
     }
 
 }

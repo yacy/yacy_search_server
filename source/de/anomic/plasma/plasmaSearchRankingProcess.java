@@ -40,6 +40,7 @@ import de.anomic.index.indexContainer;
 import de.anomic.index.indexRWIEntry;
 import de.anomic.index.indexRWIEntryOrder;
 import de.anomic.index.indexRWIRowEntry;
+import de.anomic.index.indexRWIVarEntry;
 import de.anomic.index.indexURLEntry;
 import de.anomic.kelondro.kelondroBinSearch;
 import de.anomic.kelondro.kelondroMScoreCluster;
@@ -113,81 +114,80 @@ public final class plasmaSearchRankingProcess {
         }
         
         if (sortorder == 2) {
-            insert(index, true);
+            insertRanked(index, true);
         } else {            
-            final Iterator<indexRWIRowEntry> en = index.entries();
-            // generate a new map where the urls are sorted (not by hash but by the url text)
-            
-            indexRWIEntry ientry;
-            indexURLEntry uentry;
-            String u;
-            loop: while (en.hasNext()) {
-                ientry = (indexRWIEntry) en.next();
-
-                // check constraints
-                if (!testFlags(ientry)) continue loop;
-                
-                // increase flag counts
-                for (int i = 0; i < 32; i++) {
-                    if (ientry.flags().get(i)) {flagcount[i]++;}
-                }
-                
-                // load url
-                if (sortorder == 0) {
-                    this.sortedRWIEntries.put(ientry.urlHash(), ientry);
-                    this.urlhashes.put(ientry.urlHash(), ientry.urlHash());
-                    filteredCount++;
-                } else {
-                    if (fetchURLs) {
-                        uentry = wordIndex.loadedURL.load(ientry.urlHash(), ientry, 0);
-                        if (uentry == null) {
-                            this.misses.add(ientry.urlHash());
-                        } else {
-                            u = uentry.comp().url().toNormalform(false, true);
-                            this.sortedRWIEntries.put(u, ientry);
-                            this.urlhashes.put(ientry.urlHash(), u);
-                            filteredCount++;
-                        }
-                    } else {
-                        filteredCount++;
-                    }
-                }
-                
-                // interrupt if we have enough
-                if ((query.neededResults() > 0) && (this.misses.size() + this.sortedRWIEntries.size() > query.neededResults())) break loop;
-            } // end loop
+            insertNoOrder(index, fetchURLs);
         }
     }
     
-    public void insert(indexContainer container, boolean local) {
+    private void insertNoOrder(indexContainer index, boolean local) {
+        final Iterator<indexRWIRowEntry> en = index.entries();
+        // generate a new map where the urls are sorted (not by hash but by the url text)
+        
+        indexRWIEntry ientry;
+        indexURLEntry uentry;
+        String u;
+        loop: while (en.hasNext()) {
+            ientry = (indexRWIEntry) en.next();
+
+            // check constraints
+            if (!testFlags(ientry)) continue loop;
+            
+            // increase flag counts
+            for (int i = 0; i < 32; i++) {
+                if (ientry.flags().get(i)) {flagcount[i]++;}
+            }
+            
+            // load url
+            if (sortorder == 0) {
+                this.sortedRWIEntries.put(ientry.urlHash(), ientry);
+                this.urlhashes.put(ientry.urlHash(), ientry.urlHash());
+                filteredCount++;
+            } else {
+                if (local) {
+                    uentry = wordIndex.loadedURL.load(ientry.urlHash(), ientry, 0);
+                    if (uentry == null) {
+                        this.misses.add(ientry.urlHash());
+                    } else {
+                        u = uentry.comp().url().toNormalform(false, true);
+                        this.sortedRWIEntries.put(u, ientry);
+                        this.urlhashes.put(ientry.urlHash(), u);
+                        filteredCount++;
+                    }
+                } else {
+                    filteredCount++;
+                }
+            }
+            
+            // interrupt if we have enough
+            if ((query.neededResults() > 0) && (this.misses.size() + this.sortedRWIEntries.size() > query.neededResults())) break loop;
+        } // end loop
+    }
+    
+    public void insertRanked(indexContainer index, boolean local) {
         // we collect the urlhashes and construct a list with urlEntry objects
         // attention: if minEntries is too high, this method will not terminate within the maxTime
 
-        assert (container != null);
-        if (container.size() == 0) return;
+        assert (index != null);
+        if (index.size() == 0) return;
         
         long timer = System.currentTimeMillis();
         if (this.order == null) {
             this.order = new indexRWIEntryOrder(query.ranking);
         }
-        this.order.extend(container);
-        serverProfiling.update("SEARCH", new plasmaProfiling.searchEvent(query.id(true), plasmaSearchEvent.NORMALIZING, container.size(), System.currentTimeMillis() - timer));
-        
-        /*
-        container.setOrdering(o, 0);
-        container.sort();
-        */
+        this.order.normalizeWith(index);
+        serverProfiling.update("SEARCH", new plasmaProfiling.searchEvent(query.id(true), plasmaSearchEvent.NORMALIZING, index.size(), System.currentTimeMillis() - timer));
         
         // normalize entries and get ranking
         timer = System.currentTimeMillis();
-        Iterator<indexRWIRowEntry> i = container.entries();
-        indexRWIEntry iEntry, l;
+        Iterator<indexRWIRowEntry> i = index.entries();
+        indexRWIVarEntry iEntry, l;
         long biggestEntry = 0;
         //long s0 = System.currentTimeMillis();
         Long r;
         while (i.hasNext()) {
-            iEntry = (indexRWIEntry) i.next();
-            if (iEntry.urlHash().length() != container.row().primaryKeyLength) continue;
+            iEntry = new indexRWIVarEntry(i.next());
+            if (iEntry.urlHash().length() != index.row().primaryKeyLength) continue;
 
             // increase flag counts
             for (int j = 0; j < 32; j++) {
@@ -216,11 +216,11 @@ public final class plasmaSearchRankingProcess {
                     continue;
                 } else {
                     if (urlhashes.containsKey(iEntry.urlHash())) continue;
-                    l = (indexRWIEntry) sortedRWIEntries.remove((Long) sortedRWIEntries.lastKey());
+                    l = (indexRWIVarEntry) sortedRWIEntries.remove((Long) sortedRWIEntries.lastKey());
                     urlhashes.remove(l.urlHash());
                     while (sortedRWIEntries.containsKey(r)) r = new Long(r.longValue() + 1);
                     sortedRWIEntries.put(r, iEntry);
-                    biggestEntry = order.cardinal((indexRWIEntry) sortedRWIEntries.get(sortedRWIEntries.lastKey()));
+                    biggestEntry = order.cardinal((indexRWIVarEntry) sortedRWIEntries.get(sortedRWIEntries.lastKey()));
                 }
             }
             
@@ -232,7 +232,7 @@ public final class plasmaSearchRankingProcess {
         //System.out.println("###DEBUG### time to sort " + container.size() + " entries to " + this.filteredCount + ": " + sc + " milliseconds, " + (container.size() / sc) + " entries/millisecond, ranking = " + tc);
         
         //if ((query.neededResults() > 0) && (container.size() > query.neededResults())) remove(true, true);
-        serverProfiling.update("SEARCH", new plasmaProfiling.searchEvent(query.id(true), plasmaSearchEvent.PRESORT, container.size(), System.currentTimeMillis() - timer));
+        serverProfiling.update("SEARCH", new plasmaProfiling.searchEvent(query.id(true), plasmaSearchEvent.PRESORT, index.size(), System.currentTimeMillis() - timer));
     }
 
     private boolean testFlags(indexRWIEntry ientry) {

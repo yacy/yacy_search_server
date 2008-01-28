@@ -67,7 +67,8 @@ public class Ranking_p {
 		rankingParameters.put(plasmaSearchRankingProfile.POSOFPHRASE, "Position Of Phrase");
 		rankingParameters.put(plasmaSearchRankingProfile.POSINPHRASE, "Position In Phrase");
 		rankingParameters.put(plasmaSearchRankingProfile.PREFER, "Application Of Prefer Pattern");
-		rankingParameters.put(plasmaSearchRankingProfile.URLCOMPINTOPLIST, "URL Component Appears In Toplist");
+		rankingParameters.put(plasmaSearchRankingProfile.TERMFREQUENCY, "Term Frequency");
+        rankingParameters.put(plasmaSearchRankingProfile.URLCOMPINTOPLIST, "URL Component Appears In Toplist");
 		rankingParameters.put(plasmaSearchRankingProfile.URLCOMPS, "URL Components");
 		rankingParameters.put(plasmaSearchRankingProfile.URLLENGTH, "URL Length");
 		rankingParameters.put(plasmaSearchRankingProfile.WORDDISTANCE, "Word Distance");

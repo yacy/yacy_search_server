@@ -39,10 +39,10 @@ import de.anomic.plasma.plasmaSearchRankingProcess;
 import de.anomic.plasma.plasmaSearchRankingProfile;
 import de.anomic.yacy.yacyURL;
 
-public class indexRWIEntryOrder extends kelondroAbstractOrder<indexRWIEntry> implements kelondroOrder<indexRWIEntry> {
+public class indexRWIEntryOrder extends kelondroAbstractOrder<indexRWIVarEntry> implements kelondroOrder<indexRWIVarEntry> {
     private indexRWIVarEntry min, max;
     private plasmaSearchRankingProfile ranking;
-    private kelondroMScoreCluster<String> doms;
+    private kelondroMScoreCluster<String> doms; // collected for "authority" heuristic 
     private int maxdomcount;
     
     private static final int processors = Runtime.getRuntime().availableProcessors(); // for multiprocessor support, used during normalization
@@ -55,7 +55,8 @@ public class indexRWIEntryOrder extends kelondroAbstractOrder<indexRWIEntry> imp
         this.maxdomcount = 0;
     }
     
-    public void extend(indexContainer container) {
+    public void normalizeWith(indexContainer container) {
+        // normalize ranking: find minimum and maxiumum of separate ranking criteria
         assert (container != null);
     
         //long s0 = System.currentTimeMillis();
@@ -102,7 +103,7 @@ public class indexRWIEntryOrder extends kelondroAbstractOrder<indexRWIEntry> imp
         if (this.doms.size() > 0) this.maxdomcount = this.doms.getMaxScore();
     }
     
-    public kelondroOrder<indexRWIEntry> clone() {
+    public kelondroOrder<indexRWIVarEntry> clone() {
         return null;
     }
     
@@ -111,14 +112,14 @@ public class indexRWIEntryOrder extends kelondroAbstractOrder<indexRWIEntry> imp
     }
     
     public long cardinal(byte[] key) {
-        return cardinal(new indexRWIRowEntry(key));
+        return cardinal(new indexRWIVarEntry(new indexRWIRowEntry(key)));
     }
 
-    public long tf(indexRWIEntry t) {
-        return (t.hitcount() - min.hitcount()) * (1 + max.wordsintext() - min.wordsintext()) / (1 + max.hitcount() - min.hitcount()) / (t.wordsintext() - min.wordsintext());
+    public static final double termFrequency(indexRWIEntry t) {
+        return (((double) t.hitcount()) / ((double) (t.wordsintext() + t.wordsintitle() + 1)));
     }
     
-    public long cardinal(indexRWIEntry t) {
+    public long cardinal(indexRWIVarEntry t) {
         //return Long.MAX_VALUE - preRanking(ranking, iEntry, this.entryMin, this.entryMax, this.searchWords);
         // the normalizedEntry must be a normalized indexEntry
         kelondroBitfield flags = t.flags();
@@ -138,25 +139,26 @@ public class indexRWIEntryOrder extends kelondroAbstractOrder<indexRWIEntry> imp
            + (       (((t.llocal()       - min.llocal()        ) << 8) / (1 + max.llocal()       - min.llocal())        ) << ranking.coeff_llocal)
            + (       (((t.lother()       - min.lother()        ) << 8) / (1 + max.lother()       - min.lother())        ) << ranking.coeff_lother)
            + (       (((t.hitcount()     - min.hitcount()      ) << 8) / (1 + max.hitcount()     - min.hitcount())      ) << ranking.coeff_hitcount)
+           + (((int)((((t.termFrequency()- min.termFrequency() )*256.0)/ (1 + max.termFrequency()- min.termFrequency()))))<< ranking.coeff_termfrequency)
            + (       authority(t.urlHash()) << ranking.coeff_authority)
-           + (((flags.get(indexRWIEntry.flag_app_dc_identifier))        ? 255 << ranking.coeff_appurl      : 0))
-           + (((flags.get(indexRWIEntry.flag_app_dc_title))      ? 255 << ranking.coeff_appdescr    : 0))
+           + (((flags.get(indexRWIEntry.flag_app_dc_identifier))  ? 255 << ranking.coeff_appurl      : 0))
+           + (((flags.get(indexRWIEntry.flag_app_dc_title))       ? 255 << ranking.coeff_appdescr    : 0))
            + (((flags.get(indexRWIEntry.flag_app_dc_creator))     ? 255 << ranking.coeff_appauthor   : 0))
-           + (((flags.get(indexRWIEntry.flag_app_dc_subject))       ? 255 << ranking.coeff_apptags     : 0))
-           + (((flags.get(indexRWIEntry.flag_app_dc_description))  ? 255 << ranking.coeff_appref      : 0))
-           + (((flags.get(indexRWIEntry.flag_app_emphasized)) ? 255 << ranking.coeff_appemph     : 0))
-           + (((flags.get(plasmaCondenser.flag_cat_indexof))  ? 255 << ranking.coeff_catindexof  : 0))
-           + (((flags.get(plasmaCondenser.flag_cat_hasimage)) ? 255 << ranking.coeff_cathasimage : 0))
-           + (((flags.get(plasmaCondenser.flag_cat_hasaudio)) ? 255 << ranking.coeff_cathasaudio : 0))
-           + (((flags.get(plasmaCondenser.flag_cat_hasvideo)) ? 255 << ranking.coeff_cathasvideo : 0))
-           + (((flags.get(plasmaCondenser.flag_cat_hasapp))   ? 255 << ranking.coeff_cathasapp   : 0))
-           + (((yacyURL.probablyRootURL(t.urlHash()))         ?  15 << ranking.coeff_urllength   : 0));
+           + (((flags.get(indexRWIEntry.flag_app_dc_subject))     ? 255 << ranking.coeff_apptags     : 0))
+           + (((flags.get(indexRWIEntry.flag_app_dc_description)) ? 255 << ranking.coeff_appref      : 0))
+           + (((flags.get(indexRWIEntry.flag_app_emphasized))     ? 255 << ranking.coeff_appemph     : 0))
+           + (((flags.get(plasmaCondenser.flag_cat_indexof))      ? 255 << ranking.coeff_catindexof  : 0))
+           + (((flags.get(plasmaCondenser.flag_cat_hasimage))     ? 255 << ranking.coeff_cathasimage : 0))
+           + (((flags.get(plasmaCondenser.flag_cat_hasaudio))     ? 255 << ranking.coeff_cathasaudio : 0))
+           + (((flags.get(plasmaCondenser.flag_cat_hasvideo))     ? 255 << ranking.coeff_cathasvideo : 0))
+           + (((flags.get(plasmaCondenser.flag_cat_hasapp))       ? 255 << ranking.coeff_cathasapp   : 0))
+           + (((yacyURL.probablyRootURL(t.urlHash()))             ?  15 << ranking.coeff_urllength   : 0));
         //if (searchWords != null) r += (yacyURL.probablyWordURL(t.urlHash(), searchWords) != null) ? 256 << ranking.coeff_appurl : 0;
 
         return Long.MAX_VALUE - r; // returns a reversed number: the lower the number the better the ranking. This is used for simple sorting with a TreeMap
     }
     
-    public int compare(indexRWIEntry a, indexRWIEntry b) {
+    public int compare(indexRWIVarEntry a, indexRWIVarEntry b) {
     	long ca = cardinal(a);
     	long cb = cardinal(b);
         return (ca > cb) ? 1 : (ca < cb) ? -1 : 0;
@@ -166,7 +168,7 @@ public class indexRWIEntryOrder extends kelondroAbstractOrder<indexRWIEntry> imp
         return "rx";
     }
 
-    public boolean wellformed(indexRWIEntry a) {
+    public boolean wellformed(indexRWIVarEntry a) {
         return true;
     }
 
