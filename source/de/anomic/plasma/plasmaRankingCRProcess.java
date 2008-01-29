@@ -48,7 +48,6 @@ package de.anomic.plasma;
 import java.io.File;
 import java.io.IOException;
 import java.util.Iterator;
-import java.util.Map;
 
 import de.anomic.kelondro.kelondroAttrSeq;
 import de.anomic.kelondro.kelondroBase64Order;
@@ -355,12 +354,10 @@ public class plasmaRankingCRProcess {
             cr_UDate = cr_entry.getAttr("UDate", 0);
             
             // loop over all anchors
-            Iterator j = cr_entry.getSeqSet().iterator();
-            Map.Entry entry;
+            Iterator<String> j = cr_entry.getSeqSet().iterator();
             while (j.hasNext()) {
                 // get domain of anchors
-                entry = (Map.Entry) j.next();
-                anchor = (String) entry.getKey();
+                anchor = j.next();
                 if (anchor.length() == 6) anchorDom = anchor; else anchorDom = anchor.substring(6);
 
                 // update domain-specific entry
@@ -401,22 +398,22 @@ public class plasmaRankingCRProcess {
         int size = seq.size();
         long start = System.currentTimeMillis();
         long l;
-        final Iterator i = seq.keycollections(null, null, false);
+        final Iterator<Object[]> i = seq.keycollections(null, null, false);
         Object[] keycollection;
         String referee, refereeDom, anchor, anchorDom;
         kelondroRowSet cr_entry, rci_entry;
         while (i.hasNext()) {
-            keycollection = (Object[]) i.next();
+            keycollection = i.next();
             referee = new String((byte[]) keycollection[0]);
             if (referee.length() == 6) refereeDom = referee; else refereeDom = referee.substring(6);
             cr_entry = (kelondroRowSet) keycollection[1];
             
             // loop over all anchors
-            Iterator j = cr_entry.rows();
+            Iterator<kelondroRow.Entry> j = cr_entry.rows();
             kelondroRow.Entry entry;
             while (j.hasNext()) {
                 // get domain of anchors
-                entry = (kelondroRow.Entry) j.next();
+                entry = j.next();
                 anchor = (String) entry.getColString(0, null);
                 if (anchor.length() == 6) anchorDom = anchor; else anchorDom = anchor.substring(6);
 

@@ -147,19 +147,18 @@ public class kelondroMergeIterator<E> implements kelondroCloneableIterator<E> {
         throw new java.lang.UnsupportedOperationException("merge does not support remove");
     }
     
-    public static <A> kelondroCloneableIterator<A> cascade(Set<kelondroCloneableIterator<A>> /*of*/ iterators, kelondroOrder<A> c, Method merger, boolean up) {
+    public static <A> kelondroCloneableIterator<A> cascade(Set<kelondroCloneableIterator<A>> iterators, kelondroOrder<A> c, Method merger, boolean up) {
         // this extends the ability to combine two iterators
-        // to the abiliy of combining a set of iterators
+        // to the ability of combining a set of iterators
         if (iterators == null) return null;
         if (iterators.size() == 0) return null;
-        return cascade((Set<kelondroCloneableIterator<A>>) iterators.iterator(), c, merger, up);
+        return cascade(iterators.iterator(), c, merger, up);
     }
     
-	@SuppressWarnings("unchecked")
-    private static <A> kelondroCloneableIterator<A> cascade(Iterator<A> /*of*/ iiterators, kelondroOrder<A> c, Method merger, boolean up) {
+    private static <A> kelondroCloneableIterator<A> cascade(Iterator<kelondroCloneableIterator<A>> iiterators, kelondroOrder<A> c, Method merger, boolean up) {
         if (iiterators == null) return null;
         if (!(iiterators.hasNext())) return null;
-        kelondroCloneableIterator<A> one = (kelondroCloneableIterator<A>) iiterators.next();
+        kelondroCloneableIterator<A> one = iiterators.next();
         if (!(iiterators.hasNext())) return one;
         return new kelondroMergeIterator<A>(one, cascade(iiterators, c, merger, up), c, merger, up);
     }
