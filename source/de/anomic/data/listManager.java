@@ -81,7 +81,7 @@ public class listManager {
      * @param setName name of the ListSet
      * @return a ListSet from configuration file
      */
-    public static Set getListSet(String setName) {
+    public static Set<String> getListSet(String setName) {
         return string2set(switchboard.getConfig(setName, ""));
     }
 
@@ -93,7 +93,7 @@ public class listManager {
      * @param listName name of the element to remove from the ListSet.
      */
     public static void removeFromListSet(String setName, String listName) {
-        Set listSet = getListSet(setName);
+        Set<String> listSet = getListSet(setName);
         
         if (listSet.size() > 0) {
             listSet.remove(listName);
@@ -112,7 +112,7 @@ public class listManager {
      * @param newListName
      */
     public static void updateListSet(String setName, String newListName) {
-        Set listSet = getListSet(setName);
+        Set<String> listSet = getListSet(setName);
         listSet.add(newListName);
 
         switchboard.setConfig(setName, collection2string(listSet));
@@ -125,7 +125,7 @@ public class listManager {
      *         "listName", <code>false</code> otherwise.
      */
     public static boolean listSetContains(String setName, String listName) {
-        Set Lists =  getListSet(setName);
+        Set<String> Lists =  getListSet(setName);
 
         return Lists.contains(listName);
     }
@@ -139,9 +139,9 @@ public class listManager {
      * @param listFile the file
      * @return the resulting array as an ArrayList
      */
-    public static ArrayList getListArray(File listFile){
+    public static ArrayList<String> getListArray(File listFile){
         String line;
-        ArrayList list = new ArrayList();
+        ArrayList<String> list = new ArrayList<String>();
         int count = 0;
         BufferedReader br = null;
         try {
@@ -269,7 +269,7 @@ public class listManager {
     }    
 
     // same as below
-    public static ArrayList getDirsRecursive(File dir, String notdir){
+    public static ArrayList<File> getDirsRecursive(File dir, String notdir){
         return getDirsRecursive(dir, notdir, true);
     }
     
@@ -278,11 +278,11 @@ public class listManager {
      *
      * Warning: untested
      */
-    public static ArrayList getDirsRecursive(File dir, String notdir, boolean excludeDotfiles){
+    public static ArrayList<File> getDirsRecursive(File dir, String notdir, boolean excludeDotfiles){
         final File[] dirList = dir.listFiles();
-        final ArrayList resultList = new ArrayList();
-        ArrayList recursive;
-        Iterator iter;
+        final ArrayList<File> resultList = new ArrayList<File>();
+        ArrayList<File> recursive;
+        Iterator<File> iter;
         for (int i=0;i<dirList.length;i++) {
             if (dirList[i].isDirectory() && (!excludeDotfiles || !dirList[i].getName().startsWith(".")) && !dirList[i].getName().equals(notdir)) {
                 resultList.add(dirList[i]);
@@ -307,14 +307,14 @@ public class listManager {
      * @param col a Collection of Strings.
      * @return String with elements from set separated by comma.
      */
-    public static String collection2string(Collection col){
+    public static String collection2string(Collection<String> col){
         StringBuffer str = new StringBuffer();
         
         if (col != null && (col.size() > 0)) {
-            Iterator it = col.iterator();
-            str.append((String) it.next());
+            Iterator<String> it = col.iterator();
+            str.append(it.next());
             while(it.hasNext()) {
-                str.append(",").append((String) it.next());
+                str.append(",").append(it.next());
             }
         }
         
@@ -324,13 +324,13 @@ public class listManager {
     /**
      * @see listManager#string2vector(String)
      */
-    public static ArrayList string2arraylist(String string){
-        ArrayList l;
+    public static ArrayList<String> string2arraylist(String string){
+        ArrayList<String> l;
 
         if (string != null) {
-            l = new ArrayList(Arrays.asList(string.split(",")));
+            l = new ArrayList<String>(Arrays.asList(string.split(",")));
         } else {
-            l = new ArrayList();
+            l = new ArrayList<String>();
         }
 
         return l;
@@ -342,13 +342,13 @@ public class listManager {
      * @param string list of comma separated Strings
      * @return resulting Set or empty Set if string is <code>null</code>
      */
-    public static Set string2set(String string){
-        HashSet set;
+    public static Set<String> string2set(String string){
+        HashSet<String> set;
         
         if (string != null) {
-            set = new HashSet(Arrays.asList(string.split(",")));
+            set = new HashSet<String>(Arrays.asList(string.split(",")));
         } else {
-            set = new HashSet();
+            set = new HashSet<String>();
         }
 
         return set;
@@ -361,13 +361,13 @@ public class listManager {
      * @param string list of comma separated Strings
      * @return resulting Vector or empty Vector if string is <code>null</code>
      */
-    public static Vector string2vector(String string){
-        Vector v;
+    public static Vector<String> string2vector(String string){
+        Vector<String> v;
 
         if (string != null) {
-            v = new Vector(Arrays.asList(string.split(",")));
+            v = new Vector<String>(Arrays.asList(string.split(",")));
         } else {
-            v = new Vector();
+            v = new Vector<String>();
         }
 
         return v;
@@ -382,7 +382,7 @@ public class listManager {
         String supportedBlacklistTypesStr = abstractURLPattern.BLACKLIST_TYPES_STRING;
         String[] supportedBlacklistTypes = supportedBlacklistTypesStr.split(",");
         
-        ArrayList blacklistFiles = new ArrayList(supportedBlacklistTypes.length);
+        ArrayList<blacklistFile> blacklistFiles = new ArrayList<blacklistFile>(supportedBlacklistTypes.length);
         for (int i=0; i < supportedBlacklistTypes.length; i++) {
             blacklistFile blFile = new blacklistFile(
                     switchboard.getConfig(
@@ -393,7 +393,7 @@ public class listManager {
         
         plasmaSwitchboard.urlBlacklist.clear();
         plasmaSwitchboard.urlBlacklist.loadList(
-                (blacklistFile[])blacklistFiles.toArray(new blacklistFile[blacklistFiles.size()]),
+                blacklistFiles.toArray(new blacklistFile[blacklistFiles.size()]),
                 "/");
 
 //       switchboard.urlBlacklist.clear();

@@ -53,7 +53,6 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.LinkedList;
-import java.util.Map;
 
 import de.anomic.kelondro.kelondroDyn;
 import de.anomic.kelondro.kelondroException;
@@ -103,7 +102,7 @@ public class plasmaCrawlRobotsTxt {
     
     public Entry getEntry(String hostName) {
         try {
-            Map<String, String> record = this.robotsTable.getMap(hostName);
+            HashMap<String, String> record = this.robotsTable.getMap(hostName);
             if (record == null) return null;
             return new Entry(hostName, record);
         } catch (kelondroException e) {
@@ -147,11 +146,11 @@ public class plasmaCrawlRobotsTxt {
         public static final String CRAWL_DELAY = "crawlDelay";
         
         // this is a simple record structure that hold all properties of a single crawl start
-        Map<String, String> mem;
+        HashMap<String, String> mem;
         private LinkedList<String> disallowPathList;
         String hostName;
         
-        public Entry(String hostName, Map<String, String> mem) {
+        public Entry(String hostName, HashMap<String, String> mem) {
             this.hostName = hostName.toLowerCase();
             this.mem = mem; 
             

@@ -90,7 +90,6 @@ import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.net.URLDecoder;
 import java.util.Date;
-import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
@@ -394,10 +393,10 @@ public final class httpdFileHandler {
             // check for cross site scripting - attacks in request arguments
             if (argc > 0) {
                 // check all values for occurrences of script values
-                Enumeration<String> e = args.elements(); // enumeration of values
+                Iterator<String> e = args.values().iterator(); // enumeration of values
                 String val;
-                while (e.hasMoreElements()) {
-                    val = e.nextElement();
+                while (e.hasNext()) {
+                    val = e.next();
                     if ((val != null) && (val.indexOf("<script") >= 0)) {
                         // deny request
                         httpd.sendRespondError(conProp,out,4,403,null,"bad post values",null);

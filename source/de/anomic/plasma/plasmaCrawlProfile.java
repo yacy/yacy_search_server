@@ -140,7 +140,7 @@ public class plasmaCrawlProfile {
         } catch (IOException e) {}
     }
     
-    public entry newEntry(Map<String, String> mem) {
+    public entry newEntry(HashMap<String, String> mem) {
         entry ne = new entry(mem);
         try {
             profileTable.set(ne.handle(), ne.map());
@@ -204,7 +204,7 @@ public class plasmaCrawlProfile {
     }
     
     public entry getEntry(String handle) {
-        Map<String, String> m = profileTable.getMap(handle);
+        HashMap<String, String> m = profileTable.getMap(handle);
         if (m == null) return null;
         return new entry(m);
     }
@@ -254,7 +254,7 @@ public class plasmaCrawlProfile {
         public static final String XDSTOPW          = "xdstopw";
         public static final String XPSTOPW          = "xpstopw";
         
-        private Map<String, String> mem;
+        private HashMap<String, String> mem;
         private Map<String, DomProfile> doms;
         
         public entry(String name, yacyURL startURL, String generalFilter, String specificFilter,
@@ -301,13 +301,13 @@ public class plasmaCrawlProfile {
             return str.toString();
         }        
         
-        public entry(Map<String, String> mem) {
+        public entry(HashMap<String, String> mem) {
             this.mem = mem;
             this.doms = (HashMap<String, DomProfile>) domsCache.get(this.mem.get(HANDLE));
             if (this.doms == null) this.doms = new HashMap<String, DomProfile>();
         }
         
-        public Map<String, String> map() {
+        public HashMap<String, String> map() {
             return mem;
         }
         public String handle() {

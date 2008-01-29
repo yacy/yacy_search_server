@@ -5,7 +5,6 @@ import java.io.IOException;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
-import java.util.TreeMap;
 
 import de.anomic.plasma.plasmaCrawlEntry;
 import de.anomic.plasma.plasmaCrawlNURL;
@@ -47,7 +46,7 @@ public class plasmaCrawlNURLImporter extends AbstractImporter implements dbImpor
         return theStatus.toString();
     }
 
-    public void init(HashMap initParams) throws ImporterException {
+    public void init(HashMap<String, String> initParams) throws ImporterException {
         super.init(initParams);
         
         if (initParams == null || initParams.size() == 0) throw new IllegalArgumentException("Init parameters are missing");
@@ -110,6 +109,7 @@ public class plasmaCrawlNURLImporter extends AbstractImporter implements dbImpor
         this.importProfileDB = new plasmaCrawlProfile(profileDbFile, 300);
     }
 
+    @SuppressWarnings("unchecked")
     public void run() {
         try {   
             // waiting on init thread to finish
@@ -178,7 +178,7 @@ public class plasmaCrawlNURLImporter extends AbstractImporter implements dbImpor
                                 if (sourceEntry != null) {
                                     this.profileCount++;
                                     this.importProfileHandleCache.add(profileHandle);
-                                    this.sb.profilesActiveCrawls.newEntry((TreeMap)((TreeMap)sourceEntry.map()).clone());
+                                    this.sb.profilesActiveCrawls.newEntry((HashMap<String, String>) sourceEntry.map().clone());
                                 } else {
                                     this.log.logWarning("Profile '" + profileHandle + "' of url entry '" + nextHash + "' unknown.");
                                     continue;

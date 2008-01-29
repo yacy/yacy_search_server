@@ -37,11 +37,11 @@ public class URLLicense {
     // it is used in case of snippet- and preview-Image-fetching to grant also non-authorized users the usage of a image-fetcher servlet
 
     private Random random;
-    private HashMap permissions;
+    private HashMap<String, yacyURL> permissions;
     private int keylen;
     
     public URLLicense(int keylen) {
-        this.permissions = new HashMap();
+        this.permissions = new HashMap<String, yacyURL>();
         this.random = new Random(System.currentTimeMillis());
         this.keylen = keylen;
     }
@@ -62,7 +62,7 @@ public class URLLicense {
     public yacyURL releaseLicense(String license) {
         yacyURL url = null;
         synchronized (permissions) {
-            url = (yacyURL) permissions.remove(license);
+            url = permissions.remove(license);
         }
         /*
         if (url == null) {

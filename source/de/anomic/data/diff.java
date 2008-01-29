@@ -54,7 +54,7 @@ import java.util.ArrayList;
  */
 public class diff {
     
-    private final ArrayList /* of Part */ parts = new ArrayList();
+    private final ArrayList <Part> parts = new ArrayList<Part>();
     private final Object[] o;
     private final Object[] n;
     
@@ -191,12 +191,12 @@ public class diff {
      * @see Part
      * @return all parts this diff consists of in correct order
      */
-    public Part[] getParts() { return (Part[])this.parts.toArray(new Part[this.parts.size()]); }
+    public Part[] getParts() { return this.parts.toArray(new Part[this.parts.size()]); }
     
     public String toString() {
         StringBuffer sb = new StringBuffer(this.parts.size() * 20);
         for (int j=0; j<this.parts.size(); j++)
-            sb.append(((Part)this.parts.get(j)).toString()).append("\n");
+            sb.append(this.parts.get(j).toString()).append("\n");
         return new String(sb);
     }
     

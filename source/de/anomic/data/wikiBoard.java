@@ -47,7 +47,6 @@ import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Iterator;
-import java.util.Map;
 import java.util.TimeZone;
 
 import de.anomic.kelondro.kelondroBase64Order;
@@ -69,7 +68,7 @@ public class wikiBoard {
 
     private kelondroMapObjects datbase = null;
     private kelondroMapObjects bkpbase = null;
-    private static HashMap authors = new HashMap();
+    private static HashMap<String, String> authors = new HashMap<String, String>();
 
     public wikiBoard(File actpath, File bkppath, long preloadTime) {
         new File(actpath.getParent()).mkdirs();
@@ -120,7 +119,7 @@ public class wikiBoard {
     }
 
     public static String guessAuthor(String ip) {
-        String author = (String) authors.get(ip);
+        String author = authors.get(ip);
         //yacyCore.log.logDebug("DEBUG: guessing author for ip = " + ip + " is '" + author + "', authors = " + authors.toString());
         return author;
     }
@@ -136,10 +135,10 @@ public class wikiBoard {
     public class entry {
 
         String key;
-        Map record;
+        HashMap<String, String> record;
 
         public entry(String subject, String author, String ip, String reason, byte[] page) throws IOException {
-            record = new HashMap();
+            record = new HashMap<String, String>();
             key = subject;
             if (key.length() > keyLength) key = key.substring(0, keyLength);
             record.put("date", dateString());
@@ -157,7 +156,7 @@ public class wikiBoard {
             //System.out.println("DEBUG: setting author " + author + " for ip = " + ip + ", authors = " + authors.toString());
         }
 
-        private entry(String key, Map record) {
+        private entry(String key, HashMap<String, String> record) {
             this.key = key;
             this.record = record;
         }
@@ -168,7 +167,7 @@ public class wikiBoard {
 
         public Date date() {
             try {
-                String c = (String) record.get("date");
+                String c = record.get("date");
                 if (c == null) {
                     System.out.println("DEBUG - ERROR: date field missing in wikiBoard");
                     return new Date();
@@ -182,7 +181,7 @@ public class wikiBoard {
         }
 
         public String author() {
-            String a = (String) record.get("author");
+            String a = record.get("author");
             if (a == null) return "anonymous";
             byte[] b = kelondroBase64Order.enhancedCoder.decode(a, "de.anomic.data.wikiBoard.author()");
             if (b == null) return "anonymous";
@@ -190,7 +189,7 @@ public class wikiBoard {
         }
 
         public String reason() {
-            String r = (String) record.get("reason");
+            String r = record.get("reason");
             if (r == null) return "";
             byte[] b = kelondroBase64Order.enhancedCoder.decode(r, "de.anomic.data.wikiBoard.reason()");
             if (b == null) return "unknown";
@@ -198,7 +197,7 @@ public class wikiBoard {
         }
 
         public byte[] page() {
-            String m = (String) record.get("page");
+            String m = record.get("page");
             if (m == null) return new byte[0];
             byte[] b = kelondroBase64Order.enhancedCoder.decode(m, "de.anomic.data.wikiBoard.page()");
             if (b == null) return "".getBytes();
@@ -211,7 +210,7 @@ public class wikiBoard {
 
         private Date getAncestorDate() {
             try {
-                String c = (String) record.get("date");
+                String c = record.get("date");
                 if (c == null) return null;
                 synchronized (SimpleFormatter) {
                     return SimpleFormatter.parse(c);
@@ -244,7 +243,7 @@ public class wikiBoard {
         }
 
         private String getChildName() {
-            String c = (String) record.get("child");
+            String c = record.get("child");
             if (c == null) return null;
             byte[] subject = kelondroBase64Order.enhancedCoder.decode(c, "de.anomic.data.wikiBoard.getChildName()");
             if (subject == null) return null;
@@ -252,7 +251,7 @@ public class wikiBoard {
         }
 
         public boolean hasChild() {
-            String c = (String) record.get("child");
+            String c = record.get("child");
             if (c == null) return false;
             byte[] subject = kelondroBase64Order.enhancedCoder.decode(c, "de.anomic.data.wikiBoard.hasChild()");
             return (subject != null);
@@ -295,7 +294,7 @@ public class wikiBoard {
         try {
             key = normalize(key);
             if (key.length() > keyLength) key = key.substring(0, keyLength);
-            Map record = base.getMap(key);
+            HashMap<String, String> record = base.getMap(key);
             if (record == null) return newEntry(key, "anonymous", "127.0.0.1", "New Page", "".getBytes());
             return new entry(key, record);
         } catch (IOException e) {
@@ -317,11 +316,11 @@ public class wikiBoard {
     }
      */
 
-    public Iterator keys(boolean up) throws IOException {
+    public Iterator<String> keys(boolean up) throws IOException {
         return datbase.keys(up, false);
     }
 
-    public Iterator keysBkp(boolean up) throws IOException {
+    public Iterator<String> keysBkp(boolean up) throws IOException {
         return bkpbase.keys(up, false);
     }
 }

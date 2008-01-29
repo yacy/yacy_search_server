@@ -64,7 +64,7 @@ public class wikiCode extends abstractWikiParser implements wikiParser {
     
     /* Table properties */
     private static final String[] tps = { "rowspan", "colspan", "vspace", "hspace", "cellspacing", "cellpadding", "border" };
-    private static final HashMap/* <String,String[]> */ ps = new HashMap();
+    private static final HashMap/* <String,String[]> */<String, String[]> ps = new HashMap<String, String[]>();
     static {
         Arrays.sort(tps);
         String[] array;
@@ -95,7 +95,7 @@ public class wikiCode extends abstractWikiParser implements wikiParser {
     private int preindented = 0;                //needed for indented <pre>s
     private int escindented = 0;                //needed for indented [=s
     private int headlines = 0;                  //number of headlines in page
-    private ArrayList dirElements = new ArrayList();    //list of headlines used to create diectory of page
+    private ArrayList<String> dirElements = new ArrayList<String>();    //list of headlines used to create diectory of page
 
     /** Constructor of the class wikiCode */
     public wikiCode(plasmaSwitchboard switchboard){
@@ -221,7 +221,7 @@ public class wikiCode extends abstractWikiParser implements wikiParser {
                         (key.equals("summary")) ||
                         (key.equals("bgcolor") && value.matches("#{0,1}[0-9a-fA-F]{1,6}|[a-zA-Z]{3,}")) ||
                         ((key.equals("width") || key.equals("height")) && value.matches("\\d+%{0,1}")) ||
-                        ((posVals = (String[])ps.get(key)) != null && Arrays.binarySearch(posVals, value) >= 0) ||
+                        ((posVals = ps.get(key)) != null && Arrays.binarySearch(posVals, value) >= 0) ||
                         (Arrays.binarySearch(tps, key) >= 0 && value.matches("\\d+"))
                 ) {
                     addPair(key, value, sb);

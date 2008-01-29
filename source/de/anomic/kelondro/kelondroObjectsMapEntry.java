@@ -29,17 +29,16 @@ package de.anomic.kelondro;
 
 import java.io.IOException;
 import java.util.HashMap;
-import java.util.Map;
 
 public class kelondroObjectsMapEntry implements kelondroObjectsEntry {
 
-    protected Map<String, String> entry;
+    protected HashMap<String, String> entry;
     
     public kelondroObjectsMapEntry() {
         this.entry = new HashMap<String, String>();
     }
     
-    public kelondroObjectsMapEntry(Map<String, String> map) {
+    public kelondroObjectsMapEntry(HashMap<String, String> map) {
         this.entry = map;
     }
     
@@ -63,7 +62,7 @@ public class kelondroObjectsMapEntry implements kelondroObjectsEntry {
         }
     }
     
-    public Map<String, String> map() {
+    public HashMap<String, String> map() {
         return this.entry;
     }
 

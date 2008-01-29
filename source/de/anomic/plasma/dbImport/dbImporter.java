@@ -25,6 +25,6 @@ public interface dbImporter {
     public String getError();
     public String getStatus();    
     //public void init(File plasmaPath, File indexPrimaryPath, File indexSecondaryPath, int cacheSize, long preloadTime);
-    public void init(HashMap initParams) throws ImporterException;
+    public void init(HashMap<String, String> initParams) throws ImporterException;
     public void startIt();    
 }

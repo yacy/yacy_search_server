@@ -49,7 +49,6 @@
 import java.net.InetSocketAddress;
 import java.net.SocketException;
 import java.util.Arrays;
-import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
@@ -556,26 +555,26 @@ public class SettingsAck_p {
         if (post.containsKey("parserSettings")) {
             post.remove("parserSettings");
             
-            Set parserModes = plasmaParser.getParserConfigList().keySet();
-            HashMap newConfigList = new HashMap();     
-            Iterator parserModeIter = parserModes.iterator();
+            Set<String> parserModes = plasmaParser.getParserConfigList().keySet();
+            HashMap<String, HashSet> newConfigList = new HashMap<String, HashSet>();     
+            Iterator<String> parserModeIter = parserModes.iterator();
             while (parserModeIter.hasNext()) {
-                String currParserMode = (String)parserModeIter.next();
+                String currParserMode = parserModeIter.next();
                 newConfigList.put(currParserMode, new HashSet());
             }
             
             // looping through all received settings
             int pos;
-            Enumeration keyEnum = post.keys();
-            while (keyEnum.hasMoreElements()) {                
-                String key = (String) keyEnum.nextElement();
+            Iterator<String> keyEnum = post.keySet().iterator();
+            while (keyEnum.hasNext()) {                
+                String key = keyEnum.next();
                 if ((pos = key.indexOf(".")) != -1) {
                     String currParserMode = key.substring(0,pos).trim().toUpperCase();
                     String currMimeType = key.substring(pos+1).replaceAll("\n", "");
                     if (parserModes.contains(currParserMode)) {
-                        HashSet currEnabledMimeTypes;
+                        HashSet<String> currEnabledMimeTypes;
                         assert (newConfigList.containsKey(currParserMode)) : "Unexpected Error";
-                        currEnabledMimeTypes = (HashSet) newConfigList.get(currParserMode);
+                        currEnabledMimeTypes = newConfigList.get(currParserMode);
                         currEnabledMimeTypes.add(currMimeType);
                     }
                 }
@@ -585,8 +584,8 @@ public class SettingsAck_p {
             StringBuffer currEnabledMimesTxt = new StringBuffer();
             parserModeIter = newConfigList.keySet().iterator();
             while (parserModeIter.hasNext()) {                
-                String currParserMode = (String)parserModeIter.next();
-                String[] enabledMimes = plasmaParser.setEnabledParserList(currParserMode, (Set)newConfigList.get(currParserMode));
+                String currParserMode = parserModeIter.next();
+                String[] enabledMimes = plasmaParser.setEnabledParserList(currParserMode, newConfigList.get(currParserMode));
                 Arrays.sort(enabledMimes);
                 
                 currEnabledMimesTxt.setLength(0);

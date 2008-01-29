@@ -63,6 +63,7 @@ import java.lang.StringBuffer;
 import java.net.InetAddress;
 import java.util.Collections;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.LinkedList;
@@ -345,7 +346,7 @@ public final class plasmaHTCache {
     public static Entry pop() {
         synchronized (cacheStack) {
         if (cacheStack.size() > 0)
-            return (Entry) cacheStack.removeFirst();
+            return cacheStack.removeFirst();
         return null;
         }
     }
@@ -1130,7 +1131,9 @@ public final class plasmaHTCache {
     public boolean writeResourceInfo() {
         if (this.resInfo == null) return false;
         try {
-            responseHeaderDB.set(this.url.hash(), this.resInfo.getMap());
+            HashMap<String, String> hm = new HashMap<String, String>();
+            hm.putAll(this.resInfo.getMap());
+            responseHeaderDB.set(this.url.hash(), hm);
         } catch (Exception e) {
             resetResponseHeaderDB();
             return false;

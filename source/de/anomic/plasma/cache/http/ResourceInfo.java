@@ -50,6 +50,7 @@ package de.anomic.plasma.cache.http;
 
 import java.util.Date;
 import java.util.Map;
+import java.util.TreeMap;
 
 import de.anomic.http.httpHeader;
 import de.anomic.plasma.plasmaHTCache;
@@ -90,7 +91,7 @@ public class ResourceInfo implements IResourceInfo {
         this.responseHeader = responseHeaders;
     }
     
-    public Map<String, String> getMap() {
+    public TreeMap<String, String> getMap() {
         return this.responseHeader;
     }
     

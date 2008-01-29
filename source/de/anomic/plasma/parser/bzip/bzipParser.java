@@ -84,7 +84,7 @@ public class bzipParser extends AbstractParser implements Parser {
         this.parserName = "Bzip 2 UNIX Compressed File Parser";
     }
     
-    public Hashtable getSupportedMimeTypes() {
+    public Hashtable<String, String> getSupportedMimeTypes() {
         return SUPPORTED_MIME_TYPES;
     }
     

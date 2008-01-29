@@ -49,7 +49,7 @@
 package de.anomic.plasma.cache;
 
 import java.util.Date;
-import java.util.Map;
+import java.util.TreeMap;
 
 import de.anomic.yacy.yacyURL;
 
@@ -61,7 +61,7 @@ public interface IResourceInfo {
     /**
      * @return the resource information
      */
-    public Map<String, String> getMap();
+    public TreeMap<String, String> getMap();
     
     /**
      * @return the URL of this content

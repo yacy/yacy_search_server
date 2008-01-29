@@ -77,18 +77,18 @@ import de.anomic.tools.yFormatter;
  * Uses a Property like file with phrases or single words to translate a string or a file
  * */
 public class translator {
-	public static String translate(String source, Hashtable translationList){
-		Enumeration keys = translationList.keys();
+	public static String translate(String source, Hashtable<String, String> translationList){
+		Enumeration<String> keys = translationList.keys();
 		String result = source;
 		String key = "";
 		while(keys.hasMoreElements()){
-			key = (String)keys.nextElement();
+			key = keys.nextElement();
 			Pattern pattern = Pattern.compile(key);
 			Matcher matcher = pattern.matcher(result);
-			if(matcher.find()){
-				result = matcher.replaceAll((String)translationList.get(key));
-			}else{
-				//Filename not availible, but it will be printed in Log 
+			if (matcher.find()) {
+				result = matcher.replaceAll(translationList.get(key));
+			} else {
+				//Filename not available, but it will be printed in Log 
 				//after all untranslated Strings as "Translated file: "
 				serverLog.logFine("TRANSLATOR", "Unused String: "+key); 
 			}
@@ -100,12 +100,12 @@ public class translator {
 	 * @param translationFile the File, which contains the Lists
 	 * @return a Hashtable, which contains for each File a Hashtable with translations.
 	 */
-	public static Hashtable loadTranslationsLists(File translationFile){
-		Hashtable lists = new Hashtable(); //list of translationLists for different files.
-		Hashtable translationList = new Hashtable(); //current Translation Table
+	public static Hashtable<String, Hashtable<String, String>> loadTranslationsLists(File translationFile){
+		Hashtable<String, Hashtable<String, String>> lists = new Hashtable<String, Hashtable<String, String>>(); //list of translationLists for different files.
+		Hashtable<String, String> translationList = new Hashtable<String, String>(); //current Translation Table
         
-		ArrayList list = listManager.getListArray(translationFile);
-		Iterator it = list.iterator();
+		ArrayList<String> list = listManager.getListArray(translationFile);
+		Iterator<String> it = list.iterator();
 		String line = "";
 		String[] splitted;
 		String forFile="";
@@ -128,9 +128,9 @@ public class translator {
 					forFile=line.substring(6);
 				}
 				if(lists.containsKey(forFile)){
-					translationList=(Hashtable) lists.get(forFile);
+					translationList=lists.get(forFile);
 				}else{
-					translationList=new Hashtable();
+					translationList=new Hashtable<String, String>();
 				}
 			}
 		}
@@ -139,11 +139,11 @@ public class translator {
 	}
 
 	public static boolean translateFile(File sourceFile, File destFile, File translationFile){
-		Hashtable translationList = (Hashtable)loadTranslationsLists(translationFile).get(sourceFile.getName());
+	    Hashtable<String, String> translationList = loadTranslationsLists(translationFile).get(sourceFile.getName());
 		return translateFile(sourceFile, destFile, translationList);
 	}
 	
-	public static boolean translateFile(File sourceFile, File destFile, Hashtable translationList){
+	public static boolean translateFile(File sourceFile, File destFile, Hashtable<String, String> translationList){
 
 		String content = "";
 		String line = "";
@@ -176,16 +176,16 @@ public class translator {
 	}
 
 	public static boolean translateFiles(File sourceDir, File destDir, File baseDir, File translationFile, String extensions){
-			Hashtable translationLists = loadTranslationsLists(translationFile);
+			Hashtable<String, Hashtable<String, String>> translationLists = loadTranslationsLists(translationFile);
 			return translateFiles(sourceDir, destDir, baseDir, translationLists, extensions);
 	}
 
-	public static boolean translateFiles(File sourceDir, File destDir, File baseDir, Hashtable translationLists, String extensions){
+	public static boolean translateFiles(File sourceDir, File destDir, File baseDir, Hashtable<String, Hashtable<String, String>> translationLists, String extensions){
 		destDir.mkdirs();
 		File[] sourceFiles = sourceDir.listFiles();
-        Vector exts=listManager.string2vector(extensions);
+        Vector<String> exts=listManager.string2vector(extensions);
         boolean rightExtension;
-        Iterator it;
+        Iterator<String> it;
         String relativePath;
 		for(int i=0;i<sourceFiles.length;i++){
              it=exts.iterator();
@@ -209,7 +209,7 @@ public class translator {
 					if(!translateFile(
                                       sourceFiles[i]
                                     , new File(destDir, sourceFiles[i].getName().replace('/', File.separatorChar))
-                                    , (Hashtable)translationLists.get(relativePath))){
+                                    , translationLists.get(relativePath))){
 						serverLog.logSevere("TRANSLATOR", "File error while translating file "+relativePath);
 					}
 				}else{
@@ -222,13 +222,13 @@ public class translator {
 	}
 
     public static boolean translateFilesRecursive(File sourceDir, File destDir, File translationFile, String extensions, String notdir){
-        ArrayList dirList=listManager.getDirsRecursive(sourceDir, notdir);
+        ArrayList<File> dirList=listManager.getDirsRecursive(sourceDir, notdir);
         dirList.add(sourceDir);
-        Iterator it=dirList.iterator();
+        Iterator<File> it=dirList.iterator();
         File file=null;
         File file2=null;
         while(it.hasNext()){
-            file=(File)it.next();
+            file=it.next();
             //cuts the sourcePath and prepends the destPath
             file2=new File(destDir, file.getPath().substring(sourceDir.getPath().length()));
             if(file.isDirectory() && !file.getName().equals(notdir)){
@@ -238,9 +238,9 @@ public class translator {
         return true;
     }
 
-    public static HashMap langMap(serverSwitch env) {
+    public static HashMap<String, String> langMap(serverSwitch env) {
         String[] ms = env.getConfig("locale.lang", "").split(",");
-        HashMap map = new HashMap();
+        HashMap<String, String> map = new HashMap<String, String>();
         int p;
         for (int i = 0; i < ms.length; i++) {
             p = ms[i].indexOf("/");

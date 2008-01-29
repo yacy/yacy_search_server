@@ -33,6 +33,7 @@ import java.util.Map;
 import java.util.Set;
 import java.util.TreeMap;
 import java.util.TreeSet;
+import java.util.Map.Entry;
 
 import de.anomic.http.httpHeader;
 import de.anomic.net.natLib;
@@ -128,7 +129,7 @@ public class AccessTracker_p {
         if ((page == 2) || (page == 4)) {
             ArrayList<HashMap<String, Object>> array = (page == 2) ? switchboard.localSearches : switchboard.remoteSearches;
             Long trackerHandle;
-            HashMap searchProfile;
+            HashMap<String, Object> searchProfile;
             int m = Math.min(maxCount, array.size());
             long qcountSum = 0;
             long qtimeSum = 0;
@@ -138,7 +139,7 @@ public class AccessTracker_p {
             long rtimeSum = 0;
             
             for (int entCount = 0; entCount < m; entCount++) {
-                searchProfile = (HashMap<String, Object>) array.get(array.size() - entCount - 1);
+                searchProfile = array.get(array.size() - entCount - 1);
                 trackerHandle = (Long) searchProfile.get("time");
             
                 // put values in template
@@ -154,7 +155,7 @@ public class AccessTracker_p {
                 } else {
                     // remote search
                     prop.putHTML("page_list_" + entCount + "_peername", (String) searchProfile.get("peername"));
-                    prop.put("page_list_" + entCount + "_queryhashes", plasmaSearchQuery.anonymizedQueryHashes((Set) searchProfile.get("queryhashes")));
+                    prop.put("page_list_" + entCount + "_queryhashes", plasmaSearchQuery.anonymizedQueryHashes((Set<String>) searchProfile.get("queryhashes")));
                 }
                 prop.putNum("page_list_" + entCount + "_querycount", ((Integer) searchProfile.get("querycount")).longValue());
                 prop.putNum("page_list_" + entCount + "_querytime", ((Long) searchProfile.get("querytime")).longValue());
@@ -183,22 +184,22 @@ public class AccessTracker_p {
             prop.putNum("page_total", (page == 2) ? switchboard.localSearches.size() : switchboard.remoteSearches.size());
         }
         if ((page == 3) || (page == 5)) {
-            Iterator i = (page == 3) ? switchboard.localSearchTracker.entrySet().iterator() : switchboard.remoteSearchTracker.entrySet().iterator();
+            Iterator<Entry<String, TreeSet<Long>>> i = (page == 3) ? switchboard.localSearchTracker.entrySet().iterator() : switchboard.remoteSearchTracker.entrySet().iterator();
             String host;
-            TreeSet handles;
+            TreeSet<Long> handles;
             int entCount = 0;
             int qphSum = 0;
             Map.Entry entry;
             try {
             while ((entCount < maxCount) && (i.hasNext())) {
-                entry = (Map.Entry) i.next();
+                entry = i.next();
                 host = (String) entry.getKey();
-                handles = (TreeSet) entry.getValue();
+                handles = (TreeSet<Long>) entry.getValue();
                 
                 int dateCount = 0;
-                Iterator ii = handles.iterator();
+                Iterator<Long> ii = handles.iterator();
                 while (ii.hasNext()) {
-                	Long timestamp = (Long) ii.next();
+                	Long timestamp = ii.next();
                 	prop.put("page_list_" + entCount + "_dates_" + dateCount + "_date", serverDate.formatShortSecond(new Date(timestamp.longValue())));
                 	prop.put("page_list_" + entCount + "_dates_" + dateCount + "_timestamp", timestamp.toString());
                 	dateCount++;

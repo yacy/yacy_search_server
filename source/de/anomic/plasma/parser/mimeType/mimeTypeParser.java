@@ -103,6 +103,7 @@ public class mimeTypeParser extends AbstractParser implements Parser {
         this.parserName = "MimeType Parser"; 
     }
     
+    @SuppressWarnings("unchecked")
     public String getMimeType (File sourceFile) {
         String mimeType = null;
         
@@ -111,9 +112,9 @@ public class mimeTypeParser extends AbstractParser implements Parser {
             
             // if a match was found we can return the new mimeType
             if (match!=null) {
-                Collection subMatches = match.getSubMatches();
+                Collection<MagicMatch> subMatches = match.getSubMatches();
                 if ((subMatches != null) && (!subMatches.isEmpty())) {
-                    mimeType = ((MagicMatch) subMatches.iterator().next()).getMimeType();
+                    mimeType = subMatches.iterator().next().getMimeType();
                 } else {
                     mimeType = match.getMimeType();
                 }
@@ -125,6 +126,7 @@ public class mimeTypeParser extends AbstractParser implements Parser {
         return null;        
     }
     
+    @SuppressWarnings("unchecked")
     public plasmaParserDocument parse(yacyURL location, String mimeType, String charset, File sourceFile) throws ParserException, InterruptedException {
         
         String orgMimeType = mimeType;
@@ -134,7 +136,7 @@ public class mimeTypeParser extends AbstractParser implements Parser {
             // adding current thread to loop detection list
             Integer loopDepth = null;
             if (threadLoopDetection.containsKey(Thread.currentThread())) {
-                loopDepth = (Integer) threadLoopDetection.get(Thread.currentThread());                
+                loopDepth = threadLoopDetection.get(Thread.currentThread());                
             } else {
                 loopDepth = new Integer(0);
             }
@@ -149,9 +151,9 @@ public class mimeTypeParser extends AbstractParser implements Parser {
             
             // if a match was found we can return the new mimeType
             if (match!=null) {
-                Collection subMatches = match.getSubMatches();
+                Collection<MagicMatch> subMatches = match.getSubMatches();
                 if ((subMatches != null) && (!subMatches.isEmpty())) {
-                    mimeType = ((MagicMatch) subMatches.iterator().next()).getMimeType();
+                    mimeType = subMatches.iterator().next().getMimeType();
                     if ((mimeType == null)||(mimeType.length() == 0)) mimeType = match.getMimeType();
                 } else {
                     mimeType = match.getMimeType();
@@ -177,7 +179,7 @@ public class mimeTypeParser extends AbstractParser implements Parser {
             
             throw new ParserException("Unexpected error while detect mimetype of resource. " + e.getMessage(),location); 
         } finally {
-            Integer loopDepth = (Integer) threadLoopDetection.get(Thread.currentThread());                
+            Integer loopDepth = threadLoopDetection.get(Thread.currentThread());                
             if (loopDepth.intValue() <= 1) {
                 threadLoopDetection.remove(Thread.currentThread());
             } else {
@@ -200,7 +202,7 @@ public class mimeTypeParser extends AbstractParser implements Parser {
         
     }
     
-    public java.util.Hashtable getSupportedMimeTypes() {
+    public java.util.Hashtable<String, String> getSupportedMimeTypes() {
         return mimeTypeParser.SUPPORTED_MIME_TYPES;
     }
     

@@ -265,7 +265,7 @@ public final class httpHeader extends TreeMap<String, String> implements Map<Str
     }
 
     public httpHeader(HashMap<String, String> reverseMappingCache) {
-        // this creates a new TreeMap with a case insesitive mapping
+        // this creates a new TreeMap with a case insensitive mapping
         // to provide a put-method that translates given keys into their
         // 'proper' appearance, a translation cache is needed.
         // upon instantiation, such a mapping cache can be handed over

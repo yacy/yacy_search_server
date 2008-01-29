@@ -59,7 +59,6 @@ import java.io.PushbackInputStream;
 import java.io.UnsupportedEncodingException;
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.Hashtable;
 import java.util.List;
 
 import de.anomic.server.serverByteBuffer;
@@ -229,14 +228,14 @@ public final class httpTemplate {
         return false;
     }
 
-    public static void writeTemplate(InputStream in, OutputStream out, Hashtable<String, String> pattern, byte[] dflt) throws IOException {
+    public static void writeTemplate(InputStream in, OutputStream out, HashMap<String, String> pattern, byte[] dflt) throws IOException {
         writeTemplate(in, out, pattern, dflt, new byte[0]);
     }
 
     /**
      * Reads a input stream, and writes the data with replaced templates on a output stream
      */
-    public static byte[] writeTemplate(InputStream in, OutputStream out, Hashtable<String, String> pattern, byte[] dflt, byte[] prefix) throws IOException {
+    public static byte[] writeTemplate(InputStream in, OutputStream out, HashMap<String, String> pattern, byte[] dflt, byte[] prefix) throws IOException {
         PushbackInputStream pis = new PushbackInputStream(in, 100);
         ByteArrayOutputStream keyStream;
         byte[] key;
@@ -487,7 +486,7 @@ public final class httpTemplate {
         return structure.getBytes();
     }
 
-    public static byte[] replacePattern(String key, Hashtable<String, String> pattern, byte dflt[]) {
+    public static byte[] replacePattern(String key, HashMap<String, String> pattern, byte dflt[]) {
         byte[] replacement;
         Object value;
         if (pattern.containsKey(key)) {
@@ -515,7 +514,7 @@ public final class httpTemplate {
         // arg1 = test input; arg2 = replacement for pattern 'test'; arg3 = default replacement
         try {
             InputStream i = new ByteArrayInputStream(args[0].getBytes());
-            Hashtable<String, String> h = new Hashtable<String, String>();
+            HashMap<String, String> h = new HashMap<String, String>();
             h.put("test", args[1]);
             writeTemplate(new PushbackInputStream(i, 100), System.out, h, args[2].getBytes());
             System.out.flush();

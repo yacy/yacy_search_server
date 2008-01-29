@@ -110,7 +110,7 @@ public class docParser extends AbstractParser implements Parser {
 		}        
 	}
 
-	public java.util.Hashtable getSupportedMimeTypes() {
+	public java.util.Hashtable<String, String> getSupportedMimeTypes() {
 		return docParser.SUPPORTED_MIME_TYPES;
 	}
 

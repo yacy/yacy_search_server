@@ -61,7 +61,6 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Comparator;
 import java.util.Date;
-import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
@@ -835,13 +834,13 @@ public final class httpc {
         if (args.size() != 0) {
             // we have values for the POST, start with one boundary
             String key, value;
-            Enumeration<String> e = args.keys();
-            while (e.hasMoreElements()) {
+            Iterator<String> e = args.keySet().iterator();
+            while (e.hasNext()) {
                 // start with a boundary
                 out.write(boundary.getBytes("UTF-8"));
                 out.write(serverCore.CRLF);
                 // write value
-                key = (String) e.nextElement();
+                key = e.next();
                 value = args.get(key, "");
                 if ((files != null) && (files.containsKey(key))) {
                     // we are about to write a file

@@ -79,7 +79,7 @@ public class gzipParser extends AbstractParser implements Parser {
         this.parserName = "GNU Zip Compressed Archive Parser";
     }
     
-    public Hashtable getSupportedMimeTypes() {
+    public Hashtable<String, String> getSupportedMimeTypes() {
         return SUPPORTED_MIME_TYPES;
     }
     

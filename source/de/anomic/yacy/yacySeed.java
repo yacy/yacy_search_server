@@ -64,11 +64,9 @@ import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.net.InetAddress;
-import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Iterator;
-import java.util.Map;
 import java.util.Random;
 import java.util.Set;
 
@@ -180,12 +178,12 @@ public class yacySeed {
     /** the peer-hash */
     public String hash;
     /** a set of identity founding values, eg. IP, name of the peer, YaCy-version, ...*/
-    private final Map<String, String> dna;
+    private final HashMap<String, String> dna;
     public int available;
     public int selectscore = -1; // only for debugging
     public String alternativeIP = null;
 
-    public yacySeed(String theHash, Map<String, String> theDna) {
+    public yacySeed(String theHash, HashMap<String, String> theDna) {
         // create a seed with a pre-defined hash map
         this.hash = theHash;
         this.dna = theDna;
@@ -195,7 +193,7 @@ public class yacySeed {
     }
 
     public yacySeed(String theHash) {
-        this.dna = Collections.synchronizedMap(new HashMap<String, String>());
+        this.dna = new HashMap<String, String>();
 
         // settings that can only be computed by originating peer:
         // at first startup -
@@ -359,7 +357,7 @@ public class yacySeed {
     }
 
     /** @return the DNA-map of this peer */
-    public final Map<String, String> getMap() {
+    public final HashMap<String, String> getMap() {
         return this.dna;
     }
 
@@ -793,7 +791,7 @@ public class yacySeed {
         if (seedStr == null) { return null; }
         final String seed = crypt.simpleDecode(seedStr, key);
         if (seed == null) { return null; }
-        final Map<String, String> dna = serverCodings.string2map(seed, ",");
+        final HashMap<String, String> dna = serverCodings.string2map(seed, ",");
         final String hash = (String) dna.remove(yacySeed.HASH);
         final yacySeed resultSeed = new yacySeed(hash, dna);
         if (properTest) {

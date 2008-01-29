@@ -232,7 +232,7 @@ public class Blacklist_p {
                 }
                 
                 // load blacklist data from file
-                ArrayList list = listManager.getListArray(new File(listManager.listsPath, blacklistToUse));
+                ArrayList<String> list = listManager.getListArray(new File(listManager.listsPath, blacklistToUse));
                 
                 // delete the old entry from file
                 if (list != null) {
@@ -369,7 +369,7 @@ public class Blacklist_p {
                 }
 
                 // load blacklist data from file
-                ArrayList list = listManager.getListArray(new File(listManager.listsPath, blacklistToUse));
+                ArrayList<String> list = listManager.getListArray(new File(listManager.listsPath, blacklistToUse));
 
                 // delete the old entry from file
                 if (list != null) {
@@ -413,7 +413,7 @@ public class Blacklist_p {
         // Read the blacklist items from file
         if (blacklistToUse != null) {
             int entryCount = 0;
-            final ArrayList list = listManager.getListArray(new File(listManager.listsPath, blacklistToUse));
+            final ArrayList<String> list = listManager.getListArray(new File(listManager.listsPath, blacklistToUse));
             
             // sort them
             String[] sortedlist = new String[list.size()];
@@ -436,16 +436,16 @@ public class Blacklist_p {
 	        if (yacyCore.seedDB != null && yacyCore.seedDB.sizeConnected() > 0) { // no nullpointer error
 	            int peerCount = 0;
 	            try {
-	                TreeMap hostList = new TreeMap();
-	                final Iterator e = yacyCore.seedDB.seedsConnected(true, false, null, (float) 0.0);
+	                TreeMap<String, String> hostList = new TreeMap<String, String>();
+	                final Iterator<yacySeed> e = yacyCore.seedDB.seedsConnected(true, false, null, (float) 0.0);
 	                while (e.hasNext()) {
 	                    yacySeed seed = (yacySeed) e.next();
 	                    if (seed != null) hostList.put(seed.get(yacySeed.NAME, "nameless"),seed.hash);
 	                }
 	
 	                String peername;
-	                while ((peername = (String) hostList.firstKey()) != null) {
-	                    final String Hash = (String) hostList.get(peername);
+	                while ((peername = hostList.firstKey()) != null) {
+	                    final String Hash = hostList.get(peername);
 	                    prop.put(DISABLED + "otherHosts_" + peerCount + "_hash", Hash);
 	                    prop.putHTML(DISABLED + "otherHosts_" + peerCount + "_name", peername, true);
 	                    hostList.remove(peername);

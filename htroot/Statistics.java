@@ -44,10 +44,10 @@
 // if the shell's current path is HTROOT
 
 import java.net.MalformedURLException;
-import java.util.Iterator;
-import java.util.Map;
+import java.util.HashMap;
 
 import de.anomic.http.httpHeader;
+import de.anomic.kelondro.kelondroMapObjects;
 import de.anomic.plasma.plasmaSwitchboard;
 import de.anomic.server.serverObjects;
 import de.anomic.server.serverSwitch;
@@ -71,11 +71,11 @@ public class Statistics {
                     prop.put("page_backlinks", "0");
                 } else {
                     prop.put("page_backlinks", "1");
-                    Iterator<Map<String, String>> it = switchboard.facilityDB.maps("backlinks", false, "date");
+                    kelondroMapObjects.mapIterator it = switchboard.facilityDB.maps("backlinks", false, "date");
                     int count = 0;
                     int maxCount = 100;
                     boolean dark = true;
-                    Map<String, String> map;
+                    HashMap<String, String> map;
                     String urlString;
                     yacyURL url;
                     while ((it.hasNext()) && (count < maxCount)) {

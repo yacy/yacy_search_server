@@ -101,7 +101,7 @@ public class SitemapImporter extends AbstractImporter implements dbImporter {
 	 * @see dbImporter#init(HashMap)
 	 * @see AbstractImporter#init(HashMap)
 	 */
-	public void init(HashMap initParams) throws ImporterException {
+	public void init(HashMap<String, String> initParams) throws ImporterException {
         super.init(initParams);
         
         if (initParams == null || initParams.size() == 0) throw new IllegalArgumentException("Init parameters are missing");

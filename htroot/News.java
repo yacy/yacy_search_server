@@ -44,7 +44,6 @@
 // if the shell's current path is HTROOT
 
 import java.io.IOException;
-import java.util.Enumeration;
 import java.util.Iterator;
 import java.util.Map;
 
@@ -75,11 +74,11 @@ public class News {
                     prop.put("AUTHENTICATE", "admin log-in");
                     return prop; // this button needs authentication, force log-in
                 }
-                Enumeration e = post.keys();
+                Iterator<String> e = post.keySet().iterator();
                 String check;
                 String id;
-                while (e.hasMoreElements()) {
-                    check = (String) e.nextElement();
+                while (e.hasNext()) {
+                    check = e.next();
                     if ((check.startsWith("del_")) && (post.get(check, "off").equals("on"))) {
                         id = check.substring(4);
                         try {
@@ -125,12 +124,12 @@ public class News {
                 
             } else {
                 int maxCount = Math.min(1000, yacyCore.newsPool.size(tableID));
-                Iterator recordIterator = yacyCore.newsPool.recordIterator(tableID, false);
+                Iterator<yacyNewsRecord> recordIterator = yacyCore.newsPool.recordIterator(tableID, false);
                 yacyNewsRecord record;
                 yacySeed seed;
                 int i = 0;
                 while ((recordIterator.hasNext()) && (i < maxCount)) {
-                    record = (yacyNewsRecord) recordIterator.next();
+                    record = recordIterator.next();
                     if (record == null) continue;
                     
                     seed = yacyCore.seedDB.getConnected(record.originator());
@@ -144,11 +143,11 @@ public class News {
                     prop.put("table_list_" + i + "_rec", (record.received() == null) ? "-" : serverDate.formatShortSecond(record.received()));
                     prop.put("table_list_" + i + "_dis", record.distributed());
                     
-                    Map attributeMap = record.attributes();
+                    Map<String, String> attributeMap = record.attributes();
                     prop.putHTML("table_list_" + i + "_att", attributeMap.toString());
                     int j = 0;
                     if (attributeMap.size() > 0) {
-	                    Iterator attributeKeys = attributeMap.keySet().iterator();
+	                    Iterator<String> attributeKeys = attributeMap.keySet().iterator();
 	                    while (attributeKeys.hasNext()) {
 	                    	String key = (String) attributeKeys.next();
 	                    	String value = (String) attributeMap.get(key);

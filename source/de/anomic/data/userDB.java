@@ -71,8 +71,8 @@ public final class userDB {
     kelondroMapObjects userTable;
     private final File userTableFile;
     private long preloadTime;
-	private HashMap ipUsers = new HashMap();
-    private HashMap cookieUsers = new HashMap();
+	private HashMap<String, String> ipUsers = new HashMap<String, String>();
+    private HashMap<String, Object> cookieUsers = new HashMap<String, Object>();
     
     public userDB(File userTableFile, long preloadTime) {
         this.userTableFile = userTableFile;
@@ -107,12 +107,12 @@ public final class userDB {
         if(userName.length()>128){
             userName=userName.substring(0, 127);
         }
-        Map record = userTable.getMap(userName);
+        HashMap<String, String> record = userTable.getMap(userName);
         if (record == null) return null;
         return new Entry(userName, record);
     }    
     
-    public Entry createEntry(String userName, HashMap userProps) throws IllegalArgumentException{
+    public Entry createEntry(String userName, HashMap<String, String> userProps) throws IllegalArgumentException{
         Entry entry = new Entry(userName,userProps);
         return entry;
     }
@@ -200,7 +200,7 @@ public final class userDB {
 	 */
 	public Entry ipAuth(String ip) {
         if(this.ipUsers.containsKey(ip)){
-            String user=(String)this.ipUsers.get(ip);
+            String user=this.ipUsers.get(ip);
             Entry entry=this.getEntry(user);
             Long entryTimestamp=entry.getLastAccess();
             if(entryTimestamp == null || (System.currentTimeMillis()-entryTimestamp.longValue()) > (1000*60*10) ){ //no timestamp or older than 10 Minutes
@@ -327,11 +327,11 @@ public final class userDB {
         public static final int PROXY_TIMELIMIT_REACHED = 3;
         
         // this is a simple record structure that hold all properties of a user
-        private Map mem;
+        private HashMap<String, String> mem;
         private String userName;
 		private Calendar oldDate, newDate;
         
-        public Entry(String userName, Map mem) throws IllegalArgumentException {
+        public Entry(String userName, HashMap<String, String> mem) throws IllegalArgumentException {
             if ((userName == null) || (userName.length() == 0)) 
                 throw new IllegalArgumentException("Username needed.");
             if(userName.length()>128){
@@ -342,7 +342,7 @@ public final class userDB {
             if (this.userName.length() < USERNAME_MIN_LENGTH) 
                 throw new IllegalArgumentException("Username to short. Length should be >= " + USERNAME_MIN_LENGTH);
             
-            if (mem == null) this.mem = new HashMap();
+            if (mem == null) this.mem = new HashMap<String, String>();
             else this.mem = mem;            
             
             if (!mem.containsKey(AUTHENTICATION_METHOD))this.mem.put(AUTHENTICATION_METHOD,"yacy");
@@ -355,21 +355,21 @@ public final class userDB {
         }
         
         public String getFirstName() {
-            return (this.mem.containsKey(USER_FIRSTNAME)?(String)this.mem.get(USER_FIRSTNAME):null);
+            return (this.mem.containsKey(USER_FIRSTNAME)?this.mem.get(USER_FIRSTNAME):null);
         } 
         
         public String getLastName() {
-            return (this.mem.containsKey(USER_LASTNAME)?(String)this.mem.get(USER_LASTNAME):null);
+            return (this.mem.containsKey(USER_LASTNAME)?this.mem.get(USER_LASTNAME):null);
         }     
         
         public String getAddress() {
-            return (this.mem.containsKey(USER_ADDRESS)?(String)this.mem.get(USER_ADDRESS):null);
+            return (this.mem.containsKey(USER_ADDRESS)?this.mem.get(USER_ADDRESS):null);
         } 
         
         public long getTimeUsed() {
             if (this.mem.containsKey(TIME_USED)) {
                 try{
-                    return Long.valueOf((String)this.mem.get(TIME_USED)).longValue();
+                    return Long.valueOf(this.mem.get(TIME_USED)).longValue();
                 }catch(NumberFormatException e){
                     return 0;
                 }
@@ -383,7 +383,7 @@ public final class userDB {
         public long getTimeLimit() {
             if (this.mem.containsKey(TIME_LIMIT)) {
                 try{
-                    return Long.valueOf((String)this.mem.get(TIME_LIMIT)).longValue();
+                    return Long.valueOf(this.mem.get(TIME_LIMIT)).longValue();
                 }catch(NumberFormatException e){
                     return 0;
                 }
@@ -396,7 +396,7 @@ public final class userDB {
         
         public long getTrafficSize() {
             if (this.mem.containsKey(TRAFFIC_SIZE)) {
-                return Long.valueOf((String)this.mem.get(TRAFFIC_SIZE)).longValue();
+                return Long.valueOf(this.mem.get(TRAFFIC_SIZE)).longValue();
             }
             try {
                 this.setProperty(TRAFFIC_SIZE,"0");
@@ -407,7 +407,7 @@ public final class userDB {
         }
         
         public Long getTrafficLimit() {
-            return (this.mem.containsKey(TRAFFIC_LIMIT)?Long.valueOf((String)this.mem.get(TRAFFIC_LIMIT)):null);
+            return (this.mem.containsKey(TRAFFIC_LIMIT)?Long.valueOf(this.mem.get(TRAFFIC_LIMIT)):null);
         }
         
         public long updateTrafficSize(long responseSize) {
@@ -424,7 +424,7 @@ public final class userDB {
         }
         
         public Long getLastAccess() {
-            return (this.mem.containsKey(LAST_ACCESS)?Long.valueOf((String)this.mem.get(LAST_ACCESS)):null);
+            return (this.mem.containsKey(LAST_ACCESS)?Long.valueOf(this.mem.get(LAST_ACCESS)):null);
         }        
         
         public int surfRight(){
@@ -484,10 +484,10 @@ public final class userDB {
         }
         
         public String getMD5EncodedUserPwd() {
-            return (this.mem.containsKey(MD5ENCODED_USERPWD_STRING)?(String)this.mem.get(MD5ENCODED_USERPWD_STRING):null);
+            return (this.mem.containsKey(MD5ENCODED_USERPWD_STRING)?this.mem.get(MD5ENCODED_USERPWD_STRING):null);
         }
         
-        public Map getProperties() {
+        public Map<String, String> getProperties() {
             return this.mem;
         }
         
@@ -497,10 +497,10 @@ public final class userDB {
         }
         
         public String getProperty(String propName, String defaultValue) {
-            return (this.mem.containsKey(propName)?(String)this.mem.get(propName):defaultValue);
+            return (this.mem.containsKey(propName)?this.mem.get(propName):defaultValue);
         }
         public boolean hasRight(String rightName){
-        	return (this.mem.containsKey(rightName)?((String)this.mem.get(rightName)).equals("true"):false);
+        	return (this.mem.containsKey(rightName)?this.mem.get(rightName).equals("true"):false);
         }
         /**
          * @deprecated use hasRight(UPLOAD_RIGHT) instead
@@ -545,7 +545,7 @@ public final class userDB {
         	return this.hasRight(BOOKMARK_RIGHT);
         }
         public boolean isLoggedOut(){
-        	   return (this.mem.containsKey(LOGGED_OUT)?((String)this.mem.get(LOGGED_OUT)).equals("true"):false);
+        	   return (this.mem.containsKey(LOGGED_OUT)?this.mem.get(LOGGED_OUT).equals("true"):false);
         }
         public void logout(String ip, String logintoken){
             logout(ip);
@@ -578,19 +578,19 @@ public final class userDB {
         
     }
     
-    public Iterator iterator(boolean up) {
+    public Iterator<Entry> iterator(boolean up) {
         // enumerates users
         try {
             return new userIterator(up);
         } catch (IOException e) {
-            return new HashSet().iterator();
+            return new HashSet<Entry>().iterator();
         }
     }
 
 
-    public class userIterator implements Iterator {
+    public class userIterator implements Iterator<Entry> {
         // the iterator iterates all userNames
-        kelondroCloneableIterator userIter;
+        kelondroCloneableIterator<String> userIter;
         userDB.Entry nextEntry;
         
         public userIterator(boolean up) throws IOException {
@@ -605,7 +605,7 @@ public final class userDB {
                 return false;
             }
         }
-        public Object next() {
+        public Entry next() {
             try {
                 return getEntry((String) this.userIter.next());
             } catch (kelondroException e) {

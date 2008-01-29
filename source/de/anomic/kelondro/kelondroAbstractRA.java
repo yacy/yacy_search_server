@@ -49,9 +49,9 @@ import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStreamReader;
+import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
-import java.util.TreeMap;
 
 import de.anomic.server.serverByteBuffer;
 
@@ -213,11 +213,11 @@ abstract class kelondroAbstractRA implements kelondroRA {
         write(bb.getBytes());
     }
 
-    public Map<String, String> readMap() throws IOException {
+    public HashMap<String, String> readMap() throws IOException {
         this.seek(0);
         byte[] b = readFully();
         BufferedReader br = new BufferedReader(new InputStreamReader(new ByteArrayInputStream(b)));
-        final TreeMap<String, String> map = new TreeMap<String, String>();
+        final HashMap<String, String> map = new HashMap<String, String>();
         String line;
         int pos;
         while ((line = br.readLine()) != null) { // very slow readLine????

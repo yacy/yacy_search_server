@@ -97,7 +97,7 @@ public class kelondroMapTable {
         tTables.put(tablename, Tree);
     }
 
-    public synchronized void update(String tablename, String key, Map<String, String> map) throws IOException {
+    public synchronized void update(String tablename, String key, HashMap<String, String> map) throws IOException {
         kelondroMapObjects table = (kelondroMapObjects) mTables.get(tablename);
         if (table == null) throw new RuntimeException("kelondroTables.update: map table '" + tablename + "' does not exist.");
         if (key.length() > table.keySize()) key = key.substring(0, table.keySize());

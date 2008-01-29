@@ -102,7 +102,7 @@ public class bookmarksDB {
     
     // tags
     kelondroMapObjects tagsTable;
-    HashMap tagCache;					
+    HashMap<String, Tag> tagCache;					
     
     // dates
     kelondroMapObjects datesTable;
@@ -114,7 +114,7 @@ public class bookmarksDB {
 
     public bookmarksDB(File bookmarksFile, File tagsFile, File datesFile, long preloadTime) {
         // bookmarks
-        tagCache=new HashMap();
+        tagCache=new HashMap<String, Tag>();
         bookmarkCache=new HashMap();
         bookmarksFile.getParentFile().mkdirs();
         //this.bookmarksTable = new kelondroMap(kelondroDyn.open(bookmarksFile, bufferkb * 1024, preloadTime, 12, 256, '_', true, false));
@@ -164,11 +164,11 @@ public class bookmarksDB {
     
     	Set<String> folders = new TreeSet<String>();
     	String path = "";   	
-    	Iterator it = this.getTagIterator(priv);
+    	Iterator<Tag> it = this.getTagIterator(priv);
     	Tag tag;
     	
     	while(it.hasNext()){
-    		tag=(Tag) it.next();
+    		tag=it.next();
     		if (tag.getFriendlyName().startsWith("/")) {
     			path = tag.getFriendlyName();
     			path = cleanTagsString(path);                  
@@ -282,8 +282,8 @@ public class bookmarksDB {
        
         
     }
-    public Iterator getBookmarksIterator(boolean priv){
-        TreeSet set=new TreeSet(new bookmarkComparator(true));
+    public Iterator<String> getBookmarksIterator(boolean priv){
+        TreeSet<String> set=new TreeSet<String>(new bookmarkComparator(true));
         Iterator it=bookmarkIterator(true);
         Bookmark bm;
         while(it.hasNext()){
@@ -294,21 +294,21 @@ public class bookmarksDB {
         }
         return set.iterator();
     }
-    public Iterator getBookmarksIterator(String tagName, boolean priv){
-        TreeSet set=new TreeSet(new bookmarkComparator(true));
+    public Iterator<String> getBookmarksIterator(String tagName, boolean priv){
+        TreeSet<String> set=new TreeSet<String>(new bookmarkComparator(true));
         String tagHash=tagHash(tagName);
         Tag tag=getTag(tagHash);
-        Set hashes=new HashSet();
+        Set<String> hashes=new HashSet<String>();
         if(tag != null){
             hashes=getTag(tagHash).getUrlHashes();
         }
         if(priv){
         	set.addAll(hashes);
         }else{
-        	Iterator it=hashes.iterator();
+        	Iterator<String> it=hashes.iterator();
         	Bookmark bm;
         	while(it.hasNext()){
-        		bm=getBookmark((String) it.next());
+        		bm=getBookmark(it.next());
         		if(bm.getPublic()){
         			set.add(bm.getUrlHash());
         		}
@@ -335,7 +335,7 @@ public class bookmarksDB {
      * @param hash an object of type String, containing a tagHash
      */
     public Tag loadTag(String hash){	// TODO: check if loadTag() could be private
-        Map map;
+        HashMap<String, String> map;
         Tag ret=null;
         map = tagsTable.getMap(hash);
         if(map!=null){
@@ -350,7 +350,7 @@ public class bookmarksDB {
      */
     public Tag getTag(String hash){
         if(tagCache.containsKey(hash)){
-            return (Tag) tagCache.get(hash);
+            return tagCache.get(hash);
         }
         return loadTag(hash); //null if it does not exists
     }    
@@ -377,11 +377,11 @@ public class bookmarksDB {
         }
     }
     public void flushTagCache(){
-        Iterator it=tagCache.keySet().iterator();
+        Iterator<String> it=tagCache.keySet().iterator();
         while(it.hasNext()){
-            storeTag((Tag) tagCache.get(it.next()));
+            storeTag(tagCache.get(it.next()));
         }
-        tagCache=new HashMap();
+        tagCache=new HashMap<String, Tag>();
     }
     public String addTag(Tag tag){		// TODO: is addTag() really needed - check storeTag() and saveTag()
     	//tagsTable.set(tag.getTagName(), tag.getMap());
@@ -404,14 +404,14 @@ public class bookmarksDB {
             return new HashSet().iterator();
         }
     }
-    public Iterator getTagIterator(boolean priv){
+    public Iterator<Tag> getTagIterator(boolean priv){
     	return getTagIterator(priv,1);
     }
-    public Iterator getTagIterator(boolean priv, int c){
+    public Iterator<Tag> getTagIterator(boolean priv, int c){
     	Comparator comp;    	
     	if (c == SORT_SIZE) comp = new tagSizeComparator(); 
     	else comp = new tagComparator();
-    	TreeSet set=new TreeSet(comp);
+    	TreeSet<Tag> set=new TreeSet<Tag>(comp);
     	Iterator it=tagIterator(true);
     	Tag tag;
     	while(it.hasNext()){
@@ -422,11 +422,11 @@ public class bookmarksDB {
     	}    	  		
     	return set.iterator();
     }
-    public Iterator getTagIterator(boolean priv, int comp, int max){
+    public Iterator<Tag> getTagIterator(boolean priv, int comp, int max){
     	if (max==SHOW_ALL) 
     		return getTagIterator(priv, comp);
-    	Iterator it = getTagIterator(priv, comp);
-    	TreeSet set=new TreeSet(new tagComparator());
+    	Iterator<Tag> it = getTagIterator(priv, comp);
+    	TreeSet<Tag> set=new TreeSet<Tag>(new tagComparator());
     	int count = 0;
     	while (it.hasNext() && count<=max) {
     		set.add(it.next());
@@ -434,25 +434,25 @@ public class bookmarksDB {
     	}    	
     	return set.iterator();
     }
-    public Iterator getTagIterator(String tagName, boolean priv){
+    public Iterator<Tag> getTagIterator(String tagName, boolean priv){
      	return getTagIterator(tagName, priv, 1);
     }
-    public Iterator getTagIterator(String tagName, boolean priv, int comp){
+    public Iterator<Tag> getTagIterator(String tagName, boolean priv, int comp){
     	Comparator c;    	
     	if (comp == SORT_SIZE) c = new tagSizeComparator();
     	else c = new tagComparator();
-    	TreeSet set=new TreeSet(c);
-    	Iterator it=null;
-    	Iterator bit=getBookmarksIterator(tagName, priv);
+    	TreeSet<Tag> set=new TreeSet<Tag>(c);
+    	Iterator<String> it=null;
+    	Iterator<String> bit=getBookmarksIterator(tagName, priv);
     	Bookmark bm;
     	Tag tag;
     	Set<String> tags;
     	while(bit.hasNext()){
-    		bm=getBookmark((String)bit.next());
+    		bm=getBookmark(bit.next());
     		tags = bm.getTags();
     		it = tags.iterator();
     		while (it.hasNext()) {
-    			tag=getTag( tagHash((String) it.next()) );
+    			tag=getTag( tagHash(it.next()) );
         		if(priv ||tag.hasPublicItems()){
         			set.add(tag);
         		}
@@ -460,11 +460,11 @@ public class bookmarksDB {
     	}
     	return set.iterator();
     }
-    public Iterator getTagIterator(String tagName, boolean priv, int comp, int max){
+    public Iterator<Tag> getTagIterator(String tagName, boolean priv, int comp, int max){
     	if (max==SHOW_ALL) 
     		return getTagIterator(priv, comp);
-   		Iterator it = getTagIterator(tagName, priv, comp);
-   		TreeSet set=new TreeSet(new tagComparator());
+   		Iterator<Tag> it = getTagIterator(tagName, priv, comp);
+   		TreeSet<Tag> set=new TreeSet<Tag>(new tagComparator());
    		int count = 0;
    		while (it.hasNext() && count<=max) {
    			set.add(it.next());
@@ -502,7 +502,7 @@ public class bookmarksDB {
 	// ---------------------------------------
     
     public bookmarksDate getDate(String date){
-    	Map map;
+    	HashMap<String, String> map;
         map=datesTable.getMap(date);
         if(map==null) return new bookmarksDate(date);
         return new bookmarksDate(date, map);
@@ -541,7 +541,7 @@ public class bookmarksDB {
     		removeTag(oldHash);
     		Iterator it = urlHashes.iterator();
             Bookmark bookmark;                
-            Set tags = new HashSet(); 
+            Set<String> tags = new HashSet<String>(); 
             String tagsString;            
             while (it.hasNext()) {							// looping through all bookmarks which were tagged with oldName
                 bookmark = getBookmark((String) it.next());
@@ -588,7 +588,7 @@ public class bookmarksDB {
     	String title;
     	yacyURL url;
     	Bookmark bm;
-    	Set tags=listManager.string2set(tag); //this allow multiple default tags
+    	Set<String> tags=listManager.string2set(tag); //this allow multiple default tags
     	try {
     		//load the links
     		htmlFilterContentScraper scraper = new htmlFilterContentScraper(baseURL);    		
@@ -672,7 +672,7 @@ public class bookmarksDB {
             if(attributes.getNamedItem("time")!=null){
                 time=attributes.getNamedItem("time").getNodeValue();
             }
-            Set tags=new HashSet();
+            Set<String> tags=new HashSet<String>();
             
             if(title != null){
                 bm.setProperty(Bookmark.BOOKMARK_TITLE, title);
@@ -721,32 +721,32 @@ public class bookmarksDB {
         public static final String URL_HASHES="urlHashes";
         public static final String TAG_NAME="tagName";
         private String tagHash;
-        private Map mem;
+        private HashMap<String, String> mem;
         private Set<String> urlHashes;
 
-        public Tag(String hash, Map map){
+        public Tag(String hash, HashMap<String, String> map){
         	tagHash=hash;
             mem=map;
             if(mem.containsKey(URL_HASHES))
-                urlHashes = listManager.string2set((String) mem.get(URL_HASHES));
+                urlHashes = listManager.string2set(mem.get(URL_HASHES));
             else
-                urlHashes = new HashSet();
+                urlHashes = new HashSet<String>();
         }
-        public Tag(String name, HashSet entries){
+        public Tag(String name, HashSet<String> entries){
             tagHash=tagHash(name);
-            mem=new HashMap();
+            mem=new HashMap<String, String>();
             //mem.put(URL_HASHES, listManager.arraylist2string(entries));
             urlHashes=entries;
             mem.put(TAG_NAME, name);
         }
         public Tag(String name){
             tagHash=tagHash(name);
-            mem=new HashMap();
+            mem=new HashMap<String, String>();
             //mem.put(URL_HASHES, "");
-            urlHashes=new HashSet();
+            urlHashes=new HashSet<String>();
             mem.put(TAG_NAME, name);
         }
-        public Map getMap(){
+        public HashMap<String, String> getMap(){
             mem.put(URL_HASHES, listManager.collection2string(this.urlHashes));
             return mem;
         }
@@ -772,7 +772,7 @@ public class bookmarksDB {
             }
             return getTagName();*/
             if(this.mem.containsKey(TAG_NAME)){
-                return (String) this.mem.get(TAG_NAME);
+                return this.mem.get(TAG_NAME);
             }
             return "notagname";
         }
@@ -780,7 +780,7 @@ public class bookmarksDB {
             return urlHashes;
         }
         public boolean hasPublicItems(){
-        	Iterator it=getBookmarksIterator(this.getTagHash(), false);
+        	Iterator<String> it=getBookmarksIterator(this.getTagHash(), false);
         	if(it.hasNext()){
         		return true;
         	}
@@ -801,34 +801,34 @@ public class bookmarksDB {
      */    
     public class bookmarksDate{
         public static final String URL_HASHES="urlHashes";
-        private Map mem;
+        private HashMap<String, String> mem;
         String date;
 
         public bookmarksDate(String mydate){
             //round to seconds, but store as milliseconds (java timestamp)
             date=String.valueOf((Long.parseLong(mydate)/1000)*1000);
-            mem=new HashMap();
+            mem=new HashMap<String, String>();
             mem.put(URL_HASHES, "");
         }
 
-        public bookmarksDate(String mydate, Map map){
+        public bookmarksDate(String mydate, HashMap<String, String> map){
             //round to seconds, but store as milliseconds (java timestamp)
             date=String.valueOf((Long.parseLong(mydate)/1000)*1000);
             mem=map;
         }
-        public bookmarksDate(String mydate, ArrayList entries){
+        public bookmarksDate(String mydate, ArrayList<String> entries){
             //round to seconds, but store as milliseconds (java timestamp)
             date=String.valueOf((Long.parseLong(mydate)/1000)*1000);
-            mem=new HashMap();
+            mem=new HashMap<String, String>();
             mem.put(URL_HASHES, listManager.collection2string(entries));
         }
         public void add(String urlHash){
-            String urlHashes = (String)mem.get(URL_HASHES);
-            ArrayList list;
+            String urlHashes = mem.get(URL_HASHES);
+            ArrayList<String> list;
             if(urlHashes != null && !urlHashes.equals("")){
                 list=listManager.string2arraylist(urlHashes);
             }else{
-                list=new ArrayList();
+                list=new ArrayList<String>();
             }
             if(!list.contains(urlHash) && urlHash != null && !urlHash.equals("")){
                 list.add(urlHash);
@@ -843,7 +843,7 @@ public class bookmarksDB {
             }*/
         }
         public void delete(String urlHash){
-            ArrayList list=listManager.string2arraylist((String) this.mem.get(URL_HASHES));
+            ArrayList<String> list=listManager.string2arraylist(this.mem.get(URL_HASHES));
             if(list.contains(urlHash)){
                 list.remove(urlHash);
             }
@@ -862,10 +862,10 @@ public class bookmarksDB {
             return date;
         }
         public ArrayList getBookmarkList(){
-            return listManager.string2arraylist((String)this.mem.get(URL_HASHES));
+            return listManager.string2arraylist(this.mem.get(URL_HASHES));
         }
         public int size(){
-            return listManager.string2arraylist(((String)this.mem.get(URL_HASHES))).size();
+            return listManager.string2arraylist(this.mem.get(URL_HASHES)).size();
         }
     }
     /**
@@ -883,13 +883,13 @@ public class bookmarksDB {
         private String urlHash;
         private Set<String> tags;
         private long timestamp;
-        public Bookmark(String urlHash, Map map){
+        public Bookmark(String urlHash, HashMap map){
             super(map);
             this.urlHash=urlHash;
             if(map.containsKey(BOOKMARK_TAGS))
                 tags=listManager.string2set((String) map.get(BOOKMARK_TAGS));
             else
-                tags=new HashSet();
+                tags=new HashSet<String>();
             loadTimestamp();
         }
         public Bookmark(String url){
@@ -904,14 +904,14 @@ public class bookmarksDB {
             }
             entry.put(BOOKMARK_URL, url);
             this.timestamp=System.currentTimeMillis();
-            tags=new HashSet();
+            tags=new HashSet<String>();
             Bookmark oldBm=getBookmark(this.urlHash);
             if(oldBm!=null && oldBm.entry.containsKey(BOOKMARK_TIMESTAMP)){
                 entry.put(BOOKMARK_TIMESTAMP, oldBm.entry.get(BOOKMARK_TIMESTAMP)); //preserve timestamp on edit
             }else{
                 entry.put(BOOKMARK_TIMESTAMP, String.valueOf(System.currentTimeMillis()));
             }  
-            bookmarksDate bmDate=getDate((String) entry.get(BOOKMARK_TIMESTAMP));
+            bookmarksDate bmDate=getDate(entry.get(BOOKMARK_TIMESTAMP));
             bmDate.add(this.urlHash);
             bmDate.setDatesTable();
             
@@ -921,14 +921,14 @@ public class bookmarksDB {
             super();
             this.urlHash=urlHash;
             entry.put(BOOKMARK_URL, url.toNormalform(false, true));
-            tags=new HashSet();
+            tags=new HashSet<String>();
             timestamp=System.currentTimeMillis();
         }
         public Bookmark(String urlHash, String url){
             super();
             this.urlHash=urlHash;
             entry.put(BOOKMARK_URL, url);
-            tags=new HashSet();
+            tags=new HashSet<String>();
             timestamp=System.currentTimeMillis();
         }
 
@@ -936,20 +936,20 @@ public class bookmarksDB {
             this((new yacyURL((String)map.map().get(BOOKMARK_URL), null)).hash(), map.map());
         }
         
-        private Map toMap(){
+        private Map<String, String> toMap(){
             entry.put(BOOKMARK_TAGS, listManager.collection2string(tags));
             entry.put(BOOKMARK_TIMESTAMP, String.valueOf(this.timestamp));
             return entry;
         }
         private void loadTimestamp(){
             if(entry.containsKey(BOOKMARK_TIMESTAMP))
-                this.timestamp=Long.parseLong((String)entry.get(BOOKMARK_TIMESTAMP));
+                this.timestamp=Long.parseLong(entry.get(BOOKMARK_TIMESTAMP));
         }
         public String getUrlHash(){
             return urlHash;
         }
         public String getUrl(){
-            return (String) entry.get(BOOKMARK_URL);
+            return entry.get(BOOKMARK_URL);
         }
         public Set<String> getTags(){
             return tags;
@@ -976,19 +976,19 @@ public class bookmarksDB {
         }        
         public String getDescription(){
             if(entry.containsKey(BOOKMARK_DESCRIPTION)){
-                return (String) entry.get(BOOKMARK_DESCRIPTION);
+                return entry.get(BOOKMARK_DESCRIPTION);
             }
             return "";
         }
         public String getTitle(){
             if(entry.containsKey(BOOKMARK_TITLE)){
-                return (String) entry.get(BOOKMARK_TITLE);
+                return entry.get(BOOKMARK_TITLE);
             }
-            return (String) entry.get(BOOKMARK_URL);
+            return entry.get(BOOKMARK_URL);
         }
         public String getOwner(){
             if(entry.containsKey(BOOKMARK_OWNER)){
-                return (String) entry.get(BOOKMARK_OWNER);
+                return entry.get(BOOKMARK_OWNER);
             }
             return null; //null means admin
         }
@@ -997,13 +997,13 @@ public class bookmarksDB {
         }
         public boolean getPublic(){
             if(entry.containsKey(BOOKMARK_PUBLIC)){
-                return ((String) entry.get(BOOKMARK_PUBLIC)).equals("public");
+                return entry.get(BOOKMARK_PUBLIC).equals("public");
             }
             return false;
         }
         public boolean getFeed(){
             if(entry.containsKey(BOOKMARK_IS_FEED)){
-                return ((String) entry.get(BOOKMARK_IS_FEED)).equals("true");
+                return entry.get(BOOKMARK_IS_FEED).equals("true");
             }
             return false;
         }
@@ -1045,7 +1045,7 @@ public class bookmarksDB {
         	// tags.addAll(tags2);	// in order for renameTag() to work I had to change this form 'add' to 'set'
             Iterator<String> it=tags.iterator();
             while(it.hasNext()){
-                String tagName=(String) it.next();
+                String tagName=it.next();
                 Tag tag=getTag(tagHash(tagName));
                 if(tag == null){
                     tag=new Tag(tagName);

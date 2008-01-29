@@ -8,8 +8,8 @@ import java.util.TreeSet;
 
 import de.anomic.index.indexContainer;
 import de.anomic.index.indexRWIEntry;
+import de.anomic.index.indexRWIRowEntry;
 import de.anomic.index.indexURLEntry;
-import de.anomic.kelondro.kelondroNaturalOrder;
 import de.anomic.plasma.plasmaSwitchboard;
 import de.anomic.plasma.plasmaWordIndex;
 import de.anomic.server.serverDate;
@@ -69,7 +69,7 @@ public class plasmaDbImporter extends AbstractImporter implements dbImporter {
      * @throws ImporterException 
      * @see dbImporter#init(HashMap)
      */
-    public void init(HashMap initParams) throws ImporterException {
+    public void init(HashMap<String, String> initParams) throws ImporterException {
         super.init(initParams);
         
         if (initParams == null || initParams.size() == 0) throw new IllegalArgumentException("Init parameters are missing");
@@ -147,15 +147,15 @@ public class plasmaDbImporter extends AbstractImporter implements dbImporter {
             this.log.logInfo("Home word index contains " + homeWordIndex.size() + " words and " + homeWordIndex.loadedURL.size() + " URLs.");
             this.log.logInfo("Import word index contains " + this.importWordIndex.size() + " words and " + this.importWordIndex.loadedURL.size() + " URLs.");                        
             
-            HashSet unknownUrlBuffer = new HashSet();
-            HashSet importedUrlBuffer = new HashSet();
+            HashSet<String> unknownUrlBuffer = new HashSet<String>();
+            HashSet<String> importedUrlBuffer = new HashSet<String>();
 			
             // iterate over all words from import db
             //Iterator importWordHashIterator = this.importWordIndex.wordHashes(this.wordChunkStartHash, plasmaWordIndex.RL_WORDFILES, false);
-            Iterator indexContainerIterator = this.importWordIndex.indexContainerSet(this.wordChunkStartHash, false, false, 100).iterator();
+            Iterator<indexContainer> indexContainerIterator = this.importWordIndex.indexContainerSet(this.wordChunkStartHash, false, false, 100).iterator();
             while (!isAborted() && indexContainerIterator.hasNext()) {
                 
-                TreeSet entityUrls = new TreeSet(new kelondroNaturalOrder(true));
+                TreeSet<String> entityUrls = new TreeSet<String>();
                 indexContainer newContainer = null;
                 try {
                     this.wordCounter++;
@@ -164,7 +164,7 @@ public class plasmaDbImporter extends AbstractImporter implements dbImporter {
                     
                     // loop throug the entities of the container and get the
                     // urlhash
-                    Iterator importWordIdxEntries = newContainer.entries();
+                    Iterator<indexRWIRowEntry> importWordIdxEntries = newContainer.entries();
                     indexRWIEntry importWordIdxEntry;
                     while (importWordIdxEntries.hasNext()) {
                         // testing if import process was aborted
@@ -176,10 +176,10 @@ public class plasmaDbImporter extends AbstractImporter implements dbImporter {
                         entityUrls.add(urlHash);
                     }
 
-                    Iterator urlIter = entityUrls.iterator();
+                    Iterator<String> urlIter = entityUrls.iterator();
                     while (urlIter.hasNext()) {	
                         if (isAborted()) break;
-                        String urlHash = (String) urlIter.next();
+                        String urlHash = urlIter.next();
 
                         if (importedUrlBuffer.contains(urlHash)) {
                             // already known url
@@ -253,7 +253,7 @@ public class plasmaDbImporter extends AbstractImporter implements dbImporter {
 
                 if (!indexContainerIterator.hasNext()) {
                     // We may not be finished yet, try to get the next chunk of wordHashes
-                    TreeSet containers = this.importWordIndex.indexContainerSet(this.wordHash, false, false, 100);
+                    TreeSet<indexContainer> containers = this.importWordIndex.indexContainerSet(this.wordHash, false, false, 100);
                     indexContainerIterator = containers.iterator();
                     // Make sure we don't get the same wordhash twice, but don't skip a word
                     if ((indexContainerIterator.hasNext())&&(!this.wordHash.equals(((indexContainer) indexContainerIterator.next()).getWordHash()))) {

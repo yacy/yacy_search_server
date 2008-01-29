@@ -51,6 +51,7 @@ import de.anomic.kelondro.kelondroBase64Order;
 import de.anomic.kelondro.kelondroException;
 import de.anomic.kelondro.kelondroRow;
 import de.anomic.kelondro.kelondroStack;
+import de.anomic.kelondro.kelondroRow.EntryIndex;
 import de.anomic.server.logging.serverLog;
 import de.anomic.yacy.yacyURL;
 
@@ -115,15 +116,15 @@ public class URLFetcherStack {
     
     public String[] top(int count) {
         try {
-            final ArrayList ar = new ArrayList();
-            Iterator it = db.contentRows(500);
+            final ArrayList<String> ar = new ArrayList<String>();
+            Iterator<EntryIndex> it = db.contentRows(500);
             kelondroRow.EntryIndex ei;
             for (int i=0; i<count && it.hasNext(); i++) {
-                ei = (kelondroRow.EntryIndex)it.next();
+                ei = it.next();
                 if (ei == null) continue;
                 ar.add(ei.getColString(0, null));
             }
-            return (String[])ar.toArray(new String[ar.size()]);
+            return ar.toArray(new String[ar.size()]);
         } catch (kelondroException e) {
             this.log.logSevere("error retrieving entry", e);
             return null;

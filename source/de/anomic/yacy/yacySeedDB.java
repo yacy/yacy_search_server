@@ -421,7 +421,7 @@ public final class yacySeedDB {
         //seed.put(yacySeed.LASTSEEN, yacyCore.shortFormatter.format(new Date(yacyCore.universalTime())));
         try {
             nameLookupCache.put(seed.getName(), seed);
-            Map<String, String> seedPropMap = seed.getMap();
+            HashMap<String, String> seedPropMap = seed.getMap();
             synchronized(seedPropMap) {
                 seedActiveDB.set(seed.hash, seedPropMap);
             }
@@ -448,7 +448,7 @@ public final class yacySeedDB {
         } catch (Exception e) {}
         //seed.put(yacySeed.LASTSEEN, yacyCore.shortFormatter.format(new Date(yacyCore.universalTime())));
         try {
-            Map<String, String> seedPropMap = seed.getMap();
+            HashMap<String, String> seedPropMap = seed.getMap();
             synchronized(seedPropMap) {
                 seedPassiveDB.set(seed.hash, seedPropMap);
             }
@@ -474,7 +474,7 @@ public final class yacySeedDB {
     if (seed.isProper() != null) return;
     //seed.put(yacySeed.LASTSEEN, yacyCore.shortFormatter.format(new Date(yacyCore.universalTime())));
         try {
-            Map<String, String> seedPropMap = seed.getMap();
+            HashMap<String, String> seedPropMap = seed.getMap();
             synchronized(seedPropMap) {
                 seedPotentialDB.set(seed.hash, seedPropMap);
             }
@@ -531,7 +531,7 @@ public final class yacySeedDB {
     private yacySeed get(String hash, kelondroMapObjects database) {
         if (hash == null) return null;
         if ((this.mySeed != null) && (hash.equals(mySeed.hash))) return mySeed;
-        Map<String, String> entry = database.getMap(hash);
+        HashMap<String, String> entry = database.getMap(hash);
         if (entry == null) return null;
         return new yacySeed(hash, entry);
     }
@@ -962,7 +962,7 @@ public final class yacySeedDB {
         
         public yacySeed internalNext() {
             if ((it == null) || (!(it.hasNext()))) return null;
-            Map<String, String> dna = it.next();
+            HashMap<String, String> dna = it.next();
             if (dna == null) return null;
             String hash = (String) dna.remove("key");
             //while (hash.length() < commonHashLength) { hash = hash + "_"; }

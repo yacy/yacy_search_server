@@ -7,7 +7,7 @@ import de.anomic.server.logging.serverLog;
 
 public class dbImportManager {
 
-    public final Vector finishedJobs = new Vector();
+    public final Vector<dbImporter> finishedJobs = new Vector<dbImporter>();
     public final ThreadGroup runningJobs = new ThreadGroup("ImporterThreads");
     public  int currMaxJobNr = 0;
     private plasmaSwitchboard sb;

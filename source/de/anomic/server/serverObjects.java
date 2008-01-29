@@ -68,15 +68,15 @@ import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.net.InetAddress;
 import java.util.ArrayList;
-import java.util.Enumeration;
-import java.util.Hashtable;
+import java.util.HashMap;
+import java.util.Iterator;
 import java.util.Map;
 
 import de.anomic.data.htmlTools;
 import de.anomic.plasma.plasmaSwitchboard;
 import de.anomic.tools.yFormatter;
 
-public class serverObjects extends Hashtable<String, String> implements Cloneable {
+public class serverObjects extends HashMap<String, String> implements Cloneable {
 
     private static final long serialVersionUID = 1L;
     private boolean localized = true; 
@@ -280,10 +280,10 @@ public class serverObjects extends Hashtable<String, String> implements Cloneabl
         // the keyMapper may contain regular expressions as defined in String.matches
         // this method is particulary useful when parsing the result of checkbox forms
         ArrayList<String> v = new ArrayList<String>();
-        Enumeration<String> e = keys();
+        Iterator<String> e = keySet().iterator();
         String key;
-        while (e.hasMoreElements()) {
-            key = e.nextElement();
+        while (e.hasNext()) {
+            key = e.next();
             if (key.matches(keyMapper)) v.add((String) get(key));
         }
         // make a String[]
@@ -294,10 +294,10 @@ public class serverObjects extends Hashtable<String, String> implements Cloneabl
 
     // put all elements of another hashtable into the own table
     public void putAll(serverObjects add) {
-        Enumeration<String> e = add.keys();
+        Iterator<String> e = add.keySet().iterator();
         String k;
-        while (e.hasMoreElements()) {
-            k = e.nextElement();
+        while (e.hasNext()) {
+            k = e.next();
             put(k, add.get(k));
         }
     }
@@ -307,11 +307,11 @@ public class serverObjects extends Hashtable<String, String> implements Cloneabl
         BufferedOutputStream fos = null;
         try {
             fos = new BufferedOutputStream(new FileOutputStream(f));
-            Enumeration<String> e = keys();
+            Iterator<String> e = keySet().iterator();
             String key, value;
-            while (e.hasMoreElements()) {
-                key = e.nextElement();
-                value = ((String) get(key)).replaceAll("\n", "\\\\n");  
+            while (e.hasNext()) {
+                key = e.next();
+                value = get(key).replaceAll("\n", "\\\\n");  
                 fos.write((key + "=" + value + "\r\n").getBytes());
             }
         } finally {

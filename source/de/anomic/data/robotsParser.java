@@ -110,6 +110,7 @@ public final class robotsParser{
         }
     }
     
+    @SuppressWarnings("unchecked")
     public static Object[] parse(byte[] robotsTxt) throws IOException {
         if ((robotsTxt == null)||(robotsTxt.length == 0)) return new Object[]{new ArrayList(0),null,null};
         ByteArrayInputStream bin = new ByteArrayInputStream(robotsTxt);
@@ -118,8 +119,8 @@ public final class robotsParser{
     }
     
     public static Object[] parse(BufferedReader reader) throws IOException{
-        ArrayList deny4AllAgents = new ArrayList();
-        ArrayList deny4YaCyAgent = new ArrayList();
+        ArrayList<String> deny4AllAgents = new ArrayList<String>();
+        ArrayList<String> deny4YaCyAgent = new ArrayList<String>();
         
         int pos;
         String line = null, lineUpper = null, sitemap = null;
@@ -223,7 +224,7 @@ public final class robotsParser{
             }
         }
         
-        ArrayList denyList = (rule4YaCyFound)?deny4YaCyAgent:deny4AllAgents;
+        ArrayList<String> denyList = (rule4YaCyFound) ? deny4YaCyAgent : deny4AllAgents;
         return new Object[]{denyList,sitemap,crawlDelay};
     }        
     
@@ -292,6 +293,7 @@ public final class robotsParser{
         return crawlDelay;    	
     }
     
+    @SuppressWarnings("unchecked")
     public static boolean isDisallowed(yacyURL nexturl) {
         if (nexturl == null) throw new IllegalArgumentException();               
         
@@ -341,17 +343,17 @@ public final class robotsParser{
                 }
                 
                 if ((robotsTxt4Host==null)||((robotsTxt4Host!=null)&&(result!=null))) {
-                    ArrayList denyPath = null;
+                    ArrayList<String> denyPath = null;
                     String sitemap = null;
                     Integer crawlDelay = null;
                     if (accessCompletelyRestricted) {
-                        denyPath = new ArrayList();
+                        denyPath = new ArrayList<String>();
                         denyPath.add("/");
                     } else {
                         // parsing the robots.txt Data and converting it into an arraylist
                         try {
                             Object[] parserResult = robotsParser.parse(robotsTxt);
-                            denyPath = (ArrayList) parserResult[0];
+                            denyPath = (ArrayList<String>) parserResult[0];
                             sitemap = (String) parserResult[1];
                             crawlDelay = (Integer) parserResult[2];
                         } catch (IOException e) {

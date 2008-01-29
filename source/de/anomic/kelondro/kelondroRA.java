@@ -51,6 +51,7 @@
 package de.anomic.kelondro;
 
 import java.io.IOException;
+import java.util.HashMap;
 import java.util.Map;
 
 public interface kelondroRA {
@@ -92,7 +93,7 @@ public interface kelondroRA {
     public String readLine() throws IOException;
 
     public void writeMap(Map<String, String> props, String comment) throws IOException;
-    public Map<String, String> readMap() throws IOException;
+    public HashMap<String, String> readMap() throws IOException;
 
     public void writeArray(byte[] b) throws IOException;
     public byte[] readArray() throws IOException;

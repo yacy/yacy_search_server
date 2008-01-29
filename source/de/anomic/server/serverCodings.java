@@ -176,10 +176,10 @@ public final class serverCodings {
 	return p;
     }
     
-    public static Map<String, String> string2map(String string, String separator) {
+    public static HashMap<String, String> string2map(String string, String separator) {
         // this can be used to parse a Map.toString() into a Map again
         if (string == null) return null;
-        Map<String, String> map = Collections.synchronizedMap(new HashMap<String, String>());
+        HashMap<String, String> map = new HashMap<String, String>();
         int pos;
         if ((pos = string.indexOf("{")) >= 0) string = string.substring(pos + 1).trim();
         if ((pos = string.lastIndexOf("}")) >= 0) string = string.substring(0, pos).trim();

@@ -47,8 +47,8 @@
 package de.anomic.plasma.cache.ftp;
 
 import java.util.Date;
-import java.util.HashMap;
 import java.util.Map;
+import java.util.TreeMap;
 
 import de.anomic.plasma.cache.IResourceInfo;
 import de.anomic.plasma.cache.ResourceInfoFactory;
@@ -60,7 +60,7 @@ public class ResourceInfo implements IResourceInfo {
     public static final String MODIFICATION_DATE = "modificationDate";
     
     private yacyURL objectURL, refererURL;
-    private HashMap<String, String> propertyMap; 
+    private TreeMap<String, String> propertyMap; 
     
     /**
      * Constructor used by the {@link ResourceInfoFactory}
@@ -76,7 +76,7 @@ public class ResourceInfo implements IResourceInfo {
         this.refererURL = null;
         
         // create the http header object
-        this.propertyMap =  new HashMap<String, String>(objectInfo);
+        this.propertyMap =  new TreeMap<String, String>(objectInfo);
     }    
     
     public ResourceInfo(yacyURL objectURL, yacyURL refererUrl, String mimeType, Date fileDate) {
@@ -86,7 +86,7 @@ public class ResourceInfo implements IResourceInfo {
         this.objectURL = objectURL;
         
         // create the http header object
-        this.propertyMap =  new HashMap<String, String>();
+        this.propertyMap =  new TreeMap<String, String>();
         if (refererUrl != null) 
             this.refererURL = refererUrl;
         if (mimeType != null) 
@@ -95,7 +95,7 @@ public class ResourceInfo implements IResourceInfo {
             this.propertyMap.put(MODIFICATION_DATE, Long.toString(fileDate.getTime()));
     }
     
-    public Map<String, String> getMap() {
+    public TreeMap<String, String> getMap() {
         return this.propertyMap;
     }
 

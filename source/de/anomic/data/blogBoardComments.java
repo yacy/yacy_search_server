@@ -53,7 +53,6 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Iterator;
-import java.util.Map;
 import java.util.TimeZone;
 
 import javax.xml.parsers.DocumentBuilder;
@@ -130,10 +129,10 @@ public class blogBoardComments {
     public class CommentEntry {
 	
 	String key;
-        Map record;
+    HashMap<String, String> record;
 
     public CommentEntry(String nkey, byte[] subject, byte[] author, String ip, Date date, byte[] page) {
-	    record = new HashMap();
+	    record = new HashMap<String, String>();
 	    key = nkey;
 	    if (key.length() > keyLength) key = key.substring(0, keyLength);
 	    if(date == null) date = new Date(); 
@@ -151,10 +150,10 @@ public class blogBoardComments {
         //System.out.println("DEBUG: setting author " + author + " for ip = " + ip + ", authors = " + authors.toString());
 	}
 
-	private CommentEntry(String key, Map record) {
+	private CommentEntry(String key, HashMap<String, String> record) {
 	    this.key = key;
 	    this.record = record;
-        if (this.record.get("comments")==null) this.record.put("comments", listManager.collection2string(new ArrayList()));
+        if (this.record.get("comments")==null) this.record.put("comments", listManager.collection2string(new ArrayList<String>()));
 	}
 	
 	public String key() {
@@ -216,13 +215,11 @@ public class blogBoardComments {
 	}        
 
     public boolean isAllowed() {
-        Boolean moderated = (Boolean) record.get("moderated");
-        if (moderated == null) return false;
-        return moderated.booleanValue();
+        return (record.get("moderated") != null) && record.get("moderated").equals("true");
     } 
     
     public void allow() {
-        record.put("moderated", new Boolean(true));
+        record.put("moderated", "true");
     } 
     
     }
@@ -245,7 +242,7 @@ public class blogBoardComments {
     private CommentEntry read(String key, kelondroMapObjects base) {
         key = normalize(key);
         if (key.length() > keyLength) key = key.substring(0, keyLength);
-        Map record = base.getMap(key);
+        HashMap<String, String> record = base.getMap(key);
         if (record == null) return newEntry(key, "".getBytes(), "anonymous".getBytes(), "127.0.0.1", new Date(), "".getBytes());
         return new CommentEntry(key, record);
     }
@@ -347,7 +344,7 @@ public class blogBoardComments {
 		} catch (IOException e) { }
     }
     
-    public Iterator keys(boolean up) throws IOException {
+    public Iterator<String> keys(boolean up) throws IOException {
 	return datbase.keys(up, false);
     }
 

@@ -76,6 +76,7 @@ public class odtDetector implements MagicDetector {
         return "0.1";
     }
 
+    @SuppressWarnings("unchecked")
     public String[] process(byte[] data, int offset, int length, long bitmask, char comparator, String mimeType, Map params) {
         File dstFile = null;
         try {
@@ -89,6 +90,7 @@ public class odtDetector implements MagicDetector {
         }
     }
 
+    @SuppressWarnings("unchecked")
     public String[] process(File file, int offset, int length, long bitmask, char comparator, String mimeType, Map params) {
         try {
             // opening the zip file

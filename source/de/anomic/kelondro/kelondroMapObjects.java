@@ -172,7 +172,7 @@ public class kelondroMapObjects extends kelondroObjects {
         this.elementCount = 0;
     }
     
-    public synchronized void set(String key, Map<String, String> newMap) throws IOException {
+    public synchronized void set(String key, HashMap<String, String> newMap) throws IOException {
         assert (key != null);
         assert (key.length() > 0);
         assert (newMap != null);
@@ -267,7 +267,7 @@ public class kelondroMapObjects extends kelondroObjects {
         super.remove(key);
     }
     
-    public Map<String, String> getMap(String key) {
+    public HashMap<String, String> getMap(String key) {
         try {
             kelondroObjectsMapEntry mapEntry = (kelondroObjectsMapEntry) super.get(key);
             if (mapEntry == null) return null;
@@ -347,7 +347,7 @@ public class kelondroMapObjects extends kelondroObjects {
         super.close();
     }
     
-    public class mapIterator implements Iterator<Map<String, String>> {
+    public class mapIterator implements Iterator<HashMap<String, String>> {
         // enumerates Map-Type elements
         // the key is also included in every map that is returned; it's key is 'key'
 
@@ -363,9 +363,9 @@ public class kelondroMapObjects extends kelondroObjects {
             return (!(finish)) && (keyIterator != null) && (keyIterator.hasNext());
         }
 
-        public Map<String, String> next() {
+        public HashMap<String, String> next() {
             String nextKey;
-            Map<String, String> map;
+            HashMap<String, String> map;
             while (keyIterator.hasNext()) {
                 nextKey = keyIterator.next();
                 if (nextKey == null) {

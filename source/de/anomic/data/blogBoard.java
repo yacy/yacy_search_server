@@ -52,7 +52,6 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Iterator;
-import java.util.Map;
 
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
@@ -109,17 +108,17 @@ public class blogBoard {
         return wikiBoard.guessAuthor(ip);
     }
 
-    public entry newEntry(String key, byte[] subject, byte[] author, String ip, Date date, byte[] page, ArrayList comments, String commentMode) {
+    public entry newEntry(String key, byte[] subject, byte[] author, String ip, Date date, byte[] page, ArrayList<String> comments, String commentMode) {
 	return new entry(normalize(key), subject, author, ip, date, page, comments, commentMode);
     }
 
     public class entry {
 	
 	String key;
-        Map record;
+    HashMap<String, String> record;
 
-    public entry(String nkey, byte[] subject, byte[] author, String ip, Date date, byte[] page, ArrayList comments, String commentMode) {
-	    record = new HashMap();
+    public entry(String nkey, byte[] subject, byte[] author, String ip, Date date, byte[] page, ArrayList<String> comments, String commentMode) {
+	    record = new HashMap<String, String>();
 	    key = nkey;
 	    if (key.length() > keyLength) key = key.substring(0, keyLength);
 	    if(date == null) date = new Date();
@@ -132,7 +131,7 @@ public class blogBoard {
 	    record.put("ip", ip);
         if (page == null) record.put("page", "");
         else record.put("page", kelondroBase64Order.enhancedCoder.encode(page));
-        if (comments == null) record.put("comments", listManager.collection2string(new ArrayList()));
+        if (comments == null) record.put("comments", listManager.collection2string(new ArrayList<String>()));
         else record.put("comments", listManager.collection2string(comments));
         if (commentMode == null) record.put("commentMode", "1");
         else record.put("commentMode", commentMode);
@@ -141,10 +140,10 @@ public class blogBoard {
         //System.out.println("DEBUG: setting author " + author + " for ip = " + ip + ", authors = " + authors.toString());
 	}
 
-	private entry(String key, Map record) {
+	private entry(String key, HashMap<String, String> record) {
 	    this.key = key;
 	    this.record = record;
-        if (this.record.get("comments")==null) this.record.put("comments", listManager.collection2string(new ArrayList()));
+        if (this.record.get("comments")==null) this.record.put("comments", listManager.collection2string(new ArrayList<String>()));
         if (this.record.get("commentMode")==null || this.record.get("commentMode").equals("")) this.record.put("commentMode", "1");
 	}
 	
@@ -153,7 +152,7 @@ public class blogBoard {
 	}
 
 	public byte[] subject() {
-		String m = (String) record.get("subject");
+		String m = record.get("subject");
 	    if (m == null) return new byte[0];
 	    byte[] b = kelondroBase64Order.enhancedCoder.decode(m, "de.anomic.data.blogBoard.subject()");
 	    if (b == null) return "".getBytes();
@@ -162,7 +161,7 @@ public class blogBoard {
 
 	public Date date() {
 	    try {
-		String c = (String) record.get("date");
+		String c = record.get("date");
 		if (c == null) {
             System.out.println("DEBUG - ERROR: date field missing in blogBoard");
             return new Date();
@@ -174,7 +173,7 @@ public class blogBoard {
 	}
 	
 	public String timestamp() {
-		String c = (String) record.get("date");
+		String c = record.get("date");
 		if (c == null) {
 	        System.out.println("DEBUG - ERROR: date field missing in blogBoard");
 	        return serverDate.formatShortSecond();
@@ -183,7 +182,7 @@ public class blogBoard {
 	}
 	
     public byte[] author() {
-        String m = (String) record.get("author");
+        String m = record.get("author");
         if (m == null) return new byte[0];
         byte[] b = kelondroBase64Order.enhancedCoder.decode(m, "de.anomic.data.blogBoard.author()");
         if (b == null) return "".getBytes();
@@ -191,27 +190,27 @@ public class blogBoard {
     }
     
     public byte[] commentsSize() {
-        ArrayList m = listManager.string2arraylist((String) record.get("comments"));
+        ArrayList<String> m = listManager.string2arraylist(record.get("comments"));
         if (m == null) return new byte[0];
         byte[] b = Integer.toString(m.size()).getBytes();
         if (b == null) return "".getBytes();
         return b;
     }
 
-    public ArrayList comments() {
-        ArrayList m = listManager.string2arraylist((String) record.get("comments"));
-        if (m == null) return new ArrayList();
+    public ArrayList<String> comments() {
+        ArrayList<String> m = listManager.string2arraylist(record.get("comments"));
+        if (m == null) return new ArrayList<String>();
         return m;
     }
 
 	public String ip() {
-	    String a = (String) record.get("ip");
+	    String a = record.get("ip");
 	    if (a == null) return "127.0.0.1";
 	    return a;
 	}
 
 	public byte[] page() {
-	    String m = (String) record.get("page");
+	    String m = record.get("page");
 	    if (m == null) return new byte[0];
 	    byte[] b = kelondroBase64Order.enhancedCoder.decode(m, "de.anomic.data.blogBoard.page()");
 	    if (b == null) return "".getBytes();
@@ -219,20 +218,20 @@ public class blogBoard {
 	}        
 
     public void addComment(String commentID) {
-        ArrayList comments = listManager.string2arraylist((String) record.get("comments"));
+        ArrayList<String> comments = listManager.string2arraylist(record.get("comments"));
         comments.add(commentID);
         record.put("comments", listManager.collection2string(comments));
     }
     
     public boolean removeComment(String commentID) {
-        ArrayList comments = listManager.string2arraylist((String) record.get("comments"));
+        ArrayList<String> comments = listManager.string2arraylist(record.get("comments"));
         boolean success = comments.remove(commentID);
         record.put("comments", listManager.collection2string(comments));
         return success;
     }
     
     public int getCommentMode(){
-        return Integer.parseInt((String) record.get("commentMode"));
+        return Integer.parseInt(record.get("commentMode"));
     }
     }
 
@@ -253,7 +252,7 @@ public class blogBoard {
     private entry read(String key, kelondroMapObjects base) {
     	key = normalize(key);
         if (key.length() > keyLength) key = key.substring(0, keyLength);
-        Map record = base.getMap(key);
+        HashMap<String, String> record = base.getMap(key);
         if (record == null) return newEntry(key, "".getBytes(), "anonymous".getBytes(), "127.0.0.1", new Date(), "".getBytes(), null, null);
         return new entry(key, record);
     }
@@ -342,7 +341,7 @@ public class blogBoard {
 		} catch (IOException e) { }
     }
     
-    public Iterator keys(boolean up) throws IOException {
+    public Iterator<String> keys(boolean up) throws IOException {
 	return datbase.keys(up, false);
     }
 
