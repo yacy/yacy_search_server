@@ -72,9 +72,9 @@ public class ConfigProperties_p {
                 env.setConfig(key, value);
             }
         }
-        Iterator keys = env.configKeys();
+        Iterator<String> keys = env.configKeys();
 
-        final List list = new ArrayList(250);
+        final List<String> list = new ArrayList<String>(250);
         while(keys.hasNext()){
             list.add(keys.next());
         }

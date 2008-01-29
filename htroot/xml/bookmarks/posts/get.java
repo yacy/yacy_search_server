@@ -63,11 +63,11 @@ public class get {
 			parsedDate = new Date();
 		}
         
-        ArrayList bookmark_hashes=switchboard.bookmarksDB.getDate(Long.toString(parsedDate.getTime())).getBookmarkList();
-        Iterator it=bookmark_hashes.iterator();
+        ArrayList<String> bookmark_hashes=switchboard.bookmarksDB.getDate(Long.toString(parsedDate.getTime())).getBookmarkList();
+        Iterator<String> it=bookmark_hashes.iterator();
         bookmarksDB.Bookmark bookmark=null;
         while(it.hasNext()){
-            bookmark=switchboard.bookmarksDB.getBookmark((String) it.next());
+            bookmark=switchboard.bookmarksDB.getBookmark(it.next());
             if(serverDate.formatISO8601(new Date(bookmark.getTimeStamp())) == date &&
                     tag==null || bookmark.getTags().contains(tag) &&
                     isAdmin || bookmark.getPublic()){

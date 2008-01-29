@@ -41,28 +41,28 @@ public class webstructure {
     public static serverObjects respond(httpHeader header, serverObjects post, serverSwitch env) {
         serverObjects prop = new serverObjects();
         plasmaSwitchboard sb = (plasmaSwitchboard) env;
-        Iterator i = sb.webStructure.structureEntryIterator();
+        Iterator<plasmaWebStructure.structureEntry> i = sb.webStructure.structureEntryIterator();
         int c = 0, d;
         plasmaWebStructure.structureEntry sentry;
-        Map.Entry refentry;
+        Map.Entry<String, Integer> refentry;
         String refdom, refhash;
         Integer refcount;
-        Iterator k;
+        Iterator<Map.Entry<String, Integer>> k;
         while (i.hasNext()) {
-            sentry = (plasmaWebStructure.structureEntry) i.next();
+            sentry = i.next();
             prop.put("domains_" + c + "_hash", sentry.domhash);
             prop.put("domains_" + c + "_domain", sentry.domain);
             prop.put("domains_" + c + "_date", sentry.date);
             k = sentry.references.entrySet().iterator();
             d = 0;
             refloop: while (k.hasNext()) {
-                refentry = (Map.Entry) k.next();
-                refhash = (String) refentry.getKey();
+                refentry = k.next();
+                refhash = refentry.getKey();
                 refdom = sb.webStructure.resolveDomHash2DomString(refhash);
                 if (refdom == null) continue refloop;
                 prop.put("domains_" + c + "_citations_" + d + "_refhash", refhash);
                 prop.put("domains_" + c + "_citations_" + d + "_refdom", refdom);
-                refcount = (Integer) refentry.getValue();
+                refcount = refentry.getValue();
                 prop.put("domains_" + c + "_citations_" + d + "_refcount", refcount.intValue());
                 d++;
             }

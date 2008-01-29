@@ -141,9 +141,9 @@ public class Blog {
 
         if(hasRights && post.containsKey("delete") && post.get("delete").equals("sure")) {
             page = switchboard.blogDB.read(pagename);
-            final Iterator i = page.comments().iterator();
+            final Iterator<String> i = page.comments().iterator();
             while(i.hasNext()) {
-                switchboard.blogCommentDB.delete((String) i.next());
+                switchboard.blogCommentDB.delete(i.next());
             }
             switchboard.blogDB.delete(pagename);
             pagename = DEFAULT_PAGE;
@@ -163,7 +163,7 @@ public class Blog {
             }
 
             Date date = null;
-            ArrayList comments = null;
+            ArrayList<String> comments = null;
 
             //set name for new entry or date for old entry
             if(pagename.equals(DEFAULT_PAGE)) {
@@ -185,7 +185,7 @@ public class Blog {
             switchboard.blogDB.write(switchboard.blogDB.newEntry(pagename, subject, author, ip, date, content, comments, commentMode));
 
             // create a news message
-            final HashMap map = new HashMap();
+            final HashMap<String, String> map = new HashMap<String, String>();
             map.put("page", pagename);
             map.put("subject", StrSubject.replace(',', ' '));
             map.put("author", StrAuthor.replace(',', ' '));
@@ -292,7 +292,7 @@ public class Blog {
             final boolean xml) 
     {
         try {
-            final Iterator i = switchboard.blogDB.keys(false);
+            final Iterator<String> i = switchboard.blogDB.keys(false);
             String pageid;
             int count = 0;                        //counts how many entries are shown to the user
             if(xml) num = 0;
@@ -301,7 +301,7 @@ public class Blog {
             boolean prev = false;                 //indicates if there were previous comments to the ones that are dispalyed
             if (start > 0) prev = true;
             while(i.hasNext() && (num == 0 || num > count)) {
-                pageid = (String) i.next();
+                pageid = i.next();
                 if(0 < start--) continue;
                 putBlogEntry(
                         prop,

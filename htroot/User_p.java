@@ -133,11 +133,11 @@ public class User_p {
             String address=(String)post.get("address");
             String timeLimit=(String)post.get("timelimit");
             String timeUsed=(String)post.get("timeused");
-            HashMap rightsSet=new HashMap();
+            HashMap<String, String> rightsSet=new HashMap<String, String>();
             for(i=0;i<rights.length;i++){
         	    		rightsSet.put(rights[i], post.containsKey(rights[i])&&((String)post.get(rights[i])).equals("on") ? "true" : "false");
             }
-            HashMap mem=new HashMap();
+            HashMap<String, String> mem=new HashMap<String, String>();
             if( post.get("current_user").equals("newuser")){ //new user
                 
 				if(!pw.equals("")){ //change only if set
@@ -149,7 +149,7 @@ public class User_p {
 				mem.put(userDB.Entry.TIME_LIMIT, timeLimit);
 				mem.put(userDB.Entry.TIME_USED, timeUsed);
 				for(i=0;i<rights.length;i++)
-					mem.put(rights[i], (String)rightsSet.get(rights[i]));
+					mem.put(rights[i], rightsSet.get(rights[i]));
 
                 try{
                     entry=sb.userDB.createEntry(username, mem);
@@ -175,7 +175,7 @@ public class User_p {
 						entry.setProperty(userDB.Entry.TIME_LIMIT, timeLimit);
 						entry.setProperty(userDB.Entry.TIME_USED, timeUsed);
 						for(i=0;i<rights.length;i++)
-							entry.setProperty(rights[i], (String)rightsSet.get(rights[i]));
+							entry.setProperty(rights[i], rightsSet.get(rights[i]));
 		            }catch (IOException e){
 					}
                 }else{
@@ -188,10 +188,10 @@ public class User_p {
         }
 		
 		//Generate Userlist
-        Iterator it = sb.userDB.iterator(true);
+        Iterator<userDB.Entry> it = sb.userDB.iterator(true);
         int numUsers=0;
         while(it.hasNext()){
-            entry = (userDB.Entry)it.next();
+            entry = it.next();
             prop.putHTML("users_"+numUsers+"_user", entry.getUserName());
             numUsers++;
         }

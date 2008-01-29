@@ -33,8 +33,9 @@ import java.util.Iterator;
 
 import de.anomic.http.httpHeader;
 import de.anomic.kelondro.kelondroMScoreCluster;
-import de.anomic.kelondro.kelondroRow;
 import de.anomic.kelondro.kelondroNaturalOrder;
+import de.anomic.kelondro.kelondroRow;
+import de.anomic.kelondro.kelondroRow.Entry;
 import de.anomic.plasma.plasmaSwitchboard;
 import de.anomic.plasma.urlPattern.plasmaURLPattern;
 import de.anomic.server.serverDate;
@@ -82,7 +83,7 @@ public class Surftips {
                     return prop;
                 }
                 // make new news message with voting
-                HashMap map = new HashMap();
+                HashMap<String, String> map = new HashMap<String, String>();
                 map.put("urlhash", hash);
                 map.put("vote", "negative");
                 map.put("refid", post.get("refid", ""));
@@ -94,7 +95,7 @@ public class Surftips {
                     return prop;
                 }
                 // make new news message with voting
-                HashMap map = new HashMap();
+                HashMap<String, String> map = new HashMap<String, String>();
                 map.put("urlhash", hash);
                 map.put("url", crypt.simpleDecode(post.get("url", ""), null));
                 map.put("title", crypt.simpleDecode(post.get("title", ""), null));
@@ -106,29 +107,29 @@ public class Surftips {
             }
         
             // create surftips
-            HashMap negativeHashes = new HashMap(); // a mapping from an url hash to Integer (count of votes)
-            HashMap positiveHashes = new HashMap(); // a mapping from an url hash to Integer (count of votes)
+            HashMap<String, Integer> negativeHashes = new HashMap<String, Integer>(); // a mapping from an url hash to Integer (count of votes)
+            HashMap<String, Integer> positiveHashes = new HashMap<String, Integer>(); // a mapping from an url hash to Integer (count of votes)
             accumulateVotes(negativeHashes, positiveHashes, yacyNewsPool.INCOMING_DB);
             //accumulateVotes(negativeHashes, positiveHashes, yacyNewsPool.OUTGOING_DB);
             //accumulateVotes(negativeHashes, positiveHashes, yacyNewsPool.PUBLISHED_DB);
             kelondroMScoreCluster<String> ranking = new kelondroMScoreCluster<String>(); // score cluster for url hashes
             kelondroRow rowdef = new kelondroRow("String url-255, String title-120, String description-120, String refid-" + (serverDate.PATTERN_SHORT_SECOND.length() + 12), kelondroNaturalOrder.naturalOrder, 0);
-            HashMap surftips = new HashMap(); // a mapping from an url hash to a kelondroRow.Entry with display properties
+            HashMap<String, Entry> surftips = new HashMap<String, Entry>(); // a mapping from an url hash to a kelondroRow.Entry with display properties
             accumulateSurftips(surftips, ranking, rowdef, negativeHashes, positiveHashes, yacyNewsPool.INCOMING_DB);
             //accumulateSurftips(surftips, ranking, rowdef, negativeHashes, positiveHashes, yacyNewsPool.OUTGOING_DB);
             //accumulateSurftips(surftips, ranking, rowdef, negativeHashes, positiveHashes, yacyNewsPool.PUBLISHED_DB);
         
             // read out surftipp array and create property entries
-            Iterator k = ranking.scores(false);
+            Iterator<String> k = ranking.scores(false);
             int i = 0;
             kelondroRow.Entry row;
             String url, urlhash, refid, title, description;
             boolean voted;
             while (k.hasNext()) {
-                urlhash = (String) k.next();
+                urlhash = k.next();
                 if (urlhash == null) continue;
                 
-                row = (kelondroRow.Entry) surftips.get(urlhash);
+                row = surftips.get(urlhash);
                 if (row == null) continue;
                 
                 url = row.getColString(0, null);
@@ -176,13 +177,13 @@ public class Surftips {
         return (int) Math.max(0, 10 - ((System.currentTimeMillis() - created.getTime()) / 24 / 60 / 60 / 1000));
     }
     
-    private static void accumulateVotes(HashMap negativeHashes, HashMap positiveHashes, int dbtype) {
+    private static void accumulateVotes(HashMap<String, Integer> negativeHashes, HashMap<String, Integer> positiveHashes, int dbtype) {
         int maxCount = Math.min(1000, yacyCore.newsPool.size(dbtype));
         yacyNewsRecord record;
-        Iterator recordIterator = yacyCore.newsPool.recordIterator(dbtype, true);
+        Iterator<yacyNewsRecord> recordIterator = yacyCore.newsPool.recordIterator(dbtype, true);
         int j = 0;
         while ((recordIterator.hasNext()) && (j++ < maxCount)) {
-            record = (yacyNewsRecord) recordIterator.next();
+            record = recordIterator.next();
             if (record == null) continue;
             
             if (record.category().equals(yacyNewsPool.CATEGORY_SURFTIPP_VOTE_ADD)) {
@@ -190,12 +191,12 @@ public class Surftips {
                 String vote    = record.attribute("vote", "");
                 int factor = ((dbtype == yacyNewsPool.OUTGOING_DB) || (dbtype == yacyNewsPool.PUBLISHED_DB)) ? 2 : 1;
                 if (vote.equals("negative")) {
-                    Integer i = (Integer) negativeHashes.get(urlhash);
+                    Integer i = negativeHashes.get(urlhash);
                     if (i == null) negativeHashes.put(urlhash, new Integer(factor));
                     else negativeHashes.put(urlhash, new Integer(i.intValue() + factor));
                 }
                 if (vote.equals("positive")) {
-                    Integer i = (Integer) positiveHashes.get(urlhash);
+                    Integer i = positiveHashes.get(urlhash);
                     if (i == null) positiveHashes.put(urlhash, new Integer(factor));
                     else positiveHashes.put(urlhash, new Integer(i.intValue() + factor));
                 }
@@ -204,18 +205,18 @@ public class Surftips {
     }
     
     private static void accumulateSurftips(
-            HashMap surftips, kelondroMScoreCluster ranking, kelondroRow rowdef,
-            HashMap negativeHashes, HashMap positiveHashes, int dbtype) {
+            HashMap<String, Entry> surftips, kelondroMScoreCluster<String> ranking, kelondroRow rowdef,
+            HashMap<String, Integer> negativeHashes, HashMap<String, Integer> positiveHashes, int dbtype) {
         int maxCount = Math.min(1000, yacyCore.newsPool.size(dbtype));
         yacyNewsRecord record;
-        Iterator recordIterator = yacyCore.newsPool.recordIterator(dbtype, true);
+        Iterator<yacyNewsRecord> recordIterator = yacyCore.newsPool.recordIterator(dbtype, true);
         int j = 0;
         String url = "", urlhash;
         kelondroRow.Entry entry;
         int score = 0;
         Integer vote;
         while ((recordIterator.hasNext()) && (j++ < maxCount)) {
-            record = (yacyNewsRecord) recordIterator.next();
+            record = recordIterator.next();
             if (record == null) continue;
             
             entry = null;
@@ -316,10 +317,10 @@ public class Surftips {
                 			System.out.println("Surftips: bad url '" + url + "' from news record " + record.toString());
                 			continue;
                 		}
-                if ((vote = (Integer) negativeHashes.get(urlhash)) != null) {
+                if ((vote = negativeHashes.get(urlhash)) != null) {
                     score = Math.max(0, score - vote.intValue()); // do not go below zero
                 }
-                if ((vote = (Integer) positiveHashes.get(urlhash)) != null) {
+                if ((vote = positiveHashes.get(urlhash)) != null) {
                     score += 2 * vote.intValue();
                 }
                 // consider double-entries

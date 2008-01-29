@@ -53,9 +53,9 @@ public class xbel {
     		count++;
     		prop.put("xbel_"+count+"_elements", "<title>"+fn.replaceFirst(root+"/*","")+"</title>");   		
     		count++;    
-    		Iterator bit=switchboard.bookmarksDB.getBookmarksIterator(fn, isAdmin);
+    		Iterator<String> bit=switchboard.bookmarksDB.getBookmarksIterator(fn, isAdmin);
     		while(bit.hasNext()){    			
-    			bookmark=switchboard.bookmarksDB.getBookmark((String)bit.next());
+    			bookmark=switchboard.bookmarksDB.getBookmark(bit.next());
     			prop.put("xbel_"+count+"_elements", "<bookmark id=\""+bookmark.getUrlHash()+"\" href=\""+bookmark.getUrl()+"\">");   		
         		count++; 
         		prop.put("xbel_"+count+"_elements", "<title>"+bookmark.getTitle()+"</title>");   		

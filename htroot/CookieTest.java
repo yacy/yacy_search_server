@@ -47,7 +47,7 @@
 // if the shell's current path is HTROOT
 
 import java.util.Iterator;
-import java.util.Map.Entry;
+import java.util.Map;
 
 import de.anomic.http.httpHeader;
 import de.anomic.server.serverObjects;
@@ -68,15 +68,13 @@ public class CookieTest {
         }
         
         final servletProperties prop = new servletProperties();
-        if(post.containsKey("act")&&post.get("act").equals("clear_cookie"))
-        {
-         httpHeader outgoingHeader=new httpHeader();
-        	Iterator it = header.entrySet().iterator();
-        	while(it.hasNext())
-        	{
-        		java.util.Map.Entry e = (Entry) it.next();
-        		if(e.getKey().equals("Cookie"))
-        		{
+        if(post.containsKey("act")&&post.get("act").equals("clear_cookie")) {
+         httpHeader outgoingHeader = new httpHeader();
+        	Iterator<Map.Entry<String, String>> it = header.entrySet().iterator();
+        	Map.Entry<String, String> e;
+        	while (it.hasNext()) {
+        		e = it.next();
+        		if (e.getKey().equals("Cookie")) {
         			String coockie[]=e.getValue().toString().split(";");
         			for(int i=0;i<coockie.length;i++)
         			{

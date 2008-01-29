@@ -49,9 +49,9 @@ public class config_p {
             }
         }
         
-        Iterator keys = env.configKeys();
+        Iterator<String> keys = env.configKeys();
         
-        List list = new ArrayList(250);
+        List<String> list = new ArrayList<String>(250);
         while(keys.hasNext()){
             list.add(keys.next());
         }

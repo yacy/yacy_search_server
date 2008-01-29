@@ -483,11 +483,11 @@ public class SettingsAck_p {
          * Loop through the available seed uploaders to see if the 
          * configuration of one of them has changed 
          */
-        HashMap uploaders = yacyCore.getSeedUploadMethods();
-        Iterator uploaderKeys = uploaders.keySet().iterator();
+        HashMap<String, String> uploaders = yacyCore.getSeedUploadMethods();
+        Iterator<String> uploaderKeys = uploaders.keySet().iterator();
         while (uploaderKeys.hasNext()) {
             // getting the uploader module name
-            String uploaderName = (String) uploaderKeys.next();
+            String uploaderName = uploaderKeys.next();
             
             
             // determining if the user has reconfigured the settings of this uploader
@@ -556,11 +556,11 @@ public class SettingsAck_p {
             post.remove("parserSettings");
             
             Set<String> parserModes = plasmaParser.getParserConfigList().keySet();
-            HashMap<String, HashSet> newConfigList = new HashMap<String, HashSet>();     
+            HashMap<String, HashSet<String>> newConfigList = new HashMap<String, HashSet<String>>();     
             Iterator<String> parserModeIter = parserModes.iterator();
             while (parserModeIter.hasNext()) {
                 String currParserMode = parserModeIter.next();
-                newConfigList.put(currParserMode, new HashSet());
+                newConfigList.put(currParserMode, new HashSet<String>());
             }
             
             // looping through all received settings

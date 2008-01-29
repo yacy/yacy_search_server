@@ -93,7 +93,7 @@ public class sharedBlacklist_p {
         prop.put("page_target", selectedBlacklistName);
         
         if (post != null) {
-            ArrayList otherBlacklist = null;
+            ArrayList<String> otherBlacklist = null;
             
             if (post.containsKey("hash")) {
                 /* ======================================================
@@ -232,7 +232,7 @@ public class sharedBlacklist_p {
             // generate the html list
             if (otherBlacklist != null) {
                 // loading the current blacklist content
-                HashSet Blacklist = new HashSet(listManager.getListArray(new File(listManager.listsPath, selectedBlacklistName)));
+                HashSet<String> Blacklist = new HashSet<String>(listManager.getListArray(new File(listManager.listsPath, selectedBlacklistName)));
                 
                 // sort the loaded blacklist
                 String[] sortedlist = (String[])otherBlacklist.toArray(new String[otherBlacklist.size()]);

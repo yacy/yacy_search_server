@@ -115,7 +115,7 @@ public class IndexCreateIndexingQueue_p {
             plasmaSwitchboardQueue.Entry pcentry;
             int inProcessCount = 0, entryCount = 0, totalCount = 0; 
             long totalSize = 0;
-            ArrayList entryList = new ArrayList();
+            ArrayList<plasmaSwitchboardQueue.Entry> entryList = new ArrayList<plasmaSwitchboardQueue.Entry>();
             
             // getting all entries that are currently in process
             synchronized (switchboard.indexingTasksInProcess) {
@@ -125,8 +125,8 @@ public class IndexCreateIndexingQueue_p {
             
             // getting all enqueued entries
             if ((switchboard.sbQueue.size() > 0)) {
-                Iterator i = switchboard.sbQueue.entryIterator(false);
-                while (i.hasNext()) entryList.add((plasmaSwitchboardQueue.Entry) i.next());
+                Iterator<plasmaSwitchboardQueue.Entry> i = switchboard.sbQueue.entryIterator(false);
+                while (i.hasNext()) entryList.add(i.next());
             }
                             
             int count=entryList.size();

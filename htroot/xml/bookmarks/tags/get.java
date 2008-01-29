@@ -62,11 +62,11 @@ public class get {
         boolean isAdmin=switchboard.verifyAuthentication(header, true);
         serverObjects prop = new serverObjects();
 
-        Iterator it=switchboard.bookmarksDB.getTagIterator(isAdmin);
+        Iterator<bookmarksDB.Tag> it = switchboard.bookmarksDB.getTagIterator(isAdmin);
         int count=0;
         bookmarksDB.Tag tag;
-        while(it.hasNext()){
-            tag=(bookmarksDB.Tag)it.next();
+        while (it.hasNext()) {
+            tag = it.next();
             prop.put("tags_"+count+"_name", tag.getTagName());
             prop.put("tags_"+count+"_count", tag.size());
             count++;

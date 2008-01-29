@@ -259,7 +259,7 @@ public class BlogComments {
                 }
                 //show all commments
                 try {
-                    Iterator i = page.comments().iterator();
+                    Iterator<String> i = page.comments().iterator();
                     int commentMode = page.getCommentMode();
                     String pageid;
                     blogBoardComments.CommentEntry entry;
@@ -278,7 +278,7 @@ public class BlogComments {
                     int prevstart = start-num;      //indicates the starting offset for previous results
                     while(i.hasNext() && count < num) {
 
-                        pageid = (String) i.next();
+                        pageid = i.next();
                         
                         if(start > 0) {
                             start--;

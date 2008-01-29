@@ -39,12 +39,12 @@ public class PerformanceSearch_p {
         // return variable that accumulates replacements
         serverObjects prop = new serverObjects();
         
-        Iterator events = serverProfiling.history("SEARCH");
+        Iterator<serverProfiling.Event> events = serverProfiling.history("SEARCH");
         int c = 0;
         serverProfiling.Event event;
         plasmaProfiling.searchEvent search;
         while (events.hasNext()) {
-            event = (serverProfiling.Event) events.next();
+            event = events.next();
             search = (plasmaProfiling.searchEvent) event.payload;
             prop.put("table_" + c + "_query", search.queryID);
             prop.put("table_" + c + "_event", search.processName);

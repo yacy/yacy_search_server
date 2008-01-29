@@ -29,9 +29,9 @@ import java.util.ArrayList;
 import java.util.Iterator;
 
 import de.anomic.http.httpHeader;
-import de.anomic.plasma.plasmaCrawlProfile.entry;
 import de.anomic.plasma.plasmaCrawlProfile;
 import de.anomic.plasma.plasmaSwitchboard;
+import de.anomic.plasma.plasmaCrawlProfile.entry;
 import de.anomic.server.serverObjects;
 import de.anomic.server.serverSwitch;
 import de.anomic.server.servletProperties;
@@ -56,7 +56,7 @@ public class CrawlProfileEditor_p {
         }
     }
     
-    private static final ArrayList /*<eentry>*/ labels = new ArrayList();
+    private static final ArrayList <eentry> labels = new ArrayList<eentry>();
     static {
         labels.add(new eentry(entry.NAME,             "Name",                 true,  eentry.STRING));
         labels.add(new eentry(entry.START_URL,        "Start URL",            true,  eentry.STRING));
@@ -100,7 +100,7 @@ public class CrawlProfileEditor_p {
         
         // generate handle list
         int count = 0;
-        Iterator it = sb.profilesActiveCrawls.profiles(true);
+        Iterator<plasmaCrawlProfile.entry> it = sb.profilesActiveCrawls.profiles(true);
         entry selentry;
         while (it.hasNext()) {
             selentry = (entry)it.next();
@@ -122,10 +122,10 @@ public class CrawlProfileEditor_p {
         if ((post != null) && (selentry != null)) {
 			if (post.containsKey("submit")) {
 				try {
-					it = labels.iterator();
+					Iterator<eentry> lit = labels.iterator();
 					eentry tee;
-					while (it.hasNext()) {
-						tee = (eentry) it.next();
+					while (lit.hasNext()) {
+						tee = lit.next();
 						String cval = (String) selentry.map().get(tee.name);
 						String val = (tee.type == eentry.BOOLEAN) ? Boolean.toString(post.containsKey(tee.name)) : post.get(tee.name, cval);
 						if (!cval.equals(val)) sb.profilesActiveCrawls.changeEntry(selentry, tee.name, val);
@@ -167,10 +167,10 @@ public class CrawlProfileEditor_p {
         	prop.put("edit", "1");
 			prop.put("edit_name", selentry.name());
 			prop.put("edit_handle", selentry.handle());
-			it = labels.iterator();
+			Iterator<eentry> lit = labels.iterator();
 			count = 0;
-			while (it.hasNext()) {
-				eentry ee = (eentry) it.next();
+			while (lit.hasNext()) {
+				eentry ee = lit.next();
 				String val = selentry.map().get(ee.name);
 				prop.put("edit_entries_" + count + "_readonly", ee.readonly ? "1" : "0");
 				prop.put("edit_entries_" + count + "_readonly_name", ee.name);

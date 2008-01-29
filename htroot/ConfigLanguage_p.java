@@ -95,7 +95,7 @@ public class ConfigLanguage_p {
                 //load language file from URL
             } else if (post.containsKey("url")){
                 String url = (String)post.get("url");
-                ArrayList langVector;
+                ArrayList<String> langVector;
                 try{
                     yacyURL u = new yacyURL(url, null);
                     langVector = nxTools.strings(httpc.wget(u, u.getHost(), 6000, null, null, switchboard.remoteProxyConfig, null, null), "UTF-8");
@@ -105,11 +105,11 @@ public class ConfigLanguage_p {
                     return prop;
                 }
                 try{
-                    Iterator it = langVector.iterator();
+                    Iterator<String> it = langVector.iterator();
                     File langFile = new File(langPath, url.substring(url.lastIndexOf("/"), url.length()));
                     BufferedWriter bw = new BufferedWriter(new PrintWriter(new FileWriter(langFile)));
 
-                    while(it.hasNext()){
+                    while (it.hasNext()) {
                         bw.write(it.next() + "\n");
                     }
                     bw.close();
@@ -126,7 +126,7 @@ public class ConfigLanguage_p {
         //reread language files
         langFiles = listManager.getDirListing(langPath);
         int i;
-        HashMap langNames = translator.langMap(env);
+        HashMap<String, String> langNames = translator.langMap(env);
         String langKey, langName;
 
         //virtual entry

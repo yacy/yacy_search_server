@@ -47,14 +47,15 @@ import de.anomic.yacy.yacySeed;
 
 public class AccessTracker_p {
     
-	private static final TreeMap treemapclone(TreeMap m) {
-		TreeMap accessClone = new TreeMap();
+	private static final TreeMap<Long, String> treemapclone(TreeMap<Long, String> m) {
+		TreeMap<Long, String> accessClone = new TreeMap<Long, String>();
 		try {
 			accessClone.putAll(m);
 		} catch (ConcurrentModificationException e) {}
 		return accessClone;
 	}
 	
+    @SuppressWarnings("unchecked")
     public static serverObjects respond(httpHeader header, serverObjects post, serverSwitch sb) {
         plasmaSwitchboard switchboard = (plasmaSwitchboard) sb;
      
@@ -68,9 +69,9 @@ public class AccessTracker_p {
         int maxCount = 1000;
         boolean dark = true;
         if (page == 0) {
-            Iterator i = switchboard.accessHosts();
+            Iterator<String> i = switchboard.accessHosts();
             String host;
-            TreeMap access;
+            TreeMap<Long, String> access;
             int entCount = 0;
             try {
             while ((entCount < maxCount) && (i.hasNext())) {
@@ -90,15 +91,15 @@ public class AccessTracker_p {
         if (page == 1) {
             String host = post.get("host", "");
             int entCount = 0;
-            TreeMap access;
-            Map.Entry entry;
+            TreeMap<Long, String> access;
+            Map.Entry<Long, String> entry;
             if (host.length() > 0) {
 				access = switchboard.accessTrack(host);
 				if (access != null) {
 					try {
-						Iterator ii = treemapclone(access).entrySet().iterator();
+						Iterator<Map.Entry<Long, String>> ii = treemapclone(access).entrySet().iterator();
 						while (ii.hasNext()) {
-							entry = (Map.Entry) ii.next();
+							entry = ii.next();
 							prop.putHTML("page_list_" + entCount + "_host", host);
 							prop.put("page_list_" + entCount + "_date", serverDate.formatShortSecond(new Date(((Long) entry.getKey()).longValue())));
 							prop.putHTML("page_list_" + entCount + "_path", (String) entry.getValue());
@@ -108,13 +109,13 @@ public class AccessTracker_p {
 				}
 			} else {
                 try {
-                	Iterator i = switchboard.accessHosts();
+                	Iterator<String> i = switchboard.accessHosts();
                     while ((entCount < maxCount) && (i.hasNext())) {
 						host = (String) i.next();
 						access = switchboard.accessTrack(host);
-						Iterator ii = treemapclone(access).entrySet().iterator();
+						Iterator<Map.Entry<Long, String>> ii = treemapclone(access).entrySet().iterator();
 						while (ii.hasNext()) {
-							entry = (Map.Entry) ii.next();
+							entry = ii.next();
 							prop.putHTML("page_list_" + entCount + "_host", host);
 							prop.put("page_list_" + entCount + "_date", serverDate.formatShortSecond(new Date(((Long) entry.getKey()).longValue())));
 							prop.putHTML("page_list_" + entCount + "_path", (String) entry.getValue());
@@ -189,12 +190,12 @@ public class AccessTracker_p {
             TreeSet<Long> handles;
             int entCount = 0;
             int qphSum = 0;
-            Map.Entry entry;
+            Map.Entry<String, TreeSet<Long>> entry;
             try {
             while ((entCount < maxCount) && (i.hasNext())) {
                 entry = i.next();
-                host = (String) entry.getKey();
-                handles = (TreeSet<Long>) entry.getValue();
+                host = entry.getKey();
+                handles = entry.getValue();
                 
                 int dateCount = 0;
                 Iterator<Long> ii = handles.iterator();

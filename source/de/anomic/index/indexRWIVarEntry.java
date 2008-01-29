@@ -62,7 +62,7 @@ public class indexRWIVarEntry implements indexRWIEntry {
         this.worddistance = e.worddistance();
         this.wordsintext = e.wordsintext();
         this.wordsintitle = e.wordsintitle();
-        this.termFrequency = ((double) e.hitcount()) / ((double) (e.wordsintext() + e.wordsintitle() + 1));
+        this.termFrequency = e.termFrequency();
     }
     
     public void combineDistance(indexRWIEntry oe) {
@@ -175,6 +175,7 @@ public class indexRWIVarEntry implements indexRWIEntry {
     public static final void min(indexRWIVarEntry t, indexRWIEntry other) {
         int v;
         long w;
+        double d;
         if (t.hitcount() > (v = other.hitcount())) t.hitcount = v;
         if (t.llocal() > (v = other.llocal())) t.llocal = v;
         if (t.lother() > (v = other.lother())) t.lother = v;
@@ -191,14 +192,13 @@ public class indexRWIVarEntry implements indexRWIEntry {
         if (t.urllength() > (v = other.urllength())) t.urllength = v;
         if (t.urlcomps() > (v = other.urlcomps())) t.urlcomps = v;
         if (t.wordsintitle() > (v = other.wordsintitle())) t.wordsintitle = v;
-        double tf = (other instanceof indexRWIVarEntry) ? ((indexRWIVarEntry) other).termFrequency : indexRWIEntryOrder.termFrequency(other);
-        if (t.termFrequency > tf) t.termFrequency = tf;
-        
+        if (t.termFrequency > (d = other.termFrequency())) t.termFrequency = d;
     }
     
     public static final void max(indexRWIVarEntry t, indexRWIEntry other) {
         int v;
         long w;
+        double d;
         if (t.hitcount() < (v = other.hitcount())) t.hitcount = v;
         if (t.llocal() < (v = other.llocal())) t.llocal = v;
         if (t.lother() < (v = other.lother())) t.lother = v;
@@ -215,8 +215,7 @@ public class indexRWIVarEntry implements indexRWIEntry {
         if (t.urllength() < (v = other.urllength())) t.urllength = v;
         if (t.urlcomps() < (v = other.urlcomps())) t.urlcomps = v;
         if (t.wordsintitle() < (v = other.wordsintitle())) t.wordsintitle = v;
-        double tf = (other instanceof indexRWIVarEntry) ? ((indexRWIVarEntry) other).termFrequency : indexRWIEntryOrder.termFrequency(other);
-        if (t.termFrequency < tf) t.termFrequency = tf;
+        if (t.termFrequency < (d = other.termFrequency())) t.termFrequency = d;
     }
 
 }

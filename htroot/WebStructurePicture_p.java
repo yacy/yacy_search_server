@@ -124,21 +124,21 @@ public class WebStructurePicture_p {
         if (nextlayer == maxlayer) return mynodes;
         nextlayer++;
         double radius = 1.0 / (1 << nextlayer);
-        Map next = structure.references(centerhash);
-        Map.Entry entry;
+        Map<String, Integer> next = structure.references(centerhash);
+        Map.Entry<String, Integer> entry;
         String targethash, targethost;
         // first set points to next hosts
-        Iterator i = next.entrySet().iterator();
-        ArrayList targets = new ArrayList();
+        Iterator<Map.Entry<String, Integer>> i = next.entrySet().iterator();
+        ArrayList<String[]> targets = new ArrayList<String[]>();
         int maxtargetrefs = 8, maxthisrefs = 8;
         int targetrefs, thisrefs;
         double rr, re;
         while ((i.hasNext()) && (maxnodes > 0) && (System.currentTimeMillis() < timeout)) {
-            entry = (Map.Entry) i.next();
-            targethash = (String) entry.getKey();
+            entry = i.next();
+            targethash = entry.getKey();
             targethost = structure.resolveDomHash2DomString(targethash);
             if (targethost == null) continue;
-            thisrefs = ((Integer) entry.getValue()).intValue();
+            thisrefs = entry.getValue().intValue();
             targetrefs = structure.referencesCount(targethash); // can be cpu/time-critical
             maxtargetrefs = Math.max(targetrefs, maxtargetrefs);
             maxthisrefs = Math.max(thisrefs, maxthisrefs);
@@ -154,11 +154,11 @@ public class WebStructurePicture_p {
             mynodes++;
         }
         // recursively set next hosts
-        i = targets.iterator();
+        Iterator<String[]> j = targets.iterator();
         String[] target;
         int nextnodes;
-        while (i.hasNext()) {
-            target = (String[]) i.next();
+        while (j.hasNext()) {
+            target = j.next();
             targethash = target[0];
             targethost = target[1];
             ymageGraph.coordinate c = graph.getPoint(targethost);

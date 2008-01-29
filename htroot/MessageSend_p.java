@@ -85,7 +85,7 @@ public class MessageSend_p {
 
             // open an editor page for the message
             // first ask if the other peer is online, and also what kind of document it accepts
-            HashMap result = yacyClient.permissionMessage(hash);
+            HashMap<String, String> result = yacyClient.permissionMessage(hash);
             //System.out.println("DEBUG: permission request result = " + result.toString());
             String peerName;
             yacySeed targetPeer = null;
@@ -149,7 +149,7 @@ public class MessageSend_p {
                 } catch (UnsupportedEncodingException e) {
                     mb = message.getBytes();
                 }
-                HashMap result = yacyClient.postMessage(hash, subject, mb);
+                HashMap<String, String> result = yacyClient.postMessage(hash, subject, mb);
 
                 //message has been sent
                 prop.put("mode_status_response", (String) result.get("response"));

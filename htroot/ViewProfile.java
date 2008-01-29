@@ -68,6 +68,7 @@ import de.anomic.yacy.yacySeed;
 
 public class ViewProfile {
 
+    @SuppressWarnings("unchecked")
     public static serverObjects respond(httpHeader header, serverObjects post, serverSwitch env) {
         // listManager.switchboard = (plasmaSwitchboard) env;
         serverObjects prop = new serverObjects();
@@ -142,7 +143,7 @@ public class ViewProfile {
         }
         Map.Entry entry;
         // all known keys which should be set as they are
-        HashSet knownKeys = new HashSet();
+        HashSet<String> knownKeys = new HashSet<String>();
         knownKeys.add("name");
         knownKeys.add("nickname");
         // knownKeys.add("homepage");//+http
@@ -155,9 +156,9 @@ public class ViewProfile {
         knownKeys.add("comment");        
 
         //empty values
-        Iterator it = knownKeys.iterator();
+        Iterator<String> it = knownKeys.iterator();
         while (it.hasNext()) {
-            prop.put("success_" + (String) it.next(), "0");
+            prop.put("success_" + it.next(), "0");
         }
         
         //number of not explicitly recognized but displayed items

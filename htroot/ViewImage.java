@@ -59,7 +59,7 @@ import de.anomic.ymage.ymageImageParser;
 
 public class ViewImage {
 
-    private static HashMap iconcache = new HashMap();
+    private static HashMap<String, Image> iconcache = new HashMap<String, Image>();
     private static String defaulticon = "htroot/env/grafics/dfltfvcn.ico";
     
     public static Image respond(httpHeader header, serverObjects post, serverSwitch env) {
@@ -96,7 +96,7 @@ public class ViewImage {
         int timeout = post.getInt("timeout", 5000);
         
         // getting the image as stream
-        Image scaled = (Image) iconcache.get(urlString);
+        Image scaled = iconcache.get(urlString);
         if (scaled == null) {
             Object[] resource = plasmaSnippetCache.getResource(url, true, timeout, false);
             byte[] imgb = null;

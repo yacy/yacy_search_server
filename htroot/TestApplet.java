@@ -69,11 +69,11 @@ public class TestApplet {
         prop.put("text", "");
         return prop;
     }
-    Iterator it=tp.keySet().iterator();
-    StringBuffer tmp=new StringBuffer();
-    String key="";
+    Iterator<String> it = tp.keySet().iterator();
+    StringBuffer tmp = new StringBuffer();
+    String key = "";
     while(it.hasNext()){
-        key=(String)it.next();
+        key = it.next();
         tmp.append(key).append("=").append(tp.get(key)).append("\n");
     }
     prop.put("mode_templates", tmp.toString());

@@ -63,7 +63,7 @@ public class all {
         boolean isAdmin=switchboard.verifyAuthentication(header, true);
         serverObjects prop = new serverObjects();
         
-        Iterator it;
+        Iterator<String> it;
         if(post != null && post.containsKey("tag")){
             it=switchboard.bookmarksDB.getBookmarksIterator((String) post.get("tag"), isAdmin);
         }else{

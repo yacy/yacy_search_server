@@ -89,7 +89,7 @@ import de.anomic.yacy.yacyURL;
 
 public class bookmarksDB {
 	// ------------------------------------
-	// Declacration of Class-Attributes
+	// Declaration of Class-Attributes
 	// ------------------------------------
 
 	final static int SORT_ALPHA = 1;
@@ -98,7 +98,6 @@ public class bookmarksDB {
 	
 	// bookmarks
     kelondroObjects bookmarksTable;		// kelondroMap bookmarksTable;
-    HashMap bookmarkCache;				
     
     // tags
     kelondroMapObjects tagsTable;
@@ -115,7 +114,6 @@ public class bookmarksDB {
     public bookmarksDB(File bookmarksFile, File tagsFile, File datesFile, long preloadTime) {
         // bookmarks
         tagCache=new HashMap<String, Tag>();
-        bookmarkCache=new HashMap();
         bookmarksFile.getParentFile().mkdirs();
         //this.bookmarksTable = new kelondroMap(kelondroDyn.open(bookmarksFile, bufferkb * 1024, preloadTime, 12, 256, '_', true, false));
         this.bookmarksTable = new kelondroObjects(new kelondroDyn(bookmarksFile, true, true, preloadTime, 12, 256, '_', kelondroNaturalOrder.naturalOrder, true, false, false), 1000);
@@ -240,6 +238,7 @@ public class bookmarksDB {
         return bookmark.getUrlHash();
  
     }
+    
     public Bookmark getBookmark(String urlHash){
         try {
             kelondroObjectsMapEntry map = (kelondroObjectsMapEntry)bookmarksTable.get(urlHash);
@@ -250,14 +249,15 @@ public class bookmarksDB {
             return null;
         }
     }
+    
     public boolean removeBookmark(String urlHash){
         Bookmark bookmark = getBookmark(urlHash);
         if(bookmark == null) return false; //does not exist
-        Set tags = bookmark.getTags();
+        Set<String> tags = bookmark.getTags();
         bookmarksDB.Tag tag=null;
-        Iterator it=tags.iterator();
+        Iterator<String> it=tags.iterator();
         while(it.hasNext()){
-            tag=getTag( tagHash((String) it.next()) );
+            tag=getTag(tagHash(it.next()));
             if(tag!=null){
                 tag.delete(urlHash);
                 saveTag(tag);
@@ -272,19 +272,18 @@ public class bookmarksDB {
         }
         return b != null;
     }
-    public Iterator bookmarkIterator(boolean up){
-        
+    
+    public Iterator<Bookmark> bookmarkIterator(boolean up){
     	try {
             return new bookmarkIterator(up);
         } catch (IOException e) {
-            return new HashSet().iterator();
+            return new HashSet<Bookmark>().iterator();
         }
-       
-        
     }
+    
     public Iterator<String> getBookmarksIterator(boolean priv){
         TreeSet<String> set=new TreeSet<String>(new bookmarkComparator(true));
-        Iterator it=bookmarkIterator(true);
+        Iterator<Bookmark> it=bookmarkIterator(true);
         Bookmark bm;
         while(it.hasNext()){
             bm=(Bookmark)it.next();
@@ -861,7 +860,7 @@ public class bookmarksDB {
         public String getDateString(){
             return date;
         }
-        public ArrayList getBookmarkList(){
+        public ArrayList<String> getBookmarkList(){
             return listManager.string2arraylist(this.mem.get(URL_HASHES));
         }
         public int size(){

@@ -31,10 +31,10 @@ public class WatchWebStructure_p {
         
         if (host.equals("auto")) {
         	// try to find the host from the crawl profiles
-        	Iterator it = sb.profilesActiveCrawls.profiles(true);
+        	Iterator<entry> it = sb.profilesActiveCrawls.profiles(true);
             entry e;
             while (it.hasNext()) {
-                e = (entry)it.next();
+                e = it.next();
                 if (e.name().equals(plasmaSwitchboard.CRAWL_PROFILE_PROXY) ||
                     e.name().equals(plasmaSwitchboard.CRAWL_PROFILE_REMOTE) ||
                     e.name().equals(plasmaSwitchboard.CRAWL_PROFILE_SNIPPET_TEXT) ||

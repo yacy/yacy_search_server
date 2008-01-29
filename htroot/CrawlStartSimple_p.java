@@ -100,13 +100,13 @@ public class CrawlStartSimple_p {
         boolean dark = true;   
         
         // create other peer crawl table using YaCyNews
-        Iterator recordIterator = yacyCore.newsPool.recordIterator(yacyNewsPool.INCOMING_DB, true);
+        Iterator<yacyNewsRecord> recordIterator = yacyCore.newsPool.recordIterator(yacyNewsPool.INCOMING_DB, true);
         int showedCrawl = 0;
         yacyNewsRecord record;
         yacySeed peer;
         String peername;
         while (recordIterator.hasNext()) {
-            record = (yacyNewsRecord) recordIterator.next();
+            record = recordIterator.next();
             if (record == null) continue;
             if (record.category().equals(yacyNewsPool.CATEGORY_CRAWL_START)) {
                 peer = yacyCore.seedDB.get(record.originator());
@@ -151,8 +151,8 @@ public class CrawlStartSimple_p {
         if ((yacyCore.seedDB == null) || (yacyCore.seedDB.mySeed().isVirgin()) || (yacyCore.seedDB.mySeed().isJunior())) {
             prop.put("remoteCrawlPeers", "0");
         } else {
-            Iterator crawlavail = yacyCore.dhtAgent.getAcceptRemoteCrawlSeeds(yacyURL.dummyHash, true);
-            Iterator crawlpendi = yacyCore.dhtAgent.getAcceptRemoteCrawlSeeds(yacyURL.dummyHash, false);
+            Iterator<yacySeed> crawlavail = yacyCore.dhtAgent.getAcceptRemoteCrawlSeeds(yacyURL.dummyHash, true);
+            Iterator<yacySeed> crawlpendi = yacyCore.dhtAgent.getAcceptRemoteCrawlSeeds(yacyURL.dummyHash, false);
             if ((!(crawlavail.hasNext())) && (!(crawlpendi.hasNext()))) {
                 prop.put("remoteCrawlPeers", "0"); //no peers availible
             } else {
@@ -161,7 +161,7 @@ public class CrawlStartSimple_p {
                 int availcount = 0;
                 yacySeed seed;
                 while ((availcount < maxcount) && (crawlavail.hasNext())) {
-                    seed = (yacySeed) crawlavail.next();
+                    seed = crawlavail.next();
                     prop.put("remoteCrawlPeers_available_" + availcount + "_name", seed.getName());
                     prop.put("remoteCrawlPeers_available_" + availcount + "_due", (yacyCore.yacyTime() - seed.available));
                     availcount++;
@@ -169,7 +169,7 @@ public class CrawlStartSimple_p {
                 prop.put("remoteCrawlPeers_available", availcount);
                 int pendicount = 0;
                 while ((pendicount < maxcount) && (crawlpendi.hasNext())) {
-                    seed = (yacySeed) crawlpendi.next();
+                    seed = crawlpendi.next();
                     prop.put("remoteCrawlPeers_busy_" + pendicount + "_name", seed.getName());
                     prop.put("remoteCrawlPeers_busy_" + pendicount + "_due", (yacyCore.yacyTime() - seed.available));
                     pendicount++;

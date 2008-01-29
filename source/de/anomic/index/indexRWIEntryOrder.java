@@ -115,10 +115,6 @@ public class indexRWIEntryOrder extends kelondroAbstractOrder<indexRWIVarEntry> 
         return cardinal(new indexRWIVarEntry(new indexRWIRowEntry(key)));
     }
 
-    public static final double termFrequency(indexRWIEntry t) {
-        return (((double) t.hitcount()) / ((double) (t.wordsintext() + t.wordsintitle() + 1)));
-    }
-    
     public long cardinal(indexRWIVarEntry t) {
         //return Long.MAX_VALUE - preRanking(ranking, iEntry, this.entryMin, this.entryMax, this.searchWords);
         // the normalizedEntry must be a normalized indexEntry

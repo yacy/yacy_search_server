@@ -60,6 +60,7 @@ public class LogStatistics_p {
     
     private static final String RESULTS = "results_";
     
+    @SuppressWarnings("unchecked")
     public static serverObjects respond(httpHeader header, serverObjects post, serverSwitch env) {
         
         final serverObjects prop = new serverObjects();

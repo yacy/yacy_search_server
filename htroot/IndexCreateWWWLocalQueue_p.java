@@ -108,10 +108,10 @@ public class IndexCreateWWWLocalQueue_p {
                         if (option == PROFILE) {
                             // search and delete the crawl profile (_much_ faster, independant of queue size)
                             // XXX: what to do about the annoying LOST PROFILE messages in the log?
-                            Iterator it = sb.profilesActiveCrawls.profiles(true);
+                            Iterator<plasmaCrawlProfile.entry> it = sb.profilesActiveCrawls.profiles(true);
                             plasmaCrawlProfile.entry entry;
                             while (it.hasNext()) {
-                                entry = (plasmaCrawlProfile.entry)it.next();
+                                entry = it.next();
                                 final String name = entry.name();
                                 if (name.equals(plasmaSwitchboard.CRAWL_PROFILE_PROXY) ||
                                         name.equals(plasmaSwitchboard.CRAWL_PROFILE_REMOTE) ||
@@ -124,10 +124,10 @@ public class IndexCreateWWWLocalQueue_p {
                             }
                         } else {
                             // iterating through the list of URLs
-                            Iterator iter = sb.crawlQueues.noticeURL.iterator(plasmaCrawlNURL.STACK_TYPE_CORE);
+                            Iterator<plasmaCrawlEntry> iter = sb.crawlQueues.noticeURL.iterator(plasmaCrawlNURL.STACK_TYPE_CORE);
                             plasmaCrawlEntry entry;
                             while (iter.hasNext()) {
-                                if ((entry = (plasmaCrawlEntry) iter.next()) == null) continue;
+                                if ((entry = iter.next()) == null) continue;
                                 String value = null;
                                 
                                 switch (option) {

@@ -54,6 +54,7 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Set;
+
 import de.anomic.data.bookmarksDB;
 import de.anomic.data.listManager;
 import de.anomic.data.userDB;
@@ -155,7 +156,7 @@ public class Bookmarks {
     			if(tagsString.equals("")){
     				tagsString="unsorted"; //default tag
     			}
-    			Set tags=listManager.string2set(bookmarksDB.cleanTagsString(tagsString)); 
+    			Set<String> tags=listManager.string2set(bookmarksDB.cleanTagsString(tagsString)); 
     			bookmarksDB.Bookmark bookmark = switchboard.bookmarksDB.createBookmark(url, username);
     			if(bookmark != null){
     				bookmark.setProperty(bookmarksDB.Bookmark.BOOKMARK_TITLE, title);
@@ -278,8 +279,7 @@ public class Bookmarks {
     	// create bookmark list
     	//-----------------------
     	int count=0;
-        bookmarksDB.Tag tag;
-    	Iterator it = null;    	
+        Iterator<String> it = null;    	
        	bookmarksDB.Bookmark bookmark;
        	Set<String> tags;
        	Iterator<String> tagsIt;
@@ -369,7 +369,7 @@ public class Bookmarks {
     private static void printTagList(String id, String tagName, int comp, int max, boolean opt){    	
     	int count=0;
         bookmarksDB.Tag tag;
-    	Iterator it = null;
+    	Iterator<Tag> it = null;
     	
         if (tagName.equals("")) {
         	it = switchboard.bookmarksDB.getTagIterator(isAdmin, comp, max);
@@ -398,11 +398,11 @@ public class Bookmarks {
        	prop.put(id, count);    	
     }
     
-    private static int recurseFolders(Iterator it, String root, int count, boolean next, String prev){
+    private static int recurseFolders(Iterator<String> it, String root, int count, boolean next, String prev){
     	String fn="";    	
     	bookmarksDB.Bookmark bookmark;
    	
-    	if(next) fn = it.next().toString();    		
+    	if (next) fn = it.next().toString();    		
     	else fn = prev;
 
     	if(fn.equals("\uffff")) {    		
@@ -418,7 +418,7 @@ public class Bookmarks {
     	if(fn.startsWith(root)){
     		prop.put("folderlist_"+count+"_folder", "<li>"+fn.replaceFirst(root+"/*","")+"<ul class=\"folder\">");
     		count++;    
-    		Iterator bit=switchboard.bookmarksDB.getBookmarksIterator(fn, isAdmin);
+    		Iterator<String> bit=switchboard.bookmarksDB.getBookmarksIterator(fn, isAdmin);
     		while(bit.hasNext()){
     			bookmark=switchboard.bookmarksDB.getBookmark((String)bit.next());
     			prop.put("folderlist_"+count+"_folder", "<li><a href=\""+bookmark.getUrl()+"\" title=\""+bookmark.getDescription()+"\">"+ bookmark.getTitle()+"</a></li>");

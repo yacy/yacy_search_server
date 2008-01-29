@@ -98,7 +98,7 @@ public class queues_p {
             int inProcessCount = 0;
             long totalSize = 0;
             int i=0; //counter
-            ArrayList entryList = new ArrayList();
+            ArrayList<plasmaSwitchboardQueue.Entry> entryList = new ArrayList<plasmaSwitchboardQueue.Entry>();
             
             // getting all entries that are currently in process
             synchronized (sb.indexingTasksInProcess) {
@@ -108,8 +108,8 @@ public class queues_p {
             
             // getting all enqueued entries
             if ((sb.sbQueue.size() > 0)) {
-                Iterator i1 = sb.sbQueue.entryIterator(false);
-                while (i1.hasNext()) entryList.add((plasmaSwitchboardQueue.Entry) i1.next());
+                Iterator<plasmaSwitchboardQueue.Entry> i1 = sb.sbQueue.entryIterator(false);
+                while (i1.hasNext()) entryList.add(i1.next());
             }
             
             int size = (post == null) ? entryList.size() : post.getInt("num", entryList.size());

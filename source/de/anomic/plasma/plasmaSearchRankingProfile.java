@@ -97,7 +97,7 @@ public class plasmaSearchRankingProfile {
     
     public plasmaSearchRankingProfile(int mediatype) {
         // set default-values
-        coeff_domlength          = 8;
+        coeff_domlength          = 11;
         coeff_ybr                = 9;
         coeff_date               = 4;
         coeff_wordsintitle       = 4;
@@ -105,20 +105,20 @@ public class plasmaSearchRankingProfile {
         coeff_phrasesintext      = 3;
         coeff_llocal             = 2;
         coeff_lother             = 3;
-        coeff_urllength          = 13;
-        coeff_urlcomps           = 13;
-        coeff_hitcount           = 4;
+        coeff_urllength          = 12;
+        coeff_urlcomps           = 12;
+        coeff_hitcount           = 9;
         coeff_posintext          = 10;
-        coeff_posofphrase        = 9;
+        coeff_posofphrase        = 8;
         coeff_posinphrase        = 1;
-        coeff_authority          = 12;
-        coeff_worddistance       = 13;
+        coeff_authority          = 11;
+        coeff_worddistance       = 12;
         coeff_appurl             = 13;
-        coeff_appdescr           = 11;
-        coeff_appauthor          = 12;
+        coeff_appdescr           = 10;
+        coeff_appauthor          = 11;
         coeff_apptags            = 8;
-        coeff_appref             = 8;
-        coeff_appemph            = 11;
+        coeff_appref             = 7;
+        coeff_appemph            = 10;
         coeff_catindexof         = (mediatype == plasmaSearchQuery.CONTENTDOM_TEXT) ? 0 : 15;
         coeff_cathasimage        = (mediatype == plasmaSearchQuery.CONTENTDOM_IMAGE) ? 15 : 0;
         coeff_cathasaudio        = (mediatype == plasmaSearchQuery.CONTENTDOM_AUDIO) ? 15 : 0;
@@ -127,7 +127,7 @@ public class plasmaSearchRankingProfile {
         coeff_termfrequency      = 14;
         coeff_urlcompintoplist   = 3;
         coeff_descrcompintoplist = 2;
-        coeff_prefer             = 13;
+        coeff_prefer             = 12;
     }
     
     public plasmaSearchRankingProfile(String prefix, String profile) {

@@ -38,6 +38,7 @@
 	    <td colspan="6">appearance in</td>
 	    <td colspan="4">in link type</td>
 	    <td colspan="1">document type</td>
+	  </tr>
       <tr class="TableCellDark">
         <td style="background-color:#FFFFFF">&nbsp;</td>
         <td>description</td>
@@ -87,8 +88,8 @@
     <fieldset><legend>Display URL List</legend>
       <dl>
         <dt class="TableCellDark">Number of lines:</dt>
-        <dd><input type="radio" name="lines" value="all" checked="checked" />all lines&nbsp;&nbsp;
-            <input type="radio" name="lines" value="100" />100&nbsp;&nbsp;
+        <dd><input type="radio" name="lines" value="all" />all lines&nbsp;&nbsp;
+            <input type="radio" name="lines" value="100" checked="checked" />100&nbsp;&nbsp;
             <input type="radio" name="lines" value="1000" />1000&nbsp;&nbsp;
         </dd>
         <dt class="TableCellDark">Ordering of list:</dt>
@@ -138,6 +139,7 @@
         <td colspan="3">Resource</td>
         <td colspan="8">Negative Ranking Factors</td>
         <td colspan="8">Positive Ranking Factors</td>
+        <td rowspan="2">props</td>
         <td rowspan="2">Reverse Normalized Weighted Ranking Sum</td>
       </tr>
       <tr class="TableHeader">
@@ -160,7 +162,6 @@
         <td>local links</td>
         <td>remote links</td>
         <td>hitcount</td>
-        <td>props</td>
       </tr>
       #{urlList}#
       <tr class="TableCellLight">

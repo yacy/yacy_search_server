@@ -83,6 +83,8 @@ public interface indexRWIEntry {
     
     public kelondroBitfield flags();
     
+    public double termFrequency();
+    
     public String toString();
     
     public void combineDistance(indexRWIEntry oe);

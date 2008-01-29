@@ -131,10 +131,10 @@ public final class IndexTransfer_p {
         yacySeed seed;
         int hc = 0;
         if ((yacyCore.seedDB != null) && (yacyCore.seedDB.sizeConnected() > 0)) {
-            Iterator e = yacyCore.dhtAgent.getAcceptRemoteIndexSeeds("------------");
+            Iterator<yacySeed> e = yacyCore.dhtAgent.getAcceptRemoteIndexSeeds("------------");
             TreeMap<String, String> hostList = new TreeMap<String, String>();
             while (e.hasNext()) {
-                seed = (yacySeed) e.next();
+                seed = e.next();
                 if (seed != null) hostList.put(seed.get(yacySeed.NAME, "nameless"), seed.hash);
             }
             

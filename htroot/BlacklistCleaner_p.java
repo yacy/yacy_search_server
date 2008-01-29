@@ -57,7 +57,7 @@ import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
-import java.util.Map.Entry;
+import java.util.Map;
 import java.util.regex.Pattern;
 import java.util.regex.PatternSyntaxException;
 
@@ -85,7 +85,7 @@ public class BlacklistCleaner_p {
     private static final int ERR_HOST_WRONG_CHARS = 4;
     private static final int ERR_DOUBLE_OCCURANCE = 5;
     
-    public static final Class[] supportedBLEngines = {
+    public static final Class<?>[] supportedBLEngines = {
         defaultURLPattern.class
     };
     
@@ -127,18 +127,18 @@ public class BlacklistCleaner_p {
             }
             
             // list illegal entries
-            HashMap ies = getIllegalEntries(blacklistToUse, supportedBlacklistTypes, plasmaSwitchboard.urlBlacklist);
+            HashMap<String, Integer> ies = getIllegalEntries(blacklistToUse, supportedBlacklistTypes, plasmaSwitchboard.urlBlacklist);
             prop.put(RESULTS + "entries", ies.size());
             prop.putHTML(RESULTS + "blEngine", plasmaSwitchboard.urlBlacklist.getEngineInfo());
             prop.put(RESULTS + "disabled", (ies.size() == 0) ? "1" : "0");
             if (ies.size() > 0) {
                 prop.put(RESULTS + DISABLED + "entries", ies.size());
-                Iterator it = ies.keySet().iterator();
+                Iterator<String> it = ies.keySet().iterator();
                 int i = 0;
                 String s;
                 while (it.hasNext()) {
-                    s = (String)it.next();
-                    prop.put(RESULTS + DISABLED + ENTRIES + i + "_error", ((Integer)ies.get(s)).longValue());
+                    s = it.next();
+                    prop.put(RESULTS + DISABLED + ENTRIES + i + "_error", ies.get(s).longValue());
                     prop.putHTML(RESULTS + DISABLED + ENTRIES + i + "_entry", s);
                     i++;
                 }
@@ -173,38 +173,37 @@ public class BlacklistCleaner_p {
     }
     
     private static String[] getByPrefix(serverObjects post, String prefix, boolean useKeys, boolean useHashSet) {
-        Collection r;
+        Collection<String> r;
         if (useHashSet) {
-            r = new HashSet();
+            r = new HashSet<String>();
         } else {
-            r = new ArrayList();
+            r = new ArrayList<String>();
         }
-        Iterator it;
+        
         String s;
         if (useKeys) {
-            it =  post.keySet().iterator();
+            Iterator<String> it =  post.keySet().iterator();
             while (it.hasNext())
                 if ((s = (String)it.next()).indexOf(prefix) == 0)
                     r.add(s.substring(prefix.length()));
         } else {
-            it = post.entrySet().iterator();
-            Entry entry;
+            Iterator<Map.Entry<String, String>> it = post.entrySet().iterator();
+            Map.Entry<String, String> entry;
             while (it.hasNext()) {
-                entry = (Entry)it.next();
-                if (((String)entry.getKey()).indexOf(prefix) == 0)
-                    r.add(entry.getValue());
+                entry = it.next();
+                if (entry.getKey().indexOf(prefix) == 0) r.add((String) entry.getValue());
             }
         }
         
-        return (String[])r.toArray(new String[r.size()]);
+        return r.toArray(new String[r.size()]);
     }
     
-    private static HashMap /* entry, error-code */ getIllegalEntries(String blacklistToUse, String[] supportedBlacklistTypes, plasmaURLPattern blEngine) {
-        HashMap r = new HashMap();
-        HashSet ok = new HashSet();
+    private static HashMap<String, Integer>/* entry, error-code */ getIllegalEntries(String blacklistToUse, String[] supportedBlacklistTypes, plasmaURLPattern blEngine) {
+        HashMap<String, Integer> r = new HashMap<String, Integer>();
+        HashSet<String> ok = new HashSet<String>();
         
-        ArrayList list = listManager.getListArray(new File(listManager.listsPath, blacklistToUse));
-        Iterator it = list.iterator();
+        ArrayList<String> list = listManager.getListArray(new File(listManager.listsPath, blacklistToUse));
+        Iterator<String> it = list.iterator();
         String s, host, path;
         
         if (blEngine instanceof defaultURLPattern) {
@@ -273,7 +272,7 @@ public class BlacklistCleaner_p {
     
     private static int removeEntries(String blacklistToUse, String[] supportedBlacklistTypes, String[] entries) {
         // load blacklist data from file
-        ArrayList list = listManager.getListArray(new File(listManager.listsPath, blacklistToUse));
+        ArrayList<String> list = listManager.getListArray(new File(listManager.listsPath, blacklistToUse));
         
         // delete the old entry from file
         String s;

@@ -255,6 +255,10 @@ public final class indexRWIRowEntry implements indexRWIEntry {
         return new kelondroBitfield(this.entry.getColBytes(col_flags));
     }
     
+    public double termFrequency() {
+        return (((double) this.hitcount()) / ((double) (this.wordsintext() + this.wordsintitle() + 1)));
+    }
+    
     public String toString() {
         return toPropertyForm();
     }

@@ -33,7 +33,6 @@ import java.util.Iterator;
 
 import de.anomic.data.listManager;
 import de.anomic.index.indexRWIEntry;
-import de.anomic.index.indexRWIEntryOrder;
 import de.anomic.index.indexURLEntry;
 import de.anomic.kelondro.kelondroBitfield;
 import de.anomic.plasma.urlPattern.plasmaURLPattern;
@@ -150,7 +149,7 @@ public class plasmaSearchAPI {
                 prop.putNum("genUrlList_urlList_"+i+"_urlExists_ranking", (entry.ranking() - rn));
                 prop.putNum("genUrlList_urlList_"+i+"_urlExists_domlength", yacyURL.domLengthEstimation(entry.hash()));
                 prop.putNum("genUrlList_urlList_"+i+"_urlExists_ybr", plasmaSearchRankingProcess.ybr(entry.hash()));
-                prop.putNum("genUrlList_urlList_"+i+"_urlExists_tf", indexRWIEntryOrder.termFrequency(entry.word()));
+                prop.putNum("genUrlList_urlList_"+i+"_urlExists_tf", 1000.0 * entry.word().termFrequency());
                 prop.putNum("genUrlList_urlList_"+i+"_urlExists_authority", (ranked.getOrder() == null) ? -1 : ranked.getOrder().authority(entry.hash()));
                 prop.put("genUrlList_urlList_"+i+"_urlExists_date", serverDate.formatShortDay(new Date(entry.word().lastModified())));
                 prop.putNum("genUrlList_urlList_"+i+"_urlExists_wordsintitle", entry.word().wordsintitle());

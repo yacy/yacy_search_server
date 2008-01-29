@@ -229,17 +229,17 @@ public final class Settings_p {
             env.setConfig("seedUploadMethod",enabledUploader);
         }                  
         
-        HashMap uploaders = yacyCore.getSeedUploadMethods();
+        HashMap<String, String> uploaders = yacyCore.getSeedUploadMethods();
         prop.put("seedUploadMethods", uploaders.size() + 1);
         prop.put("seedUploadMethods_0_name", "none");
         prop.put("seedUploadMethods_0_selected", enabledUploader.equals("none") ? "1" : "0");
         prop.put("seedUploadMethods_0_file", "");
         
         int count = 0;
-        Iterator uploaderKeys = uploaders.keySet().iterator();
+        Iterator<String> uploaderKeys = uploaders.keySet().iterator();
         while (uploaderKeys.hasNext()) {
             count++;
-            String uploaderName = (String) uploaderKeys.next();
+            String uploaderName = uploaderKeys.next();
             prop.put("seedUploadMethods_" +count+ "_name", uploaderName);
             prop.put("seedUploadMethods_" +count+ "_selected", uploaderName.equals(enabledUploader) ? "1" : "0");            
             prop.put("seedUploadMethods_" +count+ "_file", "Settings_Seed_Upload" + uploaderName + ".inc");
@@ -269,7 +269,7 @@ public final class Settings_p {
          */
         plasmaSwitchboard sb = (plasmaSwitchboard)env;
         
-        HashMap configList = plasmaParser.getParserConfigList();        
+        HashMap<String, plasmaParserConfig> configList = plasmaParser.getParserConfigList();        
         plasmaParserConfig[] configArray = (plasmaParserConfig[]) configList.values().toArray(new plasmaParserConfig[configList.size()]);
         
         HashSet<ParserInfo> parserInfos = new HashSet<ParserInfo>(sb.parser.getAvailableParserList().values());
@@ -286,9 +286,9 @@ public final class Settings_p {
         	allParsersEnabled[i] = true;
         int parserIdx = 0;
         
-        Iterator availableParserIter = parserInfos.iterator();
+        Iterator<ParserInfo> availableParserIter = parserInfos.iterator();
         while (availableParserIter.hasNext()) {
-            ParserInfo parserInfo = (ParserInfo) availableParserIter.next();
+            ParserInfo parserInfo = availableParserIter.next();
             prop.put("parser_" + parserIdx + "_name", parserInfo.parserName);
             prop.putHTML("parser_" + parserIdx + "_version", parserInfo.parserVersionNr, true);
             prop.put("parser_" + parserIdx + "_usage", parserInfo.usageCount);
@@ -303,7 +303,7 @@ public final class Settings_p {
                 //prop.put("parser_" + parserIdx + "_name", parserName);
                 //prop.put("parser_" + parserIdx + "_shortname", parserName.substring(parserName.lastIndexOf(".")+1));
                 for (int i=0; i<configArray.length; i++) {
-                    HashSet enabledParsers =  configArray[i].getEnabledParserList();
+                    HashSet<String> enabledParsers =  configArray[i].getEnabledParserList();
                     prop.put("parser_" + parserIdx + "_mime_" + mimeIdx + "_parserMode_" + i + "_optionName", configArray[i].parserMode + "." + mimeType);
                     prop.put("parser_" + parserIdx + "_mime_" + mimeIdx + "_parserMode_" + i + "_status", enabledParsers.contains(mimeType) ? "1" : "0");
                     allParsersEnabled[i] &= enabledParsers.contains(mimeType);

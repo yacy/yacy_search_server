@@ -106,9 +106,9 @@ public class rct_p {
         yacySeed seed;
         int hc = 0;
         if (yacyCore.seedDB != null && yacyCore.seedDB.sizeConnected() > 0) {
-            Iterator e = yacyCore.dhtAgent.getProvidesRemoteCrawlURLs();
+            Iterator<yacySeed> e = yacyCore.dhtAgent.getProvidesRemoteCrawlURLs();
             while (e.hasNext()) {
-                seed = (yacySeed) e.next();
+                seed = e.next();
                 if (seed != null) {
                     prop.put("hosts_" + hc + "_hosthash", seed.hash);
                     prop.putHTML("hosts_" + hc + "_hostname", seed.hash + " " + seed.get(yacySeed.NAME, "nameless") + " (" + seed.getLong(yacySeed.RCOUNT, 0) + ")");

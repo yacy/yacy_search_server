@@ -210,10 +210,10 @@ public class Network {
                     return prop;
                 }
 
-                final HashMap map = new HashMap();
+                final HashMap<String, String> map = new HashMap<String, String>();
                 map.put(yacySeed.IP,post.get("peerIP"));
                 map.put(yacySeed.PORT,post.get("peerPort"));
-                yacySeed peer = new yacySeed((String) post.get("peerHash"),map);
+                yacySeed peer = new yacySeed(post.get("peerHash"),map);
 
                 yacyCore.peerActions.updateMySeed();
                 final int added = yacyClient.publishMySeed(peer.getPublicAddress(), peer.hash);
@@ -233,9 +233,9 @@ public class Network {
                     }
                 }
 
-                prop.put("table_peerHash",(String) post.get("peerHash"));
-                prop.put("table_peerIP",(String)post.get("peerIP"));
-                prop.put("table_peerPort",(String) post.get("peerPort"));                
+                prop.put("table_peerHash",post.get("peerHash"));
+                prop.put("table_peerIP",post.get("peerIP"));
+                prop.put("table_peerPort",post.get("peerPort"));                
             } else {
                 prop.put("table_peerHash","");
                 prop.put("table_peerIP","");
@@ -268,14 +268,14 @@ public class Network {
                     }
 
                     // find updated Information using YaCyNews
-                    final HashSet updatedProfile = new HashSet();
-                    final HashMap updatedWiki = new HashMap();
-                    final HashMap updatedBlog = new HashMap();
-                    final HashMap isCrawling = new HashMap();
+                    final HashSet<String> updatedProfile = new HashSet<String>();
+                    final HashMap<String, Map<String, String>> updatedWiki = new HashMap<String, Map<String, String>>();
+                    final HashMap<String, Map<String, String>> updatedBlog = new HashMap<String, Map<String, String>>();
+                    final HashMap<String, String> isCrawling = new HashMap<String, String>();
                     yacyNewsRecord record;
-                    Iterator recordIterator = yacyCore.newsPool.recordIterator(yacyNewsPool.INCOMING_DB, true);
+                    Iterator<yacyNewsRecord> recordIterator = yacyCore.newsPool.recordIterator(yacyNewsPool.INCOMING_DB, true);
                     while (recordIterator.hasNext()) {
-                        record = (yacyNewsRecord) recordIterator.next();
+                        record = recordIterator.next();
                         if (record == null) {
                             continue;
                         } else if (record.category().equals(yacyNewsPool.CATEGORY_PROFILE_UPDATE)) {
@@ -292,7 +292,7 @@ public class Network {
                     boolean dark = true;
                     yacySeed seed;
                     final boolean complete = post.containsKey("ip");
-                    Iterator e = null;
+                    Iterator<yacySeed> e = null;
                     switch (page) {
                         case 1 : e = yacyCore.seedDB.seedsSortedConnected(post.get("order", "down").equals("up"), post.get("sort", yacySeed.LCOUNT)); break;
                         case 2 : e = yacyCore.seedDB.seedsSortedDisconnected(post.get("order", "down").equals("up"), post.get("sort", yacySeed.LASTSEEN)); break;
@@ -301,8 +301,8 @@ public class Network {
                     }
                     int p;
                     String startURL;
-                    Map wikiMap;
-                    Map blogMap;
+                    Map<String, String> wikiMap;
+                    Map<String, String> blogMap;
                     String userAgent, location;
                     int PPM;
                     double QPM;
@@ -310,7 +310,7 @@ public class Network {
                     String wrongregex = null;
                     prop.put("regexerror", 0);
                     prop.put("regexerror_wrongregex", (String)null);
-                    if(post.containsKey("search")) {
+                    if (post.containsKey("search")) {
                         try {
                             peerSearchPattern = Pattern.compile(post.get("match", ""), Pattern.CASE_INSENSITIVE);
                         } catch (PatternSyntaxException pse){
@@ -348,14 +348,14 @@ public class Network {
                                 prop.put(STR_TABLE_LIST + conCount + "_updatedProfile", 1);
                                 prop.put(STR_TABLE_LIST + conCount + "_updatedProfile_hash", seed.hash);
                             }
-                            if ((wikiMap = (Map) updatedWiki.get(seed.hash)) == null) {
+                            if ((wikiMap = updatedWiki.get(seed.hash)) == null) {
                                 prop.put(STR_TABLE_LIST + conCount + "_updatedWiki", 0);
                             } else {
                                 prop.put(STR_TABLE_LIST + conCount + "_updatedWiki", 1);
                                 prop.putHTML(STR_TABLE_LIST + conCount + "_updatedWiki_page", (String) wikiMap.get("page"));
                                 prop.put(STR_TABLE_LIST + conCount + "_updatedWiki_address", seed.getPublicAddress());
                             }
-                            if ((blogMap = (Map) updatedBlog.get(seed.hash)) == null) {
+                            if ((blogMap = updatedBlog.get(seed.hash)) == null) {
                                 prop.put(STR_TABLE_LIST + conCount + "_updatedBlog", 0);
                             } else {
                                 prop.put(STR_TABLE_LIST + conCount + "_updatedBlog", 1);

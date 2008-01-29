@@ -85,16 +85,16 @@ public class Messages_p {
             prop.put("peersKnown", "1");
             int peerCount = 0;
             try {
-                TreeMap hostList = new TreeMap();
-                final Iterator e = yacyCore.seedDB.seedsConnected(true, false, null, (float) 0.0);
+                TreeMap<String, String> hostList = new TreeMap<String, String>();
+                final Iterator<yacySeed> e = yacyCore.seedDB.seedsConnected(true, false, null, (float) 0.0);
                 while (e.hasNext()) {
-                    yacySeed seed = (yacySeed) e.next();
+                    yacySeed seed = e.next();
                     if (seed != null) hostList.put(seed.get(yacySeed.NAME, "nameless"),seed.hash);
                 }
 
                 String peername;
-                while ((peername = (String) hostList.firstKey()) != null) {
-                    final String Hash = (String) hostList.get(peername);
+                while ((peername = hostList.firstKey()) != null) {
+                    final String Hash = hostList.get(peername);
                     prop.put(PEERSKNOWN + "peers_" + peerCount + "_hash", Hash);
                     prop.putHTML(PEERSKNOWN + "peers_" + peerCount + "_name", peername, true);
                     hostList.remove(peername);
@@ -129,13 +129,13 @@ public class Messages_p {
         if (action.equals("list")) {
             prop.put("mode", "0"); //list
             try {
-                Iterator i = switchboard.messageDB.keys(null, true);
+                Iterator<String> i = switchboard.messageDB.keys(null, true);
                 String key;
 
                 boolean dark = true;
                 int count=0;
                 while (i.hasNext()) {
-                    key = (String) i.next();
+                    key = i.next();
                     message = switchboard.messageDB.read(key);
                     prop.put("mode_messages_"+count+"_dark", ((dark) ? "1" : "0") );
                     prop.put("mode_messages_"+count+"_date", dateString(message.date()));

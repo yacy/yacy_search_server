@@ -80,7 +80,7 @@ public final class IndexImport_p {
                     String cacheSizeStr = (String) post.get("cacheSize");
                     boolean startImport = true;
                     
-                    HashMap initParams = new HashMap();
+                    HashMap<String, String> initParams = new HashMap<String, String>();
                     initParams.put("plasmaPath",importPlasmaPath);
                     initParams.put("cacheSize",cacheSizeStr);
                     initParams.put("preloadTime","100");

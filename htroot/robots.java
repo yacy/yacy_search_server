@@ -48,6 +48,7 @@ public class robots {
         return prop;
     }
     
+    @SuppressWarnings("unchecked")
     private static ArrayList<String>[] getFiles(String htrootPath) {
         final File htroot = new File(htrootPath);
         if (!htroot.exists()) return null;

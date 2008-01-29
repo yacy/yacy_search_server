@@ -124,17 +124,17 @@ public class ConfigSkins_p {
 		//load skin from URL
 		} else if (post.containsKey("url")){
 			String url = (String)post.get("url");
-			ArrayList skinVector;
-			try{
+			ArrayList<String> skinVector;
+			try {
                 yacyURL u = new yacyURL(url, null);
 				skinVector = nxTools.strings(httpc.wget(u, u.getHost(), 6000, null, null, switchboard.remoteProxyConfig, null, null), "UTF-8");
-			}catch(IOException e){
+			} catch(IOException e) {
 				prop.put("status", "1");//unable to get URL
 				prop.put("status_url", url);
 				return prop;
 			}
-			try{
-				Iterator it = skinVector.iterator();
+			try {
+				Iterator<String> it = skinVector.iterator();
 				File skinFile = new File(skinPath, url.substring(url.lastIndexOf("/"), url.length()));
 				BufferedWriter bw = new BufferedWriter(new PrintWriter(new FileWriter(skinFile)));
 
@@ -142,11 +142,11 @@ public class ConfigSkins_p {
 					bw.write(it.next() + "\n");
 				}
 				bw.close();
-			}catch(IOException e){
+			} catch(IOException e){
 				prop.put("status", "2");//error saving the skin
 				return prop;
 			}
-			if(post.containsKey("use_skin") && ((String)post.get("use_skin")).equals("on")){
+			if (post.containsKey("use_skin") && ((String)post.get("use_skin")).equals("on")){
 				changeSkin(switchboard, skinPath, url.substring(url.lastIndexOf("/"), url.length()));
 			}
 		}

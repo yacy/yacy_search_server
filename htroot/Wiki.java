@@ -132,7 +132,7 @@ public class Wiki {
             wikiBoard.entry newEntry = switchboard.wikiDB.newEntry(pagename, author, ip, post.get("reason", "edit"), content);
             switchboard.wikiDB.write(newEntry);
             // create a news message
-            HashMap map = new HashMap();
+            HashMap<String, String> map = new HashMap<String, String>();
             map.put("page", pagename);
             map.put("author", author.replace(',', ' '));
             if (post.get("content", "").trim().length() > 0 && !page.page().equals(content))
@@ -174,11 +174,11 @@ public class Wiki {
             prop.put("mode", "3"); //Index
             String subject;
             try {
-                Iterator i = switchboard.wikiDB.keys(true);
+                Iterator<String> i = switchboard.wikiDB.keys(true);
                 wikiBoard.entry entry;
                 int count=0;
                 while (i.hasNext()) {
-                    subject = (String) i.next();
+                    subject = i.next();
                     entry = switchboard.wikiDB.read(subject);
                     prop.putHTML("mode_pages_"+count+"_name",wikiBoard.webalize(subject));
                     prop.putHTML("mode_pages_"+count+"_subject", subject);
@@ -201,14 +201,14 @@ public class Wiki {
             prop.putHTML("mode_error_page", pagename);
             
             try {
-                Iterator it = switchboard.wikiDB.keysBkp(true);
+                Iterator<String> it = switchboard.wikiDB.keysBkp(true);
                 wikiBoard.entry entry;
                 wikiBoard.entry oentry = null;
                 wikiBoard.entry nentry = null;
                 int count = 0;
                 boolean oldselected = false, newselected = false;
                 while (it.hasNext()) {
-                    entry = switchboard.wikiDB.readBkp((String)it.next());
+                    entry = switchboard.wikiDB.readBkp(it.next());
                     prop.put("mode_error_versions_" + count + "_date", wikiBoard.dateString(entry.date()));
                     prop.put("mode_error_versions_" + count + "_fdate", dateString(entry.date()));
                     if (wikiBoard.dateString(entry.date()).equals(post.get("old", null))) {

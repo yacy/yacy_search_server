@@ -27,14 +27,14 @@ public class PeerLoadPicture {
         
         final CircleThreadPiece idle = new CircleThreadPiece("Idle", new Color(170, 255, 170));
         final CircleThreadPiece misc = new CircleThreadPiece("Misc.", new Color(190,  50, 180));
-        final HashMap /* <String,CircleThreadPiece> */ pieces = new HashMap();
+        final HashMap<String, CircleThreadPiece> pieces = new HashMap<String, CircleThreadPiece>();
         pieces.put(null, idle);
         pieces.put(plasmaSwitchboard.CRAWLSTACK, new CircleThreadPiece("Stacking",         new Color(115, 200, 210)));
         pieces.put(plasmaSwitchboard.INDEXER,    new CircleThreadPiece("Parsing/Indexing", new Color(255, 130,   0)));
         pieces.put(plasmaSwitchboard.INDEX_DIST, new CircleThreadPiece("DHT-Distribution", new Color(119, 136, 153)));
         pieces.put(plasmaSwitchboard.PEER_PING,  new CircleThreadPiece("YaCy Core",        new Color(255, 230, 160)));
         
-        Iterator threads = env.threadNames();
+        Iterator<String> threads = env.threadNames();
         String threadname;
         serverThread thread;
         
@@ -42,7 +42,7 @@ public class PeerLoadPicture {
         
         //Iterate over threads
         while (threads.hasNext()) {
-            threadname = (String)threads.next();
+            threadname = threads.next();
             thread = env.getThread(threadname);
             
             //count total times
@@ -51,7 +51,7 @@ public class PeerLoadPicture {
             if (showidle) idle.addExecTime(thread.getSleepTime());
             
             //count threadgroup-specific times
-            CircleThreadPiece piece = (CircleThreadPiece)pieces.get(threadname);
+            CircleThreadPiece piece = pieces.get(threadname);
             if (piece == null) {
                 misc.addExecTime(thread.getBlockTime()+thread.getExecTime());
             } else {
@@ -61,10 +61,10 @@ public class PeerLoadPicture {
         busy_time += idle.getExecTime();
         
         // set respective angles
-        Iterator it = pieces.values().iterator();
+        Iterator<CircleThreadPiece> it = pieces.values().iterator();
         CircleThreadPiece current;
         while (it.hasNext()) {
-            current = (CircleThreadPiece)it.next();
+            current = it.next();
             current.setFraction(busy_time);
             //remove unneccessary elements
             if(current.getAngle() == 0) it.remove();
@@ -81,7 +81,7 @@ public class PeerLoadPicture {
                 5000,
                 width,
                 height,
-                (CircleThreadPiece[])pieces.values().toArray(new CircleThreadPiece[pieces.size()]),
+                pieces.values().toArray(new CircleThreadPiece[pieces.size()]),
                 misc
         );
     }

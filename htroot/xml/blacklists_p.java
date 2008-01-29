@@ -38,7 +38,7 @@ public class blacklists_p {
         String[] dirlist = listManager.getDirListing(listManager.listsPath);
         int blacklistCount=0;
         
-        ArrayList list;
+        ArrayList<String> list;
         int count;
         if (dirlist != null) {
             for (int i = 0; i <= dirlist.length - 1; i++) {
