@@ -59,6 +59,7 @@ import java.util.TreeSet;
 import de.anomic.htmlFilter.htmlFilterImageEntry;
 import de.anomic.http.httpHeader;
 import de.anomic.http.httpc;
+import de.anomic.index.indexURLEntry;
 import de.anomic.kelondro.kelondroMScoreCluster;
 import de.anomic.kelondro.kelondroMSetTools;
 import de.anomic.plasma.cache.IResourceInfo;
@@ -246,9 +247,9 @@ public class plasmaSnippetCache {
     }
     
     @SuppressWarnings("unchecked")
-    public static TextSnippet retrieveTextSnippet(yacyURL url, Set<String> queryhashes, boolean fetchOnline, boolean pre, int snippetMaxLength, int timeout, int maxDocLen) {
+    public static TextSnippet retrieveTextSnippet(indexURLEntry.Components comp, Set<String> queryhashes, boolean fetchOnline, boolean pre, int snippetMaxLength, int timeout, int maxDocLen) {
         // heise = "0OQUNU3JSs05"
-        
+        yacyURL url = comp.url();
         if (queryhashes.size() == 0) {
             //System.out.println("found no queryhashes for URL retrieve " + url);
             return new TextSnippet(url, null, ERROR_NO_HASH_GIVEN, queryhashes, "no query hashes given");
@@ -258,8 +259,8 @@ public class plasmaSnippetCache {
         int source = SOURCE_CACHE;
         String wordhashes = yacySearch.set2string(queryhashes);
         String line = retrieveFromCache(wordhashes, url.hash());
-        if (line != null) {        	
-            //System.out.println("found snippet for URL " + url + " in cache: " + line);
+        if (line != null) {
+            // found the snippet
             return new TextSnippet(url, line, source, null, null, faviconCache.get(url.hash()));
         }
         
@@ -279,7 +280,11 @@ public class plasmaSnippetCache {
                 if ((resContentLength > maxDocLen) && (!fetchOnline)) {
                     // content may be too large to be parsed here. To be fast, we omit calculation of snippet here
                     return new TextSnippet(url, null, ERROR_SOURCE_LOADING, queryhashes, "resource available, but too large: " + resContentLength + " bytes");
-                }
+                }/*
+            } else if (url.) {
+                // try to create the snippet from information given in the url itself
+                */
+                
             } else if (fetchOnline) {
                 // if not found try to download it
                 
@@ -342,7 +347,7 @@ public class plasmaSnippetCache {
         if (sentences == null) return new TextSnippet(url, null, ERROR_PARSER_NO_LINES, queryhashes, "parser returned no sentences",resFavicon);
         Object[] tsr = computeTextSnippet(sentences, queryhashes, snippetMaxLength);
         String textline = (tsr == null) ? null : (String) tsr[0];
-        Set<String> remainingHashes = (tsr == null) ? queryhashes : (Set) tsr[1];
+        Set<String> remainingHashes = (tsr == null) ? queryhashes : (Set<String>) tsr[1];
         
         // compute snippet from media
         String audioline = computeMediaSnippet(document.getAudiolinks(), queryhashes);

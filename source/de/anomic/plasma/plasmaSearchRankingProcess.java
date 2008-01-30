@@ -40,7 +40,6 @@ import de.anomic.index.indexContainer;
 import de.anomic.index.indexRWIEntry;
 import de.anomic.index.indexRWIEntryOrder;
 import de.anomic.index.indexRWIRowEntry;
-import de.anomic.index.indexRWIVarEntry;
 import de.anomic.index.indexURLEntry;
 import de.anomic.kelondro.kelondroBinSearch;
 import de.anomic.kelondro.kelondroMScoreCluster;
@@ -53,8 +52,8 @@ public final class plasmaSearchRankingProcess {
     public  static kelondroBinSearch[] ybrTables = null; // block-rank tables
     private static boolean useYBR = true;
     
-    private TreeMap<Object, indexRWIEntry> sortedRWIEntries; // key = ranking (Long); value = indexRWIEntry; if sortorder < 2 then key is instance of String
-    private HashMap<String, TreeMap<Object, indexRWIEntry>> doubleDomCache; // key = domhash (6 bytes); value = TreeMap like sortedRWIEntries
+    private TreeMap<Object, indexRWIRowEntry> sortedRWIEntries; // key = ranking (Long); value = indexRWIEntry; if sortorder < 2 then key is instance of String
+    private HashMap<String, TreeMap<Object, indexRWIRowEntry>> doubleDomCache; // key = domhash (6 bytes); value = TreeMap like sortedRWIEntries
     private HashMap<String, String> handover; // key = urlhash, value = urlstring; used for double-check of urls that had been handed over to search process
     private plasmaSearchQuery query;
     private int sortorder;
@@ -74,8 +73,8 @@ public final class plasmaSearchRankingProcess {
         // attention: if minEntries is too high, this method will not terminate within the maxTime
         // sortorder: 0 = hash, 1 = url, 2 = ranking
         this.localSearchContainerMaps = null;
-        this.sortedRWIEntries = new TreeMap<Object, indexRWIEntry>();
-        this.doubleDomCache = new HashMap<String, TreeMap<Object, indexRWIEntry>>();
+        this.sortedRWIEntries = new TreeMap<Object, indexRWIRowEntry>();
+        this.doubleDomCache = new HashMap<String, TreeMap<Object, indexRWIRowEntry>>();
         this.handover = new HashMap<String, String>();
         this.filteredCount = 0;
         this.order = null;
@@ -124,11 +123,11 @@ public final class plasmaSearchRankingProcess {
         final Iterator<indexRWIRowEntry> en = index.entries();
         // generate a new map where the urls are sorted (not by hash but by the url text)
         
-        indexRWIEntry ientry;
+        indexRWIRowEntry ientry;
         indexURLEntry uentry;
         String u;
         loop: while (en.hasNext()) {
-            ientry = (indexRWIEntry) en.next();
+            ientry = en.next();
 
             // check constraints
             if (!testFlags(ientry)) continue loop;
@@ -181,12 +180,12 @@ public final class plasmaSearchRankingProcess {
         // normalize entries and get ranking
         timer = System.currentTimeMillis();
         Iterator<indexRWIRowEntry> i = index.entries();
-        indexRWIVarEntry iEntry, l;
+        indexRWIRowEntry iEntry, l;
         long biggestEntry = 0;
         //long s0 = System.currentTimeMillis();
         Long r;
         while (i.hasNext()) {
-            iEntry = new indexRWIVarEntry(i.next());
+            iEntry = i.next();
             if (iEntry.urlHash().length() != index.row().primaryKeyLength) continue;
 
             // increase flag counts
@@ -216,11 +215,11 @@ public final class plasmaSearchRankingProcess {
                     continue;
                 } else {
                     if (urlhashes.containsKey(iEntry.urlHash())) continue;
-                    l = (indexRWIVarEntry) sortedRWIEntries.remove((Long) sortedRWIEntries.lastKey());
+                    l = sortedRWIEntries.remove((Long) sortedRWIEntries.lastKey());
                     urlhashes.remove(l.urlHash());
                     while (sortedRWIEntries.containsKey(r)) r = new Long(r.longValue() + 1);
                     sortedRWIEntries.put(r, iEntry);
-                    biggestEntry = order.cardinal((indexRWIVarEntry) sortedRWIEntries.get(sortedRWIEntries.lastKey()));
+                    biggestEntry = order.cardinal(sortedRWIEntries.get(sortedRWIEntries.lastKey()));
                 }
             }
             
@@ -267,18 +266,18 @@ public final class plasmaSearchRankingProcess {
     private synchronized Object[] /*{Object, indexRWIEntry}*/ bestRWI(boolean skipDoubleDom) {
         // returns from the current RWI list the best entry and removed this entry from the list
         Object bestEntry;
-        TreeMap<Object, indexRWIEntry> m;
-        indexRWIEntry rwi;
+        TreeMap<Object, indexRWIRowEntry> m;
+        indexRWIRowEntry rwi;
         while (sortedRWIEntries.size() > 0) {
             bestEntry = sortedRWIEntries.firstKey();
-            rwi = (indexRWIEntry) sortedRWIEntries.remove(bestEntry);
+            rwi = sortedRWIEntries.remove(bestEntry);
             if (!skipDoubleDom) return new Object[]{bestEntry, rwi};
             // check doubledom
             String domhash = rwi.urlHash().substring(6);
-            m = (TreeMap<Object, indexRWIEntry>) this.doubleDomCache.get(domhash);
+            m = this.doubleDomCache.get(domhash);
             if (m == null) {
                 // first appearance of dom
-                m = new TreeMap<Object, indexRWIEntry>();
+                m = new TreeMap<Object, indexRWIRowEntry>();
                 this.doubleDomCache.put(domhash, m);
                 return new Object[]{bestEntry, rwi};
             }
@@ -287,20 +286,20 @@ public final class plasmaSearchRankingProcess {
         }
         // no more entries in sorted RWI entries. Now take Elements from the doubleDomCache
         // find best entry from all caches
-        Iterator<TreeMap<Object, indexRWIEntry>> i = this.doubleDomCache.values().iterator();
+        Iterator<TreeMap<Object, indexRWIRowEntry>> i = this.doubleDomCache.values().iterator();
         bestEntry = null;
         Object o;
-        indexRWIEntry bestrwi = null;
+        indexRWIRowEntry bestrwi = null;
         while (i.hasNext()) {
             m = i.next();
             if (m.size() == 0) continue;
             if (bestEntry == null) {
                 bestEntry = m.firstKey();
-                bestrwi = (indexRWIEntry) m.remove(bestEntry);
+                bestrwi = m.remove(bestEntry);
                 continue;
             }
             o = m.firstKey();
-            rwi = (indexRWIEntry) m.remove(o);
+            rwi = m.remove(o);
             if (o instanceof Long) {
                 if (((Long) o).longValue() < ((Long) bestEntry).longValue()) {
                     bestEntry = o;
@@ -326,7 +325,7 @@ public final class plasmaSearchRankingProcess {
         while ((sortedRWIEntries.size() > 0) || (size() > 0)) {
             Object[] obrwi = bestRWI(skipDoubleDom);
             Object bestEntry = obrwi[0];
-            indexRWIEntry ientry = (indexRWIEntry) obrwi[1];
+            indexRWIRowEntry ientry = (indexRWIRowEntry) obrwi[1];
             long ranking = (bestEntry instanceof Long) ? ((Long) bestEntry).longValue() : 0;
             indexURLEntry u = wordIndex.loadedURL.load(ientry.urlHash(), ientry, ranking);
             if (u != null) {
@@ -342,7 +341,7 @@ public final class plasmaSearchRankingProcess {
     public synchronized int size() {
         //assert sortedRWIEntries.size() == urlhashes.size() : "sortedRWIEntries.size() = " + sortedRWIEntries.size() + ", urlhashes.size() = " + urlhashes.size();
         int c = sortedRWIEntries.size();
-        Iterator<TreeMap<Object, indexRWIEntry>> i = this.doubleDomCache.values().iterator();
+        Iterator<TreeMap<Object, indexRWIRowEntry>> i = this.doubleDomCache.values().iterator();
         while (i.hasNext()) c += i.next().size();
         return c;
     }

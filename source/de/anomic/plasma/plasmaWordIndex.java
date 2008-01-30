@@ -598,7 +598,7 @@ public final class plasmaWordIndex implements indexRI {
         public void run() {
             serverLog.logInfo("INDEXCLEANER", "IndexCleaner-Thread started");
             indexContainer container = null;
-            indexRWIEntry entry = null;
+            indexRWIRowEntry entry = null;
             yacyURL url = null;
             HashSet<String> urlHashs = new HashSet<String>();
             Iterator<indexContainer> indexContainerIterator = indexContainerSet(startHash, false, false, 100).iterator();
@@ -609,7 +609,7 @@ public final class plasmaWordIndex implements indexRI {
                 wordHashNow = container.getWordHash();
                 while (containerIterator.hasNext() && run) {
                     waiter();
-                    entry = (indexRWIEntry) containerIterator.next();
+                    entry = containerIterator.next();
                     // System.out.println("Wordhash: "+wordHash+" UrlHash:
                     // "+entry.getUrlHash());
                     indexURLEntry ue = lurl.load(entry.urlHash(), entry, 0);

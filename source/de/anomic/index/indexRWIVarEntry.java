@@ -89,12 +89,12 @@ public class indexRWIVarEntry implements indexRWIEntry {
     }
 
     public boolean isNewer(indexRWIEntry other) {
-        // TODO Auto-generated method stub
+        assert false; // should not be used
         return false;
     }
 
     public boolean isOlder(indexRWIEntry other) {
-        // TODO Auto-generated method stub
+        assert false; // should not be used
         return false;
     }
 
@@ -131,12 +131,12 @@ public class indexRWIVarEntry implements indexRWIEntry {
     }
 
     public Entry toKelondroEntry() {
-        // TODO Auto-generated method stub
+        assert false; // should not be used
         return null;
     }
 
     public String toPropertyForm() {
-        // TODO Auto-generated method stub
+        assert false; // should not be used
         return null;
     }
 

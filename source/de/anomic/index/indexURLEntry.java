@@ -115,7 +115,7 @@ public class indexURLEntry {
     
     private kelondroRow.Entry entry;
     private String snippet;
-    private indexRWIEntry word; // this is only used if the url is transported via remote search requests
+    private indexRWIRowEntry word; // this is only used if the url is transported via remote search requests
     private long ranking; // during generation of a search result this value is set
     
     public indexURLEntry(
@@ -185,7 +185,7 @@ public class indexURLEntry {
         return s.toString().getBytes();
     }
     
-    public indexURLEntry(kelondroRow.Entry entry, indexRWIEntry searchedWord, long ranking) {
+    public indexURLEntry(kelondroRow.Entry entry, indexRWIRowEntry searchedWord, long ranking) {
         this.entry = entry;
         this.snippet = null;
         this.word = searchedWord;
@@ -287,7 +287,7 @@ public class indexURLEntry {
             //          serverLog.logFailure("plasmaLURL.corePropList", e.getMessage());
             //          if (moddate == null) serverLog.logFailure("plasmaLURL.corePropList", "moddate=null");
             //          if (loaddate == null) serverLog.logFailure("plasmaLURL.corePropList", "loaddate=null");
-            //          e.printStackTrace();
+            e.printStackTrace();
             return null;
         }
     }
@@ -391,7 +391,7 @@ public class indexURLEntry {
         return snippet;
     }
 
-    public indexRWIEntry word() {
+    public indexRWIRowEntry word() {
         return word;
     }
 

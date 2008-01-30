@@ -115,6 +115,10 @@ public class indexRWIEntryOrder extends kelondroAbstractOrder<indexRWIVarEntry> 
         return cardinal(new indexRWIVarEntry(new indexRWIRowEntry(key)));
     }
 
+    public long cardinal(indexRWIRowEntry t) {
+        return cardinal(new indexRWIVarEntry(t));
+    }
+
     public long cardinal(indexRWIVarEntry t) {
         //return Long.MAX_VALUE - preRanking(ranking, iEntry, this.entryMin, this.entryMax, this.searchWords);
         // the normalizedEntry must be a normalized indexEntry

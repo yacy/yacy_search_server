@@ -213,7 +213,7 @@ public class plasmaDHTChunk {
             final Iterator<indexContainer> indexContainerIterator = wordIndex.indexContainerSet(hash, ram, true, maxcount).iterator();
             indexContainer container;
             Iterator<indexRWIRowEntry> urlIter;
-            indexRWIEntry iEntry;
+            indexRWIRowEntry iEntry;
             indexURLEntry lurl;
             int refcount = 0;
             int wholesize;
@@ -243,7 +243,7 @@ public class plasmaDHTChunk {
                         // CPU & IO reduce
                         // try { Thread.sleep(50); } catch (InterruptedException e) { }
 
-                        iEntry = (indexRWIEntry) urlIter.next();
+                        iEntry = urlIter.next();
                         if ((iEntry == null) || (iEntry.urlHash() == null)) {
                             urlIter.remove();
                             continue;
@@ -263,7 +263,7 @@ public class plasmaDHTChunk {
 
                     // remove all remaining; we have enough
                     while (urlIter.hasNext()) {
-                        iEntry = (indexRWIEntry) urlIter.next();
+                        iEntry = urlIter.next();
                         urlIter.remove();
                     }
 
