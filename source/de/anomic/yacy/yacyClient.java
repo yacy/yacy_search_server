@@ -477,9 +477,10 @@ public final class yacyClient {
 		// now create a plasmaIndex out of this result
 		// System.out.println("yacyClient: " + ((urlhashes.length() == 0) ? "primary" : "secondary")+ " search result = " + result.toString()); // debug
 		
-		int results = 0;
+		int results = 0, joincount = 0;
         try {
-            results = Integer.parseInt((String) result.get("count"));
+            results = Integer.parseInt(result.get("count"));
+            joincount = Integer.parseInt(result.get("joincount"));
         } catch (NumberFormatException e) {
             yacyCore.log.logFine("SEARCH failed FROM " + target.hash + ":" + target.getName() + ", wrong output format");
             yacyCore.peerActions.peerDeparture(target, "search request to peer created number format exception");
@@ -557,7 +558,7 @@ public final class yacyClient {
         // store remote result to local result container
         synchronized (containerCache) {
             // insert one container into the search result buffer
-            containerCache.insertRanked(container[0], false); // one is enough
+            containerCache.insertRanked(container[0], false, joincount); // one is enough
             
             // integrate remote topwords
             String references = (String) result.get("references");

@@ -241,7 +241,7 @@ public class IndexControlURLs_p {
         prop.put("genUrlProfile", "2");
         prop.putHTML("genUrlProfile_urlNormalform", comp.url().toNormalform(false, true));
         prop.put("genUrlProfile_urlhash", urlhash);
-        prop.put("genUrlProfile_urlDescr", comp.title());
+        prop.put("genUrlProfile_urlDescr", comp.dc_title());
         prop.put("genUrlProfile_moddate", entry.moddate().toString());
         prop.put("genUrlProfile_loaddate", entry.loaddate().toString());
         prop.put("genUrlProfile_referrer", (le == null) ? 0 : 1);

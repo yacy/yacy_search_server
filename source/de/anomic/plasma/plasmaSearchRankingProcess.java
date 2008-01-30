@@ -57,9 +57,8 @@ public final class plasmaSearchRankingProcess {
     private HashMap<String, String> handover; // key = urlhash, value = urlstring; used for double-check of urls that had been handed over to search process
     private plasmaSearchQuery query;
     private int sortorder;
-    private int filteredCount;
     private int maxentries;
-    private int globalcount;
+    private int remote_peerCount, remote_indexCount, remote_resourceSize, local_resourceSize;
     private indexRWIEntryOrder order;
     private HashMap<String, Object> urlhashes; // map for double-check; String/Long relation, addresses ranking number (backreference for deletion)
     private kelondroMScoreCluster<String> ref;  // reference score computation for the commonSense heuristic
@@ -76,11 +75,13 @@ public final class plasmaSearchRankingProcess {
         this.sortedRWIEntries = new TreeMap<Object, indexRWIRowEntry>();
         this.doubleDomCache = new HashMap<String, TreeMap<Object, indexRWIRowEntry>>();
         this.handover = new HashMap<String, String>();
-        this.filteredCount = 0;
         this.order = null;
         this.query = query;
         this.maxentries = maxentries;
-        this.globalcount = 0;
+        this.remote_peerCount = 0;
+        this.remote_indexCount = 0;
+        this.remote_resourceSize = 0;
+        this.local_resourceSize = 0;
         this.urlhashes = new HashMap<String, Object>();
         this.ref = new kelondroMScoreCluster<String>();
         this.misses = new TreeSet<String>();
@@ -90,7 +91,7 @@ public final class plasmaSearchRankingProcess {
         for (int i = 0; i < 32; i++) {this.flagcount[i] = 0;}
     }
     
-    public void execQuery(boolean fetchURLs) {
+    public void execQuery() {
         
         long timer = System.currentTimeMillis();
         this.localSearchContainerMaps = wordIndex.localSearchContainers(query, null);
@@ -113,15 +114,23 @@ public final class plasmaSearchRankingProcess {
         }
         
         if (sortorder == 2) {
-            insertRanked(index, true);
+            insertRanked(index, true, index.size());
         } else {            
-            insertNoOrder(index, fetchURLs);
+            insertNoOrder(index, true, index.size());
         }
     }
     
-    private void insertNoOrder(indexContainer index, boolean local) {
+    private void insertNoOrder(indexContainer index, boolean local, int fullResource) {
         final Iterator<indexRWIRowEntry> en = index.entries();
         // generate a new map where the urls are sorted (not by hash but by the url text)
+        
+        if (local) {
+            this.local_resourceSize += fullResource;
+        } else {
+            this.remote_resourceSize += fullResource;
+            this.remote_peerCount++;
+            this.remote_indexCount += index.size();
+        }
         
         indexRWIRowEntry ientry;
         indexURLEntry uentry;
@@ -141,20 +150,14 @@ public final class plasmaSearchRankingProcess {
             if (sortorder == 0) {
                 this.sortedRWIEntries.put(ientry.urlHash(), ientry);
                 this.urlhashes.put(ientry.urlHash(), ientry.urlHash());
-                filteredCount++;
             } else {
-                if (local) {
-                    uentry = wordIndex.loadedURL.load(ientry.urlHash(), ientry, 0);
-                    if (uentry == null) {
-                        this.misses.add(ientry.urlHash());
-                    } else {
-                        u = uentry.comp().url().toNormalform(false, true);
-                        this.sortedRWIEntries.put(u, ientry);
-                        this.urlhashes.put(ientry.urlHash(), u);
-                        filteredCount++;
-                    }
+                uentry = wordIndex.loadedURL.load(ientry.urlHash(), ientry, 0);
+                if (uentry == null) {
+                    this.misses.add(ientry.urlHash());
                 } else {
-                    filteredCount++;
+                    u = uentry.comp().url().toNormalform(false, true);
+                    this.sortedRWIEntries.put(u, ientry);
+                    this.urlhashes.put(ientry.urlHash(), u);
                 }
             }
             
@@ -163,12 +166,18 @@ public final class plasmaSearchRankingProcess {
         } // end loop
     }
     
-    public void insertRanked(indexContainer index, boolean local) {
+    public void insertRanked(indexContainer index, boolean local, int fullResource) {
         // we collect the urlhashes and construct a list with urlEntry objects
         // attention: if minEntries is too high, this method will not terminate within the maxTime
 
         assert (index != null);
         if (index.size() == 0) return;
+        if (local) {
+            this.local_resourceSize += fullResource;
+        } else {
+            this.remote_resourceSize += fullResource;
+            this.remote_peerCount++;
+        }
         
         long timer = System.currentTimeMillis();
         if (this.order == null) {
@@ -224,11 +233,8 @@ public final class plasmaSearchRankingProcess {
             }
             
             // increase counter for statistics
-            if (!local) this.globalcount++;
+            if (!local) this.remote_indexCount++;
         }
-        this.filteredCount = sortedRWIEntries.size();
-        //long sc = Math.max(1, System.currentTimeMillis() - s0);
-        //System.out.println("###DEBUG### time to sort " + container.size() + " entries to " + this.filteredCount + ": " + sc + " milliseconds, " + (container.size() / sc) + " entries/millisecond, ranking = " + tc);
         
         //if ((query.neededResults() > 0) && (container.size() > query.neededResults())) remove(true, true);
         serverProfiling.update("SEARCH", new plasmaProfiling.searchEvent(query.id(true), plasmaSearchEvent.PRESORT, index.size(), System.currentTimeMillis() - timer));
@@ -350,13 +356,33 @@ public final class plasmaSearchRankingProcess {
     	return flagcount;
     }
     
+    // "results from a total number of <remote_resourceSize + local_resourceSize> known (<local_resourceSize> local, <remote_resourceSize> remote), <remote_indexCount> links from <remote_peerCount> other YaCy peers."
+    
     public int filteredCount() {
-        return this.filteredCount;
+        // the number of index entries that are considered as result set
+        return this.sortedRWIEntries.size();
     }
 
-    public int getGlobalCount() {
-        return this.globalcount;
+    public int getRemoteIndexCount() {
+        // the number of result contributions from all the remote peers
+        return this.remote_indexCount;
     }
+    
+    public int getRemotePeerCount() {
+        // the number of remote peers that have contributed
+        return this.remote_peerCount;
+    }
+    
+    public int getRemoteResourceSize() {
+        // the number of all hits in all the remote peers
+        return this.remote_resourceSize;
+    }
+    
+    public int getLocalResourceSize() {
+        // the number of hits in the local peer (index size, size of the collection in the own index)
+        return this.local_resourceSize;
+    }
+    
     
     public indexRWIEntry remove(String urlHash) {
         Object r = (Long) urlhashes.get(urlHash);

@@ -104,11 +104,11 @@ public class urls {
                 referrer = sb.getURL(entry.referrerHash());
                 // create RSS entry
                 comp = entry.comp();
-                prop.put("item_" + c + "_title", comp.title());
+                prop.put("item_" + c + "_title", comp.dc_title());
                 prop.putHTML("item_" + c + "_link", comp.url().toNormalform(true, false));
                 prop.putHTML("item_" + c + "_referrer", (referrer == null) ? "" : referrer.toNormalform(true, false));
-                prop.putHTML("item_" + c + "_description", comp.title());
-                prop.put("item_" + c + "_author", comp.author());
+                prop.putHTML("item_" + c + "_description", comp.dc_title());
+                prop.put("item_" + c + "_author", comp.dc_creator());
                 prop.put("item_" + c + "_pubDate", serverDate.formatShortSecond(entry.moddate()));
                 prop.put("item_" + c + "_guid", entry.hash());
                 c++;

@@ -203,10 +203,10 @@ public class Bookmarks {
                             document = plasmaSnippetCache.retrieveDocument(comp.url(), true, 5000, true);
                             prop.put("mode_edit", "0"); // create mode
                             prop.put("mode_url", comp.url().toNormalform(false, true));
-                            prop.putHTML("mode_title", comp.title());
-                            prop.putHTML("mode_description", (document == null) ? comp.title(): document.dc_title());
-                            prop.putHTML("mode_author", comp.author());
-                            prop.putHTML("mode_tags", (document == null) ? comp.tags() : document.dc_subject(','));
+                            prop.putHTML("mode_title", comp.dc_title());
+                            prop.putHTML("mode_description", (document == null) ? comp.dc_title(): document.dc_title());
+                            prop.putHTML("mode_author", comp.dc_creator());
+                            prop.putHTML("mode_tags", (document == null) ? comp.dc_subject() : document.dc_subject(','));
                             prop.putHTML("mode_path","");
                             prop.put("mode_public", "0");
                             prop.put("mode_feed", "0"); //TODO: check if it IS a feed

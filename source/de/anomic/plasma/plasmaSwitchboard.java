@@ -2205,7 +2205,7 @@ public final class plasmaSwitchboard extends serverAbstractSwitch implements ser
             /* =========================================================================
              * CREATE INDEX
              * ========================================================================= */  
-            String docDescription = document.dc_title();
+            String dc_title = document.dc_title();
             yacyURL referrerURL = entry.referrerURL();
 
             String noIndexReason = plasmaCrawlEURL.DENIED_UNSPECIFIED_INDEXING_ERROR;
@@ -2236,9 +2236,9 @@ public final class plasmaSwitchboard extends serverAbstractSwitch implements ser
                     long ldate = System.currentTimeMillis();
                     indexURLEntry newEntry = new indexURLEntry(
                             entry.url(),                               // URL
-                            docDescription,                            // document description
-                            document.dc_creator(),                      // author
-                            document.dc_subject(' '),                 // tags
+                            dc_title,                            // document description
+                            document.dc_creator(),                     // author
+                            document.dc_subject(' '),                  // tags
                             "",                                        // ETag
                             docDate,                                   // modification date
                             new Date(),                                // loaded date
@@ -2406,7 +2406,7 @@ public final class plasmaSwitchboard extends serverAbstractSwitch implements ser
                             // of string concatenation
                             log.logInfo("*Indexed " + words + " words in URL " + entry.url() +
                                     " [" + entry.urlHash() + "]" +
-                                    "\n\tDescription:  " + docDescription +
+                                    "\n\tDescription:  " + dc_title +
                                     "\n\tMimeType: "  + document.dc_format() + " | Charset: " + document.getCharset() + " | " +
                                     "Size: " + document.getTextLength() + " bytes | " +
                                     "Anchors: " + ((document.getAnchors() == null) ? 0 : document.getAnchors().size()) +
@@ -2430,7 +2430,7 @@ public final class plasmaSwitchboard extends serverAbstractSwitch implements ser
                         }
                     } else {
                         log.logFine("Not Indexed Resource '" + entry.url().toNormalform(false, true) + "': process case=" + processCase);
-                        addURLtoErrorDB(entry.url(), referrerURL.hash(), initiatorPeerHash, docDescription, plasmaCrawlEURL.DENIED_UNKNOWN_INDEXING_PROCESS_CASE, new kelondroBitfield());
+                        addURLtoErrorDB(entry.url(), referrerURL.hash(), initiatorPeerHash, dc_title, plasmaCrawlEURL.DENIED_UNKNOWN_INDEXING_PROCESS_CASE, new kelondroBitfield());
                     }
                 } catch (Exception ee) {
                     if (ee instanceof InterruptedException) throw (InterruptedException)ee;
@@ -2443,7 +2443,7 @@ public final class plasmaSwitchboard extends serverAbstractSwitch implements ser
                         if (clusterhashes != null) initiatorPeer.setAlternativeAddress((String) clusterhashes.get(initiatorPeer.hash));
                         yacyClient.crawlReceipt(initiatorPeer, "crawl", "exception", ee.getMessage(), null, "");
                     }
-                    addURLtoErrorDB(entry.url(), (referrerURL == null) ? null : referrerURL.hash(), initiatorPeerHash, docDescription, plasmaCrawlEURL.DENIED_UNSPECIFIED_INDEXING_ERROR, new kelondroBitfield());
+                    addURLtoErrorDB(entry.url(), (referrerURL == null) ? null : referrerURL.hash(), initiatorPeerHash, dc_title, plasmaCrawlEURL.DENIED_UNSPECIFIED_INDEXING_ERROR, new kelondroBitfield());
                 }
                 
             } else {
@@ -2451,7 +2451,7 @@ public final class plasmaSwitchboard extends serverAbstractSwitch implements ser
                 checkInterruption();
                 
                 log.logInfo("Not indexed any word in URL " + entry.url() + "; cause: " + noIndexReason);
-                addURLtoErrorDB(entry.url(), (referrerURL == null) ? null : referrerURL.hash(), initiatorPeerHash, docDescription, noIndexReason, new kelondroBitfield());
+                addURLtoErrorDB(entry.url(), (referrerURL == null) ? null : referrerURL.hash(), initiatorPeerHash, dc_title, noIndexReason, new kelondroBitfield());
                 if ((processCase == PROCESSCASE_6_GLOBAL_CRAWLING) && (initiatorPeer != null)) {
                     if (clusterhashes != null) initiatorPeer.setAlternativeAddress((String) clusterhashes.get(initiatorPeer.hash));
                     yacyClient.crawlReceipt(initiatorPeer, "crawl", "rejected", noIndexReason, null, "");

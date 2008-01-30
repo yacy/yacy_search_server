@@ -120,9 +120,9 @@ public class indexURLEntry {
     
     public indexURLEntry(
             yacyURL url,
-            String descr,
-            String author,
-            String tags,
+            String dc_title,
+            String dc_creator,
+            String dc_subject,
             String ETag,
             Date mod,
             Date load,
@@ -143,7 +143,7 @@ public class indexURLEntry {
         // create new entry and store it into database
         this.entry = rowdef.newEntry();
         this.entry.setCol(col_hash, url.hash(), null);
-        this.entry.setCol(col_comp, encodeComp(url, descr, author, tags, ETag));
+        this.entry.setCol(col_comp, encodeComp(url, dc_title, dc_creator, dc_subject, ETag));
         encodeDate(col_mod, mod);
         encodeDate(col_load, load);
         encodeDate(col_fresh, fresh);
@@ -175,12 +175,12 @@ public class indexURLEntry {
         return new Date(86400000 * this.entry.getColLong(col));
     }
     
-    public static byte[] encodeComp(yacyURL url, String descr, String author, String tags, String ETag) {
+    public static byte[] encodeComp(yacyURL url, String dc_title, String dc_creator, String dc_subject, String ETag) {
         serverCharBuffer s = new serverCharBuffer(200);
         s.append(url.toNormalform(false, true)).append(10);
-        s.append(descr).append(10);
-        s.append(author).append(10);
-        s.append(tags).append(10);
+        s.append(dc_title).append(10);
+        s.append(dc_creator).append(10);
+        s.append(dc_subject).append(10);
         s.append(ETag).append(10);
         return s.toString().getBytes();
     }
@@ -203,13 +203,13 @@ public class indexURLEntry {
             url = null;
         }
         String descr = crypt.simpleDecode(prop.getProperty("descr", ""), null); if (descr == null) descr = "";
-        String author = crypt.simpleDecode(prop.getProperty("author", ""), null); if (author == null) author = "";
+        String dc_creator = crypt.simpleDecode(prop.getProperty("author", ""), null); if (dc_creator == null) dc_creator = "";
         String tags = crypt.simpleDecode(prop.getProperty("tags", ""), null); if (tags == null) tags = "";
         String ETag = crypt.simpleDecode(prop.getProperty("ETag", ""), null); if (ETag == null) ETag = "";
         
         this.entry = rowdef.newEntry();
         this.entry.setCol(col_hash, url.hash(), null);
-        this.entry.setCol(col_comp, encodeComp(url, descr, author, tags, ETag));
+        this.entry.setCol(col_comp, encodeComp(url, descr, dc_creator, tags, ETag));
         try {
             encodeDate(col_mod, serverDate.parseShortDay(prop.getProperty("mod", "20000101")));
         } catch (ParseException e) {
@@ -256,9 +256,9 @@ public class indexURLEntry {
         try {
             s.append("hash=").append(hash());
             s.append(",url=").append(crypt.simpleEncode(comp.url().toNormalform(false, true)));
-            s.append(",descr=").append(crypt.simpleEncode(comp.title()));
-            s.append(",author=").append(crypt.simpleEncode(comp.author()));
-            s.append(",tags=").append(crypt.simpleEncode(comp.tags()));
+            s.append(",descr=").append(crypt.simpleEncode(comp.dc_title()));
+            s.append(",author=").append(crypt.simpleEncode(comp.dc_creator()));
+            s.append(",tags=").append(crypt.simpleEncode(comp.dc_subject()));
             s.append(",ETag=").append(crypt.simpleEncode(comp.ETag()));
             s.append(",mod=").append(serverDate.formatShortDay(moddate()));
             s.append(",load=").append(serverDate.formatShortDay(loaddate()));
@@ -429,7 +429,7 @@ public class indexURLEntry {
                 null, 
                 comp().url(), 
                 referrerHash(), 
-                comp().title(),
+                comp().dc_title(),
                 loaddate(), 
                 null,
                 0, 
@@ -455,7 +455,7 @@ public class indexURLEntry {
 
     public class Components {
         private yacyURL url;
-        private String title, author, tags, ETag;
+        private String dc_title, dc_creator, dc_subject, ETag;
         
         public Components(String url, String urlhash, String title, String author, String tags, String ETag) {
             try {
@@ -463,22 +463,22 @@ public class indexURLEntry {
             } catch (MalformedURLException e) {
                 this.url = null;
             }
-            this.title = title;
-            this.author = author;
-            this.tags = tags;
+            this.dc_title = title;
+            this.dc_creator = author;
+            this.dc_subject = tags;
             this.ETag = ETag;
         }
         public Components(yacyURL url, String descr, String author, String tags, String ETag) {
             this.url = url;
-            this.title = descr;
-            this.author = author;
-            this.tags = tags;
+            this.dc_title = descr;
+            this.dc_creator = author;
+            this.dc_subject = tags;
             this.ETag = ETag;
         }
         public yacyURL url()    { return this.url; }
-        public String  title()  { return this.title; }
-        public String  author() { return this.author; }
-        public String  tags()   { return this.tags; }
+        public String  dc_title()  { return this.dc_title; }
+        public String  dc_creator() { return this.dc_creator; }
+        public String  dc_subject()   { return this.dc_subject; }
         public String  ETag()   { return this.ETag; }
     }
     

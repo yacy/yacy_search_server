@@ -70,9 +70,12 @@ function addHover() {
   }
 }
 
-function statistics(offset, items, global, total) {
+function statistics(offset, itemscount, totalcount, localResourceSize, remoteResourceSize, remoteIndexCount, remotePeerCount) {
   document.getElementById("resultsOffset").firstChild.nodeValue = offset;
-  document.getElementById("itemscount").firstChild.nodeValue = items;
-  document.getElementById("globalcount").firstChild.nodeValue = global;
-  document.getElementById("totalcount").firstChild.nodeValue = total;
+  document.getElementById("itemscount").firstChild.nodeValue = itemscount;
+  document.getElementById("totalcount").firstChild.nodeValue = totalcount;
+  document.getElementById("localResourceSize").firstChild.nodeValue = localResourceSize;
+  document.getElementById("remoteResourceSize").firstChild.nodeValue = remoteResourceSize;
+  document.getElementById("remoteIndexCount").firstChild.nodeValue = remoteIndexCount;
+  document.getElementById("remotePeerCount").firstChild.nodeValue = remotePeerCount;
 }

@@ -183,7 +183,7 @@ public final class search {
             snippetComputationAllTime = theSearch.getSnippetComputationTime();
             
             // set statistic details of search result and find best result index set
-            if (theSearch.getLocalCount() == 0) {
+            if (theSearch.getRankingResult().getLocalResourceSize() == 0) {
                 prop.put("indexcount", "");
                 prop.put("joincount", "0");
             } else {
@@ -207,11 +207,11 @@ public final class search {
                 }
                 prop.put("indexcount", indexcount.toString());
                 
-                if (theSearch.getLocalCount() == 0) {
+                if (theSearch.getRankingResult().getLocalResourceSize() == 0) {
                     joincount = 0;
                     prop.put("joincount", "0");
                 } else {
-                    joincount = theSearch.getLocalCount();
+                    joincount = theSearch.getRankingResult().getLocalResourceSize();
                     prop.put("joincount", Integer.toString(joincount));
                     accu = theSearch.completeResults(duetime);
                 }

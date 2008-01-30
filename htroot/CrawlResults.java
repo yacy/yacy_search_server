@@ -217,11 +217,11 @@ public class CrawlResults {
                         } else {
                             prop.put("table_indexed_" + cnt + "_showTitle_available", "1");
 
-                            if (comp.title() == null || comp.title().trim().length() == 0)
+                            if (comp.dc_title() == null || comp.dc_title().trim().length() == 0)
                                 prop.put("table_indexed_" + cnt + "_showTitle_available_nodescr", "0");
                             else
                                 prop.put("table_indexed_" + cnt + "_showTitle_available_nodescr", "1");
-                            prop.putHTML("table_indexed_" + cnt + "_showTitle_available_nodescr_urldescr", comp.title());
+                            prop.putHTML("table_indexed_" + cnt + "_showTitle_available_nodescr_urldescr", comp.dc_title());
 
                             prop.put("table_indexed_" + cnt + "_showTitle_available_cachepath", cachepath);
                             prop.putHTML("table_indexed_" + cnt + "_showTitle_available_urltitle", urlstr);

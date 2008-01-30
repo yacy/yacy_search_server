@@ -89,7 +89,7 @@ public class IndexControlRWIs_p {
             if (post.containsKey("keystringsearch")) {
                 keyhash = plasmaCondenser.word2hash(keystring);
                 prop.put("keyhash", keyhash);
-                final plasmaSearchRankingProcess ranking = plasmaSearchAPI.genSearchresult(prop, sb, keyhash, null, sortorder, false);
+                final plasmaSearchRankingProcess ranking = plasmaSearchAPI.genSearchresult(prop, sb, keyhash, null, sortorder);
                 if (ranking.filteredCount() == 0) {
                     prop.put("searchresult", 1);
                     prop.put("searchresult_word", keystring);
@@ -100,7 +100,7 @@ public class IndexControlRWIs_p {
                 if (keystring.length() == 0 || !plasmaCondenser.word2hash(keystring).equals(keyhash)) {
                     prop.put("keystring", "&lt;not possible to compute word from hash&gt;");
                 }
-                final plasmaSearchRankingProcess ranking = plasmaSearchAPI.genSearchresult(prop, sb, keyhash, null, sortorder, false);
+                final plasmaSearchRankingProcess ranking = plasmaSearchAPI.genSearchresult(prop, sb, keyhash, null, sortorder);
                 if (ranking.filteredCount() == 0) {
                     prop.put("searchresult", 2);
                     prop.put("searchresult_wordhash", keyhash);
@@ -159,7 +159,7 @@ public class IndexControlRWIs_p {
                 }
                 kelondroBitfield flags = plasmaSearchAPI.compileFlags(post);
                 int count = (post.get("lines", "all").equals("all")) ? -1 : post.getInt("lines", -1);
-                final plasmaSearchRankingProcess ranking = plasmaSearchAPI.genSearchresult(prop, sb, keyhash, flags, sortorder, true);
+                final plasmaSearchRankingProcess ranking = plasmaSearchAPI.genSearchresult(prop, sb, keyhash, flags, sortorder);
                 plasmaSearchAPI.genURLList(prop, keyhash, keystring, ranking, flags, count, sortorder);
             }
 

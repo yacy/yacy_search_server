@@ -874,7 +874,7 @@ public class plasmaSnippetCache {
             plasmaSearchEvent event = plasmaSearchEvent.getEvent(eventID);
             assert plasmaSwitchboard.getSwitchboard() != null;
             assert plasmaSwitchboard.getSwitchboard().wordIndex != null;
-            assert event != null;
+            assert event != null : "eventID = " + eventID;
             assert event.getQuery() != null;
             plasmaSwitchboard.getSwitchboard().wordIndex.removeEntryMultiple(event.getQuery().queryHashes, urlHash);
             event.remove(urlHash);

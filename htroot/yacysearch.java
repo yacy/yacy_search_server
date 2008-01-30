@@ -240,8 +240,8 @@ public class yacysearch {
                         // create a news message
                         HashMap<String, String> map = new HashMap<String, String>();
                         map.put("url", comp.url().toNormalform(false, true).replace(',', '|'));
-                        map.put("title", comp.title().replace(',', ' '));
-                        map.put("description", ((document == null) ? comp.title() : document.dc_title()).replace(',', ' '));
+                        map.put("title", comp.dc_title().replace(',', ' '));
+                        map.put("description", ((document == null) ? comp.dc_title() : document.dc_title()).replace(',', ' '));
                         map.put("author", ((document == null) ? "" : document.dc_creator()));
                         map.put("tags", ((document == null) ? "" : document.dc_subject(' ')));
                         yacyCore.newsPool.publishMyNews(yacyNewsRecord.newRecord(yacyNewsPool.CATEGORY_SURFTIPP_ADD, map));
@@ -306,12 +306,12 @@ public class yacysearch {
 
             // log
             serverLog.logInfo("LOCAL_SEARCH", "EXIT WORD SEARCH: " + theQuery.queryString + " - " +
-                    (theSearch.getLocalCount() + theSearch.getGlobalCount()) + " links found, " +
+                    (theSearch.getRankingResult().getLocalResourceSize() + theSearch.getRankingResult().getRemoteResourceSize()) + " links found, " +
                     ((System.currentTimeMillis() - timestamp) / 1000) + " seconds");
 
             // prepare search statistics
             Long trackerHandle = new Long(System.currentTimeMillis());
-            HashMap<String, Object> searchProfile = theQuery.resultProfile(theSearch.getLocalCount() + theSearch.getGlobalCount(), System.currentTimeMillis() - timestamp, theSearch.getURLRetrievalTime(), theSearch.getSnippetComputationTime());
+            HashMap<String, Object> searchProfile = theQuery.resultProfile(theSearch.getRankingResult().getLocalResourceSize() + theSearch.getRankingResult().getRemoteResourceSize(), System.currentTimeMillis() - timestamp, theSearch.getURLRetrievalTime(), theSearch.getSnippetComputationTime());
             searchProfile.put("querystring", theQuery.queryString);
             searchProfile.put("time", trackerHandle);
             searchProfile.put("host", client);
@@ -323,13 +323,16 @@ public class yacysearch {
             sb.localSearchTracker.put(client, handles);
         
             prop = new serverObjects();
-            prop.put("num-results_totalcount", yFormatter.number(theSearch.getLocalCount() + theSearch.getGlobalCount(), !rss));
-            prop.put("num-results_globalresults", "1");
-            prop.put("num-results_globalresults_globalcount", yFormatter.number(theSearch.getGlobalCount(), !rss));
             prop.put("num-results_offset", offset);
-            prop.put("num-results_linkcount", "0");
+            prop.put("num-results_itemscount", "0");
             prop.put("num-results_itemsPerPage", itemsPerPage);
-
+            prop.put("num-results_totalcount", yFormatter.number(theSearch.getRankingResult().getLocalResourceSize() + theSearch.getRankingResult().getRemoteResourceSize(), !rss));
+            prop.put("num-results_globalresults", (globalsearch) ? "1" : "0");
+            prop.put("num-results_globalresults_localResourceSize", yFormatter.number(theSearch.getRankingResult().getLocalResourceSize(), !rss));
+            prop.put("num-results_globalresults_remoteResourceSize", yFormatter.number(theSearch.getRankingResult().getRemoteResourceSize(), !rss));
+            prop.put("num-results_globalresults_remoteIndexCount", yFormatter.number(theSearch.getRankingResult().getRemoteIndexCount(), !rss));
+            prop.put("num-results_globalresults_remotePeerCount", yFormatter.number(theSearch.getRankingResult().getRemotePeerCount(), !rss));
+            
             // compose page navigation
             StringBuffer resnav = new StringBuffer();
             int thispage = offset / theQuery.displayResults();
@@ -337,7 +340,7 @@ public class yacysearch {
                 resnav.append(navurla(thispage - 1, display, theQuery));
                 resnav.append("<strong>&lt;</strong></a>&nbsp;");
             }
-            int numberofpages = Math.min(10, Math.min(thispage + 2, (theSearch.getGlobalCount() + theSearch.getLocalCount()) / theQuery.displayResults()));
+            int numberofpages = Math.min(10, Math.min(thispage + 2, (theSearch.getRankingResult().getRemoteResourceSize() + theSearch.getRankingResult().getLocalResourceSize()) / theQuery.displayResults()));
             for (int i = 0; i < numberofpages; i++) {
                 if (i == thispage) {
                     resnav.append("<strong>");

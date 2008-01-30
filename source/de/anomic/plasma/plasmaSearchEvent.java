@@ -76,7 +76,6 @@ public final class plasmaSearchEvent {
     public  TreeMap<String, String> IAResults;
     public  TreeMap<String, Integer> IACount;
     public  String IAmaxcounthash, IAneardhthash;
-    private int localcount;
     private resultWorker[] workerThreads;
     private ArrayList<ResultEntry> resultList;
     //private int resultListLock; // a pointer that shows that all elements below this pointer are fixed and may not be changed again
@@ -101,7 +100,6 @@ public final class plasmaSearchEvent {
         this.IACount = new TreeMap<String, Integer>();
         this.IAmaxcounthash = null;
         this.IAneardhthash = null;
-        this.localcount = 0;
         this.urlRetrievalAllTime = 0;
         this.snippetComputationAllTime = 0;
         this.workerThreads = null;
@@ -157,8 +155,7 @@ public final class plasmaSearchEvent {
         } else {
             // do a local search
             this.rankedCache = new plasmaSearchRankingProcess(wordIndex, query, 2, max_results_preparation);
-            this.rankedCache.execQuery(true);
-            this.localcount = this.rankedCache.filteredCount();
+            this.rankedCache.execQuery();
             //plasmaWordIndex.Finding finding = wordIndex.retrieveURLs(query, false, 2, ranking, process);
             
             if (generateAbstracts) {
@@ -249,8 +246,7 @@ public final class plasmaSearchEvent {
             // sort the local containers and truncate it to a limited count,
             // so following sortings together with the global results will be fast
             synchronized (rankedCache) {
-                rankedCache.execQuery(true);
-                localcount = rankedCache.filteredCount();
+                rankedCache.execQuery();
             }
         }
     }
@@ -291,13 +287,13 @@ public final class plasmaSearchEvent {
         
         long startTime = System.currentTimeMillis();
         indexURLEntry.Components comp = page.comp();
-        String pagetitle = comp.title().toLowerCase();
+        String pagetitle = comp.dc_title().toLowerCase();
         if (comp.url() == null) {
             registerFailure(page.hash(), "url corrupted (null)");
             return null; // rare case where the url is corrupted
         }
         String pageurl = comp.url().toString().toLowerCase();
-        String pageauthor = comp.author().toLowerCase();
+        String pageauthor = comp.dc_creator().toLowerCase();
         long dbRetrievalTime = System.currentTimeMillis() - startTime;
         
         // check exclusion
@@ -315,7 +311,7 @@ public final class plasmaSearchEvent {
         // check constraints
         if ((query.constraint != null) &&
             (query.constraint.get(plasmaCondenser.flag_cat_indexof)) &&
-            (!(comp.title().startsWith("Index of")))) {
+            (!(comp.dc_title().startsWith("Index of")))) {
             final Iterator<String> wi = query.queryHashes.iterator();
             while (wi.hasNext()) wordIndex.removeEntry((String) wi.next(), page.hash());
             registerFailure(page.hash(), "index-of constraint not fullfilled");
@@ -423,12 +419,8 @@ public final class plasmaSearchEvent {
         return secondarySearchThreads;
     }
     
-    public int getLocalCount() {
-        return this.localcount;
-    }
-    
-    public int getGlobalCount() {
-        return this.rankedCache.getGlobalCount();
+    public plasmaSearchRankingProcess getRankingResult() {
+        return this.rankedCache;
     }
     
     public long getURLRetrievalTime() {
@@ -465,7 +457,7 @@ public final class plasmaSearchEvent {
             if ((query.onlineSnippetFetch) &&
                 (!event.anyWorkerAlive()) &&
                 (event.resultList.size() < query.neededResults() + 10) &&
-                ((event.getLocalCount() + event.getGlobalCount()) > event.resultList.size())) {
+                ((event.getRankingResult().getLocalResourceSize() + event.getRankingResult().getRemoteResourceSize()) > event.resultList.size())) {
                 // set new timeout
                 event.eventTime = System.currentTimeMillis();
                 // start worker threads to fetch urls and snippets
@@ -764,7 +756,7 @@ public final class plasmaSearchEvent {
                                 ("yacyshare " +
                                  filename.replace('?', ' ') +
                                  " " +
-                                 urlcomps.title()).getBytes(), "UTF-8").keySet(),
+                                 urlcomps.dc_title()).getBytes(), "UTF-8").keySet(),
                                  urlentry.hash());
                         wordIndex.loadedURL.remove(urlentry.hash()); // clean up
                         throw new RuntimeException("index void");
@@ -794,7 +786,7 @@ public final class plasmaSearchEvent {
             return (alternative_urlname == null) ? urlcomps.url().toNormalform(false, true) : alternative_urlname;
         }
         public String title() {
-            return urlcomps.title();
+            return urlcomps.dc_title();
         }
         public plasmaSnippetCache.TextSnippet textSnippet() {
             return this.textSnippet;

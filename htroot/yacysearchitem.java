@@ -44,6 +44,7 @@ import de.anomic.server.serverObjects;
 import de.anomic.server.serverSwitch;
 import de.anomic.tools.crypt;
 import de.anomic.tools.nxTools;
+import de.anomic.tools.yFormatter;
 import de.anomic.yacy.yacyCore;
 import de.anomic.yacy.yacyNewsPool;
 import de.anomic.yacy.yacySeed;
@@ -85,9 +86,12 @@ public class yacysearchitem {
         // dynamically update count values
         if (!rss) {
             prop.put("dynamic_offset", theQuery.neededResults() - theQuery.displayResults() + 1);
-            prop.put("dynamic_global", theSearch.getGlobalCount());
-            prop.put("dynamic_total", theSearch.getGlobalCount() + theSearch.getLocalCount());
-            prop.put("dynamic_items", (item < 0) ? theQuery.neededResults() : item + 1);
+            prop.put("dynamic_itemscount", (item < 0) ? theQuery.neededResults() : item + 1);
+            prop.put("dynamic_totalcount", yFormatter.number(theSearch.getRankingResult().getLocalResourceSize() + theSearch.getRankingResult().getRemoteResourceSize(), !rss));
+            prop.put("dynamic_localResourceSize", yFormatter.number(theSearch.getRankingResult().getLocalResourceSize(), !rss));
+            prop.put("dynamic_remoteResourceSize", yFormatter.number(theSearch.getRankingResult().getRemoteResourceSize(), !rss));
+            prop.put("dynamic_remoteIndexCount", yFormatter.number(theSearch.getRankingResult().getRemoteIndexCount(), !rss));
+            prop.put("dynamic_remotePeerCount", yFormatter.number(theSearch.getRankingResult().getRemotePeerCount(), !rss));
             prop.put("dynamic", "1");
         }
         

@@ -343,6 +343,7 @@ public class kelondroEcoTable implements kelondroIndex {
         } else {
             // read old value
             kelondroRow.Entry v = table.get(i);
+            assert v != null;
             System.arraycopy(row.getPrimaryKeyBytes(), 0, b, 0, rowdef.primaryKeyLength);
             System.arraycopy(v.bytes(), 0, b, rowdef.primaryKeyLength, rowdef.objectsize - rowdef.primaryKeyLength);
             // write new value
