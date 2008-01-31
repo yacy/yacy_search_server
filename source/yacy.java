@@ -164,7 +164,7 @@ public final class yacy {
     * @param homePath Root-path where all information is to be found.
     * @param startupFree free memory at startup time, to be used later for statistics
     */
-    private static void startup(String homePath, long startupMemFree, long startupMemTotal) {
+    private static void startup(File homePath, long startupMemFree, long startupMemTotal) {
         int oldRev=0;
         int newRev=0;
 
@@ -183,7 +183,7 @@ public final class yacy {
             }
             
             // ensure that there is a DATA directory, if not, create one and if that fails warn and die
-            File f = new File(homePath); if (!(f.exists())) f.mkdirs();
+            File f = homePath; if (!(f.exists())) f.mkdirs();
             f = new File(homePath, "DATA/"); if (!(f.exists())) f.mkdirs();
 			if (!(f.exists())) { 
 				System.err.println("Error creating DATA-directory in " + homePath.toString() + " . Please check your write-permission for this folder. YaCy will now terminate."); 
@@ -198,7 +198,7 @@ public final class yacy {
                 System.out.println("could not copy yacy.logging");
             }
             try{
-                serverLog.configureLogging(homePath,new File(homePath, "DATA/LOG/yacy.logging"));
+                serverLog.configureLogging(homePath, new File(homePath, "DATA/LOG/yacy.logging"));
             } catch (IOException e) {
                 System.out.println("could not find logging properties in homePath=" + homePath);
                 e.printStackTrace();
@@ -263,7 +263,7 @@ public final class yacy {
             sb.setConfig("version", Double.toString(version));
             sb.setConfig("vString", yacyVersion.combined2prettyVersion(Double.toString(version)));
             sb.setConfig("vdate", (vDATE.startsWith("@")) ? serverDate.formatShortDay() : vDATE);
-            sb.setConfig("applicationRoot", homePath);
+            sb.setConfig("applicationRoot", homePath.toString());
             serverLog.logConfig("STARTUP", "YACY Version: " + version + ", Built " + sb.getConfig("vdate", "00000000"));
             yacyVersion.latestRelease = version;
 
@@ -451,7 +451,7 @@ public final class yacy {
     * @param homePath Root-path where all the information is to be found.
     * @return Properties read from the configurationfile.
     */
-    private static Properties configuration(String mes, String homePath) {
+    private static Properties configuration(String mes, File homePath) {
         serverLog.logConfig(mes, "Application Root Path: " + homePath.toString());
 
         // read data folder
@@ -480,7 +480,7 @@ public final class yacy {
     		// YaCy is running in the same runtime. we can shutdown via interrupt
     		sb.terminate();
     	} else {    	
-    		String applicationRoot = System.getProperty("user.dir").replace('\\', '/');
+    		File applicationRoot = new File(System.getProperty("user.dir").replace('\\', '/'));
     		shutdown(applicationRoot);
     	}
     }
@@ -491,7 +491,7 @@ public final class yacy {
     *
     * @param homePath Root-path where all the information is to be found.
     */
-    static void shutdown(String homePath) {
+    static void shutdown(File homePath) {
         // start up
         System.out.println(copyright);
         System.out.println(hline);
@@ -544,7 +544,7 @@ public final class yacy {
     *
     * @param homePath Root-Path where all the information is to be found.
     */
-    private static void genWordstat(String homePath) {
+    private static void genWordstat(File homePath) {
         // start up
         System.out.println(copyright);
         System.out.println(hline);
@@ -587,12 +587,12 @@ public final class yacy {
      * @param homePath path to the YaCy directory
      * @param dbcache cache size in MB
      */
-    public static void minimizeUrlDB(String homePath) {
+    public static void minimizeUrlDB(File homePath) {
         // run with "java -classpath classes yacy -minimizeUrlDB"
-        try {serverLog.configureLogging(homePath,new File(homePath, "DATA/LOG/yacy.logging"));} catch (Exception e) {}
-        File indexPrimaryRoot = new File(new File(homePath), "DATA/INDEX");
-        File indexSecondaryRoot = new File(new File(homePath), "DATA/INDEX");
-        File indexRoot2 = new File(new File(homePath), "DATA/INDEX2");
+        try {serverLog.configureLogging(homePath, new File(homePath, "DATA/LOG/yacy.logging"));} catch (Exception e) {}
+        File indexPrimaryRoot = new File(homePath, "DATA/INDEX");
+        File indexSecondaryRoot = new File(homePath, "DATA/INDEX");
+        File indexRoot2 = new File(homePath, "DATA/INDEX2");
         serverLog log = new serverLog("URL-CLEANUP");
         try {
             log.logInfo("STARTING URL CLEANUP");
@@ -777,24 +777,24 @@ public final class yacy {
      *
      * @param homePath Root-Path where all information is to be found.
      */
-    private static void urldbcleanup(String homePath) {
-        File root = new File(homePath);
+    private static void urldbcleanup(File homePath) {
+        File root = homePath;
         File indexroot = new File(root, "DATA/INDEX");
-        try {serverLog.configureLogging(homePath,new File(homePath, "DATA/LOG/yacy.logging"));} catch (Exception e) {}
+        try {serverLog.configureLogging(homePath, new File(homePath, "DATA/LOG/yacy.logging"));} catch (Exception e) {}
         plasmaCrawlLURL currentUrlDB = new plasmaCrawlLURL(indexroot, 10000);
         currentUrlDB.urldbcleanup();
         currentUrlDB.close();
     }
     
-    private static void RWIHashList(String homePath, String targetName, String resource, String format) {
+    private static void RWIHashList(File homePath, String targetName, String resource, String format) {
         plasmaWordIndex WordIndex = null;
         serverLog log = new serverLog("HASHLIST");
-        File indexPrimaryRoot = new File(new File(homePath), "DATA/INDEX");
-        File indexSecondaryRoot = new File(new File(homePath), "DATA/INDEX");
+        File indexPrimaryRoot = new File(homePath, "DATA/INDEX");
+        File indexSecondaryRoot = new File(homePath, "DATA/INDEX");
         String wordChunkStartHash = "AAAAAAAAAAAA";
-        try {serverLog.configureLogging(homePath,new File(homePath, "DATA/LOG/yacy.logging"));} catch (Exception e) {}
+        try {serverLog.configureLogging(homePath, new File(homePath, "DATA/LOG/yacy.logging"));} catch (Exception e) {}
         log.logInfo("STARTING CREATION OF RWI-HASHLIST");
-        File root = new File(homePath);
+        File root = homePath;
         try {
             Iterator<indexContainer> indexContainerIterator = null;
             if (resource.equals("all")) {
@@ -850,10 +850,10 @@ public final class yacy {
      * Searching for peers affected by Bug
      * @param homePath
      */
-    public static void testPeerDB(String homePath) {
+    public static void testPeerDB(File homePath) {
         
         try {
-            File yacyDBPath = new File(new File(homePath), "DATA/YACYDB");
+            File yacyDBPath = new File(homePath, "DATA/YACYDB");
             
             String[] dbFileNames = {"seed.new.db","seed.old.db","seed.pot.db"};
             for (int i=0; i < dbFileNames.length; i++) {
@@ -905,16 +905,16 @@ public final class yacy {
         // go into headless awt mode
         System.setProperty("java.awt.headless", "true");
         
-        String applicationRoot = System.getProperty("user.dir").replace('\\', '/');
+        File applicationRoot = new File(System.getProperty("user.dir").replace('\\', '/'));
         //System.out.println("args.length=" + args.length);
         //System.out.print("args=["); for (int i = 0; i < args.length; i++) System.out.print(args[i] + ", "); System.out.println("]");
         if ((args.length >= 1) && ((args[0].toLowerCase().equals("-startup")) || (args[0].equals("-start")))) {
             // normal start-up of yacy
-            if (args.length == 2) applicationRoot= args[1];
+            if (args.length == 2) applicationRoot= new File(args[1]);
             startup(applicationRoot, startupMemFree, startupMemTotal);
         } else if ((args.length >= 1) && ((args[0].toLowerCase().equals("-shutdown")) || (args[0].equals("-stop")))) {
             // normal shutdown of yacy
-            if (args.length == 2) applicationRoot= args[1];
+            if (args.length == 2) applicationRoot= new File(args[1]);
             shutdown(applicationRoot);
         } else if ((args.length >= 1) && (args[0].toLowerCase().equals("-minimizeurldb"))) {
             // migrate words from DATA/PLASMADB/WORDS path to assortment cache, if possible
@@ -922,11 +922,11 @@ public final class yacy {
             if (args.length >= 3 && args[1].toLowerCase().equals("-cache")) {
                 args = shift(args, 1, 2);
             }
-            if (args.length == 2) applicationRoot= args[1];
+            if (args.length == 2) applicationRoot= new File(args[1]);
             minimizeUrlDB(applicationRoot);
         } else if ((args.length >= 1) && (args[0].toLowerCase().equals("-testpeerdb"))) {
             if (args.length == 2) {
-                applicationRoot= args[1];
+                applicationRoot = new File(args[1]);
             } else if (args.length > 2) {
                 System.err.println("Usage: -testPeerDB [homeDbRoot]");
             }
@@ -935,7 +935,7 @@ public final class yacy {
             // this can help to create a stop-word list
             // to use this, you need a 'yacy.words' file in the root path
             // start this with "java -classpath classes yacy -genwordstat [<rootdir>]"
-            if (args.length == 2) applicationRoot= args[1];
+            if (args.length == 2) applicationRoot= new File(args[1]);
             genWordstat(applicationRoot);
         } else if ((args.length == 4) && (args[0].toLowerCase().equals("-cleanwordlist"))) {
             // this can be used to organize and clean a word-list
@@ -950,7 +950,7 @@ public final class yacy {
             transferCR(targetaddress, crfile);
         } else if ((args.length >= 1) && (args[0].toLowerCase().equals("-urldbcleanup"))) {
             // generate a url list and save it in a file
-            if (args.length == 2) applicationRoot= args[1];
+            if (args.length == 2) applicationRoot= new File(args[1]);
             urldbcleanup(applicationRoot);
         } else if ((args.length >= 1) && (args[0].toLowerCase().equals("-rwihashlist"))) {
             // generate a url list and save it in a file
@@ -958,11 +958,11 @@ public final class yacy {
             String format = "txt";
             if (args.length >= 2) domain= args[1];
             if (args.length >= 3) format= args[2];
-            if (args.length == 4) applicationRoot= args[3];
+            if (args.length == 4) applicationRoot= new File(args[3]);
             String outfile = "rwihashlist_" + System.currentTimeMillis();
             RWIHashList(applicationRoot, outfile, domain, format);
         } else {
-            if (args.length == 1) applicationRoot= args[0];
+            if (args.length == 1) applicationRoot= new File(args[0]);
             startup(applicationRoot, startupMemFree, startupMemTotal);
         }
     }

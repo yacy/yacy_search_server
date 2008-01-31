@@ -87,7 +87,7 @@ public interface indexRWIEntry {
     
     public String toString();
     
-    public void combineDistance(indexRWIEntry oe);
+    public void join(indexRWIEntry oe);
 
     public int worddistance();
     

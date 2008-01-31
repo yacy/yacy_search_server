@@ -40,6 +40,7 @@
 
 package de.anomic.http;
 
+import java.io.File;
 import java.util.LinkedList;
 
 import de.anomic.server.serverAbstractSwitch;
@@ -50,7 +51,7 @@ public final class httpdSwitchboard extends serverAbstractSwitch implements serv
 
     private final LinkedList<Object> cacheStack;
         
-    public httpdSwitchboard(String rootPath, String initPath, String configPath, boolean applyPro) {
+    public httpdSwitchboard(File rootPath, String initPath, String configPath, boolean applyPro) {
         super(rootPath, initPath, configPath, applyPro);
         cacheStack = new LinkedList<Object>();
      }

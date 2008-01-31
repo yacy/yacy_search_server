@@ -103,6 +103,7 @@ public final class plasmaSearchEvent {
         this.urlRetrievalAllTime = 0;
         this.snippetComputationAllTime = 0;
         this.workerThreads = null;
+        this.localSearchThread = null;
         this.resultList = new ArrayList<ResultEntry>(10); // this is the result set which is filled up with search results, enriched with snippets
         //this.resultListLock = 0; // no locked elements until now
         this.failedURLs = new HashMap<String, String>(); // a map of urls to reason strings where a worker thread tried to work on, but failed.
@@ -407,6 +408,17 @@ public final class plasmaSearchEvent {
         return false;
     }
     
+    private int countFinishedRemoteSearch() {
+        int count = 0;
+        // check only primary search threads
+        if ((this.primarySearchThreads != null) && (this.primarySearchThreads.length != 0)) {
+            for (int i = 0; i < this.primarySearchThreads.length; i++) {
+                if ((this.primarySearchThreads[i] == null) || (!(this.primarySearchThreads[i].isAlive()))) count++;
+            }
+        }
+        return count;
+    }
+    
     public plasmaSearchQuery getQuery() {
         return query;
     }
@@ -563,19 +575,12 @@ public final class plasmaSearchEvent {
     
     public ResultEntry oneResult(int item) {
         // first sleep a while to give accumulation threads a chance to work
-        if (anyWorkerAlive()) {
-        	long sleeptime = Math.min(600, this.eventTime + (this.query.maximumTime / this.query.displayResults() * ((item % this.query.displayResults()) + 1)) - System.currentTimeMillis());
-        	if (this.resultList.size() <= item + 10) sleeptime = Math.min(sleeptime + 300, 600);
-        	if (sleeptime > 0) try {Thread.sleep(sleeptime);} catch (InterruptedException e) {}
-            //System.out.println("+++DEBUG-oneResult+++ (1) sleeping " + sleeptime);
-            
-            // then sleep until any result is available (that should not happen)
-            while ((this.resultList.size() <= item) && (anyWorkerAlive())) {
-                try {Thread.sleep(100);} catch (InterruptedException e) {}
-                //System.out.println("+++DEBUG-oneResult+++ (2) sleeping " + 100);
-            }
-            
+        while (((localSearchThread != null) && (localSearchThread.isAlive())) ||
+               ((this.primarySearchThreads != null) && (this.primarySearchThreads.length > item) && (anyWorkerAlive()) && 
+                ((this.resultList.size() <= item) || (countFinishedRemoteSearch() <= item)))) {
+            try {Thread.sleep(100);} catch (InterruptedException e) {}
         }
+        
         // finally, if there is something, return the result
         synchronized (this.resultList) {
             // check if we have enough entries
@@ -610,7 +615,7 @@ public final class plasmaSearchEvent {
     boolean secondarySearchStartet = false;
     
     private void prepareSecondarySearch() {
-        if (secondarySearchStartet) return; // dont do this twice
+        if (secondarySearchStartet) return; // don't do this twice
         
         if ((rcAbstracts == null) || (rcAbstracts.size() != query.queryHashes.size())) return; // secondary search not possible (yet)
         this.secondarySearchStartet = true;

@@ -54,7 +54,7 @@ public class indexRWIVarEntry implements indexRWIEntry {
         this.phrasesintext = e.phrasesintext();
         this.posintext = e.posintext();
         this.posinphrase = e.posinphrase();
-        this.posofphrase= e.posofphrase();
+        this.posofphrase = e.posofphrase();
         this.quality = e.quality();
         this.urlcomps = e.urlcomps();
         this.urllength = e.urllength();
@@ -65,7 +65,15 @@ public class indexRWIVarEntry implements indexRWIEntry {
         this.termFrequency = e.termFrequency();
     }
     
-    public void combineDistance(indexRWIEntry oe) {
+    public void join(indexRWIEntry oe) {
+        // combine the distance
+        this.worddistance = this.worddistance() + oe.worddistance() + Math.abs(this.posintext() - oe.posintext());
+        this.posintext = Math.min(this.posintext(), oe.posintext());
+        this.posinphrase = (this.posofphrase() == oe.posofphrase()) ? Math.min(this.posinphrase(), oe.posinphrase()) : 0;
+        this.posofphrase = Math.min(this.posofphrase(), oe.posofphrase());
+
+        // combine term frequency
+        this.wordsintext = this.wordsintext() + oe.wordsintext();
     }
 
     public kelondroBitfield flags() {

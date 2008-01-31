@@ -74,10 +74,10 @@ public class plasmaCrawlNURL {
 
     public plasmaCrawlNURL(File cachePath) {
         super();
-        coreStack = new plasmaCrawlBalancer(cachePath, "urlNoticeCoreStack", true);
+        coreStack = new plasmaCrawlBalancer(cachePath, "urlNoticeCoreStack", false);
         limitStack = new plasmaCrawlBalancer(cachePath, "urlNoticeLimitStack", false);
         //overhangStack = new plasmaCrawlBalancer(overhangStackFile);
-        remoteStack = new plasmaCrawlBalancer(cachePath, "urlNoticeRemoteStack", true);
+        remoteStack = new plasmaCrawlBalancer(cachePath, "urlNoticeRemoteStack", false);
     }
 
     public void close() {

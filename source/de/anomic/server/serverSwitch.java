@@ -60,7 +60,7 @@ import de.anomic.server.logging.serverLog;
 public interface serverSwitch {
 
     // the root path for the application
-    public String getRootPath();
+    public File getRootPath();
 
     // a logger for this switchboard
     public void setLog(serverLog log);

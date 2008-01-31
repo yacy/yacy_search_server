@@ -58,7 +58,7 @@ public abstract class serverAbstractSwitch implements serverSwitch {
     // configuration management
     private   File      configFile;
     private   String    configComment;
-    private   String    rootPath;
+    private   File      rootPath;
     protected serverLog log;
     protected int       serverJobs;
     protected long      maxTrackingTime;
@@ -69,7 +69,7 @@ public abstract class serverAbstractSwitch implements serverSwitch {
     private   TreeMap<String, serverSwitchAction>    switchActions;
     protected HashMap<String, TreeMap<Long, String>> accessTracker; // mappings from requesting host to an ArrayList of serverTrack-entries
     
-    public serverAbstractSwitch(String rootPath, String initPath, String configPath, boolean applyPro) {
+    public serverAbstractSwitch(File rootPath, String initPath, String configPath, boolean applyPro) {
         // we initialize the switchboard with a property file,
         // but maintain these properties then later in a new 'config' file
         // to reset all changed configs, the config file must
@@ -526,7 +526,7 @@ public abstract class serverAbstractSwitch implements serverSwitch {
 
     public abstract serverObjects action(String actionName, serverObjects actionInput);
 
-    public String getRootPath() {
+    public File getRootPath() {
        return rootPath;
     }
     

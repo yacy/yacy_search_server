@@ -26,9 +26,11 @@
 
 package de.anomic.server;
 
+import java.io.File;
+
 public class serverPlainSwitch extends serverAbstractSwitch implements serverSwitch {
 
-    public serverPlainSwitch(String rootPath, String initPath, String configPath, boolean applyPro) {
+    public serverPlainSwitch(File rootPath, String initPath, String configPath, boolean applyPro) {
         super(rootPath, initPath, configPath, applyPro);
     }
         

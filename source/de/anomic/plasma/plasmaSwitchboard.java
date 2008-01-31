@@ -877,7 +877,7 @@ public final class plasmaSwitchboard extends serverAbstractSwitch implements ser
     
     private static plasmaSwitchboard sb;
     
-    public plasmaSwitchboard(String rootPath, String initPath, String configPath, boolean applyPro) {
+    public plasmaSwitchboard(File rootPath, String initPath, String configPath, boolean applyPro) {
         super(rootPath, initPath, configPath, applyPro);
         serverProfiling.startSystemProfiling();
         sb=this;

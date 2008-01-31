@@ -263,18 +263,22 @@ public final class indexRWIRowEntry implements indexRWIEntry {
         return toPropertyForm();
     }
     
-    public static indexRWIEntry combineDistance(indexRWIRowEntry ie1, indexRWIEntry ie2) {
+    public static indexRWIEntry join(indexRWIRowEntry ie1, indexRWIEntry ie2) {
         // returns a modified entry of the first argument
+        
+        // combine the distance
         ie1.entry.setCol(col_worddistance, ie1.worddistance() + ie2.worddistance() + Math.abs(ie1.posintext() - ie2.posintext()));
         ie1.entry.setCol(col_posintext, Math.min(ie1.posintext(), ie2.posintext()));
-        ie1.entry.setCol(col_posinphrase, (ie1.posofphrase() == ie2.posofphrase()) ? ie1.posofphrase() : 0 /*unknown*/);
+        ie1.entry.setCol(col_posinphrase, (ie1.posofphrase() == ie2.posofphrase()) ? Math.min(ie1.posinphrase(), ie2.posinphrase()) : 0 /*unknown*/);
         ie1.entry.setCol(col_posofphrase, Math.min(ie1.posofphrase(), ie2.posofphrase()));
-        ie1.entry.setCol(col_wordsInText, (ie1.wordsintext() + ie2.wordsintext()) / 2);
+
+        // combine term frequency
+        ie1.entry.setCol(col_wordsInText, ie1.wordsintext() + ie2.wordsintext());
         return ie1;
     }
     
-    public void combineDistance(indexRWIEntry oe) {
-        combineDistance(this, oe);
+    public void join(indexRWIEntry oe) {
+        join(this, oe);
     }
 
     public int worddistance() {

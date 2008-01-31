@@ -186,7 +186,7 @@ public final class serverLog {
         Logger.getLogger(appName).isLoggable(Level.FINEST);
     } 
     
-    public static final void configureLogging(String homePath, File loggingConfigFile) throws SecurityException, FileNotFoundException, IOException {
+    public static final void configureLogging(File homePath, File loggingConfigFile) throws SecurityException, FileNotFoundException, IOException {
         FileInputStream fileIn = null;
         try {
             System.out.println("STARTUP: Trying to load logging configuration from file " + loggingConfigFile.toString());

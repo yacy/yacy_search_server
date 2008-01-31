@@ -43,6 +43,7 @@
 
 package de.anomic.yacy;
 
+import java.io.File;
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.util.ArrayList;
@@ -1092,7 +1093,7 @@ public final class yacyClient {
     public static void main(String[] args) {
         System.out.println("yacyClient Test");
         try {
-            final plasmaSwitchboard sb = new plasmaSwitchboard(args[0], "httpProxy.init", "DATA/SETTINGS/httpProxy.conf", false);
+            final plasmaSwitchboard sb = new plasmaSwitchboard(new File(args[0]), "httpProxy.init", "DATA/SETTINGS/httpProxy.conf", false);
             /*final yacyCore core =*/ new yacyCore(sb);
             yacyCore.peerActions.loadSeedLists();
             final yacySeed target = yacyCore.seedDB.getConnected(args[1]);

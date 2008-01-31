@@ -51,7 +51,7 @@ public class migration {
     //SVN constants
     public static final int USE_WORK_DIR=1389; //wiki & messages in DATA/WORK
     public static final int TAGDB_WITH_TAGHASH=1635; //tagDB keys are tagHashes instead of plain tagname.
-    public static final int NEW_OVERLAYS=3675;
+    public static final int NEW_OVERLAYS=4422;
     public static void main(String[] args) {
 
     }

@@ -384,6 +384,7 @@ public final class yacyVersion implements Comparator<yacyVersion>, Comparable<ya
         //byte[] script = ("cd " + plasmaSwitchboard.getSwitchboard().getRootPath() + ";while [ -e ../yacy.running ]; do sleep 1;done;tar xfz " + release + ";cp -Rf yacy/* ../../;rm -Rf yacy;cd ../../;startYACY.sh").getBytes();
         try {
             plasmaSwitchboard sb = plasmaSwitchboard.getSwitchboard();
+            String apphome = sb.getRootPath().toString();
             serverLog.logInfo("UPDATE", "INITIATED");
             String script =
                 "#!/bin/sh" + serverCore.LF_STRING +
@@ -394,14 +395,14 @@ public final class yacyVersion implements Comparator<yacyVersion>, Comparable<ya
                 "while [ -f ../yacy.running ]; do" + serverCore.LF_STRING +
                 "sleep 1" + serverCore.LF_STRING +
                 "done" + serverCore.LF_STRING +
-                "cp -Rf yacy/* ../../" + serverCore.LF_STRING +
+                "cp -Rf yacy/* " + apphome + serverCore.LF_STRING +
                 "rm -Rf yacy" + serverCore.LF_STRING +
                 "else" + serverCore.LF_STRING +
                 "while [ -f ../yacy.running ]; do" + serverCore.LF_STRING +
                 "sleep 1" + serverCore.LF_STRING +
                 "done" + serverCore.LF_STRING +
                 "fi" + serverCore.LF_STRING +
-                "cd ../../" + serverCore.LF_STRING +
+                "cd " + apphome + serverCore.LF_STRING +
                 "nohup ./startYACY.sh > /dev/null" + serverCore.LF_STRING;
             File scriptFile = new File(sb.getRootPath(), "DATA/RELEASE/update.sh");
             serverSystem.deployScript(scriptFile, script);

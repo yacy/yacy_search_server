@@ -325,7 +325,7 @@ public class indexContainer extends kelondroRowSet {
                     assert (ie0.urlHash().length() == keylength) : "ie0.urlHash() = " + ie0.urlHash();
                     assert (ie1.urlHash().length() == keylength) : "ie1.urlHash() = " + ie1.urlHash();
                     // this is a hit. Calculate word distance:
-                    ie0.combineDistance(ie1);
+                    ie0.join(ie1);
                     if (ie0.worddistance() <= maxDistance) conj.add(ie0);
                 }
             }
@@ -360,7 +360,7 @@ public class indexContainer extends kelondroRowSet {
                     if (e2.hasNext()) ie2 = (indexRWIEntry) e2.next(); else break;
                 } else {
                     // we have found the same urls in different searches!
-                    ie1.combineDistance(ie2);
+                    ie1.join(ie2);
                     if (ie1.worddistance() <= maxDistance) conj.add(ie1);
                     if (e1.hasNext()) ie1 = (indexRWIEntry) e1.next(); else break;
                     if (e2.hasNext()) ie2 = (indexRWIEntry) e2.next(); else break;
@@ -435,7 +435,7 @@ public class indexContainer extends kelondroRowSet {
                     if (e2.hasNext()) ie2 = (indexRWIEntry) e2.next(); else break;
                 } else {
                     // we have found the same urls in different searches!
-                    ie1.combineDistance(ie2);
+                    ie1.join(ie2);
                     e1.remove();
                     if (e1.hasNext()) ie1 = (indexRWIEntry) e1.next(); else break;
                     if (e2.hasNext()) ie2 = (indexRWIEntry) e2.next(); else break;
