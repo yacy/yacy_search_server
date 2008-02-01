@@ -128,7 +128,8 @@ by==von
 Comments</a>==Kommentare</a>
 >edit==>bearbeiten
 >delete==>l&ouml;schen
-show more entries==zeige weitere Eintr&auml;ge
+previous entries==vorherige Eintr&auml;ge
+next entries==n&auml;chste  Eintr&auml;ge
 new entry==Neuer Eintrag
 import XML-File==XML-Datei importieren
 export as XML==als XML exportieren
@@ -183,13 +184,15 @@ here.==benutzen.
 #File: Bookmarks.html
 #---------------------------
 YaCy \'\#\[clientname\]\#\': Bookmarks==YaCy '#[clientname]#': Lesezeichen
-<h2>Bookmarks==<h2>Lesezeichen
+<h3>Bookmarks==<h3>Lesezeichen
+#Login==Login
 Add Bookmark==Lesezeichen hinzuf&uuml;gen
 Import XML Bookmarks==Importiere XML-Lesezeichen
 Edit Bookmark==Lesezeichen bearbeiten
 #URL:==URL:
 Title:==Titel:
 Description:==Beschreibung:
+Folder \(/folder/subfolder\):==Ordner (/Ordner/Unterordner):
 Tags \(comma separated\):==Tags (durch Komma trennen):
 Public:==&Ouml;ffentlich:
 yes==ja
@@ -204,6 +207,9 @@ import as Public==als &ouml;ffentlich importieren
 Tagged with==Stichworte:
 Edit==Bearbeiten
 Delete==L&ouml;schen
+Folders==Ordner
+Bookmark Folder==Lesezeichen Ordner
+#Tags==Tags
 Bookmark List==Liste der Lesezeichen
 previous page==vorherige Seite
 next page==n&auml;chste Seite
@@ -834,10 +840,10 @@ total URLs</td>==insgesamte URLs</td>
 appearance in</td>==kommt vor in</td>
 in link type</td>==im Link-Typ</td>
 document type</td>==Dokumenten-Typ</td>
-<td>reference</td>==<td>Verweis</td>
 <td>description</td>==<td>Beschreibung</td>
-<td>author</td>==<td>Autor</td>
-<td>tags</td>==<td>Tags</td>
+<td>title</td>==<td>Titel</td>
+<td>creator</td>==<td>Erzeuger</td>
+<td>subject</td>==<td>Thema</td>
 <td>url</td>==<td>URL</td>
 <td>emphasized</td>==<td>betont</td>
 <td>image</td>==<td>Bilder</td>
@@ -1382,10 +1388,7 @@ The word flush size is applied when an indexing loop is executed, and the cache 
 Enter New Cache Size==Neue Cachegr&ouml;&szlig;e eintragen
 Thread pool settings:==Threadpool Einstellungen:
 maximum Active==max. aktiv
-maximum Idle==max. inaktiv
-minimum Idle==min. inaktiv
 current Active==derzeit aktiv
-current Idle==derzeit inaktiv
 Enter new Threadpool Configuration==neue Threadpoolkonfiguration eintragen
 YaCy Priority Settings==YaCy Priorit&auml;t Einstellungen
 YaCy Process Priority==YaCy Prozess Priorit&auml;t
@@ -1429,6 +1432,11 @@ Memory Settings==Speicher Einstellungen
 Memory reserved for JVM==F&uuml;r JVM reservierter Speicher
 "Set"=="Setzen"
 Accepted change. This will take effect after <strong>restart</strong> of YaCy==&Auml;nderung akzeptiert. Diese werden erst nach einem <strong>Neustart</strong> von YaCy wirksam
+auto-reload graph==Graphik automatisch neuladen
+EcoTable RAM Index:==EcoTabelle RAM Index:
+>Size==>Gr&ouml;sse
+>Key==>Schl&uuml;ssel
+>Value==>Wert
 FlexTable RAM Index:==FlexTabelle RAM Index:
 Table</td>==Tabelle</td>
 Chunk Size==Chunk Gr&ouml;&szlig;e
@@ -2001,7 +2009,7 @@ Configure==Einstellen
 Reset</a>==Zur&uuml;cksetzen</a>
 Incoming Connections==Eingehende Verbindungen
 Active:==Aktiv:
-Idle:==Wartend:
+
 #Max:Max:
 Indexing Queue==Indexier Puffer
 Loader Queue==Lade Puffer
@@ -2308,7 +2316,10 @@ No Results.==Keine Ergebnisse.
 length of search words must be at least 3 characters==Die L&auml;nge der Suchbegriffe muss mindestens 3 Zeichen betragen
 results from a total number of==Treffer aus insgesamt
 known==bekannten Links
-links from other YaCy peers==Links von anderen YaCy Peers
+g> local,==g> lokal,
+#g> remote),==g> remote),
+links from==Links von
+other YaCy peers==anderen YaCy Peers
 #-----------------------------
 
 #File: yacysearchitem.html
