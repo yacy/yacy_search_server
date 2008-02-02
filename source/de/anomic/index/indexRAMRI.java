@@ -481,7 +481,7 @@ public final class indexRAMRI implements indexRI {
         return delCount;
     }
     
-    public synchronized void addEntries(indexContainer container, long updateTime, boolean dhtCase) {
+    public synchronized void addEntries(indexContainer container) {
         // this puts the entries into the cache, not into the assortment directly
         int added = 0;
         if ((container == null) || (container.size() == 0)) return;
@@ -498,7 +498,7 @@ public final class indexRAMRI implements indexRI {
         if (added > 0) {
             cache.put(wordHash, entries);
             hashScore.addScore(wordHash, added);
-            hashDate.setScore(wordHash, intTime(updateTime));
+            hashDate.setScore(wordHash, intTime(System.currentTimeMillis()));
         }
         entries = null;
     }

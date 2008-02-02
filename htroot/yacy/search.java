@@ -77,7 +77,6 @@ public final class search {
         String abstracts = post.get("abstracts", "");  // a string of word hashes for abstracts that shall be generated, or 'auto' (for maxcount-word), or '' (for none)
 //      final String  fwdep  = post.get("fwdep", "");  // forward depth. if "0" then peer may NOT ask another peer for more results
 //      final String  fwden  = post.get("fwden", "");  // forward deny, a list of seed hashes. They may NOT be target of forward hopping
-        final long    duetime= Math.min(60000, post.getLong("duetime", 3000));
         final int     count  = Math.min(100, post.getInt("count", 10)); // maximum number of wanted results
         final int     maxdist= post.getInt("maxdist", Integer.MAX_VALUE);
         final String  prefer = post.get("prefer", "");
@@ -119,7 +118,7 @@ public final class search {
         }
         
         // tell all threads to do nothing for a specific time
-        sb.intermissionAllThreads(2 * duetime);
+        sb.intermissionAllThreads(3000);
 
         TreeSet<String> abstractSet = ((abstracts.length() == 0) || (abstracts.equals("auto"))) ? null : plasmaSearchQuery.hashes2Set(abstracts);
         
@@ -147,7 +146,7 @@ public final class search {
         long urlRetrievalAllTime = 0, snippetComputationAllTime = 0;
         if ((query.length() == 0) && (abstractSet != null)) {
             // this is _not_ a normal search, only a request for index abstracts
-            theQuery = new plasmaSearchQuery(null, abstractSet, new TreeSet<String>(kelondroBase64Order.enhancedComparator), rankingProfile, maxdist, prefer, plasmaSearchQuery.contentdomParser(contentdom), false, count, 0, duetime, filter, plasmaSearchQuery.SEARCHDOM_LOCAL, null, -1, null, false);
+            theQuery = new plasmaSearchQuery(null, abstractSet, new TreeSet<String>(kelondroBase64Order.enhancedComparator), rankingProfile, maxdist, prefer, plasmaSearchQuery.contentdomParser(contentdom), false, count, 0, filter, plasmaSearchQuery.SEARCHDOM_LOCAL, null, -1, null, false);
             theQuery.domType = plasmaSearchQuery.SEARCHDOM_LOCAL;
             yacyCore.log.logInfo("INIT HASH SEARCH (abstracts only): " + plasmaSearchQuery.anonymizedQueryHashes(theQuery.queryHashes) + " - " + theQuery.displayResults() + " links");
 
@@ -173,7 +172,7 @@ public final class search {
             
         } else {
             // retrieve index containers from search request
-            theQuery = new plasmaSearchQuery(null, queryhashes, excludehashes, rankingProfile, maxdist, prefer, plasmaSearchQuery.contentdomParser(contentdom), false, count, 0, duetime, filter, plasmaSearchQuery.SEARCHDOM_LOCAL, null, -1, constraint, false);
+            theQuery = new plasmaSearchQuery(null, queryhashes, excludehashes, rankingProfile, maxdist, prefer, plasmaSearchQuery.contentdomParser(contentdom), false, count, 0, filter, plasmaSearchQuery.SEARCHDOM_LOCAL, null, -1, constraint, false);
             theQuery.domType = plasmaSearchQuery.SEARCHDOM_LOCAL;
             yacyCore.log.logInfo("INIT HASH SEARCH (query-" + abstracts + "): " + plasmaSearchQuery.anonymizedQueryHashes(theQuery.queryHashes) + " - " + theQuery.displayResults() + " links");
             
@@ -213,7 +212,7 @@ public final class search {
                 } else {
                     joincount = theSearch.getRankingResult().getLocalResourceSize();
                     prop.put("joincount", Integer.toString(joincount));
-                    accu = theSearch.completeResults(duetime);
+                    accu = theSearch.completeResults(3000);
                 }
                 
                 // generate compressed index for maxcounthash

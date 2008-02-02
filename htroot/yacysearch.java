@@ -120,7 +120,6 @@ public class yacysearch {
             prop.put("input_count", "10");
             prop.put("input_offset", "0");
             prop.put("input_resource", "global");
-            prop.put("input_time", sb.getConfigLong("network.unit.search.time", 3));
             prop.put("input_urlmaskfilter", ".*");
             prop.put("input_prefermaskfilter", "");
             prop.put("input_indexof", "off");
@@ -154,7 +153,6 @@ public class yacysearch {
         int offset = post.getInt("offset", 0);
         boolean global = (post == null) ? true : post.get("resource", "global").equals("global");
         final boolean indexof = post.get("indexof","").equals("on"); 
-        final long searchtime = 1000 * post.getLong("time", (int) sb.getConfigLong("network.unit.search.time", 3));
         String urlmask = "";
         if (post.containsKey("urlmask") && post.get("urlmask").equals("no")) {
             urlmask = ".*";
@@ -267,7 +265,6 @@ public class yacysearch {
                     true,
                     itemsPerPage,
                     offset,
-                    searchtime,
                     urlmask,
                     (clustersearch && globalsearch) ? plasmaSearchQuery.SEARCHDOM_CLUSTERALL :
                     ((globalsearch) ? plasmaSearchQuery.SEARCHDOM_GLOBALDHT : plasmaSearchQuery.SEARCHDOM_LOCAL),
@@ -279,13 +276,13 @@ public class yacysearch {
             String client = (String) header.get("CLIENTIP"); // the search client who initiated the search
         
             // tell all threads to do nothing for a specific time
-            sb.intermissionAllThreads(2 * theQuery.maximumTime);
+            sb.intermissionAllThreads(10000);
         
             // filter out words that appear in bluelist
             theQuery.filterOut(plasmaSwitchboard.blueList);
             
             // log
-            serverLog.logInfo("LOCAL_SEARCH", "INIT WORD SEARCH: " + theQuery.queryString + ":" + theQuery.queryHashes + " - " + theQuery.neededResults() + " links to be computed, " + theQuery.displayResults() + " lines to be displayed, " + (theQuery.maximumTime / 1000) + " seconds");
+            serverLog.logInfo("LOCAL_SEARCH", "INIT WORD SEARCH: " + theQuery.queryString + ":" + theQuery.queryHashes + " - " + theQuery.neededResults() + " links to be computed, " + theQuery.displayResults() + " lines to be displayed");
             long timestamp = System.currentTimeMillis();
 
             // create a new search event
@@ -300,8 +297,6 @@ public class yacysearch {
             serverLog.logFine("LOCAL_SEARCH", "SEARCH TIME AFTER RESULT PREPARATION: " + ((System.currentTimeMillis() - timestamp) / 1000) + " seconds");
                 
             // calc some more cross-reference
-            long remainingTime = theQuery.maximumTime - (System.currentTimeMillis() - timestamp);
-            if (remainingTime < 0) remainingTime = 1000;
             serverLog.logFine("LOCAL_SEARCH", "SEARCH TIME AFTER XREF PREPARATION: " + ((System.currentTimeMillis() - timestamp) / 1000) + " seconds");
 
             // log
@@ -406,7 +401,6 @@ public class yacysearch {
         prop.put("input_count", itemsPerPage);
         prop.put("input_offset", offset);
         prop.put("input_resource", global ? "global" : "local");
-        prop.put("input_time", searchtime / 1000);
         prop.putHTML("input_urlmaskfilter", urlmask);
         prop.putHTML("input_prefermaskfilter", prefermask);
         prop.put("input_indexof", (indexof) ? "on" : "off");
@@ -435,7 +429,6 @@ public class yacysearch {
         "&amp;count="+ theQuery.displayResults() +
         "&amp;offset=" + (page * theQuery.displayResults()) +
         "&amp;resource=" + theQuery.searchdom() +
-        "&amp;time=" + (theQuery.maximumTime / 1000) +
         "&amp;urlmaskfilter=" + theQuery.urlMask +
         "&amp;prefermaskfilter=" + theQuery.prefer +
         "&amp;cat=href&amp;constraint=" + ((theQuery.constraint == null) ? "" : theQuery.constraint.exportB64()) +

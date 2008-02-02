@@ -60,7 +60,6 @@ public class index {
         final int searchoptions = (post == null) ? 0 : post.getInt("searchoptions", 0);
         final String former = (post == null) ? "" : post.get("former", "");
         final int count = Math.min(100, (post == null) ? 10 : post.getInt("count", 10));
-        final int time = Math.min(60, (post == null) ? (int) sb.getConfigLong("network.unit.search.time", 3) : post.getInt("time", (int) sb.getConfigLong("network.unit.search.time", 3)));
         final String urlmaskfilter = (post == null) ? ".*" : post.get("urlmaskfilter", ".*");
         final String prefermaskfilter = (post == null) ? "" : post.get("prefermaskfilter", "");
         final String constraint = (post == null) ? "" : post.get("constraint", "");
@@ -119,14 +118,6 @@ public class index {
         prop.put("searchoptions_resource-global-disabled", (indexReceiveGranted && indexDistributeGranted) ? "0" : "1");
         prop.put("searchoptions_resource-global-disabled_reason", (indexReceiveGranted) ? "0" : (indexDistributeGranted ? "1" : "2"));
         prop.put("searchoptions_resource-local", global ? "0" : "1");
-        prop.put("searchoptions_searchtime", time);
-        prop.put("searchoptions_time-1", (time == 1) ? "1" : "0");
-        prop.put("searchoptions_time-2", (time == 2) ? "1" : "0");
-        prop.put("searchoptions_time-3", (time == 3) ? "1" : "0");
-        prop.put("searchoptions_time-4", (time == 4) ? "1" : "0");
-        prop.put("searchoptions_time-6", (time == 6) ? "1" : "0");
-        prop.put("searchoptions_time-8", (time == 8) ? "1" : "0");
-        prop.put("searchoptions_time-10", (time == 10) ? "1" : "0");
         prop.put("searchoptions_urlmaskoptions", "0");
         prop.putHTML("searchoptions_urlmaskoptions_urlmaskfilter", urlmaskfilter);
         prop.put("searchoptions_prefermaskoptions", "0");

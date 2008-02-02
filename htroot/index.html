@@ -35,7 +35,6 @@
         <input type="hidden" name="count" value="10" />
         <input type="hidden" name="offset" value="0" />
         <input type="hidden" name="resource" value="global" />
-        <input type="hidden" name="time" value="#[searchtime]#" />
         <input type="hidden" name="urlmaskfilter" value=".*" />
         <input type="hidden" name="prefermaskfilter" value="" />
         <input type="hidden" name="indexof" value="off" />
@@ -72,20 +71,6 @@
           </td>
         </tr>
         <tr>
-          <td><label for="time">Max. search time (seconds)</label>:</td>
-            <td>
-              <select id="time" name="time">
-                <option #(time-1)#::selected="selected"#(/time-1)#>1</option>
-                <option #(time-2)#::selected="selected"#(/time-2)#>2</option>
-                <option #(time-3)#::selected="selected"#(/time-3)#>3</option>
-                <option #(time-4)#::selected="selected"#(/time-4)#>4</option>
-                <option #(time-6)#::selected="selected"#(/time-6)#>6</option>
-                <option #(time-8)#::selected="selected"#(/time-8)#>8</option>
-                <option #(time-10)#::selected="selected"#(/time-10)#>10</option>
-              </select>
-            </td>
-          </tr>
-          <tr>
           <td><label for="urlmaskfilter">URL mask</label>:</td>
           <td>#(urlmaskoptions)#
             <input id="urlmaskfilter" name="urlmaskfilter" type="text" size="12" maxlength="80" value="#[urlmaskfilter]#" />

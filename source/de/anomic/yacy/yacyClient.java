@@ -417,6 +417,7 @@ public final class yacyClient {
         post.put("partitions", partitions);
         post.put("query", wordhashes);
         post.put("exclude", excludehashes);
+        post.put("duetime", 1000);
         post.put("urls", urlhashes);
         post.put("prefer", prefer);
         post.put("filter", filter);
@@ -573,7 +574,7 @@ public final class yacyClient {
         
 		// insert the containers to the index
         for (int m = 0; m < words; m++) {
-            wordIndex.addEntries(container[m], System.currentTimeMillis(), true);
+            wordIndex.addEntries(container[m], true);
 		}
         
 		// read index abstract

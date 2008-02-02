@@ -122,9 +122,7 @@ public final class plasmaSearchEvent {
             // do a global search
             this.rankedCache = new plasmaSearchRankingProcess(wordIndex, query, 2, max_results_preparation);
             
-            int fetchpeers = (int) (query.maximumTime / 500L); // number of target peers; means 10 peers in 10 seconds
-            if (fetchpeers > 50) fetchpeers = 50;
-            if (fetchpeers < 30) fetchpeers = 30;
+            int fetchpeers = 30;
 
             // the result of the fetch is then in the rcGlobal
             long timer = System.currentTimeMillis();
@@ -194,7 +192,7 @@ public final class plasmaSearchEvent {
             // start worker threads to fetch urls and snippets
             this.workerThreads = new resultWorker[workerThreadCount];
             for (int i = 0; i < workerThreadCount; i++) {
-                this.workerThreads[i] = new resultWorker(i, query.maximumTime * 3);
+                this.workerThreads[i] = new resultWorker(i, 10000);
                 this.workerThreads[i].start();
             }
         } else {
@@ -475,7 +473,7 @@ public final class plasmaSearchEvent {
                 // start worker threads to fetch urls and snippets
                 event.workerThreads = new resultWorker[workerThreadCount];
                 for (int i = 0; i < workerThreadCount; i++) {
-                    event.workerThreads[i] = event.deployWorker(i, 3 * query.maximumTime);
+                    event.workerThreads[i] = event.deployWorker(i, 10000);
                 }
             }
         
@@ -619,7 +617,7 @@ public final class plasmaSearchEvent {
     public ArrayList<ResultEntry> completeResults(long waitingtime) {
         long timeout = System.currentTimeMillis() + waitingtime;
         while ((this.resultList.size() < query.neededResults()) && (anyWorkerAlive()) && (System.currentTimeMillis() < timeout)) {
-            try {Thread.sleep(200);} catch (InterruptedException e) {}
+            try {Thread.sleep(100);} catch (InterruptedException e) {}
             //System.out.println("+++DEBUG-completeResults+++ sleeping " + 200);
         }
         return this.resultList;

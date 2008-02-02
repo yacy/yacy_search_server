@@ -169,7 +169,7 @@ public class indexCollectionRI implements indexRI {
         }
     }
 
-    public void addEntries(indexContainer newEntries, long creationTime, boolean dhtCase) {
+    public void addEntries(indexContainer newEntries) {
         try {
             collectionIndex.merge(newEntries);
         } catch (kelondroOutOfLimitsException e) {

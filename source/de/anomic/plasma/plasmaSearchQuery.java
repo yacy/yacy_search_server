@@ -78,7 +78,6 @@ public final class plasmaSearchQuery {
     private int linesPerPage, offset;
     public String prefer;
     public int contentdom;
-    public long maximumTime;
     public String urlMask;
     public int domType;
     public String domGroupName;
@@ -110,7 +109,6 @@ public final class plasmaSearchQuery {
         this.contentdom = CONTENTDOM_ALL;
         this.linesPerPage = lines;
         this.offset = 0;
-        this.maximumTime = 3000;
         this.urlMask = ".*";
         this.domType = SEARCHDOM_LOCAL;
         this.domGroupName = "";
@@ -125,7 +123,7 @@ public plasmaSearchQuery(
         plasmaSearchRankingProfile ranking,
         int maxDistance, String prefer, int contentdom,
         boolean onlineSnippetFetch,
-        int lines, int offset, long maximumTime, String urlMask,
+        int lines, int offset, String urlMask,
         int domType, String domGroupName, int domMaxTargets,
         kelondroBitfield constraint, boolean allofconstraint) {
 		this.queryString = queryString;
@@ -137,7 +135,7 @@ public plasmaSearchQuery(
 		this.contentdom = contentdom;
 		this.linesPerPage = lines;
 		this.offset = offset;
-		this.maximumTime = Math.min(6000, maximumTime);
+		//this.maximumTime = Math.min(6000, maximumTime);
 		this.urlMask = urlMask;
 		this.domType = domType;
 		this.domGroupName = domGroupName;
@@ -288,7 +286,7 @@ public plasmaSearchQuery(
         r.put("queryhashes", queryHashes);
         r.put("querystring", queryString);
         r.put("querycount", new Integer(linesPerPage));
-        r.put("querytime", new Long(maximumTime));
+        //r.put("querytime", new Long(maximumTime));
         r.put("resultcount", new Integer(searchcount));
         r.put("resulttime", new Long(searchtime));
         r.put("resulturltime", new Long(urlretrieval));

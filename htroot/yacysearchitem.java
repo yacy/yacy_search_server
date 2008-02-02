@@ -151,7 +151,6 @@ public class yacysearchitem {
                             prop.put("references_words_" + hintcount + "_offset", "0");
                             prop.put("references_words_" + hintcount + "_contentdom", theQuery.contentdom());
                             prop.put("references_words_" + hintcount + "_resource", theQuery.searchdom());
-                            prop.put("references_words_" + hintcount + "_time", (theQuery.maximumTime / 1000));
                         }
                         prop.put("references_words", hintcount);
                         if (hintcount++ > MAX_TOPWORDS) {

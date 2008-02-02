@@ -225,12 +225,12 @@ public class kelondroEcoFS {
         assert b.length - start >= this.recordsize;
         if (index > size()) throw new IndexOutOfBoundsException("kelondroEcoFS.put(" + index + ") outside bounds (" + this.size() + ")");
         // check if this is an empty entry
-        /*
+        
         if (isClean(b , start, this.recordsize)) {
             clean(index);
             return;
         }
-        */
+        
         // check if index is inside of cache
         int p = inCache(index);
         int q = (p >= 0) ? -1 : inBuffer(index);
@@ -306,7 +306,7 @@ public class kelondroEcoFS {
          assert false;
          return false;
     }
-    /*
+    
     public synchronized void clean(long index, byte[] b, int start) throws IOException {
         // removes an entry by cleaning (writing zero bytes to the file)
         // the entry that had been at the specific place before is copied to the given array b
@@ -378,7 +378,7 @@ public class kelondroEcoFS {
         raf.seek((long) index * (long) this.recordsize);
         raf.write(zero, 0, this.recordsize);
     }
-    */
+    
     public synchronized void cleanLast(byte[] b, int start) throws IOException {
         cleanLast0(b, start);
         long i;

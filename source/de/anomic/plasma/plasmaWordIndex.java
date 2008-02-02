@@ -187,7 +187,11 @@ public final class plasmaWordIndex implements indexRI {
         }
     }
     
-    public void addEntries(indexContainer entries, long updateTime, boolean dhtInCase) {
+    public void addEntries(indexContainer entries) {
+        addEntries(entries, false);
+    }
+    
+    public void addEntries(indexContainer entries, boolean dhtInCase) {
         assert (entries.row().objectsize == indexRWIRowEntry.urlEntryRow.objectsize);
         
         // set dhtInCase depending on wordHash
@@ -195,10 +199,10 @@ public final class plasmaWordIndex implements indexRI {
         
         // add the entry
         if (dhtInCase) {
-            dhtInCache.addEntries(entries, updateTime, true);
+            dhtInCache.addEntries(entries);
             dhtFlushControl(this.dhtInCache);
         } else {
-            dhtOutCache.addEntries(entries, updateTime, false);
+            dhtOutCache.addEntries(entries);
             dhtFlushControl(this.dhtOutCache);
         }
     }
@@ -244,6 +248,9 @@ public final class plasmaWordIndex implements indexRI {
             if (c != null) containerList.add(c);
         }
         // flush the containers
+        for (int i = 0; i < containerList.size(); i++) {
+            collections.addEntries((indexContainer) containerList.get(i));
+        }
         collections.addMultipleEntries(containerList);
         //System.out.println("DEBUG-Finished flush of " + count + " entries from RAM to DB in " + (System.currentTimeMillis() - start) + " milliseconds");
         busyCacheFlush = false;
