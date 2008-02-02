@@ -291,6 +291,9 @@ public class plasmaSnippetCache {
             } else if (containsAllHashes(comp.dc_subject(), queryhashes)) {
                 // try to create the snippet from information given in the subject metadata
                 return new TextSnippet(url, (comp.dc_creator().length() > 0) ? comp.dc_creator() : comp.dc_subject(), SOURCE_METADATA, null, null, faviconCache.get(url.hash()));
+            } else if (containsAllHashes(comp.url().toNormalform(true, true), queryhashes)) {
+                // try to create the snippet from information given in the subject metadata
+                return new TextSnippet(url, (comp.dc_creator().length() > 0) ? comp.dc_creator() : comp.dc_subject(), SOURCE_METADATA, null, null, faviconCache.get(url.hash()));
             } else if (fetchOnline) {
                 // if not found try to download it
                 

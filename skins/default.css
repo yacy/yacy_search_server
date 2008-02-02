@@ -156,7 +156,7 @@ div.ProgressBarFill {
 /* Searchresults */
 
 .searchresults {
-  border-top:1px #000 dashed;
+  /*border-top:1px #000 dashed;*/
 }
 
 .searchresults .url a {

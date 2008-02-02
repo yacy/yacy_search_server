@@ -391,17 +391,6 @@ public final class plasmaSearchEvent {
         }
         return false;
     }
-
-    private int countFinishedWorkerThreads() {
-        if (this.workerThreads == null) return workerThreadCount;
-        int c = 0;
-        for (int i = 0; i < workerThreadCount; i++) {
-           if ((this.workerThreads[i] == null) ||
-               !(this.workerThreads[i].isAlive()) ||
-               (this.workerThreads[i].busytime() >= 3000)) c++;
-        }
-        return c;
-    }
     
     private boolean anyRemoteSearchAlive() {
         // check primary search threads
@@ -504,7 +493,6 @@ public final class plasmaSearchEvent {
     private class resultWorker extends Thread {
         
         private long timeout; // the date until this thread should try to work
-        private long sleeptime; // the sleeptime of this thread at the beginning of its life
         private long lastLifeSign; // when the last time the run()-loop was executed
         private int id;
         
@@ -512,7 +500,7 @@ public final class plasmaSearchEvent {
             this.id = id;
             this.lastLifeSign = System.currentTimeMillis();
             this.timeout = System.currentTimeMillis() + Math.max(1000, maxlifetime);
-            this.sleeptime = Math.min(300, maxlifetime / 10 * id);
+            //this.sleeptime = Math.min(300, maxlifetime / 10 * id);
         }
 
         public void run() {
@@ -522,7 +510,7 @@ public final class plasmaSearchEvent {
             while (System.currentTimeMillis() < this.timeout) {
                 this.lastLifeSign = System.currentTimeMillis();
 
-                if (resultList.size() >= query.neededResults() + query.displayResults()) break; // we have enough
+                if (resultList.size() >= query.neededResults() /*+ query.displayResults()*/) break; // we have enough
 
                 // get next entry
                 page = rankedCache.bestURL(true);
@@ -554,11 +542,6 @@ public final class plasmaSearchEvent {
                     rankedCache.addReferences(resultEntry);
                 }
                 //System.out.println("DEBUG SNIPPET_LOADING: thread " + id + " got " + resultEntry.url());
-
-                if (resultList.size() >= query.neededResults() + query.displayResults()) break; // we have enough
-
-                // sleep first to give remote loading threads a chance to fetch entries
-                if (anyRemoteSearchAlive()) try {Thread.sleep(this.sleeptime);} catch (InterruptedException e1) {}
             }
             serverLog.logInfo("SEARCH", "resultWorker thread " + id + " terminated");
         }
@@ -586,11 +569,29 @@ public final class plasmaSearchEvent {
     
     public ResultEntry oneResult(int item) {
         // first sleep a while to give accumulation threads a chance to work
-        while (((localSearchThread != null) && (localSearchThread.isAlive())) ||
-                ((countFinishedWorkerThreads() <= item) && (item < workerThreadCount)) ||
-               ((this.primarySearchThreads != null) && (this.primarySearchThreads.length > item) && (anyWorkerAlive()) && 
-                ((this.resultList.size() <= item) || (countFinishedRemoteSearch() <= item)))) {
-            try {Thread.sleep(100);} catch (InterruptedException e) {}
+        if ((query.domType == plasmaSearchQuery.SEARCHDOM_GLOBALDHT) ||
+            (query.domType == plasmaSearchQuery.SEARCHDOM_CLUSTERALL)) {
+            // this is a search using remote search threads. Also the local search thread is started as background process
+            if ((localSearchThread != null) && (localSearchThread.isAlive())) {
+                // in case that the local search takes longer than some other remote search requests, 
+                // do some sleeps to give the local process a chance to contribute
+                try {Thread.sleep(200);} catch (InterruptedException e) {}
+            }
+            // now wait until as many remote worker threads have finished, as we want to display results
+            while ((this.primarySearchThreads != null) && (this.primarySearchThreads.length > item) && (anyWorkerAlive()) && 
+                   ((this.resultList.size() <= item) || (countFinishedRemoteSearch() <= item))) {
+                try {Thread.sleep(100);} catch (InterruptedException e) {}
+            }
+            // finally wait until enough results are there produced from the snippet fetch process
+            while ((anyWorkerAlive()) && (this.resultList.size() <= item)) {
+                try {Thread.sleep(100);} catch (InterruptedException e) {}
+            }
+        } else {
+            // we did a local search. If we arrive here, the local search process was finished
+            // and the only things we need to wait for are snippets from snippet fetch processes
+            while ((anyWorkerAlive()) && (this.resultList.size() <= item)) {
+                try {Thread.sleep(100);} catch (InterruptedException e) {}
+            }
         }
         
         // finally, if there is something, return the result
