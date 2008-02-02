@@ -76,6 +76,7 @@ public class plasmaSnippetCache {
     public static final int SOURCE_CACHE = 0;
     public static final int SOURCE_FILE = 1;
     public static final int SOURCE_WEB = 2;
+    public static final int SOURCE_METADATA = 3;
     
     public static final int ERROR_NO_HASH_GIVEN = 11;
     public static final int ERROR_SOURCE_LOADING = 12;
@@ -280,11 +281,16 @@ public class plasmaSnippetCache {
                 if ((resContentLength > maxDocLen) && (!fetchOnline)) {
                     // content may be too large to be parsed here. To be fast, we omit calculation of snippet here
                     return new TextSnippet(url, null, ERROR_SOURCE_LOADING, queryhashes, "resource available, but too large: " + resContentLength + " bytes");
-                }/*
-            } else if (url.) {
+                }
+            } else if (containsAllHashes(comp.dc_title(), queryhashes)) {
                 // try to create the snippet from information given in the url itself
-                */
-                
+                return new TextSnippet(url, (comp.dc_subject().length() > 0) ? comp.dc_creator() : comp.dc_subject(), SOURCE_METADATA, null, null, faviconCache.get(url.hash()));
+            } else if (containsAllHashes(comp.dc_creator(), queryhashes)) {
+                // try to create the snippet from information given in the creator metadata
+                return new TextSnippet(url, comp.dc_creator(), SOURCE_METADATA, null, null, faviconCache.get(url.hash()));
+            } else if (containsAllHashes(comp.dc_subject(), queryhashes)) {
+                // try to create the snippet from information given in the subject metadata
+                return new TextSnippet(url, (comp.dc_creator().length() > 0) ? comp.dc_creator() : comp.dc_subject(), SOURCE_METADATA, null, null, faviconCache.get(url.hash()));
             } else if (fetchOnline) {
                 // if not found try to download it
                 
@@ -741,7 +747,16 @@ public class plasmaSnippetCache {
         }
         return map;
     }
-     
+    
+    private static boolean containsAllHashes(String sentence, Set<String> queryhashes) {
+        HashMap<String, Integer> m = hashSentence(sentence);
+        Iterator<String> i = queryhashes.iterator();
+        while (i.hasNext()) {
+            if (!(m.containsKey(i.next()))) return false;
+        }
+        return true;
+    }
+    
     public static plasmaParserDocument parseDocument(yacyURL url, long contentLength, InputStream resourceStream) throws ParserException {
         return parseDocument(url, contentLength, resourceStream, null);
     }

@@ -58,7 +58,7 @@ public final class plasmaSearchEvent {
     public static final String URLFETCH = "urlfetch";
     public static final String NORMALIZING = "normalizing";
     
-    public static int workerThreadCount = 8;
+    public static int workerThreadCount = 10;
     public static String lastEventID = "";
     private static HashMap<String, plasmaSearchEvent> lastEvents = new HashMap<String, plasmaSearchEvent>(); // a cache for objects from this class: re-use old search requests
     public static final long eventLifetime = 600000; // the time an event will stay in the cache, 10 Minutes
@@ -391,6 +391,17 @@ public final class plasmaSearchEvent {
         }
         return false;
     }
+
+    private int countFinishedWorkerThreads() {
+        if (this.workerThreads == null) return workerThreadCount;
+        int c = 0;
+        for (int i = 0; i < workerThreadCount; i++) {
+           if ((this.workerThreads[i] == null) ||
+               !(this.workerThreads[i].isAlive()) ||
+               (this.workerThreads[i].busytime() >= 3000)) c++;
+        }
+        return c;
+    }
     
     private boolean anyRemoteSearchAlive() {
         // check primary search threads
@@ -576,6 +587,7 @@ public final class plasmaSearchEvent {
     public ResultEntry oneResult(int item) {
         // first sleep a while to give accumulation threads a chance to work
         while (((localSearchThread != null) && (localSearchThread.isAlive())) ||
+                ((countFinishedWorkerThreads() <= item) && (item < workerThreadCount)) ||
                ((this.primarySearchThreads != null) && (this.primarySearchThreads.length > item) && (anyWorkerAlive()) && 
                 ((this.resultList.size() <= item) || (countFinishedRemoteSearch() <= item)))) {
             try {Thread.sleep(100);} catch (InterruptedException e) {}
