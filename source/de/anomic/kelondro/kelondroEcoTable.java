@@ -375,7 +375,7 @@ public class kelondroEcoTable implements kelondroIndex {
         byte[] p = new byte[rowdef.objectsize];
         if (table == null) {
             if (i == index.size() - 1) {
-                file.clean(i);
+                file.cleanLast();
             } else {
                 file.cleanLast(p, 0);
                 file.put(i, p, 0);
@@ -387,7 +387,7 @@ public class kelondroEcoTable implements kelondroIndex {
             if (i == index.size() - 1) {
                 // special handling if the entry is the last entry in the file
                 table.removeRow(i, false);
-                file.clean(i);
+                file.cleanLast();
             } else {
                 // switch values
                 kelondroRow.Entry te = table.removeOne();
@@ -413,12 +413,17 @@ public class kelondroEcoTable implements kelondroIndex {
         byte[] b = new byte[rowdef.objectsize];
         byte[] p = new byte[rowdef.objectsize];
         int sb = index.size();
+        int ix;
+        assert i < index.size();
         if (table == null) {
             if (i == index.size() - 1) {
-                index.removei(key);
-                file.clean(i, b, 0);
+                ix = index.removei(key);
+                assert ix == i;
+                file.cleanLast(b, 0);
             } else {
-                index.removei(key);
+                assert i < index.size() - 1;
+                ix = index.removei(key);
+                assert ix == i;
                 file.get(i, b, 0);
                 file.cleanLast(p, 0);
                 file.put(i, p, 0);
@@ -437,7 +442,7 @@ public class kelondroEcoTable implements kelondroIndex {
                 // special handling if the entry is the last entry in the file
                 index.removei(key);
                 table.removeRow(i, false);
-                file.clean(i);
+                file.cleanLast();
             } else {
                 // switch values
                 index.removei(key);

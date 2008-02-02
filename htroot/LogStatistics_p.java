@@ -60,7 +60,7 @@ public class LogStatistics_p {
     
     private static final String RESULTS = "results_";
     
-    @SuppressWarnings("unchecked")
+    @SuppressWarnings({ "unchecked", "boxing" })
     public static serverObjects respond(httpHeader header, serverObjects post, serverSwitch env) {
         
         final serverObjects prop = new serverObjects();
@@ -89,7 +89,7 @@ public class LogStatistics_p {
         prop.put("results", "1");
         String[] t;
         float l;
-        prop.put(RESULTS + LogParserPLASMA.DHT_DISTANCE_AVERAGE, (String) r.get(LogParserPLASMA.DHT_DISTANCE_AVERAGE));
+        prop.put(RESULTS + LogParserPLASMA.DHT_DISTANCE_AVERAGE, (Double) r.get(LogParserPLASMA.DHT_DISTANCE_AVERAGE));
         prop.put(RESULTS + LogParserPLASMA.DHT_DISTANCE_MAX, (String) r.get(LogParserPLASMA.DHT_DISTANCE_MAX));
         prop.put(RESULTS + LogParserPLASMA.DHT_DISTANCE_MIN, (String) r.get(LogParserPLASMA.DHT_DISTANCE_MIN));
         prop.put(RESULTS + LogParserPLASMA.DHT_REJECTED, (String) r.get(LogParserPLASMA.DHT_REJECTED));
