@@ -91,22 +91,6 @@ public class yacysearch {
         
         boolean rss = (post == null) ? false : post.get("rss", "false").equals("true");
         if ((post == null) || (env == null) || (querystring.length() == 0) || (!searchAllowed)) {
-        	/*
-            // save referrer
-            final String referer = (String) header.get("Referer");
-        	if (referer != null) {
-                yacyURL url;
-                try { url = new yacyURL(referer, null); } catch (MalformedURLException e) { url = null; }
-                if ((url != null) && (!url.isLocal())) {
-                    final HashMap referrerprop = new HashMap();
-                    referrerprop.put("count", "1");
-                    referrerprop.put("clientip", header.get("CLIENTIP"));
-                    referrerprop.put("useragent", header.get("User-Agent"));
-                    referrerprop.put("date", (new serverDate()).toShortString(false));
-                    if (sb.facilityDB != null) try { sb.facilityDB.update("backlinks", referer, referrerprop); } catch (IOException e) {}
-                }
-            }
-        	 */
             // we create empty entries for template strings
             final serverObjects prop = new serverObjects();
             prop.put("searchagain", "0");
@@ -169,13 +153,13 @@ public class yacysearch {
         }
         
         // SEARCH
-        final boolean indexDistributeGranted = sb.getConfig(plasmaSwitchboard.INDEX_DIST_ALLOW, "true").equals("true");
-        final boolean indexReceiveGranted = sb.getConfig("allowReceiveIndex", "true").equals("true");
-        final boolean offline = yacyCore.seedDB.mySeed().isVirgin();
+        //final boolean indexDistributeGranted = sb.getConfig(plasmaSwitchboard.INDEX_DIST_ALLOW, "true").equals("true");
+        //final boolean indexReceiveGranted = sb.getConfig("allowReceiveIndex", "true").equals("true");
+        //final boolean offline = yacyCore.seedDB.mySeed().isVirgin();
         final boolean clustersearch = sb.isRobinsonMode() &&
     									(sb.getConfig("cluster.mode", "").equals("privatecluster") ||
     									 sb.getConfig("cluster.mode", "").equals("publiccluster"));
-        if (offline || !indexDistributeGranted || !indexReceiveGranted) { global = false; }
+        //if (offline || !indexDistributeGranted || !indexReceiveGranted) { global = false; }
         if (clustersearch) global = true; // switches search on, but search target is limited to cluster nodes
         
         // find search domain

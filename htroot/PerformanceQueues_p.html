@@ -205,14 +205,20 @@
   <form action="PerformanceQueues_p.html" method="post" enctype="multipart/form-data">
     <fieldset><legend>Proxy Performance Settings</legend>
       <p>
-        This is the time that the crawler idles when the proxy is accessed. The delay is extended by this time
-        each time the proxy is accessed afterwards. This shall improve performance of the proxy throughput.
-        (current delta is #[onlineCautionDelayCurrent]# milliseconds since last proxy access.)
+        This is the time that the crawler idles when the proxy is accessed, or a local or remote search is done.
+        The delay is extended by this time each time the proxy is accessed afterwards.
+        This shall improve performance of the affected process (proxy or search).
+        (current delta is #[crawlPauseProxyCurrent]#/#[crawlPauseLocalsearchCurrent]#/#[crawlPauseRemotesearchCurrent]#
+        seconds since last proxy/local-search/remote-search access.)
       </p>
       <dl>
-        <dt><label for="onlineCautionDelay">Online Caution Delay (milliseconds)</label>:</dt>
-        <dd><input id="onlineCautionDelay" name="onlineCautionDelay" type="text" size="20" maxlength="100" value="#[onlineCautionDelay]#" /></dd>
-        <dt><input type="submit" name="proxyControlSubmit" value="Enter New Parameters" /></dt>
+        <dt><label for="crawlPauseProxy">Online Caution Delay for Proxy (milliseconds)</label>:</dt>
+        <dd><input id="crawlPauseProxy" name="crawlPauseProxy" type="text" size="20" maxlength="100" value="#[crawlPauseProxy]#" /></dd>
+        <dt><label for="crawlPauseLocalsearch">Online Caution Delay for Local Search (milliseconds)</label>:</dt>
+        <dd><input id="crawlPauseLocalsearch" name="crawlPauseLocalsearch" type="text" size="20" maxlength="100" value="#[crawlPauseLocalsearch]#" /></dd>
+        <dt><label for="crawlPauseRemotesearch">Online Caution Delay for Remote Search (milliseconds)</label>:</dt>
+        <dd><input id="crawlPauseRemotesearch" name="crawlPauseRemotesearch" type="text" size="20" maxlength="100" value="#[crawlPauseRemotesearch]#" /></dd>
+        <dt><input type="submit" name="onlineCautionSubmit" value="Enter New Parameters" /></dt>
         <dd>Changes take effect immediately</dd>
       </dl>
     </fieldset>

@@ -725,11 +725,11 @@ crawler.http.acceptEncoding=gzip
 crawler.http.acceptLanguage=en-us,en;q=0.5
 crawler.http.acceptCharset=ISO-8859-1,utf-8;q=0.7,*;q=0.7
 crawler.http.maxFileSize=262144
-crawler.http.maxFileSize__pro=1048576
+crawler.http.maxFileSize__pro=262144
 
 # ftp crawler specific settings; size in bytes
 crawler.ftp.maxFileSize=262144
-crawler.ftp.maxFileSize__pro=1048576
+crawler.ftp.maxFileSize__pro=262144
 
 # maximum number of crawler threads
 crawler.MaxActiveThreads = 30
@@ -902,27 +902,6 @@ tableTypeForPreNURL=0
 # this can be applied to the Surftips.html and yacysearch.html page
 publicSurftips = true
 publicSearchpage = true
-
-# a Java Properties file containig a list of SOAP services that should deployed
-# additionally to the default services. E.g.
-#    soap.serviceDeploymentList = DATA/SETTINGS/myServices.properties
-#
-# One entry in the property file should must have the following format:
-#    servicename=fullClassname
-#
-# e.g.
-#    test=org.myservices.test
-#
-# Servicename is the name that shoud be used to access the service, e.g.
-# if the service name is "test" then the service can be reached using
-#    http://localhost:8080/soap/test
-#
-# The WSDL document that belongs to the deployed service could be reached
-# using 
-#    http://localhost:8080/soap/test?wsdl
-#
-soap.serviceDeploymentList =
-
 
 # Wiki access rights
 # the built-in wiki system allows by default only that the administrator is allowed to make changes

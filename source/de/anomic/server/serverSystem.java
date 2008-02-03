@@ -50,6 +50,8 @@ import java.util.Hashtable;
 import java.util.Properties;
 import java.util.Vector;
 
+import de.anomic.server.logging.serverLog;
+
 public final class serverSystem {
 
     // constants for system identification
@@ -330,6 +332,7 @@ public final class serverSystem {
         try {
             Runtime.getRuntime().exec("chmod 755 " + scriptFile.getAbsolutePath().replaceAll(" ", "\\ ")).waitFor();
         } catch (InterruptedException e) {
+            serverLog.logSevere("DEPLOY", "deploy of script file failed. file = " + scriptFile.getAbsolutePath(), e);
             throw new IOException(e.getMessage());
         }
     }

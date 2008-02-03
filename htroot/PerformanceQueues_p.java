@@ -227,9 +227,10 @@ public class PerformanceQueues_p {
         	switchboard.setConfig("javastart_priority",post.get("YaCyPriority","0"));
         }
         
-        if ((post != null) && (post.containsKey("proxyControlSubmit"))) {
-            int onlineCautionDelay = post.getInt("onlineCautionDelay", 30000);
-            switchboard.setConfig("onlineCautionDelay", Integer.toString(onlineCautionDelay));
+        if ((post != null) && (post.containsKey("onlineCautionSubmit"))) {
+            switchboard.setConfig(plasmaSwitchboard.PROXY_ONLINE_CAUTION_DELAY, Integer.toString(post.getInt("crawlPauseProxy", 30000)));
+            switchboard.setConfig(plasmaSwitchboard.LOCALSEACH_ONLINE_CAUTION_DELAY, Integer.toString(post.getInt("crawlPauseLocalsearch", 30000)));
+            switchboard.setConfig(plasmaSwitchboard.REMOTESEARCH_ONLINE_CAUTION_DELAY, Integer.toString(post.getInt("crawlPauseRemotesearch", 30000)));
         }
         
         // table cache settings
@@ -248,8 +249,12 @@ public class PerformanceQueues_p {
         prop.put("wordCacheMaxCount", switchboard.getConfigLong(plasmaSwitchboard.WORDCACHE_MAX_COUNT, 20000));
         prop.put("wordCacheInitCount", switchboard.getConfigLong(plasmaSwitchboard.WORDCACHE_INIT_COUNT, 30000));
         prop.put("wordFlushSize", switchboard.getConfigLong("wordFlushSize", 2000));
-        prop.put("onlineCautionDelay", switchboard.getConfigLong("onlineCautionDelay", 30000));
-        prop.putNum("onlineCautionDelayCurrent", System.currentTimeMillis() - switchboard.proxyLastAccess);
+        prop.put("crawlPauseProxy", switchboard.getConfigLong(plasmaSwitchboard.PROXY_ONLINE_CAUTION_DELAY, 30000));
+        prop.put("crawlPauseLocalsearch", switchboard.getConfigLong(plasmaSwitchboard.LOCALSEACH_ONLINE_CAUTION_DELAY, 30000));
+        prop.put("crawlPauseRemotesearch", switchboard.getConfigLong(plasmaSwitchboard.REMOTESEARCH_ONLINE_CAUTION_DELAY, 30000));
+        prop.putNum("crawlPauseProxyCurrent", (System.currentTimeMillis() - switchboard.proxyLastAccess) / 1000);
+        prop.putNum("crawlPauseLocalsearchCurrent", (System.currentTimeMillis() - switchboard.localSearchLastAccess) / 1000);
+        prop.putNum("crawlPauseRemotesearchCurrent", (System.currentTimeMillis() - switchboard.remoteSearchLastAccess) / 1000);
         
         // table thread pool settings
         prop.put("pool_0_name","Crawler Pool");

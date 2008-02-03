@@ -68,26 +68,8 @@ public class index {
         
         final boolean indexDistributeGranted = sb.getConfigBool(plasmaSwitchboard.INDEX_DIST_ALLOW, true);
         final boolean indexReceiveGranted = sb.getConfigBool(plasmaSwitchboard.INDEX_RECEIVE_ALLOW, true);
-        global = global && indexDistributeGranted && indexReceiveGranted;
-/*
-        final String referer = (String) header.get(httpHeader.REFERER);
-        if (referer != null) {
-            yacyURL url;
-            try {
-                url = new yacyURL(referer, null);
-            } catch (MalformedURLException e) {
-                url = null;
-            }
-            if ((url != null) && (!url.isLocal())) {
-                final HashMap referrerprop = new HashMap();
-                referrerprop.put("count", "1");
-                referrerprop.put("clientip", header.get(httpHeader.CONNECTION_PROP_CLIENTIP));
-                referrerprop.put("useragent", header.get(httpHeader.USER_AGENT));
-                referrerprop.put("date", (new serverDate()).toShortString(false));
-                if (sb.facilityDB != null) try {sb.facilityDB.update("backlinks", referer, referrerprop);} catch (IOException e) {}
-            }
-        }
-*/
+        //global = global && indexDistributeGranted && indexReceiveGranted;
+        
         // search domain
         int contentdom = plasmaSearchQuery.CONTENTDOM_TEXT;
         String cds = (post == null) ? "text" : post.get("contentdom", "text");
