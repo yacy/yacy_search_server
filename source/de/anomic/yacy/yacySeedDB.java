@@ -54,6 +54,7 @@ import java.net.InetAddress;
 import java.net.UnknownHostException;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Hashtable;
 import java.util.Iterator;
 import java.util.Map;
@@ -633,18 +634,19 @@ public final class yacySeedDB {
         int pos = -1;
         String addressStr = null;
         InetAddress seedIPAddress = null;        
+        HashSet<String> badPeerHashes = new HashSet<String>();
         
         if (lookupConnected) {
             // enumerate the cache and simultanous insert values
             Iterator<yacySeed> e = seedsConnected(true, false, null, (float) 0.0);
-
             while (e.hasNext()) {
                 try {
                     seed = (yacySeed) e.next();
                     if (seed != null) {
                         addressStr = seed.getPublicAddress();
                         if (addressStr == null) {
-                        	serverLog.logWarning("YACY","lookupByIP: address of seed " + seed.getName() + " is null.");
+                        	serverLog.logWarning("YACY","lookupByIP/Connected: address of seed " + seed.getName() + "/" + seed.hash + " is null.");
+                        	badPeerHashes.add(seed.hash);
                         	continue; 
                         }
                         if ((pos = addressStr.indexOf(":"))!= -1) {
@@ -656,6 +658,10 @@ public final class yacySeedDB {
                     }
                 } catch (UnknownHostException ex) {}
             }
+            // delete bad peers
+            Iterator<String> i = badPeerHashes.iterator();
+            while (i.hasNext()) try {seedActiveDB.remove(i.next());} catch (IOException e1) {e1.printStackTrace();}
+            badPeerHashes.clear();
         }
         
         if (lookupDisconnected) {
@@ -668,8 +674,9 @@ public final class yacySeedDB {
                     if (seed != null) {
                         addressStr = seed.getPublicAddress();
                         if (addressStr == null) {
-                                serverLog.logWarning("YACY","lookupByIP: address of seed " + seed.getName() + " is null.");
-                                continue;
+                            serverLog.logWarning("YACY","lookupByIPDisconnected: address of seed " + seed.getName() + "/" + seed.hash + " is null.");
+                            badPeerHashes.add(seed.hash);
+                            continue;
                         }
                         if ((pos = addressStr.indexOf(":"))!= -1) {
                             addressStr = addressStr.substring(0,pos);
@@ -680,6 +687,10 @@ public final class yacySeedDB {
                     }
                 } catch (UnknownHostException ex) {}
             }
+            // delete bad peers
+            Iterator<String> i = badPeerHashes.iterator();
+            while (i.hasNext()) try {seedActiveDB.remove(i.next());} catch (IOException e1) {e1.printStackTrace();}
+            badPeerHashes.clear();
         }
         
         if (lookupPotential) {
