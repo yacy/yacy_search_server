@@ -572,11 +572,6 @@ public final class yacyClient {
             }
         }
         
-		// insert the containers to the index
-        for (int m = 0; m < words; m++) {
-            wordIndex.addEntries(container[m], true);
-		}
-        
 		// read index abstract
 		if (abstractCache != null) {
 			Iterator<Map.Entry<String, String>> i = result.entrySet().iterator();
@@ -600,7 +595,12 @@ public final class yacyClient {
 			}
 		}
 
-		// generate statistics
+		// insert the containers to the index
+        for (int m = 0; m < words; m++) {
+            wordIndex.addEntries(container[m], true);
+        }
+        
+        // generate statistics
 		long searchtime;
 		try {
 			searchtime = Integer.parseInt((String) result.get("searchtime"));

@@ -51,6 +51,7 @@ import de.anomic.kelondro.kelondroCloneableIterator;
 import de.anomic.kelondro.kelondroMergeIterator;
 import de.anomic.kelondro.kelondroOrder;
 import de.anomic.kelondro.kelondroRotateIterator;
+import de.anomic.kelondro.kelondroRowSet;
 import de.anomic.plasma.urlPattern.plasmaURLPattern;
 import de.anomic.server.serverMemory;
 import de.anomic.server.logging.serverLog;
@@ -361,6 +362,27 @@ public final class plasmaWordIndex implements indexRI {
                 container.addAllUnique(collections.getContainer(wordHash, urlselection));
             }
         }
+        
+        // check doubles
+        int beforeDouble = container.size();
+        ArrayList<kelondroRowSet> d = container.removeDoubles();
+        kelondroRowSet set;
+        for (int i = 0; i < d.size(); i++) {
+            // for each element in the double-set, take that one that is the most recent one
+            set = d.get(i);
+            indexRWIRowEntry e, elm = null;
+            long lm = 0;
+            for (int j = 0; j < set.size(); j++) {
+                e = new indexRWIRowEntry(set.get(j));
+                if ((elm == null) || (e.lastModified() > lm)) {
+                    elm = e;
+                    lm = e.lastModified();
+                }
+            }
+            container.addUnique(elm.toKelondroEntry());
+        }
+        if (container.size() < beforeDouble) System.out.println("*** DEBUG DOUBLECHECK - removed " + (beforeDouble - container.size()) + " index entries from word container " + container.getWordHash());
+
         return container;
     }
 
