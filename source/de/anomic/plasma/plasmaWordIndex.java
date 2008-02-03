@@ -363,6 +363,8 @@ public final class plasmaWordIndex implements indexRI {
             }
         }
         
+        if (container == null) return null;
+        
         // check doubles
         int beforeDouble = container.size();
         ArrayList<kelondroRowSet> d = container.removeDoubles();

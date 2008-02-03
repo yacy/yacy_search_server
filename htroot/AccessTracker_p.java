@@ -133,7 +133,6 @@ public class AccessTracker_p {
             HashMap<String, Object> searchProfile;
             int m = Math.min(maxCount, array.size());
             long qcountSum = 0;
-            long qtimeSum = 0;
             long rcountSum = 0;
             long utimeSum = 0;
             long stimeSum = 0;
@@ -159,13 +158,11 @@ public class AccessTracker_p {
                     prop.put("page_list_" + entCount + "_queryhashes", plasmaSearchQuery.anonymizedQueryHashes((Set<String>) searchProfile.get("queryhashes")));
                 }
                 prop.putNum("page_list_" + entCount + "_querycount", ((Integer) searchProfile.get("querycount")).longValue());
-                prop.putNum("page_list_" + entCount + "_querytime", ((Long) searchProfile.get("querytime")).longValue());
                 prop.putNum("page_list_" + entCount + "_resultcount", ((Integer) searchProfile.get("resultcount")).longValue());
                 prop.putNum("page_list_" + entCount + "_urltime", ((Long) searchProfile.get("resulturltime")).longValue());
                 prop.putNum("page_list_" + entCount + "_snippettime", ((Long) searchProfile.get("resultsnippettime")).longValue());
                 prop.putNum("page_list_" + entCount + "_resulttime", ((Long) searchProfile.get("resulttime")).longValue());
                 qcountSum += ((Integer) searchProfile.get("querycount")).intValue();
-                qtimeSum += ((Long) searchProfile.get("querytime")).longValue();
                 rcountSum += ((Integer) searchProfile.get("resultcount")).intValue();
                 utimeSum += ((Long) searchProfile.get("resulturltime")).longValue();
                 stimeSum += ((Long) searchProfile.get("resultsnippettime")).longValue();
@@ -177,7 +174,6 @@ public class AccessTracker_p {
             // Put -1 instead of NaN as result for empty search list
             if (m == 0) m = -1;
             prop.putNum("page_querycount_avg", (double)qcountSum/m);
-            prop.putNum("page_querytime_avg", (double)qtimeSum/m);
             prop.putNum("page_resultcount_avg", (double)rcountSum/m);
             prop.putNum("page_urltime_avg", (double)utimeSum/m);
             prop.putNum("page_snippettime_avg", (double)stimeSum/m);
