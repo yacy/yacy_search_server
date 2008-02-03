@@ -496,7 +496,10 @@ public class kelondroRowCollection {
             isort(L, R, swapspace);
             return;
         }
+    	assert R > L;
 		int p = partition(L, R, S, swapspace);
+		assert p > L;
+		assert p < R;
 		qsort(L, p, 0, swapspace);
 		qsort(p, R, 0, swapspace);
 	}

@@ -371,6 +371,7 @@ public class kelondroBase64Order extends kelondroAbstractOrder<byte[]> implement
         byte[] cp = new byte[Math.min(alength, a.length - aoffset)];
         for (int i = cp.length - 1; i >= 0; i--) {
             cp[i] = ahpla[a[aoffset + i]];
+            assert cp[i] != -1;
         }
         return cp;
     }

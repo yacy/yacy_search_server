@@ -318,10 +318,11 @@ public class yacysearch {
             sb.localSearchTracker.put(client, handles);
         
             prop = new serverObjects();
+            int totalcount = theSearch.getRankingResult().getLocalResourceSize() + theSearch.getRankingResult().getRemoteResourceSize();
             prop.put("num-results_offset", offset);
             prop.put("num-results_itemscount", "0");
             prop.put("num-results_itemsPerPage", itemsPerPage);
-            prop.put("num-results_totalcount", yFormatter.number(theSearch.getRankingResult().getLocalResourceSize() + theSearch.getRankingResult().getRemoteResourceSize(), !rss));
+            prop.put("num-results_totalcount", yFormatter.number(totalcount, !rss));
             prop.put("num-results_globalresults", (globalsearch) ? "1" : "0");
             prop.put("num-results_globalresults_localResourceSize", yFormatter.number(theSearch.getRankingResult().getLocalResourceSize(), !rss));
             prop.put("num-results_globalresults_remoteResourceSize", yFormatter.number(theSearch.getRankingResult().getRemoteResourceSize(), !rss));
@@ -335,7 +336,7 @@ public class yacysearch {
                 resnav.append(navurla(thispage - 1, display, theQuery));
                 resnav.append("<strong>&lt;</strong></a>&nbsp;");
             }
-            int numberofpages = Math.min(10, Math.min(thispage + 2, (theSearch.getRankingResult().getRemoteResourceSize() + theSearch.getRankingResult().getLocalResourceSize()) / theQuery.displayResults()));
+            int numberofpages = Math.min(10, Math.max(thispage + 2, totalcount / theQuery.displayResults()));
             for (int i = 0; i < numberofpages; i++) {
                 if (i == thispage) {
                     resnav.append("<strong>");

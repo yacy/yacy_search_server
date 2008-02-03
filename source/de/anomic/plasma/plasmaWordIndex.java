@@ -248,9 +248,6 @@ public final class plasmaWordIndex implements indexRI {
             if (c != null) containerList.add(c);
         }
         // flush the containers
-        for (int i = 0; i < containerList.size(); i++) {
-            collections.addEntries((indexContainer) containerList.get(i));
-        }
         collections.addMultipleEntries(containerList);
         //System.out.println("DEBUG-Finished flush of " + count + " entries from RAM to DB in " + (System.currentTimeMillis() - start) + " milliseconds");
         busyCacheFlush = false;

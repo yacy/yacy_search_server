@@ -85,7 +85,8 @@ public class yacysearchitem {
 
         // dynamically update count values
         if (!rss) {
-            prop.put("dynamic_offset", theQuery.neededResults() - theQuery.displayResults() + 1);
+            int offset = theQuery.neededResults() - theQuery.displayResults() + 1;
+            prop.put("dynamic_offset", offset);
             prop.put("dynamic_itemscount", (item < 0) ? theQuery.neededResults() : item + 1);
             prop.put("dynamic_totalcount", yFormatter.number(theSearch.getRankingResult().getLocalResourceSize() + theSearch.getRankingResult().getRemoteResourceSize(), !rss));
             prop.put("dynamic_localResourceSize", yFormatter.number(theSearch.getRankingResult().getLocalResourceSize(), !rss));
@@ -284,4 +285,5 @@ public class yacysearchitem {
         if (p < 0) return s.substring(0, length - 3) + "...";
         return s.substring(0, length - (s.length() - p) - 3) + "..." + s.substring(p);
     }
+
 }

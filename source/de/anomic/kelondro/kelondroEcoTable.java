@@ -440,12 +440,14 @@ public class kelondroEcoTable implements kelondroIndex {
             
             if (i == index.size() - 1) {
                 // special handling if the entry is the last entry in the file
-                index.removei(key);
+                ix = index.removei(key);
+                assert ix == i;
                 table.removeRow(i, false);
                 file.cleanLast();
             } else {
                 // switch values
-                index.removei(key);
+                ix = index.removei(key);
+                assert ix == i;
                 
                 kelondroRow.Entry te = table.removeOne();
                 table.set(i, te);

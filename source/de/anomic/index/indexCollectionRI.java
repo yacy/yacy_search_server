@@ -181,7 +181,7 @@ public class indexCollectionRI implements indexRI {
 
     public void addMultipleEntries(List<indexContainer> containerList) {
         try {
-        	for (int i = 0; i < containerList.size(); i++) collectionIndex.merge((indexContainer) containerList.get(i));
+        	for (int i = 0; i < containerList.size(); i++) collectionIndex.merge(containerList.get(i));
             //collectionIndex.mergeMultiple(containerList);
         } catch (kelondroOutOfLimitsException e) {
             e.printStackTrace();
