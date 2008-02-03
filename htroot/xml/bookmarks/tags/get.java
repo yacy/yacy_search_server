@@ -67,9 +67,11 @@ public class get {
         bookmarksDB.Tag tag;
         while (it.hasNext()) {
             tag = it.next();
-            prop.put("tags_"+count+"_name", tag.getTagName());
-            prop.put("tags_"+count+"_count", tag.size());
-            count++;
+            if(!tag.getTagName().startsWith("/")) {						// ignore folder tags
+            	prop.put("tags_"+count+"_name", tag.getTagName());
+            	prop.put("tags_"+count+"_count", tag.size());
+            	count++;
+            }
         }
         prop.put("tags", count);
 
