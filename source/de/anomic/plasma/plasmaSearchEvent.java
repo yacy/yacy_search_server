@@ -531,12 +531,21 @@ public final class plasmaSearchEvent {
                 //System.out.println("+++DEBUG-resultWorker+++ fetched " + resultEntry.urlstring());
                 
                 // place the result to the result vector
+                boolean d = false;
                 synchronized (resultList) {
-                    resultList.add(resultEntry);
+                    doublecheck: for (int i = 0; i < resultList.size(); i++) {
+                        if (resultList.get(i).urlcomps.url().hash().equals(resultEntry.urlcomps.url().hash())) {
+                            d = true;
+                            break doublecheck;
+                        }
+                    }
+                    if (!d) {
+                        resultList.add(resultEntry);
+                    }
                 }
 
                 // add references
-                synchronized (rankedCache) {
+                if (!d) synchronized (rankedCache) {
                     rankedCache.addReferences(resultEntry);
                 }
                 //System.out.println("DEBUG SNIPPET_LOADING: thread " + id + " got " + resultEntry.url());
