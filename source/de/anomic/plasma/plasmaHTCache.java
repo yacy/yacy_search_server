@@ -809,11 +809,13 @@ public final class plasmaHTCache {
     
     
     /**
-     * This is a helper funktion that extracts the Hash from the filename
+     * This is a helper function that extracts the Hash from the filename
      */
     public static String getHash(final File f) {
         if ((!f.isFile()) || (f.getPath().indexOf("hash") < 0)) return null;
-        String hexHash = f.getName().substring(0,18);
+        String name = f.getName();
+        if (name.length() < 18) return null; // not a hash file name
+        String hexHash = name.substring(0,18);
         if (hexHash.indexOf('.') >= 0) return null;
         try {
             String hash = kelondroBase64Order.enhancedCoder.encode(serverCodings.decodeHex(hexHash));
