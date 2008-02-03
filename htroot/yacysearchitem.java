@@ -145,6 +145,7 @@ public class yacysearchitem {
                     final Iterator<String> iter = topwords.iterator();
                     while (iter.hasNext()) {
                         word = (String) iter.next();
+                        if ((theQuery == null) || (theQuery.queryString == null)) break;
                         if (word != null) {
                             prop.putHTML("references_words_" + hintcount + "_word", word);
                             prop.putHTML("references_words_" + hintcount + "_newsearch", theQuery.queryString.replace(' ', '+') + "+" + word);
