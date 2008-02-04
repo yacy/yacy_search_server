@@ -640,10 +640,8 @@ ramCacheProfiles_time=      500
 # -Xmx<size> and -Xms<size> maximum/init Java heap size
 # both values should be equal,
 # othervise the YaCy-internal memory supervision does not work
-javastart_Xmx=Xmx96m
-javastart_Xms=Xms96m
-javastart_Xmx__pro=Xmx120m
-javastart_Xms__pro=Xms120m
+javastart_Xmx=Xmx120m
+javastart_Xms=Xms120m
 
 # priority of the yacy-process
 # is valid in unix/shell and windows environments but

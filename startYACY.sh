@@ -96,6 +96,8 @@ then
 #		i="${i#javastart_*=}";
 #		JAVA_ARGS="-$i $JAVA_ARGS";
 #	done
+else
+    JAVA_ARGS="-Xmx120m -Xms120m $JAVA_ARGS";
 fi
 #echo "JAVA_ARGS: $JAVA_ARGS"
 #echo "JAVA: $JAVA"

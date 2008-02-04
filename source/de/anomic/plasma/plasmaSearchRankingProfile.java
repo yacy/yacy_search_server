@@ -48,34 +48,34 @@ import java.util.Map;
 public class plasmaSearchRankingProfile {
 
     // pre-sort attributes
-    public static final String DOMLENGTH     = "domlength";
-    public static final String YBR           = "ybr";
-    public static final String DATE          = "date";
-    public static final String WORDSINTITLE  = "wordsintitle";
-    public static final String WORDSINTEXT   = "wordsintext";
-    public static final String PHRASESINTEXT = "phrasesintext";
-    public static final String LLOCAL        = "llocal";
-    public static final String LOTHER        = "lother";
-    public static final String URLLENGTH     = "urllength";
-    public static final String URLCOMPS      = "urlcomps";
-    public static final String HITCOUNT      = "hitcount";
-    public static final String POSINTEXT     = "posintext";
-    public static final String POSOFPHRASE   = "posofphrase";
-    public static final String POSINPHRASE   = "posinphrase";
-    public static final String AUTHORITY     = "authority";
-    public static final String WORDDISTANCE  = "worddistance";
-    public static final String APPURL        = "appurl";
-    public static final String APPDESCR      = "appdescr";
-    public static final String APPAUTHOR     = "appauthor";
-    public static final String APPTAGS       = "apptags";
-    public static final String APPREF        = "appref";
-    public static final String APPEMPH       = "appemph";
-    public static final String CATINDEXOF    = "catindexof";
-    public static final String CATHASIMAGE   = "cathasimage";
-    public static final String CATHASAUDIO   = "cathasaudio";
-    public static final String CATHASVIDEO   = "cathasvideo";
-    public static final String CATHASAPP     = "cathasapp";
-    public static final String TERMFREQUENCY = "tf";
+    public static final String DOMLENGTH          = "domlength";
+    public static final String YBR                = "ybr";
+    public static final String DATE               = "date";
+    public static final String WORDSINTITLE       = "wordsintitle";
+    public static final String WORDSINTEXT        = "wordsintext";
+    public static final String PHRASESINTEXT      = "phrasesintext";
+    public static final String LLOCAL             = "llocal";
+    public static final String LOTHER             = "lother";
+    public static final String URLLENGTH          = "urllength";
+    public static final String URLCOMPS           = "urlcomps";
+    public static final String HITCOUNT           = "hitcount";
+    public static final String POSINTEXT          = "posintext";
+    public static final String POSOFPHRASE        = "posofphrase";
+    public static final String POSINPHRASE        = "posinphrase";
+    public static final String AUTHORITY          = "authority";
+    public static final String WORDDISTANCE       = "worddistance";
+    public static final String APPURL             = "appurl";
+    public static final String APP_DC_TITLE       = "appdescr";   // title of page
+    public static final String APP_DC_CREATOR     = "appauthor";  // the author field
+    public static final String APP_DC_SUBJECT     = "apptags";    // tags
+    public static final String APP_DC_DESCRIPTION = "appref";     // references to the source (content of <a> tag)
+    public static final String APPEMPH            = "appemph";
+    public static final String CATINDEXOF         = "catindexof";
+    public static final String CATHASIMAGE        = "cathasimage";
+    public static final String CATHASAUDIO        = "cathasaudio";
+    public static final String CATHASVIDEO        = "cathasvideo";
+    public static final String CATHASAPP          = "cathasapp";
+    public static final String TERMFREQUENCY      = "tf";
 
     // post-sort predicates
     public static final String URLCOMPINTOPLIST   = "urlcompintoplist";
@@ -90,7 +90,7 @@ public class plasmaSearchRankingProfile {
         coeff_domlength, coeff_ybr, coeff_date, coeff_wordsintitle, coeff_wordsintext, coeff_phrasesintext,
         coeff_llocal, coeff_lother, coeff_urllength, coeff_urlcomps, coeff_hitcount, 
         coeff_posintext, coeff_posofphrase, coeff_posinphrase, coeff_authority, coeff_worddistance,
-        coeff_appurl, coeff_appdescr, coeff_appauthor, coeff_apptags, coeff_appref, coeff_appemph,
+        coeff_appurl, coeff_app_dc_title, coeff_app_dc_creator, coeff_app_dc_subject, coeff_app_dc_description, coeff_appemph,
         coeff_catindexof, coeff_cathasimage, coeff_cathasaudio, coeff_cathasvideo, coeff_cathasapp,
         coeff_urlcompintoplist, coeff_descrcompintoplist, coeff_prefer,
         coeff_termfrequency;
@@ -114,10 +114,10 @@ public class plasmaSearchRankingProfile {
         coeff_authority          = 11;
         coeff_worddistance       = 12;
         coeff_appurl             = 13;
-        coeff_appdescr           = 10;
-        coeff_appauthor          = 11;
-        coeff_apptags            = 8;
-        coeff_appref             = 7;
+        coeff_app_dc_title       = 13;
+        coeff_app_dc_creator     = 12;
+        coeff_app_dc_subject     = 9;
+        coeff_app_dc_description = 8;
         coeff_appemph            = 10;
         coeff_catindexof         = (mediatype == plasmaSearchQuery.CONTENTDOM_TEXT) ? 0 : 15;
         coeff_cathasimage        = (mediatype == plasmaSearchQuery.CONTENTDOM_IMAGE) ? 15 : 0;
@@ -127,7 +127,7 @@ public class plasmaSearchRankingProfile {
         coeff_termfrequency      = 14;
         coeff_urlcompintoplist   = 3;
         coeff_descrcompintoplist = 2;
-        coeff_prefer             = 12;
+        coeff_prefer             = 14;
     }
     
     public plasmaSearchRankingProfile(String prefix, String profile) {
@@ -165,10 +165,10 @@ public class plasmaSearchRankingProfile {
             coeff_authority          = parseMap(coeff, AUTHORITY, coeff_authority);
             coeff_worddistance       = parseMap(coeff, WORDDISTANCE, coeff_worddistance);
             coeff_appurl             = parseMap(coeff, APPURL, coeff_appurl);
-            coeff_appdescr           = parseMap(coeff, APPDESCR, coeff_appdescr);
-            coeff_appauthor          = parseMap(coeff, APPAUTHOR, coeff_appauthor);
-            coeff_apptags            = parseMap(coeff, APPTAGS, coeff_apptags);
-            coeff_appref             = parseMap(coeff, APPREF, coeff_appref);
+            coeff_app_dc_title       = parseMap(coeff, APP_DC_TITLE, coeff_app_dc_title);
+            coeff_app_dc_creator     = parseMap(coeff, APP_DC_CREATOR, coeff_app_dc_creator);
+            coeff_app_dc_subject     = parseMap(coeff, APP_DC_SUBJECT, coeff_app_dc_subject);
+            coeff_app_dc_description = parseMap(coeff, APP_DC_DESCRIPTION, coeff_app_dc_description);
             coeff_appemph            = parseMap(coeff, APPEMPH, coeff_appemph);
             coeff_catindexof         = parseMap(coeff, CATINDEXOF, coeff_catindexof);
             coeff_cathasimage        = parseMap(coeff, CATHASIMAGE, coeff_cathasimage);
@@ -221,10 +221,10 @@ public class plasmaSearchRankingProfile {
         ext.put(prefix + AUTHORITY, Integer.toString(coeff_authority));
         ext.put(prefix + WORDDISTANCE, Integer.toString(coeff_worddistance));
         ext.put(prefix + APPURL, Integer.toString(coeff_appurl));
-        ext.put(prefix + APPDESCR, Integer.toString(coeff_appdescr));
-        ext.put(prefix + APPAUTHOR, Integer.toString(coeff_appauthor));
-        ext.put(prefix + APPTAGS, Integer.toString(coeff_apptags));
-        ext.put(prefix + APPREF, Integer.toString(coeff_appref));
+        ext.put(prefix + APP_DC_TITLE, Integer.toString(coeff_app_dc_title));
+        ext.put(prefix + APP_DC_CREATOR, Integer.toString(coeff_app_dc_creator));
+        ext.put(prefix + APP_DC_SUBJECT, Integer.toString(coeff_app_dc_subject));
+        ext.put(prefix + APP_DC_DESCRIPTION, Integer.toString(coeff_app_dc_description));
         ext.put(prefix + APPEMPH, Integer.toString(coeff_appemph));
         ext.put(prefix + CATINDEXOF, Integer.toString(coeff_catindexof));
         ext.put(prefix + CATHASIMAGE, Integer.toString(coeff_cathasimage));

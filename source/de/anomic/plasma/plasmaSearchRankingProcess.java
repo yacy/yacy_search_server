@@ -521,7 +521,7 @@ public final class plasmaSearchRankingProcess {
         while (shi.hasNext()) {
             queryhash = shi.next();
             if (urlcomph.contains(queryhash)) r += 256 << query.ranking.coeff_appurl;
-            if (descrcomph.contains(queryhash)) r += 256 << query.ranking.coeff_appdescr;
+            if (descrcomph.contains(queryhash)) r += 256 << query.ranking.coeff_app_dc_title;
         }
 
         return r;

@@ -44,11 +44,11 @@ public class Ranking_p {
 	
 	private static final HashMap<String, String> rankingParameters = new HashMap<String, String>();
 	static {
-		rankingParameters.put(plasmaSearchRankingProfile.APPAUTHOR, "Appearance In Author");
-		rankingParameters.put(plasmaSearchRankingProfile.APPDESCR, "Appearance In Description");
+		rankingParameters.put(plasmaSearchRankingProfile.APP_DC_CREATOR, "Appearance In Author");
+		rankingParameters.put(plasmaSearchRankingProfile.APP_DC_TITLE, "Appearance In Title");
 		rankingParameters.put(plasmaSearchRankingProfile.APPEMPH, "Appearance In Emphasized Text");
-		rankingParameters.put(plasmaSearchRankingProfile.APPREF, "Appearance In Reference");
-		rankingParameters.put(plasmaSearchRankingProfile.APPTAGS, "Appearance In Tags");
+		rankingParameters.put(plasmaSearchRankingProfile.APP_DC_DESCRIPTION, "Appearance In Reference/Anchor Name");
+		rankingParameters.put(plasmaSearchRankingProfile.APP_DC_SUBJECT, "Appearance In Tags");
 		rankingParameters.put(plasmaSearchRankingProfile.APPURL, "Appearance In URL");
 		rankingParameters.put(plasmaSearchRankingProfile.AUTHORITY, "Authority of Domain");
 		rankingParameters.put(plasmaSearchRankingProfile.CATHASAPP, "Category App, Appearance");

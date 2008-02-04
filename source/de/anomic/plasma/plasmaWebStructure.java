@@ -67,7 +67,7 @@ public class plasmaWebStructure {
         this.structureFile = structureFile;
         
         // load web structure
-        Map<String, String> loadedStructure = serverFileUtils.loadHashMap(this.structureFile);
+        Map<String, String> loadedStructure = (this.structureFile.exists()) ? serverFileUtils.loadHashMap(this.structureFile) : new TreeMap<String, String>();
         if (loadedStructure != null) this.structure.putAll(loadedStructure);
         
         // delete outdated entries in case the structure is too big
