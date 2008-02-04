@@ -114,125 +114,121 @@ public class blogBoard {
 
     public class entry {
 	
-	String key;
-    HashMap<String, String> record;
-
-    public entry(String nkey, byte[] subject, byte[] author, String ip, Date date, byte[] page, ArrayList<String> comments, String commentMode) {
-	    record = new HashMap<String, String>();
-	    key = nkey;
-	    if (key.length() > keyLength) key = key.substring(0, keyLength);
-	    if(date == null) date = new Date();
-	    record.put("date", serverDate.formatShortSecond(date));
-	    if (subject == null) record.put("subject","");
-	    else record.put("subject", kelondroBase64Order.enhancedCoder.encode(subject));
-	    if (author == null) record.put("author","");
-	    else record.put("author", kelondroBase64Order.enhancedCoder.encode(author));
-	    if ((ip == null) || (ip.length() == 0)) ip = "";
-	    record.put("ip", ip);
-        if (page == null) record.put("page", "");
-        else record.put("page", kelondroBase64Order.enhancedCoder.encode(page));
-        if (comments == null) record.put("comments", listManager.collection2string(new ArrayList<String>()));
-        else record.put("comments", listManager.collection2string(comments));
-        if (commentMode == null) record.put("commentMode", "1");
-        else record.put("commentMode", commentMode);
-	    
-        wikiBoard.setAuthor(ip, new String(author));
-        //System.out.println("DEBUG: setting author " + author + " for ip = " + ip + ", authors = " + authors.toString());
-	}
-
-	private entry(String key, HashMap<String, String> record) {
-	    this.key = key;
-	    this.record = record;
-        if (this.record.get("comments")==null) this.record.put("comments", listManager.collection2string(new ArrayList<String>()));
-        if (this.record.get("commentMode")==null || this.record.get("commentMode").equals("")) this.record.put("commentMode", "1");
-	}
+		String key;
+	    HashMap<String, String> record;
 	
-	public String key() {
-		return key;
-	}
-
-	public byte[] subject() {
-		String m = record.get("subject");
-	    if (m == null) return new byte[0];
-	    byte[] b = kelondroBase64Order.enhancedCoder.decode(m, "de.anomic.data.blogBoard.subject()");
-	    if (b == null) return "".getBytes();
-	    return b;
-	}
-
-	public Date date() {
-	    try {
-		String c = record.get("date");
-		if (c == null) {
-            System.out.println("DEBUG - ERROR: date field missing in blogBoard");
-            return new Date();
-        }
-		return serverDate.parseShortSecond(c);
-	    } catch (ParseException e) {
-		return new Date();
-	    }
-	}
-	
-	public String timestamp() {
-		String c = record.get("date");
-		if (c == null) {
-	        System.out.println("DEBUG - ERROR: date field missing in blogBoard");
-	        return serverDate.formatShortSecond();
+	    public entry(String nkey, byte[] subject, byte[] author, String ip, Date date, byte[] page, ArrayList<String> comments, String commentMode) {
+		    record = new HashMap<String, String>();
+		    key = nkey;
+		    if (key.length() > keyLength) key = key.substring(0, keyLength);
+		    if(date == null) date = new Date();
+		    record.put("date", serverDate.formatShortSecond(date));
+		    if (subject == null) record.put("subject","");
+		    else record.put("subject", kelondroBase64Order.enhancedCoder.encode(subject));
+		    if (author == null) record.put("author","");
+		    else record.put("author", kelondroBase64Order.enhancedCoder.encode(author));
+		    if ((ip == null) || (ip.length() == 0)) ip = "";
+		    record.put("ip", ip);
+	        if (page == null) record.put("page", "");
+	        else record.put("page", kelondroBase64Order.enhancedCoder.encode(page));
+	        if (comments == null) record.put("comments", listManager.collection2string(new ArrayList<String>()));
+	        else record.put("comments", listManager.collection2string(comments));
+	        if (commentMode == null) record.put("commentMode", "1");
+	        else record.put("commentMode", commentMode);
+		    
+	        wikiBoard.setAuthor(ip, new String(author));
+	        //System.out.println("DEBUG: setting author " + author + " for ip = " + ip + ", authors = " + authors.toString());
 		}
-		return c;
-	}
 	
-    public byte[] author() {
-        String m = record.get("author");
-        if (m == null) return new byte[0];
-        byte[] b = kelondroBase64Order.enhancedCoder.decode(m, "de.anomic.data.blogBoard.author()");
-        if (b == null) return "".getBytes();
-        return b;
-    }
-    
-    public byte[] commentsSize() {
-        ArrayList<String> m = listManager.string2arraylist(record.get("comments"));
-        if (m == null) return new byte[0];
-        byte[] b = Integer.toString(m.size()).getBytes();
-        if (b == null) return "".getBytes();
-        return b;
-    }
-
-    public ArrayList<String> comments() {
-        ArrayList<String> m = listManager.string2arraylist(record.get("comments"));
-        if (m == null) return new ArrayList<String>();
-        return m;
-    }
-
-	public String ip() {
-	    String a = record.get("ip");
-	    if (a == null) return "127.0.0.1";
-	    return a;
-	}
-
-	public byte[] page() {
-	    String m = record.get("page");
-	    if (m == null) return new byte[0];
-	    byte[] b = kelondroBase64Order.enhancedCoder.decode(m, "de.anomic.data.blogBoard.page()");
-	    if (b == null) return "".getBytes();
-	    return b;
-	}        
-
-    public void addComment(String commentID) {
-        ArrayList<String> comments = listManager.string2arraylist(record.get("comments"));
-        comments.add(commentID);
-        record.put("comments", listManager.collection2string(comments));
-    }
-    
-    public boolean removeComment(String commentID) {
-        ArrayList<String> comments = listManager.string2arraylist(record.get("comments"));
-        boolean success = comments.remove(commentID);
-        record.put("comments", listManager.collection2string(comments));
-        return success;
-    }
-    
-    public int getCommentMode(){
-        return Integer.parseInt(record.get("commentMode"));
-    }
+		private entry(String key, HashMap<String, String> record) {
+		    this.key = key;
+		    this.record = record;
+	        if (this.record.get("comments")==null) this.record.put("comments", listManager.collection2string(new ArrayList<String>()));
+	        if (this.record.get("commentMode")==null || this.record.get("commentMode").equals("")) this.record.put("commentMode", "1");
+		}
+		
+		public String key() {
+			return key;
+		}
+	
+		public byte[] subject() {
+			String m = record.get("subject");
+		    if (m == null) return new byte[0];
+		    byte[] b = kelondroBase64Order.enhancedCoder.decode(m, "de.anomic.data.blogBoard.subject()");
+		    if (b == null) return "".getBytes();
+		    return b;
+		}
+	
+		public Date date() {
+		    try {
+			String c = record.get("date");
+			if (c == null) {
+	            System.out.println("DEBUG - ERROR: date field missing in blogBoard");
+	            return new Date();
+	        }
+			return serverDate.parseShortSecond(c);
+		    } catch (ParseException e) {
+			return new Date();
+		    }
+		}
+		
+		public String timestamp() {
+			String c = record.get("date");
+			if (c == null) {
+		        System.out.println("DEBUG - ERROR: date field missing in blogBoard");
+		        return serverDate.formatShortSecond();
+			}
+			return c;
+		}
+		
+	    public byte[] author() {
+	        String m = record.get("author");
+	        if (m == null) return new byte[0];
+	        byte[] b = kelondroBase64Order.enhancedCoder.decode(m, "de.anomic.data.blogBoard.author()");
+	        if (b == null) return "".getBytes();
+	        return b;
+	    }
+	    
+	    public int commentsSize() {
+	        ArrayList<String> m = listManager.string2arraylist(record.get("comments"));
+	        return m.size();
+	    }
+	
+	    public ArrayList<String> comments() {
+	        ArrayList<String> m = listManager.string2arraylist(record.get("comments"));
+	        return m;
+	    }
+	
+		public String ip() {
+		    String a = record.get("ip");
+		    if (a == null) return "127.0.0.1";
+		    return a;
+		}
+	
+		public byte[] page() {
+		    String m = record.get("page");
+		    if (m == null) return new byte[0];
+		    byte[] b = kelondroBase64Order.enhancedCoder.decode(m, "de.anomic.data.blogBoard.page()");
+		    if (b == null) return "".getBytes();
+		    return b;
+		}        
+	
+	    public void addComment(String commentID) {
+	        ArrayList<String> comments = listManager.string2arraylist(record.get("comments"));
+	        comments.add(commentID);
+	        record.put("comments", listManager.collection2string(comments));
+	    }
+	    
+	    public boolean removeComment(String commentID) {
+	        ArrayList<String> comments = listManager.string2arraylist(record.get("comments"));
+	        boolean success = comments.remove(commentID);
+	        record.put("comments", listManager.collection2string(comments));
+	        return success;
+	    }
+	    
+	    public int getCommentMode(){
+	        return Integer.parseInt(record.get("commentMode"));
+	    }
     }
 
     public String write(entry page) {

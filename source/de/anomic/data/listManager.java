@@ -327,7 +327,7 @@ public class listManager {
     public static ArrayList<String> string2arraylist(String string){
         ArrayList<String> l;
 
-        if (string != null) {
+        if (string != null && string.length() > 0) {
             l = new ArrayList<String>(Arrays.asList(string.split(",")));
         } else {
             l = new ArrayList<String>();

@@ -362,11 +362,7 @@ public class Blog {
             prop.put("mode_entries_" + number + "_commentsactive", "1");
             prop.put("mode_entries_" + number + "_commentsactive_pageid", entry.key());
             prop.put("mode_entries_" + number + "_commentsactive_address", address);
-            try {
-                prop.put("mode_entries_" + number + "_commentsactive_comments", new String(entry.commentsSize(),"UTF-8"));
-            } catch (UnsupportedEncodingException e) {
-                prop.put("mode_entries_" + number + "_commentsactive_comments", new String(entry.commentsSize()));
-            }
+            prop.put("mode_entries_" + number + "_commentsactive_comments", entry.commentsSize());
         }
 
         prop.put("mode_entries_" + number + "_date", dateString(entry.date()));

@@ -246,11 +246,7 @@ public class BlogComments {
                     prop.putHTML("mode_author", new String(page.author()));
                     prop.putHTML("mode_allow_author", new String(author));
                 }
-                try {
-                    prop.put("mode_comments", new String(page.commentsSize(),"UTF-8"));
-                } catch (UnsupportedEncodingException e) {
-                    prop.put("mode_comments", new String(page.commentsSize()));
-                }
+                prop.put("mode_comments", page.commentsSize());
                 prop.put("mode_date", dateString(page.date()));
                 prop.putWiki("mode_page", page.page());
                 if(hasRights) {
@@ -272,7 +268,7 @@ public class BlogComments {
                     int num   = post.getInt("num",10);  //indicates how many entries should be shown
                     boolean prev = false;               //indicates if there were previous comments to the ones that are dispalyed
                     if(xml) num = 0;
-                    if (start < 1) start = 1;       // dirrrty fix for incorrect comment count, need to find reason
+                    if (start < 0) start = 0;       
                     if (start > 1) prev = true;
                     int nextstart = start+num;      //indicates the starting offset for next results
                     int prevstart = start-num;      //indicates the starting offset for previous results
