@@ -54,7 +54,7 @@ import de.anomic.yacy.yacyURL;
 public class kelondroCollectionIndex {
 
     private static final int serialNumber = 0;
-    private static final long minimumRAM4Eco = 200 * 1024 * 1024;
+    private static final long minimumRAM4Eco = 20 * 1024 * 1024;
     private static final int EcoFSBufferSize = 1000;
     
     private kelondroIndex index;
