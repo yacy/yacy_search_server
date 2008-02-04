@@ -97,13 +97,13 @@ public class kelondroEcoTable implements kelondroIndex {
         
             // initialize index and copy table
             int  records = (int) Math.max(file.size(), initialSpace);
-            long neededRAM4table = 200 * 1024 * 1024 + records * (rowdef.objectsize + 4) * 3 / 2;
+            long neededRAM4table = records * (rowdef.objectsize + 4) * 3 / 2;
             table = ((neededRAM4table < maxarraylength) &&
                      ((useTailCache == tailCacheForceUsage) ||
-                      ((useTailCache == tailCacheUsageAuto) && (serverMemory.request(neededRAM4table, false))))) ?
+                      ((useTailCache == tailCacheUsageAuto) && (serverMemory.request(neededRAM4table + 200 * 1024 * 1024, false))))) ?
                     new kelondroRowSet(taildef, records) : null;
             System.out.println("*** DEBUG " + tablefile + ": available RAM: " + (serverMemory.available() / 1024 / 1024) + "MB, allocating space for " + records + " entries");
-            long neededRAM4index = 200 * 1024 * 1024 + records * (rowdef.primaryKeyLength + 4) * 3 / 2;
+            long neededRAM4index = 2 * 1024 * 1024 + records * (rowdef.primaryKeyLength + 4) * 3 / 2;
             if (!serverMemory.request(neededRAM4index, false)) {
                 // despite calculations seemed to show that there is enough memory for the table AND the index
                 // there is now not enough memory left for the index. So delete the table again to free the memory
