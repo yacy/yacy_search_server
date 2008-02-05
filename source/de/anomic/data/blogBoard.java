@@ -109,7 +109,7 @@ public class blogBoard {
     }
 
     public entry newEntry(String key, byte[] subject, byte[] author, String ip, Date date, byte[] page, ArrayList<String> comments, String commentMode) {
-	return new entry(normalize(key), subject, author, ip, date, page, comments, commentMode);
+        return new entry(normalize(key), subject, author, ip, date, page, comments, commentMode);
     }
 
     public class entry {
@@ -166,9 +166,9 @@ public class blogBoard {
 	            System.out.println("DEBUG - ERROR: date field missing in blogBoard");
 	            return new Date();
 	        }
-			return serverDate.parseShortSecond(c);
+		        return serverDate.parseShortSecond(c);
 		    } catch (ParseException e) {
-			return new Date();
+		        return new Date();
 		    }
 		}
 		
@@ -190,6 +190,11 @@ public class blogBoard {
 	    }
 	    
 	    public int commentsSize() {
+            // This ist a Bugfix for Version older than 4443.
+            if(record.get("comments").startsWith(",")) {
+                    record.put("comments", record.get("comments").substring(1));
+                    write(this);
+            }
 	        ArrayList<String> m = listManager.string2arraylist(record.get("comments"));
 	        return m.size();
 	    }
@@ -232,17 +237,17 @@ public class blogBoard {
     }
 
     public String write(entry page) {
-	// writes a new page and returns key
-	try {
-	    datbase.set(page.key, page.record);
-	    return page.key;
-	} catch (IOException e) {
-	    return null;
-	}
+        // writes a new page and returns key
+        try {
+            datbase.set(page.key, page.record);
+            return page.key;
+        } catch (IOException e) {
+            return null;
+        }
     }
 
     public entry read(String key) {
-	return read(key, datbase);
+        return read(key, datbase);
     }
 
     private entry read(String key, kelondroMapObjects base) {
@@ -338,7 +343,7 @@ public class blogBoard {
     }
     
     public Iterator<String> keys(boolean up) throws IOException {
-	return datbase.keys(up, false);
+        return datbase.keys(up, false);
     }
 
 }
