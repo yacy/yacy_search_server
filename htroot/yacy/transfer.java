@@ -89,7 +89,7 @@ public final class transfer {
         final yacySeed otherPeer = yacyCore.seedDB.get(otherpeer);
         if (otherPeer == null) {
             // reject unknown peers: this does not appear fair, but anonymous senders are dangerous
-            sb.getLog().logFine("RankingTransmission: rejected unknown peer '" + otherpeer + "', current IP " + header.get("CLIENTIP", "unknown"));
+            sb.getLog().logFine("RankingTransmission: rejected unknown peer, current IP " + header.get("CLIENTIP", "unknown"));
             return prop;
         }
         otherPeer.setLastSeenUTC();
