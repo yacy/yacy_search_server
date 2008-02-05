@@ -110,9 +110,15 @@ public final class crawlReceipt {
            stale       - the resource was reloaded but not processed because source had no changes
 
         */
-        
+
         final yacySeed otherPeer = yacyCore.seedDB.get(iam);
-        final String otherPeerName = iam + ":" + ((otherPeer == null) ? "NULL" : (otherPeer.getName() + "/" + otherPeer.getVersion()));        
+        if (otherPeer == null) {
+            prop.put("delay", "3600");
+            return prop;
+        } else {
+            otherPeer.setLastSeenUTC();
+        }
+        final String otherPeerName = iam + ":" + otherPeer.getName() + "/" + otherPeer.getVersion();
 
         if ((yacyCore.seedDB.mySeed() == null) || (!(yacyCore.seedDB.mySeed().hash.equals(youare)))) {
             // no yacy connection / unknown peers

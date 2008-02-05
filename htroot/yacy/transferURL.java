@@ -82,12 +82,19 @@ public final class transferURL {
         final boolean granted = sb.getConfig("allowReceiveIndex", "false").equals("true");
         final boolean blockBlacklist = sb.getConfig("indexReceiveBlockBlacklist", "false").equals("true");
 
+        final yacySeed otherPeer = yacyCore.seedDB.get(iam);
+        if (otherPeer == null) {
+            prop.put("result", "error_not_granted");
+            prop.put("pause", "120000");
+            return prop;
+        } else {
+            otherPeer.setLastSeenUTC();
+        }
+        final String otherPeerName = iam + ":" + otherPeer.getName() + "/" + otherPeer.getVersion();
+
         // response values
         String result = "";
         String doublevalues = "0";
-
-        final yacySeed otherPeer = yacyCore.seedDB.get(iam);
-        final String otherPeerName = iam + ":" + ((otherPeer == null) ? "NULL" : (otherPeer.getName() + "/" + otherPeer.getVersion()));
 
         if ((youare == null) || (!youare.equals(yacyCore.seedDB.mySeed().hash))) {
         	sb.getLog().logInfo("Rejecting URLs from peer " + otherPeerName + ". Wrong target. Wanted peer=" + youare + ", iam=" + yacyCore.seedDB.mySeed().hash);

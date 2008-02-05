@@ -81,13 +81,14 @@ public final class transfer {
         prop.put("process_path", "");
         prop.put("process_maxsize", "0");
 
-        if (sb.isRobinsonMode() || !sb.rankingOn) {
-        	// in a robinson environment, do not answer. We do not do any transfer in a robinson cluster.
-        	return prop;
+        final yacySeed otherseed = yacyCore.seedDB.get(otherpeer);
+        if (otherseed == null || sb.isRobinsonMode() || !sb.rankingOn) {
+            // in a robinson environment, do not answer. We do not do any transfer in a robinson cluster.
+            return prop;
         }
+        otherseed.setLastSeenUTC();
 
-        yacySeed otherseed = yacyCore.seedDB.get(otherpeer);
-        if ((otherseed == null) || (filename.indexOf("..") >= 0)) {
+        if (filename.indexOf("..") >= 0) {
             // reject unknown peers: this does not appear fair, but anonymous senders are dangerous
             // reject paths that contain '..' because they are dangerous
             if (otherseed == null) sb.getLog().logFine("RankingTransmission: rejected unknown peer '" + otherpeer + "', current IP " + header.get("CLIENTIP", "unknown"));

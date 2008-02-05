@@ -71,6 +71,16 @@ public final class search {
         final String  oseed  = post.get("myseed", ""); // complete seed of the requesting peer
 //      final String  youare = post.get("youare", ""); // seed hash of the target peer, used for testing network stability
         final String  key    = post.get("key", "");    // transmission key for response
+
+        final yacySeed otherPeer = yacySeed.genRemoteSeed(oseed, key, false);
+        if (otherPeer == null) {
+            prop.put("links", "");
+            prop.put("linkcount", "0");
+            prop.put("references", "");
+            return prop;
+        }
+        otherPeer.setLastSeenUTC();
+
         final String  query  = post.get("query", "");  // a string of word hashes that shall be searched and combined
         final String  exclude= post.get("exclude", "");// a string of word hashes that shall not be within the search result
         String  urls   = post.get("urls", "");         // a string of url hashes that are preselected for the search: no other may be returned

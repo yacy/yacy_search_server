@@ -53,6 +53,7 @@ import de.anomic.server.serverObjects;
 import de.anomic.server.serverSwitch;
 import de.anomic.yacy.yacyCore;
 import de.anomic.yacy.yacyNetwork;
+import de.anomic.yacy.yacySeed;
 
 public final class query {
 
@@ -79,11 +80,19 @@ public final class query {
                   
 //      System.out.println("YACYQUERY: RECEIVED POST = " + ((post == null) ? "NULL" : post.toString()));
 
-//      final String iam    = post.get("iam", "");    // complete seed of the requesting peer
+        final String iam    = post.get("iam", "");    // complete seed of the requesting peer
         final String youare = post.get("youare", ""); // seed hash of the target peer, used for testing network stability
 //      final String key    = post.get("key", "");    // transmission key for response
         final String obj    = post.get("object", ""); // keyword for query subject
         final String env    = post.get("env", "");    // argument to query
+
+        final yacySeed otherPeer = yacyCore.seedDB.get(iam);
+        if (otherPeer == null) {
+            prop.put("response", "0");
+            return prop;
+        } else {
+            otherPeer.setLastSeenUTC();
+        }
 
         prop.put("mytime", serverDate.formatShortSecond());
 
