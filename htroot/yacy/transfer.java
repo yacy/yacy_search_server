@@ -81,22 +81,26 @@ public final class transfer {
         prop.put("process_path", "");
         prop.put("process_maxsize", "0");
 
-        final yacySeed otherseed = yacyCore.seedDB.get(otherpeer);
-        if (otherseed == null || sb.isRobinsonMode() || !sb.rankingOn) {
+        if (sb.isRobinsonMode() || !sb.rankingOn) {
             // in a robinson environment, do not answer. We do not do any transfer in a robinson cluster.
             return prop;
         }
-        otherseed.setLastSeenUTC();
+
+        final yacySeed otherPeer = yacyCore.seedDB.get(otherpeer);
+        if (otherPeer == null) {
+            // reject unknown peers: this does not appear fair, but anonymous senders are dangerous
+            sb.getLog().logFine("RankingTransmission: rejected unknown peer '" + otherpeer + "', current IP " + header.get("CLIENTIP", "unknown"));
+            return prop;
+        }
+        otherPeer.setLastSeenUTC();
 
         if (filename.indexOf("..") >= 0) {
-            // reject unknown peers: this does not appear fair, but anonymous senders are dangerous
             // reject paths that contain '..' because they are dangerous
-            if (otherseed == null) sb.getLog().logFine("RankingTransmission: rejected unknown peer '" + otherpeer + "', current IP " + header.get("CLIENTIP", "unknown"));
-            if (filename.indexOf("..") >= 0) sb.getLog().logFine("RankingTransmission: rejected wrong path '" + filename + "' from peer " + otherseed.getName() + "/" + otherseed.getPublicAddress()+ ", current IP " + header.get("CLIENTIP", "unknown"));
+            sb.getLog().logFine("RankingTransmission: rejected wrong path '" + filename + "' from peer " + otherPeer.getName() + "/" + otherPeer.getPublicAddress()+ ", current IP " + header.get("CLIENTIP", "unknown"));
             return prop;
         }
         
-        String otherpeerName = otherseed.hash + ":" + otherseed.getName();
+        String otherpeerName = otherPeer.hash + ":" + otherPeer.getName();
         
         if (process.equals("permission")) {
             prop.put("process", "0");
