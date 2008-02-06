@@ -68,6 +68,7 @@ import de.anomic.kelondro.kelondroBase64Order;
 import de.anomic.kelondro.kelondroDyn;
 import de.anomic.kelondro.kelondroMapObjects;
 import de.anomic.kelondro.kelondroNaturalOrder;
+import de.anomic.server.logging.serverLog;
 
 public class blogBoardComments {
     
@@ -123,109 +124,111 @@ public class blogBoardComments {
     }
 
     public CommentEntry newEntry(String key, byte[] subject, byte[] author, String ip, Date date, byte[] page) {
-	return new CommentEntry(normalize(key), subject, author, ip, date, page);
+        return new CommentEntry(normalize(key), subject, author, ip, date, page);
     }
 
     public class CommentEntry {
 	
-	String key;
-    HashMap<String, String> record;
-
-    public CommentEntry(String nkey, byte[] subject, byte[] author, String ip, Date date, byte[] page) {
-	    record = new HashMap<String, String>();
-	    key = nkey;
-	    if (key.length() > keyLength) key = key.substring(0, keyLength);
-	    if(date == null) date = new Date(); 
-	    record.put("date", dateString(date));
-	    if (subject == null) record.put("subject","");
-	    else record.put("subject", kelondroBase64Order.enhancedCoder.encode(subject));
-	    if (author == null) record.put("author","");
-	    else record.put("author", kelondroBase64Order.enhancedCoder.encode(author));
-	    if ((ip == null) || (ip.length() == 0)) ip = "";
-	    record.put("ip", ip);
-        if (page == null) record.put("page", "");
-        else record.put("page", kelondroBase64Order.enhancedCoder.encode(page));
-	    
-        wikiBoard.setAuthor(ip, new String(author));
-        //System.out.println("DEBUG: setting author " + author + " for ip = " + ip + ", authors = " + authors.toString());
-	}
-
-	private CommentEntry(String key, HashMap<String, String> record) {
-	    this.key = key;
-	    this.record = record;
-        if (this.record.get("comments")==null) this.record.put("comments", listManager.collection2string(new ArrayList<String>()));
-	}
-	
-	public String key() {
-		return key;
-	}
-
-	public byte[] subject() {
-		String m = (String) record.get("subject");
-	    if (m == null) return new byte[0];
-	    byte[] b = kelondroBase64Order.enhancedCoder.decode(m, "de.anomic.data.blogBoardComments.subject()");
-	    if (b == null) return "".getBytes();
-	    return b;
-	}
-
-	public Date date() {
-	    try {
-		String c = (String) record.get("date");
-		if (c == null) {
-                    System.out.println("DEBUG - ERROR: date field missing in blogBoard");
+    	String key;
+        HashMap<String, String> record;
+    
+        public CommentEntry(String nkey, byte[] subject, byte[] author, String ip, Date date, byte[] page) {
+    	    record = new HashMap<String, String>();
+    	    key = nkey;
+    	    if (key.length() > keyLength) key = key.substring(0, keyLength);
+    	    if(date == null) date = new Date(); 
+    	    record.put("date", dateString(date));
+    	    if (subject == null) record.put("subject","");
+    	    else record.put("subject", kelondroBase64Order.enhancedCoder.encode(subject));
+    	    if (author == null) record.put("author","");
+    	    else record.put("author", kelondroBase64Order.enhancedCoder.encode(author));
+    	    if ((ip == null) || (ip.length() == 0)) ip = "";
+    	    record.put("ip", ip);
+            if (page == null) record.put("page", "");
+            else record.put("page", kelondroBase64Order.enhancedCoder.encode(page));
+    	    
+            wikiBoard.setAuthor(ip, new String(author));
+            //System.out.println("DEBUG: setting author " + author + " for ip = " + ip + ", authors = " + authors.toString());
+    	}
+    
+    	private CommentEntry(String key, HashMap<String, String> record) {
+    	    this.key = key;
+    	    this.record = record;
+            if (this.record.get("comments")==null) this.record.put("comments", listManager.collection2string(new ArrayList<String>()));
+    	}
+    	
+    	public String key() {
+    		return key;
+    	}
+    
+    	public byte[] subject() {
+    		String m = (String) record.get("subject");
+    	    if (m == null) return new byte[0];
+    	    byte[] b = kelondroBase64Order.enhancedCoder.decode(m, "de.anomic.data.blogBoardComments.subject()");
+    	    if (b == null) return "".getBytes();
+    	    return b;
+    	}
+    
+    	public Date date() {
+    	    try {
+        		String c = (String) record.get("date");
+        		if (c == null) {
+        		    serverLog.logFinest("Blog", "ERROR: date field missing in blogBoard");
+        		    //System.out.println("DEBUG - ERROR: date field missing in blogBoard");
                     return new Date();
                 }
                 synchronized (SimpleFormatter) {
                     return SimpleFormatter.parse(c);
                 }
-	    } catch (ParseException e) {
-		return new Date();
-	    }
-	}
-	
-	public String timestamp() {
-		String c = (String) record.get("date");
-		if (c == null) {
-	        System.out.println("DEBUG - ERROR: date field missing in blogBoard");
-	        return dateString(new Date());
-		}
-		return c;
-	}
-	
-    public byte[] author() {
-        String m = (String) record.get("author");
-        if (m == null) return new byte[0];
-        byte[] b = kelondroBase64Order.enhancedCoder.decode(m, "de.anomic.data.blogBoardComments.author()");
-        if (b == null) return "".getBytes();
-        return b;
-    }
-	
-	public String ip() {
-	    String a = (String) record.get("ip");
-	    if (a == null) return "127.0.0.1";
-	    return a;
-	}
-
-	public byte[] page() {
-	    String m = (String) record.get("page");
-	    if (m == null) return new byte[0];
-	    byte[] b = kelondroBase64Order.enhancedCoder.decode(m, "de.anomic.data.blogBoardComments.page()");
-	    if (b == null) return "".getBytes();
-	    return b;
-	}        
-
-    public boolean isAllowed() {
-        return (record.get("moderated") != null) && record.get("moderated").equals("true");
-    } 
+    	    } catch (ParseException e) {
+    	        return new Date();
+    	    }
+    	}
+    	
+    	public String timestamp() {
+    		String c = (String) record.get("date");
+    		if (c == null) {
+    		    serverLog.logFinest("Blog", "ERROR: date field missing in blogBoard");
+    	        //System.out.println("DEBUG - ERROR: date field missing in blogBoard");
+    	        return dateString(new Date());
+    		}
+    		return c;
+    	}
+    	
+        public byte[] author() {
+            String m = (String) record.get("author");
+            if (m == null) return new byte[0];
+            byte[] b = kelondroBase64Order.enhancedCoder.decode(m, "de.anomic.data.blogBoardComments.author()");
+            if (b == null) return "".getBytes();
+            return b;
+        }
+    	
+    	public String ip() {
+    	    String a = (String) record.get("ip");
+    	    if (a == null) return "127.0.0.1";
+    	    return a;
+    	}
     
-    public void allow() {
-        record.put("moderated", "true");
-    } 
+    	public byte[] page() {
+    	    String m = (String) record.get("page");
+    	    if (m == null) return new byte[0];
+    	    byte[] b = kelondroBase64Order.enhancedCoder.decode(m, "de.anomic.data.blogBoardComments.page()");
+    	    if (b == null) return "".getBytes();
+    	    return b;
+    	}        
+    
+        public boolean isAllowed() {
+            return (record.get("moderated") != null) && record.get("moderated").equals("true");
+        } 
+        
+        public void allow() {
+            record.put("moderated", "true");
+        } 
     
     }
 
     public String write(CommentEntry page) {
-	// writes a new page and returns key
+        // writes a new page and returns key
     	try {
     	    datbase.set(page.key, page.record);
     	    return page.key;
@@ -345,7 +348,7 @@ public class blogBoardComments {
     }
     
     public Iterator<String> keys(boolean up) throws IOException {
-	return datbase.keys(up, false);
+        return datbase.keys(up, false);
     }
 
 }

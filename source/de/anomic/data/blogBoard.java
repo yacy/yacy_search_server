@@ -67,6 +67,7 @@ import de.anomic.kelondro.kelondroDyn;
 import de.anomic.kelondro.kelondroMapObjects;
 import de.anomic.kelondro.kelondroNaturalOrder;
 import de.anomic.server.serverDate;
+import de.anomic.server.logging.serverLog;
 
 public class blogBoard {
     
@@ -163,7 +164,8 @@ public class blogBoard {
 		    try {
 			String c = record.get("date");
 			if (c == null) {
-	            System.out.println("DEBUG - ERROR: date field missing in blogBoard");
+			    serverLog.logFinest("Blog", "ERROR: date field missing in blogBoard");
+	            //System.out.println("DEBUG - ERROR: date field missing in blogBoard");
 	            return new Date();
 	        }
 		        return serverDate.parseShortSecond(c);
@@ -175,7 +177,8 @@ public class blogBoard {
 		public String timestamp() {
 			String c = record.get("date");
 			if (c == null) {
-		        System.out.println("DEBUG - ERROR: date field missing in blogBoard");
+			    serverLog.logFinest("Blog", "ERROR: date field missing in blogBoard");
+		        //System.out.println("DEBUG - ERROR: date field missing in blogBoard");
 		        return serverDate.formatShortSecond();
 			}
 			return c;
