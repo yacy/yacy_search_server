@@ -234,7 +234,7 @@ public class yacysearch {
 
             // prepare search properties
             final boolean yacyonline = ((yacyCore.seedDB != null) && (yacyCore.seedDB.mySeed() != null) && (yacyCore.seedDB.mySeed().getPublicAddress() != null));
-            final boolean globalsearch = (global) && (yacyonline);
+            final boolean globalsearch = (global) && (yacyonline) && (sb.getConfigBool(plasmaSwitchboard.INDEX_RECEIVE_ALLOW, false));
         
             // do the search
             TreeSet<String> queryHashes = plasmaCondenser.words2hashes(query[0]);

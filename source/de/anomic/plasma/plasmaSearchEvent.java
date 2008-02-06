@@ -582,23 +582,18 @@ public final class plasmaSearchEvent {
             if ((localSearchThread != null) && (localSearchThread.isAlive())) {
                 // in case that the local search takes longer than some other remote search requests, 
                 // do some sleeps to give the local process a chance to contribute
-                try {Thread.sleep(200);} catch (InterruptedException e) {}
+                try {Thread.sleep(item * 100);} catch (InterruptedException e) {}
             }
             // now wait until as many remote worker threads have finished, as we want to display results
             while ((this.primarySearchThreads != null) && (this.primarySearchThreads.length > item) && (anyWorkerAlive()) && 
                    ((this.resultList.size() <= item) || (countFinishedRemoteSearch() <= item))) {
                 try {Thread.sleep(100);} catch (InterruptedException e) {}
             }
-            // finally wait until enough results are there produced from the snippet fetch process
-            while ((anyWorkerAlive()) && (this.resultList.size() <= item)) {
-                try {Thread.sleep(100);} catch (InterruptedException e) {}
-            }
-        } else {
-            // we did a local search. If we arrive here, the local search process was finished
-            // and the only things we need to wait for are snippets from snippet fetch processes
-            while ((anyWorkerAlive()) && (this.resultList.size() <= item)) {
-                try {Thread.sleep(100);} catch (InterruptedException e) {}
-            }
+            
+        }
+        // finally wait until enough results are there produced from the snippet fetch process
+        while ((anyWorkerAlive()) && (this.resultList.size() <= item)) {
+            try {Thread.sleep(100);} catch (InterruptedException e) {}
         }
         
         // finally, if there is something, return the result
