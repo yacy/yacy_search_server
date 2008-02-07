@@ -257,7 +257,7 @@ public class yacysearch {
                     constraint,
                     true);
 
-            String client = (String) header.get("CLIENTIP"); // the search client who initiated the search
+            String client = (String) header.get(httpHeader.CONNECTION_PROP_CLIENTIP); // the search client who initiated the search
         
             // tell all threads to do nothing for a specific time
             sb.intermissionAllThreads(10000);

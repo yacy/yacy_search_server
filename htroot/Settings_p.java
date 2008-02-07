@@ -212,7 +212,7 @@ public final class Settings_p {
         }
         
         // clientIP
-        prop.putHTML("clientIP", (String) header.get("CLIENTIP", "<unknown>"), true); // read an artificial header addendum
+        prop.putHTML("clientIP", (String) header.get(httpHeader.CONNECTION_PROP_CLIENTIP, "<unknown>"), true); // read an artificial header addendum
         
         /* 
          * seed upload settings

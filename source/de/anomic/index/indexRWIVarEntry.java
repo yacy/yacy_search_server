@@ -37,7 +37,7 @@ public class indexRWIVarEntry implements indexRWIEntry {
     public char type;
     public int hitcount, llocal, lother, phrasesintext, posintext,
                posinphrase, posofphrase,
-               quality, urlcomps, urllength, virtualAge,
+               urlcomps, urllength, virtualAge,
                worddistance, wordsintext, wordsintitle;
     public double termFrequency;
     
@@ -55,7 +55,6 @@ public class indexRWIVarEntry implements indexRWIEntry {
         this.posintext = e.posintext();
         this.posinphrase = e.posinphrase();
         this.posofphrase = e.posofphrase();
-        this.quality = e.quality();
         this.urlcomps = e.urlcomps();
         this.urllength = e.urllength();
         this.virtualAge = e.virtualAge();
@@ -133,9 +132,29 @@ public class indexRWIVarEntry implements indexRWIEntry {
     public int posofphrase() {
         return posofphrase;
     }
-
-    public int quality() {
-        return quality;
+    
+    private indexRWIRowEntry toRowEntry() {
+        return new indexRWIRowEntry(
+                urlHash,
+                urllength,     // byte-length of complete URL
+                urlcomps,      // number of path components
+                wordsintitle,  // length of description/length (longer are better?)
+                hitcount,      // how often appears this word in the text
+                wordsintext,   // total number of words
+                phrasesintext, // total number of phrases
+                posintext,     // position of word in all words
+                posinphrase,   // position of word in its phrase
+                posofphrase,   // number of the phrase where word appears
+                worddistance,  // word distance
+                lastModified,  // last-modified time of the document where word appears
+                System.currentTimeMillis(),    // update time;
+                language,      // (guessed) language of document
+                type,          // type of document
+                llocal,        // outlinks to same domain
+                lother,        // outlinks to other domain
+                flags,          // attributes to the url and to the word according the url
+                termFrequency
+        );
     }
 
     public Entry toKelondroEntry() {
@@ -144,8 +163,7 @@ public class indexRWIVarEntry implements indexRWIEntry {
     }
 
     public String toPropertyForm() {
-        assert false; // should not be used
-        return null;
+        return toRowEntry().toPropertyForm();
     }
 
     public String urlHash() {
@@ -177,7 +195,8 @@ public class indexRWIVarEntry implements indexRWIEntry {
     }
 
     public double termFrequency() {
-        return termFrequency;
+        if (this.termFrequency == 0.0) this.termFrequency = (((double) this.hitcount()) / ((double) (this.wordsintext() + this.wordsintitle() + 1)));
+        return this.termFrequency;
     }
     
     public static final void min(indexRWIVarEntry t, indexRWIEntry other) {
@@ -187,7 +206,6 @@ public class indexRWIVarEntry implements indexRWIEntry {
         if (t.hitcount() > (v = other.hitcount())) t.hitcount = v;
         if (t.llocal() > (v = other.llocal())) t.llocal = v;
         if (t.lother() > (v = other.lother())) t.lother = v;
-        if (t.quality() > (v = other.quality())) t.quality = v;
         if (t.virtualAge() > (v = other.virtualAge())) t.virtualAge = v;
         if (t.wordsintext() > (v = other.wordsintext())) t.wordsintext = v;
         if (t.phrasesintext() > (v = other.phrasesintext())) t.phrasesintext = v;
@@ -210,7 +228,6 @@ public class indexRWIVarEntry implements indexRWIEntry {
         if (t.hitcount() < (v = other.hitcount())) t.hitcount = v;
         if (t.llocal() < (v = other.llocal())) t.llocal = v;
         if (t.lother() < (v = other.lother())) t.lother = v;
-        if (t.quality() < (v = other.quality())) t.quality = v;
         if (t.virtualAge() < (v = other.virtualAge())) t.virtualAge = v;
         if (t.wordsintext() < (v = other.wordsintext())) t.wordsintext = v;
         if (t.phrasesintext() < (v = other.phrasesintext())) t.phrasesintext = v;

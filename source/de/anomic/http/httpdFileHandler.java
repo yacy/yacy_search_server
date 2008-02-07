@@ -303,13 +303,13 @@ public final class httpdFileHandler {
             if ((path.substring(0,(pos==-1)?path.length():pos)).endsWith("_p") && (adminAccountBase64MD5.length() != 0)) {
                 //authentication required
                 //userDB
-                if(sb.userDB.hasAdminRight(authorization, conProp.getProperty("CLIENTIP"), requestHeader.getHeaderCookies())){
+                if(sb.userDB.hasAdminRight(authorization, conProp.getProperty(httpHeader.CONNECTION_PROP_CLIENTIP), requestHeader.getHeaderCookies())){
                     //Authentication successful. remove brute-force flag
-                    serverCore.bfHost.remove(conProp.getProperty("CLIENTIP"));
+                    serverCore.bfHost.remove(conProp.getProperty(httpHeader.CONNECTION_PROP_CLIENTIP));
                 //static
                 }else if(authorization != null && httpd.staticAdminAuthenticated(authorization.trim().substring(6), switchboard)==4){
                     //Authentication successful. remove brute-force flag
-                    serverCore.bfHost.remove(conProp.getProperty("CLIENTIP"));
+                    serverCore.bfHost.remove(conProp.getProperty(httpHeader.CONNECTION_PROP_CLIENTIP));
                 //no auth
                 }else if (authorization == null) {
                     // no authorization given in response. Ask for that
@@ -323,7 +323,7 @@ public final class httpdFileHandler {
                     return;
                 } else {
                     // a wrong authentication was given or the userDB user does not have admin access. Ask again
-                    String clientIP = conProp.getProperty("CLIENTIP", "unknown-host");
+                    String clientIP = conProp.getProperty(httpHeader.CONNECTION_PROP_CLIENTIP, "unknown-host");
                     serverLog.logInfo("HTTPD", "Wrong log-in for account 'admin' in http file handler for path '" + path + "' from host '" + clientIP + "'");
                     Integer attempts = (Integer) serverCore.bfHost.get(clientIP);
                     if (attempts == null)
@@ -473,7 +473,7 @@ public final class httpdFileHandler {
                 // call an image-servlet to produce an on-the-fly - generated image
                 Object img = null;
                 try {
-                    requestHeader.put(httpHeader.CONNECTION_PROP_CLIENTIP, conProp.getProperty("CLIENTIP"));
+                    requestHeader.put(httpHeader.CONNECTION_PROP_CLIENTIP, conProp.getProperty(httpHeader.CONNECTION_PROP_CLIENTIP));
                     requestHeader.put(httpHeader.CONNECTION_PROP_PATH, path);
                     // in case that there are no args given, args = null or empty hashmap
                     img = invokeServlet(targetClass, requestHeader, args);
@@ -527,7 +527,7 @@ public final class httpdFileHandler {
                 }
             } else if ((targetClass != null) && (path.endsWith(".stream"))) {
                 // call rewrite-class
-                requestHeader.put(httpHeader.CONNECTION_PROP_CLIENTIP, conProp.getProperty("CLIENTIP"));
+                requestHeader.put(httpHeader.CONNECTION_PROP_CLIENTIP, conProp.getProperty(httpHeader.CONNECTION_PROP_CLIENTIP));
                 requestHeader.put(httpHeader.CONNECTION_PROP_PATH, path);
                 //requestHeader.put(httpHeader.CONNECTION_PROP_INPUTSTREAM, body);
                 //requestHeader.put(httpHeader.CONNECTION_PROP_OUTPUTSTREAM, out);
@@ -570,7 +570,7 @@ public final class httpdFileHandler {
                     } else {
                         // CGI-class: call the class to create a property for rewriting
                         try {
-                            requestHeader.put(httpHeader.CONNECTION_PROP_CLIENTIP, conProp.getProperty("CLIENTIP"));
+                            requestHeader.put(httpHeader.CONNECTION_PROP_CLIENTIP, conProp.getProperty(httpHeader.CONNECTION_PROP_CLIENTIP));
                             requestHeader.put(httpHeader.CONNECTION_PROP_PATH, path);
                             // in case that there are no args given, args = null or empty hashmap
                             Object tmp = invokeServlet(targetClass, requestHeader, args);
@@ -586,7 +586,7 @@ public final class httpdFileHandler {
                             if (tp.containsKey(servletProperties.ACTION_AUTHENTICATE)) {
                                 // handle brute-force protection
                                 if (authorization != null) {
-                                    String clientIP = conProp.getProperty("CLIENTIP", "unknown-host");
+                                    String clientIP = conProp.getProperty(httpHeader.CONNECTION_PROP_CLIENTIP, "unknown-host");
                                     serverLog.logInfo("HTTPD", "dynamic log-in for account 'admin' in http file handler for path '" + path + "' from host '" + clientIP + "'");
                                     Integer attempts = (Integer) serverCore.bfHost.get(clientIP);
                                     if (attempts == null)

@@ -282,7 +282,7 @@ public final class search {
         // prepare search statistics
         Long trackerHandle = new Long(System.currentTimeMillis());
         HashMap<String, Object> searchProfile = theQuery.resultProfile(joincount, System.currentTimeMillis() - timestamp, urlRetrievalAllTime, snippetComputationAllTime);
-        String client = (String) header.get("CLIENTIP");
+        String client = (String) header.get(httpHeader.CONNECTION_PROP_CLIENTIP);
         searchProfile.put("host", client);
         yacySeed remotepeer = yacyCore.seedDB.lookupByIP(natLib.getInetAddress(client), true, false, false);
         searchProfile.put("peername", (remotepeer == null) ? "unknown" : remotepeer.getName());

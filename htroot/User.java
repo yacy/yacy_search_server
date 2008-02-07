@@ -79,7 +79,7 @@ public class User{
             prop.put("logged-in_identified-by", "2");
             //try via ip
             if(entry == null){
-                entry=sb.userDB.ipAuth(((String)header.get("CLIENTIP", "xxxxxx")));
+                entry=sb.userDB.ipAuth(((String)header.get(httpHeader.CONNECTION_PROP_CLIENTIP, "xxxxxx")));
                 if(entry != null){
                     prop.put("logged-in_identified-by", "0");
                 }
@@ -108,7 +108,7 @@ public class User{
         //identified via form-login
         //TODO: this does not work for a static admin, yet.
         }else if(post != null && post.containsKey("username") && post.containsKey("password")){
-            //entry=sb.userDB.passwordAuth((String)post.get("username"), (String)post.get("password"), (String)header.get("CLIENTIP", "xxxxxx"));
+            //entry=sb.userDB.passwordAuth((String)post.get("username"), (String)post.get("password"), (String)header.get(httpHeader.CONNECTION_PROP_CLIENTIP, "xxxxxx"));
             String username=(String)post.get("username");
             String password=(String)post.get("password");
             
@@ -163,7 +163,7 @@ public class User{
         if(post!=null && post.containsKey("logout")){
             prop.put("logged-in", "0");
             if(entry != null){
-                entry.logout(((String)header.get("CLIENTIP", "xxxxxx")), userDB.getLoginToken(header.getHeaderCookies())); //todo: logout cookie
+                entry.logout(((String)header.get(httpHeader.CONNECTION_PROP_CLIENTIP, "xxxxxx")), userDB.getLoginToken(header.getHeaderCookies())); //todo: logout cookie
             }else{
                 sb.userDB.adminLogout(userDB.getLoginToken(header.getHeaderCookies()));
             }

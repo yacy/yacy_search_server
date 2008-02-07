@@ -906,7 +906,7 @@ public final class plasmaSwitchboard extends serverAbstractSwitch implements ser
             } catch (MalformedURLException e) {
             }
         } else {
-            File networkUnitDefinitionFile = new File(rootPath, networkUnitDefinition);
+            File networkUnitDefinitionFile = (networkUnitDefinition.startsWith("/")) ? new File(networkUnitDefinition) : new File(rootPath, networkUnitDefinition);
             if (networkUnitDefinitionFile.exists()) {
                 initProps = serverFileUtils.loadHashMap(networkUnitDefinitionFile);
                 this.setConfig(initProps);
@@ -2348,14 +2348,14 @@ public final class plasmaSwitchboard extends serverAbstractSwitch implements ser
                                             wordStat.posInPhrase,
                                             wordStat.numOfPhrase,
                                             0,
-                                            newEntry.size(),
                                             docDate.getTime(),
                                             System.currentTimeMillis(),
                                             language,
                                             doctype,
                                             ioLinks[0].intValue(),
                                             ioLinks[1].intValue(),
-                                            condenser.RESULT_FLAGS
+                                            condenser.RESULT_FLAGS,
+                                            0.0
                                         );
                                 indexContainer wordIdxContainer = plasmaWordIndex.emptyContainer(wordHash, 1);
                                 wordIdxContainer.add(wordIdxEntry);
@@ -2573,10 +2573,10 @@ public final class plasmaSwitchboard extends serverAbstractSwitch implements ser
         if (authorization.length() > 256) return 0; 
         
         // authorization by encoded password, only for localhost access
-        if ((((String) header.get("CLIENTIP", "")).equals("localhost")) && (adminAccountBase64MD5.equals(authorization))) return 3; // soft-authenticated for localhost
+        if ((((String) header.get(httpHeader.CONNECTION_PROP_CLIENTIP, "")).equals("localhost")) && (adminAccountBase64MD5.equals(authorization))) return 3; // soft-authenticated for localhost
 
         // authorization by hit in userDB
-        if (userDB.hasAdminRight((String) header.get(httpHeader.AUTHORIZATION, "xxxxxx"), ((String) header.get("CLIENTIP", "")), header.getHeaderCookies())) return 4; //return, because 4=max
+        if (userDB.hasAdminRight((String) header.get(httpHeader.AUTHORIZATION, "xxxxxx"), ((String) header.get(httpHeader.CONNECTION_PROP_CLIENTIP, "")), header.getHeaderCookies())) return 4; //return, because 4=max
 
         // authorization with admin keyword in configuration
         return httpd.staticAdminAuthenticated(authorization, this);

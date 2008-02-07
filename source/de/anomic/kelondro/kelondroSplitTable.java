@@ -119,7 +119,7 @@ public class kelondroSplitTable implements kelondroIndex {
                 // this is a kelonodroFlex table
                 table = new kelondroCache(new kelondroFlexTable(path, maxf, preloadTime, rowdef, 0, resetOnFail));
             } else {
-                table = new kelondroEcoTable(f, rowdef, kelondroEcoTable.tailCacheDenyUsage, EcoFSBufferSize, 0);
+                table = new kelondroEcoTable(f, rowdef, kelondroEcoTable.tailCacheUsageAuto, EcoFSBufferSize, 0);
             }
             tables.put(date, table);
         }

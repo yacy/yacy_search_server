@@ -105,9 +105,9 @@ public class CrawlProfileEditor_p {
         while (it.hasNext()) {
             selentry = (entry)it.next();
             if (selentry.name().equals(plasmaSwitchboard.CRAWL_PROFILE_PROXY) ||
-                    selentry.name().equals(plasmaSwitchboard.CRAWL_PROFILE_REMOTE) ||
+                    selentry.name().equals(plasmaSwitchboard.CRAWL_PROFILE_REMOTE) /*||
                     selentry.name().equals(plasmaSwitchboard.CRAWL_PROFILE_SNIPPET_TEXT) ||
-                    selentry.name().equals(plasmaSwitchboard.CRAWL_PROFILE_SNIPPET_MEDIA))
+                    selentry.name().equals(plasmaSwitchboard.CRAWL_PROFILE_SNIPPET_MEDIA)*/)
                 continue;
             prop.put("profiles_" + count + "_name", selentry.name());
             prop.put("profiles_" + count + "_handle", selentry.handle());

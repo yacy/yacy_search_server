@@ -26,6 +26,7 @@
 
 package de.anomic.index;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
@@ -55,12 +56,13 @@ public class indexRWIEntryOrder extends kelondroAbstractOrder<indexRWIVarEntry> 
         this.maxdomcount = 0;
     }
     
-    public void normalizeWith(indexContainer container) {
+    public ArrayList<indexRWIVarEntry> normalizeWith(indexContainer container) {
         // normalize ranking: find minimum and maxiumum of separate ranking criteria
         assert (container != null);
-    
+        ArrayList<indexRWIVarEntry> result = null;
+        
         //long s0 = System.currentTimeMillis();
-        if ((processors > 1) && (container.size() > 10000)) {
+        if ((processors > 1) && (container.size() > 600)) {
             // run minmax with two threads
             int middle = container.size() / 2;
             minmaxfinder mmf0 = new minmaxfinder(container, 0, middle);
@@ -83,6 +85,8 @@ public class indexRWIEntryOrder extends kelondroAbstractOrder<indexRWIVarEntry> 
             	entry = di.next();
             	this.doms.addScore(entry.getKey(), ((Integer) entry.getValue()).intValue());
             }
+            result = mmf0.decodedEntries;
+            result.addAll(mmf1.decodedContainer());
             //long s1= System.currentTimeMillis(), sc = Math.max(1, s1 - s0);
             //System.out.println("***DEBUG*** indexRWIEntry.Order (2-THREADED): " + sc + " milliseconds for " + container.size() + " entries, " + (container.size() / sc) + " entries/millisecond");
         } else if (container.size() > 0) {
@@ -97,10 +101,12 @@ public class indexRWIEntryOrder extends kelondroAbstractOrder<indexRWIVarEntry> 
             	entry = di.next();
             	this.doms.addScore(entry.getKey(), ((Integer) entry.getValue()).intValue());
             }
+            result = mmf.decodedContainer();
             //long s1= System.currentTimeMillis(), sc = Math.max(1, s1 - s0);
             //System.out.println("***DEBUG*** indexRWIEntry.Order (ONETHREAD): " + sc + " milliseconds for " + container.size() + " entries, " + (container.size() / sc) + " entries/millisecond");
         }
         if (this.doms.size() > 0) this.maxdomcount = this.doms.getMaxScore();
+        return result;
     }
     
     public kelondroOrder<indexRWIVarEntry> clone() {
@@ -179,6 +185,7 @@ public class indexRWIEntryOrder extends kelondroAbstractOrder<indexRWIVarEntry> 
         private int start, end;
         private HashMap<String, Integer> doms;
         private Integer int1;
+        ArrayList<indexRWIVarEntry> decodedEntries;
         
         public minmaxfinder(indexContainer container, int start /*including*/, int end /*excluding*/) {
             this.container = container;
@@ -186,18 +193,20 @@ public class indexRWIEntryOrder extends kelondroAbstractOrder<indexRWIVarEntry> 
             this.end = end;
             this.doms = new HashMap<String, Integer>();
             this.int1 = new Integer(1);
+            this.decodedEntries = new ArrayList<indexRWIVarEntry>();
         }
         
         public void run() {
             // find min/max to obtain limits for normalization
             this.entryMin = null;
             this.entryMax = null;
-            indexRWIRowEntry iEntry;
+            indexRWIVarEntry iEntry;
             int p = this.start;
             String dom;
             Integer count;
             while (p < this.end) {
-                iEntry = new indexRWIRowEntry(container.get(p++));
+                iEntry = new indexRWIVarEntry(new indexRWIRowEntry(container.get(p++)));
+                this.decodedEntries.add(iEntry);
                 // find min/max
                 if (this.entryMin == null) this.entryMin = new indexRWIVarEntry(iEntry); else indexRWIVarEntry.min(this.entryMin, iEntry);
                 if (this.entryMax == null) this.entryMax = new indexRWIVarEntry(iEntry); else indexRWIVarEntry.max(this.entryMax, iEntry);
@@ -210,6 +219,10 @@ public class indexRWIEntryOrder extends kelondroAbstractOrder<indexRWIVarEntry> 
                 	doms.put(dom, new Integer(count.intValue() + 1));
                 }
             }
+        }
+        
+        public ArrayList<indexRWIVarEntry> decodedContainer() {
+            return this.decodedEntries;
         }
         
         public HashMap<String, Integer> domcount() {

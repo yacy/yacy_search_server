@@ -414,7 +414,7 @@ public class plasmaSnippetCache {
                     resInfo = entry.getDocumentInfo();
 
                     // read resource body (if it is there)
-                    byte []resourceArray = entry.cacheArray();
+                    byte[] resourceArray = entry.cacheArray();
                     if (resourceArray != null) {
                         resContent = new ByteArrayInputStream(resourceArray);
                         resContentLength = resourceArray.length;

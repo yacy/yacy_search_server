@@ -102,7 +102,7 @@ public class BlogComments {
         }
 
         String pagename = post.get("page", "blog_default");
-        String ip = post.get("CLIENTIP", "127.0.0.1");
+        String ip = post.get(httpHeader.CONNECTION_PROP_CLIENTIP, "127.0.0.1");
 
         String StrAuthor = post.get("author", "anonymous");
 

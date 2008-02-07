@@ -155,7 +155,7 @@ public final class userDB {
 		return null;
 	}
         public Entry getUser(httpHeader header){
-            return getUser((String) header.get(httpHeader.AUTHORIZATION), (String)header.get("CLIENTIP"), header.getHeaderCookies());
+            return getUser((String) header.get(httpHeader.AUTHORIZATION), (String)header.get(httpHeader.CONNECTION_PROP_CLIENTIP), header.getHeaderCookies());
         }
         public Entry getUser(String auth, String ip, String cookies){
         Entry entry=null;

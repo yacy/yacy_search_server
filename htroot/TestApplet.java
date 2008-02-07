@@ -50,7 +50,7 @@ public class TestApplet {
     //File templatefile=filehandler.getOverlayedFile((String)post.get("url"));
     File classfile = httpdFileHandler.getOverlayedClass((String)post.get("url"));
     httpHeader header2=new httpHeader();
-    header2.put("CLIENTIP", "127.0.0.1");
+    header2.put(httpHeader.CONNECTION_PROP_CLIENTIP, "127.0.0.1");
     header2.put("PATH", post.get("url"));
     serverObjects tp=null;
     try {

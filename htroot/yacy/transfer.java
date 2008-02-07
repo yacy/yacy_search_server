@@ -89,14 +89,14 @@ public final class transfer {
         final yacySeed opeer = yacyCore.seedDB.get(ohash);
         if (opeer == null) {
             // reject unknown peers: this does not appear fair, but anonymous senders are dangerous
-            sb.getLog().logFine("RankingTransmission: rejected unknown peer '" + ohash + "', current IP " + header.get("CLIENTIP", "unknown"));
+            sb.getLog().logFine("RankingTransmission: rejected unknown peer '" + ohash + "', current IP " + header.get(httpHeader.CONNECTION_PROP_CLIENTIP, "unknown"));
             return prop;
         }
         opeer.setLastSeenUTC();
 
         if (filename.indexOf("..") >= 0) {
             // reject paths that contain '..' because they are dangerous
-            sb.getLog().logFine("RankingTransmission: rejected wrong path '" + filename + "' from peer " + opeer.getName() + "/" + opeer.getPublicAddress()+ ", current IP " + header.get("CLIENTIP", "unknown"));
+            sb.getLog().logFine("RankingTransmission: rejected wrong path '" + filename + "' from peer " + opeer.getName() + "/" + opeer.getPublicAddress()+ ", current IP " + header.get(httpHeader.CONNECTION_PROP_CLIENTIP, "unknown"));
             return prop;
         }
 

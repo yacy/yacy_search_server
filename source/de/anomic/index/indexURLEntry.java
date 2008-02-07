@@ -115,7 +115,7 @@ public class indexURLEntry {
     
     private kelondroRow.Entry entry;
     private String snippet;
-    private indexRWIRowEntry word; // this is only used if the url is transported via remote search requests
+    private indexRWIEntry word; // this is only used if the url is transported via remote search requests
     private long ranking; // during generation of a search result this value is set
     
     public indexURLEntry(
@@ -185,7 +185,7 @@ public class indexURLEntry {
         return s.toString().getBytes();
     }
     
-    public indexURLEntry(kelondroRow.Entry entry, indexRWIRowEntry searchedWord, long ranking) {
+    public indexURLEntry(kelondroRow.Entry entry, indexRWIEntry searchedWord, long ranking) {
         this.entry = entry;
         this.snippet = null;
         this.word = searchedWord;
@@ -391,7 +391,7 @@ public class indexURLEntry {
         return snippet;
     }
 
-    public indexRWIRowEntry word() {
+    public indexRWIEntry word() {
         return word;
     }
 

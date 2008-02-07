@@ -103,7 +103,7 @@ public final class hello {
 //      if ((properTest != null) && (! properTest.substring(0,1).equals("IP"))) { return null; }
 
         // we easily know the caller's IP:
-        final String clientip = (String) header.get("CLIENTIP", "<unknown>"); // read an artificial header addendum
+        final String clientip = (String) header.get(httpHeader.CONNECTION_PROP_CLIENTIP, "<unknown>"); // read an artificial header addendum
         InetAddress ias = serverDomains.dnsResolve(clientip);
         if (ias == null) {
             prop.put("message", "cannot resolve your IP from your reported location " + clientip);

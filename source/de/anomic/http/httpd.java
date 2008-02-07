@@ -193,7 +193,7 @@ public final class httpd implements serverHandler {
     public void initSession(serverCore.Session newsession) throws IOException {
         this.session = newsession;
         this.userAddress = session.userAddress; // client InetAddress
-        this.clientIP = this.userAddress.getHostAddress();
+        this.clientIP = this.userAddress.getHostName();
         if (this.userAddress.isAnyLocalAddress()) this.clientIP = "localhost";
         if (this.clientIP.equals("0:0:0:0:0:0:0:1")) this.clientIP = "localhost";
         if (this.clientIP.equals("127.0.0.1")) this.clientIP = "localhost";
@@ -1147,7 +1147,7 @@ public final class httpd implements serverHandler {
 //            tp.put("host", serverCore.publicIP().getHostAddress());
 //            tp.put("port", switchboard.getConfig("port", "8080"));
 
-            String clientIP = conProp.getProperty(httpHeader.CONNECTION_PROP_CLIENTIP,"127.0.0.1");
+            String clientIP = conProp.getProperty(httpHeader.CONNECTION_PROP_CLIENTIP, "127.0.0.1");
 
             // check if ip is local ip address
             InetAddress hostAddress = serverDomains.dnsResolve(clientIP);

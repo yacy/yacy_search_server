@@ -78,7 +78,7 @@ public class welcome {
             prop.put("hostip", "Unknown Host Exception");
         }       
         prop.put("port", serverCore.getPortNr(env.getConfig("port","8080")));
-        prop.put("clientip", (String) header.get("CLIENTIP", ""));
+        prop.put("clientip", (String) header.get(httpHeader.CONNECTION_PROP_CLIENTIP, ""));
 
         final String peertype = (yacyCore.seedDB.mySeed() == null) ? yacySeed.PEERTYPE_JUNIOR : yacyCore.seedDB.mySeed().get(yacySeed.PEERTYPE, yacySeed.PEERTYPE_VIRGIN);
         final boolean senior = (peertype.equals(yacySeed.PEERTYPE_SENIOR)) || (peertype.equals(yacySeed.PEERTYPE_PRINCIPAL));

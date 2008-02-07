@@ -314,13 +314,13 @@ public final class plasmaWordIndex implements indexRI {
                         wprop.posInPhrase,
                         wprop.numOfPhrase,
                         0,
-                        size,
                         urlModified.getTime(),
                         System.currentTimeMillis(),
                         language,
                         doctype,
                         outlinksSame, outlinksOther,
-                        wprop.flags);
+                        wprop.flags,
+                        0.0);
             addEntry(plasmaCondenser.word2hash(word), ientry, System.currentTimeMillis(), false);
             wordCount++;
         }

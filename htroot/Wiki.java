@@ -88,7 +88,7 @@ public class Wiki {
         
         String access = switchboard.getConfig("WikiAccess", "admin");
         String pagename = post.get("page", "start");
-        String ip = post.get("CLIENTIP", "127.0.0.1");
+        String ip = post.get(httpHeader.CONNECTION_PROP_CLIENTIP, "127.0.0.1");
         String author = post.get("author", "anonymous");
         if (author.equals("anonymous")) {
             author = wikiBoard.guessAuthor(ip);

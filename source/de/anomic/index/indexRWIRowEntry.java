@@ -88,6 +88,8 @@ public final class indexRWIRowEntry implements indexRWIEntry {
     private static final int col_worddistance  = 18; // i  1 initial zero; may be used as reserve: is filled during search
     private static final int col_reserve       = 19; // k  1 reserve
 
+    public double termFrequency;
+    
     private kelondroRow.Entry entry;
     
     public indexRWIRowEntry(String  urlHash,
@@ -101,14 +103,14 @@ public final class indexRWIRowEntry implements indexRWIEntry {
             int      posinphrase,   // position of word in its phrase
             int      posofphrase,   // number of the phrase where word appears
             int      worddistance,  // word distance; this is 0 by default, and set to the difference of posintext from two indexes if these are combined (simultanous search). If stored, this shows that the result was obtained by remote search
-            int      sizeOfPage,    // # of bytes of the page TODO: not needed any more
             long     lastmodified,  // last-modified time of the document where word appears
             long     updatetime,    // update time; this is needed to compute a TTL for the word, so it can be removed easily if the TTL is short
             String   language,      // (guessed) language of document
             char     doctype,       // type of document
             int      outlinksSame,  // outlinks to same domain
             int      outlinksOther, // outlinks to other domain
-            kelondroBitfield flags  // attributes to the url and to the word according the url
+            kelondroBitfield flags, // attributes to the url and to the word according the url
+            double   termFrequency
     ) {
 
         assert (urlHash.length() == 12) : "urlhash = " + urlHash;
@@ -136,6 +138,7 @@ public final class indexRWIRowEntry implements indexRWIEntry {
         this.entry.setCol(col_posofphrase, posofphrase);
         this.entry.setCol(col_worddistance, worddistance);
         this.entry.setCol(col_reserve, 0);
+        this.termFrequency = termFrequency;
     }
     
     public indexRWIRowEntry(String urlHash, String code) {
@@ -181,10 +184,6 @@ public final class indexRWIRowEntry implements indexRWIEntry {
 
     public String urlHash() {
         return this.entry.getColString(col_urlhash, null);
-    }
-
-    public int quality() {
-        return 0; // not used any more
     }
 
     public int virtualAge() {
@@ -256,7 +255,8 @@ public final class indexRWIRowEntry implements indexRWIEntry {
     }
     
     public double termFrequency() {
-        return (((double) this.hitcount()) / ((double) (this.wordsintext() + this.wordsintitle() + 1)));
+        if (this.termFrequency == 0.0) this.termFrequency = (((double) this.hitcount()) / ((double) (this.wordsintext() + this.wordsintitle() + 1)));
+        return this.termFrequency;
     }
     
     public String toString() {
@@ -288,18 +288,12 @@ public final class indexRWIRowEntry implements indexRWIEntry {
     public boolean isNewer(indexRWIEntry other) {
         if (other == null) return true;
         if (this.lastModified() > other.lastModified()) return true;
-        if (this.lastModified() == other.lastModified()) {
-            if (this.quality() > other.quality()) return true;
-        }
         return false;
     }
  
     public boolean isOlder(indexRWIEntry other) {
         if (other == null) return false;
         if (this.lastModified() < other.lastModified()) return true;
-        if (this.lastModified() == other.lastModified()) {
-            if (this.quality() < other.quality()) return true;
-        }
         return false;
     }
     

@@ -47,8 +47,6 @@ public interface indexRWIEntry {
 
     public String urlHash();
 
-    public int quality();
-
     public int virtualAge();
 
     public long lastModified();

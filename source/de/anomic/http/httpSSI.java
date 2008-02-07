@@ -85,7 +85,7 @@ public class httpSSI {
         conProp.setProperty(httpHeader.CONNECTION_PROP_PATH, path);
         conProp.setProperty(httpHeader.CONNECTION_PROP_ARGS, args);
         conProp.setProperty(httpHeader.CONNECTION_PROP_HTTP_VER, httpHeader.HTTP_VERSION_0_9);
-        conProp.setProperty("CLIENTIP", "127.0.0.1");
+        conProp.setProperty(httpHeader.CONNECTION_PROP_CLIENTIP, "127.0.0.1");
         header.put(httpHeader.AUTHORIZATION, authorization);
         httpdFileHandler.doGet(conProp, header, out);
     }
