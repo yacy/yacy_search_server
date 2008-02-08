@@ -57,41 +57,41 @@ import de.anomic.yacy.yacySeed;
 
 public final class query {
 
-    public static serverObjects respond(httpHeader header, serverObjects post, serverSwitch ss) {
-        if (post == null || ss == null) { return null; }
-
+    public static serverObjects respond(httpHeader header, serverObjects post, serverSwitch env) {
         // return variable that accumulates replacements
-        final plasmaSwitchboard sb = (plasmaSwitchboard) ss;
         final serverObjects prop = new serverObjects();
-        if ((post == null) || (ss == null)) return prop;
-        if (!yacyNetwork.authentifyRequest(post, ss)) return prop;
-        
-        
-        if ((sb.isRobinsonMode()) &&
-            (!sb.isPublicRobinson()) &&
-            (!sb.isInMyCluster((String)header.get(httpHeader.CONNECTION_PROP_CLIENTIP)))) {
-        	// if we are a robinson cluster, answer only if we are public robinson peers,
-        	// or we are a private cluster and the requester is in our cluster.
-          	// if we don't answer, the remote peer will recognize us as junior peer,
-          	// what would mean that our peer ping does not work
-        	prop.put("response", "-1"); // request rejected
+
+        if (post == null || env == null || !yacyNetwork.authentifyRequest(post, env)) {
             return prop;
         }
-                  
+
+        final plasmaSwitchboard sb = (plasmaSwitchboard) env;
+        if (sb.isRobinsonMode() &&
+            !sb.isPublicRobinson() &&
+            !sb.isInMyCluster((String) header.get(httpHeader.CONNECTION_PROP_CLIENTIP))) {
+            // if we are a robinson cluster, answer only if we are public robinson peers,
+            // or we are a private cluster and the requester is in our cluster.
+            // if we don't answer, the remote peer will recognize us as junior peer,
+            // what would mean that our peer ping does not work
+            prop.put("response", "-1"); // request rejected
+            return prop;
+        }
+
 //      System.out.println("YACYQUERY: RECEIVED POST = " + ((post == null) ? "NULL" : post.toString()));
 
-        final String iam    = post.get("iam", "");    // complete seed of the requesting peer
+        final String ohash  = post.get("iam", "");    // complete seed of the requesting peer
         final String youare = post.get("youare", ""); // seed hash of the target peer, used for testing network stability
 //      final String key    = post.get("key", "");    // transmission key for response
         final String obj    = post.get("object", ""); // keyword for query subject
-        final String env    = post.get("env", "");    // argument to query
+        final String qenv    = post.get("env", "");    // argument to query
 
-        final yacySeed otherPeer = yacyCore.seedDB.get(iam);
-        if (otherPeer == null) {
+        final yacySeed oseed = yacyCore.seedDB.get(ohash);
+        if (oseed == null) {
             prop.put("response", "0");
             return prop;
         } else {
-            otherPeer.setLastSeenUTC();
+            oseed.setFlagDirectConnect(true);
+            oseed.setLastSeenUTC();
         }
 
         prop.put("mytime", serverDate.formatShortSecond());
@@ -107,7 +107,7 @@ public final class query {
         if (obj.equals("rwiurlcount")) {
             // the total number of different urls in the rwi is returned
             // <env> shall contain a word hash, the number of assigned lurls to this hash is returned
-            prop.put("response", sb.wordIndex.indexSize(env));
+            prop.put("response", sb.wordIndex.indexSize(qenv));
             return prop;
         }
 

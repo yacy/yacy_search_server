@@ -93,11 +93,11 @@ public class yacyCore {
     public static File yacyDBPath;
     public static final Map<String, yacyAccessible> amIAccessibleDB = Collections.synchronizedMap(new HashMap<String, yacyAccessible>()); // Holds PeerHash / yacyAccessible Relations
     // constants for PeerPing behaviour
-    private static final int PING_INITIAL = 18;
+    private static final int PING_INITIAL = 12;
     private static final int PING_MAX_RUNNING = 6;
     private static final int PING_MIN_RUNNING = 3;
-    private static final int PING_MIN_DBSIZE = 5;
-    private static final int PING_MIN_PEERSEEN = 1; // min. accessible to force senior
+    private static final int PING_MIN_DBSIZE = 3;
+    private static final int PING_MIN_PEERSEEN = 2; // min. accessible to force senior
     private static final long PING_MAX_DBAGE = 15 * 60 * 1000; // in milliseconds
 
     // public static yacyShare shareManager = null;
@@ -438,7 +438,7 @@ public class yacyCore {
 
             // going through the peer list and starting a new publisher thread for each peer
             int i = 0;
-            while (si. hasNext()) {
+            while (si.hasNext()) {
                 seed = (yacySeed) si.next();
                 if (seed == null) {
                     sync.P();

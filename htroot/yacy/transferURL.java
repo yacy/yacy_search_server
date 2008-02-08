@@ -62,45 +62,48 @@ import de.anomic.yacy.yacySeed;
 
 public final class transferURL {
 
-    
     public static serverObjects respond(httpHeader header, serverObjects post, serverSwitch env) throws InterruptedException {
+        // return variable that accumulates replacements
+        final serverObjects prop = new serverObjects();
+
+        if (post == null || env == null || !yacyNetwork.authentifyRequest(post, env)) {
+            return prop;
+        }
+
         long start = System.currentTimeMillis();
         long freshdate = 0;
         try {freshdate = serverDate.parseShortDay("20061101").getTime();} catch (ParseException e1) {}
-        
-        // return variable that accumulates replacements
-        final plasmaSwitchboard sb = (plasmaSwitchboard) env;
-        final serverObjects prop = new serverObjects();
-        if ((post == null) || (env == null)) return prop;
-        if (!yacyNetwork.authentifyRequest(post, env)) return prop;
 
         // request values
-        final String iam      = post.get("iam", "");      // seed hash of requester
-        final String youare   = post.get("youare", "");   // seed hash of the target peer, needed for network stability
-//      final String key      = post.get("key", "");      // transmission key
-        final int urlc        = post.getInt("urlc", 0);    // number of transported urls
+        final String ohash  = post.get("iam", "");    // seed hash of requester
+        final String youare = post.get("youare", ""); // seed hash of the target peer, needed for network stability
+//      final String key    = post.get("key", "");    // transmission key
+        final int urlc      = post.getInt("urlc", 0); // number of transported urls
+
+        final plasmaSwitchboard sb = (plasmaSwitchboard) env;
         final boolean granted = sb.getConfig("allowReceiveIndex", "false").equals("true");
         final boolean blockBlacklist = sb.getConfig("indexReceiveBlockBlacklist", "false").equals("true");
 
-        final yacySeed otherPeer = yacyCore.seedDB.get(iam);
-        if (otherPeer == null) {
+        final yacySeed oseed = yacyCore.seedDB.get(ohash);
+        if (oseed == null) {
             prop.put("result", "error_not_granted");
             prop.put("pause", "120000");
             return prop;
         } else {
-            otherPeer.setLastSeenUTC();
+            oseed.setFlagDirectConnect(true);
+            oseed.setLastSeenUTC();
         }
-        final String otherPeerName = iam + ":" + otherPeer.getName() + "/" + otherPeer.getVersion();
+        final String oname = ohash + ":" + oseed.getName() + "/" + oseed.getVersion();
 
         // response values
         String result = "";
         String doublevalues = "0";
 
         if ((youare == null) || (!youare.equals(yacyCore.seedDB.mySeed().hash))) {
-        	sb.getLog().logInfo("Rejecting URLs from peer " + otherPeerName + ". Wrong target. Wanted peer=" + youare + ", iam=" + yacyCore.seedDB.mySeed().hash);
+        	sb.getLog().logInfo("Rejecting URLs from peer " + oname + ". Wrong target. Wanted peer=" + youare + ", iam=" + yacyCore.seedDB.mySeed().hash);
             result = "wrong_target";
         } else if ((!granted) || (sb.isRobinsonMode())) {
-        	sb.getLog().logInfo("Rejecting URLs from peer " + otherPeerName + ". Not granted.");
+        	sb.getLog().logInfo("Rejecting URLs from peer " + oname + ". Not granted.");
             result = "error_not_granted";
         } else {
             int received = 0;
@@ -115,7 +118,7 @@ public final class transferURL {
                 // read new lurl-entry
                 urls = (String) post.get("url" + i);
                 if (urls == null) {
-                    yacyCore.log.logFine("transferURL: got null URL-string from peer " + otherPeerName);
+                    yacyCore.log.logFine("transferURL: got null URL-string from peer " + oname);
                     blocked++;
                     continue;
                 }
@@ -123,7 +126,7 @@ public final class transferURL {
                 // parse new lurl-entry
                 lEntry = sb.wordIndex.loadedURL.newEntry(urls);
                 if (lEntry == null) {
-                    yacyCore.log.logWarning("transferURL: received invalid URL (entry null) from peer " + otherPeerName + "\n\tURL Property: " + urls);
+                    yacyCore.log.logWarning("transferURL: received invalid URL (entry null) from peer " + oname + "\n\tURL Property: " + urls);
                     blocked++;
                     continue;
                 }
@@ -131,14 +134,14 @@ public final class transferURL {
                 // check if entry is well-formed
                 indexURLEntry.Components comp = lEntry.comp();
                 if (comp.url() == null) {
-                    yacyCore.log.logWarning("transferURL: received invalid URL from peer " + otherPeerName + "\n\tURL Property: " + urls);
+                    yacyCore.log.logWarning("transferURL: received invalid URL from peer " + oname + "\n\tURL Property: " + urls);
                     blocked++;
                     continue;
                 }
                 
                 // check whether entry is too old
                 if (lEntry.freshdate().getTime() <= freshdate) {
-                    yacyCore.log.logFine("transerURL: received too old URL from peer " + otherPeerName + ": " + lEntry.freshdate());
+                    yacyCore.log.logFine("transerURL: received too old URL from peer " + oname + ": " + lEntry.freshdate());
                     blocked++;
                     continue;
                 }
@@ -146,7 +149,7 @@ public final class transferURL {
                 // check if the entry is blacklisted
                 if ((blockBlacklist) && (plasmaSwitchboard.urlBlacklist.isListed(plasmaURLPattern.BLACKLIST_DHT, comp.url()))) {
                     int deleted = sb.wordIndex.tryRemoveURLs(lEntry.hash());
-                    yacyCore.log.logFine("transferURL: blocked blacklisted URL '" + comp.url().toNormalform(false, true) + "' from peer " + otherPeerName + "; deleted " + deleted + " URL entries from RWIs");
+                    yacyCore.log.logFine("transferURL: blocked blacklisted URL '" + comp.url().toNormalform(false, true) + "' from peer " + oname + "; deleted " + deleted + " URL entries from RWIs");
                     lEntry = null;
                     blocked++;
                     continue;
@@ -154,7 +157,7 @@ public final class transferURL {
                 
                 // check if the entry is in our network domain
                 if (!sb.acceptURL(comp.url())) {
-                    yacyCore.log.logFine("transferURL: blocked URL outside of our domain '" + comp.url().toNormalform(false, true) + "' from peer " + otherPeerName);
+                    yacyCore.log.logFine("transferURL: blocked URL outside of our domain '" + comp.url().toNormalform(false, true) + "' from peer " + oname);
                     lEntry = null;
                     blocked++;
                     continue;
@@ -163,8 +166,8 @@ public final class transferURL {
                 // write entry to database
                 try {
                     sb.wordIndex.loadedURL.store(lEntry);
-                    sb.wordIndex.loadedURL.stack(lEntry, iam, iam, 3);
-                    yacyCore.log.logFine("transferURL: received URL '" + comp.url().toNormalform(false, true) + "' from peer " + otherPeerName);
+                    sb.wordIndex.loadedURL.stack(lEntry, ohash, ohash, 3);
+                    yacyCore.log.logFine("transferURL: received URL '" + comp.url().toNormalform(false, true) + "' from peer " + oname);
                     received++;
                 } catch (IOException e) {
                     e.printStackTrace();
@@ -176,8 +179,8 @@ public final class transferURL {
             // return rewrite properties
             final int more = sb.wordIndex.loadedURL.size() - sizeBefore;
             doublevalues = Integer.toString(received - more);
-            sb.getLog().logInfo("Received " + received + " URLs from peer " + otherPeerName + " in " + (System.currentTimeMillis() - start) + " ms, Blocked " + blocked + " URLs");
-            if ((received - more) > 0) sb.getLog().logSevere("Received " + doublevalues + " double URLs from peer " + otherPeerName);
+            sb.getLog().logInfo("Received " + received + " URLs from peer " + oname + " in " + (System.currentTimeMillis() - start) + " ms, Blocked " + blocked + " URLs");
+            if ((received - more) > 0) sb.getLog().logSevere("Received " + doublevalues + " double URLs from peer " + oname);
             result = "ok";
         }
 

@@ -59,7 +59,7 @@ public final class search {
 
     public static serverObjects respond(httpHeader header, serverObjects post, serverSwitch env) {
         // return variable that accumulates replacements
-        serverObjects prop = new serverObjects();
+        final serverObjects prop = new serverObjects();
         // defaults
         prop.put("links", "");
         prop.put("linkcount", "0");
@@ -86,8 +86,8 @@ public final class search {
             return prop;
         }
 
-        final String query = post.get("query", "");   // a string of word hashes that shall be searched and combined
-        String abstracts = post.get("abstracts", ""); // a string of word hashes for abstracts that shall be generated, or 'auto' (for maxcount-word), or '' (for none)
+        final String query = post.get("query", ""); // a string of word hashes that shall be searched and combined
+        final String abstracts = post.get("abstracts", ""); // a string of word hashes for abstracts that shall be generated, or 'auto' (for maxcount-word), or '' (for none)
         if ((query == null || query.length() == 0) & (abstracts == null || abstracts.length() == 0)) {
             return prop;
         }
@@ -96,9 +96,8 @@ public final class search {
         sb.intermissionAllThreads(3000);
         sb.remoteSearchLastAccess = System.currentTimeMillis();
 
-        final String oseed = post.get("myseed", ""); // complete seed of the requesting peer
-        final String key   = post.get("key", "");    // transmission key for response
-        final yacySeed opeer = yacySeed.genRemoteSeed(oseed, key, true);
+        // myseed = complete seed of the requesting peer, key = transmission key for response
+        final yacySeed opeer = yacySeed.genRemoteSeed(post.get("myseed", ""), post.get("key", ""), true);
         // store accessing peer
         if (yacyCore.seedDB == null) {
             yacyCore.log.logSevere("yacy.search: seed cache not initialized");

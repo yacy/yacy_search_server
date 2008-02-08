@@ -61,11 +61,13 @@ import de.anomic.yacy.yacySeed;
 public final class transfer {
 
     public static serverObjects respond(httpHeader header, serverObjects post, serverSwitch env) {
-        plasmaSwitchboard sb = (plasmaSwitchboard) env;
-        serverObjects prop = new serverObjects();
-        if ((post == null) || (env == null)) return prop;
-        if (!yacyNetwork.authentifyRequest(post, env)) return prop;
-        
+        // return variable that accumulates replacements
+        final serverObjects prop = new serverObjects();
+
+        if (post == null || env == null || !yacyNetwork.authentifyRequest(post, env)) {
+            return prop;
+        }
+
         String process  = post.get("process", "");  // permission or store
 //      String key      = post.get("key", "");      // a transmission key from the client
         String ohash    = post.get("iam", "");      // identification of the client (a peer-hash)
@@ -81,22 +83,24 @@ public final class transfer {
         prop.put("process_path", "");
         prop.put("process_maxsize", "0");
 
+        final plasmaSwitchboard sb = (plasmaSwitchboard) env;
         if (sb.isRobinsonMode() || !sb.rankingOn) {
             // in a robinson environment, do not answer. We do not do any transfer in a robinson cluster.
             return prop;
         }
 
-        final yacySeed opeer = yacyCore.seedDB.get(ohash);
-        if (opeer == null) {
+        final yacySeed oseed = yacyCore.seedDB.get(ohash);
+        if (oseed == null) {
             // reject unknown peers: this does not appear fair, but anonymous senders are dangerous
             sb.getLog().logFine("RankingTransmission: rejected unknown peer '" + ohash + "', current IP " + header.get(httpHeader.CONNECTION_PROP_CLIENTIP, "unknown"));
             return prop;
         }
-        opeer.setLastSeenUTC();
+        oseed.setFlagDirectConnect(true);
+        oseed.setLastSeenUTC();
 
         if (filename.indexOf("..") >= 0) {
             // reject paths that contain '..' because they are dangerous
-            sb.getLog().logFine("RankingTransmission: rejected wrong path '" + filename + "' from peer " + opeer.getName() + "/" + opeer.getPublicAddress()+ ", current IP " + header.get(httpHeader.CONNECTION_PROP_CLIENTIP, "unknown"));
+            sb.getLog().logFine("RankingTransmission: rejected wrong path '" + filename + "' from peer " + oseed.getName() + "/" + oseed.getPublicAddress()+ ", current IP " + header.get(httpHeader.CONNECTION_PROP_CLIENTIP, "unknown"));
             return prop;
         }
 
@@ -114,7 +118,7 @@ public final class transfer {
                 prop.put("process_path", "");  // currently empty; the store process will find a path
                 prop.put("process_maxsize", "-1"); // if response is too big we return the size of the file
                 sb.rankingPermissions.put(serverCodings.encodeMD5Hex(kelondroBase64Order.standardCoder.encodeString(access)), filename);
-                sb.getLog().logFine("RankingTransmission: granted peer " + opeer.hash + ":" + opeer.getName() + " to send CR file " + filename);
+                sb.getLog().logFine("RankingTransmission: granted peer " + oseed.hash + ":" + oseed.getName() + " to send CR file " + filename);
             }
             return prop;
         }
@@ -132,7 +136,7 @@ public final class transfer {
                 if ((grantedFile == null) || (!(grantedFile.equals(filename)))) {
                     // fraud-access of this interface
                     prop.put("response", "denied");
-                    sb.getLog().logFine("RankingTransmission: denied " + opeer.hash + ":" + opeer.getName() + " to send CR file " + filename + ": wrong access code");
+                    sb.getLog().logFine("RankingTransmission: denied " + oseed.hash + ":" + oseed.getName() + " to send CR file " + filename + ": wrong access code");
                 } else {
                     sb.rankingPermissions.remove(accesscode); // not needed any more
                     File path = new File(sb.rankingPath, plasmaRankingDistribution.CR_OTHER);
@@ -144,10 +148,10 @@ public final class transfer {
                             String md5t = serverCodings.encodeMD5Hex(file);
                             if (md5t.equals(md5)) {
                                 prop.put("response", "ok");
-                                sb.getLog().logFine("RankingTransmission: received from peer " + opeer.hash + ":" + opeer.getName() + " CR file " + filename);
+                                sb.getLog().logFine("RankingTransmission: received from peer " + oseed.hash + ":" + oseed.getName() + " CR file " + filename);
                             } else {
                                 prop.put("response", "transfer failure");
-                                sb.getLog().logFine("RankingTransmission: transfer failure from peer " + opeer.hash + ":" + opeer.getName() + " for CR file " + filename);
+                                sb.getLog().logFine("RankingTransmission: transfer failure from peer " + oseed.hash + ":" + oseed.getName() + " for CR file " + filename);
                             }
                         }else{
                             //exploit?
@@ -163,7 +167,7 @@ public final class transfer {
         }
 
         // wrong access
-        sb.getLog().logFine("RankingTransmission: rejected unknown process " + process + ":" + purpose + " from peer " + opeer.hash + ":" + opeer.getName());
+        sb.getLog().logFine("RankingTransmission: rejected unknown process " + process + ":" + purpose + " from peer " + oseed.hash + ":" + oseed.getName());
         return prop;
     }
 

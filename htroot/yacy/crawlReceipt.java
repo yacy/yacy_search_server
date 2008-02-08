@@ -62,25 +62,34 @@ import de.anomic.yacy.yacySeed;
 
 public final class crawlReceipt {
 
-    
     /*
      * this is used to respond on a remote crawling request
      */
-
     public static serverObjects respond(httpHeader header, serverObjects post, serverSwitch env) {
         // return variable that accumulates replacements
-        plasmaSwitchboard switchboard = (plasmaSwitchboard) env;
-        serverObjects prop = new serverObjects();
-        if ((post == null) || (env == null)) return prop;
-        if (!yacyNetwork.authentifyRequest(post, env)) return prop;
-        
-        serverLog log = switchboard.getLog();
+        final serverObjects prop = new serverObjects();
+        // defaults
+        prop.put("delay", "3600");
+
+        if (post == null || env == null || !yacyNetwork.authentifyRequest(post, env)) {
+            return prop;
+        }
+
+        // seed hash of requester
+        String ohash = post.get("iam", "");
+        if (ohash == null || ohash.length() == 0 ) return prop;
+        yacySeed oseed = yacyCore.seedDB.get(ohash);
+        if (oseed == null) return prop;
+        oseed.setFlagDirectConnect(true);
+        oseed.setLastSeenUTC();
+
+        final plasmaSwitchboard sb = (plasmaSwitchboard) env;
+        serverLog log = sb.getLog();
 
         //int proxyPrefetchDepth = Integer.parseInt(env.getConfig("proxyPrefetchDepth", "0"));
         //int crawlingDepth = Integer.parseInt(env.getConfig("crawlingDepth", "0"));
 
         // request values
-        String iam        = post.get("iam", "");      // seed hash of requester
         String youare     = post.get("youare", "");    // seed hash of the target peer, needed for network stability
         //String process    = post.get("process", "");  // process type
         String key        = post.get("key", "");      // transmission key
@@ -111,59 +120,50 @@ public final class crawlReceipt {
 
         */
 
-        final yacySeed otherPeer = yacyCore.seedDB.get(iam);
-        if (otherPeer == null) {
-            prop.put("delay", "3600");
-            return prop;
-        } else {
-            otherPeer.setLastSeenUTC();
-        }
-        final String otherPeerName = iam + ":" + otherPeer.getName() + "/" + otherPeer.getVersion();
+        
 
         if ((yacyCore.seedDB.mySeed() == null) || (!(yacyCore.seedDB.mySeed().hash.equals(youare)))) {
             // no yacy connection / unknown peers
-            prop.put("delay", "3600");
             return prop;
         }
         
         if (propStr == null) {
             // error with url / wrong key
-            prop.put("delay", "3600");
             return prop;
         }
         
-        if ((switchboard.isRobinsonMode()) && (!switchboard.isInMyCluster(otherPeer))) {
+        if ((sb.isRobinsonMode()) && (!sb.isInMyCluster(oseed))) {
         	// we reject urls that are from outside our cluster
         	prop.put("delay", "9999");
+            return prop; // ???
     	}
         
         // generating a new loaded URL entry
-        indexURLEntry entry = switchboard.wordIndex.loadedURL.newEntry(propStr);
+        indexURLEntry entry = sb.wordIndex.loadedURL.newEntry(propStr);
         if (entry == null) {
-            log.logWarning("crawlReceipt: RECEIVED wrong RECEIPT (entry null) from peer " + iam + "\n\tURL properties: "+ propStr);
-            prop.put("delay", "3600");
+            log.logWarning("crawlReceipt: RECEIVED wrong RECEIPT (entry null) from peer " + ohash + "\n\tURL properties: "+ propStr);
             return prop;
         }
         
         indexURLEntry.Components comp = entry.comp();
         if (comp.url() == null) {
-            log.logWarning("crawlReceipt: RECEIVED wrong RECEIPT (url null) for hash " + entry.hash() + " from peer " + iam + "\n\tURL properties: "+ propStr);
-            prop.put("delay", "3600");
+            log.logWarning("crawlReceipt: RECEIVED wrong RECEIPT (url null) for hash " + entry.hash() + " from peer " + ohash + "\n\tURL properties: "+ propStr);
             return prop;
         }
         
         // check if the entry is in our network domain
-        if (!switchboard.acceptURL(comp.url())) {
-            log.logWarning("crawlReceipt: RECEIVED wrong RECEIPT (url outside of our domain) for hash " + entry.hash() + " from peer " + iam + "\n\tURL properties: "+ propStr);
+        if (!sb.acceptURL(comp.url())) {
+            log.logWarning("crawlReceipt: RECEIVED wrong RECEIPT (url outside of our domain) for hash " + entry.hash() + " from peer " + ohash + "\n\tURL properties: "+ propStr);
             prop.put("delay", "9999");
             return prop;
         }
         
         if (result.equals("fill")) try {
             // put new entry into database
-            switchboard.wordIndex.loadedURL.store(entry);
-            switchboard.wordIndex.loadedURL.stack(entry, youare, iam, 1);
-            switchboard.crawlQueues.delegatedURL.remove(entry.hash()); // the delegated work has been done
+            sb.wordIndex.loadedURL.store(entry);
+            sb.wordIndex.loadedURL.stack(entry, youare, ohash, 1);
+            sb.crawlQueues.delegatedURL.remove(entry.hash()); // the delegated work has been done
+            final String otherPeerName = ohash + ":" + oseed.getName() + "/" + oseed.getVersion();
             log.logInfo("crawlReceipt: RECEIVED RECEIPT from " + otherPeerName + " for URL " + entry.hash() + ":" + comp.url().toNormalform(false, true));
 
             // ready for more
@@ -171,16 +171,14 @@ public final class crawlReceipt {
             return prop;
         } catch (IOException e) {
             e.printStackTrace();
-            prop.put("delay", "3600");
             return prop;
         }
 
-        switchboard.crawlQueues.delegatedURL.remove(entry.hash()); // the delegated work is transformed into an error case
-        plasmaCrawlZURL.Entry ee = switchboard.crawlQueues.errorURL.newEntry(entry.toBalancerEntry(), youare, null, 0, result + ":" + reason);
+        sb.crawlQueues.delegatedURL.remove(entry.hash()); // the delegated work is transformed into an error case
+        plasmaCrawlZURL.Entry ee = sb.crawlQueues.errorURL.newEntry(entry.toBalancerEntry(), youare, null, 0, result + ":" + reason);
         ee.store();
-        switchboard.crawlQueues.errorURL.push(ee);
+        sb.crawlQueues.errorURL.push(ee);
         //switchboard.noticeURL.remove(receivedUrlhash);
-        prop.put("delay", "3600");
         return prop;
 	
          // return rewrite properties

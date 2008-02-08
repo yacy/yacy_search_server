@@ -815,7 +815,7 @@ public class yacySeed {
 
     public final String genSeedStr(String key) {
         // use a default encoding
-        return this.genSeedStr('b', key);
+        return this.genSeedStr('z', key);
     }
 
     public final synchronized String genSeedStr(char method, String key) {
@@ -838,7 +838,7 @@ public class yacySeed {
     }
 
     public final void save(File f) throws IOException {
-        final String out = this.genSeedStr('p', null);
+        final String out = this.genSeedStr('z', null);
         final FileWriter fw = new FileWriter(f);
         fw.write(out, 0, out.length());
         fw.close();

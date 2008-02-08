@@ -259,6 +259,7 @@ public final class yacyClient {
             );
 
             if (result == null || result.size() == 0) { return null; }
+            target.setFlagDirectConnect(true);
             target.setLastSeenUTC();
             //final Date remoteTime = yacyCore.parseUniversalDate((String) result.get(yacySeed.MYTIME)); // read remote time
             return yacySeed.genRemoteSeed((String) result.get("response"), post.get("key", ""), true);
@@ -294,6 +295,7 @@ public final class yacyClient {
             if (resp == null) {
                 return -1;
             } else try {
+                target.setFlagDirectConnect(true);
                 target.setLastSeenUTC();
                 return Integer.parseInt(resp);
             } catch (NumberFormatException e) {
@@ -334,6 +336,7 @@ public final class yacyClient {
             if (resp == null) {
                 return -1;
             } else try {
+                target.setFlagDirectConnect(true);
                 target.setLastSeenUTC();
                 return Integer.parseInt(resp);
             } catch (NumberFormatException e) {
@@ -862,7 +865,7 @@ public final class yacyClient {
         }
     }
 
-    public static HashMap<String, Object> transferIndex(yacySeed targetSeed, indexContainer[] indexes, HashMap<String, indexURLEntry> urlCache, boolean gzipBody, int timeout) {
+    public static HashMap<String, Object> transferIndex(yacySeed target, indexContainer[] indexes, HashMap<String, indexURLEntry> urlCache, boolean gzipBody, int timeout) {
         
         HashMap<String, Object> resultObj = new HashMap<String, Object>();
         int payloadSize = 0;
@@ -882,7 +885,7 @@ public final class yacyClient {
             }        
             
             // transfer the RWI without the URLs
-            HashMap<String, String> in = transferRWI(targetSeed, indexes, gzipBody, timeout);
+            HashMap<String, String> in = transferRWI(target, indexes, gzipBody, timeout);
             resultObj.put("resultTransferRWI", in);
 
             if (in == null) {
@@ -897,11 +900,9 @@ public final class yacyClient {
                 return resultObj;
             }
 
-            targetSeed.setLastSeenUTC();
-
             if (!(result.equals("ok"))) {
-                targetSeed.setFlagAcceptRemoteIndex(false);
-                yacyCore.seedDB.update(targetSeed.hash, targetSeed);
+                target.setFlagAcceptRemoteIndex(false);
+                yacyCore.seedDB.update(target.hash, target);
                 resultObj.put("result", result);
                 return resultObj;
             }
@@ -926,7 +927,7 @@ public final class yacyClient {
                 }
             }
             
-            in = transferURL(targetSeed, urls, gzipBody, timeout);
+            in = transferURL(target, urls, gzipBody, timeout);
             resultObj.put("resultTransferURL", in);
             
             if (in == null) {
@@ -941,8 +942,8 @@ public final class yacyClient {
                 return resultObj;
             }
             if (!(result.equals("ok"))) {
-                targetSeed.setFlagAcceptRemoteIndex(false);
-                yacyCore.seedDB.update(targetSeed.hash, targetSeed);
+                target.setFlagAcceptRemoteIndex(false);
+                yacyCore.seedDB.update(target.hash, target);
                 resultObj.put("result",result);
                 return resultObj;
             }

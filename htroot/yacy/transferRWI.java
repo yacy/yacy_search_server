@@ -67,55 +67,59 @@ import de.anomic.yacy.yacySeed;
 public final class transferRWI {
 
     public static serverObjects respond(httpHeader header, serverObjects post, serverSwitch env) throws InterruptedException {
-        
         // return variable that accumulates replacements
-        final plasmaSwitchboard sb = (plasmaSwitchboard) env;
         final serverObjects prop = new serverObjects();
-        if ((post == null) || (env == null)) return prop;
-        if (!yacyNetwork.authentifyRequest(post, env)) return prop;
+
+        if (post == null || env == null || !yacyNetwork.authentifyRequest(post, env)) {
+            return prop;
+        }
+
         if (!post.containsKey("wordc")) return prop;
         if (!post.containsKey("entryc")) return prop;
-        
+
         // request values
-        final String iam      = post.get("iam", "");                      // seed hash of requester
-        final String youare   = post.get("youare", "");                   // seed hash of the target peer, needed for network stability
-//      final String key      = (String) post.get("key", "");             // transmission key
-        final int wordc       = post.getInt("wordc", 0);                  // number of different words
-        final int entryc      = post.getInt("entryc", 0);                 // number of entries in indexes
-        byte[] indexes        = post.get("indexes", "").getBytes();       // the indexes, as list of word entries
+        final String ohash  = post.get("iam", "");                // seed hash of requester
+        final String youare = post.get("youare", "");             // seed hash of the target peer, needed for network stability
+//      final String key    = (String) post.get("key", "");       // transmission key
+        final int wordc     = post.getInt("wordc", 0);            // number of different words
+        final int entryc    = post.getInt("entryc", 0);           // number of entries in indexes
+        byte[] indexes      = post.get("indexes", "").getBytes(); // the indexes, as list of word entries
+
+        final plasmaSwitchboard sb = (plasmaSwitchboard) env;
         boolean granted       = sb.getConfig("allowReceiveIndex", "false").equals("true");
         boolean blockBlacklist = sb.getConfig("indexReceiveBlockBlacklist", "false").equals("true");
         boolean checkLimit    = sb.getConfigBool("indexDistribution.transferRWIReceiptLimitEnabled", true);
         final long cachelimit = sb.getConfigLong("indexDistribution.dhtReceiptLimit", 10000);
 
-        final yacySeed otherPeer = yacyCore.seedDB.get(iam);
-        if (otherPeer == null) {
+        final yacySeed oseed = yacyCore.seedDB.get(ohash);
+        if (oseed == null) {
             prop.put("unknownURL", "");
             prop.put("result", "busy");
             prop.put("pause", "120000");
             return prop;
         } else {
-            otherPeer.setLastSeenUTC();
+            oseed.setFlagDirectConnect(true);
+            oseed.setLastSeenUTC();
         }
-        final String otherPeerName = iam + ":" + otherPeer.getName() + "/" + otherPeer.getVersion();
+        final String oname = ohash + ":" + oseed.getName() + "/" + oseed.getVersion();
 
         // response values
         String       result      = "ok";
         StringBuffer unknownURLs = new StringBuffer();
         int          pause       = 10000;
-        
+
         if ((youare == null) || (!youare.equals(yacyCore.seedDB.mySeed().hash))) {
-        	sb.getLog().logInfo("Rejecting RWIs from peer " + otherPeerName + ". Wrong target. Wanted peer=" + youare + ", iam=" + yacyCore.seedDB.mySeed().hash);
+        	sb.getLog().logInfo("Rejecting RWIs from peer " + oname + ". Wrong target. Wanted peer=" + youare + ", iam=" + yacyCore.seedDB.mySeed().hash);
             result = "wrong_target";
             pause = 0;
         } else if ((!granted) || (sb.isRobinsonMode())) {
             // we dont want to receive indexes
-            sb.getLog().logInfo("Rejecting RWIs from peer " + otherPeerName + ". Not granted.");
+            sb.getLog().logInfo("Rejecting RWIs from peer " + oname + ". Not granted.");
             result = "not_granted";
             pause = 0;
         } else if (checkLimit && sb.wordIndex.dhtInCacheSize() > cachelimit) {
             // we are too busy to receive indexes
-            sb.getLog().logInfo("Rejecting RWIs from peer " + otherPeerName + ". We are too busy (buffersize=" + sb.wordIndex.dhtInCacheSize() + ").");
+            sb.getLog().logInfo("Rejecting RWIs from peer " + oname + ". We are too busy (buffersize=" + sb.wordIndex.dhtInCacheSize() + ").");
             granted = false; // don't accept more words if there are too many words to flush
             result = "busy";
             pause = 60000;
@@ -128,7 +132,7 @@ public final class transferRWI {
         } */ else {
             // we want and can receive indexes
             // log value status (currently added to find outOfMemory error
-            sb.getLog().logFine("Processing " + indexes.length + " bytes / " + wordc + " words / " + entryc + " entries from " + otherPeerName);
+            sb.getLog().logFine("Processing " + indexes.length + " bytes / " + wordc + " words / " + entryc + " entries from " + oname);
             final long startProcess = System.currentTimeMillis();
 
             // decode request
@@ -171,7 +175,7 @@ public final class transferRWI {
                 // block blacklisted entries
                 if ((blockBlacklist) && (plasmaSwitchboard.urlBlacklist.hashInBlacklistedCache(plasmaURLPattern.BLACKLIST_DHT, urlHash))) {
                     int deleted = sb.wordIndex.tryRemoveURLs(urlHash);
-                    yacyCore.log.logFine("transferRWI: blocked blacklisted URLHash '" + urlHash + "' from peer " + otherPeerName + "; deleted " + deleted + " URL entries from RWIs");
+                    yacyCore.log.logFine("transferRWI: blocked blacklisted URLHash '" + urlHash + "' from peer " + oname + "; deleted " + deleted + " URL entries from RWIs");
                     blocked++;
                     continue;
                 }
@@ -205,10 +209,10 @@ public final class transferRWI {
             }
             if (unknownURLs.length() > 0) { unknownURLs.delete(0, 1); }
             if ((wordhashes.length == 0) || (received == 0)) {
-                sb.getLog().logInfo("Received 0 RWIs from " + otherPeerName + ", processed in " + (System.currentTimeMillis() - startProcess) + " milliseconds, requesting " + unknownURL.size() + " URLs, blocked " + blocked + " RWIs");
+                sb.getLog().logInfo("Received 0 RWIs from " + oname + ", processed in " + (System.currentTimeMillis() - startProcess) + " milliseconds, requesting " + unknownURL.size() + " URLs, blocked " + blocked + " RWIs");
             } else {
                 final double avdist = (yacyDHTAction.dhtDistance(yacyCore.seedDB.mySeed().hash, wordhashes[0]) + yacyDHTAction.dhtDistance(yacyCore.seedDB.mySeed().hash, wordhashes[received - 1])) / 2.0;
-                sb.getLog().logInfo("Received " + received + " Entries " + wordc + " Words [" + wordhashes[0] + " .. " + wordhashes[received - 1] + "]/" + avdist + " from " + otherPeerName + ", processed in " + (System.currentTimeMillis() - startProcess) + " milliseconds, requesting " + unknownURL.size() + "/" + receivedURL + " URLs, blocked " + blocked + " RWIs");
+                sb.getLog().logInfo("Received " + received + " Entries " + wordc + " Words [" + wordhashes[0] + " .. " + wordhashes[received - 1] + "]/" + avdist + " from " + oname + ", processed in " + (System.currentTimeMillis() - startProcess) + " milliseconds, requesting " + unknownURL.size() + "/" + receivedURL + " URLs, blocked " + blocked + " RWIs");
             }
             result = "ok";
             
