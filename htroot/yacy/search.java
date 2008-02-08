@@ -97,12 +97,12 @@ public final class search {
         sb.remoteSearchLastAccess = System.currentTimeMillis();
 
         // myseed = complete seed of the requesting peer, key = transmission key for response
-        final yacySeed opeer = yacySeed.genRemoteSeed(post.get("myseed", ""), post.get("key", ""), true);
+        final yacySeed oseed = yacySeed.genRemoteSeed(post.get("myseed", ""), post.get("key", ""), true);
         // store accessing peer
         if (yacyCore.seedDB == null) {
             yacyCore.log.logSevere("yacy.search: seed cache not initialized");
         } else {
-            yacyCore.peerActions.peerArrival(opeer, true);
+            yacyCore.peerActions.peerArrival(oseed, true);
         }
 
 //      final String youare  = post.get("youare", "");  // seed hash of the target peer, used for testing network stability
