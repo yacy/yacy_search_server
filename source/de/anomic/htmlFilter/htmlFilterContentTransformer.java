@@ -163,15 +163,15 @@ public class htmlFilterContentTransformer extends htmlFilterAbstractTransformer 
     public char[] transformTag0(String tagname, Properties tagopts, char quotechar) {
         if (tagname.equals("img")) {
             // check bluelist
-            if (bluelistHit(tagopts.getProperty("src","").toCharArray())) return genBlueLetters(5);
-            if (bluelistHit(tagopts.getProperty("alt","").toCharArray())) return genBlueLetters(5);
-            
+            if (bluelistHit(tagopts.getProperty("src", "").toCharArray())) return genBlueLetters(5);
+            if (bluelistHit(tagopts.getProperty("alt", "").toCharArray())) return genBlueLetters(5);
+
             // replace image alternative name
-            tagopts.setProperty("alt", new String(transformText(tagopts.getProperty("alt","").toCharArray())));
+            tagopts.setProperty("alt", new String(transformText(tagopts.getProperty("alt", "").toCharArray())));
         }
-        if ((tagname.equals("input")) && (tagopts.getProperty("type").equals("submit"))) {
+        if (tagname.equals("input") && (tagopts.getProperty("type") != null && tagopts.getProperty("type").equals("submit"))) {
             // rewrite button name
-            tagopts.setProperty("value", new String(transformText(tagopts.getProperty("value","").toCharArray())));
+            tagopts.setProperty("value", new String(transformText(tagopts.getProperty("value", "").toCharArray())));
         }
         return htmlFilterWriter.genTag0(tagname, tagopts, quotechar);
     }
