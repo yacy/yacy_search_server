@@ -606,7 +606,7 @@ Use filter==Filter nutzen
 Restrict to start domain==Auf Startdomain beschr&auml;nken
 The filter is an emacs-like regular expression that must match with the URLs which are used to be crawled; default is 'catch all'.==Dieser Filter ist ein emacs-&auml;hnlicher regul&auml;rer Ausdruck, der mit den zu crawlenden URLs &uuml;bereinstimmen muss; standard ist 'sammel alle'.
 You can also use an automatic domain-restriction to fully crawl a single domain.==Sie k&ouml;nnen aber auch eine automatische Domain-Beschr&auml;nkung benutzen, um eine einzelne Domain komplett zu crawlen.
-#Re-Crawl Option:==Re-Crawl Option:
+Min-Age Option:==Mindest-Alter Option:
 Use</label>:==Benutzen</label>:
 Interval==Intervall
 Year\(s\)==Jahr(e)
@@ -784,9 +784,7 @@ more options...==mehr Optionen...
 Max. number of results==Max. Anzahl der Ergebnisse
 Resource==Quelle
 global==global
-local==lokal
-Max. search time==Max. Suchdauer
-\(seconds\)==(Sekunden)
+>local==>lokal
 URL mask==URL-Filter
 restrict on==beschr&auml;nken auf
 show all==alle zeigen
@@ -835,7 +833,7 @@ Retrieve by Word-Hash==Abfrage nach Wort-Hash
 "Generate List"=="Liste erstellen"
 No entry for word \'\#\[word\]\#\'==Keinen Eintrag zu Wort '#[word]#'
 No entry for word hash==Keinen Eintrag zu Wort-Hash
-Search result==Suchergebniss
+Search result==Suchergebnis
 total URLs</td>==insgesamte URLs</td>
 appearance in</td>==kommt vor in</td>
 in link type</td>==im Link-Typ</td>
@@ -1384,7 +1382,7 @@ flushed to disc; this may last some minutes.==auf die Festplatte gesichert werde
 Initial space of words in cache:==Anfangs Freiraum im Word Cache:
 This is is the init size of space for words in cache.==Dies ist die Anfangsgr&ouml;sse von W&ouml;rtern im Cache.
 word flush size:==Wort Flush Gr&ouml;sse:
-The word flush size is applied when an indexing loop is executed, and the cache size is exceeded.==Die Wort Flush Gr&ouml;sse wird eingesetzt, wenn ein Indexier Loop ausgef&uuml;hrt wird und die Cache Gr&ouml;sse &uumlberschritten wurde. 
+The word flush size is applied when an indexing loop is executed, and the cache size is exceeded.==Die Wort Flush Gr&ouml;sse wird eingesetzt, wenn ein Indexier Loop ausgef&uuml;hrt wird und die Cache Gr&ouml;sse &uuml;berschritten wurde. 
 Enter New Cache Size==Neue Cachegr&ouml;&szlig;e eintragen
 Thread pool settings:==Threadpool Einstellungen:
 maximum Active==max. aktiv
@@ -2071,7 +2069,7 @@ title="positive vote"==title="Positive Bewertung"
 alt="Give positive vote"==alt="Link positiv bewerten"
 title="negative vote"==title="Negative Bewertung"
 alt="Give negative vote"==alt="Link negativ bewerten"
-provided by YaCy peers using public bookmarks, link votes and crawl start points==automatisch erzeugt durch öffentliche Lesezeichen, Link Bewertungen und Crawl Startpunkte anderer YaCy-Peers
+provided by YaCy peers using public bookmarks, link votes and crawl start points==automatisch erzeugt durch öffentliche Lesezeichen, Link-Bewertungen und Crawl-Startpunkte anderer YaCy-Peers
 "Please enter a comment to your link recommendation. \(Your Vote is also considered without a comment.\)"=="Bitte geben Sie zu Ihrer Linkempfehlung einen Kommentar ein. (Ihre Stimme wird auch ohne Kommentar angenommen.)"
 "authentication required"=="Autorisierung erforderlich"
 Hide surftips for users without autorization==Verberge Surftipps f&uuml;r Benutzer ohne Autorisierung
