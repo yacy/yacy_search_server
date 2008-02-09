@@ -93,13 +93,12 @@ public class yacyCore {
     public static File yacyDBPath;
     public static final Map<String, yacyAccessible> amIAccessibleDB = Collections.synchronizedMap(new HashMap<String, yacyAccessible>()); // Holds PeerHash / yacyAccessible Relations
     // constants for PeerPing behaviour
-    private static final int PING_INITIAL = 12;
-    private static final int PING_MAX_RUNNING = 6;
-    private static final int PING_MIN_RUNNING = 3;
-    private static final int PING_MIN_DBSIZE = 3;
+    private static final int PING_INITIAL = 16;
+    private static final int PING_MAX_RUNNING = 8;
+    private static final int PING_MIN_RUNNING = 4;
     private static final int PING_MIN_PEERSEEN = 2; // min. accessible to force senior
     private static final long PING_MAX_DBAGE = 15 * 60 * 1000; // in milliseconds
-
+    
     // public static yacyShare shareManager = null;
     // public static boolean terminate = false;
 
@@ -375,38 +374,36 @@ public class yacyCore {
             // getting a list of peers to contact
             if (seedDB.mySeed().get(yacySeed.PEERTYPE, yacySeed.PEERTYPE_VIRGIN).equals(yacySeed.PEERTYPE_VIRGIN)) {
                 if (attempts > PING_INITIAL) { attempts = PING_INITIAL; }
-                Map<String, String> ch = plasmaSwitchboard.getSwitchboard().clusterhashes;
+                final Map<String, String> ch = plasmaSwitchboard.getSwitchboard().clusterhashes;
                 seeds = seedDB.seedsByAge(true, attempts - ((ch == null) ? 0 : ch.size())); // best for fast connection
                 // add also all peers from cluster if this is a public robinson cluster
                 if (plasmaSwitchboard.getSwitchboard().clusterhashes != null) {
-                    Iterator<Map.Entry<String, String>> i = ch.entrySet().iterator();
+                    final Iterator<Map.Entry<String, String>> i = ch.entrySet().iterator();
                     String hash;
                     Map.Entry<String, String> entry;
                     yacySeed seed;
                     while (i.hasNext()) {
                         entry = i.next();
                         hash = entry.getKey();
-                        seed = (yacySeed) seeds.get(hash);
+                        seed = seeds.get(hash);
                         if (seed == null) {
                             seed = seedDB.get(hash);
-                            if (seed == null) continue;
+                            if (seed == null) { continue; }
                         }
-                        seed.setAlternativeAddress((String) entry.getValue());
+                        seed.setAlternativeAddress(entry.getValue());
                         seeds.put(hash, seed);
-                	}
+                    }
                 }
             } else {
-                int diff = PING_MIN_DBSIZE - amIAccessibleDB.size();
-                if (diff > PING_MIN_RUNNING) {
-                    diff = Math.min(diff, PING_MAX_RUNNING);
-                    if (attempts > diff) { attempts = diff; }
+                if (amIAccessibleDB.size() > PING_MAX_RUNNING) {
+                    attempts = PING_MAX_RUNNING;
                 } else {
-                    if (attempts > PING_MIN_RUNNING) { attempts = PING_MIN_RUNNING; }
+                    attempts = Math.min(attempts, PING_MIN_RUNNING);
                 }
                 seeds = seedDB.seedsByAge(false, attempts); // best for seed list maintenance/cleaning
             }
 
-            if ((seeds == null) || seeds.size() == 0) { return 0; }
+            if (seeds == null || seeds.size() == 0) { return 0; }
             if (seeds.size() < attempts) { attempts = seeds.size(); }
 
             // This will try to get Peers that are not currently in amIAccessibleDB
