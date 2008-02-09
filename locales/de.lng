@@ -928,7 +928,7 @@ Plain Text List \(URLs only\)==Einfache Text Liste (nur URLs)
 HTML \(URLs with title\)==HTML (URLs mit Titel)
 #XML (RSS)==XML (RSS)
 "Export URLs"=="URLs exportieren"
-Export to file \#\[exportfile\]\# is running ..  \#\[urlcount\]\# URLs so far==Export nach Datei #[exportfile]# l&auml;ft ..  #[urlcount]# URLs bisher
+Export to file \#\[exportfile\]\# is running ..  \#\[urlcount\]\# URLs so far==Export nach Datei #[exportfile]# l&auml;uft ..  #[urlcount]# URLs bisher
 No entry found for URL-hash==Keinen Eintrag gefunden f&uuml;r URL-Hash
 URL String</td>==URL Adresse</td>
 Hash</td>==Hash</td>
