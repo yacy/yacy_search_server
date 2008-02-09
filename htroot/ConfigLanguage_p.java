@@ -132,7 +132,7 @@ public class ConfigLanguage_p {
         //virtual entry
         prop.put("langlist_0_file", "default");
         prop.put("langlist_0_name", ((langNames.get("default") == null) ? "default" : (String) langNames.get("default")));
-        prop.put("langlist_0_selected", "selected");
+        prop.put("langlist_0_selected", "selected=\"selected\"");
 
         for(i=0;i<= langFiles.length-1 ;i++){
             if(langFiles[i].endsWith(".lng")){
@@ -142,7 +142,7 @@ public class ConfigLanguage_p {
                 prop.put("langlist_"+(i+1)+"_file", langFiles[i]);
                 prop.put("langlist_"+(i+1)+"_name", ((langName == null) ? langKey : langName));
                 if(env.getConfig("locale.language", "default").equals(langKey)) {
-                    prop.put("langlist_"+(i+1)+"_selected", "selected");
+                    prop.put("langlist_"+(i+1)+"_selected", "selected=\"selected\"");
                     prop.put("langlist_0_selected", " "); // reset Default
                 } else {
                     prop.put("langlist_"+(i+1)+"_selected", " ");
