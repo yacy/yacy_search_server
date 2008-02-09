@@ -606,9 +606,9 @@ Use filter==Filter nutzen
 Restrict to start domain==Auf Startdomain beschr&auml;nken
 The filter is an emacs-like regular expression that must match with the URLs which are used to be crawled; default is 'catch all'.==Dieser Filter ist ein emacs-&auml;hnlicher regul&auml;rer Ausdruck, der mit den zu crawlenden URLs &uuml;bereinstimmen muss; standard ist 'sammel alle'.
 You can also use an automatic domain-restriction to fully crawl a single domain.==Sie k&ouml;nnen aber auch eine automatische Domain-Beschr&auml;nkung benutzen, um eine einzelne Domain komplett zu crawlen.
-Min-Age Option:==Mindest-Alter Option:
+Re-crawl known URLs:==Re-crawl bekannter URLs:
 Use</label>:==Benutzen</label>:
-Interval==Intervall
+If older than==Wenn &auml;lter als
 Year\(s\)==Jahr(e)
 Month\(s\)==Monat(e)
 Day\(s\)==Tag(e)

@@ -82,11 +82,11 @@
           </td>
         </tr>
         <tr valign="top" class="TableCellLight">
-          <td>Min-Age Option:</td>
+          <td>Re-crawl known URLs:</td>
           <td>
             <label for="crawlingIfOlderChecked">Use</label>:
             <input type="checkbox" name="crawlingIfOlderCheck" id="crawlingIfOlderChecked" #(crawlingIfOlderCheck)#::checked="checked"#(/crawlingIfOlderCheck)# />&nbsp;&nbsp;
-            <label for="crawlingIfOlderNumber">Interval</label>:
+            <label for="crawlingIfOlderNumber">If older than</label>:
 			<input name="crawlingIfOlderNumber" id="crawlingIfOlderNumber" type="text" size="7" maxlength="7" value="#[crawlingIfOlderNumber]#" />
 			<select name="crawlingIfOlderUnit">
               <option value="year"   #(crawlingIfOlderUnitYearCheck)#::selected="selected"#(/crawlingIfOlderUnitYearCheck)#>Year(s)</option>
