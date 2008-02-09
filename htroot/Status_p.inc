@@ -23,7 +23,7 @@
       #(/protection)#</dd>
     
     <dt>Address</dt>
-    <dd>Host: #[host]#:#[port]# #(extPortFormat)#::| (Binding to interface: #[extPort]#)#(/extPortFormat)# #(sslSupport)#::| SSL: enabled#(/sslSupport)#<br>
+    <dd>Host: #[host]#:#[port]# #(extPortFormat)#::| (Binding to interface: #[extPort]#)#(/extPortFormat)# #(sslSupport)#::| SSL: enabled#(/sslSupport)#<br />
     #(peerAddress)#
       peer address not assigned
       ::
@@ -68,7 +68,7 @@
       <td><div class="ProgressBar"><div class="ProgressBarFill" style="width:#[indexingQueuePercent]#%;" ></div></div></td>
       <td><div class="ProgressBarCaption">#[indexingQueueSize]#&nbsp;|&nbsp;#[indexingQueueMax]#</div></td>
       </tr>
-    </table><br>
+    </table><br />
     
     <a href="IndexCreateLoaderQueue_p.html">Loader Queue</a>:
     <table>
