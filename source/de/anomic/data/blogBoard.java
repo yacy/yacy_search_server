@@ -390,16 +390,16 @@ public class blogBoard {
         }
         
         public int compare(String obj1, String obj2) {
-            BlogEntry blogEntry1=readBlogEntry(obj1);
-            BlogEntry blogEntry2=readBlogEntry(obj2);
+            BlogEntry blogEntry1 = readBlogEntry(obj1);
+            BlogEntry blogEntry2 = readBlogEntry(obj2);
             if(blogEntry1 == null || blogEntry2 == null)
                 return 0;
-            if(this.newestFirst){
-                if(Long.valueOf(blogEntry2.getTimestamp()) - Long.valueOf(blogEntry1.getTimestamp()) >0) 
+            if (this.newestFirst) {
+                if (Long.parseLong(blogEntry2.getTimestamp()) - Long.parseLong(blogEntry1.getTimestamp()) > 0) 
                     return 1;
                 return -1;
             }
-            if(Long.valueOf(blogEntry1.getTimestamp()) - Long.valueOf(blogEntry2.getTimestamp()) >0) 
+            if (Long.parseLong(blogEntry1.getTimestamp()) - Long.parseLong(blogEntry2.getTimestamp()) > 0) 
                 return 1;
             return -1;
         }

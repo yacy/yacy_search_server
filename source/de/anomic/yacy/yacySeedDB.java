@@ -384,7 +384,7 @@ public final class yacySeedDB {
     public HashMap<String, yacySeed> getOldestSeeds(int count, int minage) {
         // returns a peerhash/yacySeed relation
         try {
-            final kelondroMScoreCluster seedScore = new kelondroMScoreCluster();
+            final kelondroMScoreCluster<String> seedScore = new kelondroMScoreCluster<String>();
             final Iterator<yacySeed> s = seedsConnected(true, false, null, (float) 0.0);
             yacySeed ys;
             int age;
