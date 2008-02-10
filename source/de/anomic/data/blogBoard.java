@@ -49,9 +49,12 @@ import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.text.ParseException;
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Iterator;
+import java.util.TreeSet;
 
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
@@ -64,6 +67,7 @@ import org.xml.sax.SAXException;
 
 import de.anomic.kelondro.kelondroBase64Order;
 import de.anomic.kelondro.kelondroDyn;
+import de.anomic.kelondro.kelondroException;
 import de.anomic.kelondro.kelondroMapObjects;
 import de.anomic.kelondro.kelondroNaturalOrder;
 import de.anomic.server.serverDate;
@@ -74,7 +78,7 @@ public class blogBoard {
     public  static final int keyLength = 64;
     private static final int recordSize = 512;
     
-    private kelondroMapObjects datbase = null;
+    kelondroMapObjects datbase = null;
     
     public blogBoard(File actpath, long preloadTime) {
     		new File(actpath.getParent()).mkdir();
@@ -109,16 +113,16 @@ public class blogBoard {
         return wikiBoard.guessAuthor(ip);
     }
 
-    public entry newEntry(String key, byte[] subject, byte[] author, String ip, Date date, byte[] page, ArrayList<String> comments, String commentMode) {
-        return new entry(normalize(key), subject, author, ip, date, page, comments, commentMode);
+    public BlogEntry newEntry(String key, byte[] subject, byte[] author, String ip, Date date, byte[] page, ArrayList<String> comments, String commentMode) {
+        return new BlogEntry(normalize(key), subject, author, ip, date, page, comments, commentMode);
     }
 
-    public class entry {
+    public class BlogEntry {
 	
 		String key;
 	    HashMap<String, String> record;
 	
-	    public entry(String nkey, byte[] subject, byte[] author, String ip, Date date, byte[] page, ArrayList<String> comments, String commentMode) {
+	    public BlogEntry(String nkey, byte[] subject, byte[] author, String ip, Date date, byte[] page, ArrayList<String> comments, String commentMode) {
 		    record = new HashMap<String, String>();
 		    key = nkey;
 		    if (key.length() > keyLength) key = key.substring(0, keyLength);
@@ -137,11 +141,13 @@ public class blogBoard {
 	        if (commentMode == null) record.put("commentMode", "1");
 	        else record.put("commentMode", commentMode);
 		    
+	        // TODO: implement this function
+	        record.put("privacy", "public");
+	        
 	        wikiBoard.setAuthor(ip, new String(author));
-	        //System.out.println("DEBUG: setting author " + author + " for ip = " + ip + ", authors = " + authors.toString());
 		}
 	
-		private entry(String key, HashMap<String, String> record) {
+		private BlogEntry(String key, HashMap<String, String> record) {
 		    this.key = key;
 		    this.record = record;
 	        if (this.record.get("comments")==null) this.record.put("comments", listManager.collection2string(new ArrayList<String>()));
@@ -237,9 +243,12 @@ public class blogBoard {
 	    public int getCommentMode(){
 	        return Integer.parseInt(record.get("commentMode"));
 	    }
+	    public boolean isPublic() {
+	        return true;
+	    }
     }
 
-    public String write(entry page) {
+    public String write(BlogEntry page) {
         // writes a new page and returns key
         try {
             datbase.set(page.key, page.record);
@@ -249,16 +258,16 @@ public class blogBoard {
         }
     }
 
-    public entry read(String key) {
+    public BlogEntry read(String key) {
         return read(key, datbase);
     }
 
-    private entry read(String key, kelondroMapObjects base) {
+    private BlogEntry read(String key, kelondroMapObjects base) {
     	key = normalize(key);
         if (key.length() > keyLength) key = key.substring(0, keyLength);
         HashMap<String, String> record = base.getMap(key);
         if (record == null) return newEntry(key, "".getBytes(), "anonymous".getBytes(), "127.0.0.1", new Date(), "".getBytes(), null, null);
-        return new entry(key, record);
+        return new BlogEntry(key, record);
     }
     
     public boolean importXML(String input) {
@@ -348,5 +357,92 @@ public class blogBoard {
     public Iterator<String> keys(boolean up) throws IOException {
         return datbase.keys(up, false);
     }
-
+    /**
+     * Comparator to sort objects of type Blog according to their timestamps
+     */
+    public class BlogComparator implements Comparator<String> {
+        
+        private boolean newestFirst;
+        
+        /**
+         * @param newestFirst newest first, or oldest first?
+         */
+        public BlogComparator(boolean newestFirst){
+            this.newestFirst=newestFirst;
+        }
+        
+        public int compare(String obj1, String obj2) {
+            BlogEntry bm1=read(obj1);
+            BlogEntry bm2=read(obj2);
+            if(bm1==null || bm2==null)
+                return 0; //XXX: i think this should not happen? maybe this needs further tracing of the bug
+            if(this.newestFirst){
+                if(Long.valueOf(bm2.timestamp()) - Long.valueOf(bm1.timestamp()) >0) return 1;
+                return -1;
+            }
+            if(Long.valueOf(bm1.timestamp()) - Long.valueOf(bm2.timestamp()) >0) return 1;
+            return -1;
+        }
+    }
+    public Iterator<String> getBlogIterator(boolean priv){
+        TreeSet<String> set=new TreeSet<String>(new BlogComparator(false));
+        Iterator<BlogEntry> it=blogIterator(true);
+        BlogEntry bm;
+        while(it.hasNext()){
+            bm=(BlogEntry)it.next();
+            if(priv || bm.isPublic()){
+                set.add(bm.key());
+            }
+        }
+        return set.iterator();
+    }
+    public Iterator<BlogEntry> blogIterator(boolean up){
+        try {
+            return new BlogIterator(up);
+        } catch (IOException e) {
+            return new HashSet<BlogEntry>().iterator();
+        }
+    }
+    /**
+     * Subclass of blogBoard, which provides the blogIterator object-type
+     */
+    public class BlogIterator implements Iterator<BlogEntry> {
+        Iterator<String> blogIter;
+        blogBoard.BlogEntry nextEntry;
+        public BlogIterator(boolean up) throws IOException {
+            //flushBookmarkCache(); //XXX: this will cost performance
+            this.blogIter = blogBoard.this.datbase.keys(up, false);
+            this.nextEntry = null;
+        }
+        
+        public boolean hasNext() {
+            try {
+                return this.blogIter.hasNext();
+            } catch (kelondroException e) {
+                //resetDatabase();
+                return false;
+            }
+        }
+        
+        public BlogEntry next() {
+            try {
+                return read((String) this.blogIter.next());
+            } catch (kelondroException e) {
+                //resetDatabase();
+                return null;
+            }
+        }
+        
+        public void remove() {
+            if (this.nextEntry != null) {
+                try {
+                    Object blogKey = this.nextEntry.key();
+                    if (blogKey != null) delete((String) blogKey);
+                } catch (kelondroException e) {
+                    //resetDatabase();
+                }
+            }
+        }
+    }
+ 
 }

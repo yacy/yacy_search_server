@@ -46,7 +46,6 @@
 // javac -classpath .:../classes Blog.java
 // if the shell's current path is HTROOT
 
-import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -61,7 +60,6 @@ import de.anomic.http.httpc;
 import de.anomic.plasma.plasmaSwitchboard;
 import de.anomic.server.serverObjects;
 import de.anomic.server.serverSwitch;
-import de.anomic.server.logging.serverLog;
 import de.anomic.yacy.yacyCore;
 import de.anomic.yacy.yacyNewsPool;
 import de.anomic.yacy.yacyNewsRecord;
@@ -80,7 +78,7 @@ public class Blog {
     public static serverObjects respond(httpHeader header, serverObjects post, serverSwitch env) {
         final plasmaSwitchboard switchboard = (plasmaSwitchboard) env;
         final serverObjects prop = new serverObjects();
-        blogBoard.entry page = null;
+        blogBoard.BlogEntry page = null;
 
         boolean hasRights = switchboard.verifyAuthentication(header, true);
         
@@ -293,8 +291,8 @@ public class Blog {
             final boolean hasRights,
             final boolean xml) 
     {
-        try {
-            final Iterator<String> i = switchboard.blogDB.keys(false);
+            //final Iterator<String> i = switchboard.blogDB.keys(false);
+            final Iterator<String> i = switchboard.blogDB.getBlogIterator(false);
             String pageid;
             int count = 0;                        //counts how many entries are shown to the user
             if(xml) num = 0;
@@ -331,13 +329,12 @@ public class Blog {
             } else prop.put("mode_preventries", "0");
             
             
-        } catch (IOException e) { serverLog.logSevere("BLOG", "Error reading blog-DB", e); }
         return prop;
     }
 
     private static serverObjects putBlogEntry(
             final serverObjects prop,
-            final blogBoard.entry entry,
+            final blogBoard.BlogEntry entry,
             final String address,
             final int number,
             final boolean hasRights,

@@ -58,7 +58,7 @@ import de.anomic.data.blogBoard;
 import de.anomic.data.blogBoardComments;
 import de.anomic.data.messageBoard;
 import de.anomic.data.userDB;
-import de.anomic.data.blogBoard.entry;
+import de.anomic.data.blogBoard.BlogEntry;
 import de.anomic.http.httpHeader;
 import de.anomic.plasma.plasmaSwitchboard;
 import de.anomic.server.serverFileUtils;
@@ -79,7 +79,7 @@ public class BlogComments {
     public static serverObjects respond(httpHeader header, serverObjects post, serverSwitch env) {
         plasmaSwitchboard switchboard = (plasmaSwitchboard) env;
         serverObjects prop = new serverObjects();
-        blogBoard.entry page = null;
+        blogBoard.BlogEntry page = null;
         boolean hasRights = switchboard.verifyAuthentication(header, true);
 
         if (hasRights) prop.put("mode_admin", "1");
@@ -158,7 +158,7 @@ public class BlogComments {
                     subject = StrSubject.getBytes();
                 }
                 String commentID = String.valueOf(System.currentTimeMillis());
-                entry blogEntry = switchboard.blogDB.read(pagename);
+                BlogEntry blogEntry = switchboard.blogDB.read(pagename);
                 blogEntry.addComment(commentID);
                 switchboard.blogDB.write(blogEntry);
                 switchboard.blogCommentDB.write(switchboard.blogCommentDB.newEntry(commentID, subject, author, ip, date, content));
