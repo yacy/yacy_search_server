@@ -84,7 +84,7 @@ import de.anomic.tools.crypt;
 
 public class yacySeed {
 
-	public static final int maxsize = 4096;
+    public static final int maxsize = 4096;
     /**
      * <b>substance</b> "sI" (send index/words)
      */
@@ -281,9 +281,9 @@ public class yacySeed {
      * that is used instead the address stored in the seed DNA
      */
     public void setAlternativeAddress(String ipport) {
-    	if (ipport == null) return;
-    	int p = ipport.indexOf(':');
-    	if (p < 0) this.alternativeIP = ipport; else this.alternativeIP = ipport.substring(0, p);
+        if (ipport == null) return;
+        int p = ipport.indexOf(':');
+        if (p < 0) this.alternativeIP = ipport; else this.alternativeIP = ipport.substring(0, p);
     }
 
     /**
@@ -298,7 +298,7 @@ public class yacySeed {
     public final String getPeerType() { return get(yacySeed.PEERTYPE, ""); }
     /**
      * try to get the peertype<br>
-     * @return the peertype or "Virgin"
+     * @return the peertype or "virgin"
      */
     public final String orVirgin() { return get(yacySeed.PEERTYPE, yacySeed.PEERTYPE_VIRGIN); }
     /**
@@ -342,14 +342,14 @@ public class yacySeed {
         } else return dflt;
     }
 
-    public final void setIP()                    { dna.put(yacySeed.IP, ""); }
-    public final void setIP(final String ip)     { dna.put(yacySeed.IP, ip); }
-    public final void setPort(final String port) { dna.put(yacySeed.PORT, port); }
-    public final void setJunior()                { dna.put(yacySeed.PEERTYPE, yacySeed.PEERTYPE_JUNIOR); }
-    public final void setSenior()                { dna.put(yacySeed.PEERTYPE, yacySeed.PEERTYPE_SENIOR); }
-    public final void setPrincipal()             { dna.put(yacySeed.PEERTYPE, yacySeed.PEERTYPE_PRINCIPAL); }
-    
-    
+    public final void setIP()              { dna.put(yacySeed.IP, ""); }
+    public final void setIP(String ip)     { dna.put(yacySeed.IP, ip); }
+    public final void setPort(String port) { dna.put(yacySeed.PORT, port); }
+    public final void setType(String type) { dna.put(yacySeed.PEERTYPE, type); }
+    public final void setJunior()          { dna.put(yacySeed.PEERTYPE, yacySeed.PEERTYPE_JUNIOR); }
+    public final void setSenior()          { dna.put(yacySeed.PEERTYPE, yacySeed.PEERTYPE_SENIOR); }
+    public final void setPrincipal()       { dna.put(yacySeed.PEERTYPE, yacySeed.PEERTYPE_PRINCIPAL); }
+
     public final void put(String key, String value) {
         synchronized (this.dna) {
             this.dna.put(key, value);
@@ -643,8 +643,8 @@ public class yacySeed {
     public final void setUnusedFlags() {
         for (int i = 4; i < 24; i++) { setFlag(i, true); }
     }
-    public final boolean isPotential() {
-        return isVirgin() || isJunior();
+    public final boolean isType(String type) {
+        return get(yacySeed.PEERTYPE, "").equals(type);
     }
     public final boolean isVirgin() {
         return get(yacySeed.PEERTYPE, "").equals(yacySeed.PEERTYPE_VIRGIN);
@@ -652,14 +652,17 @@ public class yacySeed {
     public final boolean isJunior() {
         return get(yacySeed.PEERTYPE, "").equals(yacySeed.PEERTYPE_JUNIOR);
     }
-    public final boolean isActive() {
-        return isSenior() || isPrincipal();
-    }
     public final boolean isSenior() {
         return get(yacySeed.PEERTYPE, "").equals(yacySeed.PEERTYPE_SENIOR);
     }
     public final boolean isPrincipal() {
         return get(yacySeed.PEERTYPE, "").equals(yacySeed.PEERTYPE_PRINCIPAL);
+    }
+    public final boolean isPotential() {
+        return isVirgin() || isJunior();
+    }
+    public final boolean isActive() {
+        return isSenior() || isPrincipal();
     }
     public final boolean isOnline() {
         return isSenior() || isPrincipal();
@@ -667,7 +670,7 @@ public class yacySeed {
     public final boolean isOnline(final String type) {
         return type.equals(yacySeed.PEERTYPE_SENIOR) || type.equals(yacySeed.PEERTYPE_PRINCIPAL);
     }
-    
+
     public static final long minDHTNumber   = kelondroBase64Order.enhancedCoder.cardinal(kelondroBase64Order.zero(12));
     public static final long maxDHTDistance = Long.MAX_VALUE;
 

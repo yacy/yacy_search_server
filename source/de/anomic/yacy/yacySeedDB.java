@@ -381,6 +381,40 @@ public final class yacySeedDB {
         }
     }
 
+    public HashMap<String, yacySeed> getOldestSeeds(int count, int minage) {
+        // returns a peerhash/yacySeed relation
+        try {
+            final kelondroMScoreCluster seedScore = new kelondroMScoreCluster();
+            final Iterator<yacySeed> s = seedsConnected(true, false, null, (float) 0.0);
+            yacySeed ys;
+            int age;
+            int searchcount = 1000;
+            while (s.hasNext() && searchcount-- > 0) {
+                ys = s.next();
+                if (ys == null) { continue; }
+                age = (int) Math.abs(System.currentTimeMillis() + serverDate.dayMillis - ys.getLastSeenUTC());
+                if (age < minage) { continue; }
+                seedScore.addScore(ys.hash, age); // the higher age, the older is the peer
+            }
+            if (seedScore.size() == 0) { return null; }
+
+            // result is now in the score object; create a result vector
+            final HashMap<String, yacySeed> result = new HashMap<String, yacySeed>();
+            final Iterator<String> it = seedScore.scores(false);
+            searchcount = Math.min(count, seedScore.size());
+            int c = 0;
+            while (c++ < searchcount && it.hasNext()) {
+                ys = getConnected(it.next());
+                if (ys != null && ys.hash != null) { result.put(ys.hash, ys); }
+            }
+            return result;
+        } catch (kelondroException e) {
+            seedActiveDB = resetSeedTable(seedActiveDB, seedActiveDBFile);
+            yacyCore.log.logFine("Internal Error at yacySeedDB.seedsByAge: " + e.getMessage(), e);
+            return null;
+        }
+    }
+
     public int sizeConnected() {
     return seedActiveDB.size();
         /*
