@@ -78,28 +78,24 @@ public class blogBoard {
     public  static final int keyLength = 64;
     private static final int recordSize = 512;
     
-    kelondroMapObjects datbase = null;
+    kelondroMapObjects database = null;
     
     public blogBoard(File actpath, long preloadTime) {
     		new File(actpath.getParent()).mkdir();
-        if (datbase == null) {
-            datbase = new kelondroMapObjects(new kelondroDyn(actpath, true, true, preloadTime, keyLength, recordSize, '_', kelondroNaturalOrder.naturalOrder, true, false, false), 500);
+        if (database == null) {
+            database = new kelondroMapObjects(new kelondroDyn(actpath, true, true, preloadTime, keyLength, recordSize, '_', kelondroNaturalOrder.naturalOrder, true, false, false), 500);
         }
     }
-    
     public int size() {
-        return datbase.size();
+        return database.size();
     }
-    
     public void close() {
-        datbase.close();
+        database.close();
     }
-
     private static String normalize(String key) {
         if (key == null) return "null";
         return key.trim().toLowerCase();
     }
-
     public static String webalize(String key) {
         if (key == null) return "null";
         key = key.trim().toLowerCase();
@@ -108,11 +104,9 @@ public class blogBoard {
             key = key.substring(0, p) + "%20" + key.substring(p +1);
         return key;
     }
-    
     public String guessAuthor(String ip) {
         return wikiBoard.guessAuthor(ip);
     }
-
     public BlogEntry newEntry(String key, byte[] subject, byte[] author, String ip, Date date, byte[] page, ArrayList<String> comments, String commentMode) {
         return new BlogEntry(normalize(key), subject, author, ip, date, page, comments, commentMode);
     }
@@ -124,152 +118,179 @@ public class blogBoard {
 	
 	    public BlogEntry(String nkey, byte[] subject, byte[] author, String ip, Date date, byte[] page, ArrayList<String> comments, String commentMode) {
 		    record = new HashMap<String, String>();
-		    key = nkey;
-		    if (key.length() > keyLength) key = key.substring(0, keyLength);
-		    if(date == null) date = new Date();
-		    record.put("date", serverDate.formatShortSecond(date));
-		    if (subject == null) record.put("subject","");
-		    else record.put("subject", kelondroBase64Order.enhancedCoder.encode(subject));
-		    if (author == null) record.put("author","");
-		    else record.put("author", kelondroBase64Order.enhancedCoder.encode(author));
-		    if ((ip == null) || (ip.length() == 0)) ip = "";
-		    record.put("ip", ip);
-	        if (page == null) record.put("page", "");
-	        else record.put("page", kelondroBase64Order.enhancedCoder.encode(page));
-	        if (comments == null) record.put("comments", listManager.collection2string(new ArrayList<String>()));
-	        else record.put("comments", listManager.collection2string(comments));
-	        if (commentMode == null) record.put("commentMode", "1");
-	        else record.put("commentMode", commentMode);
+		    setKey(nkey);
+		    setDate(date);
+		    setSubject(subject);
+		    setAuthor(author);
+		    setIp(ip);
+		    setPage(page);
+		    setComments(comments);
+		    setCommentMode(commentMode);
 		    
 	        // TODO: implement this function
 	        record.put("privacy", "public");
 	        
 	        wikiBoard.setAuthor(ip, new String(author));
 		}
-	
 		private BlogEntry(String key, HashMap<String, String> record) {
 		    this.key = key;
 		    this.record = record;
 	        if (this.record.get("comments")==null) this.record.put("comments", listManager.collection2string(new ArrayList<String>()));
 	        if (this.record.get("commentMode")==null || this.record.get("commentMode").equals("")) this.record.put("commentMode", "1");
 		}
-		
-		public String key() {
+		private void setKey(String key) {
+            if (key.length() > keyLength) 
+                this.key = key.substring(0, keyLength);
+            this.key = key;
+		}
+		public String getKey() {
 			return key;
 		}
-	
-		public byte[] subject() {
+		public byte[] getSubject() {
 			String m = record.get("subject");
 		    if (m == null) return new byte[0];
 		    byte[] b = kelondroBase64Order.enhancedCoder.decode(m, "de.anomic.data.blogBoard.subject()");
 		    if (b == null) return "".getBytes();
 		    return b;
 		}
-	
-		public Date date() {
+		private void setSubject(byte[] subject) {
+            if (subject == null) 
+                record.put("subject","");
+            else 
+                record.put("subject", kelondroBase64Order.enhancedCoder.encode(subject));
+		}
+		public Date getDate() {
 		    try {
-			String c = record.get("date");
-			if (c == null) {
-			    serverLog.logFinest("Blog", "ERROR: date field missing in blogBoard");
-	            //System.out.println("DEBUG - ERROR: date field missing in blogBoard");
-	            return new Date();
-	        }
-		        return serverDate.parseShortSecond(c);
+    			String date = record.get("date");
+    			if (date == null) {
+    			    serverLog.logFinest("Blog", "ERROR: date field missing in blogBoard");
+    	            return new Date();
+    	        }
+    		    return serverDate.parseShortSecond(date);
 		    } catch (ParseException e) {
 		        return new Date();
 		    }
 		}
-		
-		public String timestamp() {
-			String c = record.get("date");
-			if (c == null) {
+		private void setDate(Date date) {
+            if(date == null) 
+                date = new Date();
+            record.put("date", serverDate.formatShortSecond(date));
+		}
+		public String getTimestamp() {
+			String timestamp = record.get("date");
+			if (timestamp == null) {
 			    serverLog.logFinest("Blog", "ERROR: date field missing in blogBoard");
-		        //System.out.println("DEBUG - ERROR: date field missing in blogBoard");
 		        return serverDate.formatShortSecond();
 			}
-			return c;
+			return timestamp;
 		}
-		
-	    public byte[] author() {
-	        String m = record.get("author");
-	        if (m == null) return new byte[0];
-	        byte[] b = kelondroBase64Order.enhancedCoder.decode(m, "de.anomic.data.blogBoard.author()");
+	    public byte[] getAuthor() {
+	        String author = record.get("author");
+	        if (author == null) return new byte[0];
+	        byte[] b = kelondroBase64Order.enhancedCoder.decode(author, "de.anomic.data.blogBoard.author()");
 	        if (b == null) return "".getBytes();
 	        return b;
 	    }
-	    
-	    public int commentsSize() {
+	    private void setAuthor(byte[] author) {
+            if (author == null) 
+                record.put("author","");
+            else 
+                record.put("author", kelondroBase64Order.enhancedCoder.encode(author));
+	    }
+	    public int getCommentsSize() {
             // This ist a Bugfix for Version older than 4443.
             if(record.get("comments").startsWith(",")) {
                     record.put("comments", record.get("comments").substring(1));
-                    write(this);
+                    writeBlogEntry(this);
             }
-	        ArrayList<String> m = listManager.string2arraylist(record.get("comments"));
-	        return m.size();
+	        ArrayList<String> commentsize = listManager.string2arraylist(record.get("comments"));
+	        return commentsize.size();
 	    }
-	
-	    public ArrayList<String> comments() {
-	        ArrayList<String> m = listManager.string2arraylist(record.get("comments"));
-	        return m;
+	    public ArrayList<String> getComments() {
+	        ArrayList<String> comments = listManager.string2arraylist(record.get("comments"));
+	        return comments;
 	    }
-	
-		public String ip() {
-		    String a = record.get("ip");
-		    if (a == null) return "127.0.0.1";
-		    return a;
+	    private void setComments(ArrayList<String> comments) {
+            if (comments == null) 
+                record.put("comments", listManager.collection2string(new ArrayList<String>()));
+            else 
+                record.put("comments", listManager.collection2string(comments));
+	    }
+	    public String getIp() {
+		    String ip = record.get("ip");
+		    if (ip == null) return "127.0.0.1";
+		    return ip;
 		}
-	
-		public byte[] page() {
-		    String m = record.get("page");
-		    if (m == null) return new byte[0];
-		    byte[] b = kelondroBase64Order.enhancedCoder.decode(m, "de.anomic.data.blogBoard.page()");
-		    if (b == null) return "".getBytes();
-		    return b;
+		private void setIp(String ip) {
+            if ((ip == null) || (ip.length() == 0)) 
+                ip = "";
+            record.put("ip", ip);
+		}
+		public byte[] getPage() {
+		    String page = record.get("page");
+		    if (page == null) return new byte[0];
+		    byte[] page_as_byte = kelondroBase64Order.enhancedCoder.decode(page, "de.anomic.data.blogBoard.page()");
+		    if (page_as_byte == null) return "".getBytes();
+		    return page_as_byte;
 		}        
-	
-	    public void addComment(String commentID) {
+		private void setPage(byte[] page) {
+            if (page == null) 
+                record.put("page", "");
+            else 
+                record.put("page", kelondroBase64Order.enhancedCoder.encode(page));
+		}
+		public void addComment(String commentID) {
 	        ArrayList<String> comments = listManager.string2arraylist(record.get("comments"));
 	        comments.add(commentID);
 	        record.put("comments", listManager.collection2string(comments));
 	    }
-	    
 	    public boolean removeComment(String commentID) {
 	        ArrayList<String> comments = listManager.string2arraylist(record.get("comments"));
 	        boolean success = comments.remove(commentID);
 	        record.put("comments", listManager.collection2string(comments));
 	        return success;
 	    }
-	    
 	    public int getCommentMode(){
 	        return Integer.parseInt(record.get("commentMode"));
 	    }
+	    private void setCommentMode(String mode) {
+            if (mode == null) 
+                record.put("commentMode", "1");
+            else 
+                record.put("commentMode", mode);
+	    }
 	    public boolean isPublic() {
-	        return true;
+	        String privacy = record.get("privacy");
+	        if (privacy == null)
+	            return true;
+	        if(privacy.equalsIgnoreCase("public"))
+	            return true;
+	        return false;
 	    }
     }
-
-    public String write(BlogEntry page) {
-        // writes a new page and returns key
+    /*
+     * writes a new page and return the key
+     */
+    public String writeBlogEntry(BlogEntry page) {
         try {
-            datbase.set(page.key, page.record);
+            database.set(page.key, page.record);
             return page.key;
         } catch (IOException e) {
             return null;
         }
     }
-
-    public BlogEntry read(String key) {
-        return read(key, datbase);
+    public BlogEntry readBlogEntry(String key) {
+        return readBlogEntry(key, database);
     }
-
-    private BlogEntry read(String key, kelondroMapObjects base) {
+    private BlogEntry readBlogEntry(String key, kelondroMapObjects base) {
     	key = normalize(key);
-        if (key.length() > keyLength) key = key.substring(0, keyLength);
+        if (key.length() > keyLength) 
+            key = key.substring(0, keyLength);
         HashMap<String, String> record = base.getMap(key);
-        if (record == null) return newEntry(key, "".getBytes(), "anonymous".getBytes(), "127.0.0.1", new Date(), "".getBytes(), null, null);
+        if (record == null) 
+            return newEntry(key, "".getBytes(), "anonymous".getBytes(), "127.0.0.1", new Date(), "".getBytes(), null, null);
         return new BlogEntry(key, record);
     }
-    
     public boolean importXML(String input) {
     	DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
     	try {
@@ -282,7 +303,6 @@ public class blogBoard {
 		
     	return false;
     }
-    
     private boolean parseXMLimport(Document doc) {
     	if(!doc.getDocumentElement().getTagName().equals("blog"))
     		return false;
@@ -342,20 +362,18 @@ public class blogBoard {
 				page = StrPage.getBytes();
 			}
 
-		write (newEntry(key, subject, author, ip, date, page, null, null));
+		writeBlogEntry (newEntry(key, subject, author, ip, date, page, null, null));
     	}
     	return true;
     }
-    
-    public void delete(String key) {
+    public void deleteBlogEntry(String key) {
     	key = normalize(key);
     	try {
-			datbase.remove(key);
+			database.remove(key);
 		} catch (IOException e) { }
     }
-    
     public Iterator<String> keys(boolean up) throws IOException {
-        return datbase.keys(up, false);
+        return database.keys(up, false);
     }
     /**
      * Comparator to sort objects of type Blog according to their timestamps
@@ -368,30 +386,32 @@ public class blogBoard {
          * @param newestFirst newest first, or oldest first?
          */
         public BlogComparator(boolean newestFirst){
-            this.newestFirst=newestFirst;
+            this.newestFirst = newestFirst;
         }
         
         public int compare(String obj1, String obj2) {
-            BlogEntry bm1=read(obj1);
-            BlogEntry bm2=read(obj2);
-            if(bm1==null || bm2==null)
-                return 0; //XXX: i think this should not happen? maybe this needs further tracing of the bug
+            BlogEntry blogEntry1=readBlogEntry(obj1);
+            BlogEntry blogEntry2=readBlogEntry(obj2);
+            if(blogEntry1 == null || blogEntry2 == null)
+                return 0;
             if(this.newestFirst){
-                if(Long.valueOf(bm2.timestamp()) - Long.valueOf(bm1.timestamp()) >0) return 1;
+                if(Long.valueOf(blogEntry2.getTimestamp()) - Long.valueOf(blogEntry1.getTimestamp()) >0) 
+                    return 1;
                 return -1;
             }
-            if(Long.valueOf(bm1.timestamp()) - Long.valueOf(bm2.timestamp()) >0) return 1;
+            if(Long.valueOf(blogEntry1.getTimestamp()) - Long.valueOf(blogEntry2.getTimestamp()) >0) 
+                return 1;
             return -1;
         }
     }
     public Iterator<String> getBlogIterator(boolean priv){
-        TreeSet<String> set=new TreeSet<String>(new BlogComparator(false));
-        Iterator<BlogEntry> it=blogIterator(true);
-        BlogEntry bm;
-        while(it.hasNext()){
-            bm=(BlogEntry)it.next();
-            if(priv || bm.isPublic()){
-                set.add(bm.key());
+        TreeSet<String> set = new TreeSet<String>(new BlogComparator(true));
+        Iterator<BlogEntry> iterator = blogIterator(priv);
+        BlogEntry blogEntry;
+        while(iterator.hasNext()){
+            blogEntry=(BlogEntry)iterator.next();
+            if(priv || blogEntry.isPublic()){
+                set.add(blogEntry.getKey());
             }
         }
         return set.iterator();
@@ -411,7 +431,7 @@ public class blogBoard {
         blogBoard.BlogEntry nextEntry;
         public BlogIterator(boolean up) throws IOException {
             //flushBookmarkCache(); //XXX: this will cost performance
-            this.blogIter = blogBoard.this.datbase.keys(up, false);
+            this.blogIter = blogBoard.this.database.keys(up, false);
             this.nextEntry = null;
         }
         
@@ -426,7 +446,7 @@ public class blogBoard {
         
         public BlogEntry next() {
             try {
-                return read((String) this.blogIter.next());
+                return readBlogEntry((String) this.blogIter.next());
             } catch (kelondroException e) {
                 //resetDatabase();
                 return null;
@@ -436,8 +456,8 @@ public class blogBoard {
         public void remove() {
             if (this.nextEntry != null) {
                 try {
-                    Object blogKey = this.nextEntry.key();
-                    if (blogKey != null) delete((String) blogKey);
+                    Object blogKey = this.nextEntry.getKey();
+                    if (blogKey != null) deleteBlogEntry((String) blogKey);
                 } catch (kelondroException e) {
                     //resetDatabase();
                 }

@@ -140,12 +140,12 @@ public class Blog {
         }
 
         if(hasRights && post.containsKey("delete") && post.get("delete").equals("sure")) {
-            page = switchboard.blogDB.read(pagename);
-            final Iterator<String> i = page.comments().iterator();
+            page = switchboard.blogDB.readBlogEntry(pagename);
+            final Iterator<String> i = page.getComments().iterator();
             while(i.hasNext()) {
                 switchboard.blogCommentDB.delete(i.next());
             }
-            switchboard.blogDB.delete(pagename);
+            switchboard.blogDB.deleteBlogEntry(pagename);
             pagename = DEFAULT_PAGE;
         }
 
@@ -169,9 +169,9 @@ public class Blog {
             if(pagename.equals(DEFAULT_PAGE)) {
                 pagename = String.valueOf(System.currentTimeMillis());
             } else {
-                page = switchboard.blogDB.read(pagename);
-                comments = page.comments();
-                date = page.date();
+                page = switchboard.blogDB.readBlogEntry(pagename);
+                comments = page.getComments();
+                date = page.getDate();
             }
             final String commentMode = post.get("commentMode", "1");
             final String StrSubject = post.get("subject", "");
@@ -182,7 +182,7 @@ public class Blog {
                 subject = StrSubject.getBytes();
             }
 
-            switchboard.blogDB.write(switchboard.blogDB.newEntry(pagename, subject, author, ip, date, content, comments, commentMode));
+            switchboard.blogDB.writeBlogEntry(switchboard.blogDB.newEntry(pagename, subject, author, ip, date, content, comments, commentMode));
 
             // create a news message
             final HashMap<String, String> map = new HashMap<String, String>();
@@ -192,7 +192,7 @@ public class Blog {
             yacyCore.newsPool.publishMyNews(yacyNewsRecord.newRecord(yacyNewsPool.CATEGORY_BLOG_ADD, map));
         }
 
-        page = switchboard.blogDB.read(pagename); //maybe "if(page == null)"
+        page = switchboard.blogDB.readBlogEntry(pagename); //maybe "if(page == null)"
 
         if (post.containsKey("edit")) {
             //edit an entry
@@ -200,10 +200,10 @@ public class Blog {
                 try {
                     prop.put("mode", "1"); //edit
                     prop.put("mode_commentMode", page.getCommentMode());
-                    prop.putHTML("mode_author", new String(page.author(),"UTF-8"), xml);
-                    prop.put("mode_pageid", page.key());
-                    prop.putHTML("mode_subject", new String(page.subject(), "UTF-8"), xml);
-                    prop.put("mode_page-code", new String(page.page(), "UTF-8"));
+                    prop.putHTML("mode_author", new String(page.getAuthor(),"UTF-8"), xml);
+                    prop.put("mode_pageid", page.getKey());
+                    prop.putHTML("mode_subject", new String(page.getSubject(), "UTF-8"), xml);
+                    prop.put("mode_page-code", new String(page.getPage(), "UTF-8"));
                 } catch (UnsupportedEncodingException e) {}
             }
             else {
@@ -235,14 +235,14 @@ public class Blog {
                 prop.put("mode", "4");
                 prop.put("mode_pageid", pagename);
                 try {
-                    prop.putHTML("mode_author",new String(page.author(), "UTF-8"), xml);
+                    prop.putHTML("mode_author",new String(page.getAuthor(), "UTF-8"), xml);
                 } catch (UnsupportedEncodingException e) {
-                    prop.putHTML("mode_author",new String(page.author()), xml);
+                    prop.putHTML("mode_author",new String(page.getAuthor()), xml);
                 }
                 try {
-                    prop.putHTML("mode_subject",new String(page.subject(),"UTF-8"), xml);
+                    prop.putHTML("mode_subject",new String(page.getSubject(),"UTF-8"), xml);
                 } catch (UnsupportedEncodingException e) {
-                    prop.putHTML("mode_subject",new String(page.subject()), xml);
+                    prop.putHTML("mode_subject",new String(page.getSubject()), xml);
                 }
             }
             else prop.put("mode", "3"); //access denied (no rights)
@@ -305,7 +305,7 @@ public class Blog {
                 if(0 < start--) continue;
                 putBlogEntry(
                         prop,
-                        switchboard.blogDB.read(pageid),
+                        switchboard.blogDB.readBlogEntry(pageid),
                         address,
                         count++,
                         hasRights,
@@ -342,16 +342,16 @@ public class Blog {
     {
         // subject
         try {
-            prop.putHTML("mode_entries_" + number + "_subject", new String(entry.subject(),"UTF-8"), xml);
+            prop.putHTML("mode_entries_" + number + "_subject", new String(entry.getSubject(),"UTF-8"), xml);
         } catch (UnsupportedEncodingException e) {
-            prop.putHTML("mode_entries_" + number + "_subject", new String(entry.subject()), xml);
+            prop.putHTML("mode_entries_" + number + "_subject", new String(entry.getSubject()), xml);
         }
 
         // author
         try {
-            prop.putHTML("mode_entries_" + number + "_author", new String(entry.author(),"UTF-8"), xml);
+            prop.putHTML("mode_entries_" + number + "_author", new String(entry.getAuthor(),"UTF-8"), xml);
         } catch (UnsupportedEncodingException e) {
-            prop.putHTML("mode_entries_" + number + "_author", new String(entry.author()), xml);
+            prop.putHTML("mode_entries_" + number + "_author", new String(entry.getAuthor()), xml);
         }
 
         // comments
@@ -359,27 +359,27 @@ public class Blog {
             prop.put("mode_entries_" + number + "_commentsactive", "0");
         } else {
             prop.put("mode_entries_" + number + "_commentsactive", "1");
-            prop.put("mode_entries_" + number + "_commentsactive_pageid", entry.key());
+            prop.put("mode_entries_" + number + "_commentsactive_pageid", entry.getKey());
             prop.put("mode_entries_" + number + "_commentsactive_address", address);
-            prop.put("mode_entries_" + number + "_commentsactive_comments", entry.commentsSize());
+            prop.put("mode_entries_" + number + "_commentsactive_comments", entry.getCommentsSize());
         }
 
-        prop.put("mode_entries_" + number + "_date", dateString(entry.date()));
-        prop.put("mode_entries_" + number + "_rfc822date", httpc.dateString(entry.date()));
-        prop.put("mode_entries_" + number + "_pageid", entry.key());
+        prop.put("mode_entries_" + number + "_date", dateString(entry.getDate()));
+        prop.put("mode_entries_" + number + "_rfc822date", httpc.dateString(entry.getDate()));
+        prop.put("mode_entries_" + number + "_pageid", entry.getKey());
         prop.put("mode_entries_" + number + "_address", address);
-        prop.put("mode_entries_" + number + "_ip", entry.ip());
+        prop.put("mode_entries_" + number + "_ip", entry.getIp());
 
         if(xml) {
-            prop.put("mode_entries_" + number + "_page", entry.page());
-            prop.put("mode_entries_" + number + "_timestamp", entry.timestamp());
+            prop.put("mode_entries_" + number + "_page", entry.getPage());
+            prop.put("mode_entries_" + number + "_timestamp", entry.getTimestamp());
         } else {
-            prop.putWiki("mode_entries_" + number + "_page", entry.page());
+            prop.putWiki("mode_entries_" + number + "_page", entry.getPage());
         }
 
         if(hasRights) {
             prop.put("mode_entries_" + number + "_admin", "1");
-            prop.put("mode_entries_" + number + "_admin_pageid",entry.key());
+            prop.put("mode_entries_" + number + "_admin_pageid",entry.getKey());
         } else {
             prop.put("mode_entries_" + number + "_admin", "0");
         }

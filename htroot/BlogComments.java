@@ -126,7 +126,7 @@ public class BlogComments {
             author = StrAuthor.getBytes();
         }
 
-        page = switchboard.blogDB.read(pagename); //maybe "if(page == null)"
+        page = switchboard.blogDB.readBlogEntry(pagename); //maybe "if(page == null)"
         
         // comments not allowed
         if (page.getCommentMode() == 0) {
@@ -158,9 +158,9 @@ public class BlogComments {
                     subject = StrSubject.getBytes();
                 }
                 String commentID = String.valueOf(System.currentTimeMillis());
-                BlogEntry blogEntry = switchboard.blogDB.read(pagename);
+                BlogEntry blogEntry = switchboard.blogDB.readBlogEntry(pagename);
                 blogEntry.addComment(commentID);
-                switchboard.blogDB.write(blogEntry);
+                switchboard.blogDB.writeBlogEntry(blogEntry);
                 switchboard.blogCommentDB.write(switchboard.blogCommentDB.newEntry(commentID, subject, author, ip, date, content));
                 prop.put("LOCATION","BlogComments.html?page=" + pagename);
 
@@ -171,14 +171,14 @@ public class BlogComments {
                             StrAuthor,
                             yacyCore.seedDB.mySeed().hash,
                             yacyCore.seedDB.mySeed().getName(), yacyCore.seedDB.mySeed().hash,
-                            "new blog comment: " + new String(blogEntry.subject(),"UTF-8"), content));
+                            "new blog comment: " + new String(blogEntry.getSubject(),"UTF-8"), content));
                 } catch (UnsupportedEncodingException e1) {
                     switchboard.messageDB.write(msgEntry = switchboard.messageDB.newEntry(
                             "blogComment",
                             StrAuthor,
                             yacyCore.seedDB.mySeed().hash,
                             yacyCore.seedDB.mySeed().getName(), yacyCore.seedDB.mySeed().hash,
-                            "new blog comment: " + new String(blogEntry.subject()), content));
+                            "new blog comment: " + new String(blogEntry.getSubject()), content));
                 }
 
                 messageForwardingViaEmail(env, msgEntry);
@@ -232,30 +232,30 @@ public class BlogComments {
             }
             else {
                 //show 1 blog entry
-                prop.put("mode_pageid", page.key());
+                prop.put("mode_pageid", page.getKey());
                 prop.put("mode_allow_pageid", pagename);
                 try {
-                    prop.putHTML("mode_subject", new String(page.subject(),"UTF-8"));
+                    prop.putHTML("mode_subject", new String(page.getSubject(),"UTF-8"));
                 } catch (UnsupportedEncodingException e) {
-                    prop.putHTML("mode_subject", new String(page.subject()));
+                    prop.putHTML("mode_subject", new String(page.getSubject()));
                 }
                 try {
-                    prop.putHTML("mode_author", new String(page.author(),"UTF-8"));
+                    prop.putHTML("mode_author", new String(page.getAuthor(),"UTF-8"));
                     prop.putHTML("mode_allow_author", new String(author, "UTF-8"));
                 } catch (UnsupportedEncodingException e) {
-                    prop.putHTML("mode_author", new String(page.author()));
+                    prop.putHTML("mode_author", new String(page.getAuthor()));
                     prop.putHTML("mode_allow_author", new String(author));
                 }
-                prop.put("mode_comments", page.commentsSize());
-                prop.put("mode_date", dateString(page.date()));
-                prop.putWiki("mode_page", page.page());
+                prop.put("mode_comments", page.getCommentsSize());
+                prop.put("mode_date", dateString(page.getDate()));
+                prop.putWiki("mode_page", page.getPage());
                 if(hasRights) {
                     prop.put("mode_admin", "1");
-                    prop.put("mode_admin_pageid", page.key());
+                    prop.put("mode_admin_pageid", page.getKey());
                 }
                 //show all commments
                 try {
-                    Iterator<String> i = page.comments().iterator();
+                    Iterator<String> i = page.getComments().iterator();
                     int commentMode = page.getCommentMode();
                     String pageid;
                     blogBoardComments.CommentEntry entry;
@@ -303,11 +303,11 @@ public class BlogComments {
                         prop.put("mode_entries_"+count+"_ip", entry.ip());
                         if(hasRights) {
                             prop.put("mode_entries_"+count+"_admin", "1");
-                            prop.put("mode_entries_"+count+"_admin_pageid", page.key());
+                            prop.put("mode_entries_"+count+"_admin_pageid", page.getKey());
                             prop.put("mode_entries_"+count+"_admin_commentid", pageid);
                             if(!entry.isAllowed()) {
                                 prop.put("mode_entries_"+count+"_admin_moderate", "1");
-                                prop.put("mode_entries_"+count+"_admin_moderate_pageid", page.key());
+                                prop.put("mode_entries_"+count+"_admin_moderate_pageid", page.getKey());
                                 prop.put("mode_entries_"+count+"_admin_moderate_commentid", pageid);
 
                             }
@@ -320,7 +320,7 @@ public class BlogComments {
                         prop.put("mode_moreentries", "1"); //more entries are availible
                         prop.put("mode_moreentries_start", nextstart);
                         prop.put("mode_moreentries_num", num);
-                        prop.put("mode_moreentries_pageid", page.key());
+                        prop.put("mode_moreentries_pageid", page.getKey());
                     }
                     else prop.put("mode_moreentries", "0");
                     if(prev) {
@@ -328,7 +328,7 @@ public class BlogComments {
                         if (prevstart < 0) prevstart = 0;
                         prop.put("mode_preventries_start", prevstart);
                         prop.put("mode_preventries_num", num);
-                        prop.put("mode_preventries_pageid", page.key());
+                        prop.put("mode_preventries_pageid", page.getKey());
                     } else prop.put("mode_preventries", "0");
                 } catch (IOException e) {
 
