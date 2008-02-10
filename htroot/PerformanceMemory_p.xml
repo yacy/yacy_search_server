@@ -27,7 +27,7 @@
 	#{EcoList}#
 		<entry>
 			<tableIndexPath>#[tableIndexPath]#</tableIndexPath>
-            <tableCount>#[tableCount]#</tableCount>
+            <tableSize>#[tableSize]#</tableSize>
 			<tableKeyChunkSize>#[tableKeyChunkSize]#</tableKeyChunkSize>
 			<tableKeyMem>#[tableKeyMem]#</tableKeyMem>
             <tableValueChunkSize>#[tableValueChunkSize]#</tableValueChunkSize>
