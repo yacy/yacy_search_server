@@ -83,7 +83,7 @@ public class yacyCore {
     public static final ThreadGroup publishThreadGroup = new ThreadGroup("publishThreadGroup");
     public static yacySeedDB seedDB;
     public static yacyNewsPool newsPool;
-    public static final HashMap seedUploadMethods = new HashMap();
+    public static final HashMap<String, String> seedUploadMethods = new HashMap<String, String>();
     public static yacyPeerActions peerActions;
     public static yacyDHTAction dhtAgent;
     public static serverLog log;
@@ -91,7 +91,7 @@ public class yacyCore {
     /** pseudo-random key derived from a time-interval while YaCy startup. */
     public static long speedKey;
     public static File yacyDBPath;
-    public static final Map amIAccessibleDB = Collections.synchronizedMap(new HashMap()); // Holds PeerHash / yacyAccessible Relations
+    public static final Map<String, yacyAccessible> amIAccessibleDB = Collections.synchronizedMap(new HashMap<String, yacyAccessible>()); // Holds PeerHash / yacyAccessible Relations
     // constants for PeerPing behaviour
     private static final int PING_INITIAL = 64;
     private static final int PING_MIN_LASTSEEN = 240000; // in milliseconds
@@ -484,7 +484,7 @@ public class yacyCore {
                 dbSize = amIAccessibleDB.size();
                 final Iterator<String> ai = amIAccessibleDB.keySet().iterator();
                 while (ai.hasNext()) {
-                    final yacyAccessible ya = (yacyAccessible) amIAccessibleDB.get(ai.next());
+                    final yacyAccessible ya = amIAccessibleDB.get(ai.next());
                     if (ya.lastUpdated < cutofftime) {
                         ai.remove();
                     } else {
