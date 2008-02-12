@@ -107,6 +107,18 @@ public class blogBoard {
     public String guessAuthor(String ip) {
         return wikiBoard.guessAuthor(ip);
     }
+    /**
+     * Create a new BlogEntry an return it
+     * @param key
+     * @param subject
+     * @param author
+     * @param ip
+     * @param date
+     * @param page the content of the Blogentry
+     * @param comments
+     * @param commentMode possible params are: 0 - no comments allowed, 1 - comments allowed, 2 - comments moderated
+     * @return BlogEntry
+     */
     public BlogEntry newEntry(String key, byte[] subject, byte[] author, String ip, Date date, byte[] page, ArrayList<String> comments, String commentMode) {
         return new BlogEntry(normalize(key), subject, author, ip, date, page, comments, commentMode);
     }
