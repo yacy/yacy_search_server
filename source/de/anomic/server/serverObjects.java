@@ -275,6 +275,16 @@ public class serverObjects extends HashMap<String, String> implements Cloneable 
         }
     }
 
+    public double getDouble(String key, double dflt) {
+        String s = (String) super.get(key);
+        if (s == null) return dflt;
+        try {
+            return Double.parseDouble(s);
+        } catch (NumberFormatException e) {
+            return dflt;
+        }
+    }
+
     // returns a set of all values where their key mappes the keyMapper
     public String[] getAll(String keyMapper) {
         // the keyMapper may contain regular expressions as defined in String.matches
