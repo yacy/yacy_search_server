@@ -155,7 +155,8 @@ public class plasmaCrawlBalancer {
     }
     
     public synchronized plasmaCrawlEntry get(String urlhash) throws IOException {
-       kelondroRow.Entry entry = urlFileIndex.get(urlhash.getBytes());
+        assert urlhash != null;
+        kelondroRow.Entry entry = urlFileIndex.get(urlhash.getBytes());
        if (entry == null) return null;
        return new plasmaCrawlEntry(entry);
     }

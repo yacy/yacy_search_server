@@ -31,7 +31,6 @@ import java.net.InetAddress;
 import java.net.UnknownHostException;
 import java.text.SimpleDateFormat;
 import java.util.Arrays;
-import java.util.Comparator;
 import java.util.Date;
 import java.util.Iterator;
 
@@ -53,6 +52,7 @@ import de.anomic.server.serverMemory;
 import de.anomic.server.serverObjects;
 import de.anomic.server.serverSwitch;
 import de.anomic.server.logging.serverLog;
+import de.anomic.server.serverFileUtils.dirlistComparator;
 import de.anomic.tools.md5DirFileFilter;
 import de.anomic.yacy.yacyCore;
 import de.anomic.yacy.yacySeed;
@@ -146,23 +146,20 @@ public class dir {
             switchboard.setConfig("uploadAccountBase64MD5", (post.get("password", "").length() == 0) ? "" : serverCodings.encodeMD5Hex(kelondroBase64Order.standardCoder.encodeString("upload:" + post.get("password", ""))));
         } else if (action.equals("upload") && (uploadAuthorization || adminAuthorization)) {
             String filename = new File(post.get("file", "dummy")).getName();
-            String description = post.get("description", "");
             pos = filename.lastIndexOf("\\");
             if (pos >= 0) { filename = filename.substring(pos + 1); }
             final File newfile    = new File(dir, filename);
-            final File newfilemd5 = new File(dir, filename + ".md5");
             final byte[] binary = (byte[]) post.get("file$file", new byte[0]);
             try {
                 serverFileUtils.write(binary, newfile);
                 byte[] md5 = serverCodings.encodeMD5Raw(newfile);
                 String md5s = serverCodings.encodeHex(md5);
-                serverFileUtils.write((md5s + "\n" + description).getBytes("UTF-8"), newfilemd5); // generate md5
-
+                
                 // index file info
                 if (post.get("indexing", "").equals("on")) {
                     final String urlstring = yacyhURL(yacyCore.seedDB.mySeed(), filename, md5s);
                     final String phrase = filename.replace('.', ' ').replace('_', ' ').replace('-', ' ');
-                    indexPhrase(switchboard, urlstring, phrase, description, md5);
+                    indexPhrase(switchboard, urlstring, phrase, "", md5);
                 }
             } catch (IOException e) {}
         } else if (action.equals("newdir") && (uploadAuthorization || adminAuthorization)) {
@@ -175,18 +172,6 @@ public class dir {
             String filename = post.get("file", "foo");
             final File file = new File(dir, filename);
             if (file.exists()) {
-                final File filemd5 = new File(dir, post.get("file", "foo") + ".md5");
-                // read md5 and phrase
-                String md5s = "";
-                String description = "";
-                if (filemd5.exists()) try {
-                    md5s = new String(serverFileUtils.read(filemd5));
-                    pos = md5s.indexOf('\n');
-                    if (pos >= 0) {
-                        description = md5s.substring(pos + 1);
-                        md5s = md5s.substring(0, pos);
-                    }
-                } catch (IOException e) {}
                 // delete file(s)
                 if (file.isDirectory()) {
                     final String[] content = file.list();
@@ -194,12 +179,11 @@ public class dir {
                     file.delete();
                 } else if (file.isFile()) {
                     file.delete();
-                    if (filemd5.exists()) filemd5.delete();
                 }
                 // delete index
-                final String urlstring = yacyhURL(yacyCore.seedDB.mySeed(), filename, md5s);
+                final String urlstring = yacyhURL(yacyCore.seedDB.mySeed(), filename, "");
                 final String phrase = filename.replace('.', ' ').replace('_', ' ').replace('-', ' ');
-                deletePhrase(switchboard, urlstring, phrase, description);
+                deletePhrase(switchboard, urlstring, phrase, "");
             }
         }
 
@@ -207,13 +191,13 @@ public class dir {
         if ((adminAuthorization) || (uploadAuthorization) || (downloadAuthorization)) {
             // generate dir listing
             md5DirFileFilter fileFilter = new md5DirFileFilter();
-            final File[] list = dir.listFiles(fileFilter);
+            File[] list = dir.listFiles(fileFilter);
+            if (list == null) list = new File[0];
             
             // sorting the dir list
             dirlistComparator comparator = new dirlistComparator();
             Arrays.sort(list, comparator);
             
-            String md5s, description;
             // tree += "<span class=\"tt\">path&nbsp;=&nbsp;" + path + "</span><br><br>";
             if (list != null) {
                 int filecount = 0, fileIdx = 0;
@@ -231,31 +215,6 @@ public class dir {
                     dark = !dark;                        
 
 
-                    // reading the content of the md5 file that belongs
-                    // to the file
-                    File fmd5 = new File(dir, fileName + ".md5");
-                    try {
-                        if (fmd5.exists()) {
-                            md5s = new String(serverFileUtils.read(fmd5));
-                            pos = md5s.indexOf('\n');
-                            if (pos >= 0) {
-                                // the second line contains an optional description
-                                description = md5s.substring(pos + 1);
-                                // the first line contains the md5 sum of the file
-                                md5s = md5s.substring(0, pos);
-                            } else {
-                                description = "";
-                            }                
-                        } else {
-                            // generate md5 on-the-fly
-                            md5s = serverCodings.encodeMD5Hex(f);
-                            description = "";
-                            serverFileUtils.write((md5s + "\n" + description).getBytes("UTF-8"), fmd5);
-                        }
-                    } catch (IOException e) {
-                        md5s = "";
-                        description = "";
-                    }
 
                     // last modification date if the entry
                     prop.put("dirlist_" + fileIdx + "_dir_date" , dateString(new Date(f.lastModified())));
@@ -273,6 +232,8 @@ public class dir {
                         boolean showImage = /* (description.length() == 0) && */ (fileName.endsWith(".jpg") || fileName.endsWith(".gif") || fileName.endsWith(".png") || fileName.endsWith(".ico") || fileName.endsWith(".bmp"));
 
                         // the entry is a file
+                        String md5s = serverCodings.encodeMD5Hex(f);
+                        
                         prop.put("dirlist_" + fileIdx + "_dir" , "0");
                         // the file size
                         prop.put("dirlist_" + fileIdx + "_dir_size" , serverMemory.bytesToString(f.length()));
@@ -288,7 +249,7 @@ public class dir {
                             prop.putHTML("dirlist_" + fileIdx + "_dir_descriptionMode_image",fileName);
                         }
                         // always set the description tag (needed by rss and xml)
-                        prop.putHTML("dirlist_" + fileIdx + "_dir_descriptionMode_text",description);                                                   
+                        prop.putHTML("dirlist_" + fileIdx + "_dir_descriptionMode_text", "");                                                   
                     }
 
                     prop.put("dirlist_" + fileIdx + "_adminAuthorization",adminAuthorization ? "1" : "0");
@@ -389,17 +350,4 @@ public class dir {
         }
     }
 
-    public static class dirlistComparator implements Comparator<File> {
-        
-        public int compare(File file1, File file2) {
-            if (file1.isDirectory() && !file2.isDirectory()) {
-                return -1;
-            } else if (!file1.isDirectory() && file2.isDirectory()) {
-                return 1;
-            } else {
-                return file1.getName().compareToIgnoreCase(file2.getName());
-            }
-         }
-        
-     }
 }

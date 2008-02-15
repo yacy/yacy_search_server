@@ -7,7 +7,6 @@
 		<date timestamp="#[timestamp]#">#[date]#</date>
 		<size bytes="#[sizeBytes]#">#[size]#</size>
 		<md5>#[md5s]#</md5>
-		<comment>#(descriptionMode)##[text]#::#[text]##(/descriptionMode)#</comment>
 		<yacyURL>#[yacyhURL]#</yacyURL>
 	</file>
 	::

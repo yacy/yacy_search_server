@@ -28,6 +28,7 @@ package de.anomic.ymage;
 
 import java.awt.image.BufferedImage;
 import java.io.ByteArrayInputStream;
+import java.io.EOFException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.MalformedURLException;
@@ -83,6 +84,8 @@ public class ymageOSM {
         }
         try {
             return ImageIO.read(tileStream);
+        } catch (EOFException e) {
+            return null;
         } catch (IOException e) {
             return null;
         }

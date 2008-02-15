@@ -14,7 +14,6 @@
 		<link>#(dir)##[URL]#::#[URL]##(/dir)#</link>
 		<pubDate>#(dir)##[rfc822date]#::#[rfc822date]##(/dir)#</pubDate>
 		#(dir)#<guid>#[md5s]#</guid>::#(/dir)#
-		#(dir)#<description><![CDATA[#(descriptionMode)##[text]#::#[text]##(/descriptionMode)#]]></description>::#(/dir)#
 		<category><![CDATA[#(dir)#File::Directory#(/dir)#]]></category>
 	</item>#{/dirlist}#
 </channel>

@@ -138,6 +138,7 @@ public final class serverCodings {
 	    System.out.println("Internal Error at md5:" + e.getMessage());
 	} catch (java.io.FileNotFoundException e) {
 	    System.out.println("file not found:" + file.toString());
+	    e.printStackTrace();
 	} catch (java.io.IOException e) {
 	    System.out.println("file error with " + file.toString() + ": " + e.getMessage());
 	}

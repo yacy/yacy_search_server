@@ -54,6 +54,7 @@ import java.io.OutputStream;
 import java.io.PrintWriter;
 import java.io.Reader;
 import java.io.Writer;
+import java.util.Comparator;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Map;
@@ -483,6 +484,20 @@ public final class serverFileUtils {
         String[] list = from_dir.list();
         for (int i = 0; i < list.length; i++) (new File(from_dir, list[i])).renameTo(new File(to_dir, list[i]));
     }
+    
+
+    public static class dirlistComparator implements Comparator<File> {
+        
+        public int compare(File file1, File file2) {
+            if (file1.isDirectory() && !file2.isDirectory()) {
+                return -1;
+            } else if (!file1.isDirectory() && file2.isDirectory()) {
+                return 1;
+            } else {
+                return file1.getName().compareToIgnoreCase(file2.getName());
+            }
+        }
+    }    
 
     public static void main(String[] args) {
         try {
