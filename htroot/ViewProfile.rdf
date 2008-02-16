@@ -1,0 +1,18 @@
+<rdf:RDF xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#" xmlns:foaf="http://xmlns.com/foaf/0.1/">
+#(success)#::::::
+<foaf:Person rdf:nodeID="#[peerhash]#" #(nickname)#::rdf:about="#[value]#"#(/nickname)# xmlns:foaf="http://xmlns.com/foaf/0.1/">
+  #(name)#::<foaf:name>#[value]#</foaf:name>#(/name)#
+  #(email)#::<foaf:mbox rdf:resource="#[value]#"/>#(/email)#
+  #(homepage)#::<foaf:homepage rdf:resource="#[value]#" />#(/homepage)#
+  #(icq)#::
+  <foaf:holdsAccount>
+    <foaf:OnlineAccount>
+      <rdf:type rdf:resource="http://xmlns.com/foaf/0.1/OnlineChatAccount"/>
+      <foaf:accountServiceHomepage rdf:resource="http://www.freenode.net/irc_servers.shtml"/>
+      <foaf:accountName>#[value]#</foaf:accountName>
+    </foaf:OnlineAccount>
+  </foaf:holdsAccount>
+  #(/icq)#
+</foaf:Person>
+#(/success)#
+</rdf:RDF>
