@@ -291,7 +291,6 @@ public class Blog {
             final boolean hasRights,
             final boolean xml) 
     {
-            //final Iterator<String> i = switchboard.blogDB.keys(false);
             final Iterator<String> i = switchboard.blogDB.getBlogIterator(false);
             String pageid;
             int count = 0;                        //counts how many entries are shown to the user

@@ -9,7 +9,7 @@
     #(mode)#
       <!-- 0: viewing -->
       <div class="Post">
-        <h2 class="PostSubject"><a href="Blog.html?page=#[pageid]#">#[subject]#</a></h2>
+        <h2 class="PostSubject"><a href="BlogComments.html?page=#[pageid]#">#[subject]#</a></h2>
         <div class="PostBody">#[page]#</div>
         <p class="PostInfo">
           #[date]# | by #[author]# | <a href="BlogComments.html?page=#[pageid]#">#[comments]# Comments</a>
@@ -49,16 +49,17 @@
         <p>Comments are not allowed for this posting!</p>
         </fieldset>
       ::
+        <h2>Comment on this Blog</h2>
         <form action="BlogComments.html" method="post" enctype="multipart/form-data" accept-charset="UTF-8">
           <fieldset>
             <dl>
               <dt><label for="author">Author:</label></dt>
               <dd>
-                <input name="author" id="author" type="text" size="20" maxlength="80" value="#[author]#" />
+                <input name="author" id="author" type="text" size="80" maxlength="80" value="#[author]#" />
               </dd>
               <dt><label for="subject">Subject:</label></dt>
               <dd>
-                <input name="subject" id="subject" type="text" size="20" maxlength="80" value="" />
+                <input name="subject" id="subject" type="text" size="80" maxlength="80" value="" />
               </dd>
               <dt><label for="content">Text:</label></dt>
               <dd>
@@ -92,22 +93,22 @@
           <dl>
             <dt><label for="author">Author:</label></dt>
             <dd>
-              <input name="author" id="author" type="text" size="20" maxlength="80" value="#[author]#" />
+              <input name="author" id="author" type="text" size="80" maxlength="80" value="#[author]#" />
             </dd>
             <dt><label for="subject">Subject:</label></dt>
             <dd>
-              <input name="subject" id="subject" type="text" size="20" maxlength="80" value="#[subject]#" />
+              <input name="subject" id="subject" type="text" size="80" maxlength="80" value="#[subject]#" />
             </dd>
             <dt><label for="content">Text:</label></dt>
             <dd>
-              <textarea name="content" id="conten	t" cols="80" rows="12">#[page-code]#</textarea>
+              <textarea name="content" id="content" cols="80" rows="12">#[page-code]#</textarea>
               <p class="help">
                 You can use <a href="WikiHelp.html" onclick="window.open('WikiHelp.html','WikiHelp','toolbar=0,scrollbars=1,location=0,statusbar=0,menubar=0,resizable=1,width=640,height=480');return false;">Yacy-Wiki Code</a> here.
               </p>
             </dd>
           </dl>
           <input type="hidden" name="page" value="#[pageid]#" />
-          <input type="text" name="page" value="#[pageid]#" />
+          <!-- <input type="text" name="page" value="#[pageid]#" /> -->
           <input type="submit" name="submit" value="Submit" />
           <input type="submit" name="preview" value="Preview" />
           <input type="submit" name="view" value="Discard" />

@@ -123,163 +123,6 @@ public class blogBoard {
         return new BlogEntry(normalize(key), subject, author, ip, date, page, comments, commentMode);
     }
 
-    public class BlogEntry {
-	
-		String key;
-	    HashMap<String, String> record;
-	
-	    public BlogEntry(String nkey, byte[] subject, byte[] author, String ip, Date date, byte[] page, ArrayList<String> comments, String commentMode) {
-		    record = new HashMap<String, String>();
-		    setKey(nkey);
-		    setDate(date);
-		    setSubject(subject);
-		    setAuthor(author);
-		    setIp(ip);
-		    setPage(page);
-		    setComments(comments);
-		    setCommentMode(commentMode);
-		    
-	        // TODO: implement this function
-	        record.put("privacy", "public");
-	        
-	        wikiBoard.setAuthor(ip, new String(author));
-		}
-		private BlogEntry(String key, HashMap<String, String> record) {
-		    this.key = key;
-		    this.record = record;
-	        if (this.record.get("comments")==null) this.record.put("comments", listManager.collection2string(new ArrayList<String>()));
-	        if (this.record.get("commentMode")==null || this.record.get("commentMode").equals("")) this.record.put("commentMode", "1");
-		}
-		private void setKey(String key) {
-            if (key.length() > keyLength) 
-                this.key = key.substring(0, keyLength);
-            this.key = key;
-		}
-		public String getKey() {
-			return key;
-		}
-		public byte[] getSubject() {
-			String m = record.get("subject");
-		    if (m == null) return new byte[0];
-		    byte[] b = kelondroBase64Order.enhancedCoder.decode(m, "de.anomic.data.blogBoard.subject()");
-		    if (b == null) return "".getBytes();
-		    return b;
-		}
-		private void setSubject(byte[] subject) {
-            if (subject == null) 
-                record.put("subject","");
-            else 
-                record.put("subject", kelondroBase64Order.enhancedCoder.encode(subject));
-		}
-		public Date getDate() {
-		    try {
-    			String date = record.get("date");
-    			if (date == null) {
-    			    serverLog.logFinest("Blog", "ERROR: date field missing in blogBoard");
-    	            return new Date();
-    	        }
-    		    return serverDate.parseShortSecond(date);
-		    } catch (ParseException e) {
-		        return new Date();
-		    }
-		}
-		private void setDate(Date date) {
-            if(date == null) 
-                date = new Date();
-            record.put("date", serverDate.formatShortSecond(date));
-		}
-		public String getTimestamp() {
-			String timestamp = record.get("date");
-			if (timestamp == null) {
-			    serverLog.logFinest("Blog", "ERROR: date field missing in blogBoard");
-		        return serverDate.formatShortSecond();
-			}
-			return timestamp;
-		}
-	    public byte[] getAuthor() {
-	        String author = record.get("author");
-	        if (author == null) return new byte[0];
-	        byte[] b = kelondroBase64Order.enhancedCoder.decode(author, "de.anomic.data.blogBoard.author()");
-	        if (b == null) return "".getBytes();
-	        return b;
-	    }
-	    private void setAuthor(byte[] author) {
-            if (author == null) 
-                record.put("author","");
-            else 
-                record.put("author", kelondroBase64Order.enhancedCoder.encode(author));
-	    }
-	    public int getCommentsSize() {
-            // This ist a Bugfix for Version older than 4443.
-            if(record.get("comments").startsWith(",")) {
-                    record.put("comments", record.get("comments").substring(1));
-                    writeBlogEntry(this);
-            }
-	        ArrayList<String> commentsize = listManager.string2arraylist(record.get("comments"));
-	        return commentsize.size();
-	    }
-	    public ArrayList<String> getComments() {
-	        ArrayList<String> comments = listManager.string2arraylist(record.get("comments"));
-	        return comments;
-	    }
-	    private void setComments(ArrayList<String> comments) {
-            if (comments == null) 
-                record.put("comments", listManager.collection2string(new ArrayList<String>()));
-            else 
-                record.put("comments", listManager.collection2string(comments));
-	    }
-	    public String getIp() {
-		    String ip = record.get("ip");
-		    if (ip == null) return "127.0.0.1";
-		    return ip;
-		}
-		private void setIp(String ip) {
-            if ((ip == null) || (ip.length() == 0)) 
-                ip = "";
-            record.put("ip", ip);
-		}
-		public byte[] getPage() {
-		    String page = record.get("page");
-		    if (page == null) return new byte[0];
-		    byte[] page_as_byte = kelondroBase64Order.enhancedCoder.decode(page, "de.anomic.data.blogBoard.page()");
-		    if (page_as_byte == null) return "".getBytes();
-		    return page_as_byte;
-		}        
-		private void setPage(byte[] page) {
-            if (page == null) 
-                record.put("page", "");
-            else 
-                record.put("page", kelondroBase64Order.enhancedCoder.encode(page));
-		}
-		public void addComment(String commentID) {
-	        ArrayList<String> comments = listManager.string2arraylist(record.get("comments"));
-	        comments.add(commentID);
-	        record.put("comments", listManager.collection2string(comments));
-	    }
-	    public boolean removeComment(String commentID) {
-	        ArrayList<String> comments = listManager.string2arraylist(record.get("comments"));
-	        boolean success = comments.remove(commentID);
-	        record.put("comments", listManager.collection2string(comments));
-	        return success;
-	    }
-	    public int getCommentMode(){
-	        return Integer.parseInt(record.get("commentMode"));
-	    }
-	    private void setCommentMode(String mode) {
-            if (mode == null) 
-                record.put("commentMode", "1");
-            else 
-                record.put("commentMode", mode);
-	    }
-	    public boolean isPublic() {
-	        String privacy = record.get("privacy");
-	        if (privacy == null)
-	            return true;
-	        if(privacy.equalsIgnoreCase("public"))
-	            return true;
-	        return false;
-	    }
-    }
     /*
      * writes a new page and return the key
      */
@@ -477,4 +320,168 @@ public class blogBoard {
         }
     }
  
+    public class BlogEntry {
+        
+        String key;
+        HashMap<String, String> record;
+    
+        public BlogEntry(String nkey, byte[] subject, byte[] author, String ip, Date date, byte[] page, ArrayList<String> comments, String commentMode) {
+            record = new HashMap<String, String>();
+            setKey(nkey);
+            setDate(date);
+            setSubject(subject);
+            setAuthor(author);
+            setIp(ip);
+            setPage(page);
+            setComments(comments);
+            setCommentMode(commentMode);
+            
+            // TODO: implement this function
+            record.put("privacy", "public");
+            
+            wikiBoard.setAuthor(ip, new String(author));
+        }
+        private BlogEntry(String key, HashMap<String, String> record) {
+            this.key = key;
+            this.record = record;
+            if (this.record.get("comments")==null) this.record.put("comments", listManager.collection2string(new ArrayList<String>()));
+            if (this.record.get("commentMode")==null || this.record.get("commentMode").equals("")) this.record.put("commentMode", "1");
+        }
+        private void setKey(String key) {
+            if (key.length() > keyLength) 
+                this.key = key.substring(0, keyLength);
+            this.key = key;
+        }
+        public String getKey() {
+            return key;
+        }
+        public byte[] getSubject() {
+            String m = record.get("subject");
+            if (m == null) return new byte[0];
+            byte[] b = kelondroBase64Order.enhancedCoder.decode(m, "de.anomic.data.blogBoard.subject()");
+            if (b == null) return "".getBytes();
+            return b;
+        }
+        private void setSubject(byte[] subject) {
+            if (subject == null) 
+                record.put("subject","");
+            else 
+                record.put("subject", kelondroBase64Order.enhancedCoder.encode(subject));
+        }
+        public Date getDate() {
+            try {
+                String date = record.get("date");
+                if (date == null) {
+                    serverLog.logFinest("Blog", "ERROR: date field missing in blogBoard");
+                    return new Date();
+                }
+                return serverDate.parseShortSecond(date);
+            } catch (ParseException e) {
+                return new Date();
+            }
+        }
+        private void setDate(Date date) {
+            if(date == null) 
+                date = new Date();
+            record.put("date", serverDate.formatShortSecond(date));
+        }
+        public String getTimestamp() {
+            String timestamp = record.get("date");
+            if (timestamp == null) {
+                serverLog.logFinest("Blog", "ERROR: date field missing in blogBoard");
+                return serverDate.formatShortSecond();
+            }
+            return timestamp;
+        }
+        public byte[] getAuthor() {
+            String author = record.get("author");
+            if (author == null) return new byte[0];
+            byte[] b = kelondroBase64Order.enhancedCoder.decode(author, "de.anomic.data.blogBoard.author()");
+            if (b == null) return "".getBytes();
+            return b;
+        }
+        private void setAuthor(byte[] author) {
+            if (author == null) 
+                record.put("author","");
+            else 
+                record.put("author", kelondroBase64Order.enhancedCoder.encode(author));
+        }
+        public int getCommentsSize() {
+            // This ist a Bugfix for Version older than 4443.
+            if(record.get("comments").startsWith(",")) {
+                    record.put("comments", record.get("comments").substring(1));
+                    writeBlogEntry(this);
+            }
+            ArrayList<String> commentsize = listManager.string2arraylist(record.get("comments"));
+            return commentsize.size();
+        }
+        public ArrayList<String> getComments() {
+            ArrayList<String> comments = listManager.string2arraylist(record.get("comments"));
+            return comments;
+        }
+        private void setComments(ArrayList<String> comments) {
+            if (comments == null) 
+                record.put("comments", listManager.collection2string(new ArrayList<String>()));
+            else 
+                record.put("comments", listManager.collection2string(comments));
+        }
+        public String getIp() {
+            String ip = record.get("ip");
+            if (ip == null) return "127.0.0.1";
+            return ip;
+        }
+        private void setIp(String ip) {
+            if ((ip == null) || (ip.length() == 0)) 
+                ip = "";
+            record.put("ip", ip);
+        }
+        public byte[] getPage() {
+            String page = record.get("page");
+            if (page == null) return new byte[0];
+            byte[] page_as_byte = kelondroBase64Order.enhancedCoder.decode(page, "de.anomic.data.blogBoard.page()");
+            if (page_as_byte == null) return "".getBytes();
+            return page_as_byte;
+        }        
+        private void setPage(byte[] page) {
+            if (page == null) 
+                record.put("page", "");
+            else 
+                record.put("page", kelondroBase64Order.enhancedCoder.encode(page));
+        }
+        public void addComment(String commentID) {
+            ArrayList<String> comments = listManager.string2arraylist(record.get("comments"));
+            comments.add(commentID);
+            record.put("comments", listManager.collection2string(comments));
+        }
+        public boolean removeComment(String commentID) {
+            ArrayList<String> comments = listManager.string2arraylist(record.get("comments"));
+            boolean success = comments.remove(commentID);
+            record.put("comments", listManager.collection2string(comments));
+            return success;
+        }
+        /**
+         * returns the comment mode
+         * 0 - no comments allowed
+         * 1 - comments allowed
+         * 2 - comments moderated
+         * @return comment mode
+         */
+        public int getCommentMode(){
+            return Integer.parseInt(record.get("commentMode"));
+        }
+        private void setCommentMode(String mode) {
+            if (mode == null) 
+                record.put("commentMode", "1");
+            else 
+                record.put("commentMode", mode);
+        }
+        public boolean isPublic() {
+            String privacy = record.get("privacy");
+            if (privacy == null)
+                return true;
+            if(privacy.equalsIgnoreCase("public"))
+                return true;
+            return false;
+        }
+    }
 }
