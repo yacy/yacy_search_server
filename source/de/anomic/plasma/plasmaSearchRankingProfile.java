@@ -105,7 +105,7 @@ public class plasmaSearchRankingProfile {
         coeff_phrasesintext      = 3;
         coeff_llocal             = 2;
         coeff_lother             = 3;
-        coeff_urllength          = 12;
+        coeff_urllength          = 13;
         coeff_urlcomps           = 12;
         coeff_hitcount           = 9;
         coeff_posintext          = 10;
@@ -113,11 +113,11 @@ public class plasmaSearchRankingProfile {
         coeff_posinphrase        = 1;
         coeff_authority          = 11;
         coeff_worddistance       = 12;
-        coeff_appurl             = 13;
-        coeff_app_dc_title       = 13;
+        coeff_appurl             = 14;
+        coeff_app_dc_title       = 14;
         coeff_app_dc_creator     = 12;
-        coeff_app_dc_subject     = 9;
-        coeff_app_dc_description = 8;
+        coeff_app_dc_subject     = 13;
+        coeff_app_dc_description = 13;
         coeff_appemph            = 10;
         coeff_catindexof         = (mediatype == plasmaSearchQuery.CONTENTDOM_TEXT) ? 0 : 15;
         coeff_cathasimage        = (mediatype == plasmaSearchQuery.CONTENTDOM_IMAGE) ? 15 : 0;
