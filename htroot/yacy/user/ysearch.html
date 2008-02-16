@@ -1,0 +1,148 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<!--
+Design by Free CSS Templates
+http://www.freecsstemplates.org
+Released for free under a Creative Commons Attribution 2.5 License
+-->
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="content-type" content="text/html; charset=utf-8" />
+<title>YaCy '#[clientname]#': Search Page</title>
+  <meta name="keywords" content="" />
+  <meta name="description" content="" />
+  <link href="default.css" rel="stylesheet" type="text/css" />
+  <link rel="alternate" type="application/rss+xml" title="Search for #[input_former]#" href="yacysearch.rss?search=#[input_former]#" />
+  <script type="text/javascript" src="/js/ajax.js"></script>
+  <script type="text/javascript" src="/js/xml.js"></script>
+  <script type="text/javascript" src="/js/yacysearch.js"></script>
+</head>
+<body>
+<div id="header">
+  <div id="topmenu">
+    <ul>
+      <li><a href="http://yacy.net" id="topmenuhome" accesskey="1" title="">YaCy Home</a></li>
+      <li><a href="../../Status.html" id="topmenutree" accesskey="2" title="">Peer Administration</a></li>
+      <li><a href="../../ViewProfile.html?hash=localhash" id="topmenucontact" accesskey="3" title="">Contact</a></li>
+    </ul>
+  </div>
+  <div id="logo">
+    <h1><a href="#">#[promoteSearchPageGreeting]#</a></h1>
+    <h2><a href="http://yacy.net">A Peer-to-Peer Search Network</a></h2>
+  </div>
+</div>
+<div id="menu">
+  <ul>
+    <li class="first"><a href="/yacy/user/ysearch.html" title="">Search</a></li>
+    <li><a href="../../WatchCrawler_p.html" title="">Status</a></li>
+    <li><a href="#" title="">About</a></li>
+  </ul>
+</div>
+
+<div id="content">
+  <div id="main">
+    <div id="welcome">
+      <h2>Welcome to YaCy P2P Web Search!</h2>
+
+      #(input)#
+		::
+	    <form class="search small" action="ysearch.html" method="get" accept-charset="UTF-8">
+	      <fieldset class="yacys">
+	        <input id="searchtext" name="search" type="text" size="50" maxlength="80" value="#[former]#" onclick="document.getElementById('Enter').value = 'Search'" />
+	        <input id="searchbutton" id="Enter" type="submit" name="Enter" value="Search" />
+	        <input type="hidden" name="contentdom" value="#[contentdom]#" />
+	        <input type="hidden" name="former" value="#[former]#" />
+	        <input type="hidden" name="count" value="#[count]#" />
+	        <input type="hidden" name="offset" value="#[offset]#" />
+	        <input type="hidden" name="resource" value="#[resource]#" />
+	        <input type="hidden" name="urlmaskfilter" value="#[urlmaskfilter]#" />
+	        <input type="hidden" name="prefermaskfilter" value="#[prefermaskfilter]#" />
+	        <input type="hidden" name="depth" value="#[depth]#" />
+	        <input type="hidden" name="cat" value="#[cat]#" />
+	        <input type="hidden" name="type" value="#[type]#" />
+	        <input type="hidden" name="display" value="#[display]#" />
+	        <input type="hidden" name="input" value="#[input]#" />
+	        <input type="hidden" name="constraint" value="#[constraint]#" />
+	      </fieldset>
+	    </form>
+	    ::
+	    <form class="search small" action="ysearch.html" method="get" accept-charset="UTF-8">
+	      <fieldset class="yacys">
+	              <input id="searchtext" name="search" type="text" size="50" maxlength="80" value="#[former]#" onclick="document.getElementById('Enter').value = 'Search'" />
+	              <input  id="searchbutton" type="submit" name="Enter" value="Search" /> &nbsp;
+	              <a href="index.html?display=#[display]#&amp;input=#[input]#&amp;searchoptions=1&amp;count=#[count]#&amp;resource=#[resource]#&amp;time=#[time]#&amp;urlmaskfilter=#[urlmaskfilter]#&amp;prefermaskfilter=#[prefermaskfilter]#&amp;cat=#[cat]#&amp;constraint=#[constraint]#&amp;contentdom=#[contentdom]#&amp;former=#[former]#">more options</a>
+	          <div class="ysearch">
+	              <input type="radio" id="text" name="contentdom" value="text"#(contentdomCheckText)#:: checked="checked"#(/contentdomCheckText)# />
+	              <label for="text">Text</label>&nbsp;&nbsp;
+	              <input type="radio" id="images" name="contentdom" value="image"#(contentdomCheckImage)#:: checked="checked"#(/contentdomCheckImage)# />
+	              <label for="images">Images</label>&nbsp;&nbsp;
+	              <input type="radio" id="audio" name="contentdom" value="audio"#(contentdomCheckAudio)#:: checked="checked"#(/contentdomCheckAudio)# />
+	              <label for="audio">Audio</label>&nbsp;&nbsp;
+	              <input type="radio" id="video" name="contentdom" value="video"#(contentdomCheckVideo)#:: checked="checked"#(/contentdomCheckVideo)# />
+	              <label for="video">Video</label>&nbsp;&nbsp;
+	              <input type="radio" id="appl" name="contentdom" value="app"#(contentdomCheckApp)#:: checked="checked"#(/contentdomCheckApp)# />
+	              <label for="appl">Applications</label>
+	           </div>
+	        <input type="hidden" name="former" value="#[former]#" />
+	        <input type="hidden" name="count" value="#[count]#" />
+	        <input type="hidden" name="offset" value="#[offset]#" />
+	        <input type="hidden" name="resource" value="#[resource]#" />
+	        <input type="hidden" name="time" value="#[time]#" />
+	        <input type="hidden" name="urlmaskfilter" value="#[urlmaskfilter]#" />
+	        <input type="hidden" name="prefermaskfilter" value="#[prefermaskfilter]#" />
+	        <input type="hidden" name="depth" value="#[depth]#" />
+	        <input type="hidden" name="cat" value="#[cat]#" />
+	        <input type="hidden" name="display" value="#[display]#" />
+	        <input type="hidden" name="input" value="#[input]#" />
+	        <input type="hidden" name="constraint" value="#[constraint]#" />
+	      </fieldset>
+	    </form>
+	  #(/input)#
+    </div>
+
+#(searchagain)#
+::
+<script type="text/javascript">
+document.getElementById("Enter").value = "search again - catch up more links";
+</script>
+#(/searchagain)#
+
+<!-- show information about search key handling -->
+#(excluded)#
+	::
+	<p><strong>The following words are stop-words and had been excluded from the search: #[stopwords]#.</strong></p>
+#(/excluded)#
+
+<!-- type the number of results -->
+#(num-results)#
+	::
+	<p>No Results.</p>
+	::
+	<p>No Results. (length of search words must be at least 3 characters)</p>
+	::
+	<div id="results"></div>
+	<span id="resCounter" style="display: inline;">Results <strong id="resultsOffset">#[offset]#</strong>-<strong id="itemscount">#[itemscount]#</strong> from <strong id="totalcount">#[totalcount]#</strong> total#(globalresults)#.:: (<strong id="localResourceSize">#[localResourceSize]#</strong> local, <strong id="remoteResourceSize">#[remoteResourceSize]#</strong> remote), <strong id="remoteIndexCount">#[remoteIndexCount]#</strong> links from <strong id="remotePeerCount">#[remotePeerCount]#</strong> other YaCy peers.#(/globalresults)#</span>
+	<span id="resNav" style="display: inline;">#[resnav]#</span>
+	::
+	<p>Searching the web with this peer is disabled for unauthorized users. Please <a href="Status.html?login=">log in</a> as administrator to use the search function</p>
+#(/num-results)#
+
+<!-- the search results -->
+<script type="text/javascript">
+var progressbar = new Progressbar(#[results]#, document.getElementById("results"));
+</script>
+
+<!-- linklist begin -->
+#(resultTable)#::<table width="100%"><tr class="TableHeader"><td width="30%">Media</td><td width="70%">URL</tr>#(/resultTable)#
+#{results}#
+<!--#include virtual="/yacy/user/ysearchitem.html?rss=false&item=#[item]#&eventID=#[eventID]#" -->
+#{/results}#
+#(resultTable)#::</table>#(/resultTable)#
+
+  </div>
+</div>
+
+<div id="footer">
+  <p id="legal">Search results are produced by a peer-to-peer network, owned by private persons. No search central has control over the network.</p>
+</div>
+</body>
+</html>

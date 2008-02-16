@@ -1,10 +1,11 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <classpath>
 	<classpathentry kind="src" path="source"/>
-	<classpathentry excluding="env/|htdocsdefault/|proxymsg/|yacy/|env/" kind="src" output="htroot" path="htroot"/>
+	<classpathentry excluding="env/|htdocsdefault/|proxymsg/|yacy/|env/|yacy/user/" kind="src" output="htroot" path="htroot"/>
 	<classpathentry kind="src" path="htroot/htdocsdefault"/>
-	<classpathentry kind="src" path="htroot/yacy"/>
+	<classpathentry excluding="user/" kind="src" path="htroot/yacy"/>
 	<classpathentry kind="src" path="htroot/env"/>
+	<classpathentry kind="src" path="htroot/yacy/user"/>
 	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER"/>
 	<classpathentry kind="lib" path="lib/tar.jar"/>
 	<classpathentry kind="lib" path="libx/axis-ant.jar"/>
