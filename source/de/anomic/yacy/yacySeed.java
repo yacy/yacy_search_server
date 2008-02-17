@@ -818,7 +818,11 @@ public class yacySeed {
 
     public final String genSeedStr(String key) {
         // use a default encoding
-        return this.genSeedStr('z', key);
+        String z = this.genSeedStr('z', key);
+        String b = this.genSeedStr('b', key);
+        // the compressed string may be longer that the uncompressed if there is too much overhead for compression meta-info
+        // take simply that string that is shorter
+        if (b.length() < z.length()) return b; else return z;
     }
 
     public final synchronized String genSeedStr(char method, String key) {
