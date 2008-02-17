@@ -27,10 +27,8 @@
 import java.util.ArrayList;
 import java.util.ConcurrentModificationException;
 import java.util.Date;
-import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
-import java.util.Set;
 import java.util.TreeMap;
 import java.util.TreeSet;
 import java.util.Map.Entry;
@@ -55,7 +53,6 @@ public class AccessTracker_p {
 		return accessClone;
 	}
 	
-    @SuppressWarnings("unchecked")
     public static serverObjects respond(httpHeader header, serverObjects post, serverSwitch sb) {
         plasmaSwitchboard switchboard = (plasmaSwitchboard) sb;
      
@@ -128,9 +125,8 @@ public class AccessTracker_p {
             prop.put("page_num", entCount);
         }
         if ((page == 2) || (page == 4)) {
-            ArrayList<HashMap<String, Object>> array = (page == 2) ? switchboard.localSearches : switchboard.remoteSearches;
-            Long trackerHandle;
-            HashMap<String, Object> searchProfile;
+            ArrayList<plasmaSearchQuery> array = (page == 2) ? switchboard.localSearches : switchboard.remoteSearches;
+            plasmaSearchQuery searchProfile;
             int m = Math.min(maxCount, array.size());
             long qcountSum = 0;
             long rcountSum = 0;
@@ -140,44 +136,43 @@ public class AccessTracker_p {
             
             for (int entCount = 0; entCount < m; entCount++) {
                 searchProfile = array.get(array.size() - entCount - 1);
-                trackerHandle = (Long) searchProfile.get("time");
             
                 // put values in template
                 prop.put("page_list_" + entCount + "_dark", ((dark) ? 1 : 0) );
                 dark =! dark;
-                prop.putHTML("page_list_" + entCount + "_host", (String) searchProfile.get("host"));
-                prop.put("page_list_" + entCount + "_date", serverDate.formatShortSecond(new Date(trackerHandle.longValue())));
-                prop.put("page_list_" + entCount + "_timestamp", trackerHandle.longValue());
+                prop.putHTML("page_list_" + entCount + "_host", searchProfile.host);
+                prop.put("page_list_" + entCount + "_date", serverDate.formatShortSecond(new Date(searchProfile.handle.longValue())));
+                prop.put("page_list_" + entCount + "_timestamp", searchProfile.handle.longValue());
                 if (page == 2) {
                     // local search
-                    prop.putNum("page_list_" + entCount + "_offset", ((Integer) searchProfile.get("offset")).longValue());
-                    prop.put("page_list_" + entCount + "_querystring", (String) searchProfile.get("querystring"));
+                    prop.putNum("page_list_" + entCount + "_offset", searchProfile.offset);
+                    prop.put("page_list_" + entCount + "_querystring", searchProfile.queryString);
                 } else {
                     // remote search
-                    prop.putHTML("page_list_" + entCount + "_peername", (String) searchProfile.get("peername"));
-                    prop.put("page_list_" + entCount + "_queryhashes", plasmaSearchQuery.anonymizedQueryHashes((Set<String>) searchProfile.get("queryhashes")));
+                    prop.putHTML("page_list_" + entCount + "_peername", (searchProfile.remotepeer == null) ? "<unknown>" : searchProfile.remotepeer.getName());
+                    prop.put("page_list_" + entCount + "_queryhashes", plasmaSearchQuery.anonymizedQueryHashes(searchProfile.queryHashes));
                 }
-                prop.putNum("page_list_" + entCount + "_querycount", ((Integer) searchProfile.get("querycount")).longValue());
-                prop.putNum("page_list_" + entCount + "_resultcount", ((Integer) searchProfile.get("resultcount")).longValue());
-                prop.putNum("page_list_" + entCount + "_urltime", ((Long) searchProfile.get("resulturltime")).longValue());
-                prop.putNum("page_list_" + entCount + "_snippettime", ((Long) searchProfile.get("resultsnippettime")).longValue());
-                prop.putNum("page_list_" + entCount + "_resulttime", ((Long) searchProfile.get("resulttime")).longValue());
-                qcountSum += ((Integer) searchProfile.get("querycount")).intValue();
-                rcountSum += ((Integer) searchProfile.get("resultcount")).intValue();
-                utimeSum += ((Long) searchProfile.get("resulturltime")).longValue();
-                stimeSum += ((Long) searchProfile.get("resultsnippettime")).longValue();
-                rtimeSum += ((Long) searchProfile.get("resulttime")).longValue();
+                prop.putNum("page_list_" + entCount + "_querycount", searchProfile.linesPerPage);
+                prop.putNum("page_list_" + entCount + "_resultcount", searchProfile.resultcount);
+                prop.putNum("page_list_" + entCount + "_urltime", searchProfile.urlretrievaltime);
+                prop.putNum("page_list_" + entCount + "_snippettime", searchProfile.snippetcomputationtime);
+                prop.putNum("page_list_" + entCount + "_resulttime", searchProfile.searchtime);
+                qcountSum += searchProfile.linesPerPage;
+                rcountSum += searchProfile.resultcount;
+                utimeSum += searchProfile.urlretrievaltime;
+                stimeSum += searchProfile.snippetcomputationtime;
+                rtimeSum += searchProfile.searchtime;
             }
             prop.put("page_list", m);
             prop.put("page_num", m);
             
             // Put -1 instead of NaN as result for empty search list
             if (m == 0) m = -1;
-            prop.putNum("page_querycount_avg", (double)qcountSum/m);
-            prop.putNum("page_resultcount_avg", (double)rcountSum/m);
-            prop.putNum("page_urltime_avg", (double)utimeSum/m);
-            prop.putNum("page_snippettime_avg", (double)stimeSum/m);
-            prop.putNum("page_resulttime_avg", (double)rtimeSum/m);
+            prop.putNum("page_querycount_avg", (double) qcountSum / m);
+            prop.putNum("page_resultcount_avg", (double) rcountSum / m);
+            prop.putNum("page_urltime_avg", (double) utimeSum / m);
+            prop.putNum("page_snippettime_avg", (double) stimeSum / m);
+            prop.putNum("page_resulttime_avg", (double) rtimeSum / m);
             prop.putNum("page_total", (page == 2) ? switchboard.localSearches.size() : switchboard.remoteSearches.size());
         }
         if ((page == 3) || (page == 5)) {

@@ -42,7 +42,6 @@
 
 package de.anomic.plasma;
 
-import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Set;
 import java.util.TreeSet;
@@ -53,6 +52,7 @@ import de.anomic.kelondro.kelondroBitfield;
 import de.anomic.kelondro.kelondroMSetTools;
 import de.anomic.kelondro.kelondroNaturalOrder;
 import de.anomic.server.serverCharBuffer;
+import de.anomic.yacy.yacySeed;
 import de.anomic.yacy.yacySeedDB;
 
 public final class plasmaSearchQuery {
@@ -75,7 +75,7 @@ public final class plasmaSearchQuery {
     
     public String queryString;
     public TreeSet<String> queryHashes, excludeHashes;
-    private int linesPerPage, offset;
+    public int linesPerPage, offset;
     public String prefer;
     public int contentdom;
     public String urlMask;
@@ -87,6 +87,12 @@ public final class plasmaSearchQuery {
     public boolean allofconstraint;
     public boolean onlineSnippetFetch;
     public plasmaSearchRankingProfile ranking;
+    public String host;
+    public yacySeed remotepeer;
+    public Long handle;
+    // values that are set after a search:
+    public int resultcount; // number of found results
+    public long searchtime, urlretrievaltime, snippetcomputationtime; // time to perform the search, to get all the urls, and to compute the snippets
 
     public plasmaSearchQuery(String queryString,
     						 int lines,
@@ -116,16 +122,20 @@ public final class plasmaSearchQuery {
         this.constraint = constraint;
         this.allofconstraint = false;
         this.onlineSnippetFetch = false;
+        this.host = null;
+        this.remotepeer = null;
+        this.handle = new Long(System.currentTimeMillis());
     }
     
-public plasmaSearchQuery(
+    public plasmaSearchQuery(
 		String queryString, TreeSet<String> queryHashes, TreeSet<String> excludeHashes, 
         plasmaSearchRankingProfile ranking,
         int maxDistance, String prefer, int contentdom,
         boolean onlineSnippetFetch,
         int lines, int offset, String urlMask,
         int domType, String domGroupName, int domMaxTargets,
-        kelondroBitfield constraint, boolean allofconstraint) {
+        kelondroBitfield constraint, boolean allofconstraint,
+        String host) {
 		this.queryString = queryString;
 		this.queryHashes = queryHashes;
 		this.excludeHashes = excludeHashes;
@@ -143,6 +153,9 @@ public plasmaSearchQuery(
 		this.constraint = constraint;
 		this.allofconstraint = allofconstraint;
 		this.onlineSnippetFetch = onlineSnippetFetch;
+		this.host = host;
+        this.remotepeer = null;
+		this.handle = new Long(System.currentTimeMillis());
     }
     
     public int neededResults() {
@@ -280,17 +293,4 @@ public plasmaSearchQuery(
         }
     }
     
-    public HashMap<String, Object> resultProfile(int searchcount, long searchtime, long urlretrieval, long snippetcomputation) {
-        // generate statistics about search: query, time, etc
-        HashMap<String, Object> r = new HashMap<String, Object>();
-        r.put("queryhashes", queryHashes);
-        r.put("querystring", queryString);
-        r.put("querycount", new Integer(linesPerPage));
-        //r.put("querytime", new Long(maximumTime));
-        r.put("resultcount", new Integer(searchcount));
-        r.put("resulttime", new Long(searchtime));
-        r.put("resulturltime", new Long(urlretrieval));
-        r.put("resultsnippettime", new Long(snippetcomputation));
-        return r;
-    }
 }

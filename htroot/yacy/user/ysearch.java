@@ -237,6 +237,7 @@ public class ysearch {
             final boolean globalsearch = (global) && (yacyonline) && (sb.getConfigBool(plasmaSwitchboard.INDEX_RECEIVE_ALLOW, false));
         
             // do the search
+            String client = (String) header.get(httpHeader.CONNECTION_PROP_CLIENTIP); // the search client who initiated the search
             TreeSet<String> queryHashes = plasmaCondenser.words2hashes(query[0]);
             plasmaSearchQuery theQuery = new plasmaSearchQuery(
         			querystring,
@@ -255,10 +256,10 @@ public class ysearch {
                     "",
                     20,
                     constraint,
-                    true);
+                    true,
+                    client);
 
-            String client = (String) header.get(httpHeader.CONNECTION_PROP_CLIENTIP); // the search client who initiated the search
-        
+            
             // tell all threads to do nothing for a specific time
             sb.intermissionAllThreads(10000);
         
@@ -289,18 +290,16 @@ public class ysearch {
                     ((System.currentTimeMillis() - timestamp) / 1000) + " seconds");
 
             // prepare search statistics
-            Long trackerHandle = new Long(System.currentTimeMillis());
-            HashMap<String, Object> searchProfile = theQuery.resultProfile(theSearch.getRankingResult().getLocalResourceSize() + theSearch.getRankingResult().getRemoteResourceSize(), System.currentTimeMillis() - timestamp, theSearch.getURLRetrievalTime(), theSearch.getSnippetComputationTime());
-            searchProfile.put("querystring", theQuery.queryString);
-            searchProfile.put("time", trackerHandle);
-            searchProfile.put("host", client);
-            searchProfile.put("offset", new Integer(0));
-            sb.localSearches.add(searchProfile);
+            theQuery.resultcount = theSearch.getRankingResult().getLocalResourceSize() + theSearch.getRankingResult().getRemoteResourceSize();
+            theQuery.searchtime = System.currentTimeMillis() - timestamp;
+            theQuery.urlretrievaltime = theSearch.getURLRetrievalTime();
+            theQuery.snippetcomputationtime = theSearch.getSnippetComputationTime();
+            sb.localSearches.add(theQuery);
             TreeSet<Long> handles = sb.localSearchTracker.get(client);
             if (handles == null) handles = new TreeSet<Long>();
-            handles.add(trackerHandle);
+            handles.add(theQuery.handle);
             sb.localSearchTracker.put(client, handles);
-        
+            
             prop = new serverObjects();
             int totalcount = theSearch.getRankingResult().getLocalResourceSize() + theSearch.getRankingResult().getRemoteResourceSize();
             prop.put("num-results_offset", offset);

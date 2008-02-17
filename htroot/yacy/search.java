@@ -29,7 +29,6 @@
 // if the shell's current path is htroot/yacy
 
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
 import java.util.Set;
@@ -68,7 +67,8 @@ public final class search {
         if (post == null || env == null || !yacyNetwork.authentifyRequest(post, env)) {
             return prop;
         }
-
+        String client = (String) header.get(httpHeader.CONNECTION_PROP_CLIENTIP);
+        
         // test:
         // http://localhost:8080/yacy/search.html?query=4galTpdpDM5Q (search for linux)
         // http://localhost:8080/yacy/search.html?query=gh8DKIhGKXws (search for book)
@@ -149,10 +149,10 @@ public final class search {
         int joincount = 0;
         plasmaSearchQuery theQuery = null;
         ArrayList<ResultEntry> accu = null;
-        long urlRetrievalAllTime = 0, snippetComputationAllTime = 0;
+        plasmaSearchEvent theSearch = null;
         if ((query.length() == 0) && (abstractSet != null)) {
             // this is _not_ a normal search, only a request for index abstracts
-            theQuery = new plasmaSearchQuery(null, abstractSet, new TreeSet<String>(kelondroBase64Order.enhancedComparator), rankingProfile, maxdist, prefer, plasmaSearchQuery.contentdomParser(contentdom), false, count, 0, filter, plasmaSearchQuery.SEARCHDOM_LOCAL, null, -1, null, false);
+            theQuery = new plasmaSearchQuery(null, abstractSet, new TreeSet<String>(kelondroBase64Order.enhancedComparator), rankingProfile, maxdist, prefer, plasmaSearchQuery.contentdomParser(contentdom), false, count, 0, filter, plasmaSearchQuery.SEARCHDOM_LOCAL, null, -1, null, false, client);
             theQuery.domType = plasmaSearchQuery.SEARCHDOM_LOCAL;
             yacyCore.log.logInfo("INIT HASH SEARCH (abstracts only): " + plasmaSearchQuery.anonymizedQueryHashes(theQuery.queryHashes) + " - " + theQuery.displayResults() + " links");
 
@@ -177,14 +177,12 @@ public final class search {
 
         } else {
             // retrieve index containers from search request
-            theQuery = new plasmaSearchQuery(null, queryhashes, excludehashes, rankingProfile, maxdist, prefer, plasmaSearchQuery.contentdomParser(contentdom), false, count, 0, filter, plasmaSearchQuery.SEARCHDOM_LOCAL, null, -1, constraint, false);
+            theQuery = new plasmaSearchQuery(null, queryhashes, excludehashes, rankingProfile, maxdist, prefer, plasmaSearchQuery.contentdomParser(contentdom), false, count, 0, filter, plasmaSearchQuery.SEARCHDOM_LOCAL, null, -1, constraint, false, client);
             theQuery.domType = plasmaSearchQuery.SEARCHDOM_LOCAL;
             yacyCore.log.logInfo("INIT HASH SEARCH (query-" + abstracts + "): " + plasmaSearchQuery.anonymizedQueryHashes(theQuery.queryHashes) + " - " + theQuery.displayResults() + " links");
 
             // make event
-            plasmaSearchEvent theSearch = plasmaSearchEvent.getEvent(theQuery, rankingProfile, sb.wordIndex, null, true);
-            urlRetrievalAllTime = theSearch.getURLRetrievalTime();
-            snippetComputationAllTime = theSearch.getSnippetComputationTime();
+            theSearch = plasmaSearchEvent.getEvent(theQuery, rankingProfile, sb.wordIndex, null, true); 
 
             // set statistic details of search result and find best result index set
             if (theSearch.getRankingResult().getLocalResourceSize() == 0) {
@@ -279,17 +277,15 @@ public final class search {
         prop.put("fwrec", ""); // peers that would have helped to construct this result (recommendations)
 
         // prepare search statistics
-        Long trackerHandle = new Long(System.currentTimeMillis());
-        HashMap<String, Object> searchProfile = theQuery.resultProfile(joincount, System.currentTimeMillis() - timestamp, urlRetrievalAllTime, snippetComputationAllTime);
-        String client = (String) header.get(httpHeader.CONNECTION_PROP_CLIENTIP);
-        searchProfile.put("host", client);
-        yacySeed remotepeer = yacyCore.seedDB.lookupByIP(natLib.getInetAddress(client), true, false, false);
-        searchProfile.put("peername", (remotepeer == null) ? "unknown" : remotepeer.getName());
-        searchProfile.put("time", trackerHandle);
-        sb.remoteSearches.add(searchProfile);
+        theQuery.remotepeer = yacyCore.seedDB.lookupByIP(natLib.getInetAddress(client), true, false, false);
+        theQuery.resultcount = (theSearch == null) ? 0 : theSearch.getRankingResult().getLocalResourceSize() + theSearch.getRankingResult().getRemoteResourceSize();
+        theQuery.searchtime = System.currentTimeMillis() - timestamp;
+        theQuery.urlretrievaltime = (theSearch == null) ? 0 : theSearch.getURLRetrievalTime();
+        theQuery.snippetcomputationtime = (theSearch == null) ? 0 : theSearch.getSnippetComputationTime();
+        sb.remoteSearches.add(theQuery);
         TreeSet<Long> handles = sb.remoteSearchTracker.get(client);
         if (handles == null) handles = new TreeSet<Long>();
-        handles.add(trackerHandle);
+        handles.add(theQuery.handle);
         sb.remoteSearchTracker.put(client, handles);
 
         // log
