@@ -261,7 +261,7 @@ public class blogBoard {
     }
     public Iterator<String> getBlogIterator(boolean priv){
         TreeSet<String> set = new TreeSet<String>(new BlogComparator(true));
-        Iterator<BlogEntry> iterator = blogIterator(priv);
+        Iterator<BlogEntry> iterator = blogIterator(true);
         BlogEntry blogEntry;
         while(iterator.hasNext()){
             blogEntry=(BlogEntry)iterator.next();
@@ -285,7 +285,6 @@ public class blogBoard {
         Iterator<String> blogIter;
         blogBoard.BlogEntry nextEntry;
         public BlogIterator(boolean up) throws IOException {
-            //flushBookmarkCache(); //XXX: this will cost performance
             this.blogIter = blogBoard.this.database.keys(up, false);
             this.nextEntry = null;
         }
