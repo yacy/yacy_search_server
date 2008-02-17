@@ -10,7 +10,7 @@
     <h2>Index Administration</h2>
     <p>The local index currently contains #[wcount]# reverse word indexes</p>
     <form action="IndexControlRWIs_p.html" method="post" enctype="multipart/form-data">
-    <fieldset><legend>RWI Retrieval</legend>
+    <fieldset><legend>RWI Retrieval (= search for a single word)</legend>
       <dl>
         <dt class="TableCellDark">Retrieve by Word:</dt>
         <dd><input type="text" name="keystring" value="#[keystring]#" size="40" maxlength="80" />
@@ -101,6 +101,22 @@
         <dd><input type="submit" name="urllist" value="List Selected URLs" />
         </dd>
       </dl>
+    </fieldset>
+    <fieldset><legend>Word Deletion</legend>
+        <dl>
+          <dt><input type="checkbox" id="delurl" name="delurl" value="" align="top" checked /></dt>
+          <dd>delete also the referenced URL (recommended, may produce unresolved references
+              at other word indexes but they do not harm)
+          </dd>
+          <dt><input type="checkbox" id="delurlref" name="delurlref" value="" align="top" /></dt>
+          <dd>for every resolvable and deleted URL reference, delete the same reference at every other word where
+              the reference exists (very extensive, but prevents further unresolved references)
+          </dd>
+          <dt class="TableCellLight"></dt>
+          <dd>
+            <input type="submit" value="Delete Word" name="keyhashdeleteall" />
+          </dd>
+        </dl>
     </fieldset>
     <fieldset><legend>Transfer RWI to other Peer</legend>
       <dl>
@@ -204,20 +220,19 @@
       <input type="hidden" name="keyhash" value="#[keyHash]#" />
       <input type="hidden" name="urlstring" value="" />
       <input type="hidden" name="urlhash" value="" /><br />
-      <fieldset><legend>Reference Deletion</legend>
+      <fieldset><legend>Deletion of selected URLs</legend>
         <dl>
           <dt><input type="checkbox" id="delurl" name="delurl" value="" align="top" checked /></dt>
-          <dd>delete also the referenced URL itself (reasonable and recommended, may produce unresolved references<br />
+          <dd>delete also the referenced URL (recommended, may produce unresolved references
               at other word indexes but they do not harm)
           </dd>
           <dt><input type="checkbox" id="delurlref" name="delurlref" value="" align="top" /></dt>
-          <dd>for every resolvable and deleted URL reference, delete the same reference at every other word where<br />
+          <dd>for every resolvable and deleted URL reference, delete the same reference at every other word where
               the reference exists (very extensive, but prevents further unresolved references)
           </dd>
-          <dt>&nbsp;</dt>
+          <dt class="TableCellLight"></dt>
           <dd>
             <input type="submit" value="Delete reference to selected URLs" name="keyhashdelete" /><br />
-            <input type="submit" value="Delete reference to ALL URLs" name="keyhashdeleteall" /><span class="small">&nbsp;&nbsp;(= delete Word)</span>
           </dd>
         </dl>
       </fieldset>
