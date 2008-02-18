@@ -22,7 +22,10 @@
   ::
   #{items}#
   <div class="thumbcontainer">
-  <a href="#[href]#" class="thumblink"><img src="/ViewImage.png?maxwidth=96&maxheight=96&code=#[code]#" alt="#[name]#"></a>
+    <a href="#[href]#" class="thumblink" onclick="return hs.expand(this)">
+      <img src="/ViewImage.png?maxwidth=96&maxheight=96&code=#[code]#" alt="#[name]#">
+    </a>
+    <div class="highslide-caption">#[name]#</div>
   <div class="TableCellDark"><a href="#[href]#">#[name]#</a></div>
   </div>
   #{/items}#

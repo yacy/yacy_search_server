@@ -1,14 +1,15 @@
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml">
 <head>
-	<title>YaCy '#[clientname]#': Search Page</title>
-	#%env/templates/metas.template%#
-	<link rel="alternate" type="application/rss+xml" title="Search for #[input_former]#" href="yacysearch.rss?search=#[input_former]#" />
-	   
-	<script type="text/javascript" src="/js/ajax.js"></script>
-	<script type="text/javascript" src="/js/xml.js"></script>
-	<script type="text/javascript" src="/js/yacysearch.js"></script>
-   
+  <title>YaCy '#[clientname]#': Search Page</title>
+  #%env/templates/metas.template%#
+  <link rel="alternate" type="application/rss+xml" title="Search for #[input_former]#" href="yacysearch.rss?search=#[input_former]#" />
+  <script type="text/javascript" src="/js/ajax.js"></script>
+  <script type="text/javascript" src="/js/xml.js"></script>
+  <script type="text/javascript" src="/js/yacysearch.js"></script>
+  <script type="text/javascript" src="/js/highslide.js"></script>
+  <link rel="stylesheet" type="text/css" media="screen" href="env/highslide.css" />
+  <script type="text/javascript">hs.outlineType = 'rounded-white';</script>
 </head>
 <body id="yacysearch"#(input)#:: onload="document.getElementById('search').focus()":: onload="document.getElementById('search').focus()"#(/input)#>
 

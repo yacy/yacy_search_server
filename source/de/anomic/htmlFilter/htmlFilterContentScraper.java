@@ -46,6 +46,7 @@
 package de.anomic.htmlFilter;
 
 import java.io.ByteArrayInputStream;
+import java.io.File;
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.io.Writer;
@@ -485,6 +486,19 @@ public class htmlFilterContentScraper extends htmlFilterAbstractScraper implemen
                     ((htmlFilterEventListener)listeners[i+1]).scrapeTag1(tagname, tagopts, text);
             }
         }
+    }
+    
+    public static htmlFilterContentScraper parseResource(File file) throws IOException {
+        // load page
+        byte[] page = serverFileUtils.read(file);
+        if (page == null) throw new IOException("no content in file " + file.toString());
+        
+        // scrape content
+        htmlFilterContentScraper scraper = new htmlFilterContentScraper(new yacyURL("http://localhost", null));
+        Writer writer = new htmlFilterWriter(null, null, scraper, null, false);
+        serverFileUtils.copy(new ByteArrayInputStream(page), writer, "UTF-8");
+        
+        return scraper;
     }
     
     public static htmlFilterContentScraper parseResource(yacyURL location) throws IOException {

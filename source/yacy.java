@@ -283,8 +283,8 @@ public final class yacy {
                                      new File(htDocsPath, "notifier.gif"));
             } catch (IOException e) {}
 
-            final File htdocsDefaultReadme = new File(htDocsPath, "readme.txt");
-            if (!(htdocsDefaultReadme.exists())) try {serverFileUtils.write((
+            final File htdocsReadme = new File(htDocsPath, "readme.txt");
+            if (!(htdocsReadme.exists())) try {serverFileUtils.write((
                     "This is your root directory for individual Web Content\r\n" +
                     "\r\n" +
                     "Please place your html files into the www subdirectory.\r\n" +
@@ -296,7 +296,7 @@ public final class yacy {
                     "This directory shares it's content with the applications htroot path, so you\r\n" +
                     "may access your yacy search page with\r\n" +
                     "http://<your-peer-name>.yacy/\r\n" +
-                    "\r\n").getBytes(), htdocsDefaultReadme);} catch (IOException e) {
+                    "\r\n").getBytes(), htdocsReadme);} catch (IOException e) {
                         System.out.println("Error creating htdocs readme: " + e.getMessage());
                     }
 

@@ -98,6 +98,7 @@ import java.util.logging.Level;
 import java.util.zip.GZIPInputStream;
 import java.util.zip.GZIPOutputStream;
 
+import de.anomic.htmlFilter.htmlFilterContentScraper;
 import de.anomic.plasma.plasmaParser;
 import de.anomic.plasma.plasmaSwitchboard;
 import de.anomic.server.serverByteBuffer;
@@ -120,12 +121,12 @@ public final class httpdFileHandler {
     private static serverSwitch switchboard;
     private static plasmaSwitchboard sb = plasmaSwitchboard.getSwitchboard();
     
-    private static File htRootPath = null;
-    private static File htDocsPath = null;
-    private static File htTemplatePath = null;
-    private static String[] defaultFiles = null;
-    private static File htDefaultPath = null;
-    private static File htLocalePath = null;
+    private static File     htRootPath     = null;
+    private static File     htDocsPath     = null;
+    private static File     htTemplatePath = null;
+    private static String[] defaultFiles   = null;
+    private static File     htDefaultPath  = null;
+    private static File     htLocalePath   = null;
 
     private static final HashMap<File, SoftReference<byte[]>> templateCache;    
     private static final HashMap<File, SoftReference<Method>> templateMethodCache;
@@ -438,29 +439,75 @@ public final class httpdFileHandler {
                 for (int i = 0; i < defaultFiles.length; i++) {
                     testpath = path + defaultFiles[i];
                     targetFile = getOverlayedFile(testpath);
-                    targetClass=getOverlayedClass(testpath);
+                    targetClass = getOverlayedClass(testpath);
                     if (targetFile.exists()) {
                         path = testpath;
                         break;
                     }
                 }
+                
                 //no defaultfile, send a dirlisting
-                if(targetFile == null || !targetFile.exists()){
-                	String dirlistFormat = (args==null)?"html":args.get("format","html");
-                	targetExt = dirlistFormat; // this is needed to set the mime type correctly
-                    targetFile = getOverlayedFile("/htdocsdefault/dir." + dirlistFormat);
-                    targetClass=getOverlayedClass("/htdocsdefault/dir." + dirlistFormat);
-                    if(! (( targetFile != null && targetFile.exists()) && ( targetClass != null && targetClass.exists())) ){
-                        httpd.sendRespondError(conProp, out, 3, 500, "dir." + dirlistFormat + " or dir.class not found.", null, null);
+                if (targetFile == null || !targetFile.exists()) {
+                    StringBuffer sb = new StringBuffer();
+                    sb.append("<html>\n<head>\n</head>\n<body>\n<h1>Index of " + path + "</h1>\n  <ul>\n");
+                    File dir = new File(htDocsPath, path);
+                    String[] list = dir.list();
+                    File f;
+                    String size;
+                    long sz;
+                    String headline, author, description;
+                    int images, links;
+                    htmlFilterContentScraper scraper;
+                    for (int i = 0; i < list.length; i++) {
+                        f = new File(dir, list[i]);
+                        if (f.isDirectory()) {
+                            sb.append("    <li><a href=\"" + path + list[i] + "\">" + list[i] + "/</a><br></li>\n");
+                        } else {
+                            if (list[i].endsWith("html") || (list[i].endsWith("htm"))) {
+                                scraper = htmlFilterContentScraper.parseResource(f);
+                                headline = scraper.getTitle();
+                                author = scraper.getAuthor();
+                                description = scraper.getDescription();
+                                images = scraper.getImages().size();
+                                links = scraper.getAnchors().size();
+                            } else {
+                                headline = null;
+                                author = null;
+                                description = null;
+                                images = 0;
+                                links = 0;
+                            }
+                            sz = f.length();
+                            if (sz < 1024) {
+                                size = sz + " bytes";
+                            } else if (sz < 1024 * 1024) {
+                                size = (sz / 1024) + " KB";
+                            } else {
+                                size = (sz / 1024 / 1024) + " MB";
+                            }
+                            sb.append("    <li>");
+                            if ((headline != null) && (headline.length() > 0)) sb.append("<a href=\"" + list[i] + "\"><b>" + headline + "</b></a><br>");
+                            sb.append("<a href=\"" + path + list[i] + "\">" + list[i] + "</a><br>");
+                            if ((author != null) && (author.length() > 0)) sb.append("Author: " + author + "<br>");
+                            if ((description != null) && (description.length() > 0)) sb.append("Description: " + description + "<br>");
+                            sb.append(serverDate.formatShortDay(new Date(f.lastModified())) + ", " + size + ((images > 0) ? ", " + images + " images" : "") + ((links > 0) ? ", " + links + " links" : "") + "<br></li>\n");
+                        }
                     }
+                    sb.append("  </ul>\n</body>\n</html>\n");
+
+                    // write the list to the client
+                    httpd.sendRespondHeader(conProp, out, httpVersion, 200, null, "text/html", sb.length(), new Date(dir.lastModified()), null, new httpHeader(), null, null, true);
+                    if (!method.equals(httpHeader.METHOD_HEAD)) {
+                        out.write(sb.toString().getBytes());
+                    }
+                    return;
                 }
-            }else{
+            } else {
                     //XXX: you cannot share a .png/.gif file with a name like a class in htroot.
                     if ( !(targetFile.exists()) && !((path.endsWith("png")||path.endsWith("gif")||path.endsWith(".stream"))&&targetClass!=null ) ){
                         targetFile = new File(htDocsPath, path);
                         targetClass = rewriteClassFile(new File(htDocsPath, path));
                     }
-                
             }
             
             //File targetClass = rewriteClassFile(targetFile);
@@ -796,7 +843,7 @@ public final class httpdFileHandler {
                             newOut = zipped;
                         }
                         
-                        serverFileUtils.copyRange(targetFile,newOut,rangeStartOffset);
+                        serverFileUtils.copyRange(targetFile, newOut, rangeStartOffset);
                         
                         if (zipped != null) {
                             zipped.flush();
@@ -884,8 +931,8 @@ public final class httpdFileHandler {
     
     public static final File getOverlayedClass(String path) {
         File targetClass;
-        targetClass=rewriteClassFile(new File(htDefaultPath, path)); //works for default and localized files
-        if(targetClass == null || !targetClass.exists()){
+        targetClass = rewriteClassFile(new File(htDefaultPath, path)); //works for default and localized files
+        if (targetClass == null || !targetClass.exists()) {
             //works for htdocs
             targetClass=rewriteClassFile(new File(htDocsPath, path));
         }
@@ -895,7 +942,7 @@ public final class httpdFileHandler {
     public static final File getOverlayedFile(String path) {
         File targetFile;
         targetFile = getLocalizedFile(path);
-        if (!(targetFile.exists())){
+        if (!targetFile.exists()) {
             targetFile = new File(htDocsPath, path);
         }
         return targetFile;
