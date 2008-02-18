@@ -1,20 +1,20 @@
 /* highslide styles for rounded boxes, taken from highslide demo page */
 .highslide {
-	   cursor: url(highslide/graphics/zoomin.cur), pointer;
+	cursor: pointer;
     outline: none;
 }
 .highslide-active-anchor img {
-			 visibility: hidden;
+	visibility: hidden;
 }
 .highslide img {
 	   border: 2px solid gray;
 }
 .highslide:hover img {
-		 border: 2px solid white;
+	border: 2px solid white;
 }
 
 .highslide-wrapper {
-		   background: white;
+	background: white;
 }
 .highslide-image {
     border: 2px solid white;
@@ -43,7 +43,6 @@
     background-color: white;
     
     padding-left: 22px;
-    background-image: url(highslide/graphics/loader.white.gif);
     background-repeat: no-repeat;
     background-position: 3px 1px;
 }
@@ -61,11 +60,10 @@ a.highslide-credits:hover i {
 }
 
 a.highslide-full-expand {
-			background: url(highslide/graphics/fullexpand.gif) no-repeat;
-			display: block;
-			margin: 0 10px 10px 0;
-			width: 34px;
-			height: 34px;
+	display: block;
+	margin: 0 10px 10px 0;
+	width: 34px;
+	height: 34px;
 }
 
 /* These must always be last */

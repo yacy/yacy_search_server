@@ -528,3 +528,24 @@ div.ProgressBarFill {
 	left: 0px;
 	top: 0px;
 }
+
+.thumbcontainer {
+  margin: 2px;
+  width: 100px;
+  height: 160px; /* 96px thumbnail + some lines of text */
+  float: left;
+}
+
+a.thumblink {
+  display:block;
+  width: 96px;
+  height: 96px;
+  margin: 2px;
+  line-height: 96px;
+  text-align: center;
+  overflow: hidden;
+}
+
+.thumblink img {
+  vertical-align: bottom;
+}

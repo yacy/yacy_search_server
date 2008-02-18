@@ -1,4 +1,4 @@
-	/******************************************************************************
+/******************************************************************************
 Name:    Highslide JS
 Version: 3.3.9 (February 15 2008)
 Config:  default +positioning +events +unobtrusive +transitions +inline +ajax +iframe +flash
@@ -28,8 +28,7 @@ Your fair use and other rights are in no way affected by the above.
 
 var hs = {
 
-// Apply your own settings here, or override them in the html file.  
-graphicsDir : '/env/grafics/highslide/',
+// Apply your own settings here, or override them in the html file.
 restoreCursor : 'zoomout.cur', // necessary for preload
 expandSteps : 10, // number of steps in zoom. Each step lasts for duration/step milliseconds.
 expandDuration : 250, // milliseconds
@@ -63,7 +62,6 @@ enableKeyListener : true,
 transitions : [],
 dimmingOpacity: 0, // Lightbox style dimming background
 dimmingDuration: 50, // 0 for instant dimming
-
 
 // HTML extension
 
@@ -438,10 +436,7 @@ dim : function(exp) {
 	hs.dimmer.style.display = '';
 	hs.setDimmerSize();
 	hs.dimmer.owner = exp.key;
-	if (hs.geckoMac && hs.dimmingGeckoFix) 
-		hs.dimmer.style.background = 'url('+ hs.graphicsDir + 'geckodimmer.png)';		
-	else
-		hs.fade(hs.dimmer, 0, exp.dimmingOpacity, hs.dimmingDuration); 
+	hs.fade(hs.dimmer, 0, exp.dimmingOpacity, hs.dimmingDuration); 
 },
 unDim : function(key) {
 	if (!hs.dimmer) return;
@@ -708,10 +703,6 @@ preloadImages : function (number) {
 	
 	// preload outlines
 	new hs.Outline(hs.outlineType, function () { hs.preloadFullImage(0)} );
-	
-	
-	// preload cursor
-	var cur = hs.createElement('img', { src: hs.graphicsDir + hs.restoreCursor });
 },
 
 
@@ -824,17 +815,13 @@ hs.Outline =  function (outlineType, onLoad) {
 };
 
 hs.Outline.prototype = {
-preloadGraphic : function () {	
-	var src = hs.graphicsDir + (hs.outlinesDir || "outlines/")+ this.outlineType +".png";
-				
+preloadGraphic : function () {
 	var appendTo = hs.safari ? hs.container : null;
 	this.graphic = hs.createElement('img', null, { position: 'absolute', left: '-9999px', 
 		top: '-9999px' }, appendTo, true); // for onload trigger
 	
 	var pThis = this;
 	this.graphic.onload = function() { pThis.onGraphicLoad(); };
-	
-	this.graphic.src = src;
 },
 
 onGraphicLoad : function () {
@@ -857,8 +844,6 @@ onGraphicLoad : function () {
 					}, 
 				div,
 				true);
-			} else {
-				hs.setStyles(this.td[i], { background: 'url('+ this.graphic.src +') '+ (pos[i][0]*o)+'px '+(pos[i][1]*o)+'px'});
 			}
 			
 			if (window.opera && (i == 3 || i ==5)) 
@@ -1884,7 +1869,7 @@ focus : function() {
 	if (this.isImage) {
 		this.content.title = hs.restoreTitle;
 		
-		hs.styleRestoreCursor = window.opera ? 'pointer' : 'url('+ hs.graphicsDir + hs.restoreCursor +'), pointer';
+		hs.styleRestoreCursor = 'pointer';
 		if (hs.ie && hs.ieVersion() < 6) hs.styleRestoreCursor = 'hand';
 		this.content.style.cursor = hs.styleRestoreCursor;
 	}

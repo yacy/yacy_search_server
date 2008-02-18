@@ -788,12 +788,13 @@ public final class plasmaParser {
     
     static Map<yacyURL, String> allSubpaths(Set<?> links) {
         // links is either a Set of Strings (urls) or a Set of htmlFilterImageEntries
-        HashMap<yacyURL, String> v = new HashMap<yacyURL, String>();
+        HashSet<String> h = new HashSet<String>();
         Iterator<?> i = links.iterator();
         Object o;
         yacyURL url;
         String u;
         int pos;
+        int l;
         while (i.hasNext()) try {
             o = i.next();
             if (o instanceof yacyURL) url = (yacyURL) o;
@@ -805,15 +806,26 @@ public final class plasmaParser {
             }
             u = url.toNormalform(true, true);
             if (u.endsWith("/")) u = u.substring(0, u.length() - 1);
-            pos = u.lastIndexOf("/");
+            pos = u.lastIndexOf('/');
             while (pos > 8) {
+                l = u.length();
                 u = u.substring(0, pos + 1);
-                url = new yacyURL(u, null);
-                if (!(v.containsKey(url))) v.put(url, "sub");
+                h.add(u);
                 u = u.substring(0, pos);
-                pos = u.lastIndexOf("/");
+                assert (u.length() < l) : "u = " + u;
+                pos = u.lastIndexOf('/');
             }
         } catch (MalformedURLException e) {}
+        // now convert the strings to yacyURLs
+        i = h.iterator();
+        HashMap<yacyURL, String> v = new HashMap<yacyURL, String>();
+        while (i.hasNext()) {
+            u = (String) i.next();
+            try {
+                url = new yacyURL(u, null);
+                v.put(url, "sub");
+            } catch (MalformedURLException e) {}
+        }
         return v;
     }
     
