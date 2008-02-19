@@ -111,22 +111,22 @@ public class bookmarksDB {
 	// bookmarksDB's class constructor
 	// ------------------------------------
 
-    public bookmarksDB(File bookmarksFile, File tagsFile, File datesFile, long preloadTime) {
+    public bookmarksDB(File bookmarksFile, File tagsFile, File datesFile) {
         // bookmarks
         tagCache=new HashMap<String, Tag>();
         bookmarksFile.getParentFile().mkdirs();
         //this.bookmarksTable = new kelondroMap(kelondroDyn.open(bookmarksFile, bufferkb * 1024, preloadTime, 12, 256, '_', true, false));
-        this.bookmarksTable = new kelondroObjects(new kelondroDyn(bookmarksFile, true, true, preloadTime, 12, 256, '_', kelondroNaturalOrder.naturalOrder, true, false, false), 1000);
+        this.bookmarksTable = new kelondroObjects(new kelondroDyn(bookmarksFile, true, true, 12, 256, '_', kelondroNaturalOrder.naturalOrder, true, false, false), 1000);
 
         // tags
         tagsFile.getParentFile().mkdirs();
         boolean tagsFileExisted = tagsFile.exists();
-        this.tagsTable = new kelondroMapObjects(new kelondroDyn(tagsFile, true, true, preloadTime, 12, 256, '_', kelondroNaturalOrder.naturalOrder, true, false, false), 500);
+        this.tagsTable = new kelondroMapObjects(new kelondroDyn(tagsFile, true, true, 12, 256, '_', kelondroNaturalOrder.naturalOrder, true, false, false), 500);
         if (!tagsFileExisted) rebuildTags();
 
         // dates
         boolean datesExisted = datesFile.exists();
-        this.datesTable = new kelondroMapObjects(new kelondroDyn(datesFile, true, true, preloadTime, 20, 256, '_', kelondroNaturalOrder.naturalOrder, true, false, false), 500);
+        this.datesTable = new kelondroMapObjects(new kelondroDyn(datesFile, true, true, 20, 256, '_', kelondroNaturalOrder.naturalOrder, true, false, false), 500);
         if (!datesExisted) rebuildDates();
 
     }

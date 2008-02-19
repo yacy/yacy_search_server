@@ -97,10 +97,10 @@ public final class plasmaCrawlLURL {
     // the class object
     private kelondroIndex urlIndexFile;
 
-    public plasmaCrawlLURL(File indexPath, long preloadTime) {
+    public plasmaCrawlLURL(File indexPath) {
         super();
 
-        urlIndexFile = new kelondroSplitTable(new File(indexPath, "PUBLIC/TEXT"), "urls", preloadTime, indexURLEntry.rowdef, false);
+        urlIndexFile = new kelondroSplitTable(new File(indexPath, "PUBLIC/TEXT"), "urls", indexURLEntry.rowdef, false);
 
         // init result stacks
         externResultStack = new LinkedList<String>();
@@ -676,7 +676,7 @@ public final class plasmaCrawlLURL {
         } catch (MalformedURLException e) {}
         if (args[0].equals("-l")) try {
             // arg 1 is path to URLCache
-            final plasmaCrawlLURL urls = new plasmaCrawlLURL(new File(args[2]), 0);
+            final plasmaCrawlLURL urls = new plasmaCrawlLURL(new File(args[2]));
             final Iterator<indexURLEntry> enu = urls.entries(true, null);
             while (enu.hasNext()) {
                 System.out.println(enu.next().toString());

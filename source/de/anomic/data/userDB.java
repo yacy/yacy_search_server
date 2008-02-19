@@ -70,15 +70,13 @@ public final class userDB {
     
     kelondroMapObjects userTable;
     private final File userTableFile;
-    private long preloadTime;
 	private HashMap<String, String> ipUsers = new HashMap<String, String>();
     private HashMap<String, Object> cookieUsers = new HashMap<String, Object>();
     
-    public userDB(File userTableFile, long preloadTime) {
+    public userDB(File userTableFile) {
         this.userTableFile = userTableFile;
-        this.preloadTime = preloadTime;
         userTableFile.getParentFile().mkdirs();
-        this.userTable = new kelondroMapObjects(new kelondroDyn(userTableFile, true, true, preloadTime, 128, 256, '_', kelondroNaturalOrder.naturalOrder, true, false, false), 10);
+        this.userTable = new kelondroMapObjects(new kelondroDyn(userTableFile, true, true, 128, 256, '_', kelondroNaturalOrder.naturalOrder, true, false, false), 10);
     }
     
     void resetDatabase() {
@@ -86,7 +84,7 @@ public final class userDB {
         if (userTable != null) userTable.close();
         if (!(userTableFile.delete())) throw new RuntimeException("cannot delete user database");
         userTableFile.getParentFile().mkdirs();
-        userTable = new kelondroMapObjects(new kelondroDyn(userTableFile, true, true, preloadTime, 256, 512, '_', kelondroNaturalOrder.naturalOrder, true, false, false), 10);
+        userTable = new kelondroMapObjects(new kelondroDyn(userTableFile, true, true, 256, 512, '_', kelondroNaturalOrder.naturalOrder, true, false, false), 10);
     }
     
     public void close() {

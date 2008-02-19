@@ -229,7 +229,7 @@ public final class plasmaHTCache {
         return doctype;
     }
     
-    public static void init(File htCachePath, long CacheSizeMax, long preloadTime, String layout, boolean migration) {
+    public static void init(File htCachePath, long CacheSizeMax, String layout, boolean migration) {
         
         cachePath = htCachePath;
         cacheLayout = layout;
@@ -287,7 +287,7 @@ public final class plasmaHTCache {
         }
 
         // open the response header database
-        openResponseHeaderDB(preloadTime);
+        openResponseHeaderDB();
 
         // start the cache startup thread
         // this will collect information about the current cache size and elements
@@ -302,13 +302,13 @@ public final class plasmaHTCache {
         if (responseHeaderDB != null) responseHeaderDB.close();
         File dbfile = new File(cachePath, DB_NAME);
         if (dbfile.exists()) dbfile.delete();
-        openResponseHeaderDB(0);
+        openResponseHeaderDB();
     }
     
-    private static void openResponseHeaderDB(long preloadTime) {
+    private static void openResponseHeaderDB() {
         // open the response header database
         File dbfile = new File(cachePath, DB_NAME);
-        responseHeaderDB = new kelondroMapObjects(new kelondroDyn(dbfile, true, true, preloadTime, yacySeedDB.commonHashLength, 150, '#', kelondroBase64Order.enhancedCoder, false, false, true), 500);
+        responseHeaderDB = new kelondroMapObjects(new kelondroDyn(dbfile, true, true, yacySeedDB.commonHashLength, 150, '#', kelondroBase64Order.enhancedCoder, false, false, true), 500);
     }
     
     private static void deleteOldHTCache(File directory) {

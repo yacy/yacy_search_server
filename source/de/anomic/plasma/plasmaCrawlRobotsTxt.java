@@ -65,13 +65,11 @@ public class plasmaCrawlRobotsTxt {
     
     kelondroMapObjects robotsTable;
     private final File robotsTableFile;
-    private long preloadTime;
     
-    public plasmaCrawlRobotsTxt(File robotsTableFile, long preloadTime) {
+    public plasmaCrawlRobotsTxt(File robotsTableFile) {
         this.robotsTableFile = robotsTableFile;
-        this.preloadTime = preloadTime;
         robotsTableFile.getParentFile().mkdirs();
-        robotsTable = new kelondroMapObjects(new kelondroDyn(robotsTableFile, true, true, preloadTime, 256, 512, '_', kelondroNaturalOrder.naturalOrder, false, false, true), 100);
+        robotsTable = new kelondroMapObjects(new kelondroDyn(robotsTableFile, true, true, 256, 512, '_', kelondroNaturalOrder.naturalOrder, false, false, true), 100);
     }
     
     private void resetDatabase() {
@@ -79,7 +77,7 @@ public class plasmaCrawlRobotsTxt {
         if (robotsTable != null) robotsTable.close();
         if (!(robotsTableFile.delete())) throw new RuntimeException("cannot delete robots.txt database");
         robotsTableFile.getParentFile().mkdirs();
-        robotsTable = new kelondroMapObjects(new kelondroDyn(robotsTableFile, true, true, preloadTime, 256, 512, '_', kelondroNaturalOrder.naturalOrder, false, false, true), 100);
+        robotsTable = new kelondroMapObjects(new kelondroDyn(robotsTableFile, true, true, 256, 512, '_', kelondroNaturalOrder.naturalOrder, false, false, true), 100);
     }
     
     public void close() {

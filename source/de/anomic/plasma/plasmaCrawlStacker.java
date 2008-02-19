@@ -85,7 +85,6 @@ public final class plasmaCrawlStacker extends Thread {
     private final LinkedList<String> urlEntryHashCache;
     private kelondroIndex urlEntryCache;
     private File cacheStacksPath;
-    private long preloadTime;
     private int dbtype;
     private boolean prequeue;
     private long dnsHit, dnsMiss;
@@ -95,7 +94,7 @@ public final class plasmaCrawlStacker extends Thread {
     // objects for the prefetch task
     private ArrayList<String> dnsfetchHosts = new ArrayList<String>();    
     
-    public plasmaCrawlStacker(plasmaSwitchboard sb, File dbPath, long preloadTime, int dbtype, boolean prequeue) {
+    public plasmaCrawlStacker(plasmaSwitchboard sb, File dbPath, int dbtype, boolean prequeue) {
         this.sb = sb;
         this.prequeue = prequeue;
         this.dnsHit = 0;
@@ -107,7 +106,6 @@ public final class plasmaCrawlStacker extends Thread {
         
         // create a stack for newly entered entries
         this.cacheStacksPath = dbPath;
-        this.preloadTime = preloadTime;
         this.dbtype = dbtype;
 
         openDB();
@@ -321,7 +319,7 @@ public final class plasmaCrawlStacker extends Thread {
         if (this.dbtype == QUEUE_DB_TYPE_TREE) {
             File cacheFile = new File(cacheStacksPath, stackfile);
             cacheFile.getParentFile().mkdirs();
-            this.urlEntryCache = new kelondroCache(kelondroTree.open(cacheFile, true, preloadTime, plasmaCrawlEntry.rowdef));
+            this.urlEntryCache = new kelondroCache(kelondroTree.open(cacheFile, true, 0, plasmaCrawlEntry.rowdef));
         }
     }
 

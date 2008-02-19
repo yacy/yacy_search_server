@@ -71,20 +71,14 @@ public class kelondroMapTable {
     
     public void declareMaps(
             String tablename, int keysize, kelondroByteOrder objectOrder, int nodesize, int cacheslots,
-            String[] sortfields, String[] longaccfields, String[] doubleaccfields, char fillChar, boolean resetOnFail) {
-        declareMaps(tablename, keysize, objectOrder, nodesize, cacheslots, sortfields, longaccfields, doubleaccfields, fillChar, 0, resetOnFail);
-    }
-    
-    public void declareMaps(
-            String tablename, int keysize, kelondroByteOrder objectOrder, int nodesize, int cacheslots,
             String[] sortfields, String[] longaccfields, String[] doubleaccfields, char fillChar,
-            long preloadTime, boolean resetOnFail) {
+            boolean resetOnFail) {
         if (mTables.containsKey(tablename)) throw new RuntimeException("kelondroTables.declareMap: table '" + tablename + "' declared twice.");
         if (tTables.containsKey(tablename)) throw new RuntimeException("kelondroTables.declareMap: table '" + tablename + "' declared already in other context.");
         File tablefile = new File(tablesPath, "table." + tablename + ".mdb");
         kelondroDyn dyn;
         if (!(tablefile.exists())) tablefile.getParentFile().mkdirs();
-        dyn = new kelondroDyn(tablefile, true, true, preloadTime, keysize, nodesize, fillChar, objectOrder, true, false, resetOnFail);
+        dyn = new kelondroDyn(tablefile, true, true, keysize, nodesize, fillChar, objectOrder, true, false, resetOnFail);
         kelondroMapObjects map = new kelondroMapObjects(dyn, cacheslots, sortfields, longaccfields, doubleaccfields, null, null);
         mTables.put(tablename, map);
     }

@@ -114,7 +114,7 @@ public class kelondroCollectionIndex {
     }
     
     public kelondroCollectionIndex(File path, String filenameStub, int keyLength, kelondroByteOrder indexOrder,
-                                   long preloadTime, int loadfactor, int maxpartitions, kelondroRow rowdef) throws IOException {
+                                   int loadfactor, int maxpartitions, kelondroRow rowdef) throws IOException {
         // the buffersize is number of bytes that are only used if the kelondroFlexTable is backed up with a kelondroTree
         this.path = path;
         this.filenameStub = filenameStub;
@@ -131,7 +131,7 @@ public class kelondroCollectionIndex {
             
             // open index and array files
             this.arrays = new HashMap<String, kelondroFixedWidthArray>(); // all entries will be dynamically created with getArray()
-            index = openIndexFile(path, filenameStub, indexOrder, preloadTime, loadfactor, rowdef, 0);
+            index = openIndexFile(path, filenameStub, indexOrder, loadfactor, rowdef, 0);
             openAllArrayFiles(false, indexOrder);
         } else {
             // calculate initialSpace
@@ -164,7 +164,7 @@ public class kelondroCollectionIndex {
             } else if (serverMemory.request(necessaryRAM4fullIndex, false)) {
                 index = new kelondroEcoTable(f, indexRowdef, kelondroEcoTable.tailCacheDenyUsage, EcoFSBufferSize, initialSpace);
             } else {
-                index = new kelondroFlexTable(path, filenameStub + ".index", preloadTime, indexRowdef, initialSpace, true);
+                index = new kelondroFlexTable(path, filenameStub + ".index", indexRowdef, initialSpace, true);
             }
             
             // open array files
@@ -264,14 +264,14 @@ public class kelondroCollectionIndex {
     }
     
     private kelondroIndex openIndexFile(File path, String filenameStub, kelondroByteOrder indexOrder,
-            long preloadTime, int loadfactor, kelondroRow rowdef, int initialSpace) throws IOException {
+            int loadfactor, kelondroRow rowdef, int initialSpace) throws IOException {
         // open/create index table
         File f = new File(path, filenameStub + ".index");
         kelondroRow indexRowdef = indexRow(keylength, indexOrder);
         
         if (f.isDirectory()) {
             // use a flextable
-            kelondroIndex theindex = new kelondroCache(new kelondroFlexTable(path, filenameStub + ".index", preloadTime, indexRowdef, initialSpace, true));
+            kelondroIndex theindex = new kelondroCache(new kelondroFlexTable(path, filenameStub + ".index", indexRowdef, initialSpace, true));
         
             // save/check property file for this array
             File propfile = propertyFile(path, filenameStub, loadfactor, rowdef.objectsize);
@@ -1087,12 +1087,11 @@ public class kelondroCollectionIndex {
         
         File path = new File(args[0]);
         String filenameStub = args[1];
-        long preloadTime = 10000;
         try {
             // initialize collection index
             kelondroCollectionIndex collectionIndex  = new kelondroCollectionIndex(
                         path, filenameStub, 9 /*keyLength*/,
-                        kelondroNaturalOrder.naturalOrder, preloadTime,
+                        kelondroNaturalOrder.naturalOrder,
                         4 /*loadfactor*/, 7, rowdef);
             
             // fill index with values
@@ -1120,7 +1119,7 @@ public class kelondroCollectionIndex {
             
             // printout of index
             collectionIndex.close();
-            kelondroFlexTable index = new kelondroFlexTable(path, filenameStub + ".index", preloadTime, kelondroCollectionIndex.indexRow(9, kelondroNaturalOrder.naturalOrder), 0, true);
+            kelondroFlexTable index = new kelondroFlexTable(path, filenameStub + ".index", kelondroCollectionIndex.indexRow(9, kelondroNaturalOrder.naturalOrder), 0, true);
             index.print();
             index.close();
         } catch (IOException e) {

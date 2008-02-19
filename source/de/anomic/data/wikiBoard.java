@@ -70,14 +70,14 @@ public class wikiBoard {
     private kelondroMapObjects bkpbase = null;
     private static HashMap<String, String> authors = new HashMap<String, String>();
 
-    public wikiBoard(File actpath, File bkppath, long preloadTime) {
+    public wikiBoard(File actpath, File bkppath) {
         new File(actpath.getParent()).mkdirs();
         if (datbase == null) {
-            datbase = new kelondroMapObjects(new kelondroDyn(actpath, true, true, preloadTime, keyLength, recordSize, '_', kelondroNaturalOrder.naturalOrder, true, false, false), 500);
+            datbase = new kelondroMapObjects(new kelondroDyn(actpath, true, true, keyLength, recordSize, '_', kelondroNaturalOrder.naturalOrder, true, false, false), 500);
         }
         new File(bkppath.getParent()).mkdirs();
         if (bkpbase == null) {
-            bkpbase = new kelondroMapObjects(new kelondroDyn(bkppath, true, true, preloadTime, keyLength + dateFormat.length(), recordSize, '_', kelondroNaturalOrder.naturalOrder, true, false, false), 500);
+            bkpbase = new kelondroMapObjects(new kelondroDyn(bkppath, true, true, keyLength + dateFormat.length(), recordSize, '_', kelondroNaturalOrder.naturalOrder, true, false, false), 500);
         }
     }
 

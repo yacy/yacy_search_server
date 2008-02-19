@@ -80,10 +80,10 @@ public class blogBoard {
     
     kelondroMapObjects database = null;
     
-    public blogBoard(File actpath, long preloadTime) {
+    public blogBoard(File actpath) {
     		new File(actpath.getParent()).mkdir();
         if (database == null) {
-            database = new kelondroMapObjects(new kelondroDyn(actpath, true, true, preloadTime, keyLength, recordSize, '_', kelondroNaturalOrder.naturalOrder, true, false, false), 500);
+            database = new kelondroMapObjects(new kelondroDyn(actpath, true, true, keyLength, recordSize, '_', kelondroNaturalOrder.naturalOrder, true, false, false), 500);
         }
     }
     public int size() {

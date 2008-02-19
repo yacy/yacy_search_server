@@ -82,10 +82,10 @@ public class blogBoardComments {
         SimpleFormatter.setTimeZone(TimeZone.getTimeZone("GMT"));
     }
     private kelondroMapObjects database = null;
-    public blogBoardComments(File actpath, long preloadTime) {
+    public blogBoardComments(File actpath) {
     		new File(actpath.getParent()).mkdir();
         if (database == null) {
-            database = new kelondroMapObjects(new kelondroDyn(actpath, true, true, preloadTime, keyLength, recordSize, '_', kelondroNaturalOrder.naturalOrder, false, false, false), 500);
+            database = new kelondroMapObjects(new kelondroDyn(actpath, true, true, keyLength, recordSize, '_', kelondroNaturalOrder.naturalOrder, false, false, false), 500);
         }
     }
     public int size() {

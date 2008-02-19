@@ -47,7 +47,7 @@ public class kelondroFlexTable extends kelondroFlexWidthArray implements kelondr
     protected kelondroBytesIntMap index;
     private boolean RAMIndex;
     
-    public kelondroFlexTable(File path, String tablename, long preloadTime, kelondroRow rowdef, int minimumSpace, boolean resetOnFail) {
+    public kelondroFlexTable(File path, String tablename, kelondroRow rowdef, int minimumSpace, boolean resetOnFail) {
     	// the buffersize applies to a possible load of the ram-index
         // the minimumSpace is a initial allocation space for the index; names the number of index slots
     	// if the ram is not sufficient, a tree file is generated
@@ -94,13 +94,13 @@ public class kelondroFlexTable extends kelondroFlexWidthArray implements kelondr
 			if (indexfile.exists()) {
 				// use existing index file
 				System.out.println("*** Using File index " + indexfile);
-				ki = new kelondroCache(kelondroTree.open(indexfile, true, preloadTime, treeIndexRow(rowdef.width(0), rowdef.objectOrder), 2, 80));
+				ki = new kelondroCache(kelondroTree.open(indexfile, true, 0, treeIndexRow(rowdef.width(0), rowdef.objectOrder), 2, 80));
 				RAMIndex = false;
 			} else {
 				// generate new index file
 				System.out.println("*** Generating File index for " + size() + " entries from " + indexfile);
 				System.out.println("*** Cause: too less RAM (" + serverMemory.available() + " Bytes) configured. Assign at least " + (neededRAM / 1024 / 1024) + " MB more RAM to enable a RAM index.");
-				ki = initializeTreeIndex(indexfile, preloadTime, rowdef.objectOrder);
+				ki = initializeTreeIndex(indexfile, 0, rowdef.objectOrder);
 
 				System.out.println(" -done-");
 				System.out.println(ki.size() + " entries indexed from " + super.col[0].size() + " keys.");
@@ -490,7 +490,7 @@ public class kelondroFlexTable extends kelondroFlexWidthArray implements kelondr
         String name = args[1];
         kelondroRow row = new kelondroRow("Cardinal key-4 {b256}, byte[] x-64", kelondroNaturalOrder.naturalOrder, 0);
         try {
-            kelondroFlexTable t = new kelondroFlexTable(f, name, 0, row, 0, true);
+            kelondroFlexTable t = new kelondroFlexTable(f, name, row, 0, true);
             kelondroRow.Entry entry = row.newEntry();
             entry.setCol(0, System.currentTimeMillis());
             entry.setCol(1, "dummy".getBytes());

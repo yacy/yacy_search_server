@@ -598,16 +598,16 @@ public final class yacy {
             log.logInfo("STARTING URL CLEANUP");
             
             // db containing all currently loades urls
-            plasmaCrawlLURL currentUrlDB = new plasmaCrawlLURL(indexSecondaryRoot, 10000);
+            plasmaCrawlLURL currentUrlDB = new plasmaCrawlLURL(indexSecondaryRoot);
             
             // db used to hold all neede urls
-            plasmaCrawlLURL minimizedUrlDB = new plasmaCrawlLURL(indexRoot2, 10000);
+            plasmaCrawlLURL minimizedUrlDB = new plasmaCrawlLURL(indexRoot2);
             
             Runtime rt = Runtime.getRuntime();
             int cacheMem = (int)(rt.maxMemory() - rt.totalMemory());
             if (cacheMem < 2048000) throw new OutOfMemoryError("Not enough memory available to start clean up.");
                 
-            plasmaWordIndex wordIndex = new plasmaWordIndex(indexPrimaryRoot, indexSecondaryRoot, 10000, log);
+            plasmaWordIndex wordIndex = new plasmaWordIndex(indexPrimaryRoot, indexSecondaryRoot, log);
             Iterator<indexContainer> indexContainerIterator = wordIndex.wordContainers("AAAAAAAAAAAA", false, false);
             
             long urlCounter = 0, wordCounter = 0;
@@ -781,7 +781,7 @@ public final class yacy {
         File root = homePath;
         File indexroot = new File(root, "DATA/INDEX");
         try {serverLog.configureLogging(homePath, new File(homePath, "DATA/LOG/yacy.logging"));} catch (Exception e) {}
-        plasmaCrawlLURL currentUrlDB = new plasmaCrawlLURL(indexroot, 10000);
+        plasmaCrawlLURL currentUrlDB = new plasmaCrawlLURL(indexroot);
         currentUrlDB.urldbcleanup();
         currentUrlDB.close();
     }
@@ -798,7 +798,7 @@ public final class yacy {
         try {
             Iterator<indexContainer> indexContainerIterator = null;
             if (resource.equals("all")) {
-                WordIndex = new plasmaWordIndex(indexPrimaryRoot, indexSecondaryRoot, 3000, log);
+                WordIndex = new plasmaWordIndex(indexPrimaryRoot, indexSecondaryRoot, log);
                 indexContainerIterator = WordIndex.wordContainers(wordChunkStartHash, false, false);
             }
             int counter = 0;
@@ -858,7 +858,7 @@ public final class yacy {
             String[] dbFileNames = {"seed.new.db","seed.old.db","seed.pot.db"};
             for (int i=0; i < dbFileNames.length; i++) {
                 File dbFile = new File(yacyDBPath,dbFileNames[i]);
-                kelondroMapObjects db = new kelondroMapObjects(new kelondroDyn(dbFile, true, true, 3000, yacySeedDB.commonHashLength, 480, '#', kelondroBase64Order.enhancedCoder, true, false, true), 500, yacySeedDB.sortFields, yacySeedDB.longaccFields, yacySeedDB.doubleaccFields, null, null);
+                kelondroMapObjects db = new kelondroMapObjects(new kelondroDyn(dbFile, true, true, yacySeedDB.commonHashLength, 480, '#', kelondroBase64Order.enhancedCoder, true, false, true), 500, yacySeedDB.sortFields, yacySeedDB.longaccFields, yacySeedDB.doubleaccFields, null, null);
                 
                 kelondroMapObjects.mapIterator it;
                 it = db.maps(true, false);

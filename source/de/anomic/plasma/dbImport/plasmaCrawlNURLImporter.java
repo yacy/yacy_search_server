@@ -106,7 +106,7 @@ public class plasmaCrawlNURLImporter extends AbstractImporter implements dbImpor
         
         // init profile DB
         this.log.logInfo("Initializing the source profileDB");
-        this.importProfileDB = new plasmaCrawlProfile(profileDbFile, 300);
+        this.importProfileDB = new plasmaCrawlProfile(profileDbFile);
     }
 
     @SuppressWarnings("unchecked")

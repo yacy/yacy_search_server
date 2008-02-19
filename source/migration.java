@@ -163,7 +163,7 @@ public class migration {
                     file.delete();
                 } catch (IOException e) {}        
             }
-            sb.initWiki(sb.getConfigLong("ramCacheWiki_time", 1000));
+            sb.initWiki();
         }
         
         
@@ -176,7 +176,7 @@ public class migration {
                 serverFileUtils.copy(file, file2);
                 file.delete();
             } catch (IOException e) {}
-            sb.initMessages(sb.getConfigLong("ramCacheMessage_time", 1000));
+            sb.initMessages();
         }
     }
 

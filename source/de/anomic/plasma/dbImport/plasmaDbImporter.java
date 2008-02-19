@@ -85,8 +85,6 @@ public class plasmaDbImporter extends AbstractImporter implements dbImporter {
         this.cacheSize = Integer.valueOf((String)initParams.get("cacheSize")).intValue();
         if (this.cacheSize < 2*1024*1024) this.cacheSize = 8*1024*1024;
         
-        this.preloadTime = Long.valueOf((String)initParams.get("preloadTime")).longValue();
-        
         // configure import DB
         String errorMsg = null;
         if (!this.importPrimaryPath.exists()) errorMsg = "Primary Import directory does not exist.";
@@ -107,7 +105,7 @@ public class plasmaDbImporter extends AbstractImporter implements dbImporter {
         }
         
         this.log.logFine("Initializing source word index db.");
-        this.importWordIndex = new plasmaWordIndex(this.importPrimaryPath, this.importSecondaryPath, preloadTime / 2, this.log);
+        this.importWordIndex = new plasmaWordIndex(this.importPrimaryPath, this.importSecondaryPath, this.log);
 
         this.importStartSize = this.importWordIndex.size();
     }

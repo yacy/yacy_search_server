@@ -375,7 +375,7 @@ public class htmlFilterContentScraper extends htmlFilterAbstractScraper implemen
     
     public String getDescription() {
         String s = metas.get("description");
-        if (s == null) s = metas.get("DC.description");
+        if (s == null) s = metas.get("dc.description");
         if (s == null) return ""; else return s;
     }
     
@@ -387,21 +387,21 @@ public class htmlFilterContentScraper extends htmlFilterAbstractScraper implemen
     public String getAuthor() {
         String s = metas.get("author");
         if (s == null) s = metas.get("copyright");
-        if (s == null) s = metas.get("DC.creator");
+        if (s == null) s = metas.get("dc.creator");
         if (s == null) return "";
         return s;
     }
     
     public String[] getContentLanguages() {
         String s = metas.get("content-language");
-        if (s == null) s = metas.get("DC.language");
+        if (s == null) s = metas.get("dc.language");
         if (s == null) s = "";
         return s.split(" |,");
     }
     
     public String[] getKeywords() {
         String s = metas.get("keywords");
-        if (s == null) s = metas.get("DC.description");
+        if (s == null) s = metas.get("dc.description");
         if (s == null) s = "";
         if (s.length() == 0) {
             return getTitle().toLowerCase().split(splitrex);

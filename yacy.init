@@ -167,7 +167,7 @@ htDocsPath = DATA/HTDOCS
 # The complete path to this file is created by combination with the rootPath
 # you can set a list of defaults, separated by comma
 # the first one is priorized
-defaultFiles = ConfigBasic.html,index.html,default.html,search.html,console.html,control.html,welcome.html,wiki.html,forum.html,blog.html,email.html,content.html,monitor.html,share.html,dir.html,readme.txt
+defaultFiles = ConfigBasic.html,index.html,index.htm,default.html,search.html,console.html,control.html,welcome.html,wiki.html,forum.html,blog.html,email.html,content.html,monitor.html,share.html,dir.html,readme.txt
 
 # locale-options: YaCy supports localization.
 # Web pages for special languages are located in the htLocalePath
@@ -594,44 +594,6 @@ cleanup.deletionPublishedNews = true
 # If you have a double-processor system,
 # a cluster value of '2' would be appropriate
 80_indexing_cluster=1
-
-# ram cache init timeout for database files
-
-# ram cache for collection index
-ramCacheRWI_time     =    30000
-
-# ram cache for responseHeader.db
-ramCacheHTTP_time    =     1000
-
-# ram cache for urlHash.db
-ramCacheLURL_time    =    10000
-
-# ram cache for stack crawl thread db
-ramCachePreNURL_time =     3000
-
-# ram cache for urlNotice.db
-ramCacheNURL_time    =     2000
-
-# ram cache for urlErr.db 
-ramCacheEURL_time    =     1000
-
-# ram cache for seedDBs
-ramCacheDHT_time     =     1000
-
-# ram cache for message.db
-ramCacheMessage_time =      500
-
-# ram cache for wiki.db
-ramCacheWiki_time    =      500
-
-# ram cache for blog.db
-ramCacheBlog_time    =      500
-
-# ram cache for robotsTxt.db
-ramCacheRobots_time  =        0
-
-# ram cache for crawlProfile.db
-ramCacheProfiles_time=      500
 
 # default memory settings for startup of yacy
 # is valid in unix/shell and windows environments but

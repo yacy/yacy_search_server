@@ -260,8 +260,8 @@ public class plasmaRankingCRProcess {
         kelondroCollectionIndex newseq = null;
         if (newdb) {
             File path = to_file.getParentFile(); // path to storage place
-            newacc = new kelondroFlexTable(path, CRG_accname, -1, CRG_accrow, 0, false);
-            newseq = new kelondroCollectionIndex(path, CRG_seqname, 12, kelondroBase64Order.enhancedCoder, -1, 2, 9, CRG_colrow);
+            newacc = new kelondroFlexTable(path, CRG_accname, CRG_accrow, 0, false);
+            newseq = new kelondroCollectionIndex(path, CRG_seqname, 12, kelondroBase64Order.enhancedCoder, 2, 9, CRG_colrow);
         } else {
             if (!(to_file.exists())) {
                 acc = new kelondroAttrSeq("Global Ranking Accumulator File",
@@ -390,8 +390,8 @@ public class plasmaRankingCRProcess {
     
     public static int genrcix(File cr_path_in, File rci_path_out) throws IOException {
         //kelondroFlexTable       acc = new kelondroFlexTable(cr_path_in, CRG_accname, kelondroBase64Order.enhancedCoder, 128 * 1024 * 1024, -1, CRG_accrow, true);
-        kelondroCollectionIndex seq = new kelondroCollectionIndex(cr_path_in, CRG_seqname, 12, kelondroBase64Order.enhancedCoder, -1, 2, 9, CRG_colrow);
-        kelondroCollectionIndex rci = new kelondroCollectionIndex(rci_path_out, RCI_colname, 6, kelondroBase64Order.enhancedCoder, -1, 2, 9, RCI_coli);
+        kelondroCollectionIndex seq = new kelondroCollectionIndex(cr_path_in, CRG_seqname, 12, kelondroBase64Order.enhancedCoder, 2, 9, CRG_colrow);
+        kelondroCollectionIndex rci = new kelondroCollectionIndex(rci_path_out, RCI_colname, 6, kelondroBase64Order.enhancedCoder, 2, 9, RCI_coli);
         
         // loop over all referees
         int count = 0;

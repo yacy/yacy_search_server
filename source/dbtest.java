@@ -34,7 +34,6 @@ public class dbtest {
 
     public final static int keylength = 12;
     public final static int valuelength = 223; // sum of all data length as defined in plasmaURL
-    public final static long preload = 1000; // 1 second
     public static byte[] dummyvalue2 = new byte[valuelength];
     static {
         // fill the dummy value
@@ -201,15 +200,15 @@ public class dbtest {
         }
         if (dbe.equals("kelondroTree")) {
             File tablefile = new File(tablename + ".kelondro.db");
-            return new kelondroCache(new kelondroTree(tablefile, true, preload, testRow));
+            return new kelondroCache(new kelondroTree(tablefile, true, 0, testRow));
         }
         if (dbe.equals("kelondroFlexTable")) {
             File tablepath = new File(tablename).getParentFile();
-            return new kelondroFlexTable(tablepath, new File(tablename).getName(), preload, testRow, 0, true);
+            return new kelondroFlexTable(tablepath, new File(tablename).getName(), testRow, 0, true);
         }
         if (dbe.equals("kelondroSplitTable")) {
             File tablepath = new File(tablename).getParentFile();
-            return new kelondroSplitTable(tablepath, new File(tablename).getName(), preload, testRow, true);
+            return new kelondroSplitTable(tablepath, new File(tablename).getName(), testRow, true);
         }
         if (dbe.equals("kelondroEcoTable")) {
             return new kelondroEcoTable(new File(tablename), testRow, kelondroEcoTable.tailCacheForceUsage, 1000, 0);

@@ -100,7 +100,6 @@ public final class yacySeedDB {
     protected File seedActiveDBFile, seedPassiveDBFile, seedPotentialDBFile;
 
     protected kelondroMapObjects seedActiveDB, seedPassiveDB, seedPotentialDB;
-    private long preloadTime;
     
     private final plasmaSwitchboard sb;
     private yacySeed mySeed; // my own seed
@@ -111,15 +110,13 @@ public final class yacySeedDB {
     public yacySeedDB(plasmaSwitchboard sb,
             File seedActiveDBFile,
             File seedPassiveDBFile,
-            File seedPotentialDBFile,
-            long preloadTime) {
+            File seedPotentialDBFile) {
         
         this.seedActiveDBFile = seedActiveDBFile;
         this.seedPassiveDBFile = seedPassiveDBFile;
         this.seedPotentialDBFile = seedPotentialDBFile;
         this.mySeed = null; // my own seed
         this.sb = sb;
-        this.preloadTime = preloadTime;
         
         // set up seed database
         seedActiveDB = openSeedTable(seedActiveDBFile);
@@ -224,11 +221,11 @@ public final class yacySeedDB {
             initializeHandlerMethod = null;
         }
         try {
-            return new kelondroMapObjects(new kelondroDyn(seedDBFile, true, true, preloadTime / 3, commonHashLength, 480, '#', kelondroBase64Order.enhancedCoder, usetree, false, true), 500, sortFields, longaccFields, doubleaccFields, initializeHandlerMethod, this);
+            return new kelondroMapObjects(new kelondroDyn(seedDBFile, true, true, commonHashLength, 480, '#', kelondroBase64Order.enhancedCoder, usetree, false, true), 500, sortFields, longaccFields, doubleaccFields, initializeHandlerMethod, this);
         } catch (Exception e) {
             // try again
             kelondroDyn.delete(seedDBFile, usetree);
-            return new kelondroMapObjects(new kelondroDyn(seedDBFile, true, true, preloadTime / 3, commonHashLength, 480, '#', kelondroBase64Order.enhancedCoder, usetree, false, true), 500, sortFields, longaccFields, doubleaccFields, initializeHandlerMethod, this);
+            return new kelondroMapObjects(new kelondroDyn(seedDBFile, true, true, commonHashLength, 480, '#', kelondroBase64Order.enhancedCoder, usetree, false, true), 500, sortFields, longaccFields, doubleaccFields, initializeHandlerMethod, this);
         }
     }
     
