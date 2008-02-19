@@ -27,7 +27,6 @@
 package de.anomic.index;
 
 import de.anomic.kelondro.kelondroBitfield;
-import de.anomic.kelondro.kelondroRow.Entry;
 
 public class indexRWIVarEntry implements indexRWIEntry {
 
@@ -58,13 +57,13 @@ public class indexRWIVarEntry implements indexRWIEntry {
         this.urlcomps = e.urlcomps();
         this.urllength = e.urllength();
         this.virtualAge = e.virtualAge();
-        this.worddistance = e.worddistance();
+        this.worddistance = 0;
         this.wordsintext = e.wordsintext();
         this.wordsintitle = e.wordsintitle();
-        this.termFrequency = e.termFrequency();
+        this.termFrequency = 0.0;
     }
     
-    public void join(indexRWIEntry oe) {
+    public void join(indexRWIVarEntry oe) {
         // combine the distance
         this.worddistance = this.worddistance() + oe.worddistance() + Math.abs(this.posintext() - oe.posintext());
         this.posintext = Math.min(this.posintext(), oe.posintext());
@@ -133,7 +132,7 @@ public class indexRWIVarEntry implements indexRWIEntry {
         return posofphrase;
     }
     
-    private indexRWIRowEntry toRowEntry() {
+    public indexRWIRowEntry toRowEntry() {
         return new indexRWIRowEntry(
                 urlHash,
                 urllength,     // byte-length of complete URL
@@ -145,21 +144,14 @@ public class indexRWIVarEntry implements indexRWIEntry {
                 posintext,     // position of word in all words
                 posinphrase,   // position of word in its phrase
                 posofphrase,   // number of the phrase where word appears
-                worddistance,  // word distance
                 lastModified,  // last-modified time of the document where word appears
                 System.currentTimeMillis(),    // update time;
                 language,      // (guessed) language of document
                 type,          // type of document
                 llocal,        // outlinks to same domain
                 lother,        // outlinks to other domain
-                flags,          // attributes to the url and to the word according the url
-                termFrequency
+                flags          // attributes to the url and to the word according the url
         );
-    }
-
-    public Entry toKelondroEntry() {
-        assert false; // should not be used
-        return null;
     }
 
     public String toPropertyForm() {
@@ -199,7 +191,7 @@ public class indexRWIVarEntry implements indexRWIEntry {
         return this.termFrequency;
     }
     
-    public static final void min(indexRWIVarEntry t, indexRWIEntry other) {
+    public static final void min(indexRWIVarEntry t, indexRWIVarEntry other) {
         int v;
         long w;
         double d;
@@ -221,7 +213,7 @@ public class indexRWIVarEntry implements indexRWIEntry {
         if (t.termFrequency > (d = other.termFrequency())) t.termFrequency = d;
     }
     
-    public static final void max(indexRWIVarEntry t, indexRWIEntry other) {
+    public static final void max(indexRWIVarEntry t, indexRWIVarEntry other) {
         int v;
         long w;
         double d;
@@ -241,6 +233,24 @@ public class indexRWIVarEntry implements indexRWIEntry {
         if (t.urlcomps() < (v = other.urlcomps())) t.urlcomps = v;
         if (t.wordsintitle() < (v = other.wordsintitle())) t.wordsintitle = v;
         if (t.termFrequency < (d = other.termFrequency())) t.termFrequency = d;
+    }
+
+    public static void join(indexRWIVarEntry ie1, indexRWIEntry ie2) {
+        // returns a modified entry of the first argument
+        
+        // combine the distance
+        ie1.worddistance = ie1.worddistance + ((ie2 instanceof indexRWIVarEntry) ? ((indexRWIVarEntry) ie2).worddistance() : 0) + Math.abs(ie1.posintext() - ie2.posintext());
+        ie1.posintext = Math.min(ie1.posintext(), ie2.posintext());
+        ie1.posinphrase = (ie1.posofphrase() == ie2.posofphrase()) ? Math.min(ie1.posinphrase(), ie2.posinphrase()) : 0;
+        ie1.posofphrase = Math.min(ie1.posofphrase(), ie2.posofphrase());
+
+        // combine term frequency
+        ie1.termFrequency = ie1.termFrequency + ie2.termFrequency();
+        ie1.wordsintext = ie1.wordsintext() + ie2.wordsintext();
+    }
+    
+    public void join(indexRWIEntry oe) {
+        join(this, oe);
     }
 
 }

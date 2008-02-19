@@ -51,7 +51,6 @@ import java.util.Iterator;
 import java.util.List;
 
 import de.anomic.http.httpHeader;
-import de.anomic.index.indexRWIEntry;
 import de.anomic.index.indexRWIRowEntry;
 import de.anomic.plasma.plasmaSwitchboard;
 import de.anomic.plasma.urlPattern.plasmaURLPattern;
@@ -149,7 +148,7 @@ public final class transferRWI {
             int p;
             String wordHash;
             String urlHash;
-            indexRWIEntry iEntry;
+            indexRWIRowEntry iEntry;
             final HashSet<String> unknownURL = new HashSet<String>();
             final HashSet<String> knownURL = new HashSet<String>();
             String[] wordhashes = new String[v.size()];

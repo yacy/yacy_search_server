@@ -27,7 +27,6 @@
 package de.anomic.index;
 
 import de.anomic.kelondro.kelondroBitfield;
-import de.anomic.kelondro.kelondroRow.Entry;
 
 public interface indexRWIEntry {
 
@@ -42,8 +41,6 @@ public interface indexRWIEntry {
     public  static final int flag_app_emphasized    = 29; // word is emphasized in text (i.e. bold, italics, special size)
 
     public String toPropertyForm();
-    
-    public Entry toKelondroEntry();
 
     public String urlHash();
 
@@ -84,10 +81,6 @@ public interface indexRWIEntry {
     public double termFrequency();
     
     public String toString();
-    
-    public void join(indexRWIEntry oe);
-
-    public int worddistance();
     
     public boolean isNewer(indexRWIEntry other);
  

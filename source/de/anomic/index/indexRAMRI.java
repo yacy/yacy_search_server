@@ -129,7 +129,7 @@ public final class indexRAMRI implements indexRI {
         String wordHash;
         indexContainer container;
         long updateTime;
-        indexRWIEntry iEntry;
+        indexRWIRowEntry iEntry;
         kelondroRow.Entry row = dumpArray.row().newEntry();
         byte[] occ, time;
 
@@ -207,7 +207,7 @@ public final class indexRAMRI implements indexRI {
                 Iterator<EntryIndex> i = dumpArray.contentRows(-1);
                 String wordHash;
                 //long creationTime;
-                indexRWIEntry wordEntry;
+                indexRWIRowEntry wordEntry;
                 kelondroRow.EntryIndex row;
                 //Runtime rt = Runtime.getRuntime();
                 while (i.hasNext()) {
@@ -503,7 +503,7 @@ public final class indexRAMRI implements indexRI {
         entries = null;
     }
 
-    public synchronized void addEntry(String wordHash, indexRWIEntry newEntry, long updateTime, boolean dhtCase) {
+    public synchronized void addEntry(String wordHash, indexRWIRowEntry newEntry, long updateTime, boolean dhtCase) {
         indexContainer container = (indexContainer) cache.get(wordHash);
         if (container == null) container = new indexContainer(wordHash, this.payloadrow, 1);
         container.put(newEntry);

@@ -42,7 +42,6 @@ import de.anomic.index.indexContainer;
 import de.anomic.index.indexContainerOrder;
 import de.anomic.index.indexRAMRI;
 import de.anomic.index.indexRI;
-import de.anomic.index.indexRWIEntry;
 import de.anomic.index.indexRWIRowEntry;
 import de.anomic.index.indexURLEntry;
 import de.anomic.kelondro.kelondroBase64Order;
@@ -174,7 +173,7 @@ public final class plasmaWordIndex implements indexRI {
     	return new indexContainer(wordHash, indexRWIRowEntry.urlEntryRow, elementCount);
     }
 
-    public void addEntry(String wordHash, indexRWIEntry entry, long updateTime, boolean dhtInCase) {
+    public void addEntry(String wordHash, indexRWIRowEntry entry, long updateTime, boolean dhtInCase) {
         // set dhtInCase depending on wordHash
         if ((!dhtInCase) && (yacyDHTAction.shallBeOwnWord(wordHash))) dhtInCase = true;
         
@@ -298,7 +297,7 @@ public final class plasmaWordIndex implements indexRI {
         Iterator<Map.Entry<String, plasmaCondenser.wordStatProp>> i = condenser.words().entrySet().iterator();
         Map.Entry<String, plasmaCondenser.wordStatProp> wentry;
         String word;
-        indexRWIEntry ientry;
+        indexRWIRowEntry ientry;
         plasmaCondenser.wordStatProp wprop;
         while (i.hasNext()) {
             wentry = i.next();
@@ -313,14 +312,12 @@ public final class plasmaWordIndex implements indexRI {
                         wprop.posInText,
                         wprop.posInPhrase,
                         wprop.numOfPhrase,
-                        0,
                         urlModified.getTime(),
                         System.currentTimeMillis(),
                         language,
                         doctype,
                         outlinksSame, outlinksOther,
-                        wprop.flags,
-                        0.0);
+                        wprop.flags);
             addEntry(plasmaCondenser.word2hash(word), ientry, System.currentTimeMillis(), false);
             wordCount++;
         }

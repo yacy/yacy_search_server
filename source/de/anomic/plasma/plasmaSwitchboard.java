@@ -124,7 +124,6 @@ import de.anomic.http.httpc;
 import de.anomic.http.httpd;
 import de.anomic.http.httpdRobotsTxtConfig;
 import de.anomic.index.indexContainer;
-import de.anomic.index.indexRWIEntry;
 import de.anomic.index.indexRWIRowEntry;
 import de.anomic.index.indexURLEntry;
 import de.anomic.kelondro.kelondroBitfield;
@@ -2313,7 +2312,7 @@ public final class plasmaSwitchboard extends serverAbstractSwitch implements ser
                                 String word = wentry.getKey();
                                 wordStat = wentry.getValue();
                                 String wordHash = plasmaCondenser.word2hash(word);
-                                indexRWIEntry wordIdxEntry = new indexRWIRowEntry(
+                                indexRWIRowEntry wordIdxEntry = new indexRWIRowEntry(
                                             urlHash,
                                             urlLength, urlComps,
                                             wordStat.count,
@@ -2323,15 +2322,13 @@ public final class plasmaSwitchboard extends serverAbstractSwitch implements ser
                                             wordStat.posInText,
                                             wordStat.posInPhrase,
                                             wordStat.numOfPhrase,
-                                            0,
                                             docDate.getTime(),
                                             System.currentTimeMillis(),
                                             language,
                                             doctype,
                                             ioLinks[0].intValue(),
                                             ioLinks[1].intValue(),
-                                            condenser.RESULT_FLAGS,
-                                            0.0
+                                            condenser.RESULT_FLAGS
                                         );
                                 indexContainer wordIdxContainer = plasmaWordIndex.emptyContainer(wordHash, 1);
                                 wordIdxContainer.add(wordIdxEntry);

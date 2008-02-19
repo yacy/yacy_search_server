@@ -85,11 +85,9 @@ public final class indexRWIRowEntry implements indexRWIEntry {
     private static final int col_posintext     = 15; // t  2 first appearance of word in text
     private static final int col_posinphrase   = 16; // r  1 position of word in its phrase
     private static final int col_posofphrase   = 17; // o  1 number of the phrase where word appears
-    private static final int col_worddistance  = 18; // i  1 initial zero; may be used as reserve: is filled during search
-    private static final int col_reserve       = 19; // k  1 reserve
+    private static final int col_reserve1      = 18; // i  1 reserve1
+    private static final int col_reserve2      = 19; // k  1 reserve2
 
-    public double termFrequency;
-    
     private kelondroRow.Entry entry;
     
     public indexRWIRowEntry(String  urlHash,
@@ -102,15 +100,13 @@ public final class indexRWIRowEntry implements indexRWIEntry {
             int      posintext,     // position of word in all words
             int      posinphrase,   // position of word in its phrase
             int      posofphrase,   // number of the phrase where word appears
-            int      worddistance,  // word distance; this is 0 by default, and set to the difference of posintext from two indexes if these are combined (simultanous search). If stored, this shows that the result was obtained by remote search
             long     lastmodified,  // last-modified time of the document where word appears
             long     updatetime,    // update time; this is needed to compute a TTL for the word, so it can be removed easily if the TTL is short
             String   language,      // (guessed) language of document
             char     doctype,       // type of document
             int      outlinksSame,  // outlinks to same domain
             int      outlinksOther, // outlinks to other domain
-            kelondroBitfield flags, // attributes to the url and to the word according the url
-            double   termFrequency
+            kelondroBitfield flags  // attributes to the url and to the word according the url
     ) {
 
         assert (urlHash.length() == 12) : "urlhash = " + urlHash;
@@ -136,9 +132,8 @@ public final class indexRWIRowEntry implements indexRWIEntry {
         this.entry.setCol(col_posintext, posintext);
         this.entry.setCol(col_posinphrase, posinphrase);
         this.entry.setCol(col_posofphrase, posofphrase);
-        this.entry.setCol(col_worddistance, worddistance);
-        this.entry.setCol(col_reserve, 0);
-        this.termFrequency = termFrequency;
+        this.entry.setCol(col_reserve1, 0);
+        this.entry.setCol(col_reserve2, 0);
     }
     
     public indexRWIRowEntry(String urlHash, String code) {
@@ -255,36 +250,13 @@ public final class indexRWIRowEntry implements indexRWIEntry {
     }
     
     public double termFrequency() {
-        if (this.termFrequency == 0.0) this.termFrequency = (((double) this.hitcount()) / ((double) (this.wordsintext() + this.wordsintitle() + 1)));
-        return this.termFrequency;
+        return (((double) this.hitcount()) / ((double) (this.wordsintext() + this.wordsintitle() + 1)));
     }
     
     public String toString() {
         return toPropertyForm();
     }
-    
-    public static indexRWIEntry join(indexRWIRowEntry ie1, indexRWIEntry ie2) {
-        // returns a modified entry of the first argument
-        
-        // combine the distance
-        ie1.entry.setCol(col_worddistance, ie1.worddistance() + ie2.worddistance() + Math.abs(ie1.posintext() - ie2.posintext()));
-        ie1.entry.setCol(col_posintext, Math.min(ie1.posintext(), ie2.posintext()));
-        ie1.entry.setCol(col_posinphrase, (ie1.posofphrase() == ie2.posofphrase()) ? Math.min(ie1.posinphrase(), ie2.posinphrase()) : 0 /*unknown*/);
-        ie1.entry.setCol(col_posofphrase, Math.min(ie1.posofphrase(), ie2.posofphrase()));
 
-        // combine term frequency
-        ie1.entry.setCol(col_wordsInText, ie1.wordsintext() + ie2.wordsintext());
-        return ie1;
-    }
-    
-    public void join(indexRWIEntry oe) {
-        join(this, oe);
-    }
-
-    public int worddistance() {
-        return (int) this.entry.getColLong(col_worddistance);
-    }
-    
     public boolean isNewer(indexRWIEntry other) {
         if (other == null) return true;
         if (this.lastModified() > other.lastModified()) return true;
