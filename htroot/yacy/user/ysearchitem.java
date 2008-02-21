@@ -235,7 +235,9 @@ public class ysearchitem {
                 prop.putHTML("content_items_0_href", ms.href.toNormalform(true, false));
                 prop.put("content_items_0_code", sb.licensedURLs.aquireLicense(ms.href));
                 prop.putHTML("content_items_0_name", shorten(ms.name, namelength));
-                prop.put("content_items_0_attr", (ms.attr.equals("-1 x -1")) ? "" : " (" + ms.attr + ")"); // attributes, here: original size of image
+                prop.put("content_items_0_attr", (ms.attr.equals("-1 x -1")) ? "" : "(" + ms.attr + ")"); // attributes, here: original size of image
+                prop.put("content_items_0_source", ms.source.toNormalform(true, false));
+                prop.put("content_items_0_sourcedom", ms.source.getHost());
                 prop.put("content_items", 1);
             }
             return prop;

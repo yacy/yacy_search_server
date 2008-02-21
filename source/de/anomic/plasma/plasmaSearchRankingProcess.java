@@ -154,16 +154,16 @@ public final class plasmaSearchRankingProcess {
             
             // load url
             if (sortorder == 0) {
-                this.stack.push(ientry, ientry.urlHash().hashCode());
-                this.urlhashes.put(ientry.urlHash(), ientry.urlHash().hashCode());
+                this.stack.push(ientry, new Long(ientry.urlHash().hashCode()));
+                this.urlhashes.put(ientry.urlHash(), new Integer(ientry.urlHash().hashCode()));
             } else {
                 uentry = wordIndex.loadedURL.load(ientry.urlHash(), ientry, 0);
                 if (uentry == null) {
                     this.misses.add(ientry.urlHash());
                 } else {
                     u = uentry.comp().url().toNormalform(false, true);
-                    this.stack.push(ientry, u.hashCode());
-                    this.urlhashes.put(ientry.urlHash(), u.hashCode());
+                    this.stack.push(ientry, new Long(u.hashCode()));
+                    this.urlhashes.put(ientry.urlHash(), new Integer(u.hashCode()));
                 }
             }
             
@@ -306,7 +306,7 @@ public final class plasmaSearchRankingProcess {
                 continue;
             }
             o = m.top();
-            if (o.weight < bestEntry.weight) {
+            if (o.weight.longValue() < bestEntry.weight.longValue()) {
                 bestEntry = o;
             }
         }
@@ -322,7 +322,7 @@ public final class plasmaSearchRankingProcess {
         // returns from the current RWI list the best URL entry and removed this entry from the list
         while ((stack.size() > 0) || (size() > 0)) {
             kelondroSortStack<indexRWIVarEntry>.stackElement obrwi = bestRWI(skipDoubleDom);
-            indexURLEntry u = wordIndex.loadedURL.load(obrwi.element.urlHash(), obrwi.element, obrwi.weight);
+            indexURLEntry u = wordIndex.loadedURL.load(obrwi.element.urlHash(), obrwi.element, obrwi.weight.longValue());
             if (u != null) {
             	indexURLEntry.Components comp = u.comp();
             	if (comp.url() != null) this.handover.put(u.hash(), comp.url().toNormalform(true, false)); // remember that we handed over this url

@@ -50,7 +50,7 @@ public class kelondroSortStore<E> extends kelondroSortStack<E> {
         return this.offstack.size();
     }
 
-    public synchronized void push(E element, long weight) {
+    public synchronized void push(E element, Long weight) {
         super.push(element, weight);
         if (this.maxsize <= 0) return;
         while ((this.onstack.size() > 0) && (super.onstack.size() + this.offstack.size() > this.maxsize)) {
@@ -79,7 +79,7 @@ public class kelondroSortStore<E> extends kelondroSortStack<E> {
         while (position >= this.offstack.size()) {
             Long w = this.onstack.firstKey();
             E element = this.onstack.remove(w);
-            stackElement se = new stackElement(element, w.longValue());
+            stackElement se = new stackElement(element, w);
             this.offstack.add(se);
         }
         return this.offstack.get(position);
@@ -94,7 +94,7 @@ public class kelondroSortStore<E> extends kelondroSortStack<E> {
             while (this.onstack.size() > 0) {
                 Long w = this.onstack.firstKey();
                 E element = this.onstack.remove(w);
-                stackElement se = new stackElement(element, w.longValue());
+                stackElement se = new stackElement(element, w);
                 this.offstack.add(se);
             }
             return this.offstack;
@@ -103,7 +103,7 @@ public class kelondroSortStore<E> extends kelondroSortStack<E> {
         while (this.onstack.size() < count) {
             Long w = this.onstack.firstKey();
             E element = this.onstack.remove(w);
-            stackElement se = new stackElement(element, w.longValue());
+            stackElement se = new stackElement(element, w);
             this.offstack.add(se);
         }
         return this.offstack;

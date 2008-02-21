@@ -216,7 +216,7 @@ public final class plasmaSearchEvent {
                     snippetComputationAllTime += resultEntry.snippetComputationTime;
                 
                     // place the result to the result vector
-                    result.push(resultEntry, rankedCache.getOrder().cardinal(resultEntry.word()));
+                    result.push(resultEntry, new Long(rankedCache.getOrder().cardinal(resultEntry.word())));
 
                     // add references
                     synchronized (rankedCache) {
@@ -464,6 +464,14 @@ public final class plasmaSearchEvent {
                 event.query = query;
             }
         
+            // if a local crawl is ongoing, do another local search to enrich the current results with more
+            // entries that can possibly come out of the running crawl
+            if (plasmaSwitchboard.getSwitchboard().crawlQueues.noticeURL.size() > 0) {
+                synchronized (event.rankedCache) {
+                    event.rankedCache.execQuery();
+                }
+            }
+            
             // if worker threads had been alive, but did not succeed, start them again to fetch missing links
             if ((query.onlineSnippetFetch) &&
                 (!event.anyWorkerAlive()) &&
@@ -536,7 +544,7 @@ public final class plasmaSearchEvent {
                 
                 // place the result to the result vector
                 if (!result.exists(resultEntry)) {
-                    result.push(resultEntry, rankedCache.getOrder().cardinal(resultEntry.word()));
+                    result.push(resultEntry, new Long(rankedCache.getOrder().cardinal(resultEntry.word())));
                     rankedCache.addReferences(resultEntry);
                 }
                 //System.out.println("DEBUG SNIPPET_LOADING: thread " + id + " got " + resultEntry.url());
@@ -620,7 +628,7 @@ public final class plasmaSearchEvent {
                 if (imagemedia != null) {
                     for (int j = 0; j < imagemedia.size(); j++) {
                         ms = imagemedia.get(j);
-                        images.push(ms, ms.ranking);
+                        images.push(ms, new Long(ms.ranking));
                     }
                 }
             }

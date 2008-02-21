@@ -230,12 +230,13 @@ public class plasmaSnippetCache {
     
     public static class MediaSnippet {
         public int type;
-        public yacyURL href;
+        public yacyURL href, source;
         public String name, attr;
         public int ranking;
-        public MediaSnippet(int type, yacyURL href, String name, String attr, int ranking) {
+        public MediaSnippet(int type, yacyURL href, String name, String attr, int ranking, yacyURL source) {
             this.type = type;
             this.href = href;
+            this.source = source; // the web page where the media resource appeared
             this.name = name;
             this.attr = attr;
             this.ranking = ranking; // the smaller the better! small values should be shown first
@@ -682,12 +683,12 @@ public class plasmaSnippetCache {
             desc = entry.getValue();
             s = removeAppearanceHashes(url.toNormalform(false, false), queryhashes);
             if (s.size() == 0) {
-                result.add(new MediaSnippet(mediatype, url, desc, null, 0));
+                result.add(new MediaSnippet(mediatype, url, desc, null, 0, document.dc_source()));
                 continue;
             }
             s = removeAppearanceHashes(desc, s);
             if (s.size() == 0) {
-                result.add(new MediaSnippet(mediatype, url, desc, null, 0));
+                result.add(new MediaSnippet(mediatype, url, desc, null, 0, document.dc_source()));
                 continue;
             }
         }
@@ -712,15 +713,13 @@ public class plasmaSnippetCache {
             s = removeAppearanceHashes(url.toNormalform(false, false), queryhashes);
             if (s.size() == 0) {
                 int ranking = ientry.hashCode();
-                System.out.println(ranking);
-                result.add(new MediaSnippet(plasmaSearchQuery.CONTENTDOM_IMAGE, url, desc, ientry.width() + " x " + ientry.height(), ranking));
+                result.add(new MediaSnippet(plasmaSearchQuery.CONTENTDOM_IMAGE, url, desc, ientry.width() + " x " + ientry.height(), ranking, document.dc_source()));
                 continue;
             }
             s = removeAppearanceHashes(desc, s);
             if (s.size() == 0) {
                 int ranking = ientry.hashCode();
-                System.out.println(ranking);
-                result.add(new MediaSnippet(plasmaSearchQuery.CONTENTDOM_IMAGE, url, desc, ientry.width() + " x " + ientry.height(), ranking));
+                result.add(new MediaSnippet(plasmaSearchQuery.CONTENTDOM_IMAGE, url, desc, ientry.width() + " x " + ientry.height(), ranking, document.dc_source()));
                 continue;
             }
         }

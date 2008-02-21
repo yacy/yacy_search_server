@@ -57,18 +57,17 @@ public class kelondroSortStack<E> {
         push(se.element, se.weight);
     }
     
-    public synchronized void push(E element, long weight) {
+    public synchronized void push(E element, Long weight) {
         if (exists(element)) return;
         
         // manipulate weight in such a way that it has no conflicts
-        Long w = new Long(weight);
-        while (this.onstack.containsKey(w)) w = new Long(w.longValue() + 1);
+        while (this.onstack.containsKey(weight)) weight = new Long(weight.longValue() + 1);
         
         // put the element on the stack
-        this.onstack.put(w, element);
+        this.onstack.put(weight, element);
         
         // register it for double-check
-        this.instack.add(element.hashCode());
+        this.instack.add(new Integer(element.hashCode()));
 
         // check maximum size of the stack an remove elements if the stack gets too large
         if (this.maxsize <= 0) return;
@@ -82,7 +81,7 @@ public class kelondroSortStack<E> {
         if (this.onstack.size() == 0) return null;
         Long w = this.onstack.firstKey();
         E element = this.onstack.get(w);
-        return new stackElement(element, w.longValue());
+        return new stackElement(element, w);
     }
     
     public synchronized stackElement pop() {
@@ -92,18 +91,18 @@ public class kelondroSortStack<E> {
         if (this.onstack.size() == 0) return null;
         Long w = this.onstack.firstKey();
         E element = this.onstack.remove(w);
-        stackElement se = new stackElement(element, w.longValue());
+        stackElement se = new stackElement(element, w);
         return se;
     }
     
     public boolean exists(E element) {
         // uses the hashCode of the element to find out of the element had been on the list or the stack
-        return this.instack.contains(element.hashCode());
+        return this.instack.contains(new Integer(element.hashCode()));
     }
     
     public boolean exists(int hashcode) {
         // uses the hashCode of the element to find out of the element had been on the list or the stack
-        return this.instack.contains(hashcode);
+        return this.instack.contains(new Integer(hashcode));
     }
     
     public stackElement get(int hashcode) {
@@ -111,7 +110,7 @@ public class kelondroSortStack<E> {
         Map.Entry<Long, E> entry;
         while (i.hasNext()) {
             entry = i.next();
-            if (entry.getValue().hashCode() == hashcode) return new stackElement(entry.getValue(), entry.getKey().longValue());
+            if (entry.getValue().hashCode() == hashcode) return new stackElement(entry.getValue(), entry.getKey());
         }
         return null;
     }
@@ -123,7 +122,7 @@ public class kelondroSortStack<E> {
         while (i.hasNext()) {
             entry = i.next();
             if (entry.getValue().hashCode() == hashcode) {
-                se = new stackElement(entry.getValue(), entry.getKey().longValue());
+                se = new stackElement(entry.getValue(), entry.getKey());
                 this.onstack.remove(se.weight);
                 return se;
             }
@@ -137,9 +136,9 @@ public class kelondroSortStack<E> {
     }
     
     public class stackElement {
-        public long weight;
+        public Long weight;
         public E element;
-        public stackElement(E element, long weight) {
+        public stackElement(E element, Long weight) {
             this.element = element;
             this.weight = weight;
         }

@@ -167,7 +167,7 @@ public class yacysearch {
         int contentdomCode = plasmaSearchQuery.contentdomParser(post.get("contentdom", "text"));
         
         // patch until better search profiles are available
-        if ((contentdomCode != plasmaSearchQuery.CONTENTDOM_TEXT) && (itemsPerPage <= 30)) itemsPerPage = 30;
+        if ((contentdomCode != plasmaSearchQuery.CONTENTDOM_TEXT) && (itemsPerPage <= 32)) itemsPerPage = 32;
         
         serverObjects prop = new serverObjects();
         if (post.get("cat", "href").equals("href")) {
