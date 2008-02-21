@@ -242,6 +242,9 @@ public class plasmaSnippetCache {
             if ((this.name == null) || (this.name.length() == 0)) this.name = "_";
             if ((this.attr == null) || (this.attr.length() == 0)) this.attr = "_";
         }
+        public int hashCode() {
+            return href.hashCode();
+        }
     }
     
     public static boolean existsInCache(yacyURL url, Set<String> queryhashes) {
