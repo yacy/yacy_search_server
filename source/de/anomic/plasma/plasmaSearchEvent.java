@@ -81,6 +81,7 @@ public final class plasmaSearchEvent {
     public  String IAmaxcounthash, IAneardhthash;
     private resultWorker[] workerThreads;
     private kelondroSortStore<ResultEntry> result;
+    private kelondroSortStore<plasmaSnippetCache.MediaSnippet> images; // container to sort images by size
     private HashMap<String, String> failedURLs; // a mapping from a urlhash to a fail reason string
     TreeSet<String> snippetFetchWordHashes; // a set of word hashes that are used to match with the snippets
     private long urlRetrievalAllTime;
@@ -107,6 +108,7 @@ public final class plasmaSearchEvent {
         this.workerThreads = null;
         this.localSearchThread = null;
         this.result = new kelondroSortStore<ResultEntry>(-1); // this is the result, enriched with snippets, ranked and ordered by ranking
+        this.images = new kelondroSortStore<plasmaSnippetCache.MediaSnippet>(-1);
         this.failedURLs = new HashMap<String, String>(); // a map of urls to reason strings where a worker thread tried to work on, but failed.
         
         // snippets do not need to match with the complete query hashes,
@@ -465,7 +467,8 @@ public final class plasmaSearchEvent {
             // if worker threads had been alive, but did not succeed, start them again to fetch missing links
             if ((query.onlineSnippetFetch) &&
                 (!event.anyWorkerAlive()) &&
-                (event.result.size() < query.neededResults() + 10) &&
+                (((query.contentdom == plasmaSearchQuery.CONTENTDOM_IMAGE) && (event.images.size() + 30 < query.neededResults())) ||
+                 (event.result.size() < query.neededResults() + 10)) &&
                 (event.getRankingResult().getLocalResourceSize() + event.getRankingResult().getRemoteResourceSize() > event.result.size())) {
                 // set new timeout
                 event.eventTime = System.currentTimeMillis();
@@ -507,7 +510,9 @@ public final class plasmaSearchEvent {
             while (System.currentTimeMillis() < this.timeout) {
                 this.lastLifeSign = System.currentTimeMillis();
 
-                if (result.size() >= query.neededResults() /*+ query.displayResults()*/) break; // we have enough
+                // check if we have enough
+                if ((query.contentdom == plasmaSearchQuery.CONTENTDOM_IMAGE) && (images.size() >= query.neededResults() + 30)) break;
+                if ((query.contentdom != plasmaSearchQuery.CONTENTDOM_IMAGE) && (result.size() >= query.neededResults() + 10 /*+ query.displayResults()*/)) break;
 
                 // get next entry
                 page = rankedCache.bestURL(true);
@@ -558,7 +563,7 @@ public final class plasmaSearchEvent {
     }
     
     public ResultEntry oneResult(int item) {
-        // first sleep a while to give accumulation threads a chance to work
+        // check if we already retrieved this item (happens if a search pages is accessed a second time)
         if (this.result.sizeStore() > item) {
             // we have the wanted result already in the result array .. return that
             return this.result.element(item).element;
@@ -589,6 +594,43 @@ public final class plasmaSearchEvent {
         return this.result.element(item).element;
     }
 
+    private int resultCounter = 0;
+    public ResultEntry nextResult() {
+        ResultEntry re = oneResult(resultCounter);
+        resultCounter++;
+        return re;
+    }
+    
+    public plasmaSnippetCache.MediaSnippet oneImage(int item) {
+        // check if we already retrieved this item (happens if a search pages is accessed a second time)
+        if (this.images.sizeStore() > item) {
+            // we have the wanted result already in the result array .. return that
+            return this.images.element(item).element;
+        }
+        
+        // feed some results from the result stack into the image stack
+        int count = Math.min(5, Math.max(1, 10 * this.result.size() / (item + 1)));
+        for (int i = 0; i < count; i++) {
+            // generate result object
+            plasmaSearchEvent.ResultEntry result = nextResult();
+            plasmaSnippetCache.MediaSnippet ms;
+            if (result != null) {
+                // iterate over all images in the result
+                ArrayList<plasmaSnippetCache.MediaSnippet> imagemedia = result.mediaSnippets();
+                if (imagemedia != null) {
+                    for (int j = 0; j < imagemedia.size(); j++) {
+                        ms = imagemedia.get(j);
+                        images.push(ms, ms.ranking);
+                    }
+                }
+            }
+        }
+        
+        // now take the specific item from the image stack
+        if (this.images.size() <= item) return null;
+        return this.images.element(item).element;
+    }
+    
     public ArrayList<kelondroSortStack<ResultEntry>.stackElement> completeResults(long waitingtime) {
         long timeout = System.currentTimeMillis() + waitingtime;
         while ((result.size() < query.neededResults()) && (anyWorkerAlive()) && (System.currentTimeMillis() < timeout)) {

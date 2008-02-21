@@ -80,10 +80,10 @@ public class htmlFilterImageEntry implements Comparable<htmlFilterImageEntry> {
         // this hash method therefore tries to compute a 'perfect hash' based on the size of the images
         // unfortunately it can not be ensured that all images get different hashes, but this should appear
         // only in very rare cases
-        if ((width > 0) && (height > 0))
-            return ((0xFFFF - (((width * height) >> 8) & 0xFFFF)) << 16) | (url.hashCode() & 0xFFFF);
+        if ((width >= 0) && (height >= 0))
+            return ((0x7FFF - (((width * height) >> 9) & 0x7FFF)) << 16) | (url.hashCode() & 0xFFFF);
         else
-            return 0xFFFF0000 | (url.hashCode() & 0xFFFF);
+            return 0x7FFF0000 | (url.hashCode() & 0xFFFF);
     }
     
     public int compareTo(htmlFilterImageEntry h) {

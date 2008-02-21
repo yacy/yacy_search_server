@@ -164,35 +164,32 @@ public class ysearchitem {
             
             return prop;
         }
-        
-        // generate result object
-        plasmaSearchEvent.ResultEntry result = theSearch.oneResult(item);
-        
-        if (result == null) {
-            // no content
-            return prop;
-        }
-            
-        if (rss) {
-            // text search for rss output
-            prop.put("rss", "1"); // switch on specific content
-            prop.putHTML("rss_title", result.title(), true);
-            prop.putHTML("rss_description", result.textSnippet().getLineRaw(), true);
-            prop.putHTML("rss_link", result.urlstring(), true);
-            prop.put("rss_urlhash", result.hash());
-            prop.put("rss_date", plasmaSwitchboard.dateString822(result.modified()));
-            return prop;
-        }
-        
+
         prop.put("rss", "0");
         
         if (theQuery.contentdom == plasmaSearchQuery.CONTENTDOM_TEXT) {
             // text search
+
+            // generate result object
+            plasmaSearchEvent.ResultEntry result = theSearch.oneResult(item);
+            if (result == null) return prop; // no content
+                
+            if (rss) {
+                // text search for rss output
+                prop.put("rss", "1"); // switch on specific content
+                prop.putHTML("rss_title", result.title(), true);
+                prop.putHTML("rss_description", result.textSnippet().getLineRaw(), true);
+                prop.putHTML("rss_link", result.urlstring(), true);
+                prop.put("rss_urlhash", result.hash());
+                prop.put("rss_date", plasmaSwitchboard.dateString822(result.modified()));
+                return prop;
+            }
+            
             prop.put("content", theQuery.contentdom + 1); // switch on specific content
             prop.put("content_authorized", authenticated ? "1" : "0");
             prop.put("content_authorized_recommend", (yacyCore.newsPool.getSpecific(yacyNewsPool.OUTGOING_DB, yacyNewsPool.CATEGORY_SURFTIPP_ADD, "url", result.urlstring()) == null) ? "1" : "0");
-            prop.put("content_authorized_recommend_deletelink", "/ysearch.html?search=" + theQuery.queryString + "&Enter=Search&count=" + theQuery.displayResults() + "&offset=" + (theQuery.neededResults() - theQuery.displayResults()) + "&order=" + crypt.simpleEncode(theQuery.ranking.toExternalString()) + "&resource=local&time=3&deleteref=" + result.hash() + "&urlmaskfilter=.*");
-            prop.put("content_authorized_recommend_recommendlink", "/ysearch.html?search=" + theQuery.queryString + "&Enter=Search&count=" + theQuery.displayResults() + "&offset=" + (theQuery.neededResults() - theQuery.displayResults()) + "&order=" + crypt.simpleEncode(theQuery.ranking.toExternalString()) + "&resource=local&time=3&recommendref=" + result.hash() + "&urlmaskfilter=.*");
+            prop.put("content_authorized_recommend_deletelink", "/yacysearch.html?search=" + theQuery.queryString + "&Enter=Search&count=" + theQuery.displayResults() + "&offset=" + (theQuery.neededResults() - theQuery.displayResults()) + "&order=" + crypt.simpleEncode(theQuery.ranking.toExternalString()) + "&resource=local&time=3&deleteref=" + result.hash() + "&urlmaskfilter=.*");
+            prop.put("content_authorized_recommend_recommendlink", "/yacysearch.html?search=" + theQuery.queryString + "&Enter=Search&count=" + theQuery.displayResults() + "&offset=" + (theQuery.neededResults() - theQuery.displayResults()) + "&order=" + crypt.simpleEncode(theQuery.ranking.toExternalString()) + "&resource=local&time=3&recommendref=" + result.hash() + "&urlmaskfilter=.*");
             prop.put("content_authorized_urlhash", result.hash());
             prop.putHTML("content_description", result.title());
             prop.put("content_url", result.urlstring());
@@ -229,23 +226,17 @@ public class ysearchitem {
         
         if (theQuery.contentdom == plasmaSearchQuery.CONTENTDOM_IMAGE) {
             // image search; shows thumbnails
-            // iterate over all images in the result
+
             prop.put("content", theQuery.contentdom + 1); // switch on specific content
-            ArrayList<plasmaSnippetCache.MediaSnippet> images = result.mediaSnippets();
-            if (images != null) {
-                plasmaSnippetCache.MediaSnippet ms;
-                int c = 0;
-                for (int i = 0; i < images.size(); i++) {
-                    ms = (plasmaSnippetCache.MediaSnippet) images.get(i);
-                    prop.putHTML("content_items_" + i + "_href", ms.href.toNormalform(true, false));
-                    prop.put("content_items_" + i + "_code", sb.licensedURLs.aquireLicense(ms.href));
-                    prop.putHTML("content_items_" + i + "_name", shorten(ms.name, namelength));
-                    prop.put("content_items_" + i + "_attr", ms.attr); // attributes, here: original size of image
-                    c++;
-                }
-                prop.put("content_items", c);
-            } else {
+            plasmaSnippetCache.MediaSnippet ms = theSearch.oneImage(item);
+            if (ms == null) {
                 prop.put("content_items", "0");
+            } else {
+                prop.putHTML("content_items_0_href", ms.href.toNormalform(true, false));
+                prop.put("content_items_0_code", sb.licensedURLs.aquireLicense(ms.href));
+                prop.putHTML("content_items_0_name", shorten(ms.name, namelength));
+                prop.put("content_items_0_attr", (ms.attr.equals("-1 x -1")) ? "" : " (" + ms.attr + ")"); // attributes, here: original size of image
+                prop.put("content_items", 1);
             }
             return prop;
         }
@@ -254,6 +245,11 @@ public class ysearchitem {
             (theQuery.contentdom == plasmaSearchQuery.CONTENTDOM_VIDEO) ||
             (theQuery.contentdom == plasmaSearchQuery.CONTENTDOM_APP)) {
             // any other media content
+
+            // generate result object
+            plasmaSearchEvent.ResultEntry result = theSearch.oneResult(item);
+            if (result == null) return prop; // no content
+            
             prop.put("content", theQuery.contentdom + 1); // switch on specific content
             ArrayList<plasmaSnippetCache.MediaSnippet> media = result.mediaSnippets();
             if (item == 0) col = true;

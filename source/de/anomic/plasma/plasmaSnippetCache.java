@@ -232,11 +232,13 @@ public class plasmaSnippetCache {
         public int type;
         public yacyURL href;
         public String name, attr;
-        public MediaSnippet(int type, yacyURL href, String name, String attr) {
+        public int ranking;
+        public MediaSnippet(int type, yacyURL href, String name, String attr, int ranking) {
             this.type = type;
             this.href = href;
             this.name = name;
             this.attr = attr;
+            this.ranking = ranking; // the smaller the better! small values should be shown first
             if ((this.name == null) || (this.name.length() == 0)) this.name = "_";
             if ((this.attr == null) || (this.attr.length() == 0)) this.attr = "_";
         }
@@ -677,12 +679,12 @@ public class plasmaSnippetCache {
             desc = entry.getValue();
             s = removeAppearanceHashes(url.toNormalform(false, false), queryhashes);
             if (s.size() == 0) {
-                result.add(new MediaSnippet(mediatype, url, desc, null));
+                result.add(new MediaSnippet(mediatype, url, desc, null, 0));
                 continue;
             }
             s = removeAppearanceHashes(desc, s);
             if (s.size() == 0) {
-                result.add(new MediaSnippet(mediatype, url, desc, null));
+                result.add(new MediaSnippet(mediatype, url, desc, null, 0));
                 continue;
             }
         }
@@ -691,7 +693,8 @@ public class plasmaSnippetCache {
     
     public static ArrayList<MediaSnippet> computeImageSnippets(plasmaParserDocument document, Set<String> queryhashes) {
         
-        TreeSet<htmlFilterImageEntry> images = document.getImages();
+        TreeSet<htmlFilterImageEntry> images = document.getImages(); // iterates images in descending size order!
+        // a measurement for the size of the images can be retrieved using the htmlFilterImageEntry.hashCode()
         
         Iterator<htmlFilterImageEntry> i = images.iterator();
         htmlFilterImageEntry ientry;
@@ -705,12 +708,16 @@ public class plasmaSnippetCache {
             desc = ientry.alt();
             s = removeAppearanceHashes(url.toNormalform(false, false), queryhashes);
             if (s.size() == 0) {
-                result.add(new MediaSnippet(plasmaSearchQuery.CONTENTDOM_IMAGE, url, desc, ientry.width() + " x " + ientry.height()));
+                int ranking = ientry.hashCode();
+                System.out.println(ranking);
+                result.add(new MediaSnippet(plasmaSearchQuery.CONTENTDOM_IMAGE, url, desc, ientry.width() + " x " + ientry.height(), ranking));
                 continue;
             }
             s = removeAppearanceHashes(desc, s);
             if (s.size() == 0) {
-                result.add(new MediaSnippet(plasmaSearchQuery.CONTENTDOM_IMAGE, url, desc, ientry.width() + " x " + ientry.height()));
+                int ranking = ientry.hashCode();
+                System.out.println(ranking);
+                result.add(new MediaSnippet(plasmaSearchQuery.CONTENTDOM_IMAGE, url, desc, ientry.width() + " x " + ientry.height(), ranking));
                 continue;
             }
         }
