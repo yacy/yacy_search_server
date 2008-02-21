@@ -27,6 +27,7 @@
 package de.anomic.index;
 
 import de.anomic.kelondro.kelondroBitfield;
+import de.anomic.plasma.plasmaWordIndex;
 
 public class indexRWIVarEntry implements indexRWIEntry {
 
@@ -40,7 +41,52 @@ public class indexRWIVarEntry implements indexRWIEntry {
                worddistance, wordsintext, wordsintitle;
     public double termFrequency;
     
-    public indexRWIVarEntry(indexRWIEntry e) {
+    public indexRWIVarEntry(String  urlHash,
+            int      urlLength,     // byte-length of complete URL
+            int      urlComps,      // number of path components
+            int      titleLength,   // length of description/length (longer are better?)
+            int      hitcount,      // how often appears this word in the text
+            int      wordcount,     // total number of words
+            int      phrasecount,   // total number of phrases
+            int      posintext,     // position of word in all words
+            int      posinphrase,   // position of word in its phrase
+            int      posofphrase,   // number of the phrase where word appears
+            long     lastmodified,  // last-modified time of the document where word appears
+            long     updatetime,    // update time; this is needed to compute a TTL for the word, so it can be removed easily if the TTL is short
+            String   language,      // (guessed) language of document
+            char     doctype,       // type of document
+            int      outlinksSame,  // outlinks to same domain
+            int      outlinksOther, // outlinks to other domain
+            kelondroBitfield flags,  // attributes to the url and to the word according the url
+            int      worddistance,
+            double   termfrequency
+    ) {
+        if ((language == null) || (language.length() != 2)) language = "uk";
+        int mddlm = plasmaWordIndex.microDateDays(lastmodified);
+        int mddct = plasmaWordIndex.microDateDays(updatetime);
+        this.flags = flags;
+        this.freshUntil = Math.max(0, mddlm + (mddct - mddlm) * 2);
+        this.lastModified = lastmodified;
+        this.language = language;
+        this.urlHash = urlHash;
+        this.type = doctype;
+        this.hitcount = hitcount;
+        this.llocal = outlinksSame;
+        this.lother = outlinksOther;
+        this.phrasesintext = outlinksOther;
+        this.posintext = posintext;
+        this.posinphrase = posinphrase;
+        this.posofphrase = posofphrase;
+        this.urlcomps = urlComps;
+        this.urllength = urlLength;
+        this.virtualAge = mddlm;
+        this.worddistance = worddistance;
+        this.wordsintext = wordcount;
+        this.wordsintitle = titleLength;
+        this.termFrequency = termfrequency;
+    }
+    
+    public indexRWIVarEntry(indexRWIRowEntry e) {
         this.flags = e.flags();
         this.freshUntil = e.freshUntil();
         this.lastModified = e.lastModified();
@@ -60,18 +106,43 @@ public class indexRWIVarEntry implements indexRWIEntry {
         this.worddistance = 0;
         this.wordsintext = e.wordsintext();
         this.wordsintitle = e.wordsintitle();
-        this.termFrequency = 0.0;
+        this.termFrequency = e.termFrequency();
+    }
+    
+    public indexRWIVarEntry clone() {
+        indexRWIVarEntry c = new indexRWIVarEntry(
+                this.urlHash,
+                this.urllength,
+                this.urlcomps,
+                this.wordsintitle,
+                this.hitcount,
+                this.wordsintext,
+                this.phrasesintext,
+                this.posintext,
+                this.posinphrase,
+                this.posofphrase,
+                this.lastModified,
+                System.currentTimeMillis(),
+                this.language,
+                this.type,
+                this.llocal,
+                this.lother,
+                this.flags,
+                this.worddistance,
+                this.termFrequency);
+        return c;
     }
     
     public void join(indexRWIVarEntry oe) {
         // combine the distance
-        this.worddistance = this.worddistance() + oe.worddistance() + Math.abs(this.posintext() - oe.posintext());
-        this.posintext = Math.min(this.posintext(), oe.posintext());
-        this.posinphrase = (this.posofphrase() == oe.posofphrase()) ? Math.min(this.posinphrase(), oe.posinphrase()) : 0;
-        this.posofphrase = Math.min(this.posofphrase(), oe.posofphrase());
+        this.worddistance = this.worddistance + oe.worddistance + Math.abs(this.posintext - oe.posintext);
+        this.posintext = Math.min(this.posintext, oe.posintext);
+        this.posinphrase = (this.posofphrase == oe.posofphrase) ? Math.min(this.posinphrase, oe.posinphrase) : 0;
+        this.posofphrase = Math.min(this.posofphrase, oe.posofphrase);
 
         // combine term frequency
-        this.wordsintext = this.wordsintext() + oe.wordsintext();
+        this.wordsintext = this.wordsintext + oe.wordsintext;
+        this.termFrequency = this.termFrequency + oe.termFrequency;
     }
 
     public kelondroBitfield flags() {
@@ -191,66 +262,65 @@ public class indexRWIVarEntry implements indexRWIEntry {
         return this.termFrequency;
     }
     
-    public static final void min(indexRWIVarEntry t, indexRWIVarEntry other) {
+    public final void min(indexRWIVarEntry other) {
         int v;
         long w;
         double d;
-        if (t.hitcount() > (v = other.hitcount())) t.hitcount = v;
-        if (t.llocal() > (v = other.llocal())) t.llocal = v;
-        if (t.lother() > (v = other.lother())) t.lother = v;
-        if (t.virtualAge() > (v = other.virtualAge())) t.virtualAge = v;
-        if (t.wordsintext() > (v = other.wordsintext())) t.wordsintext = v;
-        if (t.phrasesintext() > (v = other.phrasesintext())) t.phrasesintext = v;
-        if (t.posintext() > (v = other.posintext())) t.posintext = v;
-        if (t.posinphrase() > (v = other.posinphrase())) t.posinphrase = v;
-        if (t.posofphrase() > (v = other.posofphrase())) t.posofphrase = v;
-        if (t.worddistance() > (v = other.worddistance())) t.worddistance = v;
-        if (t.lastModified() > (w = other.lastModified())) t.lastModified = w;
-        if (t.freshUntil() > (w = other.freshUntil())) t.freshUntil = w;
-        if (t.urllength() > (v = other.urllength())) t.urllength = v;
-        if (t.urlcomps() > (v = other.urlcomps())) t.urlcomps = v;
-        if (t.wordsintitle() > (v = other.wordsintitle())) t.wordsintitle = v;
-        if (t.termFrequency > (d = other.termFrequency())) t.termFrequency = d;
+        if (this.hitcount > (v = other.hitcount)) this.hitcount = v;
+        if (this.llocal > (v = other.llocal)) this.llocal = v;
+        if (this.lother > (v = other.lother)) this.lother = v;
+        if (this.virtualAge > (v = other.virtualAge)) this.virtualAge = v;
+        if (this.wordsintext > (v = other.wordsintext)) this.wordsintext = v;
+        if (this.phrasesintext > (v = other.phrasesintext)) this.phrasesintext = v;
+        if (this.posintext > (v = other.posintext)) this.posintext = v;
+        if (this.posinphrase > (v = other.posinphrase)) this.posinphrase = v;
+        if (this.posofphrase > (v = other.posofphrase)) this.posofphrase = v;
+        if (this.worddistance > (v = other.worddistance)) this.worddistance = v;
+        if (this.lastModified > (w = other.lastModified)) this.lastModified = w;
+        if (this.freshUntil > (w = other.freshUntil)) this.freshUntil = w;
+        if (this.urllength > (v = other.urllength)) this.urllength = v;
+        if (this.urlcomps > (v = other.urlcomps)) this.urlcomps = v;
+        if (this.wordsintitle > (v = other.wordsintitle)) this.wordsintitle = v;
+        if (this.termFrequency > (d = other.termFrequency)) this.termFrequency = d;
     }
     
-    public static final void max(indexRWIVarEntry t, indexRWIVarEntry other) {
+    public final void max(indexRWIVarEntry other) {
         int v;
         long w;
         double d;
-        if (t.hitcount() < (v = other.hitcount())) t.hitcount = v;
-        if (t.llocal() < (v = other.llocal())) t.llocal = v;
-        if (t.lother() < (v = other.lother())) t.lother = v;
-        if (t.virtualAge() < (v = other.virtualAge())) t.virtualAge = v;
-        if (t.wordsintext() < (v = other.wordsintext())) t.wordsintext = v;
-        if (t.phrasesintext() < (v = other.phrasesintext())) t.phrasesintext = v;
-        if (t.posintext() < (v = other.posintext())) t.posintext = v;
-        if (t.posinphrase() < (v = other.posinphrase())) t.posinphrase = v;
-        if (t.posofphrase() < (v = other.posofphrase())) t.posofphrase = v;
-        if (t.worddistance() < (v = other.worddistance())) t.worddistance = v;
-        if (t.lastModified() < (w = other.lastModified())) t.lastModified = w;
-        if (t.freshUntil() < (w = other.freshUntil())) t.freshUntil = w;
-        if (t.urllength() < (v = other.urllength())) t.urllength = v;
-        if (t.urlcomps() < (v = other.urlcomps())) t.urlcomps = v;
-        if (t.wordsintitle() < (v = other.wordsintitle())) t.wordsintitle = v;
-        if (t.termFrequency < (d = other.termFrequency())) t.termFrequency = d;
+        if (this.hitcount < (v = other.hitcount)) this.hitcount = v;
+        if (this.llocal < (v = other.llocal)) this.llocal = v;
+        if (this.lother < (v = other.lother)) this.lother = v;
+        if (this.virtualAge < (v = other.virtualAge)) this.virtualAge = v;
+        if (this.wordsintext < (v = other.wordsintext)) this.wordsintext = v;
+        if (this.phrasesintext < (v = other.phrasesintext)) this.phrasesintext = v;
+        if (this.posintext < (v = other.posintext)) this.posintext = v;
+        if (this.posinphrase < (v = other.posinphrase)) this.posinphrase = v;
+        if (this.posofphrase < (v = other.posofphrase)) this.posofphrase = v;
+        if (this.worddistance < (v = other.worddistance)) this.worddistance = v;
+        if (this.lastModified < (w = other.lastModified)) this.lastModified = w;
+        if (this.freshUntil < (w = other.freshUntil)) this.freshUntil = w;
+        if (this.urllength < (v = other.urllength)) this.urllength = v;
+        if (this.urlcomps < (v = other.urlcomps)) this.urlcomps = v;
+        if (this.wordsintitle < (v = other.wordsintitle)) this.wordsintitle = v;
+        if (this.termFrequency < (d = other.termFrequency)) this.termFrequency = d;
     }
 
-    public static void join(indexRWIVarEntry ie1, indexRWIEntry ie2) {
-        // returns a modified entry of the first argument
+    public void join(indexRWIEntry oe) {
+        // joins two entries into one entry
         
         // combine the distance
-        ie1.worddistance = ie1.worddistance + ((ie2 instanceof indexRWIVarEntry) ? ((indexRWIVarEntry) ie2).worddistance() : 0) + Math.abs(ie1.posintext() - ie2.posintext());
-        ie1.posintext = Math.min(ie1.posintext(), ie2.posintext());
-        ie1.posinphrase = (ie1.posofphrase() == ie2.posofphrase()) ? Math.min(ie1.posinphrase(), ie2.posinphrase()) : 0;
-        ie1.posofphrase = Math.min(ie1.posofphrase(), ie2.posofphrase());
+        this.worddistance = this.worddistance + ((oe instanceof indexRWIVarEntry) ? ((indexRWIVarEntry) oe).worddistance : 0) + Math.abs(this.posintext() - oe.posintext());
+        this.posintext = Math.min(this.posintext, oe.posintext());
+        this.posinphrase = (this.posofphrase == oe.posofphrase()) ? Math.min(this.posinphrase, oe.posinphrase()) : 0;
+        this.posofphrase = Math.min(this.posofphrase, oe.posofphrase());
 
         // combine term frequency
-        ie1.termFrequency = ie1.termFrequency + ie2.termFrequency();
-        ie1.wordsintext = ie1.wordsintext() + ie2.wordsintext();
-    }
-    
-    public void join(indexRWIEntry oe) {
-        join(this, oe);
+        this.termFrequency = this.termFrequency + oe.termFrequency();
+        this.wordsintext = this.wordsintext + oe.wordsintext();
     }
 
+    public int hashCode() {
+        return this.urlHash.hashCode();
+    }
 }

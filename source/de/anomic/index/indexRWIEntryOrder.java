@@ -31,16 +31,14 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
 
-import de.anomic.kelondro.kelondroAbstractOrder;
 import de.anomic.kelondro.kelondroBitfield;
 import de.anomic.kelondro.kelondroMScoreCluster;
-import de.anomic.kelondro.kelondroOrder;
 import de.anomic.plasma.plasmaCondenser;
 import de.anomic.plasma.plasmaSearchRankingProcess;
 import de.anomic.plasma.plasmaSearchRankingProfile;
 import de.anomic.yacy.yacyURL;
 
-public class indexRWIEntryOrder extends kelondroAbstractOrder<indexRWIVarEntry> implements kelondroOrder<indexRWIVarEntry> {
+public class indexRWIEntryOrder {
     private indexRWIVarEntry min, max;
     private plasmaSearchRankingProfile ranking;
     private kelondroMScoreCluster<String> doms; // collected for "authority" heuristic 
@@ -69,8 +67,8 @@ public class indexRWIEntryOrder extends kelondroAbstractOrder<indexRWIVarEntry> 
             mmf0.start(); // fork here
             minmaxfinder mmf1 = new minmaxfinder(container, middle, container.size());
             mmf1.run(); // execute other fork in this thread
-            if (this.min == null) this.min = mmf1.entryMin; else indexRWIVarEntry.min(this.min, mmf1.entryMin);
-            if (this.max == null) this.max = mmf1.entryMax; else indexRWIVarEntry.max(this.max, mmf1.entryMax);
+            if (this.min == null) this.min = mmf1.entryMin.clone(); else this.min.min(mmf1.entryMin);
+            if (this.max == null) this.max = mmf1.entryMax.clone(); else this.max.max(mmf1.entryMax);
             Map.Entry<String, Integer> entry;
             Iterator<Map.Entry<String, Integer>> di = mmf1.domcount().entrySet().iterator();
             while (di.hasNext()) {
@@ -78,8 +76,8 @@ public class indexRWIEntryOrder extends kelondroAbstractOrder<indexRWIVarEntry> 
             	this.doms.addScore(entry.getKey(), ((Integer) entry.getValue()).intValue());
             }
             try {mmf0.join();} catch (InterruptedException e) {} // wait for fork thread to finish
-            if (this.min == null) this.min = mmf0.entryMin; else indexRWIVarEntry.min(this.min, mmf0.entryMin);
-            if (this.max == null) this.max = mmf0.entryMax; else indexRWIVarEntry.max(this.max, mmf0.entryMax);
+            if (this.min == null) this.min = mmf0.entryMin.clone(); else this.min.min(mmf0.entryMin);
+            if (this.max == null) this.max = mmf0.entryMax.clone(); else this.max.max(mmf0.entryMax);
             di = mmf0.domcount().entrySet().iterator();
             while (di.hasNext()) {
             	entry = di.next();
@@ -93,8 +91,8 @@ public class indexRWIEntryOrder extends kelondroAbstractOrder<indexRWIVarEntry> 
             // run minmax in one thread
             minmaxfinder mmf = new minmaxfinder(container, 0, container.size());
             mmf.run(); // execute without multi-threading
-            if (this.min == null) this.min = mmf.entryMin; else indexRWIVarEntry.min(this.min, mmf.entryMin);
-            if (this.max == null) this.max = mmf.entryMax; else indexRWIVarEntry.max(this.max, mmf.entryMax);
+            if (this.min == null) this.min = mmf.entryMin.clone(); else this.min.min(mmf.entryMin);
+            if (this.max == null) this.max = mmf.entryMax.clone(); else this.max.max(mmf.entryMax);
             Map.Entry<String, Integer> entry;
             Iterator<Map.Entry<String, Integer>> di = mmf.domcount().entrySet().iterator();
             while (di.hasNext()) {
@@ -109,44 +107,34 @@ public class indexRWIEntryOrder extends kelondroAbstractOrder<indexRWIVarEntry> 
         return result;
     }
     
-    public kelondroOrder<indexRWIVarEntry> clone() {
-        return null;
-    }
-    
     public int authority(String urlHash) {
     	return (doms.getScore(urlHash.substring(6)) << 8) / (1 + this.maxdomcount);
-    }
-    
-    public long cardinal(byte[] key) {
-        return cardinal(new indexRWIVarEntry(new indexRWIRowEntry(key)));
-    }
-
-    public long cardinal(indexRWIRowEntry t) {
-        return cardinal(new indexRWIVarEntry(t));
     }
 
     public long cardinal(indexRWIVarEntry t) {
         //return Long.MAX_VALUE - preRanking(ranking, iEntry, this.entryMin, this.entryMax, this.searchWords);
         // the normalizedEntry must be a normalized indexEntry
         kelondroBitfield flags = t.flags();
+        long tf = ((max.termFrequency() == min.termFrequency()) ? 0 : (((int)(((t.termFrequency()-min.termFrequency())*256.0)/(max.termFrequency() - min.termFrequency())))) << ranking.coeff_termfrequency);
+        //System.out.println("tf(" + t.urlHash + ") = " + Math.floor(1000 * t.termFrequency()) + ", min = " + Math.floor(1000 * min.termFrequency()) + ", max = " + Math.floor(1000 * max.termFrequency()) + ", tf-normed = " + tf);
         long r =
-        	 ((256 - yacyURL.domLengthNormalized(t.urlHash())) << ranking.coeff_domlength)
+             ((256 - yacyURL.domLengthNormalized(t.urlHash())) << ranking.coeff_domlength)
            + ((256 - (plasmaSearchRankingProcess.ybr(t.urlHash()) << 4)) << ranking.coeff_ybr)
-           + ((t.urlcomps() == 0) ? 0 : ((256 - (((t.urlcomps()     - min.urlcomps()     ) << 8) / (1 + max.urlcomps()     - min.urlcomps())     )) << ranking.coeff_urlcomps))
-           + ((t.urllength() == 0) ? 0 : ((256 - (((t.urllength()    - min.urllength()    ) << 8) / (1 + max.urllength()    - min.urllength())    )) << ranking.coeff_urllength))
-           + ((t.posintext() == 0) ? 0 : ((256 - (((t.posintext()    - min.posintext()    ) << 8) / (1 + max.posintext()    - min.posintext())    )) << ranking.coeff_posintext))
-           + ((t.posofphrase() == 0) ? 0 : ((256 - (((t.posofphrase()  - min.posofphrase()  ) << 8) / (1 + max.posofphrase()  - min.posofphrase())  )) << ranking.coeff_posofphrase))
-           + ((t.posinphrase() == 0) ? 0 : ((256 - (((t.posinphrase()  - min.posinphrase()  ) << 8) / (1 + max.posinphrase()  - min.posinphrase())  )) << ranking.coeff_posinphrase))
-           + ((256 - (((t.worddistance() - min.worddistance()  ) << 8) / (1 + max.worddistance() - min.worddistance()) )) << ranking.coeff_worddistance)
-           + (       (((t.virtualAge()   - min.virtualAge()    ) << 8) / (1 + max.virtualAge()   - min.virtualAge())    ) << ranking.coeff_date)
-           + (       (((t.wordsintitle() - min.wordsintitle()  ) << 8) / (1 + max.wordsintitle() - min.wordsintitle())  ) << ranking.coeff_wordsintitle)
-           + (       (((t.wordsintext()  - min.wordsintext()   ) << 8) / (1 + max.wordsintext()  - min.wordsintext())   ) << ranking.coeff_wordsintext)
-           + (       (((t.phrasesintext()- min.phrasesintext() ) << 8) / (1 + max.phrasesintext()- min.phrasesintext()) ) << ranking.coeff_phrasesintext)
-           + (       (((t.llocal()       - min.llocal()        ) << 8) / (1 + max.llocal()       - min.llocal())        ) << ranking.coeff_llocal)
-           + (       (((t.lother()       - min.lother()        ) << 8) / (1 + max.lother()       - min.lother())        ) << ranking.coeff_lother)
-           + (       (((t.hitcount()     - min.hitcount()      ) << 8) / (1 + max.hitcount()     - min.hitcount())      ) << ranking.coeff_hitcount)
-           + (((int)((((t.termFrequency()- min.termFrequency() )*256.0)/ (1 + max.termFrequency()- min.termFrequency()))))<< ranking.coeff_termfrequency)
-           + (       authority(t.urlHash()) << ranking.coeff_authority)
+           + ((max.urlcomps()      == min.urlcomps()   )   ? 0 : (256 - (((t.urlcomps()     - min.urlcomps()     ) << 8) / (max.urlcomps()     - min.urlcomps())     )) << ranking.coeff_urlcomps)
+           + ((max.urllength()     == min.urllength()  )   ? 0 : (256 - (((t.urllength()    - min.urllength()    ) << 8) / (max.urllength()    - min.urllength())    )) << ranking.coeff_urllength)
+           + ((max.posintext()     == min.posintext()  )   ? 0 : (256 - (((t.posintext()    - min.posintext()    ) << 8) / (max.posintext()    - min.posintext())    )) << ranking.coeff_posintext)
+           + ((max.posofphrase()   == min.posofphrase())   ? 0 : (256 - (((t.posofphrase()  - min.posofphrase()  ) << 8) / (max.posofphrase()  - min.posofphrase())  )) << ranking.coeff_posofphrase)
+           + ((max.posinphrase()   == min.posinphrase())   ? 0 : (256 - (((t.posinphrase()  - min.posinphrase()  ) << 8) / (max.posinphrase()  - min.posinphrase())  )) << ranking.coeff_posinphrase)
+           + ((max.worddistance()  == min.worddistance())  ? 0 : (256 - (((t.worddistance() - min.worddistance() ) << 8) / (max.worddistance() - min.worddistance()) )) << ranking.coeff_worddistance)
+           + ((max.virtualAge()    == min.virtualAge())    ? 0 :        (((t.virtualAge()   - min.virtualAge()    ) << 8) / (max.virtualAge()   - min.virtualAge())    ) << ranking.coeff_date)
+           + ((max.wordsintitle()  == min.wordsintitle())  ? 0 : (((t.wordsintitle() - min.wordsintitle()  ) << 8) / (max.wordsintitle() - min.wordsintitle())  ) << ranking.coeff_wordsintitle)
+           + ((max.wordsintext()   == min.wordsintext())   ? 0 : (((t.wordsintext()  - min.wordsintext()   ) << 8) / (max.wordsintext()  - min.wordsintext())   ) << ranking.coeff_wordsintext)
+           + ((max.phrasesintext() == min.phrasesintext()) ? 0 : (((t.phrasesintext()- min.phrasesintext() ) << 8) / (max.phrasesintext()- min.phrasesintext()) ) << ranking.coeff_phrasesintext)
+           + ((max.llocal()        == min.llocal())        ? 0 : (((t.llocal()       - min.llocal()        ) << 8) / (max.llocal()       - min.llocal())        ) << ranking.coeff_llocal)
+           + ((max.lother()        == min.lother())        ? 0 : (((t.lother()       - min.lother()        ) << 8) / (max.lother()       - min.lother())        ) << ranking.coeff_lother)
+           + ((max.hitcount()      == min.hitcount())      ? 0 : (((t.hitcount()     - min.hitcount()      ) << 8) / (max.hitcount()     - min.hitcount())      ) << ranking.coeff_hitcount)
+           + tf
+           + (authority(t.urlHash()) << ranking.coeff_authority)
            + (((flags.get(indexRWIEntry.flag_app_dc_identifier))  ? 255 << ranking.coeff_appurl             : 0))
            + (((flags.get(indexRWIEntry.flag_app_dc_title))       ? 255 << ranking.coeff_app_dc_title       : 0))
            + (((flags.get(indexRWIEntry.flag_app_dc_creator))     ? 255 << ranking.coeff_app_dc_creator     : 0))
@@ -162,20 +150,6 @@ public class indexRWIEntryOrder extends kelondroAbstractOrder<indexRWIVarEntry> 
         //if (searchWords != null) r += (yacyURL.probablyWordURL(t.urlHash(), searchWords) != null) ? 256 << ranking.coeff_appurl : 0;
 
         return Long.MAX_VALUE - r; // returns a reversed number: the lower the number the better the ranking. This is used for simple sorting with a TreeMap
-    }
-    
-    public int compare(indexRWIVarEntry a, indexRWIVarEntry b) {
-    	long ca = cardinal(a);
-    	long cb = cardinal(b);
-        return (ca > cb) ? 1 : (ca < cb) ? -1 : 0;
-    }
-    
-    public String signature() {
-        return "rx";
-    }
-
-    public boolean wellformed(indexRWIVarEntry a) {
-        return true;
     }
 
     public static class minmaxfinder extends Thread {
@@ -208,8 +182,8 @@ public class indexRWIEntryOrder extends kelondroAbstractOrder<indexRWIVarEntry> 
                 iEntry = new indexRWIVarEntry(new indexRWIRowEntry(container.get(p++)));
                 this.decodedEntries.add(iEntry);
                 // find min/max
-                if (this.entryMin == null) this.entryMin = new indexRWIVarEntry(iEntry); else indexRWIVarEntry.min(this.entryMin, iEntry);
-                if (this.entryMax == null) this.entryMax = new indexRWIVarEntry(iEntry); else indexRWIVarEntry.max(this.entryMax, iEntry);
+                if (this.entryMin == null) this.entryMin = iEntry.clone(); else this.entryMin.min(iEntry);
+                if (this.entryMax == null) this.entryMax = iEntry.clone(); else this.entryMax.max(iEntry);
                 // update domcount
                 dom = iEntry.urlHash().substring(6);
                 count = (Integer) doms.get(dom);

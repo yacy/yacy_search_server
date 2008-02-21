@@ -86,4 +86,5 @@ public interface indexRWIEntry {
  
     public boolean isOlder(indexRWIEntry other);
 
+    public int hashCode();
 }

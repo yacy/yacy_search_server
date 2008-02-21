@@ -269,4 +269,7 @@ public final class indexRWIRowEntry implements indexRWIEntry {
         return false;
     }
     
+    public int hashCode() {
+        return this.urlHash().hashCode();
+    }
 }

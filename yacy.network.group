@@ -1,7 +1,7 @@
 # YaCy Network Group Definition
 # -----------------------------
 # This is an addition to the yacy.network.unit configuration file.
-# This file is adressed by the network.group.definition property in yacy.init
+# This file is addressed by the network.group.definition property in yacy.init
 # The purpose of a group within a network is that some parts of a network may be managed independently,
 # while the content of the network stays private for the whole network, mostly for a special purpose.
 # This file needs to be configured if someone wants to participate with several peers to the network,
