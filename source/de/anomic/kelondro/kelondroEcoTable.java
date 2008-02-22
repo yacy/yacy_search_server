@@ -59,7 +59,7 @@ public class kelondroEcoTable implements kelondroIndex {
     public static final int tailCacheForceUsage = 1;
     public static final int tailCacheUsageAuto  = 2;
     
-    public static final long maxarraylength = 134217727; // that may be the maxmimum size of array length in some JVMs
+    public static final long maxarraylength = 134217727L; // that may be the maxmimum size of array length in some JVMs
     
     private kelondroRowSet table;
     private kelondroBytesIntMap index;
@@ -97,7 +97,7 @@ public class kelondroEcoTable implements kelondroIndex {
         
             // initialize index and copy table
             int  records = (int) Math.max(file.size(), initialSpace);
-            long neededRAM4table = records * (rowdef.objectsize + 4) * 3 / 2;
+            long neededRAM4table = ((long) records) * (((long) rowdef.objectsize) + 4L) * 3L;
             table = ((neededRAM4table < maxarraylength) &&
                      ((useTailCache == tailCacheForceUsage) ||
                       ((useTailCache == tailCacheUsageAuto) && (Runtime.getRuntime().freeMemory() > neededRAM4table + 200 * 1024 * 1024)))) ?
