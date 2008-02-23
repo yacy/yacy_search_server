@@ -915,17 +915,15 @@ public class kelondroCollectionIndex {
         oldcollection.sort();
         oldcollection.trim(false);
 
-        /* in case that the new array size is zero we dont delete the array, just allocate a minimal chunk
-         * 
-
         if (oldcollection.size() == 0) {
             // delete the index entry and the array
-            kelondroFixedWidthArray array = getArray(oldPartitionNumber, serialNumber, oldchunksize);
-            array.remove(oldrownumber, false);
-            index.remove(key);
+            array_remove(
+                    oldPartitionNumber, serialNumber, this.payloadrow.objectsize,
+                    oldrownumber);
+            index.remove(key, true);
             return removed;
         }
-         */
+        
         int newPartitionNumber = arrayIndex(oldcollection.size());
 
         // see if we need new space or if we can overwrite the old space
