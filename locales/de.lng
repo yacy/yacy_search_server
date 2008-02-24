@@ -43,7 +43,6 @@ Date</td>==Datum</td>
 Offset==Versatz
 Expected Results==Erwartete Ergebnisse
 Returned Results==Gefundene Ergebnisse
-Expected Time \(ms\)==Erwartete Zeit (in ms)
 Used Time \(ms\)==Gebrauchte Zeit (in ms)
 URL fetch \(ms\)==URL Abruf (in ms)
 Snippet comp \(ms\)==Vorschau Erzeugung (in ms)
@@ -497,6 +496,7 @@ The profiles for remote crawls, <a href="/ProxyIndexingMonitor_p.html">indexing 
 cannot be altered here as they are hard-coded.==k&ouml;nnen nicht ver&auml;ndert werden, weil sie "hard-coded" sind.
 Crawl Profile List==Crawl Profil Liste
 Crawl Thread==Crawl Art
+#Status==Status
 #Start URL==Start URL
 >Depth</strong>==>Tiefe</strong>
 Filter</strong>==Maske</strong>
@@ -509,6 +509,7 @@ Fill Proxy Cache==F&uuml;lle Proxy Cache
 Local Text Indexing==Lokal Text Indexieren
 Local Media Indexing==Lokal Media Indexieren
 Remote Indexing==Remote Indexieren
+Status / Action==Status / Aktion
 no::yes==nein::ja
 "Delete"=="l&ouml;schen"
 "Terminate"=="Beenden"
@@ -785,6 +786,11 @@ Max. number of results==Max. Anzahl der Ergebnisse
 Resource==Quelle
 global==global
 >local==>lokal
+Global search is disabled because==Die globale Suche ist deaktiviert, denn
+DHT Distribution</a> is==die DHT-Verteilung</a> ist
+Index Receive</a> is==der Index-Empfang</a> ist 
+DHT Distribution and Index Receive</a> are==DHT-Verteilung und Index-Empfang</a> sind
+disabled.\#\(==deaktiviert.#(
 URL mask==URL-Filter
 restrict on==beschr&auml;nken auf
 show all==alle zeigen
@@ -825,7 +831,7 @@ RWIDbCleaner - Clean up the database by deletion of words with reference to blac
 Index Control==Index Kontrolle
 Index Administration==Index Administration
 The local index currently contains \#\[wcount\]\# reverse word indexes==Der lokale Index enth&auml;lt im Moment #[wcount]# inverse Wort Indexe
-RWI Retrieval==RWI Abfrage
+RWI Retrieval \(= search for a single word\)==RWI Abfrage (= Suche nach einem einzelnen Wort)
 Retrieve by Word:<==Abfrage nach Wort:<
 "Show URL Entries for Word"=="URL Eintr&auml;ge f&uuml;r Wort zeigen"
 Retrieve by Word-Hash==Abfrage nach Wort-Hash
@@ -889,14 +895,14 @@ remote links</td>==remote Links</td>
 hitcount</td>==Trefferzahl</td>
 #props</td>==</td>
 unresolved URL Hash==ungel&ouml;ster URL-Hash
-Reference Deletion==Referenzen L&ouml;schung
-delete also the referenced URL itself \(reasonable and recommended, may produce unresolved references==l&ouml;sche ebenso die verwiesene URL selber (akzeptabel und empfohlen, produziert eventuell ungel&ouml;ste Referenzen
+Word Deletion==Wort L&ouml;schung
+Deletion of selected URLs==L&ouml;schung von selektierten URLs
+delete also the referenced URL \(recommended, may produce unresolved references==l&ouml;sche ebenso die verwiesene URL (empfohlen, produziert eventuell ungel&ouml;ste Referenzen
 at other word indexes but they do not harm\)==an anderen Wort Indizes, aber es verursacht keinen Schaden
 for every resolvable and deleted URL reference, delete the same reference at every other word where==f&uuml;r jede l&ouml;sbare und gel&ouml;schte URL Referenz, l&ouml;sche die selbe Referenz bei jedem anderen Wort, wo
 the reference exists \(very extensive, but prevents further unresolved references\)==die Referenz existiert (sehr umfassend, aber bewahrt vor weiteren ungel&ouml;sten Referenzen)
 "Delete reference to selected URLs"=="Referenz und markierte URLs l&ouml;schen"
-"Delete reference to ALL URLs"=="Referenz und ALLE URLs l&ouml;schen"
-delete Word\)==Wort l&ouml;schen)
+"Delete Word"=="Wort l&ouml;schen"
 Blacklist Extension==Blacklist Erweiterung
 "Add selected URLs to blacklist"=="Markierte URLs zu Blacklist hinzuf&uuml;gen"
 "Add selected domains to blacklist"=="Markierte Domains zu Blacklist hinzuf&uuml;gen"
@@ -2343,7 +2349,8 @@ Project Home==Projektseite
 #---------------------------
 YaCy - Distributed Web Search==YaCy - Verteilte Internet Suche
 Search&nbsp;&amp;&nbsp;Browse==Suchen&nbsp;&amp;&nbsp;Surfen
-Search Page==Suchseite
+\(old\) Search Page==(alte) Suchseite
+\(new\) Search Page==(neue) Suchseite
 Ranking Config==Ranking Einstellungen
 >Surftips==>Surftipps
 Publication==Ver&ouml;ffentlichung
