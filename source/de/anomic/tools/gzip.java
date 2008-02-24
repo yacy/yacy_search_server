@@ -53,8 +53,12 @@ import java.io.OutputStream;
 import java.util.zip.GZIPInputStream;
 import java.util.zip.GZIPOutputStream;
 
+import de.anomic.server.logging.serverLog;
+
 public class gzip {
 
+    private static serverLog logger = new serverLog("GZIP");
+    
     public static void gzipFile(String inFile, String outFile) {
 	try {
 	    InputStream  fin  = new FileInputStream(inFile);
@@ -63,9 +67,11 @@ public class gzip {
 	    fin.close();
 	    fout.close();
 	} catch (FileNotFoundException e) {
-	    System.err.println("ERROR: file '" + inFile + "' not found");
+            //System.err.println("ERROR: file '" + inFile + "' not found");
+	    logger.logWarning("ERROR: file '" + inFile + "' not found", e);
 	} catch (IOException e) {
-	    System.err.println("ERROR: IO trouble");
+            //System.err.println("ERROR: IO trouble ");
+            logger.logWarning("ERROR: IO trouble ",e);
 	}
     }
 
@@ -77,9 +83,11 @@ public class gzip {
 	    fin.close();
 	    fout.close();
 	} catch (FileNotFoundException e) {
-	    System.err.println("ERROR: file '" + inFile + "' not found");
+            //System.err.println("ERROR: file '" + inFile + "' not found");
+	    logger.logWarning("ERROR: file '" + inFile + "' not found", e);
 	} catch (IOException e) {
-	    System.err.println("ERROR: IO trouble");
+            //System.err.println("ERROR: IO trouble ");
+            logger.logWarning("ERROR: IO trouble ",e);
 	}
     }
 
@@ -93,7 +101,8 @@ public class gzip {
 	    fout.close();
 	    return baos.toByteArray();
 	} catch (IOException e) {
-	    System.err.println("ERROR: IO trouble");
+            //System.err.println("ERROR: IO trouble ");
+	    logger.logWarning("ERROR: IO trouble ",e);
 	    return null;
 	}
     }
@@ -107,7 +116,8 @@ public class gzip {
 	    fout.close();
 	    return new String(fout.toByteArray(), "UTF-8");
 	} catch (IOException e) {
-	    System.err.println("ERROR: IO trouble");
+            //System.err.println("ERROR: IO trouble ");
+	    logger.logWarning("ERROR: IO trouble ",e);
 	    return null;
 	}
     }
