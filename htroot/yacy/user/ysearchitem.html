@@ -60,10 +60,10 @@ progressbar.step(1);
         </p>
         #(topwords)#::
         <p><strong>Category</strong>:
-        <select id="count" name="count">
+        <select onchange="window.location.href=this.options[this.selectedIndex].value">
           <option selected="selected">-select-</option>
         #{words}#
-          <option onclick="window.location.href='/yacy/user/ysearch.html?search=#[newsearch]#&amp;Enter=Search&amp;count=#[count]#&amp;offset=#[offset]#&amp;resource=#[resource]#&amp;contentdom=#[contentdom]#'">#[word]#</option>
+          <option value="/yacy/user/ysearch.html?search=#[newsearch]#&amp;Enter=Search&amp;count=#[count]#&amp;offset=#[offset]#&amp;resource=#[resource]#&amp;contentdom=#[contentdom]#">#[word]#</option>
         #{/words}#
         </select>
         </p>

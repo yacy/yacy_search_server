@@ -872,9 +872,9 @@ public final class plasmaCondenser {
     }
 
     static StringBuffer readSentence(Reader reader, boolean pre) throws IOException {
-        StringBuffer s = new StringBuffer(20);
+        StringBuffer s = new StringBuffer(40);
         int nextChar;
-        char c, lc = (char) 0;
+        char c, lc = ' '; // starting with ' ' as last character prevents that the result string starts with a ' '
         
         // find sentence end
         for (;;) {
@@ -885,13 +885,18 @@ public final class plasmaCondenser {
             }
             c = (char) nextChar;
             if (pre && ((c == (char) 10) || (c == (char) 13))) break;
-            if ((c == (char) 8) || (c == (char) 10) || (c == (char) 13)) c = ' ';
+            if (c < ' ') c = ' ';
             if ((lc == ' ') && (c == ' ')) continue; // ignore double spaces
             s.append(c);
             if (htmlFilterContentScraper.punctuation(c)) break;
             lc = c;
         }
         
+        if (s.length() == 0) return s;
+        if (s.charAt(s.length() - 1) == ' ') {
+            s.trimToSize();
+            s.deleteCharAt(s.length() - 1);
+        }
         return s;
     }
 
