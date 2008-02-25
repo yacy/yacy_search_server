@@ -49,9 +49,9 @@ import java.io.InputStream;
 import java.io.UnsupportedEncodingException;
 import java.net.MalformedURLException;
 import java.net.URLDecoder;
+import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
-import java.util.TreeSet;
 
 import de.anomic.data.htmlTools;
 import de.anomic.htmlFilter.htmlFilterImageEntry;
@@ -339,8 +339,8 @@ public class ViewFile {
                 i += putMediaInfo(prop, wordArray, i, document.getAudiolinks(), "audio", (i % 2 == 0));
                 dark = (i % 2 == 0);
                 
-                TreeSet<htmlFilterImageEntry> ts = document.getImages();
-                Iterator<htmlFilterImageEntry> tsi = ts.iterator();
+                HashMap<String, htmlFilterImageEntry> ts = document.getImages();
+                Iterator<htmlFilterImageEntry> tsi = ts.values().iterator();
                 htmlFilterImageEntry entry;
                 while (tsi.hasNext()) {
                     entry = tsi.next();

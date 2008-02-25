@@ -54,6 +54,7 @@ import java.io.File;
 import java.io.FilenameFilter;
 import java.io.IOException;
 import java.io.Writer;
+import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
 import java.util.TreeSet;
@@ -313,8 +314,8 @@ public class CacheAdmin_p {
         prop.put("info_type_use." + extension, (i == 0) ? 0 : 1);
     }
 
-    private static void formatImageAnchor(serverObjects prop, TreeSet<htmlFilterImageEntry> anchor) {
-        final Iterator<htmlFilterImageEntry> iter = anchor.iterator();
+    private static void formatImageAnchor(serverObjects prop, HashMap<String, htmlFilterImageEntry> anchor) {
+        final Iterator<htmlFilterImageEntry> iter = anchor.values().iterator();
         htmlFilterImageEntry ie;
         prop.put("info_type_use.images_images", anchor.size());
         int i = 0;

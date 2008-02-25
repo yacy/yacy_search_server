@@ -54,6 +54,7 @@ import java.net.MalformedURLException;
 import java.text.Collator;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
@@ -102,7 +103,7 @@ public class htmlFilterContentScraper extends htmlFilterAbstractScraper implemen
 
     // class variables: collectors for links
     private HashMap<yacyURL, String> anchors;
-    private TreeSet<htmlFilterImageEntry> images; // String(absolute url)/ImageEntry relation
+    private HashMap<String, htmlFilterImageEntry> images; // urlhash/image relation
     private HashMap<String, String> metas;
     private String title;
     //private String headline;
@@ -127,7 +128,7 @@ public class htmlFilterContentScraper extends htmlFilterAbstractScraper implemen
         super(linkTags0, linkTags1);
         this.root = root;
         this.anchors = new HashMap<yacyURL, String>();
-        this.images = new TreeSet<htmlFilterImageEntry>();
+        this.images = new HashMap<String, htmlFilterImageEntry>();
         this.metas = new HashMap<String, String>();
         this.title = "";
         this.headlines = new ArrayList[4];
@@ -178,7 +179,7 @@ public class htmlFilterContentScraper extends htmlFilterAbstractScraper implemen
             } catch (NumberFormatException e) {}
             yacyURL url = absolutePath(tagopts.getProperty("src", ""));
             htmlFilterImageEntry ie = new htmlFilterImageEntry(url, tagopts.getProperty("alt",""), width, height);
-            images.add(ie);
+            addImage(images, ie);
         }
         if (tagname.equalsIgnoreCase("base")) try {
             root = new yacyURL(tagopts.getProperty("href", ""), null);
@@ -212,7 +213,7 @@ public class htmlFilterContentScraper extends htmlFilterAbstractScraper implemen
 
                 if (type.equalsIgnoreCase("shortcut icon")) {
                     htmlFilterImageEntry ie = new htmlFilterImageEntry(newLink, linktitle, -1,-1);
-                    images.add(ie);    
+                    images.put(ie.url().hash(), ie);    
                     this.favicon = newLink;
                 } else if (!type.equalsIgnoreCase("stylesheet") && !type.equalsIgnoreCase("alternate stylesheet")) {
                     anchors.put(newLink, linktitle);
@@ -234,12 +235,24 @@ public class htmlFilterContentScraper extends htmlFilterAbstractScraper implemen
         // fire event
         fireScrapeTag0(tagname, tagopts);
     }
-
+    
     public void scrapeTag1(String tagname, Properties tagopts, char[] text) {
         // System.out.println("ScrapeTag1: tagname=" + tagname + ", opts=" + tagopts.toString() + ", text=" + new String(text));
         if ((tagname.equalsIgnoreCase("a")) && (text.length < 2048)) {
             String href = tagopts.getProperty("href", "");
-            if (href.length() > 0) anchors.put(absolutePath(href), super.stripAll(new serverCharBuffer(text)).trim().toString());
+            if (href.length() > 0) {
+                yacyURL url = absolutePath(href);
+                String f = url.getFile();
+                int p = f.lastIndexOf('.');
+                String type = (p < 0) ? "" : f.substring(p + 1);
+                if (type.equals("png") || type.equals("gif") || type.equals("jpg") || type.equals("jpeg")) {
+                    // special handling of such urls: put them to the image urls
+                    htmlFilterImageEntry ie = new htmlFilterImageEntry(url, super.stripAll(new serverCharBuffer(text)).trim().toString(), -1, -1);
+                    addImage(images, ie);
+                } else {
+                    anchors.put(url, super.stripAll(new serverCharBuffer(text)).trim().toString());
+                }
+            }
         }
         String h;
         if ((tagname.equalsIgnoreCase("h1")) && (text.length < 1024)) {
@@ -348,7 +361,7 @@ public class htmlFilterContentScraper extends htmlFilterAbstractScraper implemen
         return anchors;
     }
 
-    public TreeSet<htmlFilterImageEntry> getImages() {
+    public HashMap<String, htmlFilterImageEntry> getImages() {
         // this resturns a String(absolute url)/htmlFilterImageEntry - relation
         return images;
     }
@@ -522,5 +535,24 @@ public class htmlFilterContentScraper extends htmlFilterAbstractScraper implemen
         
         return scraper;
     }
+    
+    public static void addAllImages(HashMap<String, htmlFilterImageEntry> a, HashMap<String, htmlFilterImageEntry> b) {
+        Iterator<Map.Entry<String, htmlFilterImageEntry>> i = b.entrySet().iterator();
+        Map.Entry<String, htmlFilterImageEntry> ie;
+        while (i.hasNext()) {
+            ie = i.next();
+            addImage(a, ie.getValue());
+        }
+    }
+    
+    public static void addImage(HashMap<String, htmlFilterImageEntry> a, htmlFilterImageEntry ie) {
+        if (a.containsKey(ie.url().hash())) {
+            // in case of a collision, take that image that has the better image size tags
+            if ((ie.height() > 0) && (ie.width() > 0)) a.put(ie.url().hash(), ie);
+        } else {
+            a.put(ie.url().hash(), ie);
+        }
+    }
+    
 }
 

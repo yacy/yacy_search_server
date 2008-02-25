@@ -135,46 +135,46 @@ public class ViewImage {
             // find original size
             int h = image.getHeight(null);
             int w = image.getWidth(null);
-
-            // System.out.println("DEBUG: get access to image " +
-            // url.toNormalform() + " is " + ((auth) ? "authorized" : "NOT
-            // authorized"));
-
+            
             // in case of not-authorized access shrink the image to prevent
-            // copyright problems
-            // so that images are not larger than thumbnails
-            if ((!auth) && ((w > 16) || (h > 16))) {
+            // copyright problems, so that images are not larger than thumbnails
+            if (auth) {
+                maxwidth = (maxwidth == 0) ? w : maxwidth;
+                maxheight = (maxheight == 0) ? h : maxheight;
+            } else if ((w > 16) || (h > 16)) {
                 maxwidth = (int) Math.min(64.0, w * 0.6);
                 maxheight = (int) Math.min(64.0, h * 0.6);
+            } else {
+                maxwidth = 16;
+                maxheight = 16;
             }
 
             // calculate width & height from maxwidth & maxheight
-            if ((maxwidth != 0) || (maxheight != 0)) {
+            if ((maxwidth < w) || (maxheight < h)) {
+                // scale image
                 double hs = (w <= maxwidth) ? 1.0 : ((double) maxwidth) / ((double) w);
                 double vs = (h <= maxheight) ? 1.0 : ((double) maxheight) / ((double) h);
                 double scale = Math.min(hs, vs);
                 if (!auth) scale = Math.min(scale, 0.6); // this is for copyright purpose
                 if (scale < 1.0) {
-                    width = (int) (w * scale);
-                    height = (int) (h * scale);
+                    width = Math.max(1, (int) (w * scale));
+                    height = Math.max(1, (int) (h * scale));
                 } else {
-                    width = w;
-                    height = h;
+                    width = Math.max(1, w);
+                    height = Math.max(1, h);
                 }
+                
+                // compute scaled image
+                scaled = ((w == width) && (h == height)) ? image : image.getScaledInstance(width, height, Image.SCALE_AREA_AVERAGING);
+                MediaTracker mediaTracker = new MediaTracker(new Container());
+                mediaTracker.addImage(scaled, 0);
+                try {mediaTracker.waitForID(0);} catch (InterruptedException e) {}
             } else {
+                // do not scale
                 width = w;
                 height = h;
+                scaled = image;
             }
-
-            // check for minimum values
-            width = Math.max(width, 1);
-            height = Math.max(height, 1);
-
-            // scale image
-            scaled = ((w == width) && (h == height)) ? image : image.getScaledInstance(width, height, Image.SCALE_AREA_AVERAGING);
-            MediaTracker mediaTracker = new MediaTracker(new Container());
-            mediaTracker.addImage(scaled, 0);
-            try {mediaTracker.waitForID(0);} catch (InterruptedException e) {}
 
             if ((height == 16) && (width == 16) && (resource != null)) {
                 // this might be a favicon, store image to cache for faster re-load later on

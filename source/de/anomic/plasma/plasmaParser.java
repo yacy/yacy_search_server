@@ -39,6 +39,7 @@ import java.io.UnsupportedEncodingException;
 import java.net.MalformedURLException;
 import java.net.URI;
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Hashtable;
@@ -747,7 +748,7 @@ public final class plasmaParser {
         
     }
     
-    static Map<yacyURL, String> allReflinks(Set<?> links) {
+    static Map<yacyURL, String> allReflinks(Collection<?> links) {
         // links is either a Set of Strings (with urls) or htmlFilterImageEntries
         // we find all links that are part of a reference inside a url
         HashMap<yacyURL, String> v = new HashMap<yacyURL, String>();
@@ -786,7 +787,7 @@ public final class plasmaParser {
         return v;
     }
     
-    static Map<yacyURL, String> allSubpaths(Set<?> links) {
+    static Map<yacyURL, String> allSubpaths(Collection<?> links) {
         // links is either a Set of Strings (urls) or a Set of htmlFilterImageEntries
         HashSet<String> h = new HashSet<String>();
         Iterator<?> i = links.iterator();

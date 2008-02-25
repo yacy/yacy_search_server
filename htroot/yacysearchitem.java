@@ -67,6 +67,7 @@ public class yacysearchitem {
         boolean rss = post.get("rss", "false").equals("true");
         boolean authenticated = sb.adminAuthenticated(header) >= 2;
         int item = post.getInt("item", -1);
+        boolean auth = ((String) header.get(httpHeader.CONNECTION_PROP_CLIENTIP, "")).equals("localhost") || sb.verifyAuthentication(header, true);
         
         // default settings for blank item
         prop.put("content", "0");
@@ -233,6 +234,7 @@ public class yacysearchitem {
             if (ms == null) {
                 prop.put("content_items", "0");
             } else {
+                prop.putHTML("content_items_0_hrefCache", (auth) ? "/ViewImage.png?url=" + ms.href.toNormalform(true, false) : ms.href.toNormalform(true, false));
                 prop.putHTML("content_items_0_href", ms.href.toNormalform(true, false));
                 prop.put("content_items_0_code", sb.licensedURLs.aquireLicense(ms.href));
                 prop.putHTML("content_items_0_name", shorten(ms.name, namelength));

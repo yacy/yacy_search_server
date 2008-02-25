@@ -50,7 +50,6 @@ import java.util.HashMap;
 import java.util.Hashtable;
 import java.util.LinkedList;
 import java.util.Map;
-import java.util.TreeSet;
 
 import de.anomic.htmlFilter.htmlFilterAbstractScraper;
 import de.anomic.htmlFilter.htmlFilterContentScraper;
@@ -97,7 +96,7 @@ public class rssParser extends AbstractParser implements Parser {
         try {
             LinkedList<String> feedSections = new LinkedList<String>();
             HashMap<yacyURL, String> anchors = new HashMap<yacyURL, String>();
-            TreeSet<htmlFilterImageEntry> images  = new TreeSet<htmlFilterImageEntry>();
+            HashMap<String, htmlFilterImageEntry> images  = new HashMap<String, htmlFilterImageEntry>();
             serverByteBuffer text = new serverByteBuffer();
             serverCharBuffer authors = new serverCharBuffer();
             
@@ -114,7 +113,8 @@ public class rssParser extends AbstractParser implements Parser {
             String feedDescription = reader.getChannel().getDescription();
             
             if (reader.getImage() != null) {
-                images.add(new htmlFilterImageEntry(new yacyURL(reader.getImage(), null), feedTitle, -1, -1));
+                yacyURL imgURL = new yacyURL(reader.getImage(), null);
+                images.put(imgURL.hash(), new htmlFilterImageEntry(imgURL, feedTitle, -1, -1));
             }            
             
             // loop through the feed items
@@ -154,9 +154,9 @@ public class rssParser extends AbstractParser implements Parser {
                             anchors.putAll(itemLinks);
                         }
                         
-                        TreeSet<htmlFilterImageEntry> itemImages = scraper.getImages();
+                        HashMap<String, htmlFilterImageEntry> itemImages = scraper.getImages();
                         if ((itemImages != null) && (itemImages.size() > 0)) {
-                            images.addAll(itemImages);
+                            htmlFilterContentScraper.addAllImages(images, itemImages);
                         }
                         
                         byte[] extractedText = scraper.getText();

@@ -49,6 +49,8 @@ import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.Iterator;
 
+import de.anomic.server.logging.serverLog;
+
 public class plasmaCrawlNURL {
     
     public static final int STACK_TYPE_NULL     =  0; // do not stack
@@ -64,9 +66,9 @@ public class plasmaCrawlNURL {
     private static final long minimumGlobalDelta = 500; // the minimum time difference between access of the same global domain
     private static final long maximumDomAge =  60000; // the maximum age of a domain until it is used for another crawl attempt
     
-    private final plasmaCrawlBalancer coreStack;      // links found by crawling to depth-1
-    private final plasmaCrawlBalancer limitStack;     // links found by crawling at target depth
-    private final plasmaCrawlBalancer remoteStack;    // links from remote crawl orders
+    private plasmaCrawlBalancer coreStack;      // links found by crawling to depth-1
+    private plasmaCrawlBalancer limitStack;     // links found by crawling at target depth
+    private plasmaCrawlBalancer remoteStack;    // links from remote crawl orders
     //private final plasmaCrawlBalancer overhangStack;  // links found by crawling at depth+1
     //private kelondroStack imageStack;     // links pointing to image resources
     //private kelondroStack movieStack;     // links pointing to movie resources
@@ -81,10 +83,26 @@ public class plasmaCrawlNURL {
     }
 
     public void close() {
-        coreStack.close();
-        limitStack.close();
+        if (coreStack != null) {
+            coreStack.close();
+            coreStack = null;
+        }
+        if (limitStack != null) {
+            limitStack.close();
+            limitStack = null;
+        }
         //overhangStack.close();
-        remoteStack.close();
+        if (remoteStack != null) {
+            remoteStack.close();
+            remoteStack = null;
+        }
+    }
+    
+    public void finalize() {
+        if ((coreStack != null) || (limitStack != null) || (remoteStack != null)) {
+            serverLog.logWarning("plasmaCrawlNURL", "NURL stack closed by finalizer");
+            close();
+        }
     }
     
     public boolean notEmpty() {

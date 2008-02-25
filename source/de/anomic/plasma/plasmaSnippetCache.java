@@ -697,7 +697,8 @@ public class plasmaSnippetCache {
     
     public static ArrayList<MediaSnippet> computeImageSnippets(plasmaParserDocument document, Set<String> queryhashes) {
         
-        TreeSet<htmlFilterImageEntry> images = document.getImages(); // iterates images in descending size order!
+        TreeSet<htmlFilterImageEntry> images = new TreeSet<htmlFilterImageEntry>();
+        images.addAll(document.getImages().values()); // iterates images in descending size order!
         // a measurement for the size of the images can be retrieved using the htmlFilterImageEntry.hashCode()
         
         Iterator<htmlFilterImageEntry> i = images.iterator();

@@ -452,6 +452,7 @@ public final class httpdFileHandler {
                     sb.append("<html>\n<head>\n</head>\n<body>\n<h1>Index of " + path + "</h1>\n  <ul>\n");
                     File dir = new File(htDocsPath, path);
                     String[] list = dir.list();
+                    if (list == null) list = new String[0]; // should not occur!
                     File f;
                     String size;
                     long sz;

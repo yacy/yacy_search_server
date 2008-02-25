@@ -61,6 +61,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.TreeSet;
 
+import de.anomic.htmlFilter.htmlFilterContentScraper;
 import de.anomic.htmlFilter.htmlFilterImageEntry;
 import de.anomic.plasma.parser.Parser;
 
@@ -76,7 +77,7 @@ public class plasmaParserDocument {
     private StringBuffer description;   // an abstract, if present: short content description
     private Object text;            // the clear text, all that is visible
     private Map<yacyURL, String> anchors;    // all links embedded as clickeable entities (anchor tags)
-    private TreeSet<htmlFilterImageEntry> images;         // all visible pictures in document
+    private HashMap<String, htmlFilterImageEntry> images;         // all visible pictures in document
     // the anchors and images - Maps are URL-to-EntityDescription mappings.
     // The EntityDescription appear either as visible text in anchors or as alternative
     // text in image tags.
@@ -89,7 +90,7 @@ public class plasmaParserDocument {
     protected plasmaParserDocument(yacyURL location, String mimeType, String charset,
                     String[] keywords, String title, String author,
                     String[] sections, String abstrct,
-                    Object text, Map<yacyURL, String> anchors, TreeSet<htmlFilterImageEntry> images) {
+                    Object text, Map<yacyURL, String> anchors, HashMap<String, htmlFilterImageEntry> images) {
         this.source = location;
         this.mimeType = (mimeType == null) ? "application/octet-stream" : mimeType;
         this.charset = charset;
@@ -99,7 +100,7 @@ public class plasmaParserDocument {
         this.sections = (sections == null) ? new LinkedList<String>() : Arrays.asList(sections);
         this.description = (abstrct == null) ? new StringBuffer() : new StringBuffer(abstrct);
         this.anchors = (anchors == null) ? new HashMap<yacyURL, String>(0) : anchors;
-        this.images =  (images == null) ? new TreeSet<htmlFilterImageEntry>() : images;
+        this.images =  (images == null) ? new HashMap<String, htmlFilterImageEntry>() : images;
         this.hyperlinks = null;
         this.audiolinks = null;
         this.videolinks = null;
@@ -124,21 +125,21 @@ public class plasmaParserDocument {
     public plasmaParserDocument(yacyURL location, String mimeType, String charset,
                     String[] keywords, String title, String author,
                     String[] sections, String abstrct,
-                    byte[] text, Map<yacyURL, String> anchors, TreeSet<htmlFilterImageEntry> images) {
+                    byte[] text, Map<yacyURL, String> anchors, HashMap<String, htmlFilterImageEntry> images) {
         this(location, mimeType, charset, keywords, title, author, sections, abstrct, (Object)text, anchors, images);
     }
     
     public plasmaParserDocument(yacyURL location, String mimeType, String charset,
             String[] keywords, String title, String author,
             String[] sections, String abstrct,
-            File text, Map<yacyURL, String> anchors, TreeSet<htmlFilterImageEntry> images) {
+            File text, Map<yacyURL, String> anchors, HashMap<String, htmlFilterImageEntry> images) {
         this(location, mimeType, charset, keywords, title, author, sections, abstrct, (Object)text, anchors, images);
     }
     
     public plasmaParserDocument(yacyURL location, String mimeType, String charset,
             String[] keywords, String title, String author,
             String[] sections, String abstrct,
-            serverCachedFileOutputStream text, Map<yacyURL, String> anchors, TreeSet<htmlFilterImageEntry> images) {
+            serverCachedFileOutputStream text, Map<yacyURL, String> anchors, HashMap<String, htmlFilterImageEntry> images) {
         this(location, mimeType, charset, keywords, title, author, sections, abstrct, (Object)text, anchors, images);
     }
 
@@ -310,7 +311,7 @@ dc_rights
         return this.videolinks;
     }
     
-    public TreeSet<htmlFilterImageEntry> getImages() {
+    public HashMap<String, htmlFilterImageEntry> getImages() {
         // returns all links enbedded as pictures (visible in document)
         // this resturns a htmlFilterImageEntry collection
         if (!resorted) resortLinks();
@@ -341,7 +342,7 @@ dc_rights
         audiolinks = new HashMap<yacyURL, String>();
         applinks   = new HashMap<yacyURL, String>();
         emaillinks = new HashMap<String, String>();
-        TreeSet<htmlFilterImageEntry> collectedImages = new TreeSet<htmlFilterImageEntry>(); // this is a set that is collected now and joined later to the imagelinks
+        HashMap<String, htmlFilterImageEntry> collectedImages = new HashMap<String, htmlFilterImageEntry>(); // this is a set that is collected now and joined later to the imagelinks
         Map.Entry<yacyURL, String> entry;
         while (i.hasNext()) {
             entry = i.next();
@@ -361,7 +362,7 @@ dc_rights
                     if (plasmaParser.mediaExtContains(ext)) {
                         // this is not a normal anchor, its a media link
                         if (plasmaParser.imageExtContains(ext)) {
-                            collectedImages.add(new htmlFilterImageEntry(url, (String) entry.getValue(), -1, -1));
+                            htmlFilterContentScraper.addImage(collectedImages, new htmlFilterImageEntry(url, (String) entry.getValue(), -1, -1));
                         }
                         else if (plasmaParser.audioExtContains(ext)) audiolinks.put(url, (String)entry.getValue());
                         else if (plasmaParser.videoExtContains(ext)) videolinks.put(url, (String)entry.getValue());
@@ -374,23 +375,18 @@ dc_rights
         }
         
         // add image links that we collected from the anchors to the image map
-        Iterator<htmlFilterImageEntry>  j = collectedImages.iterator();
-        htmlFilterImageEntry iEntry;
-        while (j.hasNext()) {
-            iEntry = (htmlFilterImageEntry) j.next();
-            if (!images.contains(iEntry)) images.add(iEntry);
-        }
+        htmlFilterContentScraper.addAllImages(images, collectedImages);
        
         // expand the hyperlinks:
         // we add artificial hyperlinks to the hyperlink set
         // that can be calculated from given hyperlinks and imagelinks
         
-        hyperlinks.putAll(plasmaParser.allReflinks(images));
+        hyperlinks.putAll(plasmaParser.allReflinks(images.values()));
         hyperlinks.putAll(plasmaParser.allReflinks(audiolinks.keySet()));
         hyperlinks.putAll(plasmaParser.allReflinks(videolinks.keySet()));
         hyperlinks.putAll(plasmaParser.allReflinks(applinks.keySet()));
         hyperlinks.putAll(plasmaParser.allSubpaths(hyperlinks.keySet()));
-        hyperlinks.putAll(plasmaParser.allSubpaths(images));
+        hyperlinks.putAll(plasmaParser.allSubpaths(images.values()));
         hyperlinks.putAll(plasmaParser.allSubpaths(audiolinks.keySet()));
         hyperlinks.putAll(plasmaParser.allSubpaths(videolinks.keySet()));
         hyperlinks.putAll(plasmaParser.allSubpaths(applinks.keySet()));
@@ -417,7 +413,7 @@ dc_rights
         serverFileUtils.copy(doc.getText(), (serverCachedFileOutputStream)this.text);
         
         anchors.putAll(doc.getAnchors());
-        images.addAll(doc.getImages());
+        htmlFilterContentScraper.addAllImages(images, doc.getImages());
     }
     
     /**

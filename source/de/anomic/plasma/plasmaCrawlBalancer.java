@@ -130,7 +130,10 @@ public class plasmaCrawlBalancer {
     }
     
     public void finalize() {
-        if (urlFileStack != null) close();
+        if (urlFileStack != null) {
+            serverLog.logWarning("plasmaCrawlBalancer", "crawl stack " + stackname + " closed by finalizer");
+            close();
+        }
     }
     
     public synchronized void clear() {

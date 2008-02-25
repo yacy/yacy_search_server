@@ -43,9 +43,10 @@ package de.anomic.plasma;
 
 import java.io.InputStream;
 import java.net.MalformedURLException;
+import java.util.HashMap;
 import java.util.Iterator;
-import java.util.TreeSet;
 
+import de.anomic.htmlFilter.htmlFilterContentScraper;
 import de.anomic.htmlFilter.htmlFilterImageEntry;
 import de.anomic.plasma.parser.ParserException;
 import de.anomic.server.serverDate;
@@ -53,11 +54,11 @@ import de.anomic.yacy.yacyURL;
 
 public final class plasmaSearchImages {
 
-    private TreeSet<htmlFilterImageEntry> images;
+    private HashMap<String, htmlFilterImageEntry> images;
     
     public plasmaSearchImages(long maxTime, yacyURL url, int depth) {
         long start = System.currentTimeMillis();
-        this.images = new TreeSet<htmlFilterImageEntry>();
+        this.images = new HashMap<String, htmlFilterImageEntry>();
         if (maxTime > 10) {
             Object[] resource = plasmaSnippetCache.getResource(url, true, (int) maxTime, false);
             InputStream res = (InputStream) resource[0];
@@ -75,7 +76,7 @@ public final class plasmaSearchImages {
                 if (document == null) return;
                 
                 // add the image links
-                this.addAll(document.getImages());
+                htmlFilterContentScraper.addAllImages(this.images, document.getImages());
 
                 // add also links from pages one step deeper, if depth > 0
                 if (depth > 0) {
@@ -97,26 +98,13 @@ public final class plasmaSearchImages {
     
     public void addAll(plasmaSearchImages m) {
         synchronized (m.images) {
-            addAll(m.images);
-        }
-    }
-    
-    private void addAll(TreeSet<htmlFilterImageEntry> ts) {
-        Iterator<htmlFilterImageEntry> i = ts.iterator();
-        htmlFilterImageEntry ie;
-        while (i.hasNext()) {
-            ie = i.next();
-            if (images.contains(ie)) {
-                if ((ie.height() > 0) && (ie.width() > 0)) images.add(ie);
-            } else {
-                images.add(ie);
-            }
+            htmlFilterContentScraper.addAllImages(this.images, m.images);
         }
     }
     
     public Iterator<htmlFilterImageEntry> entries() {
         // returns htmlFilterImageEntry - Objects
-        return images.iterator();
+        return images.values().iterator();
     }
     
 }

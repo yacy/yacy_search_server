@@ -107,6 +107,19 @@ public final class plasmaCondenser {
     
     private final static int numlength = 5;
 
+    // initialize array of invisible characters
+    private static boolean[] invisibleChar = new boolean['z' - ' ' + 1];
+    static {
+        // initialize array of invisible charachters
+        String invisibleString = "\"$%&/()=`^+*#'-_:;,<>[]\\";
+        for (int i = ' '; i <= 'z'; i++) {
+            invisibleChar[i - ' '] = false;
+        }
+        for (int i = 0; i < invisibleString.length(); i++) {
+            invisibleChar[invisibleString.charAt(i) - ' '] = true;
+        }
+    }
+    
     //private Properties analysis;
     private TreeMap<String, wordStatProp> words; // a string (the words) to (wordStatProp) - relation
     private HashMap<StringBuffer, phraseStatProp> sentences;
@@ -198,7 +211,7 @@ public final class plasmaCondenser {
             }
 
             // images
-            Iterator<htmlFilterImageEntry> j = document.getImages().iterator();
+            Iterator<htmlFilterImageEntry> j = document.getImages().values().iterator();
             htmlFilterImageEntry ientry;
             while (j.hasNext()) {
                 ientry = j.next();
@@ -659,7 +672,7 @@ public final class plasmaCondenser {
     public final static boolean invisible(char c) {
         // TODO: Bugfix for UTF-8: does this work for non ISO-8859-1 chars?
         if ((c < ' ') || (c > 'z')) return true;
-        return ("$%&/()=\"$%&/()=`^+*~#'-_:;,|<>[]\\".indexOf(c) >= 0);
+        return invisibleChar[c - ' '];
     }
 
     public static Enumeration<StringBuffer> wordTokenizer(String s, String charset, int minLength) {
@@ -727,7 +740,7 @@ public final class plasmaCondenser {
 
         public unsievedWordsEnum(InputStream is, String charset) throws UnsupportedEncodingException {
             e = new sentencesFromInputStreamEnum(is, charset);
-            s = new StringBuffer();
+            s = new StringBuffer(20);
             buffer = nextElement0();
         }
 
@@ -859,9 +872,9 @@ public final class plasmaCondenser {
     }
 
     static StringBuffer readSentence(Reader reader, boolean pre) throws IOException {
-        StringBuffer s = new StringBuffer();
+        StringBuffer s = new StringBuffer(20);
         int nextChar;
-        char c;
+        char c, lc = (char) 0;
         
         // find sentence end
         for (;;) {
@@ -871,20 +884,14 @@ public final class plasmaCondenser {
                 if (s.length() == 0) return null; else break;
             }
             c = (char) nextChar;
+            if (pre && ((c == (char) 10) || (c == (char) 13))) break;
+            if ((c == (char) 8) || (c == (char) 10) || (c == (char) 13)) c = ' ';
+            if ((lc == ' ') && (c == ' ')) continue; // ignore double spaces
             s.append(c);
-            if (pre) {
-                if ((c == (char) 10) || (c == (char) 13)) break;
-            } else {
-                if (htmlFilterContentScraper.punctuation(c)) break;
-            }
+            if (htmlFilterContentScraper.punctuation(c)) break;
+            lc = c;
         }
-
-        // replace line endings and tabs by blanks
-        for (int i = 0; i < s.length(); i++) {
-            if ((s.charAt(i) == (char) 10) || (s.charAt(i) == (char) 13) || (s.charAt(i) == (char) 8)) s.setCharAt(i, ' ');
-        }
-        // remove all double-spaces
-        int p; while ((p = s.indexOf("  ")) >= 0) s.deleteCharAt(p);
+        
         return s;
     }
 

@@ -53,10 +53,10 @@ import java.util.HashMap;
 import java.util.Hashtable;
 import java.util.LinkedList;
 import java.util.Map;
-import java.util.TreeSet;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
 
+import de.anomic.htmlFilter.htmlFilterContentScraper;
 import de.anomic.htmlFilter.htmlFilterImageEntry;
 import de.anomic.plasma.plasmaParser;
 import de.anomic.plasma.plasmaParserDocument;
@@ -115,7 +115,7 @@ public class zipParser extends AbstractParser implements Parser {
             LinkedList<String> docSections = new LinkedList<String>();
             StringBuffer docAbstrct = new StringBuffer();
             Map<yacyURL, String> docAnchors = new HashMap<yacyURL, String>();
-            TreeSet<htmlFilterImageEntry> docImages = new TreeSet<htmlFilterImageEntry>(); 
+            HashMap<String, htmlFilterImageEntry> docImages = new HashMap<String, htmlFilterImageEntry>(); 
             
             // creating a new parser class to parse the unzipped content
             plasmaParser theParser = new plasmaParser();            
@@ -176,7 +176,7 @@ public class zipParser extends AbstractParser implements Parser {
                 }
                 
                 docAnchors.putAll(subDoc.getAnchors());
-                docImages.addAll(subDoc.getImages());
+                htmlFilterContentScraper.addAllImages(docImages, subDoc.getImages());
                 
                 // release subdocument
                 subDoc.close();
