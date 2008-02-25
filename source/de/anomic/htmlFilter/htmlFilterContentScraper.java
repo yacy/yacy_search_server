@@ -240,8 +240,8 @@ public class htmlFilterContentScraper extends htmlFilterAbstractScraper implemen
         // System.out.println("ScrapeTag1: tagname=" + tagname + ", opts=" + tagopts.toString() + ", text=" + new String(text));
         if ((tagname.equalsIgnoreCase("a")) && (text.length < 2048)) {
             String href = tagopts.getProperty("href", "");
-            if (href.length() > 0) {
-                yacyURL url = absolutePath(href);
+            yacyURL url;
+            if ((href.length() > 0) && ((url = absolutePath(href)) != null)) {
                 String f = url.getFile();
                 int p = f.lastIndexOf('.');
                 String type = (p < 0) ? "" : f.substring(p + 1);

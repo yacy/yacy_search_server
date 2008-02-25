@@ -232,6 +232,7 @@ public final class yacyClient {
             if (seedStr.length() > yacySeed.maxsize) {
                 yacyCore.log.logInfo("hello/client: rejected contacting seed; too large (" + seedStr.length() + " > " + yacySeed.maxsize + ")");
             } else {
+                //System.out.println("DEBUG yacyClient.publishMySeed seedStr = " + seedStr);
                 if (yacyCore.peerActions.peerArrival(yacySeed.genRemoteSeed(seedStr, post.get("key", ""), true), (i == 1))) count++;
             }
         }

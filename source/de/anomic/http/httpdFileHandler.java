@@ -280,6 +280,7 @@ public final class httpdFileHandler {
             path = conProp.getProperty(httpHeader.CONNECTION_PROP_PATH);
             String argsString = conProp.getProperty(httpHeader.CONNECTION_PROP_ARGS); // is null if no args were given
             String httpVersion = conProp.getProperty(httpHeader.CONNECTION_PROP_HTTP_VER);
+            String clientIP = conProp.getProperty(httpHeader.CONNECTION_PROP_CLIENTIP, "unknown-host");
             
             // check hack attacks in path
             if (path.indexOf("..") >= 0) {
@@ -324,7 +325,6 @@ public final class httpdFileHandler {
                     return;
                 } else {
                     // a wrong authentication was given or the userDB user does not have admin access. Ask again
-                    String clientIP = conProp.getProperty(httpHeader.CONNECTION_PROP_CLIENTIP, "unknown-host");
                     serverLog.logInfo("HTTPD", "Wrong log-in for account 'admin' in http file handler for path '" + path + "' from host '" + clientIP + "'");
                     Integer attempts = (Integer) serverCore.bfHost.get(clientIP);
                     if (attempts == null)
@@ -420,8 +420,7 @@ public final class httpdFileHandler {
             
             // a different language can be desired (by i.e. ConfigBasic.html) than the one stored in the locale.language
             String localeSelection = switchboard.getConfig("locale.language","default");
-            if (args != null && (args.containsKey("language"))) 
-            {
+            if (args != null && (args.containsKey("language"))) {
                 // TODO 9.11.06 Bost: a class with information about available languages is needed. 
                 // the indexOf(".") is just a workaround because there from ConfigLanguage.html commes "de.lng" and
                 // from ConfigBasic.html comes just "de" in the "language" parameter
@@ -634,7 +633,6 @@ public final class httpdFileHandler {
                             if (tp.containsKey(servletProperties.ACTION_AUTHENTICATE)) {
                                 // handle brute-force protection
                                 if (authorization != null) {
-                                    String clientIP = conProp.getProperty(httpHeader.CONNECTION_PROP_CLIENTIP, "unknown-host");
                                     serverLog.logInfo("HTTPD", "dynamic log-in for account 'admin' in http file handler for path '" + path + "' from host '" + clientIP + "'");
                                     Integer attempts = (Integer) serverCore.bfHost.get(clientIP);
                                     if (attempts == null)
@@ -735,7 +733,7 @@ public final class httpdFileHandler {
                         httpd.sendRespondHeader(conProp, out, httpVersion, 200, null, mimeType, -1, targetDate, null, tp.getOutgoingHeader(), null, "chunked", nocache);
                         // send the content in chunked parts, see RFC 2616 section 3.6.1
                         httpChunkedOutputStream chos = new httpChunkedOutputStream(out);
-                        httpSSI.writeSSI(o, chos, authorization);
+                        httpSSI.writeSSI(o, chos, authorization, clientIP);
                         //chos.write(result);
                         chos.finish();
                     } else {
@@ -749,14 +747,14 @@ public final class httpdFileHandler {
                         
                         if (zipContent) {
                             GZIPOutputStream zippedOut = new GZIPOutputStream(o);
-                            httpSSI.writeSSI(o1, zippedOut, authorization);
+                            httpSSI.writeSSI(o1, zippedOut, authorization, clientIP);
                             //httpTemplate.writeTemplate(fis, zippedOut, tp, "-UNRESOLVED_PATTERN-".getBytes("UTF-8"));
                             zippedOut.finish();
                             zippedOut.flush();
                             zippedOut.close();
                             zippedOut = null;
                         } else {
-                            httpSSI.writeSSI(o1, o, authorization);
+                            httpSSI.writeSSI(o1, o, authorization, clientIP);
                             //httpTemplate.writeTemplate(fis, o, tp, "-UNRESOLVED_PATTERN-".getBytes("UTF-8"));
                         }
                         if (method.equals(httpHeader.METHOD_HEAD)) {

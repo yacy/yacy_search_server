@@ -28,6 +28,7 @@ import java.io.UnsupportedEncodingException;
 import java.net.MalformedURLException;
 import java.net.URLEncoder;
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Set;
 import java.util.TreeSet;
@@ -188,6 +189,29 @@ public class ysearchitem {
             }
             prop.put("navigation_resnav", resnav.toString());
             prop.put("navigation", "1");
+            
+            // list search history
+            Iterator<plasmaSearchQuery> i = sb.localSearches.iterator();
+            String client = (String) header.get(httpHeader.CONNECTION_PROP_CLIENTIP);
+            plasmaSearchQuery query;
+            int c = 0;
+            HashSet<String> visibleQueries = new HashSet<String>();
+            while (i.hasNext()) {
+                query = i.next();
+                if (query.resultcount == 0) continue;
+                if (query.offset != 0) continue;
+                if (!query.host.equals(client)) continue; // the search history should only be visible from the user who initiated the search
+                if (visibleQueries.contains(query.queryString)) continue; // avoid doubles
+                visibleQueries.add(query.queryString);
+                prop.put("history_list_" + c + "_querystring", query.queryString);
+                prop.put("history_list_" + c + "_searchdom", query.searchdom());
+                prop.put("history_list_" + c + "_contentdom", query.contentdom());
+                c++;
+                if (c >= 10) break;
+            }
+            prop.put("history_list", c);
+            prop.put("history_host", client);
+            if (c == 0) prop.put("history", 0); else prop.put("history", 1); // switch on if there is anything to see
             
             return prop;
         }
