@@ -38,11 +38,6 @@
 <guid isPermaLink="false">#[urlhash]#</guid>
 </item>
 #(/rss)#
-#(references)#::
-<p><strong>Topwords</strong>:
-#{words}#&nbsp;<a href="ysearch.html?search=#[newsearch]#&amp;Enter=Search&amp;count=#[count]#&amp;offset=#[offset]#&amp;resource=#[resource]#&amp;contentdom=#[contentdom]#&amp;time=#[time]#">#[word]#</a>&nbsp;|#{/words}#
-</p>
-#(/references)#
 #(rssreferences)#::
 <yacyTopwords:topwords>
 #{words}#
@@ -56,4 +51,25 @@ statistics("#[offset]#", "#[itemscount]#", "#[totalcount]#", "#[localResourceSiz
 progressbar.step(1);
 </script>
 #(/dynamic)#
+#(navigation)#::
+    <div id="navigate" class="boxed">
+      <h2 class="title">Navigate</h2>
+      <div class="content">
+        <p><Strong>Page</strong>:
+        #[resnav]#
+        </p>
+        #(topwords)#::
+        <p><strong>Category</strong>:
+        <select id="count" name="count">
+          <option selected="selected">-select-</option>
+        #{words}#
+          <option onclick="window.location.href='/yacy/user/ysearch.html?search=#[newsearch]#&amp;Enter=Search&amp;count=#[count]#&amp;offset=#[offset]#&amp;resource=#[resource]#&amp;contentdom=#[contentdom]#'">#[word]#</option>
+        #{/words}#
+        </select>
+        </p>
+        #(/topwords)#
+      </div>
+    </div>
+    
+#(/navigation)#
 

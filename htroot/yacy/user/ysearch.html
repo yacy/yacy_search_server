@@ -43,13 +43,12 @@ Released for free under a Creative Commons Attribution 2.5 License
 <div id="content">
   <div id="main">
     <div id="welcome">
-      <h2>Welcome to YaCy P2P Web Search!</h2>
 
       #(input)#
 		::
 	    <form class="search small" action="ysearch.html" method="get" accept-charset="UTF-8">
 	      <fieldset class="yacys">
-	        <input id="searchtext" name="search" type="text" size="50" maxlength="80" value="#[former]#" onclick="document.getElementById('Enter').value = 'Search'" />
+	        Search: <input id="searchtext" name="search" type="text" size="50" maxlength="80" value="#[former]#" onclick="document.getElementById('Enter').value = 'Search'" />
 	        <input id="searchbutton" id="Enter" type="submit" name="Enter" value="Search" />
 	        <input type="hidden" name="contentdom" value="#[contentdom]#" />
 	        <input type="hidden" name="former" value="#[former]#" />
@@ -69,9 +68,8 @@ Released for free under a Creative Commons Attribution 2.5 License
 	    ::
 	    <form class="search small" action="ysearch.html" method="get" accept-charset="UTF-8">
 	      <fieldset class="yacys">
-	              <input id="searchtext" name="search" type="text" size="50" maxlength="80" value="#[former]#" onclick="document.getElementById('Enter').value = 'Search'" />
-	              <input  id="searchbutton" type="submit" name="Enter" value="Search" /> &nbsp;
-	              <a href="index.html?display=#[display]#&amp;input=#[input]#&amp;searchoptions=1&amp;count=#[count]#&amp;resource=#[resource]#&amp;time=#[time]#&amp;urlmaskfilter=#[urlmaskfilter]#&amp;prefermaskfilter=#[prefermaskfilter]#&amp;cat=#[cat]#&amp;constraint=#[constraint]#&amp;contentdom=#[contentdom]#&amp;former=#[former]#">more options</a>
+	              Search: <input id="searchtext" name="search" type="text" size="50" maxlength="80" value="#[former]#" onclick="document.getElementById('Enter').value = 'Search'" />
+	              <input  id="searchbutton" type="submit" name="Enter" value="Search" />
 	          <div class="ysearch">
 	              <input type="radio" id="text" name="contentdom" value="text"#(contentdomCheckText)#:: checked="checked"#(/contentdomCheckText)# />
 	              <label for="text">Text</label>&nbsp;&nbsp;
@@ -88,7 +86,6 @@ Released for free under a Creative Commons Attribution 2.5 License
 	        <input type="hidden" name="count" value="#[count]#" />
 	        <input type="hidden" name="offset" value="#[offset]#" />
 	        <input type="hidden" name="resource" value="#[resource]#" />
-	        <input type="hidden" name="time" value="#[time]#" />
 	        <input type="hidden" name="urlmaskfilter" value="#[urlmaskfilter]#" />
 	        <input type="hidden" name="prefermaskfilter" value="#[prefermaskfilter]#" />
 	        <input type="hidden" name="depth" value="#[depth]#" />
@@ -123,7 +120,7 @@ document.getElementById("Enter").value = "search again - catch up more links";
 	::
 	<div id="results"></div>
 	<span id="resCounter" style="display: inline;">Results <strong id="resultsOffset">#[offset]#</strong>-<strong id="itemscount">#[itemscount]#</strong> from <strong id="totalcount">#[totalcount]#</strong> total#(globalresults)#.:: (<strong id="localResourceSize">#[localResourceSize]#</strong> local, <strong id="remoteResourceSize">#[remoteResourceSize]#</strong> remote), <strong id="remoteIndexCount">#[remoteIndexCount]#</strong> links from <strong id="remotePeerCount">#[remotePeerCount]#</strong> other YaCy peers.#(/globalresults)#</span>
-	<span id="resNav" style="display: inline;">#[resnav]#</span>
+	<span id="resNav" style="display: inline;"></span>
 	::
 	<p>Searching the web with this peer is disabled for unauthorized users. Please <a href="Status.html?login=">log in</a> as administrator to use the search function</p>
 #(/num-results)#
@@ -143,16 +140,9 @@ var progressbar = new Progressbar(#[results]#, document.getElementById("results"
   </div>
   
   <div id="sidebar">
-    <div id="navigate" class="boxed">
-      <h2 class="title">Navigate</h2>
-      <div class="content">
-        <form id="form1" method="post" action="#">
-          <fieldset>
-          <input id="inputsubmit1" type="submit" name="inputsubmit1" value="Sign In" />
-          </fieldset>
-        </form>
-      </div>
-    </div>
+<!-- attach the bottomline -->
+<!--#include virtual="/yacy/user/ysearchitem.html?bottomline=true&eventID=#[eventID]#" -->
+    
     <!--
     <div id="updates" class="boxed">
       <h2 class="title">News</h2>

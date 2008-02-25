@@ -1,14 +1,15 @@
-// ysearch.java
-// -----------------------
-// part of the AnomicHTTPD caching proxy
-// (C) by Michael Peter Christen; mc@anomic.de
-// first published on http://www.anomic.de
-// Frankfurt, Germany, 2004
+// ysearchitem.java
+// (C) 2004-2008 by Michael Peter Christen; mc@yacy.net, Frankfurt a. M., Germany
+// first published 2004 on http://yacy.net
 //
-// $LastChangedDate: 2008-02-07 22:16:36 +0000 (Do, 07 Feb 2008) $
-// $LastChangedRevision: 4459 $
+// This is a part of YaCy, a peer-to-peer based web search engine
+//
+// $LastChangedDate: 2006-04-02 22:40:07 +0200 (So, 02 Apr 2006) $
+// $LastChangedRevision: 1986 $
 // $LastChangedBy: orbiter $
 //
+// LICENSE
+// 
 // This program is free software; you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
 // the Free Software Foundation; either version 2 of the License, or
@@ -22,43 +23,16 @@
 // You should have received a copy of the GNU General Public License
 // along with this program; if not, write to the Free Software
 // Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
-//
-// Using this software in any meaning (reading, learning, copying, compiling,
-// running) means that you agree that the Author(s) is (are) not responsible
-// for cost, loss of data or any harm that may be caused directly or indirectly
-// by usage of this softare or this documentation. The usage of this software
-// is on your own risk. The installation and usage (starting/running) of this
-// software may allow other people or application to access your computer and
-// any attached devices and is highly dependent on the configuration of the
-// software which must be done by the user of the software; the author(s) is
-// (are) also not responsible for proper configuration and usage of the
-// software, even if provoked by documentation provided together with
-// the software.
-//
-// Any changes to this file according to the GPL as documented in the file
-// gpl.txt aside this file in the shipment you received can be done to the
-// lines that follows this copyright notice here, but changes must not be
-// done inside the copyright notive above. A re-distribution must contain
-// the intact and unchanged copyright notice.
-// Contributions and changes to the program code must be marked as such.
-//
-// You must compile this file with
-// javac -classpath .:../classes yacysearch.java
-// if the shell's current path is HTROOT
 
-import java.util.HashMap;
 import java.util.TreeSet;
 
 import de.anomic.http.httpHeader;
-import de.anomic.index.indexURLEntry;
 import de.anomic.kelondro.kelondroBitfield;
 import de.anomic.kelondro.kelondroMSetTools;
 import de.anomic.plasma.plasmaCondenser;
-import de.anomic.plasma.plasmaParserDocument;
 import de.anomic.plasma.plasmaSearchEvent;
 import de.anomic.plasma.plasmaSearchQuery;
 import de.anomic.plasma.plasmaSearchRankingProfile;
-import de.anomic.plasma.plasmaSnippetCache;
 import de.anomic.plasma.plasmaSwitchboard;
 import de.anomic.server.serverCore;
 import de.anomic.server.serverObjects;
@@ -66,8 +40,6 @@ import de.anomic.server.serverSwitch;
 import de.anomic.server.logging.serverLog;
 import de.anomic.tools.yFormatter;
 import de.anomic.yacy.yacyCore;
-import de.anomic.yacy.yacyNewsPool;
-import de.anomic.yacy.yacyNewsRecord;
 import de.anomic.yacy.yacyURL;
 
 public class ysearch {
@@ -77,7 +49,6 @@ public class ysearch {
         sb.localSearchLastAccess = System.currentTimeMillis();
         
         boolean searchAllowed = sb.getConfigBool("publicSearchpage", true) || sb.verifyAuthentication(header, false);
-        
         boolean authenticated = sb.adminAuthenticated(header) >= 2;
         int display = (post == null) ? 0 : post.getInt("display", 0);
         if ((display == 1) && (!authenticated)) display = 0;
@@ -88,11 +59,11 @@ public class ysearch {
 
         // get query
         String querystring = (post == null) ? "" : post.get("search", "").trim();
+        final serverObjects prop = new serverObjects();
         
         boolean rss = (post == null) ? false : post.get("rss", "false").equals("true");
         if ((post == null) || (env == null) || (querystring.length() == 0) || (!searchAllowed)) {
             // we create empty entries for template strings
-            final serverObjects prop = new serverObjects();
             prop.put("searchagain", "0");
             prop.put("input", input);
             prop.put("display", display);
@@ -168,7 +139,6 @@ public class ysearch {
         // patch until better search profiles are available
         if ((contentdomCode != plasmaSearchQuery.CONTENTDOM_TEXT) && (itemsPerPage <= 32)) itemsPerPage = 32;
         
-        serverObjects prop = new serverObjects();
         if (post.get("cat", "href").equals("href")) {
 
             final TreeSet<String>[] query = plasmaSearchQuery.cleanQuery(querystring); // converts also umlaute
@@ -185,51 +155,6 @@ public class ysearch {
             final TreeSet<String> filtered = kelondroMSetTools.joinConstructive(query[0], plasmaSwitchboard.stopwords);
             if (filtered.size() > 0) {
                 kelondroMSetTools.excludeDestructive(query[0], plasmaSwitchboard.stopwords);
-            }
-
-            // if a minus-button was hit, remove a special reference first
-            if (post.containsKey("deleteref")) {
-                if (!sb.verifyAuthentication(header, true)) {
-                    prop.put("AUTHENTICATE", "admin log-in"); // force log-in
-                    return prop;
-                }
-                
-                // delete the index entry locally
-                final String delHash = post.get("deleteref", ""); // urlhash
-                sb.wordIndex.removeWordReferences(query[0], delHash);
-
-                // make new news message with negative voting
-                HashMap<String, String> map = new HashMap<String, String>();
-                map.put("urlhash", delHash);
-                map.put("vote", "negative");
-                map.put("refid", "");
-                yacyCore.newsPool.publishMyNews(yacyNewsRecord.newRecord(yacyNewsPool.CATEGORY_SURFTIPP_VOTE_ADD, map));
-            }
-
-            // if a plus-button was hit, create new voting message
-            if (post.containsKey("recommendref")) {
-                if (!sb.verifyAuthentication(header, true)) {
-                    prop.put("AUTHENTICATE", "admin log-in"); // force log-in
-                    return prop;
-                }
-                final String recommendHash = post.get("recommendref", ""); // urlhash
-                indexURLEntry urlentry = sb.wordIndex.loadedURL.load(recommendHash, null, 0);
-                if (urlentry != null) {
-                    indexURLEntry.Components comp = urlentry.comp();
-                    plasmaParserDocument document;
-                    document = plasmaSnippetCache.retrieveDocument(comp.url(), true, 5000, true);
-                    if (document != null) {
-                        // create a news message
-                        HashMap<String, String> map = new HashMap<String, String>();
-                        map.put("url", comp.url().toNormalform(false, true).replace(',', '|'));
-                        map.put("title", comp.dc_title().replace(',', ' '));
-                        map.put("description", ((document == null) ? comp.dc_title() : document.dc_title()).replace(',', ' '));
-                        map.put("author", ((document == null) ? "" : document.dc_creator()));
-                        map.put("tags", ((document == null) ? "" : document.dc_subject(' ')));
-                        yacyCore.newsPool.publishMyNews(yacyNewsRecord.newRecord(yacyNewsPool.CATEGORY_SURFTIPP_ADD, map));
-                        document.close();
-                    }
-                }
             }
 
             // prepare search properties
@@ -261,7 +186,7 @@ public class ysearch {
 
             
             // tell all threads to do nothing for a specific time
-            sb.intermissionAllThreads(10000);
+            sb.intermissionAllThreads(3000);
         
             // filter out words that appear in bluelist
             theQuery.filterOut(plasmaSwitchboard.blueList);
@@ -300,7 +225,6 @@ public class ysearch {
             handles.add(theQuery.handle);
             sb.localSearchTracker.put(client, handles);
             
-            prop = new serverObjects();
             int totalcount = theSearch.getRankingResult().getLocalResourceSize() + theSearch.getRankingResult().getRemoteResourceSize();
             prop.put("num-results_offset", offset);
             prop.put("num-results_itemscount", "0");
@@ -311,31 +235,6 @@ public class ysearch {
             prop.put("num-results_globalresults_remoteResourceSize", yFormatter.number(theSearch.getRankingResult().getRemoteResourceSize(), !rss));
             prop.put("num-results_globalresults_remoteIndexCount", yFormatter.number(theSearch.getRankingResult().getRemoteIndexCount(), !rss));
             prop.put("num-results_globalresults_remotePeerCount", yFormatter.number(theSearch.getRankingResult().getRemotePeerCount(), !rss));
-            
-            // compose page navigation
-            StringBuffer resnav = new StringBuffer();
-            int thispage = offset / theQuery.displayResults();
-            if (thispage == 0) resnav.append("&lt;&nbsp;"); else {
-                resnav.append(navurla(thispage - 1, display, theQuery));
-                resnav.append("<strong>&lt;</strong></a>&nbsp;");
-            }
-            int numberofpages = Math.min(10, Math.max(thispage + 2, totalcount / theQuery.displayResults()));
-            for (int i = 0; i < numberofpages; i++) {
-                if (i == thispage) {
-                    resnav.append("<strong>");
-                    resnav.append(i + 1);
-                    resnav.append("</strong>&nbsp;");
-                } else {
-                    resnav.append(navurla(i, display, theQuery));
-                    resnav.append(i + 1);
-                    resnav.append("</a>&nbsp;");
-                }
-            }
-            if (thispage >= numberofpages) resnav.append("&gt;"); else {
-                resnav.append(navurla(thispage + 1, display, theQuery));
-                resnav.append("<strong>&gt;</strong></a>");
-            }
-            prop.put("num-results_resnav", resnav.toString());
         
             // generate the search result lines; they will be produced by another servlet
             for (int i = 0; i < theQuery.displayResults(); i++) {
@@ -405,18 +304,20 @@ public class ysearch {
         // return rewrite properties
         return prop;
     }
-
-    private static String navurla(int page, int display, plasmaSearchQuery theQuery) {
+/*
+    private static String navhidden(int page, int display, plasmaSearchQuery theQuery) {
         return
-        "<a href=\"ysearch.html?display=" + display +
-        "&amp;search=" + theQuery.queryString() +
-        "&amp;count="+ theQuery.displayResults() +
-        "&amp;offset=" + (page * theQuery.displayResults()) +
-        "&amp;resource=" + theQuery.searchdom() +
-        "&amp;urlmaskfilter=" + theQuery.urlMask +
-        "&amp;prefermaskfilter=" + theQuery.prefer +
-        "&amp;cat=href&amp;constraint=" + ((theQuery.constraint == null) ? "" : theQuery.constraint.exportB64()) +
-        "&amp;contentdom=" + theQuery.contentdom() +
-        "&amp;former=" + theQuery.queryString() + "\">";
+        "<input type=\"hidden\" name=\"display\" value=\"" + display + "\" />" +
+        "<input type=\"hidden\" name=\"search\" value=\"" + theQuery.queryString() + "\" />" +
+        "<input type=\"hidden\" name=\"count\" value=\"" + theQuery.displayResults() + "\" />" +
+        "<input type=\"hidden\" name=\"offset\" value=\"" + (page * theQuery.displayResults()) + "\" />" +
+        "<input type=\"hidden\" name=\"resource\" value=\"" + theQuery.searchdom() + "\" />" +
+        "<input type=\"hidden\" name=\"urlmaskfilter\" value=\"" + theQuery.urlMask + "\" />" +
+        "<input type=\"hidden\" name=\"prefermaskfilter\" value=\"" + theQuery.prefer + "\" />" +
+        "<input type=\"hidden\" name=\"cat\" value=\"href\" />" +
+        "<input type=\"hidden\" name=\"constraint\" value=\"" + ((theQuery.constraint == null) ? "" : theQuery.constraint.exportB64()) + "\" />" +
+        "<input type=\"hidden\" name=\"contentdom\" value=\"" + theQuery.contentdom() + "\" />" +
+        "<input type=\"hidden\" name=\"former\" value=\"" + theQuery.queryString() + "\" />";
     }
+    */
 }

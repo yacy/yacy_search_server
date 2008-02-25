@@ -42,11 +42,8 @@ import de.anomic.plasma.plasmaSnippetCache;
 import de.anomic.plasma.plasmaSwitchboard;
 import de.anomic.server.serverObjects;
 import de.anomic.server.serverSwitch;
-import de.anomic.tools.crypt;
 import de.anomic.tools.nxTools;
 import de.anomic.tools.yFormatter;
-import de.anomic.yacy.yacyCore;
-import de.anomic.yacy.yacyNewsPool;
 import de.anomic.yacy.yacySeed;
 import de.anomic.yacy.yacyURL;
 
@@ -64,14 +61,15 @@ public class ysearchitem {
         String eventID = post.get("eventID", "");
         boolean bottomline = post.get("bottomline", "false").equals("true");
         boolean rss = post.get("rss", "false").equals("true");
-        boolean authenticated = sb.adminAuthenticated(header) >= 2;
         int item = post.getInt("item", -1);
+        boolean auth = ((String) header.get(httpHeader.CONNECTION_PROP_CLIENTIP, "")).equals("localhost") || sb.verifyAuthentication(header, true);
         
         // default settings for blank item
         prop.put("content", "0");
         prop.put("rss", "0");
         prop.put("references", "0");
         prop.put("rssreferences", "0");
+        prop.put("navigation", "0");
         prop.put("dynamic", "0");
         
         // find search event
@@ -81,17 +79,19 @@ public class ysearchitem {
             return prop;
         }
         plasmaSearchQuery theQuery = theSearch.getQuery();
-
+        int offset = theQuery.neededResults() - theQuery.displayResults();
+        int totalcount = theSearch.getRankingResult().getLocalResourceSize() + theSearch.getRankingResult().getRemoteResourceSize();
+        
         // dynamically update count values
         if (!rss) {
-            int offset = theQuery.neededResults() - theQuery.displayResults() + 1;
-            prop.put("dynamic_offset", offset);
+            prop.put("dynamic_offset", offset + 1);
             prop.put("dynamic_itemscount", (item < 0) ? theQuery.neededResults() : item + 1);
             prop.put("dynamic_totalcount", yFormatter.number(theSearch.getRankingResult().getLocalResourceSize() + theSearch.getRankingResult().getRemoteResourceSize(), !rss));
             prop.put("dynamic_localResourceSize", yFormatter.number(theSearch.getRankingResult().getLocalResourceSize(), !rss));
             prop.put("dynamic_remoteResourceSize", yFormatter.number(theSearch.getRankingResult().getRemoteResourceSize(), !rss));
             prop.put("dynamic_remoteIndexCount", yFormatter.number(theSearch.getRankingResult().getRemoteIndexCount(), !rss));
             prop.put("dynamic_remotePeerCount", yFormatter.number(theSearch.getRankingResult().getRemotePeerCount(), !rss));
+            prop.put("dynamic_resnav", "");
             prop.put("dynamic", "1");
         }
         
@@ -146,21 +146,48 @@ public class ysearchitem {
                         word = (String) iter.next();
                         if ((theQuery == null) || (theQuery.queryString == null)) break;
                         if (word != null) {
-                            prop.putHTML("references_words_" + hintcount + "_word", word);
-                            prop.putHTML("references_words_" + hintcount + "_newsearch", theQuery.queryString.replace(' ', '+') + "+" + word);
-                            prop.put("references_words_" + hintcount + "_count", theQuery.displayResults());
-                            prop.put("references_words_" + hintcount + "_offset", "0");
-                            prop.put("references_words_" + hintcount + "_contentdom", theQuery.contentdom());
-                            prop.put("references_words_" + hintcount + "_resource", theQuery.searchdom());
+                            prop.putHTML("navigation_topwords_words_" + hintcount + "_word", word);
+                            prop.putHTML("navigation_topwords_words_" + hintcount + "_newsearch", theQuery.queryString.replace(' ', '+') + "+" + word);
+                            prop.put("navigation_topwords_words_" + hintcount + "_count", theQuery.displayResults());
+                            prop.put("navigation_topwords_words_" + hintcount + "_offset", "0");
+                            prop.put("navigation_topwords_words_" + hintcount + "_contentdom", theQuery.contentdom());
+                            prop.put("navigation_topwords_words_" + hintcount + "_resource", theQuery.searchdom());
                         }
-                        prop.put("references_words", hintcount);
+                        prop.put("navigation_topwords_words", hintcount);
                         if (hintcount++ > MAX_TOPWORDS) {
                             break;
                         }
                     }
-                    prop.put("references", "1");
+                    prop.put("navigation_topwords", "1");
+                }
+                
+            }
+            
+            // compose page navigation
+            StringBuffer resnav = new StringBuffer();
+            int thispage = offset / theQuery.displayResults();
+            if (thispage == 0) resnav.append("&lt;&nbsp;"); else {
+                resnav.append(navurla(thispage - 1, theQuery));
+                resnav.append("<strong>&lt;</strong></a>&nbsp;");
+            }
+            int numberofpages = Math.min(10, Math.max(thispage + 2, totalcount / theQuery.displayResults()));
+            for (int j = 0; j < numberofpages; j++) {
+                if (j == thispage) {
+                    resnav.append("<strong>");
+                    resnav.append(j + 1);
+                    resnav.append("</strong>&nbsp;");
+                } else {
+                    resnav.append(navurla(j, theQuery));
+                    resnav.append(j + 1);
+                    resnav.append("</a>&nbsp;");
                 }
             }
+            if (thispage >= numberofpages) resnav.append("&gt;"); else {
+                resnav.append(navurla(thispage + 1, theQuery));
+                resnav.append("<strong>&gt;</strong></a>");
+            }
+            prop.put("navigation_resnav", resnav.toString());
+            prop.put("navigation", "1");
             
             return prop;
         }
@@ -186,11 +213,6 @@ public class ysearchitem {
             }
             
             prop.put("content", theQuery.contentdom + 1); // switch on specific content
-            prop.put("content_authorized", authenticated ? "1" : "0");
-            prop.put("content_authorized_recommend", (yacyCore.newsPool.getSpecific(yacyNewsPool.OUTGOING_DB, yacyNewsPool.CATEGORY_SURFTIPP_ADD, "url", result.urlstring()) == null) ? "1" : "0");
-            prop.put("content_authorized_recommend_deletelink", "/yacysearch.html?search=" + theQuery.queryString + "&Enter=Search&count=" + theQuery.displayResults() + "&offset=" + (theQuery.neededResults() - theQuery.displayResults()) + "&order=" + crypt.simpleEncode(theQuery.ranking.toExternalString()) + "&resource=local&time=3&deleteref=" + result.hash() + "&urlmaskfilter=.*");
-            prop.put("content_authorized_recommend_recommendlink", "/yacysearch.html?search=" + theQuery.queryString + "&Enter=Search&count=" + theQuery.displayResults() + "&offset=" + (theQuery.neededResults() - theQuery.displayResults()) + "&order=" + crypt.simpleEncode(theQuery.ranking.toExternalString()) + "&resource=local&time=3&recommendref=" + result.hash() + "&urlmaskfilter=.*");
-            prop.put("content_authorized_urlhash", result.hash());
             prop.putHTML("content_description", result.title());
             prop.put("content_url", result.urlstring());
         
@@ -232,6 +254,7 @@ public class ysearchitem {
             if (ms == null) {
                 prop.put("content_items", "0");
             } else {
+                prop.putHTML("content_items_0_hrefCache", (auth) ? "/ViewImage.png?url=" + ms.href.toNormalform(true, false) : ms.href.toNormalform(true, false));
                 prop.putHTML("content_items_0_href", ms.href.toNormalform(true, false));
                 prop.put("content_items_0_code", sb.licensedURLs.aquireLicense(ms.href));
                 prop.putHTML("content_items_0_name", shorten(ms.name, namelength));
@@ -273,7 +296,7 @@ public class ysearchitem {
             }
             return prop;
         }
-        
+
         return prop;
     }
     
@@ -284,4 +307,18 @@ public class ysearchitem {
         return s.substring(0, length - (s.length() - p) - 3) + "..." + s.substring(p);
     }
 
+
+    private static String navurla(int page, plasmaSearchQuery theQuery) {
+        return
+        "<a href=\"ysearch.html?search=" + theQuery.queryString() +
+        "&amp;count="+ theQuery.displayResults() +
+        "&amp;offset=" + (page * theQuery.displayResults()) +
+        "&amp;resource=" + theQuery.searchdom() +
+        "&amp;urlmaskfilter=" + theQuery.urlMask +
+        "&amp;prefermaskfilter=" + theQuery.prefer +
+        "&amp;cat=href&amp;constraint=" + ((theQuery.constraint == null) ? "" : theQuery.constraint.exportB64()) +
+        "&amp;contentdom=" + theQuery.contentdom() +
+        "&amp;former=" + theQuery.queryString() + "\">";
+    }
+    
 }
