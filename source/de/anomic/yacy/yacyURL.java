@@ -467,9 +467,16 @@ public class yacyURL {
         
         // handle international domains
         if (!Punycode.isBasic(host)) try {
-            int d = host.lastIndexOf('.');
-            if (d >= 0) {
-                host = Punycode.encode(host.substring(0, d - 1)) + host.substring(d);
+            int d1 = host.lastIndexOf('.');
+            if (d1 >= 0) {
+                String tld = host.substring(d1 + 1);
+                String dom = host.substring(0, d1 - 1);
+                int d0 = dom.lastIndexOf('.');
+                if (d0 >= 0) {
+                    host = dom.substring(0, d0) + ".xn--" + Punycode.encode(dom.substring(d0)) + "." + tld;
+                } else {
+                    host = "xn--" + Punycode.encode(dom) + "." + tld;
+                }
             }
         } catch (PunycodeException e) {}
     }
