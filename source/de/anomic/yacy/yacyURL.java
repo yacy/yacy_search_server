@@ -470,10 +470,10 @@ public class yacyURL {
             int d1 = host.lastIndexOf('.');
             if (d1 >= 0) {
                 String tld = host.substring(d1 + 1);
-                String dom = host.substring(0, d1 - 1);
+                String dom = host.substring(0, d1);
                 int d0 = dom.lastIndexOf('.');
                 if (d0 >= 0) {
-                    host = dom.substring(0, d0) + ".xn--" + Punycode.encode(dom.substring(d0)) + "." + tld;
+                    host = dom.substring(0, d0) + ".xn--" + Punycode.encode(dom.substring(d0 + 1)) + "." + tld;
                 } else {
                     host = "xn--" + Punycode.encode(dom) + "." + tld;
                 }
