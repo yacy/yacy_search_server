@@ -1607,7 +1607,7 @@ public final class plasmaSwitchboard extends serverAbstractSwitch implements ser
         return hasDoneSomething;
     }
     
-    synchronized public boolean htEntryStoreProcess(plasmaHTCache.Entry entry) {
+    public boolean htEntryStoreProcess(plasmaHTCache.Entry entry) {
         
         if (entry == null) return false;
 
@@ -1641,6 +1641,7 @@ public final class plasmaSwitchboard extends serverAbstractSwitch implements ser
             doIndexing = false;
         }
         
+        synchronized (sbQueue) {
         /* =========================================================================
          * STORING DATA
          * 
@@ -1648,10 +1649,7 @@ public final class plasmaSwitchboard extends serverAbstractSwitch implements ser
          * a) the user has configured to use the htcache or
          * b) the content should be indexed
          * ========================================================================= */        
-        if (
-                (entry.profile().storeHTCache()) ||
-                (doIndexing && isSupportedContent)
-        ) {
+        if ((entry.profile().storeHTCache()) || (doIndexing && isSupportedContent)) {
             // store response header            
             if (entry.writeResourceInfo()) {
                 this.log.logInfo("WROTE HEADER for " + entry.cacheFile());
@@ -1696,6 +1694,7 @@ public final class plasmaSwitchboard extends serverAbstractSwitch implements ser
             if (!entry.profile().storeHTCache() && entry.cacheFile().exists()) {
                 plasmaHTCache.deleteURLfromCache(entry.url());                
             }
+        }
         }
         
         return true;
@@ -1808,6 +1807,7 @@ public final class plasmaSwitchboard extends serverAbstractSwitch implements ser
             checkInterruption();
 
             // getting the next entry from the indexing queue
+            plasmaSwitchboardQueue.Entry nextentry = null;
             synchronized (sbQueue) {
 
                 if (sbQueue.size() == 0) {
@@ -1820,8 +1820,7 @@ public final class plasmaSwitchboard extends serverAbstractSwitch implements ser
                     return doneSomething;
                 }
 
-                plasmaSwitchboardQueue.Entry nextentry;
-
+                
                 // if we were interrupted we should return now
                 if (Thread.currentThread().isInterrupted()) {
                     log.logFine("deQueue: thread was interrupted");
@@ -1856,9 +1855,9 @@ public final class plasmaSwitchboard extends serverAbstractSwitch implements ser
                     this.indexingTasksInProcess.put(nextentry.urlHash(), nextentry);
                 }
 
-                // parse and index the resource
-                processResourceStack(nextentry);
             }
+            // parse and index the resource
+            processResourceStack(nextentry);
             return true;
         } catch (InterruptedException e) {
             log.logInfo("DEQUEUE: Shutdown detected.");
