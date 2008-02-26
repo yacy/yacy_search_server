@@ -241,6 +241,8 @@ public class ViewFile {
             prop.put("viewMode", VIEW_MODE_NO_TEXT);
             return prop;
         }
+        
+        String[] wordArray = wordArray(post.get("words", null));
 
         if (viewMode.equals("plain")) {
 
@@ -262,11 +264,9 @@ public class ViewFile {
                     }
             }
 
-            content = content.replaceAll("\n", "<br />").replaceAll("\t", "&nbsp;&nbsp;&nbsp;&nbsp;");
-
             prop.put("error", "0");
             prop.put("viewMode", VIEW_MODE_AS_PLAIN_TEXT);
-            prop.putHTML("viewMode_plainText", content);
+            prop.put("viewMode_plainText", markup(wordArray, content).replaceAll("\n", "<br />").replaceAll("\t", "&nbsp;&nbsp;&nbsp;&nbsp;"));
             
         } else if (viewMode.equals("iframe")) {
             prop.put("viewMode", VIEW_MODE_AS_IFRAME);
@@ -298,15 +298,13 @@ public class ViewFile {
             }
 
             resMime = document.dc_format();
-            String[] wordArray = wordArray(post.get("words", null));
-
+            
             if (viewMode.equals("parsed")) {
                 String content = new String(document.getTextBytes());
                 // content = wikiCode.replaceHTML(content); // added by Marc Nause
-                content = content.replaceAll("\n", "<br />").replaceAll("\t", "&nbsp;&nbsp;&nbsp;&nbsp;");
 
                 prop.put("viewMode", VIEW_MODE_AS_PARSED_TEXT);
-                prop.put("viewMode_parsedText", markup(wordArray, content));
+                prop.put("viewMode_parsedText", markup(wordArray, content).replaceAll("\n", "<br />").replaceAll("\t", "&nbsp;&nbsp;&nbsp;&nbsp;"));
                 
             } else if (viewMode.equals("sentences")) {
                 prop.put("viewMode", VIEW_MODE_AS_PARSED_SENTENCES);
