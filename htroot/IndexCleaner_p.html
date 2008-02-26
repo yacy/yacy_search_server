@@ -12,36 +12,40 @@
     
     #(urldb)#
     ::
-    <p>
-      ThreadAlive: #[threadAlive]#<br />
-      ThreadToString: #[threadToString]#<br />
-      Total URLs searched: #[total]# (#[percentUrls]#%)<br />
-      Blacklisted URLs found: #[blacklisted]#<br />
-      Percentage blacklisted: #[percent]#%<br />
-      last searched URL: #[lastUrl]# (#[lastHash]#)<br />
-      last blacklisted URL found: #[lastBlacklistedUrl]# (#[lastBlacklistedHash]#)<br />
-    </p>
+    <fieldset><legend>URL-DB-Cleaner</legend>
+      <dl>
+        <dt>ThreadAlive: #[threadAlive]#</dt>
+        <dt>ThreadToString: #[threadToString]#</dt>
+        <dt>Total URLs searched: #[total]# (#[percentUrls]#%)</dt>
+        <dt>Blacklisted URLs found: #[blacklisted]#</dt>
+        <dt>Percentage blacklisted: #[percent]#%</dt>
+        <dt>last searched URL: #[lastUrl]# (#[lastHash]#)</dt>
+        <dt>last blacklisted URL found: #[lastBlacklistedUrl]# (#[lastBlacklistedHash]#)</dt>
+      </dl>    
+    </fieldset>
     #(/urldb)#
     #(rwidb)#
     ::
-    <p>
-      ThreadAlive: #[threadAlive]#<br />
-      ThreadToString: #[threadToString]#<br />
-      RWIs at Start: #[RWIcountstart]#<br />
-      RWIs now: #[RWIcountnow]#<br />
-      wordHash in Progress: #[wordHashNow]#<br />
-      last wordHash with deleted URLs: #[lastWordHash]#<br />
-      Number of deleted URLs in on this Hash: #[lastDeletionCounter]#<br />
-    </p>
+    <fieldset><legend>RWI-DB-Cleaner</legend>
+      <dl>
+        <dt>ThreadAlive: #[threadAlive]#</dt>
+        <dt>ThreadToString: #[threadToString]#</dt>
+        <dt>RWIs at Start: #[RWIcountstart]#</dt>
+        <dt>RWIs now: #[RWIcountnow]#</dt>
+        <dt>wordHash in Progress: #[wordHashNow]#</dt>
+        <dt>last wordHash with deleted URLs: #[lastWordHash]#</dt>
+        <dt>Number of deleted URLs in on this Hash: #[lastDeletionCounter]#</dt>
+      </dl>
+    </fieldset>
     #(/rwidb)#
     <p>
-      UrldbCleaner - Clean up the database by deletion of blacklisted urls:<br />
+      URL-DB-Cleaner - Clean up the database by deletion of blacklisted urls:<br />
       <a href="IndexCleaner_p.html?action=ustart">Start/Resume</a>
       <a href="IndexCleaner_p.html?action=ustop">Stop</a>
       <a href="IndexCleaner_p.html?action=upause">Pause</a>
     </p>
     <p>
-    RWIDbCleaner - Clean up the database by deletion of words with reference to blacklisted urls:<br />
+    RWI-DB-Cleaner - Clean up the database by deletion of words with reference to blacklisted urls:<br />
       <a href="IndexCleaner_p.html?action=rstart">Start/Resume</a>
       <a href="IndexCleaner_p.html?action=rstop">Stop</a>
       <a href="IndexCleaner_p.html?action=rpause">Pause</a>

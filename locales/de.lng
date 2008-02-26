@@ -269,7 +269,7 @@ You did not set a user name and/or a password.==Sie haben keinen Nutzernamen und
 Some pages are protected by passwords.==Einige Seiten sind passwortgesch&uuml;tzt.
 You should set a password here to secure your YaCy peer.==Sie sollten hier ein Passwort einstellen um Ihren YaCy-Peer zu sichern.
 You did not open a port in your firewall or your router does not forward the server port to your peer.==Sie haben keinen Port in Ihrer Firewall ge&ouml;ffnet oder Ihr Router leitet den Server-Port nicht zu Ihrem Peer weiter.
-This is needed if you want to fully participate in the YaCy network.==Dies ist jedoch erforderlich wenn Sie vollst&auml;ndig am YaCy-Netzwerk teilhaben m&ouml;chten.
+This is needed if you want to fully participate in the YaCy network.==Dies ist jedoch erforderlich, wenn Sie vollst&auml;ndig am YaCy-Netzwerk teilhaben m&ouml;chten.
 You can also use your peer without opening it, but this is not recomended.==Sie k&ouml;nnen Ihren Peer auch nutzen ohne ihn zu &ouml;ffnen, dies wird jedoch nicht empfohlen.
 #-----------------------------
 
@@ -296,7 +296,7 @@ Error saving the language file.==Es trat ein Fehler beim Speichern der Sprachdat
 Network Configuration==Netzwerk Einstellungen
 Accepted Changes==&Auml;nderungen gespeichert
 Inapplicable Setting Combination==unpassende Einstellungskombination
-P2P operation can run without remote indexing, but runs better with remote indexing switched on. Please switch 'Accept Remote Crawl Requests' on==P2P-T&auml;tigkeit l&auml;uft ohne Remote-Indexierung, aber funktioniert besser wenn diese eingeschaltet ist. Bitte aktivieren Sie 'Remote Crawling akzeptieren'
+P2P operation can run without remote indexing, but runs better with remote indexing switched on. Please switch 'Accept Remote Crawl Requests' on==P2P-T&auml;tigkeit l&auml;uft ohne Remote-Indexierung, aber funktioniert besser, wenn diese eingeschaltet ist. Bitte aktivieren Sie 'Remote Crawling akzeptieren'
 For P2P operation, at least DHT distribution or DHT receive \(or both\) must be set. You have thus defined a Robinson configuration==F&uuml;r P2P-T&auml;tigkeit muss mindestens DHT-Verteilung oder DHT-Empfang (oder beides) aktiviert sein. Ansonsten haben Sie einen Robinson-Peer definiert
 Global Search in P2P configuration is only allowed, if both, index receive and distribution is switched on. You have a P2P configuration, but are not allowed to search other peers==Die globale Suche im P2P-Modus ist nur erlaubt, wenn DHT-Empfang und -Versand aktiviert wurden. Sie sind im P2P-Modus, aber Sie d&uuml;rfen keine anderen Peers durchsuchen
 For Robinson Mode, index distribution and receive is switched off==Im Robinson-Modus werden Indexverteilung und -empfang deaktiviert
@@ -807,6 +807,7 @@ Enable web search to everyone==Suchfunktion f&uuml;r alle Nutzer erlauben
 #File: IndexCleaner_p.html
 #---------------------------
 Index Cleaner==Index Aufr&auml;umer
+>URL-DB-Cleaner==>URL-DB-Aufr&auml;umer
 #ThreadAlive:
 #ThreadToString:
 Total URLs searched:==Insgesamt durchsuchte URLs:
@@ -814,16 +815,17 @@ Blacklisted URLs found:==URLS auf Blacklist gefunden:
 Percentage blacklisted:==Prozent auf Blacklist:
 last searched URL:==zuletzt durchsuchte URL: 
 last blacklisted URL found:==zuletzt gefundene URL auf Blacklist:
+>RWI-DB-Cleaner==>RWI-DB-Aufr&auml;umer
 RWIs at Start:==RWIs beim Start:
 RWIs now:==RWIs jetzt: 
 wordHash in Progress:==Wort-Hash in Benutzung:
 last wordHash with deleted URLs:==letzter Wort-Hash mit gel&ouml;schten URLs:
 Number of deleted URLs in on this Hash:==Anzahl an gel&ouml;schten URLs in diesem Hash:
-UrldbCleaner - Clean up the database by deletion of blacklisted urls:==UrlDBCleaner - R&auml;umen Sie Ihre Datenbank auf, indem Sie URLs, die auf Ihrer Blacklist stehen, l&ouml;schen:
+URL-DB-Cleaner - Clean up the database by deletion of blacklisted urls:==URL-DB-Aufr&auml;umer - R&auml;umen Sie Ihre Datenbank auf, indem Sie URLs, die auf Ihrer Blacklist stehen, l&ouml;schen:
 Start/Resume==Start/Fortsetzen
 Stop==Stopp
 Pause==Anhalten
-RWIDbCleaner - Clean up the database by deletion of words with reference to blacklisted urls:==RWIDBCleaner - R&auml;umen Sie Ihre Datenbank auf, indem Sie W&ouml;rter, die mit Ihrer Blacklist verbunden sind, l&ouml;schen:
+RWI-DB-Cleaner - Clean up the database by deletion of words with reference to blacklisted urls:==RWI-DB-Aufr&auml;umer - R&auml;umen Sie Ihre Datenbank auf, indem Sie W&ouml;rter, die mit Ihrer Blacklist verbunden sind, l&ouml;schen:
 #-----------------------------
 
 #File: IndexControlRWIs_p.html
@@ -1403,7 +1405,7 @@ Idle</option>==unt&auml;tig</option>
 Changes take effect after <strong>restart</strong> of YaCy==&Auml;nderungen werden erst nach einem <strong>Neustart</strong> von YaCy wirksam.
 Proxy Performance Settings==Proxy Performance Einstellungen
 #Online Caution Delay==
-This is the time that the crawler idles when the proxy is accessed.==Dies ist die Zeit die der Crawler pausiert wenn auf den Proxy zugegriffen wird.
+This is the time that the crawler idles when the proxy is accessed.==Dies ist die Zeit die der Crawler pausiert, wenn auf den Proxy zugegriffen wird.
 The delay is extended by this time==Die normale Verz&ouml;gerung wird um diese Zeit verl&auml;ngert,
 each time the proxy is accessed afterwards. This shall improve performance of the proxy throughput.==wenn auf den Proxy zugegriffen wird. Dies soll die Performance des Proxydurchsatzes erh&ouml;hen.
 current delta is==Seit dem letzten Zugriff auf den Proxy sind
