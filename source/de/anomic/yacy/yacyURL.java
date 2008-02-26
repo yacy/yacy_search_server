@@ -38,6 +38,8 @@ import java.util.regex.Pattern;
 import de.anomic.kelondro.kelondroBase64Order;
 import de.anomic.server.serverCodings;
 import de.anomic.server.serverDomains;
+import de.anomic.tools.Punycode;
+import de.anomic.tools.Punycode.PunycodeException;
 
 public class yacyURL {
 
@@ -394,6 +396,7 @@ public class yacyURL {
     
     public yacyURL(String url, String hash) throws MalformedURLException {
         if (url == null) throw new MalformedURLException("url string is null");
+        
         parseURLString(url);
         this.hash = hash;
     }
@@ -461,6 +464,14 @@ public class yacyURL {
                 throw new MalformedURLException("unknown protocol: " + url);
             }
         }
+        
+        // handle international domains
+        if (!Punycode.isBasic(host)) try {
+            int d = host.lastIndexOf('.');
+            if (d >= 0) {
+                host = Punycode.encode(host.substring(0, d - 1)) + host.substring(d);
+            }
+        } catch (PunycodeException e) {}
     }
 
     public yacyURL(File file) throws MalformedURLException {
