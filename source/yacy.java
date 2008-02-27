@@ -75,6 +75,7 @@ import de.anomic.kelondro.kelondroBase64Order;
 import de.anomic.kelondro.kelondroDyn;
 import de.anomic.kelondro.kelondroMScoreCluster;
 import de.anomic.kelondro.kelondroMapObjects;
+import de.anomic.kelondro.kelondroRowCollection;
 import de.anomic.plasma.plasmaCondenser;
 import de.anomic.plasma.plasmaCrawlLURL;
 import de.anomic.plasma.plasmaSwitchboard;
@@ -408,6 +409,7 @@ public final class yacy {
                         serverLog.logSevere("MAIN CONTROL LOOP", "PANIC: " + e.getMessage(),e);
                     }
                     // shut down
+                    if (kelondroRowCollection.sortingthread != null) kelondroRowCollection.sortingthread.terminate();
                     serverLog.logConfig("SHUTDOWN", "caught termination signal");
                     server.terminate(false);
                     server.interrupt();

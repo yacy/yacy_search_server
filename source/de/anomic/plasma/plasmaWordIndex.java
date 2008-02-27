@@ -385,11 +385,11 @@ public final class plasmaWordIndex implements indexRI {
         return container;
     }
 
-    public Map<String, indexContainer> getContainers(Set<String> wordHashes, Set<String> urlselection, boolean deleteIfEmpty, boolean interruptIfEmpty) {
+    public HashMap<String, indexContainer> getContainers(Set<String> wordHashes, Set<String> urlselection, boolean deleteIfEmpty, boolean interruptIfEmpty) {
         // return map of wordhash:indexContainer
         
         // retrieve entities that belong to the hashes
-        HashMap<String, indexContainer> containers = new HashMap<String, indexContainer>();
+        HashMap<String, indexContainer> containers = new HashMap<String, indexContainer>(wordHashes.size());
         String singleHash;
         indexContainer singleContainer;
             Iterator<String> i = wordHashes.iterator();
@@ -402,7 +402,7 @@ public final class plasmaWordIndex implements indexRI {
                 singleContainer = getContainer(singleHash, urlselection);
             
                 // check result
-                if (((singleContainer == null) || (singleContainer.size() == 0)) && (interruptIfEmpty)) return new HashMap<String, indexContainer>();
+                if (((singleContainer == null) || (singleContainer.size() == 0)) && (interruptIfEmpty)) return new HashMap<String, indexContainer>(0);
             
                 containers.put(singleHash, singleContainer);
             }
@@ -410,22 +410,22 @@ public final class plasmaWordIndex implements indexRI {
     }
 
     @SuppressWarnings("unchecked")
-    public Map<String, indexContainer>[] localSearchContainers(plasmaSearchQuery query, Set<String> urlselection) {
+    public HashMap<String, indexContainer>[] localSearchContainers(plasmaSearchQuery query, Set<String> urlselection) {
         // search for the set of hashes and return a map of of wordhash:indexContainer containing the seach result
 
         // retrieve entities that belong to the hashes
-        Map<String, indexContainer> inclusionContainers = (query.queryHashes.size() == 0) ? new HashMap<String, indexContainer>() : getContainers(
+        HashMap<String, indexContainer> inclusionContainers = (query.queryHashes.size() == 0) ? new HashMap<String, indexContainer>(0) : getContainers(
                         query.queryHashes,
                         urlselection,
                         true,
                         true);
-        if ((inclusionContainers.size() != 0) && (inclusionContainers.size() < query.queryHashes.size())) inclusionContainers = new HashMap<String, indexContainer>(); // prevent that only a subset is returned
-        Map<String, indexContainer> exclusionContainers = (inclusionContainers.size() == 0) ? new HashMap<String, indexContainer>() : getContainers(
+        if ((inclusionContainers.size() != 0) && (inclusionContainers.size() < query.queryHashes.size())) inclusionContainers = new HashMap<String, indexContainer>(0); // prevent that only a subset is returned
+        HashMap<String, indexContainer> exclusionContainers = (inclusionContainers.size() == 0) ? new HashMap<String, indexContainer>(0) : getContainers(
                 query.excludeHashes,
                 urlselection,
                 true,
                 true);
-        return new Map[]{inclusionContainers, exclusionContainers};
+        return new HashMap[]{inclusionContainers, exclusionContainers};
     }
     
     public int size() {

@@ -26,11 +26,10 @@
 
 package de.anomic.server;
 
-import java.util.Collections;
-import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
 import java.util.TreeMap;
+import java.util.concurrent.ConcurrentHashMap;
 
 public class serverProfiling extends Thread {
     
@@ -41,8 +40,8 @@ public class serverProfiling extends Thread {
     
     static {
         // initialize profiling
-        historyMaps = Collections.synchronizedMap(new HashMap<String, TreeMap<Long, Event>>());
-        eventCounter = Collections.synchronizedMap(new HashMap<String, Integer>());
+        historyMaps = new ConcurrentHashMap<String, TreeMap<Long, Event>>();
+        eventCounter = new ConcurrentHashMap<String, Integer>();
         lastCompleteCleanup = System.currentTimeMillis();
         systemProfiler = null;
     }

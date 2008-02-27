@@ -58,6 +58,7 @@ import de.anomic.server.serverDate;
 import de.anomic.server.serverDomains;
 import de.anomic.server.serverMemory;
 import de.anomic.server.serverObjects;
+import de.anomic.server.serverProcessor;
 import de.anomic.server.serverSwitch;
 import de.anomic.tools.yFormatter;
 import de.anomic.yacy.yacyCore;
@@ -293,7 +294,7 @@ public class Status {
         prop.put("freeMemory", serverMemory.bytesToString(rt.freeMemory()));
         prop.put("totalMemory", serverMemory.bytesToString(rt.totalMemory()));
         prop.put("maxMemory", serverMemory.bytesToString(rt.maxMemory()));
-        prop.put("processors", rt.availableProcessors());
+        prop.put("processors", serverProcessor.availableCPU);
 
         // proxy traffic
         //prop.put("trafficIn",bytesToString(httpdByteCountInputStream.getGlobalCount()));

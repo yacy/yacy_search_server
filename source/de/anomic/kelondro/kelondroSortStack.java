@@ -53,7 +53,7 @@ public class kelondroSortStack<E> {
         return this.onstack.size();
     }
     
-    public synchronized void push(stackElement se) {
+    public void push(stackElement se) {
         push(se.element, se.weight);
     }
     

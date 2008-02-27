@@ -44,6 +44,7 @@ import de.anomic.http.httpdByteCountInputStream;
 import de.anomic.http.httpdByteCountOutputStream;
 import de.anomic.plasma.plasmaSwitchboard;
 import de.anomic.server.serverObjects;
+import de.anomic.server.serverProcessor;
 import de.anomic.server.serverSwitch;
 import de.anomic.yacy.yacyCore;
 
@@ -75,7 +76,7 @@ public class status_p {
         prop.putNum("freeMemory", rt.freeMemory());
         prop.putNum("totalMemory", rt.totalMemory());
         prop.putNum("maxMemory", rt.maxMemory());
-        prop.putNum("processors", rt.availableProcessors());
+        prop.putNum("processors", serverProcessor.availableCPU);
 
 		// proxy traffic
 		prop.put("trafficIn", httpdByteCountInputStream.getGlobalCount());

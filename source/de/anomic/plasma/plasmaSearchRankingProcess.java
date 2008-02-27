@@ -34,6 +34,7 @@ import java.util.Iterator;
 import java.util.Map;
 import java.util.Set;
 import java.util.TreeSet;
+import java.util.concurrent.ConcurrentHashMap;
 
 import de.anomic.htmlFilter.htmlFilterContentScraper;
 import de.anomic.index.indexContainer;
@@ -62,14 +63,14 @@ public final class plasmaSearchRankingProcess {
     private int maxentries;
     private int remote_peerCount, remote_indexCount, remote_resourceSize, local_resourceSize;
     private indexRWIEntryOrder order;
-    private HashMap<String, Integer> urlhashes; // map for double-check; String/Long relation, addresses ranking number (backreference for deletion)
+    private ConcurrentHashMap<String, Integer> urlhashes; // map for double-check; String/Long relation, addresses ranking number (backreference for deletion)
     private kelondroMScoreCluster<String> ref;  // reference score computation for the commonSense heuristic
     private int[] flagcount; // flag counter
     private TreeSet<String> misses; // contains url-hashes that could not been found in the LURL-DB
     private plasmaWordIndex wordIndex;
-    private Map<String, indexContainer>[] localSearchContainerMaps;
+    private HashMap<String, indexContainer>[] localSearchContainerMaps;
     
-    public plasmaSearchRankingProcess(plasmaWordIndex wordIndex, plasmaSearchQuery query, int sortorder, int maxentries) {
+    public plasmaSearchRankingProcess(plasmaWordIndex wordIndex, plasmaSearchQuery query, int sortorder, int maxentries, int concurrency) {
         // we collect the urlhashes and construct a list with urlEntry objects
         // attention: if minEntries is too high, this method will not terminate within the maxTime
         // sortorder: 0 = hash, 1 = url, 2 = ranking
@@ -84,7 +85,7 @@ public final class plasmaSearchRankingProcess {
         this.remote_indexCount = 0;
         this.remote_resourceSize = 0;
         this.local_resourceSize = 0;
-        this.urlhashes = new HashMap<String, Integer>();
+        this.urlhashes = new ConcurrentHashMap<String, Integer>(0, 0.75f, concurrency);
         this.ref = new kelondroMScoreCluster<String>();
         this.misses = new TreeSet<String>();
         this.wordIndex = wordIndex;
@@ -262,7 +263,7 @@ public final class plasmaSearchRankingProcess {
         return false;
     }
     
-    public synchronized Map<String, indexContainer>[] searchContainerMaps() {
+    public Map<String, indexContainer>[] searchContainerMaps() {
         // direct access to the result maps is needed for abstract generation
         // this is only available if execQuery() was called before
         return localSearchContainerMaps;

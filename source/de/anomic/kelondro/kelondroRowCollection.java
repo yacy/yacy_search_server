@@ -31,9 +31,11 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Random;
 import java.util.Set;
+import java.util.concurrent.SynchronousQueue;
 
 import de.anomic.server.serverFileUtils;
 import de.anomic.server.serverMemory;
+import de.anomic.server.serverProcessor;
 import de.anomic.server.logging.serverLog;
 import de.anomic.yacy.yacySeedDB;
 
@@ -41,7 +43,17 @@ public class kelondroRowCollection {
 
     public  static final double growfactor = 1.4;
     private static final int isortlimit = 20;
+    private static final Integer dummy = new Integer(0);
     
+    public static final qsortthread sortingthread;
+    static {
+        if (serverProcessor.useCPU > 1) {
+            sortingthread = new qsortthread();
+            sortingthread.start();
+        } else {
+            sortingthread = null;
+        }
+    }
     
     protected byte[]        chunkcache;
     protected int           chunkcount;
@@ -56,8 +68,6 @@ public class kelondroRowCollection {
     private static final int exp_order_col   = 4;
     private static final int exp_order_bound = 5;
     private static final int exp_collection  = 6;
-    
-    private static int processors = Runtime.getRuntime().availableProcessors();
     
     public kelondroRowCollection(kelondroRowCollection rc) {
         this.rowdef = rc.rowdef;
@@ -465,12 +475,11 @@ public class kelondroRowCollection {
         }
         byte[] swapspace = new byte[this.rowdef.objectsize];
         int p = partition(0, this.chunkcount, this.sortBound, swapspace);
-        if ((processors > 1) && (this.chunkcount >= 10000)) {
-        	// sort this using multi-threading; use one second thread
-        	qsortthread qs = new qsortthread(0, p, 0);
-            qs.start();
+        if ((sortingthread != null) && (p > 50) && (sortingthread.isAlive())) {
+        	// sort this using multi-threading
+            sortingthread.process(this, 0, p, 0);
         	qsort(p, this.chunkcount, 0, swapspace);
-        	try {qs.join();} catch (InterruptedException e) {e.printStackTrace();}
+        	sortingthread.waitFinish();
         } else {
         	qsort(0, p, 0, swapspace);
         	qsort(p, this.chunkcount, 0, swapspace);
@@ -479,16 +488,54 @@ public class kelondroRowCollection {
         //assert this.isSorted();
     }
 
-    private class qsortthread extends Thread {
-    	private int sl, sr, sb;
-    	public qsortthread(int L, int R, int S) {
-    		this.sl = L;
-    		this.sr = R;
-    		this.sb = S;
+    public static class qsortthread extends Thread {
+        private boolean terminate;
+        private SynchronousQueue<qsortobject> startObject;
+        private SynchronousQueue<Integer> finishObject;
+    	public qsortthread() {
+    		this.terminate = false;
+            this.startObject = new SynchronousQueue<qsortobject>();
+    		this.finishObject = new SynchronousQueue<Integer>();
+    		this.setName("kelondroRowCollection SORT THREAD");
+    	}
+    	public void process(kelondroRowCollection rc, int L, int R, int S) {
+    	    assert rc != null;
+    	    synchronized (startObject) {
+    	        try {this.startObject.put(new qsortobject(rc, L, R, S));} catch (InterruptedException e) {}
+    	    }
+        }
+        public void waitFinish() {
+            try {this.finishObject.take();} catch (InterruptedException e) {}
+        }
+    	public void terminate() {
+    	    this.terminate = true;
+    	    this.interrupt();
     	}
     	public void run() {
-    		qsort(sl, sr, sb, new byte[rowdef.objectsize]);
+    	    qsortobject so = null;
+    	    while (!terminate) {
+    	        try {so = this.startObject.take();} catch (InterruptedException e) {
+    	            break;
+                }
+    	        assert so != null;
+    	        so.rc.qsort(so.sl, so.sr, so.sb, new byte[so.rc.rowdef.objectsize]);
+    	        try {this.finishObject.put(dummy);} catch (InterruptedException e1) {
+    	            break;
+    	        }
+    	        so = null;
+    	    }
     	}
+    }
+    
+    private static class qsortobject {
+        protected kelondroRowCollection rc;
+        protected int sl, sr, sb;
+        public qsortobject(kelondroRowCollection rc, int L, int R, int S) {
+                this.rc = rc;
+                this.sl = L;
+                this.sr = R;
+                this.sb = S;
+        }
     }
     
     private final void qsort(int L, int R, int S, byte[] swapspace) {
@@ -790,11 +837,11 @@ public class kelondroRowCollection {
     	}
     	long t2 = System.currentTimeMillis();
     	System.out.println("copy c -> d: " + (t2 - t1) + " milliseconds, " + d(testsize, (t2 - t1)) + " entries/millisecond");
-    	processors = 1;
+    	serverProcessor.useCPU = 1;
     	c.sort();
     	long t3 = System.currentTimeMillis();
     	System.out.println("sort c (1) : " + (t3 - t2) + " milliseconds, " + d(testsize, (t3 - t2)) + " entries/millisecond");
-    	processors = 2;
+    	serverProcessor.useCPU = 2;
     	d.sort();
     	long t4 = System.currentTimeMillis();
     	System.out.println("sort d (2) : " + (t4 - t3) + " milliseconds, " + d(testsize, (t4 - t3)) + " entries/millisecond");

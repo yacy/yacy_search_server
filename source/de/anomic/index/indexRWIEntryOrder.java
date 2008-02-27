@@ -36,6 +36,7 @@ import de.anomic.kelondro.kelondroMScoreCluster;
 import de.anomic.plasma.plasmaCondenser;
 import de.anomic.plasma.plasmaSearchRankingProcess;
 import de.anomic.plasma.plasmaSearchRankingProfile;
+import de.anomic.server.serverProcessor;
 import de.anomic.yacy.yacyURL;
 
 public class indexRWIEntryOrder {
@@ -43,8 +44,6 @@ public class indexRWIEntryOrder {
     private plasmaSearchRankingProfile ranking;
     private kelondroMScoreCluster<String> doms; // collected for "authority" heuristic 
     private int maxdomcount;
-    
-    private static final int processors = Runtime.getRuntime().availableProcessors(); // for multiprocessor support, used during normalization
     
     public indexRWIEntryOrder(plasmaSearchRankingProfile profile) {
         this.min = null;
@@ -60,7 +59,7 @@ public class indexRWIEntryOrder {
         ArrayList<indexRWIVarEntry> result = null;
         
         //long s0 = System.currentTimeMillis();
-        if ((processors > 1) && (container.size() > 600)) {
+        if ((serverProcessor.useCPU > 1) && (container.size() > 600)) {
             // run minmax with two threads
             int middle = container.size() / 2;
             minmaxfinder mmf0 = new minmaxfinder(container, 0, middle);

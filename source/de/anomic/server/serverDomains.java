@@ -28,13 +28,13 @@ package de.anomic.server;
 import java.net.InetAddress;
 import java.net.UnknownHostException;
 import java.util.Collections;
-import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.concurrent.ConcurrentHashMap;
 
 import de.anomic.kelondro.kelondroMScoreCluster;
 import de.anomic.plasma.plasmaSwitchboard;
@@ -42,7 +42,7 @@ import de.anomic.plasma.plasmaSwitchboard;
 public class serverDomains {
 
     // a dns cache
-    private static final Map<String, InetAddress> nameCacheHit = Collections.synchronizedMap(new HashMap<String, InetAddress>()); // a not-synchronized map resulted in deadlocks
+    private static final Map<String, InetAddress> nameCacheHit = new ConcurrentHashMap<String, InetAddress>(); // a not-synchronized map resulted in deadlocks
     private static final Set<String> nameCacheMiss = Collections.synchronizedSet(new HashSet<String>());
     private static final kelondroMScoreCluster<String> nameCacheHitAges = new kelondroMScoreCluster<String>();
     private static final kelondroMScoreCluster<String> nameCacheMissAges = new kelondroMScoreCluster<String>();
