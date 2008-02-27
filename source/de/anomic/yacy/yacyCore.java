@@ -93,7 +93,7 @@ public class yacyCore {
     public static File yacyDBPath;
     public static final Map<String, yacyAccessible> amIAccessibleDB = Collections.synchronizedMap(new HashMap<String, yacyAccessible>()); // Holds PeerHash / yacyAccessible Relations
     // constants for PeerPing behaviour
-    private static final int PING_INITIAL = 64;
+    private static final int PING_INITIAL = 16;
     private static final int PING_MIN_LASTSEEN = 240000; // in milliseconds
     private static final int PING_MIN_PEERSEEN = 2; // min. accessible to force senior
     private static final long PING_MAX_DBAGE = 15 * 60 * 1000; // in milliseconds
