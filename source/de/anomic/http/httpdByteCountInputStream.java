@@ -91,9 +91,14 @@ public class httpdByteCountInputStream extends FilterInputStream {
     }
 
     public int read(byte[] b, int off, int len) throws IOException {
+        try {
         int readCount = super.read(b, off, len);
         if (readCount > 0) this.byteCount += readCount;
         return readCount;
+        } catch (IOException e) {
+            e.printStackTrace();
+            throw new IOException(e.getMessage() + "; b.length = " + b.length + ", off = " + off + ", len = " + len);
+        }
     }
 
     public int read() throws IOException {

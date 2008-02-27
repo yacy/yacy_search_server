@@ -100,7 +100,7 @@ public class kelondroSortStore<E> extends kelondroSortStack<E> {
             return this.offstack;
         }
         if (size() < count) throw new RuntimeException("list(" + count + ") exceeded avaiable number of elements (" + size() + ")"); 
-        while (this.onstack.size() < count) {
+        while (this.offstack.size() < count) {
             Long w = this.onstack.firstKey();
             E element = this.onstack.remove(w);
             stackElement se = new stackElement(element, w);

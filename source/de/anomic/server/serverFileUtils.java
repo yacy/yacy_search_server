@@ -72,7 +72,7 @@ import de.anomic.tools.nxTools;
 
 public final class serverFileUtils {
 
-    private static final int DEFAULT_BUFFER_SIZE = 4096;
+    private static final int DEFAULT_BUFFER_SIZE = 512;
     
     public static long copy(InputStream source, OutputStream dest) throws IOException {
         return copy(source,dest, -1);
@@ -95,13 +95,13 @@ public final class serverFileUtils {
         int chunkSize = (int) ((count > 0) ? Math.min(count, DEFAULT_BUFFER_SIZE) : DEFAULT_BUFFER_SIZE);
         
         int c; long total = 0;
-        while ((c = source.read(buffer,0,chunkSize)) > 0) {
+        while ((c = source.read(buffer, 0, chunkSize)) > 0) {
             dest.write(buffer, 0, c);
             dest.flush();
             total += c;
             
             if (count > 0) {
-                chunkSize = (int)Math.min(count-total,DEFAULT_BUFFER_SIZE);
+                chunkSize = (int) Math.min(count-total, DEFAULT_BUFFER_SIZE);
                 if (chunkSize == 0) break;
             }
             
@@ -111,7 +111,7 @@ public final class serverFileUtils {
         return total;
     }
     
-    public static int copy (File source, String inputCharset, Writer dest) throws IOException {
+    public static int copy(File source, String inputCharset, Writer dest) throws IOException {
         InputStream fis = null;
         try {
             fis = new FileInputStream(source);
@@ -121,18 +121,18 @@ public final class serverFileUtils {
         }
     }    
     
-    public static int copy (InputStream source, Writer dest, String inputCharset) throws IOException {
+    public static int copy(InputStream source, Writer dest, String inputCharset) throws IOException {
         InputStreamReader reader = new InputStreamReader(source,inputCharset);
         return copy(reader,dest);
     }
     
-    public static int copy (String source, Writer dest) throws IOException {
+    public static int copy(String source, Writer dest) throws IOException {
         dest.write(source);
         dest.flush();
         return source.length();
     }
     
-    public static int copy (Reader source, Writer dest) throws IOException {        
+    public static int copy(Reader source, Writer dest) throws IOException {        
         char[] buffer = new char[4096];
         int count = 0;
         int n = 0;
@@ -188,7 +188,7 @@ public final class serverFileUtils {
             fis = new FileInputStream(source);
             long skipped = fis.skip(start);
             if (skipped != start) throw new IllegalStateException("Unable to skip '" + start + "' bytes. Only '" + skipped + "' bytes skipped.");
-            copy(fis, dest,-1);
+            copy(fis, dest, -1);
         } finally {
             if (fis != null) try { fis.close(); } catch (Exception e) {}
         }
@@ -305,11 +305,13 @@ public final class serverFileUtils {
     }
     
     public static void write(String source, Writer dest) throws IOException {
-        copy(source,dest);
+        dest.write(source);
+        dest.flush();
     }
 
     public static void write(byte[] source, OutputStream dest) throws IOException {
-        copy(new ByteArrayInputStream(source), dest, -1);
+        dest.write(source, 0, source.length);
+        dest.flush();
     }
 
     public static void write(byte[] source, File dest) throws IOException {
@@ -327,6 +329,7 @@ public final class serverFileUtils {
     	
         // support of gzipped data (requested by roland)      
         if ((source.length > 1) && (((source[1] << 8) | source[0]) == GZIPInputStream.GZIP_MAGIC)) {
+            System.out.println("DEBUG: uncompressGZipArray - uncompressing source");
             try {
                 ByteArrayInputStream byteInput = new ByteArrayInputStream(source);
                 ByteArrayOutputStream byteOutput = new ByteArrayOutputStream();

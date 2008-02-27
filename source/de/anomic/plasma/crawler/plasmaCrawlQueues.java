@@ -178,8 +178,6 @@ public class plasmaCrawlQueues {
             log.logFine("CoreCrawl: online caution, omitting processing");
             return false;
         }
-        // if the server is busy, we do crawling more slowly
-        //if (!(cacheManager.idle())) try {Thread.currentThread().sleep(2000);} catch (InterruptedException e) {}
         
         // if crawling was paused we have to wait until we wer notified to continue
         Object[] status = (Object[]) sb.crawlJobsStatus.get(plasmaSwitchboard.CRAWLJOB_LOCAL_CRAWL);

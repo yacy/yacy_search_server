@@ -601,7 +601,7 @@ public final class serverCore extends serverAbstractThread implements serverThre
     	}
     
     	public byte[] readLine() {
-    	    return receive(this.in, serverCore.this.commandMaxLength, false);
+    	    return receive(this.in, serverCore.this.commandMaxLength, true);
     	}
     
         /**

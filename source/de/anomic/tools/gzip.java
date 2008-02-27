@@ -107,19 +107,13 @@ public class gzip {
 	}
     }
 	
-    public static String gunzipString(byte[] in) {
-	try {
+    public static String gunzipString(byte[] in) throws IOException {
 	    InputStream  fin  = new GZIPInputStream(new ByteArrayInputStream(in));
 	    ByteArrayOutputStream fout = new ByteArrayOutputStream();
 	    copy(fout, fin, 128);
 	    fin.close();
 	    fout.close();
 	    return new String(fout.toByteArray(), "UTF-8");
-	} catch (IOException e) {
-            //System.err.println("ERROR: IO trouble ");
-	    logger.logWarning("ERROR: IO trouble ",e);
-	    return null;
-	}
     }
 
     private static void copy(OutputStream out, InputStream in, int bufferSize) throws IOException {

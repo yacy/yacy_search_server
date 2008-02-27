@@ -233,9 +233,15 @@ public final class yacyClient {
                 yacyCore.log.logInfo("hello/client: rejected contacting seed; too large (" + seedStr.length() + " > " + yacySeed.maxsize + ")");
             } else {
                 //System.out.println("DEBUG yacyClient.publishMySeed seedStr = " + seedStr);
-                if (yacyCore.peerActions.peerArrival(yacySeed.genRemoteSeed(seedStr, post.get("key", ""), true), (i == 1))) count++;
+                yacySeed remoteSeed = yacySeed.genRemoteSeed(seedStr, post.get("key", ""), true);
+                if (remoteSeed == null) {
+                    yacyCore.log.logWarning("hello/client: bad seed string from peer " + otherHash + ", address = " + address + ", count = " + (i-1) + " seedStr = " + seedStr);
+                } else {
+                    if (yacyCore.peerActions.peerArrival(remoteSeed, (i == 1))) count++;
+                }
             }
         }
+        
         return count;
     }
 

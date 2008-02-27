@@ -400,6 +400,7 @@ public final class httpc {
             this.socket.setSoTimeout(timeout); // waiting time for read
             // get the connection
             this.socket.connect(address, timeout);
+            this.socket.setSoTimeout(timeout); // waiting time for read
             
             if (incomingByteCountAccounting != null) {
                 this.clientInputByteCount = new httpdByteCountInputStream(this.socket.getInputStream(),incomingByteCountAccounting);
@@ -411,7 +412,7 @@ public final class httpc {
             // getting input and output streams
             this.clientInput  = new PushbackInputStream((this.clientInputByteCount!=null)?
                                 this.clientInputByteCount:
-                                this.socket.getInputStream()); 
+                                this.socket.getInputStream());
             this.clientOutput = this.socket.getOutputStream();
             
             // if we reached this point, we should have a connection
@@ -422,7 +423,7 @@ public final class httpc {
         } catch (IOException e) {
             // There was an error while connecting the socket, probably a SocketTimeoutException
             // we have to close the httpc, otherwise it would stay in activeConnections forever
-            serverLog.logFine("HTTPC", "Couldn't open socket to: " + this.adressed_host + ":" + this.adressed_port);
+            serverLog.logFine("HTTPC", "Couldn't open socket to " + this.adressed_host + ":" + this.adressed_port + ": " + e.getMessage());
             close();
             
             // TODO do we need to hand it over to the caller?
@@ -979,6 +980,8 @@ public final class httpc {
         // read connection body and return body
         serverByteBuffer sbb = new serverByteBuffer();
         res.writeContent(sbb, null);
+        if ((res.responseHeader.contentLength() > 0) && (res.responseHeader.contentLength() != sbb.length()))
+            throw new IOException("content length and loaded resource length from http://" + realhost + ":" + port + path + " does not match. HEADER.Content-Length = " + res.responseHeader.contentLength() + ", resource.length =" + sbb.length());
         con.close();
         return sbb.getBytes();
     }
@@ -1244,7 +1247,7 @@ public final class httpc {
             }
 
             // reads in the http header, right now, right here
-            byte[] b = serverCore.receive(httpc.this.clientInput, terminalMaxLength, false);
+            byte[] b = serverCore.receive(httpc.this.clientInput, terminalMaxLength, true);
             if (b == null) {
                 // the server has meanwhile disconnected
                 this.statusCode = 503;
@@ -1263,7 +1266,7 @@ public final class httpc {
             
             if ((this.statusCode==500)&&(this.statusText.equals("status line parse error"))) {
                 // flush in anything that comes without parsing
-                while ((b != null) && (b.length != 0)) b = serverCore.receive(httpc.this.clientInput, terminalMaxLength, false);
+                while ((b != null) && (b.length != 0)) b = serverCore.receive(httpc.this.clientInput, terminalMaxLength, true);
                 return; // in bad mood                
             }
                         
@@ -1271,13 +1274,13 @@ public final class httpc {
             if (this.statusCode == 400) {
                 // bad request
                 // flush in anything that comes without parsing
-                while ((b = serverCore.receive(httpc.this.clientInput, terminalMaxLength, false)).length != 0) {}
+                while ((b = serverCore.receive(httpc.this.clientInput, terminalMaxLength, true)).length != 0) {}
                 return; // in bad mood
             }
 
             // at this point we should have a valid response. read in the header properties
             String key = "";
-            while ((b = serverCore.receive(httpc.this.clientInput, terminalMaxLength, false)) != null) {
+            while ((b = serverCore.receive(httpc.this.clientInput, terminalMaxLength, true)) != null) {
                 if (b.length == 0) break;
                 buffer = new String(b);
                 buffer=buffer.trim();
@@ -1362,7 +1365,7 @@ public final class httpc {
                 return new GZIPInputStream(httpc.this.clientInput);
             } else if (this.responseHeader.contentLength() != -1) {
                 // use a httpContentLengthInputStream to read until the end of the response body is reached
-                return new httpContentLengthInputStream(httpc.this.clientInput,this.responseHeader.contentLength());
+                return new httpContentLengthInputStream(httpc.this.clientInput, this.responseHeader.contentLength());
             } 
             // no Content-Lenght was set. In this case we can read until EOF
             return httpc.this.clientInput;
@@ -1429,13 +1432,17 @@ public final class httpc {
                 } else {
                     throw new IllegalArgumentException("Invalid procOS object type '" + procOS.getClass().getName() + "'");
                 }
-            } catch (IOException e) {}
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
             
             if (bufferOS != null) {
                 try {
                     bufferOS.flush();
                     bufferOS.close();
-                } catch (IOException e) {}
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
                 if (file.length() == 0) file.delete();
             }
         }
@@ -1453,13 +1460,16 @@ public final class httpc {
                     if (System.currentTimeMillis() - lastIO > 30000) break;
                     this.wait(300);
                     continue io;
-                } catch (InterruptedException e) {} // may happen without EOF
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                } // may happen without EOF
                 lastIO = System.currentTimeMillis();
                 c += l;
                 if (procOS != null) procOS.write(buffer, 0, l);
                 if (bufferOS != null) bufferOS.write(buffer, 0, l);
             } catch (IOException e) {
-                //System.out.println("*** DEBUG: writeX/IOStream terminated with IOException, processed " + c + " bytes.");
+                System.out.println("*** DEBUG: writeX/IOStream terminated with IOException, processed " + c + " bytes. cause: " + e.getMessage());
+                e.printStackTrace();
                 break;
             }
             
@@ -1484,13 +1494,15 @@ public final class httpc {
                         if (System.currentTimeMillis() - lastIO > 30000) break;
                         this.wait(300);
                         continue io;
-                    } catch (InterruptedException e) {} // may happen without EOF
+                    } catch (InterruptedException e) {
+                        e.printStackTrace();
+                    } // may happen without EOF
                     lastIO = System.currentTimeMillis();
                     c += l;
                     if (procOS != null) procOS.write(buffer, 0, l);
                     if (bufferOSWriter != null) bufferOSWriter.write(buffer, 0, l);
                 } catch (IOException e) {
-                    //System.out.println("*** DEBUG: writeX/ReaderWriter terminated with IOException, processed " + c + " bytes.");
+                    System.out.println("*** DEBUG: writeX/ReaderWriter terminated with IOException, processed " + c + " bytes. cause: " + e.getMessage());
                     break;
                 }
                 
