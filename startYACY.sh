@@ -91,6 +91,8 @@ then
 	if [ ! -z "$j" ];then
 		if [ -n $j ]; then JAVA="nice -n $j $JAVA"; fi;
 	fi
+
+        PORT="`grep ^port= DATA/SETTINGS/httpProxy.conf | sed 's/^[^=]*=//'`";
 	
 #	for i in `grep javastart DATA/SETTINGS/httpProxy.conf`;do
 #		i="${i#javastart_*=}";
@@ -98,6 +100,7 @@ then
 #	done
 else
     JAVA_ARGS="-Xmx120m -Xms120m $JAVA_ARGS";
+    PORT="8080"
 fi
 #echo "JAVA_ARGS: $JAVA_ARGS"
 #echo "JAVA: $JAVA"
@@ -127,7 +130,7 @@ else
 	echo "**  STOP         YaCy: execute stopYACY.sh and wait some seconds             **"
 	echo "**  GET HELP for YaCy: see www.yacy-websearch.net/wiki and forum.yacy.de     **"
 	echo "*******************************************************************************"
-	echo " >> YaCy started as daemon process. Administration at http://localhost:8080 << "
+	echo " >> YaCy started as daemon process. Administration at http://localhost:$PORT << "
 	eval $cmdline
 	if [ "$TAILLOG" -eq "1" -a ! "$DEBUG" -eq "1" ];then
 		tail -f DATA/LOG/yacy00.log
