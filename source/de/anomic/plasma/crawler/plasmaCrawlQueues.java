@@ -38,6 +38,7 @@ import java.util.Iterator;
 import java.util.Map;
 
 import de.anomic.data.robotsParser;
+import de.anomic.kelondro.kelondroFlexTable;
 import de.anomic.plasma.plasmaCrawlEntry;
 import de.anomic.plasma.plasmaCrawlNURL;
 import de.anomic.plasma.plasmaCrawlProfile;
@@ -75,9 +76,14 @@ public class plasmaCrawlQueues {
         log.logConfig("Starting Crawling Management");
         noticeURL = new plasmaCrawlNURL(plasmaPath);
         //errorURL = new plasmaCrawlZURL(); // fresh error DB each startup; can be hold in RAM and reduces IO;
+        File errorDBFile = new File(plasmaPath, "urlError2.db");
+        if (errorDBFile.exists()) {
+            // delete the error db to get a fresh each time on startup
+            // this is useful because there is currently no re-use of the data in this table.
+            if (errorDBFile.isDirectory()) kelondroFlexTable.delete(plasmaPath, "urlError2.db"); else errorDBFile.delete();
+        }
         errorURL = new plasmaCrawlZURL(plasmaPath, "urlError2.db", false);
         delegatedURL = new plasmaCrawlZURL(plasmaPath, "urlDelegated2.db", true);
-        
     }
 
     public String urlExists(String hash) {

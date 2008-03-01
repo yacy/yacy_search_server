@@ -95,7 +95,7 @@ public class serverMemory {
      * a Full GC to free enough RAM
      * @return whether enough RAM is available
      */
-    public static long available() {
+    public static final long available() {
         // memory that is available including increasing total memory up to maximum
         return runtime.maxMemory() - runtime.totalMemory() + runtime.freeMemory();
     }
