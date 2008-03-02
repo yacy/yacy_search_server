@@ -288,12 +288,10 @@ public class Status {
             prop.put("omode", "2");
         }
 
-        final Runtime rt = Runtime.getRuntime();
-
         // memory usage and system attributes
-        prop.put("freeMemory", serverMemory.bytesToString(rt.freeMemory()));
-        prop.put("totalMemory", serverMemory.bytesToString(rt.totalMemory()));
-        prop.put("maxMemory", serverMemory.bytesToString(rt.maxMemory()));
+        prop.put("freeMemory", serverMemory.bytesToString(serverMemory.free()));
+        prop.put("totalMemory", serverMemory.bytesToString(serverMemory.total()));
+        prop.put("maxMemory", serverMemory.bytesToString(serverMemory.max()));
         prop.put("processors", serverProcessor.availableCPU);
 
         // proxy traffic

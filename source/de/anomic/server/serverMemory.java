@@ -28,6 +28,9 @@ package de.anomic.server;
 import de.anomic.server.logging.serverLog;
 import de.anomic.tools.yFormatter;
 
+/**
+ * Use this to get information about memory usage or try to free some memory
+ */
 public class serverMemory {
 
     private static final Runtime runtime = Runtime.getRuntime();
@@ -38,6 +41,11 @@ public class serverMemory {
 
     private static long lastGC;
 
+    /**
+     * Runs the garbage collector if last garbage collection is more than last millis ago
+     * @param last time which must be passed since lased gc
+     * @param info additional info for log
+     */
     public final synchronized static void gc(int last, String info) { // thq
         long elapsed = System.currentTimeMillis() - lastGC;
         if (elapsed > last) {
@@ -50,11 +58,15 @@ public class serverMemory {
         }
     }
 
-    /** @return the amount of freed bytes by a forced GC this method performes */
+    /**
+     * Tries to free count bytes
+     * @param count bytes
+     * @return the amount of freed bytes by a forced GC this method performes
+     */
     private static long runGC(final boolean count) {
-        final long memnow = runtime.maxMemory() - runtime.totalMemory() + runtime.freeMemory();
+        final long memBefore = available();
         gc(1000, "serverMemory.runGC(...)");
-        final long freed = runtime.maxMemory() - runtime.totalMemory() + runtime.freeMemory() - memnow;
+        final long freed = available() - memBefore;
         if (count) {
             gcs[gcs_pos] = freed;
             gcs_pos = (gcs_pos + 1) % gcs.length;
@@ -78,29 +90,41 @@ public class serverMemory {
         return (y == 0) ? 0 : x / y;
     }
 
-    public static long free() {
-        // memory that is free without increasing of total memory taken from os
+    /**
+     * memory that is free without increasing of total memory taken from os
+     * @return bytes
+     */
+    public static final long free() {
         return runtime.freeMemory();
     }
     
     /**
-     * Tries to free a specified amount of bytes. If the currently available memory is enough, the
-     * method returns <code>true</code> without performing additional steps. Otherwise - if
-     * <code>gciffail</code> is set - a Full GC is run, if <code>gciffail</code> is set to
-     * <code>false</code> and not enough memory is available, this method returns <code>false</code>.
-     * 
-     * @see serverMemory#request(long, boolean) for another implementation
-     * @param memory amount of bytes to be assured to be free
-     * @param gciffail if not enough memory is available, this parameter specifies whether to perform
-     * a Full GC to free enough RAM
-     * @return whether enough RAM is available
+     * memory that is available including increasing total memory up to maximum
+     * @return bytes
      */
     public static final long available() {
-        // memory that is available including increasing total memory up to maximum
-        return runtime.maxMemory() - runtime.totalMemory() + runtime.freeMemory();
+        return max() - total() + free();
     }
     
     /**
+     * maximum memory which the vm can use
+	 * @return bytes
+	 */
+	public static final long max()
+	{
+		return runtime.maxMemory();
+	}
+
+	/**
+	 * currently allocated memory in the Java virtual machine; may vary over time
+	 * @return bytes
+	 */
+	public static final long total()
+	{
+		return runtime.totalMemory();
+	}
+
+	/**
      * <p>Tries to free a specified amount of bytes.</p>
      * <p>
      *   If the currently available memory is enough, the method returns <code>true</code> without
@@ -120,7 +144,7 @@ public class serverMemory {
      * @return whether enough memory could be freed (or is free) or not
      */
     public static boolean request(final long size, final boolean force) {
-        long avail = runtime.maxMemory() - runtime.totalMemory() + runtime.freeMemory();
+        long avail = available();
         if (avail >= size) return true;
         if (log.isFine()) {
             String t = new Throwable("Stack trace").getStackTrace()[1].toString();
@@ -130,7 +154,7 @@ public class serverMemory {
         if (force || avg == 0 || avg + avail >= size) {
             // this is only called if we expect that an allocation of <size> bytes would cause the jvm to call the GC anyway
             final long freed = runGC(!force);
-            avail = runtime.maxMemory() - runtime.totalMemory() + runtime.freeMemory();
+            avail = available();
             log.logInfo("performed " + ((force) ? "explicit" : "necessary") + " GC, freed " + (freed >> 10)
                     + " KB (requested/available/average: "
                     + (size >> 10) + " / " + (avail >> 10) + " / " + (avg >> 10) + " KB)");
@@ -142,11 +166,19 @@ public class serverMemory {
         }
     }
     
+    /**
+     * memory that is currently bound in objects
+     * @return used bytes
+     */
     public static long used() {
-        // memory that is currently bound in objects
-        return runtime.totalMemory() - runtime.freeMemory();
+        return total() - free();
     }
     
+    /**
+     * Formats a number if it are bytes to greatest unit (1024 based)
+     * @param byteCount
+     * @return formatted String with unit
+     */
     public static String bytesToString(long byteCount) {
         try {
             final StringBuffer byteString = new StringBuffer();
@@ -171,21 +203,24 @@ public class serverMemory {
         }
     }
     
+    /**
+     * main
+     * @param args
+     */
     public static void main(String[] args) {
         // try this with a jvm 1.4.2 and with a jvm 1.5 and compare results
         int mb = 1024 * 1024;
         System.out.println("vm: " + System.getProperty("java.vm.version"));
-        System.out.println("computed max = " + (Runtime.getRuntime().maxMemory() / mb) + " mb");
+        System.out.println("computed max = " + (max() / mb) + " mb");
         int alloc = 10000;
-        Runtime rt = Runtime.getRuntime();
         byte[][] x = new byte[100000][];
         for (int i = 0; i < 100000; i++) {
             x[i] = new byte[alloc];
             if (i % 100 == 0) System.out.println("used = " + (i * alloc / mb) +
-                    ", total = " + (rt.totalMemory() / mb) +
-                    ", free = " + (rt.freeMemory() / mb) +
-                    ", max = " + (rt.maxMemory() / mb) +
-                    ", avail = " + ((rt.maxMemory() - rt.totalMemory() + rt.freeMemory()) / mb));
+                    ", total = " + (total() / mb) +
+                    ", free = " + (free() / mb) +
+                    ", max = " + (max() / mb) +
+                    ", avail = " + (available() / mb));
         }
 
     }

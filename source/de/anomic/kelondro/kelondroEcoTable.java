@@ -100,7 +100,7 @@ public class kelondroEcoTable implements kelondroIndex {
             long neededRAM4table = ((long) records) * (((long) rowdef.objectsize) + 4L) * 3L;
             table = ((neededRAM4table < maxarraylength) &&
                      ((useTailCache == tailCacheForceUsage) ||
-                      ((useTailCache == tailCacheUsageAuto) && (Runtime.getRuntime().freeMemory() > neededRAM4table + 200 * 1024 * 1024)))) ?
+                      ((useTailCache == tailCacheUsageAuto) && (serverMemory.free() > neededRAM4table + 200 * 1024 * 1024)))) ?
                     new kelondroRowSet(taildef, records) : null;
             System.out.println("*** DEBUG " + tablefile + ": available RAM: " + (serverMemory.available() / 1024 / 1024) + "MB, allocating space for " + records + " entries");
             long neededRAM4index = 2 * 1024 * 1024 + records * (rowdef.primaryKeyLength + 4) * 3 / 2;

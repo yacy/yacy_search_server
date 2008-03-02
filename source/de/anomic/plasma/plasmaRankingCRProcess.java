@@ -428,7 +428,7 @@ public class plasmaRankingCRProcess {
             count++;
             if ((count % 1000) == 0) {
                 l = java.lang.Math.max(1, (System.currentTimeMillis() - start) / 1000);
-                System.out.println("processed " + count + " citations, " + (count / l) + " per second, rci.size = " + rci.size() + ", " + ((size - count) / (count / l) / 60) + " minutes remaining; mem = " + Runtime.getRuntime().freeMemory());
+                System.out.println("processed " + count + " citations, " + (count / l) + " per second, rci.size = " + rci.size() + ", " + ((size - count) / (count / l) / 60) + " minutes remaining; mem = " + serverMemory.free());
             }
         }
 

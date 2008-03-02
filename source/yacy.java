@@ -83,6 +83,7 @@ import de.anomic.plasma.plasmaWordIndex;
 import de.anomic.server.serverCore;
 import de.anomic.server.serverDate;
 import de.anomic.server.serverFileUtils;
+import de.anomic.server.serverMemory;
 import de.anomic.server.serverSemaphore;
 import de.anomic.server.serverSystem;
 import de.anomic.server.logging.serverLog;
@@ -392,11 +393,11 @@ public final class yacy {
 
                     // save information about available memory after all initializations
                     //try {
-                        sb.setConfig("memoryFreeAfterInitBGC", Runtime.getRuntime().freeMemory());
-                        sb.setConfig("memoryTotalAfterInitBGC", Runtime.getRuntime().totalMemory());
+                        sb.setConfig("memoryFreeAfterInitBGC", serverMemory.free());
+                        sb.setConfig("memoryTotalAfterInitBGC", serverMemory.total());
                         System.gc();
-                        sb.setConfig("memoryFreeAfterInitAGC", Runtime.getRuntime().freeMemory());
-                        sb.setConfig("memoryTotalAfterInitAGC", Runtime.getRuntime().totalMemory());
+                        sb.setConfig("memoryFreeAfterInitAGC", serverMemory.free());
+                        sb.setConfig("memoryTotalAfterInitAGC", serverMemory.total());
                     //} catch (ConcurrentModificationException e) {}
                     
                     // signal finished startup
@@ -605,8 +606,7 @@ public final class yacy {
             // db used to hold all neede urls
             plasmaCrawlLURL minimizedUrlDB = new plasmaCrawlLURL(indexRoot2);
             
-            Runtime rt = Runtime.getRuntime();
-            int cacheMem = (int)(rt.maxMemory() - rt.totalMemory());
+            int cacheMem = (int)(serverMemory.max() - serverMemory.total());
             if (cacheMem < 2048000) throw new OutOfMemoryError("Not enough memory available to start clean up.");
                 
             plasmaWordIndex wordIndex = new plasmaWordIndex(indexPrimaryRoot, indexSecondaryRoot, log);
@@ -645,8 +645,8 @@ public final class yacy {
                         log.logInfo(wordCounter + " words scanned " +
                                 "[" + wordChunkStartHash + " .. " + wordChunkEndHash + "]\n" + 
                                 "Duration: "+ 500*1000/duration + " words/s" +
-                                " | Free memory: " + rt.freeMemory() + 
-                                " | Total memory: " + rt.totalMemory());
+                                " | Free memory: " + serverMemory.free() + 
+                                " | Total memory: " + serverMemory.total());
                         wordChunkStart = wordChunkEnd;
                         wordChunkStartHash = wordChunkEndHash;
                     }
@@ -901,8 +901,8 @@ public final class yacy {
         
         // check memory amount
         System.gc();
-        long startupMemFree  = Runtime.getRuntime().freeMemory(); // the amount of free memory in the Java Virtual Machine
-        long startupMemTotal = Runtime.getRuntime().totalMemory(); // the total amount of memory in the Java virtual machine; may vary over time
+        long startupMemFree  = serverMemory.free();
+        long startupMemTotal = serverMemory.total();
         
         // go into headless awt mode
         System.setProperty("java.awt.headless", "true");

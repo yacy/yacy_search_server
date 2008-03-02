@@ -169,7 +169,7 @@ public final class indexRAMRI implements indexRI {
                             + " words done, "
                             + (cache.size() / (wordsPerSecond + 1))
                             + " seconds remaining, free mem = "
-                            + (Runtime.getRuntime().freeMemory() / 1024 / 1024)
+                            + (serverMemory.free() / 1024 / 1024)
                             + "MB");
                     messageTime = System.currentTimeMillis() + 5000;
                 }
@@ -209,7 +209,6 @@ public final class indexRAMRI implements indexRI {
                 //long creationTime;
                 indexRWIRowEntry wordEntry;
                 kelondroRow.EntryIndex row;
-                //Runtime rt = Runtime.getRuntime();
                 while (i.hasNext()) {
                     // get out one entry
                     row = i.next();
@@ -221,12 +220,12 @@ public final class indexRAMRI implements indexRI {
                     addEntry(wordHash, wordEntry, startTime, false);
                     urlCount++;
                     // protect against memory shortage
-                    //while (rt.freeMemory() < 1000000) {flushFromMem(); java.lang.System.gc();}
+                    //while (serverMemory.free() < 1000000) {flushFromMem(); java.lang.System.gc();}
                     // write a log
                     if (System.currentTimeMillis() > messageTime) {
                         serverMemory.gc(1000, "indexRAMRI, for better statistic-2"); // for better statistic - thq
                         urlsPerSecond = 1 + urlCount * 1000 / (1 + System.currentTimeMillis() - startTime);
-                        log.logInfo("restoring status: " + urlCount + " urls done, " + ((dumpArray.size() - urlCount) / urlsPerSecond) + " seconds remaining, free mem = " + (Runtime.getRuntime().freeMemory() / 1024 / 1024) + "MB");
+                        log.logInfo("restoring status: " + urlCount + " urls done, " + ((dumpArray.size() - urlCount) / urlsPerSecond) + " seconds remaining, free mem = " + (serverMemory.free() / 1024 / 1024) + "MB");
                         messageTime = System.currentTimeMillis() + 5000;
                     }
                 }
@@ -363,7 +362,7 @@ public final class indexRAMRI implements indexRI {
                     return hash;
                 }
                 // cases with respect to memory situation
-                if (Runtime.getRuntime().freeMemory() < 100000) {
+                if (serverMemory.free() < 100000) {
                     // urgent low-memory case
                     hash = (String) hashScore.getMaxObject(); // flush high-score entries (saves RAM)
                 } else {

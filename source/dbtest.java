@@ -270,8 +270,7 @@ public class dbtest {
         boolean assertionenabled = false;
         assert assertionenabled = true;
         if (assertionenabled) System.out.println("*** Asserts are enabled"); else System.out.println("*** HINT: YOU SHOULD ENABLE ASSERTS! (include -ea in start arguments");
-        Runtime runtime = Runtime.getRuntime();
-        long mb = (runtime.maxMemory() - runtime.totalMemory() + runtime.freeMemory()) / 1024 / 1024;
+        long mb = serverMemory.available() / 1024 / 1024;
         System.out.println("*** RAM = " + mb + " MB");
         System.out.print(">java " +
                 ((assertionenabled) ? "-ea " : "") +
@@ -398,14 +397,14 @@ public class dbtest {
                     
                     System.out.println("Loop " + loop + ": Write = " + write + ", Remove = " + remove);
                     System.out.println(" bevore GC: " +
-                              "free = " + Runtime.getRuntime().freeMemory() +
-                            ", max = " + Runtime.getRuntime().maxMemory() +
-                            ", total = " + Runtime.getRuntime().totalMemory());
+                              "free = " + serverMemory.free() +
+                            ", max = " + serverMemory.max() +
+                            ", total = " + serverMemory.total());
                     System.gc();
                     System.out.println(" after  GC: " +
-                            "free = " + Runtime.getRuntime().freeMemory() +
-                          ", max = " + Runtime.getRuntime().maxMemory() +
-                          ", total = " + Runtime.getRuntime().totalMemory());
+                            "free = " + serverMemory.free() +
+                          ", max = " + serverMemory.max() +
+                          ", total = " + serverMemory.total());
                   loop++;
                 }
             }

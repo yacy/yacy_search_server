@@ -87,15 +87,15 @@ public class PerformanceMemory_p {
             }
         }
         
-        long memoryFreeNow = Runtime.getRuntime().freeMemory();
+        long memoryFreeNow = serverMemory.free();
         long memoryFreeAfterInitBGC = Long.parseLong(env.getConfig("memoryFreeAfterInitBGC", "0"));
         long memoryFreeAfterInitAGC = Long.parseLong(env.getConfig("memoryFreeAfterInitAGC", "0"));
         long memoryFreeAfterStartup = Long.parseLong(env.getConfig("memoryFreeAfterStartup", "0"));
-        long memoryTotalNow = Runtime.getRuntime().totalMemory();
+        long memoryTotalNow = serverMemory.total();
         long memoryTotalAfterInitBGC = Long.parseLong(env.getConfig("memoryTotalAfterInitBGC", "0"));
         long memoryTotalAfterInitAGC = Long.parseLong(env.getConfig("memoryTotalAfterInitAGC", "0"));
         long memoryTotalAfterStartup = Long.parseLong(env.getConfig("memoryTotalAfterStartup", "0"));
-        long memoryMax = Runtime.getRuntime().maxMemory();
+        long memoryMax = serverMemory.max();
         
         prop.putNum("memoryMax", memoryMax / MB);
         prop.putNum("memoryAvailAfterStartup", (memoryMax - memoryTotalAfterStartup + memoryFreeAfterStartup) / MB);
