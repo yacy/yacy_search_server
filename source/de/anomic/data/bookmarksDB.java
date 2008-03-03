@@ -494,8 +494,8 @@ public class bookmarksDB {
         Tag tag;
         String[] tags;
         while(it.hasNext()){
-            bookmark=(Bookmark) it.next();
-            tags = bookmark.getTagsString().split(",");
+            bookmark=(Bookmark) it.next();            
+            tags = cleanTagsString(bookmark.getTagsString() + bookmark.getFoldersString()).split(",");
             tag=null;
             for(int i=0;i<tags.length;i++){
                 tag=getTag(tagHash(tags[i]));
