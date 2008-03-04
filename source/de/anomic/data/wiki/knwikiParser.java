@@ -259,7 +259,7 @@ public class knwikiParser implements wikiParser {
 		public boolean isEscaped() { return this.escaped; }
 		public boolean isNewLineBefore() { return this.nl; }
         
-		private static Text[] split2Texts(String text, String escapeBegin, String escapeEnd) {
+		static Text[] split2Texts(String text, String escapeBegin, String escapeEnd) {
 			if (text == null) return null;
 			if (text.length() < 2) return new Text[] { new Text(text, false, true) };
 			
@@ -286,7 +286,7 @@ public class knwikiParser implements wikiParser {
 					from < escapeEnd.length() + 2 || (!escaped && text.charAt(from - escapeEnd.length() - 1) == '\n'));
 		}
 		
-		private static String mergeTexts(Text[] texts) {
+		static String mergeTexts(Text[] texts) {
 			StringBuffer sb = new StringBuffer();
 			for (int n=0; n < texts.length; n++)
 				sb.append(texts[n].getTextPlain());

@@ -99,7 +99,7 @@ public final class plasmaHTCache {
     private static final int stackLimit = 150; // if we exceed that limit, we do not check idle
     public  static final long oneday = 1000 * 60 * 60 * 24; // milliseconds of a day
 
-    private static kelondroMapObjects responseHeaderDB = null;
+    static kelondroMapObjects responseHeaderDB = null;
     private static final LinkedList<Entry> cacheStack = new LinkedList<Entry>();
     private static final Map<String, File> cacheAge = Collections.synchronizedMap(new TreeMap<String, File>()); // a <date+hash, cache-path> - relation
     public static long curCacheSize = 0;
@@ -298,7 +298,7 @@ public final class plasmaHTCache {
         }
     }
 
-    private static void resetResponseHeaderDB() {
+    static void resetResponseHeaderDB() {
         if (responseHeaderDB != null) responseHeaderDB.close();
         File dbfile = new File(cachePath, DB_NAME);
         if (dbfile.exists()) dbfile.delete();

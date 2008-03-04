@@ -217,7 +217,7 @@ public final class kelondroStack extends kelondroFullRecords {
         return row().newEntry(n.getValueRow());
     }
     
-    private void unlinkNode(kelondroNode n) throws IOException {
+    void unlinkNode(kelondroNode n) throws IOException {
         // join chaines over node
         kelondroHandle l = n.getOHHandle(left);
         kelondroHandle r = n.getOHHandle(right);

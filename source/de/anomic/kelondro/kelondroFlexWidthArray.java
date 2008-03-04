@@ -162,7 +162,7 @@ public class kelondroFlexWidthArray implements kelondroArray {
 
         // open existing files
         File file = new File(tabledir, "col.000.list");
-        return kelondroCachedRecords.staticsize(file);
+        return kelondroAbstractRecords.staticsize(file);
     }
     
     public static void delete(File path, String tablename) {

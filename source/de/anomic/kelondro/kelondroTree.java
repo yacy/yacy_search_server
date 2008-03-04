@@ -1507,7 +1507,7 @@ public class kelondroTree extends kelondroCachedRecords implements kelondroIndex
             
         } catch (Exception e) {
             e.printStackTrace();
-            try {tt.print();} catch (IOException ee) {}
+            if (tt != null) try {tt.print();} catch (IOException ee) {}
             System.out.println("TERMINATED");
         }
     }

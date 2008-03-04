@@ -75,7 +75,7 @@ public class plasmaCrawlBalancer {
     // class variables
     private ArrayList<String>                   urlRAMStack;     // a list that is flushed first
     private kelondroStack                       urlFileStack;    // a file with url hashes
-    private kelondroIndex                       urlFileIndex;
+    kelondroIndex                       urlFileIndex;
     private HashMap<String, LinkedList<String>> domainStacks;    // a map from domain name part to Lists with url hashs
     private File                                cacheStacksPath;
     private String                              stackname;

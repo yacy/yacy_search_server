@@ -283,7 +283,7 @@ public class yacyCore {
     }
 
     protected class publishThread extends Thread {
-        private int added;
+        int added;
         private yacySeed seed;
         private final serverSemaphore sync;
         private final List<Thread> syncList;

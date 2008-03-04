@@ -96,7 +96,7 @@ public final class serverCore extends serverAbstractThread implements serverThre
     public static final Class<?>[] stringType = {"".getClass()}; //  set up some reflection
     public static final long startupTime = System.currentTimeMillis();
     public static final ThreadGroup sessionThreadGroup = new ThreadGroup("sessionThreadGroup");
-    private static int sessionCounter = 0; // will be increased with each session and is used to return a hash code
+    static int sessionCounter = 0; // will be increased with each session and is used to return a hash code
     
     // static variables
     public static final Boolean TERMINATE_CONNECTION = Boolean.FALSE;
@@ -122,7 +122,7 @@ public final class serverCore extends serverAbstractThread implements serverThre
     HashMap<String, String> denyHost;
     int commandMaxLength;
     private int maxBusySessions;
-    private HashSet<Session> busySessions;
+    HashSet<Session> busySessions;
     
     /*
     private static ServerSocketFactory getServerSocketFactory(boolean dflt, File keyfile, String passphrase) {

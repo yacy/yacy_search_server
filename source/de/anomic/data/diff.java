@@ -55,8 +55,8 @@ import java.util.ArrayList;
 public class diff {
     
     private final ArrayList <Part> parts = new ArrayList<Part>();
-    private final Object[] o;
-    private final Object[] n;
+    final Object[] o;
+    final Object[] n;
     
     /**
      * @param o the original <code>String</code>
@@ -217,7 +217,7 @@ public class diff {
         private final int posOld;
         private final int posNew;
         
-        private Part(int action, int posOld, int posNew) {
+        Part(int action, int posOld, int posNew) {
             this.action = action;
             this.posOld = posOld;
             this.posNew = posNew;

@@ -46,7 +46,7 @@ import de.anomic.server.logging.serverLog;
 public class rssReader extends DefaultHandler {
     
     // statics for item generation and automatic categorization
-    private static int guidcount = 0;
+    static int guidcount = 0;
     private static final String[] tagsDef = new String[]{
         "author",      //
         "copyright",   //

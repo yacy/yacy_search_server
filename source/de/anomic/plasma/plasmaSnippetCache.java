@@ -116,7 +116,7 @@ public class plasmaSnippetCache {
         private String line;
         private String error;
         private int errorCode;
-        private Set<String> remaingHashes;
+        Set<String> remaingHashes;
         private yacyURL favicon;
         
         public TextSnippet(yacyURL url, String line, int errorCode, Set<String> remaingHashes, String errortext) {

@@ -119,7 +119,7 @@ public class kelondroDyn {
             file.delete();
         } else {
             if (file.isDirectory()) {
-                kelondroFlexTable.delete(file.getParentFile(), file.getName());
+                kelondroFlexWidthArray.delete(file.getParentFile(), file.getName());
             } else {
                 file.delete();
             }

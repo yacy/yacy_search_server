@@ -55,7 +55,7 @@ public class plasmaWebStructure {
     private serverLog    log;
     private File         rankingPath, structureFile;
     private String       crlFile, crgFile;
-    private TreeMap<String, String> structure; // <b64hash(6)>','<host> to <date-yyyymmdd(8)>{<target-b64hash(6)><target-count-hex(4)>}*
+    TreeMap<String, String> structure; // <b64hash(6)>','<host> to <date-yyyymmdd(8)>{<target-b64hash(6)><target-count-hex(4)>}*
     
     public plasmaWebStructure(serverLog log, File rankingPath, String crlFile, String crgFile, File structureFile) {
         this.log = log;
@@ -181,7 +181,7 @@ public class plasmaWebStructure {
         return (refs.length() - 8) / 10;
     }
     
-    private static Map<String, Integer> refstr2map(String refs) {
+    static Map<String, Integer> refstr2map(String refs) {
         if ((refs == null) || (refs.length() <= 8)) return new HashMap<String, Integer>();
         Map<String, Integer> map = new HashMap<String, Integer>();
         String c;

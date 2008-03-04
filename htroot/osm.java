@@ -1,4 +1,4 @@
-import java.io.IOException;
+
 
 import de.anomic.http.httpHeader;
 import de.anomic.server.serverObjects;
@@ -8,7 +8,7 @@ import de.anomic.ymage.ymageOSM;
 
 public class osm {
 
-    public static ymageMatrix respond(httpHeader header, serverObjects post, serverSwitch env) throws IOException {
+    public static ymageMatrix respond(httpHeader header, serverObjects post, serverSwitch env) {
 
         int zoom = 10;
         double lat = 47.968056d;

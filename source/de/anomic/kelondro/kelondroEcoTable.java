@@ -61,10 +61,12 @@ public class kelondroEcoTable implements kelondroIndex {
     
     public static final long maxarraylength = 134217727L; // that may be the maxmimum size of array length in some JVMs
     
-    private kelondroRowSet table;
-    private kelondroBytesIntMap index;
-    private kelondroBufferedEcoFS file;
-    private kelondroRow rowdef, taildef;
+    kelondroRowSet table;
+    kelondroBytesIntMap index;
+    kelondroBufferedEcoFS file;
+    kelondroRow rowdef;
+
+    kelondroRow taildef;
     private int buffersize;
     
     public kelondroEcoTable(File tablefile, kelondroRow rowdef, int useTailCache, int buffersize, int initialSpace) {
@@ -88,7 +90,7 @@ public class kelondroEcoTable implements kelondroIndex {
                 // should not happen
                 e.printStackTrace();
             }
-            try { fos.close(); } catch (IOException e) {}
+            if (fos != null) try { fos.close(); } catch (IOException e) {}
         }
         
         try {
@@ -220,7 +222,7 @@ public class kelondroEcoTable implements kelondroIndex {
     }
     
     public static int staticRAMIndexNeed(File f, kelondroRow rowdef) {
-        return (int) ((rowdef.primaryKeyLength + 4) * tableSize(f, rowdef.objectsize) * kelondroRowSet.growfactor);
+        return (int) ((rowdef.primaryKeyLength + 4) * tableSize(f, rowdef.objectsize) * kelondroRowCollection.growfactor);
     }
     
     public synchronized void addUnique(Entry row) throws IOException {
@@ -492,7 +494,7 @@ public class kelondroEcoTable implements kelondroIndex {
             // should not happen
             e.printStackTrace();
         }
-        try { fos.close(); } catch (IOException e) {}
+        if (fos != null) try { fos.close(); } catch (IOException e) {}
         
         
         // open an existing table file

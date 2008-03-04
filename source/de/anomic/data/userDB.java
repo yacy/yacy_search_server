@@ -70,8 +70,8 @@ public final class userDB {
     
     kelondroMapObjects userTable;
     private final File userTableFile;
-	private HashMap<String, String> ipUsers = new HashMap<String, String>();
-    private HashMap<String, Object> cookieUsers = new HashMap<String, Object>();
+	HashMap<String, String> ipUsers = new HashMap<String, String>();
+    HashMap<String, Object> cookieUsers = new HashMap<String, Object>();
     
     public userDB(File userTableFile) {
         this.userTableFile = userTableFile;
@@ -325,8 +325,8 @@ public final class userDB {
         public static final int PROXY_TIMELIMIT_REACHED = 3;
         
         // this is a simple record structure that hold all properties of a user
-        private HashMap<String, String> mem;
-        private String userName;
+        HashMap<String, String> mem;
+        String userName;
 		private Calendar oldDate, newDate;
         
         public Entry(String userName, HashMap<String, String> mem) throws IllegalArgumentException {

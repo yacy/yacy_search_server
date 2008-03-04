@@ -140,7 +140,7 @@ public class kelondroFlexTable extends kelondroFlexWidthArray implements kelondr
     }
     
     public static int staticRAMIndexNeed(File path, String tablename, kelondroRow rowdef) {
-        return (int) ((rowdef.column(0).cellwidth + 4) * staticSize(path, tablename) * kelondroRowSet.growfactor);
+        return (int) ((rowdef.column(0).cellwidth + 4) * staticSize(path, tablename) * kelondroRowCollection.growfactor);
     }
     
     public boolean hasRAMIndex() {
@@ -385,26 +385,24 @@ public class kelondroFlexTable extends kelondroFlexWidthArray implements kelondr
     }
     
     public synchronized kelondroCloneableIterator<kelondroRow.Entry> rows(boolean up, byte[] firstKey) throws IOException {
-        if (index == null) return new rowIterator(index, up, firstKey);
+        if (index == null) return new rowIterator(up, firstKey);
         assert this.size() == index.size() : "content.size() = " + this.size() + ", index.size() = " + index.size();
-		return new rowIterator(index, up, firstKey);
+		return new rowIterator(up, firstKey);
     }
     
     public class rowIterator implements kelondroCloneableIterator<kelondroRow.Entry> {
 
         kelondroCloneableIterator<kelondroRow.Entry> indexIterator;
-        kelondroBytesIntMap index;
         boolean up;
         
-        public rowIterator(kelondroBytesIntMap index, boolean up, byte[] firstKey) throws IOException {
-            this.index = index;
+        public rowIterator(boolean up, byte[] firstKey) throws IOException {
             this.up = up;
             indexIterator = index.rows(up, firstKey);
         }
         
         public rowIterator clone(Object modifier) {
             try {
-                return new rowIterator(index, up, (byte[]) modifier);
+                return new rowIterator(up, (byte[]) modifier);
             } catch (IOException e) {
                 return null;
             }

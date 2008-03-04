@@ -286,7 +286,6 @@ public class kelondroAttrSeq {
             StringTokenizer st = new StringTokenizer(attr, ",");
             while (st.hasMoreTokens()) {
                 a = new kelondroColumn(st.nextToken());
-                if (a == null) break;
                 l.add(a);
             }
             prop_names = new String[l.size()];
@@ -307,7 +306,6 @@ public class kelondroAttrSeq {
             st = new StringTokenizer(seqs, ",");
             while (st.hasMoreTokens()) {
                 a = new kelondroColumn(st.nextToken());
-                if (a == null) break;
                 l.add(a);
             }
             seq_names = new String[l.size()];

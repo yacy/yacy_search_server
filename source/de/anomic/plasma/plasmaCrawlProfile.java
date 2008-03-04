@@ -60,9 +60,9 @@ import de.anomic.yacy.yacyURL;
 
 public class plasmaCrawlProfile {
     
-    private static HashMap<String, Map<String, DomProfile>> domsCache = new HashMap<String, Map<String, DomProfile>>();
+    static HashMap<String, Map<String, DomProfile>> domsCache = new HashMap<String, Map<String, DomProfile>>();
     
-    private kelondroMapObjects profileTable;
+    kelondroMapObjects profileTable;
     private File profileTableFile;
     
     public plasmaCrawlProfile(File file) {
@@ -72,7 +72,7 @@ public class plasmaCrawlProfile {
         profileTable = new kelondroMapObjects(dyn, 500);
     }
     
-    private void resetDatabase() {
+    void resetDatabase() {
         // deletes the profile database and creates a new one
         if (profileTable != null) profileTable.close();
         if (!(profileTableFile.delete())) throw new RuntimeException("cannot delete crawl profile database");
@@ -252,7 +252,7 @@ public class plasmaCrawlProfile {
         public static final String XDSTOPW          = "xdstopw";
         public static final String XPSTOPW          = "xpstopw";
         
-        private HashMap<String, String> mem;
+        HashMap<String, String> mem;
         private Map<String, DomProfile> doms;
         
         public entry(String name, yacyURL startURL, String generalFilter, String specificFilter,

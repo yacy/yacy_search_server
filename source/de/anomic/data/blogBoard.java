@@ -340,7 +340,7 @@ public class blogBoard {
             
             wikiBoard.setAuthor(ip, new String(author));
         }
-        private BlogEntry(String key, HashMap<String, String> record) {
+        BlogEntry(String key, HashMap<String, String> record) {
             this.key = key;
             this.record = record;
             if (this.record.get("comments")==null) this.record.put("comments", listManager.collection2string(new ArrayList<String>()));

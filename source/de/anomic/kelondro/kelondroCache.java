@@ -165,7 +165,7 @@ public class kelondroCache implements kelondroIndex {
         return true;
     }
     
-    private boolean checkHitSpace() throws IOException {
+    private boolean checkHitSpace() {
         // returns true if it is allowed to write into this cache
         int status = cacheGrowStatus();
         if (status < 1) {

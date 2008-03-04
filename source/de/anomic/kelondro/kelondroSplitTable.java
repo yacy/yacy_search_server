@@ -131,7 +131,7 @@ public class kelondroSplitTable implements kelondroIndex {
     	for (int i = 0; i < l.length; i++) {
     		if (l[i].startsWith(tablename)) {
     		    File f = new File(path, l[i]);
-    		    if (f.isDirectory()) kelondroFlexTable.delete(path, l[i]); else f.delete();
+    		    if (f.isDirectory()) kelondroFlexWidthArray.delete(path, l[i]); else f.delete();
     		}
     	}
     	init(true);

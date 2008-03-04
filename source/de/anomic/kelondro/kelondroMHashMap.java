@@ -45,8 +45,10 @@ import java.util.Iterator;
 
 public class kelondroMHashMap {
 
-    private int keylen, valuelen, reclen, count;
-    private byte[] mem;
+    int keylen;
+    int valuelen;
+    int reclen, count;
+    byte[] mem;
     private byte[] emptykey;
     
     public kelondroMHashMap(int valuelen) {

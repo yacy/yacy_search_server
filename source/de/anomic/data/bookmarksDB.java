@@ -951,7 +951,7 @@ public class bookmarksDB {
             this((new yacyURL((String)map.map().get(BOOKMARK_URL), null)).hash(), map.map());
         }
         
-        private Map<String, String> toMap() {
+        Map<String, String> toMap() {
             entry.put(BOOKMARK_TAGS, listManager.collection2string(tags));
             entry.put(BOOKMARK_TIMESTAMP, String.valueOf(this.timestamp));
             return entry;

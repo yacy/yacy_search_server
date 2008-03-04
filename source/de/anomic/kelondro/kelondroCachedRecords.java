@@ -46,8 +46,18 @@ public class kelondroCachedRecords extends kelondroAbstractRecords implements ke
     private static long memStartShrink =  6000000; // a limit for the node cache to start with shrinking if less than this memory amount is available
     
     // caching buffer
-    private   kelondroIntBytesMap   cacheHeaders; // the cache; holds overhead values and key element
-    private   int readHit, readMiss, writeUnique, writeDouble, cacheDelete, cacheFlush;
+    kelondroIntBytesMap   cacheHeaders; // the cache; holds overhead values and key element
+    int readHit;
+
+    int readMiss;
+
+    int writeUnique;
+
+    int writeDouble;
+
+    int cacheDelete;
+
+    int cacheFlush;
     
     
     public kelondroCachedRecords(
@@ -110,7 +120,7 @@ public class kelondroCachedRecords extends kelondroAbstractRecords implements ke
         }
     }
 
-    private int cacheGrowStatus() {
+    int cacheGrowStatus() {
         long available = serverMemory.available();
         if ((cacheHeaders != null) && (available < cacheHeaders.memoryNeededForGrow())) return 0;
         return cacheGrowStatus(available, memStopGrow, memStartShrink);
@@ -300,7 +310,7 @@ public class kelondroCachedRecords extends kelondroAbstractRecords implements ke
         //private Handle[]  ohHandle= null;  // the overhead handles, OHHANDLEC values
         //private byte[][]  values  = null;  // an array of byte[] nodes is the value vector
         private kelondroHandle handle = null; // index of the entry, by default NUL means undefined
-        private byte[] headChunk = null; // contains ohBytes, ohHandles and the key value
+        byte[] headChunk = null; // contains ohBytes, ohHandles and the key value
         private byte[] tailChunk = null; // contains all values except the key value
         private boolean headChanged = false;
         private boolean tailChanged = false;

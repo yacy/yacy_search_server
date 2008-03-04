@@ -53,9 +53,9 @@ public abstract class kelondroAbstractRecords implements kelondroRecords {
     private   static long POS_COLUMNS    = POS_DESCR      + LEN_DESCR; // 2 bytes, short: number of columns in one entry
     private   static long POS_OHBYTEC    = POS_COLUMNS    + 2;    // 2 bytes, number of extra bytes on each Node
     private   static long POS_OHHANDLEC  = POS_OHBYTEC    + 2;    // 2 bytes, number of Handles on each Node
-    private   static long POS_USEDC      = POS_OHHANDLEC  + 2;    // 4 bytes, int: used counter
-    private   static long POS_FREEC      = POS_USEDC      + 4;    // 4 bytes, int: free counter
-    private   static long POS_FREEH      = POS_FREEC      + 4;    // 4 bytes, int: free pointer (to free chain start)
+    static long POS_USEDC      = POS_OHHANDLEC  + 2;    // 4 bytes, int: used counter
+    static long POS_FREEC      = POS_USEDC      + 4;    // 4 bytes, int: free counter
+    static long POS_FREEH      = POS_FREEC      + 4;    // 4 bytes, int: free pointer (to free chain start)
     private   static long POS_MD5PW      = POS_FREEH      + 4;    // 16 bytes, string (encrypted password to this file)
     private   static long POS_ENCRYPTION = POS_MD5PW      + 16;   // 16 bytes, string (method description)
     private   static long POS_OFFSET     = POS_ENCRYPTION + 16;   // 8 bytes, long (seek position of first record)
@@ -75,7 +75,7 @@ public abstract class kelondroAbstractRecords implements kelondroRecords {
     protected int              headchunksize;// overheadsize + key element column size
     protected int              tailchunksize;// sum(all: COLWIDTHS) minus the size of the key element colum
     protected int              recordsize;   // (overhead + sum(all: COLWIDTHS)) = the overall size of a record
-    private   byte[]           spaceChunk;   // a chunk of data that is used to reserve space within the file
+    byte[]           spaceChunk;   // a chunk of data that is used to reserve space within the file
     
     // dynamic run-time seek pointers
     private   long POS_HANDLES  = 0; // starts after end of POS_COLWIDHS which is POS_COLWIDTHS + COLWIDTHS.length * 4
@@ -137,7 +137,7 @@ public abstract class kelondroAbstractRecords implements kelondroRecords {
             }
         }
         
-        private synchronized void writeused(boolean finalwrite) throws IOException {
+        synchronized void writeused(boolean finalwrite) throws IOException {
             // we write only at close time, not in between. othervise, the read/write head
             // needs to run up and own all the way between the beginning and the end of the
             // file for each record. We check consistency beteen file size and
@@ -176,7 +176,7 @@ public abstract class kelondroAbstractRecords implements kelondroRecords {
             return this.USEDC + this.FREEC;
         }
         
-        private synchronized int used() {
+        synchronized int used() {
             checkConsistency();
             return this.USEDC;
         }

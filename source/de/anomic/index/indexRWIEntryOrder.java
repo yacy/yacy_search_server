@@ -153,7 +153,8 @@ public class indexRWIEntryOrder {
 
     public static class minmaxfinder extends Thread {
 
-        private indexRWIVarEntry entryMin, entryMax;
+        indexRWIVarEntry entryMin;
+        indexRWIVarEntry entryMax;
         private indexContainer container;
         private int start, end;
         private HashMap<String, Integer> doms;

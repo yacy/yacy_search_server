@@ -60,13 +60,13 @@ public class messageBoard {
     private static final String dateFormat = "yyyyMMddHHmmss";
     private static final int recordSize = 512;
 
-    private static SimpleDateFormat SimpleFormatter = new SimpleDateFormat(dateFormat);
+    static SimpleDateFormat SimpleFormatter = new SimpleDateFormat(dateFormat);
 
     static {
         SimpleFormatter.setTimeZone(TimeZone.getTimeZone("GMT"));
     }
 
-    private kelondroMapObjects database = null;
+    kelondroMapObjects database = null;
     private int sn = 0;
 
     public messageBoard(File path) {
@@ -85,13 +85,13 @@ public class messageBoard {
         database.close();
     }
     
-    private static String dateString() {
+    static String dateString() {
         synchronized (SimpleFormatter) {
             return SimpleFormatter.format(new Date());
         }
     }
 
-    private String snString() {
+    String snString() {
 	String s = Integer.toString(sn);
 	if (s.length() == 1) s = "0" + s;
 	sn++;
@@ -137,7 +137,7 @@ public class messageBoard {
             record.put("read", "false");
 	}
 
-	private entry(String key, HashMap<String, String> record) {
+	entry(String key, HashMap<String, String> record) {
 	    this.key = key;
 	    this.record = record;
 	}

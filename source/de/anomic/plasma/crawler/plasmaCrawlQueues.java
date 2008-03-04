@@ -38,7 +38,7 @@ import java.util.Iterator;
 import java.util.Map;
 
 import de.anomic.data.robotsParser;
-import de.anomic.kelondro.kelondroFlexTable;
+import de.anomic.kelondro.kelondroFlexWidthArray;
 import de.anomic.plasma.plasmaCrawlEntry;
 import de.anomic.plasma.plasmaCrawlNURL;
 import de.anomic.plasma.plasmaCrawlProfile;
@@ -57,9 +57,9 @@ import de.anomic.yacy.yacyURL;
 public class plasmaCrawlQueues {
 
     private plasmaSwitchboard sb;
-    private serverLog log;
-    private Map<Integer, crawlWorker> workers; // mapping from url hash to Worker thread object
-    private plasmaProtocolLoader loader;
+    serverLog log;
+    Map<Integer, crawlWorker> workers; // mapping from url hash to Worker thread object
+    plasmaProtocolLoader loader;
     private ArrayList<String> remoteCrawlProviderHashes;
 
     public  plasmaCrawlNURL noticeURL;
@@ -80,7 +80,7 @@ public class plasmaCrawlQueues {
         if (errorDBFile.exists()) {
             // delete the error db to get a fresh each time on startup
             // this is useful because there is currently no re-use of the data in this table.
-            if (errorDBFile.isDirectory()) kelondroFlexTable.delete(plasmaPath, "urlError2.db"); else errorDBFile.delete();
+            if (errorDBFile.isDirectory()) kelondroFlexWidthArray.delete(plasmaPath, "urlError2.db"); else errorDBFile.delete();
         }
         errorURL = new plasmaCrawlZURL(plasmaPath, "urlError2.db", false);
         delegatedURL = new plasmaCrawlZURL(plasmaPath, "urlDelegated2.db", true);

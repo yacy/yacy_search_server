@@ -34,7 +34,7 @@ import java.util.LinkedList;
 
 import de.anomic.kelondro.kelondroBase64Order;
 import de.anomic.kelondro.kelondroEcoTable;
-import de.anomic.kelondro.kelondroFlexTable;
+import de.anomic.kelondro.kelondroFlexWidthArray;
 import de.anomic.kelondro.kelondroIndex;
 import de.anomic.kelondro.kelondroRow;
 import de.anomic.kelondro.kelondroRowSet;
@@ -57,7 +57,7 @@ public class plasmaCrawlZURL {
             0);
 
     // the class object
-    private kelondroIndex urlIndex = null;
+    kelondroIndex urlIndex = null;
     private LinkedList<String> stack = new LinkedList<String>(); // strings: url
     
     public plasmaCrawlZURL(File cachePath, String tablename, boolean startWithEmptyFile) {
@@ -66,7 +66,7 @@ public class plasmaCrawlZURL {
         File f = new File(cachePath, tablename);
         if (startWithEmptyFile) {
             if (f.exists()) {
-                if (f.isDirectory()) kelondroFlexTable.delete(cachePath, tablename); else f.delete();
+                if (f.isDirectory()) kelondroFlexWidthArray.delete(cachePath, tablename); else f.delete();
             }
         }
         urlIndex = new kelondroEcoTable(f, rowdef, kelondroEcoTable.tailCacheDenyUsage, EcoFSBufferSize, 0);

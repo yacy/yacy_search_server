@@ -62,9 +62,9 @@ import de.anomic.yacy.yacyURL;
 
 public class plasmaSwitchboardQueue {
 
-    private kelondroStack sbQueueStack;
-    private plasmaCrawlProfile profiles;
-    private plasmaCrawlLURL lurls;
+    kelondroStack sbQueueStack;
+    plasmaCrawlProfile profiles;
+    plasmaCrawlLURL lurls;
     private File sbQueueStackPath;
     
     public plasmaSwitchboardQueue(plasmaCrawlLURL lurls, File sbQueueStackPath, plasmaCrawlProfile profiles) {
@@ -191,14 +191,14 @@ public class plasmaSwitchboardQueue {
     }
 
     public class Entry {
-        private yacyURL url;          // plasmaURL.urlStringLength
-        private String referrerHash;  // plasmaURL.urlHashLength
-        private Date ifModifiedSince; // 6
-        private byte flags;           // 1
-        private String initiator;     // yacySeedDB.commonHashLength
-        private int depth;            // plasmaURL.urlCrawlDepthLength
-        private String profileHandle; // plasmaURL.urlCrawlProfileHandleLength
-        private String anchorName;    // plasmaURL.urlDescrLength
+        yacyURL url;          // plasmaURL.urlStringLength
+        String referrerHash;  // plasmaURL.urlHashLength
+        Date ifModifiedSince; // 6
+        byte flags;           // 1
+        String initiator;     // yacySeedDB.commonHashLength
+        int depth;            // plasmaURL.urlCrawlDepthLength
+        String profileHandle; // plasmaURL.urlCrawlProfileHandleLength
+        String anchorName;    // plasmaURL.urlDescrLength
 
         // computed values
         private plasmaCrawlProfile.entry profileEntry;

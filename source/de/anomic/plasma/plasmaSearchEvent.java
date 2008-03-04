@@ -68,9 +68,9 @@ public final class plasmaSearchEvent {
     private static final int max_results_preparation = 200;
     
     private long eventTime;
-    private plasmaSearchQuery query;
+    plasmaSearchQuery query;
     private plasmaWordIndex wordIndex;
-    private plasmaSearchRankingProcess rankedCache; // ordered search results, grows dynamically as all the query threads enrich this container
+    plasmaSearchRankingProcess rankedCache; // ordered search results, grows dynamically as all the query threads enrich this container
     private Map<String, TreeMap<String, String>> rcAbstracts; // cache for index abstracts; word:TreeMap mapping where the embedded TreeMap is a urlhash:peerlist relation
     private yacySearch[] primarySearchThreads, secondarySearchThreads;
     private Thread localSearchThread;
@@ -80,12 +80,12 @@ public final class plasmaSearchEvent {
     public  TreeMap<String, Integer> IACount;
     public  String IAmaxcounthash, IAneardhthash;
     private resultWorker[] workerThreads;
-    private kelondroSortStore<ResultEntry> result;
-    private kelondroSortStore<plasmaSnippetCache.MediaSnippet> images; // container to sort images by size
-    private HashMap<String, String> failedURLs; // a mapping from a urlhash to a fail reason string
+    kelondroSortStore<ResultEntry> result;
+    kelondroSortStore<plasmaSnippetCache.MediaSnippet> images; // container to sort images by size
+    HashMap<String, String> failedURLs; // a mapping from a urlhash to a fail reason string
     TreeSet<String> snippetFetchWordHashes; // a set of word hashes that are used to match with the snippets
-    private long urlRetrievalAllTime;
-    private long snippetComputationAllTime;
+    long urlRetrievalAllTime;
+    long snippetComputationAllTime;
     
     @SuppressWarnings("unchecked")
     private plasmaSearchEvent(plasmaSearchQuery query,
@@ -270,7 +270,7 @@ public final class plasmaSearchEvent {
         }
     }
     
-    private ResultEntry obtainResultEntry(indexURLEntry page, int snippetFetchMode) {
+    ResultEntry obtainResultEntry(indexURLEntry page, int snippetFetchMode) {
 
         // a search result entry needs some work to produce a result Entry:
         // - check if url entry exists in LURL-db
@@ -391,7 +391,7 @@ public final class plasmaSearchEvent {
         return false;
     }
     
-    private boolean anyRemoteSearchAlive() {
+    boolean anyRemoteSearchAlive() {
         // check primary search threads
         if ((this.primarySearchThreads != null) && (this.primarySearchThreads.length != 0)) {
             for (int i = 0; i < this.primarySearchThreads.length; i++) {
@@ -650,7 +650,7 @@ public final class plasmaSearchEvent {
     
     boolean secondarySearchStartet = false;
     
-    private void prepareSecondarySearch() {
+    void prepareSecondarySearch() {
         if (secondarySearchStartet) return; // don't do this twice
         
         if ((rcAbstracts == null) || (rcAbstracts.size() != query.queryHashes.size())) return; // secondary search not possible (yet)

@@ -86,7 +86,7 @@ public class AccessTracker_p {
             prop.put("page_num", entCount);
         }
         if (page == 1) {
-            String host = post.get("host", "");
+            String host = (post == null) ? "" : post.get("host", "");
             int entCount = 0;
             TreeMap<Long, String> access;
             Map.Entry<Long, String> entry;

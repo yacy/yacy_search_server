@@ -42,7 +42,7 @@ public class ymageBMPParser {
     public  static int INFOHEADER_size   = 40;
 
     // compression tags
-    private static int BI_RGB = 0;
+    static int BI_RGB = 0;
     //private static int BI_RLE8 = 1;
     //private static int BI_RLE4 = 2;
     //private static int BI_BITFIELDS = 3;

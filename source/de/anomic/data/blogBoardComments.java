@@ -76,7 +76,7 @@ public class blogBoardComments {
     private static final String dateFormat = "yyyyMMddHHmmss";
     private static final int recordSize = 512;
 
-    private static SimpleDateFormat SimpleFormatter = new SimpleDateFormat(dateFormat);
+    static SimpleDateFormat SimpleFormatter = new SimpleDateFormat(dateFormat);
 
     static {
         SimpleFormatter.setTimeZone(TimeZone.getTimeZone("GMT"));
@@ -94,7 +94,7 @@ public class blogBoardComments {
     public void close() {
         database.close();
     }
-    private static String dateString(Date date) {
+    static String dateString(Date date) {
         synchronized (SimpleFormatter) {
             return SimpleFormatter.format(date);
         }
@@ -240,7 +240,7 @@ public class blogBoardComments {
             wikiBoard.setAuthor(ip, new String(author));
         }
     
-        private CommentEntry(String key, HashMap<String, String> record) {
+        CommentEntry(String key, HashMap<String, String> record) {
             this.key = key;
             this.record = record;
             if (this.record.get("comments")==null) this.record.put("comments", listManager.collection2string(new ArrayList<String>()));

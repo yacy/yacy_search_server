@@ -39,7 +39,7 @@ import org.xml.sax.helpers.DefaultHandler;
 public class crawlHandler extends DefaultHandler {
     
     // statics for item generation and automatic categorization
-    private static int guidcount = 0;
+    static int guidcount = 0;
     private static final String[] startpointTags = new String[]{
         "author",      //
         "copyright",   //

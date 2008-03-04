@@ -58,7 +58,7 @@ import de.anomic.server.serverDate;
 public class yacyNewsQueue {
 
     private File path;
-    private kelondroStack queueStack;
+    kelondroStack queueStack;
     private yacyNewsDB newsDB;
     
     public static final kelondroRow rowdef = new kelondroRow(new kelondroColumn[]{
@@ -144,7 +144,7 @@ public class yacyNewsQueue {
         return null;
     }
 
-    private yacyNewsRecord b2r(kelondroRow.Entry b) throws IOException {
+    yacyNewsRecord b2r(kelondroRow.Entry b) throws IOException {
         if (b == null) return null;
         String id = b.getColString(0, null);
         //Date touched = yacyCore.parseUniversalDate(new String(b[1]));

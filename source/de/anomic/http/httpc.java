@@ -108,7 +108,7 @@ public final class httpc {
     private static final String vDATE = "20040602";
     private static final int terminalMaxLength = 30000;
     private static final SimpleDateFormat HTTPGMTFormatter = new SimpleDateFormat("EEE, dd MMM yyyy HH:mm:ss zzz", Locale.US);
-    private static final HashMap<String, String> reverseMappingCache = new HashMap<String, String>();
+    static final HashMap<String, String> reverseMappingCache = new HashMap<String, String>();
     private static final HashSet<httpc> activeConnections = new HashSet<httpc>(); // all connections are stored here and deleted when they are finished
     private static final long minimumTime_before_activeConnections_cleanup = 3600000; // 1 Hour
     private static final long minimumTime_before_idleConnections_cleanup   =  120000; // 2 Minutes
@@ -189,7 +189,7 @@ public final class httpc {
     private String target_virtual_host = null;
     
     // output and input streams for client control connection
-    private PushbackInputStream clientInput = null;
+    PushbackInputStream clientInput = null;
     private OutputStream clientOutput = null;
     
     private httpdByteCountInputStream clientInputByteCount = null;
@@ -198,7 +198,7 @@ public final class httpc {
     private boolean remoteProxyUse = false;
     private httpRemoteProxyConfig remoteProxyConfig = null;
     
-    private String  requestPath = null;
+    String  requestPath = null;
     private boolean allowContentEncoding = true;
 	
     public boolean ssl;
@@ -1443,7 +1443,7 @@ public final class httpc {
                 } catch (IOException e) {
                     e.printStackTrace();
                 }
-                if (file.length() == 0) file.delete();
+                if ((file != null) && (file.length() == 0)) file.delete();
             }
         }
         

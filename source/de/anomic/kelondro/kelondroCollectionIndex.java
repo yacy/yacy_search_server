@@ -57,7 +57,7 @@ public class kelondroCollectionIndex {
     private static final long minimumRAM4Eco = 20 * 1024 * 1024;
     private static final int EcoFSBufferSize = 1000;
     
-    private kelondroIndex index;
+    kelondroIndex index;
     private int           keylength;
     private File          path;
     private String        filenameStub;
@@ -354,7 +354,7 @@ public class kelondroCollectionIndex {
         // this is computed by the size of the biggest used collection
         // this must be multiplied with the payload size
         // and doubled for necessary memory transformation during sort operation
-        return (int) (arrayCapacity(arrays.size() - 1) * this.payloadrow.objectsize * kelondroRowSet.growfactor);
+        return (int) (arrayCapacity(arrays.size() - 1) * this.payloadrow.objectsize * kelondroRowCollection.growfactor);
     }
     
     private void array_remove(

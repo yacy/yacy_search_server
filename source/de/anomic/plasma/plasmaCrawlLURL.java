@@ -95,7 +95,7 @@ public final class plasmaCrawlLURL {
     private final LinkedList<String> gcrawlResultStack; // 6 - local index: triggered external
 
     // the class object
-    private kelondroIndex urlIndexFile;
+    kelondroIndex urlIndexFile;
 
     public plasmaCrawlLURL(File indexPath) {
         super();

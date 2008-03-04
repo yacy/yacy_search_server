@@ -60,15 +60,15 @@ public class wikiBoard {
     private static final String dateFormat = "yyyyMMddHHmmss";
     private static final int recordSize = 512;
 
-    private static SimpleDateFormat SimpleFormatter = new SimpleDateFormat(dateFormat);
+    static SimpleDateFormat SimpleFormatter = new SimpleDateFormat(dateFormat);
 
     static {
         SimpleFormatter.setTimeZone(TimeZone.getTimeZone("GMT"));
     }
 
-    private kelondroMapObjects datbase = null;
-    private kelondroMapObjects bkpbase = null;
-    private static HashMap<String, String> authors = new HashMap<String, String>();
+    kelondroMapObjects datbase = null;
+    kelondroMapObjects bkpbase = null;
+    static HashMap<String, String> authors = new HashMap<String, String>();
 
     public wikiBoard(File actpath, File bkppath) {
         new File(actpath.getParent()).mkdirs();
@@ -94,7 +94,7 @@ public class wikiBoard {
         bkpbase.close();
     }
 
-    private static String dateString() {
+    static String dateString() {
         return dateString(new Date());
     }
 
@@ -156,7 +156,7 @@ public class wikiBoard {
             //System.out.println("DEBUG: setting author " + author + " for ip = " + ip + ", authors = " + authors.toString());
         }
 
-        private entry(String key, HashMap<String, String> record) {
+        entry(String key, HashMap<String, String> record) {
             this.key = key;
             this.record = record;
         }
@@ -204,7 +204,7 @@ public class wikiBoard {
             return b;
         }
 
-        private void setAncestorDate(Date date) {
+        void setAncestorDate(Date date) {
             record.put("bkp", dateString(date));
         }
 
@@ -238,7 +238,7 @@ public class wikiBoard {
             return read(key + dateString(ancDate), bkpbase);
         }
 
-        private void setChild(String subject) {
+        void setChild(String subject) {
             record.put("child", kelondroBase64Order.enhancedCoder.encode(subject.getBytes()));
         }
 
@@ -290,7 +290,7 @@ public class wikiBoard {
         return read(key, datbase);
     }
 
-    private entry read(String key, kelondroMapObjects base) {
+    entry read(String key, kelondroMapObjects base) {
         try {
             key = normalize(key);
             if (key.length() > keyLength) key = key.substring(0, keyLength);

@@ -42,7 +42,7 @@ public class kelondroBufferedEcoFS {
      * That means, each time, an entry is written to the end of the file, it is not buffered
      */
     
-    public kelondroBufferedEcoFS(kelondroEcoFS efs, int maxEntries) throws IOException {
+    public kelondroBufferedEcoFS(kelondroEcoFS efs, int maxEntries) {
         this.efs = efs;
         this.maxEntries = maxEntries;
         this.buffer = new TreeMap<Long, byte[]>();

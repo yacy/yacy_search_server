@@ -43,7 +43,7 @@ public class kelondroRowCollection {
 
     public  static final double growfactor = 1.4;
     private static final int isortlimit = 20;
-    private static final Integer dummy = new Integer(0);
+    static final Integer dummy = new Integer(0);
     
     public static final qsortthread sortingthread;
     static {
@@ -538,7 +538,7 @@ public class kelondroRowCollection {
         }
     }
     
-    private final void qsort(int L, int R, int S, byte[] swapspace) {
+    final void qsort(int L, int R, int S, byte[] swapspace) {
     	if (R - L < isortlimit) {
             isort(L, R, swapspace);
             return;

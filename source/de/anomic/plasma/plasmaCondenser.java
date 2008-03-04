@@ -324,7 +324,7 @@ public final class plasmaCondenser {
         public  int              posInText;   // unique handle, is initialized with word position (excluding double occurring words)
         public  int              posInPhrase; // position of word in phrase
         public  int              numOfPhrase; // number of phrase. 'normal' phrases begin with number 100
-        private HashSet<Integer> hash;        // a set of handles to all sentences where this word appears
+        HashSet<Integer> hash;        // a set of handles to all sentences where this word appears
         public  kelondroBitfield flags;       // the flag bits for each word
 
         public wordStatProp(int handle, int pip, int nop) {
