@@ -40,7 +40,6 @@ import de.anomic.htmlFilter.htmlFilterContentScraper;
 import de.anomic.index.indexContainer;
 import de.anomic.index.indexRWIEntry;
 import de.anomic.index.indexRWIEntryOrder;
-import de.anomic.index.indexRWIRowEntry;
 import de.anomic.index.indexRWIVarEntry;
 import de.anomic.index.indexURLEntry;
 import de.anomic.kelondro.kelondroBinSearch;
@@ -49,6 +48,7 @@ import de.anomic.kelondro.kelondroSortStack;
 import de.anomic.server.serverCodings;
 import de.anomic.server.serverFileUtils;
 import de.anomic.server.serverProfiling;
+import de.anomic.yacy.yacyURL;
 
 public final class plasmaSearchRankingProcess {
     
@@ -59,7 +59,6 @@ public final class plasmaSearchRankingProcess {
     private HashMap<String, kelondroSortStack<indexRWIVarEntry>> doubleDomCache; // key = domhash (6 bytes); value = like stack
     private HashMap<String, String> handover; // key = urlhash, value = urlstring; used for double-check of urls that had been handed over to search process
     private plasmaSearchQuery query;
-    private int sortorder;
     private int maxentries;
     private int remote_peerCount, remote_indexCount, remote_resourceSize, local_resourceSize;
     private indexRWIEntryOrder order;
@@ -70,7 +69,7 @@ public final class plasmaSearchRankingProcess {
     private plasmaWordIndex wordIndex;
     private HashMap<String, indexContainer>[] localSearchContainerMaps;
     
-    public plasmaSearchRankingProcess(plasmaWordIndex wordIndex, plasmaSearchQuery query, int sortorder, int maxentries, int concurrency) {
+    public plasmaSearchRankingProcess(plasmaWordIndex wordIndex, plasmaSearchQuery query, int maxentries, int concurrency) {
         // we collect the urlhashes and construct a list with urlEntry objects
         // attention: if minEntries is too high, this method will not terminate within the maxTime
         // sortorder: 0 = hash, 1 = url, 2 = ranking
@@ -89,7 +88,6 @@ public final class plasmaSearchRankingProcess {
         this.ref = new kelondroMScoreCluster<String>();
         this.misses = new TreeSet<String>();
         this.wordIndex = wordIndex;
-        this.sortorder = sortorder;
         this.flagcount = new int[32];
         for (int i = 0; i < 32; i++) {this.flagcount[i] = 0;}
     }
@@ -120,57 +118,7 @@ public final class plasmaSearchRankingProcess {
             return;
         }
         
-        if (sortorder == 2) {
-            insertRanked(index, true, index.size());
-        } else {            
-            insertNoOrder(index, true, index.size());
-        }
-    }
-    
-    private void insertNoOrder(indexContainer index, boolean local, int fullResource) {
-        final Iterator<indexRWIRowEntry> en = index.entries();
-        // generate a new map where the urls are sorted (not by hash but by the url text)
-        
-        if (local) {
-            this.local_resourceSize += fullResource;
-        } else {
-            this.remote_resourceSize += fullResource;
-            this.remote_peerCount++;
-            this.remote_indexCount += index.size();
-        }
-        
-        indexRWIVarEntry ientry;
-        indexURLEntry uentry;
-        String u;
-        loop: while (en.hasNext()) {
-            ientry = new indexRWIVarEntry(en.next());
-
-            // check constraints
-            if (!testFlags(ientry)) continue loop;
-            
-            // increase flag counts
-            for (int i = 0; i < 32; i++) {
-                if (ientry.flags().get(i)) {flagcount[i]++;}
-            }
-            
-            // load url
-            if (sortorder == 0) {
-                this.stack.push(ientry, new Long(ientry.urlHash().hashCode()));
-                this.urlhashes.put(ientry.urlHash(), new Integer(ientry.urlHash().hashCode()));
-            } else {
-                uentry = wordIndex.loadedURL.load(ientry.urlHash(), ientry, 0);
-                if (uentry == null) {
-                    this.misses.add(ientry.urlHash());
-                } else {
-                    u = uentry.comp().url().toNormalform(false, true);
-                    this.stack.push(ientry, new Long(u.hashCode()));
-                    this.urlhashes.put(ientry.urlHash(), new Integer(u.hashCode()));
-                }
-            }
-            
-            // interrupt if we have enough
-            if ((query.neededResults() > 0) && (this.misses.size() + this.stack.size() > query.neededResults())) break loop;
-        } // end loop
+        insertRanked(index, true, index.size());
     }
     
     public void insertRanked(indexContainer index, boolean local, int fullResource) {
@@ -222,6 +170,12 @@ public final class plasmaSearchRankingProcess {
                 if ((query.contentdom == plasmaSearchQuery.CONTENTDOM_APP  ) && (!(iEntry.flags().get(plasmaCondenser.flag_cat_hasapp  )))) continue;
             }
 
+            // check tld domain
+            if (!yacyURL.matchesAnyDomDomain(iEntry.urlHash(), this.query.zonecode)) {
+                // filter out all tld that do not match with wanted tld domain
+                continue;
+            }
+            
             // insert
             if ((maxentries < 0) || (stack.size() < maxentries)) {
                 // in case that we don't have enough yet, accept any new entry

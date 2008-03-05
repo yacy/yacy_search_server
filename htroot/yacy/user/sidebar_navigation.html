@@ -1,0 +1,37 @@
+#(rssreferences)#::
+<yacyTopwords:topwords>
+#{words}#
+<yacyTopwords:item><yacyTopwords:word>#[word]#</yacyTopwords:word></yacyTopwords:item>
+#{/words}#
+</yacyTopwords:topwords>
+#(/rssreferences)#
+#(navigation)#::
+    <div id="navigate" class="boxed">
+      <h2 class="title">Navigate</h2>
+      <div class="content">
+        <p><Strong>Page</strong>:
+        #[resnav]#
+        </p>
+        #(topwords)#::
+        <p><strong>Category</strong>:
+        <select onchange="window.location.href=this.options[this.selectedIndex].value">
+          <option selected="selected">-select-</option>
+        #{words}#
+          <option value="/yacy/user/ysearch.html?search=#[newsearch]#&amp;Enter=Search&amp;count=#[count]#&amp;offset=#[offset]#&amp;resource=#[resource]#&amp;contentdom=#[contentdom]#&amp;zone=#[zonecode]#">#[word]#</option>
+        #{/words}#
+        </select>
+        </p>
+        #(/topwords)#
+        #(languagezone)#::
+        <p><strong>Language Zone</strong>:
+        <select onchange="window.location.href=this.options[this.selectedIndex].value">
+          <option selected="selected">-select-</option>
+        #{zones}#
+          <option value="/yacy/user/ysearch.html?search=#[search]#&amp;Enter=Search&amp;count=#[count]#&amp;offset=#[offset]#&amp;resource=#[resource]#&amp;contentdom=#[contentdom]#&amp;zone=#[zonecode]#">#[zone]#</option>
+        #{/zones}#
+        </select>
+        </p>
+        #(/languagezone)#
+      </div>
+    </div>
+#(/navigation)#

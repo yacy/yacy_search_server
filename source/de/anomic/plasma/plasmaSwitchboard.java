@@ -1445,6 +1445,7 @@ public final class plasmaSwitchboard extends serverAbstractSwitch implements ser
         if (hostAddress == null) return ((this.remoteProxyConfig != null) && (this.remoteProxyConfig.useProxy()));
         // check if this is a local address and we are allowed to index local pages:
         boolean local = hostAddress.isSiteLocalAddress() || hostAddress.isLoopbackAddress();
+        //assert local == yacyURL.isLocalDomain(url.hash()); // TODO: remove the dnsResolve above!
         return (this.acceptGlobalURLs && !local) || (this.acceptLocalURLs && local);
     }
     

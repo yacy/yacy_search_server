@@ -139,7 +139,7 @@ public class yacyURL {
          "UY=Uruguay",
          "VE=Venezuela"
      };
-     private static final String[] TLD_EuropaRussia = {
+     private static final String[] TLD_EuropeRussia = {
         // includes also countries that are mainly french- dutch- speaking
         // and culturally close to europe
          "AD=Andorra",
@@ -373,20 +373,30 @@ public class yacyURL {
             }
         }
     }
-
+    
+    public static final int language_domain_europe_zone     = 128 + 1;       //{0, 7};
+    public static final int language_domain_english_zone    = 128 + 16 + 64; //{4, 6, 7};
+    public static final int language_domain_spanish_zone    = 128 + 2;       //{1, 7};
+    public static final int language_domain_asia_zone       = 128 + 4;       //{2, 7};
+    public static final int language_domain_middleeast_zone = 128 + 8;       //{3, 7};
+    public static final int language_domain_africa_zone     = 128 + 32;      //{5, 7};
+    public static final int language_domain_any_zone        = 255;
+    
+    public static final String[] regions = {"europe", "english", "spanish", "asia", "middleeast", "africa"};
+    
     static {
         // create a dummy hash
         dummyHash = "";
         for (int i = 0; i < yacySeedDB.commonHashLength; i++) dummyHash += "-";
 
         // assign TLD-ids and names
-        insertTLDProps(TLD_EuropaRussia, 0);
-        insertTLDProps(TLD_MiddleSouthAmerica, 1);
-        insertTLDProps(TLD_SouthEastAsia, 2);
-        insertTLDProps(TLD_MiddleEastWestAsia, 3);
-        insertTLDProps(TLD_NorthAmericaOceania, 4);
-        insertTLDProps(TLD_Africa, 5);
-        insertTLDProps(TLD_Generic, 6);
+        insertTLDProps(TLD_EuropeRussia,        0); // European languages but no english
+        insertTLDProps(TLD_MiddleSouthAmerica,  1); // mainly spanish-speaking countries
+        insertTLDProps(TLD_SouthEastAsia,       2); // asia
+        insertTLDProps(TLD_MiddleEastWestAsia,  3); // middle east
+        insertTLDProps(TLD_NorthAmericaOceania, 4); // english-speaking countries
+        insertTLDProps(TLD_Africa,              5); // africa
+        insertTLDProps(TLD_Generic,             6); // anything else, mixed languages, mainly english
         // the id=7 is used to flag local addresses
     }
     
@@ -971,7 +981,7 @@ public class yacyURL {
             tld = host.substring(p + 1);
             dom = host.substring(0, p);
         }
-        Integer ID = (serverDomains.isLocal(tld)) ? null : (Integer) TLDID.get(tld); // identify local addresses
+        Integer ID = (serverDomains.isLocal(tld)) ? null : TLDID.get(tld); // identify local addresses
         int id = (ID == null) ? 7 : ID.intValue(); // local addresses are flagged with id=7
         boolean isHTTP = this.protocol.equals("http");
         p = dom.lastIndexOf('.'); // locate subdomain
@@ -1083,14 +1093,22 @@ public class yacyURL {
         // returns the ID of the domain of the domain
         assert (urlHash != null);
         assert (urlHash.length() == 12) : "urlhash = " + urlHash;
-        int flagbyte = kelondroBase64Order.enhancedCoder.decodeByte(urlHash.charAt(11));
-        return (flagbyte & 12) >> 2;
+        return (kelondroBase64Order.enhancedCoder.decodeByte(urlHash.charAt(11)) & 12) >> 2;
     }
 
-    public static boolean isGlobalDomain(String urlhash) {
-        return domDomain(urlhash) != 7;
+    public static boolean isLocalDomain(String urlhash) {
+        return domDomain(urlhash) == 7;
     }
 
+    public static boolean isDomDomain(String urlHash, int id) {
+        return domDomain(urlHash) == id;
+    }
+    
+    public static boolean matchesAnyDomDomain(String urlHash, int idset) {
+        // this is a boolean matching on a set of domDomains
+        return (domDomain(urlHash) | idset) != 0;
+    }
+    
     // checks for local/global IP range and local IP
     public boolean isLocal() {
         return serverDomains.isLocal(this.host);

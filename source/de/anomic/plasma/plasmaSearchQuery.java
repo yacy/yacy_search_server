@@ -54,6 +54,7 @@ import de.anomic.kelondro.kelondroNaturalOrder;
 import de.anomic.server.serverCharBuffer;
 import de.anomic.yacy.yacySeed;
 import de.anomic.yacy.yacySeedDB;
+import de.anomic.yacy.yacyURL;
 
 public final class plasmaSearchQuery {
     
@@ -80,7 +81,7 @@ public final class plasmaSearchQuery {
     public int contentdom;
     public String urlMask;
     public int domType;
-    public String domGroupName;
+    public int zonecode;
     public int domMaxTargets;
     public int maxDistance;
     public kelondroBitfield constraint;
@@ -117,7 +118,7 @@ public final class plasmaSearchQuery {
         this.offset = 0;
         this.urlMask = ".*";
         this.domType = SEARCHDOM_LOCAL;
-        this.domGroupName = "";
+        this.zonecode = yacyURL.language_domain_any_zone;
         this.domMaxTargets = 0;
         this.constraint = constraint;
         this.allofconstraint = false;
@@ -148,7 +149,7 @@ public final class plasmaSearchQuery {
 		//this.maximumTime = Math.min(6000, maximumTime);
 		this.urlMask = urlMask;
 		this.domType = domType;
-		this.domGroupName = domGroupName;
+        this.zonecode = yacyURL.language_domain_any_zone;
 		this.domMaxTargets = domMaxTargets;
 		this.constraint = constraint;
 		this.allofconstraint = allofconstraint;

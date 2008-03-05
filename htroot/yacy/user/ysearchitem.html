@@ -38,50 +38,9 @@
 <guid isPermaLink="false">#[urlhash]#</guid>
 </item>
 #(/rss)#
-#(rssreferences)#::
-<yacyTopwords:topwords>
-#{words}#
-<yacyTopwords:item><yacyTopwords:word>#[word]#</yacyTopwords:word></yacyTopwords:item>
-#{/words}#
-</yacyTopwords:topwords>
-#(/rssreferences)#
 #(dynamic)#::
 <script type="text/javascript">
 statistics("#[offset]#", "#[itemscount]#", "#[totalcount]#", "#[localResourceSize]#", "#[remoteResourceSize]#", "#[remoteIndexCount]#", "#[remotePeerCount]#");
 progressbar.step(1);
 </script>
 #(/dynamic)#
-#(navigation)#::
-    <div id="navigate" class="boxed">
-      <h2 class="title">Navigate</h2>
-      <div class="content">
-        <p><Strong>Page</strong>:
-        #[resnav]#
-        </p>
-        #(topwords)#::
-        <p><strong>Category</strong>:
-        <select onchange="window.location.href=this.options[this.selectedIndex].value">
-          <option selected="selected">-select-</option>
-        #{words}#
-          <option value="/yacy/user/ysearch.html?search=#[newsearch]#&amp;Enter=Search&amp;count=#[count]#&amp;offset=#[offset]#&amp;resource=#[resource]#&amp;contentdom=#[contentdom]#">#[word]#</option>
-        #{/words}#
-        </select>
-        </p>
-        #(/topwords)#
-      </div>
-    </div>
-#(/navigation)#
-#(history)#::
-    <div id="partners" class="boxed">
-      <h2 class="title">Recent Searches</h2>
-      <div class="content">
-        <ul>
-        #{list}#
-          <li><a href="/yacy/user/ysearch.html?search=#[querystring]#&amp;resource=#[searchdom]#&amp;contentdom=#[contentdom]#">#[querystring]#</a></li>
-        #{/list}#
-        </ul>
-        <p>The search history is only visible for users from host #[host]#</p>
-      </div>
-    </div>
-#(/history)#
-

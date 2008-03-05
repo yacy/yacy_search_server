@@ -88,9 +88,9 @@ public class plasmaSearchAPI {
         }
     }
 
-    public static plasmaSearchRankingProcess genSearchresult(serverObjects prop, plasmaSwitchboard sb, String keyhash, kelondroBitfield filter, int sortorder) {
+    public static plasmaSearchRankingProcess genSearchresult(serverObjects prop, plasmaSwitchboard sb, String keyhash, kelondroBitfield filter) {
         plasmaSearchQuery query = new plasmaSearchQuery(keyhash, -1, sb.getRanking(), filter);
-        plasmaSearchRankingProcess ranked = new plasmaSearchRankingProcess(sb.wordIndex, query, sortorder, Integer.MAX_VALUE, 1);
+        plasmaSearchRankingProcess ranked = new plasmaSearchRankingProcess(sb.wordIndex, query, Integer.MAX_VALUE, 1);
         ranked.execQuery();
         
         if (ranked.filteredCount() == 0) {
@@ -114,7 +114,7 @@ public class plasmaSearchAPI {
         return ranked;
     }
     
-    public static void genURLList(serverObjects prop, String keyhash, String keystring, plasmaSearchRankingProcess ranked, kelondroBitfield flags, int maxlines, int ordering) {
+    public static void genURLList(serverObjects prop, String keyhash, String keystring, plasmaSearchRankingProcess ranked, kelondroBitfield flags, int maxlines) {
         // search for a word hash and generate a list of url links
         prop.put("genUrlList_keyHash", keyhash);
         
@@ -127,7 +127,6 @@ public class plasmaSearchAPI {
             prop.put("searchresult", 3);
             prop.put("genUrlList_flags", (flags == null) ? "" : flags.exportB64());
             prop.put("genUrlList_lines", maxlines);
-            prop.put("genUrlList_ordering", ordering);
             int i = 0;
             yacyURL url;
             indexURLEntry entry;

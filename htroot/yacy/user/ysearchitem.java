@@ -28,14 +28,9 @@ import java.io.UnsupportedEncodingException;
 import java.net.MalformedURLException;
 import java.net.URLEncoder;
 import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.Iterator;
-import java.util.Set;
 import java.util.TreeSet;
 
 import de.anomic.http.httpHeader;
-import de.anomic.kelondro.kelondroMSetTools;
-import de.anomic.kelondro.kelondroNaturalOrder;
 import de.anomic.plasma.plasmaSearchEvent;
 import de.anomic.plasma.plasmaSearchQuery;
 import de.anomic.plasma.plasmaSearchRankingProcess;
@@ -53,14 +48,12 @@ public class ysearchitem {
     private static boolean col = true;
     private static final int namelength = 60;
     private static final int urllength = 120;
-    private static final int MAX_TOPWORDS = 24;
     
     public static serverObjects respond(httpHeader header, serverObjects post, serverSwitch env) {
         final plasmaSwitchboard sb = (plasmaSwitchboard) env;
         final serverObjects prop = new serverObjects();
         
         String eventID = post.get("eventID", "");
-        boolean bottomline = post.get("bottomline", "false").equals("true");
         boolean rss = post.get("rss", "false").equals("true");
         int item = post.getInt("item", -1);
         boolean auth = ((String) header.get(httpHeader.CONNECTION_PROP_CLIENTIP, "")).equals("localhost") || sb.verifyAuthentication(header, true);
@@ -69,8 +62,6 @@ public class ysearchitem {
         prop.put("content", "0");
         prop.put("rss", "0");
         prop.put("references", "0");
-        prop.put("rssreferences", "0");
-        prop.put("navigation", "0");
         prop.put("dynamic", "0");
         
         // find search event
@@ -81,7 +72,6 @@ public class ysearchitem {
         }
         plasmaSearchQuery theQuery = theSearch.getQuery();
         int offset = theQuery.neededResults() - theQuery.displayResults();
-        int totalcount = theSearch.getRankingResult().getLocalResourceSize() + theSearch.getRankingResult().getRemoteResourceSize();
         
         // dynamically update count values
         if (!rss) {
@@ -95,129 +85,7 @@ public class ysearchitem {
             prop.put("dynamic_resnav", "");
             prop.put("dynamic", "1");
         }
-        
-        if (bottomline) {
-            // attach the bottom line with search references (topwords)
-            final Set<String> references = theSearch.references(20);
-            if (references.size() > 0) {
-                // get the topwords
-                final TreeSet<String> topwords = new TreeSet<String>(kelondroNaturalOrder.naturalComparator);
-                String tmp = "";
-                Iterator<String> i = references.iterator();
-                while (i.hasNext()) {
-                    tmp = i.next();
-                    if (tmp.matches("[a-z]+")) {
-                        topwords.add(tmp);
-                    }
-                }
 
-                // filter out the badwords
-                final TreeSet<String> filteredtopwords = kelondroMSetTools.joinConstructive(topwords, plasmaSwitchboard.badwords);
-                if (filteredtopwords.size() > 0) {
-                    kelondroMSetTools.excludeDestructive(topwords, plasmaSwitchboard.badwords);
-                }
-
-                // avoid stopwords being topwords
-                if (env.getConfig("filterOutStopwordsFromTopwords", "true").equals("true")) {
-                    if ((plasmaSwitchboard.stopwords != null) && (plasmaSwitchboard.stopwords.size() > 0)) {
-                        kelondroMSetTools.excludeDestructive(topwords, plasmaSwitchboard.stopwords);
-                    }
-                }
-                
-                if (rss) {
-                    String word;
-                    int hintcount = 0;
-                    final Iterator<String> iter = topwords.iterator();
-                    while (iter.hasNext()) {
-                        word = (String) iter.next();
-                        if (word != null) {
-                            prop.putHTML("rssreferences_words_" + hintcount + "_word", word);
-                        }
-                        prop.put("rssreferences_words", hintcount);
-                        if (hintcount++ > MAX_TOPWORDS) {
-                            break;
-                        }
-                    }
-                    prop.put("rssreferences", "1");
-                } else {
-                    String word;
-                    int hintcount = 0;
-                    final Iterator<String> iter = topwords.iterator();
-                    while (iter.hasNext()) {
-                        word = (String) iter.next();
-                        if ((theQuery == null) || (theQuery.queryString == null)) break;
-                        if (word != null) {
-                            prop.putHTML("navigation_topwords_words_" + hintcount + "_word", word);
-                            prop.putHTML("navigation_topwords_words_" + hintcount + "_newsearch", theQuery.queryString.replace(' ', '+') + "+" + word);
-                            prop.put("navigation_topwords_words_" + hintcount + "_count", theQuery.displayResults());
-                            prop.put("navigation_topwords_words_" + hintcount + "_offset", "0");
-                            prop.put("navigation_topwords_words_" + hintcount + "_contentdom", theQuery.contentdom());
-                            prop.put("navigation_topwords_words_" + hintcount + "_resource", theQuery.searchdom());
-                        }
-                        prop.put("navigation_topwords_words", hintcount);
-                        if (hintcount++ > MAX_TOPWORDS) {
-                            break;
-                        }
-                    }
-                    prop.put("navigation_topwords", "1");
-                }
-                
-            }
-            
-            // compose page navigation
-            StringBuffer resnav = new StringBuffer();
-            int thispage = offset / theQuery.displayResults();
-            if (thispage == 0) resnav.append("&lt;&nbsp;"); else {
-                resnav.append(navurla(thispage - 1, theQuery));
-                resnav.append("<strong>&lt;</strong></a>&nbsp;");
-            }
-            int numberofpages = Math.min(10, Math.max(thispage + 2, totalcount / theQuery.displayResults()));
-            for (int j = 0; j < numberofpages; j++) {
-                if (j == thispage) {
-                    resnav.append("<strong>");
-                    resnav.append(j + 1);
-                    resnav.append("</strong>&nbsp;");
-                } else {
-                    resnav.append(navurla(j, theQuery));
-                    resnav.append(j + 1);
-                    resnav.append("</a>&nbsp;");
-                }
-            }
-            if (thispage >= numberofpages) resnav.append("&gt;"); else {
-                resnav.append(navurla(thispage + 1, theQuery));
-                resnav.append("<strong>&gt;</strong></a>");
-            }
-            prop.put("navigation_resnav", resnav.toString());
-            prop.put("navigation", "1");
-            
-            // list search history
-            Iterator<plasmaSearchQuery> i = sb.localSearches.iterator();
-            String client = (String) header.get(httpHeader.CONNECTION_PROP_CLIENTIP);
-            plasmaSearchQuery query;
-            int c = 0;
-            HashSet<String> visibleQueries = new HashSet<String>();
-            while (i.hasNext()) {
-                query = i.next();
-                if (query.resultcount == 0) continue;
-                if (query.offset != 0) continue;
-                if (!query.host.equals(client)) continue; // the search history should only be visible from the user who initiated the search
-                if (visibleQueries.contains(query.queryString)) continue; // avoid doubles
-                visibleQueries.add(query.queryString);
-                prop.put("history_list_" + c + "_querystring", query.queryString);
-                prop.put("history_list_" + c + "_searchdom", query.searchdom());
-                prop.put("history_list_" + c + "_contentdom", query.contentdom());
-                c++;
-                if (c >= 10) break;
-            }
-            prop.put("history_list", c);
-            prop.put("history_host", client);
-            if (c == 0) prop.put("history", 0); else prop.put("history", 1); // switch on if there is anything to see
-            
-            return prop;
-        }
-
-        prop.put("rss", "0");
-        
         if (theQuery.contentdom == plasmaSearchQuery.CONTENTDOM_TEXT) {
             // text search
 
@@ -331,18 +199,4 @@ public class ysearchitem {
         return s.substring(0, length - (s.length() - p) - 3) + "..." + s.substring(p);
     }
 
-
-    private static String navurla(int page, plasmaSearchQuery theQuery) {
-        return
-        "<a href=\"ysearch.html?search=" + theQuery.queryString() +
-        "&amp;count="+ theQuery.displayResults() +
-        "&amp;offset=" + (page * theQuery.displayResults()) +
-        "&amp;resource=" + theQuery.searchdom() +
-        "&amp;urlmaskfilter=" + theQuery.urlMask +
-        "&amp;prefermaskfilter=" + theQuery.prefer +
-        "&amp;cat=href&amp;constraint=" + ((theQuery.constraint == null) ? "" : theQuery.constraint.exportB64()) +
-        "&amp;contentdom=" + theQuery.contentdom() +
-        "&amp;former=" + theQuery.queryString() + "\">";
-    }
-    
 }

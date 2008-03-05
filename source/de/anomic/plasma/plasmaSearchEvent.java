@@ -123,7 +123,7 @@ public final class plasmaSearchEvent {
         if ((query.domType == plasmaSearchQuery.SEARCHDOM_GLOBALDHT) ||
             (query.domType == plasmaSearchQuery.SEARCHDOM_CLUSTERALL)) {
             // do a global search
-            this.rankedCache = new plasmaSearchRankingProcess(wordIndex, query, 2, max_results_preparation, 16);
+            this.rankedCache = new plasmaSearchRankingProcess(wordIndex, query, max_results_preparation, 16);
             
             int fetchpeers = 30;
 
@@ -156,7 +156,7 @@ public final class plasmaSearchEvent {
             serverLog.logFine("SEARCH_EVENT", "SEARCH TIME AFTER GLOBAL-TRIGGER TO " + primarySearchThreads.length + " PEERS: " + ((System.currentTimeMillis() - start) / 1000) + " seconds");
         } else {
             // do a local search
-            this.rankedCache = new plasmaSearchRankingProcess(wordIndex, query, 2, max_results_preparation, 2);
+            this.rankedCache = new plasmaSearchRankingProcess(wordIndex, query, max_results_preparation, 2);
             this.rankedCache.execQuery();
             //plasmaWordIndex.Finding finding = wordIndex.retrieveURLs(query, false, 2, ranking, process);
             
