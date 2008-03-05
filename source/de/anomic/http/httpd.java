@@ -4,8 +4,9 @@
 // first published on http://www.anomic.de
 // Frankfurt, Germany, 2004
 //
-// last major change: $LastChangedDate$ by $LastChangedBy$
-// Revision: $LastChangedRevision$
+// $LastChangedDate$
+// $LastChangedRevision$
+// $LastChangedBy$
 //
 // This program is free software; you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -184,37 +185,37 @@ public final class httpd implements serverHandler {
         this.emptyRequestCount = 0;
         this.keepAliveRequestCount = 0;
     }    
-    
-    
-    /** 
+
+
+    /**
      * Must be called at least once, but can be called again to re-use the object.
      * @see de.anomic.server.serverHandler#initSession(de.anomic.server.serverCore.Session)
      */
     public void initSession(serverCore.Session newsession) throws IOException {
         this.session = newsession;
         this.userAddress = session.userAddress; // client InetAddress
-        this.clientIP = this.userAddress.getHostName();
+        this.clientIP = this.userAddress.getHostAddress();
         if (this.userAddress.isAnyLocalAddress()) this.clientIP = "localhost";
         if (this.clientIP.equals("0:0:0:0:0:0:0:1")) this.clientIP = "localhost";
         if (this.clientIP.equals("127.0.0.1")) this.clientIP = "localhost";
         String proxyClient = switchboard.getConfig("proxyClient", "*");
         String serverClient = switchboard.getConfig("serverClient", "*");
-        
+
         this.allowProxy = (proxyClient.equals("*")) ? true : match(this.clientIP, proxyClient);
         this.allowServer = (serverClient.equals("*")) ? true : match(this.clientIP, serverClient);
         this.allowYaCyHop = switchboard.getConfigBool("YaCyHop", false);
-        
+
         // check if we want to allow this socket to connect us
         if (!(this.allowProxy || this.allowServer || this.allowYaCyHop)) {
-            String errorMsg = "CONNECTION FROM " + this.clientIP + " FORBIDDEN";
+            String errorMsg = "CONNECTION FROM " + this.userAddress.getHostName() + " FORBIDDEN";
             this.log.logWarning(errorMsg);
             throw new IOException(errorMsg);
         }
-        
+
         this.proxyAccounts_init = false;
         this.serverAccountBase64MD5 = null;
     }
-    
+
     private static boolean match(String key, String latch) {
         // the latch is a comma-separated list of patterns
         // each pattern may contain one wildcard-character '*' which matches anything
@@ -312,7 +313,7 @@ public final class httpd implements serverHandler {
             this.serverAccountBase64MD5 = switchboard.getConfig("serverAccountBase64MD5", "");
         
         if (this.serverAccountBase64MD5.length() > 0) {
-            String auth = (String) header.get(httpHeader.AUTHORIZATION);
+            String auth = header.get(httpHeader.AUTHORIZATION);
             if (auth == null) {
                 // authorization requested, but no authorizeation given in header. Ask for authenticate:
                 this.session.out.write((httpVersion + " 401 log-in required" + serverCore.CRLF_STRING +
@@ -392,7 +393,7 @@ public final class httpd implements serverHandler {
         String httpVersion = this.prop.getProperty("HTTP", "HTTP/0.9");            
         
         // reading the authentication settings from switchboard
-        if (this.proxyAccounts_init == false) {
+        if (!this.proxyAccounts_init) {
             this.use_proxyAccounts = (switchboard.getConfig("use_proxyAccounts", "false").equals("true") ? true : false);
 			this.proxyAccounts_init = true; // is initialised
 		}
@@ -886,7 +887,7 @@ public final class httpd implements serverHandler {
         // we parse a multipart message and put results into the properties
         // find/identify boundary marker
         //System.out.println("DEBUG parseMultipart = <<" + new String(buffer) + ">>");
-        String s = (String) header.get(httpHeader.CONTENT_TYPE);
+        String s = header.get(httpHeader.CONTENT_TYPE);
         if (s == null) return null;
         int q;
         int p = s.toLowerCase().indexOf("boundary=");
@@ -1116,9 +1117,9 @@ public final class httpd implements serverHandler {
             String httpVersion = conProp.getProperty(httpHeader.CONNECTION_PROP_HTTP_VER,"HTTP/1.1");
             if ((httpStatusText == null)||(httpStatusText.length()==0)) {
                 if (httpVersion.equals("HTTP/1.0") && httpHeader.http1_0.containsKey(Integer.toString(httpStatusCode))) 
-                    httpStatusText = (String) httpHeader.http1_0.get(Integer.toString(httpStatusCode));
+                    httpStatusText = httpHeader.http1_0.get(Integer.toString(httpStatusCode));
                 else if (httpVersion.equals("HTTP/1.1") && httpHeader.http1_1.containsKey(Integer.toString(httpStatusCode)))
-                    httpStatusText = (String) httpHeader.http1_1.get(Integer.toString(httpStatusCode));
+                    httpStatusText = httpHeader.http1_1.get(Integer.toString(httpStatusCode));
                 else httpStatusText = "Unknown";
             }
             
@@ -1362,9 +1363,9 @@ public final class httpd implements serverHandler {
         try {                        
             if ((httpStatusText == null)||(httpStatusText.length()==0)) {
                 if (httpVersion.equals(httpHeader.HTTP_VERSION_1_0) && httpHeader.http1_0.containsKey(Integer.toString(httpStatusCode))) 
-                    httpStatusText = (String) httpHeader.http1_0.get(Integer.toString(httpStatusCode));
+                    httpStatusText = httpHeader.http1_0.get(Integer.toString(httpStatusCode));
                 else if (httpVersion.equals(httpHeader.HTTP_VERSION_1_1) && httpHeader.http1_1.containsKey(Integer.toString(httpStatusCode)))
-                    httpStatusText = (String) httpHeader.http1_1.get(Integer.toString(httpStatusCode));
+                    httpStatusText = httpHeader.http1_1.get(Integer.toString(httpStatusCode));
                 else httpStatusText = "Unknown";
             }
             
