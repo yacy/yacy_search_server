@@ -54,7 +54,6 @@ import java.io.PrintStream;
 import java.io.UnsupportedEncodingException;
 import java.net.InetAddress;
 import java.net.MalformedURLException;
-import java.net.URLDecoder;
 import java.net.URLEncoder;
 import java.util.Arrays;
 import java.util.Date;
@@ -198,8 +197,8 @@ public final class httpd implements serverHandler {
         if (this.userAddress.isAnyLocalAddress()) this.clientIP = "localhost";
         if (this.clientIP.equals("0:0:0:0:0:0:0:1")) this.clientIP = "localhost";
         if (this.clientIP.equals("127.0.0.1")) this.clientIP = "localhost";
-        String proxyClient = switchboard.getConfig("proxyClient", "*");
-        String serverClient = switchboard.getConfig("serverClient", "*");
+        final String proxyClient = switchboard.getConfig("proxyClient", "*");
+        final String serverClient = switchboard.getConfig("serverClient", "*");
 
         this.allowProxy = (proxyClient.equals("*")) ? true : match(this.clientIP, proxyClient);
         this.allowServer = (serverClient.equals("*")) ? true : match(this.clientIP, serverClient);
@@ -207,7 +206,7 @@ public final class httpd implements serverHandler {
 
         // check if we want to allow this socket to connect us
         if (!(this.allowProxy || this.allowServer || this.allowYaCyHop)) {
-            String errorMsg = "CONNECTION FROM " + this.userAddress.getHostName() + " FORBIDDEN";
+            final String errorMsg = "CONNECTION FROM " + this.userAddress.getHostName() + " [" + this.clientIP + "] FORBIDDEN";
             this.log.logWarning(errorMsg);
             throw new IOException(errorMsg);
         }
