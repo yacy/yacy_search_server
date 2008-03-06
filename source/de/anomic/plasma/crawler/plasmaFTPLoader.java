@@ -215,10 +215,10 @@ public class plasmaFTPLoader {
                     htCache = createCacheEntry(entry, mimeType, fileDate);
 
                     // change into working directory
-                    ftpClient.exec("cd \"" + fullPath + "\"", false);
+                    //ftpClient.exec("cd \"" + path + "\"", false);
 
                     // download the remote file
-                    ftpClient.exec("get \"" + file + "\" \"" + cacheFile.getAbsolutePath() + "\"", false);
+                    ftpClient.exec("get \"" + fullPath + "\" \"" + cacheFile.getAbsolutePath() + "\"", false);
                 } else {
                     // if the response has not the right file type then reject file
                     this.log.logInfo("REJECTED WRONG MIME/EXT TYPE " + mimeType + " for URL " + entry.url().toString());
