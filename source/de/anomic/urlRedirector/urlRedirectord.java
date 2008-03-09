@@ -90,7 +90,7 @@ public class urlRedirectord implements serverHandler {
         return null;
     }
     
-    public Object clone() {
+    public urlRedirectord clone() {
         return null;
     }
     

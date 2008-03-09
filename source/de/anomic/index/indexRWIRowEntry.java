@@ -163,7 +163,7 @@ public final class indexRWIRowEntry implements indexRWIEntry {
         return (int) (time / 86400000);
     }
     
-    public Object clone() {
+    public indexRWIRowEntry clone() {
         byte[] b = new byte[urlEntryRow.objectsize];
         System.arraycopy(entry.bytes(), 0, b, 0, urlEntryRow.objectsize);
         return new indexRWIRowEntry(b);

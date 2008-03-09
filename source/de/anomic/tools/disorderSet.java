@@ -58,7 +58,7 @@ public class disorderSet extends HashSet<String> implements Set<String> {
         return (this.size() > 0);
     }
 
-    public Object any() {
+    public String any() {
         // return just any element
         if ((dh == null) || (dh.size() == 0)) {
             if (this.size() == 0) return null;

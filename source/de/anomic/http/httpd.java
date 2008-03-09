@@ -1036,7 +1036,7 @@ public final class httpd implements serverHandler {
         return true;
     }
     
-    public Object clone() {
+    public httpd clone() {
         return new httpd(switchboard);        
     }
     

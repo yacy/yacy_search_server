@@ -720,7 +720,7 @@ public abstract class kelondroAbstractRecords implements kelondroRecords {
                     // check handle
                     seekp = seekpos(h);
                     if (seekp > entryFile.length()) {
-                        // repair last hande store position
+                        // repair last handle store position
                         this.theLogger.severe("KELONDRO WARNING " + this.filename + ": seek position " + seekp + "/" + h.index + " out of file size " + entryFile.length() + "/" + ((entryFile.length() - POS_NODES) / recordsize) + " after " + markedDeleted.size() + " iterations; patched wrong node");
                         entryFile.writeInt(repair_position, kelondroHandle.NUL);
                         return markedDeleted;
@@ -871,6 +871,7 @@ public abstract class kelondroAbstractRecords implements kelondroRecords {
         return new contentRowIterator(maxInitTime);
     }
     
+    /*
     public final class contentRowIterator implements Iterator<EntryIndex> {
         // iterator that iterates all kelondroRow.Entry-objects in the file
         // all records that are marked as deleted are omitted
@@ -885,6 +886,15 @@ public abstract class kelondroAbstractRecords implements kelondroRecords {
             return nodeIterator.hasNext();
         }
 
+        public EntryIndex next0() {
+            try {
+                kelondroNode n = (kelondroNode) nodeIterator.next();
+                return row().newEntryIndex(n.getValueRow(), n.handle().index);
+            } catch (IOException e) {
+                throw new kelondroException(filename, e.getMessage());
+            }
+        }
+        
         public EntryIndex next() {
             try {
                 kelondroNode n = (kelondroNode) nodeIterator.next();
@@ -892,6 +902,54 @@ public abstract class kelondroAbstractRecords implements kelondroRecords {
             } catch (IOException e) {
                 throw new kelondroException(filename, e.getMessage());
             }
+        }
+
+        public void remove() {
+            throw new UnsupportedOperationException();
+        }
+        
+    }
+     */
+
+     public final class contentRowIterator implements Iterator<EntryIndex> {
+        // iterator that iterates all kelondroRow.Entry-objects in the file
+        // all records that are marked as deleted are omitted
+        
+        private Iterator<kelondroNode> nodeIterator;
+        private EntryIndex nextEntry;
+        
+        public contentRowIterator(long maxInitTime) {
+            nodeIterator = contentNodes(maxInitTime);
+            if (nodeIterator.hasNext()) nextEntry = next0(); else nextEntry = null;
+        }
+
+        public boolean hasNext() {
+            return nextEntry != null;
+        }
+
+        public EntryIndex next0() {
+            if (!nodeIterator.hasNext()) {
+                return null;
+            }
+            try {
+                kelondroNode n = (kelondroNode) nodeIterator.next();
+                return row().newEntryIndex(n.getValueRow(), n.handle().index);
+            } catch (IOException e) {
+                throw new kelondroException(filename, e.getMessage());
+            }
+        }
+        
+        public EntryIndex next() {
+            EntryIndex ni = nextEntry;
+            byte[] b;
+            nextEntry = null;
+            while (nodeIterator.hasNext()) {
+                nextEntry = next0();
+                if (nextEntry == null) break;
+                b = nextEntry.bytes();
+                if ((b[0] != -128) || (b[1] != 0)) break;
+            }            
+            return ni;
         }
 
         public void remove() {

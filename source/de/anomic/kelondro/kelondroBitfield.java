@@ -55,7 +55,7 @@ public class kelondroBitfield implements Cloneable {
         }
     }
     
-    public Object clone() {
+    public kelondroBitfield clone() {
         kelondroBitfield theClone = new kelondroBitfield(new byte[this.bb.length]);
         System.arraycopy(this.bb, 0, theClone.bb, 0, this.bb.length);
         return theClone;

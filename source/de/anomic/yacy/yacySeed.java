@@ -860,9 +860,9 @@ public class yacySeed {
     }
 
     @SuppressWarnings("unchecked")
-    public final Object clone() {
+    public final yacySeed clone() {
         synchronized (this.dna) {
-            return new yacySeed(this.hash, (HashMap<String, String>) (new HashMap<String, String>(this.dna)).clone());
+            return new yacySeed(this.hash, (HashMap<String, String>) (new HashMap<String, String>(this.dna).clone()));
         }
     }
 

@@ -105,7 +105,7 @@ public class icapd implements serverHandler {
         
     }
     
-    public Object clone(){
+    public icapd clone(){
         return new icapd();
     }
     

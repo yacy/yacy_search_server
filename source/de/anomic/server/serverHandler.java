@@ -109,7 +109,7 @@ public interface serverHandler {
     // each time a server makes a new connection it clones the hanlder prototype
     // the clone method does not need to clone every detail of a handler connection,
     // but only the necessary one for a newly initialized instance
-    public Object clone();
+    public serverHandler clone();
     
     /** 
      * Instead of using clone this function can be used to reset an existing 

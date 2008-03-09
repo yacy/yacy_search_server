@@ -1705,7 +1705,7 @@ cd ..
       // write remote file to local file
       byte[] block = new byte[blockSize];
       int numRead;
-      long length = 0;
+      int length = 0;
       
       while ((numRead = ClientStream.read(block)) != -1) {
       	outFile.write(block, 0, numRead);
@@ -1726,7 +1726,7 @@ cd ..
       // write statistics
       long stop = System.currentTimeMillis();
       out.print("---- downloaded " +
-        ((length < 2048) ? length + " bytes" : ((int) length / 1024) + " kbytes") +
+        ((length < 2048) ? length + " bytes" : (length / 1024) + " kbytes") +
         " in " +
         (((stop - start) < 2000) ? (stop - start) + " milliseconds" : (((int) ((stop - start) / 100)) / 10) + " seconds"));
       if (start == stop) err.println(logPrefix + ""); else

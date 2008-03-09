@@ -272,13 +272,13 @@ public final class kelondroMScoreCluster<E> {
         return (int) ((keyrefDB.firstKey().longValue() & 0xFFFFFFFF00000000L) >> 32);
     }
 
-    public synchronized Object getMaxObject() {
+    public synchronized E getMaxObject() {
         if (refkeyDB.size() == 0) return null;
         //return getScores(1, false)[0];
         return keyrefDB.get(keyrefDB.lastKey());
     }
     
-    public synchronized Object getMinObject() {
+    public synchronized E getMinObject() {
         if (refkeyDB.size() == 0) return null;
         //return getScores(1, true)[0];
         return keyrefDB.get(keyrefDB.firstKey());

@@ -1020,7 +1020,7 @@ public final class plasmaHTCache {
      */
     private IResourceInfo            resInfo;
 
-    protected Object clone() throws CloneNotSupportedException {
+    protected Entry clone() throws CloneNotSupportedException {
         return new Entry(
                 this.initDate,
                 this.depth,

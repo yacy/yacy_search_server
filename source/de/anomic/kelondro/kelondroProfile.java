@@ -81,7 +81,7 @@ public class kelondroProfile implements Cloneable {
         accDelete += System.currentTimeMillis() - handle;
     }
     
-    public Object clone() {
+    public kelondroProfile clone() {
         kelondroProfile clone = new kelondroProfile();
         clone.accRead = this.accRead;
         clone.accWrite = this.accWrite;
