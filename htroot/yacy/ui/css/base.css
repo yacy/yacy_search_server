@@ -38,6 +38,11 @@ div.sidebar {
 
 /* Boxed Style */
 
+.searchbox {
+  float:left; 
+  width:600px;
+}
+
 .boxed{  
   margin-bottom: 1em;
 }
@@ -49,6 +54,23 @@ div.sidebar {
   font-weight: bold;
   font-family: Helvetica,Arial,sans-serif;
   background: url(../img/tab.png) no-repeat;  
+}
+.sidebar .boxed .title {
+  display: block;
+  height: 25px;
+  padding: 5px 0 0 10px;  
+  font-weight: bold;
+  font-family: Helvetica,Arial,sans-serif;
+  background: url(../img/box250.png) no-repeat;  
+}
+
+.searchbox .boxed .title {
+  display: block;
+  height: 25px;
+  padding: 5px 0 0 10px;  
+  font-weight: bold;
+  font-family: Helvetica,Arial,sans-serif;
+  background: url(../img/box600.png) no-repeat;  
 }
 
 .boxed .content {

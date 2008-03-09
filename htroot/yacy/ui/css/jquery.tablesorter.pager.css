@@ -1,5 +1,7 @@
 div.tablesorterPager {
-	
+	text-align: center;
+	padding-right: 10px;
+	padding-bottom: 10px;
 }
 div.tablesorterPager span {
 	padding: 0 5px 0 5px;
