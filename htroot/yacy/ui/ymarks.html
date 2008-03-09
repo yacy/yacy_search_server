@@ -1,0 +1,62 @@
+
+<script type="text/javascript">  
+	$(document).ready(function() { 
+    	$('#ymarks') 
+    	.tablesorter({widgets: ['zebra']}) 
+    	.tablesorterPager({container: $('#pager'), size: 15, positionFixed: false});
+	}); 
+</script>
+
+<!-- Table -->		
+		<table class="ytable" id="ymarks">
+			<colgroup>
+				<col width="25"/>
+				<col width="25"/>
+				<col width="250"/>
+				<col width="250"/>
+				<col width="210"/>
+				<col width="40"/>								
+			</colgroup>
+			<thead>
+			  <tr>			 
+				<th class="{sorter: false}"></th>
+				<th class="{sorter: false}"></th>
+				<th>Title</th>
+				<th>URL</th>				
+				<th>Tags</th>
+				<th class="{sorter: false}"></th>							
+			  </tr>
+			</thead>			
+			<tbody>
+			#{bookmarks}#						
+			<tr>
+				<td>
+					<input type="checkbox" value="true" />
+				</td>
+				<td>
+					#(public)#
+					<img src="img-2/lock.png" alt="private bookmark" title="private bookmark"/>
+					::
+					<img src="img-2/world2.png" alt="public bookmark" title="public bookmark"/>
+					#(/public)#
+				</td>
+				<td>
+					#[title]#				
+				</td>
+				<td class="url">
+					<a href="#[link]#">#[link]#</a>
+				</td>				
+				<td>#{tags}# #[tag]#,#{/tags}#</td>
+				<td>
+					<a href="Bookmarks.html?edit=#[hash]#">
+						<img src="img-2/pencil.png" alt="edit bookmark" title="edit bookmark" border="0" />
+					</a>
+					<img src="img-2/cancel.png" alt="delete bookmark" title="delete bookmark"/>					
+				</td>
+			</tr>			
+			#{/bookmarks}#
+			</tbody>
+		</table>
+
+
+

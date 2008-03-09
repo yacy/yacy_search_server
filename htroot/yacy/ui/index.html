@@ -1,0 +1,100 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01//EN" "http://www.w3.org/TR/html4/strict.dtd">
+<html lang="en">
+<head>
+  <meta content="text/html; charset=utf-8" http-equiv="Content-Type">
+  <meta content="text/css" http-equiv="Content-Style-Type">
+  <meta content="text/javascript" http-equiv="Content-Script-Type">
+
+  <title>YaCy - Peer-to-Peer Search Network</title>
+
+  <link media="screen" type="text/css" href="css/base.css" rel="stylesheet">
+  <link media="screen" type="text/css" href="css/ui.tabs.css" rel="stylesheet">
+  <link media="screen" type="text/css" href="css/jquery.tablesorter.pager.css" rel="stylesheet">	
+	
+  <script src="js/jquery-1.2.3.min.js" type="text/javascript"></script>    
+  <script src="js/jquery.tablesorter.min.js" type="text/javascript"></script>  
+  <script src="js/jquery.tablesorter.pager.js" type="text/javascript"></script>
+  <script src="js/jquery.dimensions.min.js" type="text/javascript"></script>  
+  <script src="js/jquery.metadata.min.js" type="text/javascript"></script>
+  <script src="js/jquery.form.js" type="text/javascript"></script>
+  <script src="js/jquery.field.min.js" type="text/javascript"></script>
+  <script src="js/ui.tabs.min.js" type="text/javascript"></script>
+  <script type="text/javascript">
+	$(document).ready(function() {
+		$('#container > ul').tabs();
+		insert_sidebar();
+		$('#searchbox').submit(function() {
+			var tabnr = $('#container > ul').tabs('length');			
+			var result = "result.html?" + $('#searchbox').formSerialize();
+			var tabname = "*" + $("input[@name='search']").getValue();		
+			$('#container > ul').tabs('add', result, tabname);
+			$('#container > ul').tabs('select', tabnr);					
+			return false;
+		});
+	});
+	function insert_sidebar() {
+		$('<div id="pager" class="boxed"></div>').appendTo('#sidebar')
+		$("#pager").load("sidebar/sidebar_pager.html");		
+	}
+  </script>  
+</head>
+
+<body>
+	<div style="float:left; width:600px;">
+		<div id="menu" class="boxed">
+			<div class="title">
+				YaCy Search
+			</div>
+			<div class="content">
+				<table style="text-align: left; width: 600px;" border="0" cellpadding="2" cellspacing="2">
+					<tr>		
+						<td style="height: 85px; text-align: left; width: 160px;">
+							<img style="width: 150px; height: 75px;" alt="YaCy" title="YaCy" src="img/kaskelix.png"> 
+						</td>
+						<td style="text-align: left; vertical-align: middle; width: 440px;">							
+							<form id="searchbox" class="search small" method="get" accept-charset="UTF-8">
+								<small> 
+								<input id="searchtext" name="search" type="text" size="50" maxlength="80" value=""/>
+								<input  id="searchbutton" type="submit" name="Enter" value="Search" />
+								<div class="ysearch">
+									<input type="radio" id="text" name="contentdom" value="text" checked="checked"/>
+										<label for="text">Text</label>&nbsp;&nbsp;
+									<input type="radio" id="images" name="contentdom" value="image"/>
+										<label for="images">Images</label>&nbsp;&nbsp;
+									<input type="radio" id="audio" name="contentdom" value="audio"/>
+										<label for="audio">Audio</label>&nbsp;&nbsp;
+									<input type="radio" id="video" name="contentdom" value="video"/>
+										<label for="video">Video</label>&nbsp;&nbsp;
+									<input type="radio" id="appl" name="contentdom" value="app"/>
+										<label for="appl">Applications</label>
+								</div>
+								<input type="hidden" name="former" value="" />
+								<input type="hidden" name="count" value="150" />
+								<input type="hidden" name="offset" value="0" />
+								<input type="hidden" name="resource" value="global" />
+								<input type="hidden" name="urlmaskfilter" value=".*" />
+								<input type="hidden" name="prefermaskfilter" value="" />
+								<input type="hidden" name="depth" value="0" />
+								<input type="hidden" name="cat" value="href" />
+								<input type="hidden" name="display" value="1" />
+								<input type="hidden" name="input" value="1" />
+								<input type="hidden" name="constraint" value="" />
+								</small>
+							</form>
+						</td>      
+    				</tr>
+				</table>
+			</div>
+		</div>
+	</div>	
+	<div id="container" class="main">
+		<ul>
+			<li><a href="welcome.html" title="Welcome"><span>Welcome</span></a></li>
+			<li><a href="ymarks.html" title="Ymarks"><span>Y-Marks</span></a></li>			
+		</ul>		
+	</div>	
+	<div id="sidebar" class="sidebar"><!-- Sidebar wird dynamisch geladen --></div>
+</body>
+</html>
+
+

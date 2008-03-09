@@ -1,0 +1,45 @@
+#(content)#
+::
+<tr>
+	<td>
+		<input type="checkbox" value="true" />
+	</td>
+	<td>
+		<img src="../../ViewImage.png?width=16&height=16&code=#[faviconCode]#" id="f#[urlhash]#" width="16" height="16" alt="" />
+	</td>
+	<td>
+		#[description]#				
+	</td>
+	<td class="url">
+		<a href="#[url]#" id="url#[urlhash]#" target="_parent">#[urlname]#</a>
+	</td>				
+	<td>
+		#[snippet]#
+	</td>
+	<td>				
+		<img src="img-2/cancel.png" alt="delete bookmark" title="delete bookmark"/>					
+	</td>
+</tr>
+  ::
+  #{items}#
+  <div class="thumbcontainer">
+    <a href="#[hrefCache]#" class="thumblink" onclick="return hs.expand(this)">
+      <img src="/ViewImage.png?maxwidth=96&maxheight=96&code=#[code]#" alt="#[name]#">
+    </a>
+    <div class="highslide-caption"><a href="#[href]#">#[name]#<br \><a href="#[source]#">#[sourcedom]#</a></a></div>
+    <div class="TableCellDark"><a href="#[href]#">#[name]#</a><br \>#[attr]#</div>
+  </div>
+  #{/items}#
+  ::
+  #{items}#
+  <tr class="#(col)#TableCellLight::TableCellDark#(/col)#"><td>#[name]#</td><td><a href="#[href]#">#[hrefshort]#</a></tr>
+  #{/items}#
+  ::
+  #{items}#
+  <tr class="#(col)#TableCellLight::TableCellDark#(/col)#"><td>#[name]#</td><td><a href="#[href]#">#[hrefshort]#</a></tr>
+  #{/items}#
+  ::
+  #{items}#
+  <tr class="#(col)#TableCellLight::TableCellDark#(/col)#"><td>#[name]#</td><td><a href="#[href]#">#[hrefshort]#</a></tr>
+  #{/items}#
+#(/content)#
