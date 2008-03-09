@@ -25,6 +25,7 @@
 // Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 
 import java.util.Iterator;
+import java.util.Map;
 import java.util.Set;
 import java.util.TreeSet;
 
@@ -36,6 +37,7 @@ import de.anomic.plasma.plasmaSearchQuery;
 import de.anomic.plasma.plasmaSwitchboard;
 import de.anomic.server.serverObjects;
 import de.anomic.server.serverSwitch;
+import de.anomic.yacy.yacyURL;
 
 public class sidebar_navigation {
 
@@ -119,14 +121,33 @@ public class sidebar_navigation {
                         prop.put("navigation_topwords_words_" + hintcount + "_resource", theQuery.searchdom());
                         prop.put("navigation_topwords_words_" + hintcount + "_zonecode", theQuery.zonecode);
                     }
-                    prop.put("navigation_topwords_words", hintcount);
-                    if (hintcount++ > MAX_TOPWORDS) {
-                        break;
-                    }
+                    hintcount++;
+                    if (hintcount >= MAX_TOPWORDS) break;
                 }
+                prop.put("navigation_topwords_words", hintcount);
                 prop.put("navigation_topwords", "1");
             }
         }
+        
+        // compose language zone drill-down
+        int c = 0;
+        final Iterator<Map.Entry<String, Integer>> iter = theSearch.getRankingResult().getZoneStatistics().entrySet().iterator();
+        Map.Entry<String, Integer> entry;
+        while (iter.hasNext()) {
+            entry = iter.next();
+            if ((theQuery == null) || (theQuery.queryString == null)) break;
+            prop.putHTML("navigation_languagezone_zones_" + c + "_zone", entry.getKey() + " (" + entry.getValue() + ")");
+            prop.putHTML("navigation_languagezone_zones_" + c + "_search", theQuery.queryString.replace(' ', '+'));
+            prop.put("navigation_languagezone_zones_" + c + "_count", theQuery.displayResults());
+            prop.put("navigation_languagezone_zones_" + c + "_offset", "0");
+            prop.put("navigation_languagezone_zones_" + c + "_contentdom", theQuery.contentdom());
+            prop.put("navigation_languagezone_zones_" + c + "_resource", theQuery.searchdom());
+            prop.put("navigation_languagezone_zones_" + c + "_zonecode", yacyURL.zone2map.get(entry.getKey()).intValue());
+            prop.put("navigation_languagezone_zones", c);
+            c++;
+        }
+        prop.put("navigation_languagezone", (c > 2) ? "1" : "0");
+        
         
         // compose page navigation
         StringBuffer resnav = new StringBuffer();

@@ -851,7 +851,17 @@ public final class httpdFileHandler {
                         if (chunkedOut != null) {
                             chunkedOut.finish();
                         }
-                    }   
+
+                        // flush all
+                        try {newOut.flush();}catch (Exception e) {}
+                        
+                        // wait a little time until everything closes so that clients can read from the streams/sockets
+                        if ((contentLength >= 0) && ((String)requestHeader.get(httpHeader.CONNECTION, "close")).indexOf("keep-alive") == -1) {
+                            // in case that the client knows the size in advance (contentLength present) the waiting will have no effect on the interface performance
+                            // but if the client waits on a connection interruption this will slow down.
+                            try {Thread.sleep(2000);} catch (InterruptedException e) {} // FIXME: is this necessary?
+                        }
+                    }
                     
                     // check mime type again using the result array: these are 'magics'
 //                    if (serverByteBuffer.equals(result, 1, "PNG".getBytes())) mimeType = mimeTable.getProperty("png","text/html");
@@ -921,10 +931,6 @@ public final class httpdFileHandler {
             
         } finally {
             try {out.flush();}catch (Exception e) {}
-            if (((String)requestHeader.get(httpHeader.CONNECTION, "close")).indexOf("keep-alive") == -1) {
-                // wait a little time until everything closes so that clients can read from the streams/sockets
-                try {Thread.sleep(50);} catch (InterruptedException e) {} // FIXME: is this necessary?
-            }
         }
     }
     

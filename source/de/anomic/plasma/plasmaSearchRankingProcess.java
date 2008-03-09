@@ -68,6 +68,7 @@ public final class plasmaSearchRankingProcess {
     private TreeSet<String> misses; // contains url-hashes that could not been found in the LURL-DB
     private plasmaWordIndex wordIndex;
     private HashMap<String, indexContainer>[] localSearchContainerMaps;
+    private int[] domZones;
     
     public plasmaSearchRankingProcess(plasmaWordIndex wordIndex, plasmaSearchQuery query, int maxentries, int concurrency) {
         // we collect the urlhashes and construct a list with urlEntry objects
@@ -90,6 +91,8 @@ public final class plasmaSearchRankingProcess {
         this.wordIndex = wordIndex;
         this.flagcount = new int[32];
         for (int i = 0; i < 32; i++) {this.flagcount[i] = 0;}
+        this.domZones = new int[8];
+        for (int i = 0; i < 8; i++) {this.domZones[i] = 0;}
     }
     
     public long ranking(indexRWIVarEntry word) {
@@ -175,6 +178,10 @@ public final class plasmaSearchRankingProcess {
                 // filter out all tld that do not match with wanted tld domain
                 continue;
             }
+            
+            // count domZones
+            System.out.println("DEBUG domDomain dom=" + wordIndex.loadedURL.load(iEntry.urlHash, iEntry, 0).comp().url().getHost() + ", zone=" + yacyURL.domDomain(iEntry.urlHash()));
+            this.domZones[yacyURL.domDomain(iEntry.urlHash())]++;
             
             // insert
             if ((maxentries < 0) || (stack.size() < maxentries)) {
@@ -325,6 +332,10 @@ public final class plasmaSearchRankingProcess {
     public int getLocalResourceSize() {
         // the number of hits in the local peer (index size, size of the collection in the own index)
         return this.local_resourceSize;
+    }
+    
+    public Map<String, Integer> getZoneStatistics() {
+        return yacyURL.zoneStatistics(this.domZones);
     }
     
     public indexRWIEntry remove(String urlHash) {

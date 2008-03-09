@@ -920,7 +920,7 @@ public class kelondroCollectionIndex {
             array_remove(
                     oldPartitionNumber, serialNumber, this.payloadrow.objectsize,
                     oldrownumber);
-            index.remove(key, true);
+            index.remove(key, false);
             return removed;
         }
         

@@ -31,6 +31,7 @@ import java.io.File;
 import java.net.MalformedURLException;
 import java.util.HashMap;
 import java.util.Iterator;
+import java.util.Map;
 import java.util.TreeSet;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -382,7 +383,7 @@ public class yacyURL {
     public static final int language_domain_africa_zone     = 128 + 32;      //{5, 7};
     public static final int language_domain_any_zone        = 255;
     
-    public static final String[] regions = {"europe", "english", "spanish", "asia", "middleeast", "africa"};
+    public static final HashMap<String, Integer> zone2map = new HashMap<String, Integer>();
     
     static {
         // create a dummy hash
@@ -398,6 +399,14 @@ public class yacyURL {
         insertTLDProps(TLD_Africa,              5); // africa
         insertTLDProps(TLD_Generic,             6); // anything else, mixed languages, mainly english
         // the id=7 is used to flag local addresses
+        
+        zone2map.put("europe",     language_domain_europe_zone);
+        zone2map.put("english",    language_domain_english_zone);
+        zone2map.put("spanish",    language_domain_spanish_zone);
+        zone2map.put("asia",       language_domain_asia_zone);
+        zone2map.put("middleeast", language_domain_middleeast_zone);
+        zone2map.put("africa",     language_domain_africa_zone);
+        zone2map.put("any",        language_domain_any_zone);
     }
     
     // class variables
@@ -1093,7 +1102,7 @@ public class yacyURL {
         // returns the ID of the domain of the domain
         assert (urlHash != null);
         assert (urlHash.length() == 12) : "urlhash = " + urlHash;
-        return (kelondroBase64Order.enhancedCoder.decodeByte(urlHash.charAt(11)) & 12) >> 2;
+        return (kelondroBase64Order.enhancedCoder.decodeByte(urlHash.charAt(11)) & 28) >> 2;
     }
 
     public static boolean isLocalDomain(String urlhash) {
@@ -1123,6 +1132,26 @@ public class yacyURL {
         return language;
     }
     
+    public static Map<String, Integer> zoneStatistics(int[] domAccumulators) {
+        assert domAccumulators.length == 8;
+        HashMap<String, Integer> zoneCounter = new HashMap<String, Integer>();
+        Iterator<Map.Entry<String, Integer>> j;
+        Map.Entry<String, Integer> entry;
+        for (int i = 0; i < 8; i++) {
+            j = zone2map.entrySet().iterator();
+            while (j.hasNext()) {
+                entry = j.next();
+                if ((i & entry.getValue().intValue()) != 0) {
+                    if (zoneCounter.containsKey(entry.getKey())) {
+                        zoneCounter.put(entry.getKey(), zoneCounter.get(entry.getKey()) + domAccumulators[i]);
+                    } else {
+                        zoneCounter.put(entry.getKey(), domAccumulators[i]);
+                    }
+                }
+            }
+        }
+        return zoneCounter;
+    }
     
     public static void main(String[] args) {
         String[][] test = new String[][]{
