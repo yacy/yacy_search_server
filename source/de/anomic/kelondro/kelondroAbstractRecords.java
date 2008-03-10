@@ -870,46 +870,6 @@ public abstract class kelondroAbstractRecords implements kelondroRecords {
     public final Iterator<EntryIndex> contentRows(long maxInitTime) throws kelondroException {
         return new contentRowIterator(maxInitTime);
     }
-    
-    /*
-    public final class contentRowIterator implements Iterator<EntryIndex> {
-        // iterator that iterates all kelondroRow.Entry-objects in the file
-        // all records that are marked as deleted are omitted
-        
-        private Iterator<kelondroNode> nodeIterator;
-        
-        public contentRowIterator(long maxInitTime) {
-            nodeIterator = contentNodes(maxInitTime);
-        }
-
-        public boolean hasNext() {
-            return nodeIterator.hasNext();
-        }
-
-        public EntryIndex next0() {
-            try {
-                kelondroNode n = (kelondroNode) nodeIterator.next();
-                return row().newEntryIndex(n.getValueRow(), n.handle().index);
-            } catch (IOException e) {
-                throw new kelondroException(filename, e.getMessage());
-            }
-        }
-        
-        public EntryIndex next() {
-            try {
-                kelondroNode n = (kelondroNode) nodeIterator.next();
-                return row().newEntryIndex(n.getValueRow(), n.handle().index);
-            } catch (IOException e) {
-                throw new kelondroException(filename, e.getMessage());
-            }
-        }
-
-        public void remove() {
-            throw new UnsupportedOperationException();
-        }
-        
-    }
-     */
 
      public final class contentRowIterator implements Iterator<EntryIndex> {
         // iterator that iterates all kelondroRow.Entry-objects in the file

@@ -69,6 +69,7 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Random;
 import java.util.Set;
+import java.util.TreeMap;
 
 import de.anomic.kelondro.kelondroBase64Order;
 import de.anomic.net.natLib;
@@ -691,9 +692,9 @@ public class yacySeed {
         if (from == null) return dhtPosition(to);
         final double fromPos = dhtPosition(from);
         final double toPos = dhtPosition(to);
-        return (fromPos < toPos) ? (toPos - fromPos) : (1.0 - fromPos + toPos);
+        return (fromPos <= toPos) ? (toPos - fromPos) : (1.0 - fromPos + toPos);
     }
-    
+    /*
     private static String bestNewHash(yacySeedDB seedDB) {
         if ((seedDB == null) || (seedDB.sizeConnected() <= 8)) {
             // use random hash
@@ -734,6 +735,62 @@ public class yacySeed {
         System.out.println("BESTHASH  finally is " + bestHash);
         return bestHash;
     }
+    */
+    private static String bestGap(yacySeedDB seedDB) {
+        if ((seedDB == null) || (seedDB.sizeConnected() <= 2)) {
+            // use random hash
+            return randomHash();
+        }
+        // find gaps
+        TreeMap<Double, String> gaps = hashGaps(seedDB);
+        
+        // take one gap; prefer biggest but take also another smaller by chance
+        String interval = null;
+        Random r = new Random();
+        while (gaps.size() > 0) {
+            interval = gaps.remove(gaps.lastKey());
+            if (r.nextBoolean()) break;
+        }
+        if (interval == null) return randomHash();
+        
+        // find dht position and size of gap
+        double gapsize = dhtDistance(interval.substring(0, 12), interval.substring(12));
+        assert gapsize >= 0.0;
+        double gappos = dhtPosition(interval.substring(0, 12)) + (gapsize / 2);
+        if (gappos >= 1.0) gappos = gappos - 1.0; // fix overflow; can only occur for gap at end
+        return positionToHash(gappos);
+    }
+    
+    private static TreeMap<Double, String> hashGaps(yacySeedDB seedDB) {
+        TreeMap<Double, String>gaps = new TreeMap<Double, String>();
+        if (seedDB == null) return gaps;
+        
+        Iterator<yacySeed> i = seedDB.seedsConnected(true, false, null, (float) 0.0);
+        double d;
+        yacySeed s0 = null, s1, first = null;
+        while (i.hasNext()) {
+            s1 = i.next();
+            if (s0 == null) {
+                s0 = s1;
+                first = s0;
+                continue;
+            }
+            if (s0.hash.equals("fF99P8dMio7M")) {
+                System.out.print(0);
+            }
+            d = dhtDistance(s0.hash, s1.hash);
+            assert d >= 0.0;
+            gaps.put(d, s0.hash + s1.hash);
+            s0 = s1;
+        }
+        // compute also the last gap
+        if ((first != null) && (s0 != null)) {
+            d = dhtDistance(s0.hash, first.hash);
+            assert d >= 0.0;
+            gaps.put(d, s0.hash + first.hash);
+        }
+        return gaps;
+    }
     
     private static String positionToHash(double t) {
         // transform the position of a peer position into a close peer hash
@@ -759,7 +816,7 @@ public class yacySeed {
         // genera a seed for the local peer
         // this is the birthplace of a seed, that then will start to travel to other peers
 
-        final String hash = bestNewHash(yacyCore.seedDB);
+        final String hash = bestGap(yacyCore.seedDB);
         yacyCore.log.logInfo("init: OWN SEED = " + hash);
 
         final yacySeed newSeed = new yacySeed(hash);
