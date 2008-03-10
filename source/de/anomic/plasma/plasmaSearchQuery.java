@@ -288,9 +288,9 @@ public final class plasmaSearchQuery {
     public String id(boolean anonymized) {
         // generate a string that identifies a search so results can be re-used in a cache
         if (anonymized) {
-            return anonymizedQueryHashes(this.queryHashes) + "-" + anonymizedQueryHashes(this.excludeHashes) + ":" + this.contentdom + "*" + this.ranking.toExternalString();
+            return anonymizedQueryHashes(this.queryHashes) + "-" + anonymizedQueryHashes(this.excludeHashes) + ":" + this.contentdom + "*" + plasmaCondenser.word2hash(this.ranking.toExternalString());
         } else {
-            return hashSet2hashString(this.queryHashes) + "-" + hashSet2hashString(this.excludeHashes) + ":" + this.contentdom + this.ranking.toExternalString();
+            return hashSet2hashString(this.queryHashes) + "-" + hashSet2hashString(this.excludeHashes) + ":" + this.contentdom + "*" + plasmaCondenser.word2hash(this.ranking.toExternalString());
         }
     }
     
