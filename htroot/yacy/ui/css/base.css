@@ -24,7 +24,7 @@
 
 div.main { 
   float:left;
-  width:75%;  
+  width:70%;  
 }
 
 /* Sidebar */
@@ -82,10 +82,9 @@ div.sidebar {
 /* YaCy Tables ---------------------------*/
 
 table.ytable {
-	font-family:arial;
+	font: normal small Arial, Helvetica, sans-serif;	
 	background-color: #fff;
-	margin:10px 0pt 15px;
-	font-size: 8pt;
+	margin:10px 0pt 15px;	
 	width: 100%;
 	text-align: left;
 	table-layout:fixed;
@@ -93,7 +92,7 @@ table.ytable {
 table.ytable thead tr th, table.ytable tfoot tr th {
 	background-color: #e6EEEE;
 	border: 1px solid #FFF;
-	font-size: 8pt;
+	font: bold small Arial, Helvetica, sans-serif;
 	padding: 4px;
 }
 table.ytable thead tr .header {
@@ -124,5 +123,52 @@ table.ytable thead tr .headerSortDown, table.ytable thead tr .headerSortUp {
 	background-color: #8dbdd8;
 }
 
+/* YaCy Search ---------------------------*/
 
+div.searchresults {
+  	width:70%;
+	margin-top: 1.5em;
+	margin-left: 25px;	
+}
+div.searchresults.hidden {
+  display:none;
+}
+h3.linktitle {
+	margin:2px;
+	padding-left: 20px;
+	margin-bottom: -0.5em;
+        font-size: 0.8em;
+        line-height: 1.2em;
+}
+.snippet {
+  	font-style:italic;
+	font-size: 0.7em;
+  	color: #808080;
+  	line-height: 1.2em;
+  	margin-bottom:-1em;
+  	margin-left:22px;
+}
+.snippet b {
+  	color: black;
+}
+.searchresults .linktitle a {
+  	color:#239AFF;
+  	text-decoration:none;
+}
+.searchresults .url {
+	font-size: 0.7em;
+  	line-height: 1.2em;
+  	margin-bottom:0.6em;
+  	margin-left:22px;
+}
+.searchresults .url a {
+  	color:#20A020;
+  	text-decoration:none;
+}
+img.favicon{
+  margin: 0px 4px 0px -20px;
+  width: 16px;
+  height: 16px;
+  float: left;
+}
 
