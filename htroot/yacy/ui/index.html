@@ -27,8 +27,10 @@
 			var tabnr = $('#container > ul').tabs('length');			
 			var result = "result.html?" + $('#searchbox').formSerialize();
 			var tabname = "*" + $("input[@name='search']").getValue();		
-			$('#container > ul').tabs('add', result, tabname);
-			$('#container > ul').tabs('select', tabnr);					
+			$('#container > ul').tabs('add', '#empty', tabname);
+			$('#container > ul').tabs('select', tabnr);
+			$('#container > ul').tabs('url', tabnr, result);
+			$('#container > ul').tabs('load', tabnr);
 			return false;
 		});
 	});
@@ -93,7 +95,8 @@
 		<ul>
 			<li><a href="welcome.html" title="Welcome"><span>Welcome</span></a></li>
 			<li><a href="ymarks.html" title="Ymarks"><span>Y-Marks</span></a></li>			
-		</ul>		
+		</ul>
+		<div id="empty"></div>
 	</div>	
 	<div id="sidebar" class="sidebar"><!-- Sidebar wird dynamisch geladen --></div>
 </body>

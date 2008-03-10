@@ -1,39 +1,19 @@
-<script type="text/javascript">  
-	$(document).ready(function() { 
-    	$('#ritems') 
-    	.tablesorter({widgets: ['zebra']}) 
-    	.tablesorterPager({container: $('#pager'), size: 15, positionFixed: false});	
-	}); 
+<script type="text/javascript">
+	$(document).ready(function() {
+		var url = "/yacy/user/sidebar_history.html?eventID=#[eventID]#";		
+		$('<div id="history" class="boxed"></div>').appendTo('#sidebar')
+		$("#history").load(url);				
+	});
 </script>
 
-<!-- resultTable -->
-#(resultTable)#
-	<table class="ytable" id="ritems">
-		<colgroup>
-			<col width="25"/>
-			<col width="25"/>
-			<col width="220"/>
-			<col width="220"/>
-			<col width="285"/>
-			<col width="25"/>								
-		</colgroup>
-		<thead>
-		  <tr>			 
-			<th class="{sorter: false}"></th>
-			<th class="{sorter: false}"></th>
-			<th>Description</th>
-			<th>URL</th>				
-			<th>Snippet</th>
-			<th class="{sorter: false}"></th>							
-		  </tr>
-		</thead>			
-		<tbody>
-#(/resultTable)#
+<!-- linklist begin -->
+#(resultTable)#::<table width="100%"><tr class="TableHeader"><td width="30%">Media</td><td width="70%">URL</tr>#(/resultTable)#
 #{results}#
-	<!--#include virtual="/yacy/ui/ritem.html?rss=false&item=#[item]#&eventID=#[eventID]#" -->
+<!--#include virtual="/yacy/user/ysearchitem.html?rss=false&item=#[item]#&eventID=#[eventID]#" -->
 #{/results}#
-#(resultTable)#
-		</tbody>
-	</table>
-	<!-- Navigation -->
-#(/resultTable)#
+#(resultTable)#::</table>#(/resultTable)#
+/yacy/user/sidebar_history.html?eventID=#[eventID]#
+
+
+
+
