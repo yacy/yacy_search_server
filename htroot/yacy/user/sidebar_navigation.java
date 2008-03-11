@@ -25,7 +25,6 @@
 // Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 
 import java.util.Iterator;
-import java.util.Map;
 import java.util.Set;
 import java.util.TreeSet;
 
@@ -130,24 +129,24 @@ public class sidebar_navigation {
         }
         
         // compose language zone drill-down
-        int c = 0;
-        final Iterator<Map.Entry<String, Integer>> iter = theSearch.getRankingResult().getZoneStatistics().entrySet().iterator();
-        Map.Entry<String, Integer> entry;
-        while (iter.hasNext()) {
-            entry = iter.next();
-            if ((theQuery == null) || (theQuery.queryString == null)) break;
-            prop.putHTML("navigation_languagezone_zones_" + c + "_zone", entry.getKey() + " (" + entry.getValue() + ")");
-            prop.putHTML("navigation_languagezone_zones_" + c + "_search", theQuery.queryString.replace(' ', '+'));
-            prop.put("navigation_languagezone_zones_" + c + "_count", theQuery.displayResults());
-            prop.put("navigation_languagezone_zones_" + c + "_offset", "0");
-            prop.put("navigation_languagezone_zones_" + c + "_contentdom", theQuery.contentdom());
-            prop.put("navigation_languagezone_zones_" + c + "_resource", theQuery.searchdom());
-            prop.put("navigation_languagezone_zones_" + c + "_zonecode", yacyURL.zone2map.get(entry.getKey()).intValue());
-            prop.put("navigation_languagezone_zones", c);
-            c++;
-        }
-        prop.put("navigation_languagezone", (c > 2) ? "1" : "0");
-        
+        final int[] zones = theSearch.getRankingResult().zones();
+        boolean z = false;
+        domzone(prop, "All", theSearch.getRankingResult().size(), theQuery);
+        if (zones[yacyURL.TLD_EuropeRussia_ID] > 0)
+            { z = true; domzone(prop, "EuropeRussia", zones[yacyURL.TLD_EuropeRussia_ID], theQuery);}
+        if (zones[yacyURL.TLD_MiddleSouthAmerica_ID] > 0)
+            { z = true; domzone(prop, "MiddleSouthAmerica", zones[yacyURL.TLD_MiddleSouthAmerica_ID], theQuery);}
+        if (zones[yacyURL.TLD_SouthEastAsia_ID] > 0)
+            { z = true; domzone(prop, "SouthEastAsia", zones[yacyURL.TLD_SouthEastAsia_ID], theQuery);}
+        if (zones[yacyURL.TLD_MiddleEastWestAsia_ID] > 0)
+            { z = true; domzone(prop, "MiddleEastWestAsia_", zones[yacyURL.TLD_MiddleEastWestAsia_ID], theQuery);}
+        if (zones[yacyURL.TLD_NorthAmericaOceania_ID] + zones[yacyURL.TLD_Generic_ID] > 0)
+            { z = true; domzone(prop, "NorthAmericaOceania", zones[yacyURL.TLD_NorthAmericaOceania_ID] + zones[yacyURL.TLD_Generic_ID], theQuery);}
+        if (zones[yacyURL.TLD_Africa_ID] > 0)
+            { z = true; domzone(prop, "Africa", zones[yacyURL.TLD_Africa_ID], theQuery);}
+        if (zones[7] > 0)
+            { z = true; domzone(prop, "Intranet", zones[7], theQuery);}
+        prop.put("navigation_languagezone", (z) ? "1" : "0");
         
         // compose page navigation
         StringBuffer resnav = new StringBuffer();
@@ -189,6 +188,15 @@ public class sidebar_navigation {
         "&amp;cat=href&amp;constraint=" + ((theQuery.constraint == null) ? "" : theQuery.constraint.exportB64()) +
         "&amp;contentdom=" + theQuery.contentdom() +
         "&amp;former=" + theQuery.queryString() + "\">";
+    }
+    
+    private static void domzone(serverObjects prop, String zonename, int zonecount, plasmaSearchQuery theQuery) {
+        prop.put("navigation_languagezone_" + zonename + "_count", zonecount);
+        prop.putHTML("navigation_languagezone_" + zonename + "_search", theQuery.queryString.replace(' ', '+'));
+        prop.put("navigation_languagezone_" + zonename + "_offset", "0");
+        prop.put("navigation_languagezone_" + zonename + "_contentdom", theQuery.contentdom());
+        prop.put("navigation_languagezone_" + zonename + "_resource", theQuery.searchdom());
+        prop.put("navigation_languagezone_" + zonename, 1);
     }
     
 }

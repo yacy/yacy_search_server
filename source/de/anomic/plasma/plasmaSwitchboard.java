@@ -2658,8 +2658,11 @@ public final class plasmaSwitchboard extends serverAbstractSwitch implements ser
         if (yacyCore.seedDB.noDHTActivity()) {
             return "no DHT distribution: network too small";
         }
+        if (!this.getConfigBool("network.unit.dht", true)) {
+            return "no DHT distribution: disabled by network.unit.dht";
+        }
         if (getConfig(INDEX_DIST_ALLOW, "false").equalsIgnoreCase("false")) {
-            return "no DHT distribution: not enabled";
+            return "no DHT distribution: not enabled (ser setting)";
         }
         if (wordIndex.loadedURL.size() < 10) {
             return "no DHT distribution: loadedURL.size() = " + wordIndex.loadedURL.size();
@@ -2673,7 +2676,7 @@ public final class plasmaSwitchboard extends serverAbstractSwitch implements ser
         if ((getConfig(INDEX_DIST_ALLOW_WHILE_INDEXING, "false").equalsIgnoreCase("false")) && (sbQueue.size() > 1)) {
             return "no DHT distribution: indexing in progress: noticeURL.stackSize() = " + crawlQueues.noticeURL.size() + ", sbQueue.size() = " + sbQueue.size();
         }
-        return null;
+        return null; // this means; yes, please do dht transfer
     }
     
     public boolean dhtTransferJob() {

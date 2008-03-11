@@ -123,6 +123,8 @@ public class ysearch {
             constraint.set(plasmaCondenser.flag_cat_indexof, true);
         }
         
+        int domainzone = post.getInt("zone", yacyURL.TLD_any_zone_filter);
+        
         // SEARCH
         //final boolean indexDistributeGranted = sb.getConfig(plasmaSwitchboard.INDEX_DIST_ALLOW, "true").equals("true");
         //final boolean indexReceiveGranted = sb.getConfig("allowReceiveIndex", "true").equals("true");
@@ -182,6 +184,7 @@ public class ysearch {
                     20,
                     constraint,
                     true,
+                    domainzone,
                     client);
 
             

@@ -118,7 +118,7 @@ public final class plasmaSearchQuery {
         this.offset = 0;
         this.urlMask = ".*";
         this.domType = SEARCHDOM_LOCAL;
-        this.zonecode = yacyURL.language_domain_any_zone;
+        this.zonecode = yacyURL.TLD_any_zone_filter;
         this.domMaxTargets = 0;
         this.constraint = constraint;
         this.allofconstraint = false;
@@ -136,6 +136,7 @@ public final class plasmaSearchQuery {
         int lines, int offset, String urlMask,
         int domType, String domGroupName, int domMaxTargets,
         kelondroBitfield constraint, boolean allofconstraint,
+        int domainzone,
         String host) {
 		this.queryString = queryString;
 		this.queryHashes = queryHashes;
@@ -149,7 +150,7 @@ public final class plasmaSearchQuery {
 		//this.maximumTime = Math.min(6000, maximumTime);
 		this.urlMask = urlMask;
 		this.domType = domType;
-        this.zonecode = yacyURL.language_domain_any_zone;
+        this.zonecode = domainzone;
 		this.domMaxTargets = domMaxTargets;
 		this.constraint = constraint;
 		this.allofconstraint = allofconstraint;
@@ -288,9 +289,9 @@ public final class plasmaSearchQuery {
     public String id(boolean anonymized) {
         // generate a string that identifies a search so results can be re-used in a cache
         if (anonymized) {
-            return anonymizedQueryHashes(this.queryHashes) + "-" + anonymizedQueryHashes(this.excludeHashes) + ":" + this.contentdom + "*" + plasmaCondenser.word2hash(this.ranking.toExternalString());
+            return anonymizedQueryHashes(this.queryHashes) + "-" + anonymizedQueryHashes(this.excludeHashes) + "*" + this.contentdom + "*" + this.zonecode + "*" + this.ranking.toExternalString();
         } else {
-            return hashSet2hashString(this.queryHashes) + "-" + hashSet2hashString(this.excludeHashes) + ":" + this.contentdom + "*" + plasmaCondenser.word2hash(this.ranking.toExternalString());
+            return hashSet2hashString(this.queryHashes) + "-" + hashSet2hashString(this.excludeHashes) + "*" + this.contentdom + "*" + this.zonecode + "*" + this.ranking.toExternalString();
         }
     }
     

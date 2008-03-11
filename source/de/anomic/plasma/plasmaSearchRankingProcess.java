@@ -99,6 +99,10 @@ public final class plasmaSearchRankingProcess {
         return order.cardinal(word);
     }
     
+    public int[] zones() {
+        return this.domZones;
+    }
+    
     public void execQuery() {
         
         long timer = System.currentTimeMillis();
@@ -332,10 +336,6 @@ public final class plasmaSearchRankingProcess {
     public int getLocalResourceSize() {
         // the number of hits in the local peer (index size, size of the collection in the own index)
         return this.local_resourceSize;
-    }
-    
-    public Map<String, Integer> getZoneStatistics() {
-        return yacyURL.zoneStatistics(this.domZones);
     }
     
     public indexRWIEntry remove(String urlHash) {

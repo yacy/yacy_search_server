@@ -31,7 +31,6 @@ import java.io.File;
 import java.net.MalformedURLException;
 import java.util.HashMap;
 import java.util.Iterator;
-import java.util.Map;
 import java.util.TreeSet;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -44,10 +43,18 @@ import de.anomic.tools.Punycode.PunycodeException;
 
 public class yacyURL {
 
-
     // TLD separation in political and cultural parts
     // https://www.cia.gov/cia/publications/factbook/index.html
     // http://en.wikipedia.org/wiki/List_of_countries_by_continent
+    public static final int TLD_EuropeRussia_ID        = 0; // European languages but no english
+    public static final int TLD_MiddleSouthAmerica_ID  = 1; // mainly spanish-speaking countries
+    public static final int TLD_SouthEastAsia_ID       = 2; // asia
+    public static final int TLD_MiddleEastWestAsia_ID  = 3; // middle east
+    public static final int TLD_NorthAmericaOceania_ID = 4; // english-speaking countries
+    public static final int TLD_Africa_ID              = 5; // africa
+    public static final int TLD_Generic_ID             = 6; // anything else, mixed languages, mainly english
+    
+    public static final int TLD_any_zone_filter = 255; // from TLD zones can be filtered during search; this is the catch-all filter
     
     private static final String[] TLD_NorthAmericaOceania={
         // primary english-speaking countries
@@ -160,6 +167,7 @@ public class yacyURL {
          "DK=Denmark",
          "ES=Spain",
          "EE=Estonia",
+         "EU=Europe",
          "FI=Finland",
          "FO=Faroe Islands", // Viking Settlers
          "FR=France",
@@ -334,27 +342,6 @@ public class yacyURL {
          "NT=Neutral Zone"
      };
 
-
-    /*
-     * TLDs: aero, biz, com, coop, edu, gov, info, int, mil, museum, name, net,
-     * org, pro, arpa AC, AD, AE, AERO, AF, AG, AI, AL, AM, AN, AO, AQ, AR,
-     * ARPA, AS, AT, AU, AW, AZ, BA, BB, BD, BE, BF, BG, BH, BI, BIZ, BJ, BM,
-     * BN, BO, BR, BS, BT, BV, BW, BY, BZ, CA, CC, CD, CF, CG, CH, CI, CK, CL,
-     * CM, CN, CO, COM, COOP, CR, CU, CV, CX, CY, CZ, DE, DJ, DK, DM, DO, DZ,
-     * EC, EDU, EE, EG, ER, ES, ET, EU, FI, FJ, FK, FM, FO, FR, GA, GB, GD, GE,
-     * GF, GG, GH, GI, GL, GM, GN, GOV, GP, GQ, GR, GS, GT, GU, GW, GY, HK, HM,
-     * HN, HR, HT, HU, ID, IE, IL, IM, IN, INFO, INT, IO, IQ, IR, IS, IT, JE,
-     * JM, JO, JOBS, JP, KE, KG, KH, KI, KM, KN, KR, KW, KY, KZ, LA, LB, LC, LI,
-     * LK, LR, LS, LT, LU, LV, LY, MA, MC, MD, MG, MH, MIL, MK, ML, MM, MN, MO,
-     * MOBI, MP, MQ, MR, MS, MT, MU, MUSEUM, MV, MW, MX, MY, MZ, NA, NAME, NC,
-     * NE, NET, NF, NG, NI, NL, NO, NP, NR, NU, NZ, OM, ORG, PA, PE, PF, PG, PH,
-     * PK, PL, PM, PN, PR, PRO, PS, PT, PW, PY, QA, RE, RO, RU, RW, SA, SB, SC,
-     * SD, SE, SG, SH, SI, SJ, SK, SL, SM, SN, SO, SR, ST, SU, SV, SY, SZ, TC,
-     * TD, TF, TG, TH, TJ, TK, TL, TM, TN, TO, TP, TR, TRAVEL, TT, TV, TW, TZ,
-     * UA, UG, UK, UM, US, UY, UZ, VA, VC, VE, VG, VI, VN, VU, WF, WS, YE, YT,
-     * YU, ZA, ZM, ZW
-     */
-
     public static String dummyHash;
 
     private static HashMap<String, Integer> TLDID = new HashMap<String, Integer>();
@@ -375,38 +362,21 @@ public class yacyURL {
         }
     }
     
-    public static final int language_domain_europe_zone     = 128 + 1;       //{0, 7};
-    public static final int language_domain_english_zone    = 128 + 16 + 64; //{4, 6, 7};
-    public static final int language_domain_spanish_zone    = 128 + 2;       //{1, 7};
-    public static final int language_domain_asia_zone       = 128 + 4;       //{2, 7};
-    public static final int language_domain_middleeast_zone = 128 + 8;       //{3, 7};
-    public static final int language_domain_africa_zone     = 128 + 32;      //{5, 7};
-    public static final int language_domain_any_zone        = 255;
-    
-    public static final HashMap<String, Integer> zone2map = new HashMap<String, Integer>();
-    
     static {
         // create a dummy hash
         dummyHash = "";
         for (int i = 0; i < yacySeedDB.commonHashLength; i++) dummyHash += "-";
 
         // assign TLD-ids and names
-        insertTLDProps(TLD_EuropeRussia,        0); // European languages but no english
-        insertTLDProps(TLD_MiddleSouthAmerica,  1); // mainly spanish-speaking countries
-        insertTLDProps(TLD_SouthEastAsia,       2); // asia
-        insertTLDProps(TLD_MiddleEastWestAsia,  3); // middle east
-        insertTLDProps(TLD_NorthAmericaOceania, 4); // english-speaking countries
-        insertTLDProps(TLD_Africa,              5); // africa
-        insertTLDProps(TLD_Generic,             6); // anything else, mixed languages, mainly english
+        insertTLDProps(TLD_EuropeRussia,        TLD_EuropeRussia_ID);
+        insertTLDProps(TLD_MiddleSouthAmerica,  TLD_MiddleSouthAmerica_ID);
+        insertTLDProps(TLD_SouthEastAsia,       TLD_SouthEastAsia_ID);
+        insertTLDProps(TLD_MiddleEastWestAsia,  TLD_MiddleEastWestAsia_ID);
+        insertTLDProps(TLD_NorthAmericaOceania, TLD_NorthAmericaOceania_ID);
+        insertTLDProps(TLD_Africa,              TLD_Africa_ID);
+        insertTLDProps(TLD_Generic,             TLD_Generic_ID);
         // the id=7 is used to flag local addresses
-        
-        zone2map.put("europe",     language_domain_europe_zone);
-        zone2map.put("english",    language_domain_english_zone);
-        zone2map.put("spanish",    language_domain_spanish_zone);
-        zone2map.put("asia",       language_domain_asia_zone);
-        zone2map.put("middleeast", language_domain_middleeast_zone);
-        zone2map.put("africa",     language_domain_africa_zone);
-        zone2map.put("any",        language_domain_any_zone);
+
     }
     
     // class variables
@@ -1130,27 +1100,6 @@ public class yacyURL {
         int pos = host.lastIndexOf(".");
         if ((pos > 0) && (host.length() - pos == 3)) language = host.substring(pos + 1).toLowerCase();
         return language;
-    }
-    
-    public static Map<String, Integer> zoneStatistics(int[] domAccumulators) {
-        assert domAccumulators.length == 8;
-        HashMap<String, Integer> zoneCounter = new HashMap<String, Integer>();
-        Iterator<Map.Entry<String, Integer>> j;
-        Map.Entry<String, Integer> entry;
-        for (int i = 0; i < 8; i++) {
-            j = zone2map.entrySet().iterator();
-            while (j.hasNext()) {
-                entry = j.next();
-                if ((i & entry.getValue().intValue()) != 0) {
-                    if (zoneCounter.containsKey(entry.getKey())) {
-                        zoneCounter.put(entry.getKey(), zoneCounter.get(entry.getKey()) + domAccumulators[i]);
-                    } else {
-                        zoneCounter.put(entry.getKey(), domAccumulators[i]);
-                    }
-                }
-            }
-        }
-        return zoneCounter;
     }
     
     public static void main(String[] args) {

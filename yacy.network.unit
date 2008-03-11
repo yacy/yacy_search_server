@@ -53,6 +53,7 @@ network.unit.name = freeworld
 network.unit.description = Public YaCy Community
 network.unit.domain = global
 network.unit.search.time = 4
+network.unit.dht = true
 network.unit.dhtredundancy.junior = 1
 network.unit.dhtredundancy.senior = 3
 network.unit.bootstrap.seedlist0 = http://www.yacy.net/seed.txt

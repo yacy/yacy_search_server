@@ -257,6 +257,7 @@ public class yacysearch {
                     20,
                     constraint,
                     true,
+                    yacyURL.TLD_any_zone_filter,
                     client);
 
             

@@ -54,6 +54,7 @@ import de.anomic.tools.crypt;
 import de.anomic.yacy.yacyCore;
 import de.anomic.yacy.yacyNetwork;
 import de.anomic.yacy.yacySeed;
+import de.anomic.yacy.yacyURL;
 
 public final class search {
 
@@ -153,7 +154,7 @@ public final class search {
         plasmaSearchEvent theSearch = null;
         if ((query.length() == 0) && (abstractSet != null)) {
             // this is _not_ a normal search, only a request for index abstracts
-            theQuery = new plasmaSearchQuery(null, abstractSet, new TreeSet<String>(kelondroBase64Order.enhancedComparator), rankingProfile, maxdist, prefer, plasmaSearchQuery.contentdomParser(contentdom), false, count, 0, filter, plasmaSearchQuery.SEARCHDOM_LOCAL, null, -1, null, false, client);
+            theQuery = new plasmaSearchQuery(null, abstractSet, new TreeSet<String>(kelondroBase64Order.enhancedComparator), rankingProfile, maxdist, prefer, plasmaSearchQuery.contentdomParser(contentdom), false, count, 0, filter, plasmaSearchQuery.SEARCHDOM_LOCAL, null, -1, null, false, yacyURL.TLD_any_zone_filter, client);
             theQuery.domType = plasmaSearchQuery.SEARCHDOM_LOCAL;
             yacyCore.log.logInfo("INIT HASH SEARCH (abstracts only): " + plasmaSearchQuery.anonymizedQueryHashes(theQuery.queryHashes) + " - " + theQuery.displayResults() + " links");
 
@@ -178,7 +179,7 @@ public final class search {
 
         } else {
             // retrieve index containers from search request
-            theQuery = new plasmaSearchQuery(null, queryhashes, excludehashes, rankingProfile, maxdist, prefer, plasmaSearchQuery.contentdomParser(contentdom), false, count, 0, filter, plasmaSearchQuery.SEARCHDOM_LOCAL, null, -1, constraint, false, client);
+            theQuery = new plasmaSearchQuery(null, queryhashes, excludehashes, rankingProfile, maxdist, prefer, plasmaSearchQuery.contentdomParser(contentdom), false, count, 0, filter, plasmaSearchQuery.SEARCHDOM_LOCAL, null, -1, constraint, false, yacyURL.TLD_any_zone_filter, client);
             theQuery.domType = plasmaSearchQuery.SEARCHDOM_LOCAL;
             yacyCore.log.logInfo("INIT HASH SEARCH (query-" + abstracts + "): " + plasmaSearchQuery.anonymizedQueryHashes(theQuery.queryHashes) + " - " + theQuery.displayResults() + " links");
 

@@ -26,9 +26,30 @@
         <p><strong>Language Zone</strong>:
         <select onchange="window.location.href=this.options[this.selectedIndex].value">
           <option selected="selected">-select-</option>
-        #{zones}#
-          <option value="/yacy/user/ysearch.html?search=#[search]#&amp;Enter=Search&amp;count=#[count]#&amp;offset=#[offset]#&amp;resource=#[resource]#&amp;contentdom=#[contentdom]#&amp;zone=#[zonecode]#">#[zone]#</option>
-        #{/zones}#
+        #(All)#::
+          <option value="/yacy/user/ysearch.html?search=#[search]#&amp;Enter=Search&amp;count=#[count]#&amp;offset=#[offset]#&amp;resource=#[resource]#&amp;contentdom=#[contentdom]#&amp;zone=255">all languages, all regions (#[count]#)</option>
+        #(/All)#
+        #(EuropeRussia)#::
+          <option value="/yacy/user/ysearch.html?search=#[search]#&amp;Enter=Search&amp;count=#[count]#&amp;offset=#[offset]#&amp;resource=#[resource]#&amp;contentdom=#[contentdom]#&amp;zone=1">european languages but no english (#[count]#)</option>
+        #(/EuropeRussia)#
+        #(NorthAmericaOceania)#::
+          <option value="/yacy/user/ysearch.html?search=#[search]#&amp;Enter=Search&amp;count=#[count]#&amp;offset=#[offset]#&amp;resource=#[resource]#&amp;contentdom=#[contentdom]#&amp;zone=80">english and generic domains (#[count]#)</option>
+        #(/NorthAmericaOceania)#
+        #(MiddleSouthAmerica)#::
+          <option value="/yacy/user/ysearch.html?search=#[search]#&amp;Enter=Search&amp;count=#[count]#&amp;offset=#[offset]#&amp;resource=#[resource]#&amp;contentdom=#[contentdom]#&amp;zone=2">spanish-speaking countries (#[count]#)</option>
+        #(/MiddleSouthAmerica)#
+        #(SouthEastAsia)#::
+          <option value="/yacy/user/ysearch.html?search=#[search]#&amp;Enter=Search&amp;count=#[count]#&amp;offset=#[offset]#&amp;resource=#[resource]#&amp;contentdom=#[contentdom]#&amp;zone=4">from asia (#[count]#)</option>
+        #(/SouthEastAsia)#
+        #(MiddleEastWestAsia)#::
+          <option value="/yacy/user/ysearch.html?search=#[search]#&amp;Enter=Search&amp;count=#[count]#&amp;offset=#[offset]#&amp;resource=#[resource]#&amp;contentdom=#[contentdom]#&amp;zone=8">from the middle east (#[count]#)</option>
+        #(/MiddleEastWestAsia)#
+        #(Africa)#::
+          <option value="/yacy/user/ysearch.html?search=#[search]#&amp;Enter=Search&amp;count=#[count]#&amp;offset=#[offset]#&amp;resource=#[resource]#&amp;contentdom=#[contentdom]#&amp;zone=32">from Africa (#[count]#)</option>
+        #(/Africa)#
+        #(Intranet)#::
+        <option value="/yacy/user/ysearch.html?search=#[search]#&amp;Enter=Search&amp;count=#[count]#&amp;offset=#[offset]#&amp;resource=#[resource]#&amp;contentdom=#[contentdom]#&amp;zone=128">intranet content (#[count]#)</option>
+        #(/Intranet)#
         </select>
         </p>
         #(/languagezone)#
