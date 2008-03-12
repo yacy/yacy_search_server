@@ -443,8 +443,8 @@ public final class yacyClient {
                     ), "UTF-8"
             	);
         } catch (IOException e) {
-            yacyCore.log.logFine("SEARCH failed FROM " + target.hash + ":" + target.getName() + " (" + e.getMessage() + "), score=" + target.selectscore + ", DHTdist=" + yacyDHTAction.dhtDistance(target.hash, wordhashes.substring(0, 12)));
-            yacyCore.peerActions.peerDeparture(target, "search request to peer created io exception: " + e.getMessage());
+            yacyCore.log.logInfo("SEARCH failed, Peer: " + target.hash + ":" + target.getName() + " (" + e.getMessage() + "), score=" + target.selectscore + ", DHTdist=" + yacyDHTAction.dhtDistance(target.hash, wordhashes.substring(0, 12)));
+            //yacyCore.peerActions.peerDeparture(target, "search request to peer created io exception: " + e.getMessage());
             return null;
         }
 
@@ -484,8 +484,8 @@ public final class yacyClient {
             results = Integer.parseInt(result.get("count"));
             joincount = Integer.parseInt(result.get("joincount"));
         } catch (NumberFormatException e) {
-            yacyCore.log.logFine("SEARCH failed FROM " + target.hash + ":" + target.getName() + ", wrong output format");
-            yacyCore.peerActions.peerDeparture(target, "search request to peer created number format exception");
+            yacyCore.log.logInfo("SEARCH failed FROM " + target.hash + ":" + target.getName() + ", wrong output format: " + e.getMessage());
+            //yacyCore.peerActions.peerDeparture(target, "search request to peer created number format exception");
             return null;
         }
 		// System.out.println("***result count " + results);
