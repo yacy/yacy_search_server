@@ -60,17 +60,46 @@ public final class search {
 
     public static serverObjects respond(httpHeader header, serverObjects post, serverSwitch env) {
         // return variable that accumulates replacements
-        final serverObjects prop = new serverObjects();
-        // defaults
-        prop.put("links", "");
-        prop.put("linkcount", "0");
-        prop.put("references", "");
-
-        if (post == null || env == null || !yacyNetwork.authentifyRequest(post, env)) {
-            return prop;
-        }
-        String client = (String) header.get(httpHeader.CONNECTION_PROP_CLIENTIP);
+        final plasmaSwitchboard sb = (plasmaSwitchboard) env;
+        sb.remoteSearchLastAccess = System.currentTimeMillis();
         
+        serverObjects prop = new serverObjects();
+        if ((post == null) || (env == null)) return prop;
+        if (!yacyNetwork.authentifyRequest(post, env)) return prop;
+        String client = (String) header.get(httpHeader.CONNECTION_PROP_CLIENTIP);
+
+        //System.out.println("yacy: search received request = " + post.toString());
+
+        final String  oseed  = post.get("myseed", ""); // complete seed of the requesting peer
+//      final String  youare = post.get("youare", ""); // seed hash of the target peer, used for testing network stability
+        final String  key    = post.get("key", "");    // transmission key for response
+        final String  query  = post.get("query", "");  // a string of word hashes that shall be searched and combined
+        final String  exclude= post.get("exclude", "");// a string of word hashes that shall not be within the search result
+        String  urls   = post.get("urls", "");         // a string of url hashes that are preselected for the search: no other may be returned
+        String abstracts = post.get("abstracts", "");  // a string of word hashes for abstracts that shall be generated, or 'auto' (for maxcount-word), or '' (for none)
+//      final String  fwdep  = post.get("fwdep", "");  // forward depth. if "0" then peer may NOT ask another peer for more results
+//      final String  fwden  = post.get("fwden", "");  // forward deny, a list of seed hashes. They may NOT be target of forward hopping
+        final int     count  = Math.min(100, post.getInt("count", 10)); // maximum number of wanted results
+        final int     maxdist= post.getInt("maxdist", Integer.MAX_VALUE);
+        final String  prefer = post.get("prefer", "");
+        final String  contentdom = post.get("contentdom", "text");
+        final String  filter = post.get("filter", ".*");
+        final int     partitions = post.getInt("partitions", 30);
+        String  profile = post.get("profile", ""); // remote profile hand-over
+        if (profile.length() > 0) profile = crypt.simpleDecode(profile, null);
+        //final boolean includesnippet = post.get("includesnippet", "false").equals("true");
+        kelondroBitfield constraint = ((post.containsKey("constraint")) && (post.get("constraint", "").length() > 0)) ? new kelondroBitfield(4, post.get("constraint", "______")) : null;
+        if (constraint != null) {
+        	// check bad handover parameter from older versions
+            boolean allon = true;
+            for (int i = 0; i < 32; i++) {
+            	if (!constraint.get(i)) {allon = false; break;}
+            }
+            if (allon) constraint = null;
+        }
+//      final boolean global = ((String) post.get("resource", "global")).equals("global"); // if true, then result may consist of answers from other peers
+//      Date remoteTime = yacyCore.parseUniversalDate((String) post.get(yacySeed.MYTIME));        // read remote time
+
         // test:
         // http://localhost:8080/yacy/search.html?query=4galTpdpDM5Q (search for linux)
         // http://localhost:8080/yacy/search.html?query=gh8DKIhGKXws (search for book)
@@ -80,71 +109,36 @@ public final class search {
         // http://localhost:8080/yacy/search.html?query=4galTpdpDM5Qgh8DKIhGKXws&abstracts=auto (search for linux and book, generate abstract automatically)
         // http://localhost:8080/yacy/search.html?query=&abstracts=4galTpdpDM5Q (only abstracts for linux)
 
-        final plasmaSwitchboard sb = (plasmaSwitchboard) env;
-        if (sb.isRobinsonMode() &&
-           !(sb.isPublicRobinson() ||
-             sb.isInMyCluster((String)header.get(httpHeader.CONNECTION_PROP_CLIENTIP)))) {
-            // if we are a robinson cluster, answer only if this client is known by our network definition
-            return prop;
+        if ((sb.isRobinsonMode()) &&
+             	 (!((sb.isPublicRobinson()) ||
+             	    (sb.isInMyCluster((String)header.get(httpHeader.CONNECTION_PROP_CLIENTIP)))))) {
+                 // if we are a robinson cluster, answer only if this client is known by our network definition
+        	prop.put("links", "");
+            prop.put("linkcount", "0");
+            prop.put("references", "");
+        	return prop;
         }
-
-        final String query = post.get("query", ""); // a string of word hashes that shall be searched and combined
-        final String abstracts = post.get("abstracts", ""); // a string of word hashes for abstracts that shall be generated, or 'auto' (for maxcount-word), or '' (for none)
-        if ((query == null || query.length() == 0) & (abstracts == null || abstracts.length() == 0)) {
-            return prop;
-        }
-
+        
         // tell all threads to do nothing for a specific time
         sb.intermissionAllThreads(3000);
-        sb.remoteSearchLastAccess = System.currentTimeMillis();
 
-        // myseed = complete seed of the requesting peer, key = transmission key for response
-        final yacySeed oseed = yacySeed.genRemoteSeed(post.get("myseed", ""), post.get("key", ""), true);
+        TreeSet<String> abstractSet = ((abstracts.length() == 0) || (abstracts.equals("auto"))) ? null : plasmaSearchQuery.hashes2Set(abstracts);
+        
         // store accessing peer
         if (yacyCore.seedDB == null) {
             yacyCore.log.logSevere("yacy.search: seed cache not initialized");
         } else {
-            yacyCore.peerActions.peerArrival(oseed, true);
+            yacyCore.peerActions.peerArrival(yacySeed.genRemoteSeed(oseed, key, true), true);
         }
-
-//      final String youare  = post.get("youare", "");  // seed hash of the target peer, used for testing network stability
-//      final String fwdep   = post.get("fwdep", "");   // forward depth. if "0" then peer may NOT ask another peer for more results
-//      final String fwden   = post.get("fwden", "");   // forward deny, a list of seed hashes. They may NOT be target of forward hopping                
-        String       profile = post.get("profile", ""); // remote profile hand-over
-        String       urls    = post.get("urls", "");    // a string of url hashes that are preselected for the search: no other may be returned
-        final String exclude = post.get("exclude", ""); // a string of word hashes that shall not be within the search result
-        final int    count   = Math.min(100, post.getInt("count", 10)); // maximum number of wanted results
-        final int    maxdist = post.getInt("maxdist", Integer.MAX_VALUE);
-        final String prefer  = post.get("prefer", "");
-        final String filter  = post.get("filter", ".*");
-        final int    partitions = post.getInt("partitions", 30);
-        final String contentdom = post.get("contentdom", "text");
-
-        if (profile.length() > 0) profile = crypt.simpleDecode(profile, null);
-        //final boolean includesnippet = post.get("includesnippet", "false").equals("true");
-
-        kelondroBitfield constraint = ((post.containsKey("constraint")) && (post.get("constraint", "").length() > 0)) ? new kelondroBitfield(4, post.get("constraint", "______")) : null;
-        if (constraint != null) {
-            // check bad handover parameter from older versions
-            boolean allon = true;
-            for (int i = 0; i < 32; i++) {
-                if (!constraint.get(i)) {allon = false; break;}
-            }
-            if (allon) constraint = null;
-        }
-//      final boolean global = ((String) post.get("resource", "global")).equals("global"); // if true, then result may consist of answers from other peers
-//      Date remoteTime = yacyCore.parseUniversalDate((String) post.get(yacySeed.MYTIME));        // read remote time
-
 
         // prepare search
         final TreeSet<String> queryhashes = plasmaSearchQuery.hashes2Set(query);
-        final TreeSet<String> abstractSet = (abstracts.length() == 0 || abstracts.equals("auto")) ? null : plasmaSearchQuery.hashes2Set(abstracts);
         final TreeSet<String> excludehashes = (exclude.length() == 0) ? new TreeSet<String>(kelondroBase64Order.enhancedComparator) : plasmaSearchQuery.hashes2Set(exclude);
         final long timestamp = System.currentTimeMillis();
-
-        // prepare a search profile
+        
+    	// prepare a search profile
         plasmaSearchRankingProfile rankingProfile = (profile.length() == 0) ? new plasmaSearchRankingProfile(plasmaSearchQuery.contentdomParser(contentdom)) : new plasmaSearchRankingProfile("", profile);
-
+        
         // prepare an abstract result
         StringBuffer indexabstract = new StringBuffer();
         int indexabstractContainercount = 0;
@@ -173,19 +167,20 @@ public final class search {
                     indexabstract.append("indexabstract." + wordhash + "=").append(indexContainer.compressIndex(container, null, 1000).toString()).append(serverCore.CRLF_STRING);                
                 }
             }
+            
             prop.put("indexcount", "");
             prop.put("joincount", "0");
             prop.put("references", "");
-
+            
         } else {
             // retrieve index containers from search request
             theQuery = new plasmaSearchQuery(null, queryhashes, excludehashes, rankingProfile, maxdist, prefer, plasmaSearchQuery.contentdomParser(contentdom), false, count, 0, filter, plasmaSearchQuery.SEARCHDOM_LOCAL, null, -1, constraint, false, yacyURL.TLD_any_zone_filter, client);
             theQuery.domType = plasmaSearchQuery.SEARCHDOM_LOCAL;
             yacyCore.log.logInfo("INIT HASH SEARCH (query-" + abstracts + "): " + plasmaSearchQuery.anonymizedQueryHashes(theQuery.queryHashes) + " - " + theQuery.displayResults() + " links");
-
+            
             // make event
             theSearch = plasmaSearchEvent.getEvent(theQuery, rankingProfile, sb.wordIndex, null, true); 
-
+            
             // set statistic details of search result and find best result index set
             if (theSearch.getRankingResult().getLocalResourceSize() == 0) {
                 prop.put("indexcount", "");
@@ -210,7 +205,7 @@ public final class search {
                     }
                 }
                 prop.put("indexcount", indexcount.toString());
-
+                
                 if (theSearch.getRankingResult().getLocalResourceSize() == 0) {
                     joincount = 0;
                     prop.put("joincount", "0");
@@ -219,7 +214,7 @@ public final class search {
                     prop.put("joincount", Integer.toString(joincount));
                     accu = theSearch.completeResults(3000);
                 }
-
+                
                 // generate compressed index for maxcounthash
                 // this is not needed if the search is restricted to specific
                 // urls, because it is a re-search
@@ -240,7 +235,7 @@ public final class search {
                 }
             }
             if (partitions > 0) sb.requestedQueries = sb.requestedQueries + 1d / partitions; // increase query counter
-
+            
             // prepare reference hints
             long timer = System.currentTimeMillis();
             Set<String> ws = theSearch.references(10);
@@ -253,9 +248,16 @@ public final class search {
             serverProfiling.update("SEARCH", new plasmaProfiling.searchEvent(theQuery.id(true), "reference collection", ws.size(), System.currentTimeMillis() - timer));
         }
         prop.put("indexabstract", indexabstract.toString());
-
+        
         // prepare result
-        if (joincount != 0 || accu != null) {
+        if ((joincount == 0) || (accu == null)) {
+            
+            // no results
+            prop.put("links", "");
+            prop.put("linkcount", "0");
+            prop.put("references", "");
+
+        } else {
             // result is a List of urlEntry elements
             long timer = System.currentTimeMillis();
             StringBuffer links = new StringBuffer();
@@ -272,7 +274,7 @@ public final class search {
             prop.put("linkcount", accu.size());
             serverProfiling.update("SEARCH", new plasmaProfiling.searchEvent(theQuery.id(true), "result list preparation", accu.size(), System.currentTimeMillis() - timer));
         }
-
+        
         // add information about forward peers
         prop.put("fwhop", ""); // hops (depth) of forwards that had been performed to construct this result
         prop.put("fwsrc", ""); // peers that helped to construct this result
@@ -289,19 +291,20 @@ public final class search {
         if (handles == null) handles = new TreeSet<Long>();
         handles.add(theQuery.handle);
         sb.remoteSearchTracker.put(client, handles);
-
+        
         // log
         yacyCore.log.logInfo("EXIT HASH SEARCH: " +
                 plasmaSearchQuery.anonymizedQueryHashes(theQuery.queryHashes) + " - " + joincount + " links found, " +
                 prop.get("linkcount", "?") + " links selected, " +
                 indexabstractContainercount + " index abstracts, " +
                 (System.currentTimeMillis() - timestamp) + " milliseconds");
-
+ 
         prop.put("searchtime", System.currentTimeMillis() - timestamp);
 
-        final int links = Integer.parseInt(prop.get("linkcount", "0"));
+        final int links = Integer.parseInt(prop.get("linkcount","0"));
         yacyCore.seedDB.mySeed().incSI(links);
         yacyCore.seedDB.mySeed().incSU(links);
         return prop;
     }
+
 }

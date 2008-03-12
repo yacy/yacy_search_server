@@ -61,19 +61,17 @@ import de.anomic.yacy.yacySeed;
 public final class transfer {
 
     public static serverObjects respond(httpHeader header, serverObjects post, serverSwitch env) {
-        // return variable that accumulates replacements
-        final serverObjects prop = new serverObjects();
-
-        if (post == null || env == null || !yacyNetwork.authentifyRequest(post, env)) {
-            return prop;
-        }
-
-        String process  = post.get("process", "");  // permission or store
-//      String key      = post.get("key", "");      // a transmission key from the client
-        String ohash    = post.get("iam", "");      // identification of the client (a peer-hash)
-        String purpose  = post.get("purpose", "");  // declares how the file shall be treated
-        String filename = post.get("filename", ""); // a name of a file without path
-//      long   filesize = Long.parseLong((String) post.get("filesize", "")); // the size of the file
+        plasmaSwitchboard sb = (plasmaSwitchboard) env;
+        serverObjects prop = new serverObjects();
+        if ((post == null) || (env == null)) return prop;
+        if (!yacyNetwork.authentifyRequest(post, env)) return prop;
+        
+        String process   = post.get("process", "");  // permission or store
+        //String key       = post.get("key", "");      // a transmission key from the client
+        String otherpeer = post.get("iam", "");      // identification of the client (a peer-hash)
+        String purpose   = post.get("purpose", "");  // declares how the file shall be treated
+        String filename  = post.get("filename", ""); // a name of a file without path
+        //long   filesize  = Long.parseLong((String) post.get("filesize", "")); // the size of the file
 
         prop.put("process", "0");
         prop.put("response", "denied"); // reject is default and is overwritten if ok
@@ -83,34 +81,29 @@ public final class transfer {
         prop.put("process_path", "");
         prop.put("process_maxsize", "0");
 
-        final plasmaSwitchboard sb = (plasmaSwitchboard) env;
         if (sb.isRobinsonMode() || !sb.rankingOn) {
-            // in a robinson environment, do not answer. We do not do any transfer in a robinson cluster.
-            return prop;
+        	// in a robinson environment, do not answer. We do not do any transfer in a robinson cluster.
+        	return prop;
         }
 
-        final yacySeed oseed = yacyCore.seedDB.get(ohash);
-        if (oseed == null) {
+        yacySeed otherseed = yacyCore.seedDB.get(otherpeer);
+        if ((otherseed == null) || (filename.indexOf("..") >= 0)) {
             // reject unknown peers: this does not appear fair, but anonymous senders are dangerous
-            sb.getLog().logFine("RankingTransmission: rejected unknown peer '" + ohash + "', current IP " + header.get(httpHeader.CONNECTION_PROP_CLIENTIP, "unknown"));
-            return prop;
-        }
-        oseed.setFlagDirectConnect(true);
-        oseed.setLastSeenUTC();
-
-        if (filename.indexOf("..") >= 0) {
             // reject paths that contain '..' because they are dangerous
-            sb.getLog().logFine("RankingTransmission: rejected wrong path '" + filename + "' from peer " + oseed.getName() + "/" + oseed.getPublicAddress()+ ", current IP " + header.get(httpHeader.CONNECTION_PROP_CLIENTIP, "unknown"));
+            if (otherseed == null) sb.getLog().logFine("RankingTransmission: rejected unknown peer '" + otherpeer + "', current IP " + header.get(httpHeader.CONNECTION_PROP_CLIENTIP, "unknown"));
+            if (filename.indexOf("..") >= 0) sb.getLog().logFine("RankingTransmission: rejected wrong path '" + filename + "' from peer " + otherseed.getName() + "/" + otherseed.getPublicAddress()+ ", current IP " + header.get(httpHeader.CONNECTION_PROP_CLIENTIP, "unknown"));
             return prop;
         }
-
+        
+        String otherpeerName = otherseed.hash + ":" + otherseed.getName();
+        
         if (process.equals("permission")) {
             prop.put("process", "0");
             if (((purpose.equals("crcon")) && (filename.startsWith("CRG")) && (filename.endsWith(".cr.gz"))) || ((filename.startsWith("domlist")) && (filename.endsWith(".txt.gz") || filename.endsWith(".zip")))) {
                 // consolidation of cr files
                 //System.out.println("yacy/transfer:post=" + post.toString());
                 //String cansendprotocol = (String) post.get("can-send-protocol", "http");
-                String access = kelondroBase64Order.enhancedCoder.encode(serverCodings.encodeMD5Raw(ohash + ":" + filename)) + ":" + kelondroBase64Order.enhancedCoder.encode(serverCodings.encodeMD5Raw("" + System.currentTimeMillis()));
+                String access = kelondroBase64Order.enhancedCoder.encode(serverCodings.encodeMD5Raw(otherpeer + ":" + filename)) + ":" + kelondroBase64Order.enhancedCoder.encode(serverCodings.encodeMD5Raw("" + System.currentTimeMillis()));
                 prop.put("response", "ok");
                 prop.put("process_access", access);
                 prop.put("process_address", yacyCore.seedDB.mySeed().getPublicAddress());
@@ -118,7 +111,7 @@ public final class transfer {
                 prop.put("process_path", "");  // currently empty; the store process will find a path
                 prop.put("process_maxsize", "-1"); // if response is too big we return the size of the file
                 sb.rankingPermissions.put(serverCodings.encodeMD5Hex(kelondroBase64Order.standardCoder.encodeString(access)), filename);
-                sb.getLog().logFine("RankingTransmission: granted peer " + oseed.hash + ":" + oseed.getName() + " to send CR file " + filename);
+                sb.getLog().logFine("RankingTransmission: granted peer " + otherpeerName + " to send CR file " + filename);
             }
             return prop;
         }
@@ -136,7 +129,7 @@ public final class transfer {
                 if ((grantedFile == null) || (!(grantedFile.equals(filename)))) {
                     // fraud-access of this interface
                     prop.put("response", "denied");
-                    sb.getLog().logFine("RankingTransmission: denied " + oseed.hash + ":" + oseed.getName() + " to send CR file " + filename + ": wrong access code");
+                    sb.getLog().logFine("RankingTransmission: denied " + otherpeerName + " to send CR file " + filename + ": wrong access code");
                 } else {
                     sb.rankingPermissions.remove(accesscode); // not needed any more
                     File path = new File(sb.rankingPath, plasmaRankingDistribution.CR_OTHER);
@@ -148,10 +141,10 @@ public final class transfer {
                             String md5t = serverCodings.encodeMD5Hex(file);
                             if (md5t.equals(md5)) {
                                 prop.put("response", "ok");
-                                sb.getLog().logFine("RankingTransmission: received from peer " + oseed.hash + ":" + oseed.getName() + " CR file " + filename);
+                                sb.getLog().logFine("RankingTransmission: received from peer " + otherpeerName + " CR file " + filename);
                             } else {
                                 prop.put("response", "transfer failure");
-                                sb.getLog().logFine("RankingTransmission: transfer failure from peer " + oseed.hash + ":" + oseed.getName() + " for CR file " + filename);
+                                sb.getLog().logFine("RankingTransmission: transfer failure from peer " + otherpeerName + " for CR file " + filename);
                             }
                         }else{
                             //exploit?
@@ -167,7 +160,7 @@ public final class transfer {
         }
 
         // wrong access
-        sb.getLog().logFine("RankingTransmission: rejected unknown process " + process + ":" + purpose + " from peer " + oseed.hash + ":" + oseed.getName());
+        sb.getLog().logFine("RankingTransmission: rejected unknown process " + process + ":" + purpose + " from peer " + otherpeerName);
         return prop;
     }
 

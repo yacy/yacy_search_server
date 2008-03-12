@@ -64,32 +64,29 @@ public final class profile {
 
     public static serverObjects respond(httpHeader header, serverObjects post, serverSwitch env) {
         // return variable that accumulates replacements
-        final serverObjects prop = new serverObjects();
-        // defaults
-        prop.put("list", "0");
+        serverObjects prop = new serverObjects();
+        plasmaSwitchboard sb = (plasmaSwitchboard) env;
+        if ((post == null) || (env == null)) return prop;
+        if (!yacyNetwork.authentifyRequest(post, env)) return prop;
 
-        if (post == null || env == null || !yacyNetwork.authentifyRequest(post, env)) {
+        if ((sb.isRobinsonMode()) &&
+           	(!sb.isPublicRobinson()) &&
+           	(!sb.isInMyCluster((String)header.get(httpHeader.CONNECTION_PROP_CLIENTIP)))) {
+               // if we are a robinson cluster, answer only if this client is known by our network definition
+        	prop.put("list", "0");
             return prop;
         }
-
-        final plasmaSwitchboard sb = (plasmaSwitchboard) env;
-        if (sb.isRobinsonMode() &&
-            !sb.isPublicRobinson() &&
-            !sb.isInMyCluster((String) header.get(httpHeader.CONNECTION_PROP_CLIENTIP))) {
-            // if we are a robinson cluster, answer only if this client is known by our network definition
-            return prop;
-        }
-
+        
         Properties profile = new Properties();
-        int count = 0;
-        String key = "";
-        String value = "";
+        int count=0;
+        String key="";
+        String value="";
 
         FileInputStream fileIn = null;
         try {
             fileIn = new FileInputStream(new File("DATA/SETTINGS/profile.txt"));
-            profile.load(fileIn);
-        } catch (IOException e) {
+            profile.load(fileIn);        
+        } catch(IOException e) {
         } finally {
             if (fileIn != null) try { fileIn.close(); fileIn = null; } catch (Exception e) {}
         }

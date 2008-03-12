@@ -73,17 +73,16 @@ public final class message {
     }
 
     public static serverObjects respond(httpHeader header, serverObjects post, serverSwitch env) {
-        // return variable that accumulates replacements
-        final serverObjects prop = new serverObjects();
-        // defaults
-        prop.put("response", "-1"); // request rejected
+        if (post == null || env == null) { return null; }
 
-        if (post == null || env == null || !yacyNetwork.authentifyRequest(post, env)) {
-            return prop;
-        }
+        // return variable that accumulates replacements
+        plasmaSwitchboard sb = (plasmaSwitchboard) env;
+        serverObjects prop = new serverObjects();
+        if ((post == null) || (env == null)) return prop;
+        if (!yacyNetwork.authentifyRequest(post, env)) return prop;
 
         String process = post.get("process", "permission");
-        String key = post.get("key", "");
+        String key =  post.get("key", "");
 
         int messagesize = 10240;
         int attachmentsize = 0;
@@ -95,17 +94,18 @@ public final class message {
         // check if we are the right target and requester has correct information about this peer
         if ((yacyCore.seedDB.mySeed() == null) || (!(yacyCore.seedDB.mySeed().hash.equals(youare)))) {
             // this request has a wrong target
+            prop.put("response", "-1"); // request rejected
             return prop;
         }
 
-        final plasmaSwitchboard sb = (plasmaSwitchboard) env;
-        if (sb.isRobinsonMode() &&
-            !(sb.isPublicRobinson() ||
-              sb.isInMyCluster((String)header.get(httpHeader.CONNECTION_PROP_CLIENTIP)))) {
-            // if we are a robinson cluster, answer only if this client is known by our network definition            
+        if ((sb.isRobinsonMode()) &&
+        	 (!((sb.isPublicRobinson()) ||
+        	    (sb.isInMyCluster((String)header.get(httpHeader.CONNECTION_PROP_CLIENTIP)))))) {
+            // if we are a robinson cluster, answer only if this client is known by our network definition
+        	prop.put("response", "-1"); // request rejected
             return prop;
         }
-
+        
         prop.put("messagesize", Integer.toString(messagesize));
         prop.put("attachmentsize", Integer.toString(attachmentsize));
 
