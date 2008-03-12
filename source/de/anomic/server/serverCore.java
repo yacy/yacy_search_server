@@ -410,7 +410,17 @@ public final class serverCore extends serverAbstractThread implements serverThre
             
             if ((this.denyHost == null) || (this.denyHost.get(cIP) == null)) {
                 // setting the timeout properly
+                assert this.timeout >= 1000;
                 controlSocket.setSoTimeout(this.timeout);
+                // keep-alive: if set to true, the server frequently sends keep-alive packets to the client which the client must respond to
+                // we set this to false to prevent that a missing ack from the client forces the server to close the connection
+                controlSocket.setKeepAlive(false); 
+                
+                // disable Nagle's algorithm (waiting for more data until packet is full)
+                controlSocket.setTcpNoDelay(true);
+                
+                // set a non-zero linger, that means that a socket.close() blocks until all data is written
+                controlSocket.setSoLinger(true, this.timeout);
                 
                 // create session
                 Session connection = new Session(sessionThreadGroup, controlSocket, this.timeout);

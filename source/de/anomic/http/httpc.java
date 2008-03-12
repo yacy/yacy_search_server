@@ -396,11 +396,14 @@ public final class httpc {
             this.initTime = System.currentTimeMillis();
             this.lastIO = System.currentTimeMillis();
             this.socket.setKeepAlive(false);
-            // setting socket timeout and keep alive behaviour
+            // set socket timeout and keep alive behavior
+            assert timeout >= 1000;
             this.socket.setSoTimeout(timeout); // waiting time for read
+            this.socket.setTcpNoDelay(true); // no accumulation until buffer is full
+            this.socket.setSoLinger(true, timeout); // wait for all data being written on close()
+            
             // get the connection
             this.socket.connect(address, timeout);
-            this.socket.setSoTimeout(timeout); // waiting time for read
             
             if (incomingByteCountAccounting != null) {
                 this.clientInputByteCount = new httpdByteCountInputStream(this.socket.getInputStream(),incomingByteCountAccounting);
