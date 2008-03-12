@@ -1,18 +1,22 @@
-<script type="text/javascript">
-	$(document).ready(function() {
-		var url = "/yacy/user/sidebar_history.html?eventID=#[eventID]#";		
-		$('<div id="history" class="boxed"></div>').appendTo('#sidebar')
-		$("#history").load(url);				
-	});
-</script>
-
+<div id="#[ID]#"></div>
 <!-- linklist begin -->
 #(resultTable)#::<table width="100%"><tr class="TableHeader"><td width="30%">Media</td><td width="70%">URL</tr>#(/resultTable)#
 #{results}#
-<!--#include virtual="/yacy/user/ysearchitem.html?rss=false&item=#[item]#&eventID=#[eventID]#" -->
+<script type="text/javascript">
+	$(function() {		
+		var id = "#"+"#[ID]#";
+		$.get("/yacy/ui/ritem.html?rss=false&item=#[item]#&eventID=#[eventID]#", function(html) {              
+        	$(id).append(html);         	
+			$(id).trigger("update");
+		});		
+	});
+</script>
 #{/results}#
 #(resultTable)#::</table>#(/resultTable)#
-/yacy/user/sidebar_history.html?eventID=#[eventID]#
+
+
+
+
 
 
 

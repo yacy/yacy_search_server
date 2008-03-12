@@ -123,6 +123,8 @@ public class result {
             constraint.set(plasmaCondenser.flag_cat_indexof, true);
         }
         
+        int domainzone = post.getInt("zone", yacyURL.TLD_any_zone_filter);
+        
         // SEARCH
         //final boolean indexDistributeGranted = sb.getConfig(plasmaSwitchboard.INDEX_DIST_ALLOW, "true").equals("true");
         //final boolean indexReceiveGranted = sb.getConfig("allowReceiveIndex", "true").equals("true");
@@ -182,7 +184,7 @@ public class result {
                     20,
                     constraint,
                     true,
-                    yacyURL.TLD_any_zone_filter,
+                    domainzone,
                     client);
 
             
@@ -241,10 +243,12 @@ public class result {
             for (int i = 0; i < theQuery.displayResults(); i++) {
                 prop.put("results_" + i + "_item", offset + i);
                 prop.put("results_" + i + "_eventID", theQuery.id(false));
+                prop.put("results_" + i + "_ID", theQuery.id(false).substring(1,6));
             }
             prop.put("results", theQuery.displayResults());
             prop.put("resultTable", (contentdomCode <= 1) ? "0" : "1");
             prop.put("eventID", theQuery.id(false)); // for bottomline
+            prop.put("ID", theQuery.id(false).substring(1,6)); // for bottomline            
             
             // process result of search
             if (filtered.size() > 0) {
@@ -300,8 +304,8 @@ public class result {
         prop.putHTML("rss_query", querystring, true);
         prop.put("rss_queryenc", yacyURL.escape(querystring.replace(' ', '+')));
 
-        sb.localSearchLastAccess = System.currentTimeMillis();      
-
+        sb.localSearchLastAccess = System.currentTimeMillis();
+        
         // return rewrite properties
         return prop;
     }

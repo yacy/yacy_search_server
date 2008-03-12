@@ -20,25 +20,22 @@
   <script src="js/jquery.field.min.js" type="text/javascript"></script>
   <script src="js/ui.tabs.min.js" type="text/javascript"></script>
   <script type="text/javascript">
-	$(document).ready(function() {
-		$('#container > ul').tabs();
+	$(function() {		
+		var $tabs = $('#container > ul').tabs();		
 		insert_sidebar();
 		$('#searchbox').submit(function() {
 			var tabnr = $('#container > ul').tabs('length');			
 			var result = "result.html?" + $('#searchbox').formSerialize();
-			var tabname = "*" + $("input[@name='search']").getValue();		
-			$('#container > ul').tabs('add', '#empty', tabname);
-			$('#container > ul').tabs('select', tabnr);
-			$('#container > ul').tabs('url', tabnr, result);
-			$('#container > ul').tabs('load', tabnr);
+			var tabname = $("input[@name='search']").getValue();		
+			$('<div id='+tabname+'</div>').appendTo('#container');
+			$tabs.tabs('add', result, '*'+tabname);
+			$tabs.tabs('select',tabnr);
 			return false;
 		});
 	});
 	function insert_sidebar() {
 		$('<div id="pager" class="boxed"></div>').appendTo('#sidebar')
-		$("#pager").load("sidebar/sidebar_pager.html");
-		$('<div id="example" class="boxed"></div>').appendTo('#sidebar')
-		$("#example").load("sidebar/sidebar.html");	
+		$("#pager").load("sidebar/sidebar_pager.html");		
 	}
   </script>  
 </head>
@@ -95,8 +92,7 @@
 		<ul>
 			<li><a href="welcome.html" title="Welcome"><span>Welcome</span></a></li>
 			<li><a href="ymarks.html" title="Ymarks"><span>Y-Marks</span></a></li>			
-		</ul>
-		<div id="empty"></div>
+		</ul>		
 	</div>	
 	<div id="sidebar" class="sidebar"><!-- Sidebar wird dynamisch geladen --></div>
 </body>
