@@ -61,15 +61,18 @@ import de.anomic.plasma.plasmaParser;
 import de.anomic.plasma.plasmaSwitchboard;
 import de.anomic.plasma.cache.ftp.ResourceInfo;
 import de.anomic.server.logging.serverLog;
+import de.anomic.yacy.yacyURL;
 
 public class plasmaFTPLoader {
 
     private final plasmaSwitchboard sb;
     private final serverLog log;
+    private final int maxFileSize;
 
     public plasmaFTPLoader(final plasmaSwitchboard sb, final serverLog log) {
         this.sb = sb;
         this.log = log;
+        maxFileSize = (int) sb.getConfigLong("crawler.ftp.maxFileSize", -1l);
     }
 
     protected plasmaHTCache.Entry createCacheEntry(final plasmaCrawlEntry entry, final String mimeType,
@@ -79,63 +82,40 @@ public class plasmaFTPLoader {
                 sb.profilesActiveCrawls.getEntry(entry.profileHandle()));
     }
 
+    /**
+     * Loads the entry from a ftp-server
+     * 
+     * @param entry
+     * @return
+     */
     public plasmaHTCache.Entry load(final plasmaCrawlEntry entry) {
+        final yacyURL entryUrl = entry.url();
+        final String fullPath = entryUrl.getPath();
 
-        final ByteArrayOutputStream bout = new ByteArrayOutputStream();
-        final PrintStream out = new PrintStream(bout);
-
-        final ByteArrayOutputStream berr = new ByteArrayOutputStream();
-        final PrintStream err = new PrintStream(berr);
-
-        // create a new ftp client
-        final ftpc ftpClient = new ftpc(System.in, out, err);
-
-        // get username and password
-        final String userInfo = entry.url().getUserInfo();
-        String userName = "anonymous", userPwd = "anonymous";
-        if (userInfo != null) {
-            final int pos = userInfo.indexOf(":");
-            if (pos != -1) {
-                userName = userInfo.substring(0, pos);
-                userPwd = userInfo.substring(pos + 1);
+        // determine filename and path
+        String file, path;
+        if (fullPath.endsWith("/")) {
+            file = "";
+            path = fullPath;
+        } else {
+            final int pos = fullPath.lastIndexOf("/");
+            if (pos == -1) {
+                file = fullPath;
+                path = "/";
+            } else {
+                path = fullPath.substring(0, pos + 1);
+                file = fullPath.substring(pos + 1);
             }
         }
+        assert path.endsWith("/") : "FTPLoader: path is not a path: '" + path + "'";
 
-        // get server name, port and file path
-        final String host = entry.url().getHost();
-        String fullPath = entry.url().getPath();
-        final int port = entry.url().getPort();
+        // stream for ftp-client errors
+        final ByteArrayOutputStream berr = new ByteArrayOutputStream();
+        final ftpc ftpClient = createFTPClient(berr);
 
         plasmaHTCache.Entry htCache = null;
         try {
-            // open a connection to the ftp server
-            if (port == -1) {
-                ftpClient.exec("open " + host, false);
-            } else {
-                ftpClient.exec("open " + host + " " + port, false);
-            }
-
-            // login to the server
-            ftpClient.exec("user " + userName + " " + userPwd, false);
-
-            // change transfer mode to binary
-            ftpClient.exec("binary", false);
-
-            // determine filename and path
-            String file, path;
-            if (fullPath.endsWith("/")) {
-                file = "";
-                path = fullPath;
-            } else {
-                final int pos = fullPath.lastIndexOf("/");
-                if (pos == -1) {
-                    file = fullPath;
-                    path = "/";
-                } else {
-                    path = fullPath.substring(0, pos + 1);
-                    file = fullPath.substring(pos + 1);
-                }
-            }
+            openConnection(ftpClient, entryUrl);
 
             // testing if the specified file is a directory
             if (file.length() > 0) {
@@ -144,86 +124,45 @@ public class plasmaFTPLoader {
                 // testing if the current name is a directoy
                 final boolean isFolder = ftpClient.isFolder(file);
                 if (isFolder) {
-                    fullPath = fullPath + "/";
+                    path = fullPath + "/";
                     file = "";
                 }
             }
 
             // creating a cache file object
-            final File cacheFile = plasmaHTCache.getCachePath(entry.url());
-
-            // TODO: aborting download if content is to long ...
+            final File cacheFile = plasmaHTCache.getCachePath(entryUrl);
 
             // TODO: invalid file path check
 
             // testing if the file already exists
             if (cacheFile.isFile()) {
                 // delete the file if it already exists
-                plasmaHTCache.deleteURLfromCache(entry.url());
+                plasmaHTCache.deleteURLfromCache(entryUrl);
             } else {
                 // create parent directories
                 cacheFile.getParentFile().mkdirs();
             }
 
-            String mimeType;
-            Date fileDate;
             if (file.length() == 0) {
-                // getting the dirlist
-                mimeType = "text/html";
-                fileDate = new Date();
-
+                // directory -> get list of files
                 // create a htcache entry
-                htCache = createCacheEntry(entry, mimeType, fileDate);
-
-                // generate the dirlist
-                final StringBuffer dirList = ftpClient.dirhtml(fullPath);
-
-                if (dirList != null && dirList.length() > 0) {
-                    try {
-                        // write it into a file
-                        final PrintWriter writer = new PrintWriter(new FileOutputStream(cacheFile), false);
-                        writer.write(dirList.toString());
-                        writer.flush();
-                        writer.close();
-                    } catch (final Exception e) {
-                        log.logInfo("Unable to write dirlist for URL " + entry.url().toString());
-                        htCache = null;
-                    }
+                htCache = createCacheEntry(entry, "text/html", new Date());
+                if (!generateDirlist(ftpClient, entry, path, cacheFile)) {
+                    htCache = null;
                 }
             } else {
-                // determine the mimetype of the resource
-                final String extension = plasmaParser.getFileExt(entry.url());
-                mimeType = plasmaParser.getMimeTypeByFileExt(extension);
-
-                // if the mimetype and file extension is supported we start to
-                // download the file
-                if (plasmaParser.supportedContent(plasmaParser.PARSER_MODE_CRAWLER, entry.url(), mimeType)) {
-
-                    // TODO: determine the real file date
-                    fileDate = new Date();
-
-                    // create a htcache entry
-                    htCache = createCacheEntry(entry, mimeType, fileDate);
-
-                    // change into working directory
-                    // ftpClient.exec("cd \"" + path + "\"", false);
-
-                    // download the remote file
-                    ftpClient.exec("get \"" + fullPath + "\" \"" + cacheFile.getAbsolutePath() + "\"", false);
-                } else {
-                    // if the response has not the right file type then reject
-                    // file
-                    log.logInfo("REJECTED WRONG MIME/EXT TYPE " + mimeType + " for URL " + entry.url().toString());
-                    sb.crawlQueues.errorURL.newEntry(entry, null, new Date(), 1,
-                            plasmaCrawlEURL.DENIED_WRONG_MIMETYPE_OR_EXT);
-                    return null;
+                // file -> download
+                try {
+                    htCache = getFile(ftpClient, entry, cacheFile);
+                } catch (final Exception e) {
                 }
             }
 
             // pass the downloaded resource to the cache manager
             if (berr.size() > 0 || htCache == null) {
-                // if the response has not the right file type then reject file
-                log.logWarning("Unable to download URL " + entry.url().toString() + "\nErrorlog: " + berr.toString());
+                // some error logging
+                final String detail = (berr.size() > 0) ? "\n    Errorlog: " + berr.toString() : "";
+                log.logWarning("Unable to download URL " + entry.url().toString() + detail);
                 sb.crawlQueues.errorURL.newEntry(entry, null, new Date(), 1,
                         plasmaCrawlEURL.DENIED_SERVER_DOWNLOAD_ERROR);
 
@@ -238,10 +177,149 @@ public class plasmaFTPLoader {
 
             return htCache;
         } finally {
-            // closing connection
-            ftpClient.exec("close", false);
-            ftpClient.exec("exit", false);
+            closeConnection(ftpClient);
         }
+    }
+
+    /**
+     * @param ftpClient
+     */
+    private void closeConnection(final ftpc ftpClient) {
+        // closing connection
+        ftpClient.exec("close", false);
+        ftpClient.exec("exit", false);
+    }
+
+    /**
+     * establish a connection to the ftp server (open, login, set transfer mode)
+     * 
+     * @param ftpClient
+     * @param host
+     * @param port
+     */
+    private void openConnection(final ftpc ftpClient, final yacyURL entryUrl) {
+        // get username and password
+        final String userInfo = entryUrl.getUserInfo();
+        String userName = "anonymous", userPwd = "anonymous";
+        if (userInfo != null) {
+            final int pos = userInfo.indexOf(":");
+            if (pos != -1) {
+                userName = userInfo.substring(0, pos);
+                userPwd = userInfo.substring(pos + 1);
+            }
+        }
+
+        // get server name and port
+        final String host = entryUrl.getHost();
+        final int port = entryUrl.getPort();
+        // open a connection to the ftp server
+        if (port == -1) {
+            ftpClient.exec("open " + host, false);
+        } else {
+            ftpClient.exec("open " + host + " " + port, false);
+        }
+
+        // login to the server
+        ftpClient.exec("user " + userName + " " + userPwd, false);
+
+        // change transfer mode to binary
+        ftpClient.exec("binary", false);
+    }
+
+    /**
+     * @param ftpClient
+     * @param entry
+     * @param htCache
+     * @param cacheFile
+     * @return
+     * @throws Exception
+     */
+    private plasmaHTCache.Entry getFile(final ftpc ftpClient, final plasmaCrawlEntry entry, final File cacheFile)
+            throws Exception {
+        // determine the mimetype of the resource
+        final yacyURL entryUrl = entry.url();
+        final String extension = plasmaParser.getFileExt(entryUrl);
+        final String mimeType = plasmaParser.getMimeTypeByFileExt(extension);
+        final String path = entryUrl.getPath();
+
+        // if the mimetype and file extension is supported we start to download
+        // the file
+        plasmaHTCache.Entry htCache = null;
+        if (plasmaParser.supportedContent(plasmaParser.PARSER_MODE_CRAWLER, entryUrl, mimeType)) {
+            // aborting download if content is too long
+            final int size = ftpClient.fileSize(path);
+            if (size <= maxFileSize) {
+                // timeout for download
+                ftpClient.setDataTimeoutByMaxFilesize(size);
+
+                // determine the file date
+                final Date fileDate = ftpClient.entryDate(path);
+
+                // create a htcache entry
+                htCache = createCacheEntry(entry, mimeType, fileDate);
+
+                // download the remote file
+                ftpClient.exec("get \"" + path + "\" \"" + cacheFile.getAbsolutePath() + "\"", false);
+            } else {
+                log.logInfo("REJECTED TOO BIG FILE with size " + size + " Bytes for URL " + entry.url().toString());
+                sb.crawlQueues.errorURL.newEntry(entry, null, new Date(), 1,
+                        plasmaCrawlEURL.DENIED_FILESIZE_LIMIT_EXCEEDED);
+                throw new Exception("filesize too big: " + size + " bytes");
+            }
+        } else {
+            // if the response has not the right file type then reject file
+            log.logInfo("REJECTED WRONG MIME/EXT TYPE " + mimeType + " for URL " + entry.url().toString());
+            sb.crawlQueues.errorURL.newEntry(entry, null, new Date(), 1, plasmaCrawlEURL.DENIED_WRONG_MIMETYPE_OR_EXT);
+            throw new Exception("response has not the right file type -> rejected");
+        }
+        return htCache;
+    }
+
+    /**
+     * @param ftpClient
+     * @param entry
+     * @param cacheFile
+     * @return
+     */
+    private boolean generateDirlist(final ftpc ftpClient, final plasmaCrawlEntry entry, final String path,
+            final File cacheFile) {
+        // getting the dirlist
+        final yacyURL entryUrl = entry.url();
+
+        // generate the dirlist
+        final StringBuilder dirList = ftpClient.dirhtml(path);
+
+        if (dirList != null && dirList.length() > 0) {
+            try {
+                // write it into a file
+                final PrintWriter writer = new PrintWriter(new FileOutputStream(cacheFile), false);
+                writer.write(dirList.toString());
+                writer.flush();
+                writer.close();
+                return true;
+            } catch (final Exception e) {
+                log.logInfo("Unable to write dirlist for URL " + entryUrl.toString());
+            }
+        }
+        return false;
+    }
+
+    /**
+     * create a new ftp client
+     * 
+     * @param berr
+     * @return
+     */
+    private ftpc createFTPClient(final ByteArrayOutputStream berr) {
+        // error
+        final PrintStream err = new PrintStream(berr);
+
+        final ftpc ftpClient = new ftpc(System.in, null, err);
+
+        // set timeout
+        ftpClient.setDataTimeoutByMaxFilesize(maxFileSize);
+
+        return ftpClient;
     }
 
 }
