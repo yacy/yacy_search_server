@@ -81,7 +81,7 @@ public class odtDetector implements MagicDetector {
         File dstFile = null;
         try {
             dstFile = File.createTempFile("mimeTypeParser",".tmp");
-            serverFileUtils.write(data,dstFile);
+            serverFileUtils.copy(data,dstFile);
             return process(dstFile, offset, length, bitmask, comparator, mimeType, params);
         } catch (IOException e) {
             return null;

@@ -137,7 +137,7 @@ public final class transfer {
                     File file = new File(path, filename);
                     try {
                         if (file.getCanonicalPath().toString().startsWith(path.getCanonicalPath().toString())){
-                            serverFileUtils.write(fileString.getBytes(), file);
+                            serverFileUtils.copy(fileString.getBytes(), file);
                             String md5t = serverCodings.encodeMD5Hex(file);
                             if (md5t.equals(md5)) {
                                 prop.put("response", "ok");

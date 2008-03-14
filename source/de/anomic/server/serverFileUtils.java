@@ -72,10 +72,10 @@ import de.anomic.tools.nxTools;
 
 public final class serverFileUtils {
 
-    private static final int DEFAULT_BUFFER_SIZE = 512;
+    private static final int DEFAULT_BUFFER_SIZE = 1024; // this is also the maximum chunk size
     
     public static long copy(InputStream source, OutputStream dest) throws IOException {
-        return copy(source,dest, -1);
+        return copy(source, dest, -1);
     }
     
     /**
@@ -133,7 +133,7 @@ public final class serverFileUtils {
     }
     
     public static int copy(Reader source, Writer dest) throws IOException {        
-        char[] buffer = new char[4096];
+        char[] buffer = new char[DEFAULT_BUFFER_SIZE];
         int count = 0;
         int n = 0;
         try {
@@ -151,7 +151,7 @@ public final class serverFileUtils {
     public static void copy(InputStream source, File dest) throws IOException {
         copy(source,dest,-1);
     }
-
+    
     /**
     * Copies an InputStream to a File.
     * @param source    InputStream
@@ -213,10 +213,6 @@ public final class serverFileUtils {
         }
     }
 
-    public static void copy(File source, File dest) throws IOException {
-        copy(source,dest,-1);
-    }
-    
     /**
     * Copies a File to a File.
     * @param source    File
@@ -227,17 +223,26 @@ public final class serverFileUtils {
     * @see #copyRange(File source, OutputStream dest, int start)
     * @see #copy(File source, OutputStream dest)
     */
-    public static void copy(File source, File dest, long count) throws IOException {
+    public static void copy(File source, File dest) throws IOException {
         FileInputStream fis = null;
         FileOutputStream fos = null;
         try {
             fis = new FileInputStream(source);
             fos = new FileOutputStream(dest);
-            copy(fis, fos, count);
+            copy(fis, fos, -1);
         } finally {
             if (fis != null) try {fis.close();} catch (Exception e) {}
             if (fos != null) try {fos.close();} catch (Exception e) {}
         }
+    }
+
+    public static void copy(byte[] source, OutputStream dest) throws IOException {
+        dest.write(source, 0, source.length);
+        dest.flush();
+    }
+    
+    public static void copy(byte[] source, File dest) throws IOException {
+        copy(new ByteArrayInputStream(source), dest);
     }
 
     public static byte[] read(InputStream source) throws IOException {
@@ -297,25 +302,11 @@ public final class serverFileUtils {
         GZIPOutputStream zipOut = null;
         try {
             zipOut = new GZIPOutputStream(dest);
-            write(source, zipOut);
+            copy(source, zipOut);
             zipOut.close();
         } finally {
             if (zipOut != null) try { zipOut.close(); } catch (Exception e) {}
         }
-    }
-    
-    public static void write(String source, Writer dest) throws IOException {
-        dest.write(source);
-        dest.flush();
-    }
-
-    public static void write(byte[] source, OutputStream dest) throws IOException {
-        dest.write(source, 0, source.length);
-        dest.flush();
-    }
-
-    public static void write(byte[] source, File dest) throws IOException {
-        copy(new ByteArrayInputStream(source), dest);
     }
     
     /**

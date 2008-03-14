@@ -328,7 +328,7 @@ public final class serverSystem {
     }
 
     public static void deployScript(File scriptFile, String theScript) throws IOException {
-        serverFileUtils.write(theScript.getBytes(), scriptFile);
+        serverFileUtils.copy(theScript.getBytes(), scriptFile);
         try {
             Runtime.getRuntime().exec("chmod 755 " + scriptFile.getAbsolutePath().replaceAll(" ", "\\ ")).waitFor();
         } catch (InterruptedException e) {

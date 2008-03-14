@@ -435,7 +435,7 @@ public final class httpTemplate {
 			}
                      */
 
-                    serverFileUtils.write(replacement, out);
+                    serverFileUtils.copy(replacement, out);
                 } else {
                     // inconsistency, simply finalize this
                     serverFileUtils.copy(pis, out);
@@ -479,7 +479,7 @@ public final class httpTemplate {
                 byte[] tmp=new byte[2];
                 tmp[0]=hash;
                 tmp[1]=(byte)bb;
-                serverFileUtils.write(tmp, out);
+                serverFileUtils.copy(tmp, out);
             }
         }
         //System.out.println(structure.toString()); //DEBUG

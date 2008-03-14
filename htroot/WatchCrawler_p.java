@@ -262,7 +262,7 @@ public class WatchCrawler_p {
                                 htmlFilterContentScraper scraper = new htmlFilterContentScraper(new yacyURL(file));
                                 //OutputStream os = new htmlFilterOutputStream(null, scraper, null, false);
                                 Writer writer = new htmlFilterWriter(null,null,scraper,null,false);
-                                serverFileUtils.write(fileString,writer);
+                                serverFileUtils.copy(fileString, writer);
                                 writer.close();
                                 
                                 //String headline = scraper.getHeadline();

@@ -1236,7 +1236,7 @@ public final class httpd implements serverHandler {
 
             if (! method.equals(httpHeader.METHOD_HEAD)) {
                 // write the array to the client
-                serverFileUtils.write(result, respond);
+                serverFileUtils.copy(result, respond);
             }
             respond.flush();
         } catch (Exception e) { 

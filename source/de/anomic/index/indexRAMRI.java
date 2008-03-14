@@ -178,7 +178,7 @@ public final class indexRAMRI implements indexRI {
         if (writeBuffer != null) {
             serverByteBuffer bb = writeBuffer.getBuffer();
             //System.out.println("*** byteBuffer size = " + bb.length());
-            serverFileUtils.write(bb.getBytes(), indexDumpFile);
+            serverFileUtils.copy(bb.getBytes(), indexDumpFile);
             writeBuffer.close();
         }
         dumpArray.close();

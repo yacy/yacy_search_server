@@ -183,7 +183,7 @@ public class kelondroRowCollection {
     }
     
     public void saveCollection(File file) throws IOException {
-        serverFileUtils.write(exportCollection(), file);
+        serverFileUtils.copy(exportCollection(), file);
     }
 
     public kelondroRow row() {

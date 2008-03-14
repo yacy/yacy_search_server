@@ -204,7 +204,7 @@ public class kelondroAttrSeq {
         if (out.toString().endsWith(".gz")) {
             serverFileUtils.writeAndGZip((new String(sb)).getBytes(), out);
         } else {
-            serverFileUtils.write((new String(sb)).getBytes(), out);
+            serverFileUtils.copy((new String(sb)).getBytes(), out);
         }
     }
     

@@ -88,7 +88,7 @@ public class getpageinfo_p {
                     htmlFilterContentScraper scraper = new htmlFilterContentScraper(u);
                     //OutputStream os = new htmlFilterOutputStream(null, scraper, null, false);
                     Writer writer = new htmlFilterWriter(null,null,scraper,null,false);
-                    serverFileUtils.write(contentString,writer);
+                    serverFileUtils.copy(contentString,writer);
                     writer.close();
                     
                     // put the document title 

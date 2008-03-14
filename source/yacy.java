@@ -286,7 +286,7 @@ public final class yacy {
             } catch (IOException e) {}
 
             final File htdocsReadme = new File(htDocsPath, "readme.txt");
-            if (!(htdocsReadme.exists())) try {serverFileUtils.write((
+            if (!(htdocsReadme.exists())) try {serverFileUtils.copy((
                     "This is your root directory for individual Web Content\r\n" +
                     "\r\n" +
                     "Please place your html files into the www subdirectory.\r\n" +

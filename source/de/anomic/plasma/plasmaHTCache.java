@@ -373,7 +373,7 @@ public final class plasmaHTCache {
         try {
             deleteFile(file);
             file.getParentFile().mkdirs();
-            serverFileUtils.write(array, file);
+            serverFileUtils.copy(array, file);
         } catch (FileNotFoundException e) {
             // this is the case of a "(Not a directory)" error, which should be prohibited
             // by the shallStoreCache() property. However, sometimes the error still occurs

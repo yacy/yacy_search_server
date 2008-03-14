@@ -768,7 +768,7 @@ public final class httpdFileHandler {
                                     httpVersion, 200, null, mimeType, result.length,
                                     targetDate, null, tp.getOutgoingHeader(),
                                     contentEncoding, null, nocache);
-                            serverFileUtils.write(result, out);
+                            serverFileUtils.copy(result, out);
                         }  
                     }
                 } else { // no html
