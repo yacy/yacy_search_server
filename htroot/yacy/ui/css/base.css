@@ -126,9 +126,9 @@ table.ytable thead tr .headerSortDown, table.ytable thead tr .headerSortUp {
 /* YaCy Search ---------------------------*/
 
 div.searchresults {
-  	width:70%;
+  	width:100%;
 	margin-top: 1.5em;
-	margin-left: 25px;	
+	margin-left: 5px;	
 }
 div.searchresults.hidden {
   display:none;
@@ -137,12 +137,12 @@ h3.linktitle {
 	margin:2px;
 	padding-left: 20px;
 	margin-bottom: -0.5em;
-        font-size: 0.8em;
+        font-size: 1.0em;
         line-height: 1.2em;
 }
 .snippet {
   	font-style:italic;
-	font-size: 0.7em;
+	font-size: 0.9em;
   	color: #808080;
   	line-height: 1.2em;
   	margin-bottom:-1em;
@@ -156,7 +156,7 @@ h3.linktitle {
   	text-decoration:none;
 }
 .searchresults .url {
-	font-size: 0.7em;
+	font-size: 0.9em;
   	line-height: 1.2em;
   	margin-bottom:0.6em;
   	margin-left:22px;

@@ -20,15 +20,22 @@
   <script src="js/jquery.field.min.js" type="text/javascript"></script>
   <script src="js/ui.tabs.min.js" type="text/javascript"></script>
   <script type="text/javascript">
-	$(function() {		
-		var $tabs = $('#container > ul').tabs();		
+	$(function() {				
+		var $tabs = $('#container ul').tabs()
+        	.bind('add.ui-tabs', function(e, ui) {
+            	var li = $(ui.tab).parents('li:eq(0)')[0];
+                $('<img class="close" src="/yacy/ui/img/cancel.png" border="0"/>').appendTo(li)
+                	.bind('click', function() {                    	
+                        $tabs.tabs('remove', $('li', $tabs).index(li));
+                   	});
+             });
 		insert_sidebar();
 		$('#searchbox').submit(function() {
 			var tabnr = $('#container > ul').tabs('length');			
 			var result = "result.html?" + $('#searchbox').formSerialize();
 			var tabname = $("input[@name='search']").getValue();		
 			$('<div id='+tabname+'</div>').appendTo('#container');
-			$tabs.tabs('add', result, '*'+tabname);
+			$tabs.tabs('add', result, '*' + tabname);
 			$tabs.tabs('select',tabnr);
 			return false;
 		});
@@ -70,7 +77,7 @@
 										<label for="appl">Applications</label>
 								</div>
 								<input type="hidden" name="former" value="" />
-								<input type="hidden" name="count" value="150" />
+								<input type="hidden" name="count" value="3" />
 								<input type="hidden" name="offset" value="0" />
 								<input type="hidden" name="resource" value="global" />
 								<input type="hidden" name="urlmaskfilter" value=".*" />

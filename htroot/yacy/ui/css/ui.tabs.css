@@ -31,6 +31,7 @@
     float: left;
     margin: 0 0 0 1px;
     min-width: 84px; /* be nice to Opera */
+    position: relative; /* close button */
 }
 .ui-tabs-nav a, .ui-tabs-nav a span {
     display: block;
@@ -69,6 +70,8 @@
 }
 .ui-tabs-nav .ui-tabs-selected a span {
     padding-bottom: 1px;
+    padding-right: 15px; /* close button */
+    
 }
 .ui-tabs-nav .ui-tabs-selected a, .ui-tabs-nav a:hover, .ui-tabs-nav a:focus, .ui-tabs-nav a:active {
     background-position: 100% -150px;
@@ -110,4 +113,21 @@
 *:first-child+html .ui-tabs-nav  { /* @ IE 7 Standards Mode - do not group selectors, otherwise IE 6 will ignore complete rule (because of the unknown + combinator)... */
     display: inline-block;
 }
+
+/* close button */
+.close {
+        display: none;
+        position: absolute;
+        top: 8px;
+        right: 7px;
+        z-index: 2000;
+        width: 12px;
+        height: 12px;
+	border: 0;
+
+}
+.ui-tabs-selected .close {
+        display: block;
+}
+
 
