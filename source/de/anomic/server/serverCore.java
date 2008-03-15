@@ -420,7 +420,7 @@ public final class serverCore extends serverAbstractThread implements serverThre
                 controlSocket.setTcpNoDelay(true);
                 
                 // set a non-zero linger, that means that a socket.close() blocks until all data is written
-                controlSocket.setSoLinger(true, this.timeout);
+                controlSocket.setSoLinger(false, this.timeout);
                 
                 // ensure that MTU-48 is not exceeded to prevent that routers cannot handle large data packets
                 // read http://www.cisco.com/warp/public/105/38.shtml for explanation

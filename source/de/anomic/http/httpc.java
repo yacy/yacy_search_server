@@ -400,7 +400,7 @@ public final class httpc {
             assert timeout >= 1000;
             this.socket.setSoTimeout(timeout); // waiting time for read
             this.socket.setTcpNoDelay(true); // no accumulation until buffer is full
-            this.socket.setSoLinger(true, timeout); // wait for all data being written on close()
+            this.socket.setSoLinger(false, timeout); // !wait for all data being written on close()
             this.socket.setSendBufferSize(1440); // read http://www.cisco.com/warp/public/105/38.shtml
             this.socket.setReceiveBufferSize(1440); // read http://www.cisco.com/warp/public/105/38.shtml
             
