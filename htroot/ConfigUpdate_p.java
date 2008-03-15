@@ -114,7 +114,7 @@ public class ConfigUpdate_p {
         
         // version information
         String versionstring = yacyVersion.combined2prettyVersion(sb.getConfig("version","0.1"));
-        prop.put("versionpp", versionstring);
+        prop.put("candeploy_versionpp", versionstring);
         boolean devenvironment = versionstring.startsWith("dev");
         double thisVersion = Double.parseDouble(sb.getConfig("version","0.1"));
         // cut off the SVN Rev in the Version
