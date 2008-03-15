@@ -245,9 +245,7 @@ public final class plasmaSearchEvent {
             
             // sort the local containers and truncate it to a limited count,
             // so following sortings together with the global results will be fast
-            synchronized (rankedCache) {
-                rankedCache.execQuery();
-            }
+            rankedCache.execQuery();
         }
     }
 

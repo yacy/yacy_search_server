@@ -423,7 +423,9 @@ public final class serverCore extends serverAbstractThread implements serverThre
                 controlSocket.setSoLinger(true, this.timeout);
                 
                 // ensure that MTU-48 is not exceeded to prevent that routers cannot handle large data packets
+                // read http://www.cisco.com/warp/public/105/38.shtml for explanation
                 controlSocket.setSendBufferSize(1440);
+                controlSocket.setReceiveBufferSize(1440);
                 
                 // create session
                 Session connection = new Session(sessionThreadGroup, controlSocket, this.timeout);

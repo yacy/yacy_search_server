@@ -1719,6 +1719,7 @@ public final class plasmaSwitchboard extends serverAbstractSwitch implements ser
         log.logConfig("SWITCHBOARD SHUTDOWN STEP 2: sending termination signal to threaded indexing");
         // closing all still running db importer jobs
         this.dbImportManager.close();
+        httpc.closeAllConnections();
         crawlQueues.close();
         wikiDB.close();
         blogDB.close();
@@ -1733,7 +1734,6 @@ public final class plasmaSwitchboard extends serverAbstractSwitch implements ser
         parser.close();
         plasmaHTCache.close();
         sbQueue.close();
-        httpc.closeAllConnections();
         webStructure.flushCitationReference("crg");
         webStructure.close();
         log.logConfig("SWITCHBOARD SHUTDOWN STEP 3: sending termination signal to database manager (stand by...)");

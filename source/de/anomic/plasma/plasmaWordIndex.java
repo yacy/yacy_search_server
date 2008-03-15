@@ -340,24 +340,18 @@ public final class plasmaWordIndex implements indexRI {
         
         // get from cache
         indexContainer container;
-        synchronized (dhtOutCache) {
-        	container = dhtOutCache.getContainer(wordHash, urlselection);
-        }
-        synchronized (dhtInCache) {
-        	if (container == null) {
-        		container = dhtInCache.getContainer(wordHash, urlselection);
-        	} else {
-        		container.addAllUnique(dhtInCache.getContainer(wordHash, urlselection));
-        	}
+        container = dhtOutCache.getContainer(wordHash, urlselection);
+        if (container == null) {
+            container = dhtInCache.getContainer(wordHash, urlselection);
+        } else {
+        	container.addAllUnique(dhtInCache.getContainer(wordHash, urlselection));
         }
         
         // get from collection index
-        synchronized (this) {
-            if (container == null) {
-                container = collections.getContainer(wordHash, urlselection);
-            } else {
-                container.addAllUnique(collections.getContainer(wordHash, urlselection));
-            }
+        if (container == null) {
+            container = collections.getContainer(wordHash, urlselection);
+        } else {
+            container.addAllUnique(collections.getContainer(wordHash, urlselection));
         }
         
         if (container == null) return null;
@@ -443,10 +437,8 @@ public final class plasmaWordIndex implements indexRI {
     public void close() {
         dhtInCache.close();
         dhtOutCache.close();
-        synchronized (this) {
-            collections.close();
-            loadedURL.close();
-        }
+        collections.close();
+        loadedURL.close();
     }
 
     public indexContainer deleteContainer(String wordHash) {
@@ -455,29 +447,17 @@ public final class plasmaWordIndex implements indexRI {
                 indexRWIRowEntry.urlEntryRow,
                 dhtInCache.sizeContainer(wordHash) + dhtOutCache.sizeContainer(wordHash) + collections.indexSize(wordHash)
                 );
-        synchronized (dhtInCache) {
-        	c.addAllUnique(dhtInCache.deleteContainer(wordHash));
-        }
-        synchronized (dhtOutCache) {
-        	c.addAllUnique(dhtOutCache.deleteContainer(wordHash));
-        }
-        synchronized (this) {
-            c.addAllUnique(collections.deleteContainer(wordHash));
-        }
+        c.addAllUnique(dhtInCache.deleteContainer(wordHash));
+        c.addAllUnique(dhtOutCache.deleteContainer(wordHash));
+        c.addAllUnique(collections.deleteContainer(wordHash));
         return c;
     }
     
     public boolean removeEntry(String wordHash, String urlHash) {
         boolean removed = false;
-        synchronized (dhtInCache) {
-        	removed = removed | (dhtInCache.removeEntry(wordHash, urlHash));
-        }
-        synchronized (dhtOutCache) {
-        	removed = removed | (dhtOutCache.removeEntry(wordHash, urlHash));
-        }
-        synchronized (this) {
-            removed = removed | (collections.removeEntry(wordHash, urlHash));
-        }
+        removed = removed | (dhtInCache.removeEntry(wordHash, urlHash));
+        removed = removed | (dhtOutCache.removeEntry(wordHash, urlHash));
+        removed = removed | (collections.removeEntry(wordHash, urlHash));
         return removed;
     }
     
@@ -494,29 +474,17 @@ public final class plasmaWordIndex implements indexRI {
     
     public int removeEntries(String wordHash, Set<String> urlHashes) {
         int removed = 0;
-        synchronized (dhtInCache) {
-            removed += dhtInCache.removeEntries(wordHash, urlHashes);
-        }
-        synchronized (dhtOutCache) {
-            removed += dhtOutCache.removeEntries(wordHash, urlHashes);
-        }
-        synchronized (this) {
-            removed += collections.removeEntries(wordHash, urlHashes);
-        }
+        removed += dhtInCache.removeEntries(wordHash, urlHashes);
+        removed += dhtOutCache.removeEntries(wordHash, urlHashes);
+        removed += collections.removeEntries(wordHash, urlHashes);
         return removed;
     }
     
     public String removeEntriesExpl(String wordHash, Set<String> urlHashes) {
         String removed = "";
-        synchronized (dhtInCache) {
-            removed += dhtInCache.removeEntries(wordHash, urlHashes) + ", ";
-        }
-        synchronized (dhtOutCache) {
-            removed += dhtOutCache.removeEntries(wordHash, urlHashes) + ", ";
-        }
-        synchronized (this) {
-            removed += collections.removeEntries(wordHash, urlHashes);
-        }
+        removed += dhtInCache.removeEntries(wordHash, urlHashes) + ", ";
+        removed += dhtOutCache.removeEntries(wordHash, urlHashes) + ", ";
+        removed += collections.removeEntries(wordHash, urlHashes);
         return removed;
     }
     

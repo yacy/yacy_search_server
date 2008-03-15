@@ -395,12 +395,14 @@ public final class httpc {
             // trying to establish a connection to the address
             this.initTime = System.currentTimeMillis();
             this.lastIO = System.currentTimeMillis();
-            this.socket.setKeepAlive(false);
+            this.socket.setKeepAlive(true);
             // set socket timeout and keep alive behavior
             assert timeout >= 1000;
             this.socket.setSoTimeout(timeout); // waiting time for read
             this.socket.setTcpNoDelay(true); // no accumulation until buffer is full
             this.socket.setSoLinger(true, timeout); // wait for all data being written on close()
+            this.socket.setSendBufferSize(1440); // read http://www.cisco.com/warp/public/105/38.shtml
+            this.socket.setReceiveBufferSize(1440); // read http://www.cisco.com/warp/public/105/38.shtml
             
             // get the connection
             this.socket.connect(address, timeout);
@@ -1411,8 +1413,9 @@ public final class httpc {
         *
         * @param procOS
         * @param file
+         * @throws IOException 
         */
-        public void writeContent(Object procOS, File file) {
+        public void writeContent(Object procOS, File file) throws IOException {
             // this writes the input stream to either another output stream or
             // a file or both.
             FileOutputStream bufferOS = null;
@@ -1421,22 +1424,18 @@ public final class httpc {
             } catch (FileNotFoundException e) {
                 file = null;
             }
-            try {
-                InputStream is = this.getContentInputStream();
-                if (procOS == null) {
-                    writeX(is, null, bufferOS);
-                } else if (procOS instanceof OutputStream) {
-                    writeX(is, (OutputStream) procOS, bufferOS);
-                    //writeContentX(httpc.this.clientInput, this.gzip, this.responseHeader.contentLength(), procOS, bufferOS);
-                } else if (procOS instanceof Writer) {
-                    String charSet = this.responseHeader.getCharacterEncoding();
-                    if (charSet == null) charSet = httpHeader.DEFAULT_CHARSET;
-                    writeX(is, charSet, (Writer) procOS, bufferOS, charSet);                
-                } else {
-                    throw new IllegalArgumentException("Invalid procOS object type '" + procOS.getClass().getName() + "'");
-                }
-            } catch (IOException e) {
-                e.printStackTrace();
+            InputStream is = this.getContentInputStream();
+            if (procOS == null) {
+                writeX(is, null, bufferOS);
+            } else if (procOS instanceof OutputStream) {
+                writeX(is, (OutputStream) procOS, bufferOS);
+                //writeContentX(httpc.this.clientInput, this.gzip, this.responseHeader.contentLength(), procOS, bufferOS);
+            } else if (procOS instanceof Writer) {
+                String charSet = this.responseHeader.getCharacterEncoding();
+                if (charSet == null) charSet = httpHeader.DEFAULT_CHARSET;
+                writeX(is, charSet, (Writer) procOS, bufferOS, charSet);                
+            } else {
+                throw new IllegalArgumentException("Invalid procOS object type '" + procOS.getClass().getName() + "'");
             }
             
             if (bufferOS != null) {
@@ -1451,12 +1450,12 @@ public final class httpc {
         }
         
 
-        public void writeX(InputStream source, OutputStream procOS, OutputStream bufferOS) {
+        public void writeX(InputStream source, OutputStream procOS, OutputStream bufferOS) throws IOException {
             byte[] buffer = new byte[2048];
             int l, c = 0;
             lastIO = System.currentTimeMillis();
             
-            io: while (true) try {
+            io: while (true) {
                 l = source.read(buffer, 0, buffer.length);
                 if (l < 0) break;
                 if (l == 0) try {
@@ -1470,10 +1469,6 @@ public final class httpc {
                 c += l;
                 if (procOS != null) procOS.write(buffer, 0, l);
                 if (bufferOS != null) bufferOS.write(buffer, 0, l);
-            } catch (IOException e) {
-                System.out.println("*** DEBUG: writeX/IOStream terminated with IOException, processed " + c + " bytes. cause: " + e.getMessage());
-                e.printStackTrace();
-                break;
             }
             
             // flush the streams

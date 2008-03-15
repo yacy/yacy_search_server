@@ -99,7 +99,7 @@ public final class yacyClient {
         
         HashMap<String, String> result = null;
         final serverObjects post = yacyNetwork.basicRequestPost(plasmaSwitchboard.getSwitchboard(), null);
-        for (int retry = 0; retry < 3; retry++) try {
+        for (int retry = 0; retry < 4; retry++) try {
             // generate request
             post.put("count", "20");
             post.put("seed", yacyCore.seedDB.mySeed().genSeedStr(post.get("key", "")));
@@ -119,10 +119,10 @@ public final class yacyClient {
             break;
         } catch (Exception e) {
             if (Thread.currentThread().isInterrupted()) {
-                yacyCore.log.logFine("yacyClient.publishMySeed thread '" + Thread.currentThread().getName() + "' interrupted.");
+                yacyCore.log.logWarning("yacyClient.publishMySeed thread '" + Thread.currentThread().getName() + "' interrupted.");
                 return -1;
             } else {
-                yacyCore.log.logFine("yacyClient.publishMySeed thread '" + Thread.currentThread().getName() + "' exception: " + e.getMessage() + "; retry = " + retry); // here VERY OFTEN a 'Connection reset' appears. What is the cause?
+                yacyCore.log.logWarning("yacyClient.publishMySeed thread '" + Thread.currentThread().getName() + "' exception: " + e.getMessage() + "; retry = " + retry); // here VERY OFTEN a 'Connection reset' appears. What is the cause?
                 // try again (go into loop)
             }
             result = null;

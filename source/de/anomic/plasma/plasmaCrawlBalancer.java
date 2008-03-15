@@ -118,6 +118,7 @@ public class plasmaCrawlBalancer {
 
     public synchronized void close() {
         while (domainStacksNotEmpty()) flushOnceDomStacks(0, true); // flush to ram, because the ram flush is optimized
+        size();
         try { flushAllRamStack(); } catch (IOException e) {}
         if (urlFileIndex != null) {
             urlFileIndex.close();

@@ -62,9 +62,9 @@ public class plasmaCrawlNURL {
     public static final int STACK_TYPE_MOVIE    = 12; // put on movie stack
     public static final int STACK_TYPE_MUSIC    = 13; // put on music stack
 
-    private static final long minimumLocalDelta  =  50; // the minimum time difference between access of the same local domain
-    private static final long minimumGlobalDelta = 500; // the minimum time difference between access of the same global domain
-    private static final long maximumDomAge =  60000; // the maximum age of a domain until it is used for another crawl attempt
+    private static final long minimumLocalDelta  =  10; // the minimum time difference between access of the same local domain
+    private static final long minimumGlobalDelta = 333; // the minimum time difference between access of the same global domain
+    private static final long maximumDomAge   =  60000; // the maximum age of a domain until it is used for another crawl attempt
     
     private plasmaCrawlBalancer coreStack;      // links found by crawling to depth-1
     private plasmaCrawlBalancer limitStack;     // links found by crawling at target depth
