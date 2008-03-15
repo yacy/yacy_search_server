@@ -72,6 +72,7 @@ import java.util.Calendar;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 import java.util.Properties;
 import java.util.StringTokenizer;
@@ -88,6 +89,7 @@ public class ftpc {
     private final InputStream in;
     private final PrintStream out;
     private final PrintStream err;
+
     private boolean glob = true; // glob = false -> filenames are taken
     // literally for mget, ..
 
@@ -130,6 +132,11 @@ public class ftpc {
 
     // entry info cache
     private final Map<String, entryInfo> infoCache = new HashMap<String, entryInfo>();
+
+    // date-format in LIST (english month names)
+    private static final SimpleDateFormat lsDateFormat = new SimpleDateFormat("MMM d y H:m", new Locale("en"));
+
+    // TODO: implement RFC 2640 Internationalization
 
     public ftpc() {
         this(System.in, System.out, System.err);
@@ -197,20 +204,20 @@ public class ftpc {
 
             }
         } catch (final Exception e) {
-            errPrintln(logPrefix + "---- Error - ftp exception: " + e);
+            errPrintln("Error - ftp exception: " + e);
             e.printStackTrace(err);
         }
     }
 
     private void errPrintln(final String msg) {
         if (err != null) {
-            err.println(msg);
+            err.println(logPrefix + "---- " + msg);
         }
     }
 
     private void outPrintln(final String msg) {
         if (out != null) {
-            out.println(msg);
+            out.println(logPrefix + msg);
         }
     }
 
@@ -234,7 +241,7 @@ public class ftpc {
                 command = command.substring(pos + 1);
             }
             if (promptIt) {
-                outPrintln(logPrefix + prompt + com);
+                outPrintln(prompt + com);
             }
             cmd = line2args(com);
             try {
@@ -245,15 +252,15 @@ public class ftpc {
                 } else if (ControlSocket == null) {
                     // the error was probably caused because there is no
                     // connection
-                    errPrintln(logPrefix + "---- not connected. no effect.");
+                    errPrintln("not connected. no effect.");
                     e.printStackTrace();
                     return ret;
                 } else {
-                    errPrintln(logPrefix + "---- ftp internal exception: target exception " + e);
+                    errPrintln("ftp internal exception: target exception " + e);
                     return ret;
                 }
             } catch (final IllegalAccessException e) {
-                errPrintln(logPrefix + "---- ftp internal exception: wrong access " + e);
+                errPrintln("ftp internal exception: wrong access " + e);
                 return ret;
             } catch (final NoSuchMethodException e) {
                 // consider first that the user attempted to execute a java
@@ -264,7 +271,7 @@ public class ftpc {
                     try {
                         javaexec(cmd);
                     } catch (final Exception ee) {
-                        errPrintln(logPrefix + "---- Command '" + cmd[0] + "' not supported. Try 'HELP'.");
+                        errPrintln("Command '" + cmd[0] + "' not supported. Try 'HELP'.");
                     }
                 } else {
                     // try a remote exec
@@ -383,41 +390,41 @@ public class ftpc {
 
             // handle result
             if (result != null) {
-                outPrintln(logPrefix + "returns " + result);
+                outPrintln("returns " + result);
             }
 
             // set the local path to the user.dir (which may have changed)
             currentLocalPath = new File((String) pr.get("user.dir"));
 
         } catch (final ClassNotFoundException e) {
-            // errPrintln(logPrefix + "---- cannot find class file " + obj +
+            // errPrintln("cannot find class file " + obj +
             // ".class");
             // class file does not exist, go silently over it to not show
             // everybody that the
             // system attempted to load a class file
-            errPrintln(logPrefix + "---- Command '" + obj + "' not supported. Try 'HELP'.");
+            errPrintln("Command '" + obj + "' not supported. Try 'HELP'.");
         } catch (final NoSuchMethodException e) {
-            errPrintln(logPrefix + "---- no \"public static main(String args[])\" in " + obj);
+            errPrintln("no \"public static main(String args[])\" in " + obj);
         } catch (final InvocationTargetException e) {
             final Throwable orig = e.getTargetException();
             if (orig.getMessage() == null) {
             } else {
-                errPrintln(logPrefix + "---- Exception from " + obj + ": " + orig.getMessage());
+                errPrintln("Exception from " + obj + ": " + orig.getMessage());
                 orig.printStackTrace(err);
             }
         } catch (final IllegalAccessException e) {
-            errPrintln(logPrefix + "---- Illegal access for " + obj + ": class is probably not declared as public");
+            errPrintln("Illegal access for " + obj + ": class is probably not declared as public");
             e.printStackTrace(err);
         } catch (final NullPointerException e) {
-            errPrintln(logPrefix + "---- main(String args[]) is not defined as static for " + obj);
+            errPrintln("main(String args[]) is not defined as static for " + obj);
             /*
              * } catch (IOException e) { // class file does not exist, go
              * silently over it to not show everybody that the // system
-             * attempted to load a class file errPrintln(logPrefix + "----
-             * Command '" + obj + "' not supported. Try 'HELP'.");
+             * attempted to load a class file errPrintln("Command '" + obj + "'
+             * not supported. Try 'HELP'.");
              */
         } catch (final Exception e) {
-            errPrintln(logPrefix + "---- Exception caught: " + e);
+            errPrintln("Exception caught: " + e);
             e.printStackTrace(err);
         }
 
@@ -430,26 +437,26 @@ public class ftpc {
 
     public boolean ASCII() {
         if (cmd.length != 1) {
-            errPrintln(logPrefix + "---- Syntax: ASCII  (no parameter)");
+            errPrintln("Syntax: ASCII  (no parameter)");
             return true;
         }
         try {
             literal("TYPE A");
         } catch (final IOException e) {
-            errPrintln(logPrefix + "---- Error: ASCII transfer type not supported by server.");
+            errPrintln("Error: ASCII transfer type not supported by server.");
         }
         return true;
     }
 
     public boolean BINARY() {
         if (cmd.length != 1) {
-            errPrintln(logPrefix + "---- Syntax: BINARY  (no parameter)");
+            errPrintln("Syntax: BINARY  (no parameter)");
             return true;
         }
         try {
             literal("TYPE I");
         } catch (final IOException e) {
-            errPrintln(logPrefix + "---- Error: BINARY transfer type not supported by server.");
+            errPrintln("Error: BINARY transfer type not supported by server.");
         }
         return true;
     }
@@ -460,7 +467,7 @@ public class ftpc {
 
     public boolean CD() {
         if (cmd.length != 2) {
-            errPrintln(logPrefix + "---- Syntax: CD <path>");
+            errPrintln("Syntax: CD <path>");
             return true;
         }
         if (ControlSocket == null) {
@@ -475,7 +482,7 @@ public class ftpc {
                 throw new IOException(reply);
             }
         } catch (final IOException e) {
-            errPrintln(logPrefix + "---- Error: change of working directory to path " + cmd[1] + " failed.");
+            errPrintln("Error: change of working directory to path " + cmd[1] + " failed.");
         }
         return true;
     }
@@ -514,14 +521,14 @@ public class ftpc {
         final entryInfo info = fileInfo(path);
         Date date = null;
         if (info != null) {
-            date = info.getDate();
+            date = info.date;
         }
         return date;
     }
 
     public boolean DEL() {
         if (cmd.length != 2) {
-            errPrintln(logPrefix + "---- Syntax: DEL <file>");
+            errPrintln("Syntax: DEL <file>");
             return true;
         }
         if (ControlSocket == null) {
@@ -530,7 +537,7 @@ public class ftpc {
         try {
             rmForced(cmd[1]);
         } catch (final IOException e) {
-            errPrintln(logPrefix + "---- Error: deletion of file " + cmd[1] + " failed.");
+            errPrintln("Error: deletion of file " + cmd[1] + " failed.");
         }
         return true;
     }
@@ -541,7 +548,7 @@ public class ftpc {
 
     public boolean DIR() {
         if (cmd.length > 2) {
-            errPrintln(logPrefix + "---- Syntax: DIR [<path>|<file>]");
+            errPrintln("Syntax: DIR [<path>|<file>]");
             return true;
         }
         if (ControlSocket == null) {
@@ -556,7 +563,7 @@ public class ftpc {
             }
             printElements(l);
         } catch (final IOException e) {
-            errPrintln(logPrefix + "---- Error: remote list not available");
+            errPrintln("Error: remote list not available");
         }
         return true;
     }
@@ -564,9 +571,9 @@ public class ftpc {
     public boolean DISCONNECT() {
         try {
             quit();
-            outPrintln(logPrefix + "---- Connection closed.");
+            outPrintln("---- Connection closed.");
         } catch (final IOException e) {
-            errPrintln(logPrefix + "---- Connection to server lost.");
+            errPrintln("Connection to server lost.");
         }
         ControlSocket = null;
         DataSocketActive = null;
@@ -616,7 +623,7 @@ public class ftpc {
 
     public boolean GET() {
         if ((cmd.length < 2) || (cmd.length > 3)) {
-            errPrintln(logPrefix + "---- Syntax: GET <remote-file> [<local-file>]");
+            errPrintln("Syntax: GET <remote-file> [<local-file>]");
             return true;
         }
         final String remote = cmd[1]; // (new File(cmd[1])).getName();
@@ -626,7 +633,7 @@ public class ftpc {
         final File local = absoluteLocalFile(localFilename);
 
         if (local.exists()) {
-            errPrintln(logPrefix + "---- Error: local file " + local.toString() + " already exists.");
+            errPrintln("Error: local file " + local.toString() + " already exists.");
             errPrintln(logPrefix + "            File " + remote + " not retrieved. Local file unchanged.");
         } else {
             if (withoutLocalFile) {
@@ -635,8 +642,7 @@ public class ftpc {
                 try {
                     get(local.getAbsolutePath(), remote);
                 } catch (final IOException e) {
-                    errPrintln(logPrefix + "---- Error: retrieving file " + remote + " failed. (" + e.getMessage()
-                            + ")");
+                    errPrintln("Error: retrieving file " + remote + " failed. (" + e.getMessage() + ")");
                 }
             }
         }
@@ -667,7 +673,7 @@ public class ftpc {
                     rmForced(remote);
                 }
             } catch (final IOException eee) {
-                errPrintln(logPrefix + "---- Warning: remote file or path " + remote + " cannot be removed.");
+                errPrintln("Warning: remote file or path " + remote + " cannot be removed.");
             }
         } catch (final IOException e) {
             if (e.getMessage().startsWith("550")) {
@@ -690,13 +696,13 @@ public class ftpc {
                             rmForced(remote);
                         }
                     } catch (final IOException eee) {
-                        errPrintln(logPrefix + "---- Warning: remote file or path " + remote + " cannot be removed.");
+                        errPrintln("Warning: remote file or path " + remote + " cannot be removed.");
                     }
                 } else {
-                    errPrintln(logPrefix + "---- Error: remote file or path " + remote + " does not exist.");
+                    errPrintln("Error: remote file or path " + remote + " does not exist.");
                 }
             } else {
-                errPrintln(logPrefix + "---- Error: retrieving file " + remote + " failed. (" + e.getMessage() + ")");
+                errPrintln("Error: retrieving file " + remote + " failed. (" + e.getMessage() + ")");
             }
         }
     }
@@ -740,16 +746,16 @@ public class ftpc {
 
     public boolean GLOB() {
         if (cmd.length != 1) {
-            errPrintln(logPrefix + "---- Syntax: GLOB  (no parameter)");
+            errPrintln("Syntax: GLOB  (no parameter)");
             return true;
         }
         glob = !glob;
-        outPrintln(logPrefix + "---- globbing is now turned " + ((glob) ? "ON" : "OFF"));
+        outPrintln("---- globbing is now turned " + ((glob) ? "ON" : "OFF"));
         return true;
     }
 
     public boolean HASH() {
-        errPrintln(logPrefix + "---- no games implemented");
+        errPrintln("no games implemented");
         return true;
     }
 
@@ -764,7 +770,7 @@ public class ftpc {
 
     public boolean JJENCODE() {
         if (cmd.length != 2) {
-            errPrintln(logPrefix + "---- Syntax: JJENCODE <path>");
+            errPrintln("Syntax: JJENCODE <path>");
             return true;
         }
         final String path = cmd[1];
@@ -789,17 +795,17 @@ public class ftpc {
                 exec("cd ..;jar -cfM \"" + path + ".jj\" \"" + path + ".jar\"", true);
                 exec("rm \"" + path + ".jar\"", true);
             } else {
-                errPrintln(logPrefix + "---- Error: local path " + newPath.toString() + " denotes not to a directory.");
+                errPrintln("Error: local path " + newPath.toString() + " denotes not to a directory.");
             }
         } else {
-            errPrintln(logPrefix + "---- Error: local path " + newPath.toString() + " does not exist.");
+            errPrintln("Error: local path " + newPath.toString() + " does not exist.");
         }
         return true;
     }
 
     public boolean JJDECODE() {
         if (cmd.length != 2) {
-            errPrintln(logPrefix + "---- Syntax: JJENCODE <path>");
+            errPrintln("Syntax: JJENCODE <path>");
             return true;
         }
         final String path = cmd[1];
@@ -818,13 +824,13 @@ public class ftpc {
                     exec("mkdir \"" + path + ".dir\"", true);
 
                 } else {
-                    errPrintln(logPrefix + "---- Error: target dir " + newFolder.toString() + " cannot be created");
+                    errPrintln("Error: target dir " + newFolder.toString() + " cannot be created");
                 }
             } else {
-                errPrintln(logPrefix + "---- Error: local path " + newPath.toString() + " must denote to jar/jar file");
+                errPrintln("Error: local path " + newPath.toString() + " must denote to jar/jar file");
             }
         } else {
-            errPrintln(logPrefix + "---- Error: local path " + newPath.toString() + " does not exist.");
+            errPrintln("Error: local path " + newPath.toString() + " does not exist.");
         }
         return true;
     }
@@ -1002,7 +1008,7 @@ public class ftpc {
 
     public boolean LCD() {
         if (cmd.length != 2) {
-            errPrintln(logPrefix + "---- Syntax: LCD <path>");
+            errPrintln("Syntax: LCD <path>");
             return true;
         }
         final String path = cmd[1];
@@ -1015,12 +1021,12 @@ public class ftpc {
         if (newPath.exists()) {
             if (newPath.isDirectory()) {
                 currentLocalPath = newPath;
-                outPrintln(logPrefix + "---- New local path: " + currentLocalPath.toString());
+                outPrintln("---- New local path: " + currentLocalPath.toString());
             } else {
-                errPrintln(logPrefix + "---- Error: local path " + newPath.toString() + " denotes not a directory.");
+                errPrintln("Error: local path " + newPath.toString() + " denotes not a directory.");
             }
         } else {
-            errPrintln(logPrefix + "---- Error: local path " + newPath.toString() + " does not exist.");
+            errPrintln("Error: local path " + newPath.toString() + " does not exist.");
         }
         return true;
     }
@@ -1031,12 +1037,12 @@ public class ftpc {
 
     public boolean LDIR() {
         if (cmd.length != 1) {
-            errPrintln(logPrefix + "---- Syntax: LDIR  (no parameter)");
+            errPrintln("Syntax: LDIR  (no parameter)");
             return true;
         }
         final String[] name = currentLocalPath.list();
         for (int n = 0; n < name.length; ++n) {
-            outPrintln(logPrefix + ls(new File(currentLocalPath, name[n])));
+            outPrintln(ls(new File(currentLocalPath, name[n])));
         }
         return true;
     }
@@ -1143,30 +1149,34 @@ public class ftpc {
         if (tokens.matches()) {
             final boolean isDir = tokens.group(1).startsWith("d");
             int size = -1;
-            int day = -1;
             try {
                 size = Integer.parseInt(tokens.group(2));
-                day = Integer.parseInt(tokens.group(4));
             } catch (final NumberFormatException e) {
-                errPrintln(logPrefix + "not a number in list-entry: " + e.getMessage());
+                errPrintln("Error: not a number in list-entry: " + e.getMessage());
                 return null;
             }
             String time;
-            int year;
+            String year;
             if (tokens.group(5).contains(":")) {
                 time = tokens.group(5);
-                year = Calendar.getInstance().get(Calendar.YEAR); // current
+                year = String.valueOf(Calendar.getInstance().get(Calendar.YEAR)); // current
                 // year
             } else {
                 time = "00:00";
-                try {
-                    year = Integer.parseInt(tokens.group(5));
-                } catch (final NumberFormatException e) {
-                    errPrintln(logPrefix + "not a number in list-entry: " + e.getMessage());
-                    return null;
-                }
+                year = tokens.group(5);
             }
-            return new entryInfo(isDir, size, tokens.group(3), day, time, year, tokens.group(6));
+            // construct date string
+            // this has to be done, because the list-entry may have multiple
+            // spaces, tabs or so
+            Date date;
+            final String dateString = tokens.group(3) + " " + tokens.group(4) + " " + year + " " + time;
+            try {
+                date = lsDateFormat.parse(dateString);
+            } catch (ParseException e) {
+                errPrintln(logPrefix + "---- Error: not ls date-format '" + dateString + "': " + e.getMessage());
+                date = new Date();
+            }
+            return new entryInfo(isDir, size, date, tokens.group(6));
         }
         return null;
     }
@@ -1187,27 +1197,13 @@ public class ftpc {
          */
         public final int size;
         /**
-         * month as string like Apr
+         * date of file
          */
-        public final String month;
-        /**
-         * day of month
-         */
-        public final int day;
-        /**
-         * time in [h]h:mm format
-         */
-        public final String time;
-        /**
-         * year
-         */
-        public final int year;
+        public final Date date;
         /**
          * name of entry
          */
         public final String name;
-
-        final SimpleDateFormat dateFormat = new SimpleDateFormat("d MMM y H:m");
 
         /**
          * constructor
@@ -1215,36 +1211,14 @@ public class ftpc {
          * @param isDir
          * @param size
          *                bytes
-         * @param month
-         *                3 letters, ie 'Apr' or 'Dez'
-         * @param day
-         * @param time
-         *                hh:mm
-         * @param year
+         * @param date
          * @param name
          */
-        public entryInfo(final boolean isDir, final int size, final String month, final int day, final String time,
-                final int year, final String name) {
+        public entryInfo(final boolean isDir, final int size, final Date date, final String name) {
             this.isDir = isDir;
             this.size = size;
-            this.month = month;
-            this.day = day;
-            this.time = time;
-            this.year = year;
+            this.date = date;
             this.name = name;
-        }
-
-        /**
-         * @return
-         */
-        public Date getDate() {
-            // current date as default
-            Date date = new Date();
-            try {
-                date = dateFormat.parse(day + " " + month + " " + year + " " + time);
-            } catch (final ParseException e) {
-            }
-            return date;
         }
 
         /*
@@ -1260,7 +1234,7 @@ public class ftpc {
             info.append(", size=");
             info.append(size);
             info.append(", ");
-            info.append(getDate());
+            info.append(date);
             info.append(")");
             return info.toString();
         }
@@ -1309,7 +1283,7 @@ public class ftpc {
 
     public boolean LITERAL() {
         if (cmd.length == 1) {
-            errPrintln(logPrefix + "---- Syntax: LITERAL <ftp-command> [<command-argument>]   (see RFC959)");
+            errPrintln("Syntax: LITERAL <ftp-command> [<command-argument>]   (see RFC959)");
             return true;
         }
         String s = "";
@@ -1319,7 +1293,7 @@ public class ftpc {
         try {
             literal(s.substring(1));
         } catch (final IOException e) {
-            errPrintln(logPrefix + "---- Error: Syntax of FTP-command wrong. See RFC959 for details.");
+            errPrintln("Error: Syntax of FTP-command wrong. See RFC959 for details.");
         }
         return true;
     }
@@ -1334,15 +1308,15 @@ public class ftpc {
 
     public boolean LMKDIR() {
         if (cmd.length != 2) {
-            errPrintln(logPrefix + "---- Syntax: LMKDIR <folder-name>");
+            errPrintln("Syntax: LMKDIR <folder-name>");
             return true;
         }
         final File f = new File(currentLocalPath, cmd[1]);
         if (f.exists()) {
-            errPrintln(logPrefix + "---- Error: local file/folder " + cmd[1] + " already exists");
+            errPrintln("Error: local file/folder " + cmd[1] + " already exists");
         } else {
             if (!f.mkdir()) {
-                errPrintln(logPrefix + "---- Error: creation of local folder " + cmd[1] + " failed");
+                errPrintln("Error: creation of local folder " + cmd[1] + " failed");
             }
         }
         return true;
@@ -1350,14 +1324,14 @@ public class ftpc {
 
     public boolean LMV() {
         if (cmd.length != 3) {
-            errPrintln(logPrefix + "---- Syntax: LMV <from> <to>");
+            errPrintln("Syntax: LMV <from> <to>");
             return true;
         }
         final File from = new File(cmd[1]);
         final File to = new File(cmd[2]);
         if (!to.exists()) {
             if (from.renameTo(to)) {
-                outPrintln(logPrefix + "---- \"" + from.toString() + "\" renamed to \"" + to.toString() + "\"");
+                outPrintln("---- \"" + from.toString() + "\" renamed to \"" + to.toString() + "\"");
             } else {
                 errPrintln(logPrefix + "rename failed");
             }
@@ -1369,10 +1343,10 @@ public class ftpc {
 
     public boolean LPWD() {
         if (cmd.length != 1) {
-            errPrintln(logPrefix + "---- Syntax: LPWD  (no parameter)");
+            errPrintln("Syntax: LPWD  (no parameter)");
             return true;
         }
-        outPrintln(logPrefix + "---- Local path: " + currentLocalPath.toString());
+        outPrintln("---- Local path: " + currentLocalPath.toString());
         return true;
     }
 
@@ -1382,15 +1356,15 @@ public class ftpc {
 
     public boolean LRMDIR() {
         if (cmd.length != 2) {
-            errPrintln(logPrefix + "---- Syntax: LRMDIR <folder-name>");
+            errPrintln("Syntax: LRMDIR <folder-name>");
             return true;
         }
         final File f = new File(currentLocalPath, cmd[1]);
         if (!f.exists()) {
-            errPrintln(logPrefix + "---- Error: local folder " + cmd[1] + " does not exist");
+            errPrintln("Error: local folder " + cmd[1] + " does not exist");
         } else {
             if (!f.delete()) {
-                errPrintln(logPrefix + "---- Error: deletion of local folder " + cmd[1] + " failed");
+                errPrintln("Error: deletion of local folder " + cmd[1] + " failed");
             }
         }
         return true;
@@ -1398,15 +1372,15 @@ public class ftpc {
 
     public boolean LRM() {
         if (cmd.length != 2) {
-            errPrintln(logPrefix + "---- Syntax: LRM <file-name>");
+            errPrintln("Syntax: LRM <file-name>");
             return true;
         }
         final File f = new File(currentLocalPath, cmd[1]);
         if (!f.exists()) {
-            errPrintln(logPrefix + "---- Error: local file " + cmd[1] + " does not exist");
+            errPrintln("Error: local file " + cmd[1] + " does not exist");
         } else {
             if (!f.delete()) {
-                errPrintln(logPrefix + "---- Error: deletion of file " + cmd[1] + " failed");
+                errPrintln("Error: deletion of file " + cmd[1] + " failed");
             }
         }
         return true;
@@ -1414,7 +1388,7 @@ public class ftpc {
 
     public boolean LS() {
         if (cmd.length > 2) {
-            errPrintln(logPrefix + "---- Syntax: LS [<path>|<file>]");
+            errPrintln("Syntax: LS [<path>|<file>]");
             return true;
         }
         if (ControlSocket == null) {
@@ -1429,7 +1403,7 @@ public class ftpc {
             }
             printElements(l);
         } catch (final IOException e) {
-            errPrintln(logPrefix + "---- Error: remote list not available");
+            errPrintln("Error: remote list not available");
         }
         return true;
     }
@@ -1438,11 +1412,12 @@ public class ftpc {
      * @param list
      */
     private void printElements(final List<String> list) {
-        outPrintln(logPrefix + "---- v---v---v---v---v---v---v---v---v---v---v---v---v---v---v---v---v---v---v");
+        outPrintln("---- v---v---v---v---v---v---v---v---v---v---v---v---v---v---v---v---v---v---v");
         for (final String element : list) {
-            outPrintln(logPrefix + element);
+            outPrintln(element);
+            outPrintln("--> " + parseListData(element));
         }
-        outPrintln(logPrefix + "---- ^---^---^---^---^---^---^---^---^---^---^---^---^---^---^---^---^---^---^");
+        outPrintln("---- ^---^---^---^---^---^---^---^---^---^---^---^---^---^---^---^---^---^---^");
     }
 
     private List<String> list(final String path, final boolean extended) throws IOException {
@@ -1499,7 +1474,7 @@ public class ftpc {
 
     public boolean MKDIR() {
         if (cmd.length != 2) {
-            errPrintln(logPrefix + "---- Syntax: MKDIR <folder-name>");
+            errPrintln("Syntax: MKDIR <folder-name>");
             return true;
         }
         if (ControlSocket == null) {
@@ -1514,20 +1489,20 @@ public class ftpc {
                 throw new IOException(reply);
             }
         } catch (final IOException e) {
-            errPrintln(logPrefix + "---- Error: creation of folder " + cmd[1] + " failed");
+            errPrintln("Error: creation of folder " + cmd[1] + " failed");
         }
         return true;
     }
 
     public boolean MGET() {
         if (cmd.length != 2) {
-            errPrintln(logPrefix + "---- Syntax: MGET <file-pattern>");
+            errPrintln("Syntax: MGET <file-pattern>");
             return true;
         }
         try {
             mget(cmd[1], false);
         } catch (final IOException e) {
-            errPrintln(logPrefix + "---- Error: mget failed (" + e.getMessage() + ")");
+            errPrintln("Error: mget failed (" + e.getMessage() + ")");
         }
         return true;
     }
@@ -1539,7 +1514,7 @@ public class ftpc {
             if (matches(remote, pattern)) {
                 local = new File(currentLocalPath, remote);
                 if (local.exists()) {
-                    errPrintln(logPrefix + "---- Warning: local file " + local.toString() + " overwritten.");
+                    errPrintln("Warning: local file " + local.toString() + " overwritten.");
                     local.delete();
                 }
                 retrieveFilesRecursively(remote, remove);
@@ -1549,13 +1524,13 @@ public class ftpc {
 
     public boolean MOVEDOWN() {
         if (cmd.length != 2) {
-            errPrintln(logPrefix + "---- Syntax: MOVEDOWN <file-pattern>");
+            errPrintln("Syntax: MOVEDOWN <file-pattern>");
             return true;
         }
         try {
             mget(cmd[1], true);
         } catch (final IOException e) {
-            errPrintln(logPrefix + "---- Error: movedown failed (" + e.getMessage() + ")");
+            errPrintln("Error: movedown failed (" + e.getMessage() + ")");
         }
         return true;
     }
@@ -1567,7 +1542,7 @@ public class ftpc {
      */
     public boolean MV() {
         if (cmd.length != 3) {
-            errPrintln(logPrefix + "---- Syntax: MV <from> <to>");
+            errPrintln("Syntax: MV <from> <to>");
             return true;
         }
         if (ControlSocket == null) {
@@ -1588,27 +1563,27 @@ public class ftpc {
                 throw new IOException(reply);
             }
         } catch (final IOException e) {
-            errPrintln(logPrefix + "---- Error: rename of " + cmd[1] + " to " + cmd[2] + " failed.");
+            errPrintln("Error: rename of " + cmd[1] + " to " + cmd[2] + " failed.");
         }
         return true;
     }
 
     public boolean NOOP() {
         if (cmd.length != 1) {
-            errPrintln(logPrefix + "---- Syntax: NOOP  (no parameter)");
+            errPrintln("Syntax: NOOP  (no parameter)");
             return true;
         }
         try {
             literal("NOOP");
         } catch (final IOException e) {
-            errPrintln(logPrefix + "---- Error: server does not know how to do nothing");
+            errPrintln("Error: server does not know how to do nothing");
         }
         return true;
     }
 
     public boolean OPEN() {
         if ((cmd.length < 2) || (cmd.length > 3)) {
-            errPrintln(logPrefix + "---- Syntax: OPEN <host> [<port>]");
+            errPrintln("Syntax: OPEN <host> [<port>]");
             return true;
         }
         int port = 21;
@@ -1626,10 +1601,10 @@ public class ftpc {
         }
         try {
             open(cmd[1], port);
-            outPrintln(logPrefix + "---- Connection to " + cmd[1] + " established.");
+            outPrintln("---- Connection to " + cmd[1] + " established.");
             prompt = "ftp [" + cmd[1] + "]>";
         } catch (final IOException e) {
-            errPrintln(logPrefix + "---- Error: connecting " + cmd[1] + " on port " + port + " failed.");
+            errPrintln("Error: connecting " + cmd[1] + " on port " + port + " failed.");
         }
         return true;
     }
@@ -1654,25 +1629,25 @@ public class ftpc {
     }
 
     public boolean PROMPT() {
-        errPrintln(logPrefix + "---- prompt is always off");
+        errPrintln("prompt is always off");
         return true;
     }
 
     public boolean PUT() {
         if ((cmd.length < 2) || (cmd.length > 3)) {
-            errPrintln(logPrefix + "---- Syntax: PUT <local-file> [<remote-file>]");
+            errPrintln("Syntax: PUT <local-file> [<remote-file>]");
             return true;
         }
         final File local = new File(currentLocalPath, cmd[1]);
         final String remote = (cmd.length == 2) ? local.getName() : cmd[2];
         if (!local.exists()) {
-            errPrintln(logPrefix + "---- Error: local file " + local.toString() + " does not exist.");
+            errPrintln("Error: local file " + local.toString() + " does not exist.");
             errPrintln(logPrefix + "            Remote file " + remote + " not overwritten.");
         } else {
             try {
                 put(local.getAbsolutePath(), remote);
             } catch (final IOException e) {
-                errPrintln(logPrefix + "---- Error: transmitting file " + local.toString() + " failed.");
+                errPrintln("Error: transmitting file " + local.toString() + " failed.");
             }
         }
         return true;
@@ -1680,16 +1655,16 @@ public class ftpc {
 
     public boolean PWD() {
         if (cmd.length > 1) {
-            errPrintln(logPrefix + "---- Syntax: PWD  (no parameter)");
+            errPrintln("Syntax: PWD  (no parameter)");
             return true;
         }
         if (ControlSocket == null) {
             return LPWD();
         }
         try {
-            outPrintln(logPrefix + "---- Current remote path is: " + pwd());
+            outPrintln("---- Current remote path is: " + pwd());
         } catch (final IOException e) {
-            errPrintln(logPrefix + "---- Error: remote path not available");
+            errPrintln("Error: remote path not available");
         }
         return true;
     }
@@ -1710,20 +1685,20 @@ public class ftpc {
 
     public boolean REMOTEHELP() {
         if (cmd.length != 1) {
-            errPrintln(logPrefix + "---- Syntax: REMOTEHELP  (no parameter)");
+            errPrintln("Syntax: REMOTEHELP  (no parameter)");
             return true;
         }
         try {
             literal("HELP");
         } catch (final IOException e) {
-            errPrintln(logPrefix + "---- Error: remote help not supported by server.");
+            errPrintln("Error: remote help not supported by server.");
         }
         return true;
     }
 
     public boolean RMDIR() {
         if (cmd.length != 2) {
-            errPrintln(logPrefix + "---- Syntax: RMDIR <folder-name>");
+            errPrintln("Syntax: RMDIR <folder-name>");
             return true;
         }
         if (ControlSocket == null) {
@@ -1732,7 +1707,7 @@ public class ftpc {
         try {
             rmForced(cmd[1]);
         } catch (final IOException e) {
-            errPrintln(logPrefix + "---- Error: deletion of folder " + cmd[1] + " failed.");
+            errPrintln("Error: deletion of folder " + cmd[1] + " failed.");
         }
         return true;
     }
@@ -1798,180 +1773,180 @@ public class ftpc {
 
     public boolean USER() {
         if (cmd.length != 3) {
-            errPrintln(logPrefix + "---- Syntax: USER <user-name> <password>");
+            errPrintln("Syntax: USER <user-name> <password>");
             return true;
         }
         try {
             login(cmd[1], cmd[2]);
-            outPrintln(logPrefix + "---- Granted access for user " + cmd[1] + ".");
+            outPrintln("---- Granted access for user " + cmd[1] + ".");
         } catch (final IOException e) {
-            errPrintln(logPrefix + "---- Error: authorization of user " + cmd[1] + " failed.");
+            errPrintln("Error: authorization of user " + cmd[1] + " failed.");
         }
         return true;
     }
 
     public boolean APPEND() {
-        errPrintln(logPrefix + "---- not yet supported");
+        errPrintln("not yet supported");
         return true;
     }
 
     public boolean HELP() {
-        outPrintln(logPrefix + "---- ftp HELP ----");
-        outPrintln(logPrefix + "");
-        outPrintln(logPrefix + "This ftp client shell can act as command shell for the local host as well for the");
-        outPrintln(logPrefix + "remote host. Commands that point to the local host are preceded by 'L'.");
-        outPrintln(logPrefix + "");
-        outPrintln(logPrefix + "Supported Commands:");
-        outPrintln(logPrefix + "ASCII");
-        outPrintln(logPrefix + "   switch remote server to ASCII transfer mode");
-        outPrintln(logPrefix + "BINARY");
-        outPrintln(logPrefix + "   switch remote server to BINARY transfer mode");
-        outPrintln(logPrefix + "BYE");
-        outPrintln(logPrefix + "   quit the command shell (same as EXIT)");
-        outPrintln(logPrefix + "CD <path>");
-        outPrintln(logPrefix + "   change remote path");
-        outPrintln(logPrefix + "CLOSE");
-        outPrintln(logPrefix + "   close connection to remote host (same as DISCONNECT)");
-        outPrintln(logPrefix + "DEL <file>");
-        outPrintln(logPrefix + "   delete file on remote server (same as RM)");
-        outPrintln(logPrefix + "RM <file>");
-        outPrintln(logPrefix + "   remove file from remote server (same as DEL)");
-        outPrintln(logPrefix + "DIR [<path>|<file>] ");
-        outPrintln(logPrefix + "   print file information for remote directory or file");
-        outPrintln(logPrefix + "DISCONNECT");
-        outPrintln(logPrefix + "   disconnect from remote server (same as CLOSE)");
-        outPrintln(logPrefix + "EXIT");
-        outPrintln(logPrefix + "   quit the command shell (same as BYE)");
-        outPrintln(logPrefix + "GET <remote-file> [<local-file>]");
-        outPrintln(logPrefix + "   load <remote-file> from remote server and store it locally,");
-        outPrintln(logPrefix + "   optionally to <local-file>. if the <remote-file> is a directory,");
-        outPrintln(logPrefix + "   then all files in that directory are retrieved,");
-        outPrintln(logPrefix + "   including recursively all subdirectories.");
-        outPrintln(logPrefix + "GLOB");
-        outPrintln(logPrefix + "   toggles globbing: matching with wild cards or not");
-        outPrintln(logPrefix + "COPY");
-        outPrintln(logPrefix + "   copies local files");
-        outPrintln(logPrefix + "LCD <path>");
-        outPrintln(logPrefix + "   local directory change");
-        outPrintln(logPrefix + "LDEL <file>");
-        outPrintln(logPrefix + "   local file delete");
-        outPrintln(logPrefix + "LDIR");
-        outPrintln(logPrefix + "   shows local directory content");
-        outPrintln(logPrefix + "LITERAL <ftp-command> [<command-argument>]");
-        outPrintln(logPrefix + "   Sends FTP commands as documented in RFC959");
-        outPrintln(logPrefix + "LLS");
-        outPrintln(logPrefix + "   as LDIR");
-        outPrintln(logPrefix + "LMD");
-        outPrintln(logPrefix + "   as LMKDIR");
-        outPrintln(logPrefix + "LMV <local-from> <local-to>");
-        outPrintln(logPrefix + "   copies local files");
-        outPrintln(logPrefix + "LPWD");
-        outPrintln(logPrefix + "   prints local path");
-        outPrintln(logPrefix + "LRD");
-        outPrintln(logPrefix + "   as LMKDIR");
-        outPrintln(logPrefix + "LRMD <folder-name>");
-        outPrintln(logPrefix + "   deletes local directory <folder-name>");
-        outPrintln(logPrefix + "LRM <file-name>");
-        outPrintln(logPrefix + "   deletes local file <file-name>");
-        outPrintln(logPrefix + "LS [<path>|<file>]");
-        outPrintln(logPrefix + "   prints list of remote directory <path> or information of file <file>");
-        outPrintln(logPrefix + "MDIR");
-        outPrintln(logPrefix + "   as MKDIR");
-        outPrintln(logPrefix + "MGET <file-pattern>");
-        outPrintln(logPrefix + "   copies files from remote server that fits into the");
-        outPrintln(logPrefix + "   pattern <file-pattern> to the local path.");
-        outPrintln(logPrefix + "MOVEDOWN <file-pattern>");
-        outPrintln(logPrefix + "   copies files from remote server as with MGET");
-        outPrintln(logPrefix + "   and deletes them afterwards on the remote server");
-        outPrintln(logPrefix + "MV <from> <to>");
-        outPrintln(logPrefix + "   moves or renames files on the local host");
-        outPrintln(logPrefix + "NOOP");
-        outPrintln(logPrefix + "   sends the NOOP command to the remote server (which does nothing)");
-        outPrintln(logPrefix + "   This command is usually used to measure the speed of the remote server.");
-        outPrintln(logPrefix + "OPEN <host[':'port]> [<port>]");
-        outPrintln(logPrefix + "   connects the ftp shell to the remote server <host>. Optionally,");
-        outPrintln(logPrefix + "   a port number can be given, the default port number is 21.");
-        outPrintln(logPrefix + "   Example: OPEN localhost:2121 or OPEN 192.168.0.1 2121");
-        outPrintln(logPrefix + "PROMPT");
-        outPrintln(logPrefix + "   compatibility command, that usually toggles beween prompting on or off.");
-        outPrintln(logPrefix + "   ftp has prompting switched off by default and cannot switched on.");
-        outPrintln(logPrefix + "PUT <local-file> [<remote-file>]");
-        outPrintln(logPrefix + "   copies the <local-file> to the remote server to the current remote path or");
-        outPrintln(logPrefix + "   optionally to the given <remote-file> path.");
-        outPrintln(logPrefix + "PWD");
-        outPrintln(logPrefix + "   prints current path on the remote server.");
-        outPrintln(logPrefix + "REMOTEHELP");
-        outPrintln(logPrefix + "   asks the remote server to print the help text of the remote server");
-        outPrintln(logPrefix + "RMDIR <folder-name>");
-        outPrintln(logPrefix + "   removes the directory <folder-name> on the remote server");
-        outPrintln(logPrefix + "QUIT");
-        outPrintln(logPrefix + "   exits the ftp application");
-        outPrintln(logPrefix + "RECV");
-        outPrintln(logPrefix + "   as GET");
-        outPrintln(logPrefix + "USER <user-name> <password>");
-        outPrintln(logPrefix + "   logs into the remote server with the user <user-name>");
-        outPrintln(logPrefix + "   and the password <password>");
-        outPrintln(logPrefix + "");
-        outPrintln(logPrefix + "");
-        outPrintln(logPrefix + "EXAMPLE:");
-        outPrintln(logPrefix + "a standard sessions looks like this");
-        outPrintln(logPrefix + ">open 192.168.0.1:2121");
-        outPrintln(logPrefix + ">user anonymous bob");
-        outPrintln(logPrefix + ">pwd");
-        outPrintln(logPrefix + ">ls");
-        outPrintln(logPrefix + ">.....");
-        outPrintln(logPrefix + "");
-        outPrintln(logPrefix + "");
+        outPrintln("---- ftp HELP ----");
+        outPrintln("");
+        outPrintln("This ftp client shell can act as command shell for the local host as well for the");
+        outPrintln("remote host. Commands that point to the local host are preceded by 'L'.");
+        outPrintln("");
+        outPrintln("Supported Commands:");
+        outPrintln("ASCII");
+        outPrintln("   switch remote server to ASCII transfer mode");
+        outPrintln("BINARY");
+        outPrintln("   switch remote server to BINARY transfer mode");
+        outPrintln("BYE");
+        outPrintln("   quit the command shell (same as EXIT)");
+        outPrintln("CD <path>");
+        outPrintln("   change remote path");
+        outPrintln("CLOSE");
+        outPrintln("   close connection to remote host (same as DISCONNECT)");
+        outPrintln("DEL <file>");
+        outPrintln("   delete file on remote server (same as RM)");
+        outPrintln("RM <file>");
+        outPrintln("   remove file from remote server (same as DEL)");
+        outPrintln("DIR [<path>|<file>] ");
+        outPrintln("   print file information for remote directory or file");
+        outPrintln("DISCONNECT");
+        outPrintln("   disconnect from remote server (same as CLOSE)");
+        outPrintln("EXIT");
+        outPrintln("   quit the command shell (same as BYE)");
+        outPrintln("GET <remote-file> [<local-file>]");
+        outPrintln("   load <remote-file> from remote server and store it locally,");
+        outPrintln("   optionally to <local-file>. if the <remote-file> is a directory,");
+        outPrintln("   then all files in that directory are retrieved,");
+        outPrintln("   including recursively all subdirectories.");
+        outPrintln("GLOB");
+        outPrintln("   toggles globbing: matching with wild cards or not");
+        outPrintln("COPY");
+        outPrintln("   copies local files");
+        outPrintln("LCD <path>");
+        outPrintln("   local directory change");
+        outPrintln("LDEL <file>");
+        outPrintln("   local file delete");
+        outPrintln("LDIR");
+        outPrintln("   shows local directory content");
+        outPrintln("LITERAL <ftp-command> [<command-argument>]");
+        outPrintln("   Sends FTP commands as documented in RFC959");
+        outPrintln("LLS");
+        outPrintln("   as LDIR");
+        outPrintln("LMD");
+        outPrintln("   as LMKDIR");
+        outPrintln("LMV <local-from> <local-to>");
+        outPrintln("   copies local files");
+        outPrintln("LPWD");
+        outPrintln("   prints local path");
+        outPrintln("LRD");
+        outPrintln("   as LMKDIR");
+        outPrintln("LRMD <folder-name>");
+        outPrintln("   deletes local directory <folder-name>");
+        outPrintln("LRM <file-name>");
+        outPrintln("   deletes local file <file-name>");
+        outPrintln("LS [<path>|<file>]");
+        outPrintln("   prints list of remote directory <path> or information of file <file>");
+        outPrintln("MDIR");
+        outPrintln("   as MKDIR");
+        outPrintln("MGET <file-pattern>");
+        outPrintln("   copies files from remote server that fits into the");
+        outPrintln("   pattern <file-pattern> to the local path.");
+        outPrintln("MOVEDOWN <file-pattern>");
+        outPrintln("   copies files from remote server as with MGET");
+        outPrintln("   and deletes them afterwards on the remote server");
+        outPrintln("MV <from> <to>");
+        outPrintln("   moves or renames files on the local host");
+        outPrintln("NOOP");
+        outPrintln("   sends the NOOP command to the remote server (which does nothing)");
+        outPrintln("   This command is usually used to measure the speed of the remote server.");
+        outPrintln("OPEN <host[':'port]> [<port>]");
+        outPrintln("   connects the ftp shell to the remote server <host>. Optionally,");
+        outPrintln("   a port number can be given, the default port number is 21.");
+        outPrintln("   Example: OPEN localhost:2121 or OPEN 192.168.0.1 2121");
+        outPrintln("PROMPT");
+        outPrintln("   compatibility command, that usually toggles beween prompting on or off.");
+        outPrintln("   ftp has prompting switched off by default and cannot switched on.");
+        outPrintln("PUT <local-file> [<remote-file>]");
+        outPrintln("   copies the <local-file> to the remote server to the current remote path or");
+        outPrintln("   optionally to the given <remote-file> path.");
+        outPrintln("PWD");
+        outPrintln("   prints current path on the remote server.");
+        outPrintln("REMOTEHELP");
+        outPrintln("   asks the remote server to print the help text of the remote server");
+        outPrintln("RMDIR <folder-name>");
+        outPrintln("   removes the directory <folder-name> on the remote server");
+        outPrintln("QUIT");
+        outPrintln("   exits the ftp application");
+        outPrintln("RECV");
+        outPrintln("   as GET");
+        outPrintln("USER <user-name> <password>");
+        outPrintln("   logs into the remote server with the user <user-name>");
+        outPrintln("   and the password <password>");
+        outPrintln("");
+        outPrintln("");
+        outPrintln("EXAMPLE:");
+        outPrintln("a standard sessions looks like this");
+        outPrintln(">open 192.168.0.1:2121");
+        outPrintln(">user anonymous bob");
+        outPrintln(">pwd");
+        outPrintln(">ls");
+        outPrintln(">.....");
+        outPrintln("");
+        outPrintln("");
         return true;
     }
 
     public boolean QUOTE() {
-        errPrintln(logPrefix + "---- not yet supported");
+        errPrintln("not yet supported");
         return true;
     }
 
     public boolean BELL() {
-        errPrintln(logPrefix + "---- not yet supported");
+        errPrintln("not yet supported");
         return true;
     }
 
     public boolean MDELETE() {
-        errPrintln(logPrefix + "---- not yet supported");
+        errPrintln("not yet supported");
         return true;
     }
 
     public boolean SEND() {
-        errPrintln(logPrefix + "---- not yet supported");
+        errPrintln("not yet supported");
         return true;
     }
 
     public boolean DEBUG() {
-        errPrintln(logPrefix + "---- not yet supported");
+        errPrintln("not yet supported");
         return true;
     }
 
     public boolean MLS() {
-        errPrintln(logPrefix + "---- not yet supported");
+        errPrintln("not yet supported");
         return true;
     }
 
     public boolean TRACE() {
-        errPrintln(logPrefix + "---- not yet supported");
+        errPrintln("not yet supported");
         return true;
     }
 
     public boolean MPUT() {
-        errPrintln(logPrefix + "---- not yet supported");
+        errPrintln("not yet supported");
         return true;
     }
 
     public boolean TYPE() {
-        errPrintln(logPrefix + "---- not yet supported");
+        errPrintln("not yet supported");
         return true;
     }
 
     public boolean CREATE() {
-        errPrintln(logPrefix + "---- not yet supported");
+        errPrintln("not yet supported");
         return true;
     }
 
@@ -1981,7 +1956,7 @@ public class ftpc {
         // checks whether the string name matches with the pattern
         // the pattern may contain characters '*' as wildcard for several
         // characters (also none) and '?' to match exactly one characters
-        // outPrintln(logPrefix + "MATCH " + name + " " + pattern);
+        // outPrintln("MATCH " + name + " " + pattern);
         if (!glob) {
             return name.equals(pattern);
         }
@@ -2032,9 +2007,9 @@ public class ftpc {
         clientOutput.write('\n');
         clientOutput.flush();
         if (buf.startsWith("PASS")) {
-            outPrintln(logPrefix + "> PASS ********");
+            outPrintln("> PASS ********");
         } else {
-            outPrintln(logPrefix + "> " + buf);
+            outPrintln("> " + buf);
         }
     }
 
@@ -2050,7 +2025,7 @@ public class ftpc {
                 throw new IOException("Server has presumably shut down the connection.");
             }
 
-            outPrintln(logPrefix + "< " + reply);
+            outPrintln("< " + reply);
             // serverResponse.addElement(reply);
 
             if (reply.length() >= 4 && Character.isDigit(reply.charAt(0)) && Character.isDigit(reply.charAt(1))
@@ -2310,7 +2285,7 @@ public class ftpc {
             if (start == stop) {
                 errPrintln(logPrefix + "");
             } else {
-                outPrintln(logPrefix + " (" + (length * 1000 / 1024 / (stop - start)) + " kbytes/second)");
+                outPrintln(" (" + (length * 1000 / 1024 / (stop - start)) + " kbytes/second)");
             }
 
         } else {
@@ -2516,7 +2491,7 @@ public class ftpc {
         }
 
         public void checkExit(final int status) {
-            // System.outPrintln(logPrefix + "ShellSecurityManager: object
+            // System.outPrintln("ShellSecurityManager: object
             // called System.exit(" + status + ")");
             // signal that someone is trying to terminate the JVM.
             throw new ee(status);
