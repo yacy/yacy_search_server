@@ -90,7 +90,11 @@ public class plasmaFTPLoader {
      */
     public plasmaHTCache.Entry load(final plasmaCrawlEntry entry) {
         final yacyURL entryUrl = entry.url();
-        final String fullPath = entryUrl.getPath();
+        final String fullPath = getPath(entryUrl);
+        final File cacheFile = createCachefile(entryUrl);
+
+        // the return value
+        plasmaHTCache.Entry htCache = null;
 
         // determine filename and path
         String file, path;
@@ -113,72 +117,78 @@ public class plasmaFTPLoader {
         final ByteArrayOutputStream berr = new ByteArrayOutputStream();
         final ftpc ftpClient = createFTPClient(berr);
 
-        plasmaHTCache.Entry htCache = null;
-        try {
-            openConnection(ftpClient, entryUrl);
+        if (openConnection(ftpClient, entryUrl)) {
+            // ftp stuff
+            try {
+                // testing if the specified file is a directory
+                if (file.length() > 0) {
+                    ftpClient.exec("cd \"" + path + "\"", false);
 
-            // testing if the specified file is a directory
-            if (file.length() > 0) {
-                ftpClient.exec("cd \"" + path + "\"", false);
-
-                // testing if the current name is a directoy
-                final boolean isFolder = ftpClient.isFolder(file);
-                if (isFolder) {
-                    path = fullPath + "/";
-                    file = "";
+                    final boolean isFolder = ftpClient.isFolder(file);
+                    if (isFolder) {
+                        path = fullPath + "/";
+                        file = "";
+                    }
                 }
-            }
 
-            // creating a cache file object
-            final File cacheFile = plasmaHTCache.getCachePath(entryUrl);
-
-            // TODO: invalid file path check
-
-            // testing if the file already exists
-            if (cacheFile.isFile()) {
-                // delete the file if it already exists
-                plasmaHTCache.deleteURLfromCache(entryUrl);
-            } else {
-                // create parent directories
-                cacheFile.getParentFile().mkdirs();
-            }
-
-            if (file.length() == 0) {
-                // directory -> get list of files
-                // create a htcache entry
-                htCache = createCacheEntry(entry, "text/html", new Date());
-                if (!generateDirlist(ftpClient, entry, path, cacheFile)) {
-                    htCache = null;
+                if (file.length() == 0) {
+                    // directory -> get list of files
+                    // create a htcache entry
+                    htCache = createCacheEntry(entry, "text/html", new Date());
+                    if (!generateDirlist(ftpClient, entry, path, cacheFile)) {
+                        htCache = null;
+                    }
+                } else {
+                    // file -> download
+                    try {
+                        htCache = getFile(ftpClient, entry, cacheFile);
+                    } catch (final Exception e) {
+                        // add message to errorLog
+                        (new PrintStream(berr)).print(e.getMessage());
+                    }
                 }
-            } else {
-                // file -> download
-                try {
-                    htCache = getFile(ftpClient, entry, cacheFile);
-                } catch (final Exception e) {
-                }
+            } finally {
+                closeConnection(ftpClient);
             }
-
-            // pass the downloaded resource to the cache manager
-            if (berr.size() > 0 || htCache == null) {
-                // some error logging
-                final String detail = (berr.size() > 0) ? "\n    Errorlog: " + berr.toString() : "";
-                log.logWarning("Unable to download URL " + entry.url().toString() + detail);
-                sb.crawlQueues.errorURL.newEntry(entry, null, new Date(), 1,
-                        plasmaCrawlEURL.DENIED_SERVER_DOWNLOAD_ERROR);
-
-                // an error has occured. cleanup
-                if (cacheFile.exists()) {
-                    cacheFile.delete();
-                }
-            } else {
-                // announce the file
-                plasmaHTCache.writeFileAnnouncement(cacheFile);
-            }
-
-            return htCache;
-        } finally {
-            closeConnection(ftpClient);
         }
+
+        // pass the downloaded resource to the cache manager
+        if (berr.size() > 0 || htCache == null) {
+            // some error logging
+            final String detail = (berr.size() > 0) ? "\n    Errorlog: " + berr.toString() : "";
+            log.logWarning("Unable to download URL " + entry.url().toString() + detail);
+            sb.crawlQueues.errorURL.newEntry(entry, null, new Date(), 1, plasmaCrawlEURL.DENIED_SERVER_DOWNLOAD_ERROR);
+
+            // an error has occured. cleanup
+            if (cacheFile.exists()) {
+                cacheFile.delete();
+            }
+        } else {
+            // announce the file
+            plasmaHTCache.writeFileAnnouncement(cacheFile);
+        }
+
+        return htCache;
+    }
+
+    /**
+     * creating a cache file object
+     * 
+     * @param entryUrl
+     * @return
+     */
+    private File createCachefile(final yacyURL entryUrl) {
+        final File cacheFile = plasmaHTCache.getCachePath(entryUrl);
+
+        // testing if the file already exists
+        if (cacheFile.isFile()) {
+            // delete the file if it already exists
+            plasmaHTCache.deleteURLfromCache(entryUrl);
+        } else {
+            // create parent directories
+            cacheFile.getParentFile().mkdirs();
+        }
+        return cacheFile;
     }
 
     /**
@@ -196,8 +206,9 @@ public class plasmaFTPLoader {
      * @param ftpClient
      * @param host
      * @param port
+     * @return success
      */
-    private void openConnection(final ftpc ftpClient, final yacyURL entryUrl) {
+    private boolean openConnection(final ftpc ftpClient, final yacyURL entryUrl) {
         // get username and password
         final String userInfo = entryUrl.getUserInfo();
         String userName = "anonymous", userPwd = "anonymous";
@@ -218,12 +229,20 @@ public class plasmaFTPLoader {
         } else {
             ftpClient.exec("open " + host + " " + port, false);
         }
+        if (ftpClient.notConnected()) {
+            return false;
+        }
 
         // login to the server
         ftpClient.exec("user " + userName + " " + userPwd, false);
 
-        // change transfer mode to binary
-        ftpClient.exec("binary", false);
+        if (ftpClient.isLoggedIn()) {
+            // change transfer mode to binary
+            ftpClient.exec("binary", false);
+        } else {
+            return false;
+        }
+        return true;
     }
 
     /**
@@ -240,7 +259,7 @@ public class plasmaFTPLoader {
         final yacyURL entryUrl = entry.url();
         final String extension = plasmaParser.getFileExt(entryUrl);
         final String mimeType = plasmaParser.getMimeTypeByFileExt(extension);
-        final String path = entryUrl.getPath();
+        final String path = getPath(entryUrl);
 
         // if the mimetype and file extension is supported we start to download
         // the file
@@ -264,7 +283,7 @@ public class plasmaFTPLoader {
                 log.logInfo("REJECTED TOO BIG FILE with size " + size + " Bytes for URL " + entry.url().toString());
                 sb.crawlQueues.errorURL.newEntry(entry, null, new Date(), 1,
                         plasmaCrawlEURL.DENIED_FILESIZE_LIMIT_EXCEEDED);
-                throw new Exception("filesize too big: " + size + " bytes");
+                throw new Exception("file size exceeds limit");
             }
         } else {
             // if the response has not the right file type then reject file
@@ -273,6 +292,16 @@ public class plasmaFTPLoader {
             throw new Exception("response has not the right file type -> rejected");
         }
         return htCache;
+    }
+
+    /**
+     * gets path suitable for FTP (url-decoded, double-quotes escaped)
+     * 
+     * @param entryUrl
+     * @return
+     */
+    private String getPath(final yacyURL entryUrl) {
+        return yacyURL.unescape(entryUrl.getPath()).replace("\"", "\"\"");
     }
 
     /**

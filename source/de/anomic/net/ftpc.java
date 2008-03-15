@@ -249,11 +249,11 @@ public class ftpc {
                         .booleanValue());
             } catch (final InvocationTargetException e) {
                 if (e.getMessage() == null) {
-                } else if (ControlSocket == null) {
+                } else if (notConnected()) {
                     // the error was probably caused because there is no
                     // connection
                     errPrintln("not connected. no effect.");
-                    e.printStackTrace();
+                    e.printStackTrace(err);
                     return ret;
                 } else {
                     errPrintln("ftp internal exception: target exception " + e);
@@ -266,7 +266,7 @@ public class ftpc {
                 // consider first that the user attempted to execute a java
                 // command from
                 // the current path; either local or remote
-                if (ControlSocket == null) {
+                if (notConnected()) {
                     // try a local exec
                     try {
                         javaexec(cmd);
@@ -470,7 +470,7 @@ public class ftpc {
             errPrintln("Syntax: CD <path>");
             return true;
         }
-        if (ControlSocket == null) {
+        if (notConnected()) {
             return LCD();
         }
         try {
@@ -531,7 +531,7 @@ public class ftpc {
             errPrintln("Syntax: DEL <file>");
             return true;
         }
-        if (ControlSocket == null) {
+        if (notConnected()) {
             return LDEL();
         }
         try {
@@ -551,7 +551,7 @@ public class ftpc {
             errPrintln("Syntax: DIR [<path>|<file>]");
             return true;
         }
-        if (ControlSocket == null) {
+        if (notConnected()) {
             return LDIR();
         }
         try {
@@ -575,18 +575,21 @@ public class ftpc {
         } catch (final IOException e) {
             errPrintln("Connection to server lost.");
         }
-        ControlSocket = null;
-        DataSocketActive = null;
-        DataSocketPassive = null;
-        clientInput = null;
-        clientOutput = null;
+        try {
+            closeConnection();
+        } catch (final IOException e) {
+            ControlSocket = null;
+            DataSocketActive = null;
+            DataSocketPassive = null;
+            clientInput = null;
+            clientOutput = null;
+        }
         prompt = "ftp [local]>";
         return true;
     }
 
     private String quit() throws IOException {
 
-        // send delete command
         send("QUIT");
 
         // read status reply
@@ -595,24 +598,7 @@ public class ftpc {
             throw new IOException(reply);
         }
 
-        // cleanup
-        if (ControlSocket != null) {
-            clientOutput.close();
-            clientInput.close();
-            ControlSocket.close();
-            ControlSocket = null;
-        }
-
-        if (DataSocketActive != null) {
-            DataSocketActive.close();
-            DataSocketActive = null;
-        }
-        if (DataSocketPassive != null) {
-            DataSocketPassive.close();
-            DataSocketPassive = null; // "Once a socket has been closed, it is
-            // not available for further networking
-            // use"
-        }
+        closeConnection();
 
         return reply;
     }
@@ -633,8 +619,8 @@ public class ftpc {
         final File local = absoluteLocalFile(localFilename);
 
         if (local.exists()) {
-            errPrintln("Error: local file " + local.toString() + " already exists.");
-            errPrintln(logPrefix + "            File " + remote + " not retrieved. Local file unchanged.");
+            errPrintln("Error: local file " + local.toString() + " already exists.\n" + "               File " + remote
+                    + " not retrieved. Local file unchanged.");
         } else {
             if (withoutLocalFile) {
                 retrieveFilesRecursively(remote, false);
@@ -732,7 +718,8 @@ public class ftpc {
             }
             // check if we actually changed into the folder
             final String changedPath = pwd();
-            if (!(changedPath.equals(path) || changedPath.equals(currentFolder + "/" + path))) {
+            if (!(changedPath.equals(path) || changedPath.equals(currentFolder
+                    + (currentFolder.endsWith("/") ? "" : "/") + path))) {
                 throw new IOException("folder is '" + changedPath + "' should be '" + path + "'");
             }
             // return to last folder
@@ -1172,7 +1159,7 @@ public class ftpc {
             final String dateString = tokens.group(3) + " " + tokens.group(4) + " " + year + " " + time;
             try {
                 date = lsDateFormat.parse(dateString);
-            } catch (ParseException e) {
+            } catch (final ParseException e) {
                 errPrintln(logPrefix + "---- Error: not ls date-format '" + dateString + "': " + e.getMessage());
                 date = new Date();
             }
@@ -1391,7 +1378,7 @@ public class ftpc {
             errPrintln("Syntax: LS [<path>|<file>]");
             return true;
         }
-        if (ControlSocket == null) {
+        if (notConnected()) {
             return LLS();
         }
         try {
@@ -1415,7 +1402,6 @@ public class ftpc {
         outPrintln("---- v---v---v---v---v---v---v---v---v---v---v---v---v---v---v---v---v---v---v");
         for (final String element : list) {
             outPrintln(element);
-            outPrintln("--> " + parseListData(element));
         }
         outPrintln("---- ^---^---^---^---^---^---^---^---^---^---^---^---^---^---^---^---^---^---^");
     }
@@ -1477,7 +1463,7 @@ public class ftpc {
             errPrintln("Syntax: MKDIR <folder-name>");
             return true;
         }
-        if (ControlSocket == null) {
+        if (notConnected()) {
             return LMKDIR();
         }
         try {
@@ -1545,7 +1531,7 @@ public class ftpc {
             errPrintln("Syntax: MV <from> <to>");
             return true;
         }
-        if (ControlSocket == null) {
+        if (notConnected()) {
             return LMV();
         }
         try {
@@ -1604,7 +1590,7 @@ public class ftpc {
             outPrintln("---- Connection to " + cmd[1] + " established.");
             prompt = "ftp [" + cmd[1] + "]>";
         } catch (final IOException e) {
-            errPrintln("Error: connecting " + cmd[1] + " on port " + port + " failed.");
+            errPrintln("Error: connecting " + cmd[1] + " on port " + port + " failed: " + e.getMessage());
         }
         return true;
     }
@@ -1614,17 +1600,56 @@ public class ftpc {
             exec("close", false); // close any existing connections first
         }
 
-        ControlSocket = new Socket(host, port);
-        ControlSocket.setSoTimeout(getTimeout());
-        clientInput = new BufferedReader(new InputStreamReader(ControlSocket.getInputStream()));
-        clientOutput = new DataOutputStream(new BufferedOutputStream(ControlSocket.getOutputStream()));
+        try {
+            ControlSocket = new Socket(host, port);
+            ControlSocket.setSoTimeout(getTimeout());
+            clientInput = new BufferedReader(new InputStreamReader(ControlSocket.getInputStream()));
+            clientOutput = new DataOutputStream(new BufferedOutputStream(ControlSocket.getOutputStream()));
 
-        // read and return server message
-        this.host = host;
-        this.port = port;
-        remotemessage = receive();
-        if ((remotemessage != null) && (remotemessage.length() > 3)) {
-            remotemessage = remotemessage.substring(4);
+            // read and return server message
+            this.host = host;
+            this.port = port;
+            remotemessage = receive();
+            if ((remotemessage != null) && (remotemessage.length() > 3)) {
+                remotemessage = remotemessage.substring(4);
+            }
+        } catch (final IOException e) {
+            // if a connection was opened, it should not be used
+            closeConnection();
+            throw new IOException(e);
+        }
+    }
+
+    /**
+     * @return
+     */
+    public boolean notConnected() {
+        return ControlSocket == null;
+    }
+
+    /**
+     * close all sockets
+     * 
+     * @throws IOException
+     */
+    private void closeConnection() throws IOException {
+        // cleanup
+        if (ControlSocket != null) {
+            clientOutput.close();
+            clientInput.close();
+            ControlSocket.close();
+            ControlSocket = null;
+        }
+
+        if (DataSocketActive != null) {
+            DataSocketActive.close();
+            DataSocketActive = null;
+        }
+        if (DataSocketPassive != null) {
+            DataSocketPassive.close();
+            DataSocketPassive = null; // "Once a socket has been closed, it is
+            // not available for further networking
+            // use"
         }
     }
 
@@ -1658,7 +1683,7 @@ public class ftpc {
             errPrintln("Syntax: PWD  (no parameter)");
             return true;
         }
-        if (ControlSocket == null) {
+        if (notConnected()) {
             return LPWD();
         }
         try {
@@ -1701,7 +1726,7 @@ public class ftpc {
             errPrintln("Syntax: RMDIR <folder-name>");
             return true;
         }
-        if (ControlSocket == null) {
+        if (notConnected()) {
             return LRMDIR();
         }
         try {
@@ -1713,7 +1738,7 @@ public class ftpc {
     }
 
     public boolean QUIT() {
-        if (ControlSocket != null) {
+        if (!notConnected()) {
             exec("close", false);
         }
         return false;
@@ -1780,7 +1805,7 @@ public class ftpc {
             login(cmd[1], cmd[2]);
             outPrintln("---- Granted access for user " + cmd[1] + ".");
         } catch (final IOException e) {
-            errPrintln("Error: authorization of user " + cmd[1] + " failed.");
+            errPrintln("Error: authorization of user " + cmd[1] + " failed: " + e.getMessage());
         }
         return true;
     }
@@ -2354,6 +2379,7 @@ public class ftpc {
      * @throws IOException
      */
     private void login(final String account, final String password) throws IOException {
+        unsetLoginData();
 
         // send user name
         send("USER " + account);
@@ -2381,6 +2407,15 @@ public class ftpc {
     }
 
     /**
+     * we are authorized to use the server
+     * 
+     * @return
+     */
+    public boolean isLoggedIn() {
+        return (account != null && password != null && remotegreeting != null);
+    }
+
+    /**
      * remember username and password which were used to login
      * 
      * @param account
@@ -2392,6 +2427,12 @@ public class ftpc {
         this.account = account;
         this.password = password;
         remotegreeting = reply;
+    }
+
+    private void unsetLoginData() {
+        account = null;
+        password = null;
+        remotegreeting = null;
     }
 
     public void sys() throws IOException {
@@ -2451,7 +2492,7 @@ public class ftpc {
      * @param timeout
      *                in seconds, 0 = infinite
      */
-    public void setDataSocketTimeout(int timeout) {
+    public void setDataSocketTimeout(final int timeout) {
         DataSocketTimeout = timeout;
 
         try {
