@@ -1,5 +1,6 @@
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml">
+#(forwardToSteering)#::<meta http-equiv="REFRESH" content="0; url=/Steering.html?update=1&releaseinstall=#[release]#">#(/forwardToSteering)#
   <head>
     <title>YaCy '#[clientname]#': System Update</title>
     #%env/templates/metas.template%#
@@ -29,7 +30,7 @@
     	&nbsp;&nbsp;<input type="submit" name="checkRelease" value="Check for new Release" />
       </form></dd>
       <dt><br />Downloaded Releases</dt>
-      <dd><form action="Steering.html" method="get">
+      <dd><form action="ConfigUpdate_p.html" method="get">
         &nbsp;<select name="releaseinstall">
         #{downloadedreleases}#
         <option #(selected)#::selected#(/selected)# value="#[file]#">#[name]#</option>
@@ -37,6 +38,7 @@
         </select>
         #(deployenabled)#::no&nbsp;automated installation on development environments::
     	&nbsp;&nbsp;<input type="submit" name="update" value="Install Release" />
+        &nbsp;&nbsp;<input type="submit" name="deleteRelease" value="Delete Release" />
         #(/deployenabled)#
       </form></dd>
       <dt><br />Automatic Update</dt>

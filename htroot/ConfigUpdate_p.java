@@ -49,6 +49,12 @@ public class ConfigUpdate_p {
         prop.put("candeploy_autoUpdate", "0");
         
         if (post != null) {
+            if (post.containsKey("update")) {
+                prop.put("forwardToSteering", "1");
+                prop.put("forwardToSteering_release",post.get("releaseinstall", ""));
+                return prop;
+            }
+            
             if (post.containsKey("downloadRelease")) {
                 // download a release
                 String release = post.get("releasedownload", "");
@@ -64,6 +70,16 @@ public class ConfigUpdate_p {
          
             if (post.containsKey("checkRelease")) {
                 yacyVersion.allReleases(true);
+            }
+            if (post.containsKey("deleteRelease")) {
+                String release = post.get("releaseinstall", "");
+                if(release.length() > 0) {
+                    try {
+                        new File(sb.releasePath, release).delete();
+                    } catch (NullPointerException e) {
+                        sb.getLog().logSevere("AUTO-UPDATE: could not delete release " + release + ": " + e.getMessage());
+                    }
+                }
             }
          
             if (post.containsKey("autoUpdate")) {
