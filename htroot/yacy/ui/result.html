@@ -53,6 +53,7 @@
 			var selected = $('#container ul').data('selected.ui-tabs');
 			$('#container ul').tabs('url', selected, result);
     		$('#container ul').tabs('load', selected);
+			$('#pagination').trigger("update");
 		}
 	</script>	
 	::
