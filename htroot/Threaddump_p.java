@@ -56,7 +56,6 @@ import de.anomic.yacy.yacyVersion;
 
 import java.util.Map;
 import java.lang.StringBuffer;
-import java.util.Iterator;
 import java.util.Date;
 
 public class Threaddump_p {

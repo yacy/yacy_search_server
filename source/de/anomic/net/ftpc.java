@@ -1616,7 +1616,7 @@ public class ftpc {
         } catch (final IOException e) {
             // if a connection was opened, it should not be used
             closeConnection();
-            throw new IOException(e);
+            throw new IOException(e.getMessage());
         }
     }
 
