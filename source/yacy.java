@@ -220,7 +220,13 @@ public final class yacy {
             f.deleteOnExit();
             
             pro = new File(homePath, "libx").exists();
-            sb = new plasmaSwitchboard(homePath, "yacy.init", "DATA/SETTINGS/httpProxy.conf", pro);
+            String oldconf = "DATA/SETTINGS/httpProxy.conf";
+            String newconf = "DATA/SETTINGS/yacy.conf";
+            File oldconffile = new File(homePath, oldconf);
+            if (oldconffile.exists()) {
+                oldconffile.renameTo(new File(homePath, newconf));
+            }
+            sb = new plasmaSwitchboard(homePath, "defaults/yacy.init", newconf, pro);
             sbSync.V(); // signal that the sb reference was set
             
             // save information about available memory at startup time
@@ -590,7 +596,7 @@ public final class yacy {
      * @param homePath path to the YaCy directory
      * @param dbcache cache size in MB
      */
-    public static void minimizeUrlDB(File homePath) {
+    public static void minimizeUrlDB(File homePath, String networkName) {
         // run with "java -classpath classes yacy -minimizeUrlDB"
         try {serverLog.configureLogging(homePath, new File(homePath, "DATA/LOG/yacy.logging"));} catch (Exception e) {}
         File indexPrimaryRoot = new File(homePath, "DATA/INDEX");
@@ -601,15 +607,15 @@ public final class yacy {
             log.logInfo("STARTING URL CLEANUP");
             
             // db containing all currently loades urls
-            plasmaCrawlLURL currentUrlDB = new plasmaCrawlLURL(indexSecondaryRoot);
+            plasmaCrawlLURL currentUrlDB = new plasmaCrawlLURL(indexSecondaryRoot, networkName);
             
             // db used to hold all neede urls
-            plasmaCrawlLURL minimizedUrlDB = new plasmaCrawlLURL(indexRoot2);
+            plasmaCrawlLURL minimizedUrlDB = new plasmaCrawlLURL(indexRoot2, networkName);
             
             int cacheMem = (int)(serverMemory.max() - serverMemory.total());
             if (cacheMem < 2048000) throw new OutOfMemoryError("Not enough memory available to start clean up.");
                 
-            plasmaWordIndex wordIndex = new plasmaWordIndex(indexPrimaryRoot, indexSecondaryRoot, log);
+            plasmaWordIndex wordIndex = new plasmaWordIndex(indexPrimaryRoot, indexSecondaryRoot, networkName, log);
             Iterator<indexContainer> indexContainerIterator = wordIndex.wordContainers("AAAAAAAAAAAA", false, false);
             
             long urlCounter = 0, wordCounter = 0;
@@ -779,11 +785,11 @@ public final class yacy {
      *
      * @param homePath Root-Path where all information is to be found.
      */
-    private static void urldbcleanup(File homePath) {
+    private static void urldbcleanup(File homePath, String networkName) {
         File root = homePath;
         File indexroot = new File(root, "DATA/INDEX");
         try {serverLog.configureLogging(homePath, new File(homePath, "DATA/LOG/yacy.logging"));} catch (Exception e) {}
-        plasmaCrawlLURL currentUrlDB = new plasmaCrawlLURL(indexroot);
+        plasmaCrawlLURL currentUrlDB = new plasmaCrawlLURL(indexroot, networkName);
         currentUrlDB.urldbcleanup();
         currentUrlDB.close();
     }
@@ -800,7 +806,7 @@ public final class yacy {
         try {
             Iterator<indexContainer> indexContainerIterator = null;
             if (resource.equals("all")) {
-                WordIndex = new plasmaWordIndex(indexPrimaryRoot, indexSecondaryRoot, log);
+                WordIndex = new plasmaWordIndex(indexPrimaryRoot, indexSecondaryRoot, "freeworld", log);
                 indexContainerIterator = WordIndex.wordContainers(wordChunkStartHash, false, false);
             }
             int counter = 0;
@@ -925,7 +931,7 @@ public final class yacy {
                 args = shift(args, 1, 2);
             }
             if (args.length == 2) applicationRoot= new File(args[1]);
-            minimizeUrlDB(applicationRoot);
+            minimizeUrlDB(applicationRoot, "freeworld");
         } else if ((args.length >= 1) && (args[0].toLowerCase().equals("-testpeerdb"))) {
             if (args.length == 2) {
                 applicationRoot = new File(args[1]);
@@ -953,7 +959,7 @@ public final class yacy {
         } else if ((args.length >= 1) && (args[0].toLowerCase().equals("-urldbcleanup"))) {
             // generate a url list and save it in a file
             if (args.length == 2) applicationRoot= new File(args[1]);
-            urldbcleanup(applicationRoot);
+            urldbcleanup(applicationRoot, "freeworld");
         } else if ((args.length >= 1) && (args[0].toLowerCase().equals("-rwihashlist"))) {
             // generate a url list and save it in a file
             String domain = "all";

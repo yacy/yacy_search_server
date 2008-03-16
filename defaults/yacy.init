@@ -4,7 +4,7 @@
 # These properties will be loaded upon installation.
 # They are used only once for set-up.
 # If you make changes to this file and want these to make any effect,
-# you must delete the httpProxy.conf file in DATA/SETTINGS
+# you must delete the yacy.conf file in DATA/SETTINGS
 
 # ----------------------------------------------------------------------------
 # the HTTP service configurations
@@ -70,8 +70,8 @@ server.maxTrackingTime = 3600000
 # The property here can also be a url where the definition can be loaded.
 # In case of privately managed networks, this configuration must be changed BEFORE it is released
 # to the members of the separated network peers.
-network.unit.definition = yacy.network.unit
-network.group.definition = yacy.network.group
+network.unit.definition = defaults/yacy.network.freeworld.unit
+network.group.definition = defaults/yacy.network.group
 
 # Update process properties
 # The update server location is given in the network.unit.definition,

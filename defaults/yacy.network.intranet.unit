@@ -1,0 +1,25 @@
+# Network definition file for the freeworld network
+# this is the default standard network for fresh YaCy Peers
+
+# -----------------------------------------------------------------#
+# for an explanation please see the file yacy.network.readme       #
+# this is a work in progress. disabled properties are not yet used #
+# -----------------------------------------------------------------#
+
+# general network definition
+network.unit.name = intranet
+network.unit.description = Private Intranet
+network.unit.domain = local
+network.unit.dht = false
+network.unit.dhtredundancy.junior = 1
+network.unit.dhtredundancy.senior = 1
+
+# each network may use different yacy distributions.
+# the auto-updater can access network-specific update locations
+network.unit.update.location0 = http://yacy.net/index.html
+network.unit.update.location1 = http://latest.yacy.de
+network.unit.update.location2 = http://www.findenstattsuchen.info/YaCy/latest/index.php
+network.unit.update.location3 = http://www.yacystats.de/yacybuild/
+
+# properties for in-protocol response authentification:
+network.unit.protocol.control = uncontrolled

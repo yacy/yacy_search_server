@@ -37,12 +37,15 @@ Section "Binaries (required)"
 	File "stopYACY.bat"
 	File "stopYACY_Win9x.bat"
 	#File "httpProxy.command" ##Apple
-	File "yacy.init"
 	#File "httpProxy.sh"      ##UNIX
 	File "yacy.yellow"
 	File "yacy.stopwords"
 	File "yacy.badwords.example"
 	
+	#defaults
+	SetOutPath "$INSTDIR\defaults"
+	File /r "defaults\*"
+
 	#texts
 	File "readme.txt"
 	File "gpl.txt"

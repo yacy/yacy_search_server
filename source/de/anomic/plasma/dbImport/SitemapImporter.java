@@ -101,26 +101,21 @@ public class SitemapImporter extends AbstractImporter implements dbImporter {
 	 * @see dbImporter#init(HashMap)
 	 * @see AbstractImporter#init(HashMap)
 	 */
-	public void init(HashMap<String, String> initParams) throws ImporterException {
-        super.init(initParams);
-        
-        if (initParams == null || initParams.size() == 0) throw new IllegalArgumentException("Init parameters are missing");
-        if (!initParams.containsKey("crawlingProfile")) throw new IllegalArgumentException("Init parameters 'crawlingProfile' is missing");
-        if (!initParams.containsKey("sitemapURL")) throw new IllegalArgumentException("Init parameters 'sitemapURL' is missing");
-        
-        try {
-        	// getting the sitemap URL
-        	this.sitemapURL = new yacyURL((String)initParams.get("sitemapURL"), null);
-        	
-        	// getting the crawling profile to use
-        	plasmaCrawlProfile.entry profileEntry = this.sb.profilesActiveCrawls.getEntry((String)initParams.get("crawlingProfile"));
-        	
-        	// creating the sitemap parser
-        	this.parser = new SitemapParser(this.sb,this.sitemapURL,profileEntry);
-        } catch (Exception e) {
-        	throw new ImporterException("Unable to initialize Importer",e);
-        }
+	public void init(plasmaSwitchboard switchboard, int cacheSize) throws ImporterException {
+        super.init();
 	}
+	
+	public void initSitemap(yacyURL sitemapURL, plasmaCrawlProfile.entry profileEntry) throws ImporterException {
+        try {
+            // getting the sitemap URL
+            this.sitemapURL = sitemapURL;
+            
+            // creating the sitemap parser
+            this.parser = new SitemapParser(this.sb,this.sitemapURL, profileEntry);
+        } catch (Exception e) {
+            throw new ImporterException("Unable to initialize Importer",e);
+        }
+    }
 	
 	public void run() {
 		try {

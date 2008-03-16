@@ -1,7 +1,6 @@
 package de.anomic.plasma.dbImport;
 
-import java.util.HashMap;
-
+import de.anomic.plasma.plasmaSwitchboard;
 
 public interface dbImporter {
 
@@ -23,8 +22,7 @@ public interface dbImporter {
     public String getJobName();
     public String getJobType();
     public String getError();
-    public String getStatus();    
-    //public void init(File plasmaPath, File indexPrimaryPath, File indexSecondaryPath, int cacheSize, long preloadTime);
-    public void init(HashMap<String, String> initParams) throws ImporterException;
+    public String getStatus();
+    public void init(plasmaSwitchboard switchboard, int cacheSize) throws ImporterException;
     public void startIt();    
 }

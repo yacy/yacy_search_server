@@ -95,7 +95,7 @@ The maximum cache size is==La dimensione massima della cache &egrave;
 Advanced Config==Configurazione avanzata
 Here are all configuration options from YaCy.==Qui ci sono tutte le opzioni di configurazione di YaCy
 You can change anything, but some options need a restart, and some options can crash YaCy, if wrong values are used.==Puoi cambiare tutto, ma alcune opzioni richiedono il restart, e altre opzioni possono far crashare YaCy, se sono utilizzati valori sbagliati.
-For explanation please look into yacy.init==Per spiegazioni per favore guarda in yacy.init
+For explanation please look into defaults/yacy.init==Per spiegazioni per favore guarda in defaults/yacy.init
 "Save"=="Save"
 
 #-------------------------------------------------------

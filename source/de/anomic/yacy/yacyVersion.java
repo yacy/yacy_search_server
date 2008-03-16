@@ -60,9 +60,9 @@ public final class yacyVersion implements Comparator<yacyVersion>, Comparable<ya
 
     // information about latest release, retrieved from download pages
     // this static information should be overwritten by network-specific locations
-    // for details see yacy.network.unit
+    // for details see defaults/yacy.network.freeworld.unit
     private static HashMap<yacyURL, DevMain> latestReleases = new HashMap<yacyURL, DevMain>();
-    public  static ArrayList<yacyURL> latestReleaseLocations = new ArrayList<yacyURL>(); // will be initialized with value in yacy.network.unit
+    public  static ArrayList<yacyURL> latestReleaseLocations = new ArrayList<yacyURL>(); // will be initialized with value in defaults/yacy.network.freeworld.unit
     
     // private static release info about this release; is generated only once and can be retrieved by thisVersion()
     private static yacyVersion thisVersion = null;

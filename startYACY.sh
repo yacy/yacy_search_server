@@ -77,7 +77,33 @@ done
 
 #get javastart args
 java_args=""
-if [ -f DATA/SETTINGS/httpProxy.conf ]
+if [ -f DATA/SETTINGS/yacy.conf ]
+then
+	# startup memory
+	for i in Xmx Xms; do
+		j="`grep javastart_$i DATA/SETTINGS/yacy.conf | sed 's/^[^=]*=//'`";
+		if [ -n $j ]; then JAVA_ARGS="-$j $JAVA_ARGS"; fi;
+	done
+	
+	# Priority
+	j="`grep javastart_priority DATA/SETTINGS/yacy.conf | sed 's/^[^=]*=//'`";
+
+	if [ ! -z "$j" ];then
+		if [ -n $j ]; then JAVA="nice -n $j $JAVA"; fi;
+	fi
+
+        PORT="`grep ^port= DATA/SETTINGS/yacy.conf | sed 's/^[^=]*=//'`";
+	
+#	for i in `grep javastart DATA/SETTINGS/yacy.conf`;do
+#		i="${i#javastart_*=}";
+#		JAVA_ARGS="-$i $JAVA_ARGS";
+#	done
+else
+    JAVA_ARGS="-Xmx120m -Xms120m $JAVA_ARGS";
+    PORT="8080"
+fi
+
+if [ -f DATA/SETTINGS/httpProx.conf ]
 then
 	# startup memory
 	for i in Xmx Xms; do
@@ -93,15 +119,8 @@ then
 	fi
 
         PORT="`grep ^port= DATA/SETTINGS/httpProxy.conf | sed 's/^[^=]*=//'`";
-	
-#	for i in `grep javastart DATA/SETTINGS/httpProxy.conf`;do
-#		i="${i#javastart_*=}";
-#		JAVA_ARGS="-$i $JAVA_ARGS";
-#	done
-else
-    JAVA_ARGS="-Xmx120m -Xms120m $JAVA_ARGS";
-    PORT="8080"
 fi
+
 #echo "JAVA_ARGS: $JAVA_ARGS"
 #echo "JAVA: $JAVA"
 

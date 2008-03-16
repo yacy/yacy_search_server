@@ -156,7 +156,7 @@ Advanced Config==Pokrocile nastavenia
 Here are all configuration options from YaCy.==Tu sa nachadzaju vsetky konfiguracne nastavenia YaCy.
 You can change anything, but some options need a restart, and some options can crash YaCy, if wrong values are used.==Vsetky konfiguracne nastavenia mozu byt zmenene, avsak niektore volby vyzaduju restart a niektore mozu sposobit pad YaCy v pripade zadnia nespravnych hodnot.
 # NOT USED
-#For an explanation of the available options please look into yacy.init==Vysvetlenie jednotlivych volieb najdete v subore yacy.init
+#For an explanation of the available options please look into defaults/yacy.init==Vysvetlenie jednotlivych volieb najdete v subore defaults/yacy.init
 "Save"==Uloz
 
 
@@ -166,7 +166,7 @@ You can change anything, but some options need a restart, and some options can c
 Advanced Config==Pokrocile nastavenia
 Here are all configuration options from YaCy.==Tu sa nachadzaju vsetky konfiguracne nastavenia YaCy.
 You can change anything, but some options need a restart, and some options can crash YaCy, if wrong values are used.==Vsetky konfiguracne nastavenia mozu byt zmenene, avsak niektore volby vyzaduju restart a niektore mozu sposobit pad YaCy v pripade zadnia nespravnych hodnot.
-For explanation please look into yacy.init==Vysvetlenie najdete v subore yacy.init
+For explanation please look into defaults/yacy.init==Vysvetlenie najdete v subore defaults/yacy.init
 "Save"==Uloz
 
 #-----------------------------------------------------------
@@ -1467,7 +1467,7 @@ To restrict the access to this page, please set an administrator account and pas
 If you want to restore all settings to the default values,==Ak chcete obnovit povodne nastavenia,
 # NOT USED
 #but <b>forgot your administration password</b>, you must stop the proxy,==avsak <b>zabudli ste heslo administratora</b>, tak musite YaCy zastavit (prikaz 'stopYaCy.*'),  
-delete the file 'DATA/SETTINGS/httpProxy.conf' in the YaCy application root folder and start YaCy again.==zmazat subor 'DATA/SETTINGS/httpProxy.conf' v domovskom adresary YaCy a YaCy restartovat (prikaz 'startYaCy.*')
+delete the file 'DATA/SETTINGS/yacy.conf' in the YaCy application root folder and start YaCy again.==zmazat subor 'DATA/SETTINGS/yacy.conf' v domovskom adresary YaCy a YaCy restartovat (prikaz 'startYaCy.*')
 # NOT USED
 #Administration Account Settings==Nastavenia konta administratora
 # NOT USED

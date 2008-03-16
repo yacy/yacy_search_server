@@ -62,7 +62,7 @@ public class PerformanceQueues_p {
         // return variable that accumulates replacements
         plasmaSwitchboard switchboard = (plasmaSwitchboard) sb;
         serverObjects prop = new serverObjects();
-        File defaultSettingsFile = new File(switchboard.getRootPath(), "yacy.init");
+        File defaultSettingsFile = new File(switchboard.getRootPath(), "defaults/yacy.init");
         Map<String, String> defaultSettings = ((post == null) || (!(post.containsKey("submitdefault")))) ? null : serverFileUtils.loadHashMap(defaultSettingsFile);
         Iterator<String> threads = switchboard.threadNames();
         String threadName;

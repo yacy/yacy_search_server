@@ -1,0 +1,31 @@
+# Network definition file for the freeworld network
+# this is the default standard network for fresh YaCy Peers
+
+# -----------------------------------------------------------------#
+# for an explanation please see the file yacy.network.readme       #
+# this is a work in progress. disabled properties are not yet used #
+# -----------------------------------------------------------------#
+
+# general network definition
+network.unit.name = freeworld
+network.unit.description = Public YaCy Community
+network.unit.domain = global
+network.unit.search.time = 4
+network.unit.dht = true
+network.unit.dhtredundancy.junior = 1
+network.unit.dhtredundancy.senior = 3
+network.unit.bootstrap.seedlist0 = http://www.yacy.net/seed.txt
+network.unit.bootstrap.seedlist1 = http://home.arcor.de/hermens/yacy/seed.txt
+network.unit.bootstrap.seedlist2 = http://low.audioattack.de/yacy/seed.txt
+network.unit.bootstrap.seedlist3 = http://www.lulabad.de/seed.txt
+network.unit.bootstrap.seedlist4 = http://www.marcelhenseler.de/yacy/seed.txt
+
+# each network may use different yacy distributions.
+# the auto-updater can access network-specific update locations
+network.unit.update.location0 = http://yacy.net/index.html
+network.unit.update.location1 = http://latest.yacy.de
+network.unit.update.location2 = http://www.findenstattsuchen.info/YaCy/latest/index.php
+network.unit.update.location3 = http://www.yacystats.de/yacybuild/
+
+# properties for in-protocol response authentification:
+network.unit.protocol.control = uncontrolled

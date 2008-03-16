@@ -83,10 +83,9 @@ install -d ${RPM_BUILD_ROOT}{$YACYCDIR,$YACYDDIR,$YACYLDIR/libx,$DATADIR,$LOGDIR
 
 # copy all other files
 cp -r htroot locales ranking skins ${RPM_BUILD_ROOT}$YACYCDIR/
-cp -r classes lib libx ${RPM_BUILD_ROOT}$YACYLDIR/
+cp -r defaults classes lib libx ${RPM_BUILD_ROOT}$YACYLDIR/
 cp -r doc ${RPM_BUILD_ROOT}$YACYDDIR/
-
-cp *.sh build.properties superseed.txt httpd.mime yacy.badwords.example yacy.init yacy.logging yacy.stopwords* yacy.yellow ${RPM_BUILD_ROOT}$YACYCDIR/
+cp *.sh build.properties superseed.txt httpd.mime yacy.badwords.example yacy.logging yacy.stopwords* yacy.yellow ${RPM_BUILD_ROOT}$YACYCDIR/
 cp AUTHORS COPYRIGHT ChangeLog gpl.txt readme.txt ${RPM_BUILD_ROOT}$YACYDDIR/
 
 install -m 744 *.sh ${RPM_BUILD_ROOT}$YACYCDIR/				# start/stop/kill scripts
@@ -129,8 +128,8 @@ chmod +x /usr/share/yacy/killYACY.sh
 #if [ $LNT == de -o $LNT == it -o $LNT == sk ]; then 							# translation exists
 #	# test whether settings-directory exists
 #	if [ ! -d /var/lib/yacy/SETTINGS ]; then mkdir /var/lib/yacy/SETTINGS; chown yacy:root /var/lib/yacy/SETTINGS; fi
-#	echo "htLocaleSelection=$LNT.lng" >> /var/lib/yacy/SETTINGS/httpProxy.conf
-#	chown yacy:root /var/lib/yacy/SETTINGS/httpProxy.conf
+#	echo "htLocaleSelection=$LNT.lng" >> /var/lib/yacy/SETTINGS/yacy.conf
+#	chown yacy:root /var/lib/yacy/SETTINGS/yacy.conf
 #fi
 
 
@@ -153,7 +152,7 @@ cat > /etc/init.d/yacy <<EOF
 # Default-Start:  3 5
 # Default-Stop:
 # Description:    yacy is a distributed search engine
-#                 config-file is /etc/yacy/httpProxy.conf
+#                 config-file is /etc/yacy/yacy.conf
 ### END INIT INFO
 
 YACY_HOME="/usr/share/yacy"
@@ -171,10 +170,10 @@ if [ ! -x "\$JAVA" ]; then
 fi
 
 # get arguments for java
-if [ -f \$DATA_HOME/SETTINGS/httpProxy.conf ]; then
-	i=\`grep javastart_Xmx \$DATA_HOME/SETTINGS/httpProxy.conf\`;
+if [ -f \$DATA_HOME/SETTINGS/yacy.conf ]; then
+	i=\`grep javastart_Xmx \$DATA_HOME/SETTINGS/yacy.conf\`;
 	JAVA_MAX="-\${i#javastart_Xmx=}";
-	i=\`grep javastart_Xms \$DATA_HOME/SETTINGS/httpProxy.conf\`;
+	i=\`grep javastart_Xms \$DATA_HOME/SETTINGS/yacy.conf\`;
 	JAVA_MIN="-\${i#javastart_Xms=}";
 fi
 

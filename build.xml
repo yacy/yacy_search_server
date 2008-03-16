@@ -390,19 +390,22 @@
     <copy todir="${release_main}">
       <fileset dir=".">
         <include name="yacy.logging"/>
-        <include name="yacy.init"/>
         <include name="yacy.yellow"/>
         <include name="yacy.badwords.example"/>
         <include name="yacy.stopwords"/>
         <include name="yacy.parser"/>
-        <include name="yacy.network.group"/>
-        <include name="yacy.network.unit"/>
         <include name="httpd.mime"/>
         <include name="superseed.txt"/>
       </fileset>
     </copy>
 
-    <!-- copy Unix wrappers -->
+  	<!-- copy defaults -->
+  	    <copy todir="${release_main}/defaults">
+  	      <fileset dir="${defaults}" 
+  	               includes="**/*"/>
+  	    </copy>
+
+  	<!-- copy Unix wrappers -->
     <copy todir="${release_main}">
       <fileset dir=".">
         <include name="startYACY.sh"/>

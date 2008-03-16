@@ -14,7 +14,6 @@ public abstract class AbstractImporter extends Thread implements dbImporter{
     protected boolean paused = false;
     
     protected int cacheSize;
-    protected long preloadTime;
     
     protected long globalStart = System.currentTimeMillis();
     protected long globalEnd;
@@ -37,7 +36,7 @@ public abstract class AbstractImporter extends Thread implements dbImporter{
     /**
      * @see dbImporter#init(HashMap)
      */
-    public void init(HashMap<String, String> initparams) throws ImporterException {
+    public void init() throws ImporterException {
         // initializing the logger and setting a more verbose thread name
         this.log = new serverLog("IMPORT_" + this.jobType + "_" + this.jobID);
         this.setName("IMPORT_" + this.jobType + "_" + this.jobID);

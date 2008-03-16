@@ -70,7 +70,7 @@ public class PerformanceMemory_p {
         // return variable that accumulates replacements
         serverObjects prop = new serverObjects();
         if (defaultSettings == null) {
-            defaultSettings = serverFileUtils.loadHashMap(new File(env.getRootPath(), "yacy.init"));
+            defaultSettings = serverFileUtils.loadHashMap(new File(env.getRootPath(), "defaults/yacy.init"));
         }
         prop.put("gc", "0");
         if (post != null) {

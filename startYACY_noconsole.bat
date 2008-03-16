@@ -14,7 +14,7 @@ set jms=
 set javacmd=-Xmx64m -Xms10m
 set priolvl=0
 set priority=/NORMAL
-if exist DATA\SETTINGS\httpProxy.conf GoTo :GETSTARTOPTS
+if exist DATA\SETTINGS\yacy.conf GoTo :GETSTARTOPTS
 
 :STARTJAVA
 Rem Starting YaCy
@@ -28,7 +28,7 @@ GoTo :END
 
 Rem This target is used to read java runtime parameters out of the yacy config file
 :GETSTARTOPTS
-for /F "tokens=1,2 delims==" %%i in (DATA\SETTINGS\httpProxy.conf) do (
+for /F "tokens=1,2 delims==" %%i in (DATA\SETTINGS\yacy.conf) do (
 	if "%%i"=="javastart_Xmx" set jmx=%%j
 	if "%%i"=="javastart_Xms" set jms=%%j
 	if "%%i"=="javastart_priority" set priolvl=%%j

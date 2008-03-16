@@ -6,7 +6,7 @@
 # To distinguish between index areas where the shared web index is for a intranet or the public internet,
 # we distinguish local and global networks. Each network type can have different user groups.
 # Groups can be uncontrolled, moderated or controlled. The whole network may also have a global master.
-# This file is adressed by the network.unit.definition property in yacy.init. If necessary this
+# This file is adressed by the network.unit.definition property in defaults/yacy.init. If necessary this
 # property can also address a URL where a network definition file can be hosted, so that a network
 # can easily be moderated from a single central. In case of the public network of all independent peers
 # for global indexing, the network definition is attached to the release and defines no network master or
@@ -42,42 +42,3 @@
 #     network.unit.administration.manager = <a .yacy or .yacyh - domain, naming the manager peer>
 #     network.unit.administration.request.authentification.method = 'salted-magic'
 #     network.unit.administration.request.authentification.essentials = <any string, a secret password>
-
-
-# -----------------------------------------------------------------#
-# this is a work in progress. disabled properties are not yet used #
-# -----------------------------------------------------------------#
-
-# general network definition
-network.unit.name = freeworld
-network.unit.description = Public YaCy Community
-network.unit.domain = global
-network.unit.search.time = 4
-network.unit.dht = true
-network.unit.dhtredundancy.junior = 1
-network.unit.dhtredundancy.senior = 3
-network.unit.bootstrap.seedlist0 = http://www.yacy.net/seed.txt
-network.unit.bootstrap.seedlist1 = http://home.arcor.de/hermens/yacy/seed.txt
-network.unit.bootstrap.seedlist2 = http://low.audioattack.de/yacy/seed.txt
-network.unit.bootstrap.seedlist3 = http://www.lulabad.de/seed.txt
-network.unit.bootstrap.seedlist4 = http://www.marcelhenseler.de/yacy/seed.txt
-
-# each network may use different yacy distributions.
-# the auto-updater can access network-specific update locations
-network.unit.update.location0 = http://yacy.net/index.html
-network.unit.update.location1 = http://latest.yacy.de
-network.unit.update.location2 = http://www.findenstattsuchen.info/YaCy/latest/index.php
-network.unit.update.location3 = http://www.yacystats.de/yacybuild/
-
-# properties for in-protocol response authentification:
-network.unit.protocol.control = uncontrolled
-#network.unit.protocol.request.authentification.method = salted-magic-sim
-#network.unit.protocol.request.authentification.essentials =
-#network.unit.protocol.response.authentification.method = challenge-pwresponse
-#network.unit.protocol.response.authentification.essentials =
-
-# properties for unit access administrator-authentification:
-#network.unit.administration.control = uncontrolled
-#network.unit.administration.manager =
-#network.unit.administration.request.authentification.method = salted-magic
-#network.unit.administration.request.authentification.essentials =

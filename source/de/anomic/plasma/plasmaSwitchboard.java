@@ -192,7 +192,7 @@ public final class plasmaSwitchboard extends serverAbstractSwitch implements ser
     
     // storage management
     public  File                        htCachePath;
-    private File                        plasmaPath;
+    public  File                        plasmaPath;
     public  File                        indexPrimaryPath, indexSecondaryPath;
     public  File                        listsPath;
     public  File                        htDocsPath;
@@ -710,8 +710,8 @@ public final class plasmaSwitchboard extends serverAbstractSwitch implements ser
      * <p>Name of the setting specifying the folder beginning from the YaCy-installation's top-folder, where all
      * databases containing queues are stored</p>
      */
-    public static final String DBPATH                   = "dbPath";
-    public static final String DBPATH_DEFAULT           = "DATA/PLASMADB";
+    public static final String PLASMA_PATH              = "dbPath";
+    public static final String PLASMA_PATH_DEFAULT      = "DATA/PLASMADB";
     /**
      * <p><code>public static final String <strong>HTCACHE_PATH</strong> = "proxyCache"</code></p>
      * <p>Name of the setting specifying the folder beginning from the YaCy-installation's top-folder, where all
@@ -854,7 +854,7 @@ public final class plasmaSwitchboard extends serverAbstractSwitch implements ser
      * <p><code>public static final String <strong>DBFILE_CRAWL_PROFILES</strong> = "crawlProfiles0.db"</code>
      * <p>Name of the file containing the database holding all recent crawl profiles</p>
      * 
-     * @see plasmaSwitchboard#DBPATH for the folder this file lies in
+     * @see plasmaSwitchboard#PLASMA_PATH for the folder this file lies in
      */
     public static final String DBFILE_ACTIVE_CRAWL_PROFILES    = "crawlProfilesActive1.db";
     public static final String DBFILE_PASSIVE_CRAWL_PROFILES    = "crawlProfilesPassive1.db";
@@ -862,7 +862,7 @@ public final class plasmaSwitchboard extends serverAbstractSwitch implements ser
      * <p><code>public static final String <strong>DBFILE_CRAWL_ROBOTS</strong> = "crawlRobotsTxt.db"</code></p>
      * <p>Name of the file containing the database holding all <code>robots.txt</code>-entries of the lately crawled domains</p>
      * 
-     * @see plasmaSwitchboard#DBPATH for the folder this file lies in
+     * @see plasmaSwitchboard#PLASMA_PATH for the folder this file lies in
      */
     public static final String DBFILE_CRAWL_ROBOTS      = "crawlRobotsTxt1.db";
     /**
@@ -891,8 +891,10 @@ public final class plasmaSwitchboard extends serverAbstractSwitch implements ser
         this.log.logConfig("Remote proxy configuration:\n" + this.remoteProxyConfig.toString());
         
         // load network configuration into settings
-        String networkUnitDefinition = getConfig("network.unit.definition", "yacy.network.unit");
+        String networkUnitDefinition = getConfig("network.unit.definition", "defaults/yacy.network.freeworld.unit");
         String networkGroupDefinition = getConfig("network.group.definition", "yacy.network.group");
+        // patch old values
+        if (networkUnitDefinition.equals("yacy.network.unit")) networkUnitDefinition = "defaults/yacy.network.freeworld.unit";
         
         // include additional network definition properties into our settings
         // note that these properties cannot be set in the application because they are
@@ -947,7 +949,7 @@ public final class plasmaSwitchboard extends serverAbstractSwitch implements ser
         this.acceptLocalURLs = "local.any".indexOf(getConfig("network.unit.domain", "global")) >= 0;
         
         // load values from configs
-        this.plasmaPath   = getConfigPath(DBPATH, DBPATH_DEFAULT);
+        this.plasmaPath   = getConfigPath(PLASMA_PATH, PLASMA_PATH_DEFAULT);
         this.log.logConfig("Plasma DB Path: " + this.plasmaPath.toString());
         this.indexPrimaryPath = getConfigPath(INDEX_PRIMARY_PATH, INDEX_PATH_DEFAULT);
         this.log.logConfig("Index Primary Path: " + this.indexPrimaryPath.toString());
@@ -965,7 +967,8 @@ public final class plasmaSwitchboard extends serverAbstractSwitch implements ser
         
         // start indexing management
         log.logConfig("Starting Indexing Management");
-        wordIndex = new plasmaWordIndex(indexPrimaryPath, indexSecondaryPath, log);
+        String networkName = getConfig("network.unit.name", "");
+        wordIndex = new plasmaWordIndex(indexPrimaryPath, indexSecondaryPath, networkName, log);
         
         // start yacy core
         log.logConfig("Starting YaCy Protocol Core");
@@ -1211,7 +1214,7 @@ public final class plasmaSwitchboard extends serverAbstractSwitch implements ser
         CRDist1Percent = 30
         CRDist1Target  = kaskelix.de:8080,yacy.dyndns.org:8000,suma-lab.de:8080
          **/
-        rankingOn = getConfig(RANKING_DIST_ON, "true").equals("true") && getConfig("network.unit.name", "").equals("freeworld");
+        rankingOn = getConfig(RANKING_DIST_ON, "true").equals("true") && networkName.equals("freeworld");
         rankingOwnDistribution = new plasmaRankingDistribution(log, new File(rankingPath, getConfig(RANKING_DIST_0_PATH, plasmaRankingDistribution.CR_OWN)), (int) getConfigLong(RANKING_DIST_0_METHOD, plasmaRankingDistribution.METHOD_ANYSENIOR), (int) getConfigLong(RANKING_DIST_0_METHOD, 0), getConfig(RANKING_DIST_0_TARGET, ""));
         rankingOtherDistribution = new plasmaRankingDistribution(log, new File(rankingPath, getConfig(RANKING_DIST_1_PATH, plasmaRankingDistribution.CR_OTHER)), (int) getConfigLong(RANKING_DIST_1_METHOD, plasmaRankingDistribution.METHOD_MIXEDSENIOR), (int) getConfigLong(RANKING_DIST_1_METHOD, 30), getConfig(RANKING_DIST_1_TARGET, "kaskelix.de:8080,yacy.dyndns.org:8000,suma-lab.de:8080"));
         

@@ -65,11 +65,9 @@ public class Threaddump_p {
 
     public static serverObjects respond(httpHeader header, serverObjects post, serverSwitch env) {
 
-   	
     	prop = new serverObjects();
     	sb = (plasmaSwitchboard) env;
-    	StringBuffer buffer = new StringBuffer();
-    	
+    	StringBuffer buffer = new StringBuffer(1000);
     	
     	if (post != null && post.containsKey("createThreaddump")) {
     	    prop.put("dump", "1");
@@ -81,17 +79,17 @@ public class Threaddump_p {
         	buffer.append("************* Start Thread Dump " + dt + " *******************").append("<br />");
             buffer.append("<br /> YaCy Version: " + versionstring + "<br />");
         	buffer.append("Total Memory = " + (Runtime.getRuntime().totalMemory())).append("<br />");
-        	buffer.append("Used Memory = " + (Runtime.getRuntime().totalMemory() - Runtime.getRuntime().freeMemory())).append("<br />");
-        	buffer.append("Free Memory = " + (Runtime.getRuntime().freeMemory())).append("<br />");
-        	buffer.append(" --- --- --- --- <br />");
-        	for (Thread thread: stackTraces.keySet()) {
-        	    StackTraceElement[] stackTraceElement = (StackTraceElement[]) stackTraces.get(thread);
-        	    buffer.append("Thread= " + thread.getName() + " " + (thread.isDaemon()?"daemon":"") + " id=" + thread.getId() + " " + thread.getState()).append("<br />");
-        	    for(int i = 0; i <= (stackTraceElement.length -1); i++)	{
-        	        buffer.append(stackTraceElement[i]).append("<br />");
-        	    }
-        	    buffer.append("<br />");
-        	}
+        	buffer.append("Used&nbsp;&nbsp;Memory = " + (Runtime.getRuntime().totalMemory() - Runtime.getRuntime().freeMemory())).append("<br />");
+        	buffer.append("Free&nbsp;&nbsp;Memory = " + (Runtime.getRuntime().freeMemory())).append("<br />");
+        	buffer.append(" --- --- --- --- <br /><br />");
+        	
+        	appendStackTraces(buffer, stackTraces, Thread.State.BLOCKED);
+        	appendStackTraces(buffer, stackTraces, Thread.State.RUNNABLE);
+        	appendStackTraces(buffer, stackTraces, Thread.State.TIMED_WAITING);
+        	appendStackTraces(buffer, stackTraces, Thread.State.WAITING);
+        	appendStackTraces(buffer, stackTraces, Thread.State.NEW);
+        	appendStackTraces(buffer, stackTraces, Thread.State.TERMINATED);
+            
         	buffer.append("************* End Thread Dump " + dt + " *******************").append("<br />");       	
         
         	prop.put("dump_content", buffer.toString());
@@ -102,5 +100,19 @@ public class Threaddump_p {
        	return prop;    // return from serverObjects respond()
     }    
     
-
+    private static void appendStackTraces(StringBuffer buffer, Map<Thread,StackTraceElement[]> stackTraces, Thread.State stateIn) {
+        buffer.append("THREADS WITH STATES: " + stateIn.toString()).append("<br />").append("<br />");
+        
+        for (Thread thread: stackTraces.keySet()) {
+            StackTraceElement[] stackTraceElement = stackTraces.get(thread);
+            if (stateIn.equals(thread.getState())) {
+                buffer.append("Thread= " + thread.getName() + " " + (thread.isDaemon()?"daemon":"") + " id=" + thread.getId() + " " + thread.getState().toString()).append("<br />");
+                for (int i = 0; i < stackTraceElement.length; i++) {
+                    buffer.append("at " + stackTraceElement[i]).append("<br />");
+                }
+                buffer.append("<br />");
+            }
+        }
+        buffer.append("<br />");
+    }
 }

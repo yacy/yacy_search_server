@@ -46,22 +46,13 @@ public class plasmaCrawlNURLImporter extends AbstractImporter implements dbImpor
         return theStatus.toString();
     }
 
-    public void init(HashMap<String, String> initParams) throws ImporterException {
-        super.init(initParams);
-        
-        if (initParams == null || initParams.size() == 0) throw new IllegalArgumentException("Init parameters are missing");
-        if (!initParams.containsKey("plasmaPath")) throw new IllegalArgumentException("Init parameters 'plasmaPath' is missing");
-        if (!initParams.containsKey("cacheSize")) throw new IllegalArgumentException("Init parameters 'cacheSize' is missing");
-        if (!initParams.containsKey("preloadTime")) throw new IllegalArgumentException("Init parameters 'preloadTime' is missing");
+    public void init(plasmaSwitchboard sb, int cacheSize) throws ImporterException {
+        super.init();
         
         // TODO: we need more errorhandling here
-        this.plasmaPath = new File((String)initParams.get("plasmaPath"));      
-
-        this.cacheSize = Integer.valueOf((String)initParams.get("cacheSize")).intValue();
+        this.plasmaPath = sb.plasmaPath;
+        this.cacheSize = cacheSize;
         if (this.cacheSize < 2*1024*1024) this.cacheSize = 8*1024*1024;
-        
-        this.preloadTime = Long.valueOf((String)initParams.get("preloadTime")).longValue();        
-        
         File noticeUrlDbFile = new File(plasmaPath,"urlNotice1.db");
         File profileDbFile = new File(plasmaPath, plasmaSwitchboard.DBFILE_ACTIVE_CRAWL_PROFILES);
         

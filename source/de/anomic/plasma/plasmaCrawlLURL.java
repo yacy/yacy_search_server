@@ -97,10 +97,27 @@ public final class plasmaCrawlLURL {
     // the class object
     kelondroIndex urlIndexFile;
 
-    public plasmaCrawlLURL(File indexPath) {
+    public plasmaCrawlLURL(File indexSecondaryRoot, String networkName) {
         super();
-
-        urlIndexFile = new kelondroSplitTable(new File(indexPath, "PUBLIC/TEXT"), "urls", indexURLEntry.rowdef, false);
+        File indexSecondaryPath = new File(indexSecondaryRoot, networkName);
+        File indexSecondaryTextLocation = new File(indexSecondaryPath, "TEXT");
+        if (!indexSecondaryTextLocation.exists()) {
+            // patch old index locations; the secondary path is patched in plasmaCrawlLURL
+            File oldSecondaryPath = new File(new File(indexSecondaryRoot, "PUBLIC"), "TEXT");
+            File oldSecondaryTextLocation = new File(new File(indexSecondaryRoot, "PUBLIC"), "TEXT");
+            if (oldSecondaryPath.exists() && oldSecondaryTextLocation.exists()) {
+                // move the text folder from the old location to the new location
+                assert !indexSecondaryTextLocation.exists();
+                indexSecondaryTextLocation.mkdirs();
+                if (oldSecondaryTextLocation.renameTo(indexSecondaryTextLocation)) {
+                    if (!oldSecondaryPath.delete()) oldSecondaryPath.deleteOnExit();
+                } else {
+                    indexSecondaryTextLocation = oldSecondaryTextLocation; // emergency case: stay with old directory
+                }
+            }
+        }
+        
+        urlIndexFile = new kelondroSplitTable(indexSecondaryTextLocation, "urls", indexURLEntry.rowdef, false);
 
         // init result stacks
         externResultStack = new LinkedList<String>();
@@ -676,7 +693,7 @@ public final class plasmaCrawlLURL {
         } catch (MalformedURLException e) {}
         if (args[0].equals("-l")) try {
             // arg 1 is path to URLCache
-            final plasmaCrawlLURL urls = new plasmaCrawlLURL(new File(args[2]));
+            final plasmaCrawlLURL urls = new plasmaCrawlLURL(new File(args[2]), "freeworld");
             final Iterator<indexURLEntry> enu = urls.entries(true, null);
             while (enu.hasNext()) {
                 System.out.println(enu.next().toString());

@@ -6,7 +6,8 @@
     <h3>Search&nbsp;&amp;&nbsp;Browse</h3>
     <ul class="menu">
       <li><a href="/index.html?display=1" accesskey="s" class="MenuItemLink">(old) Search Page</a></li>
-      <li><a href="/yacy/user/ysearch.html?display=1" accesskey="s" class="MenuItemLink">(new) Search Page</a></li>
+      <li><a href="/yacy/user/ysearch.html?display=1" accesskey="s" class="MenuItemLink">(alternative a) Search Page</a></li>
+      <li><a href="/yacy/ui/" accesskey="s" class="MenuItemLink">(alternative b) Search Page</a></li>
       <li><a href="/Ranking_p.html" class="MenuItemLink lock">Ranking Config</a></li>
       <li><a href="/Surftips.html?display=1" class="MenuItemLink">Surftips</a></li>
       <li><a href="/Wiki.html?display=1" class="MenuItemLink">Publication</a></li>

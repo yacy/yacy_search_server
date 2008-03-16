@@ -132,7 +132,7 @@ The maximum cache size is==La taille maximale du cache est
 Advanced Config==Configuration avancée
 Here are all configuration options from YaCy.==toutes les options de configuration de YaCy sont ici.
 You can change anything, but some options need a restart, and some options can crash YaCy, if wrong values are used.==Vous pouvez tout changer, mais certaines options nécessitent un redémarrage et certaines autres peuvent provoquer l'arrêt de YaCy si elles sont mal choisies.
-For explanation please look into yacy.init==Pour des explications, regardez dans le fichier « yacy.init » s'il vous plait.
+For explanation please look into defaults/yacy.init==Pour des explications, regardez dans le fichier « defaults/yacy.init » s'il vous plait.
 "Save"=="Sauver"
 #-----------------------------
 
@@ -141,7 +141,7 @@ For explanation please look into yacy.init==Pour des explications, regardez dans
 Advanced Config==Configuration avancée
 Here are all configuration options from YaCy.==toutes les options de configuration de YaCy sont ici.
 You can change anything, but some options need a restart, and some options can crash YaCy, if wrong values are used.==Vous pouvez tout changer, mais certaines options nécessitent un redémarrage et certaines autres peuvent provoquer l'arrêt de YaCy si elles sont mal choisies.
-For explanation please look into yacy.init==Pour des explications, regardez dans le fichier « yacy.init » s'il vous plaît.
+For explanation please look into defaults/yacy.init==Pour des explications, regardez dans le fichier « defaults/yacy.init » s'il vous plaît.
 "Save"=="Sauver"
 #-----------------------------
 
@@ -1193,7 +1193,7 @@ YaCy \'\#\[clientname\]\#\': Settings==YaCy '#[clientname]#': Paramètres
 <h2>Settings</h2>==<h2>Paramètres</h2>
 If you want to restore all settings to the default values,==Si vous souhaitez rétablir les valeurs par défaut des paramètres,
 but <strong>forgot your administration password</strong>, you must stop the proxy,==Mais que vous avez <strong> oublié votre mot de passe d'administration </ strong>, vous devez arrêter le proxy,
-delete the file 'DATA/SETTINGS/httpProxy.conf' in the YaCy application root folder and start YaCy again.==Supprimer le fichier 'DATA/SETTINGS/httpProxy.conf'dans le dossier racine de yacy et démarrer YaCy à nouveau.
+delete the file 'DATA/SETTINGS/yacy.conf' in the YaCy application root folder and start YaCy again.==Supprimer le fichier 'DATA/SETTINGS/yacy.conf'dans le dossier racine de yacy et démarrer YaCy à nouveau.
 Administration Account Settings==Paramètres du compte administrateur
 Server Access Settings==Paramètres d'accès au serveur
 Proxy Access Settings==Paramètres Proxy

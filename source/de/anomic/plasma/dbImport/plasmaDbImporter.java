@@ -69,20 +69,14 @@ public class plasmaDbImporter extends AbstractImporter implements dbImporter {
      * @throws ImporterException 
      * @see dbImporter#init(HashMap)
      */
-    public void init(HashMap<String, String> initParams) throws ImporterException {
-        super.init(initParams);
-        
-        if (initParams == null || initParams.size() == 0) throw new IllegalArgumentException("Init parameters are missing");
-        if (!initParams.containsKey("primaryPath")) throw new IllegalArgumentException("Init parameters 'primaryPath' is missing");
-        if (!initParams.containsKey("secondaryPath")) throw new IllegalArgumentException("Init parameters 'secondaryPath' is missing");
-        if (!initParams.containsKey("cacheSize")) throw new IllegalArgumentException("Init parameters 'cacheSize' is missing");
-        if (!initParams.containsKey("preloadTime")) throw new IllegalArgumentException("Init parameters 'preloadTime' is missing");
+    public void init(plasmaSwitchboard db, int cacheSize) throws ImporterException {
+        super.init();
         
         // TODO: we need more errorhandling here
-        this.importPrimaryPath = new File((String)initParams.get("primaryPath"));
-        this.importSecondaryPath = new File((String)initParams.get("secondaryPath"));        
+        this.importPrimaryPath = sb.indexPrimaryPath;
+        this.importSecondaryPath = sb.indexSecondaryPath;
 
-        this.cacheSize = Integer.valueOf((String)initParams.get("cacheSize")).intValue();
+        this.cacheSize = cacheSize;
         if (this.cacheSize < 2*1024*1024) this.cacheSize = 8*1024*1024;
         
         // configure import DB
@@ -105,7 +99,7 @@ public class plasmaDbImporter extends AbstractImporter implements dbImporter {
         }
         
         this.log.logFine("Initializing source word index db.");
-        this.importWordIndex = new plasmaWordIndex(this.importPrimaryPath, this.importSecondaryPath, this.log);
+        this.importWordIndex = new plasmaWordIndex(this.importPrimaryPath, this.importSecondaryPath, sb.getConfig("network.unit.name", ""), this.log);
 
         this.importStartSize = this.importWordIndex.size();
     }

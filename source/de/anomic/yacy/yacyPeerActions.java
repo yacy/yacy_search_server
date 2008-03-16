@@ -204,7 +204,7 @@ public class yacyPeerActions {
                     
                 } catch (IOException e) {
                     // this is when wget fails, commonly because of timeout
-                    yacyCore.log.logWarning("BOOTSTRAP: failed (1) to load seeds from seed-list URL " + seedListFileURL + ": " + e.getMessage(), e);
+                    yacyCore.log.logWarning("BOOTSTRAP: failed (1) to load seeds from seed-list URL " + seedListFileURL + ": " + e.getMessage());
                 } catch (Exception e) {
                     // this is when wget fails; may be because of missing internet connection
                     yacyCore.log.logSevere("BOOTSTRAP: failed (2) to load seeds from seed-list URL " + seedListFileURL + ": " + e.getMessage(), e);

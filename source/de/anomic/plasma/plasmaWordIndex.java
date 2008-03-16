@@ -73,19 +73,37 @@ public final class plasmaWordIndex implements indexRI {
     private       int                flushsize;
     public  final plasmaCrawlLURL    loadedURL;
     
-    public plasmaWordIndex(File indexPrimaryRoot, File indexSecondaryRoot, serverLog log) {
-        File textindexcache = new File(indexPrimaryRoot, "PUBLIC/TEXT/RICACHE");
+    public plasmaWordIndex(File indexPrimaryRoot, File indexSecondaryRoot, String networkName, serverLog log) {
+        File indexPrimaryPath = new File(indexPrimaryRoot, networkName);
+        File indexPrimaryTextLocation = new File(indexPrimaryPath, "TEXT");
+        if (!indexPrimaryTextLocation.exists()) {
+            // patch old index locations; the secondary path is patched in plasmaCrawlLURL
+            File oldPrimaryPath = new File(new File(indexPrimaryRoot, "PUBLIC"), "TEXT");
+            File oldPrimaryTextLocation = new File(new File(indexPrimaryRoot, "PUBLIC"), "TEXT");
+            if (oldPrimaryPath.exists() && oldPrimaryTextLocation.exists()) {
+                // move the text folder from the old location to the new location
+                assert !indexPrimaryTextLocation.exists();
+                indexPrimaryTextLocation.mkdirs();
+                if (oldPrimaryTextLocation.renameTo(indexPrimaryTextLocation)) {
+                    if (!oldPrimaryPath.delete()) oldPrimaryPath.deleteOnExit();
+                } else {
+                    indexPrimaryTextLocation = oldPrimaryTextLocation; // emergency case: stay with old directory
+                }
+            }
+        }
+        
+        File textindexcache = new File(indexPrimaryTextLocation, "RICACHE");
         if (!(textindexcache.exists())) textindexcache.mkdirs();
         this.dhtOutCache = new indexRAMRI(textindexcache, indexRWIRowEntry.urlEntryRow, wCacheMaxChunk, wCacheMaxAge, "dump1.array", log);
         this.dhtInCache  = new indexRAMRI(textindexcache, indexRWIRowEntry.urlEntryRow, wCacheMaxChunk, wCacheMaxAge, "dump2.array", log);
         
         // create collections storage path
-        File textindexcollections = new File(indexPrimaryRoot, "PUBLIC/TEXT/RICOLLECTION");
+        File textindexcollections = new File(indexPrimaryTextLocation, "RICOLLECTION");
         if (!(textindexcollections.exists())) textindexcollections.mkdirs();
         this.collections = new indexCollectionRI(textindexcollections, "collection", maxCollectionPartition, indexRWIRowEntry.urlEntryRow);
 
         // create LURL-db
-        loadedURL = new plasmaCrawlLURL(indexSecondaryRoot);
+        loadedURL = new plasmaCrawlLURL(indexSecondaryRoot, networkName);
         
         // performance settings
         busyCacheFlush = false;

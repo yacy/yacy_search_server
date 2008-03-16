@@ -50,7 +50,6 @@
 
 import java.io.PrintStream;
 import java.util.Date;
-import java.util.HashMap;
 
 import de.anomic.http.httpHeader;
 import de.anomic.plasma.plasmaSwitchboard;
@@ -72,18 +71,9 @@ public final class IndexImport_p {
         if (post != null) {
             if (post.containsKey("startIndexDbImport")) {
                 try {
-                    // getting the import path
-                    String importPlasmaPath = (String) post.get("importPlasmaPath");
-                    //String importIndexPrimaryPath = (String) post.get("importIndexPrimaryPath");
-                    //String importIndexSecondaryPath = (String) post.get("importIndexSecondaryPath");
                     String importType = (String) post.get("importType");
-                    String cacheSizeStr = (String) post.get("cacheSize");
+                    int cacheSize = post.getInt("cacheSize", 0);
                     boolean startImport = true;
-                    
-                    HashMap<String, String> initParams = new HashMap<String, String>();
-                    initParams.put("plasmaPath",importPlasmaPath);
-                    initParams.put("cacheSize",cacheSizeStr);
-                    initParams.put("preloadTime","100");
                     
 //                    // check if there is an already running thread with the same import path
 //                    Thread[] importThreads = new Thread[plasmaDbImporter.runningJobs.activeCount()*2];
@@ -101,7 +91,7 @@ public final class IndexImport_p {
                     if (startImport) {
                         dbImporter importerThread = switchboard.dbImportManager.getNewImporter(importType);
                         if (importerThread != null) {
-                            importerThread.init(initParams);
+                            importerThread.init(switchboard, cacheSize);
                             importerThread.startIt();                            
                         }
                         prop.put("LOCATION","");

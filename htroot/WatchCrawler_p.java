@@ -41,7 +41,7 @@ import de.anomic.http.httpHeader;
 import de.anomic.plasma.plasmaCrawlProfile;
 import de.anomic.plasma.plasmaCrawlZURL;
 import de.anomic.plasma.plasmaSwitchboard;
-import de.anomic.plasma.dbImport.dbImporter;
+import de.anomic.plasma.dbImport.SitemapImporter;
 import de.anomic.server.serverFileUtils;
 import de.anomic.server.serverObjects;
 import de.anomic.server.serverSwitch;
@@ -325,13 +325,10 @@ public class WatchCrawler_p {
                     				storeHTCache, true, crawlOrder, xsstopw, xdstopw, xpstopw);
                     		
                     		// create a new sitemap importer
-                    		dbImporter importerThread = switchboard.dbImportManager.getNewImporter("sitemap");
+                    		SitemapImporter importerThread = (SitemapImporter) switchboard.dbImportManager.getNewImporter("sitemap");
                     		if (importerThread != null) {
-                    			HashMap<String, String> initParams = new HashMap<String, String>();
-                    			initParams.put("sitemapURL", sitemapURLStr);
-                    			initParams.put("crawlingProfile", pe.handle());
-                    			
-                    			importerThread.init(initParams);
+                    			importerThread.init(switchboard, 0);
+                    			importerThread.initSitemap(new yacyURL(sitemapURLStr, null), pe);
                     			importerThread.startIt();
                     		}
                     	} catch (Exception e) {
