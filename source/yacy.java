@@ -207,7 +207,7 @@ public final class yacy {
             }
             serverLog.logConfig("STARTUP", "Java version: " + System.getProperty("java.version", "no-java-version"));
             serverLog.logConfig("STARTUP", "Operation system: " + System.getProperty("os.name","unknown"));
-            serverLog.logConfig("STARTUP", "Application root-ath: " + homePath);
+            serverLog.logConfig("STARTUP", "Application root-path: " + homePath);
             serverLog.logConfig("STARTUP", "Time zone: UTC" + serverDate.UTCDiffString() + "; UTC+0000 is " + System.currentTimeMillis());
             serverLog.logConfig("STARTUP", "Maximum file system path length: " + serverSystem.maxPathLength);
             
