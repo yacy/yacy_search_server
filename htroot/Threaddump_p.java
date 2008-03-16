@@ -81,20 +81,17 @@ public class Threaddump_p {
         	
         	buffer.append("************* Start Thread Dump " + dt + " *******************").append("<br />");
             buffer.append("<br /> YaCy Version: " + versionstring + "<br />");
-        	//buffer.append(" -- Memory Details --").append("<br />");
         	buffer.append("Total Memory = " + (Runtime.getRuntime().totalMemory())).append("<br />");
         	buffer.append("Used Memory = " + (Runtime.getRuntime().totalMemory() - Runtime.getRuntime().freeMemory())).append("<br />");
-        	buffer.append("Total Memory = " + (Runtime.getRuntime().freeMemory())).append("<br />");
-        	buffer.append(" --- --- --- ---").append("<br />");
-        	for (Iterator<Thread> iterator = stackTraces.keySet().iterator(); iterator.hasNext();) {
-        	    Thread thread = (Thread) iterator.next();
+        	buffer.append("Free Memory = " + (Runtime.getRuntime().freeMemory())).append("<br />");
+        	buffer.append(" --- --- --- --- <br />");
+        	for (Thread thread: stackTraces.keySet()) {
         	    StackTraceElement[] stackTraceElement = (StackTraceElement[]) stackTraces.get(thread);
         	    buffer.append("Thread= " + thread.getName() + " " + (thread.isDaemon()?"daemon":"") + " id=" + thread.getId() + " " + thread.getState()).append("<br />");
         	    for(int i = 0; i <= (stackTraceElement.length -1); i++)	{
-        	        buffer.append("\t" + stackTraceElement[i]).append("<br />");
+        	        buffer.append(stackTraceElement[i]).append("<br />");
         	    }
         	    buffer.append("<br />");
-        	    //buffer.append(" --- --- --- ---").append("<br>");
         	}
         	buffer.append("************* End Thread Dump " + dt + " *******************").append("<br />");       	
         
