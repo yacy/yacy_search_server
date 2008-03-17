@@ -109,10 +109,8 @@ else
     PORT="8080"
 fi
 
-echo "CONFIGFILE: $CONFIGFILE"
-echo "JAVA_ARGS: $JAVA_ARGS"
-echo "JAVA: $JAVA"
-exit;
+#echo "JAVA_ARGS: $JAVA_ARGS"
+#echo "JAVA: $JAVA"
 
 # generating the proper classpath
 CLASSPATH=""
