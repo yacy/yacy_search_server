@@ -1,5 +1,6 @@
 #!/bin/sh
 JAVA="`which java`"
+CONFIGFILE="DATA/SETTINGS/yacy.conf"
 LOGFILE="yacy.log"
 OS="`uname`"
 
@@ -76,25 +77,30 @@ done
 #echo $options;exit 0 #DEBUG for getopts
 
 #get javastart args
-java_args=""
-if [ -f DATA/SETTINGS/yacy.conf ]
+JAVA_ARGS=""
+if [ ! -f $CONFIGFILE -a -f DATA/SETTINGS/httpProxy.conf ]
+then
+	# old config if new does not exist
+	CONFIGFILE="DATA/SETTINGS/httpProxy.conf"
+fi
+if [ -f $CONFIGFILE ]
 then
 	# startup memory
 	for i in Xmx Xms; do
-		j="`grep javastart_$i DATA/SETTINGS/yacy.conf | sed 's/^[^=]*=//'`";
+		j="`grep javastart_$i $CONFIGFILE | sed 's/^[^=]*=//'`";
 		if [ -n $j ]; then JAVA_ARGS="-$j $JAVA_ARGS"; fi;
 	done
 	
 	# Priority
-	j="`grep javastart_priority DATA/SETTINGS/yacy.conf | sed 's/^[^=]*=//'`";
+	j="`grep javastart_priority $CONFIGFILE | sed 's/^[^=]*=//'`";
 
 	if [ ! -z "$j" ];then
 		if [ -n $j ]; then JAVA="nice -n $j $JAVA"; fi;
 	fi
 
-        PORT="`grep ^port= DATA/SETTINGS/yacy.conf | sed 's/^[^=]*=//'`";
+        PORT="`grep ^port= $CONFIGFILE | sed 's/^[^=]*=//'`";
 	
-#	for i in `grep javastart DATA/SETTINGS/yacy.conf`;do
+#	for i in `grep javastart $CONFIGFILE`;do
 #		i="${i#javastart_*=}";
 #		JAVA_ARGS="-$i $JAVA_ARGS";
 #	done
@@ -103,26 +109,10 @@ else
     PORT="8080"
 fi
 
-if [ -f DATA/SETTINGS/httpProx.conf ]
-then
-	# startup memory
-	for i in Xmx Xms; do
-		j="`grep javastart_$i DATA/SETTINGS/httpProxy.conf | sed 's/^[^=]*=//'`";
-		if [ -n $j ]; then JAVA_ARGS="-$j $JAVA_ARGS"; fi;
-	done
-	
-	# Priority
-	j="`grep javastart_priority DATA/SETTINGS/httpProxy.conf | sed 's/^[^=]*=//'`";
-
-	if [ ! -z "$j" ];then
-		if [ -n $j ]; then JAVA="nice -n $j $JAVA"; fi;
-	fi
-
-        PORT="`grep ^port= DATA/SETTINGS/httpProxy.conf | sed 's/^[^=]*=//'`";
-fi
-
-#echo "JAVA_ARGS: $JAVA_ARGS"
-#echo "JAVA: $JAVA"
+echo "CONFIGFILE: $CONFIGFILE"
+echo "JAVA_ARGS: $JAVA_ARGS"
+echo "JAVA: $JAVA"
+exit;
 
 # generating the proper classpath
 CLASSPATH=""
