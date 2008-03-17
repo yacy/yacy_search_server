@@ -31,11 +31,10 @@ import java.io.IOException;
 import java.net.MalformedURLException;
 import java.text.ParseException;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.Date;
-import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 
 import de.anomic.data.robotsParser;
 import de.anomic.kelondro.kelondroFlexWidthArray;
@@ -68,7 +67,7 @@ public class plasmaCrawlQueues {
     public plasmaCrawlQueues(plasmaSwitchboard sb, File plasmaPath) {
         this.sb = sb;
         this.log = new serverLog("CRAWLER");
-        this.workers = Collections.synchronizedMap(new HashMap<Integer, crawlWorker>());
+        this.workers = new ConcurrentHashMap<Integer, crawlWorker>();
         this.loader = new plasmaProtocolLoader(sb, log);
         this.remoteCrawlProviderHashes = new ArrayList<String>();
         
@@ -93,8 +92,9 @@ public class plasmaCrawlQueues {
         if (noticeURL.existsInStack(hash)) return "crawler";
         if (delegatedURL.exists(hash)) return "delegated";
         if (errorURL.exists(hash)) return "errors";
-        Iterator<crawlWorker> i = workers.values().iterator();
-        while (i.hasNext()) if (i.next().entry.url().hash().equals(hash)) return "worker";
+        for (crawlWorker worker: workers.values()) {
+            if (worker.entry.url().hash().equals(hash)) return "worker";
+        }
         return null;
     }
     
@@ -112,10 +112,7 @@ public class plasmaCrawlQueues {
         if (ee != null) return ee.url();
         ee = errorURL.getEntry(urlhash);
         if (ee != null) return ee.url();
-        Iterator<crawlWorker> i = workers.values().iterator();
-        crawlWorker w;
-        while (i.hasNext()) {
-            w = i.next();
+        for (crawlWorker w: workers.values()) {
             if (w.entry.url().hash().equals(urlhash)) return w.entry.url();
         }
         return null;
@@ -123,8 +120,9 @@ public class plasmaCrawlQueues {
     
     public void close() {
         // wait for all workers to finish
-        Iterator<crawlWorker> i = workers.values().iterator();
-        while (i.hasNext()) i.next().interrupt();
+        for (crawlWorker w: workers.values()) {
+            w.interrupt();
+        }
         // TODO: wait some more time until all threads are finished
         noticeURL.close();
         errorURL.close();
@@ -133,13 +131,7 @@ public class plasmaCrawlQueues {
     
     public plasmaCrawlEntry[] activeWorker() {
         synchronized (workers) {
-            plasmaCrawlEntry[] w = new plasmaCrawlEntry[workers.size()];
-            int i = 0;
-            Iterator<crawlWorker> j = workers.values().iterator();
-            while (j.hasNext()) {
-                w[i++] = j.next().entry;
-            }
-            return w;
+            return workers.values().toArray(new plasmaCrawlEntry[0]);
         }
     }
     
