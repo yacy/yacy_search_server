@@ -413,11 +413,13 @@ Error saving the skin.==Es trat ein Fehler beim Speichern des Skins auf.
 #File: ConfigUpdate_p.html
 #---------------------------
 Manual System Update==Manuelle Systemaktualisierung
+Current installed Release==Aktuell installierte Version
 Available Releases==Verf&uuml;gbare Versionen
 "Download Release"=="Version Herunterladen"
 "Check for new Release"=="Nach neuer Version suchen"
 Downloaded Releases==Heruntergeladene Versionen
 "Install Release"=="Version Installieren"
+"Delete Release"=="Version l&ouml;schen"
 Automatic Update==Automatische Aktualisierung
 check for new releases, download if available and restart with downloaded release==suche nach neuer Version, lade sie herunter und starte neu mit dieser Version
 "Check \+ Download \+ Install Release Now"=="Suchen + Herunterladen + Version nun installieren"
@@ -861,10 +863,6 @@ index of</td>==Index of</td>
 Display URL List==Anzeige der URL-Liste
 Number of lines==Zeilenanzahl
 all lines==alle Zeilen
-Ordering of list==Sortierung der Liste nach
-by Ranking==Ranking
-by URL==URL
-by URL Hash==URL-Hash
 "List Selected URLs"=="Ausgew&auml;hlte URLs anzeigen"
 Transfer RWI to other Peer==RWI Transfer an anderen Peer
 Transfer by Word-Hash==Transfer per Wort-Hash
@@ -2352,7 +2350,8 @@ Project Home==Projektseite
 YaCy - Distributed Web Search==YaCy - Verteilte Internet Suche
 Search&nbsp;&amp;&nbsp;Browse==Suchen&nbsp;&amp;&nbsp;Surfen
 \(old\) Search Page==(alte) Suchseite
-\(new\) Search Page==(neue) Suchseite
+\(alternative a\) Search Page==(alternative a) Suchseite
+\(alternative b\) Search Page==(alternative b) Suchseite
 Ranking Config==Ranking Einstellungen
 >Surftips==>Surftipps
 Publication==Ver&ouml;ffentlichung
@@ -2483,6 +2482,7 @@ File Hosting==Datei Freigabe
 
 #File: env/templates/submenuViewLog.template
 #---------------------------
+Server Log Menu==Server Log Men&uuml;
 #Server Log==Server Log
 Log Statistics==Log Statistik
 #-----------------------------
