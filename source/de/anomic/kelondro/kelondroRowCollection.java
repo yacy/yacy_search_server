@@ -31,7 +31,8 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Random;
 import java.util.Set;
-import java.util.concurrent.SynchronousQueue;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 
 import de.anomic.server.serverFileUtils;
 import de.anomic.server.serverMemory;
@@ -45,13 +46,13 @@ public class kelondroRowCollection {
     private static final int isortlimit = 20;
     static final Integer dummy = new Integer(0);
     
-    public static final qsortthread sortingthread;
+    public static ExecutorService sortingthreadexecutor = null;
+
     static {
         if (serverProcessor.useCPU > 1) {
-            sortingthread = new qsortthread();
-            sortingthread.start();
+            sortingthreadexecutor = Executors.newCachedThreadPool();
         } else {
-            sortingthread = null;
+            sortingthreadexecutor = null;
         }
     }
     
@@ -475,11 +476,12 @@ public class kelondroRowCollection {
         }
         byte[] swapspace = new byte[this.rowdef.objectsize];
         int p = partition(0, this.chunkcount, this.sortBound, swapspace);
-        if ((sortingthread != null) && (p > 50) && (sortingthread.isAlive())) {
+        if ((sortingthreadexecutor != null) && (!sortingthreadexecutor.isShutdown()) && (p > 50)) {
         	// sort this using multi-threading
-            sortingthread.process(this, 0, p, 0);
+            Thread qsortthread = new qsortthread(this, 0, p, 0);
+            sortingthreadexecutor.execute(qsortthread);
         	qsort(p, this.chunkcount, 0, swapspace);
-        	sortingthread.waitFinish();
+        	if (qsortthread.isAlive()) try { this.wait(); } catch (InterruptedException e) { e.printStackTrace(); }
         } else {
         	qsort(0, p, 0, swapspace);
         	qsort(p, this.chunkcount, 0, swapspace);
@@ -489,53 +491,20 @@ public class kelondroRowCollection {
     }
 
     public static class qsortthread extends Thread {
-        private boolean terminate;
-        private SynchronousQueue<qsortobject> startObject;
-        private SynchronousQueue<Integer> finishObject;
-    	public qsortthread() {
-    		this.terminate = false;
-            this.startObject = new SynchronousQueue<qsortobject>();
-    		this.finishObject = new SynchronousQueue<Integer>();
-    		this.setName("kelondroRowCollection SORT THREAD");
-    	}
-    	public void process(kelondroRowCollection rc, int L, int R, int S) {
-    	    assert rc != null;
-    	    synchronized (startObject) {
-    	        try {this.startObject.put(new qsortobject(rc, L, R, S));} catch (InterruptedException e) {}
-    	    }
+        kelondroRowCollection rc;
+        int L, R, S;
+        
+    	public qsortthread(kelondroRowCollection rc, int L, int R, int S) {
+    	    this.rc = rc;
+    	    this.L = L;
+    	    this.R = R;
+    	    this.S = S;
         }
-        public void waitFinish() {
-            try {this.finishObject.take();} catch (InterruptedException e) {}
-        }
-    	public void terminate() {
-    	    this.terminate = true;
-    	    this.interrupt();
-    	}
+    	
     	public void run() {
-    	    qsortobject so = null;
-    	    while (!terminate) {
-    	        try {so = this.startObject.take();} catch (InterruptedException e) {
-    	            break;
-                }
-    	        assert so != null;
-    	        so.rc.qsort(so.sl, so.sr, so.sb, new byte[so.rc.rowdef.objectsize]);
-    	        try {this.finishObject.put(dummy);} catch (InterruptedException e1) {
-    	            break;
-    	        }
-    	        so = null;
-    	    }
+    	    rc.qsort(L, R, S, new byte[rc.rowdef.objectsize]);
+    	    synchronized (rc) {rc.notify();}
     	}
-    }
-    
-    private static class qsortobject {
-        protected kelondroRowCollection rc;
-        protected int sl, sr, sb;
-        public qsortobject(kelondroRowCollection rc, int L, int R, int S) {
-                this.rc = rc;
-                this.sl = L;
-                this.sr = R;
-                this.sb = S;
-        }
     }
     
     final void qsort(int L, int R, int S, byte[] swapspace) {

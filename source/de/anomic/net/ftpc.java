@@ -1,12 +1,19 @@
-// ftpc.java 
-// -------------------------------------
-// (C) by Michael Peter Christen; mc@anomic.de
+// ftpc.java
+// (C) by Michael Peter Christen; mc@yacy.net
 // first published on http://www.anomic.de
 // Frankfurt, Germany, 2002, 2004, 2006
 // main implementation finished: 28.05.2002
 // last major change: 06.05.2004
 // added html generation for directories: 5.9.2006
 //
+// This is a part of YaCy, a peer-to-peer based web search engine
+//
+// $LastChangedDate: 2006-04-02 22:40:07 +0200 (So, 02 Apr 2006) $
+// $LastChangedRevision: 1986 $
+// $LastChangedBy: orbiter $
+//
+// LICENSE
+// 
 // This program is free software; you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
 // the Free Software Foundation; either version 2 of the License, or
@@ -20,25 +27,6 @@
 // You should have received a copy of the GNU General Public License
 // along with this program; if not, write to the Free Software
 // Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
-//
-// Using this software in any meaning (reading, learning, copying, compiling,
-// running) means that you agree that the Author(s) is (are) not responsible
-// for cost, loss of data or any harm that may be caused directly or indirectly
-// by usage of this softare or this documentation. The usage of this software
-// is on your own risk. The installation and usage (starting/running) of this
-// software may allow other people or application to access your computer and
-// any attached devices and is highly dependent on the configuration of the
-// software which must be done by the user of the software; the author(s) is
-// (are) also not responsible for proper configuration and usage of the
-// software, even if provoked by documentation provided together with
-// the software.
-//
-// Any changes to this file according to the GPL as documented in the file
-// gpl.txt aside this file in the shipment you received can be done to the
-// lines that follows this copyright notice here, but changes must not be
-// done inside the copyright notive above. A re-distribution must contain
-// the intact and unchanged copyright notice.
-// Contributions and changes to the program code must be marked as such.
 
 package de.anomic.net;
 
@@ -48,7 +36,6 @@ import java.io.ByteArrayOutputStream;
 import java.io.DataInputStream;
 import java.io.DataOutputStream;
 import java.io.File;
-import java.io.FileDescriptor;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
@@ -1603,6 +1590,11 @@ public class ftpc {
         try {
             ControlSocket = new Socket(host, port);
             ControlSocket.setSoTimeout(getTimeout());
+            ControlSocket.setKeepAlive(true);
+            ControlSocket.setTcpNoDelay(true); // no accumulation until buffer is full
+            ControlSocket.setSoLinger(false, getTimeout()); // !wait for all data being written on close()
+            ControlSocket.setSendBufferSize(1440); // read http://www.cisco.com/warp/public/105/38.shtml
+            ControlSocket.setReceiveBufferSize(1440); // read http://www.cisco.com/warp/public/105/38.shtml
             clientInput = new BufferedReader(new InputStreamReader(ControlSocket.getInputStream()));
             clientOutput = new DataOutputStream(new BufferedOutputStream(ControlSocket.getOutputStream()));
 
@@ -2116,6 +2108,8 @@ public class ftpc {
     private void createActiveDataPort() throws IOException {
         // create data socket and bind it to free port available
         DataSocketActive = new ServerSocket(0);
+        DataSocketActive.setSoTimeout(getTimeout());
+        DataSocketActive.setReceiveBufferSize(1440); // read http://www.cisco.com/warp/public/105/38.shtml
         applyDataSocketTimeout();
 
         // get port socket has been bound to
@@ -2499,120 +2493,6 @@ public class ftpc {
             applyDataSocketTimeout();
         } catch (final SocketException e) {
             errPrintln(logPrefix + " setDataSocketTimeout: " + e.getMessage());
-        }
-    }
-
-    private class ee extends SecurityException {
-
-        private static final long serialVersionUID = 1L;
-        private int value = 0;
-
-        public ee() {
-        }
-
-        public ee(final int value) {
-            super();
-            this.value = value;
-        }
-
-        public int value() {
-            return value;
-        }
-    }
-
-    // TODO is this necessary??? (not used, no function)
-    private class sm extends SecurityManager {
-        public void checkCreateClassLoader() {
-        }
-
-        public void checkAccess(final Thread g) {
-        }
-
-        public void checkAccess(final ThreadGroup g) {
-        }
-
-        public void checkExit(final int status) {
-            // System.outPrintln("ShellSecurityManager: object
-            // called System.exit(" + status + ")");
-            // signal that someone is trying to terminate the JVM.
-            throw new ee(status);
-        }
-
-        public void checkExec(final String cmd) {
-        }
-
-        public void checkLink(final String lib) {
-        }
-
-        public void checkRead(final FileDescriptor fd) {
-        }
-
-        public void checkRead(final String file) {
-        }
-
-        public void checkRead(final String file, final Object context) {
-        }
-
-        public void checkWrite(final FileDescriptor fd) {
-        }
-
-        public void checkWrite(final String file) {
-        }
-
-        public void checkDelete(final String file) {
-        }
-
-        public void checkConnect(final String host, final int port) {
-        }
-
-        public void checkConnect(final String host, final int port, final Object context) {
-        }
-
-        public void checkListen(final int port) {
-        }
-
-        public void checkAccept(final String host, final int port) {
-        }
-
-        public void checkMulticast(final InetAddress maddr) {
-        }
-
-        // public void checkMulticast(InetAddress maddr, byte ttl) { }
-        public void checkPropertiesAccess() {
-        }
-
-        public void checkPropertyAccess(final String key) {
-        }
-
-        public void checkPropertyAccess(final String key, final String def) {
-        }
-
-        public boolean checkTopLevelWindow(final Object window) {
-            return true;
-        }
-
-        public void checkPrintJobAccess() {
-        }
-
-        public void checkSystemClipboardAccess() {
-        }
-
-        public void checkAwtEventQueueAccess() {
-        }
-
-        public void checkPackageAccess(final String pkg) {
-        }
-
-        public void checkPackageDefinition(final String pkg) {
-        }
-
-        public void checkSetFactory() {
-        }
-
-        public void checkMemberAccess(final Class<?> clazz, final int which) {
-        }
-
-        public void checkSecurityAccess(final String provider) {
         }
     }
 

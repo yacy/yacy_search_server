@@ -416,7 +416,7 @@ public final class yacy {
                         serverLog.logSevere("MAIN CONTROL LOOP", "PANIC: " + e.getMessage(),e);
                     }
                     // shut down
-                    if (kelondroRowCollection.sortingthread != null) kelondroRowCollection.sortingthread.terminate();
+                    if (kelondroRowCollection.sortingthreadexecutor != null) kelondroRowCollection.sortingthreadexecutor.shutdown();
                     serverLog.logConfig("SHUTDOWN", "caught termination signal");
                     server.terminate(false);
                     server.interrupt();
