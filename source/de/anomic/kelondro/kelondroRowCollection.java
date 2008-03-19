@@ -31,8 +31,13 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Random;
 import java.util.Set;
+import java.util.concurrent.Callable;
+import java.util.concurrent.CompletionService;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.ExecutorCompletionService;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+import java.util.concurrent.Future;
 
 import de.anomic.server.serverFileUtils;
 import de.anomic.server.serverMemory;
@@ -47,12 +52,15 @@ public class kelondroRowCollection {
     static final Integer dummy = new Integer(0);
     
     public static ExecutorService sortingthreadexecutor = null;
+    public static CompletionService<Object> sortingthreadcompletion = null;
 
     static {
         if (serverProcessor.useCPU > 1) {
             sortingthreadexecutor = Executors.newCachedThreadPool();
+            sortingthreadcompletion = new ExecutorCompletionService<Object>(sortingthreadexecutor);
         } else {
             sortingthreadexecutor = null;
+            sortingthreadcompletion = null;
         }
     }
     
@@ -478,10 +486,15 @@ public class kelondroRowCollection {
         int p = partition(0, this.chunkcount, this.sortBound, swapspace);
         if ((sortingthreadexecutor != null) && (!sortingthreadexecutor.isShutdown()) && (p > 50)) {
         	// sort this using multi-threading
-            Thread qsortthread = new qsortthread(this, 0, p, 0);
-            sortingthreadexecutor.execute(qsortthread);
+            Future<Object> part = sortingthreadcompletion.submit(new qsortthread(this, 0, p, 0));
         	qsort(p, this.chunkcount, 0, swapspace);
-        	if (qsortthread.isAlive()) try { this.wait(); } catch (InterruptedException e) { e.printStackTrace(); }
+        	try {
+                part.get();
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            } catch (ExecutionException e) {
+                e.printStackTrace();
+            }
         } else {
         	qsort(0, p, 0, swapspace);
         	qsort(p, this.chunkcount, 0, swapspace);
@@ -490,7 +503,7 @@ public class kelondroRowCollection {
         //assert this.isSorted();
     }
 
-    public static class qsortthread extends Thread {
+    public static class qsortthread implements Callable<Object> {
         kelondroRowCollection rc;
         int L, R, S;
         
@@ -501,10 +514,10 @@ public class kelondroRowCollection {
     	    this.S = S;
         }
     	
-    	public void run() {
+    	public Object call() throws Exception {
     	    rc.qsort(L, R, S, new byte[rc.rowdef.objectsize]);
-    	    synchronized (rc) {rc.notify();}
-    	}
+            return null;
+        }
     }
     
     final void qsort(int L, int R, int S, byte[] swapspace) {

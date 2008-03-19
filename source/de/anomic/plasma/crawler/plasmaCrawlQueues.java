@@ -129,9 +129,12 @@ public class plasmaCrawlQueues {
         delegatedURL.close();
     }
     
-    public plasmaCrawlEntry[] activeWorker() {
+    public plasmaCrawlEntry[] activeWorkerEntries() {
         synchronized (workers) {
-            return workers.values().toArray(new plasmaCrawlEntry[0]);
+            plasmaCrawlEntry[] e = new plasmaCrawlEntry[workers.size()];
+            int i = 0;
+            for (crawlWorker w: workers.values()) e[i++] = w.entry;
+            return e;
         }
     }
     

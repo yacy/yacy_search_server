@@ -144,7 +144,7 @@ public class queues_p {
         if (sb.crawlQueues.size() == 0) {
             prop.put("list-loader", "0");
         } else {
-            plasmaCrawlEntry[] w = sb.crawlQueues.activeWorker();
+            plasmaCrawlEntry[] w = sb.crawlQueues.activeWorkerEntries();
             int count = 0;
             for (int i = 0; i < w.length; i++)  {
                 if (w[i] == null) continue;

@@ -64,7 +64,7 @@ public class IndexCreateLoaderQueue_p {
         } else {
             prop.put("loader-set", "1");
             boolean dark = true;
-            plasmaCrawlEntry[] w = switchboard.crawlQueues.activeWorker();
+            plasmaCrawlEntry[] w = switchboard.crawlQueues.activeWorkerEntries();
             yacySeed initiator;
             int count = 0;
             for (int i = 0; i < w.length; i++)  {
