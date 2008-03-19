@@ -114,15 +114,12 @@ public class kelondroDyn {
         buffer = new kelondroObjectBuffer(file.toString());
     }
     
-    public static final void delete(File file,  boolean usetree) {
-        if (usetree) {
+    public static final void delete(File file) {
+        if (file.isFile()) {
             file.delete();
+            if (file.exists()) file.deleteOnExit();
         } else {
-            if (file.isDirectory()) {
-                kelondroFlexWidthArray.delete(file.getParentFile(), file.getName());
-            } else {
-                file.delete();
-            }
+            kelondroFlexWidthArray.delete(file.getParentFile(), file.getName());
         }
     }
     
@@ -199,7 +196,7 @@ public class kelondroDyn {
             kelondroRow.Entry nt;
             while (ri.hasNext()) {
                 nt = (kelondroRow.Entry) ri.next();
-                if (nt == null) throw new kelondroException("no more elements available");
+                if (nt == null) return null;
                 g = nt.getColBytes(0);
                 if (g == null) return null;
                 k = new String(g, 0, keylen);

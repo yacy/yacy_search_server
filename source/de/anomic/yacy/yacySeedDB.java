@@ -224,7 +224,7 @@ public final class yacySeedDB {
             return new kelondroMapObjects(new kelondroDyn(seedDBFile, true, true, commonHashLength, 480, '#', kelondroBase64Order.enhancedCoder, usetree, false, true), 500, sortFields, longaccFields, doubleaccFields, initializeHandlerMethod, this);
         } catch (Exception e) {
             // try again
-            kelondroDyn.delete(seedDBFile, usetree);
+            kelondroDyn.delete(seedDBFile);
             return new kelondroMapObjects(new kelondroDyn(seedDBFile, true, true, commonHashLength, 480, '#', kelondroBase64Order.enhancedCoder, usetree, false, true), 500, sortFields, longaccFields, doubleaccFields, initializeHandlerMethod, this);
         }
     }
