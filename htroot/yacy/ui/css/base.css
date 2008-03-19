@@ -106,7 +106,7 @@ table.ytable tbody td {
 	padding: 4px;
 	background-color: #FFF;
 	vertical-align: top;
-	white-space: nowrap;
+	/* white-space: nowrap; */
 	text-overflow:ellipsis;
 	overflow:hidden;
 }
@@ -123,6 +123,32 @@ table.ytable thead tr .headerSortDown, table.ytable thead tr .headerSortUp {
 	background-color: #8dbdd8;
 }
 
+/* YaCy Bookmarks ---------------------------*/
+.url {
+	padding-top: 1px;
+	font-size: 0.9em;
+  	line-height: 1.2em;
+  	margin-bottom:0.6em;
+}
+h3.linktitle {
+	margin-top:2px;	
+	margin-bottom: -0.5em;
+        font-size: 1.0em;
+        line-height: 1.2em;
+	color:#239AFF;
+}
+.url a {
+  	color:#20A020;
+  	text-decoration:none;
+}
+.desc {
+  	font-style:italic;
+	font-size: 0.9em;
+  	color: #808080;
+  	line-height: 1.2em;
+  	margin-bottom:-1em; 	
+}
+
 /* YaCy Search ---------------------------*/
 
 div.searchresults {
@@ -133,12 +159,13 @@ div.searchresults {
 div.searchresults.hidden {
   display:none;
 }
-h3.linktitle {
+
+.searchresults h3.linktitle {	
 	margin:2px;
 	padding-left: 20px;
 	margin-bottom: -0.5em;
         font-size: 1.0em;
-        line-height: 1.2em;
+        line-height: 1.2em
 }
 .snippet {
   	font-style:italic;
@@ -152,7 +179,7 @@ h3.linktitle {
   	color: black;
 }
 .searchresults .linktitle a {
-  	color:#239AFF;
+	color:#239AFF;  	
   	text-decoration:none;
 }
 .searchresults .url {

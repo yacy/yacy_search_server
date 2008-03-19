@@ -3,7 +3,7 @@
 	$(document).ready(function() { 
     	$('#ymarks') 
     	.tablesorter({widgets: ['zebra']}) 
-    	.tablesorterPager({container: $('#pager'), size: 15, positionFixed: false});
+    	.tablesorterPager({container: $('#pager'), size: 5, positionFixed: false});
 	}); 
 </script>
 
@@ -12,18 +12,18 @@
 			<colgroup>
 				<col width="25"/>
 				<col width="25"/>
-				<col width="250"/>
-				<col width="250"/>
-				<col width="210"/>
-				<col width="40"/>								
+				<col width="425"/>
+				<col width="150"/>
+				<col width="150"/>
+				<col width="25"/>								
 			</colgroup>
 			<thead>
 			  <tr>			 
 				<th class="{sorter: false}"></th>
 				<th></th>
 				<th>Title</th>
-				<th>URL</th>				
-				<th>Tags</th>
+				<th>Tags</th>				
+				<th>Date</th>
 				<th class="{sorter: false}"></th>							
 			  </tr>
 			</thead>			
@@ -41,12 +41,14 @@
 					#(/public)#
 				</td>
 				<td>
-					#[title]#				
-				</td>
-				<td class="url">
-					<a href="#[link]#">#[link]#</a>
-				</td>				
+					<h3 class="linktitle">#[title]#</h3>
+					<p class="desc">#[description]#</p>
+					<p class="url"><a href="#[link]#">#[link]#</a></p>					
+				</td>								
 				<td>#{tags}# #[tag]#,#{/tags}#</td>
+				<td>
+					#[date]#
+				</td>
 				<td>
 					<a href="Bookmarks.html?edit=#[hash]#">
 						<img src="img-2/pencil.png" alt="edit bookmark" title="edit bookmark" border="0" />

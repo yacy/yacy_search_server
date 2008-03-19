@@ -44,8 +44,7 @@
 		$('#searchbox').submit(function() {
 			var tabnr = $('#container > ul').tabs('length');			
 			var result = "result.html?" + $('#searchbox').formSerialize();
-			var tabname = $("input[@name='search']").getValue();		
-			$('<div id='+tabname+'</div>').appendTo('#container');
+			var tabname = $("input[@name='search']").getValue();			
 			$tabs.tabs('add', result, '*' + tabname);
 			$tabs.tabs('select',tabnr);
 			return false;
