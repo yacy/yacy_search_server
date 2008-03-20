@@ -51,13 +51,17 @@
 import de.anomic.data.htmlTools;
 import de.anomic.http.httpHeader;
 import de.anomic.plasma.plasmaSwitchboard;
+import de.anomic.server.serverFileUtils;
 import de.anomic.server.serverObjects;
 import de.anomic.server.serverSwitch;
+import de.anomic.tools.nxTools;
 import de.anomic.yacy.yacyVersion;
 
 import java.util.Map;
 import java.lang.StringBuffer;
 import java.util.Date;
+import java.io.File;
+import java.io.IOException;
 
 public class Threaddump_p {
 
@@ -78,18 +82,18 @@ public class Threaddump_p {
         	String versionstring = yacyVersion.combined2prettyVersion(sb.getConfig("version","0.1"));
         	
         	buffer.append("************* Start Thread Dump " + dt + " *******************").append("<br />");
-                buffer.append("<br /> YaCy Version: " + versionstring + "<br />");
+            buffer.append("<br /> YaCy Version: " + versionstring + "<br />");
         	buffer.append("Total Memory = " + (Runtime.getRuntime().totalMemory())).append("<br />");
         	buffer.append("Used&nbsp;&nbsp;Memory = " + (Runtime.getRuntime().totalMemory() - Runtime.getRuntime().freeMemory())).append("<br />");
         	buffer.append("Free&nbsp;&nbsp;Memory = " + (Runtime.getRuntime().freeMemory())).append("<br />");
         	buffer.append(" --- --- --- --- <br /><br />");
         	
-        	appendStackTraces(buffer, stackTraces, Thread.State.BLOCKED);
-        	appendStackTraces(buffer, stackTraces, Thread.State.RUNNABLE);
-        	appendStackTraces(buffer, stackTraces, Thread.State.TIMED_WAITING);
-        	appendStackTraces(buffer, stackTraces, Thread.State.WAITING);
-        	appendStackTraces(buffer, stackTraces, Thread.State.NEW);
-        	appendStackTraces(buffer, stackTraces, Thread.State.TERMINATED);
+        	appendStackTraces(sb.getRootPath(), buffer, stackTraces, Thread.State.BLOCKED);
+        	appendStackTraces(sb.getRootPath(), buffer, stackTraces, Thread.State.RUNNABLE);
+        	appendStackTraces(sb.getRootPath(), buffer, stackTraces, Thread.State.TIMED_WAITING);
+        	appendStackTraces(sb.getRootPath(), buffer, stackTraces, Thread.State.WAITING);
+        	appendStackTraces(sb.getRootPath(), buffer, stackTraces, Thread.State.NEW);
+        	appendStackTraces(sb.getRootPath(), buffer, stackTraces, Thread.State.TERMINATED);
             
         	buffer.append("************* End Thread Dump " + dt + " *******************").append("<br />");       	
         
@@ -101,19 +105,46 @@ public class Threaddump_p {
        	return prop;    // return from serverObjects respond()
     }    
     
-    private static void appendStackTraces(StringBuffer buffer, Map<Thread,StackTraceElement[]> stackTraces, Thread.State stateIn) {
+    private static void appendStackTraces(File rootPath, StringBuffer buffer, Map<Thread,StackTraceElement[]> stackTraces, Thread.State stateIn) {
         buffer.append("THREADS WITH STATES: " + stateIn.toString()).append("<br />").append("<br />");
+        File classPath = new File(rootPath, "source");
         
         for (Thread thread: stackTraces.keySet()) {
-            StackTraceElement[] stackTraceElement = stackTraces.get(thread);
+            StackTraceElement[] stackTraceElements = stackTraces.get(thread);
+            StackTraceElement ste;
+            String line;
             if (stateIn.equals(thread.getState())) {
                 buffer.append("Thread= " + thread.getName() + " " + (thread.isDaemon()?"daemon":"") + " id=" + thread.getId() + " " + thread.getState().toString()).append("<br />");
-                for (int i = 0; i < stackTraceElement.length; i++) {
-                    buffer.append("at " + htmlTools.encodeUnicode2html(stackTraceElement[i].toString(), true)).append("<br />");
+                for (int i = 0; i < stackTraceElements.length; i++) {
+                    ste = stackTraceElements[i];
+                    if (i == 0) {
+                        line = getLine(classPath, ste.getClassName(), ste.getLineNumber());
+                    } else {
+                        line = null;
+                    }
+                    if ((line != null) && (line.length() > 0)) {
+                        buffer.append("at " + htmlTools.encodeUnicode2html(ste.toString(), true)).append(" [").append(line).append("]<br />");
+                    } else {
+                        buffer.append("at " + htmlTools.encodeUnicode2html(ste.toString(), true)).append("<br />");
+                    }
                 }
                 buffer.append("<br />");
             }
         }
         buffer.append("<br />");
+    }
+    
+    private static String getLine(File sourcePath, String classname, int line) {
+        // find class
+        String classPath = classname.replace('.', '/') + ".java";
+        File file = new File(sourcePath, classPath);
+        if (!file.exists()) return "";
+        try {
+            String lineString = nxTools.line(serverFileUtils.read(file), line);
+            if (lineString == null) return "@ERROR";
+            return lineString;
+        } catch (IOException e) {
+            return "@EXCEPTION: " + e.getMessage();
+        }
     }
 }

@@ -52,15 +52,12 @@ public class kelondroRowCollection {
     static final Integer dummy = new Integer(0);
     
     public static ExecutorService sortingthreadexecutor = null;
-    public static CompletionService<Object> sortingthreadcompletion = null;
-
+    
     static {
         if (serverProcessor.useCPU > 1) {
             sortingthreadexecutor = Executors.newCachedThreadPool();
-            sortingthreadcompletion = new ExecutorCompletionService<Object>(sortingthreadexecutor);
         } else {
             sortingthreadexecutor = null;
-            sortingthreadcompletion = null;
         }
     }
     
@@ -486,6 +483,7 @@ public class kelondroRowCollection {
         int p = partition(0, this.chunkcount, this.sortBound, swapspace);
         if ((sortingthreadexecutor != null) && (!sortingthreadexecutor.isShutdown()) && (p > 50)) {
         	// sort this using multi-threading
+            CompletionService<Object> sortingthreadcompletion = new ExecutorCompletionService<Object>(sortingthreadexecutor);
             Future<Object> part = sortingthreadcompletion.submit(new qsortthread(this, 0, p, 0));
         	qsort(p, this.chunkcount, 0, swapspace);
         	try {

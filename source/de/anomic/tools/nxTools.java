@@ -43,6 +43,10 @@
 
 package de.anomic.tools;
 
+import java.io.ByteArrayInputStream;
+import java.io.IOException;
+import java.io.InputStreamReader;
+import java.io.LineNumberReader;
 import java.io.UnsupportedEncodingException;
 import java.util.ArrayList;
 import java.util.Enumeration;
@@ -187,6 +191,21 @@ public class nxTools {
             }
         }
         return v;
+    }
+    
+    public static String line(byte[] a, int lineNr) {
+        InputStreamReader r = new InputStreamReader(new ByteArrayInputStream(a));
+        LineNumberReader lnr = new LineNumberReader(r);
+        String theLine = null;
+        while (lnr.getLineNumber() < lineNr) {
+            try {
+                theLine = lnr.readLine();
+            } catch (IOException e) {
+                return null;
+            }
+            if (theLine == null) return null;
+        }
+        return theLine;
     }
     
     /**
