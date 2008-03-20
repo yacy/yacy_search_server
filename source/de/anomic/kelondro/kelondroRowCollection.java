@@ -530,15 +530,15 @@ public class kelondroRowCollection {
 		qsort(L, p, 0, swapspace);
 		qsort(p, R, 0, swapspace);
 	}
-
-	private final int partition(int L, int R, int S, byte[] swapspace) {
+    
+    private final int partition(int L, int R, int S, byte[] swapspace) {
 		// returns {partition-point, new-S}
         assert (L < R - 1);
         assert (R - L >= isortlimit);
         
         int p = L;
         int q = R - 1;
-        int pivot = (L + R - 1) / 2;
+        int pivot = pivot(L, R, S, swapspace);
         int oldpivot = -1;
         byte[] compiledPivot = null;
         if (this.rowdef.objectOrder instanceof kelondroBase64Order) {
@@ -585,6 +585,67 @@ public class kelondroRowCollection {
         return p;
     }
 	
+    private final int pivot(int L, int R, int S, byte[] swapspace) {
+        if ((S == 0) || (S < L)) {
+            // the collection has no ordering
+            // or
+            // the collection has an ordering, but this is not relevant for this pivot
+            // because the ordered zone is outside of ordering zone
+            int m = picMiddle(new int[]{L, (3 * L + R - 1) / 4, (L + R - 1) / 2, (3 * R - L - 1) / 4, R - 1}, 5);
+            assert L <= m;
+            assert m < R;
+            return m;
+        }
+        if (S < R) {
+            // the collection has an ordering
+            // and part of the ordered zone is inside the to-be-ordered zone
+            int m = picMiddle(new int[]{L + (S - L) / 3, L + 2 * (S - L) / 3, S, (S + R - 1) / 2, R - 1}, 5);
+            assert S <= m;
+            assert L <= m;
+            assert m < R;
+            return m;
+        }
+        // use the sorted set to find good pivot:
+        // the sort range is fully inside the sorted area:
+        // the middle element must be the best
+        // (hovever, it should be skipped because there is no point in sorting this)
+        return (L + R - 1) / 2;
+    }
+
+    private final int picMiddle(int[] list, int len) {
+        assert len % 2 == 1;
+        assert len <= list.length;
+        int cut = list.length / 2;
+        for (int i = 0; i < cut; i++) {remove(list, len, min(list, len)); len--;}
+        for (int i = 0; i < cut; i++) {remove(list, len, max(list, len)); len--;}
+        // the remaining element must be the middle element
+        assert len == 1;
+        return list[0];
+    }
+    
+    private final void remove(int[] list, int len, int idx) {
+        if (idx == len - 1) return;
+        list[idx] = list[len - 1]; // shift last element to front
+    }
+    
+    private final int min(int[] list, int len) {
+        assert len > 0;
+        int f = 0;
+        while (len-- > 0) {
+            if (compare(list[f], list[len]) > 0) f = len;
+        }
+        return f;
+    }
+    
+    private final int max(int[] list, int len) {
+        assert len > 0;
+        int f = 0;
+        while (len-- > 0) {
+            if (compare(list[f], list[len]) < 0) f = len;
+        }
+        return f;
+    }
+    
     private final void isort(int L, int R, byte[] swapspace) {
         for (int i = L + 1; i < R; i++)
             for (int j = i; j > L && compare(j - 1, j) > 0; j--)
