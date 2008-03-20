@@ -30,34 +30,41 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.RandomAccessFile;
 
+/**
+ * The EcoFS is a flat file with records of fixed length. The file does not contain
+ * any meta information and the first record starts right at file position 0
+ * The access rules are in such a way that a minimum of IO operations are necessary
+ * Two caches provide a mirror to content in the file: a read cache and a write buffer
+ * The read cache contains a number of entries from the file; a mirror that moves
+ * whenever information outside the mirror is requested.
+ * The write buffer always exists only at the end of the file. It contains only records
+ * that have never been written to the file before. When the write buffer is flushed,
+ * the file grows
+ * The record file may also shrink when the last entry of the file is removed.
+ * Removal of Entries inside the file is not possible, but such entries can be erased
+ * by overwriting the data with zero bytes
+ * All access to the file is made with byte[] that are generated outside of this class
+ * This class only references byte[] that are handed over to methods of this class.
+ */
 public class kelondroEcoFS {
-
-
-    /*
-     * The EcoFS is a flat file with records of fixed length. The file does not contain
-     * any meta information and the first record starts right at file position 0
-     * The access rules are in such a way that a minimum of IO operations are necessary
-     * Two caches provide a mirror to content in the file: a read cache and a write buffer
-     * The read cache contains a number of entries from the file; a mirror that moves
-     * whenever information outside the mirror is requested.
-     * The write buffer always exists only at the end of the file. It contains only records
-     * that have never been written to the file before. When the write buffer is flushed,
-     * the file grows
-     * The record file may also shrink when the last entry of the file is removed.
-     * Removal of Entries inside the file is not possible, but such entries can be erased
-     * by overwriting the data with zero bytes
-     * All access to the file is made with byte[] that are generated outside of this class
-     * This class only references byte[] that are handed over to methods of this class.
-     */
     
     private RandomAccessFile raf;
     private File tablefile;
-    protected int recordsize;  // number of bytes in one record
+    /**
+     * number of bytes in one record
+     */
+    protected final int recordsize;
     private long cacheindex;
-    private int cachecount, buffercount; // number of entries in buffer
+    /**
+     * number of entries in buffer
+     */
+    private int cachecount, buffercount;
     private byte[] cache, buffer, zero;
     
-    private static final int maxBuffer = 4 * 1024; // stay below hard disc cache (is that necessary?)
+    /**
+     * stay below hard disc cache (is that necessary?)
+     */
+    private static final int maxBuffer = 4 * 1024;
     
     
     public kelondroEcoFS(File tablefile, int recordsize) throws IOException {
@@ -99,16 +106,23 @@ public class kelondroEcoFS {
         fillCache(0);
     }
     
+    /**
+     * @param tablefile
+     * @param recordsize
+     * @return number of records in table
+     */
     public static long tableSize(File tablefile, long recordsize) {
-        // returns number of records in table
         if (!tablefile.exists()) return 0;
         long size = tablefile.length();
         assert size % recordsize == 0;
         return size / (long) recordsize;
     }
 
+    /**
+     * @return the number of records in file plus number of records in buffer
+     * @throws IOException
+     */
     public synchronized long size() throws IOException {
-        // return the number of records in file plus number of records in buffer
         return filesize() + (long) this.buffercount;
     }
     
@@ -116,24 +130,35 @@ public class kelondroEcoFS {
         return this.tablefile;
     }
     
+    /**
+     * @return records in file
+     * @throws IOException
+     */
     private long filesize() throws IOException {
         return raf.length() / (long) recordsize;
     }
 
+    /**
+     * checks if the index is inside the cache
+     * 
+     * @param index
+     * @return the index offset inside the cache or -1 if the index is not in the cache 
+     */
     private int inCache(long index) {
-        // checks if the index is inside the cache and returns the index offset inside
-        // the cache if the index is inside the cache
-        // returns -1 if the index is not in the cache
         if ((index >= this.cacheindex) && (index < this.cacheindex + this.cachecount)) {
             return (int) (index - this.cacheindex);
         }
         return -1;
     }
     
+    /**
+     * checks if the index is inside the buffer
+     * 
+     * @param index
+     * @return the index offset inside the buffer or -1 if the index is not in the buffer 
+     * @throws IOException
+     */
     private int inBuffer(long index) throws IOException {
-        // checks if the index is inside the buffer and returns the index offset inside
-        // the buffer if the index is inside the buffer
-        // returns -1 if the index is not in the buffer
         long fs = filesize();
         if ((index >= fs) && (index < fs + this.buffercount)) {
             return (int) (index - fs);
@@ -141,11 +166,16 @@ public class kelondroEcoFS {
         return -1;
     }
     
+    /**
+     * load cache with copy of disc content; start with record at index
+     * 
+     * if the record would overlap with the write buffer,
+     * its start is shifted forward until it fits
+     * 
+     * @param index
+     * @throws IOException
+     */
     private void fillCache(long index) throws IOException {
-        // load cache with copy of disc content; start with record at index
-        // if the record would overlap with the write buffer,
-        // its start is shifted forward until it fits
-        
         // first check if the index is inside the current cache
         assert inCache(index) < 0;
         if (inCache(index) >= 0) return;
@@ -169,9 +199,11 @@ public class kelondroEcoFS {
         raf.seek((long) this.recordsize * (long) index);
         raf.read(this.cache, 0, this.recordsize * this.cachecount);
     }
-    
+
+    /**
+     * write buffer to end of file 
+     */
     private void flushBuffer() {
-        // write buffer to end of file
         try {
             raf.seek(raf.length());
             raf.write(this.buffer, 0, this.recordsize * this.buffercount);
@@ -196,6 +228,12 @@ public class kelondroEcoFS {
         cache = null;
     }
 
+    /**
+     * @param index record which should be read
+     * @param b destination array
+     * @param start offset in b to store data
+     * @throws IOException
+     */
     public synchronized void get(long index, byte[] b, int start) throws IOException {
         assert b.length - start >= this.recordsize;
         if (index >= size()) throw new IndexOutOfBoundsException("kelondroEcoFS.get(" + index + ") outside bounds (" + this.size() + ")");
@@ -224,8 +262,8 @@ public class kelondroEcoFS {
     public synchronized void put(long index, byte[] b, int start) throws IOException {
         assert b.length - start >= this.recordsize;
         if (index > size()) throw new IndexOutOfBoundsException("kelondroEcoFS.put(" + index + ") outside bounds (" + this.size() + ")");
-        // check if this is an empty entry
         
+        // check if this is an empty entry
         if (isClean(b , start, this.recordsize)) {
             clean(index);
             return;
@@ -271,7 +309,6 @@ public class kelondroEcoFS {
             raf.write(b, start, this.recordsize);
         }
     }
-    
 
     public synchronized void add(byte[] b, int start) throws IOException {
         put(size(), b, start);
@@ -307,15 +344,23 @@ public class kelondroEcoFS {
          return false;
     }
     
+    /**
+     * removes an entry by cleaning (writing zero bytes to the file)
+     * 
+     * the entry that had been at the specific place before is copied to the given array b
+     * if the last entry in the file was cleaned, the file shrinks by the given record
+     * 
+     * this is like
+     * <code>get(index, b, start);
+     * put(index, zero, 0);</code>
+     * plus an additional check if the file should shrink
+     * 
+     * @param index
+     * @param b content at index
+     * @param start offset in record to start reading
+     * @throws IOException
+     */
     public synchronized void clean(long index, byte[] b, int start) throws IOException {
-        // removes an entry by cleaning (writing zero bytes to the file)
-        // the entry that had been at the specific place before is copied to the given array b
-        // if the last entry in the file was cleaned, the file shrinks by the given record
-        // this is like
-        // get(index, b, start);
-        // put(index, zero, 0);
-        // plus an additional check if the file should shrink
-        
         assert b.length - start >= this.recordsize;
         if (index >= size()) throw new IndexOutOfBoundsException("kelondroEcoFS.clean(" + index + ") outside bounds (" + this.size() + ")");
         if (index == size() - 1) {
@@ -352,6 +397,11 @@ public class kelondroEcoFS {
         assert false;
     }
 
+    /**
+     * @see clean(long, byte[], int)
+     * @param index
+     * @throws IOException
+     */
     public synchronized void clean(long index) throws IOException {
         if (index >= size()) throw new IndexOutOfBoundsException("kelondroEcoFS.clean(" + index + ") outside bounds (" + this.size() + ")");
         if (index == size() - 1) {
@@ -379,6 +429,12 @@ public class kelondroEcoFS {
         raf.write(zero, 0, this.recordsize);
     }
     
+    /**
+     * @see clean(long, byte[], int)
+     * @param b
+     * @param start
+     * @throws IOException
+     */
     public synchronized void cleanLast(byte[] b, int start) throws IOException {
         cleanLast0(b, start);
         long i;
@@ -389,10 +445,16 @@ public class kelondroEcoFS {
         }
     }
     
+    /**
+     * this is like
+     * <code>clean(this.size() - 1, b, start);</code>
+     * 
+     * @see clean(long, byte[], int)
+     * @param b
+     * @param start
+     * @throws IOException
+     */
     private synchronized void cleanLast0(byte[] b, int start) throws IOException {
-        // this is like
-        // clean(this.size() - 1, b, start);
-
         assert b.length - start >= this.recordsize;
         // check if index is inside of cache
         int p = inCache(this.size() - 1);
@@ -423,6 +485,10 @@ public class kelondroEcoFS {
         assert false;
     }
     
+    /**
+     * @see clean(long, byte[], int)
+     * @throws IOException
+     */
     public synchronized void cleanLast() throws IOException {
         cleanLast0();
         long i;
@@ -456,6 +522,10 @@ public class kelondroEcoFS {
         this.raf.setLength((long) (this.size() - 1) * (long) this.recordsize);
     }
     
+    /**
+     * main - writes some data and checks the tables size (with time measureing)
+     * @param args
+     */
     public static void main(String[] args) {
         // open a file, add one entry and exit
         File f = new File(args[0]);

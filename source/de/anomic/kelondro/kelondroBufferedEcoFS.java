@@ -30,17 +30,16 @@ import java.util.Iterator;
 import java.util.Map;
 import java.util.TreeMap;
 
+/**
+ * The kelondroBufferedEcoFS extends the IO reduction to EcoFS by providing a
+ * write buffer to elements that are inside the filed entries of the file
+ * That means, each time, an entry is written to the end of the file, it is not buffered
+ */
 public class kelondroBufferedEcoFS {
 
     private kelondroEcoFS efs;
     private int maxEntries;
     private TreeMap<Long, byte[]> buffer;
-    
-    /*
-     * The kelondroBufferedEcoFS extends the IO reduction to EcoFS by providing a
-     * write buffer to elements that are inside the filed entries of the file
-     * That means, each time, an entry is written to the end of the file, it is not buffered
-     */
     
     public kelondroBufferedEcoFS(kelondroEcoFS efs, int maxEntries) {
         this.efs = efs;

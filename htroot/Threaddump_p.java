@@ -48,6 +48,7 @@
 // javac -classpath .:../Classes Blacklist_p.java
 // if the shell's current path is HTROOT
 
+import de.anomic.data.htmlTools;
 import de.anomic.http.httpHeader;
 import de.anomic.plasma.plasmaSwitchboard;
 import de.anomic.server.serverObjects;
@@ -77,7 +78,7 @@ public class Threaddump_p {
         	String versionstring = yacyVersion.combined2prettyVersion(sb.getConfig("version","0.1"));
         	
         	buffer.append("************* Start Thread Dump " + dt + " *******************").append("<br />");
-            buffer.append("<br /> YaCy Version: " + versionstring + "<br />");
+                buffer.append("<br /> YaCy Version: " + versionstring + "<br />");
         	buffer.append("Total Memory = " + (Runtime.getRuntime().totalMemory())).append("<br />");
         	buffer.append("Used&nbsp;&nbsp;Memory = " + (Runtime.getRuntime().totalMemory() - Runtime.getRuntime().freeMemory())).append("<br />");
         	buffer.append("Free&nbsp;&nbsp;Memory = " + (Runtime.getRuntime().freeMemory())).append("<br />");
@@ -108,7 +109,7 @@ public class Threaddump_p {
             if (stateIn.equals(thread.getState())) {
                 buffer.append("Thread= " + thread.getName() + " " + (thread.isDaemon()?"daemon":"") + " id=" + thread.getId() + " " + thread.getState().toString()).append("<br />");
                 for (int i = 0; i < stackTraceElement.length; i++) {
-                    buffer.append("at " + stackTraceElement[i]).append("<br />");
+                    buffer.append("at " + htmlTools.encodeUnicode2html(stackTraceElement[i].toString(), true)).append("<br />");
                 }
                 buffer.append("<br />");
             }
