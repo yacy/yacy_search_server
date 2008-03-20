@@ -32,9 +32,7 @@ import java.util.List;
 import java.util.Random;
 import java.util.Set;
 import java.util.concurrent.Callable;
-import java.util.concurrent.CompletionService;
 import java.util.concurrent.ExecutionException;
-import java.util.concurrent.ExecutorCompletionService;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
@@ -481,10 +479,14 @@ public class kelondroRowCollection {
         }
         byte[] swapspace = new byte[this.rowdef.objectsize];
         int p = partition(0, this.chunkcount, this.sortBound, swapspace);
-        if ((sortingthreadexecutor != null) && (!sortingthreadexecutor.isShutdown()) && (p > 50)) {
+        if ((sortingthreadexecutor != null) &&
+            (!sortingthreadexecutor.isShutdown()) &&
+            (serverProcessor.useCPU > 1) && 
+            (this.chunkcount > 80)) {
         	// sort this using multi-threading
-            CompletionService<Object> sortingthreadcompletion = new ExecutorCompletionService<Object>(sortingthreadexecutor);
-            Future<Object> part = sortingthreadcompletion.submit(new qsortthread(this, 0, p, 0));
+            Future<Object> part = sortingthreadexecutor.submit(new qsortthread(this, 0, p, 0));
+            //CompletionService<Object> sortingthreadcompletion = new ExecutorCompletionService<Object>(sortingthreadexecutor);
+            //Future<Object> part = sortingthreadcompletion.submit(new qsortthread(this, 0, p, 0));
         	qsort(p, this.chunkcount, 0, swapspace);
         	try {
                 part.get();
@@ -608,7 +610,7 @@ public class kelondroRowCollection {
         // use the sorted set to find good pivot:
         // the sort range is fully inside the sorted area:
         // the middle element must be the best
-        // (hovever, it should be skipped because there is no point in sorting this)
+        // (however, it should be skipped because there is no point in sorting this)
         return (L + R - 1) / 2;
     }
 
@@ -861,59 +863,59 @@ public class kelondroRowCollection {
         for (int i = 0; i < testsize; i++) a.add(randomHash().getBytes());
         a.sort();
         a.uniq();
-        long t1 = System.currentTimeMillis();
-        System.out.println("create a   : " + (t1 - t0) + " milliseconds, " + d(testsize, (t1 - t0)) + " entries/millisecond; a.size() = " + a.size());
+        long t1 = System.nanoTime();
+        System.out.println("create a   : " + (t1 - t0) + " nanoseconds, " + d(testsize, (t1 - t0)) + " entries/nanoseconds; a.size() = " + a.size());
         
     	kelondroRowCollection c = new kelondroRowCollection(r, testsize);
     	random = new Random(0);
-    	t0 = System.currentTimeMillis();
+    	t0 = System.nanoTime();
     	for (int i = 0; i < testsize; i++) {
     		c.add(randomHash().getBytes());
     	}
-    	t1 = System.currentTimeMillis();
-    	System.out.println("create c   : " + (t1 - t0) + " milliseconds, " + d(testsize, (t1 - t0)) + " entries/millisecond");
+    	t1 = System.nanoTime();
+    	System.out.println("create c   : " + (t1 - t0) + " nanoseconds, " + d(testsize, (t1 - t0)) + " entries/nanoseconds");
     	kelondroRowCollection d = new kelondroRowCollection(r, testsize);
     	for (int i = 0; i < testsize; i++) {
     		d.add(c.get(i).getColBytes(0));
     	}
-    	long t2 = System.currentTimeMillis();
-    	System.out.println("copy c -> d: " + (t2 - t1) + " milliseconds, " + d(testsize, (t2 - t1)) + " entries/millisecond");
+    	long t2 = System.nanoTime();
+    	System.out.println("copy c -> d: " + (t2 - t1) + " nanoseconds, " + d(testsize, (t2 - t1)) + " entries/nanoseconds");
     	serverProcessor.useCPU = 1;
     	c.sort();
-    	long t3 = System.currentTimeMillis();
-    	System.out.println("sort c (1) : " + (t3 - t2) + " milliseconds, " + d(testsize, (t3 - t2)) + " entries/millisecond");
+    	long t3 = System.nanoTime();
+    	System.out.println("sort c (1) : " + (t3 - t2) + " nanoseconds, " + d(testsize, (t3 - t2)) + " entries/nanoseconds");
     	serverProcessor.useCPU = 2;
     	d.sort();
-    	long t4 = System.currentTimeMillis();
-    	System.out.println("sort d (2) : " + (t4 - t3) + " milliseconds, " + d(testsize, (t4 - t3)) + " entries/millisecond");
+    	long t4 = System.nanoTime();
+    	System.out.println("sort d (2) : " + (t4 - t3) + " nanoseconds, " + d(testsize, (t4 - t3)) + " entries/nanoseconds");
     	c.uniq();
-    	long t5 = System.currentTimeMillis();
-    	System.out.println("uniq c     : " + (t5 - t4) + " milliseconds, " + d(testsize, (t5 - t4)) + " entries/millisecond");
+    	long t5 = System.nanoTime();
+    	System.out.println("uniq c     : " + (t5 - t4) + " nanoseconds, " + d(testsize, (t5 - t4)) + " entries/nanoseconds");
     	d.uniq();
-    	long t6 = System.currentTimeMillis();
-    	System.out.println("uniq d     : " + (t6 - t5) + " milliseconds, " + d(testsize, (t6 - t5)) + " entries/millisecond");
+    	long t6 = System.nanoTime();
+    	System.out.println("uniq d     : " + (t6 - t5) + " nanoseconds, " + d(testsize, (t6 - t5)) + " entries/nanoseconds");
     	random = new Random(0);
     	kelondroRowSet e = new kelondroRowSet(r, testsize);
     	for (int i = 0; i < testsize; i++) {
-    		e.put(r.newEntry(randomHash().getBytes()));
+    		//e.put(r.newEntry(randomHash().getBytes()));
     	}
-    	long t7 = System.currentTimeMillis();
-    	System.out.println("create e   : " + (t7 - t6) + " milliseconds, " + d(testsize, (t7 - t6)) + " entries/millisecond");
+    	long t7 = System.nanoTime();
+    	System.out.println("create e   : " + (t7 - t6) + " nanoseconds, " + d(testsize, (t7 - t6)) + " entries/nanoseconds");
     	e.sort();
-    	long t8 = System.currentTimeMillis();
-    	System.out.println("sort e (2) : " + (t8 - t7) + " milliseconds, " + d(testsize, (t8 - t7)) + " entries/millisecond");
+    	long t8 = System.nanoTime();
+    	System.out.println("sort e (2) : " + (t8 - t7) + " nanoseconds, " + d(testsize, (t8 - t7)) + " entries/nanoseconds");
     	e.uniq();
-    	long t9 = System.currentTimeMillis();
-    	System.out.println("uniq e     : " + (t9 - t8) + " milliseconds, " + d(testsize, (t9 - t8)) + " entries/millisecond");
+    	long t9 = System.nanoTime();
+    	System.out.println("uniq e     : " + (t9 - t8) + " nanoseconds, " + d(testsize, (t9 - t8)) + " entries/nanoseconds");
     	boolean cis = c.isSorted();
-    	long t10 = System.currentTimeMillis();
-    	System.out.println("c isSorted = " + ((cis) ? "true" : "false") + ": " + (t10 - t9) + " milliseconds");
+    	long t10 = System.nanoTime();
+    	System.out.println("c isSorted = " + ((cis) ? "true" : "false") + ": " + (t10 - t9) + " nanoseconds");
     	boolean dis = d.isSorted();
-    	long t11 = System.currentTimeMillis();
-    	System.out.println("d isSorted = " + ((dis) ? "true" : "false") + ": " + (t11 - t10) + " milliseconds");
+    	long t11 = System.nanoTime();
+    	System.out.println("d isSorted = " + ((dis) ? "true" : "false") + ": " + (t11 - t10) + " nanoseconds");
     	boolean eis = e.isSorted();
-    	long t12 = System.currentTimeMillis();
-    	System.out.println("e isSorted = " + ((eis) ? "true" : "false") + ": " + (t12 - t11) + " milliseconds");
+    	long t12 = System.nanoTime();
+    	System.out.println("e isSorted = " + ((eis) ? "true" : "false") + ": " + (t12 - t11) + " nanoseconds");
     	random = new Random(0);
     	boolean allfound = true;
         for (int i = 0; i < testsize; i++) {
@@ -935,12 +937,13 @@ public class kelondroRowCollection {
         System.out.println("e noghosts = " + ((noghosts) ? "true" : "false") + ": " + (t14 - t13) + " milliseconds");
         System.out.println("Result size: c = " + c.size() + ", d = " + d.size() + ", e = " + e.size());
     	System.out.println();
+    	if (sortingthreadexecutor != null) sortingthreadexecutor.shutdown();
     }
     
     public static void main(String[] args) {
     	//test(1000);
     	test(10000);
-    	test(100000);
+    	//test(100000);
     	//test(1000000);
     	
     	/*   	
