@@ -45,7 +45,7 @@ public class WebStructurePicture_p {
     
     private static final double maxlongd = Long.MAX_VALUE;
     
-    public static ymageMatrix respond(httpHeader header, serverObjects post, serverSwitch env) {
+    public static ymageMatrix respond(httpHeader header, serverObjects post, serverSwitch<?> env) {
         plasmaSwitchboard sb = (plasmaSwitchboard) env;
         
         int width = 768;

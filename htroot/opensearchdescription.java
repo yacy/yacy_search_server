@@ -32,7 +32,7 @@ import de.anomic.yacy.yacyCore;
 
 public class opensearchdescription {
 
-    public static serverObjects respond(httpHeader header, serverObjects post, serverSwitch env) {
+    public static serverObjects respond(httpHeader header, serverObjects post, serverSwitch<?> env) {
 
         // generate message content for open search description
         String promoteSearchPageGreeting = env.getConfig("promoteSearchPageGreeting", "");

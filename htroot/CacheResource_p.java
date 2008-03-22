@@ -55,7 +55,7 @@ import de.anomic.server.serverSwitch;
 
 public class CacheResource_p {
 
-    public static serverObjects respond(httpHeader header, serverObjects post, serverSwitch env) {
+    public static serverObjects respond(httpHeader header, serverObjects post, serverSwitch<?> env) {
         plasmaSwitchboard switchboard = (plasmaSwitchboard) env;
         serverObjects prop = new serverObjects();
 

@@ -67,7 +67,7 @@ import de.anomic.yacy.yacyURL;
 
 public class ConfigLanguage_p {
 
-    public static serverObjects respond(httpHeader header, serverObjects post, serverSwitch env) {
+    public static serverObjects respond(httpHeader header, serverObjects post, serverSwitch<?> env) {
         //listManager.switchboard = (plasmaSwitchboard) env;
         serverObjects prop = new serverObjects();
         plasmaSwitchboard switchboard = (plasmaSwitchboard) env;

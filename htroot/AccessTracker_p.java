@@ -53,7 +53,7 @@ public class AccessTracker_p {
 		return accessClone;
 	}
 	
-    public static serverObjects respond(httpHeader header, serverObjects post, serverSwitch sb) {
+    public static serverObjects respond(httpHeader header, serverObjects post, serverSwitch<?> sb) {
         plasmaSwitchboard switchboard = (plasmaSwitchboard) sb;
      
         // return variable that accumulates replacements

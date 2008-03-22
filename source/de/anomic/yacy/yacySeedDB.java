@@ -766,7 +766,7 @@ public final class yacySeedDB {
     }
 
     public String uploadCache(yacySeedUploader uploader, 
-            serverSwitch sb,
+            serverSwitch<?> sb,
             yacySeedDB seedDB,
 //          String  seedFTPServer,
 //          String  seedFTPAccount,

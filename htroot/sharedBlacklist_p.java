@@ -76,7 +76,7 @@ public class sharedBlacklist_p {
     public static final int STATUS_URL_PROBLEM = 4;
     public static final int STATUS_WRONG_INVOCATION = 5;
     
-    public static serverObjects respond(httpHeader header, serverObjects post, serverSwitch env) {
+    public static serverObjects respond(httpHeader header, serverObjects post, serverSwitch<?> env) {
         // return variable that accumulates replacements
         serverObjects prop = new serverObjects();
         plasmaSwitchboard switchboard = (plasmaSwitchboard) env;

@@ -88,7 +88,7 @@ public class ymarks {
 	final static boolean TAGS = false;
 	final static boolean FOLDERS = true;
 	
-    public static serverObjects respond(httpHeader header, serverObjects post, serverSwitch env) {
+    public static serverObjects respond(httpHeader header, serverObjects post, serverSwitch<?> env) {
 
     	int max_count = 1000;
     	int start=0;

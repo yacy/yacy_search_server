@@ -62,7 +62,7 @@ import de.anomic.server.serverSwitch;
 import de.anomic.yacy.yacyURL;
 
 public class getpageinfo_p {
-    public static serverObjects respond(httpHeader header, serverObjects post, serverSwitch env) {
+    public static serverObjects respond(httpHeader header, serverObjects post, serverSwitch<?> env) {
         serverObjects prop = new serverObjects();
         prop.put("sitemap", "");
         prop.put("title", "");

@@ -699,7 +699,7 @@ public class yacyCore {
         return saveSeedList(this.switchboard);
     }
 
-    public final String saveSeedList(serverSwitch sb) {
+    public final String saveSeedList(serverSwitch<?> sb) {
         try {
             // return an error if this is not successful, and NULL if everything is fine
             String logt;

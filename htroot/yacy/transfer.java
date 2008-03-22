@@ -60,7 +60,7 @@ import de.anomic.yacy.yacySeed;
 
 public final class transfer {
 
-    public static serverObjects respond(httpHeader header, serverObjects post, serverSwitch env) {
+    public static serverObjects respond(httpHeader header, serverObjects post, serverSwitch<?> env) {
         plasmaSwitchboard sb = (plasmaSwitchboard) env;
         serverObjects prop = new serverObjects();
         if ((post == null) || (env == null)) return prop;

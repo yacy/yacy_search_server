@@ -36,7 +36,7 @@ public abstract class AbstractImporter extends Thread implements dbImporter{
     /**
      * @see dbImporter#init(HashMap)
      */
-    public void init() throws ImporterException {
+    public void init() {
         // initializing the logger and setting a more verbose thread name
         this.log = new serverLog("IMPORT_" + this.jobType + "_" + this.jobID);
         this.setName("IMPORT_" + this.jobType + "_" + this.jobID);

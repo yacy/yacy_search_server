@@ -51,7 +51,7 @@ import de.anomic.ymage.ymageToolPrint;
 
 public class imagetest {
     
-    public static ymageMatrix respond(httpHeader header, serverObjects post, serverSwitch env) {
+    public static ymageMatrix respond(httpHeader header, serverObjects post, serverSwitch<?> env) {
         /*
         BufferedImage bi = new BufferedImage(640, 400, BufferedImage.TYPE_INT_RGB); 
         Graphics2D g = bi.createGraphics();

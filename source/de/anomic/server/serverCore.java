@@ -118,7 +118,7 @@ public final class serverCore extends serverAbstractThread implements serverThre
     private int timeout;                   // connection time-out of the socket
     serverHandler handlerPrototype;        // the command class (a serverHandler) 
 
-    private serverSwitch switchboard;      // the command class switchboard
+    private serverSwitch<?> switchboard;   // the command class switchboard
     HashMap<String, String> denyHost;
     int commandMaxLength;
     private int maxBusySessions;
@@ -178,7 +178,7 @@ public final class serverCore extends serverAbstractThread implements serverThre
             int timeout,
             boolean blockAttack,
             serverHandler handlerPrototype, 
-            serverSwitch switchboard,
+            serverSwitch<?> switchboard,
             int commandMaxLength
     ) {
         this.timeout = timeout;

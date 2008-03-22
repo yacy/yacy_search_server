@@ -57,7 +57,7 @@ import java.util.TreeMap;
 
 import de.anomic.server.logging.serverLog;
 
-public interface serverSwitch {
+public interface serverSwitch<E> {
 
     // the root path for the application
     public File getRootPath();
@@ -112,8 +112,9 @@ public interface serverSwitch {
     // to work off a queue job, use deQueue, which is meant to
     // work off exactly only one job, not all
     public int queueSize();
-    public void enQueue(Object job);
-    public boolean deQueue(); // returns true if there had been dequeued anything
+    public E queuePeek(); // looks for next element in the queue, returns but not deletes it if there is one; returns null othervise
+    public void enQueue(E job);
+    public E deQueue() throws InterruptedException; // returns a FIFO entry from the stack, blocks until one element is available
 
     // authentification routines: sets and reads access attributes according to host addresses
     public void    setAuthentify(InetAddress host, String user, String rigth);

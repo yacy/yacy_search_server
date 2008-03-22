@@ -48,10 +48,11 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
 import java.util.TreeMap;
+import java.util.concurrent.LinkedBlockingQueue;
 
 import de.anomic.server.logging.serverLog;
 
-public abstract class serverAbstractSwitch implements serverSwitch {
+public abstract class serverAbstractSwitch<E> implements serverSwitch<E> {
     
     private static final long maxTrackingTimeDefault = 1000 * 60 * 60; // store only access data from the last hour to save ram space
     
@@ -68,6 +69,7 @@ public abstract class serverAbstractSwitch implements serverSwitch {
     private   TreeMap<String, serverThread>          workerThreads;
     private   TreeMap<String, serverSwitchAction>    switchActions;
     protected HashMap<String, TreeMap<Long, String>> accessTracker; // mappings from requesting host to an ArrayList of serverTrack-entries
+    private   LinkedBlockingQueue<E> cacheStack;
     
     public serverAbstractSwitch(File rootPath, String initPath, String configPath, boolean applyPro) {
         // we initialize the switchboard with a property file,
@@ -76,10 +78,11 @@ public abstract class serverAbstractSwitch implements serverSwitch {
         // be deleted, but not the init file
         // the only attribute that will always be read from the init is the
         // file name of the config file
+        this.cacheStack = new LinkedBlockingQueue<E>();
     	this.rootPath = rootPath;
-        configComment = "This is an automatically generated file, updated by serverAbstractSwitch and initialized by " + initPath;
+    	this.configComment = "This is an automatically generated file, updated by serverAbstractSwitch and initialized by " + initPath;
         File initFile = new File(rootPath, initPath);
-        configFile = new File(rootPath, configPath); // propertiesFile(config);
+        this.configFile = new File(rootPath, configPath); // propertiesFile(config);
         new File(configFile.getParent()).mkdir();
 
         // predefine init's
@@ -471,10 +474,21 @@ public abstract class serverAbstractSwitch implements serverSwitch {
         return workerThreads.keySet().iterator();
     }
     
-    abstract public int queueSize();
-    abstract public void enQueue(Object job);
-    abstract public boolean deQueue();
-
+    public int queueSize() {
+        return cacheStack.size();
+    }
+    
+    public E queuePeek() {
+        return cacheStack.peek();
+    }
+    
+    public void enQueue(E job) {
+        cacheStack.add(job);
+    }
+    
+    public E deQueue() throws InterruptedException {
+        return cacheStack.take();
+    }
 
     // authentification routines:
     

@@ -71,7 +71,7 @@ public class yacySeedUploadScp implements yacySeedUploader {
     public static final String CONFIG_SCP_PASSWORD = "seedScpPassword";
     public static final String CONFIG_SCP_PATH = "seedScpPath";
     
-    public String uploadSeedFile(serverSwitch sb, yacySeedDB seedDB, File seedFile) throws Exception {
+    public String uploadSeedFile(serverSwitch<?> sb, yacySeedDB seedDB, File seedFile) throws Exception {
         try {        
             if (sb == null) throw new NullPointerException("Reference to serverSwitch nut not be null.");
             if (seedDB == null) throw new NullPointerException("Reference to seedDB must not be null.");

@@ -102,7 +102,7 @@ public final class httpdRobotsTxtConfig {
         }
     }
     
-    public static httpdRobotsTxtConfig init(serverSwitch env) {
+    public static httpdRobotsTxtConfig init(serverSwitch<?> env) {
         String cfg = env.getConfig(plasmaSwitchboard.ROBOTS_TXT, plasmaSwitchboard.ROBOTS_TXT_DEFAULT);
         if (cfg == null) return new httpdRobotsTxtConfig();
         return new httpdRobotsTxtConfig(cfg.split(","));

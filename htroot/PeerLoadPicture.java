@@ -13,7 +13,7 @@ import de.anomic.server.serverThread;
 
 public class PeerLoadPicture {
     
-    public static Image respond(httpHeader header, serverObjects post, serverSwitch env) {
+    public static Image respond(httpHeader header, serverObjects post, serverSwitch<?> env) {
 
         int width = 800;
         int height = 600;

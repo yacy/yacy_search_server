@@ -63,7 +63,7 @@ import de.anomic.yacy.yacyNewsRecord;
 
 public class ConfigProfile_p {
 
-    public static serverObjects respond(httpHeader header, serverObjects post, serverSwitch env) {
+    public static serverObjects respond(httpHeader header, serverObjects post, serverSwitch<?> env) {
         //listManager.switchboard = (plasmaSwitchboard) env;
         final serverObjects prop = new serverObjects();
         final Properties profile = new Properties();

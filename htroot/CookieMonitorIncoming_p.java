@@ -55,7 +55,7 @@ import de.anomic.server.serverSwitch;
 
 public class CookieMonitorIncoming_p {
 
-    public static serverObjects respond(httpHeader header, serverObjects post, serverSwitch sb) {
+    public static serverObjects respond(httpHeader header, serverObjects post, serverSwitch<?> sb) {
         plasmaSwitchboard switchboard = (plasmaSwitchboard) sb;
 
         // return variable that accumulates replacements

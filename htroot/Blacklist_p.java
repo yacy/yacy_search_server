@@ -74,7 +74,7 @@ public class Blacklist_p {
     private final static String BLACKLIST        = "blackLists_";
     private final static String BLACKLIST_SHARED = "BlackLists.Shared";
 
-    public static serverObjects respond(httpHeader header, serverObjects post, serverSwitch env) {
+    public static serverObjects respond(httpHeader header, serverObjects post, serverSwitch<?> env) {
 
         // initialize the list manager
         listManager.switchboard = (plasmaSwitchboard) env;

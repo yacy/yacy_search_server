@@ -225,13 +225,14 @@ public final class plasmaWordIndex implements indexRI {
         }
     }
 
-    public void flushCacheSome() {
-    	flushCache(dhtOutCache, (dhtOutCache.size() > 3 * flushsize) ? flushsize : Math.min(flushsize, Math.max(1, dhtOutCache.size() / lowcachedivisor)));
-    	flushCache(dhtInCache, (dhtInCache.size() > 3 * flushsize) ? flushsize : Math.min(flushsize, Math.max(1, dhtInCache.size() / lowcachedivisor)));
+    public int flushCacheSome() {
+    	int fo = flushCache(dhtOutCache, (dhtOutCache.size() > 3 * flushsize) ? flushsize : Math.min(flushsize, Math.max(1, dhtOutCache.size() / lowcachedivisor)));
+    	int fi = flushCache(dhtInCache, (dhtInCache.size() > 3 * flushsize) ? flushsize : Math.min(flushsize, Math.max(1, dhtInCache.size() / lowcachedivisor)));
+    	return fo + fi;
     }
     
-    private void flushCache(indexRAMRI ram, int count) {
-        if (count <= 0) return;
+    private int flushCache(indexRAMRI ram, int count) {
+        if (count <= 0) return 0;
         
         busyCacheFlush = true;
         String wordHash;
@@ -269,6 +270,7 @@ public final class plasmaWordIndex implements indexRI {
         collections.addMultipleEntries(containerList);
         //System.out.println("DEBUG-Finished flush of " + count + " entries from RAM to DB in " + (System.currentTimeMillis() - start) + " milliseconds");
         busyCacheFlush = false;
+        return containerList.size();
     }
     
     private static final int hour = 3600000;

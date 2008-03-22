@@ -78,7 +78,7 @@ public class serverPortForwardingSch implements serverPortForwarding{
     /* ========================================================================
      * Other object fields
      * ======================================================================== */
-    private serverSwitch switchboard;
+    private serverSwitch<?> switchboard;
 
     private String forwardingHost;
     private int forwardingHostPort;
@@ -105,7 +105,7 @@ public class serverPortForwardingSch implements serverPortForwarding{
     }
 
     public void init(
-            serverSwitch switchboard,
+            serverSwitch<?> switchboard,
             String localHost,
             int localPort
     ) throws Exception {

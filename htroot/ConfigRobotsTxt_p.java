@@ -58,7 +58,7 @@ import de.anomic.yacy.yacyCore;
 
 public class ConfigRobotsTxt_p {
     
-    public static servletProperties respond(httpHeader header, serverObjects post, serverSwitch env) {
+    public static servletProperties respond(httpHeader header, serverObjects post, serverSwitch<?> env) {
         final servletProperties prop = new servletProperties();
         
         httpdRobotsTxtConfig rbc = ((plasmaSwitchboard)env).robotstxtConfig;

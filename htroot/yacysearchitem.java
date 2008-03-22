@@ -58,7 +58,7 @@ public class yacysearchitem {
     private static final int urllength = 120;
     private static final int MAX_TOPWORDS = 24;
     
-    public static serverObjects respond(httpHeader header, serverObjects post, serverSwitch env) {
+    public static serverObjects respond(httpHeader header, serverObjects post, serverSwitch<?> env) {
         final plasmaSwitchboard sb = (plasmaSwitchboard) env;
         final serverObjects prop = new serverObjects();
         

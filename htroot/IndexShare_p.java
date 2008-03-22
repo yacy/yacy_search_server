@@ -55,7 +55,7 @@ import de.anomic.server.serverSwitch;
 
 public class IndexShare_p {
 
-    public static serverObjects respond(httpHeader header, serverObjects post, serverSwitch env) {
+    public static serverObjects respond(httpHeader header, serverObjects post, serverSwitch<?> env) {
     	// return variable that accumulates replacements
         plasmaSwitchboard switchboard = (plasmaSwitchboard) env;
 		serverObjects prop = new serverObjects();

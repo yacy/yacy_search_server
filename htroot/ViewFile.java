@@ -82,7 +82,7 @@ public class ViewFile {
     private static final String HIGHLIGHT_CSS = "searchHighlight";
     private static final int MAX_HIGHLIGHTS = 6;
 
-    public static serverObjects respond(httpHeader header, serverObjects post, serverSwitch env) {
+    public static serverObjects respond(httpHeader header, serverObjects post, serverSwitch<?> env) {
 
         serverObjects prop = new serverObjects();
         plasmaSwitchboard sb = (plasmaSwitchboard)env;     

@@ -38,7 +38,7 @@ import de.anomic.yacy.yacyURL;
 
 public class CrawlStartSimple_p {
     
-    public static serverObjects respond(httpHeader header, serverObjects post, serverSwitch env) {
+    public static serverObjects respond(httpHeader header, serverObjects post, serverSwitch<?> env) {
         // return variable that accumulates replacements
         serverObjects prop = new serverObjects();
         

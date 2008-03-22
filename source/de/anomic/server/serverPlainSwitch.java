@@ -28,28 +28,14 @@ package de.anomic.server;
 
 import java.io.File;
 
-public class serverPlainSwitch extends serverAbstractSwitch implements serverSwitch {
+public class serverPlainSwitch<E> extends serverAbstractSwitch<E> implements serverSwitch<E> {
 
     public serverPlainSwitch(File rootPath, String initPath, String configPath, boolean applyPro) {
         super(rootPath, initPath, configPath, applyPro);
     }
-        
-    public int queueSize() {
-        // no queueing
-        return 0;
-    }
-
-    public void enQueue(Object job) {
-        // no queueing: do nothing
-    }
-
-    public boolean deQueue() {
-        // no queueing
-        return false;
-    }
 
     public serverObjects action(String actionName, serverObjects actionInput) {
-        // no acions
+        // no actions
         return null;
     }
 

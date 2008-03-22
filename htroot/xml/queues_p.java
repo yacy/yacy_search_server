@@ -74,7 +74,7 @@ public class queues_p {
         return dayFormatter.format(date);
     }
     
-    public static serverObjects respond(httpHeader header, serverObjects post, serverSwitch env) {
+    public static serverObjects respond(httpHeader header, serverObjects post, serverSwitch<?> env) {
         // return variable that accumulates replacements
         plasmaSwitchboard sb = (plasmaSwitchboard) env;
         //wikiCode wikiTransformer = new wikiCode(switchboard);

@@ -60,7 +60,7 @@ import javax.imageio.ImageIO;
 /** draw a banner with information about the peer */
 public class Banner {
 
-    public static ymageMatrix respond(httpHeader header, serverObjects post, serverSwitch env) throws IOException {
+    public static ymageMatrix respond(httpHeader header, serverObjects post, serverSwitch<?> env) throws IOException {
 
         final String IMAGE = "htroot/env/grafics/yacy.gif";
         int width = 468;

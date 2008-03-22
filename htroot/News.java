@@ -60,7 +60,7 @@ import de.anomic.yacy.yacySeed;
 
 public class News {
     
-    public static serverObjects respond(httpHeader header, serverObjects post, serverSwitch env) {
+    public static serverObjects respond(httpHeader header, serverObjects post, serverSwitch<?> env) {
         plasmaSwitchboard switchboard = (plasmaSwitchboard) env;
         serverObjects prop = new serverObjects();
         boolean overview = (post == null) || (post.get("page", "0").equals("0"));

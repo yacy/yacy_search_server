@@ -72,7 +72,7 @@ public class Network {
 
     private static final String STR_TABLE_LIST = "table_list_";
 
-    public static serverObjects respond(httpHeader header, serverObjects post, serverSwitch switchboard) {
+    public static serverObjects respond(httpHeader header, serverObjects post, serverSwitch<?> switchboard) {
         plasmaSwitchboard sb = (plasmaSwitchboard) switchboard;
         final long start = System.currentTimeMillis();
         

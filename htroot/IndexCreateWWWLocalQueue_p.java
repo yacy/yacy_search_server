@@ -77,7 +77,7 @@ public class IndexCreateWWWLocalQueue_p {
     private static final int INITIATOR  = 5;
     private static final int MODIFIED   = 6;
     
-    public static serverObjects respond(httpHeader header, serverObjects post, serverSwitch env) {
+    public static serverObjects respond(httpHeader header, serverObjects post, serverSwitch<?> env) {
         // return variable that accumulates replacements
         plasmaSwitchboard sb = (plasmaSwitchboard) env;
         serverObjects prop = new serverObjects();

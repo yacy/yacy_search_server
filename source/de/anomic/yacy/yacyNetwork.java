@@ -38,7 +38,7 @@ import de.anomic.tools.crypt;
 
 public class yacyNetwork {
 
-	public static final boolean authentifyRequest(serverObjects post, serverSwitch env) {
+	public static final boolean authentifyRequest(serverObjects post, serverSwitch<?> env) {
 		if ((post == null) || (env == null)) return false;
 		
 		// identify network
@@ -67,7 +67,7 @@ public class yacyNetwork {
 		return false;
 	}
 	
-	public static final serverObjects basicRequestPost(serverSwitch env, String targetHash) {
+	public static final serverObjects basicRequestPost(serverSwitch<?> env, String targetHash) {
         // put in all the essentials for routing and network authentification
 		// generate a session key
         serverObjects post = new serverObjects();

@@ -62,7 +62,7 @@ public class ViewImage {
     private static HashMap<String, Image> iconcache = new HashMap<String, Image>();
     private static String defaulticon = "htroot/env/grafics/dfltfvcn.ico";
     
-    public static Image respond(httpHeader header, serverObjects post, serverSwitch env) {
+    public static Image respond(httpHeader header, serverObjects post, serverSwitch<?> env) {
         
         plasmaSwitchboard sb = (plasmaSwitchboard)env;
         

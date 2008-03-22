@@ -64,7 +64,7 @@ public class MessageSend_p {
     }
 
 
-    public static serverObjects respond(httpHeader header, serverObjects post, serverSwitch env) {
+    public static serverObjects respond(httpHeader header, serverObjects post, serverSwitch<?> env) {
         serverObjects prop = new serverObjects();
 
         if ((post == null) || (post.get("hash","").length() == 0)) {

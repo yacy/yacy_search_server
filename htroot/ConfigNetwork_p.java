@@ -35,7 +35,7 @@ import de.anomic.yacy.yacyCore;
 
 public class ConfigNetwork_p {
 
-	public static serverObjects respond(httpHeader header, serverObjects post, serverSwitch env) {
+	public static serverObjects respond(httpHeader header, serverObjects post, serverSwitch<?> env) {
         
         plasmaSwitchboard sb = (plasmaSwitchboard) env;
         serverObjects prop = new serverObjects();

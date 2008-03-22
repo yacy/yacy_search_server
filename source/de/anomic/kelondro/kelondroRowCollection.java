@@ -602,7 +602,6 @@ public class kelondroRowCollection {
             // the collection has an ordering
             // and part of the ordered zone is inside the to-be-ordered zone
             int m = picMiddle(new int[]{L + (S - L) / 3, L + 2 * (S - L) / 3, S, (S + R - 1) / 2, R - 1}, 5);
-            assert S <= m;
             assert L <= m;
             assert m < R;
             return m;

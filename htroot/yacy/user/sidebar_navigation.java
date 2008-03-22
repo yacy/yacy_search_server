@@ -42,7 +42,7 @@ public class sidebar_navigation {
 
     private static final int MAX_TOPWORDS = 24;
     
-    public static serverObjects respond(httpHeader header, serverObjects post, serverSwitch env) {
+    public static serverObjects respond(httpHeader header, serverObjects post, serverSwitch<?> env) {
         final serverObjects prop = new serverObjects();
         
         String eventID = post.get("eventID", "");

@@ -90,7 +90,7 @@ public class ConfigSkins_p {
 		return false;
 	}
 
-	public static serverObjects respond(httpHeader header, serverObjects post, serverSwitch env) {
+	public static serverObjects respond(httpHeader header, serverObjects post, serverSwitch<?> env) {
 	serverObjects prop = new serverObjects();
 	plasmaSwitchboard switchboard = (plasmaSwitchboard) env;
 	String skinPath = new File(env.getRootPath(), env.getConfig("skinPath", "DATA/SKINS")).toString();

@@ -128,7 +128,7 @@ public class Ranking_p {
     	}
     }
     
-    public static serverObjects respond(httpHeader header, serverObjects post, serverSwitch env) {
+    public static serverObjects respond(httpHeader header, serverObjects post, serverSwitch<?> env) {
         final plasmaSwitchboard sb = (plasmaSwitchboard) env;
 
         // clean up all search events

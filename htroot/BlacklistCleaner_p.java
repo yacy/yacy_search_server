@@ -89,7 +89,7 @@ public class BlacklistCleaner_p {
         defaultURLPattern.class
     };
     
-    public static serverObjects respond(httpHeader header, serverObjects post, serverSwitch env) {
+    public static serverObjects respond(httpHeader header, serverObjects post, serverSwitch<?> env) {
         serverObjects prop = new serverObjects();
         
         // initialize the list manager

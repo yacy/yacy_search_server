@@ -147,7 +147,7 @@ public final class httpd implements serverHandler {
     private final serverLog log = new serverLog("HTTPD");
 
     // class methods
-    public httpd(serverSwitch s) {
+    public httpd(serverSwitch<?> s) {
         // handler info
         httpd.switchboard = (plasmaSwitchboard)s;
         httpd.virtualHost = switchboard.getConfig("fileHost","localhost");
@@ -293,7 +293,7 @@ public final class httpd implements serverHandler {
         return persistent;
     }
     
-    public static int staticAdminAuthenticated(String authorization, serverSwitch sw){
+    public static int staticAdminAuthenticated(String authorization, serverSwitch<?> sw) {
         if (authorization==null) return 1;
         //if (authorization.length() < 6) return 1; // no authentication information given
         //authorization = authorization.trim().substring(6);

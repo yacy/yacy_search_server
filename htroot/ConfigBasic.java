@@ -73,7 +73,7 @@ public class ConfigBasic {
     private static final int NEXTSTEP_RECONNECT = 4;
     
     
-    public static serverObjects respond(httpHeader header, serverObjects post, serverSwitch env) {
+    public static serverObjects respond(httpHeader header, serverObjects post, serverSwitch<?> env) {
         
         // return variable that accumulates replacements
         ConfigBasic config = new ConfigBasic();
@@ -279,7 +279,7 @@ public class ConfigBasic {
         return new Object[]{upnp,scanForRouter};
     }
     */
-    private void reinitPortForwarding(serverObjects post, serverSwitch env) {
+    private void reinitPortForwarding(serverObjects post, serverSwitch<?> env) {
         if ((post != null)) {
             try {
                 boolean reinitPortForwarding = false;

@@ -65,7 +65,7 @@ import de.anomic.yacy.yacySeed;
 
 public final class transferRWI {
 
-    public static serverObjects respond(httpHeader header, serverObjects post, serverSwitch env) throws InterruptedException {
+    public static serverObjects respond(httpHeader header, serverObjects post, serverSwitch<?> env) throws InterruptedException {
         
         // return variable that accumulates replacements
         final plasmaSwitchboard sb = (plasmaSwitchboard) env;

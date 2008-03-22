@@ -72,7 +72,7 @@ import de.anomic.yacy.yacyURL;
 
 public class yacysearch {
 
-    public static serverObjects respond(httpHeader header, serverObjects post, serverSwitch env) {
+    public static serverObjects respond(httpHeader header, serverObjects post, serverSwitch<?> env) {
         final plasmaSwitchboard sb = (plasmaSwitchboard) env;
         sb.localSearchLastAccess = System.currentTimeMillis();
         

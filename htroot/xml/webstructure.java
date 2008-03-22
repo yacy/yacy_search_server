@@ -38,7 +38,7 @@ import de.anomic.server.serverSwitch;
 
 public class webstructure {
 
-    public static serverObjects respond(httpHeader header, serverObjects post, serverSwitch env) {
+    public static serverObjects respond(httpHeader header, serverObjects post, serverSwitch<?> env) {
         serverObjects prop = new serverObjects();
         plasmaSwitchboard sb = (plasmaSwitchboard) env;
         Iterator<plasmaWebStructure.structureEntry> i = sb.webStructure.structureEntryIterator();

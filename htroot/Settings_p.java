@@ -60,7 +60,7 @@ import de.anomic.yacy.yacySeedUploader;
 
 public final class Settings_p {
     
-    public static serverObjects respond(httpHeader header, serverObjects post, serverSwitch env) {
+    public static serverObjects respond(httpHeader header, serverObjects post, serverSwitch<?> env) {
         // return variable that accumulates replacements
         serverObjects prop = new serverObjects();
         

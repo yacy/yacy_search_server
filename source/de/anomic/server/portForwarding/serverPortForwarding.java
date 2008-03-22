@@ -51,7 +51,7 @@ import java.io.IOException;
 import de.anomic.server.serverSwitch;
 
 public interface serverPortForwarding {
-    public void init(serverSwitch switchboard, String localHost, int localPort) throws Exception;
+    public void init(serverSwitch<?> switchboard, String localHost, int localPort) throws Exception;
 
     public String getHost();
     public int getPort();

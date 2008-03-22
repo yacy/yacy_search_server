@@ -8,7 +8,7 @@ import de.anomic.ymage.ymageOSM;
 
 public class osm {
 
-    public static ymageMatrix respond(httpHeader header, serverObjects post, serverSwitch env) {
+    public static ymageMatrix respond(httpHeader header, serverObjects post, serverSwitch<?> env) {
 
         int zoom = 10;
         double lat = 47.968056d;

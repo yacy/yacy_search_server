@@ -63,7 +63,7 @@ import de.anomic.yacy.yacySeed;
 public final class transferURL {
 
     
-    public static serverObjects respond(httpHeader header, serverObjects post, serverSwitch env) throws InterruptedException {
+    public static serverObjects respond(httpHeader header, serverObjects post, serverSwitch<?> env) throws InterruptedException {
         long start = System.currentTimeMillis();
         long freshdate = 0;
         try {freshdate = serverDate.parseShortDay("20061101").getTime();} catch (ParseException e1) {}

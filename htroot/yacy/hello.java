@@ -64,7 +64,7 @@ import de.anomic.yacy.yacyVersion;
 
 public final class hello {
 
-    public static serverObjects respond(httpHeader header, serverObjects post, serverSwitch env) throws InterruptedException {
+    public static serverObjects respond(httpHeader header, serverObjects post, serverSwitch<?> env) throws InterruptedException {
         plasmaSwitchboard sb = (plasmaSwitchboard) env;
         serverObjects prop = new serverObjects();
         prop.put("message", "none");

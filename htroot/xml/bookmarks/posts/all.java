@@ -57,7 +57,7 @@ import de.anomic.server.serverObjects;
 import de.anomic.server.serverSwitch;
 
 public class all {
-    public static serverObjects respond(httpHeader header, serverObjects post, serverSwitch env) {
+    public static serverObjects respond(httpHeader header, serverObjects post, serverSwitch<?> env) {
         // return variable that accumulates replacements
         plasmaSwitchboard switchboard = (plasmaSwitchboard) env;
         boolean isAdmin=switchboard.verifyAuthentication(header, true);

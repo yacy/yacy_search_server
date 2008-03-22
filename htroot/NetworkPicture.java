@@ -52,7 +52,7 @@ import de.anomic.ymage.ymageMatrix;
 /** draw a picture of the yacy network */
 public class NetworkPicture {
     
-    public static ymageMatrix respond(httpHeader header, serverObjects post, serverSwitch env) {
+    public static ymageMatrix respond(httpHeader header, serverObjects post, serverSwitch<?> env) {
 
         int width = 768;
         int height = 576;

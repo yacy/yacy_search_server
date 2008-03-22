@@ -76,7 +76,7 @@ public class BlogComments {
         return SimpleFormatter.format(date);
     }
 
-    public static serverObjects respond(httpHeader header, serverObjects post, serverSwitch env) {
+    public static serverObjects respond(httpHeader header, serverObjects post, serverSwitch<?> env) {
         plasmaSwitchboard switchboard = (plasmaSwitchboard) env;
         serverObjects prop = new serverObjects();
         blogBoard.BlogEntry page = null;
@@ -338,7 +338,7 @@ public class BlogComments {
         return prop;
     }
 
-    private static void messageForwardingViaEmail(serverSwitch env, messageBoard.entry msgEntry) {
+    private static void messageForwardingViaEmail(serverSwitch<?> env, messageBoard.entry msgEntry) {
         try {
             if (!Boolean.valueOf(env.getConfig("msgForwardingEnabled","false")).booleanValue()) return;
 

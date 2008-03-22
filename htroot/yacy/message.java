@@ -72,7 +72,7 @@ public final class message {
         return SimpleFormatter.format(date);
     }
 
-    public static serverObjects respond(httpHeader header, serverObjects post, serverSwitch env) {
+    public static serverObjects respond(httpHeader header, serverObjects post, serverSwitch<?> env) {
         if (post == null || env == null) { return null; }
 
         // return variable that accumulates replacements
@@ -181,7 +181,7 @@ public final class message {
 
      #[message]#
      */
-    private static void messageForwardingViaEmail(serverSwitch env, messageBoard.entry msgEntry) {
+    private static void messageForwardingViaEmail(serverSwitch<?> env, messageBoard.entry msgEntry) {
         try {
             if (!Boolean.valueOf(env.getConfig("msgForwardingEnabled","false")).booleanValue()) return;
 

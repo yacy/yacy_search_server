@@ -54,7 +54,7 @@ public class IndexCleaner_p {
     private static plasmaCrawlLURL.Cleaner urldbCleanerThread;
     private static plasmaWordIndex.Cleaner indexCleanerThread;
 
-    public static serverObjects respond(httpHeader header, serverObjects post, serverSwitch env) {
+    public static serverObjects respond(httpHeader header, serverObjects post, serverSwitch<?> env) {
         serverObjects prop = new serverObjects();
         plasmaSwitchboard sb = (plasmaSwitchboard) env;
         prop.put("title", "DbCleanup_p");

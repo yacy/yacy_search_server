@@ -56,7 +56,7 @@ public class yacySeedUploadFile implements yacySeedUploader {
     
     public static final String CONFIG_FILE_PATH = "seedFilePath";
 
-    public String uploadSeedFile(serverSwitch sb, yacySeedDB seedDB, File seedFile) throws Exception {
+    public String uploadSeedFile(serverSwitch<?> sb, yacySeedDB seedDB, File seedFile) throws Exception {
         
         String seedFilePath = "";
         try {

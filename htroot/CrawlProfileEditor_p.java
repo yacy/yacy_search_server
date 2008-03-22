@@ -78,7 +78,7 @@ public class CrawlProfileEditor_p {
         labels.add(new eentry(entry.XPSTOPW,          "Parent stop-words",    false, eentry.BOOLEAN));
     }
     
-    public static serverObjects respond(httpHeader header, serverObjects post, serverSwitch env) {
+    public static serverObjects respond(httpHeader header, serverObjects post, serverSwitch<?> env) {
         final servletProperties prop = new servletProperties();
         final plasmaSwitchboard sb = (plasmaSwitchboard)env;
         

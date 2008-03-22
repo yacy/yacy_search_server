@@ -167,7 +167,7 @@ public class serverPortForwardingUpnp implements serverPortForwarding {
         return this.localHostPort;
     }
 
-    public void init(serverSwitch switchboard, String localHost, int localPort)
+    public void init(serverSwitch<?> switchboard, String localHost, int localPort)
             throws Exception {
         try {
             this.log.logFine("Initializing port forwarding via UPnP ...");

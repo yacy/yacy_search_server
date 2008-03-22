@@ -6,7 +6,7 @@ public class test {
     
     // http://localhost:8080/test.xml?count=10
     
-    public static serverObjects respond(httpHeader header, serverObjects post, serverSwitch env) {
+    public static serverObjects respond(httpHeader header, serverObjects post, serverSwitch<?> env) {
         serverObjects prop = new serverObjects();
         int count = Math.min(1000, (post == null) ? 0 : post.getInt("count", 0));
         

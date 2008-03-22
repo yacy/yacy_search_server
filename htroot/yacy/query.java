@@ -56,7 +56,7 @@ import de.anomic.yacy.yacyNetwork;
 
 public final class query {
 
-    public static serverObjects respond(httpHeader header, serverObjects post, serverSwitch ss) {
+    public static serverObjects respond(httpHeader header, serverObjects post, serverSwitch<?> ss) {
         if (post == null || ss == null) { return null; }
 
         // return variable that accumulates replacements

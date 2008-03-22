@@ -238,7 +238,7 @@ public class translator {
         return true;
     }
 
-    public static HashMap<String, String> langMap(serverSwitch env) {
+    public static HashMap<String, String> langMap(serverSwitch<?> env) {
         String[] ms = env.getConfig("locale.lang", "").split(",");
         HashMap<String, String> map = new HashMap<String, String>();
         int p;
@@ -250,7 +250,7 @@ public class translator {
         return map;
     }
         
-    public static boolean changeLang(serverSwitch env, String langPath, String lang) {
+    public static boolean changeLang(serverSwitch<?> env, String langPath, String lang) {
         if ((lang.equals("default")) || (lang.equals("default.lng"))) {
             env.setConfig("locale.language", "default");
             return true;

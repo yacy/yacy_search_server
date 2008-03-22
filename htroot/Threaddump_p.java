@@ -68,7 +68,7 @@ public class Threaddump_p {
 	private static serverObjects prop;
 	private static plasmaSwitchboard sb;
 
-    public static serverObjects respond(httpHeader header, serverObjects post, serverSwitch env) {
+    public static serverObjects respond(httpHeader header, serverObjects post, serverSwitch<?> env) {
 
     	prop = new serverObjects();
     	sb = (plasmaSwitchboard) env;

@@ -49,7 +49,7 @@ package de.anomic.data.wiki.tokens;
 
 public class DefinitionListToken extends ListToken {
 	
-	private static final String[] blockElements = { "dl", "dt", "dd" };
+	//private static final String[] blockElements = { "dl", "dt", "dd" };
 	
 	public DefinitionListToken() {
 		super(';', null, null);

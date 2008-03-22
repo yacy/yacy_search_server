@@ -60,7 +60,7 @@ import de.anomic.server.logging.LogalizerHandler;
 
 public class ViewLog_p {
     
-    public static serverObjects respond(httpHeader header, serverObjects post, serverSwitch env) {
+    public static serverObjects respond(httpHeader header, serverObjects post, serverSwitch<?> env) {
         serverObjects prop = new serverObjects();
         String[] log = new String[0];
         boolean reversed = false;

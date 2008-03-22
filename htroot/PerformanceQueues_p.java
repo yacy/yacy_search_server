@@ -58,7 +58,7 @@ import de.anomic.tools.yFormatter;
 
 public class PerformanceQueues_p {
     
-    public static serverObjects respond(httpHeader header, serverObjects post, serverSwitch sb) {
+    public static serverObjects respond(httpHeader header, serverObjects post, serverSwitch<?> sb) {
         // return variable that accumulates replacements
         plasmaSwitchboard switchboard = (plasmaSwitchboard) sb;
         serverObjects prop = new serverObjects();

@@ -160,10 +160,10 @@ import de.anomic.yacy.yacySeed;
 import de.anomic.yacy.yacyURL;
 import de.anomic.yacy.yacyVersion;
 
-public final class plasmaSwitchboard extends serverAbstractSwitch implements serverSwitch {
+public final class plasmaSwitchboard extends serverAbstractSwitch<plasmaSwitchboardQueue.Entry> implements serverSwitch<plasmaSwitchboardQueue.Entry> {
     
     // load slots
-    public static int xstackCrawlSlots       = 2000;
+    public static int xstackCrawlSlots      = 2000;
     
     private int       dhtTransferIndexCount = 100;    
     
@@ -381,7 +381,7 @@ public final class plasmaSwitchboard extends serverAbstractSwitch implements ser
     public static final String INDEXER_MEMPREREQ            = "80_indexing_memprereq";
     public static final String INDEXER_IDLESLEEP            = "80_indexing_idlesleep";
     public static final String INDEXER_BUSYSLEEP            = "80_indexing_busysleep";
-    public static final String INDEXER_METHOD_START         = "deQueue";
+    public static final String INDEXER_METHOD_START         = "deQueueProcess";
     public static final String INDEXER_METHOD_JOBCOUNT      = "queueSize";
     public static final String INDEXER_METHOD_FREEMEM       = "deQueueFreeMem";
     public static final String INDEXER_SLOTS                = "indexer.slots";
@@ -1749,7 +1749,7 @@ public final class plasmaSwitchboard extends serverAbstractSwitch implements ser
         return sbQueue.size();
     }
     
-    public void enQueue(Object job) {
+    public void enQueue(plasmaSwitchboardQueue.Entry job) {
         assert job != null;
         if (!(job instanceof plasmaSwitchboardQueue.Entry)) {
             System.out.println("Internal error at plasmaSwitchboard.enQueue: wrong job type");
@@ -1771,7 +1771,38 @@ public final class plasmaSwitchboard extends serverAbstractSwitch implements ser
         wordIndex.setMaxWordCount(newMaxCount); */
     }
     
-    public boolean deQueue() {
+    public plasmaSwitchboardQueue.Entry deQueue() {
+        // getting the next entry from the indexing queue
+        plasmaSwitchboardQueue.Entry nextentry = null;
+        synchronized (sbQueue) {
+            // do one processing step
+            log.logFine("DEQUEUE: sbQueueSize=" + sbQueue.size() +
+                    ", coreStackSize=" + crawlQueues.noticeURL.stackSize(plasmaCrawlNURL.STACK_TYPE_CORE) +
+                    ", limitStackSize=" + crawlQueues.noticeURL.stackSize(plasmaCrawlNURL.STACK_TYPE_LIMIT) +
+                    ", overhangStackSize=" + crawlQueues.noticeURL.stackSize(plasmaCrawlNURL.STACK_TYPE_OVERHANG) +
+                    ", remoteStackSize=" + crawlQueues.noticeURL.stackSize(plasmaCrawlNURL.STACK_TYPE_REMOTE));
+            try {
+                int sizeBefore = sbQueue.size();
+                nextentry = sbQueue.pop();
+                if (nextentry == null) {
+                    log.logWarning("deQueue: null entry on queue stack.");
+                    if (sbQueue.size() == sizeBefore) {
+                        // this is a severe problem: because this time a null is returned, it means that this status will last forever
+                        // to re-enable use of the sbQueue, it must be emptied completely
+                        log.logSevere("deQueue: does not shrink after pop() == null. Emergency reset.");
+                        sbQueue.clear();
+                    }
+                    return null;
+                }
+            } catch (IOException e) {
+                log.logSevere("IOError in plasmaSwitchboard.deQueue: " + e.getMessage(), e);
+                return null;
+            }
+            return nextentry;
+        }
+    }
+    
+    public boolean deQueueProcess() {
         try {
             // work off fresh entries from the proxy or from the crawler
             if (onlineCaution()) {
@@ -1779,11 +1810,13 @@ public final class plasmaSwitchboard extends serverAbstractSwitch implements ser
                 return false;
             }
             
-            // flush some entries from the RAM cache
-            if (sbQueue.size() == 0) wordIndex.flushCacheSome(); // permanent flushing only if we are not busy
-
             boolean doneSomething = false;
-
+ 
+            // flush some entries from the RAM cache
+            if (sbQueue.size() == 0) {
+                doneSomething = wordIndex.flushCacheSome() > 0; // permanent flushing only if we are not busy
+            }
+            
             // possibly delete entries from last chunk
             if ((this.dhtTransferChunk != null) && (this.dhtTransferChunk.getStatus() == plasmaDHTChunk.chunkStatus_COMPLETE)) {
                 String deletedURLs = this.dhtTransferChunk.deleteTransferIndexes();
@@ -1811,55 +1844,28 @@ public final class plasmaSwitchboard extends serverAbstractSwitch implements ser
             checkInterruption();
 
             // getting the next entry from the indexing queue
-            plasmaSwitchboardQueue.Entry nextentry = null;
-            synchronized (sbQueue) {
-
-                if (sbQueue.size() == 0) {
-                    //log.logFine("deQueue: nothing to do, queue is emtpy");
-                    return doneSomething; // nothing to do
-                }
-
-                if (crawlStacker.size() >= getConfigLong(CRAWLSTACK_SLOTS, 2000)) {
-                    log.logFine("deQueue: too many processes in stack crawl thread queue (" + "stackCrawlQueue=" + crawlStacker.size() + ")");
-                    return doneSomething;
-                }
-
-                
-                // if we were interrupted we should return now
-                if (Thread.currentThread().isInterrupted()) {
-                    log.logFine("deQueue: thread was interrupted");
-                    return false;
-                }
-
-                // do one processing step
-                log.logFine("DEQUEUE: sbQueueSize=" + sbQueue.size() +
-                        ", coreStackSize=" + crawlQueues.noticeURL.stackSize(plasmaCrawlNURL.STACK_TYPE_CORE) +
-                        ", limitStackSize=" + crawlQueues.noticeURL.stackSize(plasmaCrawlNURL.STACK_TYPE_LIMIT) +
-                        ", overhangStackSize=" + crawlQueues.noticeURL.stackSize(plasmaCrawlNURL.STACK_TYPE_OVERHANG) +
-                        ", remoteStackSize=" + crawlQueues.noticeURL.stackSize(plasmaCrawlNURL.STACK_TYPE_REMOTE));
-                try {
-                    int sizeBefore = sbQueue.size();
-                    nextentry = sbQueue.pop();
-                    if (nextentry == null) {
-                        log.logWarning("deQueue: null entry on queue stack.");
-                        if (sbQueue.size() == sizeBefore) {
-                            // this is a severe problem: because this time a null is returned, it means that this status will last forever
-                            // to re-enable use of the sbQueue, it must be emptied completely
-                            log.logSevere("deQueue: does not shrink after pop() == null. Emergency reset.");
-                            sbQueue.clear();
-                        }
-                        return false;
-                    }
-                } catch (IOException e) {
-                    log.logSevere("IOError in plasmaSwitchboard.deQueue: " + e.getMessage(), e);
-                    return doneSomething;
-                }
-
-                synchronized (this.indexingTasksInProcess) {
-                    this.indexingTasksInProcess.put(nextentry.urlHash(), nextentry);
-                }
-
+            if (sbQueue.size() == 0) {
+                //log.logFine("deQueue: nothing to do, queue is emtpy");
+                return doneSomething; // nothing to do
             }
+
+            if (crawlStacker.size() >= getConfigLong(CRAWLSTACK_SLOTS, 2000)) {
+                log.logFine("deQueue: too many processes in stack crawl thread queue (" + "stackCrawlQueue=" + crawlStacker.size() + ")");
+                return doneSomething;
+            }
+
+            // if we were interrupted we should return now
+            if (Thread.currentThread().isInterrupted()) {
+                log.logFine("deQueue: thread was interrupted");
+                return false;
+            }
+
+            plasmaSwitchboardQueue.Entry nextentry = deQueue();
+
+            synchronized (this.indexingTasksInProcess) {
+                this.indexingTasksInProcess.put(nextentry.urlHash(), nextentry);
+            }
+
             // parse and index the resource
             processResourceStack(nextentry);
             return true;
