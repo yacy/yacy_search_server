@@ -487,7 +487,7 @@ public class kelondroRowCollection {
             Future<Object> part = sortingthreadexecutor.submit(new qsortthread(this, 0, p, 0));
             //CompletionService<Object> sortingthreadcompletion = new ExecutorCompletionService<Object>(sortingthreadexecutor);
             //Future<Object> part = sortingthreadcompletion.submit(new qsortthread(this, 0, p, 0));
-        	qsort(p, this.chunkcount, 0, swapspace);
+        	qsort(p + 1, this.chunkcount, 0, swapspace);
         	try {
                 part.get();
             } catch (InterruptedException e) {
@@ -497,7 +497,7 @@ public class kelondroRowCollection {
             }
         } else {
         	qsort(0, p, 0, swapspace);
-        	qsort(p, this.chunkcount, 0, swapspace);
+        	qsort(p + 1, this.chunkcount, 0, swapspace);
         }
         this.sortBound = this.chunkcount;
         //assert this.isSorted();
@@ -525,18 +525,20 @@ public class kelondroRowCollection {
             isort(L, R, swapspace);
             return;
         }
-    	assert R > L;
+    	assert R > L: "L = " + L + ", R = " + R + ", S = " + S;
 		int p = partition(L, R, S, swapspace);
-		assert p > L;
-		assert p < R;
+		assert p >= L: "L = " + L + ", R = " + R + ", S = " + S + ", p = " + p;
+		assert p < R: "L = " + L + ", R = " + R + ", S = " + S + ", p = " + p;
 		qsort(L, p, 0, swapspace);
-		qsort(p, R, 0, swapspace);
+		qsort(p + 1, R, 0, swapspace);
 	}
     
     private final int partition(int L, int R, int S, byte[] swapspace) {
-		// returns {partition-point, new-S}
-        assert (L < R - 1);
-        assert (R - L >= isortlimit);
+		// L is the first element in the sequence
+        // R is the right bound of the sequence, and outside of the sequence
+        // S is the bound of the sorted elements in the sequence
+        assert (L < R - 1): "L = " + L + ", R = " + R + ", S = " + S;
+        assert (R - L >= isortlimit): "L = " + L + ", R = " + R + ", S = " + S;
         
         int p = L;
         int q = R - 1;
@@ -557,10 +559,10 @@ public class kelondroRowCollection {
         			p = pivot;
         			S = 0;
         		} else {
-        			while (comparePivot(compiledPivot, p) ==  1) p++; // chunkAt[p] < pivot
+        			while ((p < R - 1) && (comparePivot(compiledPivot, p) >= 0)) p++; // chunkAt[p] < pivot
         		}
         		// nun gilt chunkAt[p] >= pivot
-        		while (comparePivot(compiledPivot, q) == -1) q--; // chunkAt[q] > pivot
+        		while ((q > L) && (comparePivot(compiledPivot, q) <= 0)) q--; // chunkAt[q] > pivot
         		if (p <= q) {
         			oldpivot = pivot;
         			pivot = swap(p, q, pivot, swapspace);
@@ -574,9 +576,9 @@ public class kelondroRowCollection {
         			p = pivot;
         			S = 0;
         		} else {
-        			while (compare(pivot, p) ==  1) p++; // chunkAt[p] < pivot
+        			while ((p < R - 1) && (compare(pivot, p) >= 0)) p++; // chunkAt[p] < pivot
         		}
-        		while (compare(pivot, q) == -1) q--; // chunkAt[q] > pivot
+        		while ((q > L) && (compare(pivot, q) <= 0)) q--; // chunkAt[q] > pivot
         		if (p <= q) {
         			pivot = swap(p, q, pivot, swapspace);
         			p++;
@@ -584,6 +586,21 @@ public class kelondroRowCollection {
         		}
         	}
         }
+        // now p is the beginning of the upper sequence
+        // finally, the pivot element should be exactly between the two sequences
+        // distinguish two cases: pivot in lower and upper sequence
+        // to do this it is sufficient to compare the index, not the entry content
+        if (pivot < p) {
+            // switch the pivot with the element _below_ p, the element in p belongs to the upper sequence
+            // and does not fit into the lower sequence
+            swap(pivot, p - 1, pivot, swapspace);
+            return p - 1;
+        } else if (pivot > p) {
+            // switch the pivot with p, they are both in the same sequence
+            swap(pivot, p, pivot, swapspace);
+            return p;
+        }
+        assert pivot == p;
         return p;
     }
 	
