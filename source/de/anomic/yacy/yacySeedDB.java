@@ -970,11 +970,20 @@ public final class yacySeedDB {
         
         public yacySeed internalNext() {
             if ((it == null) || (!(it.hasNext()))) return null;
-            HashMap<String, String> dna = it.next();
-            if (dna == null) return null;
-            String hash = (String) dna.remove("key");
-            //while (hash.length() < commonHashLength) { hash = hash + "_"; }
-            return new yacySeed(hash, dna);
+            try {
+                HashMap<String, String> dna = it.next();
+                if (dna == null) return null;
+                String hash = (String) dna.remove("key");
+                //while (hash.length() < commonHashLength) { hash = hash + "_"; }
+                return new yacySeed(hash, dna);
+            } catch (Exception e) {
+                e.printStackTrace();
+                yacyCore.log.logSevere("ERROR internalNext: seed.db corrupt (" + e.getMessage() + "); resetting seed.db", e);
+                if (database == seedActiveDB) seedActiveDB = resetSeedTable(seedActiveDB, seedActiveDBFile);
+                if (database == seedPassiveDB) seedPassiveDB = resetSeedTable(seedPassiveDB, seedPassiveDBFile);
+                if (database == seedPotentialDB) seedPotentialDB = resetSeedTable(seedPotentialDB, seedPotentialDBFile);
+                return null;
+            }
         }
         
         public yacySeed next() {
