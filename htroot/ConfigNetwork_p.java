@@ -143,7 +143,7 @@ public class ConfigNetwork_p {
         try {
             RTCbusySleep = Integer.parseInt(env.getConfig(plasmaSwitchboard.CRAWLJOB_REMOTE_TRIGGERED_CRAWL_BUSYSLEEP, "100"));
         } catch (NumberFormatException e) {}
-        int RTCppm = (int) (60000L / RTCbusySleep);
+        int RTCppm = (int) (60000L / (RTCbusySleep + 1));
         prop.put("acceptCrawlLimit", RTCppm);
         
         boolean indexDistribute = sb.getConfig(plasmaSwitchboard.INDEX_DIST_ALLOW, "true").equals("true");

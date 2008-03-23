@@ -35,12 +35,14 @@ import java.util.TreeSet;
 import de.anomic.http.httpHeader;
 import de.anomic.kelondro.kelondroMSetTools;
 import de.anomic.kelondro.kelondroNaturalOrder;
+import de.anomic.plasma.plasmaProfiling;
 import de.anomic.plasma.plasmaSearchEvent;
 import de.anomic.plasma.plasmaSearchQuery;
 import de.anomic.plasma.plasmaSearchRankingProcess;
 import de.anomic.plasma.plasmaSnippetCache;
 import de.anomic.plasma.plasmaSwitchboard;
 import de.anomic.server.serverObjects;
+import de.anomic.server.serverProfiling;
 import de.anomic.server.serverSwitch;
 import de.anomic.tools.crypt;
 import de.anomic.tools.nxTools;
@@ -83,7 +85,7 @@ public class yacysearchitem {
             return prop;
         }
         plasmaSearchQuery theQuery = theSearch.getQuery();
-
+        
         // dynamically update count values
         if (!rss) {
             int offset = theQuery.neededResults() - theQuery.displayResults() + 1;
@@ -163,6 +165,7 @@ public class yacysearchitem {
                     prop.put("references", "1");
                 }
             }
+            serverProfiling.update("SEARCH", new plasmaProfiling.searchEvent(theQuery.id(true), plasmaSearchEvent.FINALIZATION + "-" + "bottomline", 0, 0));
             
             return prop;
         }
@@ -223,6 +226,8 @@ public class yacysearchitem {
                     (((wordURL = yacyURL.probablyWordURL(result.hash(), query[0])) != null) ? ", probablyWordURL=" + wordURL.toNormalform(false, true) : ""));
             plasmaSnippetCache.TextSnippet snippet = result.textSnippet();
             prop.put("content_snippet", (snippet == null) ? "(snippet not found)" : snippet.getLineMarked(theQuery.queryHashes));
+            serverProfiling.update("SEARCH", new plasmaProfiling.searchEvent(theQuery.id(true), plasmaSearchEvent.FINALIZATION + "-" + item, 0, 0));
+            
             return prop;
         }
         

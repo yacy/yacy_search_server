@@ -43,15 +43,18 @@ public class PerformanceSearch_p {
         int c = 0;
         serverProfiling.Event event;
         plasmaProfiling.searchEvent search;
+        long lastt = 0;
         while (events.hasNext()) {
             event = events.next();
             search = (plasmaProfiling.searchEvent) event.payload;
             prop.put("table_" + c + "_query", search.queryID);
             prop.put("table_" + c + "_event", search.processName);
             prop.putNum("table_" + c + "_count", search.resultCount);
+            prop.putNum("table_" + c + "_delta", event.time - lastt);
             prop.put("table_" + c + "_time", (new Date(event.time)).toString());
             prop.putNum("table_" + c + "_duration", search.duration);
             c++;
+            lastt = event.time;
         }
         prop.put("table", c);
         

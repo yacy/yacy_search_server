@@ -55,11 +55,13 @@ import de.anomic.yacy.yacyURL;
 
 public final class plasmaSearchEvent {
     
+    public static final String INITIALIZATION = "initialization";
     public static final String COLLECTION = "collection";
     public static final String JOIN = "join";
     public static final String PRESORT = "presort";
     public static final String URLFETCH = "urlfetch";
     public static final String NORMALIZING = "normalizing";
+    public static final String FINALIZATION = "finalization";
     
     public static int workerThreadCount = 10;
     public static String lastEventID = "";
@@ -198,6 +200,7 @@ public final class plasmaSearchEvent {
                 this.workerThreads[i] = new resultWorker(i, 10000);
                 this.workerThreads[i].start();
             }
+            serverProfiling.update("SEARCH", new plasmaProfiling.searchEvent(query.id(true), "online snippet fetch threads started", 0, 0));
         } else {
             // prepare result vector directly without worker threads
             long timer = System.currentTimeMillis();
@@ -229,6 +232,7 @@ public final class plasmaSearchEvent {
         
         // clean up events
         cleanupEvents(false);
+        serverProfiling.update("SEARCH", new plasmaProfiling.searchEvent(query.id(true), "event-cleanup", 0, 0));
         
         // store this search to a cache so it can be re-used
         lastEvents.put(query.id(false), this);
@@ -282,6 +286,8 @@ public final class plasmaSearchEvent {
         
         // load only urls if there was not yet a root url of that hash
         // find the url entry
+
+        serverProfiling.update("SEARCH", new plasmaProfiling.searchEvent(query.id(true), "obtain result entry - start", 0, 0));
         
         long startTime = System.currentTimeMillis();
         indexURLEntry.Components comp = page.comp();
@@ -344,6 +350,7 @@ public final class plasmaSearchEvent {
             plasmaSnippetCache.TextSnippet snippet = plasmaSnippetCache.retrieveTextSnippet(comp, snippetFetchWordHashes, (snippetFetchMode == 2), ((query.constraint != null) && (query.constraint.get(plasmaCondenser.flag_cat_indexof))), 180, 3000, (snippetFetchMode == 2) ? Integer.MAX_VALUE : 100000);
             long snippetComputationTime = System.currentTimeMillis() - startTime;
             serverLog.logInfo("SEARCH_EVENT", "text snippet load time for " + comp.url() + ": " + snippetComputationTime + ", " + ((snippet.getErrorCode() < 11) ? "snippet found" : ("no snippet found (" + snippet.getError() + ")")));
+            serverProfiling.update("SEARCH", new plasmaProfiling.searchEvent(query.id(true), "obtain result entry - finish", 0, 0));
             
             if (snippet.getErrorCode() < 11) {
                 // we loaded the file and found the snippet

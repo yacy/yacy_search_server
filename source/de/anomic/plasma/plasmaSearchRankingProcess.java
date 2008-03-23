@@ -184,9 +184,11 @@ public final class plasmaSearchRankingProcess {
             }
             
             // count domZones
-            indexURLEntry uentry = wordIndex.loadedURL.load(iEntry.urlHash, iEntry, 0);
+            /*
+            indexURLEntry uentry = wordIndex.loadedURL.load(iEntry.urlHash, iEntry, 0); // this eats up a lot of time!!!
             yacyURL uurl = (uentry == null) ? null : uentry.comp().url();
             System.out.println("DEBUG domDomain dom=" + ((uurl == null) ? "null" : uurl.getHost()) + ", zone=" + yacyURL.domDomain(iEntry.urlHash()));
+            */
             this.domZones[yacyURL.domDomain(iEntry.urlHash())]++;
             
             // insert
