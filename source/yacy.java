@@ -472,7 +472,7 @@ public final class yacy {
 
         Properties config = new Properties();
         try {
-            config.load(new FileInputStream(new File(homePath, "DATA/SETTINGS/httpProxy.conf")));
+            config.load(new FileInputStream(new File(homePath, "DATA/SETTINGS/yacy.conf")));
         } catch (FileNotFoundException e) {
             serverLog.logSevere(mes, "could not find configuration file.");
             System.exit(-1);

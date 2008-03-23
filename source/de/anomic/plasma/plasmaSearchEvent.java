@@ -287,8 +287,6 @@ public final class plasmaSearchEvent {
         // load only urls if there was not yet a root url of that hash
         // find the url entry
 
-        serverProfiling.update("SEARCH", new plasmaProfiling.searchEvent(query.id(true), "obtain result entry - start", 0, 0));
-        
         long startTime = System.currentTimeMillis();
         indexURLEntry.Components comp = page.comp();
         String pagetitle = comp.dc_title().toLowerCase();
@@ -350,7 +348,6 @@ public final class plasmaSearchEvent {
             plasmaSnippetCache.TextSnippet snippet = plasmaSnippetCache.retrieveTextSnippet(comp, snippetFetchWordHashes, (snippetFetchMode == 2), ((query.constraint != null) && (query.constraint.get(plasmaCondenser.flag_cat_indexof))), 180, 3000, (snippetFetchMode == 2) ? Integer.MAX_VALUE : 100000);
             long snippetComputationTime = System.currentTimeMillis() - startTime;
             serverLog.logInfo("SEARCH_EVENT", "text snippet load time for " + comp.url() + ": " + snippetComputationTime + ", " + ((snippet.getErrorCode() < 11) ? "snippet found" : ("no snippet found (" + snippet.getError() + ")")));
-            serverProfiling.update("SEARCH", new plasmaProfiling.searchEvent(query.id(true), "obtain result entry - finish", 0, 0));
             
             if (snippet.getErrorCode() < 11) {
                 // we loaded the file and found the snippet
@@ -577,6 +574,7 @@ public final class plasmaSearchEvent {
     
     public ResultEntry oneResult(int item) {
         // check if we already retrieved this item (happens if a search pages is accessed a second time)
+        serverProfiling.update("SEARCH", new plasmaProfiling.searchEvent(query.id(true), "obtain one result entry - start", 0, 0));
         if (this.result.sizeStore() > item) {
             // we have the wanted result already in the result array .. return that
             return this.result.element(item).element;
