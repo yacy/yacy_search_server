@@ -57,6 +57,8 @@ import de.anomic.kelondro.kelondroRow;
 import de.anomic.kelondro.kelondroStack;
 import de.anomic.plasma.cache.IResourceInfo;
 import de.anomic.server.logging.serverLog;
+import de.anomic.yacy.yacyCore;
+import de.anomic.yacy.yacySeed;
 import de.anomic.yacy.yacySeedDB;
 import de.anomic.yacy.yacyURL;
 
@@ -286,6 +288,17 @@ public class plasmaSwitchboardQueue {
         public String initiator() {
             return initiator;
         }
+        
+        public yacySeed initiatorPeer() {
+            if ((initiator == null) || (initiator.equals(yacyURL.dummyHash))) return null;
+            if (initiator.equals(yacyCore.seedDB.mySeed().hash)) {
+                // normal crawling
+                return null;
+            } else {
+                // this was done for remote peer (a global crawl)
+                return yacyCore.seedDB.getConnected(initiator);
+            }
+        }
 
         public int depth() {
             return depth;
@@ -342,6 +355,28 @@ public class plasmaSwitchboardQueue {
             return anchorName;
         }
 
+        public int processCase() {
+            // we must distinguish the following cases: resource-load was initiated by
+            // 1) global crawling: the index is extern, not here (not possible here)
+            // 2) result of search queries, some indexes are here (not possible here)
+            // 3) result of index transfer, some of them are here (not possible here)
+            // 4) proxy-load (initiator is "------------")
+            // 5) local prefetch/crawling (initiator is own seedHash)
+            // 6) local fetching for global crawling (other known or unknwon initiator)
+            int processCase = plasmaSwitchboard.PROCESSCASE_0_UNKNOWN;
+            if ((initiator == null) || (initiator.equals(yacyURL.dummyHash))) {
+                // proxy-load
+                processCase = plasmaSwitchboard.PROCESSCASE_4_PROXY_LOAD;
+            } else if ((initiator != null) && (initiator.equals(yacyCore.seedDB.mySeed().hash))) {
+                // normal crawling
+                processCase = plasmaSwitchboard.PROCESSCASE_5_LOCAL_CRAWLING;
+            } else {
+                // this was done for remote peer (a global crawl)
+                processCase = plasmaSwitchboard.PROCESSCASE_6_GLOBAL_CRAWLING;
+            }
+            return processCase;
+        }
+        
         /**
          * decide upon header information if a specific file should be indexed
          * this method returns null if the answer is 'YES'!

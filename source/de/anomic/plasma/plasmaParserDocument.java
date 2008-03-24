@@ -67,17 +67,17 @@ import de.anomic.plasma.parser.Parser;
 
 public class plasmaParserDocument {
     
-    private yacyURL source;       // the source url
-    private String mimeType;        // mimeType as taken from http header
-    private String charset;         // the charset of the document
-    private List<String> keywords;  // most resources provide a keyword field
-    private StringBuffer title;     // a document title, taken from title or h1 tag; shall appear as headline of search result
-    private StringBuffer creator;    // author or copyright
-    private List<String> sections;  // if present: more titles/headlines appearing in the document
-    private StringBuffer description;   // an abstract, if present: short content description
-    private Object text;            // the clear text, all that is visible
-    private Map<yacyURL, String> anchors;    // all links embedded as clickeable entities (anchor tags)
-    private HashMap<String, htmlFilterImageEntry> images;         // all visible pictures in document
+    private yacyURL source;               // the source url
+    private String mimeType;              // mimeType as taken from http header
+    private String charset;               // the charset of the document
+    private List<String> keywords;        // most resources provide a keyword field
+    private StringBuffer title;           // a document title, taken from title or h1 tag; shall appear as headline of search result
+    private StringBuffer creator;         // author or copyright
+    private List<String> sections;        // if present: more titles/headlines appearing in the document
+    private StringBuffer description;     // an abstract, if present: short content description
+    private Object text;                  // the clear text, all that is visible
+    private Map<yacyURL, String> anchors; // all links embedded as clickeable entities (anchor tags)
+    private HashMap<String, htmlFilterImageEntry> images; // all visible pictures in document
     // the anchors and images - Maps are URL-to-EntityDescription mappings.
     // The EntityDescription appear either as visible text in anchors or as alternative
     // text in image tags.

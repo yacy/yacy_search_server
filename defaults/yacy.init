@@ -767,9 +767,6 @@ CRDist1Method  = 9
 CRDist1Percent = 30
 CRDist1Target  = kaskelix.de:8080,yacy.dyndns.org:8000,suma-lab.de:8080
 
-# Hash of the peer, you would like to store to the data your installation collected.
-storagePeerHash =
-
 # Search sequence settings
 # collection:
 # time = time to get a RWI out of RAM cache, assortments and WORDS files

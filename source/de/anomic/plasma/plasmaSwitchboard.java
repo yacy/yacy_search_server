@@ -117,14 +117,11 @@ import de.anomic.data.messageBoard;
 import de.anomic.data.userDB;
 import de.anomic.data.wikiBoard;
 import de.anomic.data.wiki.wikiParser;
-import de.anomic.htmlFilter.htmlFilterContentScraper;
 import de.anomic.http.httpHeader;
 import de.anomic.http.httpRemoteProxyConfig;
 import de.anomic.http.httpc;
 import de.anomic.http.httpd;
 import de.anomic.http.httpdRobotsTxtConfig;
-import de.anomic.index.indexContainer;
-import de.anomic.index.indexRWIRowEntry;
 import de.anomic.index.indexURLEntry;
 import de.anomic.kelondro.kelondroBitfield;
 import de.anomic.kelondro.kelondroCache;
@@ -137,7 +134,6 @@ import de.anomic.plasma.crawler.plasmaCrawlQueues;
 import de.anomic.plasma.crawler.plasmaProtocolLoader;
 import de.anomic.plasma.dbImport.dbImportManager;
 import de.anomic.plasma.parser.ParserException;
-import de.anomic.plasma.plasmaCondenser.wordStatProp;
 import de.anomic.plasma.urlPattern.defaultURLPattern;
 import de.anomic.plasma.urlPattern.plasmaURLPattern;
 import de.anomic.server.serverAbstractSwitch;
@@ -175,9 +171,6 @@ public final class plasmaSwitchboard extends serverAbstractSwitch<plasmaSwitchbo
     // 5) local prefetch/crawling (initiator is own seedHash)
     // 6) local fetching for global crawling (other known or unknown initiator)
     public static final int PROCESSCASE_0_UNKNOWN = 0;
-    public static final int PROCESSCASE_1_GLOBAL_CRAWLING = 1;
-    public static final int PROCESSCASE_2_SEARCH_QUERY_RESULT = 2;
-    public static final int PROCESSCASE_3_INDEX_TRANSFER_RESULT = 3;
     public static final int PROCESSCASE_4_PROXY_LOAD = 4;
     public static final int PROCESSCASE_5_LOCAL_CRAWLING = 5;
     public static final int PROCESSCASE_6_GLOBAL_CRAWLING = 6;
@@ -651,16 +644,9 @@ public final class plasmaSwitchboard extends serverAbstractSwitch<plasmaSwitchbo
      * <p>Name of the setting how many active crawler-threads may maximal be running on the same time</p>
      */
     public static final String CRAWLER_THREADS_ACTIVE_MAX       = "crawler.MaxActiveThreads";
-    
+
     public static final String OWN_SEED_FILE                    = "yacyOwnSeedFile";
-    /**
-     * <p><code>public static final String <strong>STORAGE_PEER_HASH</strong> = "storagePeerHash"</code></p>
-     * <p>Name of the setting holding the Peer-Hash where indexes shall be transferred after indexing a webpage. If this setting
-     * is empty, the Storage Peer function is disabled</p>
-     */
-    public static final String STORAGE_PEER_HASH                = "storagePeerHash";
     public static final String YACY_MODE_DEBUG                  = "yacyDebugMode";
-    
     public static final String WORDCACHE_INIT_COUNT             = "wordCacheInitCount";
     /**
      * <p><code>public static final String <strong>WORDCACHE_MAX_COUNT</strong> = "wordCacheMaxCount"</code></p>
@@ -1825,15 +1811,12 @@ public final class plasmaSwitchboard extends serverAbstractSwitch<plasmaSwitchbo
             }
 
             // generate a dht chunk
-            if (
-                    (dhtShallTransfer() == null) &&
-                    (
-                            (this.dhtTransferChunk == null) ||
-                            (this.dhtTransferChunk.getStatus() == plasmaDHTChunk.chunkStatus_UNDEFINED) ||
-                            // (this.dhtTransferChunk.getStatus() == plasmaDHTChunk.chunkStatus_COMPLETE) ||
-                            (this.dhtTransferChunk.getStatus() == plasmaDHTChunk.chunkStatus_FAILED)
-                    )
-            ) {
+            if ((dhtShallTransfer() == null) && (
+                    (this.dhtTransferChunk == null) ||
+                    (this.dhtTransferChunk.getStatus() == plasmaDHTChunk.chunkStatus_UNDEFINED) ||
+                    // (this.dhtTransferChunk.getStatus() == plasmaDHTChunk.chunkStatus_COMPLETE) ||
+                    (this.dhtTransferChunk.getStatus() == plasmaDHTChunk.chunkStatus_FAILED)
+               )) {
                 // generate new chunk
                 int minChunkSize = (int) getConfigLong(INDEX_DIST_CHUNK_SIZE_MIN, 30);
                 dhtTransferChunk = new plasmaDHTChunk(this.log, wordIndex, minChunkSize, dhtTransferIndexCount, 5000);
@@ -1867,7 +1850,13 @@ public final class plasmaSwitchboard extends serverAbstractSwitch<plasmaSwitchbo
             }
 
             // parse and index the resource
-            processResourceStack(nextentry);
+            plasmaParserDocument document = parseDocument(nextentry);
+            if (document != null) {
+                plasmaCondenser condensement = condenseDocument(nextentry, document);
+                if (condensement != null) {
+                    indexDocument(nextentry, document, condensement);
+                }
+            }
             return true;
         } catch (InterruptedException e) {
             log.logInfo("DEQUEUE: Shutdown detected.");
@@ -2078,7 +2067,7 @@ public final class plasmaSwitchboard extends serverAbstractSwitch<plasmaSwitchbo
         }
     }
     
-    private plasmaParserDocument parseResource(plasmaSwitchboardQueue.Entry entry, String initiatorHash) throws InterruptedException, ParserException {
+    private plasmaParserDocument parseResource(plasmaSwitchboardQueue.Entry entry) throws InterruptedException, ParserException {
         
         // the mimetype of this entry
         String mimeType = entry.getMimeType();
@@ -2097,71 +2086,43 @@ public final class plasmaSwitchboard extends serverAbstractSwitch<plasmaSwitchbo
         return doc;
     }
     
-    private void processResourceStack(plasmaSwitchboardQueue.Entry entry) throws InterruptedException {
+    private plasmaParserDocument parseDocument(plasmaSwitchboardQueue.Entry entry) throws InterruptedException {
         plasmaParserDocument document = null;
         try {
-            // work off one stack entry with a fresh resource
             long stackStartTime = 0, stackEndTime = 0,
-            parsingStartTime = 0, parsingEndTime = 0,
-            indexingStartTime = 0, indexingEndTime = 0,
-            storageStartTime = 0, storageEndTime = 0;
-            
-            // we must distinguish the following cases: resource-load was initiated by
-            // 1) global crawling: the index is extern, not here (not possible here)
-            // 2) result of search queries, some indexes are here (not possible here)
-            // 3) result of index transfer, some of them are here (not possible here)
-            // 4) proxy-load (initiator is "------------")
-            // 5) local prefetch/crawling (initiator is own seedHash)
-            // 6) local fetching for global crawling (other known or unknwon initiator)
-            int processCase = PROCESSCASE_0_UNKNOWN;
-            yacySeed initiatorPeer = null;
-            String initiatorPeerHash = (entry.proxy()) ? yacyURL.dummyHash : entry.initiator();
-            if (initiatorPeerHash.equals(yacyURL.dummyHash)) {
-                // proxy-load
-                processCase = PROCESSCASE_4_PROXY_LOAD;
-            } else if (initiatorPeerHash.equals(yacyCore.seedDB.mySeed().hash)) {
-                // normal crawling
-                processCase = PROCESSCASE_5_LOCAL_CRAWLING;
-            } else {
-                // this was done for remote peer (a global crawl)
-                initiatorPeer = yacyCore.seedDB.getConnected(initiatorPeerHash);
-                processCase = PROCESSCASE_6_GLOBAL_CRAWLING;
-            }
+            parsingStartTime = 0, parsingEndTime = 0;
+            int processCase = entry.processCase();
             
             log.logFine("processResourceStack processCase=" + processCase +
                     ", depth=" + entry.depth() +
                     ", maxDepth=" + ((entry.profile() == null) ? "null" : Integer.toString(entry.profile().generalDepth())) +
                     ", filter=" + ((entry.profile() == null) ? "null" : entry.profile().generalFilter()) +
-                    ", initiatorHash=" + initiatorPeerHash +
+                    ", initiatorHash=" + entry.initiator() +
                     //", responseHeader=" + ((entry.responseHeader() == null) ? "null" : entry.responseHeader().toString()) +
                     ", url=" + entry.url()); // DEBUG
             
-            /* =========================================================================
-             * PARSE CONTENT
-             * ========================================================================= */
+            // PARSE CONTENT
             parsingStartTime = System.currentTimeMillis();
 
             try {
-                document = this.parseResource(entry, initiatorPeerHash);
-                if (document == null) return;
+                document = this.parseResource(entry);
+                if (document == null) return null;
             } catch (ParserException e) {
                 this.log.logInfo("Unable to parse the resource '" + entry.url() + "'. " + e.getMessage());
-                addURLtoErrorDB(entry.url(), entry.referrerHash(), initiatorPeerHash, entry.anchorName(), e.getErrorCode(), new kelondroBitfield());
+                addURLtoErrorDB(entry.url(), entry.referrerHash(), entry.initiator(), entry.anchorName(), e.getErrorCode(), new kelondroBitfield());
                 if (document != null) {
                     document.close();
                     document = null;
                 }
-                return;
+                return null;
             }
             
             parsingEndTime = System.currentTimeMillis();            
             
-            // getting the document date
+            // get the document date
             Date docDate = entry.getModificationDate();
             
-            /* =========================================================================
-             * put anchors on crawl stack
-             * ========================================================================= */            
+            // put anchors on crawl stack
             stackStartTime = System.currentTimeMillis();
             if (
                     ((processCase == PROCESSCASE_4_PROXY_LOAD) || (processCase == PROCESSCASE_5_LOCAL_CRAWLING)) &&
@@ -2179,268 +2140,14 @@ public final class plasmaSwitchboard extends serverAbstractSwitch<plasmaSwitchbo
                     nextEntry = i.next();
                     nextUrl = nextEntry.getKey();
                     // enqueue the hyperlink into the pre-notice-url db
-                    crawlStacker.enqueueEntry(nextUrl, entry.urlHash(), initiatorPeerHash, nextEntry.getValue(), docDate, entry.depth() + 1, entry.profile());
+                    crawlStacker.enqueueEntry(nextUrl, entry.urlHash(), entry.initiator(), nextEntry.getValue(), docDate, entry.depth() + 1, entry.profile());
                 }
-                log.logInfo("CRAWL: ADDED " + hl.size() + " LINKS FROM " + entry.url().toNormalform(false, true) +
-                        ", NEW CRAWL STACK SIZE IS " + crawlQueues.noticeURL.stackSize(plasmaCrawlNURL.STACK_TYPE_CORE));
+                if (log.isInfo()) log.logInfo("CRAWL: ADDED " + hl.size() + " LINKS FROM " + entry.url().toNormalform(false, true) +
+                        ", NEW CRAWL STACK SIZE IS " + crawlQueues.noticeURL.stackSize(plasmaCrawlNURL.STACK_TYPE_CORE) +
+                        ", STACKING TIME = " + (stackEndTime-stackStartTime) +
+                        ", PARSING TIME = " + (parsingEndTime-parsingStartTime));
             }
             stackEndTime = System.currentTimeMillis();
-            
-            /* =========================================================================
-             * CREATE INDEX
-             * ========================================================================= */  
-            String dc_title = document.dc_title();
-            yacyURL referrerURL = entry.referrerURL();
-
-            String noIndexReason = plasmaCrawlEURL.DENIED_UNSPECIFIED_INDEXING_ERROR;
-            if (processCase == PROCESSCASE_4_PROXY_LOAD) {
-                // proxy-load
-                noIndexReason = entry.shallIndexCacheForProxy();
-            } else {
-                // normal crawling
-                noIndexReason = entry.shallIndexCacheForCrawler();
-            }
-            
-            if (noIndexReason == null) {
-                // strip out words
-                indexingStartTime = System.currentTimeMillis();
-                
-                checkInterruption();
-                log.logFine("Condensing for '" + entry.url().toNormalform(false, true) + "'");
-                plasmaCondenser condenser = new plasmaCondenser(document, entry.profile().indexText(), entry.profile().indexMedia());
-                
-                // generate citation reference
-                Integer[] ioLinks = webStructure.generateCitationReference(entry.url(), entry.urlHash(), docDate, document, condenser); // [outlinksSame, outlinksOther]
-                
-                try {        
-                    // check for interruption
-                    checkInterruption();
-                    
-                    // create a new loaded URL db entry
-                    long ldate = System.currentTimeMillis();
-                    indexURLEntry newEntry = new indexURLEntry(
-                            entry.url(),                               // URL
-                            dc_title,                            // document description
-                            document.dc_creator(),                     // author
-                            document.dc_subject(' '),                  // tags
-                            "",                                        // ETag
-                            docDate,                                   // modification date
-                            new Date(),                                // loaded date
-                            new Date(ldate + Math.max(0, ldate - docDate.getTime()) / 2), // freshdate, computed with Proxy-TTL formula 
-                            (referrerURL == null) ? null : referrerURL.hash(),                        // referer hash
-                            new byte[0],                               // md5
-                            (int) entry.size(),                        // size
-                            condenser.RESULT_NUMB_WORDS,               // word count
-                            plasmaHTCache.docType(document.dc_format()), // doctype
-                            condenser.RESULT_FLAGS,                    // flags
-                            yacyURL.language(entry.url()),             // language
-                            ioLinks[0].intValue(),                     // llocal
-                            ioLinks[1].intValue(),                     // lother
-                            document.getAudiolinks().size(),           // laudio
-                            document.getImages().size(),               // limage
-                            document.getVideolinks().size(),           // lvideo
-                            document.getApplinks().size()              // lapp
-                    );
-                    /* ========================================================================
-                     * STORE URL TO LOADED-URL-DB
-                     * ======================================================================== */
-                    wordIndex.loadedURL.store(newEntry);
-                    wordIndex.loadedURL.stack(
-                            newEntry,                       // loaded url db entry
-                            initiatorPeerHash,              // initiator peer hash
-                            yacyCore.seedDB.mySeed().hash,    // executor peer hash
-                            processCase                     // process case
-                    );                    
-                    
-                    // check for interruption
-                    checkInterruption();
-                    
-                    /* ========================================================================
-                     * STORE WORD INDEX
-                     * ======================================================================== */
-                    if (
-                            (
-                                    (processCase == PROCESSCASE_4_PROXY_LOAD) || 
-                                    (processCase == PROCESSCASE_5_LOCAL_CRAWLING) || 
-                                    (processCase == PROCESSCASE_6_GLOBAL_CRAWLING)
-                            ) && 
-                            ((entry.profile().indexText()) || (entry.profile().indexMedia()))
-                    ) {
-                        String urlHash = newEntry.hash();
-                        
-                        // remove stopwords                        
-                        log.logInfo("Excluded " + condenser.excludeWords(stopwords) + " words in URL " + entry.url());
-                        indexingEndTime = System.currentTimeMillis();
-                        
-                        storageStartTime = System.currentTimeMillis();
-                        int words = 0;
-                        String storagePeerHash;
-                        yacySeed seed;
-                                                
-                        if (
-                                ((storagePeerHash = getConfig(STORAGE_PEER_HASH, null)) == null) ||
-                                (storagePeerHash.trim().length() == 0) ||
-                                ((seed = yacyCore.seedDB.getConnected(storagePeerHash)) == null)
-                        ){
-                            
-                            /* ========================================================================
-                             * STORE PAGE INDEX INTO WORD INDEX DB
-                             * ======================================================================== */
-                            words = wordIndex.addPageIndex(
-                                    entry.url(),                                  // document url
-                                    docDate,                                      // document mod date
-                                    (int) entry.size(),                           // document size
-                                    document,                                     // document content
-                                    condenser,                                    // document condenser
-                                    yacyURL.language(entry.url()),                // document language
-                                    plasmaHTCache.docType(document.dc_format()),// document type
-                                    ioLinks[0].intValue(),                        // outlinkSame
-                                    ioLinks[1].intValue()                         // outlinkOthers
-                            );
-                        } else {
-                            /* ========================================================================
-                             * SEND PAGE INDEX TO STORAGE PEER
-                             * ======================================================================== */                            
-                            HashMap<String, indexURLEntry> urlCache = new HashMap<String, indexURLEntry>(1);
-                            urlCache.put(newEntry.hash(), newEntry);
-                            
-                            ArrayList<indexContainer> tmpContainers = new ArrayList<indexContainer>(condenser.words().size());
-                            
-                            String language = yacyURL.language(entry.url());                            
-                            char doctype = plasmaHTCache.docType(document.dc_format());
-                            indexURLEntry.Components comp = newEntry.comp();
-                            int urlLength = comp.url().toNormalform(true, true).length();
-                            int urlComps = htmlFilterContentScraper.urlComps(comp.url().toNormalform(true, true)).length;
-
-                            // iterate over all words
-                            Iterator<Map.Entry<String, wordStatProp>> i = condenser.words().entrySet().iterator();
-                            Map.Entry<String, wordStatProp> wentry;
-                            plasmaCondenser.wordStatProp wordStat;
-                            while (i.hasNext()) {
-                                wentry = i.next();
-                                String word = wentry.getKey();
-                                wordStat = wentry.getValue();
-                                String wordHash = plasmaCondenser.word2hash(word);
-                                indexRWIRowEntry wordIdxEntry = new indexRWIRowEntry(
-                                            urlHash,
-                                            urlLength, urlComps,
-                                            wordStat.count,
-                                            document.dc_title().length(),
-                                            condenser.words().size(),
-                                            condenser.sentences().size(),
-                                            wordStat.posInText,
-                                            wordStat.posInPhrase,
-                                            wordStat.numOfPhrase,
-                                            docDate.getTime(),
-                                            System.currentTimeMillis(),
-                                            language,
-                                            doctype,
-                                            ioLinks[0].intValue(),
-                                            ioLinks[1].intValue(),
-                                            condenser.RESULT_FLAGS
-                                        );
-                                indexContainer wordIdxContainer = plasmaWordIndex.emptyContainer(wordHash, 1);
-                                wordIdxContainer.add(wordIdxEntry);
-                                tmpContainers.add(wordIdxContainer);
-                            }
-                            //System.out.println("DEBUG: plasmaSearch.addPageIndex: added " + condenser.getWords().size() + " words, flushed " + c + " entries");
-                            words = condenser.words().size();
-                            
-                            // transfering the index to the storage peer
-                            indexContainer[] indexData = (indexContainer[]) tmpContainers.toArray(new indexContainer[tmpContainers.size()]);
-                            HashMap<String, Object> resultObj = yacyClient.transferIndex(
-                                    seed,       // target seed
-                                    indexData,  // word index data
-                                    urlCache,   // urls
-                                    true,       // gzip body
-                                    120000      // transfer timeout 
-                            );
-                            
-                            // check for interruption
-                            checkInterruption();
-                            
-                            // if the transfer failed we try to store the index locally
-                            String error = (String) resultObj.get("result");
-                            if (error != null) {
-                                words = wordIndex.addPageIndex(
-                                        entry.url(),
-                                        docDate, 
-                                        (int) entry.size(),
-                                        document, 
-                                        condenser,
-                                        yacyURL.language(entry.url()),
-                                        plasmaHTCache.docType(document.dc_format()),
-                                        ioLinks[0].intValue(), 
-                                        ioLinks[1].intValue()
-                                );
-                            }
-                            
-                            tmpContainers = null;
-                        } //end: SEND PAGE INDEX TO STORAGE PEER
-                        
-                        storageEndTime = System.currentTimeMillis();
-                        
-                        //increment number of indexed urls
-                		indexedPages++;
-                        
-                        if (log.isInfo()) {
-                            // TODO: UTF-8 docDescription seems not to be displayed correctly because
-                            // of string concatenation
-                            log.logInfo("*Indexed " + words + " words in URL " + entry.url() +
-                                    " [" + entry.urlHash() + "]" +
-                                    "\n\tDescription:  " + dc_title +
-                                    "\n\tMimeType: "  + document.dc_format() + " | Charset: " + document.getCharset() + " | " +
-                                    "Size: " + document.getTextLength() + " bytes | " +
-                                    "Anchors: " + ((document.getAnchors() == null) ? 0 : document.getAnchors().size()) +
-                                    "\n\tStackingTime:  " + (stackEndTime-stackStartTime) + " ms | " +
-                                    "ParsingTime:  " + (parsingEndTime-parsingStartTime) + " ms | " +
-                                    "IndexingTime: " + (indexingEndTime-indexingStartTime) + " ms | " +
-                                    "StorageTime: " + (storageEndTime-storageStartTime) + " ms");
-                        }
-
-                        // update profiling info
-                        plasmaProfiling.updateIndexedPage(entry);
-                        
-                        // check for interruption
-                        checkInterruption();
-                        
-                        // if this was performed for a remote crawl request, notify requester
-                        if ((processCase == PROCESSCASE_6_GLOBAL_CRAWLING) && (initiatorPeer != null)) {
-                            log.logInfo("Sending crawl receipt for '" + entry.url().toNormalform(false, true) + "' to " + initiatorPeer.getName());
-                            if (clusterhashes != null) initiatorPeer.setAlternativeAddress((String) clusterhashes.get(initiatorPeer.hash));
-                            yacyClient.crawlReceipt(initiatorPeer, "crawl", "fill", "indexed", newEntry, "");
-                        }
-                    } else {
-                        log.logFine("Not Indexed Resource '" + entry.url().toNormalform(false, true) + "': process case=" + processCase);
-                        addURLtoErrorDB(entry.url(), referrerURL.hash(), initiatorPeerHash, dc_title, plasmaCrawlEURL.DENIED_UNKNOWN_INDEXING_PROCESS_CASE, new kelondroBitfield());
-                    }
-                } catch (Exception ee) {
-                    if (ee instanceof InterruptedException) throw (InterruptedException)ee;
-                    
-                    // check for interruption
-                    checkInterruption();
-                    
-                    log.logSevere("Could not index URL " + entry.url() + ": " + ee.getMessage(), ee);
-                    if ((processCase == PROCESSCASE_6_GLOBAL_CRAWLING) && (initiatorPeer != null)) {
-                        if (clusterhashes != null) initiatorPeer.setAlternativeAddress((String) clusterhashes.get(initiatorPeer.hash));
-                        yacyClient.crawlReceipt(initiatorPeer, "crawl", "exception", ee.getMessage(), null, "");
-                    }
-                    addURLtoErrorDB(entry.url(), (referrerURL == null) ? null : referrerURL.hash(), initiatorPeerHash, dc_title, plasmaCrawlEURL.DENIED_UNSPECIFIED_INDEXING_ERROR, new kelondroBitfield());
-                }
-                
-            } else {
-                // check for interruption
-                checkInterruption();
-                
-                log.logInfo("Not indexed any word in URL " + entry.url() + "; cause: " + noIndexReason);
-                addURLtoErrorDB(entry.url(), (referrerURL == null) ? null : referrerURL.hash(), initiatorPeerHash, dc_title, noIndexReason, new kelondroBitfield());
-                if ((processCase == PROCESSCASE_6_GLOBAL_CRAWLING) && (initiatorPeer != null)) {
-                    if (clusterhashes != null) initiatorPeer.setAlternativeAddress((String) clusterhashes.get(initiatorPeer.hash));
-                    yacyClient.crawlReceipt(initiatorPeer, "crawl", "rejected", noIndexReason, null, "");
-                }
-            }
-            document.close();
-            document = null;
         } catch (Exception e) {
             if (e instanceof InterruptedException) throw (InterruptedException)e;
             this.log.logSevere("Unexpected exception while parsing/indexing URL ",e);
@@ -2456,14 +2163,6 @@ public final class plasmaSwitchboard extends serverAbstractSwitch<plasmaSwitchbo
             synchronized (this.indexingTasksInProcess) {
                 this.indexingTasksInProcess.remove(entry.urlHash());
             }
-
-            // removing current entry from notice URL queue
-            /*
-            boolean removed = noticeURL.remove(entry.urlHash()); // worked-off
-            if (!removed) {
-                log.logFinest("Unable to remove indexed URL " + entry.url() + " from Crawler Queue. This could be because of an URL redirect.");
-            }
-            */
             
             // explicit delete/free resources
             if ((entry != null) && (entry.profile() != null) && (!(entry.profile().storeHTCache()))) {
@@ -2472,7 +2171,173 @@ public final class plasmaSwitchboard extends serverAbstractSwitch<plasmaSwitchbo
             }
             entry = null;
             
-            if (document != null) try { document.close(); } catch (Exception e) { /* ignore this */ }
+            if (document != null) try { document.close(); } catch (Exception e) {}
+        }
+        return document;
+    }
+    
+    private plasmaCondenser condenseDocument(plasmaSwitchboardQueue.Entry entry, plasmaParserDocument document) throws InterruptedException {
+        // CREATE INDEX
+        String dc_title = document.dc_title();
+        yacyURL referrerURL = entry.referrerURL();
+        int processCase = entry.processCase();
+        
+        String noIndexReason = plasmaCrawlEURL.DENIED_UNSPECIFIED_INDEXING_ERROR;
+        if (processCase == PROCESSCASE_4_PROXY_LOAD) {
+            // proxy-load
+            noIndexReason = entry.shallIndexCacheForProxy();
+        } else {
+            // normal crawling
+            noIndexReason = entry.shallIndexCacheForCrawler();
+        }
+        
+        if (noIndexReason != null) {
+            // check for interruption
+            checkInterruption();
+            
+            log.logInfo("Not indexed any word in URL " + entry.url() + "; cause: " + noIndexReason);
+            addURLtoErrorDB(entry.url(), (referrerURL == null) ? null : referrerURL.hash(), entry.initiator(), dc_title, noIndexReason, new kelondroBitfield());
+            /*
+            if ((processCase == PROCESSCASE_6_GLOBAL_CRAWLING) && (initiatorPeer != null)) {
+                if (clusterhashes != null) initiatorPeer.setAlternativeAddress((String) clusterhashes.get(initiatorPeer.hash));
+                yacyClient.crawlReceipt(initiatorPeer, "crawl", "rejected", noIndexReason, null, "");
+            }
+            */
+            document.close();
+            document = null;
+            return null;
+        }
+    
+        // strip out words
+        checkInterruption();
+        log.logFine("Condensing for '" + entry.url().toNormalform(false, true) + "'");
+        plasmaCondenser condenser;
+        try {
+            condenser = new plasmaCondenser(document, entry.profile().indexText(), entry.profile().indexMedia());
+        } catch (UnsupportedEncodingException e) {
+            return null;
+        }
+        return condenser;
+    }
+    
+    private void indexDocument(plasmaSwitchboardQueue.Entry entry, plasmaParserDocument document, plasmaCondenser condenser) throws InterruptedException {
+        long indexingStartTime = 0, indexingEndTime = 0,
+        storageStartTime = 0, storageEndTime = 0;
+
+        // CREATE INDEX
+        String dc_title = document.dc_title();
+        yacyURL referrerURL = entry.referrerURL();
+        Date docDate = entry.getModificationDate();
+        int processCase = entry.processCase();
+
+        // generate citation reference
+        Integer[] ioLinks = webStructure.generateCitationReference(entry.url(), entry.urlHash(), docDate, document, condenser); // [outlinksSame, outlinksOther]
+           
+        // check for interruption
+        checkInterruption();
+        
+        // create a new loaded URL db entry
+        long ldate = System.currentTimeMillis();
+        indexURLEntry newEntry = new indexURLEntry(
+                entry.url(),                               // URL
+                dc_title,                                  // document description
+                document.dc_creator(),                     // author
+                document.dc_subject(' '),                  // tags
+                "",                                        // ETag
+                docDate,                                   // modification date
+                new Date(),                                // loaded date
+                new Date(ldate + Math.max(0, ldate - docDate.getTime()) / 2), // freshdate, computed with Proxy-TTL formula 
+                (referrerURL == null) ? null : referrerURL.hash(),            // referer hash
+                new byte[0],                               // md5
+                (int) entry.size(),                        // size
+                condenser.RESULT_NUMB_WORDS,               // word count
+                plasmaHTCache.docType(document.dc_format()), // doctype
+                condenser.RESULT_FLAGS,                    // flags
+                yacyURL.language(entry.url()),             // language
+                ioLinks[0].intValue(),                     // llocal
+                ioLinks[1].intValue(),                     // lother
+                document.getAudiolinks().size(),           // laudio
+                document.getImages().size(),               // limage
+                document.getVideolinks().size(),           // lvideo
+                document.getApplinks().size()              // lapp
+        );
+        
+        // STORE URL TO LOADED-URL-DB
+        try {
+            wordIndex.loadedURL.store(newEntry);
+        } catch (IOException e) {
+            log.logFine("Not Indexed Resource '" + entry.url().toNormalform(false, true) + "': process case=" + processCase);
+            addURLtoErrorDB(entry.url(), referrerURL.hash(), entry.initiator(), dc_title, "error storing url: " + e.getMessage(), new kelondroBitfield());
+            return;
+        }
+        
+        wordIndex.loadedURL.stack(
+                newEntry,                      // loaded url db entry
+                entry.initiator(),             // initiator peer hash
+                yacyCore.seedDB.mySeed().hash, // executor peer hash
+                processCase                    // process case
+        );                    
+        
+        // check for interruption
+        checkInterruption();
+        
+        // STORE WORD INDEX
+        if ((!entry.profile().indexText()) && (!entry.profile().indexMedia())) {
+            log.logFine("Not Indexed Resource '" + entry.url().toNormalform(false, true) + "': process case=" + processCase);
+            addURLtoErrorDB(entry.url(), referrerURL.hash(), entry.initiator(), dc_title, plasmaCrawlEURL.DENIED_UNKNOWN_INDEXING_PROCESS_CASE, new kelondroBitfield());
+            return;
+        }
+            
+        // remove stopwords                        
+        log.logInfo("Excluded " + condenser.excludeWords(stopwords) + " words in URL " + entry.url());
+        indexingEndTime = System.currentTimeMillis();
+        
+        storageStartTime = System.currentTimeMillis();
+        int words = 0;
+             
+        // STORE PAGE INDEX INTO WORD INDEX DB
+        words = wordIndex.addPageIndex(
+                entry.url(),                                  // document url
+                docDate,                                      // document mod date
+                (int) entry.size(),                           // document size
+                document,                                     // document content
+                condenser,                                    // document condenser
+                yacyURL.language(entry.url()),                // document language
+                plasmaHTCache.docType(document.dc_format()),// document type
+                ioLinks[0].intValue(),                        // outlinkSame
+                ioLinks[1].intValue()                         // outlinkOthers
+        );
+            
+        storageEndTime = System.currentTimeMillis();
+        
+        //increment number of indexed urls
+        indexedPages++;
+        
+        if (log.isInfo()) {
+            // TODO: UTF-8 docDescription seems not to be displayed correctly because
+            // of string concatenation
+            log.logInfo("*Indexed " + words + " words in URL " + entry.url() +
+                    " [" + entry.urlHash() + "]" +
+                    "\n\tDescription:  " + dc_title +
+                    "\n\tMimeType: "  + document.dc_format() + " | Charset: " + document.getCharset() + " | " +
+                    "Size: " + document.getTextLength() + " bytes | " +
+                    "Anchors: " + ((document.getAnchors() == null) ? 0 : document.getAnchors().size()) +
+                    "\n\tIndexingTime: " + (indexingEndTime-indexingStartTime) + " ms | " +
+                    "StorageTime: " + (storageEndTime-storageStartTime) + " ms");
+        }
+
+        // update profiling info
+        plasmaProfiling.updateIndexedPage(entry);
+        
+        // check for interruption
+        checkInterruption();
+        yacySeed initiatorPeer = entry.initiatorPeer();
+        
+        // if this was performed for a remote crawl request, notify requester
+        if ((processCase == PROCESSCASE_6_GLOBAL_CRAWLING) && (initiatorPeer != null)) {
+            log.logInfo("Sending crawl receipt for '" + entry.url().toNormalform(false, true) + "' to " + initiatorPeer.getName());
+            if (clusterhashes != null) initiatorPeer.setAlternativeAddress((String) clusterhashes.get(initiatorPeer.hash));
+            yacyClient.crawlReceipt(initiatorPeer, "crawl", "fill", "indexed", newEntry, "");
         }
     }
     
