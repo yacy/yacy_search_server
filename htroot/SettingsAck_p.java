@@ -83,6 +83,10 @@ public class SettingsAck_p {
         // return variable that accumulates replacements
         serverObjects prop = new serverObjects();
         
+        // get referer for backlink
+        String referer = (String) header.get(httpHeader.REFERER);
+        prop.put("referer", (referer == null) ? "Settings_p.html" : referer); 
+        
         //if (post == null) System.out.println("POST: NULL"); else System.out.println("POST: " + post.toString());
         
         if (post == null) {
