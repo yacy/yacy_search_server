@@ -92,8 +92,8 @@ public class plasmaWebStructure {
         }
     }
     
-    public Integer[] /*(outlinksSame, outlinksOther)*/ generateCitationReference(yacyURL url, String baseurlhash, Date docDate, plasmaParserDocument document, plasmaCondenser condenser) {
-        assert url.hash().equals(baseurlhash);
+    public Integer[] /*(outlinksSame, outlinksOther)*/ generateCitationReference(plasmaParserDocument document, plasmaCondenser condenser, Date docDate) {
+        yacyURL url = document.dc_source();
         
         // generate citation reference
         Map<yacyURL, String> hl = document.getHyperlinks();
@@ -101,7 +101,7 @@ public class plasmaWebStructure {
         String nexturlhash;
         StringBuffer cpg = new StringBuffer(12 * (hl.size() + 1) + 1);
         StringBuffer cpl = new StringBuffer(12 * (hl.size() + 1) + 1);
-        String lhp = baseurlhash.substring(6); // local hash part
+        String lhp = url.hash().substring(6); // local hash part
         int GCount = 0;
         int LCount = 0;
         while (it.hasNext()) {
@@ -121,7 +121,7 @@ public class plasmaWebStructure {
         
         // append this reference to buffer
         // generate header info
-        String head = baseurlhash + "=" +
+        String head = url.hash() + "=" +
         plasmaWordIndex.microDateHoursStr(docDate.getTime()) +          // latest update timestamp of the URL
         plasmaWordIndex.microDateHoursStr(System.currentTimeMillis()) + // last visit timestamp of the URL
         kelondroBase64Order.enhancedCoder.encodeLongSmart(LCount, 2) +  // count of links to local resources

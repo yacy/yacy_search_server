@@ -54,7 +54,7 @@ import de.anomic.yacy.yacyURL;
 public final class indexRepositoryReference {
 
     // class objects
-    private kelondroIndex urlIndexFile;
+    kelondroIndex urlIndexFile;
     private Export exportthread = null; // will habe a export thread assigned if exporter is running
     
     public indexRepositoryReference(File indexSecondaryRoot, String networkName) {

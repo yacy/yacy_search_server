@@ -54,6 +54,7 @@ import de.anomic.server.serverFileUtils;
 import de.anomic.yacy.yacyURL;
 
 import java.util.Arrays;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.LinkedList;
@@ -86,6 +87,7 @@ public class plasmaParserDocument {
     private yacyURL favicon;
     private boolean resorted;
     private InputStream textStream;
+    private int inboundLinks, outboundLinks; // counters for inbound and outbound links, are counted after calling notifyWebStructure
     
     protected plasmaParserDocument(yacyURL location, String mimeType, String charset,
                     String[] keywords, String title, String author,
@@ -107,6 +109,8 @@ public class plasmaParserDocument {
         this.applinks = null;
         this.emaillinks = null;
         this.resorted = false;
+        this.inboundLinks = -1;
+        this.outboundLinks = -1;
         
         if (text == null) try {
             this.text = new serverCachedFileOutputStream(Parser.MAX_KEEP_IN_MEMORY_SIZE);
@@ -428,6 +432,22 @@ dc_rights
      */
     public void setFavicon(yacyURL faviconURL) {
     	this.favicon = faviconURL;
+    }
+    
+    public void notifyWebStructure(plasmaWebStructure webStructure, plasmaCondenser condenser, Date docDate) {
+        Integer[] ioLinks = webStructure.generateCitationReference(this, condenser, docDate); // [outlinksSame, outlinksOther]
+        this.inboundLinks = ioLinks[0].intValue();
+        this.outboundLinks = ioLinks[1].intValue();
+    }
+    
+    public int inboundLinks() {
+        assert this.inboundLinks >= 0;
+        return (this.inboundLinks < 0) ? 0 : this.inboundLinks;
+    }
+    
+    public int outboundLinks() {
+        assert this.outboundLinks >= 0;
+        return (this.outboundLinks < 0) ? 0 : this.outboundLinks;
     }
     
     public void close() {

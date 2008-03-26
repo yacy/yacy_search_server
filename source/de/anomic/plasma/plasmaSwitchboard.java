@@ -1862,7 +1862,8 @@ public final class plasmaSwitchboard extends serverAbstractSwitch<plasmaSwitchbo
             if (document != null) {
                 plasmaCondenser condensement = condenseDocument(nextentry, document);
                 if (condensement != null) {
-                    indexDocument(nextentry, document, condensement);
+                    document.notifyWebStructure(webStructure, condensement, nextentry.getModificationDate());
+                    storeDocumentIndex(nextentry, document, condensement);
                 }
             }
             return true;
@@ -2228,8 +2229,58 @@ public final class plasmaSwitchboard extends serverAbstractSwitch<plasmaSwitchbo
         return condenser;
     }
     
+    private void storeDocumentIndex(plasmaSwitchboardQueue.Entry entry, plasmaParserDocument document, plasmaCondenser condenser) {
+        
+        // CREATE INDEX
+        String dc_title = document.dc_title();
+        yacyURL referrerURL = entry.referrerURL();
+        int processCase = entry.processCase();
+
+        // remove stopwords                        
+        log.logInfo("Excluded " + condenser.excludeWords(stopwords) + " words in URL " + entry.url());
+
+        // STORE URL TO LOADED-URL-DB
+        indexURLReference newEntry = null;
+        try {
+            newEntry = wordIndex.storeDocument(entry, document, condenser);
+        } catch (IOException e) {
+            log.logFine("Not Indexed Resource '" + entry.url().toNormalform(false, true) + "': process case=" + processCase);
+            addURLtoErrorDB(entry.url(), referrerURL.hash(), entry.initiator(), dc_title, "error storing url: " + e.getMessage(), new kelondroBitfield());
+            return;
+        }
+        
+        // update statistics
+        crawlResults.stack(
+                newEntry,                      // loaded url db entry
+                entry.initiator(),             // initiator peer hash
+                yacyCore.seedDB.mySeed().hash, // executor peer hash
+                processCase                    // process case
+        );
+        
+        // STORE WORD INDEX
+        if ((!entry.profile().indexText()) && (!entry.profile().indexMedia())) {
+            log.logFine("Not Indexed Resource '" + entry.url().toNormalform(false, true) + "': process case=" + processCase);
+            addURLtoErrorDB(entry.url(), referrerURL.hash(), entry.initiator(), dc_title, plasmaCrawlEURL.DENIED_UNKNOWN_INDEXING_PROCESS_CASE, new kelondroBitfield());
+            return;
+        }
+        
+        // increment number of indexed urls
+        indexedPages++;
+        
+        // update profiling info
+        plasmaProfiling.updateIndexedPage(entry);
+        
+        // if this was performed for a remote crawl request, notify requester
+        yacySeed initiatorPeer = entry.initiatorPeer();
+        if ((processCase == PROCESSCASE_6_GLOBAL_CRAWLING) && (initiatorPeer != null)) {
+            log.logInfo("Sending crawl receipt for '" + entry.url().toNormalform(false, true) + "' to " + initiatorPeer.getName());
+            if (clusterhashes != null) initiatorPeer.setAlternativeAddress((String) clusterhashes.get(initiatorPeer.hash));
+            yacyClient.crawlReceipt(initiatorPeer, "crawl", "fill", "indexed", newEntry, "");
+        }
+    }
+    /*
     private void indexDocument(plasmaSwitchboardQueue.Entry entry, plasmaParserDocument document, plasmaCondenser condenser) throws InterruptedException {
-        long indexingStartTime = 0, indexingEndTime = 0,
+        long indexingStartTime = System.currentTimeMillis(), indexingEndTime = 0,
         storageStartTime = 0, storageEndTime = 0;
 
         // CREATE INDEX
@@ -2348,6 +2399,7 @@ public final class plasmaSwitchboard extends serverAbstractSwitch<plasmaSwitchbo
             yacyClient.crawlReceipt(initiatorPeer, "crawl", "fill", "indexed", newEntry, "");
         }
     }
+    */
     
     private static SimpleDateFormat DateFormatter = new SimpleDateFormat("EEE, dd MMM yyyy");
     public static String dateString(Date date) {

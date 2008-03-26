@@ -75,9 +75,11 @@ public final class plasmaWordIndex implements indexRI {
     private final indexRAMRI               dhtOutCache, dhtInCache;
     private final indexCollectionRI        collections;          // new database structure to replace AssortmentCluster and FileCluster
     private       int                      flushsize;
-    private final indexRepositoryReference referenceURL;
+    private       serverLog                log;
+    final         indexRepositoryReference referenceURL;
     
     public plasmaWordIndex(File indexPrimaryRoot, File indexSecondaryRoot, String networkName, serverLog log) {
+        this.log = log;
         File indexPrimaryPath = new File(indexPrimaryRoot, networkName);
         File indexPrimaryTextLocation = new File(indexPrimaryPath, "TEXT");
         if (!indexPrimaryTextLocation.exists()) {
@@ -603,6 +605,77 @@ public final class plasmaWordIndex implements indexRI {
         return containers; // this may return less containers as demanded
     }
 
+    public indexURLReference storeDocument(plasmaSwitchboardQueue.Entry entry, plasmaParserDocument document, plasmaCondenser condenser) throws IOException {
+        long startTime = System.currentTimeMillis();
+
+        // CREATE INDEX
+        String dc_title = document.dc_title();
+        yacyURL referrerURL = entry.referrerURL();
+        Date docDate = entry.getModificationDate();
+        
+        // create a new loaded URL db entry
+        long ldate = System.currentTimeMillis();
+        indexURLReference newEntry = new indexURLReference(
+                entry.url(),                               // URL
+                dc_title,                                  // document description
+                document.dc_creator(),                     // author
+                document.dc_subject(' '),                  // tags
+                "",                                        // ETag
+                docDate,                                   // modification date
+                new Date(),                                // loaded date
+                new Date(ldate + Math.max(0, ldate - docDate.getTime()) / 2), // freshdate, computed with Proxy-TTL formula 
+                (referrerURL == null) ? null : referrerURL.hash(),            // referer hash
+                new byte[0],                               // md5
+                (int) entry.size(),                        // size
+                condenser.RESULT_NUMB_WORDS,               // word count
+                plasmaHTCache.docType(document.dc_format()), // doctype
+                condenser.RESULT_FLAGS,                    // flags
+                yacyURL.language(entry.url()),             // language
+                document.inboundLinks(),                   // inbound links
+                document.outboundLinks(),                  // outbound links
+                document.getAudiolinks().size(),           // laudio
+                document.getImages().size(),               // limage
+                document.getVideolinks().size(),           // lvideo
+                document.getApplinks().size()              // lapp
+        );
+        
+        // STORE URL TO LOADED-URL-DB
+        putURL(newEntry);
+        
+        long storageEndTime = System.currentTimeMillis();
+        
+        // STORE PAGE INDEX INTO WORD INDEX DB
+        int words = addPageIndex(
+                entry.url(),                                  // document url
+                docDate,                                      // document mod date
+                (int) entry.size(),                           // document size
+                document,                                     // document content
+                condenser,                                    // document condenser
+                yacyURL.language(entry.url()),                // document language
+                plasmaHTCache.docType(document.dc_format()),  // document type
+                document.inboundLinks(),                      // inbound links
+                document.outboundLinks()                      // outbound links
+        );
+            
+        long indexingEndTime = System.currentTimeMillis();
+        
+        if (log.isInfo()) {
+            // TODO: UTF-8 docDescription seems not to be displayed correctly because
+            // of string concatenation
+            log.logInfo("*Indexed " + words + " words in URL " + entry.url() +
+                    " [" + entry.urlHash() + "]" +
+                    "\n\tDescription:  " + dc_title +
+                    "\n\tMimeType: "  + document.dc_format() + " | Charset: " + document.getCharset() + " | " +
+                    "Size: " + document.getTextLength() + " bytes | " +
+                    "Anchors: " + ((document.getAnchors() == null) ? 0 : document.getAnchors().size()) +
+                    "\n\tLinkStorageTime: " + (storageEndTime - startTime) + " ms | " +
+                    "indexStorageTime: " + (indexingEndTime - storageEndTime) + " ms");
+        }
+        
+        // finished
+        return newEntry;
+    }
+    
     public synchronized kelondroCloneableIterator<indexContainer> wordContainers(String startHash, boolean ram, boolean rot) {
         kelondroCloneableIterator<indexContainer> i = wordContainers(startHash, ram);
         if (rot) {
