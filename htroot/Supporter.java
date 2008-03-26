@@ -32,12 +32,12 @@ import java.util.HashMap;
 import java.util.Iterator;
 
 import de.anomic.http.httpHeader;
+import de.anomic.index.indexReferenceBlacklist;
 import de.anomic.kelondro.kelondroMScoreCluster;
 import de.anomic.kelondro.kelondroNaturalOrder;
 import de.anomic.kelondro.kelondroRow;
 import de.anomic.kelondro.kelondroRow.Entry;
 import de.anomic.plasma.plasmaSwitchboard;
-import de.anomic.plasma.urlPattern.plasmaURLPattern;
 import de.anomic.server.serverDate;
 import de.anomic.server.serverObjects;
 import de.anomic.server.serverSwitch;
@@ -126,7 +126,7 @@ public class Supporter {
                 
                 url = row.getColString(0, null);
                 try {
-                    if (plasmaSwitchboard.urlBlacklist.isListed(plasmaURLPattern.BLACKLIST_SURFTIPS ,new yacyURL(url, urlhash))) continue;
+                    if (plasmaSwitchboard.urlBlacklist.isListed(indexReferenceBlacklist.BLACKLIST_SURFTIPS ,new yacyURL(url, urlhash))) continue;
                 } catch(MalformedURLException e) {continue;}
                 title = row.getColString(1,"UTF-8");
                 description = row.getColString(2,"UTF-8");

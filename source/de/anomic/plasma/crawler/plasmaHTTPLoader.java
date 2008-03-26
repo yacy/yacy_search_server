@@ -60,6 +60,7 @@ import de.anomic.http.httpc;
 import de.anomic.http.httpdBoundedSizeOutputStream;
 import de.anomic.http.httpdLimitExceededException;
 import de.anomic.http.httpdProxyHandler;
+import de.anomic.index.indexReferenceBlacklist;
 import de.anomic.plasma.plasmaCrawlEURL;
 import de.anomic.plasma.plasmaCrawlEntry;
 import de.anomic.plasma.plasmaHTCache;
@@ -67,7 +68,6 @@ import de.anomic.plasma.plasmaParser;
 import de.anomic.plasma.plasmaSwitchboard;
 import de.anomic.plasma.cache.IResourceInfo;
 import de.anomic.plasma.cache.http.ResourceInfo;
-import de.anomic.plasma.urlPattern.plasmaURLPattern;
 import de.anomic.server.serverSystem;
 import de.anomic.server.logging.serverLog;
 import de.anomic.yacy.yacyURL;
@@ -151,7 +151,7 @@ public final class plasmaHTTPLoader {
         
         // check if url is in blacklist
         String hostlow = host.toLowerCase();
-        if (plasmaSwitchboard.urlBlacklist.isListed(plasmaURLPattern.BLACKLIST_CRAWLER, hostlow, path)) {
+        if (plasmaSwitchboard.urlBlacklist.isListed(indexReferenceBlacklist.BLACKLIST_CRAWLER, hostlow, path)) {
             this.log.logInfo("CRAWLER Rejecting URL '" + entry.url().toString() + "'. URL is in blacklist.");
             sb.crawlQueues.errorURL.newEntry(entry, null, new Date(), 1, plasmaCrawlEURL.DENIED_URL_IN_BLACKLIST).store();
             return null;

@@ -71,9 +71,9 @@ import java.util.Random;
 import java.util.Set;
 import java.util.TreeMap;
 
+import de.anomic.index.indexWord;
 import de.anomic.kelondro.kelondroBase64Order;
 import de.anomic.net.natLib;
-import de.anomic.plasma.plasmaCondenser;
 import de.anomic.plasma.plasmaSwitchboard;
 import de.anomic.server.serverCodings;
 import de.anomic.server.serverCore;
@@ -582,7 +582,7 @@ public class yacySeed {
         Set<String> tags = serverCodings.string2set(get(PEERTAGS, ""), "|");
         Iterator<String> i = tags.iterator();
         while (i.hasNext()) {
-        	if (searchHashes.contains(plasmaCondenser.word2hash((String) i.next()))) return true;
+        	if (searchHashes.contains(indexWord.word2hash((String) i.next()))) return true;
         }
         return false;
     }

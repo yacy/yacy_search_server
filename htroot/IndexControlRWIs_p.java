@@ -36,17 +36,17 @@ import java.util.Set;
 
 import de.anomic.data.listManager;
 import de.anomic.http.httpHeader;
+import de.anomic.index.indexAbstractReferenceBlacklist;
 import de.anomic.index.indexContainer;
 import de.anomic.index.indexRWIEntry;
 import de.anomic.index.indexRWIRowEntry;
-import de.anomic.index.indexURLEntry;
+import de.anomic.index.indexURLReference;
+import de.anomic.index.indexWord;
 import de.anomic.kelondro.kelondroBitfield;
-import de.anomic.plasma.plasmaCondenser;
 import de.anomic.plasma.plasmaSearchAPI;
 import de.anomic.plasma.plasmaSearchEvent;
 import de.anomic.plasma.plasmaSearchRankingProcess;
 import de.anomic.plasma.plasmaSwitchboard;
-import de.anomic.plasma.urlPattern.abstractURLPattern;
 import de.anomic.server.serverObjects;
 import de.anomic.server.serverSwitch;
 import de.anomic.yacy.yacyClient;
@@ -86,7 +86,7 @@ public class IndexControlRWIs_p {
             boolean delurlref = post.containsKey("delurlref");
 
             if (post.containsKey("keystringsearch")) {
-                keyhash = plasmaCondenser.word2hash(keystring);
+                keyhash = indexWord.word2hash(keystring);
                 prop.put("keyhash", keyhash);
                 final plasmaSearchRankingProcess ranking = plasmaSearchAPI.genSearchresult(prop, sb, keyhash, null);
                 if (ranking.filteredCount() == 0) {
@@ -96,7 +96,7 @@ public class IndexControlRWIs_p {
             }
     
             if (post.containsKey("keyhashsearch")) {
-                if (keystring.length() == 0 || !plasmaCondenser.word2hash(keystring).equals(keyhash)) {
+                if (keystring.length() == 0 || !indexWord.word2hash(keystring).equals(keyhash)) {
                     prop.put("keystring", "&lt;not possible to compute word from hash&gt;");
                 }
                 final plasmaSearchRankingProcess ranking = plasmaSearchAPI.genSearchresult(prop, sb, keyhash, null);
@@ -153,7 +153,7 @@ public class IndexControlRWIs_p {
             }
             
             if (post.containsKey("urllist")) {
-                if (keystring.length() == 0 || !plasmaCondenser.word2hash(keystring).equals(keyhash)) {
+                if (keystring.length() == 0 || !indexWord.word2hash(keystring).equals(keyhash)) {
                     prop.put("keystring", "&lt;not possible to compute word from hash&gt;");
                 }
                 kelondroBitfield flags = plasmaSearchAPI.compileFlags(post);
@@ -164,7 +164,7 @@ public class IndexControlRWIs_p {
 
             // transfer to other peer
             if (post.containsKey("keyhashtransfer")) {
-                if (keystring.length() == 0 || !plasmaCondenser.word2hash(keystring).equals(keyhash)) {
+                if (keystring.length() == 0 || !indexWord.word2hash(keystring).equals(keyhash)) {
                     prop.put("keystring", "&lt;not possible to compute word from hash&gt;");
                 }
                 
@@ -191,10 +191,10 @@ public class IndexControlRWIs_p {
                 index = sb.wordIndex.getContainer(keyhash, null);
                 // built urlCache
                 Iterator<indexRWIRowEntry> urlIter = index.entries();
-                HashMap<String, indexURLEntry> knownURLs = new HashMap<String, indexURLEntry>();
+                HashMap<String, indexURLReference> knownURLs = new HashMap<String, indexURLReference>();
                 HashSet<String> unknownURLEntries = new HashSet<String>();
                 indexRWIEntry iEntry;
-                indexURLEntry lurl;
+                indexURLReference lurl;
                 while (urlIter.hasNext()) {
                     iEntry = urlIter.next();
                     lurl = sb.wordIndex.getURL(iEntry.urlHash(), null, 0);
@@ -254,7 +254,7 @@ public class IndexControlRWIs_p {
                         yacyURL url;
                         for (int i=0; i<urlx.length; i++) {
                             urlHashes.add(urlx[i]);
-                            indexURLEntry e = sb.wordIndex.getURL(urlx[i], null, 0);
+                            indexURLReference e = sb.wordIndex.getURL(urlx[i], null, 0);
                             sb.wordIndex.removeURL(urlx[i]);
                             if (e != null) {
                                 url = e.comp().url();
@@ -277,12 +277,12 @@ public class IndexControlRWIs_p {
                 if (post.containsKey("blacklistdomains")) {
                     PrintWriter pw;
                     try {
-                        String[] supportedBlacklistTypes = abstractURLPattern.BLACKLIST_TYPES_STRING.split(",");
+                        String[] supportedBlacklistTypes = indexAbstractReferenceBlacklist.BLACKLIST_TYPES_STRING.split(",");
                         pw = new PrintWriter(new FileWriter(new File(listManager.listsPath, blacklist), true));
                         yacyURL url;
                         for (int i=0; i<urlx.length; i++) {
                             urlHashes.add(urlx[i]);
-                            indexURLEntry e = sb.wordIndex.getURL(urlx[i], null, 0);
+                            indexURLReference e = sb.wordIndex.getURL(urlx[i], null, 0);
                             sb.wordIndex.removeURL(urlx[i]);
                             if (e != null) {
                                 url = e.comp().url();

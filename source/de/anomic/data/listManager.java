@@ -59,9 +59,9 @@ import java.util.Iterator;
 import java.util.Set;
 import java.util.Vector;
 
+import de.anomic.index.indexAbstractReferenceBlacklist;
 import de.anomic.plasma.plasmaSwitchboard;
-import de.anomic.plasma.urlPattern.abstractURLPattern;
-import de.anomic.plasma.urlPattern.plasmaURLPattern.blacklistFile;
+import de.anomic.index.indexReferenceBlacklist.blacklistFile;
 import de.anomic.server.serverCore;
 
 // The Naming of the functions is a bit strange...
@@ -379,7 +379,7 @@ public class listManager {
      * Load or reload all active Blacklists
      */
     public static void reloadBlacklists(){
-        String supportedBlacklistTypesStr = abstractURLPattern.BLACKLIST_TYPES_STRING;
+        String supportedBlacklistTypesStr = indexAbstractReferenceBlacklist.BLACKLIST_TYPES_STRING;
         String[] supportedBlacklistTypes = supportedBlacklistTypesStr.split(",");
         
         ArrayList<blacklistFile> blacklistFiles = new ArrayList<blacklistFile>(supportedBlacklistTypes.length);

@@ -29,7 +29,7 @@ import java.util.Date;
 import java.util.Locale;
 
 import de.anomic.http.httpHeader;
-import de.anomic.index.indexURLEntry;
+import de.anomic.index.indexURLReference;
 import de.anomic.plasma.plasmaHTCache;
 import de.anomic.plasma.plasmaSwitchboard;
 import de.anomic.server.serverObjects;
@@ -157,7 +157,7 @@ public class CrawlResults {
             String urlHash, initiatorHash, executorHash;
             String cachepath, urlstr, urltxt;
             yacySeed initiatorSeed, executorSeed;
-            indexURLEntry urle;
+            indexURLReference urle;
 
             int i, cnt = 0;
             for (i = sb.crawlResults.getStackSize(tabletype) - 1; i >= (sb.crawlResults.getStackSize(tabletype) - lines); i--) {
@@ -168,7 +168,7 @@ public class CrawlResults {
 //              serverLog.logFinest("PLASMA", "plasmaCrawlLURL/genTableProps urlHash=" + urlHash);
                 try {
                     urle = sb.wordIndex.getURL(urlHash, null, 0);
-                    indexURLEntry.Components comp = urle.comp();
+                    indexURLReference.Components comp = urle.comp();
 //                  serverLog.logFinest("PLASMA", "plasmaCrawlLURL/genTableProps urle=" + urle.toString());
                     initiatorSeed = yacyCore.seedDB.getConnected(initiatorHash);
                     executorSeed = yacyCore.seedDB.getConnected(executorHash);

@@ -53,7 +53,7 @@ import java.util.Iterator;
 import de.anomic.index.indexContainer;
 import de.anomic.index.indexRWIEntry;
 import de.anomic.index.indexRWIRowEntry;
-import de.anomic.index.indexURLEntry;
+import de.anomic.index.indexURLReference;
 import de.anomic.kelondro.kelondroBase64Order;
 import de.anomic.kelondro.kelondroException;
 import de.anomic.server.serverCodings;
@@ -79,7 +79,7 @@ public class plasmaDHTChunk {
     private int status = chunkStatus_UNDEFINED;
     private String startPointHash = "AAAAAAAAAAAA";
     private indexContainer[] indexContainers = null;
-    private HashMap<String, indexURLEntry> urlCache; // String (url-hash) / plasmaCrawlLURL.Entry
+    private HashMap<String, indexURLReference> urlCache; // String (url-hash) / plasmaCrawlLURL.Entry
     private int idxCount;
     
     private long selectionStartTime = 0;
@@ -115,7 +115,7 @@ public class plasmaDHTChunk {
         return c;
     }
     
-    public HashMap<String, indexURLEntry> urlCacheMap() {
+    public HashMap<String, indexURLReference> urlCacheMap() {
         return urlCache;
     }
     
@@ -214,11 +214,11 @@ public class plasmaDHTChunk {
             indexContainer container;
             Iterator<indexRWIRowEntry> urlIter;
             indexRWIRowEntry iEntry;
-            indexURLEntry lurl;
+            indexURLReference lurl;
             int refcount = 0;
             int wholesize;
 
-            urlCache = new HashMap<String, indexURLEntry>();
+            urlCache = new HashMap<String, indexURLReference>();
             final double maximumDistance = ((double) peerRedundancy * 2) / ((double) yacyCore.seedDB.sizeConnected());
             final long timeout = (maxtime < 0) ? Long.MAX_VALUE : System.currentTimeMillis() + maxtime;
             while (
@@ -289,7 +289,7 @@ public class plasmaDHTChunk {
         } catch (kelondroException e) {
             log.logSevere("selectTransferIndexes database corrupted: " + e.getMessage(), e);
             indexContainers = new indexContainer[0];
-            urlCache = new HashMap<String, indexURLEntry>();
+            urlCache = new HashMap<String, indexURLReference>();
             this.status = chunkStatus_FAILED;
             return 0;
         }

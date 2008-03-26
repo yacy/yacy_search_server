@@ -58,8 +58,8 @@ import java.util.HashSet;
 import de.anomic.data.listManager;
 import de.anomic.http.httpHeader;
 import de.anomic.http.httpc;
+import de.anomic.index.indexAbstractReferenceBlacklist;
 import de.anomic.plasma.plasmaSwitchboard;
-import de.anomic.plasma.urlPattern.abstractURLPattern;
 import de.anomic.server.serverObjects;
 import de.anomic.server.serverSwitch;
 import de.anomic.tools.nxTools;
@@ -207,7 +207,7 @@ public class sharedBlacklist_p {
 
                             count++;
                             if (plasmaSwitchboard.urlBlacklist != null) {
-                                String supportedBlacklistTypesStr = abstractURLPattern.BLACKLIST_TYPES_STRING;
+                                String supportedBlacklistTypesStr = indexAbstractReferenceBlacklist.BLACKLIST_TYPES_STRING;
                                 String[] supportedBlacklistTypes = supportedBlacklistTypesStr.split(",");  
 
                                 for (int blTypes=0; blTypes < supportedBlacklistTypes.length; blTypes++) {

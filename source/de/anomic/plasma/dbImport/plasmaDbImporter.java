@@ -9,7 +9,7 @@ import java.util.TreeSet;
 import de.anomic.index.indexContainer;
 import de.anomic.index.indexRWIEntry;
 import de.anomic.index.indexRWIRowEntry;
-import de.anomic.index.indexURLEntry;
+import de.anomic.index.indexURLReference;
 import de.anomic.plasma.plasmaSwitchboard;
 import de.anomic.plasma.plasmaWordIndex;
 import de.anomic.server.serverDate;
@@ -185,7 +185,7 @@ public class plasmaDbImporter extends AbstractImporter implements dbImporter {
                             // we need to import the url
 
                             // getting the url entry
-                            indexURLEntry urlEntry = this.importWordIndex.getURL(urlHash, null, 0);
+                            indexURLReference urlEntry = this.importWordIndex.getURL(urlHash, null, 0);
                             if (urlEntry != null) {
 
                                 /* write it into the home url db */

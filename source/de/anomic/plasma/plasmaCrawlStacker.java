@@ -55,7 +55,8 @@ import java.util.Date;
 import java.util.Iterator;
 import java.util.LinkedList;
 
-import de.anomic.index.indexURLEntry;
+import de.anomic.index.indexReferenceBlacklist;
+import de.anomic.index.indexURLReference;
 import de.anomic.kelondro.kelondroCache;
 import de.anomic.kelondro.kelondroEcoTable;
 import de.anomic.kelondro.kelondroException;
@@ -63,7 +64,6 @@ import de.anomic.kelondro.kelondroIndex;
 import de.anomic.kelondro.kelondroRow;
 import de.anomic.kelondro.kelondroRowSet;
 import de.anomic.kelondro.kelondroTree;
-import de.anomic.plasma.urlPattern.plasmaURLPattern;
 import de.anomic.server.serverDomains;
 import de.anomic.server.logging.serverLog;
 import de.anomic.yacy.yacyCore;
@@ -393,7 +393,7 @@ public final class plasmaCrawlStacker extends Thread {
         }
         
         // check blacklist
-        if (plasmaSwitchboard.urlBlacklist.isListed(plasmaURLPattern.BLACKLIST_CRAWLER, entry.url())) {
+        if (plasmaSwitchboard.urlBlacklist.isListed(indexReferenceBlacklist.BLACKLIST_CRAWLER, entry.url())) {
             reason = plasmaCrawlEURL.DENIED_URL_IN_BLACKLIST;
             this.log.logFine("URL '" + entry.url().toString() + "' is in blacklist. " +
                              "Stack processing time: " + (System.currentTimeMillis()-startTime) + "ms");
@@ -459,7 +459,7 @@ public final class plasmaCrawlStacker extends Thread {
 
         // check if the url is double registered
         String dbocc = sb.crawlQueues.urlExists(entry.url().hash());
-        indexURLEntry oldEntry = this.sb.wordIndex.getURL(entry.url().hash(), null, 0);
+        indexURLReference oldEntry = this.sb.wordIndex.getURL(entry.url().hash(), null, 0);
         boolean recrawl = (oldEntry != null) && ((System.currentTimeMillis() - oldEntry.loaddate().getTime()) > profile.recrawlIfOlder());
         // do double-check
         if ((dbocc != null) && (!recrawl)) {

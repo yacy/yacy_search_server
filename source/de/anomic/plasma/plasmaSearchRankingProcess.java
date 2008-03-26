@@ -41,7 +41,8 @@ import de.anomic.index.indexContainer;
 import de.anomic.index.indexRWIEntry;
 import de.anomic.index.indexRWIEntryOrder;
 import de.anomic.index.indexRWIVarEntry;
-import de.anomic.index.indexURLEntry;
+import de.anomic.index.indexURLReference;
+import de.anomic.index.indexWord;
 import de.anomic.kelondro.kelondroBinSearch;
 import de.anomic.kelondro.kelondroMScoreCluster;
 import de.anomic.kelondro.kelondroSortStack;
@@ -288,13 +289,13 @@ public final class plasmaSearchRankingProcess {
         return bestEntry;
     }
     
-    public synchronized indexURLEntry bestURL(boolean skipDoubleDom) {
+    public synchronized indexURLReference bestURL(boolean skipDoubleDom) {
         // returns from the current RWI list the best URL entry and removed this entry from the list
         while ((stack.size() > 0) || (size() > 0)) {
             kelondroSortStack<indexRWIVarEntry>.stackElement obrwi = bestRWI(skipDoubleDom);
-            indexURLEntry u = wordIndex.getURL(obrwi.element.urlHash(), obrwi.element, obrwi.weight.longValue());
+            indexURLReference u = wordIndex.getURL(obrwi.element.urlHash(), obrwi.element, obrwi.weight.longValue());
             if (u != null) {
-            	indexURLEntry.Components comp = u.comp();
+            	indexURLReference.Components comp = u.comp();
             	if (comp.url() != null) this.handover.put(u.hash(), comp.url().toNormalform(true, false)); // remember that we handed over this url
                 return u;
             }
@@ -370,7 +371,7 @@ public final class plasmaSearchRankingProcess {
             word = words[i].toLowerCase();
             if ((word.length() > 2) &&
                 ("http_html_php_ftp_www_com_org_net_gov_edu_index_home_page_for_usage_the_and_".indexOf(word) < 0) &&
-                (!(query.queryHashes.contains(plasmaCondenser.word2hash(word)))))
+                (!(query.queryHashes.contains(indexWord.word2hash(word)))))
                 ref.incScore(word);
         }
     }
@@ -470,8 +471,8 @@ public final class plasmaSearchRankingProcess {
         }
 
         // apply query-in-result matching
-        Set<String> urlcomph = plasmaCondenser.words2hashSet(urlcomps);
-        Set<String> descrcomph = plasmaCondenser.words2hashSet(descrcomps);
+        Set<String> urlcomph = indexWord.words2hashSet(urlcomps);
+        Set<String> descrcomph = indexWord.words2hashSet(descrcomps);
         Iterator<String> shi = query.queryHashes.iterator();
         String queryhash;
         while (shi.hasNext()) {

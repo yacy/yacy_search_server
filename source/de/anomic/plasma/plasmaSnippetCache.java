@@ -59,7 +59,8 @@ import java.util.TreeSet;
 import de.anomic.htmlFilter.htmlFilterImageEntry;
 import de.anomic.http.httpHeader;
 import de.anomic.http.httpc;
-import de.anomic.index.indexURLEntry;
+import de.anomic.index.indexURLReference;
+import de.anomic.index.indexWord;
 import de.anomic.kelondro.kelondroMScoreCluster;
 import de.anomic.kelondro.kelondroMSetTools;
 import de.anomic.plasma.cache.IResourceInfo;
@@ -193,14 +194,14 @@ public class plasmaSnippetCache {
                         for(int k=0; k < w[j].length(); k++) {
                             //is character a special character?
                             if(w[j].substring(k,k+1).matches("[^\\p{L}\\p{N}]")) {
-                                if (plasmaCondenser.word2hash(temp).equals(h)) temp = "<b>" + temp + "</b>";
+                                if (indexWord.word2hash(temp).equals(h)) temp = "<b>" + temp + "</b>";
                                 out = out + temp + w[j].substring(k,k+1);
                                 temp = "";
                             }
                             //last character
                             else if(k == (w[j].length()-1)) {
                                 temp = temp + w[j].substring(k,k+1);
-                                if (plasmaCondenser.word2hash(temp).equals(h)) temp = "<b>" + temp + "</b>";
+                                if (indexWord.word2hash(temp).equals(h)) temp = "<b>" + temp + "</b>";
                                 out = out + temp;
                                 temp = "";
                             }
@@ -210,7 +211,7 @@ public class plasmaSnippetCache {
                     }
 
                     //end contrib [MN]
-                    else if (plasmaCondenser.word2hash(w[j]).equals(h)) w[j] = "<b>" + w[j] + "</b>";
+                    else if (indexWord.word2hash(w[j]).equals(h)) w[j] = "<b>" + w[j] + "</b>";
 
                     w[j] = prefix + w[j] + postfix;
                 }
@@ -254,7 +255,7 @@ public class plasmaSnippetCache {
     }
     
     @SuppressWarnings("unchecked")
-    public static TextSnippet retrieveTextSnippet(indexURLEntry.Components comp, Set<String> queryhashes, boolean fetchOnline, boolean pre, int snippetMaxLength, int timeout, int maxDocLen) {
+    public static TextSnippet retrieveTextSnippet(indexURLReference.Components comp, Set<String> queryhashes, boolean fetchOnline, boolean pre, int snippetMaxLength, int timeout, int maxDocLen) {
         // heise = "0OQUNU3JSs05"
         yacyURL url = comp.url();
         if (queryhashes.size() == 0) {
@@ -754,7 +755,7 @@ public class plasmaSnippetCache {
         String hash;
         while (words.hasMoreElements()) {
             word = words.nextElement();
-            hash = plasmaCondenser.word2hash(new String(word));
+            hash = indexWord.word2hash(new String(word));
             if (!map.containsKey(hash)) map.put(hash, new Integer(pos)); // dont overwrite old values, that leads to too far word distances
             pos += word.length() + 1;
         }

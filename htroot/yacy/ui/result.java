@@ -27,6 +27,7 @@
 import java.util.TreeSet;
 
 import de.anomic.http.httpHeader;
+import de.anomic.index.indexWord;
 import de.anomic.kelondro.kelondroBitfield;
 import de.anomic.kelondro.kelondroMSetTools;
 import de.anomic.plasma.plasmaCondenser;
@@ -165,11 +166,11 @@ public class result {
         
             // do the search
             String client = (String) header.get(httpHeader.CONNECTION_PROP_CLIENTIP); // the search client who initiated the search
-            TreeSet<String> queryHashes = plasmaCondenser.words2hashes(query[0]);
+            TreeSet<String> queryHashes = indexWord.words2hashes(query[0]);
             plasmaSearchQuery theQuery = new plasmaSearchQuery(
         			querystring,
         			queryHashes,
-        			plasmaCondenser.words2hashes(query[1]),
+        			indexWord.words2hashes(query[1]),
         			ranking,
                     maxDistance,
                     prefermask,

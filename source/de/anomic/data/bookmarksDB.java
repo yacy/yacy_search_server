@@ -74,6 +74,7 @@ import org.xml.sax.SAXException;
 
 import de.anomic.htmlFilter.htmlFilterContentScraper;
 import de.anomic.htmlFilter.htmlFilterWriter;
+import de.anomic.index.indexWord;
 import de.anomic.kelondro.kelondroCloneableIterator;
 import de.anomic.kelondro.kelondroDyn;
 import de.anomic.kelondro.kelondroException;
@@ -81,7 +82,6 @@ import de.anomic.kelondro.kelondroMapObjects;
 import de.anomic.kelondro.kelondroNaturalOrder;
 import de.anomic.kelondro.kelondroObjects;
 import de.anomic.kelondro.kelondroObjectsMapEntry;
-import de.anomic.plasma.plasmaCondenser;
 import de.anomic.server.serverDate;
 import de.anomic.server.serverFileUtils;
 import de.anomic.server.logging.serverLog;
@@ -152,10 +152,10 @@ public class bookmarksDB {
      *        tagName is converted to lower case before hash is generated!
      */
     public static String tagHash(String tagName){
-        return plasmaCondenser.word2hash(tagName.toLowerCase());
+        return indexWord.word2hash(tagName.toLowerCase());
     }    
     public static String tagHash(String tagName, String user){
-        return plasmaCondenser.word2hash(user+":"+tagName.toLowerCase());
+        return indexWord.word2hash(user+":"+tagName.toLowerCase());
     }
     
     public Iterator<String> getFolderList(boolean priv){

@@ -24,7 +24,7 @@ import java.util.ArrayList;
 
 import de.anomic.data.listManager;
 import de.anomic.http.httpHeader;
-import de.anomic.plasma.urlPattern.abstractURLPattern;
+import de.anomic.index.indexAbstractReferenceBlacklist;
 import de.anomic.server.serverObjects;
 import de.anomic.server.serverSwitch;
 
@@ -50,7 +50,7 @@ public class blacklists_p {
                     prop.put("lists_" + blacklistCount + "_shared", "0");
                 }
                 
-                String[] types = abstractURLPattern.BLACKLIST_TYPES_STRING.split(",");
+                String[] types = indexAbstractReferenceBlacklist.BLACKLIST_TYPES_STRING.split(",");
                 for (int j=0; j<types.length; j++) {
                     prop.put("lists_" + blacklistCount + "_types_" + j + "_name", types[j]);
                     prop.put("lists_" + blacklistCount + "_types_" + j + "_value",

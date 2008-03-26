@@ -47,6 +47,7 @@ import java.util.Set;
 import java.util.TreeSet;
 
 import de.anomic.htmlFilter.htmlFilterAbstractScraper;
+import de.anomic.index.indexWord;
 import de.anomic.kelondro.kelondroBase64Order;
 import de.anomic.kelondro.kelondroBitfield;
 import de.anomic.kelondro.kelondroMSetTools;
@@ -107,8 +108,8 @@ public final class plasmaSearchQuery {
     	} else {
     		this.queryString = queryString;
     		TreeSet<String>[] cq = cleanQuery(queryString);
-    		this.queryHashes = plasmaCondenser.words2hashes(cq[0]);
-    		this.excludeHashes = plasmaCondenser.words2hashes(cq[1]);
+    		this.queryHashes = indexWord.words2hashes(cq[0]);
+    		this.excludeHashes = indexWord.words2hashes(cq[1]);
     	}
     	this.ranking = ranking;
         this.maxDistance = Integer.MAX_VALUE;
@@ -233,7 +234,7 @@ public final class plasmaSearchQuery {
     public static final boolean matches(String text, TreeSet<String> keyhashes) {
     	// returns true if any of the word hashes in keyhashes appear in the String text
     	// to do this, all words in the string must be recognized and transcoded to word hashes
-    	TreeSet<String> wordhashes = plasmaCondenser.words2hashes(plasmaCondenser.getWords(text).keySet());
+    	TreeSet<String> wordhashes = indexWord.words2hashes(plasmaCondenser.getWords(text).keySet());
     	return kelondroMSetTools.anymatch(wordhashes, keyhashes);
     }
     
@@ -282,16 +283,16 @@ public final class plasmaSearchQuery {
     public void filterOut(Set<String> blueList) {
         // filter out words that appear in this set
     	// this is applied to the queryHashes
-    	TreeSet<String> blues = plasmaCondenser.words2hashes(blueList);
+    	TreeSet<String> blues = indexWord.words2hashes(blueList);
     	kelondroMSetTools.excludeDestructive(queryHashes, blues);
     }
 
     public String id(boolean anonymized) {
         // generate a string that identifies a search so results can be re-used in a cache
         if (anonymized) {
-            return anonymizedQueryHashes(this.queryHashes) + "-" + anonymizedQueryHashes(this.excludeHashes) + "*" + this.contentdom + "*" + this.zonecode + "*" + plasmaCondenser.word2hash(this.ranking.toExternalString());
+            return anonymizedQueryHashes(this.queryHashes) + "-" + anonymizedQueryHashes(this.excludeHashes) + "*" + this.contentdom + "*" + this.zonecode + "*" + indexWord.word2hash(this.ranking.toExternalString());
         } else {
-            return hashSet2hashString(this.queryHashes) + "-" + hashSet2hashString(this.excludeHashes) + "*" + this.contentdom + "*" + this.zonecode + "*" + plasmaCondenser.word2hash(this.ranking.toExternalString());
+            return hashSet2hashString(this.queryHashes) + "-" + hashSet2hashString(this.excludeHashes) + "*" + this.contentdom + "*" + this.zonecode + "*" + indexWord.word2hash(this.ranking.toExternalString());
         }
     }
     

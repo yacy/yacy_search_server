@@ -71,13 +71,13 @@ import de.anomic.index.indexContainer;
 import de.anomic.index.indexRWIEntry;
 import de.anomic.index.indexRWIRowEntry;
 import de.anomic.index.indexRepositoryReference;
-import de.anomic.index.indexURLEntry;
+import de.anomic.index.indexURLReference;
+import de.anomic.index.indexWord;
 import de.anomic.kelondro.kelondroBase64Order;
 import de.anomic.kelondro.kelondroDyn;
 import de.anomic.kelondro.kelondroMScoreCluster;
 import de.anomic.kelondro.kelondroMapObjects;
 import de.anomic.kelondro.kelondroRowCollection;
-import de.anomic.plasma.plasmaCondenser;
 import de.anomic.plasma.plasmaSwitchboard;
 import de.anomic.plasma.plasmaWordIndex;
 import de.anomic.server.serverCore;
@@ -635,7 +635,7 @@ public final class yacy {
                         iEntry = (indexRWIEntry) wordIdxEntries.next();
                         String urlHash = iEntry.urlHash();                    
                         if ((currentUrlDB.exists(urlHash)) && (!minimizedUrlDB.exists(urlHash))) try {
-                            indexURLEntry urlEntry = currentUrlDB.load(urlHash, null, 0);                       
+                            indexURLReference urlEntry = currentUrlDB.load(urlHash, null, 0);                       
                             urlCounter++;
                             minimizedUrlDB.store(urlEntry);
                             if (urlCounter % 500 == 0) {
@@ -699,7 +699,7 @@ public final class yacy {
         try {
             String word;
             BufferedReader br = new BufferedReader(new InputStreamReader(new FileInputStream(wordlist)));
-            while ((word = br.readLine()) != null) wordmap.put(plasmaCondenser.word2hash(word), word);
+            while ((word = br.readLine()) != null) wordmap.put(indexWord.word2hash(word), word);
             br.close();
         } catch (IOException e) {}
         return wordmap;

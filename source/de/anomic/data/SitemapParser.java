@@ -59,7 +59,7 @@ import org.xml.sax.helpers.DefaultHandler;
 
 import de.anomic.http.httpc;
 import de.anomic.http.httpdByteCountInputStream;
-import de.anomic.index.indexURLEntry;
+import de.anomic.index.indexURLReference;
 import de.anomic.plasma.plasmaCrawlProfile;
 import de.anomic.plasma.plasmaCrawlZURL;
 import de.anomic.plasma.plasmaSwitchboard;
@@ -286,7 +286,7 @@ public class SitemapParser extends DefaultHandler {
 				String dbocc = this.switchboard.urlExists(nexturlhash);
 				if ((dbocc != null) && (dbocc.equalsIgnoreCase("loaded"))) {
 					// the url was already loaded. we need to check the date
-					indexURLEntry oldEntry = switchboard.wordIndex.getURL(nexturlhash, null, 0);
+					indexURLReference oldEntry = switchboard.wordIndex.getURL(nexturlhash, null, 0);
 					if (oldEntry != null) {
 						Date modDate = oldEntry.moddate();
 						// check if modDate is null

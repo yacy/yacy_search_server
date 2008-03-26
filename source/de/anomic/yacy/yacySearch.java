@@ -50,6 +50,7 @@ import java.util.Map;
 import java.util.Set;
 import java.util.TreeMap;
 
+import de.anomic.index.indexReferenceBlacklist;
 import de.anomic.kelondro.kelondroBitfield;
 import de.anomic.kelondro.kelondroMScoreCluster;
 import de.anomic.plasma.plasmaCrawlResults;
@@ -57,7 +58,6 @@ import de.anomic.plasma.plasmaSearchRankingProcess;
 import de.anomic.plasma.plasmaSearchQuery;
 import de.anomic.plasma.plasmaSearchRankingProfile;
 import de.anomic.plasma.plasmaWordIndex;
-import de.anomic.plasma.urlPattern.plasmaURLPattern;
 import de.anomic.server.logging.serverLog;
 
 public class yacySearch extends Thread {
@@ -68,7 +68,7 @@ public class yacySearch extends Thread {
     final private plasmaWordIndex wordIndex;
     final private plasmaSearchRankingProcess containerCache;
     final private Map<String, TreeMap<String, String>> abstractCache;
-    final private plasmaURLPattern blacklist;
+    final private indexReferenceBlacklist blacklist;
     final private yacySeed targetPeer;
     private String[] urls;
     private int count, maxDistance;
@@ -82,7 +82,7 @@ public class yacySearch extends Thread {
                       plasmaCrawlResults crawlResults,
                       plasmaSearchRankingProcess containerCache,
                       Map<String, TreeMap<String, String>> abstractCache,
-                      plasmaURLPattern blacklist,
+                      indexReferenceBlacklist blacklist,
                       plasmaSearchRankingProfile rankingProfile,
                       kelondroBitfield constraint) {
         super("yacySearch_" + targetPeer.getName());
@@ -256,7 +256,7 @@ public class yacySearch extends Thread {
             plasmaSearchRankingProcess containerCache,
             Map<String, TreeMap<String, String>> abstractCache,
             int targets,
-            plasmaURLPattern blacklist,
+            indexReferenceBlacklist blacklist,
             plasmaSearchRankingProfile rankingProfile,
             kelondroBitfield constraint,
             TreeMap<String, String> clusterselection) {
@@ -282,7 +282,7 @@ public class yacySearch extends Thread {
             plasmaWordIndex wordIndex,
             plasmaCrawlResults crawlResults,
             plasmaSearchRankingProcess containerCache,
-            String targethash, plasmaURLPattern blacklist,
+            String targethash, indexReferenceBlacklist blacklist,
             plasmaSearchRankingProfile rankingProfile,
             kelondroBitfield constraint, TreeMap<String, String> clusterselection) {
         // check own peer status

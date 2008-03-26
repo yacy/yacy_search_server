@@ -33,9 +33,9 @@ import java.util.Iterator;
 
 import de.anomic.data.listManager;
 import de.anomic.index.indexRWIEntry;
-import de.anomic.index.indexURLEntry;
+import de.anomic.index.indexReferenceBlacklist;
+import de.anomic.index.indexURLReference;
 import de.anomic.kelondro.kelondroBitfield;
-import de.anomic.plasma.urlPattern.plasmaURLPattern;
 import de.anomic.server.serverDate;
 import de.anomic.server.serverObjects;
 import de.anomic.yacy.yacyCore;
@@ -129,7 +129,7 @@ public class plasmaSearchAPI {
             prop.put("genUrlList_lines", maxlines);
             int i = 0;
             yacyURL url;
-            indexURLEntry entry;
+            indexURLReference entry;
             String us;
             long rn = -1;
             while ((ranked.size() > 0) && ((entry = ranked.bestURL(false)) != null)) {
@@ -177,7 +177,7 @@ public class plasmaSearchAPI {
                         ((entry.word().flags().get(indexRWIEntry.flag_app_emphasized)) ? "appears emphasized, " : "") +
                         ((yacyURL.probablyRootURL(entry.word().urlHash())) ? "probably root url" : "")
                 );
-                if (plasmaSwitchboard.urlBlacklist.isListed(plasmaURLPattern.BLACKLIST_DHT, url)) {
+                if (plasmaSwitchboard.urlBlacklist.isListed(indexReferenceBlacklist.BLACKLIST_DHT, url)) {
                     prop.put("genUrlList_urlList_"+i+"_urlExists_urlhxChecked", "1");
                 }
                 i++;

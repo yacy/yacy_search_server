@@ -50,8 +50,8 @@ import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Map;
 
+import de.anomic.index.indexReferenceBlacklist;
 import de.anomic.plasma.plasmaSwitchboard;
-import de.anomic.plasma.urlPattern.plasmaURLPattern;
 
 public class yacyNewsPool {
     
@@ -325,13 +325,13 @@ public class yacyNewsPool {
         if (record.created().getTime() == 0) return;
         Map<String, String> attributes = record.attributes();
         if (attributes.containsKey("url")){
-            if (plasmaSwitchboard.urlBlacklist.isListed(plasmaURLPattern.BLACKLIST_NEWS, new yacyURL((String) attributes.get("url"), null))){
+            if (plasmaSwitchboard.urlBlacklist.isListed(indexReferenceBlacklist.BLACKLIST_NEWS, new yacyURL((String) attributes.get("url"), null))){
                 System.out.println("DEBUG: ignored news-entry url blacklisted: " + attributes.get("url"));
                 return;
             }
         }
         if (attributes.containsKey("startURL")){
-            if (plasmaSwitchboard.urlBlacklist.isListed(plasmaURLPattern.BLACKLIST_NEWS, new yacyURL((String) attributes.get("startURL"), null))){
+            if (plasmaSwitchboard.urlBlacklist.isListed(indexReferenceBlacklist.BLACKLIST_NEWS, new yacyURL((String) attributes.get("startURL"), null))){
                 System.out.println("DEBUG: ignored news-entry url blacklisted: " + attributes.get("startURL"));
                 return;
             }

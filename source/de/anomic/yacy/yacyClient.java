@@ -57,17 +57,17 @@ import de.anomic.http.httpc;
 import de.anomic.index.indexContainer;
 import de.anomic.index.indexRWIEntry;
 import de.anomic.index.indexRWIRowEntry;
-import de.anomic.index.indexURLEntry;
+import de.anomic.index.indexReferenceBlacklist;
+import de.anomic.index.indexURLReference;
+import de.anomic.index.indexWord;
 import de.anomic.kelondro.kelondroBase64Order;
 import de.anomic.kelondro.kelondroBitfield;
-import de.anomic.plasma.plasmaCondenser;
 import de.anomic.plasma.plasmaCrawlResults;
 import de.anomic.plasma.plasmaSearchRankingProcess;
 import de.anomic.plasma.plasmaSearchRankingProfile;
 import de.anomic.plasma.plasmaSnippetCache;
 import de.anomic.plasma.plasmaSwitchboard;
 import de.anomic.plasma.plasmaWordIndex;
-import de.anomic.plasma.urlPattern.plasmaURLPattern;
 import de.anomic.server.serverByteBuffer;
 import de.anomic.server.serverCodings;
 import de.anomic.server.serverCore;
@@ -391,7 +391,7 @@ public final class yacyClient {
             plasmaCrawlResults crawlResults,
             plasmaSearchRankingProcess containerCache,
             Map<String, TreeMap<String, String>> abstractCache,
-            plasmaURLPattern blacklist,
+            indexReferenceBlacklist blacklist,
             plasmaSearchRankingProfile rankingProfile,
             kelondroBitfield constraint
     ) {
@@ -500,16 +500,16 @@ public final class yacyClient {
 		}
 
 		// insert results to containers
-		indexURLEntry urlEntry;
+		indexURLReference urlEntry;
 		String[] urls = new String[results];
 		for (int n = 0; n < results; n++) {
 			// get one single search result
-			urlEntry = indexURLEntry.importEntry((String) result.get("resource" + n));
+			urlEntry = indexURLReference.importEntry((String) result.get("resource" + n));
 			if (urlEntry == null) continue;
 			assert (urlEntry.hash().length() == 12) : "urlEntry.hash() = " + urlEntry.hash();
 			if (urlEntry.hash().length() != 12) continue; // bad url hash
-			indexURLEntry.Components comp = urlEntry.comp();
-			if (blacklist.isListed(plasmaURLPattern.BLACKLIST_SEARCH, comp.url())) {
+			indexURLReference.Components comp = urlEntry.comp();
+			if (blacklist.isListed(indexReferenceBlacklist.BLACKLIST_SEARCH, comp.url())) {
 				yacyCore.log.logInfo("remote search (client): filtered blacklisted url " + comp.url() + " from peer " + target.getName());
 				continue; // block with backlist
 			}
@@ -796,7 +796,7 @@ public final class yacyClient {
         return "wrong protocol: " + protocol;
     }
 
-    public static HashMap<String, String> crawlReceipt(yacySeed target, String process, String result, String reason, indexURLEntry entry, String wordhashes) {
+    public static HashMap<String, String> crawlReceipt(yacySeed target, String process, String result, String reason, indexURLReference entry, String wordhashes) {
         assert (target != null);
         assert (yacyCore.seedDB.mySeed() != null);
         assert (yacyCore.seedDB.mySeed() != target);
@@ -854,7 +854,7 @@ public final class yacyClient {
         }
     }
 
-    public static HashMap<String, Object> transferIndex(yacySeed targetSeed, indexContainer[] indexes, HashMap<String, indexURLEntry> urlCache, boolean gzipBody, int timeout) {
+    public static HashMap<String, Object> transferIndex(yacySeed targetSeed, indexContainer[] indexes, HashMap<String, indexURLReference> urlCache, boolean gzipBody, int timeout) {
         
         HashMap<String, Object> resultObj = new HashMap<String, Object>();
         int payloadSize = 0;
@@ -907,9 +907,9 @@ public final class yacyClient {
             if (uhs.length == 0) { return resultObj; } // all url's known
             
             // extract the urlCache from the result
-            indexURLEntry[] urls = new indexURLEntry[uhs.length];
+            indexURLReference[] urls = new indexURLReference[uhs.length];
             for (int i = 0; i < uhs.length; i++) {
-                urls[i] = (indexURLEntry) urlCache.get(uhs[i]);
+                urls[i] = (indexURLReference) urlCache.get(uhs[i]);
                 if (urls[i] == null) {
                     yacyCore.log.logFine("DEBUG transferIndex: requested url hash '" + uhs[i] + "', unknownURL='" + uhss + "'");
                 }
@@ -1009,7 +1009,7 @@ public final class yacyClient {
         }
     }
 
-    private static HashMap<String, String> transferURL(yacySeed targetSeed, indexURLEntry[] urls, boolean gzipBody, int timeout) {
+    private static HashMap<String, String> transferURL(yacySeed targetSeed, indexURLReference[] urls, boolean gzipBody, int timeout) {
         // this post a message to the remote message board
         final String address = targetSeed.getPublicAddress();
         if (address == null) { return null; }
@@ -1100,7 +1100,7 @@ public final class yacyClient {
             /*final yacyCore core =*/ new yacyCore(sb);
             yacyCore.peerActions.loadSeedLists();
             final yacySeed target = yacyCore.seedDB.getConnected(args[1]);
-            final String wordhashe = plasmaCondenser.word2hash("test");
+            final String wordhashe = indexWord.word2hash("test");
             //System.out.println("permission=" + permissionMessage(args[1]));
             
             // should we use the proxy?

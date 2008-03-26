@@ -63,10 +63,10 @@ import java.util.regex.PatternSyntaxException;
 
 import de.anomic.data.listManager;
 import de.anomic.http.httpHeader;
+import de.anomic.index.indexAbstractReferenceBlacklist;
+import de.anomic.index.indexDefaultReferenceBlacklist;
+import de.anomic.index.indexReferenceBlacklist;
 import de.anomic.plasma.plasmaSwitchboard;
-import de.anomic.plasma.urlPattern.abstractURLPattern;
-import de.anomic.plasma.urlPattern.defaultURLPattern;
-import de.anomic.plasma.urlPattern.plasmaURLPattern;
 import de.anomic.server.serverObjects;
 import de.anomic.server.serverSwitch;
 import de.anomic.server.logging.serverLog;
@@ -86,7 +86,7 @@ public class BlacklistCleaner_p {
     private static final int ERR_DOUBLE_OCCURANCE = 5;
     
     public static final Class<?>[] supportedBLEngines = {
-        defaultURLPattern.class
+        indexDefaultReferenceBlacklist.class
     };
     
     public static serverObjects respond(httpHeader header, serverObjects post, serverSwitch<?> env) {
@@ -98,7 +98,7 @@ public class BlacklistCleaner_p {
         String blacklistToUse = null;
         
         // getting the list of supported blacklist types
-        String supportedBlacklistTypesStr = abstractURLPattern.BLACKLIST_TYPES_STRING;
+        String supportedBlacklistTypesStr = indexAbstractReferenceBlacklist.BLACKLIST_TYPES_STRING;
         String[] supportedBlacklistTypes = supportedBlacklistTypesStr.split(","); 
         
         if (post == null) {
@@ -198,7 +198,7 @@ public class BlacklistCleaner_p {
         return r.toArray(new String[r.size()]);
     }
     
-    private static HashMap<String, Integer>/* entry, error-code */ getIllegalEntries(String blacklistToUse, String[] supportedBlacklistTypes, plasmaURLPattern blEngine) {
+    private static HashMap<String, Integer>/* entry, error-code */ getIllegalEntries(String blacklistToUse, String[] supportedBlacklistTypes, indexReferenceBlacklist blEngine) {
         HashMap<String, Integer> r = new HashMap<String, Integer>();
         HashSet<String> ok = new HashSet<String>();
         
@@ -206,7 +206,7 @@ public class BlacklistCleaner_p {
         Iterator<String> it = list.iterator();
         String s, host, path;
         
-        if (blEngine instanceof defaultURLPattern) {
+        if (blEngine instanceof indexDefaultReferenceBlacklist) {
             int slashPos;
             while (it.hasNext()) {
                 s = ((String)it.next()).trim();

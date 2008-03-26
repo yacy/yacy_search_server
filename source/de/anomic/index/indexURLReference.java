@@ -1,4 +1,4 @@
-// indexURLEntry.java
+// indexURLReference.java
 // (C) 2006 by Michael Peter Christen; mc@anomic.de, Frankfurt a. M., Germany
 // first published 2006 on http://www.anomic.de
 //
@@ -24,7 +24,6 @@
 // along with this program; if not, write to the Free Software
 // Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 
-
 package de.anomic.index;
 
 import java.net.MalformedURLException;
@@ -47,7 +46,7 @@ import de.anomic.tools.crypt;
 import de.anomic.tools.nxTools;
 import de.anomic.yacy.yacyURL;
 
-public class indexURLEntry {
+public class indexURLReference {
 
     // this object stores attributes for URL entries
     
@@ -118,7 +117,7 @@ public class indexURLEntry {
     private indexRWIEntry word; // this is only used if the url is transported via remote search requests
     private long ranking; // during generation of a search result this value is set
     
-    public indexURLEntry(
+    public indexURLReference(
             yacyURL url,
             String dc_title,
             String dc_creator,
@@ -185,14 +184,14 @@ public class indexURLEntry {
         return s.toString().getBytes();
     }
     
-    public indexURLEntry(kelondroRow.Entry entry, indexRWIEntry searchedWord, long ranking) {
+    public indexURLReference(kelondroRow.Entry entry, indexRWIEntry searchedWord, long ranking) {
         this.entry = entry;
         this.snippet = null;
         this.word = searchedWord;
         this.ranking = ranking;
     }
 
-    public indexURLEntry(Properties prop){
+    public indexURLReference(Properties prop){
         // generates an plasmaLURLEntry using the properties from the argument
         // the property names must correspond to the one from toString
         //System.out.println("DEBUG-ENTRY: prop=" + prop.toString());
@@ -248,9 +247,9 @@ public class indexURLEntry {
         this.ranking = 0;
     }
 
-    public static indexURLEntry importEntry(String propStr) {
+    public static indexURLReference importEntry(String propStr) {
         if (propStr != null && propStr.startsWith("{") && propStr.endsWith("}")) try {
-            return new indexURLEntry(serverCodings.s2p(propStr.substring(1, propStr.length() - 1)));
+            return new indexURLReference(serverCodings.s2p(propStr.substring(1, propStr.length() - 1)));
         } catch (kelondroException e) {
                 // wrong format
                 return null;
@@ -261,7 +260,7 @@ public class indexURLEntry {
 
     private StringBuffer corePropList() {
         // generate a parseable string; this is a simple property-list
-        indexURLEntry.Components comp = this.comp();
+        indexURLReference.Components comp = this.comp();
         final StringBuffer s = new StringBuffer(300);
         //System.out.println("author=" + comp.author());
         try {
@@ -319,9 +318,9 @@ public class indexURLEntry {
     	return this.ranking;
     }
     
-    public indexURLEntry.Components comp() {
+    public indexURLReference.Components comp() {
         ArrayList<String> cl = nxTools.strings(this.entry.getCol("comp", null), "UTF-8");
-        return new indexURLEntry.Components(
+        return new indexURLReference.Components(
                 (cl.size() > 0) ? ((String) cl.get(0)).trim() : "",
                 hash(),
                 (cl.size() > 1) ? ((String) cl.get(1)).trim() : "",
@@ -406,7 +405,7 @@ public class indexURLEntry {
         return word;
     }
 
-    public boolean isOlder(indexURLEntry other) {
+    public boolean isOlder(indexURLReference other) {
         if (other == null) return false;
         Date tmoddate = moddate();
         Date omoddate = other.moddate();

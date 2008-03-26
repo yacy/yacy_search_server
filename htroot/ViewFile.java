@@ -57,7 +57,7 @@ import de.anomic.data.htmlTools;
 import de.anomic.htmlFilter.htmlFilterImageEntry;
 import de.anomic.http.httpHeader;
 import de.anomic.http.httpc;
-import de.anomic.index.indexURLEntry;
+import de.anomic.index.indexURLReference;
 import de.anomic.plasma.plasmaCondenser;
 import de.anomic.plasma.plasmaHTCache;
 import de.anomic.plasma.plasmaParserDocument;
@@ -108,7 +108,7 @@ public class ViewFile {
         String urlHash = post.get("urlHash","");
         if (urlHash.length() > 0) {
             // getting the urlEntry that belongs to the url hash
-            indexURLEntry urlEntry = null;
+            indexURLReference urlEntry = null;
             urlEntry = sb.wordIndex.getURL(urlHash, null, 0);
             if (urlEntry == null) {
                 prop.put("error", "2");
@@ -117,7 +117,7 @@ public class ViewFile {
             }            
             
                 // gettin the url that belongs to the entry
-            indexURLEntry.Components comp = urlEntry.comp();
+            indexURLReference.Components comp = urlEntry.comp();
             if ((comp == null) || (comp.url() == null)) {
                 prop.put("error", "3");
                 prop.put("viewMode", VIEW_MODE_NO_TEXT);

@@ -39,7 +39,7 @@ import java.util.TreeSet;
 import de.anomic.index.indexContainer;
 import de.anomic.index.indexRWIEntry;
 import de.anomic.index.indexRWIVarEntry;
-import de.anomic.index.indexURLEntry;
+import de.anomic.index.indexURLReference;
 import de.anomic.kelondro.kelondroBitfield;
 import de.anomic.kelondro.kelondroMSetTools;
 import de.anomic.kelondro.kelondroSortStack;
@@ -208,7 +208,7 @@ public final class plasmaSearchEvent {
         } else {
             // prepare result vector directly without worker threads
             long timer = System.currentTimeMillis();
-            indexURLEntry uentry;
+            indexURLReference uentry;
             ResultEntry resultEntry;
             yacyURL url;
             synchronized (rankedCache) {
@@ -276,7 +276,7 @@ public final class plasmaSearchEvent {
         }
     }
     
-    ResultEntry obtainResultEntry(indexURLEntry page, int snippetFetchMode) {
+    ResultEntry obtainResultEntry(indexURLReference page, int snippetFetchMode) {
 
         // a search result entry needs some work to produce a result Entry:
         // - check if url entry exists in LURL-db
@@ -292,7 +292,7 @@ public final class plasmaSearchEvent {
         // find the url entry
 
         long startTime = System.currentTimeMillis();
-        indexURLEntry.Components comp = page.comp();
+        indexURLReference.Components comp = page.comp();
         String pagetitle = comp.dc_title().toLowerCase();
         if (comp.url() == null) {
             registerFailure(page.hash(), "url corrupted (null)");
@@ -521,7 +521,7 @@ public final class plasmaSearchEvent {
         public void run() {
 
             // start fetching urls and snippets
-            indexURLEntry page;
+            indexURLReference page;
             while (System.currentTimeMillis() < this.timeout) {
                 this.lastLifeSign = System.currentTimeMillis();
 
@@ -767,8 +767,8 @@ public final class plasmaSearchEvent {
     
     public static class ResultEntry {
         // payload objects
-        private indexURLEntry urlentry;
-        private indexURLEntry.Components urlcomps; // buffer for components
+        private indexURLReference urlentry;
+        private indexURLReference.Components urlcomps; // buffer for components
         private String alternative_urlstring;
         private String alternative_urlname;
         private plasmaSnippetCache.TextSnippet textSnippet;
@@ -777,7 +777,7 @@ public final class plasmaSearchEvent {
         // statistic objects
         public long dbRetrievalTime, snippetComputationTime;
         
-        public ResultEntry(indexURLEntry urlentry, plasmaWordIndex wordIndex,
+        public ResultEntry(indexURLReference urlentry, plasmaWordIndex wordIndex,
         				   plasmaSnippetCache.TextSnippet textSnippet,
         				   ArrayList<plasmaSnippetCache.MediaSnippet> mediaSnippets,
                            long dbRetrievalTime, long snippetComputationTime) {

@@ -50,7 +50,8 @@ import java.util.HashMap;
 import java.util.TreeSet;
 
 import de.anomic.http.httpHeader;
-import de.anomic.index.indexURLEntry;
+import de.anomic.index.indexURLReference;
+import de.anomic.index.indexWord;
 import de.anomic.kelondro.kelondroBitfield;
 import de.anomic.kelondro.kelondroMSetTools;
 import de.anomic.plasma.plasmaCondenser;
@@ -216,9 +217,9 @@ public class yacysearch {
                     return prop;
                 }
                 final String recommendHash = post.get("recommendref", ""); // urlhash
-                indexURLEntry urlentry = sb.wordIndex.getURL(recommendHash, null, 0);
+                indexURLReference urlentry = sb.wordIndex.getURL(recommendHash, null, 0);
                 if (urlentry != null) {
-                    indexURLEntry.Components comp = urlentry.comp();
+                    indexURLReference.Components comp = urlentry.comp();
                     plasmaParserDocument document;
                     document = plasmaSnippetCache.retrieveDocument(comp.url(), true, 5000, true);
                     if (document != null) {
@@ -240,11 +241,11 @@ public class yacysearch {
             final boolean globalsearch = (global) && (yacyonline) && (sb.getConfigBool(plasmaSwitchboard.INDEX_RECEIVE_ALLOW, false));
         
             // do the search
-            TreeSet<String> queryHashes = plasmaCondenser.words2hashes(query[0]);
+            TreeSet<String> queryHashes = indexWord.words2hashes(query[0]);
             plasmaSearchQuery theQuery = new plasmaSearchQuery(
         			querystring,
         			queryHashes,
-        			plasmaCondenser.words2hashes(query[1]),
+        			indexWord.words2hashes(query[1]),
         			ranking,
                     maxDistance,
                     prefermask,

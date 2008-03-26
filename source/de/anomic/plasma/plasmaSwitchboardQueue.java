@@ -50,7 +50,7 @@ import java.net.MalformedURLException;
 import java.util.Date;
 import java.util.Iterator;
 
-import de.anomic.index.indexURLEntry;
+import de.anomic.index.indexURLReference;
 import de.anomic.kelondro.kelondroBase64Order;
 import de.anomic.kelondro.kelondroNaturalOrder;
 import de.anomic.kelondro.kelondroRow;
@@ -341,7 +341,7 @@ public class plasmaSwitchboardQueue {
         public yacyURL referrerURL() {
             if (referrerURL == null) {
                 if ((referrerHash == null) || (referrerHash.equals(yacyURL.dummyHash))) return null;
-                indexURLEntry entry = index.getURL(referrerHash, null, 0);
+                indexURLReference entry = index.getURL(referrerHash, null, 0);
                 if (entry == null) referrerURL = null; else referrerURL = entry.comp().url();
             }
             return referrerURL;

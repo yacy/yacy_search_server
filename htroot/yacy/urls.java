@@ -27,7 +27,7 @@
 import java.io.IOException;
 
 import de.anomic.http.httpHeader;
-import de.anomic.index.indexURLEntry;
+import de.anomic.index.indexURLReference;
 import de.anomic.plasma.plasmaCrawlEntry;
 import de.anomic.plasma.plasmaCrawlNURL;
 import de.anomic.plasma.plasmaSwitchboard;
@@ -94,8 +94,8 @@ public class urls {
             if (urlhashes.length() % 12 != 0) return prop;
             int count = urlhashes.length() / 12;
         	int c = 0;
-        	indexURLEntry entry;
-        	indexURLEntry.Components comp;
+        	indexURLReference entry;
+        	indexURLReference.Components comp;
             yacyURL referrer;
             for (int i = 0; i < count; i++) {
                 entry = sb.wordIndex.getURL(urlhashes.substring(12 * i, 12 * (i + 1)), null, 0);

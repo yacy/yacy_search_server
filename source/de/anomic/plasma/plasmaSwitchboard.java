@@ -122,7 +122,9 @@ import de.anomic.http.httpRemoteProxyConfig;
 import de.anomic.http.httpc;
 import de.anomic.http.httpd;
 import de.anomic.http.httpdRobotsTxtConfig;
-import de.anomic.index.indexURLEntry;
+import de.anomic.index.indexDefaultReferenceBlacklist;
+import de.anomic.index.indexReferenceBlacklist;
+import de.anomic.index.indexURLReference;
 import de.anomic.kelondro.kelondroBitfield;
 import de.anomic.kelondro.kelondroCache;
 import de.anomic.kelondro.kelondroCachedRecords;
@@ -134,8 +136,6 @@ import de.anomic.plasma.crawler.plasmaCrawlQueues;
 import de.anomic.plasma.crawler.plasmaProtocolLoader;
 import de.anomic.plasma.dbImport.dbImportManager;
 import de.anomic.plasma.parser.ParserException;
-import de.anomic.plasma.urlPattern.defaultURLPattern;
-import de.anomic.plasma.urlPattern.plasmaURLPattern;
 import de.anomic.server.serverAbstractSwitch;
 import de.anomic.server.serverDomains;
 import de.anomic.server.serverFileUtils;
@@ -179,7 +179,7 @@ public final class plasmaSwitchboard extends serverAbstractSwitch<plasmaSwitchbo
     public static TreeSet<String> badwords = null;
     public static TreeSet<String> blueList = null;
     public static TreeSet<String> stopwords = null;    
-    public static plasmaURLPattern urlBlacklist;
+    public static indexReferenceBlacklist urlBlacklist;
     
     public static wikiParser wikiParser = null;
     
@@ -677,11 +677,11 @@ public final class plasmaSwitchboard extends serverAbstractSwitch<plasmaSwitchbo
     public static final String BLACKLIST_CLASS          = "BlackLists.class";
     /**
      * <p><code>public static final String <strong>BLACKLIST_CLASS_DEFAULT</strong> = "de.anomic.plasma.urlPattern.defaultURLPattern"</code></p>
-     * <p>Package and name of YaCy's {@link defaultURLPattern default} blacklist implementation</p>
+     * <p>Package and name of YaCy's {@link indexDefaultReferenceBlacklist default} blacklist implementation</p>
      * 
-     * @see defaultURLPattern for a detailed overview about the syntax of the default implementation
+     * @see indexDefaultReferenceBlacklist for a detailed overview about the syntax of the default implementation
      */
-    public static final String BLACKLIST_CLASS_DEFAULT  = "de.anomic.plasma.urlPattern.defaultURLPattern";
+    public static final String BLACKLIST_CLASS_DEFAULT  = "de.anomic.index.indexDefaultReferenceBlacklist";
     
     public static final String LIST_BLUE                = "plasmaBlueList";
     public static final String LIST_BLUE_DEFAULT        = null;
@@ -990,12 +990,17 @@ public final class plasmaSwitchboard extends serverAbstractSwitch<plasmaSwitchbo
         // load the black-list / inspired by [AS]
         File blacklistsPath = getConfigPath(LISTS_PATH, LISTS_PATH_DEFAULT);
         String blacklistClassName = getConfig(BLACKLIST_CLASS, BLACKLIST_CLASS_DEFAULT);
-        
+        if (blacklistClassName.equals("de.anomic.plasma.urlPattern.defaultURLPattern")) {
+            // patch old class location
+            blacklistClassName = BLACKLIST_CLASS_DEFAULT;
+            setConfig(BLACKLIST_CLASS, blacklistClassName);
+        }
+            
         this.log.logConfig("Starting blacklist engine ...");
         try {
             Class<?> blacklistClass = Class.forName(blacklistClassName);
             Constructor<?> blacklistClassConstr = blacklistClass.getConstructor( new Class[] { File.class } );
-            urlBlacklist = (plasmaURLPattern) blacklistClassConstr.newInstance(new Object[] { blacklistsPath });
+            urlBlacklist = (indexReferenceBlacklist) blacklistClassConstr.newInstance(new Object[] { blacklistsPath });
             this.log.logFine("Used blacklist engine class: " + blacklistClassName);
             this.log.logConfig("Using blacklist engine: " + urlBlacklist.getEngineInfo());
         } catch (Exception e) {
@@ -1459,7 +1464,7 @@ public final class plasmaSwitchboard extends serverAbstractSwitch<plasmaSwitchbo
         if (urlhash.equals(yacyURL.dummyHash)) return null;
         yacyURL ne = crawlQueues.getURL(urlhash);
         if (ne != null) return ne;
-        indexURLEntry le = wordIndex.getURL(urlhash, null, 0);
+        indexURLReference le = wordIndex.getURL(urlhash, null, 0);
         if (le != null) return le.comp().url();
         return null;
     }
@@ -2241,7 +2246,7 @@ public final class plasmaSwitchboard extends serverAbstractSwitch<plasmaSwitchbo
         
         // create a new loaded URL db entry
         long ldate = System.currentTimeMillis();
-        indexURLEntry newEntry = new indexURLEntry(
+        indexURLReference newEntry = new indexURLReference(
                 entry.url(),                               // URL
                 dc_title,                                  // document description
                 document.dc_creator(),                     // author
@@ -2377,9 +2382,9 @@ public final class plasmaSwitchboard extends serverAbstractSwitch<plasmaSwitchbo
         // finally, delete the url entry
         
         // determine the url string
-        indexURLEntry entry = wordIndex.getURL(urlhash, null, 0);
+        indexURLReference entry = wordIndex.getURL(urlhash, null, 0);
         if (entry == null) return 0;
-        indexURLEntry.Components comp = entry.comp();
+        indexURLReference.Components comp = entry.comp();
         if (comp.url() == null) return 0;
         
         InputStream resourceContent = null;

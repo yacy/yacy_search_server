@@ -32,7 +32,7 @@ import java.util.Iterator;
 
 import de.anomic.http.httpHeader;
 import de.anomic.index.indexRepositoryReference;
-import de.anomic.index.indexURLEntry;
+import de.anomic.index.indexURLReference;
 import de.anomic.kelondro.kelondroBase64Order;
 import de.anomic.kelondro.kelondroRotateIterator;
 import de.anomic.plasma.plasmaSwitchboard;
@@ -103,7 +103,7 @@ public class IndexControlURLs_p {
         }
 
         if (post.containsKey("urlhashdelete")) {
-            indexURLEntry entry = sb.wordIndex.getURL(urlhash, null, 0);
+            indexURLReference entry = sb.wordIndex.getURL(urlhash, null, 0);
             if (entry == null) {
                 prop.put("result", "No Entry for URL hash " + urlhash + "; nothing deleted.");
             } else {
@@ -135,7 +135,7 @@ public class IndexControlURLs_p {
                 yacyURL url = new yacyURL(urlstring, null);
                 urlhash = url.hash();
                 prop.put("urlhash", urlhash);
-                indexURLEntry entry = sb.wordIndex.getURL(urlhash, null, 0);
+                indexURLReference entry = sb.wordIndex.getURL(urlhash, null, 0);
                 if (entry == null) {
                     prop.putHTML("urlstring", "unknown url: " + urlstring);
                     prop.put("urlhash", "");
@@ -150,7 +150,7 @@ public class IndexControlURLs_p {
         }
 
         if (post.containsKey("urlhashsearch")) {
-            indexURLEntry entry = sb.wordIndex.getURL(urlhash, null, 0);
+            indexURLReference entry = sb.wordIndex.getURL(urlhash, null, 0);
             if (entry == null) {
                 prop.put("result", "No Entry for URL hash " + urlhash);
             } else {
@@ -163,14 +163,14 @@ public class IndexControlURLs_p {
         // generate list
         if (post.containsKey("urlhashsimilar")) {
             try {
-                final Iterator<indexURLEntry> entryIt = new kelondroRotateIterator<indexURLEntry>(sb.wordIndex.entriesURL(true, urlhash), new String(kelondroBase64Order.zero(urlhash.length())), sb.wordIndex.size()); 
+                final Iterator<indexURLReference> entryIt = new kelondroRotateIterator<indexURLReference>(sb.wordIndex.entriesURL(true, urlhash), new String(kelondroBase64Order.zero(urlhash.length())), sb.wordIndex.size()); 
                 StringBuffer result = new StringBuffer("Sequential List of URL-Hashes:<br />");
-                indexURLEntry entry;
+                indexURLReference entry;
                 int i = 0;
                 int rows = 0, cols = 0;
                 prop.put("urlhashsimilar", "1");
                 while (entryIt.hasNext() && i < 256) {
-                    entry = (indexURLEntry) entryIt.next();
+                    entry = (indexURLReference) entryIt.next();
                     if (entry == null) break;
                     prop.put("urlhashsimilar_rows_"+rows+"_cols_"+cols+"_urlHash", entry.hash());
                     cols++;
@@ -223,15 +223,15 @@ public class IndexControlURLs_p {
         return prop;
     }
     
-    private static serverObjects genUrlProfile(plasmaSwitchboard switchboard, indexURLEntry entry, String urlhash) {
+    private static serverObjects genUrlProfile(plasmaSwitchboard switchboard, indexURLReference entry, String urlhash) {
         serverObjects prop = new serverObjects();
         if (entry == null) {
             prop.put("genUrlProfile", "1");
             prop.put("genUrlProfile_urlhash", urlhash);
             return prop;
         }
-        indexURLEntry.Components comp = entry.comp();
-        indexURLEntry le = ((entry.referrerHash() == null) || (entry.referrerHash().length() != yacySeedDB.commonHashLength)) ? null : switchboard.wordIndex.getURL(entry.referrerHash(), null, 0);
+        indexURLReference.Components comp = entry.comp();
+        indexURLReference le = ((entry.referrerHash() == null) || (entry.referrerHash().length() != yacySeedDB.commonHashLength)) ? null : switchboard.wordIndex.getURL(entry.referrerHash(), null, 0);
         if (comp.url() == null) {
             prop.put("genUrlProfile", "1");
             prop.put("genUrlProfile_urlhash", urlhash);

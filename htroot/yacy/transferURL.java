@@ -49,9 +49,9 @@ import java.io.IOException;
 import java.text.ParseException;
 
 import de.anomic.http.httpHeader;
-import de.anomic.index.indexURLEntry;
+import de.anomic.index.indexReferenceBlacklist;
+import de.anomic.index.indexURLReference;
 import de.anomic.plasma.plasmaSwitchboard;
-import de.anomic.plasma.urlPattern.plasmaURLPattern;
 import de.anomic.server.serverCore;
 import de.anomic.server.serverObjects;
 import de.anomic.server.serverSwitch;
@@ -101,7 +101,7 @@ public final class transferURL {
             final int sizeBefore = sb.wordIndex.countURL();
             // read the urls from the other properties and store
             String urls;
-            indexURLEntry lEntry;
+            indexURLReference lEntry;
             for (int i = 0; i < urlc; i++) {
                 serverCore.checkInterruption();
                 
@@ -114,7 +114,7 @@ public final class transferURL {
                 }
 
                 // parse new lurl-entry
-                lEntry = indexURLEntry.importEntry(urls);
+                lEntry = indexURLReference.importEntry(urls);
                 if (lEntry == null) {
                     yacyCore.log.logWarning("transferURL: received invalid URL (entry null) from peer " + otherPeerName + "\n\tURL Property: " + urls);
                     blocked++;
@@ -122,7 +122,7 @@ public final class transferURL {
                 }
                 
                 // check if entry is well-formed
-                indexURLEntry.Components comp = lEntry.comp();
+                indexURLReference.Components comp = lEntry.comp();
                 if (comp.url() == null) {
                     yacyCore.log.logWarning("transferURL: received invalid URL from peer " + otherPeerName + "\n\tURL Property: " + urls);
                     blocked++;
@@ -137,7 +137,7 @@ public final class transferURL {
                 }
                 
                 // check if the entry is blacklisted
-                if ((blockBlacklist) && (plasmaSwitchboard.urlBlacklist.isListed(plasmaURLPattern.BLACKLIST_DHT, comp.url()))) {
+                if ((blockBlacklist) && (plasmaSwitchboard.urlBlacklist.isListed(indexReferenceBlacklist.BLACKLIST_DHT, comp.url()))) {
                     int deleted = sb.wordIndex.tryRemoveURLs(lEntry.hash());
                     yacyCore.log.logFine("transferURL: blocked blacklisted URL '" + comp.url().toNormalform(false, true) + "' from peer " + otherPeerName + "; deleted " + deleted + " URL entries from RWIs");
                     lEntry = null;

@@ -45,8 +45,10 @@ import de.anomic.index.indexRAMRI;
 import de.anomic.index.indexRI;
 import de.anomic.index.indexRWIEntry;
 import de.anomic.index.indexRWIRowEntry;
+import de.anomic.index.indexReferenceBlacklist;
 import de.anomic.index.indexRepositoryReference;
-import de.anomic.index.indexURLEntry;
+import de.anomic.index.indexURLReference;
+import de.anomic.index.indexWord;
 import de.anomic.index.indexRepositoryReference.Export;
 import de.anomic.kelondro.kelondroBase64Order;
 import de.anomic.kelondro.kelondroByteOrder;
@@ -55,7 +57,6 @@ import de.anomic.kelondro.kelondroMergeIterator;
 import de.anomic.kelondro.kelondroOrder;
 import de.anomic.kelondro.kelondroRotateIterator;
 import de.anomic.kelondro.kelondroRowSet;
-import de.anomic.plasma.urlPattern.plasmaURLPattern;
 import de.anomic.server.serverMemory;
 import de.anomic.server.logging.serverLog;
 import de.anomic.yacy.yacyDHTAction;
@@ -112,11 +113,11 @@ public final class plasmaWordIndex implements indexRI {
         this.flushsize = 2000;
     }
 
-    public void putURL(indexURLEntry entry) throws IOException {
+    public void putURL(indexURLReference entry) throws IOException {
         this.referenceURL.store(entry);
     }
     
-    public indexURLEntry getURL(String urlHash, indexRWIEntry searchedWord, long ranking) {
+    public indexURLReference getURL(String urlHash, indexRWIEntry searchedWord, long ranking) {
         return this.referenceURL.load(urlHash, searchedWord, ranking);
     }
     
@@ -140,11 +141,11 @@ public final class plasmaWordIndex implements indexRI {
         return this.referenceURL.export();
     }
     
-    public kelondroCloneableIterator<indexURLEntry> entriesURL(boolean up, String firstHash) throws IOException {
+    public kelondroCloneableIterator<indexURLReference> entriesURL(boolean up, String firstHash) throws IOException {
         return this.referenceURL.entries(up, firstHash);
     }
     
-    public indexRepositoryReference.BlacklistCleaner getURLCleaner(plasmaURLPattern blacklist) {
+    public indexRepositoryReference.BlacklistCleaner getURLCleaner(indexReferenceBlacklist blacklist) {
         return this.referenceURL.getBlacklistCleaner(blacklist); // thread is not already started after this is called!
     }
     
@@ -354,11 +355,11 @@ public final class plasmaWordIndex implements indexRI {
         int urlComps = htmlFilterContentScraper.urlComps(url.toString()).length;
         
         // iterate over all words of context text
-        Iterator<Map.Entry<String, plasmaCondenser.wordStatProp>> i = condenser.words().entrySet().iterator();
-        Map.Entry<String, plasmaCondenser.wordStatProp> wentry;
+        Iterator<Map.Entry<String, indexWord>> i = condenser.words().entrySet().iterator();
+        Map.Entry<String, indexWord> wentry;
         String word;
         indexRWIRowEntry ientry;
-        plasmaCondenser.wordStatProp wprop;
+        indexWord wprop;
         while (i.hasNext()) {
             wentry = i.next();
             word = wentry.getKey();
@@ -367,8 +368,8 @@ public final class plasmaWordIndex implements indexRI {
             ientry = new indexRWIRowEntry(url.hash(),
                         urlLength, urlComps, (document == null) ? urlLength : document.dc_title().length(),
                         wprop.count,
-                        condenser.words().size(),
-                        condenser.sentences().size(),
+                        condenser.RESULT_NUMB_WORDS,
+                        condenser.RESULT_NUMB_SENTENCES,
                         wprop.posInText,
                         wprop.posInPhrase,
                         wprop.numOfPhrase,
@@ -378,7 +379,7 @@ public final class plasmaWordIndex implements indexRI {
                         doctype,
                         outlinksSame, outlinksOther,
                         wprop.flags);
-            addEntry(plasmaCondenser.word2hash(word), ientry, System.currentTimeMillis(), false);
+            addEntry(indexWord.word2hash(word), ientry, System.currentTimeMillis(), false);
             wordCount++;
         }
         
@@ -564,7 +565,7 @@ public final class plasmaWordIndex implements indexRI {
         int count = 0;
         while (iter.hasNext()) {
             // delete the URL reference in this word index
-            if (removeEntry(plasmaCondenser.word2hash((String) iter.next()), urlhash)) count++;
+            if (removeEntry(indexWord.word2hash((String) iter.next()), urlhash)) count++;
         }
         return count;
     }
@@ -664,12 +665,12 @@ public final class plasmaWordIndex implements indexRI {
                     entry = containerIterator.next();
                     // System.out.println("Wordhash: "+wordHash+" UrlHash:
                     // "+entry.getUrlHash());
-                    indexURLEntry ue = referenceURL.load(entry.urlHash(), entry, 0);
+                    indexURLReference ue = referenceURL.load(entry.urlHash(), entry, 0);
                     if (ue == null) {
                         urlHashs.add(entry.urlHash());
                     } else {
                         url = ue.comp().url();
-                        if ((url == null) || (plasmaSwitchboard.urlBlacklist.isListed(plasmaURLPattern.BLACKLIST_CRAWLER, url) == true)) {
+                        if ((url == null) || (plasmaSwitchboard.urlBlacklist.isListed(indexReferenceBlacklist.BLACKLIST_CRAWLER, url) == true)) {
                             urlHashs.add(entry.urlHash());
                         }
                     }

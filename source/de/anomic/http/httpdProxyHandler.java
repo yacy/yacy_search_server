@@ -93,12 +93,12 @@ import java.util.zip.GZIPOutputStream;
 import de.anomic.htmlFilter.htmlFilterContentTransformer;
 import de.anomic.htmlFilter.htmlFilterTransformer;
 import de.anomic.htmlFilter.htmlFilterWriter;
+import de.anomic.index.indexReferenceBlacklist;
 import de.anomic.plasma.plasmaHTCache;
 import de.anomic.plasma.plasmaParser;
 import de.anomic.plasma.plasmaSwitchboard;
 import de.anomic.plasma.cache.IResourceInfo;
 import de.anomic.plasma.cache.http.ResourceInfo;
-import de.anomic.plasma.urlPattern.plasmaURLPattern;
 import de.anomic.server.serverCore;
 import de.anomic.server.serverDomains;
 import de.anomic.server.serverFileUtils;
@@ -367,7 +367,7 @@ public final class httpdProxyHandler {
             // respond a 404 for all AGIS ("all you get is shit") servers
             String hostlow = host.toLowerCase();
             if (args != null) { path = path + "?" + args; }
-            if (plasmaSwitchboard.urlBlacklist.isListed(plasmaURLPattern.BLACKLIST_PROXY, hostlow, path)) {
+            if (plasmaSwitchboard.urlBlacklist.isListed(indexReferenceBlacklist.BLACKLIST_PROXY, hostlow, path)) {
                 httpd.sendRespondError(conProp,respond,4,403,null,
                         "URL '" + hostlow + "' blocked by yacy proxy (blacklisted)",null);
                 theLogger.logInfo("AGIS blocking of host '" + hostlow + "'");
@@ -907,7 +907,7 @@ public final class httpdProxyHandler {
             // re-calc the url path
             String remotePath = (args == null) ? path : (path + "?" + args);
 
-            if (plasmaSwitchboard.urlBlacklist.isListed(plasmaURLPattern.BLACKLIST_PROXY, hostlow, remotePath)) {
+            if (plasmaSwitchboard.urlBlacklist.isListed(indexReferenceBlacklist.BLACKLIST_PROXY, hostlow, remotePath)) {
                 httpd.sendRespondError(conProp,respond,4,403,null,
                         "URL '" + hostlow + "' blocked by yacy proxy (blacklisted)",null);
                 theLogger.logInfo("AGIS blocking of host '" + hostlow + "'");
@@ -1114,7 +1114,7 @@ public final class httpdProxyHandler {
         // blacklist idea inspired by [AS]:
         // respond a 404 for all AGIS ("all you get is shit") servers
         final String hostlow = host.toLowerCase();
-        if (plasmaSwitchboard.urlBlacklist.isListed(plasmaURLPattern.BLACKLIST_PROXY, hostlow, path)) {
+        if (plasmaSwitchboard.urlBlacklist.isListed(indexReferenceBlacklist.BLACKLIST_PROXY, hostlow, path)) {
             httpd.sendRespondError(conProp,clientOut,4,403,null,
                     "URL '" + hostlow + "' blocked by yacy proxy (blacklisted)",null);
             theLogger.logInfo("AGIS blocking of host '" + hostlow + "'");

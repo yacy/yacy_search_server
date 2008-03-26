@@ -47,7 +47,6 @@ import de.anomic.kelondro.kelondroIndex;
 import de.anomic.kelondro.kelondroRow;
 import de.anomic.kelondro.kelondroRowSet;
 import de.anomic.kelondro.kelondroSplitTable;
-import de.anomic.plasma.urlPattern.plasmaURLPattern;
 import de.anomic.server.serverCodings;
 import de.anomic.server.logging.serverLog;
 import de.anomic.yacy.yacyURL;
@@ -78,7 +77,7 @@ public final class indexRepositoryReference {
             }
         }
         
-        urlIndexFile = new kelondroSplitTable(indexSecondaryTextLocation, "urls", indexURLEntry.rowdef, false);
+        urlIndexFile = new kelondroSplitTable(indexSecondaryTextLocation, "urls", indexURLReference.rowdef, false);
     }
 
     public int size() {
@@ -98,22 +97,22 @@ public final class indexRepositoryReference {
         return 0;
     }
 
-    public synchronized indexURLEntry load(String urlHash, indexRWIEntry searchedWord, long ranking) {
+    public synchronized indexURLReference load(String urlHash, indexRWIEntry searchedWord, long ranking) {
         // generates an plasmaLURLEntry using the url hash
         // if the url cannot be found, this returns null
         if (urlHash == null) return null;
         try {
             kelondroRow.Entry entry = urlIndexFile.get(urlHash.getBytes());
             if (entry == null) return null;
-            return new indexURLEntry(entry, searchedWord, ranking);
+            return new indexURLReference(entry, searchedWord, ranking);
         } catch (IOException e) {
             return null;
         }
     }
 
-    public synchronized void store(indexURLEntry entry) throws IOException {
+    public synchronized void store(indexURLReference entry) throws IOException {
         // Check if there is a more recent Entry already in the DB
-        indexURLEntry oldEntry;
+        indexURLReference oldEntry;
         try {
             if (exists(entry.hash())) {
                 oldEntry = load(entry.hash(), null, 0);
@@ -135,9 +134,9 @@ public final class indexRepositoryReference {
         urlIndexFile.put(entry.toRowEntry(), new Date() /*entry.loaddate()*/);
     }
 
-    public synchronized indexURLEntry newEntry(String propStr) {
+    public synchronized indexURLReference newEntry(String propStr) {
         if (propStr != null && propStr.startsWith("{") && propStr.endsWith("}")) try {
-            return new indexURLEntry(serverCodings.s2p(propStr.substring(1, propStr.length() - 1)));
+            return new indexURLReference(serverCodings.s2p(propStr.substring(1, propStr.length() - 1)));
         } catch (kelondroException e) {
             // wrong format
             return null;
@@ -165,12 +164,12 @@ public final class indexRepositoryReference {
         }
     }
 
-    public kelondroCloneableIterator<indexURLEntry> entries(boolean up, String firstHash) throws IOException {
+    public kelondroCloneableIterator<indexURLReference> entries(boolean up, String firstHash) throws IOException {
         // enumerates entry elements
         return new kiter(up, firstHash);
     }
 
-    public class kiter implements kelondroCloneableIterator<indexURLEntry> {
+    public class kiter implements kelondroCloneableIterator<indexURLReference> {
         // enumerates entry elements
         private Iterator<kelondroRow.Entry> iter;
         private boolean error;
@@ -196,12 +195,12 @@ public final class indexRepositoryReference {
             return this.iter.hasNext();
         }
 
-        public final indexURLEntry next() {
+        public final indexURLReference next() {
             kelondroRow.Entry e = null;
             if (this.iter == null) { return null; }
             if (this.iter.hasNext()) { e = this.iter.next(); }
             if (e == null) { return null; }
-            return new indexURLEntry(e, null, 0);
+            return new indexURLReference(e, null, 0);
         }
 
         public final void remove() {
@@ -220,7 +219,7 @@ public final class indexRepositoryReference {
         serverLog log = new serverLog("URLDBCLEANUP");
         HashSet<String> damagedURLS = new HashSet<String>();
         try {
-            Iterator<indexURLEntry> eiter = entries(true, null);
+            Iterator<indexURLReference> eiter = entries(true, null);
             int iteratorCount = 0;
             while (eiter.hasNext()) try {
                 eiter.next();
@@ -287,7 +286,7 @@ public final class indexRepositoryReference {
         }
     }
 
-    public BlacklistCleaner getBlacklistCleaner(plasmaURLPattern blacklist) {
+    public BlacklistCleaner getBlacklistCleaner(indexReferenceBlacklist blacklist) {
         return new BlacklistCleaner(blacklist);
     }
     
@@ -301,16 +300,16 @@ public final class indexRepositoryReference {
         public String lastBlacklistedHash = "";
         public String lastUrl = "";
         public String lastHash = "";
-        private plasmaURLPattern blacklist;
+        private indexReferenceBlacklist blacklist;
 
-        public BlacklistCleaner(plasmaURLPattern blacklist) {
+        public BlacklistCleaner(indexReferenceBlacklist blacklist) {
             this.blacklist = blacklist;
         }
 
         public void run() {
             try {
                 serverLog.logInfo("URLDBCLEANER", "UrldbCleaner-Thread startet");
-                final Iterator<indexURLEntry> eiter = entries(true, null);
+                final Iterator<indexURLReference> eiter = entries(true, null);
                 while (eiter.hasNext() && run) {
                     synchronized (this) {
                         if (this.pause) {
@@ -323,19 +322,19 @@ public final class indexRepositoryReference {
                             }
                         }
                     }
-                    final indexURLEntry entry = eiter.next();
+                    final indexURLReference entry = eiter.next();
                     if (entry == null) {
                         serverLog.logFine("URLDBCLEANER", "entry == null");
                     } else if (entry.hash() == null) {
                         serverLog.logFine("URLDBCLEANER", ++blacklistedUrls + " blacklisted (" + ((double) blacklistedUrls / totalSearchedUrls) * 100 + "%): " + "hash == null");
                     } else {
-                        final indexURLEntry.Components comp = entry.comp();
+                        final indexURLReference.Components comp = entry.comp();
                         totalSearchedUrls++;
                         if (comp.url() == null) {
                             serverLog.logFine("URLDBCLEANER", ++blacklistedUrls + " blacklisted (" + ((double) blacklistedUrls / totalSearchedUrls) * 100 + "%): " + entry.hash() + "URL == null");
                             remove(entry.hash());
-                        } else if (blacklist.isListed(plasmaURLPattern.BLACKLIST_CRAWLER, comp.url()) ||
-                                blacklist.isListed(plasmaURLPattern.BLACKLIST_DHT, comp.url())) {
+                        } else if (blacklist.isListed(indexReferenceBlacklist.BLACKLIST_CRAWLER, comp.url()) ||
+                                blacklist.isListed(indexReferenceBlacklist.BLACKLIST_DHT, comp.url())) {
                             lastBlacklistedUrl = comp.url().toNormalform(true, true);
                             lastBlacklistedHash = entry.hash();
                             serverLog.logFine("URLDBCLEANER", ++blacklistedUrls + " blacklisted (" + ((double) blacklistedUrls / totalSearchedUrls) * 100 + "%): " + entry.hash() + " " + comp.url().toNormalform(false, true));
@@ -443,9 +442,9 @@ public final class indexRepositoryReference {
                     pw.println("<link>http://yacy.net</link>");
                 }
                 
-                Iterator<indexURLEntry> i = entries(true, null); // iterates indexURLEntry objects
-                indexURLEntry entry;
-                indexURLEntry.Components comp;
+                Iterator<indexURLReference> i = entries(true, null); // iterates indexURLEntry objects
+                indexURLReference entry;
+                indexURLReference.Components comp;
                 String url;
                 loop: while (i.hasNext()) {
                     entry = i.next();
