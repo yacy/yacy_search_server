@@ -88,14 +88,17 @@ public final class plasmaSearchEvent {
     TreeSet<String> snippetFetchWordHashes; // a set of word hashes that are used to match with the snippets
     long urlRetrievalAllTime;
     long snippetComputationAllTime;
+    plasmaCrawlResults crawlResults;
     
     @SuppressWarnings("unchecked")
     private plasmaSearchEvent(plasmaSearchQuery query,
                              plasmaWordIndex wordIndex,
+                             plasmaCrawlResults crawlResults,
                              TreeMap<String, String> preselectedPeerHashes,
                              boolean generateAbstracts) {
         this.eventTime = System.currentTimeMillis(); // for lifetime check
         this.wordIndex = wordIndex;
+        this.crawlResults = crawlResults;
         this.query = query;
         this.rcAbstracts = (query.queryHashes.size() > 1) ? new TreeMap<String, TreeMap<String, String>>() : null; // generate abstracts only for combined searches
         this.primarySearchThreads = null;
@@ -141,7 +144,8 @@ public final class plasmaSearchEvent {
                     query.displayResults(),
                     query.maxDistance,
                     wordIndex,
-                    rankedCache, 
+                    crawlResults,
+                    rankedCache,
                     rcAbstracts,
                     fetchpeers,
                     plasmaSwitchboard.urlBlacklist,
@@ -453,12 +457,13 @@ public final class plasmaSearchEvent {
     public static plasmaSearchEvent getEvent(plasmaSearchQuery query,
             plasmaSearchRankingProfile ranking,
             plasmaWordIndex wordIndex,
+            plasmaCrawlResults crawlResults,
             TreeMap<String, String> preselectedPeerHashes,
             boolean generateAbstracts) {
         synchronized (lastEvents) {
             plasmaSearchEvent event = (plasmaSearchEvent) lastEvents.get(query.id(false));
             if (event == null) {
-                event = new plasmaSearchEvent(query, wordIndex, preselectedPeerHashes, generateAbstracts);
+                event = new plasmaSearchEvent(query, wordIndex, crawlResults, preselectedPeerHashes, generateAbstracts);
             } else {
                 //re-new the event time for this event, so it is not deleted next time too early
                 event.eventTime = System.currentTimeMillis();
@@ -714,7 +719,7 @@ public final class plasmaSearchEvent {
                 //System.out.println("DEBUG-INDEXABSTRACT ***: peer " + peer + "   has urls: " + urls);
                 //System.out.println("DEBUG-INDEXABSTRACT ***: peer " + peer + " from words: " + words);
                 secondarySearchThreads[c++] = yacySearch.secondaryRemoteSearch(
-                        words, "", urls, wordIndex, this.rankedCache, peer, plasmaSwitchboard.urlBlacklist,
+                        words, "", urls, wordIndex, crawlResults, this.rankedCache, peer, plasmaSwitchboard.urlBlacklist,
                         query.ranking, query.constraint, preselectedPeerHashes);
 
             }
@@ -802,7 +807,7 @@ public final class plasmaSearchEvent {
                                  " " +
                                  urlcomps.dc_title()).getBytes(), "UTF-8").keySet(),
                                  urlentry.hash());
-                        wordIndex.loadedURL.remove(urlentry.hash()); // clean up
+                        wordIndex.removeURL(urlentry.hash()); // clean up
                         throw new RuntimeException("index void");
                     } catch (UnsupportedEncodingException e) {
                         throw new RuntimeException("parser failed: " + e.getMessage());

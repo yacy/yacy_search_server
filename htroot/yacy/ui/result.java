@@ -203,7 +203,7 @@ public class result {
                 theQuery.setOffset(0); // in case that this is a new search, always start without a offset 
                 offset = 0;
             }
-            plasmaSearchEvent theSearch = plasmaSearchEvent.getEvent(theQuery, ranking, sb.wordIndex, (sb.isRobinsonMode()) ? sb.clusterhashes : null, false);
+            plasmaSearchEvent theSearch = plasmaSearchEvent.getEvent(theQuery, ranking, sb.wordIndex, sb.crawlResults, (sb.isRobinsonMode()) ? sb.clusterhashes : null, false);
             
             // generate result object
             serverLog.logFine("LOCAL_SEARCH", "SEARCH TIME AFTER ORDERING OF SEARCH RESULTS: " + ((System.currentTimeMillis() - timestamp) / 1000) + " seconds");

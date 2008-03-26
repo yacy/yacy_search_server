@@ -197,7 +197,7 @@ public class IndexControlRWIs_p {
                 indexURLEntry lurl;
                 while (urlIter.hasNext()) {
                     iEntry = urlIter.next();
-                    lurl = sb.wordIndex.loadedURL.load(iEntry.urlHash(), null, 0);
+                    lurl = sb.wordIndex.getURL(iEntry.urlHash(), null, 0);
                     if (lurl == null) {
                         unknownURLEntries.add(iEntry.urlHash());
                         urlIter.remove();
@@ -254,8 +254,8 @@ public class IndexControlRWIs_p {
                         yacyURL url;
                         for (int i=0; i<urlx.length; i++) {
                             urlHashes.add(urlx[i]);
-                            indexURLEntry e = sb.wordIndex.loadedURL.load(urlx[i], null, 0);
-                            sb.wordIndex.loadedURL.remove(urlx[i]);
+                            indexURLEntry e = sb.wordIndex.getURL(urlx[i], null, 0);
+                            sb.wordIndex.removeURL(urlx[i]);
                             if (e != null) {
                                 url = e.comp().url();
                                 pw.println(url.getHost() + "/" + url.getFile());
@@ -282,8 +282,8 @@ public class IndexControlRWIs_p {
                         yacyURL url;
                         for (int i=0; i<urlx.length; i++) {
                             urlHashes.add(urlx[i]);
-                            indexURLEntry e = sb.wordIndex.loadedURL.load(urlx[i], null, 0);
-                            sb.wordIndex.loadedURL.remove(urlx[i]);
+                            indexURLEntry e = sb.wordIndex.getURL(urlx[i], null, 0);
+                            sb.wordIndex.removeURL(urlx[i]);
                             if (e != null) {
                                 url = e.comp().url();
                                 pw.println(url.getHost() + "/.*");

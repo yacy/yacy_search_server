@@ -31,6 +31,7 @@ import java.net.MalformedURLException;
 import java.util.Iterator;
 
 import de.anomic.http.httpHeader;
+import de.anomic.index.indexRepositoryReference;
 import de.anomic.index.indexURLEntry;
 import de.anomic.kelondro.kelondroBase64Order;
 import de.anomic.kelondro.kelondroRotateIterator;
@@ -51,35 +52,33 @@ public class IndexControlURLs_p {
         prop.put("urlstring", "");
         prop.put("urlhash", "");
         prop.put("result", "");
-        prop.put("ucount", Integer.toString(sb.wordIndex.loadedURL.size()));
+        prop.put("ucount", Integer.toString(sb.wordIndex.countURL()));
         prop.put("otherHosts", "");
         
-        if (sb.wordIndex.loadedURL.export_running()) {
+        indexRepositoryReference.Export export = sb.wordIndex.exportURL();
+        if ((export != null) && (export.isAlive())) {
         	// there is currently a running export
         	prop.put("lurlexportfinished", 0);
     		prop.put("lurlexporterror", 0);
     		prop.put("lurlexport", 2);
-            prop.put("lurlexport_exportfile", sb.wordIndex.loadedURL.export_file().toString());
-            prop.put("lurlexport_urlcount", sb.wordIndex.loadedURL.export_count());
+            prop.put("lurlexport_exportfile", export.file().toString());
+            prop.put("lurlexport_urlcount", export.count());
         } else {
         	prop.put("lurlexport", 1);
     		prop.put("lurlexport_exportfile", sb.getRootPath() + "/DATA/EXPORT/" + serverDate.formatShortSecond());
 
     		prop.put("lurlexportfinished", 0);
     		prop.put("lurlexporterror", 0);
-    		if (sb.wordIndex.loadedURL.export_failed() == null) {
+    		if (export == null) {
         		// the export is finished, or there has not been a export
-        		if (sb.wordIndex.loadedURL.export_count() > 0) {
-        			// an export is finished
-        			prop.put("lurlexportfinished", 1);
-            		prop.put("lurlexportfinished_exportfile", sb.wordIndex.loadedURL.export_file().toString());
-            		prop.put("lurlexportfinished_urlcount", sb.wordIndex.loadedURL.export_count());
-        		}               
+        		prop.put("lurlexportfinished", 1);
+        		prop.put("lurlexportfinished_exportfile", "");
+            	prop.put("lurlexportfinished_urlcount", 0);
         	} else {
         		// the export had errors
         		prop.put("lurlexporterror", 1);
-        		prop.put("lurlexporterror_exportfile", sb.wordIndex.loadedURL.export_file().toString());
-        		prop.put("lurlexporterror_exportfailmsg", sb.wordIndex.loadedURL.export_failed());
+        		prop.put("lurlexporterror_exportfile", export.file().toString());
+        		prop.put("lurlexporterror_exportfailmsg", export.failed());
         	}
         }        
         if (post == null || env == null) {
@@ -104,7 +103,7 @@ public class IndexControlURLs_p {
         }
 
         if (post.containsKey("urlhashdelete")) {
-            indexURLEntry entry = sb.wordIndex.loadedURL.load(urlhash, null, 0);
+            indexURLEntry entry = sb.wordIndex.getURL(urlhash, null, 0);
             if (entry == null) {
                 prop.put("result", "No Entry for URL hash " + urlhash + "; nothing deleted.");
             } else {
@@ -136,7 +135,7 @@ public class IndexControlURLs_p {
                 yacyURL url = new yacyURL(urlstring, null);
                 urlhash = url.hash();
                 prop.put("urlhash", urlhash);
-                indexURLEntry entry = sb.wordIndex.loadedURL.load(urlhash, null, 0);
+                indexURLEntry entry = sb.wordIndex.getURL(urlhash, null, 0);
                 if (entry == null) {
                     prop.putHTML("urlstring", "unknown url: " + urlstring);
                     prop.put("urlhash", "");
@@ -151,7 +150,7 @@ public class IndexControlURLs_p {
         }
 
         if (post.containsKey("urlhashsearch")) {
-            indexURLEntry entry = sb.wordIndex.loadedURL.load(urlhash, null, 0);
+            indexURLEntry entry = sb.wordIndex.getURL(urlhash, null, 0);
             if (entry == null) {
                 prop.put("result", "No Entry for URL hash " + urlhash);
             } else {
@@ -164,7 +163,7 @@ public class IndexControlURLs_p {
         // generate list
         if (post.containsKey("urlhashsimilar")) {
             try {
-                final Iterator<indexURLEntry> entryIt = new kelondroRotateIterator<indexURLEntry>(sb.wordIndex.loadedURL.entries(true, urlhash), new String(kelondroBase64Order.zero(urlhash.length())), sb.wordIndex.size()); 
+                final Iterator<indexURLEntry> entryIt = new kelondroRotateIterator<indexURLEntry>(sb.wordIndex.entriesURL(true, urlhash), new String(kelondroBase64Order.zero(urlhash.length())), sb.wordIndex.size()); 
                 StringBuffer result = new StringBuffer("Sequential List of URL-Hashes:<br />");
                 indexURLEntry entry;
                 int i = 0;
@@ -209,17 +208,17 @@ public class IndexControlURLs_p {
         	File f = new File(s);
 			f.getParentFile().mkdirs();
 			String filter = post.get("exportfilter", ".*");
-			boolean running = sb.wordIndex.loadedURL.export(f, filter, format, dom);
+			indexRepositoryReference.Export running = sb.wordIndex.exportURL(f, filter, format, dom);
 
 			prop.put("lurlexport_exportfile", s);
-			prop.put("lurlexport_urlcount", sb.wordIndex.loadedURL.export_count());
-			if ((running) && (sb.wordIndex.loadedURL.export_failed() == null)) {
+			prop.put("lurlexport_urlcount", running.count());
+			if ((running != null) && (running.failed() == null)) {
 				prop.put("lurlexport", 2);			    
 			}
         }
         
         // insert constants
-        prop.putNum("ucount", sb.wordIndex.loadedURL.size());
+        prop.putNum("ucount", sb.wordIndex.countURL());
         // return rewrite properties
         return prop;
     }
@@ -232,7 +231,7 @@ public class IndexControlURLs_p {
             return prop;
         }
         indexURLEntry.Components comp = entry.comp();
-        indexURLEntry le = ((entry.referrerHash() == null) || (entry.referrerHash().length() != yacySeedDB.commonHashLength)) ? null : switchboard.wordIndex.loadedURL.load(entry.referrerHash(), null, 0);
+        indexURLEntry le = ((entry.referrerHash() == null) || (entry.referrerHash().length() != yacySeedDB.commonHashLength)) ? null : switchboard.wordIndex.getURL(entry.referrerHash(), null, 0);
         if (comp.url() == null) {
             prop.put("genUrlProfile", "1");
             prop.put("genUrlProfile_urlhash", urlhash);

@@ -185,7 +185,7 @@ public class WatchCrawler_p {
                             // first delete old entry, if exists
                             yacyURL url = new yacyURL(crawlingStart, null);
                             String urlhash = url.hash();
-                            switchboard.wordIndex.loadedURL.remove(urlhash);
+                            switchboard.wordIndex.removeURL(urlhash);
                             switchboard.crawlQueues.noticeURL.removeByURLHash(urlhash);
                             switchboard.crawlQueues.errorURL.remove(urlhash);
                             

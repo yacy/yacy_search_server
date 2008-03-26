@@ -179,7 +179,7 @@ public final class search {
             yacyCore.log.logInfo("INIT HASH SEARCH (query-" + abstracts + "): " + plasmaSearchQuery.anonymizedQueryHashes(theQuery.queryHashes) + " - " + theQuery.displayResults() + " links");
             
             // make event
-            theSearch = plasmaSearchEvent.getEvent(theQuery, rankingProfile, sb.wordIndex, null, true); 
+            theSearch = plasmaSearchEvent.getEvent(theQuery, rankingProfile, sb.wordIndex, sb.crawlResults, null, true); 
             
             // set statistic details of search result and find best result index set
             if (theSearch.getRankingResult().getLocalResourceSize() == 0) {

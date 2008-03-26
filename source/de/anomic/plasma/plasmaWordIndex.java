@@ -27,6 +27,7 @@
 package de.anomic.plasma;
 
 import java.io.File;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
@@ -42,8 +43,11 @@ import de.anomic.index.indexContainer;
 import de.anomic.index.indexContainerOrder;
 import de.anomic.index.indexRAMRI;
 import de.anomic.index.indexRI;
+import de.anomic.index.indexRWIEntry;
 import de.anomic.index.indexRWIRowEntry;
+import de.anomic.index.indexRepositoryReference;
 import de.anomic.index.indexURLEntry;
+import de.anomic.index.indexRepositoryReference.Export;
 import de.anomic.kelondro.kelondroBase64Order;
 import de.anomic.kelondro.kelondroByteOrder;
 import de.anomic.kelondro.kelondroCloneableIterator;
@@ -61,17 +65,16 @@ import de.anomic.yacy.yacyURL;
 public final class plasmaWordIndex implements indexRI {
 
     // environment constants
-    public  static final long wCacheMaxAge   = 1000 * 60 * 30; // milliseconds; 30 minutes
-    public  static final int  wCacheMaxChunk =  400;           // maximum number of references for each urlhash
-    public  static final int  lowcachedivisor = 320;
-    public  static final int  maxCollectionPartition = 7; // should be 7
+    public  static final long wCacheMaxAge    = 1000 * 60 * 30; // milliseconds; 30 minutes
+    public  static final int  wCacheMaxChunk  =  400;           // maximum number of references for each urlhash
+    public  static final int  lowcachedivisor =  320;
+    public  static final int  maxCollectionPartition = 7;       // should be 7
     
-    private final kelondroByteOrder  indexOrder = kelondroBase64Order.enhancedCoder;
-    private final indexRAMRI         dhtOutCache, dhtInCache;
-    private final indexCollectionRI  collections;          // new database structure to replace AssortmentCluster and FileCluster
-    public        boolean            busyCacheFlush;       // shows if a cache flush is currently performed
-    private       int                flushsize;
-    public  final plasmaCrawlLURL    loadedURL;
+    private final kelondroByteOrder        indexOrder = kelondroBase64Order.enhancedCoder;
+    private final indexRAMRI               dhtOutCache, dhtInCache;
+    private final indexCollectionRI        collections;          // new database structure to replace AssortmentCluster and FileCluster
+    private       int                      flushsize;
+    private final indexRepositoryReference referenceURL;
     
     public plasmaWordIndex(File indexPrimaryRoot, File indexSecondaryRoot, String networkName, serverLog log) {
         File indexPrimaryPath = new File(indexPrimaryRoot, networkName);
@@ -103,13 +106,52 @@ public final class plasmaWordIndex implements indexRI {
         this.collections = new indexCollectionRI(textindexcollections, "collection", maxCollectionPartition, indexRWIRowEntry.urlEntryRow);
 
         // create LURL-db
-        loadedURL = new plasmaCrawlLURL(indexSecondaryRoot, networkName);
+        referenceURL = new indexRepositoryReference(indexSecondaryRoot, networkName);
         
         // performance settings
-        busyCacheFlush = false;
         this.flushsize = 2000;
     }
 
+    public void putURL(indexURLEntry entry) throws IOException {
+        this.referenceURL.store(entry);
+    }
+    
+    public indexURLEntry getURL(String urlHash, indexRWIEntry searchedWord, long ranking) {
+        return this.referenceURL.load(urlHash, searchedWord, ranking);
+    }
+    
+    public boolean removeURL(String urlHash) {
+        return this.referenceURL.remove(urlHash);
+    }
+        
+    public boolean existsURL(String urlHash) {
+        return this.referenceURL.exists(urlHash);
+    }
+    
+    public int countURL() {
+        return this.referenceURL.size();
+    }
+    
+    public Export exportURL(File f, String filter, int format, boolean dom) {
+        return this.referenceURL.export(f, filter, format, dom);
+    }
+    
+    public Export exportURL() {
+        return this.referenceURL.export();
+    }
+    
+    public kelondroCloneableIterator<indexURLEntry> entriesURL(boolean up, String firstHash) throws IOException {
+        return this.referenceURL.entries(up, firstHash);
+    }
+    
+    public indexRepositoryReference.BlacklistCleaner getURLCleaner(plasmaURLPattern blacklist) {
+        return this.referenceURL.getBlacklistCleaner(blacklist); // thread is not already started after this is called!
+    }
+    
+    public int getURLwriteCacheSize() {
+        return this.referenceURL.writeCacheSize();
+    }
+    
     public int minMem() {
         return 1024*1024 /* indexing overhead */ + dhtOutCache.minMem() + dhtInCache.minMem() + collections.minMem();
     }
@@ -234,7 +276,6 @@ public final class plasmaWordIndex implements indexRI {
     private int flushCache(indexRAMRI ram, int count) {
         if (count <= 0) return 0;
         
-        busyCacheFlush = true;
         String wordHash;
         ArrayList<indexContainer> containerList = new ArrayList<indexContainer>();
         count = Math.min(5000, Math.min(count, ram.size()));
@@ -269,7 +310,6 @@ public final class plasmaWordIndex implements indexRI {
         // flush the containers
         collections.addMultipleEntries(containerList);
         //System.out.println("DEBUG-Finished flush of " + count + " entries from RAM to DB in " + (System.currentTimeMillis() - start) + " milliseconds");
-        busyCacheFlush = false;
         return containerList.size();
     }
     
@@ -458,7 +498,7 @@ public final class plasmaWordIndex implements indexRI {
         dhtInCache.close();
         dhtOutCache.close();
         collections.close();
-        loadedURL.close();
+        referenceURL.close();
     }
 
     public indexContainer deleteContainer(String wordHash) {
@@ -586,12 +626,13 @@ public final class plasmaWordIndex implements indexRI {
         }
     }
     
+
     //  The Cleaner class was provided as "UrldbCleaner" by Hydrox
-    public synchronized Cleaner makeCleaner(plasmaCrawlLURL lurl, String startHash) {
-        return new Cleaner(lurl, startHash);
+    public synchronized ReferenceCleaner getReferenceCleaner(String startHash) {
+        return new ReferenceCleaner(startHash);
     }
     
-    public class Cleaner extends Thread {
+    public class ReferenceCleaner extends Thread {
         
         private String startHash;
         private boolean run = true;
@@ -600,10 +641,8 @@ public final class plasmaWordIndex implements indexRI {
         public String wordHashNow = "";
         public String lastWordHash = "";
         public int lastDeletionCounter = 0;
-        private plasmaCrawlLURL lurl;
         
-        public Cleaner(plasmaCrawlLURL lurl, String startHash) {
-            this.lurl = lurl;
+        public ReferenceCleaner(String startHash) {
             this.startHash = startHash;
             this.rwiCountAtStart = size();
         }
@@ -625,7 +664,7 @@ public final class plasmaWordIndex implements indexRI {
                     entry = containerIterator.next();
                     // System.out.println("Wordhash: "+wordHash+" UrlHash:
                     // "+entry.getUrlHash());
-                    indexURLEntry ue = lurl.load(entry.urlHash(), entry, 0);
+                    indexURLEntry ue = referenceURL.load(entry.urlHash(), entry, 0);
                     if (ue == null) {
                         urlHashs.add(entry.urlHash());
                     } else {

@@ -44,15 +44,15 @@
 //Contributions and changes to the program code must be marked as such.
 
 import de.anomic.http.httpHeader;
-import de.anomic.plasma.plasmaCrawlLURL;
+import de.anomic.index.indexRepositoryReference;
 import de.anomic.plasma.plasmaSwitchboard;
 import de.anomic.plasma.plasmaWordIndex;
 import de.anomic.server.serverObjects;
 import de.anomic.server.serverSwitch;
 
 public class IndexCleaner_p {
-    private static plasmaCrawlLURL.Cleaner urldbCleanerThread;
-    private static plasmaWordIndex.Cleaner indexCleanerThread;
+    private static indexRepositoryReference.BlacklistCleaner urldbCleanerThread;
+    private static plasmaWordIndex.ReferenceCleaner indexCleanerThread;
 
     public static serverObjects respond(httpHeader header, serverObjects post, serverSwitch<?> env) {
         serverObjects prop = new serverObjects();
@@ -62,7 +62,7 @@ public class IndexCleaner_p {
             //prop.putHTML("bla", "post!=null");
             if (post.get("action").equals("ustart")) {
                 if (urldbCleanerThread==null || !urldbCleanerThread.isAlive()) {
-                    urldbCleanerThread = sb.wordIndex.loadedURL.makeCleaner();
+                    urldbCleanerThread = sb.wordIndex.getURLCleaner(plasmaSwitchboard.urlBlacklist);
                     urldbCleanerThread.start();
                 }
                 else {
@@ -77,7 +77,7 @@ public class IndexCleaner_p {
             }
             else if (post.get("action").equals("rstart")) {
                 if (indexCleanerThread==null || !indexCleanerThread.isAlive()) {
-                    indexCleanerThread = sb.wordIndex.makeCleaner(sb.wordIndex.loadedURL, post.get("wordHash","AAAAAAAAAAAA"));
+                    indexCleanerThread = sb.wordIndex.getReferenceCleaner(post.get("wordHash","AAAAAAAAAAAA"));
                     indexCleanerThread.start();
                 }
                 else {
@@ -96,7 +96,7 @@ public class IndexCleaner_p {
         //prop.put("bla", "post==null");
         if (urldbCleanerThread!=null) {
             prop.put("urldb", "1");
-            prop.putNum("urldb_percentUrls", ((double)urldbCleanerThread.totalSearchedUrls/sb.wordIndex.loadedURL.size())*100);
+            prop.putNum("urldb_percentUrls", ((double)urldbCleanerThread.totalSearchedUrls/sb.wordIndex.countURL())*100);
             prop.putNum("urldb_blacklisted", urldbCleanerThread.blacklistedUrls);
             prop.putNum("urldb_total", urldbCleanerThread.totalSearchedUrls);
             prop.putHTML("urldb_lastBlacklistedUrl", urldbCleanerThread.lastBlacklistedUrl);

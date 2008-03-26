@@ -610,7 +610,7 @@ public class kelondroRowCollection {
             // or
             // the collection has an ordering, but this is not relevant for this pivot
             // because the ordered zone is outside of ordering zone
-            int m = picMiddle(new int[]{L, (3 * L + R - 1) / 4, (L + R - 1) / 2, (3 * R - L - 1) / 4, R - 1}, 5);
+            int m = picMiddle(new int[]{L, (3 * L + R - 1) / 4, (L + R - 1) / 2, (L + 3 * R - 3) / 4, R - 1}, 5);
             assert L <= m;
             assert m < R;
             return m;
@@ -618,7 +618,7 @@ public class kelondroRowCollection {
         if (S < R) {
             // the collection has an ordering
             // and part of the ordered zone is inside the to-be-ordered zone
-            int m = picMiddle(new int[]{L + (S - L) / 3, L + 2 * (S - L) / 3, S, (S + R - 1) / 2, R - 1}, 5);
+            int m = picMiddle(new int[]{L, L + (S - L) / 3, (L + R - 1) / 2, S, R - 1}, 5);
             assert L <= m;
             assert m < R;
             return m;
@@ -958,7 +958,7 @@ public class kelondroRowCollection {
     
     public static void main(String[] args) {
     	//test(1000);
-    	test(10000);
+    	test(50000);
     	//test(100000);
     	//test(1000000);
     	

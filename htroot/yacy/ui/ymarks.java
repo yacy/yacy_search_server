@@ -196,7 +196,7 @@ public class ymarks {
                     bookmarksDB.Bookmark bookmark = switchboard.bookmarksDB.getBookmark(urlHash);
                     if (bookmark == null) {
                         // try to get the bookmark from the LURL database
-                        indexURLEntry urlentry = switchboard.wordIndex.loadedURL.load(urlHash, null, 0);
+                        indexURLEntry urlentry = switchboard.wordIndex.getURL(urlHash, null, 0);
                         plasmaParserDocument document = null;
                         if (urlentry != null) {
                             indexURLEntry.Components comp = urlentry.comp();

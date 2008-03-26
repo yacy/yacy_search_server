@@ -248,6 +248,17 @@ public class indexURLEntry {
         this.ranking = 0;
     }
 
+    public static indexURLEntry importEntry(String propStr) {
+        if (propStr != null && propStr.startsWith("{") && propStr.endsWith("}")) try {
+            return new indexURLEntry(serverCodings.s2p(propStr.substring(1, propStr.length() - 1)));
+        } catch (kelondroException e) {
+                // wrong format
+                return null;
+        } else {
+            return null;
+        }
+    }
+
     private StringBuffer corePropList() {
         // generate a parseable string; this is a simple property-list
         indexURLEntry.Components comp = this.comp();

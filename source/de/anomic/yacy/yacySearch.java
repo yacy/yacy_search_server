@@ -52,6 +52,7 @@ import java.util.TreeMap;
 
 import de.anomic.kelondro.kelondroBitfield;
 import de.anomic.kelondro.kelondroMScoreCluster;
+import de.anomic.plasma.plasmaCrawlResults;
 import de.anomic.plasma.plasmaSearchRankingProcess;
 import de.anomic.plasma.plasmaSearchQuery;
 import de.anomic.plasma.plasmaSearchRankingProfile;
@@ -74,9 +75,11 @@ public class yacySearch extends Thread {
     final private plasmaSearchRankingProfile rankingProfile;
     final private String prefer, filter;
     final private kelondroBitfield constraint;
+    plasmaCrawlResults crawlResults;
     
     public yacySearch(String wordhashes, String excludehashes, String urlhashes, String prefer, String filter, int count, int maxDistance, 
                       boolean global, int partitions, yacySeed targetPeer, plasmaWordIndex wordIndex,
+                      plasmaCrawlResults crawlResults,
                       plasmaSearchRankingProcess containerCache,
                       Map<String, TreeMap<String, String>> abstractCache,
                       plasmaURLPattern blacklist,
@@ -92,6 +95,7 @@ public class yacySearch extends Thread {
         this.global = global;
         this.partitions = partitions;
         this.wordIndex = wordIndex;
+        this.crawlResults = crawlResults;
         this.containerCache = containerCache;
         this.abstractCache = abstractCache;
         this.blacklist = blacklist;
@@ -106,7 +110,7 @@ public class yacySearch extends Thread {
     public void run() {
         this.urls = yacyClient.search(
                     wordhashes, excludehashes, urlhashes, prefer, filter, count, maxDistance, global, partitions,
-                    targetPeer, wordIndex, containerCache, abstractCache,
+                    targetPeer, wordIndex, crawlResults, containerCache, abstractCache,
                     blacklist, rankingProfile, constraint);
         if (urls != null) {
             // urls is an array of url hashes. this is only used for log output
@@ -248,6 +252,7 @@ public class yacySearch extends Thread {
             String wordhashes, String excludehashes, String urlhashes,
             String prefer, String filter, int count, int maxDist,
             plasmaWordIndex wordIndex,
+            plasmaCrawlResults crawlResults,
             plasmaSearchRankingProcess containerCache,
             Map<String, TreeMap<String, String>> abstractCache,
             int targets,
@@ -266,7 +271,7 @@ public class yacySearch extends Thread {
         yacySearch[] searchThreads = new yacySearch[targets];
         for (int i = 0; i < targets; i++) {
             searchThreads[i] = new yacySearch(wordhashes, excludehashes, urlhashes, prefer, filter, count, maxDist, true, targets, targetPeers[i],
-                    wordIndex, containerCache, abstractCache, blacklist, rankingProfile, constraint);
+                    wordIndex, crawlResults, containerCache, abstractCache, blacklist, rankingProfile, constraint);
             searchThreads[i].start();
             //try {Thread.sleep(20);} catch (InterruptedException e) {}
         }
@@ -275,6 +280,7 @@ public class yacySearch extends Thread {
     
     public static yacySearch secondaryRemoteSearch(String wordhashes, String excludehashes, String urlhashes,
             plasmaWordIndex wordIndex,
+            plasmaCrawlResults crawlResults,
             plasmaSearchRankingProcess containerCache,
             String targethash, plasmaURLPattern blacklist,
             plasmaSearchRankingProfile rankingProfile,
@@ -287,7 +293,7 @@ public class yacySearch extends Thread {
         if (targetPeer == null) return null;
         if (clusterselection != null) targetPeer.setAlternativeAddress((String) clusterselection.get(targetPeer.hash));
         yacySearch searchThread = new yacySearch(wordhashes, excludehashes, urlhashes, "", "", 0, 9999, true, 0, targetPeer,
-                                             wordIndex, containerCache, new TreeMap<String, TreeMap<String, String>>(), blacklist, rankingProfile, constraint);
+                                             wordIndex, crawlResults, containerCache, new TreeMap<String, TreeMap<String, String>>(), blacklist, rankingProfile, constraint);
         searchThread.start();
         return searchThread;
     }

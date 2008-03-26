@@ -191,7 +191,7 @@ public class urlRedirectord implements serverHandler {
                         ) {
                             // first delete old entry, if exists
                             String urlhash = reqURL.hash();
-                            switchboard.wordIndex.loadedURL.remove(urlhash);
+                            switchboard.wordIndex.removeURL(urlhash);
                             switchboard.crawlQueues.noticeURL.removeByURLHash(urlhash);
                             switchboard.crawlQueues.errorURL.remove(urlhash);                            
                             

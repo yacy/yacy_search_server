@@ -98,7 +98,7 @@ public final class transferURL {
         } else {
             int received = 0;
             int blocked = 0;
-            final int sizeBefore = sb.wordIndex.loadedURL.size();
+            final int sizeBefore = sb.wordIndex.countURL();
             // read the urls from the other properties and store
             String urls;
             indexURLEntry lEntry;
@@ -114,7 +114,7 @@ public final class transferURL {
                 }
 
                 // parse new lurl-entry
-                lEntry = sb.wordIndex.loadedURL.newEntry(urls);
+                lEntry = indexURLEntry.importEntry(urls);
                 if (lEntry == null) {
                     yacyCore.log.logWarning("transferURL: received invalid URL (entry null) from peer " + otherPeerName + "\n\tURL Property: " + urls);
                     blocked++;
@@ -155,8 +155,8 @@ public final class transferURL {
                 
                 // write entry to database
                 try {
-                    sb.wordIndex.loadedURL.store(lEntry);
-                    sb.wordIndex.loadedURL.stack(lEntry, iam, iam, 3);
+                    sb.wordIndex.putURL(lEntry);
+                    sb.crawlResults.stack(lEntry, iam, iam, 3);
                     yacyCore.log.logFine("transferURL: received URL '" + comp.url().toNormalform(false, true) + "' from peer " + otherPeerName);
                     received++;
                 } catch (IOException e) {
@@ -167,7 +167,7 @@ public final class transferURL {
             yacyCore.seedDB.mySeed().incRU(received);
 
             // return rewrite properties
-            final int more = sb.wordIndex.loadedURL.size() - sizeBefore;
+            final int more = sb.wordIndex.countURL() - sizeBefore;
             doublevalues = Integer.toString(received - more);
             sb.getLog().logInfo("Received " + received + " URLs from peer " + otherPeerName + " in " + (System.currentTimeMillis() - start) + " ms, Blocked " + blocked + " URLs");
             if ((received - more) > 0) sb.getLog().logSevere("Received " + doublevalues + " double URLs from peer " + otherPeerName);

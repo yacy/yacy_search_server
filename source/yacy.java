@@ -70,6 +70,7 @@ import de.anomic.http.httpd;
 import de.anomic.index.indexContainer;
 import de.anomic.index.indexRWIEntry;
 import de.anomic.index.indexRWIRowEntry;
+import de.anomic.index.indexRepositoryReference;
 import de.anomic.index.indexURLEntry;
 import de.anomic.kelondro.kelondroBase64Order;
 import de.anomic.kelondro.kelondroDyn;
@@ -77,7 +78,6 @@ import de.anomic.kelondro.kelondroMScoreCluster;
 import de.anomic.kelondro.kelondroMapObjects;
 import de.anomic.kelondro.kelondroRowCollection;
 import de.anomic.plasma.plasmaCondenser;
-import de.anomic.plasma.plasmaCrawlLURL;
 import de.anomic.plasma.plasmaSwitchboard;
 import de.anomic.plasma.plasmaWordIndex;
 import de.anomic.server.serverCore;
@@ -607,10 +607,10 @@ public final class yacy {
             log.logInfo("STARTING URL CLEANUP");
             
             // db containing all currently loades urls
-            plasmaCrawlLURL currentUrlDB = new plasmaCrawlLURL(indexSecondaryRoot, networkName);
+            indexRepositoryReference currentUrlDB = new indexRepositoryReference(indexSecondaryRoot, networkName);
             
             // db used to hold all neede urls
-            plasmaCrawlLURL minimizedUrlDB = new plasmaCrawlLURL(indexRoot2, networkName);
+            indexRepositoryReference minimizedUrlDB = new indexRepositoryReference(indexRoot2, networkName);
             
             int cacheMem = (int)(serverMemory.max() - serverMemory.total());
             if (cacheMem < 2048000) throw new OutOfMemoryError("Not enough memory available to start clean up.");
@@ -789,8 +789,8 @@ public final class yacy {
         File root = homePath;
         File indexroot = new File(root, "DATA/INDEX");
         try {serverLog.configureLogging(homePath, new File(homePath, "DATA/LOG/yacy.logging"));} catch (Exception e) {}
-        plasmaCrawlLURL currentUrlDB = new plasmaCrawlLURL(indexroot, networkName);
-        currentUrlDB.urldbcleanup();
+        indexRepositoryReference currentUrlDB = new indexRepositoryReference(indexroot, networkName);
+        currentUrlDB.deadlinkCleaner(null);
         currentUrlDB.close();
     }
     

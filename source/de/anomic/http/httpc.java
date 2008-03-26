@@ -395,15 +395,29 @@ public final class httpc {
             // trying to establish a connection to the address
             this.initTime = System.currentTimeMillis();
             this.lastIO = System.currentTimeMillis();
-            this.socket.setKeepAlive(true);
-            // set socket timeout and keep alive behavior
+            //this.socket.setKeepAlive(true); // set socket timeout and keep alive behavior
             assert timeout >= 1000;
-            this.socket.setSoTimeout(timeout); // waiting time for read
+            this.socket.setSoTimeout(0); // waiting time for read; 0 means: no timeout, wait forever
             this.socket.setTcpNoDelay(true); // no accumulation until buffer is full
-            this.socket.setSoLinger(false, timeout); // !wait for all data being written on close()
+            this.socket.setSoLinger(false, 0); // !wait for all data being written on close()
             this.socket.setSendBufferSize(1440); // read http://www.cisco.com/warp/public/105/38.shtml
-            this.socket.setReceiveBufferSize(1440); // read http://www.cisco.com/warp/public/105/38.shtml
+            //this.socket.setReceiveBufferSize(1440); // read http://www.cisco.com/warp/public/105/38.shtml
             
+	    /*
+
+    public int getSoTimeout() {
+        return getIntParameter(SO_TIMEOUT, 0);
+    public boolean getTcpNoDelay() {
+        return getBooleanParameter(TCP_NODELAY, true);
+    public int getLinger() {
+        return getIntParameter(SO_LINGER, -1);
+    public int getSendBufferSize() {
+        return getIntParameter(SO_SNDBUF, -1);
+    public int getReceiveBufferSize() {
+        return getIntParameter(SO_RCVBUF, -1);
+
+	     */
+
             // get the connection
             this.socket.connect(address, timeout);
             
@@ -435,7 +449,48 @@ public final class httpc {
             throw e;
         }
     }    
-    
+    /* code from apache commons
+    protected boolean isStale() throws IOException {
+        boolean isStale = true;
+        if (isOpen) {
+            // the connection is open, but now we have to see if we can read it
+            // assume the connection is not stale.
+            isStale = false;
+            try {
+                if (inputStream.available() <= 0) {
+                    try {
+                        socket.setSoTimeout(1);
+                        inputStream.mark(1);
+                        int byteRead = inputStream.read();
+                        if (byteRead == -1) {
+                            // again - if the socket is reporting all data read,
+                            // probably stale
+                            isStale = true;
+                        } else {
+                            inputStream.reset();
+                        }
+                    } finally {
+                        socket.setSoTimeout(this.params.getSoTimeout());
+                    }
+                }
+            } catch (InterruptedIOException e) {
+                if (!ExceptionUtil.isSocketTimeoutException(e)) {
+                    throw e;
+                }
+                // aha - the connection is NOT stale - continue on!
+            } catch (IOException e) {
+                // oops - the connection is stale, the read or soTimeout failed.
+                LOG.debug(
+                    "An error occurred while reading from the socket, is appears to be stale",
+                    e
+                );
+                isStale = true;
+            }
+        }
+
+        return isStale;
+    }
+*/
     public long getInputStreamByteCount() {
         return (this.clientInputByteCount == null)?0:this.clientInputByteCount.getCount();
     }

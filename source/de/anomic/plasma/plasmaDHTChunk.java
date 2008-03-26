@@ -64,12 +64,12 @@ import de.anomic.yacy.yacySeedDB;
 
 public class plasmaDHTChunk {
 
-    public static final int chunkStatus_UNDEFINED = -1;
-    public static final int chunkStatus_FAILED = 0;
-    public static final int chunkStatus_FILLED = 1;
-    public static final int chunkStatus_RUNNING = 2;
-    public static final int chunkStatus_INTERRUPTED = 3;
-    public static final int chunkStatus_COMPLETE = 4;
+    public static final int chunkStatus_UNDEFINED   = -1;
+    public static final int chunkStatus_FAILED      =  0;
+    public static final int chunkStatus_FILLED      =  1;
+    public static final int chunkStatus_RUNNING     =  2;
+    public static final int chunkStatus_INTERRUPTED =  3;
+    public static final int chunkStatus_COMPLETE    =  4;
     
     public static final int peerRedundancy = 3;
     
@@ -248,7 +248,7 @@ public class plasmaDHTChunk {
                             urlIter.remove();
                             continue;
                         }
-                        lurl = wordIndex.loadedURL.load(iEntry.urlHash(), iEntry, 0);
+                        lurl = wordIndex.getURL(iEntry.urlHash(), iEntry, 0);
                         if ((lurl == null) || (lurl.comp() == null) || (lurl.comp().url() == null)) {
                             //yacyCore.log.logFine("DEBUG selectTransferContainersResource: not-bound url hash '" + iEntry.urlHash() + "' for word hash " + container.getWordHash());
                             notBoundCounter++;

@@ -292,7 +292,7 @@ public final class plasmaSearchRankingProcess {
         // returns from the current RWI list the best URL entry and removed this entry from the list
         while ((stack.size() > 0) || (size() > 0)) {
             kelondroSortStack<indexRWIVarEntry>.stackElement obrwi = bestRWI(skipDoubleDom);
-            indexURLEntry u = wordIndex.loadedURL.load(obrwi.element.urlHash(), obrwi.element, obrwi.weight.longValue());
+            indexURLEntry u = wordIndex.getURL(obrwi.element.urlHash(), obrwi.element, obrwi.weight.longValue());
             if (u != null) {
             	indexURLEntry.Components comp = u.comp();
             	if (comp.url() != null) this.handover.put(u.hash(), comp.url().toNormalform(true, false)); // remember that we handed over this url

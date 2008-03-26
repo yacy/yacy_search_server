@@ -98,7 +98,7 @@ public class urls {
         	indexURLEntry.Components comp;
             yacyURL referrer;
             for (int i = 0; i < count; i++) {
-                entry = sb.wordIndex.loadedURL.load(urlhashes.substring(12 * i, 12 * (i + 1)), null, 0);
+                entry = sb.wordIndex.getURL(urlhashes.substring(12 * i, 12 * (i + 1)), null, 0);
                 if (entry == null) continue;
                 // find referrer, if there is one
                 referrer = sb.getURL(entry.referrerHash());

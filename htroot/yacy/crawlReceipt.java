@@ -132,7 +132,7 @@ public final class crawlReceipt {
     	}
         
         // generating a new loaded URL entry
-        indexURLEntry entry = switchboard.wordIndex.loadedURL.newEntry(propStr);
+        indexURLEntry entry = indexURLEntry.importEntry(propStr);
         if (entry == null) {
             log.logWarning("crawlReceipt: RECEIVED wrong RECEIPT (entry null) from peer " + iam + "\n\tURL properties: "+ propStr);
             prop.put("delay", "3600");
@@ -155,8 +155,8 @@ public final class crawlReceipt {
         
         if (result.equals("fill")) try {
             // put new entry into database
-            switchboard.wordIndex.loadedURL.store(entry);
-            switchboard.wordIndex.loadedURL.stack(entry, youare, iam, 1);
+            switchboard.wordIndex.putURL(entry);
+            switchboard.crawlResults.stack(entry, youare, iam, 1);
             switchboard.crawlQueues.delegatedURL.remove(entry.hash()); // the delegated work has been done
             log.logInfo("crawlReceipt: RECEIVED RECEIPT from " + otherPeerName + " for URL " + entry.hash() + ":" + comp.url().toNormalform(false, true));
 

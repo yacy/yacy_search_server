@@ -69,7 +69,7 @@ public class CrawlResults {
             tabletype = 0;
         }
 
-        if ((post != null) && (post.containsKey("autoforward")) && (tabletype == 5) && (sb.wordIndex.loadedURL.getStackSize(5) == 0)) {
+        if ((post != null) && (post.containsKey("autoforward")) && (tabletype == 5) && (sb.crawlResults.getStackSize(5) == 0)) {
             // the main menu does a request to the local crawler page, but in case this table is empty, the overview page is shown
             tabletype = 0;
         }
@@ -98,12 +98,12 @@ public class CrawlResults {
         }
 
         // do the commands
-        if (post.containsKey("clearlist")) sb.wordIndex.loadedURL.clearStack(tabletype);
+        if (post.containsKey("clearlist")) sb.crawlResults.clearStack(tabletype);
         if (post.containsKey("deleteentry")) {
                 String hash = post.get("hash", null);
                 if (hash != null) {
                     // delete from database
-                    sb.wordIndex.loadedURL.remove(hash);
+                    sb.wordIndex.removeURL(hash);
                 }
             }
         if (post.containsKey("moreIndexed")) {
@@ -127,18 +127,18 @@ public class CrawlResults {
         // create table
         if (tabletype == 0) {
             prop.put("table", "2");
-        } else if (sb.wordIndex.loadedURL.getStackSize(tabletype) == 0) {
+        } else if (sb.crawlResults.getStackSize(tabletype) == 0) {
             prop.put("table", "0");
         } else {
             prop.put("table", "1");
-            if (lines > sb.wordIndex.loadedURL.getStackSize(tabletype)) lines = sb.wordIndex.loadedURL.getStackSize(tabletype);
-            if (lines == sb.wordIndex.loadedURL.getStackSize(tabletype)) {
+            if (lines > sb.crawlResults.getStackSize(tabletype)) lines = sb.crawlResults.getStackSize(tabletype);
+            if (lines == sb.crawlResults.getStackSize(tabletype)) {
                 prop.put("table_size", "0");
             } else {
                 prop.put("table_size", "1");
                 prop.put("table_size_count", lines);
             }
-            prop.put("table_size_all", sb.wordIndex.loadedURL.getStackSize(tabletype));
+            prop.put("table_size_all", sb.crawlResults.getStackSize(tabletype));
             
             if (showControl) {
                 prop.put("table_showControl", "1");
@@ -160,14 +160,14 @@ public class CrawlResults {
             indexURLEntry urle;
 
             int i, cnt = 0;
-            for (i = sb.wordIndex.loadedURL.getStackSize(tabletype) - 1; i >= (sb.wordIndex.loadedURL.getStackSize(tabletype) - lines); i--) {
-                initiatorHash = sb.wordIndex.loadedURL.getInitiatorHash(tabletype, i);
-                executorHash = sb.wordIndex.loadedURL.getExecutorHash(tabletype, i);
+            for (i = sb.crawlResults.getStackSize(tabletype) - 1; i >= (sb.crawlResults.getStackSize(tabletype) - lines); i--) {
+                initiatorHash = sb.crawlResults.getInitiatorHash(tabletype, i);
+                executorHash = sb.crawlResults.getExecutorHash(tabletype, i);
 //              serverLog.logFinest("PLASMA", "plasmaCrawlLURL/genTableProps initiatorHash=" + initiatorHash + " executorHash=" + executorHash);
-                urlHash = sb.wordIndex.loadedURL.getUrlHash(tabletype, i);
+                urlHash = sb.crawlResults.getUrlHash(tabletype, i);
 //              serverLog.logFinest("PLASMA", "plasmaCrawlLURL/genTableProps urlHash=" + urlHash);
                 try {
-                    urle = sb.wordIndex.loadedURL.load(urlHash, null, 0);
+                    urle = sb.wordIndex.getURL(urlHash, null, 0);
                     indexURLEntry.Components comp = urle.comp();
 //                  serverLog.logFinest("PLASMA", "plasmaCrawlLURL/genTableProps urle=" + urle.toString());
                     initiatorSeed = yacyCore.seedDB.getConnected(initiatorHash);

@@ -459,7 +459,7 @@ public final class plasmaCrawlStacker extends Thread {
 
         // check if the url is double registered
         String dbocc = sb.crawlQueues.urlExists(entry.url().hash());
-        indexURLEntry oldEntry = this.sb.wordIndex.loadedURL.load(entry.url().hash(), null, 0);
+        indexURLEntry oldEntry = this.sb.wordIndex.getURL(entry.url().hash(), null, 0);
         boolean recrawl = (oldEntry != null) && ((System.currentTimeMillis() - oldEntry.loaddate().getTime()) > profile.recrawlIfOlder());
         // do double-check
         if ((dbocc != null) && (!recrawl)) {

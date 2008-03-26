@@ -195,6 +195,7 @@ public final class plasmaSwitchboard extends serverAbstractSwitch<plasmaSwitchbo
     public  HashMap<String, String>     rankingPermissions;
     public  plasmaWordIndex             wordIndex;
     public  plasmaCrawlQueues           crawlQueues;
+    public  plasmaCrawlResults          crawlResults;
     public  plasmaSwitchboardQueue      sbQueue;
     public  plasmaCrawlStacker          crawlStacker;
     public  messageBoard                messageDB;
@@ -955,6 +956,7 @@ public final class plasmaSwitchboard extends serverAbstractSwitch<plasmaSwitchbo
         log.logConfig("Starting Indexing Management");
         String networkName = getConfig("network.unit.name", "");
         wordIndex = new plasmaWordIndex(indexPrimaryPath, indexSecondaryPath, networkName, log);
+        crawlResults = new plasmaCrawlResults();
         
         // start yacy core
         log.logConfig("Starting YaCy Protocol Core");
@@ -1113,7 +1115,7 @@ public final class plasmaSwitchboard extends serverAbstractSwitch<plasmaSwitchbo
          * initialize switchboard queue
          * ====================================================================== */
         // create queue
-        this.sbQueue = new plasmaSwitchboardQueue(this.wordIndex.loadedURL, new File(this.plasmaPath, "switchboardQueue2.stack"), this.profilesActiveCrawls);
+        this.sbQueue = new plasmaSwitchboardQueue(wordIndex, new File(this.plasmaPath, "switchboardQueue2.stack"), this.profilesActiveCrawls);
         
         // create in process list
         this.indexingTasksInProcess = new HashMap<String, plasmaSwitchboardQueue.Entry>();
@@ -1442,12 +1444,13 @@ public final class plasmaSwitchboard extends serverAbstractSwitch<plasmaSwitchbo
         // tests if hash occurrs in any database
         // if it exists, the name of the database is returned,
         // if it not exists, null is returned
-        if (wordIndex.loadedURL.exists(hash)) return "loaded";
+        if (wordIndex.existsURL(hash)) return "loaded";
         return this.crawlQueues.urlExists(hash);
     }
     
     public void urlRemove(String hash) {
-        wordIndex.loadedURL.remove(hash);
+        wordIndex.removeURL(hash);
+        crawlResults.remove(hash);
         crawlQueues.urlRemove(hash);
     }
     
@@ -1456,7 +1459,7 @@ public final class plasmaSwitchboard extends serverAbstractSwitch<plasmaSwitchbo
         if (urlhash.equals(yacyURL.dummyHash)) return null;
         yacyURL ne = crawlQueues.getURL(urlhash);
         if (ne != null) return ne;
-        indexURLEntry le = wordIndex.loadedURL.load(urlhash, null, 0);
+        indexURLEntry le = wordIndex.getURL(urlhash, null, 0);
         if (le != null) return le.comp().url();
         return null;
     }
@@ -1869,7 +1872,7 @@ public final class plasmaSwitchboard extends serverAbstractSwitch<plasmaSwitchbo
         if ((crawlQueues.delegatedURL.stackSize() > 1000)) c++;
         if ((crawlQueues.errorURL.stackSize() > 1000)) c++;
         for (int i = 1; i <= 6; i++) {
-            if (wordIndex.loadedURL.getStackSize(i) > 1000) c++;
+            if (crawlResults.getStackSize(i) > 1000) c++;
         }
         return c;
     }
@@ -1907,9 +1910,9 @@ public final class plasmaSwitchboard extends serverAbstractSwitch<plasmaSwitchbo
             // clean up loadedURL stack
             for (int i = 1; i <= 6; i++) {
                 checkInterruption();
-                if (wordIndex.loadedURL.getStackSize(i) > 1000) {
-                    log.logFine("Cleaning Loaded-URLs report stack, " + wordIndex.loadedURL.getStackSize(i) + " entries on stack " + i);
-                    wordIndex.loadedURL.clearStack(i);
+                if (crawlResults.getStackSize(i) > 1000) {
+                    log.logFine("Cleaning Loaded-URLs report stack, " + crawlResults.getStackSize(i) + " entries on stack " + i);
+                    crawlResults.clearStack(i);
                     hasDoneSomething = true;
                 }
             }
@@ -2264,14 +2267,14 @@ public final class plasmaSwitchboard extends serverAbstractSwitch<plasmaSwitchbo
         
         // STORE URL TO LOADED-URL-DB
         try {
-            wordIndex.loadedURL.store(newEntry);
+            wordIndex.putURL(newEntry);
         } catch (IOException e) {
             log.logFine("Not Indexed Resource '" + entry.url().toNormalform(false, true) + "': process case=" + processCase);
             addURLtoErrorDB(entry.url(), referrerURL.hash(), entry.initiator(), dc_title, "error storing url: " + e.getMessage(), new kelondroBitfield());
             return;
         }
         
-        wordIndex.loadedURL.stack(
+        crawlResults.stack(
                 newEntry,                      // loaded url db entry
                 entry.initiator(),             // initiator peer hash
                 yacyCore.seedDB.mySeed().hash, // executor peer hash
@@ -2374,7 +2377,7 @@ public final class plasmaSwitchboard extends serverAbstractSwitch<plasmaSwitchbo
         // finally, delete the url entry
         
         // determine the url string
-        indexURLEntry entry = wordIndex.loadedURL.load(urlhash, null, 0);
+        indexURLEntry entry = wordIndex.getURL(urlhash, null, 0);
         if (entry == null) return 0;
         indexURLEntry.Components comp = entry.comp();
         if (comp.url() == null) return 0;
@@ -2402,7 +2405,7 @@ public final class plasmaSwitchboard extends serverAbstractSwitch<plasmaSwitchbo
             if (words != null) count = wordIndex.removeWordReferences(words, urlhash);
             
             // finally delete the url entry itself
-            wordIndex.loadedURL.remove(urlhash);
+            wordIndex.removeURL(urlhash);
             return count;
         } catch (ParserException e) {
             return 0;
@@ -2538,8 +2541,8 @@ public final class plasmaSwitchboard extends serverAbstractSwitch<plasmaSwitchbo
         if (getConfig(INDEX_DIST_ALLOW, "false").equalsIgnoreCase("false")) {
             return "no DHT distribution: not enabled (ser setting)";
         }
-        if (wordIndex.loadedURL.size() < 10) {
-            return "no DHT distribution: loadedURL.size() = " + wordIndex.loadedURL.size();
+        if (wordIndex.countURL() < 10) {
+            return "no DHT distribution: loadedURL.size() = " + wordIndex.countURL();
         }
         if (wordIndex.size() < 100) {
             return "no DHT distribution: not enough words - wordIndex.size() = " + wordIndex.size();

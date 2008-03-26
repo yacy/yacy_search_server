@@ -66,13 +66,13 @@ public class plasmaSwitchboardQueue {
 
     kelondroStack sbQueueStack;
     plasmaCrawlProfile profiles;
-    plasmaCrawlLURL lurls;
+    plasmaWordIndex index;
     private File sbQueueStackPath;
     
-    public plasmaSwitchboardQueue(plasmaCrawlLURL lurls, File sbQueueStackPath, plasmaCrawlProfile profiles) {
+    public plasmaSwitchboardQueue(plasmaWordIndex index, File sbQueueStackPath, plasmaCrawlProfile profiles) {
         this.sbQueueStackPath = sbQueueStackPath;
         this.profiles = profiles;
-        this.lurls = lurls;
+        this.index = index;
 
         initQueueStack();
     }
@@ -341,7 +341,7 @@ public class plasmaSwitchboardQueue {
         public yacyURL referrerURL() {
             if (referrerURL == null) {
                 if ((referrerHash == null) || (referrerHash.equals(yacyURL.dummyHash))) return null;
-                indexURLEntry entry = lurls.load(referrerHash, null, 0);
+                indexURLEntry entry = index.getURL(referrerHash, null, 0);
                 if (entry == null) referrerURL = null; else referrerURL = entry.comp().url();
             }
             return referrerURL;

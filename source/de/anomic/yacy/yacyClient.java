@@ -61,6 +61,7 @@ import de.anomic.index.indexURLEntry;
 import de.anomic.kelondro.kelondroBase64Order;
 import de.anomic.kelondro.kelondroBitfield;
 import de.anomic.plasma.plasmaCondenser;
+import de.anomic.plasma.plasmaCrawlResults;
 import de.anomic.plasma.plasmaSearchRankingProcess;
 import de.anomic.plasma.plasmaSearchRankingProfile;
 import de.anomic.plasma.plasmaSnippetCache;
@@ -387,6 +388,7 @@ public final class yacyClient {
             int partitions,
             yacySeed target,
             plasmaWordIndex wordIndex,
+            plasmaCrawlResults crawlResults,
             plasmaSearchRankingProcess containerCache,
             Map<String, TreeMap<String, String>> abstractCache,
             plasmaURLPattern blacklist,
@@ -502,7 +504,7 @@ public final class yacyClient {
 		String[] urls = new String[results];
 		for (int n = 0; n < results; n++) {
 			// get one single search result
-			urlEntry = wordIndex.loadedURL.newEntry((String) result.get("resource" + n));
+			urlEntry = indexURLEntry.importEntry((String) result.get("resource" + n));
 			if (urlEntry == null) continue;
 			assert (urlEntry.hash().length() == 12) : "urlEntry.hash() = " + urlEntry.hash();
 			if (urlEntry.hash().length() != 12) continue; // bad url hash
@@ -533,8 +535,8 @@ public final class yacyClient {
 
 			// passed all checks, store url
 			try {
-				wordIndex.loadedURL.store(urlEntry);
-                wordIndex.loadedURL.stack(urlEntry, yacyCore.seedDB.mySeed().hash, target.hash, 2);
+				wordIndex.putURL(urlEntry);
+				crawlResults.stack(urlEntry, yacyCore.seedDB.mySeed().hash, target.hash, 2);
 			} catch (IOException e) {
 				yacyCore.log.logSevere("could not store search result", e);
 				continue; // db-error

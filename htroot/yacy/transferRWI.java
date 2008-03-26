@@ -172,7 +172,7 @@ public final class transferRWI {
 
                 // check if we need to ask for the corresponding URL
                 if (!(knownURL.contains(urlHash)||unknownURL.contains(urlHash)))  try {
-                    if (sb.wordIndex.loadedURL.exists(urlHash)) {
+                    if (sb.wordIndex.existsURL(urlHash)) {
                         knownURL.add(urlHash);
                     } else {
                         unknownURL.add(urlHash);

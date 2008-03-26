@@ -96,7 +96,7 @@ public final class IndexTransfer_p {
         
         // insert constants
         prop.putNum("wcount", switchboard.wordIndex.size());
-        prop.putNum("ucount", switchboard.wordIndex.loadedURL.size());
+        prop.putNum("ucount", switchboard.wordIndex.countURL());
         prop.put("running",(switchboard.transferIdxThread==null) ? "0" : "1");
         if (switchboard.transferIdxThread != null) {
             String[] status = switchboard.transferIdxThread.getStatus();

@@ -114,7 +114,7 @@ public class yacyPeerActions {
         seedDB.mySeed().put(yacySeed.RSPEED, Double.toString(sb.totalQPM /*Math.max((float) requestcdiff, 0f) * 60f / Math.max((float) uptimediff, 1f)*/ ));
         
         seedDB.mySeed().put(yacySeed.UPTIME, Long.toString(uptime/60)); // the number of minutes that the peer is up in minutes/day (moving average MA30)
-        seedDB.mySeed().put(yacySeed.LCOUNT, Integer.toString(sb.wordIndex.loadedURL.size())); // the number of links that the peer has stored (LURL's)
+        seedDB.mySeed().put(yacySeed.LCOUNT, Integer.toString(sb.wordIndex.countURL())); // the number of links that the peer has stored (LURL's)
         seedDB.mySeed().put(yacySeed.NCOUNT, Integer.toString(sb.crawlQueues.noticeURL.size())); // the number of links that the peer has noticed, but not loaded (NURL's)
         seedDB.mySeed().put(yacySeed.RCOUNT, Integer.toString(sb.crawlQueues.noticeURL.stackSize(plasmaCrawlNURL.STACK_TYPE_LIMIT))); // the number of links that the peer provides for remote crawling (ZURL's)
         seedDB.mySeed().put(yacySeed.ICOUNT, Integer.toString(sb.wordIndex.size())); // the minimum number of words that the peer has indexed (as it says)

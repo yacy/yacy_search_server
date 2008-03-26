@@ -139,7 +139,7 @@ public class QuickCrawlLink_p {
             }
                     
             String urlhash = crawlingStartURL.hash();
-            switchboard.wordIndex.loadedURL.remove(urlhash);
+            switchboard.wordIndex.removeURL(urlhash);
             switchboard.crawlQueues.noticeURL.removeByURLHash(urlhash);
             switchboard.crawlQueues.errorURL.remove(urlhash);
             
