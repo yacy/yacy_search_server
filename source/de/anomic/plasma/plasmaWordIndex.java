@@ -605,7 +605,7 @@ public final class plasmaWordIndex implements indexRI {
         return containers; // this may return less containers as demanded
     }
 
-    public indexURLReference storeDocument(plasmaSwitchboardQueue.Entry entry, plasmaParserDocument document, plasmaCondenser condenser) throws IOException {
+    public indexURLReference storeDocument(plasmaSwitchboardQueue.QueueEntry entry, plasmaParserDocument document, plasmaCondenser condenser) throws IOException {
         long startTime = System.currentTimeMillis();
 
         // CREATE INDEX

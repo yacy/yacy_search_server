@@ -47,8 +47,10 @@ package de.anomic.plasma;
 import java.io.File;
 import java.io.IOException;
 import java.net.MalformedURLException;
+import java.util.Collection;
 import java.util.Date;
 import java.util.Iterator;
+import java.util.concurrent.ConcurrentHashMap;
 
 import de.anomic.index.indexURLReference;
 import de.anomic.kelondro.kelondroBase64Order;
@@ -68,11 +70,13 @@ public class plasmaSwitchboardQueue {
     plasmaCrawlProfile profiles;
     plasmaWordIndex index;
     private File sbQueueStackPath;
+    ConcurrentHashMap<String, QueueEntry> queueInProcess;
     
     public plasmaSwitchboardQueue(plasmaWordIndex index, File sbQueueStackPath, plasmaCrawlProfile profiles) {
         this.sbQueueStackPath = sbQueueStackPath;
         this.profiles = profiles;
         this.index = index;
+        this.queueInProcess = new ConcurrentHashMap<String, QueueEntry>();
 
         initQueueStack();
     }
@@ -104,7 +108,7 @@ public class plasmaSwitchboardQueue {
         return sbQueueStack.size();
     }
 
-    public synchronized void push(Entry entry) throws IOException {
+    public synchronized void push(QueueEntry entry) throws IOException {
         if (entry == null) return;
         sbQueueStack.push(sbQueueStack.row().newEntry(new byte[][]{
             entry.url.toString().getBytes(),
@@ -118,20 +122,20 @@ public class plasmaSwitchboardQueue {
         }));
     }
 
-    public synchronized Entry pop() throws IOException {
+    public synchronized QueueEntry pop() throws IOException {
         if (sbQueueStack.size() == 0) return null;
         kelondroRow.Entry b = sbQueueStack.pot();
         if (b == null) return null;
-        return new Entry(b);
+        return new QueueEntry(b);
     }
 
-    public synchronized Entry remove(String urlHash) {
+    public synchronized QueueEntry remove(String urlHash) {
         Iterator<kelondroRow.Entry> i = sbQueueStack.stackIterator(true);
         kelondroRow.Entry rowentry;
-        Entry entry;
+        QueueEntry entry;
         while (i.hasNext()) {
             rowentry = (kelondroRow.Entry) i.next();
-            entry = new Entry(rowentry);
+            entry = new QueueEntry(rowentry);
             if (entry.urlHash().equals(urlHash)) {
                 i.remove();
                 return entry;
@@ -160,13 +164,13 @@ public class plasmaSwitchboardQueue {
         super.finalize();
     }
 
-    public Iterator<Entry> entryIterator(boolean up) {
+    public Iterator<QueueEntry> entryIterator(boolean up) {
         // iterates the elements in an ordered way.
         // returns plasmaSwitchboardQueue.Entry - type Objects
         return new entryIterator(up);
     }
 
-    public class entryIterator implements Iterator<Entry> {
+    public class entryIterator implements Iterator<QueueEntry> {
 
         Iterator<kelondroRow.Entry> rows;
         
@@ -178,8 +182,8 @@ public class plasmaSwitchboardQueue {
             return rows.hasNext();
         }
 
-        public Entry next() {
-            return new Entry((kelondroRow.Entry) rows.next());
+        public QueueEntry next() {
+            return new QueueEntry((kelondroRow.Entry) rows.next());
         }
 
         public void remove() {
@@ -187,12 +191,43 @@ public class plasmaSwitchboardQueue {
         }
     }
     
-    public Entry newEntry(yacyURL url, String referrer, Date ifModifiedSince, boolean requestWithCookie,
+    public QueueEntry newEntry(yacyURL url, String referrer, Date ifModifiedSince, boolean requestWithCookie,
                      String initiator, int depth, String profilehandle, String anchorName) {
-        return new Entry(url, referrer, ifModifiedSince, requestWithCookie, initiator, depth, profilehandle, anchorName);
+        return new QueueEntry(url, referrer, ifModifiedSince, requestWithCookie, initiator, depth, profilehandle, anchorName);
     }
+    
+    public void enQueueToActive(QueueEntry entry) {
+        queueInProcess.put(entry.urlHash(), entry);
+    }
+    
+    public QueueEntry getActiveEntry(String urlhash) {
+        // show one entry from the queue
+        return this.queueInProcess.get(urlhash);
+    }
+    
+    public int getActiveQueueSize() {
+        return this.queueInProcess.size();
+    }
+   
+    public Collection<QueueEntry> getActiveQueueEntries() {
+        return this.queueInProcess.values();
+    }
+    
+    public static final int QUEUE_STATE_FRESH                      =  0;
+    public static final int QUEUE_STATE_PARSING_WAITING            =  1;
+    public static final int QUEUE_STATE_PARSING_RUNNING            =  2;
+    public static final int QUEUE_STATE_PARSING_COMPLETE           =  3;
+    public static final int QUEUE_STATE_CONDENSING_WAITING         =  4;
+    public static final int QUEUE_STATE_CONDENSING_RUNNING         =  5;
+    public static final int QUEUE_STATE_CONDENSING_COMPLETE        =  6;
+    public static final int QUEUE_STATE_STRUCTUREANALYSIS_WAITING  =  7;
+    public static final int QUEUE_STATE_STRUCTUREANALYSIS_RUNNING  =  8;
+    public static final int QUEUE_STATE_STRUCTUREANALYSIS_COMPLETE =  9;
+    public static final int QUEUE_STATE_INDEXSTORAGE_WAITING       = 10;
+    public static final int QUEUE_STATE_INDEXSTORAGE_RUNNING       = 11;
+    public static final int QUEUE_STATE_INDEXSTORAGE_COMPLETE      = 12;
 
-    public class Entry {
+    public class QueueEntry {
         yacyURL url;          // plasmaURL.urlStringLength
         String referrerHash;  // plasmaURL.urlHashLength
         Date ifModifiedSince; // 6
@@ -201,13 +236,14 @@ public class plasmaSwitchboardQueue {
         int depth;            // plasmaURL.urlCrawlDepthLength
         String profileHandle; // plasmaURL.urlCrawlProfileHandleLength
         String anchorName;    // plasmaURL.urlDescrLength
-
+        int status;
+        
         // computed values
         private plasmaCrawlProfile.entry profileEntry;
         private IResourceInfo contentInfo;
         private yacyURL referrerURL;
 
-        public Entry(yacyURL url, String referrer, Date ifModifiedSince, boolean requestWithCookie,
+        public QueueEntry(yacyURL url, String referrer, Date ifModifiedSince, boolean requestWithCookie,
                      String initiator, int depth, String profileHandle, String anchorName) {
             this.url = url;
             this.referrerHash = referrer;
@@ -221,9 +257,10 @@ public class plasmaSwitchboardQueue {
             this.profileEntry = null;
             this.contentInfo = null;
             this.referrerURL = null;
+            this.status = QUEUE_STATE_FRESH;
         }
 
-        public Entry(kelondroRow.Entry row) {
+        public QueueEntry(kelondroRow.Entry row) {
             long ims = row.getColLong(2);
             byte flags = row.getColByte(3);
             try {
@@ -242,9 +279,10 @@ public class plasmaSwitchboardQueue {
             this.profileEntry = null;
             this.contentInfo = null;
             this.referrerURL = null;
+            this.status = QUEUE_STATE_FRESH;
         }
 
-        public Entry(byte[][] row) throws IOException {
+        public QueueEntry(byte[][] row) throws IOException {
             long ims = (row[2] == null) ? 0 : kelondroBase64Order.enhancedCoder.decodeLong(new String(row[2], "UTF-8"));
             byte flags = (row[3] == null) ? 0 : row[3][0];
             try {
@@ -263,6 +301,19 @@ public class plasmaSwitchboardQueue {
             this.profileEntry = null;
             this.contentInfo = null;
             this.referrerURL = null;
+            this.status = QUEUE_STATE_FRESH;
+        }
+        
+        public void updateStatus(int newStatus) {
+            this.status = newStatus;
+        }
+        
+        public void close() {
+            queueInProcess.remove(this.url.hash());
+        }
+        
+        public void finalize() {
+            this.close();
         }
         
         public yacyURL url() {

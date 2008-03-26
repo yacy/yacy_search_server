@@ -84,7 +84,7 @@ public class IndexCreateIndexingQueue_p {
             if (post.containsKey("clearIndexingQueue")) {
                 try {
                     synchronized (switchboard.sbQueue) {
-                        plasmaSwitchboardQueue.Entry entry = null;
+                        plasmaSwitchboardQueue.QueueEntry entry = null;
                         while ((entry = switchboard.sbQueue.pop()) != null) {
                             if ((entry != null) && (entry.profile() != null) && (!(entry.profile().storeHTCache()))) {
                                 plasmaHTCache.deleteURLfromCache(entry.url());
@@ -106,26 +106,24 @@ public class IndexCreateIndexingQueue_p {
         yacySeed initiator;
         boolean dark;
         
-        if ((switchboard.sbQueue.size() == 0) && (switchboard.indexingTasksInProcess.size() == 0)) {
+        if ((switchboard.sbQueue.size() == 0) && (switchboard.sbQueue.getActiveQueueSize() == 0)) {
             prop.put("indexing-queue", "0"); //is empty
         } else {
             prop.put("indexing-queue", "1"); // there are entries in the queue or in process
             
             dark = true;
-            plasmaSwitchboardQueue.Entry pcentry;
-            int inProcessCount = 0, entryCount = 0, totalCount = 0; 
+            plasmaSwitchboardQueue.QueueEntry pcentry;
+            int entryCount = 0, totalCount = 0; 
             long totalSize = 0;
-            ArrayList<plasmaSwitchboardQueue.Entry> entryList = new ArrayList<plasmaSwitchboardQueue.Entry>();
             
             // getting all entries that are currently in process
-            synchronized (switchboard.indexingTasksInProcess) {
-                inProcessCount = switchboard.indexingTasksInProcess.size();
-                entryList.addAll(switchboard.indexingTasksInProcess.values());
-            }
+            ArrayList<plasmaSwitchboardQueue.QueueEntry> entryList = new ArrayList<plasmaSwitchboardQueue.QueueEntry>();
+            entryList.addAll(switchboard.sbQueue.getActiveQueueEntries());
+            int inProcessCount = entryList.size();
             
             // getting all enqueued entries
             if ((switchboard.sbQueue.size() > 0)) {
-                Iterator<plasmaSwitchboardQueue.Entry> i = switchboard.sbQueue.entryIterator(false);
+                Iterator<plasmaSwitchboardQueue.QueueEntry> i = switchboard.sbQueue.entryIterator(false);
                 while (i.hasNext()) entryList.add(i.next());
             }
                             
@@ -134,7 +132,7 @@ public class IndexCreateIndexingQueue_p {
             for (int i = 0; (i < count) && (entryCount < showLimit); i++) {
 
                 boolean inProcess = i < inProcessCount;
-                pcentry = (plasmaSwitchboardQueue.Entry) entryList.get(i);
+                pcentry = (plasmaSwitchboardQueue.QueueEntry) entryList.get(i);
                 if ((pcentry != null)&&(pcentry.url() != null)) {
                     long entrySize = pcentry.size();
                     totalSize += entrySize;

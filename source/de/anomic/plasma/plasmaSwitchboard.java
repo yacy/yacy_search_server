@@ -156,7 +156,7 @@ import de.anomic.yacy.yacySeed;
 import de.anomic.yacy.yacyURL;
 import de.anomic.yacy.yacyVersion;
 
-public final class plasmaSwitchboard extends serverAbstractSwitch<plasmaSwitchboardQueue.Entry> implements serverSwitch<plasmaSwitchboardQueue.Entry> {
+public final class plasmaSwitchboard extends serverAbstractSwitch<plasmaSwitchboardQueue.QueueEntry> implements serverSwitch<plasmaSwitchboardQueue.QueueEntry> {
     
     // load slots
     public static int xstackCrawlSlots      = 2000;
@@ -216,7 +216,6 @@ public final class plasmaSwitchboard extends serverAbstractSwitch<plasmaSwitchbo
     public  plasmaParser                parser;
     public  long                        proxyLastAccess, localSearchLastAccess, remoteSearchLastAccess;
     public  yacyCore                    yc;
-    public  HashMap<String, plasmaSwitchboardQueue.Entry> indexingTasksInProcess;
     public  userDB                      userDB;
     public  bookmarksDB                 bookmarksDB;
     public  plasmaWebStructure          webStructure;
@@ -364,6 +363,21 @@ public final class plasmaSwitchboard extends serverAbstractSwitch<plasmaSwitchbo
     public static final String PROXY_CACHE_ENQUEUE_METHOD_FREEMEM   = null;
     public static final String PROXY_CACHE_ENQUEUE_IDLESLEEP        = "70_cachemanager_idlesleep";
     public static final String PROXY_CACHE_ENQUEUE_BUSYSLEEP        = "70_cachemanager_busysleep";
+    
+    
+    // 74_parsing
+    /**
+     * <p><code>public static final String <strong>INDEXER</strong> = "80_indexing"</code></p>
+     * <p>Name of the indexer thread, performing the actual indexing of a website</p>
+     */
+    public static final String PARSER                      = "74_indexing";
+    public static final String PARSER_MEMPREREQ            = "74_indexing_memprereq";
+    public static final String PARSER_IDLESLEEP            = "74_indexing_idlesleep";
+    public static final String PARSER_BUSYSLEEP            = "74_indexing_busysleep";
+    public static final String PARSER_METHOD_START         = "deQueueProcess";
+    public static final String PARSER_METHOD_JOBCOUNT      = "queueSize";
+    public static final String PARSER_METHOD_FREEMEM       = "deQueueFreeMem";
+    
     
     // 80_indexing
     /**
@@ -1122,13 +1136,10 @@ public final class plasmaSwitchboard extends serverAbstractSwitch<plasmaSwitchbo
         // create queue
         this.sbQueue = new plasmaSwitchboardQueue(wordIndex, new File(this.plasmaPath, "switchboardQueue2.stack"), this.profilesActiveCrawls);
         
-        // create in process list
-        this.indexingTasksInProcess = new HashMap<String, plasmaSwitchboardQueue.Entry>();
-        
         // going through the sbQueue Entries and registering all content files as in use
         int count = 0;
-        plasmaSwitchboardQueue.Entry queueEntry;
-        Iterator<plasmaSwitchboardQueue.Entry> i1 = sbQueue.entryIterator(true);
+        plasmaSwitchboardQueue.QueueEntry queueEntry;
+        Iterator<plasmaSwitchboardQueue.QueueEntry> i1 = sbQueue.entryIterator(true);
         while (i1.hasNext()) {
             queueEntry = i1.next();
             if ((queueEntry != null) && (queueEntry.url() != null) && (queueEntry.cacheFile().exists())) {
@@ -1284,8 +1295,12 @@ public final class plasmaSwitchboard extends serverAbstractSwitch<plasmaSwitchbo
         deployThread(CRAWLSTACK, "Crawl URL Stacker", "process that checks url for double-occurrences and for allowance/disallowance by robots.txt", null,
         new serverInstantThread(crawlStacker, CRAWLSTACK_METHOD_START, CRAWLSTACK_METHOD_JOBCOUNT, CRAWLSTACK_METHOD_FREEMEM), 8000);
 
-        deployThread(INDEXER, "Parsing/Indexing", "thread that performes document parsing and indexing", "/IndexCreateIndexingQueue_p.html",
+        //deployThread(PARSER, "Parsing", "thread that feeds a concurrent document parsing queue", "/IndexCreateIndexingQueue_p.html",
+        //new serverInstantThread(this, PARSER_METHOD_START, PARSER_METHOD_JOBCOUNT, PARSER_METHOD_FREEMEM), 10000);
+        
+        deployThread(INDEXER, "Indexing", "thread that either distributes the index into the DHT, stores parsed documents or flushes the index cache", "/IndexCreateIndexingQueue_p.html",
         new serverInstantThread(this, INDEXER_METHOD_START, INDEXER_METHOD_JOBCOUNT, INDEXER_METHOD_FREEMEM), 10000);
+
         for (i = 1; i < indexing_cluster; i++) {
             setConfig((i + 80) + "_indexing_idlesleep", getConfig(INDEXER_IDLESLEEP, ""));
             setConfig((i + 80) + "_indexing_busysleep", getConfig(INDEXER_BUSYSLEEP, ""));
@@ -1474,8 +1489,6 @@ public final class plasmaSwitchboard extends serverAbstractSwitch<plasmaSwitchbo
                   new plasmaSearchRankingProfile(plasmaSearchQuery.CONTENTDOM_TEXT) :
                   new plasmaSearchRankingProfile("", crypt.simpleDecode(sb.getConfig("rankingProfile", ""), null));
     }
-    
-    
     
     /**
      * This method changes the HTCache size.<br>
@@ -1743,14 +1756,14 @@ public final class plasmaSwitchboard extends serverAbstractSwitch<plasmaSwitchbo
         return sbQueue.size();
     }
     
-    public void enQueue(plasmaSwitchboardQueue.Entry job) {
+    public void enQueue(plasmaSwitchboardQueue.QueueEntry job) {
         assert job != null;
-        if (!(job instanceof plasmaSwitchboardQueue.Entry)) {
+        if (!(job instanceof plasmaSwitchboardQueue.QueueEntry)) {
             System.out.println("Internal error at plasmaSwitchboard.enQueue: wrong job type");
             System.exit(0);
         }
         try {
-            sbQueue.push((plasmaSwitchboardQueue.Entry) job);
+            sbQueue.push((plasmaSwitchboardQueue.QueueEntry) job);
         } catch (IOException e) {
             log.logSevere("IOError in plasmaSwitchboard.enQueue: " + e.getMessage(), e);
         }
@@ -1765,9 +1778,9 @@ public final class plasmaSwitchboard extends serverAbstractSwitch<plasmaSwitchbo
         wordIndex.setMaxWordCount(newMaxCount); */
     }
     
-    public plasmaSwitchboardQueue.Entry deQueue() {
+    public plasmaSwitchboardQueue.QueueEntry deQueue() {
         // getting the next entry from the indexing queue
-        plasmaSwitchboardQueue.Entry nextentry = null;
+        plasmaSwitchboardQueue.QueueEntry nextentry = null;
         synchronized (sbQueue) {
             // do one processing step
             log.logFine("DEQUEUE: sbQueueSize=" + sbQueue.size() +
@@ -1851,21 +1864,67 @@ public final class plasmaSwitchboard extends serverAbstractSwitch<plasmaSwitchbo
                 return false;
             }
 
-            plasmaSwitchboardQueue.Entry nextentry = deQueue();
-
-            synchronized (this.indexingTasksInProcess) {
-                this.indexingTasksInProcess.put(nextentry.urlHash(), nextentry);
+            // get next queue entry and start a queue processing
+            plasmaSwitchboardQueue.QueueEntry queueEntry = deQueue();
+            assert queueEntry != null;
+            if (queueEntry == null) return true;
+            if (queueEntry.profile() == null) {
+                queueEntry.close();
+                return true;
             }
-
+            sbQueue.enQueueToActive(queueEntry);
+            
+            // THE FOLLOWING CAN BE CONCURRENT ->
+            
             // parse and index the resource
-            plasmaParserDocument document = parseDocument(nextentry);
-            if (document != null) {
-                plasmaCondenser condensement = condenseDocument(nextentry, document);
-                if (condensement != null) {
-                    document.notifyWebStructure(webStructure, condensement, nextentry.getModificationDate());
-                    storeDocumentIndex(nextentry, document, condensement);
+            queueEntry.updateStatus(plasmaSwitchboardQueue.QUEUE_STATE_PARSING_WAITING);
+            queueEntry.updateStatus(plasmaSwitchboardQueue.QUEUE_STATE_PARSING_RUNNING);
+            plasmaParserDocument document = parseDocument(queueEntry);
+            if (document == null) {
+                if (!queueEntry.profile().storeHTCache()) {
+                    plasmaHTCache.filesInUse.remove(queueEntry.cacheFile());
+                    //plasmaHTCache.deleteURLfromCache(entry.url());
                 }
+                queueEntry.close();
+                return true;
             }
+            queueEntry.updateStatus(plasmaSwitchboardQueue.QUEUE_STATE_PARSING_COMPLETE);
+            
+            // do condensing
+            queueEntry.updateStatus(plasmaSwitchboardQueue.QUEUE_STATE_CONDENSING_WAITING);
+            queueEntry.updateStatus(plasmaSwitchboardQueue.QUEUE_STATE_CONDENSING_RUNNING);
+            plasmaCondenser condensement = condenseDocument(queueEntry, document);
+            if (condensement == null) {
+                if (!queueEntry.profile().storeHTCache()) {
+                    plasmaHTCache.filesInUse.remove(queueEntry.cacheFile());
+                    //plasmaHTCache.deleteURLfromCache(entry.url());
+                }
+                queueEntry.close();
+                return true;
+            }
+            queueEntry.updateStatus(plasmaSwitchboardQueue.QUEUE_STATE_CONDENSING_COMPLETE);
+            
+            // do a web structure analysis
+            queueEntry.updateStatus(plasmaSwitchboardQueue.QUEUE_STATE_STRUCTUREANALYSIS_WAITING);
+            queueEntry.updateStatus(plasmaSwitchboardQueue.QUEUE_STATE_STRUCTUREANALYSIS_RUNNING);
+            document.notifyWebStructure(webStructure, condensement, queueEntry.getModificationDate());
+            queueEntry.updateStatus(plasmaSwitchboardQueue.QUEUE_STATE_STRUCTUREANALYSIS_COMPLETE);
+            
+            // <- CONCURRENT UNTIL HERE, THEN SERIALIZE AGAIN
+            
+            // store the result
+            queueEntry.updateStatus(plasmaSwitchboardQueue.QUEUE_STATE_INDEXSTORAGE_WAITING);
+            queueEntry.updateStatus(plasmaSwitchboardQueue.QUEUE_STATE_INDEXSTORAGE_RUNNING);
+            storeDocumentIndex(queueEntry, document, condensement);
+            queueEntry.updateStatus(plasmaSwitchboardQueue.QUEUE_STATE_INDEXSTORAGE_COMPLETE);
+            
+            // finally close the queue process
+            if (!queueEntry.profile().storeHTCache()) {
+                plasmaHTCache.filesInUse.remove(queueEntry.cacheFile());
+                //plasmaHTCache.deleteURLfromCache(entry.url());
+            }
+            queueEntry.close();
+            
             return true;
         } catch (InterruptedException e) {
             log.logInfo("DEQUEUE: Shutdown detected.");
@@ -2076,116 +2135,71 @@ public final class plasmaSwitchboard extends serverAbstractSwitch<plasmaSwitchbo
         }
     }
     
-    private plasmaParserDocument parseResource(plasmaSwitchboardQueue.Entry entry) throws InterruptedException, ParserException {
-        
-        // the mimetype of this entry
-        String mimeType = entry.getMimeType();
-        String charset = entry.getCharacterEncoding();        
-
-        // the parser logger
-        //serverLog parserLogger = parser.getLogger();
-
-        // parse the document
-        return parseResource(entry.url(), mimeType, charset, entry.cacheFile());
-    }
-    
-    public plasmaParserDocument parseResource(yacyURL location, String mimeType, String documentCharset, File sourceFile) throws InterruptedException, ParserException {
-        plasmaParserDocument doc = parser.parseSource(location, mimeType, documentCharset, sourceFile);
-        assert(doc != null) : "Unexpected error. Parser returned null.";
-        return doc;
-    }
-    
-    private plasmaParserDocument parseDocument(plasmaSwitchboardQueue.Entry entry) throws InterruptedException {
+    private plasmaParserDocument parseDocument(plasmaSwitchboardQueue.QueueEntry entry) throws InterruptedException {
         plasmaParserDocument document = null;
+        int processCase = entry.processCase();
+        
+        log.logFine("processResourceStack processCase=" + processCase +
+                ", depth=" + entry.depth() +
+                ", maxDepth=" + ((entry.profile() == null) ? "null" : Integer.toString(entry.profile().generalDepth())) +
+                ", filter=" + ((entry.profile() == null) ? "null" : entry.profile().generalFilter()) +
+                ", initiatorHash=" + entry.initiator() +
+                //", responseHeader=" + ((entry.responseHeader() == null) ? "null" : entry.responseHeader().toString()) +
+                ", url=" + entry.url()); // DEBUG
+        
+        // PARSE CONTENT
+        long parsingStartTime = System.currentTimeMillis();
+
         try {
-            long stackStartTime = 0, stackEndTime = 0,
-            parsingStartTime = 0, parsingEndTime = 0;
-            int processCase = entry.processCase();
-            
-            log.logFine("processResourceStack processCase=" + processCase +
-                    ", depth=" + entry.depth() +
-                    ", maxDepth=" + ((entry.profile() == null) ? "null" : Integer.toString(entry.profile().generalDepth())) +
-                    ", filter=" + ((entry.profile() == null) ? "null" : entry.profile().generalFilter()) +
-                    ", initiatorHash=" + entry.initiator() +
-                    //", responseHeader=" + ((entry.responseHeader() == null) ? "null" : entry.responseHeader().toString()) +
-                    ", url=" + entry.url()); // DEBUG
-            
-            // PARSE CONTENT
-            parsingStartTime = System.currentTimeMillis();
-
-            try {
-                document = this.parseResource(entry);
-                if (document == null) return null;
-            } catch (ParserException e) {
-                this.log.logInfo("Unable to parse the resource '" + entry.url() + "'. " + e.getMessage());
-                addURLtoErrorDB(entry.url(), entry.referrerHash(), entry.initiator(), entry.anchorName(), e.getErrorCode(), new kelondroBitfield());
-                if (document != null) {
-                    document.close();
-                    document = null;
-                }
-                return null;
+            // parse the document
+            document = parser.parseSource(entry.url(), entry.getMimeType(), entry.getCharacterEncoding(), entry.cacheFile());
+            assert(document != null) : "Unexpected error. Parser returned null.";
+            if (document == null) return null;
+        } catch (ParserException e) {
+            this.log.logInfo("Unable to parse the resource '" + entry.url() + "'. " + e.getMessage());
+            addURLtoErrorDB(entry.url(), entry.referrerHash(), entry.initiator(), entry.anchorName(), e.getErrorCode(), new kelondroBitfield());
+            if (document != null) {
+                document.close();
+                document = null;
             }
-            
-            parsingEndTime = System.currentTimeMillis();            
-            
-            // get the document date
-            Date docDate = entry.getModificationDate();
-            
-            // put anchors on crawl stack
-            stackStartTime = System.currentTimeMillis();
-            if (
-                    ((processCase == PROCESSCASE_4_PROXY_LOAD) || (processCase == PROCESSCASE_5_LOCAL_CRAWLING)) &&
-                    ((entry.profile() == null) || (entry.depth() < entry.profile().generalDepth()))
-            ) {
-                Map<yacyURL, String> hl = document.getHyperlinks();
-                Iterator<Map.Entry<yacyURL, String>> i = hl.entrySet().iterator();
-                yacyURL nextUrl;
-                Map.Entry<yacyURL, String> nextEntry;
-                while (i.hasNext()) {
-                    // check for interruption
-                    checkInterruption();
-                    
-                    // fetching the next hyperlink
-                    nextEntry = i.next();
-                    nextUrl = nextEntry.getKey();
-                    // enqueue the hyperlink into the pre-notice-url db
-                    crawlStacker.enqueueEntry(nextUrl, entry.urlHash(), entry.initiator(), nextEntry.getValue(), docDate, entry.depth() + 1, entry.profile());
-                }
-                if (log.isInfo()) log.logInfo("CRAWL: ADDED " + hl.size() + " LINKS FROM " + entry.url().toNormalform(false, true) +
-                        ", NEW CRAWL STACK SIZE IS " + crawlQueues.noticeURL.stackSize(plasmaCrawlNURL.STACK_TYPE_CORE) +
-                        ", STACKING TIME = " + (stackEndTime-stackStartTime) +
-                        ", PARSING TIME = " + (parsingEndTime-parsingStartTime));
+            return null;
+        }
+        
+        long parsingEndTime = System.currentTimeMillis();            
+        
+        // get the document date
+        Date docDate = entry.getModificationDate();
+        
+        // put anchors on crawl stack
+        long stackStartTime = System.currentTimeMillis();
+        if (
+                ((processCase == PROCESSCASE_4_PROXY_LOAD) || (processCase == PROCESSCASE_5_LOCAL_CRAWLING)) &&
+                ((entry.profile() == null) || (entry.depth() < entry.profile().generalDepth()))
+        ) {
+            Map<yacyURL, String> hl = document.getHyperlinks();
+            Iterator<Map.Entry<yacyURL, String>> i = hl.entrySet().iterator();
+            yacyURL nextUrl;
+            Map.Entry<yacyURL, String> nextEntry;
+            while (i.hasNext()) {
+                // check for interruption
+                checkInterruption();
+                
+                // fetching the next hyperlink
+                nextEntry = i.next();
+                nextUrl = nextEntry.getKey();
+                // enqueue the hyperlink into the pre-notice-url db
+                crawlStacker.enqueueEntry(nextUrl, entry.urlHash(), entry.initiator(), nextEntry.getValue(), docDate, entry.depth() + 1, entry.profile());
             }
-            stackEndTime = System.currentTimeMillis();
-        } catch (Exception e) {
-            if (e instanceof InterruptedException) throw (InterruptedException)e;
-            this.log.logSevere("Unexpected exception while parsing/indexing URL ",e);
-        } catch (Error e) {
-            this.log.logSevere("Unexpected exception while parsing/indexing URL ",e);
-        } finally {
-            checkInterruption();
-            
-            // The following code must be into the finally block, otherwise it will not be executed
-            // on errors!
-
-            // removing current entry from in process list
-            synchronized (this.indexingTasksInProcess) {
-                this.indexingTasksInProcess.remove(entry.urlHash());
-            }
-            
-            // explicit delete/free resources
-            if ((entry != null) && (entry.profile() != null) && (!(entry.profile().storeHTCache()))) {
-                plasmaHTCache.filesInUse.remove(entry.cacheFile());
-                //plasmaHTCache.deleteURLfromCache(entry.url());
-            }
-            entry = null;
-            
-            if (document != null) try { document.close(); } catch (Exception e) {}
+            long stackEndTime = System.currentTimeMillis();
+            if (log.isInfo()) log.logInfo("CRAWL: ADDED " + hl.size() + " LINKS FROM " + entry.url().toNormalform(false, true) +
+                    ", NEW CRAWL STACK SIZE IS " + crawlQueues.noticeURL.stackSize(plasmaCrawlNURL.STACK_TYPE_CORE) +
+                    ", STACKING TIME = " + (stackEndTime-stackStartTime) +
+                    ", PARSING TIME = " + (parsingEndTime-parsingStartTime));
         }
         return document;
     }
     
-    private plasmaCondenser condenseDocument(plasmaSwitchboardQueue.Entry entry, plasmaParserDocument document) throws InterruptedException {
+    private plasmaCondenser condenseDocument(plasmaSwitchboardQueue.QueueEntry entry, plasmaParserDocument document) throws InterruptedException {
         // CREATE INDEX
         String dc_title = document.dc_title();
         yacyURL referrerURL = entry.referrerURL();
@@ -2229,7 +2243,7 @@ public final class plasmaSwitchboard extends serverAbstractSwitch<plasmaSwitchbo
         return condenser;
     }
     
-    private void storeDocumentIndex(plasmaSwitchboardQueue.Entry entry, plasmaParserDocument document, plasmaCondenser condenser) {
+    private void storeDocumentIndex(plasmaSwitchboardQueue.QueueEntry entry, plasmaParserDocument document, plasmaCondenser condenser) {
         
         // CREATE INDEX
         String dc_title = document.dc_title();
@@ -2275,131 +2289,23 @@ public final class plasmaSwitchboard extends serverAbstractSwitch<plasmaSwitchbo
         if ((processCase == PROCESSCASE_6_GLOBAL_CRAWLING) && (initiatorPeer != null)) {
             log.logInfo("Sending crawl receipt for '" + entry.url().toNormalform(false, true) + "' to " + initiatorPeer.getName());
             if (clusterhashes != null) initiatorPeer.setAlternativeAddress((String) clusterhashes.get(initiatorPeer.hash));
-            yacyClient.crawlReceipt(initiatorPeer, "crawl", "fill", "indexed", newEntry, "");
+            // start a thread for receipt sending to avoid a blocking here
+            new Thread(new receiptSending(initiatorPeer, newEntry)).start();
         }
     }
-    /*
-    private void indexDocument(plasmaSwitchboardQueue.Entry entry, plasmaParserDocument document, plasmaCondenser condenser) throws InterruptedException {
-        long indexingStartTime = System.currentTimeMillis(), indexingEndTime = 0,
-        storageStartTime = 0, storageEndTime = 0;
-
-        // CREATE INDEX
-        String dc_title = document.dc_title();
-        yacyURL referrerURL = entry.referrerURL();
-        Date docDate = entry.getModificationDate();
-        int processCase = entry.processCase();
-
-        // generate citation reference
-        Integer[] ioLinks = webStructure.generateCitationReference(entry.url(), entry.urlHash(), docDate, document, condenser); // [outlinksSame, outlinksOther]
-           
-        // check for interruption
-        checkInterruption();
+    
+    public class receiptSending implements Runnable {
+        yacySeed initiatorPeer;
+        indexURLReference reference;
         
-        // create a new loaded URL db entry
-        long ldate = System.currentTimeMillis();
-        indexURLReference newEntry = new indexURLReference(
-                entry.url(),                               // URL
-                dc_title,                                  // document description
-                document.dc_creator(),                     // author
-                document.dc_subject(' '),                  // tags
-                "",                                        // ETag
-                docDate,                                   // modification date
-                new Date(),                                // loaded date
-                new Date(ldate + Math.max(0, ldate - docDate.getTime()) / 2), // freshdate, computed with Proxy-TTL formula 
-                (referrerURL == null) ? null : referrerURL.hash(),            // referer hash
-                new byte[0],                               // md5
-                (int) entry.size(),                        // size
-                condenser.RESULT_NUMB_WORDS,               // word count
-                plasmaHTCache.docType(document.dc_format()), // doctype
-                condenser.RESULT_FLAGS,                    // flags
-                yacyURL.language(entry.url()),             // language
-                ioLinks[0].intValue(),                     // llocal
-                ioLinks[1].intValue(),                     // lother
-                document.getAudiolinks().size(),           // laudio
-                document.getImages().size(),               // limage
-                document.getVideolinks().size(),           // lvideo
-                document.getApplinks().size()              // lapp
-        );
-        
-        // STORE URL TO LOADED-URL-DB
-        try {
-            wordIndex.putURL(newEntry);
-        } catch (IOException e) {
-            log.logFine("Not Indexed Resource '" + entry.url().toNormalform(false, true) + "': process case=" + processCase);
-            addURLtoErrorDB(entry.url(), referrerURL.hash(), entry.initiator(), dc_title, "error storing url: " + e.getMessage(), new kelondroBitfield());
-            return;
+        public receiptSending(yacySeed initiatorPeer, indexURLReference reference) {
+            this.initiatorPeer = initiatorPeer;
+            this.reference = reference;
         }
-        
-        crawlResults.stack(
-                newEntry,                      // loaded url db entry
-                entry.initiator(),             // initiator peer hash
-                yacyCore.seedDB.mySeed().hash, // executor peer hash
-                processCase                    // process case
-        );                    
-        
-        // check for interruption
-        checkInterruption();
-        
-        // STORE WORD INDEX
-        if ((!entry.profile().indexText()) && (!entry.profile().indexMedia())) {
-            log.logFine("Not Indexed Resource '" + entry.url().toNormalform(false, true) + "': process case=" + processCase);
-            addURLtoErrorDB(entry.url(), referrerURL.hash(), entry.initiator(), dc_title, plasmaCrawlEURL.DENIED_UNKNOWN_INDEXING_PROCESS_CASE, new kelondroBitfield());
-            return;
-        }
-            
-        // remove stopwords                        
-        log.logInfo("Excluded " + condenser.excludeWords(stopwords) + " words in URL " + entry.url());
-        indexingEndTime = System.currentTimeMillis();
-        
-        storageStartTime = System.currentTimeMillis();
-        int words = 0;
-             
-        // STORE PAGE INDEX INTO WORD INDEX DB
-        words = wordIndex.addPageIndex(
-                entry.url(),                                  // document url
-                docDate,                                      // document mod date
-                (int) entry.size(),                           // document size
-                document,                                     // document content
-                condenser,                                    // document condenser
-                yacyURL.language(entry.url()),                // document language
-                plasmaHTCache.docType(document.dc_format()),// document type
-                ioLinks[0].intValue(),                        // outlinkSame
-                ioLinks[1].intValue()                         // outlinkOthers
-        );
-            
-        storageEndTime = System.currentTimeMillis();
-        
-        //increment number of indexed urls
-        indexedPages++;
-        
-        if (log.isInfo()) {
-            // TODO: UTF-8 docDescription seems not to be displayed correctly because
-            // of string concatenation
-            log.logInfo("*Indexed " + words + " words in URL " + entry.url() +
-                    " [" + entry.urlHash() + "]" +
-                    "\n\tDescription:  " + dc_title +
-                    "\n\tMimeType: "  + document.dc_format() + " | Charset: " + document.getCharset() + " | " +
-                    "Size: " + document.getTextLength() + " bytes | " +
-                    "Anchors: " + ((document.getAnchors() == null) ? 0 : document.getAnchors().size()) +
-                    "\n\tIndexingTime: " + (indexingEndTime-indexingStartTime) + " ms | " +
-                    "StorageTime: " + (storageEndTime-storageStartTime) + " ms");
-        }
-
-        // update profiling info
-        plasmaProfiling.updateIndexedPage(entry);
-        
-        // check for interruption
-        checkInterruption();
-        yacySeed initiatorPeer = entry.initiatorPeer();
-        
-        // if this was performed for a remote crawl request, notify requester
-        if ((processCase == PROCESSCASE_6_GLOBAL_CRAWLING) && (initiatorPeer != null)) {
-            log.logInfo("Sending crawl receipt for '" + entry.url().toNormalform(false, true) + "' to " + initiatorPeer.getName());
-            if (clusterhashes != null) initiatorPeer.setAlternativeAddress((String) clusterhashes.get(initiatorPeer.hash));
-            yacyClient.crawlReceipt(initiatorPeer, "crawl", "fill", "indexed", newEntry, "");
+        public void run() {
+            yacyClient.crawlReceipt(initiatorPeer, "crawl", "fill", "indexed", reference, "");
         }
     }
-    */
     
     private static SimpleDateFormat DateFormatter = new SimpleDateFormat("EEE, dd MMM yyyy");
     public static String dateString(Date date) {

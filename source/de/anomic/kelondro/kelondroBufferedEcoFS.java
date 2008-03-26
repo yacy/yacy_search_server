@@ -48,6 +48,7 @@ public class kelondroBufferedEcoFS {
     }
 
     private void flushBuffer() throws IOException {
+        if (efs == null) return;
         Iterator<Map.Entry<Long, byte[]>> i = buffer.entrySet().iterator();
         Map.Entry<Long, byte[]> entry;
         while (i.hasNext()) {
@@ -71,7 +72,7 @@ public class kelondroBufferedEcoFS {
         } catch (IOException e) {
             e.printStackTrace();
         }
-        efs.close();
+        if (efs != null) efs.close();
         efs = null;
     }
 

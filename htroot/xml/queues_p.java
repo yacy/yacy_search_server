@@ -87,28 +87,25 @@ public class queues_p {
         yacySeed initiator;
         
         //indexing queue
-        prop.putNum("indexingSize", sb.getThread(plasmaSwitchboard.INDEXER).getJobCount()+sb.indexingTasksInProcess.size());
+        prop.putNum("indexingSize", sb.getThread(plasmaSwitchboard.INDEXER).getJobCount() + sb.sbQueue.getActiveQueueSize());
         prop.putNum("indexingMax", (int) sb.getConfigLong(plasmaSwitchboard.INDEXER_SLOTS, 30));
         prop.putNum("urlpublictextSize", sb.wordIndex.countURL());
         prop.putNum("rwipublictextSize", sb.wordIndex.size());
-        if ((sb.sbQueue.size() == 0) && (sb.indexingTasksInProcess.size() == 0)) {
+        if ((sb.sbQueue.size() == 0) && (sb.sbQueue.getActiveQueueSize() == 0)) {
             prop.put("list", "0"); //is empty
         } else {
-            plasmaSwitchboardQueue.Entry pcentry;
-            int inProcessCount = 0;
+            plasmaSwitchboardQueue.QueueEntry pcentry;
             long totalSize = 0;
             int i=0; //counter
-            ArrayList<plasmaSwitchboardQueue.Entry> entryList = new ArrayList<plasmaSwitchboardQueue.Entry>();
             
             // getting all entries that are currently in process
-            synchronized (sb.indexingTasksInProcess) {
-                inProcessCount = sb.indexingTasksInProcess.size();
-                entryList.addAll(sb.indexingTasksInProcess.values());
-            }
+            ArrayList<plasmaSwitchboardQueue.QueueEntry> entryList = new ArrayList<plasmaSwitchboardQueue.QueueEntry>();
+            entryList.addAll(sb.sbQueue.getActiveQueueEntries());
+            int inProcessCount = entryList.size();
             
             // getting all enqueued entries
             if ((sb.sbQueue.size() > 0)) {
-                Iterator<plasmaSwitchboardQueue.Entry> i1 = sb.sbQueue.entryIterator(false);
+                Iterator<plasmaSwitchboardQueue.QueueEntry> i1 = sb.sbQueue.entryIterator(false);
                 while (i1.hasNext()) entryList.add(i1.next());
             }
             
@@ -118,8 +115,8 @@ public class queues_p {
             int ok = 0;
             for (i = 0; i < size; i++) {
                 boolean inProcess = i < inProcessCount;
-                pcentry = (plasmaSwitchboardQueue.Entry) entryList.get(i);
-                if ((pcentry != null)&&(pcentry.url() != null)) {
+                pcentry = entryList.get(i);
+                if ((pcentry != null) && (pcentry.url() != null)) {
                     long entrySize = pcentry.size();
                     totalSize += entrySize;
                     initiator = yacyCore.seedDB.getConnected(pcentry.initiator());

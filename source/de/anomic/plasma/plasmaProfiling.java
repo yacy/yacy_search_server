@@ -41,7 +41,7 @@ public class plasmaProfiling {
 
     public static long lastPPMUpdate = System.currentTimeMillis()- 30000;
 
-    public static void updateIndexedPage(plasmaSwitchboardQueue.Entry entry) {
+    public static void updateIndexedPage(plasmaSwitchboardQueue.QueueEntry entry) {
         if (System.currentTimeMillis() - lastPPMUpdate > 30000) {
             // we don't want to do this too often
             yacyCore.peerActions.updateMySeed();
