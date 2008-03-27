@@ -84,11 +84,11 @@ public interface serverSwitch<E> {
                              String threadShortDescription,
                              String threadLongDescription,
                              String threadMonitorURL,
-                             serverThread newThread,
+                             serverBusyThread newThread,
                              long startupDelay,
                              long initialIdleSleep, long initialBusySleep,
                              long initialMemoryPreRequisite);
-    public serverThread getThread(String threadName);
+    public serverBusyThread getThread(String threadName);
     public void setThreadPerformance(String threadName, long idleMillis, long busyMillis, long memprereq);
     public void terminateThread(String threadName, boolean waitFor);
     public void intermissionAllThreads(long pause);

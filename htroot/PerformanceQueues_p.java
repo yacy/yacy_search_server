@@ -49,6 +49,7 @@ import java.util.Map;
 
 import de.anomic.http.httpHeader;
 import de.anomic.plasma.plasmaSwitchboard;
+import de.anomic.server.serverBusyThread;
 import de.anomic.server.serverCore;
 import de.anomic.server.serverFileUtils;
 import de.anomic.server.serverObjects;
@@ -66,7 +67,7 @@ public class PerformanceQueues_p {
         Map<String, String> defaultSettings = ((post == null) || (!(post.containsKey("submitdefault")))) ? null : serverFileUtils.loadHashMap(defaultSettingsFile);
         Iterator<String> threads = switchboard.threadNames();
         String threadName;
-        serverThread thread;
+        serverBusyThread thread;
         
         boolean xml = ((String)header.get("PATH")).endsWith(".xml");
         prop.setLocalized(!xml);

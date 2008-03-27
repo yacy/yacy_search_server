@@ -25,7 +25,7 @@ import de.anomic.kelondro.kelondroRowSet;
 import de.anomic.kelondro.kelondroSQLTable;
 import de.anomic.kelondro.kelondroSplitTable;
 import de.anomic.kelondro.kelondroTree;
-import de.anomic.server.serverInstantThread;
+import de.anomic.server.serverInstantBusyThread;
 import de.anomic.server.serverMemory;
 import de.anomic.server.logging.serverLog;
 import de.anomic.ymage.ymageChart;
@@ -449,10 +449,10 @@ public class dbtest {
                     r = Math.abs(random.nextLong() % 1000);
                     jcontrol.add(new Long(r));
                     kcontrol.putb((int) r, "x".getBytes());
-                    serverInstantThread.oneTimeJob(new WriteJob(table_test, table_reference, r), 0, 50);
+                    serverInstantBusyThread.oneTimeJob(new WriteJob(table_test, table_reference, r), 0, 50);
                     if (random.nextLong() % 5 == 0) ra.add(new Long(r));
                     for (int j = 0; j < readCount; j++) {
-                        serverInstantThread.oneTimeJob(new ReadJob(table_test, table_reference, random.nextLong() % writeCount), random.nextLong() % 1000, 20);
+                        serverInstantBusyThread.oneTimeJob(new ReadJob(table_test, table_reference, random.nextLong() % writeCount), random.nextLong() % 1000, 20);
                     }
                     if ((ra.size() > 0) && (random.nextLong() % 7 == 0)) {
                         rc++;
@@ -461,13 +461,13 @@ public class dbtest {
                         jcontrol.remove(R);
                         kcontrol.removeb((int) R.longValue());
                         System.out.println("remove: " + R.longValue());
-                        serverInstantThread.oneTimeJob(new RemoveJob(table_test, table_reference, ((Long) ra.remove(p)).longValue()), 0, 50);
+                        serverInstantBusyThread.oneTimeJob(new RemoveJob(table_test, table_reference, ((Long) ra.remove(p)).longValue()), 0, 50);
                     }
                 }
                 System.out.println("removed: " + rc + ", size of jcontrol set: " + jcontrol.size() + ", size of kcontrol set: " + kcontrol.size());
-                while (serverInstantThread.instantThreadCounter > 0) {
+                while (serverInstantBusyThread.instantThreadCounter > 0) {
                     try {Thread.sleep(1000);} catch (InterruptedException e) {} // wait for all tasks to finish
-                    System.out.println("count: "  + serverInstantThread.instantThreadCounter + ", jobs: " + serverInstantThread.jobs.toString());
+                    System.out.println("count: "  + serverInstantBusyThread.instantThreadCounter + ", jobs: " + serverInstantBusyThread.jobs.toString());
                 }
                 try {Thread.sleep(6000);} catch (InterruptedException e) {}
             }

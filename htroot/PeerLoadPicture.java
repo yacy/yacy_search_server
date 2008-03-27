@@ -7,9 +7,9 @@ import de.anomic.http.httpHeader;
 import de.anomic.plasma.plasmaGrafics;
 import de.anomic.plasma.plasmaSwitchboard;
 import de.anomic.plasma.plasmaGrafics.CircleThreadPiece;
+import de.anomic.server.serverBusyThread;
 import de.anomic.server.serverObjects;
 import de.anomic.server.serverSwitch;
-import de.anomic.server.serverThread;
 
 public class PeerLoadPicture {
     
@@ -36,7 +36,7 @@ public class PeerLoadPicture {
         
         Iterator<String> threads = env.threadNames();
         String threadname;
-        serverThread thread;
+        serverBusyThread thread;
         
         long busy_time = 0;
         

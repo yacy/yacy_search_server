@@ -24,29 +24,9 @@
 
 package de.anomic.server;
 
-import java.util.concurrent.LinkedBlockingQueue;
-
-
 public class serverProcessor {
 
     public static final int availableCPU = Runtime.getRuntime().availableProcessors();
     public static int       useCPU = availableCPU;
-  
-    public static class queue<I, O> {
-        String nickname;
-        int priority;
-        serverProcess<I, O> implementation;
-        LinkedBlockingQueue<I> inputQueue;
-        LinkedBlockingQueue<O> outputQueue;
-        
-        public queue(String nickname, int priority, serverProcess<I, O> implementation) {
-            this.nickname = nickname;
-            this.priority = priority;
-            this.implementation = implementation;
-            this.inputQueue = new LinkedBlockingQueue<I>();
-            this.outputQueue = new LinkedBlockingQueue<O>();
-        }
-    }
-    
-    
+
 }

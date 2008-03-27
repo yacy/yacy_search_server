@@ -70,7 +70,6 @@ import de.anomic.server.serverDate;
 import de.anomic.server.serverMemory;
 import de.anomic.server.serverObjects;
 import de.anomic.server.serverSwitch;
-import de.anomic.server.serverThread;
 import de.anomic.yacy.yacyCore;
 import de.anomic.yacy.yacySeed;
 import de.anomic.yacy.yacySeedUploader;
@@ -257,8 +256,8 @@ public class SettingsAck_p {
                 httpd.initPortForwarding();
                 
                 // notifying publishSeed Thread
-                serverThread peerPing = env.getThread("30_peerping");
-                peerPing.notifyThread();
+                //serverThread peerPing = env.getThread("30_peerping");
+                //peerPing.notifyThread();
             } catch (Exception e) {
                 prop.put("info", "23"); 
                 prop.putHTML("info_errormsg",(e.getMessage() == null) ? "unknown" : e.getMessage().replaceAll("\n","<br>"));

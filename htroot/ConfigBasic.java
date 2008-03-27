@@ -59,7 +59,7 @@ import de.anomic.plasma.plasmaSwitchboard;
 import de.anomic.server.serverCodings;
 import de.anomic.server.serverCore;
 import de.anomic.server.serverDomains;
-import de.anomic.server.serverInstantThread;
+import de.anomic.server.serverInstantBusyThread;
 import de.anomic.server.serverObjects;
 import de.anomic.server.serverSwitch;
 import de.anomic.yacy.yacyCore;
@@ -96,7 +96,7 @@ public class ConfigBasic {
         
         //boolean doPeerPing = false;
         if ((yacyCore.seedDB.mySeed().isVirgin()) || (yacyCore.seedDB.mySeed().isJunior())) {
-            serverInstantThread.oneTimeJob(sb.yc, "peerPing", null, 0);
+            serverInstantBusyThread.oneTimeJob(sb.yc, "peerPing", null, 0);
             //doPeerPing = true;
         }
         

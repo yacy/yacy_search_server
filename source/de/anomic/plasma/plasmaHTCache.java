@@ -83,7 +83,7 @@ import de.anomic.plasma.cache.UnsupportedProtocolException;
 import de.anomic.server.serverCodings;
 import de.anomic.server.serverDomains;
 import de.anomic.server.serverFileUtils;
-import de.anomic.server.serverInstantThread;
+import de.anomic.server.serverInstantBusyThread;
 import de.anomic.server.serverSystem;
 import de.anomic.server.serverThread;
 import de.anomic.server.logging.serverLog;
@@ -292,7 +292,7 @@ public final class plasmaHTCache {
         // start the cache startup thread
         // this will collect information about the current cache size and elements
         try {
-            cacheScanThread = serverInstantThread.oneTimeJob(Class.forName("de.anomic.plasma.plasmaHTCache"), "cacheScan", log, 120000);
+            cacheScanThread = serverInstantBusyThread.oneTimeJob(Class.forName("de.anomic.plasma.plasmaHTCache"), "cacheScan", log, 120000);
         } catch (ClassNotFoundException e) {
             e.printStackTrace();
         }

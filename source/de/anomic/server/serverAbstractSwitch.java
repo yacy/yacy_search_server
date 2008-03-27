@@ -66,7 +66,7 @@ public abstract class serverAbstractSwitch<E> implements serverSwitch<E> {
     private   Map<String, String>                    configProps;
     private   Map<String, String>                    configRemoved;
     private   HashMap<InetAddress, String>           authorization;
-    private   TreeMap<String, serverThread>          workerThreads;
+    private   TreeMap<String, serverBusyThread>      workerThreads;
     private   TreeMap<String, serverSwitchAction>    switchActions;
     protected HashMap<String, TreeMap<Long, String>> accessTracker; // mappings from requesting host to an ArrayList of serverTrack-entries
     private   LinkedBlockingQueue<E> cacheStack;
@@ -151,7 +151,7 @@ public abstract class serverAbstractSwitch<E> implements serverSwitch<E> {
         accessTracker = new HashMap<String, TreeMap<Long, String>>();
 
         // init thread control
-        workerThreads = new TreeMap<String, serverThread>();
+        workerThreads = new TreeMap<String, serverBusyThread>();
 
         // init switch actions
         switchActions = new TreeMap<String, serverSwitchAction>();
@@ -379,7 +379,7 @@ public abstract class serverAbstractSwitch<E> implements serverSwitch<E> {
             String threadShortDescription,
             String threadLongDescription,
             String threadMonitorURL,
-            serverThread newThread,
+            serverBusyThread newThread,
             long startupDelay) {
         deployThread(threadName, threadShortDescription, threadLongDescription, threadMonitorURL,
                      newThread, startupDelay,
@@ -393,7 +393,7 @@ public abstract class serverAbstractSwitch<E> implements serverSwitch<E> {
             String threadShortDescription,
             String threadLongDescription,
             String threadMonitorURL,
-            serverThread newThread,
+            serverBusyThread newThread,
             long startupDelay,
             long initialIdleSleep,
             long initialBusySleep,
@@ -429,12 +429,12 @@ public abstract class serverAbstractSwitch<E> implements serverSwitch<E> {
         if (workerThreads.containsKey(threadName)) newThread.start();
     }
 
-    public serverThread getThread(String threadName) {
-        return (serverThread) workerThreads.get(threadName);
+    public serverBusyThread getThread(String threadName) {
+        return workerThreads.get(threadName);
     }
     
     public void setThreadPerformance(String threadName, long idleMillis, long busyMillis, long memprereqBytes) {
-        serverThread thread = (serverThread) workerThreads.get(threadName);
+        serverBusyThread thread = workerThreads.get(threadName);
         if (thread != null) {
             thread.setIdleSleep(idleMillis);
             thread.setBusySleep(busyMillis);
@@ -452,7 +452,7 @@ public abstract class serverAbstractSwitch<E> implements serverSwitch<E> {
     public void intermissionAllThreads(long pause) {
         Iterator<String> e = workerThreads.keySet().iterator();
         while (e.hasNext()) {
-            ((serverThread) workerThreads.get(e.next())).intermission(pause);
+            workerThreads.get(e.next()).intermission(pause);
         }
     }
     

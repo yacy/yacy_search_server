@@ -137,9 +137,10 @@ import de.anomic.plasma.crawler.plasmaProtocolLoader;
 import de.anomic.plasma.dbImport.dbImportManager;
 import de.anomic.plasma.parser.ParserException;
 import de.anomic.server.serverAbstractSwitch;
+import de.anomic.server.serverBusyThread;
 import de.anomic.server.serverDomains;
 import de.anomic.server.serverFileUtils;
-import de.anomic.server.serverInstantThread;
+import de.anomic.server.serverInstantBusyThread;
 import de.anomic.server.serverMemory;
 import de.anomic.server.serverObjects;
 import de.anomic.server.serverProfiling;
@@ -975,7 +976,7 @@ public final class plasmaSwitchboard extends serverAbstractSwitch<plasmaSwitchbo
         // start yacy core
         log.logConfig("Starting YaCy Protocol Core");
         this.yc = new yacyCore(this);
-        serverInstantThread.oneTimeJob(yacyCore.peerActions, "loadSeedLists", yacyCore.log, 0);
+        serverInstantBusyThread.oneTimeJob(yacyCore.peerActions, "loadSeedLists", yacyCore.log, 0);
         long startedSeedListAquisition = System.currentTimeMillis();
         
         // set up local robots.txt
@@ -1291,43 +1292,41 @@ public final class plasmaSwitchboard extends serverAbstractSwitch<plasmaSwitchbo
         int indexing_cluster = Integer.parseInt(getConfig(INDEXER_CLUSTER, "1"));
         if (indexing_cluster < 1) indexing_cluster = 1;
         deployThread(CLEANUP, "Cleanup", "simple cleaning process for monitoring information", null,
-        new serverInstantThread(this, CLEANUP_METHOD_START, CLEANUP_METHOD_JOBCOUNT, CLEANUP_METHOD_FREEMEM), 10000); // all 5 Minutes
+        new serverInstantBusyThread(this, CLEANUP_METHOD_START, CLEANUP_METHOD_JOBCOUNT, CLEANUP_METHOD_FREEMEM), 10000); // all 5 Minutes
         deployThread(CRAWLSTACK, "Crawl URL Stacker", "process that checks url for double-occurrences and for allowance/disallowance by robots.txt", null,
-        new serverInstantThread(crawlStacker, CRAWLSTACK_METHOD_START, CRAWLSTACK_METHOD_JOBCOUNT, CRAWLSTACK_METHOD_FREEMEM), 8000);
+        new serverInstantBusyThread(crawlStacker, CRAWLSTACK_METHOD_START, CRAWLSTACK_METHOD_JOBCOUNT, CRAWLSTACK_METHOD_FREEMEM), 8000);
 
         //deployThread(PARSER, "Parsing", "thread that feeds a concurrent document parsing queue", "/IndexCreateIndexingQueue_p.html",
         //new serverInstantThread(this, PARSER_METHOD_START, PARSER_METHOD_JOBCOUNT, PARSER_METHOD_FREEMEM), 10000);
         
         deployThread(INDEXER, "Indexing", "thread that either distributes the index into the DHT, stores parsed documents or flushes the index cache", "/IndexCreateIndexingQueue_p.html",
-        new serverInstantThread(this, INDEXER_METHOD_START, INDEXER_METHOD_JOBCOUNT, INDEXER_METHOD_FREEMEM), 10000);
+        new serverInstantBusyThread(this, INDEXER_METHOD_START, INDEXER_METHOD_JOBCOUNT, INDEXER_METHOD_FREEMEM), 10000);
 
         for (i = 1; i < indexing_cluster; i++) {
             setConfig((i + 80) + "_indexing_idlesleep", getConfig(INDEXER_IDLESLEEP, ""));
             setConfig((i + 80) + "_indexing_busysleep", getConfig(INDEXER_BUSYSLEEP, ""));
             deployThread((i + 80) + "_indexing", "Parsing/Indexing (cluster job)", "thread that performes document parsing and indexing", null,
-            new serverInstantThread(this, INDEXER_METHOD_START, INDEXER_METHOD_JOBCOUNT, INDEXER_METHOD_FREEMEM), 10000 + (i * 1000),
+            new serverInstantBusyThread(this, INDEXER_METHOD_START, INDEXER_METHOD_JOBCOUNT, INDEXER_METHOD_FREEMEM), 10000 + (i * 1000),
             Long.parseLong(getConfig(INDEXER_IDLESLEEP , "5000")),
             Long.parseLong(getConfig(INDEXER_BUSYSLEEP , "0")),
             Long.parseLong(getConfig(INDEXER_MEMPREREQ , "1000000")));
         }
 
         deployThread(PROXY_CACHE_ENQUEUE, "Proxy Cache Enqueue", "job takes new input files from RAM stack, stores them, and hands over to the Indexing Stack", null,
-        new serverInstantThread(this, PROXY_CACHE_ENQUEUE_METHOD_START, PROXY_CACHE_ENQUEUE_METHOD_JOBCOUNT, PROXY_CACHE_ENQUEUE_METHOD_FREEMEM), 10000);
+        new serverInstantBusyThread(this, PROXY_CACHE_ENQUEUE_METHOD_START, PROXY_CACHE_ENQUEUE_METHOD_JOBCOUNT, PROXY_CACHE_ENQUEUE_METHOD_FREEMEM), 10000);
         deployThread(CRAWLJOB_REMOTE_TRIGGERED_CRAWL, "Remote Crawl Job", "thread that performes a single crawl/indexing step triggered by a remote peer", null,
-        new serverInstantThread(crawlQueues, CRAWLJOB_REMOTE_TRIGGERED_CRAWL_METHOD_START, CRAWLJOB_REMOTE_TRIGGERED_CRAWL_METHOD_JOBCOUNT, CRAWLJOB_REMOTE_TRIGGERED_CRAWL_METHOD_FREEMEM), 30000);
+        new serverInstantBusyThread(crawlQueues, CRAWLJOB_REMOTE_TRIGGERED_CRAWL_METHOD_START, CRAWLJOB_REMOTE_TRIGGERED_CRAWL_METHOD_JOBCOUNT, CRAWLJOB_REMOTE_TRIGGERED_CRAWL_METHOD_FREEMEM), 30000);
         deployThread(CRAWLJOB_REMOTE_CRAWL_LOADER, "Remote Crawl URL Loader", "thread that loads remote crawl lists from other peers", "",
-        new serverInstantThread(crawlQueues, CRAWLJOB_REMOTE_CRAWL_LOADER_METHOD_START, CRAWLJOB_REMOTE_CRAWL_LOADER_METHOD_JOBCOUNT, CRAWLJOB_REMOTE_CRAWL_LOADER_METHOD_FREEMEM), 30000); // error here?
+        new serverInstantBusyThread(crawlQueues, CRAWLJOB_REMOTE_CRAWL_LOADER_METHOD_START, CRAWLJOB_REMOTE_CRAWL_LOADER_METHOD_JOBCOUNT, CRAWLJOB_REMOTE_CRAWL_LOADER_METHOD_FREEMEM), 30000); // error here?
         deployThread(CRAWLJOB_LOCAL_CRAWL, "Local Crawl", "thread that performes a single crawl step from the local crawl queue", "/IndexCreateWWWLocalQueue_p.html",
-        new serverInstantThread(crawlQueues, CRAWLJOB_LOCAL_CRAWL_METHOD_START, CRAWLJOB_LOCAL_CRAWL_METHOD_JOBCOUNT, CRAWLJOB_LOCAL_CRAWL_METHOD_FREEMEM), 10000);
+        new serverInstantBusyThread(crawlQueues, CRAWLJOB_LOCAL_CRAWL_METHOD_START, CRAWLJOB_LOCAL_CRAWL_METHOD_JOBCOUNT, CRAWLJOB_LOCAL_CRAWL_METHOD_FREEMEM), 10000);
         deployThread(SEED_UPLOAD, "Seed-List Upload", "task that a principal peer performes to generate and upload a seed-list to a ftp account", null,
-        new serverInstantThread(yc, SEED_UPLOAD_METHOD_START, SEED_UPLOAD_METHOD_JOBCOUNT, SEED_UPLOAD_METHOD_FREEMEM), 180000);
-        serverInstantThread peerPing = null;
+        new serverInstantBusyThread(yc, SEED_UPLOAD_METHOD_START, SEED_UPLOAD_METHOD_JOBCOUNT, SEED_UPLOAD_METHOD_FREEMEM), 180000);
         deployThread(PEER_PING, "YaCy Core", "this is the p2p-control and peer-ping task", null,
-        peerPing = new serverInstantThread(yc, PEER_PING_METHOD_START, PEER_PING_METHOD_JOBCOUNT, PEER_PING_METHOD_FREEMEM), 2000);
-        peerPing.setSyncObject(new Object());
+        new serverInstantBusyThread(yc, PEER_PING_METHOD_START, PEER_PING_METHOD_JOBCOUNT, PEER_PING_METHOD_FREEMEM), 2000);
         
         deployThread(INDEX_DIST, "DHT Distribution", "selection, transfer and deletion of index entries that are not searched on your peer, but on others", null,
-            new serverInstantThread(this, INDEX_DIST_METHOD_START, INDEX_DIST_METHOD_JOBCOUNT, INDEX_DIST_METHOD_FREEMEM), 60000,
+            new serverInstantBusyThread(this, INDEX_DIST_METHOD_START, INDEX_DIST_METHOD_JOBCOUNT, INDEX_DIST_METHOD_FREEMEM), 60000,
             Long.parseLong(getConfig(INDEX_DIST_IDLESLEEP , "5000")),
             Long.parseLong(getConfig(INDEX_DIST_BUSYSLEEP , "0")),
             Long.parseLong(getConfig(INDEX_DIST_MEMPREREQ , "1000000")));
@@ -2422,7 +2421,7 @@ public final class plasmaSwitchboard extends serverAbstractSwitch<plasmaSwitchbo
         if (wantedPPM >= 1000) wantedPPM = 1000;
         int newBusySleep = 60000 / wantedPPM; // for wantedPPM = 10: 6000; for wantedPPM = 1000: 60
 
-        serverThread thread;
+        serverBusyThread thread;
         
         thread = getThread(INDEX_DIST);
         if (thread != null) {

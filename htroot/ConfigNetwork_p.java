@@ -27,10 +27,10 @@
 
 import de.anomic.http.httpHeader;
 import de.anomic.plasma.plasmaSwitchboard;
+import de.anomic.server.serverBusyThread;
 import de.anomic.server.serverCodings;
 import de.anomic.server.serverObjects;
 import de.anomic.server.serverSwitch;
-import de.anomic.server.serverThread;
 import de.anomic.yacy.yacyCore;
 
 public class ConfigNetwork_p {
@@ -122,7 +122,7 @@ public class ConfigNetwork_p {
                 newppm = Math.max(1, Integer.parseInt(post.get("acceptCrawlLimit", "1")));
             } catch (NumberFormatException e) {}
             long newBusySleep = Math.max(100, 60000 / newppm);
-            serverThread rct = sb.getThread(plasmaSwitchboard.CRAWLJOB_REMOTE_TRIGGERED_CRAWL);
+            serverBusyThread rct = sb.getThread(plasmaSwitchboard.CRAWLJOB_REMOTE_TRIGGERED_CRAWL);
             rct.setBusySleep(newBusySleep);
             sb.setConfig(plasmaSwitchboard.CRAWLJOB_REMOTE_TRIGGERED_CRAWL_BUSYSLEEP, Long.toString(newBusySleep));
             

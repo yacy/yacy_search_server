@@ -83,7 +83,7 @@ import de.anomic.urlRedirector.urlRedirectord;
 import de.anomic.yacy.yacyCore;
 import de.anomic.yacy.yacySeed;
 
-public final class serverCore extends serverAbstractThread implements serverThread {
+public final class serverCore extends serverAbstractBusyThread implements serverBusyThread {
 
     // special ASCII codes used for protocol handling
     public static final byte HT = 9;  // Horizontal Tab
