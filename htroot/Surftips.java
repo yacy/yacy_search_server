@@ -154,11 +154,11 @@ public class Surftips {
 				prop.put("surftips_results_" + i + "_authorized_recommend_display", display);
 				prop.put("surftips_results_" + i + "_authorized_recommend_showScore", (showScore ? "1" : "0"));
 
-                prop.put("surftips_results_" + i + "_authorized_urlhash", urlhash);
-                prop.put("surftips_results_" + i + "_url", url);
-                prop.put("surftips_results_" + i + "_urlname", nxTools.shortenURLString(url, 60));
-                prop.put("surftips_results_" + i + "_urlhash", urlhash);
-                prop.putHTML("surftips_results_" + i + "_title", (showScore) ? ("(" + ranking.getScore(urlhash) + ") " + title) : title);
+                prop.putHTML("surftips_results_" + i + "_authorized_urlhash", urlhash, true);
+                prop.putHTML("surftips_results_" + i + "_url", url, true);
+                prop.putHTML("surftips_results_" + i + "_urlname", nxTools.shortenURLString(url, 60), true);
+                prop.putHTML("surftips_results_" + i + "_urlhash", urlhash, true);
+                prop.putHTML("surftips_results_" + i + "_title", (showScore) ? ("(" + ranking.getScore(urlhash) + ") " + title) : title, true);
                 prop.putHTML("surftips_results_" + i + "_description", description);
                 i++;
                 
