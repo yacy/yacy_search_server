@@ -202,7 +202,7 @@ public class plasmaCrawlZURL {
             newrow.setCol(4, this.anycause.getBytes());
             newrow.setCol(5, this.bentry.toRow().bytes());
             try {
-                urlIndex.put(newrow);
+                if (urlIndex != null) urlIndex.put(newrow);
                 this.stored = true;
             } catch (IOException e) {
                 System.out.println("INTERNAL ERROR AT plasmaEURL:url2hash:" + e.toString());

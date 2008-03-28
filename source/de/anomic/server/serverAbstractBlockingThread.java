@@ -28,7 +28,7 @@ import java.util.concurrent.BlockingQueue;
 
 import de.anomic.server.logging.serverLog;
 
-public abstract class serverAbstractBlockingThread<I, O> extends serverAbstractThread implements serverBlockingThread<I, O> {
+public abstract class serverAbstractBlockingThread<I extends serverProcessorJob, O extends serverProcessorJob> extends serverAbstractThread implements serverBlockingThread<I, O> {
 
     private BlockingQueue<I> input = null;
     private BlockingQueue<O> output = null;
@@ -60,8 +60,16 @@ public abstract class serverAbstractBlockingThread<I, O> extends serverAbstractT
                 // do job
                 timestamp = System.currentTimeMillis();
                 memstamp0 = serverMemory.used();
-                O out = this.job(this.input.take());
-                if (out != null) this.output.add(out);
+                I in = this.input.take();
+                if ((in == null) || (in == serverProcessor.shutdownJob)) {
+                    // the poison pill: shutdown
+                    // a null element is pushed to the queue on purpose to signal
+                    // that a termination should be made
+                    this.running = false;
+                    break;
+                }
+                O out = this.job(in);
+                if ((out != null) && (this.output != null)) this.output.put(out);
                 // do memory and busy/idle-count/time monitoring
                 memstamp1 = serverMemory.used();
                 if (memstamp1 >= memstamp0) {

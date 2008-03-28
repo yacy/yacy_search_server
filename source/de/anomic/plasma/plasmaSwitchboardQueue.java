@@ -213,20 +213,13 @@ public class plasmaSwitchboardQueue {
         return this.queueInProcess.values();
     }
     
-    public static final int QUEUE_STATE_FRESH                      =  0;
-    public static final int QUEUE_STATE_PARSING_WAITING            =  1;
-    public static final int QUEUE_STATE_PARSING_RUNNING            =  2;
-    public static final int QUEUE_STATE_PARSING_COMPLETE           =  3;
-    public static final int QUEUE_STATE_CONDENSING_WAITING         =  4;
-    public static final int QUEUE_STATE_CONDENSING_RUNNING         =  5;
-    public static final int QUEUE_STATE_CONDENSING_COMPLETE        =  6;
-    public static final int QUEUE_STATE_STRUCTUREANALYSIS_WAITING  =  7;
-    public static final int QUEUE_STATE_STRUCTUREANALYSIS_RUNNING  =  8;
-    public static final int QUEUE_STATE_STRUCTUREANALYSIS_COMPLETE =  9;
-    public static final int QUEUE_STATE_INDEXSTORAGE_WAITING       = 10;
-    public static final int QUEUE_STATE_INDEXSTORAGE_RUNNING       = 11;
-    public static final int QUEUE_STATE_INDEXSTORAGE_COMPLETE      = 12;
-
+    public static final int QUEUE_STATE_FRESH             = 0;
+    public static final int QUEUE_STATE_PARSING           = 1;
+    public static final int QUEUE_STATE_CONDENSING        = 2;
+    public static final int QUEUE_STATE_STRUCTUREANALYSIS = 3;
+    public static final int QUEUE_STATE_INDEXSTORAGE      = 4;
+    public static final int QUEUE_STATE_FINISHED          = 5;
+    
     public class QueueEntry {
         yacyURL url;          // plasmaURL.urlStringLength
         String referrerHash;  // plasmaURL.urlHashLength

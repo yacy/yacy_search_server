@@ -586,15 +586,6 @@ filterOutStopwordsFromTopwords=true
 cleanup.deletionProcessedNews = true
 cleanup.deletionPublishedNews = true
 
-# multiprocessor-settings
-# you may want to run time-consuming processes on several processors
-# the most time-consuming process is the indexing-Process
-# We implemented an option to run several of these processes here
-# setting the number of processes to Zero is not allowed
-# If you have a double-processor system,
-# a cluster value of '2' would be appropriate
-80_indexing_cluster=1
-
 # default memory settings for startup of yacy
 # is valid in unix/shell and windows environments but
 # not for first startup of YaCy

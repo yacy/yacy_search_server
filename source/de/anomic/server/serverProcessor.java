@@ -24,9 +24,58 @@
 
 package de.anomic.server;
 
-public class serverProcessor {
+import java.util.concurrent.BlockingQueue;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.TimeUnit;
+
+public class serverProcessor<I extends serverProcessorJob, O extends serverProcessorJob> {
 
     public static final int availableCPU = Runtime.getRuntime().availableProcessors();
     public static int       useCPU = availableCPU;
 
+    ExecutorService executor;
+    BlockingQueue<I> input;
+    BlockingQueue<O> output;
+    int poolsize;
+    
+    public serverProcessor(Object env, String jobExec, BlockingQueue<I> input, BlockingQueue<O> output) {
+        this(env, jobExec, input, output, useCPU + 1);
+    }
+
+    public serverProcessor(Object env, String jobExec, BlockingQueue<I> input, BlockingQueue<O> output, int poolsize) {
+        // start a fixed number of executors that handle entries in the process queue
+        this.input = input;
+        this.output = output;
+        this.poolsize = poolsize;
+        executor = Executors.newCachedThreadPool();
+        for (int i = 0; i < poolsize; i++) {
+            executor.submit(new serverInstantBlockingThread<I, O>(env, jobExec, input, output));
+        }
+    }
+    
+    @SuppressWarnings("unchecked")
+    public void shutdown(long millisTimeout) {
+        if (executor == null) return;
+        if (executor.isShutdown()) return;
+        // put poison pills into the queue
+        for (int i = 0; i < poolsize; i++) {
+            try {
+                input.put((I) shutdownJob);
+            } catch (InterruptedException e) { }
+        }
+        // wait for shutdown
+        try {
+            executor.awaitTermination(millisTimeout, TimeUnit.MILLISECONDS);
+        } catch (InterruptedException e) {}
+        executor.shutdown();
+        executor = null;
+    }
+    
+    public static class SpecialJob implements serverProcessorJob {
+        int type = 0;
+    }
+    
+    public static final serverProcessorJob shutdownJob = new SpecialJob();
+    
 }

@@ -107,6 +107,8 @@ import java.util.Timer;
 import java.util.TimerTask;
 import java.util.TreeMap;
 import java.util.TreeSet;
+import java.util.concurrent.ArrayBlockingQueue;
+import java.util.concurrent.LinkedBlockingQueue;
 
 import de.anomic.data.URLLicense;
 import de.anomic.data.blogBoard;
@@ -143,6 +145,8 @@ import de.anomic.server.serverFileUtils;
 import de.anomic.server.serverInstantBusyThread;
 import de.anomic.server.serverMemory;
 import de.anomic.server.serverObjects;
+import de.anomic.server.serverProcessor;
+import de.anomic.server.serverProcessorJob;
 import de.anomic.server.serverProfiling;
 import de.anomic.server.serverSemaphore;
 import de.anomic.server.serverSwitch;
@@ -238,6 +242,15 @@ public final class plasmaSwitchboard extends serverAbstractSwitch<plasmaSwitchbo
     public  URLLicense                  licensedURLs;
     public  Timer                       moreMemory;
 
+    public serverProcessor<indexingQueueEntry, indexingQueueEntry> indexingDocumentProcessor;
+    public serverProcessor<indexingQueueEntry, indexingQueueEntry> indexingCondensementProcessor;
+    public serverProcessor<indexingQueueEntry, indexingQueueEntry> indexingAnalysisProcessor;
+    public serverProcessor<indexingQueueEntry, indexingQueueEntry> indexingStorageProcessor;
+    public LinkedBlockingQueue<indexingQueueEntry> indexingDocumentQueue;
+    public LinkedBlockingQueue<indexingQueueEntry> indexingCondensementQueue;
+    public LinkedBlockingQueue<indexingQueueEntry> indexingAnalysisQueue;
+    public ArrayBlockingQueue<indexingQueueEntry> indexingStorageQueue;
+    
     /*
      * Remote Proxy configuration
      */
@@ -386,7 +399,6 @@ public final class plasmaSwitchboard extends serverAbstractSwitch<plasmaSwitchbo
      * <p>Name of the indexer thread, performing the actual indexing of a website</p>
      */
     public static final String INDEXER                      = "80_indexing";
-    public static final String INDEXER_CLUSTER              = "80_indexing_cluster";
     public static final String INDEXER_MEMPREREQ            = "80_indexing_memprereq";
     public static final String INDEXER_IDLESLEEP            = "80_indexing_idlesleep";
     public static final String INDEXER_BUSYSLEEP            = "80_indexing_busysleep";
@@ -1282,36 +1294,30 @@ public final class plasmaSwitchboard extends serverAbstractSwitch<plasmaSwitchbo
         try {Thread.sleep(1000);} catch (InterruptedException e) {}
         this.clusterhashes = yacyCore.seedDB.clusterHashes(getConfig("cluster.peers.yacydomain", ""));
         
-        // deploy threads
+        // deploy blocking threads
+
+        indexingDocumentQueue     = new LinkedBlockingQueue<indexingQueueEntry>();
+        indexingCondensementQueue = new LinkedBlockingQueue<indexingQueueEntry>();
+        indexingAnalysisQueue     = new LinkedBlockingQueue<indexingQueueEntry>();
+        indexingStorageQueue      = new ArrayBlockingQueue<indexingQueueEntry>(1);
+        indexingDocumentProcessor     = new serverProcessor<indexingQueueEntry, indexingQueueEntry>(this, "parseDocument", indexingDocumentQueue, indexingCondensementQueue);
+        indexingCondensementProcessor = new serverProcessor<indexingQueueEntry, indexingQueueEntry>(this, "condenseDocument", indexingCondensementQueue, indexingAnalysisQueue);
+        indexingAnalysisProcessor     = new serverProcessor<indexingQueueEntry, indexingQueueEntry>(this, "webStructureAnalysis", indexingAnalysisQueue, indexingStorageQueue);
+        indexingStorageProcessor      = new serverProcessor<indexingQueueEntry, indexingQueueEntry>(this, "storeDocumentIndex", indexingStorageQueue, null);
+        
+        // deploy busy threads
         log.logConfig("Starting Threads");
         serverMemory.gc(1000, "plasmaSwitchboard, help for profiler"); // help for profiler - thq
 
         moreMemory = new Timer(); // init GC Thread - thq
         moreMemory.schedule(new MoreMemory(), 300000, 600000);
-
-        int indexing_cluster = Integer.parseInt(getConfig(INDEXER_CLUSTER, "1"));
-        if (indexing_cluster < 1) indexing_cluster = 1;
+        
         deployThread(CLEANUP, "Cleanup", "simple cleaning process for monitoring information", null,
         new serverInstantBusyThread(this, CLEANUP_METHOD_START, CLEANUP_METHOD_JOBCOUNT, CLEANUP_METHOD_FREEMEM), 10000); // all 5 Minutes
         deployThread(CRAWLSTACK, "Crawl URL Stacker", "process that checks url for double-occurrences and for allowance/disallowance by robots.txt", null,
         new serverInstantBusyThread(crawlStacker, CRAWLSTACK_METHOD_START, CRAWLSTACK_METHOD_JOBCOUNT, CRAWLSTACK_METHOD_FREEMEM), 8000);
-
-        //deployThread(PARSER, "Parsing", "thread that feeds a concurrent document parsing queue", "/IndexCreateIndexingQueue_p.html",
-        //new serverInstantThread(this, PARSER_METHOD_START, PARSER_METHOD_JOBCOUNT, PARSER_METHOD_FREEMEM), 10000);
-        
-        deployThread(INDEXER, "Indexing", "thread that either distributes the index into the DHT, stores parsed documents or flushes the index cache", "/IndexCreateIndexingQueue_p.html",
+        deployThread(INDEXER, "Indexing", "thread that either initiates a parsing/indexing queue, distributes the index into the DHT, stores parsed documents or flushes the index cache", "/IndexCreateIndexingQueue_p.html",
         new serverInstantBusyThread(this, INDEXER_METHOD_START, INDEXER_METHOD_JOBCOUNT, INDEXER_METHOD_FREEMEM), 10000);
-
-        for (i = 1; i < indexing_cluster; i++) {
-            setConfig((i + 80) + "_indexing_idlesleep", getConfig(INDEXER_IDLESLEEP, ""));
-            setConfig((i + 80) + "_indexing_busysleep", getConfig(INDEXER_BUSYSLEEP, ""));
-            deployThread((i + 80) + "_indexing", "Parsing/Indexing (cluster job)", "thread that performes document parsing and indexing", null,
-            new serverInstantBusyThread(this, INDEXER_METHOD_START, INDEXER_METHOD_JOBCOUNT, INDEXER_METHOD_FREEMEM), 10000 + (i * 1000),
-            Long.parseLong(getConfig(INDEXER_IDLESLEEP , "5000")),
-            Long.parseLong(getConfig(INDEXER_BUSYSLEEP , "0")),
-            Long.parseLong(getConfig(INDEXER_MEMPREREQ , "1000000")));
-        }
-
         deployThread(PROXY_CACHE_ENQUEUE, "Proxy Cache Enqueue", "job takes new input files from RAM stack, stores them, and hands over to the Indexing Stack", null,
         new serverInstantBusyThread(this, PROXY_CACHE_ENQUEUE_METHOD_START, PROXY_CACHE_ENQUEUE_METHOD_JOBCOUNT, PROXY_CACHE_ENQUEUE_METHOD_FREEMEM), 10000);
         deployThread(CRAWLJOB_REMOTE_TRIGGERED_CRAWL, "Remote Crawl Job", "thread that performes a single crawl/indexing step triggered by a remote peer", null,
@@ -1743,9 +1749,13 @@ public final class plasmaSwitchboard extends serverAbstractSwitch<plasmaSwitchbo
         parser.close();
         plasmaHTCache.close();
         sbQueue.close();
+        indexingDocumentProcessor.shutdown(1000);
+        indexingCondensementProcessor.shutdown(1000);
+        indexingAnalysisProcessor.shutdown(1000);
         webStructure.flushCitationReference("crg");
         webStructure.close();
         log.logConfig("SWITCHBOARD SHUTDOWN STEP 3: sending termination signal to database manager (stand by...)");
+        indexingStorageProcessor.shutdown(1000);
         wordIndex.close();
         yc.close();
         log.logConfig("SWITCHBOARD SHUTDOWN TERMINATED");
@@ -1873,61 +1883,46 @@ public final class plasmaSwitchboard extends serverAbstractSwitch<plasmaSwitchbo
             }
             sbQueue.enQueueToActive(queueEntry);
             
+            // check for interruption
+            checkInterruption();
+
+            this.indexingDocumentQueue.put(new indexingQueueEntry(queueEntry, null, null));
+            /*
+            
             // THE FOLLOWING CAN BE CONCURRENT ->
             
             // parse and index the resource
-            queueEntry.updateStatus(plasmaSwitchboardQueue.QUEUE_STATE_PARSING_WAITING);
-            queueEntry.updateStatus(plasmaSwitchboardQueue.QUEUE_STATE_PARSING_RUNNING);
-            plasmaParserDocument document = parseDocument(queueEntry);
-            if (document == null) {
-                if (!queueEntry.profile().storeHTCache()) {
-                    plasmaHTCache.filesInUse.remove(queueEntry.cacheFile());
-                    //plasmaHTCache.deleteURLfromCache(entry.url());
-                }
-                queueEntry.close();
-                return true;
-            }
-            queueEntry.updateStatus(plasmaSwitchboardQueue.QUEUE_STATE_PARSING_COMPLETE);
+            indexingQueueEntry document = parseDocument(new indexingQueueEntry(queueEntry, null, null));
             
             // do condensing
-            queueEntry.updateStatus(plasmaSwitchboardQueue.QUEUE_STATE_CONDENSING_WAITING);
-            queueEntry.updateStatus(plasmaSwitchboardQueue.QUEUE_STATE_CONDENSING_RUNNING);
-            plasmaCondenser condensement = condenseDocument(queueEntry, document);
-            if (condensement == null) {
-                if (!queueEntry.profile().storeHTCache()) {
-                    plasmaHTCache.filesInUse.remove(queueEntry.cacheFile());
-                    //plasmaHTCache.deleteURLfromCache(entry.url());
-                }
-                queueEntry.close();
-                return true;
-            }
-            queueEntry.updateStatus(plasmaSwitchboardQueue.QUEUE_STATE_CONDENSING_COMPLETE);
+            indexingQueueEntry condensement = condenseDocument(document);
             
             // do a web structure analysis
-            queueEntry.updateStatus(plasmaSwitchboardQueue.QUEUE_STATE_STRUCTUREANALYSIS_WAITING);
-            queueEntry.updateStatus(plasmaSwitchboardQueue.QUEUE_STATE_STRUCTUREANALYSIS_RUNNING);
-            document.notifyWebStructure(webStructure, condensement, queueEntry.getModificationDate());
-            queueEntry.updateStatus(plasmaSwitchboardQueue.QUEUE_STATE_STRUCTUREANALYSIS_COMPLETE);
+            indexingQueueEntry analysis = webStructureAnalysis(condensement);
             
             // <- CONCURRENT UNTIL HERE, THEN SERIALIZE AGAIN
             
             // store the result
-            queueEntry.updateStatus(plasmaSwitchboardQueue.QUEUE_STATE_INDEXSTORAGE_WAITING);
-            queueEntry.updateStatus(plasmaSwitchboardQueue.QUEUE_STATE_INDEXSTORAGE_RUNNING);
-            storeDocumentIndex(queueEntry, document, condensement);
-            queueEntry.updateStatus(plasmaSwitchboardQueue.QUEUE_STATE_INDEXSTORAGE_COMPLETE);
-            
-            // finally close the queue process
-            if (!queueEntry.profile().storeHTCache()) {
-                plasmaHTCache.filesInUse.remove(queueEntry.cacheFile());
-                //plasmaHTCache.deleteURLfromCache(entry.url());
-            }
-            queueEntry.close();
-            
+            storeDocumentIndex(analysis);
+            */
             return true;
         } catch (InterruptedException e) {
             log.logInfo("DEQUEUE: Shutdown detected.");
             return false;
+        }
+    }
+    
+    public static class indexingQueueEntry implements serverProcessorJob {
+        public plasmaSwitchboardQueue.QueueEntry queueEntry;
+        public plasmaParserDocument document;
+        public plasmaCondenser condenser;
+        public indexingQueueEntry(
+                plasmaSwitchboardQueue.QueueEntry queueEntry,
+                plasmaParserDocument document,
+                plasmaCondenser condenser) {
+            this.queueEntry = queueEntry;
+            this.document = document;
+            this.condenser = condenser;
         }
     }
     
@@ -2134,6 +2129,25 @@ public final class plasmaSwitchboard extends serverAbstractSwitch<plasmaSwitchbo
         }
     }
     
+    public indexingQueueEntry parseDocument(indexingQueueEntry in) {
+        in.queueEntry.updateStatus(plasmaSwitchboardQueue.QUEUE_STATE_PARSING);
+        plasmaParserDocument document = null;
+        try {
+            document = parseDocument(in.queueEntry);
+        } catch (InterruptedException e) {
+            document = null;
+        }
+        if (document == null) {
+            if (!in.queueEntry.profile().storeHTCache()) {
+                plasmaHTCache.filesInUse.remove(in.queueEntry.cacheFile());
+                //plasmaHTCache.deleteURLfromCache(entry.url());
+            }
+            in.queueEntry.close();
+            return null;
+        }
+        return new indexingQueueEntry(in.queueEntry, document, null);
+    }
+    
     private plasmaParserDocument parseDocument(plasmaSwitchboardQueue.QueueEntry entry) throws InterruptedException {
         plasmaParserDocument document = null;
         int processCase = entry.processCase();
@@ -2198,6 +2212,25 @@ public final class plasmaSwitchboard extends serverAbstractSwitch<plasmaSwitchbo
         return document;
     }
     
+    public indexingQueueEntry condenseDocument(indexingQueueEntry in) {
+        in.queueEntry.updateStatus(plasmaSwitchboardQueue.QUEUE_STATE_CONDENSING);
+        plasmaCondenser condenser = null;
+        try {
+            condenser = condenseDocument(in.queueEntry, in.document);
+        } catch (InterruptedException e) {
+            condenser = null;
+        }
+        if (condenser == null) {
+            if (!in.queueEntry.profile().storeHTCache()) {
+                plasmaHTCache.filesInUse.remove(in.queueEntry.cacheFile());
+                //plasmaHTCache.deleteURLfromCache(entry.url());
+            }
+            in.queueEntry.close();
+            return null;
+        }
+        return new indexingQueueEntry(in.queueEntry, in.document, condenser);
+    }
+    
     private plasmaCondenser condenseDocument(plasmaSwitchboardQueue.QueueEntry entry, plasmaParserDocument document) throws InterruptedException {
         // CREATE INDEX
         String dc_title = document.dc_title();
@@ -2240,6 +2273,23 @@ public final class plasmaSwitchboard extends serverAbstractSwitch<plasmaSwitchbo
             return null;
         }
         return condenser;
+    }
+    
+    public indexingQueueEntry webStructureAnalysis(indexingQueueEntry in) {
+        in.queueEntry.updateStatus(plasmaSwitchboardQueue.QUEUE_STATE_STRUCTUREANALYSIS);
+        in.document.notifyWebStructure(webStructure, in.condenser, in.queueEntry.getModificationDate());
+        return in;
+    }
+   
+    public void storeDocumentIndex(indexingQueueEntry in) {
+        in.queueEntry.updateStatus(plasmaSwitchboardQueue.QUEUE_STATE_INDEXSTORAGE);
+        storeDocumentIndex(in.queueEntry, in.document, in.condenser);
+        if (!in.queueEntry.profile().storeHTCache()) {
+                plasmaHTCache.filesInUse.remove(in.queueEntry.cacheFile());
+                //plasmaHTCache.deleteURLfromCache(entry.url());
+        }
+        in.queueEntry.updateStatus(plasmaSwitchboardQueue.QUEUE_STATE_FINISHED);
+        in.queueEntry.close();
     }
     
     private void storeDocumentIndex(plasmaSwitchboardQueue.QueueEntry entry, plasmaParserDocument document, plasmaCondenser condenser) {

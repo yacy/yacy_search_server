@@ -32,6 +32,7 @@ public abstract class serverAbstractBusyThread extends serverAbstractThread impl
     private long idletime = 0, memprereq = 0;
     private long idleCycles = 0, busyCycles = 0, outofmemoryCycles = 0;
     private boolean intermissionObedient = true;
+    private Object syncObject = new Object();
     
     protected final void announceMoreSleepTime(long millis) {
         this.idletime += millis;
@@ -181,12 +182,31 @@ public abstract class serverAbstractBusyThread extends serverAbstractThread impl
         this.close();
         logSystem("thread '" + this.getName() + "' terminated.");
     }
-    
+
     private void ratz(long millis) {
-        try {
-            Thread.sleep(millis);
+        try {/*
+            if (this.syncObject != null) {
+                synchronized (this.syncObject) {
+                    this.syncObject.wait(millis);
+                }
+            } else {*/
+                Thread.sleep(millis);
+            //}
         } catch (InterruptedException e) {
-            if (this.log != null) this.log.logConfig("thread '" + this.getName() + "' interrupted because of shutdown.");
+            if (this.log != null)
+                this.log.logConfig("thread '" + this.getName() + "' interrupted because of shutdown.");
+        }
+    }
+    
+    public void notifyThread() {
+        if (this.syncObject != null) {
+            synchronized (this.syncObject) {
+                if (this.log != null)
+                    this.log.logFine("thread '" + this.getName()
+                            + "' has received a notification from thread '"
+                            + Thread.currentThread().getName() + "'.");
+                this.syncObject.notifyAll();
+            }
         }
     }
     

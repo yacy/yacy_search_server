@@ -67,4 +67,5 @@ public interface serverBusyThread extends serverThread {
     // is called when an outOfMemoryCycle is performed
     // this method should try to free some memory, so that the job can be executed
 
+    public void notifyThread();
 }

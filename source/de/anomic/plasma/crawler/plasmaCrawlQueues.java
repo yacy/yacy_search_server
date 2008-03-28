@@ -84,7 +84,7 @@ public class plasmaCrawlQueues {
         errorURL = new plasmaCrawlZURL(plasmaPath, "urlError2.db", false);
         delegatedURL = new plasmaCrawlZURL(plasmaPath, "urlDelegated2.db", true);
     }
-
+    
     public String urlExists(String hash) {
         // tests if hash occurrs in any database
         // if it exists, the name of the database is returned,

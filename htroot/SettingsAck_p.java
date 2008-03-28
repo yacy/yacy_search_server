@@ -64,6 +64,7 @@ import de.anomic.http.httpdProxyHandler;
 import de.anomic.kelondro.kelondroBase64Order;
 import de.anomic.plasma.plasmaParser;
 import de.anomic.plasma.plasmaSwitchboard;
+import de.anomic.server.serverBusyThread;
 import de.anomic.server.serverCodings;
 import de.anomic.server.serverCore;
 import de.anomic.server.serverDate;
@@ -256,8 +257,8 @@ public class SettingsAck_p {
                 httpd.initPortForwarding();
                 
                 // notifying publishSeed Thread
-                //serverThread peerPing = env.getThread("30_peerping");
-                //peerPing.notifyThread();
+                serverBusyThread peerPing = env.getThread("30_peerping");
+                peerPing.notifyThread();
             } catch (Exception e) {
                 prop.put("info", "23"); 
                 prop.putHTML("info_errormsg",(e.getMessage() == null) ? "unknown" : e.getMessage().replaceAll("\n","<br>"));
