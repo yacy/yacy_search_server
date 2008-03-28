@@ -6,13 +6,17 @@
     <script>
     <!--
     function selectall(){
-        for(i = 0; i<= document.getElementsByName("num")[0].value; i++){
-    	    document.getElementsByName("item" + i)[0].checked = true;
+        var selectForm = document.forms[0];
+        var count = selectForm.elements["num"].value;
+        for(i = 0; i<= count; i++){
+    	    selectForm.elements["item" + i].checked = true;
         }
     }
     function deselectall(){
-        for(i = 0; i<= document.getElementsByName("num")[0].value; i++){
-            document.getElementsByName("item" + i)[0].checked = false;
+        var selectForm = document.forms[0];
+        var count = selectForm.elements["num"].value;
+        for(i = 0; i<= count; i++){
+            selectForm.elements["item" + i].checked = false;
         }
     }
     -->
