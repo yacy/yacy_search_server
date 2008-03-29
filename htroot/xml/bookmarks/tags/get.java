@@ -62,6 +62,15 @@ public class get {
         boolean isAdmin=switchboard.verifyAuthentication(header, true);
         serverObjects prop = new serverObjects();
 
+    	if(post != null){        
+    		if(!isAdmin){
+			// force authentication if desired
+    			if(post.containsKey("login")){
+    				prop.put("AUTHENTICATE","admin log-in");
+    			}
+		}
+	}
+
         Iterator<bookmarksDB.Tag> it = switchboard.bookmarksDB.getTagIterator(isAdmin);
         int count=0;
         bookmarksDB.Tag tag;
