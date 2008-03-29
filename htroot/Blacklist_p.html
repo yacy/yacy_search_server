@@ -7,7 +7,7 @@
   <body id="Blacklist">
     #%env/templates/header.template%#
     #%env/templates/submenuBlacklist.template%#
-    
+  
     <h2>Blacklist Administration</h2>
     <p>Used Blacklist engine: <span class="settingsValue">#[blacklistEngine]#</span></p>
     <p>
@@ -103,6 +103,17 @@
           </select>
           <br />
           <input type="submit" name="deleteBlacklistEntry" value="Delete URL pattern" />
+          <br /><br />
+          #(edit)# 
+          <input type="submit" name="editBlacklistEntry" value="Edit URL pattern" />
+           ::
+          <form action="Blacklist_p.html" method="post" enctype="multipart/form-data">
+          <input type="hidden" name="currentBlacklist" value="#[currentBlacklist]#" />
+          <input type="text" name="editedBlacklistEntry" size="50" value="#[item]#"/>
+          <input type="hidden" name="selectedBlacklistEntry" value="#[item]#"/>
+          <input type="submit" name="editBlacklistEntry" value="Save URL pattern" />
+          </form>
+          #(/edit)#          
           <br />
           <br />
           <input type="submit" name="moveBlacklistEntry" value="Move URL pattern to" /> 
