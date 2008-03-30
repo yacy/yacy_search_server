@@ -29,6 +29,8 @@ package de.anomic.index;
 import java.io.File;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.regex.Pattern;
+import java.util.regex.PatternSyntaxException;
 
 
 public class indexDefaultReferenceBlacklist extends indexAbstractReferenceBlacklist implements indexReferenceBlacklist {
@@ -46,18 +48,31 @@ public class indexDefaultReferenceBlacklist extends indexAbstractReferenceBlackl
         if (path == null) throw new NullPointerException();
 
         // getting the proper blacklist
-        HashMap<String, ArrayList<String>> blacklistMap = super.getBlacklistMap(blacklistType);
+        HashMap<String, ArrayList<String>> blacklistMapMatched = super.getBlacklistMap(blacklistType,true);
 
         if (path.length() > 0 && path.charAt(0) == '/') path = path.substring(1);
         ArrayList<String> app;
         boolean matched = false;
         String pp = ""; // path-pattern
 
+        // try to match complete domain
+        if (!matched && (app = blacklistMapMatched.get(hostlow)) != null) {
+            for (int i=app.size()-1; !matched && i>-1; i--) {
+                pp = (String)app.get(i);
+                matched |= ((pp.equals("*")) || (path.matches(pp)));
+            }
+        }
         // first try to match the domain with wildcard '*'
         // [TL] While "." are found within the string
         int index = 0;
         while (!matched && (index = hostlow.indexOf('.', index + 1)) != -1) {
-            if ((app = blacklistMap.get(hostlow.substring(0, index + 1) + "*")) != null) {
+            if ((app = blacklistMapMatched.get(hostlow.substring(0, index + 1) + "*")) != null) {
+                for (int i=app.size()-1; !matched && i>-1; i--) {
+                    pp = (String)app.get(i);
+                    matched |= ((pp.equals("*")) || (path.matches(pp)));
+                }
+            }
+            if ((app = blacklistMapMatched.get(hostlow.substring(0, index))) != null) {
                 for (int i=app.size()-1; !matched && i>-1; i--) {
                     pp = (String)app.get(i);
                     matched |= ((pp.equals("*")) || (path.matches(pp)));
@@ -66,7 +81,13 @@ public class indexDefaultReferenceBlacklist extends indexAbstractReferenceBlackl
         }
         index = hostlow.length();
         while (!matched && (index = hostlow.lastIndexOf('.', index - 1)) != -1) {
-            if ((app = blacklistMap.get("*" + hostlow.substring(index, hostlow.length()))) != null) {
+            if ((app = blacklistMapMatched.get("*" + hostlow.substring(index, hostlow.length()))) != null) {
+                for (int i=app.size()-1; !matched && i>-1; i--) {
+                    pp = (String)app.get(i);
+                    matched |= ((pp.equals("*")) || (path.matches(pp)));
+                }
+            }
+            if ((app = blacklistMapMatched.get(hostlow.substring(index +1, hostlow.length()))) != null) {
                 for (int i=app.size()-1; !matched && i>-1; i--) {
                     pp = (String)app.get(i);
                     matched |= ((pp.equals("*")) || (path.matches(pp)));
@@ -74,14 +95,25 @@ public class indexDefaultReferenceBlacklist extends indexAbstractReferenceBlackl
             }
         }
 
-        // try to match without wildcard in domain
-        if (!matched && (app = blacklistMap.get(hostlow)) != null) {
-            for (int i=app.size()-1; !matched && i>-1; i--) {
-                pp = (String)app.get(i);
-                matched |= ((pp.equals("*")) || (path.matches(pp)));
+
+        // loop over all Regexentrys
+        if(!matched) {
+            HashMap<String, ArrayList<String>> blacklistMapNotMatched = super.getBlacklistMap(blacklistType,false);
+            for(String key: blacklistMapNotMatched.keySet()) {
+                try {
+                
+                    if(Pattern.matches(key, hostlow)) {
+                        app = blacklistMapNotMatched.get(key);
+                        for (int i=0; i<app.size(); i++) {
+                            if(Pattern.matches(app.get(i), path)) 
+                                return true;
+                        }
+                    }
+                } catch (PatternSyntaxException e) {
+                    //System.out.println(e.toString());
+                }
             }
         }
-
         return matched;
     }
 }
