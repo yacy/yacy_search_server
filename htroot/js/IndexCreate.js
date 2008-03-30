@@ -1,6 +1,7 @@
-AJAX_OFF="/env/grafics/empty.gif";
-AJAX_ON="/env/grafics/ajax.gif";
-timeout="";
+var AJAX_OFF="/env/grafics/empty.gif";
+var AJAX_ON="/env/grafics/ajax.gif";
+var timeout="";
+
 function handleResponse(){
     if(http.readyState == 4){
         var response = http.responseXML;

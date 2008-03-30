@@ -1,5 +1,5 @@
-AJAX_OFF="/env/grafics/empty.gif";
-AJAX_ON="/env/grafics/ajax.gif";
+var AJAX_OFF="/env/grafics/empty.gif";
+var AJAX_ON="/env/grafics/ajax.gif";
 
 function handleResponse(){
     if(http.readyState == 4){
