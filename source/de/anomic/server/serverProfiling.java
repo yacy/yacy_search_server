@@ -28,18 +28,18 @@ package de.anomic.server;
 
 import java.util.Iterator;
 import java.util.Map;
-import java.util.TreeMap;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ConcurrentLinkedQueue;
 
 public class serverProfiling extends Thread {
     
-    private static Map<String, TreeMap<Long, Event>> historyMaps; // key=name of history, value=TreeMap of Long/Event
+    private static Map<String, ConcurrentLinkedQueue<Event>> historyMaps; // key=name of history, value=TreeMap of Long/Event
     private static Map<String, Integer> eventCounter; // key=name of history, value=Integer of event counter
     private static serverProfiling systemProfiler;
     
     static {
         // initialize profiling
-        historyMaps = new ConcurrentHashMap<String, TreeMap<Long, Event>>();
+        historyMaps = new ConcurrentHashMap<String, ConcurrentLinkedQueue<Event>>();
         eventCounter = new ConcurrentHashMap<String, Integer>();
         //lastCompleteCleanup = System.currentTimeMillis();
         systemProfiler = null;
@@ -76,33 +76,37 @@ public class serverProfiling extends Thread {
     public static void update(String eventName, Object eventPayload) {
     	// get event history container
     	int counter = eventCounter.containsKey(eventName) ? ((Integer) eventCounter.get(eventName)).intValue() : 0;
-    	TreeMap<Long, Event> history = historyMaps.containsKey(eventName) ? (historyMaps.get(eventName)) : new TreeMap<Long, Event>();
+    	if (historyMaps.containsKey(eventName)) {
+    	    ConcurrentLinkedQueue<Event> history = historyMaps.get(eventName);
 
-    	// update entry
-        Long time = new Long(System.currentTimeMillis());
-        history.put(time, new Event(counter, eventPayload));
-        counter++;
-        eventCounter.put(eventName, new Integer(counter));
-        
-        // clean up too old entries
-        cleanup(history);
-        
-        // store map
-        historyMaps.put(eventName, history);
-    }
-    
-    private static void cleanup(TreeMap<Long, Event> history) {
-    	// clean up too old entries
-        while (history.size() > 0) {
-        	Long time = history.firstKey();
-            if (System.currentTimeMillis() - time.longValue() < 600000) break;
-            history.remove(time);
-        }
-        
+            // update entry
+            history.add(new Event(counter, eventPayload));
+            counter++;
+            eventCounter.put(eventName, new Integer(counter));
+            
+            // clean up too old entries
+            Event e;
+            long now = System.currentTimeMillis();
+            while (history.size() > 0) {
+                e = history.peek();
+                if (now - e.time < 600000) break;
+                history.poll();
+            }
+    	} else {
+    	    ConcurrentLinkedQueue<Event> history = new ConcurrentLinkedQueue<Event>();
+
+            // update entry
+            history.add(new Event(counter, eventPayload));
+            counter++;
+            eventCounter.put(eventName, new Integer(counter));
+            
+            // store map
+            historyMaps.put(eventName, history);
+    	}
     }
     
     public static Iterator<Event> history(String eventName) {
-    	return (historyMaps.containsKey(eventName) ? (historyMaps.get(eventName)) : new TreeMap<Long, Event>()).values().iterator();
+    	return (historyMaps.containsKey(eventName) ? (historyMaps.get(eventName)) : new ConcurrentLinkedQueue<Event>()).iterator();
     }
 
     public static class Event {
