@@ -42,7 +42,11 @@ public interface kelondroByteOrder extends kelondroOrder<byte[]> {
     		this.baseOrder = base;
     	}
     	
-		public int compare(String s1, String s2) {
+    	public StringOrder(kelondroOrder<byte[]> base) {
+            this.baseOrder = (kelondroByteOrder) base;
+        }
+        
+        public int compare(String s1, String s2) {
 			return baseOrder.compare(s1.getBytes(), s2.getBytes());
 		}
     	

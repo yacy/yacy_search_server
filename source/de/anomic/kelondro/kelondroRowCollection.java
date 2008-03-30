@@ -26,6 +26,7 @@ package de.anomic.kelondro;
 
 import java.io.File;
 import java.io.IOException;
+import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
@@ -172,6 +173,7 @@ public class kelondroRowCollection {
     public synchronized byte[] exportCollection() {
         // returns null if the collection is empty
         trim(false);
+        assert this.size() * this.rowdef.objectsize == this.chunkcache.length;
         kelondroRow row = exportRow(chunkcache.length);
         kelondroRow.Entry entry = row.newEntry();
         assert (sortBound <= chunkcount) : "sortBound = " + sortBound + ", chunkcount = " + chunkcount;
@@ -184,6 +186,22 @@ public class kelondroRowCollection {
         entry.setCol(exp_order_bound, this.sortBound);
         entry.setCol(exp_collection, this.chunkcache);
         return entry.bytes();
+    }
+    
+    public static kelondroRowCollection importCollection(InputStream is, kelondroRow rowdef) throws IOException {
+        byte[] byte2 = new byte[2];
+        byte[] byte4 = new byte[4];
+        is.read(byte4); int size = (int) kelondroNaturalOrder.decodeLong(byte4);
+        is.read(byte2); //short lastread = (short) kelondroNaturalOrder.decodeLong(byte2);
+        is.read(byte2); //short lastwrote = (short) kelondroNaturalOrder.decodeLong(byte2);
+        is.read(byte2); //String orderkey = new String(byte2);
+        is.read(byte2); short ordercol = (short) kelondroNaturalOrder.decodeLong(byte2);
+        is.read(byte2); short orderbound = (short) kelondroNaturalOrder.decodeLong(byte2);
+        assert rowdef.primaryKeyIndex == ordercol;
+        byte[] chunkcache = new byte[size * rowdef.objectsize];
+        int c = is.read(chunkcache);
+        assert c == chunkcache.length;
+        return new kelondroRowCollection(rowdef, size, chunkcache, orderbound);
     }
     
     public void saveCollection(File file) throws IOException {
