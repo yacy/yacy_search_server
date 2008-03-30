@@ -96,6 +96,14 @@ public class CrawlProfileEditor_p {
                 // deletion of a terminated crawl profile
                 sb.profilesPassiveCrawls.removeEntry(handle);
             }
+            if (post.containsKey("deleteTerminatedProfiles")) {
+                Iterator profiles = sb.profilesPassiveCrawls.profiles(false);
+                while (profiles.hasNext()) {
+                    profiles.next();
+                    profiles.remove();
+                    profiles = sb.profilesPassiveCrawls.profiles(false);
+                }
+            }
         }
         
         // generate handle list
@@ -151,14 +159,22 @@ public class CrawlProfileEditor_p {
             count++;
         }
         // put passive crawls into list
+        boolean existPassiveCrawls = false;
         it = sb.profilesPassiveCrawls.profiles(true);
         while (it.hasNext()) {
             profile = (plasmaCrawlProfile.entry) it.next();
             putProfileEntry(prop, profile, false, dark, count, domlistlength);
             dark = !dark;
             count++;
+            existPassiveCrawls = true;
         }
         prop.put("crawlProfiles", count);
+        
+        if(existPassiveCrawls) {
+            prop.put("existPassiveCrawls", "1");
+        } else {
+            prop.put("existPassiveCrawls", "0");
+        }
         
         // generate edit field
         if (selentry == null) {

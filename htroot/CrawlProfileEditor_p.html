@@ -78,6 +78,11 @@
   </tr>
   #{/crawlProfiles}# 
 </table>
+#(existPassiveCrawls)#::
+<form action="CrawlProfileEditor_p.html" method="post" enctype="multipart/form-data">
+<input type="submit" name="deleteTerminatedProfiles" value="Delete finished crawls" />
+</form>
+#(/existPassiveCrawls)#
 </fieldset>
 
 
