@@ -97,7 +97,7 @@ public class CrawlProfileEditor_p {
                 sb.profilesPassiveCrawls.removeEntry(handle);
             }
             if (post.containsKey("deleteTerminatedProfiles")) {
-                Iterator profiles = sb.profilesPassiveCrawls.profiles(false);
+                Iterator<plasmaCrawlProfile.entry> profiles = sb.profilesPassiveCrawls.profiles(false);
                 while (profiles.hasNext()) {
                     profiles.next();
                     profiles.remove();
@@ -111,7 +111,7 @@ public class CrawlProfileEditor_p {
         Iterator<plasmaCrawlProfile.entry> it = sb.profilesActiveCrawls.profiles(true);
         entry selentry;
         while (it.hasNext()) {
-            selentry = (entry)it.next();
+            selentry = it.next();
             if (selentry.name().equals(plasmaSwitchboard.CRAWL_PROFILE_PROXY) ||
                     selentry.name().equals(plasmaSwitchboard.CRAWL_PROFILE_REMOTE) /*||
                     selentry.name().equals(plasmaSwitchboard.CRAWL_PROFILE_SNIPPET_TEXT) ||
@@ -153,7 +153,7 @@ public class CrawlProfileEditor_p {
         // put active crawls into list
         it = sb.profilesActiveCrawls.profiles(true);
         while (it.hasNext()) {
-            profile = (plasmaCrawlProfile.entry) it.next();
+            profile = it.next();
             putProfileEntry(prop, profile, true, dark, count, domlistlength);
             dark = !dark;
             count++;
@@ -162,7 +162,7 @@ public class CrawlProfileEditor_p {
         boolean existPassiveCrawls = false;
         it = sb.profilesPassiveCrawls.profiles(true);
         while (it.hasNext()) {
-            profile = (plasmaCrawlProfile.entry) it.next();
+            profile = it.next();
             putProfileEntry(prop, profile, false, dark, count, domlistlength);
             dark = !dark;
             count++;

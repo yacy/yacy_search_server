@@ -35,14 +35,13 @@ public class serverProfiling extends Thread {
     
     private static Map<String, TreeMap<Long, Event>> historyMaps; // key=name of history, value=TreeMap of Long/Event
     private static Map<String, Integer> eventCounter; // key=name of history, value=Integer of event counter
-    private static long lastCompleteCleanup;
     private static serverProfiling systemProfiler;
     
     static {
         // initialize profiling
         historyMaps = new ConcurrentHashMap<String, TreeMap<Long, Event>>();
         eventCounter = new ConcurrentHashMap<String, Integer>();
-        lastCompleteCleanup = System.currentTimeMillis();
+        //lastCompleteCleanup = System.currentTimeMillis();
         systemProfiler = null;
     }
     
@@ -87,31 +86,9 @@ public class serverProfiling extends Thread {
         
         // clean up too old entries
         cleanup(history);
-        cleanup();
         
         // store map
         historyMaps.put(eventName, history);
-    }
-    
-    private static void cleanup() {
-    	if (System.currentTimeMillis() - lastCompleteCleanup < 600000) return;
-    	Object[] historyNames = historyMaps.keySet().toArray();
-    	for (int i = 0; i < historyNames.length; i++) {
-    		cleanup((String) historyNames[i]);
-    	}
-    	lastCompleteCleanup = System.currentTimeMillis();
-    }
-    
-    private static void cleanup(String eventName) {
-    	if (historyMaps.containsKey(eventName)) {
-    		TreeMap<Long, Event> history = historyMaps.get(eventName);
-    		cleanup(history);
-    		if (history.size() > 0) {
-    			historyMaps.put(eventName, history);
-    		} else {
-    			historyMaps.remove(eventName);
-    		}
-    	}
     }
     
     private static void cleanup(TreeMap<Long, Event> history) {
