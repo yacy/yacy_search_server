@@ -111,15 +111,15 @@ public class plasmaCrawlNURL {
     
     public int size() {
         // this does not count the overhang stack size
-        return coreStack.size()  + limitStack.size() + remoteStack.size();
+        return ((coreStack == null) ? 0 : coreStack.size()) + ((limitStack == null) ? 0 : limitStack.size()) + ((remoteStack == null) ? 0 : remoteStack.size());
     }
 
     public int stackSize(int stackType) {
         switch (stackType) {
-            case STACK_TYPE_CORE:     return coreStack.size();
-            case STACK_TYPE_LIMIT:    return limitStack.size();
+            case STACK_TYPE_CORE:     return (coreStack == null) ? 0 : coreStack.size();
+            case STACK_TYPE_LIMIT:    return (limitStack == null) ? 0 : limitStack.size();
             case STACK_TYPE_OVERHANG: return 0;
-            case STACK_TYPE_REMOTE:   return remoteStack.size();
+            case STACK_TYPE_REMOTE:   return (remoteStack == null) ? 0 : remoteStack.size();
             default: return -1;
         }
     }

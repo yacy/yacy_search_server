@@ -114,7 +114,6 @@ public final class serverCore extends serverAbstractBusyThread implements server
     
     private SSLSocketFactory sslSocketFactory = null;
     private ServerSocket socket;           // listener
-    serverLog log;                         // log object
     private int timeout;                   // connection time-out of the socket
     serverHandler handlerPrototype;        // the command class (a serverHandler) 
 

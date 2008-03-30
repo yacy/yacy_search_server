@@ -31,7 +31,7 @@ import java.util.concurrent.ConcurrentHashMap;
 
 import de.anomic.server.logging.serverLog;
 
-public class serverInstantBlockingThread<I extends serverProcessorJob, O extends serverProcessorJob> extends serverAbstractBlockingThread<I, O> implements serverBlockingThread<I, O> {
+public class serverInstantBlockingThread<J extends serverProcessorJob> extends serverAbstractBlockingThread<J> implements serverBlockingThread<J> {
 
     private Method jobExecMethod;
     private Object environment;
@@ -40,33 +40,34 @@ public class serverInstantBlockingThread<I extends serverProcessorJob, O extends
     public static int instantThreadCounter = 0;
     public static ConcurrentHashMap<Long, String> jobs = new ConcurrentHashMap<Long, String>();
     
-    public serverInstantBlockingThread(Object env, String jobExec, BlockingQueue<I> input, BlockingQueue<O> output) {
+    public serverInstantBlockingThread(Object env, String jobExec, BlockingQueue<J> input, serverProcessor<J> output) {
         // jobExec is the name of a method of the object 'env' that executes the one-step-run
         // jobCount is the name of a method that returns the size of the job
         
         // set the blocking queues for input and output
         this.setInputQueue(input);
-        this.setOutputQueue(output);
+        this.setOutputProcess(output);
         
         // define execution class
+        this.jobExecMethod = execMethod(env, jobExec);
+        this.environment = (env instanceof Class) ? null : env;
+        this.setName(jobExecMethod.getClass().getName() + "." + jobExecMethod.getName() + "." + handleCounter++);
+        this.handle = new Long(System.currentTimeMillis() + this.getName().hashCode());
+    }
+    
+    protected static Method execMethod(Object env, String jobExec) {
         Class<?> theClass = (env instanceof Class) ? (Class<?>) env : env.getClass();
         try {
-            this.jobExecMethod = null;
             Method[] methods = theClass.getMethods();
             for (int i = 0; i < methods.length; i++) {
                 if ((methods[i].getParameterTypes().length == 1) && (methods[i].getName().equals(jobExec))) {
-                    this.jobExecMethod = methods[i];
-                    break;
+                    return methods[i];
                 }
             }
-            if (this.jobExecMethod == null) throw new NoSuchMethodException(jobExec + " does not exist in " + env.getClass().getName());
+            throw new NoSuchMethodException(jobExec + " does not exist in " + env.getClass().getName());
         } catch (NoSuchMethodException e) {
             throw new RuntimeException("serverInstantThread, wrong declaration of jobExec: " + e.getMessage());
         }
-        
-        this.environment = (env instanceof Class) ? null : env;
-        this.setName(theClass.getName() + "." + jobExec + "." + handleCounter++);
-        this.handle = new Long(System.currentTimeMillis() + this.getName().hashCode());
     }
     
     public int getJobCount() {
@@ -74,14 +75,14 @@ public class serverInstantBlockingThread<I extends serverProcessorJob, O extends
     }
         
     @SuppressWarnings("unchecked")
-    public O job(I next) throws Exception {
+    public J job(J next) throws Exception {
         if (next == null) return null; // poison pill: shutdown
         instantThreadCounter++;
         //System.out.println("started job " + this.handle + ": " + this.getName());
         jobs.put(this.handle, this.getName());
-        O out = null;
+        J out = null;
         try {
-            out = (O) jobExecMethod.invoke(environment, new Object[]{next});
+            out = (J) jobExecMethod.invoke(environment, new Object[]{next});
         } catch (IllegalAccessException e) {
             serverLog.logSevere("BLOCKINGTHREAD", "Internal Error in serverInstantThread.job: " + e.getMessage());
             serverLog.logSevere("BLOCKINGTHREAD", "shutting down thread '" + this.getName() + "'");

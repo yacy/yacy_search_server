@@ -28,21 +28,21 @@ import java.util.concurrent.BlockingQueue;
 
 import de.anomic.server.logging.serverLog;
 
-public abstract class serverAbstractBlockingThread<I extends serverProcessorJob, O extends serverProcessorJob> extends serverAbstractThread implements serverBlockingThread<I, O> {
+public abstract class serverAbstractBlockingThread<J extends serverProcessorJob> extends serverAbstractThread implements serverBlockingThread<J> {
 
-    private BlockingQueue<I> input = null;
-    private BlockingQueue<O> output = null;
+    private BlockingQueue<J> input = null;
+    private serverProcessor<J> output = null;
 
-    public void setInputQueue(BlockingQueue<I> queue) {
+    public void setInputQueue(BlockingQueue<J> queue) {
         this.input = queue;
     }
-    public void setOutputQueue(BlockingQueue<O> queue) {
-        this.output = queue;
+    public void setOutputProcess(serverProcessor<J> processor) {
+        this.output = processor;
     }
-    public BlockingQueue<I> getInputQueue() {
+    public BlockingQueue<J> getInputQueue() {
         return this.input;
     }
-    public BlockingQueue<O> getOutputQueue() {
+    public serverProcessor<J> getOutputProcess() {
         return this.output;
     }
 
@@ -60,16 +60,16 @@ public abstract class serverAbstractBlockingThread<I extends serverProcessorJob,
                 // do job
                 timestamp = System.currentTimeMillis();
                 memstamp0 = serverMemory.used();
-                I in = this.input.take();
-                if ((in == null) || (in == serverProcessor.shutdownJob)) {
+                J in = this.input.take();
+                if ((in == null) || (in.status == serverProcessorJob.STATUS_POISON)) {
                     // the poison pill: shutdown
                     // a null element is pushed to the queue on purpose to signal
                     // that a termination should be made
                     this.running = false;
                     break;
                 }
-                O out = this.job(in);
-                if ((out != null) && (this.output != null)) this.output.put(out);
+                J out = this.job(in);
+                if ((out != null) && (this.output != null)) this.output.enQueue(out);
                 // do memory and busy/idle-count/time monitoring
                 memstamp1 = serverMemory.used();
                 if (memstamp1 >= memstamp0) {
@@ -80,6 +80,10 @@ public abstract class serverAbstractBlockingThread<I extends serverProcessorJob,
                     if (busyCycles > 0) memuse += memuse / busyCycles;
                 }
                 busytime += System.currentTimeMillis() - timestamp;
+            } catch (InterruptedException e) {
+                // don't ignore this: shut down
+                this.running = false;
+                break;
             } catch (Exception e) {
                 // handle exceptions: thread must not die on any unexpected exceptions
                 // if the exception is too bad it should call terminate()

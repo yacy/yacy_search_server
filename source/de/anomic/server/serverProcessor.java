@@ -24,34 +24,68 @@
 
 package de.anomic.server;
 
+import java.lang.reflect.InvocationTargetException;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.TimeUnit;
 
-public class serverProcessor<I extends serverProcessorJob, O extends serverProcessorJob> {
+import de.anomic.server.logging.serverLog;
+
+public class serverProcessor<J extends serverProcessorJob> {
 
     public static final int availableCPU = Runtime.getRuntime().availableProcessors();
     public static int       useCPU = availableCPU;
 
-    ExecutorService executor;
-    BlockingQueue<I> input;
-    BlockingQueue<O> output;
-    int poolsize;
+    private ExecutorService executor;
+    private BlockingQueue<J> input;
+    private serverProcessor<J> output;
+    private int poolsize;
+    private Object environment;
+    private String methodName;
     
-    public serverProcessor(Object env, String jobExec, BlockingQueue<I> input, BlockingQueue<O> output) {
-        this(env, jobExec, input, output, useCPU + 1);
+    public serverProcessor(Object env, String jobExec, int inputQueueSize, serverProcessor<J> output) {
+        this(env, jobExec, inputQueueSize, output, useCPU + 1);
     }
 
-    public serverProcessor(Object env, String jobExec, BlockingQueue<I> input, BlockingQueue<O> output, int poolsize) {
+    public serverProcessor(Object env, String jobExec, int inputQueueSize, serverProcessor<J> output, int poolsize) {
         // start a fixed number of executors that handle entries in the process queue
-        this.input = input;
+        this.environment = env;
+        this.methodName = jobExec;
+        this.input = new LinkedBlockingQueue<J>(inputQueueSize);
         this.output = output;
         this.poolsize = poolsize;
         executor = Executors.newCachedThreadPool();
         for (int i = 0; i < poolsize; i++) {
-            executor.submit(new serverInstantBlockingThread<I, O>(env, jobExec, input, output));
+            executor.submit(new serverInstantBlockingThread<J>(env, jobExec, input, output));
         }
+    }
+    
+    public int queueSize() {
+        return input.size();
+    }
+    
+    @SuppressWarnings("unchecked")
+    public void enQueue(J in) throws InterruptedException {
+        // ensure that enough job executors are running
+        if ((this.input == null) || (executor == null) || (executor.isShutdown()) || (executor.isTerminated())) {
+            // execute serialized without extra thread
+            serverLog.logWarning("PROCESSOR", "executing job " + environment.getClass().getName() + "." + methodName + " serialized");
+            try {
+                J out = (J) serverInstantBlockingThread.execMethod(this.environment, this.methodName).invoke(environment, new Object[]{in});
+                if ((out != null) && (output != null)) output.enQueue(out);
+            } catch (IllegalArgumentException e) {
+                e.printStackTrace();
+            } catch (IllegalAccessException e) {
+                e.printStackTrace();
+            } catch (InvocationTargetException e) {
+                e.printStackTrace();
+            }
+            return;
+        }
+        // execute concurrent in thread
+        this.input.put(in);
     }
     
     @SuppressWarnings("unchecked")
@@ -61,7 +95,7 @@ public class serverProcessor<I extends serverProcessorJob, O extends serverProce
         // put poison pills into the queue
         for (int i = 0; i < poolsize; i++) {
             try {
-                input.put((I) shutdownJob);
+                input.put((J) serverProcessorJob.poisonPill); // put a poison pill into the queue which will kill the job
             } catch (InterruptedException e) { }
         }
         // wait for shutdown
@@ -69,13 +103,8 @@ public class serverProcessor<I extends serverProcessorJob, O extends serverProce
             executor.awaitTermination(millisTimeout, TimeUnit.MILLISECONDS);
         } catch (InterruptedException e) {}
         executor.shutdown();
-        executor = null;
+        this.executor = null;
+        this.input = null;
     }
-    
-    public static class SpecialJob implements serverProcessorJob {
-        int type = 0;
-    }
-    
-    public static final serverProcessorJob shutdownJob = new SpecialJob();
     
 }

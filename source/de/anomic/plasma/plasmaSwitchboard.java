@@ -107,8 +107,6 @@ import java.util.Timer;
 import java.util.TimerTask;
 import java.util.TreeMap;
 import java.util.TreeSet;
-import java.util.concurrent.ArrayBlockingQueue;
-import java.util.concurrent.LinkedBlockingQueue;
 
 import de.anomic.data.URLLicense;
 import de.anomic.data.blogBoard;
@@ -242,14 +240,10 @@ public final class plasmaSwitchboard extends serverAbstractSwitch<plasmaSwitchbo
     public  URLLicense                  licensedURLs;
     public  Timer                       moreMemory;
 
-    public serverProcessor<indexingQueueEntry, indexingQueueEntry> indexingDocumentProcessor;
-    public serverProcessor<indexingQueueEntry, indexingQueueEntry> indexingCondensementProcessor;
-    public serverProcessor<indexingQueueEntry, indexingQueueEntry> indexingAnalysisProcessor;
-    public serverProcessor<indexingQueueEntry, indexingQueueEntry> indexingStorageProcessor;
-    public LinkedBlockingQueue<indexingQueueEntry> indexingDocumentQueue;
-    public LinkedBlockingQueue<indexingQueueEntry> indexingCondensementQueue;
-    public LinkedBlockingQueue<indexingQueueEntry> indexingAnalysisQueue;
-    public ArrayBlockingQueue<indexingQueueEntry> indexingStorageQueue;
+    public serverProcessor<indexingQueueEntry> indexingDocumentProcessor;
+    public serverProcessor<indexingQueueEntry> indexingCondensementProcessor;
+    public serverProcessor<indexingQueueEntry> indexingAnalysisProcessor;
+    public serverProcessor<indexingQueueEntry> indexingStorageProcessor;
     
     /*
      * Remote Proxy configuration
@@ -1295,15 +1289,10 @@ public final class plasmaSwitchboard extends serverAbstractSwitch<plasmaSwitchbo
         this.clusterhashes = yacyCore.seedDB.clusterHashes(getConfig("cluster.peers.yacydomain", ""));
         
         // deploy blocking threads
-
-        indexingDocumentQueue     = new LinkedBlockingQueue<indexingQueueEntry>();
-        indexingCondensementQueue = new LinkedBlockingQueue<indexingQueueEntry>();
-        indexingAnalysisQueue     = new LinkedBlockingQueue<indexingQueueEntry>();
-        indexingStorageQueue      = new ArrayBlockingQueue<indexingQueueEntry>(1);
-        indexingDocumentProcessor     = new serverProcessor<indexingQueueEntry, indexingQueueEntry>(this, "parseDocument", indexingDocumentQueue, indexingCondensementQueue);
-        indexingCondensementProcessor = new serverProcessor<indexingQueueEntry, indexingQueueEntry>(this, "condenseDocument", indexingCondensementQueue, indexingAnalysisQueue);
-        indexingAnalysisProcessor     = new serverProcessor<indexingQueueEntry, indexingQueueEntry>(this, "webStructureAnalysis", indexingAnalysisQueue, indexingStorageQueue);
-        indexingStorageProcessor      = new serverProcessor<indexingQueueEntry, indexingQueueEntry>(this, "storeDocumentIndex", indexingStorageQueue, null);
+        indexingStorageProcessor      = new serverProcessor<indexingQueueEntry>(this, "storeDocumentIndex", 1, null);
+        indexingAnalysisProcessor     = new serverProcessor<indexingQueueEntry>(this, "webStructureAnalysis", serverProcessor.useCPU + 1, indexingStorageProcessor);
+        indexingCondensementProcessor = new serverProcessor<indexingQueueEntry>(this, "condenseDocument", serverProcessor.useCPU + 1, indexingAnalysisProcessor);
+        indexingDocumentProcessor     = new serverProcessor<indexingQueueEntry>(this, "parseDocument", serverProcessor.useCPU + 1, indexingCondensementProcessor);
         
         // deploy busy threads
         log.logConfig("Starting Threads");
@@ -1733,9 +1722,12 @@ public final class plasmaSwitchboard extends serverAbstractSwitch<plasmaSwitchbo
         if (transferIdxThread != null) stopTransferWholeIndex(false);
         log.logConfig("SWITCHBOARD SHUTDOWN STEP 2: sending termination signal to threaded indexing");
         // closing all still running db importer jobs
+        indexingDocumentProcessor.shutdown(4000);
+        indexingCondensementProcessor.shutdown(3000);
+        indexingAnalysisProcessor.shutdown(2000);
+        indexingStorageProcessor.shutdown(1000);
         this.dbImportManager.close();
         httpc.closeAllConnections();
-        crawlQueues.close();
         wikiDB.close();
         blogDB.close();
         blogCommentDB.close();
@@ -1749,13 +1741,10 @@ public final class plasmaSwitchboard extends serverAbstractSwitch<plasmaSwitchbo
         parser.close();
         plasmaHTCache.close();
         sbQueue.close();
-        indexingDocumentProcessor.shutdown(1000);
-        indexingCondensementProcessor.shutdown(1000);
-        indexingAnalysisProcessor.shutdown(1000);
         webStructure.flushCitationReference("crg");
         webStructure.close();
+        crawlQueues.close();
         log.logConfig("SWITCHBOARD SHUTDOWN STEP 3: sending termination signal to database manager (stand by...)");
-        indexingStorageProcessor.shutdown(1000);
         wordIndex.close();
         yc.close();
         log.logConfig("SWITCHBOARD SHUTDOWN TERMINATED");
@@ -1872,7 +1861,7 @@ public final class plasmaSwitchboard extends serverAbstractSwitch<plasmaSwitchbo
                 log.logFine("deQueue: thread was interrupted");
                 return false;
             }
-
+            
             // get next queue entry and start a queue processing
             plasmaSwitchboardQueue.QueueEntry queueEntry = deQueue();
             assert queueEntry != null;
@@ -1886,7 +1875,7 @@ public final class plasmaSwitchboard extends serverAbstractSwitch<plasmaSwitchbo
             // check for interruption
             checkInterruption();
 
-            this.indexingDocumentQueue.put(new indexingQueueEntry(queueEntry, null, null));
+            this.indexingDocumentProcessor.enQueue(new indexingQueueEntry(queueEntry, null, null));
             /*
             
             // THE FOLLOWING CAN BE CONCURRENT ->
@@ -1912,7 +1901,7 @@ public final class plasmaSwitchboard extends serverAbstractSwitch<plasmaSwitchbo
         }
     }
     
-    public static class indexingQueueEntry implements serverProcessorJob {
+    public static class indexingQueueEntry extends serverProcessorJob {
         public plasmaSwitchboardQueue.QueueEntry queueEntry;
         public plasmaParserDocument document;
         public plasmaCondenser condenser;
@@ -1920,6 +1909,7 @@ public final class plasmaSwitchboard extends serverAbstractSwitch<plasmaSwitchbo
                 plasmaSwitchboardQueue.QueueEntry queueEntry,
                 plasmaParserDocument document,
                 plasmaCondenser condenser) {
+            super();
             this.queueEntry = queueEntry;
             this.document = document;
             this.condenser = condenser;

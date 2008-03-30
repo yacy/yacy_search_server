@@ -453,13 +453,14 @@ public final class plasmaSearchEvent {
         return (plasmaSearchEvent) lastEvents.get(eventID);
     }
     
-    public static plasmaSearchEvent getEvent(plasmaSearchQuery query,
-        plasmaSearchRankingProfile ranking,
-        plasmaWordIndex wordIndex,
-        plasmaCrawlResults crawlResults,
-        TreeMap<String, String> preselectedPeerHashes,
-        boolean generateAbstracts) {
-        plasmaSearchEvent event = (plasmaSearchEvent) lastEvents.get(query.id(false));
+    public static plasmaSearchEvent getEvent(
+            plasmaSearchQuery query,
+            plasmaSearchRankingProfile ranking,
+            plasmaWordIndex wordIndex,
+            plasmaCrawlResults crawlResults,
+            TreeMap<String, String> preselectedPeerHashes,
+            boolean generateAbstracts) {
+        plasmaSearchEvent event = lastEvents.get(query.id(false));
         if (event == null) {
             event = new plasmaSearchEvent(query, wordIndex, crawlResults, preselectedPeerHashes, generateAbstracts);
         } else {
