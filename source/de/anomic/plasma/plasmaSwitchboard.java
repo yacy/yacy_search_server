@@ -902,7 +902,10 @@ public final class plasmaSwitchboard extends serverAbstractSwitch<plasmaSwitchbo
         String networkUnitDefinition = getConfig("network.unit.definition", "defaults/yacy.network.freeworld.unit");
         String networkGroupDefinition = getConfig("network.group.definition", "yacy.network.group");
         // patch old values
-        if (networkUnitDefinition.equals("yacy.network.unit")) networkUnitDefinition = "defaults/yacy.network.freeworld.unit";
+        if (networkUnitDefinition.equals("yacy.network.unit")) {
+            networkUnitDefinition = "defaults/yacy.network.freeworld.unit";
+            setConfig("network.unit.definition", networkUnitDefinition);
+        }
         
         // include additional network definition properties into our settings
         // note that these properties cannot be set in the application because they are
@@ -1124,7 +1127,6 @@ public final class plasmaSwitchboard extends serverAbstractSwitch<plasmaSwitchbo
                                          (int) getConfigLong(WORDCACHE_MAX_COUNT, 20000));
         setConfig(WORDCACHE_MAX_COUNT, Integer.toString(wordCacheMaxCount));
         wordIndex.setMaxWordCount(wordCacheMaxCount);
-        wordIndex.setWordFlushSize((int) getConfigLong("wordFlushSize", 10000));
         
         // set a maximum amount of memory for the caches
         // long memprereq = Math.max(getConfigLong(INDEXER_MEMPREREQ, 0), wordIndex.minMem());

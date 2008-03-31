@@ -67,14 +67,13 @@ public final class plasmaWordIndex implements indexRI {
 
     // environment constants
     public  static final long wCacheMaxAge    = 1000 * 60 * 30; // milliseconds; 30 minutes
-    public  static final int  wCacheMaxChunk  =  400;           // maximum number of references for each urlhash
-    public  static final int  lowcachedivisor =  320;
+    public  static final int  wCacheMaxChunk  =   500;          // maximum number of references for each urlhash
+    public  static final int  lowcachedivisor =  1000;
     public  static final int  maxCollectionPartition = 7;       // should be 7
     
     private final kelondroByteOrder        indexOrder = kelondroBase64Order.enhancedCoder;
     private final indexRAMRI               dhtOutCache, dhtInCache;
     private final indexCollectionRI        collections;          // new database structure to replace AssortmentCluster and FileCluster
-    private       int                      flushsize;
     private       serverLog                log;
     final         indexRepositoryReference referenceURL;
     
@@ -111,8 +110,6 @@ public final class plasmaWordIndex implements indexRI {
         // create LURL-db
         referenceURL = new indexRepositoryReference(indexSecondaryRoot, networkName);
         
-        // performance settings
-        this.flushsize = 2000;
     }
 
     public void putURL(indexURLReference entry) throws IOException {
@@ -200,7 +197,6 @@ public final class plasmaWordIndex implements indexRI {
             Iterator<indexContainer> it = cache.wordContainers(null, false);
             while (it.hasNext()) cacheBytes += it.next().size() * entryBytes;
         }
-        
         return cacheBytes;
     }
 
@@ -209,21 +205,15 @@ public final class plasmaWordIndex implements indexRI {
         dhtInCache.setMaxWordCount(maxWords);
     }
 
-    public void setWordFlushSize(int flushsize) {
-       this.flushsize = flushsize;
-    }
-
     public void dhtFlushControl(indexRAMRI theCache) {
         // check for forced flush
-        int count = -1;
-        synchronized (theCache) {
-            if ((theCache.maxURLinCache() > wCacheMaxChunk ) ||
-                (theCache.size() > theCache.getMaxWordCount()) ||
-                (serverMemory.available() < collections.minMem())) {
-                count = theCache.size() + flushsize - theCache.getMaxWordCount();
-            }
+        while (theCache.maxURLinCache() > wCacheMaxChunk ) {
+            flushCache(theCache, Math.min(10, theCache.size()));
         }
-        if (count >= 0) flushCache(theCache, (count > 0) ? count : 1);
+        if ((theCache.size() > theCache.getMaxWordCount()) ||
+            (serverMemory.available() < collections.minMem())) {
+            flushCache(theCache, Math.min(theCache.size() - theCache.getMaxWordCount() + 1, theCache.size()));
+        }
     }
     
     public long getUpdateTime(String wordHash) {
@@ -271,8 +261,8 @@ public final class plasmaWordIndex implements indexRI {
     }
 
     public int flushCacheSome() {
-    	int fo = flushCache(dhtOutCache, (dhtOutCache.size() > 3 * flushsize) ? flushsize : Math.min(flushsize, Math.max(1, dhtOutCache.size() / lowcachedivisor)));
-    	int fi = flushCache(dhtInCache, (dhtInCache.size() > 3 * flushsize) ? flushsize : Math.min(flushsize, Math.max(1, dhtInCache.size() / lowcachedivisor)));
+    	int fo = flushCache(dhtOutCache, Math.max(1, dhtOutCache.size() / lowcachedivisor));
+    	int fi = flushCache(dhtInCache, Math.max(1, dhtInCache.size() / lowcachedivisor));
     	return fo + fi;
     }
     

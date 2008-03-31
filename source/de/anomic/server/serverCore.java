@@ -699,7 +699,7 @@ public final class serverCore extends serverAbstractBusyThread implements server
                 } catch (IOException e) {
                     e.printStackTrace();
                 }
-                busySessions.remove(this);
+                if (busySessions != null) busySessions.remove(this);
             }
             
         }

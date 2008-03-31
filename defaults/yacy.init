@@ -610,7 +610,6 @@ javastart_priority__pro=0
 # flushed to disc; this may last some minutes.
 wordCacheMaxCount = 20000
 wordCacheInitCount = 20000
-wordFlushSize = 500
 wordCacheMaxCount__pro = 20000
 wordCacheInitCount__pro = 20000
 wordFlushSize__pro = 500
