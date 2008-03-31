@@ -75,7 +75,7 @@ public class plasmaCrawlBalancer {
     // class variables
     private ArrayList<String>                   urlRAMStack;     // a list that is flushed first
     private kelondroStack                       urlFileStack;    // a file with url hashes
-    kelondroIndex                       urlFileIndex;
+    kelondroIndex                               urlFileIndex;
     private HashMap<String, LinkedList<String>> domainStacks;    // a map from domain name part to Lists with url hashs
     private File                                cacheStacksPath;
     private String                              stackname;
@@ -248,7 +248,12 @@ public class plasmaCrawlBalancer {
         if (componentsize != urlFileIndex.size()) {
 		    // here is urlIndexFile.size() always smaller. why?
 		    if (kelondroAbstractRecords.debugmode) {
-		        serverLog.logWarning("PLASMA BALANCER", "size operation wrong in " + stackname + " - componentsize = " + componentsize + ", urlFileIndex.size() = " + urlFileIndex.size());
+		        serverLog.logWarning("BALANCER", "size wrong in " + stackname +
+		                " - urlFileIndex = " + urlFileIndex.size() +
+		                ", componentsize = " + componentsize +
+                        " = (urlFileStack = " + urlFileStack.size() +
+		                ", urlRAMStack = " + urlRAMStack.size() +
+		                ", sizeDomainStacks = " + sizeDomainStacks() + ")");
 		    }
 		    if ((componentsize == 0) && (urlFileIndex.size() > 0)) {
 		        resetFileIndex();
