@@ -30,7 +30,6 @@ import java.io.File;
 import java.io.IOException;
 import java.util.HashSet;
 import java.util.Iterator;
-import java.util.List;
 import java.util.Set;
 
 import de.anomic.kelondro.kelondroBase64Order;
@@ -171,17 +170,6 @@ public class indexCollectionRI implements indexRI {
     public void addEntries(indexContainer newEntries) {
         try {
             collectionIndex.merge(newEntries);
-        } catch (kelondroOutOfLimitsException e) {
-            e.printStackTrace();
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-    }
-
-    public void addMultipleEntries(List<indexContainer> containerList) {
-        try {
-        	for (int i = 0; i < containerList.size(); i++) collectionIndex.merge(containerList.get(i));
-            //collectionIndex.mergeMultiple(containerList);
         } catch (kelondroOutOfLimitsException e) {
             e.printStackTrace();
         } catch (IOException e) {

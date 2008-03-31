@@ -207,9 +207,14 @@ public final class plasmaWordIndex implements indexRI {
 
     public void dhtFlushControl(indexRAMRI theCache) {
         // check for forced flush
-        while (theCache.maxURLinCache() > wCacheMaxChunk ) {
+        int l = 0;
+        // flush elements that are too big. This flushinfg depends on the fact that the flush rule
+        // selects the biggest elements first for flushing. If it does not for any reason, the following
+        // loop would not terminate. To ensure termination an additional counter is used
+        while ((l++ < 100) && (theCache.maxURLinCache() > wCacheMaxChunk)) {
             flushCache(theCache, Math.min(10, theCache.size()));
         }
+        // next flush more entries if the size exceeds the maximum size of the cache
         if ((theCache.size() > theCache.getMaxWordCount()) ||
             (serverMemory.available() < collections.minMem())) {
             flushCache(theCache, Math.min(theCache.size() - theCache.getMaxWordCount() + 1, theCache.size()));
@@ -301,7 +306,7 @@ public final class plasmaWordIndex implements indexRI {
             if (c != null) containerList.add(c);
         }
         // flush the containers
-        collections.addMultipleEntries(containerList);
+        for (indexContainer container : containerList) collections.addEntries(container);
         //System.out.println("DEBUG-Finished flush of " + count + " entries from RAM to DB in " + (System.currentTimeMillis() - start) + " milliseconds");
         return containerList.size();
     }

@@ -57,7 +57,7 @@ public class kelondroSplitTable implements kelondroIndex {
 
     private static final long minimumRAM4Eco = 80 * 1024 * 1024;
     private static final int EcoFSBufferSize = 20;
-    private static final kelondroIndex dummyIndex = new kelondroRAMIndex(new kelondroRow(new kelondroColumn[]{new kelondroColumn("key", kelondroColumn.celltype_binary, kelondroColumn.encoder_bytes, 2, "key")}, kelondroNaturalOrder.naturalOrder, 0), 0);
+    static final kelondroIndex dummyIndex = new kelondroRAMIndex(new kelondroRow(new kelondroColumn[]{new kelondroColumn("key", kelondroColumn.celltype_binary, kelondroColumn.encoder_bytes, 2, "key")}, kelondroNaturalOrder.naturalOrder, 0), 0);
 
     // the thread pool for the keeperOf executor service
     private ExecutorService executor;
@@ -255,7 +255,7 @@ public class kelondroSplitTable implements kelondroIndex {
         return null;
     }
     
-    public synchronized kelondroIndex keeperOf(final byte[] key) throws IOException {
+    public synchronized kelondroIndex keeperOf(final byte[] key) {
         // because the index is stored only in one table,
         // and the index is completely in RAM, a concurrency will create
         // not concurrent File accesses
