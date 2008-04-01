@@ -29,7 +29,6 @@ package de.anomic.plasma;
 
 import java.io.File;
 import java.io.IOException;
-import java.util.ConcurrentModificationException;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Iterator;
@@ -74,11 +73,8 @@ public class plasmaWebStructure {
         if (this.structure.size() > maxhosts) {
         	// fill a set with last-modified - dates of the structure
         	TreeSet<String> delset = new TreeSet<String>();
-        	Map.Entry<String, String> entry;
-        	Iterator<Map.Entry<String, String>> i = this.structure.entrySet().iterator();
         	String key, value;
-        	while (i.hasNext()) {
-        		entry = i.next();
+        	for (Map.Entry<String, String> entry : this.structure.entrySet()) {
         		key = entry.getKey();
         		value = entry.getValue();
         		delset.add(value.substring(0, 8) + key);
@@ -196,11 +192,8 @@ public class plasmaWebStructure {
     private static String map2refstr(Map<String, Integer> map) {
         StringBuffer s = new StringBuffer(map.size() * 10);
         s.append(serverDate.formatShortDay(new Date()));
-        Iterator<Map.Entry<String, Integer>> i = map.entrySet().iterator();
-        Map.Entry<String, Integer> entry;
         String h;
-        while (i.hasNext()) {
-            entry = i.next();
+        for (Map.Entry<String, Integer> entry : map.entrySet()) {
             s.append(entry.getKey());
             h = Integer.toHexString(entry.getValue().intValue());
             if (h.length() == 0) {
@@ -223,50 +216,45 @@ public class plasmaWebStructure {
     public Map<String, Integer> references(String domhash) {
         // returns a map with a domhash(String):refcount(Integer) relation
         assert domhash.length() == 6;
-        SortedMap<String, String> tailMap = structure.tailMap(domhash);
-        if ((tailMap == null) || (tailMap.size() == 0)) return new HashMap<String, Integer>();
-        String key = tailMap.firstKey();
-        if (key.startsWith(domhash)) {
-            return refstr2map(tailMap.get(key));
-        } else {
-            return new HashMap<String, Integer>();
+        synchronized(structure) {
+            SortedMap<String, String> tailMap = structure.tailMap(domhash);
+            if ((tailMap == null) || (tailMap.isEmpty())) return new HashMap<String, Integer>();
+            String key = tailMap.firstKey();
+            if (key.startsWith(domhash)) {
+                return refstr2map(tailMap.get(key));
+            } else {
+                return new HashMap<String, Integer>();
+            }
         }
     }
     
     public int referencesCount(String domhash) {
         // returns the number of domains that are referenced by this domhash
         assert domhash.length() == 6 : "domhash = " + domhash;
-        try {
+        synchronized(structure) {
             SortedMap<String, String> tailMap = structure.tailMap(domhash);
-            if ((tailMap == null) || (tailMap.size() == 0)) return 0;
+            if ((tailMap == null) || (tailMap.isEmpty())) return 0;
             String key = tailMap.firstKey();
             if (key.startsWith(domhash)) {
                 return refstr2count(tailMap.get(key));
             } else {
                 return 0;
             }
-        } catch (ConcurrentModificationException e) {
-            return 0;
         }
     }
     
     public String resolveDomHash2DomString(String domhash) {
         // returns the domain as string, null if unknown
         assert domhash.length() == 6;
-        try {
+        synchronized(structure) {
             SortedMap<String, String> tailMap = structure.tailMap(domhash);
-            if ((tailMap == null) || (tailMap.size() == 0)) return null;
+            if ((tailMap == null) || (tailMap.isEmpty())) return null;
             String key = tailMap.firstKey();
             if (key.startsWith(domhash)) {
                 return key.substring(7);
             } else {
                 return null;
             }
-        } catch (ConcurrentModificationException e) {
-            // we don't want to implement a synchronization here,
-            // because this is 'only' used for a graphics application
-            // just return null
-            return null;
         }
     }
     
@@ -294,10 +282,7 @@ public class plasmaWebStructure {
 				// shrink the references: the entry with the smallest number of references is removed
 				int minrefcount = Integer.MAX_VALUE;
 				String minrefkey = null;
-				Iterator<Map.Entry<String, Integer>> i = refs.entrySet().iterator();
-				Map.Entry<String, Integer> entry;
-				findloop: while (i.hasNext()) {
-					entry = i.next();
+				findloop: for (Map.Entry<String, Integer> entry : refs.entrySet()) {
 					if (entry.getValue().intValue() < minrefcount) {
 						minrefcount = entry.getValue().intValue();
 						minrefkey = entry.getKey();
@@ -312,12 +297,16 @@ public class plasmaWebStructure {
 		}
         
         // store the map back to the structure
-        structure.put(domhash + "," + url.getHost(), map2refstr(refs));
+        synchronized(structure) {
+            structure.put(domhash + "," + url.getHost(), map2refstr(refs));
+        }
     }
     
     public void saveWebStructure() {
         try {
-            serverFileUtils.saveMap(this.structureFile, this.structure, "Web Structure Syntax: <b64hash(6)>','<host> to <date-yyyymmdd(8)>{<target-b64hash(6)><target-count-hex(4)>}*");
+            synchronized(structure) {
+                serverFileUtils.saveMap(this.structureFile, this.structure, "Web Structure Syntax: <b64hash(6)>','<host> to <date-yyyymmdd(8)>{<target-b64hash(6)><target-count-hex(4)>}*");
+            }
         } catch (IOException e) {
             e.printStackTrace();
         }
@@ -325,16 +314,15 @@ public class plasmaWebStructure {
     
     public String hostWithMaxReferences() {
         // find domain with most references
-        Iterator<Map.Entry<String, String>> i = structure.entrySet().iterator();
-        int refsize, maxref = 0;
         String maxhost = null;
-        Map.Entry<String, String> entry;
-        while (i.hasNext()) {
-            entry = i.next();
-            refsize = entry.getValue().length();
-            if (refsize > maxref) {
-                maxref = refsize;
-                maxhost = entry.getKey().substring(7);
+        int refsize, maxref = 0;
+        synchronized(structure) {
+            for (Map.Entry<String, String> entry : structure.entrySet()) {
+                refsize = entry.getValue().length();
+                if (refsize > maxref) {
+                    maxref = refsize;
+                    maxhost = entry.getKey().substring(7);
+                }
             }
         }
         return maxhost;
