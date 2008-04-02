@@ -24,8 +24,8 @@
 
 package de.anomic.kelondro;
 
+import java.io.DataInputStream;
 import java.io.IOException;
-import java.io.InputStream;
 import java.util.Date;
 import java.util.Iterator;
 import java.util.List;
@@ -72,20 +72,34 @@ public class kelondroRowSet extends kelondroRowCollection implements kelondroInd
         }
     }
     
-    public static kelondroRowSet importRowSet(InputStream is, kelondroRow rowdef) throws IOException {
+    public static kelondroRowSet importRowSet(DataInputStream is, kelondroRow rowdef) throws IOException {
         byte[] byte2 = new byte[2];
         byte[] byte4 = new byte[4];
-        is.read(byte4); int size = (int) kelondroNaturalOrder.decodeLong(byte4);
-        is.read(byte2); //short lastread = (short) kelondroNaturalOrder.decodeLong(byte2);
-        is.read(byte2); //short lastwrote = (short) kelondroNaturalOrder.decodeLong(byte2);
-        is.read(byte2); //String orderkey = new String(byte2);
-        is.read(byte2); short ordercol = (short) kelondroNaturalOrder.decodeLong(byte2);
-        is.read(byte2); short orderbound = (short) kelondroNaturalOrder.decodeLong(byte2);
+        is.readFully(byte4); int size = (int) kelondroNaturalOrder.decodeLong(byte4);
+        is.readFully(byte2); //short lastread = (short) kelondroNaturalOrder.decodeLong(byte2);
+        is.readFully(byte2); //short lastwrote = (short) kelondroNaturalOrder.decodeLong(byte2);
+        is.readFully(byte2); //String orderkey = new String(byte2);
+        is.readFully(byte2); short ordercol = (short) kelondroNaturalOrder.decodeLong(byte2);
+        is.readFully(byte2); short orderbound = (short) kelondroNaturalOrder.decodeLong(byte2);
         assert rowdef.primaryKeyIndex == ordercol;
         byte[] chunkcache = new byte[size * rowdef.objectsize];
-        int c = is.read(chunkcache);
-        assert c == chunkcache.length;
+        is.readFully(chunkcache);
         return new kelondroRowSet(rowdef, size, chunkcache, orderbound);
+    }
+    
+    public static int skipNextRowSet(DataInputStream is, kelondroRow rowdef) throws IOException {
+        byte[] byte2 = new byte[2];
+        byte[] byte4 = new byte[4];
+        is.readFully(byte4); int size = (int) kelondroNaturalOrder.decodeLong(byte4);
+        is.readFully(byte2); //short lastread = (short) kelondroNaturalOrder.decodeLong(byte2);
+        is.readFully(byte2); //short lastwrote = (short) kelondroNaturalOrder.decodeLong(byte2);
+        is.readFully(byte2); //String orderkey = new String(byte2);
+        is.readFully(byte2); short ordercol = (short) kelondroNaturalOrder.decodeLong(byte2);
+        is.readFully(byte2);
+        assert rowdef.primaryKeyIndex == ordercol;
+        int skip = size * rowdef.objectsize;
+        while (skip > 0) skip -= is.skip(skip);
+        return size * rowdef.objectsize + 14;
     }
     
 	public void reset() {

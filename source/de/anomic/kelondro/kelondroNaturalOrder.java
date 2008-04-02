@@ -70,6 +70,14 @@ public final class kelondroNaturalOrder extends kelondroAbstractOrder<byte[]> im
         return o;
     }
     
+    public static kelondroByteOrder orderBySignature(String signature) {
+        kelondroByteOrder oo = null;
+        if (oo == null) oo = kelondroNaturalOrder.bySignature(signature);
+        if (oo == null) oo = kelondroBase64Order.bySignature(signature);
+        if (oo == null) oo = new kelondroNaturalOrder(true);
+        return oo;
+    }
+    
     public final static kelondroByteOrder bySignature(String signature) {
         if (signature.equals("nd")) return new kelondroNaturalOrder(false);
         if (signature.equals("nu")) return new kelondroNaturalOrder(true);

@@ -68,4 +68,5 @@ public interface kelondroOrder<A> extends Comparator<A> {
     public void rotate(A zero); // defines that the ordering rotates, and sets the zero point for the rotation
     
     public boolean equals(kelondroOrder<A> o); // used to compare different order objects; they may define the same ordering
+
 }

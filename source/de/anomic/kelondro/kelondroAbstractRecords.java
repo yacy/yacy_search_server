@@ -584,18 +584,10 @@ public abstract class kelondroAbstractRecords implements kelondroRecords {
         try {
             byte[] d = getDescription();
             String s = new String(d).substring(0, 2);
-            return orderBySignature(s);
+            return kelondroNaturalOrder.orderBySignature(s);
         } catch (IOException e) {
             return null;
         }
-    }
-    
-    public static kelondroByteOrder orderBySignature(String signature) {
-    	kelondroByteOrder oo = null;
-        if (oo == null) oo = kelondroNaturalOrder.bySignature(signature);
-        if (oo == null) oo = kelondroBase64Order.bySignature(signature);
-        if (oo == null) oo = new kelondroNaturalOrder(true);
-        return oo;
     }
     
     public String filename() {

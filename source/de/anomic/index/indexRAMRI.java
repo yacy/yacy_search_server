@@ -37,24 +37,21 @@ import java.util.TreeMap;
 
 import de.anomic.kelondro.kelondroBase64Order;
 import de.anomic.kelondro.kelondroBufferedRA;
+import de.anomic.kelondro.kelondroByteOrder;
 import de.anomic.kelondro.kelondroCloneableIterator;
 import de.anomic.kelondro.kelondroException;
 import de.anomic.kelondro.kelondroFixedWidthArray;
 import de.anomic.kelondro.kelondroMScoreCluster;
-import de.anomic.kelondro.kelondroNaturalOrder;
 import de.anomic.kelondro.kelondroRow;
 import de.anomic.kelondro.kelondroRow.EntryIndex;
-import de.anomic.server.serverByteBuffer;
-import de.anomic.server.serverFileUtils;
 import de.anomic.server.serverMemory;
 import de.anomic.server.logging.serverLog;
 import de.anomic.yacy.yacySeedDB;
 
-public final class indexRAMRI implements indexRI {
+public final class indexRAMRI implements indexRI, indexRIReader {
 
     // class variables
-    private final File databaseRoot;
-    protected final SortedMap<String, indexContainer> cache; // wordhash-container
+    protected SortedMap<String, indexContainer> cache; // wordhash-container
     private final kelondroMScoreCluster<String> hashScore;
     private final kelondroMScoreCluster<String> hashDate;
     private long  initTime;
@@ -62,16 +59,14 @@ public final class indexRAMRI implements indexRI {
     public  int   cacheReferenceCountLimit;
     public  long  cacheReferenceAgeLimit;
     private final serverLog log;
-    private String indexArrayFileName;
+    private File indexArrayFile, indexHeapFile;
     private kelondroRow payloadrow;
     private kelondroRow bufferStructureBasis;
     
-    public indexRAMRI(File databaseRoot, kelondroRow payloadrow, int wCacheReferenceCountLimitInit, long wCacheReferenceAgeLimitInit, String dumpname, serverLog log) {
+    public indexRAMRI(File databaseRoot, kelondroRow payloadrow, int wCacheReferenceCountLimitInit, long wCacheReferenceAgeLimitInit, String oldArrayName, String newHeapName, serverLog log) {
 
         // creates a new index cache
         // the cache has a back-end where indexes that do not fit in the cache are flushed
-        this.databaseRoot = databaseRoot;
-        this.cache = Collections.synchronizedSortedMap(new TreeMap<String, indexContainer>());
         this.hashScore = new kelondroMScoreCluster<String>();
         this.hashDate  = new kelondroMScoreCluster<String>();
         this.initTime = System.currentTimeMillis();
@@ -79,7 +74,8 @@ public final class indexRAMRI implements indexRI {
         this.cacheReferenceCountLimit = wCacheReferenceCountLimitInit;
         this.cacheReferenceAgeLimit = wCacheReferenceAgeLimitInit;
         this.log = log;
-        this.indexArrayFileName = dumpname;
+        this.indexArrayFile = new File(databaseRoot, oldArrayName);
+        this.indexHeapFile = new File(databaseRoot, newHeapName);
         this.payloadrow = payloadrow;
         this.bufferStructureBasis = new kelondroRow(
                 "byte[] wordhash-" + yacySeedDB.commonHashLength + ", " +
@@ -89,10 +85,25 @@ public final class indexRAMRI implements indexRI {
                 kelondroBase64Order.enhancedCoder, 0);
         
         // read in dump of last session
-        try {
-            restore();
-        } catch (IOException e){
-            log.logSevere("unable to restore cache dump: " + e.getMessage(), e);
+        if (indexArrayFile.exists()) {
+            this.cache = Collections.synchronizedSortedMap(new TreeMap<String, indexContainer>(new kelondroByteOrder.StringOrder(payloadrow.getOrdering())));
+            try {
+                restoreArray();
+            } catch (IOException e){
+                log.logSevere("unable to restore cache dump: " + e.getMessage(), e);
+            }
+            indexArrayFile.delete();
+            if (indexArrayFile.exists()) log.logSevere("cannot delete old array file: " + indexArrayFile.toString() + "; please delete manually");
+        } else if (indexHeapFile.exists()) {
+            this.cache = null;
+            try {
+                //indexContainerHeap.indexHeap(this.indexHeapFile, payloadrow, log); // for testing
+                this.cache = indexContainerHeap.restoreHeap(this.indexHeapFile, payloadrow, log);
+            } catch (IOException e){
+                log.logSevere("unable to restore cache dump: " + e.getMessage(), e);
+            }
+        } else {
+            this.cache = Collections.synchronizedSortedMap(new TreeMap<String, indexContainer>(new kelondroByteOrder.StringOrder(payloadrow.getOrdering())));
         }
     }
 
@@ -108,97 +119,12 @@ public final class indexRAMRI implements indexRI {
         return entries.updated();
     }
     
-    private void dump() throws IOException {
-        log.logConfig("creating dump for index cache '" + indexArrayFileName + "', " + cache.size() + " words (and much more urls)");
-        File indexDumpFile = new File(databaseRoot, indexArrayFileName);
-        if (indexDumpFile.exists()) indexDumpFile.delete();
-        kelondroFixedWidthArray dumpArray = null;
-        kelondroBufferedRA writeBuffer = null;
-        if (false /*serverMemory.available() > 50 * bufferStructureBasis.objectsize() * cache.size()*/) {
-            writeBuffer = new kelondroBufferedRA();
-            dumpArray = new kelondroFixedWidthArray(writeBuffer, indexDumpFile.getCanonicalPath(), bufferStructureBasis, 0);
-            log.logInfo("started dump of ram cache: " + cache.size() + " words; memory-enhanced write");
-        } else {
-            dumpArray = new kelondroFixedWidthArray(indexDumpFile, bufferStructureBasis, 0);
-            log.logInfo("started dump of ram cache: " + cache.size() + " words; low-memory write");
-        }
-        long startTime = System.currentTimeMillis();
-        long messageTime = System.currentTimeMillis() + 5000;
-        long wordsPerSecond = 0, wordcount = 0, urlcount = 0;
-        Map.Entry<String, indexContainer> entry;
-        String wordHash;
-        indexContainer container;
-        long updateTime;
-        indexRWIRowEntry iEntry;
-        kelondroRow.Entry row = dumpArray.row().newEntry();
-        byte[] occ, time;
-
-        // write wCache
-        synchronized (cache) {
-            Iterator<Map.Entry<String, indexContainer>> i = cache.entrySet().iterator();
-            while (i.hasNext()) {
-                // get entries
-                entry = i.next();
-                wordHash = entry.getKey();
-                updateTime = getUpdateTime(wordHash);
-                container = entry.getValue();
-
-                // put entries on stack
-                if (container != null) {
-                    Iterator<indexRWIRowEntry> ci = container.entries();
-                    occ = kelondroNaturalOrder.encodeLong(container.size(), 4);
-                    time = kelondroNaturalOrder.encodeLong(updateTime, 8);
-                    while (ci.hasNext()) {
-                        iEntry = ci.next();
-                        row.setCol(0, wordHash.getBytes());
-                        row.setCol(1, occ);
-                        row.setCol(2, time);
-                        row.setCol(3, iEntry.toKelondroEntry().bytes());
-                        dumpArray.set((int) urlcount++, row);
-                    }
-                }
-                wordcount++;
-                i.remove(); // free some mem
-
-                // write a log
-                if (System.currentTimeMillis() > messageTime) {
-                    serverMemory.gc(1000, "indexRAMRI, for better statistic-1"); // for better statistic - thq
-                    wordsPerSecond = wordcount * 1000
-                            / (1 + System.currentTimeMillis() - startTime);
-                    log.logInfo("dump status: " + wordcount
-                            + " words done, "
-                            + (cache.size() / (wordsPerSecond + 1))
-                            + " seconds remaining, free mem = "
-                            + (serverMemory.free() / 1024 / 1024)
-                            + "MB");
-                    messageTime = System.currentTimeMillis() + 5000;
-                }
-            }
-        }
-        if (writeBuffer != null) {
-            serverByteBuffer bb = writeBuffer.getBuffer();
-            //System.out.println("*** byteBuffer size = " + bb.length());
-            serverFileUtils.copy(bb.getBytes(), indexDumpFile);
-            writeBuffer.close();
-        }
-        dumpArray.close();
-        dumpArray = null;
-        log.logInfo("finished dump of ram cache: " + urlcount + " word/URL relations in " + ((System.currentTimeMillis() - startTime) / 1000) + " seconds");
-    }
-
-    private long restore() throws IOException {
-        File indexDumpFile = new File(databaseRoot, indexArrayFileName);
-        if (!(indexDumpFile.exists())) return 0;
+    private long restoreArray() throws IOException {
+        if (!(indexArrayFile.exists())) return 0;
         kelondroFixedWidthArray dumpArray;
         kelondroBufferedRA readBuffer = null;
-        if (false /*serverMemory.available() > indexDumpFile.length() * 2*/) {
-            readBuffer = new kelondroBufferedRA(new serverByteBuffer(serverFileUtils.read(indexDumpFile)));
-            dumpArray = new kelondroFixedWidthArray(readBuffer, indexDumpFile.getCanonicalPath(), bufferStructureBasis, 0);
-            log.logInfo("started restore of ram cache '" + indexArrayFileName + "', " + dumpArray.size() + " word/URL relations; memory-enhanced read");
-        } else {
-            dumpArray = new kelondroFixedWidthArray(indexDumpFile, bufferStructureBasis, 0);
-            log.logInfo("started restore of ram cache '" + indexArrayFileName + "', " + dumpArray.size() + " word/URL relations; low-memory read");
-        }
+        dumpArray = new kelondroFixedWidthArray(indexArrayFile, bufferStructureBasis, 0);
+        log.logInfo("started restore of ram cache '" + indexArrayFile.getName() + "', " + dumpArray.size() + " word/URL relations");
         long startTime = System.currentTimeMillis();
         long messageTime = System.currentTimeMillis() + 5000;
         long urlCount = 0, urlsPerSecond = 0;
@@ -233,7 +159,7 @@ public final class indexRAMRI implements indexRI {
             if (readBuffer != null) readBuffer.close();
             dumpArray.close();
             dumpArray = null;
-            log.logConfig("finished restore: " + cache.size() + " words in " + ((System.currentTimeMillis() - startTime) / 1000) + " seconds");
+            log.logInfo("finished restore: " + cache.size() + " words in " + ((System.currentTimeMillis() - startTime) / 1000) + " seconds");
         } catch (kelondroException e) {
             // restore failed
             log.logSevere("failed restore of indexCache array dump: " + e.getMessage(), e);
@@ -242,9 +168,9 @@ public final class indexRAMRI implements indexRI {
         }
         return urlCount;
     }
-
+    
+    
     // cache settings
-
     public int maxURLinCache() {
         if (hashScore.size() == 0) return 0;
         return hashScore.getMaxScore();
@@ -514,7 +440,7 @@ public final class indexRAMRI implements indexRI {
     public synchronized void close() {
         // dump cache
         try {
-            dump();
+            indexContainerHeap.dumpHeap(this.indexHeapFile, this.payloadrow, this.cache, this.log);
         } catch (IOException e){
             log.logSevere("unable to dump cache: " + e.getMessage(), e);
         }

@@ -99,8 +99,8 @@ public final class plasmaWordIndex implements indexRI {
         
         File textindexcache = new File(indexPrimaryTextLocation, "RICACHE");
         if (!(textindexcache.exists())) textindexcache.mkdirs();
-        this.dhtOutCache = new indexRAMRI(textindexcache, indexRWIRowEntry.urlEntryRow, wCacheMaxChunk, wCacheMaxAge, "dump1.array", log);
-        this.dhtInCache  = new indexRAMRI(textindexcache, indexRWIRowEntry.urlEntryRow, wCacheMaxChunk, wCacheMaxAge, "dump2.array", log);
+        this.dhtOutCache = new indexRAMRI(textindexcache, indexRWIRowEntry.urlEntryRow, wCacheMaxChunk, wCacheMaxAge, "dump1.array", "index.dhtout.heap", log);
+        this.dhtInCache  = new indexRAMRI(textindexcache, indexRWIRowEntry.urlEntryRow, wCacheMaxChunk, wCacheMaxAge, "dump2.array", "index.dhtin.heap", log);
         
         // create collections storage path
         File textindexcollections = new File(indexPrimaryTextLocation, "RICOLLECTION");
