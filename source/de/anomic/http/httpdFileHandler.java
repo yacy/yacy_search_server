@@ -296,6 +296,12 @@ public final class httpdFileHandler {
                 assert(false) : "UnsupportedEncodingException: " + e.getMessage();
             }
             
+            // check again hack attacks in path
+            if (path.indexOf("..") >= 0) {
+                httpd.sendRespondError(conProp,out,4,403,null,"Access not allowed",null);
+                return;
+            }
+            
             // check permission/granted access
             String authorization = (String) requestHeader.get(httpHeader.AUTHORIZATION);
             String adminAccountBase64MD5 = switchboard.getConfig(httpd.ADMIN_ACCOUNT_B64MD5, "");
