@@ -491,7 +491,8 @@ public final class htmlFilterWriter extends Writer {
 
     private static boolean binaryHint(char c) {
         // space, punctiation and symbols, letters and digits (ASCII/latin)
-        if (c >= 31 && c < 128) return false;
+        //if (c >= 31 && c < 128) return false;
+        if(c >= 31) return false;
         //  8 = backspace
         //  9 = horizontal tab
         // 10 = new line (line feed)
