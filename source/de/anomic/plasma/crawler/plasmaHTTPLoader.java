@@ -54,12 +54,13 @@ import java.net.SocketException;
 import java.net.UnknownHostException;
 import java.util.Date;
 
+import de.anomic.http.HttpClient;
+import de.anomic.http.HttpFactory;
+import de.anomic.http.HttpResponse;
+import de.anomic.http.JakartaCommonsHttpResponse;
 import de.anomic.http.httpHeader;
-import de.anomic.http.httpRemoteProxyConfig;
-import de.anomic.http.httpc;
 import de.anomic.http.httpdBoundedSizeOutputStream;
 import de.anomic.http.httpdLimitExceededException;
-import de.anomic.http.httpdProxyHandler;
 import de.anomic.index.indexReferenceBlacklist;
 import de.anomic.plasma.plasmaCrawlEURL;
 import de.anomic.plasma.plasmaCrawlEntry;
@@ -75,6 +76,7 @@ import de.anomic.yacy.yacyURL;
 public final class plasmaHTTPLoader {
 
     public static final int DEFAULT_CRAWLING_RETRY_COUNT = 5;
+    private static final String crawlerUserAgent = "yacybot (" + HttpClient.getSystemOST() +") http://yacy.net/bot.html";
     
     /**
      * The socket timeout that should be used
@@ -86,11 +88,6 @@ public final class plasmaHTTPLoader {
      */
     private long maxFileSize = -1;
     
-    /**
-     * The remote http proxy that should be used
-     */
-    private httpRemoteProxyConfig remoteProxyConfig;
-
     private String acceptEncoding;
     private String acceptLanguage;
     private String acceptCharset;
@@ -111,19 +108,24 @@ public final class plasmaHTTPLoader {
         this.acceptEncoding = sb.getConfig("crawler.http.acceptEncoding", "gzip,deflate");
         this.acceptLanguage = sb.getConfig("crawler.http.acceptLanguage","en-us,en;q=0.5");
         this.acceptCharset  = sb.getConfig("crawler.http.acceptCharset","ISO-8859-1,utf-8;q=0.7,*;q=0.7");
-        
-        // getting the http proxy config
-        this.remoteProxyConfig = sb.remoteProxyConfig;        
-    }
+            }
 
-    protected plasmaHTCache.Entry createCacheEntry(plasmaCrawlEntry entry, Date requestDate, httpHeader requestHeader, httpc.response response) {
-        IResourceInfo resourceInfo = new ResourceInfo(entry.url(), requestHeader, response.responseHeader);
+    /**
+     * @param entry
+     * @param requestDate
+     * @param requestHeader
+     * @param responseHeader
+     * @param responseStatus Status-Code SPACE Reason-Phrase
+     * @return
+     */
+    protected plasmaHTCache.Entry createCacheEntry(plasmaCrawlEntry entry, Date requestDate, httpHeader requestHeader, httpHeader responseHeader, final String responseStatus) {
+        IResourceInfo resourceInfo = new ResourceInfo(entry.url(), requestHeader, responseHeader);
         return plasmaHTCache.newEntry(
                 requestDate, 
                 entry.depth(),
                 entry.url(),
                 entry.name(),
-                response.status,
+                responseStatus,
                 resourceInfo, 
                 entry.initiator(),
                 sb.profilesActiveCrawls.getEntry(entry.profileHandle())
@@ -158,12 +160,11 @@ public final class plasmaHTTPLoader {
         }
         
         // take a file from the net
-        httpc remote = null;
         plasmaHTCache.Entry htCache = null;
         try {
             // create a request header
             httpHeader requestHeader = new httpHeader();
-            requestHeader.put(httpHeader.USER_AGENT, httpdProxyHandler.crawlerUserAgent);
+            requestHeader.put(httpHeader.USER_AGENT, crawlerUserAgent);
             yacyURL refererURL = null;
             if (entry.referrerhash() != null) refererURL = sb.getURL(entry.referrerhash());
             if (refererURL != null)
@@ -175,24 +176,22 @@ public final class plasmaHTTPLoader {
             if (this.acceptEncoding != null && this.acceptEncoding.length() > 0)
                 requestHeader.put(httpHeader.ACCEPT_ENCODING, this.acceptEncoding);
 
-            // open the connection
-            remote = new httpc(host, host, port, this.socketTimeout, ssl, this.remoteProxyConfig, "CRAWLER", null);
+            // HTTP-Client
+            HttpClient client = HttpFactory.newClient(requestHeader, socketTimeout);
+            
+            HttpResponse res = null;
+            try {
+                // send request
+                res = client.GET(entry.url().toString());
 
-            // specifying if content encoding is allowed
-            remote.setAllowContentEncoding((this.acceptEncoding != null && this.acceptEncoding.length() > 0));
-
-            // send request
-            httpc.response res = remote.GET(path, requestHeader);
-
-            if (res.status.startsWith("200") || res.status.startsWith("203")) {
+            if (res.getStatusCode() == 200 || res.getStatusCode() == 203) {
                 // the transfer is ok
                 
                 // create a new cache entry
-                htCache = createCacheEntry(entry, requestDate, requestHeader, res); 
+                htCache = createCacheEntry(entry, requestDate, requestHeader, res.getResponseHeader(), res.getStatusLine()); 
                 
                 // aborting download if content is to long ...
                 if (htCache.cacheFile().getAbsolutePath().length() > serverSystem.maxPathLength) {
-                    remote.close();
                     this.log.logInfo("REJECTED URL " + entry.url().toString() + " because path too long '" + plasmaHTCache.cachePath.getAbsolutePath() + "'");
                     sb.crawlQueues.errorURL.newEntry(entry, null, new Date(), 1, plasmaCrawlEURL.DENIED_CACHEFILE_PATH_TOO_LONG);                    
                     return (htCache = null);
@@ -201,7 +200,6 @@ public final class plasmaHTTPLoader {
                 // reserve cache entry
                 if (!htCache.cacheFile().getCanonicalPath().startsWith(plasmaHTCache.cachePath.getCanonicalPath())) {
                     // if the response has not the right file type then reject file
-                    remote.close();
                     this.log.logInfo("REJECTED URL " + entry.url().toString() + " because of an invalid file path ('" +
                                 htCache.cacheFile().getCanonicalPath() + "' does not start with '" +
                                 plasmaHTCache.cachePath.getAbsolutePath() + "').");
@@ -212,7 +210,7 @@ public final class plasmaHTTPLoader {
                 // request has been placed and result has been returned. work off response
                 File cacheFile = plasmaHTCache.getCachePath(entry.url());
                 try {
-                    if (plasmaParser.supportedContent(parserMode, entry.url(), res.responseHeader.mime())) {
+                    if (plasmaParser.supportedContent(parserMode, entry.url(), res.getResponseHeader().mime())) {
                         // delete old content
                         if (cacheFile.isFile()) {
                             plasmaHTCache.deleteURLfromCache(entry.url());
@@ -227,14 +225,13 @@ public final class plasmaHTTPLoader {
                             fos = new FileOutputStream(cacheFile); 
                             
                             // getting content length
-                            long contentLength = (res.isGzipped()) ? res.getGzippedLength() : res.responseHeader.contentLength();
+                            long contentLength = res.getResponseHeader().contentLength();
                             
                             // check the maximum allowed file size                            
                             if (this.maxFileSize > -1) {                                
                                 if (contentLength == -1) {
                                     fos = new httpdBoundedSizeOutputStream(fos,this.maxFileSize);                     
                                 } else if (contentLength > this.maxFileSize) {
-                                    remote.close();
                                     this.log.logInfo("REJECTED URL " + entry.url() + " because file size '" + contentLength + "' exceeds max filesize limit of " + this.maxFileSize + " bytes.");
                                     sb.crawlQueues.errorURL.newEntry(entry, null, new Date(), 1, plasmaCrawlEURL.DENIED_FILESIZE_LIMIT_EXCEEDED);                    
                                     return null;
@@ -242,21 +239,19 @@ public final class plasmaHTTPLoader {
                             }
 
                             // we write the new cache entry to file system directly
-                            byte[] cacheArray = null;
-                            cacheArray = res.writeContent(fos, false);
-                            remote.close();
-                            htCache.setCacheArray(cacheArray);
+                            ((JakartaCommonsHttpResponse)res).setAccountingName("CRAWLER");
+                            byte[] responseBody = res.getData();
+                            fos.write(responseBody);
+                            htCache.setCacheArray(responseBody);
                             plasmaHTCache.writeFileAnnouncement(cacheFile);
                         } finally {
                             if (fos!=null)try{fos.close();}catch(Exception e){/* ignore this */}
-                            remote.close();
                         }
                         
                         return htCache;
                     } else {
                         // if the response has not the right file type then reject file
-                        remote.close();
-                        this.log.logInfo("REJECTED WRONG MIME/EXT TYPE " + res.responseHeader.mime() + " for URL " + entry.url().toString());
+                        this.log.logInfo("REJECTED WRONG MIME/EXT TYPE " + res.getResponseHeader().mime() + " for URL " + entry.url().toString());
                         sb.crawlQueues.errorURL.newEntry(entry, null, new Date(), 1, plasmaCrawlEURL.DENIED_WRONG_MIMETYPE_OR_EXT);
                         return null;
                     }
@@ -271,10 +266,10 @@ public final class plasmaHTTPLoader {
                     sb.crawlQueues.errorURL.newEntry(entry, null, new Date(), 1, plasmaCrawlEURL.DENIED_CONNECTION_ERROR);
                     htCache = null;
                 }
-            } else if (res.status.startsWith("30")) {
-                    if (res.responseHeader.containsKey(httpHeader.LOCATION)) {
+            } else if (res.getStatusLine().startsWith("30")) {
+                    if (res.getResponseHeader().containsKey(httpHeader.LOCATION)) {
                         // getting redirection URL
-                        String redirectionUrlString = (String) res.responseHeader.get(httpHeader.LOCATION);
+                        String redirectionUrlString = (String) res.getResponseHeader().get(httpHeader.LOCATION);
                         redirectionUrlString = redirectionUrlString.trim();
 
                         if (redirectionUrlString.length() == 0) {
@@ -287,7 +282,7 @@ public final class plasmaHTTPLoader {
                         yacyURL redirectionUrl = yacyURL.newURL(entry.url(), redirectionUrlString);
 
                         // restart crawling with new url
-                        this.log.logInfo("CRAWLER Redirection detected ('" + res.status + "') for URL " + entry.url().toString());
+                        this.log.logInfo("CRAWLER Redirection detected ('" + res.getStatusLine() + "') for URL " + entry.url().toString());
                         this.log.logInfo("CRAWLER ..Redirecting request to: " + redirectionUrl);
 
                         // if we are already doing a shutdown we don't need to retry crawling
@@ -315,13 +310,18 @@ public final class plasmaHTTPLoader {
                     }
             } else {
                 // if the response has not the right response type then reject file
-                this.log.logInfo("REJECTED WRONG STATUS TYPE '" + res.status + "' for URL " + entry.url().toString());
+                this.log.logInfo("REJECTED WRONG STATUS TYPE '" + res.getStatusLine() + "' for URL " + entry.url().toString());
                 
                 // not processed any further
-                sb.crawlQueues.errorURL.newEntry(entry, null, new Date(), 1, plasmaCrawlEURL.DENIED_WRONG_HTTP_STATUSCODE + res.statusCode +  ")");
+                sb.crawlQueues.errorURL.newEntry(entry, null, new Date(), 1, plasmaCrawlEURL.DENIED_WRONG_HTTP_STATUSCODE + res.getStatusCode() +  ")");
             }
             
-            if (remote != null) remote.close();
+            } finally {
+                if(res != null) {
+                    // release connection
+                    res.closeStream();
+                }
+            }
             return htCache;
         } catch (Exception e) {
             String errorMsg = e.getMessage();

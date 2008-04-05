@@ -52,8 +52,12 @@ import java.util.Iterator;
 import java.util.Map;
 import java.util.TreeMap;
 
+import de.anomic.http.HttpClient;
+import de.anomic.http.HttpFactory;
+import de.anomic.http.HttpResponse;
+import de.anomic.http.httpHeader;
 import de.anomic.http.httpRemoteProxyConfig;
-import de.anomic.http.httpc;
+import de.anomic.http.httpdProxyHandler;
 import de.anomic.index.indexContainer;
 import de.anomic.index.indexRWIEntry;
 import de.anomic.index.indexRWIRowEntry;
@@ -78,6 +82,11 @@ import de.anomic.tools.nxTools;
 import de.anomic.xml.rssReader;
 
 public final class yacyClient {
+
+    /**
+     * 
+     */
+    private static final String GZIP_POST_BODY = "GZIP_POST_BODY";
 
     public static int publishMySeed(String address, String otherHash) {
         // this is called to enrich the seed information by
@@ -106,24 +115,15 @@ public final class yacyClient {
             post.put("seed", yacyCore.seedDB.mySeed().genSeedStr(post.get("key", "")));
             yacyCore.log.logFine("yacyClient.publishMySeed thread '" + Thread.currentThread().getName() + "' contacting peer at " + address);
             // send request
-            result = nxTools.table(
-                    httpc.wput(new yacyURL("http://" + address + "/yacy/hello.html", null),
-                               yacySeed.b64Hash2hexHash(otherHash) + ".yacyh",
-                               12000, 
-                               null, 
-                               null,
-                               proxyConfig(),
-                               post,
-                               null
-                    ), "UTF-8"
-            );
+            byte[] content = wput("http://" + address + "/yacy/hello.html", yacySeed.b64Hash2hexHash(otherHash) + ".yacyh", post);
+            result = nxTools.table(content, "UTF-8");
             break;
         } catch (Exception e) {
             if (Thread.currentThread().isInterrupted()) {
                 yacyCore.log.logWarning("yacyClient.publishMySeed thread '" + Thread.currentThread().getName() + "' interrupted.");
                 return -1;
             } else {
-                yacyCore.log.logWarning("yacyClient.publishMySeed thread '" + Thread.currentThread().getName() + "' exception: " + e.getMessage() + "; retry = " + retry); // here VERY OFTEN a 'Connection reset' appears. What is the cause?
+                yacyCore.log.logWarning("yacyClient.publishMySeed thread '" + Thread.currentThread().getName() + "' exception: " + e.getMessage() + "; retry = " + retry);
                 // try again (go into loop)
             }
             result = null;
@@ -239,6 +239,53 @@ public final class yacyClient {
         return count;
     }
 
+    /**
+     * send data to the server named by vhost
+     * @param address address of the server
+     * @param vhost name of the server at address which should respond
+     * @param post data to send (name-value-pairs)
+     * @return response body
+     * @throws IOException
+     */
+    private static byte[] wput(final String url, String vhost, final Map<String, ?> post) throws IOException {
+        HttpClient client = HttpFactory.newClient(null, 12000);
+        client.setProxy(proxyConfig());
+        
+        // address vhost
+        httpHeader header = new httpHeader();
+        header.add(httpHeader.HOST, vhost);
+        client.setHeader(header);
+        
+        HttpResponse res = null;
+        byte[] content = null;
+        try {
+            // send request/data
+            res = client.POST(url, post);
+            content = res.getData();
+        } finally {
+            if(res != null) {
+                // release connection
+                res.closeStream();
+            }
+        }
+        return content;
+    }
+
+    /**
+     * @see wput
+     * @param target
+     * @param filename
+     * @param post
+     * @return
+     * @throws IOException
+     */
+    private static byte[] postToFile(final yacySeed target, final String filename, final serverObjects post) throws IOException {
+        return wput("http://" + target.getClusterAddress() + "/yacy/" + filename, target.getHexHash() + ".yacyh", post);
+    }
+    private static byte[] postToFile(final String targetHash, final String filename, final serverObjects post) throws IOException {
+        return wput("http://" + targetAddress(targetHash) + "/yacy/" + filename, yacySeed.b64Hash2hexHash(targetHash)+ ".yacyh", post);
+    }
+
     public static yacySeed querySeed(yacySeed target, String seedHash) {
         // prepare request
         final serverObjects post = yacyNetwork.basicRequestPost(plasmaSwitchboard.getSwitchboard(), target.hash);
@@ -247,17 +294,8 @@ public final class yacyClient {
             
         // send request
         try {
-            final HashMap<String, String> result = nxTools.table(
-                    httpc.wput(new yacyURL("http://" + target.getClusterAddress() + "/yacy/query.html", null),
-                    		   target.getHexHash() + ".yacyh",
-                               8000, 
-                               null, 
-                               null,
-                               proxyConfig(),
-                               post,
-                               null
-                    ), "UTF-8"
-            );
+            byte[] content = postToFile(target, "query.html", post);
+            final HashMap<String, String> result = nxTools.table(content, "UTF-8");
             
             if (result == null || result.size() == 0) { return null; }
             //final Date remoteTime = yacyCore.parseUniversalDate((String) result.get(yacySeed.MYTIME)); // read remote time
@@ -277,17 +315,8 @@ public final class yacyClient {
             
         // send request
         try {
-            final HashMap<String, String> result = nxTools.table(
-                    httpc.wput(new yacyURL("http://" + target.getClusterAddress() + "/yacy/query.html", null),
-                    		   target.getHexHash() + ".yacyh",
-                               8000, 
-                               null, 
-                               null,
-                               proxyConfig(),
-                               post,
-                               null
-                    ), "UTF-8"
-            );
+            byte[] content = postToFile(target, "query.html", post);
+            final HashMap<String, String> result = nxTools.table(content, "UTF-8");
             
             if (result == null || result.size() == 0) { return -1; }
             return Integer.parseInt((String) result.get("response"));
@@ -309,17 +338,8 @@ public final class yacyClient {
         
         // send request
         try {
-        	final HashMap<String, String> result = nxTools.table(
-                httpc.wput(new yacyURL("http://" + target.getClusterAddress() + "/yacy/query.html", null),
-                		   target.getHexHash() + ".yacyh",
-                           6000, 
-                           null, 
-                           null,
-                           proxyConfig(),
-                           post,
-                           null
-                ), "UTF-8"
-        	);
+            byte[] content = postToFile(target, "query.html", post);
+            final HashMap<String, String> result = nxTools.table(content, "UTF-8");
             
             if ((result == null) || (result.size() == 0)) return -1;
             final String resp = (String) result.get("response");
@@ -348,16 +368,7 @@ public final class yacyClient {
         
         // send request
         try {
-            final byte[] result = 
-                httpc.wput(new yacyURL("http://" + target.getClusterAddress() + "/yacy/urls.xml", null),
-                           target.getHexHash() + ".yacyh",
-                           60000, /* a long time-out is needed */
-                           null, 
-                           null,
-                           proxyConfig(),
-                           post,
-                           null
-                );
+            final byte[] result = wput("http://" + target.getClusterAddress() + "/yacy/urls.xml", target.getHexHash() + ".yacyh", post); 
             
             rssReader reader = rssReader.parse(result);
             if (reader == null) {
@@ -433,17 +444,7 @@ public final class yacyClient {
         // send request
         HashMap<String, String> result = null;
         try {
-          	result = nxTools.table(
-                httpc.wput(new yacyURL("http://" + target.getClusterAddress() + "/yacy/search.html", null),
-                        target.getHexHash() + ".yacyh",
-                        60000, 
-                        null, 
-                        null,
-                        proxyConfig(),
-                        post,
-                        null
-                    ), "UTF-8"
-            	);
+          	result = nxTools.table(postToFile(target, "search.html", post), "UTF-8");
         } catch (IOException e) {
             yacyCore.log.logInfo("SEARCH failed, Peer: " + target.hash + ":" + target.getName() + " (" + e.getMessage() + "), score=" + target.selectscore + ", DHTdist=" + yacyDHTAction.dhtDistance(target.hash, wordhashes.substring(0, 12)));
             //yacyCore.peerActions.peerDeparture(target, "search request to peer created io exception: " + e.getMessage());
@@ -638,17 +639,8 @@ public final class yacyClient {
         
         // send request
         try {
-            final HashMap<String, String> result = nxTools.table(
-                httpc.wput(new yacyURL("http://" + targetAddress(targetHash) + "/yacy/message.html", null),
-                           yacySeed.b64Hash2hexHash(targetHash)+ ".yacyh",
-                           8000, 
-                           null, 
-                           null,
-                           proxyConfig(),
-                           post,
-                           null
-                ), "UTF-8"
-            );
+            final byte[] content = postToFile(targetHash, "message.html", post); 
+            final HashMap<String, String> result = nxTools.table(content, "UTF-8");
             return result;
         } catch (Exception e) {
             // most probably a network time-out exception
@@ -673,17 +665,8 @@ public final class yacyClient {
 
         // send request
         try {
-            final HashMap<String, String> result = nxTools.table(
-                httpc.wput(new yacyURL("http://" + targetAddress(targetHash) + "/yacy/message.html", null),
-                           yacySeed.b64Hash2hexHash(targetHash)+ ".yacyh",
-                           20000, 
-                           null, 
-                           null,
-                           proxyConfig(),
-                           post,
-                           null
-                ), "UTF-8"
-            );
+            final byte[] content = postToFile(targetHash, "message.html", post);
+            final HashMap<String, String> result = nxTools.table(content, "UTF-8");
             return result;
         } catch (Exception e) {
             yacyCore.log.logSevere("yacyClient.postMessage error:" + e.getMessage());
@@ -717,18 +700,10 @@ public final class yacyClient {
         
         // send request
         try {
+            // TODO is targetAddress == url.getHost()?
             final yacyURL url = new yacyURL("http://" + targetAddress + "/yacy/transfer.html", null);
-            final HashMap<String, String> result = nxTools.table(
-                httpc.wput(url,
-                           url.getHost(),
-                           6000, 
-                           null, 
-                           null,
-                           proxyConfig(),
-                           post,
-                           null
-                ), "UTF-8"
-            );
+            final byte[] content = wput("http://" + targetAddress + "/yacy/transfer.html", url.getHost(), post);
+            final HashMap<String, String> result = nxTools.table(content, "UTF-8");
             return result;
         } catch (Exception e) {
             // most probably a network time-out exception
@@ -752,18 +727,10 @@ public final class yacyClient {
         
         // send request
         try {
+            // TODO is targetAddress == url.getHost()?
             final yacyURL url = new yacyURL("http://" + targetAddress + "/yacy/transfer.html", null);
-            final HashMap<String, String> result = nxTools.table(
-                httpc.wput(url,
-                           url.getHost(),
-                           20000, 
-                           null, 
-                           null,
-                           proxyConfig(),
-                           post,
-                           files
-                ), "UTF-8"
-            );
+            final byte[] content = wput("http://" + targetAddress + "/yacy/transfer.html", url.getHost(), post);
+            final HashMap<String, String> result = nxTools.table(content, "UTF-8");
             return result;
         } catch (Exception e) {
             yacyCore.log.logSevere("yacyClient.postMessage error:" + e.getMessage());
@@ -836,17 +803,8 @@ public final class yacyClient {
             
         // send request
         try {
-            return nxTools.table(
-                    httpc.wput(new yacyURL("http://" + address + "/yacy/crawlReceipt.html", null),
-                               target.getHexHash() + ".yacyh",
-                               60000, 
-                               null, 
-                               null,
-                               proxyConfig(),
-                               post,
-                               null
-                    ), "UTF-8"
-            );
+            byte[] content = wput("http://" + address + "/yacy/crawlReceipt.html", target.getHexHash() + ".yacyh", post);
+            return nxTools.table(content, "UTF-8");
         } catch (Exception e) {
             // most probably a network time-out exception
             yacyCore.log.logSevere("yacyClient.crawlReceipt error:" + e.getMessage());
@@ -953,7 +911,7 @@ public final class yacyClient {
         
         // enabling gzip compression for post request body
         if ((gzipBody) && (targetSeed.getVersion() >= yacyVersion.YACY_SUPPORTS_GZIP_POST_REQUESTS)) {
-            post.put(httpc.GZIP_POST_BODY,"true");
+            post.put(GZIP_POST_BODY,"true");
         }
         post.put("wordc", Integer.toString(indexes.length));
         
@@ -983,17 +941,8 @@ public final class yacyClient {
         post.put("entryc", indexcount);
         post.put("indexes", entrypost.toString());  
         try {
-            final ArrayList<String> v = nxTools.strings(
-                httpc.wput(
-                    new yacyURL("http://" + address + "/yacy/transferRWI.html", null), 
-                    targetSeed.getHexHash() + ".yacyh",
-                    timeout, 
-                    null, 
-                    null,
-                    proxyConfig(), 
-                    post,
-                    null
-                ), "UTF-8");
+            final byte[] content = wput("http://" + address + "/yacy/transferRWI.html", targetSeed.getHexHash() + ".yacyh", post);
+            final ArrayList<String> v = nxTools.strings(content, "UTF-8");
             // this should return a list of urlhashes that are unknwon
             if ((v != null) && (v.size() > 0)) {
                 yacyCore.seedDB.mySeed().incSI(indexcount);
@@ -1019,7 +968,7 @@ public final class yacyClient {
         
         // enabling gzip compression for post request body
         if ((gzipBody) && (targetSeed.getVersion() >= yacyVersion.YACY_SUPPORTS_GZIP_POST_REQUESTS)) {
-            post.put(httpc.GZIP_POST_BODY,"true");
+            post.put(GZIP_POST_BODY,"true");
         }        
         
         String resource = "";
@@ -1037,17 +986,8 @@ public final class yacyClient {
         }
         post.put("urlc", urlc);
         try {
-            final ArrayList<String> v = nxTools.strings(
-                httpc.wput(
-                    new yacyURL("http://" + address + "/yacy/transferURL.html", null),
-                    targetSeed.getHexHash() + ".yacyh",
-                    timeout, 
-                    null, 
-                    null,
-                    proxyConfig(), 
-                    post,
-                    null
-                ), "UTF-8");
+            final byte[] content = wput("http://" + address + "/yacy/transferURL.html", targetSeed.getHexHash() + ".yacyh", post);
+            final ArrayList<String> v = nxTools.strings(content, "UTF-8");
             
             if ((v != null) && (v.size() > 0)) {
                 yacyCore.seedDB.mySeed().incSU(urlc);
@@ -1071,25 +1011,20 @@ public final class yacyClient {
         String address = targetSeed.getClusterAddress();
         if (address == null) { address = "localhost:8080"; }
         try {
-            return nxTools.table(
-                httpc.wput(
-                    new yacyURL("http://" + address + "/yacy/profile.html", null), 
-                    targetSeed.getHexHash() + ".yacyh",
-                    10000, 
-                    null, 
-                    null,
-                    proxyConfig(), 
-                    post,
-                    null
-                ), "UTF-8");
+            final byte[] content = wput("http://" + address + "/yacy/profile.html", targetSeed.getHexHash() + ".yacyh", post);
+            return nxTools.table(content, "UTF-8");
         } catch (Exception e) {
             yacyCore.log.logSevere("yacyClient.getProfile error:" + e.getMessage());
             return null;
         }
     }
     
+    /**
+     * proxy for "to YaCy connections"
+     * @return
+     */
     private static final httpRemoteProxyConfig proxyConfig() {
-        httpRemoteProxyConfig p = plasmaSwitchboard.getSwitchboard().remoteProxyConfig;
+        httpRemoteProxyConfig p = httpdProxyHandler.getRemoteProxyConfig();
         return ((p != null) && (p.useProxy()) && (p.useProxy4Yacy())) ? p : null;
     }
 
@@ -1103,30 +1038,17 @@ public final class yacyClient {
             final String wordhashe = indexWord.word2hash("test");
             //System.out.println("permission=" + permissionMessage(args[1]));
             
-            // should we use the proxy?
-            boolean useProxy = (sb.remoteProxyConfig != null) && 
-                               (sb.remoteProxyConfig.useProxy()) && 
-                               (sb.remoteProxyConfig.useProxy4Yacy());            
-            
-            final HashMap<String, String> result = nxTools.table(
-                    httpc.wget(
-                            new yacyURL("http://" + target.getPublicAddress() + "/yacy/search.html" +
-                                    "?myseed=" + yacyCore.seedDB.mySeed().genSeedStr(null) +
-                                    "&youare=" + target.hash + "&key=" +
-                                    "&myseed=" + yacyCore.seedDB.mySeed() .genSeedStr(null) +
-                                    "&count=10" +
-                                    "&resource=global" +
-                                    "&query=" + wordhashe +
-                                    "&network.unit.name=" + plasmaSwitchboard.getSwitchboard().getConfig("network.unit.name", yacySeed.DFLT_NETWORK_UNIT), null),
-                                    target.getHexHash() + ".yacyh",
-                                    5000, 
-                                    null, 
-                                    null, 
-                                    (useProxy) ? sb.remoteProxyConfig : null,
-                                    null,
-                                    null
-                    )
-                    , "UTF-8");
+            final byte[] content = HttpClient.wget(
+                                              "http://" + target.getPublicAddress() + "/yacy/search.html" +
+                                                      "?myseed=" + yacyCore.seedDB.mySeed().genSeedStr(null) +
+                                                      "&youare=" + target.hash + "&key=" +
+                                                      "&myseed=" + yacyCore.seedDB.mySeed() .genSeedStr(null) +
+                                                      "&count=10" +
+                                                      "&resource=global" +
+                                                      "&query=" + wordhashe +
+                                                      "&network.unit.name=" + plasmaSwitchboard.getSwitchboard().getConfig("network.unit.name", yacySeed.DFLT_NETWORK_UNIT),
+                                                      target.getHexHash() + ".yacyh");            
+            final HashMap<String, String> result = nxTools.table(content, "UTF-8");
             System.out.println("Result=" + result.toString());
         } catch (Exception e) {
             e.printStackTrace();

@@ -56,9 +56,8 @@ import java.util.Iterator;
 
 import de.anomic.data.listManager;
 import de.anomic.data.translator;
+import de.anomic.http.HttpClient;
 import de.anomic.http.httpHeader;
-import de.anomic.http.httpc;
-import de.anomic.plasma.plasmaSwitchboard;
 import de.anomic.server.serverObjects;
 import de.anomic.server.serverSwitch;
 import de.anomic.tools.nxTools;
@@ -70,7 +69,6 @@ public class ConfigLanguage_p {
     public static serverObjects respond(httpHeader header, serverObjects post, serverSwitch<?> env) {
         //listManager.switchboard = (plasmaSwitchboard) env;
         serverObjects prop = new serverObjects();
-        plasmaSwitchboard switchboard = (plasmaSwitchboard) env;
         String langPath = env.getConfigPath("locale.work", "DATA/LOCALE/locales").getAbsolutePath();
 
         //Fallback
@@ -98,7 +96,7 @@ public class ConfigLanguage_p {
                 ArrayList<String> langVector;
                 try{
                     yacyURL u = new yacyURL(url, null);
-                    langVector = nxTools.strings(httpc.wget(u, u.getHost(), 6000, null, null, switchboard.remoteProxyConfig, null, null), "UTF-8");
+                    langVector = nxTools.strings(HttpClient.wget(u.toString()), "UTF-8");
                 }catch(IOException e){
                     prop.put("status", "1");//unable to get url
                     prop.put("status_url", url);

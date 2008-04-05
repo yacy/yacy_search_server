@@ -47,8 +47,8 @@ import java.util.Date;
 import java.util.Iterator;
 import java.util.Map;
 
+import de.anomic.http.HttpClient;
 import de.anomic.http.httpHeader;
-import de.anomic.http.httpc;
 import de.anomic.plasma.plasmaSwitchboard;
 import de.anomic.server.serverObjects;
 import de.anomic.server.serverSwitch;
@@ -84,7 +84,7 @@ public class CookieMonitorOutgoing_p {
             prop.put("list_" + entCount + "_dark", dark ? "1" : "0" ); 
             dark =! dark;
             prop.put("list_" + entCount + "_host", host);
-            prop.put("list_" + entCount + "_date", httpc.dateString(date));
+            prop.put("list_" + entCount + "_date", HttpClient.dateString(date));
             prop.put("list_" + entCount + "_client", client);
             while (tmpCount < cookies.length){
                 prop.putHTML("list_" + entCount + "_cookies_" + tmpCount + "_item", ((String) cookies[tmpCount]));

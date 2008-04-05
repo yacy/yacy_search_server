@@ -44,7 +44,6 @@
 //javac -classpath .:../Classes Status.java
 //if the shell's current path is HTROOT
 
-import java.io.IOException;
 import java.io.InputStream;
 import java.io.UnsupportedEncodingException;
 import java.net.MalformedURLException;
@@ -55,8 +54,8 @@ import java.util.Map;
 
 import de.anomic.data.htmlTools;
 import de.anomic.htmlFilter.htmlFilterImageEntry;
+import de.anomic.http.HttpClient;
 import de.anomic.http.httpHeader;
-import de.anomic.http.httpc;
 import de.anomic.index.indexURLReference;
 import de.anomic.plasma.plasmaCondenser;
 import de.anomic.plasma.plasmaHTCache;
@@ -159,87 +158,74 @@ public class ViewFile {
         long resourceLength = -1;
         IResourceInfo resInfo = null;
         String resMime = null;
-        try {
-            // trying to load the resource body
-            resource = plasmaHTCache.getResourceContentStream(url);
-            resourceLength = plasmaHTCache.getResourceContentLength(url);
+        // trying to load the resource body
+        resource = plasmaHTCache.getResourceContentStream(url);
+        resourceLength = plasmaHTCache.getResourceContentLength(url);
 
-            // if the resource body was not cached we try to load it from web
+        // if the resource body was not cached we try to load it from web
+        if (resource == null) {
+            plasmaHTCache.Entry entry = null;
+            try {
+                entry = sb.crawlQueues.loadResourceFromWeb(url, 5000, false, true);
+            } catch (Exception e) {
+                prop.put("error", "4");
+                prop.putHTML("error_errorText", e.getMessage());
+                prop.put("viewMode", VIEW_MODE_NO_TEXT);
+                return prop;
+            }
+
+            if (entry != null) {
+                resInfo = entry.getDocumentInfo();
+                resource = plasmaHTCache.getResourceContentStream(url);
+                resourceLength = plasmaHTCache.getResourceContentLength(url);
+            }
+
             if (resource == null) {
-                plasmaHTCache.Entry entry = null;
+                prop.put("error", "4");
+                prop.put("error_errorText", "No resource available");
+                prop.put("viewMode", VIEW_MODE_NO_TEXT);
+                return prop;
+            }
+        }
+
+        // try to load resource metadata
+        if (resInfo == null) {
+
+            // try to load the metadata from cache
+            try {
+                resInfo = plasmaHTCache.loadResourceInfo(url);
+            } catch (Exception e) {
+                /* ignore this */
+            }
+
+            // if the metadata was not cached try to load it from web
+            if (resInfo == null) {
+                String protocol = url.getProtocol();
+                if (!((protocol.equals("http") || protocol.equals("https")))) {
+                    prop.put("error", "6");
+                    prop.put("viewMode", VIEW_MODE_NO_TEXT);
+                    return prop;
+                }
+
+                httpHeader responseHeader = HttpClient.whead(url.toString());
+                if (responseHeader == null) {
+                    prop.put("error", "4");
+                    prop.put("error_errorText", "Unable to load resource metadata.");
+                    prop.put("viewMode", VIEW_MODE_NO_TEXT);
+                    return prop;
+                }
                 try {
-                    entry = sb.crawlQueues.loadResourceFromWeb(url, 5000, false, true);
+                    resInfo = plasmaHTCache.getResourceInfoFactory().buildResourceInfoObj(url, responseHeader);
                 } catch (Exception e) {
                     prop.put("error", "4");
                     prop.putHTML("error_errorText", e.getMessage());
                     prop.put("viewMode", VIEW_MODE_NO_TEXT);
                     return prop;
                 }
-
-                if (entry != null) {
-                    resInfo = entry.getDocumentInfo();
-                    resource = plasmaHTCache.getResourceContentStream(url);
-                    resourceLength = plasmaHTCache.getResourceContentLength(url);
-                }
-
-                if (resource == null) {
-                    prop.put("error", "4");
-                    prop.put("error_errorText", "No resource available");
-                    prop.put("viewMode", VIEW_MODE_NO_TEXT);
-                    return prop;
-                }
+                resMime = responseHeader.mime();
             }
-
-            // try to load resource metadata
-            if (resInfo == null) {
-
-                // try to load the metadata from cache
-                try {
-                    resInfo = plasmaHTCache.loadResourceInfo(url);
-                } catch (Exception e) {
-                    /* ignore this */
-                }
-
-                // if the metadata was not cached try to load it from web
-                if (resInfo == null) {
-                    String protocol = url.getProtocol();
-                    if (!((protocol.equals("http") || protocol.equals("https")))) {
-                        prop.put("error", "6");
-                        prop.put("viewMode", VIEW_MODE_NO_TEXT);
-                        return prop;
-                    }
-
-                    httpHeader responseHeader = httpc.whead(url, url.getHost(), 5000, null, null, sb.remoteProxyConfig);
-                    if (responseHeader == null) {
-                        prop.put("error", "4");
-                        prop.put("error_errorText", "Unable to load resource metadata.");
-                        prop.put("viewMode", VIEW_MODE_NO_TEXT);
-                        return prop;
-                    }
-                    try {
-                        resInfo = plasmaHTCache.getResourceInfoFactory().buildResourceInfoObj(url, responseHeader);
-                    } catch (Exception e) {
-                        prop.put("error", "4");
-                        prop.putHTML("error_errorText", e.getMessage());
-                        prop.put("viewMode", VIEW_MODE_NO_TEXT);
-                        return prop;
-                    }
-                    resMime = responseHeader.mime();
-                }
-            } else {
-                resMime = resInfo.getMimeType();
-            }
-        } catch (IOException e) {
-            if (resource != null)
-                try {
-                    resource.close();
-                } catch (Exception ex) {
-                    /* ignore this */
-                }
-            prop.put("error", "4");
-            prop.putHTML("error_errorText", e.getMessage());
-            prop.put("viewMode", VIEW_MODE_NO_TEXT);
-            return prop;
+        } else {
+            resMime = resInfo.getMimeType();
         }
         
         String[] wordArray = wordArray(post.get("words", null));

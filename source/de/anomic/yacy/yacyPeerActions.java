@@ -49,8 +49,8 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
 
+import de.anomic.http.HttpClient;
 import de.anomic.http.httpHeader;
-import de.anomic.http.httpc;
 import de.anomic.plasma.plasmaCrawlNURL;
 import de.anomic.plasma.plasmaSwitchboard;
 import de.anomic.server.serverCore;
@@ -172,7 +172,7 @@ public class yacyPeerActions {
                     
                     url = new yacyURL(seedListFileURL, null);
                     long start = System.currentTimeMillis();
-                    header = httpc.whead(url, url.getHost(), this.bootstrapLoadTimeout, null, null, this.sb.remoteProxyConfig,reqHeader);
+                    header = HttpClient.whead(url.toString(), reqHeader); 
                     long loadtime = System.currentTimeMillis() - start;
                     if (header == null) {
                         if (loadtime > this.bootstrapLoadTimeout) {
@@ -186,7 +186,8 @@ public class yacyPeerActions {
                         yacyCore.log.logInfo("BOOTSTRAP: seed-list URL " + seedListFileURL + " too old (" + (header.age() / 86400000) + " days)");
                     } else {
                         ssc++;
-                        seedList = nxTools.strings(httpc.wget(url, url.getHost(), this.bootstrapLoadTimeout, null, null, this.sb.remoteProxyConfig,reqHeader, null), "UTF-8");
+                        final byte[] content = HttpClient.wget(url.toString(), reqHeader);
+                        seedList = nxTools.strings(content, "UTF-8");
                         enu = seedList.iterator();
                         lc = 0;
                         while (enu.hasNext()) {

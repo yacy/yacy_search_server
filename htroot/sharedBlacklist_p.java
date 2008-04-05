@@ -56,8 +56,8 @@ import java.util.Arrays;
 import java.util.HashSet;
 
 import de.anomic.data.listManager;
+import de.anomic.http.HttpClient;
 import de.anomic.http.httpHeader;
-import de.anomic.http.httpc;
 import de.anomic.index.indexAbstractReferenceBlacklist;
 import de.anomic.plasma.plasmaSwitchboard;
 import de.anomic.server.serverObjects;
@@ -79,7 +79,6 @@ public class sharedBlacklist_p {
     public static serverObjects respond(httpHeader header, serverObjects post, serverSwitch<?> env) {
         // return variable that accumulates replacements
         serverObjects prop = new serverObjects();
-        plasmaSwitchboard switchboard = (plasmaSwitchboard) env;
 
         // getting the name of the destination blacklist
         String selectedBlacklistName = "";
@@ -132,7 +131,7 @@ public class sharedBlacklist_p {
 
                         // get List
                         yacyURL u = new yacyURL(downloadURL, null);
-                        otherBlacklist = nxTools.strings(httpc.wget(u, u.getHost(), 12000, null, null, switchboard.remoteProxyConfig,reqHeader, null), "UTF-8"); 
+                        otherBlacklist = nxTools.strings(HttpClient.wget(u.toString(), reqHeader), "UTF-8"); 
                     } catch (Exception e) {
                         prop.put("status", STATUS_PEER_UNKNOWN);
                         prop.put("page", "1");
@@ -148,7 +147,7 @@ public class sharedBlacklist_p {
 
                 try {
                     yacyURL u = new yacyURL(downloadURL, null);
-                    otherBlacklist = nxTools.strings(httpc.wget(u, u.getHost(), 6000, null, null, switchboard.remoteProxyConfig, null, null), "UTF-8"); //get List
+                    otherBlacklist = nxTools.strings(HttpClient.wget(u.toString()), "UTF-8"); //get List
                 } catch (Exception e) {
                     prop.put("status", STATUS_URL_PROBLEM);
                     prop.putHTML("status_address",downloadURL);

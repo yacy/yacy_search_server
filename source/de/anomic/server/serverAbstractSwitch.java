@@ -274,6 +274,9 @@ public abstract class serverAbstractSwitch<E> implements serverSwitch<E> {
         }
     }
 
+    /* (non-Javadoc)
+     * @see de.anomic.server.serverSwitch#getConfig(java.lang.String, java.lang.String)
+     */
     public String getConfig(String key, String dflt) {
         Iterator<serverSwitchAction> i = switchActions.values().iterator();
         synchronized (configProps) {

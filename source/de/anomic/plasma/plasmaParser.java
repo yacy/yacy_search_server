@@ -54,7 +54,9 @@ import de.anomic.htmlFilter.htmlFilterContentScraper;
 import de.anomic.htmlFilter.htmlFilterImageEntry;
 import de.anomic.htmlFilter.htmlFilterInputStream;
 import de.anomic.htmlFilter.htmlFilterWriter;
-import de.anomic.http.httpc;
+import de.anomic.http.HttpClient;
+import de.anomic.http.HttpFactory;
+import de.anomic.http.HttpResponse;
 import de.anomic.plasma.parser.Parser;
 import de.anomic.plasma.parser.ParserException;
 import de.anomic.plasma.parser.ParserInfo;
@@ -833,7 +835,6 @@ public final class plasmaParser {
     public static void main(String[] args) {
         //javac -sourcepath source source/de/anomic/plasma/plasmaParser.java
         //java -cp source de.anomic.plasma.plasmaParser bug.html bug.out
-    	httpc remote = null;
         try {
             Object content = null;
             yacyURL contentURL = null;
@@ -846,6 +847,9 @@ public final class plasmaParser {
             }            
                         
             String mode = args[0];
+            HttpResponse res = null;
+            plasmaParserDocument document = null;
+            try { // close InputStream when done
             if (mode.equalsIgnoreCase("-f")) {
                 content = new File(args[1]);
                 contentURL = new yacyURL((File)content);
@@ -853,25 +857,18 @@ public final class plasmaParser {
                 contentURL = new yacyURL(args[1], null);
                 
                 // downloading the document content
-                remote = new httpc(
-                		contentURL.getHost(),
-                		contentURL.getHost(),
-                		contentURL.getPort(),
-                		5000,
-                		contentURL.getProtocol().equalsIgnoreCase("https"),
-                        null,
-                        null, null);
+                HttpClient client = HttpFactory.newClient();
+                client.setTimeout(5000);
                 
-                httpc.response res = remote.GET(contentURL.getFile(), null);
-                if (res.statusCode != 200) {
-                	System.err.println("Unable to download " + contentURL + ". " + res.status);
-                	return;
+                res = client.GET(args[1]);
+                if (res.getStatusCode() != 200) {
+                    System.err.println("Unable to download " + contentURL + ". " + res.getStatusLine());
+                    return;
                 }
-				content = res.getContentInputStream();
-                contentMimeType = res.responseHeader.mime();
-                charSet = res.responseHeader.getCharacterEncoding();
-                contentLength = res.responseHeader.contentLength();
-                remote.close();
+                content = res.getDataAsStream();
+                contentMimeType = res.getResponseHeader().mime();
+                charSet = res.getResponseHeader().getCharacterEncoding();
+                contentLength = res.getResponseHeader().contentLength();
             }
             
             if ((args.length >= 4)&&(args[2].equalsIgnoreCase("-m"))) {
@@ -889,13 +886,17 @@ public final class plasmaParser {
             plasmaParser.initHTMLParsableMimeTypes("application/xhtml+xml,text/html,text/plain,text/sgml");
 
             // parsing the content
-            plasmaParserDocument document = null;
             if (content instanceof byte[]) {
                 document = theParser.parseSource(contentURL, contentMimeType, charSet, (byte[])content);
             } else if (content instanceof File) {
                 document = theParser.parseSource(contentURL, contentMimeType, charSet, (File)content);
             } else if (content instanceof InputStream) {
             	document = theParser.parseSource(contentURL, contentMimeType, charSet, contentLength, (InputStream)content);
+            }
+            } finally {
+                if(res != null) {
+                    res.closeStream();
+                }
             }
 
             // printing out all parsed sentences

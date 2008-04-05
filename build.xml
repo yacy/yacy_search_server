@@ -183,6 +183,7 @@
       <pathelement location="${lib}/tar.jar" />
       <pathelement location="${libx}/saaj.jar" />
       <pathelement location="${libx}/axis.jar" />
+      <pathelement location="${libx}/commons-httpclient-3.1.jar" />
     </path>
 
     <!-- compiling yacy.java -->

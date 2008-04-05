@@ -54,6 +54,7 @@ import java.io.PrintStream;
 import java.io.UnsupportedEncodingException;
 import java.net.InetAddress;
 import java.net.MalformedURLException;
+import java.net.URLDecoder;
 import java.net.URLEncoder;
 import java.util.Arrays;
 import java.util.Date;
@@ -329,6 +330,7 @@ public final class httpd implements serverHandler {
                         serverCore.CRLF_STRING).getBytes());
                 this.session.out.write((httpHeader.CONTENT_LENGTH + ": 0\r\n").getBytes());
                 this.session.out.write("\r\n".getBytes());                
+                this.session.out.flush();
                 return false;
             }
         }
@@ -424,6 +426,7 @@ public final class httpd implements serverHandler {
 				httpHeader.PROXY_AUTHENTICATE + ": Basic realm=\"log-in\"" + serverCore.CRLF_STRING).getBytes());
             this.session.out.write((httpHeader.CONTENT_LENGTH + ": 0\r\n").getBytes());
             this.session.out.write("\r\n".getBytes());                   
+            this.session.out.flush();
             return false;
         }
         
@@ -1211,7 +1214,7 @@ public final class httpd implements serverHandler {
             
             // Generated Tue, 23 Aug 2005 11:19:14 GMT by brain.wg (squid/2.5.STABLE3)
             // adding some system information
-            String systemDate = httpc.dateString(httpc.nowDate());
+            String systemDate = HttpClient.dateString(new Date());
             tp.put("date", systemDate);
             
             // rewrite the file
@@ -1312,9 +1315,9 @@ public final class httpd implements serverHandler {
         Date now = new Date(System.currentTimeMillis());
         
         headers.put(httpHeader.SERVER, "AnomicHTTPD (www.anomic.de)");
-        headers.put(httpHeader.DATE, httpc.dateString(now));
+        headers.put(httpHeader.DATE, HttpClient.dateString(now));
         if (moddate.after(now)) moddate = now;
-        headers.put(httpHeader.LAST_MODIFIED, httpc.dateString(moddate));
+        headers.put(httpHeader.LAST_MODIFIED, HttpClient.dateString(moddate));
         
         if (nocache) {
             if (httpVersion.toUpperCase().equals(httpHeader.HTTP_VERSION_1_1)) headers.put(httpHeader.CACHE_CONTROL, "no-cache");
@@ -1328,7 +1331,7 @@ public final class httpd implements serverHandler {
         headers.put(httpHeader.CONTENT_TYPE, contentType);  
         if (contentLength > 0)   headers.put(httpHeader.CONTENT_LENGTH, Long.toString(contentLength));
         //if (cookie != null)      headers.put(httpHeader.SET_COOKIE, cookie);
-        if (expires != null)     headers.put(httpHeader.EXPIRES, httpc.dateString(expires));
+        if (expires != null)     headers.put(httpHeader.EXPIRES, HttpClient.dateString(expires));
         if (contentEnc != null)  headers.put(httpHeader.CONTENT_ENCODING, contentEnc);
         if (transferEnc != null) headers.put(httpHeader.TRANSFER_ENCODING, transferEnc);
         
@@ -1379,7 +1382,7 @@ public final class httpd implements serverHandler {
 
                 // prepare header
                 if (!header.containsKey(httpHeader.DATE)) 
-                    header.put(httpHeader.DATE, httpc.dateString(httpc.nowDate()));
+                    header.put(httpHeader.DATE, HttpClient.dateString(new Date()));
                 if (!header.containsKey(httpHeader.CONTENT_TYPE)) 
                     header.put(httpHeader.CONTENT_TYPE, "text/html; charset=UTF-8"); // fix this
                 if (!header.containsKey(httpHeader.CONNECTION) && conProp.containsKey(httpHeader.CONNECTION_PROP_PERSISTENT))

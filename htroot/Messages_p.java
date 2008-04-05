@@ -52,8 +52,8 @@ import java.util.Iterator;
 import java.util.TreeMap;
 
 import de.anomic.data.messageBoard;
+import de.anomic.http.HttpClient;
 import de.anomic.http.httpHeader;
-import de.anomic.http.httpc;
 import de.anomic.plasma.plasmaSwitchboard;
 import de.anomic.server.serverFileUtils;
 import de.anomic.server.serverObjects;
@@ -151,7 +151,7 @@ public class Messages_p {
                     	prop.put("mode_messages_"+count+"_peerAddress", peerAddress);
 
                     	// set the rfc822 date
-                    	prop.put("mode_messages_"+count+"_rfc822Date",httpc.dateString(message.date()));
+                    	prop.put("mode_messages_"+count+"_rfc822Date",HttpClient.dateString(message.date()));
 
                     	// also write out the message body (needed for the RSS feed)
                         try {

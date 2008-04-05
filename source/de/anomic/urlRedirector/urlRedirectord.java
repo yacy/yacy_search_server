@@ -8,8 +8,8 @@ import java.net.MalformedURLException;
 import java.util.Date;
 
 import de.anomic.data.userDB;
+import de.anomic.http.HttpClient;
 import de.anomic.http.httpHeader;
-import de.anomic.http.httpc;
 import de.anomic.plasma.plasmaCrawlProfile;
 import de.anomic.plasma.plasmaParser;
 import de.anomic.plasma.plasmaSwitchboard;
@@ -182,7 +182,7 @@ public class urlRedirectord implements serverHandler {
                         yacyURL reqURL = new yacyURL(this.nextURL, null);
                         
                         // getting URL mimeType
-                        httpHeader header = httpc.whead(reqURL, reqURL.getHost(), 10000, null, null, switchboard.remoteProxyConfig);                        
+                        httpHeader header = HttpClient.whead(reqURL.toString()); 
                         
                         if (plasmaParser.supportedContent(
                                 plasmaParser.PARSER_MODE_URLREDIRECTOR,

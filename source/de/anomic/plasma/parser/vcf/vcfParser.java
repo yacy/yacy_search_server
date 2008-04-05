@@ -53,7 +53,7 @@ import java.util.Hashtable;
 import java.util.Iterator;
 import java.util.LinkedList;
 
-import de.anomic.http.httpc;
+import de.anomic.http.HttpClient;
 import de.anomic.kelondro.kelondroBase64Order;
 import de.anomic.plasma.plasmaParserDocument;
 import de.anomic.plasma.parser.AbstractParser;
@@ -291,7 +291,7 @@ public class vcfParser extends AbstractParser implements Parser {
             yacyURL contentUrl = new yacyURL(args[0], null);
             
             vcfParser testParser = new vcfParser();
-            byte[] content = httpc.singleGET(contentUrl, contentUrl.getHost(), 10000, null, null, null, null);
+            byte[] content = HttpClient.wget(contentUrl.toString());
             ByteArrayInputStream input = new ByteArrayInputStream(content);
             testParser.parse(contentUrl, "text/x-vcard", "UTF-8",input);
         } catch (Exception e) {

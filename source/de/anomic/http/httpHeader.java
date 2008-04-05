@@ -78,9 +78,9 @@ import de.anomic.yacy.yacyURL;
 public final class httpHeader extends TreeMap<String, String> implements Map<String, String> {
 
     
-	private static final long serialVersionUID = 17L;
+    private static final long serialVersionUID = 18L;
     
-    public static final String DEFAULT_CHARSET = "ISO-8859-1";
+    static final String DEFAULT_CHARSET = "ISO-8859-1";
 	
 	/* =============================================================
      * Constants defining http versions
@@ -946,5 +946,17 @@ public final class httpHeader extends TreeMap<String, String> implements Map<Str
     /*
      * Patch END:
      * Name: Header Property Patch
-     */ 
+     */
+
+    /**
+     * @param header
+     * @return
+     */
+    static String getCharSet(httpHeader header) {
+        String charSet = header.getCharacterEncoding();
+        if (charSet == null) {
+            charSet = DEFAULT_CHARSET;
+        }
+        return charSet;
+    } 
 }

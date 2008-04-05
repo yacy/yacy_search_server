@@ -54,8 +54,9 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.regex.PatternSyntaxException;
 
+import de.anomic.http.HttpClient;
+import de.anomic.http.HttpFactory;
 import de.anomic.http.httpHeader;
-import de.anomic.http.httpc;
 import de.anomic.plasma.plasmaSwitchboard;
 import de.anomic.server.serverCodings;
 import de.anomic.server.serverDate;
@@ -163,10 +164,7 @@ public class Network {
                 prop.put("table_my-url", seed.get("seedURL", ""));
                 
                 // generating the location string
-                String location = httpc.userAgent;
-                int p = location.lastIndexOf(';');
-                location = (p > 0) ? location.substring(p + 1, location.length() - 1).trim(): "";
-                prop.putHTML("table_my-location", location);
+                prop.putHTML("table_my-location", HttpClient.generateLocation());
             }
 
             // overall results: Network statistics
@@ -378,12 +376,14 @@ public class Network {
                             prop.putHTML(STR_TABLE_LIST + conCount + "_fullname", seed.get(yacySeed.NAME, "deadlink"));
                             userAgent = null;
                             if (seed.hash.equals(yacyCore.seedDB.mySeed().hash)) {
-                               userAgent = httpc.userAgent;
+                                final HttpClient httpClient = HttpFactory.newClient();
+                                userAgent = httpClient.getUserAgent();
+                                location = HttpClient.generateLocation();
                             } else {
                                userAgent = yacyCore.peerActions.getUserAgent(seed.getIP());
+                               p = userAgent.lastIndexOf(';');
+                               location = (p > 0) ? userAgent.substring(p + 1, userAgent.length() - 1).trim(): "";
                             }
-                            p = userAgent.lastIndexOf(';');
-                            location = (p > 0) ? userAgent.substring(p + 1, userAgent.length() - 1).trim(): "";
                             prop.put(STR_TABLE_LIST + conCount + "_location", location);
                             if (complete) {
                                 prop.put(STR_TABLE_LIST + conCount + "_complete", 1);

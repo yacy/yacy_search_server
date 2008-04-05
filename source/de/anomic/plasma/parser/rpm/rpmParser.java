@@ -52,7 +52,7 @@ import java.util.Hashtable;
 import com.jguild.jrpm.io.RPMFile;
 import com.jguild.jrpm.io.datatype.DataTypeIf;
 
-import de.anomic.http.httpc;
+import de.anomic.http.HttpClient;
 import de.anomic.plasma.plasmaParserDocument;
 import de.anomic.plasma.parser.AbstractParser;
 import de.anomic.plasma.parser.Parser;
@@ -180,7 +180,7 @@ public class rpmParser extends AbstractParser implements Parser {
             yacyURL contentUrl = new yacyURL(args[0], null);
             
             rpmParser testParser = new rpmParser();
-            byte[] content = httpc.singleGET(contentUrl, contentUrl.getHost(), 10000, null, null, null, null);
+            byte[] content = HttpClient.wget(contentUrl.toString());
             ByteArrayInputStream input = new ByteArrayInputStream(content);
             testParser.parse(contentUrl, "application/x-rpm", null, input);
         } catch (Exception e) {

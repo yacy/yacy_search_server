@@ -48,12 +48,11 @@ import java.net.InetAddress;
 import java.net.UnknownHostException;
 import java.util.ArrayList;
 
-import de.anomic.http.httpc;
+import de.anomic.http.HttpClient;
 import de.anomic.plasma.plasmaSwitchboard;
 import de.anomic.server.serverDomains;
 import de.anomic.tools.disorderHeap;
 import de.anomic.tools.nxTools;
-import de.anomic.yacy.yacyURL;
 
 public class natLib {
 
@@ -65,7 +64,7 @@ public class natLib {
 	  rm status.htm
 	*/
 	try {
-	    ArrayList<String> x = nxTools.strings(httpc.wget(new yacyURL("http://192.168.0.1:80/status.htm", null), "192.168.0.1", 5000, "admin", password, null, null, null));
+	    ArrayList<String> x = nxTools.strings(HttpClient.wget("http://admin:"+password+"@192.168.0.1:80/status.htm"));
 	    x = nxTools.grep(x, 1, "IP Address");
 	    if ((x == null) || (x.size() == 0)) return null;
 	    String line = nxTools.tail1(x);
@@ -77,7 +76,7 @@ public class natLib {
 
     private static String getWhatIsMyIP() {
 	try {
-        ArrayList<String> x = nxTools.strings(httpc.wget(new yacyURL("http://www.whatismyip.com/", null), "www.whatsmyip.com", 5000, null, null, null, null, null));
+        ArrayList<String> x = nxTools.strings(HttpClient.wget("http://www.whatismyip.com/"));
 	    x = nxTools.grep(x, 0, "Your IP is");
 	    String line = nxTools.tail1(x);
 	    return nxTools.awk(line, " ", 4);
@@ -88,7 +87,7 @@ public class natLib {
 
     private static String getStanford() {
 	try {
-        ArrayList<String> x = nxTools.strings(httpc.wget(new yacyURL("http://www.slac.stanford.edu/cgi-bin/nph-traceroute.pl", null), "www.slac.stanford.edu", 5000, null, null, null, null, null));
+        ArrayList<String> x = nxTools.strings(HttpClient.wget("http://www.slac.stanford.edu/cgi-bin/nph-traceroute.pl"));
 	    x = nxTools.grep(x, 0, "firewall protecting your browser");
 	    String line = nxTools.tail1(x);
 	    return nxTools.awk(line, " ", 7);
@@ -99,7 +98,7 @@ public class natLib {
 
     private static String getIPID() {
 	try {
-        ArrayList<String> x = nxTools.strings(httpc.wget(new yacyURL("http://ipid.shat.net/", null), "ipid.shat.net", 5000, null, null, null, null, null), "UTF-8");
+        ArrayList<String> x = nxTools.strings(HttpClient.wget("http://ipid.shat.net/"), "UTF-8");
 	    x = nxTools.grep(x, 2, "Your IP address");
 	    String line = nxTools.tail1(x);
 	    return nxTools.awk(nxTools.awk(nxTools.awk(line, " ", 5), ">", 2), "<", 1);

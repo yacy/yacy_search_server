@@ -44,8 +44,9 @@ import java.net.MalformedURLException;
 import java.util.ArrayList;
 import java.util.Hashtable;
 
+import de.anomic.http.HttpClient;
 import de.anomic.http.httpRemoteProxyConfig;
-import de.anomic.http.httpc;
+import de.anomic.http.httpdProxyHandler;
 import de.anomic.yacy.yacyURL;
 
 public class loaderThreads {
@@ -61,23 +62,17 @@ public class loaderThreads {
     int completed, failed;
     
     public loaderThreads() {
-        this(null);
-    }
-    
-    public loaderThreads(httpRemoteProxyConfig theremoteProxyConfig) {
-       this(10000, null, null, theremoteProxyConfig);
+       this(10000, null, null);
     }
     
     public loaderThreads(
             int timeout, 
             String user, 
-            String password,
-            httpRemoteProxyConfig theremoteProxyConfig
+            String password
     ) {
         this.timeout = timeout;
         this.user = user;
         this.password = password;
-        this.remoteProxyConfig = theremoteProxyConfig;
         this.threads = new Hashtable<String, Thread>();
         this.completed = 0;
         this.failed = 0;
@@ -146,7 +141,7 @@ public class loaderThreads {
 
         public void run() {
             try {
-                page = httpc.wget(url, url.getHost(), timeout, user, password, remoteProxyConfig, null, null);
+                page = HttpClient.wget(url.toString());
                 loaded = true;
                 process.feed(page);
                 if (process.status() == loaderCore.STATUS_FAILED) {
@@ -229,8 +224,8 @@ public class loaderThreads {
     }
     
     public static void main(String[] args) {
-        httpRemoteProxyConfig proxyConfig = httpRemoteProxyConfig.init("192.168.1.122", 3128);
-        loaderThreads loader = new loaderThreads(proxyConfig);
+        httpdProxyHandler.setRemoteProxyConfig(httpRemoteProxyConfig.init("192.168.1.122", 3128));
+        loaderThreads loader = new loaderThreads();
         try {
             loader.newPropLoaderThread("load1", new yacyURL("http://www.anomic.de/superseed.txt", null));
         } catch (MalformedURLException e) {

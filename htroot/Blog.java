@@ -55,8 +55,8 @@ import java.util.Iterator;
 
 import de.anomic.data.blogBoard;
 import de.anomic.data.userDB;
+import de.anomic.http.HttpClient;
 import de.anomic.http.httpHeader;
-import de.anomic.http.httpc;
 import de.anomic.plasma.plasmaSwitchboard;
 import de.anomic.server.serverObjects;
 import de.anomic.server.serverSwitch;
@@ -364,7 +364,7 @@ public class Blog {
         }
 
         prop.put("mode_entries_" + number + "_date", dateString(entry.getDate()));
-        prop.put("mode_entries_" + number + "_rfc822date", httpc.dateString(entry.getDate()));
+        prop.put("mode_entries_" + number + "_rfc822date", HttpClient.dateString(entry.getDate()));
         prop.put("mode_entries_" + number + "_pageid", entry.getKey());
         prop.put("mode_entries_" + number + "_address", address);
         prop.put("mode_entries_" + number + "_ip", entry.getIp());

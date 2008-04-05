@@ -57,9 +57,9 @@ import java.net.InetAddress;
 import java.util.Date;
 import java.util.Properties;
 
+import de.anomic.http.HttpClient;
 import de.anomic.http.httpChunkedInputStream;
 import de.anomic.http.httpHeader;
-import de.anomic.http.httpc;
 import de.anomic.plasma.plasmaHTCache;
 import de.anomic.plasma.plasmaParser;
 import de.anomic.plasma.plasmaSwitchboard;
@@ -145,7 +145,7 @@ public class icapd implements serverHandler {
         icapHeader newHeaders = new icapHeader();
         
         newHeaders.put(icapHeader.SERVER,"YaCy/" + switchboard.getConfig("vString",""));
-        newHeaders.put(icapHeader.DATE, httpc.dateString(httpc.nowDate()));
+        newHeaders.put(icapHeader.DATE, HttpClient.dateString(new Date()));
         newHeaders.put(icapHeader.ISTAG, "\"" + switchboard.getConfig("vString","") + "\"");
         
         return newHeaders;

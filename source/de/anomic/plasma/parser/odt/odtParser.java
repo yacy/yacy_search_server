@@ -58,7 +58,7 @@ import com.catcode.odf.ODFMetaFileAnalyzer;
 import com.catcode.odf.OpenDocumentMetadata;
 import com.catcode.odf.OpenDocumentTextInputStream;
 
-import de.anomic.http.httpc;
+import de.anomic.http.HttpClient;
 import de.anomic.plasma.plasmaParserDocument;
 import de.anomic.plasma.parser.AbstractParser;
 import de.anomic.plasma.parser.Parser;
@@ -250,7 +250,7 @@ public class odtParser extends AbstractParser implements Parser {
             testParser.setLogger(new serverLog("PARSER.ODT"));
             
             // downloading the document content
-            byte[] content = httpc.singleGET(contentUrl, contentUrl.getHost(), 10000, null, null, null, null);
+            byte[] content = HttpClient.wget(contentUrl.toString());
             ByteArrayInputStream input = new ByteArrayInputStream(content);
             
             // parsing the document

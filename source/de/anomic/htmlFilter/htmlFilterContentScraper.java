@@ -63,8 +63,7 @@ import java.util.TreeSet;
 
 import javax.swing.event.EventListenerList;
 
-import de.anomic.http.httpc;
-import de.anomic.plasma.plasmaSwitchboard;
+import de.anomic.http.HttpClient;
 import de.anomic.server.serverCharBuffer;
 import de.anomic.server.serverFileUtils;
 import de.anomic.yacy.yacyURL;
@@ -112,12 +111,12 @@ public class htmlFilterContentScraper extends htmlFilterAbstractScraper implemen
     private EventListenerList htmlFilterEventListeners = new EventListenerList();
     
     /**
-     * {@link URL} to the favicon that belongs to the document
+     * {@link yacyURL} to the favicon that belongs to the document
      */
     private yacyURL favicon;
     
     /**
-     * The document root {@link URL} 
+     * The document root {@link yacyURL} 
      */
     private yacyURL root;
 
@@ -371,7 +370,7 @@ public class htmlFilterContentScraper extends htmlFilterAbstractScraper implemen
     }
     
     /**
-     * @return the {@link URL} to the favicon that belongs to the document
+     * @return the {@link yacyURL} to the favicon that belongs to the document
      */    
     public yacyURL getFavicon() {
         return this.favicon;
@@ -516,16 +515,7 @@ public class htmlFilterContentScraper extends htmlFilterAbstractScraper implemen
     
     public static htmlFilterContentScraper parseResource(yacyURL location) throws IOException {
         // load page
-        byte[] page = httpc.wget(
-                location,
-                location.getHost(),
-                10000, 
-                null, 
-                null, 
-                plasmaSwitchboard.getSwitchboard().remoteProxyConfig,
-                null,
-                null
-        );
+        byte[] page = HttpClient.wget(location.toString());
         if (page == null) throw new IOException("no response from url " + location.toString());
         
         // scrape content

@@ -54,8 +54,11 @@ import java.net.URLDecoder;
 import java.util.ArrayList;
 import java.util.Date;
 
+import de.anomic.http.HttpClient;
+import de.anomic.http.HttpFactory;
+import de.anomic.http.HttpResponse;
 import de.anomic.http.httpHeader;
-import de.anomic.http.httpc;
+import de.anomic.http.HttpResponse.Saver;
 import de.anomic.plasma.plasmaCrawlRobotsTxt;
 import de.anomic.plasma.plasmaSwitchboard;
 import de.anomic.server.serverByteBuffer;
@@ -380,47 +383,46 @@ public final class robotsParser{
         
         boolean accessCompletelyRestricted = false;
         byte[] robotsTxt = null;
-        httpc con = null;
         long downloadStart, downloadEnd;
         String eTag=null, oldEtag = null;
         Date lastMod=null;
+        downloadStart = System.currentTimeMillis();
+        
+        // if we previously have downloaded this robots.txt then we can set the if-modified-since header
+        httpHeader reqHeaders = new httpHeader();
+        
+        // adding referer
+        reqHeaders.put(httpHeader.REFERER, (yacyURL.newURL(robotsURL,"/")).toNormalform(true, true));
+        
+        if (entry != null) {
+            oldEtag = entry.getETag();
+            reqHeaders = new httpHeader();
+            Date modDate = entry.getModDate();
+            if (modDate != null) reqHeaders.put(httpHeader.IF_MODIFIED_SINCE,HttpClient.dateString(entry.getModDate()));
+            
+        }
+        
+        // setup http-client
+        //TODO: adding Traffic statistic for robots download?
+        HttpClient client = HttpFactory.newClient(reqHeaders, 10000);
+        HttpResponse res = null;
         try {
-            downloadStart = System.currentTimeMillis();
-            plasmaSwitchboard sb = plasmaSwitchboard.getSwitchboard();
-            //TODO: adding Traffic statistic for robots download?
-            con = new httpc(robotsURL.getHost(), robotsURL.getHost(), robotsURL.getPort(), 10000, robotsURL.getProtocol().equalsIgnoreCase("https"), sb.remoteProxyConfig, null, null);
-            
-            // if we previously have downloaded this robots.txt then we can set the if-modified-since header
-            httpHeader reqHeaders = new httpHeader();
-            
-            // adding referer
-            reqHeaders.put(httpHeader.REFERER, (yacyURL.newURL(robotsURL,"/")).toNormalform(true, true));
-            
-            if (entry != null) {
-                oldEtag = entry.getETag();
-                reqHeaders = new httpHeader();
-                Date modDate = entry.getModDate();
-                if (modDate != null) reqHeaders.put(httpHeader.IF_MODIFIED_SINCE,httpc.dateString(entry.getModDate()));
-                
-            }
-            
             // sending the get request
-            httpc.response res = con.GET(robotsURL.getFile(), reqHeaders);
+            res = client.GET(robotsURL.toString());
             
             // check for interruption
             if (Thread.currentThread().isInterrupted()) throw new InterruptedException("Shutdown in progress.");
             
             // check the response status
-            if (res.status.startsWith("2")) {
-                if (!res.responseHeader.mime().startsWith("text/plain")) {
+            if (res.getStatusLine().startsWith("2")) {
+                if (!res.getResponseHeader().mime().startsWith("text/plain")) {
                     robotsTxt = null;
-                    serverLog.logFinest("ROBOTS","Robots.txt from URL '" + robotsURL + "' has wrong mimetype '" + res.responseHeader.mime() + "'.");                    
-                    con.close();
+                    serverLog.logFinest("ROBOTS","Robots.txt from URL '" + robotsURL + "' has wrong mimetype '" + res.getResponseHeader().mime() + "'.");                    
                 } else {
 
                     // getting some metadata
-                    eTag = res.responseHeader.containsKey(httpHeader.ETAG)?((String)res.responseHeader.get(httpHeader.ETAG)).trim():null;
-                    lastMod = res.responseHeader.lastModified();                    
+                    eTag = res.getResponseHeader().containsKey(httpHeader.ETAG)?((String)res.getResponseHeader().get(httpHeader.ETAG)).trim():null;
+                    lastMod = res.getResponseHeader().lastModified();                    
                     
                     // if the robots.txt file was not changed we break here
                     if ((eTag != null) && (oldEtag != null) && (eTag.equals(oldEtag))) {
@@ -430,22 +432,19 @@ public final class robotsParser{
                     
                     // downloading the content
                     serverByteBuffer sbb = new serverByteBuffer();
-                    res.writeContent(sbb, null);
+                    Saver.writeContent(res, sbb, null);
                     robotsTxt = sbb.getBytes();
-                    con.close();
                     
                     downloadEnd = System.currentTimeMillis();                    
                     serverLog.logFinest("ROBOTS","Robots.txt successfully loaded from URL '" + robotsURL + "' in " + (downloadEnd-downloadStart) + " ms.");
                 }
-            } else if (res.status.startsWith("304")) {
-            	con.close();
+            } else if (res.getStatusCode() == 304) {
                 return null;
-            } else if (res.status.startsWith("3")) {
+            } else if (res.getStatusLine().startsWith("3")) {
                 // getting redirection URL
-                String redirectionUrlString = (String) res.responseHeader.get(httpHeader.LOCATION);
-                con.close();
+                String redirectionUrlString = (String) res.getResponseHeader().get(httpHeader.LOCATION);
                 if (redirectionUrlString==null) {
-                    serverLog.logFinest("ROBOTS","robots.txt could not be downloaded from URL '" + robotsURL + "' because of missing redirecton header. [" + res.status + "].");
+                    serverLog.logFinest("ROBOTS","robots.txt could not be downloaded from URL '" + robotsURL + "' because of missing redirecton header. [" + res.getStatusLine() + "].");
                     robotsTxt = null;                    
                 }
                 
@@ -459,17 +458,20 @@ public final class robotsParser{
                         "\nRedirecting request to: " + redirectionUrl);
                 return downloadRobotsTxt(redirectionUrl,redirectionCount,entry);
                 
-            } else if (res.status.startsWith("401") || res.status.startsWith("403")) {
-            	con.close();
+            } else if (res.getStatusCode() == 401 || res.getStatusCode() == 403) {
                 accessCompletelyRestricted = true;
                 serverLog.logFinest("ROBOTS","Access to Robots.txt not allowed on URL '" + robotsURL + "'.");
             } else {
-                serverLog.logFinest("ROBOTS","robots.txt could not be downloaded from URL '" + robotsURL + "'. [" + res.status + "].");
-                con.close();
+                serverLog.logFinest("ROBOTS","robots.txt could not be downloaded from URL '" + robotsURL + "'. [" + res.getStatusLine() + "].");
                 robotsTxt = null;
             }        
         } catch (Exception e) {
             throw e;
+        } finally {
+            if(res != null) {
+                // release connection
+                res.closeStream();
+            }
         }
         return new Object[]{new Boolean(accessCompletelyRestricted),robotsTxt,eTag,lastMod};
     }

@@ -414,7 +414,7 @@ public class SettingsAck_p {
              * Enabling settings
              * ==================================================================== */
             plasmaSwitchboard sb = (plasmaSwitchboard)env;
-            sb.remoteProxyConfig = httpRemoteProxyConfig.init(sb);            
+            httpdProxyHandler.setRemoteProxyConfig(httpRemoteProxyConfig.init(sb));            
             
 //            httpdProxyHandler.remoteProxyUse = post.get("remoteProxyUse", "").equals("on");
 //            httpdProxyHandler.remoteProxyHost = post.get("remoteProxyHost", "");

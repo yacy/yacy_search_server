@@ -57,8 +57,8 @@ import java.util.TreeMap;
 import java.util.TreeSet;
 
 import de.anomic.htmlFilter.htmlFilterImageEntry;
+import de.anomic.http.HttpClient;
 import de.anomic.http.httpHeader;
-import de.anomic.http.httpc;
 import de.anomic.index.indexURLReference;
 import de.anomic.index.indexWord;
 import de.anomic.kelondro.kelondroMScoreCluster;
@@ -396,6 +396,8 @@ public class plasmaSnippetCache {
      * 
      * @param url the URL of the resource
      * @param fetchOnline specifies if the resource should be loaded from web if it'as not available in the cache
+     * @param timeout 
+     * @param forText 
      * @return the parsed document as {@link plasmaParserDocument}
      */
     public static plasmaParserDocument retrieveDocument(yacyURL url, boolean fetchOnline, int timeout, boolean forText) {
@@ -805,7 +807,7 @@ public class plasmaSnippetCache {
                 
                 // getting URL mimeType
                 try {
-                    httpHeader header = httpc.whead(url, url.getHost(), 10000, null, null, plasmaSwitchboard.getSwitchboard().remoteProxyConfig);
+                    httpHeader header = HttpClient.whead(url.toString());
                     docInfo = plasmaHTCache.getResourceInfoFactory().buildResourceInfoObj(url, header);
                 } catch (Exception e) {
                     // ingore this. http header download failed
@@ -851,6 +853,7 @@ public class plasmaSnippetCache {
      * @param url
      * @param fetchOnline
      * @param socketTimeout
+     * @param forText 
      * @return an Object array containing
      * <table>
      * <tr><td>[0]</td><td>the content as {@link InputStream}</td></tr>

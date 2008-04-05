@@ -28,6 +28,7 @@
 package de.anomic.yacy;
 
 import java.io.File;
+import java.io.FileOutputStream;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Comparator;
@@ -39,7 +40,10 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import de.anomic.htmlFilter.htmlFilterContentScraper;
-import de.anomic.http.httpc;
+import de.anomic.http.HttpClient;
+import de.anomic.http.HttpFactory;
+import de.anomic.http.HttpResponse;
+import de.anomic.http.HttpResponse.Saver;
 import de.anomic.plasma.plasmaSwitchboard;
 import de.anomic.server.serverCore;
 import de.anomic.server.serverSystem;
@@ -324,16 +328,17 @@ public final class yacyVersion implements Comparator<yacyVersion>, Comparable<ya
         File storagePath = plasmaSwitchboard.getSwitchboard().releasePath;
         // load file
         File download = new File(storagePath, release.url.getFileName());
-        httpc.wget(
-                release.url,
-                release.url.getHost(),
-                300000, 
-                null, 
-                null, 
-                plasmaSwitchboard.getSwitchboard().remoteProxyConfig,
-                null,
-                download
-        );
+        HttpClient client = HttpFactory.newClient(null, 30000);
+        HttpResponse res = null;
+        try {
+            res = client.GET(release.url.toString());
+            Saver.writeContent(res, new FileOutputStream(download), null);
+        } finally {
+            if(res != null) {
+                // release connection
+                res.closeStream();
+            }
+        }
         if ((!download.exists()) || (download.length() == 0)) throw new IOException("wget of url " + release.url + " failed");
         plasmaSwitchboard.getSwitchboard().setConfig("update.time.download", System.currentTimeMillis());
     }
@@ -450,11 +455,12 @@ public final class yacyVersion implements Comparator<yacyVersion>, Comparable<ya
      * @param svn Current version given from SVN.
      * @return String with the combined version.
      */
-     public static double versvn2combinedVersion(double v, int svn) {
-        return (Math.rint((v*100000000.0) + ((double)svn))/100000000);
+     public static double versvn2combinedVersion(double version, int svn) {
+        return (Math.rint((version*100000000.0) + ((double)svn))/100000000);
      }
      
      public static void main(String[] args) {
+         System.out.println(thisVersion());
          float base = (float) 0.53;
          String blacklist = "....[123]";
          String test;

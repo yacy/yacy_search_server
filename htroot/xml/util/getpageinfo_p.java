@@ -53,9 +53,8 @@ import java.net.MalformedURLException;
 import de.anomic.data.robotsParser;
 import de.anomic.htmlFilter.htmlFilterContentScraper;
 import de.anomic.htmlFilter.htmlFilterWriter;
+import de.anomic.http.HttpClient;
 import de.anomic.http.httpHeader;
-import de.anomic.http.httpc;
-import de.anomic.plasma.plasmaSwitchboard;
 import de.anomic.server.serverFileUtils;
 import de.anomic.server.serverObjects;
 import de.anomic.server.serverSwitch;
@@ -83,7 +82,7 @@ public class getpageinfo_p {
             if (actions.indexOf("title")>=0) {
                 try {
                     yacyURL u = new yacyURL(url, null);
-                    String contentString=new String(httpc.wget(u, u.getHost(), 6000, null, null, ((plasmaSwitchboard) env).remoteProxyConfig, null, null))	;
+                    String contentString=new String(HttpClient.wget(u.toString()));
                     
                     htmlFilterContentScraper scraper = new htmlFilterContentScraper(u);
                     //OutputStream os = new htmlFilterOutputStream(null, scraper, null, false);

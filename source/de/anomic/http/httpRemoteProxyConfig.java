@@ -49,6 +49,7 @@
 
 package de.anomic.http;
 
+import java.util.Arrays;
 import java.util.HashSet;
 
 import de.anomic.plasma.plasmaSwitchboard;
@@ -67,7 +68,6 @@ public final class httpRemoteProxyConfig {
     private String   remoteProxyUser;
     private String   remoteProxyPwd;
     
-    private String   remoteProxyNoProxy = "";
     private String[] remoteProxyNoProxyPatterns = null;
     
     public final HashSet<String> remoteProxyAllowProxySet = new HashSet<String>();
@@ -101,16 +101,12 @@ public final class httpRemoteProxyConfig {
         return this.remoteProxyPwd;
     }
     
-    public String getProxyNoProxy() {
-        return this.remoteProxyNoProxy;
-    }
-    
     public String[] getProxyNoProxyPatterns() {
         return this.remoteProxyNoProxyPatterns;
     }
 
     public String toString() {
-        StringBuffer toStrBuf = new StringBuffer();
+        final StringBuilder toStrBuf = new StringBuilder(50);
         
         toStrBuf
         .append("Status: ").append(this.remoteProxyUse?"ON":"OFF").append(" | ")
@@ -126,10 +122,10 @@ public final class httpRemoteProxyConfig {
         if (this.remoteProxyUse4SSL) toStrBuf.append(" SSL");
         toStrBuf.append(" | ")
         .append("No Proxy for: ")
-        .append(this.remoteProxyNoProxy);
+        .append(Arrays.toString(this.remoteProxyNoProxyPatterns));
         
         
-        return new String(toStrBuf);
+        return toStrBuf.toString();
     }
     
     public static httpRemoteProxyConfig init(
@@ -179,8 +175,14 @@ public final class httpRemoteProxyConfig {
         newConfig.remoteProxyPwd = sb.getConfig("remoteProxyPwd", "").trim();
         
         // determining addresses for which the remote proxy should not be used
-        newConfig.remoteProxyNoProxy = sb.getConfig("remoteProxyNoProxy","").trim();
-        newConfig.remoteProxyNoProxyPatterns = newConfig.remoteProxyNoProxy.split(",");     
+        final String remoteProxyNoProxy = sb.getConfig("remoteProxyNoProxy","").trim();
+        newConfig.remoteProxyNoProxyPatterns = remoteProxyNoProxy.split(",");
+        // trim split entries
+        int i = 0;
+        for(final String pattern: newConfig.remoteProxyNoProxyPatterns) {
+            newConfig.remoteProxyNoProxyPatterns[i] = pattern.trim();
+            i++;
+        }
         
         return newConfig;
     }

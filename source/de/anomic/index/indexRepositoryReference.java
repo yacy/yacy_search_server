@@ -36,9 +36,10 @@ import java.util.HashSet;
 import java.util.Iterator;
 
 import de.anomic.data.htmlTools;
+import de.anomic.http.HttpClient;
+import de.anomic.http.HttpFactory;
+import de.anomic.http.HttpResponse;
 import de.anomic.http.httpRemoteProxyConfig;
-import de.anomic.http.httpc;
-import de.anomic.http.httpc.response;
 import de.anomic.kelondro.kelondroBase64Order;
 import de.anomic.kelondro.kelondroCache;
 import de.anomic.kelondro.kelondroCloneableIterator;
@@ -212,8 +213,8 @@ public final class indexRepositoryReference {
     /**
      * Uses an Iteration over urlHash.db to detect malformed URL-Entries.
      * Damaged URL-Entries will be marked in a HashSet and removed at the end of the function.
-     *
-     * @param homePath Root-Path where all information is to be found.
+     * 
+     * @param proxyConfig 
      */
     public void deadlinkCleaner(httpRemoteProxyConfig proxyConfig) {
         serverLog log = new serverLog("URLDBCLEANUP");
@@ -241,7 +242,6 @@ public final class indexRepositoryReference {
                 urlHash = (String) eiter2.next();
 
                 // trying to fix the invalid URL
-                httpc theHttpc = null;
                 String oldUrlStr = null;
                 try {
                     // getting the url data as byte array
@@ -257,26 +257,30 @@ public final class indexRepositoryReference {
                         yacyURL newUrl = new yacyURL(newUrlStr, null);
 
                         // doing a http head request to test if the url is correct
-                        theHttpc = new httpc(newUrl.getHost(), newUrl.getHost(), newUrl.getPort(), 30000, false, proxyConfig, null, null);
-                        response res = theHttpc.HEAD(newUrl.getPath(), null);
+                        HttpClient client = HttpFactory.newClient();
+                        client.setProxy(proxyConfig);
+                        HttpResponse res = null;
+                        try {
+                            res = client.HEAD(newUrl.toString());
+                        } finally {
+                            if(res != null) {
+                                // release connection
+                                res.closeStream();
+                            }
+                        }
 
-                        if (res.statusCode == 200) {
+                        if (res.getStatusCode() == 200) {
                             entry.setCol(1, newUrl.toString().getBytes());
                             urlIndexFile.put(entry);
                             log.logInfo("UrlDB-Entry with urlHash '" + urlHash + "' corrected\n\tURL: " + oldUrlStr + " -> " + newUrlStr);
                         } else {
                             remove(urlHash);
-                            log.logInfo("UrlDB-Entry with urlHash '" + urlHash + "' removed\n\tURL: " + oldUrlStr + "\n\tConnection Status: " + res.status);
+                            log.logInfo("UrlDB-Entry with urlHash '" + urlHash + "' removed\n\tURL: " + oldUrlStr + "\n\tConnection Status: " + res.getStatusLine());
                         }
-                        theHttpc.close();
                     }
                 } catch (Exception e) {
                     remove(urlHash);
                     log.logInfo("UrlDB-Entry with urlHash '" + urlHash + "' removed\n\tURL: " + oldUrlStr + "\n\tExecption: " + e.getMessage());
-                } finally {
-                    if (theHttpc != null) try {
-                        theHttpc.close();
-                    } catch (Exception e) { }
                 }
             }
 

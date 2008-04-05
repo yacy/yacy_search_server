@@ -60,8 +60,8 @@ import java.util.Set;
 import java.util.Vector;
 
 import de.anomic.index.indexAbstractReferenceBlacklist;
-import de.anomic.plasma.plasmaSwitchboard;
 import de.anomic.index.indexReferenceBlacklist.blacklistFile;
+import de.anomic.plasma.plasmaSwitchboard;
 import de.anomic.server.serverCore;
 
 // The Naming of the functions is a bit strange...

@@ -49,11 +49,9 @@
 import java.io.UnsupportedEncodingException;
 import java.net.InetAddress;
 import java.net.URLEncoder;
-import java.util.Arrays;
 import java.util.Properties;
 
 import de.anomic.http.httpHeader;
-import de.anomic.http.httpc;
 import de.anomic.http.httpd;
 import de.anomic.plasma.plasmaSwitchboard;
 import de.anomic.server.serverCore;
@@ -229,21 +227,22 @@ public final class Connections_p {
         prop.putNum("numActivePending", numActivePending);
         
         // client sessions
-        httpc[] a = httpc.allConnections();
-        Arrays.sort(a, httpc.connectionTimeComparatorInstance);
+        // FIXME track connections of JakartaCommons Connection Manager
+//        httpc[] a = httpc.allConnections();
+//        Arrays.sort(a, httpc.connectionTimeComparatorInstance);
         int c = 0;
-        for (int i = 0; i < a.length; i++) {
-            httpc clientConnection = a[i];
-            if (clientConnection != null) {
-                prop.put("clientList_" + c + "_clientProtocol", (clientConnection.ssl) ? "HTTPS" : "HTTP");
-                prop.putNum("clientList_" + c + "_clientLifetime", System.currentTimeMillis() - clientConnection.initTime);
-                prop.putNum("clientList_" + c + "_clientIdletime", System.currentTimeMillis() - clientConnection.lastIO);
-                prop.put("clientList_" + c + "_clientTargetHost", clientConnection.adressed_host + ":" + clientConnection.adressed_port);
-                prop.putHTML("clientList_" + c + "_clientCommand", (clientConnection.command == null) ? "-" : clientConnection.command);
-                prop.put("clientList_" + c + "_clientID", clientConnection.hashCode());
-                c++;
-            }
-        }
+//        for (int i = 0; i < a.length; i++) {
+//            httpc clientConnection = a[i];
+//            if (clientConnection != null) {
+//                prop.put("clientList_" + c + "_clientProtocol", (clientConnection.ssl) ? "HTTPS" : "HTTP");
+//                prop.putNum("clientList_" + c + "_clientLifetime", System.currentTimeMillis() - clientConnection.initTime);
+//                prop.putNum("clientList_" + c + "_clientIdletime", System.currentTimeMillis() - clientConnection.lastIO);
+//                prop.put("clientList_" + c + "_clientTargetHost", clientConnection.adressed_host + ":" + clientConnection.adressed_port);
+//                prop.putHTML("clientList_" + c + "_clientCommand", (clientConnection.command == null) ? "-" : clientConnection.command);
+//                prop.put("clientList_" + c + "_clientID", clientConnection.hashCode());
+//                c++;
+//            }
+//        }
         prop.put("clientList", c);
         prop.put("clientActive", c);
         

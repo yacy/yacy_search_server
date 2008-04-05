@@ -74,6 +74,18 @@ public class nxTools {
         return table(strings(a, encoding));
     }
     
+    /**
+     * parse config files
+     * 
+     * splits the lines in list into pairs sperarated by =, lines beginning with # are ignored
+     * ie:
+     * abc=123
+     * # comment
+     * fg=dcf
+     * => Map{abc => 123, fg => dcf}
+     * @param list
+     * @return
+     */
     public static HashMap<String, String> table(ArrayList<String> list) {
         if (list == null) return new HashMap<String, String>();
         Iterator<String> i = list.iterator();
@@ -214,7 +226,8 @@ public class nxTools {
      * Example returns:<br>
      * <dl><dt>normal domain:</dt><dd>http://domain.net/leftpath..rightpath</dd>
      * <dt>long domain:</dt><dd>http://very_very_long_domain.net/le..</dd></dl>
-     * @param String like a URL
+     * @param url String like a URL
+     * @param len 
      * @return the shorten or the old String
      */
     public static String shortenURLString(String url, int len) {

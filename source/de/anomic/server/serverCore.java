@@ -86,27 +86,57 @@ import de.anomic.yacy.yacySeed;
 public final class serverCore extends serverAbstractBusyThread implements serverBusyThread {
 
     // special ASCII codes used for protocol handling
-    public static final byte HT = 9;  // Horizontal Tab
-    public static final byte LF = 10; // Line Feed
-    public static final byte CR = 13; // Carriage Return
-    public static final byte SP = 32; // Space
-    public static final byte[] CRLF = {CR, LF}; // Line End of HTTP/ICAP headers
+    /**
+     * Horizontal Tab
+     */
+    public static final byte HT = 9;
+    /**
+     * Line Feed
+     */
+    public static final byte LF = 10;
+    /**
+     * Carriage Return
+     */
+    public static final byte CR = 13;
+    /**
+     * Space
+     */
+    public static final byte SP = 32;
+    /**
+     * Line End of HTTP/ICAP headers
+     */
+    public static final byte[] CRLF = {CR, LF};
     public static final String CRLF_STRING = new String(CRLF);
     public static final String LF_STRING = new String(new byte[]{LF});
     public static final Class<?>[] stringType = {"".getClass()}; //  set up some reflection
     public static final long startupTime = System.currentTimeMillis();
     public static final ThreadGroup sessionThreadGroup = new ThreadGroup("sessionThreadGroup");
-    static int sessionCounter = 0; // will be increased with each session and is used to return a hash code
+    /**
+     * will be increased with each session and is used to return a hash code
+     */
+    static int sessionCounter = 0;
     
     // static variables
     public static final Boolean TERMINATE_CONNECTION = Boolean.FALSE;
     public static final Boolean RESUME_CONNECTION = Boolean.TRUE;
-    public static HashMap<String, Integer> bfHost = new HashMap<String, Integer>(); // for brute-force prevention
+    /**
+     * for brute-force prevention
+     */
+    public static HashMap<String, Integer> bfHost = new HashMap<String, Integer>();
     
     // class variables
-    private String extendedPort;           // the port, which is visible from outside (in most cases bind-port)
-	private String bindPort;               // if set, yacy will bind to this port, but set extendedPort in the seed
-    public boolean forceRestart = false;   // specifies if the server should try to do a restart
+    /**
+     * the port, which is visible from outside (in most cases bind-port)
+     */
+    private String extendedPort;
+    /**
+     * if set, yacy will bind to this port, but set extendedPort in the seed
+     */
+    private String bindPort;
+    /**
+     * specifies if the server should try to do a restart
+     */
+    public boolean forceRestart = false;
     
     public static boolean portForwardingEnabled = false;
     public static boolean useStaticIP = false;

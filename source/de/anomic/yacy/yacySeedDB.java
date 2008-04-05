@@ -60,8 +60,10 @@ import java.util.Iterator;
 import java.util.Map;
 import java.util.TreeMap;
 
+import de.anomic.http.HttpClient;
+import de.anomic.http.HttpFactory;
+import de.anomic.http.HttpResponse;
 import de.anomic.http.httpHeader;
-import de.anomic.http.httpc;
 import de.anomic.http.httpd;
 import de.anomic.kelondro.kelondroBase64Order;
 import de.anomic.kelondro.kelondroDyn;
@@ -809,35 +811,33 @@ public final class yacySeedDB {
     }
     
     private ArrayList<String> downloadSeedFile(yacyURL seedURL) throws IOException {
-    	httpc remote = null;
+        // Configure http headers
+        httpHeader reqHeader = new httpHeader();
+        reqHeader.put(httpHeader.PRAGMA, "no-cache");
+        reqHeader.put(httpHeader.CACHE_CONTROL, "no-cache"); // httpc uses HTTP/1.0 is this necessary?            
+        
+        // init http-client
+        HttpClient client = HttpFactory.newClient(reqHeader, 10000);
+        byte[] content = null;
+        HttpResponse res = null;
         try {
-            // init httpc
-        	remote = new httpc(
-                		seedURL.getHost(),
-                		seedURL.getHost(),
-                		seedURL.getPort(),
-                		10000,
-                		seedURL.getProtocol().equalsIgnoreCase("https"),
-                		sb.remoteProxyConfig,
-                        null, null);
-            
-            // Configure http headers
-            httpHeader reqHeader = new httpHeader();
-            reqHeader.put(httpHeader.PRAGMA, "no-cache");
-            reqHeader.put(httpHeader.CACHE_CONTROL, "no-cache"); // httpc uses HTTP/1.0 is this necessary?            
-            
             // send request
-            httpc.response res = remote.GET(seedURL.getFile(), reqHeader);
+            res = client.GET(seedURL.toString());
             
             // check response code
-            if (res.statusCode != 200) {
-            	throw new IOException("Server returned status: " + res.status);
+            if (res.getStatusCode() != 200) {
+            	throw new IOException("Server returned status: " + res.getStatusLine());
             }
             
             // read byte array
-            byte[] content = serverFileUtils.read(res.getContentInputStream());
-            remote.close();
+                content = res.getData();
+        } finally {
+            if(res != null) {
+                res.closeStream();
+            }
+        }
             
+        try {
             // uncompress it if it is gzipped
             content = serverFileUtils.uncompressGZipArray(content);
 

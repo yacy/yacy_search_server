@@ -64,9 +64,12 @@ import java.util.zip.ZipEntry;
 import java.util.zip.ZipOutputStream;
 
 import de.anomic.data.translator;
+import de.anomic.http.HttpClient;
+import de.anomic.http.HttpFactory;
+import de.anomic.http.HttpResponse;
 import de.anomic.http.httpHeader;
-import de.anomic.http.httpc;
 import de.anomic.http.httpd;
+import de.anomic.http.HttpResponse.Saver;
 import de.anomic.index.indexContainer;
 import de.anomic.index.indexRWIEntry;
 import de.anomic.index.indexRWIRowEntry;
@@ -421,8 +424,9 @@ public final class yacy {
                     server.terminate(false);
                     server.interrupt();
                     if (server.isAlive()) try {
+                        // TODO only send request, don't read response (cause server is already down resulting in error)
                         yacyURL u = new yacyURL((server.withSSL()?"https":"http")+"://localhost:" + serverCore.getPortNr(port), null);
-                        httpc.wget(u, u.getHost(), 1000, null, null, null, null, null); // kick server
+                        HttpClient.wget(u.toString()); // kick server
                         serverLog.logConfig("SHUTDOWN", "sent termination signal to server socket");
                     } catch (IOException ee) {
                         serverLog.logConfig("SHUTDOWN", "termination signal to server socket missed (server shutdown, ok)");
@@ -517,25 +521,29 @@ public final class yacy {
         // send 'wget' to web interface
         httpHeader requestHeader = new httpHeader();
         requestHeader.put("Authorization", "realm=" + encodedPassword); // for http-authentify
+        HttpClient con = HttpFactory.newClient(requestHeader, 10000);
+        HttpResponse res = null;
         try {
-            httpc con = new httpc("localhost", "localhost", port, 10000, false, null, null, null);
-            httpc.response res = con.GET("Steering.html?shutdown=", requestHeader);
+            res = con.GET("http://localhost:"+ port +"/Steering.html?shutdown=");
 
             // read response
-            if (res.status.startsWith("2")) {
+            if (res.getStatusLine().startsWith("2")) {
                 serverLog.logConfig("REMOTE-SHUTDOWN", "YACY accepted shutdown command.");
                 serverLog.logConfig("REMOTE-SHUTDOWN", "Stand by for termination, which may last some seconds.");
                 ByteArrayOutputStream bos = new ByteArrayOutputStream();
-                res.writeContent(bos, null);
-                con.close();
+                Saver.writeContent(res, bos, null);
             } else {
-                serverLog.logSevere("REMOTE-SHUTDOWN", "error response from YACY socket: " + res.status);
-                con.close();
+                serverLog.logSevere("REMOTE-SHUTDOWN", "error response from YACY socket: " + res.getStatusLine());
                 System.exit(-1);
             }
         } catch (IOException e) {
             serverLog.logSevere("REMOTE-SHUTDOWN", "could not establish connection to YACY socket: " + e.getMessage());
             System.exit(-1);
+        } finally {
+            // release connection
+            if(res != null) {
+                res.closeStream();
+            }
         }
 
         // finished
@@ -594,7 +602,7 @@ public final class yacy {
     
     /**
      * @param homePath path to the YaCy directory
-     * @param dbcache cache size in MB
+     * @param networkName 
      */
     public static void minimizeUrlDB(File homePath, String networkName) {
         // run with "java -classpath classes yacy -minimizeUrlDB"

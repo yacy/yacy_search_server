@@ -43,6 +43,7 @@
 package de.anomic.ymage;
 
 import java.util.Random;
+
 import javax.imageio.ImageIO;
 
 public class ymageCaptcha extends ymageMatrix {

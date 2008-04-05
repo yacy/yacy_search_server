@@ -63,7 +63,9 @@
 package de.anomic.http;
 
 import java.io.BufferedReader;
+import java.io.ByteArrayOutputStream;
 import java.io.File;
+import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
@@ -93,6 +95,7 @@ import java.util.zip.GZIPOutputStream;
 import de.anomic.htmlFilter.htmlFilterContentTransformer;
 import de.anomic.htmlFilter.htmlFilterTransformer;
 import de.anomic.htmlFilter.htmlFilterWriter;
+import de.anomic.http.HttpResponse.Saver;
 import de.anomic.index.indexReferenceBlacklist;
 import de.anomic.plasma.plasmaHTCache;
 import de.anomic.plasma.plasmaParser;
@@ -123,8 +126,11 @@ public final class httpdProxyHandler {
     private static BufferedReader redirectorReader;
 
     private static htmlFilterTransformer transformer = null;
-    public static final String proxyUserAgent = "yacy (" + httpc.systemOST +") yacy.net";
-    public static final String crawlerUserAgent = "yacybot (" + httpc.systemOST +") http://yacy.net/bot.html";
+    /**
+     * *The* remote Proxy configuration
+     */
+    private static httpRemoteProxyConfig remoteProxyConfig = null;
+    private static final String proxyUserAgent = "yacy (" + HttpClient.getSystemOST() +") yacy.net";
     private static File htRootPath = null;
 
     //private Properties connectionProperties = null;
@@ -383,10 +389,7 @@ public final class httpdProxyHandler {
                 requestHeader.put(httpHeader.USER_AGENT, generateUserAgent(requestHeader));
             }
             
-            // setting the X-Forwarded-For Header
-            if (switchboard.getConfigBool("proxy.sendXForwardedForHeader", true)) {
-                requestHeader.put(httpHeader.X_FORWARDED_FOR,conProp.getProperty(httpHeader.CONNECTION_PROP_CLIENTIP));
-            }
+            addXForwardedForHeader(conProp, requestHeader);
             
             // decide wether to use a cache entry or connect to the network
             File cacheFile = plasmaHTCache.getCachePath(url);
@@ -480,8 +483,7 @@ public final class httpdProxyHandler {
         httpChunkedOutputStream chunkedOut = null;
         Object hfos = null;
         
-        httpc remote = null;
-        httpc.response res = null;                
+        HttpResponse res = null;                
         try {
 
             String host =    conProp.getProperty(httpHeader.CONNECTION_PROP_HOST);
@@ -510,48 +512,44 @@ public final class httpdProxyHandler {
                     (!(remotePath.startsWith("/env"))) // this is the special path, staying always at root-level
             ) remotePath = yAddress.substring(pos) + remotePath;            
             
-            // open the connection
-            remote = (yAddress == null) ? newhttpc(host, port, timeout) : newhttpc(yAddress, timeout);
+            prepareHeader(requestHeader, httpVer);
             
-            // removing hop by hop headers
-            removeHopByHopHeaders(requestHeader);
+            // generate request-url
+            final String connectHost = (yAddress == null) ? host +":"+ port : yAddress;
+            final String getUrl = "http://"+ connectHost + remotePath;
             
-            // adding additional headers
-            setViaHeader(requestHeader, httpVer);        
+            // setup HTTP-client
+            final HttpClient client = HttpFactory.newClient(requestHeader, timeout);
             
             // send request
-            res = remote.GET(remotePath, requestHeader);
+            try {
+            res = client.GET(getUrl);
             conProp.put(httpHeader.CONNECTION_PROP_CLIENT_REQUEST_HEADER,requestHeader);
             
             // determine if it's an internal error of the httpc
-            if (res.responseHeader.size() == 0) {
-                throw new Exception(res.statusText);
+            if (res.getResponseHeader().size() == 0) {
+                throw new Exception(res.getStatusLine());
             }
             
             // if the content length is not set we have to use chunked transfer encoding
-            long contentLength = res.responseHeader.contentLength();
+            long contentLength = res.getResponseHeader().contentLength();
             if (contentLength < 0) {
                 // according to http://www.w3.org/Protocols/rfc2616/rfc2616-sec10.html
                 // a 204,304 message must not contain a message body.
                 // Therefore we need to set the content-length to 0.
-                if (res.status.startsWith("204") || 
-                    res.status.startsWith("304")) {
-                    res.responseHeader.put(httpHeader.CONTENT_LENGTH,"0");
+                if (res.getStatusCode() == 204 || 
+                    res.getStatusCode() == 304) {
+                    res.getResponseHeader().put(httpHeader.CONTENT_LENGTH,"0");
                 } else {
                     if (httpVer.equals(httpHeader.HTTP_VERSION_0_9) || httpVer.equals(httpHeader.HTTP_VERSION_1_0)) {
                         conProp.setProperty(httpHeader.CONNECTION_PROP_PERSISTENT,"close");
                     } else {
                         chunkedOut = new httpChunkedOutputStream(respond);
                     }
-                    res.responseHeader.remove(httpHeader.CONTENT_LENGTH);
+                    res.getResponseHeader().remove(httpHeader.CONTENT_LENGTH);
                 }
             }        
             
-//          if (((String)requestHeader.get(httpHeader.ACCEPT_ENCODING,"")).indexOf("gzip") != -1) {
-//          zipped = new GZIPOutputStream((chunked != null) ? chunked : respond);
-//          res.responseHeader.put(httpHeader.CONTENT_ENCODING, "gzip");
-//          res.responseHeader.remove(httpHeader.CONTENT_LENGTH);
-//          }
 
             // the cache does either not exist or is (supposed to be) stale
             long sizeBeforeDelete = -1;
@@ -564,14 +562,14 @@ public final class httpdProxyHandler {
 
             // reserver cache entry
             Date requestDate = new Date(((Long)conProp.get(httpHeader.CONNECTION_PROP_REQUEST_START)).longValue());
-            IResourceInfo resInfo = new ResourceInfo(url,requestHeader,res.responseHeader);
+            IResourceInfo resInfo = new ResourceInfo(url,requestHeader,res.getResponseHeader());
             plasmaHTCache.Entry cacheEntry = plasmaHTCache.newEntry(
                     requestDate, 
                     0, 
                     url,
                     "",
                     //requestHeader, 
-                    res.status, 
+                    res.getStatusLine(), 
                     //res.responseHeader,
                     resInfo,
                     null, 
@@ -581,41 +579,40 @@ public final class httpdProxyHandler {
             // handle file types and make (possibly transforming) output stream
             if (
                     (!transformer.isIdentityTransformer()) &&
-                    (plasmaParser.supportedHTMLContent(url,res.responseHeader.mime()))
+                    (plasmaParser.supportedHTMLContent(url,res.getResponseHeader().mime()))
                 ) {
                 // make a transformer
                 theLogger.logFine("create transformer for URL " + url);
                 //hfos = new htmlFilterOutputStream((gzippedOut != null) ? gzippedOut : ((chunkedOut != null)? chunkedOut : respond), null, transformer, (ext.length() == 0));
-                String charSet = res.responseHeader.getCharacterEncoding();
-                if (charSet == null) charSet = httpHeader.DEFAULT_CHARSET;
+                String charSet = httpHeader.getCharSet(res.getResponseHeader());
                 hfos = new htmlFilterWriter((gzippedOut != null) ? gzippedOut : ((chunkedOut != null)? chunkedOut : respond),charSet, null, transformer, (ext.length() == 0));
             } else {
                 // simply pass through without parsing
-                theLogger.logFine("create passthrough for URL " + url + ", extension '" + ext + "', mime-type '" + res.responseHeader.mime() + "'");
+                theLogger.logFine("create passthrough for URL " + url + ", extension '" + ext + "', mime-type '" + res.getResponseHeader().mime() + "'");
                 hfos = (gzippedOut != null) ? gzippedOut : ((chunkedOut != null)? chunkedOut : respond);
             }
             
             // handle incoming cookies
-            handleIncomingCookies(res.responseHeader, host, ip);
+            handleIncomingCookies(res.getResponseHeader(), host, ip);
             
             // remove hop by hop headers
-            removeHopByHopHeaders(res.responseHeader);
+            removeHopByHopHeaders(res.getResponseHeader());
             
             // adding additional headers
-            setViaHeader(res.responseHeader, res.httpVer);               
+            setViaHeader(res.getResponseHeader(), res.getHttpVer());               
             
             // sending the respond header back to the client
             if (chunkedOut != null) {
-                res.responseHeader.put(httpHeader.TRANSFER_ENCODING, "chunked");
+                res.getResponseHeader().put(httpHeader.TRANSFER_ENCODING, "chunked");
             }
             
             httpd.sendRespondHeader(
                     conProp,
                     respond,
                     httpVer,
-                    res.statusCode,
-                    res.statusText, 
-                    res.responseHeader);
+                    res.getStatusCode(),
+                    res.getStatusLine().substring(4), // status text 
+                    res.getResponseHeader());
             
             String storeError = cacheEntry.shallStoreCacheForProxy();
             boolean storeHTCache = cacheEntry.profile().storeHTCache();
@@ -636,7 +633,15 @@ public final class httpdProxyHandler {
                 if ((contentLength > 0) && (contentLength < 1048576)) // if the length is known and < 1 MB
                 {
                     // ok, we don't write actually into a file, only to RAM, and schedule writing the file.
-                    byte[] cacheArray = res.writeContent(hfos,true);
+                    ByteArrayOutputStream byteStream = new ByteArrayOutputStream();
+                    Saver.writeContent(res, hfos, byteStream);
+                    // cached bytes
+                    byte[] cacheArray;
+                    if(byteStream.size() > 0) {
+                        cacheArray = byteStream.toByteArray();
+                    } else {
+                        cacheArray = null;
+                    }
                     theLogger.logFine("writeContent of " + url + " produced cacheArray = " + ((cacheArray == null) ? "null" : ("size=" + cacheArray.length)));
 
                     if (hfos instanceof htmlFilterWriter) ((htmlFilterWriter) hfos).finalize();
@@ -664,7 +669,7 @@ public final class httpdProxyHandler {
                     // the file is too big to cache it in the ram, or the size is unknown
                     // write to file right here.
                     cacheFile.getParentFile().mkdirs();
-                    res.writeContent(hfos, cacheFile);
+                    Saver.writeContent(res, hfos, new FileOutputStream(cacheFile));
                     if (hfos instanceof htmlFilterWriter) ((htmlFilterWriter) hfos).finalize();
                     theLogger.logFine("for write-file of " + url + ": contentLength = " + contentLength + ", sizeBeforeDelete = " + sizeBeforeDelete);
                     plasmaHTCache.writeFileAnnouncement(cacheFile);
@@ -694,7 +699,7 @@ public final class httpdProxyHandler {
                         " StoreHTCache=" + storeHTCache + 
                         " SupportetContent=" + isSupportedContent);
 
-                res.writeContent(hfos, null);
+                Saver.writeContent(res, hfos, null);
                 if (hfos instanceof htmlFilterWriter) ((htmlFilterWriter) hfos).finalize();
                 if (sizeBeforeDelete == -1) {
                     // no old file and no load. just data passing
@@ -707,8 +712,6 @@ public final class httpdProxyHandler {
                 }
                 conProp.setProperty(httpHeader.CONNECTION_PROP_PROXY_RESPOND_CODE,"TCP_MISS");
             }
-
-            remote.close();
             
             if (gzippedOut != null) {
                 gzippedOut.finish();
@@ -717,13 +720,19 @@ public final class httpdProxyHandler {
                 chunkedOut.finish();
                 chunkedOut.flush();
             }
+            } finally {
+                // if opened ...
+                if(res != null) {
+                    // ... close connection
+                    res.closeStream();
+                }
+            }
         } catch (Exception e) {
             // deleting cached content
             if (cacheFile.exists()) cacheFile.delete();                            
-            handleProxyException(e,remote,conProp,respond,url);
+            handleProxyException(e,conProp,respond,url);
         }
     }
-
 
     private static void fulfillRequestFromCache(
             Properties conProp, 
@@ -743,14 +752,10 @@ public final class httpdProxyHandler {
         
         // we respond on the request by using the cache, the cache is fresh        
         try {
-            // remove hop by hop headers
-            removeHopByHopHeaders(cachedResponseHeader);
-            
-            // adding additional headers
-            setViaHeader(cachedResponseHeader, httpVer);
+            prepareHeader(cachedResponseHeader, httpVer);
             
             // replace date field in old header by actual date, this is according to RFC
-            cachedResponseHeader.put(httpHeader.DATE, httpc.dateString(httpc.nowDate()));
+            cachedResponseHeader.put(httpHeader.DATE, HttpClient.dateString(new Date()));
             
 //          if (((String)requestHeader.get(httpHeader.ACCEPT_ENCODING,"")).indexOf("gzip") != -1) {
 //          chunked = new httpChunkedOutputStream(respond);
@@ -789,8 +794,7 @@ public final class httpdProxyHandler {
                 //respondHeader(respond, "203 OK", cachedResponseHeader); // respond with 'non-authoritative'
                 
                 // determine the content charset
-                String charSet = cachedResponseHeader.getCharacterEncoding();
-                if (charSet == null) charSet = httpHeader.DEFAULT_CHARSET;
+                String charSet = httpHeader.getCharSet(cachedResponseHeader);
                 
                 // make a transformer
                 if (( !transformer.isIdentityTransformer()) &&
@@ -863,8 +867,7 @@ public final class httpdProxyHandler {
     
     public static void doHead(Properties conProp, httpHeader requestHeader, OutputStream respond) {
         
-        httpc remote = null;
-        httpc.response res = null;
+        HttpResponse res = null;
         yacyURL url = null;
         try {
             // remembering the starting time of the request
@@ -920,10 +923,7 @@ public final class httpdProxyHandler {
                 requestHeader.put(httpHeader.USER_AGENT, generateUserAgent(requestHeader));
             }
             
-            // setting the X-Forwarded-For Header
-            if (switchboard.getConfigBool("proxy.sendXForwardedForHeader", true)) {
-                requestHeader.put(httpHeader.X_FORWARDED_FOR,conProp.getProperty(httpHeader.CONNECTION_PROP_CLIENTIP));
-            }
+            addXForwardedForHeader(conProp, requestHeader);
             
             // resolve yacy and yacyh domains
             String yAddress = yacyCore.seedDB.resolveYacyAddress(host);
@@ -931,41 +931,51 @@ public final class httpdProxyHandler {
             // attach possible yacy-sublevel-domain
             if ((yAddress != null) && ((pos = yAddress.indexOf("/")) >= 0)) remotePath = yAddress.substring(pos) + remotePath;
             
-            // removing hop by hop headers
-            removeHopByHopHeaders(requestHeader);            
-
-            // adding outgoing headers
-            setViaHeader(requestHeader, httpVer);            
+            prepareHeader(requestHeader, httpVer);            
             
-            // open the connection: second is needed for [AS] patch
-            remote = (yAddress == null) ? newhttpc(host, port, timeout): newhttpc(yAddress, timeout);
+            // setup HTTP-client
+            HttpClient client = HttpFactory.newClient();
+            client.setTimeout(timeout);
             
+            // set header for connection
+            client.setHeader(requestHeader);
+            
+            // send request
+            final String connectHost = (yAddress == null) ? host +":"+ port : yAddress;
+            client.setProxy(getProxyConfig(connectHost));
+            final String getUrl = "http://"+ connectHost + remotePath;
+            
+            try {
             // sending the http-HEAD request to the server
-            res = remote.HEAD(remotePath, requestHeader);
+            res = client.HEAD(getUrl);
             
             // determine if it's an internal error of the httpc
-            if (res.responseHeader.size() == 0) {
-                throw new Exception(res.statusText);
+            if (res.getResponseHeader().size() == 0) {
+                throw new Exception(res.getStatusLine());
             }            
             
             // removing hop by hop headers
-            removeHopByHopHeaders(res.responseHeader);
+            removeHopByHopHeaders(res.getResponseHeader());
             
             // adding outgoing headers
-            setViaHeader(res.responseHeader, res.httpVer);
+            setViaHeader(res.getResponseHeader(), res.getHttpVer());
             
             // sending the server respond back to the client
-            httpd.sendRespondHeader(conProp,respond,httpVer,res.statusCode,res.statusText,res.responseHeader);
+            httpd.sendRespondHeader(conProp,respond,httpVer,res.getStatusCode(),res.getStatusLine().substring(4),res.getResponseHeader());
             respond.flush();
-            remote.close();
+            } finally {
+                if(res != null) {
+                    // ... close connection
+                    res.closeStream();
+                }
+            }
         } catch (Exception e) {
-            handleProxyException(e,remote,conProp,respond,url); 
+            handleProxyException(e,conProp,respond,url); 
         }
     }
     
     public static void doPost(Properties conProp, httpHeader requestHeader, OutputStream respond, PushbackInputStream body) throws IOException {
         
-        httpc remote = null;
         yacyURL url = null;
         try {
             // remembering the starting time of the request
@@ -1006,10 +1016,7 @@ public final class httpdProxyHandler {
                 requestHeader.put(httpHeader.USER_AGENT, generateUserAgent(requestHeader));
             }
             
-            // setting the X-Forwarded-For Header
-            if (switchboard.getConfigBool("proxy.sendXForwardedForHeader", true)) {
-                requestHeader.put(httpHeader.X_FORWARDED_FOR,conProp.getProperty(httpHeader.CONNECTION_PROP_CLIENTIP));
-            }
+            addXForwardedForHeader(conProp, requestHeader);
             
             // resolve yacy and yacyh domains
             String yAddress = yacyCore.seedDB.resolveYacyAddress(host);
@@ -1020,68 +1027,83 @@ public final class httpdProxyHandler {
             // attach possible yacy-sublevel-domain
             if ((yAddress != null) && ((pos = yAddress.indexOf("/")) >= 0)) remotePath = yAddress.substring(pos) + remotePath;
                   
-            // removing hop by hop headers
-            removeHopByHopHeaders(requestHeader);
+            prepareHeader(requestHeader, httpVer); 
             
-            // adding additional headers
-            setViaHeader(requestHeader, httpVer); 
+            // setup HTTP-client
+            JakartaCommonsHttpClient client = new JakartaCommonsHttpClient();
+            client.setTimeout(timeout);
             
+            // set header for connection
+            client.setHeader(requestHeader);
+            
+            // send request
+            final String connectHost = (yAddress == null) ? host +":"+ port : yAddress;
+            client.setProxy(getProxyConfig(connectHost));
+            final String getUrl = "http://"+ connectHost + remotePath;
+            HttpResponse res = null;
+            try {
             // sending the request
-            remote = (yAddress == null) ? newhttpc(host, port, timeout) : newhttpc(yAddress, timeout);                
-            httpc.response res = remote.POST(remotePath, requestHeader, body);
+            // is the input stream required and valid HTTP-data?
+            res = client.POST(getUrl, body);
             
             // determine if it's an internal error of the httpc
-            if (res.responseHeader.size() == 0) {
-                throw new Exception(res.statusText);
+            if (res.getResponseHeader().size() == 0) {
+                throw new Exception(res.getStatusLine());
             }                                  
             
             // if the content length is not set we need to use chunked content encoding
-            long contentLength = res.responseHeader.contentLength();
+            long contentLength = res.getResponseHeader().contentLength();
             httpChunkedOutputStream chunked = null;
             if (contentLength <= 0) {
                 // according to http://www.w3.org/Protocols/rfc2616/rfc2616-sec10.html
                 // a 204,304 message must not contain a message body.
                 // Therefore we need to set the content-length to 0.
-                if (res.status.startsWith("204") || 
-                    res.status.startsWith("304")) {
-                    res.responseHeader.put(httpHeader.CONTENT_LENGTH,"0");
+                if (res.getStatusCode() == 204 || 
+                    res.getStatusCode() == 304) {
+                    res.getResponseHeader().put(httpHeader.CONTENT_LENGTH,"0");
                 } else {                
                     if (httpVer.equals("HTTP/0.9") || httpVer.equals("HTTP/1.0")) {
                         forceConnectionClose(conProp);
                     } else {
                         chunked = new httpChunkedOutputStream(respond);
                     }
-                    res.responseHeader.remove(httpHeader.CONTENT_LENGTH);                
+                    res.getResponseHeader().remove(httpHeader.CONTENT_LENGTH);                
                 }
             }
             
             // remove hop by hop headers
-            removeHopByHopHeaders(res.responseHeader);
+            removeHopByHopHeaders(res.getResponseHeader());
             
             // adding additional headers
-            setViaHeader(res.responseHeader, res.httpVer); 
+            setViaHeader(res.getResponseHeader(), res.getHttpVer()); 
             
             // sending the respond header back to the client
             if (chunked != null) {
-                res.responseHeader.put(httpHeader.TRANSFER_ENCODING, "chunked");
+                res.getResponseHeader().put(httpHeader.TRANSFER_ENCODING, "chunked");
             }            
             
             // sending response headers
             httpd.sendRespondHeader(conProp,
                                     respond,
                                     httpVer,
-                                    res.statusCode,
-                                    res.statusText,
-                                    res.responseHeader);
+                                    res.getStatusCode(),
+                                    res.getStatusLine().substring(4), // status text
+                                    res.getResponseHeader());
             
             // respondHeader(respond, res.status, res.responseHeader);
-            res.writeContent((chunked != null) ? chunked : respond, null);
+            Saver.writeContent(res, (chunked != null) ? chunked : respond, null);
             if (chunked != null)  chunked.finish();
             
-            remote.close();
             respond.flush();
+            } finally {
+                // if opened ...
+                if(res != null) {
+                    // ... close connection
+                    res.closeStream();
+                }
+            }
         } catch (Exception e) {
-            handleProxyException(e,remote,conProp,respond,url);                 
+            handleProxyException(e,conProp,respond,url);                 
         } finally {
             respond.flush();
             if (respond instanceof httpdByteCountOutputStream) ((httpdByteCountOutputStream)respond).finish();           
@@ -1090,6 +1112,30 @@ public final class httpdProxyHandler {
             conProp.put(httpHeader.CONNECTION_PROP_PROXY_RESPOND_SIZE,new Long(((httpdByteCountOutputStream)respond).getCount()));
             logProxyAccess(conProp);
         }
+    }
+
+    /**
+     * adds the client-IP of conProp to the requestHeader
+     * 
+     * @param conProp
+     * @param requestHeader
+     */
+    private static void addXForwardedForHeader(Properties conProp, httpHeader requestHeader) {
+        // setting the X-Forwarded-For Header
+        if (switchboard.getConfigBool("proxy.sendXForwardedForHeader", true)) {
+            requestHeader.put(httpHeader.X_FORWARDED_FOR,conProp.getProperty(httpHeader.CONNECTION_PROP_CLIENTIP));
+        }
+    }
+
+    /**
+     * removing hop by hop headers and adding additional headers
+     * 
+     * @param requestHeader
+     * @param httpVer
+     */
+    private static void prepareHeader(httpHeader requestHeader, String httpVer) {
+        removeHopByHopHeaders(requestHeader);
+        setViaHeader(requestHeader, httpVer);
     }
     
     public static void doConnect(Properties conProp, de.anomic.http.httpHeader requestHeader, InputStream clientIn, OutputStream clientOut) throws IOException {
@@ -1123,41 +1169,43 @@ public final class httpdProxyHandler {
         }
 
         // possibly branch into PROXY-PROXY connection
+        final httpRemoteProxyConfig proxyConfig = getRemoteProxyConfig();
         if (
-                (switchboard.remoteProxyConfig != null) &&
-                (switchboard.remoteProxyConfig.useProxy()) &&
-                (switchboard.remoteProxyConfig.useProxy4SSL())
+                (proxyConfig != null) &&
+                (proxyConfig.useProxy()) &&
+                (proxyConfig.useProxy4SSL())
         ) {
-            httpc remoteProxy = null;
-            try {
-                remoteProxy = new httpc(
-                        host,
-                        host,
-                        port,
-                        timeout,
-                        false,
-                        switchboard.remoteProxyConfig,
-                        null, null
-                );
+            HttpClient remoteProxy = HttpFactory.newClient();
+            remoteProxy.setTimeout(timeout);
+            remoteProxy.setProxy(proxyConfig);
+            remoteProxy.setHeader(requestHeader);
 
-                httpc.response response = remoteProxy.CONNECT(host, port, requestHeader);
-                response.print();
-                if (response.success()) {
+            HttpResponse response = null;
+            try {
+                response = remoteProxy.CONNECT(host, port);
+                // outputs a logline to the serverlog with the current status
+                serverLog.logInfo("HttpdProxyHandler", "RESPONSE: status=" + response.getStatusLine() + ", header=" + response.getResponseHeader().toString());
+                // (response.getStatusLine().charAt(0) == '2') || (response.getStatusLine().charAt(0) == '3')
+                final boolean success = response.getStatusCode() >= 200 && response.getStatusCode() <= 399;
+                if (success) {
                     // replace connection details
-                    host = switchboard.remoteProxyConfig.getProxyHost();
-                    port = switchboard.remoteProxyConfig.getProxyPort();
-                    remoteProxy.close();
+                    host = proxyConfig.getProxyHost();
+                    port = proxyConfig.getProxyPort();
                     // go on (see below)
                 } else {
                     // pass error response back to client
-                    httpd.sendRespondHeader(conProp,clientOut,httpVersion,response.statusCode,response.statusText,response.responseHeader);
+                    httpd.sendRespondHeader(conProp,clientOut,httpVersion,response.getStatusCode(),response.getStatusLine().substring(4),response.getResponseHeader());
                     //respondHeader(clientOut, response.status, response.responseHeader);
                     forceConnectionClose(conProp);
-                    remoteProxy.close();
                     return;
                 }
             } catch (Exception e) {
                 throw new IOException(e.getMessage());
+            } finally {
+                if(response != null) {
+                    // release connection
+                    response.closeStream();
+                }
             }
         }
 
@@ -1234,79 +1282,85 @@ public final class httpdProxyHandler {
         }
     }
     
-    private static httpc newhttpc(String server, int port, int timeout) throws IOException {
-        
-        // getting the remote proxy configuration
-        httpRemoteProxyConfig remProxyConfig = switchboard.remoteProxyConfig;
-        
-        // a new httpc connection, combined with possible remote proxy
+    /**
+     * checks if proxy-config exists for server (is allowed and not denied)
+     * 
+     * @param server
+     * @param port not used (only to indicate that server is plain address)
+     * @return proxy which should be used or null if no proxy should be used
+     */
+    public static httpRemoteProxyConfig getProxyConfig(final String server, final int port) {
+        return getProxyConfig(server, getRemoteProxyConfig());
+    }
+
+    /**
+     * checks if proxy-config is allowed and not denied
+     * 
+     * @param server
+     * @param remProxyConfig
+     * @return proxy which should be used or null if no proxy should be used
+     */
+    public static httpRemoteProxyConfig getProxyConfig(final String server, httpRemoteProxyConfig remProxyConfig) {
+        // possible remote proxy
         // check no-proxy rule
-        if (
-                (remProxyConfig != null) &&
-                (remProxyConfig.useProxy()) && 
-                (!(remProxyConfig.remoteProxyAllowProxySet.contains(server)))) {
-            if (remProxyConfig.remoteProxyDisallowProxySet.contains(server)) {
-                remProxyConfig = null;
-            } else {
-                // analyse remoteProxyNoProxy;
-                // set either remoteProxyAllowProxySet or remoteProxyDisallowProxySet accordingly
-                int i = 0;
-                while (i < remProxyConfig.getProxyNoProxyPatterns().length) {
-                    if (server.matches(remProxyConfig.getProxyNoProxyPatterns()[i])) {
-                        // disallow proxy for this server
-                        switchboard.remoteProxyConfig.remoteProxyDisallowProxySet.add(server);
+        if (remProxyConfig != null) {
+            if (remProxyConfig.useProxy()) {
+                if (!(remProxyConfig.remoteProxyAllowProxySet.contains(server))) {
+                    if (remProxyConfig.remoteProxyDisallowProxySet.contains(server)) {
                         remProxyConfig = null;
-                        break;
+                    } else {
+                        // analyse remoteProxyNoProxy;
+                        // set either remoteProxyAllowProxySet or remoteProxyDisallowProxySet accordingly
+                        boolean allowed = true;
+                        synchronized (remProxyConfig) {
+                            for (final String pattern :remProxyConfig.getProxyNoProxyPatterns()) {
+                                if (server.matches(pattern)) {
+                                    // disallow proxy for this server
+                                    allowed = false;
+                                    remProxyConfig.remoteProxyDisallowProxySet.add(server);
+                                    remProxyConfig = null;
+                                    break;
+                                }
+                            }
+                            if (allowed) {
+                                // no pattern matches: allow server
+                                remProxyConfig.remoteProxyAllowProxySet.add(server);
+                            }
+                        }
                     }
-                    i++;
                 }
-                if (i == remProxyConfig.getProxyNoProxyPatterns().length) {
-                    // no pattern matches: allow server
-                    switchboard.remoteProxyConfig.remoteProxyAllowProxySet.add(server);
-                }
+            } else {
+                // not enabled
+                remProxyConfig = null;
             }
         }
-        
-        // branch to server/proxy
-        return new httpc(
-                    server, 
-                    server,
-                    port, 
-                    timeout, 
-                    false, 
-                    remProxyConfig,
-                    null, null
-            );
+
+        return remProxyConfig;
     }
     
-    private static httpc newhttpc(String address, int timeout) throws IOException {
-        // a new httpc connection for <host>:<port>/<path> syntax
-        // this is called when a '.yacy'-domain is used
+    /**
+     * gets proxy config for full adress (without protocol (ie. "http://"))
+     * @param address full address with host and optionally port or path <host>:<port>/<path>
+     * @return null if no proxy should be used
+     */
+    public static httpRemoteProxyConfig getProxyConfig(String address) {
+        // host goes to port
         int p = address.indexOf(":");
-        if (p < 0) return null;
-        String server = address.substring(0, p);
-        address = address.substring(p + 1);
-        // remove possible path elements (may occur for 'virtual' subdomains
-        p = address.indexOf("/");
-        if (p >= 0) address = address.substring(0, p); // cut it off
-        int port = Integer.parseInt(address);
-        // normal creation of httpc object
-        return newhttpc(server, port, timeout);
+        if (p < 0) {
+            // no port, so host goes to path
+            p = address.indexOf("/");
+        }
+        // host should have minimum 1 character ;) 
+        if(p > 0) {
+            String server = address.substring(0, p);
+            return getProxyConfig(server, 0);
+        } else {
+            // check if full address is in allow/deny-list
+            return getProxyConfig(address, 0);
+        }
     }
-    /*
-    private void textMessage(OutputStream out, String body) throws IOException {
-        out.write(("HTTP/1.1 200 OK\r\n").getBytes());
-        out.write((httpHeader.SERVER + ": AnomicHTTPD (www.anomic.de)\r\n").getBytes());
-        out.write((httpHeader.DATE + ": " + httpc.dateString(httpc.nowDate()) + "\r\n").getBytes());
-        out.write((httpHeader.CONTENT_TYPE + ": text/plain\r\n").getBytes());
-        out.write((httpHeader.CONTENT_LENGTH + ": " + body.length() +"\r\n").getBytes());
-        out.write(("\r\n").getBytes());
-        out.flush();
-        out.write(body.getBytes());
-        out.flush();
-    }
-    */
-    private static void handleProxyException(Exception e, httpc remote, Properties conProp, OutputStream respond, yacyURL url) {
+
+    private static void handleProxyException(Exception e, Properties conProp, OutputStream respond, yacyURL url) {
         // this may happen if 
         // - the targeted host does not exist 
         // - anything with the remote server was wrong.
@@ -1370,9 +1424,6 @@ public final class httpdProxyHandler {
                      (exceptionMsg.indexOf("server has closed connection") >= 0)
                   )) { 
                     errorMessage = exceptionMsg;
-                } else if ((remote != null)&&(remote.isClosed())) { 
-                    // TODO: query for broken pipe
-                    errorMessage = "Destination host unexpectedly closed connection";                 
                 } else {
                     errorMessage = "Unexpected Error. " + e.getClass().getName() + ": " + e.getMessage();
                     unknownError = true;
@@ -1626,6 +1677,20 @@ public final class httpdProxyHandler {
         
         // sending the logging message to the logger
         proxyLog.logFine(new String(logMessage));
+    }
+
+    /**
+     * @param remoteProxyConfig the remoteProxyConfig to set
+     */
+    public static void setRemoteProxyConfig(httpRemoteProxyConfig remoteProxyConfig) {
+        httpdProxyHandler.remoteProxyConfig = remoteProxyConfig;
+    }
+
+    /**
+     * @return the remoteProxyConfig
+     */
+    public static httpRemoteProxyConfig getRemoteProxyConfig() {
+        return remoteProxyConfig;
     }
     
 }

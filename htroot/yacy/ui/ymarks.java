@@ -59,8 +59,8 @@ import de.anomic.data.bookmarksDB;
 import de.anomic.data.listManager;
 import de.anomic.data.userDB;
 import de.anomic.data.bookmarksDB.Tag;
+import de.anomic.http.HttpClient;
 import de.anomic.http.httpHeader;
-import de.anomic.http.httpc;
 import de.anomic.index.indexURLReference;
 import de.anomic.plasma.plasmaParserDocument;
 import de.anomic.plasma.plasmaSnippetCache;
@@ -314,7 +314,7 @@ public class ymarks {
        			prop.putHTML("bookmarks_"+count+"_title", bookmark.getTitle());
        			prop.putHTML("bookmarks_"+count+"_description", bookmark.getDescription());
        			prop.put("bookmarks_"+count+"_date", serverDate.formatISO8601(new Date(bookmark.getTimeStamp())));
-       			prop.put("bookmarks_"+count+"_rfc822date", httpc.dateString(new Date(bookmark.getTimeStamp())));
+       			prop.put("bookmarks_"+count+"_rfc822date", HttpClient.dateString(new Date(bookmark.getTimeStamp())));
        			prop.put("bookmarks_"+count+"_public", (bookmark.getPublic() ? "1" : "0"));
             
        			//List Tags.

@@ -117,10 +117,12 @@ import de.anomic.data.messageBoard;
 import de.anomic.data.userDB;
 import de.anomic.data.wikiBoard;
 import de.anomic.data.wiki.wikiParser;
+import de.anomic.http.HttpClient;
+import de.anomic.http.JakartaCommonsHttpClient;
 import de.anomic.http.httpHeader;
 import de.anomic.http.httpRemoteProxyConfig;
-import de.anomic.http.httpc;
 import de.anomic.http.httpd;
+import de.anomic.http.httpdProxyHandler;
 import de.anomic.http.httpdRobotsTxtConfig;
 import de.anomic.index.indexDefaultReferenceBlacklist;
 import de.anomic.index.indexReferenceBlacklist;
@@ -151,6 +153,7 @@ import de.anomic.server.serverSwitch;
 import de.anomic.server.serverThread;
 import de.anomic.server.logging.serverLog;
 import de.anomic.tools.crypt;
+import de.anomic.tools.nxTools;
 import de.anomic.yacy.yacyClient;
 import de.anomic.yacy.yacyCore;
 import de.anomic.yacy.yacyNewsPool;
@@ -244,17 +247,6 @@ public final class plasmaSwitchboard extends serverAbstractSwitch<plasmaSwitchbo
     public serverProcessor<indexingQueueEntry> indexingCondensementProcessor;
     public serverProcessor<indexingQueueEntry> indexingAnalysisProcessor;
     public serverProcessor<indexingQueueEntry> indexingStorageProcessor;
-    
-    /*
-     * Remote Proxy configuration
-     */
-    //    public boolean  remoteProxyUse;
-    //    public boolean  remoteProxyUse4Yacy;
-    //    public String   remoteProxyHost;
-    //    public int      remoteProxyPort;
-    //    public String   remoteProxyNoProxy = "";
-    //    public String[] remoteProxyNoProxyPatterns = null;
-    public httpRemoteProxyConfig remoteProxyConfig = null;
     
     public httpdRobotsTxtConfig robotstxtConfig = null;
     
@@ -895,8 +887,8 @@ public final class plasmaSwitchboard extends serverAbstractSwitch<plasmaSwitchbo
         if (applyPro) this.log.logInfo("This is the pro-version of YaCy");
         
         // remote proxy configuration
-        this.remoteProxyConfig = httpRemoteProxyConfig.init(this);
-        this.log.logConfig("Remote proxy configuration:\n" + this.remoteProxyConfig.toString());
+        httpdProxyHandler.setRemoteProxyConfig(httpRemoteProxyConfig.init(this)); // TODO refactoring
+        this.log.logConfig("Remote proxy configuration:\n" + httpdProxyHandler.getRemoteProxyConfig().toString());
         
         // load network configuration into settings
         String networkUnitDefinition = getConfig("network.unit.definition", "defaults/yacy.network.freeworld.unit");
@@ -915,7 +907,7 @@ public final class plasmaSwitchboard extends serverAbstractSwitch<plasmaSwitchbo
         Map<String, String> initProps;
         if (networkUnitDefinition.startsWith("http://")) {
             try {
-                this.setConfig(httpc.loadHashMap(new yacyURL(networkUnitDefinition, null), remoteProxyConfig));
+                this.setConfig(plasmaSwitchboard.loadHashMap(new yacyURL(networkUnitDefinition, null)));
             } catch (MalformedURLException e) {
             }
         } else {
@@ -927,7 +919,7 @@ public final class plasmaSwitchboard extends serverAbstractSwitch<plasmaSwitchbo
         }
         if (networkGroupDefinition.startsWith("http://")) {
             try {
-                this.setConfig(httpc.loadHashMap(new yacyURL(networkGroupDefinition, null), remoteProxyConfig));
+                this.setConfig(plasmaSwitchboard.loadHashMap(new yacyURL(networkGroupDefinition, null)));
             } catch (MalformedURLException e) {
             }
         } else {
@@ -1247,12 +1239,6 @@ public final class plasmaSwitchboard extends serverAbstractSwitch<plasmaSwitchbo
         testresult = facilityDB.selectLong("statistik", (new serverDate()).toShortString(false).substring(0, 11));
          */
         
-        /*
-         * Initializing httpc
-         */
-        // initializing yacyDebugMode
-        httpc.yacyDebugMode = getConfig(YACY_MODE_DEBUG, "false").equals("true");
-        
         // init nameCacheNoCachingList
         String noCachingList = getConfig(HTTPC_NAME_CACHE_CACHING_PATTERNS_NO,"");
         String[] noCachingEntries = noCachingList.split(",");
@@ -1449,7 +1435,8 @@ public final class plasmaSwitchboard extends serverAbstractSwitch<plasmaSwitchbo
         InetAddress hostAddress = serverDomains.dnsResolve(host);
         // if we don't know the host, we cannot load that resource anyway.
         // But in case we use a proxy, it is possible that we dont have a DNS service.
-        if (hostAddress == null) return ((this.remoteProxyConfig != null) && (this.remoteProxyConfig.useProxy()));
+        final httpRemoteProxyConfig remoteProxyConfig = httpdProxyHandler.getRemoteProxyConfig();
+        if (hostAddress == null) return ((remoteProxyConfig != null) && (remoteProxyConfig.useProxy()));
         // check if this is a local address and we are allowed to index local pages:
         boolean local = hostAddress.isSiteLocalAddress() || hostAddress.isLoopbackAddress();
         //assert local == yacyURL.isLocalDomain(url.hash()); // TODO: remove the dnsResolve above!
@@ -1729,7 +1716,7 @@ public final class plasmaSwitchboard extends serverAbstractSwitch<plasmaSwitchbo
         indexingAnalysisProcessor.shutdown(2000);
         indexingStorageProcessor.shutdown(1000);
         this.dbImportManager.close();
-        httpc.closeAllConnections();
+        JakartaCommonsHttpClient.closeAllConnections();
         wikiDB.close();
         blogDB.close();
         blogCommentDB.close();
@@ -2088,6 +2075,7 @@ public final class plasmaSwitchboard extends serverAbstractSwitch<plasmaSwitchbo
     
     /**
      * With this function the crawling process can be paused
+     * @param jobType 
      */
     public void pauseCrawlJob(String jobType) {
         Object[] status = (Object[])this.crawlJobsStatus.get(jobType);
@@ -2099,6 +2087,7 @@ public final class plasmaSwitchboard extends serverAbstractSwitch<plasmaSwitchbo
     
     /**
      * Continue the previously paused crawling
+     * @param jobType 
      */
     public void continueCrawlJob(String jobType) {
         Object[] status = (Object[])this.crawlJobsStatus.get(jobType);
@@ -2112,6 +2101,7 @@ public final class plasmaSwitchboard extends serverAbstractSwitch<plasmaSwitchbo
     } 
     
     /**
+     * @param jobType 
      * @return <code>true</code> if crawling was paused or <code>false</code> otherwise
      */
     public boolean crawlJobIsPaused(String jobType) {
@@ -2741,6 +2731,28 @@ public final class plasmaSwitchboard extends serverAbstractSwitch<plasmaSwitchbo
     public boolean waitForShutdown() throws InterruptedException {
         this.shutdownSync.P();
         return this.terminate;
+    }
+
+    /**
+     * loads the url as Map
+     * 
+     * Strings like abc=123 are parsed as pair: abc => 123
+     * 
+     * @param url
+     * @return
+     */
+    public static Map<String, String> loadHashMap(yacyURL url) {
+        try {
+            // sending request
+            final HashMap<String, String> result = nxTools.table(
+                    HttpClient.wget(url.toString())
+                    , "UTF-8");
+    
+            if (result == null) return new HashMap<String, String>();
+            return result;
+        } catch (Exception e) {
+            return new HashMap<String, String>();
+        }
     }
 }
 
