@@ -491,7 +491,7 @@ public final class htmlFilterWriter extends Writer {
 
     private static boolean binaryHint(char c) {
         // space, punctiation and symbols, letters and digits (ASCII/latin)
-        if (c > 31 && c < 128) return false;
+        if (c >= 31 && c < 128) return false;
         //  8 = backspace
         //  9 = horizontal tab
         // 10 = new line (line feed)
@@ -501,7 +501,7 @@ public final class htmlFilterWriter extends Writer {
         if (c > 7 && c <= 13) return false;
         //if (Character.isLetterOrDigit(c)) return false;
 //      return false;
-      System.out.println("BINARY HINT: " + (int) c);
+//      System.err.println("BINARY HINT: " + (int) c);
         return true;
     }
 
