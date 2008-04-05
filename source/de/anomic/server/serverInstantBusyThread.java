@@ -125,7 +125,6 @@ public final class serverInstantBusyThread extends serverAbstractBusyThread impl
             this.terminate(false);
         } catch (InvocationTargetException e) {
             String targetException = e.getTargetException().getMessage();
-            e.getTargetException().printStackTrace();
             e.printStackTrace();
             if ((targetException != null) && ((targetException.indexOf("heap space") > 0) || (targetException.indexOf("NullPointerException") > 0))) e.getTargetException().printStackTrace();
             serverLog.logSevere("BUSYTHREAD", "Runtime Error in serverInstantThread.job, thread '" + this.getName() + "': " + e.getMessage() + "; target exception: " + targetException, e.getTargetException());

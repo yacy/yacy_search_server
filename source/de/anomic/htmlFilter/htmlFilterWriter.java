@@ -501,7 +501,7 @@ public final class htmlFilterWriter extends Writer {
         if (c > 7 && c <= 13) return false;
         //if (Character.isLetterOrDigit(c)) return false;
 //      return false;
-//      System.out.println("BINARY HINT: " + (int) b);
+      System.out.println("BINARY HINT: " + (int) c);
         return true;
     }
 
