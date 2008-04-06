@@ -301,7 +301,7 @@ public final class plasmaWordIndex implements indexRI {
                 wordHash = ram.bestFlushWordHash();
                 
                 // move one container from ram to flush list
-                c = ram.deleteContainer(wordHash);
+                if (wordHash == null) c = null; else c = ram.deleteContainer(wordHash);
             }
             if (c != null) containerList.add(c);
         }
