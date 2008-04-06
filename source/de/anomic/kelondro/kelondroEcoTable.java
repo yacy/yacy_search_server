@@ -41,7 +41,7 @@ import de.anomic.kelondro.kelondroRow.Entry;
 import de.anomic.server.serverMemory;
 
 /*
- * The EcoIndex builts upon the EcoFS and tries to reduce the number of IO requests that the
+ * The EcoIndex builds upon the EcoFS and tries to reduce the number of IO requests that the
  * EcoFS must do to a minimum. In best cases, no IO has to be done for read operations (complete database shadow in RAM)
  * and a rare number of write IO operations must be done for a large number of table-writings (using the write buffer of EcoFS)
  * To make the EcoIndex scalable in question of available RAM, there are two elements that must be scalable:

@@ -552,6 +552,7 @@ public class kelondroEcoFS {
             try {
                 return stream != null && stream.available() > 0;
             } catch (IOException e) {
+                e.printStackTrace();
                 return false;
             }
         }
@@ -571,6 +572,7 @@ public class kelondroEcoFS {
                 }
                 return chunk;
             } catch (IOException e) {
+                e.printStackTrace();
                 this.stream = null;
                 return null;
             }
