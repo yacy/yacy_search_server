@@ -24,6 +24,7 @@
 
 package de.anomic.kelondro;
 
+import java.io.DataInput;
 import java.io.DataInputStream;
 import java.io.IOException;
 import java.util.Date;
@@ -72,7 +73,7 @@ public class kelondroRowSet extends kelondroRowCollection implements kelondroInd
         }
     }
     
-    public static kelondroRowSet importRowSet(DataInputStream is, kelondroRow rowdef) throws IOException {
+    public static kelondroRowSet importRowSet(DataInput is, kelondroRow rowdef) throws IOException {
         byte[] byte2 = new byte[2];
         byte[] byte4 = new byte[4];
         is.readFully(byte4); int size = (int) kelondroNaturalOrder.decodeLong(byte4);

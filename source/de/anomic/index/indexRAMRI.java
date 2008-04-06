@@ -28,30 +28,17 @@ package de.anomic.index;
 
 import java.io.File;
 import java.io.IOException;
-import java.util.Collections;
-import java.util.Iterator;
-import java.util.Map;
 import java.util.Set;
-import java.util.SortedMap;
-import java.util.TreeMap;
 
-import de.anomic.kelondro.kelondroBase64Order;
-import de.anomic.kelondro.kelondroBufferedRA;
-import de.anomic.kelondro.kelondroByteOrder;
 import de.anomic.kelondro.kelondroCloneableIterator;
-import de.anomic.kelondro.kelondroException;
-import de.anomic.kelondro.kelondroFixedWidthArray;
 import de.anomic.kelondro.kelondroMScoreCluster;
 import de.anomic.kelondro.kelondroRow;
-import de.anomic.kelondro.kelondroRow.EntryIndex;
 import de.anomic.server.serverMemory;
 import de.anomic.server.logging.serverLog;
-import de.anomic.yacy.yacySeedDB;
 
 public final class indexRAMRI implements indexRI, indexRIReader {
 
     // class variables
-    protected SortedMap<String, indexContainer> cache; // wordhash-container
     private final kelondroMScoreCluster<String> hashScore;
     private final kelondroMScoreCluster<String> hashDate;
     private long  initTime;
@@ -59,10 +46,10 @@ public final class indexRAMRI implements indexRI, indexRIReader {
     public  int   cacheReferenceCountLimit;
     public  long  cacheReferenceAgeLimit;
     private final serverLog log;
-    private File indexArrayFile, indexHeapFile;
-    private kelondroRow payloadrow;
-    private kelondroRow bufferStructureBasis;
+    private File indexHeapFile;
+    private indexContainerHeap heap;
     
+    @SuppressWarnings("unchecked")
     public indexRAMRI(File databaseRoot, kelondroRow payloadrow, int wCacheReferenceCountLimitInit, long wCacheReferenceAgeLimitInit, String oldArrayName, String newHeapName, serverLog log) {
 
         // creates a new index cache
@@ -74,36 +61,33 @@ public final class indexRAMRI implements indexRI, indexRIReader {
         this.cacheReferenceCountLimit = wCacheReferenceCountLimitInit;
         this.cacheReferenceAgeLimit = wCacheReferenceAgeLimitInit;
         this.log = log;
-        this.indexArrayFile = new File(databaseRoot, oldArrayName);
+        File indexArrayFile = new File(databaseRoot, oldArrayName);
         this.indexHeapFile = new File(databaseRoot, newHeapName);
-        this.payloadrow = payloadrow;
-        this.bufferStructureBasis = new kelondroRow(
-                "byte[] wordhash-" + yacySeedDB.commonHashLength + ", " +
-                "Cardinal occ-4 {b256}, " +
-                "Cardinal time-8 {b256}, " +
-                "byte[] urlprops-" + payloadrow.objectsize,
-                kelondroBase64Order.enhancedCoder, 0);
+        this.heap = new indexContainerHeap(payloadrow, log);
         
         // read in dump of last session
         if (indexArrayFile.exists()) {
-            this.cache = Collections.synchronizedSortedMap(new TreeMap<String, indexContainer>(new kelondroByteOrder.StringOrder(payloadrow.getOrdering())));
             try {
-                restoreArray();
+                heap.restoreArray(indexArrayFile);
+                for (indexContainer ic : (Iterable<indexContainer>) heap.wordContainers(null, false)) {
+                    this.hashDate.setScore(ic.getWordHash(), intTime(ic.lastWrote()));
+                    this.hashScore.setScore(ic.getWordHash(), ic.size());
+                }
             } catch (IOException e){
                 log.logSevere("unable to restore cache dump: " + e.getMessage(), e);
             }
             indexArrayFile.delete();
             if (indexArrayFile.exists()) log.logSevere("cannot delete old array file: " + indexArrayFile.toString() + "; please delete manually");
         } else if (indexHeapFile.exists()) {
-            this.cache = null;
             try {
-                //indexContainerHeap.indexHeap(this.indexHeapFile, payloadrow, log); // for testing
-                this.cache = indexContainerHeap.restoreHeap(this.indexHeapFile, payloadrow, log);
+                heap.restoreHeap(indexHeapFile);
+                for (indexContainer ic : (Iterable<indexContainer>) heap.wordContainers(null, false)) {
+                    this.hashDate.setScore(ic.getWordHash(), intTime(ic.lastWrote()));
+                    this.hashScore.setScore(ic.getWordHash(), ic.size());
+                }
             } catch (IOException e){
                 log.logSevere("unable to restore cache dump: " + e.getMessage(), e);
             }
-        } else {
-            this.cache = Collections.synchronizedSortedMap(new TreeMap<String, indexContainer>(new kelondroByteOrder.StringOrder(payloadrow.getOrdering())));
         }
     }
 
@@ -118,57 +102,6 @@ public final class indexRAMRI implements indexRI, indexRIReader {
         if (entries == null) return 0;
         return entries.updated();
     }
-    
-    private long restoreArray() throws IOException {
-        if (!(indexArrayFile.exists())) return 0;
-        kelondroFixedWidthArray dumpArray;
-        kelondroBufferedRA readBuffer = null;
-        dumpArray = new kelondroFixedWidthArray(indexArrayFile, bufferStructureBasis, 0);
-        log.logInfo("started restore of ram cache '" + indexArrayFile.getName() + "', " + dumpArray.size() + " word/URL relations");
-        long startTime = System.currentTimeMillis();
-        long messageTime = System.currentTimeMillis() + 5000;
-        long urlCount = 0, urlsPerSecond = 0;
-        try {
-            synchronized (cache) {
-                Iterator<EntryIndex> i = dumpArray.contentRows(-1);
-                String wordHash;
-                //long creationTime;
-                indexRWIRowEntry wordEntry;
-                kelondroRow.EntryIndex row;
-                while (i.hasNext()) {
-                    // get out one entry
-                    row = i.next();
-                    if ((row == null) || (row.empty(0)) || (row.empty(3))) continue;
-                    wordHash = row.getColString(0, "UTF-8");
-                    //creationTime = kelondroRecords.bytes2long(row[2]);
-                    wordEntry = new indexRWIRowEntry(row.getColBytes(3));
-                    // store to cache
-                    addEntry(wordHash, wordEntry, startTime, false);
-                    urlCount++;
-                    // protect against memory shortage
-                    //while (serverMemory.free() < 1000000) {flushFromMem(); java.lang.System.gc();}
-                    // write a log
-                    if (System.currentTimeMillis() > messageTime) {
-                        serverMemory.gc(1000, "indexRAMRI, for better statistic-2"); // for better statistic - thq
-                        urlsPerSecond = 1 + urlCount * 1000 / (1 + System.currentTimeMillis() - startTime);
-                        log.logInfo("restoring status: " + urlCount + " urls done, " + ((dumpArray.size() - urlCount) / urlsPerSecond) + " seconds remaining, free mem = " + (serverMemory.free() / 1024 / 1024) + "MB");
-                        messageTime = System.currentTimeMillis() + 5000;
-                    }
-                }
-            }
-            if (readBuffer != null) readBuffer.close();
-            dumpArray.close();
-            dumpArray = null;
-            log.logInfo("finished restore: " + cache.size() + " words in " + ((System.currentTimeMillis() - startTime) / 1000) + " seconds");
-        } catch (kelondroException e) {
-            // restore failed
-            log.logSevere("failed restore of indexCache array dump: " + e.getMessage(), e);
-        } finally {
-            if (dumpArray != null) try {dumpArray.close();}catch(Exception e){}
-        }
-        return urlCount;
-    }
-    
     
     // cache settings
     public int maxURLinCache() {
@@ -195,11 +128,11 @@ public final class indexRAMRI implements indexRI, indexRIReader {
     }
     
     public int size() {
-        return cache.size();
+        return heap.size();
     }
 
     public synchronized int indexSize(String wordHash) {
-        indexContainer cacheIndex = (indexContainer) cache.get(wordHash);
+        indexContainer cacheIndex = heap.get(wordHash);
         if (cacheIndex == null) return 0;
         return cacheIndex.size();
     }
@@ -208,56 +141,12 @@ public final class indexRAMRI implements indexRI, indexRIReader {
         // we return an iterator object that creates top-level-clones of the indexContainers
         // in the cache, so that manipulations of the iterated objects do not change
         // objects in the cache.
-        return new wordContainerIterator(startWordHash, rot);
+        return heap.wordContainers(startWordHash, rot);
     }
 
-    public class wordContainerIterator implements kelondroCloneableIterator<indexContainer> {
-
-        // this class exists, because the wCache cannot be iterated with rotation
-        // and because every indexContainer Object that is iterated must be returned as top-level-clone
-        // so this class simulates wCache.tailMap(startWordHash).values().iterator()
-        // plus the mentioned features
-        
-        private boolean rot;
-        private Iterator<indexContainer> iterator;
-        
-        public wordContainerIterator(String startWordHash, boolean rot) {
-            this.rot = rot;
-            this.iterator = (startWordHash == null) ? cache.values().iterator() : cache.tailMap(startWordHash).values().iterator();
-            // The collection's iterator will return the values in the order that their corresponding keys appear in the tree.
-        }
-        
-        public wordContainerIterator clone(Object secondWordHash) {
-            return new wordContainerIterator((String) secondWordHash, rot);
-        }
-        
-        public boolean hasNext() {
-            if (rot) return true;
-            return iterator.hasNext();
-        }
-
-        public indexContainer next() {
-            if (iterator.hasNext()) {
-                return ((indexContainer) iterator.next()).topLevelClone();
-            } else {
-                // rotation iteration
-                if (rot) {
-                    iterator = cache.values().iterator();
-                    return ((indexContainer) iterator.next()).topLevelClone();
-                } else {
-                    return null;
-                }
-            }
-        }
-
-        public void remove() {
-            iterator.remove();
-        }
-        
-    }
 
     public synchronized String maxScoreWordHash() {
-        if (cache.size() == 0) return null;
+        if (heap.size() == 0) return null;
         try {
             return (String) hashScore.getMaxObject();
         } catch (Exception e) {
@@ -271,31 +160,34 @@ public final class indexRAMRI implements indexRI, indexRIReader {
         // we have 2 different methods to find a good hash:
         // - the oldest entry in the cache
         // - the entry with maximum count
-        if (cache.size() == 0) return null;
+        if (heap.size() == 0) return null;
         try {
-                String hash = null;
-                int count = hashScore.getMaxScore();
-                if ((count >= cacheReferenceCountLimit) &&
-                    ((hash = (String) hashScore.getMaxObject()) != null)) {
-                    // we MUST flush high-score entries, because a loop deletes entries in cache until this condition fails
-                    // in this cache we MUST NOT check wCacheMinAge
-                    return hash;
-                }
-                long oldestTime = longEmit(hashDate.getMinScore());
-                if (((System.currentTimeMillis() - oldestTime) > cacheReferenceAgeLimit) &&
-                    ((hash = (String) hashDate.getMinObject()) != null)) {
-                    // flush out-dated entries
-                    return hash;
-                }
-                // cases with respect to memory situation
-                if (serverMemory.free() < 100000) {
-                    // urgent low-memory case
-                    hash = (String) hashScore.getMaxObject(); // flush high-score entries (saves RAM)
-                } else {
-                    // not-efficient-so-far case. cleans up unnecessary cache slots
-                    hash = (String) hashDate.getMinObject(); // flush oldest entries
-                }
+            String hash = null;
+            int count = hashScore.getMaxScore();
+            if ((count >= cacheReferenceCountLimit) &&
+                ((hash = (String) hashScore.getMaxObject()) != null)) {
+                // we MUST flush high-score entries, because a loop deletes entries in cache until this condition fails
+                // in this cache we MUST NOT check wCacheMinAge
                 return hash;
+            }
+            long oldestTime = longEmit(hashDate.getMinScore());
+            if (((System.currentTimeMillis() - oldestTime) > cacheReferenceAgeLimit) &&
+                ((hash = (String) hashDate.getMinObject()) != null)) {
+                // flush out-dated entries
+                return hash;
+            }
+            // cases with respect to memory situation
+            if (serverMemory.free() < 100000) {
+                // urgent low-memory case
+                hash = (String) hashScore.getMaxObject(); // flush high-score entries (saves RAM)
+            } else {
+                // not-efficient-so-far case. cleans up unnecessary cache slots
+                hash = (String) hashDate.getMinObject(); // flush oldest entries
+            }
+            if (hash == null) {
+                heap.wordContainers(null, false).next();
+            }
+            return hash;
         } catch (Exception e) {
             log.logSevere("flushFromMem: " + e.getMessage(), e);
         }
@@ -311,11 +203,11 @@ public final class indexRAMRI implements indexRI, indexRIReader {
     }
     
     public boolean hasContainer(String wordHash) {
-        return cache.containsKey(wordHash);
+        return heap.has(wordHash);
     }
     
     public int sizeContainer(String wordHash) {
-        indexContainer c = (indexContainer) cache.get(wordHash);
+        indexContainer c = heap.get(wordHash);
         return (c == null) ? 0 : c.size();
     }
 
@@ -323,7 +215,7 @@ public final class indexRAMRI implements indexRI, indexRIReader {
         if (wordHash == null) return null;
         
         // retrieve container
-        indexContainer container = (indexContainer) cache.get(wordHash);
+        indexContainer container = heap.get(wordHash);
         
         // We must not use the container from cache to store everything we find,
         // as that container remains linked to in the cache and might be changed later
@@ -339,22 +231,21 @@ public final class indexRAMRI implements indexRI, indexRIReader {
 
     public synchronized indexContainer deleteContainer(String wordHash) {
         // returns the index that had been deleted
-        indexContainer container = (indexContainer) cache.remove(wordHash);
+        indexContainer container = heap.delete(wordHash);
         hashScore.deleteScore(wordHash);
         hashDate.deleteScore(wordHash);
         return container;
     }
 
     public synchronized boolean removeEntry(String wordHash, String urlHash) {
-        indexContainer c = (indexContainer) cache.get(wordHash);
-        if ((c != null) && (c.remove(urlHash) != null)) {
-            // removal successful
-            if (c.size() == 0) {
-                deleteContainer(wordHash);
-            } else {
-                cache.put(wordHash, c);
+        boolean removed = heap.removeReference(wordHash, urlHash);
+        if (removed) {
+            if (heap.has(wordHash)) {
                 hashScore.decScore(wordHash);
                 hashDate.setScore(wordHash, intTime(System.currentTimeMillis()));
+            } else {
+                hashScore.deleteScore(wordHash);
+                hashDate.deleteScore(wordHash);
             }
             return true;
         }
@@ -363,76 +254,36 @@ public final class indexRAMRI implements indexRI, indexRIReader {
     
     public synchronized int removeEntries(String wordHash, Set<String> urlHashes) {
         if (urlHashes.size() == 0) return 0;
-        indexContainer c = (indexContainer) cache.get(wordHash);
-        int count;
-        if ((c != null) && ((count = c.removeEntries(urlHashes)) > 0)) {
+        int c = heap.removeReferences(wordHash, urlHashes);
+        if (c > 0) {
             // removal successful
-            if (c.size() == 0) {
-                deleteContainer(wordHash);
-            } else {
-                cache.put(wordHash, c);
-                hashScore.setScore(wordHash, c.size());
+            if (heap.has(wordHash)) {
+                hashScore.decScore(wordHash);
                 hashDate.setScore(wordHash, intTime(System.currentTimeMillis()));
             }
-            return count;
+            return c;
         }
         return 0;
     }
  
     public synchronized int tryRemoveURLs(String urlHash) {
-        // this tries to delete an index from the cache that has this
-        // urlHash assigned. This can only work if the entry is really fresh
-        // Such entries must be searched in the latest entries
-        int delCount = 0;
-            Iterator<Map.Entry<String, indexContainer>> i = cache.entrySet().iterator();
-            Map.Entry<String, indexContainer> entry;
-            String wordhash;
-            indexContainer c;
-            while (i.hasNext()) {
-                entry = i.next();
-                wordhash = entry.getKey();
-            
-                // get container
-                c = entry.getValue();
-                if (c.remove(urlHash) != null) {
-                    if (c.size() == 0) {
-                        i.remove();
-                    } else {
-                        cache.put(wordhash, c); // superfluous?
-                    }
-                    delCount++;
-                }
-            }
-        return delCount;
+        return heap.removeReference(urlHash);
     }
     
     public synchronized void addEntries(indexContainer container) {
         // this puts the entries into the cache, not into the assortment directly
-        int added = 0;
         if ((container == null) || (container.size() == 0)) return;
 
         // put new words into cache
-        String wordHash = container.getWordHash();
-        indexContainer entries = (indexContainer) cache.get(wordHash); // null pointer exception? wordhash != null! must be cache==null
-        if (entries == null) {
-            entries = container.topLevelClone();
-            added = entries.size();
-        } else {
-            added = entries.putAllRecent(container);
-        }
+        int added = heap.add(container);
         if (added > 0) {
-            cache.put(wordHash, entries);
-            hashScore.addScore(wordHash, added);
-            hashDate.setScore(wordHash, intTime(System.currentTimeMillis()));
+            hashScore.addScore(container.getWordHash(), added);
+            hashDate.setScore(container.getWordHash(), intTime(System.currentTimeMillis()));
         }
-        entries = null;
     }
 
     public synchronized void addEntry(String wordHash, indexRWIRowEntry newEntry, long updateTime, boolean dhtCase) {
-        indexContainer container = (indexContainer) cache.get(wordHash);
-        if (container == null) container = new indexContainer(wordHash, this.payloadrow, 1);
-        container.put(newEntry);
-        cache.put(wordHash, container);
+        heap.addEntry(wordHash, newEntry);
         hashScore.incScore(wordHash);
         hashDate.setScore(wordHash, intTime(updateTime));
     }
@@ -440,7 +291,7 @@ public final class indexRAMRI implements indexRI, indexRIReader {
     public synchronized void close() {
         // dump cache
         try {
-            indexContainerHeap.dumpHeap(this.indexHeapFile, this.payloadrow, this.cache, this.log);
+            heap.dumpHeap(this.indexHeapFile);
         } catch (IOException e){
             log.logSevere("unable to dump cache: " + e.getMessage(), e);
         }
