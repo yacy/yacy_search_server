@@ -297,7 +297,6 @@ public class Network {
                         case 3 : e = yacyCore.seedDB.seedsSortedPotential(post.get("order", "down").equals("up"), post.get("sort", yacySeed.LASTSEEN)); break;
                         default: break;
                     }
-                    int p;
                     String startURL;
                     Map<String, String> wikiMap;
                     Map<String, String> blogMap;
@@ -381,8 +380,7 @@ public class Network {
                                 location = HttpClient.generateLocation();
                             } else {
                                userAgent = yacyCore.peerActions.getUserAgent(seed.getIP());
-                               p = userAgent.lastIndexOf(';');
-                               location = (p > 0) ? userAgent.substring(p + 1, userAgent.length() - 1).trim(): "";
+                               location = parseLocationInUserAgent(userAgent);
                             }
                             prop.put(STR_TABLE_LIST + conCount + "_location", location);
                             if (complete) {
@@ -488,5 +486,41 @@ public class Network {
 
         // return rewrite properties
         return prop;
+    }
+
+    /**
+     * gets the location out of the user agent
+     * 
+     * location must be after last ; and before first )
+     * 
+     * @param userAgent in form "useragentinfo (some params; _location_) additional info"
+     * @return
+     */
+    private static String parseLocationInUserAgent(final String userAgent) {
+        final String location;
+        
+        final int firstOpenParenthesis = userAgent.indexOf('(');
+        final int lastSemicolon = userAgent.lastIndexOf(';');
+        final int firstClosedParenthesis = userAgent.indexOf(')');
+        
+        if(lastSemicolon > 0) {
+            // ; Location)
+            location = (firstClosedParenthesis > 0) ? userAgent.substring(lastSemicolon, firstClosedParenthesis).trim()
+                    : userAgent.substring(lastSemicolon + 1).trim();
+        } else {
+            if(firstOpenParenthesis > 0) {
+                if(firstClosedParenthesis > 0) {
+                    // (Location)
+                    location = userAgent.substring(firstOpenParenthesis, firstClosedParenthesis).trim();
+                } else {
+                    // ( Location <end>
+                    location = userAgent.substring(firstOpenParenthesis).trim();
+                }
+            } else {
+                location = "";
+            }
+        }
+        
+        return location;
     }
 }
