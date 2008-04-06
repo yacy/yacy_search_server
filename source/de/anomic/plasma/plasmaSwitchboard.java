@@ -1643,7 +1643,7 @@ public final class plasmaSwitchboard extends serverAbstractSwitch<plasmaSwitchbo
          * a) the user has configured to use the htcache or
          * b) the content should be indexed
          * ========================================================================= */        
-        if ((entry.profile().storeHTCache()) || (doIndexing && isSupportedContent)) {
+        if (((entry.profile() != null) && (entry.profile().storeHTCache())) || (doIndexing && isSupportedContent)) {
             // store response header            
             if (entry.writeResourceInfo()) {
                 this.log.logInfo("WROTE HEADER for " + entry.cacheFile());

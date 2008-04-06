@@ -95,10 +95,10 @@ public class kelondroEcoTable implements kelondroIndex {
         
         try {
             // open an existing table file
-            this.file = new kelondroBufferedEcoFS(new kelondroEcoFS(tablefile, rowdef.objectsize), this.buffersize);
-        
+            int fileSize = (int) tableSize(tablefile, rowdef.objectsize);
+            
             // initialize index and copy table
-            int  records = (int) Math.max(file.size(), initialSpace);
+            int  records = (int) Math.max(fileSize, initialSpace);
             long neededRAM4table = ((long) records) * (((long) rowdef.objectsize) + 4L) * 3L;
             table = ((neededRAM4table < maxarraylength) &&
                      ((useTailCache == tailCacheForceUsage) ||
@@ -118,52 +118,69 @@ public class kelondroEcoTable implements kelondroIndex {
             System.out.println("*** DEBUG " + tablefile + ": EcoTable " + tablefile.toString() + " has table copy " + ((table == null) ? "DISABLED" : "ENABLED"));
 
             // read all elements from the file into the copy table
-            byte[] record = new byte[rowdef.objectsize];
-            byte[] key = new byte[rowdef.primaryKeyLength];
-            int fs = (int) file.size();
             System.out.print("*** initializing RAM index for EcoTable " + tablefile.getName() + ":");
-            for (int i = 0; i < fs; i++) {
-                // read entry
-                file.get(i, record, 0);
-            
-                // write the key into the index table
-                System.arraycopy(record, 0, key, 0, rowdef.primaryKeyLength);
-                index.addi(key, i);
-            
-                // write the tail into the table
-                if (table != null) table.addUnique(taildef.newEntry(record, rowdef.primaryKeyLength, true));
+            int i = 0;
+            byte[] key;
+            if (table == null) {
+                Iterator<byte[]> ki = keyIterator(tablefile, rowdef);
+                while (ki.hasNext()) {
+                    key = ki.next();
                 
-                if ((i % 10000) == 0) {
-                    System.out.print('.');
-                    System.out.flush();
+                    // write the key into the index table
+                    assert key != null;
+                    if (key == null) {i++; continue;}
+                    index.addi(key, i++);
+            
+                    if ((i % 10000) == 0) {
+                        System.out.print('.');
+                        System.out.flush();
+                    }
+                }
+            } else {
+                byte[] record;
+                key = new byte[rowdef.primaryKeyLength];
+                Iterator<byte[]> ri = new kelondroEcoFS.ChunkIterator(tablefile, rowdef.objectsize, rowdef.objectsize);
+                while (ri.hasNext()) {
+                    record = ri.next();
+                    assert record != null;
+                    if (record == null) {i++; continue;}
+                    System.arraycopy(record, 0, key, 0, rowdef.primaryKeyLength);
+                    
+                    // write the key into the index table
+                    index.addi(key, i++);
+            
+                    // write the tail into the table
+                    table.addUnique(taildef.newEntry(record, rowdef.primaryKeyLength, true));
+                
+                    if ((i % 10000) == 0) {
+                        System.out.print('.');
+                        System.out.flush();
+                    }
                 }
             }
+            
+            // check consistency
             System.out.print(" -ordering- ..");
             System.out.flush();
-            // check consistency
+            this.file = new kelondroBufferedEcoFS(new kelondroEcoFS(tablefile, rowdef.objectsize), this.buffersize);
             ArrayList<Integer[]> doubles = index.removeDoubles();
             System.out.println(" -removed " + doubles.size() + " doubles- done.");
             if (doubles.size() > 0) {
                 System.out.println("DEBUG " + tablefile + ": WARNING - EcoTable " + tablefile + " has " + doubles.size() + " doubles");
                 // from all the doubles take one, put it back to the index and remove the others from the file
-                Iterator<Integer[]> i = doubles.iterator();
-                Integer[] ds;
                 // first put back one element each
-                while (i.hasNext()) {
-                    ds = i.next();
+                byte[] record = new byte[rowdef.objectsize];
+                key = new byte[rowdef.primaryKeyLength];
+                for (Integer[] ds: doubles) {
                     file.get(ds[0].longValue(), record, 0);
                     System.arraycopy(record, 0, key, 0, rowdef.primaryKeyLength);
                     index.addi(key, ds[0].intValue());
                 }
                 // then remove the other doubles by removing them from the table, but do a re-indexing while doing that
                 // first aggregate all the delete positions because the elements from the top positions must be removed first
-                i = doubles.iterator();
                 TreeSet<Integer> delpos = new TreeSet<Integer>();
-                while (i.hasNext()) {
-                    ds = i.next();
-                    for (int j = 1; j < ds.length; j++) {
-                        delpos.add(ds[j]);
-                    }
+                for (Integer[] ds: doubles) {
+                    for (int j = 1; j < ds.length; j++) delpos.add(ds[j]);
                 }
                 // now remove the entries in a sorted way (top-down)
                 Integer top;
@@ -189,6 +206,18 @@ public class kelondroEcoTable implements kelondroIndex {
         
         // track this table
         tableTracker.put(tablefile.toString(), this);
+    }
+    
+    /**
+     * a KeyIterator
+     * @param file: the eco-file
+     * @param rowdef: the row definition
+     * @throws FileNotFoundException 
+     * @return an iterator for all keys in the file
+     */
+    public Iterator<byte[]> keyIterator(File file, kelondroRow rowdef) throws FileNotFoundException {
+        assert rowdef.primaryKeyIndex == 0;
+        return new kelondroEcoFS.ChunkIterator(file, rowdef.objectsize, rowdef.primaryKeyLength);
     }
     
     public static long tableSize(File tablefile, int recordsize) {

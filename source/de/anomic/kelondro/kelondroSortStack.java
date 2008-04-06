@@ -78,7 +78,7 @@ public class kelondroSortStack<E> {
     
     public synchronized stackElement top() {
         // returns the element that is currently on top of the stack
-        if (this.onstack.size() == 0) return null;
+        if (this.onstack.isEmpty()) return null;
         Long w = this.onstack.firstKey();
         E element = this.onstack.get(w);
         return new stackElement(element, w);
@@ -88,7 +88,7 @@ public class kelondroSortStack<E> {
         // returns the element that is currently on top of the stack
         // it is removed and added to the offstack list
         // this is exactly the same as element(offstack.size())
-        if (this.onstack.size() == 0) return null;
+        if (this.onstack.isEmpty()) return null;
         Long w = this.onstack.firstKey();
         E element = this.onstack.remove(w);
         stackElement se = new stackElement(element, w);

@@ -259,7 +259,7 @@ public class result {
                 prop.put("excluded", "0");
             }
 
-            if (prop == null || prop.size() == 0) {
+            if (prop == null || prop.isEmpty()) {
                 if (post.get("search", "").length() < 3) {
                     prop.put("num-results", "2"); // no results - at least 3 chars
                 } else {

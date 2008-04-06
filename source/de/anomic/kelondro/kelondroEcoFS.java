@@ -24,11 +24,15 @@
 
 package de.anomic.kelondro;
 
+import java.io.BufferedInputStream;
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.RandomAccessFile;
+import java.util.Iterator;
 
 /**
  * The EcoFS is a flat file with records of fixed length. The file does not contain
@@ -117,7 +121,7 @@ public class kelondroEcoFS {
         assert size % recordsize == 0;
         return size / (long) recordsize;
     }
-
+    
     /**
      * @return the number of records in file plus number of records in buffer
      * @throws IOException
@@ -520,6 +524,62 @@ public class kelondroEcoFS {
         // check if file should shrink
         assert this.buffercount == 0;
         this.raf.setLength((long) (this.size() - 1) * (long) this.recordsize);
+    }
+    
+    public static class ChunkIterator implements Iterator<byte[]> {
+
+        private int recordsize, chunksize;
+        private InputStream stream;
+        
+        /**
+         * create a ChunkIterator
+         * a ChunkIterator uses a BufferedInputStream to iterate through the file
+         * and is therefore a fast option to get all elements in the file as a sequence
+         * @param file: the eco-file
+         * @param recordsize: the size of the elements in the file
+         * @param chunksize: the size of the chunks that are returned by next(). remaining bytes until the lenght of recordsize are skipped
+         * @throws FileNotFoundException 
+         */
+        public ChunkIterator(File file, int recordsize, int chunksize) throws FileNotFoundException {
+            assert (file.exists());
+            assert file.length() % recordsize == 0;
+            this.recordsize = recordsize;
+            this.chunksize = chunksize;
+            this.stream = new BufferedInputStream(new FileInputStream(file), 64 * 1024);
+        }
+        
+        public boolean hasNext() {
+            try {
+                return stream != null && stream.available() > 0;
+            } catch (IOException e) {
+                return false;
+            }
+        }
+
+        public byte[] next() {
+            byte[] chunk = new byte[chunksize];
+            int r;
+            try {
+                // read the chunk
+                r = this.stream.read(chunk);
+                while (r < chunksize) {
+                    r += this.stream.read(chunk, r, chunksize - r);
+                }
+                // skip remaining bytes
+                while (r < recordsize) {
+                    r += this.stream.skip(recordsize - r);
+                }
+                return chunk;
+            } catch (IOException e) {
+                this.stream = null;
+                return null;
+            }
+        }
+
+        public void remove() {
+            throw new UnsupportedOperationException();
+        }
+        
     }
     
     /**
