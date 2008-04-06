@@ -25,12 +25,12 @@
 package de.anomic.kelondro;
 
 import java.io.BufferedInputStream;
+import java.io.DataInputStream;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
-import java.io.InputStream;
 import java.io.RandomAccessFile;
 import java.util.Iterator;
 
@@ -529,7 +529,7 @@ public class kelondroEcoFS {
     public static class ChunkIterator implements Iterator<byte[]> {
 
         private int recordsize, chunksize;
-        private InputStream stream;
+        private DataInputStream stream;
         
         /**
          * create a ChunkIterator
@@ -545,7 +545,7 @@ public class kelondroEcoFS {
             assert file.length() % recordsize == 0;
             this.recordsize = recordsize;
             this.chunksize = chunksize;
-            this.stream = new BufferedInputStream(new FileInputStream(file), 64 * 1024);
+            this.stream = new DataInputStream(new BufferedInputStream(new FileInputStream(file), 64 * 1024));
         }
         
         public boolean hasNext() {
@@ -562,11 +562,9 @@ public class kelondroEcoFS {
             int r;
             try {
                 // read the chunk
-                r = this.stream.read(chunk);
-                while (r < chunksize) {
-                    r += this.stream.read(chunk, r, chunksize - r);
-                }
+                this.stream.readFully(chunk);
                 // skip remaining bytes
+                r = chunksize;
                 while (r < recordsize) {
                     r += this.stream.skip(recordsize - r);
                 }
