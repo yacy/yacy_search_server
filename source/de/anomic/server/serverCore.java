@@ -443,13 +443,13 @@ public final class serverCore extends serverAbstractBusyThread implements server
                 controlSocket.setSoTimeout(this.timeout);
                 // keep-alive: if set to true, the server frequently sends keep-alive packets to the client which the client must respond to
                 // we set this to false to prevent that a missing ack from the client forces the server to close the connection
-                controlSocket.setKeepAlive(false); 
+                // controlSocket.setKeepAlive(false); 
                 
                 // disable Nagle's algorithm (waiting for more data until packet is full)
-                controlSocket.setTcpNoDelay(true);
+                // controlSocket.setTcpNoDelay(true);
                 
                 // set a non-zero linger, that means that a socket.close() blocks until all data is written
-                controlSocket.setSoLinger(false, this.timeout);
+                // controlSocket.setSoLinger(false, this.timeout);
                 
                 // ensure that MTU-48 is not exceeded to prevent that routers cannot handle large data packets
                 // read http://www.cisco.com/warp/public/105/38.shtml for explanation
@@ -478,6 +478,13 @@ public final class serverCore extends serverAbstractBusyThread implements server
     public synchronized void close() {
         // consuming the isInterrupted Flag. Otherwise we could not properly close the session pool
         Thread.interrupted();
+        
+        // shut down all busySessions
+        for (Session session: this.busySessions) {
+            try {session.notify();} catch (IllegalMonitorStateException e) {e.printStackTrace();}
+            try {session.notifyAll();} catch (IllegalMonitorStateException e) {e.printStackTrace();}
+            try {session.interrupt();} catch (SecurityException e ) {e.printStackTrace();}
+        }
         
         // closing the port forwarding channel
         if ((portForwardingEnabled) && (portForwarding != null) ) {

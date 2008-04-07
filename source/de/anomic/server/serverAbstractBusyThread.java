@@ -24,6 +24,8 @@
 
 package de.anomic.server;
 
+import java.net.SocketException;
+
 import de.anomic.server.logging.serverLog;
 
 public abstract class serverAbstractBusyThread extends serverAbstractThread implements serverBusyThread {
@@ -160,6 +162,9 @@ public abstract class serverAbstractBusyThread extends serverAbstractThread impl
                 timestamp = System.currentTimeMillis();
                 ratz((isBusy) ? this.busyPause : this.idlePause);
                 idletime += System.currentTimeMillis() - timestamp;
+            } catch (SocketException e) {
+                // in case that a socket is interrupted, this method must die silently (shutdown)
+                this.log.logFine("socket-job interrupted: " + e.getMessage());
             } catch (Exception e) {
                 // handle exceptions: thread must not die on any unexpected exceptions
                 // if the exception is too bad it should call terminate()

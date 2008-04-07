@@ -63,6 +63,8 @@ import java.util.regex.Pattern;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipOutputStream;
 
+import org.apache.commons.httpclient.MultiThreadedHttpConnectionManager;
+
 import de.anomic.data.translator;
 import de.anomic.http.HttpClient;
 import de.anomic.http.HttpFactory;
@@ -70,6 +72,7 @@ import de.anomic.http.HttpResponse;
 import de.anomic.http.httpHeader;
 import de.anomic.http.httpd;
 import de.anomic.http.HttpResponse.Saver;
+import de.anomic.http.JakartaCommonsHttpClient;
 import de.anomic.index.indexContainer;
 import de.anomic.index.indexRWIEntry;
 import de.anomic.index.indexRWIRowEntry;
@@ -423,6 +426,7 @@ public final class yacy {
                     serverLog.logConfig("SHUTDOWN", "caught termination signal");
                     server.terminate(false);
                     server.interrupt();
+                    server.close();
                     if (server.isAlive()) try {
                         // TODO only send request, don't read response (cause server is already down resulting in error)
                         yacyURL u = new yacyURL((server.withSSL()?"https":"http")+"://localhost:" + serverCore.getPortNr(port), null);
@@ -431,13 +435,18 @@ public final class yacy {
                     } catch (IOException ee) {
                         serverLog.logConfig("SHUTDOWN", "termination signal to server socket missed (server shutdown, ok)");
                     }
-
+                    JakartaCommonsHttpClient.closeAllConnections();
+                    MultiThreadedHttpConnectionManager.shutdownAll();
+                    
                     // idle until the processes are down
-                    while (server.isAlive()) {
+                    if (server.isAlive()) {
                         Thread.sleep(2000); // wait a while
+                        server.interrupt();
+                        MultiThreadedHttpConnectionManager.shutdownAll();
                     }
                     serverLog.logConfig("SHUTDOWN", "server has terminated");
                     sb.close();
+                    MultiThreadedHttpConnectionManager.shutdownAll();
                 }
             } catch (Exception e) {
                 serverLog.logSevere("STARTUP", "Unexpected Error: " + e.getClass().getName(),e);

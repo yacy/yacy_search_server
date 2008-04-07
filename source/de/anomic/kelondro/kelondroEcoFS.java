@@ -566,14 +566,16 @@ public class kelondroEcoFS {
 
         public byte[] next() {
             byte[] chunk = new byte[chunksize];
-            int r;
+            int r, s;
             try {
                 // read the chunk
                 this.stream.readFully(chunk);
                 // skip remaining bytes
                 r = chunksize;
                 while (r < recordsize) {
-                    r += this.stream.skip(recordsize - r);
+                    s = (int) this.stream.skip(recordsize - r);
+                    assert s != 0;
+                    r += s;
                 }
                 return chunk;
             } catch (IOException e) {

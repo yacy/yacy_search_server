@@ -80,7 +80,7 @@ public final class indexRAMRI implements indexRI, indexRIReader {
             if (indexArrayFile.exists()) log.logSevere("cannot delete old array file: " + indexArrayFile.toString() + "; please delete manually");
         } else if (indexHeapFile.exists()) {
             try {
-                heap.restoreHeap(indexHeapFile);
+                heap.initWriteMode(indexHeapFile);
                 for (indexContainer ic : (Iterable<indexContainer>) heap.wordContainers(null, false)) {
                     this.hashDate.setScore(ic.getWordHash(), intTime(ic.lastWrote()));
                     this.hashScore.setScore(ic.getWordHash(), ic.size());
@@ -88,6 +88,8 @@ public final class indexRAMRI implements indexRI, indexRIReader {
             } catch (IOException e){
                 log.logSevere("unable to restore cache dump: " + e.getMessage(), e);
             }
+        } else {
+            heap.initWriteMode();
         }
     }
 
@@ -291,7 +293,7 @@ public final class indexRAMRI implements indexRI, indexRIReader {
     public synchronized void close() {
         // dump cache
         try {
-            heap.dumpHeap(this.indexHeapFile);
+            heap.dump(this.indexHeapFile);
         } catch (IOException e){
             log.logSevere("unable to dump cache: " + e.getMessage(), e);
         }
