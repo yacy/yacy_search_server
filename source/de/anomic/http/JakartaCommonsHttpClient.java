@@ -99,9 +99,11 @@ public class JakartaCommonsHttpClient extends de.anomic.http.HttpClient {
 
     /**
      * constructor
+     * 
+     * with half-hour timeout
      */
     public JakartaCommonsHttpClient() {
-        super();
+        this(1800000, null, null);
     }
 
     /**
@@ -112,7 +114,7 @@ public class JakartaCommonsHttpClient extends de.anomic.http.HttpClient {
      * @param proxyConfig
      */
     public JakartaCommonsHttpClient(final int timeout, final httpHeader header, final httpRemoteProxyConfig proxyConfig) {
-        this();
+        super();
         setTimeout(timeout);
         setHeader(header);
         setProxy(proxyConfig);
