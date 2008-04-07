@@ -28,6 +28,7 @@ package de.anomic.http;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.zip.GZIPInputStream;
 
 import org.apache.commons.httpclient.Header;
 import org.apache.commons.httpclient.HttpMethod;
@@ -115,8 +116,12 @@ public class JakartaCommonsHttpResponse implements HttpResponse {
      * @throws IOException
      */
     public InputStream getDataAsStream() throws IOException {
+        InputStream inStream = method.getResponseBodyAsStream();
+        if(getResponseHeader().gzip()) {
+            inStream = new GZIPInputStream(inStream);
+        }
         // count bytes for overall http-statistics
-        return new httpdByteCountInputStream(method.getResponseBodyAsStream(), incomingAccountingName);
+        return new httpdByteCountInputStream(inStream, incomingAccountingName);
     }
 
     /*
