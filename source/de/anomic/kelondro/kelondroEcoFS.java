@@ -34,6 +34,8 @@ import java.io.IOException;
 import java.io.RandomAccessFile;
 import java.util.Iterator;
 
+import de.anomic.server.logging.serverLog;
+
 /**
  * The EcoFS is a flat file with records of fixed length. The file does not contain
  * any meta information and the first record starts right at file position 0
@@ -528,8 +530,10 @@ public class kelondroEcoFS {
     
     public static class ChunkIterator implements Iterator<byte[]> {
 
-        private int recordsize, chunksize;
+        private int recordsize, chunksize, chunkcounter;
         private DataInputStream stream;
+        private serverLog log;
+        private File file;
         
         /**
          * create a ChunkIterator
@@ -540,12 +544,15 @@ public class kelondroEcoFS {
          * @param chunksize: the size of the chunks that are returned by next(). remaining bytes until the lenght of recordsize are skipped
          * @throws FileNotFoundException 
          */
-        public ChunkIterator(File file, int recordsize, int chunksize) throws FileNotFoundException {
+        public ChunkIterator(File file, int recordsize, int chunksize, serverLog log) throws FileNotFoundException {
             assert (file.exists());
             assert file.length() % recordsize == 0;
             this.recordsize = recordsize;
             this.chunksize = chunksize;
+            this.chunkcounter = 0; // only for logging
             this.stream = new DataInputStream(new BufferedInputStream(new FileInputStream(file), 64 * 1024));
+            this.log = log;
+            this.file = file;
         }
         
         public boolean hasNext() {
@@ -570,7 +577,11 @@ public class kelondroEcoFS {
                 }
                 return chunk;
             } catch (IOException e) {
-                e.printStackTrace();
+                if (log == null) {
+                    serverLog.logWarning("kelondroEcoFS", "ChunkIterator for file " + file.toString() + " ended with " + e.getCause().getMessage() + " at chunk " + this.chunkcounter, e);
+                } else {
+                    log.logWarning("ChunkIterator for file " + file.toString() + " ended with " + e.getCause().getMessage() + " at chunk " + this.chunkcounter, e);
+                }
                 this.stream = null;
                 return null;
             }

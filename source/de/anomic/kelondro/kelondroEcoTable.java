@@ -139,7 +139,7 @@ public class kelondroEcoTable implements kelondroIndex {
             } else {
                 byte[] record;
                 key = new byte[rowdef.primaryKeyLength];
-                Iterator<byte[]> ri = new kelondroEcoFS.ChunkIterator(tablefile, rowdef.objectsize, rowdef.objectsize);
+                Iterator<byte[]> ri = new kelondroEcoFS.ChunkIterator(tablefile, rowdef.objectsize, rowdef.objectsize, null);
                 while (ri.hasNext()) {
                     record = ri.next();
                     assert record != null;
@@ -217,7 +217,7 @@ public class kelondroEcoTable implements kelondroIndex {
      */
     public Iterator<byte[]> keyIterator(File file, kelondroRow rowdef) throws FileNotFoundException {
         assert rowdef.primaryKeyIndex == 0;
-        return new kelondroEcoFS.ChunkIterator(file, rowdef.objectsize, rowdef.primaryKeyLength);
+        return new kelondroEcoFS.ChunkIterator(file, rowdef.objectsize, rowdef.primaryKeyLength, null);
     }
     
     public static long tableSize(File tablefile, int recordsize) {
