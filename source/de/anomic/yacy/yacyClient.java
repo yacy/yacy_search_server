@@ -248,7 +248,7 @@ public final class yacyClient {
      * @throws IOException
      */
     private static byte[] wput(final String url, String vhost, final Map<String, ?> post) throws IOException {
-        HttpClient client = HttpFactory.newClient(null, 12000);
+        HttpClient client = HttpFactory.newClient(null, 3600000); // abort after 1 hour
         client.setProxy(proxyConfig());
         
         // address vhost

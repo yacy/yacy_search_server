@@ -50,8 +50,8 @@ public class HttpFactory {
     /**
      * generates a new HttpClient object with given header and timeout
      * 
-     * @param header 
-     * @param timeout 
+     * @param header used for all HTTP-requests (unless another one is set)
+     * @param timeout in milliseconds
      * @return
      */
     public static HttpClient newClient(httpHeader header, int timeout) {

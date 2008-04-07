@@ -498,29 +498,29 @@ public class Network {
      */
     private static String parseLocationInUserAgent(final String userAgent) {
         final String location;
-        
+
         final int firstOpenParenthesis = userAgent.indexOf('(');
         final int lastSemicolon = userAgent.lastIndexOf(';');
         final int firstClosedParenthesis = userAgent.indexOf(')');
-        
-        if(lastSemicolon > 0) {
-            // ; Location)
-            location = (firstClosedParenthesis > 0) ? userAgent.substring(lastSemicolon, firstClosedParenthesis).trim()
-                    : userAgent.substring(lastSemicolon + 1).trim();
+
+        if (lastSemicolon > 0) {
+            // ; Location )
+            location = (firstClosedParenthesis > 0) ? userAgent.substring(lastSemicolon + 1, firstClosedParenthesis)
+                    .trim() : userAgent.substring(lastSemicolon + 1).trim();
         } else {
-            if(firstOpenParenthesis > 0) {
-                if(firstClosedParenthesis > 0) {
-                    // (Location)
-                    location = userAgent.substring(firstOpenParenthesis, firstClosedParenthesis).trim();
+            if (firstOpenParenthesis > 0) {
+                if (firstClosedParenthesis > 0) {
+                    // ( Location )
+                    location = userAgent.substring(firstOpenParenthesis + 1, firstClosedParenthesis).trim();
                 } else {
                     // ( Location <end>
-                    location = userAgent.substring(firstOpenParenthesis).trim();
+                    location = userAgent.substring(firstOpenParenthesis + 1).trim();
                 }
             } else {
                 location = "";
             }
         }
-        
+
         return location;
     }
 }
