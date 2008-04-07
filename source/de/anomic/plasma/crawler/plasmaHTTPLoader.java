@@ -52,6 +52,7 @@ import java.net.MalformedURLException;
 import java.net.NoRouteToHostException;
 import java.net.SocketException;
 import java.net.UnknownHostException;
+import java.util.Arrays;
 import java.util.Date;
 
 import de.anomic.http.HttpClient;
@@ -377,6 +378,9 @@ public final class plasmaHTTPLoader {
             } else if ((errorMsg != null) && (errorMsg.indexOf("Connection refused") >= 0)) {
                 this.log.logWarning("CRAWLER Connection refused while trying to connect to '" + entry.url().toString() + "'.");
                 failreason = plasmaCrawlEURL.DENIED_CONNECTION_REFUSED;
+            } else if ((errorMsg != null) && (errorMsg.indexOf("Circular redirect to '")>= 0)) {
+                this.log.logWarning("CRAWLER Redirect Error with URL '" + entry.url().toString() + "': "+ e.toString());  
+                failreason = plasmaCrawlEURL.DENIED_REDIRECTION_COUNTER_EXCEEDED;
             } else if ((errorMsg != null) && (errorMsg.indexOf("There is not enough space on the disk") >= 0)) {
                 this.log.logSevere("CRAWLER Not enough space on the disk detected while crawling '" + entry.url().toString() + "'. " +
                 "Pausing crawlers. ");
