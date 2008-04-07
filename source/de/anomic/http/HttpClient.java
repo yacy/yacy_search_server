@@ -40,12 +40,10 @@ public abstract class HttpClient {
     private static final String systemOST;
     static {
         // provide system information for client identification
-        String loc = generateLocation();
-        systemOST =
-            System.getProperty("os.arch", "no-os-arch") + " " +
-            System.getProperty("os.name", "no-os-name") + " " +
-            System.getProperty("os.version", "no-os-version") + "; " +
-            "java " + System.getProperty("java.version", "no-java-version") + "; " + loc;
+        final String loc = generateLocation();
+        systemOST = System.getProperty("os.arch", "no-os-arch") + " " + System.getProperty("os.name", "no-os-name") +
+                " " + System.getProperty("os.version", "no-os-version") + "; " + "java " +
+                System.getProperty("java.version", "no-java-version") + "; " + loc;
     }
 
     /**
@@ -56,7 +54,9 @@ public abstract class HttpClient {
     public static String generateLocation() {
         String loc = System.getProperty("user.timezone", "nowhere");
         final int p = loc.indexOf("/");
-        if (p > 0) loc = loc.substring(0,p);
+        if (p > 0) {
+            loc = loc.substring(0, p);
+        }
         loc = loc + "/" + System.getProperty("user.language", "dumb");
         return loc;
     }
@@ -134,7 +134,7 @@ public abstract class HttpClient {
      * @return
      */
     public abstract String getUserAgent();
-    
+
     /**
      * Returns the given date in an HTTP-usable format. (according to RFC1123/RFC822)
      * 
@@ -142,14 +142,15 @@ public abstract class HttpClient {
      * @return String with the date.
      */
     public abstract String date2String(Date date);
-    
+
     /**
      * for easy access
+     * 
      * @see date2String(Date)
      * @param date
      * @return
      */
-    public static String dateString(Date date) {
+    public static String dateString(final Date date) {
         return HttpFactory.newClient().date2String(date);
     }
 
@@ -197,11 +198,11 @@ public abstract class HttpClient {
     public static byte[] wget(final String uri, httpHeader header, final String vhost) {
         assert uri != null : "precondition violated: uri != null";
         final HttpClient client = HttpFactory.newClient();
-    
+
         // set header
         header = addHostHeader(header, vhost);
         client.setHeader(header);
-    
+
         // do the request
         try {
             final HttpResponse response = client.GET(uri);

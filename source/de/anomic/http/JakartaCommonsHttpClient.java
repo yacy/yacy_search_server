@@ -53,6 +53,7 @@ import org.apache.commons.httpclient.methods.multipart.Part;
 import org.apache.commons.httpclient.methods.multipart.StringPart;
 import org.apache.commons.httpclient.params.HttpClientParams;
 import org.apache.commons.httpclient.params.HttpMethodParams;
+import org.apache.commons.httpclient.protocol.Protocol;
 import org.apache.commons.httpclient.util.DateUtil;
 
 import de.anomic.kelondro.kelondroBase64Order;
@@ -87,6 +88,9 @@ public class JakartaCommonsHttpClient extends de.anomic.http.HttpClient {
         // conManager.getParams().setDefaultMaxConnectionsPerHost(4); // default 2
         conManager.getParams().setMaxTotalConnections(50); // default 20
         // TODO should this be configurable?
+        
+        // accept self-signed or untrusted certificates
+        Protocol.registerProtocol("https", new Protocol("https", new EasySSLProtocolSocketFactory(), 443));
     }
 
     private final Map<HttpMethod, InputStream> openStreams = new HashMap<HttpMethod, InputStream>();
