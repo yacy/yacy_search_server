@@ -63,7 +63,7 @@ public class plasmaProfiling {
         return max;
     }
     
-    public static ymageMatrix performanceGraph(int width, int height) {        
+    public static ymageMatrix performanceGraph(int width, int height, String subline) {        
         // find maximum values for automatic graph dimension adoption
         int maxppm = (int) maxPayload("ppm", 25);
         long maxbytes = maxPayload("memory", 110 * 1024 * 1024);
@@ -73,13 +73,13 @@ public class plasmaProfiling {
         int rightborder = 30;
         int topborder = 20;
         int bottomborder = 20;
-        int leftscale = 20;
+        int leftscale = 50;
         int rightscale = 100;
         int bottomscale = 60;
         int vspace = height - topborder - bottomborder;
         int hspace = width - leftborder - rightborder;
         int maxtime = 600;
-        ymageChart chart = new ymageChart(width, height, "FFFFFF", "000000", leftborder, rightborder, topborder, bottomborder, "PEER PERFORMANCE GRAPH: PAGES/MINUTE and USED MEMORY");
+        ymageChart chart = new ymageChart(width, height, "FFFFFF", "000000", "AAAAAA", leftborder, rightborder, topborder, bottomborder, "PEER PERFORMANCE GRAPH: PAGES/MINUTE and USED MEMORY", subline);
         chart.declareDimension(ymageChart.DIMENSION_BOTTOM, bottomscale, hspace / (maxtime / bottomscale), -maxtime, "000000", "CCCCCC", "TIME/SECONDS");
         chart.declareDimension(ymageChart.DIMENSION_LEFT, leftscale, vspace * leftscale / maxppm, 0, "008800", null , "PPM [PAGES/MINUTE]");
         chart.declareDimension(ymageChart.DIMENSION_RIGHT, rightscale, vspace * rightscale / (int)(maxbytes / 1024 / 1024), 0, "0000FF", "CCCCCC", "MEMORY/MEGABYTE");

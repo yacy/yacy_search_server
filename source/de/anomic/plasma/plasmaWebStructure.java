@@ -165,7 +165,7 @@ public class plasmaWebStructure {
         crg.insert(0, header.toString());
         try {
             serverFileUtils.writeAndGZip(crg.toString().getBytes(), file);
-            log.logFine("wrote citation reference dump " + file.toString());
+            if (this.log.isFine()) log.logFine("wrote citation reference dump " + file.toString());
         } catch (IOException e) {
             e.printStackTrace();
         }

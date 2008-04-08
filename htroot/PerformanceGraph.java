@@ -26,6 +26,7 @@
 
 import de.anomic.http.httpHeader;
 import de.anomic.plasma.plasmaProfiling;
+import de.anomic.plasma.plasmaSwitchboard;
 import de.anomic.server.serverObjects;
 import de.anomic.server.serverSwitch;
 import de.anomic.ymage.ymageMatrix;
@@ -33,14 +34,14 @@ import de.anomic.ymage.ymageMatrix;
 public class PerformanceGraph {
     
     public static ymageMatrix respond(httpHeader header, serverObjects post, serverSwitch<?> env) {
-        //plasmaSwitchboard sb = (plasmaSwitchboard) env;
+        plasmaSwitchboard sb = (plasmaSwitchboard) env;
         
         if (post == null) post = new serverObjects();
         
         int width = post.getInt("width", 660);
         int height = post.getInt("height", 240);
         
-        return plasmaProfiling.performanceGraph(width, height);
+        return plasmaProfiling.performanceGraph(width, height, sb.wordIndex.countURL() + " URLS / " + sb.wordIndex.collectionsSize() + " WORDS IN COLLECTIONS / " + sb.wordIndex.cacheSize() + " WORDS IN CACHE");
     }
     
 }

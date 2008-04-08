@@ -154,7 +154,7 @@ public class plasmaDHTFlush extends Thread {
             plasmaDHTChunk newDHTChunk = null, oldDHTChunk = null;
             try {
                 // initial startingpoint of intex transfer is "AAAAAAAAAAAA"                 
-                this.log.logFine("Selected hash " + this.startPointHash + " as start point for index distribution of whole index");        
+                if (this.log.isFine()) this.log.logFine("Selected hash " + this.startPointHash + " as start point for index distribution of whole index");        
                 
                 /* Loop until we have
                  * - finished transfer of whole index
@@ -181,7 +181,7 @@ public class plasmaDHTFlush extends Thread {
                             this.startPointHash = "AAAAAAAAAAAA";
                         } else {                            
                             // otherwise we could end transfer now
-                            this.log.logFine("No index available for index transfer, hash start-point " + this.startPointHash);
+                            if (this.log.isFine()) this.log.logFine("No index available for index transfer, hash start-point " + this.startPointHash);
                             this.status = "Finished. " + iteration + " chunks transfered.";
                             this.finished = true; 
                         }
@@ -223,7 +223,7 @@ public class plasmaDHTFlush extends Thread {
                         if (this.delete) {
                             this.status = "Running: Deleting chunk " + iteration;
                             String urlReferences = oldDHTChunk.deleteTransferIndexes();
-                            this.log.logFine("Deleted from " + oldDHTChunk.containerSize() + " transferred RWIs locally " + urlReferences + " URL references");
+                            if (this.log.isFine()) this.log.logFine("Deleted from " + oldDHTChunk.containerSize() + " transferred RWIs locally " + urlReferences + " URL references");
                         } 
                         oldDHTChunk = null;
                     }

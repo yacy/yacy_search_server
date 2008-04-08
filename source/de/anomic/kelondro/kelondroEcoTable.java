@@ -167,7 +167,7 @@ public class kelondroEcoTable implements kelondroIndex {
             System.out.flush();
             this.file = new kelondroBufferedEcoFS(new kelondroEcoFS(tablefile, rowdef.objectsize), this.buffersize);
             ArrayList<Integer[]> doubles = index.removeDoubles();
-            assert index.size() + doubles.size() + fail == i;
+            //assert index.size() + doubles.size() + fail == i;
             System.out.println(" -removed " + doubles.size() + " doubles- done.");
             if (doubles.size() > 0) {
                 System.out.println("DEBUG " + tablefile + ": WARNING - EcoTable " + tablefile + " has " + doubles.size() + " doubles");
@@ -196,7 +196,7 @@ public class kelondroEcoTable implements kelondroIndex {
             }
 
             try {
-                assert file.size() == index.size() + doubles.size() + fail : "file.size() = " + file.size() + ", index.size() = " + index.size() + ", doubles.size() = " + doubles.size() + ", fail = " + fail + ", i = " + i;
+                assert file.size() == index.size() + fail : "file.size() = " + file.size() + ", index.size() = " + index.size() + ", doubles.size() = " + doubles.size() + ", fail = " + fail + ", i = " + i;
             } catch (IOException e) {
                 e.printStackTrace();
             }

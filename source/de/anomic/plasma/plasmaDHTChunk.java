@@ -132,13 +132,13 @@ public class plasmaDHTChunk {
             this.log = log;
             this.wordIndex = wordIndex;
             this.startPointHash = selectTransferStart();
-            log.logFine("Selected hash " + this.startPointHash + " as start point for index distribution, distance = " + yacyDHTAction.dhtDistance(yacyCore.seedDB.mySeed().hash, this.startPointHash));
+            if (this.log.isFine()) log.logFine("Selected hash " + this.startPointHash + " as start point for index distribution, distance = " + yacyDHTAction.dhtDistance(yacyCore.seedDB.mySeed().hash, this.startPointHash));
             selectTransferContainers(this.startPointHash, minCount, maxCount, maxtime);
 
             // count the indexes, can be smaller as expected
             this.idxCount = indexCounter();
             if (this.idxCount < minCount) {
-                log.logFine("Too few (" + this.idxCount + ") indexes selected for transfer.");
+                if (this.log.isFine()) log.logFine("Too few (" + this.idxCount + ") indexes selected for transfer.");
                 this.status = chunkStatus_FAILED;
             }
         } catch (InterruptedException e) {
@@ -150,13 +150,13 @@ public class plasmaDHTChunk {
         try {
             this.log = log;
             this.wordIndex = wordIndex;
-            log.logFine("Demanded hash " + startHash + " as start point for index distribution, distance = " + yacyDHTAction.dhtDistance(yacyCore.seedDB.mySeed().hash, this.startPointHash));
+            if (this.log.isFine()) log.logFine("Demanded hash " + startHash + " as start point for index distribution, distance = " + yacyDHTAction.dhtDistance(yacyCore.seedDB.mySeed().hash, this.startPointHash));
             selectTransferContainers(startHash, minCount, maxCount, maxtime);
 
             // count the indexes, can be smaller as expected
             this.idxCount = indexCounter();
             if (this.idxCount < minCount) {
-                log.logFine("Too few (" + this.idxCount + ") indexes selected for transfer.");
+                if (this.log.isFine()) log.logFine("Too few (" + this.idxCount + ") indexes selected for transfer.");
                 this.status = chunkStatus_FAILED;
             }
         } catch (InterruptedException e) {
@@ -194,11 +194,11 @@ public class plasmaDHTChunk {
             this.selectionStartTime = System.currentTimeMillis();
             int refcountRAM = selectTransferContainersResource(hash, true, maxcount, maxtime);
             if (refcountRAM >= mincount) {
-                log.logFine("DHT selection from RAM: " + refcountRAM + " entries");
+                if (this.log.isFine()) log.logFine("DHT selection from RAM: " + refcountRAM + " entries");
                 return;
             }
             int refcountFile = selectTransferContainersResource(hash, false, maxcount, maxtime);
-            log.logFine("DHT selection from FILE: " + refcountFile + " entries, RAM provided only " + refcountRAM + " entries");
+            if (this.log.isFine()) log.logFine("DHT selection from FILE: " + refcountFile + " entries, RAM provided only " + refcountRAM + " entries");
             return;
         } finally {
             this.selectionEndTime = System.currentTimeMillis();
@@ -268,7 +268,7 @@ public class plasmaDHTChunk {
                     }
 
                     // use whats left
-                    log.logFine("Selected partial index (" + container.size() + " from " + wholesize + " URLs, " + notBoundCounter + " not bound) for word " + container.getWordHash());
+                    if (this.log.isFine()) log.logFine("Selected partial index (" + container.size() + " from " + wholesize + " URLs, " + notBoundCounter + " not bound) for word " + container.getWordHash());
                     tmpContainers.add(container);
                 } catch (kelondroException e) {
                     log.logSevere("plasmaWordIndexDistribution/2: deleted DB for word " + container.getWordHash(), e);
@@ -279,7 +279,7 @@ public class plasmaDHTChunk {
             indexContainers = (indexContainer[]) tmpContainers.toArray(new indexContainer[tmpContainers.size()]);
 //[C[16GwGuFzwffp] has 1 entries, C[16hGKMAl0w97] has 9 entries, C[17A8cDPF6SfG] has 9 entries, C[17Kdj__WWnUy] has 1 entries, C[1
             if ((indexContainers == null) || (indexContainers.length == 0)) {
-                log.logFine("No index available for index transfer, hash start-point " + startPointHash);
+                if (this.log.isFine()) log.logFine("No index available for index transfer, hash start-point " + startPointHash);
                 this.status = chunkStatus_FAILED;
                 return 0;
             }
@@ -304,7 +304,7 @@ public class plasmaDHTChunk {
         for (int i = 0; i < this.indexContainers.length; i++) {
             // delete entries separately
             if (this.indexContainers[i] == null) {
-                log.logFine("Deletion of partial index #" + i + " not possible, entry is null");
+                if (this.log.isFine()) log.logFine("Deletion of partial index #" + i + " not possible, entry is null");
                 continue;
             }
             int c = this.indexContainers[i].size();
@@ -317,7 +317,7 @@ public class plasmaDHTChunk {
             String wordHash = indexContainers[i].getWordHash();
             count = wordIndex.removeEntriesExpl(this.indexContainers[i].getWordHash(), urlHashes);
             if (log.isFine()) 
-                log.logFine("Deleted partial index (" + c + " URLs) for word " + wordHash + "; " + this.wordIndex.indexSize(wordHash) + " entries left");
+                if (this.log.isFine()) log.logFine("Deleted partial index (" + c + " URLs) for word " + wordHash + "; " + this.wordIndex.indexSize(wordHash) + " entries left");
             this.indexContainers[i] = null;
         }
         return count;

@@ -267,7 +267,7 @@ public class kelondroBase64Order extends kelondroAbstractOrder<byte[]> implement
         } catch (ArrayIndexOutOfBoundsException e) {
             // maybe the input was not base64
             // throw new RuntimeException("input probably not base64");
-            this.log.logFine("wrong string receive: " + in + ", call: " + info);
+            if (this.log.isFine()) this.log.logFine("wrong string receive: " + in + ", call: " + info);
             return new byte[0];
         }
     }

@@ -168,15 +168,15 @@ public class plasmaCrawlQueues {
             return false;
         }
         if (sb.sbQueue.size() >= (int) sb.getConfigLong(plasmaSwitchboard.INDEXER_SLOTS, 30)) {
-            log.logFine("CoreCrawl: too many processes in indexing queue, dismissed (" + "sbQueueSize=" + sb.sbQueue.size() + ")");
+            if (this.log.isFine()) log.logFine("CoreCrawl: too many processes in indexing queue, dismissed (" + "sbQueueSize=" + sb.sbQueue.size() + ")");
             return false;
         }
         if (this.size() >= sb.getConfigLong(plasmaSwitchboard.CRAWLER_THREADS_ACTIVE_MAX, 10)) {
-            log.logFine("CoreCrawl: too many processes in loader queue, dismissed (" + "cacheLoader=" + this.size() + ")");
+            if (this.log.isFine()) log.logFine("CoreCrawl: too many processes in loader queue, dismissed (" + "cacheLoader=" + this.size() + ")");
             return false;
         }
         if (sb.onlineCaution()) {
-            log.logFine("CoreCrawl: online caution, omitting processing");
+            if (this.log.isFine()) log.logFine("CoreCrawl: online caution, omitting processing");
             return false;
         }
         
@@ -218,7 +218,7 @@ public class plasmaCrawlQueues {
                     return true;            
                 }
                 
-                log.logFine("LOCALCRAWL: URL=" + urlEntry.url() + ", initiator=" + urlEntry.initiator() + ", crawlOrder=" + ((profile.remoteIndexing()) ? "true" : "false") + ", depth=" + urlEntry.depth() + ", crawlDepth=" + profile.generalDepth() + ", filter=" + profile.generalFilter()
+                if (this.log.isFine()) log.logFine("LOCALCRAWL: URL=" + urlEntry.url() + ", initiator=" + urlEntry.initiator() + ", crawlOrder=" + ((profile.remoteIndexing()) ? "true" : "false") + ", depth=" + urlEntry.depth() + ", crawlDepth=" + profile.generalDepth() + ", filter=" + profile.generalFilter()
                         + ", permission=" + ((yacyCore.seedDB == null) ? "undefined" : (((yacyCore.seedDB.mySeed().isSenior()) || (yacyCore.seedDB.mySeed().isPrincipal())) ? "true" : "false")));
                 
                 processLocalCrawling(urlEntry, stats);
@@ -245,17 +245,17 @@ public class plasmaCrawlQueues {
         }
         
         if (sb.sbQueue.size() >= (int) sb.getConfigLong(plasmaSwitchboard.INDEXER_SLOTS, 30)) {
-            log.logFine("remoteCrawlLoaderJob: too many processes in indexing queue, dismissed (" + "sbQueueSize=" + sb.sbQueue.size() + ")");
+            if (this.log.isFine()) log.logFine("remoteCrawlLoaderJob: too many processes in indexing queue, dismissed (" + "sbQueueSize=" + sb.sbQueue.size() + ")");
             return false;
         }
         
         if (this.size() >= sb.getConfigLong(plasmaSwitchboard.CRAWLER_THREADS_ACTIVE_MAX, 10)) {
-            log.logFine("remoteCrawlLoaderJob: too many processes in loader queue, dismissed (" + "cacheLoader=" + this.size() + ")");
+            if (this.log.isFine()) log.logFine("remoteCrawlLoaderJob: too many processes in loader queue, dismissed (" + "cacheLoader=" + this.size() + ")");
             return false;
         }
         
         if (sb.onlineCaution()) {
-            log.logFine("remoteCrawlLoaderJob: online caution, omitting processing");
+            if (this.log.isFine()) log.logFine("remoteCrawlLoaderJob: online caution, omitting processing");
             return false;
         }
         
@@ -360,15 +360,15 @@ public class plasmaCrawlQueues {
             return false;
         }
         if (sb.sbQueue.size() >= (int) sb.getConfigLong(plasmaSwitchboard.INDEXER_SLOTS, 30)) {
-            log.logFine("GlobalCrawl: too many processes in indexing queue, dismissed (" + "sbQueueSize=" + sb.sbQueue.size() + ")");
+            if (this.log.isFine()) log.logFine("GlobalCrawl: too many processes in indexing queue, dismissed (" + "sbQueueSize=" + sb.sbQueue.size() + ")");
             return false;
         }
         if (this.size() >= sb.getConfigLong(plasmaSwitchboard.CRAWLER_THREADS_ACTIVE_MAX, 10)) {
-            log.logFine("GlobalCrawl: too many processes in loader queue, dismissed (" + "cacheLoader=" + this.size() + ")");
+            if (this.log.isFine()) log.logFine("GlobalCrawl: too many processes in loader queue, dismissed (" + "cacheLoader=" + this.size() + ")");
             return false;
         }        
         if (sb.onlineCaution()) {
-            log.logFine("GlobalCrawl: online caution, omitting processing");
+            if (this.log.isFine()) log.logFine("GlobalCrawl: online caution, omitting processing");
             return false;
         }
 
@@ -407,7 +407,7 @@ public class plasmaCrawlQueues {
                 return true;            
             }
             
-            log.logFine("plasmaSwitchboard.remoteTriggeredCrawlJob: url=" + urlEntry.url() + ", initiator=" + urlEntry.initiator() + ", crawlOrder=" + ((profile.remoteIndexing()) ? "true" : "false") + ", depth=" + urlEntry.depth() + ", crawlDepth=" + profile.generalDepth() + ", filter="
+            if (this.log.isFine()) log.logFine("plasmaSwitchboard.remoteTriggeredCrawlJob: url=" + urlEntry.url() + ", initiator=" + urlEntry.initiator() + ", crawlOrder=" + ((profile.remoteIndexing()) ? "true" : "false") + ", depth=" + urlEntry.depth() + ", crawlDepth=" + profile.generalDepth() + ", filter="
                         + profile.generalFilter() + ", permission=" + ((yacyCore.seedDB == null) ? "undefined" : (((yacyCore.seedDB.mySeed().isSenior()) || (yacyCore.seedDB.mySeed().isPrincipal())) ? "true" : "false")));
 
             processLocalCrawling(urlEntry, stats);
@@ -476,7 +476,7 @@ public class plasmaCrawlQueues {
                 // checking robots.txt for http(s) resources
                 this.entry.setStatus("worker-checkingrobots");
                 if ((entry.url().getProtocol().equals("http") || entry.url().getProtocol().equals("https")) && robotsParser.isDisallowed(entry.url())) {
-                    log.logFine("Crawling of URL '" + entry.url().toString() + "' disallowed by robots.txt.");
+                    if (log.isFine()) log.logFine("Crawling of URL '" + entry.url().toString() + "' disallowed by robots.txt.");
                     plasmaCrawlZURL.Entry eentry = errorURL.newEntry(this.entry.url(), "denied by robots.txt");
                     eentry.store();
                     errorURL.push(eentry);         

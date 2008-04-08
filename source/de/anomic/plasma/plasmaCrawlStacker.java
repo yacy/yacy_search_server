@@ -188,7 +188,7 @@ public final class plasmaCrawlStacker extends Thread {
         }
         terminateDNSPrefetcher();
         
-        this.log.logFine("Shutdown. Closing stackCrawl queue.");
+        this.log.logInfo("Shutdown. Closing stackCrawl queue.");
 
         // closing the db
         this.urlEntryCache.close();
@@ -387,7 +387,7 @@ public final class plasmaCrawlStacker extends Thread {
         // check if ip is local ip address
         if (!sb.acceptURL(entry.url())) {
             reason = plasmaCrawlEURL.DENIED_IP_ADDRESS_NOT_IN_DECLARED_DOMAIN + "[" + sb.getConfig("network.unit.domain", "unknown") + "]";
-            this.log.logFine("Host in URL '" + entry.url().toString() + "' has IP address outside of declared range (" + sb.getConfig("network.unit.domain", "unknown") + "). " +
+            if (this.log.isFine()) this.log.logFine("Host in URL '" + entry.url().toString() + "' has IP address outside of declared range (" + sb.getConfig("network.unit.domain", "unknown") + "). " +
                     "Stack processing time: " + (System.currentTimeMillis()-startTime) + "ms");
             return reason;                
         }
@@ -395,7 +395,7 @@ public final class plasmaCrawlStacker extends Thread {
         // check blacklist
         if (plasmaSwitchboard.urlBlacklist.isListed(indexReferenceBlacklist.BLACKLIST_CRAWLER, entry.url())) {
             reason = plasmaCrawlEURL.DENIED_URL_IN_BLACKLIST;
-            this.log.logFine("URL '" + entry.url().toString() + "' is in blacklist. " +
+            if (this.log.isFine()) this.log.logFine("URL '" + entry.url().toString() + "' is in blacklist. " +
                              "Stack processing time: " + (System.currentTimeMillis()-startTime) + "ms");
             return reason;
         }
@@ -411,7 +411,7 @@ public final class plasmaCrawlStacker extends Thread {
         if ((entry.depth() > 0) && (profile != null) && (!(entry.url().toString().matches(profile.generalFilter())))) {
             reason = plasmaCrawlEURL.DENIED_URL_DOES_NOT_MATCH_FILTER;
 
-            this.log.logFine("URL '" + entry.url().toString() + "' does not match crawling filter '" + profile.generalFilter() + "'. " +
+            if (this.log.isFine()) this.log.logFine("URL '" + entry.url().toString() + "' does not match crawling filter '" + profile.generalFilter() + "'. " +
                              "Stack processing time: " + (System.currentTimeMillis()-startTime) + "ms");
             return reason;
         }
@@ -420,7 +420,7 @@ public final class plasmaCrawlStacker extends Thread {
         if (entry.url().isCGI())  {
             reason = plasmaCrawlEURL.DENIED_CGI_URL;
 
-            this.log.logFine("URL '" + entry.url().toString() + "' is CGI URL. " + 
+            if (this.log.isFine()) this.log.logFine("URL '" + entry.url().toString() + "' is CGI URL. " + 
                              "Stack processing time: " + (System.currentTimeMillis()-startTime) + "ms");
             return reason;
         }
@@ -429,7 +429,7 @@ public final class plasmaCrawlStacker extends Thread {
         if ((entry.url().isPOST()) && (profile != null) && (!(profile.crawlingQ())))  {
             reason = plasmaCrawlEURL.DENIED_POST_URL;
 
-            this.log.logFine("URL '" + entry.url().toString() + "' is post URL. " + 
+            if (this.log.isFine()) this.log.logFine("URL '" + entry.url().toString() + "' is post URL. " + 
                              "Stack processing time: " + (System.currentTimeMillis()-startTime) + "ms");
             return reason;
         }
@@ -444,7 +444,7 @@ public final class plasmaCrawlStacker extends Thread {
         // deny urls that do not match with the profile domain list
         if (!(profile.grantedDomAppearance(entry.url().getHost()))) {
             reason = plasmaCrawlEURL.DENIED_NO_MATCH_WITH_DOMAIN_FILTER;
-            this.log.logFine("URL '" + entry.url().toString() + "' is not listed in granted domains. " + 
+            if (this.log.isFine()) this.log.logFine("URL '" + entry.url().toString() + "' is not listed in granted domains. " + 
                              "Stack processing time: " + (System.currentTimeMillis()-startTime) + "ms");
             return reason;
         }
@@ -452,7 +452,7 @@ public final class plasmaCrawlStacker extends Thread {
         // deny urls that exceed allowed number of occurrences
         if (!(profile.grantedDomCount(entry.url().getHost()))) {
             reason = plasmaCrawlEURL.DENIED_DOMAIN_COUNT_EXCEEDED;
-            this.log.logFine("URL '" + entry.url().toString() + "' appeared too often, a maximum of " + profile.domMaxPages() + " is allowed. "+ 
+            if (this.log.isFine()) this.log.logFine("URL '" + entry.url().toString() + "' appeared too often, a maximum of " + profile.domMaxPages() + " is allowed. "+ 
                              "Stack processing time: " + (System.currentTimeMillis()-startTime) + "ms");
             return reason;
         }
@@ -464,18 +464,18 @@ public final class plasmaCrawlStacker extends Thread {
         // do double-check
         if ((dbocc != null) && (!recrawl)) {
             reason = plasmaCrawlEURL.DOUBLE_REGISTERED + dbocc + ")";
-            this.log.logFine("URL '" + entry.url().toString() + "' is double registered in '" + dbocc + "'. " + "Stack processing time: " + (System.currentTimeMillis()-startTime) + "ms");
+            if (this.log.isFine()) this.log.logFine("URL '" + entry.url().toString() + "' is double registered in '" + dbocc + "'. " + "Stack processing time: " + (System.currentTimeMillis()-startTime) + "ms");
             return reason;
         }
         if ((oldEntry != null) && (!recrawl)) {
             reason = plasmaCrawlEURL.DOUBLE_REGISTERED + "LURL)";
-            this.log.logFine("URL '" + entry.url().toString() + "' is double registered in 'LURL'. " + "Stack processing time: " + (System.currentTimeMillis()-startTime) + "ms");
+            if (this.log.isFine()) this.log.logFine("URL '" + entry.url().toString() + "' is double registered in 'LURL'. " + "Stack processing time: " + (System.currentTimeMillis()-startTime) + "ms");
             return reason;
         }
 
         // show potential re-crawl
         if (recrawl) {
-            this.log.logFine("RE-CRAWL of URL '" + entry.url().toString() + "': this url was crawled " +
+            if (this.log.isFine()) this.log.logFine("RE-CRAWL of URL '" + entry.url().toString() + "': this url was crawled " +
                     ((System.currentTimeMillis() - oldEntry.loaddate().getTime()) / 60000 / 60 / 24) + " days ago.");
         }
         

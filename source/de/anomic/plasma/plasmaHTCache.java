@@ -407,7 +407,7 @@ public final class plasmaHTCache {
         if (deleteFileandDirs(getCachePath(url), "FROM")) {
             try {
                 // As the file is gone, the entry in responseHeader.db is not needed anymore
-                log.logFinest("Trying to remove responseHeader from URL: " + url.toNormalform(false, true));
+                if (log.isFinest()) log.logFinest("Trying to remove responseHeader from URL: " + url.toNormalform(false, true));
                 responseHeaderDB.remove(url.hash());
             } catch (IOException e) {
                 resetResponseHeaderDB();
@@ -436,7 +436,7 @@ public final class plasmaHTCache {
             // If the has been emptied, remove it
             // Loop as long as we produce empty driectoriers, but stop at HTCACHE
             while ((!(obj.equals(cachePath))) && (obj.isDirectory()) && (obj.list().length == 0)) {
-                if (obj.delete()) log.logFine("DELETED EMPTY DIRECTORY : " + obj.toString());
+                if (obj.delete()) if (log.isFine()) log.logFine("DELETED EMPTY DIRECTORY : " + obj.toString());
                 obj = obj.getParentFile();
             }
             return true;
@@ -458,19 +458,19 @@ public final class plasmaHTCache {
                 if (System.currentTimeMillis() - t < 300000) break; // files must have been at least 5 minutes in the cache before they are deleted
                 if (file != null) {
                     if (filesInUse.contains(file)) continue;
-                    log.logFinest("Trying to delete [" + key + "] = old file: " + file.toString());
+                    if (log.isFinest()) log.logFinest("Trying to delete [" + key + "] = old file: " + file.toString());
                     // This needs to be called *before* the file is deleted
                     String urlHash = getHash(file);
                     if (deleteFileandDirs(file, "OLD")) {
                         try {
                             // As the file is gone, the entry in responseHeader.db is not needed anymore
                             if (urlHash != null) {
-                                log.logFinest("Trying to remove responseHeader for URLhash: " + urlHash);
+                                if (log.isFinest()) log.logFinest("Trying to remove responseHeader for URLhash: " + urlHash);
                                 responseHeaderDB.remove(urlHash);
                             } else {
                                 yacyURL url = getURL(file);
                                 if (url != null) {
-                                    log.logFinest("Trying to remove responseHeader for URL: " + url.toNormalform(false, true));
+                                    if (log.isFinest()) log.logFinest("Trying to remove responseHeader for URL: " + url.toNormalform(false, true));
                                     responseHeaderDB.remove(url.hash());
                                 }
                             }
@@ -676,13 +676,13 @@ public final class plasmaHTCache {
                     cacheAge.put(ageString(d, newpath), newpath);
                     File obj = oldpath.getParentFile();
                     while ((!(obj.equals(cachePath))) && (obj.isDirectory()) && (obj.list().length == 0)) {
-                        if (obj.delete()) log.logFine("DELETED EMPTY DIRECTORY : " + obj.toString());
+                        if (obj.delete()) if (log.isFine()) log.logFine("DELETED EMPTY DIRECTORY : " + obj.toString());
                         obj = obj.getParentFile();
                     }
                 }
             }
         } catch (Exception e) {
-            log.logFine("moveCachedObject('" + oldpath.toString() + "','" +
+            if (log.isFine()) log.logFine("moveCachedObject('" + oldpath.toString() + "','" +
                         newpath.toString() + "')", e);
         }
     }

@@ -484,6 +484,14 @@ public final class plasmaWordIndex implements indexRI {
         return java.lang.Math.max(collections.size(), java.lang.Math.max(dhtInCache.size(), dhtOutCache.size()));
     }
 
+    public int collectionsSize() {
+        return collections.size();
+    }
+    
+    public int cacheSize() {
+        return dhtInCache.size() + dhtOutCache.size();
+    }
+    
     public int indexSize(String wordHash) {
         int size = 0;
         size += dhtInCache.indexSize(wordHash);

@@ -300,7 +300,7 @@ public final class serverCore extends serverAbstractBusyThread implements server
             if (bindIP.startsWith("#")) {
                 String interfaceName = bindIP.substring(1);
                 String hostName = null;
-                this.log.logFine("Trying to determine IP address of interface '" + interfaceName + "'.");                    
+                if (this.log.isFine()) this.log.logFine("Trying to determine IP address of interface '" + interfaceName + "'.");                    
 
                 Enumeration<NetworkInterface> interfaces = NetworkInterface.getNetworkInterfaces();
                 if (interfaces != null) {
@@ -402,7 +402,7 @@ public final class serverCore extends serverAbstractBusyThread implements server
             // prepare for new connection
             // idleThreadCheck();
             this.switchboard.handleBusyState(this.busySessions.size());
-            this.log.logFinest("* waiting for connections, " + this.busySessions.size() + " sessions running");
+            if (log.isFinest()) this.log.logFinest("* waiting for connections, " + this.busySessions.size() + " sessions running");
                         
             announceThreadBlockApply();
             
@@ -638,7 +638,7 @@ public final class serverCore extends serverAbstractBusyThread implements server
     	*/
     
     	public void log(boolean outgoing, String request) {
-    	    serverCore.this.log.logFine(this.userAddress.getHostAddress() + "/" + this.identity + " " +
+    	    if (log.isFine()) log.logFine(this.userAddress.getHostAddress() + "/" + this.identity + " " +
     		     "[" + ((busySessions == null)? -1 : busySessions.size()) + ", " + this.commandCounter +
     		     ((outgoing) ? "] > " : "] < ") +
     		     request);

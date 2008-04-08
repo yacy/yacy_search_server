@@ -106,11 +106,11 @@ public class dbImportManager {
             runningJobs.interrupt();  
             
             // we need to use a timeout here because of missing interruptable session threads ...
-            log.logFine("Waiting for " + runningJobs.activeCount() + " remaining dbImporter threads to finish shutdown ...");
+            if (log.isFine()) log.logFine("Waiting for " + runningJobs.activeCount() + " remaining dbImporter threads to finish shutdown ...");
             for ( int currentThreadIdx = 0; currentThreadIdx < threadCount; currentThreadIdx++ )  {
                 Thread currentThread = threadList[currentThreadIdx];
                 if (currentThread.isAlive()) {
-                    log.logFine("Waiting for dbImporter thread '" + currentThread.getName() + "' [" + currentThreadIdx + "] to finish shutdown.");
+                    if (log.isFine()) log.logFine("Waiting for dbImporter thread '" + currentThread.getName() + "' [" + currentThreadIdx + "] to finish shutdown.");
                     try { currentThread.join(500); } catch (InterruptedException ex) {}
                 }
             }

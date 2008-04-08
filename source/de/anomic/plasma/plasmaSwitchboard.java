@@ -1631,7 +1631,7 @@ public final class plasmaSwitchboard extends serverAbstractSwitch<plasmaSwitchbo
          * check if ip is local ip address // TODO: remove this procotol specific code here
          * ========================================================================= */
         if (!acceptURL(entry.url())) {
-            this.log.logFine("Host in URL '" + entry.url() + "' is not in defined indexing domain.");
+            if (this.log.isFine()) this.log.logFine("Host in URL '" + entry.url() + "' is not in defined indexing domain.");
             doIndexing = false;
         }
         
@@ -1656,9 +1656,9 @@ public final class plasmaSwitchboard extends serverAbstractSwitch<plasmaSwitchbo
                 String error = entry.shallStoreCacheForProxy();
                 if (error == null) {
                     plasmaHTCache.writeResourceContent(entry.url(), entry.cacheArray());
-                    this.log.logFine("WROTE FILE (" + entry.cacheArray().length + " bytes) for " + entry.cacheFile());
+                    if (this.log.isFine()) this.log.logFine("WROTE FILE (" + entry.cacheArray().length + " bytes) for " + entry.cacheFile());
                 } else {
-                    this.log.logFine("WRITE OF FILE " + entry.cacheFile() + " FORBIDDEN: " + error);
+                    if (this.log.isFine()) this.log.logFine("WRITE OF FILE " + entry.cacheFile() + " FORBIDDEN: " + error);
                 }
             }
         }
@@ -1770,7 +1770,7 @@ public final class plasmaSwitchboard extends serverAbstractSwitch<plasmaSwitchbo
         plasmaSwitchboardQueue.QueueEntry nextentry = null;
         synchronized (sbQueue) {
             // do one processing step
-            log.logFine("DEQUEUE: sbQueueSize=" + sbQueue.size() +
+            if (this.log.isFine()) log.logFine("DEQUEUE: sbQueueSize=" + sbQueue.size() +
                     ", coreStackSize=" + crawlQueues.noticeURL.stackSize(plasmaCrawlNURL.STACK_TYPE_CORE) +
                     ", limitStackSize=" + crawlQueues.noticeURL.stackSize(plasmaCrawlNURL.STACK_TYPE_LIMIT) +
                     ", overhangStackSize=" + crawlQueues.noticeURL.stackSize(plasmaCrawlNURL.STACK_TYPE_OVERHANG) +
@@ -1800,7 +1800,7 @@ public final class plasmaSwitchboard extends serverAbstractSwitch<plasmaSwitchbo
         try {
             // work off fresh entries from the proxy or from the crawler
             if (onlineCaution()) {
-                log.logFine("deQueue: online caution, omitting resource stack processing");
+                if (this.log.isFine()) log.logFine("deQueue: online caution, omitting resource stack processing");
                 return false;
             }
             
@@ -1814,7 +1814,7 @@ public final class plasmaSwitchboard extends serverAbstractSwitch<plasmaSwitchbo
             // possibly delete entries from last chunk
             if ((this.dhtTransferChunk != null) && (this.dhtTransferChunk.getStatus() == plasmaDHTChunk.chunkStatus_COMPLETE)) {
                 String deletedURLs = this.dhtTransferChunk.deleteTransferIndexes();
-                this.log.logFine("Deleted from " + this.dhtTransferChunk.containers().length + " transferred RWIs locally, removed " + deletedURLs + " URL references");
+                if (this.log.isFine()) this.log.logFine("Deleted from " + this.dhtTransferChunk.containers().length + " transferred RWIs locally, removed " + deletedURLs + " URL references");
                 this.dhtTransferChunk = null;
             }
 
@@ -1841,13 +1841,13 @@ public final class plasmaSwitchboard extends serverAbstractSwitch<plasmaSwitchbo
             }
 
             if (crawlStacker.size() >= getConfigLong(CRAWLSTACK_SLOTS, 2000)) {
-                log.logFine("deQueue: too many processes in stack crawl thread queue (" + "stackCrawlQueue=" + crawlStacker.size() + ")");
+                if (this.log.isFine()) log.logFine("deQueue: too many processes in stack crawl thread queue (" + "stackCrawlQueue=" + crawlStacker.size() + ")");
                 return doneSomething;
             }
 
             // if we were interrupted we should return now
             if (Thread.currentThread().isInterrupted()) {
-                log.logFine("deQueue: thread was interrupted");
+                if (this.log.isFine()) log.logFine("deQueue: thread was interrupted");
                 return false;
             }
             
@@ -1932,7 +1932,7 @@ public final class plasmaSwitchboard extends serverAbstractSwitch<plasmaSwitchbo
             // clean up delegated stack
             checkInterruption();
             if ((crawlQueues.delegatedURL.stackSize() > 1000)) {
-                log.logFine("Cleaning Delegated-URLs report stack, " + crawlQueues.delegatedURL.stackSize() + " entries on stack");
+                if (this.log.isFine()) log.logFine("Cleaning Delegated-URLs report stack, " + crawlQueues.delegatedURL.stackSize() + " entries on stack");
                 crawlQueues.delegatedURL.clearStack();
                 hasDoneSomething = true;
             }
@@ -1940,7 +1940,7 @@ public final class plasmaSwitchboard extends serverAbstractSwitch<plasmaSwitchbo
             // clean up error stack
             checkInterruption();
             if ((crawlQueues.errorURL.stackSize() > 1000)) {
-                log.logFine("Cleaning Error-URLs report stack, " + crawlQueues.errorURL.stackSize() + " entries on stack");
+                if (this.log.isFine()) log.logFine("Cleaning Error-URLs report stack, " + crawlQueues.errorURL.stackSize() + " entries on stack");
                 crawlQueues.errorURL.clearStack();
                 hasDoneSomething = true;
             }
@@ -1949,7 +1949,7 @@ public final class plasmaSwitchboard extends serverAbstractSwitch<plasmaSwitchbo
             for (int i = 1; i <= 6; i++) {
                 checkInterruption();
                 if (crawlResults.getStackSize(i) > 1000) {
-                    log.logFine("Cleaning Loaded-URLs report stack, " + crawlResults.getStackSize(i) + " entries on stack " + i);
+                    if (this.log.isFine()) log.logFine("Cleaning Loaded-URLs report stack, " + crawlResults.getStackSize(i) + " entries on stack " + i);
                     crawlResults.clearStack(i);
                     hasDoneSomething = true;
                 }
@@ -1962,7 +1962,7 @@ public final class plasmaSwitchboard extends serverAbstractSwitch<plasmaSwitchbo
             // clean up news
             checkInterruption();
             try {                
-                log.logFine("Cleaning Incoming News, " + yacyCore.newsPool.size(yacyNewsPool.INCOMING_DB) + " entries on stack");
+                if (this.log.isFine()) log.logFine("Cleaning Incoming News, " + yacyCore.newsPool.size(yacyNewsPool.INCOMING_DB) + " entries on stack");
                 if (yacyCore.newsPool.automaticProcess() > 0) hasDoneSomething = true;
             } catch (IOException e) {}
             if (getConfigBool("cleanup.deletionProcessedNews", true)) {
@@ -2134,7 +2134,7 @@ public final class plasmaSwitchboard extends serverAbstractSwitch<plasmaSwitchbo
         plasmaParserDocument document = null;
         int processCase = entry.processCase();
         
-        log.logFine("processResourceStack processCase=" + processCase +
+        if (this.log.isFine()) log.logFine("processResourceStack processCase=" + processCase +
                 ", depth=" + entry.depth() +
                 ", maxDepth=" + ((entry.profile() == null) ? "null" : Integer.toString(entry.profile().generalDepth())) +
                 ", filter=" + ((entry.profile() == null) ? "null" : entry.profile().generalFilter()) +
@@ -2247,7 +2247,7 @@ public final class plasmaSwitchboard extends serverAbstractSwitch<plasmaSwitchbo
     
         // strip out words
         checkInterruption();
-        log.logFine("Condensing for '" + entry.url().toNormalform(false, true) + "'");
+        if (this.log.isFine()) log.logFine("Condensing for '" + entry.url().toNormalform(false, true) + "'");
         plasmaCondenser condenser;
         try {
             condenser = new plasmaCondenser(document, entry.profile().indexText(), entry.profile().indexMedia());
@@ -2289,7 +2289,7 @@ public final class plasmaSwitchboard extends serverAbstractSwitch<plasmaSwitchbo
         try {
             newEntry = wordIndex.storeDocument(entry, document, condenser);
         } catch (IOException e) {
-            log.logFine("Not Indexed Resource '" + entry.url().toNormalform(false, true) + "': process case=" + processCase);
+            if (this.log.isFine()) log.logFine("Not Indexed Resource '" + entry.url().toNormalform(false, true) + "': process case=" + processCase);
             addURLtoErrorDB(entry.url(), referrerURL.hash(), entry.initiator(), dc_title, "error storing url: " + e.getMessage(), new kelondroBitfield());
             return;
         }
@@ -2304,7 +2304,7 @@ public final class plasmaSwitchboard extends serverAbstractSwitch<plasmaSwitchbo
         
         // STORE WORD INDEX
         if ((!entry.profile().indexText()) && (!entry.profile().indexMedia())) {
-            log.logFine("Not Indexed Resource '" + entry.url().toNormalform(false, true) + "': process case=" + processCase);
+            if (this.log.isFine()) log.logFine("Not Indexed Resource '" + entry.url().toNormalform(false, true) + "': process case=" + processCase);
             addURLtoErrorDB(entry.url(), referrerURL.hash(), entry.initiator(), dc_title, plasmaCrawlEURL.DENIED_UNKNOWN_INDEXING_PROCESS_CASE, new kelondroBitfield());
             return;
         }
@@ -2553,15 +2553,15 @@ public final class plasmaSwitchboard extends serverAbstractSwitch<plasmaSwitchbo
     public boolean dhtTransferJob() {
         String rejectReason = dhtShallTransfer();
         if (rejectReason != null) {
-            log.logFine(rejectReason);
+            if (this.log.isFine()) log.logFine(rejectReason);
             return false;
         }
         if (this.dhtTransferChunk == null) {
-            log.logFine("no DHT distribution: no transfer chunk defined");
+            if (this.log.isFine()) log.logFine("no DHT distribution: no transfer chunk defined");
             return false;
         }
         if ((this.dhtTransferChunk != null) && (this.dhtTransferChunk.getStatus() != plasmaDHTChunk.chunkStatus_FILLED)) {
-            log.logFine("no DHT distribution: index distribution is in progress, status=" + this.dhtTransferChunk.getStatus());
+            if (this.log.isFine()) log.logFine("no DHT distribution: index distribution is in progress, status=" + this.dhtTransferChunk.getStatus());
             return false;
         }
         
@@ -2575,7 +2575,7 @@ public final class plasmaSwitchboard extends serverAbstractSwitch<plasmaSwitchbo
 
         if (ok) {
             dhtTransferChunk.setStatus(plasmaDHTChunk.chunkStatus_COMPLETE);
-            log.logFine("DHT distribution: transfer COMPLETE");
+            if (this.log.isFine()) log.logFine("DHT distribution: transfer COMPLETE");
             // adopt transfer count
             if ((System.currentTimeMillis() - starttime) > (10000 * peerCount)) {
                 dhtTransferIndexCount--;
@@ -2595,11 +2595,11 @@ public final class plasmaSwitchboard extends serverAbstractSwitch<plasmaSwitchbo
             if (dhtTransferChunk.getTransferFailedCounter() >= maxChunkFails) {
                 //System.out.println("DEBUG: " + dhtTransferChunk.getTransferFailedCounter() + " of " + maxChunkFails + " sendings failed for this chunk, aborting!");
                 dhtTransferChunk.setStatus(plasmaDHTChunk.chunkStatus_FAILED);
-                log.logFine("DHT distribution: transfer FAILED");   
+                if (this.log.isFine()) log.logFine("DHT distribution: transfer FAILED");   
             }
             else {
                 //System.out.println("DEBUG: " + dhtTransferChunk.getTransferFailedCounter() + " of " + maxChunkFails + " sendings failed for this chunk, retrying!");
-                log.logFine("DHT distribution: transfer FAILED, sending this chunk again");   
+                if (this.log.isFine()) log.logFine("DHT distribution: transfer FAILED, sending this chunk again");   
             }
             return false;
         }

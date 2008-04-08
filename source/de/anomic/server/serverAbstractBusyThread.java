@@ -207,7 +207,7 @@ public abstract class serverAbstractBusyThread extends serverAbstractThread impl
         if (this.syncObject != null) {
             synchronized (this.syncObject) {
                 if (this.log != null)
-                    this.log.logFine("thread '" + this.getName()
+                    if (this.log.isFine()) this.log.logFine("thread '" + this.getName()
                             + "' has received a notification from thread '"
                             + Thread.currentThread().getName() + "'.");
                 this.syncObject.notifyAll();

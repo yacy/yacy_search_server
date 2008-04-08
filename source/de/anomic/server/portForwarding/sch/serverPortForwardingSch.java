@@ -110,7 +110,7 @@ public class serverPortForwardingSch implements serverPortForwarding{
             int localPort
     ) throws Exception {
         try {
-            this.log.logFine("Initializing port forwarding via sch ...");
+            if (this.log.isFine()) this.log.logFine("Initializing port forwarding via sch ...");
 
             this.switchboard = switchboard;
 
@@ -205,7 +205,7 @@ public class serverPortForwardingSch implements serverPortForwarding{
 
     public synchronized boolean reconnect() throws IOException {
         if ((!this.isConnected()) && (!Thread.currentThread().isInterrupted())) {
-            this.log.logFine("Trying to reconnect to port forwarding host.");
+            if (this.log.isFine()) this.log.logFine("Trying to reconnect to port forwarding host.");
             this.disconnect();
             this.connect();
             return this.isConnected();
