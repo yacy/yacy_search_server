@@ -63,6 +63,7 @@
 package de.anomic.http;
 
 import java.io.BufferedReader;
+import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileOutputStream;
@@ -71,7 +72,6 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.io.PrintWriter;
-import java.io.PushbackInputStream;
 import java.io.Writer;
 import java.net.BindException;
 import java.net.ConnectException;
@@ -514,12 +514,12 @@ public final class httpdProxyHandler {
             
             prepareRequestHeader(requestHeader, httpVer);
             
-            // generate request-url
-            final String connectHost = (yAddress == null) ? host +":"+ port : yAddress;
-            final String getUrl = "http://"+ connectHost + remotePath;
-            
             // setup HTTP-client
             final HttpClient client = HttpFactory.newClient(requestHeader, timeout);
+            
+            final String connectHost = hostPart(host, port, yAddress);
+            final String getUrl = "http://"+ connectHost + remotePath;
+            client.setProxy(getProxyConfig(connectHost));
             
             // send request
             try {
@@ -585,7 +585,7 @@ public final class httpdProxyHandler {
                 // make a transformer
                 theLogger.logFine("create transformer for URL " + url);
                 //hfos = new htmlFilterOutputStream((gzippedOut != null) ? gzippedOut : ((chunkedOut != null)? chunkedOut : respond), null, transformer, (ext.length() == 0));
-                String charSet = httpHeader.getCharSet(responseHeader);
+                final String charSet = httpHeader.getCharSet(responseHeader);
                 hfos = new htmlFilterWriter((gzippedOut != null) ? gzippedOut : ((chunkedOut != null)? chunkedOut : respond),charSet, null, transformer, (ext.length() == 0));
             } else {
                 // simply pass through without parsing
@@ -931,19 +931,15 @@ public final class httpdProxyHandler {
             prepareRequestHeader(requestHeader, httpVer);            
             
             // setup HTTP-client
-            HttpClient client = HttpFactory.newClient();
-            client.setTimeout(timeout);
+            HttpClient client = HttpFactory.newClient(requestHeader, timeout);
             
-            // set header for connection
-            client.setHeader(requestHeader);
+            // generate request-url
+            final String connectHost = hostPart(host, port, yAddress);
+            final String getUrl = "http://"+ connectHost + remotePath;
+            client.setProxy(getProxyConfig(connectHost));
             
             // send request
-            final String connectHost = (yAddress == null) ? host +":"+ port : yAddress;
-            client.setProxy(getProxyConfig(connectHost));
-            final String getUrl = "http://"+ connectHost + remotePath;
-            
             try {
-            // sending the http-HEAD request to the server
             res = client.HEAD(getUrl);
             
             // determine if it's an internal error of the httpc
@@ -967,8 +963,22 @@ public final class httpdProxyHandler {
             handleProxyException(e,conProp,respond,url); 
         }
     }
+
+    /**
+     * @param host
+     * @param port
+     * @param yAddress
+     * @return
+     */
+    private static String hostPart(String host, int port, String yAddress) {
+        final String connectHost = (yAddress == null) ? host +":"+ port : yAddress;
+        return connectHost;
+    }
     
-    public static void doPost(Properties conProp, httpHeader requestHeader, OutputStream respond, PushbackInputStream body) throws IOException {
+    public static void doPost(Properties conProp, httpHeader requestHeader, OutputStream respond, InputStream body) throws IOException {
+        assert conProp != null : "precondition violated: conProp != null";
+        assert requestHeader != null : "precondition violated: requestHeader != null";
+        assert body != null : "precondition violated: body != null";
         yacyURL url = null;
         try {
             // remembering the starting time of the request
@@ -1029,14 +1039,27 @@ public final class httpdProxyHandler {
             // set header for connection
             client.setHeader(requestHeader);
             
-            // send request
-            final String connectHost = (yAddress == null) ? host +":"+ port : yAddress;
+            final String connectHost = hostPart(host, port, yAddress);
             client.setProxy(getProxyConfig(connectHost));
             final String getUrl = "http://"+ connectHost + remotePath;
+            
+            // check input
+            if(body == null) {
+                theLogger.logSevere("no body to POST!");
+            }
+            // from old httpc:
+            // "if there is a body to the call, we would have a CONTENT-LENGTH tag in the requestHeader"
+            // it seems that it is a HTTP/1.1 connection which stays open (the inputStream) and endlessly waits for
+            // input so we have to end it to do the request
+            final long requestLength = requestHeader.contentLength();
+            if(requestLength > -1) {
+                ByteArrayOutputStream buffer = new ByteArrayOutputStream();
+                serverFileUtils.copy(body, buffer, requestLength);
+                body = new ByteArrayInputStream(buffer.toByteArray());
+            }
             HttpResponse res = null;
             try {
             // sending the request
-            // TODO is the input stream required and valid HTTP-data?
             res = client.POST(getUrl, body);
             
             // determine if it's an internal error of the httpc
@@ -1133,7 +1156,7 @@ public final class httpdProxyHandler {
     private static void addXForwardedForHeader(Properties conProp, httpHeader requestHeader) {
         // setting the X-Forwarded-For Header
         if (switchboard.getConfigBool("proxy.sendXForwardedForHeader", true)) {
-            requestHeader.put(httpHeader.X_FORWARDED_FOR,conProp.getProperty(httpHeader.CONNECTION_PROP_CLIENTIP));
+            requestHeader.put(httpHeader.X_FORWARDED_FOR, conProp.getProperty(httpHeader.CONNECTION_PROP_CLIENTIP));
         }
     }
 

@@ -952,7 +952,7 @@ public final class httpHeader extends TreeMap<String, String> implements Map<Str
      * @param header
      * @return
      */
-    static String getCharSet(httpHeader header) {
+    static String getCharSet(final httpHeader header) {
         String charSet = header.getCharacterEncoding();
         if (charSet == null) {
             charSet = DEFAULT_CHARSET;

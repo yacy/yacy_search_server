@@ -54,11 +54,12 @@ import org.apache.commons.httpclient.methods.multipart.StringPart;
 import org.apache.commons.httpclient.params.HttpClientParams;
 import org.apache.commons.httpclient.params.HttpMethodParams;
 import org.apache.commons.httpclient.protocol.Protocol;
+import org.apache.commons.httpclient.protocol.ProtocolSocketFactory;
 import org.apache.commons.httpclient.util.DateUtil;
 
 import de.anomic.kelondro.kelondroBase64Order;
+import de.anomic.server.serverFileUtils;
 import de.anomic.server.logging.serverLog;
-import de.anomic.tools.StreamTools;
 import de.anomic.yacy.yacyVersion;
 
 /**
@@ -90,7 +91,7 @@ public class JakartaCommonsHttpClient extends de.anomic.http.HttpClient {
         // TODO should this be configurable?
         
         // accept self-signed or untrusted certificates
-        Protocol.registerProtocol("https", new Protocol("https", new EasySSLProtocolSocketFactory(), 443));
+        Protocol.registerProtocol("https", new Protocol("https", (ProtocolSocketFactory)new EasySSLProtocolSocketFactory(), 443));
     }
 
     private final Map<HttpMethod, InputStream> openStreams = new HashMap<HttpMethod, InputStream>();
@@ -227,7 +228,7 @@ public class JakartaCommonsHttpClient extends de.anomic.http.HttpClient {
                     if (file.isFile() && file.canRead()) {
                         // read file
                         final ByteArrayOutputStream fileData = new ByteArrayOutputStream();
-                        StreamTools.copyToStreams(new FileInputStream(file), new OutputStream[] { fileData });
+                        serverFileUtils.copyToStreams(new FileInputStream(file), new OutputStream[] { fileData });
                         value = fileData.toByteArray();
                     }
                 }
@@ -505,5 +506,23 @@ public class JakartaCommonsHttpClient extends de.anomic.http.HttpClient {
      */
     public static String getCurrentUserAgent() {
         return (String) apacheHttpClient.getParams().getParameter(HttpClientParams.USER_AGENT);
+    }
+
+    /**
+     * a list of all connections (not yet implemented)
+     * 
+     * @return
+     */
+    public static HttpConnectionInfo[] allConnections() {
+        return new HttpConnectionInfo[0];
+    }
+    
+    /**
+     * number of active connections
+     * 
+     * @return
+     */
+    public static int connectionCount() {
+        return conManager.getConnectionsInPool();
     }
 }

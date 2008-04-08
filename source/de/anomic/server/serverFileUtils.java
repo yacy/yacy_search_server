@@ -40,8 +40,10 @@
 
 package de.anomic.server;
 
+import java.io.BufferedInputStream;
 import java.io.BufferedOutputStream;
 import java.io.BufferedReader;
+import java.io.BufferedWriter;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
@@ -79,17 +81,19 @@ public final class serverFileUtils {
     }
     
     /**
-    * Copies an InputStream to an OutputStream.
-    * @param source InputStream
-    * @param dest OutputStream
-    * @param count the total amount of bytes to copy
-    * @return Total number of bytes copied.
-    * 
-    * @see #copy(InputStream source, File dest)
-    * @see #copyRange(File source, OutputStream dest, int start)
-    * @see #copy(File source, OutputStream dest)
-    * @see #copy(File source, File dest)
-    */
+     * Copies an InputStream to an OutputStream.
+     * 
+     * @param source InputStream
+     * @param dest OutputStream
+     * @param count the total amount of bytes to copy
+     * @return Total number of bytes copied.
+     * @throws IOException 
+     * 
+     * @see #copy(InputStream source, File dest)
+     * @see #copyRange(File source, OutputStream dest, int start)
+     * @see #copy(File source, OutputStream dest)
+     * @see #copy(File source, File dest)
+     */
     public static long copy(InputStream source, OutputStream dest, long count) throws IOException {
         byte[] buffer = new byte[DEFAULT_BUFFER_SIZE];                
         int chunkSize = (int) ((count > 0) ? Math.min(count, DEFAULT_BUFFER_SIZE) : DEFAULT_BUFFER_SIZE);
@@ -153,15 +157,17 @@ public final class serverFileUtils {
     }
     
     /**
-    * Copies an InputStream to a File.
-    * @param source    InputStream
-    * @param dest    File
-    * @param the amount of bytes to copy
-    * @see #copy(InputStream source, OutputStream dest)
-    * @see #copyRange(File source, OutputStream dest, int start)
-    * @see #copy(File source, OutputStream dest)
-    * @see #copy(File source, File dest)
-    */
+     * Copies an InputStream to a File.
+     * 
+     * @param source    InputStream
+     * @param dest    File
+     * @param count the amount of bytes to copy
+     * @throws IOException 
+     * @see #copy(InputStream source, OutputStream dest)
+     * @see #copyRange(File source, OutputStream dest, int start)
+     * @see #copy(File source, OutputStream dest)
+     * @see #copy(File source, File dest)
+     */
     public static void copy(InputStream source, File dest, long count) throws IOException {
         FileOutputStream fos = null;
         try {
@@ -173,15 +179,16 @@ public final class serverFileUtils {
     }
 
     /**
-    * Copies a part of a File to an OutputStream.
-    * @param source    File
-    * @param dest    OutputStream
-    * @param start Number of bytes to skip from the beginning of the File
-    * @see #copy(InputStream source, OutputStream dest)
-    * @see #copy(InputStream source, File dest)
-    * @see #copy(File source, OutputStream dest)
-    * @see #copy(File source, File dest)
-    */
+     * Copies a part of a File to an OutputStream.
+     * @param source    File
+     * @param dest    OutputStream
+     * @param start Number of bytes to skip from the beginning of the File
+     * @throws IOException 
+     * @see #copy(InputStream source, OutputStream dest)
+     * @see #copy(InputStream source, File dest)
+     * @see #copy(File source, OutputStream dest)
+     * @see #copy(File source, File dest)
+     */
     public static void copyRange(File source, OutputStream dest, int start) throws IOException {
         InputStream fis = null;
         try {
@@ -195,14 +202,15 @@ public final class serverFileUtils {
     }
 
     /**
-    * Copies a File to an OutputStream.
-    * @param source    File
-    * @param dest    OutputStream
-    * @see #copy(InputStream source, OutputStream dest)
-    * @see #copy(InputStream source, File dest)
-    * @see #copyRange(File source, OutputStream dest, int start)
-    * @see #copy(File source, File dest)
-    */
+     * Copies a File to an OutputStream.
+     * @param source    File
+     * @param dest    OutputStream
+     * @throws IOException 
+     * @see #copy(InputStream source, OutputStream dest)
+     * @see #copy(InputStream source, File dest)
+     * @see #copyRange(File source, OutputStream dest, int start)
+     * @see #copy(File source, File dest)
+     */
     public static void copy(File source, OutputStream dest) throws IOException {
         InputStream fis = null;
         try {
@@ -214,15 +222,16 @@ public final class serverFileUtils {
     }
 
     /**
-    * Copies a File to a File.
-    * @param source    File
-    * @param dest    File
-    * @param count the amount of bytes to copy
-    * @see #copy(InputStream source, OutputStream dest)
-    * @see #copy(InputStream source, File dest)
-    * @see #copyRange(File source, OutputStream dest, int start)
-    * @see #copy(File source, OutputStream dest)
-    */
+     * Copies a File to a File.
+     * @param source    File
+     * @param dest    File
+     * @param count the amount of bytes to copy
+     * @throws IOException 
+     * @see #copy(InputStream source, OutputStream dest)
+     * @see #copy(InputStream source, File dest)
+     * @see #copyRange(File source, OutputStream dest, int start)
+     * @see #copy(File source, OutputStream dest)
+     */
     public static void copy(File source, File dest) throws IOException {
         FileInputStream fis = null;
         FileOutputStream fos = null;
@@ -499,5 +508,76 @@ public final class serverFileUtils {
         } catch (IOException e) {
             e.printStackTrace();
         }
+    }
+
+    /**
+     * copies the input stream to all output streams (byte per byte)
+     * @param in
+     * @param outs
+     * @return
+     * @throws IOException
+     */
+    public static int copyToStreams(InputStream in, final OutputStream[] outs) throws IOException {
+        if(!(in instanceof BufferedInputStream)) {
+            // add buffer
+            in = new BufferedInputStream(in);
+        }
+        
+        // check if buffer is used
+        int i = 0;
+        for(final OutputStream output: outs) {
+            if (!(output instanceof BufferedOutputStream)) {
+                // add buffer
+                outs[i] = new BufferedOutputStream(output);
+            }
+            i++;
+        }
+        
+        int count = 0;
+        // copy bytes
+        int b;
+        while((b = in.read()) != -1) {
+            count++;
+            for(final OutputStream out: outs) {
+                out.write(b);
+            }
+        }
+        return count;
+    }
+
+    /**
+     * copies the input stream to all writers (byte per byte)
+     * @param data
+     * @param writers
+     * @param charSet
+     * @return
+     * @throws IOException
+     */
+    public static int copyToWriters(final InputStream data, final Writer[] writers, final String charSet) throws IOException {
+        // the docs say: "For top efficiency, consider wrapping an InputStreamReader within a BufferedReader."
+        final BufferedReader sourceReader = new BufferedReader(new InputStreamReader(data, charSet));
+        
+        // check if buffer is used. From the documentation:
+        // "For top efficiency, consider wrapping an OutputStreamWriter within a BufferedWriter so as to avoid frequent
+        // converter invocations"
+        int i = 0;
+        for(final Writer writer: writers) {
+            if (!(writer instanceof BufferedWriter)) {
+                // add buffer
+                writers[i] = new BufferedWriter(writer);
+            }
+            i++;
+        }
+        
+        int count = 0;
+        // copy bytes
+        int b;
+        while((b = sourceReader.read()) != -1) {
+            count++;
+            for(final Writer writer: writers) {
+                writer.write(b);
+            }
+        }
+        return count;
     }
 }

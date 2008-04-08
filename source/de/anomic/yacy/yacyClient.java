@@ -83,11 +83,6 @@ import de.anomic.xml.rssReader;
 
 public final class yacyClient {
 
-    /**
-     * 
-     */
-    private static final String GZIP_POST_BODY = "GZIP_POST_BODY";
-
     public static int publishMySeed(String address, String otherHash) {
         // this is called to enrich the seed information by
         // - own address (if peer is behind a nat/router)
@@ -911,7 +906,7 @@ public final class yacyClient {
         
         // enabling gzip compression for post request body
         if ((gzipBody) && (targetSeed.getVersion() >= yacyVersion.YACY_SUPPORTS_GZIP_POST_REQUESTS)) {
-            post.put(GZIP_POST_BODY,"true");
+            // TODO generate gzip-Header (and stream?)
         }
         post.put("wordc", Integer.toString(indexes.length));
         
@@ -968,7 +963,7 @@ public final class yacyClient {
         
         // enabling gzip compression for post request body
         if ((gzipBody) && (targetSeed.getVersion() >= yacyVersion.YACY_SUPPORTS_GZIP_POST_REQUESTS)) {
-            post.put(GZIP_POST_BODY,"true");
+            // TODO generate gzip-Header (and stream?)
         }        
         
         String resource = "";

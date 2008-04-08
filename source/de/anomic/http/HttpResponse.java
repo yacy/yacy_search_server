@@ -32,7 +32,7 @@ import java.io.OutputStreamWriter;
 import java.io.UnsupportedEncodingException;
 import java.io.Writer;
 
-import de.anomic.tools.StreamTools;
+import de.anomic.server.serverFileUtils;
 
 /**
  * @author daniel
@@ -108,12 +108,12 @@ public interface HttpResponse {
                 if (hfos instanceof OutputStream) {
                     OutputStream[] streams = (byteStream == null ? new OutputStream[] { (OutputStream) hfos }
                             : new OutputStream[] { (OutputStream) hfos, byteStream });
-                    StreamTools.copyToStreams(data, streams);
+                    serverFileUtils.copyToStreams(data, streams);
                 } else if (hfos instanceof Saver) {
                     String charSet = httpHeader.getCharSet(res.getResponseHeader());
                     Writer[] writers = (byteStream == null ? new Writer[] { (Writer) hfos } : new Writer[] { (Writer) hfos,
                             new OutputStreamWriter(byteStream, charSet) });
-                    StreamTools.copyToWriters(data, writers, charSet);
+                    serverFileUtils.copyToWriters(data, writers, charSet);
                 } else {
                     throw new IOException("cannot save data: hfos-type ("+  hfos.getClass().toString() +") not supported!");
                 }

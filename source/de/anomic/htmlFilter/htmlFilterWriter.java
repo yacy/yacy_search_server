@@ -314,7 +314,7 @@ public final class htmlFilterWriter extends Writer {
     }
 
     public void write(int c) throws IOException {
-//      System.out.println((char) b);
+//      System.out.println((char) c);
         if ((binaryUnsuspect) && (binaryHint((char)c))) {
             binaryUnsuspect = false;
             if (passbyIfBinarySuspect) finalize();
@@ -489,10 +489,10 @@ public final class htmlFilterWriter extends Writer {
 //      if (transformer != null) {transformer.close(); transformer = null;}
     }
 
-    private static boolean binaryHint(char c) {
+    private static boolean binaryHint(final char c) {
         // space, punctiation and symbols, letters and digits (ASCII/latin)
         //if (c >= 31 && c < 128) return false;
-        if(c >= 31) return false;
+        if(c > 31) return false;
         //  8 = backspace
         //  9 = horizontal tab
         // 10 = new line (line feed)

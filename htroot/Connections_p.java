@@ -51,6 +51,8 @@ import java.net.InetAddress;
 import java.net.URLEncoder;
 import java.util.Properties;
 
+import de.anomic.http.HttpConnectionInfo;
+import de.anomic.http.JakartaCommonsHttpClient;
 import de.anomic.http.httpHeader;
 import de.anomic.http.httpd;
 import de.anomic.plasma.plasmaSwitchboard;
@@ -227,24 +229,21 @@ public final class Connections_p {
         prop.putNum("numActivePending", numActivePending);
         
         // client sessions
-        // FIXME track connections of JakartaCommons Connection Manager
-//        httpc[] a = httpc.allConnections();
+        HttpConnectionInfo[] a = JakartaCommonsHttpClient.allConnections();
+        // TODO sorting
 //        Arrays.sort(a, httpc.connectionTimeComparatorInstance);
         int c = 0;
-//        for (int i = 0; i < a.length; i++) {
-//            httpc clientConnection = a[i];
-//            if (clientConnection != null) {
-//                prop.put("clientList_" + c + "_clientProtocol", (clientConnection.ssl) ? "HTTPS" : "HTTP");
-//                prop.putNum("clientList_" + c + "_clientLifetime", System.currentTimeMillis() - clientConnection.initTime);
-//                prop.putNum("clientList_" + c + "_clientIdletime", System.currentTimeMillis() - clientConnection.lastIO);
-//                prop.put("clientList_" + c + "_clientTargetHost", clientConnection.adressed_host + ":" + clientConnection.adressed_port);
-//                prop.putHTML("clientList_" + c + "_clientCommand", (clientConnection.command == null) ? "-" : clientConnection.command);
-//                prop.put("clientList_" + c + "_clientID", clientConnection.hashCode());
-//                c++;
-//            }
-//        }
+        for (HttpConnectionInfo conInfo: a) {
+            prop.put("clientList_" + c + "_clientProtocol", conInfo.getProtocol());
+            prop.putNum("clientList_" + c + "_clientLifetime", conInfo.getLifetime());
+            prop.putNum("clientList_" + c + "_clientIdletime", conInfo.getIdletime());
+            prop.put("clientList_" + c + "_clientTargetHost", conInfo.getTargetHost());
+            prop.putHTML("clientList_" + c + "_clientCommand", conInfo.getCommand());
+            prop.put("clientList_" + c + "_clientID", conInfo.getID());
+            c++;
+       }
         prop.put("clientList", c);
-        prop.put("clientActive", c);
+        prop.put("clientActive", JakartaCommonsHttpClient.connectionCount());
         
         // return rewrite values for templates
         return prop;
