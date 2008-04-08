@@ -78,7 +78,7 @@ public class JakartaCommonsHttpClient extends de.anomic.http.HttpClient {
 
     static {
         // set user-agent
-        apacheHttpClient.getParams().setParameter(HttpClientParams.USER_AGENT,
+        apacheHttpClient.getParams().setParameter(HttpMethodParams.USER_AGENT,
                                                   "yacy/" + yacyVersion.thisVersion().releaseNr +
                                                           " (www.yacy.net; " +
                                                           de.anomic.http.HttpClient.getSystemOST() + ") " +
@@ -505,7 +505,7 @@ public class JakartaCommonsHttpClient extends de.anomic.http.HttpClient {
      * @return
      */
     public static String getCurrentUserAgent() {
-        return (String) apacheHttpClient.getParams().getParameter(HttpClientParams.USER_AGENT);
+        return (String) apacheHttpClient.getParams().getParameter(HttpMethodParams.USER_AGENT);
     }
 
     /**

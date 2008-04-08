@@ -71,6 +71,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.OutputStream;
+import java.io.OutputStreamWriter;
 import java.io.PrintWriter;
 import java.io.Writer;
 import java.net.BindException;
@@ -481,7 +482,7 @@ public final class httpdProxyHandler {
         
         GZIPOutputStream gzippedOut = null; 
         httpChunkedOutputStream chunkedOut = null;
-        Object hfos = null;
+        Writer hfos = null;
         
         HttpResponse res = null;                
         try {
@@ -590,7 +591,7 @@ public final class httpdProxyHandler {
             } else {
                 // simply pass through without parsing
                 theLogger.logFine("create passthrough for URL " + url + ", extension '" + ext + "', mime-type '" + responseHeader.mime() + "'");
-                hfos = (gzippedOut != null) ? gzippedOut : ((chunkedOut != null)? chunkedOut : respond);
+                hfos = new OutputStreamWriter((gzippedOut != null) ? gzippedOut : ((chunkedOut != null)? chunkedOut : respond), httpHeader.getCharSet(res.getResponseHeader()));
             }
             
             // handle incoming cookies

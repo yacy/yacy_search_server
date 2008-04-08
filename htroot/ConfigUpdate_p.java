@@ -86,17 +86,17 @@ public class ConfigUpdate_p {
                 yacyVersion updateVersion = yacyVersion.rulebasedUpdateInfo(true);
                 if (updateVersion == null) {
                     prop.put("candeploy_autoUpdate", "2"); // no more recent release found
-                } else try {
+                } else {
                     // there is a version that is more recent. Load it and re-start with it
                     sb.getLog().logInfo("AUTO-UPDATE: downloading more recent release " + updateVersion.url);
-                    yacyVersion.downloadRelease(updateVersion);
+                    boolean downloaded = yacyVersion.downloadRelease(updateVersion);
                     prop.put("candeploy_autoUpdate_downloadedRelease", updateVersion.name);
                     File releaseFile = new File(sb.getRootPath(), "DATA/RELEASE/" + updateVersion.name);
                     boolean devenvironment = yacyVersion.combined2prettyVersion(sb.getConfig("version","0.1")).startsWith("dev");
                     if (devenvironment) {
                         sb.getLog().logInfo("AUTO-UPDATE: omiting update because this is a development environment");
                         prop.put("candeploy_autoUpdate", "3");
-                    } else if ((!releaseFile.exists()) || (releaseFile.length() == 0)) {
+                    } else if ((!downloaded) || (!releaseFile.exists()) || (releaseFile.length() == 0)) {
                         sb.getLog().logInfo("AUTO-UPDATE: omiting update because download failed (file cannot be found or is too small)");
                         prop.put("candeploy_autoUpdate", "4");
                     } else {
@@ -105,8 +105,6 @@ public class ConfigUpdate_p {
                         sb.getLog().logInfo("AUTO-UPDATE: deploy and restart initiated");
                         prop.put("candeploy_autoUpdate", "1");
                     }
-                } catch (IOException e) {
-                    sb.getLog().logSevere("AUTO-UPDATE: could not download and install release " + updateVersion.url + ": " + e.getMessage());
                 }
             }
          

@@ -2003,29 +2003,27 @@ public final class plasmaSwitchboard extends serverAbstractSwitch<plasmaSwitchbo
                 		deleteQueue.add(seed.hash);
                 	}
                 }
-                for(int i=0;i<deleteQueue.size();++i) yacyCore.seedDB.removePotential((String)deleteQueue.get(i));
+                for (int i = 0; i < deleteQueue.size(); ++i) yacyCore.seedDB.removePotential((String)deleteQueue.get(i));
             }
             
             // check if update is available and
             // if auto-update is activated perform an automatic installation and restart
             yacyVersion updateVersion = yacyVersion.rulebasedUpdateInfo(false);
-            if (updateVersion != null) try {
+            if (updateVersion != null) {
                 // there is a version that is more recent. Load it and re-start with it
                 log.logInfo("AUTO-UPDATE: downloading more recent release " + updateVersion.url);
-                yacyVersion.downloadRelease(updateVersion);
+                boolean downloaded = yacyVersion.downloadRelease(updateVersion);
                 File releaseFile = new File(sb.getRootPath(), "DATA/RELEASE/" + updateVersion.name);
                 boolean devenvironment = yacyVersion.combined2prettyVersion(sb.getConfig("version","0.1")).startsWith("dev");
                 if (devenvironment) {
                     log.logInfo("AUTO-UPDATE: omiting update because this is a development environment");
-                } else if ((!releaseFile.exists()) || (releaseFile.length() == 0)) {
+                } else if ((!downloaded) || (!releaseFile.exists()) || (releaseFile.length() == 0)) {
                     log.logInfo("AUTO-UPDATE: omiting update because download failed (file cannot be found or is too small)");
                 } else {
                     yacyVersion.deployRelease(updateVersion.name);
                     terminate(5000);
                     log.logInfo("AUTO-UPDATE: deploy and restart initiated");
                 }
-            } catch (IOException e) {
-                log.logSevere("AUTO-UPDATE: could not download and install release " + updateVersion.url + ": " + e.getMessage());
             }
             
             // initiate broadcast about peer startup to spread supporter url

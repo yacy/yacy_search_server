@@ -300,7 +300,7 @@ public final class serverCore extends serverAbstractBusyThread implements server
             if (bindIP.startsWith("#")) {
                 String interfaceName = bindIP.substring(1);
                 String hostName = null;
-                if (this.log.isFine()) this.log.logFine("Trying to determine IP address of interface '" + interfaceName + "'.");                    
+                this.log.logFine("Trying to determine IP address of interface '" + interfaceName + "'.");                    
 
                 Enumeration<NetworkInterface> interfaces = NetworkInterface.getNetworkInterfaces();
                 if (interfaces != null) {
@@ -402,7 +402,7 @@ public final class serverCore extends serverAbstractBusyThread implements server
             // prepare for new connection
             // idleThreadCheck();
             this.switchboard.handleBusyState(this.busySessions.size());
-            if (log.isFinest()) this.log.logFinest("* waiting for connections, " + this.busySessions.size() + " sessions running");
+            this.log.logFinest("* waiting for connections, " + this.busySessions.size() + " sessions running");
                         
             announceThreadBlockApply();
             
@@ -480,7 +480,8 @@ public final class serverCore extends serverAbstractBusyThread implements server
         Thread.interrupted();
         
         // shut down all busySessions
-        if (this.busySessions != null) for (Session session: this.busySessions) {
+        for (Session session: this.busySessions) {
+            try {session.notifyAll();} catch (IllegalMonitorStateException e) {e.printStackTrace();}
             try {session.interrupt();} catch (SecurityException e ) {e.printStackTrace();}
         }
         
@@ -539,7 +540,7 @@ public final class serverCore extends serverAbstractBusyThread implements server
     public final class Session extends Thread {
 
         boolean destroyed = false;
-        private boolean running = false;
+        private boolean runningsession = false;
         private boolean stopped = false;
         
         private long start;                // startup time
@@ -566,7 +567,7 @@ public final class serverCore extends serverAbstractBusyThread implements server
             this.hashIndex = sessionCounter;
             sessionCounter++;
             
-            if (!this.running)  {
+            if (!this.runningsession)  {
                // this.setDaemon(true);
                this.start();
             }  else { 
@@ -638,7 +639,7 @@ public final class serverCore extends serverAbstractBusyThread implements server
     	*/
     
     	public void log(boolean outgoing, String request) {
-    	    if (log.isFine()) log.logFine(this.userAddress.getHostAddress() + "/" + this.identity + " " +
+    	    serverCore.this.log.logFine(this.userAddress.getHostAddress() + "/" + this.identity + " " +
     		     "[" + ((busySessions == null)? -1 : busySessions.size()) + ", " + this.commandCounter +
     		     ((outgoing) ? "] > " : "] < ") +
     		     request);
@@ -667,7 +668,7 @@ public final class serverCore extends serverAbstractBusyThread implements server
          * @return whether the {@link Thread} is currently running
          */
         public boolean isRunning() {
-            return this.running;
+            return this.runningsession;
         }
         
         /**
@@ -676,7 +677,7 @@ public final class serverCore extends serverAbstractBusyThread implements server
          * @see java.lang.Thread#run()
          */
         public void run()  {
-            this.running = true;
+            this.runningsession = true;
             
             try {
                 // setting the session startup time

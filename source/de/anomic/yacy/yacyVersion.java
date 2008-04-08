@@ -324,23 +324,27 @@ public final class yacyVersion implements Comparator<yacyVersion>, Comparable<ya
         return new DevMain(devreleases, mainreleases);
     }
     
-    public static void downloadRelease(yacyVersion release) throws IOException {
+    public static boolean downloadRelease(yacyVersion release) {
         File storagePath = plasmaSwitchboard.getSwitchboard().releasePath;
         // load file
         File download = new File(storagePath, release.url.getFileName());
-        HttpClient client = HttpFactory.newClient(null, 30000);
+        HttpClient client = HttpFactory.newClient(null, 60000);
         HttpResponse res = null;
         try {
             res = client.GET(release.url.toString());
             Saver.writeContent(res, new FileOutputStream(download), null);
+            if ((!download.exists()) || (download.length() == 0)) throw new IOException("wget of url " + release.url + " failed");
+        } catch (IOException e) {
+            serverLog.logSevere("yacyVersion", "download of " + release.name + " failed: " + e.getMessage());
+            if (download.exists()) download.delete();
         } finally {
-            if(res != null) {
+            if (res != null) {
                 // release connection
                 res.closeStream();
             }
         }
-        if ((!download.exists()) || (download.length() == 0)) throw new IOException("wget of url " + release.url + " failed");
         plasmaSwitchboard.getSwitchboard().setConfig("update.time.download", System.currentTimeMillis());
+        return download.exists();
     }
     
     

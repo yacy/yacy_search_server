@@ -54,7 +54,7 @@ public class JakartaCommonsHttpResponse implements HttpResponse {
      * @param method
      * @throws IOException
      */
-    public JakartaCommonsHttpResponse(final HttpMethod method) throws IOException {
+    public JakartaCommonsHttpResponse(final HttpMethod method) {
         super();
 
         this.method = method;

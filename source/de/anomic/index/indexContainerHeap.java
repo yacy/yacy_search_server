@@ -61,7 +61,7 @@ public final class indexContainerHeap {
     private kelondroRow payloadrow;
     private serverLog log;
     private kelondroBytesLongMap index;
-    private SortedMap<String, indexContainer> cache;
+    SortedMap<String, indexContainer> cache;
     private File backupFile;
     private boolean readOnlyMode;
     // index xor cache is used. If one is not null, then the other must be null

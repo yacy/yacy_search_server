@@ -542,6 +542,9 @@ public final class serverFileUtils {
                 out.write(b);
             }
         }
+        for(final OutputStream out: outs) {
+            out.flush();
+        }
         return count;
     }
 
@@ -577,6 +580,9 @@ public final class serverFileUtils {
             for(final Writer writer: writers) {
                 writer.write(b);
             }
+        }
+        for(final Writer writer: writers) {
+            writer.flush();
         }
         return count;
     }

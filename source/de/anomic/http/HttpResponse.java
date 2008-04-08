@@ -101,22 +101,27 @@ public interface HttpResponse {
          * @throws IOException
          * @throws UnsupportedEncodingException
          */
-        public static void writeContent(HttpResponse res, Object hfos, OutputStream byteStream) throws IOException,
+        public static void writeContent(HttpResponse res, OutputStream hfos, OutputStream byteStream) throws IOException,
                 UnsupportedEncodingException {
             try {
                 InputStream data = res.getDataAsStream();
-                if (hfos instanceof OutputStream) {
-                    OutputStream[] streams = (byteStream == null ? new OutputStream[] { (OutputStream) hfos }
-                            : new OutputStream[] { (OutputStream) hfos, byteStream });
-                    serverFileUtils.copyToStreams(data, streams);
-                } else if (hfos instanceof Saver) {
-                    String charSet = httpHeader.getCharSet(res.getResponseHeader());
-                    Writer[] writers = (byteStream == null ? new Writer[] { (Writer) hfos } : new Writer[] { (Writer) hfos,
-                            new OutputStreamWriter(byteStream, charSet) });
-                    serverFileUtils.copyToWriters(data, writers, charSet);
-                } else {
-                    throw new IOException("cannot save data: hfos-type ("+  hfos.getClass().toString() +") not supported!");
-                }
+                OutputStream[] streams = (byteStream == null ? new OutputStream[] { (OutputStream) hfos }
+                        : new OutputStream[] { (OutputStream) hfos, byteStream });
+                serverFileUtils.copyToStreams(data, streams);
+                
+            } finally {
+                res.closeStream();
+            }
+        }
+        
+        public static void writeContent(HttpResponse res, Writer hfos, OutputStream byteStream) throws IOException,
+        UnsupportedEncodingException {
+            try {
+                InputStream data = res.getDataAsStream();
+                String charSet = httpHeader.getCharSet(res.getResponseHeader());
+                Writer[] writers = (byteStream == null ? new Writer[] { hfos } : new Writer[] { hfos,
+                        new OutputStreamWriter(byteStream, charSet) });
+                serverFileUtils.copyToWriters(data, writers, charSet);
             } finally {
                 res.closeStream();
             }
