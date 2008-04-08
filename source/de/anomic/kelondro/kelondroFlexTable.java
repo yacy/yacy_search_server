@@ -299,13 +299,13 @@ public class kelondroFlexTable extends kelondroFlexWidthArray implements kelondr
         return oldentry;
     }
     
-    public synchronized void addUnique(kelondroRow.Entry row) throws IOException {
+    public synchronized boolean addUnique(kelondroRow.Entry row) throws IOException {
         assert row.objectsize() == this.rowdef.objectsize;
         assert this.size() == index.size() : "content.size() = " + this.size() + ", index.size() = " + index.size();
-		index.addi(row.getColBytes(0), super.add(row));
+		return index.addi(row.getColBytes(0), super.add(row));
     }
     
-    public synchronized void addUniqueMultiple(List<kelondroRow.Entry> rows) throws IOException {
+    public synchronized int addUniqueMultiple(List<kelondroRow.Entry> rows) throws IOException {
         // add a list of entries in a ordered way.
         // this should save R/W head positioning time
         TreeMap<Integer, byte[]> indexed_result = super.addMultiple(rows);
@@ -318,7 +318,7 @@ public class kelondroFlexTable extends kelondroFlexWidthArray implements kelondr
             index.puti(entry.getValue(), entry.getKey().intValue());
         }
         assert this.size() == index.size() : "content.size() = " + this.size() + ", index.size() = " + index.size();
-		
+		return indexed_result.size();
     }
     
     public synchronized ArrayList<kelondroRowSet> removeDoubles() throws IOException {

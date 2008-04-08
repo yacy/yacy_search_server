@@ -1,6 +1,6 @@
-// kelondroBytesIntMap.java
-// (C) 2006 by Michael Peter Christen; mc@anomic.de, Frankfurt a. M., Germany
-// first published 18.06.2006 on http://www.anomic.de
+// kelondroBytesLongMap.java
+// (C) 2008 by Michael Peter Christen; mc@yacy.net, Frankfurt a. M., Germany
+// first published 08.04.2008 on http://yacy.net
 //
 // $LastChangedDate: 2006-04-02 22:40:07 +0200 (So, 02 Apr 2006) $
 // $LastChangedRevision: 1986 $
@@ -28,20 +28,20 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Iterator;
 
-public class kelondroBytesIntMap {
+public class kelondroBytesLongMap {
     
     private kelondroRow rowdef;
     private kelondroIndex index;
     
-    public kelondroBytesIntMap(kelondroIndex ki) {
+    public kelondroBytesLongMap(kelondroIndex ki) {
         assert (ki.row().columns() == 2); // must be a key/index relation
-        assert (ki.row().width(1) == 4);  // the value must be a b256-encoded int, 4 bytes long
+        assert (ki.row().width(1) == 8);  // the value must be a b256-encoded int, 4 bytes long
         this.index = ki;
         this.rowdef = ki.row();
     }
     
-    public kelondroBytesIntMap(int keylength, kelondroByteOrder objectOrder, int space) {
-        this.rowdef = new kelondroRow(new kelondroColumn[]{new kelondroColumn("key", kelondroColumn.celltype_binary, kelondroColumn.encoder_bytes, keylength, "key"), new kelondroColumn("int c-4 {b256}")}, objectOrder, 0);
+    public kelondroBytesLongMap(int keylength, kelondroByteOrder objectOrder, int space) {
+        this.rowdef = new kelondroRow(new kelondroColumn[]{new kelondroColumn("key", kelondroColumn.celltype_binary, kelondroColumn.encoder_bytes, keylength, "key"), new kelondroColumn("int c-8 {b256}")}, objectOrder, 0);
         this.index = new kelondroRAMIndex(rowdef, space);
     }
     
@@ -49,65 +49,62 @@ public class kelondroBytesIntMap {
         return index.row();
     }
     
-    public synchronized int geti(byte[] key) throws IOException {
+    public synchronized long getl(byte[] key) throws IOException {
         assert (key != null);
         kelondroRow.Entry indexentry = index.get(key);
         if (indexentry == null) return -1;
-        return (int) indexentry.getColLong(1);
+        return indexentry.getColLong(1);
     }
     
-    public synchronized int puti(byte[] key, int i) throws IOException {
-        assert i >= 0 : "i = " + i;
+    public synchronized long putl(byte[] key, long l) throws IOException {
+        assert l >= 0 : "l = " + l;
         assert (key != null);
         kelondroRow.Entry newentry = index.row().newEntry();
         newentry.setCol(0, key);
-        newentry.setCol(1, i);
+        newentry.setCol(1, l);
         kelondroRow.Entry oldentry = index.put(newentry);
         if (oldentry == null) return -1;
-        return (int) oldentry.getColLong(1);
+        return oldentry.getColLong(1);
     }
     
-    public synchronized boolean addi(byte[] key, int i) throws IOException {
-        assert i >= 0 : "i = " + i;
+    public synchronized boolean addl(byte[] key, long l) throws IOException {
+        assert l >= 0 : "l = " + l;
         assert (key != null);
         kelondroRow.Entry newentry = this.rowdef.newEntry();
         newentry.setCol(0, key);
-        newentry.setCol(1, i);
+        newentry.setCol(1, l);
         return index.addUnique(newentry);
     }
     
-    public synchronized ArrayList<Integer[]> removeDoubles() throws IOException {
+    public synchronized ArrayList<Long[]> removeDoubles() throws IOException {
         ArrayList<kelondroRowSet> indexreport = index.removeDoubles();
-        ArrayList<Integer[]> report = new ArrayList<Integer[]>();
-        Iterator<kelondroRowSet> i = indexreport.iterator();
-        kelondroRowSet rowset;
-        Integer[] is;
+        ArrayList<Long[]> report = new ArrayList<Long[]>();
+        Long[] is;
         Iterator<kelondroRow.Entry> ei;
         int c;
-        while (i.hasNext()) {
-            rowset = i.next();
-            is = new Integer[rowset.size()];
+        for (kelondroRowSet rowset: indexreport) {
+            is = new Long[rowset.size()];
             ei = rowset.rows();
             c = 0;
             while (ei.hasNext()) {
-                is[c++] = new Integer((int) ei.next().getColLong(1));
+                is[c++] = new Long(ei.next().getColLong(1));
             }
             report.add(is);
         }
         return report;
     }
     
-    public synchronized int removei(byte[] key) throws IOException {
+    public synchronized long removel(byte[] key) throws IOException {
         assert (key != null);
         kelondroRow.Entry indexentry = index.remove(key, true); // keeping the order will prevent multiple re-sorts
         if (indexentry == null) return -1;
-        return (int) indexentry.getColLong(1);
+        return indexentry.getColLong(1);
     }
 
-    public synchronized int removeonei() throws IOException {
+    public synchronized long removeonel() throws IOException {
         kelondroRow.Entry indexentry = index.removeOne();
         if (indexentry == null) return -1;
-        return (int) indexentry.getColLong(1);
+        return indexentry.getColLong(1);
     }
     
     public synchronized int size() {

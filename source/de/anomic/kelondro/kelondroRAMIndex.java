@@ -105,22 +105,24 @@ public class kelondroRAMIndex implements kelondroIndex {
 		}
 	}
 
-	public synchronized void addUnique(kelondroRow.Entry entry) {    	
+	public synchronized boolean addUnique(kelondroRow.Entry entry) {    	
     	assert (entry != null);
         if (index1 == null) {
             // we are in the initialization phase
-        	index0.addUnique(entry);
+        	return index0.addUnique(entry);
         } else {
         	// initialization is over, add to secondary index
-        	index1.addUnique(entry);
+        	return index1.addUnique(entry);
         }
     }
 
-	public void addUniqueMultiple(List<Entry> rows) {
+	public int addUniqueMultiple(List<Entry> rows) {
 		Iterator<Entry> i = rows.iterator();
+		int c = 0;
 		while (i.hasNext()) {
-			addUnique(i.next());
+			if (addUnique(i.next())) c++;
 		}
+		return c;
 	}
 	
 	public synchronized ArrayList<kelondroRowSet> removeDoubles() {

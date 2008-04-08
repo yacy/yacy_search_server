@@ -308,15 +308,15 @@ public class kelondroSplitTable implements kelondroIndex {
         return null;
     }
     
-    public synchronized void addUnique(kelondroRow.Entry row) throws IOException {
-        addUnique(row, null);
+    public synchronized boolean addUnique(kelondroRow.Entry row) throws IOException {
+        return addUnique(row, null);
     }
     
-    public synchronized void addUnique(kelondroRow.Entry row, Date entryDate) throws IOException {
+    public synchronized boolean addUnique(kelondroRow.Entry row, Date entryDate) throws IOException {
         assert row.objectsize() <= this.rowdef.objectsize;
         if ((entryDate == null) || (entryDate.after(new Date()))) entryDate = new Date(); // fix date
         String suffix = dateSuffix(entryDate);
-        if (suffix == null) return;
+        if (suffix == null) return false;
         kelondroIndex table = (kelondroIndex) tables.get(suffix);
         if (table == null) {
             // make new table
@@ -329,12 +329,16 @@ public class kelondroSplitTable implements kelondroIndex {
             }
             tables.put(suffix, table);
         }
-        table.addUnique(row);
+        return table.addUnique(row);
     }
     
-    public synchronized void addUniqueMultiple(List<kelondroRow.Entry> rows) throws IOException {
+    public synchronized int addUniqueMultiple(List<kelondroRow.Entry> rows) throws IOException {
         Iterator<kelondroRow.Entry> i = rows.iterator();
-        while (i.hasNext()) addUnique(i.next());
+        int c = 0;
+        while (i.hasNext()) {
+            if (addUnique(i.next())) c++;
+        }
+        return c;
     }
     
     public synchronized void addUniqueMultiple(List<kelondroRow.Entry> rows, Date entryDate) throws IOException {

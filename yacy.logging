@@ -21,7 +21,7 @@ WORDMIGRATION.level = FINE
 FILEHANDLER.level = INFO
 SESSION-POOL.level = INFO
 CRAWLER-POOL.level = INFO
-STACKCRAWL-POOL.level = INFO
+STACKCRAWL.level = INFO
 MEMORY.level = INFO
 
 # List of global handlers

@@ -52,7 +52,6 @@ import java.net.MalformedURLException;
 import java.net.NoRouteToHostException;
 import java.net.SocketException;
 import java.net.UnknownHostException;
-import java.util.Arrays;
 import java.util.Date;
 
 import de.anomic.http.HttpClient;

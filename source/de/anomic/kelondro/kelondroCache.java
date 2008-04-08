@@ -294,7 +294,7 @@ public class kelondroCache implements kelondroIndex {
         throw new UnsupportedOperationException("put with date is inefficient in kelondroCache");
     }
 
-    public synchronized void addUnique(Entry row) throws IOException {
+    public synchronized boolean addUnique(Entry row) throws IOException {
         assert (row != null);
         assert (row.columns() == row().columns());
         //assert (!(serverLog.allZero(row.getColBytes(index.primarykey()))));
@@ -307,20 +307,21 @@ public class kelondroCache implements kelondroIndex {
             this.readMissCache.remove(key, true);
             this.hasnotDelete++;
             // the entry does not exist before
-            index.addUnique(row); // write to backend
-            if (readHitCache != null) {
+            boolean added = index.addUnique(row); // write to backend
+            if (added && (readHitCache != null)) {
                 kelondroRow.Entry dummy = readHitCache.put(row); // learn that entry
                 if (dummy == null) this.writeUnique++; else this.writeDouble++;
             }
-            return;
+            return added;
         }
         
         // the worst case: we must write to the back-end directly
-        index.addUnique(row);
-        if (readHitCache != null) {
+        boolean added = index.addUnique(row);
+        if (added && (readHitCache != null)) {
             kelondroRow.Entry dummy = readHitCache.put(row); // learn that entry
             if (dummy == null) this.writeUnique++; else this.writeDouble++;
         }
+        return added;
     }
 
     public synchronized void addUnique(Entry row, Date entryDate) throws IOException {
@@ -349,9 +350,13 @@ public class kelondroCache implements kelondroIndex {
         }
     }
     
-    public synchronized void addUniqueMultiple(List<Entry> rows) throws IOException {
+    public synchronized int addUniqueMultiple(List<Entry> rows) throws IOException {
         Iterator<Entry> i = rows.iterator();
-        while (i.hasNext()) addUnique((Entry) i.next());
+        int c = 0;
+        while (i.hasNext()) {
+            if (addUnique((Entry) i.next())) c++;
+        }
+        return c;
     }
 
     public synchronized ArrayList<kelondroRowSet> removeDoubles() throws IOException {

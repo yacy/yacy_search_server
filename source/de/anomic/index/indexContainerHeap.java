@@ -45,7 +45,7 @@ import java.util.TreeMap;
 import de.anomic.kelondro.kelondroBase64Order;
 import de.anomic.kelondro.kelondroBufferedRA;
 import de.anomic.kelondro.kelondroByteOrder;
-import de.anomic.kelondro.kelondroBytesIntMap;
+import de.anomic.kelondro.kelondroBytesLongMap;
 import de.anomic.kelondro.kelondroCloneableIterator;
 import de.anomic.kelondro.kelondroException;
 import de.anomic.kelondro.kelondroFixedWidthArray;
@@ -60,7 +60,7 @@ public final class indexContainerHeap {
 
     private kelondroRow payloadrow;
     private serverLog log;
-    private kelondroBytesIntMap index;
+    private kelondroBytesLongMap index;
     private SortedMap<String, indexContainer> cache;
     private File backupFile;
     private boolean readOnlyMode;
@@ -145,27 +145,36 @@ public final class indexContainerHeap {
         if (log != null) log.logInfo("creating index for rwi heap '" + heapFile.getName() + "'");
         
         long start = System.currentTimeMillis();
-        this.index = new kelondroBytesIntMap(payloadrow.primaryKeyLength, (kelondroByteOrder) payloadrow.getOrdering(), 0);
+        this.index = new kelondroBytesLongMap(payloadrow.primaryKeyLength, (kelondroByteOrder) payloadrow.getOrdering(), 0);
         DataInputStream is = null;
         long urlCount = 0;
         String wordHash;
         byte[] word = new byte[payloadrow.primaryKeyLength];
-        int seek = 0, seek0;
+        long seek = 0, seek0;
         synchronized (index) {
             is = new DataInputStream(new BufferedInputStream(new FileInputStream(heapFile), 64*1024));
         
-            while (is.available() > 0) {
+            // dont test available() here because this does not work for files > 2GB
+            loop: while (true) {
                 // remember seek position
                 seek0 = seek;
             
                 // read word
-                is.readFully(word);
+                try {
+                    is.readFully(word);
+                } catch (IOException e) {
+                    break loop; // terminate loop
+                }
                 wordHash = new String(word);
-                seek += wordHash.length();
+                seek += (long) wordHash.length();
             
                 // read collection
-                seek += kelondroRowSet.skipNextRowSet(is, payloadrow);
-                index.addi(word, seek0);
+                try {
+                    seek += (long) kelondroRowSet.skipNextRowSet(is, payloadrow);
+                } catch (IOException e) {
+                    break loop; // terminate loop
+                }
+                index.addl(word, seek0);
             }
         }
         is.close();
@@ -222,29 +231,33 @@ public final class indexContainerHeap {
         DataInputStream is;
         byte[] word;
         kelondroRow payloadrow;
+        indexContainer nextContainer;
         
         public heapFileEntries(File heapFile, kelondroRow payloadrow) throws IOException {
             if (!(heapFile.exists())) throw new IOException("file " + heapFile + " does not exist");
             is = new DataInputStream(new BufferedInputStream(new FileInputStream(heapFile), 64*1024));
             word = new byte[payloadrow.primaryKeyLength];
             this.payloadrow = payloadrow;
+            this.nextContainer = next0();
         }
         
         public boolean hasNext() {
-            try {
-                return is.available() > 0;
-            } catch (IOException e) {
-                return false;
-            }
+            return this.nextContainer != null;
         }
 
-        public indexContainer next() {
+        private indexContainer next0() {
             try {
                 is.readFully(word);
                 return new indexContainer(new String(word), kelondroRowSet.importRowSet(is, payloadrow));
             } catch (IOException e) {
                 return null;
             }
+        }
+        
+        public indexContainer next() {
+            indexContainer n = this.nextContainer;
+            this.nextContainer = next0();
+            return n;
         }
 
         public void remove() {
@@ -340,7 +353,7 @@ public final class indexContainerHeap {
             
             // check if the index contains the key
             try {
-                return index.geti(key.getBytes()) >= 0;
+                return index.getl(key.getBytes()) >= 0;
             } catch (IOException e) {
                 e.printStackTrace();
                 return false;
@@ -361,7 +374,7 @@ public final class indexContainerHeap {
             assert index.row().primaryKeyLength == key.length();
             
             // check if the index contains the key
-            int pos = index.geti(key.getBytes());
+            long pos = index.getl(key.getBytes());
             if (pos < 0) return null;
             
             // access the file and read the container

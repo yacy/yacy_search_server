@@ -209,7 +209,7 @@ public class kelondroSQLTable implements kelondroIndex {
         }
     }
 
-    public synchronized void addUnique(kelondroRow.Entry row) throws IOException {
+    public synchronized boolean addUnique(kelondroRow.Entry row) throws IOException {
         throw new UnsupportedOperationException();
     }
     
@@ -217,7 +217,7 @@ public class kelondroSQLTable implements kelondroIndex {
         throw new UnsupportedOperationException();
     }
     
-    public synchronized void addUniqueMultiple(List<kelondroRow.Entry> rows) throws IOException {
+    public synchronized int addUniqueMultiple(List<kelondroRow.Entry> rows) throws IOException {
         throw new UnsupportedOperationException();
     }
     

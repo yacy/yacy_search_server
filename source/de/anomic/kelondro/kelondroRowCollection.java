@@ -296,22 +296,26 @@ public class kelondroRowCollection {
         set(index, a);
     }
     
-    public synchronized void addUnique(kelondroRow.Entry row) {
+    public synchronized boolean addUnique(kelondroRow.Entry row) {
         byte[] r = row.bytes();
-        addUnique(r, 0, r.length);
+        return addUnique(r, 0, r.length);
     }
 
-    public synchronized void addUniqueMultiple(List<kelondroRow.Entry> rows) {
+    public synchronized int addUniqueMultiple(List<kelondroRow.Entry> rows) {
         assert this.sortBound == 0 : "sortBound = " + this.sortBound + ", chunkcount = " + this.chunkcount;
         Iterator<kelondroRow.Entry> i = rows.iterator();
-        while (i.hasNext()) addUnique(i.next());
+        int c = 0;
+        while (i.hasNext()) {
+            if (addUnique(i.next())) c++;
+        }
+        return c;
     }
     
     public synchronized void add(byte[] a) {
         addUnique(a, 0, a.length);
     }
     
-    private final void addUnique(byte[] a, int astart, int alength) {
+    private final boolean addUnique(byte[] a, int astart, int alength) {
         assert (a != null);
         assert (astart >= 0) && (astart < a.length) : " astart = " + a;
         assert (!(serverLog.allZero(a, astart, alength))) : "a = " + serverLog.arrayList(a, astart, alength);
@@ -319,7 +323,7 @@ public class kelondroRowCollection {
         assert (astart + alength <= a.length);
         if (bugappearance(a, astart, alength)) {
             System.out.println("*** DEBUG: patched wrong a = " + serverLog.arrayList(a, astart, alength));
-            return; // TODO: this is temporary; remote peers may still submit bad entries
+            return false; // TODO: this is temporary; remote peers may still submit bad entries
         }
         assert (!(bugappearance(a, astart, alength))) : "a = " + serverLog.arrayList(a, astart, alength);
         int l = Math.min(rowdef.objectsize, Math.min(alength, a.length - astart));
@@ -327,6 +331,7 @@ public class kelondroRowCollection {
         System.arraycopy(a, astart, chunkcache, rowdef.objectsize * chunkcount, l);
         chunkcount++;
         this.lastTimeWrote = System.currentTimeMillis();
+        return true;
     }
     
     private static boolean bugappearance(byte[] a, int astart, int alength) {

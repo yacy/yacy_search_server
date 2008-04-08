@@ -181,7 +181,7 @@ public final class plasmaCrawlStacker extends Thread {
     
     public void close() {
         if (this.dbtype == QUEUE_DB_TYPE_RAM) {
-            this.log.logFine("Shutdown. Flushing remaining " + size() + " crawl stacker job entries. please wait.");
+            this.log.logInfo("Shutdown. Flushing remaining " + size() + " crawl stacker job entries. please wait.");
             while (size() > 0) {
                 if (!job()) break;
             }
