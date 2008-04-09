@@ -55,7 +55,7 @@ import java.util.regex.Pattern;
 import java.util.regex.PatternSyntaxException;
 
 import de.anomic.http.HttpClient;
-import de.anomic.http.HttpFactory;
+import de.anomic.http.JakartaCommonsHttpClient;
 import de.anomic.http.httpHeader;
 import de.anomic.plasma.plasmaSwitchboard;
 import de.anomic.server.serverCodings;
@@ -375,7 +375,7 @@ public class Network {
                             prop.putHTML(STR_TABLE_LIST + conCount + "_fullname", seed.get(yacySeed.NAME, "deadlink"));
                             userAgent = null;
                             if (seed.hash.equals(yacyCore.seedDB.mySeed().hash)) {
-                                final HttpClient httpClient = HttpFactory.newClient();
+                                final HttpClient httpClient = new JakartaCommonsHttpClient(10000, null, null);
                                 userAgent = httpClient.getUserAgent();
                                 location = HttpClient.generateLocation();
                             } else {

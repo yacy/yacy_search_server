@@ -37,8 +37,8 @@ import java.util.Iterator;
 
 import de.anomic.data.htmlTools;
 import de.anomic.http.HttpClient;
-import de.anomic.http.HttpFactory;
 import de.anomic.http.HttpResponse;
+import de.anomic.http.JakartaCommonsHttpClient;
 import de.anomic.http.httpRemoteProxyConfig;
 import de.anomic.kelondro.kelondroBase64Order;
 import de.anomic.kelondro.kelondroCache;
@@ -257,7 +257,7 @@ public final class indexRepositoryReference {
                         yacyURL newUrl = new yacyURL(newUrlStr, null);
 
                         // doing a http head request to test if the url is correct
-                        HttpClient client = HttpFactory.newClient(null, 30000);
+                        HttpClient client = new JakartaCommonsHttpClient(10000, null, null);
                         client.setProxy(proxyConfig);
                         HttpResponse res = null;
                         try {

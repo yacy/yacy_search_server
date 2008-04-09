@@ -55,8 +55,8 @@ import java.util.ArrayList;
 import java.util.Date;
 
 import de.anomic.http.HttpClient;
-import de.anomic.http.HttpFactory;
 import de.anomic.http.HttpResponse;
+import de.anomic.http.JakartaCommonsHttpClient;
 import de.anomic.http.httpHeader;
 import de.anomic.http.HttpResponse.Saver;
 import de.anomic.plasma.plasmaCrawlRobotsTxt;
@@ -404,7 +404,7 @@ public final class robotsParser{
         
         // setup http-client
         //TODO: adding Traffic statistic for robots download?
-        HttpClient client = HttpFactory.newClient(reqHeaders, 10000);
+        HttpClient client = new JakartaCommonsHttpClient(10000, reqHeaders, null);
         HttpResponse res = null;
         try {
             // sending the get request

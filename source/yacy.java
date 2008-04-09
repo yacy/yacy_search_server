@@ -67,7 +67,6 @@ import org.apache.commons.httpclient.MultiThreadedHttpConnectionManager;
 
 import de.anomic.data.translator;
 import de.anomic.http.HttpClient;
-import de.anomic.http.HttpFactory;
 import de.anomic.http.HttpResponse;
 import de.anomic.http.httpHeader;
 import de.anomic.http.httpd;
@@ -530,7 +529,7 @@ public final class yacy {
         // send 'wget' to web interface
         httpHeader requestHeader = new httpHeader();
         requestHeader.put("Authorization", "realm=" + encodedPassword); // for http-authentify
-        HttpClient con = HttpFactory.newClient(requestHeader, 10000);
+        HttpClient con = new JakartaCommonsHttpClient(10000, requestHeader, null);
         HttpResponse res = null;
         try {
             res = con.GET("http://localhost:"+ port +"/Steering.html?shutdown=");

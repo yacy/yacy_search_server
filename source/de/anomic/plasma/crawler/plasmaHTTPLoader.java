@@ -55,8 +55,8 @@ import java.net.UnknownHostException;
 import java.util.Date;
 
 import de.anomic.http.HttpClient;
-import de.anomic.http.HttpFactory;
 import de.anomic.http.HttpResponse;
+import de.anomic.http.JakartaCommonsHttpClient;
 import de.anomic.http.JakartaCommonsHttpResponse;
 import de.anomic.http.httpHeader;
 import de.anomic.http.httpdBoundedSizeOutputStream;
@@ -177,7 +177,7 @@ public final class plasmaHTTPLoader {
                 requestHeader.put(httpHeader.ACCEPT_ENCODING, this.acceptEncoding);
 
             // HTTP-Client
-            HttpClient client = HttpFactory.newClient(requestHeader, socketTimeout);
+            HttpClient client = new JakartaCommonsHttpClient(socketTimeout, requestHeader, null);
             
             HttpResponse res = null;
             try {

@@ -517,7 +517,7 @@ public final class httpdProxyHandler {
             prepareRequestHeader(requestHeader, httpVer);
             
             // setup HTTP-client
-            final HttpClient client = HttpFactory.newClient(requestHeader, timeout);
+            final HttpClient client = new JakartaCommonsHttpClient(timeout, requestHeader, null);
             
             final String connectHost = hostPart(host, port, yAddress);
             final String getUrl = "http://"+ connectHost + remotePath;
@@ -933,7 +933,7 @@ public final class httpdProxyHandler {
             prepareRequestHeader(requestHeader, httpVer);            
             
             // setup HTTP-client
-            HttpClient client = HttpFactory.newClient(requestHeader, timeout);
+            HttpClient client = new JakartaCommonsHttpClient(timeout, requestHeader, null);
             
             // generate request-url
             final String connectHost = hostPart(host, port, yAddress);
@@ -1035,11 +1035,7 @@ public final class httpdProxyHandler {
             prepareRequestHeader(requestHeader, httpVer); 
             
             // setup HTTP-client
-            JakartaCommonsHttpClient client = new JakartaCommonsHttpClient();
-            client.setTimeout(timeout);
-            
-            // set header for connection
-            client.setHeader(requestHeader);
+            JakartaCommonsHttpClient client = new JakartaCommonsHttpClient(timeout, requestHeader, null);
             
             final String connectHost = hostPart(host, port, yAddress);
             client.setProxy(getProxyConfig(connectHost));
@@ -1210,10 +1206,7 @@ public final class httpdProxyHandler {
                 (proxyConfig.useProxy()) &&
                 (proxyConfig.useProxy4SSL())
         ) {
-            HttpClient remoteProxy = HttpFactory.newClient();
-            remoteProxy.setTimeout(timeout);
-            remoteProxy.setProxy(proxyConfig);
-            remoteProxy.setHeader(requestHeader);
+            HttpClient remoteProxy = new JakartaCommonsHttpClient(timeout, requestHeader, proxyConfig);
 
             HttpResponse response = null;
             try {

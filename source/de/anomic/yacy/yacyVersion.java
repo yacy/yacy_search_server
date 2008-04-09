@@ -41,8 +41,8 @@ import java.util.regex.Pattern;
 
 import de.anomic.htmlFilter.htmlFilterContentScraper;
 import de.anomic.http.HttpClient;
-import de.anomic.http.HttpFactory;
 import de.anomic.http.HttpResponse;
+import de.anomic.http.JakartaCommonsHttpClient;
 import de.anomic.http.HttpResponse.Saver;
 import de.anomic.plasma.plasmaSwitchboard;
 import de.anomic.server.serverCore;
@@ -329,7 +329,7 @@ public final class yacyVersion implements Comparator<yacyVersion>, Comparable<ya
         File storagePath = plasmaSwitchboard.getSwitchboard().releasePath;
         // load file
         File download = new File(storagePath, release.url.getFileName());
-        HttpClient client = HttpFactory.newClient(null, 120000);
+        HttpClient client = new JakartaCommonsHttpClient(120000, null, null);
         HttpResponse res = null;
         try {
             res = client.GET(release.url.toString());

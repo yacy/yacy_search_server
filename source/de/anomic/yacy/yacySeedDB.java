@@ -61,8 +61,8 @@ import java.util.Map;
 import java.util.TreeMap;
 
 import de.anomic.http.HttpClient;
-import de.anomic.http.HttpFactory;
 import de.anomic.http.HttpResponse;
+import de.anomic.http.JakartaCommonsHttpClient;
 import de.anomic.http.httpHeader;
 import de.anomic.http.httpd;
 import de.anomic.kelondro.kelondroBase64Order;
@@ -817,7 +817,7 @@ public final class yacySeedDB {
         reqHeader.put(httpHeader.CACHE_CONTROL, "no-cache"); // httpc uses HTTP/1.0 is this necessary?            
         
         // init http-client
-        HttpClient client = HttpFactory.newClient(reqHeader, 10000);
+        HttpClient client = new JakartaCommonsHttpClient(10000, reqHeader, null);
         byte[] content = null;
         HttpResponse res = null;
         try {

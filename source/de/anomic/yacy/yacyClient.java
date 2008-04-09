@@ -53,8 +53,8 @@ import java.util.Map;
 import java.util.TreeMap;
 
 import de.anomic.http.HttpClient;
-import de.anomic.http.HttpFactory;
 import de.anomic.http.HttpResponse;
+import de.anomic.http.JakartaCommonsHttpClient;
 import de.anomic.http.httpHeader;
 import de.anomic.http.httpRemoteProxyConfig;
 import de.anomic.http.httpdProxyHandler;
@@ -257,7 +257,7 @@ public final class yacyClient {
      * @throws IOException
      */
     private static byte[] wput(final String url, String vhost, final Map<String, ?> post, final int timeout) throws IOException {
-        HttpClient client = HttpFactory.newClient(null, timeout);
+        HttpClient client = new JakartaCommonsHttpClient(timeout, null, null);
         client.setProxy(proxyConfig());
         
         // address vhost

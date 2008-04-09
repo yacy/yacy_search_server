@@ -136,14 +136,6 @@ public abstract class HttpClient {
     public abstract String getUserAgent();
 
     /**
-     * Returns the given date in an HTTP-usable format. (according to RFC1123/RFC822)
-     * 
-     * @param date The Date-Object to be converted.
-     * @return String with the date.
-     */
-    public abstract String date2String(Date date);
-
-    /**
      * for easy access
      * 
      * @see date2String(Date)
@@ -151,7 +143,7 @@ public abstract class HttpClient {
      * @return
      */
     public static String dateString(final Date date) {
-        return HttpFactory.newClient().date2String(date);
+        return JakartaCommonsHttpClient.date2String(date);
     }
 
     /**
@@ -221,7 +213,7 @@ public abstract class HttpClient {
      */
     public static byte[] wget(final String uri, httpHeader header, final String vhost, int timeout) {
         assert uri != null : "precondition violated: uri != null";
-        final HttpClient client = HttpFactory.newClient(null, timeout);
+        final HttpClient client = new JakartaCommonsHttpClient(timeout, null, null);
 
         // set header
         header = addHostHeader(header, vhost);
@@ -273,10 +265,7 @@ public abstract class HttpClient {
      * @return
      */
     public static httpHeader whead(final String uri, final httpHeader header) {
-        final de.anomic.http.HttpClient client = HttpFactory.newClient();
-        if (header != null) {
-            client.setHeader(header);
-        }
+        final de.anomic.http.HttpClient client = new JakartaCommonsHttpClient(10000, header, null);
         try {
             final HttpResponse response = client.HEAD(uri);
             return response.getResponseHeader();

@@ -99,15 +99,6 @@ public class JakartaCommonsHttpClient extends de.anomic.http.HttpClient {
     private httpRemoteProxyConfig proxyConfig = null;
 
     /**
-     * constructor
-     * 
-     * with half-hour timeout
-     */
-    public JakartaCommonsHttpClient() {
-        this(1800000, null, null);
-    }
-
-    /**
      * constructs a new Client with given parameters
      * 
      * @param timeout in milliseconds
@@ -432,7 +423,7 @@ public class JakartaCommonsHttpClient extends de.anomic.http.HttpClient {
      * @param date The Date-Object to be converted.
      * @return String with the date.
      */
-    public String date2String(Date date) {
+    public static String date2String(Date date) {
         if (date == null)
             return "";
 
@@ -474,7 +465,7 @@ public class JakartaCommonsHttpClient extends de.anomic.http.HttpClient {
                 files.put("myfile.txt", "this is not a file ;)".getBytes());
                 files.put("anotherfile.raw", "this is not a binary file ;)".getBytes());
                 System.out.println("POST " + files.size() + " elements to " + url);
-                final de.anomic.http.HttpClient client = HttpFactory.newClient();
+                final de.anomic.http.HttpClient client = new JakartaCommonsHttpClient(1000, null, null);
                 resp = client.POST(url, files);
                 System.out.println("----- Header: -----");
                 System.out.println(new String(resp.getResponseHeader().toString()));
