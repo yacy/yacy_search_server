@@ -51,7 +51,6 @@ import org.apache.commons.httpclient.methods.multipart.FilePart;
 import org.apache.commons.httpclient.methods.multipart.MultipartRequestEntity;
 import org.apache.commons.httpclient.methods.multipart.Part;
 import org.apache.commons.httpclient.methods.multipart.StringPart;
-import org.apache.commons.httpclient.params.HttpClientParams;
 import org.apache.commons.httpclient.params.HttpMethodParams;
 import org.apache.commons.httpclient.protocol.Protocol;
 import org.apache.commons.httpclient.protocol.ProtocolSocketFactory;
@@ -78,8 +77,9 @@ public class JakartaCommonsHttpClient extends de.anomic.http.HttpClient {
 
     static {
         // set user-agent
+        yacyVersion thisversion = yacyVersion.thisVersion();
         apacheHttpClient.getParams().setParameter(HttpMethodParams.USER_AGENT,
-                                                  "yacy/" + yacyVersion.thisVersion().releaseNr +
+                                                  "yacy/" + ((thisversion == null) ? "0.0" : thisversion.releaseNr) +
                                                           " (www.yacy.net; " +
                                                           de.anomic.http.HttpClient.getSystemOST() + ") " +
                                                           getCurrentUserAgent().replace(';', ':')); // last ; must be before location (this is parsed)

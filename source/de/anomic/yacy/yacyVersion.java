@@ -171,6 +171,7 @@ public final class yacyVersion implements Comparator<yacyVersion>, Comparable<ya
         // construct a virtual release name for this release
         if (thisVersion == null) {
             plasmaSwitchboard sb = plasmaSwitchboard.getSwitchboard();
+            if (sb == null) return null;
             boolean full = new File(sb.getRootPath(), "libx").exists();
             thisVersion = new yacyVersion(
                 "yacy" + ((full) ? "" : "_emb") +
@@ -328,7 +329,7 @@ public final class yacyVersion implements Comparator<yacyVersion>, Comparable<ya
         File storagePath = plasmaSwitchboard.getSwitchboard().releasePath;
         // load file
         File download = new File(storagePath, release.url.getFileName());
-        HttpClient client = HttpFactory.newClient(null, 300000);
+        HttpClient client = HttpFactory.newClient(null, 120000);
         HttpResponse res = null;
         try {
             res = client.GET(release.url.toString());

@@ -55,9 +55,7 @@ public class HttpFactory {
      * @return
      */
     public static HttpClient newClient(httpHeader header, int timeout) {
-        HttpClient client = new JakartaCommonsHttpClient();
-        client.setTimeout(timeout);
-        client.setHeader(header);
+        HttpClient client = new JakartaCommonsHttpClient(timeout, header, null);
         return client;
     }
 

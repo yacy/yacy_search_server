@@ -188,7 +188,7 @@ public final class httpdProxyHandler {
         }
         
         switchboard = plasmaSwitchboard.getSwitchboard();
-        
+        if (switchboard != null) {
         // creating a logger
         theLogger = new serverLog("PROXY");
             
@@ -225,6 +225,7 @@ public final class httpdProxyHandler {
             } catch (IOException e) {
                 System.out.println("redirector not Found");
             }
+        }
         }
     }
     

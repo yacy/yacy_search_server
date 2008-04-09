@@ -481,7 +481,6 @@ public final class serverCore extends serverAbstractBusyThread implements server
         
         // shut down all busySessions
         for (Session session: this.busySessions) {
-            try {session.notifyAll();} catch (IllegalMonitorStateException e) {e.printStackTrace();}
             try {session.interrupt();} catch (SecurityException e ) {e.printStackTrace();}
         }
         
