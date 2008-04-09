@@ -257,7 +257,7 @@ public final class indexRepositoryReference {
                         yacyURL newUrl = new yacyURL(newUrlStr, null);
 
                         // doing a http head request to test if the url is correct
-                        HttpClient client = HttpFactory.newClient();
+                        HttpClient client = HttpFactory.newClient(null, 30000);
                         client.setProxy(proxyConfig);
                         HttpResponse res = null;
                         try {

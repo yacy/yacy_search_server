@@ -328,7 +328,7 @@ public final class yacyVersion implements Comparator<yacyVersion>, Comparable<ya
         File storagePath = plasmaSwitchboard.getSwitchboard().releasePath;
         // load file
         File download = new File(storagePath, release.url.getFileName());
-        HttpClient client = HttpFactory.newClient(null, 60000);
+        HttpClient client = HttpFactory.newClient(null, 300000);
         HttpResponse res = null;
         try {
             res = client.GET(release.url.toString());

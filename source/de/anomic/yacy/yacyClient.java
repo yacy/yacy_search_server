@@ -236,6 +236,7 @@ public final class yacyClient {
 
     /**
      * send data to the server named by vhost
+     * 
      * @param address address of the server
      * @param vhost name of the server at address which should respond
      * @param post data to send (name-value-pairs)
@@ -243,7 +244,20 @@ public final class yacyClient {
      * @throws IOException
      */
     private static byte[] wput(final String url, String vhost, final Map<String, ?> post) throws IOException {
-        HttpClient client = HttpFactory.newClient(null, 3600000); // abort after 1 hour
+        return wput(url, vhost, post, 10000);
+    }
+    /**
+     * send data to the server named by vhost
+     * 
+     * @param address address of the server
+     * @param vhost name of the server at address which should respond
+     * @param post data to send (name-value-pairs)
+     * @param timeout in milliseconds
+     * @return response body
+     * @throws IOException
+     */
+    private static byte[] wput(final String url, String vhost, final Map<String, ?> post, final int timeout) throws IOException {
+        HttpClient client = HttpFactory.newClient(null, timeout);
         client.setProxy(proxyConfig());
         
         // address vhost
@@ -363,7 +377,8 @@ public final class yacyClient {
         
         // send request
         try {
-            final byte[] result = wput("http://" + target.getClusterAddress() + "/yacy/urls.xml", target.getHexHash() + ".yacyh", post); 
+            /* a long time-out is needed */
+            final byte[] result = wput("http://" + target.getClusterAddress() + "/yacy/urls.xml", target.getHexHash() + ".yacyh", post, 60000); 
             
             rssReader reader = rssReader.parse(result);
             if (reader == null) {
@@ -439,7 +454,7 @@ public final class yacyClient {
         // send request
         HashMap<String, String> result = null;
         try {
-          	result = nxTools.table(postToFile(target, "search.html", post), "UTF-8");
+          	result = nxTools.table(wput("http://" + target.getClusterAddress() + "/yacy/search.html", target.getHexHash() + ".yacyh", post, 60000), "UTF-8");
         } catch (IOException e) {
             yacyCore.log.logInfo("SEARCH failed, Peer: " + target.hash + ":" + target.getName() + " (" + e.getMessage() + "), score=" + target.selectscore + ", DHTdist=" + yacyDHTAction.dhtDistance(target.hash, wordhashes.substring(0, 12)));
             //yacyCore.peerActions.peerDeparture(target, "search request to peer created io exception: " + e.getMessage());
@@ -724,7 +739,7 @@ public final class yacyClient {
         try {
             // TODO is targetAddress == url.getHost()?
             final yacyURL url = new yacyURL("http://" + targetAddress + "/yacy/transfer.html", null);
-            final byte[] content = wput("http://" + targetAddress + "/yacy/transfer.html", url.getHost(), post);
+            final byte[] content = wput("http://" + targetAddress + "/yacy/transfer.html", url.getHost(), post, 20000);
             final HashMap<String, String> result = nxTools.table(content, "UTF-8");
             return result;
         } catch (Exception e) {

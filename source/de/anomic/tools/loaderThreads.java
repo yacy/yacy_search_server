@@ -141,7 +141,7 @@ public class loaderThreads {
 
         public void run() {
             try {
-                page = HttpClient.wget(url.toString());
+                page = HttpClient.wget(url.toString(), timeout);
                 loaded = true;
                 process.feed(page);
                 if (process.status() == loaderCore.STATUS_FAILED) {

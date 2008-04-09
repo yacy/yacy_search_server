@@ -174,6 +174,17 @@ public abstract class HttpClient {
     public static byte[] wget(final String uri, final String vhost) {
         return wget(uri, null, vhost);
     }
+    
+    /**
+     * Gets a page (as raw bytes) aborting after timeout
+     * 
+     * @param uri
+     * @param timeout in milliseconds
+     * @return
+     */
+    public static byte[] wget(final String uri, final int timeout) {
+        return wget(uri, null, null, timeout);
+    }
 
     /**
      * Gets a page (as raw bytes) with specified header
@@ -196,8 +207,21 @@ public abstract class HttpClient {
      * @assert uri != null
      */
     public static byte[] wget(final String uri, httpHeader header, final String vhost) {
+        return wget(uri, header, vhost, 10000);
+    }
+    
+    /**
+     * Gets a page (as raw bytes) addressing vhost at host in uri with specified header and timeout
+     * 
+     * @param uri
+     * @param header
+     * @param vhost
+     * @param timeout in milliseconds
+     * @return
+     */
+    public static byte[] wget(final String uri, httpHeader header, final String vhost, int timeout) {
         assert uri != null : "precondition violated: uri != null";
-        final HttpClient client = HttpFactory.newClient();
+        final HttpClient client = HttpFactory.newClient(null, timeout);
 
         // set header
         header = addHostHeader(header, vhost);

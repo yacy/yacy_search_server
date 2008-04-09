@@ -186,7 +186,7 @@ public class yacyPeerActions {
                         yacyCore.log.logInfo("BOOTSTRAP: seed-list URL " + seedListFileURL + " too old (" + (header.age() / 86400000) + " days)");
                     } else {
                         ssc++;
-                        final byte[] content = HttpClient.wget(url.toString(), reqHeader);
+                        final byte[] content = HttpClient.wget(url.toString(), reqHeader, null, bootstrapLoadTimeout);
                         seedList = nxTools.strings(content, "UTF-8");
                         enu = seedList.iterator();
                         lc = 0;
