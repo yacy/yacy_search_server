@@ -25,12 +25,13 @@
 // Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
 package de.anomic.http;
 
+import java.io.BufferedInputStream;
+import java.io.BufferedOutputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.io.OutputStream;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
@@ -88,10 +89,29 @@ public class JakartaCommonsHttpClient extends de.anomic.http.HttpClient {
          */
         // conManager.getParams().setDefaultMaxConnectionsPerHost(4); // default 2
         conManager.getParams().setMaxTotalConnections(50); // default 20
+        conManager.getParams().setConnectionTimeout(60000); // set a default timeout
+        conManager.getParams().setDefaultMaxConnectionsPerHost(10); // prevent DoS by mistake
         // TODO should this be configurable?
         
         // accept self-signed or untrusted certificates
         Protocol.registerProtocol("https", new Protocol("https", (ProtocolSocketFactory)new EasySSLProtocolSocketFactory(), 443));
+        
+        
+        /**
+         * set network timeout properties.
+         * see: http://java.sun.com/j2se/1.5.0/docs/guide/net/properties.html
+         * These properties specify the default connect and read timeout (resp.)
+         * for the protocol handler used by java.net.URLConnection.
+         * the java.net.URLConnection is also used by JakartaCommons HttpClient, see
+         * http://hc.apache.org/httpclient-3.x/apidocs/org/apache/commons/httpclient/util/HttpURLConnection.html
+         */
+        // specify the timeout, in milliseconds, to establish the connection to the host.
+        // For HTTP connections, it is the timeout when establishing the connection to the HTTP server.
+        System.setProperty("sun.net.client.defaultConnectTimeout","10000");
+        
+        // specify the response timeout, in milliseconds, when reading from an input stream
+        // after a connection is established with a resource
+        System.setProperty("sun.net.client.defaultReadTimeout","60000"); 
     }
 
     private final Map<HttpMethod, InputStream> openStreams = new HashMap<HttpMethod, InputStream>();
@@ -219,7 +239,7 @@ public class JakartaCommonsHttpClient extends de.anomic.http.HttpClient {
                     if (file.isFile() && file.canRead()) {
                         // read file
                         final ByteArrayOutputStream fileData = new ByteArrayOutputStream();
-                        serverFileUtils.copyToStreams(new FileInputStream(file), new OutputStream[] { fileData });
+                        serverFileUtils.copyToStream(new BufferedInputStream(new FileInputStream(file)), new BufferedOutputStream(fileData));
                         value = fileData.toByteArray();
                     }
                 }

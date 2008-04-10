@@ -27,6 +27,7 @@
 
 package de.anomic.yacy;
 
+import java.io.BufferedOutputStream;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
@@ -333,7 +334,7 @@ public final class yacyVersion implements Comparator<yacyVersion>, Comparable<ya
         HttpResponse res = null;
         try {
             res = client.GET(release.url.toString());
-            Saver.writeContent(res, new FileOutputStream(download), null);
+            Saver.writeContent(res, new BufferedOutputStream(new FileOutputStream(download)), null);
             if ((!download.exists()) || (download.length() == 0)) throw new IOException("wget of url " + release.url + " failed");
         } catch (IOException e) {
             serverLog.logSevere("yacyVersion", "download of " + release.name + " failed: " + e.getMessage());

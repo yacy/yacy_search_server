@@ -62,6 +62,7 @@
 
 package de.anomic.http;
 
+import java.io.BufferedOutputStream;
 import java.io.BufferedReader;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
@@ -1102,7 +1103,7 @@ public final class httpdProxyHandler {
                                     responseHeader);
             
             // respondHeader(respond, res.status, res.responseHeader);
-            Saver.writeContent(res, (chunked != null) ? chunked : respond, null);
+            Saver.writeContent(res, (chunked != null) ? new BufferedOutputStream(chunked) : new BufferedOutputStream(respond), null);
             if (chunked != null)  chunked.finish();
             
             respond.flush();

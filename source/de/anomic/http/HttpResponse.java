@@ -25,6 +25,8 @@
 // Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
 package de.anomic.http;
 
+import java.io.BufferedInputStream;
+import java.io.BufferedOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
@@ -101,13 +103,16 @@ public interface HttpResponse {
          * @throws IOException
          * @throws UnsupportedEncodingException
          */
-        public static void writeContent(HttpResponse res, OutputStream hfos, OutputStream byteStream) throws IOException,
+        public static void writeContent(HttpResponse res, BufferedOutputStream hfos, BufferedOutputStream byteStream) throws IOException,
                 UnsupportedEncodingException {
             try {
                 InputStream data = res.getDataAsStream();
-                OutputStream[] streams = (byteStream == null ? new OutputStream[] { (OutputStream) hfos }
-                        : new OutputStream[] { (OutputStream) hfos, byteStream });
-                serverFileUtils.copyToStreams(data, streams);
+                if (byteStream == null) {
+                    serverFileUtils.copyToStream(new BufferedInputStream(data), hfos);
+                } else {
+                    serverFileUtils.copyToStreams(new BufferedInputStream(data), hfos, byteStream);
+                }
+                
                 
             } finally {
                 res.closeStream();

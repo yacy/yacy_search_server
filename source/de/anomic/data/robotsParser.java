@@ -43,6 +43,7 @@
 
 package de.anomic.data;
 
+import java.io.BufferedOutputStream;
 import java.io.BufferedReader;
 import java.io.ByteArrayInputStream;
 import java.io.File;
@@ -432,7 +433,7 @@ public final class robotsParser{
                     
                     // downloading the content
                     serverByteBuffer sbb = new serverByteBuffer();
-                    Saver.writeContent(res, sbb, null);
+                    Saver.writeContent(res, new BufferedOutputStream(sbb), null);
                     robotsTxt = sbb.getBytes();
                     
                     downloadEnd = System.currentTimeMillis();                    

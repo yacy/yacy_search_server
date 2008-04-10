@@ -85,7 +85,7 @@ public final class serverFileUtils {
      * 
      * @param source InputStream
      * @param dest OutputStream
-     * @param count the total amount of bytes to copy
+     * @param count the total amount of bytes to copy (-1 for all)
      * @return Total number of bytes copied.
      * @throws IOException 
      * 
@@ -511,40 +511,46 @@ public final class serverFileUtils {
     }
 
     /**
-     * copies the input stream to all output streams (byte per byte)
+     * copies the input stream to one output stream (byte per byte)
      * @param in
-     * @param outs
-     * @return
+     * @param out
+     * @return number of copies bytes
      * @throws IOException
      */
-    public static int copyToStreams(InputStream in, final OutputStream[] outs) throws IOException {
-        if(!(in instanceof BufferedInputStream)) {
-            // add buffer
-            in = new BufferedInputStream(in);
+    public static int copyToStream(BufferedInputStream in, final BufferedOutputStream out) throws IOException {
+        int count = 0;
+        // copy bytes
+        int b;
+        while ((b = in.read()) != -1) {
+            count++;
+            out.write(b);
         }
-        
-        // check if buffer is used
-        int i = 0;
-        for(final OutputStream output: outs) {
-            if (!(output instanceof BufferedOutputStream)) {
-                // add buffer
-                outs[i] = new BufferedOutputStream(output);
-            }
-            i++;
-        }
+        out.flush();
+        return count;
+    }
+    
+    /**
+     * copies the input stream to both output streams (byte per byte)
+     * @param in
+     * @param out0
+     * @param out1
+     * @return number of copies bytes
+     * @throws IOException
+     */
+    public static int copyToStreams(BufferedInputStream in, final BufferedOutputStream out0, final BufferedOutputStream out1) throws IOException {
+        assert out0 != null;
+        assert out1 != null;
         
         int count = 0;
         // copy bytes
         int b;
         while((b = in.read()) != -1) {
             count++;
-            for(final OutputStream out: outs) {
-                out.write(b);
-            }
+            out0.write(b);
+            out1.write(b);
         }
-        for(final OutputStream out: outs) {
-            out.flush();
-        }
+        out0.flush();
+        out1.flush();
         return count;
     }
 

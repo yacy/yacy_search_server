@@ -539,7 +539,7 @@ public final class yacy {
                 serverLog.logConfig("REMOTE-SHUTDOWN", "YACY accepted shutdown command.");
                 serverLog.logConfig("REMOTE-SHUTDOWN", "Stand by for termination, which may last some seconds.");
                 ByteArrayOutputStream bos = new ByteArrayOutputStream();
-                Saver.writeContent(res, bos, null);
+                Saver.writeContent(res, new BufferedOutputStream(bos), null);
             } else {
                 serverLog.logSevere("REMOTE-SHUTDOWN", "error response from YACY socket: " + res.getStatusLine());
                 System.exit(-1);
