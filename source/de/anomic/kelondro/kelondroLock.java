@@ -95,7 +95,7 @@ public class kelondroLock {
         if (locked()) {
             lock = false;
             releaseTime = 0;
-            notify();
+            notifyAll();
         }
     }
 

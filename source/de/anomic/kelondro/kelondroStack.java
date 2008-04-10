@@ -145,7 +145,7 @@ public final class kelondroStack extends kelondroFullRecords {
         }
     }
 
-    public int size() {
+    public synchronized int size() {
         return super.size();
     }
     

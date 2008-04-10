@@ -27,12 +27,12 @@ package de.anomic.http;
 
 import java.io.BufferedInputStream;
 import java.io.BufferedOutputStream;
+import java.io.BufferedWriter;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.io.OutputStreamWriter;
 import java.io.UnsupportedEncodingException;
-import java.io.Writer;
 
 import de.anomic.server.serverFileUtils;
 
@@ -103,8 +103,7 @@ public interface HttpResponse {
          * @throws IOException
          * @throws UnsupportedEncodingException
          */
-        public static void writeContent(HttpResponse res, BufferedOutputStream hfos, BufferedOutputStream byteStream) throws IOException,
-                UnsupportedEncodingException {
+        public static void writeContent(HttpResponse res, BufferedOutputStream hfos, BufferedOutputStream byteStream) throws IOException, UnsupportedEncodingException {
             try {
                 InputStream data = res.getDataAsStream();
                 if (byteStream == null) {
@@ -112,21 +111,20 @@ public interface HttpResponse {
                 } else {
                     serverFileUtils.copyToStreams(new BufferedInputStream(data), hfos, byteStream);
                 }
-                
-                
             } finally {
                 res.closeStream();
             }
         }
         
-        public static void writeContent(HttpResponse res, Writer hfos, OutputStream byteStream) throws IOException,
-        UnsupportedEncodingException {
+        public static void writeContent(HttpResponse res, BufferedWriter hfos, OutputStream byteStream) throws IOException, UnsupportedEncodingException {
             try {
                 InputStream data = res.getDataAsStream();
                 String charSet = httpHeader.getCharSet(res.getResponseHeader());
-                Writer[] writers = (byteStream == null ? new Writer[] { hfos } : new Writer[] { hfos,
-                        new OutputStreamWriter(byteStream, charSet) });
-                serverFileUtils.copyToWriters(data, writers, charSet);
+                if (byteStream == null) {
+                    serverFileUtils.copyToWriter(new BufferedInputStream(data), hfos, charSet);
+                } else {
+                    serverFileUtils.copyToWriters(new BufferedInputStream(data), hfos, new BufferedWriter(new OutputStreamWriter(byteStream, charSet)) , charSet);
+                }
             } finally {
                 res.closeStream();
             }

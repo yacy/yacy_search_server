@@ -562,34 +562,36 @@ public final class serverFileUtils {
      * @return
      * @throws IOException
      */
-    public static int copyToWriters(final InputStream data, final Writer[] writers, final String charSet) throws IOException {
+    public static int copyToWriter(final BufferedInputStream data, final BufferedWriter writer, final String charSet) throws IOException {
         // the docs say: "For top efficiency, consider wrapping an InputStreamReader within a BufferedReader."
-        final BufferedReader sourceReader = new BufferedReader(new InputStreamReader(data, charSet));
-        
-        // check if buffer is used. From the documentation:
-        // "For top efficiency, consider wrapping an OutputStreamWriter within a BufferedWriter so as to avoid frequent
-        // converter invocations"
-        int i = 0;
-        for(final Writer writer: writers) {
-            if (!(writer instanceof BufferedWriter)) {
-                // add buffer
-                writers[i] = new BufferedWriter(writer);
-            }
-            i++;
-        }
+        final Reader sourceReader = new InputStreamReader(data, charSet);
         
         int count = 0;
         // copy bytes
         int b;
         while((b = sourceReader.read()) != -1) {
             count++;
-            for(final Writer writer: writers) {
-                writer.write(b);
-            }
+            writer.write(b);
         }
-        for(final Writer writer: writers) {
-            writer.flush();
+        writer.flush();
+        return count;
+    }
+    public static int copyToWriters(final BufferedInputStream data, final BufferedWriter writer0, final BufferedWriter writer1, final String charSet) throws IOException {
+        // the docs say: "For top efficiency, consider wrapping an InputStreamReader within a BufferedReader."
+        assert writer0 != null;
+        assert writer1 != null;
+        final Reader sourceReader = new InputStreamReader(data, charSet);
+        
+        int count = 0;
+        // copy bytes
+        int b;
+        while((b = sourceReader.read()) != -1) {
+            count++;
+            writer0.write(b);
+            writer1.write(b);
         }
+        writer0.flush();
+        writer1.flush();
         return count;
     }
 }

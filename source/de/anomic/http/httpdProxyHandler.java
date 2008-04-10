@@ -64,6 +64,7 @@ package de.anomic.http;
 
 import java.io.BufferedOutputStream;
 import java.io.BufferedReader;
+import java.io.BufferedWriter;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
@@ -634,7 +635,7 @@ public final class httpdProxyHandler {
                 {
                     // ok, we don't write actually into a file, only to RAM, and schedule writing the file.
                     ByteArrayOutputStream byteStream = new ByteArrayOutputStream();
-                    Saver.writeContent(res, hfos, byteStream);
+                    Saver.writeContent(res, new BufferedWriter(hfos), byteStream);
                     // cached bytes
                     byte[] cacheArray;
                     if(byteStream.size() > 0) {
@@ -669,7 +670,7 @@ public final class httpdProxyHandler {
                     // the file is too big to cache it in the ram, or the size is unknown
                     // write to file right here.
                     cacheFile.getParentFile().mkdirs();
-                    Saver.writeContent(res, hfos, new FileOutputStream(cacheFile));
+                    Saver.writeContent(res, new BufferedWriter(hfos), new FileOutputStream(cacheFile));
                     if (hfos instanceof htmlFilterWriter) ((htmlFilterWriter) hfos).finalize();
                     theLogger.logFine("for write-file of " + url + ": contentLength = " + contentLength + ", sizeBeforeDelete = " + sizeBeforeDelete);
                     plasmaHTCache.writeFileAnnouncement(cacheFile);
@@ -699,7 +700,7 @@ public final class httpdProxyHandler {
                         " StoreHTCache=" + storeHTCache + 
                         " SupportetContent=" + isSupportedContent);
 
-                Saver.writeContent(res, hfos, null);
+                Saver.writeContent(res, new BufferedWriter(hfos), null);
                 if (hfos instanceof htmlFilterWriter) ((htmlFilterWriter) hfos).finalize();
                 if (sizeBeforeDelete == -1) {
                     // no old file and no load. just data passing

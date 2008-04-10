@@ -283,9 +283,6 @@ public final class httpTemplate {
                                 num=0;
                             }
                             //System.out.println(multi_key + ": " + num); //DEBUG
-                        }else{
-                            //0 interations - no display
-                            //System.out.println("_"+new String(multi_key)+" is null or does not exist"); //DEBUG
                         }
 
                         //Enumeration enx = pattern.keys(); while (enx.hasMoreElements()) System.out.println("KEY=" + enx.nextElement()); // DEBUG
@@ -336,8 +333,6 @@ public final class httpTemplate {
                         byName=true;
                         patternName=patternId.getBytes("UTF-8");
                     }
-                }else{
-                    //System.out.println("Pattern \""+new String(prefix + key)+"\" is not set"); //DEBUG
                 }
 
                 int currentPattern=0;

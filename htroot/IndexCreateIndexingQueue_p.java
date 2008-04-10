@@ -177,6 +177,7 @@ public class IndexCreateIndexingQueue_p {
             int j=0;
             for (int i = switchboard.crawlQueues.errorURL.stackSize() - 1; i >= (switchboard.crawlQueues.errorURL.stackSize() - showRejectedCount); i--) {
                     entry = switchboard.crawlQueues.errorURL.top(i);
+                    if (entry == null) continue;
                     url = entry.url();
                     if (url == null) continue;
                     
