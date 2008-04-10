@@ -37,6 +37,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 import org.apache.commons.httpclient.ConnectMethod;
+import org.apache.commons.httpclient.DefaultHttpMethodRetryHandler;
 import org.apache.commons.httpclient.Header;
 import org.apache.commons.httpclient.HostConfiguration;
 import org.apache.commons.httpclient.HttpClient;
@@ -77,6 +78,9 @@ public class JakartaCommonsHttpClient extends de.anomic.http.HttpClient {
     private final static HttpClient apacheHttpClient = new HttpClient(conManager);
 
     static {
+        /**
+         * set options for client
+         */
         // set user-agent
         yacyVersion thisversion = yacyVersion.thisVersion();
         apacheHttpClient.getParams().setParameter(HttpMethodParams.USER_AGENT,
@@ -84,6 +88,9 @@ public class JakartaCommonsHttpClient extends de.anomic.http.HttpClient {
                                                           " (www.yacy.net; " +
                                                           de.anomic.http.HttpClient.getSystemOST() + ") " +
                                                           getCurrentUserAgent().replace(';', ':')); // last ; must be before location (this is parsed)
+        // only one retry
+        apacheHttpClient.getParams().setParameter(HttpMethodParams.RETRY_HANDLER, new DefaultHttpMethodRetryHandler(1, false));
+        
         /**
          * set options for connection manager
          */
