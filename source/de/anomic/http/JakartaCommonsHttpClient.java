@@ -69,7 +69,7 @@ import de.anomic.yacy.yacyVersion;
  * @author danielr
  * 
  */
-public class JakartaCommonsHttpClient extends de.anomic.http.HttpClient {
+public class JakartaCommonsHttpClient  {
     /**
      * "the HttpClient instance and connection manager should be shared among all threads for maximum efficiency."
      * (Concurrent execution of HTTP methods, http://hc.apache.org/httpclient-3.x/performance.html)
@@ -95,7 +95,7 @@ public class JakartaCommonsHttpClient extends de.anomic.http.HttpClient {
          * set options for connection manager
          */
         // conManager.getParams().setDefaultMaxConnectionsPerHost(4); // default 2
-        conManager.getParams().setMaxTotalConnections(50); // default 20
+        conManager.getParams().setMaxTotalConnections(200); // Proxy may need many connections
         conManager.getParams().setConnectionTimeout(60000); // set a default timeout
         conManager.getParams().setDefaultMaxConnectionsPerHost(20); // prevent DoS by mistake
         // TODO should this be configurable?
@@ -184,7 +184,7 @@ public class JakartaCommonsHttpClient extends de.anomic.http.HttpClient {
      * @return InputStream of content (body)
      * @throws IOException
      */
-    public HttpResponse GET(final String uri) throws IOException {
+    public JakartaCommonsHttpResponse GET(final String uri) throws IOException {
         final HttpMethod get = new GetMethod(uri);
         return execute(get);
     }
@@ -197,7 +197,7 @@ public class JakartaCommonsHttpClient extends de.anomic.http.HttpClient {
      * @return Instance of response with the content.
      * @throws IOException
      */
-    public HttpResponse HEAD(final String uri) throws IOException {
+    public JakartaCommonsHttpResponse HEAD(final String uri) throws IOException {
         assert uri != null : "precondition violated: uri != null";
         final HttpMethod head = new HeadMethod(uri);
         return execute(head);
@@ -213,7 +213,7 @@ public class JakartaCommonsHttpClient extends de.anomic.http.HttpClient {
      * @return Instance of response with the content.
      * @throws IOException
      */
-    public HttpResponse POST(final String uri, final InputStream ins) throws IOException {
+    public JakartaCommonsHttpResponse POST(final String uri, final InputStream ins) throws IOException {
         assert uri != null : "precondition violated: uri != null";
         assert ins != null : "precondition violated: ins != null";
         final PostMethod post = new PostMethod(uri);
@@ -231,7 +231,7 @@ public class JakartaCommonsHttpClient extends de.anomic.http.HttpClient {
      * @return Instance of response with the content.
      * @throws IOException
      */
-    public HttpResponse POST(final String uri, final Map<String, ?> files) throws IOException {
+    public JakartaCommonsHttpResponse POST(final String uri, final Map<String, ?> files) throws IOException {
         assert uri != null : "precondition violated: uri != null";
         final PostMethod post = new PostMethod(uri);
 
@@ -278,7 +278,7 @@ public class JakartaCommonsHttpClient extends de.anomic.http.HttpClient {
      * 
      * @see de.anomic.http.HttpClient#CONNECT(java.lang.String, int, de.anomic.http.httpHeader)
      */
-    public HttpResponse CONNECT(final String host, final int port) throws IOException {
+    public JakartaCommonsHttpResponse CONNECT(final String host, final int port) throws IOException {
         final HostConfiguration hostConfig = new HostConfiguration();
         hostConfig.setHost(host, port);
         final HttpMethod connect = new ConnectMethod(hostConfig);
@@ -369,7 +369,7 @@ public class JakartaCommonsHttpClient extends de.anomic.http.HttpClient {
      * @throws IOException
      * @throws HttpException
      */
-    private HttpResponse execute(final HttpMethod method) throws IOException, HttpException {
+    private JakartaCommonsHttpResponse execute(final HttpMethod method) throws IOException, HttpException {
         assert method != null : "precondition violated: method != null";
         // set header
         for (final Header header : headers) {
@@ -480,7 +480,7 @@ public class JakartaCommonsHttpClient extends de.anomic.http.HttpClient {
      * @param args
      */
     public static void main(final String[] args) {
-        HttpResponse resp = null;
+        JakartaCommonsHttpResponse resp = null;
         String url = args[0];
         if (!(url.toUpperCase().startsWith("HTTP://"))) {
             url = "http://" + url;
@@ -492,7 +492,7 @@ public class JakartaCommonsHttpClient extends de.anomic.http.HttpClient {
                 files.put("myfile.txt", "this is not a file ;)".getBytes());
                 files.put("anotherfile.raw", "this is not a binary file ;)".getBytes());
                 System.out.println("POST " + files.size() + " elements to " + url);
-                final de.anomic.http.HttpClient client = new JakartaCommonsHttpClient(1000, null, null);
+                final JakartaCommonsHttpClient client = new JakartaCommonsHttpClient(1000, null, null);
                 resp = client.POST(url, files);
                 System.out.println("----- Header: -----");
                 System.out.println(new String(resp.getResponseHeader().toString()));

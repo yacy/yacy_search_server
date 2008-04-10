@@ -62,7 +62,7 @@
 
 package de.anomic.http;
 
-import java.io.BufferedOutputStream;
+import java.io.BufferedInputStream;
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
 import java.io.ByteArrayInputStream;
@@ -75,6 +75,7 @@ import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.io.OutputStreamWriter;
 import java.io.PrintWriter;
+import java.io.UnsupportedEncodingException;
 import java.io.Writer;
 import java.net.BindException;
 import java.net.ConnectException;
@@ -98,7 +99,6 @@ import java.util.zip.GZIPOutputStream;
 import de.anomic.htmlFilter.htmlFilterContentTransformer;
 import de.anomic.htmlFilter.htmlFilterTransformer;
 import de.anomic.htmlFilter.htmlFilterWriter;
-import de.anomic.http.HttpResponse.Saver;
 import de.anomic.index.indexReferenceBlacklist;
 import de.anomic.plasma.plasmaHTCache;
 import de.anomic.plasma.plasmaParser;
@@ -144,7 +144,7 @@ public final class httpdProxyHandler {
      * Do logging configuration for special proxy access log file
      */
     static {
-        // Doing logger initialisation
+        // Doing logger initialization
         try {
             serverLog.logInfo("PROXY","Configuring proxy access logging ...");            
             
@@ -395,7 +395,7 @@ public final class httpdProxyHandler {
             
             addXForwardedForHeader(conProp, requestHeader);
             
-            // decide wether to use a cache entry or connect to the network
+            // decide whether to use a cache entry or connect to the network
             File cacheFile = plasmaHTCache.getCachePath(url);
             
             httpHeader cachedResponseHeader = null;
@@ -411,8 +411,8 @@ public final class httpdProxyHandler {
             
             // why are files unzipped upon arrival? why not zip all files in cache?
             // This follows from the following premises
-            // (a) no file shall be unzip-ed more than once to prevent unnessesary computing time
-            // (b) old cache entries shall be comparable with refill-entries to detect/distiguish case 3+4
+            // (a) no file shall be unzip-ed more than once to prevent unnecessary computing time
+            // (b) old cache entries shall be comparable with refill-entries to detect/distinguish case 3+4
             // (c) the indexing mechanism needs files unzip-ed, a schedule could do that later
             // case b and c contradicts, if we use a scheduler, because files in a stale cache would be unzipped
             // and the newly arrival would be zipped and would have to be unzipped upon load. But then the
@@ -487,7 +487,7 @@ public final class httpdProxyHandler {
         httpChunkedOutputStream chunkedOut = null;
         Writer hfos = null;
         
-        HttpResponse res = null;                
+        JakartaCommonsHttpResponse res = null;                
         try {
 
             String host =    conProp.getProperty(httpHeader.CONNECTION_PROP_HOST);
@@ -519,7 +519,7 @@ public final class httpdProxyHandler {
             prepareRequestHeader(requestHeader, httpVer);
             
             // setup HTTP-client
-            final HttpClient client = new JakartaCommonsHttpClient(timeout, requestHeader, null);
+            final JakartaCommonsHttpClient client = new JakartaCommonsHttpClient(timeout, requestHeader, null);
             
             final String connectHost = hostPart(host, port, yAddress);
             final String getUrl = "http://"+ connectHost + remotePath;
@@ -635,7 +635,7 @@ public final class httpdProxyHandler {
                 {
                     // ok, we don't write actually into a file, only to RAM, and schedule writing the file.
                     ByteArrayOutputStream byteStream = new ByteArrayOutputStream();
-                    Saver.writeContent(res, new BufferedWriter(hfos), byteStream);
+                    writeContent(res, new BufferedWriter(hfos), byteStream);
                     // cached bytes
                     byte[] cacheArray;
                     if(byteStream.size() > 0) {
@@ -670,7 +670,7 @@ public final class httpdProxyHandler {
                     // the file is too big to cache it in the ram, or the size is unknown
                     // write to file right here.
                     cacheFile.getParentFile().mkdirs();
-                    Saver.writeContent(res, new BufferedWriter(hfos), new FileOutputStream(cacheFile));
+                    writeContent(res, new BufferedWriter(hfos), new FileOutputStream(cacheFile));
                     if (hfos instanceof htmlFilterWriter) ((htmlFilterWriter) hfos).finalize();
                     theLogger.logFine("for write-file of " + url + ": contentLength = " + contentLength + ", sizeBeforeDelete = " + sizeBeforeDelete);
                     plasmaHTCache.writeFileAnnouncement(cacheFile);
@@ -700,7 +700,7 @@ public final class httpdProxyHandler {
                         " StoreHTCache=" + storeHTCache + 
                         " SupportetContent=" + isSupportedContent);
 
-                Saver.writeContent(res, new BufferedWriter(hfos), null);
+                writeContent(res, new BufferedWriter(hfos));
                 if (hfos instanceof htmlFilterWriter) ((htmlFilterWriter) hfos).finalize();
                 if (sizeBeforeDelete == -1) {
                     // no old file and no load. just data passing
@@ -834,6 +834,28 @@ public final class httpdProxyHandler {
         return;
     }
 
+    public static void writeContent(JakartaCommonsHttpResponse res, BufferedWriter hfos) throws IOException, UnsupportedEncodingException {
+        try {
+            InputStream data = res.getDataAsStream();
+            if (data == null) return;
+            String charSet = httpHeader.getCharSet(res.getResponseHeader());
+            serverFileUtils.copyToWriter(new BufferedInputStream(data), hfos, charSet);
+        } finally {
+            res.closeStream();
+        }
+    }
+    
+    public static void writeContent(JakartaCommonsHttpResponse res, BufferedWriter hfos, OutputStream byteStream) throws IOException, UnsupportedEncodingException {
+        assert byteStream != null;
+        try {
+            InputStream data = res.getDataAsStream();
+            if (data == null) return;
+            String charSet = httpHeader.getCharSet(res.getResponseHeader());
+            serverFileUtils.copyToWriters(new BufferedInputStream(data), hfos, new BufferedWriter(new OutputStreamWriter(byteStream, charSet)) , charSet);
+        } finally {
+            res.closeStream();
+        }
+    }
 
     private static void removeHopByHopHeaders(httpHeader headers) {
         /*
@@ -868,7 +890,7 @@ public final class httpdProxyHandler {
     
     public static void doHead(Properties conProp, httpHeader requestHeader, OutputStream respond) {
         
-        HttpResponse res = null;
+        JakartaCommonsHttpResponse res = null;
         yacyURL url = null;
         try {
             // remembering the starting time of the request
@@ -935,7 +957,7 @@ public final class httpdProxyHandler {
             prepareRequestHeader(requestHeader, httpVer);            
             
             // setup HTTP-client
-            HttpClient client = new JakartaCommonsHttpClient(timeout, requestHeader, null);
+            JakartaCommonsHttpClient client = new JakartaCommonsHttpClient(timeout, requestHeader, null);
             
             // generate request-url
             final String connectHost = hostPart(host, port, yAddress);
@@ -1057,7 +1079,7 @@ public final class httpdProxyHandler {
                 serverFileUtils.copy(body, buffer, requestLength);
                 body = new ByteArrayInputStream(buffer.toByteArray());
             }
-            HttpResponse res = null;
+            JakartaCommonsHttpResponse res = null;
             try {
             // sending the request
             res = client.POST(getUrl, body);
@@ -1104,8 +1126,17 @@ public final class httpdProxyHandler {
                                     responseHeader);
             
             // respondHeader(respond, res.status, res.responseHeader);
-            Saver.writeContent(res, (chunked != null) ? new BufferedOutputStream(chunked) : new BufferedOutputStream(respond), null);
+            // Saver.writeContent(res, (chunked != null) ? new BufferedOutputStream(chunked) : new BufferedOutputStream(respond));
+            /*
+            // *** (†bernommen aus Saver-Klasse: warum ist dies hier die einzige Methode, die einen OutputStream statt einen Writer benutzt?)
+            try {
+                serverFileUtils.copyToStream(new BufferedInputStream(res.getDataAsStream()), (chunked != null) ? new BufferedOutputStream(chunked) : new BufferedOutputStream(respond));
+            } finally {
+                res.closeStream();
+            }
             if (chunked != null)  chunked.finish();
+            */
+            writeContent(res, new BufferedWriter(new OutputStreamWriter((chunked != null) ? chunked : respond)));
             
             respond.flush();
             } finally {
@@ -1208,9 +1239,9 @@ public final class httpdProxyHandler {
                 (proxyConfig.useProxy()) &&
                 (proxyConfig.useProxy4SSL())
         ) {
-            HttpClient remoteProxy = new JakartaCommonsHttpClient(timeout, requestHeader, proxyConfig);
+            JakartaCommonsHttpClient remoteProxy = new JakartaCommonsHttpClient(timeout, requestHeader, proxyConfig);
 
-            HttpResponse response = null;
+            JakartaCommonsHttpResponse response = null;
             try {
                 response = remoteProxy.CONNECT(host, port);
                 // outputs a logline to the serverlog with the current status

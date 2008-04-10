@@ -43,6 +43,7 @@
 
 package de.anomic.data;
 
+import java.io.BufferedInputStream;
 import java.io.BufferedOutputStream;
 import java.io.BufferedReader;
 import java.io.ByteArrayInputStream;
@@ -56,13 +57,13 @@ import java.util.ArrayList;
 import java.util.Date;
 
 import de.anomic.http.HttpClient;
-import de.anomic.http.HttpResponse;
 import de.anomic.http.JakartaCommonsHttpClient;
+import de.anomic.http.JakartaCommonsHttpResponse;
 import de.anomic.http.httpHeader;
-import de.anomic.http.HttpResponse.Saver;
 import de.anomic.plasma.plasmaCrawlRobotsTxt;
 import de.anomic.plasma.plasmaSwitchboard;
 import de.anomic.server.serverByteBuffer;
+import de.anomic.server.serverFileUtils;
 import de.anomic.server.logging.serverLog;
 import de.anomic.yacy.yacyURL;
 
@@ -405,8 +406,8 @@ public final class robotsParser{
         
         // setup http-client
         //TODO: adding Traffic statistic for robots download?
-        HttpClient client = new JakartaCommonsHttpClient(10000, reqHeaders, null);
-        HttpResponse res = null;
+        JakartaCommonsHttpClient client = new JakartaCommonsHttpClient(10000, reqHeaders, null);
+        JakartaCommonsHttpResponse res = null;
         try {
             // sending the get request
             res = client.GET(robotsURL.toString());
@@ -433,7 +434,11 @@ public final class robotsParser{
                     
                     // downloading the content
                     serverByteBuffer sbb = new serverByteBuffer();
-                    Saver.writeContent(res, new BufferedOutputStream(sbb), null);
+                    try {
+                        serverFileUtils.copyToStream(new BufferedInputStream(res.getDataAsStream()), new BufferedOutputStream(sbb));
+                    } finally {
+                        res.closeStream();
+                    }
                     robotsTxt = sbb.getBytes();
                     
                     downloadEnd = System.currentTimeMillis();                    

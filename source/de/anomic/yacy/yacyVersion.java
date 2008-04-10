@@ -27,6 +27,7 @@
 
 package de.anomic.yacy;
 
+import java.io.BufferedInputStream;
 import java.io.BufferedOutputStream;
 import java.io.File;
 import java.io.FileOutputStream;
@@ -41,12 +42,11 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import de.anomic.htmlFilter.htmlFilterContentScraper;
-import de.anomic.http.HttpClient;
-import de.anomic.http.HttpResponse;
 import de.anomic.http.JakartaCommonsHttpClient;
-import de.anomic.http.HttpResponse.Saver;
+import de.anomic.http.JakartaCommonsHttpResponse;
 import de.anomic.plasma.plasmaSwitchboard;
 import de.anomic.server.serverCore;
+import de.anomic.server.serverFileUtils;
 import de.anomic.server.serverSystem;
 import de.anomic.server.logging.serverLog;
 
@@ -330,11 +330,15 @@ public final class yacyVersion implements Comparator<yacyVersion>, Comparable<ya
         File storagePath = plasmaSwitchboard.getSwitchboard().releasePath;
         // load file
         File download = new File(storagePath, release.url.getFileName());
-        HttpClient client = new JakartaCommonsHttpClient(120000, null, null);
-        HttpResponse res = null;
+        JakartaCommonsHttpClient client = new JakartaCommonsHttpClient(120000, null, null);
+        JakartaCommonsHttpResponse res = null;
         try {
             res = client.GET(release.url.toString());
-            Saver.writeContent(res, new BufferedOutputStream(new FileOutputStream(download)), null);
+            try {
+                serverFileUtils.copyToStream(new BufferedInputStream(res.getDataAsStream()), new BufferedOutputStream(new FileOutputStream(download)));
+            } finally {
+                res.closeStream();
+            }
             if ((!download.exists()) || (download.length() == 0)) throw new IOException("wget of url " + release.url + " failed");
         } catch (IOException e) {
             serverLog.logSevere("yacyVersion", "download of " + release.name + " failed: " + e.getMessage());

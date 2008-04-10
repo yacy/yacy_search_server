@@ -23,6 +23,7 @@
 // You should have received a copy of the GNU General Public License
 // along with this program; if not, write to the Free Software
 // Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
+
 package de.anomic.http;
 
 import java.io.ByteArrayOutputStream;
@@ -39,7 +40,7 @@ import org.apache.commons.httpclient.HttpMethod;
  * @author daniel
  * @since 21.03.2008
  */
-public class JakartaCommonsHttpResponse implements HttpResponse {
+public class JakartaCommonsHttpResponse {
     private final HttpMethod method;
     private String incomingAccountingName = null;
 

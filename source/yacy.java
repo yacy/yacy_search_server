@@ -41,6 +41,7 @@
 // the intact and unchanged copyright notice.
 // Contributions and changes to the program code must be marked as such.
 
+import java.io.BufferedInputStream;
 import java.io.BufferedOutputStream;
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
@@ -67,10 +68,9 @@ import org.apache.commons.httpclient.MultiThreadedHttpConnectionManager;
 
 import de.anomic.data.translator;
 import de.anomic.http.HttpClient;
-import de.anomic.http.HttpResponse;
+import de.anomic.http.JakartaCommonsHttpResponse;
 import de.anomic.http.httpHeader;
 import de.anomic.http.httpd;
-import de.anomic.http.HttpResponse.Saver;
 import de.anomic.http.JakartaCommonsHttpClient;
 import de.anomic.index.indexContainer;
 import de.anomic.index.indexRWIEntry;
@@ -529,8 +529,8 @@ public final class yacy {
         // send 'wget' to web interface
         httpHeader requestHeader = new httpHeader();
         requestHeader.put("Authorization", "realm=" + encodedPassword); // for http-authentify
-        HttpClient con = new JakartaCommonsHttpClient(10000, requestHeader, null);
-        HttpResponse res = null;
+        JakartaCommonsHttpClient con = new JakartaCommonsHttpClient(10000, requestHeader, null);
+        JakartaCommonsHttpResponse res = null;
         try {
             res = con.GET("http://localhost:"+ port +"/Steering.html?shutdown=");
 
@@ -539,7 +539,11 @@ public final class yacy {
                 serverLog.logConfig("REMOTE-SHUTDOWN", "YACY accepted shutdown command.");
                 serverLog.logConfig("REMOTE-SHUTDOWN", "Stand by for termination, which may last some seconds.");
                 ByteArrayOutputStream bos = new ByteArrayOutputStream();
-                Saver.writeContent(res, new BufferedOutputStream(bos), null);
+                try {
+                    serverFileUtils.copyToStream(new BufferedInputStream(res.getDataAsStream()), new BufferedOutputStream(bos));
+                } finally {
+                    res.closeStream();
+                }
             } else {
                 serverLog.logSevere("REMOTE-SHUTDOWN", "error response from YACY socket: " + res.getStatusLine());
                 System.exit(-1);

@@ -23,11 +23,11 @@
 // You should have received a copy of the GNU General Public License
 // along with this program; if not, write to the Free Software
 // Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
+
 package de.anomic.http;
 
 import java.io.IOException;
 import java.util.Date;
-import java.util.Map;
 
 import de.anomic.server.logging.serverLog;
 
@@ -37,6 +37,7 @@ import de.anomic.server.logging.serverLog;
  * some methods must be implemented (the "socket-layer")
  */
 public abstract class HttpClient {
+    
     private static final String systemOST;
     static {
         // provide system information for client identification
@@ -67,73 +68,6 @@ public abstract class HttpClient {
     public static String getSystemOST() {
         return systemOST;
     }
-
-    /**
-     * "This method can be used for obtaining metainformation about the entity implied by the request without
-     * transferring the entity-body itself" [RFC 2616, sect. 9.4]
-     * 
-     * @param uri
-     * @return response header
-     * @throws IOException if data cannot be read
-     */
-    public abstract HttpResponse HEAD(String uri) throws IOException;
-
-    /**
-     * "The GET method means retrieve whatever information [...] is identified by the Request-URI" [RFC 2616, sect. 9.3]
-     * 
-     * @param uri
-     * @return response body
-     * @throws IOException if data cannot be read
-     */
-    public abstract HttpResponse GET(String uri) throws IOException;
-
-    /**
-     * "Providing a block of data [...] to a data-handling process;" [RFC 2616, sect. 9.5]
-     * 
-     * @param uri
-     * @param nameDataPairs
-     * @return response body
-     * @throws IOException if data cannot be read
-     */
-    public abstract HttpResponse POST(String uri, Map<String, ?> nameDataPairs) throws IOException;
-
-    /**
-     * "for use with a proxy that can dynamically switch to being a tunnel" [RFC 2616, sect. 9.9]
-     * 
-     * @param host
-     * @param port
-     * @return
-     * @throws IOException
-     */
-    public abstract HttpResponse CONNECT(String host, int port) throws IOException;
-
-    /**
-     * use proxyConfig to establish the connection
-     * 
-     * @param proxyConfig
-     */
-    public abstract void setProxy(httpRemoteProxyConfig proxyConfig);
-
-    /**
-     * sets the header for all coming requests
-     * 
-     * @param header may be null
-     */
-    public abstract void setHeader(httpHeader header);
-
-    /**
-     * sets the timeout in milliseconds
-     * 
-     * @param timeout
-     */
-    public abstract void setTimeout(int timeout);
-
-    /**
-     * gives the user-agent used by this http-client
-     * 
-     * @return
-     */
-    public abstract String getUserAgent();
 
     /**
      * for easy access
@@ -213,7 +147,7 @@ public abstract class HttpClient {
      */
     public static byte[] wget(final String uri, httpHeader header, final String vhost, int timeout) {
         assert uri != null : "precondition violated: uri != null";
-        final HttpClient client = new JakartaCommonsHttpClient(timeout, null, null);
+        final JakartaCommonsHttpClient client = new JakartaCommonsHttpClient(timeout, null, null);
 
         // set header
         header = addHostHeader(header, vhost);
@@ -221,7 +155,7 @@ public abstract class HttpClient {
 
         // do the request
         try {
-            final HttpResponse response = client.GET(uri);
+            final JakartaCommonsHttpResponse response = client.GET(uri);
             return response.getData();
         } catch (final IOException e) {
             serverLog.logWarning("HTTPC", "wget(" + uri + ") failed: " + e.getMessage());
@@ -265,9 +199,9 @@ public abstract class HttpClient {
      * @return
      */
     public static httpHeader whead(final String uri, final httpHeader header) {
-        final de.anomic.http.HttpClient client = new JakartaCommonsHttpClient(10000, header, null);
+        final JakartaCommonsHttpClient client = new JakartaCommonsHttpClient(10000, header, null);
         try {
-            final HttpResponse response = client.HEAD(uri);
+            final JakartaCommonsHttpResponse response = client.HEAD(uri);
             return response.getResponseHeader();
         } catch (final IOException e) {
             serverLog.logWarning("HTTPC", "whead(" + uri + ") failed: " + e.getMessage());
