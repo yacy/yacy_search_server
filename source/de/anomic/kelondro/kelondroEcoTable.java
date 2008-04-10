@@ -196,7 +196,7 @@ public class kelondroEcoTable implements kelondroIndex {
             }
 
             try {
-                assert file.size() == index.size() + fail : "file.size() = " + file.size() + ", index.size() = " + index.size() + ", doubles.size() = " + doubles.size() + ", fail = " + fail + ", i = " + i;
+                assert file.size() == index.size() + doubles.size() + fail : "file.size() = " + file.size() + ", index.size() = " + index.size() + ", doubles.size() = " + doubles.size() + ", fail = " + fail + ", i = " + i;
             } catch (IOException e) {
                 e.printStackTrace();
             }
@@ -269,7 +269,7 @@ public class kelondroEcoTable implements kelondroIndex {
             assert table.size() == i;
             table.addUnique(taildef.newEntry(row.bytes(), rowdef.primaryKeyLength, true));
         }
-        file.put(i, row.bytes(), 0);
+        file.add(row.bytes(), 0);
         assert file.size() == index.size() + fail : "file.size() = " + file.size() + ", index.size() = " + index.size();
         return true;
     }
@@ -327,7 +327,7 @@ public class kelondroEcoTable implements kelondroIndex {
     }
     
     public synchronized Entry get(byte[] key) throws IOException {
-        assert file.size() == index.size() + fail : "file.size() = " + file.size() + ", index.size() = " + index.size();
+        assert file.size() == index.size() + fail : "file.size() = " + file.size() + ", index.size() = " + index.size() + ", fail = " + fail;
         assert ((table == null) || (table.size() == index.size()));
         int i = index.geti(key);
         if (i == -1) return null;

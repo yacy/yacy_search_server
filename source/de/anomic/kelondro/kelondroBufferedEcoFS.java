@@ -32,8 +32,9 @@ import java.util.TreeMap;
 
 /**
  * The kelondroBufferedEcoFS extends the IO reduction to EcoFS by providing a
- * write buffer to elements that are inside the filed entries of the file
- * That means, each time, an entry is written to the end of the file, it is not buffered
+ * write buffer to elements that are INSIDE the filed entries of the file
+ * That means, each time, an entry is written to the end of the file, it is NOT buffered here,
+ * but possibly buffered in the enclosed kelondroEcoFS
  */
 public class kelondroBufferedEcoFS {
 
@@ -93,9 +94,10 @@ public class kelondroBufferedEcoFS {
 
     public synchronized void put(long index, byte[] b, int start) throws IOException {
         assert b.length - start >= efs.recordsize;
-        if (index > size()) throw new IndexOutOfBoundsException("kelondroBufferedEcoFS.put(" + index + ") outside bounds (" + this.size() + ")");
-        if (index == efs.size()) {
-            efs.put(index, b, start);
+        long s = size();
+        if (index > s) throw new IndexOutOfBoundsException("kelondroBufferedEcoFS.put(" + index + ") outside bounds (" + this.size() + ")");
+        if (index == s) {
+            efs.add(b, start);
         } else {
             byte[] bb = new byte[efs.recordsize];
             System.arraycopy(b, start, bb, 0, efs.recordsize);
@@ -105,13 +107,14 @@ public class kelondroBufferedEcoFS {
     }
     
     public synchronized void add(byte[] b, int start) throws IOException {
-        put(size(), b, start);
+        assert b.length - start >= efs.recordsize;
+        // index == size() == efs.size();
+        efs.add(b, start);
     }
 
     public synchronized void cleanLast(byte[] b, int start) throws IOException {
         assert b.length - start >= efs.recordsize;
-        Long i = new Long(size() - 1);
-        byte[] bb = buffer.remove(i);
+        byte[] bb = buffer.remove(new Long(size() - 1));
         if (bb == null) {
             efs.cleanLast(b, start);
         } else {
@@ -121,8 +124,7 @@ public class kelondroBufferedEcoFS {
     }
     
     public synchronized void cleanLast() throws IOException {
-        Long i = new Long(size() - 1);
-        buffer.remove(i);
+        buffer.remove(new Long(size() - 1));
         efs.cleanLast();
     }
     

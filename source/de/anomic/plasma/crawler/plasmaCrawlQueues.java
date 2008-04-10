@@ -295,7 +295,7 @@ public class plasmaCrawlQueues {
         if (seed == null) return false;
         
         // we know a peer which should provide remote crawl entries. load them now.
-        rssReader reader = (seed == null) ? null : yacyClient.queryRemoteCrawlURLs(seed, 10);
+        rssReader reader = (seed == null) ? null : yacyClient.queryRemoteCrawlURLs(seed, 20);
         if (reader == null) return true;
         // parse the rss
         rssReader.Item item;

@@ -67,8 +67,8 @@ public final class plasmaWordIndex implements indexRI {
 
     // environment constants
     public  static final long wCacheMaxAge    = 1000 * 60 * 30; // milliseconds; 30 minutes
-    public  static final int  wCacheMaxChunk  =   500;          // maximum number of references for each urlhash
-    public  static final int  lowcachedivisor =  1000;
+    public  static final int  wCacheMaxChunk  =   800;          // maximum number of references for each urlhash
+    public  static final int  lowcachedivisor =  1200;
     public  static final int  maxCollectionPartition = 7;       // should be 7
     
     private final kelondroByteOrder        indexOrder = kelondroBase64Order.enhancedCoder;
@@ -208,7 +208,7 @@ public final class plasmaWordIndex implements indexRI {
     public void dhtFlushControl(indexRAMRI theCache) {
         // check for forced flush
         int l = 0;
-        // flush elements that are too big. This flushinfg depends on the fact that the flush rule
+        // flush elements that are too big. This flushing depends on the fact that the flush rule
         // selects the biggest elements first for flushing. If it does not for any reason, the following
         // loop would not terminate. To ensure termination an additional counter is used
         while ((l++ < 100) && (theCache.maxURLinCache() > wCacheMaxChunk)) {

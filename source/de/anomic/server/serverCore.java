@@ -480,7 +480,7 @@ public final class serverCore extends serverAbstractBusyThread implements server
         Thread.interrupted();
         
         // shut down all busySessions
-        for (Session session: this.busySessions) {
+        if (this.busySessions != null) for (Session session: this.busySessions) {
             try {session.interrupt();} catch (SecurityException e ) {e.printStackTrace();}
         }
         

@@ -92,7 +92,7 @@ public final class kelondroBufferedIOChunks extends kelondroAbstractIOChunks imp
         synchronized (this.buffer) {
             byte[] bb = (byte[]) buffer.get(new Long(pos));
             if (bb == null) {
-                // entry not known, read direktly from IO
+                // entry not known, read directly from IO
                 synchronized (this.ra) {
                     this.ra.seek(pos + off);
                     return ra.read(b, off, len);
@@ -100,7 +100,7 @@ public final class kelondroBufferedIOChunks extends kelondroAbstractIOChunks imp
             }
             // use buffered entry
             if (bb.length >= off + len) {
-                // the bufferd entry is long enough
+                // the buffered entry is long enough
                 System.arraycopy(bb, off, b, off, len);
                 return len;
             }
