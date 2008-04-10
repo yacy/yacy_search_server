@@ -1468,12 +1468,12 @@ public final class httpdProxyHandler {
                 }
             } else {
                 if (unknownError) {
-                    theLogger.logFine("Error while processing request '" + 
+                    theLogger.logWarning("Error while processing request '" + 
                             conProp.getProperty(httpHeader.CONNECTION_PROP_REQUESTLINE,"unknown") + "':" +
                             "\n" + Thread.currentThread().getName() + 
                             "\n" + errorMessage,e);
                 } else {
-                    theLogger.logFine("Error while processing request '" + 
+                    theLogger.logWarning("Error while processing request '" + 
                             conProp.getProperty(httpHeader.CONNECTION_PROP_REQUESTLINE,"unknown") + "':" +
                             "\n" + Thread.currentThread().getName() + 
                             "\n" + errorMessage);                        
