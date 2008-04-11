@@ -93,11 +93,11 @@ public final class yacyVersion implements Comparator<yacyVersion>, Comparable<ya
         // i.e. yacy_v0.51_20070321_3501.tar.gz
         this.url = null;
         this.name = release;
-        if ((release == null) || (!release.endsWith(".tar.gz"))) {
+        if ((release == null) || (!((release.endsWith(".tar.gz") || (release.endsWith(".tar")))))) {
             throw new RuntimeException("release file name '" + release + "' is not valid, no tar.gz");
         }
         // cut off tail
-        release = release.substring(0, release.length() - 7);
+        release = release.substring(0, release.length() - ((release.endsWith(".gz")) ? 7 : 4));
         if (release.startsWith("yacy_pro_v")) {
             release = release.substring(10);
         } else if (release.startsWith("yacy_emb_v")) {
@@ -358,7 +358,7 @@ public final class yacyVersion implements Comparator<yacyVersion>, Comparable<ya
             }
         }
         plasmaSwitchboard.getSwitchboard().setConfig("update.time.download", System.currentTimeMillis());
-        return download;
+        return ((download != null) && (download.exists())) ? download : null;
     }
     
     
