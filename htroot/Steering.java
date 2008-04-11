@@ -88,7 +88,7 @@ public class Steering {
             String releaseFileName = post.get("releaseinstall", "");
             File releaseFile = new File(sb.getRootPath(), "DATA/RELEASE/" + releaseFileName);
             if ((!devenvironment) && (releaseFile.length() > 0) && (releaseFile.exists())) {
-                yacyVersion.deployRelease(releaseFileName);
+                yacyVersion.deployRelease(releaseFile);
             }
             prop.put("info", "5");
             prop.put("info_release", releaseFileName);

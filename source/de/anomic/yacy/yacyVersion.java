@@ -326,14 +326,21 @@ public final class yacyVersion implements Comparator<yacyVersion>, Comparable<ya
         return new DevMain(devreleases, mainreleases);
     }
     
-    public static boolean downloadRelease(yacyVersion release) {
+    public static File downloadRelease(yacyVersion release) {
         File storagePath = plasmaSwitchboard.getSwitchboard().releasePath;
         // load file
-        File download = new File(storagePath, release.url.getFileName());
+        File download = null;
         JakartaCommonsHttpClient client = new JakartaCommonsHttpClient(120000, null, null);
         JakartaCommonsHttpResponse res = null;
+        String name = release.url.getFileName();
         try {
             res = client.GET(release.url.toString());
+            boolean unzipped = res.getResponseHeader().gzip() && (res.getResponseHeader().mime().toLowerCase().equals("application/x-tar")); // if true, then the httpc has unzipped the file
+            if ((unzipped) && (name.endsWith(".tar.gz"))) {
+                download = new File(storagePath, name.substring(0, name.length() - 3));
+            } else {
+                download = new File(storagePath, name);
+            }
             try {
                 serverFileUtils.copyToStream(new BufferedInputStream(res.getDataAsStream()), new BufferedOutputStream(new FileOutputStream(download)));
             } finally {
@@ -343,6 +350,7 @@ public final class yacyVersion implements Comparator<yacyVersion>, Comparable<ya
         } catch (IOException e) {
             serverLog.logSevere("yacyVersion", "download of " + release.name + " failed: " + e.getMessage());
             if (download.exists()) download.delete();
+            download = null;
         } finally {
             if (res != null) {
                 // release connection
@@ -350,7 +358,7 @@ public final class yacyVersion implements Comparator<yacyVersion>, Comparable<ya
             }
         }
         plasmaSwitchboard.getSwitchboard().setConfig("update.time.download", System.currentTimeMillis());
-        return download.exists();
+        return download;
     }
     
     
@@ -395,7 +403,7 @@ public final class yacyVersion implements Comparator<yacyVersion>, Comparable<ya
         }
     }
     
-    public static void deployRelease(String release) {
+    public static void deployRelease(File releaseFile) {
         //byte[] script = ("cd " + plasmaSwitchboard.getSwitchboard().getRootPath() + ";while [ -e ../yacy.running ]; do sleep 1;done;tar xfz " + release + ";cp -Rf yacy/* ../../;rm -Rf yacy;cd ../../;startYACY.sh").getBytes();
         try {
             plasmaSwitchboard sb = plasmaSwitchboard.getSwitchboard();
@@ -404,9 +412,12 @@ public final class yacyVersion implements Comparator<yacyVersion>, Comparable<ya
             String script =
                 "#!/bin/sh" + serverCore.LF_STRING +
                 "cd " + sb.getRootPath() + "/DATA/RELEASE/" + serverCore.LF_STRING +
-                "if gunzip -t " + release + serverCore.LF_STRING +
-                "then" + serverCore.LF_STRING + 
-                "gunzip -c " + release + " | tar xf -" + serverCore.LF_STRING +
+                ((releaseFile.getName().endsWith(".gz")) ?
+                       ("if gunzip -t " + releaseFile.getAbsolutePath() + serverCore.LF_STRING +
+                        "then" + serverCore.LF_STRING + 
+                        "gunzip -c " + releaseFile.getAbsolutePath() + " | tar xf -" + serverCore.LF_STRING) :
+                       ("tar xf " + releaseFile.getAbsolutePath() + serverCore.LF_STRING)
+                ) +
                 "while [ -f ../yacy.running ]; do" + serverCore.LF_STRING +
                 "sleep 1" + serverCore.LF_STRING +
                 "done" + serverCore.LF_STRING +
