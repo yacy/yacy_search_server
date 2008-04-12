@@ -38,6 +38,10 @@
 	<classpathentry kind="lib" path="libx/FontBox-0.1.0-dev.jar"/>
 	<classpathentry kind="lib" path="libx/bcprov-jdk14-132.jar"/>
 	<classpathentry kind="lib" path="libx/commons-codec-1.3.jar"/>
-	<classpathentry kind="lib" path="lib/commons-httpclient-3.1.jar"/>
+	<classpathentry kind="lib" path="lib/commons-httpclient-3.1.jar" sourcepath="doc/commons-httpclient-3.1/src">
+		<attributes>
+			<attribute name="javadoc_location" value="file:/home/daniel/workspace/yacy/doc/commons-httpclient-3.1/docs/apidocs/"/>
+		</attributes>
+	</classpathentry>
 	<classpathentry kind="output" path="gen"/>
 </classpath>

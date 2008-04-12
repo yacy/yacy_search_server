@@ -431,8 +431,9 @@ public class JakartaCommonsHttpClient {
         } catch (final URIException e) {
             // should not happen, because method is already executed
         }
-        return new HttpConnectionInfo(protocol, (port == 80) ? host : host + ":" + port, method.getName() + " " +
-                method.getPath() + "?" + method.getQueryString(), method.hashCode(), System.currentTimeMillis());
+        final String query = (method.getQueryString() != null) ? "?" + method.getQueryString() : "";
+        return new HttpConnectionInfo(protocol, (port == -1 || port == 80) ? host : host + ":" + port, method.getName() + " " +
+                method.getPath() + query, method.hashCode(), System.currentTimeMillis());
     }
 
     /**
@@ -593,6 +594,7 @@ public class JakartaCommonsHttpClient {
             lastCleanup = now;
             conManager.closeIdleConnections(120000);
             conManager.deleteClosedConnections();
+            HttpConnectionInfo.cleanUp();
         }
     }
 }

@@ -42,6 +42,7 @@ public class HttpConnectionInfo {
      */
     private final static Set<HttpConnectionInfo> allConnections = Collections
             .synchronizedSet(new HashSet<HttpConnectionInfo>());
+    private final static int staleAfterMillis = 1800 * 1000;
 
     private final String protocol;
     private final String targetHost;
@@ -141,6 +142,19 @@ public class HttpConnectionInfo {
      */
     public static void removeConnection(final int id) {
         removeConnection(new HttpConnectionInfo(null, null, null, id, 0));
+    }
+    
+    /**
+     * removes stale connections
+     */
+    public static void cleanUp() {
+        synchronized (allConnections) {
+            for(HttpConnectionInfo con: allConnections) {
+                if(con.getLifetime() > staleAfterMillis) {
+                    allConnections.remove(con);
+                }
+            }
+        }
     }
     
     /* (non-Javadoc)

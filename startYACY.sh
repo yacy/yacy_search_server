@@ -77,7 +77,7 @@ done
 #echo $options;exit 0 #DEBUG for getopts
 
 #get javastart args
-JAVA_ARGS=""
+JAVA_ARGS="-ea"
 if [ ! -f $CONFIGFILE -a -f DATA/SETTINGS/httpProxy.conf ]
 then
 	# old config if new does not exist
