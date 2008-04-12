@@ -9,7 +9,7 @@
 // $LastChangedBy: orbiter $
 //
 // LICENSE
-// 
+//
 // This program is free software; you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
 // the Free Software Foundation; either version 2 of the License, or
@@ -41,6 +41,7 @@ import org.apache.commons.httpclient.HttpClient;
 import org.apache.commons.httpclient.HttpException;
 import org.apache.commons.httpclient.HttpMethod;
 import org.apache.commons.httpclient.MultiThreadedHttpConnectionManager;
+import org.apache.commons.httpclient.URIException;
 import org.apache.commons.httpclient.methods.GetMethod;
 import org.apache.commons.httpclient.methods.HeadMethod;
 import org.apache.commons.httpclient.methods.InputStreamRequestEntity;
@@ -77,15 +78,19 @@ public class JakartaCommonsHttpClient {
          * set options for client
          */
         // set user-agent
-        yacyVersion thisversion = yacyVersion.thisVersion();
-        apacheHttpClient.getParams().setParameter(HttpMethodParams.USER_AGENT,
+        final yacyVersion thisversion = yacyVersion.thisVersion();
+        apacheHttpClient.getParams().setParameter(
+                                                  HttpMethodParams.USER_AGENT,
                                                   "yacy/" + ((thisversion == null) ? "0.0" : thisversion.releaseNr) +
                                                           " (www.yacy.net; " +
                                                           de.anomic.http.HttpClient.getSystemOST() + ") " +
-                                                          getCurrentUserAgent().replace(';', ':')); // last ; must be before location (this is parsed)
+                                                          getCurrentUserAgent().replace(';', ':')); // last ; must be
+                                                                                                    // before location
+                                                                                                    // (this is parsed)
         // only one retry
-        apacheHttpClient.getParams().setParameter(HttpMethodParams.RETRY_HANDLER, new DefaultHttpMethodRetryHandler(1, false));
-        
+        apacheHttpClient.getParams().setParameter(HttpMethodParams.RETRY_HANDLER,
+                                                  new DefaultHttpMethodRetryHandler(1, false));
+
         /**
          * set options for connection manager
          */
@@ -94,31 +99,39 @@ public class JakartaCommonsHttpClient {
         conManager.getParams().setConnectionTimeout(60000); // set a default timeout
         conManager.getParams().setDefaultMaxConnectionsPerHost(20); // prevent DoS by mistake
         // TODO should this be configurable?
-        
+
         // accept self-signed or untrusted certificates
-        Protocol.registerProtocol("https", new Protocol("https", (ProtocolSocketFactory)new EasySSLProtocolSocketFactory(), 443));
-        
-        
+        Protocol.registerProtocol("https", new Protocol("https",
+                (ProtocolSocketFactory) new EasySSLProtocolSocketFactory(), 443));
+
         /**
-         * set network timeout properties.
-         * see: http://java.sun.com/j2se/1.5.0/docs/guide/net/properties.html
-         * These properties specify the default connect and read timeout (resp.)
-         * for the protocol handler used by java.net.URLConnection.
-         * the java.net.URLConnection is also used by JakartaCommons HttpClient, see
+         * set network timeout properties. see: http://java.sun.com/j2se/1.5.0/docs/guide/net/properties.html These
+         * properties specify the default connect and read timeout (resp.) for the protocol handler used by
+         * java.net.URLConnection. the java.net.URLConnection is also used by JakartaCommons HttpClient, see
          * http://hc.apache.org/httpclient-3.x/apidocs/org/apache/commons/httpclient/util/HttpURLConnection.html
          */
         // specify the timeout, in milliseconds, to establish the connection to the host.
         // For HTTP connections, it is the timeout when establishing the connection to the HTTP server.
-        System.setProperty("sun.net.client.defaultConnectTimeout","10000");
-        
+        System.setProperty("sun.net.client.defaultConnectTimeout", "10000");
+
         // specify the response timeout, in milliseconds, when reading from an input stream
         // after a connection is established with a resource
-        System.setProperty("sun.net.client.defaultReadTimeout","60000"); 
+        System.setProperty("sun.net.client.defaultReadTimeout", "60000");
     }
+    
+    /**
+     * every x milliseconds do a cleanup (close old connections)
+     */
+    private final static int cleanupIntervall = 60000;
+    /**
+     * time the last cleanup was started
+     */
+    private static long lastCleanup = 0;
 
     private final Map<HttpMethod, InputStream> openStreams = new HashMap<HttpMethod, InputStream>();
     private Header[] headers = new Header[0];
     private httpRemoteProxyConfig proxyConfig = null;
+    private boolean followRedirects = true;
 
     /**
      * constructs a new Client with given parameters
@@ -161,6 +174,15 @@ public class JakartaCommonsHttpClient {
      */
     public void setTimeout(final int timeout) {
         apacheHttpClient.getParams().setIntParameter(HttpMethodParams.SO_TIMEOUT, timeout);
+    }
+
+    /**
+     * should redirects automatically be followed?
+     * 
+     * @param follow
+     */
+    public void setFollowRedirects(final boolean follow) {
+        followRedirects = follow;
     }
 
     /*
@@ -242,7 +264,8 @@ public class JakartaCommonsHttpClient {
                     if (file.isFile() && file.canRead()) {
                         // read file
                         final ByteArrayOutputStream fileData = new ByteArrayOutputStream();
-                        serverFileUtils.copyToStream(new BufferedInputStream(new FileInputStream(file)), new BufferedOutputStream(fileData));
+                        serverFileUtils.copyToStream(new BufferedInputStream(new FileInputStream(file)),
+                                                     new BufferedOutputStream(fileData));
                         value = fileData.toByteArray();
                     }
                 }
@@ -368,22 +391,48 @@ public class JakartaCommonsHttpClient {
      */
     private JakartaCommonsHttpResponse execute(final HttpMethod method) throws IOException, HttpException {
         assert method != null : "precondition violated: method != null";
+        method.setFollowRedirects(followRedirects);
         // set header
         for (final Header header : headers) {
             method.setRequestHeader(header);
         }
+        
         // set proxy
         final httpRemoteProxyConfig proxyConfig = getProxyConfig(method.getURI().getHost());
         addProxyAuth(method, proxyConfig);
         final HostConfiguration hostConfig = getProxyHostConfig(proxyConfig);
+        
+        // statistics
+        HttpConnectionInfo.addConnection(generateConInfo(method));
+        
         // execute (send request)
         if (hostConfig == null) {
             apacheHttpClient.executeMethod(method);
         } else {
             apacheHttpClient.executeMethod(hostConfig, method);
         }
+        
         // return response
         return new JakartaCommonsHttpResponse(method);
+    }
+
+    /**
+     * @param method
+     * @return
+     */
+    private HttpConnectionInfo generateConInfo(final HttpMethod method) {
+        int port = 80;
+        String host = null;
+        String protocol = null;
+        try {
+            port = method.getURI().getPort();
+            host = method.getURI().getHost();
+            protocol = method.getURI().getScheme();
+        } catch (final URIException e) {
+            // should not happen, because method is already executed
+        }
+        return new HttpConnectionInfo(protocol, (port == 80) ? host : host + ":" + port, method.getName() + " " +
+                method.getPath() + "?" + method.getQueryString(), method.hashCode(), System.currentTimeMillis());
     }
 
     /**
@@ -392,15 +441,16 @@ public class JakartaCommonsHttpClient {
      * @param method
      * @param proxyConfig
      */
-    private void addProxyAuth(HttpMethod method, httpRemoteProxyConfig proxyConfig) {
-        if(proxyConfig != null && proxyConfig.useProxy()) {
+    private void addProxyAuth(final HttpMethod method, final httpRemoteProxyConfig proxyConfig) {
+        if (proxyConfig != null && proxyConfig.useProxy()) {
             final String remoteProxyUser = proxyConfig.getProxyUser();
             if (remoteProxyUser != null && remoteProxyUser.length() > 0) {
                 if (remoteProxyUser.contains(":")) {
                     serverLog.logWarning("HTTPC", "Proxy authentication contains invalid characters, trying anyway");
                 }
                 final String remoteProxyPwd = proxyConfig.getProxyPwd();
-                final String credentials = kelondroBase64Order.standardCoder.encodeString(remoteProxyUser.replace(":", "") +
+                final String credentials = kelondroBase64Order.standardCoder.encodeString(remoteProxyUser.replace(":",
+                                                                                                                  "") +
                         ":" + remoteProxyPwd);
                 method.setRequestHeader(httpHeader.PROXY_AUTHORIZATION, "Basic " + credentials);
             }
@@ -432,7 +482,7 @@ public class JakartaCommonsHttpClient {
         // generate http-configuration
         if (proxyConfig != null && proxyConfig.useProxy()) {
             // new config based on client (default)
-            HostConfiguration hostConfig = new HostConfiguration(apacheHttpClient.getHostConfiguration());
+            final HostConfiguration hostConfig = new HostConfiguration(apacheHttpClient.getHostConfiguration());
             // add proxy
             hostConfig.setProxy(proxyConfig.getProxyHost(), proxyConfig.getProxyPort());
             return hostConfig;
@@ -447,9 +497,10 @@ public class JakartaCommonsHttpClient {
      * @param date The Date-Object to be converted.
      * @return String with the date.
      */
-    public static String date2String(Date date) {
-        if (date == null)
+    public static String date2String(final Date date) {
+        if (date == null) {
             return "";
+        }
 
         return DateUtil.formatDate(date);
     }
@@ -524,20 +575,24 @@ public class JakartaCommonsHttpClient {
     }
 
     /**
-     * a list of all connections (not yet implemented)
-     * 
-     * @return
-     */
-    public static HttpConnectionInfo[] allConnections() {
-        return new HttpConnectionInfo[0];
-    }
-    
-    /**
      * number of active connections
      * 
      * @return
      */
     public static int connectionCount() {
         return conManager.getConnectionsInPool();
+    }
+
+    /**
+     * remove unused connections
+     */
+    public static void cleanup() {
+        // do it only once a while
+        final long now = System.currentTimeMillis(); 
+        if(now - lastCleanup > cleanupIntervall) {
+            lastCleanup = now;
+            conManager.closeIdleConnections(120000);
+            conManager.deleteClosedConnections();
+        }
     }
 }

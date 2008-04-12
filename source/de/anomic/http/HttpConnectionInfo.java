@@ -26,7 +26,9 @@
 
 package de.anomic.http;
 
-import org.apache.commons.httpclient.HttpConnection;
+import java.util.Collections;
+import java.util.HashSet;
+import java.util.Set;
 
 /**
  * Information about a connection
@@ -35,22 +37,17 @@ import org.apache.commons.httpclient.HttpConnection;
  * @since 07.04.2008
  */
 public class HttpConnectionInfo {
+    /**
+     * a list of all current connections
+     */
+    private final static Set<HttpConnectionInfo> allConnections = Collections
+            .synchronizedSet(new HashSet<HttpConnectionInfo>());
+
     private final String protocol;
     private final String targetHost;
     private final String command;
     private final int id;
     private final long initTime;
-
-    /**
-     * constructor using org.apache.commons.httpclient.HttpConnection
-     * 
-     * @param connection
-     */
-    public HttpConnectionInfo(final HttpConnection connection) {
-        this(connection.getProtocol().toString(), ((connection.getPort() == 80) ? connection.getHost() 
-                : connection.getHost() + ":" + connection.getPort()), "unknown command", connection.hashCode(),
-                System.currentTimeMillis());
-    }
 
     /**
      * constructor setting all data
@@ -110,5 +107,95 @@ public class HttpConnectionInfo {
      */
     public int getID() {
         return id;
+    }
+
+    /**
+     * @return the allConnections
+     */
+    public static Set<HttpConnectionInfo> getAllConnections() {
+        return allConnections;
+    }
+
+    /**
+     * add a connection to the list of all current connections
+     * 
+     * @param conInfo
+     */
+    public static void addConnection(final HttpConnectionInfo conInfo) {
+        allConnections.add(conInfo);
+    }
+
+    /**
+     * remove a connection from the list of all current connections
+     * 
+     * @param conInfo
+     */
+    public static void removeConnection(final HttpConnectionInfo conInfo) {
+        allConnections.remove(conInfo);
+    }
+
+    /**
+     * connections with same id {@link equals()} another
+     * 
+     * @param id
+     */
+    public static void removeConnection(final int id) {
+        removeConnection(new HttpConnectionInfo(null, null, null, id, 0));
+    }
+    
+    /* (non-Javadoc)
+     * @see java.lang.Object#toString()
+     */
+    @Override
+    public String toString() {
+        StringBuilder string = new StringBuilder(50);
+        string.append("ID ");
+        string.append(getID());
+        string.append(", ");
+        string.append(getProtocol());
+        string.append("://");
+        string.append(getTargetHost());
+        string.append(" ");
+        string.append(getCommand());
+        string.append(", since ");
+        string.append(getLifetime());
+        string.append(" ms");
+        return string.toString();
+    }
+
+    /*
+     * (non-Javadoc)
+     * 
+     * @see java.lang.Object#hashCode()
+     */
+    @Override
+    public int hashCode() {
+        final int prime = 31;
+        int result = 1;
+        result = prime * result + id;
+        return result;
+    }
+
+    /*
+     * (non-Javadoc)
+     * 
+     * @see java.lang.Object#equals(java.lang.Object)
+     */
+    @Override
+    public boolean equals(final Object obj) {
+        if (this == obj) {
+            return true;
+        }
+        if (obj == null) {
+            return false;
+        }
+        if (getClass() != obj.getClass()) {
+            return false;
+        }
+        final HttpConnectionInfo other = (HttpConnectionInfo) obj;
+        if (id != other.id) {
+            return false;
+        }
+        return true;
     }
 }

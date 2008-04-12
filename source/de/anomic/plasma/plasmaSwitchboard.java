@@ -220,7 +220,7 @@ public final class plasmaSwitchboard extends serverAbstractSwitch<plasmaSwitchbo
     public  HashMap<String, Object[]>   outgoingCookies, incomingCookies;
     public  kelondroMapTable            facilityDB;
     public  plasmaParser                parser;
-    public  long                        proxyLastAccess, localSearchLastAccess, remoteSearchLastAccess;
+    public  volatile long                        proxyLastAccess, localSearchLastAccess, remoteSearchLastAccess;
     public  yacyCore                    yc;
     public  userDB                      userDB;
     public  bookmarksDB                 bookmarksDB;
@@ -1918,6 +1918,9 @@ public final class plasmaSwitchboard extends serverAbstractSwitch<plasmaSwitchbo
     public boolean cleanupJob() {
         try {
             boolean hasDoneSomething = false;
+            
+            // close unused connections
+            JakartaCommonsHttpClient.cleanup();
 
             // do transmission of CR-files
             checkInterruption();

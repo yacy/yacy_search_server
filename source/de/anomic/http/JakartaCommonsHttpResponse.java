@@ -9,7 +9,7 @@
 // $LastChangedBy: orbiter $
 //
 // LICENSE
-// 
+//
 // This program is free software; you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
 // the Free Software Foundation; either version 2 of the License, or
@@ -88,19 +88,19 @@ public class JakartaCommonsHttpResponse {
      * @throws IOException
      */
     public byte[] getData() throws IOException {
-        if (this.responseBody == null) {
+        if (responseBody == null) {
             InputStream instream = null;
             try {
                 instream = getDataAsStream();
                 if (instream != null) {
-                    ByteArrayOutputStream outstream = new ByteArrayOutputStream();
-                    byte[] buffer = new byte[4096];
+                    final ByteArrayOutputStream outstream = new ByteArrayOutputStream();
+                    final byte[] buffer = new byte[4096];
                     int len;
                     while ((len = instream.read(buffer)) > 0) {
                         outstream.write(buffer, 0, len);
                     }
                     outstream.close();
-                    this.responseBody = outstream.toByteArray();
+                    responseBody = outstream.toByteArray();
                 }
             } finally {
                 if (instream != null) {
@@ -108,7 +108,7 @@ public class JakartaCommonsHttpResponse {
                 }
             }
         }
-        return this.responseBody;
+        return responseBody;
     }
 
     /**
@@ -118,7 +118,7 @@ public class JakartaCommonsHttpResponse {
      */
     public InputStream getDataAsStream() throws IOException {
         InputStream inStream = method.getResponseBodyAsStream();
-        if(getResponseHeader().gzip()) {
+        if (getResponseHeader().gzip()) {
             inStream = new GZIPInputStream(inStream);
         }
         // count bytes for overall http-statistics
@@ -132,6 +132,8 @@ public class JakartaCommonsHttpResponse {
      */
     public void closeStream() {
         method.releaseConnection();
+        // statistics
+        HttpConnectionInfo.removeConnection(method.hashCode());
     }
 
     /*

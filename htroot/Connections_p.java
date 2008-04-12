@@ -50,6 +50,7 @@ import java.io.UnsupportedEncodingException;
 import java.net.InetAddress;
 import java.net.URLEncoder;
 import java.util.Properties;
+import java.util.Set;
 
 import de.anomic.http.HttpConnectionInfo;
 import de.anomic.http.JakartaCommonsHttpClient;
@@ -229,7 +230,7 @@ public final class Connections_p {
         prop.putNum("numActivePending", numActivePending);
         
         // client sessions
-        HttpConnectionInfo[] a = JakartaCommonsHttpClient.allConnections();
+        Set<HttpConnectionInfo> a = HttpConnectionInfo.getAllConnections();
         // TODO sorting
 //        Arrays.sort(a, httpc.connectionTimeComparatorInstance);
         int c = 0;

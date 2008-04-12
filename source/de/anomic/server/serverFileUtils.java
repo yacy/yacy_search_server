@@ -557,7 +557,7 @@ public final class serverFileUtils {
     /**
      * copies the input stream to all writers (byte per byte)
      * @param data
-     * @param writers
+     * @param writer
      * @param charSet
      * @return
      * @throws IOException
