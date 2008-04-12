@@ -25,15 +25,12 @@
 // Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
 package de.anomic.http;
 
-import java.io.BufferedInputStream;
-import java.io.BufferedOutputStream;
-import java.io.ByteArrayOutputStream;
-import java.io.File;
-import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 import org.apache.commons.httpclient.ConnectMethod;
@@ -52,14 +49,12 @@ import org.apache.commons.httpclient.methods.multipart.ByteArrayPartSource;
 import org.apache.commons.httpclient.methods.multipart.FilePart;
 import org.apache.commons.httpclient.methods.multipart.MultipartRequestEntity;
 import org.apache.commons.httpclient.methods.multipart.Part;
-import org.apache.commons.httpclient.methods.multipart.StringPart;
 import org.apache.commons.httpclient.params.HttpMethodParams;
 import org.apache.commons.httpclient.protocol.Protocol;
 import org.apache.commons.httpclient.protocol.ProtocolSocketFactory;
 import org.apache.commons.httpclient.util.DateUtil;
 
 import de.anomic.kelondro.kelondroBase64Order;
-import de.anomic.server.serverFileUtils;
 import de.anomic.server.logging.serverLog;
 import de.anomic.yacy.yacyVersion;
 
@@ -69,7 +64,7 @@ import de.anomic.yacy.yacyVersion;
  * @author danielr
  * 
  */
-public class JakartaCommonsHttpClient  {
+public class JakartaCommonsHttpClient {
     /**
      * "the HttpClient instance and connection manager should be shared among all threads for maximum efficiency."
      * (Concurrent execution of HTTP methods, http://hc.apache.org/httpclient-3.x/performance.html)
@@ -231,7 +226,7 @@ public class JakartaCommonsHttpClient  {
      * @return Instance of response with the content.
      * @throws IOException
      */
-    public JakartaCommonsHttpResponse POST(final String uri, final Map<String, ?> files) throws IOException {
+    public JakartaCommonsHttpResponse POST(final String uri, final List<Part> files) throws IOException {
         assert uri != null : "precondition violated: uri != null";
         final PostMethod post = new PostMethod(uri);
 
@@ -239,8 +234,9 @@ public class JakartaCommonsHttpClient  {
         if (files != null) {
             parts = new Part[files.size()];
             int i = 0;
-            for (final String key : files.keySet()) {
-                Object value = files.get(key);
+            for (final Part part : files) {
+                parts[i] = part;
+                /*
                 if (value instanceof File) {
                     final File file = (File) value;
                     if (file.isFile() && file.canRead()) {
@@ -263,6 +259,7 @@ public class JakartaCommonsHttpClient  {
                     throw new IOException("cannot POST data: " + msg);
                     // break; // post nothing is not what is expected by the caller
                 }
+                */
                 i++;
             }
         } else {
@@ -488,9 +485,9 @@ public class JakartaCommonsHttpClient  {
         try {
             if (args.length > 1 && "post".equals(args[1])) {
                 // POST
-                final HashMap<String, byte[]> files = new HashMap<String, byte[]>();
-                files.put("myfile.txt", "this is not a file ;)".getBytes());
-                files.put("anotherfile.raw", "this is not a binary file ;)".getBytes());
+                final ArrayList<Part> files = new ArrayList<Part>();
+                files.add(new FilePart("myfile.txt", new ByteArrayPartSource("myfile.txt", "this is not a file ;)".getBytes())));
+                files.add(new FilePart("anotherfile.raw", new ByteArrayPartSource("anotherfile.raw", "this is not a binary file ;)".getBytes())));
                 System.out.println("POST " + files.size() + " elements to " + url);
                 final JakartaCommonsHttpClient client = new JakartaCommonsHttpClient(1000, null, null);
                 resp = client.POST(url, files);

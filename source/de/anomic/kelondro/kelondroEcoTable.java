@@ -194,12 +194,11 @@ public class kelondroEcoTable implements kelondroIndex {
                     removeInFile(top.intValue());
                 }
             }
-
-            try {
+            /* try {
                 assert file.size() == index.size() + doubles.size() + fail : "file.size() = " + file.size() + ", index.size() = " + index.size() + ", doubles.size() = " + doubles.size() + ", fail = " + fail + ", i = " + i;
             } catch (IOException e) {
                 e.printStackTrace();
-            }
+            }*/
         } catch (FileNotFoundException e) {
             // should never happen
             e.printStackTrace();

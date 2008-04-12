@@ -27,14 +27,18 @@
 
 package de.anomic.yacy;
 
+import java.util.ArrayList;
 import java.util.Date;
+import java.util.List;
+
+import org.apache.commons.httpclient.methods.multipart.Part;
+import org.apache.commons.httpclient.methods.multipart.StringPart;
 
 import de.anomic.plasma.plasmaSwitchboard;
 import de.anomic.server.serverCodings;
 import de.anomic.server.serverDate;
 import de.anomic.server.serverObjects;
 import de.anomic.server.serverSwitch;
-import de.anomic.tools.crypt;
 
 public class yacyNetwork {
 
@@ -67,23 +71,22 @@ public class yacyNetwork {
 		return false;
 	}
 	
-	public static final serverObjects basicRequestPost(serverSwitch<?> env, String targetHash) {
+	public static final List<Part> basicRequestPost(serverSwitch<?> env, String targetHash, String salt) {
         // put in all the essentials for routing and network authentification
 		// generate a session key
-        serverObjects post = new serverObjects();
-        final String salt = crypt.randomSalt();
-        post.put("key", salt);
+        ArrayList<Part> post = new ArrayList<Part>();
+        post.add(new StringPart("key", salt));
         
         // just standard identification essentials
-		post.put("iam", yacyCore.seedDB.mySeed().hash);
-		if (targetHash != null) post.put("youare", targetHash);
+		post.add(new StringPart("iam", yacyCore.seedDB.mySeed().hash));
+		if (targetHash != null) post.add(new StringPart("youare", targetHash));
         
         // time information for synchronization
-		post.put("mytime", serverDate.formatShortSecond(new Date()));
-		post.put("myUTC", System.currentTimeMillis());
+		post.add(new StringPart("mytime", serverDate.formatShortSecond(new Date())));
+		post.add(new StringPart("myUTC", Long.toString(System.currentTimeMillis())));
 
         // network identification
-        post.put("network.unit.name", plasmaSwitchboard.getSwitchboard().getConfig("network.unit.name", yacySeed.DFLT_NETWORK_UNIT));
+        post.add(new StringPart("network.unit.name", plasmaSwitchboard.getSwitchboard().getConfig("network.unit.name", yacySeed.DFLT_NETWORK_UNIT)));
 
         // authentification essentials
         String authentificationControl = env.getConfig("network.unit.protocol.control", "uncontrolled");
@@ -93,7 +96,7 @@ public class yacyNetwork {
                 // generate an authentification essential using the salt, the iam-hash and the network magic
                 String magic = env.getConfig("network.unit.protocol.request.authentification.essentials", "");
                 String md5 = serverCodings.encodeMD5Hex(salt + yacyCore.seedDB.mySeed().hash + magic);
-                post.put("magicmd5", md5);
+                post.add(new StringPart("magicmd5", md5));
             }
         }        
         

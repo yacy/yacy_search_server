@@ -1128,7 +1128,7 @@ public final class httpdProxyHandler {
             // respondHeader(respond, res.status, res.responseHeader);
             // Saver.writeContent(res, (chunked != null) ? new BufferedOutputStream(chunked) : new BufferedOutputStream(respond));
             /*
-            // *** (†bernommen aus Saver-Klasse: warum ist dies hier die einzige Methode, die einen OutputStream statt einen Writer benutzt?)
+            // *** (Uebernommen aus Saver-Klasse: warum ist dies hier die einzige Methode, die einen OutputStream statt einen Writer benutzt?)
             try {
                 serverFileUtils.copyToStream(new BufferedInputStream(res.getDataAsStream()), (chunked != null) ? new BufferedOutputStream(chunked) : new BufferedOutputStream(respond));
             } finally {
