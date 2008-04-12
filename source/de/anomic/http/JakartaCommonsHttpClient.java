@@ -203,6 +203,7 @@ public class JakartaCommonsHttpClient {
      */
     public JakartaCommonsHttpResponse GET(final String uri) throws IOException {
         final HttpMethod get = new GetMethod(uri);
+        get.setFollowRedirects(followRedirects);
         return execute(get);
     }
 
@@ -217,6 +218,7 @@ public class JakartaCommonsHttpClient {
     public JakartaCommonsHttpResponse HEAD(final String uri) throws IOException {
         assert uri != null : "precondition violated: uri != null";
         final HttpMethod head = new HeadMethod(uri);
+        head.setFollowRedirects(followRedirects);
         return execute(head);
     }
 
@@ -235,6 +237,7 @@ public class JakartaCommonsHttpClient {
         assert ins != null : "precondition violated: ins != null";
         final PostMethod post = new PostMethod(uri);
         post.setRequestEntity(new InputStreamRequestEntity(ins));
+        post.setFollowRedirects(false); // redirects in POST cause a "Entity enclosing requests cannot be redirected without user intervention" - exception
         return execute(post);
     }
 
@@ -290,6 +293,7 @@ public class JakartaCommonsHttpClient {
             parts = new Part[0];
         }
         post.setRequestEntity(new MultipartRequestEntity(parts, post.getParams()));
+        post.setFollowRedirects(false); // redirects in POST cause a "Entity enclosing requests cannot be redirected without user intervention" - exception
         return execute(post);
     }
 
@@ -302,6 +306,7 @@ public class JakartaCommonsHttpClient {
         final HostConfiguration hostConfig = new HostConfiguration();
         hostConfig.setHost(host, port);
         final HttpMethod connect = new ConnectMethod(hostConfig);
+        connect.setFollowRedirects(false); // there are no redirects possible for CONNECT commands as far as I know.
         return execute(connect);
     }
 
@@ -391,7 +396,6 @@ public class JakartaCommonsHttpClient {
      */
     private JakartaCommonsHttpResponse execute(final HttpMethod method) throws IOException, HttpException {
         assert method != null : "precondition violated: method != null";
-        method.setFollowRedirects(followRedirects);
         // set header
         for (final Header header : headers) {
             method.setRequestHeader(header);
