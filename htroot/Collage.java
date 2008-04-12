@@ -60,11 +60,11 @@ public class Collage {
     private static           Integer   imgPosX[]     = new Integer[fifoMax];
     private static           Integer   imgPosY[]     = new Integer[fifoMax];
     private static           long      imgZIndex[]   = new long[fifoMax];
-
+    private static final     Random rand = new Random();
+    
     public static serverObjects respond(httpHeader header, serverObjects post, serverSwitch<?> env) {
         final serverObjects prop = new serverObjects();
         final plasmaSwitchboard sb = (plasmaSwitchboard) env;
-        Random rand = new Random();
         final boolean authenticated = sb.adminAuthenticated(header) >= 2;
         collageQueue.ImageOriginEntry nextOrigin = collageQueue.next(!authenticated);
         
@@ -105,6 +105,8 @@ public class Collage {
             prop.put("imgurl", "0");
         }
         
+        prop.putNum("privateQueueSize", collageQueue.privateQueueSize());
+        prop.putNum("publicQueueSize", collageQueue.publicQueueSize());
         return prop;
     }
 }

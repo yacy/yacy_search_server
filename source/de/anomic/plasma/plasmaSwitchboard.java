@@ -2129,7 +2129,7 @@ public final class plasmaSwitchboard extends serverAbstractSwitch<plasmaSwitchbo
             return null;
         } else {
             plasmaCrawlProfile.entry profile = profilesActiveCrawls.getEntry(in.queueEntry.profileHandle);
-            collageQueue.registerImages(document, (profile == null) ? true : profile.remoteIndexing());
+            collageQueue.registerImages(document, (profile == null) ? true : !profile.remoteIndexing());
         }
         return new indexingQueueEntry(in.queueEntry, document, null);
     }

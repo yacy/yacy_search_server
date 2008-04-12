@@ -2,6 +2,7 @@
   <h3>Web Visualization</h3>
   <ul class="SubMenu">
     <li><a href="/WatchWebStructure_p.html" class="MenuItemLink lock">Web Structure</a></li>
+    <li><a href="/Collage.html" class="MenuItemLink">Image Collage</a></li>
     <li><a href="/CacheAdmin_p.html" class="MenuItemLink lock">Web Cache</a></li>
   </ul>
 </div>

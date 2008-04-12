@@ -81,6 +81,14 @@ public class collageQueue {
         return e;
     }
     
+    public static int privateQueueSize() {
+        return privateImageQueue.size();
+    }
+    
+    public static int publicQueueSize() {
+        return publicImageQueue.size();
+    }
+    
     public static class ImageOriginEntry {
         public htmlFilterImageEntry imageEntry;
         public yacyURL baseURL;

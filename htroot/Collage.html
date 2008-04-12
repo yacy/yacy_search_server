@@ -1,18 +1,44 @@
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml">
-  <head>
-    <title>YaCy '#[clientname]#': Collage</title>
-    #%env/templates/metas.template%#
-    <meta http-equiv="REFRESH" content="5" />
-  </head>
-  <body style="margin:0px;">
-    #%env/templates/header.template%#
-    #(imgurl)#
-    ::
-      #{list}#
-        #[url]#
-      #{/list}#
-    #(/imgurl)#
-    #%env/templates/footer.template%#
-  </body>
+<head>
+<title>YaCy '#[clientname]#': Collage</title>
+#%env/templates/metas.template%#
+<style type="text/css">
+#left {
+  float: left;
+  width: 224px;
+}
+form dt {
+  width: 40px;
+}
+form dd {
+  width: 130px;
+  text-align:right;
+}
+</style><meta http-equiv="REFRESH" content="5" />
+</head>
+<body style="margin:0px;">
+#%env/templates/header.template%#
+#%env/templates/submenuWebStructure.template%#
+<h2>Collage</h2>
+
+<div id="left">
+<form action="/Collage.html">
+<dl>
+	<dt>Private Queue</dt>
+	<dd>#[privateQueueSize]#</dd>
+	<dt>Public Queue</dt>
+	<dd>#[publicQueueSize]#</dd>
+</dl>
+</form>
+</div>
+
+#(imgurl)#
+::
+  #{list}#
+    #[url]#
+  #{/list}#
+#(/imgurl)#
+#%env/templates/footer.template%#
+</body>
 </html>
