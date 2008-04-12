@@ -112,6 +112,7 @@ import de.anomic.data.URLLicense;
 import de.anomic.data.blogBoard;
 import de.anomic.data.blogBoardComments;
 import de.anomic.data.bookmarksDB;
+import de.anomic.data.collageQueue;
 import de.anomic.data.listManager;
 import de.anomic.data.messageBoard;
 import de.anomic.data.userDB;
@@ -242,7 +243,7 @@ public final class plasmaSwitchboard extends serverAbstractSwitch<plasmaSwitchbo
     public  boolean                     acceptLocalURLs, acceptGlobalURLs;
     public  URLLicense                  licensedURLs;
     public  Timer                       moreMemory;
-
+    
     public serverProcessor<indexingQueueEntry> indexingDocumentProcessor;
     public serverProcessor<indexingQueueEntry> indexingCondensementProcessor;
     public serverProcessor<indexingQueueEntry> indexingAnalysisProcessor;
@@ -2126,6 +2127,9 @@ public final class plasmaSwitchboard extends serverAbstractSwitch<plasmaSwitchbo
             }
             in.queueEntry.close();
             return null;
+        } else {
+            plasmaCrawlProfile.entry profile = profilesActiveCrawls.getEntry(in.queueEntry.profileHandle);
+            collageQueue.registerImages(document, (profile == null) ? true : profile.remoteIndexing());
         }
         return new indexingQueueEntry(in.queueEntry, document, null);
     }

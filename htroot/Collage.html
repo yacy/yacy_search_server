@@ -1,0 +1,18 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <title>YaCy '#[clientname]#': Collage</title>
+    #%env/templates/metas.template%#
+    <meta http-equiv="REFRESH" content="5" />
+  </head>
+  <body style="margin:0px;">
+    #%env/templates/header.template%#
+    #(imgurl)#
+    ::
+      #{list}#
+        #[url]#
+      #{/list}#
+    #(/imgurl)#
+    #%env/templates/footer.template%#
+  </body>
+</html>
