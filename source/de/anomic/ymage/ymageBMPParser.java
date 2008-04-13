@@ -172,6 +172,7 @@ public class ymageBMPParser {
             int b;
             for (int rows = 0; rows < height; rows++) {
                 for (int columns = 0; columns < width; columns = columns + 8) {
+                    if (offset + n >= s.length) return; // emergency break
                     b = (s[offset + n] & 0xff);
                     n++;
                     image.setRGB(columns,     (height - rows - 1), colortable.colorindex[(b & 0x80) >> 7]);
@@ -192,6 +193,7 @@ public class ymageBMPParser {
             int b;
             for (int rows = 0; rows < height; rows++) {
                 for (int columns = 0; columns < width; columns = columns + 2) {
+                    if (offset + n >= s.length) return; // emergency break
                     b = (s[offset + n] & 0xff);
                     n++;
                     image.setRGB(columns,     (height - rows - 1), colortable.colorindex[(b & 0xf0) >> 4]);
@@ -205,6 +207,7 @@ public class ymageBMPParser {
             int n = 0;
             for (int rows = 0; rows < height; rows++) {
                 for (int columns = 0; columns < width; columns++) {
+                    if (offset + n >= s.length) return; // emergency break
                     image.setRGB(columns, (height - rows - 1), colortable.colorindex[(s[offset + n] & 0xff)]);
                     n++;
                 }
@@ -216,6 +219,7 @@ public class ymageBMPParser {
             int n = 0;
             for (int rows = 0; rows < height; rows++) {
                 for (int columns = 0; columns < width; columns++) {
+                    if (offset + n + 3 >= s.length) return; // emergency break
                     image.setRGB(columns, (height - rows - 1), 0xffffff & DWORD(s, offset + n));
                     n += 3;
                 }
@@ -227,6 +231,7 @@ public class ymageBMPParser {
             int n = 0;
             for (int rows = 0; rows < height; rows++) {
                 for (int columns = 0; columns < width; columns++) {
+                    if (offset + n + 3 >= s.length) return; // emergency break
                     image.setRGB(columns, (height - rows - 1), 0xffffff & DWORD(s, offset + n));
                     n += 4;
                 }
