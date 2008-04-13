@@ -230,11 +230,12 @@ public final class Connections_p {
         prop.putNum("numActivePending", numActivePending);
         
         // client sessions
-        Set<HttpConnectionInfo> a = HttpConnectionInfo.getAllConnections();
+        Set<HttpConnectionInfo> allConnections = HttpConnectionInfo.getAllConnections();
         // TODO sorting
 //        Arrays.sort(a, httpc.connectionTimeComparatorInstance);
         int c = 0;
-        for (HttpConnectionInfo conInfo: a) {
+        synchronized (allConnections) {
+        for (HttpConnectionInfo conInfo: allConnections) {
             prop.put("clientList_" + c + "_clientProtocol", conInfo.getProtocol());
             prop.putNum("clientList_" + c + "_clientLifetime", conInfo.getLifetime());
             prop.putNum("clientList_" + c + "_clientIdletime", conInfo.getIdletime());
@@ -242,7 +243,8 @@ public final class Connections_p {
             prop.putHTML("clientList_" + c + "_clientCommand", conInfo.getCommand());
             prop.put("clientList_" + c + "_clientID", conInfo.getID());
             c++;
-       }
+        }
+        }
         prop.put("clientList", c);
         prop.put("clientActive", JakartaCommonsHttpClient.connectionCount());
         

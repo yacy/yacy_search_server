@@ -111,6 +111,10 @@ public class HttpConnectionInfo {
     }
 
     /**
+     * gets a {@link Set} of all collected ConnectionInfos
+     * 
+     * Important: iterations must be synchronized!
+     * 
      * @return the allConnections
      */
     public static Set<HttpConnectionInfo> getAllConnections() {
