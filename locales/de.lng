@@ -52,7 +52,6 @@ Count</td>==Anzahl</td>
 Queries Per Last Hour==Suchanfragen pro letzter Stunde
 Access Dates==Zugriffszeiten
 This is a list of searches that had been requested from remote peer search interface==Dies ist eine Liste aller Suchanfragen, die von einem anderen Peer gestellt wurden. 
-
 #---------------------------
 
 
@@ -224,6 +223,13 @@ The current cache size is==Die aktuelle Gr&ouml;&szlig;e des Caches betr&auml;gt
 The maximum cache size is==Die maximale Gr&ouml;&szlig;e betr&auml;gt
 #-----------------------------
 
+#File: Collage.html
+#---------------------------
+#Collage==Collage
+Private Queue==Privater Puffer
+Public Queue==&Ouml;ffentlicher Puffer
+#-----------------------------
+
 #File: Config_p.html
 #---------------------------
 Advanced Config==Erweiterte Einstellungen
@@ -279,7 +285,7 @@ Language selection==Sprachauswahl
 You can change the language of the YaCy-webinterface with translation files.==Hier k&ouml;nnen Sie die Sprache &auml;ndern. W&auml;hlen Sie die gew&uuml;nschte Sprache aus der Liste aus.
 Current language</label>==Aktuelle Sprache</label>
 default\(english\)==Deutsch
-Author\(s\) \(chronological\)</label>==Autor(en) (chronologisch)</label>
+Author\(s\) \(chronological\)</label>==Autoren (chronologisch)</label>
 Send additions to maintainer</em>==Schicken Sie Erg&auml;nzungen bitte an</em>
 Available Languages</label>==Verf&uuml;gbare Sprachen</label>
 Install new language from URL==Neue Sprachdatei herunterladen
@@ -461,7 +467,7 @@ Used==Benutzt
 Close==Schlie&szlig;en
 Waiting for new request nr.==Warte auf neue Anfrage Nr.
 Outgoing Connections==Ausgehende Verbindungen
-Showing \#\[clientActive\]\# active outgoing connections:==Es werden #[clientActive]# aktive ausgehende Verbindungen gezeigt:
+Showing \#\[clientActive\]\# active outgoing connections:==Gezeigt werden #[clientActive]# zusammengefasste ausgehende Verbindungen, benutzt als:
 Duration==Dauer
 #ID==ID
 #-----------------------------
@@ -513,8 +519,11 @@ Local Media Indexing==Lokal Media Indexieren
 Remote Indexing==Remote Indexieren
 Status / Action==Status / Aktion
 no::yes==nein::ja
-"Delete"=="l&ouml;schen"
+Running==L&auml;uft
 "Terminate"=="Beenden"
+Finished==Beendet
+"Delete"=="l&ouml;schen"
+"Delete finished crawls"=="Beendete Crawls l&ouml;schen"
 Select the profile to edit==Profil zur Bearbeitung ausw&auml;hlen 
 "Edit profile"=="Profil bearbeiten"
 An error occured during editing the crawl profile:==Es trat folgender Fehler bei der Bearbeitung des Crawl Profils auf:
@@ -1128,7 +1137,7 @@ Language selection==Sprachauswahl
 You can change the language of the YaCy-webinterface with translation files.==Hier k&ouml;nnen Sie die Sprache &auml;ndern. W&auml;hlen Sie die gew&uuml;nschte Sprache aus der Liste aus.
 Current language:==Aktuelle Sprache
 default\(english\)==Deutsch
-Languagefile Author(s) (chronological):==Autor(en) der Sprachdatei (chronologisch):
+Languagefile Author(s) (chronological):==Autoren der Sprachdatei (chronologisch):
 Send additions to maintainer:==Schicken Sie Erg&auml;nzungen bitte an:
 Available Languages:==Verf&uuml;gbare Sprachen:
 Install new language from URL:==Neue Sprachdatei herunterladen:
@@ -1387,8 +1396,6 @@ ram cache during indexing. When YaCy is shut down, this cache must be==RAM-Cache
 flushed to disc; this may last some minutes.==auf die Festplatte gesichert werden; dies kann einige Minuten dauern.
 Initial space of words in cache:==Anfangs Freiraum im Word Cache:
 This is is the init size of space for words in cache.==Dies ist die Anfangsgr&ouml;sse von W&ouml;rtern im Cache.
-word flush size:==Wort Flush Gr&ouml;sse:
-The word flush size is applied when an indexing loop is executed, and the cache size is exceeded.==Die Wort Flush Gr&ouml;sse wird eingesetzt, wenn ein Indexier Loop ausgef&uuml;hrt wird und die Cache Gr&ouml;sse &uuml;berschritten wurde. 
 Enter New Cache Size==Neue Cachegr&ouml;&szlig;e eintragen
 Thread pool settings:==Threadpool Einstellungen:
 maximum Active==max. aktiv
@@ -1402,12 +1409,11 @@ Idle</option>==unt&auml;tig</option>
 "Set new Priority"=="Neue Priorit&auml;t speichern"
 Changes take effect after <strong>restart</strong> of YaCy==&Auml;nderungen werden erst nach einem <strong>Neustart</strong> von YaCy wirksam.
 Proxy Performance Settings==Proxy Performance Einstellungen
-#Online Caution Delay==
-This is the time that the crawler idles when the proxy is accessed.==Dies ist die Zeit die der Crawler pausiert, wenn auf den Proxy zugegriffen wird.
-The delay is extended by this time==Die normale Verz&ouml;gerung wird um diese Zeit verl&auml;ngert,
-each time the proxy is accessed afterwards. This shall improve performance of the proxy throughput.==wenn auf den Proxy zugegriffen wird. Dies soll die Performance des Proxydurchsatzes erh&ouml;hen.
-current delta is==Seit dem letzten Zugriff auf den Proxy sind
-since last proxy access.==vergangen.
+This is the time that the crawler idles when the proxy is accessed, or a local or remote search is done.==Dies ist die Zeit die der Crawler pausiert, wenn auf den Proxy zugegriffen wird, oder eine lokale oder globale Suche durchgef&uuml;hrt wird.
+The delay is extended by this time each time the proxy is accessed afterwards.==Die normale Verz&ouml;gerung wird um diese Zeit verl&auml;ngert, wenn auf den Proxy zugegriffen wird.
+This shall improve performance of the affected process \(proxy or search\).==Dies soll die Performance des betroffenen Prozesses (Proxy oder Suche) erh&ouml;hen.
+\(current delta is==(Seit dem letzten Zugriff auf Proxy/Lokale-Suche/Globale-Suche sind
+seconds since last proxy/local-search/remote-search access\)==Sekunden vergangen.)
 Enter New Parameters==Neue Parameter eintragen
 milliseconds==Millisekunden
 #-----------------------------
@@ -1477,7 +1483,7 @@ Timing results of latest search request:==Timing-Ergebnisse der letzten Suchanfr
 Query==Abfrage
 Event</td>==Ereignis</td>
 Time==Zeit
-Duration \(milliseconds\)==Dauer (Millisekunden)
+Duration \(ms\)==Dauer (Millisekunden)
 Result-Count==Anzahl Ergebnisse
 The network picture below shows how the latest search query was solved by asking corresponding peers in the DHT:==Das Netzwerkbild zeigt wie die letzte Suche durch Anfragen bei zust&auml;ndigen Peers im DHT gel&ouml;st wurde.
 "Search event picture"=="Such Ereignis Bild"
@@ -2080,6 +2086,12 @@ provided by YaCy peers using public bookmarks, link votes and crawl start points
 "authentication required"=="Autorisierung erforderlich"
 Hide surftips for users without autorization==Verberge Surftipps f&uuml;r Benutzer ohne Autorisierung
 Show surftips to everyone==Zeige Surftipps allen Benutzern
+#-----------------------------
+
+#File: Threaddump_p.html
+#-----------------------------
+"create Threaddump"=="Threaddump erstellen"
+#-----------------------------
 
 #File: User_p.html
 #---------------------------
@@ -2491,6 +2503,7 @@ Log Statistics==Log Statistik
 #---------------------------
 Web Visualization==Internet Visualisierung
 Web Structure==Internet Struktur
+Image Collage==Bilder Collage
 Web Cache==Internet Zwischenspeicher
 #-----------------------------
 
