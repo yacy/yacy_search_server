@@ -225,13 +225,13 @@ public final class yacy {
             f.deleteOnExit();
             
             pro = new File(homePath, "libx").exists();
-            String oldconf = "DATA/SETTINGS/httpProxy.conf";
-            String newconf = "DATA/SETTINGS/yacy.conf";
+            String oldconf = "DATA/SETTINGS/httpProxy.conf".replace("/", File.separator);
+            String newconf = "DATA/SETTINGS/yacy.conf".replace("/", File.separator);
             File oldconffile = new File(homePath, oldconf);
             if (oldconffile.exists()) {
                 oldconffile.renameTo(new File(homePath, newconf));
             }
-            sb = new plasmaSwitchboard(homePath, "defaults/yacy.init", newconf, pro);
+            sb = new plasmaSwitchboard(homePath, "defaults/yacy.init".replace("/", File.separator), newconf, pro);
             sbSync.V(); // signal that the sb reference was set
             
             // save information about available memory at startup time
