@@ -47,6 +47,7 @@
 // if the shell's current path is HTROOT
 
 import java.net.InetAddress;
+import java.util.ConcurrentModificationException;
 import java.util.Iterator;
 import java.util.Map;
 
@@ -210,10 +211,12 @@ public final class hello {
                 Iterator<yacySeed> si = ySeeds.values().iterator();
                 yacySeed s;
                 while (si.hasNext()) {
-                	s = (yacySeed) si.next();
-                    if ((s != null) && (s.isProper() == null)) {
+                	s = si.next();
+                    if ((s != null) && (s.isProper() == null)) try {
                         seeds.append("seed").append(count).append('=').append(s.genSeedStr(key)).append(serverCore.CRLF_STRING);
                         count++;
+                    } catch (ConcurrentModificationException e) {
+                        e.printStackTrace();
                     }
                 }
             }

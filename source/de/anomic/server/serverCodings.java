@@ -195,18 +195,19 @@ public final class serverCodings {
     }
 
     public static String map2string(Map<String, String> m, String separator, boolean braces) {
-        final StringBuffer buf = new StringBuffer(20 * m.size());
-        if (braces) { buf.append("{"); }
-        final Iterator<Map.Entry<String, String>> i = m.entrySet().iterator();
-        while (i.hasNext()) {
-            final Entry<String, String> e = i.next();
-            buf.append(e.getKey()).append('=');
-            if (e.getValue() != null) { buf.append(e.getValue()); }
-            buf.append(separator);
+        // m must be synchronized to prevent that a ConcurrentModificationException occurs
+        synchronized (m) {
+            final StringBuffer buf = new StringBuffer(20 * m.size());
+            if (braces) { buf.append("{"); }
+            for (Entry<String, String> e: m.entrySet()) {
+                buf.append(e.getKey()).append('=');
+                if (e.getValue() != null) { buf.append(e.getValue()); }
+                buf.append(separator);
+            }
+            if (buf.length() > 1) { buf.setLength(buf.length() - 1); } // remove last separator
+            if (braces) { buf.append("}"); }
+            return new String(buf);
         }
-        if (buf.length() > 1) { buf.setLength(buf.length() - 1); } // remove last separator
-        if (braces) { buf.append("}"); }
-        return new String(buf);
     }
 
     public static Set<String> string2set(String string, String separator) {
