@@ -588,12 +588,16 @@ public class kelondroEcoTable implements kelondroIndex {
 
         public Entry next() {
             byte[] k = i.next();
+            assert k != null;
+            if (k == null) return null;
             try {
                 this.c = index.geti(k);
             } catch (IOException e) {
                 e.printStackTrace();
                 return null;
             }
+            assert this.c >= 0;
+            if (this.c < 0) return null;
             byte[] b = new byte[rowdef.objectsize];
             if (table == null) {
                 // read from file
@@ -606,6 +610,8 @@ public class kelondroEcoTable implements kelondroIndex {
             } else {
                 // compose from table and key
                 kelondroRow.Entry v = table.get(this.c);
+                assert v != null;
+                if (v == null) return null;
                 System.arraycopy(k, 0, b, 0, rowdef.primaryKeyLength);
                 System.arraycopy(v.bytes(), 0, b, rowdef.primaryKeyLength, taildef.objectsize);
             }
