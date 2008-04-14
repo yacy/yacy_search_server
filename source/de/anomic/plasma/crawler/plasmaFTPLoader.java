@@ -267,7 +267,7 @@ public class plasmaFTPLoader {
         if (plasmaParser.supportedContent(plasmaParser.PARSER_MODE_CRAWLER, entryUrl, mimeType)) {
             // aborting download if content is too long
             final int size = ftpClient.fileSize(path);
-            if (size <= maxFileSize) {
+            if (size <= maxFileSize || maxFileSize == -1) {
                 // timeout for download
                 ftpClient.setDataTimeoutByMaxFilesize(size);
 

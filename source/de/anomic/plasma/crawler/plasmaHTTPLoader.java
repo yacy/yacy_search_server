@@ -361,6 +361,10 @@ public final class plasmaHTTPLoader {
                 "'. Retrying request without using gzip content encoding.");
                 failreason = plasmaCrawlEURL.DENIED_CONTENT_DECODING_ERROR;
                 this.acceptEncoding = null;
+            } else if ((errorMsg != null) && (errorMsg.indexOf("The host did not accept the connection within timeout of") >= 0)) {
+                this.log.logWarning("CRAWLER Timeout while trying to connect to '" + entry.url().toString() +
+                "'. Retrying request.");
+                failreason = plasmaCrawlEURL.DENIED_CONNECTION_TIMEOUT;
             } else if ((errorMsg != null) && (errorMsg.indexOf("Read timed out") >= 0)) {
                 this.log.logWarning("CRAWLER Read timeout while receiving content from '" + entry.url().toString() +
                 "'. Retrying request.");
