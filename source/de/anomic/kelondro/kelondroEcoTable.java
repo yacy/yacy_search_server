@@ -338,6 +338,7 @@ public class kelondroEcoTable implements kelondroIndex {
             // construct the row using the copy in RAM
             kelondroRow.Entry v = table.get(i);
             assert v != null;
+            if (v == null) return null;
             assert key.length == rowdef.primaryKeyLength;
             System.arraycopy(key, 0, b, 0, key.length);
             System.arraycopy(v.bytes(), 0, b, rowdef.primaryKeyLength, rowdef.objectsize - rowdef.primaryKeyLength);
