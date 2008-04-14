@@ -257,7 +257,7 @@ public class kelondroRowCollection {
         assert (index * rowdef.objectsize < chunkcache.length);
         if ((chunkcache == null) || (rowdef == null)) return null; // case may appear during shutdown
         if (index >= chunkcount) return null;
-        if (index * rowdef.objectsize >= chunkcache.length) return null;
+        if ((index + 1) * rowdef.objectsize > chunkcache.length) return null; // the whole chunk does not fit into the chunkcache
         this.lastTimeRead = System.currentTimeMillis();
         byte[] b = new byte[this.rowdef.width(0)];
         System.arraycopy(chunkcache, index * rowdef.objectsize, b, 0, b.length);
@@ -270,7 +270,7 @@ public class kelondroRowCollection {
         assert (index * rowdef.objectsize < chunkcache.length);
         if ((chunkcache == null) || (rowdef == null)) return null; // case may appear during shutdown
         if (index >= chunkcount) return null;
-        if (index * rowdef.objectsize >= chunkcache.length) return null;
+        if ((index + 1) * rowdef.objectsize > chunkcache.length) return null; // the whole chunk does not fit into the chunkcache
         this.lastTimeRead = System.currentTimeMillis();
         return rowdef.newEntry(chunkcache, index * rowdef.objectsize, true);
     }
