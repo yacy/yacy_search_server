@@ -30,6 +30,8 @@ import java.util.Collections;
 import java.util.HashSet;
 import java.util.Set;
 
+import de.anomic.server.logging.serverLog;
+
 /**
  * Information about a connection
  * 
@@ -152,12 +154,16 @@ public class HttpConnectionInfo {
      * removes stale connections
      */
     public static void cleanUp() {
-        synchronized (allConnections) {
-            for(HttpConnectionInfo con: allConnections) {
-                if(con.getLifetime() > staleAfterMillis) {
-                    allConnections.remove(con);
+        try {
+            synchronized (allConnections) {
+                for(HttpConnectionInfo con: allConnections) {
+                    if(con.getLifetime() > staleAfterMillis) {
+                        allConnections.remove(con);
+                    }
                 }
             }
+        } catch (java.util.ConcurrentModificationException e) {
+            serverLog.logWarning("HTTPC", "cleanUp ConnectionInfo interrupted by ConcurrentModificationException");
         }
     }
     
