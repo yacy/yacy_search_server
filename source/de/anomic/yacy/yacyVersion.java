@@ -413,9 +413,11 @@ public final class yacyVersion implements Comparator<yacyVersion>, Comparable<ya
                 "#!/bin/sh" + serverCore.LF_STRING +
                 "cd " + sb.getRootPath() + "/DATA/RELEASE/" + serverCore.LF_STRING +
                 ((releaseFile.getName().endsWith(".gz")) ?
+                        // test gz-file for integrity and tar xfz then
                        ("if gunzip -t " + releaseFile.getAbsolutePath() + serverCore.LF_STRING +
                         "then" + serverCore.LF_STRING + 
                         "gunzip -c " + releaseFile.getAbsolutePath() + " | tar xf -" + serverCore.LF_STRING) :
+                        // just tar xf the file, no integrity test possible?
                        ("tar xf " + releaseFile.getAbsolutePath() + serverCore.LF_STRING)
                 ) +
                 "while [ -f ../yacy.running ]; do" + serverCore.LF_STRING +
@@ -423,11 +425,16 @@ public final class yacyVersion implements Comparator<yacyVersion>, Comparable<ya
                 "done" + serverCore.LF_STRING +
                 "cp -Rf yacy/* " + apphome + serverCore.LF_STRING +
                 "rm -Rf yacy" + serverCore.LF_STRING +
-                "else" + serverCore.LF_STRING +
-                "while [ -f ../yacy.running ]; do" + serverCore.LF_STRING +
-                "sleep 1" + serverCore.LF_STRING +
-                "done" + serverCore.LF_STRING +
-                "fi" + serverCore.LF_STRING +
+                ((releaseFile.getName().endsWith(".gz")) ?
+                        // else-case of gunzip -t test: if failed, just restart
+                       ("else" + serverCore.LF_STRING +
+                        "while [ -f ../yacy.running ]; do" + serverCore.LF_STRING +
+                        "sleep 1" + serverCore.LF_STRING +
+                        "done" + serverCore.LF_STRING +
+                        "fi" + serverCore.LF_STRING) :
+                        // in case that we did not made the integrity test, there is no else case
+                        ""
+                ) +
                 "cd " + apphome + serverCore.LF_STRING +
                 "nohup ./startYACY.sh > /dev/null" + serverCore.LF_STRING;
             File scriptFile = new File(sb.getRootPath(), "DATA/RELEASE/update.sh");
