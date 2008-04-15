@@ -44,7 +44,8 @@ public class HttpConnectionInfo {
      */
     private final static Set<HttpConnectionInfo> allConnections = Collections
             .synchronizedSet(new HashSet<HttpConnectionInfo>());
-    private final static int staleAfterMillis = 1800 * 1000;
+    // this is only for statistics, so it can be bigger to see lost connectionInfos
+    private final static int staleAfterMillis = 30 * 60000; // 30 minutes
 
     private final String protocol;
     private final String targetHost;
@@ -156,11 +157,13 @@ public class HttpConnectionInfo {
     public static void cleanUp() {
         try {
             synchronized (allConnections) {
+                final int sizeBefore = allConnections.size();
                 for(HttpConnectionInfo con: allConnections) {
                     if(con.getLifetime() > staleAfterMillis) {
                         allConnections.remove(con);
                     }
                 }
+                serverLog.logFine("HTTPC", "cleanUp ConnectionInfo removed "+ (sizeBefore - allConnections.size()));
             }
         } catch (java.util.ConcurrentModificationException e) {
             serverLog.logWarning("HTTPC", "cleanUp ConnectionInfo interrupted by ConcurrentModificationException");

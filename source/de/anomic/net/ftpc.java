@@ -2261,35 +2261,43 @@ public class ftpc {
 
         // starting data transaction
         if (status == 1) {
-            final Socket data = getDataSocket();
-            final InputStream ClientStream = data.getInputStream();
-
-            // create local file
-            RandomAccessFile outFile;
-            if (fileDest == null) {
-                outFile = new RandomAccessFile(fileName, "rw");
-            } else {
-                outFile = new RandomAccessFile(fileDest, "rw");
-            }
-
-            // write remote file to local file
-            final byte[] block = new byte[blockSize];
-            int numRead;
+            Socket data = null;
+            InputStream ClientStream = null;
+            RandomAccessFile outFile = null;
             int length = 0;
-
-            while ((numRead = ClientStream.read(block)) != -1) {
-                outFile.write(block, 0, numRead);
-                length = length + numRead;
+            try {
+                data = getDataSocket();
+                ClientStream = data.getInputStream();
+    
+                // create local file
+                if (fileDest == null) {
+                    outFile = new RandomAccessFile(fileName, "rw");
+                } else {
+                    outFile = new RandomAccessFile(fileDest, "rw");
+                }
+    
+                // write remote file to local file
+                final byte[] block = new byte[blockSize];
+                int numRead;
+    
+                while ((numRead = ClientStream.read(block)) != -1) {
+                    outFile.write(block, 0, numRead);
+                    length = length + numRead;
+                }
+    
+                // after stream is empty we should get control completion echo
+                reply = receive();
+                // boolean success = !isNotPositiveCompletion(reply);
+            } finally {
+                // shutdown connection
+                if(outFile != null) {
+                    outFile.close();
+                }
+                if(ClientStream != null) {
+                    ClientStream.close();
+                }
+                closeDataSocket();
             }
-
-            // after stream is empty we should get control completion echo
-            reply = receive();
-            // boolean success = !isNotPositiveCompletion(reply);
-
-            // shutdown connection
-            outFile.close();
-            ClientStream.close();
-            closeDataSocket();
 
             // if (!success) throw new IOException(reply);
 

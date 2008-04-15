@@ -29,9 +29,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.Date;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 import org.apache.commons.httpclient.ConnectMethod;
 import org.apache.commons.httpclient.DefaultHttpMethodRetryHandler;
@@ -122,13 +120,18 @@ public class JakartaCommonsHttpClient {
     /**
      * every x milliseconds do a cleanup (close old connections)
      */
-    private final static int cleanupIntervall = 60000;
+    private static final int cleanupIntervall = 60000;
+    /**
+     * close connections when they are not used for this time
+     * or otherwise:
+     * hold connections this time open to reuse them
+     */
+    private static final long closeConnectionsAfterMillis = 120000;
     /**
      * time the last cleanup was started
      */
     private static long lastCleanup = 0;
 
-    private final Map<HttpMethod, InputStream> openStreams = new HashMap<HttpMethod, InputStream>();
     private Header[] headers = new Header[0];
     private httpRemoteProxyConfig proxyConfig = null;
     private boolean followRedirects = true;
@@ -310,31 +313,6 @@ public class JakartaCommonsHttpClient {
         return execute(connect);
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see de.anomic.http.HttpClient#closeStream()
-     */
-    public void closeStream() {
-        // close all opened streams (by this instance)
-        synchronized (openStreams) {
-            for (final HttpMethod method : openStreams.keySet()) {
-                try {
-                    // close stream
-                    openStreams.get(method).close();
-                } catch (final IOException e) {
-                    serverLog.logSevere("HTTPC", "connection cannot be closed! will unset variable.");
-                    e.printStackTrace();
-                } finally {
-                    // remove from pool
-                    openStreams.remove(method);
-                }
-                // free the connection
-                method.releaseConnection();
-            }
-        }
-    }
-
     /**
      * adds the yacy-header to the method
      * 
@@ -410,10 +388,16 @@ public class JakartaCommonsHttpClient {
         HttpConnectionInfo.addConnection(generateConInfo(method));
         
         // execute (send request)
-        if (hostConfig == null) {
-            apacheHttpClient.executeMethod(method);
-        } else {
-            apacheHttpClient.executeMethod(hostConfig, method);
+        try {
+            if (hostConfig == null) {
+                apacheHttpClient.executeMethod(method);
+            } else {
+                apacheHttpClient.executeMethod(hostConfig, method);
+            }
+        } catch (IOException e) {
+            // cleanUp statistics
+            HttpConnectionInfo.removeConnection(generateConInfo(method));
+            throw e;
         }
         
         // return response
@@ -596,7 +580,7 @@ public class JakartaCommonsHttpClient {
         final long now = System.currentTimeMillis(); 
         if(now - lastCleanup > cleanupIntervall) {
             lastCleanup = now;
-            conManager.closeIdleConnections(120000);
+            conManager.closeIdleConnections(closeConnectionsAfterMillis);
             conManager.deleteClosedConnections();
             HttpConnectionInfo.cleanUp();
         }
