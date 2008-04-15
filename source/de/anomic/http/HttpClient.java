@@ -200,11 +200,16 @@ public abstract class HttpClient {
      */
     public static httpHeader whead(final String uri, final httpHeader header) {
         final JakartaCommonsHttpClient client = new JakartaCommonsHttpClient(10000, header, null);
+        JakartaCommonsHttpResponse response = null;
         try {
-            final JakartaCommonsHttpResponse response = client.HEAD(uri);
+            response = client.HEAD(uri);
             return response.getResponseHeader();
         } catch (final IOException e) {
             serverLog.logWarning("HTTPC", "whead(" + uri + ") failed: " + e.getMessage());
+        } finally {
+            if(response != null) {
+                response.closeStream();
+            }
         }
         return null;
     }
