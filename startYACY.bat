@@ -14,6 +14,7 @@ set jms=
 set javacmd=-Xmx64m -Xms10m
 set priolvl=0
 set priority=/NORMAL
+if exist DATA\SETTINGS\httpProxy.conf GoTo :RENAMEINDEX
 if exist DATA\SETTINGS\yacy.conf GoTo :GETSTARTOPTS
 
 :STARTJAVA
@@ -35,6 +36,17 @@ start "YaCy" %priority% /B /WAIT java %javacmd% -classpath %CLASSPATH% yacy
 
 if not exist DATA\yacy.restart GoTo :END
 del DATA\yacy.restart
+
+Rem PUBLIC is now freeworld (r4575)
+:RENAMEINDEX
+for /F "tokens=1,2 delims==" %%i in (DATA\SETTINGS\httpProxy.conf) do (
+    if "%%i"=="network.unit.name" set networkname=%%j
+)
+if not defined networkname set networkname=PUBLIC
+cd DATA\INDEX
+ren PUBLIC %networkname%
+cd ..
+cd ..
 
 Rem This target is used to read java runtime parameters out of the yacy config file
 :GETSTARTOPTS

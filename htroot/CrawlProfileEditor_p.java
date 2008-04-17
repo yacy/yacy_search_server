@@ -87,7 +87,8 @@ public class CrawlProfileEditor_p {
         if (post != null) {
             if (post.containsKey("terminate")) {
                 // termination of a crawl: shift the crawl from active to passive
-                sb.profilesPassiveCrawls.newEntry(sb.profilesActiveCrawls.getEntry(handle).map());
+                plasmaCrawlProfile.entry entry = sb.profilesActiveCrawls.getEntry(handle);
+                if (entry != null) sb.profilesPassiveCrawls.newEntry(entry.map());
                 sb.profilesActiveCrawls.removeEntry(handle);
                 // delete all entries from the crawl queue that are deleted here
                 sb.crawlQueues.noticeURL.removeByProfileHandle(handle);
