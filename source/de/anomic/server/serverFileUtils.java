@@ -389,13 +389,14 @@ public final class serverFileUtils {
         File tf = new File(file.toString() + "." + (System.currentTimeMillis() % 1000));
         pw = new PrintWriter(new BufferedOutputStream(new FileOutputStream(tf)));
         pw.println("# " + comment);
-        Iterator<Map.Entry<String, String>> i = props.entrySet().iterator();
         String key, value;
-        Map.Entry<String, String> entry;
-        while (i.hasNext()) {
-            entry  = i.next();
+        for (Map.Entry<String, String> entry: props.entrySet()) {
             key = entry.getKey();
-            value = entry.getValue().replaceAll("\n", "\\\\n");
+            if (entry.getValue() == null) {
+                value = "";
+            } else {
+                value = entry.getValue().replaceAll("\n", "\\\\n");
+            }
             pw.println(key + "=" + value);
         }
         pw.println("# EOF");

@@ -1,0 +1,32 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <title>YaCy '#[clientname]#': Peer Profile</title>
+    #%env/templates/metas.template%#
+  </head>
+  <body id="ConfigProfile">
+    #%env/templates/header.template%#
+    #%env/templates/submenuConfig.template%#
+    <h2>Peer Profile</h2>
+    <p>
+      This defines visual attributes of the search interfaces.
+    </p>
+    <form action="ConfigPeerProfile_p.html" accept-charset="UTF-8">
+      <fieldset>
+        <dl>
+          <dt><label for="name">Greeting Line (<a href="index.html">visible above the search field</a>)</label></dt>
+          <dd>
+            <input type="text" name="promoteSearchPageGreeting" id="promoteSearchPageGreeting" size="80" maxlength="120" value="#[promoteSearchPageGreeting]#" />
+          </dd>
+        </dl>
+        <dl>
+          <dt>&nbsp;</dt>
+          <dd>
+            <input type="submit" name="set" value="Save" />
+          </dd>
+        </dl> 
+      </fieldset>
+    </form>
+    #%env/templates/footer.template%#
+  </body>
+</html>

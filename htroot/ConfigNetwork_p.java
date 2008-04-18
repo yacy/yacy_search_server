@@ -41,6 +41,12 @@ public class ConfigNetwork_p {
         serverObjects prop = new serverObjects();
         int commit = 0;
         
+        prop.put("network.unit.definition", sb.getConfig("network.unit.definition", ""));
+        prop.put("network.unit.name", sb.getConfig("network.unit.name", ""));
+        prop.put("network.unit.description", sb.getConfig("network.unit.description", ""));
+        prop.put("network.unit.domain", sb.getConfig("network.unit.domain", ""));
+        prop.put("network.unit.dht", sb.getConfig("network.unit.dht", ""));
+        
         if (post != null) {
         	
         	boolean crawlResponse = post.get("crawlResponse", "off").equals("on");

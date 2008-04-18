@@ -48,6 +48,35 @@
         #(commitRobinson)#::<div class="commit">For Robinson Mode, index distribution and receive is switched off.</div>#(/commitRobinson)#
         #(commitRobinsonWithRemoteIndexing)#::<div class="commit">This Robinson Mode switches remote indexing on, but limits targets to peers within the same cluster. Remote indexing requests from peers within the same cluster are accepted.</div>#(/commitRobinsonWithRemoteIndexing)#
         #(commitRobinsonWithoutRemoteIndexing)#::<div class="commit">This Robinson Mode does not allow any remote indexing (neither requests remote indexing, nor accepts it).</div>#(/commitRobinsonWithoutRemoteIndexing)#
+    <form name="ConfigForm" method="post" action="ConfigNetwork_p.html" enctype="multipart/form-data" accept-charset="UTF-8">
+    <fieldset>
+      <legend>
+        <label for="domain">Network and Domain Specification</label>
+      </legend>
+      <p>
+      YaCy can operate a computing grid of YaCy peers or as a stand-alone node.
+      To control that all participants within a web indexing domain have access to the same domain,
+      this network definition must be equal to all members of the same YaCy network.
+      </p>
+      <dl>
+        <dt>Network Definition</dt>
+		<dd>#[network.unit.definition]#</dd>
+		<dt>Network Nick</dt>
+		<dd>#[network.unit.name]#</dd>
+		<dt>Long Description</dt>
+		<dd>#[network.unit.description]#</dd>
+		<dt>Indexing Domain</dt>
+		<dd>#[network.unit.domain]#</dd>
+		<dt>DHT</dt>
+		<dd>#[network.unit.dht]#</dd>
+      </dl>
+	</fieldset>
+	</form>
+    <fieldset>
+      <legend>
+        <label for="p2p">Distributed Computing Network for Domain</label>
+      </legend>
+	  
     <p>
       You can configure if you want to participate at the global YaCy network or if you want to have your
       own separate search cluster with or without connection to the global network. You may also define
@@ -177,6 +206,7 @@
     </fieldset>
     <input type="submit" name="save" value="Save" />
     </form>
+    </fieldset>
     #%env/templates/footer.template%#
   </body>
 </html>
