@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<crawlProfiles>
+#{crawlProfiles}# 
+	<crawlProfile>
+		<name>#[name]#</name>
+		<status>#(status)#terminated::active#(/status)#</status>
+		<starturl>#[startURL]#</starturl>
+		<depth>#[depth]#</depth>
+		<filter>#[filter]#</filter>
+		<crawlingIfOlder>#[crawlingIfOlder]#</crawlingIfOlder>
+		<crawlingDomFilterDepth>#[crawlingDomFilterDepth]#</crawlingDomFilterDepth>
+		<crawlingDomFilterContent>
+		#{crawlingDomFilterContent}#
+			<item>#[item]#</item>
+		#{/crawlingDomFilterContent}#
+		</crawlingDomFilterContent>
+		<crawlingDomMaxPages>#[crawlingDomMaxPages]#</crawlingDomMaxPages>
+		<withQuery>#(withQuery)#no::yes#(/withQuery)#</withQuery>
+		<storeCache>#(storeCache)#no::yes#(/storeCache)#</storeCache>
+		<indexText>#(indexText)#no::yes#(/indexText)#</indexText>
+		<indexMedia>#(indexMedia)#no::yes#(/indexMedia)#</indexMedia>
+		<remoteIndexing>#(remoteIndexing)#no::yes#(/remoteIndexing)#</remoteIndexing>
+	</crawlProfile>
+#{/crawlProfiles}# 
+</crawlProfiles>
