@@ -7,6 +7,6 @@
             <dd><input type="password" id="password" name="password" /></dd>
             <dt><input type="submit" value="login" /></dt>
           </dl>
-          <input type="hidden" name="returnto", value="#[returnto]#" />
+          <input type="hidden" name="returnto" value="#[returnto]#" />
         </fieldset>
       </form>
