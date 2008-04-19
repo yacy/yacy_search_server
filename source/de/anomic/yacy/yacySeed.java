@@ -155,7 +155,7 @@ public class yacySeed {
     public static final String NCOUNT    = "NCount";
     /** the number of links that the peer provides for remote crawls (ZURL's) */
     public static final String RCOUNT    = "RCount";
-    /** the number of words the peer has indexed (as it says) */
+    /** the number of different words the peer has indexed */
     public static final String ICOUNT    = "ICount";
     /** the number of seeds that the peer has stored */
     public static final String SCOUNT    = "SCount";
@@ -694,48 +694,7 @@ public class yacySeed {
         final double toPos = dhtPosition(to);
         return (fromPos <= toPos) ? (toPos - fromPos) : (1.0 - fromPos + toPos);
     }
-    /*
-    private static String bestNewHash(yacySeedDB seedDB) {
-        if ((seedDB == null) || (seedDB.sizeConnected() <= 8)) {
-            // use random hash
-            return randomHash();
-        }
-        
-        int tries = Math.max(1, Math.min(32, seedDB.sizeConnected() / 2));
-        String hash;
-        String bestHash = null;
-        double c, bestC = Double.MAX_VALUE;
-        double segmentSize = Math.min(0.9, 4.0 / seedDB.sizeConnected());
-        Iterator<yacySeed> i;
-        double d;
-        yacySeed s;
-        for (int t = 0; t < tries; t++) {
-            hash = randomHash();
-            i = seedDB.seedsConnected(true, true, hash, (float) 0.0);
-            c = 0.0;
-            while (i.hasNext()) {
-                s = i.next();
-                d = dhtDistance(hash, s.hash);
-                if (d > segmentSize) break;
-                c = c + 1.0/d;
-            }
-            System.out.println("BESTHASH  " + hash + " = " + c);
-            if (c < bestC) {
-                bestC = c;
-                bestHash = hash;
-                System.out.println("BESTHASH  " + hash + " is best now");
-            }
-        }
-        if (bestHash == null) return randomHash();
-        
-        // at this point we know only the position of a peer sequence
-        double bestPosition = dhtPosition(bestHash) + (segmentSize / 2);
-        if (bestPosition > 1.0) bestPosition = bestPosition - 1.0;
-        bestHash = positionToHash(bestPosition);
-        System.out.println("BESTHASH  finally is " + bestHash);
-        return bestHash;
-    }
-    */
+    
     private static String bestGap(yacySeedDB seedDB) {
         if ((seedDB == null) || (seedDB.sizeConnected() <= 2)) {
             // use random hash

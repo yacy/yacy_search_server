@@ -322,8 +322,8 @@ public class kelondroRowCollection {
         assert (alength > 0);
         assert (astart + alength <= a.length);
         if (bugappearance(a, astart, alength)) {
-            System.out.println("*** DEBUG: patched wrong a = " + serverLog.arrayList(a, astart, alength));
-            return false; // TODO: this is temporary; remote peers may still submit bad entries
+            System.out.println("*** DEBUG warning: wrong a = " + serverLog.arrayList(a, astart, alength));
+            //return false; // TODO: this is temporary; remote peers may still submit bad entries
         }
         assert (!(bugappearance(a, astart, alength))) : "a = " + serverLog.arrayList(a, astart, alength);
         int l = Math.min(rowdef.objectsize, Math.min(alength, a.length - astart));
