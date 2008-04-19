@@ -267,10 +267,6 @@ public final class indexRAMRI implements indexRI, indexRIReader {
         }
         return 0;
     }
- 
-    public synchronized int tryRemoveURLs(String urlHash) {
-        return heap.removeReference(urlHash);
-    }
     
     public synchronized void addEntries(indexContainer container) {
         // this puts the entries into the cache, not into the assortment directly

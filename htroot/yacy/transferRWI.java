@@ -160,8 +160,7 @@ public final class transferRWI {
                 
                 // block blacklisted entries
                 if ((blockBlacklist) && (plasmaSwitchboard.urlBlacklist.hashInBlacklistedCache(indexReferenceBlacklist.BLACKLIST_DHT, urlHash))) {
-                    //int deleted = sb.wordIndex.tryRemoveURLs(urlHash);
-                    //yacyCore.log.logFine("transferRWI: blocked blacklisted URLHash '" + urlHash + "' from peer " + otherPeerName + "; deleted " + deleted + " URL entries from RWIs");
+                    yacyCore.log.logFine("transferRWI: blocked blacklisted URLHash '" + urlHash + "' from peer " + otherPeerName);
                     blocked++;
                     continue;
                 }

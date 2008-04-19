@@ -425,35 +425,6 @@ public final class indexContainerHeap {
         }
         return false;
     }
-
-    public synchronized int removeReference(String urlHash) {
-        // this tries to delete an index from the cache that has this
-        // urlHash assigned. This can only work if the entry is really fresh
-        // Such entries must be searched in the latest entries
-        assert this.cache != null;
-        assert !this.readOnlyMode;
-        int delCount = 0;
-        Iterator<Map.Entry<String, indexContainer>> i = cache.entrySet().iterator();
-        Map.Entry<String, indexContainer> entry;
-        String wordhash;
-        indexContainer c;
-        while (i.hasNext()) {
-            entry = i.next();
-            wordhash = entry.getKey();
-        
-            // get container
-            c = entry.getValue();
-            if (c.remove(urlHash) != null) {
-                if (c.size() == 0) {
-                    i.remove();
-                } else {
-                    cache.put(wordhash, c); // superfluous?
-                }
-                delCount++;
-            }
-        }
-        return delCount;
-    }
     
     public synchronized int removeReferences(String wordHash, Set<String> urlHashes) {
         assert this.cache != null;

@@ -135,8 +135,8 @@ public class CrawlStartSimple_p {
                 if (peer == null) peername = record.originator(); else peername = peer.getName();
                 prop.put("otherCrawlStartFinished_" + showedCrawl + "_dark", dark ? "1" : "0");
                 prop.put("otherCrawlStartFinished_" + showedCrawl + "_cre", record.created().toString());
-                prop.put("otherCrawlStartFinished_" + showedCrawl + "_peername", peername);
-                prop.put("otherCrawlStartFinished_" + showedCrawl + "_startURL", record.attributes().get("startURL").toString());
+                prop.putHTML("otherCrawlStartFinished_" + showedCrawl + "_peername", peername);
+                prop.putHTML("otherCrawlStartFinished_" + showedCrawl + "_startURL", record.attributes().get("startURL").toString());
                 prop.put("otherCrawlStartFinished_" + showedCrawl + "_intention", record.attributes().get("intention").toString());
                 prop.put("otherCrawlStartFinished_" + showedCrawl + "_generalDepth", record.attributes().get("generalDepth"));
                 prop.put("otherCrawlStartFinished_" + showedCrawl + "_crawlingQ", (record.attributes().get("crawlingQ").equals("true")) ? "1" : "0");
@@ -162,7 +162,7 @@ public class CrawlStartSimple_p {
                 yacySeed seed;
                 while ((availcount < maxcount) && (crawlavail.hasNext())) {
                     seed = crawlavail.next();
-                    prop.put("remoteCrawlPeers_available_" + availcount + "_name", seed.getName());
+                    prop.putHTML("remoteCrawlPeers_available_" + availcount + "_name", seed.getName());
                     prop.put("remoteCrawlPeers_available_" + availcount + "_due", (yacyCore.yacyTime() - seed.available));
                     availcount++;
                 }
@@ -170,7 +170,7 @@ public class CrawlStartSimple_p {
                 int pendicount = 0;
                 while ((pendicount < maxcount) && (crawlpendi.hasNext())) {
                     seed = crawlpendi.next();
-                    prop.put("remoteCrawlPeers_busy_" + pendicount + "_name", seed.getName());
+                    prop.putHTML("remoteCrawlPeers_busy_" + pendicount + "_name", seed.getName());
                     prop.put("remoteCrawlPeers_busy_" + pendicount + "_due", (yacyCore.yacyTime() - seed.available));
                     pendicount++;
                 }

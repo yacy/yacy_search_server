@@ -575,16 +575,6 @@ public final class plasmaWordIndex implements indexRI {
         return count;
     }
     
-    public int tryRemoveURLs(String urlHash) {
-        // this tries to delete an index from the cache that has this
-        // urlHash assigned. This can only work if the entry is really fresh
-        // and can be found in the RAM cache
-        // this returns the number of deletion that had been possible
-    	int d = 0;
-    	d = dhtInCache.tryRemoveURLs(urlHash);
-    	if (d > 0) return d; else return dhtOutCache.tryRemoveURLs(urlHash);
-    }
-    
     public synchronized TreeSet<indexContainer> indexContainerSet(String startHash, boolean ram, boolean rot, int count) {
         // creates a set of indexContainers
         // this does not use the dhtInCache
