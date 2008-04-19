@@ -1,13 +1,83 @@
-<div class="title">Sidebar:</div>
-<div class="content">
-<ul id="test">
-	<li>Sidebar Example</li>
-	<li>Sidebar Example</li>
-	<li>Sidebar Example</li>
-	<li>Sidebar Example</li>
-	<li>Sidebar Example</li>
-</ul>
+<script type="text/javascript"> 
+   //<![CDATA[
+	$(document).ready(function() { 
+  		$("#side3").accordion({
+			autoheight: false,
+			header: "h3"
+		});	
+	});
+  //]]>
+</script>
+
+<h3>Search Options</h3> <!-- 0 -->
+<div>	
+		<form id="yoptions" class="small" method="get" action="" accept-charset="UTF-8">			
+			<p>
+			<label for="itemsPerPage">Items per page: </label>			
+			<br />
+			<select class="selector" name="itemsPerPage">
+				<option selected="selected" value="5">5</option>
+				<option value="10">10</option>
+				<option value="25">25</option>
+				<option value="50">50</option>
+			</select>
+			<br />
+			<label for="constraint">Constraint:</label>
+			<br />
+			<select class="selector" id="constraint" name="constraint">
+				<option value="&nbsp;" selected="selected">all pages</option>
+				<option value="AQAAAA" >index pages</option>														
+			</select>			
+			<br />
+			<label for="urlmaskfilter">URL mask:</label>
+			<br />
+			<input class="filter" name="urlmaskfilter" value=".*" type="text" size="12" maxlength="80" />
+			<img src="img-2/question_blue.png" alt="help" title="help" />
+			<br />
+			<label for="prefermaskfilter">Prefer mask:</label>
+			<br />
+			<input class="filter" name="prefermaskfilter" value="&nbsp;" type="text" size="12" maxlength="80" />
+			<img src="img-2/question_blue.png" alt="help" title="help" />
+			<br />								
+			<label for="resource">Language:</label>
+			<br />
+			<select class="filter" id="language" name="language">
+				<option value="any" selected="selected">any language</option>
+				<option value="ger" >German</option>
+				<option value="eng" >English</option>										
+			</select>			
+			</p>
+		</form>			
 </div>
+
+<h3>Ranking</h3> <!-- 1 -->
+<div>
+		Some easy to use ranking controlls....
+</div>
+
+<h3>Bookmark Navigation</h3> <!-- 2 -->
+<div id="pager" class="tablesorterPager">	
+	<form action="">
+		 <p>
+			<img src="img/first.png" class="first" alt="first" />
+			<img src="img/prev.png" class="prev" alt="prev" />
+			<input type="text" class="pagedisplay" alt="pagedisplay" name="pagedisplay" />
+			<img src="img/next.png" class="next" alt="next" />
+			<img src="img/last.png" class="last" alt="last" />
+			<select class="pagesize" name="pagesize">
+				<option selected="selected" value="5">5</option>
+				<option value="10">10</option>
+				<option value="25">25</option>
+				<option value="50">50</option>
+			</select>
+		 </p>
+	</form>	
+</div>	
+
+
+
+
+	
 
 
 

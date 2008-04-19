@@ -1,0 +1,73 @@
+<script type="application/javascript">
+  //<![CDATA[
+	$(function() {				
+		$("#side3").accordion("activate", 0);
+		$.ajax({
+			type: "GET",
+			url: query,
+			dataType: "xml",
+			success: function(xml) {
+				var totalResults = parseInt($(xml).find('totalResults').text().replace(".",""));
+				var startIndex = parseInt($(xml).find('startIndex').text());
+				var itemsPerPage = parseInt($(xml).find('itemsPerPage').text());
+				var query = $(xml).find('Query').attr('searchTerms');
+				var endIndex = startIndex+itemsPerPage;				
+				if (endIndex > totalResults) {
+					endIndex = totalResults;
+				}
+				
+				var totalPages = (totalResults/itemsPerPage)|0;
+				if (startIndex != 0) {
+    				var currentPage = ((startIndex-1)/itemsPerPage);
+  				} else {
+    				var currentPage = 0;
+  				}
+				$("#pagination").pagination(totalResults, {
+					current_page:currentPage,
+					items_per_page:itemsPerPage,
+					num_edge_entries:1,
+					num_display_entries:10,
+					callback: loadContents
+				});	
+												
+				$(xml).find('item').each(function(){					
+					var title = $(this).find('title').text();
+					var link = $(this).find('link').text();
+					var desc = $(this).find('description').text();
+					var guid = $(this).find('guid').text();
+					$('<div class="searchresults"></div>')
+						.html('<h3 class="linktitle"><a href="' +link+ '">' +title+ '</a></h3><p class="snippet">' +desc+ '</p><p class="url"><a href="' +link+ '" id="' +guid+ '" >' +link+ '</a></p>')						
+						.prependTo(tabid);
+					$(".linktitle a").faviconize({
+						position: "before",
+						defaultImage: "img-2/article.png",
+						className: "favicon"				
+					});					
+				}); //close each(
+			}
+		}); //close $.ajax(
+		function loadContents(page_id, jq) {        	
+			var $tabs = $('#container ul');
+			var count = $(tabid).attr('count');		
+			var offset = ((page_id*count)+1);
+			$(tabid).attr('offset', offset);
+		
+			query = $(tabid).attr('resource')
+				+"&search="+$(tabid).attr('search')
+				+"&contentdom="+$(tabid).attr('contentdom')
+				+"&count="+$(tabid).attr('count')
+				+"&offset="+$(tabid).attr('offset')
+				+"&constraint="+$(tabid).attr('constraint')
+				+"&prefermaskfilter="+$(tabid).attr('prefermaskfilter')
+				+"&urlmaskfilter="+$(tabid).attr('urlmaskfilter');
+			
+			var selected = $('#container ul').data('selected.ui-tabs');		
+			$tabs.tabs("load", selected);			
+			$('#pagination').trigger("update");
+			return false;
+		}		
+	 }); //close $(
+  //]]>
+</script>
+<div id="pagination" class="pagination">[loading...]</div>
+

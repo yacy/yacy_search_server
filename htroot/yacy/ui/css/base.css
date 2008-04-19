@@ -1,5 +1,34 @@
-/* Search */
+/* Main */
 
+div.main { 
+  float:left;
+  width:100%; 
+}
+div.top { 
+  float:left;
+  width:75%;
+  margin-top: -1.0em;  
+}
+
+/* Searchbox */
+.searchbox {
+  float:left; 
+  width:800px;
+}
+.searchbox .boxed h3 {
+  font-family: Helvetica,Arial,sans-serif;
+  display:block;
+  padding:5px 15px;
+  margin-top: 0;
+  margin-bottom: 0px;
+  text-decoration: none;
+  font-weight: bold;
+  font-size: 14px;
+  color: black;  
+  border-top: 1px solid #FFFFFF;
+  border-bottom: 1px solid #999;
+  background: url(../img/box800.png) no-repeat;  
+}
 #searchtext {
   width: 280px;
   margin-top: 1em;
@@ -9,8 +38,7 @@
   font: normal small Arial, Helvetica, sans-serif;
   color: #999999;
 }
-
-#searchbutton {
+#searchbutton, .selectbox {
   width: 100px;
   margin-top: 1em;
   margin-bottom: .5em;
@@ -19,60 +47,69 @@
   font: normal small Arial, Helvetica, sans-serif;
   color: #999999;
 }
-
-/* Main */
-
-div.main { 
-  float:left;
-  width:70%;  
+.filter {
+  width: 180px;  
+  margin-bottom: .5em;
+  padding: 2px 5px;
+  border: 1px solid #CCCCCC;
+  font: normal small Arial, Helvetica, sans-serif;
+  color: #999999;
+}
+.selector {
+  width: 100px;  
+  margin-bottom: .5em;
+  padding: 2px 5px;
+  border: 1px solid #CCCCCC;
+  font: normal small Arial, Helvetica, sans-serif;
+  color: #999999;
+}
+.small {
+  font: normal Arial, Helvetica, sans-serif;
+  font-size: 9px;
+}
+.normal {
+  font: normal small Arial, Helvetica, sans-serif;  
 }
 
 /* Sidebar */
 
-div.sidebar {
-  margin-top: 1.5em;    
-  margin-left: 2em;
-  float:left;
+div.sidebar {   
+  margin-left: 1em;
+  margin-right: 1em;
+  float:right;
   width:250px;
+}
+.menu img {
+  width: 32px; 
+  height: 32px;
+  padding: 2px 16px 2px 8px;
+  vertical-align: middle;
+}
+img {
+  vertical-align: top;
+}
+
+.sidebar .boxed h3 {
+  font-family: Helvetica,Arial,sans-serif;
+  display:block;
+  padding:5px 15px;
+  margin-top: 0;
+  margin-bottom: 0px;
+  text-decoration: none;
+  font-weight: bold;
+  font-size: 14px;
+  color: black;
+  background: url(../img/box250.png) no-repeat;
+  border-top: 1px solid #FFFFFF;
+  border-bottom: 1px solid #999;    
 }
 
 /* Boxed Style */
 
-.searchbox {
-  float:left; 
-  width:600px;
-}
-
 .boxed{  
+  margin-top: 1em;
   margin-bottom: 1em;
 }
-
-.boxed .title {
-  display: block;
-  height: 25px;
-  padding: 5px 0 0 10px;  
-  font-weight: bold;
-  font-family: Helvetica,Arial,sans-serif;
-  background: url(../img/tab.png) no-repeat;  
-}
-.sidebar .boxed .title {
-  display: block;
-  height: 25px;
-  padding: 5px 0 0 10px;  
-  font-weight: bold;
-  font-family: Helvetica,Arial,sans-serif;
-  background: url(../img/box250.png) no-repeat;  
-}
-
-.searchbox .boxed .title {
-  display: block;
-  height: 25px;
-  padding: 5px 0 0 10px;  
-  font-weight: bold;
-  font-family: Helvetica,Arial,sans-serif;
-  background: url(../img/box600.png) no-repeat;  
-}
-
 .boxed .content {
   font-family: Helvetica,Arial,sans-serif;
   border: 1px solid #000000;
@@ -122,6 +159,24 @@ table.ytable thead tr .headerSortDown {
 table.ytable thead tr .headerSortDown, table.ytable thead tr .headerSortUp {
 	background-color: #8dbdd8;
 }
+table.ytable img {
+	border:0;
+	padding-top:6px;
+}
+
+table.ystat {
+	text-align: left; 
+	height: 75px; 
+	margin-left: 10px; 
+	width: 200px;
+	padding-bottom: 5px;	
+}
+table.ystat td {
+	vertical-align: middle; 
+	width: 100px; 
+	font-family: Courier New,Courier,monospace;
+	font-size: 10px;
+}
 
 /* YaCy Bookmarks ---------------------------*/
 .url {
@@ -153,14 +208,21 @@ h3.linktitle {
 
 div.searchresults {
   	width:100%;
-	margin-top: 1.5em;
-	margin-left: 5px;	
+	margin-top: 1.0em;
+	margin-left: 5px;		
 }
+div.searchselect {
+	width:100%;
+	margin-top: 1.0em;
+	margin-left: 5px;
+	background-color:#F0F0F6;	
+}
+
 div.searchresults.hidden {
   display:none;
 }
 
-.searchresults h3.linktitle {	
+.searchresults h3.linktitle, .searchselect h3.linktitle {	
 	margin:2px;
 	padding-left: 20px;
 	margin-bottom: -0.5em;
@@ -178,24 +240,77 @@ div.searchresults.hidden {
 .snippet b {
   	color: black;
 }
-.searchresults .linktitle a {
+.searchresults .linktitle a, .searchselect .linktitle a {
 	color:#239AFF;  	
   	text-decoration:none;
 }
-.searchresults .url {
+.searchresults .url, .searchselect .url {
 	font-size: 0.9em;
   	line-height: 1.2em;
   	margin-bottom:0.6em;
   	margin-left:22px;
 }
-.searchresults .url a {
+.searchresults .url a,. searchselect .url a {
   	color:#20A020;
   	text-decoration:none;
 }
-img.favicon{
-  margin: 0px 4px 0px -20px;
-  width: 16px;
+img.favicon{  
+  width: 16px;pagesize
   height: 16px;
-  float: left;
+  vertical-align: middle;  
+  margin-left: -20px;
 }
+/* <dl>, <dd>, <dt> */
+
+dl.pairs dd { 
+  float:right;
+  padding: 2px;
+  margin-right:15px; 
+}
+
+dl.pairs dt {
+  float:left;  
+  text-align:left;
+  padding: 5px; 
+}
+/* jQuery Accordion */
+.basic  {
+	font-family: Helvetica,Arial,sans-serif;
+	width: 250px;	
+}
+.basic div {
+	background-color: white;
+	margin-bottom : 10px;
+	border: none;	
+	margin: 0px;
+	padding: 10px;
+	border: 1px solid black;
+	text-decoration: none;	
+	font-size: 12px;
+}
+
+.basic p {
+	
+}
+.basic h3 {
+	cursor:pointer;
+	display:block;
+	padding:5px 15px;
+	margin-top: 0;
+	margin-bottom: 0px;
+	text-decoration: none;
+	font-weight: bold;
+	font-size: 14px;
+	color: black;
+	background: url(../img/box250.png) no-repeat;
+	border-top: 1px solid #FFFFFF;
+	border-bottom: 1px solid #999;	
+}
+.basic h3:hover {
+	
+}
+.basic h3.selected {
+	
+}
+
 

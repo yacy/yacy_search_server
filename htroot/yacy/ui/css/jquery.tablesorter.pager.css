@@ -30,7 +30,9 @@ div.tablesorterPager select {
   	font: normal small Arial, Helvetica, sans-serif;
   	color: #999999;
 }
-
+div.tablesorterPager img{
+	vertical-align: middle;
+}
  
 
 

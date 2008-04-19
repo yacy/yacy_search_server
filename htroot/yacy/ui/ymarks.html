@@ -1,14 +1,19 @@
 
-<script type="text/javascript">  
+<script type="text/javascript">
+   //<![CDATA[
 	$(document).ready(function() { 
     	$('#ymarks') 
     	.tablesorter({widgets: ['zebra']}) 
     	.tablesorterPager({container: $('#pager'), size: 5, positionFixed: false});
-	}); 
+		$("#side1").accordion("activate", 1);
+		$("#side3").accordion("activate", 2);
+		$('#yoptions').resetForm();
+	});
+  //]]>
 </script>
 
 <!-- Table -->		
-		<table class="ytable" id="ymarks">
+		<table class="ytable" id="ymarks" summary="YaCy Bookmarks">
 			<colgroup>
 				<col width="25"/>
 				<col width="25"/>
@@ -51,7 +56,7 @@
 				</td>
 				<td>
 					<a href="Bookmarks.html?edit=#[hash]#">
-						<img src="img-2/pencil.png" alt="edit bookmark" title="edit bookmark" border="0" />
+						<img src="img-2/pencil.png" alt="edit bookmark" title="edit bookmark" />
 					</a>
 					<img src="img-2/cancel.png" alt="delete bookmark" title="delete bookmark"/>					
 				</td>

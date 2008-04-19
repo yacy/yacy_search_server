@@ -1,20 +1,25 @@
-<div class="sidebar">
-<div id="menu" class="boxed">
-	<div class="title">Peer-Menu</div>
-	<div class="content">
-		<img style="width: 32px; height: 32px;" alt="login" title="Login" src="img-1/User.png" align="absmiddle" hspace="3" vspace="3"/>Login<br>
-		<img style="width: 32px; height: 32px;" alt="contact" title="Contact" src="img-1/New%20Mail.png" align="absmiddle" hspace="3" vspace="3"/>Contact<br>
-		<img style="width: 32px; height: 32px;" alt="peer-admin" title="Peer administration" src="img-1/Run.png" align="absmiddle" hspace="3" vspace="3"/>Administration
-	</div>
-</div>
-</div>
-<div class="sidebar">
-<div id="menu" class="boxed">
-	<div class="title">YaCy Project</div>
-	<div class="content"><img style="width: 32px; height: 32px;" alt="YaCy Project Home" title="YaCy Project Home" src="img-1/home.png" align="absmiddle" hspace="3" vspace="3"/>Home<br>
-		<img style="width: 32px; height: 32px;" alt="YaCy Statistics" title="YaCy Statistics" src="img-2/bar_graph.png" align="absmiddle" hspace="3" vspace="3"/>Statistics<br>
-		<img style="width: 32px; height: 32px;" alt="YaCy Forum" title="YaCy Forum" src="img-1/Discussion.png" align="absmiddle" hspace="3" vspace="3"/>Forum<br>
-		<img style="width: 32px; height: 32px;" alt="Help" title="YaCy Wiki" src="img-1/Help%20Blue%20Button.png" align="absmiddle" hspace="3" vspace="3"/>Wiki<br>
-	</div>
-</div>
-</div>
+<h3>Overview</h3>
+<p>
+	YaCy-UI is going to be a rich client for YaCy attempting to provide a new, more functional and easier search interface.
+	Unlike the current server based interface YaCy-UI makes heavy use of jQuery, JavaScript, Ajax, XML and XSLT. This
+	approach offers some neat advantages, one example could be the integration of sciencenet via opensearch. The overall
+	idea is to integrate functionallity on a modular basis (e.g. a webshot function could be integrated by linking to
+	another, even local web service without the need to further extend YaCy's functionallity). Currently YaCy-UI is at most
+	alpha status, so I would be very greatful for feedback and bug reports!
+</p>
+apfelmaennchen
+<h3>Change Log</h3>
+	<ul>
+		<li>19-04-2007: new double-accordion sidebar menu is up and running (I am open for suggestions on how to populate the menus).</li>
+		<li>19-04-2007: search results are now retrieved from yacysearch.rss (XML) and does no longer need a seperate servlet</li>
+	</ul>
+<h3>Bug Tracker</h3>
+	<ul>
+		<li>Please report bugs in the official <a href="http://forum.yacy-websuche.de/">YaCy-Forum</a> - thanks!</li> 
+		<li>19-04-2007: if you open more than one search tab, only the first result item is shown. I would be greatful for any hint...</li>
+		<li>19-04-2007: resource types 'sciencenet' and 'bookmarks' doen't work yet. For 'sciencenet' we have to solve the Ajax cross domain restriction.</li>		
+		<li>19-04-2007: currently only contentdom="text" is working, all others will fail...</li>
+		<li>19-04-2007: language selection is not yet supported</li>
+	</ul>
+
+		

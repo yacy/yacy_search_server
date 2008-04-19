@@ -1,7 +1,8 @@
 .pagination {
    font-size: 1em;
-   margin-left: 26px;
-   margin-top: 25px;
+   margin-top: 20px;
+   margin-left: 10px;
+   float:left;
 }
        
 .pagination a {
@@ -29,3 +30,5 @@
 	border-color:#999;
 	background:#fff;
 }
+
+
