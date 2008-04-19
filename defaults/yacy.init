@@ -70,8 +70,8 @@ server.maxTrackingTime = 3600000
 # The property here can also be a url where the definition can be loaded.
 # In case of privately managed networks, this configuration must be changed BEFORE it is released
 # to the members of the separated network peers.
-#network.unit.definition = defaults/yacy.network.freeworld.unit
-network.unit.definition = defaults/yacy.network.intranet.unit
+network.unit.definition = defaults/yacy.network.freeworld.unit
+#network.unit.definition = defaults/yacy.network.intranet.unit
 network.group.definition = defaults/yacy.network.group
 
 # Update process properties
