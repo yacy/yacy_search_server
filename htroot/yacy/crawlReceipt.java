@@ -147,8 +147,9 @@ public final class crawlReceipt {
         }
         
         // check if the entry is in our network domain
-        if (!switchboard.acceptURL(comp.url())) {
-            log.logWarning("crawlReceipt: RECEIVED wrong RECEIPT (url outside of our domain) for hash " + entry.hash() + " from peer " + iam + "\n\tURL properties: "+ propStr);
+        String urlRejectReason = switchboard.acceptURL(comp.url());
+        if (urlRejectReason != null) {
+            log.logWarning("crawlReceipt: RECEIVED wrong RECEIPT (" + urlRejectReason + ") for hash " + entry.hash() + " from peer " + iam + "\n\tURL properties: "+ propStr);
             prop.put("delay", "9999");
             return prop;
         }

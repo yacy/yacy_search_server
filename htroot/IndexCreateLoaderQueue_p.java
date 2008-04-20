@@ -72,10 +72,10 @@ public class IndexCreateLoaderQueue_p {
                 
                 initiator = yacyCore.seedDB.getConnected(w[i].initiator());
                 prop.put("loader-set_list_"+count+"_dark", dark ? "1" : "0");
-                prop.put("loader-set_list_"+count+"_initiator", ((initiator == null) ? "proxy" : initiator.getName()));
+                prop.putHTML("loader-set_list_"+count+"_initiator", ((initiator == null) ? "proxy" : initiator.getName()));
                 prop.put("loader-set_list_"+count+"_depth", w[i].depth());
                 prop.put("loader-set_list_"+count+"_status", w[i].getStatus());
-                prop.put("loader-set_list_"+count+"_url", w[i].url().toNormalform(true, false));
+                prop.putHTML("loader-set_list_"+count+"_url", w[i].url().toNormalform(true, false));
                 dark = !dark;
                 count++;
             }

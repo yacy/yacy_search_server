@@ -73,7 +73,8 @@ public class rct_p {
                             loaddate = new Date();
                         }
                         yacyURL referrer = null; // referrer needed!
-                        if (sb.acceptURL(url)) {
+                        String urlRejectReason = sb.acceptURL(url);
+                        if (urlRejectReason == null) {
                             // stack url
                             sb.getLog().logFinest("crawlOrder: stack: url='" + url + "'");
                             String reasonString = sb.crawlStacker.stackCrawl(url, referrer, peerhash, "REMOTE-CRAWLING", loaddate, 0, sb.defaultRemoteProfile);
@@ -88,7 +89,7 @@ public class rct_p {
                                 env.getLog().logInfo("crawlOrder: ignored [" + reasonString + "] remote crawl url: " + url.toNormalform(true, false));
                             }
                         } else {
-                            env.getLog().logWarning("crawlOrder: Received URL outside of our domain: " + url.toNormalform(true, false));
+                            env.getLog().logWarning("crawlOrder: Rejected URL '" + url.toNormalform(true, false) + "': " + urlRejectReason);
                         }
                     }
                 }

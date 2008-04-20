@@ -138,11 +138,11 @@ public class IndexCreateIndexingQueue_p {
                     totalSize += entrySize;
                     initiator = yacyCore.seedDB.getConnected(pcentry.initiator());
                     prop.put("indexing-queue_list_"+entryCount+"_dark", inProcess ? "2" : (dark ? "1" : "0"));
-                    prop.put("indexing-queue_list_"+entryCount+"_initiator", ((initiator == null) ? "proxy" : initiator.getName()));
+                    prop.putHTML("indexing-queue_list_"+entryCount+"_initiator", ((initiator == null) ? "proxy" : initiator.getName()));
                     prop.put("indexing-queue_list_"+entryCount+"_depth", pcentry.depth());
                     prop.put("indexing-queue_list_"+entryCount+"_modified", pcentry.getModificationDate().toString());
                     prop.putHTML("indexing-queue_list_"+entryCount+"_anchor", (pcentry.anchorName()==null)?"":pcentry.anchorName());
-                    prop.put("indexing-queue_list_"+entryCount+"_url", pcentry.url().toNormalform(false, true));
+                    prop.putHTML("indexing-queue_list_"+entryCount+"_url", pcentry.url().toNormalform(false, true));
                     prop.put("indexing-queue_list_"+entryCount+"_size", serverMemory.bytesToString(entrySize));
                     prop.put("indexing-queue_list_"+entryCount+"_inProcess", inProcess ? "1" :"0");
                     prop.put("indexing-queue_list_"+entryCount+"_inProcess_hash", pcentry.urlHash());
@@ -185,9 +185,9 @@ public class IndexCreateIndexingQueue_p {
                     executorHash = entry.executor();
                     initiatorSeed = yacyCore.seedDB.getConnected(initiatorHash);
                     executorSeed = yacyCore.seedDB.getConnected(executorHash);
-                    prop.put("rejected_list_"+j+"_initiator", ((initiatorSeed == null) ? "proxy" : initiatorSeed.getName()));
-                    prop.put("rejected_list_"+j+"_executor", ((executorSeed == null) ? "proxy" : executorSeed.getName()));
-                    prop.put("rejected_list_"+j+"_url", url.toNormalform(false, true));
+                    prop.putHTML("rejected_list_"+j+"_initiator", ((initiatorSeed == null) ? "proxy" : initiatorSeed.getName()));
+                    prop.putHTML("rejected_list_"+j+"_executor", ((executorSeed == null) ? "proxy" : executorSeed.getName()));
+                    prop.putHTML("rejected_list_"+j+"_url", url.toNormalform(false, true));
                     prop.putHTML("rejected_list_"+j+"_failreason", entry.anycause());
                     prop.put("rejected_list_"+j+"_dark", dark ? "1" : "0");
                     dark = !dark;

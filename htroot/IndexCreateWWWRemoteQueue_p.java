@@ -119,12 +119,12 @@ public class IndexCreateWWWRemoteQueue_p {
                     profileHandle = urle.profileHandle();
                     profileEntry = (profileHandle == null) ? null : sb.profilesActiveCrawls.getEntry(profileHandle);
                     prop.put("crawler-queue_list_" + showNum + "_dark", dark ? "1" : "0");
-                    prop.put("crawler-queue_list_" + showNum + "_initiator", ((initiator == null) ? "proxy" : initiator.getName()));
+                    prop.putHTML("crawler-queue_list_" + showNum + "_initiator", ((initiator == null) ? "proxy" : initiator.getName()));
                     prop.put("crawler-queue_list_" + showNum + "_profile", ((profileEntry == null) ? "unknown" : profileEntry.name()));
                     prop.put("crawler-queue_list_" + showNum + "_depth", urle.depth());
                     prop.put("crawler-queue_list_" + showNum + "_modified", daydate(urle.loaddate()) );
                     prop.putHTML("crawler-queue_list_" + showNum + "_anchor", urle.name());
-                    prop.put("crawler-queue_list_" + showNum + "_url", urle.url().toString());
+                    prop.putHTML("crawler-queue_list_" + showNum + "_url", urle.url().toString());
                     prop.put("crawler-queue_list_" + showNum + "_hash", urle.url().hash());
                     dark = !dark;
                     showNum++;

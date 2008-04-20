@@ -145,8 +145,9 @@ public final class transferURL {
                 }
                 
                 // check if the entry is in our network domain
-                if (!sb.acceptURL(comp.url())) {
-                    yacyCore.log.logFine("transferURL: blocked URL outside of our domain '" + comp.url().toNormalform(false, true) + "' from peer " + otherPeerName);
+                String urlRejectReason = sb.acceptURL(comp.url());
+                if (urlRejectReason != null) {
+                    yacyCore.log.logFine("transferURL: blocked URL '" + comp.url() + "' (" + urlRejectReason + ") from peer " + otherPeerName);
                     lEntry = null;
                     blocked++;
                     continue;

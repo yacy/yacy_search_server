@@ -146,7 +146,7 @@ public class AccessTracker_p {
                 if (page == 2) {
                     // local search
                     prop.putNum("page_list_" + entCount + "_offset", searchProfile.offset);
-                    prop.put("page_list_" + entCount + "_querystring", searchProfile.queryString);
+                    prop.putHTML("page_list_" + entCount + "_querystring", searchProfile.queryString);
                 } else {
                     // remote search
                     prop.putHTML("page_list_" + entCount + "_peername", (searchProfile.remotepeer == null) ? "<unknown>" : searchProfile.remotepeer.getName());

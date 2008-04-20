@@ -321,7 +321,8 @@ public class plasmaCrawlQueues {
             } catch (ParseException e) {
                 loaddate = new Date();
             }
-            if (sb.acceptURL(url)) {
+            String urlRejectReason = sb.acceptURL(url);
+            if (urlRejectReason == null) {
                 // stack url
                 sb.getLog().logFinest("crawlOrder: stack: url='" + url + "'");
                 String reasonString = sb.crawlStacker.stackCrawl(url, referrer, hash, item.getDescription(), loaddate, 0, sb.defaultRemoteProfile);
@@ -336,7 +337,7 @@ public class plasmaCrawlQueues {
                     log.logInfo("crawlOrder: ignored [" + reasonString + "] remote crawl url: " + url.toNormalform(true, false));
                 }
             } else {
-                log.logWarning("crawlOrder: Received URL outside of our domain: " + url.toNormalform(true, false));
+                log.logWarning("crawlOrder: Rejected URL '" + url.toNormalform(true, false) + "': " + urlRejectReason);
             }
         }
         return true;

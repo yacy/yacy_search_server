@@ -385,10 +385,10 @@ public final class plasmaCrawlStacker extends Thread {
         }
 
         // check if ip is local ip address
-        if (!sb.acceptURL(entry.url())) {
-            reason = plasmaCrawlEURL.DENIED_IP_ADDRESS_NOT_IN_DECLARED_DOMAIN + "[" + sb.getConfig("network.unit.domain", "unknown") + "]";
-            if (this.log.isFine()) this.log.logFine("Host in URL '" + entry.url().toString() + "' has IP address outside of declared range (" + sb.getConfig("network.unit.domain", "unknown") + "). " +
-                    "Stack processing time: " + (System.currentTimeMillis()-startTime) + "ms");
+        String urlRejectReason = sb.acceptURL(entry.url());
+        if (urlRejectReason != null) {
+            reason = "denied_(" + urlRejectReason + ")_domain=" + sb.getConfig("network.unit.domain", "unknown");
+            if (this.log.isFine()) this.log.logFine(reason + "Stack processing time: " + (System.currentTimeMillis()-startTime) + "ms");
             return reason;                
         }
         

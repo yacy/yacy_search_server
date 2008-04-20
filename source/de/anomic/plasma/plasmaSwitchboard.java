@@ -1427,21 +1427,32 @@ public final class plasmaSwitchboard extends serverAbstractSwitch<plasmaSwitchbo
     	}
     }
    
-    public boolean acceptURL(yacyURL url) {
+    /**
+     * Test a url if it can be used for crawling/indexing
+     * This mainly checks if the url is in the declared domain (local/global)
+     * @param url
+     * @return null if the url can be accepted, a string containing a rejection reason if the url cannot be accepted
+     */
+    public String acceptURL(yacyURL url) {
         // returns true if the url can be accepted accoring to network.unit.domain
-        if (url == null) return false;
+        if (url == null) return "url is null";
         String host = url.getHost();
-        if (host == null) return false;
-        if (this.acceptGlobalURLs && this.acceptLocalURLs) return true; // fast shortcut to avoid dnsResolve
+        if (host == null) return "url.host is null";
+        if (this.acceptGlobalURLs && this.acceptLocalURLs) return null; // fast shortcut to avoid dnsResolve
         InetAddress hostAddress = serverDomains.dnsResolve(host);
         // if we don't know the host, we cannot load that resource anyway.
         // But in case we use a proxy, it is possible that we dont have a DNS service.
         final httpRemoteProxyConfig remoteProxyConfig = httpdProxyHandler.getRemoteProxyConfig();
-        if (hostAddress == null) return ((remoteProxyConfig != null) && (remoteProxyConfig.useProxy()));
+        if (hostAddress == null) {
+            if ((remoteProxyConfig != null) && (remoteProxyConfig.useProxy())) return null; else return "the dns of the host '" + host + "' cannot be resolved";
+        }
         // check if this is a local address and we are allowed to index local pages:
         boolean local = hostAddress.isSiteLocalAddress() || hostAddress.isLoopbackAddress();
         //assert local == yacyURL.isLocalDomain(url.hash()); // TODO: remove the dnsResolve above!
-        return (this.acceptGlobalURLs && !local) || (this.acceptLocalURLs && local);
+        if ((this.acceptGlobalURLs && !local) || (this.acceptLocalURLs && local)) return null;
+        return (local) ?
+            ("the host '" + host + "' is local, but local addresses are not accepted") :
+            ("the host '" + host + "' is global, but global addresses are not accepted");
     }
     
     public String urlExists(String hash) {
@@ -1631,8 +1642,9 @@ public final class plasmaSwitchboard extends serverAbstractSwitch<plasmaSwitchbo
          * 
          * check if ip is local ip address // TODO: remove this procotol specific code here
          * ========================================================================= */
-        if (!acceptURL(entry.url())) {
-            if (this.log.isFine()) this.log.logFine("Host in URL '" + entry.url() + "' is not in defined indexing domain.");
+        String urlRejectReason = acceptURL(entry.url());
+        if (urlRejectReason != null) {
+            if (this.log.isFine()) this.log.logFine("Rejected URL '" + entry.url() + "': " + urlRejectReason);
             doIndexing = false;
         }
         

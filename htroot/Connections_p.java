@@ -208,7 +208,7 @@ public final class Connections_p {
                     prop.put("list_" + idx + "_ms", "1");
                     prop.putNum("list_" + idx + "_ms_duration", sessionTime);
                 }
-                prop.put("list_" + idx + "_source",(seed!=null)?seed.getName()+".yacy":userAddress.getHostAddress()+":"+userPort);
+                prop.putHTML("list_" + idx + "_source",(seed!=null)?seed.getName()+".yacy":userAddress.getHostAddress()+":"+userPort);
                 prop.put("list_" + idx + "_dest",(dest==null)?"-":dest);
                 if (blockingRequest) {
                     prop.put("list_" + idx + "_running", "0");
