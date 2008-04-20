@@ -157,12 +157,19 @@ public class plasmaCrawlNURL {
         return null;
     }
     
-    public plasmaCrawlEntry removeByURLHash(String urlhash) {
-        plasmaCrawlEntry entry = null;
-        try {if ((entry = coreStack.remove(urlhash)) != null) return entry;} catch (IOException e) {}
-        try {if ((entry = limitStack.remove(urlhash)) != null) return entry;} catch (IOException e) {}
-        try {if ((entry = remoteStack.remove(urlhash)) != null) return entry;} catch (IOException e) {}
-        return null;
+    /**
+     * remove a plasmaCrawlEntry by a given hash. Usage of this method is not encouraged,
+     * because the underlying data structure (crawl stacks) cannot handle removals very good.
+     * @param urlhash
+     * @return true, if the entry was removed; false if not
+     */
+    public boolean removeByURLHash(String urlhash) {
+        HashSet<String> urlHashes = new HashSet<String>();
+        urlHashes.add(urlhash);
+        try {return coreStack.remove(urlHashes) > 0;} catch (IOException e) {}
+        try {return limitStack.remove(urlHashes) > 0;} catch (IOException e) {}
+        try {return remoteStack.remove(urlHashes) > 0;} catch (IOException e) {}
+        return false;
     }
     
     public int removeByProfileHandle(String handle) {

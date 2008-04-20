@@ -46,6 +46,7 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.Map;
@@ -172,7 +173,7 @@ public class plasmaCrawlBalancer {
         
         // first find a list of url hashes that shall be deleted
         Iterator<kelondroRow.Entry> i = urlFileIndex.rows(true, null);
-        ArrayList<String> urlHashes = new ArrayList<String>();
+        HashSet<String> urlHashes = new HashSet<String>();
         kelondroRow.Entry rowEntry;
         plasmaCrawlEntry crawlEntry;
         while (i.hasNext()) {
@@ -184,31 +185,35 @@ public class plasmaCrawlBalancer {
         }
         
         // then delete all these urls from the queues and the file index
-        Iterator<String> j = urlHashes.iterator();
-        while (j.hasNext()) this.remove(j.next());
-        return urlHashes.size();
+        return this.remove(urlHashes);
     }
     
-    public synchronized plasmaCrawlEntry remove(String urlhash) throws IOException {
-        // this method is only here, because so many import/export methods need it
-        // and it was implemented in the previous architecture
-        // however, usage is not recommended
-    	int s = urlFileIndex.size();
-       kelondroRow.Entry entry = urlFileIndex.remove(urlhash.getBytes(), false);
-       if (entry == null) return null;
-       assert urlFileIndex.size() + 1 == s : "urlFileIndex.size() = " + urlFileIndex.size() + ", s = " + s;
+    /**
+     * this method is only here, because so many import/export methods need it
+       and it was implemented in the previous architecture
+       however, usage is not recommended
+     * @param urlHashes, a list of hashes that shall be removed
+     * @return number of entries that had been removed
+     * @throws IOException
+     */
+    public synchronized int remove(HashSet<String> urlHashes) throws IOException {
+        int s = urlFileIndex.size();
+        int removedCounter = 0;
+        for (String urlhash: urlHashes) {
+            kelondroRow.Entry entry = urlFileIndex.remove(urlhash.getBytes(), false);
+            if (entry != null) removedCounter++;
+        }
+        if (removedCounter == 0) return 0;
+        assert urlFileIndex.size() + removedCounter == s : "urlFileIndex.size() = " + urlFileIndex.size() + ", s = " + s;
        
-       // now delete that thing also from the queues
+        // now delete these hashes also from the queues
 
-       // iterate through the RAM stack
-       Iterator<String> i = urlRAMStack.iterator();
-       String h;
-       while (i.hasNext()) {
+        // iterate through the RAM stack
+        Iterator<String> i = urlRAMStack.iterator();
+        String h;
+        while (i.hasNext()) {
            h = (String) i.next();
-           if (h.equals(urlhash)) {
-               i.remove();
-               return new plasmaCrawlEntry(entry);
-           }
+           if (urlHashes.contains(h)) i.remove();
        }
        
        // iterate through the file stack
@@ -216,16 +221,10 @@ public class plasmaCrawlBalancer {
        Iterator<kelondroRow.Entry> j = urlFileStack.stackIterator(true);
        while (j.hasNext()) {
            h = new String(j.next().getColBytes(0));
-           if (h.equals(urlhash)) {
-               j.remove();
-               return new plasmaCrawlEntry(entry);
-           }
+           if (urlHashes.contains(h)) j.remove();
        }
        
-       if (kelondroAbstractRecords.debugmode) {
-           serverLog.logWarning("PLASMA BALANCER", "remove: not found urlhash " + urlhash + " in " + stackname);
-       }
-       return new plasmaCrawlEntry(entry);
+       return removedCounter;
     }
     
     public synchronized boolean has(String urlhash) {
