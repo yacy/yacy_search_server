@@ -72,7 +72,7 @@ import de.anomic.index.indexURLReference;
 import de.anomic.index.indexWord;
 import de.anomic.kelondro.kelondroBase64Order;
 import de.anomic.kelondro.kelondroBitfield;
-import de.anomic.plasma.plasmaCrawlResults;
+import de.anomic.plasma.plasmaCrawlResultURLs;
 import de.anomic.plasma.plasmaSearchRankingProcess;
 import de.anomic.plasma.plasmaSearchRankingProfile;
 import de.anomic.plasma.plasmaSnippetCache;
@@ -419,7 +419,7 @@ public final class yacyClient {
             int partitions,
             yacySeed target,
             plasmaWordIndex wordIndex,
-            plasmaCrawlResults crawlResults,
+            plasmaCrawlResultURLs crawlResults,
             plasmaSearchRankingProcess containerCache,
             Map<String, TreeMap<String, String>> abstractCache,
             indexReferenceBlacklist blacklist,

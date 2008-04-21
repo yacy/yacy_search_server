@@ -53,7 +53,7 @@ import java.util.TreeMap;
 import de.anomic.index.indexReferenceBlacklist;
 import de.anomic.kelondro.kelondroBitfield;
 import de.anomic.kelondro.kelondroMScoreCluster;
-import de.anomic.plasma.plasmaCrawlResults;
+import de.anomic.plasma.plasmaCrawlResultURLs;
 import de.anomic.plasma.plasmaSearchQuery;
 import de.anomic.plasma.plasmaSearchRankingProcess;
 import de.anomic.plasma.plasmaSearchRankingProfile;
@@ -75,11 +75,11 @@ public class yacySearch extends Thread {
     final private plasmaSearchRankingProfile rankingProfile;
     final private String prefer, filter;
     final private kelondroBitfield constraint;
-    plasmaCrawlResults crawlResults;
+    plasmaCrawlResultURLs crawlResults;
     
     public yacySearch(String wordhashes, String excludehashes, String urlhashes, String prefer, String filter, int count, int maxDistance, 
                       boolean global, int partitions, yacySeed targetPeer, plasmaWordIndex wordIndex,
-                      plasmaCrawlResults crawlResults,
+                      plasmaCrawlResultURLs crawlResults,
                       plasmaSearchRankingProcess containerCache,
                       Map<String, TreeMap<String, String>> abstractCache,
                       indexReferenceBlacklist blacklist,
@@ -252,7 +252,7 @@ public class yacySearch extends Thread {
             String wordhashes, String excludehashes, String urlhashes,
             String prefer, String filter, int count, int maxDist,
             plasmaWordIndex wordIndex,
-            plasmaCrawlResults crawlResults,
+            plasmaCrawlResultURLs crawlResults,
             plasmaSearchRankingProcess containerCache,
             Map<String, TreeMap<String, String>> abstractCache,
             int targets,
@@ -280,7 +280,7 @@ public class yacySearch extends Thread {
     
     public static yacySearch secondaryRemoteSearch(String wordhashes, String excludehashes, String urlhashes,
             plasmaWordIndex wordIndex,
-            plasmaCrawlResults crawlResults,
+            plasmaCrawlResultURLs crawlResults,
             plasmaSearchRankingProcess containerCache,
             String targethash, indexReferenceBlacklist blacklist,
             plasmaSearchRankingProfile rankingProfile,

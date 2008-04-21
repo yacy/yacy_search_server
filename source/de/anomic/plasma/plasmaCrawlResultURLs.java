@@ -58,7 +58,7 @@ import de.anomic.index.indexURLReference;
 import de.anomic.yacy.yacySeedDB;
 import de.anomic.yacy.yacyURL;
 
-public final class plasmaCrawlResults {
+public final class plasmaCrawlResultURLs {
 
     // result stacks;
     // these have all entries of form
@@ -70,7 +70,7 @@ public final class plasmaCrawlResults {
     private final LinkedList<String> lcrawlResultStack; // 5 - local index: result of local crawling
     private final LinkedList<String> gcrawlResultStack; // 6 - local index: triggered external
 
-    public plasmaCrawlResults() {
+    public plasmaCrawlResultURLs() {
         // init result stacks
         externResultStack = new LinkedList<String>();
         searchResultStack = new LinkedList<String>();

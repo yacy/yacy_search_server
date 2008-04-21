@@ -82,7 +82,9 @@ public class getpageinfo_p {
             if (actions.indexOf("title")>=0) {
                 try {
                     yacyURL u = new yacyURL(url, null);
-                    String contentString=new String(HttpClient.wget(u.toString()));
+                    byte[] r = HttpClient.wget(u.toString());
+                    if (r == null) return prop;
+                    String contentString=new String(r);
                     
                     htmlFilterContentScraper scraper = new htmlFilterContentScraper(u);
                     //OutputStream os = new htmlFilterOutputStream(null, scraper, null, false);

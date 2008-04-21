@@ -112,7 +112,6 @@ import de.anomic.data.URLLicense;
 import de.anomic.data.blogBoard;
 import de.anomic.data.blogBoardComments;
 import de.anomic.data.bookmarksDB;
-import de.anomic.data.collageQueue;
 import de.anomic.data.listManager;
 import de.anomic.data.messageBoard;
 import de.anomic.data.userDB;
@@ -202,7 +201,7 @@ public final class plasmaSwitchboard extends serverAbstractSwitch<plasmaSwitchbo
     public  HashMap<String, String>     rankingPermissions;
     public  plasmaWordIndex             wordIndex;
     public  plasmaCrawlQueues           crawlQueues;
-    public  plasmaCrawlResults          crawlResults;
+    public  plasmaCrawlResultURLs          crawlResults;
     public  plasmaSwitchboardQueue      sbQueue;
     public  plasmaCrawlStacker          crawlStacker;
     public  messageBoard                messageDB;
@@ -973,7 +972,7 @@ public final class plasmaSwitchboard extends serverAbstractSwitch<plasmaSwitchbo
         log.logConfig("Starting Indexing Management");
         String networkName = getConfig("network.unit.name", "");
         wordIndex = new plasmaWordIndex(indexPrimaryPath, indexSecondaryPath, networkName, log);
-        crawlResults = new plasmaCrawlResults();
+        crawlResults = new plasmaCrawlResultURLs();
         
         // start yacy core
         log.logConfig("Starting YaCy Protocol Core");
@@ -1970,6 +1969,8 @@ public final class plasmaSwitchboard extends serverAbstractSwitch<plasmaSwitchbo
                     hasDoneSomething = true;
                 }
             }
+            // clean up image stack
+            plasmaCrawlResultImages.clearQueues();
             
             // clean up profiles
             checkInterruption();
@@ -2139,9 +2140,6 @@ public final class plasmaSwitchboard extends serverAbstractSwitch<plasmaSwitchbo
             }
             in.queueEntry.close();
             return null;
-        } else {
-            plasmaCrawlProfile.entry profile = profilesActiveCrawls.getEntry(in.queueEntry.profileHandle);
-            collageQueue.registerImages(document, (profile == null) ? true : !profile.remoteIndexing());
         }
         return new indexingQueueEntry(in.queueEntry, document, null);
     }
@@ -2226,6 +2224,13 @@ public final class plasmaSwitchboard extends serverAbstractSwitch<plasmaSwitchbo
             in.queueEntry.close();
             return null;
         }
+
+        // update image result list statistics
+        // its good to do this concurrently here, because it needs a DNS lookup
+        // to compute a URL hash which is necessary for a double-check
+        plasmaCrawlProfile.entry profile = profilesActiveCrawls.getEntry(in.queueEntry.profileHandle);
+        plasmaCrawlResultImages.registerImages(in.document, (profile == null) ? true : !profile.remoteIndexing());
+        
         return new indexingQueueEntry(in.queueEntry, in.document, condenser);
     }
     
@@ -2290,38 +2295,38 @@ public final class plasmaSwitchboard extends serverAbstractSwitch<plasmaSwitchbo
         in.queueEntry.close();
     }
     
-    private void storeDocumentIndex(plasmaSwitchboardQueue.QueueEntry entry, plasmaParserDocument document, plasmaCondenser condenser) {
+    private void storeDocumentIndex(plasmaSwitchboardQueue.QueueEntry queueEntry, plasmaParserDocument document, plasmaCondenser condenser) {
         
         // CREATE INDEX
         String dc_title = document.dc_title();
-        yacyURL referrerURL = entry.referrerURL();
-        int processCase = entry.processCase();
+        yacyURL referrerURL = queueEntry.referrerURL();
+        int processCase = queueEntry.processCase();
 
         // remove stopwords                        
-        log.logInfo("Excluded " + condenser.excludeWords(stopwords) + " words in URL " + entry.url());
+        log.logInfo("Excluded " + condenser.excludeWords(stopwords) + " words in URL " + queueEntry.url());
 
         // STORE URL TO LOADED-URL-DB
         indexURLReference newEntry = null;
         try {
-            newEntry = wordIndex.storeDocument(entry, document, condenser);
+            newEntry = wordIndex.storeDocument(queueEntry, document, condenser);
         } catch (IOException e) {
-            if (this.log.isFine()) log.logFine("Not Indexed Resource '" + entry.url().toNormalform(false, true) + "': process case=" + processCase);
-            addURLtoErrorDB(entry.url(), referrerURL.hash(), entry.initiator(), dc_title, "error storing url: " + e.getMessage(), new kelondroBitfield());
+            if (this.log.isFine()) log.logFine("Not Indexed Resource '" + queueEntry.url().toNormalform(false, true) + "': process case=" + processCase);
+            addURLtoErrorDB(queueEntry.url(), referrerURL.hash(), queueEntry.initiator(), dc_title, "error storing url: " + e.getMessage(), new kelondroBitfield());
             return;
         }
         
-        // update statistics
+        // update url result list statistics
         crawlResults.stack(
                 newEntry,                      // loaded url db entry
-                entry.initiator(),             // initiator peer hash
+                queueEntry.initiator(),        // initiator peer hash
                 yacyCore.seedDB.mySeed().hash, // executor peer hash
                 processCase                    // process case
         );
         
         // STORE WORD INDEX
-        if ((!entry.profile().indexText()) && (!entry.profile().indexMedia())) {
-            if (this.log.isFine()) log.logFine("Not Indexed Resource '" + entry.url().toNormalform(false, true) + "': process case=" + processCase);
-            addURLtoErrorDB(entry.url(), referrerURL.hash(), entry.initiator(), dc_title, plasmaCrawlEURL.DENIED_UNKNOWN_INDEXING_PROCESS_CASE, new kelondroBitfield());
+        if ((!queueEntry.profile().indexText()) && (!queueEntry.profile().indexMedia())) {
+            if (this.log.isFine()) log.logFine("Not Indexed Resource '" + queueEntry.url().toNormalform(false, true) + "': process case=" + processCase);
+            addURLtoErrorDB(queueEntry.url(), referrerURL.hash(), queueEntry.initiator(), dc_title, plasmaCrawlEURL.DENIED_UNKNOWN_INDEXING_PROCESS_CASE, new kelondroBitfield());
             return;
         }
         
@@ -2329,12 +2334,12 @@ public final class plasmaSwitchboard extends serverAbstractSwitch<plasmaSwitchbo
         indexedPages++;
         
         // update profiling info
-        plasmaProfiling.updateIndexedPage(entry);
+        plasmaProfiling.updateIndexedPage(queueEntry);
         
         // if this was performed for a remote crawl request, notify requester
-        yacySeed initiatorPeer = entry.initiatorPeer();
+        yacySeed initiatorPeer = queueEntry.initiatorPeer();
         if ((processCase == PROCESSCASE_6_GLOBAL_CRAWLING) && (initiatorPeer != null)) {
-            log.logInfo("Sending crawl receipt for '" + entry.url().toNormalform(false, true) + "' to " + initiatorPeer.getName());
+            log.logInfo("Sending crawl receipt for '" + queueEntry.url().toNormalform(false, true) + "' to " + initiatorPeer.getName());
             if (clusterhashes != null) initiatorPeer.setAlternativeAddress((String) clusterhashes.get(initiatorPeer.hash));
             // start a thread for receipt sending to avoid a blocking here
             new Thread(new receiptSending(initiatorPeer, newEntry)).start();

@@ -89,12 +89,12 @@ public final class plasmaSearchEvent {
     TreeSet<String> snippetFetchWordHashes; // a set of word hashes that are used to match with the snippets
     long urlRetrievalAllTime;
     long snippetComputationAllTime;
-    plasmaCrawlResults crawlResults;
+    plasmaCrawlResultURLs crawlResults;
     
     @SuppressWarnings("unchecked")
     private plasmaSearchEvent(plasmaSearchQuery query,
                              plasmaWordIndex wordIndex,
-                             plasmaCrawlResults crawlResults,
+                             plasmaCrawlResultURLs crawlResults,
                              TreeMap<String, String> preselectedPeerHashes,
                              boolean generateAbstracts) {
         this.eventTime = System.currentTimeMillis(); // for lifetime check
@@ -457,7 +457,7 @@ public final class plasmaSearchEvent {
             plasmaSearchQuery query,
             plasmaSearchRankingProfile ranking,
             plasmaWordIndex wordIndex,
-            plasmaCrawlResults crawlResults,
+            plasmaCrawlResultURLs crawlResults,
             TreeMap<String, String> preselectedPeerHashes,
             boolean generateAbstracts) {
         plasmaSearchEvent event = lastEvents.get(query.id(false));
