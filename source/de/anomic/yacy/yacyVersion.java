@@ -506,9 +506,6 @@ public final class yacyVersion implements Comparator<yacyVersion>, Comparable<ya
      * @param deleteAfterDays 
      */
     public static void deleteOldDownloads(File filesPath, int deleteAfterDays) {
-        serverLog.logFine("STARTUP", "deleting downloaded releases older than "+ deleteAfterDays +" days");
-        final long deleteAfterMillis = deleteAfterDays * 24 * 60 * 60000l;
-        
         // list downloaded releases
         yacyVersion release;
         String[] downloaded = filesPath.list();
@@ -524,28 +521,36 @@ public final class yacyVersion implements Comparator<yacyVersion>, Comparable<ya
             }
         }
         
-        // keep latest version
-        final yacyVersion latest = downloadedreleases.last();
-        downloadedreleases.remove(latest);
-        // if latest is a developer release, we also keep a main release
-        boolean keepMain = !latest.mainRelease;
-        
-        // remove old files
-        long now = System.currentTimeMillis();
-        final Iterator<yacyVersion> iter = downloadedreleases.descendingIterator();
-        while (iter.hasNext()) {
-            release = iter.next();
+        // if we have some files
+        if(downloadedreleases.size() > 0) {
+            serverLog.logFine("STARTUP", "deleting downloaded releases older than "+ deleteAfterDays +" days");
             
-            if(keepMain && release.mainRelease) {
-                // we found the latest main release
-                keepMain = false;
-                continue;
-            }
+            // keep latest version
+            final yacyVersion latest = downloadedreleases.last();
+            downloadedreleases.remove(latest);
+            // if latest is a developer release, we also keep a main release
+            boolean keepMain = !latest.mainRelease;
             
-            File downloadedFile = new File(filesPath + File.separator + release.name);
-            if(now - downloadedFile.lastModified() > deleteAfterMillis) {
-                if(!downloadedFile.delete()) {
-                    serverLog.logWarning("STARTUP", "cannot delete old release "+ downloadedFile.getAbsolutePath());
+            // remove old files
+            long now = System.currentTimeMillis();
+            final long deleteAfterMillis = deleteAfterDays * 24 * 60 * 60000l;
+            final Iterator<yacyVersion> iter = downloadedreleases.descendingIterator();
+            while (iter.hasNext()) {
+                release = iter.next();
+                
+                if(keepMain && release.mainRelease) {
+                    // we found the latest main release
+                    keepMain = false;
+                    continue;
+                }
+                
+                // check file age
+                File downloadedFile = new File(filesPath + File.separator + release.name);
+                if(now - downloadedFile.lastModified() > deleteAfterMillis) {
+                    // delete file
+                    if(!downloadedFile.delete()) {
+                        serverLog.logWarning("STARTUP", "cannot delete old release "+ downloadedFile.getAbsolutePath());
+                    }
                 }
             }
         }
