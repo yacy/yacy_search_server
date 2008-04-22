@@ -532,7 +532,6 @@ public final class yacyVersion implements Comparator<yacyVersion>, Comparable<ya
         
         // remove old files
         long now = System.currentTimeMillis();
-        System.out.println("+-+ DEBUG now is "+ new Date(now));
         final Iterator<yacyVersion> iter = downloadedreleases.descendingIterator();
         while (iter.hasNext()) {
             release = iter.next();
@@ -544,7 +543,6 @@ public final class yacyVersion implements Comparator<yacyVersion>, Comparable<ya
             }
             
             File downloadedFile = new File(filesPath + File.separator + release.name);
-            System.out.println("+-+ DEBUG lastModified of "+ downloadedFile.getName() +" is "+ new Date(downloadedFile.lastModified()) +" delta="+ (now-downloadedFile.lastModified()) +" > "+ deleteAfterMillis);
             if(now - downloadedFile.lastModified() > deleteAfterMillis) {
                 if(!downloadedFile.delete()) {
                     serverLog.logWarning("STARTUP", "cannot delete old release "+ downloadedFile.getAbsolutePath());
