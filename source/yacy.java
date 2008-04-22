@@ -322,6 +322,10 @@ public final class yacy {
 
             migration.migrate(sb, oldRev, newRev);
             
+            // delete old release files
+            int deleteOldDownloadsAfterDays = (int) sb.getConfigLong("update.deleteOld", 30);
+            yacyVersion.deleteOldDownloads(sb.releasePath, deleteOldDownloadsAfterDays );
+            
             // start main threads
             final String port = sb.getConfig("port", "8080");
             try {

@@ -99,6 +99,9 @@ update.time.lookup = 0
 update.time.download = 0
 # the deploy time when the last update was done; milliseconds since epoch
 update.time.deploy = 0
+# delete old downloaded files after this amount of days to free disk space
+# the latest release is always kept
+update.deleteOld = 30
 
 # restart-option
 # a peer can be re-started periodically

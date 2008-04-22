@@ -34,6 +34,7 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Comparator;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
@@ -497,5 +498,59 @@ public final class yacyVersion implements Comparator<yacyVersion>, Comparable<ya
              System.out.println(test + " is " + ((test.matches(blacklist)) ? "blacklisted" : " not blacklisted"));
          }
      }
+
+    /**
+     * keep only releases of last month (minimum latest and 1 main (maybe the same))
+     * 
+     * @param filesPath where all downloaded files reside
+     * @param deleteAfterDays 
+     */
+    public static void deleteOldDownloads(File filesPath, int deleteAfterDays) {
+        serverLog.logFine("STARTUP", "deleting downloaded releases older than "+ deleteAfterDays +" days");
+        final long deleteAfterMillis = deleteAfterDays * 24 * 60 * 60000l;
+        
+        // list downloaded releases
+        yacyVersion release;
+        String[] downloaded = filesPath.list();
+          
+        // parse all filenames and put them in a sorted set
+        TreeSet<yacyVersion> downloadedreleases = new TreeSet<yacyVersion>();
+        for (int j = 0; j < downloaded.length; j++) {
+            try {
+                release = new yacyVersion(downloaded[j]);
+                downloadedreleases.add(release);
+            } catch (RuntimeException e) {
+                // not a valid release
+            }
+        }
+        
+        // keep latest version
+        final yacyVersion latest = downloadedreleases.last();
+        downloadedreleases.remove(latest);
+        // if latest is a developer release, we also keep a main release
+        boolean keepMain = !latest.mainRelease;
+        
+        // remove old files
+        long now = System.currentTimeMillis();
+        System.out.println("+-+ DEBUG now is "+ new Date(now));
+        final Iterator<yacyVersion> iter = downloadedreleases.descendingIterator();
+        while (iter.hasNext()) {
+            release = iter.next();
+            
+            if(keepMain && release.mainRelease) {
+                // we found the latest main release
+                keepMain = false;
+                continue;
+            }
+            
+            File downloadedFile = new File(filesPath + File.separator + release.name);
+            System.out.println("+-+ DEBUG lastModified of "+ downloadedFile.getName() +" is "+ new Date(downloadedFile.lastModified()) +" delta="+ (now-downloadedFile.lastModified()) +" > "+ deleteAfterMillis);
+            if(now - downloadedFile.lastModified() > deleteAfterMillis) {
+                if(!downloadedFile.delete()) {
+                    serverLog.logWarning("STARTUP", "cannot delete old release "+ downloadedFile.getAbsolutePath());
+                }
+            }
+        }
+    }
      
 }
