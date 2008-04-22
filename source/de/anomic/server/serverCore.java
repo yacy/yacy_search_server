@@ -409,16 +409,6 @@ public final class serverCore extends serverAbstractBusyThread implements server
             // wait for new connection
             Socket controlSocket = this.socket.accept();
             
-            // wrap this socket
-            if (this.sslSocketFactory != null) {
-                controlSocket = new serverCoreSocket(controlSocket);
-
-                // if the current connection is SSL we need to do a handshake
-                if (((serverCoreSocket)controlSocket).isSSL()) {                
-                    controlSocket = negotiateSSL(controlSocket);    
-                }            
-            }
-            
             announceThreadBlockRelease();
             
             String cIP = clientAddress(controlSocket);
@@ -441,6 +431,16 @@ public final class serverCore extends serverAbstractBusyThread implements server
                 // setting the timeout properly
                 assert this.timeout >= 1000;
                 controlSocket.setSoTimeout(this.timeout);
+                
+                // wrap this socket
+                if (this.sslSocketFactory != null) {
+                    controlSocket = new serverCoreSocket(controlSocket);
+
+                    // if the current connection is SSL we need to do a handshake
+                    if (((serverCoreSocket)controlSocket).isSSL()) {                
+                        controlSocket = negotiateSSL(controlSocket);    
+                    }            
+                }
                 // keep-alive: if set to true, the server frequently sends keep-alive packets to the client which the client must respond to
                 // we set this to false to prevent that a missing ack from the client forces the server to close the connection
                 // controlSocket.setKeepAlive(false); 
