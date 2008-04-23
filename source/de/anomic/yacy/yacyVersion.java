@@ -536,17 +536,19 @@ public final class yacyVersion implements Comparator<yacyVersion>, Comparable<ya
             long now = System.currentTimeMillis();
             final long deleteAfterMillis = deleteAfterDays * 24 * 60 * 60000l;
             String lastMain = null;
+            String filename;
             for (final yacyVersion aRelease: downloadedreleases) {
+                filename = aRelease.name;
                 if(keepMain && aRelease.mainRelease) {
                     // keep this one, delete last remembered main release file
                     if(lastMain != null) {
-                        aRelease.name = lastMain;
+                        filename = lastMain;
                     }
                     lastMain = aRelease.name;
                 }
                 
                 // check file age
-                File downloadedFile = new File(filesPath + File.separator + aRelease.name);
+                File downloadedFile = new File(filesPath + File.separator + filename);
                 if(now - downloadedFile.lastModified() > deleteAfterMillis) {
                     // delete file
                     if(!downloadedFile.delete()) {
