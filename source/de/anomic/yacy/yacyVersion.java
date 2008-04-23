@@ -38,6 +38,7 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
+import java.util.SortedSet;
 import java.util.TreeSet;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -511,7 +512,7 @@ public final class yacyVersion implements Comparator<yacyVersion>, Comparable<ya
         String[] downloaded = filesPath.list();
           
         // parse all filenames and put them in a sorted set
-        TreeSet<yacyVersion> downloadedreleases = new TreeSet<yacyVersion>();
+        SortedSet<yacyVersion> downloadedreleases = new TreeSet<yacyVersion>();
         for (int j = 0; j < downloaded.length; j++) {
             try {
                 release = new yacyVersion(downloaded[j]);
@@ -534,18 +535,18 @@ public final class yacyVersion implements Comparator<yacyVersion>, Comparable<ya
             // remove old files
             long now = System.currentTimeMillis();
             final long deleteAfterMillis = deleteAfterDays * 24 * 60 * 60000l;
-            final Iterator<yacyVersion> iter = downloadedreleases.descendingIterator();
-            while (iter.hasNext()) {
-                release = iter.next();
-                
-                if(keepMain && release.mainRelease) {
-                    // we found the latest main release
-                    keepMain = false;
-                    continue;
+            String lastMain = null;
+            for (final yacyVersion aRelease: downloadedreleases) {
+                if(keepMain && aRelease.mainRelease) {
+                    // keep this one, delete last remembered main release file
+                    if(lastMain != null) {
+                        aRelease.name = lastMain;
+                    }
+                    lastMain = aRelease.name;
                 }
                 
                 // check file age
-                File downloadedFile = new File(filesPath + File.separator + release.name);
+                File downloadedFile = new File(filesPath + File.separator + aRelease.name);
                 if(now - downloadedFile.lastModified() > deleteAfterMillis) {
                     // delete file
                     if(!downloadedFile.delete()) {
