@@ -37,8 +37,10 @@ public class WatchWebStructure_p {
                 e = it.next();
                 if (e.name().equals(plasmaSwitchboard.CRAWL_PROFILE_PROXY) ||
                     e.name().equals(plasmaSwitchboard.CRAWL_PROFILE_REMOTE) ||
-                    e.name().equals(plasmaSwitchboard.CRAWL_PROFILE_SNIPPET_TEXT) ||
-                    e.name().equals(plasmaSwitchboard.CRAWL_PROFILE_SNIPPET_MEDIA))
+                    e.name().equals(plasmaSwitchboard.CRAWL_PROFILE_SNIPPET_LOCAL_TEXT)  ||
+                    e.name().equals(plasmaSwitchboard.CRAWL_PROFILE_SNIPPET_GLOBAL_TEXT) ||
+                    e.name().equals(plasmaSwitchboard.CRAWL_PROFILE_SNIPPET_LOCAL_MEDIA) ||
+                    e.name().equals(plasmaSwitchboard.CRAWL_PROFILE_SNIPPET_GLOBAL_MEDIA))
                    continue;
                 host = e.name();
                 break; // take the first one

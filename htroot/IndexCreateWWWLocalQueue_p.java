@@ -115,8 +115,10 @@ public class IndexCreateWWWLocalQueue_p {
                                 final String name = entry.name();
                                 if (name.equals(plasmaSwitchboard.CRAWL_PROFILE_PROXY) ||
                                         name.equals(plasmaSwitchboard.CRAWL_PROFILE_REMOTE) ||
-                                        name.equals(plasmaSwitchboard.CRAWL_PROFILE_SNIPPET_TEXT) ||
-                                        name.equals(plasmaSwitchboard.CRAWL_PROFILE_SNIPPET_MEDIA))
+                                        name.equals(plasmaSwitchboard.CRAWL_PROFILE_SNIPPET_LOCAL_TEXT)  ||
+                                        name.equals(plasmaSwitchboard.CRAWL_PROFILE_SNIPPET_GLOBAL_TEXT)  ||
+                                        name.equals(plasmaSwitchboard.CRAWL_PROFILE_SNIPPET_LOCAL_MEDIA) ||
+                                        name.equals(plasmaSwitchboard.CRAWL_PROFILE_SNIPPET_GLOBAL_MEDIA))
                                     continue;
                                 if (compiledPattern.matcher(name).find()) {
                                     sb.profilesActiveCrawls.removeEntry(entry.handle());

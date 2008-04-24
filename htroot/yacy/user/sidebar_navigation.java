@@ -117,7 +117,7 @@ public class sidebar_navigation {
                         prop.put("navigation_topwords_words_" + hintcount + "_count", theQuery.displayResults());
                         prop.put("navigation_topwords_words_" + hintcount + "_offset", "0");
                         prop.put("navigation_topwords_words_" + hintcount + "_contentdom", theQuery.contentdom());
-                        prop.put("navigation_topwords_words_" + hintcount + "_resource", theQuery.searchdom());
+                        prop.put("navigation_topwords_words_" + hintcount + "_resource", ((theQuery.isLocal()) ? "local" : "global"));
                         prop.put("navigation_topwords_words_" + hintcount + "_zonecode", theQuery.zonecode);
                     }
                     hintcount++;
@@ -182,7 +182,7 @@ public class sidebar_navigation {
         "<a href=\"ysearch.html?search=" + theQuery.queryString() +
         "&amp;count="+ theQuery.displayResults() +
         "&amp;offset=" + (page * theQuery.displayResults()) +
-        "&amp;resource=" + theQuery.searchdom() +
+        "&amp;resource=" + ((theQuery.isLocal()) ? "local" : "global") +
         "&amp;urlmaskfilter=" + theQuery.urlMask +
         "&amp;prefermaskfilter=" + theQuery.prefer +
         "&amp;cat=href&amp;constraint=" + ((theQuery.constraint == null) ? "" : theQuery.constraint.exportB64()) +
@@ -195,7 +195,7 @@ public class sidebar_navigation {
         prop.putHTML("navigation_languagezone_" + zonename + "_search", theQuery.queryString.replace(' ', '+'));
         prop.put("navigation_languagezone_" + zonename + "_offset", "0");
         prop.put("navigation_languagezone_" + zonename + "_contentdom", theQuery.contentdom());
-        prop.put("navigation_languagezone_" + zonename + "_resource", theQuery.searchdom());
+        prop.put("navigation_languagezone_" + zonename + "_resource", ((theQuery.isLocal()) ? "local" : "global"));
         prop.put("navigation_languagezone_" + zonename, 1);
     }
     

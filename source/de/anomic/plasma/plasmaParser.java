@@ -667,7 +667,7 @@ public final class plasmaParser {
         }
         
         if (!documentCharset.equalsIgnoreCase(charset)) {
-            this.theLogger.logInfo("Charset transformation needed from '" + documentCharset + "' to '" + charset + "'");
+            this.theLogger.logInfo("Charset transformation needed from '" + documentCharset + "' to '" + charset + "' for URL = " + location.toNormalform(true, true));
         }
         
         // parsing the content

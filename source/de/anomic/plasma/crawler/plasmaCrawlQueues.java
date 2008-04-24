@@ -436,7 +436,8 @@ public class plasmaCrawlQueues {
             yacyURL url, 
             int socketTimeout,
             boolean keepInMemory,
-            boolean forText
+            boolean forText,
+            boolean global
     ) {
         
         plasmaCrawlEntry centry = new plasmaCrawlEntry(
@@ -445,7 +446,14 @@ public class plasmaCrawlQueues {
                 null, 
                 "", 
                 new Date(),
-                (forText) ? sb.defaultTextSnippetProfile.handle() : sb.defaultMediaSnippetProfile.handle(), // crawl profile
+                (forText) ?
+                    ((global) ?
+                        sb.defaultTextSnippetGlobalProfile.handle() :
+                        sb.defaultTextSnippetLocalProfile.handle())
+                    :
+                    ((global) ?
+                        sb.defaultMediaSnippetGlobalProfile.handle() :
+                        sb.defaultMediaSnippetLocalProfile.handle()), // crawl profile
                 0, 
                 0, 
                 0);

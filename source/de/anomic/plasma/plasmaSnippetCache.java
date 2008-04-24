@@ -255,7 +255,7 @@ public class plasmaSnippetCache {
     }
     
     @SuppressWarnings("unchecked")
-    public static TextSnippet retrieveTextSnippet(indexURLReference.Components comp, Set<String> queryhashes, boolean fetchOnline, boolean pre, int snippetMaxLength, int timeout, int maxDocLen) {
+    public static TextSnippet retrieveTextSnippet(indexURLReference.Components comp, Set<String> queryhashes, boolean fetchOnline, boolean pre, int snippetMaxLength, int timeout, int maxDocLen, boolean reindexing) {
         // heise = "0OQUNU3JSs05"
         yacyURL url = comp.url();
         if (queryhashes.size() == 0) {
@@ -305,7 +305,7 @@ public class plasmaSnippetCache {
                 // if not found try to download it
                 
                 // download resource using the crawler and keep resource in memory if possible
-                plasmaHTCache.Entry entry = plasmaSwitchboard.getSwitchboard().crawlQueues.loadResourceFromWeb(url, timeout, true, true);
+                plasmaHTCache.Entry entry = plasmaSwitchboard.getSwitchboard().crawlQueues.loadResourceFromWeb(url, timeout, true, true, reindexing);
                 
                 // place entry on crawl queue
                 plasmaHTCache.push(entry);
@@ -398,9 +398,10 @@ public class plasmaSnippetCache {
      * @param fetchOnline specifies if the resource should be loaded from web if it'as not available in the cache
      * @param timeout 
      * @param forText 
+     * @param global the domain of the search. If global == true then the content is re-indexed
      * @return the parsed document as {@link plasmaParserDocument}
      */
-    public static plasmaParserDocument retrieveDocument(yacyURL url, boolean fetchOnline, int timeout, boolean forText) {
+    public static plasmaParserDocument retrieveDocument(yacyURL url, boolean fetchOnline, int timeout, boolean forText, boolean global) {
 
         // load resource
         long resContentLength = 0;
@@ -416,7 +417,7 @@ public class plasmaSnippetCache {
                 // if not found try to download it
                 
                 // download resource using the crawler and keep resource in memory if possible
-                plasmaHTCache.Entry entry = plasmaSwitchboard.getSwitchboard().crawlQueues.loadResourceFromWeb(url, timeout, true, forText);
+                plasmaHTCache.Entry entry = plasmaSwitchboard.getSwitchboard().crawlQueues.loadResourceFromWeb(url, timeout, true, forText, global);
                 
                 // getting resource metadata (e.g. the http headers for http resources)
                 if (entry != null) {
@@ -648,13 +649,13 @@ public class plasmaSnippetCache {
         }
     }
     
-    public static ArrayList<MediaSnippet> retrieveMediaSnippets(yacyURL url, Set<String> queryhashes, int mediatype, boolean fetchOnline, int timeout) {
+    public static ArrayList<MediaSnippet> retrieveMediaSnippets(yacyURL url, Set<String> queryhashes, int mediatype, boolean fetchOnline, int timeout, boolean reindexing) {
         if (queryhashes.size() == 0) {
             serverLog.logFine("snippet fetch", "no query hashes given for url " + url);
             return new ArrayList<MediaSnippet>();
         }
         
-        plasmaParserDocument document = retrieveDocument(url, fetchOnline, timeout, false);
+        plasmaParserDocument document = retrieveDocument(url, fetchOnline, timeout, false, reindexing);
         ArrayList<MediaSnippet> a = new ArrayList<MediaSnippet>();
         if (document != null) {
             if ((mediatype == plasmaSearchQuery.CONTENTDOM_ALL) || (mediatype == plasmaSearchQuery.CONTENTDOM_AUDIO)) a.addAll(computeMediaSnippets(document, queryhashes, plasmaSearchQuery.CONTENTDOM_AUDIO));
@@ -860,7 +861,7 @@ public class plasmaSnippetCache {
      * <tr><td>[1]</td><td>the content-length as {@link Integer}</td></tr>
      * </table>
      */
-    public static Object[] getResource(yacyURL url, boolean fetchOnline, int socketTimeout, boolean forText) {
+    public static Object[] getResource(yacyURL url, boolean fetchOnline, int socketTimeout, boolean forText, boolean reindexing) {
         // load the url as resource from the web
             long contentLength = -1;
             
@@ -872,7 +873,7 @@ public class plasmaSnippetCache {
                 // if the content is not available in cache try to download it from web
                 
                 // try to download the resource using a crawler
-                plasmaHTCache.Entry entry = plasmaSwitchboard.getSwitchboard().crawlQueues.loadResourceFromWeb(url, (socketTimeout < 0) ? -1 : socketTimeout, true, forText);
+                plasmaHTCache.Entry entry = plasmaSwitchboard.getSwitchboard().crawlQueues.loadResourceFromWeb(url, (socketTimeout < 0) ? -1 : socketTimeout, true, forText, reindexing);
                 if (entry == null) return null; // not found in web
                 
                 // read resource body (if it is there)

@@ -166,7 +166,7 @@ public class ViewFile {
         if (resource == null) {
             plasmaHTCache.Entry entry = null;
             try {
-                entry = sb.crawlQueues.loadResourceFromWeb(url, 5000, false, true);
+                entry = sb.crawlQueues.loadResourceFromWeb(url, 5000, false, true, false);
             } catch (Exception e) {
                 prop.put("error", "4");
                 prop.putHTML("error_errorText", e.getMessage());

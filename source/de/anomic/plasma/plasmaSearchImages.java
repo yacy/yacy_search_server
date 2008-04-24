@@ -56,11 +56,11 @@ public final class plasmaSearchImages {
 
     private HashMap<String, htmlFilterImageEntry> images;
     
-    public plasmaSearchImages(long maxTime, yacyURL url, int depth) {
+    public plasmaSearchImages(long maxTime, yacyURL url, int depth, boolean indexing) {
         long start = System.currentTimeMillis();
         this.images = new HashMap<String, htmlFilterImageEntry>();
         if (maxTime > 10) {
-            Object[] resource = plasmaSnippetCache.getResource(url, true, (int) maxTime, false);
+            Object[] resource = plasmaSnippetCache.getResource(url, true, (int) maxTime, false, indexing);
             InputStream res = (InputStream) resource[0];
             Long resLength = (Long) resource[1];
             if (res != null) {
@@ -85,7 +85,7 @@ public final class plasmaSearchImages {
                     while (i.hasNext()) {
                         try {
                             nexturlstring = i.next().toNormalform(true, true);
-                            addAll(new plasmaSearchImages(serverDate.remainingTime(start, maxTime, 10), new yacyURL(nexturlstring, null), depth - 1));
+                            addAll(new plasmaSearchImages(serverDate.remainingTime(start, maxTime, 10), new yacyURL(nexturlstring, null), depth - 1, indexing));
                         } catch (MalformedURLException e1) {
                             e1.printStackTrace();
                         }

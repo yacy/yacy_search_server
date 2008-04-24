@@ -212,8 +212,8 @@ public final class plasmaSwitchboard extends serverAbstractSwitch<plasmaSwitchbo
     public  plasmaCrawlProfile          profilesActiveCrawls, profilesPassiveCrawls;
     public  plasmaCrawlProfile.entry    defaultProxyProfile;
     public  plasmaCrawlProfile.entry    defaultRemoteProfile;
-    public  plasmaCrawlProfile.entry    defaultTextSnippetProfile;
-    public  plasmaCrawlProfile.entry    defaultMediaSnippetProfile;
+    public  plasmaCrawlProfile.entry    defaultTextSnippetLocalProfile, defaultTextSnippetGlobalProfile;
+    public  plasmaCrawlProfile.entry    defaultMediaSnippetLocalProfile, defaultMediaSnippetGlobalProfile;
     public  boolean                     rankingOn;
     public  plasmaRankingDistribution   rankingOwnDistribution;
     public  plasmaRankingDistribution   rankingOtherDistribution;
@@ -648,10 +648,12 @@ public final class plasmaSwitchboard extends serverAbstractSwitch<plasmaSwitchbo
     // Miscellaneous settings
     //////////////////////////////////////////////////////////////////////////////////////////////
     
-    public static final String CRAWL_PROFILE_PROXY              = "proxy";
-    public static final String CRAWL_PROFILE_REMOTE             = "remote";
-    public static final String CRAWL_PROFILE_SNIPPET_TEXT       = "snippetText";
-    public static final String CRAWL_PROFILE_SNIPPET_MEDIA      = "snippetMedia";
+    public static final String CRAWL_PROFILE_PROXY                 = "proxy";
+    public static final String CRAWL_PROFILE_REMOTE                = "remote";
+    public static final String CRAWL_PROFILE_SNIPPET_LOCAL_TEXT    = "snippetLocalText";
+    public static final String CRAWL_PROFILE_SNIPPET_GLOBAL_TEXT   = "snippetGlobalText";
+    public static final String CRAWL_PROFILE_SNIPPET_LOCAL_MEDIA   = "snippetLocalMedia";
+    public static final String CRAWL_PROFILE_SNIPPET_GLOBAL_MEDIA  = "snippetGlobalMedia";
     
     /**
      * <p><code>public static final String <strong>CRAWLER_THREADS_ACTIVE_MAX</strong> = "crawler.MaxActiveThreads"</code></p>
@@ -1511,8 +1513,10 @@ public final class plasmaSwitchboard extends serverAbstractSwitch<plasmaSwitchbo
     private void initActiveCrawlProfiles() {
         this.defaultProxyProfile = null;
         this.defaultRemoteProfile = null;
-        this.defaultTextSnippetProfile = null;
-        this.defaultMediaSnippetProfile = null;
+        this.defaultTextSnippetLocalProfile = null;
+        this.defaultTextSnippetGlobalProfile = null;
+        this.defaultMediaSnippetLocalProfile = null;
+        this.defaultMediaSnippetGlobalProfile = null;
         Iterator<plasmaCrawlProfile.entry> i = this.profilesActiveCrawls.profiles(true);
         plasmaCrawlProfile.entry profile;
         String name;
@@ -1521,8 +1525,10 @@ public final class plasmaSwitchboard extends serverAbstractSwitch<plasmaSwitchbo
             name = profile.name();
             if (name.equals(CRAWL_PROFILE_PROXY)) this.defaultProxyProfile = profile;
             if (name.equals(CRAWL_PROFILE_REMOTE)) this.defaultRemoteProfile = profile;
-            if (name.equals(CRAWL_PROFILE_SNIPPET_TEXT)) this.defaultTextSnippetProfile = profile;
-            if (name.equals(CRAWL_PROFILE_SNIPPET_MEDIA)) this.defaultMediaSnippetProfile = profile;
+            if (name.equals(CRAWL_PROFILE_SNIPPET_LOCAL_TEXT)) this.defaultTextSnippetLocalProfile = profile;
+            if (name.equals(CRAWL_PROFILE_SNIPPET_GLOBAL_TEXT)) this.defaultTextSnippetGlobalProfile = profile;
+            if (name.equals(CRAWL_PROFILE_SNIPPET_LOCAL_MEDIA)) this.defaultMediaSnippetLocalProfile = profile;
+            if (name.equals(CRAWL_PROFILE_SNIPPET_GLOBAL_MEDIA)) this.defaultMediaSnippetGlobalProfile = profile;
         }
         if (this.defaultProxyProfile == null) {
             // generate new default entry for proxy crawling
@@ -1540,14 +1546,24 @@ public final class plasmaSwitchboard extends serverAbstractSwitch<plasmaSwitchbo
             defaultRemoteProfile = this.profilesActiveCrawls.newEntry(CRAWL_PROFILE_REMOTE, null, ".*", ".*", 0, 0,
                     -1, -1, -1, true, true, true, false, true, false, true, true, false);
         }
-        if (this.defaultTextSnippetProfile == null) {
+        if (this.defaultTextSnippetLocalProfile == null) {
             // generate new default entry for snippet fetch and optional crawling
-            defaultTextSnippetProfile = this.profilesActiveCrawls.newEntry(CRAWL_PROFILE_SNIPPET_TEXT, null, ".*", ".*", 0, 0,
+            defaultTextSnippetLocalProfile = this.profilesActiveCrawls.newEntry(CRAWL_PROFILE_SNIPPET_LOCAL_TEXT, null, ".*", ".*", 0, 0,
+                    60 * 24 * 30, -1, -1, true, false, false, false, false, false, true, true, false);
+        }
+        if (this.defaultTextSnippetGlobalProfile == null) {
+            // generate new default entry for snippet fetch and optional crawling
+            defaultTextSnippetGlobalProfile = this.profilesActiveCrawls.newEntry(CRAWL_PROFILE_SNIPPET_GLOBAL_TEXT, null, ".*", ".*", 0, 0,
                     60 * 24 * 30, -1, -1, true, true, true, true, true, false, true, true, false);
         }
-        if (this.defaultMediaSnippetProfile == null) {
+        if (this.defaultMediaSnippetLocalProfile == null) {
             // generate new default entry for snippet fetch and optional crawling
-            defaultMediaSnippetProfile = this.profilesActiveCrawls.newEntry(CRAWL_PROFILE_SNIPPET_MEDIA, null, ".*", ".*", 0, 0,
+            defaultMediaSnippetLocalProfile = this.profilesActiveCrawls.newEntry(CRAWL_PROFILE_SNIPPET_LOCAL_MEDIA, null, ".*", ".*", 0, 0,
+                    60 * 24 * 30, -1, -1, true, false, false, false, false, false, true, true, false);
+        }
+        if (this.defaultMediaSnippetGlobalProfile == null) {
+            // generate new default entry for snippet fetch and optional crawling
+            defaultMediaSnippetGlobalProfile = this.profilesActiveCrawls.newEntry(CRAWL_PROFILE_SNIPPET_GLOBAL_MEDIA, null, ".*", ".*", 0, 0,
                     60 * 24 * 30, -1, -1, true, false, true, true, true, false, true, true, false);
         }
     }
@@ -1598,8 +1614,10 @@ public final class plasmaSwitchboard extends serverAbstractSwitch<plasmaSwitchbo
                 entry = iter.next();
                 if (!((entry.name().equals(CRAWL_PROFILE_PROXY))  ||
                       (entry.name().equals(CRAWL_PROFILE_REMOTE)) ||
-                      (entry.name().equals(CRAWL_PROFILE_SNIPPET_TEXT)) ||
-                      (entry.name().equals(CRAWL_PROFILE_SNIPPET_MEDIA)))) {
+                      (entry.name().equals(CRAWL_PROFILE_SNIPPET_LOCAL_TEXT))  ||
+                      (entry.name().equals(CRAWL_PROFILE_SNIPPET_GLOBAL_TEXT)) ||
+                      (entry.name().equals(CRAWL_PROFILE_SNIPPET_LOCAL_MEDIA)) ||
+                      (entry.name().equals(CRAWL_PROFILE_SNIPPET_GLOBAL_MEDIA)))) {
                     profilesPassiveCrawls.newEntry(entry.map());
                     iter.remove();
                     hasDoneSomething = true;
@@ -2253,7 +2271,7 @@ public final class plasmaSwitchboard extends serverAbstractSwitch<plasmaSwitchbo
             // check for interruption
             checkInterruption();
             
-            log.logInfo("Not indexed any word in URL " + entry.url() + "; cause: " + noIndexReason);
+            log.logFine("Not indexed any word in URL " + entry.url() + "; cause: " + noIndexReason);
             addURLtoErrorDB(entry.url(), (referrerURL == null) ? null : referrerURL.hash(), entry.initiator(), dc_title, noIndexReason, new kelondroBitfield());
             /*
             if ((processCase == PROCESSCASE_6_GLOBAL_CRAWLING) && (initiatorPeer != null)) {
@@ -2400,7 +2418,7 @@ public final class plasmaSwitchboard extends serverAbstractSwitch<plasmaSwitchbo
         InputStream resourceContent = null;
         try {
             // get the resource content
-            Object[] resource = plasmaSnippetCache.getResource(comp.url(), fetchOnline, 10000, true);
+            Object[] resource = plasmaSnippetCache.getResource(comp.url(), fetchOnline, 10000, true, false);
             resourceContent = (InputStream) resource[0];
             Long resourceContentLength = (Long) resource[1];
             

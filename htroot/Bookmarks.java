@@ -200,7 +200,7 @@ public class Bookmarks {
                         plasmaParserDocument document = null;
                         if (urlentry != null) {
                             indexURLReference.Components comp = urlentry.comp();
-                            document = plasmaSnippetCache.retrieveDocument(comp.url(), true, 5000, true);
+                            document = plasmaSnippetCache.retrieveDocument(comp.url(), true, 5000, true, false);
                             prop.put("mode_edit", "0"); // create mode
                             prop.put("mode_url", comp.url().toNormalform(false, true));
                             prop.putHTML("mode_title", comp.dc_title());

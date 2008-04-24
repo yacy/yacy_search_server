@@ -53,7 +53,7 @@ public class sidebar_history {
             if (visibleQueries.contains(query.queryString)) continue; // avoid doubles
             visibleQueries.add(query.queryString);
             prop.put("history_list_" + c + "_querystring", query.queryString);
-            prop.put("history_list_" + c + "_searchdom", query.searchdom());
+            prop.put("history_list_" + c + "_searchdom", ((query.isLocal()) ? "local" : "global"));
             prop.put("history_list_" + c + "_contentdom", query.contentdom());
             c++;
             if (c >= 10) break;

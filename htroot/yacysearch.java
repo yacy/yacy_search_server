@@ -222,7 +222,7 @@ public class yacysearch {
                 if (urlentry != null) {
                     indexURLReference.Components comp = urlentry.comp();
                     plasmaParserDocument document;
-                    document = plasmaSnippetCache.retrieveDocument(comp.url(), true, 5000, true);
+                    document = plasmaSnippetCache.retrieveDocument(comp.url(), true, 5000, true, false);
                     if (document != null) {
                         // create a news message
                         HashMap<String, String> map = new HashMap<String, String>();
@@ -417,7 +417,7 @@ public class yacysearch {
         "&amp;search=" + theQuery.queryString() +
         "&amp;count="+ theQuery.displayResults() +
         "&amp;offset=" + (page * theQuery.displayResults()) +
-        "&amp;resource=" + theQuery.searchdom() +
+        "&amp;resource=" + ((theQuery.isLocal()) ? "local" : "global") +
         "&amp;urlmaskfilter=" + theQuery.urlMask +
         "&amp;prefermaskfilter=" + theQuery.prefer +
         "&amp;cat=href&amp;constraint=" + ((theQuery.constraint == null) ? "" : theQuery.constraint.exportB64()) +

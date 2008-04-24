@@ -98,7 +98,7 @@ public class ViewImage {
         // getting the image as stream
         Image scaled = iconcache.get(urlString);
         if (scaled == null) {
-            Object[] resource = plasmaSnippetCache.getResource(url, true, timeout, false);
+            Object[] resource = plasmaSnippetCache.getResource(url, true, timeout, false, true);
             byte[] imgb = null;
             if (resource == null) {
                 if (urlString.endsWith(".ico")) {
