@@ -82,7 +82,7 @@ public class indexRWIEntryOrder {
             	entry = di.next();
             	this.doms.addScore(entry.getKey(), ((Integer) entry.getValue()).intValue());
             }
-            result = mmf0.decodedEntries;
+            result = mmf0.decodedContainer();
             result.addAll(mmf1.decodedContainer());
             //long s1= System.currentTimeMillis(), sc = Math.max(1, s1 - s0);
             //System.out.println("***DEBUG*** indexRWIEntry.Order (2-THREADED): " + sc + " milliseconds for " + container.size() + " entries, " + (container.size() / sc) + " entries/millisecond");
@@ -118,7 +118,7 @@ public class indexRWIEntryOrder {
         //System.out.println("tf(" + t.urlHash + ") = " + Math.floor(1000 * t.termFrequency()) + ", min = " + Math.floor(1000 * min.termFrequency()) + ", max = " + Math.floor(1000 * max.termFrequency()) + ", tf-normed = " + tf);
         long r =
              ((256 - yacyURL.domLengthNormalized(t.urlHash())) << ranking.coeff_domlength)
-           + ((256 - (plasmaSearchRankingProcess.ybr(t.urlHash()) << 4)) << ranking.coeff_ybr)
+           + ((ranking.coeff_ybr > 12) ? ((256 - (plasmaSearchRankingProcess.ybr(t.urlHash()) << 4)) << ranking.coeff_ybr) : 0)
            + ((max.urlcomps()      == min.urlcomps()   )   ? 0 : (256 - (((t.urlcomps()     - min.urlcomps()     ) << 8) / (max.urlcomps()     - min.urlcomps())     )) << ranking.coeff_urlcomps)
            + ((max.urllength()     == min.urllength()  )   ? 0 : (256 - (((t.urllength()    - min.urllength()    ) << 8) / (max.urllength()    - min.urllength())    )) << ranking.coeff_urllength)
            + ((max.posintext()     == min.posintext()  )   ? 0 : (256 - (((t.posintext()    - min.posintext()    ) << 8) / (max.posintext()    - min.posintext())    )) << ranking.coeff_posintext)
@@ -133,7 +133,7 @@ public class indexRWIEntryOrder {
            + ((max.lother()        == min.lother())        ? 0 : (((t.lother()       - min.lother()        ) << 8) / (max.lother()       - min.lother())        ) << ranking.coeff_lother)
            + ((max.hitcount()      == min.hitcount())      ? 0 : (((t.hitcount()     - min.hitcount()      ) << 8) / (max.hitcount()     - min.hitcount())      ) << ranking.coeff_hitcount)
            + tf
-           + (authority(t.urlHash()) << ranking.coeff_authority)
+           + ((ranking.coeff_authority > 12) ? (authority(t.urlHash()) << ranking.coeff_authority) : 0)
            + (((flags.get(indexRWIEntry.flag_app_dc_identifier))  ? 255 << ranking.coeff_appurl             : 0))
            + (((flags.get(indexRWIEntry.flag_app_dc_title))       ? 255 << ranking.coeff_app_dc_title       : 0))
            + (((flags.get(indexRWIEntry.flag_app_dc_creator))     ? 255 << ranking.coeff_app_dc_creator     : 0))
@@ -179,7 +179,7 @@ public class indexRWIEntryOrder {
             String dom;
             Integer count;
             while (p < this.end) {
-                iEntry = new indexRWIVarEntry(new indexRWIRowEntry(container.get(p++)));
+                iEntry = new indexRWIVarEntry(new indexRWIRowEntry(container.get(p++, false)));
                 this.decodedEntries.add(iEntry);
                 // find min/max
                 if (this.entryMin == null) this.entryMin = iEntry.clone(); else this.entryMin.min(iEntry);

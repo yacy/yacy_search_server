@@ -336,7 +336,7 @@ public class kelondroEcoTable implements kelondroIndex {
             file.get(i, b, 0);
         } else {
             // construct the row using the copy in RAM
-            kelondroRow.Entry v = table.get(i);
+            kelondroRow.Entry v = table.get(i, false);
             assert v != null;
             if (v == null) return null;
             assert key.length == rowdef.primaryKeyLength;
@@ -382,7 +382,7 @@ public class kelondroEcoTable implements kelondroIndex {
             file.put(i, row.bytes(), 0);
         } else {
             // read old value
-            kelondroRow.Entry v = table.get(i);
+            kelondroRow.Entry v = table.get(i, false);
             assert v != null;
             System.arraycopy(row.getPrimaryKeyBytes(), 0, b, 0, rowdef.primaryKeyLength);
             System.arraycopy(v.bytes(), 0, b, rowdef.primaryKeyLength, rowdef.objectsize - rowdef.primaryKeyLength);
@@ -474,7 +474,7 @@ public class kelondroEcoTable implements kelondroIndex {
             assert (file.size() == index.size() + fail);
         } else {
             // get result value from the table copy, so we don't need to read it from the file
-            kelondroRow.Entry v = table.get(i);
+            kelondroRow.Entry v = table.get(i, false);
             System.arraycopy(key, 0, b, 0, key.length);
             System.arraycopy(v.bytes(), 0, b, rowdef.primaryKeyLength, taildef.objectsize);
             
@@ -610,7 +610,7 @@ public class kelondroEcoTable implements kelondroIndex {
                 }
             } else {
                 // compose from table and key
-                kelondroRow.Entry v = table.get(this.c);
+                kelondroRow.Entry v = table.get(this.c, false);
                 assert v != null;
                 if (v == null) return null;
                 System.arraycopy(k, 0, b, 0, rowdef.primaryKeyLength);

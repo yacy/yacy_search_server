@@ -424,7 +424,7 @@ public final class plasmaWordIndex implements indexRI {
             indexRWIRowEntry e, elm = null;
             long lm = 0;
             for (int j = 0; j < set.size(); j++) {
-                e = new indexRWIRowEntry(set.get(j));
+                e = new indexRWIRowEntry(set.get(j, true));
                 if ((elm == null) || (e.lastModified() > lm)) {
                     elm = e;
                     lm = e.lastModified();

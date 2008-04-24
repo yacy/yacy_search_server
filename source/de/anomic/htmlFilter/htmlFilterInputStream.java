@@ -44,7 +44,7 @@ public class htmlFilterInputStream extends InputStream implements htmlFilterEven
     private static final int MODE_PRESCAN_FINISHED = 1;
     private int mode = 1;
     
-    private long preBufferSize = 143336;
+    private long preBufferSize = 2048;
     private long preRead = 0;
     private BufferedInputStream bufferedIn;
 
@@ -81,7 +81,7 @@ public class htmlFilterInputStream extends InputStream implements htmlFilterEven
                 String value = tagopts.getProperty("http-equiv");
                 if (value.equalsIgnoreCase("Content-Type")) {
                     String contentType = tagopts.getProperty("content","");
-                    this.detectedCharset = httpHeader.extractCharsetFromMimetyeHeader(contentType);
+                    this.detectedCharset = httpHeader.extractCharsetFromMimetypeHeader(contentType);
                     if (this.detectedCharset != null && this.detectedCharset.length() > 0) {
                         this.charsetChanged = true;
                     } else if (tagopts.containsKey("charset")) { 

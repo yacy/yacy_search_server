@@ -70,7 +70,7 @@ import de.anomic.yacy.yacyURL;
 
 public class htmlFilterContentScraper extends htmlFilterAbstractScraper implements htmlFilterScraper {
 
-    // statics: for initialisation of the HTMLFilterAbstractScraper
+    // statics: for initialization of the HTMLFilterAbstractScraper
     private static TreeSet<String> linkTags0;
     private static TreeSet<String> linkTags1;
 

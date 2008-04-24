@@ -54,6 +54,7 @@ import de.anomic.yacy.yacyURL;
 public final class plasmaSearchRankingProcess {
     
     public  static kelondroBinSearch[] ybrTables = null; // block-rank tables
+    public  static final int maxYBR = 3; // the lower this value, the faster the search
     private static boolean useYBR = true;
     
     private kelondroSortStack<indexRWIVarEntry> stack;
@@ -289,17 +290,20 @@ public final class plasmaSearchRankingProcess {
         return bestEntry;
     }
     
-    public synchronized indexURLReference bestURL(boolean skipDoubleDom) {
+    public indexURLReference bestURL(boolean skipDoubleDom) {
         // returns from the current RWI list the best URL entry and removed this entry from the list
         while ((stack.size() > 0) || (size() > 0)) {
-            kelondroSortStack<indexRWIVarEntry>.stackElement obrwi = bestRWI(skipDoubleDom);
-            indexURLReference u = wordIndex.getURL(obrwi.element.urlHash(), obrwi.element, obrwi.weight.longValue());
-            if (u != null) {
-            	indexURLReference.Components comp = u.comp();
-            	if (comp.url() != null) this.handover.put(u.hash(), comp.url().toNormalform(true, false)); // remember that we handed over this url
-                return u;
+            synchronized (this) {
+                if (((stack.size() == 0) && (size() == 0))) break;
+                kelondroSortStack<indexRWIVarEntry>.stackElement obrwi = bestRWI(skipDoubleDom);
+                indexURLReference u = wordIndex.getURL(obrwi.element.urlHash(), obrwi.element, obrwi.weight.longValue());
+                if (u != null) {
+                    indexURLReference.Components comp = u.comp();
+                    if (comp.url() != null) this.handover.put(u.hash(), comp.url().toNormalform(true, false)); // remember that we handed over this url
+                    return u;
+                }
+                misses.add(obrwi.element.urlHash());
             }
-            misses.add(obrwi.element.urlHash());
         }
         return null;
     }
@@ -432,7 +436,8 @@ public final class plasmaSearchRankingProcess {
         if (ybrTables == null) return 15;
         if (!(useYBR)) return 15;
         final String domHash = urlHash.substring(6);
-        for (int i = 0; i < ybrTables.length; i++) {
+        int m = Math.min(maxYBR, ybrTables.length);
+        for (int i = 0; i < m; i++) {
             if ((ybrTables[i] != null) && (ybrTables[i].contains(domHash.getBytes()))) {
                 //System.out.println("YBR FOUND: " + urlHash + " (" + i + ")");
                 return i;

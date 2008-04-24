@@ -400,10 +400,10 @@ public final class httpHeader extends TreeMap<String, String> implements Map<Str
     
     public String getCharacterEncoding() {
         String mimeType = mime();
-       return extractCharsetFromMimetyeHeader(mimeType);
+       return extractCharsetFromMimetypeHeader(mimeType);
     }  
     
-    public static String extractCharsetFromMimetyeHeader(String mimeType) {
+    public static String extractCharsetFromMimetypeHeader(String mimeType) {
         if (mimeType == null) return null;
         
         String[] parts = mimeType.split(";");

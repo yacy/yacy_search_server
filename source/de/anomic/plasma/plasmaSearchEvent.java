@@ -488,18 +488,15 @@ public final class plasmaSearchEvent {
             event.eventTime = System.currentTimeMillis();
             // start worker threads to fetch urls and snippets
             event.workerThreads = new resultWorker[workerThreadCount];
+            resultWorker worker;
             for (int i = 0; i < workerThreadCount; i++) {
-                event.workerThreads[i] = event.deployWorker(i, 10000);
+                worker = event.new resultWorker(i, 10000);
+                worker.start();
+                event.workerThreads[i] = worker;
             }
         }
     
         return event;
-    }
-    
-    private resultWorker deployWorker(int id, long lifetime) {
-        resultWorker worker = new resultWorker(id, lifetime);
-        worker.start();
-        return worker;
     }
 
     private class resultWorker extends Thread {

@@ -119,7 +119,7 @@ public class kelondroRowSet extends kelondroRowCollection implements kelondroInd
     private kelondroRow.Entry get(byte[] key, int astart, int alength) {
         long handle = profile.startRead();
         int index = find(key, astart, alength);
-        kelondroRow.Entry entry = (index >= 0) ? get(index) : null;
+        kelondroRow.Entry entry = (index >= 0) ? get(index, true) : null;
         profile.stopRead(handle);
         return entry;
     }
@@ -148,7 +148,7 @@ public class kelondroRowSet extends kelondroRowCollection implements kelondroInd
         if (index < 0) {
             super.addUnique(entry);
         } else {
-            oldentry = get(index);
+            oldentry = get(index, true);
             set(index, entry);
         }
         profile.stopWrite(handle);
@@ -159,7 +159,7 @@ public class kelondroRowSet extends kelondroRowCollection implements kelondroInd
         int index = find(a, start, length);
         if (index < 0) return null;
         //System.out.println("remove: chunk found at index position (before remove) " + index + ", inset=" + serverLog.arrayList(super.chunkcache, super.rowdef.objectsize() * index, length + 10) + ", searchkey=" + serverLog.arrayList(a, start, length));
-        kelondroRow.Entry entry = super.get(index);
+        kelondroRow.Entry entry = super.get(index, true);
         super.removeRow(index, keepOrder);
         //System.out.println("remove: chunk found at index position (after  remove) " + index + ", inset=" + serverLog.arrayList(super.chunkcache, super.rowdef.objectsize() * index, length) + ", searchkey=" + serverLog.arrayList(a, start, length));
         int findagainindex = find(a, start, length);
@@ -381,7 +381,7 @@ public class kelondroRowSet extends kelondroRowCollection implements kelondroInd
         }
 
         public kelondroRow.Entry next() {
-            kelondroRow.Entry entry = get(p);
+            kelondroRow.Entry entry = get(p, true);
             if (up) p++; else p--;
             return entry;
         }
