@@ -27,6 +27,7 @@
 
 package de.anomic.xml;
 
+import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
 
@@ -58,6 +59,14 @@ public class RSSMessage {
     
     private HashMap<String, String> map;
 
+    public RSSMessage(String title, String description) {
+        this();
+        setValue("title", title);
+        setValue("description", description);
+        setValue("pubDate", new Date().toString());
+        setValue("guid", Integer.toHexString((title + description).hashCode()));
+    }
+    
     public RSSMessage() {
         this.map = new HashMap<String, String>();
         this.map.put("guid", Long.toHexString(System.currentTimeMillis()) + ":" + guidcount++);
@@ -68,50 +77,62 @@ public class RSSMessage {
     }
     
     public String getAuthor() {
-        return (String) map.get("author");
+        String s =  map.get("author");
+        if (s == null) return ""; else return s;
     }
     
     public String getCopyright() {
-        return (String) map.get("copyright");
+        String s =  map.get("copyright");
+        if (s == null) return ""; else return s;
     }
     
     public String getCategory() {
-        return (String) map.get("category");
+        String s = map.get("category");
+        if (s == null) return ""; else return s;
     }
     
     public String getTitle() {
-        return (String) map.get("title");
+        String s = map.get("title");
+        if (s == null) return ""; else return s;
     }
     
     public String getLink() {
-        return (String) map.get("link");
+        String s =  map.get("link");
+        if (s == null) return ""; else return s;
     }
     
     public String getReferrer() {
-        return (String) map.get("referrer");
+        String s = map.get("referrer");
+        if (s == null) return ""; else return s;
     }
     
     public String getLanguage() {
-        return (String) map.get("language");
+        String s =  map.get("language");
+        if (s == null) return ""; else return s;
     }
     
     public String getDescription() {
-        return (String) map.get("description");
+        String s =  map.get("description");
+        if (s == null) return ""; else return s;
     }
     
     public String getCreator() {
-        return (String) map.get("creator");
+        String s =  map.get("creator");
+        if (s == null) return ""; else return s;
     }
     
     public String getPubDate() {
-        return (String) map.get("pubDate");
+        String s =  map.get("pubDate");
+        if (s == null) return ""; else return s;
     }
     
     public String getGuid() {
-        return (String) map.get("guid");
+        String s =  map.get("guid");
+        if (s == null) return ""; else return s;
     }
     
     public String getDocs() {
-        return (String) map.get("docs");
+        String s =  map.get("docs");
+        if (s == null) return ""; else return s;
     }
 }

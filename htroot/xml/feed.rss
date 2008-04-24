@@ -1,0 +1,21 @@
+<?xml version="1.0"?>
+<rss>
+
+<!-- rss standard channel -->
+<channel>
+<title>#[channel_title]#</title>
+<description>#[channel_description]#</description>
+<pubDate>#[channel_pubDate]#</pubDate>
+
+<!-- messages -->
+#{item}#
+<item>
+<title>#[title]#</title>
+<link>#[link]#</link>
+<description>#[description]#</description>
+<pubDate>#[pubDate]#</pubDate>
+<guid isPermaLink="false">#[guid]#</guid>
+</item>
+#{/item}#
+</channel>
+</rss>

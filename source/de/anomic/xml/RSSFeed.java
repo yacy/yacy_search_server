@@ -35,8 +35,8 @@ public class RSSFeed implements Iterable<RSSMessage> {
     // class variables
     private RSSMessage channel;
     private String imageURL;
-    private ConcurrentLinkedQueue<String> messageQueue; // a list of GUIDs, so the items can be retrieved by a specific order
-    private ConcurrentHashMap<String, RSSMessage> messages; // a guid:Item map
+    ConcurrentLinkedQueue<String> messageQueue; // a list of GUIDs, so the items can be retrieved by a specific order
+    ConcurrentHashMap<String, RSSMessage> messages; // a guid:Item map
     private int maxsize;
     
     public RSSFeed() {
@@ -136,6 +136,7 @@ public class RSSFeed implements Iterable<RSSMessage> {
         RSSFeed feed = channels.get(channelName);
         if (feed != null) return feed;
         feed = new RSSFeed();
+        feed.setChannel(new RSSMessage(channelName, ""));
         channels.put(channelName, feed);
         return feed;
     }
