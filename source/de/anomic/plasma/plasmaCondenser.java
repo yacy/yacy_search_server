@@ -611,11 +611,9 @@ public final class plasmaCondenser {
 
     }
     
-    public static StringBuffer trim(StringBuffer sb) {
-        synchronized (sb) {
-            while ((sb.length() > 0) && (sb.charAt(0) <= ' ')) sb = sb.deleteCharAt(0);
-            while ((sb.length() > 0) && (sb.charAt(sb.length() - 1) <= ' ')) sb = sb.deleteCharAt(sb.length() - 1);
-        }
+    private static StringBuffer trim(StringBuffer sb) {
+        while ((sb.length() > 0) && (sb.charAt(0) <= ' ')) sb = sb.deleteCharAt(0);
+        while ((sb.length() > 0) && (sb.charAt(sb.length() - 1) <= ' ')) sb = sb.deleteCharAt(sb.length() - 1);
         return sb;
     }
     

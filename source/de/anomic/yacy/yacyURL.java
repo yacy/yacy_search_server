@@ -904,8 +904,14 @@ public class yacyURL {
                 ((this.port     == other.port    )));
     }
     
+    /**
+     * hash code computation for yacyURL: please don't mix this up with the YaCy-Hash
+     * this hash here is only used by hashing data structures, like a HashMap
+     * We do not use tha yacy hash here, because this needs the computation of a DNS
+     * which is very time-intensive
+     */
     public int hashCode() {
-        return this.hash().hashCode();
+        return this.toNormalform(true, false).hashCode();
     }
     
     public int compareTo(Object h) {

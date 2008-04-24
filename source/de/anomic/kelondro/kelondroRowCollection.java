@@ -234,7 +234,7 @@ public class kelondroRowCollection {
                     // grow instead of shrink, simply ignore the growfactor
         if (serverMemory.available() + 1000 < needed)
             return; // if the swap buffer is not available, we must give up.
-                    // This is not critical. Othervise we provoke a serious
+                    // This is not critical. Otherwise we provoke a serious
                     // problem with OOM
         byte[] newChunkcache = new byte[needed];
         System.arraycopy(chunkcache, 0, newChunkcache, 0, Math.min(
@@ -264,15 +264,20 @@ public class kelondroRowCollection {
         return b;
     }
     
-    public synchronized final kelondroRow.Entry get(int index, boolean clone) {
+    public final kelondroRow.Entry get(int index, boolean clone) {
         assert (index >= 0) : "get: access with index " + index + " is below zero";
         assert (index < chunkcount) : "get: access with index " + index + " is above chunkcount " + chunkcount + "; sortBound = " + sortBound;
         assert (index * rowdef.objectsize < chunkcache.length);
         if ((chunkcache == null) || (rowdef == null)) return null; // case may appear during shutdown
-        if (index >= chunkcount) return null;
-        if ((index + 1) * rowdef.objectsize > chunkcache.length) return null; // the whole chunk does not fit into the chunkcache
+        kelondroRow.Entry entry;
+        int addr = index * rowdef.objectsize;
+        synchronized (this) {
+            if (index >= chunkcount) return null;
+            if (addr + rowdef.objectsize > chunkcache.length) return null; // the whole chunk does not fit into the chunkcache
+            entry = rowdef.newEntry(chunkcache, addr, clone);
+        }
         this.lastTimeRead = System.currentTimeMillis();
-        return rowdef.newEntry(chunkcache, index * rowdef.objectsize, clone);
+        return entry;
     }
     
     public synchronized final void set(int index, kelondroRow.Entry a) {

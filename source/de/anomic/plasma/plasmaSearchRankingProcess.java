@@ -246,12 +246,13 @@ public final class plasmaSearchRankingProcess {
     // - root-domain guessing to prefer the root domain over other urls if search word appears in domain name
     
     
-    private synchronized kelondroSortStack<indexRWIVarEntry>.stackElement bestRWI(boolean skipDoubleDom) {
-        // returns from the current RWI list the best entry and removed this entry from the list
+    private kelondroSortStack<indexRWIVarEntry>.stackElement bestRWI(boolean skipDoubleDom) {
+        // returns from the current RWI list the best entry and removes this entry from the list
         kelondroSortStack<indexRWIVarEntry> m;
         kelondroSortStack<indexRWIVarEntry>.stackElement rwi;
         while (stack.size() > 0) {
             rwi = stack.pop();
+            if (rwi == null) continue; // in case that a synchronization problem occurred just go lazy over it
             if (!skipDoubleDom) return rwi;
             // check doubledom
             String domhash = rwi.element.urlHash().substring(6);
@@ -272,6 +273,7 @@ public final class plasmaSearchRankingProcess {
         kelondroSortStack<indexRWIVarEntry>.stackElement o;
         while (i.hasNext()) {
             m = i.next();
+            if (m == null) continue;
             if (m.size() == 0) continue;
             if (bestEntry == null) {
                 bestEntry = m.top();
@@ -293,7 +295,6 @@ public final class plasmaSearchRankingProcess {
     public indexURLReference bestURL(boolean skipDoubleDom) {
         // returns from the current RWI list the best URL entry and removed this entry from the list
         while ((stack.size() > 0) || (size() > 0)) {
-            synchronized (this) {
                 if (((stack.size() == 0) && (size() == 0))) break;
                 kelondroSortStack<indexRWIVarEntry>.stackElement obrwi = bestRWI(skipDoubleDom);
                 indexURLReference u = wordIndex.getURL(obrwi.element.urlHash(), obrwi.element, obrwi.weight.longValue());
@@ -303,12 +304,11 @@ public final class plasmaSearchRankingProcess {
                     return u;
                 }
                 misses.add(obrwi.element.urlHash());
-            }
         }
         return null;
     }
     
-    public synchronized int size() {
+    public int size() {
         //assert sortedRWIEntries.size() == urlhashes.size() : "sortedRWIEntries.size() = " + sortedRWIEntries.size() + ", urlhashes.size() = " + urlhashes.size();
         int c = stack.size();
         Iterator<kelondroSortStack<indexRWIVarEntry>> i = this.doubleDomCache.values().iterator();

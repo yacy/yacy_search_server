@@ -27,8 +27,8 @@
 package de.anomic.htmlFilter;
 
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Properties;
-import java.util.TreeSet;
 
 import de.anomic.server.serverCharBuffer;
 
@@ -38,8 +38,8 @@ public abstract class htmlFilterAbstractScraper implements htmlFilterScraper {
     public static final char rb = '>';
     public static final char sl = '/';
  
-    private TreeSet<String> tags0;
-    private TreeSet<String> tags1;
+    private HashSet<String> tags0;
+    private HashSet<String> tags1;
 
     // define a translation table for html character codings
     private static HashMap<String, String> trans = new HashMap<String, String>(300);
@@ -289,18 +289,22 @@ public abstract class htmlFilterAbstractScraper implements htmlFilterScraper {
         trans.put("&rsaquo;", ""); //angewinkeltes einzelnes Anf.zeichen rechts
     }
 
-
-    public htmlFilterAbstractScraper(TreeSet<String> tags0, TreeSet<String> tags1) {
+    /**
+     * create a scraper. the tag sets must contain tags in lowercase!
+     * @param tags0
+     * @param tags1
+     */
+    public htmlFilterAbstractScraper(HashSet<String> tags0, HashSet<String> tags1) {
         this.tags0  = tags0;
         this.tags1  = tags1;
     }
 
     public boolean isTag0(String tag) {
-        return (tags0 != null) && (tags0.contains(tag));
+        return (tags0 != null) && (tags0.contains(tag.toLowerCase()));
     }
 
     public boolean isTag1(String tag) {
-        return (tags1 != null) && (tags1.contains(tag));
+        return (tags1 != null) && (tags1.contains(tag.toLowerCase()));
     }
 
     //the 'missing' method that shall be implemented:

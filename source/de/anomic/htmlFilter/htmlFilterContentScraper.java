@@ -51,15 +51,13 @@ import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.io.Writer;
 import java.net.MalformedURLException;
-import java.text.Collator;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
-import java.util.Locale;
 import java.util.Map;
 import java.util.Properties;
-import java.util.TreeSet;
 
 import javax.swing.event.EventListenerList;
 
@@ -71,17 +69,11 @@ import de.anomic.yacy.yacyURL;
 public class htmlFilterContentScraper extends htmlFilterAbstractScraper implements htmlFilterScraper {
 
     // statics: for initialization of the HTMLFilterAbstractScraper
-    private static TreeSet<String> linkTags0;
-    private static TreeSet<String> linkTags1;
-
-    private static final Collator insensitiveCollator = Collator.getInstance(Locale.US);
-    static {
-        insensitiveCollator.setStrength(Collator.SECONDARY);
-        insensitiveCollator.setDecomposition(Collator.NO_DECOMPOSITION);
-    }
+    private static HashSet<String> linkTags0;
+    private static HashSet<String> linkTags1;
 
     static {
-        linkTags0 = new TreeSet<String>(insensitiveCollator);
+        linkTags0 = new HashSet<String>();
         linkTags0.add("img");
         linkTags0.add("base");
         linkTags0.add("frame");
@@ -91,7 +83,7 @@ public class htmlFilterContentScraper extends htmlFilterAbstractScraper implemen
         linkTags0.add("embed");     //added by [MN]
         linkTags0.add("param");     //added by [MN]
 
-        linkTags1 = new TreeSet<String>(insensitiveCollator);
+        linkTags1 = new HashSet<String>();
         linkTags1.add("a");
         linkTags1.add("h1");
         linkTags1.add("h2");

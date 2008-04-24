@@ -366,16 +366,16 @@ public class plasmaSnippetCache {
         Set<String> remainingHashes = (tsr == null) ? queryhashes : (Set<String>) tsr[1];
         
         // compute snippet from media
-        String audioline = computeMediaSnippet(document.getAudiolinks(), queryhashes);
-        String videoline = computeMediaSnippet(document.getVideolinks(), queryhashes);
-        String appline = computeMediaSnippet(document.getApplinks(), queryhashes);
+        //String audioline = computeMediaSnippet(document.getAudiolinks(), queryhashes);
+        //String videoline = computeMediaSnippet(document.getVideolinks(), queryhashes);
+        //String appline = computeMediaSnippet(document.getApplinks(), queryhashes);
         //String hrefline = computeMediaSnippet(document.getAnchors(), queryhashes);
         //String imageline = computeMediaSnippet(document.getAudiolinks(), queryhashes);
         
         line = "";
-        if (audioline != null) line += (line.length() == 0) ? audioline : "<br />" + audioline;
-        if (videoline != null) line += (line.length() == 0) ? videoline : "<br />" + videoline;
-        if (appline   != null) line += (line.length() == 0) ? appline   : "<br />" + appline;
+        //if (audioline != null) line += (line.length() == 0) ? audioline : "<br />" + audioline;
+        //if (videoline != null) line += (line.length() == 0) ? videoline : "<br />" + videoline;
+        //if (appline   != null) line += (line.length() == 0) ? appline   : "<br />" + appline;
         //if (hrefline  != null) line += (line.length() == 0) ? hrefline  : "<br />" + hrefline;
         if (textline  != null) line += (line.length() == 0) ? textline  : "<br />" + textline;
         
@@ -494,6 +494,7 @@ public class plasmaSnippetCache {
         return snippetsCache.get(key);
     }
     
+    /*
     private static String computeMediaSnippet(Map<yacyURL, String> media, Set<String> queryhashes) {
         Iterator<Map.Entry<yacyURL, String>> i = media.entrySet().iterator();
         Map.Entry<yacyURL, String> entry;
@@ -519,6 +520,7 @@ public class plasmaSnippetCache {
         if (result.length() == 0) return null;
         return result.substring(6);
     }
+    */
     
     @SuppressWarnings("unchecked")
     private static Object[] /*{String - the snippet, Set - remaining hashes}*/
