@@ -75,69 +75,89 @@ public class Threaddump_p {
     	StringBuffer buffer = new StringBuffer(1000);
     	
     	if (post != null && post.containsKey("createThreaddump")) {
+    	    boolean plain = post.get("plain", "false").equals("true");
+    	    int sleep = post.getInt("sleep", 0); // a sleep before creation of a thread dump can be used for profiling
+    	    if (sleep > 0) try {Thread.sleep(sleep);} catch (InterruptedException e) {}
     	    prop.put("dump", "1");
         	// Thread dump
         	Map<Thread,StackTraceElement[]> stackTraces = Thread.getAllStackTraces();
         	Date dt = new Date();
         	String versionstring = yacyVersion.combined2prettyVersion(sb.getConfig("version","0.1"));
         	
-        	buffer.append("************* Start Thread Dump " + dt + " *******************").append("<br />");
-            buffer.append("<br /> YaCy Version: " + versionstring + "<br />");
-        	buffer.append("Total Memory = " + (Runtime.getRuntime().totalMemory())).append("<br />");
-        	buffer.append("Used&nbsp;&nbsp;Memory = " + (Runtime.getRuntime().totalMemory() - Runtime.getRuntime().freeMemory())).append("<br />");
-        	buffer.append("Free&nbsp;&nbsp;Memory = " + (Runtime.getRuntime().freeMemory())).append("<br />");
-        	buffer.append(" --- --- --- --- <br /><br />");
-        	
-        	appendStackTraces(sb.getRootPath(), buffer, stackTraces, Thread.State.BLOCKED);
-        	appendStackTraces(sb.getRootPath(), buffer, stackTraces, Thread.State.RUNNABLE);
-        	appendStackTraces(sb.getRootPath(), buffer, stackTraces, Thread.State.TIMED_WAITING);
-        	appendStackTraces(sb.getRootPath(), buffer, stackTraces, Thread.State.WAITING);
-        	appendStackTraces(sb.getRootPath(), buffer, stackTraces, Thread.State.NEW);
-        	appendStackTraces(sb.getRootPath(), buffer, stackTraces, Thread.State.TERMINATED);
+        	bufferappend(buffer, plain, "************* Start Thread Dump " + dt + " *******************");
+        	bufferappend(buffer, plain, "");
+        	bufferappend(buffer, plain, "YaCy Version: " + versionstring);
+        	bufferappend(buffer, plain, "Total Memory = " + (Runtime.getRuntime().totalMemory()));
+        	bufferappend(buffer, plain, "Used&nbsp;&nbsp;Memory = " + (Runtime.getRuntime().totalMemory() - Runtime.getRuntime().freeMemory()));
+        	bufferappend(buffer, plain, "Free&nbsp;&nbsp;Memory = " + (Runtime.getRuntime().freeMemory()));
+        	bufferappend(buffer, plain, "");
+        	bufferappend(buffer, plain, "");
             
-        	buffer.append("************* End Thread Dump " + dt + " *******************").append("<br />");       	
+        	appendStackTraces(sb.getRootPath(), buffer, stackTraces, plain, Thread.State.BLOCKED);
+        	appendStackTraces(sb.getRootPath(), buffer, stackTraces, plain, Thread.State.RUNNABLE);
+        	appendStackTraces(sb.getRootPath(), buffer, stackTraces, plain, Thread.State.TIMED_WAITING);
+        	appendStackTraces(sb.getRootPath(), buffer, stackTraces, plain, Thread.State.WAITING);
+        	appendStackTraces(sb.getRootPath(), buffer, stackTraces, plain, Thread.State.NEW);
+        	appendStackTraces(sb.getRootPath(), buffer, stackTraces, plain, Thread.State.TERMINATED);
+            
+        	bufferappend(buffer, plain, "************* End Thread Dump " + dt + " *******************");
         
-        	prop.put("dump_content", buffer.toString());
-    	} else {
-    	    prop.put("dump", "0");
+        	prop.put("plain_content", buffer.toString());
+        	prop.put("plain", (plain) ? 1 : 0);
     	}
     	
        	return prop;    // return from serverObjects respond()
     }    
     
-    private static void appendStackTraces(File rootPath, StringBuffer buffer, Map<Thread,StackTraceElement[]> stackTraces, Thread.State stateIn) {
-        buffer.append("THREADS WITH STATES: " + stateIn.toString()).append("<br />").append("<br />");
-        File classPath = new File(rootPath, "source");
+    private static void appendStackTraces(File rootPath, StringBuffer buffer, Map<Thread,StackTraceElement[]> stackTraces, boolean plain, Thread.State stateIn) {
+        bufferappend(buffer, plain, "THREADS WITH STATES: " + stateIn.toString());
+        bufferappend(buffer, plain, "");
         
+        File classPath = new File(rootPath, "source");
+  
         for (Thread thread: stackTraces.keySet()) {
             StackTraceElement[] stackTraceElements = stackTraces.get(thread);
             StackTraceElement ste;
             String line;
-            if (stateIn.equals(thread.getState())) {
-                buffer.append("Thread= " + thread.getName() + " " + (thread.isDaemon()?"daemon":"") + " id=" + thread.getId() + " " + thread.getState().toString()).append("<br />");
+            String tracename = "";
+            File classFile;
+            if ((stateIn.equals(thread.getState()))  && (stackTraceElements.length > 0)) {
+                if (plain) {
+                    classFile = getClassFile(classPath, stackTraceElements[stackTraceElements.length - 1].getClassName());
+                    tracename = classFile.getName();
+                    if (tracename.endsWith(".java")) tracename = tracename.substring(0, tracename.length() - 5);
+                    if (tracename.length() > 20) tracename = tracename.substring(0, 20);
+                    while (tracename.length() < 20) tracename = tracename + "_";
+                    tracename = "[" + tracename + "] ";                
+                }                
+                bufferappend(buffer, plain, tracename + "Thread= " + thread.getName() + " " + (thread.isDaemon()?"daemon":"") + " id=" + thread.getId() + " " + thread.getState().toString());
                 for (int i = 0; i < stackTraceElements.length; i++) {
                     ste = stackTraceElements[i];
                     if (i == 0) {
-                        line = getLine(classPath, ste.getClassName(), ste.getLineNumber());
+                        line = getLine(getClassFile(classPath, ste.getClassName()), ste.getLineNumber());
                     } else {
                         line = null;
                     }
                     if ((line != null) && (line.length() > 0)) {
-                        buffer.append("at " + htmlTools.encodeUnicode2html(ste.toString(), true)).append(" [").append(line).append("]<br />");
+                        bufferappend(buffer, plain, tracename + "at " + htmlTools.encodeUnicode2html(ste.toString(), true) + " [" + line.trim() + "]");
                     } else {
-                        buffer.append("at " + htmlTools.encodeUnicode2html(ste.toString(), true)).append("<br />");
+                        bufferappend(buffer, plain, tracename + "at " + htmlTools.encodeUnicode2html(ste.toString(), true));
                     }
                 }
-                buffer.append("<br />");
+                bufferappend(buffer, plain, "");
             }
         }
-        buffer.append("<br />");
+        bufferappend(buffer, plain, "");
     }
     
-    private static String getLine(File sourcePath, String classname, int line) {
-        // find class
+    private static File getClassFile(File sourcePath, String classname) {
         String classPath = classname.replace('.', '/') + ".java";
         File file = new File(sourcePath, classPath);
+        return file;
+    }
+    
+    private static String getLine(File file, int line) {
+        // find class
         if (!file.exists()) return "";
         try {
             String lineString = nxTools.line(serverFileUtils.read(file), line);
@@ -147,4 +167,14 @@ public class Threaddump_p {
             return "@EXCEPTION: " + e.getMessage();
         }
     }
+    
+    private static void bufferappend(StringBuffer buffer, boolean plain, String a) {
+        buffer.append(a);
+        if (plain) {
+            buffer.append("\n");
+        } else {
+            buffer.append("<br />");
+        }
+    }
+
 }
