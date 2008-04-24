@@ -27,7 +27,9 @@ import de.anomic.http.httpHeader;
 import de.anomic.server.serverObjects;
 import de.anomic.server.serverSwitch;
 import de.anomic.server.servletProperties;
-import de.anomic.xml.rssReader;
+import de.anomic.xml.RSSFeed;
+import de.anomic.xml.RSSMessage;
+import de.anomic.xml.RSSReader;
 import de.anomic.yacy.yacyURL;
 
 // test url:
@@ -50,26 +52,27 @@ public class FeedReader_p {
             
             // int maxitems=Integer.parseInt(post.get("max", "0"));
             // int offset=Integer.parseInt(post.get("offset", "0")); //offset to the first displayed item
-            rssReader parser = new rssReader(url.toString());
+            RSSFeed feed = new RSSReader(url.toString()).getFeed();
 
-            prop.putHTML("page_title", parser.getChannel().getTitle());
-            if (parser.getChannel().getAuthor() == null) {
+            prop.putHTML("page_title", feed.getChannel().getTitle());
+            if (feed.getChannel().getAuthor() == null) {
                 prop.put("page_hasAuthor", "0");
             } else {
                 prop.put("page_hasAuthor", "1");
-                prop.putHTML("page_hasAuthor_author", parser.getChannel().getAuthor());
+                prop.putHTML("page_hasAuthor_author", feed.getChannel().getAuthor());
             }
-            prop.putHTML("page_description", parser.getChannel().getDescription());
+            prop.putHTML("page_description", feed.getChannel().getDescription());
 
-            for (int i = 0; i < parser.items(); i++) {
-                rssReader.Item item = parser.getItem(i);
+            int i = 0;
+            for (RSSMessage item: feed) {
                 prop.putHTML("page_items_" + i + "_author", item.getAuthor());
                 prop.putHTML("page_items_" + i + "_title", item.getTitle());
                 prop.put("page_items_" + i + "_link", item.getLink());
                 prop.put("page_items_" + i + "_description", item.getDescription());
                 prop.put("page_items_" + i + "_date", item.getPubDate());
+                i++;
             }
-            prop.put("page_items", parser.items());
+            prop.put("page_items", feed.size());
             prop.put("page", "1");
         }
     

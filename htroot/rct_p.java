@@ -35,7 +35,8 @@ import de.anomic.plasma.plasmaSwitchboard;
 import de.anomic.server.serverDate;
 import de.anomic.server.serverObjects;
 import de.anomic.server.serverSwitch;
-import de.anomic.xml.rssReader;
+import de.anomic.xml.RSSFeed;
+import de.anomic.xml.RSSMessage;
 import de.anomic.yacy.yacyClient;
 import de.anomic.yacy.yacyCore;
 import de.anomic.yacy.yacySeed;
@@ -52,11 +53,9 @@ public class rct_p {
             if (post.containsKey("retrieve")) {
                 String peerhash = post.get("peer", null);
                 yacySeed seed = (peerhash == null) ? null : yacyCore.seedDB.getConnected(peerhash);
-                rssReader reader = (seed == null) ? null : yacyClient.queryRemoteCrawlURLs(seed, 10);
-                if (reader != null) {
-                    rssReader.Item item;
-                    for (int i = 0; i < reader.items(); i++) {
-                        item = reader.getItem(i);
+                RSSFeed feed = (seed == null) ? null : yacyClient.queryRemoteCrawlURLs(seed, 10);
+                if (feed != null) {
+                    for (RSSMessage item: feed) {
                         //System.out.println("URL=" + item.getLink() + ", desc=" + item.getDescription() + ", pubDate=" + item.getPubDate());
                         
                         // put url on remote crawl stack

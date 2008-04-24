@@ -62,8 +62,9 @@ import de.anomic.plasma.parser.ParserException;
 import de.anomic.server.serverByteBuffer;
 import de.anomic.server.serverCharBuffer;
 import de.anomic.server.serverFileUtils;
-import de.anomic.xml.rssReader;
-import de.anomic.xml.rssReader.Item;
+import de.anomic.xml.RSSFeed;
+import de.anomic.xml.RSSReader;
+import de.anomic.xml.RSSMessage;
 import de.anomic.yacy.yacyURL;
 
 public class rssParser extends AbstractParser implements Parser {
@@ -100,30 +101,27 @@ public class rssParser extends AbstractParser implements Parser {
             serverByteBuffer text = new serverByteBuffer();
             serverCharBuffer authors = new serverCharBuffer();
             
-            rssReader reader = new rssReader(source);
+            RSSFeed feed = new RSSReader(source).getFeed();
             
             // getting the rss feed title and description
-            String feedTitle = reader.getChannel().getTitle();
+            String feedTitle = feed.getChannel().getTitle();
 
             // getting feed creator
-			String feedCreator = reader.getChannel().getAuthor();
+			String feedCreator = feed.getChannel().getAuthor();
 			if (feedCreator != null && feedCreator.length() > 0) authors.append(",").append(feedCreator);            
             
             // getting the feed description
-            String feedDescription = reader.getChannel().getDescription();
+            String feedDescription = feed.getChannel().getDescription();
             
-            if (reader.getImage() != null) {
-                yacyURL imgURL = new yacyURL(reader.getImage(), null);
+            if (feed.getImage() != null) {
+                yacyURL imgURL = new yacyURL(feed.getImage(), null);
                 images.put(imgURL.hash(), new htmlFilterImageEntry(imgURL, feedTitle, -1, -1));
             }            
             
             // loop through the feed items
-            for (int i = 0; i < reader.items(); i++) {
+            for (RSSMessage item: feed) {
                     // check for interruption
                     checkInterruption();
-                    
-                    // getting the next item
-					Item item = reader.getItem(i);	
                     
         			String itemTitle = item.getTitle();
                     yacyURL    itemURL   = new yacyURL(item.getLink(), null);

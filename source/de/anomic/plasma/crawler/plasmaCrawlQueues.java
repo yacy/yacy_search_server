@@ -47,7 +47,8 @@ import de.anomic.plasma.plasmaParser;
 import de.anomic.plasma.plasmaSwitchboard;
 import de.anomic.server.serverDate;
 import de.anomic.server.logging.serverLog;
-import de.anomic.xml.rssReader;
+import de.anomic.xml.RSSFeed;
+import de.anomic.xml.RSSMessage;
 import de.anomic.yacy.yacyClient;
 import de.anomic.yacy.yacyCore;
 import de.anomic.yacy.yacySeed;
@@ -295,14 +296,12 @@ public class plasmaCrawlQueues {
         if (seed == null) return false;
         
         // we know a peer which should provide remote crawl entries. load them now.
-        rssReader reader = (seed == null) ? null : yacyClient.queryRemoteCrawlURLs(seed, 20);
-        if (reader == null) return true;
+        RSSFeed feed = (seed == null) ? null : yacyClient.queryRemoteCrawlURLs(seed, 20);
+        if (feed == null) return true;
         // parse the rss
-        rssReader.Item item;
         yacyURL url, referrer;
         Date loaddate;
-        for (int i = 0; i < reader.items(); i++) {
-            item = reader.getItem(i);
+        for (RSSMessage item: feed) {
             //System.out.println("URL=" + item.getLink() + ", desc=" + item.getDescription() + ", pubDate=" + item.getPubDate());
             
             // put url on remote crawl stack

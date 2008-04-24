@@ -84,7 +84,8 @@ import de.anomic.server.serverCore;
 import de.anomic.server.serverDomains;
 import de.anomic.tools.crypt;
 import de.anomic.tools.nxTools;
-import de.anomic.xml.rssReader;
+import de.anomic.xml.RSSFeed;
+import de.anomic.xml.RSSReader;
 
 public final class yacyClient {
 
@@ -374,7 +375,7 @@ public final class yacyClient {
         }
     }
 
-    public static rssReader queryRemoteCrawlURLs(yacySeed target, int count) {
+    public static RSSFeed queryRemoteCrawlURLs(yacySeed target, int count) {
         // returns a list of 
         if (target == null) { return null; }
         if (yacyCore.seedDB.mySeed() == null) return null;
@@ -390,8 +391,8 @@ public final class yacyClient {
             /* a long time-out is needed */
             final byte[] result = wput("http://" + target.getClusterAddress() + "/yacy/urls.xml", target.getHexHash() + ".yacyh", post, 60000); 
             
-            rssReader reader = rssReader.parse(result);
-            if (reader == null) {
+            RSSFeed feed = RSSReader.parse(result).getFeed();
+            if (feed == null) {
                 // case where the rss reader does not understand the content
                 yacyCore.log.logWarning("yacyClient.queryRemoteCrawlURLs failed asking peer '" + target.getName() + "': probably bad response from remote peer");
                 System.out.println("***DEBUG*** rss input = " + new String(result));
@@ -400,7 +401,7 @@ public final class yacyClient {
                 //e.printStackTrace();
                 return null;
             }
-            return reader;
+            return feed;
         } catch (IOException e) {
             yacyCore.log.logSevere("yacyClient.queryRemoteCrawlURLs error asking peer '" + target.getName() + "':" + e.toString());
             return null;
