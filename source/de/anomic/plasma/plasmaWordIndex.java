@@ -61,6 +61,7 @@ import de.anomic.server.serverMemory;
 import de.anomic.server.logging.serverLog;
 import de.anomic.xml.RSSFeed;
 import de.anomic.xml.RSSMessage;
+import de.anomic.yacy.yacyCore;
 import de.anomic.yacy.yacyDHTAction;
 import de.anomic.yacy.yacySeedDB;
 import de.anomic.yacy.yacyURL;
@@ -665,7 +666,7 @@ public final class plasmaWordIndex implements indexRI {
                     "Anchors: " + ((document.getAnchors() == null) ? 0 : document.getAnchors().size()) +
                     "\n\tLinkStorageTime: " + (storageEndTime - startTime) + " ms | " +
                     "indexStorageTime: " + (indexingEndTime - storageEndTime) + " ms");
-            RSSFeed.channels("PEERNEWS").addMessage(new RSSMessage("Indexed web page", entry.url().toNormalform(true, false)));
+            RSSFeed.channels(yacyCore.channelName).addMessage(new RSSMessage("Indexed web page", entry.url().toNormalform(true, false)));
         }
         
         // finished

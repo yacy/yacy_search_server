@@ -191,6 +191,7 @@ public class yacySeed {
         final String flags = (String) this.dna.get(yacySeed.FLAGS);
         if ((flags == null) || (flags.length() != 4)) { this.dna.put(yacySeed.FLAGS, yacySeed.FLAGSZERO); }
         this.available = 0;
+        this.dna.put(yacySeed.NAME, checkPeerName(get(yacySeed.NAME, "&empty;")));
     }
 
     public yacySeed(String theHash) {
@@ -260,6 +261,17 @@ public class yacySeed {
         name = name.replace('.', '-');
         name = name.replace('_', '-');
         name = name.replace(':', '-');
+        return name;
+    }
+    
+    /**
+     * check the peer name: protect against usage as XSS hack
+     * @param name
+     * @return a checked name without "<" and ">"
+     */
+    private static String checkPeerName(String name) {
+        name.replaceAll("<", "_");
+        name.replaceAll(">", "_");
         return name;
     }
     
@@ -363,7 +375,7 @@ public class yacySeed {
     }
 
     public final String getName() {
-        return get(yacySeed.NAME, "&empty;");
+        return checkPeerName(get(yacySeed.NAME, "&empty;"));
     }
 
     public final String getHexHash() {
@@ -811,6 +823,9 @@ public class yacySeed {
         final String seed = crypt.simpleDecode(seedStr, key);
         if (seed == null) { return null; }
         final HashMap<String, String> dna = serverCodings.string2map(seed, ",");
+        String peerName = dna.get(yacySeed.NAME);
+        if (peerName == null) return null;
+        dna.put(yacySeed.NAME, checkPeerName(peerName));
         final String hash = (String) dna.remove(yacySeed.HASH);
         final yacySeed resultSeed = new yacySeed(hash, dna);
         if (properTest) {

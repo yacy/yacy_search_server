@@ -180,7 +180,7 @@ public final class search {
             theQuery = new plasmaSearchQuery(null, queryhashes, excludehashes, rankingProfile, maxdist, prefer, plasmaSearchQuery.contentdomParser(contentdom), false, count, 0, filter, plasmaSearchQuery.SEARCHDOM_LOCAL, null, -1, constraint, false, yacyURL.TLD_any_zone_filter, client);
             theQuery.domType = plasmaSearchQuery.SEARCHDOM_LOCAL;
             yacyCore.log.logInfo("INIT HASH SEARCH (query-" + abstracts + "): " + plasmaSearchQuery.anonymizedQueryHashes(theQuery.queryHashes) + " - " + theQuery.displayResults() + " links");
-            RSSFeed.channels("PEERNEWS").addMessage(new RSSMessage("Remote Search Request from " + remoteSeed.getName(), plasmaSearchQuery.anonymizedQueryHashes(theQuery.queryHashes)));
+            RSSFeed.channels(yacyCore.channelName).addMessage(new RSSMessage("Remote Search Request from " + remoteSeed.getName(), plasmaSearchQuery.anonymizedQueryHashes(theQuery.queryHashes)));
             
             // make event
             theSearch = plasmaSearchEvent.getEvent(theQuery, rankingProfile, sb.wordIndex, sb.crawlResults, null, true); 

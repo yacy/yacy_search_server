@@ -342,7 +342,7 @@ public class yacyNewsPool {
         incomingNews.push(record);
         
         // add message to feed channel
-        //RSSFeed.channels("PEERNEWS").addMessage(new RSSMessage("Incoming News: " + record.category() + " from " + record.originator(), record.attributes().toString()));
+        //RSSFeed.channels(yacyCore.channelName).addMessage(new RSSMessage("Incoming News: " + record.category() + " from " + record.originator(), record.attributes().toString()));
     }
     
     public int size(int dbKey) {

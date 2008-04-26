@@ -66,7 +66,7 @@ public class yacyNewsAction implements yacyPeerAction {
         String decodedString = de.anomic.tools.crypt.simpleDecode(recordString, "");
         yacyNewsRecord record = yacyNewsRecord.newRecord(decodedString);
         if (record != null) {
-            RSSFeed.channels("PEERNEWS").addMessage(new RSSMessage("Peer Arrival", peer.getName() + " has joined the network"));
+            RSSFeed.channels(yacyCore.channelName).addMessage(new RSSMessage("Peer Arrival", peer.getName() + " has joined the network"));
             //System.out.println("### news arrival from peer " + peer.getName() + ", decoded=" + decodedString + ", record=" + recordString + ", news=" + record.toString());
             String cre1 = (String) serverCodings.string2map(decodedString, ",").get("cre");
             String cre2 = (String) serverCodings.string2map(record.toString(), ",").get("cre");
@@ -83,7 +83,7 @@ public class yacyNewsAction implements yacyPeerAction {
     }
 
     public void processPeerDeparture(yacySeed peer) {
-        RSSFeed.channels("PEERNEWS").addMessage(new RSSMessage("Peer Departure", peer.getName() + " has left the network"));
+        RSSFeed.channels(yacyCore.channelName).addMessage(new RSSMessage("Peer Departure", peer.getName() + " has left the network"));
     }
 
     public void processPeerPing(yacySeed peer) {

@@ -199,7 +199,7 @@ public final class Connections_p {
                     // TODO Auto-generated catch block
                     e.printStackTrace();
                 }
-                prop.put("list_" + idx + "_sessionName", currentSession.getName());
+                prop.putHTML("list_" + idx + "_sessionName", currentSession.getName());
                 prop.put("list_" + idx + "_proto", prot);
                 if (sessionTime > 1000*60) {
                     prop.put("list_" + idx + "_ms", "0");

@@ -76,6 +76,8 @@ import de.anomic.server.serverDate;
 import de.anomic.server.serverSemaphore;
 import de.anomic.server.serverSwitch;
 import de.anomic.server.logging.serverLog;
+import de.anomic.xml.RSSFeed;
+import de.anomic.xml.RSSMessage;
 
 public class yacyCore {
 
@@ -99,6 +101,7 @@ public class yacyCore {
     private static final int PING_MIN_DBSIZE = 5;
     private static final int PING_MIN_PEERSEEN = 1; // min. accessible to force senior
     private static final long PING_MAX_DBAGE = 15 * 60 * 1000; // in milliseconds
+    public static final String channelName = "PEERNEWS";
 
     // public static yacyShare shareManager = null;
     // public static boolean terminate = false;
@@ -122,6 +125,11 @@ public class yacyCore {
 
         this.switchboard = sb;
         switchboard.setConfig("yacyStatus", "");
+        
+        // create a peer news channel
+        RSSFeed peernews = RSSFeed.channels(channelName);
+        peernews.setMaxsize(100);
+        peernews.addMessage(new RSSMessage("YaCy started", ""));
 
         // set log level
         log = new serverLog("YACY");
