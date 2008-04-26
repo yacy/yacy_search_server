@@ -340,6 +340,9 @@ public class yacyNewsPool {
         // double-check with old news
         if (newsDB.get(record.id()) != null) return;
         incomingNews.push(record);
+        
+        // add message to feed channel
+        //RSSFeed.channels("PEERNEWS").addMessage(new RSSMessage("Incoming News: " + record.category() + " from " + record.originator(), record.attributes().toString()));
     }
     
     public int size(int dbKey) {

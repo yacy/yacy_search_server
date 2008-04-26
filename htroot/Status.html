@@ -3,7 +3,6 @@
   <head>
     <title>YaCy '#[clientname]#': Console Status</title>
     #%env/templates/metas.template%#
-    <meta http-equiv="REFRESH" content="30" />
   </head>
   <body style="margin:0px;">
     #%env/templates/header.template%#
@@ -24,10 +23,13 @@
     
     <div class="welcome">
     <center>
-      <h2>Welcome to YaCy!</h2><br/>
+      <h2>Welcome to YaCy!</h2><br />
+      <iframe src="rssTerminal.html?set=PEERNEWS&width=468px&height=200px&maxlines=20&maxwidth=90"
+              width="482" height="220" scrolling="no" name="newsframe"
+              marginheight="0" marginwidth="0" frameborder="0"></iframe><br />
       <img src="Banner.png?textcolor=000000&amp;bgcolor=ddeeee&amp;bordercolor=aaaaaa" alt="banner" />
     </center>
-    
+
     <dl>
     
     <!-- urgent -->

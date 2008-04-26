@@ -218,7 +218,7 @@ public final class plasmaSearchEvent {
                     if (url == null) continue;
                     //System.out.println("***DEBUG*** SEARCH RESULT URL=" + url.toNormalform(false, false));
                 
-                    resultEntry = obtainResultEntry(uentry, (snippetComputationAllTime < 300) ? 1 : 0);
+                    resultEntry = obtainResultEntry(uentry, (snippetComputationAllTime < 100) ? 1 : 0);
                     if (resultEntry == null) continue; // the entry had some problems, cannot be used
                     urlRetrievalAllTime += resultEntry.dbRetrievalTime;
                     snippetComputationAllTime += resultEntry.snippetComputationTime;
@@ -350,7 +350,7 @@ public final class plasmaSearchEvent {
         if (query.contentdom == plasmaSearchQuery.CONTENTDOM_TEXT) {
             // attach text snippet
             startTime = System.currentTimeMillis();
-            plasmaSnippetCache.TextSnippet snippet = plasmaSnippetCache.retrieveTextSnippet(comp, snippetFetchWordHashes, (snippetFetchMode == 2), ((query.constraint != null) && (query.constraint.get(plasmaCondenser.flag_cat_indexof))), 180, 3000, (snippetFetchMode == 2) ? Integer.MAX_VALUE : 100000, query.isGlobal());
+            plasmaSnippetCache.TextSnippet snippet = plasmaSnippetCache.retrieveTextSnippet(comp, snippetFetchWordHashes, (snippetFetchMode == 2), ((query.constraint != null) && (query.constraint.get(plasmaCondenser.flag_cat_indexof))), 180, 3000, (snippetFetchMode == 2) ? Integer.MAX_VALUE : 30000, query.isGlobal());
             long snippetComputationTime = System.currentTimeMillis() - startTime;
             serverLog.logInfo("SEARCH_EVENT", "text snippet load time for " + comp.url() + ": " + snippetComputationTime + ", " + ((snippet.getErrorCode() < 11) ? "snippet found" : ("no snippet found (" + snippet.getError() + ")")));
             

@@ -51,6 +51,8 @@ import de.anomic.server.serverObjects;
 import de.anomic.server.serverProfiling;
 import de.anomic.server.serverSwitch;
 import de.anomic.tools.crypt;
+import de.anomic.xml.RSSFeed;
+import de.anomic.xml.RSSMessage;
 import de.anomic.yacy.yacyCore;
 import de.anomic.yacy.yacyNetwork;
 import de.anomic.yacy.yacySeed;
@@ -125,10 +127,11 @@ public final class search {
         TreeSet<String> abstractSet = ((abstracts.length() == 0) || (abstracts.equals("auto"))) ? null : plasmaSearchQuery.hashes2Set(abstracts);
         
         // store accessing peer
+        yacySeed remoteSeed = yacySeed.genRemoteSeed(oseed, key, true);
         if (yacyCore.seedDB == null) {
             yacyCore.log.logSevere("yacy.search: seed cache not initialized");
         } else {
-            yacyCore.peerActions.peerArrival(yacySeed.genRemoteSeed(oseed, key, true), true);
+            yacyCore.peerActions.peerArrival(remoteSeed, true);
         }
 
         // prepare search
@@ -177,6 +180,7 @@ public final class search {
             theQuery = new plasmaSearchQuery(null, queryhashes, excludehashes, rankingProfile, maxdist, prefer, plasmaSearchQuery.contentdomParser(contentdom), false, count, 0, filter, plasmaSearchQuery.SEARCHDOM_LOCAL, null, -1, constraint, false, yacyURL.TLD_any_zone_filter, client);
             theQuery.domType = plasmaSearchQuery.SEARCHDOM_LOCAL;
             yacyCore.log.logInfo("INIT HASH SEARCH (query-" + abstracts + "): " + plasmaSearchQuery.anonymizedQueryHashes(theQuery.queryHashes) + " - " + theQuery.displayResults() + " links");
+            RSSFeed.channels("PEERNEWS").addMessage(new RSSMessage("Remote Search Request from " + remoteSeed.getName(), plasmaSearchQuery.anonymizedQueryHashes(theQuery.queryHashes)));
             
             // make event
             theSearch = plasmaSearchEvent.getEvent(theQuery, rankingProfile, sb.wordIndex, sb.crawlResults, null, true); 

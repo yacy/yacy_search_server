@@ -63,6 +63,7 @@ import java.net.Socket;
 import java.net.SocketException;
 import java.nio.channels.ClosedByInterruptException;
 import java.security.KeyStore;
+import java.util.ConcurrentModificationException;
 import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -481,7 +482,13 @@ public final class serverCore extends serverAbstractBusyThread implements server
         
         // shut down all busySessions
         if (this.busySessions != null) for (Session session: this.busySessions) {
-            try {session.interrupt();} catch (SecurityException e ) {e.printStackTrace();}
+            try {
+                session.interrupt();
+            } catch (SecurityException e ) {
+                e.printStackTrace();
+            } catch (ConcurrentModificationException e) {
+                e.printStackTrace();
+            }
         }
         
         // closing the port forwarding channel

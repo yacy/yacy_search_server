@@ -5,52 +5,41 @@
 <title>rss terminal</title>
 <style type="text/css">
 
-div#container {
-  padding:6px;
-  background:#fff;
-  border:1px solid #000;
-  width: 600px;
-  height: 360px;
+div#feedbox {
+  padding-left: 6px;
+  padding-top: 6px;
+  background: #fff;
+  border:1px solid #888;
   margin:0 auto;
   text-align:left;
-}
-
-div#container p {
-  margin:0px 0;
-}
-
-div#scrollObject { 
-  position: absolute; 
-  overflow: hidden;
-  width: 600px;
-  height: 360px;
-}
-
-div#content {
-  position:absolute;
   font:9px 'Lucida Console', 'Courier New', monospace;
-  top:0;
-  left:0;
+}
+
+div#feedbox p {
+  margin:0px 0;
 }
 </style>
 
 <script type="text/javascript" src="/js/ajax.js"></script>
 <script type="text/javascript" src="/js/rss2.js"></script>
+<script type="text/javascript" src="/js/query.js"></script>
 <script type="text/javascript">
 
 var lines = new Array();
-var maxlines = 360 / 9;
-var maxwidth = 600 / 5;
-var maxtime = 30000; // time that should be wasted until everything is scrolled
+var maxlines = 20;
+var maxwidth = 90;
+var maxtime = 10000; // time that should be wasted until everything is scrolled
 var minwait = 50; // if this is too short, the CPU will eat all performance
 var maxwait = 500;
 var scroller = null;
 var idleping = null;
+var loader = null;
 var lastwait = 1000;
 var tab = "&nbsp;&nbsp;";
 
 function fillLines() {
-  for (var i = 0; i < maxlines; i++) {
+  for (var i = 0; i < maxlines + 1; i++) {
+    //addLine(i + "123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789");
     addLine("");
   }
 }
@@ -130,22 +119,36 @@ function idlepingExec() {
   }
 }
 
-</script>
+function loaderInit() {
+  loader=window.setInterval("load()", 8000);
+  load();
+}
 
+function load() {
+  getRSS("http://localhost:8080/xml/feed.rss?set=PEERNEWS");
+}
+
+function windowsizing() {
+  if (query.maxlines) maxlines = query.maxlines;
+  if (query.maxwidth) maxwidth = query.maxwidth;
+  if (query.maxtime) maxtime = query.maxtime;
+  if (query.minwait) minwait = query.minwait;
+  if (query.maxwait) maxwait = query.maxwait;
+  if (query.width) {
+    document.getElementById("feedbox").style.width = query.width;
+  }
+  if (query.height) {
+    document.getElementById("feedbox").style.height = query.height;
+  }
+}
+
+</script>
 </head>
-  <body>
-    <div id="container">
-      <div id="scrollObject">
-        <div id="content"></div>
-      </div>
-    </div>
-  </body>
 
-<script type="text/javascript">
-fillLines();
-idlepingInit();
-getRSS("http://localhost:8080/yacysearch.rss?search=java&count=100");
-//getRSS("http://news.google.com/news?output=rss");
-</script>
+<body onload="self.getURLparameters();windowsizing();fillLines();idlepingInit();loaderInit();">
+  <div id="feedbox">
+      <p id="content"></p>
+  </div>
+</body>
 
 </html>

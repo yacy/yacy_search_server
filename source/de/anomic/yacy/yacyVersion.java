@@ -37,7 +37,6 @@ import java.util.Comparator;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
-import java.util.SortedSet;
 import java.util.TreeSet;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -511,7 +510,7 @@ public final class yacyVersion implements Comparator<yacyVersion>, Comparable<ya
         String[] downloaded = filesPath.list();
           
         // parse all filenames and put them in a sorted set
-        SortedSet<yacyVersion> downloadedreleases = new TreeSet<yacyVersion>();
+        TreeSet<yacyVersion> downloadedreleases = new TreeSet<yacyVersion>();
         for (int j = 0; j < downloaded.length; j++) {
             try {
                 release = new yacyVersion(downloaded[j]);
@@ -534,20 +533,18 @@ public final class yacyVersion implements Comparator<yacyVersion>, Comparable<ya
             // remove old files
             long now = System.currentTimeMillis();
             final long deleteAfterMillis = deleteAfterDays * 24 * 60 * 60000l;
-            String lastMain = null;
-            String filename;
-            for (final yacyVersion aRelease: downloadedreleases) {
-                filename = aRelease.name;
-                if(keepMain && aRelease.mainRelease) {
-                    // keep this one, delete last remembered main release file
-                    if(lastMain != null) {
-                        filename = lastMain;
-                    }
-                    lastMain = aRelease.name;
+            final Iterator<yacyVersion> iter = downloadedreleases.iterator();
+            while (iter.hasNext()) {
+                release = iter.next();
+                
+                if(keepMain && release.mainRelease) {
+                    // we found the latest main release
+                    keepMain = false;
+                    continue;
                 }
                 
                 // check file age
-                File downloadedFile = new File(filesPath + File.separator + filename);
+                File downloadedFile = new File(filesPath + File.separator + release.name);
                 if(now - downloadedFile.lastModified() > deleteAfterMillis) {
                     // delete file
                     if(!downloadedFile.delete()) {

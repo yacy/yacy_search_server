@@ -47,7 +47,7 @@ public class feed {
      if ((post == null) || (env == null)) return prop;
      //boolean authorized = sb.adminAuthenticated(header) >= 2;
      
-     String channelName = post.get("channel");
+     String channelName = post.get("set");
      if (channelName == null) return prop;
      
      RSSFeed feed = RSSFeed.channels(channelName);
