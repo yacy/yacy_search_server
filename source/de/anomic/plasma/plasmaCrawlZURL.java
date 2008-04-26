@@ -116,7 +116,11 @@ public class plasmaCrawlZURL {
     }
     
     public Entry top(int pos) {
-        String urlhash = (String) stack.get(pos);
+        String urlhash;
+        synchronized (stack) {
+            if (pos >= stack.size()) return null;
+            urlhash = (String) stack.get(pos);
+        }
         if (urlhash == null) return null;
         return getEntry(urlhash);
     }
