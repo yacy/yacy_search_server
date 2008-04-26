@@ -338,21 +338,21 @@ public final class plasmaParser {
     	if ((encoding == null) || (encoding.length() == 0)) return "ISO-8859-1";
     	
     	// trim encoding string
-    	encoding = encoding.trim();
+    	encoding = encoding.toUpperCase().trim();
     	
-    	if (encoding.toLowerCase().startsWith("windows") && encoding.length() > 7) {
+    	if (encoding.toLowerCase().startsWith("WINDOWS") && encoding.length() > 7) {
     		char c = encoding.charAt(7);
-    		if (c == '_') encoding = "windows-" + encoding.substring(8);
-    		else if ((c >= '0') && (c <= '9')) encoding = "windows-" + encoding.substring(7);
+    		if (c == '_') encoding = "WINDOWS-" + encoding.substring(8);
+    		else if ((c >= '0') && (c <= '9')) encoding = "WINDOWS-" + encoding.substring(7);
     	}
     	
-    	if (encoding.toLowerCase().startsWith("iso") && encoding.length() > 3) {
+    	if (encoding.toLowerCase().startsWith("ISO") && encoding.length() > 3) {
     		char c = encoding.charAt(3);
     		if (c == '_') encoding = "ISO-" + encoding.substring(4);
     		else if ((c >= '0') && (c <= '9')) encoding = "ISO-" + encoding.substring(3);    		
     	}
     	
-    	if (encoding.toLowerCase().startsWith("iso") && encoding.length() > 8) {
+    	if (encoding.toLowerCase().startsWith("ISO") && encoding.length() > 8) {
     		char c = encoding.charAt(8);
     		if (c == '_') encoding = encoding.substring(0,8) + "-" + encoding.substring(9);
     		else if ((c >= '0') && (c <= '9')) encoding = encoding.substring(0,8) + "-" + encoding.substring(8);    		
@@ -360,17 +360,17 @@ public final class plasmaParser {
 
     	
     	// converting cp\d{4} -> windows-\d{4}
-    	if (encoding.toLowerCase().matches("cp([_-])?125[0-8]")) {
+    	if (encoding.toLowerCase().matches("CP([_-])?125[0-8]")) {
     		char c = encoding.charAt(2);
-    		if (c == '_' || c == '-') encoding = "windows-" + encoding.substring(3);
-    		else if ((c >= '0') && (c <= '9')) encoding = "windows-" + encoding.substring(2);    		
+    		if (c == '_' || c == '-') encoding = "WINDOWS-" + encoding.substring(3);
+    		else if ((c >= '0') && (c <= '9')) encoding = "WINDOWS-" + encoding.substring(2);    		
     	}    	
     	
-    	if (encoding.toLowerCase().matches("gb[_-]?2312([-_]80)?")) {
-    		encoding = "x-EUC-CN";
+    	if (encoding.toLowerCase().matches("GB[_-]?2312([-_]80)?")) {
+    		encoding = "X-EUC-CN";
     	}
     	
-    	if (encoding.toLowerCase().matches(".*utf[-_]?8.*")) {
+    	if (encoding.toLowerCase().matches(".*UTF[-_]?8.*")) {
     		encoding = "UTF-8";
     	}
     	
@@ -636,7 +636,7 @@ public final class plasmaParser {
             
         } catch (UnsupportedEncodingException e) {
             String errorMsg = "Unsupported charset encoding: " + e.getMessage();
-            this.theLogger.logSevere("Unable to parse '" + location + "'. " + errorMsg);
+            this.theLogger.logSevere("Unable to parse '" + location + "'. " + errorMsg, e);
             throw new ParserException(errorMsg,location,plasmaCrawlEURL.DENIED_UNSUPPORTED_CHARSET);                	
         } catch (Exception e) {
             // Interrupted- and Parser-Exceptions should pass through
