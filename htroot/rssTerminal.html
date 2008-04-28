@@ -36,11 +36,14 @@ var idleping = null;
 var loader = null;
 var lastwait = 1000;
 var tab = "&nbsp;&nbsp;";
+var lastShow = new Date();
 
 function fillLines() {
+alert(maxlines);
   for (var i = 0; i < maxlines + 1; i++) {
-    //addLine(i + "123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789");
-    addLine("");
+  alert(maxlines);http://localhost:8080/Steering.html?shutdown=
+    addLine(i + "-123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789-");
+    //addLine("");
   }
 }
 
@@ -61,11 +64,14 @@ function addLine(line) {
 }
 
 function show() {
+  now = new Date();
+  if (now.getTime() - lastShow.getTime() < 50) return;
   var doc = document.getElementById("content");
   doc.innerHTML = "";
   for (var i = 0; i < maxlines; i++) {
-    doc.innerHTML += lines[i] + "<br />";
+    if (lines[i]) doc.innerHTML += lines[i] + "<br />";
   }
+  lastShow = new Date();
 }
 
 function newwait() {
@@ -120,12 +126,12 @@ function idlepingExec() {
 }
 
 function loaderInit() {
-  loader=window.setInterval("load()", 8000);
+  loader=window.setInterval("load()", 6000);
   load();
 }
 
 function load() {
-  getRSS("http://localhost:8080/xml/feed.rss?set=PEERNEWS");
+  getRSS("/xml/feed.rss?set=PEERNEWS&count=50");
 }
 
 function windowsizing() {
@@ -145,7 +151,7 @@ function windowsizing() {
 </script>
 </head>
 
-<body onload="self.getURLparameters();windowsizing();fillLines();idlepingInit();loaderInit();">
+<body onload="self.getURLparameters();windowsizing();idlepingInit();loaderInit();">
   <div id="feedbox">
       <p id="content"></p>
   </div>

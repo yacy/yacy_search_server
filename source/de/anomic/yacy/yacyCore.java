@@ -128,7 +128,7 @@ public class yacyCore {
         
         // create a peer news channel
         RSSFeed peernews = RSSFeed.channels(channelName);
-        peernews.setMaxsize(100);
+        peernews.setMaxsize(1000);
         peernews.addMessage(new RSSMessage("YaCy started", ""));
 
         // set log level

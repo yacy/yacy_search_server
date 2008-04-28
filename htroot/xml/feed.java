@@ -52,7 +52,7 @@ public class feed {
      
      RSSFeed feed = RSSFeed.channels(channelName);
      if ((feed == null) || (feed.size() == 0)) return prop;
-     int count = post.getInt("count", 10);
+     int count = post.getInt("count", 100);
      
      RSSMessage message = feed.getChannel();
      if (message != null) {
