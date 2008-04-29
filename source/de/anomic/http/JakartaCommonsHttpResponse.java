@@ -118,11 +118,15 @@ public class JakartaCommonsHttpResponse {
      */
     public InputStream getDataAsStream() throws IOException {
         InputStream inStream = method.getResponseBodyAsStream();
-        if (getResponseHeader().gzip()) {
-            inStream = new GZIPInputStream(inStream);
+        if(inStream != null) {
+            if (getResponseHeader().gzip()) {
+                inStream = new GZIPInputStream(inStream);
+            }
+            // count bytes for overall http-statistics
+            return new httpdByteCountInputStream(inStream, incomingAccountingName);
+        } else {
+            return null;
         }
-        // count bytes for overall http-statistics
-        return new httpdByteCountInputStream(inStream, incomingAccountingName);
     }
 
     /*
