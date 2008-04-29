@@ -82,8 +82,8 @@ public class ConfigProperties_p {
         keys = list.iterator();
         while(keys.hasNext()){
             key = (String) keys.next();
-            prop.put("options_"+count+"_key", key);
-            prop.put("options_"+count+"_value", env.getConfig(key, "ERROR"));
+            prop.putHTML("options_"+count+"_key", key);
+            prop.putHTML("options_"+count+"_value", env.getConfig(key, "ERROR"));
             count++;        
         }
 
