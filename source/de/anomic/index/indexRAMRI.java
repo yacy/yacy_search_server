@@ -61,24 +61,11 @@ public final class indexRAMRI implements indexRI, indexRIReader {
         this.cacheReferenceCountLimit = wCacheReferenceCountLimitInit;
         this.cacheReferenceAgeLimit = wCacheReferenceAgeLimitInit;
         this.log = log;
-        File indexArrayFile = new File(databaseRoot, oldArrayName);
         this.indexHeapFile = new File(databaseRoot, newHeapName);
         this.heap = new indexContainerHeap(payloadrow, log);
         
         // read in dump of last session
-        if (indexArrayFile.exists()) {
-            try {
-                heap.restoreArray(indexArrayFile);
-                for (indexContainer ic : (Iterable<indexContainer>) heap.wordContainers(null, false)) {
-                    this.hashDate.setScore(ic.getWordHash(), intTime(ic.lastWrote()));
-                    this.hashScore.setScore(ic.getWordHash(), ic.size());
-                }
-            } catch (IOException e){
-                log.logSevere("unable to restore cache dump: " + e.getMessage(), e);
-            }
-            indexArrayFile.delete();
-            if (indexArrayFile.exists()) log.logSevere("cannot delete old array file: " + indexArrayFile.toString() + "; please delete manually");
-        } else if (indexHeapFile.exists()) {
+        if (indexHeapFile.exists()) {
             try {
                 heap.initWriteMode(indexHeapFile);
                 for (indexContainer ic : (Iterable<indexContainer>) heap.wordContainers(null, false)) {

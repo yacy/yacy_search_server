@@ -206,25 +206,6 @@ proxyCacheSize__pro = 1024
 # storage place for new releases
 releases = DATA/RELEASE
 
-# use the mostly direct mapping of URLs to Filenames
-# makes it easy watching the content of the cache using file browsers
-# problems arise when a file already exists where a new entry expects a directory
-# or vice versa.
-# when set to false, the file names are set to the hash of the URL and the
-# directory is build from protokoll, hostname and port, as with the old
-# layout.
-# the advantage of this scheme is that no directory/file collisions can
-# occurr.
-# switching this flag will take effect after a restart of yacy.
-# files that are present under the previously used layout will be renamed
-# to the new location and thus be accessible immediately. so an accumulated
-# cache is still usable after the switch.
-# possible values are {tree, hash}
-proxyCacheLayout = hash
-
-# the migration flag shows, if the different layout shall be migrated from one to another
-proxyCacheMigration = true
-
 # the following mime-types are the whitelist for indexing
 #
 # parseableMimeTypes.HTML: specifies mime-types that can be indexed with built-in html parser

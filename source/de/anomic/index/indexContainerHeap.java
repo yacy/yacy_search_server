@@ -42,19 +42,12 @@ import java.util.Set;
 import java.util.SortedMap;
 import java.util.TreeMap;
 
-import de.anomic.kelondro.kelondroBase64Order;
-import de.anomic.kelondro.kelondroBufferedRA;
 import de.anomic.kelondro.kelondroByteOrder;
 import de.anomic.kelondro.kelondroBytesLongMap;
 import de.anomic.kelondro.kelondroCloneableIterator;
-import de.anomic.kelondro.kelondroException;
-import de.anomic.kelondro.kelondroFixedWidthArray;
 import de.anomic.kelondro.kelondroRow;
 import de.anomic.kelondro.kelondroRowSet;
-import de.anomic.kelondro.kelondroRow.EntryIndex;
-import de.anomic.server.serverMemory;
 import de.anomic.server.logging.serverLog;
-import de.anomic.yacy.yacySeedDB;
 
 public final class indexContainerHeap {
 
@@ -154,7 +147,7 @@ public final class indexContainerHeap {
         synchronized (index) {
             is = new DataInputStream(new BufferedInputStream(new FileInputStream(heapFile), 64*1024));
         
-            // dont test available() here because this does not work for files > 2GB
+            // don't test available() here because this does not work for files > 2GB
             loop: while (true) {
                 // remember seek position
                 seek0 = seek;
@@ -474,72 +467,6 @@ public final class indexContainerHeap {
         if (container == null) container = new indexContainer(wordHash, this.payloadrow, 1);
         container.put(newEntry);
         cache.put(wordHash, container);
-    }
-    
-    /**
-     * this is a compatibility method for a old heap dump format. don't use it if not necessary
-     * @param indexArrayFile
-     * @throws IOException
-     */
-    public void restoreArray(File indexArrayFile) throws IOException {
-        // is only here to read old array data structures
-        if (!(indexArrayFile.exists())) return;
-        this.readOnlyMode = false;
-        kelondroFixedWidthArray dumpArray;
-        kelondroBufferedRA readBuffer = null;
-        kelondroRow bufferStructureBasis = new kelondroRow(
-                    "byte[] wordhash-" + yacySeedDB.commonHashLength + ", " +
-                    "Cardinal occ-4 {b256}, " +
-                    "Cardinal time-8 {b256}, " +
-                    "byte[] urlprops-" + payloadrow.objectsize,
-                    kelondroBase64Order.enhancedCoder, 0);
-        dumpArray = new kelondroFixedWidthArray(indexArrayFile, bufferStructureBasis, 0);
-        log.logInfo("started restore of ram cache '" + indexArrayFile.getName() + "', " + dumpArray.size() + " word/URL relations");
-        long startTime = System.currentTimeMillis();
-        long messageTime = System.currentTimeMillis() + 5000;
-        long urlCount = 0, urlsPerSecond = 0;
-        this.cache = Collections.synchronizedSortedMap(new TreeMap<String, indexContainer>(new kelondroByteOrder.StringOrder(payloadrow.getOrdering())));
-        try {
-            Iterator<EntryIndex> i = dumpArray.contentRows(-1);
-            String wordHash;
-            //long creationTime;
-            indexRWIRowEntry wordEntry;
-            kelondroRow.EntryIndex row;
-            while (i.hasNext()) {
-                // get out one entry
-                row = i.next();
-                if ((row == null) || (row.empty(0)) || (row.empty(3))) continue;
-                wordHash = row.getColString(0, "UTF-8");
-                //creationTime = kelondroRecords.bytes2long(row[2]);
-                wordEntry = new indexRWIRowEntry(row.getColBytes(3));
-                
-                // store to cache
-                indexContainer container = cache.get(wordHash);
-                if (container == null) container = new indexContainer(wordHash, payloadrow, 1);
-                container.put(wordEntry);
-                cache.put(wordHash, container);
-                
-                urlCount++;
-                // protect against memory shortage
-                //while (serverMemory.free() < 1000000) {flushFromMem(); java.lang.System.gc();}
-                // write a log
-                if (System.currentTimeMillis() > messageTime) {
-                    serverMemory.gc(1000, "indexRAMRI, for better statistic-2"); // for better statistic - thq
-                    urlsPerSecond = 1 + urlCount * 1000 / (1 + System.currentTimeMillis() - startTime);
-                    log.logInfo("restoring status: " + urlCount + " urls done, " + ((dumpArray.size() - urlCount) / urlsPerSecond) + " seconds remaining, free mem = " + (serverMemory.free() / 1024 / 1024) + "MB");
-                    messageTime = System.currentTimeMillis() + 5000;
-                }
-            }
-            if (readBuffer != null) readBuffer.close();
-            dumpArray.close();
-            dumpArray = null;
-            log.logInfo("finished restore: " + cache.size() + " words in " + ((System.currentTimeMillis() - startTime) / 1000) + " seconds");
-        } catch (kelondroException e) {
-            // restore failed
-            log.logSevere("failed restore of indexCache array dump: " + e.getMessage(), e);
-        } finally {
-            if (dumpArray != null) try {dumpArray.close();}catch(Exception e){}
-        }
     }
     
 }

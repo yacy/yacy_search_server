@@ -61,14 +61,12 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.lang.StringBuffer;
 import java.net.InetAddress;
-import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.Iterator;
-import java.util.LinkedList;
 import java.util.Map;
-import java.util.TreeMap;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -100,16 +98,14 @@ public final class plasmaHTCache {
     public  static final long oneday = 1000 * 60 * 60 * 24; // milliseconds of a day
 
     static kelondroMapObjects responseHeaderDB = null;
-    private static final LinkedList<Entry> cacheStack = new LinkedList<Entry>();
-    private static final Map<String, File> cacheAge = Collections.synchronizedMap(new TreeMap<String, File>()); // a <date+hash, cache-path> - relation
+    private static final ConcurrentLinkedQueue<Entry> cacheStack = new ConcurrentLinkedQueue<Entry>();
+    private static final ConcurrentHashMap<String, File> cacheAge = new ConcurrentHashMap<String, File>(); // a <date+hash, cache-path> - relation
     public static long curCacheSize = 0;
     public static long maxCacheSize;
     public static File cachePath;
     public static final serverLog log = new serverLog("HTCACHE");
-    public static final HashSet<File> filesInUse = new HashSet<File>(); // can we delete this file
-    public static String cacheLayout;
-    public static boolean cacheMigration;
-
+    private static long lastcleanup = System.currentTimeMillis();
+    
     private static ResourceInfoFactory objFactory = new ResourceInfoFactory();
     private static serverThread cacheScanThread;
 
@@ -126,29 +122,6 @@ public final class plasmaHTCache {
     public static final char DT_BINARY  = 'b';
     public static final char DT_UNKNOWN = 'u';
 
-    // appearance locations: (used for flags)
-    public static final int AP_TITLE     =  0; // title tag from html header
-    public static final int AP_H1        =  1; // headline - top level
-    public static final int AP_H2        =  2; // headline, second level
-    public static final int AP_H3        =  3; // headline, 3rd level
-    public static final int AP_H4        =  4; // headline, 4th level
-    public static final int AP_H5        =  5; // headline, 5th level
-    public static final int AP_H6        =  6; // headline, 6th level
-    public static final int AP_TEXT      =  7; // word appears in text (used to check validation of other appearances against spam)
-    public static final int AP_DOM       =  8; // word inside an url: in Domain
-    public static final int AP_PATH      =  9; // word inside an url: in path
-    public static final int AP_IMG       = 10; // tag inside image references
-    public static final int AP_ANCHOR    = 11; // anchor description
-    public static final int AP_ENV       = 12; // word appears in environment (similar to anchor appearance)
-    public static final int AP_BOLD      = 13; // may be interpreted as emphasized
-    public static final int AP_ITALICS   = 14; // may be interpreted as emphasized
-    public static final int AP_WEAK      = 15; // for Text that is small or bareley visible
-    public static final int AP_INVISIBLE = 16; // good for spam detection
-    public static final int AP_TAG       = 17; // for tagged indexeing (i.e. using mp3 tags)
-    public static final int AP_AUTHOR    = 18; // word appears in author name
-    public static final int AP_OPUS      = 19; // word appears in name of opus, which may be an album name (in mp3 tags)
-    public static final int AP_TRACK     = 20; // word appears in track name (i.e. in mp3 tags)
-    
     // URL attributes
     public static final int UA_LOCAL    =  0; // URL was crawled locally
     public static final int UA_TILDE    =  1; // tilde appears in URL
@@ -229,11 +202,9 @@ public final class plasmaHTCache {
         return doctype;
     }
     
-    public static void init(File htCachePath, long CacheSizeMax, String layout, boolean migration) {
+    public static void init(File htCachePath, long CacheSizeMax) {
         
         cachePath = htCachePath;
-        cacheLayout = layout;
-        cacheMigration = migration;
         maxCacheSize = CacheSizeMax;
         
 
@@ -328,9 +299,7 @@ public final class plasmaHTCache {
     }
 
     public static int size() {
-        synchronized (cacheStack) {
-            return cacheStack.size();
-        }
+        return cacheStack.size();
     }
 
     public static int dbSize() {
@@ -338,17 +307,11 @@ public final class plasmaHTCache {
     }
     
     public static void push(Entry entry) {
-        synchronized (cacheStack) {
-            cacheStack.add(entry);
-        }
+        cacheStack.add(entry);
     }
 
     public static Entry pop() {
-        synchronized (cacheStack) {
-        if (cacheStack.size() > 0)
-            return cacheStack.removeFirst();
-        return null;
-        }
+        return cacheStack.poll();
     }
 
     /**
@@ -388,18 +351,15 @@ public final class plasmaHTCache {
         return true;
     }
 
-    private static long lastcleanup = System.currentTimeMillis();
     public static void writeFileAnnouncement(File file) {
-        synchronized (cacheAge) {
-            if (file.exists()) {
-                curCacheSize += file.length();
-                if (System.currentTimeMillis() - lastcleanup > 300000) {
-                    // call the cleanup job only every 5 minutes
-                    cleanup();
-                    lastcleanup = System.currentTimeMillis();
-                }
-                cacheAge.put(ageString(file.lastModified(), file), file);
+        if (file.exists()) {
+            curCacheSize += file.length();
+            if (System.currentTimeMillis() - lastcleanup > 300000) {
+                // call the cleanup job only every 5 minutes
+                cleanup();
+                lastcleanup = System.currentTimeMillis();
             }
+            cacheAge.put(ageString(file.lastModified(), file), file);
         }
     }
     
@@ -419,7 +379,7 @@ public final class plasmaHTCache {
     }
 
     private static boolean deleteFile(File obj) {
-        if (obj.exists() && !filesInUse.contains(obj)) {
+        if (obj.exists()) {
             long size = obj.length();
             if (obj.delete()) {
                 curCacheSize -= size;
@@ -446,41 +406,38 @@ public final class plasmaHTCache {
 
     private static void cleanupDoIt(long newCacheSize) {
         File file;
-        synchronized (cacheAge) {
-            Iterator<Map.Entry<String, File>> iter = cacheAge.entrySet().iterator();
-            Map.Entry<String, File> entry;
-            while (iter.hasNext() && curCacheSize >= newCacheSize) {
-                if (Thread.currentThread().isInterrupted()) return;
-                entry = iter.next();
-                String key = entry.getKey();
-                file = entry.getValue();
-                long t = Long.parseLong(key.substring(0, 16), 16);
-                if (System.currentTimeMillis() - t < 300000) break; // files must have been at least 5 minutes in the cache before they are deleted
-                if (file != null) {
-                    if (filesInUse.contains(file)) continue;
-                    if (log.isFinest()) log.logFinest("Trying to delete [" + key + "] = old file: " + file.toString());
-                    // This needs to be called *before* the file is deleted
-                    String urlHash = getHash(file);
-                    if (deleteFileandDirs(file, "OLD")) {
-                        try {
-                            // As the file is gone, the entry in responseHeader.db is not needed anymore
-                            if (urlHash != null) {
-                                if (log.isFinest()) log.logFinest("Trying to remove responseHeader for URLhash: " + urlHash);
-                                responseHeaderDB.remove(urlHash);
-                            } else {
-                                yacyURL url = getURL(file);
-                                if (url != null) {
-                                    if (log.isFinest()) log.logFinest("Trying to remove responseHeader for URL: " + url.toNormalform(false, true));
-                                    responseHeaderDB.remove(url.hash());
-                                }
+        Iterator<Map.Entry<String, File>> iter = cacheAge.entrySet().iterator();
+        Map.Entry<String, File> entry;
+        while (iter.hasNext() && curCacheSize >= newCacheSize) {
+            if (Thread.currentThread().isInterrupted()) return;
+            entry = iter.next();
+            String key = entry.getKey();
+            file = entry.getValue();
+            long t = Long.parseLong(key.substring(0, 16), 16);
+            if (System.currentTimeMillis() - t < 300000) break; // files must have been at least 5 minutes in the cache before they are deleted
+            if (file != null) {
+                if (log.isFinest()) log.logFinest("Trying to delete [" + key + "] = old file: " + file.toString());
+                // This needs to be called *before* the file is deleted
+                String urlHash = getHash(file);
+                if (deleteFileandDirs(file, "OLD")) {
+                    try {
+                        // As the file is gone, the entry in responseHeader.db is not needed anymore
+                        if (urlHash != null) {
+                            if (log.isFinest()) log.logFinest("Trying to remove responseHeader for URLhash: " + urlHash);
+                            responseHeaderDB.remove(urlHash);
+                        } else {
+                            yacyURL url = getURL(file);
+                            if (url != null) {
+                                if (log.isFinest()) log.logFinest("Trying to remove responseHeader for URL: " + url.toNormalform(false, true));
+                                responseHeaderDB.remove(url.hash());
                             }
-                        } catch (IOException e) {
-                            log.logInfo("IOExeption removing response header from DB: " + e.getMessage(), e);
                         }
+                    } catch (IOException e) {
+                        log.logInfo("IOExeption removing response header from DB: " + e.getMessage(), e);
                     }
                 }
-                iter.remove();
             }
+            iter.remove();
         }
     }
 
@@ -664,29 +621,6 @@ public final class plasmaHTCache {
         return plasmaParser.mediaExtContains(urlString);
     }
 
-    /**
-     * This function moves an old cached object (if it exists) to the new position
-     */
-    private static void moveCachedObject(File oldpath, File newpath) {
-        try {
-            if (oldpath.exists() && oldpath.isFile() && (!newpath.exists())) {
-                long d = oldpath.lastModified();
-                newpath.getParentFile().mkdirs();
-                if (oldpath.renameTo(newpath)) {
-                    cacheAge.put(ageString(d, newpath), newpath);
-                    File obj = oldpath.getParentFile();
-                    while ((!(obj.equals(cachePath))) && (obj.isDirectory()) && (obj.list().length == 0)) {
-                        if (obj.delete()) if (log.isFine()) log.logFine("DELETED EMPTY DIRECTORY : " + obj.toString());
-                        obj = obj.getParentFile();
-                    }
-                }
-            }
-        } catch (Exception e) {
-            if (log.isFine()) log.logFine("moveCachedObject('" + oldpath.toString() + "','" +
-                        newpath.toString() + "')", e);
-        }
-    }
-
     private static String replaceRegex(String input, String regex, String replacement) {
         if (input == null) { return ""; }
         if (input.length() > 0) {
@@ -767,34 +701,9 @@ public final class plasmaHTCache {
             fileName.append('!').append(port);
         }
 
-        // generate cache path according to storage method
-        if (cacheLayout.equals("tree")) {
-            File FileTree = treeFile(fileName, "tree", path);
-            if (cacheMigration) {
-                moveCachedObject(hashFile(fileName, "hash", extention, url.hash()), FileTree);
-                moveCachedObject(hashFile(fileName, null, extention, url.hash()), FileTree); // temporary migration
-                moveCachedObject(treeFile(fileName, null, path), FileTree);           // temporary migration
-            }
-            return FileTree;
-        }
-        if (cacheLayout.equals("hash")) {
-            File FileFlat = hashFile(fileName, "hash", extention, url.hash());
-            if (cacheMigration) {
-                moveCachedObject(treeFile(fileName, "tree", path), FileFlat);
-                moveCachedObject(treeFile(fileName, null, path), FileFlat);           // temporary migration
-                moveCachedObject(hashFile(fileName, null, extention, url.hash()), FileFlat); // temporary migration
-            }
-            return FileFlat;
-        }
-        return null;
-    }
-
-    private static File treeFile(StringBuffer fileName, String prefix, String path) {
-        StringBuffer f = new StringBuffer(fileName.length() + 30);
-        f.append(fileName);
-        if (prefix != null) f.append('/').append(prefix);
-        f.append(path);
-        return new File(cachePath, f.toString());
+        // generate cache path
+        File FileFlat = hashFile(fileName, "hash", extention, url.hash());
+        return FileFlat;
     }
     
     private static File hashFile(StringBuffer fileName, String prefix, String extention, String urlhash) {
@@ -806,7 +715,6 @@ public final class plasmaHTCache {
         if (extention != null) fileName.append(extention);
         return new File(cachePath, f.toString());
     }
-    
     
     /**
      * This is a helper function that extracts the Hash from the filename

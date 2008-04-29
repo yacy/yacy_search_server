@@ -593,46 +593,6 @@ public final class plasmaSwitchboard extends serverAbstractSwitch<plasmaSwitchbo
      * @see plasmaSwitchboard#PROXY_CACHE_LAYOUT_TREE
      * @see plasmaSwitchboard#PROXY_CACHE_LAYOUT_HASH
      */
-    public static final String PROXY_CACHE_LAYOUT               = "proxyCacheLayout";
-    /**
-     * <p><code>public static final String <strong>PROXY_CACHE_LAYOUT_TREE</strong> = "tree"</code></p>
-     * <p>Setting the file-/folder-structure for {@link #PROXY_CACHE_LAYOUT}. Websites are stored in a folder-layout
-     * according to the layout, the URL purported. The first folder is either <code>http</code> or <code>https</code>
-     * depending on the protocol used to fetch the website, descending follows the hostname and the sub-folders on the
-     * website up to the actual file itself.</p>  
-     * <p>When using <code>tree</code>, be aware that
-     * the possibility of inconsistencies between folders and files with the same name may occur which prevent proper
-     * storage of the fetched site. Below is an example how files are stored:</p>
-     * <pre>
-     * /html/
-     * /html/www.example.com/
-     * /html/www.example.com/index/
-     * /html/www.example.com/index/en/
-     * /html/www.example.com/index/en/index.html</pre>
-     */
-    public static final String PROXY_CACHE_LAYOUT_TREE          = "tree";
-    /**
-     * <p><code>public static final String <strong>PROXY_CACHE_LAYOUT_HASH</strong> = "hash"</code></p>
-     * <p>Setting the file-/folder-structure for {@link #PROXY_CACHE_LAYOUT}. Websites are stored using the MD5-sum of
-     * their respective URLs. This method prevents collisions on some websites caused by using the {@link #PROXY_CACHE_LAYOUT_TREE}
-     * layout.</p>
-     * <p>Similarly to {@link #PROXY_CACHE_LAYOUT_TREE}, the top-folders name is given by the protocol used to fetch the site,
-     * followed by either <code>www</code> or &ndash; if the hostname does not start with "www" &ndash; <code>other</code>.
-     * Afterwards the next folder has the rest of the hostname as name, followed by a folder <code>hash</code> which contains
-     * a folder consisting of the first two letters of the hash. Another folder named after the 3rd and 4th letters of the
-     * hash follows which finally contains the file named after the full 18-characters long hash.
-     * Below is an example how files are stored:</p>
-     * <pre>
-     * /html/
-     * /html/www/
-     * /html/www/example.com/
-     * /html/www/example.com/hash/
-     * /html/www/example.com/hash/0d/
-     * /html/www/example.com/hash/0d/f8/
-     * /html/www/example.com/hash/0d/f8/0df83a8444f48317d8</pre>
-     */
-    public static final String PROXY_CACHE_LAYOUT_HASH          = "hash";
-    public static final String PROXY_CACHE_MIGRATION            = "proxyCacheMigration";
     
     //////////////////////////////////////////////////////////////////////////////////////////////
     // Cluster settings
@@ -1087,9 +1047,7 @@ public final class plasmaSwitchboard extends serverAbstractSwitch<plasmaSwitchbo
         htCachePath = getConfigPath(HTCACHE_PATH, HTCACHE_PATH_DEFAULT);
         this.log.logInfo("HTCACHE Path = " + htCachePath.getAbsolutePath());
         long maxCacheSize = 1024 * 1024 * Long.parseLong(getConfig(PROXY_CACHE_SIZE, "2")); // this is megabyte
-        String cacheLayout = getConfig(PROXY_CACHE_LAYOUT, PROXY_CACHE_LAYOUT_TREE);
-        boolean cacheMigration = getConfigBool(PROXY_CACHE_MIGRATION, true);
-        plasmaHTCache.init(htCachePath, maxCacheSize, cacheLayout, cacheMigration);
+        plasmaHTCache.init(htCachePath, maxCacheSize);
         
         // create the release download directory
         releasePath = getConfigPath(RELEASE_PATH, RELEASE_PATH_DEFAULT);
@@ -1138,19 +1096,6 @@ public final class plasmaSwitchboard extends serverAbstractSwitch<plasmaSwitchbo
          * ====================================================================== */
         // create queue
         this.sbQueue = new plasmaSwitchboardQueue(wordIndex, new File(this.plasmaPath, "switchboardQueue2.stack"), this.profilesActiveCrawls);
-        
-        // going through the sbQueue Entries and registering all content files as in use
-        int count = 0;
-        plasmaSwitchboardQueue.QueueEntry queueEntry;
-        Iterator<plasmaSwitchboardQueue.QueueEntry> i1 = sbQueue.entryIterator(true);
-        while (i1.hasNext()) {
-            queueEntry = i1.next();
-            if ((queueEntry != null) && (queueEntry.url() != null) && (queueEntry.cacheFile().exists())) {
-                plasmaHTCache.filesInUse.add(queueEntry.cacheFile());
-                count++;
-            }
-        }
-        this.log.logConfig(count + " files in htcache reported to the cachemanager as in use.");
         
         // define an extension-blacklist
         log.logConfig("Parser: Initializing Extension Mappings for Media/Parser");
@@ -1696,12 +1641,7 @@ public final class plasmaSwitchboard extends serverAbstractSwitch<plasmaSwitchbo
         /* =========================================================================
          * INDEXING
          * ========================================================================= */          
-        if (doIndexing && isSupportedContent){
-            
-            // registering the cachefile as in use
-            if (entry.cacheFile().exists()) {
-                plasmaHTCache.filesInUse.add(entry.cacheFile());
-            }
+        if (doIndexing && isSupportedContent) {
             
             // enqueue for further crawling
             enQueue(this.sbQueue.newEntry(
@@ -2152,10 +2092,6 @@ public final class plasmaSwitchboard extends serverAbstractSwitch<plasmaSwitchbo
             document = null;
         }
         if (document == null) {
-            if (!in.queueEntry.profile().storeHTCache()) {
-                plasmaHTCache.filesInUse.remove(in.queueEntry.cacheFile());
-                //plasmaHTCache.deleteURLfromCache(entry.url());
-            }
             in.queueEntry.close();
             return null;
         }
@@ -2235,10 +2171,6 @@ public final class plasmaSwitchboard extends serverAbstractSwitch<plasmaSwitchbo
             condenser = null;
         }
         if (condenser == null) {
-            if (!in.queueEntry.profile().storeHTCache()) {
-                plasmaHTCache.filesInUse.remove(in.queueEntry.cacheFile());
-                //plasmaHTCache.deleteURLfromCache(entry.url());
-            }
             in.queueEntry.close();
             return null;
         }
@@ -2305,10 +2237,6 @@ public final class plasmaSwitchboard extends serverAbstractSwitch<plasmaSwitchbo
     public void storeDocumentIndex(indexingQueueEntry in) {
         in.queueEntry.updateStatus(plasmaSwitchboardQueue.QUEUE_STATE_INDEXSTORAGE);
         storeDocumentIndex(in.queueEntry, in.document, in.condenser);
-        if (!in.queueEntry.profile().storeHTCache()) {
-                plasmaHTCache.filesInUse.remove(in.queueEntry.cacheFile());
-                //plasmaHTCache.deleteURLfromCache(entry.url());
-        }
         in.queueEntry.updateStatus(plasmaSwitchboardQueue.QUEUE_STATE_FINISHED);
         in.queueEntry.close();
     }
