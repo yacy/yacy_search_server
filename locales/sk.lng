@@ -150,17 +150,6 @@ The current cache size is==Aktualna velkost cache je
 The maximum cache size is==Maximalna velkost cache je
 
 #-----------------------------------------------------------
-#File: Config_p.html
-
-Advanced Config==Pokrocile nastavenia
-Here are all configuration options from YaCy.==Tu sa nachadzaju vsetky konfiguracne nastavenia YaCy.
-You can change anything, but some options need a restart, and some options can crash YaCy, if wrong values are used.==Vsetky konfiguracne nastavenia mozu byt zmenene, avsak niektore volby vyzaduju restart a niektore mozu sposobit pad YaCy v pripade zadnia nespravnych hodnot.
-# NOT USED
-#For an explanation of the available options please look into defaults/yacy.init==Vysvetlenie jednotlivych volieb najdete v subore defaults/yacy.init
-"Save"==Uloz
-
-
-#-----------------------------------------------------------
 #File: ConfigAdvanced_p.html
 
 Advanced Config==Pokrocile nastavenia

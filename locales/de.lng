@@ -230,16 +230,6 @@ Private Queue==Privater Puffer
 Public Queue==&Ouml;ffentlicher Puffer
 #-----------------------------
 
-#File: Config_p.html
-#---------------------------
-Advanced Config==Erweiterte Einstellungen
-Here are all configuration options from YaCy.==Hier sind alle Konfigurationseinstellungen von YaCy.
-You can change anything, but some options need a restart, and some options can crash YaCy, if wrong values are used.==Sie k&ouml;nnen alles &auml;ndern, bedenken Sie aber, dass einige &Auml;nderungen einen Neustart von YaCy erfordern und andere &Auml;nderungen YaCy ganz zum Absturz bringen k&ouml;nnen.
-For explanation please look into defaults/yacy.init==F&uuml;r eine Erkl&auml;rung sehen Sie bitte in der Datei defaults/yacy.init nach
-"Save"=="Speichern"
-#-----------------------------
-
-
 #File: ConfigBasic.html
 #---------------------------
 Access Configuration==Zugangseinstellungen
