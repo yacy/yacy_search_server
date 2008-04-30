@@ -334,47 +334,77 @@ public final class plasmaParser {
         }
     }
 
-    public static String getRealCharsetEncoding(String encoding) {
+    /**
+     * some html authors use wrong encoding names, either because they don't know exactly what they
+     * are doing or they produce a type. Many times, the upper/downcase scheme of the name is fuzzy
+     * This method patches wrong encoding names. The correct names are taken from
+     * http://www.iana.org/assignments/character-sets
+     * @param encoding
+     * @return patched encoding name
+     */
+    public static String patchCharsetEncoding(String encoding) {
+        
+        // return a default encoding
     	if ((encoding == null) || (encoding.length() == 0)) return "ISO-8859-1";
     	
     	// trim encoding string
-    	encoding = encoding.toUpperCase().trim();
-    	
-    	if (encoding.toLowerCase().startsWith("WINDOWS") && encoding.length() > 7) {
-    		char c = encoding.charAt(7);
-    		if (c == '_') encoding = "WINDOWS-" + encoding.substring(8);
-    		else if ((c >= '0') && (c <= '9')) encoding = "WINDOWS-" + encoding.substring(7);
-    	}
-    	
-    	if (encoding.toLowerCase().startsWith("ISO") && encoding.length() > 3) {
-    		char c = encoding.charAt(3);
-    		if (c == '_') encoding = "ISO-" + encoding.substring(4);
-    		else if ((c >= '0') && (c <= '9')) encoding = "ISO-" + encoding.substring(3);    		
-    	}
-    	
-    	if (encoding.toLowerCase().startsWith("ISO") && encoding.length() > 8) {
-    		char c = encoding.charAt(8);
-    		if (c == '_') encoding = encoding.substring(0,8) + "-" + encoding.substring(9);
-    		else if ((c >= '0') && (c <= '9')) encoding = encoding.substring(0,8) + "-" + encoding.substring(8);    		
-    	}    	
+    	encoding = encoding.trim();
 
+    	// fix upper/lowercase
+    	encoding = encoding.toUpperCase();
+    	if (encoding.startsWith("SHIFT")) return "Shift_JIS";
+    	if (encoding.startsWith("BIG")) return "Big5";
+    	// all other names but such with "windows" use uppercase
+    	if (encoding.startsWith("WINDOWS")) encoding = "windows" + encoding.substring(7);
     	
+    	// fix wrong fill characters
+    	encoding.replaceAll("_", "-");
+
+        if (encoding.matches("GB[_-]?2312([-_]80)?")) return "GB2312";
+        if (encoding.matches(".*UTF[-_]?8.*")) return "UTF-8";
+        if (encoding.startsWith("US")) return "US-ASCII";
+        if (encoding.startsWith("KOI")) return "KOI8-R";
+    	
+        // patch missing '-'
+        if (encoding.startsWith("windows") && encoding.length() > 7) {
+    	    char c = encoding.charAt(7);
+    		if ((c >= '0') && (c <= '9')) {
+    		    encoding = "windows-" + encoding.substring(7);
+    		}
+    	}
+    	
+    	if (encoding.startsWith("ISO")) {
+            // patch typos
+    	    if (encoding.length() > 3) {
+                char c = encoding.charAt(3);
+                if ((c >= '0') && (c <= '9')) {
+                    encoding = "ISO-" + encoding.substring(3);
+                }
+    	    }
+    	    if (encoding.length() > 8) {
+    	        char c = encoding.charAt(8);
+                if ((c >= '0') && (c <= '9')) {
+                    encoding = encoding.substring(0, 8) + "-" + encoding.substring(8);           
+                } 
+    	    }
+        }
+    	
+    	// patch wrong name
+    	if (encoding.startsWith("ISO-8559")) {
+    	    // popular typo
+    	    encoding = "ISO-8859" + encoding.substring(8);
+        }
+
     	// converting cp\d{4} -> windows-\d{4}
-    	if (encoding.toLowerCase().matches("CP([_-])?125[0-8]")) {
+    	if (encoding.matches("CP([_-])?125[0-8]")) {
     		char c = encoding.charAt(2);
-    		if (c == '_' || c == '-') encoding = "WINDOWS-" + encoding.substring(3);
-    		else if ((c >= '0') && (c <= '9')) encoding = "WINDOWS-" + encoding.substring(2);    		
-    	}    	
-    	
-    	if (encoding.toLowerCase().matches("GB[_-]?2312([-_]80)?")) {
-    		encoding = "X-EUC-CN";
+    		if ((c >= '0') && (c <= '9')) {
+    		    encoding = "windows-" + encoding.substring(2);
+    		} else {
+    		    encoding = "windows" + encoding.substring(2);
+    		}
     	}
-    	
-    	if (encoding.toLowerCase().matches(".*UTF[-_]?8.*")) {
-    		encoding = "UTF-8";
-    	}
-    	
-    	
+
     	return encoding;
     }
     
@@ -595,7 +625,7 @@ public final class plasmaParser {
             
             // getting the charset of the document
             // TODO: do a charset detection here ....
-            String documentCharset = getRealCharsetEncoding(theDocumentCharset);
+            String documentCharset = patchCharsetEncoding(theDocumentCharset);
             
             // testing if parsing is supported for this resource
             if (!plasmaParser.supportedContent(location,mimeType)) {
@@ -663,7 +693,7 @@ public final class plasmaParser {
         if (charset == null) {
             charset = documentCharset;
         } else {
-        	charset = getRealCharsetEncoding(charset);
+        	charset = patchCharsetEncoding(charset);
         }
         
         if (!documentCharset.equalsIgnoreCase(charset)) {
@@ -839,7 +869,7 @@ public final class plasmaParser {
             yacyURL contentURL = null;
             long contentLength = -1;
             String contentMimeType = "application/octet-stream";
-            String charSet = "UTF-8";
+            String charSet = "utf-8";
             
             if (args.length < 2) {
                 System.err.println("Usage: java de.anomic.plasma.plasmaParser (-f filename|-u URL) [-m mimeType]");
