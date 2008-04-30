@@ -29,7 +29,6 @@ package de.anomic.yacy;
 
 import java.io.File;
 import java.net.MalformedURLException;
-import java.util.HashMap;
 import java.util.Iterator;
 import java.util.TreeSet;
 import java.util.regex.Matcher;
@@ -42,341 +41,14 @@ import de.anomic.tools.Punycode;
 import de.anomic.tools.Punycode.PunycodeException;
 
 public class yacyURL {
-
-    // TLD separation in political and cultural parts
-    // https://www.cia.gov/cia/publications/factbook/index.html
-    // http://en.wikipedia.org/wiki/List_of_countries_by_continent
-    public static final int TLD_EuropeRussia_ID        = 0; // European languages but no english
-    public static final int TLD_MiddleSouthAmerica_ID  = 1; // mainly spanish-speaking countries
-    public static final int TLD_SouthEastAsia_ID       = 2; // asia
-    public static final int TLD_MiddleEastWestAsia_ID  = 3; // middle east
-    public static final int TLD_NorthAmericaOceania_ID = 4; // english-speaking countries
-    public static final int TLD_Africa_ID              = 5; // africa
-    public static final int TLD_Generic_ID             = 6; // anything else, mixed languages, mainly english
     
     public static final int TLD_any_zone_filter = 255; // from TLD zones can be filtered during search; this is the catch-all filter
     
-    private static final String[] TLD_NorthAmericaOceania={
-        // primary english-speaking countries
-        // english-speaking countries from central america are also included
-        // includes also dutch and french colonies in the caribbean sea
-        // and US/English/Australian military bases in asia
-         "EDU=US Educational",
-         "GOV=US Government",
-         "MIL=US Military",
-         "NET=Network",
-         "ORG=Non-Profit Organization",
-         "AN=Netherlands Antilles",
-         "AS=American Samoa",
-         "AG=Antigua and Barbuda",
-         "AI=Anguilla",
-         "AU=Australia",
-         "BB=Barbados",
-         "BZ=Belize",
-         "BM=Bermuda",
-         "BS=Bahamas",
-         "CA=Canada",
-         "CC=Cocos (Keeling) Islands",
-         "CK=Cook Islands",
-         "CX=Christmas Island", // located in the Indian Ocean, but belongs to Australia
-         "DM=Dominica",
-         "FM=Micronesia",
-         "FJ=Fiji",
-         "GD=Grenada",
-         "GP=Guadeloupe",
-         "GS=South Georgia and the South Sandwich Islands", // south of south america, but administrated by british, has only a scientific base
-         "GU=Guam", // strategical US basis close to Japan
-         "HM=Heard and McDonald Islands", // uninhabited, sub-Antarctic island, owned by Australia
-         "HT=Haiti",
-         "IO=British Indian Ocean Territory", // UK-US naval support facility in the Indian Ocean
-         "KI=Kiribati", // 33 coral atolls in the pacific, formerly owned by UK
-         "KN=Saint Kitts and Nevis", // islands in the carribean see
-         "KY=Cayman Islands",
-         "LC=Saint Lucia",
-         "MH=Marshall Islands", // formerly US atomic bomb test site, now a key installation in the US missile defense network
-         "MP=Northern Mariana Islands", // US strategic location in the western Pacific Ocean
-         "NC=New Caledonia",
-         "NF=Norfolk Island",
-         "NR=Nauru", // independent UN island
-         "NU=Niue", // one of world's largest coral islands
-         "NZ=New Zealand (Aotearoa)",
-         "PG=Papua New Guinea",
-         "PN=Pitcairn", // overseas territory of the UK
-         "PR=Puerto Rico", // territory of the US with commonwealth status
-         "PW=Palau", // was once governed by Micronesia
-         "Sb=Solomon Islands",
-         "TC=Turks and Caicos Islands", // overseas territory of the UK
-         "TK=Tokelau", // group of three atolls in the South Pacific Ocean, british protectorat
-         "TO=Tonga",
-         "TT=Trinidad and Tobago",
-         "TV=Tuvalu", //  nine coral atolls in the South Pacific Ocean; in 2000, Tuvalu leased its TLD ".tv" for $50 million over a 12-year period
-         "UM=US Minor Outlying Islands", // nine insular United States possessions in the Pacific Ocean and the Caribbean Sea
-         "US=United States",
-         "VC=Saint Vincent and the Grenadines",
-         "VG=Virgin Islands (British)",
-         "VI=Virgin Islands (U.S.)",
-         "VU=Vanuatu",
-         "WF=Wallis and Futuna Islands",
-         "WS=Samoa"
-     };
-     private static final String[] TLD_MiddleSouthAmerica = {
-         // primary spanish and portugese-speaking
-         "AR=Argentina",
-         "AW=Aruba",
-         "BR=Brazil",
-         "BO=Bolivia",
-         "CL=Chile",
-         "CO=Colombia",
-         "CR=Costa Rica",
-         "CU=Cuba",
-         "DO=Dominican Republic",
-         "EC=Ecuador",
-         "FK=Falkland Islands (Malvinas)",
-         "GF=French Guiana",
-         "GT=Guatemala",
-         "GY=Guyana",
-         "HN=Honduras",
-         "JM=Jamaica",
-         "MX=Mexico",
-         "NI=Nicaragua",
-         "PA=Panama",
-         "PE=Peru",
-         "PY=Paraguay",
-         "SR=Suriname",
-         "SV=El Salvador",
-         "UY=Uruguay",
-         "VE=Venezuela"
-     };
-     private static final String[] TLD_EuropeRussia = {
-        // includes also countries that are mainly french- dutch- speaking
-        // and culturally close to europe
-         "AD=Andorra",
-         "AL=Albania",
-         "AQ=Antarctica",
-         "AT=Austria",
-         "BA=Bosnia and Herzegovina",
-         "BE=Belgium",
-         "BG=Bulgaria",
-         "BV=Bouvet Island", // this island is uninhabited and covered by ice, south of africa but governed by Norway
-         "BY=Belarus",
-         "CH=Switzerland",
-         "CS=Czechoslovakia (former)",
-         "CZ=Czech Republic",
-         "CY=Cyprus",
-         "DE=Germany",
-         "DK=Denmark",
-         "ES=Spain",
-         "EE=Estonia",
-         "EU=Europe",
-         "FI=Finland",
-         "FO=Faroe Islands", // Viking Settlers
-         "FR=France",
-         "FX=France, Metropolitan",
-         "GB=Great Britain (UK)",
-         "GI=Gibraltar",
-         "GL=Greenland",
-         "GR=Greece",
-         "HR=Croatia (Hrvatska)",
-         "HU=Hungary",
-         "IE=Ireland",
-         "IS=Iceland",
-         "IT=Italy",
-         "LI=Liechtenstein",
-         "LT=Lithuania",
-         "LU=Luxembourg",
-         "LV=Latvia",
-         "MD=Moldova",
-         "MC=Monaco",
-         "MK=Macedonia",
-         "MN=Mongolia",
-         "MS=Montserrat", // British island in the Caribbean Sea, almost not populated because of strong vulcanic activity
-         "MT=Malta",
-         "MQ=Martinique", // island in the eastern Caribbean Sea, overseas department of France
-         "NATO=Nato field",
-         "NL=Netherlands",
-         "NO=Norway",
-         "PF=French Polynesia", // French annexed Polynesian island in the South Pacific, French atomic bomb test site
-         "PL=Poland",
-         "PM=St. Pierre and Miquelon", // french-administrated colony close to canada, belongs to France
-         "PT=Portugal",
-         "RO=Romania",
-         "RU=Russia",
-         "SE=Sweden",
-         "SI=Slovenia",
-         "SJ=Svalbard and Jan Mayen Islands", // part of Norway
-         "SM=San Marino",
-         "SK=Slovak Republic",
-         "SU=USSR (former)",
-         "TF=French Southern Territories", // islands in the arctic see, no inhabitants
-         "UK=United Kingdom",
-         "UA=Ukraine",
-         "VA=Vatican City State (Holy See)",
-         "YU=Yugoslavia"
-     };
-     
-     private static final String[] TLD_MiddleEastWestAsia = {
-         // states that are influenced by islamic culture and arabic language
-         // includes also eurasia states and those that had been part of the former USSR and close to southwest asia
-         "AE=United Arab Emirates",
-         "AF=Afghanistan",
-         "AM=Armenia",
-         "AZ=Azerbaijan",
-         "BH=Bahrain",
-         "GE=Georgia",
-         "IL=Israel",
-         "IQ=Iraq",
-         "IR=Iran",
-         "JO=Jordan",
-         "KG=Kyrgyzstan",
-         "KZ=Kazakhstan",
-         "KW=Kuwait",
-         "LB=Lebanon",
-         "OM=Oman",
-         "QA=Qatar",
-         "SA=Saudi Arabia",
-         "SY=Syria",
-         "TJ=Tajikistan",
-         "TM=Turkmenistan",
-         "PK=Pakistan",
-         "TR=Turkey",
-         "UZ=Uzbekistan",
-         "YE=Yemen"
-     };
-     private static final String[] TLD_SouthEastAsia = {
-         "BD=Bangladesh",
-         "BN=Brunei Darussalam",
-         "BT=Bhutan",
-         "CN=China",
-         "HK=Hong Kong",
-         "ID=Indonesia",
-         "IN=India",
-         "LA=Laos",
-         "NP=Nepal",
-         "JP=Japan",
-         "KH=Cambodia",
-         "KP=Korea (North)",
-         "KR=Korea (South)",
-         "LK=Sri Lanka",
-         "MY=Malaysia",
-         "MM=Myanmar", // formerly known as Burma
-         "MO=Macau", // Portuguese settlement, part of China, but has some autonomy
-         "MV=Maldives", // group of atolls in the Indian Ocean
-         "PH=Philippines",
-         "SG=Singapore",
-         "TP=East Timor",
-         "TH=Thailand",
-         "TW=Taiwan",
-         "VN=Viet Nam"
-     };
-     private static final String[] TLD_Africa = {
-         "AO=Angola",
-         "BF=Burkina Faso",
-         "BI=Burundi",
-         "BJ=Benin",
-         "BW=Botswana",
-         "CF=Central African Republic",
-         "CG=Congo",
-         "CI=Cote D'Ivoire (Ivory Coast)",
-         "CM=Cameroon",
-         "CV=Cape Verde",
-         "DJ=Djibouti",
-         "DZ=Algeria",
-         "EG=Egypt",
-         "EH=Western Sahara",
-         "ER=Eritrea",
-         "ET=Ethiopia",
-         "GA=Gabon",
-         "GH=Ghana",
-         "GM=Gambia",
-         "GN=Guinea",
-         "GQ=Equatorial Guinea",
-         "GW=Guinea-Bissau",
-         "KE=Kenya",
-         "KM=Comoros",
-         "LR=Liberia",
-         "LS=Lesotho",
-         "LY=Libya",
-         "MA=Morocco",
-         "MG=Madagascar",
-         "ML=Mali",
-         "MR=Mauritania",
-         "MU=Mauritius",
-         "MW=Malawi",
-         "MZ=Mozambique",
-         "NA=Namibia",
-         "NE=Niger",
-         "NG=Nigeria",
-         "RE=Reunion",
-         "RW=Rwanda",
-         "SC=Seychelles",
-         "SD=Sudan",
-         "SH=St. Helena",
-         "SL=Sierra Leone",
-         "SN=Senegal",
-         "SO=Somalia",
-         "ST=Sao Tome and Principe",
-         "SZ=Swaziland",
-         "TD=Chad",
-         "TG=Togo",
-         "TN=Tunisia",
-         "TZ=Tanzania",
-         "UG=Uganda",
-         "ZA=South Africa",
-         "ZM=Zambia",
-         "ZR=Zaire",
-         "ZW=Zimbabwe",
-         "YT=Mayotte"
-     };
-     private static final String[] TLD_Generic = {
-         "COM=US Commercial",
-         "AERO=",
-         "BIZ=",
-         "COOP=",
-         "INFO=",
-         "MUSEUM=",
-         "NAME=",
-         "PRO=",
-         "ARPA=",
-         "INT=International",
-         "ARPA=Arpanet",
-         "NT=Neutral Zone"
-     };
-
     public static String dummyHash;
-
-    private static HashMap<String, Integer> TLDID = new HashMap<String, Integer>();
-    private static HashMap<String, String> TLDName = new HashMap<String, String>();
-
-    private static void insertTLDProps(String[] TLDList, int id) {
-        int p;
-        String tld, name;
-        Integer ID = new Integer(id);
-        for (int i = 0; i < TLDList.length; i++) {
-            p = TLDList[i].indexOf('=');
-            if (p > 0) {
-                tld = TLDList[i].substring(0, p).toLowerCase();
-                name = TLDList[i].substring(p + 1);
-                TLDID.put(tld, ID);
-                TLDName.put(tld, name);
-            }
-        }
-    }
-    
     static {
         // create a dummy hash
         dummyHash = "";
         for (int i = 0; i < yacySeedDB.commonHashLength; i++) dummyHash += "-";
-
-        // assign TLD-ids and names
-        insertTLDProps(TLD_EuropeRussia,        TLD_EuropeRussia_ID);
-        insertTLDProps(TLD_MiddleSouthAmerica,  TLD_MiddleSouthAmerica_ID);
-        insertTLDProps(TLD_SouthEastAsia,       TLD_SouthEastAsia_ID);
-        insertTLDProps(TLD_MiddleEastWestAsia,  TLD_MiddleEastWestAsia_ID);
-        insertTLDProps(TLD_NorthAmericaOceania, TLD_NorthAmericaOceania_ID);
-        insertTLDProps(TLD_Africa,              TLD_Africa_ID);
-        insertTLDProps(TLD_Generic,             TLD_Generic_ID);
-        // the id=7 is used to flag local addresses
-
     }
     
     // class variables
@@ -960,15 +632,10 @@ public class yacyURL {
         
         assert this.hash == null; // should only be called if the hash was not computed bevore
 
-        int p = this.host.lastIndexOf('.');
-        String tld = "", dom = tld;
-        if (p > 0) {
-            tld = host.substring(p + 1);
-            dom = host.substring(0, p);
-        }
-        Integer ID = (serverDomains.isLocal(tld)) ? null : TLDID.get(tld); // identify local addresses
-        int id = (ID == null) ? 7 : ID.intValue(); // local addresses are flagged with id=7
+        int id = serverDomains.getDomainID(this.host); // id=7: tld is local
         boolean isHTTP = this.protocol.equals("http");
+        int p = this.host.lastIndexOf('.');
+        String dom = (p > 0) ? dom = host.substring(0, p) : "";
         p = dom.lastIndexOf('.'); // locate subdomain
         String subdom = "";
         if (p > 0) {
@@ -1081,10 +748,6 @@ public class yacyURL {
         return (kelondroBase64Order.enhancedCoder.decodeByte(urlHash.charAt(11)) & 28) >> 2;
     }
 
-    public static boolean isLocalDomain(String urlhash) {
-        return domDomain(urlhash) == 7;
-    }
-
     public static boolean isDomDomain(String urlHash, int id) {
         return domDomain(urlHash) == id;
     }
@@ -1096,7 +759,8 @@ public class yacyURL {
     
     // checks for local/global IP range and local IP
     public boolean isLocal() {
-        return serverDomains.isLocal(this.host);
+        if (this.hash == null) synchronized (this) {this.hash = urlHashComputation();}
+        return domDomain(this.hash) == 7;
     }
     
     // language calculation

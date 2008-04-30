@@ -91,7 +91,6 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.UnsupportedEncodingException;
 import java.lang.reflect.Constructor;
-import java.net.InetAddress;
 import java.net.MalformedURLException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -1385,6 +1384,7 @@ public final class plasmaSwitchboard extends serverAbstractSwitch<plasmaSwitchbo
         String host = url.getHost();
         if (host == null) return "url.host is null";
         if (this.acceptGlobalURLs && this.acceptLocalURLs) return null; // fast shortcut to avoid dnsResolve
+        /*
         InetAddress hostAddress = serverDomains.dnsResolve(host);
         // if we don't know the host, we cannot load that resource anyway.
         // But in case we use a proxy, it is possible that we dont have a DNS service.
@@ -1392,8 +1392,10 @@ public final class plasmaSwitchboard extends serverAbstractSwitch<plasmaSwitchbo
         if (hostAddress == null) {
             if ((remoteProxyConfig != null) && (remoteProxyConfig.useProxy())) return null; else return "the dns of the host '" + host + "' cannot be resolved";
         }
+        */
         // check if this is a local address and we are allowed to index local pages:
-        boolean local = hostAddress.isSiteLocalAddress() || hostAddress.isLoopbackAddress();
+        //boolean local = hostAddress.isSiteLocalAddress() || hostAddress.isLoopbackAddress();
+        boolean local = url.isLocal();
         //assert local == yacyURL.isLocalDomain(url.hash()); // TODO: remove the dnsResolve above!
         if ((this.acceptGlobalURLs && !local) || (this.acceptLocalURLs && local)) return null;
         return (local) ?

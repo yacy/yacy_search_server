@@ -34,9 +34,9 @@ import de.anomic.kelondro.kelondroNaturalOrder;
 import de.anomic.plasma.plasmaSearchEvent;
 import de.anomic.plasma.plasmaSearchQuery;
 import de.anomic.plasma.plasmaSwitchboard;
+import de.anomic.server.serverDomains;
 import de.anomic.server.serverObjects;
 import de.anomic.server.serverSwitch;
-import de.anomic.yacy.yacyURL;
 
 public class sidebar_navigation {
 
@@ -132,18 +132,18 @@ public class sidebar_navigation {
         final int[] zones = theSearch.getRankingResult().zones();
         boolean z = false;
         domzone(prop, "All", theSearch.getRankingResult().size(), theQuery);
-        if (zones[yacyURL.TLD_EuropeRussia_ID] > 0)
-            { z = true; domzone(prop, "EuropeRussia", zones[yacyURL.TLD_EuropeRussia_ID], theQuery);}
-        if (zones[yacyURL.TLD_MiddleSouthAmerica_ID] > 0)
-            { z = true; domzone(prop, "MiddleSouthAmerica", zones[yacyURL.TLD_MiddleSouthAmerica_ID], theQuery);}
-        if (zones[yacyURL.TLD_SouthEastAsia_ID] > 0)
-            { z = true; domzone(prop, "SouthEastAsia", zones[yacyURL.TLD_SouthEastAsia_ID], theQuery);}
-        if (zones[yacyURL.TLD_MiddleEastWestAsia_ID] > 0)
-            { z = true; domzone(prop, "MiddleEastWestAsia_", zones[yacyURL.TLD_MiddleEastWestAsia_ID], theQuery);}
-        if (zones[yacyURL.TLD_NorthAmericaOceania_ID] + zones[yacyURL.TLD_Generic_ID] > 0)
-            { z = true; domzone(prop, "NorthAmericaOceania", zones[yacyURL.TLD_NorthAmericaOceania_ID] + zones[yacyURL.TLD_Generic_ID], theQuery);}
-        if (zones[yacyURL.TLD_Africa_ID] > 0)
-            { z = true; domzone(prop, "Africa", zones[yacyURL.TLD_Africa_ID], theQuery);}
+        if (zones[serverDomains.TLD_EuropeRussia_ID] > 0)
+            { z = true; domzone(prop, "EuropeRussia", zones[serverDomains.TLD_EuropeRussia_ID], theQuery);}
+        if (zones[serverDomains.TLD_MiddleSouthAmerica_ID] > 0)
+            { z = true; domzone(prop, "MiddleSouthAmerica", zones[serverDomains.TLD_MiddleSouthAmerica_ID], theQuery);}
+        if (zones[serverDomains.TLD_SouthEastAsia_ID] > 0)
+            { z = true; domzone(prop, "SouthEastAsia", zones[serverDomains.TLD_SouthEastAsia_ID], theQuery);}
+        if (zones[serverDomains.TLD_MiddleEastWestAsia_ID] > 0)
+            { z = true; domzone(prop, "MiddleEastWestAsia_", zones[serverDomains.TLD_MiddleEastWestAsia_ID], theQuery);}
+        if (zones[serverDomains.TLD_NorthAmericaOceania_ID] + zones[serverDomains.TLD_Generic_ID] > 0)
+            { z = true; domzone(prop, "NorthAmericaOceania", zones[serverDomains.TLD_NorthAmericaOceania_ID] + zones[serverDomains.TLD_Generic_ID], theQuery);}
+        if (zones[serverDomains.TLD_Africa_ID] > 0)
+            { z = true; domzone(prop, "Africa", zones[serverDomains.TLD_Africa_ID], theQuery);}
         if (zones[7] > 0)
             { z = true; domzone(prop, "Intranet", zones[7], theQuery);}
         prop.put("navigation_languagezone", (z) ? "1" : "0");
