@@ -727,7 +727,7 @@ indexDistribution.dhtReceiptLimit = 10000
 # Distribution of Citation-Reference (CR-) files
 # The distribution is done in two steps:
 # first step to anonymize the records
-# second step to forward to collecting peer
+# second step to forward to a collecting peer
 # to anonymize the data even against the intermediate peer
 # a specific precentage is also sent again to other peers.
 # for key-numbers please see de.anomic.plasma.plasmaRankingDistribution
@@ -739,7 +739,7 @@ CRDist0Target  =
 CRDist1Path    = GLOBAL/014_othercr
 CRDist1Method  = 9
 CRDist1Percent = 30
-CRDist1Target  = kaskelix.de:8080,yacy.dyndns.org:8000,suma-lab.de:8080
+CRDist1Target  = kaskelix.de:8080,yacy.dyndns.org:8000
 
 # Search sequence settings
 # collection:

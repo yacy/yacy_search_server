@@ -66,8 +66,7 @@ import java.security.KeyStore;
 import java.util.ConcurrentModificationException;
 import java.util.Enumeration;
 import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Iterator;
+import java.util.concurrent.ConcurrentHashMap;
 
 import javax.net.ssl.HandshakeCompletedEvent;
 import javax.net.ssl.HandshakeCompletedListener;
@@ -120,6 +119,10 @@ public final class serverCore extends serverAbstractBusyThread implements server
     // static variables
     public static final Boolean TERMINATE_CONNECTION = Boolean.FALSE;
     public static final Boolean RESUME_CONNECTION = Boolean.TRUE;
+    
+    // Dummy value Object to use ConcurrentHashMap as HashSet
+    private static final Object PRESENT = new Object();
+    
     /**
      * for brute-force prevention
      */
@@ -152,7 +155,7 @@ public final class serverCore extends serverAbstractBusyThread implements server
     HashMap<String, String> denyHost;
     int commandMaxLength;
     private int maxBusySessions;
-    HashSet<Session> busySessions;
+    ConcurrentHashMap<Session, Object> busySessions;
     
     /*
     private static ServerSocketFactory getServerSocketFactory(boolean dflt, File keyfile, String passphrase) {
@@ -226,7 +229,7 @@ public final class serverCore extends serverAbstractBusyThread implements server
 
         // init session parameter
         maxBusySessions = Integer.valueOf(switchboard.getConfig("httpdMaxBusySessions","100")).intValue();
-        busySessions = new HashSet<Session>();
+        busySessions = new ConcurrentHashMap<Session, Object>();
         
         // init servercore
         init();
@@ -459,7 +462,7 @@ public final class serverCore extends serverAbstractBusyThread implements server
                 
                 // create session
                 Session connection = new Session(sessionThreadGroup, controlSocket, this.timeout);
-                this.busySessions.add(connection);
+                this.busySessions.put(connection, PRESENT);
             } else {
                 this.log.logWarning("ACCESS FROM " + cIP + " DENIED");
             }
@@ -481,7 +484,7 @@ public final class serverCore extends serverAbstractBusyThread implements server
         Thread.interrupted();
         
         // shut down all busySessions
-        if (this.busySessions != null) for (Session session: this.busySessions) {
+        if (this.busySessions != null) for (Session session: this.busySessions.keySet()) {
             try {
                 session.interrupt();
             } catch (SecurityException e ) {
@@ -513,10 +516,7 @@ public final class serverCore extends serverAbstractBusyThread implements server
 
         // close all sessions
         this.log.logInfo("Closing server sessions ...");
-        Iterator<Session> i = this.busySessions.iterator();
-        Session s;
-        while (i.hasNext()) {
-            s = i.next();
+        for (Session s: this.busySessions.keySet()) {
             s.interrupt();
             s.close();
         }
