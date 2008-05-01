@@ -77,17 +77,13 @@ public class kelondroBytesIntMap {
     }
     
     public synchronized ArrayList<Integer[]> removeDoubles() throws IOException {
-        ArrayList<kelondroRowSet> indexreport = index.removeDoubles();
         ArrayList<Integer[]> report = new ArrayList<Integer[]>();
-        Iterator<kelondroRowSet> i = indexreport.iterator();
-        kelondroRowSet rowset;
         Integer[] is;
         Iterator<kelondroRow.Entry> ei;
         int c;
-        while (i.hasNext()) {
-            rowset = i.next();
-            is = new Integer[rowset.size()];
-            ei = rowset.rows();
+        for (kelondroRowCollection delset: index.removeDoubles()) {
+            is = new Integer[delset.size()];
+            ei = delset.rows();
             c = 0;
             while (ei.hasNext()) {
                 is[c++] = new Integer((int) ei.next().getColLong(1));

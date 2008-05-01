@@ -77,12 +77,12 @@ public class kelondroBytesLongMap {
     }
     
     public synchronized ArrayList<Long[]> removeDoubles() throws IOException {
-        ArrayList<kelondroRowSet> indexreport = index.removeDoubles();
+        ArrayList<kelondroRowCollection> indexreport = index.removeDoubles();
         ArrayList<Long[]> report = new ArrayList<Long[]>();
         Long[] is;
         Iterator<kelondroRow.Entry> ei;
         int c;
-        for (kelondroRowSet rowset: indexreport) {
+        for (kelondroRowCollection rowset: indexreport) {
             is = new Long[rowset.size()];
             ei = rowset.rows();
             c = 0;

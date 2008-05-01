@@ -737,18 +737,18 @@ public class kelondroRowCollection {
         }
     }
     
-    public synchronized ArrayList<kelondroRowSet> removeDoubles() {
+    public synchronized ArrayList<kelondroRowCollection> removeDoubles() {
         assert (this.rowdef.objectOrder != null);
         // removes double-occurrences of chunks
-        // in contrast to uniq() this removes also the remaining, non-double entry that had a double-occurrance to the others
+        // in contrast to uniq() this removes also the remaining, non-double entry that had a double-occurrence to the others
         // all removed chunks are returned in an array
         this.sort();
-        ArrayList<kelondroRowSet> report = new ArrayList<kelondroRowSet>();
+        ArrayList<kelondroRowCollection> report = new ArrayList<kelondroRowCollection>();
         if (chunkcount < 2) return report;
         int i = chunkcount - 2;
         int d = 0;
         boolean u = true;
-        kelondroRowSet collection = new kelondroRowSet(this.rowdef, 2);
+        kelondroRowCollection collection = new kelondroRowCollection(this.rowdef, 2);
         try {
             while (i >= 0) {
                 if (compare(i, i + 1) == 0) {
@@ -893,7 +893,7 @@ public class kelondroRowCollection {
     	a.add("BBBBBBBBBBBB".getBytes());
     	a.add("BBBBBBBBBBBB".getBytes());
     	a.add("CCCCCCCCCCCC".getBytes());
-    	ArrayList<kelondroRowSet> del = a.removeDoubles();
+    	ArrayList<kelondroRowCollection> del = a.removeDoubles();
     	System.out.println(del + "rows double");
     	Iterator<kelondroRow.Entry> j = a.rows();
     	while (j.hasNext()) System.out.println(new String(j.next().bytes()));

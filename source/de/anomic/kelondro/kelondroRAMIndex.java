@@ -125,7 +125,7 @@ public class kelondroRAMIndex implements kelondroIndex {
 		return c;
 	}
 	
-	public synchronized ArrayList<kelondroRowSet> removeDoubles() {
+	public synchronized ArrayList<kelondroRowCollection> removeDoubles() {
 	    // finish initialization phase explicitely
 	    if (index1 == null) index1 = new kelondroRowSet(rowdef, 0);
 	    return index0.removeDoubles();

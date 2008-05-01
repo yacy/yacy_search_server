@@ -345,7 +345,7 @@ public final class plasmaParser {
     public static String patchCharsetEncoding(String encoding) {
         
         // return a default encoding
-    	if ((encoding == null) || (encoding.length() == 0)) return "ISO-8859-1";
+    	if ((encoding == null) || (encoding.length() < 3)) return "ISO-8859-1";
     	
     	// trim encoding string
     	encoding = encoding.trim();

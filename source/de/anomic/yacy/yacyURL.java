@@ -24,7 +24,7 @@
 
 package de.anomic.yacy;
 
-// this class exsist to provide a system-wide normal form representation of urls,
+// this class exist to provide a system-wide normal form representation of urls,
 // and to prevent that java.net.URL usage causes DNS queries which are used in java.net.
 
 import java.io.File;

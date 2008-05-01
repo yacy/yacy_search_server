@@ -56,7 +56,7 @@ import de.anomic.kelondro.kelondroCloneableIterator;
 import de.anomic.kelondro.kelondroMergeIterator;
 import de.anomic.kelondro.kelondroOrder;
 import de.anomic.kelondro.kelondroRotateIterator;
-import de.anomic.kelondro.kelondroRowSet;
+import de.anomic.kelondro.kelondroRowCollection;
 import de.anomic.server.serverMemory;
 import de.anomic.server.logging.serverLog;
 import de.anomic.xml.RSSFeed;
@@ -419,8 +419,8 @@ public final class plasmaWordIndex implements indexRI {
         
         // check doubles
         int beforeDouble = container.size();
-        ArrayList<kelondroRowSet> d = container.removeDoubles();
-        kelondroRowSet set;
+        ArrayList<kelondroRowCollection> d = container.removeDoubles();
+        kelondroRowCollection set;
         for (int i = 0; i < d.size(); i++) {
             // for each element in the double-set, take that one that is the most recent one
             set = d.get(i);

@@ -359,7 +359,7 @@ public class kelondroCache implements kelondroIndex {
         return c;
     }
 
-    public synchronized ArrayList<kelondroRowSet> removeDoubles() throws IOException {
+    public synchronized ArrayList<kelondroRowCollection> removeDoubles() throws IOException {
         return index.removeDoubles();
         // todo: remove reported entries from the cache!!!
     }

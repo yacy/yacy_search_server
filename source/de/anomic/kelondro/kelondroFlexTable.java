@@ -321,15 +321,11 @@ public class kelondroFlexTable extends kelondroFlexWidthArray implements kelondr
 		return indexed_result.size();
     }
     
-    public synchronized ArrayList<kelondroRowSet> removeDoubles() throws IOException {
-        ArrayList<Integer[]> indexreport = index.removeDoubles();
-        ArrayList<kelondroRowSet> report = new ArrayList<kelondroRowSet>();
-        Iterator<Integer[]> i = indexreport.iterator();
-        Integer[] is;
+    public synchronized ArrayList<kelondroRowCollection> removeDoubles() throws IOException {
+        ArrayList<kelondroRowCollection> report = new ArrayList<kelondroRowCollection>();
         kelondroRowSet rows;
         TreeSet<Integer> d = new TreeSet<Integer>();
-        while (i.hasNext()) {
-            is = i.next();
+        for (Integer[] is: index.removeDoubles()) {
             rows = new kelondroRowSet(this.rowdef, is.length);
             for (int j = 0; j < is.length; j++) {
                 d.add(is[j]);
@@ -337,7 +333,7 @@ public class kelondroFlexTable extends kelondroFlexWidthArray implements kelondr
             }
             report.add(rows);
         }
-        // finally delete the affected rows, but start with largest id first, othervise we overwrite wrong entries
+        // finally delete the affected rows, but start with largest id first, otherwise we overwrite wrong entries
         Integer s;
         while (d.size() > 0) {
             s = d.last();

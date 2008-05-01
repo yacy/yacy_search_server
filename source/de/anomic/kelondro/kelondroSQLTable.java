@@ -141,8 +141,8 @@ public class kelondroSQLTable implements kelondroIndex {
         return (get(key) != null);
     }
     
-    public ArrayList<kelondroRowSet> removeDoubles() {
-        return new ArrayList<kelondroRowSet>();
+    public ArrayList<kelondroRowCollection> removeDoubles() {
+        return new ArrayList<kelondroRowCollection>();
     }
     
     public kelondroRow.Entry get(byte[] key) throws IOException {

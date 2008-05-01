@@ -32,7 +32,6 @@ package de.anomic.kelondro;
 import java.io.File;
 import java.io.IOException;
 import java.text.SimpleDateFormat;
-import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Iterator;
@@ -231,17 +230,13 @@ public class kelondroCollectionIndex {
             }
         }
         // care for double entries
-        ArrayList<kelondroRowSet> del = index.removeDoubles();
-        Iterator<kelondroRowSet> j = del.iterator();
-        kelondroRowSet rowset;
         Iterator<kelondroRow.Entry> rowiter;
         int partition, maxpartition;
         kelondroRow.Entry entry, maxentry;
         int doublecount = 0;
-        while (j.hasNext()) {
-            rowset = j.next();
-            // for each entry in row set choose one which we want to keep
-            rowiter = rowset.rows();
+        for (kelondroRowCollection doubleset: index.removeDoubles()) {
+            // for each entry in doubleset choose one which we want to keep
+            rowiter = doubleset.rows();
             maxentry = null;
             maxpartition = -1;
             while (rowiter.hasNext()) {

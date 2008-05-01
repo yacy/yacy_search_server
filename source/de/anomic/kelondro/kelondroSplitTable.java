@@ -346,9 +346,9 @@ public class kelondroSplitTable implements kelondroIndex {
         while (i.hasNext()) addUnique(i.next(), entryDate);
     }
     
-    public ArrayList<kelondroRowSet> removeDoubles() throws IOException {
+    public ArrayList<kelondroRowCollection> removeDoubles() throws IOException {
         Iterator<kelondroIndex> i = tables.values().iterator();
-        ArrayList<kelondroRowSet> report = new ArrayList<kelondroRowSet>();
+        ArrayList<kelondroRowCollection> report = new ArrayList<kelondroRowCollection>();
         while (i.hasNext()) {
             report.addAll(i.next().removeDoubles());
         }

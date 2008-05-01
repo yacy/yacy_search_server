@@ -188,9 +188,9 @@ public class kelondroTree extends kelondroCachedRecords implements kelondroIndex
         return result;
     }
     
-    public ArrayList<kelondroRowSet> removeDoubles() {
+    public ArrayList<kelondroRowCollection> removeDoubles() {
         // this data structure cannot have doubles; return empty array
-        return new ArrayList<kelondroRowSet>();
+        return new ArrayList<kelondroRowCollection>();
     }
     
     public class Search {
