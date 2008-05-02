@@ -298,6 +298,16 @@ Global Search in P2P configuration is only allowed, if both, index receive and d
 For Robinson Mode, index distribution and receive is switched off==Im Robinson-Modus werden Indexverteilung und -empfang deaktiviert
 This Robinson Mode switches remote indexing on, but limits targets to peers within the same cluster. Remote indexing requests from peers within the same cluster are accepted==Dieser Robinson-Modus aktiviert Remote-Indexierung, aber beschr&auml;nkt die Anfragen auf Peers des selben Clusters. Nur Remote-Indexierungsanfragen von Peers des selben Clusters werden akzeptiert
 This Robinson Mode does not allow any remote indexing \(neither requests remote indexing, nor accepts it\)==Dieser Robinson-Modus erlaubt keinerlei Remote-Indexierung (es wird weder Remote-Indexierung angefragt, noch akzeptiert)
+Network and Domain Specification==Netzwerk und Domain Spezifikation
+YaCy can operate a computing grid of YaCy peers or as a stand-alone node.==Sie k&ouml;nnen an einem verteiltem Netz aus YaCy Peers mitwirken oder einen eigenst&auml;ndigen Peer betreiben. 
+To control that all participants within a web indexing domain have access to the same domain,==Um zu kontrollieren, dass alle Teilnehmer innerhalb einer Indexierungs Domain Zugriff zu der selben Domain haben, 
+this network definition must be equal to all members of the same YaCy network.==m&uuml;ssen diese Netzwerkdefinitionen bei allen Mitgliedern des YaCy Netzwerkes gleich sein.
+Network Definition==Netzwerk Definition
+Network Nick==Netzwerk Nick
+Long Description==Lange Beschreibung
+Indexing Domain==Indexierungs Domain
+#DHT==DHT
+Distributed Computing Network for Domain==Verteilte Netzwerk f&uuml;r Domain
 You can configure if you want to participate at the global YaCy network or if you want to have your==Sie k&ouml;nnen einstellen, ob Sie am globalen YaCy-Netzwerk teilnehmen wollen oder ob Sie einen eigenen
 own separate search cluster with or without connection to the global network. You may also define==separaten Such-Cluster, mit oder ohne Verbindung zum globalen Netz, haben m&ouml;chten. Sie k&ouml;nnen auch
 a completely independent search engine instance, without any data exchange between your peer and other==eine vollkommen unabh&auml;ngige Instanz einer Suchmaschine, ohne jeglichen Datenaustausch zwischen Ihrem und anderen Peers, definieren.
@@ -345,8 +355,8 @@ Please describe your search portal with some keywords \(comma-separated\)==Bitte
 #File: ConfigProfile_p.html
 #---------------------------
 Your Personal Profile==Ihr pers&ouml;nliches Profil
-You can create a personal profile here, which can be seen by other YaCy-members.==Hier k&ouml;nnen Sie Ihr pers&ouml;nliches Profil verwalten, dass andere YaCy-Benutzer ansehen k&ouml;nnen.
-You do not need to provide any personal data here, but if you want to distribute your contact information, you can do that here.==Sie m&uuml;ssen hier keine pers&ouml;nlichen Daten eingeben, aber wenn Sie Kontaktinformationen bereitstellen m&ouml;chten, k&ouml;nnen Sie das hier machen.
+You can create a personal profile here, which can be seen by other YaCy-members==Hier k&ouml;nnen Sie Ihr pers&ouml;nliches Profil verwalten, dass andere YaCy-Benutzer ansehen k&ouml;nnen
+or <a href="ViewProfile.html?hash=localhash">in the public</a> using a <a href="ViewProfile.rdf?hash=localhash">FOAF RDF file</a>.==oder <a href="ViewProfile.html?hash=localhash">in der &Ouml;ffentlichkeit</a> eine <a href="ViewProfile.rdf?hash=localhash">FOAF RDF Datei</a> benutzen.
 #Name==Name
 #Nick Name==Nick Name
 Homepage \(appears on every <a href="/Supporter.html">Supporter Page</a> as long as your peer is online\)==Homepage (erscheint auf der <a href="/Supporter.html">Unterst&uuml;tzer Seite, so lange wie Ihr Peer online ist</a>
@@ -360,6 +370,14 @@ Comment==Kommentar
 "Save"==Speichern
 You can use==Sie können
 here.==im Profil benutzen.
+#-----------------------------
+
+#File: ConfigPeerProfile_p.html
+#---------------------------
+Peer Profile==Peer Profil
+This defines visual attributes of the search interfaces.==Dies definiert sichtbare Eigenschaften der Such-Schnittstelle.
+Greeting Line \(<a href="index.html">visible above the search field</a>\)==Begr&uuml;ssungszeile (<a href="index.html">sichtbar &uuml;ber dem Suchformular</a>)
+"Save"=="Speichern"
 #-----------------------------
 
 #File: ConfigProperties_p.html
@@ -457,7 +475,7 @@ Used==Benutzt
 Close==Schlie&szlig;en
 Waiting for new request nr.==Warte auf neue Anfrage Nr.
 Outgoing Connections==Ausgehende Verbindungen
-Showing \#\[clientActive\]\# active outgoing connections:==Gezeigt werden #[clientActive]# zusammengefasste ausgehende Verbindungen, benutzt als:
+Showing \#\[clientActive\]\# pooled outgoing connections used as:==Gezeigt werden #[clientActive]# zusammengefasste ausgehende Verbindungen, benutzt als:
 Duration==Dauer
 #ID==ID
 #-----------------------------
@@ -1352,7 +1370,7 @@ Queue Size==Warteschl.-<br />l&auml;nge
 Short Mem<br />Cycles==Durchl.<br />ohne ausr. Speicher
 >per Cycle==>pro Durchlauf
 >per Busy-Cycle==>pro besch&auml;ft. Durchl.
->Memoy Use==>Speicher-<br />nutzung
+>Memory Use==>Speicher-<br />nutzung
 >Delay between==>Verz&ouml;gerung zwischen
 >idle loops==>unt&auml;t. Durchl.
 >busy loops==>besch&auml;ft. Durchl.
@@ -1403,7 +1421,7 @@ This is the time that the crawler idles when the proxy is accessed, or a local o
 The delay is extended by this time each time the proxy is accessed afterwards.==Die normale Verz&ouml;gerung wird um diese Zeit verl&auml;ngert, wenn auf den Proxy zugegriffen wird.
 This shall improve performance of the affected process \(proxy or search\).==Dies soll die Performance des betroffenen Prozesses (Proxy oder Suche) erh&ouml;hen.
 \(current delta is==(Seit dem letzten Zugriff auf Proxy/Lokale-Suche/Globale-Suche sind
-seconds since last proxy/local-search/remote-search access\)==Sekunden vergangen.)
+seconds since last proxy/local-search/remote-search access.\)==Sekunden vergangen.)
 Enter New Parameters==Neue Parameter eintragen
 milliseconds==Millisekunden
 #-----------------------------
@@ -2162,6 +2180,9 @@ This is the Profile of==Dies ist das Profil von
 #MSN==MSN
 #Skype==Skype
 Comment==Kommentar
+View this profile as==Zeige dieses Profil als 
+or==oder
+#vCard==vCard
 #-----------------------------
 
 #File: WatchCrawler_p.html
@@ -2349,11 +2370,11 @@ Project Home==Projektseite
 
 #File: env/templates/header.template
 #---------------------------
-YaCy - Distributed Web Search==YaCy - Verteilte Internet Suche
+YaCy - Distributed Search Engine==YaCy - Verteilte Suchmaschine
 Search&nbsp;&amp;&nbsp;Browse==Suchen&nbsp;&amp;&nbsp;Surfen
-\(old\) Search Page==(alte) Suchseite
-\(alternative a\) Search Page==(alternative a) Suchseite
-\(alternative b\) Search Page==(alternative b) Suchseite
+Search Page \(standard\)==Suchseite (standard)
+Search Page \(alternative\)==(alternative) Suchseite
+Search Page \(Rich Client\)==Suchseite (Rich Client)
 Ranking Config==Ranking Einstellungen
 >Surftips==>Surftipps
 Publication==Ver&ouml;ffentlichung
@@ -2415,12 +2436,13 @@ Peer Administration Console==Peer Administrations Konsole
 #Status==Status
 Access Config==Eingangskonfiguration
 >Language==>Sprache
->Profile==>Profil
+User Profile==Benutzer Profil
 >Skins==>Skin Auswahl
 System Update==System Aktualisierung
 >Network==>Netzwerk
 Local robots.txt==Lokale robots.txt
 User Administration==Benutzer Verwaltung
+Peer Appearance Profile==Peer Erscheinungsbild
 Advanced Settings==Erweiterte Einstellungen
 Advanced Properties==Erweitertes Verhalten
 Queues Performance Settings==Performanceeinstellungen f&uuml;r Puffer und Prozesse
