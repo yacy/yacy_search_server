@@ -559,7 +559,10 @@ public final class httpHeader extends TreeMap<String, String> implements Map<Str
         }
         
         // replacing spaces in the url string correctly
-        args = args.replaceAll(" ","%20");
+        args = args.replace(" ","%20");
+        // replace unwise characters (see RFC 2396, 2.4.3), which may not be escaped
+        args = args.replace("{", "%7B").replace("}", "%7D").replace("|", "%7C").replace("\\", "%5C")
+                .replace("^", "%5E").replace("[", "%5B").replace("]", "%5D").replace("`", "%60");
         
         
         // properties of the query are stored with the prefix "&"
@@ -802,21 +805,21 @@ public final class httpHeader extends TreeMap<String, String> implements Map<Str
     /**
      * Implementation of Map.Entry. Structure that hold two values - exactly what we need!
      */
-    class Entry implements Map.Entry<String, Object> {
+    class Entry implements Map.Entry<String, String> {
         private String k;
-        private Object v;
-        Entry(String k, Object v) {
+        private String v;
+        Entry(String k, String v) {
             this.k = k;
             this.v = v;
         }
         public String getKey() {
             return k;
         }
-        public Object getValue() {
+        public String getValue() {
             return v;
         }
-        public Object setValue(Object v) {
-            Object r = this.v;
+        public String setValue(String v) {
+            String r = this.v;
             this.v = v;
             return r;
         }
