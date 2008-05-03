@@ -150,8 +150,9 @@ public class BlacklistCleaner_p {
     
     private static void putBlacklists(serverObjects prop, String[] lists, String selected) {
         boolean supported = false;
-        for (int i=0; i<supportedBLEngines.length && !supported; i++)
+        for (int i=0; i<supportedBLEngines.length && !supported; i++) {
             supported |= (plasmaSwitchboard.urlBlacklist.getClass() == supportedBLEngines[i]);
+        }
         
         if (supported) {
             if (lists.length > 0) {
@@ -166,8 +167,9 @@ public class BlacklistCleaner_p {
             }
         } else {
             prop.put("disabled", "1");
-            for (int i=0; i<supportedBLEngines.length; i++)
+            for (int i=0; i<supportedBLEngines.length; i++) {
                 prop.putHTML(DISABLED + "engines_" + i + "_name", supportedBLEngines[i].getName());
+            }
             prop.put(DISABLED + "engines", supportedBLEngines.length);
         }
     }
@@ -183,15 +185,19 @@ public class BlacklistCleaner_p {
         String s;
         if (useKeys) {
             Iterator<String> it =  post.keySet().iterator();
-            while (it.hasNext())
-                if ((s = (String)it.next()).indexOf(prefix) == 0)
+            while (it.hasNext()) {
+                if ((s = (String)it.next()).indexOf(prefix) == 0) {
                     r.add(s.substring(prefix.length()));
+                }
+            }
         } else {
             Iterator<Map.Entry<String, String>> it = post.entrySet().iterator();
             Map.Entry<String, String> entry;
             while (it.hasNext()) {
                 entry = it.next();
-                if (entry.getKey().indexOf(prefix) == 0) r.add((String) entry.getValue());
+                if (entry.getKey().indexOf(prefix) == 0) {
+                    r.add((String) entry.getValue());
+                }
             }
         }
         
@@ -278,7 +284,11 @@ public class BlacklistCleaner_p {
         String s;
         for (int i=0; i<entries.length; i++) {
             s = entries[i];
-            if (list != null) while (list.contains(s)) list.remove(s);
+            if (list != null){
+                while (list.contains(s)) {
+                    list.remove(s);
+                }
+            }
             
             // remove the entry from the running blacklist engine
             for (int blTypes=0; blTypes < supportedBlacklistTypes.length; blTypes++) {
@@ -288,11 +298,16 @@ public class BlacklistCleaner_p {
                     try {
                     plasmaSwitchboard.urlBlacklist.remove(supportedBlacklistTypes[blTypes],
                             host,path);
-                    } catch (RuntimeException e) { System.err.println(e.getMessage() + ": " + host + "/" + path); }
+                    } catch (RuntimeException e) {
+                        //System.err.println(e.getMessage() + ": " + host + "/" + path);
+                        serverLog.logSevere("BLACKLIST-CLEANER", e.getMessage() + ": " + host + "/" + path);
+                    }
                 }                
             }    
         }
-        if (list != null) listManager.writeList(new File(listManager.listsPath, blacklistToUse), (String[])list.toArray(new String[list.size()]));
+        if (list != null){
+            listManager.writeList(new File(listManager.listsPath, blacklistToUse), (String[])list.toArray(new String[list.size()]));
+        }
         return entries.length;
     }
     
